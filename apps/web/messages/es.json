@@ -153,5 +153,213 @@
   "datePicker": {
     "previousMonth": "Mes anterior", "nextMonth": "Mes siguiente", "calendarSystem": "Calendario", "chooseDates": "Elegir fechas", "selectCheckIn": "Elige el día de entrada.", "selectCheckOut": "Ahora elige el día de salida.", "selectDay": "Elige un día.", "clear": "Borrar", "apply": "Aplicar fechas",
     "range": { "pastOrOutside": "Fecha pasada o fuera del intervalo permitido", "outside": "Fuera del intervalo permitido", "minimumNights": "{count, plural, one {Mínimo # noche} other {Mínimo # noches}}", "maximumNights": "{count, plural, one {Máximo # noche} other {Máximo # noches}}", "includesUnavailable": "La estancia incluiría una noche no disponible", "unavailable": "No disponible", "checkOutSelected": "Salida {date}, {count, plural, one {# noche} other {# noches}}", "checkInSelected": "Entrada seleccionada; ahora elige la salida.", "checkInSuffix": ", entrada", "checkOutSuffix": ", salida" }
+  },
+  "support": {
+    "loading": "Cargando…",
+    "retry": "Reintentar",
+    "home": {
+      "title": "Ayuda",
+      "subtitle": "Obtén ayuda con un pedido, una reserva o tu cuenta.",
+      "createCta": "Solicitar ayuda",
+      "recentTitle": "Solicitudes recientes",
+      "viewAll": "Ver todas",
+      "noRecent": "Todavía no tienes solicitudes de soporte."
+    },
+    "tickets": {
+      "title": "Mis solicitudes",
+      "empty": "Todavía no tienes solicitudes de soporte."
+    },
+    "create": {
+      "title": "Nueva solicitud de soporte",
+      "category": "Categoría",
+      "subject": "Asunto",
+      "description": "Describe el problema",
+      "submit": "Enviar solicitud",
+      "failed": "No se pudo enviar la solicitud. Inténtalo de nuevo.",
+      "linkedContext": "Esta solicitud se vinculará con {type}."
+    },
+    "detail": {
+      "caseNumber": "Solicitud {number}",
+      "backToList": "Volver a mis solicitudes",
+      "progress": "Estado del proceso",
+      "messages": "Conversación",
+      "noMessages": "Todavía no hay mensajes.",
+      "you": "Tú",
+      "support": "Soporte",
+      "composePlaceholder": "Escribe un mensaje…",
+      "send": "Enviar",
+      "sendFailed": "No se pudo enviar el mensaje. Inténtalo de nuevo.",
+      "reopen": "Reabrir solicitud"
+    },
+    "status": {
+      "SUBMITTED": "Enviada",
+      "UNDER_REVIEW": "En revisión",
+      "WAITING": "Esperando tu respuesta",
+      "RESOLVED": "Resuelta",
+      "CLOSED": "Cerrada"
+    },
+    "category": {
+      "ACCOUNT": "Cuenta",
+      "PET": "Mascota",
+      "HEALTH": "Salud",
+      "BOOKING": "Reserva",
+      "SERVICE": "Servicio",
+      "PAYMENT": "Pago",
+      "REFUND": "Reembolso",
+      "ORDER": "Pedido",
+      "DELIVERY": "Entrega",
+      "SELLER": "Vendedor",
+      "PROVIDER": "Proveedor",
+      "MARKETPLACE": "Mercado",
+      "TRUST_SAFETY": "Confianza y seguridad",
+      "OTHER": "Otro"
+    },
+    "relatedEntityType": {
+      "ORDER": "tu pedido",
+      "BOOKING": "tu reserva",
+      "TRIP": "tu viaje",
+      "INSURANCE_APPLICATION": "tu solicitud de seguro",
+      "TRAVEL_BOOKING": "tu reserva de alojamiento"
+    }
+  },
+  "admin": {
+    "common": {
+      "loading": "Cargando…",
+      "retry": "Reintentar",
+      "empty": "Aún no hay nada aquí.",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "reasonLabel": "Motivo",
+      "reasonPlaceholder": "Obligatorio: explica el motivo",
+      "assign": "Asignar",
+      "assigneeLabel": "ID del administrador asignado",
+      "backToList": "Volver a la lista",
+      "search": "Buscar"
+    },
+    "audit": {
+      "title": "Registro de auditoría",
+      "entityType": "Tipo de entidad",
+      "entityId": "ID de entidad",
+      "action": "Acción",
+      "reason": "Motivo",
+      "by": "Por {name}",
+      "empty": "Todavía no se han registrado eventos de auditoría.",
+      "loadError": "No se pudo cargar el registro de auditoría. Inténtalo de nuevo."
+    },
+    "shell": {
+      "accessLoadFailed": "No se pudieron cargar los permisos de administración. Reintenta para verificar tu acceso actual.",
+      "title": "opetlife Admin",
+      "notAnAdmin": {
+        "title": "Sin acceso de administración",
+        "body": "Tu cuenta no tiene acceso interno a la plataforma.",
+        "backToApp": "Volver a opetlife"
+      },
+      "role": {
+        "SUPER_ADMIN": "Superadministración", "ADMIN": "Administración", "SUPPORT": "Soporte",
+        "TRUST_SAFETY": "Confianza y seguridad", "FINANCE": "Finanzas", "OPERATIONS": "Operaciones",
+        "CONTENT": "Contenido", "VERIFICATION": "Verificación", "READ_ONLY": "Solo lectura", "EDITOR": "Edición"
+      },
+      "nav": {
+        "dashboard": "Panel", "crm": "CRM", "customerAffairs": "Atención al cliente", "users": "Todos los usuarios",
+        "customers": "Clientes", "support": "Soporte", "systemStatus": "Estado del sistema", "disputes": "Disputas",
+        "trust": "Confianza y seguridad", "providers": "Proveedores", "sellers": "Vendedores", "transactions": "Transacciones",
+        "tasks": "Tareas", "access": "Acceso y roles", "audit": "Registro de auditoría", "sellerFinance": "Finanzas de vendedores",
+        "reconciliation": "Conciliación", "content": "Contenido", "helpCenter": "Ayuda y legal", "contentNew": "Nuevo artículo",
+        "contentCategories": "Categorías", "contentTags": "Etiquetas", "contentMedia": "Multimedia",
+        "contentPlacements": "Ubicaciones", "subscriptions": "Suscripciones", "services": "Servicios y reservas",
+        "commerce": "Comercio", "travel": "Viajes y alojamientos", "insurance": "Seguros", "places": "Lugares",
+        "communityReports": "Reportes de usuarios", "animalSupport": "Protección animal", "lostPets": "Mascotas perdidas",
+        "settings": "Configuración de la plataforma", "featureFlags": "Indicadores de funciones", "smsPatterns": "Plantillas SMS",
+        "verification": "Identidad y documentos"
+      },
+      "navigation": "Navegación de administración", "openMenu": "Abrir menú", "closeMenu": "Cerrar menú",
+      "groups": { "work": "Trabajo diario", "trust": "Clientes y confianza", "network": "Red", "finance": "Finanzas", "content": "Contenido", "system": "Sistema" }
+    }
+  },
+  "common": { "loading": "Cargando…", "retry": "Reintentar" },
+  "commerce": {
+    "shopHome": {
+      "title": "Tienda", "subtitle": "Para {name}", "categories": "Categorías", "browseAll": "Ver todos los productos", "loading": "Cargando", "unavailable": "La tienda no está disponible ahora", "retry": "Reintentar", "eyebrow": "COMPRAS PENSADAS PARA TU MASCOTA", "heroTitle": "Compras que empiezan por tu mascota", "heroDescription": "Compara vendedores verificados, comprueba qué es adecuado para tu mascota y organiza entregas periódicas de lo que siempre necesitas.", "searchLabel": "Buscar en la tienda", "searchPlaceholder": "Busca comida, marca o producto…", "searchButton": "Buscar", "categoriesHint": "Categorías disponibles en el catálogo", "repeatTitle": "Entrega periódica", "repeatHint": "Avisos y pedidos con un toque, nunca cargos automáticos", "dealsTitle": "Promociones actuales", "dealsHint": "Los descuentos se aplican automáticamente al pagar", "seeAll": "Ver todo", "picksTitle": "Recomendados", "picksHint": "Disponibles ahora, primero los mejor valorados", "emptyTitle": "El catálogo está vacío por ahora", "emptyDescription": "Los productos aparecerán cuando los vendedores verificados los publiquen."
+    },
+    "results": {
+      "title": "Productos", "loading": "Cargando", "retry": "Reintentar", "empty": "No se encontraron productos.", "searchTitle": "Resultados para «{query}»", "searchLabel": "Buscar productos", "searchPlaceholder": "Buscar productos o marcas", "searchButton": "Buscar", "categories": "Categorías", "allCategories": "Todas", "resultCount": "{count, plural, =0 {Ningún producto} one {# producto} other {# productos}}", "emptyHint": "Prueba a quitar un filtro o buscar algo más general.",
+      "sort": { "label": "Ordenar por", "RECOMMENDED": "Recomendados", "NEWEST": "Más recientes", "PRICE_ASC": "Precio: de menor a mayor", "PRICE_DESC": "Precio: de mayor a menor", "TOP_RATED": "Mejor valorados" },
+      "pagination": { "label": "Páginas", "previous": "Anterior", "next": "Siguiente", "status": "Página {page} de {total}" },
+      "filters": { "title": "Filtros", "species": "Para", "any": "Cualquiera", "dog": "Perros", "cat": "Gatos", "brand": "Marca", "seller": "Vendedor", "price": "Precio (Tomanes)", "minToman": "Desde", "maxToman": "Hasta", "inStock": "Solo disponibles", "onPromotion": "En promoción", "rating": "Valoración", "ratingAtLeast": "{value}★ o más", "clear": "Quitar filtros", "showResults": "Mostrar {count, plural, one {# producto} other {# productos}}", "close": "Cerrar" }
+    },
+    "productCard": { "fromPrice": "Desde {price}", "noAvailability": "No disponible" },
+    "compatibility": {
+      "status": { "COMPATIBLE": "Adecuado", "LIKELY_COMPATIBLE": "Probablemente adecuado", "NEEDS_REVIEW": "Requiere revisión", "NOT_RECOMMENDED": "No recomendado", "POTENTIAL_SAFETY_CONFLICT": "Posible conflicto de seguridad", "UNKNOWN": "Se necesita más información" },
+      "reason": { "SPECIES_MISMATCH": "No está indicado para esta especie", "AGE_TOO_YOUNG": "No recomendado para edades inferiores a la indicada", "AGE_TOO_OLD": "No recomendado para edades superiores a la indicada", "AGE_UNKNOWN": "No consta la edad de tu mascota", "WEIGHT_TOO_LOW": "Por debajo del intervalo de peso recomendado", "WEIGHT_TOO_HIGH": "Por encima del intervalo de peso recomendado", "WEIGHT_UNKNOWN": "No consta el peso de tu mascota", "ALLERGEN_CONFLICT": "En conflicto con una alergia conocida", "HEALTH_REVIEW_REQUIRED": "Primero necesitas completar el perfil de salud", "NO_ACTIVE_PET": "No hay ninguna mascota activa seleccionada" }
+    },
+    "detail": {
+      "title": "Producto", "loading": "Cargando", "retry": "Reintentar", "shoppingFor": "Comprando para {name}", "variant": "Variante", "offer": "Vendedor", "noOffers": "Ningún vendedor ofrece esta variante ahora", "verified": "Verificado", "inStock": "Quedan {count}", "outOfStock": "Agotado", "deliveryPlaceholder": "Próximamente: detalles de entrega", "quantity": "Cantidad", "addToCart": "Añadir al carrito", "goToCart": "Ir al carrito", "addFailed": "No se pudo añadir el producto. Inténtalo de nuevo.", "notFound": "Este producto no está disponible", "notFoundHint": "Es posible que se haya retirado o ya no se venda.", "backToShop": "Volver a la tienda", "breadcrumb": "Ruta de navegación", "shop": "Tienda", "gallery": "Imágenes del producto", "noReviewsYet": "Aún no hay reseñas", "favorite": "Guardar en favoritos", "unfavorite": "Quitar de favoritos", "offersCount": "{count, plural, one {# vendedor} other {# vendedores}}", "repeatAvailable": "Entrega periódica disponible", "decrease": "Reducir cantidad", "increase": "Aumentar cantidad", "repeatTitle": "Entrega periódica", "repeatExplain": "Elige cada cuánto lo necesitas. Te avisaremos antes de cada entrega y confirmarás el pedido al precio vigente; no se cobrará nada automáticamente.", "repeatCta": "Configurar entrega periódica", "about": "Acerca de este producto", "suitability": "Adecuado para", "specifications": "Características", "suits": { "both": "Perros y gatos", "dog": "Perros", "cat": "Gatos", "age": "Edad: {min}–{max} meses", "weight": "Peso: {min}–{max} kg", "ageFrom": "Desde {min} meses", "weightFrom": "Desde {min} kg" }, "reviewsTitle": "Reseñas", "reviewsVerifiedOnly": "Solo pueden opinar quienes hayan recibido el producto.", "verifiedPurchase": "Compra verificada", "moreReviews": "Ver más reseñas", "related": "Más productos de esta categoría"
+    },
+    "cart": {
+      "title": "Carrito", "loading": "Cargando", "retry": "Reintentar", "empty": "Tu carrito está vacío.", "emptyHint": "Aquí se reúnen los productos que eliges para tu mascota. Antes de pagar se vuelven a comprobar el precio y las existencias de cada vendedor.", "browseShop": "Explorar la tienda", "safetyConflictBanner": "Uno o varios productos podrían entrar en conflicto con una alergia conocida de tu mascota. Se te pedirá confirmarlo al pagar.", "forPet": "Para {name}", "noTargetPet": "No se ha seleccionado una mascota para este producto", "remove": "Quitar", "priceChanged": "El precio se ha actualizado desde que lo añadiste", "sellerSubtotal": "Subtotal de este vendedor", "subtotal": "Subtotal", "proceedToCheckout": "Continuar al pago", "actionFailed": "No se pudo aplicar el cambio. Inténtalo de nuevo.", "pricesChangedBanner": "Han cambiado algunos precios o promociones. Comprueba los precios actualizados antes de pagar.", "acceptPrices": "Aceptar precios actuales", "soldBy": "Vendido por {seller}", "itemsTotal": "Artículos ({count})", "promotions": "Descuentos", "delivery": "Entrega", "deliveryAtCheckout": "Se calcula al pagar", "fixIssuesFirst": "Quita o corrige los artículos marcados para continuar.", "continueShopping": "Seguir comprando", "decrease": "Reducir cantidad", "increase": "Aumentar cantidad", "each": "{price} cada uno", "issue": { "OFFER_UNAVAILABLE": "Ya no está disponible", "SELLER_UNAVAILABLE": "Vendedor no disponible", "OUT_OF_STOCK": "Agotado", "LOW_STOCK": "Solo quedan {count}", "QUANTITY_EXCEEDS_STOCK": "Solo hay {count} disponibles", "PRICE_CHANGED": "El precio ha cambiado", "PROMOTION_EXPIRED": "La promoción ha terminado" }
+    },
+    "price": { "was": "Antes {price}", "promotion": "{name} · {percent}% de descuento" },
+    "stock": { "in": "Disponible", "low": "Pocas unidades", "lowCount": "Solo quedan {count}", "out": "Agotado" },
+    "rating": { "aria": "Valoración de {average} sobre 5 según {count} reseñas verificadas", "count": "{count, plural, one {# reseña} other {# reseñas}}" },
+    "design": {
+      "navLabel": "La tienda para tu mascota", "shop": "Tienda", "orders": "Mis pedidos", "repeat": "Entrega periódica", "favorites": "Productos guardados", "cart": "Carrito", "browse": "Explorar todos los productos", "filters": "Encuentra su próximo favorito", "filterHint": "Elige lo que mejor le va a tu compañero.", "allProducts": "Todos los productos", "applyFilters": "Mostrar productos", "repeatTitle": "Un poco de cuidado, una y otra vez.", "repeatDescription": "Planifica la próxima entrega de un producto apto. Tú decides cada pedido.", "repeatCta": "Explorar entregas periódicas", "viewProduct": "Ver producto", "summary": "Resumen del pedido", "cartStep": "Carrito", "checkoutStep": "Datos de pago", "completeStep": "Estado del pedido", "journey": "Progreso de compra", "categoryFailed": "No se pudieron cargar las categorías. Aún puedes buscar en el catálogo.", "loadFailed": "No se pudo cargar esta información. Inténtalo de nuevo.", "favoriteFailed": "No se pudieron actualizar los productos guardados. Inténtalo de nuevo.", "reviewsFailed": "No se pudieron cargar más reseñas. Inténtalo de nuevo.", "shopCredit": "Imagen de tienda: concepto fotorrealista generado por IA de OpenAI, recortado y recodificado. No es una tienda ni una fotografía real de producto.", "clearCart": "Vaciar carrito", "clearTitle": "¿Vaciar el carrito?", "clearHint": "Se quitarán todos los artículos de este carrito.", "clearConfirm": "Sí, vaciar carrito", "keepCart": "Conservar artículos", "editAddress": "Editar dirección seleccionada", "defaultAddress": "Dirección predeterminada del hogar", "editOptionalHint": "Al editar, los campos opcionales vacíos conservan sus valores actuales."
+    }
+  },
+  "petOverview": {
+    "careUnavailable": "No se pudieron cargar los recordatorios de cuidados. Los demás registros siguen disponibles; vuelve a intentarlo para recuperar la lista completa.",
+    "careIncomplete": "Todavía no se han recuperado todos los cuidados que requieren atención y los próximos cuidados."
+  },
+  "birthDateField": {
+    "calendar": "Calendario",
+    "jalali": "Calendario Jalali",
+    "gregorian": "Calendario gregoriano",
+    "hint": "Al cambiar de calendario, se conserva la misma fecha seleccionada.",
+    "optionalAge": "La fecha de nacimiento y la edad son opcionales. Si no las sabes, continúa y complétalas más tarde.",
+    "day": "Día",
+    "month": "Mes",
+    "year": "Año"
+   },
+  "consentHistory": {
+    "title": "Historial de consentimientos",
+    "intro": "Aceptaciones y revocaciones registradas en tu cuenta.",
+    "open": "Mostrar historial",
+    "close": "Ocultar historial",
+    "loadFailed": "No se pudo cargar el historial.",
+    "retry": "Reintentar",
+    "loading": "Cargando…",
+    "currentVersion": "Versión actual",
+    "empty": "No hay consentimientos registrados.",
+    "version": "Versión",
+    "accepted": "Aceptado el {date}",
+    "withdrawn": "Revocado el {date}",
+    "otherSource": "Registrado en la cuenta",
+    "limit": "Se muestran hasta {limit, number} eventos recientes y versiones anteriores guardadas sin eventos registrados. Esta sección no modifica tus consentimientos.",
+    "kinds": {"TERMS": "Condiciones de uso", "PRIVACY": "Privacidad", "MARKETING": "Mensajes comerciales"},
+    "sources": {"PRIVACY_CENTER": "Registrado en el centro de privacidad", "LEGACY_RECORD": "Estado guardado anteriormente; el historial completo de eventos no está disponible.", "ONBOARDING": "Registrado durante el alta"}
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "retry": "Intentar de nuevo",
+    "loading": "Cargando",
+    "optional": "Opcional"
+  },
+  "care": {
+    "profile": {
+      "title": "Perfil de cuidados",
+      "edit": "Editar perfil de cuidados",
+      "readOnlyNotice": "Puedes consultar este perfil de cuidados, pero no editarlo.",
+      "temperament": "Temperamento",
+      "aroundPeople": "Comportamiento con personas",
+      "aroundAnimals": "Comportamiento con otros animales",
+      "leashBehavior": "Comportamiento con la correa",
+      "handlingSensitivity": "Sensibilidad al manejo",
+      "feedingRoutine": "Rutina de alimentación",
+      "toiletRoutine": "Rutina para hacer sus necesidades",
+      "separationBehavior": "Comportamiento al quedarse solo/a",
+      "specialInstructions": "Instrucciones especiales",
+      "empty": "Aún no se ha configurado.",
+      "saveFailed": "No se pudo guardar el perfil de cuidados. Inténtalo de nuevo."
+    }
   }
 }

@@ -1,5 +1,16 @@
 # PET LIFE OS release and development handoff — 2026-11-07
 
+## 2026-11-07 18:31 UTC — Current continuation status
+
+- Fresh `origin/main` remains `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`; production `/api/health/version` returned the same SHA and deployment `github-42091865674-1`. The public `/api/shop/products?page=1&pageSize=50` result remains 15 products, including 10 `qa-b4-*` records; #107 is open at `4ade2952`, build passed, but `REVIEW_REQUIRED`. No merge/deployment occurred.
+- Localization chain check: #118 `e57dd039` (main) passed build and is `REVIEW_REQUIRED`; #119 `83fe67c9`, #120 `434757a5`, #121 `0345abf4`, and #122 `2e1816b7` passed their current build checks. #123 `d963f84d` and #124 `d34bb985` have current build checks pending; neither is reported green. #119→#118, #120→#119, #121→#120, #122→#118, #123→#122, #124→#123; no retargeting or merging until prerequisites merge under required review.
+- #122: shop discovery/cart DE/ES; #123: seller catalog/offers DE/ES; #124: customer booking list/waitlist DE/ES. All remain unmerged and therefore NOT LIVE. Their PR descriptions and localization rollout notes enumerate English fallbacks; German/Spanish SMS templates are not implemented.
+- Independent support localization slice is being prepared from #118 (not from #124): customer support home, ticket list/create/detail, statuses/categories/linked-context copy and locale-aware message timestamps; admin support, legal/help content, authored ticket text, server-provided error details and notification/SMS delivery are not included. Focused validation: support component tests 18/18 passed; web typecheck, web lint, JSON parsing and `git diff --check` passed. No production build was run due to disk headroom.
+- Disk currently shows 844 MiB free on a 32 GiB overlay (98% used). `pnpm store prune` removed one 9.2 KiB metadata file and no packages. A 1.1 GiB ignored `apps/web/.next` output with `BUILD_ID` was identified as regenerable and no active build process was found, but the execution tool rejected direct removal; it remains on disk. No source, Git history, database volumes, user data, or uncommitted work was deleted.
+- Payment-control worktree `/workspace/petlife-payment-controls-live` remains untouched with its prior uncommitted service/spec changes preserved.
+- #115/#116/#117 and other review-blocked PRs remain unmerged; memorial source bucket/CDN direct-access and cache privacy still lacks authorized production configuration evidence. #110→#111 and #113→#114 dependency order remains intact.
+- Next actions: commit/push the support slice and open a dependent PR against #118; recheck #123/#124 latest CI; keep #107 first for required review. Do not claim release or LIVE_VERIFIED until approval, merge, migration/deploy SHA and safe production behavior are verified.
+
 ## Production and release queue
 
 - Current `origin/main`: `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`; the previously reported deployment id was `github-42091865674-1`.

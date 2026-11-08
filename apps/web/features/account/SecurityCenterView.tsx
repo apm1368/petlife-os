@@ -11,16 +11,49 @@ import { ConfirmActionDialog } from "./ConfirmActionDialog";
 import { formatAccountDate, useAccountCopy } from "./account-copy";
 import { useSignOut } from "./use-sign-out";
 
-const SECURITY_EVENT_LABELS: Record<string, [string, string]> = {
-  UserAuthenticated: ["ورود به حساب", "Signed in"],
-  PasswordChanged: ["رمز عبور تغییر کرد", "Password changed"],
-  PasswordResetCompleted: ["رمز عبور بازیابی شد", "Password reset"],
-  SessionRevoked: ["یک دستگاه خارج شد", "A device was signed out"],
-  OtherSessionsRevoked: ["سایر دستگاه‌ها خارج شدند", "Other devices signed out"],
-  AllSessionsRevoked: ["خروج از همهٔ دستگاه‌ها", "Signed out everywhere"],
-  ContactChanged: ["راه تماس تغییر کرد", "Contact method changed"],
-  UnverifiedCredentialsCleared: ["رمز تأییدنشده حذف شد", "Unverified password removed"],
+const SECURITY_EVENT_LABELS: Record<string, [string, string, string, string]> = {
+  UserAuthenticated: ["ورود به حساب", "Signed in", "Angemeldet", "Sesión iniciada"],
+  PasswordChanged: ["رمز عبور تغییر کرد", "Password changed", "Passwort geändert", "Contraseña cambiada"],
+  PasswordResetCompleted: ["رمز عبور بازیابی شد", "Password reset", "Passwort zurückgesetzt", "Contraseña restablecida"],
+  SessionRevoked: ["یک دستگاه خارج شد", "A device was signed out", "Ein Gerät wurde abgemeldet", "Se cerró la sesión de un dispositivo"],
+  OtherSessionsRevoked: ["سایر دستگاه‌ها خارج شدند", "Other devices signed out", "Andere Geräte abgemeldet", "Sesión cerrada en otros dispositivos"],
+  AllSessionsRevoked: ["خروج از همهٔ دستگاه‌ها", "Signed out everywhere", "Überall abgemeldet", "Sesión cerrada en todos los dispositivos"],
+  ContactChanged: ["راه تماس تغییر کرد", "Contact method changed", "Kontaktmethode geändert", "Medio de contacto actualizado"],
+  UnverifiedCredentialsCleared: ["رمز تأییدنشده حذف شد", "Unverified password removed", "Unbestätigtes Passwort entfernt", "Se eliminó la contraseña no verificada"],
 };
+
+const SECURITY_DE: Record<string, string> = {
+  Security: "Sicherheit", "Security details didn't load.": "Sicherheitsdaten konnten nicht geladen werden.", Retry: "Erneut versuchen", Loading: "Wird geladen",
+  "SECURITY CENTER": "SICHERHEIT", "Sign-in, devices & password": "Anmeldung, Geräte und Passwort", "How you sign in, every device you're signed in on, and important security changes.": "Anmeldemethoden, angemeldete Geräte und wichtige Sicherheitsänderungen Ihres Kontos.",
+  "No way to recover your account": "Keine Möglichkeit zur Kontowiederherstellung", "Add a verified email or mobile so you can get back in if you forget a password or lose a device.": "Hinterlegen Sie eine bestätigte E-Mail-Adresse oder Mobilnummer, damit Sie bei vergessenem Passwort oder Verlust eines Geräts wieder Zugriff erhalten.", "Add a contact": "Kontaktmöglichkeit hinzufügen",
+  "Sign-in methods": "Anmeldemethoden", "A one-time code to a verified email or mobile, a password, and Google when it's available.": "Einmalcode an eine bestätigte E-Mail-Adresse oder Mobilnummer, Passwort und Google, sofern verfügbar.", "Code to mobile": "Code an Mobiltelefon", "Code to email": "Code an E-Mail", "Not added": "Nicht hinterlegt", On: "Aktiv", "Not verified": "Nicht bestätigt", Off: "Aus",
+  Password: "Passwort", "For signing in with username or email": "Für die Anmeldung mit Benutzername oder E-Mail", "Not set": "Nicht eingerichtet", Connected: "Verbunden", "Links when you sign in with Google using this email.": "Wird verknüpft, wenn Sie sich mit diesem Google-Konto anmelden.", "Google sign-in isn't available in opetlife yet.": "Die Google-Anmeldung ist bei opetlife noch nicht verfügbar.", "Not linked": "Nicht verknüpft", Unavailable: "Nicht verfügbar",
+  "Password saved. You're still signed in here.": "Passwort gespeichert. Sie bleiben auf diesem Gerät angemeldet.", "Signed-in devices": "Angemeldete Geräte", "If you don't recognize a device, sign it out and change your password.": "Melden Sie unbekannte Geräte ab und ändern Sie Ihr Passwort.", "Sign out other devices": "Andere Geräte abmelden", "Sign out everywhere": "Überall abmelden", "Unknown device": "Unbekanntes Gerät",
+  "Signed in": "Angemeldet", "last active": "zuletzt aktiv", "This device": "Dieses Gerät", "Sign out": "Abmelden", "Sign out of this device": "Dieses Gerät abmelden", "Account recovery": "Kontowiederherstellung",
+  "If you forget your password, sign in with a one-time code to your verified mobile or email, or request a reset link from “Forgot password”. Each link works once, for a short time.": "Wenn Sie Ihr Passwort vergessen, melden Sie sich mit einem Einmalcode an Ihre bestätigte Mobilnummer oder E-Mail-Adresse an oder fordern Sie über „Passwort vergessen“ einen Link an. Jeder Link ist kurzzeitig gültig und kann nur einmal verwendet werden.",
+  "Recent security activity": "Letzte Sicherheitsaktivitäten", "All activity": "Alle Aktivitäten", "Account event": "Kontoereignis", "Sign out this device": "Dieses Gerät abmelden", "That device is signed out immediately.": "Dieses Gerät wird sofort abgemeldet.", "Sign out device": "Gerät abmelden", "other device(s) are signed out immediately.": "weitere Geräte werden sofort abgemeldet.", "You stay signed in on this device.": "Sie bleiben auf diesem Gerät angemeldet.", "Sign them out": "Geräte abmelden", "device(s) signed out.": "Geräte abgemeldet.", "Every device, including this one, is signed out immediately.": "Alle Geräte einschließlich dieses Geräts werden sofort abgemeldet.", "You'll need to sign in again to continue.": "Melden Sie sich anschließend erneut an.",
+  "The current password is wrong.": "Das aktuelle Passwort ist falsch.", "That password is too weak; choose a longer or less common one.": "Dieses Passwort ist zu schwach. Wählen Sie ein längeres oder weniger häufiges Passwort.", "The password wasn't saved. Try again.": "Das Passwort wurde nicht gespeichert. Bitte versuchen Sie es erneut.", "Change password": "Passwort ändern", "Set a password": "Passwort festlegen", "After saving, every other device is signed out and this one stays signed in. At least 8 characters.": "Nach dem Speichern werden alle anderen Geräte abgemeldet. Dieses Gerät bleibt angemeldet. Mindestens 8 Zeichen.", "Current password": "Aktuelles Passwort", "New password": "Neues Passwort", "Save password": "Passwort speichern",
+};
+
+const SECURITY_ES: Record<string, string> = {
+  Security: "Seguridad", "Security details didn't load.": "No se pudieron cargar los datos de seguridad.", Retry: "Reintentar", Loading: "Cargando",
+  "SECURITY CENTER": "CENTRO DE SEGURIDAD", "Sign-in, devices & password": "Acceso, dispositivos y contraseña", "How you sign in, every device you're signed in on, and important security changes.": "Tus métodos de acceso, los dispositivos con sesión abierta y los cambios importantes de seguridad de tu cuenta.",
+  "No way to recover your account": "No tienes un método de recuperación", "Add a verified email or mobile so you can get back in if you forget a password or lose a device.": "Añade un correo o móvil verificado para recuperar el acceso si olvidas la contraseña o pierdes un dispositivo.", "Add a contact": "Añadir un medio de contacto",
+  "Sign-in methods": "Métodos de acceso", "A one-time code to a verified email or mobile, a password, and Google when it's available.": "Un código de un solo uso enviado a un correo o móvil verificado, una contraseña y Google cuando esté disponible.", "Code to mobile": "Código al móvil", "Code to email": "Código al correo", "Not added": "No añadido", On: "Activo", "Not verified": "No verificado", Off: "Desactivado",
+  Password: "Contraseña", "For signing in with username or email": "Para iniciar sesión con nombre de usuario o correo", "Not set": "Sin configurar", Connected: "Conectado", "Links when you sign in with Google using this email.": "Se vincula cuando inicias sesión con Google usando este correo.", "Google sign-in isn't available in opetlife yet.": "El acceso con Google aún no está disponible en opetlife.", "Not linked": "No vinculado", Unavailable: "No disponible",
+  "Password saved. You're still signed in here.": "Contraseña guardada. La sesión sigue abierta en este dispositivo.", "Signed-in devices": "Dispositivos con sesión abierta", "If you don't recognize a device, sign it out and change your password.": "Si no reconoces un dispositivo, cierra su sesión y cambia la contraseña.", "Sign out other devices": "Cerrar sesión en otros dispositivos", "Sign out everywhere": "Cerrar sesión en todos los dispositivos", "Unknown device": "Dispositivo desconocido",
+  "Signed in": "Sesión iniciada", "last active": "última actividad", "This device": "Este dispositivo", "Sign out": "Cerrar sesión", "Sign out of this device": "Cerrar sesión en este dispositivo", "Account recovery": "Recuperación de cuenta",
+  "If you forget your password, sign in with a one-time code to your verified mobile or email, or request a reset link from “Forgot password”. Each link works once, for a short time.": "Si olvidas la contraseña, inicia sesión con un código de un solo uso enviado a tu móvil o correo verificado, o solicita un enlace desde «Olvidé mi contraseña». Cada enlace es válido por poco tiempo y solo se puede usar una vez.",
+  "Recent security activity": "Actividad de seguridad reciente", "All activity": "Toda la actividad", "Account event": "Evento de la cuenta", "Sign out this device": "Cerrar sesión en este dispositivo", "That device is signed out immediately.": "La sesión de ese dispositivo se cerrará de inmediato.", "Sign out device": "Cerrar sesión en el dispositivo", "other device(s) are signed out immediately.": "sesiones de otros dispositivos se cerrarán de inmediato.", "You stay signed in on this device.": "La sesión de este dispositivo seguirá abierta.", "Sign them out": "Cerrar esas sesiones", "device(s) signed out.": "sesiones cerradas.", "Every device, including this one, is signed out immediately.": "La sesión se cerrará de inmediato en todos los dispositivos, incluido este.", "You'll need to sign in again to continue.": "Tendrás que volver a iniciar sesión para continuar.",
+  "The current password is wrong.": "La contraseña actual no es correcta.", "That password is too weak; choose a longer or less common one.": "La contraseña es demasiado débil. Elige una más larga o menos común.", "The password wasn't saved. Try again.": "No se guardó la contraseña. Inténtalo de nuevo.", "Change password": "Cambiar contraseña", "Set a password": "Crear contraseña", "After saving, every other device is signed out and this one stays signed in. At least 8 characters.": "Al guardar, se cerrará la sesión en los demás dispositivos y seguirá abierta en este. Usa al menos 8 caracteres.", "Current password": "Contraseña actual", "New password": "Contraseña nueva", "Save password": "Guardar contraseña",
+};
+
+function useSecurityCopy() {
+  const { locale, num } = useAccountCopy();
+  const base = useAccountCopy().t;
+  const t = (fa: string, en: string, de?: string, es?: string) => locale === "de" ? de ?? SECURITY_DE[en] ?? `[Missing de: ${en}]` : locale === "es" ? es ?? SECURITY_ES[en] ?? `[Missing es: ${en}]` : base(fa, en);
+  return { locale, num, t };
+}
 
 type Confirm = { kind: "session"; session: AccountSessionDto } | { kind: "others" } | { kind: "all" } | null;
 
@@ -30,7 +63,7 @@ type Confirm = { kind: "session"; session: AccountSessionDto } | { kind: "others
  * and nothing (location, IP) is invented or shown beyond that.
  */
 export function SecurityCenterView() {
-  const { t, locale, num } = useAccountCopy();
+  const { t, locale, num } = useSecurityCopy();
   const signOut = useSignOut();
   const [data, setData] = useState<SecurityCenterDto | null>(null);
   const [methods, setMethods] = useState<AuthMethodsDto | null>(null);
@@ -98,7 +131,7 @@ export function SecurityCenterView() {
       </section>
 
       <PasswordForm hasPassword={data.methods.password.connected} onDone={async (count) => {
-        setNotice(count > 0 ? t(`رمز ذخیره شد و ${num(count)} دستگاه دیگر خارج شد. این دستگاه همچنان وارد است.`, `Password saved and ${num(count)} other device(s) were signed out. You're still signed in here.`) : t("رمز ذخیره شد. این دستگاه همچنان وارد است.", "Password saved. You're still signed in here."));
+        setNotice(count > 0 ? t(`رمز ذخیره شد و ${num(count)} دستگاه دیگر خارج شد. این دستگاه همچنان وارد است.`, `Password saved and ${num(count)} other device(s) were signed out. You're still signed in here.`, `Passwort gespeichert; ${num(count)} weitere Geräte wurden abgemeldet. Dieses Gerät bleibt angemeldet.`, `Contraseña guardada; se cerró la sesión en ${num(count)} dispositivos. Este dispositivo sigue conectado.`) : t("رمز ذخیره شد. این دستگاه همچنان وارد است.", "Password saved. You're still signed in here."));
         await load();
       }} />
 
@@ -156,7 +189,7 @@ export function SecurityCenterView() {
               <div key={event.id}>
                 <span aria-hidden />
                 <p>
-                  <b>{SECURITY_EVENT_LABELS[event.type] ? t(SECURITY_EVENT_LABELS[event.type]![0], SECURITY_EVENT_LABELS[event.type]![1]) : event.type}</b>
+                  <b>{SECURITY_EVENT_LABELS[event.type] ? t(...SECURITY_EVENT_LABELS[event.type]!) : t("رویداد حساب", "Account event")}</b>
                   <small>{formatAccountDate(event.occurredAt, locale, true)}</small>
                 </p>
               </div>
@@ -171,7 +204,7 @@ export function SecurityCenterView() {
           destructive={false}
           onClose={() => setConfirm(null)}
           title={t("خروج این دستگاه", "Sign out this device")}
-          consequences={[t(`${confirm.session.device ?? "این دستگاه"} فوراً از حساب خارج می‌شود.`, `${confirm.session.device ?? "That device"} is signed out immediately.`)]}
+          consequences={[t(`${confirm.session.device ?? "این دستگاه"} فوراً از حساب خارج می‌شود.`, `${confirm.session.device ?? "That device"} is signed out immediately.`, `${confirm.session.device ?? "Dieses Gerät"} wird sofort abgemeldet.`, `${confirm.session.device ?? "Este dispositivo"} se cerrará de inmediato.`)]}
           confirmLabel={t("خروج دستگاه", "Sign out device")}
           onConfirm={async () => {
             await accountService.revokeSession(confirm.session.id);
@@ -184,12 +217,12 @@ export function SecurityCenterView() {
           open
           onClose={() => setConfirm(null)}
           title={t("خروج از سایر دستگاه‌ها", "Sign out other devices")}
-          consequences={[t(`${num(others.length)} دستگاه دیگر فوراً خارج می‌شوند.`, `${num(others.length)} other device(s) are signed out immediately.`)]}
+          consequences={[t(`${num(others.length)} دستگاه دیگر فوراً خارج می‌شوند.`, `${num(others.length)} other device(s) are signed out immediately.`, `${num(others.length)} weitere Geräte werden sofort abgemeldet.`, `Se cerrará la sesión en ${num(others.length)} dispositivos.`)]}
           keeps={[t("همین دستگاه وارد می‌ماند.", "You stay signed in on this device.")]}
           confirmLabel={t("خروج دستگاه‌ها", "Sign them out")}
           onConfirm={async () => {
             const result = await accountService.revokeOtherSessions();
-            setNotice(t(`${num(result.count)} دستگاه خارج شد.`, `${num(result.count)} device(s) signed out.`));
+            setNotice(t(`${num(result.count)} دستگاه خارج شد.`, `${num(result.count)} device(s) signed out.`, `${num(result.count)} Geräte wurden abgemeldet.`, `Se cerró la sesión en ${num(result.count)} dispositivos.`));
             await load();
           }}
         />
@@ -225,7 +258,7 @@ function MethodRow({ icon, title, detail, status, tone, ltr }: { icon: string; t
 }
 
 function PasswordForm({ hasPassword, onDone }: { hasPassword: boolean; onDone: (otherSessionsSignedOut: number) => Promise<void> }) {
-  const { t } = useAccountCopy();
+  const { t } = useSecurityCopy();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [busy, setBusy] = useState(false);

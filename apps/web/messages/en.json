@@ -590,7 +590,8 @@
       "toiletRoutine": "Toilet routine",
       "separationBehavior": "Separation behavior",
       "specialInstructions": "Special instructions",
-      "empty": "Not set up yet."
+      "empty": "Not set up yet.",
+      "saveFailed": "We couldn't save the care profile. Please try again."
     }
   },
   "theme": {
@@ -2738,7 +2739,9 @@
       "entityId": "Entity ID",
       "action": "Action",
       "reason": "Reason",
-      "by": "By {name}"
+      "by": "By {name}",
+      "empty": "No audit events have been recorded yet.",
+      "loadError": "The audit trail could not be loaded. Please try again."
     },
     "sellerFinance": {
       "title": "Seller Finance",
@@ -5652,7 +5655,7 @@
     "accepted": "Accepted on {date}",
     "withdrawn": "Withdrawn on {date}",
     "otherSource": "Recorded on the account",
-    "limit": "Up to 200 recent events plus older stored versions without recorded events. This section does not change your consents.",
+    "limit": "Up to {limit, number} recent events plus older stored versions without recorded events. This section does not change your consents.",
     "kinds": {
       "TERMS": "Terms of use",
       "PRIVACY": "Privacy",

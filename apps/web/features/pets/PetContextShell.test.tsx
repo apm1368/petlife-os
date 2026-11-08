@@ -42,6 +42,14 @@ describe("PetContextShell — the pet on screen is the pet in context", () => {
     const dialog = await screen.findByRole("dialog");
     expect(dialog.querySelector("img")?.getAttribute("src")).toBe("https://media.example.test/cookie.jpg");
   });
+
+  it.each([["de", "Übersicht", "Hund"], ["es", "Resumen", "Perro"]] as const)("localizes the pet identity shell in %s", async (locale, overviewLabel, speciesLabel) => {
+    usePetStore.setState({ householdId: "h1", pets: [pet("cookie", "Cookie")], activePetId: "cookie" });
+    renderWithIntl(<PetContextShell petId="cookie"><p>overview</p></PetContextShell>, locale);
+    expect(await screen.findByRole("navigation", { name: locale === "de" ? "Bereiche des Haustierprofils" : "Secciones del perfil de la mascota" })).toBeTruthy();
+    expect(screen.getByText(overviewLabel)).toBeTruthy();
+    expect(screen.getByText(new RegExp(speciesLabel))).toBeTruthy();
+  });
 });
 
 describe("PetContextShell — no active pet saved yet", () => {

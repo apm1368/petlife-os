@@ -10,65 +10,95 @@ import { PasswordInput } from "@/features/auth/PasswordInput";
 import { AccountPageHeader } from "./AccountNav";
 import { ConfirmActionDialog } from "./ConfirmActionDialog";
 import { formatAccountDate, useAccountCopy } from "./account-copy";
-import { apiErrorText } from "@/lib/errors/api-error-text";
 import { formatDay } from "@/lib/date/jalali";
 
-const EXPORT_STATUS: Record<PrivacyRequestStatusValue, { fa: string; en: string; tone: StatusTone }> = {
-  PENDING: { fa: "در صف", en: "Queued", tone: "neutral" },
-  PROCESSING: { fa: "در حال آماده‌سازی", en: "Preparing", tone: "neutral" },
-  READY: { fa: "آمادهٔ دریافت", en: "Ready", tone: "success" },
-  COMPLETED: { fa: "انجام شد", en: "Done", tone: "success" },
-  CANCELLED: { fa: "لغو شد", en: "Cancelled", tone: "neutral" },
-  FAILED: { fa: "ناموفق", en: "Failed", tone: "urgent" },
-  EXPIRED: { fa: "منقضی شد", en: "Expired", tone: "neutral" },
+const EXPORT_STATUS: Record<PrivacyRequestStatusValue, { fa: string; en: string; de: string; es: string; tone: StatusTone }> = {
+  PENDING: { fa: "در صف", en: "Queued", de: "In der Warteschlange", es: "En espera", tone: "neutral" },
+  PROCESSING: { fa: "در حال آماده‌سازی", en: "Preparing", de: "Wird vorbereitet", es: "Preparando", tone: "neutral" },
+  READY: { fa: "آمادهٔ دریافت", en: "Ready", de: "Bereit", es: "Listo", tone: "success" },
+  COMPLETED: { fa: "انجام شد", en: "Done", de: "Abgeschlossen", es: "Completado", tone: "success" },
+  CANCELLED: { fa: "لغو شد", en: "Cancelled", de: "Abgebrochen", es: "Cancelado", tone: "neutral" },
+  FAILED: { fa: "ناموفق", en: "Failed", de: "Fehlgeschlagen", es: "Error", tone: "urgent" },
+  EXPIRED: { fa: "منقضی شد", en: "Expired", de: "Abgelaufen", es: "Caducado", tone: "neutral" },
 };
 
-const SCOPE_LABELS: Record<string, [string, string]> = {
-  ACCOUNT: ["حساب", "Account"],
-  HOUSEHOLDS: ["خانواده‌ها", "Households"],
-  PETS: ["حیوانات", "Pets"],
-  HEALTH_WHERE_PERMITTED: ["سلامت (در حد دسترسی شما)", "Health (as far as you may see it)"],
-  MEMORIES_YOU_WROTE: ["خاطراتی که خودتان نوشته‌اید", "Memories you wrote"],
-  BOOKINGS: ["رزروها", "Bookings"],
-  ORDERS: ["سفارش‌ها", "Orders"],
-  TRAVEL: ["سفرها", "Travel"],
-  SUPPORT: ["گفت‌وگوهای پشتیبانی", "Support conversations"],
-  PRIVACY_SETTINGS: ["رضایت‌ها و تنظیمات اعلان", "Consents & notification settings"],
-  ACTIVITY: ["فعالیت حساب", "Account activity"],
+const SCOPE_LABELS: Record<string, [string, string, string, string]> = {
+  ACCOUNT: ["حساب", "Account", "Konto", "Cuenta"],
+  HOUSEHOLDS: ["خانواده‌ها", "Households", "Haushalte", "Hogares"],
+  PETS: ["حیوانات", "Pets", "Tiere", "Mascotas"],
+  HEALTH_WHERE_PERMITTED: ["سلامت (در حد دسترسی شما)", "Health (as far as you may see it)", "Gesundheit (im Rahmen Ihrer Berechtigung)", "Salud (según tus permisos)"],
+  MEMORIES_YOU_WROTE: ["خاطراتی که خودتان نوشته‌اید", "Memories you wrote", "Von Ihnen verfasste Erinnerungen", "Recuerdos que escribiste"],
+  BOOKINGS: ["رزروها", "Bookings", "Buchungen", "Reservas"],
+  ORDERS: ["سفارش‌ها", "Orders", "Bestellungen", "Pedidos"],
+  TRAVEL: ["سفرها", "Travel", "Reisen", "Viajes"],
+  SUPPORT: ["گفت‌وگوهای پشتیبانی", "Support conversations", "Support-Unterhaltungen", "Conversaciones de soporte"],
+  PRIVACY_SETTINGS: ["رضایت‌ها و تنظیمات اعلان", "Consents & notification settings", "Einwilligungen und Benachrichtigungseinstellungen", "Consentimientos y preferencias de notificación"],
+  ACTIVITY: ["فعالیت حساب", "Account activity", "Kontoaktivität", "Actividad de la cuenta"],
 };
 
-const MEMBERSHIP_STATUS: Record<string, [string, string]> = {
-  TRIALING: ["آزمایشی", "trial"],
-  ACTIVE: ["فعال", "active"],
-  PAST_DUE: ["پرداخت معوق", "payment overdue"],
-  GRACE_PERIOD: ["مهلت پرداخت", "grace period"],
-  CANCEL_AT_PERIOD_END: ["لغو در پایان دوره", "ending at period end"],
-  CANCELLED: ["لغوشده", "cancelled"],
-  EXPIRED: ["پایان‌یافته", "ended"],
+const MEMBERSHIP_STATUS: Record<string, [string, string, string, string]> = {
+  TRIALING: ["آزمایشی", "trial", "Testphase", "prueba"], ACTIVE: ["فعال", "active", "aktiv", "activa"],
+  PAST_DUE: ["پرداخت معوق", "payment overdue", "Zahlung überfällig", "pago pendiente"],
+  GRACE_PERIOD: ["مهلت پرداخت", "grace period", "Kulanzzeitraum", "periodo de gracia"],
+  CANCEL_AT_PERIOD_END: ["لغو در پایان دوره", "ending at period end", "Endet zum Laufzeitende", "finaliza al terminar el periodo"],
+  CANCELLED: ["لغوشده", "cancelled", "gekündigt", "cancelada"], EXPIRED: ["پایان‌یافته", "ended", "abgelaufen", "finalizada"],
 };
 
-const SHARE_KIND: Record<string, [string, string]> = {
-  HOUSEHOLD: ["عضو خانواده", "Household member"],
-  TEMPORARY: ["دسترسی موقت", "Temporary access"],
-  PROVIDER_BOOKING: ["ارائه‌دهندهٔ رزرو", "Booking provider"],
-  VET_SHARE: ["اشتراک با دامپزشک", "Shared with a vet"],
+const SHARE_KIND: Record<string, [string, string, string, string]> = {
+  HOUSEHOLD: ["عضو خانواده", "Household member", "Haushaltsmitglied", "Miembro del hogar"],
+  TEMPORARY: ["دسترسی موقت", "Temporary access", "Vorübergehender Zugriff", "Acceso temporal"],
+  PROVIDER_BOOKING: ["ارائه‌دهندهٔ رزرو", "Booking provider", "Anbieter einer Buchung", "Proveedor de la reserva"],
+  VET_SHARE: ["اشتراک با دامپزشک", "Shared with a vet", "Mit einer Tierarztpraxis geteilt", "Compartido con un veterinario"],
 };
 
-const BLOCKER_COPY: Record<string, { fa: string; en: string; href?: string }> = {
-  UPCOMING_BOOKINGS: { fa: "رزروهای پیش‌رو دارید؛ آن‌ها را انجام یا لغو کنید.", en: "You have upcoming bookings; complete or cancel them.", href: "/bookings" },
-  OPEN_ORDERS: { fa: "سفارش‌های باز دارید که هنوز تحویل یا لغو نشده‌اند.", en: "You have open orders that aren't delivered or cancelled yet.", href: "/orders" },
-  OPEN_REFUND_REQUESTS: { fa: "درخواست بازپرداخت در حال بررسی دارید.", en: "A refund request is still being reviewed.", href: "/orders" },
-  OPEN_DISPUTES: { fa: "یک اختلاف باز دارید.", en: "You have an open dispute.", href: "/support" },
-  ACTIVE_TRAVEL_BOOKINGS: { fa: "رزرو سفر فعال دارید.", en: "You have an active travel booking.", href: "/travel/trips" },
-  PARTNER_ROLES: { fa: "در یک کسب‌وکار (ارائه‌دهنده یا فروشنده) نقش دارید؛ ابتدا مسئولیت را منتقل کنید.", en: "You hold a role in a partner business (provider or seller); hand it over first." },
-  ONLY_OWNER_OF_SHARED_HOUSEHOLD: { fa: "تنها مدیر خانواده‌ای با اعضای دیگر هستید؛ ابتدا عضو دیگری را مدیر کنید.", en: "You're the only owner of a household others share; make someone else an owner first.", href: "/profile/household" },
+const BLOCKER_COPY: Record<string, { fa: string; en: string; de: string; es: string; href?: string }> = {
+  UPCOMING_BOOKINGS: { fa: "رزروهای پیش‌رو دارید؛ آن‌ها را انجام یا لغو کنید.", en: "You have upcoming bookings; complete or cancel them.", de: "Sie haben anstehende Buchungen. Schließen Sie diese ab oder stornieren Sie sie.", es: "Tienes reservas próximas; complétalas o cancélalas.", href: "/bookings" },
+  OPEN_ORDERS: { fa: "سفارش‌های باز دارید که هنوز تحویل یا لغو نشده‌اند.", en: "You have open orders that aren't delivered or cancelled yet.", de: "Es gibt offene Bestellungen, die noch nicht geliefert oder storniert wurden.", es: "Tienes pedidos abiertos que aún no se han entregado ni cancelado.", href: "/orders" },
+  OPEN_REFUND_REQUESTS: { fa: "درخواست بازپرداخت در حال بررسی دارید.", en: "A refund request is still being reviewed.", de: "Ein Erstattungsantrag wird noch geprüft.", es: "Aún se está revisando una solicitud de reembolso." , href: "/orders" },
+  OPEN_DISPUTES: { fa: "یک اختلاف باز دارید.", en: "You have an open dispute.", de: "Sie haben einen offenen Streitfall.", es: "Tienes una disputa abierta.", href: "/support" },
+  ACTIVE_TRAVEL_BOOKINGS: { fa: "رزرو سفر فعال دارید.", en: "You have an active travel booking.", de: "Sie haben eine aktive Reisebuchung.", es: "Tienes una reserva de viaje activa.", href: "/travel/trips" },
+  PARTNER_ROLES: { fa: "در یک کسب‌وکار (ارائه‌دهنده یا فروشنده) نقش دارید؛ ابتدا مسئولیت را منتقل کنید.", en: "You hold a role in a partner business (provider or seller); hand it over first.", de: "Sie haben eine Rolle in einem Partnerunternehmen (Anbieter oder Verkäufer). Übertragen Sie diese zuerst.", es: "Tienes un cargo en un negocio asociado (proveedor o vendedor); transfiérelo primero." },
+  ONLY_OWNER_OF_SHARED_HOUSEHOLD: { fa: "تنها مدیر خانواده‌ای با اعضای دیگر هستید؛ ابتدا عضو دیگری را مدیر کنید.", en: "You're the only owner of a household others share; make someone else an owner first.", de: "Sie sind alleinige Leitung eines Haushalts mit weiteren Mitgliedern. Ernennen Sie zuerst eine andere Person zur Leitung.", es: "Eres la única persona administradora de un hogar con más miembros; nombra primero a otra persona administradora.", href: "/profile/household" },
 };
 
-function formatSize(bytes: number | null, fa: boolean): string {
+const PRIVACY_DE: Record<string, string> = {
+  Privacy: "Datenschutz", "Privacy details didn't load.": "Die Datenschutzinformationen konnten nicht geladen werden.", Retry: "Erneut versuchen", Loading: "Wird geladen",
+  "PRIVACY CENTER": "DATENSCHUTZ", "Data, consents & sharing": "Daten, Einwilligungen und Freigaben", "See what's required and what's optional, who can see your pets, and how to get a copy of your data or delete it.": "Erfahren Sie, was erforderlich und freiwillig ist, wer Ihre Tiere sehen kann und wie Sie eine Kopie Ihrer Daten erhalten oder deren Löschung beantragen.",
+  Consents: "Einwilligungen", "Terms of use": "Nutzungsbedingungen", "Privacy policy": "Datenschutzerklärung", "Current version": "Aktuelle Version", "Accepted on": "Angenommen am", "A newer version hasn't been accepted yet.": "Eine neuere Version wurde noch nicht angenommen.", "Your acceptance of this version isn't on record.": "Ihre Annahme dieser Version ist nicht gespeichert.", "Required to use opetlife; to stop, request account deletion.": "Für die Nutzung von opetlife erforderlich. Wenn Sie dies beenden möchten, beantragen Sie die Kontolöschung.", Accepted: "Angenommen", "Accept current version": "Aktuelle Version annehmen",
+  "Offers & marketing messages": "Angebote und Marketingnachrichten", "Optional and off by default. Turning it off never affects security, order, booking or health messages.": "Freiwillig und standardmäßig deaktiviert. Das Deaktivieren betrifft niemals Sicherheits-, Bestell-, Buchungs- oder Gesundheitsnachrichten.", "On since": "Aktiv seit", "Marketing messages are off.": "Marketingnachrichten sind deaktiviert.", "Marketing messages are on.": "Marketingnachrichten sind aktiviert.",
+  Sharing: "Freigaben", "People who can currently reach pets you manage, and your access to other people's pets.": "Personen mit aktuellem Zugriff auf die von Ihnen verwalteten Tiere sowie Ihr Zugriff auf Tiere anderer Personen.", "Manage access": "Zugriff verwalten", "The sharing summary didn't load.": "Die Freigabeübersicht konnte nicht geladen werden.", "Nothing is shared with anyone right now.": "Derzeit ist nichts für andere freigegeben.", "sees health": "kann Gesundheitsdaten sehen", until: "bis", Manage: "Verwalten",
+  "Get a copy of your data": "Kopie Ihrer Daten erhalten", "We prepare a JSON file that stays available for": "Wir erstellen eine JSON-Datei, die für", "days. Each download link works for a few minutes and every download is recorded.": "Tage verfügbar ist. Jeder Download-Link ist nur wenige Minuten gültig und jeder Download wird protokolliert.", "Requested — your file will be ready in a moment.": "Angefordert – Ihre Datei wird in Kürze bereitgestellt.", "Preparing…": "Wird vorbereitet …", "Request my data": "Meine Daten anfordern", Requested: "Angefordert", "Available until": "Verfügbar bis", "Preparing failed; please request again.": "Die Vorbereitung ist fehlgeschlagen. Bitte fordern Sie die Datei erneut an.", "Download": "Herunterladen",
+  "Delete your account": "Konto löschen", "Your deletion request was recorded on": "Ihr Löschantrag wurde am", ". It waits until the data-retention rules are published, your account keeps working meanwhile, and you can cancel it until then.": " gespeichert. Er bleibt offen, bis die Regeln zur Datenaufbewahrung veröffentlicht sind. Ihr Konto bleibt bis dahin aktiv und Sie können den Antrag stornieren.", "Deletion is a recorded request, not an instant wipe. You'll see what it affects, confirm it's you, and can cancel it until it's processed.": "Die Löschung wird zunächst beantragt und erfolgt nicht sofort. Sie sehen die Auswirkungen, bestätigen Ihre Identität und können den Antrag bis zur Bearbeitung stornieren.", "Cancel deletion request": "Löschantrag stornieren", "Request account deletion": "Kontolöschung beantragen", "Your deletion request was recorded.": "Ihr Löschantrag wurde gespeichert.", "Cancel the deletion request": "Löschantrag stornieren", "The request is cancelled and your account stays exactly as it is.": "Der Antrag wird storniert und Ihr Konto bleibt unverändert.", "Cancel request": "Antrag stornieren", "The deletion request was cancelled.": "Der Löschantrag wurde storniert.",
+  "That didn't work.": "Das hat nicht funktioniert.", "This file is no longer available; request a fresh copy.": "Diese Datei ist nicht mehr verfügbar. Fordern Sie eine neue Kopie an.", "You've requested several exports today; try again tomorrow.": "Sie haben heute bereits mehrere Datenexporte angefordert. Versuchen Sie es morgen erneut.", "Request recorded; your file will be ready in a moment.": "Antrag gespeichert. Ihre Datei wird in Kürze bereitgestellt.",
+  "The preview didn't load.": "Die Vorschau konnte nicht geladen werden.", "What this affects": "Welche Auswirkungen dies hat", "Unnamed household": "Haushalt ohne Namen", owner: "verantwortliche Person", member: "Mitglied", "After processing, you won't be able to sign in to this account.": "Nach der Bearbeitung können Sie sich nicht mehr bei diesem Konto anmelden.", "Data-retention rules (e.g. for financial records) aren't published yet; the request waits until they are and can be cancelled meanwhile.": "Die Regeln zur Datenaufbewahrung (z. B. für Finanzunterlagen) sind noch nicht veröffentlicht. Der Antrag bleibt bis dahin offen und kann storniert werden.", "Resolve these first": "Zuerst erledigen", "Something else is still open.": "Es ist noch ein weiterer Vorgang offen.", View: "Ansehen", "We suggest getting a copy of your data before deleting.": "Wir empfehlen, vor der Löschung eine Kopie Ihrer Daten anzufordern.", Cancel: "Abbrechen", Continue: "Weiter", "To confirm it's you:": "Bitte bestätigen Sie Ihre Identität:", Password: "Passwort", "Resend code": "Code erneut senden", "Reason (optional)": "Begründung (optional)", "Type DELETE to confirm": "Geben Sie DELETE zur Bestätigung ein", Back: "Zurück", "Request deletion": "Löschung beantragen",
+  "Wait a moment before asking for another code.": "Warten Sie kurz, bevor Sie einen neuen Code anfordern.", "The code wasn't sent.": "Der Code wurde nicht gesendet.", "That password or code isn't right.": "Das Passwort oder der Code ist nicht korrekt.", "Some things are still open; see the list above.": "Einige Vorgänge sind noch offen. Prüfen Sie die Liste oben.", "The request wasn't recorded.": "Der Antrag wurde nicht gespeichert.", "Code sent to": "Code gesendet an", "Send a code to": "Code senden an",
+};
+
+const PRIVACY_ES: Record<string, string> = {
+  Privacy: "Privacidad", "Privacy details didn't load.": "No se pudo cargar la información de privacidad.", Retry: "Reintentar", Loading: "Cargando",
+  "PRIVACY CENTER": "CENTRO DE PRIVACIDAD", "Data, consents & sharing": "Datos, consentimientos y accesos", "See what's required and what's optional, who can see your pets, and how to get a copy of your data or delete it.": "Consulta qué es obligatorio y qué es opcional, quién puede ver a tus mascotas y cómo obtener una copia de tus datos o solicitar su eliminación.",
+  Consents: "Consentimientos", "Terms of use": "Condiciones de uso", "Privacy policy": "Política de privacidad", "Current version": "Versión actual", "Accepted on": "Aceptado el", "A newer version hasn't been accepted yet.": "Aún no has aceptado una versión más reciente.", "Your acceptance of this version isn't on record.": "No consta que hayas aceptado esta versión.", "Required to use opetlife; to stop, request account deletion.": "Es necesario para usar opetlife. Para dejar de usarlo, solicita la eliminación de tu cuenta.", Accepted: "Aceptado", "Accept current version": "Aceptar la versión actual",
+  "Offers & marketing messages": "Ofertas y mensajes comerciales", "Optional and off by default. Turning it off never affects security, order, booking or health messages.": "Es opcional y está desactivado de forma predeterminada. Desactivarlo nunca afecta a los mensajes de seguridad, pedidos, reservas o salud.", "On since": "Activado desde", "Marketing messages are off.": "Los mensajes comerciales están desactivados.", "Marketing messages are on.": "Los mensajes comerciales están activados.",
+  Sharing: "Accesos compartidos", "People who can currently reach pets you manage, and your access to other people's pets.": "Personas que actualmente pueden acceder a las mascotas que gestionas y tu acceso a mascotas de otras personas.", "Manage access": "Gestionar accesos", "The sharing summary didn't load.": "No se pudo cargar el resumen de accesos.", "Nothing is shared with anyone right now.": "Ahora mismo no compartes acceso con nadie.", "sees health": "puede ver los datos de salud", until: "hasta", Manage: "Gestionar",
+  "Get a copy of your data": "Obtener una copia de tus datos", "We prepare a JSON file that stays available for": "Preparamos un archivo JSON que estará disponible durante", "days. Each download link works for a few minutes and every download is recorded.": "días. Cada enlace de descarga funciona durante unos minutos y cada descarga queda registrada.", "Requested — your file will be ready in a moment.": "Solicitud registrada. El archivo estará listo en breve.", "Preparing…": "Preparando…", "Request my data": "Solicitar mis datos", Requested: "Solicitado", "Available until": "Disponible hasta", "Preparing failed; please request again.": "No se pudo preparar el archivo. Solicítalo de nuevo.", Download: "Descargar",
+  "Delete your account": "Eliminar tu cuenta", "Your deletion request was recorded on": "Tu solicitud de eliminación se registró el", ". It waits until the data-retention rules are published, your account keeps working meanwhile, and you can cancel it until then.": " y quedará pendiente hasta que se publiquen las reglas de conservación de datos. Tu cuenta seguirá funcionando y podrás cancelar la solicitud hasta entonces.", "Deletion is a recorded request, not an instant wipe. You'll see what it affects, confirm it's you, and can cancel it until it's processed.": "La eliminación comienza con una solicitud, no es inmediata. Verás sus efectos, confirmarás tu identidad y podrás cancelarla hasta que se procese.", "Cancel deletion request": "Cancelar la solicitud de eliminación", "Request account deletion": "Solicitar la eliminación de la cuenta", "Your deletion request was recorded.": "Se registró tu solicitud de eliminación.", "Cancel the deletion request": "Cancelar la solicitud de eliminación", "The request is cancelled and your account stays exactly as it is.": "La solicitud se cancelará y tu cuenta seguirá sin cambios.", "Cancel request": "Cancelar solicitud", "The deletion request was cancelled.": "Se canceló la solicitud de eliminación.",
+  "That didn't work.": "No se pudo completar.", "This file is no longer available; request a fresh copy.": "Este archivo ya no está disponible. Solicita una copia nueva.", "You've requested several exports today; try again tomorrow.": "Hoy has solicitado varias exportaciones. Inténtalo de nuevo mañana.", "The preview didn't load.": "No se pudo cargar la vista previa.", "What this affects": "Qué se verá afectado", "Unnamed household": "Hogar sin nombre", owner: "administrador/a", member: "miembro", "After processing, you won't be able to sign in to this account.": "Después del proceso, no podrás iniciar sesión en esta cuenta.", "Data-retention rules (e.g. for financial records) aren't published yet; the request waits until they are and can be cancelled meanwhile.": "Las reglas de conservación de datos (por ejemplo, de registros financieros) aún no están publicadas. La solicitud quedará pendiente y podrás cancelarla mientras tanto.", "Resolve these first": "Resuelve primero estos asuntos", "Something else is still open.": "Hay otro asunto pendiente.", View: "Ver", "We suggest getting a copy of your data before deleting.": "Te recomendamos obtener una copia de tus datos antes de eliminarlos.", Cancel: "Cancelar", Continue: "Continuar", "To confirm it's you:": "Confirma que eres tú:", Password: "Contraseña", "Resend code": "Reenviar código", "Reason (optional)": "Motivo (opcional)", "Type DELETE to confirm": "Escribe DELETE para confirmar", Back: "Atrás", "Request deletion": "Solicitar eliminación",
+  "Wait a moment before asking for another code.": "Espera un momento antes de solicitar otro código.", "The code wasn't sent.": "No se pudo enviar el código.", "That password or code isn't right.": "La contraseña o el código no son correctos.", "Some things are still open; see the list above.": "Aún hay asuntos pendientes; consulta la lista anterior.", "The request wasn't recorded.": "No se registró la solicitud.", "Code sent to": "Código enviado a", "Send a code to": "Enviar un código a",
+};
+
+function usePrivacyCopy() {
+  const { locale, num } = useAccountCopy();
+  const base = useAccountCopy().t;
+  const t = (faText: string, enText: string, deText?: string, esText?: string) =>
+    locale === "de" ? deText ?? PRIVACY_DE[enText] ?? `[Missing de: ${enText}]` : locale === "es" ? esText ?? PRIVACY_ES[enText] ?? `[Missing es: ${enText}]` : base(faText, enText);
+  return { locale, num, t };
+}
+
+function formatSize(bytes: number | null, locale: string): string {
   if (!bytes) return "";
   const kb = bytes / 1024;
-  const n = new Intl.NumberFormat(fa ? "fa-IR" : "en-US", { maximumFractionDigits: 1 });
-  return kb < 1024 ? `${n.format(Math.max(1, Math.round(kb)))} ${fa ? "کیلوبایت" : "KB"}` : `${n.format(kb / 1024)} ${fa ? "مگابایت" : "MB"}`;
+  const n = new Intl.NumberFormat(locale === "fa" ? "fa-IR" : locale, { maximumFractionDigits: 1 });
+  return kb < 1024 ? `${n.format(Math.max(1, Math.round(kb)))} ${locale === "fa" ? "کیلوبایت" : "KB"}` : `${n.format(kb / 1024)} ${locale === "fa" ? "مگابایت" : "MB"}`;
 }
 
 /**
@@ -77,7 +107,7 @@ function formatSize(bytes: number | null, fa: boolean): string {
  * facts, not legal promises — the legal text itself lives in the CMS.
  */
 export function PrivacyCenterView() {
-  const { t, fa, locale, num } = useAccountCopy();
+  const { t, locale, num } = usePrivacyCopy();
   const [data, setData] = useState<PrivacyCenterDto | null>(null);
   const [sharing, setSharing] = useState<SharingSummaryDto | null>(null);
   const [failed, setFailed] = useState(false);
@@ -127,7 +157,7 @@ export function PrivacyCenterView() {
       if (success) setNotice(success);
       await load();
     } catch (err) {
-      setNotice(err instanceof ApiError && err.code === "EXPORT_LIMIT_REACHED" ? t("امروز چند بار دریافت داده درخواست داده‌اید؛ فردا دوباره تلاش کنید.", "You've requested several exports today; try again tomorrow.") : apiErrorText(err, undefined, t("انجام نشد.", "That didn't work.")));
+      setNotice(err instanceof ApiError && err.code === "EXPORT_LIMIT_REACHED" ? t("امروز چند بار دریافت داده درخواست داده‌اید؛ فردا دوباره تلاش کنید.", "You've requested several exports today; try again tomorrow.") : t("انجام نشد.", "That didn't work."));
     } finally {
       setBusy(null);
     }
@@ -158,7 +188,7 @@ export function PrivacyCenterView() {
         <div className="account-section-title">
           <div>
             <h2 id="consents-title">{t("رضایت‌ها", "Consents")}</h2>
-            {data.consentVersion ? <p>{t(`نسخهٔ فعلی: ${formatDay(data.consentVersion, "fa")}`, `Current version: ${formatDay(data.consentVersion, "en")}`)}</p> : null}
+            {data.consentVersion ? <p>{t(`نسخهٔ فعلی: ${formatDay(data.consentVersion, "fa")}`, `Current version: ${formatAccountDate(`${data.consentVersion}T12:00:00`, locale)}`, `Aktuelle Version: ${formatAccountDate(`${data.consentVersion}T12:00:00`, locale)}`, `Versión actual: ${formatAccountDate(`${data.consentVersion}T12:00:00`, locale)}`)}</p> : null}
           </div>
         </div>
         <div className="security-list">
@@ -169,7 +199,7 @@ export function PrivacyCenterView() {
                 <div className="security-row__icon" aria-hidden>§</div>
                 <div>
                   <b>{kind === "TERMS" ? t("شرایط استفاده", "Terms of use") : t("سیاست حریم خصوصی", "Privacy policy")}</b>
-                  <p>{c?.granted && c.grantedAt ? t(`پذیرفته‌شده در ${formatAccountDate(c.grantedAt, locale)}`, `Accepted on ${formatAccountDate(c.grantedAt, locale)}`) : c?.lastRecordedVersion ? t("نسخهٔ جدیدی منتشر شده که هنوز نپذیرفته‌اید.", "A newer version hasn't been accepted yet.") : t("پذیرش شما برای این نسخه ثبت نشده است.", "Your acceptance of this version isn't on record.")}</p>
+                  <p>{c?.granted && c.grantedAt ? t(`پذیرفته‌شده در ${formatAccountDate(c.grantedAt, locale)}`, `Accepted on ${formatAccountDate(c.grantedAt, locale)}`, `Angenommen am ${formatAccountDate(c.grantedAt, locale)}`, `Aceptado el ${formatAccountDate(c.grantedAt, locale)}`) : c?.lastRecordedVersion ? t("نسخهٔ جدیدی منتشر شده که هنوز نپذیرفته‌اید.", "A newer version hasn't been accepted yet.") : t("پذیرش شما برای این نسخه ثبت نشده است.", "Your acceptance of this version isn't on record.")}</p>
                   <p className="text-metadata text-text-secondary">{t("لازم برای استفاده از opetlife؛ برای توقف، درخواست حذف حساب بدهید.", "Required to use opetlife; to stop, request account deletion.")}</p>
                 </div>
                 {c?.granted ? <StatusLabel tone="success">{t("پذیرفته", "Accepted")}</StatusLabel> : <Button variant="secondary" size="sm" isLoading={busy === kind} onClick={() => run(kind, () => accountService.setConsent(kind, true))}>{t("پذیرش نسخهٔ فعلی", "Accept current version")}</Button>}
@@ -181,7 +211,7 @@ export function PrivacyCenterView() {
             <div>
               <b id="marketing-label">{t("پیام‌های تبلیغاتی و پیشنهادها", "Offers & marketing messages")}</b>
               <p>{t("انتخابی است و به‌صورت پیش‌فرض خاموش است. خاموش کردن آن هیچ اثری روی پیام‌های امنیتی، سفارش، رزرو و سلامت ندارد.", "Optional and off by default. Turning it off never affects security, order, booking or health messages.")}</p>
-              {marketing?.granted && marketing.grantedAt ? <p className="text-metadata text-text-secondary">{t(`روشن از ${formatAccountDate(marketing.grantedAt, locale)}`, `On since ${formatAccountDate(marketing.grantedAt, locale)}`)}</p> : null}
+              {marketing?.granted && marketing.grantedAt ? <p className="text-metadata text-text-secondary">{t(`روشن از ${formatAccountDate(marketing.grantedAt, locale)}`, `On since ${formatAccountDate(marketing.grantedAt, locale)}`, `Aktiv seit ${formatAccountDate(marketing.grantedAt, locale)}`, `Activado desde ${formatAccountDate(marketing.grantedAt, locale)}`)}</p> : null}
             </div>
             <button
               type="button"
@@ -216,9 +246,9 @@ export function PrivacyCenterView() {
               <div className="security-row" key={share.grantId}>
                 <div className="security-row__icon" aria-hidden>⇄</div>
                 <div>
-                  <b>{t(`${share.pet.name} — با ${share.person}`, `${share.pet.name} — with ${share.person}`)}</b>
+                  <b>{t(`${share.pet.name} — با ${share.person}`, `${share.pet.name} — with ${share.person}`, `${share.pet.name} — geteilt mit ${share.person}`, `${share.pet.name} — compartido con ${share.person}`)}</b>
                   <p>
-                    {t(SHARE_KIND[share.kind]![0], SHARE_KIND[share.kind]![1])}
+                    {t(...SHARE_KIND[share.kind]!)}
                     {share.canViewHealth ? ` · ${t("سلامت را می‌بیند", "sees health")}` : ""}
                     {share.expiresAt ? ` · ${t("تا", "until")} ${formatAccountDate(share.expiresAt, locale)}` : ""}
                   </p>
@@ -230,8 +260,8 @@ export function PrivacyCenterView() {
               <div className="security-row" key={`with-${share.pet.id}-${index}`}>
                 <div className="security-row__icon" aria-hidden>↘</div>
                 <div>
-                  <b>{t(`دسترسی شما به ${share.pet.name}`, `Your access to ${share.pet.name}`)}</b>
-                  <p>{t(SHARE_KIND[share.kind]![0], SHARE_KIND[share.kind]![1])}{share.expiresAt ? ` · ${t("تا", "until")} ${formatAccountDate(share.expiresAt, locale)}` : ""}</p>
+                  <b>{t(`دسترسی شما به ${share.pet.name}`, `Your access to ${share.pet.name}`, `Ihr Zugriff auf ${share.pet.name}`, `Tu acceso a ${share.pet.name}`)}</b>
+                  <p>{t(...SHARE_KIND[share.kind]!)}{share.expiresAt ? ` · ${t("تا", "until")} ${formatAccountDate(share.expiresAt, locale)}` : ""}</p>
                 </div>
               </div>
             ))}
@@ -242,10 +272,10 @@ export function PrivacyCenterView() {
       <ContextSurface className="privacy-export">
         <div>
           <h2>{t("دریافت یک نسخه از داده‌ها", "Get a copy of your data")}</h2>
-          <p>{t(`یک فایل JSON آماده می‌شود و ${num(data.exportAvailableDays)} روز برای دریافت در دسترس است. پیوند دریافت فقط چند دقیقه اعتبار دارد و هر دریافت ثبت می‌شود.`, `We prepare a JSON file that stays available for ${num(data.exportAvailableDays)} days. Each download link works for a few minutes and every download is recorded.`)}</p>
+          <p>{t(`یک فایل JSON آماده می‌شود و ${num(data.exportAvailableDays)} روز برای دریافت در دسترس است. پیوند دریافت فقط چند دقیقه اعتبار دارد و هر دریافت ثبت می‌شود.`, `We prepare a JSON file that stays available for ${num(data.exportAvailableDays)} days. Each download link works for a few minutes and every download is recorded.`, `Wir erstellen eine JSON-Datei, die ${num(data.exportAvailableDays)} Tage verfügbar bleibt. Jeder Download-Link ist nur wenige Minuten gültig und jeder Download wird protokolliert.`, `Preparamos un archivo JSON que estará disponible durante ${num(data.exportAvailableDays)} días. Cada enlace de descarga funciona durante unos minutos y cada descarga queda registrada.`)}</p>
           <div className="experience-pills">
             {data.exportIncludes.map((item) => (
-              <span className="experience-pill" key={item}>{SCOPE_LABELS[item] ? t(SCOPE_LABELS[item]![0], SCOPE_LABELS[item]![1]) : item}</span>
+              <span className="experience-pill" key={item}>{SCOPE_LABELS[item] ? t(...SCOPE_LABELS[item]!) : t("بخش داده", "Data category", "Datenkategorie", "Categoría de datos")}</span>
             ))}
           </div>
         </div>
@@ -263,13 +293,13 @@ export function PrivacyCenterView() {
                 <div>
                   <b>{t("درخواست", "Requested")} {formatAccountDate(request.requestedAt, locale, true)}</b>
                   <p>
-                    {request.status === "READY" && request.expiresAt ? t(`تا ${formatAccountDate(request.expiresAt, locale)} قابل دریافت`, `Available until ${formatAccountDate(request.expiresAt, locale)}`) : request.status === "FAILED" ? t("آماده‌سازی ناموفق بود؛ دوباره درخواست دهید.", "Preparing failed; please request again.") : ""}
-                    {request.fileSizeBytes ? ` · ${formatSize(request.fileSizeBytes, fa)}` : ""}
-                    {request.downloadCount ? ` · ${t(`${num(request.downloadCount)} بار دریافت شده`, `downloaded ${num(request.downloadCount)}×`)}` : ""}
+                    {request.status === "READY" && request.expiresAt ? t(`تا ${formatAccountDate(request.expiresAt, locale)} قابل دریافت`, `Available until ${formatAccountDate(request.expiresAt, locale)}`, `Verfügbar bis ${formatAccountDate(request.expiresAt, locale)}`, `Disponible hasta ${formatAccountDate(request.expiresAt, locale)}`) : request.status === "FAILED" ? t("آماده‌سازی ناموفق بود؛ دوباره درخواست دهید.", "Preparing failed; please request again.") : ""}
+                    {request.fileSizeBytes ? ` · ${formatSize(request.fileSizeBytes, locale)}` : ""}
+                    {request.downloadCount ? ` · ${t(`${num(request.downloadCount)} بار دریافت شده`, `downloaded ${num(request.downloadCount)}×`, `${num(request.downloadCount)}× heruntergeladen`, `descargado ${num(request.downloadCount)}×`)}` : ""}
                   </p>
                 </div>
                 <div className="member-row__actions">
-                  <StatusLabel tone={status.tone}>{fa ? status.fa : status.en}</StatusLabel>
+                  <StatusLabel tone={status.tone}>{locale === "fa" ? status.fa : locale === "de" ? status.de : locale === "es" ? status.es : status.en}</StatusLabel>
                   {request.status === "READY" ? <Button variant="secondary" size="sm" isLoading={busy === `download-${request.id}`} onClick={() => download(request.id)}>{t("دریافت", "Download")}</Button> : null}
                 </div>
               </div>
@@ -282,7 +312,7 @@ export function PrivacyCenterView() {
         <div>
           <h2 id="delete-title">{t("حذف حساب", "Delete your account")}</h2>
           {pendingDeletion ? (
-            <p>{t(`درخواست حذف شما در ${formatAccountDate(pendingDeletion.requestedAt, locale)} ثبت شده است. تا زمان انتشار قواعد نگهداری داده، درخواست در انتظار می‌ماند و حساب شما همچنان کار می‌کند؛ تا آن زمان می‌توانید آن را لغو کنید.`, `Your deletion request was recorded on ${formatAccountDate(pendingDeletion.requestedAt, locale)}. It waits until the data-retention rules are published, your account keeps working meanwhile, and you can cancel it until then.`)}</p>
+            <p>{t(`درخواست حذف شما در ${formatAccountDate(pendingDeletion.requestedAt, locale)} ثبت شده است. تا زمان انتشار قواعد نگهداری داده، درخواست در انتظار می‌ماند و حساب شما همچنان کار می‌کند؛ تا آن زمان می‌توانید آن را لغو کنید.`, `Your deletion request was recorded on ${formatAccountDate(pendingDeletion.requestedAt, locale)}. It waits until the data-retention rules are published, your account keeps working meanwhile, and you can cancel it until then.`, `Ihr Löschantrag wurde am ${formatAccountDate(pendingDeletion.requestedAt, locale)} gespeichert. Er bleibt offen, bis die Regeln zur Datenaufbewahrung veröffentlicht sind. Ihr Konto bleibt bis dahin aktiv und Sie können den Antrag stornieren.`, `Tu solicitud de eliminación se registró el ${formatAccountDate(pendingDeletion.requestedAt, locale)} y quedará pendiente hasta que se publiquen las reglas de conservación de datos. Tu cuenta seguirá funcionando y podrás cancelarla hasta entonces.`)}</p>
           ) : (
             <p>{t("حذف یک درخواست ثبت‌شده است، نه پاک شدن فوری. ابتدا پیامدها را می‌بینید، هویت خود را تأیید می‌کنید و تا زمان پردازش می‌توانید آن را لغو کنید.", "Deletion is a recorded request, not an instant wipe. You'll see what it affects, confirm it's you, and can cancel it until it's processed.")}</p>
           )}
@@ -324,7 +354,7 @@ export function PrivacyCenterView() {
 }
 
 function DeleteAccountDialog({ onClose, onDone }: { onClose: () => void; onDone: () => Promise<void> }) {
-  const { t, fa, locale, num } = useAccountCopy();
+  const { t, locale, num } = usePrivacyCopy();
   const [preview, setPreview] = useState<DeletionPreviewDto | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [step, setStep] = useState<"impact" | "confirm">("impact");
@@ -361,7 +391,7 @@ function DeleteAccountDialog({ onClose, onDone }: { onClose: () => void; onDone:
     } catch (err) {
       if (err instanceof ApiError && err.code === "REAUTHENTICATION_REQUIRED") setError(t("رمز یا کد درست نیست.", "That password or code isn't right."));
       else if (err instanceof ApiError && err.code === "DELETION_BLOCKED") setError(t("هنوز مواردی باز است؛ فهرست بالا را ببینید.", "Some things are still open; see the list above."));
-      else setError(apiErrorText(err, undefined, t("درخواست ثبت نشد.", "The request wasn't recorded.")));
+      else setError(t("درخواست ثبت نشد.", "The request wasn't recorded."));
     } finally {
       setBusy(false);
     }
@@ -379,9 +409,9 @@ function DeleteAccountDialog({ onClose, onDone }: { onClose: () => void; onDone:
               <ul>
                 {preview.households.map((h) => (
                   <li key={h.id}>
-                    {h.name || t("خانهٔ بدون نام", "Unnamed household")}: {h.role === "OWNER" ? t("مدیر", "owner") : t("عضو", "member")}, {t(`${num(h.pets)} حیوان`, `${num(h.pets)} pet(s)`)}
-                    {h.otherMembers ? t(`، ${num(h.otherMembers)} عضو دیگر دسترسی خود را حفظ می‌کنند`, `; ${num(h.otherMembers)} other member(s) keep their access`) : ""}
-                    {h.membershipStatus && MEMBERSHIP_STATUS[h.membershipStatus] ? t(`، عضویت: ${MEMBERSHIP_STATUS[h.membershipStatus]![0]}`, `; membership: ${MEMBERSHIP_STATUS[h.membershipStatus]![1]}`) : ""}
+                    {h.name || t("خانهٔ بدون نام", "Unnamed household")}: {h.role === "OWNER" ? t("مدیر", "owner", "verantwortliche Person", "administrador/a") : t("عضو", "member")}, {t(`${num(h.pets)} حیوان`, `${num(h.pets)} pet(s)`, `${num(h.pets)} ${h.pets === 1 ? "Tier" : "Tiere"}`, `${num(h.pets)} ${h.pets === 1 ? "mascota" : "mascotas"}`)}
+                    {h.otherMembers ? t(`، ${num(h.otherMembers)} عضو دیگر دسترسی خود را حفظ می‌کنند`, `; ${num(h.otherMembers)} other member(s) keep their access`, `; ${num(h.otherMembers)} weitere Mitglieder behalten ihren Zugriff`, `; ${num(h.otherMembers)} miembros más conservarán el acceso`) : ""}
+                    {h.membershipStatus && MEMBERSHIP_STATUS[h.membershipStatus] ? t(`، عضویت: ${MEMBERSHIP_STATUS[h.membershipStatus]![0]}`, `; membership: ${MEMBERSHIP_STATUS[h.membershipStatus]![1]}`, `; Mitgliedschaft: ${MEMBERSHIP_STATUS[h.membershipStatus]![2]}`, `; estado de membresía: ${MEMBERSHIP_STATUS[h.membershipStatus]![3]}`) : ""}
                   </li>
                 ))}
                 <li>{t("پس از پردازش، ورود به این حساب ممکن نخواهد بود.", "After processing, you won't be able to sign in to this account.")}</li>
@@ -396,7 +426,7 @@ function DeleteAccountDialog({ onClose, onDone }: { onClose: () => void; onDone:
                     const copy = BLOCKER_COPY[b.code];
                     return (
                       <li key={b.code}>
-                        {copy ? (fa ? copy.fa : copy.en) : t("مورد باز دیگری وجود دارد.", "Something else is still open.")} {b.count > 1 ? `(${num(b.count)})` : ""}
+                        {copy ? (locale === "fa" ? copy.fa : locale === "de" ? copy.de : locale === "es" ? copy.es : copy.en) : t("مورد باز دیگری وجود دارد.", "Something else is still open.")} {b.count > 1 ? `(${num(b.count)})` : ""}
                         {copy?.href ? <> · <Link href={`/${locale}${copy.href}`} className="text-brand-natural">{t("مشاهده", "View")}</Link></> : null}
                       </li>
                     );
@@ -417,9 +447,9 @@ function DeleteAccountDialog({ onClose, onDone }: { onClose: () => void; onDone:
             {preview.reauth.password ? <PasswordInput label={t("رمز عبور", "Password")} autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} /> : null}
             {preview.reauth.code ? (
               <div className="flex flex-col gap-2">
-                {codeSentTo ? <Input label={t(`کد ارسال‌شده به ${codeSentTo}`, `Code sent to ${codeSentTo}`)} inputMode="numeric" dir="ltr" value={code} onChange={(e) => setCode(e.target.value)} /> : null}
+                {codeSentTo ? <Input label={t(`کد ارسال‌شده به ${codeSentTo}`, `Code sent to ${codeSentTo}`, `Code gesendet an ${codeSentTo}`, `Código enviado a ${codeSentTo}`)} inputMode="numeric" dir="ltr" value={code} onChange={(e) => setCode(e.target.value)} /> : null}
                 <div>
-                  <Button variant="secondary" size="sm" isLoading={busy && !codeSentTo} onClick={sendCode}>{codeSentTo ? t("ارسال دوبارهٔ کد", "Resend code") : t(`ارسال کد به ${preview.reauth.code}`, `Send a code to ${preview.reauth.code}`)}</Button>
+                  <Button variant="secondary" size="sm" isLoading={busy && !codeSentTo} onClick={sendCode}>{codeSentTo ? t("ارسال دوبارهٔ کد", "Resend code") : t(`ارسال کد به ${preview.reauth.code}`, `Send a code to ${preview.reauth.code}`, `Code senden an ${preview.reauth.code}`, `Enviar un código a ${preview.reauth.code}`)}</Button>
                 </div>
               </div>
             ) : null}
