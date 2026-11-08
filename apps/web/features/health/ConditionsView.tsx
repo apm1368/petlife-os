@@ -7,6 +7,7 @@ import { Button, ContextSurface, EmptyState, Input, Skeleton, StatusLabel } from
 import { SourceType, type ConditionDto } from "@petlife/types";
 import { statusLabel } from "@/lib/status/status-labels";
 import { healthService } from "@/services/health.service";
+import { HealthLoadFailure } from "./HealthLoadFailure";
 
 export function ConditionsView({ petId }: { petId: string }) {
   const t = useTranslations("health.conditions");
@@ -17,9 +18,13 @@ export function ConditionsView({ petId }: { petId: string }) {
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadError, setLoadError] = useState<unknown | null>(null);
+  const [saveFailed, setSaveFailed] = useState(false);
 
   async function load() {
-    setConditions(await healthService.listConditions(petId));
+    setLoadError(null);
+    try { setConditions(await healthService.listConditions(petId)); }
+    catch (error) { setLoadError(error); setConditions(null); }
   }
 
   useEffect(() => {
@@ -30,17 +35,21 @@ export function ConditionsView({ petId }: { petId: string }) {
   async function submit() {
     if (!name.trim()) return;
     setIsSubmitting(true);
+    setSaveFailed(false);
     try {
       await healthService.createCondition(petId, { name: name.trim(), notes: notes.trim() || undefined });
       setName("");
       setNotes("");
       setIsAdding(false);
       await load();
+    } catch {
+      setSaveFailed(true);
     } finally {
       setIsSubmitting(false);
     }
   }
 
+  if (loadError) return <HealthLoadFailure error={loadError} onRetry={load} />;
   if (!conditions) return <Skeleton className="h-48 w-full" aria-label={tCommon("loading")} />;
 
   return (
@@ -56,6 +65,7 @@ export function ConditionsView({ petId }: { petId: string }) {
 
       {isAdding ? (
         <ContextSurface className="flex flex-col gap-3">
+          {saveFailed ? <p role="alert" className="text-sm text-error">{t("saveFailed")}</p> : null}
           <Input label={t("name")} value={name} onChange={(e) => setName(e.target.value)} autoFocus />
           <Input label={t("notes")} value={notes} onChange={(e) => setNotes(e.target.value)} />
           <div className="flex gap-2">
@@ -81,7 +91,7 @@ export function ConditionsView({ petId }: { petId: string }) {
             {t(`status_${condition.status}`)}
           </StatusLabel>
           {condition.sourceType !== SourceType.OWNER ? (
-            <span className="text-metadata text-text-secondary">{statusLabel(condition.sourceType, locale === "fa" ? "fa" : "en", "source")}</span>
+            <span className="text-metadata text-text-secondary">{statusLabel(condition.sourceType, locale as "fa" | "en" | "de" | "es", "source")}</span>
           ) : null}
         </ContextSurface>
       ))}
