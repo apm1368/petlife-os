@@ -1,30 +1,41 @@
 "use client";
-import { Brand } from "@/features/brand/Brand";
 
 import Link from "next/link";
-import { useLocale, useTranslations } from "next-intl";
-import { landingCopy } from "@/features/landing/copy";
+import { ArrowUp } from "@petlife/ui";
+import { Brand } from "@/features/brand/Brand";
+import { storyCopy } from "@/features/landing/story-copy";
+import type { RouteLocale } from "@/lib/i18n/config";
 
-/** Public footer — the same real destinations as the landing footer; no placeholder labels. */
-export function PublicFooter() {
-  const t = useTranslations("rollout.contact");
-  const locale = useLocale() === "fa" ? "fa" : "en";
-  const copy = landingCopy[locale].footer;
-  return (
-    <footer className="public-footer" aria-label={locale === "fa" ? "پیوندهای پایانی" : "Footer links"}>
-      <div className="public-footer__brand">
-        <Brand />
-        <span>{copy.demo}</span>
+/** Public-route counterpart to the landing footer, sharing its translated copy and destinations. */
+export function PublicFooter({ locale }: { locale: RouteLocale }) {
+  const copy = storyCopy[locale];
+  return <footer className="park-footer" aria-label={copy.footerLabel}>
+    <div className="park-footer__main">
+      <div className="park-footer__brand">
+        <Link href={`/${locale}`} className="park-brand"><Brand /></Link>
+        <p>{copy.footerDescription}</p>
+        <Link href={`/${locale}#lp-main`} className="park-footer__back">{copy.footerTop}<ArrowUp size={16} aria-hidden="true" /></Link>
       </div>
-      <ul>
-        <li><Link href={`/${locale}/contact`}>{t("link")}</Link></li>
-        <li><Link href={`/${locale}/help`}>{locale === "fa" ? "مرکز راهنما" : "Help Center"}</Link></li>
-        <li><Link href={`/${locale}/legal`}>{locale === "fa" ? "اسناد و سیاست‌ها" : "Policies & Legal"}</Link></li>
-        <li><Link href={`/${locale}/status`}>{locale === "fa" ? "وضعیت سامانه" : "System status"}</Link></li>
-        {copy.groups.flatMap((group) => group.links).map((link) => (
-          <li key={link.href}><Link href={`/${locale}${link.href}`}>{link.label}</Link></li>
-        ))}
-      </ul>
-    </footer>
-  );
+      {copy.footerGroups.map((group) => (
+        <nav key={group.title} aria-label={group.title}>
+          <h2>{group.title}</h2>
+          <ul>{group.links.map((link) => <li key={link.href}><Link href={`/${locale}${link.href}`}>{link.label}</Link></li>)}</ul>
+        </nav>
+      ))}
+      <nav aria-label={copy.footerPartners}>
+        <h2>{copy.footerPartners}</h2>
+        <ul>
+          <li><Link href={`/${locale}/auth?returnTo=${encodeURIComponent(`/${locale}/provider`)}`}>{copy.partnerLogin}</Link></li>
+          <li><Link href={`/${locale}/register?returnTo=${encodeURIComponent(`/${locale}/provider`)}`}>{copy.partnerJoin}</Link></li>
+        </ul>
+      </nav>
+    </div>
+    <div className="park-footer__bottom">
+      <small>{copy.footerNotice}</small>
+      <nav aria-label={copy.footerPrivacy}>
+        <Link href={`/${locale}/profile/privacy`}>{copy.footerPrivacy}</Link>
+        <Link href={`/${locale}/credits`}>{copy.footerCredits}</Link>
+      </nav>
+    </div>
+  </footer>;
 }

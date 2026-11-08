@@ -60,7 +60,7 @@ Status is per page family, not per shared header. `COMPLETE` means all applicati
 |---|---|---|---|---|---|
 | Public landing `/[locale]` | Complete | Complete | Complete | Complete | Main public sections and language-aware navigation; HERO composition/image unchanged. |
 | Member dashboard `/[locale]/home` | Complete | Complete | Complete | Complete | Dashboard body, cards, empty/loading/failure states, access error, retry, event/status labels, locale dates/numbers and dashboard links tested. User-entered names/titles and provider/plan content are preserved; plan name is explicitly identified as English in de/es because the source has only fa/en fields. |
-| Global navigation and account navigation | Complete | Complete | Partial | Partial | Member navigation tests exist. Public navigation/footer/preview are fixed in PR #162 (`aacafaae`, exact-head CI `42505793449` green); deployment run `42507308498` is in progress, so production browser verification is still pending. |
+| Global navigation and account navigation | Complete | Complete | Partial | Partial | Member navigation tests exist. Public navigation/footer/preview are fixed in PR #162 (`aacafaae`, exact-head CI `42505793449` green); deployment run `42507308498` must be checked before production browser verification. |
 | Authentication and registration | Complete | Complete | Complete | Complete | Existing auth page tests cover translated copy; external SMS delivery/templates remain provider-dependent and are not claimed active. |
 | Household membership and invitations | Partial | Partial | Partial | Partial | PR #158 adds German/Spanish owner controls, invitation-request route and pet-access management; fresh hosted CI after #149 synchronization remains pending. Visual browser inspection and other household lifecycle states remain open. |
 | Personal account settings `/profile/settings/personal` | Complete | Complete | Complete | Complete | Existing #119 translation slice covers loading/save/contact/appearance states; verification delivery remains external. |
@@ -87,6 +87,10 @@ Status is per page family, not per shared header. `COMPLETE` means all applicati
 | Admin, backoffice and ERP | Partial | Partial | Partial | Partial | Shared navigation is localized; tables, charts, permissions, operational dialogs and state copy remain open. |
 | Admin audit `/[locale]/admin/audit` and shared admin shell | Partial | Partial | Partial | Partial | PR #156 merged to main at `b0ec95c4`; CI passed on its exact head. Audit labels, empty/loading/error/retry, role/access shell, navigation groups and links have 19 focused tests. Responsive inspection remains pending; other admin routes remain partial. |
 | Notifications and message templates | Partial | Partial | Partial | Partial | PR #148 merged to main at `afefa932`; CI passed on exact head `615f6350`. Notification-center/preferences chrome, controls and timestamps are translated; server-provided titles/bodies stay unchanged. Backend errors and other surfaces remain partial. German/Spanish SMS templates and provider delivery are not implemented or simulated. |
+
+### Public shell and preview navigation follow-up
+
+The public shell now uses explicit `publicNavigation` messages for all four target languages, including primary and Explore links, accessible labels, sign-in and preview entry. The shared footer reuses the landing footer's fa/en/de/es story copy and locale-prefixed links instead of coercing every non-Persian locale to English. The local-preview product menu uses the same locale messages for its navigation and consumer destinations. This changes interface chrome only; account content, source-authored content and business behavior are untouched. German/Spanish remain PARTIAL until hosted CI and rendered 390px/1440px browser inspection pass in the live release.
 
 ### Dashboard batch on `codex/i18n-dashboard`
 
