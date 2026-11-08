@@ -37,6 +37,7 @@ enum HouseholdRole {
 
 enum HouseholdInvitationStatus {
   PENDING
+  REQUESTED
   ACCEPTED
   DECLINED
   EXPIRED
@@ -1237,6 +1238,8 @@ model User {
   dataExportRequests      DataExportRequest[]
   accountDeletionRequests AccountDeletionRequest[]
   acceptedInvitations     HouseholdInvitation[]      @relation("AcceptedInvitationUser")
+  requestedInvitations    HouseholdInvitation[]      @relation("RequestedInvitationUser")
+  reviewedInvitations     HouseholdInvitation[]      @relation("ReviewedInvitationUser")
 
   adminUser                 AdminUser?
   supportCasesRequested     SupportCase[]
@@ -1393,8 +1396,14 @@ model HouseholdInvitation {
   invitedByUserId  String                    @db.Uuid
   acceptedByUserId String?                   @db.Uuid
   acceptedBy       User?                     @relation("AcceptedInvitationUser", fields: [acceptedByUserId], references: [id], onDelete: SetNull)
+  requestedByUserId String?                  @db.Uuid
+  requestedBy       User?                    @relation("RequestedInvitationUser", fields: [requestedByUserId], references: [id], onDelete: SetNull)
+  reviewedByUserId String?                   @db.Uuid
+  reviewedBy       User?                     @relation("ReviewedInvitationUser", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
   initialAccess    Json
   expiresAt        DateTime
+  requestedAt      DateTime?
+  reviewedAt       DateTime?
   acceptedAt       DateTime?
   declinedAt       DateTime?
   cancelledAt      DateTime?
@@ -1403,6 +1412,7 @@ model HouseholdInvitation {
 
   @@index([householdId, status])
   @@index([contact, status])
+  @@index([requestedByUserId])
   @@map("household_invitations")
 }
 

@@ -72,7 +72,16 @@ export interface HouseholdCollaborationDto extends HouseholdDto {
   currentUserRole: "OWNER" | "FAMILY";
   members: Array<{ id: string; userId: string; role: "OWNER" | "FAMILY"; createdAt: string; user: Pick<UserDto, "id" | "displayName" | "avatarUrl"> }>;
   pets: Array<{ id: string; name: string; photoUrl: string | null; species: string; lifecycleStatus: string }>;
-  invitations: Array<{ id: string; contactMasked: string; status: string; expiresAt: string; createdAt: string; initialAccess: unknown }>;
+  invitations: Array<{
+    id: string;
+    contactMasked: string;
+    status: "PENDING" | "REQUESTED";
+    expiresAt: string;
+    createdAt: string;
+    requestedAt: string | null;
+    initialAccess: Array<{ petId: string; preset: "VIEW_ONLY" | "CARE_HELPER" | "FULL" }>;
+    requester: { id: string; displayName: string; avatarUrl: string | null; phoneMasked: string | null; phoneVerified: boolean } | null;
+  }>;
   grants: Array<PetAccessFlags & { id: string; petId: string; userId: string; source: string; startsAt: string | null; expiresAt: string | null; createdAt: string }>;
   history: ActivityEventDto[];
 }
