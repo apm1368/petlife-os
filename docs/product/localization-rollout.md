@@ -227,3 +227,9 @@ Lifecycle actions, status labels, confirmation dialog, owner note, loading/retry
 - The landing header actions, memorial section and their accessible labels have German/Spanish UI text; the approved HERO image and composition are unchanged. Compact header rules address mobile layout. Published/user-authored memorial content is not translated or fabricated.
 - PR #160 was synchronized with current `main` at `b6b61c4` after the travel PR #152 merged. Its German and Spanish catalog namespaces were combined with the newer main catalogs without conflicting values; the merge also preserves #152 travel strings and #163 health strings.
 - The earlier 21 focused tests and CI were for the prior head; the new sync still requires local reruns, a pushed exact-head CI and production verification. The landing remains PARTIAL, and original memorial-image/CDN privacy is not claimed.
+
+## Admin user directory and profile — PR #167, synchronized with #168
+
+- German and Spanish cover the admin user list, filters, masked contact details, pagination, profile sections/tabs, household/pet summaries, relationship/status labels, audit entries and the permitted one-account message/SMS disclosure. User-entered and provider-authored content remains unchanged; no SMS delivery is simulated.
+- The branch is synchronized with current `main` through #168. Current-main catalog conflicts had removed the `adminUsers` namespace; it is restored in both German and Spanish.
+- Synchronized-head checks: 17 user-directory render/parity tests pass, web TypeScript check, targeted ESLint, four-catalog parsing and `git diff --check` pass. A fresh hosted CI is still required after push; other admin/backoffice/ERP pages remain PARTIAL.
