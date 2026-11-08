@@ -13,6 +13,8 @@ import { buildLoginUrl } from "@/lib/auth/return-to";
 import { formatNumber, PriceBlock, ProductImage, RatingInline, StarRow, StockBadge } from "./commerce-ui";
 import { CommercePage } from "./CommercePage";
 import { ProductCard } from "./ProductCard";
+import type { RouteLocale } from "@/lib/i18n/config";
+import { formatLocaleDate } from "@/lib/i18n/format";
 
 const COMPATIBILITY_TONE: Record<string, "success" | "attention" | "urgent" | "neutral"> = {
   COMPATIBLE: "success",
@@ -37,7 +39,7 @@ export function ProductDetailView({ productId }: { productId: string }) {
   const design = useTranslations("commerce.design");
   const tCompat = useTranslations("commerce.compatibility");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as RouteLocale;
   const { activePet } = useActivePet();
 
   const loadId = useRef(0);
@@ -415,7 +417,7 @@ export function ProductDetailView({ productId }: { productId: string }) {
                       <StarRow value={review.rating} />
                       <span className="text-metadata text-text-primary">{review.authorName}</span>
                     </span>
-                    <span className="text-metadata text-text-secondary">{new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "medium" }).format(new Date(review.createdAt))}</span>
+                    <span className="text-metadata text-text-secondary">{formatLocaleDate(review.createdAt, locale, { dateStyle: "medium" })}</span>
                   </div>
                   {review.variantTitle ? <p className="text-metadata text-text-secondary">{review.variantTitle}</p> : null}
                   {review.body ? <p className="text-body text-text-primary">{review.body}</p> : null}
