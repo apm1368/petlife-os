@@ -68,7 +68,7 @@ describe("BookingFlowView", () => {
     fireEvent.click(await screen.findByLabelText(/ویزیت عمومی/));
     fireEvent.click(screen.getByLabelText(/ویزیت در منزل/));
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-    expect(await screen.findByText("All bookable pets in your household are listed. This service allows up to 1 pet." )).toBeTruthy();
+    expect(await screen.findByText("All bookable pets in your household are listed. Selection limit: 1." )).toBeTruthy();
     expect(screen.getByText("Cookie")).toBeTruthy();
     expect(screen.getByText("Pistachio")).toBeTruthy();
     fireEvent.click(screen.getByLabelText("Pistachio"));
@@ -86,5 +86,18 @@ describe("BookingFlowView", () => {
     fireEvent.click(screen.getByRole("checkbox", { name: /Cookie/ }));
     fireEvent.click(screen.getByRole("checkbox", { name: /Pistachio/ }));
     expect((screen.getByRole("button", { name: "Continue" }) as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it.each([
+    ["de", "Termin buchen", "Tiermedizin", "30 Min."],
+    ["es", "Reservar una cita", "Atención veterinaria", "30 min"],
+  ] as const)("renders the %s booking flow in the selected locale", async (locale, title, category, duration) => {
+    useSessionStore.setState({ status: "unauthenticated" });
+    renderWithIntl(<BookingFlowView providerId="p1" />, locale);
+
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByText(new RegExp(`${category} · ${duration}`))).toBeTruthy();
+    expect(screen.getByText(/Toman/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: locale === "de" ? "Weiter" : "Continuar" })).toBeTruthy();
   });
 });

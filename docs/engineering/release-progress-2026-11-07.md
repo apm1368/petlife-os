@@ -86,12 +86,10 @@
 - Memorial source-image and CDN privacy remain unverified because production bucket/CDN configuration is not available read-only. #110→#111 and #113→#114 remain unmerged dependencies; landing overlap #115/#116/#117 remains review-blocked. No release or retargeting was performed.
 - No feature is `LIVE_VERIFIED` beyond the currently deployed baseline; the localization PRs have not been deployed. Exact release blocker: qualified review/branch protection, first #107 due to production demo rows, then owner-approved dependency order for the remaining PRs.
 
-## Travel discovery localization recheck — 2026-11-08 16:32 UTC
+## Full-page localization continuation — 2026-11-08 16:52 UTC
 
-- Current main includes merged provider localization #149 at `f64e794c`; exact-head hosted CI passed. Its authorized deployment is still being checked separately; production last reported `afefa932`.
-- #151 travel discovery is synced with #149. Focused TravelMarket and currency tests pass (19 total), typecheck/lint passed locally. Fresh hosted CI is pending for the synchronized head; travel remains PARTIAL.
-- #152 travel hub/trip is based on the earlier main; exact-head CI had passed before #149 moved main. It must sync with #149 and rerun trip/currency tests before merge.
-- #150 booking creation is also synced with #149; 24 booking/care regression tests, typecheck and lint pass, hosted CI pending.
-- #158 household and #159 lifecycle exact-head CI passed before #149 moved main. Recheck bases and hosted CI before any merge.
-- #160 landing correction addresses production-observed English memorial/auth copy and 390px overflow. Its CI is pending; no post-fix browser or production verification has occurred.
-- Production remains NOT VERIFIED for these localization changes. Original memorial image/CDN privacy is still unverified. Disk free space is approximately 259 MiB; no local production build was attempted.
+- Main includes #150 at `85c9198239e259f5d36ef66a58b8d17a4a328fea`. #149 deployment `42499967855` completed; production version is `f64e794c` and readiness is healthy. #150 deployment is pending; do not assume production has advanced past #149.
+- #151 is being synced from #149 to the new #150 main. #152 `14bfa89e` and #160 `e2da007c` passed their current-head CI before #150 merged, but are now behind and need sync/retest. #158 `11ff1c43` and #159 `500b0356` include #150 and have hosted CI in progress; local focused suites/typecheck/lint passed after sync.
+- #161 separates the public services overview (`/[locale]/services`) from provider search/profile routes. Live browser inspection found the overview entirely English in de/es. The independent fix adds 25-key parity for `services.explore`; five render tests pass in fa/en/de/es, typecheck/lint pass, hosted CI pending.
+- Production browser checks for public routes have verified correct locale/dir and no overflow on service overview at 390/1440, but exposed English app copy. After #161 merges/deploys, repeat those checks. Authenticated dashboard/account screens were not inspected in a live browser this session.
+- Disk is approximately 257 MiB free; no local production build attempted. Payment worktree preserved. Original memorial source-image/CDN privacy remains unverified. No full application page family is claimed complete based solely on headers; major product families remain PARTIAL.
