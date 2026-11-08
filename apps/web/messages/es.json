@@ -164,6 +164,61 @@
       "genericError": "No se pudo cambiar la contraseña. Inténtalo de nuevo."
     }
   },
+  "admin": {
+    "common": {
+      "loading": "Cargando…",
+      "retry": "Reintentar",
+      "empty": "Aún no hay nada aquí.",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "reasonLabel": "Motivo",
+      "reasonPlaceholder": "Obligatorio: explica el motivo",
+      "assign": "Asignar",
+      "assigneeLabel": "ID del administrador asignado",
+      "backToList": "Volver a la lista",
+      "search": "Buscar"
+    },
+    "audit": {
+      "title": "Registro de auditoría",
+      "entityType": "Tipo de entidad",
+      "entityId": "ID de entidad",
+      "action": "Acción",
+      "reason": "Motivo",
+      "by": "Por {name}",
+      "empty": "Todavía no se han registrado eventos de auditoría.",
+      "loadError": "No se pudo cargar el registro de auditoría. Inténtalo de nuevo."
+    },
+    "shell": {
+      "accessLoadFailed": "No se pudieron cargar los permisos de administración. Reintenta para verificar tu acceso actual.",
+      "title": "opetlife Admin",
+      "notAnAdmin": {
+        "title": "Sin acceso de administración",
+        "body": "Tu cuenta no tiene acceso interno a la plataforma.",
+        "backToApp": "Volver a opetlife"
+      },
+      "role": {
+        "SUPER_ADMIN": "Superadministración", "ADMIN": "Administración", "SUPPORT": "Soporte",
+        "TRUST_SAFETY": "Confianza y seguridad", "FINANCE": "Finanzas", "OPERATIONS": "Operaciones",
+        "CONTENT": "Contenido", "VERIFICATION": "Verificación", "READ_ONLY": "Solo lectura", "EDITOR": "Edición"
+      },
+      "nav": {
+        "dashboard": "Panel", "crm": "CRM", "customerAffairs": "Atención al cliente", "users": "Todos los usuarios",
+        "customers": "Clientes", "support": "Soporte", "systemStatus": "Estado del sistema", "disputes": "Disputas",
+        "trust": "Confianza y seguridad", "providers": "Proveedores", "sellers": "Vendedores", "transactions": "Transacciones",
+        "tasks": "Tareas", "access": "Acceso y roles", "audit": "Registro de auditoría", "sellerFinance": "Finanzas de vendedores",
+        "reconciliation": "Conciliación", "content": "Contenido", "helpCenter": "Ayuda y legal", "contentNew": "Nuevo artículo",
+        "contentCategories": "Categorías", "contentTags": "Etiquetas", "contentMedia": "Multimedia",
+        "contentPlacements": "Ubicaciones", "subscriptions": "Suscripciones", "services": "Servicios y reservas",
+        "commerce": "Comercio", "travel": "Viajes y alojamientos", "insurance": "Seguros", "places": "Lugares",
+        "communityReports": "Reportes de usuarios", "animalSupport": "Protección animal", "lostPets": "Mascotas perdidas",
+        "settings": "Configuración de la plataforma", "featureFlags": "Indicadores de funciones", "smsPatterns": "Plantillas SMS",
+        "verification": "Identidad y documentos"
+      },
+      "navigation": "Navegación de administración", "openMenu": "Abrir menú", "closeMenu": "Cerrar menú",
+      "groups": { "work": "Trabajo diario", "trust": "Clientes y confianza", "network": "Red", "finance": "Finanzas", "content": "Contenido", "system": "Sistema" }
+    }
+  },
+  "common": { "loading": "Cargando…", "retry": "Reintentar" },
   "commerce": {
     "shopHome": {
       "title": "Tienda", "subtitle": "Para {name}", "categories": "Categorías", "browseAll": "Ver todos los productos", "loading": "Cargando", "unavailable": "La tienda no está disponible ahora", "retry": "Reintentar", "eyebrow": "COMPRAS PENSADAS PARA TU MASCOTA", "heroTitle": "Compras que empiezan por tu mascota", "heroDescription": "Compara vendedores verificados, comprueba qué es adecuado para tu mascota y organiza entregas periódicas de lo que siempre necesitas.", "searchLabel": "Buscar en la tienda", "searchPlaceholder": "Busca comida, marca o producto…", "searchButton": "Buscar", "categoriesHint": "Categorías disponibles en el catálogo", "repeatTitle": "Entrega periódica", "repeatHint": "Avisos y pedidos con un toque, nunca cargos automáticos", "dealsTitle": "Promociones actuales", "dealsHint": "Los descuentos se aplican automáticamente al pagar", "seeAll": "Ver todo", "picksTitle": "Recomendados", "picksHint": "Disponibles ahora, primero los mejor valorados", "emptyTitle": "El catálogo está vacío por ahora", "emptyDescription": "Los productos aparecerán cuando los vendedores verificados los publiquen."
@@ -205,7 +260,7 @@
     "day": "Día",
     "month": "Mes",
     "year": "Año"
-  },
+   },
   "consentHistory": {
     "title": "Historial de consentimientos",
     "intro": "Aceptaciones y revocaciones registradas en tu cuenta.",
