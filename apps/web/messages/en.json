@@ -2739,7 +2739,9 @@
       "entityId": "Entity ID",
       "action": "Action",
       "reason": "Reason",
-      "by": "By {name}"
+      "by": "By {name}",
+      "empty": "No audit events have been recorded yet.",
+      "loadError": "The audit trail could not be loaded. Please try again."
     },
     "sellerFinance": {
       "title": "Seller Finance",
