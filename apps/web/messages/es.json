@@ -1489,7 +1489,35 @@
       "systemStatus": { "HEALTHY": "Operativo", "DEGRADED": "Degradado", "LAGGING": "Con retraso", "DOWN": "No disponible", "UP": "Disponible", "RUNNING": "En ejecución", "ERROR": "Error" },
       "marketplaceStatements": "Liquidaciones del mercado", "insuranceProviders": "Gestión de aseguradoras", "externalSources": "Gestión de fuentes de viaje externas", "accessControl": "Gestión de acceso de administración", "verificationQueue": "Cola de verificación de socios"
     },
-    "adminSearch": { "title": "Buscar clientes, pedidos o casos de soporte", "search": "Buscar", "failed": "La búsqueda falló. Inténtalo de nuevo.", "order": "Pedido", "empty": "No se encontraron resultados." }
+    "adminSearch": { "title": "Buscar clientes, pedidos o casos de soporte", "search": "Buscar", "failed": "La búsqueda falló. Inténtalo de nuevo.", "order": "Pedido", "empty": "No se encontraron resultados." },
+    "sellerOffer": {
+      "title": "Añadir oferta del vendedor",
+      "search": "Buscar en el catálogo de productos",
+      "find": "Buscar",
+      "empty": "No se encontraron productos.",
+      "variant": "Variante del producto",
+      "choose": "Elige una variante",
+      "price": "Precio (IRR)",
+      "stock": "Existencias iniciales",
+      "save": "Añadir oferta",
+      "failed": "No se pudo completar la acción. Tus datos se han conservado.",
+      "saved": "Oferta del vendedor creada.",
+      "requestHelp": "Si falta el producto, puedes solicitar que se revise para el catálogo central. La solicitud no crea una oferta ni fija un precio o existencias.",
+      "requestName": "Nombre del producto",
+      "requestBrand": "Marca (opcional)",
+      "requestSource": "URL de referencia (opcional)",
+      "requestDescription": "Descripción del producto (opcional)",
+      "requestReviewNote": "Administración revisará posibles duplicados y tu solicitud. El precio y las existencias de tu vendedor se mantienen por separado.",
+      "requestSubmit": "Solicitar que se añada al catálogo",
+      "requestSaved": "Solicitud enviada para revisión.",
+      "requestHistory": "Tus solicitudes de catálogo",
+      "requestStatus": {
+        "PENDING_REVIEW": "En revisión",
+        "APPROVED": "Añadido al catálogo central",
+        "MATCHED_EXISTING": "Vinculado a un producto existente",
+        "REJECTED": "Rechazado"
+      }
+    }
   },
   "clinicCustomerExtras": {
     "sharedNotesTitle": "Mensajes de la clínica para tu hogar",

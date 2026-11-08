@@ -1489,7 +1489,35 @@
       "systemStatus": { "HEALTHY": "Betriebsbereit", "DEGRADED": "Beeinträchtigt", "LAGGING": "Verzögert", "DOWN": "Nicht verfügbar", "UP": "Erreichbar", "RUNNING": "Läuft", "ERROR": "Fehler" },
       "marketplaceStatements": "Marktplatzabrechnungen", "insuranceProviders": "Versicherungsanbieter verwalten", "externalSources": "Externe Reisequellen verwalten", "accessControl": "Admin-Zugriffsverwaltung", "verificationQueue": "Warteschlange zur Partnerprüfung"
     },
-    "adminSearch": { "title": "Kunden, Bestellungen oder Supportfälle suchen", "search": "Suchen", "failed": "Die Suche ist fehlgeschlagen. Bitte versuchen Sie es erneut.", "order": "Bestellung", "empty": "Keine Ergebnisse gefunden." }
+    "adminSearch": { "title": "Kunden, Bestellungen oder Supportfälle suchen", "search": "Suchen", "failed": "Die Suche ist fehlgeschlagen. Bitte versuchen Sie es erneut.", "order": "Bestellung", "empty": "Keine Ergebnisse gefunden." },
+    "sellerOffer": {
+      "title": "Verkäuferangebot hinzufügen",
+      "search": "Im Produktkatalog suchen",
+      "find": "Suchen",
+      "empty": "Keine Produkte gefunden.",
+      "variant": "Produktvariante",
+      "choose": "Variante auswählen",
+      "price": "Preis (IRR)",
+      "stock": "Anfangsbestand",
+      "save": "Angebot hinzufügen",
+      "failed": "Die Aktion konnte nicht abgeschlossen werden. Ihre Eingaben bleiben erhalten.",
+      "saved": "Verkäuferangebot erstellt.",
+      "requestHelp": "Wenn das Produkt fehlt, können Sie es zur Prüfung im zentralen Katalog vorschlagen. Eine Anfrage erstellt weder ein Angebot noch legt sie Preis oder Bestand fest.",
+      "requestName": "Produktname",
+      "requestBrand": "Marke (optional)",
+      "requestSource": "Referenz-URL (optional)",
+      "requestDescription": "Produktbeschreibung (optional)",
+      "requestReviewNote": "Eine Administration prüft mögliche Duplikate und Ihre Anfrage. Ihr Verkäuferpreis und Bestand bleiben getrennt.",
+      "requestSubmit": "Ergänzung zum Katalog anfragen",
+      "requestSaved": "Anfrage zur Prüfung gesendet.",
+      "requestHistory": "Ihre Kataloganfragen",
+      "requestStatus": {
+        "PENDING_REVIEW": "In Prüfung",
+        "APPROVED": "Zum zentralen Katalog hinzugefügt",
+        "MATCHED_EXISTING": "Vorhandenem Produkt zugeordnet",
+        "REJECTED": "Abgelehnt"
+      }
+    }
   },
   "clinicCustomerExtras": {
     "sharedNotesTitle": "Kliniknachrichten für Ihren Haushalt",

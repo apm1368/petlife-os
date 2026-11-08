@@ -16,6 +16,8 @@ const placeholders = (value: string) => [...value.matchAll(/\{([^{}]+)\}/g)].map
 describe("seller offer locale parity", () => {
   const source = flatten(en.seller.offers);
   const sourceKeys = source.map(([key]) => key).sort();
+  const createOfferSource = flatten(en.rollout.sellerOffer);
+  const createOfferSourceKeys = createOfferSource.map(([key]) => key).sort();
 
   it.each([["de", de.seller.offers], ["es", es.seller.offers]] as const)("translates all seller-offer UI keys and placeholders for %s", (locale, messages) => {
     const translated = flatten(messages);
@@ -23,6 +25,19 @@ describe("seller offer locale parity", () => {
     const byKey = new Map(translated);
 
     for (const [key, sourceText] of source) {
+      const translatedText = byKey.get(key)!;
+      expect(translatedText, `${locale}.${key}`).toBeTruthy();
+      expect(placeholders(translatedText), `${locale}.${key} placeholders`).toEqual(placeholders(sourceText));
+      expect(translatedText, `${locale}.${key} contains no Persian interface text`).not.toMatch(/[\u0600-\u06FF]/);
+    }
+  });
+
+  it.each([["de", de.rollout.sellerOffer], ["es", es.rollout.sellerOffer]] as const)("translates the complete create-offer and catalog-request flow for %s", (locale, messages) => {
+    const translated = flatten(messages);
+    expect(translated.map(([key]) => key).sort()).toEqual(createOfferSourceKeys);
+    const byKey = new Map(translated);
+
+    for (const [key, sourceText] of createOfferSource) {
       const translatedText = byKey.get(key)!;
       expect(translatedText, `${locale}.${key}`).toBeTruthy();
       expect(placeholders(translatedText), `${locale}.${key} placeholders`).toEqual(placeholders(sourceText));
