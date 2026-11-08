@@ -6,7 +6,8 @@ import { careRemindersService } from "@/services/care-reminders.service";
 import { bookingsService } from "@/services/bookings.service";
 import { usePetStore } from "@/stores/pet-store";
 import { useSessionStore } from "@/stores/session-store";
-import { MemberHomeView } from "./MemberHomeView";
+import { dashboardCopy, MemberHomeView } from "./MemberHomeView";
+import { glassHomeCopy } from "./glass-home-copy";
 import { routeExists } from "@/test/route-exists";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => "/fa/home" }));
@@ -31,6 +32,15 @@ describe("MemberHomeView", () => {
     vi.mocked(careRemindersService.list).mockReset().mockResolvedValue([]);
     usePetStore.setState({ householdId: "h1", pets: [PET as never], activePetId: null });
     useSessionStore.setState({ user: { id: "u1", displayName: "مریم رضایی" } as never, status: "authenticated" });
+  });
+
+  it("keeps the complete dashboard-owned copy key set in all four locales", () => {
+    const keys = Object.keys(dashboardCopy.fa).sort();
+    const glassKeys = Object.keys(glassHomeCopy.fa).sort();
+    for (const locale of ["en", "de", "es"] as const) {
+      expect(Object.keys(dashboardCopy[locale]).sort()).toEqual(keys);
+      expect(Object.keys(glassHomeCopy[locale]).sort()).toEqual(glassKeys);
+    }
   });
 
   it("shows the member's own pet — not a sample — with Persian digits, falling back to the first pet when none is active", async () => {
@@ -121,6 +131,38 @@ describe("MemberHomeView", () => {
     await screen.findByRole("heading", { name: "پشمک" });
     await screen.findAllByText("This section could not load right now.");
     expect(screen.queryByText("You have no upcoming appointment.")).toBeNull();
+  });
+
+  it.each([
+    ["de", "Benötigt Aufmerksamkeit", "Letzte Gesundheitseinträge", "Tierarzttermin", "Keine aktive Mitgliedschaft. Entdecken Sie die verfügbaren Tarife und Leistungen."],
+    ["es", "Requiere atención", "Registros de salud recientes", "Cita veterinaria", "No tienes una suscripción activa. Consulta los planes y sus ventajas."],
+  ] as const)("renders the full dashboard in %s without Persian interface fallback", async (locale, attention, health, event, membership) => {
+    useSessionStore.setState({ user: { id: "u1", displayName: "Maria Garcia" } as never, status: "authenticated" });
+    vi.mocked(petsService.getOverview).mockResolvedValue(overview({
+      attention: [{ id: "a1", severity: "URGENT", title: "VACCINATION_DUE_SOON", dueAt: "2026-11-12T10:00:00Z", href: "/care" }],
+      upcoming: [{ id: "e1", type: "BOOKING", title: "careCalendar.event.vetAppointment", occurredAt: "2026-11-12T10:00:00Z", sourceType: "PROVIDER", providerName: null, href: "/bookings/b1", status: "CONFIRMED" }],
+    }));
+
+    renderWithIntl(<MemberHomeView />, locale);
+
+    expect(await screen.findByText(attention)).toBeTruthy();
+    expect(screen.getByRole("heading", { name: health })).toBeTruthy();
+    expect(screen.getByText(event)).toBeTruthy();
+    expect(await screen.findByText(membership)).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/سلام|داشبورد|تلاش دوباره|پرونده سلامت/);
+    expect(document.body.textContent).toMatch(locale === "de" ? /12\.11\.2026/ : /12 nov 2026/i);
+  });
+
+  it.each([
+    ["de", "Lernen Sie zuerst Ihr Tier kennen.", "Erstes Tier hinzufügen", "Ihr Konto"],
+    ["es", "Primero, conozcamos a tu mascota.", "Añadir mi primera mascota", "Tu cuenta"],
+  ] as const)("translates the full empty dashboard in %s", (locale, welcome, addPet, account) => {
+    usePetStore.setState({ householdId: "h1", pets: [], activePetId: null });
+    renderWithIntl(<MemberHomeView />, locale);
+    expect(screen.getByRole("heading", { name: welcome })).toBeTruthy();
+    expect(screen.getByRole("link", { name: addPet }).getAttribute("href")).toBe(`/${locale}/onboarding`);
+    expect(screen.getByRole("heading", { name: account })).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/داشبورد|از اینجا شروع کنید|اطلاعات شخصی/);
   });
 
 });

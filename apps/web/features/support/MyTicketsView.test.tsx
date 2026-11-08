@@ -59,4 +59,14 @@ describe("MyTicketsView", () => {
 
     expect(push).toHaveBeenCalledWith("/en/support/tickets/case-1");
   });
+
+  it("renders German ticket status and empty-state copy", async () => {
+    vi.mocked(supportService.list).mockResolvedValue({ items: [TICKET], total: 1, page: 1, pageSize: 50 });
+
+    renderWithIntl(<MyTicketsView />, "de");
+
+    await waitFor(() => expect(screen.getByText("Wird geprüft")).toBeTruthy());
+    expect(screen.getByRole("heading", { name: "Meine Anfragen" })).toBeTruthy();
+    expect(screen.getByText("Hilfe anfordern")).toBeTruthy();
+  });
 });
