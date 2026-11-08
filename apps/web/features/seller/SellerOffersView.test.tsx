@@ -78,6 +78,18 @@ describe("SellerOffersView", () => {
     expect(screen.getByText("1 sync error(s)")).toBeTruthy();
   });
 
+  it.each([
+    ["de", "Angebote", "Verkäuferangebot hinzufügen"],
+    ["es", "Ofertas", "Añadir oferta del vendedor"],
+  ] as const)("localizes the seller catalog offer flow in %s", async (locale, heading, addOffer) => {
+    vi.mocked(sellerOsService.listOffers).mockResolvedValue(page([OFFER]));
+    renderWithIntl(<SellerOffersView />, locale);
+    await waitFor(() => expect(screen.getByRole("heading", { name: heading })).toBeTruthy());
+    expect(screen.getByText(addOffer)).toBeTruthy();
+    expect(screen.getByLabelText(locale === "de" ? "Preis (IRR)" : "Precio (IRR)")).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
   it("keeps existing offers visible but directs an unverified seller to verification", async () => {
     const context = useSellerStore.getState().context!;
     useSellerStore.setState({

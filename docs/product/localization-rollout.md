@@ -216,6 +216,12 @@ Lifecycle actions, status labels, confirmation dialog, owner note, loading/retry
 - Trip setup/hub remains PARTIAL: listing/detail and authenticated responsive browser behavior are not fully covered, and no live availability or booking is claimed. Source-authored content is preserved and the exact source link is the final reservation path.
 - Focused post-sync tests and exact-head CI are required before merge; production behavior must be checked after deployment.
 
+## Seller catalog offers — German/Spanish slice
+
+- The seller-offers route and its create-offer/catalog-request disclosure now use German/Spanish application UI, including search, empty/request form, approval states, offer inputs, status controls, repeat intervals and feedback. A complete-key/placeholder parity test covers both namespaces; rendering tests also assert no Persian interface text.
+- Seller names, product titles, descriptions, prices and marketplace-provided content remain source data. No seller permissions, pricing or inventory behavior changed.
+- The create-offer form is localized, but seller onboarding, central-catalog administration, orders, team, returns, finance and the complete seller OS are not. Mark seller operations PARTIAL pending hosted CI and authenticated browser verification.
+
 ## Public landing and memorial localization — PR #160
 
 - The landing header actions, memorial section and their accessible labels have German/Spanish UI text; the approved HERO image and composition are unchanged. Compact header rules address mobile layout. Published/user-authored memorial content is not translated or fabricated.

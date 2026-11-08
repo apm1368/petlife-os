@@ -175,6 +175,23 @@
 - German/Spanish message catalogs merged without conflicts. Documentation conflicts were resolved from latest main, with this travel-specific status restored. The local branch needs focused tests, commit/push and new exact-head CI before merge.
 - Production still needs rechecking after deploy run `42519281605`; last verified production SHA is `3155232`. Trip setup/hub remains PARTIAL pending authenticated responsive checks.
 
+## Localization queue — 2026-11-08 20:50 UTC
+
+- `main` is `b6b61c4124640a496c6d2cda5566ee509d07c953` after #152 merged with exact-head CI green. Production reports `8d892b2ea8b2b408f517b26866118acd8ca8e96d`; deploy `42521413577` for #152 is in progress.
+- #160 is synchronized at `44eac6ee86e4a4dd9735de99c5df6b79af1f76d3`; 21 landing/memorial/public-shell tests, typecheck, targeted lint and HERO-diff check pass locally. Current hosted CI `42521671723` is pending.
+- #166 is synchronized at `062da1127181b3ab477ef4cb1d7bfda55f0939ba`; 27 dashboard-state tests, typecheck, targeted lint and diff checks pass locally. Current hosted CI `42521799060` is pending.
+- #167 admin-user directory is synchronized at `3dee5c0cd17cd8f3c985fc6916ed90adfd8a11e2`; 17 focused tests and typecheck/lint/catalog/diff checks pass locally. Current hosted CI `42521920173` is pending.
+- At 20:50 UTC the isolated seller-offers localization from #123 was still being prepared. It was later opened as PR #168; its first CI found that `CreateSellerOffer` still used English fallback copy, which is being fixed by adding the complete German/Spanish catalog-request form translations and parity tests.
+- None of these post-#152 PRs is merged or LIVE_VERIFIED. Disk headroom remains about 104 MiB; no cleanup/build or payment-worktree change.
+
+## Current checkpoint — 2026-11-08 21:03 UTC
+
+- `main` is `de4296432bd1722273fea27a31141c326ad170de` after normal merge of #160. #160 exact-head PR CI `42521671723` passed; the post-merge main CI/deploy workflow `42522889255` is still running. Production currently reports `b6b61c4124640a496c6d2cda5566ee509d07c953` from successful deploy `42521413577`; #160 is not yet verified live.
+- #166 and #167 exact-head CI runs `42521799060` and `42521920173` passed, but both now show `DIRTY` after #160 moved `main`; they need synchronization and fresh CI before merge.
+- #168 head `28a6465a82a8cd2594d66790bbed45ed80ee0b6b` had an actual CI failure in the full suite: its German/Spanish page test exposed that the embedded create-offer/catalog-request form still rendered English. Local fix adds all DE/ES `rollout.sellerOffer` strings and key/placeholder checks; 9 focused tests and four-catalog JSON validation pass. The PR needs the merge with #160's main changes, a new pushed head and fresh CI before merge.
+- Landing HERO image/composition remains unchanged. All four affected page slices remain PARTIAL until authenticated browser/mobile checks; only the public HTML shell and deploy SHA have been checked. Original memorial source URLs/CDN copies remain outside verified revocation.
+- Disk headroom is about 103 MiB. No cleanup, package installation, full production build or payment-worktree modification was performed. The separate payment worktree was not present in this workspace listing.
+
 ## Current localization/release state — 2026-11-08 20:39 UTC
 
 - PR #152 merged normally into `main` at `b6b61c4124640a496c6d2cda5566ee509d07c953`; its exact-head CI run `42519816325` succeeded. #152 remains PARTIAL for authenticated responsive/product behavior verification.
