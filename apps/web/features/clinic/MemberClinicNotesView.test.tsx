@@ -36,21 +36,25 @@ describe("MemberClinicNotesView",()=>{
  it.each([
   ["de", "Keine Internetverbindung. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut."],
   ["es", "No hay conexión a Internet. Comprueba tu conexión e inténtalo de nuevo."],
+  ["en", "You are offline. Check your connection and try again."],
+  ["fa", "اتصال اینترنت برقرار نیست. اتصال را بررسی کنید و دوباره تلاش کنید."],
  ] as const)("renders a distinct offline state in %s",async(locale,message)=>{
   vi.stubGlobal("navigator",{onLine:false});
   vi.mocked(clinicCustomerExtrasService.sharedNotes).mockRejectedValueOnce(new TypeError("Failed to fetch"));
   renderWithIntl(<MemberClinicNotesView/>,locale);
   expect((await screen.findByRole("alert")).textContent).toBe(message);
-  expect(document.body.textContent).not.toMatch(/[\u0600-\u06ff]/);
+  if(locale!=="fa")expect(document.body.textContent).not.toMatch(/[\u0600-\u06ff]/);
  });
  it.each([
   ["de", "Sie haben keinen Zugriff auf diese Kliniknachrichten. Melden Sie sich erneut an oder wenden Sie sich an die Klinik."],
   ["es", "No tienes acceso a estos mensajes de la clínica. Inicia sesión de nuevo o contacta con la clínica."],
+  ["en", "You don't have access to these clinic messages. Sign in again or contact the clinic."],
+  ["fa", "به این پیام‌های کلینیک دسترسی ندارید. دوباره وارد شوید یا با کلینیک تماس بگیرید."],
  ] as const)("renders a distinct access-denied state in %s",async(locale,message)=>{
   vi.mocked(clinicCustomerExtrasService.sharedNotes).mockRejectedValueOnce(new ApiError({code:"FORBIDDEN",message:"Forbidden",requestId:"test"},403));
   renderWithIntl(<MemberClinicNotesView/>,locale);
   expect((await screen.findByRole("alert")).textContent).toBe(message);
-  expect(document.body.textContent).not.toMatch(/[\u0600-\u06ff]/);
+  if(locale!=="fa")expect(document.body.textContent).not.toMatch(/[\u0600-\u06ff]/);
  });
  it.each([
   ["de", "Kliniknachrichten für Ihren Haushalt", "Bis zu 100 aktuelle Nachrichten aus Ihren Haushalten."],

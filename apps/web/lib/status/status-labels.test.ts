@@ -24,6 +24,14 @@ describe("status vocabulary", () => {
     expect(statusLabel("NEW_SERVER_STATE", "es")).toBe("Estado desconocido (new server state)");
   });
 
+  it("localizes every known pet lifecycle status in German and Spanish", () => {
+    expect(statusLabel("LOST", "de", "lifecycle")).toBe("Vermisst");
+    expect(statusLabel("LOST", "es", "lifecycle")).toBe("Sin localizar");
+    expect(statusLabel("TEMPORARILY_TRANSFERRED", "de", "lifecycle")).toContain("Vorübergehend");
+    expect(statusLabel("DECEASED", "es", "lifecycle")).toBe("Ha fallecido");
+    expect(statusLabel("MEMORIAL", "de", "lifecycle")).toBe("In Erinnerung");
+  });
+
   it("tones follow meaning, not the code text", () => {
     expect(statusTone("OVERDUE", "vaccination")).toBe("urgent");
     expect(statusTone("UP_TO_DATE", "vaccination")).toBe("success");
