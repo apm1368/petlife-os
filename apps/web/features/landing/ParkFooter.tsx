@@ -1,10 +1,10 @@
 import { Brand } from "@/features/brand/Brand";
 import Link from "next/link";
 import { ArrowUp } from "@petlife/ui";
-import type { AppLocale } from "@/lib/i18n/config";
+import type { RouteLocale } from "@/lib/i18n/config";
 import { storyCopy } from "./story-copy";
 
-export function ParkFooter({ locale }: { locale: AppLocale }) {
+export function ParkFooter({ locale }: { locale: RouteLocale }) {
   const c = storyCopy[locale];
   return <footer className="park-footer" aria-label={c.footerLabel}>
     <div className="park-footer__main">

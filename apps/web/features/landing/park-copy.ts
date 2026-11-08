@@ -1,4 +1,4 @@
-import type { AppLocale } from "@/lib/i18n/config";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 export const parkDestinations = [
   { key: "shop", href: "/shop", x: 9.4, y: 47, width: 10.4, tone: "plum" },
@@ -19,7 +19,7 @@ interface ParkCopy {
   services: Record<ParkDestinationKey, { title: string; hint: string }>;
   creditsTitle: string; creditsBody: string; backdropCredit: string; shopCredit: string; processing: string; licence: string;
 }
-export const parkCopy: Record<AppLocale, ParkCopy> = {
+export const parkCopy: Record<RouteLocale, ParkCopy> = {
   fa: {
     imageSrc: "/images/landing/tehran-park.webp",
     title: "یک دنیا برای تو و همراهت",
@@ -79,5 +79,63 @@ export const parkCopy: Record<AppLocale, ParkCopy> = {
     backdropCredit: "The warm blurred member-panel backdrop is also OpenAI AI-generated artwork, re-encoded for the web; it does not depict a real location.",
     creditsBody: "This park is AI-generated concept artwork based on the approved design and reference images of Tara, Pedram and Cookie. It is not a photograph of a real location or evidence that these pavilions exist. Reference images were supplied by the project owner for this design.",
     processing: "Cropped/re-encoded", licence: "Licence and usage terms",
+  },
+  de: {
+    imageSrc: "/images/landing/tehran-park-en.webp",
+    title: "Eine ganze Welt für dich und dein Tier",
+    description: "Alles, was dein Tier braucht – in einer App",
+    subline: "Ein gesünderes, glücklicheres Leben mit deinem kleinen Begleiter",
+    explore: "Angebote entdecken",
+    imageAlt: "KI-generierte Konzeptillustration eines Parks in Teheran mit Dienstleistungspavillons, Azadi- und Milad-Turm.",
+    destinationsLabel: "Angebote im Park entdecken",
+    introTitle: "An deiner Seite, in jedem Moment",
+    introBody: "Von Gesundheit und Pflege bis zu Reisen und Unterkunft – für ein besseres Leben mit deinem Tier.",
+    brandTagline: "Eine Welt für Haustiere",
+    partnerSignIn: "Partner-Login", partnerJoin: "Partner werden",
+    memberJoin: "Registrieren", home: "Startseite", about: "Über uns", partners: "Für Partner", photoCredits: "Bildnachweise",
+    services: {
+      shop: { title: "Tierbedarf", hint: "Für den Alltag" },
+      vet: { title: "Tiermedizin", hint: "Gesundheit zuerst" },
+      grooming: { title: "Fellpflege", hint: "Pflege und Wohlbefinden" },
+      boarding: { title: "Betreuung", hint: "Gut aufgehoben, wenn du weg bist" },
+      travel: { title: "Reisen", hint: "Gemeinsam unterwegs" },
+      taxi: { title: "Tier-Taxi", hint: "Sichere Fahrten" },
+      support: { title: "Tierschutz", hint: "Tieren in Not helfen" },
+      insurance: { title: "Versicherung", hint: "Mehr Sicherheit" },
+    },
+    creditsTitle: "Der Park von Tara und Cookie",
+    shopCredit: "Shop-Motiv: KI-generierte Konzeptillustration von OpenAI, zugeschnitten und neu codiert. Kein echtes Geschäft und kein Produktfoto.",
+    backdropCredit: "Auch der warme, unscharfe Hintergrund des Mitgliederbereichs ist KI-generiert und für das Web neu codiert; er zeigt keinen realen Ort.",
+    creditsBody: "Dieser Park ist eine KI-generierte Konzeptillustration nach dem freigegebenen Entwurf und den Referenzbildern von Tara, Pedram und Cookie. Sie zeigt weder einen realen Ort noch den Nachweis, dass diese Pavillons existieren. Die Referenzbilder wurden vom Projekteigentümer für diesen Entwurf bereitgestellt.",
+    processing: "Zugeschnitten und neu codiert", licence: "Lizenz- und Nutzungsbedingungen",
+  },
+  es: {
+    imageSrc: "/images/landing/tehran-park-en.webp",
+    title: "Un mundo entero para ti y tu mascota",
+    description: "Todo lo que necesita tu mascota, en una sola aplicación",
+    subline: "Una vida más sana y feliz junto a tu pequeño compañero",
+    explore: "Explorar servicios",
+    imageAlt: "Ilustración conceptual generada con IA de un parque en Teherán, con pabellones de servicios y las torres Azadi y Milad.",
+    destinationsLabel: "Explorar los servicios del parque",
+    introTitle: "A tu lado en cada momento",
+    introBody: "De la salud y el cuidado a los viajes y el alojamiento: todo para vivir mejor con tu mascota.",
+    brandTagline: "Un mundo para las mascotas",
+    partnerSignIn: "Acceso para profesionales", partnerJoin: "Hazte colaborador",
+    memberJoin: "Crear cuenta", home: "Inicio", about: "Quiénes somos", partners: "Profesionales", photoCredits: "Créditos de imagen",
+    services: {
+      shop: { title: "Tienda para mascotas", hint: "Lo esencial cada día" },
+      vet: { title: "Veterinaria", hint: "La salud es lo primero" },
+      grooming: { title: "Peluquería", hint: "Cuidado y bienestar" },
+      boarding: { title: "Alojamiento", hint: "Bien cuidado mientras no estás" },
+      travel: { title: "Viajes", hint: "Aventuras juntos" },
+      taxi: { title: "Taxi para mascotas", hint: "Traslados seguros" },
+      support: { title: "Protección animal", hint: "Ayuda a quien lo necesita" },
+      insurance: { title: "Seguro", hint: "Más tranquilidad" },
+    },
+    creditsTitle: "El parque de Tara y Cookie",
+    shopCredit: "Imagen principal de la tienda: concepto fotorrealista generado con IA por OpenAI, recortado y recodificado. No es una tienda ni un producto real.",
+    backdropCredit: "El fondo cálido y desenfocado del área de miembros también es una imagen generada con IA por OpenAI y recodificada para la web; no representa un lugar real.",
+    creditsBody: "Este parque es una ilustración conceptual generada con IA a partir del diseño aprobado y las imágenes de referencia de Tara, Pedram y Cookie. No es una fotografía de un lugar real ni demuestra que existan estos pabellones. El propietario del proyecto facilitó las imágenes de referencia para este diseño.",
+    processing: "Recortada y recodificada", licence: "Licencia y condiciones de uso",
   },
 };

@@ -3,14 +3,14 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { PawPrint, Stethoscope, Scissors, House, Plane, CarFront, HandHeart, ShieldCheck } from "@petlife/ui";
-import type { AppLocale } from "@/lib/i18n/config";
+import type { RouteLocale } from "@/lib/i18n/config";
 import { parkCopy, parkDestinations } from "./park-copy";
 
 const icons = { shop: PawPrint, vet: Stethoscope, grooming: Scissors, boarding: House, travel: Plane, taxi: CarFront, support: HandHeart, insurance: ShieldCheck };
 // Physical sign icon centers, as percentages of the existing pavilion hit region.
 const iconTop = { shop: 12, vet: 20, grooming: 14, boarding: 17, travel: 18, taxi: 20, support: 21, insurance: 13 };
 
-export function ParkPavilions({ locale }: { locale: AppLocale }) {
+export function ParkPavilions({ locale }: { locale: RouteLocale }) {
   const ref = useRef<HTMLElement>(null);
   const [intro, setIntro] = useState(false);
   const c = parkCopy[locale];

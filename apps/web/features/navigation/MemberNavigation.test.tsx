@@ -137,18 +137,38 @@ describe("member navigation", () => {
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
   });
 
-  it.each(["fa", "en"] as const)("keeps language, appearance, support and current guides reachable in the %s mobile sheet", (locale) => {
+  it.each([
+    ["de", "Entdecken", "Pflege", "Reisen und Unterkünfte", "/de/travel"],
+    ["es", "Explorar", "Cuidados", "Viajes y alojamientos", "/es/travel"],
+  ] as const)("renders localized desktop destinations and Explore links for %s", (locale, exploreLabel, careLabel, travelLabel, travelHref) => {
+    routing.pathname = `/${locale}/home`;
+    renderWithIntl(<PrimaryNav />, locale);
+    expect(screen.getByRole("link", { name: locale === "de" ? "Übersicht" : "Inicio" }).getAttribute("href")).toBe(`/${locale}/home`);
+    fireEvent.click(screen.getByRole("button", { name: exploreLabel }));
+    expect(screen.getByRole("heading", { name: careLabel })).toBeTruthy();
+    expect(screen.getByRole("link", { name: new RegExp(travelLabel) }).getAttribute("href")).toBe(travelHref);
+    expect(screen.queryByRole("link", { name: "Travel and stays" })).toBeNull();
+  });
+
+  it.each(["fa", "en", "de", "es"] as const)("keeps language, appearance, support and current guides reachable in the %s mobile sheet", (locale) => {
     routing.pathname = `/${locale}/home`;
     renderWithIntl(<MobileTabBar />, locale);
-    const fa = locale === "fa";
-    expect(screen.getByRole("link", { name: fa ? "داشبورد" : "Dashboard" }).getAttribute("href")).toBe(`/${locale}/home`);
-    const trigger = screen.getByRole("button", { name: fa ? "کاوش" : "Explore" });
+    const labels = {
+      fa: { home: "داشبورد", explore: "کاوش", preferences: "زبان و ظاهر", language: "زبان", german: "آلمانی", help: "کمک و پشتیبانی", guides: /راهنماها راهنمای عملی/ },
+      en: { home: "Dashboard", explore: "Explore", preferences: "Language and appearance", language: "Language", german: "German", help: "Help and support", guides: /Guides Practical/ },
+      de: { home: "Übersicht", explore: "Entdecken", preferences: "Sprache und Darstellung", language: "Sprache", german: "Deutsch", help: "Hilfe und Support", guides: /Ratgeber Praktische Pflegehinweise/ },
+      es: { home: "Inicio", explore: "Explorar", preferences: "Idioma y apariencia", language: "Idioma", german: "alemán", help: "Ayuda y soporte", guides: /Guías Consejos prácticos/ },
+    }[locale];
+    expect(screen.getByRole("link", { name: labels.home }).getAttribute("href")).toBe(`/${locale}/home`);
+    const trigger = screen.getByRole("button", { name: labels.explore });
     fireEvent.click(trigger);
-    const dialog = screen.getByRole("dialog", { name: fa ? "کاوش" : "Explore" });
-    expect(within(dialog).getByRole("group", { name: fa ? "زبان و ظاهر" : "Language and appearance" })).toBeTruthy();
-    expect(within(dialog).getByRole("button", { name: fa ? "تغییر زبان به انگلیسی" : "Switch language to Persian" })).toBeTruthy();
-    expect(within(dialog).getByRole("link", { name: fa ? "کمک و پشتیبانی" : "Help and support" }).getAttribute("href")).toBe(`/${locale}/support`);
-    fireEvent.click(within(dialog).getByRole("button", { name: fa ? /راهنماها راهنمای عملی/ : /Guides Practical/ }));
+    const dialog = screen.getByRole("dialog", { name: labels.explore });
+    expect(within(dialog).getByRole("group", { name: labels.preferences })).toBeTruthy();
+    const language = within(dialog).getByRole("combobox", { name: labels.language });
+    expect((language as HTMLSelectElement).value).toBe(locale);
+    expect(within(language).getByRole("option", { name: labels.german })).toBeTruthy();
+    expect(within(dialog).getByRole("link", { name: labels.help }).getAttribute("href")).toBe(`/${locale}/support`);
+    fireEvent.click(within(dialog).getByRole("button", { name: labels.guides }));
     expect(routing.push).toHaveBeenCalledWith(`/${locale}/guides`);
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
   });

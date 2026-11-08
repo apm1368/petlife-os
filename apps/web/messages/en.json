@@ -157,13 +157,15 @@
       "emailLabel": "Email address",
       "invalidPhone": "Enter a valid Iranian mobile number.",
       "phoneLabel": "Phone number",
-      "sendCode": "Send code"
+      "sendCode": "Send code",
+      "changeIdentifier": "Change email or phone"
     },
     "otp": {
       "title": "Enter the code",
       "subtitle": "We sent a 6-digit code to {identifier}",
       "resend": "Resend code",
       "resendIn": "Resend in {seconds, number}s",
+      "passcodeLabel": "One-time passcode",
       "verify": "Verify",
       "invalid": "That code is incorrect or has expired.",
       "rateLimited": "Too many attempts. Try again in {seconds, number}s.",
@@ -185,21 +187,29 @@
       "emailLabel": "Email (optional)",
       "submit": "Create account",
       "usernameTaken": "This username is already taken.",
-      "haveAccount": "Already have an account? Log in"
+      "haveAccount": "Already have an account? Log in",
+      "confirmPassword": "Confirm password",
+      "passwordMismatch": "Passwords do not match.",
+      "terms": "I accept opetlife's Terms and Privacy Policy.",
+      "genericError": "Could not create your account. Check the details and try again."
     },
     "forgot": {
       "title": "Reset your password",
       "identifierLabel": "Username or email",
       "submit": "Send reset link",
       "sent": "If an account matches, a reset link has been sent.",
-      "backToLogin": "Back to log in"
+      "backToLogin": "Back to log in",
+      "genericError": "Could not send your request. Please try again."
     },
     "reset": {
       "title": "Choose a new password",
       "newPasswordLabel": "New password",
       "submit": "Reset password",
       "invalidToken": "This reset link is invalid or has expired.",
-      "success": "Your password has been reset. You can now log in."
+      "success": "Your password has been reset. You can now log in.",
+      "confirmPassword": "Confirm password",
+      "passwordMismatch": "Passwords do not match.",
+      "genericError": "Could not reset password. Try again."
     }
   },
   "onboarding": {

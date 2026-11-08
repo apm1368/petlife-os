@@ -1,4 +1,5 @@
-import { IsIn, IsOptional, IsString, IsUrl, Length } from "class-validator";
+import { Locale } from "@prisma/client";
+import { IsEnum, IsIn, IsOptional, IsString, IsUrl, Length } from "class-validator";
 
 export class UpdateMeDto {
   @IsOptional()
@@ -7,8 +8,8 @@ export class UpdateMeDto {
   displayName?: string;
 
   @IsOptional()
-  @IsIn(["fa", "en"])
-  locale?: "fa" | "en";
+  @IsEnum(Locale)
+  locale?: Locale;
 
   @IsOptional()
   @IsIn(["SYSTEM", "LIGHT", "DARK"])

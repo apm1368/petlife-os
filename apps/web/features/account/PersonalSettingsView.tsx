@@ -11,6 +11,7 @@ import { useLocale } from "next-intl";
 import { AccountPageHeader } from "./AccountNav";
 import { useAccountCopy } from "./account-copy";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 type ContactKind = "email" | "phone";
 
@@ -24,12 +25,12 @@ export function PersonalSettingsView() {
   const [user, setUser] = useState<UserDto | null>(null);
   const [failed, setFailed] = useState(false);
   const [name, setName] = useState("");
-  // Language and theme start from what is on screen (URL locale, applied theme) — never from the
-  // account's stored values — so saving one never silently changes the other.
-  const uiLocale = useLocale() === "en" ? "en" : "fa";
+  // The language control reflects the saved account preference, while theme reflects what is applied.
+  const locale = useLocale() as RouteLocale;
+  const uiLocale = locale;
   const appliedTheme = useThemeStore((s) => s.theme);
   const applyTheme = useThemeStore((s) => s.setTheme);
-  const [language, setLanguage] = useState<"fa" | "en">(uiLocale);
+  const [language, setLanguage] = useState<RouteLocale>(uiLocale);
   const [theme, setTheme] = useState<"SYSTEM" | "LIGHT" | "DARK">(appliedTheme);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -42,7 +43,7 @@ export function PersonalSettingsView() {
       const me = await usersService.getMe();
       setUser(me);
       setName(me.displayName);
-      setLanguage(uiLocale);
+      setLanguage(me.locale);
       setTheme(appliedTheme);
     } catch {
       setFailed(true);
@@ -61,6 +62,7 @@ export function PersonalSettingsView() {
   }
 
   async function save() {
+    if (!user) return;
     setSaving(true);
     setSaved(false);
     setSaveError(null);
@@ -69,8 +71,11 @@ export function PersonalSettingsView() {
       applyUser(updated);
       applyTheme(theme);
       setSaved(true);
-      // Only an explicit language change moves the app; a theme-only save stays on this locale.
-      if (language !== uiLocale) window.location.assign(window.location.pathname.replace(/^\/(fa|en)(?=\/|$)/, `/${language}`));
+      // Only an explicit preference change moves the app. Preserve query and fragment state.
+      if (language !== user.locale) {
+        const path = window.location.pathname.replace(/^\/(fa|en|de|es)(?=\/|$)/, `/${language}`);
+        window.location.assign(`${path}${window.location.search}${window.location.hash}`);
+      }
     } catch (err) {
       setSaveError(apiErrorText(err, undefined, t("ذخیره انجام نشد. دوباره تلاش کنید.", "Could not save. Try again.")));
     } finally {
@@ -81,7 +86,7 @@ export function PersonalSettingsView() {
   if (failed) return <ErrorRecovery title={t("اطلاعات شخصی", "Personal")} message={t("اطلاعات حساب بارگذاری نشد.", "Your account details didn't load.")} retryLabel={t("تلاش دوباره", "Retry")} onRetry={load} />;
   if (!user) return <Skeleton className="h-80 w-full" aria-label={t("در حال بارگذاری", "Loading")} />;
 
-  const dirty = name.trim() !== user.displayName || language !== uiLocale || theme !== appliedTheme;
+  const dirty = name.trim() !== user.displayName || language !== user.locale || theme !== appliedTheme;
 
   return (
     <div className="account-stack">
@@ -96,7 +101,7 @@ export function PersonalSettingsView() {
       >
         <Input label={t("نام نمایشی", "Display name")} hint={t("در خانواده، انجمن و رزروها نمایش داده می‌شود.", "Shown in your household, the community and bookings.")} value={name} onChange={(event) => setName(event.target.value)} maxLength={120} required />
         <div className="account-form-grid">
-          <Select label={t("زبان", "Language")} value={language} onChange={(event) => setLanguage(event.target.value as "fa" | "en")} options={[{ value: "fa", label: "فارسی" }, { value: "en", label: "English" }]} />
+          <Select label={languageLabel(locale)} value={language} onChange={(event) => setLanguage(event.target.value as RouteLocale)} options={[{ value: "fa", label: "فارسی" }, { value: "en", label: "English" }, { value: "de", label: "Deutsch" }, { value: "es", label: "Español" }]} />
           <Select
             label={t("ظاهر", "Appearance")}
             value={theme}
@@ -108,7 +113,7 @@ export function PersonalSettingsView() {
             ]}
           />
         </div>
-        <p className="text-metadata text-text-secondary">{t("تاریخ‌ها در فارسی به تقویم شمسی و در انگلیسی به تقویم میلادی نمایش داده می‌شوند.", "Dates show in the Solar Hijri calendar in Persian and the Gregorian calendar in English.")}</p>
+        <p className="text-metadata text-text-secondary">{datePreferenceCopy(locale)}</p>
         <div className="security-row">
           <div>
             <b>{t("نمایش ساده", "Simple display")}</b>
@@ -148,6 +153,19 @@ export function PersonalSettingsView() {
       </section>
     </div>
   );
+}
+
+function languageLabel(locale: RouteLocale): string {
+  return ({ fa: "زبان", en: "Language", de: "Sprache", es: "Idioma" })[locale];
+}
+
+function datePreferenceCopy(locale: RouteLocale): string {
+  return ({
+    fa: "تاریخ‌ها در فارسی به تقویم شمسی و در انگلیسی، آلمانی و اسپانیایی به تقویم میلادی نمایش داده می‌شوند.",
+    en: "Dates use the Solar Hijri calendar in Persian and the Gregorian calendar in English, German and Spanish.",
+    de: "Datumsangaben verwenden auf Persisch den Solar-Hidschri-Kalender und auf Englisch, Deutsch und Spanisch den gregorianischen Kalender.",
+    es: "Las fechas usan el calendario Solar Hiyri en persa y el calendario gregoriano en inglés, alemán y español.",
+  })[locale];
 }
 
 function ContactRow({ kind, user, editing, onEdit, onDone }: { kind: ContactKind; user: UserDto; editing: boolean; onEdit: () => void; onDone: (updated?: UserDto) => void }) {

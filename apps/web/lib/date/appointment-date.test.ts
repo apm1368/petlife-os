@@ -17,6 +17,12 @@ describe("appointment date formatting", () => {
     expect(formatted).toContain("September");
   });
 
+  it.each([["de", "10."], ["es", "10 de septiembre"]] as const)("renders %s with localized Gregorian date order", (locale, localizedDate) => {
+    const formatted = formatAppointmentDateTime(APPOINTMENT, locale, "Asia/Tehran");
+    expect(formatted).toContain(localizedDate);
+    expect(formatted).toContain("2026");
+  });
+
   it("always formats in the provider location's timezone, not an implicit local one", () => {
     const tehran = formatAppointmentDateTime(APPOINTMENT, "en", "Asia/Tehran");
     const utc = formatAppointmentDateTime(APPOINTMENT, "en", "UTC");

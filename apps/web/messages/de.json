@@ -1,0 +1,72 @@
+{
+  "auth": {
+    "welcome": {
+      "title": "Willkommen bei opetlife",
+      "subtitle": "Alles rund um das Leben deines Haustiers an einem Ort.",
+      "continueWithEmail": "Mit E-Mail fortfahren",
+      "continueWithPhone": "Mit Telefonnummer fortfahren",
+      "continueWithGoogle": "Mit Google fortfahren",
+      "continueWithUsername": "Mit Benutzername fortfahren",
+      "createAccount": "Konto erstellen",
+      "googleAuthFailed": "Die Anmeldung mit Google ist fehlgeschlagen. Bitte wähle eine andere Methode."
+    },
+    "identifier": {
+      "emailLabel": "E-Mail-Adresse",
+      "invalidPhone": "Gib eine gültige iranische Mobilnummer ein.",
+      "phoneLabel": "Telefonnummer",
+      "sendCode": "Code senden",
+      "changeIdentifier": "E-Mail oder Telefonnummer ändern"
+    },
+    "otp": {
+      "title": "Code eingeben",
+      "subtitle": "Wir haben einen sechsstelligen Code an {identifier} gesendet.",
+      "resend": "Code erneut senden",
+      "resendIn": "Erneut senden in {seconds, number} Sek.",
+      "passcodeLabel": "Einmalcode",
+      "verify": "Bestätigen",
+      "invalid": "Der Code ist falsch oder abgelaufen.",
+      "rateLimited": "Zu viele Versuche. Bitte warte {seconds, number} Sekunden.",
+      "rateLimitedMinutes": "Zu viele Versuche. Bitte warte etwa {minutes, number} Minuten.",
+      "genericError": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+    },
+    "password": {
+      "usernameLabel": "Benutzername",
+      "passwordLabel": "Passwort",
+      "login": "Anmelden",
+      "forgotPassword": "Passwort vergessen?",
+      "invalidCredentials": "Benutzername oder Passwort ist falsch."
+    },
+    "register": {
+      "title": "Konto erstellen",
+      "usernameLabel": "Benutzername",
+      "passwordLabel": "Passwort",
+      "displayNameLabel": "Anzeigename (optional)",
+      "emailLabel": "E-Mail (optional)",
+      "submit": "Konto erstellen",
+      "usernameTaken": "Dieser Benutzername ist bereits vergeben.",
+      "haveAccount": "Du hast schon ein Konto? Anmelden",
+      "confirmPassword": "Passwort bestätigen",
+      "passwordMismatch": "Die Passwörter stimmen nicht überein.",
+      "terms": "Ich akzeptiere die Nutzungsbedingungen und die Datenschutzerklärung von opetlife.",
+      "genericError": "Dein Konto konnte nicht erstellt werden. Prüfe deine Angaben und versuche es erneut."
+    },
+    "forgot": {
+      "title": "Passwort zurücksetzen",
+      "identifierLabel": "Benutzername oder E-Mail",
+      "submit": "Link zum Zurücksetzen senden",
+      "sent": "Falls ein passendes Konto existiert, wurde ein Link zum Zurücksetzen gesendet.",
+      "backToLogin": "Zurück zur Anmeldung",
+      "genericError": "Die Anfrage konnte nicht gesendet werden. Bitte versuche es erneut."
+    },
+    "reset": {
+      "title": "Neues Passwort festlegen",
+      "newPasswordLabel": "Neues Passwort",
+      "submit": "Passwort zurücksetzen",
+      "invalidToken": "Dieser Link ist ungültig oder abgelaufen.",
+      "success": "Dein Passwort wurde zurückgesetzt. Du kannst dich jetzt anmelden.",
+      "confirmPassword": "Passwort bestätigen",
+      "passwordMismatch": "Die Passwörter stimmen nicht überein.",
+      "genericError": "Das Passwort konnte nicht geändert werden. Bitte versuche es erneut."
+    }
+  }
+}
