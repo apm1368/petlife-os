@@ -21,6 +21,7 @@ Status is per page family, not per shared header. `COMPLETE` means all applicati
 | Household membership and invitations | Complete | Complete | Complete | Complete | Existing household copy and focused tests cover members, invite, permissions, confirmations and history. |
 | Personal account settings `/profile/settings/personal` | Complete | Complete | Complete | Complete | Existing #119 translation slice covers loading/save/contact/appearance states; verification delivery remains external. |
 | Account overview `/[locale]/profile` | Complete | Complete | Complete | Complete | Overview, loading/failure recovery, session/invitation metrics, household summary and invitation request/decline/error copy tested. Invite text clearly says phone matching does not verify the phone and access begins only after owner approval. |
+| Account activity `/[locale]/profile/activity` | Complete | Complete | Complete | Complete | Event names and summaries, filters, safe unknown-event fallback, empty/loading/error/retry and older-page control; locale-specific dates and numbers tested. Event detail values such as device names remain source content. |
 | Other account settings and profile | Partial | Partial | Partial | Partial | Some settings are localized; route-by-route form/dialog/error coverage remains open. |
 | Pet profile, health records, documents, care calendar | Partial | Partial | Partial | Partial | Member dashboard identity/event/status labels now support all four; full profile/health/document/calendar pages and their forms/states remain open. |
 | Shop, product detail, cart/checkout, seller | Partial | Partial | Partial | Partial | Full catalog and seller workflows are not represented as translated by dashboard/link copy; page content, validation and transaction states remain open. |
@@ -40,6 +41,8 @@ Status is per page family, not per shared header. `COMPLETE` means all applicati
 - Focused tests cover populated and empty dashboard states, locale-specific labels/date output, no known Persian UI fallback in de/es, shared error/retry copy, calendar date output and currency/status formatting. This is a dashboard slice only; it does not localize linked pages or mark those page families complete.
 
 The same reviewable batch now includes the account overview route (`/[locale]/profile`): profile summary, security attention counts, household card/actions, invitation inbox, membership and activity links, loading/error/retry states, invitation errors, request confirmation, and phone-verification/owner-approval explanation are fully translated. Number grouping follows the selected locale. This does not mark the other account settings routes or the household management route complete.
+
+Account activity (`/[locale]/profile/activity`) is also covered in this reviewable account slice: filter names, every known event title, method/consent summaries, empty/loading/error, pagination action and date display are translated in all four locales and exercised in German/Spanish rendering tests. Unknown event codes are shown as a localized generic event rather than the raw code. Device/browser descriptions are source values and remain unchanged.
 
 ### Audit rule
 
