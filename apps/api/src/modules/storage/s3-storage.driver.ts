@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { CopyObjectCommand, DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { AppEnv } from "../../config/env";
 import type { DownloadOptions, DownloadTarget, StorageDriver, UploadTarget } from "./storage-driver.interface";
@@ -54,6 +54,24 @@ export class S3StorageDriver implements StorageDriver {
 
   async putObject(key: string, body: Buffer, contentType: string): Promise<void> {
     await this.client.send(new PutObjectCommand({ Bucket: this.bucket, Key: key, Body: body, ContentType: contentType }));
+  }
+
+  async copyObject(sourceKey: string, destinationKey: string, contentType: string): Promise<void> {
+    const copySource = `/${this.bucket}/${sourceKey.split("/").map(encodeURIComponent).join("/")}`;
+    await this.client.send(new CopyObjectCommand({
+      Bucket: this.bucket,
+      Key: destinationKey,
+      CopySource: copySource,
+      MetadataDirective: "REPLACE",
+      ContentType: contentType,
+      CacheControl: "no-store",
+    }));
+  }
+
+  async openObject(key: string) {
+    const result = await this.client.send(new GetObjectCommand({ Bucket: this.bucket, Key: key }));
+    if (!result.Body || !("pipe" in result.Body)) throw new Error("Storage object is not a readable stream");
+    return { body: result.Body as import("node:stream").Readable, contentType: result.ContentType };
   }
 
   async deleteObject(key: string): Promise<void> {
