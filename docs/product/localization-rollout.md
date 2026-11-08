@@ -214,3 +214,14 @@ Lifecycle actions, status labels, confirmation dialog, owner note, loading/retry
 - #152 is based on `main` at `350f4d1d`; exact-head CI `42517206168` is in progress. Local validation after syncing #159: 51 travel tests and TypeScript pass. It remains PARTIAL pending hosted CI and browser checks.
 - #165's last pushed head is `c93b3077`, with CI `42516710325` still running on that older tree. Local follow-up adds fa/en offline and access-denied copy and has 16 clinic-page tests passing; it is not yet pushed or hosted-CI verified. The route remains PARTIAL.
 - Dashboard, travel and clinic pages have not been authenticated-browser verified on production. Landing HERO is unchanged. Disk is 107 MiB; no payment worktree was visible or changed. Memorial original-image/CDN privacy and German/Spanish SMS templates/delivery remain unverified/unimplemented.
+
+## Trip setup follow-up after PR #165 — 2026-11-08
+
+- PR #152 is synchronized locally through main `8d892b2` after clinic-notes PR #165 merged. Its previous exact-head CI started before that base update and is not final proof.
+- Trip setup/hub remains PARTIAL: listing/detail and authenticated responsive browser behavior are not fully covered, and no live availability or booking is claimed. Source-authored content is preserved and the exact source link is the final reservation path.
+- Focused post-sync tests and exact-head CI are required before merge; production behavior must be checked after deployment.
+
+## Admin operations dashboard failures — PR #166
+
+- The admin dashboard's loading, generic failure, offline and unauthorized/access-denied states now have explicit fa/en/de/es copy; skeletons also receive a localized accessible label. Existing dashboard body content and business behavior are unchanged.
+- The page remains PARTIAL until exact-head CI and authenticated browser checks pass. This does not translate other backoffice/ERP routes or user/admin-authored queue data.

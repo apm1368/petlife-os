@@ -162,10 +162,14 @@
 - PR #165 is based on `main`, last pushed head `c93b3077`; CI run `42516710325` is still running for that head. Local follow-up changes add fa/en offline and access-denied strings and expand its rendered clinic page coverage to 16 tests; these local changes are not yet pushed or hosted-CI verified. Route status remains PARTIAL pending responsive/authenticated browser verification.
 - Disk free space is 107 MiB; avoid production builds and package installs. No payment worktree was visible in this workspace and no payment files were touched. Original memorial source-image/CDN access and German/Spanish SMS templates/delivery remain unverified/unimplemented. Landing HERO is unchanged.
 
-## Latest queue checkpoint — 2026-11-08 20:17 UTC
+## PR #152 base update — 2026-11-08 20:20 UTC
 
-- GitHub `main` is `8d892b2ea8b2b408f517b26866118acd8ca8e96d` after PR #165 merged normally with exact-head CI green. Production still reports `315523247bc6bf837d8763f5a31542cf81a695db`; deploy run `42519281605` is in progress. Clinic-notes is merged but not yet production-verified.
-- PR #152 head `f7db2c5c` and PR #160 head `bb6c8ec3` have CI runs still in progress; both runs began before #165 moved main and must be rechecked against the new base before merge. PR #160's local sync through `3155232` passed 21 focused tests, TypeScript, targeted source lint and catalog checks; it still needs sync through #165's `8d892b2` merge.
-- PR #166 head `536ec152` has CI in progress but GitHub reports `DIRTY` after #165 merged. The local branch is being synchronized to `8d892b2`; exact-head tests/CI are needed after resolving docs conflicts.
-- PR #166 dashboard follow-up passes 27 focused tests and TypeScript/targeted ESLint locally on the pre-sync branch. Dashboard remains PARTIAL pending current-base CI and authenticated responsive rendering.
-- Disk free space is approximately 106 MiB. No production build/install ran. Payment worktrees were not visible in active worktrees and were untouched. The landing HERO is unchanged; memorial source-image/CDN privacy and German/Spanish SMS templates remain unverified/unimplemented.
+- Local `codex/review-trip-setup` now merges `origin/main` at `8d892b2` after PR #165 merged. The previously running hosted CI started before this update and is stale for final merge.
+- German/Spanish message catalogs merged without conflicts. Documentation conflicts were resolved from latest main, with this travel-specific status restored. The local branch needs focused tests, commit/push and new exact-head CI before merge.
+- Production still needs rechecking after deploy run `42519281605`; last verified production SHA is `3155232`. Trip setup/hub remains PARTIAL pending authenticated responsive checks.
+
+## Admin dashboard state localization sync — 2026-11-08 20:39 UTC
+
+- PR #166 is being synchronized from base `8d892b2` to current `main` `b6b61c4` after #152 merged. Its previous exact-head CI (`42519567714`) is not evidence for the resulting branch; rerun focused dashboard tests, typecheck/lint and hosted CI before merge.
+- #166's scope remains dashboard failure/loading/offline/access-denied text only; the rest of admin/backoffice/ERP is still PARTIAL. Do not mark the overall admin family complete.
+- Disk headroom remains about 104 MiB. No cleanup/build was performed; payment worktrees remain untouched.
