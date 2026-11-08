@@ -84,4 +84,18 @@ describe("NotificationCenterView", () => {
     fireEvent.click(screen.getByText("Load more"));
     await waitFor(() => expect(notificationsService.list).toHaveBeenCalledWith(2, 20));
   });
+
+  it("localizes Spanish notification chrome and formats its timestamp in Spanish", async () => {
+    vi.mocked(notificationsService.list).mockResolvedValue(page([UNREAD]));
+
+    renderWithIntl(<NotificationCenterView />, "es");
+
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Notificaciones" })).toBeTruthy());
+    expect(screen.getByText("Pago")).toBeTruthy();
+    expect(document.querySelector(".sr-only")?.textContent).toBe("Sin leer: ");
+    const expectedDate = new Intl.DateTimeFormat("es-ES", { dateStyle: "medium", timeStyle: "short" }).format(new Date(UNREAD.createdAt));
+    expect(screen.getByText(expectedDate)).toBeTruthy();
+    fireEvent.click(screen.getByText("Payment successful"));
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/es/orders"));
+  });
 });
