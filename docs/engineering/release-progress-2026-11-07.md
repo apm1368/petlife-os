@@ -129,5 +129,5 @@ All PRs below are still open and unmerged. Current CI was read from workflow run
 
 - Rechecked open PR list (#59 and #102–#141), current bases/heads, latest exact-head CI runs and review submissions.
 - Read-only production access was attempted but not available through this execution session; no new production verification is claimed.
-- PR descriptions were updated body-only to correct stale “CI pending/running” wording, record exact successful workflow run/head and state dependencies for #59, #107, #110–#113, #115–#116, #122–#141. These metadata edits did not change those PR heads.
+- PR descriptions were updated body-only to correct stale “CI pending/running” wording, record exact successful workflow run/head and state dependencies for #59, #107, #110–#113, #115–#116, #122–#134 and #138–#141. These metadata edits did not change those PR heads.
 - Next local action: restore an executor workspace, recheck preserved payment worktree/DB containers and disk, then continue implementation and testing. Next owner/reviewer action: add an independent qualified reviewer, starting with #107.
