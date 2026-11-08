@@ -91,6 +91,15 @@ describe("OrderDetailView", () => {
     expect(screen.getByText("Fulfillment tracking coming soon")).toBeTruthy();
   });
 
+  it.each([["de", "Bestellung von Pet Bazaar Tehran", "Lieferadresse"], ["es", "Pedido de Pet Bazaar Tehran", "Dirección de envío"]] as const)("renders the order detail interface in %s without translating source-owned product data", async (locale, heading, addressLabel) => {
+    vi.mocked(commerceService.getOrder).mockResolvedValue(ORDER);
+    renderWithIntl(<OrderDetailView orderId="order-1" />, locale);
+    expect(await screen.findByRole("heading", { name: heading })).toBeTruthy();
+    expect(screen.getByText(addressLabel)).toBeTruthy();
+    expect(screen.getByText("Royal Canin Adult Dog Food")).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
   it("shows the Fulfillment status, tracking code, and a milestone timeline once a Fulfillment exists", async () => {
     const fulfillment = {
       id: "fulfillment-1",

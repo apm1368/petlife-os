@@ -212,3 +212,10 @@
 
 - Correction to the preceding checkpoint: PR #167's sync with current `main` and restored German/Spanish admin-user namespace were pushed as `e5eb05b1`; the earlier sentence saying the work was not pushed is historical and superseded. The fresh run `42526634757` was in progress before this documentation correction; require CI on the final pushed head before merge.
 - Current release authority remains main/production SHA `352e97301e3e288b9a049861205fe8f4778388fe`. Local authenticated page inspection and production storage/CDN configuration are unavailable; no visual/browser verification or full memorial source-image revocation is claimed.
+
+## Checkout localization batch — 2026-11-08 21:14 UTC
+
+- Working branch `codex/i18n-checkout-main` is based on current `origin/main` `de4296432bd1722273fea27a31141c326ad170de`. Checkout address/review/shipping/payment UI now has German/Spanish catalog keys and localized generic API-error copy; common route strings used by checkout are translated as well.
+- Local checks pass: 17 `CheckoutView` tests, 4 checkout/common catalog-parity tests, four catalog JSON parses, web typecheck, focused ESLint and `git diff --check`. This batch is not yet committed, pushed or covered by hosted CI.
+- Current production version endpoint reports `b6b61c4124640a496c6d2cda5566ee509d07c953` (deployment `42521413577`); main has since advanced to `de429643`. The post-#160 main CI/deploy `42522889255` was still pending at last check. PR #160 is merged with green PR CI, but not LIVE_VERIFIED.
+- Order confirmation, order history/detail, account address management and authenticated checkout behavior remain PARTIAL. Disk headroom was approximately 102 MiB; no cleanup/full production build or payment-worktree modification was performed.
