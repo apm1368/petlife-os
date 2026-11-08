@@ -3328,6 +3328,7 @@
     }
   },
   "lostPet": {
+    "species": { "dog": "Dog", "cat": "Cat", "other": "Other" },
     "report": {
       "title": "Report a lost pet",
       "subtitle": "Share details so your community can help you find them.",
@@ -3336,11 +3337,42 @@
       "lastKnownLocationLabel": "Last known location",
       "lastSeenAtLabel": "Last seen at",
       "contactPreferenceLabel": "How should people reach you?",
+      "stepsLabel": "Report steps",
+      "steps": { "where": "Where and when", "photo": "Photo", "describe": "Description", "contact": "Contact", "review": "Review" },
+      "publicTag": "Public",
+      "privateTag": "Private",
+      "approximateArea": "Approximate area",
+      "approximateAreaPlaceholder": "e.g. neighbourhood or main street",
+      "approximateAreaHelp": "Use a neighbourhood or main street only. Never enter a home address; this text appears publicly.",
+      "exactLastSeenPlace": "Exact last-seen place",
+      "exactPlaceHelp": "Visible only to you, your household and support staff when needed.",
+      "approximateTime": "Approximate time",
+      "photoHelp": "Choose a clear photo of the pet. Avoid people's faces and home numbers.",
+      "publicNote": "Note for someone who spots the pet",
+      "publicNotePlaceholder": "For example: shy; please do not chase, just report a sighting.",
+      "privateNote": "Private notes",
+      "privateNotePlaceholder": "For example: microchip number",
       "contactPreference": {
         "inAppMessage": "Message me in the app",
         "maskedContact": "Share a masked phone number",
         "publicContact": "Show my contact publicly"
       },
+      "contactPreferenceHelp": {
+        "inAppMessage": "Recommended: receive reports in opetlife without showing your contact details.",
+        "maskedContact": "People can contact you through opetlife without seeing your phone number.",
+        "publicContact": "A contact line you provide will be visible on the public report."
+      },
+      "publicContactLine": "Public contact line",
+      "publicContactPlaceholder": "For example: 0912***4567 — text only",
+      "publicContactWarning": "Anyone can see this text. Avoid sharing a full phone number.",
+      "reviewTitle": "What the public report will show",
+      "review": { "area": "Area", "when": "When", "photo": "Photo", "contact": "Contact" },
+      "notGiven": "Not provided",
+      "noPhoto": "No photo",
+      "contactThroughApp": "Through opetlife",
+      "privacyNotice": "Your exact location, private notes, household members and health records are not shown publicly.",
+      "back": "Back",
+      "continue": "Continue",
       "photoLabel": "Photo",
       "submit": "Report lost pet"
     },
@@ -3349,7 +3381,8 @@
       "reportButton": "Report lost pet",
       "empty": "No lost pet reports yet.",
       "noLocation": "Location not provided",
-      "sightingsCount": "{count, plural, one {# sighting} other {# sightings}}"
+      "sightingsCount": "{count, plural, one {# sighting} other {# sightings}}",
+      "emptyDescription": "There are no active lost-pet reports right now."
     },
     "status": {
       "OPEN": "Missing",
@@ -3382,11 +3415,25 @@
       "knownReporter": "Reported by a signed-in user",
       "acceptSighting": "Likely match",
       "rejectSighting": "Not a match"
+      ,"publicArea": "Public area",
+      "exactPlacePrivate": "Exact place (private)",
+      "lastSeen": "Last seen",
+      "shareTitle": "Share the public report",
+      "shareDescription": "The public page shows only the approximate area, photo and public description.",
+      "shareText": "{name} is missing. If you see them, please report a sighting."
     },
     "public": {
       "list": {
         "title": "Lost pets nearby",
-        "subtitle": "Browse open lost pet reports. If you recognize a pet, open the report to submit a sighting."
+        "subtitle": "Browse open lost-pet reports. If you recognize a pet, open the report to submit a sighting.",
+        "speciesFilter": "Filter by species",
+        "allSpecies": "All",
+        "emptyDescription": "There are no active lost-pet reports right now.",
+        "noPhoto": "No photo",
+        "lastSeen": "Last seen: {date}",
+        "paginationLabel": "Report pages",
+        "previous": "Previous",
+        "next": "Next"
       },
       "species": "Species: {species}",
       "breed": "Breed: {breed}",
@@ -3394,10 +3441,28 @@
       "contact": "Contact: {contact}",
       "reportSighting": {
         "title": "Report a sighting",
+        "dateLabel": "Date seen",
+        "timeLabel": "Approximate time",
         "locationLabel": "Where did you see them?",
         "descriptionLabel": "Description",
+        "privacyNote": "Your report goes only to the owner; your name and contact details are never made public.",
         "submit": "Submit sighting",
         "success": "Thank you — your sighting has been submitted for review."
+      },
+      "detail": {
+        "unavailableTitle": "This report is not available",
+        "unavailableDescription": "The report may have been closed or removed.",
+        "shareText": "{name} is missing{area}. If you see them, please report a sighting.",
+        "shareArea": " near {area}",
+        "species": "Species",
+        "breed": "Breed",
+        "colorMarkings": "Color and markings",
+        "approximateAge": "Approximate age",
+        "ageYears": "About {count} years",
+        "lastSeenAround": "Last seen around",
+        "lastSeen": "Last seen",
+        "reunited": "{name} is back home. Thank you to everyone who helped.",
+        "photoAlt": "Photo of {name}"
       }
     }
   },
@@ -6477,6 +6542,19 @@
     "organizationLogo": "Public organization logo (image up to 10 MB)",
     "chooseFile": "Choose image",
     "noFile": "No image selected"
+  },
+  "adminAnimalSupportNav": {
+    "overview": "Overview",
+    "needs": "Support requests",
+    "organizations": "Organizations",
+    "rescues": "Rescue cases",
+    "campaigns": "Campaigns",
+    "donations": "Donations",
+    "lostPets": "Lost pets",
+    "reports": "Reports",
+    "trust": "Trust & safety cases",
+    "memorials": "Pet memorials",
+    "label": "Animal support section"
   },
   "supportOpsNav": {
     "overview": "Overview",

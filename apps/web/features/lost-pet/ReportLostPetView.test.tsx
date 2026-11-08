@@ -27,7 +27,7 @@ describe("ReportLostPetView", () => {
     fireEvent.change(screen.getByLabelText(/Description/), { target: { value: "Slipped out the front gate" } });
     fireEvent.click(next);
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-    expect(screen.getByText("What the public page shows")).toBeTruthy();
+    expect(screen.getByText("What the public report will show")).toBeTruthy();
     expect(screen.queryByText(/Alley 7/)).toBeNull();
     fireEvent.click(screen.getByText("Report lost pet"));
 
@@ -43,5 +43,18 @@ describe("ReportLostPetView", () => {
     fireEvent.click(screen.getByRole("button", { name: "ادامه" }));
     fireEvent.click(screen.getByLabelText(/نمایش عمومی اطلاعات تماس/));
     expect((screen.getByRole("button", { name: "ادامه" }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it.each([["de", "Weiter", "Beschreibung", "Was in der öffentlichen Meldung zu sehen ist"], ["es", "Continuar", "Descripción", "Qué se mostrará en el informe público"]] as const)("keeps the complete report wizard in %s", async (locale, nextLabel, descriptionLabel, reviewTitle) => {
+    renderWithIntl(<ReportLostPetView petId="pet-1" />, locale);
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+    fireEvent.click(screen.getByRole("button", { name: nextLabel }));
+    fireEvent.click(screen.getByRole("button", { name: nextLabel }));
+    fireEvent.change(screen.getByLabelText(new RegExp(descriptionLabel)), { target: { value: "Pet ran away" } });
+    fireEvent.click(screen.getByRole("button", { name: nextLabel }));
+    expect(screen.getByText(locale === "de" ? "Wie können Menschen dich erreichen?" : "¿Cómo pueden ponerse en contacto contigo?")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: nextLabel }));
+    expect(screen.getByRole("heading", { name: reviewTitle })).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
   });
 });
