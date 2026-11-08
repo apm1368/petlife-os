@@ -6,6 +6,7 @@ import { Button, ContextSurface, Skeleton, StatusLabel } from "@petlife/ui";
 import type { CareProfileDto } from "@petlife/types";
 import { careProfileService, type UpdateCareProfileInput } from "@/services/care-profile.service";
 import { petsService } from "@/services/pets.service";
+import { LoadFailure } from "@/features/system/LoadFailure";
 import { CareProfileForm } from "./CareProfileForm";
 
 const FIELDS: { key: keyof UpdateCareProfileInput; labelKey: string }[] = [
@@ -30,11 +31,17 @@ export function CareProfileView({ petId }: { petId: string }) {
   const [profile, setProfile] = useState<CareProfileDto | null>(null);
   const [canEdit, setCanEdit] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [error, setError] = useState<unknown>(null);
 
   async function load() {
-    const [data, access] = await Promise.all([careProfileService.get(petId), petsService.getMyAccess(petId)]);
-    setProfile(data);
-    setCanEdit(access.canEditCareProfile);
+    setError(null);
+    try {
+      const [data, access] = await Promise.all([careProfileService.get(petId), petsService.getMyAccess(petId)]);
+      setProfile(data);
+      setCanEdit(access.canEditCareProfile);
+    } catch (cause) {
+      setError(cause);
+    }
   }
 
   useEffect(() => {
@@ -42,6 +49,7 @@ export function CareProfileView({ petId }: { petId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId]);
 
+  if (error) return <LoadFailure error={error} onRetry={load} />;
   if (!profile) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   if (isEditing) {

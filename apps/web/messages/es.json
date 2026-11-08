@@ -122,7 +122,8 @@
       "toiletRoutine": "Rutina para hacer sus necesidades",
       "separationBehavior": "Comportamiento al quedarse solo/a",
       "specialInstructions": "Instrucciones especiales",
-      "empty": "Aún no se ha configurado."
+      "empty": "Aún no se ha configurado.",
+      "saveFailed": "No se pudo guardar el perfil de cuidados. Inténtalo de nuevo."
     }
   }
 }

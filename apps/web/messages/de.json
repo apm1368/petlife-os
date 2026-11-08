@@ -122,7 +122,8 @@
       "toiletRoutine": "Toilettenroutine",
       "separationBehavior": "Verhalten beim Alleinsein",
       "specialInstructions": "Besondere Hinweise",
-      "empty": "Noch nicht eingerichtet."
+      "empty": "Noch nicht eingerichtet.",
+      "saveFailed": "Das Pflegeprofil konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
     }
   }
 }

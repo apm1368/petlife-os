@@ -24,10 +24,11 @@ Status is per page family, not per shared header. `COMPLETE` means all applicati
 | Account activity `/[locale]/profile/activity` | Complete | Complete | Complete | Complete | Event names and summaries, filters, safe unknown-event fallback, empty/loading/error/retry and older-page control; locale-specific dates and numbers tested. Event detail values such as device names remain source content. |
 | Account security `/[locale]/profile/security` | Complete | Complete | Complete | Complete | PR #154 merged to main after green CI; not production-verified. |
 | Account privacy `/[locale]/profile/privacy` | Complete | Complete | Complete | Complete | PR #155 merged to main after green CI and focused tests; not production-verified. |
-| Pet overview `/[locale]/pets/[petId]` and identity edit | Complete | Complete | Complete | Complete | PR #120 slice: overview/identity labels, derived care/event terms, edit form/date field, loading/empty/error/partial-care and photo validation/upload states. Final merged-base focused tests: 44 passed; typecheck and lint passed. Updated PR-head CI is pending; not live. |
-| Care profile `/[locale]/pets/[petId]/care` | Complete | Complete | Complete | Complete | View/edit labels, read-only and empty states, common save/cancel actions; focused German/Spanish view/edit tests. Calendar and health records are separate and remain partial. |
+| Pet overview `/[locale]/pets/[petId]` and identity edit | Complete | Complete | Complete | Complete | PR #120 merged to main at `084ee787`; 44 focused tests, typecheck/lint and exact-head CI passed. Deployment workflow is still being checked; not LIVE_VERIFIED. |
+| Care profile `/[locale]/pets/[petId]/care` | Partial | Partial | Partial | Partial | View/edit, read-only, empty/loading/load-error and save-error copy/tests cover all four locales (24 tests); responsive browser inspection is still outstanding. |
 | Other account settings and profile | Partial | Partial | Partial | Partial | Some settings are localized; route-by-route form/dialog/error coverage remains open. |
-| Health records, documents, care calendar, memories, activity and expenses | Partial | Partial | Partial | Partial | Pet overview is covered by a distinct row; these linked page bodies, their forms and all states remain open. |
+| Care calendar `/[locale]/pets/[petId]/calendar` | Partial | Partial | Partial | Partial | Calendar controls, month/agenda view, pet/day selection, empty/loading/retryable-error states and event dates are translated; Persian Jalali behavior retained; 14 state/render tests pass. Responsive browser inspection is still outstanding. |
+| Health records, documents, memories, activity and expenses | Partial | Partial | Partial | Partial | Pet overview, care profile and care calendar have distinct rows; medical record, documents, memory, activity and expenses page bodies/forms/states remain open. |
 | Shop, product detail, cart/checkout, seller | Partial | Partial | Partial | Partial | Full catalog and seller workflows are not represented as translated by dashboard/link copy; page content, validation and transaction states remain open. |
 | Bookings, provider and clinical | Partial | Partial | Partial | Partial | Dashboard event/date/status vocabulary is translated; booking/provider/clinical screens and dialogs are not yet fully audited. |
 | Travel and accommodation | Partial | Partial | Partial | Partial | Dashboard links and trip summary labels are localized; marketplace/booking details and stale/error states remain open. |
@@ -63,15 +64,15 @@ Before marking any additional route complete, record its route/component, all fo
 - Persian and English strings and behavior are unchanged. Locale selection continues to use the saved account preference and existing locale-aware route behavior; this slice changes no API, persistence, verification or notification contract.
 - PR #119 merged to `main` at `d12fb4ed`. Exact-head CI run 42476941501 passed; focused account tests passed locally. This UI-only slice changes no API, persistence, verification or notification contract.
 
-## Pet profile follow-up (stacked after the account settings slice)
+## Pet profile follow-up
 
 - `PetContextShell`, `PetProfileView`, `EditPetIdentity`, the shared birth-date field, pet identity formatting, overview labels and derived care-kind labels include German and Spanish copy. User-entered pet names, breeds, provider names and custom reminder titles are retained as data and are not machine-translated.
 - Overview dates use locale-aware Gregorian formatting for en/de/es and preserve the Persian Jalali calendar for fa. Age, weight, species and lab-panel counts use locale-aware labels and number formatting. Persian and English strings remain intact.
-- Pet overview PR #120 merged to `main` at `084ee787`; its 44 focused tests, typecheck, lint and exact-head CI passed. Care-profile verification is recorded separately below.
-- Care-profile and calendar tests, typecheck and lint are rerun on this clean branch; the hosted CI production build is required before merge. Health records, documents, memories, activity, travel and expenses remain partial, as do SMS templates and locale-specific delivery.
+- Pet overview PR #120 merged to `main` at `084ee787`; its 44 focused tests, typecheck, lint and exact-head CI passed. Deployment status is being checked separately. Care-profile/calendar code is localized, with responsive browser inspection still required before completion.
+- Health records, documents, memories, activity, travel and expenses remain partial, as do SMS templates and locale-specific delivery.
 
-## Care profile and calendar (stacked after pet profile)
+## Care profile and calendar
 
 - Added German and Spanish translations for the care profile view and edit form, including field labels, read-only/empty/loading states, and common save/cancel actions. Existing Persian/English copy, authorization, persisted user-entered care notes and form behavior are unchanged.
 - Added German and Spanish labels for the care calendar, month navigation, agenda/month controls, day selection, empty state and pet selector. Date/month/day labels use the selected locale, while the Persian calendar calculation remains unchanged; the care reminder agenda and medical record pages are not included.
-- Focused care profile/calendar tests passed (7 tests across 2 files); web typecheck, lint and diff check passed. The local production build remains blocked by workspace disk exhaustion; require the CI production build before merge.
+- Focused care profile/calendar tests passed (38 tests across 2 files) after building the workspace types package. Typecheck/lint and hosted production build must pass on the final branch; responsive browser inspection remains open. Local production build is deferred because free disk is below 1 GB.
