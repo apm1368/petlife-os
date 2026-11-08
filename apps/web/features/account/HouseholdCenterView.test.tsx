@@ -62,6 +62,19 @@ describe("HouseholdCenterView", () => {
     expect(screen.getByRole("button", { name: "ترک این خانواده" })).toBeTruthy();
   });
 
+  it.each([
+    ["de", "Mitglieder", "Zugriffsverlauf", "Pflegehilfe"],
+    ["es", "Miembros", "Historial de acceso", "Ayudante de cuidados"],
+  ] as const)("renders household and access copy in %s", async (locale, membersHeading, historyHeading, presetLabel) => {
+    renderWithIntl(<HouseholdCenterView />, locale);
+    await screen.findByText("Reza");
+    expect(screen.getByRole("heading", { name: membersHeading })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: historyHeading })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: locale === "de" ? "Mitglied einladen" : "Invitar a un miembro" }));
+    expect(await screen.findByRole("option", { name: presetLabel })).toBeTruthy();
+    expect(screen.getByText(locale === "de" ? "Mitgliedsrolle geändert" : "Rol de un miembro modificado")).toBeTruthy();
+  });
+
   it("invites by mobile, sets pet-scoped access and clearly says no SMS is sent", async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } });

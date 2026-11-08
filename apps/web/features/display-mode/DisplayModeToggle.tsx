@@ -2,15 +2,20 @@
 
 import { Button } from "@petlife/ui";
 import { useDisplayModeStore } from "@/stores/display-mode-store";
-import type { AppLocale } from "@/lib/i18n/config";
+import type { RouteLocale } from "@/lib/i18n/config";
 
-export function DisplayModeToggle({ locale, compact = false }: { locale: AppLocale; compact?: boolean }) {
+const displayCopy: Record<RouteLocale, { label: string; on: string; off: string }> = {
+  fa: { label: "نمایش ساده", on: "روشن", off: "خاموش" },
+  en: { label: "Simple display", on: "on", off: "off" },
+  de: { label: "Einfache Ansicht", on: "ein", off: "aus" },
+  es: { label: "Vista sencilla", on: "activada", off: "desactivada" },
+};
+
+export function DisplayModeToggle({ locale, compact = false }: { locale: RouteLocale; compact?: boolean }) {
   const simple = useDisplayModeStore((state) => state.simple);
   const setSimple = useDisplayModeStore((state) => state.setSimple);
-  const label = locale === "fa" ? "نمایش ساده" : "Simple display";
-  const stateLabel = simple
-    ? locale === "fa" ? "روشن" : "on"
-    : locale === "fa" ? "خاموش" : "off";
+  const { label, on, off } = displayCopy[locale];
+  const stateLabel = simple ? on : off;
 
   return (
     <Button

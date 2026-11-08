@@ -2,7 +2,7 @@
 // Keep in sync with apps/api/prisma/schema.prisma enums — this package has no
 // runtime dependency on Prisma so it stays usable from the frontend.
 
-export type Locale = "fa" | "en";
+export type Locale = "fa" | "en" | "de" | "es";
 export type ThemePreference = "SYSTEM" | "LIGHT" | "DARK";
 
 /** VALIDATION_ERROR.details for a pet chip already on file. */

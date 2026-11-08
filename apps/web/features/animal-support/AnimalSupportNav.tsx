@@ -14,7 +14,7 @@ const ITEMS = [
 /** One secondary nav for the animal-support area, so needs, campaigns and organizations are never dead ends from each other. */
 export function AnimalSupportNav() {
   const locale = useLocale() === "en" ? "en" : "fa";
-  const path = (usePathname() ?? "").replace(/^\/(fa|en)/, "");
+  const path = (usePathname() ?? "").replace(/^\/(fa|en|de|es)/, "");
   return (
     <nav aria-label={locale === "fa" ? "بخش‌های حمایت از حیوانات" : "Animal support sections"} className="section-tabs">
       {ITEMS.map((item) => {

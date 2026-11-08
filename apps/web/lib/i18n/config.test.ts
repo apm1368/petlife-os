@@ -1,19 +1,26 @@
 import { describe, expect, it } from "vitest";
-import { isAppLocale, localeDirection, locales } from "./config";
+import { isAppLocale, isRouteLocale, localeDirection, locales } from "./config";
 
 describe("locale config", () => {
-  it("recognizes fa and en as valid app locales", () => {
+  it("recognizes the four supported route locales", () => {
     expect(isAppLocale("fa")).toBe(true);
     expect(isAppLocale("en")).toBe(true);
     expect(isAppLocale("de")).toBe(false);
+    expect(isAppLocale("es")).toBe(false);
+    expect(isAppLocale("ar")).toBe(false);
+    expect(isRouteLocale("de")).toBe(true);
+    expect(isRouteLocale("es")).toBe(true);
+    expect(isRouteLocale("ar")).toBe(false);
   });
 
-  it("maps fa to rtl and en to ltr — the RTL/LTR shell contract", () => {
+  it("keeps Persian RTL and the other shipped locales LTR", () => {
     expect(localeDirection.fa).toBe("rtl");
     expect(localeDirection.en).toBe("ltr");
+    expect(localeDirection.de).toBe("ltr");
+    expect(localeDirection.es).toBe("ltr");
   });
 
-  it("only ships the two locales the product supports", () => {
-    expect(locales).toEqual(["fa", "en"]);
+  it("declares Persian, English, German and Spanish route locales", () => {
+    expect(locales).toEqual(["fa", "en", "de", "es"]);
   });
 });

@@ -1,11 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Fingerprint, CalendarDays, Images, HeartPulse, LockKeyhole, FileText, CircleHelp, PawPrint } from "@petlife/ui";
-import type { AppLocale } from "@/lib/i18n/config";
+import type { RouteLocale } from "@/lib/i18n/config";
 import { ParkHeader } from "./ParkHeader";
 import { ParkHero } from "./ParkHero";
 import { ParkFooter } from "./ParkFooter";
 import { storyCopy } from "./story-copy";
+import { formatLocaleNumber } from "@/lib/i18n/format";
 import { PublicPetMemorialSection } from "./PublicPetMemorialSection";
 import { LandingPublicArticles } from "./LandingPublicArticles";
 
@@ -13,7 +14,7 @@ const facts = [Fingerprint, HeartPulse, CalendarDays, Images];
 const trustIcons = [LockKeyhole, FileText, CircleHelp];
 const photo = (name: string) => `/images/landing/home/${name}.webp`;
 
-export function HomeLanding({ locale }: { locale: AppLocale }) {
+export function HomeLanding({ locale }: { locale: RouteLocale }) {
   const c = storyCopy[locale];
   const href = (path: string) => `/${locale}${path}`;
   const Arrow = locale === "fa" ? ArrowLeft : ArrowRight;
@@ -42,7 +43,7 @@ export function HomeLanding({ locale }: { locale: AppLocale }) {
       <section className="park-how" aria-labelledby="park-how-title">
         <div className="park-section-heading"><p className="park-eyebrow">{c.howEyebrow}</p><h2 id="park-how-title">{c.howTitle}</h2></div>
         <ol className="park-steps">{c.steps.map((step,i) => <li key={step.title}>
-          <span className="park-step-number" aria-hidden="true">{new Intl.NumberFormat(locale).format(i+1).padStart(locale === "fa" ? 1 : 2, "0")}</span>
+          <span className="park-step-number" aria-hidden="true">{formatLocaleNumber(i + 1, locale).padStart(locale === "fa" ? 1 : 2, "0")}</span>
           <h3>{step.title}</h3><p>{step.body}</p>
         </li>)}</ol>
       </section>

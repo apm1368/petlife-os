@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
+import { Prisma, type User } from "@prisma/client";
 import type { Response } from "express";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { deviceLabel } from "../../../common/session/device-label.util";
@@ -18,7 +18,7 @@ function isUniqueConstraintViolation(error: unknown): boolean {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
 }
 
-function toSessionUser(user: { id: string; email: string | null; phone: string | null; displayName: string; locale: "fa" | "en"; themePreference: "SYSTEM" | "LIGHT" | "DARK" }): SessionUser {
+function toSessionUser(user: Pick<User, "id" | "email" | "phone" | "displayName" | "locale" | "themePreference">): SessionUser {
   return {
     id: user.id,
     email: user.email,

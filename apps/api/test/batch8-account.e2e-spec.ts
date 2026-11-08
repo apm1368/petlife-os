@@ -139,6 +139,17 @@ describe("Batch 8 — Account & security", () => {
   // ------------------------------------------------------------------ 8A account & profile
 
   describe("profile and contact methods", () => {
+    it("persists all four supported account language preferences", async () => {
+      const u = await user("b8-locale");
+      for (const locale of ["fa", "en", "de", "es"] as const) {
+        const updated = await u.c.patch("/me").send({ locale }).expect(200);
+        expect(updated.body.locale).toBe(locale);
+        expect((await u.c.get("/me").expect(200)).body.locale).toBe(locale);
+        expect((await prisma.user.findUniqueOrThrow({ where: { id: u.userId } })).locale).toBe(locale);
+      }
+      await u.c.patch("/me").send({ locale: "ar" }).expect(400);
+    });
+
     it("registers the requested account identity while keeping the phone explicitly unverified", async () => {
       const username = `b8new${unique().replace(/-/g, "")}`;
       const token = await csrf();

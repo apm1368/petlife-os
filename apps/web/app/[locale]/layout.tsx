@@ -3,7 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { ToastProvider } from "@petlife/ui";
-import { locales, localeDirection, isAppLocale } from "@/lib/i18n/config";
+import { locales, localeDirection, isRouteLocale } from "@/lib/i18n/config";
 import { themeInitScript } from "@/lib/theme/theme-script";
 import { inter, vazirmatn } from "@/lib/fonts";
 import "../globals.css";
@@ -41,7 +41,7 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  if (!isAppLocale(locale)) notFound();
+  if (!isRouteLocale(locale)) notFound();
 
   setRequestLocale(locale);
   const messages = await getMessages();

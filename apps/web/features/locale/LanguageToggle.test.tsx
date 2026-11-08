@@ -8,25 +8,23 @@ const push = vi.fn();
 vi.mock("next/navigation", () => ({ usePathname: () => "/fa/shop/products", useRouter: () => ({ push }) }));
 
 describe("LanguageToggle", () => {
-  it("names the other language in the page's own language and switches only the locale segment", () => {
+  it("offers all locales and switches only the locale segment", () => {
     useThemeStore.getState().setTheme("DARK");
     window.history.replaceState(null, "", "/fa/shop/products?category=toys");
     renderWithIntl(<LanguageToggle />, "fa");
-    const toggle = screen.getByRole("button", { name: "تغییر زبان به انگلیسی" });
-    // Visible UI stays Persian on a Persian page — no Latin text.
-    expect(toggle.textContent).toBe("انگلیسی");
-    expect(toggle.textContent).not.toMatch(/[A-Za-z]/);
-    fireEvent.click(toggle);
-    expect(push).toHaveBeenCalledWith("/en/shop/products?category=toys");
+    const toggle = screen.getByRole("combobox", { name: "زبان" });
+    expect(screen.getByRole("option", { name: "آلمانی" })).toBeTruthy();
+    fireEvent.change(toggle, { target: { value: "de" } });
+    expect(push).toHaveBeenCalledWith("/de/shop/products?category=toys");
     expect(useThemeStore.getState().theme).toBe("DARK");
   });
 });
 
 describe("LanguageToggle on an English page", () => {
-  it("says Persian in English — no Persian script in English UI", () => {
+  it("names the available locales in English", () => {
     renderWithIntl(<LanguageToggle />, "en");
-    const toggle = screen.getByRole("button", { name: "Switch language to Persian" });
-    expect(toggle.textContent).toBe("Persian");
-    expect(toggle.textContent).not.toMatch(/[؀-ۿ]/);
+    const toggle = screen.getByRole("combobox", { name: "Language" });
+    expect(toggle.textContent).toContain("German");
+    expect(toggle.textContent).toContain("Spanish");
   });
 });
