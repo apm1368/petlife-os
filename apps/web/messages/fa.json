@@ -4421,6 +4421,15 @@
         "storage": "ذخیره‌سازی فایل",
         "outbox": "صف رویدادها"
       },
+      "systemStatus": {
+        "HEALTHY": "سالم",
+        "DEGRADED": "دارای اختلال",
+        "LAGGING": "با تأخیر",
+        "DOWN": "از دسترس خارج",
+        "UP": "در دسترس",
+        "RUNNING": "در حال اجرا",
+        "ERROR": "خطا"
+      },
       "marketplaceStatements": "صورت‌حساب‌های بازارگاه",
       "insuranceProviders": "مدیریت شرکت‌های بیمه",
       "externalSources": "مدیریت منابع بیرونی سفر",
