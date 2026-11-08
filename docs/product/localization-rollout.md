@@ -8,23 +8,53 @@ The personal account settings page (`PersonalSettingsView`) has German and Spani
 
 Next slices: remaining account settings; customer pet/health/care calendar; commerce and provider/seller workflows; support/legal; travel/community/partner; backoffice and notifications. Each slice must include locale-aware date/number formats where relevant, route-preserving language switching, accessibility, tests and a missing-key check before it is reported complete. Account language persistence remains covered by the existing #118 API/database implementation; this batch does not alter that contract.
 
-## Route-family coverage matrix (updated 2026-11-08)
+## Route/component coverage matrix (owner correction: full-page, not header-only)
 
-“Complete” applies to all application-owned strings and relevant loading, empty, error and dialog states in that route family. User-entered and third-party content remains unchanged; it is not automatically translated. A page is not counted complete because its navigation or header is translated.
+Status is per page family, not per shared header. `COMPLETE` means all application-owned states in that page family were translated and tested. User-entered and third-party content remains original; it is not silently translated. A family marked `PARTIAL` must not be advertised as localized.
 
-| Route / page family | fa | en | de | es | Status and evidence |
-| --- | --- | --- | --- | --- | --- |
-| Public landing | Complete | Complete | Complete | Complete | Existing four-locale landing; preserve approved hero composition and image. |
-| Shared member navigation, Explore index, account navigation | Complete | Complete | Complete | Complete | Route-locale-preserving navigation coverage and tests on main. |
-| Authentication and household collaboration | Complete | Complete | Complete | Complete | Existing message catalog branches and focused tests. |
-| `/profile/personal` | Complete | Complete | Complete | Complete | Prior PR #119; settings/contact flow UI translated, SMS delivery remains provider-dependent and is not simulated. |
-| `/home` member dashboard | Complete | Complete | Complete | Complete | PR #153 open; dashboard body and key data cards/states tested. Current CI green; review/merge pending. Not live. |
-| `/profile` account overview and `/profile/activity` | Complete | Complete | Complete | Complete | PR #153 open; complete page bodies and activity labels tested. Current CI green; review/merge pending. Not live. |
-| `/profile/security` | Complete | Complete | Complete | Complete | PR #154 open; full page, dialogs, error state and no-Persian/missing-key tests. CI green; review pending. Not live. |
-| `/profile/privacy` privacy center and consent-history expansion | Complete | Complete | Complete | Complete | This PR; consent, sharing, export, account deletion and confirmation steps; consent history empty/error states. Focused tests reject Persian UI and missing markers in de/es; CI/review pending. Not live. |
-| Remaining account/household routes; pet profile, health/documents/care; shop/seller/cart/checkout; bookings/provider/clinical; support/travel/community; admin/backoffice/ERP | Partial / untranslated | Partial / untranslated | Partial / untranslated | Partial / untranslated | Not covered by the complete rows above. Related open PRs may cover selected slices; verify each exact head and all states before upgrading a route family. No whole-product localization claim. |
+| Page family / representative routes | fa | en | de | es | States verified / outstanding |
+|---|---|---|---|---|---|
+| Public landing `/[locale]` | Complete | Complete | Complete | Complete | Main public sections and language-aware navigation; HERO composition/image unchanged. |
+| Member dashboard `/[locale]/home` | Complete | Complete | Complete | Complete | Dashboard body, cards, empty/loading/failure states, access error, retry, event/status labels, locale dates/numbers and dashboard links tested. User-entered names/titles and provider/plan content are preserved; plan name is explicitly identified as English in de/es because the source has only fa/en fields. |
+| Global navigation and account navigation | Complete | Complete | Complete | Complete | Desktop/mobile navigation tests exist; dashboard link locale remains in the current route. |
+| Authentication and registration | Complete | Complete | Complete | Complete | Existing auth page tests cover translated copy; external SMS delivery/templates remain provider-dependent and are not claimed active. |
+| Household membership and invitations | Complete | Complete | Complete | Complete | Existing household copy and focused tests cover members, invite, permissions, confirmations and history. |
+| Personal account settings `/profile/settings/personal` | Complete | Complete | Complete | Complete | Existing #119 translation slice covers loading/save/contact/appearance states; verification delivery remains external. |
+| Account overview `/[locale]/profile` | Complete | Complete | Complete | Complete | Overview, loading/failure recovery, session/invitation metrics, household summary and invitation request/decline/error copy tested. Invite text clearly says phone matching does not verify the phone and access begins only after owner approval. |
+| Account activity `/[locale]/profile/activity` | Complete | Complete | Complete | Complete | Event names and summaries, filters, safe unknown-event fallback, empty/loading/error/retry and older-page control; locale-specific dates and numbers tested. Event detail values such as device names remain source content. |
+| Account security `/[locale]/profile/security` | Complete | Complete | Complete | Complete | PR #154 translates page copy, session/password/recovery states, dialogs and errors. CI is pending on its updated head after syncing main; review/merge pending. Not live. |
+| Account privacy `/[locale]/profile/privacy` | Complete | Complete | Complete | Complete | This PR covers consent, sharing, export, deletion and consent-history loading/empty/error/dialog states. Focused tests reject Persian or missing-key fallback. CI/review pending. Not live. |
+| Other account settings and profile | Partial | Partial | Partial | Partial | Some settings are localized; route-by-route form/dialog/error coverage remains open. |
+| Pet profile, health records, documents, care calendar | Partial | Partial | Partial | Partial | Member dashboard identity/event/status labels now support all four; full profile/health/document/calendar pages and their forms/states remain open. |
+| Shop, product detail, cart/checkout, seller | Partial | Partial | Partial | Partial | Full catalog and seller workflows are not represented as translated by dashboard/link copy; page content, validation and transaction states remain open. |
+| Bookings, provider and clinical | Partial | Partial | Partial | Partial | Dashboard event/date/status vocabulary is translated; booking/provider/clinical screens and dialogs are not yet fully audited. |
+| Travel and accommodation | Partial | Partial | Partial | Partial | Dashboard links and trip summary labels are localized; marketplace/booking details and stale/error states remain open. |
+| Community, shelter and animal support | Partial | Partial | Partial | Partial | Full feed, forms, moderation and empty/error states remain open. |
+| Help Center, support and legal | Partial | Partial | Partial | Partial | Help/support workflow and published legal copy require separate verification; legal body content must remain authoritative, not machine-fabricated. |
+| Admin, backoffice and ERP | Partial | Partial | Partial | Partial | Shared navigation is localized; tables, charts, permissions, operational dialogs and state copy remain open. |
+| Notifications and message templates | Partial | Partial | Partial | Partial | In-app notification UI is still being audited. German/Spanish SMS templates and provider delivery are not implemented and must not be simulated. |
 
-The privacy and security slices use explicit German/Spanish dictionaries with a visible `[Missing …]` marker rather than Persian UI fallback. Persian date formatting remains Jalali; other locales use locale-aware Gregorian formatting. `ConsentHistory` now has dedicated German and Spanish message branches. SMS/email delivery templates are not represented as implemented by these UI translations.
+### Dashboard batch on `codex/i18n-dashboard`
+
+- `MemberHomeView` and `GlassMemberHome` now retain the selected route locale instead of coercing every non-English locale to Persian. All dashboard-owned copy, welcome/account area, dashboard navigation, care/health summaries, action labels, empty/error messages, and recovery controls have German and Spanish entries.
+- Shared dashboard presentation helpers now localize system-derived care/event names, severity, species, pet age, date/number/currency display and common order/subscription statuses in fa/en/de/es. Persian remains RTL/Jalali; de/es use LTR and locale-specific Gregorian formatting.
+- The shared retry/access error page (`SystemState`) now has German and Spanish copy for its supported states, preventing a Persian or English-only error page when the dashboard's primary request fails.
+- Content boundary: pet names, owner-created reminder/memory titles, provider/city names and catalog-managed plan title remain source content. The plan model supplies only Persian/English names, so German/Spanish dashboard labels explicitly say the plan name is shown in English. No translated version is fabricated.
+- Focused tests cover populated and empty dashboard states, locale-specific labels/date output, no known Persian UI fallback in de/es, shared error/retry copy, calendar date output and currency/status formatting. This is a dashboard slice only; it does not localize linked pages or mark those page families complete.
+
+The same reviewable batch now includes the account overview route (`/[locale]/profile`): profile summary, security attention counts, household card/actions, invitation inbox, membership and activity links, loading/error/retry states, invitation errors, request confirmation, and phone-verification/owner-approval explanation are fully translated. Number grouping follows the selected locale. This does not mark the other account settings routes or the household management route complete.
+
+Account activity (`/[locale]/profile/activity`) is also covered in this reviewable account slice: filter names, every known event title, method/consent summaries, empty/loading/error, pagination action and date display are translated in all four locales and exercised in German/Spanish rendering tests. Unknown event codes are shown as a localized generic event rather than the raw code. Device/browser descriptions are source values and remain unchanged.
+
+### Audit rule
+
+Before marking any additional route complete, record its route/component, all four locale catalogs, and tested loading/empty/error/offline/forbidden/dialog/success states. The dashboard result is not evidence that a linked pet, shop, booking, or admin page is localized. Missing DE/ES application strings must be added explicitly; English or Persian fallback is not a completion criterion. The presence of authored content in another language is a content-provenance question, not a translation key.
+### Account security and privacy follow-up
+
+- Security and privacy are separate route-level slices. German and Spanish are authored explicitly; tests use a visible missing-key marker rather than silently rendering Persian UI. User-entered names, device descriptions, consent records and other source content remain unchanged.
+- Security covers the page and its password/session/recovery dialogs and error states. Privacy covers consent and sharing controls, export and deletion flows, consent history, confirmation dialogs, and empty/loading/error states.
+- PR #154's refreshed head is awaiting its new CI run after syncing main. This privacy slice is being synchronized with that same main revision; neither is live until merged and deployed.
+- Persian date behavior remains Jalali. English, German and Spanish use locale-aware Gregorian dates and numbers. UI translations do not imply that SMS/email delivery or provider templates are configured.
 
 ## Account settings follow-up (PR #119)
 

@@ -86,17 +86,42 @@ const DOMAINS: Partial<Record<StatusDomain, Record<string, Entry>>> = {
   role: { OWNER: ["مدیر", "Organizer", "neutral"], FAMILY: ["عضو خانواده", "Family member", "neutral"] },
 };
 
+// Dashboard status vocabulary for locales beyond the original fa/en catalog.
+// Unknown server codes remain readable and are tracked by the localization audit.
+const DE_ES: Partial<Record<StatusDomain, Record<string, readonly [de: string, es: string]>>> = {
+  generic: {
+    ACTIVE: ["Aktiv", "Activo"], NOT_STARTED: ["Nicht begonnen", "No iniciado"], SUBMITTED: ["Eingereicht", "Enviado"],
+    NEEDS_INFORMATION: ["Informationen erforderlich", "Se necesita información"], UNDER_REVIEW: ["Wird geprüft", "En revisión"], VERIFIED: ["Verifiziert", "Verificado"],
+    SUSPENDED: ["Ausgesetzt", "Suspendido"], CALCULATED: ["Berechnet", "Calculado"], RECONCILIATION_REQUIRED: ["Abgleich erforderlich", "Se requiere conciliación"],
+    INACTIVE: ["Inaktiv", "Inactivo"], PENDING: ["Ausstehend", "Pendiente"], DRAFT: ["Entwurf", "Borrador"], CREATED: ["Erstellt", "Creado"], SENT: ["Gesendet", "Enviado"],
+    ACCEPTED: ["Angenommen", "Aceptado"], SCHEDULED: ["Geplant", "Programado"], IN_PROGRESS: ["In Bearbeitung", "En curso"], COMPLETED: ["Abgeschlossen", "Completado"],
+    CANCELLED: ["Storniert", "Cancelado"], REJECTED: ["Abgelehnt", "Rechazado"], EXPIRED: ["Abgelaufen", "Caducado"], PAUSED: ["Pausiert", "En pausa"],
+    ARCHIVED: ["Archiviert", "Archivado"], FAILED: ["Fehlgeschlagen", "Fallido"], ERROR: ["Fehler", "Error"], AMENDED: ["Geändert", "Modificado"],
+    VOIDED: ["Ungültig", "Anulado"], RESOLVED: ["Behoben", "Resuelto"], HISTORICAL: ["Historisch", "Histórico"], DISCONTINUED: ["Eingestellt", "Interrumpido"],
+    CONFIRMED: ["Bestätigt", "Confirmado"], REFUNDED: ["Erstattet", "Reembolsado"], PARTIALLY_REFUNDED: ["Teilweise erstattet", "Reembolsado parcialmente"], UNKNOWN: ["Unbekannt", "Desconocido"],
+  },
+  order: { PENDING: ["Zahlung ausstehend", "Pago pendiente"], PREPARING: ["Wird vorbereitet", "En preparación"], READY_FOR_FULFILLMENT: ["Versandbereit", "Listo para enviar"], FULFILLED: ["Versendet", "Enviado"] },
+  subscription: { TRIALING: ["Testphase", "Prueba"], PAST_DUE: ["Zahlung überfällig", "Pago atrasado"], GRACE_PERIOD: ["Zahlungsfrist", "Periodo de gracia"], CANCEL_AT_PERIOD_END: ["Endet zum Laufzeitende", "Finaliza al terminar el periodo"] },
+};
+
 function entry(code: string, domain: StatusDomain): Entry | undefined {
   return DOMAINS[domain]?.[code] ?? GENERIC[code];
 }
 
 /** Readable label for a server status code. Never returns the raw constant for a known code. */
-export function statusLabel(code: string | null | undefined, locale: "fa" | "en", domain: StatusDomain = "generic"): string {
+export function statusLabel(code: string | null | undefined, locale: "fa" | "en" | "de" | "es", domain: StatusDomain = "generic"): string {
   if (!code) return "";
   const e = entry(code, domain);
-  if (e) return locale === "fa" ? e[0] : e[1];
-  // Unknown code: at least human-shaped ("SOME_CODE" → "Some code"); flagged by the language audit in fa.
+  if (e) {
+    if (locale === "fa") return e[0];
+    if (locale === "en") return e[1];
+    const translated = DE_ES[domain]?.[code] ?? DE_ES.generic?.[code];
+    if (translated) return locale === "de" ? translated[0] : translated[1];
+  }
+  // Unknown code: never silently present an English/Farsi label as a completed de/es translation.
   const words = code.toLowerCase().replace(/_/g, " ");
+  if (locale === "de") return `Unbekannter Status (${words})`;
+  if (locale === "es") return `Estado desconocido (${words})`;
   return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
