@@ -3,25 +3,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { BadgeCheck, ChevronLeft, ChevronRight, Clock3, EmptyState, ErrorRecovery, Heart, House, LocateFixed, MapPin, Search, Sheet, SlidersHorizontal, Skeleton, Star, X } from "@petlife/ui";
 import { discoveryService, type DiscoveryQuery, type DiscoverySort, type ProviderDiscoveryResult } from "@/services/discovery.service";
-import { formatCurrency } from "@/lib/currency/format-currency";
 import { useSessionStore } from "@/stores/session-store";
 import { categoryLabel, providerTypeLabel } from "./labels";
 import { formatCount } from "@/lib/number/format-number";
-import { formatDay } from "@/lib/date/jalali";
 import { DateField } from "@/features/shared/date-picker/DateField";
 import { DiscoveryPage } from "./DiscoveryPage";
+import type { RouteLocale } from "@/lib/i18n/config";
 
-const SORTS: { value: DiscoverySort; fa: string; en: string }[] = [
-  { value: "RECOMMENDED", fa: "پیشنهادی", en: "Recommended" },
-  { value: "EARLIEST", fa: "نزدیک‌ترین زمان آزاد", en: "Earliest availability" },
-  { value: "NEAREST", fa: "نزدیک‌ترین مکان", en: "Nearest" },
-  { value: "TOP_RATED", fa: "بیشترین امتیاز", en: "Top rated" },
-  { value: "LOWEST_PRICE", fa: "کمترین قیمت", en: "Lowest price" },
-];
+const SORTS: DiscoverySort[] = ["RECOMMENDED", "EARLIEST", "NEAREST", "TOP_RATED", "LOWEST_PRICE"];
 
 /** The category routes that exist; "all" is the search route. */
 const CATEGORY_NAV = ["VET", "GROOMING", "TRAINING", "WALKING", "SITTING", "BOARDING", "PET_TAXI"] as const;
@@ -56,8 +49,9 @@ function readQuery(params: URLSearchParams, category?: string): DiscoveryQuery {
  * is listed above the results with its own remove control.
  */
 export function ProviderDiscoveryView({ category }: { category?: string }) {
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as RouteLocale;
   const fa = locale === "fa";
+  const t = useTranslations("providerDiscovery");
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -146,9 +140,13 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
     );
   }
 
-  const fmtTime = (iso: string) => new Intl.DateTimeFormat(fa ? "fa-IR-u-ca-persian" : "en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tehran" }).format(new Date(iso));
-  const title = category ? categoryLabel(category, fa) : fa ? "همه خدمات" : "All services";
-  const speciesLabel = (s: "DOG" | "CAT") => (s === "DOG" ? (fa ? "سگ" : "Dog") : fa ? "گربه" : "Cat");
+  const dateLocale = locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-GB";
+  const categoryName = (value: string) => t.has(`categories.${value}`) ? t(`categories.${value}`) : categoryLabel(value, fa);
+  const providerName = (value: string) => t.has(`providerTypes.${value}`) ? t(`providerTypes.${value}`) : providerTypeLabel(value, fa);
+  const formatPrice = (amountRial: number) => `${Math.round(amountRial / 10).toLocaleString(dateLocale)} ${t("currencyUnit")}`;
+  const fmtTime = (iso: string) => new Intl.DateTimeFormat(dateLocale, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tehran" }).format(new Date(iso));
+  const title = category ? categoryName(category) : t("allServices");
+  const speciesLabel = (s: "DOG" | "CAT") => t(`species.${s}`);
   const navQuery = (() => {
     const next = new URLSearchParams(params.toString());
     next.delete("serviceType");
@@ -158,13 +156,13 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
   const active: { key: string; label: string; clear: Record<string, undefined> }[] = [
     ...(query.q ? [{ key: "q", label: `«${query.q}»`, clear: { q: undefined } }] : []),
     ...(query.city ? [{ key: "city", label: query.city, clear: { city: undefined } }] : []),
-    ...(query.date ? [{ key: "date", label: formatDay(query.date, locale, { year: false }), clear: { date: undefined } }] : []),
+    ...(query.date ? [{ key: "date", label: new Intl.DateTimeFormat(dateLocale, { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${query.date}T12:00:00Z`)), clear: { date: undefined } }] : []),
     ...(query.species ? [{ key: "species", label: speciesLabel(query.species), clear: { species: undefined } }] : []),
-    ...(query.homeVisit ? [{ key: "homeVisit", label: fa ? "خدمت در منزل" : "Home visit", clear: { homeVisit: undefined } }] : []),
-    ...(query.minRating ? [{ key: "minRating", label: fa ? "امتیاز ۴ به بالا" : "Rated 4+", clear: { minRating: undefined } }] : []),
-    ...(query.maxPrice ? [{ key: "maxPrice", label: `${fa ? "تا" : "Up to"} ${formatCurrency(query.maxPrice, locale)}`, clear: { maxPrice: undefined } }] : []),
-    ...(query.serviceType ? [{ key: "serviceType", label: serviceTypeLabel(query.serviceType, fa), clear: { serviceType: undefined } }] : []),
-    ...(query.lat !== undefined ? [{ key: "near", label: fa ? "نزدیک من" : "Near me", clear: { lat: undefined, lng: undefined } }] : []),
+    ...(query.homeVisit ? [{ key: "homeVisit", label: t("filters.homeVisit"), clear: { homeVisit: undefined } }] : []),
+    ...(query.minRating ? [{ key: "minRating", label: t("filters.ratedFourPlus"), clear: { minRating: undefined } }] : []),
+    ...(query.maxPrice ? [{ key: "maxPrice", label: t("filters.upTo", { amount: formatPrice(query.maxPrice) }), clear: { maxPrice: undefined } }] : []),
+    ...(query.serviceType ? [{ key: "serviceType", label: t.has(`specialties.${query.serviceType}`) ? t(`specialties.${query.serviceType}`) : query.serviceType, clear: { serviceType: undefined } }] : []),
+    ...(query.lat !== undefined ? [{ key: "near", label: t("filters.nearMe"), clear: { lat: undefined, lng: undefined } }] : []),
   ];
   const filterCount = active.filter((a) => a.key !== "q").length;
   const clearAll = () => {
@@ -175,17 +173,17 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
   const filters = (
     <div className="disc-filters">
       <label className="disc-field">
-        <span>{fa ? "شهر" : "City"}</span>
+        <span>{t("filters.city")}</span>
         <select value={query.city ?? ""} onChange={(e) => setParam({ city: e.target.value || undefined })}>
-          <option value="">{fa ? "همه شهرها" : "All cities"}</option>
+          <option value="">{t("filters.allCities")}</option>
           {cities.map((c) => (
             <option key={c} value={c}>{c}</option>
           ))}
         </select>
       </label>
-      <DateField label={fa ? "روز مراجعه" : "Date"} placeholder={fa ? "هر روز" : "Any day"} value={query.date ?? ""} min={new Date().toISOString().slice(0, 10)} onChange={(iso) => setParam({ date: iso || undefined })} />
+      <DateField label={t("filters.date")} placeholder={t("filters.anyDay")} value={query.date ?? ""} min={new Date().toISOString().slice(0, 10)} onChange={(iso) => setParam({ date: iso || undefined })} />
       <fieldset className="disc-field">
-        <legend>{fa ? "حیوان" : "Pet"}</legend>
+        <legend>{t("filters.pet")}</legend>
         <div className="disc-segment">
           {(["DOG", "CAT"] as const).map((s) => (
             <button key={s} type="button" aria-pressed={query.species === s} onClick={() => setParam({ species: query.species === s ? undefined : s })}>{speciesLabel(s)}</button>
@@ -193,28 +191,28 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
         </div>
       </fieldset>
       <label className="disc-field">
-        <span>{fa ? "حداکثر قیمت (تومان)" : "Max price (Toman)"}</span>
+        <span>{t("filters.maxPrice")}</span>
         <input key={query.maxPrice ?? "none"} inputMode="numeric" defaultValue={query.maxPrice ? String(query.maxPrice / 10) : ""} onBlur={(e) => setParam({ maxPrice: e.target.value ? String(Number(e.target.value.replace(/[^\d۰-۹]/g, "").replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)))) * 10) : undefined })} />
       </label>
       <div className="disc-toggles">
         <button type="button" className="disc-toggle" aria-pressed={Boolean(query.homeVisit)} onClick={() => setParam({ homeVisit: query.homeVisit ? undefined : "true" })}>
-          <House size={16} aria-hidden="true" /> {fa ? "در منزل" : "Home visit"}
+          <House size={16} aria-hidden="true" /> {t("filters.homeVisit")}
         </button>
         <button type="button" className="disc-toggle" aria-pressed={query.minRating === 4} onClick={() => setParam({ minRating: query.minRating === 4 ? undefined : "4" })}>
-          <Star size={16} aria-hidden="true" /> {fa ? "امتیاز ۴ به بالا" : "4★ and up"}
+          <Star size={16} aria-hidden="true" /> {t("filters.fourStarsAndUp")}
         </button>
         <button type="button" className="disc-toggle" aria-pressed={query.lat !== undefined} onClick={() => (query.lat !== undefined ? setParam({ lat: undefined, lng: undefined }) : locateMe())} aria-busy={locating === "busy"}>
-          <LocateFixed size={16} aria-hidden="true" /> {fa ? "نزدیک من" : "Near me"}
+          <LocateFixed size={16} aria-hidden="true" /> {t("filters.nearMe")}
         </button>
       </div>
-      {locating === "denied" ? <p role="status" className="disc-note">{fa ? "دسترسی به موقعیت داده نشد؛ شهر را انتخاب کنید." : "Location unavailable; choose a city instead."}</p> : null}
+      {locating === "denied" ? <p role="status" className="disc-note">{t("filters.locationUnavailable")}</p> : null}
       {category === "VET" ? (
         <fieldset className="disc-field">
-          <legend>{fa ? "نوع خدمت دامپزشکی" : "Veterinary service"}</legend>
+          <legend>{t("filters.veterinaryService")}</legend>
           <div className="disc-chips">
             {VET_SPECIALTIES.map((type) => (
               <button key={type} type="button" aria-pressed={query.serviceType === type} onClick={() => setParam({ serviceType: query.serviceType === type ? undefined : type })}>
-                {serviceTypeLabel(type, fa)}
+                {t(`specialties.${type}`)}
               </button>
             ))}
           </div>
@@ -229,9 +227,9 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
     <DiscoveryPage kind="services"><div className="disc">
       <header className="disc-head">
         <div className="disc-head__text">
-          <p className="disc-head__eyebrow"><BadgeCheck size={16} aria-hidden="true" />{fa ? "فقط ارائه‌دهندگان تأییدشده" : "Verified providers only"}</p>
+          <p className="disc-head__eyebrow"><BadgeCheck size={16} aria-hidden="true" />{t("verifiedOnly")}</p>
           <h1>{title}</h1>
-          <p>{fa ? "زمان‌های آزاد واقعی و نظر کسانی که واقعاً رزرو کرده‌اند." : "Real open times and reviews from people who actually booked."}</p>
+          <p>{t("intro")}</p>
         </div>
         <form
           className="disc-search"
@@ -242,63 +240,63 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
           }}
         >
           <Search size={18} aria-hidden="true" />
-          <input value={text} onChange={(event) => setText(event.target.value)} aria-label={fa ? "جست‌وجوی نام یا تخصص" : "Search name or specialty"} placeholder={fa ? "نام کلینیک، متخصص یا تخصص…" : "Clinic, professional or specialty…"} />
-          <button type="submit">{fa ? "جست‌وجو" : "Search"}</button>
+          <input value={text} onChange={(event) => setText(event.target.value)} aria-label={t("search.label")} placeholder={t("search.placeholder")} />
+          <button type="submit">{t("search.submit")}</button>
         </form>
       </header>
 
-      <nav className="disc-cats" aria-label={fa ? "دسته‌های خدمات" : "Service categories"}>
-        <Link href={`/${locale}/services/search${navQuery}`} aria-current={!category ? "page" : undefined}>{fa ? "همه" : "All"}</Link>
+      <nav className="disc-cats" aria-label={t("serviceCategories")}>
+        <Link href={`/${locale}/services/search${navQuery}`} aria-current={!category ? "page" : undefined}>{t("all")}</Link>
         {CATEGORY_NAV.map((c) => (
-          <Link key={c} href={`/${locale}/services/${c}${navQuery}`} aria-current={category === c ? "page" : undefined}>{categoryLabel(c, fa)}</Link>
+          <Link key={c} href={`/${locale}/services/${c}${navQuery}`} aria-current={category === c ? "page" : undefined}>{categoryName(c)}</Link>
         ))}
       </nav>
 
       <div className="disc-layout">
-        <aside className="disc-rail" aria-label={fa ? "فیلترها" : "Filters"}>
+        <aside className="disc-rail" aria-label={t("filters.title")}>
           <div className="disc-rail__head">
-            <h2>{fa ? "فیلترها" : "Filters"}</h2>
-            {filterCount ? <button type="button" onClick={clearAll}>{fa ? "پاک کردن" : "Clear"}</button> : null}
+            <h2>{t("filters.title")}</h2>
+            {filterCount ? <button type="button" onClick={clearAll}>{t("filters.clear")}</button> : null}
           </div>
           {sheet ? null : filters}
         </aside>
 
-        <section className="disc-results" aria-label={fa ? "نتایج" : "Results"}>
+        <section className="disc-results" aria-label={t("results")}>
           <div className="disc-toolbar">
             <p className="disc-count" aria-live="polite">
-              {results ? (fa ? `${formatCount(total, "fa")} ارائه‌دهنده` : `${formatCount(total, "en")} ${total === 1 ? "provider" : "providers"}`) : fa ? "در حال جست‌وجو…" : "Searching…"}
+              {results ? t("providerCount", { count: total }) : t("searching")}
             </p>
             <label className="disc-sort">
-              <span>{fa ? "مرتب‌سازی" : "Sort"}</span>
+              <span>{t("sort.label")}</span>
               <select value={query.sort} onChange={(e) => (e.target.value === "NEAREST" && query.lat === undefined ? locateMe() : setParam({ sort: e.target.value }))}>
                 {SORTS.map((s) => (
-                  <option key={s.value} value={s.value}>{fa ? s.fa : s.en}</option>
+                  <option key={s} value={s}>{t(`sort.${s}`)}</option>
                 ))}
               </select>
             </label>
             <button type="button" className="disc-filter-btn" onClick={() => setSheet(true)}>
               <SlidersHorizontal size={16} aria-hidden="true" />
-              {fa ? "فیلترها" : "Filters"}
+              {t("filters.title")}
               {filterCount ? <span className="disc-filter-btn__n">{formatCount(filterCount, locale)}</span> : null}
             </button>
           </div>
 
           {active.length ? (
-            <ul className="disc-active" aria-label={fa ? "فیلترهای فعال" : "Active filters"}>
+            <ul className="disc-active" aria-label={t("filters.active")}>
               {active.map((a) => (
                 <li key={a.key}>
-                  <button type="button" onClick={() => { if (a.key === "q") setText(""); setParam(a.clear); }} aria-label={fa ? `حذف فیلتر ${a.label}` : `Remove filter ${a.label}`}>
+                  <button type="button" onClick={() => { if (a.key === "q") setText(""); setParam(a.clear); }} aria-label={t("filters.remove", { label: a.label })}>
                     <span dir="auto">{a.label}</span>
                     <X size={14} aria-hidden="true" />
                   </button>
                 </li>
               ))}
-              <li><button type="button" className="disc-active__clear" onClick={clearAll}>{fa ? "پاک کردن همه" : "Clear all"}</button></li>
+              <li><button type="button" className="disc-active__clear" onClick={clearAll}>{t("filters.clearAll")}</button></li>
             </ul>
           ) : null}
 
           {error ? (
-            <ErrorRecovery title={fa ? "نتایج بارگیری نشد" : "Results could not load"} message="" retryLabel={fa ? "تلاش دوباره" : "Retry"} onRetry={load} />
+            <ErrorRecovery title={t("loadFailed")} message="" retryLabel={t("retry")} onRetry={load} />
           ) : !results ? (
             <div className="disc-list" aria-busy="true">
               {Array.from({ length: 4 }, (_, i) => (
@@ -307,14 +305,14 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
             </div>
           ) : results.length === 0 ? (
             <EmptyState
-              title={fa ? "ارائه‌دهنده‌ای با این فیلترها پیدا نشد" : "No providers match these filters"}
-              description={fa ? "فیلترها را کمتر کنید یا شهر دیگری انتخاب کنید." : "Loosen the filters or choose another city."}
-              actionLabel={fa ? "پاک کردن فیلترها" : "Clear filters"}
+              title={t("empty.title")}
+              description={t("empty.description")}
+              actionLabel={t("empty.clearFilters")}
               onAction={clearAll}
             />
           ) : (
             <>
-              {query.sort === "RECOMMENDED" ? <p className="disc-note">{fa ? "ترتیب بر اساس زمان آزاد، امتیاز، تجربه و فاصله است؛ جایگاه تبلیغاتی وجود ندارد." : "Ordered by availability, rating, experience and distance — there is no paid placement."}</p> : null}
+              {query.sort === "RECOMMENDED" ? <p className="disc-note">{t("recommendedOrderNote")}</p> : null}
               <ul className="disc-list">
                 {results.map((p) => {
                   const href = `/${locale}/providers/${p.id}`;
@@ -331,72 +329,60 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
                       </div>
                       <div className="disc-row__main">
                         <p className="disc-row__kicker">
-                          <span>{providerTypeLabel(p.type, fa)}</span>
-                          {p.verified ? <span className="disc-row__verified"><BadgeCheck size={14} aria-hidden="true" />{fa ? "تأییدشده" : "Verified"}</span> : null}
+                          <span>{providerName(p.type)}</span>
+                          {p.verified ? <span className="disc-row__verified"><BadgeCheck size={14} aria-hidden="true" />{t("verified")}</span> : null}
                         </p>
                         <h3><Link href={href} className="disc-row__link">{p.name}</Link></h3>
                         <p className="disc-row__services">
                           {isVet && p.specialties.length ? p.specialties.slice(0, 4).join(fa ? "، " : ", ") : p.services.slice(0, 3).map((s) => s.name).join(fa ? "، " : ", ")}
                         </p>
                         <p className="disc-row__meta">
-                          {p.location ? <span><MapPin size={14} aria-hidden="true" />{[p.location.region, p.location.city].filter(Boolean).join(fa ? "، " : ", ")}{p.distanceKm !== null ? ` · ${formatCount(p.distanceKm, locale)} ${fa ? "کیلومتر" : "km"}` : ""}</span> : null}
-                          <span className={p.nextAvailableAt ? "disc-row__open" : undefined}><Clock3 size={14} aria-hidden="true" />{p.nextAvailableAt ? `${fa ? "اولین زمان آزاد: " : "Next opening: "}${fmtTime(p.nextAvailableAt)}` : fa ? "در ۷ روز آینده زمان آزاد ندارد" : "No opening in the next 7 days"}</span>
-                          {p.homeVisit ? <span><House size={14} aria-hidden="true" />{fa ? "خدمت در منزل" : "Home visits"}</span> : null}
-                          {p.petTypes.length ? <span>{p.petTypes.map((t) => (t === "DOG" ? (fa ? "سگ" : "Dogs") : fa ? "گربه" : "Cats")).join(fa ? " و " : " & ")}</span> : null}
+                          {p.location ? <span><MapPin size={14} aria-hidden="true" />{[p.location.region, p.location.city].filter(Boolean).join(fa ? "، " : ", ")}{p.distanceKm !== null ? ` · ${formatCount(p.distanceKm, locale)} ${t("distanceUnit")}` : ""}</span> : null}
+                          <span className={p.nextAvailableAt ? "disc-row__open" : undefined}><Clock3 size={14} aria-hidden="true" />{p.nextAvailableAt ? `${t("nextOpening")}: ${fmtTime(p.nextAvailableAt)}` : t("noOpening")}</span>
+                          {p.homeVisit ? <span><House size={14} aria-hidden="true" />{t("filters.homeVisitPlural")}</span> : null}
+                          {p.petTypes.length ? <span>{p.petTypes.map((petType) => t(petType === "DOG" ? "species.dogs" : "species.cats")).join(fa ? " و " : locale === "de" ? " und " : locale === "es" ? " y " : " & ")}</span> : null}
                         </p>
                       </div>
                       <div className="disc-row__side">
                         {p.rating.count ? (
-                          <p className="disc-row__rating" aria-label={fa ? `امتیاز ${formatCount(p.rating.average ?? 0, "fa")} از ۵ در ${formatCount(p.rating.count, "fa")} نظر` : `Rated ${p.rating.average} of 5 from ${p.rating.count} reviews`}>
+                          <p className="disc-row__rating" aria-label={t("ratingAria", { average: formatCount(p.rating.average ?? 0, locale), count: formatCount(p.rating.count, locale) })}>
                             <Star size={14} aria-hidden="true" />
                             <strong>{formatCount(p.rating.average ?? 0, locale)}</strong>
                             <span>({formatCount(p.rating.count, locale)})</span>
                           </p>
                         ) : (
-                          <p className="disc-row__rating disc-row__rating--none">{fa ? "هنوز نظری ثبت نشده" : "No reviews yet"}</p>
+                          <p className="disc-row__rating disc-row__rating--none">{t("noReviews")}</p>
                         )}
-                        <p className="disc-row__price">{p.startingPrice ? <><small>{fa ? "از" : "From"}</small> {formatCurrency(p.startingPrice, locale)}</> : fa ? "قیمت پس از استعلام" : "Price on request"}</p>
+                        <p className="disc-row__price">{p.startingPrice ? <><small>{t("from")}</small> {formatPrice(p.startingPrice)}</> : t("priceOnRequest")}</p>
                         <span className="disc-row__cta" aria-hidden="true">
-                          {fa ? "مشاهده و رزرو" : "View and book"}
+                          {t("viewAndBook")}
                           <Go size={16} aria-hidden="true" />
                         </span>
                       </div>
-                      <button type="button" onClick={() => void toggleFavorite(p.id)} aria-pressed={favorites.has(p.id)} aria-label={favorites.has(p.id) ? (fa ? `حذف ${p.name} از ذخیره‌ها` : `Remove ${p.name} from saved`) : fa ? `ذخیره ${p.name}` : `Save ${p.name}`} className="disc-row__save">
+                      <button type="button" onClick={() => void toggleFavorite(p.id)} aria-pressed={favorites.has(p.id)} aria-label={favorites.has(p.id) ? t("removeSaved", { name: p.name }) : t("save", { name: p.name })} className="disc-row__save">
                         <Heart size={18} aria-hidden="true" fill={favorites.has(p.id) ? "currentColor" : "none"} />
                       </button>
                     </li>
                   );
                 })}
               </ul>
-              <p className="disc-note">{fa ? "نمای نقشه تا اتصال سرویس نقشه در دسترس نیست؛ فاصله‌ها از مختصات ثبت‌شده محاسبه می‌شوند." : "Map view is unavailable until a map provider is connected; distances use registered coordinates."}</p>
+              <p className="disc-note">{t("mapUnavailable")}</p>
             </>
           )}
         </section>
       </div>
 
-      <Sheet open={sheet} onClose={() => setSheet(false)} title={fa ? "فیلترها" : "Filters"}>
+      <Sheet open={sheet} onClose={() => setSheet(false)} title={t("filters.title")}>
         <div className="disc-sheet">
           {sheet ? filters : null}
           <div className="disc-sheet__actions">
-            {filterCount ? <button type="button" className="disc-sheet__clear" onClick={clearAll}>{fa ? "پاک کردن همه" : "Clear all"}</button> : null}
+            {filterCount ? <button type="button" className="disc-sheet__clear" onClick={clearAll}>{t("filters.clearAll")}</button> : null}
             <button type="button" className="disc-sheet__show" onClick={() => setSheet(false)}>
-              {results ? (fa ? `نمایش ${formatCount(total, "fa")} نتیجه` : `Show ${formatCount(total, "en")} ${total === 1 ? "result" : "results"}`) : fa ? "نمایش نتایج" : "Show results"}
+              {results ? t("showResults", { count: total }) : t("showResultsFallback")}
             </button>
           </div>
         </div>
       </Sheet>
     </div></DiscoveryPage>
   );
-}
-
-function serviceTypeLabel(type: string, fa: boolean): string {
-  const map: Record<string, [string, string]> = {
-    LAB_TEST: ["آزمایشگاه", "Laboratory"],
-    IMAGING_STUDY: ["تصویربرداری", "Imaging"],
-    DENTAL_CARE: ["دندانپزشکی", "Dental"],
-    REHAB_SESSION: ["توان‌بخشی", "Rehab"],
-    NUTRITION_CONSULT: ["تغذیه", "Nutrition"],
-    VACCINATION: ["واکسیناسیون", "Vaccination"],
-  };
-  return map[type]?.[fa ? 0 : 1] ?? type;
 }
