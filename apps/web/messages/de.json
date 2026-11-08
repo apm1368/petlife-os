@@ -1066,5 +1066,38 @@
       "checkInSuffix": ", Anreise",
       "checkOutSuffix": ", Abreise"
     }
+  },
+  "publicNavigation": {
+    "main": "Hauptnavigation",
+    "explore": "Entdecken",
+    "closeMenu": "Menü schließen",
+    "quickAccess": "Direktzugriff",
+    "openApp": "App öffnen",
+    "logIn": "Anmelden",
+    "home": "Startseite",
+    "health": "Gesundheit",
+    "services": "Dienstleistungen",
+    "shop": "Shop",
+    "memories": "Erinnerungen",
+    "healthAndVet": "Gesundheit und Tiermedizin",
+    "places": "Orte",
+    "travel": "Reisen",
+    "insurance": "Versicherung",
+    "animalSupport": "Tierschutz",
+    "community": "Gemeinschaft",
+    "blog": "Blog",
+    "productSections": "Produktbereiche",
+    "dashboard": "Übersicht",
+    "myPets": "Meine Tiere",
+    "activePet": "Aktives Tier",
+    "care": "Pflege",
+    "careCalendar": "Pflegekalender",
+    "cart": "Warenkorb",
+    "checkout": "Kasse",
+    "orders": "Bestellungen",
+    "bookings": "Buchungen",
+    "notifications": "Benachrichtigungen",
+    "notificationPreferences": "Benachrichtigungseinstellungen",
+    "support": "Support"
   }
 }

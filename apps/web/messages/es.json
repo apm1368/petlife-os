@@ -1066,5 +1066,38 @@
       "checkInSuffix": ", entrada",
       "checkOutSuffix": ", salida"
     }
+  },
+  "publicNavigation": {
+    "main": "Navegación principal",
+    "explore": "Explorar",
+    "closeMenu": "Cerrar menú",
+    "quickAccess": "Acceso rápido",
+    "openApp": "Abrir la aplicación",
+    "logIn": "Iniciar sesión",
+    "home": "Inicio",
+    "health": "Salud",
+    "services": "Servicios",
+    "shop": "Tienda",
+    "memories": "Recuerdos",
+    "healthAndVet": "Salud y veterinaria",
+    "places": "Lugares",
+    "travel": "Viajes",
+    "insurance": "Seguro",
+    "animalSupport": "Apoyo animal",
+    "community": "Comunidad",
+    "blog": "Blog",
+    "productSections": "Secciones del producto",
+    "dashboard": "Panel",
+    "myPets": "Mis mascotas",
+    "activePet": "Mascota activa",
+    "care": "Cuidados",
+    "careCalendar": "Calendario de cuidados",
+    "cart": "Carrito",
+    "checkout": "Pago",
+    "orders": "Pedidos",
+    "bookings": "Reservas",
+    "notifications": "Notificaciones",
+    "notificationPreferences": "Preferencias de notificaciones",
+    "support": "Soporte"
   }
 }
