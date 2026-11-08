@@ -200,6 +200,19 @@
 - #167 admin-users localization is open against `main` at `6b41572bf4181bf1f03f5392aca82fc813ee8970`; CI run `42521359719` is in progress. Its local focused 17 tests, typecheck, targeted lint, JSON parsing and diff checks passed; remains PARTIAL and not merged/live.
 - Disk headroom is 104 MiB. Creating an additional worktree failed due to capacity; source branches/worktrees remain preserved, no cleanup or full build was attempted, and payment worktrees were not accessed.
 
+## Localization queue checkpoint — 2026-11-08 21:44 UTC
+
+- `main` is `352e97301e3e288b9a049861205fe8f4778388fe` after normal merge of #168. Main CI/deploy run `42524590176` completed successfully; production version endpoint reports the same SHA and deployment `github-42524590176-1`.
+- #160 is merged and deployed at this SHA; the HERO image/composition was preserved. Only public HTTP/HTML checks were available here; authenticated browser flows and original memorial-object/CDN revocation remain unverified.
+- #169 current pushed head `d4182882b69da421ab117156b55601508ee055cc`; fresh CI `42526086626` is in progress. Its prior run on `91f9d5b` is stale. #166 current pushed head `b8c1468f0d8869f236b15cc25dccb077a06d7820`; fresh CI `42526345910` is in progress. Both PRs are blocked pending their live checks; no review is recorded.
+- #167 still points remotely at old head `3dee5c0`; its local sync with current main and restored German/Spanish user-directory messages/tests are not pushed yet. Old CI `42521920173` is stale for that sync. Synchronized local tests pass (17), with typecheck/lint/catalog validation passing.
+- Checkout/order journey focused checks pass locally (45); PR #169 is PARTIAL pending hosted CI and authenticated visual/device checks. Disk free space is approximately 101 MiB; no cleanup, full build or payment-worktree operation was performed.
+
+## Handoff correction — 2026-11-08 21:45 UTC
+
+- Correction to the preceding checkpoint: PR #167's sync with current `main` and restored German/Spanish admin-user namespace were pushed as `e5eb05b1`; the earlier sentence saying the work was not pushed is historical and superseded. The fresh run `42526634757` was in progress before this documentation correction; require CI on the final pushed head before merge.
+- Current release authority remains main/production SHA `352e97301e3e288b9a049861205fe8f4778388fe`. Local authenticated page inspection and production storage/CDN configuration are unavailable; no visual/browser verification or full memorial source-image revocation is claimed.
+
 ## Checkout localization batch — 2026-11-08 21:14 UTC
 
 - Working branch `codex/i18n-checkout-main` is based on current `origin/main` `de4296432bd1722273fea27a31141c326ad170de`. Checkout address/review/shipping/payment UI now has German/Spanish catalog keys and localized generic API-error copy; common route strings used by checkout are translated as well.

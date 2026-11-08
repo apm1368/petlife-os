@@ -119,7 +119,8 @@
       "APPROVED": "Approved",
       "PENDING": "Pending",
       "INACTIVE": "Inactive"
-    }
+    },
+    "manualMessage": {"title": "Send a message to this user", "smsNote": "SMS is attempted only when Faraz is live, the recipient allows it, and notification rules permit it.", "subject": "Title", "message": "Message", "attemptSms": "Also attempt SMS when permitted", "saved": "Message recorded.", "failed": "Message could not be sent.", "sending": "Sending…", "send": "Send message"}
   },
   "common": {
     "appName": "opetlife",
