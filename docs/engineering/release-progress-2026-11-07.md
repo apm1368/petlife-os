@@ -207,3 +207,8 @@
 - #169 current pushed head `d4182882b69da421ab117156b55601508ee055cc`; fresh CI `42526086626` is in progress. Its prior run on `91f9d5b` is stale. #166 current pushed head `b8c1468f0d8869f236b15cc25dccb077a06d7820`; fresh CI `42526345910` is in progress. Both PRs are blocked pending their live checks; no review is recorded.
 - #167 still points remotely at old head `3dee5c0`; its local sync with current main and restored German/Spanish user-directory messages/tests are not pushed yet. Old CI `42521920173` is stale for that sync. Synchronized local tests pass (17), with typecheck/lint/catalog validation passing.
 - Checkout/order journey focused checks pass locally (45); PR #169 is PARTIAL pending hosted CI and authenticated visual/device checks. Disk free space is approximately 101 MiB; no cleanup, full build or payment-worktree operation was performed.
+
+## Handoff correction — 2026-11-08 21:45 UTC
+
+- Correction to the preceding checkpoint: PR #167's sync with current `main` and restored German/Spanish admin-user namespace were pushed as `e5eb05b1`; the earlier sentence saying the work was not pushed is historical and superseded. The fresh run `42526634757` was in progress before this documentation correction; require CI on the final pushed head before merge.
+- Current release authority remains main/production SHA `352e97301e3e288b9a049861205fe8f4778388fe`. Local authenticated page inspection and production storage/CDN configuration are unavailable; no visual/browser verification or full memorial source-image revocation is claimed.
