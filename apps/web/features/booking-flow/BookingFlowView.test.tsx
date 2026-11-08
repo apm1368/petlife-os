@@ -62,6 +62,29 @@ describe("BookingFlowView", () => {
     expect(await screen.findByText("This provider cannot be booked")).toBeTruthy();
   });
 
+  it.each([
+    ["de", "Termin buchen", "Leistung", "Weiter", "Melde dich an, um dein Tier auszuwählen und zu buchen. Deine Auswahl bleibt erhalten.", "Anmelden und fortfahren"],
+    ["es", "Reservar una cita", "Servicio", "Continuar", "Inicia sesión para elegir tu mascota y reservar. Se conservará tu selección.", "Iniciar sesión y continuar"],
+  ] as const)("renders the booking service and sign-in steps in %s without translating provider-authored names", async (locale, title, serviceStep, continueLabel, prompt, signInLabel) => {
+    useSessionStore.setState({ status: "unauthenticated" });
+    vi.mocked(discoveryService.profile).mockResolvedValue({
+      ...PROFILE,
+      name: "Sample Clinic",
+      services: [{ ...SERVICE, name: "General visit", variants: [{ ...SERVICE.variants[0], name: "At clinic" }] }],
+    } as ProviderProfile);
+
+    renderWithIntl(<BookingFlowView providerId="p1" />, locale);
+
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getAllByText(serviceStep).length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByLabelText(/General visit/));
+    fireEvent.click(screen.getByLabelText(/At clinic/));
+    fireEvent.click(screen.getByRole("button", { name: continueLabel }));
+    expect(await screen.findByText(prompt)).toBeTruthy();
+    expect(screen.getByRole("button", { name: signInLabel })).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
   it("lists every pet from the owner's household and lets the owner choose any one for a single-pet service", async () => {
     useSessionStore.setState({ status: "authenticated" });
     renderWithIntl(<BookingFlowView providerId="p1" />, "en");
