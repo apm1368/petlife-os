@@ -10,8 +10,9 @@ describe("FilePicker locale copy", () => {
     ["de", "Datei auswählen", "Keine Datei ausgewählt"],
     ["es", "Elegir archivo", "No se ha seleccionado ningún archivo"],
   ] as const)("uses the selected language for controls and empty filename in %s", (locale, choose, none) => {
-    renderWithIntl(<FilePicker label="File" />, locale);
+    const view = renderWithIntl(<FilePicker label="File" />, locale);
     expect(screen.getByText(choose)).toBeTruthy();
     expect(screen.getByText(none)).toBeTruthy();
+    if (locale !== "fa") expect(view.container.textContent).not.toMatch(/[\u0600-\u06FF]/);
   });
 });

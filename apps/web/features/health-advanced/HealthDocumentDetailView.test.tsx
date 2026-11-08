@@ -26,7 +26,7 @@ describe("HealthDocumentDetailView localization", () => {
     ["es", "Volver a los documentos", "Informe de laboratorio", "Privacidad", "Este archivo es privado"],
   ] as const)("renders application-owned detail text in %s without translating clinical content", async (locale, back, kind, privacy, noticePrefix) => {
     vi.mocked(healthAdvancedService.getDocument).mockResolvedValue(doc);
-    renderWithIntl(<HealthDocumentDetailView petId="pet-1" documentId="doc-1" />, locale);
+    const view = renderWithIntl(<HealthDocumentDetailView petId="pet-1" documentId="doc-1" />, locale);
     await waitFor(() => expect(screen.getByRole("heading", { name: "Blood test" })).toBeTruthy());
     expect(screen.getByText(back)).toBeTruthy();
     expect(screen.getByText(kind)).toBeTruthy();
@@ -34,5 +34,6 @@ describe("HealthDocumentDetailView localization", () => {
     expect(screen.getByText(new RegExp(noticePrefix))).toBeTruthy();
     expect(screen.getByText("Clinic Name")).toBeTruthy();
     expect(screen.getByText("Results as recorded by the clinic.")).toBeTruthy();
+    expect(view.container.textContent).not.toMatch(/[\u0600-\u06FF]/);
   });
 });
