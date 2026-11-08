@@ -163,5 +163,65 @@
       "passwordMismatch": "Die Passwörter stimmen nicht überein.",
       "genericError": "Das Passwort konnte nicht geändert werden. Bitte versuche es erneut."
     }
+  },
+  "commerce": {
+    "shopHome": {
+      "title": "Shop", "subtitle": "Für {name}", "categories": "Kategorien", "browseAll": "Alle Produkte ansehen", "loading": "Wird geladen", "unavailable": "Der Shop ist derzeit nicht verfügbar", "retry": "Erneut versuchen", "eyebrow": "EINKAUFEN MIT DEINEM TIER IM MITTELPUNKT", "heroTitle": "Einkaufen, das bei deinem Tier beginnt", "heroDescription": "Vergleiche geprüfte Verkäufer, prüfe die Eignung für dein Tier und plane wiederkehrende Lieferungen für Dinge, die du regelmäßig brauchst.", "searchLabel": "Shop durchsuchen", "searchPlaceholder": "Futter, Marke oder Produkt suchen…", "searchButton": "Suchen", "categoriesHint": "Kategorien aus dem aktuellen Katalog", "repeatTitle": "Wiederkehrende Lieferung", "repeatHint": "Erinnerungen und Bestellungen mit einem Klick – niemals automatische Abbuchungen", "dealsTitle": "Aktuelle Angebote", "dealsHint": "Rabatte werden beim Bezahlen automatisch berücksichtigt", "seeAll": "Alle ansehen", "picksTitle": "Empfehlungen", "picksHint": "Jetzt verfügbar, zuerst die am besten bewerteten", "emptyTitle": "Der Katalog ist derzeit leer", "emptyDescription": "Produkte erscheinen hier, sobald geprüfte Verkäufer sie anbieten."
+    },
+    "results": {
+      "title": "Produkte", "loading": "Wird geladen", "retry": "Erneut versuchen", "empty": "Keine Produkte gefunden.", "searchTitle": "Ergebnisse für „{query}“", "searchLabel": "Produkte suchen", "searchPlaceholder": "Produkte oder Marken suchen", "searchButton": "Suchen", "categories": "Kategorien", "allCategories": "Alle", "resultCount": "{count, plural, =0 {Keine Produkte} one {# Produkt} other {# Produkte}}", "emptyHint": "Entferne einen Filter oder suche nach einem allgemeineren Begriff.",
+      "sort": { "label": "Sortieren nach", "RECOMMENDED": "Empfohlen", "NEWEST": "Neueste", "PRICE_ASC": "Preis: aufsteigend", "PRICE_DESC": "Preis: absteigend", "TOP_RATED": "Am besten bewertet" },
+      "pagination": { "label": "Seiten", "previous": "Zurück", "next": "Weiter", "status": "Seite {page} von {total}" },
+      "filters": { "title": "Filter", "species": "Geeignet für", "any": "Alle", "dog": "Hunde", "cat": "Katzen", "brand": "Marke", "seller": "Verkäufer", "price": "Preis (Toman)", "minToman": "Ab", "maxToman": "Bis", "inStock": "Nur auf Lager", "onPromotion": "Nur Angebote", "rating": "Bewertung", "ratingAtLeast": "Ab {value}★", "clear": "Filter zurücksetzen", "showResults": "{count, plural, one {# Produkt anzeigen} other {# Produkte anzeigen}}", "close": "Schließen" }
+    },
+    "productCard": { "fromPrice": "Ab {price}", "noAvailability": "Nicht verfügbar" },
+    "compatibility": {
+      "status": { "COMPATIBLE": "Geeignet", "LIKELY_COMPATIBLE": "Wahrscheinlich geeignet", "NEEDS_REVIEW": "Prüfung erforderlich", "NOT_RECOMMENDED": "Nicht empfohlen", "POTENTIAL_SAFETY_CONFLICT": "Möglicher Sicherheitskonflikt", "UNKNOWN": "Weitere Angaben erforderlich" },
+      "reason": { "SPECIES_MISMATCH": "Nicht für diese Tierart geeignet", "AGE_TOO_YOUNG": "Für Tiere unter dem empfohlenen Alter nicht empfohlen", "AGE_TOO_OLD": "Nicht für das vorgesehene Alter empfohlen", "AGE_UNKNOWN": "Das Alter deines Tieres ist nicht angegeben", "WEIGHT_TOO_LOW": "Unter dem empfohlenen Gewichtsbereich", "WEIGHT_TOO_HIGH": "Über dem empfohlenen Gewichtsbereich", "WEIGHT_UNKNOWN": "Das Gewicht deines Tieres ist nicht angegeben", "ALLERGEN_CONFLICT": "Widerspricht einer bekannten Allergie", "HEALTH_REVIEW_REQUIRED": "Zuerst ist ein vollständiges Gesundheitsprofil erforderlich", "NO_ACTIVE_PET": "Kein aktives Tier ausgewählt" }
+    },
+    "detail": {
+      "title": "Produkt", "loading": "Wird geladen", "retry": "Erneut versuchen", "shoppingFor": "Einkauf für {name}", "variant": "Variante", "offer": "Verkäufer", "noOffers": "Derzeit bietet niemand diese Variante an", "verified": "Geprüft", "inStock": "Noch {count} auf Lager", "outOfStock": "Nicht auf Lager", "deliveryPlaceholder": "Lieferdetails folgen", "quantity": "Menge", "addToCart": "In den Warenkorb", "goToCart": "Zum Warenkorb", "addFailed": "Das Produkt konnte nicht hinzugefügt werden. Bitte versuche es erneut.", "notFound": "Dieses Produkt ist nicht verfügbar", "notFoundHint": "Es wurde möglicherweise entfernt oder wird nicht mehr verkauft.", "backToShop": "Zurück zum Shop", "breadcrumb": "Brotkrumennavigation", "shop": "Shop", "gallery": "Produktbilder", "noReviewsYet": "Noch keine Bewertungen", "favorite": "Zu Favoriten hinzufügen", "unfavorite": "Aus Favoriten entfernen", "offersCount": "{count, plural, one {# Verkäufer} other {# Verkäufer}}", "repeatAvailable": "Wiederkehrende Lieferung verfügbar", "decrease": "Menge verringern", "increase": "Menge erhöhen", "repeatTitle": "Wiederkehrende Lieferung", "repeatExplain": "Wähle, wie oft du das Produkt brauchst. Wir erinnern dich vor jeder Lieferung. Du bestätigst die Bestellung zum aktuellen Preis – es wird nichts automatisch abgebucht.", "repeatCta": "Wiederkehrende Lieferung einrichten", "about": "Über dieses Produkt", "suitability": "Geeignet für", "specifications": "Eigenschaften", "suits": { "both": "Hunde und Katzen", "dog": "Hunde", "cat": "Katzen", "age": "Alter: {min}–{max} Monate", "weight": "Gewicht: {min}–{max} kg", "ageFrom": "Ab {min} Monaten", "weightFrom": "Ab {min} kg" }, "reviewsTitle": "Bewertungen", "reviewsVerifiedOnly": "Nur Kunden, die das Produkt erhalten haben, können es bewerten.", "verifiedPurchase": "Verifizierter Kauf", "moreReviews": "Weitere Bewertungen anzeigen", "related": "Weitere Produkte aus dieser Kategorie"
+    },
+    "cart": {
+      "title": "Warenkorb", "loading": "Wird geladen", "retry": "Erneut versuchen", "empty": "Dein Warenkorb ist leer.", "emptyHint": "Hier findest du Produkte für dein Tier. Preis und Lagerbestand jedes Verkäufers werden vor der Zahlung erneut geprüft.", "browseShop": "Shop ansehen", "safetyConflictBanner": "Ein oder mehrere Produkte könnten mit einer bekannten Allergie deines Tieres in Konflikt stehen. Beim Bezahlen wirst du um eine Bestätigung gebeten.", "forPet": "Für {name}", "noTargetPet": "Für dieses Produkt wurde kein Tier ausgewählt", "remove": "Entfernen", "priceChanged": "Preis seit dem Hinzufügen aktualisiert", "sellerSubtotal": "Zwischensumme dieses Verkäufers", "subtotal": "Zwischensumme", "proceedToCheckout": "Weiter zur Kasse", "actionFailed": "Die Änderung wurde nicht übernommen. Bitte versuche es erneut.", "pricesChangedBanner": "Einige Preise oder Angebote haben sich geändert. Prüfe die neuen Preise vor dem Bezahlen.", "acceptPrices": "Aktuelle Preise übernehmen", "soldBy": "Verkauft von {seller}", "itemsTotal": "Artikel ({count})", "promotions": "Rabatte", "delivery": "Lieferung", "deliveryAtCheckout": "Wird an der Kasse berechnet", "fixIssuesFirst": "Entferne oder korrigiere die oben markierten Artikel, um fortzufahren.", "continueShopping": "Weiter einkaufen", "decrease": "Menge verringern", "increase": "Menge erhöhen", "each": "je {price}", "issue": { "OFFER_UNAVAILABLE": "Nicht mehr verfügbar", "SELLER_UNAVAILABLE": "Verkäufer nicht verfügbar", "OUT_OF_STOCK": "Nicht auf Lager", "LOW_STOCK": "Nur noch {count} verfügbar", "QUANTITY_EXCEEDS_STOCK": "Nur {count} verfügbar", "PRICE_CHANGED": "Preis geändert", "PROMOTION_EXPIRED": "Angebot abgelaufen" }
+    },
+    "price": { "was": "Vorher {price}", "promotion": "{name} · {percent}% Rabatt" },
+    "stock": { "in": "Auf Lager", "low": "Wenig auf Lager", "lowCount": "Nur noch {count} verfügbar", "out": "Nicht auf Lager" },
+    "rating": { "aria": "Bewertung {average} von 5 aus {count} verifizierten Rezensionen", "count": "{count, plural, one {# Rezension} other {# Rezensionen}}" },
+    "design": {
+      "navLabel": "Dein Tiershop", "shop": "Shop", "orders": "Meine Bestellungen", "repeat": "Wiederkehrende Lieferung", "favorites": "Gespeicherte Produkte", "cart": "Warenkorb", "browse": "Alle Produkte entdecken", "filters": "Finde den nächsten Favoriten", "filterHint": "Wähle, was zu deinem Tier passt.", "allProducts": "Alle Produkte", "applyFilters": "Produkte anzeigen", "repeatTitle": "Ein bisschen Fürsorge – immer wieder.", "repeatDescription": "Plane die nächste Lieferung eines geeigneten Produkts. Du behältst bei jeder Bestellung die Kontrolle.", "repeatCta": "Wiederkehrende Lieferung entdecken", "viewProduct": "Produkt ansehen", "summary": "Bestellübersicht", "cartStep": "Warenkorb", "checkoutStep": "Kassendetails", "completeStep": "Bestellstatus", "journey": "Kaufübersicht", "categoryFailed": "Kategorien konnten nicht geladen werden. Du kannst den Katalog weiterhin durchsuchen.", "loadFailed": "Diese Informationen konnten nicht geladen werden. Bitte versuche es erneut.", "favoriteFailed": "Gespeicherte Produkte konnten nicht aktualisiert werden. Bitte versuche es erneut.", "reviewsFailed": "Weitere Bewertungen konnten nicht geladen werden. Bitte versuche es erneut.", "shopCredit": "Shop-Motiv: KI-generiertes fotorealistisches Konzept von OpenAI; zugeschnitten und neu codiert. Kein echtes Geschäft und kein Produktfoto.", "clearCart": "Warenkorb leeren", "clearTitle": "Warenkorb leeren?", "clearHint": "Alle Artikel in diesem Warenkorb werden entfernt.", "clearConfirm": "Ja, Warenkorb leeren", "keepCart": "Artikel behalten", "editAddress": "Ausgewählte Adresse bearbeiten", "defaultAddress": "Standardadresse des Haushalts", "editOptionalHint": "Beim Bearbeiten behalten leere optionale Felder ihre bisherigen Werte."
+    }
+  },
+  "petOverview": {
+    "careUnavailable": "Pflegeerinnerungen konnten nicht geladen werden. Andere Einträge bleiben verfügbar; versuche es erneut, um die vollständige Liste abzurufen.",
+    "careIncomplete": "Pflegepunkte mit Handlungsbedarf und anstehende Pflege wurden noch nicht vollständig geladen."
+  },
+  "birthDateField": {
+    "calendar": "Kalender",
+    "jalali": "Jalali-Kalender",
+    "gregorian": "Gregorianischer Kalender",
+    "hint": "Beim Wechsel des Kalenders bleibt das ausgewählte Datum gleich.",
+    "optionalAge": "Geburtsdatum und Alter sind optional. Wenn sie unbekannt sind, kannst du fortfahren und sie später ergänzen.",
+    "day": "Tag",
+    "month": "Monat",
+    "year": "Jahr"
+  },
+  "consentHistory": {
+    "title": "Einwilligungsverlauf",
+    "intro": "Gespeicherte Einwilligungen und Widerrufe für Ihr Konto.",
+    "open": "Verlauf anzeigen",
+    "close": "Verlauf ausblenden",
+    "loadFailed": "Der Verlauf konnte nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "loading": "Wird geladen …",
+    "currentVersion": "Aktuelle Version",
+    "empty": "Keine Einwilligung gespeichert.",
+    "version": "Version",
+    "accepted": "Angenommen am {date}",
+    "withdrawn": "Widerrufen am {date}",
+    "otherSource": "Im Konto gespeichert",
+    "limit": "Bis zu {limit, number} aktuelle Ereignisse sowie ältere gespeicherte Versionen ohne protokollierte Ereignisse. In diesem Bereich können Sie Ihre Einwilligungen nicht ändern.",
+    "kinds": {"TERMS": "Nutzungsbedingungen", "PRIVACY": "Datenschutz", "MARKETING": "Marketingnachrichten"},
+    "sources": {"PRIVACY_CENTER": "Im Datenschutzbereich gespeichert", "LEGACY_RECORD": "Älterer gespeicherter Stand; der vollständige Ereignisverlauf ist nicht verfügbar.", "ONBOARDING": "Bei der Registrierung gespeichert"}
   }
 }

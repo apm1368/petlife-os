@@ -18,6 +18,7 @@ import { careRemindersService, type CareReminder } from "@/services/care-reminde
 import { careTitle } from "@/features/care/care-labels";
 import { EditPetIdentity } from "./EditPetIdentity";
 import { attentionTitle, eventSourceLabel, eventTitle, formatOverviewDate, severityBarClass, severityLabel, severityTone, collapseLabPanels, mergeCareIntoOverview } from "./overview-labels";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 const copy = {
   fa: {
@@ -102,10 +103,16 @@ const copy = {
     memorialTitle: "Life story and history",
     memorialDescription: "Health history remains respectfully available while memories take priority.",
   },
+  de: {
+    eyebrow: "Zusammengeführte Haustierakte", title: "Was jetzt wichtig ist", description: "Wichtige Pflege, anstehende Ereignisse und aktuelle Vorgeschichte aus tatsächlich gespeicherten Angaben.", attention: "Erfordert Aufmerksamkeit", noAttention: "In den gespeicherten Angaben wurde kein konkreter Handlungsbedarf gefunden.", noAttentionHint: "Das bedeutet nicht, dass alle Gesundheitsinformationen bekannt oder klinisch unauffällig sind.", upcoming: "Anstehend", noUpcoming: "Es wurde kein zukünftiges Ereignis mit Datum erfasst.", recentHealth: "Aktuelle Gesundheit", noHealth: "Es sind noch keine Gesundheitsereignisse verfügbar.", recentActivity: "Aktuelle Aktivitäten", noActivity: "Für dieses Haustier wurden noch keine Aktivitäten erfasst.", recentMemory: "Letzte Erinnerung", noMemory: "Es wurde noch keine Erinnerung erfasst.", useful: "Schnellzugriffe", health: "Gesundheitsakte öffnen", care: "Pflegebereich", document: "Medizinisches Dokument hochladen", memory: "Erinnerung hinzufügen", yearReview: "Jahresrückblick und Geburtstag", careSheet: "Pflegeblatt für Betreuungspersonen", household: "Haushalt", editTitle: "Angaben bearbeiten", name: "Name", breed: "Rasse", cancel: "Abbrechen", save: "Änderungen speichern", loadError: "Die Aktenübersicht konnte nicht geladen werden.", retry: "Erneut versuchen", loading: "Haustierübersicht wird vorbereitet", recordedData: "Erfasste Daten", provider: "Anbieter", owner: "Halter/Haushalt", system: "System", incomplete: "Das Gesundheitsprofil ist unvollständig.", vaccinationOverdue: "Eine Impfung ist überfällig.", vaccinationDue: "Eine Impfung ist bald fällig.", memorialTitle: "Lebensgeschichte und Erinnerungen", memorialDescription: "Die Gesundheitsgeschichte bleibt respektvoll verfügbar; Erinnerungen stehen im Vordergrund.",
+  },
+  es: {
+    eyebrow: "Historial unificado de la mascota", title: "Lo que importa ahora", description: "Cuidados importantes, próximos eventos e historial reciente a partir de información realmente registrada.", attention: "Requiere atención", noAttention: "No se encontraron acciones pendientes en los datos registrados.", noAttentionHint: "Esto no significa que se conozca toda la información de salud ni que todo esté clínicamente normal.", upcoming: "Próximos", noUpcoming: "No hay eventos futuros con fecha registrada.", recentHealth: "Salud reciente", noHealth: "Todavía no hay eventos de salud disponibles.", recentActivity: "Actividad reciente", noActivity: "Todavía no se ha registrado actividad para esta mascota.", recentMemory: "Último recuerdo", noMemory: "Todavía no se ha registrado ningún recuerdo.", useful: "Accesos rápidos", health: "Abrir historial de salud", care: "Centro de cuidados", document: "Subir documento médico", memory: "Añadir recuerdo", yearReview: "Resumen del año y cumpleaños", careSheet: "Ficha de cuidados para cuidadores", household: "Hogar", editTitle: "Editar datos", name: "Nombre", breed: "Raza", cancel: "Cancelar", save: "Guardar cambios", loadError: "No se pudo cargar el resumen del historial.", retry: "Intentar de nuevo", loading: "Preparando el resumen de la mascota", recordedData: "Datos registrados", provider: "Proveedor", owner: "Tutor/a u hogar", system: "Sistema", incomplete: "El perfil de salud está incompleto.", vaccinationOverdue: "Hay una vacuna vencida.", vaccinationDue: "Pronto vence una vacuna.", memorialTitle: "Historia de vida y recuerdos", memorialDescription: "El historial de salud permanece disponible con respeto y los recuerdos tienen prioridad.",
+  },
 } as const;
 
 export function PetProfileView({ petId }: { petId: string }) {
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as RouteLocale;
   const c = copy[locale];
   const t = useTranslations("petOverview");
   const upsertPet = usePetStore((state) => state.upsertPet);
@@ -250,7 +257,7 @@ function OverviewSection({ title, children }: { title: string; children: React.R
   return <section><h2 className="mb-4 text-section-title text-text-primary">{title}</h2>{children}</section>;
 }
 
-function AttentionRow({ item, base, locale }: { item: PetOverviewAttentionDto; base: string; locale: "fa" | "en" }) {
+function AttentionRow({ item, base, locale }: { item: PetOverviewAttentionDto; base: string; locale: RouteLocale }) {
   const label = attentionTitle(item.title, locale);
   const tone = severityTone(item.severity);
   return (
@@ -262,7 +269,7 @@ function AttentionRow({ item, base, locale }: { item: PetOverviewAttentionDto; b
   );
 }
 
-function EventList({ items, empty, base, locale, compact = false, showSource = true }: { items: PetOverviewEventDto[]; empty: string; base: string; locale: "fa" | "en"; compact?: boolean; showSource?: boolean }) {
+function EventList({ items, empty, base, locale, compact = false, showSource = true }: { items: PetOverviewEventDto[]; empty: string; base: string; locale: RouteLocale; compact?: boolean; showSource?: boolean }) {
   if (items.length === 0) return <p className="border-y border-border-subtle py-5 text-sm text-text-secondary">{empty}</p>;
   return (
     <div className="divide-y divide-border-subtle border-y border-border-subtle">
