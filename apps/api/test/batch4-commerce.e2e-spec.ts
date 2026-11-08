@@ -637,6 +637,52 @@ describe("Batch 4 — Commerce", () => {
 
   // -------------------------------------------------------------- address
 
+  describe("seller central-catalog requests", () => {
+    function requestProduct(c: Client, sellerId: string, title: string) {
+      return c.post(`/seller-organizations/${sellerId}/catalog-product-requests`).send({ requestedTitle: title, brandName: "Request Brand", description: "Seller supplied product description", sourceName: "manual" });
+    }
+
+    it("requires catalog-manager access and deduplicates the same pending request", async () => {
+      const owner = await seller();
+      const title = `Request ${unique()}`;
+      const created = await requestProduct(owner.c, owner.id, title).expect(201);
+      expect(created.body.status).toBe("PENDING_REVIEW");
+      await requestProduct(owner.c, owner.id, title).expect(409);
+
+      const viewerEmail = `b4-viewer-${unique()}@example.com`;
+      const viewer = await signUp(viewerEmail);
+      const userId = (await prisma.user.findUniqueOrThrow({ where: { email: viewerEmail } })).id;
+      await prisma.sellerMembership.create({ data: { sellerOrganizationId: owner.id, userId, role: SellerMembershipRole.VIEWER, status: SellerMembershipStatus.ACTIVE } });
+      const viewerClient = client(viewer);
+      await viewerClient.post(`/seller-organizations/${owner.id}/catalog-product-requests`).send({ requestedTitle: `Unauthorized ${unique()}` }).expect(403);
+    });
+
+    it("requires duplicate review, supports match/reject, and creates a central product without seller money fields", async () => {
+      const owner = await seller();
+      const adminUser = await admin(AdminRole.ADMIN);
+      const title = `Catalog Request ${unique()}`;
+      const existing = await product({ title });
+      const matched = await requestProduct(owner.c, owner.id, title).expect(201);
+      const queue = await adminUser.c.get("/admin/commerce/catalog-product-requests").expect(200);
+      expect(queue.body).toEqual(expect.arrayContaining([expect.objectContaining({ id: matched.body.id, duplicateCandidates: expect.arrayContaining([expect.objectContaining({ id: existing.product.id })]) })]));
+      await adminUser.c.post(`/admin/commerce/catalog-product-requests/${matched.body.id}/approve`).send({ categoryId: existing.categoryId, reason: "duplicate review", reviewedDuplicateProductIds: [] }).expect(400);
+      await adminUser.c.post(`/admin/commerce/catalog-product-requests/${matched.body.id}/match`).send({ productId: existing.product.id, reason: "Exact catalog match" }).expect(201);
+
+      const newTitle = `Approved Catalog ${unique()}`;
+      const pending = await requestProduct(owner.c, owner.id, newTitle).expect(201);
+      const decision = await adminUser.c.post(`/admin/commerce/catalog-product-requests/${pending.body.id}/approve`).send({ categoryId: existing.categoryId, reason: "Duplicate candidates reviewed", reviewedDuplicateProductIds: [] }).expect(201);
+      expect(decision.body.product.title).toBe(newTitle);
+      expect(await prisma.sellerOffer.count({ where: { productVariant: { productId: decision.body.product.id } } })).toBe(0);
+      const variant = await prisma.productVariant.findFirstOrThrow({ where: { productId: decision.body.product.id } });
+      await owner.c.post(`/seller-organizations/${owner.id}/offers`).send({ productVariantId: variant.id, priceAmount: 125000, initialOnHand: 4 }).expect(201);
+      expect(await prisma.sellerOffer.count({ where: { productVariantId: variant.id, priceAmount: 125000 } })).toBe(1);
+      expect(await prisma.inventoryItem.count({ where: { sellerOffer: { productVariantId: variant.id }, onHand: 4 } })).toBe(1);
+
+      const rejected = await requestProduct(owner.c, owner.id, `Rejected ${unique()}`).expect(201);
+      await adminUser.c.post(`/admin/commerce/catalog-product-requests/${rejected.body.id}/reject`).send({ reason: "Insufficient product provenance" }).expect(201);
+    });
+  });
+
   describe("address book", () => {
     it("validates Iranian postal codes and keeps exactly one default per household", async () => {
       const cu = await customer();

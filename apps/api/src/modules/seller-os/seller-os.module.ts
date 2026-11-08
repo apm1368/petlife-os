@@ -17,6 +17,8 @@ import { SellerOrderController, SellerDashboardController } from "./seller-order
 import { SellerOrderService } from "./seller-order.service";
 import { SellerDashboardService } from "./seller-dashboard.service";
 import { SellerPromotionController } from "./seller-promotion.controller";
+import { SellerCatalogRequestController } from "./seller-catalog-request.controller";
+import { SellerCatalogRequestService } from "./seller-catalog-request.service";
 import { PromotionsModule } from "../commerce/promotions/promotions.module";
 import { OrdersModule } from "../commerce/orders/orders.module";
 
@@ -28,6 +30,7 @@ import { OrdersModule } from "../commerce/orders/orders.module";
     SellerOrganizationController,
     SellerTeamController,
     SellerOfferController,
+    SellerCatalogRequestController,
     SellerInventoryController,
     SellerOrderController,
     SellerDashboardController,
@@ -35,7 +38,7 @@ import { OrdersModule } from "../commerce/orders/orders.module";
     SellerSettlementReadController,
     SellerPromotionController,
   ],
-  providers: [SellerAccessService, SellerAuthGuard, SellerOrganizationService, SellerTeamService, SellerOfferService, SellerInventoryService, SellerOrderService, SellerDashboardService],
+  providers: [SellerAccessService, SellerAuthGuard, SellerOrganizationService, SellerTeamService, SellerOfferService, SellerCatalogRequestService, SellerInventoryService, SellerOrderService, SellerDashboardService],
   exports: [SellerAccessService, SellerAuthGuard],
 })
 export class SellerOsModule {}

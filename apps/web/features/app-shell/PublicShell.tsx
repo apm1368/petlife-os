@@ -8,6 +8,7 @@ import { Avatar, Button } from "@petlife/ui";
 import { useAppBootstrap } from "@/hooks/use-app-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
+import { DisplayModeToggle } from "@/features/display-mode/DisplayModeToggle";
 import { LocaleSwitcher } from "@/features/locale/LocaleSwitcher";
 import { PublicPrimaryNavigation } from "@/features/navigation/PublicPrimaryNavigation";
 import { useLocalPreview } from "@/features/local-preview/LocalPreviewGate";
@@ -47,6 +48,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
         <div className="public-header-actions flex items-center gap-2">
           <LocaleSwitcher />
           <ThemeToggle />
+          <DisplayModeToggle locale={locale as "fa" | "en"} compact />
           {preview ? <Link href={`/${locale}/home`}>{locale === "fa" ? "ورود به برنامه" : "Open app"}</Link> : status === "authenticated" && user ? (
             <Link href={`/${locale}/home`}>
               <Avatar name={user.displayName} src={user.avatarUrl} size="sm" />

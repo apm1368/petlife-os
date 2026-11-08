@@ -1222,6 +1222,20 @@ export class UsernameTakenException extends ApiException {
   }
 }
 
+/** A phone cannot be accepted until it normalizes to a supported Iranian mobile number. */
+export class InvalidRegistrationPhoneException extends ApiException {
+  constructor() {
+    super("PHONE_INVALID", "Enter a valid mobile number.", HttpStatus.BAD_REQUEST);
+  }
+}
+
+/** Keeps registration responses non-enumerating when a phone is already attached to another account. */
+export class PhoneAlreadyRegisteredException extends ApiException {
+  constructor() {
+    super("REGISTRATION_UNAVAILABLE", "An account could not be created with those details.", HttpStatus.CONFLICT);
+  }
+}
+
 /** class-validator already rejects an obviously-too-short password at the DTO layer; this is for the rarer case a caller bypasses that (e.g. a future non-HTTP caller). */
 export class WeakPasswordException extends ApiException {
   constructor() {
@@ -2466,6 +2480,12 @@ export class AlreadyHouseholdMemberException extends ApiException {
       "This person is already a member of your household.",
       HttpStatus.CONFLICT,
     );
+  }
+}
+
+export class HouseholdInvitationAlreadyPendingException extends ApiException {
+  constructor() {
+    super("HOUSEHOLD_INVITATION_ALREADY_PENDING", "An active invitation or membership request already exists for this contact.", HttpStatus.CONFLICT);
   }
 }
 

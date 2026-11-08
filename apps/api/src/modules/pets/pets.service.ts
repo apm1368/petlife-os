@@ -179,7 +179,7 @@ export class PetsService {
         });
         await this.events.publish(
           "PetProfileUpdated",
-          { petId: id },
+          { petId: id, changedFields: Object.keys(dto).sort() },
           { tx, aggregateType: "Pet", aggregateId: id },
         );
         return pet;

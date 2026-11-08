@@ -4,6 +4,9 @@ import { AdminTravelService } from "./travel/admin-travel.service";
 import { TravelMarketplaceModule } from "../travel-marketplace/travel-marketplace.module";
 import { AdminCommerceController } from "./commerce/admin-commerce.controller";
 import { AdminCommerceService } from "./commerce/admin-commerce.service";
+import { SellerCatalogReviewService } from "./commerce/seller-catalog-review.service";
+import { CatalogImportService } from "./commerce/catalog-import.service";
+import { CatalogImportWorker } from "./commerce/catalog-import.worker";
 import { PromotionsModule } from "../commerce/promotions/promotions.module";
 import { Module } from "@nestjs/common";
 import { SupportOpsService } from "./support/support-ops.service";
@@ -203,6 +206,9 @@ import { AdminReviewModerationService } from "./reviews/admin-review-moderation.
     AdminLostPetService,
     AdminTravelService,
     AdminCommerceService,
+    SellerCatalogReviewService,
+    CatalogImportService,
+    CatalogImportWorker,
     AdminAccessService,
     AdminAuthGuard,
     AdminAuditLogService,

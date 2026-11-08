@@ -19,7 +19,7 @@ function detail(overrides: Partial<PublicArticleDetailDto> = {}): PublicArticleD
     title: "First Post",
     excerpt: "An excerpt",
     coverMediaAsset: null,
-    author: { id: "author-1", name: "Jane Vet", bio: null, avatarMediaAsset: null, createdAt: "2025-01-01T00:00:00.000Z", updatedAt: "2025-01-01T00:00:00.000Z" },
+    author: { id: "author-1", name: "Jane Vet", bio: null, avatarMediaAsset: null },
     category: { id: "cat-1", name: "Nutrition", slug: "nutrition", description: null },
     tags: [{ id: "tag-1", name: "Puppies", slug: "puppies" }],
     publishedAt: "2026-01-01T00:00:00.000Z",
