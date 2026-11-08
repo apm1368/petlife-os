@@ -8,6 +8,40 @@ The personal account settings page (`PersonalSettingsView`) now has German and S
 
 Next slices: remaining account settings; customer pet/health/care calendar; commerce and provider/seller workflows; support/legal; travel/community/partner; backoffice and notifications. Each slice must include locale-aware date/number formats where relevant, route-preserving language switching, accessibility, tests and a missing-key check before it is reported complete. Account language persistence remains covered by the existing #118 API/database implementation; this batch does not alter that contract.
 
+## Route/component coverage matrix (owner correction: full-page, not header-only)
+
+Status is per page family, not per shared header. `COMPLETE` means all application-owned states in that page family were translated and tested. User-entered and third-party content remains original; it is not silently translated. A family marked `PARTIAL` must not be advertised as localized.
+
+| Page family / representative routes | fa | en | de | es | States verified / outstanding |
+|---|---|---|---|---|---|
+| Public landing `/[locale]` | Complete | Complete | Complete | Complete | Main public sections and language-aware navigation; HERO composition/image unchanged. |
+| Member dashboard `/[locale]/home` | Complete | Complete | Complete | Complete | Dashboard body, cards, empty/loading/failure states, access error, retry, event/status labels, locale dates/numbers and dashboard links tested. User-entered names/titles and provider/plan content are preserved; plan name is explicitly identified as English in de/es because the source has only fa/en fields. |
+| Global navigation and account navigation | Complete | Complete | Complete | Complete | Desktop/mobile navigation tests exist; dashboard link locale remains in the current route. |
+| Authentication and registration | Complete | Complete | Complete | Complete | Existing auth page tests cover translated copy; external SMS delivery/templates remain provider-dependent and are not claimed active. |
+| Household membership and invitations | Complete | Complete | Complete | Complete | Existing household copy and focused tests cover members, invite, permissions, confirmations and history. |
+| Personal account settings `/profile/settings/personal` | Complete | Complete | Complete | Complete | Existing #119 translation slice covers loading/save/contact/appearance states; verification delivery remains external. |
+| Other account settings and profile | Partial | Partial | Partial | Partial | Some settings are localized; route-by-route form/dialog/error coverage remains open. |
+| Pet profile, health records, documents, care calendar | Partial | Partial | Partial | Partial | Member dashboard identity/event/status labels now support all four; full profile/health/document/calendar pages and their forms/states remain open. |
+| Shop, product detail, cart/checkout, seller | Partial | Partial | Partial | Partial | Full catalog and seller workflows are not represented as translated by dashboard/link copy; page content, validation and transaction states remain open. |
+| Bookings, provider and clinical | Partial | Partial | Partial | Partial | Dashboard event/date/status vocabulary is translated; booking/provider/clinical screens and dialogs are not yet fully audited. |
+| Travel and accommodation | Partial | Partial | Partial | Partial | Dashboard links and trip summary labels are localized; marketplace/booking details and stale/error states remain open. |
+| Community, shelter and animal support | Partial | Partial | Partial | Partial | Full feed, forms, moderation and empty/error states remain open. |
+| Help Center, support and legal | Partial | Partial | Partial | Partial | Help/support workflow and published legal copy require separate verification; legal body content must remain authoritative, not machine-fabricated. |
+| Admin, backoffice and ERP | Partial | Partial | Partial | Partial | Shared navigation is localized; tables, charts, permissions, operational dialogs and state copy remain open. |
+| Notifications and message templates | Partial | Partial | Partial | Partial | In-app notification UI is still being audited. German/Spanish SMS templates and provider delivery are not implemented and must not be simulated. |
+
+### Dashboard batch on `codex/i18n-dashboard`
+
+- `MemberHomeView` and `GlassMemberHome` now retain the selected route locale instead of coercing every non-English locale to Persian. All dashboard-owned copy, welcome/account area, dashboard navigation, care/health summaries, action labels, empty/error messages, and recovery controls have German and Spanish entries.
+- Shared dashboard presentation helpers now localize system-derived care/event names, severity, species, pet age, date/number/currency display and common order/subscription statuses in fa/en/de/es. Persian remains RTL/Jalali; de/es use LTR and locale-specific Gregorian formatting.
+- The shared retry/access error page (`SystemState`) now has German and Spanish copy for its supported states, preventing a Persian or English-only error page when the dashboard's primary request fails.
+- Content boundary: pet names, owner-created reminder/memory titles, provider/city names and catalog-managed plan title remain source content. The plan model supplies only Persian/English names, so German/Spanish dashboard labels explicitly say the plan name is shown in English. No translated version is fabricated.
+- Focused tests cover populated and empty dashboard states, locale-specific labels/date output, no known Persian UI fallback in de/es, shared error/retry copy, calendar date output and currency/status formatting. This is a dashboard slice only; it does not localize linked pages or mark those page families complete.
+
+### Audit rule
+
+Before marking any additional route complete, record its route/component, all four locale catalogs, and tested loading/empty/error/offline/forbidden/dialog/success states. The dashboard result is not evidence that a linked pet, shop, booking, or admin page is localized. Missing DE/ES application strings must be added explicitly; English or Persian fallback is not a completion criterion. The presence of authored content in another language is a content-provenance question, not a translation key.
+
 ## Account settings follow-up (PR #119)
 
 - `PersonalSettingsView` has explicit German and Spanish translations for its user-facing settings, loading/error/success, appearance, contact verification status and contact-change/OTP steps. Tests assert translated labels and the unverified-contact state in both locales.
