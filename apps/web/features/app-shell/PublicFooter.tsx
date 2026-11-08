@@ -18,6 +18,9 @@ export function PublicFooter() {
       </div>
       <ul>
         <li><Link href={`/${locale}/contact`}>{t("link")}</Link></li>
+        <li><Link href={`/${locale}/help`}>{locale === "fa" ? "مرکز راهنما" : "Help Center"}</Link></li>
+        <li><Link href={`/${locale}/legal`}>{locale === "fa" ? "اسناد و سیاست‌ها" : "Policies & Legal"}</Link></li>
+        <li><Link href={`/${locale}/status`}>{locale === "fa" ? "وضعیت سامانه" : "System status"}</Link></li>
         {copy.groups.flatMap((group) => group.links).map((link) => (
           <li key={link.href}><Link href={`/${locale}${link.href}`}>{link.label}</Link></li>
         ))}
