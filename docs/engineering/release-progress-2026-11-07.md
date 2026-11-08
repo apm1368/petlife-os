@@ -86,17 +86,53 @@
 - Memorial source-image and CDN privacy remain unverified because production bucket/CDN configuration is not available read-only. #110→#111 and #113→#114 remain unmerged dependencies; landing overlap #115/#116/#117 remains review-blocked. No release or retargeting was performed.
 - No feature is `LIVE_VERIFIED` beyond the currently deployed baseline; the localization PRs have not been deployed. Exact release blocker: qualified review/branch protection, first #107 due to production demo rows, then owner-approved dependency order for the remaining PRs.
 
-## Full-page localization continuation — 2026-11-08 16:30 UTC
+## Current checkpoint — 2026-11-08 20:05 UTC
 
-- Current main before this batch: `f64e794cf9cb1d32273cedcd750106a42c51a528`, created by merging provider discovery/profile localization PR #149 after exact-head CI passed (8 focused tests also passed locally). Its deployment run `42499967855` is still in progress; production remains at `afefa93237e687a2613a88dd0e5d9fb5457aa68f` (`github-42497787994-1`) at this checkpoint.
-- #150 booking-creation localization is synced to #149's merge. Booking-flow and care/calendar regressions pass (24 tests); web typecheck/lint passed before and after the sync. New hosted CI is required on the sync head before any merge.
-- #151 travel results and #152 travel hub/trip surfaces, #158 household controls and #159 pet lifecycle all passed their exact-head CI before #149 moved main. Their current bases must be rechecked; sync/retest where stale, never infer a green check from the previous head.
-- Production browser inspection at 390px and 1440px found `/de` and `/es` returning HTTP 200 and LTR after a transient deploy-window Spanish 500. At 390px the mobile header overflowed by 33px (de) and 43px (es); memorial copy and sign-in header text were English. PR #160 (`9e33c483`) addresses the header, memorial translations and contrast without changing the approved HERO image/composition. Its hosted CI is pending; post-fix browser verification is not yet possible.
-- Landing correction tests: 18 pass; typecheck, lint, JSON parsing and `git diff --check` pass locally. Disk has about 259 MiB free; no local production build was attempted. Account-authenticated pages have not been visually inspected in a browser.
-- Local payment work remains preserved in its separate original branch/worktree. Memorial original-source/CDN privacy remains unverified. No German/Spanish SMS templates or delivery are claimed.
-- Live release status: notification-center localization #148 is deployed at `afefa932` but has not been behaviorally rechecked yet; provider localization #149 is merged and awaiting its deployment. Landing header/memorial correction #160 is open/pending CI. The localization matrix remains PARTIAL for all product families not explicitly covered and visually verified.
+- GitHub `main` and production `/api/health/version` both report `315523247bc6bf837d8763f5a31542cf81a695db`; deployment `github-42516946217-1` is serving that SHA. This verifies the deployment version, not authenticated page-family behavior.
+- PR #160 was based on older main and GitHub reported `DIRTY`; hosted CI passed only on old head `758f8101`. Its local branch now contains a merge of current main. German/Spanish catalogs were merged by distinct keys with no value conflicts; 21 focused tests, TypeScript and targeted source lint pass locally. Exact-head hosted CI remains required before any merge.
+- PR #152 is at `f7db2c5c` with CI `42518146302` running. PR #165 is at `6baf4221` with CI `42518099033` running. Both remain PARTIAL pending the exact-head CI and responsive/authenticated checks.
+- Disk free space is 107 MiB. No production build/install ran. Payment worktrees were not visible and were untouched; memorial original-image/CDN access and German/Spanish SMS templates remain unverified/unimplemented. The approved landing HERO is unchanged.
 
-## Landing localization sync — 2026-11-08 17:05 UTC
+## Full-page localization correction — 2026-11-08 17:20 UTC
 
-- PR #160 is synchronized with current main through #150 (`85c91982`) at the pushed merge commit. Its 18 focused landing/memorial tests, typecheck and lint passed before the sync; rerun them on the merge head and wait for exact-head CI. Existing HERO artwork/composition was untouched.
-- Production before this sync still showed English memorial/header strings and 390px overflow. Do not mark fixed until PR #160 merges, deploys, and both locales are rechecked at mobile/desktop sizes.
+### Historical checkpoint: before latest main sync
+
+- Current main before this batch: `f64e794cf9cb1d32273cedcd750106a42c51a528`, created by merging provider discovery/profile localization PR #149 after exact-head CI passed (8 focused tests also passed locally). Its deployment run `42499967855` was still in progress; production remained at `afefa93237e687a2613a88dd0e5d9fb5457aa68f` (`github-42497787994-1`) at that checkpoint.
+- #150 booking-creation localization was synced to #149's merge. Booking-flow and care/calendar regressions passed (24 tests); web typecheck/lint passed before and after the sync. New hosted CI was required on the sync head before any merge.
+- #151 travel results and #152 trip surfaces, #158 household controls and #159 pet lifecycle had passed exact-head CI before #149 moved main. Their bases required recheck/sync; old green checks were not reused.
+- Browser inspection at 390px/1440px found mobile-header overflow and English memorial/sign-in copy; PR #160 addressed those without changing the approved HERO. Account-authenticated pages were not inspected.
+- At that checkpoint, payment work was preserved and memorial source-image/CDN privacy remained unverified. No German/Spanish SMS templates or delivery were claimed.
+
+### Household localization sync — historical checkpoint, 2026-11-08 17:00 UTC
+
+- PR #158 included main through #150 (`85c91982`); household invitation and pet-access tests passed (16 total), with web typecheck/lint and diff check. Hosted CI was pending on that synchronized head.
+- Household routes remained PARTIAL. Browser/device verification and other lifecycle states were open; user-entered data was not translated.
+
+### Current full-page localization and release status
+
+- Main is `4efbcf26` after #161 merged through the normal squash path. Production still reports `5cdde4a44d98bb7e345cf6ffd43ae8d608be5947`; #161 deploy run `42505282261` is in progress. Production readiness is healthy.
+- #151 is LIVE_VERIFIED for its tested public travel search results: deployment `42503512219` completed, production reports `5cdde4a4`, and live browser checks at 390px/1440px found German/Spanish LTR pages with no horizontal overflow and translated search content. This does not verify live inventory or all travel pages.
+- #161 exact-head CI passed and it merged as `4efbcf26`; the services overview is not live-verified until its deployment completes and the route is rechecked. Before deployment, `/de/services` and `/es/services` were confirmed English-only.
+- #162 is open from `codex/i18n-public-shell` at head `f70abf48`, base `main`; hosted CI run `42505511724` is in progress. Seven focused tests, web typecheck/lint, JSON parsing, `publicNavigation` locale-key parity and diff check pass locally.
+- Current public browser inspection also found the public navigation/login/footer are still English in de/es; the new shell branch addresses that. Account-authenticated production pages remain uninspected. Several product families and error/empty/dialog states remain PARTIAL.
+- Disk is about 253 MiB free; no local production build attempted. No payment worktree was present in this workspace's worktree listing and no payment files were modified. Memorial source-image/CDN privacy remains unverified; German/Spanish SMS delivery/templates are not claimed.
+
+## Full-page localization continuation — 2026-11-08
+
+- `main` is `d48ebdda179926e74fbb69dba2e48d06807269f4` after #163 merged. Its deployment workflow is still running after CI succeeded; production reports `aacafaae73f811e9c586aad69252d9d6a2e87422`, with database and Redis ready. Health/document routes are not production-live yet.
+- PR #162 public shell navigation/footer passed exact-head CI and was deployed. Production browser checks on `/de/services` and `/es/services` at 390px/1440px verified translated service body/nav/footer, correct `lang`, `dir=ltr`, HTTP 200 and no horizontal overflow. Authenticated pages were not included. The landing HERO was unchanged.
+- PR #163 merged at `d48ebdda`; it localizes basic health overview/lists/vaccination views and basic medical-document list/detail in fa/en/de/es. Its final head had 85 focused tests, type build, web typecheck/lint and catalog/diff checks. Authored medical content stays unchanged; advanced clinical/timeline/memories/activity/expenses remain PARTIAL. Authenticated production visual verification is outstanding.
+- PR #158 and #159 are being synchronized with #163. #158's current branch head is `9adfc025`; its invitation/pet-access slice passed 16 focused tests plus web typecheck/lint on the updated tree. #159's merge exposed one duplicate `RouteLocale` import in a shared status hook; it was removed, and 9 lifecycle/status tests plus web typecheck/lint passed. New hosted CI must pass on their pushed final heads before either is considered current/green. Both remain PARTIAL pending responsive checks and broader states.
+- PR #164 adds fa/en/de/es admin operations-dashboard and search copy; open at `e25af3df`, exact-head CI pending, not merged or live.
+- PR #152's earlier trip setup sync produced locale-catalog/test/docs conflicts and was safely aborted. Preserve that worktree for deliberate resolution.
+- Disk remains about 251 MiB free; no local production build attempted. No payment worktree was visible and no payment files were modified. Memorial source-image/CDN behavior remains unverified; German/Spanish SMS templates/delivery are not claimed.
+
+## Current checkpoint — 2026-11-08 after #158
+
+- GitHub `main` is `0b8c4c38d63018d98050e68f4f35c5940810afbb` (PR #158 merged; #164 is an ancestor). Production `/api/health/version` reports `c23227cabf0bcfd7dca4a98265a4c1692e016bef`, deployment `github-42513612720-1`; production readiness reported healthy. Main is ahead of production, so #158 household controls are not LIVE_VERIFIED.
+- PR #164 is merged and present on production at `c23227c`; its exact-head CI passed. Dashboard and operational-search translations have seven focused tests, but authenticated production rendering is not verified. #158 is merged at `0b8c4c3`; its current household UI is not yet production-verified.
+- PR #159 remains open at `e81a55e`, base `main`; its last green run applies only to old head `37918a6`. The sync with #158 is committed/pushed; 9 lifecycle/status tests and TypeScript pass, and fresh hosted CI is in progress.
+- PR #152 remains open at `dee8161`, base `main`. Its old green run was for `35b0fc6`; after the main sync, 9 travel-focused suites (51 tests), TypeScript and catalog parsing pass locally. Fresh hosted CI is pending.
+- An independent clinic-notes UI localization slice exists uncommitted in `/workspace/i18n-clinic-notes` based on ancestor `c23227c`. Tests/typecheck/lint passed before syncing; no PR has been opened. Account/clinic-authenticated visual checks remain outstanding.
+- Current filesystem free space is approximately 113 MiB. No cleanable files were removed. Payment worktrees were not present in this environment's worktree listing and remain untouched; do not infer they were deleted.
+- The dashboard's German/Spanish page status remains PARTIAL pending authenticated responsive verification. The pet lifecycle, household and travel pages remain PARTIAL. Memorial original-source/CDN privacy and German/Spanish SMS templates/delivery remain unverified/unimplemented. No new feature is LIVE_VERIFIED from this checkpoint.
