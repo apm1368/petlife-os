@@ -68,5 +68,23 @@
       "passwordMismatch": "Las contraseñas no coinciden.",
       "genericError": "No se pudo cambiar la contraseña. Inténtalo de nuevo."
     }
+  },
+  "consentHistory": {
+    "title": "Historial de consentimientos",
+    "intro": "Aceptaciones y revocaciones registradas en tu cuenta.",
+    "open": "Mostrar historial",
+    "close": "Ocultar historial",
+    "loadFailed": "No se pudo cargar el historial.",
+    "retry": "Reintentar",
+    "loading": "Cargando…",
+    "currentVersion": "Versión actual",
+    "empty": "No hay consentimientos registrados.",
+    "version": "Versión",
+    "accepted": "Aceptado el {date}",
+    "withdrawn": "Revocado el {date}",
+    "otherSource": "Registrado en la cuenta",
+    "limit": "Se muestran hasta {limit, number} eventos recientes y versiones anteriores guardadas sin eventos registrados. Esta sección no modifica tus consentimientos.",
+    "kinds": {"TERMS": "Condiciones de uso", "PRIVACY": "Privacidad", "MARKETING": "Mensajes comerciales"},
+    "sources": {"PRIVACY_CENTER": "Registrado en el centro de privacidad", "LEGACY_RECORD": "Estado guardado anteriormente; el historial completo de eventos no está disponible.", "ONBOARDING": "Registrado durante el alta"}
   }
 }
