@@ -58,8 +58,8 @@ Status is per page family, not per shared header. `COMPLETE` means all applicati
 | Community, shelter and animal support | Partial | Partial | Partial | Partial | Full feed, forms, moderation and empty/error states remain open. |
 | Help Center, support and legal | Partial | Partial | Partial | Partial | Help/support workflow and published legal copy require separate verification; legal body content must remain authoritative, not machine-fabricated. |
 | Admin, backoffice and ERP | Partial | Partial | Partial | Partial | Shared navigation is localized; tables, charts, permissions, operational dialogs and state copy remain open. |
-| Admin audit `/[locale]/admin/audit` and shared admin shell | Partial | Partial | Partial | Partial | Audit labels, empty/loading/error/retry, role/access shell, navigation groups and links have 19 focused tests; responsive browser inspection and fresh CI after shop-base synchronization remain pending. Other admin routes remain partial. |
-| Notifications and message templates | Partial | Partial | Partial | Partial | In-app notification UI is still being audited. German/Spanish SMS templates and provider delivery are not implemented and must not be simulated. |
+| Admin audit `/[locale]/admin/audit` and shared admin shell | Partial | Partial | Partial | Partial | PR #156 merged to main at `b0ec95c4`; CI passed on its exact head. Audit labels, empty/loading/error/retry, role/access shell, navigation groups and links have 19 focused tests. Responsive inspection remains pending; other admin routes remain partial. |
+| Notifications and message templates | Partial | Partial | Partial | Partial | PR #148 translates notification-center/preferences chrome, controls and timestamps; synchronized head CI is pending. Server-provided titles/bodies stay unchanged; backend errors and other surfaces remain partial. German/Spanish SMS templates and provider delivery are not implemented or simulated. |
 
 ### Dashboard batch on `codex/i18n-dashboard`
 
