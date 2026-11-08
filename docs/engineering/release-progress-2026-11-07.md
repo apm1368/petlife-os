@@ -88,9 +88,9 @@
 
 ## Full-page localization correction — 2026-11-08 17:20 UTC
 
-- Main is `4efbcf26` after #161 merged through the normal squash path. Production remains `5cdde4a44d98bb7e345cf6ffd43ae8d608be5947`; the deploy for #161 (`42505282261`) is still in progress. Production readiness is healthy.
-- #151 is LIVE_VERIFIED for its tested public travel search results: deployment `42503512219` completed, production reports `5cdde4a4`, and a live browser check at 390px/1440px found German/Spanish LTR pages with no horizontal overflow and localized search copy. This does not verify live inventory or all travel pages.
-- #161 exact-head CI passed and it merged as `4efbcf26`; the services-overview body is not live-verified until deployment completes and the route is checked in production. Before deploy, `/de/services` and `/es/services` were confirmed English-only.
-- The separate `codex/i18n-public-shell` branch has seven focused tests, web typecheck/lint and four-locale message-key parity passing locally. It is now syncing to main; run checks again and obtain fresh hosted CI before merging.
+- Main is `4efbcf26` after #161 merged through the normal squash path. Production still reports `5cdde4a44d98bb7e345cf6ffd43ae8d608be5947`; #161 deploy run `42505282261` is in progress. Production readiness is healthy.
+- #151 is LIVE_VERIFIED for its tested public travel search results: deployment `42503512219` completed, production reports `5cdde4a4`, and live browser checks at 390px/1440px found German/Spanish LTR pages with no horizontal overflow and translated search content. This does not verify live inventory or all travel pages.
+- #161 exact-head CI passed and it merged as `4efbcf26`; the services overview is not live-verified until its deployment completes and the route is rechecked. Before deployment, `/de/services` and `/es/services` were confirmed English-only.
+- #162 is open from `codex/i18n-public-shell` at head `f70abf48`, base `main`; hosted CI run `42505511724` is in progress. Seven focused tests, web typecheck/lint, JSON parsing, `publicNavigation` locale-key parity and diff check pass locally.
 - Current public browser inspection also found the public navigation/login/footer are still English in de/es; the new shell branch addresses that. Account-authenticated production pages remain uninspected. Several product families and error/empty/dialog states remain PARTIAL.
-- Disk is about 254 MiB free; no local production build attempted. No payment worktree was present in this workspace's worktree listing and no payment files were modified. Memorial source-image/CDN privacy remains unverified; German/Spanish SMS delivery/templates are not claimed.
+- Disk is about 253 MiB free; no local production build attempted. No payment worktree was present in this workspace's worktree listing and no payment files were modified. Memorial source-image/CDN privacy remains unverified; German/Spanish SMS delivery/templates are not claimed.
