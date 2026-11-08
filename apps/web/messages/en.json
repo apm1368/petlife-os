@@ -750,6 +750,15 @@
     "explore": {
       "title": "Explore Services",
       "subtitle": "For {name}",
+      "eyebrow": "Verified professionals, in one place",
+      "heading": "Professional care, near you",
+      "description": "Compare services by open times, area, your pet's needs and experience, then book in a few steps.",
+      "searchLabel": "Search services",
+      "searchPlaceholder": "What service do you need?",
+      "searchButton": "Find care",
+      "chooseService": "Choose a service",
+      "allProvidersIntro": "See every provider at once:",
+      "allServices": "All services",
       "category": {
         "VET": "Veterinary care",
         "GROOMING": "Grooming",
@@ -5202,6 +5211,18 @@
       "CUSTOM": "Custom interval"
     }
   },
+  "travelResults": {
+    "allDestinations": "All destinations", "anyDates": "Any dates", "cityHeading": "Stays in {city}", "defaultHeading": "Pet-friendly stays", "editSearch": "Edit search",
+    "datesNote": "Add check-in and check-out dates to see whole-stay totals and availability reported by the listing service.", "filters": "Filters", "sort": "Sort", "view": "View", "list": "List", "map": "Map",
+    "sortOptions": { "RECOMMENDED": "Recommended", "BEST_PET_MATCH": "Best pet match", "PRICE_ASC": "Lowest price", "PRICE_DESC": "Highest price", "RATING": "Top rated" },
+    "bestMatchHelp": "Best pet match shows stays whose stated rules fit first, followed by stays needing more information; each group is sorted by rating and price.",
+    "mapUnavailable": "The map is not available right now", "mapUnavailableHelp": "No map service is connected yet. The same results are listed below, with distances shown where known.",
+    "loadFailed": "Results could not be loaded", "loadError": "Check your connection and try again.", "retry": "Try again", "emptyTitle": "No stays match these choices", "emptyDescription": "Try other dates or fewer filters. Stays reported as full for these dates, or whose stated rules clearly do not fit your pet, are not shown.", "clearFilters": "Clear filters",
+    "resultCount": "{count, plural, =0 {No stays} one {# stay} other {# stays}}", "pages": "Pages", "previous": "Previous", "next": "Next",
+    "compare": "Compare", "compareSelected": "{selected, number} of 3 selected", "clear": "Clear", "pickAtLeast": "Pick at least 2",
+    "conditions": "Conditions", "freeCancellation": "Free cancellation", "noPetFee": "No pet fee", "instantBooking": "Instant booking", "verifiedOnly": "Verified only", "stayType": "Stay type", "maximumTotal": "Maximum total (Toman)", "minimumRating": "Minimum rating", "any": "Any", "amenities": "Amenities", "applyFilters": "Apply filters",
+    "card": { "noPhoto": "No photo provided", "save": "Save", "removeSaved": "Remove from saved", "verified": "Verified", "petRulesUnknown": "Pet rules: not specified", "dogs": "Dogs", "cats": "Cats", "and": "and", "upToWeight": "up to {weight, number} kg", "noPetFee": "no pet fee", "petFee": "pet fee {amount}", "totalStay": "Total for {count, plural, one {# night} other {# nights}}", "includingPetFee": "including pet fee", "freeCancellation": "Free cancellation available", "fromNightly": "From {amount} / night", "requestToBook": "Request to book", "instantBooking": "Instant booking", "compare": "Compare", "fit": "Fits the stated pet rules", "possibleConflict": "May not fit the pet rules", "moreInfo": "More information needed", "distanceKm": "{distance} km" }
+  },
   "externalTravel": {
     "title": "Stays from external sources",
     "detailTitle": "External stay details",
@@ -6689,5 +6710,38 @@
       "noOpenTimes": "No open times",
       "full": "Full"
     }
+  },
+  "publicNavigation": {
+    "main": "Primary navigation",
+    "explore": "Explore",
+    "closeMenu": "Close menu",
+    "quickAccess": "Quick access",
+    "openApp": "Open app",
+    "logIn": "Log in",
+    "home": "Home",
+    "health": "Health",
+    "services": "Services",
+    "shop": "Shop",
+    "memories": "Memories",
+    "healthAndVet": "Health and veterinary care",
+    "places": "Places",
+    "travel": "Travel",
+    "insurance": "Insurance",
+    "animalSupport": "Animal support",
+    "community": "Community",
+    "blog": "Blog",
+    "productSections": "Product sections",
+    "dashboard": "Dashboard",
+    "myPets": "My pets",
+    "activePet": "Active pet",
+    "care": "Care",
+    "careCalendar": "Care calendar",
+    "cart": "Cart",
+    "checkout": "Checkout",
+    "orders": "Orders",
+    "bookings": "Bookings",
+    "notifications": "Notifications",
+    "notificationPreferences": "Notification preferences",
+    "support": "Support"
   }
 }
