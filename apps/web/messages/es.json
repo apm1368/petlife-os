@@ -96,5 +96,23 @@
     "design": {
       "navLabel": "La tienda para tu mascota", "shop": "Tienda", "orders": "Mis pedidos", "repeat": "Entrega periódica", "favorites": "Productos guardados", "cart": "Carrito", "browse": "Explorar todos los productos", "filters": "Encuentra su próximo favorito", "filterHint": "Elige lo que mejor le va a tu compañero.", "allProducts": "Todos los productos", "applyFilters": "Mostrar productos", "repeatTitle": "Un poco de cuidado, una y otra vez.", "repeatDescription": "Planifica la próxima entrega de un producto apto. Tú decides cada pedido.", "repeatCta": "Explorar entregas periódicas", "viewProduct": "Ver producto", "summary": "Resumen del pedido", "cartStep": "Carrito", "checkoutStep": "Datos de pago", "completeStep": "Estado del pedido", "journey": "Progreso de compra", "categoryFailed": "No se pudieron cargar las categorías. Aún puedes buscar en el catálogo.", "loadFailed": "No se pudo cargar esta información. Inténtalo de nuevo.", "favoriteFailed": "No se pudieron actualizar los productos guardados. Inténtalo de nuevo.", "reviewsFailed": "No se pudieron cargar más reseñas. Inténtalo de nuevo.", "shopCredit": "Imagen de tienda: concepto fotorrealista generado por IA de OpenAI, recortado y recodificado. No es una tienda ni una fotografía real de producto.", "clearCart": "Vaciar carrito", "clearTitle": "¿Vaciar el carrito?", "clearHint": "Se quitarán todos los artículos de este carrito.", "clearConfirm": "Sí, vaciar carrito", "keepCart": "Conservar artículos", "editAddress": "Editar dirección seleccionada", "defaultAddress": "Dirección predeterminada del hogar", "editOptionalHint": "Al editar, los campos opcionales vacíos conservan sus valores actuales."
     }
+  },
+  "consentHistory": {
+    "title": "Historial de consentimientos",
+    "intro": "Aceptaciones y revocaciones registradas en tu cuenta.",
+    "open": "Mostrar historial",
+    "close": "Ocultar historial",
+    "loadFailed": "No se pudo cargar el historial.",
+    "retry": "Reintentar",
+    "loading": "Cargando…",
+    "currentVersion": "Versión actual",
+    "empty": "No hay consentimientos registrados.",
+    "version": "Versión",
+    "accepted": "Aceptado el {date}",
+    "withdrawn": "Revocado el {date}",
+    "otherSource": "Registrado en la cuenta",
+    "limit": "Se muestran hasta {limit, number} eventos recientes y versiones anteriores guardadas sin eventos registrados. Esta sección no modifica tus consentimientos.",
+    "kinds": {"TERMS": "Condiciones de uso", "PRIVACY": "Privacidad", "MARKETING": "Mensajes comerciales"},
+    "sources": {"PRIVACY_CENTER": "Registrado en el centro de privacidad", "LEGACY_RECORD": "Estado guardado anteriormente; el historial completo de eventos no está disponible.", "ONBOARDING": "Registrado durante el alta"}
   }
 }

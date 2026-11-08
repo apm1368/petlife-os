@@ -53,4 +53,16 @@ describe("PersonalSettingsView — account locale and theme preferences", () => 
     await waitFor(() => expect(assign).toHaveBeenCalledWith(`/${targetLocale}/profile/personal`));
     expect(useThemeStore.getState().theme).toBe("LIGHT");
   });
+
+  it.each([
+    ["de", "Anzeigename", "Darstellung", "Kontaktwege", "E-Mail"],
+    ["es", "Nombre visible", "Aspecto", "Medios de contacto", "Correo"],
+  ] as const)("shows translated account settings and contact states in %s", async (locale, nameLabel, appearanceLabel, contactsHeading, emailLabel) => {
+    renderWithIntl(<PersonalSettingsView />, locale);
+    expect(await screen.findByLabelText(nameLabel)).toBeTruthy();
+    expect(screen.getByLabelText(appearanceLabel)).toBeTruthy();
+    expect(screen.getByRole("heading", { name: contactsHeading })).toBeTruthy();
+    expect(screen.getByText(emailLabel)).toBeTruthy();
+    expect(screen.getByText(locale === "de" ? "Nicht verifiziert" : "No verificado")).toBeTruthy();
+  });
 });
