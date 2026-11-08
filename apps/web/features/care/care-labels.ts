@@ -1,6 +1,19 @@
 /** Care reminder vocabulary shared by the Care Center and both calendars. */
 export const CARE_KINDS: Record<string, [string, string, string, string]> = {
-  VACCINATION:["واکسن","Vaccination","Impfung","Vacunación"], VET_VISIT:["ویزیت دامپزشک","Vet visit","Tierarztbesuch","Visita veterinaria"], LAB_TEST:["آزمایش","Lab test","Labortest","Análisis"], IMAGING:["تصویربرداری","Imaging","Bildgebung","Diagnóstico por imagen"], DENTAL:["دندان","Dental","Zahnbehandlung","Dental"], MEDICATION:["دارو","Medication","Medikament","Medicación"], MEDICATION_REFILL:["تهیه مجدد دارو","Medication refill","Medikament nachfüllen","Renovar medicación"], DEWORMING:["ضدانگل داخلی","Deworming","Entwurmung","Desparasitación"], PARASITE_PREVENTION:["پیشگیری از انگل","Parasite prevention","Parasitenschutz","Prevención de parásitos"], FOLLOW_UP:["پیگیری","Follow-up","Nachkontrolle","Seguimiento"], WEIGHT_CHECK:["کنترل وزن","Weight check","Gewichtskontrolle","Control de peso"], DOCUMENT_EXPIRY:["انقضای سند","Document expiry","Dokument läuft ab","Vencimiento del documento"], GROOMING:["آرایش و نظافت","Grooming","Fellpflege","Peluquería"], CUSTOM:["شخصی","Custom","Benutzerdefiniert","Personalizado"]
+  VACCINATION: ["واکسن", "Vaccination", "Impfung", "Vacunación"],
+  VET_VISIT: ["ویزیت دامپزشک", "Vet visit", "Tierarztbesuch", "Visita veterinaria"],
+  LAB_TEST: ["آزمایش", "Lab test", "Labortest", "Análisis de laboratorio"],
+  IMAGING: ["تصویربرداری", "Imaging", "Bildgebung", "Diagnóstico por imagen"],
+  DENTAL: ["دندان", "Dental", "Zahnbehandlung", "Dental"],
+  MEDICATION: ["دارو", "Medication", "Medikament", "Medicamento"],
+  MEDICATION_REFILL: ["تهیه مجدد دارو", "Medication refill", "Medikament nachfüllen", "Reposición de medicamento"],
+  DEWORMING: ["ضدانگل داخلی", "Deworming", "Entwurmung", "Desparasitación"],
+  PARASITE_PREVENTION: ["پیشگیری از انگل", "Parasite prevention", "Parasitenprophylaxe", "Prevención de parásitos"],
+  FOLLOW_UP: ["پیگیری", "Follow-up", "Nachkontrolle", "Seguimiento"],
+  WEIGHT_CHECK: ["کنترل وزن", "Weight check", "Gewichtskontrolle", "Control de peso"],
+  DOCUMENT_EXPIRY: ["انقضای سند", "Document expiry", "Dokumentablauf", "Vencimiento del documento"],
+  GROOMING: ["آرایش و نظافت", "Grooming", "Fellpflege", "Aseo"],
+  CUSTOM: ["شخصی", "Custom", "Benutzerdefiniert", "Personalizado"],
 };
 
 /**

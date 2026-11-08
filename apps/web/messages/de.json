@@ -97,6 +97,20 @@
       "navLabel": "Dein Tiershop", "shop": "Shop", "orders": "Meine Bestellungen", "repeat": "Wiederkehrende Lieferung", "favorites": "Gespeicherte Produkte", "cart": "Warenkorb", "browse": "Alle Produkte entdecken", "filters": "Finde den nächsten Favoriten", "filterHint": "Wähle, was zu deinem Tier passt.", "allProducts": "Alle Produkte", "applyFilters": "Produkte anzeigen", "repeatTitle": "Ein bisschen Fürsorge – immer wieder.", "repeatDescription": "Plane die nächste Lieferung eines geeigneten Produkts. Du behältst bei jeder Bestellung die Kontrolle.", "repeatCta": "Wiederkehrende Lieferung entdecken", "viewProduct": "Produkt ansehen", "summary": "Bestellübersicht", "cartStep": "Warenkorb", "checkoutStep": "Kassendetails", "completeStep": "Bestellstatus", "journey": "Kaufübersicht", "categoryFailed": "Kategorien konnten nicht geladen werden. Du kannst den Katalog weiterhin durchsuchen.", "loadFailed": "Diese Informationen konnten nicht geladen werden. Bitte versuche es erneut.", "favoriteFailed": "Gespeicherte Produkte konnten nicht aktualisiert werden. Bitte versuche es erneut.", "reviewsFailed": "Weitere Bewertungen konnten nicht geladen werden. Bitte versuche es erneut.", "shopCredit": "Shop-Motiv: KI-generiertes fotorealistisches Konzept von OpenAI; zugeschnitten und neu codiert. Kein echtes Geschäft und kein Produktfoto.", "clearCart": "Warenkorb leeren", "clearTitle": "Warenkorb leeren?", "clearHint": "Alle Artikel in diesem Warenkorb werden entfernt.", "clearConfirm": "Ja, Warenkorb leeren", "keepCart": "Artikel behalten", "editAddress": "Ausgewählte Adresse bearbeiten", "defaultAddress": "Standardadresse des Haushalts", "editOptionalHint": "Beim Bearbeiten behalten leere optionale Felder ihre bisherigen Werte."
     }
   },
+  "petOverview": {
+    "careUnavailable": "Pflegeerinnerungen konnten nicht geladen werden. Andere Einträge bleiben verfügbar; versuche es erneut, um die vollständige Liste abzurufen.",
+    "careIncomplete": "Pflegepunkte mit Handlungsbedarf und anstehende Pflege wurden noch nicht vollständig geladen."
+  },
+  "birthDateField": {
+    "calendar": "Kalender",
+    "jalali": "Jalali-Kalender",
+    "gregorian": "Gregorianischer Kalender",
+    "hint": "Beim Wechsel des Kalenders bleibt das ausgewählte Datum gleich.",
+    "optionalAge": "Geburtsdatum und Alter sind optional. Wenn sie unbekannt sind, kannst du fortfahren und sie später ergänzen.",
+    "day": "Tag",
+    "month": "Monat",
+    "year": "Jahr"
+  },
   "consentHistory": {
     "title": "Einwilligungsverlauf",
     "intro": "Gespeicherte Einwilligungen und Widerrufe für Ihr Konto.",
