@@ -4,9 +4,8 @@ import { statusLabel } from "@/lib/status/status-labels";
 
 /** Shared pet identity text — the pet header, the home hero and the pet list say the same thing. */
 type Locale = "fa" | "en" | "de" | "es";
-const localeIndex = (locale: Locale) => ({ fa: 0, en: 1, de: 2, es: 3 }[locale]);
-const intlLocale = (locale: Locale) => ({ fa: "fa-IR", en: "en-US", de: "de-DE", es: "es-ES" }[locale]);
-
+const localeIndex: Record<Locale, number> = { fa: 0, en: 1, de: 2, es: 3 };
+const intlLocale = (locale: Locale) => ({ fa: "fa-IR", en: "en-US", de: "de-DE", es: "es-ES" })[locale];
 export const SPECIES_LABELS: Record<string, [string, string, string, string]> = {
   DOG: ["سگ", "Dog", "Hund", "Perro"],
   CAT: ["گربه", "Cat", "Katze", "Gato"],
@@ -23,7 +22,7 @@ const SPECIES_SHORT: Record<string, [string, string, string, string]> = { RODENT
 
 export function speciesLabel(pet: Pick<PetDto, "species">, locale: Locale): string {
   const entry = SPECIES_SHORT[pet.species] ?? SPECIES_LABELS[pet.species];
-  return entry ? entry[localeIndex(locale)]! : ({ fa: "حیوان", en: "Pet", de: "Haustier", es: "Mascota" }[locale]);
+  return entry ? entry[localeIndex[locale]]! : ({ fa: "حیوان", en: "Pet", de: "Tier", es: "Mascota" }[locale]);
 }
 
 export function petAgeMonths(pet: Pick<PetDto, "birthDate" | "approximateAgeMonths">): number | null {
@@ -56,6 +55,6 @@ export function formatWeight(pet: Pick<PetDto, "latestWeightValue" | "latestWeig
 }
 
 /** The labels PetIdentity (UI package, no i18n) needs, in the UI language. */
-export function petIdentityLabels(pet: Pick<PetDto, "species" | "lifecycleStatus">, locale: "fa" | "en") {
-  return { active: locale === "fa" ? "فعال" : "Active", species: speciesLabel(pet, locale), lifecycle: statusLabel(pet.lifecycleStatus, locale, "lifecycle") };
+export function petIdentityLabels(pet: Pick<PetDto, "species" | "lifecycleStatus">, locale: Locale) {
+  return { active: ({ fa: "فعال", en: "Active", de: "Aktiv", es: "Activo" }[locale]), species: speciesLabel(pet, locale), lifecycle: statusLabel(pet.lifecycleStatus, locale, "lifecycle") };
 }

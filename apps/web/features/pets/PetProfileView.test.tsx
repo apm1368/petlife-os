@@ -38,6 +38,52 @@ describe("pet overview reads", () => {
     expect(screen.getByRole("link", { name: healthShortcut })).toBeTruthy();
   });
 
+  it.each([
+    ["fa", "بر اساس داده‌های ثبت‌شده، مورد اقدام‌پذیری پیدا نشد.", "رویداد زمان‌داری برای آینده ثبت نشده است.", "هنوز رویداد سلامت قابل نمایش ثبت نشده است.", "هنوز فعالیتی برای این حیوان ثبت نشده است.", "هنوز خاطره‌ای ثبت نشده است."],
+    ["en", "No actionable item was found in the recorded data.", "No future dated event has been recorded.", "No health event is available yet.", "No activity has been recorded for this pet yet.", "No memory has been recorded yet."],
+    ["de", "In den gespeicherten Angaben wurde kein konkreter Handlungsbedarf gefunden.", "Es wurde kein zukünftiges Ereignis mit Datum erfasst.", "Es sind noch keine Gesundheitsereignisse verfügbar.", "Für dieses Haustier wurden noch keine Aktivitäten erfasst.", "Es wurde noch keine Erinnerung erfasst."],
+    ["es", "No se encontraron acciones pendientes en los datos registrados.", "No hay eventos futuros con fecha registrada.", "Todavía no hay eventos de salud disponibles.", "Todavía no se ha registrado actividad para esta mascota.", "Todavía no se ha registrado ningún recuerdo."],
+  ] as const)("renders all pet-overview empty states in %s", async (locale, noAttention, noUpcoming, noHealth, noActivity, noMemory) => {
+    const { container } = renderWithIntl(<PetProfileView petId="one" />, locale);
+    await screen.findByRole("heading", { name: locale === "fa" ? "نیازمند توجه" : locale === "en" ? "Needs attention" : locale === "de" ? "Erfordert Aufmerksamkeit" : "Requiere atención" });
+    expect(container.textContent).toContain(noAttention);
+    expect(container.textContent).toContain(noUpcoming);
+    expect(container.textContent).toContain(noHealth);
+    expect(container.textContent).toContain(noActivity);
+    expect(container.textContent).toContain(noMemory);
+    if (locale !== "fa") expect(container.textContent).not.toMatch(/[آ-ی]/);
+  });
+
+  it.each([
+    ["fa", "در حال آماده‌سازی نمای کلی", "نمای کلی پرونده بارگذاری نشد.", "تلاش دوباره"],
+    ["en", "Preparing pet overview", "The pet overview could not be loaded.", "Try again"],
+    ["de", "Haustierübersicht wird vorbereitet", "Die Aktenübersicht konnte nicht geladen werden.", "Erneut versuchen"],
+    ["es", "Preparando el resumen de la mascota", "No se pudo cargar el resumen del historial.", "Intentar de nuevo"],
+  ] as const)("localizes loading and fatal read failure in %s", async (locale, loading, loadError, retry) => {
+    vi.mocked(petsService.getOverview).mockImplementation(() => new Promise(() => {}));
+    const { unmount } = renderWithIntl(<PetProfileView petId="one" />, locale);
+    expect(screen.getByLabelText(loading)).toBeTruthy();
+    unmount();
+
+    vi.mocked(petsService.getOverview).mockRejectedValue(new Error("offline"));
+    renderWithIntl(<PetProfileView petId="one" />, locale);
+    expect(await screen.findByText(loadError)).toBeTruthy();
+    expect(screen.getByRole("button", { name: retry })).toBeTruthy();
+  });
+
+  it.each([
+    ["fa", "یادآورهای مراقبت بارگذاری نشدند.", "فهرست مراقبت‌های نیازمند توجه و پیش‌رو هنوز کامل دریافت نشده است."],
+    ["en", "Care reminders could not be loaded.", "Care items needing attention and upcoming care have not been fully retrieved."],
+    ["de", "Pflegeerinnerungen konnten nicht geladen werden.", "Pflegepunkte mit Handlungsbedarf und anstehende Pflege wurden noch nicht vollständig geladen."],
+    ["es", "No se pudieron cargar los recordatorios de cuidados.", "Todavía no se han recuperado todos los cuidados que requieren atención y los próximos cuidados."],
+  ] as const)("localizes the partial-care warning in %s without claiming an empty list", async (locale, unavailable, incomplete) => {
+    vi.mocked(careRemindersService.list).mockRejectedValue(new Error("offline"));
+    const { container } = renderWithIntl(<PetProfileView petId="one" />, locale);
+    expect(await screen.findByText(new RegExp(unavailable))).toBeTruthy();
+    expect(container.textContent).toContain(incomplete);
+    if (locale !== "fa") expect(container.textContent).not.toMatch(/[آ-ی]/);
+  });
+
   it("retries reads and restores a real overdue care item after recovery", async () => {
     vi.mocked(careRemindersService.list).mockRejectedValueOnce(new Error("offline")).mockResolvedValueOnce([{ id: "care1", title: "Follow up", type: "CUSTOM", state: "OVERDUE", dueAt: "2026-10-01T10:00:00Z" }] as never);
     renderWithIntl(<PetProfileView petId="one" />);

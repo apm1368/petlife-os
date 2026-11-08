@@ -7,11 +7,11 @@ import { formatAge, speciesLabel } from "@/features/pets/pet-identity";
 import { attentionTitle, eventTitle, formatOverviewDate, severityLabel, severityTone } from "@/features/pets/overview-labels";
 import type { usePetAccess } from "@/hooks/use-pet-access";
 import { glassHomeCopy } from "./glass-home-copy";
+import type { RouteLocale } from "@/lib/i18n/config";
 import "./glass-member-home.css";
 
-type Locale = "fa" | "en";
 export function GlassMemberHome({ locale, userName, pet, overview, pets, activePetId, onSwitch, permission, isSwitching, careFailed, onRetryCare }: {
-  locale: Locale; userName: string | null; pet: PetDto; overview: PetOverviewDto;
+  locale: RouteLocale; userName: string | null; pet: PetDto; overview: PetOverviewDto;
   pets: PetDto[]; activePetId: string | null; permission: ReturnType<typeof usePetAccess>; isSwitching: boolean; careFailed: boolean; onRetryCare: () => void; onSwitch: (id: string) => void;
 }) {
   const c = glassHomeCopy[locale];
