@@ -38,6 +38,7 @@ Status is per page family, not per shared header. `COMPLETE` means all applicati
 | Account privacy `/[locale]/profile/privacy` | Complete | Complete | Complete | Complete | PR #155 merged to main at `61f99041` after green CI and focused tests; not production-verified. |
 | Other account settings and profile | Partial | Partial | Partial | Partial | Some settings are localized; route-by-route form/dialog/error coverage remains open. |
 | Pet overview `/[locale]/pets/[petId]` and identity edit | Complete | Complete | Complete | Complete | PR #120 merged to main at `084ee787`; exact-head CI and 44 focused tests plus typecheck/lint passed. Deploy workflow succeeded; authenticated in-product flow has not yet been production-verified. |
+| Pet lifecycle `/[locale]/profile/household/pets/[petId]/lifecycle` | Partial | Partial | Partial | Partial | Lifecycle actions, confirmation dialog, load/save errors and retry now have fa/en/de/es copy; lifecycle status codes have German/Spanish labels. Focused de/es render/state tests added; responsive browser inspection remains open. Other status domains and linked flows are not completed by this slice. |
 | Health records, documents, care calendar, memories, activity and expenses | Partial | Partial | Partial | Partial | Linked page bodies/forms/states remain open; pet overview alone does not complete health/calendar pages. |
 | Shop discovery, product detail and cart | Partial | Partial | Partial | Partial | PR #146 merged to main at `ea0f74a7` after green exact-head CI and 39 focused tests plus typecheck/lint. Responsive browser inspection and production behavior remain unverified; checkout, orders, repeat delivery, favorites, seller and commerce backoffice remain open. |
 | Checkout/orders, seller and commerce backoffice | Partial | Partial | Partial | Partial | Page content, validation and transaction/operational states remain open; separate dependent PRs require retargeting after #146. |
@@ -75,6 +76,12 @@ Before marking any additional route complete, record its route/component, all fo
 - `PersonalSettingsView` has explicit German and Spanish translations for its user-facing settings, loading/error/success, appearance, contact verification status and contact-change/OTP steps. Tests assert translated labels and the unverified-contact state in both locales.
 - Persian and English strings and behavior are unchanged. Locale selection continues to use the saved account preference and existing locale-aware route behavior; this slice changes no API, persistence, verification or notification contract.
 - PR #119 merged to `main` at `d12fb4ed`. Exact-head CI run 42476941501 passed; focused account tests passed locally. This UI-only slice changes no API, persistence, verification or notification contract.
+
+## Pet lifecycle (localization slice)
+
+- The pet lifecycle screen now has explicit German and Spanish copy for lost-pet guidance, deceased/memorial descriptions, confirmation dialog, optional note, loading, load retry and save failure. User-entered pet names and notes stay unchanged.
+- The locale-bound status hook now respects fa/en/de/es. German and Spanish labels were added for all known lifecycle states; unknown codes remain explicitly localized as unknown rather than being shown as English/Persian UI.
+- Focused status and route tests cover German lost-state presentation, Spanish memorial confirmation/save failure and localized retry. Responsive browser inspection remains open, so the route is PARTIAL. This does not translate lost-pet reporting or public memorial workflows.
 
 ## Pet profile follow-up (stacked after the account settings slice)
 

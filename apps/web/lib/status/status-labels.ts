@@ -101,6 +101,7 @@ const DE_ES: Partial<Record<StatusDomain, Record<string, readonly [de: string, e
     CONFIRMED: ["Bestätigt", "Confirmado"], REFUNDED: ["Erstattet", "Reembolsado"], PARTIALLY_REFUNDED: ["Teilweise erstattet", "Reembolsado parcialmente"], UNKNOWN: ["Unbekannt", "Desconocido"],
   },
   order: { PENDING: ["Zahlung ausstehend", "Pago pendiente"], PREPARING: ["Wird vorbereitet", "En preparación"], READY_FOR_FULFILLMENT: ["Versandbereit", "Listo para enviar"], FULFILLED: ["Versendet", "Enviado"] },
+  lifecycle: { ACTIVE: ["Aktiv", "En activo"], LOST: ["Vermisst", "Sin localizar"], TEMPORARILY_TRANSFERRED: ["Vorübergehend bei einer anderen Person", "Temporalmente con otra persona"], DECEASED: ["Verstorben", "Ha fallecido"], MEMORIAL: ["In Erinnerung", "En memoria"] },
   subscription: { TRIALING: ["Testphase", "Prueba"], PAST_DUE: ["Zahlung überfällig", "Pago atrasado"], GRACE_PERIOD: ["Zahlungsfrist", "Periodo de gracia"], CANCEL_AT_PERIOD_END: ["Endet zum Laufzeitende", "Finaliza al terminar el periodo"] },
 };
 
