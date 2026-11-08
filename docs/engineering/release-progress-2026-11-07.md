@@ -169,8 +169,16 @@
 - PR #165 is based on `main`, last pushed head `c93b3077`; CI run `42516710325` is still running for that head. Local follow-up changes add fa/en offline and access-denied strings and expand its rendered clinic page coverage to 16 tests; these local changes are not yet pushed or hosted-CI verified. Route status remains PARTIAL pending responsive/authenticated browser verification.
 - Disk free space is 107 MiB; avoid production builds and package installs. No payment worktree was visible in this workspace and no payment files were touched. Original memorial source-image/CDN access and German/Spanish SMS templates/delivery remain unverified/unimplemented. Landing HERO is unchanged.
 
-## PR #160 base update — 2026-11-08 20:21 UTC
+## PR #152 base update — 2026-11-08 20:20 UTC
 
-- Local landing branch now merges current main `8d892b2` (after #165); only rollout documentation required manual reconciliation. German/Spanish catalog namespaces auto-merged without conflict.
-- The prior 21 tests, TypeScript, targeted source lint and catalog parsing apply to the branch synced through `3155232`, not yet to this latest sync. Rerun these checks, then push and wait for new hosted CI.
-- Production is still known at `3155232` while deploy `42519281605` is in progress. No post-#165 production behavior is verified; the landing HERO is unchanged.
+- Local `codex/review-trip-setup` now merges `origin/main` at `8d892b2` after PR #165 merged. The previously running hosted CI started before this update and is stale for final merge.
+- German/Spanish message catalogs merged without conflicts. Documentation conflicts were resolved from latest main, with this travel-specific status restored. The local branch needs focused tests, commit/push and new exact-head CI before merge.
+- Production still needs rechecking after deploy run `42519281605`; last verified production SHA is `3155232`. Trip setup/hub remains PARTIAL pending authenticated responsive checks.
+
+## Current localization/release state — 2026-11-08 20:39 UTC
+
+- PR #152 merged normally into `main` at `b6b61c4124640a496c6d2cda5566ee509d07c953`; its exact-head CI run `42519816325` succeeded. #152 remains PARTIAL for authenticated responsive/product behavior verification.
+- Production is at `8d892b2ea8b2b408f517b26866118acd8ca8e96d`; deployment `42519281605` completed successfully for the #165 merge. Public `/de/profile/clinic-notes` and `/es/profile/clinic-notes` return HTTP 200 with correct `lang` and `dir`; authenticated content has not been exercised.
+- #160 and #166 had green CI on their exact reported heads (`42519930623`, `42519567714`) and `CLEAN` before #152 merged. Attempted normal #160 merge reported conflicts; its branch is now being merged with current main `b6b61c4`, with a fresh CI required. #166 status is being rechecked against the new base.
+- #167 admin-users localization is open against `main` at `6b41572bf4181bf1f03f5392aca82fc813ee8970`; CI run `42521359719` is in progress. Its local focused 17 tests, typecheck, targeted lint, JSON parsing and diff checks passed; remains PARTIAL and not merged/live.
+- Disk headroom is 104 MiB. Creating an additional worktree failed due to capacity; source branches/worktrees remain preserved, no cleanup or full build was attempted, and payment worktrees were not accessed.

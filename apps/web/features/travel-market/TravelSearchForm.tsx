@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button, Search } from "@petlife/ui";
 import type { TravelDestinationDto } from "@petlife/types";
 import { DateRangeField, type DateRangeValue } from "@/features/shared/date-picker/DateRangePicker";
-import { addDays, isIsoDay, localizeDigits, todayIso } from "@/lib/date/jalali";
+import { addDays, isIsoDay, todayIso } from "@/lib/date/jalali";
 import { travelMarketService } from "@/services/travel-marketplace.service";
 import { petWeightKg, readChosenPetIds, useMyPets, writeChosenPetIds } from "./use-my-pets";
 
@@ -53,8 +53,8 @@ export function searchUrl(locale: string, s: TravelSearchState, extra: Record<st
  * promise of availability — the results page asks the server.
  */
 export function TravelSearchForm({ initial, compact = false, onSubmitted }: { initial?: Partial<TravelSearchState>; compact?: boolean; onSubmitted?: () => void }) {
-  const lang = useLocale() as "fa" | "en";
-  const fa = lang === "fa";
+  const lang = useLocale();
+  const t = useTranslations("travelMarketplace");
   const router = useRouter();
   const pets = useMyPets();
   const [destinations, setDestinations] = useState<TravelDestinationDto[]>([]);
@@ -83,7 +83,7 @@ export function TravelSearchForm({ initial, compact = false, onSubmitted }: { in
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if ((state.checkIn && !state.checkOut) || (!state.checkIn && state.checkOut)) {
-      setError(fa ? "هر دو تاریخ ورود و خروج را انتخاب کنید." : "Choose both check-in and check-out.");
+      setError(t("bothDatesRequired"));
       return;
     }
     const signedInPets = pets?.filter((p) => chosen.includes(p.id)) ?? [];
@@ -101,25 +101,25 @@ export function TravelSearchForm({ initial, compact = false, onSubmitted }: { in
 
   const listId = compact ? "travel-dest-compact" : "travel-dest";
   return (
-    <form onSubmit={submit} className={compact ? "flex flex-col gap-4" : "grid gap-4 rounded-lg border border-border-subtle bg-surface-elevated p-4 md:grid-cols-2 md:p-5 lg:grid-cols-[1.2fr_1.4fr_1fr_auto] lg:items-end [&>*]:min-w-0"} role="search" aria-label={fa ? "جستجوی اقامت" : "Search stays"}>
+    <form onSubmit={submit} className={compact ? "flex flex-col gap-4" : "grid gap-4 rounded-lg border border-border-subtle bg-surface-elevated p-4 md:grid-cols-2 md:p-5 lg:grid-cols-[1.2fr_1.4fr_1fr_auto] lg:items-end [&>*]:min-w-0"} role="search" aria-label={t("searchAria")}>
       <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-text-primary">{fa ? "مقصد" : "Destination"}</span>
+        <span className="text-sm font-medium text-text-primary">{t("destinationLabel")}</span>
         <input
           list={listId}
           value={state.city}
           onChange={(e) => setState({ ...state, city: e.target.value })}
-          placeholder={fa ? "شهر یا استان" : "City or province"}
+          placeholder={t("destinationPlaceholder")}
           className="min-h-12 rounded-md border border-border-subtle bg-surface-base px-3 text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
           autoComplete="off"
         />
         <datalist id={listId}>
           {suggestions.map((d) => (
-            <option key={`${d.country}-${d.city}`} value={d.city}>{`${d.province ? `${d.province} · ` : ""}${fa ? `${localizeDigits(d.listingCount, "fa")} اقامتگاه` : `${d.listingCount} stays`}`}</option>
+            <option key={`${d.country}-${d.city}`} value={d.city}>{`${d.province ? `${d.province} · ` : ""}${t("stayCount", { count: d.listingCount })}`}</option>
           ))}
         </datalist>
       </label>
       <DateRangeField
-        label={fa ? "تاریخ ورود و خروج" : "Check-in and check-out"}
+        label={t("datesLabel")}
         value={{ start: state.checkIn, end: state.checkOut }}
         onChange={(v: DateRangeValue) => setState({ ...state, checkIn: v.start, checkOut: v.end })}
         min={todayIso()}
@@ -128,7 +128,7 @@ export function TravelSearchForm({ initial, compact = false, onSubmitted }: { in
       />
       {pets && pets.length > 0 ? (
         <fieldset className="flex flex-col gap-1">
-          <legend className="mb-1 text-sm font-medium text-text-primary">{fa ? "همراهان شما" : "Travelling pets"}</legend>
+          <legend className="mb-1 text-sm font-medium text-text-primary">{t("travellingPets")}</legend>
           <div className="flex flex-wrap gap-2">
             {pets.map((p) => {
               const on = chosen.includes(p.id);
@@ -142,24 +142,24 @@ export function TravelSearchForm({ initial, compact = false, onSubmitted }: { in
         </fieldset>
       ) : (
         <fieldset className="grid grid-cols-[1fr_auto] gap-2">
-          <legend className="mb-1 text-sm font-medium text-text-primary">{fa ? "حیوان همراه" : "Travelling pet"}</legend>
-          <select aria-label={fa ? "گونه" : "Species"} value={state.species} onChange={(e) => setState({ ...state, species: e.target.value as TravelSearchState["species"] })} className="min-h-12 rounded-md border border-border-subtle bg-surface-base px-2 text-text-primary">
-            <option value="">{fa ? "بدون فیلتر حیوان" : "Any"}</option>
-            <option value="DOG">{fa ? "سگ" : "Dog"}</option>
-            <option value="CAT">{fa ? "گربه" : "Cat"}</option>
-            <option value="OTHER">{fa ? "سایر" : "Other"}</option>
+          <legend className="mb-1 text-sm font-medium text-text-primary">{t("travellingPet")}</legend>
+          <select aria-label={t("speciesLabel")} value={state.species} onChange={(e) => setState({ ...state, species: e.target.value as TravelSearchState["species"] })} className="min-h-12 rounded-md border border-border-subtle bg-surface-base px-2 text-text-primary">
+            <option value="">{t("anySpecies")}</option>
+            <option value="DOG">{t("dog")}</option>
+            <option value="CAT">{t("cat")}</option>
+            <option value="OTHER">{t("other")}</option>
           </select>
-          <select aria-label={fa ? "تعداد" : "Number of pets"} value={state.petCount} disabled={!state.species} onChange={(e) => setState({ ...state, petCount: Number(e.target.value) })} className="min-h-12 rounded-md border border-border-subtle bg-surface-base px-2 text-text-primary">
-            {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{localizeDigits(n, lang)}</option>)}
+          <select aria-label={t("petCount")} value={state.petCount} disabled={!state.species} onChange={(e) => setState({ ...state, petCount: Number(e.target.value) })} className="min-h-12 rounded-md border border-border-subtle bg-surface-base px-2 text-text-primary">
+            {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{new Intl.NumberFormat(lang).format(n)}</option>)}
           </select>
           {state.species === "DOG" ? (
-            <input inputMode="decimal" aria-label={fa ? "وزن تقریبی (کیلوگرم)" : "Approx. weight (kg)"} placeholder={fa ? "وزن (کیلوگرم) — اختیاری" : "Weight (kg) — optional"} value={state.petWeightKg} onChange={(e) => setState({ ...state, petWeightKg: e.target.value.replace(/[^\d.]/g, "").slice(0, 5) })} className="col-span-2 min-h-11 rounded-md border border-border-subtle bg-surface-base px-3 text-sm" />
+            <input inputMode="decimal" aria-label={t("approxWeight")} placeholder={t("weightOptional")} value={state.petWeightKg} onChange={(e) => setState({ ...state, petWeightKg: e.target.value.replace(/[^\d.]/g, "").slice(0, 5) })} className="col-span-2 min-h-11 rounded-md border border-border-subtle bg-surface-base px-3 text-sm" />
           ) : null}
         </fieldset>
       )}
       <Button type="submit" size="lg" className="min-h-12">
         <Search aria-hidden className="h-5 w-5" />
-        {fa ? "جستجو" : "Search"}
+        {t("searchAction")}
       </Button>
     </form>
   );

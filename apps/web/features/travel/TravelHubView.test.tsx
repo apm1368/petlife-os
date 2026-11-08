@@ -53,6 +53,18 @@ describe("TravelHubView", () => {
     await waitFor(() => expect(screen.getByText("No trips yet. Start planning your first one.")).toBeTruthy());
   });
 
+  it.each([
+    ["de", "Noch keine Reisen. Plane deine erste Reise.", "Neue Reise"],
+    ["es", "Aún no hay viajes. Planifica el primero.", "Nuevo viaje"],
+  ] as const)("renders the %s empty state and action in the selected language", async (locale, emptyCopy, actionCopy) => {
+    vi.mocked(travelService.list).mockResolvedValue([]);
+
+    renderWithIntl(<TravelHubView petId="pet-1" />, locale);
+
+    await waitFor(() => expect(screen.getByText(emptyCopy)).toBeTruthy());
+    expect(screen.getByRole("button", { name: actionCopy })).toBeTruthy();
+  });
+
   it("shows an error state with retry when the list fails to load", async () => {
     vi.mocked(travelService.list).mockRejectedValue(new Error("network error"));
 

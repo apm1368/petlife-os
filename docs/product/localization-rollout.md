@@ -210,15 +210,14 @@ Lifecycle actions, status labels, confirmation dialog, owner note, loading/retry
 - #165's last pushed head is `c93b3077`, with CI `42516710325` still running on that older tree. Local follow-up adds fa/en offline and access-denied copy and has 16 clinic-page tests passing; it is not yet pushed or hosted-CI verified. The route remains PARTIAL.
 - Dashboard, travel and clinic pages have not been authenticated-browser verified on production. Landing HERO is unchanged. Disk is 107 MiB; no payment worktree was visible or changed. Memorial original-image/CDN privacy and German/Spanish SMS templates/delivery remain unverified/unimplemented.
 
-## Public landing follow-up — PR #160
+## Trip setup follow-up after PR #165 — 2026-11-08
 
-- German/Spanish memorial section text, header actions and accessible menu labels are localized; compact mobile header rules address the observed overflow. The approved HERO image/composition are unchanged.
-- The branch is synchronized locally with current main through `8d892b2` after PR #165. Its previous CI result predates that merge; 21 focused landing/memorial/public-shell tests, TypeScript, targeted source lint and catalog checks had passed after the prior sync. Fresh post-#165 tests and hosted CI are required before merge.
-- The landing remains PARTIAL pending synchronized-head CI and post-deployment 390px/1440px production checks.
+- PR #152 is synchronized locally through main `8d892b2` after clinic-notes PR #165 merged. Its previous exact-head CI started before that base update and is not final proof.
+- Trip setup/hub remains PARTIAL: listing/detail and authenticated responsive browser behavior are not fully covered, and no live availability or booking is claimed. Source-authored content is preserved and the exact source link is the final reservation path.
+- Focused post-sync tests and exact-head CI are required before merge; production behavior must be checked after deployment.
 
-## Current checkpoint — 2026-11-08 20:20 UTC
+## Public landing and memorial localization — PR #160
 
-- Main is `8d892b2ea8b2b408f517b26866118acd8ca8e96d` after #165 merged. Production still reports `315523247bc6bf837d8763f5a31542cf81a695db`; deploy `42519281605` is in progress.
-- PR #160's local branch now includes #165, but remote CI on the pre-#165 head is stale; the branch still needs post-sync tests/commit/push and new CI. The HERO remains untouched.
-- PR #152 is being synchronized to #165; its prior CI also predates the new main. PR #166 has been synchronized and pushed through #165 and is awaiting fresh CI.
-- Dashboard, travel and clinic routes remain PARTIAL pending authenticated responsive browser verification. Disk is about 106 MiB; no production build/install was run. Payment worktrees were not visible or modified; memorial original-image/CDN privacy and de/es SMS templates remain unverified/unimplemented.
+- The landing header actions, memorial section and their accessible labels have German/Spanish UI text; the approved HERO image and composition are unchanged. Compact header rules address mobile layout. Published/user-authored memorial content is not translated or fabricated.
+- PR #160 was synchronized with current `main` at `b6b61c4` after the travel PR #152 merged. Its German and Spanish catalog namespaces were combined with the newer main catalogs without conflicting values; the merge also preserves #152 travel strings and #163 health strings.
+- The earlier 21 focused tests and CI were for the prior head; the new sync still requires local reruns, a pushed exact-head CI and production verification. The landing remains PARTIAL, and original memorial-image/CDN privacy is not claimed.

@@ -11,7 +11,7 @@ import {DateField} from "@/features/shared/date-picker/DateField";
 import {ExternalStayCard} from "./ExternalStayCard";
 export function TripExternalStaysView({petId,tripId}:{petId:string;tripId:string}){return <TripExternalContent key={`${petId}-${tripId}`} petId={petId} tripId={tripId}/>}
 function TripExternalContent({petId,tripId}:{petId:string;tripId:string}){
- const t=useTranslations("externalTravel"),locale=useLocale() as "fa"|"en";const {access,error:accessError,retry:retryAccess}=usePetAccess(petId);
+ const t=useTranslations("externalTravel"),locale=useLocale() as "fa"|"en"|"de"|"es";const {access,error:accessError,retry:retryAccess}=usePetAccess(petId);
  const [rows,setRows]=useState<TripExternalStay[]>([]),[loading,setLoading]=useState(true),[failed,setFailed]=useState(false),[revision,setRevision]=useState(0),[busy,setBusy]=useState<string|null>(null),[saveFailed,setSaveFailed]=useState(false),[saved,setSaved]=useState(false);
  const [city,setCity]=useState(""),[checkIn,setCheckIn]=useState(""),[checkOut,setCheckOut]=useState(""),[guests,setGuests]=useState("2"),[pets,setPets]=useState("1");
  const [results,setResults]=useState<ExternalStay[]>([]),[searching,setSearching]=useState(false),[searched,setSearched]=useState(false),[searchFailed,setSearchFailed]=useState(false),[invalid,setInvalid]=useState(false),[context,setContext]=useState<ExternalStayContext>({});
