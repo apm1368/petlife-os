@@ -27,6 +27,14 @@ describe("isPrivateUploadPath (local /uploads static mount guard)", () => {
     expect(isPrivateUploadPath("/pets/p1/photo.jpg")).toBe(false);
     expect(isPrivateUploadPath("/community-media/u1/img.webp")).toBe(false);
   });
+
+  it("keeps existing public memory photos separate from private memorial publication copies", () => {
+    const petId = "3f0b8a52-3c1e-4f0e-9a51-0d2c4b8e7a11";
+    const mediaId = "7c9d2e10-5b4a-4e3f-8c21-6a0f1b2c3d4e";
+    expect(isPrivateUploadPath(`/pet-memories-public/${petId}/${mediaId}.webp`)).toBe(false);
+    expect(isPrivateUploadPath(`/pet-memorial-assets/${mediaId}.webp`)).toBe(true);
+    expect(() => resolveObjectUrl(`pet-memorial-assets/${mediaId}.webp`)).toThrow();
+  });
 });
 
 describe("object keys handed back by clients", () => {
