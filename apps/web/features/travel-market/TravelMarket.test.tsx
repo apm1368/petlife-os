@@ -4,10 +4,13 @@ import type { TravelBookingDto, TravelListingDetailDto, TravelSearchResultDto, T
 import { renderWithIntl } from "@/test/render-with-intl";
 import { useSessionStore } from "@/stores/session-store";
 import { travelMarketService } from "@/services/travel-marketplace.service";
+import { formatDay } from "@/lib/date/jalali";
 import { TravelResultsView } from "./TravelResultsView";
 import { TravelListingDetailView } from "./TravelListingDetailView";
 import { TravelBookingFlowView } from "./TravelBookingFlowView";
 import { TripHubView } from "./TripHubView";
+import { TravelHomeView } from "./TravelHomeView";
+import { TravelSearchForm } from "./TravelSearchForm";
 import { matchReason, policyFacts, stayDates } from "./labels";
 
 const params = new URLSearchParams();
@@ -20,6 +23,15 @@ vi.mock("@/services/households.service", () => ({ householdsService: { listMine:
 
 const RATING = { average: null, count: 0, petFriendliness: null, cleanliness: null, location: null };
 
+function tripHubFixture() {
+  return {
+    trip: { id: "t1", householdId: "h", petId: "p1", petName: "Milo", petPhotoUrl: null, createdByUserId: "u", originCountry: "IR", originCity: null, destinationCountry: "IR", destinationCity: "Shiraz", departAt: "2026-10-10T08:00:00.000Z", returnAt: null, travelMode: "ROAD", status: "PLANNING", notes: null, requirementsCount: 1, createdAt: "", updatedAt: "" },
+    petName: "Milo", petSpecies: "DOG", phase: "PLANNING", bookings: [],
+    readiness: { tripId: "t1", status: "PLANNING", readyCount: 0, totalCount: 1, allReady: false, hasStaleRequirement: true, requirements: [{ id: "r1", tripId: "t1", requirementType: "RABIES", status: "REQUIRED", source: "Iran Veterinary Organization", sourceUrl: "https://ivo.ir", jurisdiction: "IR", verifiedAt: "2025-01-01T00:00:00.000Z", validUntil: null, isStale: true, linkedMedicalDocumentId: null, linkedMedicalDocumentTitle: null, notes: null, createdAt: "", updatedAt: "2026-09-01T00:00:00.000Z" }] },
+    documentStates: { r1: "MISSING" }, documents: [], insuranceApplications: [{ id: "i1", providerName: "Insurer", productName: "Plan", status: "UNDER_REVIEW" }], nearbyPlaces: [], favoritePlaces: [], nearbyVets: [], activity: [{ type: "INSURANCE", label: "UNDER_REVIEW", at: "2026-01-02T00:00:00.000Z", link: null }],
+    suggestions: { requirementRules: [{ id: "rule1", country: "IR", city: null, requirementType: "MICROCHIP", title: "Microchip", description: "ISO chip", species: [], source: "IVO", sourceUrl: null, verifiedAt: "2026-09-01T00:00:00.000Z", validUntil: null, status: "ACTIVE", isStale: false }] },
+  } as unknown as TripHubDto;
+}
 afterEach(() => {
   for (const key of Array.from(params.keys())) params.delete(key);
 });
@@ -79,6 +91,36 @@ describe("localized travel stay dates", () => {
     ["es", "2 noches"],
   ] as const)("formats night counts in %s", (locale, expected) => {
     expect(stayDates(stay, locale)).toContain(expected);
+  });
+});
+
+describe("travel discovery localization", () => {
+  beforeEach(() => {
+    useSessionStore.setState({ status: "unauthenticated" });
+    vi.mocked(travelMarketService.destinations).mockResolvedValue([]);
+  });
+
+  it.each([
+    ["de", "Finde eine Unterkunft, die auch dein Haustier aufnimmt", "Dieses Verzeichnis hält kein Zimmer und erstellt keine Reservierung."],
+    ["es", "Encuentra un alojamiento que también acepte a tu mascota", "Este directorio no bloquea habitaciones ni crea reservas."],
+  ] as const)("uses translated and non-promissory travel copy in %s", async (locale, heading, noReservation) => {
+    renderWithIntl(<TravelHomeView />, locale);
+
+    expect(screen.getByRole("heading", { level: 1, name: heading })).toBeTruthy();
+    expect(screen.getByText(new RegExp(noReservation))).toBeTruthy();
+    expect(screen.queryByText(/held for you for 15 minutes/i)).toBeNull();
+  });
+
+  it.each([
+    ["de", "Reiseziel", "Tierart", "Suchen"],
+    ["es", "Destino", "Especie", "Buscar"],
+  ] as const)("localizes destination and pet search controls in %s", (locale, destination, species, action) => {
+    renderWithIntl(<TravelSearchForm />, locale);
+
+    expect(screen.getByRole("search")).toBeTruthy();
+    expect(screen.getByText(destination)).toBeTruthy();
+    expect(screen.getByLabelText(species)).toBeTruthy();
+    expect(screen.getByRole("button", { name: action })).toBeTruthy();
   });
 });
 
@@ -142,17 +184,36 @@ describe("booking flow", () => {
 
 describe("trip hub", () => {
   it("shows requirement provenance, document state and library suggestions", async () => {
-    vi.mocked(travelMarketService.hub).mockResolvedValue({
-      trip: { id: "t1", householdId: "h", petId: "p1", petName: "Milo", petPhotoUrl: null, createdByUserId: "u", originCountry: "IR", originCity: null, destinationCountry: "IR", destinationCity: "Shiraz", departAt: "2026-10-10T08:00:00.000Z", returnAt: null, travelMode: "ROAD", status: "PLANNING", notes: null, requirementsCount: 1, createdAt: "", updatedAt: "" },
-      petName: "Milo", petSpecies: "DOG", phase: "PLANNING", bookings: [],
-      readiness: { tripId: "t1", status: "PLANNING", readyCount: 0, totalCount: 1, allReady: false, hasStaleRequirement: true, requirements: [{ id: "r1", tripId: "t1", requirementType: "RABIES", status: "REQUIRED", source: "Iran Veterinary Organization", sourceUrl: "https://ivo.ir", jurisdiction: "IR", verifiedAt: "2025-01-01T00:00:00.000Z", validUntil: null, isStale: true, linkedMedicalDocumentId: null, linkedMedicalDocumentTitle: null, notes: null, createdAt: "", updatedAt: "2026-09-01T00:00:00.000Z" }] },
-      documentStates: { r1: "MISSING" }, documents: [], insuranceApplications: [], nearbyPlaces: [], favoritePlaces: [], nearbyVets: [], activity: [],
-      suggestions: { requirementRules: [{ id: "rule1", country: "IR", city: null, requirementType: "MICROCHIP", title: "Microchip", description: "ISO chip", species: [], source: "IVO", sourceUrl: null, verifiedAt: "2026-09-01T00:00:00.000Z", validUntil: null, status: "ACTIVE", isStale: false }] },
-    } as unknown as TripHubDto);
+    vi.mocked(travelMarketService.hub).mockResolvedValue(tripHubFixture());
     renderWithIntl(<TripHubView tripId="t1" />, "en");
     expect(await screen.findByText(/Source: Iran Veterinary Organization/)).toBeTruthy();
     expect(screen.getByText("Missing")).toBeTruthy();
     expect(screen.getByText(/have not been re-verified recently/)).toBeTruthy();
     expect(screen.getByText("Microchip")).toBeTruthy();
+  });
+
+  it.each([
+    ["de", "Reise nach Shiraz", "Reisevorbereitung", "Wird geprüft", "Quelle: Iran Veterinary Organization"],
+    ["es", "Viaje a Shiraz", "Preparación del viaje", "En revisión", "Fuente: Iran Veterinary Organization"],
+  ] as const)("localizes the full trip hub in %s", async (locale, title, readiness, insuranceStatus, source) => {
+    vi.mocked(travelMarketService.hub).mockResolvedValue(tripHubFixture());
+    renderWithIntl(<TripHubView tripId="t1" />, locale);
+
+    expect(await screen.findByRole("heading", { level: 1, name: title })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: readiness })).toBeTruthy();
+    expect(screen.getAllByText(new RegExp(insuranceStatus)).length).toBeGreaterThan(0);
+    expect(screen.getByText(new RegExp(source))).toBeTruthy();
+    expect(screen.queryByText("Trip readiness")).toBeNull();
+    expect(screen.queryByText("Insurance")).toBeNull();
+  });
+
+  it("keeps the Persian Jalali trip dates and Persian digits", async () => {
+    vi.mocked(travelMarketService.hub).mockResolvedValue(tripHubFixture());
+    renderWithIntl(<TripHubView tripId="t1" />, "fa");
+
+    const jalaliDate = formatDay("2026-10-10", "fa", { weekday: true, year: false });
+    expect(await screen.findByRole("heading", { level: 1, name: "سفر به Shiraz" })).toBeTruthy();
+    expect(screen.getByText((content) => content.includes(jalaliDate))).toBeTruthy();
+    expect(screen.getByText("۰ از ۱ آماده")).toBeTruthy();
   });
 });

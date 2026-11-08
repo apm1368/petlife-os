@@ -106,4 +106,20 @@ describe("TripDetailView", () => {
 
     await waitFor(() => expect(screen.getByText("Ready to travel")).toBeTruthy());
   });
+
+  it.each([
+    ["de", "Noch nicht reisefertig", "Tollwutimpfung", "Einige Angaben wurden länger nicht überprüft — bitte vor der Reise nochmals kontrollieren.", "Abreise"],
+    ["es", "Aún no está listo", "Vacuna contra la rabia", "Algunos requisitos no se han verificado recientemente. Revísalos antes del viaje.", "Salida"],
+  ] as const)("renders trip requirements and readiness in %s", async (locale, notReady, rabies, staleWarning, departureLabel) => {
+    vi.mocked(travelService.get).mockResolvedValue(trip());
+    vi.mocked(travelService.getReadiness).mockResolvedValue(readiness());
+
+    renderWithIntl(<TripDetailView petId="pet-1" tripId="trip-1" />, locale);
+
+    await waitFor(() => expect(screen.getByText(notReady)).toBeTruthy());
+    expect(screen.getAllByText(rabies).length).toBeGreaterThan(1);
+    expect(screen.getByText(staleWarning)).toBeTruthy();
+    const localizedDate = new Intl.DateTimeFormat(locale === "de" ? "de-DE-u-ca-gregory" : "es-ES-u-ca-gregory", { dateStyle: "long", timeZone: "Asia/Tehran" }).format(new Date(trip().departAt));
+    expect(screen.getByText(`${departureLabel} ${localizedDate}`)).toBeTruthy();
+  });
 });

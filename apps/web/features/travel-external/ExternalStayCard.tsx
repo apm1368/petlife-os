@@ -3,6 +3,7 @@ import Link from "next/link";
 import {useLocale,useTranslations} from "next-intl";
 import {Button,ContextSurface} from "@petlife/ui";
 import {formatCurrency} from "@/lib/currency/format-currency";
+import {useInstantFormat} from "@/lib/date/use-instant-format";
 import {travelExternalService,type ExternalStay,type ExternalStayContext} from "@/services/travel-external.service";
 
 export function matchingExternalPrice(stay:ExternalStay,context:ExternalStayContext){
@@ -13,10 +14,10 @@ export function matchingExternalPrice(stay:ExternalStay,context:ExternalStayCont
  return quote;
 }
 export function ExternalStayCard({stay,context={},saved,onFavorite,busy=false,available=true,detail=false,extra}:{stay:ExternalStay;context?:ExternalStayContext;saved?:boolean;onFavorite?:()=>void;busy?:boolean;available?:boolean;detail?:boolean;extra?:React.ReactNode}){
- const t=useTranslations("externalTravel"),locale=useLocale() as "fa"|"en";
+ const t=useTranslations("externalTravel"),locale=useLocale() as "fa"|"en"|"de"|"es",fmt=useInstantFormat();
  const price=matchingExternalPrice(stay,context),query=new URLSearchParams();for(const[key,value]of Object.entries(context)){if(value!==undefined)query.set(key,String(value))}
  const suffix=query.toString()?`?${query}`:"";
- const date=(value:string)=>new Intl.DateTimeFormat(locale==="fa"?"fa-IR":"en-US",{dateStyle:"medium",timeStyle:"short"}).format(new Date(value));
+ const date=(value:string)=>fmt.dateTime(value);
  const money=(amount:number,currency:string)=>currency==="IRR"?formatCurrency(amount,locale):`${new Intl.NumberFormat(locale).format(amount)} ${currency}`;
  return <ContextSurface className="min-w-0 space-y-3"><header><p className="text-text-secondary">{locale==="fa"?stay.source.nameFa:stay.source.nameEn} · {t("externalSource")}</p><h2 className="text-section-title break-words">{stay.title??t("unnamed")}</h2><p>{[stay.city,stay.area].filter(Boolean).join(" · ")}</p></header>
  <p className="font-medium">{t(`policy.${stay.pet.policyStatus}`)}</p>{stay.pet.summary&&<p>{stay.pet.summary}</p>}{stay.status==="STALE"&&<p>{t("staleListing")}</p>}

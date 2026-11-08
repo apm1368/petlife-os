@@ -162,9 +162,14 @@
 - PR #165 is based on `main`, last pushed head `c93b3077`; CI run `42516710325` is still running for that head. Local follow-up changes add fa/en offline and access-denied strings and expand its rendered clinic page coverage to 16 tests; these local changes are not yet pushed or hosted-CI verified. Route status remains PARTIAL pending responsive/authenticated browser verification.
 - Disk free space is 107 MiB; avoid production builds and package installs. No payment worktree was visible in this workspace and no payment files were touched. Original memorial source-image/CDN access and German/Spanish SMS templates/delivery remain unverified/unimplemented. Landing HERO is unchanged.
 
-## Current checkpoint — 2026-11-08 20:39 UTC
+## PR #152 base update — 2026-11-08 20:20 UTC
 
-- `origin/main` is `8d892b2ea8b2b408f517b26866118acd8ca8e96d` (#165 merged). Production still reports `315523247bc6bf837d8763f5a31542cf81a695db`; deploy run `42519281605` for the new main SHA is still in progress. Do not mark #165 live until the version endpoint and relevant behavior confirm the deployed SHA.
-- #152 (`b4c70fdc`), #160 (`5b9a0b17`) and #166 (`2427e310`) are open against `main`; exact-head CI runs `42519816325`, `42519930623` and `42519567714` respectively are still in progress. No review decisions are recorded. Do not merge while checks are pending.
-- The #139 admin-user-directory translation has been isolated from its stale #122-based PR as a local cherry-pick on `codex/i18n-admin-users-main`. Focused tests: 17/17; targeted lint, typecheck, four-locale JSON parsing and diff checks pass. It is PARTIAL pending hosted CI, review and browser verification; the original #139 remains `DIRTY` and unchanged.
-- Disk headroom is about 104 MiB; a second full worktree creation failed for lack of space, but the failed operation did not change any tracked user work. No cleanup/build or payment-worktree modification occurred. The incomplete worktree path is left untouched pending capacity; no changes were cherry-picked into or pushed from it.
+- Local `codex/review-trip-setup` now merges `origin/main` at `8d892b2` after PR #165 merged. The previously running hosted CI started before this update and is stale for final merge.
+- German/Spanish message catalogs merged without conflicts. Documentation conflicts were resolved from latest main, with this travel-specific status restored. The local branch needs focused tests, commit/push and new exact-head CI before merge.
+- Production still needs rechecking after deploy run `42519281605`; last verified production SHA is `3155232`. Trip setup/hub remains PARTIAL pending authenticated responsive checks.
+
+## Admin-user localization base sync — 2026-11-08 20:39 UTC
+
+- PR #167's branch is being synchronized from main `8d892b2` to current `main` `b6b61c4` after #152 merged. Its prior exact-head CI (`42521359719`) is not evidence for the resulting head; rerun its 17 focused tests and hosted CI before merge.
+- Admin user directory UI remains PARTIAL; manual message text does not claim SMS delivery. The rest of admin/backoffice/ERP remains untranslated or partial.
+- Production reports `8d892b2` after #165's deployment. Disk headroom is approximately 104 MiB; no cleanup/build was performed, and payment worktrees remain untouched.

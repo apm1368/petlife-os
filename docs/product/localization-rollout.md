@@ -210,8 +210,14 @@ Lifecycle actions, status labels, confirmation dialog, owner note, loading/retry
 - #165's last pushed head is `c93b3077`, with CI `42516710325` still running on that older tree. Local follow-up adds fa/en offline and access-denied copy and has 16 clinic-page tests passing; it is not yet pushed or hosted-CI verified. The route remains PARTIAL.
 - Dashboard, travel and clinic pages have not been authenticated-browser verified on production. Landing HERO is unchanged. Disk is 107 MiB; no payment worktree was visible or changed. Memorial original-image/CDN privacy and German/Spanish SMS templates/delivery remain unverified/unimplemented.
 
+## Trip setup follow-up after PR #165 — 2026-11-08
+
+- PR #152 is synchronized locally through main `8d892b2` after clinic-notes PR #165 merged. Its previous exact-head CI started before that base update and is not final proof.
+- Trip setup/hub remains PARTIAL: listing/detail and authenticated responsive browser behavior are not fully covered, and no live availability or booking is claimed. Source-authored content is preserved and the exact source link is the final reservation path.
+- Focused post-sync tests and exact-head CI are required before merge; production behavior must be checked after deployment.
+
 ## Admin user directory — current localization slice
 
-- `AdminUsersView` now has explicit German and Spanish text for the directory, user profile tabs, relationship/status labels, household/pet counts, masked contact labels, pagination, empty/error/access-denied states and the manual communication form. Profile dates use the selected locale; Persian retains the Persian calendar.
-- Manual message copy only describes an SMS attempt subject to provider configuration, recipient consent and notification rules; it does not imply delivery. User-entered names, contact details, message bodies and other source content remain unchanged.
-- Focused rendering and catalog-placeholder tests pass: 17 tests across the directory and locale-parity suites. Targeted ESLint, web typecheck, four catalog JSON parsing and diff checks pass. This is a localization slice, not full admin/backoffice localization; role management, operations, finance, audit, content and ERP remain PARTIAL. Browser verification is outstanding.
+- `AdminUsersView` now has explicit German and Spanish text for the directory, user profile tabs, relationship/status labels, household/pet counts, masked contact labels, pagination, empty/error/access-denied states and the manual communication form. Profile dates use the selected locale; Persian retains its calendar.
+- Manual-message copy only describes a conditional SMS attempt subject to provider configuration, recipient consent and notification rules; it does not imply delivery. User-entered names, contact details and message bodies remain unchanged.
+- Focused rendering and key/placeholder parity: 17 tests pass. Targeted lint, web typecheck, four-catalog JSON parsing and diff checks pass. This slice remains PARTIAL until browser verification; role management and the rest of admin/backoffice/ERP remain partial.
