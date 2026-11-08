@@ -119,3 +119,11 @@
 - PR #164 adds fa/en/de/es admin operations-dashboard and search copy; it is open and its exact-head CI is pending. It is not merged or live.
 - Attempting the #152 trip-setup sync previously produced locale-catalog, test and docs conflicts; that sync was safely aborted. The existing worktree and PR changes remain preserved for deliberate resolution.
 - Disk remains approximately 251 MiB free; no local production build attempted. No payment worktree was visible and no payment files were changed. Memorial source-image/CDN behavior remains unverified; German/Spanish SMS templates/delivery are not claimed.
+
+## Latest verified checkpoint — 2026-11-08 19:38 UTC
+
+- GitHub `main`: `0b8c4c38d63018d98050e68f4f35c5940810afbb`. Production `/api/health/version`: `c23227cabf0bcfd7dca4a98265a4c1692e016bef`, deployment `github-42513612720-1`; main is ahead, so latest #158 household changes are not LIVE_VERIFIED.
+- PR #159 latest head `92c5e318` is running CI `42515744753`; the earlier run on `37918a6` is stale. Its sync is pushed, and focused lifecycle tests (9) plus typecheck pass. PR #152 latest head `dee81615` is running CI `42515675935`; its earlier run on `35b0fc6` is stale. Travel tests (51 across 9 suites) and typecheck pass after sync.
+- Clinic-notes German/Spanish slice is committed locally as `9b73c87` plus merge commit `8a310e1a`, based on current main. After merge, 12 focused tests, web TypeScript, targeted ESLint, catalog JSON and diff checks pass. No PR yet; authenticated responsive browser checks and permission-denied/offline visual states remain open.
+- The dashboard translations (#164) are on production but DE/ES remain PARTIAL pending authenticated production verification; other admin pages remain partial. Landing HERO composition/image was not changed.
+- Disk free space is approximately 113 MiB. No cleanup was performed. Payment worktrees were not present in the active workspace listing and remain untouched. Memorial original image/CDN access and de/es SMS templates remain unverified/unimplemented.
