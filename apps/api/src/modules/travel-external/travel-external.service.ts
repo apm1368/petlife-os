@@ -134,7 +134,21 @@ export class TravelExternalService {
         if (!stay) throw new NotFoundApiException("External stay");
         c.itemsScanned = 1;
         try {
-          c[await this.ingestRaw(source, adapter, run.id, await adapter.fetchDetails(ctx, stay.sourceListingId))]++;
+          if (code === "JAJIGA") {
+            // Jajiga's public detail page does not carry the pet-filter evidence or the list's location/capacity.
+            // Re-observe the listing in the allowed search result first; an incomplete page is never a removal signal.
+            const discovery = await adapter.discover(ctx);
+            const observed = discovery.items.find((item) => item.externalId === stay.sourceListingId);
+            if (!observed) {
+              status = ExternalSyncStatus.PARTIAL;
+              fail("NOT_IN_OBSERVED_PAGE", "Listing was not on the currently observed first search page; it was not marked removed.", stay.sourceListingId);
+            } else {
+              const detail = await adapter.fetchDetails(ctx, observed.externalId, observed);
+              c[await this.ingestRaw(source, adapter, run.id, detail, observed)]++;
+            }
+          } else {
+            c[await this.ingestRaw(source, adapter, run.id, await adapter.fetchDetails(ctx, stay.sourceListingId))]++;
+          }
         } catch (e) {
           if (!(e instanceof AdapterError && e.category === "LISTING_REMOVED")) throw e;
           // The source says the listing is gone (404 on its own page): a confirmed removal, not a missed crawl.
@@ -150,7 +164,7 @@ export class TravelExternalService {
           try {
             let detail: RawListing | null = null;
             if (raw.stage === "search" && ctx.http.remaining > 0 && (await this.needsDetails(source, raw.externalId))) {
-              detail = await adapter.fetchDetails(ctx, raw.externalId).catch((e) => { if (e instanceof AdapterError && FATAL.includes(e.category)) throw e; return null; });
+              detail = await adapter.fetchDetails(ctx, raw.externalId, raw).catch((e) => { if (e instanceof AdapterError && FATAL.includes(e.category)) throw e; return null; });
             }
             c[await this.ingestRaw(source, adapter, run.id, detail ?? raw, detail ? raw : undefined)]++;
             seen.add(raw.externalId);
@@ -269,7 +283,7 @@ export class TravelExternalService {
   /** `raw` is the richest record (details if fetched); `searchRaw` the list item it came from (its prices are for the search window). */
   private async ingestRaw(source: ExternalTravelSource, adapter: TravelSourceAdapter, runId: string, raw: RawListing, searchRaw?: RawListing): Promise<"created" | "updated" | "unchanged"> {
     const normalized = adapter.normalize(raw);
-    const pet = adapter.extractPetPolicy(raw);
+    const pet = adapter.extractPetPolicy(raw, searchRaw);
     const prices = [...(searchRaw ? adapter.extractPrices(searchRaw) : []), ...adapter.extractPrices(raw)];
     const images = adapter.extractImages(raw);
     return this.ingest(source, { runId, mode: ExternalEntryMode.AUTOMATED, adminUserId: null, sourceType: source.sourceType }, { normalized, pet, prices, images, rawPayload: raw.payload, partial: Boolean(normalized.partial) });

@@ -1229,6 +1229,7 @@ model User {
   checkouts               Checkout[]
   orders                  Order[]
   sellerMemberships       SellerMembership[]
+  catalogProductRequests CatalogProductRequest[] @relation("RequestedCatalogProducts")
   sellerContext           SellerContextPreference?
   inventoryMovements      InventoryMovement[]
   notifications           Notification[]
@@ -2595,6 +2596,7 @@ model SellerOrganization {
   updatedAt DateTime @updatedAt
 
   offers                          SellerOffer[]
+  catalogProductRequests          CatalogProductRequest[]
   orders                          Order[]
   fulfillments                    Fulfillment[]
   shippingQuotes                  ShippingQuote[]
@@ -2687,6 +2689,7 @@ model ProductCategory {
   updatedAt DateTime @updatedAt
 
   products Product[]
+  catalogProductRequests CatalogProductRequest[]
   importJobs CatalogImportJob[]
 
   @@map("product_categories")
@@ -2743,6 +2746,7 @@ model Product {
   variants   ProductVariant[]
   orderItems OrderItem[]
   imports    CatalogImportItem[]
+  catalogProductRequests CatalogProductRequest[] @relation("ResolvedCatalogProductRequests")
 
   @@index([categoryId])
   @@index([status])
@@ -2855,6 +2859,49 @@ enum SellerOfferModerationStatus {
   PENDING_REVIEW
   APPROVED
   REJECTED
+}
+
+enum CatalogProductRequestStatus {
+  PENDING_REVIEW
+  APPROVED
+  MATCHED_EXISTING
+  REJECTED
+}
+
+/// Seller-originated request to add an absent central product. It never includes seller price or inventory;
+/// decision details and provenance remain attached to the request after approval, match, or rejection.
+model CatalogProductRequest {
+  id                   String @id @default(uuid()) @db.Uuid
+  sellerOrganizationId String @db.Uuid
+  sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
+  requestedByUserId    String @db.Uuid
+  requestedByUser      User @relation("RequestedCatalogProducts", fields: [requestedByUserId], references: [id], onDelete: Restrict)
+  categoryId           String? @db.Uuid
+  category             ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  resolvedProductId    String? @db.Uuid
+  resolvedProduct      Product? @relation("ResolvedCatalogProductRequests", fields: [resolvedProductId], references: [id], onDelete: SetNull)
+  reviewedByAdminId    String? @db.Uuid
+  reviewedByAdmin      AdminUser? @relation("ReviewedCatalogProducts", fields: [reviewedByAdminId], references: [id], onDelete: SetNull)
+
+  requestedTitle       String
+  normalizedTitle      String
+  brandName            String?
+  description          String?
+  specifications       Json?
+  sourceUrl            String?
+  sourceName           String?
+  status               CatalogProductRequestStatus @default(PENDING_REVIEW)
+  decisionReason       String?
+  duplicateReview      Json?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  reviewedAt           DateTime?
+
+  @@index([sellerOrganizationId, status, createdAt], map: "catalog_req_seller_status_created_idx")
+  @@index([status, createdAt])
+  @@index([resolvedProductId])
+  @@index([sellerOrganizationId, normalizedTitle, status], map: "catalog_req_seller_norm_title_status_idx")
+  @@map("catalog_product_requests")
 }
 
 model SellerOffer {
@@ -4883,6 +4930,7 @@ model AdminUser {
   trustActions                  TrustAction[]
   reviewedAppeals               Appeal[]
   auditLogs                     AdminAuditLog[]
+  reviewedCatalogProductRequests CatalogProductRequest[] @relation("ReviewedCatalogProducts")
   requestedRefunds              AdminRefundApproval[]             @relation("RequestedRefunds")
   approvedRefunds               AdminRefundApproval[]             @relation("ApprovedRefunds")
   createdCommissionRules        CommissionRule[]
