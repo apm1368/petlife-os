@@ -6,9 +6,14 @@
  * (never a real-time exchange rate), so dividing by 10 here is safe in a
  * way a currency conversion never would be.
  */
-export function formatCurrency(amountRial: number, locale: "fa" | "en" | "de" | "es"): string {
+export function formatCurrency(amountRial: number, locale: string): string {
   const toman = Math.round(amountRial / 10);
-  const localeTag = ({ fa: "fa-IR", en: "en-US", de: "de-DE", es: "es-ES" } as const)[locale];
-  const formatted = toman.toLocaleString(localeTag);
+  const intlLocale: Record<string, string> = {
+    fa: "fa-IR-u-ca-persian-nu-arabext",
+    en: "en-GB",
+    de: "de-DE",
+    es: "es-ES",
+  };
+  const formatted = toman.toLocaleString(intlLocale[locale] ?? "en-GB");
   return locale === "fa" ? `${formatted} تومان` : `${formatted} Toman`;
 }

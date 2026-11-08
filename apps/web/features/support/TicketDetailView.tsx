@@ -11,7 +11,8 @@ import { apiErrorText } from "@/lib/errors/api-error-text";
 import { SupportFrame } from "./SupportFrame";
 
 function formatDate(iso: string, locale: string) {
-  return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "short", timeStyle: "short" }).format(new Date(iso));
+  const intlLocale = locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-US";
+  return new Intl.DateTimeFormat(intlLocale, { dateStyle: "short", timeStyle: "short" }).format(new Date(iso));
 }
 
 /**

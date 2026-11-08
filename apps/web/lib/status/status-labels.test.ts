@@ -17,6 +17,13 @@ describe("status vocabulary", () => {
     expect(statusLabel(null, "fa")).toBe("");
   });
 
+  it("localizes dashboard statuses in German and Spanish", () => {
+    expect(statusLabel("PENDING", "de", "order")).toBe("Zahlung ausstehend");
+    expect(statusLabel("CONFIRMED", "es", "travelBooking")).toBe("Confirmado");
+    expect(statusLabel("TRIALING", "de", "subscription")).toBe("Testphase");
+    expect(statusLabel("NEW_SERVER_STATE", "es")).toBe("Estado desconocido (new server state)");
+  });
+
   it("tones follow meaning, not the code text", () => {
     expect(statusTone("OVERDUE", "vaccination")).toBe("urgent");
     expect(statusTone("UP_TO_DATE", "vaccination")).toBe("success");
