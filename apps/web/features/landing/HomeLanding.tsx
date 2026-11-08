@@ -7,6 +7,7 @@ import { ParkHero } from "./ParkHero";
 import { ParkFooter } from "./ParkFooter";
 import { storyCopy } from "./story-copy";
 import { formatLocaleNumber } from "@/lib/i18n/format";
+import { PublicPetMemorialSection } from "./PublicPetMemorialSection";
 import { LandingPublicArticles } from "./LandingPublicArticles";
 
 const facts = [Fingerprint, HeartPulse, CalendarDays, Images];
@@ -21,6 +22,7 @@ export function HomeLanding({ locale }: { locale: RouteLocale }) {
     <ParkHeader locale={locale} />
     <main id="lp-main" tabIndex={-1}>
       <ParkHero locale={locale} />
+      <PublicPetMemorialSection />
       <section id="park-about" className="park-story park-identity" aria-labelledby="park-identity-title">
         <div className="park-identity__photos">
           <Image unoptimized src={photo("cookie")} alt={c.cookieAlt} width={700} height={800} className="park-identity__cookie" />

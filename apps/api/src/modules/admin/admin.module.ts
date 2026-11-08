@@ -118,6 +118,9 @@ import { AdminNgoMembersController } from "./animal-support/admin-ngo-members.co
 import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
 import { AdminReviewModerationController } from "./reviews/admin-review-moderation.controller";
 import { AdminReviewModerationService } from "./reviews/admin-review-moderation.service";
+import { AdminPetMemorialController } from "./memorials/admin-pet-memorial.controller";
+import { AdminPetMemorialService } from "./memorials/admin-pet-memorial.service";
+import { MemoriesModule } from "../memories/memories.module";
 
 /**
  * The internal-platform module (Handoff 11) — identity/auth, audit
@@ -142,6 +145,7 @@ import { AdminReviewModerationService } from "./reviews/admin-review-moderation.
     CommunityModule,
     BookingModule,
     PaymentsModule,
+    MemoriesModule,
   ],
   controllers: [
     AdminMeController,
@@ -184,6 +188,7 @@ import { AdminReviewModerationService } from "./reviews/admin-review-moderation.
     AdminLostPetController,
     AdminNgoMembersController,
     AdminReviewModerationController,
+    AdminPetMemorialController,
   ],
   providers: [
     SupportOpsService,
@@ -215,6 +220,7 @@ import { AdminReviewModerationService } from "./reviews/admin-review-moderation.
     AdminCustomerService,
     AdminUsersService,
     AdminReviewModerationService,
+    AdminPetMemorialService,
     InternalNoteService,
     SupportCaseService,
     SupportNotificationListener,
