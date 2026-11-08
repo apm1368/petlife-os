@@ -15,7 +15,9 @@ interface ParkCopy {
   imageSrc: string; title: string; description: string; subline: string; explore: string;
   imageAlt: string; destinationsLabel: string; introTitle: string; introBody: string;
   brandTagline: string; partnerSignIn: string; partnerJoin: string;
-  memberJoin: string; home: string; about: string; partners: string; photoCredits: string;
+  memberJoin: string; signIn: string; dashboard: string; skip: string;
+  navLabel: string; menuLabel: string; closeMenuLabel: string;
+  home: string; about: string; partners: string; photoCredits: string;
   services: Record<ParkDestinationKey, { title: string; hint: string }>;
   creditsTitle: string; creditsBody: string; backdropCredit: string; shopCredit: string; processing: string; licence: string;
 }
@@ -32,7 +34,9 @@ export const parkCopy: Record<RouteLocale, ParkCopy> = {
     introBody: "از سلامت و زیبایی تا سفر و اقامت، همه‌چیز برای یک زندگی بهتر در کنار حیوان خانگی شما.",
     brandTagline: "یک جهان برای حیوانات خانگی",
     partnerSignIn: "ورود همکار", partnerJoin: "عضویت همکار",
-    memberJoin: "عضویت", home: "خانه", about: "دربارهٔ ما", partners: "برای همکاران", photoCredits: "اعتبار تصاویر",
+    memberJoin: "عضویت", signIn: "ورود", dashboard: "داشبورد من", skip: "رفتن به محتوای اصلی",
+    navLabel: "ناوبری اصلی", menuLabel: "باز کردن منو", closeMenuLabel: "بستن منو",
+    home: "خانه", about: "دربارهٔ ما", partners: "برای همکاران", photoCredits: "اعتبار تصاویر",
     services: {
       shop: { title: "پت‌شاپ", hint: "همهٔ نیازهای روزانه" },
       vet: { title: "دامپزشکی", hint: "سلامتی در اولویت" },
@@ -63,7 +67,9 @@ export const parkCopy: Record<RouteLocale, ParkCopy> = {
     introBody: "From health and grooming to travel and stays. Everything for a better life with your pet.",
     brandTagline: "A world for pets",
     partnerSignIn: "Partner sign in", partnerJoin: "Become a partner",
-    memberJoin: "Join", home: "Home", about: "About us", partners: "For partners", photoCredits: "Image credits",
+    memberJoin: "Join", signIn: "Sign in", dashboard: "My dashboard", skip: "Skip to main content",
+    navLabel: "Main navigation", menuLabel: "Open menu", closeMenuLabel: "Close menu",
+    home: "Home", about: "About us", partners: "For partners", photoCredits: "Image credits",
     services: {
       shop: { title: "Pet shop", hint: "Everyday essentials" },
       vet: { title: "Veterinary", hint: "Health comes first" },
@@ -92,7 +98,9 @@ export const parkCopy: Record<RouteLocale, ParkCopy> = {
     introBody: "Von Gesundheit und Pflege bis zu Reisen und Unterkunft – für ein besseres Leben mit deinem Tier.",
     brandTagline: "Eine Welt für Haustiere",
     partnerSignIn: "Partner-Login", partnerJoin: "Partner werden",
-    memberJoin: "Registrieren", home: "Startseite", about: "Über uns", partners: "Für Partner", photoCredits: "Bildnachweise",
+    memberJoin: "Registrieren", signIn: "Anmelden", dashboard: "Mein Dashboard", skip: "Zum Hauptinhalt",
+    navLabel: "Hauptnavigation", menuLabel: "Menü öffnen", closeMenuLabel: "Menü schließen",
+    home: "Startseite", about: "Über uns", partners: "Für Partner", photoCredits: "Bildnachweise",
     services: {
       shop: { title: "Tierbedarf", hint: "Für den Alltag" },
       vet: { title: "Tiermedizin", hint: "Gesundheit zuerst" },
@@ -121,7 +129,9 @@ export const parkCopy: Record<RouteLocale, ParkCopy> = {
     introBody: "De la salud y el cuidado a los viajes y el alojamiento: todo para vivir mejor con tu mascota.",
     brandTagline: "Un mundo para las mascotas",
     partnerSignIn: "Acceso para profesionales", partnerJoin: "Hazte colaborador",
-    memberJoin: "Crear cuenta", home: "Inicio", about: "Quiénes somos", partners: "Profesionales", photoCredits: "Créditos de imagen",
+    memberJoin: "Crear cuenta", signIn: "Iniciar sesión", dashboard: "Mi panel", skip: "Ir al contenido principal",
+    navLabel: "Navegación principal", menuLabel: "Abrir menú", closeMenuLabel: "Cerrar menú",
+    home: "Inicio", about: "Quiénes somos", partners: "Profesionales", photoCredits: "Créditos de imagen",
     services: {
       shop: { title: "Tienda para mascotas", hint: "Lo esencial cada día" },
       vet: { title: "Veterinaria", hint: "La salud es lo primero" },
