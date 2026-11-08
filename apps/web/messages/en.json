@@ -5654,7 +5654,7 @@
     "accepted": "Accepted on {date}",
     "withdrawn": "Withdrawn on {date}",
     "otherSource": "Recorded on the account",
-    "limit": "Up to 200 recent events plus older stored versions without recorded events. This section does not change your consents.",
+    "limit": "Up to {limit, number} recent events plus older stored versions without recorded events. This section does not change your consents.",
     "kinds": {
       "TERMS": "Terms of use",
       "PRIVACY": "Privacy",
