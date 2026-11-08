@@ -4,7 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
-import { Avatar, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { Avatar, Dialog, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import { PetLifecycleStatus, type PetAccessFlags, type PetDto } from "@petlife/types";
 import { petsService } from "@/services/pets.service";
 import { SystemState, systemStateFor, type SystemStateKind } from "@/features/system/SystemState";
@@ -88,6 +88,7 @@ export function PetContextShell({ petId, children }: { petId: string; children: 
   const [pet, setPet] = useState<PetDto | null>(null);
   const [access, setAccess] = useState<PetAccessFlags | null>(null);
   const [error, setError] = useState<SystemStateKind | null>(null);
+  const [photoOpen, setPhotoOpen] = useState(false);
   const { pets: householdPets, activePetId, switchActivePet } = useActivePet();
   // The pet on screen is the pet in context: keep the header's active-pet control in step with it
   // (household pets only — a pet shared with you from another household never becomes "active").
@@ -133,7 +134,16 @@ export function PetContextShell({ petId, children }: { petId: string; children: 
     <div className="pet-shell">
       <header className="pet-hero">
         <div className="pet-hero__identity">
-          <div className="pet-hero__photo"><Avatar src={pet.photoUrl} name={pet.name} size="lg" /></div>
+          <button
+            type="button"
+            className="pet-hero__photo-button"
+            aria-label={pet.photoUrl ? (locale === "fa" ? `نمایش تصویر بزرگ ${pet.name}` : `View larger photo of ${pet.name}`) : (locale === "fa" ? `تصویر ${pet.name} ثبت نشده` : `No photo set for ${pet.name}`)}
+            disabled={!pet.photoUrl}
+            onClick={() => setPhotoOpen(true)}
+          >
+            <span className="pet-hero__photo"><Avatar src={pet.photoUrl} name={pet.name} size="lg" /></span>
+            {pet.photoUrl ? <span className="pet-hero__photo-hint">{locale === "fa" ? "نمایش تصویر" : "View photo"}</span> : null}
+          </button>
           <div className="min-w-0">
             <div className="pet-hero__title">
               <p className="pet-hero__name">{pet.name}</p>
@@ -152,6 +162,13 @@ export function PetContextShell({ petId, children }: { petId: string; children: 
         </div>
         {access.canEditIdentity ? <Link className="pet-hero__edit" href={base + "?edit=identity"}>{c.edit}</Link> : null}
       </header>
+
+      {pet.photoUrl ? (
+        <Dialog open={photoOpen} onClose={() => setPhotoOpen(false)} title={pet.name}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- user-owned pet profile image; shown in an accessible lightbox */}
+          <img src={pet.photoUrl} alt={locale === "fa" ? `تصویر ${pet.name}` : `${pet.name}'s photo`} className="pet-hero__photo-expanded" />
+        </Dialog>
+      ) : null}
 
       {lifecycle.message ? (
         <div className={"my-4 border-s-4 px-4 py-3 text-sm leading-7 " + lifecycle.className} role="status">

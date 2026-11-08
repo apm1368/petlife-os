@@ -42,7 +42,8 @@ export function HouseholdInvitationView({ token }: { token: string }) {
   const router = useRouter();
   const [data, setData] = useState<Invitation | null>(null);
   const [failure, setFailure] = useState<Failure | null>(null);
-  const [busy, setBusy] = useState<"accept" | "decline" | null>(null);
+  const [busy, setBusy] = useState<"request" | "decline" | null>(null);
+  const [requestSubmitted, setRequestSubmitted] = useState(false);
 
   const load = useCallback(async () => {
     setFailure(null);
@@ -57,12 +58,12 @@ export function HouseholdInvitationView({ token }: { token: string }) {
     void load();
   }, [load]);
 
-  async function act(kind: "accept" | "decline") {
+  async function act(kind: "request" | "decline") {
     setBusy(kind);
     try {
-      if (kind === "accept") {
-        await householdsService.acceptInvitation(token);
-        router.replace(`/${locale}/profile/household`);
+      if (kind === "request") {
+        await householdsService.requestMembership(token);
+        setRequestSubmitted(true);
       } else {
         await householdsService.declineInvitation(token);
         router.replace(`/${locale}/profile`);
@@ -89,22 +90,24 @@ export function HouseholdInvitationView({ token }: { token: string }) {
   }
   if (!data) return <Skeleton className="h-72 w-full" aria-label={t("در حال بارگذاری", "Loading")} />;
 
-  const inviter = data.inviter?.displayName || t("یکی از نزدیکانتان", "Someone you know");
-  const household = data.household.name || "opetlife";
+  const pending = requestSubmitted || data.requestPending;
 
   return (
     <div className="mx-auto max-w-2xl">
       <ContextSurface className="flex flex-col gap-5">
-        <p className="experience-eyebrow">{t("دعوت خانواده", "HOUSEHOLD INVITATION")}</p>
-        <h1 className="text-page-title">{t(`${inviter} شما را به ${household} دعوت کرده است`, `${inviter} invited you to ${household}`)}</h1>
-        <p className="text-body text-text-secondary">{t("با پذیرش، حساب شما مستقل می‌ماند و فقط دسترسی‌هایی که در این دعوت آمده فعال می‌شود. مدیر خانواده بعداً می‌تواند آن را تغییر دهد و شما هر زمان می‌توانید خانواده را ترک کنید.", "Your account stays your own; only the access described in this invitation is switched on. The owner can adjust it later, and you can leave the household at any time.")}</p>
+        <p className="experience-eyebrow">{t("درخواست عضویت خانوادگی", "HOUSEHOLD MEMBERSHIP REQUEST")}</p>
+        <h1 className="text-page-title">{pending ? t("درخواست شما در انتظار بررسی مدیر خانواده است", "Your request is waiting for the household owner") : t("درخواست پیوستن به یک خانواده", "Request to join a household")}</h1>
+        <p className="text-body text-text-secondary">{t("شمارهٔ واردشده در دعوت: ", "Invited mobile: ")}<bdi dir="ltr">{data.contactMasked}</bdi></p>
+        <p className="text-body text-text-secondary">{data.phoneVerified
+          ? t("شمارهٔ این حساب تأیید شده است؛ با این حال عضویت و دسترسی به پت‌ها فقط پس از تأیید مدیر خانواده فعال می‌شود.", "This account's mobile is verified. Household membership and pet access still begin only after the owner approves.")
+          : t("این شماره در حساب شما تأیید نشده است. تطبیق شماره اثبات مالکیت آن نیست؛ این پیوند فقط درخواست عضویت می‌سازد و تا تأیید مدیر هیچ دسترسی خانوادگی یا اطلاعات پت فعال نمی‌شود.", "This account's mobile is not verified. A matching number does not prove ownership; this link only submits a request, and no household access or pet information is available before owner approval.")}</p>
         <p className="text-metadata text-text-secondary">
           {t("انقضا", "Expires")}: <time dateTime={data.expiresAt}>{formatAccountDate(data.expiresAt, locale, true)}</time>
         </p>
-        <div className="flex flex-wrap gap-2">
-          <Button isLoading={busy === "accept"} disabled={busy !== null} onClick={() => act("accept")}>{t("پذیرفتن دعوت", "Accept invitation")}</Button>
-          <Button variant="secondary" isLoading={busy === "decline"} disabled={busy !== null} onClick={() => act("decline")}>{t("رد کردن", "Decline")}</Button>
-        </div>
+        {pending ? <p role="status" className="rounded-xl border border-border-subtle p-3 text-body">{t("درخواست ثبت شده است. پس از تصمیم مدیر خانواده، نتیجه در همین حساب قابل پیگیری است.", "Your request was submitted. You can follow the owner's decision in your account.")}</p> : <div className="flex flex-wrap gap-2">
+          <Button isLoading={busy === "request"} disabled={busy !== null} onClick={() => act("request")}>{t("درخواست عضویت", "Request membership")}</Button>
+          <Button variant="secondary" isLoading={busy === "decline"} disabled={busy !== null} onClick={() => act("decline")}>{t("رد کردن دعوت", "Decline invitation")}</Button>
+        </div>}
       </ContextSurface>
     </div>
   );

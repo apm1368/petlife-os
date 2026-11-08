@@ -29,7 +29,7 @@ const COPY = {
     cancel: "انصراف",
     save: "ذخیره",
     failed: "ذخیره انجام نشد. دوباره تلاش کنید.",
-    photoFailed: "عکس بارگذاری نشد؛ بقیهٔ تغییرها ذخیره شد.",
+    photoFailed: "عکس بارگذاری نشد؛ هیچ‌کدام از تغییرها ذخیره نشد. دوباره تلاش کنید.",
   },
   en: {
     title: "Edit details",
@@ -53,7 +53,7 @@ const COPY = {
     cancel: "Cancel",
     save: "Save",
     failed: "Saving didn't work. Please try again.",
-    photoFailed: "The photo didn't upload; the other changes were saved.",
+    photoFailed: "The photo didn't upload, so none of the changes were saved. Please try again.",
   },
 } as const;
 
@@ -90,7 +90,17 @@ export function EditPetIdentity({ pet, locale, onCancel, onSaved }: { pet: PetDt
     setSaving(true);
     setMessage(null);
     try {
-      let updated = await petsService.update(pet.id, {
+      let nextPhotoUrl: string | null | undefined;
+      if (photo) {
+        const contentType = photo.type === "image/png" || photo.type === "image/webp" ? photo.type : "image/jpeg";
+        const target = await petsService.createPhotoUploadUrl(pet.id, contentType);
+        const put = await fetch(target.uploadUrl, { method: "PUT", body: photo, headers: target.headers });
+        if (!put.ok) throw new Error(String(put.status));
+        nextPhotoUrl = target.publicUrl;
+      } else if (removePhoto) {
+        nextPhotoUrl = null;
+      }
+      const updated = await petsService.update(pet.id, {
         name: name.trim(),
         sex,
         breed: breed.trim() || null,
@@ -99,25 +109,11 @@ export function EditPetIdentity({ pet, locale, onCancel, onSaved }: { pet: PetDt
         neuteredStatus: neutered,
         ...(birthDate ? { birthDate } : {}),
         ...(Number(toLatin(weight)) > 0 ? { latestWeightValue: Number(toLatin(weight)), latestWeightUnit: unit } : weight.trim() === "" ? { latestWeightValue: null, latestWeightUnit: null } : {}),
-        ...(removePhoto && !photo ? { photoUrl: null } : {}),
+        ...(nextPhotoUrl !== undefined ? { photoUrl: nextPhotoUrl } : {}),
       });
-      if (photo) {
-        try {
-          const contentType = photo.type === "image/png" || photo.type === "image/webp" ? photo.type : "image/jpeg";
-          const target = await petsService.createPhotoUploadUrl(pet.id, contentType);
-          const put = await fetch(target.uploadUrl, { method: "PUT", body: photo, headers: target.headers });
-          if (!put.ok) throw new Error(String(put.status));
-          updated = await petsService.update(pet.id, { photoUrl: target.publicUrl });
-        } catch {
-          setMessage(c.photoFailed);
-          // onSaved closes the editor: keep the partial-save error and photo draft visible.
-          // A retry must be an explicit user action, never an automatic upload.
-          return;
-        }
-      }
       onSaved(updated);
     } catch {
-      setMessage(c.failed);
+      setMessage(photo ? c.photoFailed : c.failed);
     } finally {
       setSaving(false);
     }
