@@ -68,5 +68,23 @@
       "passwordMismatch": "Die Passwörter stimmen nicht überein.",
       "genericError": "Das Passwort konnte nicht geändert werden. Bitte versuche es erneut."
     }
+  },
+  "consentHistory": {
+    "title": "Einwilligungsverlauf",
+    "intro": "Gespeicherte Einwilligungen und Widerrufe für Ihr Konto.",
+    "open": "Verlauf anzeigen",
+    "close": "Verlauf ausblenden",
+    "loadFailed": "Der Verlauf konnte nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "loading": "Wird geladen …",
+    "currentVersion": "Aktuelle Version",
+    "empty": "Keine Einwilligung gespeichert.",
+    "version": "Version",
+    "accepted": "Angenommen am {date}",
+    "withdrawn": "Widerrufen am {date}",
+    "otherSource": "Im Konto gespeichert",
+    "limit": "Bis zu {limit, number} aktuelle Ereignisse sowie ältere gespeicherte Versionen ohne protokollierte Ereignisse. In diesem Bereich können Sie Ihre Einwilligungen nicht ändern.",
+    "kinds": {"TERMS": "Nutzungsbedingungen", "PRIVACY": "Datenschutz", "MARKETING": "Marketingnachrichten"},
+    "sources": {"PRIVACY_CENTER": "Im Datenschutzbereich gespeichert", "LEGACY_RECORD": "Älterer gespeicherter Stand; der vollständige Ereignisverlauf ist nicht verfügbar.", "ONBOARDING": "Bei der Registrierung gespeichert"}
   }
 }
