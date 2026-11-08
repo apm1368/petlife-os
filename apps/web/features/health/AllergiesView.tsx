@@ -6,6 +6,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import { AllergySeverity, type AllergyDto } from "@petlife/types";
 import { healthService } from "@/services/health.service";
+import { statusLabel } from "@/lib/status/status-labels";
+import { HealthLoadFailure } from "./HealthLoadFailure";
 
 export function AllergiesView({ petId }: { petId: string }) {
   const t = useTranslations("health.allergies");
@@ -17,9 +19,13 @@ export function AllergiesView({ petId }: { petId: string }) {
   const [reaction, setReaction] = useState("");
   const [severity, setSeverity] = useState<AllergySeverity | "">("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadError, setLoadError] = useState<unknown | null>(null);
+  const [saveFailed, setSaveFailed] = useState(false);
 
   async function load() {
-    setAllergies(await healthService.listAllergies(petId));
+    setLoadError(null);
+    try { setAllergies(await healthService.listAllergies(petId)); }
+    catch (error) { setLoadError(error); setAllergies(null); }
   }
 
   useEffect(() => {
@@ -30,6 +36,7 @@ export function AllergiesView({ petId }: { petId: string }) {
   async function submit() {
     if (!name.trim()) return;
     setIsSubmitting(true);
+    setSaveFailed(false);
     try {
       await healthService.createAllergy(petId, {
         name: name.trim(),
@@ -41,11 +48,14 @@ export function AllergiesView({ petId }: { petId: string }) {
       setSeverity("");
       setIsAdding(false);
       await load();
+    } catch {
+      setSaveFailed(true);
     } finally {
       setIsSubmitting(false);
     }
   }
 
+  if (loadError) return <HealthLoadFailure error={loadError} onRetry={load} />;
   if (!allergies) return <Skeleton className="h-48 w-full" aria-label={tCommon("loading")} />;
 
   return (
@@ -61,6 +71,7 @@ export function AllergiesView({ petId }: { petId: string }) {
 
       {isAdding ? (
         <ContextSurface className="flex flex-col gap-3">
+          {saveFailed ? <p role="alert" className="text-sm text-error">{t("saveFailed")}</p> : null}
           <Input label={t("name")} value={name} onChange={(e) => setName(e.target.value)} autoFocus />
           <Input label={t("reactionOptional")} value={reaction} onChange={(e) => setReaction(e.target.value)} />
           <Select
@@ -93,7 +104,7 @@ export function AllergiesView({ petId }: { petId: string }) {
           <div>
             <Link href={`/${locale}/pets/${petId}/health/allergies/${allergy.id}`} className="text-body text-text-primary underline-offset-4 hover:underline">{allergy.name}</Link>
             {allergy.reaction ? <p className="text-metadata text-text-secondary">{allergy.reaction}</p> : null}
-            <p className="text-metadata text-text-secondary">{t("source")}: {allergy.sourceType}</p>
+            <p className="text-metadata text-text-secondary">{t("source")}: {statusLabel(allergy.sourceType, locale as "fa" | "en" | "de" | "es", "source")}</p>
           </div>
           {allergy.severity ? <StatusLabel tone="attention">{t(`severity_${allergy.severity}`)}</StatusLabel> : null}
         </ContextSurface>

@@ -17,4 +17,14 @@ describe("BasicHealthRecordEditor", () => {
   expect(screen.queryByRole("button", { name: "Remove" })).toBeNull(); fireEvent.click(screen.getByRole("button", { name: "Request a record correction" })); fireEvent.change(screen.getByRole("textbox"), { target: { value: "Reaction needs clarification" } }); fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
   await waitFor(() => expect(saved).toHaveBeenCalled()); expect(healthAdvancedService.createCorrection).toHaveBeenCalledWith("p1", { targetType: "ALLERGY", targetId: "a1", correctionText: "Reaction needs clarification" }); expect(healthService.updateAllergy).not.toHaveBeenCalled(); expect(healthService.deleteAllergy).not.toHaveBeenCalled();
  });
+ it.each([
+  ["de", "Entfernen", "Diesen Eintrag entfernen?"],
+  ["es", "Eliminar", "¿Eliminar este elemento?"],
+ ] as const)("localizes the destructive confirmation in %s", (locale, remove, confirm) => {
+  const ownerRecord = { id: "a1", name: "Pollen", reaction: "Rash", severity: "MILD", sourceType: "OWNER" } as never;
+  renderWithIntl(<BasicHealthRecordEditor petId="p1" kind="allergy" record={ownerRecord} onSaved={vi.fn()} onDeleted={vi.fn()} />, locale);
+  fireEvent.click(screen.getByRole("button", { name: remove }));
+  expect(screen.getByRole("dialog", { name: confirm })).toBeTruthy();
+  expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+ });
 });
