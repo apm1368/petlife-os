@@ -42,7 +42,7 @@ export function AccountNav() {
             </Link>
           );
         })}
-        <Link href={`${base}/clinic-notes`} aria-current={pathname===`${base}/clinic-notes`?"page":undefined}><span>{({ fa: "یادداشت‌های مشترک درمانگاه", en: clinic("sharedNotesTitle"), de: "Geteilte Kliniknotizen", es: "Notas compartidas de la clínica" })[locale]}</span><small>{({ fa: "یادداشت‌های مراقبتی با دسترسی خانواده", en: clinic("navHint"), de: "Pflegenotizen, die mit der Familie geteilt werden", es: "Notas de cuidado compartidas con la familia" })[locale]}</small></Link>
+        <Link href={`${base}/clinic-notes`} aria-current={pathname===`${base}/clinic-notes`?"page":undefined}><span>{clinic("sharedNotesTitle")}</span><small>{clinic("navHint")}</small></Link>
       </nav>
       {!onOverview ? (
         <Link href={base} className="account-back">

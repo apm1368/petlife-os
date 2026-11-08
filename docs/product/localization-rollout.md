@@ -78,6 +78,7 @@ Status is per page family, not per shared header. `COMPLETE` means all applicati
 | Health overview, allergy/condition/medication lists, vaccination summary/detail | Partial | Partial | Partial | Partial | PR #163 merged to main at `d48ebdda` with explicit four-locale body, form actions, status/source labels, empty/loading/error/offline/forbidden states and destructive dialogs. The PR head had 85 focused tests plus typecheck/lint and four-catalog JSON validation. Authenticated responsive browser checks are outstanding; not production-verified. |
 | Pet lifecycle `/[locale]/profile/household/pets/[petId]/lifecycle` | Partial | Partial | Partial | Partial | Lifecycle actions, confirmation dialog, load/save errors and retry have fa/en/de/es copy; lifecycle status codes have German/Spanish labels. PR #159 merged after 9 focused tests, TypeScript and exact-head CI passed. Responsive browser inspection and other status domains remain open. |
 | Advanced health records, documents, memories, activity and expenses | Partial | Partial | Partial | Partial | Medical document list/detail application text, status/source labels and upload/download feedback now have four-locale copy and render tests. Advanced clinical records, timeline, memories, activity and expenses page bodies/forms/states remain open; document workflows still need broader interaction and responsive-browser verification. |
+| Member clinic notes `/[locale]/profile/clinic-notes` | Partial | Partial | Partial | Partial | German/Spanish page chrome, loading/empty/error/offline/access-denied/retry, refresh action, limit notice and localized date formatting have 16 page tests; account navigation has 4 tests. Clinic-authored note bodies remain original content. Authenticated responsive browser verification remains outstanding. |
 | Shop discovery, product detail and cart | Partial | Partial | Partial | Partial | PR #146 merged to main at `ea0f74a7` after green CI and 39 focused tests plus typecheck/lint. Responsive browser inspection and production behavior remain unverified, so this family is not marked complete. |
 | Checkout/orders, seller and commerce backoffice | Partial | Partial | Partial | Partial | Page content, validation and transaction/operational states remain open; separate dependent PRs require retargeting after #146. |
 | Customer support `/[locale]/support` and tickets | Partial | Partial | Partial | Partial | German/Spanish copy covers customer support home, list/create/detail, statuses, categories and linked-context labels; 18 focused support tests passed with typecheck/lint. PR #147 merged to main at `eb5c68ea` after exact-head CI passed; admin support/help/legal remain partial. |
@@ -90,7 +91,7 @@ Status is per page family, not per shared header. `COMPLETE` means all applicati
 | Help Center, support and legal | Partial | Partial | Partial | Partial | Help/support workflow and published legal copy require separate verification; legal body content must remain authoritative, not machine-fabricated. |
 | Admin, backoffice and ERP | Partial | Partial | Partial | Partial | Shared navigation is localized; tables, charts, permissions, operational dialogs and state copy remain open. |
 | Admin audit `/[locale]/admin/audit` and shared admin shell | Partial | Partial | Partial | Partial | PR #156 merged to main at `b0ec95c4`; CI passed on its exact head. Audit labels, empty/loading/error/retry, role/access shell, navigation groups and links have 19 focused tests. Responsive inspection remains pending; other admin routes remain partial. |
-| Admin dashboard `/[locale]/admin` | Complete | Complete | Partial | Partial | Dashboard cards, permission-filtered queues, system health/status labels, operational search, empty/error/loading states and date formatting have fa/en/de/es copy. User/admin-entered task titles, support subjects and worker names remain source data. Seven focused render/catalog tests pass; authenticated DE/ES browser verification is outstanding. Other admin/backoffice/ERP routes remain partial. |
+| Admin dashboard `/[locale]/admin` | Complete | Complete | Partial | Partial | Dashboard cards, permission-filtered queues, system health/status labels, operational search, empty/error/loading states and date formatting have fa/en/de/es copy; seven focused render/catalog tests pass. Authenticated DE/ES production/admin browser verification is still outstanding. User/admin-entered task titles, support subjects and worker names remain source data. Other admin/backoffice/ERP routes remain partial. |
 | Notifications and message templates | Partial | Partial | Partial | Partial | PR #148 merged to main at `afefa932`; CI passed on exact head `615f6350`. Notification-center/preferences chrome, controls and timestamps are translated; server-provided titles/bodies stay unchanged. Backend errors and other surfaces remain partial. German/Spanish SMS templates and provider delivery are not implemented or simulated. |
 
 ### Public shell and preview navigation follow-up
@@ -182,21 +183,35 @@ Lifecycle actions, status labels, confirmation dialog, owner note, loading/retry
 - Verification on final PR #163 head: 85 focused tests, four-locale catalog parity, type build, web typecheck/lint, JSON parse and `git diff --check` passed. Merged at `d48ebdda`; the production deploy is still running and authenticated responsive/browser checks have not been done. Keep PARTIAL and not LIVE_VERIFIED.
 - Advanced clinical records, documents, timeline, care reminders, memories, activity and expenses remain PARTIAL.
 
-## Travel hub and trip workflow (PR #152 — synchronized with current main)
-
-German and Spanish copy covers trip setup, trip detail/hub, readiness/passport, external stays, marketplace search and legacy trip editing. User notes and source listing/provider content remain original; source prices/availability are observations, not a booking guarantee. The change adds no Jajiga connector, map, SMS or reservation behavior. After syncing with PR #159, 9 travel/travel-market/external-stay render suites passed 51 tests and web TypeScript passed. The previous exact-head CI passed before this final sync; fresh hosted CI is pending. This work exposed and fixed duplicate `rollout` root keys in de/es that had hidden trip-editor translations; a route-level render test now exercises those labels. Responsive browser verification is outstanding, so these routes remain PARTIAL.
-
-## Admin operations dashboard (PR #164 — merged to main)
+## Admin operations dashboard — local batch `codex/i18n-admin-dashboard`
 
 - Added explicit German and Spanish translations for the dashboard's stat cards, queue and system panels, operational-search labels/empty/error messages, health states and permission-independent UI. System dates now follow fa Jalali or the selected Gregorian locale (`en-US`, `de-DE`, `es-ES`) in Tehran time.
 - Known system/worker statuses are translated; unknown status values remain visible as source diagnostics rather than being guessed. User/admin-entered task titles, case subjects and worker identifiers remain unchanged.
-- Seven focused dashboard tests pass, including translated populated states, translation-catalog key parity and absence of Persian UI/fallback English markers. Web TypeScript check passed. PR #164 merged to main at `c23227c`; this is the current production SHA. This page-level UI coverage is not authenticated/admin-browser verified; the remainder of admin/backoffice/ERP is still PARTIAL.
+- Seven focused dashboard tests pass, including translated populated states, translation-catalog key parity and absence of Persian UI/fallback English markers. Web TypeScript check passed. This page-level UI coverage is not yet production/admin-browser verified; the remainder of admin/backoffice/ERP is still PARTIAL.
+
+## Member clinic notes (`/[locale]/profile/clinic-notes`) — PR #165
+
+- German/Spanish UI copy covers title/intro, note limit, refresh, loading, empty, generic error, offline, access-denied and retry. API 401/403 responses are distinct from offline/network failures.
+- Dates follow the selected fa/en/de/es locale while preserving Persian Jalali behavior. Clinic-authored note bodies remain unchanged.
+- Sixteen clinic-page tests and four navigation tests pass (20 total), including all four locale variants for offline and access-denied states. TypeScript, targeted lint, four-catalog JSON parsing and diff checks pass. Authenticated responsive browser verification remains open; mark PARTIAL.
 
 ## Latest checkpoint — 2026-11-08 after PR #159 merge
 
-- GitHub main is `315523247bc6bf837d8763f5a31542cf81a695db`; production `/api/health/version` remains `c23227cabf0bcfd7dca4a98265a4c1692e016bef` (`github-42513612720-1`), so main is ahead of production.
-- PR #159 merged through the normal squash path at `3155232`; its synchronized head had 9 focused tests, TypeScript and exact-head CI passing. Pet lifecycle is still PARTIAL pending responsive browser verification and other lifecycle-linked routes.
-- PR #152 is synchronized with prior main `0b8c4c3` at head `dee8161`, passed exact-head CI `42515675935`, plus 51 travel tests across 9 suites and TypeScript. It is clean but has no review recorded; travel remains PARTIAL pending browser verification.
-- PR #165 clinic-notes current pushed head is `c93b3077`; its CI is running. Sixteen focused tests, TypeScript, targeted lint, catalog parsing and diff checks pass locally. It remains PARTIAL pending authenticated visual verification.
-- Admin dashboard translations are deployed at `c23227c`, but authenticated rendering is not checked; de/es dashboard remains PARTIAL. The landing HERO has not changed.
-- Disk space is about 112 MiB; no cleanup or build was performed. Payment worktrees are not visible in the current workspace and were not touched. Memorial original-image/CDN privacy and SMS delivery/templates remain unverified/unimplemented.
+- GitHub main is `315523247bc6bf837d8763f5a31542cf81a695db`; production `/api/health/version` remains `c23227cabf0bcfd7dca4a98265a4c1692e016bef` (`github-42513612720-1`), so main is ahead.
+- PR #159 merged at `3155232` after 9 focused tests, TypeScript and exact-head CI passed. Pet lifecycle remains PARTIAL pending responsive browser verification and linked routes.
+- PR #152 was just synchronized through #159. Its current local head is being tested: 9 travel suites (51 tests) and TypeScript pass; fresh hosted CI is required after push. Travel remains PARTIAL pending browser verification.
+- PR #165's last pushed head is `c93b3077`; CI is running on that older head. Local follow-up adds fa/en offline and access-denied strings and expands focused coverage to 20 tests; these changes are not yet pushed or covered by hosted CI. It remains PARTIAL pending authenticated visual verification.
+- The admin dashboard is deployed at `c23227c`; authenticated DE/ES rendering is not verified. The landing HERO is unchanged. Disk is about 112 MiB; payment worktrees were not visible or modified. Memorial source-image/CDN privacy and SMS delivery/templates remain unverified/unimplemented.
+
+## Current checkpoint — 2026-11-08 20:00 UTC
+
+- `main` is `315523247bc6bf837d8763f5a31542cf81a695db`; production still reports `0b8c4c38d63018d98050e68f4f35c5940810afbb` (`github-42514880273-1`) while deploy `42516946217` runs. No new production behavior is verified.
+- #152 is based on `main` at `350f4d1d`; exact-head CI `42517206168` is in progress. Local validation after syncing #159: 51 travel tests and TypeScript pass. It remains PARTIAL pending hosted CI and browser checks.
+- #165's last pushed head is `c93b3077`, with CI `42516710325` still running on that older tree. Local follow-up adds fa/en offline and access-denied copy and has 16 clinic-page tests passing; it is not yet pushed or hosted-CI verified. The route remains PARTIAL.
+- Dashboard, travel and clinic pages have not been authenticated-browser verified on production. Landing HERO is unchanged. Disk is 107 MiB; no payment worktree was visible or changed. Memorial original-image/CDN privacy and German/Spanish SMS templates/delivery remain unverified/unimplemented.
+
+## Trip setup follow-up after PR #165 — 2026-11-08
+
+- PR #152 is synchronized locally through main `8d892b2` after clinic-notes PR #165 merged. Its previous exact-head CI started before that base update and is not final proof.
+- Trip setup/hub remains PARTIAL: listing/detail and authenticated responsive browser behavior are not fully covered, and no live availability or booking is claimed. Source-authored content is preserved and the exact source link is the final reservation path.
+- Focused post-sync tests and exact-head CI are required before merge; production behavior must be checked after deployment.

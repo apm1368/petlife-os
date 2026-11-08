@@ -1491,6 +1491,19 @@
     },
     "adminSearch": { "title": "Kunden, Bestellungen oder Supportfälle suchen", "search": "Suchen", "failed": "Die Suche ist fehlgeschlagen. Bitte versuchen Sie es erneut.", "order": "Bestellung", "empty": "Keine Ergebnisse gefunden." }
   },
+  "clinicCustomerExtras": {
+    "sharedNotesTitle": "Kliniknachrichten für Ihren Haushalt",
+    "sharedNotesIntro": "Nicht-klinische Hinweise, die eine Klinik ausdrücklich mit Mitgliedern Ihrer Haushalte geteilt hat. Medizinische Akten bleiben im Bereich Tiergesundheit.",
+    "notesLimit": "Bis zu 100 aktuelle Nachrichten aus Ihren Haushalten. Interne Kliniknotizen werden hier nicht angezeigt.",
+    "navHint": "Von Kliniken ausdrücklich geteilte Nachrichten",
+    "refresh": "Nachrichten neu laden",
+    "loadFailed": "Informationen konnten nicht geladen werden.",
+    "offline": "Keine Internetverbindung. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+    "noAccess": "Sie haben keinen Zugriff auf diese Kliniknachrichten. Melden Sie sich erneut an oder wenden Sie sich an die Klinik.",
+    "retry": "Erneut versuchen",
+    "loading": "Wird geladen …",
+    "emptyShared": "Es wurden noch keine Kliniknachrichten geteilt."
+  },
   "publicNavigation": {
     "main": "Hauptnavigation",
     "explore": "Entdecken",

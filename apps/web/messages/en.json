@@ -6136,6 +6136,8 @@
     "navHint": "Notes explicitly shared by clinics",
     "refresh": "Reload messages",
     "loadFailed": "Information could not be loaded.",
+    "offline": "You are offline. Check your connection and try again.",
+    "noAccess": "You don't have access to these clinic messages. Sign in again or contact the clinic.",
     "retry": "Retry",
     "loading": "Loading…",
     "emptyShared": "No clinic messages have been shared yet.",
