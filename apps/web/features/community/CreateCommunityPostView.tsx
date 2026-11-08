@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useLocalizedRouter as useRouter } from "@/features/navigation/localized-link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, Input, Select } from "@petlife/ui";
 import { CommunityPostType } from "@petlife/types";
 import { communityService } from "@/services/community.service";
@@ -15,6 +15,7 @@ const POST_TYPES: CommunityPostType[] = [CommunityPostType.GENERAL, CommunityPos
 export function CreateCommunityPostView() {
   const t = useTranslations("community");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -39,7 +40,7 @@ export function CreateCommunityPostView() {
       const post = await communityService.createPost({ type, title: title.trim() || undefined, body: body.trim(), mediaObjectKeys: mediaObjectKeys.length > 0 ? mediaObjectKeys : undefined });
       router.push(`/community/posts/${post.id}`);
     } catch (err) {
-      setError(apiErrorText(err, undefined, tCommon("genericError")));
+      setError(apiErrorText(err, locale, tCommon("genericError")));
     } finally {
       setIsSubmitting(false);
     }

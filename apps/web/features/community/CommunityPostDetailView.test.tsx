@@ -70,4 +70,12 @@ describe("CommunityPostDetailView", () => {
 
     await waitFor(() => expect(communityService.setReaction).toHaveBeenCalledWith("post-1", "LIKE"));
   });
+
+  it.each([["de","Gefällt mir","Kommentare","Noch keine Kommentare."],["es","Me gusta","Comentarios","Todavía no hay comentarios."]] as const)("localizes community post interaction in %s",async(locale,like,comments,empty)=>{
+    renderWithIntl(<CommunityPostDetailView postId="post-1"/>,locale);
+    await screen.findByText("Anyone know a good groomer nearby?");
+    expect(screen.getByRole("button",{name:like})).toBeTruthy();
+    expect(screen.getByRole("heading",{name:comments})).toBeTruthy();
+    expect(screen.getByText(empty)).toBeTruthy();
+  });
 });

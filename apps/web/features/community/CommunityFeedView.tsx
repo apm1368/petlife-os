@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "@/features/navigation/localized-link";
 import { useLocale, useTranslations } from "next-intl";
 import { Avatar, Button, EmptyState, HandHeart, Input, Mail, Select, Siren, Skeleton } from "@petlife/ui";
-import { formatDay, localizeDigits } from "@/lib/date/jalali";
+import { formatDay } from "@/lib/date/jalali";
 import { CommunityPostType } from "@petlife/types";
 import type { CommunityPostDto, PaginatedDto } from "@petlife/types";
 import { communityService } from "@/services/community.service";
@@ -14,7 +14,10 @@ import { LoadFailure } from "@/features/system/LoadFailure";
 export function CommunityFeedView() {
   const t = useTranslations("community");
   const tCommon = useTranslations("common");
-  const locale = useLocale() === "en" ? "en" : "fa";
+  const locale = useLocale();
+  const fa = locale === "fa";
+  const date = (iso: string) => fa ? formatDay(iso, "fa", { year: false }) : new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${iso}T12:00:00.000Z`));
+  const number = (value: number) => new Intl.NumberFormat(locale).format(value);
 
   const [page, setPage] = useState<PaginatedDto<CommunityPostDto> | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
@@ -42,7 +45,6 @@ export function CommunityFeedView() {
   if (error) return <LoadFailure error={error} onRetry={() => load(1)} />;
   if (!page) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
-  const fa = locale === "fa";
   const chooseType = (next: CommunityPostType | "") => { setType(next); void load(1, false, { q: appliedQuery, type: next }); };
 
   return (
@@ -51,7 +53,7 @@ export function CommunityFeedView() {
         <header className="section-head">
           <div>
             <h1>{t("feed.title")}</h1>
-            <p>{fa ? "پرسش، تجربه و خبر از صاحبان حیوانات؛ محترمانه و بدون تبلیغ." : "Questions, stories and news from pet owners — respectful, no ads."}</p>
+            <p>{t("feed.intro")}</p>
           </div>
           <Link href="/community/new" className="btn-primary-link">{t("feed.newPost")}</Link>
         </header>
@@ -88,13 +90,13 @@ export function CommunityFeedView() {
                   <span className="post-row__byline">
                     <Avatar name={post.authorDisplayName} size="sm" />
                     <span className="post-row__author">{post.authorDisplayName}</span>
-                    {post.pet ? <span className="post-row__pet">· {fa ? "با" : "with"} {post.pet.name}</span> : null}
-                    <span className="post-row__date">· {formatDay(post.createdAt.slice(0, 10), locale, { year: false })}</span>
+                    {post.pet ? <span className="post-row__pet">· {t("feed.withPet")} {post.pet.name}</span> : null}
+                    <span className="post-row__date">· {date(post.createdAt.slice(0, 10))}</span>
                     <span className="tag">{t(`postType.${post.type}`)}</span>
                   </span>
                   {post.title ? <span className="post-row__title">{post.title}</span> : null}
                   <span className="post-row__body">{post.body}</span>
-                  <span className="post-row__meta">{t("feed.commentsAndReactions", { comments: localizeDigits(post.commentCount, locale), reactions: localizeDigits(post.reactionCount, locale) })}</span>
+                  <span className="post-row__meta">{t("feed.commentsAndReactions", { comments: number(post.commentCount), reactions: number(post.reactionCount) })}</span>
                 </Link>
               </li>
             ))}
@@ -108,9 +110,9 @@ export function CommunityFeedView() {
         ) : null}
       </div>
 
-      <aside className="community-side" aria-label={fa ? "میان‌برهای جامعه" : "Community shortcuts"}>
+      <aside className="community-side" aria-label={t("feed.shortcuts")}>
         <section>
-          <h2>{fa ? "موضوع‌ها" : "Topics"}</h2>
+          <h2>{t("feed.topics")}</h2>
           <div className="community-side__chips">
             <button type="button" aria-pressed={type === ""} onClick={() => chooseType("")}>{t("feed.allTypes")}</button>
             {Object.values(CommunityPostType).map((value) => (
@@ -119,11 +121,11 @@ export function CommunityFeedView() {
           </div>
         </section>
         <section>
-          <h2>{fa ? "همین حالا" : "Right now"}</h2>
+          <h2>{t("feed.rightNow")}</h2>
           <ul className="community-side__links">
-            <li><Link href="/community/messages"><Mail size={16} aria-hidden="true" />{fa ? "پیام‌های من" : "My messages"}</Link></li>
-            <li><Link href="/lost-pets"><Siren size={16} aria-hidden="true" />{fa ? "حیوانات گم‌شده‌ی اطراف" : "Lost pets nearby"}</Link></li>
-            <li><Link href="/animal-support/needs"><HandHeart size={16} aria-hidden="true" />{fa ? "نیازهای حمایت" : "Support needs"}</Link></li>
+            <li><Link href="/community/messages"><Mail size={16} aria-hidden="true" />{t("feed.myMessages")}</Link></li>
+            <li><Link href="/lost-pets"><Siren size={16} aria-hidden="true" />{t("feed.lostPets")}</Link></li>
+            <li><Link href="/animal-support/needs"><HandHeart size={16} aria-hidden="true" />{t("feed.supportNeeds")}</Link></li>
           </ul>
         </section>
       </aside>

@@ -73,4 +73,12 @@ describe("CommunityFeedView", () => {
     await waitFor(() => expect(screen.getByText("Post Two")).toBeTruthy());
     expect(screen.getByText("Post One")).toBeTruthy();
   });
+
+  it.each([["de","2 Kommentare · 5 Reaktionen"],["es","2 comentarios · 5 reacciones"]] as const)("localizes the feed and metadata for %s",async(locale,counts)=>{
+    vi.mocked(communityService.listPosts).mockResolvedValue(page([post()]));
+    renderWithIntl(<CommunityFeedView/>,locale);
+    expect(await screen.findByRole("heading",{name:locale==="de"?"Community":"Comunidad"})).toBeTruthy();
+    expect(screen.getByText(counts)).toBeTruthy();
+    expect(screen.getByRole("complementary",{name:locale==="de"?"Community-Kurzlinks":"Accesos rápidos de la comunidad"})).toBeTruthy();
+  });
 });
