@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import type { RouteLocale } from "@/lib/i18n/config";
 import { Button, ContextSurface, EmptyState, Input, Skeleton, StatusLabel } from "@petlife/ui";
 import type { LostPetIncidentPublicDto } from "@petlife/types";
 import { lostPetService } from "@/services/lost-pet.service";
@@ -13,11 +14,10 @@ import { ReportContentPanel } from "@/features/shared/ReportContentPanel";
 import { communityService } from "@/services/community.service";
 import { lostPetStatusTone } from "./lost-pet-status";
 import { SystemState } from "@/features/system/SystemState";
-import { apiErrorText } from "@/lib/errors/api-error-text";
 import { TimeSelect } from "@/features/shared/date-picker/TimeSelect";
 import { FilePicker } from "@/features/shared/FilePicker";
 
-const SPECIES: Record<string, [string, string]> = { DOG: ["سگ", "Dog"], CAT: ["گربه", "Cat"], OTHER: ["سایر", "Other"] };
+const SPECIES_KEYS: Record<string, "species.dog" | "species.cat" | "species.other"> = { DOG: "species.dog", CAT: "species.cat", OTHER: "species.other" };
 
 /**
  * LOST INCIDENT PATTERN — public page. No sign-in needed to help. Shows only public-safe facts:
@@ -27,8 +27,7 @@ const SPECIES: Record<string, [string, string]> = { DOG: ["سگ", "Dog"], CAT: [
 export function PublicLostPetView({ incidentId }: { incidentId: string }) {
   const t = useTranslations("lostPet");
   const tCommon = useTranslations("common");
-  const lang = useLocale() as "fa" | "en";
-  const fa = lang === "fa";
+  const lang = useLocale() as RouteLocale;
 
   const [incident, setIncident] = useState<LostPetIncidentPublicDto | null>(null);
   const [error, setError] = useState<"notFound" | "error" | null>(null);
@@ -73,26 +72,26 @@ export function PublicLostPetView({ incidentId }: { incidentId: string }) {
         photoObjectKey,
       });
       setSubmitted(true);
-    } catch (err) {
-      setSubmitError(apiErrorText(err, lang, tCommon("genericError")));
+    } catch {
+      setSubmitError(tCommon("genericError"));
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  if (error === "notFound") return <EmptyState title={fa ? "این گزارش در دسترس نیست" : "This report is not available"} description={fa ? "ممکن است پرونده بسته شده باشد." : "The report may have been closed."} />;
+  if (error === "notFound") return <EmptyState title={t("public.detail.unavailableTitle")} description={t("public.detail.unavailableDescription")} />;
   if (error) return <SystemState kind="GENERIC_RETRYABLE_ERROR" onRetry={load} />;
   if (!incident) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   const reunited = incident.status === "REUNITED";
-  const shareText = fa ? `${incident.petName} گم شده است${incident.approximateArea ? ` — حوالی ${incident.approximateArea}` : ""}. اگر او را دیدید گزارش دهید.` : `${incident.petName} is lost${incident.approximateArea ? ` around ${incident.approximateArea}` : ""}. If you see them, please report it.`;
+  const shareText = t("public.detail.shareText", { name: incident.petName, area: incident.approximateArea ? t("public.detail.shareArea", { area: incident.approximateArea }) : "" });
   const facts: [string, string | null][] = [
-    [fa ? "گونه" : "Species", SPECIES[incident.petSpecies]?.[fa ? 0 : 1] ?? incident.petSpecies],
-    [fa ? "نژاد" : "Breed", incident.petBreed],
-    [fa ? "رنگ و علامت‌ها" : "Colour & markings", incident.petColorMarkings],
-    [fa ? "سن تقریبی" : "Approximate age", incident.petApproximateAgeMonths !== null ? (fa ? `${localizeDigits(Math.max(1, Math.round(incident.petApproximateAgeMonths / 12)), "fa")} سال` : `${Math.max(1, Math.round(incident.petApproximateAgeMonths / 12))} yr`) : null],
-    [fa ? "محدودهٔ آخرین مشاهده" : "Last seen around", incident.approximateArea],
-    [fa ? "زمان آخرین مشاهده" : "Last seen", incident.lastSeenAt ? formatDay(incident.lastSeenAt.slice(0, 10), lang, { weekday: true }) : null],
+    [t("public.detail.species"), SPECIES_KEYS[incident.petSpecies] ? t(SPECIES_KEYS[incident.petSpecies]!) : incident.petSpecies],
+    [t("public.detail.breed"), incident.petBreed],
+    [t("public.detail.colorMarkings"), incident.petColorMarkings],
+    [t("public.detail.approximateAge"), incident.petApproximateAgeMonths !== null ? t("public.detail.ageYears", { count: localizeDigits(Math.max(1, Math.round(incident.petApproximateAgeMonths / 12)), lang) }) : null],
+    [t("public.detail.lastSeenAround"), incident.approximateArea],
+    [t("public.detail.lastSeen"), incident.lastSeenAt ? formatDay(incident.lastSeenAt.slice(0, 10), lang, { weekday: true }) : null],
   ];
 
   return (
@@ -103,14 +102,14 @@ export function PublicLostPetView({ incidentId }: { incidentId: string }) {
       </div>
 
       {reunited ? (
-        <p role="status" className="rounded-md bg-state-success/10 p-4 text-body text-state-success">{fa ? `${incident.petName} به خانه برگشت. از همهٔ کسانی که کمک کردند سپاسگزاریم.` : `${incident.petName} is back home. Thank you to everyone who helped.`}</p>
+        <p role="status" className="rounded-md bg-state-success/10 p-4 text-body text-state-success">{t("public.detail.reunited", { name: incident.petName })}</p>
       ) : null}
 
       <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] [&>*]:min-w-0">
         <ContextSurface className="flex flex-col gap-3">
           {incident.primaryPhotoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={incident.primaryPhotoUrl} alt={fa ? `عکس ${incident.petName}` : `Photo of ${incident.petName}`} className="aspect-[4/3] w-full rounded-md object-cover" />
+            <img src={incident.primaryPhotoUrl} alt={t("public.detail.photoAlt", { name: incident.petName })} className="aspect-[4/3] w-full rounded-md object-cover" />
           ) : null}
           <dl className="grid gap-1 text-sm">
             {facts.filter(([, v]) => v).map(([label, value]) => (
@@ -131,13 +130,13 @@ export function PublicLostPetView({ incidentId }: { incidentId: string }) {
             ) : (
               <>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <DateRangeField mode="single" label={fa ? "تاریخ مشاهده" : "Date seen"} value={{ start: seenDay, end: null }} onChange={(v) => setSeenDay(v.start)} min={addDays(todayIso(), -60)} max={todayIso()} />
-                  <TimeSelect label={fa ? "ساعت تقریبی" : "Approximate time"} value={seenTime} onChange={setSeenTime} />
+                  <DateRangeField mode="single" label={t("public.reportSighting.dateLabel")} value={{ start: seenDay, end: null }} onChange={(v) => setSeenDay(v.start)} min={addDays(todayIso(), -60)} max={todayIso()} />
+                  <TimeSelect label={t("public.reportSighting.timeLabel")} value={seenTime} onChange={setSeenTime} />
                 </div>
                 <Input dir="auto" label={t("public.reportSighting.locationLabel")} value={location} onChange={(e) => setLocation(e.target.value)} />
                 <Input dir="auto" label={t("public.reportSighting.descriptionLabel")} value={description} onChange={(e) => setDescription(e.target.value)} />
                 <FilePicker label={t("report.photoLabel")} accept="image/jpeg,image/png,image/webp" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
-                <p className="text-metadata text-text-secondary">{fa ? "گزارش شما فقط برای صاحب حیوان فرستاده می‌شود؛ نام و اطلاعات تماس شما عمومی نمی‌شود." : "Your report goes only to the owner; your name and contact details are never made public."}</p>
+                <p className="text-metadata text-text-secondary">{t("public.reportSighting.privacyNote")}</p>
                 {submitError ? <p role="alert" className="text-body text-state-urgent">{submitError}</p> : null}
                 <Button variant="primary" isLoading={isSubmitting} onClick={handleSubmitSighting} disabled={!seenDay}>
                   {t("public.reportSighting.submit")}
