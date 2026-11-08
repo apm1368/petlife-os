@@ -1,4 +1,5 @@
 import type { INestApplication } from "@nestjs/common";
+import { Locale } from "@prisma/client";
 import { execFileSync } from "node:child_process";
 import { join } from "node:path";
 import request from "supertest";
@@ -8,7 +9,7 @@ import { signSessionCookie } from "../src/common/session/session-cookie.util";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { validateRichTextDocument } from "../src/modules/content/rich-text.util";
 
-/** Guides and the blog are distinct sections over one article model; the demo articles are valid content. */
+/** Guides and the blog are distinct sections over one article model; demo fixtures remain test-only in production. */
 describe("Content sections — blog vs guides, and the demo articles", () => {
   let app: INestApplication, db: PrismaService;
   beforeAll(async () => {
@@ -18,6 +19,25 @@ describe("Content sections — blog vs guides, and the demo articles", () => {
   });
   afterAll(async () => { await app?.close(); });
   const list = (q: string) => request(app.getHttpServer()).get(`/blog/articles?${q}`).expect(200);
+
+  it("production reads exclude explicitly marked demo articles without hiding unmarked editorial content", async () => {
+    const demo = await db.article.findFirstOrThrow({ where: { isDemoRecord: true, locales: { some: { slug: "dog-vaccination-schedule", locale: Locale.en } } } });
+    await db.article.update({ where: { id: demo.id }, data: { isDemoRecord: false } });
+    const priorDeploymentEnvironment = process.env.DEPLOYMENT_ENVIRONMENT;
+    process.env.DEPLOYMENT_ENVIRONMENT = "production";
+    try {
+      const publicList = (await list("locale=en&pageSize=50")).body;
+      expect(publicList.total).toBe(1);
+      expect(publicList.items.map((article: { slug: string }) => article.slug)).toEqual(["dog-vaccination-schedule"]);
+      await request(app.getHttpServer()).get("/blog/articles/dog-vaccination-schedule?locale=en").expect(200);
+      await request(app.getHttpServer()).get("/blog/articles/cat-nutrition-by-age?locale=en").expect(404);
+      await request(app.getHttpServer()).get("/blog/articles/cat-nutrition-by-age/feedback?locale=en").expect(404);
+    } finally {
+      if (priorDeploymentEnvironment === undefined) delete process.env.DEPLOYMENT_ENVIRONMENT;
+      else process.env.DEPLOYMENT_ENVIRONMENT = priorDeploymentEnvironment;
+      await db.article.update({ where: { id: demo.id }, data: { isDemoRecord: true } });
+    }
+  });
 
   it("guides list only guides, under /guides; the blog list leaves them out", async () => {
     for (const locale of ["fa", "en"]) {
