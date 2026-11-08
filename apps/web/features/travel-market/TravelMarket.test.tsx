@@ -8,7 +8,7 @@ import { TravelResultsView } from "./TravelResultsView";
 import { TravelListingDetailView } from "./TravelListingDetailView";
 import { TravelBookingFlowView } from "./TravelBookingFlowView";
 import { TripHubView } from "./TripHubView";
-import { matchReason, policyFacts } from "./labels";
+import { matchReason, policyFacts, stayDates } from "./labels";
 
 const params = new URLSearchParams();
 const push = vi.fn();
@@ -65,7 +65,20 @@ describe("travel results", () => {
     expect(screen.getByText(petRules)).toBeTruthy();
     expect(screen.getAllByText(conditions).length).toBeGreaterThan(0);
     expect(screen.getByText(rating)).toBeTruthy();
-    expect(screen.getByText(dateSummary)).toBeTruthy();
+    expect(screen.getAllByText(dateSummary).length).toBeGreaterThan(0);
+    if (locale === "de" || locale === "es") expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+});
+
+describe("localized travel stay dates", () => {
+  const stay = { checkIn: "2026-11-10T00:00:00.000Z", checkOut: "2026-11-12T00:00:00.000Z", nights: 2 };
+  it.each([
+    ["fa", "۲ شب"],
+    ["en", "2 nights"],
+    ["de", "2 Nächte"],
+    ["es", "2 noches"],
+  ] as const)("formats night counts in %s", (locale, expected) => {
+    expect(stayDates(stay, locale)).toContain(expected);
   });
 });
 
