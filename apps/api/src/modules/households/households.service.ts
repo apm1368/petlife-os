@@ -269,8 +269,11 @@ export class HouseholdsService {
       return { householdId: invitation.householdId, invitationId: invitation.id, status: "REQUESTED", alreadyRequested: true };
     }
     if (invitation.status === "REQUESTED") throw new InvitationAlreadyUsedException();
-    const active = await this.findActiveInvitation(token);
-    return this.createMembershipRequest(active, userId);
+    // Do not perform another "active invitation" read here. A concurrent
+    // request can claim the invitation between the initial read and that
+    // second read, which would turn a valid idempotent retry into a 409
+    // before the compare-and-set fallback below can return REQUESTED.
+    return this.createMembershipRequest(invitation, userId);
   }
 
   async requestIncomingMembership(invitationId: string, userId: string) {
@@ -281,13 +284,22 @@ export class HouseholdsService {
       return { householdId: invitation.householdId, invitationId: invitation.id, status: "REQUESTED", alreadyRequested: true };
     }
     if (invitation.status === "REQUESTED") throw new InvitationAlreadyUsedException();
-    const active = await this.findActiveInvitationById(invitationId);
-    return this.createMembershipRequest(active, userId);
+    return this.createMembershipRequest(invitation, userId);
   }
 
   private async createMembershipRequest(invitation: NonNullable<Awaited<ReturnType<HouseholdsService["findActiveInvitation"]>>>, userId: string) {
     await this.requireInvitee(invitation.contact, userId);
     const requestedAt = new Date();
+    if (invitation.status === "CANCELLED") throw new InvitationRevokedException();
+    if (invitation.status === "EXPIRED") throw new InvitationExpiredException();
+    if (invitation.status !== "PENDING") throw new InvitationAlreadyUsedException();
+    if (invitation.expiresAt <= requestedAt) {
+      await this.prisma.householdInvitation.updateMany({
+        where: { id: invitation.id, status: "PENDING", expiresAt: { lte: requestedAt } },
+        data: { status: "EXPIRED" },
+      });
+      throw new InvitationExpiredException();
+    }
     const claimed = await this.prisma.householdInvitation.updateMany({
       where: { id: invitation.id, status: "PENDING", expiresAt: { gt: requestedAt } },
       data: { status: "REQUESTED", requestedByUserId: userId, requestedAt },
@@ -297,6 +309,8 @@ export class HouseholdsService {
       if (current.status === "REQUESTED" && current.requestedByUserId === userId) {
         return { householdId: current.householdId, invitationId: current.id, status: "REQUESTED", alreadyRequested: true };
       }
+      if (current.status === "CANCELLED") throw new InvitationRevokedException();
+      if (current.status === "EXPIRED" || current.expiresAt <= new Date()) throw new InvitationExpiredException();
       throw new InvitationAlreadyUsedException();
     }
     await this.events.publish("HouseholdMembershipRequested", { householdId: invitation.householdId, invitationId: invitation.id, userId }, { aggregateType: "Household", aggregateId: invitation.householdId });
