@@ -11,6 +11,7 @@ import { ApiError } from "@/lib/api/client";
 import { CommercePage } from "./CommercePage";
 import { Stepper } from "@/features/shared/Stepper";
 import { formatNumber, PriceBlock, ProductImage } from "./commerce-ui";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 const COMPATIBILITY_TONE: Record<string, "success" | "attention" | "urgent" | "neutral"> = {
   COMPATIBLE: "success",
@@ -36,7 +37,7 @@ export function CartView() {
   const design = useTranslations("commerce.design");
   const tCompat = useTranslations("commerce.compatibility");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as RouteLocale;
 
   const [cart, setCart] = useState<CartDto | null>(null);
   const [error, setError] = useState(false);
@@ -173,7 +174,7 @@ export function CartView() {
 
 function CartLine({ line, busy, onQuantity, onRemove, onOpen, compatibilityLabel }: { line: CartLineDto; busy: boolean; onQuantity: (q: number) => void; onRemove: () => void; onOpen: () => void; compatibilityLabel: string | null }) {
   const t = useTranslations("commerce.cart");
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as RouteLocale;
   const max = Math.min(MAX_LINE_QUANTITY, Math.max(line.quantity, line.sellerOffer.availableQuantity));
   const blocking = line.issues.filter((i) => BLOCKING.includes(i));
   return (
