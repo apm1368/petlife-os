@@ -221,3 +221,9 @@ Lifecycle actions, status labels, confirmation dialog, owner note, loading/retry
 - The landing header actions, memorial section and their accessible labels have German/Spanish UI text; the approved HERO image and composition are unchanged. Compact header rules address mobile layout. Published/user-authored memorial content is not translated or fabricated.
 - PR #160 was synchronized with current `main` at `b6b61c4` after the travel PR #152 merged. Its German and Spanish catalog namespaces were combined with the newer main catalogs without conflicting values; the merge also preserves #152 travel strings and #163 health strings.
 - The earlier 21 focused tests and CI were for the prior head; the new sync still requires local reruns, a pushed exact-head CI and production verification. The landing remains PARTIAL, and original memorial-image/CDN privacy is not claimed.
+
+## Checkout address, shipping and payment steps — implementation batch
+
+- Added complete German/Spanish `commerce.checkout` keys, including address form/validation, allergy acknowledgement, review, shipping choices, payment/pending/failure, financing states and progress labels. `commerce.orderDetail` summary labels and shared `common` strings now cover the checkout UI dependencies.
+- Checkout uses the four-locale route type for number and currency formatting. German/Spanish API failures use localized generic copy rather than leaking English backend messages; Persian/English error behavior is retained. User-entered address fields remain unchanged.
+- Verification: 17 checkout component tests and 4 catalog parity tests pass; all four JSON catalogs parse, TypeScript and targeted ESLint pass. Checkout is only PARTIAL: order confirmation/history/detail, saved addresses/account routes, authenticated browser/responsive behavior and hosted CI are not included in this slice.

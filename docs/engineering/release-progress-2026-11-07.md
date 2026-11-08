@@ -182,3 +182,10 @@
 - #160 and #166 had green CI on their exact reported heads (`42519930623`, `42519567714`) and `CLEAN` before #152 merged. Attempted normal #160 merge reported conflicts; its branch is now being merged with current main `b6b61c4`, with a fresh CI required. #166 status is being rechecked against the new base.
 - #167 admin-users localization is open against `main` at `6b41572bf4181bf1f03f5392aca82fc813ee8970`; CI run `42521359719` is in progress. Its local focused 17 tests, typecheck, targeted lint, JSON parsing and diff checks passed; remains PARTIAL and not merged/live.
 - Disk headroom is 104 MiB. Creating an additional worktree failed due to capacity; source branches/worktrees remain preserved, no cleanup or full build was attempted, and payment worktrees were not accessed.
+
+## Checkout localization batch — 2026-11-08 21:14 UTC
+
+- Working branch `codex/i18n-checkout-main` is based on current `origin/main` `de4296432bd1722273fea27a31141c326ad170de`. Checkout address/review/shipping/payment UI now has German/Spanish catalog keys and localized generic API-error copy; common route strings used by checkout are translated as well.
+- Local checks pass: 17 `CheckoutView` tests, 4 checkout/common catalog-parity tests, four catalog JSON parses, web typecheck, focused ESLint and `git diff --check`. This batch is not yet committed, pushed or covered by hosted CI.
+- Current production version endpoint reports `b6b61c4124640a496c6d2cda5566ee509d07c953` (deployment `42521413577`); main has since advanced to `de429643`. The post-#160 main CI/deploy `42522889255` was still pending at last check. PR #160 is merged with green PR CI, but not LIVE_VERIFIED.
+- Order confirmation, order history/detail, account address management and authenticated checkout behavior remain PARTIAL. Disk headroom was approximately 102 MiB; no cleanup/full production build or payment-worktree modification was performed.

@@ -242,6 +242,40 @@ describe("CheckoutView", () => {
     push.mockReset();
   });
 
+  it.each([
+    ["de", "Lieferadresse", "Bestellübersicht", "Weiter"],
+    ["es", "Dirección de entrega", "Resumen del pedido", "Continuar"],
+  ] as const)("renders checkout chrome consistently in %s", async (locale, addressTitle, summaryTitle, nextLabel) => {
+    vi.mocked(commerceService.getCart).mockResolvedValue(EMPTY_CART);
+    vi.mocked(addressesService.list).mockResolvedValue([ADDRESS]);
+
+    renderWithIntl(<CheckoutView />, locale);
+
+    expect(await screen.findByRole("heading", { name: addressTitle })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: summaryTitle })).toBeTruthy();
+    expect(screen.getByRole("button", { name: nextLabel })).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+    // Address text is user-authored and intentionally remains in its source language.
+    expect(screen.getAllByText(/Tehran/).length).toBeGreaterThan(0);
+  });
+
+  it("uses the translated generic error instead of leaking an English API message in Spanish", async () => {
+    vi.mocked(commerceService.getCart).mockResolvedValue(EMPTY_CART);
+    vi.mocked(addressesService.list).mockResolvedValue([ADDRESS]);
+    vi.mocked(commerceService.createCheckout).mockRejectedValue(
+      new ApiError({ code: "CHECKOUT_FAILED", message: "The backend error is English.", requestId: "r-locale" }, 400),
+    );
+
+    renderWithIntl(<CheckoutView />, "es");
+    await screen.findByText(/12 Valiasr St\./);
+    fireEvent.click(screen.getByRole("radio"));
+    fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
+
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toBe("No se pudo iniciar el pago. Inténtalo de nuevo.");
+    expect(alert.textContent).not.toContain("The backend error");
+  });
+
   it("routes to the confirmation page on a successful simulated payment", async () => {
     await advanceToPayment();
     vi.mocked(commerceService.pay).mockResolvedValue({ checkout: { ...CHECKOUT, status: "CONFIRMED" as never }, paymentStatus: "SUCCEEDED", orderIds: ["order-1", "order-2"] });
