@@ -58,7 +58,7 @@ describe("HealthOverviewView", () => {
 
     renderWithIntl(<HealthOverviewView petId="pet-1" />);
 
-    await waitFor(() => expect(screen.queryByText("Complete")).not.toBeNull());
+    await waitFor(() => expect(screen.queryByText("Core health information is complete")).not.toBeNull());
     expect(screen.queryByText("Vaccination due soon.")).toBeNull();
     expect(screen.queryByText("Vaccination overdue.")).toBeNull();
   });
@@ -94,5 +94,24 @@ describe("HealthOverviewView", () => {
     expect(await screen.findByText("Chicken protein")).toBeTruthy();
     expect(screen.queryByText(/Old reaction/)).toBeNull();
     expect(screen.getByText("Apoquel (oclacitinib)")).toBeTruthy();
+  });
+
+  it.each([
+    ["fa", "سلامت", "پرونده پزشکی"],
+    ["en", "Health", "Medical record"],
+    ["de", "Gesundheit", "Medizinische Akte"],
+    ["es", "Salud", "Historia clínica"],
+  ] as const)("renders dashboard-owned overview text in %s", async (locale, title, records) => {
+    vi.mocked(healthService.getSummary).mockResolvedValue(BASE_SUMMARY);
+    renderWithIntl(<HealthOverviewView petId="pet-1" />, locale);
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: records })).toBeTruthy();
+    expect(screen.getByRole("link", { name: locale === "de" ? "Mit einer Tierarztpraxis teilen" : locale === "es" ? "Compartir con una clínica veterinaria" : locale === "fa" ? "اشتراک با دامپزشک" : "Share with a veterinarian" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: locale === "de" ? "Gesundheitsverlauf" : locale === "es" ? "Cronología de salud" : locale === "fa" ? "خط زمانی سلامت" : "Health timeline" })).toBeTruthy();
+    if (locale === "de" || locale === "es") {
+      expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+      expect(document.body.textContent).not.toContain("Current status");
+      expect(document.body.textContent).not.toContain("Medical record");
+    }
   });
 });

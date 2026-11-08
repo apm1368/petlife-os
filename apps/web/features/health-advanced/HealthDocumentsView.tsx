@@ -12,12 +12,13 @@ import { FilePicker } from "@/features/shared/FilePicker";
 
 /** spec: "private medical documents must never be publicly exposed" — download always goes through a freshly-minted signed URL, never a stored/cached link. */
 export function HealthDocumentsView({ petId }: { petId: string }) {
-  const lang = useLocale() === "en" ? "en" : "fa";
+  const locale = useLocale() as "fa" | "en" | "de" | "es";
   const t = useTranslations("healthAdvanced");
   const tCommon = useTranslations("common");
 
   const [documents, setDocuments] = useState<MedicalDocumentDto[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<unknown>(null);
   const [title, setTitle] = useState("");
   const [documentType, setDocumentType] = useState<MedicalDocumentType>(MedicalDocumentType.OTHER);
@@ -43,18 +44,20 @@ export function HealthDocumentsView({ petId }: { petId: string }) {
     const file = fileInputRef.current?.files?.[0];
     if (!title.trim()) return;
     // Never a silent no-op: say what is missing.
-    if (!file) { setError(lang === "fa" ? "ابتدا فایل سند را انتخاب کنید." : "Choose the document file first."); return; }
+    if (!file) { setError(t("documents.fileRequired")); return; }
     setIsUploading(true);
     setError(null);
+    setSuccess(null);
     try {
       const target = await healthAdvancedService.requestDocumentUpload(petId, { contentType: file.type, fileSizeBytes: file.size });
       await fetch(target.uploadUrl, { method: "PUT", headers: target.headers, body: file });
       await healthAdvancedService.createDocument(petId, { key: target.key, documentType, title: title.trim(), mimeType: file.type, fileSizeBytes: file.size });
       setTitle("");
       if (fileInputRef.current) fileInputRef.current.value = "";
+      setSuccess(t("documents.uploaded"));
       await load();
     } catch (err) {
-      setError(apiErrorText(err, lang, tCommon("genericError")));
+      setError(locale === "fa" || locale === "en" ? apiErrorText(err, locale, tCommon("genericError")) : t("documents.uploadFailed"));
     } finally {
       setIsUploading(false);
     }
@@ -65,7 +68,7 @@ export function HealthDocumentsView({ petId }: { petId: string }) {
       const { downloadUrl } = await healthAdvancedService.downloadDocument(petId, documentId);
       window.open(downloadUrl, "_blank", "noopener,noreferrer");
     } catch (err) {
-      setError(apiErrorText(err, lang, tCommon("genericError")));
+      setError(locale === "fa" || locale === "en" ? apiErrorText(err, locale, tCommon("genericError")) : t("documents.downloadFailed"));
     }
   }
 
@@ -82,10 +85,11 @@ export function HealthDocumentsView({ petId }: { petId: string }) {
           label={t("documents.documentType")}
           value={documentType}
           onChange={(e) => setDocumentType(e.target.value as MedicalDocumentType)}
-          options={Object.values(MedicalDocumentType).map((type) => ({ value: type, label: documentTypeLabel(type, lang) }))}
+          options={Object.values(MedicalDocumentType).map((type) => ({ value: type, label: documentTypeLabel(type, locale) }))}
         />
         <FilePicker ref={fileInputRef} label={tCommon("attachFile")} accept="application/pdf,image/jpeg,image/png,image/webp" />
-        {error ? <p className="text-body text-state-attention">{error}</p> : null}
+        {error ? <p role="alert" className="text-body text-state-attention">{error}</p> : null}
+        {success ? <p role="status" className="text-body text-state-success">{success}</p> : null}
         <Button variant="primary" isLoading={isUploading} onClick={handleUpload} disabled={!title.trim()}>
           {isUploading ? t("documents.uploading") : t("documents.upload")}
         </Button>
@@ -103,7 +107,7 @@ export function HealthDocumentsView({ petId }: { petId: string }) {
                   {doc.sourceType === SourceType.PROVIDER || doc.sourceType === SourceType.CLINIC ? t("documents.provenanceProvider") : t("documents.provenanceOwner")}
                 </StatusLabel>
               </div>
-              <span className="text-metadata text-text-secondary">{documentTypeLabel(doc.documentType, lang)}</span>
+              <span className="text-metadata text-text-secondary">{documentTypeLabel(doc.documentType, locale)}</span>
               <Button variant="secondary" size="sm" onClick={() => handleDownload(doc.id)}>
                 {t("documents.download")}
               </Button>
