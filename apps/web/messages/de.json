@@ -1539,6 +1539,41 @@
     "loading": "Wird geladen …",
     "emptyShared": "Es wurden noch keine Kliniknachrichten geteilt."
   },
+  "lostPet": {
+    "species": { "dog": "Hund", "cat": "Katze", "other": "Andere" },
+    "report": {
+      "title": "Vermisstes Haustier melden", "subtitle": "Teile Einzelheiten, damit die Gemeinschaft bei der Suche helfen kann.",
+      "descriptionLabel": "Beschreibung", "descriptionPlaceholder": "Was trug das Tier? Welche besonderen Merkmale hat es?",
+      "lastKnownLocationLabel": "Zuletzt bekannter Ort", "lastSeenAtLabel": "Zuletzt gesehen am", "contactPreferenceLabel": "Wie können Menschen dich erreichen?",
+      "stepsLabel": "Schritte der Meldung", "steps": { "where": "Wo und wann", "photo": "Foto", "describe": "Beschreibung", "contact": "Kontakt", "review": "Überprüfen" },
+      "publicTag": "Öffentlich", "privateTag": "Privat", "approximateArea": "Ungefähre Gegend", "approximateAreaPlaceholder": "Zum Beispiel Stadtviertel oder Hauptstraße",
+      "approximateAreaHelp": "Nenne nur ein Viertel oder eine Hauptstraße. Gib keine Wohnadresse an; dieser Text ist öffentlich sichtbar.",
+      "exactLastSeenPlace": "Genauer Ort der letzten Sichtung", "exactPlaceHelp": "Nur du, dein Haushalt und bei Bedarf das Support-Team können diese Angabe sehen.", "approximateTime": "Ungefähre Uhrzeit",
+      "photoHelp": "Wähle ein deutliches Foto des Tieres. Vermeide Gesichter und Hausnummern.", "publicNote": "Hinweis für Personen, die das Tier sehen", "publicNotePlaceholder": "Zum Beispiel: ängstlich; bitte nicht verfolgen, sondern nur eine Sichtung melden.",
+      "privateNote": "Private Notizen", "privateNotePlaceholder": "Zum Beispiel: Mikrochipnummer",
+      "contactPreference": { "inAppMessage": "Nachricht in der App", "maskedContact": "Maskierte Telefonnummer teilen", "publicContact": "Meine Kontaktdaten öffentlich anzeigen" },
+      "contactPreferenceHelp": { "inAppMessage": "Empfohlen: Erhalte Meldungen über opetlife, ohne deine Kontaktdaten anzuzeigen.", "maskedContact": "Andere können dich über opetlife erreichen, ohne deine Telefonnummer zu sehen.", "publicContact": "Eine von dir angegebene Kontaktzeile ist in der öffentlichen Meldung sichtbar." },
+      "publicContactLine": "Öffentliche Kontaktzeile", "publicContactPlaceholder": "Zum Beispiel: 0912***4567 — nur SMS", "publicContactWarning": "Alle können diesen Text sehen. Vermeide nach Möglichkeit eine vollständige Telefonnummer.",
+      "reviewTitle": "Was in der öffentlichen Meldung zu sehen ist", "review": { "area": "Gegend", "when": "Zeitpunkt", "photo": "Foto", "contact": "Kontakt" },
+      "notGiven": "Nicht angegeben", "noPhoto": "Kein Foto", "contactThroughApp": "Über opetlife", "privacyNotice": "Dein genauer Ort, private Notizen, Haushaltsmitglieder und Gesundheitsdaten werden nicht öffentlich angezeigt.",
+      "back": "Zurück", "continue": "Weiter", "photoLabel": "Foto", "submit": "Vermisstes Tier melden"
+    },
+    "list": { "title": "Meldungen zu vermissten Tieren", "reportButton": "Vermisstes Tier melden", "empty": "Es gibt noch keine Meldungen zu vermissten Tieren.", "noLocation": "Kein Ort angegeben", "sightingsCount": "{count, plural, one {# Sichtung} other {# Sichtungen}}", "emptyDescription": "Zurzeit gibt es keine aktiven Meldungen zu vermissten Tieren." },
+    "status": { "OPEN": "Vermisst", "SEARCHING": "Suche läuft", "SIGHTING_REPORTED": "Sichtung gemeldet", "FOUND": "Gefunden", "REUNITED": "Wieder bei der Familie", "CLOSED": "Geschlossen" },
+    "sightingStatus": { "SUBMITTED": "Neu", "REVIEWED": "Geprüft", "ACCEPTED": "Möglicherweise passend", "REJECTED": "Keine Übereinstimmung" },
+    "detail": {
+      "title": "{name} wird vermisst", "lastKnownLocation": "Zuletzt bekannter Ort: {location}", "privateNotes": "Private Notizen: {notes}",
+      "actions": { "markSearching": "Suche als aktiv markieren", "markFound": "Als gefunden markieren", "reunite": "Wiedervereinigung bestätigen", "share": "In der Gemeinschaft teilen", "close": "Meldung schließen" },
+      "sightingsTitle": "Sichtungen", "sightingsEmpty": "Es wurden noch keine Sichtungen gemeldet.", "anonymousReporter": "Anonym gemeldet", "knownReporter": "Von einer angemeldeten Person gemeldet", "acceptSighting": "Möglicherweise passend", "rejectSighting": "Keine Übereinstimmung",
+      "publicArea": "Öffentliche Gegend", "exactPlacePrivate": "Genauer Ort (privat)", "lastSeen": "Zuletzt gesehen", "shareTitle": "Öffentliche Meldung teilen", "shareDescription": "Die öffentliche Seite zeigt nur die ungefähre Gegend, das Foto und die öffentliche Beschreibung.", "shareText": "{name} wird vermisst. Wenn du das Tier siehst, melde bitte eine Sichtung."
+    },
+    "public": {
+      "list": { "title": "Vermisste Tiere in der Nähe", "subtitle": "Sieh dir offene Meldungen an. Wenn du ein Tier erkennst, öffne die Meldung und trage eine Sichtung ein.", "speciesFilter": "Nach Tierart filtern", "allSpecies": "Alle", "emptyDescription": "Zurzeit gibt es keine aktiven Meldungen zu vermissten Tieren.", "noPhoto": "Kein Foto", "lastSeen": "Zuletzt gesehen: {date}", "paginationLabel": "Meldungsseiten", "previous": "Zurück", "next": "Weiter" },
+      "species": "Tierart: {species}", "breed": "Rasse: {breed}", "colorMarkings": "Farbe und Merkmale: {markings}", "contact": "Kontakt: {contact}",
+      "reportSighting": { "title": "Sichtung melden", "dateLabel": "Am gesehen", "timeLabel": "Ungefähre Uhrzeit", "locationLabel": "Wo hast du das Tier gesehen?", "descriptionLabel": "Beschreibung", "privacyNote": "Deine Meldung geht nur an die Besitzerin oder den Besitzer. Dein Name und deine Kontaktdaten werden nicht öffentlich angezeigt.", "submit": "Sichtung senden", "success": "Danke. Deine Sichtung wurde zur Prüfung eingereicht." },
+      "detail": { "unavailableTitle": "Diese Meldung ist nicht verfügbar", "unavailableDescription": "Die Meldung wurde möglicherweise geschlossen oder entfernt.", "shareText": "{name} wird vermisst{area}. Wenn du das Tier siehst, melde bitte eine Sichtung.", "shareArea": " in der Gegend von {area}", "species": "Tierart", "breed": "Rasse", "colorMarkings": "Farbe und Merkmale", "approximateAge": "Ungefähres Alter", "ageYears": "Etwa {count} Jahre", "lastSeenAround": "Zuletzt gesehen in der Gegend", "lastSeen": "Zuletzt gesehen", "reunited": "{name} ist wieder zu Hause. Danke an alle, die geholfen haben.", "photoAlt": "Foto von {name}" }
+    }
+  },
   "publicNavigation": {
     "main": "Hauptnavigation",
     "explore": "Entdecken",
@@ -1923,5 +1958,18 @@
       "SOURCE_REPORTED_UNAVAILABLE": "Quelle meldet keine Verfügbarkeit.",
       "UNKNOWN": "Verfügbarkeit unbekannt."
     }
+  },
+  "adminAnimalSupportNav": {
+    "overview": "Übersicht",
+    "needs": "Hilfsanfragen",
+    "organizations": "Organisationen",
+    "rescues": "Rettungsfälle",
+    "campaigns": "Kampagnen",
+    "donations": "Spenden",
+    "lostPets": "Vermisste Tiere",
+    "reports": "Meldungen",
+    "trust": "Vertrauens- und Sicherheitsfälle",
+    "memorials": "Tiergedenkseiten",
+    "label": "Bereich Tierschutz"
   }
 }

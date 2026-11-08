@@ -3339,6 +3339,7 @@
     }
   },
   "lostPet": {
+    "species": { "dog": "سگ", "cat": "گربه", "other": "سایر" },
     "report": {
       "title": "گزارش حیوان خانگی گم‌شده",
       "subtitle": "جزئیات را به اشتراک بگذارید تا جامعه بتواند در پیدا کردن او کمک کند.",
@@ -3347,11 +3348,42 @@
       "lastKnownLocationLabel": "آخرین مکان مشاهده‌شده",
       "lastSeenAtLabel": "آخرین زمان مشاهده",
       "contactPreferenceLabel": "چگونه می‌توان با شما تماس گرفت؟",
+      "stepsLabel": "مراحل ثبت گزارش",
+      "steps": { "where": "کجا و چه زمانی", "photo": "عکس", "describe": "توضیحات", "contact": "تماس", "review": "بازبینی" },
+      "publicTag": "عمومی",
+      "privateTag": "خصوصی",
+      "approximateArea": "محدودهٔ تقریبی",
+      "approximateAreaPlaceholder": "مثلاً محله یا خیابان اصلی",
+      "approximateAreaHelp": "فقط نام محله یا خیابان اصلی را بنویسید. نشانی خانه را وارد نکنید؛ این متن عمومی است.",
+      "exactLastSeenPlace": "مکان دقیق آخرین مشاهده",
+      "exactPlaceHelp": "فقط شما، اعضای خانواده و در صورت نیاز تیم پشتیبانی این بخش را می‌بینند.",
+      "approximateTime": "ساعت تقریبی",
+      "photoHelp": "عکسی واضح از حیوان انتخاب کنید. چهرهٔ افراد و شمارهٔ خانه در تصویر نباشد.",
+      "publicNote": "نکته برای کسی که حیوان را می‌بیند",
+      "publicNotePlaceholder": "مثلاً ترسوست؛ دنبالش نکنید و فقط مشاهده را گزارش دهید.",
+      "privateNote": "یادداشت خصوصی",
+      "privateNotePlaceholder": "مثلاً شمارهٔ میکروچیپ",
       "contactPreference": {
         "inAppMessage": "پیام درون‌برنامه‌ای",
         "maskedContact": "اشتراک‌گذاری شماره تلفن پوشیده‌شده",
         "publicContact": "نمایش عمومی اطلاعات تماس"
       },
+      "contactPreferenceHelp": {
+        "inAppMessage": "پیشنهادی: گزارش‌ها از طریق opetlife به شما می‌رسد و اطلاعات تماس شما نمایش داده نمی‌شود.",
+        "maskedContact": "دیگران از طریق opetlife با شما تماس می‌گیرند و شمارهٔ شما را نمی‌بینند.",
+        "publicContact": "خط تماسی که وارد می‌کنید در گزارش عمومی نمایش داده می‌شود."
+      },
+      "publicContactLine": "خط تماس عمومی",
+      "publicContactPlaceholder": "مثلاً ۰۹۱۲***۴۵۶۷ — فقط پیامک",
+      "publicContactWarning": "همه این متن را می‌بینند. تا جای ممکن شمارهٔ کامل را ننویسید.",
+      "reviewTitle": "آنچه در گزارش عمومی نمایش داده می‌شود",
+      "review": { "area": "محدوده", "when": "زمان", "photo": "عکس", "contact": "تماس" },
+      "notGiven": "ثبت نشده",
+      "noPhoto": "بدون عکس",
+      "contactThroughApp": "از طریق opetlife",
+      "privacyNotice": "مکان دقیق، یادداشت‌های خصوصی، اعضای خانواده و پروندهٔ سلامت شما عمومی نمی‌شوند.",
+      "back": "قبلی",
+      "continue": "ادامه",
       "photoLabel": "عکس",
       "submit": "ثبت گزارش گم‌شدن"
     },
@@ -3360,7 +3392,8 @@
       "reportButton": "گزارش گم‌شدن",
       "empty": "هنوز گزارشی ثبت نشده است.",
       "noLocation": "مکانی ثبت نشده",
-      "sightingsCount": "{count, plural, one {# مشاهده} other {# مشاهده}}"
+      "sightingsCount": "{count, plural, one {# مشاهده} other {# مشاهده}}",
+      "emptyDescription": "در حال حاضر گزارش فعالی از حیوان گم‌شده ثبت نشده است."
     },
     "status": {
       "OPEN": "گم‌شده",
@@ -3392,12 +3425,26 @@
       "anonymousReporter": "گزارش ناشناس",
       "knownReporter": "گزارش‌شده توسط کاربر واردشده",
       "acceptSighting": "احتمالاً خودش است",
-      "rejectSighting": "مطابق نیست"
+      "rejectSighting": "مطابق نیست",
+      "publicArea": "محدودهٔ عمومی",
+      "exactPlacePrivate": "مکان دقیق (خصوصی)",
+      "lastSeen": "آخرین مشاهده",
+      "shareTitle": "اشتراک‌گذاری گزارش عمومی",
+      "shareDescription": "صفحهٔ عمومی فقط محدودهٔ تقریبی، عکس و توضیحات عمومی را نشان می‌دهد.",
+      "shareText": "{name} گم شده است. اگر او را دیدید، مشاهده را گزارش دهید."
     },
     "public": {
       "list": {
         "title": "حیوانات گم‌شده در اطراف",
-        "subtitle": "گزارش‌های باز حیوانات گم‌شده را مرور کنید. اگر حیوانی را شناختید، گزارش را باز کرده و مشاهده خود را ثبت کنید."
+        "subtitle": "گزارش‌های باز حیوانات گم‌شده را مرور کنید. اگر حیوانی را شناختید، گزارش را باز کرده و مشاهدهٔ خود را ثبت کنید.",
+        "speciesFilter": "فیلتر بر اساس گونه",
+        "allSpecies": "همه",
+        "emptyDescription": "در حال حاضر گزارش فعالی از حیوان گم‌شده ثبت نشده است.",
+        "noPhoto": "بدون عکس",
+        "lastSeen": "آخرین مشاهده: {date}",
+        "paginationLabel": "صفحه‌های گزارش‌ها",
+        "previous": "قبلی",
+        "next": "بعدی"
       },
       "species": "گونه: {species}",
       "breed": "نژاد: {breed}",
@@ -3405,10 +3452,28 @@
       "contact": "تماس: {contact}",
       "reportSighting": {
         "title": "گزارش یک مشاهده",
+        "dateLabel": "تاریخ مشاهده",
+        "timeLabel": "ساعت تقریبی",
         "locationLabel": "کجا او را دیدید؟",
         "descriptionLabel": "توضیحات",
+        "privacyNote": "گزارش فقط برای صاحب حیوان فرستاده می‌شود؛ نام و اطلاعات تماس شما عمومی نمی‌شود.",
         "submit": "ثبت مشاهده",
         "success": "متشکریم — مشاهده شما برای بررسی ثبت شد."
+      },
+      "detail": {
+        "unavailableTitle": "این گزارش در دسترس نیست",
+        "unavailableDescription": "ممکن است گزارش بسته یا حذف شده باشد.",
+        "shareText": "{name} گم شده است{area}. اگر او را دیدید، مشاهده را گزارش دهید.",
+        "shareArea": " — حوالی {area}",
+        "species": "گونه",
+        "breed": "نژاد",
+        "colorMarkings": "رنگ و علامت‌ها",
+        "approximateAge": "سن تقریبی",
+        "ageYears": "حدود {count} سال",
+        "lastSeenAround": "محدودهٔ آخرین مشاهده",
+        "lastSeen": "آخرین مشاهده",
+        "reunited": "{name} به خانه برگشت. از همهٔ کسانی که کمک کردند سپاسگزاریم.",
+        "photoAlt": "عکس {name}"
       }
     }
   },
@@ -6525,6 +6590,19 @@
     "organizationLogo": "نشان عمومی سازمان (تصویر تا ۱۰ مگابایت)",
     "chooseFile": "انتخاب تصویر",
     "noFile": "تصویری انتخاب نشده است"
+  },
+  "adminAnimalSupportNav": {
+    "overview": "نمای کلی",
+    "needs": "درخواست‌های کمک",
+    "organizations": "سازمان‌ها",
+    "rescues": "پرونده‌های نجات",
+    "campaigns": "کارزارها",
+    "donations": "کمک‌های مالی",
+    "lostPets": "حیوانات گم‌شده",
+    "reports": "گزارش‌ها",
+    "trust": "پرونده‌های اعتماد و ایمنی",
+    "memorials": "یادبود پت‌ها",
+    "label": "بخش حمایت از حیوانات"
   },
   "supportOpsNav": {
     "overview": "نمای کلی",

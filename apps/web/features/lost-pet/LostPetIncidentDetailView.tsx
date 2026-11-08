@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import type { RouteLocale } from "@/lib/i18n/config";
 import { ShareBar } from "@/features/shared/ShareBar";
 import { formatDay } from "@/lib/date/jalali";
 import { Button, ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
@@ -9,7 +10,6 @@ import type { LostPetIncidentDto, LostPetSightingDto } from "@petlife/types";
 import { lostPetService } from "@/services/lost-pet.service";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { lostPetStatusTone } from "./lost-pet-status";
-import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const ACTIONS_BY_STATUS: Record<string, ("markSearching" | "markFound" | "reunite" | "close" | "share")[]> = {
   // Batch 6: an owner who finds the pet themselves can record the reunion directly.
@@ -30,9 +30,8 @@ export function LostPetIncidentDetailView({ petId, incidentId }: { petId: string
   const [error, setError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<unknown>(null);
   const [isActing, setIsActing] = useState(false);
-  const lang = useLocale() as "fa" | "en";
-  const fa = lang === "fa";
-  const when = (iso: string) => `${formatDay(iso.slice(0, 10), lang, { weekday: true })} ${new Intl.DateTimeFormat(fa ? "fa-IR" : "en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tehran" }).format(new Date(iso))}`;
+  const lang = useLocale() as RouteLocale;
+  const when = (iso: string) => `${formatDay(iso.slice(0, 10), lang, { weekday: true })} ${new Intl.DateTimeFormat(({ fa: "fa-IR-u-ca-persian-nu-arabext", en: "en-GB", de: "de-DE", es: "es-ES" })[lang], { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tehran" }).format(new Date(iso))}`;
 
   async function load() {
     setError(null);
@@ -57,8 +56,8 @@ export function LostPetIncidentDetailView({ petId, incidentId }: { petId: string
     try {
       await action();
       await load();
-    } catch (err) {
-      setError(apiErrorText(err, lang, tCommon("genericError")));
+    } catch {
+      setError(tCommon("genericError"));
     } finally {
       setIsActing(false);
     }
@@ -82,17 +81,17 @@ export function LostPetIncidentDetailView({ petId, incidentId }: { petId: string
           <img src={incident.primaryPhotoUrl} alt={incident.petName} className="h-48 w-full rounded-md object-cover" />
         ) : null}
         <p className="text-body text-text-primary">{incident.description}</p>
-        <p className="text-metadata text-text-secondary">{fa ? "محدودهٔ عمومی: " : "Public area: "}{incident.publicArea ?? (fa ? "ثبت نشده" : "Not set")}</p>
-        {incident.lastKnownLocation ? <p className="text-metadata text-text-secondary">{fa ? "مکان دقیق (خصوصی): " : "Exact place (private): "}{incident.lastKnownLocation}</p> : null}
-        {incident.lastSeenAt ? <p className="text-metadata text-text-secondary">{fa ? "آخرین مشاهده: " : "Last seen: "}{when(incident.lastSeenAt)}</p> : null}
+        <p className="text-metadata text-text-secondary">{t("detail.publicArea")}: {incident.publicArea ?? t("report.notGiven")}</p>
+        {incident.lastKnownLocation ? <p className="text-metadata text-text-secondary">{t("detail.exactPlacePrivate")}: {incident.lastKnownLocation}</p> : null}
+        {incident.lastSeenAt ? <p className="text-metadata text-text-secondary">{t("detail.lastSeen")}: {when(incident.lastSeenAt)}</p> : null}
         {incident.privateNotes ? <p className="text-metadata text-text-secondary">{t("detail.privateNotes", { notes: incident.privateNotes })}</p> : null}
       </ContextSurface>
 
       {["OPEN", "SEARCHING", "SIGHTING_REPORTED", "FOUND"].includes(incident.status) ? (
         <ContextSurface className="flex flex-col gap-2">
-          <h2 className="text-section-title">{fa ? "اشتراک صفحهٔ عمومی" : "Share the public page"}</h2>
-          <p className="text-metadata text-text-secondary">{fa ? "صفحهٔ عمومی فقط محدودهٔ تقریبی، عکس و توضیحات عمومی را نشان می‌دهد." : "The public page shows only the approximate area, photo and public description."}</p>
-          <ShareBar url={`/${lang}/lost-pets/${incident.id}`} text={fa ? `${incident.petName} گم شده است. اگر او را دیدید گزارش دهید.` : `${incident.petName} is lost. If you see them, please report it.`} />
+          <h2 className="text-section-title">{t("detail.shareTitle")}</h2>
+          <p className="text-metadata text-text-secondary">{t("detail.shareDescription")}</p>
+          <ShareBar url={`/${lang}/lost-pets/${incident.id}`} text={t("detail.shareText", { name: incident.petName })} />
         </ContextSurface>
       ) : null}
 
