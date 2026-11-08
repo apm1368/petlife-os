@@ -68,5 +68,60 @@
       "passwordMismatch": "Die Passwörter stimmen nicht überein.",
       "genericError": "Das Passwort konnte nicht geändert werden. Bitte versuche es erneut."
     }
-  }
+  },
+  "admin": {
+    "common": {
+      "loading": "Wird geladen …",
+      "retry": "Erneut versuchen",
+      "empty": "Noch nichts vorhanden.",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "reasonLabel": "Begründung",
+      "reasonPlaceholder": "Erforderlich – bitte den Grund erläutern",
+      "assign": "Zuweisen",
+      "assigneeLabel": "Admin-ID der zuständigen Person",
+      "backToList": "Zurück zur Liste",
+      "search": "Suchen"
+    },
+    "audit": {
+      "title": "Prüfprotokoll",
+      "entityType": "Entitätstyp",
+      "entityId": "Entitäts-ID",
+      "action": "Aktion",
+      "reason": "Begründung",
+      "by": "Von {name}",
+      "empty": "Es wurden noch keine Prüfereignisse aufgezeichnet.",
+      "loadError": "Das Prüfprotokoll konnte nicht geladen werden. Bitte versuche es erneut."
+    },
+    "shell": {
+      "accessLoadFailed": "Die Admin-Berechtigungen konnten nicht geladen werden. Bitte versuche es erneut, um deinen aktuellen Zugriff zu prüfen.",
+      "title": "opetlife Admin",
+      "notAnAdmin": {
+        "title": "Kein Admin-Zugriff",
+        "body": "Dein Konto hat keinen internen Plattformzugriff.",
+        "backToApp": "Zurück zu opetlife"
+      },
+      "role": {
+        "SUPER_ADMIN": "Superadmin", "ADMIN": "Administrator", "SUPPORT": "Support",
+        "TRUST_SAFETY": "Vertrauen und Sicherheit", "FINANCE": "Finanzen", "OPERATIONS": "Betrieb",
+        "CONTENT": "Inhalte", "VERIFICATION": "Verifizierung", "READ_ONLY": "Nur-Lesen", "EDITOR": "Redaktion"
+      },
+      "nav": {
+        "dashboard": "Übersicht", "crm": "CRM", "customerAffairs": "Kundenservice", "users": "Alle Nutzer",
+        "customers": "Kunden", "support": "Support", "systemStatus": "Systemstatus", "disputes": "Streitfälle",
+        "trust": "Vertrauen und Sicherheit", "providers": "Anbieter", "sellers": "Verkäufer", "transactions": "Transaktionen",
+        "tasks": "Aufgaben", "access": "Zugriff und Rollen", "audit": "Prüfprotokoll", "sellerFinance": "Verkäuferfinanzen",
+        "reconciliation": "Abgleich", "content": "Inhalte", "helpCenter": "Hilfe und Rechtliches", "contentNew": "Neuer Artikel",
+        "contentCategories": "Kategorien", "contentTags": "Schlagwörter", "contentMedia": "Medien",
+        "contentPlacements": "Platzierungen", "subscriptions": "Abonnements", "services": "Dienste und Buchungen",
+        "commerce": "Handel", "travel": "Reisen und Unterkünfte", "insurance": "Versicherung", "places": "Orte",
+        "communityReports": "Nutzermeldungen", "animalSupport": "Tierschutz", "lostPets": "Vermisste Tiere",
+        "settings": "Plattformeinstellungen", "featureFlags": "Funktionsschalter", "smsPatterns": "SMS-Vorlagen",
+        "verification": "Identität und Dokumente"
+      },
+      "navigation": "Admin-Navigation", "openMenu": "Menü öffnen", "closeMenu": "Menü schließen",
+      "groups": { "work": "Tägliche Arbeit", "trust": "Kunden und Vertrauen", "network": "Netzwerk", "finance": "Finanzen", "content": "Inhalte", "system": "System" }
+    }
+  },
+  "common": { "loading": "Wird geladen …", "retry": "Erneut versuchen" }
 }

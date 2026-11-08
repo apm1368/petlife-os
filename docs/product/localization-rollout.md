@@ -30,6 +30,7 @@ Status is per page family, not per shared header. `COMPLETE` means all applicati
 | Community, shelter and animal support | Partial | Partial | Partial | Partial | Full feed, forms, moderation and empty/error states remain open. |
 | Help Center, support and legal | Partial | Partial | Partial | Partial | Help/support workflow and published legal copy require separate verification; legal body content must remain authoritative, not machine-fabricated. |
 | Admin, backoffice and ERP | Partial | Partial | Partial | Partial | Shared navigation is localized; tables, charts, permissions, operational dialogs and state copy remain open. |
+| Admin audit `/[locale]/admin/audit` and shared admin shell | Complete | Complete | Complete | Complete | This slice translates audit labels, empty/loading/error/retry, role/access shell, navigation groups and links. Tests verify de/es shell access states and links, all audit page states in four locales, locale dates and preservation of immutable audit evidence. PR/CI/review pending; not live. Other admin routes remain partial. |
 | Notifications and message templates | Partial | Partial | Partial | Partial | In-app notification UI is still being audited. German/Spanish SMS templates and provider delivery are not implemented and must not be simulated. |
 
 ### Dashboard batch on `codex/i18n-dashboard`
