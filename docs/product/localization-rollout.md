@@ -66,7 +66,8 @@ Status is per page family, not per shared header. `COMPLETE` means all applicati
 | Help Center, support and legal | Partial | Partial | Partial | Partial | Help/support workflow and published legal copy require separate verification; legal body content must remain authoritative, not machine-fabricated. |
 | Admin, backoffice and ERP | Partial | Partial | Partial | Partial | Shared navigation is localized; tables, charts, permissions, operational dialogs and state copy remain open. |
 | Admin audit `/[locale]/admin/audit` and shared admin shell | Partial | Partial | Partial | Partial | PR #156 merged to main at `b0ec95c4`; CI passed on its exact head. Audit labels, empty/loading/error/retry, role/access shell, navigation groups and links have 19 focused tests. Responsive inspection remains pending; other admin routes remain partial. |
-| Notifications and message templates | Partial | Partial | Partial | Partial | PR #148 translates notification-center/preferences chrome, controls and timestamps; CI on synchronized head `615f6350` is pending. Server-supplied title/body content is unchanged; other surfaces remain partial. German/Spanish SMS templates and provider delivery are not implemented or simulated. |
+| Customer support `/[locale]/support` and tickets | Partial | Partial | Partial | Partial | PR #147 merged after 18 focused support tests plus typecheck/lint and green exact-head CI; responsive inspection, admin support/help/legal and backend error surfaces remain open. |
+| Notifications and message templates | Partial | Partial | Partial | Partial | PR #148 merged to main at `afefa932`; CI passed on exact head `615f6350`. Notification-center/preferences chrome, controls and timestamps are translated; server-provided titles/bodies stay unchanged. Backend errors and other surfaces remain partial. German/Spanish SMS templates and provider delivery are not implemented or simulated. |
 
 ### Dashboard batch on `codex/i18n-dashboard`
 
@@ -106,6 +107,7 @@ Before marking any additional route complete, record its route/component, all fo
 - `PetContextShell`, `PetProfileView`, `EditPetIdentity`, the shared birth-date field, pet identity formatting, overview labels and derived care-kind labels include German and Spanish copy. User-entered pet names, breeds, provider names and custom reminder titles are retained as data and are not machine-translated.
 - Overview dates use locale-aware Gregorian formatting for en/de/es and preserve the Persian Jalali calendar for fa. Age, weight, species and lab-panel counts use locale-aware labels and number formatting. Persian and English strings remain intact.
 
+## Shop discovery and cart (PR #146)
 - Pet overview PR #120 merged to `main` at `084ee787`; its 44 focused tests, typecheck, lint and exact-head CI passed. Deployment status is being checked separately. Care-profile/calendar code is localized, with responsive browser inspection still required before completion.
 - Health records, documents, memories, activity, travel and expenses remain partial, as do SMS templates and locale-specific delivery.
 
@@ -115,4 +117,9 @@ Before marking any additional route complete, record its route/component, all fo
 - Added German and Spanish labels for the care calendar, month navigation, agenda/month controls, day selection, empty state and pet selector. Date/month/day labels use the selected locale, while the Persian calendar calculation remains unchanged; the care reminder agenda and medical record pages are not included.
 - Focused care profile/calendar tests passed (38 tests across 2 files) on the final PR head; typecheck/lint and hosted CI passed. Responsive browser inspection remains open. PR #157 merged to main at `3a61edef`; it is not yet production-verified.
 
-Next slices: health/documents/care calendar; checkout and orders; seller operations; provider/booking; support/legal; travel/community/partner; backoffice and notifications. Preserve route switching, RTL/LTR, locale dates/numbers, accessibility and Jalali behavior; track fallbacks explicitly.
+German and Spanish copy covers customer shop home, catalog search/results and filters, product details, compatibility guidance, cart, stock/rating labels, and shared commerce navigation/feedback. Prices retain the Rial-to-Toman display conversion; digit grouping is locale-aware. Product titles, seller names, brands and offer values remain server-provided data.
+## Customer notification center and preferences (PR #148 — pending CI)
+
+The notification-center chrome, category labels, empty/loading/retry actions, unread accessibility prefix, preference page, category/channel labels, required-category note, consent state, quiet-hours controls, save feedback and SMS channel-status copy have German and Spanish translations. Center timestamps use locale-aware formatting (`fa-IR` remains unchanged). Dynamic titles and bodies remain exactly as supplied by the server; this UI slice does not translate user/server content.
+
+SMS sandbox remains explicitly labelled as not delivered. This work adds no SMS templates, provider configuration or send simulation; email and push channels remain absent. Backend error details and other notification pages may still fall back to English. Exact-head CI is pending after syncing with current main.
