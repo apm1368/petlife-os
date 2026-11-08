@@ -48,4 +48,29 @@ describe("HouseholdInvitationView", () => {
     expect(screen.getByText(/membership and pet access still begin only after the owner approves/)).toBeTruthy();
     expect(replace).not.toHaveBeenCalled();
   });
+
+  it("renders the unverified-number request flow entirely in German", async () => {
+    vi.mocked(householdsService.inspectInvitation).mockResolvedValue({ contactMasked: "+98912***34", phoneVerified: false, expiresAt: "2026-10-05T10:00:00.000Z", requestPending: false });
+    renderWithIntl(<HouseholdInvitationView token="t" />, "de");
+
+    expect(await screen.findByRole("heading", { name: "Einem Haushalt beitreten" })).toBeTruthy();
+    expect(screen.getByText(/nicht bestätigt/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Mitgliedschaft anfragen" })).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06ff]/);
+  });
+
+  it("renders the pending owner-approval state and expired-link recovery in Spanish", async () => {
+    vi.mocked(householdsService.inspectInvitation).mockResolvedValue({ contactMasked: "+98912***34", phoneVerified: true, expiresAt: "2026-10-05T10:00:00.000Z", requestPending: true });
+    const { unmount } = renderWithIntl(<HouseholdInvitationView token="t" />, "es");
+    expect(await screen.findByRole("heading", { name: "Tu solicitud está pendiente de la aprobación de la persona responsable del hogar" })).toBeTruthy();
+    expect(screen.getByRole("status").textContent).toContain("Tu solicitud se ha enviado");
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06ff]/);
+
+    unmount();
+    vi.mocked(householdsService.inspectInvitation).mockRejectedValue(err(410, "INVITATION_EXPIRED"));
+    renderWithIntl(<HouseholdInvitationView token="t" />, "es");
+    expect(await screen.findByRole("heading", { name: "Esta invitación ha caducado" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Ir a tu cuenta" })).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06ff]/);
+  });
 });
