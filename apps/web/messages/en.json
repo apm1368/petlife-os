@@ -1785,8 +1785,13 @@
     "repeat": {
       "title": "Repeat deliveries",
       "loading": "Loading",
+      "loadFailed": "Repeat deliveries could not be loaded. Please try again.",
+      "offlineTitle": "You're offline",
+      "offlineHint": "Reconnect to view your repeat deliveries.",
+      "accessDeniedTitle": "You don't have access",
+      "accessDeniedHint": "Sign in with an account that can view this household's repeat deliveries.",
       "retry": "Retry",
-      "howItWorks": "We remind you two days before each date. You confirm the order at the live price and pay as usual — opetlife never charges you automatically.",
+      "howItWorks": "Before each scheduled date, we send a reminder. You confirm the order at the current price and pay through checkout — opetlife never charges you automatically.",
       "empty": "No repeat deliveries yet",
       "emptyHint": "Look for “Repeat delivery available” on products you buy regularly.",
       "browse": "Browse products",
@@ -1797,7 +1802,8 @@
       "status": {
         "ACTIVE": "Active",
         "PAUSED": "Paused",
-        "CANCELLED": "Cancelled"
+        "CANCELLED": "Cancelled",
+        "UNKNOWN": "Unknown status"
       },
       "notAvailableTitle": "Repeat delivery isn't available for this item",
       "notAvailableHint": "The seller may have stopped offering it.",
@@ -1809,6 +1815,8 @@
       "quantity": "Quantity",
       "address": "Deliver to",
       "needAddress": "Add a delivery address at checkout first.",
+      "loadingAddresses": "Loading addresses",
+      "addressesLoadFailed": "Addresses could not be loaded. Please try again.",
       "noAutopayTitle": "No automatic charges",
       "noAutopay": "You'll get a reminder before each delivery and confirm the order yourself.",
       "create": "Create repeat delivery",
@@ -1845,7 +1853,8 @@
         "PRICE_ACCEPTED": "New price accepted",
         "REMINDER_SENT": "Reminder sent",
         "CYCLE_PREPARED": "Added to cart",
-        "ORDERED": "Ordered"
+        "ORDERED": "Ordered",
+        "OTHER": "Updated"
       }
     },
     "favorites": {
