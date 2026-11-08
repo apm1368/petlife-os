@@ -6,6 +6,17 @@ This is not full application localization. The account preference API and databa
 
 Account settings page bodies (outside the language/calendar copy), pet/health, booking, provider, seller, shop checkout/orders/repeat delivery/favorites, admin, support and legal copy remain partially or mostly Persian/English only. German and Spanish message catalogs translate auth, household, landing, personal settings, pet profile/care, and the shop discovery/cart branches documented below; other keys fall back to English to avoid missing-key errors. Notification and trip-checklist copy also falls back to English for German and Spanish; German/Spanish SMS templates are not implemented and must not be simulated. Outside the components named above, do not present fallback text as a completed translation.
 
+### Current localization slices
+
+
+## Personal settings follow-up (PR #119 — merged)
+
+- German and Spanish copy covers personal settings, appearance, contact methods, verification state, OTP flow and success/error/loading states. This changes no verification/provider contract; SMS delivery is not simulated.
+- Exact-head CI passed on PR #119 before its merge to main at d12fb4ed.
+
+### Customer support center and tickets (PR #147 — synchronized, CI pending)
+
+The support home, ticket lists, creation form, ticket detail/conversation controls, statuses, categories and linked-context labels have explicit German and Spanish copy. Conversation timestamps use locale-aware formatting (`fa-IR` remains unchanged; English/German/Spanish use their locale formats). User/staff-authored subjects, descriptions and message bodies remain source content and are not translated. Admin support tooling, legal/help articles, backend-generated error details, notifications and German/Spanish SMS templates remain outside this slice or may still fall back to English. No support, messaging or delivery business behavior changed.
 ### Shop discovery and cart (PR #146 — merged)
 
 German and Spanish now have explicit copy for customer shop home, catalog search/results and filters, product details, compatibility guidance, cart, stock/rating labels, and shared commerce navigation/feedback. Shop-facing prices retain the Rial-to-Toman display conversion; only digit grouping follows fa/en/de/es locale. Persian stays RTL with Jalali behavior unchanged. Product titles, seller names, brands, catalog data and offer values remain server-provided data, not translated or fabricated.
@@ -42,13 +53,14 @@ Status is per page family, not per shared header. `COMPLETE` means all applicati
 | Health records, documents, care calendar, memories, activity and expenses | Partial | Partial | Partial | Partial | Linked page bodies/forms/states remain open; pet overview alone does not complete health/calendar pages. |
 | Shop discovery, product detail and cart | Partial | Partial | Partial | Partial | PR #146 merged to main at `ea0f74a7` after green exact-head CI and 39 focused tests plus typecheck/lint. Responsive browser inspection and production behavior remain unverified; checkout, orders, repeat delivery, favorites, seller and commerce backoffice remain open. |
 | Checkout/orders, seller and commerce backoffice | Partial | Partial | Partial | Partial | Page content, validation and transaction/operational states remain open; separate dependent PRs require retargeting after #146. |
+| Customer support `/[locale]/support` and tickets | Partial | Partial | Partial | Partial | German/Spanish copy covers customer support home, list/create/detail, statuses, categories and linked-context labels; 18 focused support tests passed and typecheck/lint passed on synchronized code. Fresh hosted CI after main sync is pending; admin support/help/legal remain partial. |
 | Bookings, provider and clinical | Partial | Partial | Partial | Partial | Dashboard event/date/status vocabulary is translated; booking/provider/clinical screens and dialogs are not yet fully audited. |
 | Travel and accommodation | Partial | Partial | Partial | Partial | Dashboard links and trip summary labels are localized; marketplace/booking details and stale/error states remain open. |
 | Community, shelter and animal support | Partial | Partial | Partial | Partial | Full feed, forms, moderation and empty/error states remain open. |
 | Help Center, support and legal | Partial | Partial | Partial | Partial | Help/support workflow and published legal copy require separate verification; legal body content must remain authoritative, not machine-fabricated. |
 | Admin, backoffice and ERP | Partial | Partial | Partial | Partial | Shared navigation is localized; tables, charts, permissions, operational dialogs and state copy remain open. |
-| Admin audit `/[locale]/admin/audit` and shared admin shell | Partial | Partial | Partial | Partial | Audit labels, empty/loading/error/retry, role/access shell, navigation groups and links have 19 focused tests; responsive browser inspection and fresh CI after shop-base synchronization remain pending. Other admin routes remain partial. |
-| Notifications and message templates | Partial | Partial | Partial | Partial | In-app notification UI is still being audited. German/Spanish SMS templates and provider delivery are not implemented and must not be simulated. |
+| Admin audit `/[locale]/admin/audit` and shared admin shell | Partial | Partial | Partial | Partial | PR #156 merged to main at `b0ec95c4`; CI passed on its exact head. Audit labels, empty/loading/error/retry, role/access shell, navigation groups and links have 19 focused tests. Responsive inspection remains pending; other admin routes remain partial. |
+| Notifications and message templates | Partial | Partial | Partial | Partial | PR #148 translates notification-center/preferences chrome, controls and timestamps; synchronized head CI is pending. Server-provided titles/bodies stay unchanged; backend errors and other surfaces remain partial. German/Spanish SMS templates and provider delivery are not implemented or simulated. |
 
 ### Dashboard batch on `codex/i18n-dashboard`
 
@@ -89,10 +101,5 @@ Before marking any additional route complete, record its route/component, all fo
 - Overview dates use locale-aware Gregorian formatting for en/de/es and preserve the Persian Jalali calendar for fa. Age, weight, species and lab-panel counts use locale-aware labels and number formatting. Persian and English strings remain intact.
 - PR #120 merged to `main` at `084ee787` after current-head CI passed. The pet identity shell, overview and editor passed 44 focused tests plus typecheck and lint; the merged page is not production-verified. Health records, documents, care-calendar bodies, memories and activity remain untranslated.
 
-## Shop discovery and cart (PR #146)
-
-German and Spanish copy covers customer shop home, catalog search/results and filters, product details, compatibility guidance, cart, stock/rating labels, and shared commerce navigation/feedback. Prices retain the Rial-to-Toman display conversion; digit grouping is locale-aware. Product titles, seller names, brands and offer values remain server-provided data.
-
-Six focused shop/currency test files passed (39 tests); web typecheck and lint passed locally on the latest synchronized branch. Hosted CI run 42489821177 passed on head `f38e7f3f`; PR #146 merged to main at `ea0f74a7`. Production deployment/behavior and responsive browser inspection remain unverified. Checkout, order history/details, repeat-delivery, favorites, seller operations and commerce backoffice remain fallback areas. German/Spanish SMS templates and delivery are not implemented.
 
 Next slices: health/documents/care calendar; checkout and orders; seller operations; provider/booking; support/legal; travel/community/partner; backoffice and notifications. Preserve route switching, RTL/LTR, locale dates/numbers, accessibility and Jalali behavior; track fallbacks explicitly.
