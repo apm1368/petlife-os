@@ -985,6 +985,17 @@
       }
     }
   },
+  "careCenter": {
+    "title": "مرکز مراقبت", "subtitle": "یادآورها و پیگیری‌های {petName}؛ زمان‌ها به وقت تهران", "allCare": "همهٔ مراقبت‌ها",
+    "type": "نوع", "due": "زمان", "originalDue": "زمان اصلی", "remindAt": "یادآوری در", "completedAt": "انجام‌شده در", "recurrence": "تکرار", "source": "منبع", "notification": "اعلان", "sent": "ارسال شد", "notSent": "هنوز ارسال نشده", "relatedRecord": "مشاهدهٔ سابقهٔ مرتبط",
+    "chooseDay": "روز دلخواه", "timeTehran": "ساعت (به وقت تهران)", "snooze": "تعویق اعلان", "reschedule": "تغییر زمان یادآوری", "actionFailed": "انجام نشد. دوباره تلاش کنید.", "loading": "در حال بارگذاری یادآورها", "filtersAria": "فیلتر مراقبت", "filters": { "all": "همه" },
+    "states": { "DUE": "به‌زودی", "OVERDUE": "عقب‌افتاده", "UPCOMING": "آینده", "COMPLETED": "انجام‌شده", "SNOOZED": "به‌تعویق‌افتاده", "CANCELLED": "لغوشده", "CUSTOM": "شخصی" }, "unknownState": "وضعیت نامشخص", "unknownType": "مراقبت دیگر", "unknownRecurrence": "برنامهٔ دیگر", "unknownSource": "منبع دیگر",
+    "calendar": "تقویم", "careSheet": "برگهٔ مراقبت برای پرستار", "travelReadiness": "آمادگی سفر", "create": "یادآور جدید",
+    "empty": { "body": "یادآورها می‌توانند از واکسن‌ها، داروها و نوبت‌ها ساخته شوند؛ یادآور شخصی هم می‌توانید بسازید.", "all": { "title": "هنوز مراقبتی ثبت نشده" }, "due": { "title": "یادآور نزدیکی ندارید" }, "overdue": { "title": "هیچ مراقبتی عقب نیفتاده است" }, "upcoming": { "title": "یادآور آینده‌ای ثبت نشده" }, "completed": { "title": "هنوز مراقبت انجام‌شده‌ای ثبت نشده" }, "snoozed": { "title": "یادآور به‌تعویق‌افتاده‌ای ندارید" }, "cancelled": { "title": "یادآور لغوشده‌ای ندارید" }, "custom": { "title": "یادآور شخصی ندارید" } },
+    "recentlyCompleted": "اخیراً انجام‌شده", "dailyInstructions": "دستورالعمل مراقبت روزمره", "done": "انجام شد", "reminds": "یادآوری در", "bookVisit": "رزرو نوبت", "complete": "انجام شد", "tomorrow": "فردا", "confirmCancel": "تأیید لغو", "cancelWarning": "این یادآور لغو می‌شود و دیگر اعلانی برایش ارسال نمی‌شود.", "cancelYes": "بله، لغو شود", "cancelKeep": "نه، نگه دار", "edit": "ویرایش", "laterToday": "بعداً امروز", "cancel": "لغو", "day": "روز", "save": "ذخیره", "saving": "در حال ذخیره…", "close": "بستن", "chooseDayAndTime": "روز و ساعت را انتخاب کنید.", "saveFailed": "یادآور ذخیره نشد. دوباره تلاش کنید.",
+    "form": { "title": "عنوان یادآور", "recurrence": "تکرار با انتخاب شما", "intervalDays": "فاصله به روز", "recurrenceNote": "تکرار ماهانه و سالانه بر پایهٔ تقویم میلادی است. زمان درمان را از دستور دامپزشک وارد کنید." },
+    "recurrenceOptions": { "ONCE": "یک‌بار", "DAILY": "روزانه", "WEEKLY": "هفتگی", "MONTHLY": "ماهانه", "YEARLY": "سالانه", "CUSTOM": "فاصلهٔ دلخواه (روز)" }, "sources": { "USER_CREATED": "صاحب حیوان", "PROVIDER_CREATED": "ارائه‌دهنده", "MEDICAL_RECORD_DERIVED": "پروندهٔ پزشکی", "BOOKING_DERIVED": "رزرو", "SYSTEM_SCHEDULED": "سیستم" }
+  },
   "careCalendar": {
     "title": "تقویم مراقبت",
     "empty": "هنوز چیزی برنامه‌ریزی نشده.",
