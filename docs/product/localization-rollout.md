@@ -14,8 +14,9 @@ Not included: checkout-specific copy and flows, order history/details, repeat-de
 
 Next slices: seller catalog; checkout/order/repeat-delivery; provider/booking; support/legal; travel/community/partner; backoffice and notifications. Each slice must include locale-aware date/number formats where relevant, route-preserving language switching, accessibility, tests and a missing-key check before it is reported complete. Account language persistence remains covered by the existing #118 API/database implementation; this batch does not alter that contract.
 The personal account settings page (`PersonalSettingsView`) has German and Spanish copy for its display name, appearance, save/error/loading states, contact methods and OTP-based contact-change flow. This is a focused UI translation only: changing a contact still depends on the existing verification provider flow, and no SMS delivery is simulated. German and Spanish message catalogs currently translate auth-specific branches; other keys may still fall back to English where not yet covered. Notification and trip-checklist copy also falls back to English for German and Spanish; German/Spanish SMS templates are not implemented and must not be simulated. Outside the explicitly complete route rows below, do not present fallback text as a completed translation.
+## Personal settings (PR #119 — merged)
 
-Next slices: remaining account settings; customer pet/health/care calendar; commerce and provider/seller workflows; support/legal; travel/community/partner; backoffice and notifications. Each slice must include locale-aware date/number formats where relevant, route-preserving language switching, accessibility, tests and a missing-key check before it is reported complete. Account language persistence remains covered by the existing #118 API/database implementation; this batch does not alter that contract.
+German and Spanish cover the personal settings page, including display name, appearance, contact methods, verification state and existing OTP flow. This UI-only change preserves the existing provider contract; it does not implement or simulate SMS delivery.
 
 ## Route/component coverage matrix (owner correction: full-page, not header-only)
 
@@ -72,3 +73,14 @@ Before marking any additional route complete, record its route/component, all fo
 - Persian and English strings and behavior are unchanged. Locale selection continues to use the saved account preference and existing locale-aware route behavior; this slice changes no API, persistence, verification or notification contract.
 - PR #119 merged to `main` at `d12fb4ed` after green CI. The page's translated loading/save/contact/appearance states are integrated; no production behavior is claimed without deployment verification.
 - This follow-up only translates personal settings and updates this rollout note. It changes no API, persistence, verification or notification contract. The four-locale preference foundation is supplied by #118 on `main`.
+## Pet profile (PR #120 — current)
+
+German and Spanish copy covers the pet identity shell, overview, identity editor, lifecycle/access labels, and derived care-kind labels. User-entered pet names, breeds, provider names and custom reminder titles remain source data. en/de/es use locale-aware dates and numbers; Persian keeps Jalali behavior. Health records, documents, care-calendar bodies, memories and activity remain untranslated in this slice.
+
+## Shop discovery and cart (PR #146 — current)
+
+German and Spanish copy covers customer shop home, catalog search/results and filters, product details, compatibility guidance, cart, stock/rating labels, and shared commerce navigation/feedback. Prices retain the Rial-to-Toman display conversion; digit grouping is locale-aware. Product titles, seller names, brands and offer values remain server-provided data.
+
+Checkout, order history/details, repeat-delivery, favorites, seller operations and commerce backoffice remain fallback areas. German/Spanish SMS templates and delivery are not implemented.
+
+Next slices: health/documents/care calendar; checkout and orders; seller operations; provider/booking; support/legal; travel/community/partner; backoffice and notifications. Preserve route switching, RTL/LTR, locale dates/numbers, accessibility and Jalali behavior; track fallbacks explicitly.
