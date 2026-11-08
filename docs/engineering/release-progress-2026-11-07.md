@@ -93,3 +93,11 @@
 - #161 separates the public services overview (`/[locale]/services`) from provider search/profile routes. Live browser inspection found the overview entirely English in de/es. The independent fix adds 25-key parity for `services.explore`; five render tests pass in fa/en/de/es, typecheck/lint pass, hosted CI pending.
 - Production browser checks for public routes have verified correct locale/dir and no overflow on service overview at 390/1440, but exposed English app copy. After #161 merges/deploys, repeat those checks. Authenticated dashboard/account screens were not inspected in a live browser this session.
 - Disk is approximately 257 MiB free; no local production build attempted. Payment worktree preserved. Original memorial source-image/CDN privacy remains unverified. No full application page family is claimed complete based solely on headers; major product families remain PARTIAL.
+
+## Shared-shell localization — 2026-11-08 17:35 UTC
+
+- Main is `5cdde4a4`; production remains `85c9198239e259f5d36ef66a58b8d17a4a328fea`, readiness healthy. Deployment run `42503512219` for #151 is in progress.
+- #161 is synchronized to current main in head `8f8d963f`; 18 service/travel tests, type package build, web typecheck and lint pass locally. Fresh hosted CI is pending; services overview remains PARTIAL and not live-verified.
+- New branch `codex/i18n-public-shell` translates public primary/Explore navigation, local-preview navigation, sign-in and public footer for fa/en/de/es. Seven focused tests pass; typecheck/lint passed on the implementation before the last test-only change. No PR or production release yet.
+- No complete four-language page-family claim is made. Dashboard/account authenticated production rendering remains unverified, and several product families still have documented English fallback. Preserve the landing HERO composition and distinguish source content from interface copy.
+- The separate payment worktree was not present in this workspace worktree listing; no payment files were modified. Memorial source-image/CDN privacy remains unverified; German/Spanish SMS delivery/templates are not claimed.

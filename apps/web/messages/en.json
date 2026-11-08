@@ -6701,5 +6701,38 @@
       "noOpenTimes": "No open times",
       "full": "Full"
     }
+  },
+  "publicNavigation": {
+    "main": "Primary navigation",
+    "explore": "Explore",
+    "closeMenu": "Close menu",
+    "quickAccess": "Quick access",
+    "openApp": "Open app",
+    "logIn": "Log in",
+    "home": "Home",
+    "health": "Health",
+    "services": "Services",
+    "shop": "Shop",
+    "memories": "Memories",
+    "healthAndVet": "Health and veterinary care",
+    "places": "Places",
+    "travel": "Travel",
+    "insurance": "Insurance",
+    "animalSupport": "Animal support",
+    "community": "Community",
+    "blog": "Blog",
+    "productSections": "Product sections",
+    "dashboard": "Dashboard",
+    "myPets": "My pets",
+    "activePet": "Active pet",
+    "care": "Care",
+    "careCalendar": "Care calendar",
+    "cart": "Cart",
+    "checkout": "Checkout",
+    "orders": "Orders",
+    "bookings": "Bookings",
+    "notifications": "Notifications",
+    "notificationPreferences": "Notification preferences",
+    "support": "Support"
   }
 }

@@ -6701,5 +6701,38 @@
       "noOpenTimes": "زمان آزاد ندارد",
       "full": "پر"
     }
+  },
+  "publicNavigation": {
+    "main": "ناوبری اصلی",
+    "explore": "کاوش",
+    "closeMenu": "بستن منو",
+    "quickAccess": "دسترسی سریع",
+    "openApp": "ورود به برنامه",
+    "logIn": "ورود",
+    "home": "خانه",
+    "health": "سلامت",
+    "services": "خدمات",
+    "shop": "فروشگاه",
+    "memories": "خاطرات",
+    "healthAndVet": "سلامت و دامپزشکی",
+    "places": "مکان‌ها",
+    "travel": "سفر",
+    "insurance": "بیمه",
+    "animalSupport": "حمایت از حیوانات",
+    "community": "جامعه",
+    "blog": "وبلاگ",
+    "productSections": "بخش‌های محصول",
+    "dashboard": "داشبورد",
+    "myPets": "حیوانات من",
+    "activePet": "حیوان فعال",
+    "care": "مراقبت",
+    "careCalendar": "تقویم مراقبت",
+    "cart": "سبد خرید",
+    "checkout": "پرداخت",
+    "orders": "سفارش‌ها",
+    "bookings": "نوبت‌ها",
+    "notifications": "اعلان‌ها",
+    "notificationPreferences": "تنظیمات اعلان",
+    "support": "پشتیبانی"
   }
 }
