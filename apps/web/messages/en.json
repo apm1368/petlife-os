@@ -4423,7 +4423,17 @@
       "stock": "Initial stock",
       "save": "Add offer",
       "failed": "Could not complete the action. Your entries are preserved.",
-      "saved": "Seller offer created."
+      "saved": "Seller offer created.",
+      "requestHelp": "If the product is missing, request it for central-catalog review. A request does not create an offer or set a price or stock.",
+      "requestName": "Product name",
+      "requestBrand": "Brand (optional)",
+      "requestSource": "Reference URL (optional)",
+      "requestDescription": "Product description (optional)",
+      "requestReviewNote": "An administrator checks for duplicates and reviews this request. Your seller price and inventory remain separate.",
+      "requestSubmit": "Request catalog addition",
+      "requestSaved": "Request sent for review.",
+      "requestHistory": "Your catalog requests",
+      "requestStatus": { "PENDING_REVIEW": "Under review", "APPROVED": "Added to central catalog", "MATCHED_EXISTING": "Matched to an existing product", "REJECTED": "Declined" }
     },
     "marketplace": {
       "settings": "Sync settings",
@@ -5160,6 +5170,7 @@
     "datesRequired": "Choose check-in and check-out dates for a trip-specific price.",
     "fromPrice": "Recorded starting rate: from {amount} · {date}. This is not a confirmed price for your selected dates.",
     "lastSeen": "Property last seen: {date}",
+    "lastSuccessfulSync": "Last successful source sync: {date}",
     "capacity": "Reported capacity: {count}",
     "evidence": "Recorded pet acceptance evidence",
     "unavailable": "This stay is currently unavailable in the public directory. It remains in your saved list.",

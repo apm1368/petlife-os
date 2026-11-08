@@ -54,6 +54,7 @@ import {
 } from "../../commerce/promotions/dto/promotion.dto";
 import { AdminCommerceService } from "./admin-commerce.service";
 import { CatalogImportService } from "./catalog-import.service";
+import { SellerCatalogReviewService } from "./seller-catalog-review.service";
 
 const toBool = ({ value }: { value: unknown }) => value === true || value === "true" || value === "1";
 
@@ -116,6 +117,8 @@ class ReasonDto {
 }
 
 class CatalogImportSnapshotDecisionDto extends ReasonDto {}
+class CatalogRequestMatchDto extends ReasonDto { @IsUUID() productId!: string; }
+class CatalogRequestApproveDto extends ReasonDto { @IsUUID() categoryId!: string; @IsArray() @ArrayMaxSize(50) @IsUUID("all", { each: true }) reviewedDuplicateProductIds!: string[]; }
 
 class SellerOfferModerationDecisionDto extends ReasonDto {
   @IsIn([SellerOfferModerationStatus.APPROVED, SellerOfferModerationStatus.REJECTED])
@@ -167,6 +170,7 @@ export class AdminCommerceController {
     private readonly commerce: AdminCommerceService,
     private readonly catalogImports: CatalogImportService,
     private readonly promotions: PromotionManagementService,
+    private readonly sellerCatalogRequests: SellerCatalogReviewService,
   ) {}
 
   @Get("orders")
@@ -231,6 +235,30 @@ export class AdminCommerceController {
   @RequireAdminPermission("commerce.view")
   catalogImportAvailability(@CurrentAdmin() admin: ResolvedAdminContext) {
     return this.catalogImports.availability(admin);
+  }
+
+  @Get("catalog-product-requests")
+  @RequireAdminPermission("commerce.view")
+  listCatalogProductRequests() {
+    return this.sellerCatalogRequests.listPending();
+  }
+
+  @Post("catalog-product-requests/:id/match")
+  @RequireAdminPermission("commerce.manage")
+  matchCatalogProductRequest(@Param("id", ParseUUIDPipe) id: string, @Body() dto: CatalogRequestMatchDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
+    return this.sellerCatalogRequests.matchExisting(admin, id, dto.productId, dto.reason, req.requestId);
+  }
+
+  @Post("catalog-product-requests/:id/approve")
+  @RequireAdminPermission("commerce.manage")
+  approveCatalogProductRequest(@Param("id", ParseUUIDPipe) id: string, @Body() dto: CatalogRequestApproveDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
+    return this.sellerCatalogRequests.approveNew(admin, id, dto.categoryId, dto.reason, dto.reviewedDuplicateProductIds, req.requestId);
+  }
+
+  @Post("catalog-product-requests/:id/reject")
+  @RequireAdminPermission("commerce.manage")
+  rejectCatalogProductRequest(@Param("id", ParseUUIDPipe) id: string, @Body() dto: ReasonDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
+    return this.sellerCatalogRequests.reject(admin, id, dto.reason, req.requestId);
   }
 
   @Get("product-brands")
