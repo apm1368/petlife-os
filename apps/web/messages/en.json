@@ -4420,6 +4420,15 @@
         "storage": "File storage",
         "outbox": "Event outbox"
       },
+      "systemStatus": {
+        "HEALTHY": "Healthy",
+        "DEGRADED": "Degraded",
+        "LAGGING": "Lagging",
+        "DOWN": "Unavailable",
+        "UP": "Available",
+        "RUNNING": "Running",
+        "ERROR": "Error"
+      },
       "marketplaceStatements": "Marketplace statements",
       "insuranceProviders": "Insurance provider management",
       "externalSources": "External travel source operations",
