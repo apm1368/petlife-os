@@ -1,5 +1,5 @@
 import type { AdminUser, Category, CategoryLocale, ContentAuthor, MediaAsset, Tag, TagLocale, User } from "@prisma/client";
-import type { AdminActorSummaryDto, CategoryDto, ContentAuthorDto, MediaAssetDto, PublicCategoryDto, PublicTagDto, RichTextDocument, TagDto } from "@petlife/types";
+import type { AdminActorSummaryDto, CategoryDto, ContentAuthorDto, MediaAssetDto, PublicCategoryDto, PublicContentAuthorDto, PublicMediaAssetDto, PublicTagDto, RichTextDocument, TagDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 
 export const ADMIN_ACTOR_INCLUDE = { user: true } as const;
@@ -27,6 +27,28 @@ export function toMediaAssetDto(row: MediaAssetRow): MediaAssetDto {
   };
 }
 
+/** Public content media must not disclose its uploading administrator or storage/audit metadata. */
+export const PUBLIC_MEDIA_ASSET_SELECT = {
+  id: true,
+  url: true,
+  mimeType: true,
+  widthPx: true,
+  heightPx: true,
+  altText: true,
+} as const;
+type PublicMediaAssetRow = Pick<MediaAsset, keyof typeof PUBLIC_MEDIA_ASSET_SELECT>;
+
+export function toPublicMediaAssetDto(row: PublicMediaAssetRow): PublicMediaAssetDto {
+  return {
+    id: row.id,
+    url: row.url,
+    mimeType: row.mimeType,
+    widthPx: row.widthPx,
+    heightPx: row.heightPx,
+    altText: row.altText,
+  };
+}
+
 export const CONTENT_AUTHOR_INCLUDE = { avatarMediaAsset: { include: MEDIA_ASSET_INCLUDE } } as const;
 type ContentAuthorRow = ContentAuthor & { avatarMediaAsset: MediaAssetRow | null };
 
@@ -38,6 +60,20 @@ export function toContentAuthorDto(row: ContentAuthorRow): ContentAuthorDto {
     avatarMediaAsset: row.avatarMediaAsset ? toMediaAssetDto(row.avatarMediaAsset) : null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
+  };
+}
+
+export const PUBLIC_CONTENT_AUTHOR_INCLUDE = {
+  avatarMediaAsset: { select: PUBLIC_MEDIA_ASSET_SELECT },
+} as const;
+type PublicContentAuthorRow = ContentAuthor & { avatarMediaAsset: PublicMediaAssetRow | null };
+
+export function toPublicContentAuthorDto(row: PublicContentAuthorRow): PublicContentAuthorDto {
+  return {
+    id: row.id,
+    name: row.name,
+    bio: row.bio,
+    avatarMediaAsset: row.avatarMediaAsset ? toPublicMediaAssetDto(row.avatarMediaAsset) : null,
   };
 }
 

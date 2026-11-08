@@ -44,6 +44,11 @@ describe("Content sections — blog vs guides, and the demo articles", () => {
     const detail = await request(app.getHttpServer()).get("/blog/articles/dog-vaccination-schedule?locale=fa").expect(200);
     expect(detail.body.category.slug).toBe("guides");
     expect(detail.body.coverMediaAsset.url).toBe("/images/experience/vet-hero.png");
+    expect(detail.body.coverMediaAsset).toMatchObject({ id: expect.any(String), mimeType: "image/png", altText: expect.any(String) });
+    expect(detail.body.coverMediaAsset).not.toHaveProperty("createdByAdmin");
+    expect(detail.body.coverMediaAsset).not.toHaveProperty("fileSizeBytes");
+    expect(detail.body.coverMediaAsset).not.toHaveProperty("disabledAt");
+    expect(JSON.stringify(detail.body)).not.toContain("createdByAdmin");
   });
 
   it("reading time is server-derived; related reading uses category/tags only and never the article itself", async () => {

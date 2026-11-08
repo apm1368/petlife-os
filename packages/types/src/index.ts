@@ -3523,6 +3523,16 @@ export interface MediaAssetDto {
   createdAt: string;
 }
 
+/** Public content needs display metadata only; admin identity and storage metadata stay private. */
+export interface PublicMediaAssetDto {
+  id: string;
+  url: string;
+  mimeType: string;
+  widthPx: number | null;
+  heightPx: number | null;
+  altText: string | null;
+}
+
 export interface ContentAuthorDto {
   id: string;
   name: string;
@@ -3531,6 +3541,10 @@ export interface ContentAuthorDto {
   createdAt: string;
   updatedAt: string;
 }
+
+export type PublicContentAuthorDto = Omit<ContentAuthorDto, "avatarMediaAsset" | "createdAt" | "updatedAt"> & {
+  avatarMediaAsset: PublicMediaAssetDto | null;
+};
 
 export interface CategoryLocaleDto {
   locale: Locale;
@@ -3651,8 +3665,8 @@ export interface PublicArticleSummaryDto {
   canonicalPath: string;
   title: string;
   excerpt: string | null;
-  coverMediaAsset: MediaAssetDto | null;
-  author: ContentAuthorDto | null;
+  coverMediaAsset: PublicMediaAssetDto | null;
+  author: PublicContentAuthorDto | null;
   category: PublicCategoryDto | null;
   tags: PublicTagDto[];
   publishedAt: string;
@@ -3675,7 +3689,7 @@ export interface PublicArticleReferenceDto {
   canonicalPath: string;
   title: string;
   excerpt: string | null;
-  coverMediaAsset: MediaAssetDto | null;
+  coverMediaAsset: PublicMediaAssetDto | null;
 }
 
 export interface PublicContentBlockDto {
@@ -3686,7 +3700,7 @@ export interface PublicContentBlockDto {
   ctaLabel: string | null;
   ctaHref: string | null;
   linkedArticle: PublicArticleReferenceDto | null;
-  mediaAsset: MediaAssetDto | null;
+  mediaAsset: PublicMediaAssetDto | null;
 }
 
 export interface PublicContentPlacementDto {

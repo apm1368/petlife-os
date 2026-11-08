@@ -5,13 +5,13 @@ import type { PaginatedDto, PublicArticleDetailDto, PublicArticleReferenceDto, P
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { ArticleLocaleNotFoundException, CategoryNotFoundException, TagNotFoundException } from "../../common/errors/api-exception";
 import { resolvePagination, toPaginatedDto, type PaginationQueryDto } from "../../common/pagination/pagination.dto";
-import { CONTENT_AUTHOR_INCLUDE, MEDIA_ASSET_INCLUDE, resolveRichTextMedia, toContentAuthorDto, toMediaAssetDto, toPublicCategoryDto, toPublicTagDto } from "./content-mapper";
+import { PUBLIC_CONTENT_AUTHOR_INCLUDE, PUBLIC_MEDIA_ASSET_SELECT, resolveRichTextMedia, toPublicCategoryDto, toPublicContentAuthorDto, toPublicMediaAssetDto, toPublicTagDto } from "./content-mapper";
 
 function articleInclude(locale: Locale) {
   return {
-    author: { include: CONTENT_AUTHOR_INCLUDE },
+    author: { include: PUBLIC_CONTENT_AUTHOR_INCLUDE },
     category: { include: { locales: { where: { locale } } } },
-    coverMediaAsset: { include: MEDIA_ASSET_INCLUDE },
+    coverMediaAsset: { select: PUBLIC_MEDIA_ASSET_SELECT },
     tags: { include: { tag: { include: { locales: { where: { locale } } } } } },
   } as const;
 }
@@ -34,8 +34,8 @@ function toSummary(row: PublicArticleLocaleRow): PublicArticleSummaryDto {
     canonicalPath: canonicalPath(row.locale, row.slug, article.category?.locales[0]?.slug),
     title: row.title,
     excerpt: row.excerpt,
-    coverMediaAsset: article.coverMediaAsset ? toMediaAssetDto(article.coverMediaAsset) : null,
-    author: article.author ? toContentAuthorDto(article.author) : null,
+    coverMediaAsset: article.coverMediaAsset ? toPublicMediaAssetDto(article.coverMediaAsset) : null,
+    author: article.author ? toPublicContentAuthorDto(article.author) : null,
     category: article.category?.locales[0] ? toPublicCategoryDto(article.category.locales[0]) : null,
     tags: article.tags.map((t) => t.tag.locales[0]).filter((l): l is NonNullable<typeof l> => Boolean(l)).map(toPublicTagDto),
     publishedAt: row.publishedAt!.toISOString(),

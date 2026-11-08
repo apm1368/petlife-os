@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { ContentPlacementKey, Locale } from "@prisma/client";
 import type { PublicContentBlockDto, PublicContentPlacementDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
-import { MEDIA_ASSET_INCLUDE, toMediaAssetDto } from "./content-mapper";
+import { PUBLIC_MEDIA_ASSET_SELECT, toPublicMediaAssetDto } from "./content-mapper";
 import { PublicContentReadService } from "./public-content-read.service";
 
 /**
@@ -24,7 +24,7 @@ export class PublicContentPlacementReadService {
   async get(key: ContentPlacementKey, locale: Locale): Promise<PublicContentPlacementDto> {
     const placement = await this.prisma.contentPlacement.findUnique({
       where: { key },
-      include: { blocks: { include: { mediaAsset: { include: MEDIA_ASSET_INCLUDE }, locales: { where: { locale } } }, orderBy: { sortOrder: "asc" } } },
+      include: { blocks: { include: { mediaAsset: { select: PUBLIC_MEDIA_ASSET_SELECT }, locales: { where: { locale } } }, orderBy: { sortOrder: "asc" } } },
     });
     if (!placement) return { key: key as unknown as PublicContentPlacementDto["key"], blocks: [] };
 
@@ -39,7 +39,7 @@ export class PublicContentPlacementReadService {
           ctaLabel: l?.ctaLabel ?? null,
           ctaHref: l?.ctaHref ?? null,
           linkedArticle: block.linkedArticleId ? await this.articles.getArticleReference(locale, block.linkedArticleId) : null,
-          mediaAsset: block.mediaAsset ? toMediaAssetDto(block.mediaAsset) : null,
+          mediaAsset: block.mediaAsset ? toPublicMediaAssetDto(block.mediaAsset) : null,
         };
       }),
     );
