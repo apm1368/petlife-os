@@ -881,6 +881,39 @@
       "VACCINATION": "Impfung"
     }
   },
+  "services": {
+    "explore": {
+      "title": "Dienstleistungen entdecken",
+      "subtitle": "Für {name}",
+      "eyebrow": "Geprüfte Fachkräfte – an einem Ort",
+      "heading": "Professionelle Betreuung in Ihrer Nähe",
+      "description": "Vergleichen Sie Leistungen nach freien Zeiten, Umgebung, den Bedürfnissen Ihres Tieres und der Erfahrung der Fachkräfte. Buchen Sie in wenigen Schritten.",
+      "searchLabel": "Dienstleistungen suchen",
+      "searchPlaceholder": "Welche Leistung benötigen Sie?",
+      "searchButton": "Betreuung finden",
+      "chooseService": "Leistung auswählen",
+      "allProvidersIntro": "Alle Anbieter auf einen Blick:",
+      "allServices": "Alle Leistungen",
+      "category": {
+        "VET": "Tiermedizin",
+        "GROOMING": "Fellpflege",
+        "TRAINING": "Training",
+        "WALKING": "Gassi-Service",
+        "SITTING": "Betreuung zu Hause",
+        "BOARDING": "Tierpension",
+        "PET_TAXI": "Haustiertaxi"
+      },
+      "categoryHint": {
+        "VET": "Kliniken, Hausbesuche und Fachgebiete",
+        "GROOMING": "Baden, Schneiden und fachgerechte Pflege",
+        "TRAINING": "Private Trainer und Verhaltenskurse",
+        "WALKING": "Sichere Spaziergänge mit Verlauf",
+        "SITTING": "Vertrauensvolle Betreuung bei Ihnen zu Hause",
+        "BOARDING": "Übernachtung mit täglichen Updates",
+        "PET_TAXI": "Sichere Fahrten innerhalb der Stadt"
+      }
+    }
+  },
   "providerProfile": {
     "loading": "Anbieterprofil wird geladen",
     "notFoundTitle": "Dieser Anbieter ist nicht verfügbar",
