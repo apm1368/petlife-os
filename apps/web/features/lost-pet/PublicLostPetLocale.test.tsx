@@ -16,12 +16,12 @@ describe("public lost-pet pages in German and Spanish",()=>{
  it.each([["de","Nach Tierart filtern","Zurzeit gibt es keine aktiven Vermisstmeldungen."],["es","Filtrar por especie","Ahora mismo no hay avisos activos de mascotas perdidas."]] as const)("localizes the public list and empty state in %s",async(locale,filter,empty)=>{
   renderWithIntl(<PublicLostPetListView/>,locale);
   expect(await screen.findByRole("group",{name:filter})).toBeTruthy();
-  expect(screen.getByText(empty)).toBeTruthy();
+  expect(await screen.findByText(empty)).toBeTruthy();
  });
  it.each([["fa","فیلتر بر اساس گونه","در حال حاضر گزارش فعالی از حیوان گم‌شده ثبت نشده است."],["en","Filter by species","There are no active lost-pet reports right now."]] as const)("preserves the public list in %s",async(locale,filter,empty)=>{
   renderWithIntl(<PublicLostPetListView/>,locale);
   expect(await screen.findByRole("group",{name:filter})).toBeTruthy();
-  expect(screen.getByText(empty)).toBeTruthy();
+  expect(await screen.findByText(empty)).toBeTruthy();
  });
  it.each([["de","Tierart","Sichtung melden"],["es","Especie","Comunicar un avistamiento"]] as const)("localizes public incident facts and sighting controls in %s",async(locale,species,title)=>{
   renderWithIntl(<PublicLostPetView incidentId="lost-1"/>,locale);
