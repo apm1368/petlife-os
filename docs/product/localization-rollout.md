@@ -189,6 +189,11 @@ Lifecycle actions, status labels, confirmation dialog, owner note, loading/retry
 - Known system/worker statuses are translated; unknown status values remain visible as source diagnostics rather than being guessed. User/admin-entered task titles, case subjects and worker identifiers remain unchanged.
 - Seven focused dashboard tests pass, including translated populated states, translation-catalog key parity and absence of Persian UI/fallback English markers. Web TypeScript check passed. This page-level UI coverage is not yet production/admin-browser verified; the remainder of admin/backoffice/ERP is still PARTIAL.
 
+## Admin dashboard failure-state follow-up (PR #166)
+
+- Adds explicit fa/en/de/es dashboard offline and access-denied messages, differentiates HTTP 401/403 from transport failures, and provides a localized accessible skeleton label. It does not add charts or synthetic data.
+- Twenty-seven component tests cover populated data and empty/loading/error/offline/access-denied states across all four languages, with no-Persian assertions for de/es. TypeScript, targeted ESLint, catalog parsing and diff checks passed locally. The PR needs current-base CI and authenticated responsive browser verification; dashboard remains PARTIAL.
+
 ## Member clinic notes (`/[locale]/profile/clinic-notes`) — PR #165
 
 - German/Spanish UI copy covers title/intro, note limit, refresh, loading, empty, generic error, offline, access-denied and retry. API 401/403 responses are distinct from offline/network failures.
@@ -231,8 +236,14 @@ Lifecycle actions, status labels, confirmation dialog, owner note, loading/retry
 ## Admin user directory and profile — PR #167, synchronized with current main
 
 - German and Spanish cover the admin user list, filters, masked contact details, pagination, profile sections/tabs, household/pet summaries, relationship/status labels, audit entries and the permitted one-account message/SMS disclosure. User-entered and provider-authored content remains unchanged; no SMS delivery is simulated.
-- The branch is synchronized with current `main` through #169. Current-main catalog conflicts had removed the `adminUsers` namespace; it is restored in both German and Spanish.
+- The branch is synchronized with current `main` through #166. Current-main catalog conflicts had removed the `adminUsers` namespace; it is restored in both German and Spanish.
 - Synchronized-head checks: 17 user-directory render/parity tests pass, web TypeScript check, targeted ESLint, four-catalog parsing and `git diff --check` pass. A fresh hosted CI is still required after push; other admin/backoffice/ERP pages remain PARTIAL.
+
+## Admin dashboard failure states — PR #166, synchronized with current main
+
+- German and Spanish explicitly cover dashboard offline, unauthorized, loading, empty and failure UI; skeleton labels are localized while dashboard data and business behavior remain unchanged.
+- The branch includes current `main` through #169. The sync exposed missing `offline`, `noAccess` and `loading` dashboard keys after current-main catalogs won conflicts; those keys are restored in German and Spanish.
+- PR #166 merged to `main` at `b12d262f`; exact-head CI passed, and the production deploy workflow is running. Dashboard runtime behavior still awaits safe production verification. Other admin/backoffice/ERP routes remain PARTIAL.
 
 ## Checkout-to-order journey — PR #169 (merged to main)
 
