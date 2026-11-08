@@ -2157,6 +2157,7 @@
     "loadMore": "بیشتر",
     "bellLabel": "اعلان‌ها",
     "bellLabelUnread": "اعلان‌ها، {count} خوانده‌نشده",
+    "unreadPrefix": "خوانده‌نشده: ",
     "category": {
       "SECURITY": "امنیت",
       "HEALTH": "سلامت",
