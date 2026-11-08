@@ -6,12 +6,13 @@ import { useRouter } from "next/navigation";
 import { PetSpecies, type ProductCategoryDto } from "@petlife/types";
 import { speciesLabel } from "@/features/pets/pet-identity";
 import { Button, Search, Select } from "@petlife/ui";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 /** Shop-home discovery uses the same URL contract as the full results page. */
 export function ShopSidebar({ categories }: { categories: ProductCategoryDto[] }) {
   const t = useTranslations("commerce.design");
   const f = useTranslations("commerce.results");
-  const locale = useLocale();
+  const locale = useLocale() as RouteLocale;
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
@@ -30,7 +31,7 @@ export function ShopSidebar({ categories }: { categories: ProductCategoryDto[] }
     }}>
       <label className="commerce-search"><Search size={18} aria-hidden="true" /><span className="sr-only">{f("searchLabel")}</span><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={f("searchPlaceholder")} /></label>
       <Select label={f("categories")} value={category} onChange={(e) => setCategory(e.target.value)} options={[{ value: "", label: f("allCategories") }, ...categories.map((c) => ({ value: c.id, label: c.name }))]} />
-      <Select label={f("filters.species")} value={species} onChange={(e) => setSpecies(e.target.value)} options={[{ value: "", label: f("filters.any") }, ...Object.values(PetSpecies).map((value) => ({ value, label: speciesLabel({ species: value }, locale === "fa" ? "fa" : "en") }))]} />
+      <Select label={f("filters.species")} value={species} onChange={(e) => setSpecies(e.target.value)} options={[{ value: "", label: f("filters.any") }, ...Object.values(PetSpecies).map((value) => ({ value, label: speciesLabel({ species: value }, locale) }))]} />
       <label className="commerce-toggle"><span>{f("filters.inStock")}</span><input type="checkbox" checked={inStock} onChange={(e) => setInStock(e.target.checked)} /></label>
       <Button type="submit">{t("applyFilters")}</Button>
     </form>

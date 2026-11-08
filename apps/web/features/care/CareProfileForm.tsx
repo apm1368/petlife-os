@@ -36,15 +36,19 @@ export function CareProfileForm({
     Object.fromEntries(FIELDS.map((field) => [field.key, profile[field.key] ?? ""])),
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState(false);
 
   async function save() {
     setIsSaving(true);
+    setSaveError(false);
     try {
       const input: UpdateCareProfileInput = Object.fromEntries(
         FIELDS.map((field) => [field.key, values[field.key]?.trim() || undefined]),
       );
       const updated = await careProfileService.upsert(petId, input);
       onSaved(updated);
+    } catch {
+      setSaveError(true);
     } finally {
       setIsSaving(false);
     }
@@ -75,6 +79,7 @@ export function CareProfileForm({
           {tCommon("save")}
         </Button>
       </div>
+      {saveError ? <p role="alert" className="text-sm text-status-critical">{t("saveFailed")}</p> : null}
     </div>
   );
 }

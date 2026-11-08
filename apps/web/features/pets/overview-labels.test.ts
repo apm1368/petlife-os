@@ -15,6 +15,22 @@ describe("collapseLabPanels", () => {
     const [panel] = collapseLabPanels([lab("WBC", "2026-09-17"), lab("HGB", "2026-09-17")], "fa");
     expect(panel!.title).toBe("نتایج آزمایش — ۲ مورد");
   });
+  it("localizes the panel count for German and Spanish and retains Persian dates", () => {
+    const panel = [lab("WBC", "2026-09-17"), lab("HGB", "2026-09-17")];
+    expect(collapseLabPanels(panel, "de")[0]!.title).toBe("Laborergebnisse — 2 Tests");
+    expect(collapseLabPanels(panel, "es")[0]!.title).toBe("Resultados de laboratorio — 2 pruebas");
+  });
+});
+
+describe("pet overview labels", () => {
+  it("formats German and Spanish labels and uses the Persian calendar only for Persian", async () => {
+    const { attentionTitle, eventSourceLabel, formatOverviewDate } = await import("./overview-labels");
+    expect(attentionTitle("VACCINATION_OVERDUE", "de")).toBe("Eine Impfung ist überfällig.");
+    expect(attentionTitle("VACCINATION_OVERDUE", "es")).toBe("Hay una vacuna vencida.");
+    expect(eventSourceLabel(visit, "de")).toBe("Anbieter");
+    expect(formatOverviewDate("2026-09-23T08:00:00.000Z", "es")).not.toContain("۱۴۰۵");
+    expect(formatOverviewDate("2026-09-23T08:00:00.000Z", "fa")).toContain("۱۴۰۵");
+  });
 });
 
 describe("mergeCareIntoOverview", () => {

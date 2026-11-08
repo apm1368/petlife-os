@@ -22,13 +22,14 @@ import { useActivePet } from "@/hooks/use-active-pet";
 import { useSessionStore } from "@/stores/session-store";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 import { eventTitle, eventSourceLabel, formatOverviewDate, mergeCareIntoOverview } from "@/features/pets/overview-labels";
 import "./member-home.css";
 
 type Booking = Awaited<ReturnType<typeof bookingsService.list>>[number];
 
-const COPY = {
+export const dashboardCopy = {
   fa: {
     dashboard: "داشبورد",
     startHere: "از اینجا شروع کنید",
@@ -98,6 +99,7 @@ const COPY = {
     community: "جامعه",
     unavailable: "این بخش الان بارگیری نشد.",
     retry: "تلاش دوباره",
+    planNameInEnglish: "نام طرح به انگلیسی",
   },
   en: {
     dashboard: "Dashboard",
@@ -168,6 +170,51 @@ const COPY = {
     community: "Community",
     unavailable: "This section could not load right now.",
     retry: "Retry",
+    planNameInEnglish: "Plan name in English",
+  },
+  de: {
+    dashboard: "Übersicht", startHere: "Hier starten", firstStep: "Lernen Sie zuerst Ihr Tier kennen.",
+    healthIntro: "Gesundheitsakte, Verlauf und Dokumente an einem Ort.", careIntro: "Termine und anstehende Pflege zur richtigen Zeit.",
+    memoriesIntro: "Ein Ort für die Momente, die Sie festhalten möchten.", account: "Ihr Konto", accountIntro: "Verwalten Sie hier Ihre persönlichen Daten und Ihren Haushalt.",
+    personal: "Persönliche Daten", household: "Haushalt und Zugriffsrechte", recentActivity: "Neues in der Akte",
+    noActivity: "Mit Pflegeeinträgen, Besuchen und Erinnerungen entsteht hier der Verlauf Ihres Tieres.", hello: (name: string) => `Hallo, ${name}`,
+    todayIs: "Heute", addPet: "Tier hinzufügen", profile: "Vollständiges Profil", attention: "Benötigt Aufmerksamkeit",
+    noAttention: "Laut den bisherigen Einträgen steht nichts Dringendes an.", noAttentionHint: "Das bedeutet nicht, dass die Akte vollständig ist. Mehr Angaben machen Erinnerungen genauer.",
+    next: "Nächster Termin", noNext: "Sie haben keinen anstehenden Termin.", findVet: "Tierarzt finden", findService: "Services", details: "Termindetails",
+    upcoming: "Demnächst", noUpcoming: "Es sind keine terminierten Erinnerungen oder Ereignisse eingetragen.", calendar: "Pflegekalender", shortcuts: "Direktzugriffe",
+    health: "Gesundheitsakte", care: "Pflege", memories: "Erinnerungen", shop: "Shop", welcomeTitle: "Willkommen bei opetlife",
+    welcomeBody: "Fügen Sie Ihr erstes Tier hinzu, um Gesundheit, Pflege und Erinnerungen an einem Ort zu verwalten.", welcomeCta: "Erstes Tier hinzufügen",
+    unknownAge: "Alter unbekannt", switchPet: "Tier auswählen", sections: "Profilbereiche", lastHealth: "Letzter Gesundheitseintrag",
+    documents: "Dokumente", travel: "Reisen", weight: "Gewicht", microchip: "Mikrochip", registered: "Erfasst", notRecorded: "Nicht erfasst",
+    recentHealth: "Letzte Gesundheitseinträge", noRecentHealth: "Bisher wurden keine Einträge erfasst.", allHealth: "Gesamte Akte", membership: "Mitgliedschaft",
+    noMembership: "Keine aktive Mitgliedschaft. Entdecken Sie die verfügbaren Tarife und Leistungen.", seePlans: "Tarife ansehen", manage: "Verwalten",
+    trialUntil: "Testphase bis", renewsOn: "Verlängerung am", orders: "Bestellungen", noOrders: "Sie haben noch nichts bestellt.", allOrders: "Alle Bestellungen",
+    trips: "Bevorstehende Aufenthalte", noTrips: "Sie haben keinen bevorstehenden Aufenthalt gebucht.", findStay: "Unterkunft finden", explore: "Für Ihr Tier",
+    services: "Services", vets: "Tierärzte", shopLink: "Shop", stays: "Reisen und Unterkünfte", community: "Community",
+    unavailable: "Dieser Bereich konnte gerade nicht geladen werden.", retry: "Erneut versuchen",
+    planNameInEnglish: "Tarifname auf Englisch",
+  },
+  es: {
+    dashboard: "Panel", startHere: "Empieza aquí", firstStep: "Primero, conozcamos a tu mascota.",
+    healthIntro: "Historial, visitas y documentos de salud en un solo lugar.", careIntro: "Citas y próximos cuidados en el momento adecuado.",
+    memoriesIntro: "Un lugar para guardar los momentos que quieres conservar.", account: "Tu cuenta", accountIntro: "Administra aquí tus datos personales y tu hogar.",
+    personal: "Datos personales", household: "Hogar y permisos", recentActivity: "Novedades del historial",
+    noActivity: "Los cuidados, las visitas y los recuerdos crearán aquí el historial de tu mascota.", hello: (name: string) => `Hola, ${name}`,
+    todayIs: "Hoy", addPet: "Añadir mascota", profile: "Perfil completo", attention: "Requiere atención",
+    noAttention: "Según lo registrado, no hay nada urgente pendiente.", noAttentionHint: "Esto no significa que el historial esté completo; cuanto más registres, mejores serán los recordatorios.",
+    next: "Próxima cita", noNext: "No tienes citas próximas.", findVet: "Buscar veterinario", findService: "Servicios", details: "Detalles de la cita",
+    upcoming: "Próximamente", noUpcoming: "No hay recordatorios ni eventos con fecha registrados.", calendar: "Calendario de cuidados", shortcuts: "Accesos directos",
+    health: "Historial de salud", care: "Cuidados", memories: "Recuerdos", shop: "Tienda", welcomeTitle: "Te damos la bienvenida a opetlife",
+    welcomeBody: "Añade tu primera mascota para tener su salud, cuidados y recuerdos en un solo lugar.", welcomeCta: "Añadir mi primera mascota",
+    unknownAge: "Edad desconocida", switchPet: "Elegir mascota", sections: "Secciones del perfil", lastHealth: "Último registro de salud",
+    documents: "Documentos", travel: "Viajes", weight: "Peso", microchip: "Microchip", registered: "Registrado", notRecorded: "Sin registrar",
+    recentHealth: "Registros de salud recientes", noRecentHealth: "Aún no hay registros.", allHealth: "Historial completo", membership: "Suscripción",
+    noMembership: "No tienes una suscripción activa. Consulta los planes y sus ventajas.", seePlans: "Ver planes", manage: "Administrar",
+    trialUntil: "Prueba hasta", renewsOn: "Se renueva el", orders: "Pedidos", noOrders: "Aún no has realizado ningún pedido.", allOrders: "Todos los pedidos",
+    trips: "Próximas estancias", noTrips: "No tienes ninguna estancia reservada próximamente.", findStay: "Buscar alojamiento", explore: "Para tu mascota",
+    services: "Servicios", vets: "Veterinarios", shopLink: "Tienda", stays: "Viajes y alojamientos", community: "Comunidad",
+    unavailable: "No se pudo cargar esta sección en este momento.", retry: "Reintentar",
+    planNameInEnglish: "Nombre del plan en inglés",
   },
 } as const;
 
@@ -177,8 +224,8 @@ const COPY = {
  * has an honest empty state; nothing is invented.
  */
 export function MemberHomeView() {
-  const locale = useLocale() === "en" ? "en" : "fa";
-  const c = COPY[locale];
+  const locale = useLocale() as RouteLocale;
+  const c = dashboardCopy[locale];
   const Forward = locale === "fa" ? ChevronLeft : ChevronRight;
   const user = useSessionStore((s) => s.user);
   const { pets, activePetId, switchActivePet, isSwitching } = useActivePet();
@@ -239,7 +286,7 @@ export function MemberHomeView() {
   }, [householdId]);
 
   const firstName = (user?.displayName ?? "").split(" ")[0] ?? "";
-  const today = new Intl.DateTimeFormat(locale === "fa" ? "fa-IR-u-ca-persian" : "en-US", { weekday: "long", day: "numeric", month: "long", timeZone: "Asia/Tehran" }).format(new Date());
+  const today = new Intl.DateTimeFormat(locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-US", { weekday: "long", day: "numeric", month: "long", timeZone: "Asia/Tehran" }).format(new Date());
 
   if (!petId) {
     return (
@@ -282,7 +329,7 @@ export function MemberHomeView() {
     );
   }
   if (error) return <LoadFailure error={error} onRetry={load} />;
-  if (!overview) return <Skeleton className="h-72 w-full" aria-label={locale === "fa" ? "در حال بارگذاری" : "Loading"} />;
+  if (!overview) return <Skeleton className="h-72 w-full" aria-label={locale === "fa" ? "در حال بارگذاری" : locale === "de" ? "Wird geladen" : locale === "es" ? "Cargando" : "Loading"} />;
 
   const pet = overview.pet;
   const petBase = `/${locale}/pets/${pet.id}`;
@@ -376,6 +423,7 @@ export function MemberHomeView() {
             ) : (
               <div className="member-home__fact-row">
                 <strong>{locale === "fa" ? membership.plan.nameFa : membership.plan.nameEn}</strong>
+                {locale === "de" || locale === "es" ? <small>{c.planNameInEnglish}</small> : null}
                 <StatusLabel tone="success">{statusLabel(membership.status, locale, "subscription")}</StatusLabel>
                 {membership.trialEndsAt && membership.status === "TRIALING" ? <span>{c.trialUntil} {formatDay(membership.trialEndsAt.slice(0, 10), locale)}</span> : membership.currentPeriod?.endAt ? <span>{c.renewsOn} {formatDay(membership.currentPeriod.endAt.slice(0, 10), locale)}</span> : null}
               </div>
@@ -445,8 +493,8 @@ export function MemberHomeView() {
   );
 }
 
-function DashboardExplore({ locale }: { locale: "fa" | "en" }) {
-  const c = COPY[locale];
+function DashboardExplore({ locale }: { locale: RouteLocale }) {
+  const c = dashboardCopy[locale];
   return <nav className="member-home__explore" aria-label={c.explore}>
         <h2>{c.explore}</h2>
         <div>
