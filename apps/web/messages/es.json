@@ -1858,5 +1858,18 @@
       "SOURCE_REPORTED_UNAVAILABLE": "La fuente indica que no hay disponibilidad.",
       "UNKNOWN": "Se desconoce la disponibilidad."
     }
+  },
+  "adminAnimalSupportNav": {
+    "overview": "Resumen",
+    "needs": "Solicitudes de ayuda",
+    "organizations": "Organizaciones",
+    "rescues": "Casos de rescate",
+    "campaigns": "Campañas",
+    "donations": "Donaciones",
+    "lostPets": "Mascotas desaparecidas",
+    "reports": "Informes",
+    "trust": "Casos de confianza y seguridad",
+    "memorials": "Memoriales de mascotas",
+    "label": "Sección de apoyo animal"
   }
 }

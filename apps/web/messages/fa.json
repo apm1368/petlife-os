@@ -6566,6 +6566,19 @@
     "chooseFile": "انتخاب تصویر",
     "noFile": "تصویری انتخاب نشده است"
   },
+  "adminAnimalSupportNav": {
+    "overview": "نمای کلی",
+    "needs": "درخواست‌های کمک",
+    "organizations": "سازمان‌ها",
+    "rescues": "پرونده‌های نجات",
+    "campaigns": "کارزارها",
+    "donations": "کمک‌های مالی",
+    "lostPets": "حیوانات گم‌شده",
+    "reports": "گزارش‌ها",
+    "trust": "پرونده‌های اعتماد و ایمنی",
+    "memorials": "یادبود پت‌ها",
+    "label": "بخش حمایت از حیوانات"
+  },
   "supportOpsNav": {
     "overview": "نمای کلی",
     "needs": "درخواست‌های کمک",

@@ -6529,6 +6529,19 @@
     "chooseFile": "Choose image",
     "noFile": "No image selected"
   },
+  "adminAnimalSupportNav": {
+    "overview": "Overview",
+    "needs": "Support requests",
+    "organizations": "Organizations",
+    "rescues": "Rescue cases",
+    "campaigns": "Campaigns",
+    "donations": "Donations",
+    "lostPets": "Lost pets",
+    "reports": "Reports",
+    "trust": "Trust & safety cases",
+    "memorials": "Pet memorials",
+    "label": "Animal support section"
+  },
   "supportOpsNav": {
     "overview": "Overview",
     "needs": "Support requests",

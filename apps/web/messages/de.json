@@ -1858,5 +1858,18 @@
       "SOURCE_REPORTED_UNAVAILABLE": "Quelle meldet keine Verfügbarkeit.",
       "UNKNOWN": "Verfügbarkeit unbekannt."
     }
+  },
+  "adminAnimalSupportNav": {
+    "overview": "Übersicht",
+    "needs": "Hilfsanfragen",
+    "organizations": "Organisationen",
+    "rescues": "Rettungsfälle",
+    "campaigns": "Kampagnen",
+    "donations": "Spenden",
+    "lostPets": "Vermisste Tiere",
+    "reports": "Meldungen",
+    "trust": "Vertrauens- und Sicherheitsfälle",
+    "memorials": "Tiergedenkseiten",
+    "label": "Bereich Tierschutz"
   }
 }
