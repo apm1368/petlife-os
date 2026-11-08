@@ -3215,7 +3215,8 @@
       "reportButton": "Report lost pet",
       "empty": "No lost pet reports yet.",
       "noLocation": "Location not provided",
-      "sightingsCount": "{count, plural, one {# sighting} other {# sightings}}"
+      "sightingsCount": "{count, plural, one {# sighting} other {# sightings}}",
+      "filterLabel": "Filter by species", "allSpecies": "All", "dogs": "Dogs", "cats": "Cats", "otherSpecies": "Other", "emptyPublicDescription": "There are no active lost-pet reports right now.", "noPhoto": "No photo", "lastSeen": "Last seen:", "pages": "Pages", "previous": "Previous", "next": "Next"
     },
     "status": {
       "OPEN": "Missing",
@@ -3260,6 +3261,7 @@
       "contact": "Contact: {contact}",
       "reportSighting": {
         "title": "Report a sighting",
+        "notAvailable": "This report is not available", "closedMaybe": "The report may have been closed.", "reunited": "{name} is back home. Thank you to everyone who helped.", "shareText": "{name} is lost. If you see them, please report it.", "shareTextArea": "{name} is lost around {area}. If you see them, please report it.", "speciesName": "Species", "speciesValues": {"DOG": "Dog", "CAT": "Cat", "OTHER": "Other"}, "breed": "Breed", "colorMarkings": "Colour & markings", "approximateAge": "Approximate age", "ageYears": "{count, plural, one {# year} other {# years}}", "lastSeenAround": "Last seen around", "lastSeen": "Last seen", "photoAlt": "Photo of {name}", "seenDate": "Date seen", "approximateTime": "Approximate time", "reporterPrivacy": "Your report goes only to the owner; your name and contact details are never made public.",
         "locationLabel": "Where did you see them?",
         "descriptionLabel": "Description",
         "submit": "Submit sighting",

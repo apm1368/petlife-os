@@ -3215,7 +3215,8 @@
       "reportButton": "گزارش گم‌شدن",
       "empty": "هنوز گزارشی ثبت نشده است.",
       "noLocation": "مکانی ثبت نشده",
-      "sightingsCount": "{count, plural, one {# مشاهده} other {# مشاهده}}"
+      "sightingsCount": "{count, plural, one {# مشاهده} other {# مشاهده}}",
+      "filterLabel": "فیلتر بر اساس گونه", "allSpecies": "همه", "dogs": "سگ‌ها", "cats": "گربه‌ها", "otherSpecies": "سایر", "emptyPublicDescription": "در حال حاضر گزارش فعالی از حیوان گم‌شده ثبت نشده است.", "noPhoto": "بدون عکس", "lastSeen": "آخرین مشاهده:", "pages": "صفحه‌ها", "previous": "قبلی", "next": "بعدی"
     },
     "status": {
       "OPEN": "گم‌شده",
@@ -3260,6 +3261,7 @@
       "contact": "تماس: {contact}",
       "reportSighting": {
         "title": "گزارش یک مشاهده",
+        "notAvailable": "این گزارش در دسترس نیست", "closedMaybe": "ممکن است پرونده بسته شده باشد.", "reunited": "{name} به خانه برگشت. از همهٔ کسانی که کمک کردند سپاسگزاریم.", "shareText": "{name} گم شده است. اگر او را دیدید گزارش دهید.", "shareTextArea": "{name} گم شده است — حوالی {area}. اگر او را دیدید گزارش دهید.", "speciesName": "گونه", "speciesValues": {"DOG": "سگ", "CAT": "گربه", "OTHER": "سایر"}, "breed": "نژاد", "colorMarkings": "رنگ و علامت‌ها", "approximateAge": "سن تقریبی", "ageYears": "{count} سال", "lastSeenAround": "محدودهٔ آخرین مشاهده", "lastSeen": "آخرین مشاهده", "photoAlt": "عکس {name}", "seenDate": "تاریخ مشاهده", "approximateTime": "ساعت تقریبی", "reporterPrivacy": "گزارش شما فقط برای صاحب حیوان فرستاده می‌شود؛ نام و اطلاعات تماس شما عمومی نمی‌شود.",
         "locationLabel": "کجا او را دیدید؟",
         "descriptionLabel": "توضیحات",
         "submit": "ثبت مشاهده",

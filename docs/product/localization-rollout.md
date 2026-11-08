@@ -13,3 +13,15 @@ German and Spanish now have explicit copy for customer shop home, catalog search
 Not included: checkout-specific copy and flows, order history/details, repeat-delivery management, favorites, seller onboarding/catalog/offer management, and commerce backoffice. These remain English fallback in German/Spanish. German/Spanish SMS templates and delivery are still absent. CI is the production-build gate for this slice; the local disk is constrained and a full local build is deferred.
 
 Next slices: seller catalog; checkout/order/repeat-delivery; provider/booking; support/legal; travel/community/partner; backoffice and notifications. Each slice must include locale-aware date/number formats where relevant, route-preserving language switching, accessibility, tests and a missing-key check before it is reported complete. Account language persistence remains covered by the existing #118 API/database implementation; this batch does not alter that contract.
+
+### Care suggestions (PR #138 slice)
+
+The care-suggestion review flow has explicit German and Spanish messages for loading, access denial, empty/error states, review/accept/dismiss confirmations, reminder creation, provider suggestions, status labels, suggestion types and recurrence choices. Placeholder parity is checked against English. Suggested timestamps use the selected locale; Persian retains the Persian calendar. The full Care Center, clinic documentation, health sharing and other provider workflows remain incomplete. SMS templates/delivery are not simulated.
+
+### Admin user directory/profile (PR #139 slice)
+
+The admin user list and profile sections have German and Spanish copy, including masked-contact labels, relationship types, business states, household/pet labels, review/request categories, tabs, pagination and empty/error/permission states. Manual communication copy is localized in all four target languages and explicitly says SMS is only attempted when provider configuration, consent and notification rules allow it. Profile dates use locale formatting, with Persian calendar retained. Role management, audit queues, finance, trust/safety, content, insurance, partner verification and the rest of the backoffice remain untranslated or English fallback.
+
+### Public lost-pet discovery and sightings (PR #140 slice)
+
+The public lost-pet list and incident/sighting page add German and Spanish copy for species filters, statuses, empty states, incident facts, contact/privacy text, sighting controls and share text. Gregorian display dates and page numbers use the selected locale; Persian dates keep the Jalali calendar and existing Persian strings. These screens continue to use real public incident data and the existing API; no backend contract or privacy rule changes are included. Owner-only incident management and the multi-step report-creation flow remain English/Persian and are outside this slice. This is not full community localization.
