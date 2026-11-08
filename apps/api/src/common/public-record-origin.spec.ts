@@ -7,16 +7,28 @@ const apiRoot = resolve(__dirname, "../../");
 
 describe("public demo record provenance", () => {
   const originalNodeEnv = process.env.NODE_ENV;
+  const originalDeploymentEnvironment = process.env.DEPLOYMENT_ENVIRONMENT;
 
   afterEach(() => {
     if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
     else process.env.NODE_ENV = originalNodeEnv;
+    if (originalDeploymentEnvironment === undefined) delete process.env.DEPLOYMENT_ENVIRONMENT;
+    else process.env.DEPLOYMENT_ENVIRONMENT = originalDeploymentEnvironment;
   });
 
   it("excludes only explicitly marked demo-origin records in production", () => {
     process.env.NODE_ENV = "production";
     expect(excludeDemoRecordsFromPublicReads()).toEqual({ isDemoRecord: false });
     process.env.NODE_ENV = "test";
+    expect(excludeDemoRecordsFromPublicReads()).toEqual({});
+  });
+
+  it("also excludes demo records when production is identified by the deploy contract", () => {
+    process.env.NODE_ENV = "development";
+    process.env.DEPLOYMENT_ENVIRONMENT = "production";
+    expect(excludeDemoRecordsFromPublicReads()).toEqual({ isDemoRecord: false });
+
+    process.env.DEPLOYMENT_ENVIRONMENT = "staging";
     expect(excludeDemoRecordsFromPublicReads()).toEqual({});
   });
 
