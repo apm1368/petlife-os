@@ -10,5 +10,10 @@ export const themeInitScript = `
       document.documentElement.setAttribute("data-theme", stored.toLowerCase());
     }
   } catch (e) {}
+  try {
+    if (localStorage.getItem("petlife-display-mode") === "simple") {
+      document.documentElement.setAttribute("data-display-mode", "simple");
+    }
+  } catch (e) {}
 })();
 `;

@@ -9,7 +9,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), useSea
 let currentUserId = "u-owner";
 vi.mock("@/stores/session-store", () => ({ useSessionStore: (selector: (s: { user: { id: string } }) => unknown) => selector({ user: { id: currentUserId } }) }));
 vi.mock("@/services/households.service", () => ({
-  householdsService: { listMine: vi.fn(), collaboration: vi.fn(), removeMember: vi.fn(), changeMemberRole: vi.fn(), leave: vi.fn(), invite: vi.fn(), resendInvitation: vi.fn(), cancelInvitation: vi.fn() },
+  householdsService: { listMine: vi.fn(), collaboration: vi.fn(), removeMember: vi.fn(), changeMemberRole: vi.fn(), leave: vi.fn(), invite: vi.fn(), resendInvitation: vi.fn(), cancelInvitation: vi.fn(), approveMembershipRequest: vi.fn(), rejectMembershipRequest: vi.fn() },
 }));
 
 const household = (overrides: Partial<HouseholdCollaborationDto> = {}): HouseholdCollaborationDto =>
@@ -60,5 +60,31 @@ describe("HouseholdCenterView", () => {
     expect(screen.queryByRole("button", { name: "دعوت عضو" })).toBeNull();
     expect(screen.queryByRole("button", { name: "مدیریت دسترسی" })).toBeNull();
     expect(screen.getByRole("button", { name: "ترک این خانواده" })).toBeTruthy();
+  });
+
+  it("invites by mobile, sets pet-scoped access and clearly says no SMS is sent", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } });
+    vi.mocked(householdsService.invite).mockResolvedValue({ id: "invite-1", delivery: "LINK_ONLY", sharePath: "/invitations/secret-token" } as never);
+    renderWithIntl(<HouseholdCenterView />, "en");
+    fireEvent.click(await screen.findByRole("button", { name: "Invite member" }));
+    const phone = screen.getByLabelText("Family member's mobile number");
+    fireEvent.change(phone, { target: { value: "0912 345 6789" } });
+    expect(screen.getByText(/No verification SMS or email is sent/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Save invitation" }));
+    await waitFor(() => expect(householdsService.invite).toHaveBeenCalledWith("h1", {
+      contact: "+989123456789",
+      initialAccess: [{ petId: "p1", preset: "VIEW_ONLY" }],
+    }));
+    expect(await screen.findByText(/The invitation is saved\. Share the link directly/i)).toBeTruthy();
+    const inviteLink = await screen.findByLabelText("Invitation link");
+    expect((inviteLink as HTMLInputElement).value).toMatch(/^http:\/\/localhost(?::\d+)?\/en\/invitations\/secret-token$/);
+    expect(screen.getByRole("link", { name: "WhatsApp" }).getAttribute("href")).toContain("wa.me");
+    expect(screen.getByRole("link", { name: "Telegram" }).getAttribute("href")).toContain("t.me/share/url");
+    expect(screen.getByRole("link", { name: "Bale" }).getAttribute("href")).toContain("ble.ir/share/url");
+    expect(screen.getByRole("link", { name: "SMS" }).getAttribute("href")).toContain("sms:?body=");
+    fireEvent.click(screen.getByRole("button", { name: "Copy link" }));
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith((inviteLink as HTMLInputElement).value));
+    expect(screen.getByRole("dialog")).toBeTruthy();
   });
 });
