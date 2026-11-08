@@ -5,6 +5,7 @@ import { PrismaService } from "../../common/prisma/prisma.service";
 import { DEFAULT_COUNTRY_CODE } from "../../common/country/country-config";
 import { SubscriptionPlanNotAvailableException, SubscriptionPlanNotFoundException, SubscriptionPlanPriceNotFoundException } from "../../common/errors/api-exception";
 import { PLAN_INCLUDE, toPlanDto, type PlanWithRelations } from "./subscription-mapper";
+import { excludeDemoRecordsFromPublicReads } from "../../common/public-record-origin";
 
 /**
  * Code for the self-healing default FREE plan `getFreePlanRaw()` creates
@@ -56,7 +57,7 @@ export class SubscriptionPlanReadService {
 
   async listForCountry(countryCode: string): Promise<SubscriptionPlanDto[]> {
     const rows = await this.prisma.subscriptionPlan.findMany({
-      where: { status: SubscriptionPlanStatus.ACTIVE, countryAvailability: { some: { countryCode } } },
+      where: { status: SubscriptionPlanStatus.ACTIVE, countryAvailability: { some: { countryCode } }, ...excludeDemoRecordsFromPublicReads() },
       include: PLAN_INCLUDE,
       orderBy: { sortOrder: "asc" },
     });

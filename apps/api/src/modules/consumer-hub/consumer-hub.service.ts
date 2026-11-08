@@ -13,6 +13,7 @@ import {
 } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
+import { excludeDemoRecordsFromPublicReads } from "../../common/public-record-origin";
 
 export const SEARCH_TYPES = [
   "PROVIDER",
@@ -40,7 +41,8 @@ type Preview = { title: string; subtitle: string | null; deepLink: string };
 const LIVE_NEEDS: SupportNeedStatus[] = [SupportNeedStatus.PUBLISHED, SupportNeedStatus.PARTIALLY_FULFILLED];
 const articleLink = (slug: string, categorySlug?: string | null) =>
   categorySlug === "guides" ? `/guides/${slug}` : `/blog/${slug}`;
-const PUBLIC_PRODUCT: Prisma.ProductWhereInput = {
+const publicProductWhere = (): Prisma.ProductWhereInput => ({
+  ...excludeDemoRecordsFromPublicReads(),
   status: ProductStatus.ACTIVE,
   variants: {
     some: {
@@ -57,7 +59,7 @@ const PUBLIC_PRODUCT: Prisma.ProductWhereInput = {
       },
     },
   },
-};
+});
 
 /**
  * Consumer read surfaces over public catalogue data only:
@@ -75,17 +77,17 @@ export class ConsumerHubService {
   async saved(userId: string) {
     const [places, providers, products, stays, needs, posts] = await Promise.all([
       this.prisma.petFriendlyPlaceFavorite.findMany({
-        where: { userId, place: { isPubliclyListed: true } },
+        where: { userId, place: { isPubliclyListed: true, ...excludeDemoRecordsFromPublicReads() } },
         include: { place: { select: { id: true, name: true, city: true } } },
         take: 100,
       }),
       this.prisma.providerFavorite.findMany({
-        where: { userId, providerOrganization: { verificationStatus: "VERIFIED" } },
+        where: { userId, providerOrganization: { verificationStatus: "VERIFIED", ...excludeDemoRecordsFromPublicReads() } },
         include: { providerOrganization: { select: { id: true, name: true, type: true } } },
         take: 100,
       }),
       this.prisma.productFavorite.findMany({
-        where: { userId, product: PUBLIC_PRODUCT },
+        where: { userId, product: publicProductWhere() },
         include: { product: { select: { id: true, title: true } } },
         take: 100,
       }),
@@ -182,6 +184,7 @@ export class ConsumerHubService {
             .findMany({
               where: {
                 verificationStatus: "VERIFIED",
+                ...excludeDemoRecordsFromPublicReads(),
                 name: like,
                 ...(city ? { locations: { some: { city } } } : {}),
               },
@@ -204,7 +207,7 @@ export class ConsumerHubService {
               where: {
                 isActive: true,
                 name: like,
-                providerOrganization: { verificationStatus: "VERIFIED" },
+                providerOrganization: { verificationStatus: "VERIFIED", ...excludeDemoRecordsFromPublicReads() },
                 ...(city ? { location: { city } } : {}),
               },
               select: {
@@ -233,7 +236,7 @@ export class ConsumerHubService {
         : [],
       want("PRODUCT")
         ? this.prisma.product
-            .findMany({ where: { ...PUBLIC_PRODUCT, title: like }, select: { id: true, title: true }, take })
+            .findMany({ where: { ...publicProductWhere(), title: like }, select: { id: true, title: true }, take })
             .then((r) =>
               r.map((p) =>
                 this.hit("PRODUCT", p.id, {
@@ -269,7 +272,7 @@ export class ConsumerHubService {
       want("PLACE")
         ? this.prisma.petFriendlyPlace
             .findMany({
-              where: { isPubliclyListed: true, name: like, ...(city ? { city } : {}) },
+              where: { isPubliclyListed: true, ...excludeDemoRecordsFromPublicReads(), name: like, ...(city ? { city } : {}) },
               select: { id: true, name: true, city: true, fencedArea: true, entryFeeIrr: true },
               take,
             })
@@ -422,14 +425,14 @@ export class ConsumerHubService {
     switch (type) {
       case "PROVIDER": {
         const p = await this.prisma.providerOrganization.findFirst({
-          where: { id, verificationStatus: "VERIFIED" },
+          where: { id, verificationStatus: "VERIFIED", ...excludeDemoRecordsFromPublicReads() },
           select: { name: true, type: true },
         });
         return p ? { title: p.name, subtitle: p.type, deepLink: `/providers/${id}` } : null;
       }
       case "SERVICE": {
         const sv = await this.prisma.providerService.findFirst({
-          where: { id, isActive: true, providerOrganization: { verificationStatus: "VERIFIED" } },
+          where: { id, isActive: true, providerOrganization: { verificationStatus: "VERIFIED", ...excludeDemoRecordsFromPublicReads() } },
           select: {
             name: true,
             providerOrganizationId: true,
@@ -446,7 +449,7 @@ export class ConsumerHubService {
       }
       case "PRODUCT": {
         const p = await this.prisma.product.findFirst({
-          where: { ...PUBLIC_PRODUCT, id },
+          where: { ...publicProductWhere(), id },
           select: { title: true },
         });
         return p ? { title: p.title, subtitle: null, deepLink: `/shop/products/${id}` } : null;
@@ -460,7 +463,7 @@ export class ConsumerHubService {
       }
       case "PLACE": {
         const p = await this.prisma.petFriendlyPlace.findFirst({
-          where: { id, isPubliclyListed: true },
+          where: { id, isPubliclyListed: true, ...excludeDemoRecordsFromPublicReads() },
           select: { name: true, city: true },
         });
         return p ? { title: p.name, subtitle: p.city, deepLink: `/places/${id}` } : null;
