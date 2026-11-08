@@ -22,13 +22,21 @@ describe("Content sections — blog vs guides, and the demo articles", () => {
 
   it("production reads exclude explicitly marked demo articles without hiding unmarked editorial content", async () => {
     const demo = await db.article.findFirstOrThrow({ where: { isDemoRecord: true, locales: { some: { slug: "dog-vaccination-schedule", locale: Locale.en } } } });
-    await db.article.update({ where: { id: demo.id }, data: { isDemoRecord: false } });
     const priorDeploymentEnvironment = process.env.DEPLOYMENT_ENVIRONMENT;
     process.env.DEPLOYMENT_ENVIRONMENT = "production";
     try {
+      const baseline = (await list("locale=en&pageSize=50")).body;
+      const baselineSlugs = baseline.items.map((article: { slug: string }) => article.slug);
+      expect(baselineSlugs).not.toContain("dog-vaccination-schedule");
+      expect(baselineSlugs).not.toContain("cat-nutrition-by-age");
+
+      // Only the selected demo article is unmarked here. Other legitimate
+      // editorial records from earlier E2E suites remain visible and should
+      // stay in the list, so compare to the baseline rather than a fixed total.
+      await db.article.update({ where: { id: demo.id }, data: { isDemoRecord: false } });
       const publicList = (await list("locale=en&pageSize=50")).body;
-      expect(publicList.total).toBe(1);
-      expect(publicList.items.map((article: { slug: string }) => article.slug)).toEqual(["dog-vaccination-schedule"]);
+      expect(publicList.total).toBe(baseline.total + 1);
+      expect(publicList.items.map((article: { slug: string }) => article.slug)).toContain("dog-vaccination-schedule");
       await request(app.getHttpServer()).get("/blog/articles/dog-vaccination-schedule?locale=en").expect(200);
       await request(app.getHttpServer()).get("/blog/articles/cat-nutrition-by-age?locale=en").expect(404);
       await request(app.getHttpServer()).get("/blog/articles/cat-nutrition-by-age/feedback?locale=en").expect(404);
