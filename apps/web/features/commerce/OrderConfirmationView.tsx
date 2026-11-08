@@ -11,6 +11,7 @@ import { formatNumber } from "./commerce-ui";
 import { fulfillmentTone } from "./fulfillment-tone";
 import { commerceService } from "@/services/commerce.service";
 import { formatCurrency } from "@/lib/currency/format-currency";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 /**
  * Order Confirmation (spec section 60) — each seller's Order is shown as its
@@ -24,7 +25,7 @@ export function OrderConfirmationView({ orderIds }: { orderIds: string[] }) {
   const tCommon = useTranslations("common");
   const tFulfillment = useTranslations("commerce.statusLabels.fulfillment");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as RouteLocale;
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
   const orderKey = orderIds.join(",");

@@ -73,6 +73,15 @@ describe("OrderConfirmationView", () => {
     expect(screen.getAllByText("Confirmed")).toHaveLength(2);
   });
 
+  it.each([["de", "Bestellung bestätigt", "Bestätigt"], ["es", "Pedido confirmado", "Confirmado"]] as const)("renders the entire confirmation chrome in %s and preserves source-owned seller data", async (locale, title, status) => {
+    vi.mocked(commerceService.getOrder).mockResolvedValue(order("order-1", "Pet Bazaar Tehran"));
+    renderWithIntl(<OrderConfirmationView orderIds={["order-1"]} />, locale);
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByText(status)).toBeTruthy();
+    expect(screen.getByText("Pet Bazaar Tehran")).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
   it("shows the delivery amount and a non-alarming fulfillment status, never implying courier assignment before it exists", async () => {
     vi.mocked(commerceService.getOrder).mockResolvedValue({
       ...order("order-1", "Pet Bazaar Tehran"),
