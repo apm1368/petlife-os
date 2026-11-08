@@ -6,6 +6,7 @@ import Link from "next/link";
 import { IconButton, Menu, Sheet, X } from "@petlife/ui";
 import type { AppLocale } from "@/lib/i18n/config";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
+import { DisplayModeToggle } from "@/features/display-mode/DisplayModeToggle";
 import { useSessionBootstrap } from "@/hooks/use-session-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
 import type { LandingCopy } from "./copy";
@@ -55,6 +56,7 @@ export function LandingHeader({ locale, copy }: { locale: AppLocale; copy: Landi
           <div className="lp-header__prefs">
             <a className="lp-lang" href={`/${other}`} hrefLang={other} lang={other} aria-label={copy.actions.languageLabel}>{copy.actions.language}</a>
             <ThemeToggle />
+            <DisplayModeToggle locale={locale} compact />
           </div>
           <div className="lp-header__account">{account}</div>
           <div className="lp-header__menu">
@@ -74,6 +76,7 @@ export function LandingHeader({ locale, copy }: { locale: AppLocale; copy: Landi
         <div className="lp-sheet-prefs">
           <a className="lp-lang" href={`/${other}`} hrefLang={other} lang={other} aria-label={copy.actions.languageLabel}>{copy.actions.language}</a>
           <ThemeToggle />
+          <DisplayModeToggle locale={locale} />
         </div>
         <div className="lp-sheet-actions">{account}</div>
       </Sheet>

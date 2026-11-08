@@ -9,6 +9,7 @@ import { useSessionBootstrap } from "@/hooks/use-session-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
 import { landingCopy } from "./copy";
 import { parkCopy } from "./park-copy";
+import { DisplayModeToggle } from "@/features/display-mode/DisplayModeToggle";
 
 export function ParkHeader({ locale }: { locale: AppLocale }) {
   useSessionBootstrap();
@@ -49,6 +50,7 @@ export function ParkHeader({ locale }: { locale: AppLocale }) {
           </>}
         </div>
         <a className="park-language" href={`/${other}`} hrefLang={other} lang={other} aria-label={base.actions.languageLabel}>{other.toUpperCase()}</a>
+        <DisplayModeToggle locale={locale} compact />
         <button ref={menuButton} type="button" className="park-menu-toggle" onClick={() => setOpen(value => !value)} aria-expanded={open} aria-controls="park-mobile-nav" aria-label={open ? base.nav.close : base.nav.menu}>
           {open ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
         </button>
