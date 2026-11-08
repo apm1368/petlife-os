@@ -54,4 +54,25 @@ describe("public demo record provenance", () => {
     expect(seed).toMatch(/create:\s*\{\s*id:\s*orgId\[key\],\s*name:\s*p\.name,[^}]*isDemoRecord:\s*true/);
     expect(seed).toMatch(/create:\s*\{\s*id:\s*placeId,\s*isDemoRecord:\s*true,/);
   });
+
+  it("requires a known seed account as well as the legacy provider name", () => {
+    const migration = readFileSync(
+      resolve(apiRoot, "prisma/migrations/20261105120000_public_demo_record_provenance/migration.sql"),
+      "utf8",
+    );
+    const legacyProviderUpdate = /UPDATE "provider_organizations"[\s\S]*?AND EXISTS \(([\s\S]*?)\);/.exec(migration)?.[1];
+    expect(legacyProviderUpdate).toContain('JOIN "users" AS seed_user');
+    for (const email of [
+      "dr.sara.vet@example.com",
+      "reception@example.com",
+      "groomer@example.com",
+      "trainer@example.com",
+      "walker@example.com",
+      "sitter@example.com",
+      "boarding@example.com",
+      "taxi@example.com",
+    ]) {
+      expect(legacyProviderUpdate).toContain(`'${email}'`);
+    }
+  });
 });

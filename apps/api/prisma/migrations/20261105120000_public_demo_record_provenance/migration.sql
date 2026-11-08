@@ -42,6 +42,22 @@ WHERE "name" IN (
   'Cozy Home Sitting',
   'Tehran Pet Boarding',
   'PetGo Taxi'
+)
+AND EXISTS (
+  SELECT 1
+  FROM "provider_users" AS membership
+  JOIN "users" AS seed_user ON seed_user."id" = membership."userId"
+  WHERE membership."providerOrganizationId" = "provider_organizations"."id"
+    AND seed_user."email" IN (
+      'dr.sara.vet@example.com',
+      'reception@example.com',
+      'groomer@example.com',
+      'trainer@example.com',
+      'walker@example.com',
+      'sitter@example.com',
+      'boarding@example.com',
+      'taxi@example.com'
+    )
 );
 
 UPDATE "products"
