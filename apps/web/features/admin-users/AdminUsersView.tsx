@@ -47,7 +47,7 @@ function Directory({ id }: { id?: string }) {
 
   const number = (value: number) => new Intl.NumberFormat(locale).format(value);
   const date = (value: string | null) => value && Number.isFinite(Date.parse(value))
-    ? new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : t("notRecorded");
+    ? new Intl.DateTimeFormat(locale === "fa" ? "fa-IR-u-ca-persian" : locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : t("notRecorded");
   const roleName = (value: string) => roles.has(value) ? roles(value) : t.has(`roleNames.${value}`) ? t(`roleNames.${value}`) : t("otherRole");
   const statusName = (value: string | null) => value ? t.has(`statuses.${value}`) ? t(`statuses.${value}`) : t("otherStatus") : t("notRecorded");
   if (!context) return <p role="status">{t("loading")}</p>;
@@ -82,11 +82,11 @@ function ProfileDetails({ profile }: { profile: AdminUserProfileDto }) {
   const [tab, setTab] = useState<ProfileTab>("profile");
   const households = profile.households ?? [], businesses = profile.businesses ?? [], orders = profile.orders ?? [], requests = profile.requests ?? [], tickets = profile.tickets ?? [], reviews = profile.reviews ?? [], auditTrail = profile.auditTrail ?? [];
   const number = (value: number) => new Intl.NumberFormat(locale).format(value);
-  const date = (value: string) => new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+  const date = (value: string) => new Intl.DateTimeFormat(locale === "fa" ? "fa-IR-u-ca-persian" : locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
   const empty = <p>{t("sectionEmpty")}</p>;
   const reviewPage = (kind: string) => kind === "PRODUCT" ? "commerce/reviews" : kind === "TRAVEL" ? "travel/reviews" : "services/reviews";
   return <div className="space-y-4">
-    {context?.permissions.includes("support.manage") ? <ManualMessage userId={profile.user.id} fa={locale === "fa"} /> : null}
+    {context?.permissions.includes("support.manage") ? <ManualMessage userId={profile.user.id} /> : null}
     <nav className="flex flex-wrap gap-2" aria-label={t("profileSections")}>{PROFILE_TABS.map(value => <Button key={value} variant={tab === value ? "primary" : "secondary"} aria-pressed={tab === value} onClick={() => setTab(value)}>{t(`tabs.${value}`)}</Button>)}</nav>
     <ContextSurface className="space-y-4">
       {tab === "profile" && <><h2 className="text-section-title">{t("tabs.profile")}</h2><p>{t("households", { count: number(profile.householdCount) })}</p><p>{t("pets", { count: number(profile.petCount) })}</p><Link className="underline" href={`/${locale}/admin/customers/${encodeURIComponent(profile.user.id)}`}>{t("customer360")}</Link></>}
@@ -101,7 +101,8 @@ function ProfileDetails({ profile }: { profile: AdminUserProfileDto }) {
   </div>;
 }
 
-function ManualMessage({ userId, fa }: { userId: string; fa: boolean }) {
+function ManualMessage({ userId }: { userId: string }) {
+  const t = useTranslations("adminUsers.manualMessage");
   const [title, setTitle] = useState(""), [message, setMessage] = useState(""), [attemptSms, setAttemptSms] = useState(true), [busy, setBusy] = useState(false), [result, setResult] = useState<"saved" | "failed" | null>(null);
   async function send(event: React.FormEvent) {
     event.preventDefault();
@@ -110,5 +111,5 @@ function ManualMessage({ userId, fa }: { userId: string; fa: boolean }) {
     try { await adminUsersService.sendMessage(userId, { title: title.trim(), message: message.trim(), attemptSms }); setTitle(""); setMessage(""); setResult("saved"); }
     catch { setResult("failed"); } finally { setBusy(false); }
   }
-  return <ContextSurface><form className="space-y-3" onSubmit={send}><h2 className="text-section-title">{fa ? "ارسال پیام به کاربر" : "Send a message to this user"}</h2><p className="text-text-secondary">{fa ? "ارسال پیامک فقط در صورت فعال‌بودن فراز، رضایت کاربر و عبور از قواعد اعلان انجام می‌شود." : "SMS is attempted only when Faraz is live, the recipient allows it, and notification rules permit it."}</p><Input label={fa ? "عنوان" : "Title"} value={title} minLength={3} maxLength={120} required onChange={event => setTitle(event.target.value)} /><label className="flex flex-col gap-1 text-sm"><span className="text-text-secondary">{fa ? "متن پیام" : "Message"}</span><textarea className="min-h-28 rounded-md border border-border-strong bg-surface-elevated p-3" value={message} minLength={3} maxLength={700} required onChange={event => setMessage(event.target.value)} /></label><label className="flex items-center gap-2"><input type="checkbox" checked={attemptSms} onChange={event => setAttemptSms(event.target.checked)} />{fa ? "در صورت مجازبودن، پیامک هم ارسال شود" : "Also attempt SMS when permitted"}</label>{result === "saved" ? <p role="status">{fa ? "پیام ثبت شد." : "Message recorded."}</p> : null}{result === "failed" ? <p role="alert">{fa ? "ارسال پیام ناموفق بود." : "Message could not be sent."}</p> : null}<Button type="submit" disabled={busy || title.trim().length < 3 || message.trim().length < 3}>{busy ? (fa ? "در حال ارسال…" : "Sending…") : (fa ? "ارسال پیام" : "Send message")}</Button></form></ContextSurface>;
+  return <ContextSurface><form className="space-y-3" onSubmit={send}><h2 className="text-section-title">{t("title")}</h2><p className="text-text-secondary">{t("smsNote")}</p><Input label={t("subject")} value={title} minLength={3} maxLength={120} required onChange={event => setTitle(event.target.value)} /><label className="flex flex-col gap-1 text-sm"><span className="text-text-secondary">{t("message")}</span><textarea className="min-h-28 rounded-md border border-border-strong bg-surface-elevated p-3" value={message} minLength={3} maxLength={700} required onChange={event => setMessage(event.target.value)} /></label><label className="flex items-center gap-2"><input type="checkbox" checked={attemptSms} onChange={event => setAttemptSms(event.target.checked)} />{t("attemptSms")}</label>{result === "saved" ? <p role="status">{t("saved")}</p> : null}{result === "failed" ? <p role="alert">{t("failed")}</p> : null}<Button type="submit" disabled={busy || title.trim().length < 3 || message.trim().length < 3}>{busy ? t("sending") : t("send")}</Button></form></ContextSurface>;
 }

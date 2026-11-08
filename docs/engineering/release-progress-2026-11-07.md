@@ -66,3 +66,10 @@
 - Continued #118 with DE/ES household collaboration copy: member management, invitations, pet access presets, confirmation actions, access history and delivery-unavailable copy. Account dates now use `Intl.DateTimeFormat` for selected en/de/es locale while Persian remains Jalali; account numbers use locale digits/grouping.
 - Validation: all account tests passed (9 files, 29 tests); the full web suite passed (233 files, 1,021 tests); web typecheck and lint passed; the production web build passed and generated all 724 localized route variants. `git diff --check` passed. Commit `10394b3` is pushed, and CI run `42389734102` passed all required jobs in 11m7s.
 - Separate payment worktrees remain untouched. #117's source-image/CDN privacy boundary remains unverified because no authorized production storage configuration is available.
+
+## Admin localization continuation — 2026-11-08
+
+- PR #138 is OPEN at `d19624a4b8387e551feb1d4f02ca5b1dd58871a2`, based on #122 (`feat/i18n-shop-customer`), with no review. Its latest hosted CI is still IN_PROGRESS: lint, visual/design-system, typecheck, migrations and unit tests succeeded; API E2E is running and production build is pending.
+- Prepared the next independent localization slice on `feat/i18n-admin-user-roles`, based on #122. It localizes the admin users directory/profile and manual communication copy in de/es, adds catalog parity checks, and formats dates by locale while explicitly retaining Persian calendar behavior. Validation: 17 focused tests passed; typecheck and targeted ESLint passed; four locale JSON files parse; `git diff --check` passed. No permission, PII, data access or delivery behavior changed.
+- Admin localization remains incomplete outside this directory/profile slice: role builder/assignment, support queues, audit, finance, trust/safety, content, insurance, partner verification and most other backoffice pages still use English fallback or untranslated copy. German/Spanish SMS templates remain unavailable.
+- Disk remains constrained at 671 MB free. No cleanup was performed and no full local production build was run. Payment worktrees were not accessed or modified.
