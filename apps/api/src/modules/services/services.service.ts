@@ -11,6 +11,7 @@ import { PetServiceCompatibilityService } from "./pet-service-compatibility.serv
 import type { SearchServicesDto } from "./dto/search-services.dto";
 import type { GetServiceDetailDto } from "./dto/get-service-detail.dto";
 import type { GetServiceAvailabilityDto } from "./dto/get-service-availability.dto";
+import { excludeDemoRecordsFromPublicReads } from "../../common/public-record-origin";
 
 /** The full canonical taxonomy — a static, stable list rather than "whatever categories currently have a live provider". */
 const ALL_CATEGORIES: ServiceCategory[] = [
@@ -56,6 +57,7 @@ export class ServicesService {
         ...(query.category ? { category: query.category as unknown as PrismaServiceCategory } : {}),
         ...speciesFilter(query.species),
         providerOrganization: {
+          ...excludeDemoRecordsFromPublicReads(),
           ...(verifiedOnly ? { verificationStatus: PrismaVerificationStatus.VERIFIED } : {}),
           ...(query.search ? { name: { contains: query.search, mode: "insensitive" } } : {}),
         },
@@ -96,8 +98,8 @@ export class ServicesService {
   }
 
   async getServiceDetail(serviceId: string, query: GetServiceDetailDto, viewerId?: string): Promise<ServiceDetailDto> {
-    const service = await this.prisma.providerService.findUnique({
-      where: { id: serviceId },
+    const service = await this.prisma.providerService.findFirst({
+      where: { id: serviceId, providerOrganization: excludeDemoRecordsFromPublicReads() },
       include: { providerOrganization: { include: { locations: true, services: true } } },
     });
     // Same visibility rule as availability/booking: inactive services and unverified or suspended providers are not public.
@@ -138,7 +140,7 @@ export class ServicesService {
   }
 
   async getServiceAvailability(serviceId: string, query: GetServiceAvailabilityDto, viewerId?: string) {
-    const service = await this.prisma.providerService.findUnique({ where: { id: serviceId }, include: { providerOrganization: { select: { verificationStatus: true } } } });
+    const service = await this.prisma.providerService.findFirst({ where: { id: serviceId, providerOrganization: excludeDemoRecordsFromPublicReads() }, include: { providerOrganization: { select: { verificationStatus: true } } } });
     if (!service || !service.isActive || service.providerOrganization.verificationStatus !== "VERIFIED") throw new NotFoundApiException("Service");
 
     const locationId = query.locationId ?? service.locationId;

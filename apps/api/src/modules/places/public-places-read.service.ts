@@ -5,6 +5,7 @@ import { PetFriendlyPlaceNotFoundException } from "../../common/errors/api-excep
 import { resolvePagination, toPaginatedDto } from "../../common/pagination/pagination.dto";
 import { toPetFriendlyPlaceDto } from "./places-mapper";
 import type { ListPetFriendlyPlacesQueryDto, NearbyPetFriendlyPlacesQueryDto } from "./dto/places.dto";
+import { excludeDemoRecordsFromPublicReads } from "../../common/public-record-origin";
 
 const LISTED_FILTER = { status: PetFriendlyPlaceStatus.VERIFIED, isPubliclyListed: true };
 const DEFAULT_RADIUS_METERS = 5_000;
@@ -35,6 +36,7 @@ export class PublicPlacesReadService {
     const { page, pageSize, skip, take } = resolvePagination(query);
     const where: Prisma.PetFriendlyPlaceWhereInput = {
       ...LISTED_FILTER,
+      ...excludeDemoRecordsFromPublicReads(),
       country: query.country,
       city: query.city,
       category: query.category,
@@ -57,7 +59,7 @@ export class PublicPlacesReadService {
   }
 
   async get(id: string, userId?: string) {
-    const row = await this.prisma.petFriendlyPlace.findFirst({ where: { id, ...LISTED_FILTER } });
+    const row = await this.prisma.petFriendlyPlace.findFirst({ where: { id, ...LISTED_FILTER, ...excludeDemoRecordsFromPublicReads() } });
     if (!row) throw new PetFriendlyPlaceNotFoundException({ placeId: id });
     const favorited = await this.favoritedIds(userId, [row.id]);
     return toPetFriendlyPlaceDto(row, { isFavorited: favorited.has(row.id) });
@@ -74,12 +76,14 @@ export class PublicPlacesReadService {
   async nearby(query: NearbyPetFriendlyPlacesQueryDto, userId?: string) {
     const { page, pageSize, skip, take } = resolvePagination(query);
     const radiusMeters = query.radiusMeters ?? DEFAULT_RADIUS_METERS;
+    const includeDemoRecords = process.env.NODE_ENV !== "production";
 
     const nearbyRows = await this.prisma.$queryRaw<NearbyRow[]>`
       SELECT id, ST_Distance(location, ST_SetSRID(ST_MakePoint(${query.longitude}, ${query.latitude}), 4326)::geography) AS distance_meters
       FROM pet_friendly_places
       WHERE status = 'VERIFIED'
         AND "isPubliclyListed" = true
+        AND (${includeDemoRecords} OR "isDemoRecord" = false)
         AND location IS NOT NULL
         AND ST_DWithin(location, ST_SetSRID(ST_MakePoint(${query.longitude}, ${query.latitude}), 4326)::geography, ${radiusMeters})
         AND (${query.category ?? null}::text IS NULL OR category = ${query.category ?? null}::"PetFriendlyPlaceCategory")
@@ -92,7 +96,7 @@ export class PublicPlacesReadService {
     if (nearbyRows.length === 0) return toPaginatedDto([], total, page, pageSize);
 
     const distanceById = new Map(nearbyRows.map((row) => [row.id, row.distance_meters]));
-    const rows = await this.prisma.petFriendlyPlace.findMany({ where: { id: { in: nearbyRows.map((row) => row.id) } } });
+    const rows = await this.prisma.petFriendlyPlace.findMany({ where: { id: { in: nearbyRows.map((row) => row.id) }, ...excludeDemoRecordsFromPublicReads() } });
     const byId = new Map(rows.map((row) => [row.id, row]));
     const ordered = nearbyRows.map((nearbyRow) => byId.get(nearbyRow.id)).filter((row): row is NonNullable<typeof row> => row !== undefined);
     const favorited = await this.favoritedIds(userId, ordered.map((row) => row.id));
@@ -106,11 +110,13 @@ export class PublicPlacesReadService {
   }
 
   private async countNearby(query: NearbyPetFriendlyPlacesQueryDto, radiusMeters: number) {
+    const includeDemoRecords = process.env.NODE_ENV !== "production";
     const rows = await this.prisma.$queryRaw<{ count: bigint }[]>`
       SELECT COUNT(*) AS count
       FROM pet_friendly_places
       WHERE status = 'VERIFIED'
         AND "isPubliclyListed" = true
+        AND (${includeDemoRecords} OR "isDemoRecord" = false)
         AND location IS NOT NULL
         AND ST_DWithin(location, ST_SetSRID(ST_MakePoint(${query.longitude}, ${query.latitude}), 4326)::geography, ${radiusMeters})
         AND (${query.category ?? null}::text IS NULL OR category = ${query.category ?? null}::"PetFriendlyPlaceCategory")

@@ -1914,6 +1914,8 @@ model CareProfile {
 
 model ProviderOrganization {
   id                      String                     @id @default(uuid()) @db.Uuid
+  /// Fixture-origin records are safe for local/test flows but must never be surfaced by public production reads.
+  isDemoRecord             Boolean                    @default(false)
   name                    String
   type                    ProviderType
   verificationStatus      ProviderVerificationStatus @default(NOT_STARTED)
@@ -2671,6 +2673,8 @@ model ProductCategory {
 /// stay easy to compare and maintain side by side.
 model Product {
   id             String            @id @default(uuid()) @db.Uuid
+  /// Seed/demo catalog fixtures are explicitly excluded from public production discovery.
+  isDemoRecord   Boolean           @default(false)
   /// Batch 4: structured specs [{ label, value }] supplied by manufacturer/seller — never medical claims.
   specifications Json?
   media          ProductMedia[]
@@ -5624,6 +5628,8 @@ enum SubscriptionBillingAttemptStatus {
 /// need, unlike a growing article library.
 model SubscriptionPlan {
   id            String                 @id @default(uuid()) @db.Uuid
+  /// Dev-only paid plans/prices are hidden from customer-facing production plan reads.
+  isDemoRecord  Boolean                @default(false)
   code          String                 @unique
   nameFa        String
   nameEn        String
@@ -7970,6 +7976,8 @@ enum PetFriendlyPlaceStatus {
 
 model PetFriendlyPlace {
   id               String                   @id @default(uuid()) @db.Uuid
+  /// Imported/test place records are not public production content until reviewed and published.
+  isDemoRecord     Boolean                  @default(false)
   /// Batch 5 — null means "not stated", never "no".
   leashRequired    Boolean?
   waterAvailable   Boolean?
