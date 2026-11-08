@@ -43,3 +43,20 @@ describe("checkout translation coverage", () => {
     }
   });
 });
+
+describe("order journey translation coverage", () => {
+  it.each(["confirmation", "myOrders", "orderDetail", "statusLabels"] as const)("has complete German and Spanish %s copy with matching placeholders and no Persian", (namespace) => {
+    const source = flatten(en.commerce[namespace]);
+    for (const [locale, catalog] of [["de", de], ["es", es]] as const) {
+      const translated = flatten(catalog.commerce[namespace]);
+      expect(translated.map(([key]) => key).sort(), `${locale}.${namespace} keys`).toEqual(source.map(([key]) => key).sort());
+      const values = new Map(translated);
+      for (const [key, english] of source) {
+        const localized = values.get(key)!;
+        expect(localized, `${locale}.${namespace}.${key}`).toBeTruthy();
+        expect(placeholders(localized), `${locale}.${namespace}.${key} placeholders`).toEqual(placeholders(english));
+        expect(localized, `${locale}.${namespace}.${key} contains no Persian UI`).not.toMatch(/[\u0600-\u06FF]/);
+      }
+    }
+  });
+});

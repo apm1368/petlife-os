@@ -12,10 +12,12 @@ import { formatCurrency } from "@/lib/currency/format-currency";
 import { usePetStore } from "@/stores/pet-store";
 import { ApiError } from "@/lib/api/client";
 import { fulfillmentTone } from "./fulfillment-tone";
-import { StarRow } from "./commerce-ui";
+import { formatNumber, StarRow } from "./commerce-ui";
+import type { RouteLocale } from "@/lib/i18n/config";
 
-function dateTime(value: string, locale: "fa" | "en", withTime = true) {
-  return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", withTime ? { dateStyle: "medium", timeStyle: "short" } : { dateStyle: "medium" }).format(new Date(value));
+function dateTime(value: string, locale: RouteLocale, withTime = true) {
+  const intlLocale: Record<RouteLocale, string> = { fa: "fa-IR-u-ca-persian", en: "en-GB", de: "de-DE", es: "es-ES" };
+  return new Intl.DateTimeFormat(intlLocale[locale], withTime ? { dateStyle: "medium", timeStyle: "short" } : { dateStyle: "medium" }).format(new Date(value));
 }
 
 /**
@@ -28,7 +30,7 @@ function dateTime(value: string, locale: "fa" | "en", withTime = true) {
 export function OrderDetailView({ orderId }: { orderId: string }) {
   const t = useTranslations("commerce.orderDetail");
   const tStatus = useTranslations("commerce.statusLabels");
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as RouteLocale;
   const router = useRouter();
   const pets = usePetStore((s) => s.pets);
 
@@ -78,7 +80,7 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
       setActionKey(randomId());
       await load();
     } catch (err) {
-      setActionError(err instanceof ApiError && err.status < 500 ? err.message : t("actionFailed"));
+      setActionError(err instanceof ApiError && err.status < 500 && locale !== "de" && locale !== "es" ? err.message : t("actionFailed"));
     } finally {
       setBusy(false);
     }
@@ -310,7 +312,7 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
 
 function OrderItemRow({ orderId, item, canReview, petName, onReviewed }: { orderId: string; item: OrderItemDto; canReview: boolean; petName: string | null; onReviewed: () => void }) {
   const t = useTranslations("commerce.orderDetail");
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as RouteLocale;
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [rating, setRating] = useState(0);
@@ -325,7 +327,7 @@ function OrderItemRow({ orderId, item, canReview, petName, onReviewed }: { order
       await commerceService.reviewOrderItem(orderId, item.id, { rating, body: body.trim() || undefined });
       onReviewed();
     } catch (err) {
-      setReviewError(err instanceof ApiError && err.status < 500 ? err.message : t("review.failed"));
+      setReviewError(err instanceof ApiError && err.status < 500 && locale !== "de" && locale !== "es" ? err.message : t("review.failed"));
     } finally {
       setSaving(false);
     }
@@ -340,7 +342,7 @@ function OrderItemRow({ orderId, item, canReview, petName, onReviewed }: { order
         <p className="shrink-0 whitespace-nowrap text-body text-text-primary">{formatCurrency(item.totalPrice, locale)}</p>
       </div>
       {item.variantTitleSnapshot ? <p className="text-metadata text-text-secondary">{item.variantTitleSnapshot}</p> : null}
-      <p className="text-metadata text-text-secondary">{t("quantityAndUnitPrice", { quantity: item.quantity.toLocaleString(locale === "fa" ? "fa-IR" : "en-US"), price: formatCurrency(item.unitPrice, locale) })}</p>
+      <p className="text-metadata text-text-secondary">{t("quantityAndUnitPrice", { quantity: formatNumber(item.quantity, locale), price: formatCurrency(item.unitPrice, locale) })}</p>
       {item.unitDiscount > 0 && item.promotionName ? <p className="text-metadata text-state-success">{t("itemDiscount", { name: item.promotionName, amount: formatCurrency(item.unitDiscount * item.quantity, locale) })}</p> : null}
       {petName ? <p className="text-metadata text-text-secondary">{t("forPet", { name: petName })}</p> : null}
       {item.reviewId ? <p className="text-metadata text-state-success">{t("review.done")}</p> : null}
