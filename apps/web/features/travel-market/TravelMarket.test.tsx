@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import type { TravelBookingDto, TravelListingDetailDto, TravelSearchResultDto, TripHubDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
@@ -8,7 +8,7 @@ import { TravelResultsView } from "./TravelResultsView";
 import { TravelListingDetailView } from "./TravelListingDetailView";
 import { TravelBookingFlowView } from "./TravelBookingFlowView";
 import { TripHubView } from "./TripHubView";
-import { matchReason, policyFacts } from "./labels";
+import { matchReason, policyFacts, stayDates } from "./labels";
 
 const params = new URLSearchParams();
 const push = vi.fn();
@@ -20,10 +20,14 @@ vi.mock("@/services/households.service", () => ({ householdsService: { listMine:
 
 const RATING = { average: null, count: 0, petFriendliness: null, cleanliness: null, location: null };
 
+afterEach(() => {
+  for (const key of Array.from(params.keys())) params.delete(key);
+});
+
 describe("travel results", () => {
   beforeEach(() => {
     useSessionStore.setState({ status: "unauthenticated" });
-    params.forEach((_, k) => params.delete(k));
+    for (const key of Array.from(params.keys())) params.delete(key);
   });
 
   it("shows an honest map-unavailable state instead of a fake map, and keeps the list", async () => {
@@ -41,6 +45,40 @@ describe("travel results", () => {
     renderWithIntl(<TravelResultsView />, "en");
     expect(await screen.findByText("Pet rules: not specified")).toBeTruthy();
     expect(screen.getByText("Request to book")).toBeTruthy();
+  });
+
+  it.each([
+    ["de", "Haustierfreundliche Unterkünfte", "Hunde · bis 20 kg · keine Haustiergebühr", "Bedingungen", "4,5 von 5 · 2 verifizierte Bewertungen", /10\. Nov\..*12\. Nov\./],
+    ["es", "Alojamientos que admiten mascotas", "Perros · hasta 20 kg · sin suplemento para mascotas", "Condiciones", "4,5 de 5 · 2 reseñas verificadas", /10 nov.*12 nov/],
+  ] as const)("renders localized search results in %s with translated pet rules and filters", async (locale, heading, petRules, conditions, rating, dateSummary) => {
+    params.set("checkIn", "2026-11-10");
+    params.set("checkOut", "2026-11-12");
+    vi.mocked(travelMarketService.search).mockResolvedValue({
+      items: [{ id: `listing-${locale}`, title: "Coastal stay", type: "HOTEL", city: "Rasht", province: null, country: "IR", coverUrl: null, latitude: null, longitude: null, isVerified: true, bookingMode: "REQUEST_TO_BOOK", rating: { ...RATING, average: 4.5, count: 2 }, petPolicySummary: { dogsAllowed: true, catsAllowed: false, maxPets: 2, maxWeightKg: 20, petFeeIrr: 0, stated: true }, stay: null, fromNightlyIrr: 30_000_000, freeCancellationAvailable: true, distanceKm: 1.2, petMatch: "MATCH", amenities: ["WIFI"], favorited: false }],
+      total: 1, page: 1, pageSize: 12, facets: { types: [], amenities: [], priceRange: null }, mapAvailable: false,
+    } as unknown as TravelSearchResultDto);
+
+    renderWithIntl(<TravelResultsView />, locale);
+
+    expect(await screen.findByRole("heading", { name: heading })).toBeTruthy();
+    expect(screen.getByText("Coastal stay")).toBeTruthy();
+    expect(screen.getByText(petRules)).toBeTruthy();
+    expect(screen.getAllByText(conditions).length).toBeGreaterThan(0);
+    expect(screen.getByText(rating)).toBeTruthy();
+    expect(screen.getAllByText(dateSummary).length).toBeGreaterThan(0);
+    if (locale === "de" || locale === "es") expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+});
+
+describe("localized travel stay dates", () => {
+  const stay = { checkIn: "2026-11-10T00:00:00.000Z", checkOut: "2026-11-12T00:00:00.000Z", nights: 2 };
+  it.each([
+    ["fa", "۲ شب"],
+    ["en", "2 nights"],
+    ["de", "2 Nächte"],
+    ["es", "2 noches"],
+  ] as const)("formats night counts in %s", (locale, expected) => {
+    expect(stayDates(stay, locale)).toContain(expected);
   });
 });
 

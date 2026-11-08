@@ -5202,6 +5202,18 @@
       "CUSTOM": "فاصله دلخواه"
     }
   },
+  "travelResults": {
+    "allDestinations": "همه مقصدها", "anyDates": "بدون تاریخ", "cityHeading": "اقامت در {city}", "defaultHeading": "اقامتگاه‌های دوستدار حیوانات", "editSearch": "تغییر جست‌وجو",
+    "datesNote": "برای دیدن جمع کل اقامت و موجودی اعلام‌شده توسط سرویس، تاریخ ورود و خروج را انتخاب کنید.", "filters": "فیلترها", "sort": "مرتب‌سازی", "view": "نمایش", "list": "فهرست", "map": "نقشه",
+    "sortOptions": { "RECOMMENDED": "پیشنهادی", "BEST_PET_MATCH": "بیشترین تطابق با حیوان", "PRICE_ASC": "ارزان‌ترین", "PRICE_DESC": "گران‌ترین", "RATING": "بالاترین امتیاز" },
+    "bestMatchHelp": "در بیشترین تطابق با حیوان، ابتدا اقامتگاه‌هایی نمایش داده می‌شوند که قوانین اعلام‌شده‌شان جور است و بعد مواردی که اطلاعات بیشتری لازم دارند؛ هر گروه بر اساس امتیاز و قیمت مرتب می‌شود.",
+    "mapUnavailable": "نقشه در حال حاضر در دسترس نیست", "mapUnavailableHelp": "سرویس نقشه هنوز فعال نشده است. نتایج همین جست‌وجو در فهرست زیر آمده و فاصله‌ها، در صورت وجود، کنار اقامتگاه دیده می‌شوند.",
+    "loadFailed": "نتایج بارگیری نشد", "loadError": "اتصال را بررسی کنید و دوباره تلاش کنید.", "retry": "تلاش دوباره", "emptyTitle": "اقامتگاهی با این شرایط پیدا نشد", "emptyDescription": "تاریخ‌ها یا فیلترها را تغییر دهید. اقامتگاه‌هایی که سرویس برای این تاریخ‌ها پر گزارش کرده یا قوانین اعلام‌شده‌شان آشکارا با حیوان شما جور نیست، نمایش داده نمی‌شوند.", "clearFilters": "پاک کردن فیلترها",
+    "resultCount": "{count} اقامتگاه", "pages": "صفحه‌ها", "previous": "قبلی", "next": "بعدی",
+    "compare": "مقایسه", "compareSelected": "{selected} از ۳ برای مقایسه", "clear": "پاک کردن", "pickAtLeast": "حداقل ۲ مورد را انتخاب کنید",
+    "conditions": "شرایط", "freeCancellation": "لغو رایگان", "noPetFee": "بدون هزینهٔ حیوان", "instantBooking": "رزرو فوری", "verifiedOnly": "فقط تأییدشده", "stayType": "نوع اقامتگاه", "maximumTotal": "حداکثر قیمت کل (تومان)", "minimumRating": "حداقل امتیاز", "any": "همه", "amenities": "امکانات", "applyFilters": "اعمال فیلترها",
+    "card": { "noPhoto": "تصویری ارائه نشده", "save": "ذخیره", "removeSaved": "حذف از ذخیره‌ها", "verified": "تأییدشده", "petRulesUnknown": "قوانین حیوانات: اعلام نشده", "dogs": "سگ", "cats": "گربه", "and": "و", "upToWeight": "تا {weight} کیلو", "noPetFee": "بدون هزینهٔ حیوان", "petFee": "هزینهٔ حیوان {amount}", "totalStay": "جمع کل اقامت برای {count} شب", "includingPetFee": "با هزینهٔ حیوان", "freeCancellation": "لغو رایگان دارد", "fromNightly": "از {amount} هر شب", "requestToBook": "رزرو با تأیید اقامتگاه", "instantBooking": "رزرو فوری", "compare": "مقایسه", "fit": "مطابق قوانین اعلام‌شده", "possibleConflict": "احتمال مغایرت با قوانین", "moreInfo": "اطلاعات بیشتری لازم است", "distanceKm": "{distance} کیلومتر" }
+  },
   "externalTravel": {
     "title": "اقامتگاه‌های منابع بیرونی",
     "detailTitle": "جزئیات اقامتگاه منبع بیرونی",
