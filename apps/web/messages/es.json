@@ -164,6 +164,74 @@
       "genericError": "No se pudo cambiar la contraseña. Inténtalo de nuevo."
     }
   },
+  "support": {
+    "loading": "Cargando…",
+    "retry": "Reintentar",
+    "home": {
+      "title": "Ayuda",
+      "subtitle": "Obtén ayuda con un pedido, una reserva o tu cuenta.",
+      "createCta": "Solicitar ayuda",
+      "recentTitle": "Solicitudes recientes",
+      "viewAll": "Ver todas",
+      "noRecent": "Todavía no tienes solicitudes de soporte."
+    },
+    "tickets": {
+      "title": "Mis solicitudes",
+      "empty": "Todavía no tienes solicitudes de soporte."
+    },
+    "create": {
+      "title": "Nueva solicitud de soporte",
+      "category": "Categoría",
+      "subject": "Asunto",
+      "description": "Describe el problema",
+      "submit": "Enviar solicitud",
+      "failed": "No se pudo enviar la solicitud. Inténtalo de nuevo.",
+      "linkedContext": "Esta solicitud se vinculará con {type}."
+    },
+    "detail": {
+      "caseNumber": "Solicitud {number}",
+      "backToList": "Volver a mis solicitudes",
+      "progress": "Estado del proceso",
+      "messages": "Conversación",
+      "noMessages": "Todavía no hay mensajes.",
+      "you": "Tú",
+      "support": "Soporte",
+      "composePlaceholder": "Escribe un mensaje…",
+      "send": "Enviar",
+      "sendFailed": "No se pudo enviar el mensaje. Inténtalo de nuevo.",
+      "reopen": "Reabrir solicitud"
+    },
+    "status": {
+      "SUBMITTED": "Enviada",
+      "UNDER_REVIEW": "En revisión",
+      "WAITING": "Esperando tu respuesta",
+      "RESOLVED": "Resuelta",
+      "CLOSED": "Cerrada"
+    },
+    "category": {
+      "ACCOUNT": "Cuenta",
+      "PET": "Mascota",
+      "HEALTH": "Salud",
+      "BOOKING": "Reserva",
+      "SERVICE": "Servicio",
+      "PAYMENT": "Pago",
+      "REFUND": "Reembolso",
+      "ORDER": "Pedido",
+      "DELIVERY": "Entrega",
+      "SELLER": "Vendedor",
+      "PROVIDER": "Proveedor",
+      "MARKETPLACE": "Mercado",
+      "TRUST_SAFETY": "Confianza y seguridad",
+      "OTHER": "Otro"
+    },
+    "relatedEntityType": {
+      "ORDER": "tu pedido",
+      "BOOKING": "tu reserva",
+      "TRIP": "tu viaje",
+      "INSURANCE_APPLICATION": "tu solicitud de seguro",
+      "TRAVEL_BOOKING": "tu reserva de alojamiento"
+    }
+  },
   "admin": {
     "common": {
       "loading": "Cargando…",

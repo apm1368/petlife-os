@@ -164,6 +164,74 @@
       "genericError": "Das Passwort konnte nicht geändert werden. Bitte versuche es erneut."
     }
   },
+  "support": {
+    "loading": "Wird geladen …",
+    "retry": "Erneut versuchen",
+    "home": {
+      "title": "Hilfe",
+      "subtitle": "Hilfe zu einer Bestellung, Buchung oder deinem Konto erhalten.",
+      "createCta": "Hilfe anfordern",
+      "recentTitle": "Letzte Anfragen",
+      "viewAll": "Alle anzeigen",
+      "noRecent": "Du hast noch keine Support-Anfragen."
+    },
+    "tickets": {
+      "title": "Meine Anfragen",
+      "empty": "Du hast noch keine Support-Anfragen."
+    },
+    "create": {
+      "title": "Neue Support-Anfrage",
+      "category": "Kategorie",
+      "subject": "Betreff",
+      "description": "Beschreibe dein Anliegen",
+      "submit": "Anfrage senden",
+      "failed": "Deine Anfrage konnte nicht gesendet werden. Bitte versuche es erneut.",
+      "linkedContext": "Diese Anfrage wird mit {type} verknüpft."
+    },
+    "detail": {
+      "caseNumber": "Anfrage {number}",
+      "backToList": "Zurück zu meinen Anfragen",
+      "progress": "Bearbeitungsstand",
+      "messages": "Nachrichtenverlauf",
+      "noMessages": "Noch keine Nachrichten.",
+      "you": "Du",
+      "support": "Support",
+      "composePlaceholder": "Nachricht schreiben …",
+      "send": "Senden",
+      "sendFailed": "Deine Nachricht konnte nicht gesendet werden. Bitte versuche es erneut.",
+      "reopen": "Anfrage erneut öffnen"
+    },
+    "status": {
+      "SUBMITTED": "Eingereicht",
+      "UNDER_REVIEW": "Wird geprüft",
+      "WAITING": "Deine Antwort wird benötigt",
+      "RESOLVED": "Gelöst",
+      "CLOSED": "Geschlossen"
+    },
+    "category": {
+      "ACCOUNT": "Konto",
+      "PET": "Haustier",
+      "HEALTH": "Gesundheit",
+      "BOOKING": "Buchung",
+      "SERVICE": "Dienstleistung",
+      "PAYMENT": "Zahlung",
+      "REFUND": "Erstattung",
+      "ORDER": "Bestellung",
+      "DELIVERY": "Lieferung",
+      "SELLER": "Verkäufer",
+      "PROVIDER": "Dienstleister",
+      "MARKETPLACE": "Marktplatz",
+      "TRUST_SAFETY": "Sicherheit und Vertrauen",
+      "OTHER": "Sonstiges"
+    },
+    "relatedEntityType": {
+      "ORDER": "deiner Bestellung",
+      "BOOKING": "deiner Buchung",
+      "TRIP": "deiner Reise",
+      "INSURANCE_APPLICATION": "deinem Versicherungsantrag",
+      "TRAVEL_BOOKING": "deiner Unterkunftsbuchung"
+    }
+  },
   "admin": {
     "common": {
       "loading": "Wird geladen …",
