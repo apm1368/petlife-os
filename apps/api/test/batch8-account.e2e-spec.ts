@@ -329,6 +329,9 @@ describe("Batch 8 — Account & security", () => {
         member.c.post(`/household-invitations/${token}/request`),
         member.c.post(`/household-invitations/${token}/request`),
       ]);
+      if (!concurrentRequests.every((r) => r.status === 201)) {
+        throw new Error(`Concurrent invitation requests returned: ${JSON.stringify(concurrentRequests.map(({ status, body }) => ({ status, body })))}`);
+      }
       expect(concurrentRequests.every((r) => r.status === 201)).toBe(true);
       expect(concurrentRequests.filter((r) => r.body.alreadyRequested === false)).toHaveLength(1);
       const requested = concurrentRequests[0]!;
