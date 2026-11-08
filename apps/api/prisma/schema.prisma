@@ -547,6 +547,22 @@ enum ProductCategoryStatus {
   INACTIVE
 }
 
+enum CatalogImportJobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  PARTIAL
+  FAILED
+  CANCELLED
+}
+
+enum CatalogImportItemStatus {
+  IMPORTED
+  NEEDS_REVIEW
+  FAILED
+  DUPLICATE
+}
+
 enum BrandStatus {
   ACTIVE
   INACTIVE
@@ -2648,6 +2664,7 @@ model Brand {
   updatedAt DateTime @updatedAt
 
   products Product[]
+  catalogImportJobs CatalogImportJob[]
 
   @@map("brands")
 }
@@ -2670,6 +2687,7 @@ model ProductCategory {
   updatedAt DateTime @updatedAt
 
   products Product[]
+  importJobs CatalogImportJob[]
 
   @@map("product_categories")
 }
@@ -2724,10 +2742,76 @@ model Product {
 
   variants   ProductVariant[]
   orderItems OrderItem[]
+  imports    CatalogImportItem[]
 
   @@index([categoryId])
   @@index([status])
   @@map("products")
+}
+
+/// Audited operator-started imports from an external catalog. This stores no
+/// source price or stock as PET LIFE commerce data; imported products have no
+/// variants/offers until a seller creates one through the normal workflow.
+model CatalogImportJob {
+  id               String                 @id @default(uuid()) @db.Uuid
+  status           CatalogImportJobStatus @default(QUEUED)
+  submittedUrls    String[]
+  targetCategoryId String                 @db.Uuid
+  targetCategory   ProductCategory        @relation(fields: [targetCategoryId], references: [id], onDelete: Restrict)
+  targetBrandId    String?                @db.Uuid
+  targetBrand      Brand?                 @relation(fields: [targetBrandId], references: [id], onDelete: SetNull)
+  maxPages         Int                    @default(5)
+  maxProducts      Int                    @default(50)
+  pagesVisited     Int                    @default(0)
+  productsSeen     Int                    @default(0)
+  productsImported Int                    @default(0)
+  productsFailed   Int                    @default(0)
+  cancelRequested  Boolean                @default(false)
+  attempt          Int                    @default(0)
+  nextAttemptAt    DateTime               @default(now())
+  lockedUntil      DateTime?
+  idempotencyKey   String                 @unique
+  requestedById    String                 @db.Uuid
+  lastError        String?
+  startedAt        DateTime?
+  finishedAt       DateTime?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  items CatalogImportItem[]
+
+  @@index([status, nextAttemptAt])
+  @@index([requestedById, createdAt])
+  @@map("catalog_import_jobs")
+}
+
+/// One source identity may be observed in many jobs. New source versions are
+/// staged in pendingSnapshot and require an explicit admin decision; they
+/// never silently overwrite catalog content edited by PET LIFE staff.
+model CatalogImportItem {
+  id              String                  @id @default(uuid()) @db.Uuid
+  jobId           String                  @db.Uuid
+  job             CatalogImportJob        @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  source          String                  @default("DIGIKALA")
+  sourceItemId    String
+  sourceUrl       String
+  sourceSnapshot  Json
+  sourceHash      String
+  pendingSnapshot Json?
+  productId       String?                 @db.Uuid
+  product         Product?                @relation(fields: [productId], references: [id], onDelete: SetNull)
+  status          CatalogImportItemStatus @default(NEEDS_REVIEW)
+  errorCode       String?
+  errorDetail     String?
+  observedAt      DateTime                @default(now())
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  @@unique([jobId, sourceItemId])
+  @@index([source, sourceItemId, createdAt])
+  @@index([jobId, status])
+  @@index([productId])
+  @@map("catalog_import_items")
 }
 
 /// A purchasable unit of a Product (spec section 7) — e.g. "2kg Chicken" vs.
@@ -9183,6 +9267,8 @@ model ProductMedia {
   /// Repository-owned or storage-owned path; never a third-party hotlink.
   url       String
   alt       String?
+  /// Original source reference retained for attribution and audit; never used as a remote image hotlink.
+  sourceUrl String?
   sortOrder Int             @default(0)
   createdAt DateTime        @default(now())
 

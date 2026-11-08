@@ -109,6 +109,30 @@ export class StorageService {
     await this.driver.deleteObject(key);
   }
 
+  /** Stores a validated public catalog image fetched by an approved importer. The caller must validate the source URL and bytes first. */
+  async storeCatalogImage(productId: string, contentType: string, bytes: Buffer): Promise<{ url: string; key: string }> {
+    const extensionByType: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+    const extension = extensionByType[contentType];
+    if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
+    if (bytes.length === 0 || bytes.length > 5 * 1024 * 1024) throw new DocumentTooLargeException({ fileSizeBytes: bytes.length, maxBytes: 5 * 1024 * 1024 });
+    const validSignature = contentType === "image/jpeg"
+      ? bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff
+      : contentType === "image/png"
+        ? bytes.length >= 8 && bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+        : bytes.length >= 12 && bytes.toString("ascii", 0, 4) === "RIFF" && bytes.toString("ascii", 8, 12) === "WEBP";
+    if (!validSignature) throw new UnsupportedDocumentTypeException({ contentType, reason: "image-signature-mismatch" });
+    const key = `product-catalog/${productId}/${randomUUID()}.${extension}`;
+    const target = await this.driver.createUploadTarget(key, contentType, bytes.length);
+    await this.driver.putObject(key, bytes, contentType);
+    return { url: target.publicUrl, key };
+  }
+
+  /** Removes an importer-created catalog image when an atomic draft creation fails. */
+  async deleteCatalogImage(key: string): Promise<void> {
+    if (!/^product-catalog\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.(jpg|png|webp)$/i.test(key)) throw new Error("Invalid catalog image key");
+    await this.driver.deleteObject(key);
+  }
+
   /**
    * Handoff 17: medical documents live under a PRIVATE key prefix
    * (`health-documents/...`, never `pets/...`'s public-URL scheme) — see the
