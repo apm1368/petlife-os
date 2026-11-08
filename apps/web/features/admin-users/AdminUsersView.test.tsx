@@ -42,6 +42,20 @@ describe("admin users directory", () => {
     expect(screen.getByRole("link", { name: "مشاهدهٔ پروفایل کاربر" }).getAttribute("href")).toBe("/fa/admin/users/user-1");
     expect(document.body.textContent).not.toContain("VET");
   });
+  it.each(["de", "es"] as const)("localizes the user directory and profile dates for %s", async locale => {
+    renderWithIntl(<AdminUsersView id="user-1" />, locale);
+    await screen.findByText(locale === "de" ? "Nutzerprofil" : "Perfil de usuario");
+    fireEvent.click(screen.getByRole("button", { name: locale === "de" ? "Anfragen" : "Solicitudes" }));
+    const expected = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(profile.requests[0]!.startAt));
+    await screen.findByText(content => content.includes(expected));
+  });
+  it.each([["fa", "ارسال پیام به کاربر"], ["en", "Send a message to this user"], ["de", "Nachricht an dieses Nutzerkonto"], ["es", "Mensaje para esta cuenta"]] as const)("localizes manual communication controls in %s without claiming SMS delivery", async (locale, title) => {
+    useAdminStore.setState({ context: { isAdmin: true, adminUserId: "admin", role: "ADMIN", permissions: ["customer.view", "support.manage"] } as never, status: "ready" });
+    renderWithIntl(<AdminUsersView id="user-1" />, locale);
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    const smsDisclosure = locale === "fa" ? "ارسال پیامک فقط" : locale === "de" ? "SMS wird nur versucht" : locale === "es" ? "Solo se intentará enviar un SMS" : "SMS is attempted only";
+    expect(screen.getByText(smsDisclosure, { exact: false })).toBeTruthy();
+  });
   it("applies filters explicitly and resets pagination when a new filter is submitted", async () => {
     renderWithIntl(<AdminUsersView />);
     fireEvent.click(await screen.findByRole("button", { name: "Next" }));

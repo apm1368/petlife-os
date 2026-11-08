@@ -235,11 +235,17 @@ Lifecycle actions, status labels, confirmation dialog, owner note, loading/retry
 - PR #160 was synchronized with current `main` at `b6b61c4` after the travel PR #152 merged. Its German and Spanish catalog namespaces were combined with the newer main catalogs without conflicting values; the merge also preserves #152 travel strings and #163 health strings.
 - The earlier 21 focused tests and CI were for the prior head; the new sync still requires local reruns, a pushed exact-head CI and production verification. The landing remains PARTIAL, and original memorial-image/CDN privacy is not claimed.
 
+## Admin user directory and profile — PR #167, synchronized with current main
+
+- German and Spanish cover the admin user list, filters, masked contact details, pagination, profile sections/tabs, household/pet summaries, relationship/status labels, audit entries and the permitted one-account message/SMS disclosure. User-entered and provider-authored content remains unchanged; no SMS delivery is simulated.
+- The branch is synchronized with current `main` through #166. Current-main catalog conflicts had removed the `adminUsers` namespace; it is restored in both German and Spanish.
+- Synchronized-head checks: 17 user-directory render/parity tests pass, web TypeScript check, targeted ESLint, four-catalog parsing and `git diff --check` pass. A fresh hosted CI is still required after push; other admin/backoffice/ERP pages remain PARTIAL.
+
 ## Admin dashboard failure states — PR #166, synchronized with current main
 
 - German and Spanish explicitly cover dashboard offline, unauthorized, loading, empty and failure UI; skeleton labels are localized while dashboard data and business behavior remain unchanged.
 - The branch includes current `main` through #169. The sync exposed missing `offline`, `noAccess` and `loading` dashboard keys after current-main catalogs won conflicts; those keys are restored in German and Spanish.
-- Verification on the synchronized branch: 27 dashboard tests and 4 catalog-parity tests pass; web TypeScript check passes. Exact-head hosted CI and production verification remain required. Other admin/backoffice/ERP routes are still PARTIAL.
+- PR #166 merged to `main` at `b12d262f`; exact-head CI passed, and the production deploy workflow is running. Dashboard runtime behavior still awaits safe production verification. Other admin/backoffice/ERP routes remain PARTIAL.
 
 ## Checkout-to-order journey — PR #169 (merged to main)
 
