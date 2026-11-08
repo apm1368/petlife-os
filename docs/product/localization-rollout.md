@@ -209,3 +209,9 @@ Lifecycle actions, status labels, confirmation dialog, owner note, loading/retry
 - #152 is based on `main` at `350f4d1d`; exact-head CI `42517206168` is in progress. Local validation after syncing #159: 51 travel tests and TypeScript pass. It remains PARTIAL pending hosted CI and browser checks.
 - #165's last pushed head is `c93b3077`, with CI `42516710325` still running on that older tree. Local follow-up adds fa/en offline and access-denied copy and has 16 clinic-page tests passing; it is not yet pushed or hosted-CI verified. The route remains PARTIAL.
 - Dashboard, travel and clinic pages have not been authenticated-browser verified on production. Landing HERO is unchanged. Disk is 107 MiB; no payment worktree was visible or changed. Memorial original-image/CDN privacy and German/Spanish SMS templates/delivery remain unverified/unimplemented.
+
+## Admin user directory — current localization slice
+
+- `AdminUsersView` now has explicit German and Spanish text for the directory, user profile tabs, relationship/status labels, household/pet counts, masked contact labels, pagination, empty/error/access-denied states and the manual communication form. Profile dates use the selected locale; Persian retains the Persian calendar.
+- Manual message copy only describes an SMS attempt subject to provider configuration, recipient consent and notification rules; it does not imply delivery. User-entered names, contact details, message bodies and other source content remain unchanged.
+- Focused rendering and catalog-placeholder tests pass: 17 tests across the directory and locale-parity suites. Targeted ESLint, web typecheck, four catalog JSON parsing and diff checks pass. This is a localization slice, not full admin/backoffice localization; role management, operations, finance, audit, content and ERP remain PARTIAL. Browser verification is outstanding.
