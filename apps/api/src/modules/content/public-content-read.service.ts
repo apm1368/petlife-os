@@ -3,6 +3,7 @@ import { Injectable } from "@nestjs/common";
 import { ArticleLifecycleStatus, Locale, Prisma } from "@prisma/client";
 import type { PaginatedDto, PublicArticleDetailDto, PublicArticleReferenceDto, PublicArticleSummaryDto, PublicCategoryDto, PublicTagDto, RichTextDocument } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { excludeDemoRecordsFromPublicReads } from "../../common/public-record-origin";
 import { ArticleLocaleNotFoundException, CategoryNotFoundException, TagNotFoundException } from "../../common/errors/api-exception";
 import { resolvePagination, toPaginatedDto, type PaginationQueryDto } from "../../common/pagination/pagination.dto";
 import { PUBLIC_CONTENT_AUTHOR_INCLUDE, PUBLIC_MEDIA_ASSET_SELECT, resolveRichTextMedia, toPublicCategoryDto, toPublicContentAuthorDto, toPublicMediaAssetDto, toPublicTagDto } from "./content-mapper";
@@ -79,6 +80,7 @@ export class PublicContentReadService {
       status: ArticleLifecycleStatus.VISIBLE,
       title: query.search ? { contains: query.search, mode: "insensitive" } : undefined,
       article: {
+        ...excludeDemoRecordsFromPublicReads(),
         category: query.categorySlug ? { locales: { some: { locale, slug: query.categorySlug } } } : undefined,
         tags: query.tagSlug ? { some: { tag: { locales: { some: { locale, slug: query.tagSlug } } } } } : undefined,
         ...(query.excludeCategorySlug
@@ -94,7 +96,7 @@ export class PublicContentReadService {
   }
 
   async getArticleBySlug(locale: Locale, slug: string): Promise<PublicArticleDetailDto> {
-    const row = await this.prisma.articleLocale.findUnique({ where: { locale_slug: { locale, slug } }, include: { article: { include: articleInclude(locale) } } });
+    const row = await this.prisma.articleLocale.findFirst({ where: { locale, slug, article: excludeDemoRecordsFromPublicReads() }, include: { article: { include: articleInclude(locale) } } });
     if (!row || row.status !== ArticleLifecycleStatus.VISIBLE) throw new ArticleLocaleNotFoundException({ locale, slug });
     const body = await resolveRichTextMedia(this.prisma, row.body as unknown as RichTextDocument);
     return { ...toSummary(row), body, seoTitle: row.seoTitle, seoDescription: row.seoDescription };
@@ -105,13 +107,13 @@ export class PublicContentReadService {
    * never the article itself. Ties break by newest, then id, so the order is stable.
    */
   async relatedArticles(locale: Locale, slug: string, limit = 4): Promise<PublicArticleSummaryDto[]> {
-    const current = await this.prisma.articleLocale.findUnique({ where: { locale_slug: { locale, slug } }, include: { article: { select: { id: true, categoryId: true, tags: { select: { tagId: true } } } } } });
+    const current = await this.prisma.articleLocale.findFirst({ where: { locale, slug, article: excludeDemoRecordsFromPublicReads() }, include: { article: { select: { id: true, categoryId: true, tags: { select: { tagId: true } } } } } });
     if (!current || current.status !== ArticleLifecycleStatus.VISIBLE) throw new ArticleLocaleNotFoundException({ locale, slug });
     const tagIds = current.article.tags.map((t) => t.tagId);
     const signals: Prisma.ArticleWhereInput[] = [...(current.article.categoryId ? [{ categoryId: current.article.categoryId }] : []), ...(tagIds.length ? [{ tags: { some: { tagId: { in: tagIds } } } }] : [])];
     if (!signals.length) return [];
     const rows = await this.prisma.articleLocale.findMany({
-      where: { locale, status: ArticleLifecycleStatus.VISIBLE, articleId: { not: current.articleId }, article: { OR: signals } },
+      where: { locale, status: ArticleLifecycleStatus.VISIBLE, articleId: { not: current.articleId }, article: { ...excludeDemoRecordsFromPublicReads(), OR: signals } },
       include: { article: { include: articleInclude(locale) } },
       take: 50,
     });
@@ -145,13 +147,13 @@ export class PublicContentReadService {
   }
 
   private async visibleArticleId(locale: Locale, slug: string) {
-    const row = await this.prisma.articleLocale.findUnique({ where: { locale_slug: { locale, slug } }, select: { articleId: true, status: true } });
+    const row = await this.prisma.articleLocale.findFirst({ where: { locale, slug, article: excludeDemoRecordsFromPublicReads() }, select: { articleId: true, status: true } });
     if (!row || row.status !== ArticleLifecycleStatus.VISIBLE) throw new ArticleLocaleNotFoundException({ locale, slug });
     return row.articleId;
   }
 
   async getArticleReference(locale: Locale, articleId: string): Promise<PublicArticleReferenceDto | null> {
-    const row = await this.prisma.articleLocale.findUnique({ where: { articleId_locale: { articleId, locale } }, include: { article: { include: articleInclude(locale) } } });
+    const row = await this.prisma.articleLocale.findFirst({ where: { articleId, locale, article: excludeDemoRecordsFromPublicReads() }, include: { article: { include: articleInclude(locale) } } });
     if (!row || row.status !== ArticleLifecycleStatus.VISIBLE) return null;
     return toReference(row);
   }
