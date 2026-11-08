@@ -9,6 +9,7 @@ import { AdminOperationalSearch } from "./AdminOperationalSearch";
 import { adminService, type SystemHealth, type TrustQueueItem } from "@/services/admin.service";
 import { useAdminStore } from "@/stores/admin-store";
 import { formatCount } from "@/lib/number/format-number";
+import type { RouteLocale } from "@/lib/i18n/config";
 import "./approved-admin.css";
 
 type Result<T> = { value: T | null; failed: boolean };
@@ -17,7 +18,7 @@ const initial = { value: null, failed: false };
 /** Operational dashboard: real counts and permission-gated queues, no invented sales chart. */
 export function AdminDashboardView() {
   const t = useTranslations("rollout.admin");
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as RouteLocale;
   const context = useAdminStore((s) => s.context);
   const permissions = (context?.permissions ?? []).join(",");
   const allowed = (permission: string) => permissions.split(",").includes(permission);
@@ -49,8 +50,17 @@ export function AdminDashboardView() {
     { key: "disputes", value: summary.openDisputes, href: "/admin/disputes", permission: "dispute.view", Icon: BadgeCheck },
     { key: "refunds", value: summary.pendingRefundApprovals, href: "/admin/transactions", permission: "finance.view", Icon: HeartPulse },
   ];
-  const date = (iso: string) => new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "medium" }).format(new Date(iso));
+  const date = (iso: string) => new Intl.DateTimeFormat(locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-US", { dateStyle: "medium", timeZone: "Asia/Tehran" }).format(new Date(iso));
   const failure = <div role="alert" className="approved-admin__failure"><p>{t("failed")}</p><button onClick={reload}>{t("retry")}</button></div>;
+  const statusLabel = (status: string) => {
+    const known: Record<string, string> = {
+      HEALTHY: t("systemStatus.HEALTHY"), DEGRADED: t("systemStatus.DEGRADED"),
+      LAGGING: t("systemStatus.LAGGING"), DOWN: t("systemStatus.DOWN"),
+      UP: t("systemStatus.UP"), RUNNING: t("systemStatus.RUNNING"),
+      ERROR: t("systemStatus.ERROR"), NOT_PROVIDED: t("notProvided"),
+    };
+    return known[status] ?? status;
+  };
   return <div className="approved-admin">
     <header className="approved-admin__heading"><div><p>{context?.displayName}</p><h1>{t("title")}</h1><p>{t("subtitle")}</p></div><time dateTime={new Date().toISOString()}>{date(new Date().toISOString())}</time></header>
     <AdminOperationalSearch />
@@ -72,7 +82,7 @@ export function AdminDashboardView() {
         {tasks.failed ? failure : !tasks.value ? <Skeleton className="h-48 w-full" /> : tasks.value.length === 0 ? <p>{t("empty")}</p> : <ul>{tasks.value.map((item) => <li key={item.id}><Link href="/admin/tasks"><span><b>{item.title}</b>{item.dueAt ? <small>{t("due", { date: date(item.dueAt) })}</small> : null}</span></Link></li>)}</ul>}
       </section> : null}
       {allowed("system.view") ? <section className="approved-admin__panel approved-admin__system"><header><h2>{t("system")}</h2></header>
-        {health.failed ? failure : !health.value ? <Skeleton className="h-48 w-full" /> : <><StatusLabel tone={health.value.status === "HEALTHY" ? "success" : "attention"}>{health.value.status === "HEALTHY" ? t("healthy") : health.value.status}</StatusLabel><dl>{["api", "database", "redis", "storage", "outbox"].map((key) => <div key={key}><dt>{t(`component.${key}`)}</dt><dd><bdi dir="ltr">{String((health.value?.components[key] as { status?: string } | undefined)?.status ?? t("notProvided"))}</bdi></dd></div>)}</dl><h3>{t("workers")}</h3><ul>{health.value.components.workers?.map((worker) => <li key={worker.name}><span><bdi dir="ltr">{worker.name}</bdi></span><bdi dir="ltr">{worker.status}</bdi></li>)}</ul></>}
+        {health.failed ? failure : !health.value ? <Skeleton className="h-48 w-full" /> : <><StatusLabel tone={health.value.status === "HEALTHY" ? "success" : "attention"}>{statusLabel(health.value.status)}</StatusLabel><dl>{["api", "database", "redis", "storage", "outbox"].map((key) => <div key={key}><dt>{t(`component.${key}`)}</dt><dd><bdi dir="ltr">{statusLabel(String((health.value?.components[key] as { status?: string } | undefined)?.status ?? "NOT_PROVIDED"))}</bdi></dd></div>)}</dl><h3>{t("workers")}</h3><ul>{health.value.components.workers?.map((worker) => <li key={worker.name}><span><bdi dir="ltr">{worker.name}</bdi></span><bdi dir="ltr">{statusLabel(worker.status)}</bdi></li>)}</ul></>}
       </section> : null}
     </div>
   </div>;

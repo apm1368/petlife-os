@@ -90,6 +90,7 @@ Status is per page family, not per shared header. `COMPLETE` means all applicati
 | Help Center, support and legal | Partial | Partial | Partial | Partial | Help/support workflow and published legal copy require separate verification; legal body content must remain authoritative, not machine-fabricated. |
 | Admin, backoffice and ERP | Partial | Partial | Partial | Partial | Shared navigation is localized; tables, charts, permissions, operational dialogs and state copy remain open. |
 | Admin audit `/[locale]/admin/audit` and shared admin shell | Partial | Partial | Partial | Partial | PR #156 merged to main at `b0ec95c4`; CI passed on its exact head. Audit labels, empty/loading/error/retry, role/access shell, navigation groups and links have 19 focused tests. Responsive inspection remains pending; other admin routes remain partial. |
+| Admin dashboard `/[locale]/admin` | Complete | Complete | Complete | Complete | Dashboard cards, permission-filtered queues, system health/status labels, operational search, empty/error/loading states and date formatting have explicit fa/en/de/es UI copy. User/admin-entered task titles, support subjects and worker names remain source data. Seven focused render/catalog tests pass; no production/admin browser verification yet. Other admin/backoffice/ERP routes remain partial. |
 | Notifications and message templates | Partial | Partial | Partial | Partial | PR #148 merged to main at `afefa932`; CI passed on exact head `615f6350`. Notification-center/preferences chrome, controls and timestamps are translated; server-provided titles/bodies stay unchanged. Backend errors and other surfaces remain partial. German/Spanish SMS templates and provider delivery are not implemented or simulated. |
 
 ### Public shell and preview navigation follow-up
@@ -172,3 +173,9 @@ Lifecycle actions, status labels, confirmation dialog, owner note, loading/retry
 - Fetches distinguish offline and authorization failures; list/vaccination save feedback and retry controls are localized. Record names, medical notes/reactions/instructions and other provider/owner-authored values are preserved as entered.
 - Local verification: 67 tests across `features/health*` passed; four-locale missing-key parity suite passed; web typecheck/lint, JSON parse and `git diff --check` passed before latest branch sync. The branch is not yet synced after #162, pushed, merged, deployed or browser-tested. Do not mark these routes complete or live yet.
 - Advanced clinical records, documents, timeline, care reminders, memories, activity and expenses remain PARTIAL.
+
+## Admin operations dashboard — local batch `codex/i18n-admin-dashboard`
+
+- Added explicit German and Spanish translations for the dashboard's stat cards, queue and system panels, operational-search labels/empty/error messages, health states and permission-independent UI. System dates now follow fa Jalali or the selected Gregorian locale (`en-US`, `de-DE`, `es-ES`) in Tehran time.
+- Known system/worker statuses are translated; unknown status values remain visible as source diagnostics rather than being guessed. User/admin-entered task titles, case subjects and worker identifiers remain unchanged.
+- Seven focused dashboard tests pass, including translated populated states, translation-catalog key parity and absence of Persian UI/fallback English markers. Web TypeScript check passed. This page-level UI coverage is not yet production/admin-browser verified; the remainder of admin/backoffice/ERP is still PARTIAL.
