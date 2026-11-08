@@ -130,6 +130,16 @@
 .park-landing .hl-footer__legal { border-color:color-mix(in srgb,var(--campaign-inverse) 25%,transparent); }
 .park-landing .hl-footer__demo { color:color-mix(in srgb,var(--campaign-inverse) 80%,transparent); }
 
+.park-memorial { padding:clamp(48px,7vw,88px) 24px; background:var(--campaign-cream); color:var(--campaign-ink); }
+.park-memorial .park-section-heading { max-width:760px; margin:0 auto 28px; text-align:center; }
+.park-memorial .park-section-heading > p:last-child { max-width:58ch; margin:12px auto 0; }
+.park-memorial__carousel { max-width:720px; margin-inline:auto; display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:clamp(12px,3vw,32px); }
+.park-memorial__slide { text-align:center; }
+.park-memorial__slide img { display:block; width:min(100%,320px); aspect-ratio:1; object-fit:cover; border-radius:24px; margin-inline:auto; }
+.park-memorial__slide h3 { margin:14px 0 0; font-size:1.25rem; }
+.park-memorial__carousel button { min-height:44px; }
+@media (max-width:560px) { .park-memorial { padding-inline:16px; } .park-memorial__carousel { gap:8px; } .park-memorial__carousel button { min-width:44px; padding-inline:8px; font-size:.8rem; } }
+
 @media (prefers-reduced-motion:reduce) {
   .park-pavilions[data-intro="true"] .park-pavilion__light { animation:none; }
   .park-pavilion:hover .park-pavilion__light,.park-pavilion:focus-visible .park-pavilion__light { animation:none; opacity:1; }

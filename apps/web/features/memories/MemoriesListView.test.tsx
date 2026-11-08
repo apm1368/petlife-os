@@ -6,7 +6,7 @@ import { memoriesService } from "@/services/memories.service";
 import { petsService } from "@/services/pets.service";
 import { MemoriesListView } from "./MemoriesListView";
 
-vi.mock("@/services/memories.service", () => ({ memoriesService: { list: vi.fn() } }));
+vi.mock("@/services/memories.service", () => ({ memoriesService: { list: vi.fn(), getMemorial: vi.fn(), submitMemorial: vi.fn(), withdrawMemorial: vi.fn() } }));
 vi.mock("@/services/pets.service", () => ({ petsService: { getById: vi.fn() } }));
 
 function pet(overrides: Partial<PetDto> = {}): PetDto {
@@ -58,6 +58,9 @@ describe("MemoriesListView", () => {
   beforeEach(() => {
     vi.mocked(petsService.getById).mockReset();
     vi.mocked(memoriesService.list).mockReset();
+    vi.mocked(memoriesService.getMemorial).mockReset().mockResolvedValue(null);
+    vi.mocked(memoriesService.submitMemorial).mockReset();
+    vi.mocked(memoriesService.withdrawMemorial).mockReset();
   });
 
   it("shows a plain memories heading for an active pet", async () => {

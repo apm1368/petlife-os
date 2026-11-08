@@ -67,6 +67,7 @@ export interface TrustQueueItem { kind: "REPORT" | "PLACE_REPORT" | "TRUST_CASE"
 export interface TrustQueueSummary { total: number; byKind: Record<string, number>; bySeverity: Record<string, number>; slaBreached: number; unassigned: number; oldestOpenedAt: string | null }
 /** ERP-A system health. */
 export interface SystemHealth { status: "HEALTHY" | "DEGRADED" | "LAGGING" | "DOWN"; checkedAt: string; components: Record<string, unknown> & { workers?: { name: string; intervalMs: number; lastSucceededAt: string | null; lastFailedAt: string | null; status: string }[] } }
+export interface AdminPetMemorialItem { id: string; petId: string; petName: string; displayName: string; lifecycleStatus: string; status: string; consentVersion: string; consentedAt: string; submittedAt: string; imageUrl: string | null }
 
 export const adminService = {
   getTrustQueue: (pageSize = 30) => apiFetch<PaginatedDto<TrustQueueItem>>(`/admin/trust/queue?pageSize=${pageSize}`),
@@ -172,6 +173,9 @@ export const adminService = {
   approveRefund: (id: string) => apiFetch<AdminRefundApprovalDto>(`/admin/transactions/refund-approvals/${id}/approve`, { method: "PATCH" }),
   rejectRefund: (id: string, reason?: string) => apiFetch<AdminRefundApprovalDto>(`/admin/transactions/refund-approvals/${id}/reject`, { method: "PATCH", body: { reason } }),
   executeRefund: (id: string) => apiFetch<AdminRefundApprovalDto>(`/admin/transactions/refund-approvals/${id}/execute`, { method: "PATCH" }),
+
+  listPetMemorials: (status = "PENDING_REVIEW") => apiFetch<{ items: AdminPetMemorialItem[]; total: number; page: number; pageSize: number }>(`/admin/pet-memorials${toQueryString({ status, page: 1 })}`),
+  reviewPetMemorial: (id: string, action: "APPROVE" | "REJECT", reason: string) => apiFetch<{ id: string; status: string; reviewedAt: string }>(`/admin/pet-memorials/${id}/review`, { method: "POST", body: { action, reason } }),
 
   // Audit
   listAudit: (input: { entityType?: string; entityId?: string; adminUserId?: string } & AdminPaginationInput = {}) =>
