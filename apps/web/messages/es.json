@@ -69,6 +69,20 @@
       "genericError": "No se pudo cambiar la contraseña. Inténtalo de nuevo."
     }
   },
+  "petOverview": {
+    "careUnavailable": "No se pudieron cargar los recordatorios de cuidados. Los demás registros siguen disponibles; vuelve a intentarlo para recuperar la lista completa.",
+    "careIncomplete": "Todavía no se han recuperado todos los cuidados que requieren atención y los próximos cuidados."
+  },
+  "birthDateField": {
+    "calendar": "Calendario",
+    "jalali": "Calendario Jalali",
+    "gregorian": "Calendario gregoriano",
+    "hint": "Al cambiar de calendario, se conserva la misma fecha seleccionada.",
+    "optionalAge": "La fecha de nacimiento y la edad son opcionales. Si no las sabes, continúa y complétalas más tarde.",
+    "day": "Día",
+    "month": "Mes",
+    "year": "Año"
+  },
   "consentHistory": {
     "title": "Historial de consentimientos",
     "intro": "Aceptaciones y revocaciones registradas en tu cuenta.",

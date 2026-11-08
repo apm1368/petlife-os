@@ -5,6 +5,7 @@ import { statusLabel } from "@/lib/status/status-labels";
 /** Shared pet identity text — the pet header, the home hero and the pet list say the same thing. */
 type Locale = "fa" | "en" | "de" | "es";
 const localeIndex: Record<Locale, number> = { fa: 0, en: 1, de: 2, es: 3 };
+const intlLocale = (locale: Locale) => ({ fa: "fa-IR", en: "en-US", de: "de-DE", es: "es-ES" })[locale];
 export const SPECIES_LABELS: Record<string, [string, string, string, string]> = {
   DOG: ["سگ", "Dog", "Hund", "Perro"],
   CAT: ["گربه", "Cat", "Katze", "Gato"],
@@ -35,17 +36,21 @@ export function formatAge(pet: Pick<PetDto, "birthDate" | "approximateAgeMonths"
   const years = Math.floor(months / 12);
   const remaining = months % 12;
   if (locale === "fa") return localizeDigits(years > 0 ? (remaining > 0 ? `${years} سال و ${remaining} ماه` : `${years} سال`) : `${remaining} ماه`, "fa");
-  if (locale === "de") return years > 0 ? (remaining > 0 ? `${years} J. ${remaining} Mon.` : `${years} J.`) : `${remaining} Mon.`;
-  if (locale === "es") return years > 0 ? (remaining > 0 ? `${years} a ${remaining} m` : `${years} a`) : `${remaining} m`;
-  return years > 0 ? (remaining > 0 ? `${years}y ${remaining}m` : `${years}y`) : `${remaining}m`;
+  const n = new Intl.NumberFormat(intlLocale(locale)).format;
+  if (locale === "en") return years > 0 ? (remaining > 0 ? `${n(years)}y ${n(remaining)}m` : `${n(years)}y`) : `${n(remaining)}m`;
+  const units = locale === "de" ? ["Jahr", "Jahre", "Monat", "Monate"] : ["año", "años", "mes", "meses"];
+  const year = years === 1 ? units[0] : units[1];
+  const month = remaining === 1 ? units[2] : units[3];
+  return years > 0 ? (remaining > 0 ? `${n(years)} ${year}, ${n(remaining)} ${month}` : `${n(years)} ${year}`) : `${n(remaining)} ${month}`;
 }
 
 /** "۱۸ کیلوگرم" / "18 kg"; `unknown` when no weight is recorded. Presentation only — the stored value is untouched. */
 export function formatWeight(pet: Pick<PetDto, "latestWeightValue" | "latestWeightUnit">, locale: Locale, unknown: string): string {
   if (pet.latestWeightValue === null || pet.latestWeightValue === undefined) return unknown;
-  const unit = pet.latestWeightUnit === "LB" ? (locale === "fa" ? "پوند" : "lb") : locale === "fa" ? "کیلوگرم" : "kg";
+  const units = { fa: { lb: "پوند", kg: "کیلوگرم" }, en: { lb: "lb", kg: "kg" }, de: { lb: "lb", kg: "kg" }, es: { lb: "lb", kg: "kg" } }[locale];
+  const unit = pet.latestWeightUnit === "LB" ? units.lb : units.kg;
   // The API serialises the decimal weight as a string; format the number, not the string.
-  const value = Number(pet.latestWeightValue).toLocaleString(locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-US", { maximumFractionDigits: 2 });
+  const value = Number(pet.latestWeightValue).toLocaleString(intlLocale(locale), { maximumFractionDigits: 2 });
   return `${value} ${unit}`;
 }
 

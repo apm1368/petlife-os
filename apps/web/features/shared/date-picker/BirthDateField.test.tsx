@@ -31,4 +31,18 @@ describe("BirthDateField calendars", () => {
     expect((screen.getByLabelText("Day") as HTMLSelectElement).value).toBe("29");
     expect(screen.getByTestId("iso").textContent).toBe("2024-02-29");
   });
+
+  it.each([
+    ["de", "Geburtsdatum", "Kalender", "Gregorianischer Kalender", "Tag", "Monat", "Jahr", "Januar"],
+    ["es", "Fecha de nacimiento", "Calendario", "Calendario gregoriano", "Día", "Mes", "Año", "enero"],
+  ] as const)("localizes the date controls and Gregorian month names in %s", (locale, label, calendar, gregorian, day, month, year, january) => {
+    renderWithIntl(<BirthDateField label={label} value="" onChange={() => undefined} />, locale);
+    expect(screen.getByRole("group", { name: label })).toBeTruthy();
+    const calendarSelect = screen.getByLabelText(calendar) as HTMLSelectElement;
+    expect(Array.from(calendarSelect.options).map((option) => option.text)).toContain(gregorian);
+    expect(screen.getByLabelText(day)).toBeTruthy();
+    expect(screen.getByLabelText(year)).toBeTruthy();
+    expect(Array.from((screen.getByLabelText(month) as HTMLSelectElement).options).map((option) => option.text)).toContain(january);
+    expect(document.body.textContent).not.toMatch(/[آ-ی]/);
+  });
 });
