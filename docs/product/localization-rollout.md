@@ -232,3 +232,9 @@ Lifecycle actions, status labels, confirmation dialog, owner note, loading/retry
 - The landing header actions, memorial section and their accessible labels have German/Spanish UI text; the approved HERO image and composition are unchanged. Compact header rules address mobile layout. Published/user-authored memorial content is not translated or fabricated.
 - PR #160 was synchronized with current `main` at `b6b61c4` after the travel PR #152 merged. Its German and Spanish catalog namespaces were combined with the newer main catalogs without conflicting values; the merge also preserves #152 travel strings and #163 health strings.
 - The earlier 21 focused tests and CI were for the prior head; the new sync still requires local reruns, a pushed exact-head CI and production verification. The landing remains PARTIAL, and original memorial-image/CDN privacy is not claimed.
+
+## Admin dashboard failure states — PR #166, synchronized with #168
+
+- German and Spanish explicitly cover dashboard offline, unauthorized, loading, empty and failure UI; skeleton labels are localized while dashboard data and business behavior remain unchanged.
+- The branch includes current `main` through #168. The sync exposed missing `offline`, `noAccess` and `loading` dashboard keys after current-main catalogs won conflicts; those keys are restored in German and Spanish.
+- Verification on the synchronized branch: 27 dashboard tests and 4 catalog-parity tests pass; web TypeScript check passes. Exact-head hosted CI and production verification remain required. Other admin/backoffice/ERP routes are still PARTIAL.
