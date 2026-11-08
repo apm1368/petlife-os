@@ -49,7 +49,7 @@ function ForgotPasswordFlow() {
   return (
     <div className="flex flex-col gap-5">
       <h1 className="text-page-title text-text-primary">{t("forgot.title")}</h1>
-      {failed && <p role="alert" className="text-state-urgent">{locale === "fa" ? "ارسال درخواست انجام نشد. دوباره تلاش کنید." : "Could not send your request. Please try again."}</p>}
+      {failed && <p role="alert" className="text-state-urgent">{t("forgot.genericError")}</p>}
       <Input label={t("forgot.identifierLabel")} value={identifier} onChange={(e) => setIdentifier(e.target.value)} autoFocus />
       <Button variant="primary" isLoading={isSubmitting} disabled={!identifier} onClick={submit}>
         {t("forgot.submit")}

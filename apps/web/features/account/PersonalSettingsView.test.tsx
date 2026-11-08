@@ -11,7 +11,7 @@ vi.mock("@/services/users.service", () => ({ usersService: { getMe: vi.fn(), upd
 // The account was last saved in Persian; the person is now browsing the English UI.
 const stored: UserDto = { id: "u1", email: "sara@example.com", phone: null, displayName: "Sara", locale: "fa", themePreference: "SYSTEM" } as UserDto;
 
-describe("PersonalSettingsView — theme and language stay independent", () => {
+describe("PersonalSettingsView — account locale and theme preferences", () => {
   const assign = vi.fn();
   const original = window.location;
 
@@ -27,28 +27,30 @@ describe("PersonalSettingsView — theme and language stay independent", () => {
     Object.defineProperty(window, "location", { configurable: true, value: original });
   });
 
-  it("starts from the language and theme on screen, not the account's stored values", async () => {
+  it("shows the saved language preference and currently applied theme", async () => {
     renderWithIntl(<PersonalSettingsView />, "en");
     const language = (await screen.findByLabelText("Language")) as HTMLSelectElement;
-    expect(language.value).toBe("en");
+    expect(language.value).toBe("fa");
+    expect([...language.options].map((option) => option.value)).toEqual(["fa", "en", "de", "es"]);
     expect((screen.getByLabelText("Appearance") as HTMLSelectElement).value).toBe("LIGHT");
   });
 
-  it("a theme-only save applies the theme and never moves the app to another locale", async () => {
+  it("a theme-only save preserves the saved locale and never moves the app", async () => {
     renderWithIntl(<PersonalSettingsView />, "en");
     fireEvent.change(await screen.findByLabelText("Appearance"), { target: { value: "DARK" } });
     fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
     await waitFor(() => expect(usersService.updateMe).toHaveBeenCalled());
-    expect(vi.mocked(usersService.updateMe).mock.calls[0]![0]).toMatchObject({ locale: "en", themePreference: "DARK" });
+    expect(vi.mocked(usersService.updateMe).mock.calls[0]![0]).toMatchObject({ locale: "fa", themePreference: "DARK" });
     await waitFor(() => expect(useThemeStore.getState().theme).toBe("DARK"));
     expect(assign).not.toHaveBeenCalled();
   });
 
-  it("an explicit language change moves the app and keeps the theme", async () => {
+  it.each(["en", "de", "es"] as const)("saves the %s preference and routes to it", async (targetLocale) => {
     renderWithIntl(<PersonalSettingsView />, "en");
-    fireEvent.change(await screen.findByLabelText("Language"), { target: { value: "fa" } });
+    fireEvent.change(await screen.findByLabelText("Language"), { target: { value: targetLocale } });
     fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
-    await waitFor(() => expect(assign).toHaveBeenCalledWith("/fa/profile/personal"));
+    await waitFor(() => expect(usersService.updateMe).toHaveBeenCalledWith(expect.objectContaining({ locale: targetLocale })));
+    await waitFor(() => expect(assign).toHaveBeenCalledWith(`/${targetLocale}/profile/personal`));
     expect(useThemeStore.getState().theme).toBe("LIGHT");
   });
 });

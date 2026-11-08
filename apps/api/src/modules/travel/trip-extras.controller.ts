@@ -39,14 +39,14 @@ export class TripExtrasController {
   @Get("preparation")
   @RequirePetAccess("canViewIdentity")
   preparation(@Param("petId", ParseUUIDPipe) petId: string, @Param("tripId", ParseUUIDPipe) tripId: string, @CurrentUser() user: SessionUser) {
-    return this.prep.preparation(petId, tripId, user.locale);
+    return this.prep.preparation(petId, tripId, user.locale === "fa" ? "fa" : "en");
   }
 
   /** Creates reminders only for the proposals the member confirms. */
   @Post("reminder-proposals/apply")
   @RequirePetAccess("canEditCareProfile")
   applyProposals(@Param("petId", ParseUUIDPipe) petId: string, @Param("tripId", ParseUUIDPipe) tripId: string, @CurrentUser() user: SessionUser, @Body() dto: ApplyProposalsDto) {
-    return this.prep.applyProposals(petId, tripId, user.id, user.locale, dto.keys);
+    return this.prep.applyProposals(petId, tripId, user.id, user.locale === "fa" ? "fa" : "en", dto.keys);
   }
 
   @Get("checklist")
@@ -58,7 +58,7 @@ export class TripExtrasController {
   @Post("checklist/defaults")
   @RequirePetAccess("canEditIdentity")
   defaults(@Param("petId", ParseUUIDPipe) petId: string, @Param("tripId", ParseUUIDPipe) tripId: string, @CurrentUser() user: SessionUser) {
-    return this.extras.addDefaults(petId, tripId, user.locale);
+    return this.extras.addDefaults(petId, tripId, user.locale === "fa" ? "fa" : "en");
   }
 
   @Post("checklist")

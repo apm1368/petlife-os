@@ -33,7 +33,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
   const locale = useLocale();
   const router = useRouter();
   const preview = useLocalPreview();
-  const warmSurface = /^\/(fa|en)\//.test(usePathname() ?? "");
+  const warmSurface = /^\/(fa|en|de|es)\//.test(usePathname() ?? "");
 
   // A signed-in member keeps the member frame on public discovery pages.
   if (!preview && status === "authenticated" && user) return <MemberFrame>{children}</MemberFrame>;

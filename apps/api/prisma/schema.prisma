@@ -22,6 +22,8 @@ datasource db {
 enum Locale {
   fa
   en
+  de
+  es
 }
 
 enum ThemePreference {

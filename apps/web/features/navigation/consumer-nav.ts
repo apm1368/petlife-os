@@ -16,6 +16,8 @@ export interface PrimaryDestination {
   href: string;
   fa: string;
   en: string;
+  de: string;
+  es: string;
   icon: NavIcon;
   /** Slot in the five-item mobile bar (Memories lives in the Explore sheet on mobile). */
   mobile: boolean;
@@ -26,59 +28,59 @@ const starts = (...prefixes: string[]) => (path: string) => prefixes.some((p) =>
 const petSection = (...sections: string[]) => (path: string) => sections.some((s) => new RegExp(`^/pets/[^/]+/${s}(?:/|$)`).test(path));
 
 export const PRIMARY_DESTINATIONS: PrimaryDestination[] = [
-  { key: "home", href: "/home", fa: "داشبورد", en: "Dashboard", icon: House, mobile: true, match: (p) => p === "/home" || p === "/pets" || p === "/pets/new" || /^\/pets\/[^/]+$/.test(p) || petSection("activity", "documents", "lost", "insurance")(p) },
-  { key: "explore", href: "/explore", fa: "کاوش", en: "Explore", icon: Compass, mobile: true, match: (p) => starts("/explore", "/travel", "/places", "/insurance", "/animal-support", "/donations", "/community", "/lost-pets", "/guides", "/blog", "/support", "/invitations")(p) || petSection("travel")(p) },
-  { key: "health", href: "/pets/active?view=health", fa: "سلامت", en: "Health", icon: HeartPulse, mobile: true, match: (p) => starts("/vet", "/care-calendar")(p) || petSection("health", "care")(p) },
-  { key: "services", href: "/services", fa: "خدمات", en: "Services", icon: Scissors, mobile: true, match: starts("/services", "/bookings", "/providers") },
-  { key: "shop", href: "/shop", fa: "فروشگاه", en: "Shop", icon: ShoppingBag, mobile: true, match: starts("/shop", "/cart", "/checkout", "/orders", "/repeat-delivery", "/favorites") },
-  { key: "memories", href: "/pets/active?view=memories", fa: "خاطرات", en: "Memories", icon: Images, mobile: false, match: petSection("memories", "life-timeline") },
+  { key: "home", href: "/home", fa: "داشبورد", en: "Dashboard", de: "Übersicht", es: "Inicio", icon: House, mobile: true, match: (p) => p === "/home" || p === "/pets" || p === "/pets/new" || /^\/pets\/[^/]+$/.test(p) || petSection("activity", "documents", "lost", "insurance")(p) },
+  { key: "explore", href: "/explore", fa: "کاوش", en: "Explore", de: "Entdecken", es: "Explorar", icon: Compass, mobile: true, match: (p) => starts("/explore", "/travel", "/places", "/insurance", "/animal-support", "/donations", "/community", "/lost-pets", "/guides", "/blog", "/support", "/invitations")(p) || petSection("travel")(p) },
+  { key: "health", href: "/pets/active?view=health", fa: "سلامت", en: "Health", de: "Gesundheit", es: "Salud", icon: HeartPulse, mobile: true, match: (p) => starts("/vet", "/care-calendar")(p) || petSection("health", "care")(p) },
+  { key: "services", href: "/services", fa: "خدمات", en: "Services", de: "Dienstleistungen", es: "Servicios", icon: Scissors, mobile: true, match: starts("/services", "/bookings", "/providers") },
+  { key: "shop", href: "/shop", fa: "فروشگاه", en: "Shop", de: "Shop", es: "Tienda", icon: ShoppingBag, mobile: true, match: starts("/shop", "/cart", "/checkout", "/orders", "/repeat-delivery", "/favorites") },
+  { key: "memories", href: "/pets/active?view=memories", fa: "خاطرات", en: "Memories", de: "Erinnerungen", es: "Recuerdos", icon: Images, mobile: false, match: petSection("memories", "life-timeline") },
 ];
 
-export interface ExploreLink { href: string; icon: NavIcon; fa: [string, string]; en: [string, string] }
-export interface ExploreGroup { key: string; fa: string; en: string; links: ExploreLink[] }
+export interface ExploreLink { href: string; icon: NavIcon; fa: [string, string]; en: [string, string]; de: [string, string]; es: [string, string] }
+export interface ExploreGroup { key: string; fa: string; en: string; de: string; es: string; links: ExploreLink[] }
 
 export const EXPLORE_GROUPS: ExploreGroup[] = [
   {
-    key: "care", fa: "مراقبت", en: "Care",
+    key: "care", fa: "مراقبت", en: "Care", de: "Pflege", es: "Cuidados",
     links: [
-      { href: "/pets/active?view=health", icon: HeartPulse, fa: ["سلامت", "پرونده، واکسن‌ها و داروها"], en: ["Health", "Record, vaccines and medications"] },
-      { href: "/vet/find", icon: Stethoscope, fa: ["دامپزشک", "کلینیک‌ها و دامپزشکان نزدیک"], en: ["Vets", "Clinics and vets nearby"] },
-      { href: "/services", icon: Scissors, fa: ["خدمات", "آرایش، آموزش، پیاده‌روی و نگهداری"], en: ["Services", "Grooming, training, walking, sitting"] },
-      { href: "/care-calendar", icon: CalendarDays, fa: ["تقویم مراقبت", "یادآورها و نوبت‌ها در یک نگاه"], en: ["Care calendar", "Reminders and visits at a glance"] },
+      { href: "/pets/active?view=health", icon: HeartPulse, fa: ["سلامت", "پرونده، واکسن‌ها و داروها"], en: ["Health", "Record, vaccines and medications"], de: ["Gesundheit", "Akte, Impfungen und Medikamente"], es: ["Salud", "Historial, vacunas y medicamentos"] },
+      { href: "/vet/find", icon: Stethoscope, fa: ["دامپزشک", "کلینیک‌ها و دامپزشکان نزدیک"], en: ["Vets", "Clinics and vets nearby"], de: ["Tierärzte", "Kliniken und Tierärzte in der Nähe"], es: ["Veterinarios", "Clínicas y veterinarios cercanos"] },
+      { href: "/services", icon: Scissors, fa: ["خدمات", "آرایش، آموزش، پیاده‌روی و نگهداری"], en: ["Services", "Grooming, training, walking, sitting"], de: ["Dienstleistungen", "Pflege, Training, Gassi gehen und Betreuung"], es: ["Servicios", "Peluquería, adiestramiento, paseo y cuidado"] },
+      { href: "/care-calendar", icon: CalendarDays, fa: ["تقویم مراقبت", "یادآورها و نوبت‌ها در یک نگاه"], en: ["Care calendar", "Reminders and visits at a glance"], de: ["Pflegekalender", "Erinnerungen und Termine im Überblick"], es: ["Calendario de cuidados", "Recordatorios y citas de un vistazo"] },
     ],
   },
   {
-    key: "life", fa: "زندگی", en: "Life",
+    key: "life", fa: "زندگی", en: "Life", de: "Leben", es: "Vida",
     links: [
-      { href: "/travel", icon: Plane, fa: ["سفر و اقامت", "اقامتگاه‌هایی که حیوان شما را می‌پذیرند"], en: ["Travel and stays", "Stays that welcome your pet"] },
-      { href: "/insurance", icon: ShieldPlus, fa: ["بیمه", "مقایسهٔ طرح‌ها و درخواست"], en: ["Insurance", "Compare plans and apply"] },
-      { href: "/places", icon: MapPin, fa: ["مکان‌ها", "پارک، کافه و رستوران دوستدار حیوان"], en: ["Places", "Pet-friendly parks, cafés, restaurants"] },
+      { href: "/travel", icon: Plane, fa: ["سفر و اقامت", "اقامتگاه‌هایی که حیوان شما را می‌پذیرند"], en: ["Travel and stays", "Stays that welcome your pet"], de: ["Reisen und Unterkünfte", "Unterkünfte, die Haustiere willkommen heißen"], es: ["Viajes y alojamientos", "Alojamientos que reciben mascotas"] },
+      { href: "/insurance", icon: ShieldPlus, fa: ["بیمه", "مقایسهٔ طرح‌ها و درخواست"], en: ["Insurance", "Compare plans and apply"], de: ["Versicherung", "Tarife vergleichen und Antrag stellen"], es: ["Seguro", "Compara planes y solicita"] },
+      { href: "/places", icon: MapPin, fa: ["مکان‌ها", "پارک، کافه و رستوران دوستدار حیوان"], en: ["Places", "Pet-friendly parks, cafés, restaurants"], de: ["Orte", "Haustierfreundliche Parks, Cafés und Restaurants"], es: ["Lugares", "Parques, cafés y restaurantes que admiten mascotas"] },
     ],
   },
   {
-    key: "shop", fa: "خرید", en: "Shop",
+    key: "shop", fa: "خرید", en: "Shop", de: "Einkaufen", es: "Compras",
     links: [
-      { href: "/shop", icon: ShoppingBag, fa: ["فروشگاه", "غذا و لوازم از فروشندگان معتبر"], en: ["Shop", "Food and supplies from trusted sellers"] },
-      { href: "/favorites", icon: Heart, fa: ["علاقه‌مندی‌ها", "آنچه نشان کرده‌اید"], en: ["Favorites", "What you saved"] },
-      { href: "/repeat-delivery", icon: Repeat, fa: ["تحویل دوره‌ای", "غذا و لوازم مصرفی، بی‌دغدغه"], en: ["Repeat delivery", "Regular supplies without the hassle"] },
-      { href: "/orders", icon: PackageCheck, fa: ["سفارش‌ها", "پیگیری و تاریخچهٔ خرید"], en: ["Orders", "Tracking and purchase history"] },
+      { href: "/shop", icon: ShoppingBag, fa: ["فروشگاه", "غذا و لوازم از فروشندگان معتبر"], en: ["Shop", "Food and supplies from trusted sellers"], de: ["Shop", "Futter und Zubehör von geprüften Verkäufern"], es: ["Tienda", "Alimentos y artículos de vendedores verificados"] },
+      { href: "/favorites", icon: Heart, fa: ["علاقه‌مندی‌ها", "آنچه نشان کرده‌اید"], en: ["Favorites", "What you saved"], de: ["Favoriten", "Deine gespeicherten Artikel"], es: ["Favoritos", "Lo que has guardado"] },
+      { href: "/repeat-delivery", icon: Repeat, fa: ["تحویل دوره‌ای", "غذا و لوازم مصرفی، بی‌دغدغه"], en: ["Repeat delivery", "Regular supplies without the hassle"], de: ["Regelmäßige Lieferung", "Verbrauchsartikel bequem nachbestellen"], es: ["Entrega recurrente", "Recibe tus artículos habituales sin complicaciones"] },
+      { href: "/orders", icon: PackageCheck, fa: ["سفارش‌ها", "پیگیری و تاریخچهٔ خرید"], en: ["Orders", "Tracking and purchase history"], de: ["Bestellungen", "Lieferung verfolgen und Käufe ansehen"], es: ["Pedidos", "Seguimiento e historial de compras"] },
     ],
   },
   {
-    key: "community", fa: "جامعه و کمک", en: "Community and support",
+    key: "community", fa: "جامعه و کمک", en: "Community and support", de: "Gemeinschaft und Hilfe", es: "Comunidad y ayuda",
     links: [
-      { href: "/lost-pets", icon: Siren, fa: ["حیوانات گم‌شده", "گزارش‌های اطراف و ثبت مشاهده"], en: ["Lost pets", "Reports nearby and sightings"] },
-      { href: "/animal-support/needs", icon: HandHeart, fa: ["حمایت از حیوانات", "نیازهای پناهگاه‌ها و افراد"], en: ["Animal support", "Needs from shelters and people"] },
-      { href: "/animal-support", icon: House, fa: ["سازمان‌ها و پناهگاه‌ها", "سازمان‌های تأییدشده و کمپین‌ها"], en: ["Shelters and NGOs", "Verified organizations and campaigns"] },
-      { href: "/community", icon: Users, fa: ["جامعه", "پرسش و تجربهٔ صاحبان حیوانات"], en: ["Community", "Questions and stories from owners"] },
+      { href: "/lost-pets", icon: Siren, fa: ["حیوانات گم‌شده", "گزارش‌های اطراف و ثبت مشاهده"], en: ["Lost pets", "Reports nearby and sightings"], de: ["Vermisste Tiere", "Meldungen aus der Nähe und Sichtungen"], es: ["Mascotas perdidas", "Avisos cercanos y avistamientos"] },
+      { href: "/animal-support/needs", icon: HandHeart, fa: ["حمایت از حیوانات", "نیازهای پناهگاه‌ها و افراد"], en: ["Animal support", "Needs from shelters and people"], de: ["Tierschutz", "Bedarf von Tierheimen und Helfenden"], es: ["Apoyo animal", "Necesidades de refugios y particulares"] },
+      { href: "/animal-support", icon: House, fa: ["سازمان‌ها و پناهگاه‌ها", "سازمان‌های تأییدشده و کمپین‌ها"], en: ["Shelters and NGOs", "Verified organizations and campaigns"], de: ["Tierheime und Organisationen", "Geprüfte Organisationen und Kampagnen"], es: ["Refugios y organizaciones", "Organizaciones verificadas y campañas"] },
+      { href: "/community", icon: Users, fa: ["جامعه", "پرسش و تجربهٔ صاحبان حیوانات"], en: ["Community", "Questions and stories from owners"], de: ["Gemeinschaft", "Fragen und Erfahrungen von Tierhaltern"], es: ["Comunidad", "Preguntas y experiencias de otras personas"] },
     ],
   },
   {
-    key: "stories", fa: "خاطره و مقاله", en: "Stories and articles",
+    key: "stories", fa: "خاطره و مقاله", en: "Stories and articles", de: "Geschichten und Artikel", es: "Historias y artículos",
     links: [
-      { href: "/pets/active?view=memories", icon: Images, fa: ["خاطرات", "لحظه‌ها و خط زمانی زندگی"], en: ["Memories", "Moments and the life timeline"] },
-      { href: "/guides", icon: BookOpen, fa: ["راهنماها", "راهنمای عملی مراقبت از سگ و گربه"], en: ["Guides", "Practical dog and cat care"] },
-      { href: "/blog", icon: Newspaper, fa: ["وبلاگ", "مقاله‌ها و تجربه‌ها"], en: ["Blog", "Articles and stories"] },
+      { href: "/pets/active?view=memories", icon: Images, fa: ["خاطرات", "لحظه‌ها و خط زمانی زندگی"], en: ["Memories", "Moments and the life timeline"], de: ["Erinnerungen", "Momente und die Lebensgeschichte"], es: ["Recuerdos", "Momentos y la historia de vida"] },
+      { href: "/guides", icon: BookOpen, fa: ["راهنماها", "راهنمای عملی مراقبت از سگ و گربه"], en: ["Guides", "Practical dog and cat care"], de: ["Ratgeber", "Praktische Pflegehinweise für Hunde und Katzen"], es: ["Guías", "Consejos prácticos para cuidar perros y gatos"] },
+      { href: "/blog", icon: Newspaper, fa: ["وبلاگ", "مقاله‌ها و تجربه‌ها"], en: ["Blog", "Articles and stories"], de: ["Blog", "Artikel und Erfahrungsberichte"], es: ["Blog", "Artículos y experiencias"] },
     ],
   },
 ];
