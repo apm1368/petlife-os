@@ -33,4 +33,13 @@ describe("SystemState", () => {
     renderWithIntl(<SystemState kind="FORBIDDEN" />, "en");
     expect(screen.getByRole("heading").textContent).toBe("You don't have access to this");
   });
+
+  it.each([
+    ["de", "Ein Fehler ist aufgetreten", "Erneut versuchen"],
+    ["es", "Ha ocurrido un problema", "Reintentar"],
+  ] as const)("renders retry/error states in %s", (locale, title, retry) => {
+    renderWithIntl(<SystemState kind="GENERIC_RETRYABLE_ERROR" onRetry={() => undefined} />, locale);
+    expect(screen.getByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByRole("button", { name: retry })).toBeTruthy();
+  });
 });

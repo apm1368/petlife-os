@@ -58,5 +58,7 @@ describe("jalali calendar", () => {
     expect(formatDay("2026-09-28", "fa")).toBe("۶ مهر ۱۴۰۵");
     expect(formatDay("2026-09-28", "en")).toBe("28 September 2026");
     expect(formatDay("2026-09-28", "en", { weekday: true, year: false })).toBe("Monday, 28 September");
+    expect(formatDay("2026-09-28", "de")).toBe("28 September 2026");
+    expect(formatDay("2026-09-28", "es")).toBe("28 septiembre 2026");
   });
 });

@@ -14,6 +14,7 @@ import { formatCurrency } from "@/lib/currency/format-currency";
 import { CommercePage } from "./CommercePage";
 import { ProductCard } from "./ProductCard";
 import { formatNumber } from "./commerce-ui";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 const SORTS: ProductSort[] = ["RECOMMENDED", "NEWEST", "PRICE_ASC", "PRICE_DESC", "TOP_RATED"];
 const PAGE_SIZE = 24;
@@ -57,7 +58,7 @@ export function ProductResultsView() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as RouteLocale;
   const { activePet } = useActivePet();
 
   const paramString = params.toString();
@@ -135,7 +136,7 @@ export function ProductResultsView() {
         onChange={(e) => update({ species: e.target.value || undefined })}
         options={[
           { value: "", label: t("filters.any") },
-          ...Object.values(PetSpecies).map((value) => ({ value, label: speciesLabel({ species: value }, locale === "fa" ? "fa" : "en") })),
+          ...Object.values(PetSpecies).map((value) => ({ value, label: speciesLabel({ species: value }, locale) })),
         ]}
       />
       {data.facets.brands.length ? (
@@ -164,8 +165,8 @@ export function ProductResultsView() {
           ) : null}
         </legend>
         <div className="grid grid-cols-2 gap-2">
-          <PriceInput label={t("filters.minToman")} value={filters.minPrice} onCommit={(v) => update({ minPrice: v })} />
-          <PriceInput label={t("filters.maxToman")} value={filters.maxPrice} onCommit={(v) => update({ maxPrice: v })} />
+          <PriceInput locale={locale} label={t("filters.minToman")} value={filters.minPrice} onCommit={(v) => update({ minPrice: v })} />
+          <PriceInput locale={locale} label={t("filters.maxToman")} value={filters.maxPrice} onCommit={(v) => update({ maxPrice: v })} />
         </div>
       </fieldset>
       <Toggle label={t("filters.inStock")} checked={Boolean(filters.inStock)} onChange={(v) => update({ inStock: v ? "true" : undefined })} />
@@ -306,8 +307,7 @@ function Toggle({ label, checked, onChange }: { label: string; checked: boolean;
 }
 
 /** Customers think in Toman; the API filters in IRR (×10). Persian digits are accepted. */
-function PriceInput({ label, value, onCommit }: { label: string; value: number | undefined; onCommit: (rial: string | undefined) => void }) {
-  const locale = useLocale() as "fa" | "en";
+function PriceInput({ label, value, onCommit, locale }: { label: string; value: number | undefined; onCommit: (rial: string | undefined) => void; locale: RouteLocale }) {
   const [draft, setDraft] = useState(value ? String(Math.round(value / 10)) : "");
   useEffect(() => setDraft(value ? String(Math.round(value / 10)) : ""), [value]);
   const commit = () => {
@@ -321,7 +321,7 @@ function PriceInput({ label, value, onCommit }: { label: string; value: number |
       <input
         inputMode="numeric"
         className="h-11 w-full min-w-0 rounded-md border border-border-strong bg-surface-elevated px-3 text-body text-text-primary"
-        value={localizeDigits(draft, locale)}
+        value={localizeDigits(draft, locale === "fa" ? "fa" : "en")}
         dir="ltr"
         onChange={(e) => setDraft(e.target.value)}
         onBlur={commit}

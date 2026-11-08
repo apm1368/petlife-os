@@ -5,8 +5,10 @@ import { PackageCheck, Star, StatusLabel } from "@petlife/ui";
 import type { RatingSummaryDto, StockState } from "@petlife/types";
 import { isolate } from "@/lib/text/bidi";
 import { formatCurrency } from "@/lib/currency/format-currency";
+import type { RouteLocale } from "@/lib/i18n/config";
+import { formatLocaleNumber } from "@/lib/i18n/format";
 
-type Locale = "fa" | "en";
+type Locale = RouteLocale;
 
 /**
  * The customer-facing price. The struck-through amount is only ever the
@@ -30,7 +32,7 @@ export function PriceBlock({ unitPrice, listUnitPrice, promotionName, size = "md
       </div>
       {discounted && promotionName ? (
         <span className="text-metadata text-state-success">
-          {t("promotion", { name: isolate(promotionName), percent: Math.round(((listUnitPrice! - unitPrice) / listUnitPrice!) * 100).toLocaleString(locale === "fa" ? "fa-IR" : "en-US") })}
+          {t("promotion", { name: isolate(promotionName), percent: formatLocaleNumber(Math.round(((listUnitPrice! - unitPrice) / listUnitPrice!) * 100), locale) })}
         </span>
       ) : null}
     </div>
@@ -41,7 +43,7 @@ export function StockBadge({ state, available }: { state: StockState; available?
   const t = useTranslations("commerce.stock");
   const locale = useLocale() as Locale;
   if (state === "OUT_OF_STOCK") return <StatusLabel tone="attention">{t("out")}</StatusLabel>;
-  if (state === "LOW_STOCK") return <StatusLabel tone="attention">{available !== undefined ? t("lowCount", { count: available.toLocaleString(locale === "fa" ? "fa-IR" : "en-US") }) : t("low")}</StatusLabel>;
+  if (state === "LOW_STOCK") return <StatusLabel tone="attention">{available !== undefined ? t("lowCount", { count: formatLocaleNumber(available, locale) }) : t("low")}</StatusLabel>;
   return <StatusLabel tone="success">{t("in")}</StatusLabel>;
 }
 
@@ -50,7 +52,7 @@ export function RatingInline({ rating }: { rating: RatingSummaryDto }) {
   const t = useTranslations("commerce.rating");
   const locale = useLocale() as Locale;
   if (!rating.count || rating.average === null) return null;
-  const nf = new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US", { maximumFractionDigits: 1 });
+  const nf = new Intl.NumberFormat(({ fa: "fa-IR-u-ca-persian-nu-arabext", en: "en-GB", de: "de-DE", es: "es-ES" })[locale], { maximumFractionDigits: 1 });
   return (
     <span className="inline-flex items-center gap-1 text-metadata text-text-secondary" aria-label={t("aria", { average: nf.format(rating.average), count: rating.count })}>
       <Star size={14} aria-hidden="true" className="fill-current text-brand-gold" />
@@ -84,5 +86,5 @@ export function ProductImage({ src, alt, className = "" }: { src: string | null;
 }
 
 export function formatNumber(value: number, locale: string): string {
-  return value.toLocaleString(locale === "fa" ? "fa-IR" : "en-US");
+  return formatLocaleNumber(value, (locale === "fa" || locale === "de" || locale === "es" ? locale : "en"));
 }
