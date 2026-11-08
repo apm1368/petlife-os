@@ -52,6 +52,7 @@ export const adminCommerceService = {
     apiFetch<PaginatedDto<AdminProductRowDto>>(`/admin/commerce/products${qs(input)}`),
   listProductCategories: () => apiFetch<Array<{ id: string; name: string; slug: string }>>("/admin/commerce/product-categories"),
   listProductBrands: () => apiFetch<Array<{ id: string; name: string; slug: string }>>("/admin/commerce/product-brands"),
+  catalogImportAvailability: () => apiFetch<{ key: string; enabled: boolean; reason: string }>("/admin/commerce/catalog-imports/availability"),
   listCatalogImports: () => apiFetch<Array<{
     id: string; status: string; submittedUrls: string[]; pagesVisited: number; productsSeen: number;
     productsImported: number; productsFailed: number; lastError: string | null; createdAt: string;

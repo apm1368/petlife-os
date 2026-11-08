@@ -11,6 +11,7 @@ type Lang = "fa" | "en";
 type Category = { id: string; name: string; slug: string };
 type Brand = { id: string; name: string; slug: string };
 type ImportRow = Awaited<ReturnType<typeof adminCommerceService.listCatalogImports>>[number];
+type ImportAvailability = Awaited<ReturnType<typeof adminCommerceService.catalogImportAvailability>>;
 const FIELD = "w-full rounded-md border border-border-subtle bg-surface-base px-3 py-2 text-body text-text-primary outline-none focus-visible:ring-2 focus-visible:ring-focus-ring";
 
 export function AdminCatalogImportsView() {
@@ -22,6 +23,7 @@ export function AdminCatalogImportsView() {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [brandId, setBrandId] = useState("");
   const [jobs, setJobs] = useState<ImportRow[] | null>(null);
+  const [availability, setAvailability] = useState<ImportAvailability | null>(null);
   const [error, setError] = useState<"forbidden" | "load" | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -31,7 +33,8 @@ export function AdminCatalogImportsView() {
   const load = useCallback(async () => {
     setError(null);
     try {
-      const [rows, cats, brandRows] = await Promise.all([adminCommerceService.listCatalogImports(), adminCommerceService.listProductCategories(), adminCommerceService.listProductBrands()]);
+      const [state, rows, cats, brandRows] = await Promise.all([adminCommerceService.catalogImportAvailability(), adminCommerceService.listCatalogImports(), adminCommerceService.listProductCategories(), adminCommerceService.listProductBrands()]);
+      setAvailability(state);
       setJobs(rows);
       setCategories(cats);
       setBrands(brandRows);
@@ -90,7 +93,8 @@ export function AdminCatalogImportsView() {
         </p>
       </div>
 
-      <Panel>
+      {!availability && !error ? <Skeleton className="h-36 w-full" /> : null}
+      {availability?.enabled ? <Panel>
         <PanelTitle title={fa ? "ساخت کار واردسازی" : "Create an import job"} hint={fa ? "هر آدرس در یک خط؛ حداکثر ۲۰ پیوند و سقف ۵ صفحه / ۵۰ کالا" : "One URL per line; up to 20 links, capped at 5 pages / 50 products"} />
         <div className="grid gap-3 md:grid-cols-2">
           <label className="flex flex-col gap-1 text-metadata text-text-secondary md:col-span-2">
@@ -120,7 +124,15 @@ export function AdminCatalogImportsView() {
         <Button className="mt-3" isLoading={busy} disabled={!urls.trim() || !categoryId} onClick={() => void submit()}>
           {fa ? "شروع واردسازی" : "Start import"}
         </Button>
-      </Panel>
+      </Panel> : availability ? <Panel>
+        <PanelTitle title={fa ? "واردسازی دیجی‌کالا در دسترس نیست" : "Digikala import unavailable"} />
+        <p className="text-sm leading-relaxed text-text-secondary">
+          {fa
+            ? "تا وقتی دسترسی منبع و مجوز استفاده از متن و تصاویر به‌طور معتبر بررسی و تأیید نشود، واردسازی خاموش می‌ماند. روشن‌شدن قابلیت باید از پنل پرچم‌ها و با تأیید مدیر دوم انجام شود."
+            : "Import remains off until source access and permission to use its text and images are verified. Enabling it requires the feature-flag workflow and approval by a second administrator."}
+        </p>
+        <p className="mt-2 text-metadata text-text-secondary" dir="ltr">{availability.key}</p>
+      </Panel> : null}
 
       <Panel>
         <PanelTitle title={fa ? "کارها و بازبینی تغییرات" : "Jobs and incoming changes"} />

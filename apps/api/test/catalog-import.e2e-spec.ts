@@ -5,6 +5,7 @@ import { AdminMembershipStatus, AdminRole } from "@prisma/client";
 import { PrismaService } from "../src/common/prisma/prisma.service";
 import { signSessionCookie } from "../src/common/session/session-cookie.util";
 import { createTestApp, extractCookie } from "./test-app";
+import { DIGIKALA_CATALOG_IMPORT_FLAG } from "../src/modules/admin/commerce/catalog-import.service";
 
 describe("admin catalog import job controls", () => {
   let app: INestApplication;
@@ -13,6 +14,7 @@ describe("admin catalog import job controls", () => {
   const jobIds: string[] = [];
   const users: string[] = [];
   const adminIds: string[] = [];
+  let createdImportFlag = false;
 
   async function actor(role: AdminRole) {
     const user = await db.user.create({ data: { displayName: `import-${role}`, email: `import-${randomUUID()}@example.com` } });
@@ -35,6 +37,7 @@ describe("admin catalog import job controls", () => {
   });
 
   afterAll(async () => {
+    if (createdImportFlag) await db.featureFlag.deleteMany({ where: { key: DIGIKALA_CATALOG_IMPORT_FLAG } });
     await db.catalogImportJob.deleteMany({ where: { id: { in: jobIds } } });
     await db.adminAuditLog.deleteMany({ where: { adminUserId: { in: adminIds } } });
     await db.adminUser.deleteMany({ where: { userId: { in: users } } });
@@ -50,6 +53,13 @@ describe("admin catalog import job controls", () => {
     const idempotencyKey = randomUUID();
     const body = { urls: ["https://www.digikala.com/product/dkp-42/"], categoryId: category.id, maxPages: 5, maxProducts: 10, idempotencyKey };
     await viewer.post("/admin/commerce/catalog-imports").send(body).expect(403);
+    await admin.post("/admin/commerce/catalog-imports").send(body).expect(409).expect(({ body: response }) => {
+      expect(response.error.code).toBe("CATALOG_IMPORT_UNAVAILABLE");
+    });
+    const existingFlag = await db.featureFlag.findUnique({ where: { key: DIGIKALA_CATALOG_IMPORT_FLAG } });
+    expect(existingFlag).toBeNull();
+    await db.featureFlag.create({ data: { key: DIGIKALA_CATALOG_IMPORT_FLAG, description: "Test-only authorization for the Digikala importer", isEnabled: true, rolloutPercentage: 100 } });
+    createdImportFlag = true;
     const first = (await admin.post("/admin/commerce/catalog-imports").send(body).expect(201)).body;
     const second = (await admin.post("/admin/commerce/catalog-imports").send(body).expect(201)).body;
     jobIds.push(first.id);
@@ -60,6 +70,9 @@ describe("admin catalog import job controls", () => {
     expect(await db.catalogImportJob.findUniqueOrThrow({ where: { id: first.id } })).toMatchObject({ status: "CANCELLED" });
     await admin.post("/admin/commerce/catalog-imports").send({ ...body, idempotencyKey: randomUUID(), urls: ["https://www.digikala.com/product/dkp-42/?page=2"] }).expect(400);
     await db.catalogImportJob.delete({ where: { id: first.id } });
+    if (createdImportFlag) await db.featureFlag.delete({ where: { key: DIGIKALA_CATALOG_IMPORT_FLAG } });
+    createdImportFlag = false;
     await db.productCategory.delete({ where: { id: category.id } });
   });
+
 });

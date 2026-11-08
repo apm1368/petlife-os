@@ -5,6 +5,7 @@ import { PrismaService } from "../../../common/prisma/prisma.service";
 import { ApiException, NotFoundApiException } from "../../../common/errors/api-exception";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import { AutomaticTaskService } from "../task/automatic-task.service";
+import { AdminFeatureFlagsService } from "../feature-flags/admin-feature-flags.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 import { StorageService } from "../../storage/storage.service";
 import { safeFetch, SourceFetchError } from "../../travel-external/safe-fetch";
@@ -17,6 +18,7 @@ const MAX_PAGES = 10;
 const MAX_PRODUCTS = 100;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const CRAWLER = "PetLifeDemoTravelCrawler";
+export const DIGIKALA_CATALOG_IMPORT_FLAG = "catalog.import.digikala";
 const robotsCache = new Map<string, { body: string; expiresAt: number }>();
 
 type ItemSnapshot = DigikalaProductSnapshot;
@@ -35,9 +37,33 @@ export class CatalogImportBlockedError extends Error { constructor(message: stri
 @Injectable()
 export class CatalogImportService {
   private readonly logger = new Logger(CatalogImportService.name);
-  constructor(private readonly prisma: PrismaService, private readonly storage: StorageService, private readonly audit: AdminAuditLogService, private readonly tasks: AutomaticTaskService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+    private readonly audit: AdminAuditLogService,
+    private readonly tasks: AutomaticTaskService,
+    private readonly flags: AdminFeatureFlagsService,
+  ) {}
+
+  async availability(admin: ResolvedAdminContext) {
+    const evaluation = await this.flags.evaluate(DIGIKALA_CATALOG_IMPORT_FLAG, { userId: admin.userId });
+    return { key: DIGIKALA_CATALOG_IMPORT_FLAG, enabled: evaluation.enabled, reason: evaluation.reason };
+  }
+
+  private async requireImportEnabled(userId: string) {
+    const evaluation = await this.flags.evaluate(DIGIKALA_CATALOG_IMPORT_FLAG, { userId });
+    if (!evaluation.enabled) {
+      throw new ApiException(
+        "CATALOG_IMPORT_UNAVAILABLE",
+        "Digikala import is disabled until source access and content/image-use permission are verified and the feature flag is approved.",
+        HttpStatus.CONFLICT,
+        { featureFlag: DIGIKALA_CATALOG_IMPORT_FLAG, reason: evaluation.reason },
+      );
+    }
+  }
 
   async createJob(admin: ResolvedAdminContext, input: JobInput, requestId?: string) {
+    await this.requireImportEnabled(admin.userId);
     if (!input.urls.length || input.urls.length > MAX_URLS) throw new ApiException("IMPORT_URL_LIMIT", `Provide between 1 and ${MAX_URLS} URLs.`, HttpStatus.BAD_REQUEST);
     const urls = [...new Set(input.urls.map((value) => {
       try { return canonicalDigikalaInput(value).toString(); }
@@ -92,10 +118,21 @@ export class CatalogImportService {
 
   async processNext(): Promise<boolean> {
     const now = new Date();
-    const candidate = await this.prisma.catalogImportJob.findFirst({ where: { OR: [
+    const candidates = await this.prisma.catalogImportJob.findMany({ where: { OR: [
       { status: CatalogImportJobStatus.QUEUED, nextAttemptAt: { lte: now } },
       { status: CatalogImportJobStatus.RUNNING, lockedUntil: { lt: now } },
-    ] }, orderBy: { createdAt: "asc" } });
+    ] }, orderBy: { createdAt: "asc" }, take: 50 });
+    let candidate: (typeof candidates)[number] | null = null;
+    for (const job of candidates) {
+      const requester = await this.prisma.adminUser.findFirst({
+        where: { id: job.requestedById, status: "ACTIVE" },
+        select: { userId: true },
+      });
+      if (requester && (await this.flags.evaluate(DIGIKALA_CATALOG_IMPORT_FLAG, { userId: requester.userId })).enabled) {
+        candidate = job;
+        break;
+      }
+    }
     if (!candidate) return false;
     const claimWhere = candidate.status === CatalogImportJobStatus.QUEUED
       ? { id: candidate.id, status: CatalogImportJobStatus.QUEUED, nextAttemptAt: { lte: now } }

@@ -227,6 +227,12 @@ export class AdminCommerceController {
     return this.catalogImports.listJobs();
   }
 
+  @Get("catalog-imports/availability")
+  @RequireAdminPermission("commerce.view")
+  catalogImportAvailability(@CurrentAdmin() admin: ResolvedAdminContext) {
+    return this.catalogImports.availability(admin);
+  }
+
   @Get("product-brands")
   @RequireAdminPermission("commerce.view")
   listProductBrands() {

@@ -29,7 +29,7 @@ describe("CatalogImportService", () => {
       product: { create: productCreate, deleteMany: jest.fn() },
     };
     (prisma as unknown as { $transaction: (fn: (tx: typeof prisma) => Promise<unknown>) => Promise<unknown> }).$transaction = (fn) => fn(prisma);
-    const service = new CatalogImportService(prisma as never, { storeCatalogImage, deleteCatalogImage: jest.fn() } as never, { record: jest.fn() } as never, { raise: jest.fn() } as never);
+    const service = new CatalogImportService(prisma as never, { storeCatalogImage, deleteCatalogImage: jest.fn() } as never, { record: jest.fn() } as never, { raise: jest.fn() } as never, { evaluate: jest.fn().mockResolvedValue({ enabled: true, reason: "ROLLOUT" }) } as never);
     const result = await (service as unknown as { ingestSnapshot: (sourceJob: TestJob, sourceSnapshot: TestSnapshot) => Promise<string> }).ingestSnapshot(job, snapshot);
     expect(result).toBe("IMPORTED");
     const data = productCreate.mock.calls[0]![0].data;
@@ -55,10 +55,29 @@ describe("CatalogImportService", () => {
       },
       product: { update: productUpdate },
     };
-    const service = new CatalogImportService(prisma as never, {} as never, { record: jest.fn() } as never, { raise: jest.fn() } as never);
+    const service = new CatalogImportService(prisma as never, {} as never, { record: jest.fn() } as never, { raise: jest.fn() } as never, { evaluate: jest.fn().mockResolvedValue({ enabled: true, reason: "ROLLOUT" }) } as never);
     const result = await (service as unknown as { ingestSnapshot: (sourceJob: TestJob, sourceSnapshot: TestSnapshot) => Promise<string> }).ingestSnapshot(job, snapshot);
     expect(result).toBe("NEEDS_REVIEW");
     expect(itemCreate.mock.calls[0]![0].data).toMatchObject({ productId: "local-product", status: CatalogImportItemStatus.NEEDS_REVIEW, pendingSnapshot: snapshot });
     expect(productUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rejects new import jobs while the approved feature flag is absent or off", async () => {
+    const service = new CatalogImportService({} as never, {} as never, {} as never, {} as never, { evaluate: jest.fn().mockResolvedValue({ enabled: false, reason: "DISABLED" }) } as never);
+    await expect(service.createJob({ userId: "admin-user" } as never, { urls: [], categoryId: "category", idempotencyKey: "key" })).rejects.toThrow("Digikala import is disabled");
+  });
+
+  it("does not claim queued jobs after the feature flag is switched off", async () => {
+    const candidate = { id: "job-1", status: "QUEUED", requestedById: "admin-membership", attempt: 0 };
+    const updateMany = jest.fn();
+    const prisma = {
+      catalogImportJob: { findMany: jest.fn().mockResolvedValue([candidate]), updateMany },
+      adminUser: { findFirst: jest.fn().mockResolvedValue({ userId: "admin-user" }) },
+    };
+    const flags = { evaluate: jest.fn().mockResolvedValue({ enabled: false, reason: "DISABLED" }) };
+    const service = new CatalogImportService(prisma as never, {} as never, {} as never, {} as never, flags as never);
+    await expect(service.processNext()).resolves.toBe(false);
+    expect(flags.evaluate).toHaveBeenCalledWith("catalog.import.digikala", { userId: "admin-user" });
+    expect(updateMany).not.toHaveBeenCalled();
   });
 });
