@@ -590,7 +590,8 @@
       "toiletRoutine": "Toilet routine",
       "separationBehavior": "Separation behavior",
       "specialInstructions": "Special instructions",
-      "empty": "Not set up yet."
+      "empty": "Not set up yet.",
+      "saveFailed": "We couldn't save the care profile. Please try again."
     }
   },
   "theme": {

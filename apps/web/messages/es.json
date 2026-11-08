@@ -346,5 +346,30 @@
     "limit": "Se muestran hasta {limit, number} eventos recientes y versiones anteriores guardadas sin eventos registrados. Esta sección no modifica tus consentimientos.",
     "kinds": {"TERMS": "Condiciones de uso", "PRIVACY": "Privacidad", "MARKETING": "Mensajes comerciales"},
     "sources": {"PRIVACY_CENTER": "Registrado en el centro de privacidad", "LEGACY_RECORD": "Estado guardado anteriormente; el historial completo de eventos no está disponible.", "ONBOARDING": "Registrado durante el alta"}
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "retry": "Intentar de nuevo",
+    "loading": "Cargando",
+    "optional": "Opcional"
+  },
+  "care": {
+    "profile": {
+      "title": "Perfil de cuidados",
+      "edit": "Editar perfil de cuidados",
+      "readOnlyNotice": "Puedes consultar este perfil de cuidados, pero no editarlo.",
+      "temperament": "Temperamento",
+      "aroundPeople": "Comportamiento con personas",
+      "aroundAnimals": "Comportamiento con otros animales",
+      "leashBehavior": "Comportamiento con la correa",
+      "handlingSensitivity": "Sensibilidad al manejo",
+      "feedingRoutine": "Rutina de alimentación",
+      "toiletRoutine": "Rutina para hacer sus necesidades",
+      "separationBehavior": "Comportamiento al quedarse solo/a",
+      "specialInstructions": "Instrucciones especiales",
+      "empty": "Aún no se ha configurado.",
+      "saveFailed": "No se pudo guardar el perfil de cuidados. Inténtalo de nuevo."
+    }
   }
 }
