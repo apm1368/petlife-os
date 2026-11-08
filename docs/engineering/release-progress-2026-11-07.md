@@ -1,5 +1,11 @@
 # PET LIFE OS release and development handoff — 2026-11-07
 
+## Health records localization batch — 2026-11-08 00:49 UTC
+
+- Branch `feat/i18n-health-records-de-es` is based on #122 head `2e1816b79078bc4861d6c662992782a96ee58633`; it is parallel to health core/calendar PR #136, not based on that unmerged PR. It adds de/es copy for `healthAdvanced`, `healthDepth`, `healthShares`, and `rollout.records`, preserving medical cautions and temporary-link privacy/expiry/revocation explanations.
+- Focused validation: 6 files / 20 tests passed; web typecheck/lint, locale JSON parse and `git diff --check` passed. No business logic, health permission, financial or API behavior was changed. Hosted CI is required after push.
+- Decision alignment: GC-09, GC-10, GC-12, GC-15, U-07 and PT-13. Care Center/care suggestions/provider workflows, German/Spanish SMS, and other untranslated application families remain open. #136 is a sibling PR on the same #122 base; both depend on #122 and #118 before retargeting to main.
+
 ## Production and release queue
 
 - Current `origin/main`: `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`; the previously reported deployment id was `github-42091865674-1`.
