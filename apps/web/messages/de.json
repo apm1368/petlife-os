@@ -124,6 +124,20 @@
     }
   },
   "common": { "loading": "Wird geladen …", "retry": "Erneut versuchen" },
+  "petOverview": {
+    "careUnavailable": "Pflegeerinnerungen konnten nicht geladen werden. Andere Einträge bleiben verfügbar; versuche es erneut, um die vollständige Liste abzurufen.",
+    "careIncomplete": "Pflegepunkte mit Handlungsbedarf und anstehende Pflege wurden noch nicht vollständig geladen."
+  },
+  "birthDateField": {
+    "calendar": "Kalender",
+    "jalali": "Jalali-Kalender",
+    "gregorian": "Gregorianischer Kalender",
+    "hint": "Beim Wechsel des Kalenders bleibt das ausgewählte Datum gleich.",
+    "optionalAge": "Geburtsdatum und Alter sind optional. Wenn sie unbekannt sind, kannst du fortfahren und sie später ergänzen.",
+    "day": "Tag",
+    "month": "Monat",
+    "year": "Jahr"
+   },
   "consentHistory": {
     "title": "Einwilligungsverlauf",
     "intro": "Gespeicherte Einwilligungen und Widerrufe für Ihr Konto.",
