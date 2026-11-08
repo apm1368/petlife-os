@@ -72,7 +72,7 @@ describe("ScrapeHttpClient: one at a time, polite delay, budget, stop on block",
 
   it("waits between requests within [min, max], never runs two at once, enforces the budget", async () => {
     let inFlight = 0, maxInFlight = 0;
-    jest.spyOn(safe, "safeFetch").mockImplementation(async () => { inFlight++; maxInFlight = Math.max(maxInFlight, inFlight); await new Promise((r) => setTimeout(r, 5)); inFlight--; return { status: 200, body: "{\"ok\":true}", finalUrl: "", contentType: "application/json" }; });
+    jest.spyOn(safe, "safeFetch").mockImplementation(async () => { inFlight++; maxInFlight = Math.max(maxInFlight, inFlight); await new Promise((r) => setTimeout(r, 5)); inFlight--; return { status: 200, body: "{\"ok\":true}", bodyBytes: Buffer.from("{\"ok\":true}"), finalUrl: "", contentType: "application/json" }; });
     const waits: number[] = [];
     const http = new ScrapeHttpClient(cfg, async (ms) => { waits.push(ms); });
     await Promise.all([http.getJson("https://ws.alibaba.ir/a"), http.getJson("https://ws.alibaba.ir/b"), http.postJson("https://ws.alibaba.ir/c", { x: 1 })]);
@@ -91,7 +91,7 @@ describe("ScrapeHttpClient: one at a time, polite delay, budget, stop on block",
     await expect(http.getText("https://www.alibaba.ir/x")).rejects.toMatchObject({ category: "RATE_LIMITED", retryAfterMs: 120000 });
     m.mockRejectedValueOnce(new safe.SourceFetchError("HTTP_ERROR", "x", 404));
     await expect(http.getText("https://www.alibaba.ir/x")).rejects.toMatchObject({ category: "LISTING_REMOVED" });
-    m.mockResolvedValueOnce({ status: 200, body: "<html>", finalUrl: "", contentType: "text/html" });
+    m.mockResolvedValueOnce({ status: 200, body: "<html>", bodyBytes: Buffer.from("<html>"), finalUrl: "", contentType: "text/html" });
     await expect(http.getJson("https://www.alibaba.ir/x")).rejects.toBeInstanceOf(AdapterError);
   });
 });

@@ -20,6 +20,7 @@ import {
 import { Transform, Type } from "class-transformer";
 import {
   IsBoolean,
+  IsArray,
   IsDateString,
   IsEnum,
   IsIn,
@@ -27,6 +28,8 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  ArrayMaxSize,
+  ArrayMinSize,
   Length,
   Max,
   MaxLength,
@@ -50,6 +53,7 @@ import {
   UpdatePromotionDto,
 } from "../../commerce/promotions/dto/promotion.dto";
 import { AdminCommerceService } from "./admin-commerce.service";
+import { CatalogImportService } from "./catalog-import.service";
 
 const toBool = ({ value }: { value: unknown }) => value === true || value === "true" || value === "1";
 
@@ -94,6 +98,15 @@ class AnalyticsQueryDto {
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(365) days?: number;
 }
 
+class CatalogImportCreateDto {
+  @IsArray() @ArrayMinSize(1) @ArrayMaxSize(20) @IsString({ each: true }) urls!: string[];
+  @IsUUID() categoryId!: string;
+  @IsOptional() @IsUUID() brandId?: string;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(10) maxPages?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100) maxProducts?: number;
+  @IsUUID() idempotencyKey!: string;
+}
+
 class DecisionNoteDto {
   @IsOptional() @IsString() @MaxLength(500) note?: string;
 }
@@ -101,6 +114,8 @@ class DecisionNoteDto {
 class ReasonDto {
   @IsString() @Length(3, 500) reason!: string;
 }
+
+class CatalogImportSnapshotDecisionDto extends ReasonDto {}
 
 class SellerOfferModerationDecisionDto extends ReasonDto {
   @IsIn([SellerOfferModerationStatus.APPROVED, SellerOfferModerationStatus.REJECTED])
@@ -150,6 +165,7 @@ function platformActor(admin: ResolvedAdminContext): PromotionActor {
 export class AdminCommerceController {
   constructor(
     private readonly commerce: AdminCommerceService,
+    private readonly catalogImports: CatalogImportService,
     private readonly promotions: PromotionManagementService,
   ) {}
 
@@ -203,6 +219,66 @@ export class AdminCommerceController {
   @RequireAdminPermission("commerce.view")
   listProductCategories() {
     return this.commerce.listProductCategories();
+  }
+
+  @Get("catalog-imports")
+  @RequireAdminPermission("commerce.view")
+  listCatalogImports() {
+    return this.catalogImports.listJobs();
+  }
+
+  @Get("catalog-imports/availability")
+  @RequireAdminPermission("commerce.view")
+  catalogImportAvailability(@CurrentAdmin() admin: ResolvedAdminContext) {
+    return this.catalogImports.availability(admin);
+  }
+
+  @Get("product-brands")
+  @RequireAdminPermission("commerce.view")
+  listProductBrands() {
+    return this.catalogImports.listActiveBrands();
+  }
+
+  @Post("catalog-imports")
+  @RequireAdminPermission("commerce.manage")
+  createCatalogImport(
+    @Body() dto: CatalogImportCreateDto,
+    @CurrentAdmin() admin: ResolvedAdminContext,
+    @Req() req: AdminAuthedRequest,
+  ) {
+    return this.catalogImports.createJob(admin, dto, req.requestId);
+  }
+
+  @Post("catalog-imports/:id/cancel")
+  @RequireAdminPermission("commerce.manage")
+  cancelCatalogImport(
+    @Param("id", ParseUUIDPipe) id: string,
+    @CurrentAdmin() admin: ResolvedAdminContext,
+    @Req() req: AdminAuthedRequest,
+  ) {
+    return this.catalogImports.cancelJob(admin, id, req.requestId);
+  }
+
+  @Post("catalog-import-items/:id/apply-source-update")
+  @RequireAdminPermission("commerce.manage")
+  applyCatalogSourceUpdate(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: CatalogImportSnapshotDecisionDto,
+    @CurrentAdmin() admin: ResolvedAdminContext,
+    @Req() req: AdminAuthedRequest,
+  ) {
+    return this.catalogImports.applyIncomingSnapshot(admin, id, dto.reason, req.requestId);
+  }
+
+  @Post("catalog-import-items/:id/reject-source-update")
+  @RequireAdminPermission("commerce.manage")
+  rejectCatalogSourceUpdate(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: CatalogImportSnapshotDecisionDto,
+    @CurrentAdmin() admin: ResolvedAdminContext,
+    @Req() req: AdminAuthedRequest,
+  ) {
+    return this.catalogImports.rejectIncomingSnapshot(admin, id, dto.reason, req.requestId);
   }
 
   @Post("products")
