@@ -600,6 +600,19 @@
         "CYCLE_PREPARED": "Añadido al carrito", "ORDERED": "Pedido realizado", "OTHER": "Actualizada"
       }
     },
+    "favorites": {
+      "title": "Favoritos",
+      "loading": "Cargando",
+      "retry": "Reintentar",
+      "loadFailed": "No se pudieron cargar los productos guardados. Inténtalo de nuevo.",
+      "offlineTitle": "No tienes conexión",
+      "offlineHint": "Vuelve a conectarte para ver tus productos guardados.",
+      "accessDeniedTitle": "No tienes acceso a tus productos guardados",
+      "accessDeniedHint": "Inicia sesión con una cuenta que pueda consultar estos productos guardados.",
+      "empty": "Todavía no tienes favoritos",
+      "emptyHint": "Pulsa el corazón de un producto para guardarlo aquí.",
+      "browse": "Ver productos"
+    },
     "shopHome": {
       "title": "Tienda",
       "subtitle": "Para {name}",

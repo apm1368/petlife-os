@@ -1861,6 +1861,11 @@
       "title": "Favorites",
       "loading": "Loading",
       "retry": "Retry",
+      "loadFailed": "Saved products could not be loaded. Please try again.",
+      "offlineTitle": "You're offline",
+      "offlineHint": "Reconnect to view your saved products.",
+      "accessDeniedTitle": "You don't have access",
+      "accessDeniedHint": "Sign in with an account that can view these saved products.",
       "empty": "No favorites yet",
       "emptyHint": "Tap the heart on a product to save it here.",
       "browse": "Browse products"

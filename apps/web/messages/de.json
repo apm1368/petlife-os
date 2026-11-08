@@ -600,6 +600,19 @@
         "CYCLE_PREPARED": "Zum Warenkorb hinzugefügt", "ORDERED": "Bestellt", "OTHER": "Aktualisiert"
       }
     },
+    "favorites": {
+      "title": "Favoriten",
+      "loading": "Wird geladen",
+      "retry": "Erneut versuchen",
+      "loadFailed": "Gespeicherte Produkte konnten nicht geladen werden. Bitte versuche es erneut.",
+      "offlineTitle": "Du bist offline",
+      "offlineHint": "Stelle die Internetverbindung wieder her, um deine gespeicherten Produkte zu sehen.",
+      "accessDeniedTitle": "Kein Zugriff auf deine gespeicherten Produkte",
+      "accessDeniedHint": "Melde dich mit einem Konto an, das diese gespeicherten Produkte ansehen darf.",
+      "empty": "Noch keine Favoriten",
+      "emptyHint": "Tippe bei einem Produkt auf das Herz, um es hier zu speichern.",
+      "browse": "Produkte ansehen"
+    },
     "shopHome": {
       "title": "Shop",
       "subtitle": "Für {name}",
