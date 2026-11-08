@@ -85,3 +85,49 @@
 - Disk was 670 MB free before cleanup and 2.6 GB free afterward. Only nine confirmed, inactive `.next` build-output directories were removed; `pnpm store prune` removed 9.2 kB. Source, Git history, worktrees and active Postgres/Redis volumes were preserved; Docker reported no reclaimable image/volume space. The payment-controls worktree remains uncommitted and untouched.
 - Memorial source-object and prior CDN-copy privacy remains unverified because authorized bucket/CDN read access is still unavailable. No source image, shared bucket policy or CDN cache was changed.
 - Current status: #107 is implemented/tested on its PR branch but awaiting independent review; #138–#141 are CI-green but unmerged; production remains NOT LIVE for these changes. Next required action: add a qualified reviewer, then merge only after approval and green checks; deploy and verify the exact SHA and public product API.
+
+
+## Release and review checkpoint — 2026-11-08 (rechecked)
+
+### Repository, production, and workspace
+
+- Current `main` is `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`, confirmed from the base SHA currently reported by open PR #107 and the latest successful production deployment workflow run. No PR in the queue is merged.
+- Latest recorded production deploy is GitHub Actions run `42091865674`, successful for `main` SHA `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41` on 2026-11-05. This deployment workflow runs CI, creates a database backup before migrations, applies migrations, snapshots the previous build, then runs the production smoke script which checks health/version and public landing endpoints; it restores the prior build if build/health fails.
+- Last direct production verification still recorded above is SHA `3ed6c598`, ready health, and 15 public products (10 `qa-b4-*` plus five known seed slugs). This session could not make a fresh HTTP request: the shell execution workspace returned “No usable execution environment”, the Vercel integration lists no `opetlife` project, and the web fetch tool cannot access the API endpoint. Treat the product exposure as NOT LIVE / unresolved until a fresh public API check after deployment.
+- Cloud environment status is running/connected with enforced unrestricted network policy but no execution capabilities; shell-backed git, disk, database-volume and test checks are unavailable. This session made no source-code, payment-worktree or database-volume changes. The payment worktree was last observed with uncommitted work preserved; disk last observed at approximately 2.6 GB free; both require a fresh local check when the execution environment returns.
+- Production bucket/CDN access remains unavailable. Memorial withdrawal controls the memorial asset route but does not establish revocation of original public source URLs or old CDN copies.
+
+### Current open PR queue
+
+All PRs below are still open and unmerged. Current CI was read from workflow runs attached to the exact PR heads on 2026-11-08: PRs #102–#141 completed successfully; PR #59 has no PR workflow run and GitHub reports it non-mergeable. No review submission is recorded on any open PR (#59, #102–#141). Branch-protection details cannot be read by the GitHub integration (403), so do not infer that mergeability satisfies required review.
+
+- #107 `fc193a8e25` → `main`: CI run `42435941821` success; top release priority; review required; not deployed.
+- #112 `d8dd4f88fc` → `main`: CI success; owner decisions/design references; documentation only.
+- #113 `c84d8641fd` → `main`: CI success; Jajiga selected by PL-10; no live Digikala importer or production-ready Jajiga sync claimed.
+- #114 `c915e1ce82` → #113: CI success; must wait for #113, then retarget to main, inspect diff and rerun API/web/travel/catalog tests.
+- #110 `4f3d4eaf52` → `main`: CI success; phone-first registration leaves phone unverified.
+- #111 `c8f4e332dd` → #110: CI success; retarget only after #110 and overlapping pet-ownership work are integrated; rerun signup, invitation, household isolation, multi-pet and booking tests.
+- #102 `59aaefc1a9` and #106 `ee85dc030f` → `main`: CI success, but both touch pet lifecycle/ownership services; integrate and validate as a combined change before #111.
+- #108 `7b71b9a004` → `main`: CI success; Zibal/reconciliation code overlaps the preserved payment-controls worktree; inspect and reconcile that worktree before integration.
+- #59 `49cad59cce` → `main`: no workflow run, non-mergeable, no review. Its required FarazSMS sign-in differs from current ON-01 phase scope (unverified phone, no SMS/email verification); do not merge until the product contract and provider configuration are reconciled.
+- #115 `1618a6836b`, #116 `1e16a2fd18`, #117 `6c8693de74`, #118 `e57dd03914` → `main`: current CI successful; all still need review. Their overlap is real: #115 touches ParkHeader, #116/#117 touch HomeLanding, and #118 touches HomeLanding, ParkHeader, ParkHero and ParkPavilions. Merge in a reviewed sequence, inspecting the combined diff and preserving the approved HERO image/composition after every step. #117 still does not prove the original storage object/CDN is private.
+- Locale foundation chain: #118 → #119 `83fe67c9ec` → #120 `434757a567` → #121 `0345abf47d`. Each exact head CI succeeded; none merged or reviewed.
+- #122 `2e1816b790` is based on #118 and CI succeeded. After #118 merges, retarget #122 to main; inspect and rerun shop/currency checks.
+- After #122: #123 `d963f84deb` → #124 `d34bb985a1` → #127 `a89201f149`; merge/retest in that order. #132–#141 are direct #122 children and can be retargeted independently after #122; their current exact-head CI runs succeeded.
+- #125 `b20026d407`, #126 `b47c9e65d1`, #128 `eb1dc3a8b6`, #129 `94ffaba72b`, #130 `62cca0669c`, #131 `4515b77959` are direct #118 children; after #118 merges, retarget to main and validate independently.
+- Other main-based PRs #103 `bb9bdb6102`, #104 `6274af904c`, #105 `2bee685c34`, #109 `bff3b3c173` have successful exact-head CI but no review. Integrate by domain after review; recheck overlaps with #107, #110–#117 and financial/admin code.
+
+### Review queue and release steps
+
+1. Obtain an independent qualified reviewer; all authorship/review records currently show no submitted approval. Never bypass protection.
+2. Review #107's migration `apps/api/prisma/migrations/20261105120000_public_demo_record_provenance/migration.sql`: it adds provenance booleans and backfills exact seed product slugs, exact QA IDs, seeded provider names only when paired with known seed-user emails, and exact seeded subscription price sets. E2E checks that demo records disappear while a separately reviewed product remains visible. Confirm backup/rollback readiness, then merge through the protected path.
+3. The existing main deploy workflow runs CI and `deploy.sh`; deploy makes a PostgreSQL dump before migration and retains recent deploy backups, runs Prisma migration deploy, snapshots the previous build and invokes `scripts/smoke-production.sh`. Confirm the deploy workflow's exact SHA and successful smoke outcome.
+4. After release, safely GET `/api/health/version`, `/api/health/ready`, and `/api/shop/products?page=1&pageSize=50`. Confirm the reported QA fixtures are absent, and independently confirm legitimate reviewed offers remain visible; do not call the fix LIVE_VERIFIED until the deployed SHA and API behavior are observed.
+5. Continue the dependency order above. After each base merges, retarget its child, inspect the entire resulting diff, rerun relevant tests and wait for checks on the new head.
+
+### Session actions
+
+- Rechecked open PR list (#59 and #102–#141), current bases/heads, latest exact-head CI runs and review submissions.
+- Read-only production access was attempted but not available through this execution session; no new production verification is claimed.
+- PR descriptions were updated body-only to correct stale “CI pending/running” wording, record exact successful workflow run/head and state dependencies for #59, #107, #110–#113, #115–#116, #122–#141. These metadata edits did not change those PR heads.
+- Next local action: restore an executor workspace, recheck preserved payment worktree/DB containers and disk, then continue implementation and testing. Next owner/reviewer action: add an independent qualified reviewer, starting with #107.
