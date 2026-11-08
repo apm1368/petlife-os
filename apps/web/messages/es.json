@@ -1380,6 +1380,34 @@
       "order": "Pedido",
       "empty": "No se encontraron resultados."
     },
+    "sellerOffer": {
+      "title": "Añadir oferta del vendedor",
+      "search": "Buscar en el catálogo de productos",
+      "find": "Buscar",
+      "empty": "No se encontraron productos.",
+      "variant": "Variante del producto",
+      "choose": "Elige una variante",
+      "price": "Precio (IRR)",
+      "stock": "Existencias iniciales",
+      "save": "Añadir oferta",
+      "failed": "No se pudo completar la acción. Tus datos se han conservado.",
+      "saved": "Oferta del vendedor creada.",
+      "requestHelp": "Si falta el producto, puedes solicitar que se revise para el catálogo central. La solicitud no crea una oferta ni fija un precio o existencias.",
+      "requestName": "Nombre del producto",
+      "requestBrand": "Marca (opcional)",
+      "requestSource": "URL de referencia (opcional)",
+      "requestDescription": "Descripción del producto (opcional)",
+      "requestReviewNote": "Administración revisará posibles duplicados y tu solicitud. El precio y las existencias de tu vendedor se mantienen por separado.",
+      "requestSubmit": "Solicitar que se añada al catálogo",
+      "requestSaved": "Solicitud enviada para revisión.",
+      "requestHistory": "Tus solicitudes de catálogo",
+      "requestStatus": {
+        "PENDING_REVIEW": "En revisión",
+        "APPROVED": "Añadido al catálogo central",
+        "MATCHED_EXISTING": "Vinculado a un producto existente",
+        "REJECTED": "Rechazado"
+      }
+    },
     "trip": {
       "title": "Editar plan de viaje",
       "origin": "Ciudad de origen",
@@ -1437,6 +1465,39 @@
     "notifications": "Notificaciones",
     "notificationPreferences": "Preferencias de notificaciones",
     "support": "Soporte"
+  },
+  "seller": {
+    "offers": {
+      "title": "Ofertas",
+      "loading": "Cargando ofertas…",
+      "retry": "Reintentar",
+      "empty": "Aún no hay ofertas.",
+      "lowStock": "Pocas unidades",
+      "syncErrors": "Errores de sincronización: {count}",
+      "price": "Precio (IRR)",
+      "status": "Estado",
+      "statusOptions": {
+        "ACTIVE": "Activa",
+        "PAUSED": "Pausada",
+        "SUSPENDED": "Suspendida"
+      },
+      "save": "Guardar",
+      "available": "{count} disponibles · {currency}",
+      "saveFailed": "No se pudo guardar la oferta.",
+      "moderation": {
+        "PENDING_REVIEW": "Pendiente de revisión",
+        "APPROVED": "Aprobada para la venta",
+        "REJECTED": "Se requieren cambios",
+        "pendingHelp": "La oferta no será pública hasta que opetlife la apruebe.",
+        "rejectedHelp": "Actualiza y guarda la oferta para volver a enviarla a revisión."
+      },
+      "repeat": {
+        "enable": "Ofrecer entrega periódica",
+        "intervals": "Intervalos de entrega",
+        "everyDays": "Cada {days} días",
+        "pickOne": "Elige al menos un intervalo."
+      }
+    }
   },
   "travel": {
     "status": {

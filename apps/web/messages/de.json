@@ -1380,6 +1380,34 @@
       "order": "Bestellung",
       "empty": "Keine Ergebnisse gefunden."
     },
+    "sellerOffer": {
+      "title": "Verkäuferangebot hinzufügen",
+      "search": "Im Produktkatalog suchen",
+      "find": "Suchen",
+      "empty": "Keine Produkte gefunden.",
+      "variant": "Produktvariante",
+      "choose": "Variante auswählen",
+      "price": "Preis (IRR)",
+      "stock": "Anfangsbestand",
+      "save": "Angebot hinzufügen",
+      "failed": "Die Aktion konnte nicht abgeschlossen werden. Ihre Eingaben bleiben erhalten.",
+      "saved": "Verkäuferangebot erstellt.",
+      "requestHelp": "Wenn das Produkt fehlt, können Sie es zur Prüfung im zentralen Katalog vorschlagen. Eine Anfrage erstellt weder ein Angebot noch legt sie Preis oder Bestand fest.",
+      "requestName": "Produktname",
+      "requestBrand": "Marke (optional)",
+      "requestSource": "Referenz-URL (optional)",
+      "requestDescription": "Produktbeschreibung (optional)",
+      "requestReviewNote": "Eine Administration prüft mögliche Duplikate und Ihre Anfrage. Ihr Verkäuferpreis und Bestand bleiben getrennt.",
+      "requestSubmit": "Ergänzung zum Katalog anfragen",
+      "requestSaved": "Anfrage zur Prüfung gesendet.",
+      "requestHistory": "Ihre Kataloganfragen",
+      "requestStatus": {
+        "PENDING_REVIEW": "In Prüfung",
+        "APPROVED": "Zum zentralen Katalog hinzugefügt",
+        "MATCHED_EXISTING": "Vorhandenem Produkt zugeordnet",
+        "REJECTED": "Abgelehnt"
+      }
+    },
     "trip": {
       "title": "Reiseplan bearbeiten",
       "origin": "Abreiseort",
@@ -1437,6 +1465,39 @@
     "notifications": "Benachrichtigungen",
     "notificationPreferences": "Benachrichtigungseinstellungen",
     "support": "Support"
+  },
+  "seller": {
+    "offers": {
+      "title": "Angebote",
+      "loading": "Angebote werden geladen …",
+      "retry": "Erneut versuchen",
+      "empty": "Noch keine Angebote.",
+      "lowStock": "Wenig auf Lager",
+      "syncErrors": "Synchronisierungsfehler: {count}",
+      "price": "Preis (IRR)",
+      "status": "Status",
+      "statusOptions": {
+        "ACTIVE": "Aktiv",
+        "PAUSED": "Pausiert",
+        "SUSPENDED": "Gesperrt"
+      },
+      "save": "Speichern",
+      "available": "{count} verfügbar · {currency}",
+      "saveFailed": "Das Angebot konnte nicht gespeichert werden.",
+      "moderation": {
+        "PENDING_REVIEW": "Wird geprüft",
+        "APPROVED": "Zum Verkauf freigegeben",
+        "REJECTED": "Änderung erforderlich",
+        "pendingHelp": "Dieses Angebot ist erst nach der Freigabe durch opetlife öffentlich.",
+        "rejectedHelp": "Aktualisiere und speichere das Angebot, um es erneut zur Prüfung einzureichen."
+      },
+      "repeat": {
+        "enable": "Wiederkehrende Lieferung anbieten",
+        "intervals": "Lieferintervalle",
+        "everyDays": "Alle {days} Tage",
+        "pickOne": "Wähle mindestens ein Intervall aus."
+      }
+    }
   },
   "travel": {
     "status": {
