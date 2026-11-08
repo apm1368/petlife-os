@@ -21,6 +21,8 @@ function placeholders(value: string) {
 describe("lost-pet locale catalogs", () => {
   const catalogs = { fa: flatten(fa.lostPet), de: flatten(de.lostPet), es: flatten(es.lostPet) };
   const english = flatten(en.lostPet);
+  const navCatalogs = { fa: flatten(fa.adminAnimalSupportNav), de: flatten(de.adminAnimalSupportNav), es: flatten(es.adminAnimalSupportNav) };
+  const englishNav = flatten(en.adminAnimalSupportNav);
 
   it.each(Object.entries(catalogs))("has complete keys and placeholders for %s", (_locale, catalog) => {
     expect(Object.keys(catalog).sort()).toEqual(Object.keys(english).sort());
@@ -32,6 +34,13 @@ describe("lost-pet locale catalogs", () => {
   it.each(["de", "es"] as const)("contains no Persian fallback in %s", (locale) => {
     for (const [key, text] of Object.entries(catalogs[locale])) {
       expect(text, key).not.toMatch(/[\u0600-\u06FF]/);
+    }
+  });
+
+  it.each(Object.entries(navCatalogs))("has complete animal-support navigation keys and no Persian UI in %s", (locale, catalog) => {
+    expect(Object.keys(catalog).sort()).toEqual(Object.keys(englishNav).sort());
+    if (locale === "de" || locale === "es") {
+      for (const [key, text] of Object.entries(catalog)) expect(text, key).not.toMatch(/[\u0600-\u06FF]/);
     }
   });
 });
