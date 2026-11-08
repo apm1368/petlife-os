@@ -371,5 +371,18 @@
       "empty": "Aún no se ha configurado.",
       "saveFailed": "No se pudo guardar el perfil de cuidados. Inténtalo de nuevo."
     }
+  },
+  "landing": {
+    "publicMemorial": {
+      "eyebrow": "Con cariño, en su memoria",
+      "title": "Recordamos a quienes nos acompañaron",
+      "description": "Los nombres y las fotos solo se muestran con el consentimiento explícito de su responsable y tras la revisión del equipo.",
+      "empty": "Todavía no hay ningún homenaje público aprobado.",
+      "loadError": "No se pudieron cargar los homenajes públicos.",
+      "carousel": "Carrusel de fotos conmemorativas",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "imageAlt": "Foto conmemorativa de {name}"
+    }
   }
 }

@@ -371,5 +371,18 @@
       "empty": "Noch nicht eingerichtet.",
       "saveFailed": "Das Pflegeprofil konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
     }
+  },
+  "landing": {
+    "publicMemorial": {
+      "eyebrow": "In liebevoller Erinnerung",
+      "title": "Wir erinnern uns an unsere Wegbegleiter",
+      "description": "Namen und Fotos erscheinen nur mit ausdrücklicher Zustimmung der Halterin oder des Halters und nach administrativer Prüfung.",
+      "empty": "Bisher wurde noch kein öffentliches Gedenken freigegeben.",
+      "loadError": "Die öffentlichen Gedenkseiten konnten nicht geladen werden.",
+      "carousel": "Bildkarussell zum Gedenken",
+      "previous": "Zurück",
+      "next": "Weiter",
+      "imageAlt": "Gedenkfoto von {name}"
+    }
   }
 }
