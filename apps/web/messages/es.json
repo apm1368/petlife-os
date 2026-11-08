@@ -1101,6 +1101,17 @@
     },
     "adminSearch": { "title": "Buscar clientes, pedidos o casos de soporte", "search": "Buscar", "failed": "La búsqueda falló. Inténtalo de nuevo.", "order": "Pedido", "empty": "No se encontraron resultados." }
   },
+  "clinicCustomerExtras": {
+    "sharedNotesTitle": "Mensajes de la clínica para tu hogar",
+    "sharedNotesIntro": "Notas no clínicas que una clínica ha compartido expresamente con miembros de tus hogares. Los historiales médicos están en la sección de salud de la mascota.",
+    "notesLimit": "Se muestran hasta 100 mensajes recientes de tus hogares. Las notas internas de la clínica no aparecen aquí.",
+    "navHint": "Notas compartidas expresamente por clínicas",
+    "refresh": "Volver a cargar los mensajes",
+    "loadFailed": "No se pudo cargar la información.",
+    "retry": "Reintentar",
+    "loading": "Cargando…",
+    "emptyShared": "Aún no se ha compartido ningún mensaje de la clínica."
+  },
   "publicNavigation": {
     "main": "Navegación principal",
     "explore": "Explorar",
