@@ -5,9 +5,10 @@ import { PrismaService } from "../../../common/prisma/prisma.service";
 import { deviceLabel } from "../../../common/session/device-label.util";
 import { SessionService, type SessionUser } from "../../../common/session/session.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
-import { CurrentPasswordIncorrectException, AuthRateLimitedException, InvalidCredentialsException, UsernameTakenException } from "../../../common/errors/api-exception";
+import { CurrentPasswordIncorrectException, AuthRateLimitedException, InvalidCredentialsException, InvalidRegistrationPhoneException, PhoneAlreadyRegisteredException, UsernameTakenException } from "../../../common/errors/api-exception";
 import { hashPassword, verifyPassword } from "../../../common/password/password-hash.util";
 import { normalizeUsername } from "../identifier.util";
+import { normalizeIranianPhone } from "../../../common/phone/phone-normalizer";
 import type { RegisterDto } from "../dto/register.dto";
 import type { LoginPasswordDto } from "../dto/login-password.dto";
 import { IDENTIFIER_LIMITS, IdentifierRateLimiter } from "../../../common/rate-limit/identifier-rate-limiter.service";
@@ -48,6 +49,8 @@ export class AuthPasswordService {
   async register(dto: RegisterDto, res: Response, meta: { userAgent?: string; ipAddress?: string }): Promise<SessionUser> {
     const normalizedUsername = normalizeUsername(dto.username);
     const passwordHash = await hashPassword(dto.password);
+    const normalizedPhone = dto.phone ? normalizeIranianPhone(dto.phone) : null;
+    if (dto.phone && !normalizedPhone) throw new InvalidRegistrationPhoneException();
 
     let user;
     try {
@@ -57,11 +60,20 @@ export class AuthPasswordService {
           normalizedUsername,
           passwordHash,
           email: dto.email?.toLowerCase(),
-          displayName: dto.displayName?.trim() || dto.username.trim(),
+          phone: normalizedPhone?.e164,
+          firstName: dto.firstName?.trim(),
+          lastName: dto.lastName?.trim(),
+          displayName: dto.displayName?.trim() || [dto.firstName?.trim(), dto.lastName?.trim()].filter(Boolean).join(" ") || dto.username.trim(),
         },
       });
     } catch (error) {
-      if (isUniqueConstraintViolation(error)) throw new UsernameTakenException();
+      if (isUniqueConstraintViolation(error)) {
+        const target = error instanceof Prisma.PrismaClientKnownRequestError ? error.meta?.target : undefined;
+        const fields = (Array.isArray(target) ? target.map(String) : [String(target ?? "")]).join(" ").toLowerCase();
+        if (fields.includes("username")) throw new UsernameTakenException();
+        if (fields.includes("phone") || fields.includes("email")) throw new PhoneAlreadyRegisteredException();
+        throw error;
+      }
       throw error;
     }
 

@@ -27,4 +27,6 @@ export const supportService = {
   postMessage: (id: string, body: string) => apiFetch<SupportMessageDto>(`/support/cases/${id}/messages`, { method: "POST", body: { body } }),
 
   reopen: (id: string) => apiFetch<SupportCaseUserSummaryDto>(`/support/cases/${id}/reopen`, { method: "POST" }),
+
+  escalate: (id: string, reason: string) => apiFetch<{ referenceNumber: string; caseId: string; caseNumber: string; confirmedAt: string }>(`/support/cases/${id}/escalate`, { method: "POST", body: { reason, confirm: true } }),
 };
