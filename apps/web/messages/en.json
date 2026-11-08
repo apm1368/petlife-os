@@ -750,6 +750,15 @@
     "explore": {
       "title": "Explore Services",
       "subtitle": "For {name}",
+      "eyebrow": "Verified professionals, in one place",
+      "heading": "Professional care, near you",
+      "description": "Compare services by open times, area, your pet's needs and experience, then book in a few steps.",
+      "searchLabel": "Search services",
+      "searchPlaceholder": "What service do you need?",
+      "searchButton": "Find care",
+      "chooseService": "Choose a service",
+      "allProvidersIntro": "See every provider at once:",
+      "allServices": "All services",
       "category": {
         "VET": "Veterinary care",
         "GROOMING": "Grooming",
