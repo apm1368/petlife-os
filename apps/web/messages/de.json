@@ -1108,6 +1108,8 @@
     "navHint": "Von Kliniken ausdrücklich geteilte Nachrichten",
     "refresh": "Nachrichten neu laden",
     "loadFailed": "Informationen konnten nicht geladen werden.",
+    "offline": "Keine Internetverbindung. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+    "noAccess": "Sie haben keinen Zugriff auf diese Kliniknachrichten. Melden Sie sich erneut an oder wenden Sie sich an die Klinik.",
     "retry": "Erneut versuchen",
     "loading": "Wird geladen …",
     "emptyShared": "Es wurden noch keine Kliniknachrichten geteilt."

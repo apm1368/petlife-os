@@ -1,11 +1,13 @@
-import {beforeEach,describe,expect,it,vi} from "vitest";
+import {afterEach,beforeEach,describe,expect,it,vi} from "vitest";
 import {fireEvent,screen} from "@testing-library/react";
 import {renderWithIntl} from "@/test/render-with-intl";
 import {clinicCustomerExtrasService} from "@/services/clinic-customer-extras.service";
+import {ApiError} from "@/lib/api/client";
 import {MemberClinicNotesView} from "./MemberClinicNotesView";
 vi.mock("@/services/clinic-customer-extras.service",()=>({clinicCustomerExtrasService:{sharedNotes:vi.fn()}}));
 describe("MemberClinicNotesView",()=>{
  beforeEach(()=>vi.resetAllMocks());
+ afterEach(()=>vi.unstubAllGlobals());
  it("shows explicitly shared non-clinical notes with their actual clinic and time",async()=>{vi.mocked(clinicCustomerExtrasService.sharedNotes).mockResolvedValue([{id:"note1",householdId:"h1",clinic:{id:"org1",name:"Companion clinic"},body:"Please call reception about your next appointment.",createdAt:"2026-10-15T10:00:00Z"}]);renderWithIntl(<MemberClinicNotesView/>);await screen.findByText("Please call reception about your next appointment.");expect(screen.getByRole("heading",{name:"Companion clinic"})).toBeTruthy();expect(screen.getByText(/Up to 100 recent messages/)).toBeTruthy();expect(screen.queryByRole("button",{name:"Remove note"})).toBeNull()});
  it("does not present a transport failure as no shared messages",async()=>{vi.mocked(clinicCustomerExtrasService.sharedNotes).mockRejectedValueOnce(Error("network")).mockResolvedValueOnce([]);renderWithIntl(<MemberClinicNotesView/>);await screen.findByRole("alert");expect(screen.queryByText("No clinic messages have been shared yet.")).toBeNull();fireEvent.click(screen.getByRole("button",{name:"Retry"}));await screen.findByText("No clinic messages have been shared yet.")});
  it.each([
@@ -30,6 +32,25 @@ describe("MemberClinicNotesView",()=>{
   renderWithIntl(<MemberClinicNotesView/>,locale);
   expect((await screen.findByRole("alert")).textContent).toBe(error);
   expect(screen.getByRole("button",{name:retry})).toBeTruthy();
+ });
+ it.each([
+  ["de", "Keine Internetverbindung. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut."],
+  ["es", "No hay conexión a Internet. Comprueba tu conexión e inténtalo de nuevo."],
+ ] as const)("renders a distinct offline state in %s",async(locale,message)=>{
+  vi.stubGlobal("navigator",{onLine:false});
+  vi.mocked(clinicCustomerExtrasService.sharedNotes).mockRejectedValueOnce(new TypeError("Failed to fetch"));
+  renderWithIntl(<MemberClinicNotesView/>,locale);
+  expect((await screen.findByRole("alert")).textContent).toBe(message);
+  expect(document.body.textContent).not.toMatch(/[\u0600-\u06ff]/);
+ });
+ it.each([
+  ["de", "Sie haben keinen Zugriff auf diese Kliniknachrichten. Melden Sie sich erneut an oder wenden Sie sich an die Klinik."],
+  ["es", "No tienes acceso a estos mensajes de la clínica. Inicia sesión de nuevo o contacta con la clínica."],
+ ] as const)("renders a distinct access-denied state in %s",async(locale,message)=>{
+  vi.mocked(clinicCustomerExtrasService.sharedNotes).mockRejectedValueOnce(new ApiError({code:"FORBIDDEN",message:"Forbidden",requestId:"test"},403));
+  renderWithIntl(<MemberClinicNotesView/>,locale);
+  expect((await screen.findByRole("alert")).textContent).toBe(message);
+  expect(document.body.textContent).not.toMatch(/[\u0600-\u06ff]/);
  });
  it.each([
   ["de", "Kliniknachrichten für Ihren Haushalt", "Bis zu 100 aktuelle Nachrichten aus Ihren Haushalten."],

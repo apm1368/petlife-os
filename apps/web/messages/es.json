@@ -1108,6 +1108,8 @@
     "navHint": "Notas compartidas expresamente por clínicas",
     "refresh": "Volver a cargar los mensajes",
     "loadFailed": "No se pudo cargar la información.",
+    "offline": "No hay conexión a Internet. Comprueba tu conexión e inténtalo de nuevo.",
+    "noAccess": "No tienes acceso a estos mensajes de la clínica. Inicia sesión de nuevo o contacta con la clínica.",
     "retry": "Reintentar",
     "loading": "Cargando…",
     "emptyShared": "Aún no se ha compartido ningún mensaje de la clínica."
