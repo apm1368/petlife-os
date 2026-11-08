@@ -12472,7 +12472,7 @@
     },
     {
       "verb": "POST",
-      "path": "/household-invitations/:param/accept",
+      "path": "/household-invitations/:param/request",
       "controller": "HouseholdInvitationsController",
       "handler": "accept",
       "source": "apps/api/src/modules/households/households.controller.ts",
@@ -12482,7 +12482,7 @@
       "clients": [
         {
           "service": "householdsService",
-          "method": "acceptInvitation",
+          "method": "requestMembership",
           "source": "apps/web/services/households.service.ts",
           "line": 25,
           "consumers": [

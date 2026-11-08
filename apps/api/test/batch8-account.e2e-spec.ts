@@ -125,6 +125,13 @@ describe("Batch 8 — Account & security", () => {
     return note!.deepLink!.split("/invitations/")[1]!;
   }
 
+  async function requestAndApprove(o: Awaited<ReturnType<typeof owner>>, member: { c: Client; userId: string }, token: string) {
+    const requested = await member.c.post(`/household-invitations/${token}/request`).expect(201);
+    expect(requested.body).toMatchObject({ householdId: o.householdId, status: "REQUESTED" });
+    expect(await prisma.householdMember.count({ where: { householdId: o.householdId, userId: member.userId } })).toBe(0);
+    return o.c.post(`/households/${o.householdId}/invitations/${requested.body.invitationId}/approve`).expect(201);
+  }
+
   async function memberIdOf(householdId: string, userId: string) {
     return (await prisma.householdMember.findUniqueOrThrow({ where: { householdId_userId: { householdId, userId } } })).id;
   }
@@ -213,6 +220,90 @@ describe("Batch 8 — Account & security", () => {
   // ------------------------------------------------------------------ 8B household & access
 
   describe("household membership and pet access", () => {
+    it("lets a household owner invite a verified mobile number and lets that matching account accept from its inbox", async () => {
+      const o = await owner("Phone-invited pet");
+      const phone = uniquePhone();
+      const invitee = client(await signIn(phone));
+      const inviteeRow = await prisma.user.findUniqueOrThrow({ where: { phone: canonicalIdentifier(phone) } });
+
+      const created = await o.c.post(`/households/${o.householdId}/invitations`).send({
+        contact: phone,
+        initialAccess: [{ petId: o.petId, preset: "CARE_HELPER" }],
+      }).expect(201);
+      expect(created.body).toMatchObject({ delivery: "IN_APP", status: "PENDING" });
+      expect(created.body.sharePath).toMatch(/^\/invitations\/[A-Za-z0-9_-]+$/);
+      expect(JSON.stringify(created.body)).not.toContain(phone);
+
+      const inbox = await invitee.get("/household-invitations").expect(200);
+      expect(inbox.body).toEqual([expect.objectContaining({
+        id: created.body.id,
+        inviter: { displayName: expect.any(String) },
+        contactMasked: expect.any(String),
+      })]);
+      expect(JSON.stringify(inbox.body)).not.toContain(o.householdId);
+      expect(JSON.stringify(inbox.body)).not.toContain("Phone-invited pet");
+      expect(JSON.stringify(inbox.body)).not.toContain(phone);
+
+      const requested = await invitee.post(`/household-invitations/by-id/${created.body.id}/request`).expect(201);
+      expect(requested.body).toMatchObject({ status: "REQUESTED", alreadyRequested: false });
+      expect(await prisma.householdMember.count({ where: { householdId: o.householdId, userId: inviteeRow.id } })).toBe(0);
+      const ownerView = await o.c.get(`/households/${o.householdId}/collaboration`).expect(200);
+      expect(ownerView.body.invitations).toEqual([expect.objectContaining({
+        id: created.body.id,
+        status: "REQUESTED",
+        requester: expect.objectContaining({ displayName: expect.any(String), phoneVerified: true }),
+      })]);
+      // A matching phone number without owner approval is not membership: even the household
+      // collaboration document must remain inaccessible.
+      await invitee.get(`/households/${o.householdId}/collaboration`).expect(403);
+      await o.c.post(`/households/${o.householdId}/invitations/${created.body.id}/approve`).expect(201);
+      expect(await prisma.householdMember.findUnique({ where: { householdId_userId: { householdId: o.householdId, userId: inviteeRow.id } } })).not.toBeNull();
+      expect(await prisma.petAccessGrant.findFirst({ where: { petId: o.petId, userId: inviteeRow.id, canBookCare: true, revokedAt: null } })).not.toBeNull();
+      await o.c.post(`/households/${o.householdId}/invitations/${created.body.id}/approve`).expect(409);
+    });
+
+    it("accepts an unverified matching number as a request only, with no SMS, and grants nothing until owner approval", async () => {
+      const o = await owner("Private pet");
+      const invitee = await user("b8-unverified-invitee");
+      const phone = uniquePhone();
+      const normalizedPhone = canonicalIdentifier(phone);
+      await prisma.user.update({ where: { id: invitee.userId }, data: { phone: normalizedPhone, phoneVerifiedAt: null } });
+      const sent = await o.c.post(`/households/${o.householdId}/invitations`).send({
+        contact: phone,
+        initialAccess: [{ petId: o.petId, preset: "VIEW_ONLY" }],
+      }).expect(201);
+      expect(sent.body.delivery).toBe("IN_APP");
+      const invitationNotice = await prisma.notification.findFirstOrThrow({ where: { userId: invitee.userId, type: "household.invited" }, orderBy: { createdAt: "desc" } });
+      const token = invitationNotice.deepLink!.split("/invitations/")[1]!;
+
+      const wrongNumber = await user("b8-wrong-number");
+      const wrongPhone = uniquePhone();
+      await prisma.user.update({ where: { id: wrongNumber.userId }, data: { phone: canonicalIdentifier(wrongPhone), phoneVerifiedAt: null } });
+      await wrongNumber.c.get(`/household-invitations/${token}`).expect(403);
+      await wrongNumber.c.post(`/household-invitations/${token}/request`).expect(403);
+      await wrongNumber.c.post(`/households/${o.householdId}/invitations/${sent.body.id}/approve`).expect(403);
+
+      const inspected = await invitee.c.get(`/household-invitations/${token}`).expect(200);
+      expect(inspected.body).toMatchObject({ phoneVerified: false, requestPending: false });
+      expect(inspected.body).not.toHaveProperty("household");
+      expect(inspected.body).not.toHaveProperty("initialAccess");
+      const result = await invitee.c.post(`/household-invitations/${token}/request`).expect(201);
+      expect(result.body).toMatchObject({ status: "REQUESTED", alreadyRequested: false });
+      expect((await prisma.user.findUniqueOrThrow({ where: { id: invitee.userId } })).phoneVerifiedAt).toBeNull();
+      expect(await prisma.householdMember.count({ where: { householdId: o.householdId, userId: invitee.userId } })).toBe(0);
+      expect(await prisma.petAccessGrant.count({ where: { petId: o.petId, userId: invitee.userId, revokedAt: null } })).toBe(0);
+      expect(await prisma.notification.count({ where: { userId: invitee.userId, type: "household.invited" } })).toBe(1);
+
+      const ownerView = await o.c.get(`/households/${o.householdId}/collaboration`).expect(200);
+      const requestRow = ownerView.body.invitations[0];
+      expect(requestRow.requester).toMatchObject({ displayName: expect.any(String), phoneVerified: false });
+      expect(requestRow.requester.phoneMasked).not.toContain(normalizedPhone);
+      await o.c.post(`/households/${o.householdId}/invitations/${result.body.invitationId}/approve`).expect(201);
+      expect(await prisma.householdMember.count({ where: { householdId: o.householdId, userId: invitee.userId } })).toBe(1);
+      expect(await prisma.petAccessGrant.count({ where: { petId: o.petId, userId: invitee.userId, revokedAt: null } })).toBe(1);
+      expect((await prisma.user.findUniqueOrThrow({ where: { id: invitee.userId } })).phoneVerifiedAt).toBeNull();
+    });
+
     it("invitations are single-use, bound to the invited person, and never duplicate a member or their grants", async () => {
       const o = await owner();
       const member = await user("b8-member");
@@ -222,9 +313,23 @@ describe("Batch 8 — Account & security", () => {
       const notMine = await stranger.c.get(`/household-invitations/${token}`).expect(403);
       expect(notMine.body.error.code).toBe("INVITATION_NOT_FOR_YOU");
       expect(JSON.stringify(notMine.body)).not.toContain(o.householdId);
-      await stranger.c.post(`/household-invitations/${token}/accept`).expect(403);
-      await member.c.post(`/household-invitations/${token}/accept`).expect(201);
-      expect((await member.c.post(`/household-invitations/${token}/accept`).expect(409)).body.error.code).toBe("INVITATION_ALREADY_USED");
+      await stranger.c.post(`/household-invitations/${token}/request`).expect(403);
+      const concurrentRequests = await Promise.all([
+        member.c.post(`/household-invitations/${token}/request`),
+        member.c.post(`/household-invitations/${token}/request`),
+      ]);
+      expect(concurrentRequests.every((r) => r.status === 201)).toBe(true);
+      expect(concurrentRequests.filter((r) => r.body.alreadyRequested === false)).toHaveLength(1);
+      const requested = concurrentRequests[0]!;
+      expect(requested.body).toMatchObject({ status: "REQUESTED", invitationId: expect.any(String) });
+      expect(await prisma.householdMember.count({ where: { householdId: o.householdId, userId: member.userId } })).toBe(0);
+      const concurrentApprovals = await Promise.all([
+        o.c.post(`/households/${o.householdId}/invitations/${requested.body.invitationId}/approve`),
+        o.c.post(`/households/${o.householdId}/invitations/${requested.body.invitationId}/approve`),
+      ]);
+      expect(concurrentApprovals.filter((r) => r.status === 201)).toHaveLength(1);
+      expect(concurrentApprovals.every((r) => [201, 404, 409].includes(r.status))).toBe(true);
+      expect(await prisma.householdMember.count({ where: { householdId: o.householdId, userId: member.userId } })).toBe(1);
       expect((await member.c.get("/household-invitations/not-a-real-token").expect(404)).body.error.code).toBe("NOT_FOUND");
       expect(await prisma.petAccessGrant.count({ where: { petId: o.petId, userId: member.userId, revokedAt: null } })).toBe(1);
       const dup = await o.c.post(`/households/${o.householdId}/invitations`).send({ contact: member.email, initialAccess: [] }).expect(409);
@@ -234,7 +339,7 @@ describe("Batch 8 — Account & security", () => {
       const late = await user("b8-late");
       const lateToken = await invite(o, late);
       await prisma.householdInvitation.updateMany({ where: { householdId: o.householdId, status: "PENDING" }, data: { expiresAt: new Date(Date.now() - 1000) } });
-      expect((await late.c.post(`/household-invitations/${lateToken}/accept`).expect(410)).body.error.code).toBe("INVITATION_EXPIRED");
+      expect((await late.c.post(`/household-invitations/${lateToken}/request`).expect(410)).body.error.code).toBe("INVITATION_EXPIRED");
       // A cancelled invitation says so.
       const revokedUser = await user("b8-revoked");
       const revokedToken = await invite(o, revokedUser);
@@ -247,7 +352,7 @@ describe("Batch 8 — Account & security", () => {
     it("removing a member ends their household-issued access at once and tells them why pages are closed", async () => {
       const o = await owner();
       const member = await user("b8-member");
-      await member.c.post(`/household-invitations/${await invite(o, member, "CARE_HELPER")}/accept`).expect(201);
+      await requestAndApprove(o, member, await invite(o, member, "CARE_HELPER"));
       await member.c.get(`/pets/${o.petId}`).expect(200);
       const memberId = await memberIdOf(o.householdId, member.userId);
 
@@ -269,10 +374,44 @@ describe("Batch 8 — Account & security", () => {
       expect(strangerDenied.body.error.details?.lapse).toBeUndefined();
     });
 
+    it("keeps memberships independent across households and scopes pet/health access to each household's grants", async () => {
+      const first = await owner("First household pet");
+      const second = await owner("Second household pet");
+      const firstPrivatePet = (await first.c.post(`/households/${first.householdId}/pets`).send({ name: "First private pet", species: "CAT", approximateAgeMonths: 16 }).expect(201)).body;
+      const secondPrivatePet = (await second.c.post(`/households/${second.householdId}/pets`).send({ name: "Second private pet", species: "CAT", approximateAgeMonths: 16 }).expect(201)).body;
+      const member = await user("b8-multi-household");
+
+      await requestAndApprove(first, member, await invite(first, member, "VIEW_ONLY"));
+      await requestAndApprove(second, member, await invite(second, member, "CARE_HELPER"));
+
+      const memberships = await member.c.get("/households").expect(200);
+      expect(memberships.body.map((item: { id: string }) => item.id)).toEqual(expect.arrayContaining([first.householdId, second.householdId]));
+      await member.c.get(`/pets/${first.petId}`).expect(200);
+      await member.c.get(`/pets/${second.petId}`).expect(200);
+      await member.c.get(`/pets/${first.petId}/health/snapshot`).expect(403);
+      await member.c.get(`/pets/${second.petId}/health/snapshot`).expect(200);
+      const firstContext = await member.c.get(`/households/${first.householdId}/collaboration`).expect(200);
+      const secondContext = await member.c.get(`/households/${second.householdId}/collaboration`).expect(200);
+      expect(firstContext.body.pets.map((pet: { id: string }) => pet.id)).toEqual([first.petId]);
+      expect(secondContext.body.pets.map((pet: { id: string }) => pet.id)).toEqual([second.petId]);
+      expect(firstContext.body.grants.every((grant: { userId: string }) => grant.userId === member.userId)).toBe(true);
+      expect(JSON.stringify(firstContext.body)).not.toContain("First private pet");
+      expect(JSON.stringify(secondContext.body)).not.toContain("Second private pet");
+      await member.c.get(`/pets/${firstPrivatePet.id}`).expect(403);
+      await member.c.get(`/pets/${secondPrivatePet.id}`).expect(403);
+
+      const firstMemberId = await memberIdOf(first.householdId, member.userId);
+      await first.c.delete(`/households/${first.householdId}/members/${firstMemberId}`).expect(200);
+      expect(await prisma.householdMember.count({ where: { userId: member.userId } })).toBe(1);
+      await member.c.get(`/pets/${first.petId}`).expect(403);
+      await member.c.get(`/pets/${second.petId}`).expect(200);
+      expect((await member.c.get("/households").expect(200)).body.map((item: { id: string }) => item.id)).toEqual([second.householdId]);
+    });
+
     it("a household always keeps an owner: the last owner can't leave or be demoted until someone else is promoted", async () => {
       const o = await owner();
       const member = await user("b8-member");
-      await member.c.post(`/household-invitations/${await invite(o, member)}/accept`).expect(201);
+      await requestAndApprove(o, member, await invite(o, member));
       const ownerMemberId = await memberIdOf(o.householdId, o.userId);
       const memberId = await memberIdOf(o.householdId, member.userId);
 
@@ -292,7 +431,7 @@ describe("Batch 8 — Account & security", () => {
     it("temporary access works only inside its window and then reports itself as expired", async () => {
       const o = await owner();
       const sitter = await user("b8-sitter");
-      await sitter.c.post(`/household-invitations/${await invite(o, sitter)}/accept`).expect(201);
+      await requestAndApprove(o, sitter, await invite(o, sitter));
       // Remove the standing view grant so only the temporary one applies.
       await prisma.petAccessGrant.updateMany({ where: { petId: o.petId, userId: sitter.userId }, data: { revokedAt: new Date(Date.now() - 60 * 60 * 1000) } });
       const flags = { canViewIdentity: true, canEditIdentity: false, canViewHealth: false, canEditHealth: false, canBookCare: false, canViewCareProfile: true, canEditCareProfile: false, canViewLocation: false, canManageAccess: false, canRecordClinicalData: false };
@@ -420,7 +559,7 @@ describe("Batch 8 — Account & security", () => {
     it("sharing summary lists who can see your pets and what you can see of others'", async () => {
       const o = await owner();
       const member = await user("b8-member");
-      await member.c.post(`/household-invitations/${await invite(o, member, "CARE_HELPER")}/accept`).expect(201);
+      await requestAndApprove(o, member, await invite(o, member, "CARE_HELPER"));
       const sharing = await o.c.get("/account/privacy/sharing").expect(200);
       expect(sharing.body.sharedByYou).toEqual([expect.objectContaining({ person: expect.any(String), kind: "HOUSEHOLD", canViewHealth: true, pet: { id: o.petId, name: "Cookie" } })]);
       const theirs = await member.c.get("/account/privacy/sharing").expect(200);
@@ -474,7 +613,7 @@ describe("Batch 8 — Account & security", () => {
       await prisma.petMemory.create({ data: { petId: o.petId, householdId: o.householdId, createdByUserId: o.userId, type: "STORY", title: "Owner-only memory", occurredAt: new Date(), visibility: "PRIVATE" } });
       await prisma.allergy.create({ data: { petId: o.petId, name: "Beef", knowledgeState: "KNOWN", status: "ACTIVE", sourceType: "OWNER" } });
       const viewer = await user("b8-viewer");
-      await viewer.c.post(`/household-invitations/${await invite(o, viewer, "VIEW_ONLY")}/accept`).expect(201);
+      await requestAndApprove(o, viewer, await invite(o, viewer, "VIEW_ONLY"));
       const req = await viewer.c.post("/account/privacy/exports").expect(201);
       await app.get(AccountExportService).processQueue();
       const link = await viewer.c.post(`/account/privacy/exports/${req.body.id}/download`).expect(200);
@@ -511,7 +650,7 @@ describe("Batch 8 — Account & security", () => {
 
       // The only owner of a shared household is blocked until someone else can run it.
       const member = await user("b8-member");
-      await member.c.post(`/household-invitations/${await invite(o, member)}/accept`).expect(201);
+      await requestAndApprove(o, member, await invite(o, member));
       const blocked = await o.c.get("/account/privacy/deletion/preview").expect(200);
       expect(blocked.body.blockers).toEqual([{ code: "ONLY_OWNER_OF_SHARED_HOUSEHOLD", count: 1 }]);
       await clearOtpCooldown(o.email);
@@ -560,7 +699,7 @@ describe("Batch 8 — Account & security", () => {
     it("only household owners can buy, change or cancel the membership or read its billing; members can still see what they get", async () => {
       const o = await owner();
       const member = await user("b8-member");
-      await member.c.post(`/household-invitations/${await invite(o, member)}/accept`).expect(201);
+      await requestAndApprove(o, member, await invite(o, member));
       const base = `/households/${o.householdId}/subscription`;
 
       const current = await member.c.get(base).expect(200);
@@ -608,7 +747,7 @@ describe("Batch 8 — Account & security", () => {
       // Membership events belong to the household's owners only.
       const o = await owner();
       const member = await user("b8-member");
-      await member.c.post(`/household-invitations/${await invite(o, member)}/accept`).expect(201);
+      await requestAndApprove(o, member, await invite(o, member));
       const plan = await prisma.subscriptionPlan.create({ data: { code: `b8-${unique()}`, nameFa: "آزمایشی", nameEn: "Trial plan", isFree: false, sortOrder: 90, trialDays: 7, countryAvailability: { create: { countryCode: "IR" } } } });
       await prisma.household.update({ where: { id: o.householdId }, data: { countryCode: "IR" } });
       await o.c.post(`/households/${o.householdId}/subscription/trial`).send({ planId: plan.id }).expect(201);
@@ -627,7 +766,7 @@ describe("Batch 8 — Account & security", () => {
     it("forged ids never reach another person's household, member, invitation, grant, session, subscription, export or deletion request", async () => {
       const victim = await owner("VictimPet");
       const victimMember = await user("b8-vmember");
-      await victimMember.c.post(`/household-invitations/${await invite(victim, victimMember)}/accept`).expect(201);
+      await requestAndApprove(victim, victimMember, await invite(victim, victimMember));
       await victim.c.post(`/households/${victim.householdId}/invitations`).send({ contact: `pending-${unique()}@example.com`, initialAccess: [] }).expect(201);
       const inviteRow = await prisma.householdInvitation.findFirstOrThrow({ where: { householdId: victim.householdId, status: "PENDING" } });
       const grant = await prisma.petAccessGrant.findFirstOrThrow({ where: { petId: victim.petId, userId: victimMember.userId, revokedAt: null } });

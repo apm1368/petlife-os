@@ -1723,6 +1723,12 @@ export class AlreadyHouseholdMemberException extends ApiException {
   }
 }
 
+export class HouseholdInvitationAlreadyPendingException extends ApiException {
+  constructor() {
+    super("HOUSEHOLD_INVITATION_ALREADY_PENDING", "An active invitation or membership request already exists for this contact.", HttpStatus.CONFLICT);
+  }
+}
+
 export class ConsentRequiredException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("CONSENT_REQUIRED", "This agreement is required to use PET LIFE. To stop, request account deletion instead.", HttpStatus.BAD_REQUEST, details);

@@ -149,7 +149,7 @@ export class PetsService {
             dto.microchipNumber === undefined ? undefined : normalizeMicrochip(dto.microchipNumber),
         },
       });
-      await this.events.publish("PetProfileUpdated", { petId: id }, { tx, aggregateType: "Pet", aggregateId: id });
+      await this.events.publish("PetProfileUpdated", { petId: id, changedFields: Object.keys(dto).sort() }, { tx, aggregateType: "Pet", aggregateId: id });
       return pet;
     }).catch(rethrowDuplicateMicrochip);
   }
