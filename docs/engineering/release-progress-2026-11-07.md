@@ -86,6 +86,13 @@
 - Memorial source-image and CDN privacy remain unverified because production bucket/CDN configuration is not available read-only. #110→#111 and #113→#114 remain unmerged dependencies; landing overlap #115/#116/#117 remains review-blocked. No release or retargeting was performed.
 - No feature is `LIVE_VERIFIED` beyond the currently deployed baseline; the localization PRs have not been deployed. Exact release blocker: qualified review/branch protection, first #107 due to production demo rows, then owner-approved dependency order for the remaining PRs.
 
+## Current checkpoint — 2026-11-08 20:05 UTC
+
+- GitHub `main` and production `/api/health/version` both report `315523247bc6bf837d8763f5a31542cf81a695db`; deployment `github-42516946217-1` is serving that SHA. This verifies the deployment version, not authenticated page-family behavior.
+- PR #160 was based on older main and GitHub reported `DIRTY`; hosted CI passed only on old head `758f8101`. Its local branch now contains a merge of current main. German/Spanish catalogs were merged by distinct keys with no value conflicts; 21 focused tests, TypeScript and targeted source lint pass locally. Exact-head hosted CI remains required before any merge.
+- PR #152 is at `f7db2c5c` with CI `42518146302` running. PR #165 is at `6baf4221` with CI `42518099033` running. Both remain PARTIAL pending the exact-head CI and responsive/authenticated checks.
+- Disk free space is 107 MiB. No production build/install ran. Payment worktrees were not visible and were untouched; memorial original-image/CDN access and German/Spanish SMS templates remain unverified/unimplemented. The approved landing HERO is unchanged.
+
 ## Full-page localization correction — 2026-11-08 17:20 UTC
 
 ### Historical checkpoint: before latest main sync
@@ -167,3 +174,11 @@
 - Local `codex/review-trip-setup` now merges `origin/main` at `8d892b2` after PR #165 merged. The previously running hosted CI started before this update and is stale for final merge.
 - German/Spanish message catalogs merged without conflicts. Documentation conflicts were resolved from latest main, with this travel-specific status restored. The local branch needs focused tests, commit/push and new exact-head CI before merge.
 - Production still needs rechecking after deploy run `42519281605`; last verified production SHA is `3155232`. Trip setup/hub remains PARTIAL pending authenticated responsive checks.
+
+## Current localization/release state — 2026-11-08 20:39 UTC
+
+- PR #152 merged normally into `main` at `b6b61c4124640a496c6d2cda5566ee509d07c953`; its exact-head CI run `42519816325` succeeded. #152 remains PARTIAL for authenticated responsive/product behavior verification.
+- Production is at `8d892b2ea8b2b408f517b26866118acd8ca8e96d`; deployment `42519281605` completed successfully for the #165 merge. Public `/de/profile/clinic-notes` and `/es/profile/clinic-notes` return HTTP 200 with correct `lang` and `dir`; authenticated content has not been exercised.
+- #160 and #166 had green CI on their exact reported heads (`42519930623`, `42519567714`) and `CLEAN` before #152 merged. Attempted normal #160 merge reported conflicts; its branch is now being merged with current main `b6b61c4`, with a fresh CI required. #166 status is being rechecked against the new base.
+- #167 admin-users localization is open against `main` at `6b41572bf4181bf1f03f5392aca82fc813ee8970`; CI run `42521359719` is in progress. Its local focused 17 tests, typecheck, targeted lint, JSON parsing and diff checks passed; remains PARTIAL and not merged/live.
+- Disk headroom is 104 MiB. Creating an additional worktree failed due to capacity; source branches/worktrees remain preserved, no cleanup or full build was attempted, and payment worktrees were not accessed.
