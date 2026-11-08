@@ -59,7 +59,7 @@ Status is per page family, not per shared header. `COMPLETE` means all applicati
 | Page family / representative routes | fa | en | de | es | States verified / outstanding |
 |---|---|---|---|---|---|
 | Public landing `/[locale]` | Complete | Complete | Complete | Complete | Main public sections and language-aware navigation; HERO composition/image unchanged. |
-| Member dashboard `/[locale]/home` | Complete | Complete | Partial | Partial | Dashboard body, cards, empty/loading/failure states, access error, retry, event/status labels, locale dates/numbers and dashboard links have rendering tests. Authenticated DE/ES browser verification, including navigation/refresh persistence and responsive layouts, is outstanding. User-entered names/titles and provider/plan content are preserved; plan name is explicitly identified as English in de/es because the source has only fa/en fields. |
+| Member dashboard `/[locale]/home` | Complete | Complete | Partial | Partial | Dashboard body, cards, empty/loading/failure/offline/access-denied states, retry, event/status labels, locale dates/numbers and dashboard links have rendering tests. Authenticated DE/ES browser verification, including navigation/refresh persistence and responsive layouts, is outstanding. User-entered names/titles and provider/plan content are preserved; plan name is explicitly identified as English in de/es because the source has only fa/en fields. |
 | Public navigation, footer and public preview `/[locale]/services` shell | Complete | Complete | Complete | Complete | PR #162 merged at `aacafaae`; exact-head CI `42505793449` and deploy `42507308498` succeeded. Production checks at 390px and 1440px verified German/Spanish translated navigation/footer, correct `lang`, `dir=ltr`, HTTP 200 and no horizontal overflow. |
 | Member/account navigation | Complete | Complete | Partial | Partial | Member navigation has locale catalog entries and focused tests, but authenticated German/Spanish production rendering and route-transition consistency still need verification. |
 | Authentication and registration | Complete | Complete | Complete | Complete | Existing auth page tests cover translated copy; external SMS delivery/templates remain provider-dependent and are not claimed active. |
@@ -187,6 +187,11 @@ Lifecycle actions, status labels, confirmation dialog, owner note, loading/retry
 - Added explicit German and Spanish translations for the dashboard's stat cards, queue and system panels, operational-search labels/empty/error messages, health states and permission-independent UI. System dates now follow fa Jalali or the selected Gregorian locale (`en-US`, `de-DE`, `es-ES`) in Tehran time.
 - Known system/worker statuses are translated; unknown status values remain visible as source diagnostics rather than being guessed. User/admin-entered task titles, case subjects and worker identifiers remain unchanged.
 - Seven focused dashboard tests pass, including translated populated states, translation-catalog key parity and absence of Persian UI/fallback English markers. Web TypeScript check passed. This page-level UI coverage is not yet production/admin-browser verified; the remainder of admin/backoffice/ERP is still PARTIAL.
+
+## Admin dashboard failure states — local follow-up `codex/i18n-admin-dashboard-states`
+
+- The existing dashboard body and data-driven cards/queues are already catalog-backed; this follow-up adds explicit four-language offline and access-denied states and keeps HTTP 401/403 distinct from transport failure. Skeletons receive localized loading labels. No chart or synthetic metric data is added.
+- Twenty-seven dashboard rendering tests pass, including populated data and empty/loading/error/offline/access-denied states across fa/en/de/es, plus no-Persian checks in de/es. TypeScript, targeted ESLint, four-catalog JSON parsing and diff checks pass locally. Authenticated browser verification remains outstanding; dashboard remains PARTIAL.
 
 ## Current checkpoint — 2026-11-08 (after #158 merge)
 

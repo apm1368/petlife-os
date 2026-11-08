@@ -1091,7 +1091,7 @@
       "title": "Ihr Arbeitsüberblick", "subtitle": "Echte Warteschlangen. Klare Prioritäten. Ein zentraler Ort zum Handeln.",
       "support": "Offene Supportfälle", "tasks": "Offene Aufgaben", "trust": "Fälle zu Vertrauen und Sicherheit", "disputes": "Offene Streitfälle", "refunds": "Rückerstattungen zur Freigabe",
       "queue": "Warteschlange für Vertrauen und Sicherheit", "taskList": "Ihre nächsten Prioritäten", "system": "Systemzustand", "workers": "Hintergrundprozesse",
-      "empty": "Es gibt nichts zu bearbeiten.", "failed": "Dieser Bereich konnte nicht geladen werden.", "retry": "Erneut versuchen", "all": "Alle ansehen", "noPermission": "Dieser Bereich ist für Ihre Rolle nicht verfügbar.",
+      "empty": "Es gibt nichts zu bearbeiten.", "failed": "Dieser Bereich konnte nicht geladen werden.", "offline": "Du bist offline. Prüfe deine Verbindung und versuche es erneut.", "noAccess": "Du hast keine Berechtigung, dieses Dashboard aufzurufen. Wende dich an die Administration.", "loading": "Dashboard-Daten werden geladen …", "retry": "Erneut versuchen", "all": "Alle ansehen", "noPermission": "Dieser Bereich ist für Ihre Rolle nicht verfügbar.",
       "notProvided": "Nicht gemeldet", "healthy": "Betriebsbereit", "open": "Offen", "due": "Fällig am {date}",
       "severity": { "CRITICAL": "Kritisch", "HIGH": "Hoch", "MEDIUM": "Mittel", "LOW": "Niedrig" },
       "kind": { "REPORT": "Nutzermeldung", "PLACE_REPORT": "Ortsmeldung", "TRUST_CASE": "Sicherheitsfall", "APPEAL": "Einspruch" },

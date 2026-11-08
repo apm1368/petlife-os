@@ -1091,7 +1091,7 @@
       "title": "Resumen de operaciones", "subtitle": "Colas reales, prioridades claras y un único lugar para actuar.",
       "support": "Casos de soporte abiertos", "tasks": "Tareas abiertas", "trust": "Casos de confianza y seguridad", "disputes": "Disputas abiertas", "refunds": "Reembolsos pendientes de aprobación",
       "queue": "Cola de confianza y seguridad", "taskList": "Tus próximas prioridades", "system": "Estado del sistema", "workers": "Procesos en segundo plano",
-      "empty": "No hay nada pendiente.", "failed": "No se pudo cargar esta sección.", "retry": "Reintentar", "all": "Ver todo", "noPermission": "Tu rol no tiene acceso a esta sección.",
+      "empty": "No hay nada pendiente.", "failed": "No se pudo cargar esta sección.", "offline": "No tienes conexión a Internet. Comprueba tu conexión e inténtalo de nuevo.", "noAccess": "No tienes permiso para ver este panel. Contacta con la administración.", "loading": "Cargando la información del panel…", "retry": "Reintentar", "all": "Ver todo", "noPermission": "Tu rol no tiene acceso a esta sección.",
       "notProvided": "Sin informar", "healthy": "Operativo", "open": "Abierto", "due": "Vence el {date}",
       "severity": { "CRITICAL": "Crítica", "HIGH": "Alta", "MEDIUM": "Media", "LOW": "Baja" },
       "kind": { "REPORT": "Reporte de usuario", "PLACE_REPORT": "Reporte de lugar", "TRUST_CASE": "Caso de confianza", "APPEAL": "Recurso" },

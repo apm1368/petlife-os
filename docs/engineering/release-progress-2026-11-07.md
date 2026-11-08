@@ -129,3 +129,9 @@
 - An independent clinic-notes UI localization slice exists uncommitted in `/workspace/i18n-clinic-notes` based on ancestor `c23227c`. Tests/typecheck/lint passed before syncing; no PR has been opened. Account/clinic-authenticated visual checks remain outstanding.
 - Current filesystem free space is approximately 113 MiB. No cleanable files were removed. Payment worktrees were not present in this environment's worktree listing and remain untouched; do not infer they were deleted.
 - The dashboard's German/Spanish page status remains PARTIAL pending authenticated responsive verification. The pet lifecycle, household and travel pages remain PARTIAL. Memorial original-source/CDN privacy and German/Spanish SMS templates/delivery remain unverified/unimplemented. No new feature is LIVE_VERIFIED from this checkpoint.
+
+## Dashboard localization follow-up — 2026-11-08
+
+- Main and production now both report `315523247bc6bf837d8763f5a31542cf81a695db`; deployment `github-42516946217-1` is active. This is SHA verification, not authenticated dashboard behavior verification.
+- Branch `codex/i18n-admin-dashboard-states` adds explicit fa/en/de/es dashboard offline/access-denied/loading copy and tests. Twenty-seven dashboard tests, TypeScript, targeted ESLint, catalog parsing and diff checks pass locally; hosted CI and authenticated responsive verification remain outstanding. The dashboard stays PARTIAL.
+- Disk free space is approximately 106 MiB. No build/install or cleanup was done. Payment worktrees were not visible in the active worktree inventory and were not modified.
