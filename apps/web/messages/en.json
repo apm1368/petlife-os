@@ -142,6 +142,7 @@
     "navLostPets": "Lost pets",
     "listSeparator": ", "
   },
+  "filePicker": { "choose": "Choose a file", "chooseMultiple": "Choose files", "none": "No file chosen" },
   "auth": {
     "welcome": {
       "title": "Welcome to opetlife",
@@ -3170,7 +3171,25 @@
       "void": "Remove",
       "voidReason": "Reason",
       "provenanceOwner": "Uploaded by household",
-      "provenanceProvider": "Uploaded by provider — verified"
+      "provenanceProvider": "Uploaded by provider — verified",
+      "fileRequired": "Choose the document file first.",
+      "uploadFailed": "The document could not be uploaded. Please try again.",
+      "uploaded": "Document uploaded.",
+      "downloadFailed": "Unable to access this file. Check access and try again.",
+      "back": "Back to documents",
+      "loading": "Loading document",
+      "unavailable": "The document is unavailable.",
+      "unavailableMessage": "It may have been removed or you may not have access.",
+      "retry": "Try again",
+      "source": "Source",
+      "ownerSource": "Owner/household",
+      "recordDate": "Record date",
+      "fileType": "File type",
+      "privacy": "Privacy",
+      "privateNotice": "This file is private and has no public object URL. Every download mints a short-lived signed access link.",
+      "previewDownload": "Preview and secure download",
+      "openFile": "Open file",
+      "previewUnavailable": "Preview is unavailable for this file type."
     },
     "labs": {
       "title": "Labs",

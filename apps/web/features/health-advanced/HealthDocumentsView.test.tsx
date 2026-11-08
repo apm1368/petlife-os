@@ -77,4 +77,28 @@ describe("HealthDocumentsView", () => {
     await waitFor(() => expect(healthAdvancedService.downloadDocument).toHaveBeenCalledWith("pet-1", "doc-1"));
     expect(window.open).toHaveBeenCalledWith("https://signed.example/doc-1?sig=abc", "_blank", "noopener,noreferrer");
   });
+
+  it.each([
+    ["de", "Medizinische Dokumente", "Noch keine medizinischen Dokumente hochgeladen."],
+    ["es", "Documentos médicos", "Aún no se han subido documentos médicos."],
+  ] as const)("renders the full document empty state in %s", async (locale, title, empty) => {
+    vi.mocked(healthAdvancedService.listDocuments).mockResolvedValue([]);
+    renderWithIntl(<HealthDocumentsView petId="pet-1" />, locale);
+    await waitFor(() => expect(screen.getByRole("heading", { name: title })).toBeTruthy());
+    expect(screen.getByText(empty)).toBeTruthy();
+    expect(screen.getByLabelText(locale === "de" ? "Dokumenttyp" : "Tipo de documento")).toBeTruthy();
+    expect(screen.getByText(locale === "de" ? "Datei auswählen" : "Elegir archivo")).toBeTruthy();
+  });
+
+  it.each([
+    ["de", "Vom Haushalt hochgeladen", "Laborbericht"],
+    ["es", "Subido por el hogar", "Informe de laboratorio"],
+  ] as const)("localizes document provenance and type in %s", async (locale, provenance, type) => {
+    vi.mocked(healthAdvancedService.listDocuments).mockResolvedValue([makeDoc({ documentType: "LAB_REPORT" as never })]);
+    renderWithIntl(<HealthDocumentsView petId="pet-1" />, locale);
+    await waitFor(() => expect(screen.getByText("Vet visit summary")).toBeTruthy());
+    expect(screen.getByText(provenance)).toBeTruthy();
+    expect(screen.getAllByText(type)).toHaveLength(2);
+    expect(screen.getByText(locale === "de" ? "Datei anhängen" : "Adjuntar archivo")).toBeTruthy();
+  });
 });
