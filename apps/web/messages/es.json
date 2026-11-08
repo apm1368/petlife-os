@@ -486,10 +486,76 @@
       "unsaved": "Tienes cambios sin guardar."
     }
   },
-  "filePicker": {
-    "choose": "Elegir archivo",
-    "chooseMultiple": "Elegir archivos",
-    "none": "No se ha seleccionado ningún archivo"
+  "filePicker": { "choose": "Elegir archivo", "chooseMultiple": "Elegir archivos", "none": "No se ha seleccionado ningún archivo" },
+  "auth": {
+    "welcome": {
+      "title": "Te damos la bienvenida a opetlife",
+      "subtitle": "Todo sobre la vida de tu mascota, en un solo lugar.",
+      "continueWithEmail": "Continuar con correo electrónico",
+      "continueWithPhone": "Continuar con teléfono",
+      "continueWithGoogle": "Continuar con Google",
+      "continueWithUsername": "Continuar con nombre de usuario",
+      "createAccount": "Crear una cuenta",
+      "googleAuthFailed": "No se pudo iniciar sesión con Google. Prueba otro método."
+    },
+    "identifier": {
+      "emailLabel": "Correo electrónico",
+      "invalidPhone": "Introduce un número de móvil iraní válido.",
+      "phoneLabel": "Número de teléfono",
+      "sendCode": "Enviar código",
+      "changeIdentifier": "Cambiar correo o teléfono"
+    },
+    "otp": {
+      "title": "Introduce el código",
+      "subtitle": "Hemos enviado un código de 6 dígitos a {identifier}.",
+      "resend": "Reenviar código",
+      "resendIn": "Reenviar en {seconds, number} s",
+      "passcodeLabel": "Código de un solo uso",
+      "verify": "Verificar",
+      "invalid": "El código es incorrecto o ha caducado.",
+      "rateLimited": "Demasiados intentos. Inténtalo de nuevo en {seconds, number} segundos.",
+      "rateLimitedMinutes": "Demasiados intentos. Inténtalo de nuevo en unos {minutes, number} minutos.",
+      "genericError": "Se ha producido un error. Inténtalo de nuevo."
+    },
+    "password": {
+      "usernameLabel": "Nombre de usuario",
+      "passwordLabel": "Contraseña",
+      "login": "Iniciar sesión",
+      "forgotPassword": "¿Has olvidado tu contraseña?",
+      "invalidCredentials": "El nombre de usuario o la contraseña no son correctos."
+    },
+    "register": {
+      "title": "Crear una cuenta",
+      "usernameLabel": "Nombre de usuario",
+      "passwordLabel": "Contraseña",
+      "displayNameLabel": "Nombre visible (opcional)",
+      "emailLabel": "Correo electrónico (opcional)",
+      "submit": "Crear cuenta",
+      "usernameTaken": "Ese nombre de usuario ya está en uso.",
+      "haveAccount": "¿Ya tienes una cuenta? Inicia sesión",
+      "confirmPassword": "Confirmar contraseña",
+      "passwordMismatch": "Las contraseñas no coinciden.",
+      "terms": "Acepto las condiciones de uso y la política de privacidad de opetlife.",
+      "genericError": "No se pudo crear tu cuenta. Revisa los datos e inténtalo de nuevo."
+    },
+    "forgot": {
+      "title": "Restablecer contraseña",
+      "identifierLabel": "Nombre de usuario o correo electrónico",
+      "submit": "Enviar enlace de restablecimiento",
+      "sent": "Si existe una cuenta coincidente, se ha enviado un enlace para restablecer la contraseña.",
+      "backToLogin": "Volver a iniciar sesión",
+      "genericError": "No se pudo enviar la solicitud. Inténtalo de nuevo."
+    },
+    "reset": {
+      "title": "Elige una contraseña nueva",
+      "newPasswordLabel": "Nueva contraseña",
+      "submit": "Restablecer contraseña",
+      "invalidToken": "Este enlace no es válido o ha caducado.",
+      "success": "Se ha restablecido tu contraseña. Ya puedes iniciar sesión.",
+      "confirmPassword": "Confirmar contraseña",
+      "passwordMismatch": "Las contraseñas no coinciden.",
+      "genericError": "No se pudo cambiar la contraseña. Inténtalo de nuevo."
+    }
   },
   "travelResults": {
     "allDestinations": "Todos los destinos",
@@ -1392,307 +1458,38 @@
       "checkOutSuffix": ", salida"
     }
   },
-  "errors": {
-    "generic": "Ha ocurrido un problema.",
-    "offline": "No tienes conexión. Es posible que algunas acciones no funcionen."
-  },
+  "errors": { "generic": "Ha ocurrido un problema.", "offline": "No tienes conexión. Es posible que algunas acciones no funcionen." },
   "health": {
-    "attention": {
-      "vaccinationDueSoon": "La próxima vacuna vence pronto.",
-      "vaccinationOverdue": "La vacuna está vencida.",
-      "setupIncomplete": "La información de salud está incompleta."
-    },
-    "knowledgeState": {
-      "KNOWN_PRESENT": "Conocido",
-      "KNOWN_NEGATIVE": "No se conoce ninguno",
-      "UNKNOWN": "Desconocido",
-      "INCOMPLETE": "Aún no registrado"
-    },
-    "vaccinationStatus": {
-      "UP_TO_DATE": "Al día",
-      "DUE_SOON": "Vence pronto",
-      "OVERDUE": "Vencida",
-      "UNKNOWN": "Estado desconocido",
-      "INCOMPLETE": "Aún no registrado"
-    },
-    "setupStatus": {
-      "NOT_STARTED": "Sin empezar",
-      "PARTIAL": "Configuración parcial",
-      "COMPLETE": "Completo"
-    },
+    "attention": { "vaccinationDueSoon": "La próxima vacuna vence pronto.", "vaccinationOverdue": "La vacuna está vencida.", "setupIncomplete": "La información de salud está incompleta." },
+    "knowledgeState": { "KNOWN_PRESENT": "Conocido", "KNOWN_NEGATIVE": "No se conoce ninguno", "UNKNOWN": "Desconocido", "INCOMPLETE": "Aún no registrado" },
+    "vaccinationStatus": { "UP_TO_DATE": "Al día", "DUE_SOON": "Vence pronto", "OVERDUE": "Vencida", "UNKNOWN": "Estado desconocido", "INCOMPLETE": "Aún no registrado" },
+    "setupStatus": { "NOT_STARTED": "Sin empezar", "PARTIAL": "Configuración parcial", "COMPLETE": "Completo" },
     "overview": {
-      "title": "Salud",
-      "subtitle": "Una visión clara del historial médico, el estado actual y los próximos cuidados.",
-      "attention": "Requiere atención",
-      "complete": "La información básica de salud está completa",
-      "current": "Estado actual",
-      "records": "Historia clínica",
-      "care": "Cuidados y seguimiento",
-      "allergies": "Alergias",
-      "conditions": "Afecciones",
-      "medications": "Medicamentos",
-      "vaccination": "Vacunación",
-      "activeMedications": "{count} activos",
-      "active": "activo",
-      "noActiveMedications": "Ningún medicamento activo",
-      "upcoming": "Próximos cuidados",
-      "overdue": "Vencido",
-      "openPlan": "Acción de cuidado pendiente",
-      "recentVisits": "Visitas recientes",
-      "recentDocuments": "Documentos recientes",
-      "noVisit": "Aún no hay visitas clínicas registradas",
-      "noDocument": "Aún no hay documentos médicos registrados",
-      "timeline": "Cronología de salud",
-      "documents": "Documentos médicos",
-      "labs": "Análisis",
-      "imaging": "Diagnóstico por imagen",
-      "referrals": "Derivaciones",
-      "dental": "Odontología",
-      "nutrition": "Nutrición",
-      "rehab": "Rehabilitación",
-      "observations": "Observaciones de la persona responsable",
-      "visits": "Visitas clínicas",
-      "open": "Ver",
-      "shareVet": "Compartir con una clínica veterinaria",
-      "activity": "Actividad de salud",
-      "sharesLink": "Enlaces de acceso",
-      "moreItems": "y {count} más",
-      "completeSetup": "Completar datos de salud",
-      "advancedHealth": "Salud avanzada"
+      "title": "Salud", "subtitle": "Una visión clara del historial médico, el estado actual y los próximos cuidados.", "attention": "Requiere atención", "complete": "La información básica de salud está completa", "current": "Estado actual", "records": "Historia clínica", "care": "Cuidados y seguimiento", "allergies": "Alergias", "conditions": "Afecciones", "medications": "Medicamentos", "vaccination": "Vacunación", "activeMedications": "{count} activos", "active": "activo", "noActiveMedications": "Ningún medicamento activo", "upcoming": "Próximos cuidados", "overdue": "Vencido", "openPlan": "Acción de cuidado pendiente", "recentVisits": "Visitas recientes", "recentDocuments": "Documentos recientes", "noVisit": "Aún no hay visitas clínicas registradas", "noDocument": "Aún no hay documentos médicos registrados", "timeline": "Cronología de salud", "documents": "Documentos médicos", "labs": "Análisis", "imaging": "Diagnóstico por imagen", "referrals": "Derivaciones", "dental": "Odontología", "nutrition": "Nutrición", "rehab": "Rehabilitación", "observations": "Observaciones de la persona responsable", "visits": "Visitas clínicas", "open": "Ver", "shareVet": "Compartir con una clínica veterinaria", "activity": "Actividad de salud", "sharesLink": "Enlaces de acceso", "moreItems": "y {count} más", "completeSetup": "Completar datos de salud", "advancedHealth": "Salud avanzada"
     },
-    "allergies": {
-      "title": "Alergias",
-      "empty": "No hay alergias registradas.",
-      "loadFailed": "No se pudieron cargar las alergias.",
-      "saveFailed": "No se pudo guardar la alergia. Inténtalo de nuevo.",
-      "retry": "Reintentar",
-      "addAllergy": "Añadir alergia",
-      "name": "Nombre",
-      "reaction": "Reacción",
-      "reactionOptional": "Reacción (opcional)",
-      "severity": "Gravedad",
-      "severityOptional": "Gravedad (opcional)",
-      "severity_MILD": "Leve",
-      "severity_MODERATE": "Moderada",
-      "severity_SEVERE": "Grave",
-      "severity_UNKNOWN": "Desconocida",
-      "source": "Origen"
-    },
-    "conditions": {
-      "title": "Afecciones",
-      "empty": "No hay afecciones registradas.",
-      "loadFailed": "No se pudieron cargar las afecciones.",
-      "saveFailed": "No se pudo guardar la información de salud. Inténtalo de nuevo.",
-      "retry": "Reintentar",
-      "addCondition": "Añadir afección",
-      "name": "Nombre",
-      "notes": "Notas",
-      "status_ACTIVE": "Activa",
-      "status_RESOLVED": "Resuelta",
-      "status_HISTORICAL": "Antecedente"
-    },
-    "medications": {
-      "title": "Medicamentos",
-      "empty": "No hay medicamentos registrados.",
-      "loadFailed": "No se pudieron cargar los medicamentos.",
-      "saveFailed": "No se pudo guardar el medicamento. Inténtalo de nuevo.",
-      "retry": "Reintentar",
-      "addMedication": "Añadir medicamento",
-      "name": "Nombre",
-      "dosage": "Dosis",
-      "unit": "Unidad",
-      "frequency": "Frecuencia",
-      "route": "Vía de administración",
-      "instructions": "Indicaciones",
-      "startDate": "Inicio",
-      "endDate": "Fin",
-      "status_ACTIVE": "Activo",
-      "status_SCHEDULED": "Programado",
-      "status_COMPLETED": "Completado",
-      "status_HISTORICAL": "Antecedente"
-    },
-    "vaccinationSummary": {
-      "title": "Resumen de vacunación",
-      "loadFailed": "No se pudo cargar la información de vacunación.",
-      "saveFailed": "No se pudo guardar la información de vacunación. Inténtalo de nuevo.",
-      "retry": "Reintentar",
-      "status": "Estado",
-      "nextDueDate": "Próxima fecha",
-      "lastKnownDate": "Última registrada",
-      "notes": "Notas",
-      "save": "Guardar"
-    },
-    "recordDetail": {
-      "back": "Volver a la lista",
-      "source": "Origen",
-      "recorded": "Fecha de registro",
-      "ownerNotice": "Esta información la registró la persona responsable o un miembro del hogar y no sustituye un diagnóstico veterinario.",
-      "providerNotice": "Se conserva el origen clínico de este registro y no puede sobrescribirse como información de la persona responsable.",
-      "condition": "Afección de salud",
-      "allergy": "Alergia",
-      "medication": "Medicamento",
-      "notes": "Notas",
-      "sourceLabel": "Etiqueta de origen",
-      "reaction": "Reacción",
-      "severity": "Gravedad registrada",
-      "knowledge": "Estado de conocimiento",
-      "dose": "Dosis registrada",
-      "frequency": "Frecuencia",
-      "route": "Vía de administración",
-      "instructions": "Indicaciones",
-      "end": "Fin",
-      "unavailable": "El registro no está disponible.",
-      "retry": "Reintentar",
-      "loading": "Cargando registro"
-    }
+    "allergies": { "title": "Alergias", "empty": "No hay alergias registradas.", "loadFailed": "No se pudieron cargar las alergias.", "saveFailed": "No se pudo guardar la alergia. Inténtalo de nuevo.", "retry": "Reintentar", "addAllergy": "Añadir alergia", "name": "Nombre", "reaction": "Reacción", "reactionOptional": "Reacción (opcional)", "severity": "Gravedad", "severityOptional": "Gravedad (opcional)", "severity_MILD": "Leve", "severity_MODERATE": "Moderada", "severity_SEVERE": "Grave", "severity_UNKNOWN": "Desconocida", "source": "Origen" },
+    "conditions": { "title": "Afecciones", "empty": "No hay afecciones registradas.", "loadFailed": "No se pudieron cargar las afecciones.", "saveFailed": "No se pudo guardar la información de salud. Inténtalo de nuevo.", "retry": "Reintentar", "addCondition": "Añadir afección", "name": "Nombre", "notes": "Notas", "status_ACTIVE": "Activa", "status_RESOLVED": "Resuelta", "status_HISTORICAL": "Antecedente" },
+    "medications": { "title": "Medicamentos", "empty": "No hay medicamentos registrados.", "loadFailed": "No se pudieron cargar los medicamentos.", "saveFailed": "No se pudo guardar el medicamento. Inténtalo de nuevo.", "retry": "Reintentar", "addMedication": "Añadir medicamento", "name": "Nombre", "dosage": "Dosis", "unit": "Unidad", "frequency": "Frecuencia", "route": "Vía de administración", "instructions": "Indicaciones", "startDate": "Inicio", "endDate": "Fin", "status_ACTIVE": "Activo", "status_SCHEDULED": "Programado", "status_COMPLETED": "Completado", "status_HISTORICAL": "Antecedente" },
+    "vaccinationSummary": { "title": "Resumen de vacunación", "loadFailed": "No se pudo cargar la información de vacunación.", "saveFailed": "No se pudo guardar la información de vacunación. Inténtalo de nuevo.", "retry": "Reintentar", "status": "Estado", "nextDueDate": "Próxima fecha", "lastKnownDate": "Última registrada", "notes": "Notas", "save": "Guardar" },
+    "recordDetail": { "back": "Volver a la lista", "source": "Origen", "recorded": "Fecha de registro", "ownerNotice": "Esta información la registró la persona responsable o un miembro del hogar y no sustituye un diagnóstico veterinario.", "providerNotice": "Se conserva el origen clínico de este registro y no puede sobrescribirse como información de la persona responsable.", "condition": "Afección de salud", "allergy": "Alergia", "medication": "Medicamento", "notes": "Notas", "sourceLabel": "Etiqueta de origen", "reaction": "Reacción", "severity": "Gravedad registrada", "knowledge": "Estado de conocimiento", "dose": "Dosis registrada", "frequency": "Frecuencia", "route": "Vía de administración", "instructions": "Indicaciones", "end": "Fin", "unavailable": "El registro no está disponible.", "retry": "Reintentar", "loading": "Cargando registro" }
   },
-  "healthAdvanced": {
-    "documents": {
-      "title": "Documentos médicos",
-      "empty": "Aún no se han subido documentos médicos.",
-      "upload": "Subir documento",
-      "uploading": "Subiendo…",
-      "titleLabel": "Título",
-      "documentType": "Tipo de documento",
-      "download": "Descargar",
-      "provenanceOwner": "Subido por el hogar",
-      "provenanceProvider": "Subido por la clínica veterinaria — verificado",
-      "fileRequired": "Selecciona primero el archivo del documento.",
-      "uploadFailed": "No se pudo subir el documento. Inténtalo de nuevo.",
-      "uploaded": "Documento subido.",
-      "downloadFailed": "No se pudo acceder al archivo. Comprueba el acceso e inténtalo de nuevo.",
-      "back": "Volver a los documentos",
-      "loading": "Cargando documento",
-      "unavailable": "El documento no está disponible.",
-      "unavailableMessage": "Es posible que se haya eliminado o que no tengas acceso.",
-      "retry": "Reintentar",
-      "source": "Origen",
-      "ownerSource": "Persona responsable u hogar",
-      "recordDate": "Fecha de registro",
-      "fileType": "Tipo de archivo",
-      "privacy": "Privacidad",
-      "privateNotice": "Este archivo es privado y no tiene una URL pública. Cada descarga genera un enlace de acceso firmado y de corta duración.",
-      "previewDownload": "Vista previa y descarga segura",
-      "openFile": "Abrir archivo",
-      "previewUnavailable": "La vista previa no está disponible para este tipo de archivo."
-    }
-  },
+  "healthAdvanced": { "documents": { "title": "Documentos médicos", "empty": "Aún no se han subido documentos médicos.", "upload": "Subir documento", "uploading": "Subiendo…", "titleLabel": "Título", "documentType": "Tipo de documento", "download": "Descargar", "provenanceOwner": "Subido por el hogar", "provenanceProvider": "Subido por la clínica veterinaria — verificado", "fileRequired": "Selecciona primero el archivo del documento.", "uploadFailed": "No se pudo subir el documento. Inténtalo de nuevo.", "uploaded": "Documento subido.", "downloadFailed": "No se pudo acceder al archivo. Comprueba el acceso e inténtalo de nuevo.", "back": "Volver a los documentos", "loading": "Cargando documento", "unavailable": "El documento no está disponible.", "unavailableMessage": "Es posible que se haya eliminado o que no tengas acceso.", "retry": "Reintentar", "source": "Origen", "ownerSource": "Persona responsable u hogar", "recordDate": "Fecha de registro", "fileType": "Tipo de archivo", "privacy": "Privacidad", "privateNotice": "Este archivo es privado y no tiene una URL pública. Cada descarga genera un enlace de acceso firmado y de corta duración.", "previewDownload": "Vista previa y descarga segura", "openFile": "Abrir archivo", "previewUnavailable": "La vista previa no está disponible para este tipo de archivo." } },
   "rollout": {
-    "records": {
-      "clinical": "Historia clínica",
-      "providerLocked": "Este registro lo creó el equipo veterinario. Las solicitudes de corrección se registran por separado.",
-      "correction": "Solicitar una corrección del registro",
-      "reason": "Motivo",
-      "edit": "Editar",
-      "remove": "Eliminar",
-      "name": "Nombre",
-      "reaction": "Reacción",
-      "instructions": "Indicaciones",
-      "notes": "Notas",
-      "severity": "Gravedad",
-      "status": "Estado",
-      "save": "Guardar cambios",
-      "cancel": "Cancelar",
-      "failedSave": "No se pudieron guardar los cambios. Tu texto sigue aquí.",
-      "correctionSaved": "La solicitud de corrección quedó registrada. Se conserva el registro original.",
-      "saved": "Cambios guardados.",
-      "confirmRemove": "¿Eliminar este elemento?",
-      "retractDocument": "Retirar documento",
-      "retractHint": "El documento no se elimina. El motivo de retirada permanece en el registro.",
-      "statusLabels": {
-        "ACTIVE": "Activo",
-        "RESOLVED": "Resuelto",
-        "HISTORICAL": "Antecedente",
-        "SCHEDULED": "Programado",
-        "COMPLETED": "Completado"
-      }
-    },
-    "trip": {
-      "title": "Editar plan de viaje",
-      "origin": "Ciudad de origen",
-      "destination": "Ciudad de destino",
-      "notes": "Notas",
-      "depart": "Salida",
-      "return": "Regreso",
-      "mode": "Medio de transporte",
-      "save": "Guardar",
-      "failed": "No se pudieron guardar los cambios. Tus datos siguen aquí."
-    },
+    "records": { "clinical": "Historia clínica", "providerLocked": "Este registro lo creó el equipo veterinario. Las solicitudes de corrección se registran por separado.", "correction": "Solicitar una corrección del registro", "reason": "Motivo", "edit": "Editar", "remove": "Eliminar", "name": "Nombre", "reaction": "Reacción", "instructions": "Indicaciones", "notes": "Notas", "severity": "Gravedad", "status": "Estado", "save": "Guardar cambios", "cancel": "Cancelar", "failedSave": "No se pudieron guardar los cambios. Tu texto sigue aquí.", "correctionSaved": "La solicitud de corrección quedó registrada. Se conserva el registro original.", "saved": "Cambios guardados.", "confirmRemove": "¿Eliminar este elemento?", "retractDocument": "Retirar documento", "retractHint": "El documento no se elimina. El motivo de retirada permanece en el registro.", "statusLabels": { "ACTIVE": "Activo", "RESOLVED": "Resuelto", "HISTORICAL": "Antecedente", "SCHEDULED": "Programado", "COMPLETED": "Completado" } },
+    "trip": { "title": "Editar plan de viaje", "origin": "Ciudad de origen", "destination": "Ciudad de destino", "notes": "Notas", "depart": "Salida", "return": "Regreso", "mode": "Medio de transporte", "save": "Guardar", "failed": "No se pudieron guardar los cambios. Tus datos siguen aquí." },
     "admin": {
-      "title": "Resumen de operaciones",
-      "subtitle": "Colas reales, prioridades claras y un único lugar para actuar.",
-      "support": "Casos de soporte abiertos",
-      "tasks": "Tareas abiertas",
-      "trust": "Casos de confianza y seguridad",
-      "disputes": "Disputas abiertas",
-      "refunds": "Reembolsos pendientes de aprobación",
-      "queue": "Cola de confianza y seguridad",
-      "taskList": "Tus próximas prioridades",
-      "system": "Estado del sistema",
-      "workers": "Procesos en segundo plano",
-      "empty": "No hay nada pendiente.",
-      "failed": "No se pudo cargar esta sección.",
-      "retry": "Reintentar",
-      "all": "Ver todo",
-      "noPermission": "Tu rol no tiene acceso a esta sección.",
-      "notProvided": "Sin informar",
-      "healthy": "Operativo",
-      "open": "Abierto",
-      "due": "Vence el {date}",
-      "severity": {
-        "CRITICAL": "Crítica",
-        "HIGH": "Alta",
-        "MEDIUM": "Media",
-        "LOW": "Baja"
-      },
-      "kind": {
-        "REPORT": "Reporte de usuario",
-        "PLACE_REPORT": "Reporte de lugar",
-        "TRUST_CASE": "Caso de confianza",
-        "APPEAL": "Recurso"
-      },
-      "component": {
-        "api": "API",
-        "database": "Base de datos",
-        "redis": "Redis",
-        "storage": "Almacenamiento de archivos",
-        "outbox": "Cola de eventos"
-      },
-      "systemStatus": {
-        "HEALTHY": "Operativo",
-        "DEGRADED": "Degradado",
-        "LAGGING": "Con retraso",
-        "DOWN": "No disponible",
-        "UP": "Disponible",
-        "RUNNING": "En ejecución",
-        "ERROR": "Error"
-      },
-      "marketplaceStatements": "Liquidaciones del mercado",
-      "insuranceProviders": "Gestión de aseguradoras",
-      "externalSources": "Gestión de fuentes de viaje externas",
-      "accessControl": "Gestión de acceso de administración",
-      "verificationQueue": "Cola de verificación de socios"
+      "title": "Resumen de operaciones", "subtitle": "Colas reales, prioridades claras y un único lugar para actuar.",
+      "support": "Casos de soporte abiertos", "tasks": "Tareas abiertas", "trust": "Casos de confianza y seguridad", "disputes": "Disputas abiertas", "refunds": "Reembolsos pendientes de aprobación",
+      "queue": "Cola de confianza y seguridad", "taskList": "Tus próximas prioridades", "system": "Estado del sistema", "workers": "Procesos en segundo plano",
+      "empty": "No hay nada pendiente.", "failed": "No se pudo cargar esta sección.", "retry": "Reintentar", "all": "Ver todo", "noPermission": "Tu rol no tiene acceso a esta sección.",
+      "notProvided": "Sin informar", "healthy": "Operativo", "open": "Abierto", "due": "Vence el {date}",
+      "severity": { "CRITICAL": "Crítica", "HIGH": "Alta", "MEDIUM": "Media", "LOW": "Baja" },
+      "kind": { "REPORT": "Reporte de usuario", "PLACE_REPORT": "Reporte de lugar", "TRUST_CASE": "Caso de confianza", "APPEAL": "Recurso" },
+      "component": { "api": "API", "database": "Base de datos", "redis": "Redis", "storage": "Almacenamiento de archivos", "outbox": "Cola de eventos" },
+      "systemStatus": { "HEALTHY": "Operativo", "DEGRADED": "Degradado", "LAGGING": "Con retraso", "DOWN": "No disponible", "UP": "Disponible", "RUNNING": "En ejecución", "ERROR": "Error" },
+      "marketplaceStatements": "Liquidaciones del mercado", "insuranceProviders": "Gestión de aseguradoras", "externalSources": "Gestión de fuentes de viaje externas", "accessControl": "Gestión de acceso de administración", "verificationQueue": "Cola de verificación de socios"
     },
-    "adminSearch": {
-      "title": "Buscar clientes, pedidos o casos de soporte",
-      "search": "Buscar",
-      "failed": "La búsqueda falló. Inténtalo de nuevo.",
-      "order": "Pedido",
-      "empty": "No se encontraron resultados."
-    },
-    "sellerOffer": {
-      "title": "Añadir oferta del vendedor",
-      "search": "Buscar en el catálogo central de productos",
-      "find": "Buscar",
-      "empty": "No se encontraron productos.",
-      "variant": "Variante del producto",
-      "choose": "Elegir una variante",
-      "price": "Precio (IRR)",
-      "stock": "Existencias iniciales",
-      "save": "Añadir oferta",
-      "failed": "No se pudo completar la acción. Se conservaron tus datos.",
-      "saved": "Oferta del vendedor creada."
-    }
+    "adminSearch": { "title": "Buscar clientes, pedidos o casos de soporte", "search": "Buscar", "failed": "La búsqueda falló. Inténtalo de nuevo.", "order": "Pedido", "empty": "No se encontraron resultados." }
   },
   "clinicCustomerExtras": {
     "sharedNotesTitle": "Mensajes de la clínica para tu hogar",
@@ -1741,41 +1538,6 @@
     "support": "Soporte"
   },
   "seller": {
-    "shell": {
-      "nav": {
-        "overview": "Resumen",
-        "orders": "Pedidos",
-        "offers": "Ofertas",
-        "inventory": "Inventario",
-        "channels": "Canales",
-        "team": "Equipo",
-        "settings": "Ajustes",
-        "finance": "Finanzas",
-        "promotions": "Promociones"
-      },
-      "notASeller": {
-        "title": "Sin acceso de vendedor",
-        "body": "Tu cuenta no pertenece a ninguna organización de vendedores.",
-        "backToApp": "Volver a opetlife"
-      },
-      "chooseOrg": {
-        "title": "Elige un vendedor",
-        "body": "Perteneces a varias organizaciones de vendedores. Elige en cuál quieres trabajar."
-      },
-      "headerRole": "{role}",
-      "role": {
-        "OWNER": "Propietario",
-        "ADMIN": "Administrador",
-        "OPERATIONS": "Operaciones",
-        "CATALOG_MANAGER": "Gestor del catálogo",
-        "ORDER_MANAGER": "Gestor de pedidos",
-        "FINANCE": "Finanzas",
-        "SUPPORT": "Soporte",
-        "VIEWER": "Consulta"
-      },
-      "switchOrg": "Cambiar de vendedor",
-      "suspendedBanner": "Esta organización de vendedores está suspendida. Las nuevas acciones operativas están bloqueadas."
-    },
     "offers": {
       "title": "Ofertas",
       "loading": "Cargando ofertas…",
