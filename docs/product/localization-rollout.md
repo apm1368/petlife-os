@@ -22,8 +22,8 @@ Status is per page family, not per shared header. `COMPLETE` means all applicati
 | Personal account settings `/profile/settings/personal` | Complete | Complete | Complete | Complete | Existing #119 translation slice covers loading/save/contact/appearance states; verification delivery remains external. |
 | Account overview `/[locale]/profile` | Complete | Complete | Complete | Complete | Overview, loading/failure recovery, session/invitation metrics, household summary and invitation request/decline/error copy tested. Invite text clearly says phone matching does not verify the phone and access begins only after owner approval. |
 | Account activity `/[locale]/profile/activity` | Complete | Complete | Complete | Complete | Event names and summaries, filters, safe unknown-event fallback, empty/loading/error/retry and older-page control; locale-specific dates and numbers tested. Event detail values such as device names remain source content. |
-| Account security `/[locale]/profile/security` | Complete | Complete | Complete | Complete | PR #154 translates page copy, session/password/recovery states, dialogs and errors. CI is pending on its updated head after syncing main; review/merge pending. Not live. |
-| Account privacy `/[locale]/profile/privacy` | Complete | Complete | Complete | Complete | This PR covers consent, sharing, export, deletion and consent-history loading/empty/error/dialog states. Focused tests reject Persian or missing-key fallback. CI/review pending. Not live. |
+| Account security `/[locale]/profile/security` | Complete | Complete | Complete | Complete | PR #154 merged to main after green CI; not production-verified. |
+| Account privacy `/[locale]/profile/privacy` | Complete | Complete | Complete | Complete | PR #155 covers consent, sharing, export, deletion and consent-history loading/empty/error/dialog states. Focused tests reject Persian or missing-key fallback. CI pending on current head; not live. |
 | Other account settings and profile | Partial | Partial | Partial | Partial | Some settings are localized; route-by-route form/dialog/error coverage remains open. |
 | Pet profile, health records, documents, care calendar | Partial | Partial | Partial | Partial | Member dashboard identity/event/status labels now support all four; full profile/health/document/calendar pages and their forms/states remain open. |
 | Shop, product detail, cart/checkout, seller | Partial | Partial | Partial | Partial | Full catalog and seller workflows are not represented as translated by dashboard/link copy; page content, validation and transaction states remain open. |
@@ -46,16 +46,15 @@ The same reviewable batch now includes the account overview route (`/[locale]/pr
 
 Account activity (`/[locale]/profile/activity`) is also covered in this reviewable account slice: filter names, every known event title, method/consent summaries, empty/loading/error, pagination action and date display are translated in all four locales and exercised in German/Spanish rendering tests. Unknown event codes are shown as a localized generic event rather than the raw code. Device/browser descriptions are source values and remain unchanged.
 
+### Account security and privacy follow-ups
+
+- `/[locale]/profile/security` in PR #154 translates sign-in methods, recovery, sessions, security activity, password instructions/errors, success notices, confirmations, loading and error states in fa/en/de/es. It tests de/es page/dialog rendering and rejects Persian UI and missing-key markers. CI was green before merge; merged to main, not production-verified.
+- `/[locale]/profile/privacy` in PR #155 translates consents, sharing, export, deletion impact/reauthentication, statuses and expandable consent history in fa/en/de/es. Tests cover full-page rendering, deletion dialog, consent history, loading/error/empty states and reject Persian UI/missing-key markers. Focused 11-test slice, combined 48-test account/dashboard slice, typecheck and lint pass locally. PR CI is pending on its current head; not live.
+- Source/user values (pet names, contacts, household labels, dates and consent version identifiers) remain unmodified. German/Spanish provider messages are not simulated.
+
 ### Audit rule
 
 Before marking any additional route complete, record its route/component, all four locale catalogs, and tested loading/empty/error/offline/forbidden/dialog/success states. The dashboard result is not evidence that a linked pet, shop, booking, or admin page is localized. Missing DE/ES application strings must be added explicitly; English or Persian fallback is not a completion criterion. The presence of authored content in another language is a content-provenance question, not a translation key.
-### Account security and privacy follow-up
-
-- Security and privacy are separate route-level slices. German and Spanish are authored explicitly; tests use a visible missing-key marker rather than silently rendering Persian UI. User-entered names, device descriptions, consent records and other source content remain unchanged.
-- Security covers the page and its password/session/recovery dialogs and error states. Privacy covers consent and sharing controls, export and deletion flows, consent history, confirmation dialogs, and empty/loading/error states.
-- PR #154's refreshed head is awaiting its new CI run after syncing main. This privacy slice is being synchronized with that same main revision; neither is live until merged and deployed.
-- Persian date behavior remains Jalali. English, German and Spanish use locale-aware Gregorian dates and numbers. UI translations do not imply that SMS/email delivery or provider templates are configured.
-
 ## Account settings follow-up (PR #119)
 
 - `PersonalSettingsView` has explicit German and Spanish translations for its user-facing settings, loading/error/success, appearance, contact verification status and contact-change/OTP steps. Tests assert translated labels and the unverified-contact state in both locales.
