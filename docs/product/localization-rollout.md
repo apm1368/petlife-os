@@ -233,8 +233,15 @@ Lifecycle actions, status labels, confirmation dialog, owner note, loading/retry
 - PR #160 was synchronized with current `main` at `b6b61c4` after the travel PR #152 merged. Its German and Spanish catalog namespaces were combined with the newer main catalogs without conflicting values; the merge also preserves #152 travel strings and #163 health strings.
 - The earlier 21 focused tests and CI were for the prior head; the new sync still requires local reruns, a pushed exact-head CI and production verification. The landing remains PARTIAL, and original memorial-image/CDN privacy is not claimed.
 
-## Admin dashboard failure states — PR #166, synchronized with #168
+## Admin dashboard failure states — PR #166, synchronized with current main
 
 - German and Spanish explicitly cover dashboard offline, unauthorized, loading, empty and failure UI; skeleton labels are localized while dashboard data and business behavior remain unchanged.
-- The branch includes current `main` through #168. The sync exposed missing `offline`, `noAccess` and `loading` dashboard keys after current-main catalogs won conflicts; those keys are restored in German and Spanish.
+- The branch includes current `main` through #169. The sync exposed missing `offline`, `noAccess` and `loading` dashboard keys after current-main catalogs won conflicts; those keys are restored in German and Spanish.
 - Verification on the synchronized branch: 27 dashboard tests and 4 catalog-parity tests pass; web TypeScript check passes. Exact-head hosted CI and production verification remain required. Other admin/backoffice/ERP routes are still PARTIAL.
+
+## Checkout-to-order journey — PR #169 (merged to main)
+
+- German/Spanish now cover checkout address/validation, allergy acknowledgement, review, shipping choices, payment/pending/failure, financing states, progress, order confirmation, order-history states, order detail, refund/cancel/review dialogs, and the payment/refund/fulfillment status labels used by these pages.
+- Checkout/order pages use the four-locale route type for currency, quantity and date formatting; Persian continues to use the Jalali calendar. German/Spanish action failures use localized generic UI text rather than exposing raw English backend error strings. Seller/product/address text is preserved as authored content.
+- Component/parity verification: 45 focused tests passed across checkout, confirmation, order detail, order history and DE/ES key/placeholder coverage; all four catalogs parse, web typecheck and targeted ESLint passed. PR #169 merged to `main` at `9a1b702b`; hosted CI passed on its exact head. Production deployment and route verification are tracked separately.
+- This slice remains PARTIAL: account saved-address management, accessible post-purchase/fulfillment states not exercised by component coverage, and authenticated mobile/desktop browser verification remain open. No delivery or payment provider behavior is added.
