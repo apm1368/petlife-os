@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { resolve } from "node:path";
 import { excludeDemoRecordsFromPublicReads } from "./public-record-origin";
 
@@ -31,5 +32,26 @@ describe("public demo record provenance", () => {
     expect(keys.length).toBeGreaterThan(0);
     for (const key of keys) expect(migration).toContain(`'qa-b4-${key}'`);
     expect(seed).toMatch(/create:\s*\{\s*id:\s*productId,\s*isDemoRecord:\s*true,/);
+  });
+
+  it("backfills Batch 5 public QA places and partners by deterministic fixture IDs", () => {
+    const seed = readFileSync(resolve(apiRoot, "prisma/seed-batch5.ts"), "utf8");
+    const migration = readFileSync(
+      resolve(apiRoot, "prisma/migrations/20261105120000_public_demo_record_provenance/migration.sql"),
+      "utf8",
+    );
+    const places = /const PLACES = \[([\s\S]*?)\n\] as const/.exec(seed)?.[1];
+    expect(places).toBeTruthy();
+    const placeKeys = [...places!.matchAll(/\{ key: "([^"]+)"/g)].map((match) => match[1]!);
+    expect(placeKeys).toHaveLength(11);
+
+    const seededId = (key: string) => {
+      const hash = createHash("sha256").update(`petlife-batch5-qa:${key}`).digest("hex").slice(0, 32);
+      return `${hash.slice(0, 8)}-${hash.slice(8, 12)}-4${hash.slice(13, 16)}-8${hash.slice(17, 20)}-${hash.slice(20)}`;
+    };
+    for (const key of placeKeys) expect(migration).toContain(`'${seededId(`place:${key}`)}'::uuid`);
+    for (const key of ["A", "B", "C"]) expect(migration).toContain(`'${seededId(`org:${key}`)}'::uuid`);
+    expect(seed).toMatch(/create:\s*\{\s*id:\s*orgId\[key\],\s*name:\s*p\.name,[^}]*isDemoRecord:\s*true/);
+    expect(seed).toMatch(/create:\s*\{\s*id:\s*placeId,\s*isDemoRecord:\s*true,/);
   });
 });
