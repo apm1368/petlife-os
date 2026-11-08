@@ -28,6 +28,16 @@ describe("DateRangePicker", () => {
     expect(onValue).toHaveBeenLastCalledWith({ start: "2026-09-29", end: "2026-09-30" });
   });
 
+  it.each([
+    ["de", "September 2026", "Nächster Monat", "Mo"],
+    ["es", "septiembre de 2026", "Mes siguiente", "lun"],
+  ] as const)("localizes the Gregorian calendar UI for %s", (locale, month, nextMonth, firstWeekday) => {
+    renderWithIntl(<Harness />, locale);
+    expect(screen.getByRole("heading", { name: month })).toBeTruthy();
+    expect(screen.getByRole("button", { name: nextMonth })).toBeTruthy();
+    expect(screen.getAllByRole("columnheader")[0]?.textContent).toBe(firstWeekday);
+  });
+
   it("refuses past days, stays across an unavailable night, and too-short stays — with the reason in the label", () => {
     const onValue = vi.fn();
     renderWithIntl(<Harness onValue={onValue} months={2} minNights={2} isUnavailable={(iso) => iso === "2026-10-02"} initial={{ start: "2026-09-29", end: null }} />, "en");
