@@ -1,5 +1,12 @@
 # PET LIFE OS release and development handoff — 2026-11-07
 
+## Health/care localization batch — 2026-11-08 00:30 UTC
+
+- Started branch `feat/i18n-health-de-es` from current #122 head `2e1816b79078bc4861d6c662992782a96ee58633` so this work is parallel to, not chained on, seller PR #135. The branch translates the core health namespace, care profile, care calendar, common actions and medical-derived reminder kinds for German/Spanish; it makes calendar weekdays/month/date labels locale-aware, Monday-first in de/es, Tehran-time aware, and preserves Persian Jalali behavior.
+- Focused validation so far: 7 files / 18 tests passed (health message parity, overview, medications, vaccination summary, care-kind labels, calendar date logic and de/es calendar rendering); web typecheck, web lint, locale JSON parse and `git diff --check` passed. Full hosted CI is still required on the pushed PR head.
+- Decision coverage: GC-09, GC-10, GC-12 and GC-15. Explicitly incomplete in German/Spanish: health depth/advanced health, clinical documents/labs/imaging/referrals, sharing/access, `rollout.records`, Care Center and care suggestions/provider workflows. Do not claim full health localization.
+- Current base PR #122 is open and itself depends on #118. This batch must not merge before its base/dependency is approved, merged and the resulting diff is retested. #135 remains a separate seller-localization PR based on #122; its latest head `1029c279` has successful hosted CI but still lacks review.
+
 ## Production and release queue
 
 - Current `origin/main`: `3ed6c598e92061a40a3e28e1cd48fb4cbef71a41`; the previously reported deployment id was `github-42091865674-1`.

@@ -8,7 +8,7 @@ import { PetLifecycleStatus, type PetDto, type PetYearReviewDto } from "@petlife
 import { petsService } from "@/services/pets.service";
 import { petYearReviewService } from "@/services/pet-year-review.service";
 import { LoadFailure } from "@/features/system/LoadFailure";
-import { CARE_KINDS } from "@/features/care/care-labels";
+import { careKindLabel } from "@/features/care/care-labels";
 import { petAgeMonths } from "@/features/pets/pet-identity";
 import { formatDay, localizeDigits, todayIso } from "@/lib/date/jalali";
 import { currentYear, systemFor, yearRange, type Locale } from "@/features/expenses/expense-model";
@@ -195,7 +195,7 @@ export function YearReviewView({ petId }: { petId: string }) {
             {review.care && review.care.topTypes.length ? (
               <section aria-labelledby="yr-care" className="split-panel">
                 <h2 id="yr-care" className="mb-3 font-semibold text-text-primary">{c.mostCare}</h2>
-                <Breakdown rows={review.care.topTypes.map((t) => [CARE_KINDS[t.type]?.[locale === "fa" ? 0 : 1] ?? t.type, t.count])} n={n} />
+                <Breakdown rows={review.care.topTypes.map((t) => [careKindLabel(t.type, locale), t.count])} n={n} />
               </section>
             ) : null}
             {review.services && review.services.byCategory.length ? (
