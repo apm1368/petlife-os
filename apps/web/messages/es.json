@@ -808,6 +808,39 @@
       "VACCINATION": "Vacunación"
     }
   },
+  "services": {
+    "explore": {
+      "title": "Explorar servicios",
+      "subtitle": "Para {name}",
+      "eyebrow": "Profesionales verificados, en un solo lugar",
+      "heading": "Atención profesional cerca de ti",
+      "description": "Compara servicios por horario disponible, zona, necesidades de tu mascota y experiencia del profesional. Reserva en unos pocos pasos.",
+      "searchLabel": "Buscar servicios",
+      "searchPlaceholder": "¿Qué servicio necesitas?",
+      "searchButton": "Buscar atención",
+      "chooseService": "Elige un servicio",
+      "allProvidersIntro": "Consulta todos los profesionales:",
+      "allServices": "Todos los servicios",
+      "category": {
+        "VET": "Veterinaria",
+        "GROOMING": "Peluquería y baño",
+        "TRAINING": "Adiestramiento",
+        "WALKING": "Paseos",
+        "SITTING": "Cuidado en casa",
+        "BOARDING": "Residencia para mascotas",
+        "PET_TAXI": "Taxi para mascotas"
+      },
+      "categoryHint": {
+        "VET": "Clínicas, visitas a domicilio y especialidades",
+        "GROOMING": "Baños, cortes y cuidados especializados",
+        "TRAINING": "Entrenadores particulares y clases de comportamiento",
+        "WALKING": "Paseos seguros con seguimiento",
+        "SITTING": "Cuidado de confianza en tu hogar",
+        "BOARDING": "Estancias nocturnas con informes diarios",
+        "PET_TAXI": "Traslados seguros dentro de la ciudad"
+      }
+    }
+  },
   "providerProfile": {
     "loading": "Cargando el perfil del proveedor",
     "notFoundTitle": "Este proveedor no está disponible",

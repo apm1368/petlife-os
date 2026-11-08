@@ -86,18 +86,11 @@
 - Memorial source-image and CDN privacy remain unverified because production bucket/CDN configuration is not available read-only. #110→#111 and #113→#114 remain unmerged dependencies; landing overlap #115/#116/#117 remains review-blocked. No release or retargeting was performed.
 - No feature is `LIVE_VERIFIED` beyond the currently deployed baseline; the localization PRs have not been deployed. Exact release blocker: qualified review/branch protection, first #107 due to production demo rows, then owner-approved dependency order for the remaining PRs.
 
-## Full-page localization continuation — 2026-11-08 16:52 UTC
+## Full-page localization correction — 2026-11-08 17:20 UTC
 
-- Main includes #150 at `85c9198239e259f5d36ef66a58b8d17a4a328fea`. #149 deployment `42499967855` completed; production version is `f64e794c` and readiness is healthy. #150 deployment is pending; do not assume production has advanced past #149.
-- #151 is being synced from #149 to the new #150 main. #152 `14bfa89e` and #160 `e2da007c` passed their current-head CI before #150 merged, but are now behind and need sync/retest. #158 `11ff1c43` and #159 `500b0356` include #150 and have hosted CI in progress; local focused suites/typecheck/lint passed after sync.
-- #161 separates the public services overview (`/[locale]/services`) from provider search/profile routes. Live browser inspection found the overview entirely English in de/es. The independent fix adds 25-key parity for `services.explore`; five render tests pass in fa/en/de/es, typecheck/lint pass, hosted CI pending.
-- Production browser checks for public routes have verified correct locale/dir and no overflow on service overview at 390/1440, but exposed English app copy. After #161 merges/deploys, repeat those checks. Authenticated dashboard/account screens were not inspected in a live browser this session.
-- Disk is approximately 257 MiB free; no local production build attempted. Payment worktree preserved. Original memorial source-image/CDN privacy remains unverified. No full application page family is claimed complete based solely on headers; major product families remain PARTIAL.
-
-## Shared-shell localization — 2026-11-08 17:35 UTC
-
-- Main is `5cdde4a4`; production remains `85c9198239e259f5d36ef66a58b8d17a4a328fea`, readiness healthy. Deployment run `42503512219` for #151 is in progress.
-- #161 is synchronized to current main in head `8f8d963f`; 18 service/travel tests, type package build, web typecheck and lint pass locally. Fresh hosted CI is pending; services overview remains PARTIAL and not live-verified.
-- New branch `codex/i18n-public-shell` translates public primary/Explore navigation, local-preview navigation, sign-in and public footer for fa/en/de/es. Seven focused tests pass; typecheck/lint passed on the implementation before the last test-only change. No PR or production release yet.
-- No complete four-language page-family claim is made. Dashboard/account authenticated production rendering remains unverified, and several product families still have documented English fallback. Preserve the landing HERO composition and distinguish source content from interface copy.
-- The separate payment worktree was not present in this workspace worktree listing; no payment files were modified. Memorial source-image/CDN privacy remains unverified; German/Spanish SMS delivery/templates are not claimed.
+- Main is `4efbcf26` after #161 merged through the normal squash path. Production remains `5cdde4a44d98bb7e345cf6ffd43ae8d608be5947`; the deploy for #161 (`42505282261`) is still in progress. Production readiness is healthy.
+- #151 is LIVE_VERIFIED for its tested public travel search results: deployment `42503512219` completed, production reports `5cdde4a4`, and a live browser check at 390px/1440px found German/Spanish LTR pages with no horizontal overflow and localized search copy. This does not verify live inventory or all travel pages.
+- #161 exact-head CI passed and it merged as `4efbcf26`; the services-overview body is not live-verified until deployment completes and the route is checked in production. Before deploy, `/de/services` and `/es/services` were confirmed English-only.
+- The separate `codex/i18n-public-shell` branch has seven focused tests, web typecheck/lint and four-locale message-key parity passing locally. It is now syncing to main; run checks again and obtain fresh hosted CI before merging.
+- Current public browser inspection also found the public navigation/login/footer are still English in de/es; the new shell branch addresses that. Account-authenticated production pages remain uninspected. Several product families and error/empty/dialog states remain PARTIAL.
+- Disk is about 254 MiB free; no local production build attempted. No payment worktree was present in this workspace's worktree listing and no payment files were modified. Memorial source-image/CDN privacy remains unverified; German/Spanish SMS delivery/templates are not claimed.
