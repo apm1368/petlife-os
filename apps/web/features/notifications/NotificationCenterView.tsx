@@ -27,7 +27,8 @@ const CATEGORY_TONE: Record<string, "neutral" | "success" | "urgent"> = {
 };
 
 function formatTimestamp(iso: string, locale: string): string {
-  return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(iso));
+  const intlLocale = locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-US";
+  return new Intl.DateTimeFormat(intlLocale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(iso));
 }
 
 /**
@@ -135,7 +136,7 @@ export function NotificationCenterView() {
                   <button type="button" onClick={() => void openNotification(notification)} className="notice-row" data-unread={isUnread} data-priority={isHighPriority ? "high" : undefined}>
                     <span className="notice-row__dot" aria-hidden="true" />
                     <span className="notice-row__text">
-                      <span className="notice-row__title">{isUnread ? <span className="sr-only">{locale === "fa" ? "خوانده‌نشده: " : "Unread: "}</span> : null}{notification.title}</span>
+                    <span className="notice-row__title">{isUnread ? <span className="sr-only">{t("unreadPrefix")}</span> : null}{notification.title}</span>
                       <span className="notice-row__body">{notification.body}</span>
                       <span className="notice-row__meta">
                         <StatusLabel tone={CATEGORY_TONE[notification.category] ?? "neutral"}>{t(`category.${notification.category}`)}</StatusLabel>
