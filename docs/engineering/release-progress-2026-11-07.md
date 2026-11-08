@@ -161,3 +161,9 @@
 - PR #152 is based on `main`, head `350f4d1d`; exact-head CI run `42517206168` is in progress. The sync with #159 passed 51 travel tests and TypeScript locally. It remains PARTIAL pending current CI and responsive browser inspection.
 - PR #165 is based on `main`, last pushed head `c93b3077`; CI run `42516710325` is still running for that head. Local follow-up changes add fa/en offline and access-denied strings and expand its rendered clinic page coverage to 16 tests; these local changes are not yet pushed or hosted-CI verified. Route status remains PARTIAL pending responsive/authenticated browser verification.
 - Disk free space is 107 MiB; avoid production builds and package installs. No payment worktree was visible in this workspace and no payment files were touched. Original memorial source-image/CDN access and German/Spanish SMS templates/delivery remain unverified/unimplemented. Landing HERO is unchanged.
+
+## PR #152 base update — 2026-11-08 20:20 UTC
+
+- Local `codex/review-trip-setup` now merges `origin/main` at `8d892b2` after PR #165 merged. The previously running hosted CI started before this update and is stale for final merge.
+- German/Spanish message catalogs merged without conflicts. Documentation conflicts were resolved from latest main, with this travel-specific status restored. The local branch needs focused tests, commit/push and new exact-head CI before merge.
+- Production still needs rechecking after deploy run `42519281605`; last verified production SHA is `3155232`. Trip setup/hub remains PARTIAL pending authenticated responsive checks.
