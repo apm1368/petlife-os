@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
+import type { RouteLocale } from "@/lib/i18n/config";
 import { Button, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { LostPetIncidentPublicDto, PaginatedDto } from "@petlife/types";
 import { lostPetService } from "@/services/lost-pet.service";
@@ -14,8 +15,7 @@ import { LoadFailure } from "@/features/system/LoadFailure";
 export function PublicLostPetListView() {
   const t = useTranslations("lostPet");
   const tCommon = useTranslations("common");
-  const lang = useLocale() as "fa" | "en";
-  const fa = lang === "fa";
+  const lang = useLocale() as RouteLocale;
   const [data, setData] = useState<PaginatedDto<LostPetIncidentPublicDto> | null>(null);
   const [error, setError] = useState<unknown>(null);
   const [page, setPage] = useState(1);
@@ -38,15 +38,15 @@ export function PublicLostPetListView() {
         <h1 className="text-page-title text-text-primary">{t("public.list.title")}</h1>
         <p className="text-body text-text-secondary">{t("public.list.subtitle")}</p>
       </div>
-      <div role="group" aria-label={fa ? "گونه" : "Species"} className="flex flex-wrap gap-2">
-        {[["", fa ? "همه" : "All"], ["DOG", fa ? "سگ" : "Dogs"], ["CAT", fa ? "گربه" : "Cats"], ["OTHER", fa ? "سایر" : "Other"]].map(([value, label]) => (
+      <div role="group" aria-label={t("public.list.speciesFilter")} className="flex flex-wrap gap-2">
+        {[["", t("public.list.allSpecies")], ["DOG", t("species.dog")], ["CAT", t("species.cat")], ["OTHER", t("species.other")]].map(([value, label]) => (
           <button key={value} type="button" aria-pressed={species === value} onClick={() => { setSpecies(value!); setPage(1); }} className={`min-h-11 rounded-full border px-4 text-sm ${species === value ? "border-brand-natural bg-brand-solid/10" : "border-border-subtle text-text-secondary"}`}>{label}</button>
         ))}
       </div>
       {error ? <LoadFailure error={error} onRetry={() => void load()} /> : !data ? (
         <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />
       ) : data.items.length === 0 ? (
-        <EmptyState title={t("list.empty")} description={fa ? "در حال حاضر گزارش فعالی از حیوان گم‌شده ثبت نشده است." : "There are no active lost-pet reports right now."} />
+        <EmptyState title={t("list.empty")} description={t("public.list.emptyDescription")} />
       ) : (
         <>
           <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -57,23 +57,23 @@ export function PublicLostPetListView() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={incident.primaryPhotoUrl} alt={incident.petName} loading="lazy" decoding="async" className="aspect-[4/3] w-full rounded-md object-cover" />
                   ) : (
-                    <div className="flex aspect-[4/3] items-center justify-center rounded-md bg-surface-subtle text-metadata text-text-secondary">{fa ? "بدون عکس" : "No photo"}</div>
+                    <div className="flex aspect-[4/3] items-center justify-center rounded-md bg-surface-subtle text-metadata text-text-secondary">{t("public.list.noPhoto")}</div>
                   )}
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-bold text-text-primary">{incident.petName}</span>
                     <StatusLabel tone={lostPetStatusTone(incident.status)}>{t(`status.${incident.status}`)}</StatusLabel>
                   </div>
                   <p className="text-metadata text-text-secondary">{incident.approximateArea ?? t("list.noLocation")}</p>
-                  {incident.lastSeenAt ? <p className="text-metadata text-text-secondary">{fa ? "آخرین مشاهده: " : "Last seen: "}{formatDay(incident.lastSeenAt.slice(0, 10), lang)}</p> : null}
+                  {incident.lastSeenAt ? <p className="text-metadata text-text-secondary">{t("public.list.lastSeen", { date: formatDay(incident.lastSeenAt.slice(0, 10), lang) })}</p> : null}
                 </Link>
               </li>
             ))}
           </ul>
           {data.total > data.pageSize ? (
-            <nav aria-label={fa ? "صفحه‌ها" : "Pages"} className="flex items-center justify-center gap-3">
-              <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>{fa ? "قبلی" : "Previous"}</Button>
+            <nav aria-label={t("public.list.paginationLabel")} className="flex items-center justify-center gap-3">
+              <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>{t("public.list.previous")}</Button>
               <span className="text-sm text-text-secondary">{localizeDigits(page, lang)} / {localizeDigits(Math.ceil(data.total / data.pageSize), lang)}</span>
-              <Button variant="secondary" size="sm" disabled={page * data.pageSize >= data.total} onClick={() => setPage(page + 1)}>{fa ? "بعدی" : "Next"}</Button>
+              <Button variant="secondary" size="sm" disabled={page * data.pageSize >= data.total} onClick={() => setPage(page + 1)}>{t("public.list.next")}</Button>
             </nav>
           ) : null}
         </>
