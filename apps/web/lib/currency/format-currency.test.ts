@@ -23,4 +23,9 @@ describe("formatCurrency", () => {
     const result = formatCurrency(1_234_567, "en");
     expect(result).not.toContain(".");
   });
+
+  it("formats Toman with German and Spanish number conventions", () => {
+    expect(formatCurrency(1_250_000, "de")).toBe("125.000 Toman");
+    expect(formatCurrency(1_250_000, "es")).toBe("125.000 Toman");
+  });
 });
