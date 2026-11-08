@@ -19,6 +19,14 @@ const fa = {
     { title: "وقت بیشتری برای با هم بودن", body: "پیاده‌روی، نظافت و مراقبت روزانه؛ برای روزهایی که دستت پر است.", action: "کشف خدمات مراقبتی", image: "activity", href: "/services" },
     { title: "هم‌سفر همیشگی تو", body: "اقامتگاه‌های پذیرای حیوانات و اطلاعات سفر را پیش از حرکت بررسی کن.", action: "برنامه‌ریزی سفر", image: "travel", href: "/travel" },
   ],
+  publicArticles: {
+    eyebrow: "راهنمایی‌های تأییدشده برای مراقبت بهتر",
+    title: "تازه‌ترین مقاله‌ها",
+    allArticles: "دیدن همهٔ مقاله‌ها",
+    empty: "هنوز مقالهٔ منتشرشده‌ای وجود ندارد.",
+    loadError: "مقاله‌ها بارگذاری نشدند. کمی بعد دوباره تلاش کنید.",
+    retry: "تلاش دوباره",
+  },
   trustEyebrow: "اعتماد، با شفافیت شروع می‌شود", trustTitle: "اطلاعات او، با اختیار تو",
   trust: [
     { title: "اشتراک با اجازهٔ تو", body: "دسترسی به پرونده را خودت تعیین می‌کنی؛ چه کسی، کدام بخش و تا چه زمانی." },
@@ -60,6 +68,14 @@ const en: StoryCopy = {
     { title: "More time together", body: "Walking, grooming and everyday care for the days your hands are full.", action: "Explore care services", image: "activity", href: "/services" },
     { title: "Your favourite travel companion", body: "Check pet-friendly stays and travel information before you leave.", action: "Plan a trip", image: "travel", href: "/travel" },
   ],
+  publicArticles: {
+    eyebrow: "Trusted guidance for better care",
+    title: "Latest articles",
+    allArticles: "See all articles",
+    empty: "There are no published articles yet.",
+    loadError: "Articles could not be loaded. Please try again shortly.",
+    retry: "Try again",
+  },
   trustEyebrow: "Trust starts with transparency", trustTitle: "Their information. Your choice.",
   trust: [
     { title: "Shared with your permission", body: "You decide who can access their record, which parts, and for how long." },
@@ -100,6 +116,7 @@ const de: StoryCopy = {
     { title: "Mehr Zeit füreinander", body: "Spaziergänge, Pflege und Betreuung für Tage, an denen viel los ist.", action: "Betreuungsangebote entdecken", image: "activity", href: "/services" },
     { title: "Immer an deiner Seite", body: "Prüfe tierfreundliche Unterkünfte und Reiseinformationen vor der Abfahrt.", action: "Reise planen", image: "travel", href: "/travel" },
   ],
+  publicArticles: { eyebrow: "Verlässliche Hinweise für bessere Tierpflege", title: "Neueste Artikel", allArticles: "Alle Artikel ansehen", empty: "Es gibt noch keine veröffentlichten Artikel.", loadError: "Artikel konnten nicht geladen werden. Bitte versuchen Sie es später erneut.", retry: "Erneut versuchen" },
   trustEyebrow: "Vertrauen beginnt mit Klarheit", trustTitle: "Ihre Daten. Deine Entscheidung.",
   trust: [
     { title: "Nur mit deiner Erlaubnis", body: "Du bestimmst, wer welche Teile der Akte wie lange sehen darf." },
@@ -140,6 +157,7 @@ const es: StoryCopy = {
     { title: "Más tiempo para estar juntos", body: "Paseos, higiene y cuidados para los días en que tienes mucho que hacer.", action: "Descubrir servicios de cuidado", image: "activity", href: "/services" },
     { title: "Tu compañera de viaje", body: "Consulta alojamientos que aceptan mascotas e información de viaje antes de salir.", action: "Planificar un viaje", image: "travel", href: "/travel" },
   ],
+  publicArticles: { eyebrow: "Orientación fiable para cuidar mejor", title: "Artículos recientes", allArticles: "Ver todos los artículos", empty: "Todavía no hay artículos publicados.", loadError: "No se pudieron cargar los artículos. Inténtalo de nuevo más tarde.", retry: "Reintentar" },
   trustEyebrow: "La confianza empieza con transparencia", trustTitle: "Sus datos, tu decisión",
   trust: [
     { title: "Compartir con tu permiso", body: "Tú decides quién puede ver cada parte del historial y durante cuánto tiempo." },

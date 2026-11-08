@@ -7,6 +7,7 @@ import { ParkHero } from "./ParkHero";
 import { ParkFooter } from "./ParkFooter";
 import { storyCopy } from "./story-copy";
 import { formatLocaleNumber } from "@/lib/i18n/format";
+import { LandingPublicArticles } from "./LandingPublicArticles";
 
 const facts = [Fingerprint, HeartPulse, CalendarDays, Images];
 const trustIcons = [LockKeyhole, FileText, CircleHelp];
@@ -52,6 +53,7 @@ export function HomeLanding({ locale }: { locale: RouteLocale }) {
           <Link href={href(moment.href)}>{moment.action}<Arrow size={17} aria-hidden="true" /></Link>
         </article>)}</div>
       </section>
+      <LandingPublicArticles locale={locale} copy={c.publicArticles} />
       <section className="park-trust" aria-labelledby="park-trust-title">
         <div className="park-section-heading"><p className="park-eyebrow">{c.trustEyebrow}</p><h2 id="park-trust-title">{c.trustTitle}</h2></div>
         <div className="park-trust__grid">{c.trust.map((point,i) => {

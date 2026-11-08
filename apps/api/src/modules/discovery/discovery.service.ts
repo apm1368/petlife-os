@@ -7,6 +7,7 @@ import { SlotGeneratorService } from "../providers/slot-generator.service";
 import { toProviderLocationDto, toProviderServiceDto } from "../providers/provider-dto.mapper";
 import { ProviderReviewsService, type ProviderRatingSummary } from "../booking/provider-reviews.service";
 import type { DiscoverProvidersDto, DiscoverySort } from "./discovery.dto";
+import { excludeDemoRecordsFromPublicReads } from "../../common/public-record-origin";
 
 const MAX_CANDIDATES = 60;
 const AVAILABILITY_HORIZON_DAYS = 7;
@@ -98,6 +99,7 @@ export class DiscoveryService {
     };
     const orgs = await this.prisma.providerOrganization.findMany({
       where: {
+        ...excludeDemoRecordsFromPublicReads(),
         verificationStatus: "VERIFIED",
         services: { some: serviceWhere },
         ...(query.q ? { OR: [{ name: { contains: query.q, mode: "insensitive" } }, { description: { contains: query.q, mode: "insensitive" } }, { specialties: { has: query.q } }] } : {}),
@@ -218,7 +220,7 @@ export class DiscoveryService {
   /** Public entity detail for any verified provider: identity, media, team, services, policies, FAQ, reviews, trust signals. */
   async profile(providerId: string) {
     const org = await this.prisma.providerOrganization.findFirst({
-      where: { id: providerId, verificationStatus: "VERIFIED" },
+      where: { id: providerId, verificationStatus: "VERIFIED", ...excludeDemoRecordsFromPublicReads() },
       include: {
         locations: true,
         services: { where: { isActive: true }, include: { variants: true, qualifiedStaff: { select: { providerUserId: true } } }, orderBy: { name: "asc" } },
@@ -258,7 +260,7 @@ export class DiscoveryService {
   }
 
   async cities(): Promise<string[]> {
-    const rows = await this.prisma.providerLocation.findMany({ where: { providerOrganization: { verificationStatus: "VERIFIED" } }, distinct: ["city"], select: { city: true }, orderBy: { city: "asc" } });
+    const rows = await this.prisma.providerLocation.findMany({ where: { providerOrganization: { verificationStatus: "VERIFIED", ...excludeDemoRecordsFromPublicReads() } }, distinct: ["city"], select: { city: true }, orderBy: { city: "asc" } });
     return rows.map((r) => r.city);
   }
 }
