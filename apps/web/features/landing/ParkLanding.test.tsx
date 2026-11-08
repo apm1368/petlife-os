@@ -66,6 +66,15 @@ describe("Approved park landing", () => {
     expect(within(selector).getAllByRole("option").map(option => (option as HTMLOptionElement).value)).toEqual(["fa", "en", "de", "es"]);
   });
 
+  it.each(["de", "es"] as const)("uses %s copy for all landing header actions", locale => {
+    render(<ParkHeader locale={locale} />);
+    expect(screen.getByRole("link", { name: parkCopy[locale].signIn }).getAttribute("href")).toBe(`/${locale}/auth`);
+    expect(screen.getByRole("navigation", { name: parkCopy[locale].navLabel })).toBeTruthy();
+    expect(screen.getByRole("button", { name: parkCopy[locale].menuLabel })).toBeTruthy();
+    const mobileNav = document.getElementById("park-mobile-nav")!;
+    expect(mobileNav.querySelector(`a[href="/${locale}/register"]`)?.textContent).toBe(parkCopy[locale].memberJoin);
+  });
+
   it("takes authenticated visitors to their dashboard and preserves the partner destination", () => {
     state.authenticated = true;
     render(<ParkHeader locale="fa" />);

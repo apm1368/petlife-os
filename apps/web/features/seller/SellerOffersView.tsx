@@ -20,6 +20,8 @@ import { formatCurrency } from "@/lib/currency/format-currency";
 import { ApiError } from "@/lib/api/client";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 import { VerificationRequiredNotice } from "@/features/partner-verification/VerificationRequiredNotice";
+import type { RouteLocale } from "@/lib/i18n/config";
+import { formatLocaleNumber } from "@/lib/i18n/format";
 
 const REPEAT_INTERVALS = [7, 14, 30, 45, 60, 90];
 
@@ -42,7 +44,7 @@ function toDraft(offer: SellerOsOfferDto): Draft {
 /** Seller Offers (spec section 42) — price/status edits are explicit save actions, never silent auto-save; marketplace sync health is shown per offer, never hidden. */
 export function SellerOffersView() {
   const t = useTranslations("seller.offers");
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as RouteLocale;
   const role = useSellerStore((s) => s.context?.active?.role);
   const verified = useSellerStore((s) => s.context?.active?.verificationStatus === "VERIFIED");
   const canEdit = !!role && ["OWNER", "ADMIN", "CATALOG_MANAGER"].includes(role);
@@ -90,9 +92,11 @@ export function SellerOffersView() {
       setDrafts((prev) => ({ ...prev, [offerId]: toDraft(updated) }));
     } catch (err) {
       setSaveError(
-        err instanceof ApiError && err.status < 500
-          ? apiErrorText(err, locale, t("saveFailed"))
-          : t("saveFailed"),
+        locale === "fa" && err instanceof ApiError && err.status < 500
+          ? apiErrorText(err, "fa", t("saveFailed"))
+          : locale === "en" && err instanceof ApiError && err.status < 500
+            ? apiErrorText(err, "en", t("saveFailed"))
+            : t("saveFailed"),
       );
     } finally {
       setSavingId(null);
@@ -249,7 +253,7 @@ export function SellerOffersView() {
                           className={`min-h-9 rounded-full border px-3 text-metadata ${on ? "border-brand-natural bg-brand-solid text-on-brand" : "border-border-subtle text-text-secondary"}`}
                         >
                           {t("repeat.everyDays", {
-                            days: days.toLocaleString(locale === "fa" ? "fa-IR" : "en-US"),
+                            days: formatLocaleNumber(days, locale),
                           })}
                         </button>
                       );

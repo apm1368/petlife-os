@@ -58,8 +58,8 @@ Status is per page family, not per shared header. `COMPLETE` means all applicati
 
 | Page family / representative routes | fa | en | de | es | States verified / outstanding |
 |---|---|---|---|---|---|
-| Public landing `/[locale]` | Complete | Complete | Complete | Complete | Main public sections and language-aware navigation; HERO composition/image unchanged. |
-| Member dashboard `/[locale]/home` | Complete | Complete | Partial | Partial | Dashboard body, cards, empty/loading/failure/offline/access-denied states, retry, event/status labels, locale dates/numbers and dashboard links have rendering tests. Authenticated DE/ES browser verification, including navigation/refresh persistence and responsive layouts, is outstanding. User-entered names/titles and provider/plan content are preserved; plan name is explicitly identified as English in de/es because the source has only fa/en fields. |
+| Public landing `/[locale]` | Complete | Complete | Partial | Partial | PR #160 fixes observed German/Spanish memorial copy and compact mobile header without changing the HERO; its synchronized exact-head CI and post-deploy browser verification are pending. |
+| Member dashboard `/[locale]/home` | Complete | Complete | Partial | Partial | Dashboard body, cards, empty/loading/failure states, access error, retry, event/status labels, locale dates/numbers and dashboard links have rendering tests. Authenticated DE/ES browser verification, including navigation/refresh persistence and responsive layouts, is outstanding. User-entered names/titles and provider/plan content are preserved; plan name is explicitly identified as English in de/es because the source has only fa/en fields. |
 | Public navigation, footer and public preview `/[locale]/services` shell | Complete | Complete | Complete | Complete | PR #162 merged at `aacafaae`; exact-head CI `42505793449` and deploy `42507308498` succeeded. Production checks at 390px and 1440px verified German/Spanish translated navigation/footer, correct `lang`, `dir=ltr`, HTTP 200 and no horizontal overflow. |
 | Member/account navigation | Complete | Complete | Partial | Partial | Member navigation has locale catalog entries and focused tests, but authenticated German/Spanish production rendering and route-transition consistency still need verification. |
 | Authentication and registration | Complete | Complete | Complete | Complete | Existing auth page tests cover translated copy; external SMS delivery/templates remain provider-dependent and are not claimed active. |
@@ -221,7 +221,14 @@ Lifecycle actions, status labels, confirmation dialog, owner note, loading/retry
 - Trip setup/hub remains PARTIAL: listing/detail and authenticated responsive browser behavior are not fully covered, and no live availability or booking is claimed. Source-authored content is preserved and the exact source link is the final reservation path.
 - Focused post-sync tests and exact-head CI are required before merge; production behavior must be checked after deployment.
 
-## Admin operations dashboard failures — PR #166
+## Seller catalog offers — German/Spanish slice
 
-- The admin dashboard's loading, generic failure, offline and unauthorized/access-denied states now have explicit fa/en/de/es copy; skeletons also receive a localized accessible label. Existing dashboard body content and business behavior are unchanged.
-- The page remains PARTIAL until exact-head CI and authenticated browser checks pass. This does not translate other backoffice/ERP routes or user/admin-authored queue data.
+- The seller-offers route and its create-offer/catalog-request disclosure now use German/Spanish application UI, including search, empty/request form, approval states, offer inputs, status controls, repeat intervals and feedback. A complete-key/placeholder parity test covers both namespaces; rendering tests also assert no Persian interface text.
+- Seller names, product titles, descriptions, prices and marketplace-provided content remain source data. No seller permissions, pricing or inventory behavior changed.
+- The create-offer form is localized, but seller onboarding, central-catalog administration, orders, team, returns, finance and the complete seller OS are not. Mark seller operations PARTIAL pending hosted CI and authenticated browser verification.
+
+## Public landing and memorial localization — PR #160
+
+- The landing header actions, memorial section and their accessible labels have German/Spanish UI text; the approved HERO image and composition are unchanged. Compact header rules address mobile layout. Published/user-authored memorial content is not translated or fabricated.
+- PR #160 was synchronized with current `main` at `b6b61c4` after the travel PR #152 merged. Its German and Spanish catalog namespaces were combined with the newer main catalogs without conflicting values; the merge also preserves #152 travel strings and #163 health strings.
+- The earlier 21 focused tests and CI were for the prior head; the new sync still requires local reruns, a pushed exact-head CI and production verification. The landing remains PARTIAL, and original memorial-image/CDN privacy is not claimed.
