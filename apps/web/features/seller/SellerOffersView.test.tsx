@@ -7,7 +7,7 @@ import { useSellerStore } from "@/stores/seller-store";
 import { SellerOffersView } from "./SellerOffersView";
 
 vi.mock("@/services/seller-os.service", () => ({
-  sellerOsService: { listOffers: vi.fn(), updateOffer: vi.fn() },
+  sellerOsService: { listOffers: vi.fn(), updateOffer: vi.fn(), listCatalogProductRequests: vi.fn().mockResolvedValue([]), createCatalogProductRequest: vi.fn() },
 }));
 
 const OFFER: SellerOsOfferDto = {
@@ -49,6 +49,7 @@ describe("SellerOffersView", () => {
   beforeEach(() => {
     vi.mocked(sellerOsService.listOffers).mockReset();
     vi.mocked(sellerOsService.updateOffer).mockReset();
+    vi.mocked(sellerOsService.listCatalogProductRequests).mockReset().mockResolvedValue([]);
     useSellerStore.setState({
       context: {
         active: {
