@@ -85,3 +85,18 @@
 - Disk: current free space is 668 MiB (98% used). This is below a prudent local production-build margin; no further cleanup was justified, and no production build was attempted. Safe focused tests/typecheck/lint are available. Keep the separate payment-controls worktree and its uncommitted files untouched.
 - Memorial source-image and CDN privacy remain unverified because production bucket/CDN configuration is not available read-only. #110→#111 and #113→#114 remain unmerged dependencies; landing overlap #115/#116/#117 remains review-blocked. No release or retargeting was performed.
 - No feature is `LIVE_VERIFIED` beyond the currently deployed baseline; the localization PRs have not been deployed. Exact release blocker: qualified review/branch protection, first #107 due to production demo rows, then owner-approved dependency order for the remaining PRs.
+
+## Full-page localization continuation — 2026-11-08 16:30 UTC
+
+- Current main before this batch: `f64e794cf9cb1d32273cedcd750106a42c51a528`, created by merging provider discovery/profile localization PR #149 after exact-head CI passed (8 focused tests also passed locally). Its deployment run `42499967855` is still in progress; production remains at `afefa93237e687a2613a88dd0e5d9fb5457aa68f` (`github-42497787994-1`) at this checkpoint.
+- #150 booking-creation localization is synced to #149's merge. Booking-flow and care/calendar regressions pass (24 tests); web typecheck/lint passed before and after the sync. New hosted CI is required on the sync head before any merge.
+- #151 travel results and #152 travel hub/trip surfaces, #158 household controls and #159 pet lifecycle all passed their exact-head CI before #149 moved main. Their current bases must be rechecked; sync/retest where stale, never infer a green check from the previous head.
+- Production browser inspection at 390px and 1440px found `/de` and `/es` returning HTTP 200 and LTR after a transient deploy-window Spanish 500. At 390px the mobile header overflowed by 33px (de) and 43px (es); memorial copy and sign-in header text were English. PR #160 (`9e33c483`) addresses the header, memorial translations and contrast without changing the approved HERO image/composition. Its hosted CI is pending; post-fix browser verification is not yet possible.
+- Landing correction tests: 18 pass; typecheck, lint, JSON parsing and `git diff --check` pass locally. Disk has about 259 MiB free; no local production build was attempted. Account-authenticated pages have not been visually inspected in a browser.
+- Local payment work remains preserved in its separate original branch/worktree. Memorial original-source/CDN privacy remains unverified. No German/Spanish SMS templates or delivery are claimed.
+- Live release status: notification-center localization #148 is deployed at `afefa932` but has not been behaviorally rechecked yet; provider localization #149 is merged and awaiting its deployment. Landing header/memorial correction #160 is open/pending CI. The localization matrix remains PARTIAL for all product families not explicitly covered and visually verified.
+
+## Landing localization sync — 2026-11-08 17:05 UTC
+
+- PR #160 is synchronized with current main through #150 (`85c91982`) at the pushed merge commit. Its 18 focused landing/memorial tests, typecheck and lint passed before the sync; rerun them on the merge head and wait for exact-head CI. Existing HERO artwork/composition was untouched.
+- Production before this sync still showed English memorial/header strings and 390px overflow. Do not mark fixed until PR #160 merges, deploys, and both locales are rechecked at mobile/desktop sizes.
