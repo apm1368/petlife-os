@@ -42,4 +42,29 @@ describe("AccountActivityView", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Try again" }));
     expect(await screen.findByText("Nothing to show here yet")).toBeTruthy();
   });
+
+  it.each([
+    ["de", "Kontoaktivitäten", "Sicherheit", "Angemeldet", "mit einem Einmalcode", "Datenschutz", "Werbenachrichten: widerrufen"],
+    ["es", "Actividad de la cuenta", "Seguridad", "Sesión iniciada", "con un código de un solo uso", "Privacidad", "Mensajes promocionales: retirado"],
+  ] as const)("translates activity records, filters and summaries across the page in %s", async (locale, title, security, signedIn, method, privacy, consent) => {
+    vi.mocked(accountService.activity).mockResolvedValueOnce({ items: [
+      { id: "e1", type: "UserAuthenticated", group: "SECURITY", occurredAt: "2026-09-30T08:00:00.000Z", detail: { method: "OTP", device: "Chrome · Android" } },
+      { id: "e2", type: "ConsentChanged", group: "PRIVACY", occurredAt: "2026-09-29T08:00:00.000Z", detail: { kind: "MARKETING", granted: false } },
+    ], nextCursor: null });
+    renderWithIntl(<AccountActivityView />, locale);
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByRole("button", { name: security })).toBeTruthy();
+    expect(screen.getByRole("button", { name: privacy })).toBeTruthy();
+    expect(screen.getByText(signedIn)).toBeTruthy();
+    expect(screen.getByText(new RegExp(method))).toBeTruthy();
+    expect(screen.getByText(consent)).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/فعالیت‌های حساب|همه|امنیت|حریم خصوصی|ورود به حساب/);
+    expect(document.querySelector("time")?.textContent).not.toMatch(/[۰-۹]/);
+  });
+
+  it.each([["de", "Hier gibt es noch nichts zu sehen"], ["es", "Todavía no hay actividad para mostrar"]] as const)("localizes the empty activity state in %s", async (locale, emptyTitle) => {
+    vi.mocked(accountService.activity).mockResolvedValueOnce({ items: [], nextCursor: null });
+    renderWithIntl(<AccountActivityView />, locale);
+    expect(await screen.findByText(emptyTitle)).toBeTruthy();
+  });
 });

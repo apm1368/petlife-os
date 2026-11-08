@@ -16,16 +16,16 @@ export type SystemStateKind =
 
 type Severity = "info" | "attention" | "blocked";
 
-const COPY: Record<SystemStateKind, { icon: string; severity: Severity; fa: [string, string]; en: [string, string] }> = {
-  AUTH_REQUIRED: { icon: "→", severity: "info", fa: ["برای ادامه وارد شوید", "این بخش مخصوص حساب شماست. پس از ورود به همین صفحه برمی‌گردید."], en: ["Sign in to continue", "This part is private to your account. You'll come back here after signing in."] },
-  FORBIDDEN: { icon: "⊘", severity: "blocked", fa: ["به این بخش دسترسی ندارید", "حساب شما اجازهٔ دیدن این صفحه را ندارد. اگر باید داشته باشید، از مدیر خانواده یا صاحب آن بخواهید دسترسی بدهد."], en: ["You don't have access to this", "Your account isn't allowed to see this page. If it should be, ask the household owner or whoever manages it."] },
-  NOT_FOUND: { icon: "?", severity: "info", fa: ["این صفحه پیدا نشد", "ممکن است پیوند اشتباه باشد یا این مورد حذف شده باشد."], en: ["We couldn't find that page", "The link may be wrong, or the item was removed."] },
-  ACCESS_EXPIRED: { icon: "⌛", severity: "attention", fa: ["دسترسی شما به پایان رسیده است", "دسترسی موقت شما تمام شده است. اگر هنوز لازم است، از صاحب آن بخواهید دوباره دسترسی بدهد."], en: ["Your access has ended", "Your temporary access has finished. Ask the owner to share it again if you still need it."] },
-  ACCESS_REVOKED: { icon: "⊘", severity: "blocked", fa: ["دسترسی شما برداشته شده است", "صاحب این بخش دسترسی شما را پایان داده است."], en: ["Your access was removed", "The owner has ended your access."] },
-  ACCESS_NOT_STARTED: { icon: "⏱", severity: "info", fa: ["دسترسی شما هنوز شروع نشده است", "دسترسی شما از زمان تعیین‌شده فعال می‌شود."], en: ["Your access hasn't started yet", "Your access becomes active at the scheduled time."] },
-  LINK_EXPIRED: { icon: "⌛", severity: "attention", fa: ["این پیوند دیگر معتبر نیست", "ممکن است منقضی، لغو یا قبلاً استفاده شده باشد. یک پیوند تازه درخواست کنید."], en: ["This link is no longer valid", "It may have expired, been cancelled or already been used. Ask for a fresh one."] },
-  EXTERNAL_UNAVAILABLE: { icon: "⋯", severity: "attention", fa: ["این امکان فعلاً در دسترس نیست", "این بخش به سرویسی بیرونی وابسته است که هنوز متصل نشده است."], en: ["This isn't available yet", "It depends on an outside service that isn't connected yet."] },
-  GENERIC_RETRYABLE_ERROR: { icon: "!", severity: "attention", fa: ["مشکلی پیش آمد", "بارگذاری انجام نشد. دوباره تلاش کنید."], en: ["Something went wrong", "This didn't load. Please try again."] },
+const COPY: Record<SystemStateKind, { icon: string; severity: Severity; fa: [string, string]; en: [string, string]; de: [string, string]; es: [string, string] }> = {
+  AUTH_REQUIRED: { icon: "→", severity: "info", fa: ["برای ادامه وارد شوید", "این بخش مخصوص حساب شماست. پس از ورود به همین صفحه برمی‌گردید."], en: ["Sign in to continue", "This part is private to your account. You'll come back here after signing in."], de: ["Zum Fortfahren anmelden", "Dieser Bereich ist nur für Ihr Konto bestimmt. Nach der Anmeldung kehren Sie hierher zurück."], es: ["Inicia sesión para continuar", "Esta sección es privada de tu cuenta. Volverás aquí después de iniciar sesión."] },
+  FORBIDDEN: { icon: "⊘", severity: "blocked", fa: ["به این بخش دسترسی ندارید", "حساب شما اجازهٔ دیدن این صفحه را ندارد. اگر باید داشته باشید، از مدیر خانواده یا صاحب آن بخواهید دسترسی بدهد."], en: ["You don't have access to this", "Your account isn't allowed to see this page. If it should be, ask the household owner or whoever manages it."], de: ["Sie haben keinen Zugriff", "Ihr Konto darf diese Seite nicht aufrufen. Wenn Sie Zugriff benötigen, wenden Sie sich an die Person, die den Haushalt verwaltet."], es: ["No tienes acceso", "Tu cuenta no tiene permiso para ver esta página. Si debería tenerlo, pide acceso a quien administra el hogar."] },
+  NOT_FOUND: { icon: "?", severity: "info", fa: ["این صفحه پیدا نشد", "ممکن است پیوند اشتباه باشد یا این مورد حذف شده باشد."], en: ["We couldn't find that page", "The link may be wrong, or the item was removed."], de: ["Diese Seite wurde nicht gefunden", "Der Link ist möglicherweise falsch oder der Eintrag wurde entfernt."], es: ["No encontramos esta página", "Es posible que el enlace sea incorrecto o que se haya eliminado el elemento."] },
+  ACCESS_EXPIRED: { icon: "⌛", severity: "attention", fa: ["دسترسی شما به پایان رسیده است", "دسترسی موقت شما تمام شده است. اگر هنوز لازم است، از صاحب آن بخواهید دوباره دسترسی بدهد."], en: ["Your access has ended", "Your temporary access has finished. Ask the owner to share it again if you still need it."], de: ["Ihr Zugriff ist abgelaufen", "Ihr befristeter Zugriff ist beendet. Bitten Sie die zuständige Person um erneute Freigabe, wenn Sie ihn noch benötigen."], es: ["Tu acceso ha caducado", "Tu acceso temporal ha finalizado. Si aún lo necesitas, pide a la persona responsable que lo comparta de nuevo."] },
+  ACCESS_REVOKED: { icon: "⊘", severity: "blocked", fa: ["دسترسی شما برداشته شده است", "صاحب این بخش دسترسی شما را پایان داده است."], en: ["Your access was removed", "The owner has ended your access."], de: ["Ihr Zugriff wurde entzogen", "Die zuständige Person hat Ihren Zugriff beendet."], es: ["Se retiró tu acceso", "La persona responsable ha finalizado tu acceso."] },
+  ACCESS_NOT_STARTED: { icon: "⏱", severity: "info", fa: ["دسترسی شما هنوز شروع نشده است", "دسترسی شما از زمان تعیین‌شده فعال می‌شود."], en: ["Your access hasn't started yet", "Your access becomes active at the scheduled time."], de: ["Ihr Zugriff hat noch nicht begonnen", "Ihr Zugriff wird zum festgelegten Zeitpunkt aktiviert."], es: ["Tu acceso aún no ha comenzado", "Tu acceso se activará a la hora programada."] },
+  LINK_EXPIRED: { icon: "⌛", severity: "attention", fa: ["این پیوند دیگر معتبر نیست", "ممکن است منقضی، لغو یا قبلاً استفاده شده باشد. یک پیوند تازه درخواست کنید."], en: ["This link is no longer valid", "It may have expired, been cancelled or already used. Ask for a fresh one."], de: ["Dieser Link ist nicht mehr gültig", "Er ist möglicherweise abgelaufen, widerrufen oder wurde bereits verwendet. Fordern Sie einen neuen Link an."], es: ["Este enlace ya no es válido", "Puede haber caducado, haberse cancelado o ya haberse usado. Solicita un enlace nuevo."] },
+  EXTERNAL_UNAVAILABLE: { icon: "⋯", severity: "attention", fa: ["این امکان فعلاً در دسترس نیست", "این بخش به سرویسی بیرونی وابسته است که هنوز متصل نشده است."], en: ["This isn't available yet", "It depends on an outside service that isn't connected yet."], de: ["Diese Funktion ist noch nicht verfügbar", "Sie benötigt einen externen Dienst, der noch nicht verbunden ist."], es: ["Esta función aún no está disponible", "Depende de un servicio externo que todavía no está conectado."] },
+  GENERIC_RETRYABLE_ERROR: { icon: "!", severity: "attention", fa: ["مشکلی پیش آمد", "بارگذاری انجام نشد. دوباره تلاش کنید."], en: ["Something went wrong", "This didn't load. Please try again."], de: ["Ein Fehler ist aufgetreten", "Der Inhalt konnte nicht geladen werden. Bitte versuchen Sie es erneut."], es: ["Ha ocurrido un problema", "No se pudo cargar. Inténtalo de nuevo."] },
 };
 
 export interface SystemStateAction {
@@ -59,17 +59,18 @@ export function SystemState({
   returnTo?: string;
 }) {
   const locale = useLocale();
-  const fa = locale === "fa";
   const copy = COPY[kind];
-  const [defaultTitle, defaultBody] = fa ? copy.fa : copy.en;
+  const localized = locale === "fa" ? copy.fa : locale === "de" ? copy.de : locale === "es" ? copy.es : copy.en;
+  const [defaultTitle, defaultBody] = localized;
+  const labels = locale === "fa" ? { signIn: "ورود", retry: "تلاش دوباره", home: "بازگشت به خانه" } : locale === "de" ? { signIn: "Anmelden", retry: "Erneut versuchen", home: "Zur Startseite" } : locale === "es" ? { signIn: "Iniciar sesión", retry: "Reintentar", home: "Volver al inicio" } : { signIn: "Sign in", retry: "Try again", home: "Go to home" };
   const firstAction: SystemStateAction | undefined =
     primary ??
     (kind === "AUTH_REQUIRED"
-      ? { label: fa ? "ورود" : "Sign in", href: `/${locale}/welcome${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}` }
+      ? { label: labels.signIn, href: `/${locale}/welcome${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}` }
       : onRetry
-        ? { label: fa ? "تلاش دوباره" : "Try again", onClick: onRetry }
+        ? { label: labels.retry, onClick: onRetry }
         : undefined);
-  const secondAction: SystemStateAction = secondary ?? { label: fa ? "بازگشت به خانه" : "Go to home", href: `/${locale}/home` };
+  const secondAction: SystemStateAction = secondary ?? { label: labels.home, href: `/${locale}/home` };
 
   return (
     <section className={`system-state system-state--${copy.severity}`} role={kind === "GENERIC_RETRYABLE_ERROR" ? "alert" : "status"} data-kind={kind}>
