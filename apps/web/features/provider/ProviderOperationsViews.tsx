@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
 import type { ProviderServiceDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
@@ -28,7 +28,7 @@ function useLoad<T>(fetcher: () => Promise<T>) {
 
 /** Team: who delivers which service, public bio and bookability. Mutations are OWNER-only on the API. */
 export function ProviderStaffSettingsView() {
-  const fa = useLocale() === "fa";
+  const t = useTranslations("provider.team.settings");
   const staff = useLoad<ProviderStaffMember[]>(providerOsService.listStaff);
   const services = useLoad<ProviderServiceDto[]>(providerOsService.listServices);
   const [message, setMessage] = useState<string | null>(null);
@@ -39,28 +39,29 @@ export function ProviderStaffSettingsView() {
       await run();
       await staff.load();
     } catch (e) {
-      setMessage(e instanceof ApiError && e.code === "PROVIDER_ACCESS_DENIED" ? (fa ? "فقط مالک مجموعه می‌تواند تیم را ویرایش کند." : "Only the organization owner can edit the team.") : fa ? "ذخیره نشد." : "Could not save.");
+      setMessage(e instanceof ApiError && e.code === "PROVIDER_ACCESS_DENIED" ? t("ownerOnly") : t("saveFailed"));
     }
   }
 
-  if (staff.error || services.error) return <ErrorRecovery title={fa ? "تیم بارگیری نشد" : "Team could not load"} message="" retryLabel={fa ? "تلاش دوباره" : "Retry"} onRetry={staff.load} />;
-  if (!staff.data || !services.data) return <Skeleton className="h-64 w-full" />;
+  if (staff.error || services.error) return <ErrorRecovery title={t("loadFailed")} message="" retryLabel={t("retry")} onRetry={() => { void Promise.all([staff.load(), services.load()]); }} />;
+  if (!staff.data || !services.data) return <Skeleton className="h-64 w-full" aria-label={t("loading")} />;
+  const serviceRows = services.data;
 
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="text-section-title">{fa ? "خدمات و نمایش عمومی هر عضو" : "Services and public profile per member"}</h2>
-      <p className="text-sm text-text-secondary">{fa ? "اگر برای خدمتی هیچ عضوی مشخص نشود، همه اعضای قابل‌رزرو آن را ارائه می‌کنند. اطلاعات منابع انسانی اینجا ذخیره نمی‌شود." : "A service with no assigned members is offered by every bookable member. No HR data is stored here."}</p>
+      <h2 className="text-section-title">{t("title")}</h2>
+      <p className="text-sm text-text-secondary">{t("description")}</p>
       {message ? <p role="alert" className="text-state-urgent">{message}</p> : null}
-      {staff.data.map((m) => (
+      {staff.data.length === 0 ? <EmptyState title={t("emptyStaff")} /> : staff.data.map((m) => (
         <ContextSurface key={m.providerUserId} className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="font-bold">{m.displayName}</p>
-            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={m.isBookable} onChange={(e) => void update(() => providerOsService.updateStaff(m.providerUserId, { isBookable: e.target.checked }))} />{fa ? "قابل رزرو" : "Bookable"}</label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={m.isBookable} onChange={(e) => void update(() => providerOsService.updateStaff(m.providerUserId, { isBookable: e.target.checked }))} />{t("bookable")}</label>
           </div>
           <BioEditor member={m} onSave={(publicBio, displayTitle) => update(() => providerOsService.updateStaff(m.providerUserId, { publicBio, displayTitle }))} />
           <fieldset className="flex flex-wrap gap-3 text-sm">
-            <legend className="mb-1 text-text-secondary">{fa ? "خدماتی که ارائه می‌کند" : "Services delivered"}</legend>
-            {services.data!.map((s) => (
+            <legend className="mb-1 text-text-secondary">{t("servicesDelivered")}</legend>
+            {serviceRows.length === 0 ? <p className="text-text-secondary">{t("emptyServices")}</p> : serviceRows.map((s) => (
               <label key={s.id} className="flex items-center gap-2">
                 <input type="checkbox" checked={m.serviceIds.includes(s.id)} onChange={(e) => void update(() => providerOsService.setStaffServices(m.providerUserId, e.target.checked ? [...m.serviceIds, s.id] : m.serviceIds.filter((id) => id !== s.id)))} />
                 {s.name}
@@ -74,15 +75,15 @@ export function ProviderStaffSettingsView() {
 }
 
 function BioEditor({ member, onSave }: { member: ProviderStaffMember; onSave: (bio: string | null, title: string | null) => Promise<void> }) {
-  const fa = useLocale() === "fa";
+  const t = useTranslations("provider.team.settings");
   const [title, setTitle] = useState(member.displayTitle ?? "");
   const [bio, setBio] = useState(member.publicBio ?? "");
   const dirty = title !== (member.displayTitle ?? "") || bio !== (member.publicBio ?? "");
   return (
     <div className="grid gap-2 sm:grid-cols-[14rem_1fr_auto] sm:items-end">
-      <Input label={fa ? "عنوان عمومی" : "Public title"} value={title} onChange={(e) => setTitle(e.target.value)} />
-      <Input label={fa ? "معرفی کوتاه عمومی" : "Short public bio"} value={bio} onChange={(e) => setBio(e.target.value)} />
-      <Button variant="secondary" size="sm" disabled={!dirty} onClick={() => void onSave(bio.trim() || null, title.trim() || null)}>{fa ? "ذخیره" : "Save"}</Button>
+      <Input label={t("publicTitle")} value={title} onChange={(e) => setTitle(e.target.value)} />
+      <Input label={t("publicBio")} value={bio} onChange={(e) => setBio(e.target.value)} />
+      <Button variant="secondary" size="sm" disabled={!dirty} onClick={() => void onSave(bio.trim() || null, title.trim() || null)}>{t("save")}</Button>
     </div>
   );
 }
