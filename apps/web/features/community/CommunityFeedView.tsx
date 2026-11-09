@@ -10,6 +10,7 @@ import type { CommunityPostDto, PaginatedDto } from "@petlife/types";
 import { communityService } from "@/services/community.service";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import type { RouteLocale } from "@/lib/i18n/config";
+import styles from "./CommunityFeedView.module.css";
 
 /** spec: "avoid endless card clutter" — a plain paged feed with an explicit Load more, never infinite auto-scroll. */
 export function CommunityFeedView() {
@@ -50,7 +51,8 @@ export function CommunityFeedView() {
   const chooseType = (next: CommunityPostType | "") => { setType(next); void load(1, false, { q: appliedQuery, type: next }); };
 
   return (
-    <div className="community-layout">
+    <div className={styles.page}>
+      <div className="community-layout">
       <div className="community-main">
         <header className="section-head">
           <div>
@@ -132,6 +134,7 @@ export function CommunityFeedView() {
           </ul>
         </section>
       </aside>
+      </div>
     </div>
   );
 }
