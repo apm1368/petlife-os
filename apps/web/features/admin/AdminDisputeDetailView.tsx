@@ -7,11 +7,13 @@ import { Button, ContextSurface, ErrorRecovery, Input, Skeleton, StatusLabel } f
 import { DisputeEvidenceActorType, DisputeStatus, type DisputeDto } from "@petlife/types";
 import { adminService } from "@/services/admin.service";
 import { adminStatusTone } from "./status-tone";
+import { ApiError } from "@/lib/api/client";
 
 const STATUSES = Object.values(DisputeStatus);
 
 function formatDate(iso: string, locale: string) {
-  return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "short", timeStyle: "short" }).format(new Date(iso));
+  const dateLocale = locale === "fa" ? "fa-IR-u-ca-persian" : locale;
+  return new Intl.DateTimeFormat(dateLocale, { dateStyle: "short", timeStyle: "short" }).format(new Date(iso));
 }
 
 export function AdminDisputeDetailView({ disputeId }: { disputeId: string }) {
@@ -21,17 +23,18 @@ export function AdminDisputeDetailView({ disputeId }: { disputeId: string }) {
   const locale = useLocale();
 
   const [data, setData] = useState<DisputeDto | null>(null);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<"access" | "notFound" | "failed" | null>(null);
+  const [actionError, setActionError] = useState(false);
   const [assigneeAdminId, setAssigneeAdminId] = useState("");
   const [evidenceStatement, setEvidenceStatement] = useState("");
   const [resolutionSummary, setResolutionSummary] = useState("");
 
   async function load() {
-    setError(false);
+    setError(null);
     try {
       setData(await adminService.getDispute(disputeId));
-    } catch {
-      setError(true);
+    } catch (cause) {
+      setError(cause instanceof ApiError && [401, 403].includes(cause.status) ? "access" : cause instanceof ApiError && cause.status === 404 ? "notFound" : "failed");
     }
   }
 
@@ -42,25 +45,42 @@ export function AdminDisputeDetailView({ disputeId }: { disputeId: string }) {
 
   async function assign() {
     if (!assigneeAdminId.trim()) return;
-    await adminService.assignDispute(disputeId, assigneeAdminId);
-    setAssigneeAdminId("");
-    await load();
+    setActionError(false);
+    try {
+      await adminService.assignDispute(disputeId, assigneeAdminId);
+      setAssigneeAdminId("");
+      await load();
+    } catch {
+      setActionError(true);
+    }
   }
 
   async function addEvidence() {
     if (!evidenceStatement.trim()) return;
-    await adminService.addDisputeEvidence(disputeId, { statement: evidenceStatement, actorType: DisputeEvidenceActorType.ADMIN });
-    setEvidenceStatement("");
-    await load();
+    setActionError(false);
+    try {
+      await adminService.addDisputeEvidence(disputeId, { statement: evidenceStatement, actorType: DisputeEvidenceActorType.ADMIN });
+      setEvidenceStatement("");
+      await load();
+    } catch {
+      setActionError(true);
+    }
   }
 
   async function transition(status: DisputeStatus) {
-    await adminService.transitionDispute(disputeId, status, resolutionSummary || undefined);
-    await load();
+    setActionError(false);
+    try {
+      await adminService.transitionDispute(disputeId, status, resolutionSummary || undefined);
+      await load();
+    } catch {
+      setActionError(true);
+    }
   }
 
-  if (error) return <ErrorRecovery title={t("title")} message="" retryLabel={tCommon("retry")} onRetry={load} />;
-  if (!data) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
+  if (error === "access") return <ContextSurface><h1 className="text-section-title">{t("states.accessDeniedTitle")}</h1><p>{t("states.accessDenied")}</p></ContextSurface>;
+  if (error === "notFound") return <ContextSurface><h1 className="text-section-title">{t("states.notFoundTitle")}</h1><p>{t("states.notFound")}</p></ContextSurface>;
+  if (error === "failed") return <ErrorRecovery title={t("title")} message={t("states.detailLoadFailed")} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (!data) return <Skeleton className="h-64 w-full" aria-label={t("states.loading")} />;
 
   return (
     <div className="flex flex-col gap-4">
@@ -75,6 +95,7 @@ export function AdminDisputeDetailView({ disputeId }: { disputeId: string }) {
       <span className="text-body text-text-primary">{data.claim}</span>
       {data.resolutionSummary ? <span className="text-body text-text-secondary">{t("detail.resolution")}: {data.resolutionSummary}</span> : null}
       <p className="text-metadata text-text-secondary">{t("detail.financialNote")}</p>
+      {actionError ? <p role="alert" className="text-error">{t("states.actionFailed")}</p> : null}
 
       <ContextSurface className="flex flex-wrap items-end gap-2">
         <Input label={tCommon("assigneeLabel")} value={assigneeAdminId} onChange={(e) => setAssigneeAdminId(e.target.value)} className="min-w-48 flex-1" />
@@ -83,10 +104,11 @@ export function AdminDisputeDetailView({ disputeId }: { disputeId: string }) {
 
       <ContextSurface className="flex flex-col gap-2">
         <span className="text-section-title text-text-primary">{t("detail.evidence")}</span>
+        {data.evidence.length === 0 ? <p className="text-metadata text-text-secondary">{t("states.noEvidence")}</p> : null}
         {data.evidence.map((e) => (
           <div key={e.id} className="flex flex-col gap-0.5 border-t border-border-subtle pt-2 first:border-t-0 first:pt-0">
             <span className="text-body text-text-primary">{e.statement}</span>
-            <span className="text-metadata text-text-secondary">{e.actor?.displayName ?? e.actorType} · {formatDate(e.createdAt, locale)}</span>
+            <span className="text-metadata text-text-secondary">{e.actor?.displayName ?? t(`detail.actorType.${e.actorType}`)} · {formatDate(e.createdAt, locale)}</span>
           </div>
         ))}
         <Input label={t("detail.evidencePlaceholder")} value={evidenceStatement} onChange={(e) => setEvidenceStatement(e.target.value)} />
