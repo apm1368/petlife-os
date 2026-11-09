@@ -38,7 +38,7 @@ describe("travel favorites localization", () => {
     vi.mocked(travelMarketService.favorites).mockResolvedValueOnce([listing]);
     const populated = renderWithIntl(<TravelFavoritesView />, locale);
     expect(await screen.findByRole("heading", { level: 1, name: title })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: "Source listing title" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "Source listing title" })).toBeTruthy();
     expect(screen.getByRole("button", { name: removeLabel })).toBeTruthy();
     if (locale === "de" || locale === "es") expect(populated.container.textContent).not.toMatch(/[\u0600-\u06FF]/);
     populated.unmount();
