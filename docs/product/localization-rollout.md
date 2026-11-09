@@ -74,7 +74,7 @@ Status is per page family, not per shared header. `COMPLETE` means all applicati
 | Account activity `/[locale]/profile/activity` | Complete | Complete | Complete | Complete | Event names and summaries, filters, safe unknown-event fallback, empty/loading/error/retry and older-page control; locale-specific dates and numbers tested. Event detail values such as device names remain source content. |
 | Account security `/[locale]/profile/security` | Complete | Complete | Complete | Complete | PR #154 merged to main after green CI; not production-verified. |
 | Account privacy `/[locale]/profile/privacy` | Complete | Complete | Complete | Complete | PR #155 merged to main at `61f99041` after green CI and focused tests; not production-verified. |
-| Other account settings and profile | Partial | Partial | Partial | Partial | Some settings are localized; route-by-route form/dialog/error coverage remains open. |
+| Personal settings `/[locale]/profile/personal` and remaining account settings | Partial | Partial | Partial | Partial | The personal-settings page has explicit fa/en/de/es labels and states for profile, locale/theme preferences, display mode, contact verification and OTP steps. A follow-up closes Persian/English backend-error leakage and completes DE/ES copy for the simplified-display explanation. Focused tests cover persisted-language routing, load/retry, save failure, contact-provider failure and no-Persian DE/ES rendering; authenticated responsive/refresh verification is still open. Other profile settings remain partial. |
 | Pet overview `/[locale]/pets/[petId]` and identity edit | Complete | Complete | Complete | Complete | PR #120 merged to main at `084ee787`; exact-head CI and 44 focused tests plus typecheck/lint passed. Deploy workflow succeeded; authenticated in-product flow has not yet been production-verified. |
 | Care profile `/[locale]/pets/[petId]/care` | Partial | Partial | Partial | Partial | View/edit, read-only, empty/loading/load-error and save-error copy/tests cover all four locales (24 tests); responsive browser inspection is outstanding. |
 | Printable care sheet `/[locale]/pets/[id]/care-sheet` | Partial | Partial | Partial | Partial | German/Spanish now cover print controls, daily routine, temperament, health, upcoming reminders, access/failure explanations and stay-only emergency fields. Dates, pet age/weight and medicine dosage use the selected locale; pet/user/clinical-authored content remains unchanged. DE/ES tests cover populated, access-denied, partial-failure and loading states with no-Persian UI assertions. Authenticated responsive/print-preview verification remains outstanding. |
@@ -167,6 +167,12 @@ Before marking any additional route complete, record its route/component, all fo
 - `PersonalSettingsView` has explicit German and Spanish translations for its user-facing settings, loading/error/success, appearance, contact verification status and contact-change/OTP steps. Tests assert translated labels and the unverified-contact state in both locales.
 - Persian and English strings and behavior are unchanged. Locale selection continues to use the saved account preference and existing locale-aware route behavior; this slice changes no API, persistence, verification or notification contract.
 - PR #119 merged to `main` at `d12fb4ed`. Exact-head CI run 42476941501 passed; focused account tests passed locally. This UI-only slice changes no API, persistence, verification or notification contract.
+
+## Personal settings error-path localization follow-up
+
+- `/[locale]/profile/personal` now translates the simplified-display explanation in German and Spanish; it no longer silently inherits English.
+- Save and contact-verification failures no longer display raw API messages in German/Spanish. Known OTP/provider failures have localized copy; unknown API failures use a safe localized message instead of leaking server text. No delivery provider behavior is added or claimed.
+- Thirteen focused page tests cover saved-language routing, theme-only save, page copy, load/retry, save errors containing Persian server text, and unconfigured contact-code delivery in German/Spanish. This page remains PARTIAL pending authenticated browser checks for refreshed language persistence, responsive layouts and the complete real provider flow.
 
 ## Pet lifecycle (localization slice)
 
