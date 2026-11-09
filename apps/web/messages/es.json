@@ -1345,6 +1345,8 @@
       "titleLabel": "Título",
       "documentType": "Tipo de documento",
       "download": "Descargar",
+      "void": "Retirar",
+      "voidReason": "Motivo de la retirada",
       "provenanceOwner": "Subido por el hogar",
       "provenanceProvider": "Subido por la clínica veterinaria — verificado",
       "fileRequired": "Selecciona primero el archivo del documento.",
