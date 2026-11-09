@@ -4815,7 +4815,8 @@
       "medicationComplexity": "Medication complexity",
       "retractDocument": "Retract document",
       "retractHint": "The document is not deleted. Its retraction reason stays in the record.",
-      "medicationRecord": "Medication record"
+      "medicationRecord": "Medication record",
+      "unknownStatus": "Status updated"
     },
     "share": {
       "group": "Share",
