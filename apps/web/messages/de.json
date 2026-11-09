@@ -1360,6 +1360,93 @@
       "loading": "Eintrag wird geladen"
     }
   },
+  "memories": {
+    "publicMemorial": {
+      "title": "Gedenkbeitrag einreichen",
+      "explanation": "Sie können den Namen Ihres Tieres und ein Foto für die öffentliche Gedenkseite einreichen. Der Beitrag wird erst nach Prüfung angezeigt und kann jederzeit zurückgezogen werden.",
+      "displayName": "Öffentlich angezeigter Name",
+      "image": "Foto auswählen",
+      "chooseImage": "Foto auswählen",
+      "photoOption": "Fotogedanke",
+      "noPublicPhoto": "Es ist kein freigegebenes Foto verfügbar. Erforderlich ist ein nicht archivierter, bereits öffentlicher Fotoeintrag. Private Erinnerungen werden über dieses Formular niemals veröffentlicht.",
+      "consent": "Ich stimme ausdrücklich zu, dass „{name}“ und das ausgewählte Foto nach Freigabe durch die Administration öffentlich angezeigt werden.",
+      "privacy": "Haushaltsdaten, private Notizen, Gesundheitsakten und Kontoinformationen werden nicht veröffentlicht.",
+      "submit": "Zur Prüfung einreichen",
+      "withdraw": "Öffentliche Zustimmung widerrufen und Beitrag entfernen",
+      "ownerOnly": "Nur die Inhaberin oder der Inhaber des Haushalts darf diese öffentliche Gedenkseite verwalten.",
+      "loading": "Einstellungen der Gedenkseite werden geladen",
+      "error": "Der Gedenkbeitrag konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.",
+      "retry": "Erneut versuchen",
+      "rejected": "Der Beitrag wurde nicht freigegeben. Nach Prüfung des Hinweises können Sie ihn erneut einreichen.",
+      "status": {
+        "PENDING_REVIEW": "Wartet auf die Prüfung durch die Administration. Noch nicht öffentlich.",
+        "PUBLISHED": "Auf der öffentlichen Gedenkseite veröffentlicht. Sie können den Beitrag jederzeit entfernen.",
+        "REJECTED": "Nicht freigegeben.",
+        "WITHDRAWN": "Sie haben Ihre öffentliche Zustimmung widerrufen. Der Beitrag wird nicht mehr angezeigt."
+      }
+    },
+    "memoryType": {
+      "PHOTO": "Foto",
+      "VIDEO": "Video",
+      "MILESTONE": "Meilenstein",
+      "STORY": "Geschichte",
+      "BIRTHDAY": "Geburtstag",
+      "FIRST_DAY": "Erster Tag zu Hause",
+      "ADOPTION_DAY": "Tag der Adoption",
+      "TRAVEL": "Reise",
+      "ACHIEVEMENT": "Erfolg",
+      "OTHER": "Sonstiges"
+    },
+    "timelineEntryType": {
+      "MEMORY": "Erinnerung",
+      "HEALTH": "Gesundheitseintrag",
+      "LOST_PET_RESOLVED": "Wieder zu Hause",
+      "ADOPTION": "Adoption",
+      "LIFECYCLE": "Lebensereignis"
+    },
+    "list": {
+      "title": "Erinnerungen von {name}",
+      "memorialTitle": "In liebevoller Erinnerung an {name}",
+      "memorialSubtitle": "Ein Ort für die gemeinsamen Momente.",
+      "addMemory": "Erinnerung hinzufügen",
+      "empty": "Noch keine Erinnerungen. Fügen Sie die erste hinzu.",
+      "viewLifeTimeline": "Lebensverlauf ansehen",
+      "searchLabel": "Erinnerungen durchsuchen",
+      "searchPlaceholder": "Nach Titel oder Geschichte suchen",
+      "tagLabel": "Schlagwort",
+      "allTags": "Alle Schlagwörter",
+      "yearLabel": "Jahr",
+      "allYears": "Alle Jahre",
+      "viewJournal": "Tagebuch",
+      "viewGallery": "Galerie",
+      "showArchived": "Archiviert",
+      "hideArchived": "Zurück zum Tagebuch",
+      "emptyFiltered": "Keine Erinnerung entspricht diesen Filtern.",
+      "emptyArchived": "Nichts archiviert.",
+      "restore": "Wiederherstellen",
+      "noPhoto": "Kein Foto"
+    },
+    "newMemory": {
+      "title": "Erinnerung hinzufügen",
+      "typeLabel": "Typ",
+      "titleLabel": "Titel",
+      "descriptionLabel": "Beschreibung",
+      "occurredAtLabel": "Datum",
+      "locationLabel": "Ort",
+      "mediaLabel": "Foto",
+      "submit": "Erinnerung speichern",
+      "tagsLabel": "Schlagwörter",
+      "tagsHint": "Durch Kommas trennen, z. B. Geburtstag, Reise"
+    },
+    "detail": {
+      "edit": "Bearbeiten",
+      "archive": "Erinnerung archivieren",
+      "restore": "Erinnerung wiederherstellen",
+      "archivedNotice": "Diese Erinnerung ist archiviert. Sie bleibt hier sicher gespeichert und kann jederzeit wiederhergestellt werden."
+    },
+    "timeline": { "title": "Lebensverlauf", "empty": "Noch nichts zu zeigen." },
+    "editMemory": { "title": "Erinnerung bearbeiten", "submit": "Änderungen speichern" }
+  },
   "healthAdvanced": {
     "documents": {
       "title": "Medizinische Dokumente",

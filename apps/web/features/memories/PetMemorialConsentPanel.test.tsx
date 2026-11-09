@@ -46,4 +46,17 @@ describe("PetMemorialConsentPanel", () => {
     expect(await screen.findByRole("alert")).toBeTruthy();
     expect(screen.queryByText("Only a household owner can manage this public memorial.")).toBeNull();
   });
+
+  it.each([
+    ["de", "Gedenkbeitrag einreichen", "Ich stimme ausdrücklich zu", "Zur Prüfung einreichen"],
+    ["es", "Enviar un homenaje", "Acepto expresamente", "Enviar para revisión"],
+  ] as const)("shows explicit consent and moderation copy in %s without Persian interface text", async (locale, title, consentPrefix, submit) => {
+    const { container } = renderWithIntl(<PetMemorialConsentPanel petId="pet-1" petName="Milo" memories={[photo()]} />, locale);
+
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByText(new RegExp(consentPrefix))).toBeTruthy();
+    expect(screen.getByRole("button", { name: submit })).toBeTruthy();
+    expect(container.textContent).toContain(locale === "de" ? "erst nach Prüfung" : "después de la revisión");
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
 });
