@@ -2542,6 +2542,13 @@
       "nextBooking": "Nächste Buchung", "today": "Heute ({count, number})", "noBookingsToday": "Heute gibt es keine Buchungen.", "verificationLink": "Organisationsnachweise und Verifizierung"
     },
     "bookingRow": { "respondBy": "Antwort bis " },
+    "availability": {
+      "title": "Verfügbarkeit", "retry": "Erneut versuchen", "loading": "Wird geladen", "loadFailed": "Die Verfügbarkeit konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.", "accessDenied": "Du darfst die Verfügbarkeit nicht verwalten.",
+      "day": { "sun": "So", "mon": "Mo", "tue": "Di", "wed": "Mi", "thu": "Do", "fri": "Fr", "sat": "Sa" },
+      "rules": { "title": "Wöchentlicher Zeitplan", "empty": "Es sind noch keine wiederkehrenden Zeiten eingerichtet.", "delete": "Entfernen", "locationId": "Standort-ID", "dayOfWeek": "Wochentag", "startLocalTime": "Startzeit", "endLocalTime": "Endzeit", "timezone": "Zeitzone", "add": "Hinzufügen", "locationRequired": "Ein Standort ist erforderlich.", "createFailed": "Die Regel konnte nicht erstellt werden.", "updateFailed": "Die Regel konnte nicht aktualisiert werden.", "deleteFailed": "Die Regel konnte nicht entfernt werden." },
+      "exceptions": { "title": "Abwesenheit und zusätzliche Verfügbarkeit", "empty": "Keine Ausnahmen eingerichtet.", "delete": "Entfernen", "startAt": "Beginn", "endAt": "Ende", "typeLabel": "Art", "type": { "BLOCKED": "Gesperrt", "AVAILABLE_OVERRIDE": "Zusätzliche Verfügbarkeit" }, "reason": "Grund (optional)", "add": "Hinzufügen", "fieldsRequired": "Standort, Beginn und Ende sind erforderlich.", "createFailed": "Die Ausnahme konnte nicht erstellt werden.", "updateFailed": "Die Ausnahme konnte nicht aktualisiert werden.", "deleteFailed": "Die Ausnahme konnte nicht entfernt werden.", "conflictWarning": "{count, plural, one {In diesem Zeitraum gibt es # bestätigte Buchung.} other {In diesem Zeitraum gibt es # bestätigte Buchungen.}} Eine Sperrung storniert oder verschiebt sie nicht.", "conflictCancel": "Abbrechen", "conflictProceed": "Trotzdem sperren" },
+      "actions": { "edit": "Bearbeiten", "cancel": "Abbrechen", "save": "Änderungen speichern" }
+    },
     "bookings": {
       "title": "Buchungen", "retry": "Erneut versuchen", "loading": "Buchungen werden geladen", "empty": "Keine Buchungen gefunden.", "loadFailed": "Buchungen konnten nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.", "accessDenied": "Du darfst diese Buchungen nicht ansehen.",
       "filter": { "today": "Heute", "upcoming": "Bevorstehend", "past": "Vergangen", "cancelled": "Storniert", "requests": "Anfragen" },
