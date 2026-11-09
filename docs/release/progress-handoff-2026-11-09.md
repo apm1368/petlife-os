@@ -2,6 +2,24 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
+## Batch 2 — PR and verification update, 2026-11-09 16:25 UTC
+
+- PR #221 (`fix(privacy): isolate household and pet context`) is open against `main`, head `10a5a729`. Its initial exact-head CI is pending. The committed QA record is [batch-2-household-pet-health-2026-11-09.md](../qa/batch-2-household-pet-health-2026-11-09.md).
+- After the final health-status correction, the three directly affected suites passed 28 tests; earlier broader run passed 93 tests across ten household/pet/health/care suites. Web TypeScript, focused ESLint and whitespace checks passed. Do not merge until PR #221 exact-head CI, including hosted API E2E and production build, finishes green.
+- #211 was updated against current main at head `5640ff4b3ee5d3be6a5b57f9948458b1970b4465`; its fresh build check is pending. Main run #216 `42652686244` had lint, visual-contract, typecheck, migrations and unit tests passed, with API E2E running and build pending. Production still reported `bab83701…` and readiness 200; no claim that #216 is live.
+- `main` is `8e9c71fc…`; production `bab83701…`. No migration was added by #221. Current local branch is `feat/batch-2-pet-context-health-safety` with clean working tree after commit; other worktrees were preserved.
+- Next: monitor #221 and #211 exact-head CI. If #221 passes and normal merge is permitted, merge and monitor its authorized deploy, then verify `/api/health/version` and `/api/health/ready`. Use controlled authenticated QA access for private household/pet/health routes before labeling any of them LIVE_VERIFIED. Older #102/#106/#121 have conflicting diffs against current main and need deliberate conflict review plus fresh tests.
+
+## Batch 2 — household, pet context and health safety, 2026-11-09 16:20 UTC
+
+- Current main at inspection: `8e9c71fccfb15b648d60eeea7313b56c32f3ce4` (#216). Production still reports `bab83701ccdc4d4c23d2ee69723be4fc8a5b2aa9` (`github-42647228315-1`); `/api/health/ready` is HTTP 200 with DB and Redis up. Main's #216 CI/deploy run `42652686244` was still in progress. Do not call #216 deployed until the version endpoint reports the intended SHA.
+- #216 merged normally after its PR check passed, preserving pet overview design work. #211 remains open; its base was updated to latest main through GitHub after the prior main merge, and its fresh checks are pending. #102, #106 and #121 have old green checks but `DIRTY` merge state against current main; no merge was attempted.
+- Batch 2 branch `feat/batch-2-pet-context-health-safety` is based/synced to #216 main. It changes only the household detail client, health overview client, pet context boundary, their tests and four locale message catalogs. It adds no migrations and does not touch payment-related changes.
+- Fixes: household data is hidden while switching household and stale requests are ignored; pet-scoped UI remounts across pet IDs; health overview flags failed optional details rather than displaying them as empty medical data, guards stale pet responses, and provides localized retry/partial-state copy.
+- Verification: 10 focused web test files passed, 93 tests total; web `tsc --noEmit` and focused ESLint passed. Local DB-backed E2E was not run: workspace had ~466 MiB free and no local PostgreSQL image; hosted PR CI is required. Authenticated production behavior and fresh visual screenshots are not tested.
+- Durable QA: [Batch 2 household/pet/health](../qa/batch-2-household-pet-health-2026-11-09.md). Localization route matrix remains PARTIAL for household, health records/documents, and care calendar pending complete page/state and authenticated responsive verification; only the new partial-health state is newly localized in this batch.
+- Next actions: open/update PR for this branch, wait for exact-head CI including database-backed API E2E, merge only if GitHub allows normal protected merge, then wait for authorized deploy and verify exact SHA/health. Afterwards address conflicts in #102/#106/#121 deliberately; do not treat prior green checks as current.
+
 ## Dashboard Batch 1 — post-merge checkpoint, 2026-11-09 15:14 UTC
 
 - PR #219 (`feat(dashboard): show active household context`) merged normally by squash at `4a4623ef01bc01f34737ac748ed782ee4cb71876`. It builds on already-merged #153 dashboard localization and #210 shared dashboard patterns; it did not duplicate their work. The household label uses the existing overview read model and only renders with confirmed `canViewIdentity` permission.
