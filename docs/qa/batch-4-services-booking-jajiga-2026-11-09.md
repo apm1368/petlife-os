@@ -41,6 +41,14 @@ Regression coverage added:
 - Browser screenshots, authenticated booking lifecycle and provider-side role flows: NOT_TESTED. No QA account/browser credentials were available. Do not mark booking/provider UI or visual modes LIVE_VERIFIED.
 - No migration was added. No production mutation, booking, charge or sync was performed.
 
+## Final release verification — 2026-11-09 UTC
+
+- Fix merged via PR #223, exact head `d3dbddc9abc2ab78232419e08c2f0b3a03ef0325`, merge SHA `6ed2610c6206306b4cbb2f9abbcadf3c706a8add`.
+- Exact-head PR CI run `42678180550` passed. Post-merge main CI and deployment run `42680466094` passed, including lint, visual contract, typecheck, migrations, unit tests, API E2E and production build; SSH deployment completed successfully.
+- Production `/api/health/version` reports SHA `6ed2610c6206306b4cbb2f9abbcadf3c706a8add`, deployment `github-42680466094-1`; `/api/health/ready` reports database and Redis `up`.
+- Safe production probes after deployment: external stay API remains empty (`total: 0`), so no real listing exists to exercise a production outbound redirect; shop categories are four real categories with no `qa-b4-*` entries; public product API remains empty (`total: 0`). No production data was changed.
+- Status: the published-only redirect authorization fix is deployed, and the released route behavior is backed by unit + hosted API E2E tests. A production redirect against a published listing is NOT_TESTED because there is no published listing. Services/provider and booking flows remain PARTIAL pending authenticated/browser verification and real approved provider inventory. Jajiga remains PARTIAL: pilot permissions/content rights and date-specific price/availability were not established; a daily sync is not represented as live availability.
+
 ## Remaining gaps
 
 - Real service/provider inventory is absent in the unauthenticated production probe; no customer booking or provider booking state can be verified on production without a controlled QA account and real approved provider data.
