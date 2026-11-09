@@ -4,6 +4,9 @@ import { renderWithIntl } from "@/test/render-with-intl";
 import { petsService } from "@/services/pets.service";
 import { careRemindersService } from "@/services/care-reminders.service";
 import { bookingsService } from "@/services/bookings.service";
+import { commerceService } from "@/services/commerce.service";
+import { travelMarketService } from "@/services/travel-marketplace.service";
+import { subscriptionService } from "@/services/subscription.service";
 import { usePetStore } from "@/stores/pet-store";
 import { useSessionStore } from "@/stores/session-store";
 import { dashboardCopy, MemberHomeView } from "./MemberHomeView";
@@ -40,6 +43,14 @@ describe("MemberHomeView", () => {
     for (const locale of ["en", "de", "es"] as const) {
       expect(Object.keys(dashboardCopy[locale]).sort()).toEqual(keys);
       expect(Object.keys(glassHomeCopy[locale]).sort()).toEqual(glassKeys);
+    }
+    for (const locale of ["de", "es"] as const) {
+      for (const [key, value] of Object.entries(dashboardCopy[locale])) {
+        if (typeof value === "string") expect(value, `dashboardCopy.${locale}.${key}`).not.toMatch(/[\u0600-\u06FF]/);
+      }
+      for (const [key, value] of Object.entries(glassHomeCopy[locale])) {
+        expect(value, `glassHomeCopy.${locale}.${key}`).not.toMatch(/[\u0600-\u06FF]/);
+      }
     }
   });
 
@@ -154,15 +165,56 @@ describe("MemberHomeView", () => {
   });
 
   it.each([
+    ["de", "Nächster Termin", "Bestellungen", "Bevorstehende Aufenthalte", "Alle Bestellungen", "Unterkunft finden", "Verlängerung am"],
+    ["es", "Próxima cita", "Pedidos", "Próximas estancias", "Todos los pedidos", "Buscar alojamiento", "Se renueva el"],
+  ] as const)("renders booking, membership, order, travel and actions consistently in %s", async (locale, next, orders, trips, allOrders, findStay, renews) => {
+    const englishNamedPet = { ...PET, name: "Milo" };
+    usePetStore.setState({ householdId: "h1", pets: [englishNamedPet as never], activePetId: "pet-1" });
+    vi.mocked(petsService.getOverview).mockResolvedValue(overview({ pet: englishNamedPet }));
+    vi.mocked(bookingsService.list).mockResolvedValue([{
+      id: "appointment-1", petId: "pet-1", serviceName: "Annual check-up", provider: { name: "Central Vet" },
+      startAt: "2026-11-12T10:00:00Z", location: { timezone: "Asia/Tehran" },
+    }] as never);
+    vi.mocked(commerceService.listOrders).mockResolvedValue([{
+      id: "order-1", status: "CONFIRMED", totalAmount: 1_250_000, currency: "IRR", orderNumber: "PL-ORDER-1", previewTitles: ["Monthly care kit"], createdAt: "2026-11-08T10:00:00Z",
+    }] as never);
+    vi.mocked(travelMarketService.listBookings).mockResolvedValue({
+      items: [{ id: "stay-1", listingTitle: "Garden guesthouse", listingCity: "Rasht", checkIn: "2026-11-15", status: "CONFIRMED" }], total: 1, page: 1, pageSize: 20,
+    } as never);
+    vi.mocked(subscriptionService.getCurrent).mockResolvedValue({
+      status: "ACTIVE", plan: { nameFa: "پلن طلایی", nameEn: "Gold plan" }, currentPeriod: { endAt: "2026-12-01T00:00:00Z" }, trialEndsAt: null,
+    } as never);
+    useSessionStore.setState({ user: { id: "u1", displayName: "Maria Garcia" } as never, status: "authenticated" });
+
+    const view = renderWithIntl(<MemberHomeView />, locale);
+
+    expect(await screen.findByRole("heading", { name: "Milo" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: next })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: orders })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: trips })).toBeTruthy();
+    expect(screen.getByText("Annual check-up")).toBeTruthy();
+    expect((await screen.findByRole("link", { name: /Monthly care kit/ })).getAttribute("href")).toBe(`/${locale}/orders/order-1`);
+    expect((await screen.findByRole("link", { name: /Garden guesthouse/ })).getAttribute("href")).toBe(`/${locale}/travel/bookings/stay-1`);
+    expect(screen.getByRole("link", { name: allOrders }).getAttribute("href")).toBe(`/${locale}/orders`);
+    expect(screen.getByRole("link", { name: findStay }).getAttribute("href")).toBe(`/${locale}/travel`);
+    expect(screen.getByText("Gold plan")).toBeTruthy();
+    expect(screen.getByText(renews, { exact: false })).toBeTruthy();
+    expect(view.container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+    expect(view.container.querySelectorAll("a[href^='/de/'], a[href^='/es/']").length).toBeGreaterThan(0);
+  });
+
+  it.each([
     ["de", "Lernen Sie zuerst Ihr Tier kennen.", "Erstes Tier hinzufügen", "Ihr Konto"],
     ["es", "Primero, conozcamos a tu mascota.", "Añadir mi primera mascota", "Tu cuenta"],
   ] as const)("translates the full empty dashboard in %s", (locale, welcome, addPet, account) => {
     usePetStore.setState({ householdId: "h1", pets: [], activePetId: null });
+    useSessionStore.setState({ user: { id: "u1", displayName: "Maria Garcia" } as never, status: "authenticated" });
     renderWithIntl(<MemberHomeView />, locale);
     expect(screen.getByRole("heading", { name: welcome })).toBeTruthy();
     expect(screen.getByRole("link", { name: addPet }).getAttribute("href")).toBe(`/${locale}/onboarding`);
     expect(screen.getByRole("heading", { name: account })).toBeTruthy();
     expect(document.body.textContent).not.toMatch(/داشبورد|از اینجا شروع کنید|اطلاعات شخصی/);
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
   });
 
 });
