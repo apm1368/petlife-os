@@ -14,11 +14,11 @@ Point-in-time checkpoint only. Recheck GitHub, CI and production before each mer
 
 ## Release state
 
-- `main`: `c1c8bf530c384e7eef08cbeb2c9c78fcb7eecbda` after PRs #201 and #196 merged normally.
-- Production last returned `deee3c66ad4e7533ee4751a999f2225ff4aa40fa` from `/api/health/version` (deployment `github-42573202647-1`). It is behind main. Main CI/deploy for #202's merge (`42580748820`, SHA `3097163…`) had CI green and deploy in progress. A newer main run for #196's merge (`42582860438`, SHA `c1c8bf5…`) was pending. Recheck both; do not assume the older deployment represents current main.
+- `main`: `07c2ac246e344f0eac9e319449801c2e9df88df9`, after #203 merged normally. Production `/api/health/version` last returned `c1c8bf530c384e7eef08cbeb2c9c78fcb7eecbda` (deployment `github-42582860438-1`). Main CI for `07c2ac24` is running as `42584955441`; production release is pending. Recheck before claiming #203 live.
+- Main CI/deploy for #196 (`42582860438`, SHA `c1c8bf5…`) completed successfully; the deployed SHA was verified on production. #202 (`3097163…`) was superseded by that release.
 - #199's first main deployment failed in unit tests due to a race in `TravelFavoritesView.test.tsx`. #202 fixed the test and merged at `3097163505b2e9f664dc7103d31c1e9c762756a9`; its own exact CI passed. The #199 feature is not LIVE_VERIFIED until the current deployment SHA and behavior are checked.
 - Public shop was last observed empty after demo exclusion. No legitimate reviewed seller offer was available to verify visibility or purchase.
-- Disk is critically low (about 43 MiB free of 7.9 GiB); no cleanup was performed. Avoid full builds, dependency installation, Docker pulls and large browser artifacts.
+- Disk is critically low (about 42 MiB free of 7.9 GiB); no cleanup was performed. Avoid full builds, dependency installation, Docker pulls and large browser artifacts.
 - No payment worktree appeared in `git worktree list`; this does not prove it was deleted. No payment code was changed.
 
 ## Recent integration and PR queue
@@ -29,7 +29,7 @@ Point-in-time checkpoint only. Recheck GitHub, CI and production before each mer
 | #196 provider team localization | Merged at `c1c8bf530c384e7eef08cbeb2c9c78fcb7eecbda`; synchronized-head PR CI passed. | Confirm main CI/deploy and provider route behavior. |
 | #203 account invitation inbox states | Merged and production-verified at `07c2ac24…`; its exact-head main deployment run passed. | Authenticated end-to-end account behavior remains unverified. |
 | #204 household membership/subscription localization | Merged at `e7685b3d…`; exact-head PR CI passed; main deploy workflow is pending. | Verify deployed SHA and safely inspect release; do not claim live yet. |
-| #200 insurance localization | Updated branch includes latest main; current CI pending. The X-04 customer detail UI now links to insurer only. | Await fresh CI; legacy application/eligibility API routes remain an explicit X-04 gap. |
+| #200 insurance localization | Updated branch includes #204 main; fresh CI must run on its latest pushed head. The X-04 customer detail UI now links to insurer only. | Await fresh CI; legacy application/eligibility API routes remain an explicit X-04 gap. |
 | #178, #181–#184 | Old-head CI was green, but all are behind the latest main and require synchronization plus fresh CI. | Do not use old-head passes as evidence for current code. |
 | #202 travel test race | Merged at `3097163505b2e9f664dc7103d31c1e9c762756a9`; PR CI green. | Confirm production release SHA and behavior. |
 
@@ -39,6 +39,7 @@ Older stacked PRs remain, including #110→#111, #113→#114, and older shop/boo
 
 - PR #203 covers the real `/[locale]/profile` `AccountOverviewView`, not the unused `MemberProfileView`. Household invitation inbox now has fa/en/de/es copy for accessible loading, empty, offline, 401/403 access-denied, generic failure and retry. It preserves the distinction between phone-number match and phone verification and does not grant access before owner approval. Focused tests: 16 passed; targeted ESLint and web typecheck passed. Browser verification remains outstanding.
 - PR #204 (`feat/i18n-subscription-pages`) merged at `e7685b3d…`: it adds de/es translations for `/profile/membership` and `/subscription/plans`, locale-correct dates/counts/currency, offline/access-denied/no-household/empty-plan states, source-language disclosure for plan names/descriptions available only in fa/en, and prevents raw English API messages from appearing in de/es when a localized fallback is supplied. Hosted exact-head CI passed; current production deployment is pending. Browser verification is still outstanding.
+- The member dashboard `/[locale]/home` already has full application-owned fa/en/de/es body copy and explicit state/date/number formatting with 21 rendering tests; keep de/es PARTIAL until authenticated navigation/refresh and responsive browser checks are performed. Preserve user- and provider-authored content in its source language.
 - `docs/product/localization-rollout.md` is the route-family matrix. Many page families and rendered states remain PARTIAL; a translated header is not complete localization. German/Spanish SMS templates/delivery remain unavailable and must not be simulated.
 - Keep the landing HERO unchanged. Memorial withdrawal does not prove revocation of independent source image URLs or CDN copies; production bucket/CDN access remains unverified.
 
