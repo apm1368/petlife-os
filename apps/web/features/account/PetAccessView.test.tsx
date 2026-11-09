@@ -12,6 +12,9 @@ vi.mock("@/services/pets.service", () => ({ petsService: { getById: vi.fn(), lis
 
 describe("PetAccessView locale coverage", () => {
   beforeEach(() => {
+    vi.mocked(petsService.createAccessGrant).mockReset().mockResolvedValue({ id: "g2" } as never);
+    vi.mocked(petsService.updateAccessGrant).mockReset().mockResolvedValue({ ok: true } as never);
+    vi.mocked(petsService.revokeAccessGrant).mockReset().mockResolvedValue({ ok: true } as never);
     vi.mocked(petsService.getById).mockReset().mockResolvedValue({ id: "p1", name: "Cookie", householdId: "h1" } as never);
     vi.mocked(householdsService.collaboration).mockReset().mockResolvedValue({ id: "h1", name: "Home", members: [{ userId: "u1", role: "OWNER", user: { displayName: "Sara" } }, { userId: "u2", role: "FAMILY", user: { displayName: "Reza" } }] } as never);
     vi.mocked(petsService.listAccessGrants).mockReset().mockResolvedValue([{ id: "g1", user: { displayName: "Reza", avatarUrl: null }, active: true, source: "TEMPORARY", canViewIdentity: true, canViewCareProfile: true, expiresAt: "2026-11-09T12:00:00.000Z" }] as never);
@@ -68,5 +71,48 @@ describe("PetAccessView locale coverage", () => {
     vi.mocked(petsService.getById).mockReturnValue(new Promise(() => undefined));
     renderWithIntl(<PetAccessView petId="p1"/>, locale);
     expect(screen.getByLabelText(label)).toBeTruthy();
+  });
+
+  it.each([
+    ["fa", "مجوزهای حیوان", "دسترسی‌های ثبت‌شده", "دسترسی تا"],
+    ["en", "PET PERMISSIONS", "Recorded access", "Access until"],
+    ["de", "TIERBERECHTIGUNGEN", "Erteilte Zugriffe", "Zugriff bis"],
+    ["es", "PERMISOS DE LA MASCOTA", "Accesos concedidos", "Acceso hasta"],
+  ] as const)("renders localized access records and expiry in %s", async (locale, eyebrow, section, expiry) => {
+    renderWithIntl(<PetAccessView petId="p1" />, locale);
+    await screen.findByRole("heading", { name: /Cookie/ });
+    expect(screen.getByText(eyebrow)).toBeTruthy();
+    expect(screen.getByRole("heading", { name: section })).toBeTruthy();
+    const formattedDate = new Intl.DateTimeFormat(locale === "fa" ? "fa-IR-u-ca-persian" : locale, { dateStyle: "long", timeStyle: "short" }).format(new Date("2026-11-09T12:00:00.000Z"));
+    expect(screen.getByText(new RegExp(`${expiry}.*${formattedDate}`))).toBeTruthy();
+  });
+
+  it.each([
+    ["de", "Zugriff erteilen", "Zugriff speichern", "Zugriff konnte nicht gespeichert werden. Bitte erneut versuchen."],
+    ["es", "Conceder acceso", "Guardar acceso", "No se pudo guardar el acceso. Inténtalo de nuevo."],
+  ] as const)("keeps grant action failure and form copy in %s", async (locale, openLabel, saveLabel, error) => {
+    vi.mocked(petsService.createAccessGrant).mockRejectedValueOnce(new Error("network"));
+    const { container } = renderWithIntl(<PetAccessView petId="p1" />, locale);
+    await screen.findByRole("heading", { name: /Cookie/ });
+    fireEvent.click(screen.getByRole("button", { name: openLabel }));
+    expect(screen.getByLabelText(locale === "de" ? "Grund oder Kontext (optional)" : "Motivo o contexto (opcional)")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: saveLabel }));
+    expect((await screen.findByRole("alert")).textContent).toContain(error);
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it.each([
+    ["de", "Vorzeitig widerrufen", "Diesen Zugriff widerrufen", "Zugriff widerrufen"],
+    ["es", "Revocar antes", "Revocar este acceso", "Revocar acceso"],
+  ] as const)("uses the translated confirmation before revoking access in %s", async (locale, action, dialogTitle, confirmLabel) => {
+    const { container } = renderWithIntl(<PetAccessView petId="p1" />, locale);
+    await screen.findByRole("heading", { name: /Cookie/ });
+    fireEvent.click(screen.getByRole("button", { name: action }));
+    expect(await screen.findByRole("heading", { name: dialogTitle })).toBeTruthy();
+    expect(petsService.revokeAccessGrant).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: confirmLabel }));
+    expect(await screen.findByRole("heading", { name: /Cookie/ })).toBeTruthy();
+    expect(petsService.revokeAccessGrant).toHaveBeenCalledWith("p1", "g1");
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
   });
 });
