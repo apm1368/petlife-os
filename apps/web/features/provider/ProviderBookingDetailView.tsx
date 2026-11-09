@@ -9,7 +9,7 @@ import type { ProviderBookingDetailDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
 import { providerOsService } from "@/services/provider-os.service";
 import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
-import { bookingStatusLabel, bookingStatusTone } from "@/features/discovery/labels";
+import { bookingStatusTone } from "@/features/discovery/labels";
 import type { ProviderFollowUpInput } from "@/services/provider-os.service";
 import { DateField } from "@/features/shared/date-picker/DateField";
 
@@ -30,8 +30,7 @@ const ERROR_KEYS = new Set([
 
 function mapError(err: unknown, t: (key: string) => string): string {
   if (err instanceof ApiError && ERROR_KEYS.has(err.code)) return t(`errors.${err.code}`);
-  if (err instanceof ApiError) return err.message;
-  return "Something went wrong. Please try again.";
+  return t("errors.generic");
 }
 
 /**
@@ -41,13 +40,13 @@ function mapError(err: unknown, t: (key: string) => string): string {
  */
 export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) {
   const t = useTranslations("provider.bookingDetail");
-  const tPayment = useTranslations("bookingDetail.paymentStatus");
-  const tScopePreset = useTranslations("bookingDetail.careAccess.preset");
+  const tStatus = useTranslations("provider.bookings.status");
+  const tPayment = useTranslations("provider.bookings.paymentStatus");
   const tKnowledge = useTranslations("health.knowledgeState");
   const tVaccination = useTranslations("health.vaccinationStatus");
   const tCommon = useTranslations("common");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as "fa" | "en" | "de" | "es";
 
   const [detail, setDetail] = useState<ProviderBookingDetailDto | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -97,7 +96,6 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
 
   const { booking, pet, access, careProfile, healthSummary, providerNotes } = detail;
   const isCancellable = ["CONFIRMED", "CHECKED_IN", "AWAITING_PAYMENT"].includes(booking.bookingStatus);
-  const fa = locale === "fa";
   const started = new Date(booking.startAt).getTime() <= Date.now();
 
   return (
@@ -106,7 +104,7 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
       <div>
         <h1 className="text-page-title text-text-primary">{t("title")}</h1>
         <div className="mt-2 flex flex-wrap gap-2">
-          <StatusLabel tone={bookingStatusTone(booking.bookingStatus)}>{bookingStatusLabel(booking.bookingStatus, fa)}</StatusLabel>
+          <StatusLabel tone={bookingStatusTone(booking.bookingStatus)}>{tStatus(booking.bookingStatus)}</StatusLabel>
           {booking.bookingNumber ? <span className="text-sm text-text-secondary" dir="ltr">{booking.bookingNumber}</span> : null}
           <StatusLabel tone="neutral">{tPayment(booking.paymentStatus)}</StatusLabel>
         </div>
@@ -116,7 +114,7 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
         <Row label={t("pet")} value={pet.name} />
         <Row label={t("owner")} value={booking.ownerDisplayName} />
         <Row label={t("service")} value={booking.variantName ? `${booking.serviceName} — ${booking.variantName}` : booking.serviceName} />
-        {booking.bookingStatus === "REQUESTED" && booking.requestExpiresAt ? <Row label={fa ? "مهلت پاسخ" : "Respond by"} value={formatAppointmentDateTime(booking.requestExpiresAt, locale, booking.timezone)} /> : null}
+        {booking.bookingStatus === "REQUESTED" && booking.requestExpiresAt ? <Row label={t("respondBy")} value={formatAppointmentDateTime(booking.requestExpiresAt, locale, booking.timezone)} /> : null}
         <Row label={t("location")} value={booking.locationLabel} />
         <Row label={t("dateTime")} value={formatAppointmentDateTime(booking.startAt, locale, booking.timezone)} />
         {booking.reasonForVisit ? <Row label={t("reason")} value={booking.reasonForVisit} /> : null}
@@ -129,7 +127,7 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
         <StatusLabel tone={ACCESS_TONE[access.state] ?? "neutral"}>{t(`access.state.${access.state}`)}</StatusLabel>
         {access.state === "GRANTED" ? (
           <>
-            <Row label={t("access.scope")} value={access.scopePreset ? tScopePreset(access.scopePreset) : ""} />
+            <Row label={t("access.scope")} value={access.scopePreset ? t(`access.scopePreset.${access.scopePreset}`) : ""} />
             <Row label={t("access.startsAt")} value={access.startsAt ? formatAppointmentDateTime(access.startsAt, locale, booking.timezone) : ""} />
             <Row label={t("access.expiresAt")} value={access.expiresAt ? formatAppointmentDateTime(access.expiresAt, locale, booking.timezone) : ""} />
           </>
@@ -164,8 +162,8 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
       <div className="flex flex-wrap gap-2">
         {booking.bookingStatus === "REQUESTED" ? (
           <>
-            <Button variant="primary" isLoading={isActing} onClick={() => runAction(() => providerOsService.acceptBooking(booking.id))}>{fa ? "پذیرش درخواست" : "Accept request"}</Button>
-            <Button variant="ghost" onClick={() => setShowRejectDialog(true)}>{fa ? "رد درخواست" : "Decline"}</Button>
+            <Button variant="primary" isLoading={isActing} onClick={() => runAction(() => providerOsService.acceptBooking(booking.id))}>{t("actions.acceptRequest")}</Button>
+            <Button variant="ghost" onClick={() => setShowRejectDialog(true)}>{t("actions.decline")}</Button>
           </>
         ) : null}
         {booking.bookingStatus === "CONFIRMED" ? (
@@ -174,10 +172,10 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
           </Button>
         ) : null}
         {booking.bookingStatus === "CONFIRMED" && started ? (
-          <Button variant="ghost" isLoading={isActing} onClick={() => runAction(() => providerOsService.markNoShow(booking.id))}>{fa ? "ثبت عدم حضور" : "Mark no-show"}</Button>
+          <Button variant="ghost" isLoading={isActing} onClick={() => runAction(() => providerOsService.markNoShow(booking.id))}>{t("actions.markNoShow")}</Button>
         ) : null}
         {booking.category === "VET" && ["CONFIRMED", "CHECKED_IN", "IN_PROGRESS"].includes(booking.bookingStatus) && access.state === "GRANTED" ? (
-          <Button variant="secondary" onClick={() => router.push(`/${locale}/provider/patients/${pet.id}?startVisitForBooking=${booking.id}`)}>{fa ? "شروع ویزیت بالینی" : "Start clinical visit"}</Button>
+          <Button variant="secondary" onClick={() => router.push(`/${locale}/provider/patients/${pet.id}?startVisitForBooking=${booking.id}`)}>{t("actions.startClinicalVisit")}</Button>
         ) : null}
         {booking.bookingStatus === "CONFIRMED" ? (
           <Button variant="primary" isLoading={isActing} onClick={() => runAction(() => providerOsService.checkIn(booking.id))}>
@@ -211,32 +209,32 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
           />
           {booking.category === "VET" ? (
             <fieldset className="flex flex-col gap-2 border-t border-border-subtle pt-3">
-              <legend className="font-bold">{fa ? "پیگیری‌ها (فقط در صورت نیاز)" : "Follow-ups (only if needed)"}</legend>
-              <p className="text-sm text-text-secondary">{fa ? "هر پیگیری در مرکز مراقبت صاحب حیوان با منبع «ارائه‌دهنده» ثبت می‌شود. چیزی خودکار زمان‌بندی نمی‌شود." : "Each follow-up appears in the owner's Care Center as provider-created. Nothing is scheduled automatically."}</p>
+              <legend className="font-bold">{t("followUps.legend")}</legend>
+              <p className="text-sm text-text-secondary">{t("followUps.description")}</p>
               {followUps.map((f, i) => (
                 <div key={i} className="grid gap-2 sm:grid-cols-[10rem_1fr_12rem_auto]">
-                  <select aria-label={fa ? "نوع پیگیری" : "Follow-up type"} className="rounded border border-border-subtle bg-surface-base p-2" value={f.type} onChange={(e) => setFollowUps((prev) => prev.map((x, j) => (j === i ? { ...x, type: e.target.value as ProviderFollowUpInput["type"] } : x)))}>
-                    <option value="FOLLOW_UP">{fa ? "ویزیت پیگیری" : "Follow-up visit"}</option>
-                    <option value="VACCINATION">{fa ? "واکسن بعدی" : "Next vaccination"}</option>
-                    <option value="MEDICATION">{fa ? "دارو" : "Medication"}</option>
-                    <option value="MONITORING">{fa ? "آزمایش / بررسی" : "Lab / review"}</option>
-                    <option value="OTHER">{fa ? "سایر" : "Other"}</option>
+                  <select aria-label={t("followUps.typeLabel")} className="rounded border border-border-subtle bg-surface-base p-2" value={f.type} onChange={(e) => setFollowUps((prev) => prev.map((x, j) => (j === i ? { ...x, type: e.target.value as ProviderFollowUpInput["type"] } : x)))}>
+                    <option value="FOLLOW_UP">{t("followUps.type.FOLLOW_UP")}</option>
+                    <option value="VACCINATION">{t("followUps.type.VACCINATION")}</option>
+                    <option value="MEDICATION">{t("followUps.type.MEDICATION")}</option>
+                    <option value="MONITORING">{t("followUps.type.MONITORING")}</option>
+                    <option value="OTHER">{t("followUps.type.OTHER")}</option>
                   </select>
-                  <input aria-label={fa ? "عنوان" : "Title"} className="rounded border border-border-subtle bg-surface-base p-2" maxLength={200} value={f.title} onChange={(e) => setFollowUps((prev) => prev.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)))} />
-                  <DateField label={fa ? "تاریخ" : "Date"} min={new Date(Date.now() + 86400_000).toISOString().slice(0, 10)} value={f.dueAt.slice(0, 10)} onChange={(date) => setFollowUps((prev) => prev.map((x, j) => (j === i ? { ...x, dueAt: date ? new Date(`${date}T06:30:00Z`).toISOString() : "" } : x)))} />
-                  <Button variant="ghost" size="sm" onClick={() => setFollowUps((prev) => prev.filter((_, j) => j !== i))}>{fa ? "حذف" : "Remove"}</Button>
+                  <input aria-label={t("followUps.titleLabel")} className="rounded border border-border-subtle bg-surface-base p-2" maxLength={200} value={f.title} onChange={(e) => setFollowUps((prev) => prev.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)))} />
+                  <DateField label={t("followUps.dateLabel")} min={new Date(Date.now() + 86400_000).toISOString().slice(0, 10)} value={f.dueAt.slice(0, 10)} onChange={(date) => setFollowUps((prev) => prev.map((x, j) => (j === i ? { ...x, dueAt: date ? new Date(`${date}T06:30:00Z`).toISOString() : "" } : x)))} />
+                  <Button variant="ghost" size="sm" onClick={() => setFollowUps((prev) => prev.filter((_, j) => j !== i))}>{t("followUps.remove")}</Button>
                 </div>
               ))}
-              {followUps.length < 10 ? <Button variant="secondary" size="sm" onClick={() => setFollowUps((prev) => [...prev, { type: "FOLLOW_UP", title: "", dueAt: "" }])}>{fa ? "افزودن پیگیری" : "Add follow-up"}</Button> : null}
+              {followUps.length < 10 ? <Button variant="secondary" size="sm" onClick={() => setFollowUps((prev) => [...prev, { type: "FOLLOW_UP", title: "", dueAt: "" }])}>{t("followUps.add")}</Button> : null}
             </fieldset>
           ) : null}
         </ContextSurface>
       ) : null}
 
-      <Dialog open={showRejectDialog} onClose={() => setShowRejectDialog(false)} title={fa ? "رد درخواست نوبت" : "Decline request"}>
+      <Dialog open={showRejectDialog} onClose={() => setShowRejectDialog(false)} title={t("rejectDialog.title")}>
         <div className="flex flex-col gap-3">
-          <Input label={fa ? "علت (برای مشتری نمایش داده می‌شود)" : "Reason (shown to the customer)"} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} />
-          <Button disabled={!rejectReason.trim()} isLoading={isActing} onClick={() => runAction(() => providerOsService.rejectBooking(booking.id, rejectReason.trim())).then(() => setShowRejectDialog(false))}>{fa ? "رد درخواست" : "Decline request"}</Button>
+          <Input label={t("rejectDialog.reasonLabel")} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} />
+          <Button disabled={!rejectReason.trim()} isLoading={isActing} onClick={() => runAction(() => providerOsService.rejectBooking(booking.id, rejectReason.trim())).then(() => setShowRejectDialog(false))}>{t("actions.decline")}</Button>
         </div>
       </Dialog>
 
