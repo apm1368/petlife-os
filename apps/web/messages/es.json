@@ -1646,6 +1646,36 @@
       "loading": "Cargando registro"
     }
   },
+  "communityChat": {
+    "inbox": {
+      "title": "Mensajes",
+      "emptyTitle": "Aún no hay conversaciones",
+      "emptyDescription": "Inicia una conversación desde una publicación o el perfil de otra persona.",
+      "fallbackMember": "Miembro",
+      "youPrefix": "Tú:",
+      "unread": "{count, plural, one {# mensaje sin leer} other {# mensajes sin leer}}",
+      "failed": "No se pudieron cargar los mensajes",
+      "noAccess": "No tienes acceso a estos mensajes.",
+      "stale": "No se pudieron actualizar los mensajes. Se muestran las conversaciones cargadas anteriormente.",
+      "retry": "Reintentar"
+    },
+    "thread": {
+      "allMessages": "Todos los mensajes",
+      "conversationFallback": "Conversación",
+      "block": "Bloquear",
+      "unblock": "Desbloquear",
+      "blocked": "La mensajería está bloqueada en esta conversación.",
+      "messageLabel": "Mensaje",
+      "send": "Enviar",
+      "sendFailed": "No se envió el mensaje. Inténtalo de nuevo.",
+      "blockFailed": "No se pudo cambiar el bloqueo. Inténtalo de nuevo.",
+      "notFound": "No se encontró la conversación",
+      "loadFailed": "No se pudo cargar la conversación",
+      "noAccess": "No tienes acceso a esta conversación.",
+      "retry": "Reintentar",
+      "noMessages": "Todavía no hay mensajes en esta conversación."
+    }
+  },
   "memories": {
     "publicMemorial": {
       "title": "Enviar un homenaje",

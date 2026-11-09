@@ -1646,6 +1646,36 @@
       "loading": "Eintrag wird geladen"
     }
   },
+  "communityChat": {
+    "inbox": {
+      "title": "Nachrichten",
+      "emptyTitle": "Noch keine Gespräche",
+      "emptyDescription": "Beginne ein Gespräch über einen Beitrag oder das Profil eines Mitglieds.",
+      "fallbackMember": "Mitglied",
+      "youPrefix": "Du:",
+      "unread": "{count, plural, one {# ungelesene Nachricht} other {# ungelesene Nachrichten}}",
+      "failed": "Nachrichten konnten nicht geladen werden",
+      "noAccess": "Du hast keinen Zugriff auf diese Nachrichten.",
+      "stale": "Nachrichten konnten nicht aktualisiert werden. Die zuletzt geladenen Gespräche werden angezeigt.",
+      "retry": "Erneut versuchen"
+    },
+    "thread": {
+      "allMessages": "Alle Nachrichten",
+      "conversationFallback": "Gespräch",
+      "block": "Blockieren",
+      "unblock": "Blockierung aufheben",
+      "blocked": "Nachrichten sind in diesem Gespräch blockiert.",
+      "messageLabel": "Nachricht",
+      "send": "Senden",
+      "sendFailed": "Die Nachricht wurde nicht gesendet. Bitte versuche es erneut.",
+      "blockFailed": "Die Blockierung konnte nicht geändert werden. Bitte versuche es erneut.",
+      "notFound": "Gespräch nicht gefunden",
+      "loadFailed": "Gespräch konnte nicht geladen werden",
+      "noAccess": "Du hast keinen Zugriff auf dieses Gespräch.",
+      "retry": "Erneut versuchen",
+      "noMessages": "In diesem Gespräch gibt es noch keine Nachrichten."
+    }
+  },
   "memories": {
     "publicMemorial": {
       "title": "Gedenkbeitrag einreichen",
