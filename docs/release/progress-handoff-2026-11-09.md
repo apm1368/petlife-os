@@ -2,6 +2,22 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
+## Latest verified checkpoint — 2026-11-09 11:31 UTC
+
+- #208 merged normally by squash at merge SHA `fbea505cf1e49fa60bcf7e40a7fb54499b5e2075`; #104 was closed as superseded without deleting its branch/history. #208 exact-head CI `42607738997` passed lint, design/visual, typecheck, migrations, tests, API E2E and production build. This integrates BK-19 review timing and three criteria into the localized customer booking detail.
+- `main` is `fbea505…`; its post-merge CI/build run `42609549655` is still in progress. Production remains at `be12ac5d74b043bafad66c091c2b225f3ec210a4` (`github-42605474846-1`); health and readiness are good, DB/Redis are up. Do not mark the #208 change live or start manual deployment; wait for the authorized main pipeline and verify the final production SHA.
+- Safe production `GET /api/shop/products` still returned HTTP 200 with an empty result before #208 merge; demo items are excluded, while legitimate product visibility and purchase remain unverified because no real reviewed offer exists.
+- #205 handoff PR now points at head `3cf10f06d70be210c7e5d7496a712843bb344ada`. Its exact CI `42609188281` is still running the test step. This checkpoint should be committed/pushed; check status again afterward because the new commit will trigger another exact-head run.
+- #208 local verification on source head: BookingDetailView 15/15 tests; focused ESLint and web typecheck passed; all locale JSON parsed and diff checks passed. Booking-detail behavior remains PARTIAL until an authenticated production/browser session verifies the flow, directions and responsive layout. Full page localization is not complete across the product.
+- Disk remains critically low at 32 MiB free. No `.next` directory or active local build was found, and no cleanup was performed. Payment worktree is not present in the visible worktrees and no payment code was modified. Production bucket/CDN access remains unavailable; original memorial source-image and old CDN privacy are unverified. Digikala/Jajiga source access/content rights and a real product catalog remain blockers.
+
+### Next actions
+
+1. Monitor main CI `42609549655`; then monitor the auto-deploy and verify production SHA is `fbea505…`, readiness, and safe shop API. Do not manually redeploy.
+2. Push this handoff checkpoint to #205 and monitor its exact-head CI; merge #205 normally only if the repository allows it.
+3. Do not mark booking detail LIVE_VERIFIED without authenticated production interaction/browser verification. Existing source/privacy/copy limits remain explicit.
+4. Continue independent work from current main and prioritize full-body localization and a legitimate reviewed catalog offer when authorized source data/rights are available.
+
 ## Latest verified checkpoint — 2026-11-09 11:26 UTC
 
 - `main` and production now both report `be12ac5d74b043bafad66c091c2b225f3ec210a4` (#207); deployment run `42605474846` completed successfully. Production `/api/health/ready` reports DB and Redis up. Safe `GET /api/shop/products` returns HTTP 200 with zero items: demo products are not exposed, but no legitimate reviewed offer exists to verify catalog visibility/purchase. Customer booking-detail localization is deployed but remains PARTIAL because no authenticated production browser session was available to verify its behavior/layout.
