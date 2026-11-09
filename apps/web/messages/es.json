@@ -1608,6 +1608,32 @@
     "support": "Soporte"
   },
   "seller": {
+    "dashboard": {
+      "title": "Panel del vendedor",
+      "loading": "Cargando los datos del vendedor…",
+      "retry": "Reintentar",
+      "failed": "No se pudo cargar el panel del vendedor.",
+      "offline": "No tienes conexión. Comprueba la conexión e inténtalo de nuevo.",
+      "noAccess": "No tienes permiso para ver este espacio de vendedor.",
+      "noWorkspace": "No hay ningún espacio de vendedor seleccionado.",
+      "noWorkspaceDescription": "Selecciona un espacio de vendedor autorizado para ver sus pedidos y ofertas actuales.",
+      "tiles": {
+        "ordersRequiringAction": "Pedidos que requieren atención",
+        "lowStockOffers": "Ofertas con pocas existencias",
+        "activeOffers": "Ofertas activas",
+        "channelSyncErrors": "Errores de sincronización del canal",
+        "fulfillmentExceptions": "Incidencias de preparación de pedidos",
+        "ordersToday": "Pedidos de hoy",
+        "unitsSoldToday": "Unidades vendidas hoy",
+        "gmvToday": "Valor bruto de ventas de hoy"
+      },
+      "recentOrders": "Pedidos recientes",
+      "noRecentOrders": "Aún no hay pedidos.",
+      "marketplaceOrderLabel": "Pedido de {provider}",
+      "petlifeOrderLabel": "Pedido de opetlife",
+      "itemCount": "{count, plural, one {# artículo} other {# artículos}}",
+      "verificationLink": "Verificación de la empresa y documentos"
+    },
     "offers": {
       "title": "Ofertas",
       "loading": "Cargando ofertas…",
@@ -1637,6 +1663,37 @@
         "intervals": "Intervalos de entrega",
         "everyDays": "Cada {days} días",
         "pickOne": "Elige al menos un intervalo."
+      }
+    }
+  },
+  "vetPanel": {
+    "dashboard": {
+      "title": "Panel clínico",
+      "offline": "No tienes conexión. Comprueba la conexión e inténtalo de nuevo.",
+      "noAccess": "No tienes permiso para ver este panel clínico.",
+      "todaysAppointments": "{count, number} citas hoy",
+      "openVisits": "{count, number} consultas abiertas",
+      "overdueTasks": "{count, number} tratamientos atrasados",
+      "activeAlerts": "{count, number} alertas de pacientes",
+      "whiteboard": "Ahora en la clínica",
+      "noInpatients": "No hay animales hospitalizados.",
+      "kennel": "Jaula {label}",
+      "dueTasks": "{count, number} tratamientos pendientes",
+      "lastVitals": "Constantes vitales {time}",
+      "noVitalsYet": "Aún no se han registrado constantes vitales",
+      "overdueTasksHeading": "Tratamientos atrasados",
+      "noOverdueTasks": "No hay tareas atrasadas.",
+      "overdue": "Atrasado",
+      "awaitingOwnerDecision": "Pendiente de la decisión de la persona responsable",
+      "noPendingEstimates": "No hay presupuestos pendientes de respuesta.",
+      "estimateRange": "{low}–{high} IRR",
+      "openVisitsHeading": "Consultas abiertas",
+      "inProgress": "En curso",
+      "triage": {
+        "ROUTINE": "Ordinario",
+        "URGENT": "Urgente",
+        "EMERGENT": "Emergencia",
+        "CRITICAL": "Crítico"
       }
     }
   },

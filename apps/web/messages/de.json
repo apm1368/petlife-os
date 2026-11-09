@@ -1608,6 +1608,32 @@
     "support": "Support"
   },
   "seller": {
+    "dashboard": {
+      "title": "Verkäuferübersicht",
+      "loading": "Verkäuferdaten werden geladen …",
+      "retry": "Erneut versuchen",
+      "failed": "Das Verkäufer-Dashboard konnte nicht geladen werden.",
+      "offline": "Du bist offline. Prüfe deine Verbindung und versuche es erneut.",
+      "noAccess": "Du hast keine Berechtigung für diesen Verkäuferbereich.",
+      "noWorkspace": "Es ist kein Verkäuferbereich ausgewählt.",
+      "noWorkspaceDescription": "Wähle einen autorisierten Verkäuferbereich aus, um die aktuellen Bestellungen und Angebote zu sehen.",
+      "tiles": {
+        "ordersRequiringAction": "Bestellungen mit Handlungsbedarf",
+        "lowStockOffers": "Angebote mit niedrigem Bestand",
+        "activeOffers": "Aktive Angebote",
+        "channelSyncErrors": "Fehler bei der Kanalsynchronisierung",
+        "fulfillmentExceptions": "Ausnahmen bei der Auftragsabwicklung",
+        "ordersToday": "Bestellungen heute",
+        "unitsSoldToday": "Heute verkaufte Stückzahl",
+        "gmvToday": "Bruttowarenwert heute"
+      },
+      "recentOrders": "Letzte Bestellungen",
+      "noRecentOrders": "Noch keine Bestellungen.",
+      "marketplaceOrderLabel": "Bestellung von {provider}",
+      "petlifeOrderLabel": "opetlife-Bestellung",
+      "itemCount": "{count, plural, one {# Artikel} other {# Artikel}}",
+      "verificationLink": "Unternehmensprüfung und Dokumente"
+    },
     "offers": {
       "title": "Angebote",
       "loading": "Angebote werden geladen …",
@@ -1637,6 +1663,37 @@
         "intervals": "Lieferintervalle",
         "everyDays": "Alle {days} Tage",
         "pickOne": "Wähle mindestens ein Intervall aus."
+      }
+    }
+  },
+  "vetPanel": {
+    "dashboard": {
+      "title": "Klinisches Board",
+      "offline": "Du bist offline. Prüfe deine Verbindung und versuche es erneut.",
+      "noAccess": "Du hast keine Berechtigung für dieses klinische Dashboard.",
+      "todaysAppointments": "{count, number} Termine heute",
+      "openVisits": "{count, number} offene Behandlungen",
+      "overdueTasks": "{count, number} überfällige Behandlungen",
+      "activeAlerts": "{count, number} Patientenhinweise",
+      "whiteboard": "Gerade in der Klinik",
+      "noInpatients": "Keine Tiere stationär aufgenommen.",
+      "kennel": "Gehege {label}",
+      "dueTasks": "{count, number} fällige Behandlungen",
+      "lastVitals": "Vitalwerte {time}",
+      "noVitalsYet": "Noch keine Vitalwerte erfasst",
+      "overdueTasksHeading": "Überfällige Behandlungen",
+      "noOverdueTasks": "Nichts ist überfällig.",
+      "overdue": "Überfällig",
+      "awaitingOwnerDecision": "Warten auf die Entscheidung der Halterin oder des Halters",
+      "noPendingEstimates": "Keine Kostenvoranschläge warten auf eine Entscheidung.",
+      "estimateRange": "{low}–{high} IRR",
+      "openVisitsHeading": "Offene Behandlungen",
+      "inProgress": "In Bearbeitung",
+      "triage": {
+        "ROUTINE": "Regulär",
+        "URGENT": "Dringend",
+        "EMERGENT": "Notfall",
+        "CRITICAL": "Kritisch"
       }
     }
   },
