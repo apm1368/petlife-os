@@ -2838,6 +2838,8 @@ model Brand {
 /// orphans them to the root level.
 model ProductCategory {
   id       String            @id @default(uuid()) @db.Uuid
+  /// Seed/demo taxonomy entries are excluded from public shop discovery.
+  isDemoRecord Boolean       @default(false)
   parentId String?           @db.Uuid
   parent   ProductCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
   children ProductCategory[] @relation("CategoryHierarchy")
