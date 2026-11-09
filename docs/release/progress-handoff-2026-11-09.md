@@ -2,7 +2,114 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
-## Latest verified update — 2026-11-09 09:04 UTC
+## Latest verified checkpoint — 2026-11-09 11:31 UTC
+
+- #208 merged normally by squash at merge SHA `fbea505cf1e49fa60bcf7e40a7fb54499b5e2075`; #104 was closed as superseded without deleting its branch/history. #208 exact-head CI `42607738997` passed lint, design/visual, typecheck, migrations, tests, API E2E and production build. This integrates BK-19 review timing and three criteria into the localized customer booking detail.
+- `main` is `fbea505…`; its post-merge CI/build run `42609549655` is still in progress. Production remains at `be12ac5d74b043bafad66c091c2b225f3ec210a4` (`github-42605474846-1`); health and readiness are good, DB/Redis are up. Do not mark the #208 change live or start manual deployment; wait for the authorized main pipeline and verify the final production SHA.
+- Safe production `GET /api/shop/products` still returned HTTP 200 with an empty result before #208 merge; demo items are excluded, while legitimate product visibility and purchase remain unverified because no real reviewed offer exists.
+- #205 handoff PR now points at head `3cf10f06d70be210c7e5d7496a712843bb344ada`. Its exact CI `42609188281` is still running the test step. This checkpoint should be committed/pushed; check status again afterward because the new commit will trigger another exact-head run.
+- #208 local verification on source head: BookingDetailView 15/15 tests; focused ESLint and web typecheck passed; all locale JSON parsed and diff checks passed. Booking-detail behavior remains PARTIAL until an authenticated production/browser session verifies the flow, directions and responsive layout. Full page localization is not complete across the product.
+- Disk remains critically low at 32 MiB free. No `.next` directory or active local build was found, and no cleanup was performed. Payment worktree is not present in the visible worktrees and no payment code was modified. Production bucket/CDN access remains unavailable; original memorial source-image and old CDN privacy are unverified. Digikala/Jajiga source access/content rights and a real product catalog remain blockers.
+
+### Next actions
+
+1. Monitor main CI `42609549655`; then monitor the auto-deploy and verify production SHA is `fbea505…`, readiness, and safe shop API. Do not manually redeploy.
+2. Push this handoff checkpoint to #205 and monitor its exact-head CI; merge #205 normally only if the repository allows it.
+3. Do not mark booking detail LIVE_VERIFIED without authenticated production interaction/browser verification. Existing source/privacy/copy limits remain explicit.
+4. Continue independent work from current main and prioritize full-body localization and a legitimate reviewed catalog offer when authorized source data/rights are available.
+
+## Latest verified checkpoint — 2026-11-09 11:26 UTC
+
+- `main` and production now both report `be12ac5d74b043bafad66c091c2b225f3ec210a4` (#207); deployment run `42605474846` completed successfully. Production `/api/health/ready` reports DB and Redis up. Safe `GET /api/shop/products` returns HTTP 200 with zero items: demo products are not exposed, but no legitimate reviewed offer exists to verify catalog visibility/purchase. Customer booking-detail localization is deployed but remains PARTIAL because no authenticated production browser session was available to verify its behavior/layout.
+- #104 itself remains open and conflicting. Replacement PR #208 targets `main`, head `55472363b5067bfbd326478396674da5deed5a26`; exact CI `42607738997` is still running API E2E. Lint, visual/design checks, typecheck, migrations and unit/web tests have passed on that exact head. Local focused BookingDetailView tests passed 15/15; focused ESLint, web typecheck, locale JSON parse and diff check passed. Review decision is blank and GitHub reports `BLOCKED` while the required run is pending; no merge attempted.
+- #208 contains the BK-19 two-hour provider-recorded completion gate, overall score plus three required dimensions, and fa/en/de/es copy for the new review/timing states and dialogs. Its PR description was corrected through the GitHub API after shell quoting had corrupted the initial body; it now accurately lists validations and pending CI. No schema migration is added in this slice.
+- Handoff PR #205 is at head `1114f6321741000da27bf09d9e5bba0682d8e4fe`; exact CI `42608103480` remains in progress (API E2E). Its head includes the previously committed 11:18 checkpoint; update again after #208 CI/deployment status changes.
+- The exact current shop API is still empty (no demo rows; no legitimate offer). No source catalog access/content-rights evidence or Jajiga nationwide coverage is established. Original memorial source-image/CDN privacy remains unverified due inaccessible production bucket/CDN configuration.
+- Disk is critically constrained at about 32 MiB free. Read-only inspection found no project `.next` directory and no active local build/dev server; no cleanup was performed. Payment worktree remains absent from visible worktrees and no payment files were touched. Full authenticated browser verification is unavailable.
+
+### Next actions
+
+1. Wait for #208 exact-head API E2E and build. Fix any actual failures and rerun; if CI succeeds and GitHub permits, merge normally, then verify the automatic deployment SHA and health.
+2. Wait for #205 exact-head CI and refresh its handoff after the feature merge/deployment state changes.
+3. Do not call booking detail or full localization LIVE_VERIFIED without authenticated browser checks; leave it PARTIAL.
+4. Continue independent localization/product work from current `main`, not stale translation PR stacks, and preserve the external-source/privacy boundaries.
+
+## Latest verified checkpoint — 2026-11-09 11:18 UTC
+
+- `main`: `be12ac5d74b043bafad66c091c2b225f3ec210a4` (#207). Production `/api/health/version` now reports `ff2a73abdd03ef783f409b5d25dbd9a2026b73ba` (`github-42601851619-1`, #206); deployment run `42601851619` succeeded and readiness reports DB/Redis up. Main is ahead of production; deploy run `42605474846` for `be12ac5d…` is still in progress.
+- #207 remains MERGED_NOT_DEPLOYED until production reports `be12ac5d…`; the safe public shop API remains empty (no demo products exposed, but no legitimate offer exists to verify visibility or purchase).
+- #104 remains open/conflicting against #207. Replacement PR #208 (`feat/services-review-timing-main`) targets `main`, head `55472363b5067bfbd326478396674da5deed5a26`; its exact CI run `42607738997` is in progress. It imports #104's API review timing and required dimensions while preserving the localized main booking detail. Local fix commit `55472363` localizes the new timing notice, three criteria and cancellation/reschedule/review dialogs in fa/en/de/es; the review button is unavailable until the two-hour gate opens.
+- PR #208 validation completed locally: booking detail test 15/15, focused ESLint passed, web typecheck passed, all four locale JSON files parse, and `git diff --check` passed. Full API E2E/build awaits the exact-head PR CI; no full local build was attempted because free disk is only about 33 MiB. The route remains PARTIAL pending authenticated responsive-browser verification.
+- #205 handoff PR head is `3d79550119035ec808f2ea3fcb58e6dfacaa57f3`; CI run `42606367855` is in progress and merge state is BLOCKED while checks are pending. This checkpoint must be committed and pushed to #205 for the durable handoff to stay current.
+- #178 and #206 are LIVE_VERIFIED by production version SHA `ff2a73ab…` for #206 and DB/Redis readiness. #207 is not yet live. #102/#103/#105/#106/#108/#109/#121 and old localization stacks (#132–#141) remain stale/conflicting; do not reuse their prior green checks.
+- Payment worktree is absent from available worktrees; no payment files were changed. Disk remains critically constrained (about 33 MiB free); no cleanup performed. Authenticated browser/visual tools and production bucket/CDN configuration remain unavailable, so source-image/CDN privacy is unverified.
+
+### Next actions
+
+1. Wait for exact-head CI `42607738997` on #208. Fix actual failures only, rerun, then merge normally if GitHub permits; no bypass.
+2. Monitor #207 deploy `42605474846`; verify production version SHA, readiness and safe shop API after it completes.
+3. Commit and push this checkpoint to #205, then wait for its fresh CI. Merge normally only if allowed.
+4. Continue localization using independent current-main slices; older stacks are stale and require code/diff review and fresh checks, not blind retargeting.
+5. Keep product page families PARTIAL until full-body fa/en/de/es states and authenticated responsive behavior are checked. Preserve external-source, shop-catalog and memorial-image limitations.
+
+## Latest verified checkpoint — 2026-11-09 11:06 UTC
+
+- `main`: `be12ac5d74b043bafad66c091c2b225f3ec210a4` (#207). #207 passed exact-head CI `42603584243` on `8d805a08…` (lint, design-system/visual, typecheck, migration, full unit/web tests, API E2E and build) and merged normally by squash at 11:00:24 UTC. It localizes customer booking detail/shared booking labels for fa/en/de/es and includes the two-test async memorial empty-state reliability fix. The booking-detail route remains PARTIAL pending authenticated responsive-browser verification.
+- #104 review timing/criteria is not integrated: its exact CI `42604149889` passed on head `6a1961b9…` before #207, but GitHub now reports `CONFLICTING` against current main. The conflict touches `BookingDetailView.tsx` and its test; a local merge experiment showed the dialog sections cannot be accepted wholesale from either side. No conflict resolution was pushed. The local branch `fix/pr104-memorial-empty-state` now contains an unpushed merge experiment and must not be pushed as-is; port the two-hour review delay and three review dimensions into the localized main component, retain localized dialog/state copy, and rerun exact-head CI before considering merge.
+- #206 is merged at main SHA `ff2a73ab…` (exact PR CI `42600039012` passed), but its deployment `42601851619` is still running the SSH deploy step. Current production `/api/health/version` remains `6ff48d6f8dd6697249b78e3d2b5ee36d5d72b0a1` (`github-42599736618-1`, #178), with DB/Redis ready. Deployment run `42605474846` for new main `be12ac5d…` is queued/pending behind the current deployment; do not mark #206/#207 live yet.
+- Safe public shop API check (`GET /api/shop/products`) still returns HTTP 200 with zero items. Demo records are absent, but there is no legitimate reviewed offer to verify visibility or purchase.
+- #205 handoff PR branch has now been merged locally with current main and this checkpoint; push it for a fresh CI run. It is still open until GitHub confirms merge.
+- #178 is deployed and verified at `6ff48d6f…`; #207 is merged but not deployed. #104's prior green check is stale relative to its current conflicting base. #102/#103/#105/#106/#108/#109/#121 and older stacks remain conflicting or depend on stale bases; do not reuse old green checks.
+- Worktree: no uncommitted changes before this checkpoint update. Payment worktree remains absent from the available worktree list; no payment files were changed. Disk is still critically constrained at about 34 MiB free. No cleanup performed. Authenticated browser/visual tools and production bucket/CDN configuration remain unavailable; source-image/CDN privacy is unverified.
+
+### Next actions
+
+1. Push this handoff update to PR #205 and wait for its exact-head CI.
+2. Monitor #206 deployment `42601851619`; once complete, verify production SHA `ff2a73ab…`, health/readiness and shop API. Then monitor deployment `42605474846` and verify SHA `be12ac5d…` before marking #207 live.
+3. Resolve PR #104 by porting its review timing/criteria into the four-locale main component; do not push the local merge experiment. Retest localized review availability and criteria, refresh PR base/head, and require green exact-head CI.
+4. Continue the next independent page-family localization from the route matrix. Keep pages PARTIAL until all application-owned states and responsive authenticated browser behavior are verified.
+
+## Latest verified checkpoint — 2026-11-09 10:48 UTC
+
+- `origin/main`: `ff2a73abdd03ef783f409b5d25dbd9a2026b73ba` (#206). Production `/api/health/version` reports `6ff48d6f8dd6697249b78e3d2b5ee36d5d72b0a1` (`github-42599736618-1`, #178); health readiness reports DB and Redis up. Deploy run `42601851619` for #206/main is in progress. Production is not yet at current main.
+- Safe anonymous `GET /api/shop/products` returned HTTP 200 and `{items:[], total:0, page:1, pageSize:24, facets:{...}}`. Demo records are not exposed, but there are no legitimate reviewed offers to verify visibility or purchase availability. Do not republish demos.
+- #178 merged at `6ff48d6f…`; exact PR CI `42597205731` passed and deployment run `42599736618` succeeded. #206 merged at `ff2a73ab…`; exact PR CI `42600039012` passed; its production deployment remains in progress.
+- #207 customer-booking localization current head `8d805a08d66805cb44fe628451ae2a297aaf973a`, base `main`, mergeable. Hosted CI run `42603584243` is in progress (lint passed; design-system visual checks currently running). 26 focused booking/localization tests and 2 focused memorial async-state tests passed locally; web typecheck and targeted lint passed before the final test-only correction. Page remains PARTIAL pending exact-head CI and authenticated responsive-browser verification.
+- The #104 exact-head run `42602295740` failed in `PublicPetMemorialSection.test.tsx`, not review-timing code: it asserted the async empty result synchronously while the component still displayed its loading skeleton. #207 now contains a narrow `findByText` wait correction, and the focused test passes. After #207 is merged, sync #104 to `main`, rerun the full CI, inspect/fix any new failures, and only merge if GitHub permits it.
+- #205 handoff PR is open/mergeable; exact CI run `42602108076` was still in progress at last check. Refresh the handoff after this checkpoint commit and do not claim it merged until GitHub confirms.
+- #108/#109/#102/#103/#105/#106 and #121/#132–#141 are open but merge-conflicting; #138–#141 share stale base `feat/i18n-shop-customer`. Ordinary GitHub update-branch requests for #102–#109, #121 and #132–#141 returned conflict (no branch was overwritten). Older dependency chains #110→#111 and #113→#114 still need current-base retargeting after their base PRs are ready. Do not reuse their stale green checks.
+- Disk remains critically constrained (about 34 MiB free; filesystem 100%). No cleanup performed. Existing worktrees were preserved. No payment worktree was present in `git worktree list`; that does not prove the owner's earlier payment work was deleted.
+- Authenticated browser/visual verification is unavailable in this execution environment (`cloud` desktop capability list is empty). Production bucket/CDN configuration is not accessible here; memorial withdrawal cannot be claimed to revoke an independently public source URL or prior cache.
+
+### Immediate next actions
+
+1. Monitor exact-head CI run `42603584243` for #207. If green, attempt a normal squash merge (no bypass); otherwise fix the actual defect and rerun.
+2. Confirm deployment run `42601851619`, then verify production version SHA and shop API again. Mark #206 live only if version equals `ff2a73ab…` and relevant behavior is observed.
+3. Once #207 is merged, update #104 to current `main`, verify the resulting diff and exact-head CI, then merge only if permitted.
+4. Continue localization with the next non-conflicting page family; do not call it complete until all page-owned states render in fa/en/de/es and browser verification is available.
+
+## Latest verified update — 2026-11-09 09:58 UTC
+
+- `origin/main`: `7ae527e0fef76b44f64345a73429e5b7ec62e87f`, after PR #184 merged normally (`7ae527e0`). Production `/api/health/version` still reports `e4e8ba349aa68616571a70d3069b1e7f04a757ec` / deployment `github-42592488512-1`; the main deployment run for `7ae527e0` (`42597068779`) is pending. Public home returned HTTP 200; no authenticated or feature-specific production verification was performed.
+- PR #181 merged normally at `c445790a9be6e4b6f0c28d93d53e8fd88a460fe6`; its exact-head CI `42594079873` passed. PR #184 merged normally at `7ae527e0fef76b44f64345a73429e5b7ec62e87f`; exact-head CI `42595714934` passed. #184 adds pet-access rendered locale-state coverage; it does not complete the pet-access route's authenticated responsive verification.
+- PR #178 (`feat/i18n-expenses-full-page`) was synchronized through main and its current head is `ce5574f829c6df73f4bce30b562810367e357393`; exact-head CI `42597205731` is IN_PROGRESS. Local focused expenses/year-review/health-record tests passed (48 total), local shared-types build, web typecheck, targeted ESLint and diff checks passed. No merge is claimed while CI is running. Review decision is empty.
+- PR #206 (`fix(i18n): localize checkout address errors`) is open at `1bddee1f362b4b7d5edad3b18aafee1cbd4a38d0`; it changes address-save error presentation to use localized fallback copy for de/es and adds two regressions. Checkout/message-parity tests passed (27), web typecheck, targeted ESLint and diff check passed. No hosted check has been reported yet; no merge/deploy is claimed. Checkout remains PARTIAL pending authenticated responsive inspection and order/backoffice localization.
+- PR #205 handoff CI `42596781353` is IN_PROGRESS on head `055aae3c`; this checkpoint update will require fresh CI. PR #178, #205 and #206 have no recorded review decision. Branch-protection details could not be read via the API (403), but PR #184 merged using the normal squash path; no bypass was used.
+- Disk has 36 MiB free. No cleanup was performed. The payment worktree is not present in the current `git worktree list`; it was not modified and its absence does not establish that prior payment work was deleted.
+- The member dashboard body is already translated and has populated/empty/state coverage in all four locales; rollout status remains PARTIAL because signed-in refresh/navigation, authenticated browser rendering, directionality and responsive behavior have not been verified. No complete-module or LIVE_VERIFIED claim is made.
+
+## Latest verified update — 2026-11-09 09:36 UTC
+
+- `origin/main`: `e29eb59d8427fab4e18cbbb16bf299787005be1f` (PR #183). Production: `bb8ba11238ea28fc0500c941a02a6c32f0e13fb7`, deployment `github-42590818714-1`; `/api/health/version` verified this SHA.
+- PR #200 merged normally at `e4e8ba349aa68616571a70d3069b1e7f04a757ec`. It localizes public insurance discovery/comparison/detail, adds insurer HTTPS website links and validates configured insurer website URLs. Exact-main CI/deploy run `42592488512` was still in CI Build. The legacy `/[locale]/pets/[id]/insurance` application page and APIs remain PARTIAL/X-04 unresolved; no live insurer integration is claimed.
+- PR #183 merged normally at `e29eb59d8427fab4e18cbbb16bf299787005be1f`; synchronized head `bb2b862e82e3a15fd176ae048827794764998bc4` passed exact-head CI `42592847614`. It localizes household invitation/approval failure and unknown-event states. The page remains PARTIAL pending authenticated responsive browser verification.
+- PR #178 (`a5055fede369a70e8bc9b2a3b6a4659e28dc5ca2`) CI `42594081868` and #184 (`e5988b727af9223aa05f5ed2a847a441f1abed60`) CI `42594080489` remain in progress. PR #181 (`c26fdf4a7a1fdb93b0b441ac9f43cf1dc836aeee`) CI `42594079873` passed; its merge state is CLEAN. All three are based on current main `e29eb59`; do not reuse green runs on prior heads.
+- #123 was closed as superseded after main was verified to contain its seller-offer translation behavior and translations, with current DE/ES rendering coverage. #122 remains closed/unmerged; its shop discovery/cart implementation is already in main (relevant source components match and current DE/ES commerce catalogs include its keys). No existing branch was force-pushed or discarded.
+- Local verification: full web unit suite passed (297 files / 1,783 tests); web typecheck and targeted ESLint passed. No authenticated production browser checks were performed.
+- Localization remains incomplete; many route families are PARTIAL in the route matrix. German/Spanish SMS templates/delivery are unavailable. Catalog-wide missing-key counts do not establish route/state coverage.
+- Disk: approximately 38 MiB free; no cleanup performed. Existing worktrees/local changes were preserved. No payment worktree was listed; that does not prove earlier payment changes were deleted.
+
+## Earlier verified update — 2026-11-09 09:04 UTC
 
 - `origin/main` and production both report `e7685b3dd7781839552f7c9bb5173bcbcc7f3edf` (PR #204; deployment `github-42587791639-1`). Main CI passed every stage including migrations, unit/API E2E and build. Production `/api/health/version` reports the same SHA; `/api/health/ready` reports DB and Redis up.
 - Safe unauthenticated production smoke: `/fa/auth`, `/en/auth`, `/de/auth`, `/es/auth` each returned HTTP 200 with matching HTML `lang`; stripped server-rendered de/es auth HTML contained no Persian/Arabic text. This does not verify signed-in dashboard or subscription behavior.
@@ -25,11 +132,11 @@ Point-in-time checkpoint only. Recheck GitHub, CI and production before each mer
 
 ## Release state
 
-- `main`: `07c2ac246e344f0eac9e319449801c2e9df88df9`, after #203 merged normally. Production `/api/health/version` last returned `c1c8bf530c384e7eef08cbeb2c9c78fcb7eecbda` (deployment `github-42582860438-1`). Main CI for `07c2ac24` is running as `42584955441`; production release is pending. Recheck before claiming #203 live.
-- Main CI/deploy for #196 (`42582860438`, SHA `c1c8bf5…`) completed successfully; the deployed SHA was verified on production. #202 (`3097163…`) was superseded by that release.
-- #199's first main deployment failed in unit tests due to a race in `TravelFavoritesView.test.tsx`. #202 fixed the test and merged at `3097163505b2e9f664dc7103d31c1e9c762756a9`; its own exact CI passed. The #199 feature is not LIVE_VERIFIED until the current deployment SHA and behavior are checked.
+- `main`: `e29eb59d8427fab4e18cbbb16bf299787005be1f`. Production `/api/health/version`: `bb8ba11238ea28fc0500c941a02a6c32f0e13fb7` (deployment `github-42590818714-1`).
+- Main CI/deploy run `42592488512` for #200 merge `e4e8ba34…` was still in CI Build; deploy run `42594044607` for current main `e29eb59…` was queued. Recheck workflow and production SHA before claiming either revision live.
+- #204 and earlier changes are in production SHA `bb8ba112…`. The previous public auth smoke was unauthenticated and does not verify private user flows.
 - Public shop was last observed empty after demo exclusion. No legitimate reviewed seller offer was available to verify visibility or purchase.
-- Disk is critically low (about 42 MiB free of 7.9 GiB); no cleanup was performed. Avoid full builds, dependency installation, Docker pulls and large browser artifacts.
+- Disk is critically low (about 38 MiB free of 7.9 GiB); no cleanup was performed. Avoid full builds, dependency installation, Docker pulls and large browser artifacts.
 - No payment worktree appeared in `git worktree list`; this does not prove it was deleted. No payment code was changed.
 
 ## Recent integration and PR queue
@@ -40,8 +147,9 @@ Point-in-time checkpoint only. Recheck GitHub, CI and production before each mer
 | #196 provider team localization | Merged at `c1c8bf530c384e7eef08cbeb2c9c78fcb7eecbda`; synchronized-head PR CI passed. | Confirm main CI/deploy and provider route behavior. |
 | #203 account invitation inbox states | Merged at `07c2ac24…`; included in production SHA `e7685b3d…`; anonymous auth routes smoke-tested. | Signed-in invitation behavior remains unverified. |
 | #204 household membership/subscription localization | Merged and deployed at `e7685b3d…`; exact-head CI and deployment passed. | Private flows need authenticated production verification. |
-| #200 insurance localization | Last pushed head `2264bd74…` passed CI; new local URL/privacy and documentation follow-up is unpushed. | Commit/push follow-up, then wait for exact-head CI; legacy app APIs remain X-04 gap. |
-| #178, #181–#184 | Updated to main; fresh exact-head CI is pending/in progress. | Review each diff and merge only after current checks pass. |
+| #200 insurance localization | Merged at `e4e8ba34…`; main CI/deploy not yet verified on production. | Verify deployment SHA; legacy application APIs remain X-04 gap. |
+| #183 household failure/unknown states | Merged at `e29eb59…`; exact-head CI passed. | Verify production release and later authenticated responsive flow. |
+| #178, #181, #184 | Synced against `e29eb59…`; exact-head CI pending/in progress. | Inspect final diff; merge only after current checks pass and GitHub permits normally. |
 | #202 travel test race | Merged at `3097163505b2e9f664dc7103d31c1e9c762756a9`; PR CI green. | Confirm production release SHA and behavior. |
 
 Older stacked PRs remain, including #110→#111, #113→#114, and older shop/booking localization chains. Inspect current bases and conflicts before retargeting; never bypass branch protection.
@@ -58,7 +166,28 @@ Older stacked PRs remain, including #110→#111, #113→#114, and older shop/boo
 
 - Shop remains empty until legitimate, reviewed product and seller-offer data with acceptable content/image provenance exist. Do not re-enable demo records.
 - Jajiga is selected, but the small discovery evidence does not prove nationwide coverage or live availability. Digikala access remains unproven; do not bypass source restrictions.
-- Commit and push the final #200 list-query cleanup and coverage/handoff updates, then recheck exact-head CI and mergeability.
-- Monitor the current exact-head CI runs for #178 and #181–#184; inspect each resulting diff, then merge independently only after checks pass.
+- Verify production deployments for `e4e8ba34…` then `e29eb59…`; check health/version and safe public insurance/auth routes.
+- Monitor exact-head CI for #178, #181 and #184; inspect each resulting diff, then merge independently only when current checks pass and GitHub permits a normal merge.
 - Continue the route-by-route localization work; do not report full four-language completion while the catalog and route matrix still show missing content.
 - Continue route-by-route localization and functional/security work; track remaining page states in the rollout matrix. Do not mark anything LIVE_VERIFIED without merged code, green CI, migration/deploy evidence and observed production behavior.
+
+## Current verified checkpoint — 2026-11-09 10:36 UTC
+
+- GitHub `main` is `ff2a73abdd03ef783f409b5d25dbd9a2026b73ba` after PR #206 merged normally at 10:34 UTC. #206 exact-head CI (`42600039012`) passed; main deployment `42601851619` is pending. PR #178 is merged at `6ff48d6f…`; deployment `42599736618` remains in progress.
+- Production `/api/health/version` reports `7ae527e0fef76b44f64345a73429e5b7ec62e87f` (`github-42597068779-1`); readiness returned DB and Redis up. The catalog API is HTTP 200 with `items: []`, `total: 0`. Production is not at current main; deployments for #178 and #206 are still pending/in progress.
+- #206 checkout localization is `MERGED_NOT_DEPLOYED` at `ff2a73ab…`: German/Spanish checkout address-save and validation errors now use translated copy instead of raw backend English. CI is green; safe production behavior has not yet been verified.
+- #207 is a clean main-based replacement for stale #127 (which depended on closed #124; #127 is closed as superseded). It localizes customer booking detail, shared category/provider/payment/status labels, unknown enum fallbacks, and German/Spanish API action errors. Current head `de9386319e496a2908f3a485c53525c701ce0f3b`; CI run `42601941082` is in progress. Focused detail/list/message/enum-label tests pass (23), web typecheck, targeted ESLint, JSON validation and diff checks pass locally. The page remains PARTIAL pending hosted CI and authenticated responsive browser inspection. User/provider-authored names and notes remain unchanged.
+- #205 handoff was synchronized with main `ff2a73ab…` and this checkpoint; fresh CI is required on the new head. PR #108 and #109 have stale green checks and GitHub rejected update-branch requests for each due to merge conflicts; no branch changes were made. Older stacked #110→#111, #113→#114 and #138–#141 remain open/dependency-blocked or dirty; recheck before taking action.
+- The main deployment for #184 is at `7ae527e0…`; the #178 and #206 deployments are not yet verified. Public shop remains empty and no legitimate reviewed seller offer exists to verify purchase visibility; demo rows were not re-enabled.
+- Current workspace free disk is about 34 MiB; no cleanup was performed because no additional safe regenerable artifact was established. No payment worktree is visible in `git worktree list`; absence is not evidence of deletion, and no payment data was changed.
+- Latest production checks were anonymous/read-only. Authenticated language preference, household, booking, theme/display and responsive behavior remain unverified. Memorial source-image/CDN privacy and German/Spanish SMS templates remain unverified/unavailable. The current cloud environment has no declared browser/remote-desktop capability, so browser verification was unavailable; this was checked and not inferred from HTTP smoke tests.
+
+## Current verified checkpoint — 2026-11-09 11:52 UTC
+
+- PR #208 merged normally by squash at `fbea505cf1e49fa60bcf7e40a7fb54499b5e2075`. Its exact-head CI `42607738997` passed all workflow steps, including lint, design-system/visual checks, typecheck, migrations, tests, API E2E and production build. The post-merge main CI passed and deploy run `42609549655` completed successfully.
+- Production `/api/health/version` now reports SHA `fbea505cf1e49fa60bcf7e40a7fb54499b5e2075`, deployment `github-42609549655-1`; `/api/health/ready` reports database and Redis `up`. The public shop API returns HTTP 200 with `items: []`, `total: 0`: demo products remain excluded, but no legitimate reviewed product/offer is available to verify public purchase visibility. These anonymous probes do not verify authenticated booking review behavior.
+- #208 changes booking-detail localization and review flow: review becomes available two hours after the provider-recorded completion time, requires an overall score plus timeliness, care/communication and service-quality ratings, and localizes the relevant customer-facing flow in fa/en/de/es. The API remains authoritative for eligibility. It is MERGED_AND_DEPLOYED; the full authenticated page remains PARTIAL pending browser verification.
+- PR #205's handoff branch was updated through GitHub's normal update-branch endpoint to include current `main`; new head `45da58c4d1674ab58032be202c71d763214b423c`. CI run `42611885732` is still in progress at the Test step; PR is open and blocked on that check. Do not merge until it completes and GitHub reports a normal mergeable state.
+- Current open-queue snapshot: #102, #103, #105, #106, #108 and #109 are conflict/dirty and not ready; #121 is dirty; #132–#141 remain stacked on `feat/i18n-shop-customer` and dirty; #205 is the handoff PR. #110–#120, excluding #121, are merged; #113/#114 and #110/#111 dependencies are therefore resolved in GitHub state. Review each final diff/check before any further integration. PR #108 specifically remains open and unmergeable (`mergeable=false`); its payment reconciliation changes were not modified here.
+- Workspace has about 32 MiB free on a 7.9 GiB filesystem. No safe unused regenerable artifact was identified; no cleanup was performed. Multiple worktrees remain present and untouched; no payment-named worktree is listed, which is not proof that prior payment changes were deleted.
+- Remaining blockers are unchanged: full route-family de/es localization and authenticated/responsive verification; no real catalog offer; Jajiga/Digikala source access/content rights unproven; production memorial source-image/CDN behavior unverified; no authenticated browser capability; and no payment worktree visible. Continue with a clean, independent slice after disk capacity and target PR conflicts are addressed.
