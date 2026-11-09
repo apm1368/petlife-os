@@ -985,6 +985,17 @@
       }
     }
   },
+  "careCenter": {
+    "title": "Care center", "subtitle": "{petName}'s reminders and follow-ups; times shown in Tehran time", "allCare": "All care",
+    "type": "Type", "due": "Due", "originalDue": "Original due date", "remindAt": "Remind at", "completedAt": "Completed at", "recurrence": "Recurrence", "source": "Source", "notification": "Notification", "sent": "Sent", "notSent": "Not sent yet", "relatedRecord": "View related record",
+    "chooseDay": "Choose a day", "timeTehran": "Time (Tehran time)", "snooze": "Snooze", "reschedule": "Reschedule", "actionFailed": "That didn't work. Please try again.", "loading": "Loading care reminders", "filtersAria": "Care filters", "filters": { "all": "All" },
+    "states": { "DUE": "Due soon", "OVERDUE": "Overdue", "UPCOMING": "Upcoming", "COMPLETED": "Completed", "SNOOZED": "Snoozed", "CANCELLED": "Cancelled", "CUSTOM": "Personal" }, "unknownState": "Unknown status", "unknownType": "Other care", "unknownRecurrence": "Other schedule", "unknownSource": "Other source",
+    "calendar": "Calendar", "careSheet": "Care sheet for a sitter", "travelReadiness": "Travel readiness", "create": "Create reminder",
+    "empty": { "body": "Reminders can come from vaccinations, medication and bookings. You can also add a personal reminder.", "all": { "title": "No care items yet" }, "due": { "title": "Nothing is due soon" }, "overdue": { "title": "Nothing is overdue" }, "upcoming": { "title": "No upcoming reminders" }, "completed": { "title": "No completed care yet" }, "snoozed": { "title": "No snoozed reminders" }, "cancelled": { "title": "No cancelled reminders" }, "custom": { "title": "No personal reminders" } },
+    "recentlyCompleted": "Recently completed", "dailyInstructions": "Daily care instructions", "done": "Done", "reminds": "Reminds", "bookVisit": "Book a visit", "complete": "Complete", "tomorrow": "Tomorrow", "confirmCancel": "Confirm cancellation", "cancelWarning": "This reminder will be cancelled and no further notifications will be sent.", "cancelYes": "Yes, cancel it", "cancelKeep": "Keep it", "edit": "Edit", "laterToday": "Later today", "cancel": "Cancel", "day": "Day", "save": "Save", "saving": "Saving…", "close": "Close", "chooseDayAndTime": "Choose a day and a time.", "saveFailed": "The reminder could not be saved. Please try again.",
+    "form": { "title": "Reminder title", "recurrence": "Recurrence", "intervalDays": "Repeat interval in days", "recurrenceNote": "Monthly and yearly recurrence follows Gregorian dates. Enter medical timing from your veterinarian's instructions." },
+    "recurrenceOptions": { "ONCE": "Once", "DAILY": "Daily", "WEEKLY": "Weekly", "MONTHLY": "Monthly", "YEARLY": "Yearly", "CUSTOM": "Custom interval (days)" }, "sources": { "USER_CREATED": "Owner", "PROVIDER_CREATED": "Provider", "MEDICAL_RECORD_DERIVED": "Medical record", "BOOKING_DERIVED": "Booking", "SYSTEM_SCHEDULED": "System" }
+  },
   "careCalendar": {
     "title": "Care Calendar",
     "empty": "Nothing scheduled yet.",
