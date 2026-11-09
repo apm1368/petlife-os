@@ -3716,15 +3716,25 @@
     },
     "feed": {
       "title": "Community",
+      "description": "Questions, stories and news from pet owners — respectful, no ads.",
       "newPost": "New post",
       "empty": "No posts yet. Be the first to share something.",
       "loadMore": "Load more",
+      "loading": "Loading posts…",
+      "loadingMore": "Loading…",
       "commentsAndReactions": "{comments, plural, one {# comment} other {# comments}} · {reactions, plural, one {# reaction} other {# reactions}}",
       "searchLabel": "Search posts",
       "typeLabel": "Post type",
       "allTypes": "All types",
       "search": "Search",
-      "noResults": "No posts match your search."
+      "noResults": "No posts match your search.",
+      "withPet": "with {name}",
+      "shortcutsLabel": "Community shortcuts",
+      "topics": "Topics",
+      "rightNow": "Right now",
+      "myMessages": "My messages",
+      "lostPetsNearby": "Lost pets nearby",
+      "supportNeeds": "Support needs"
     },
     "newPost": {
       "title": "New post",

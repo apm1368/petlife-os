@@ -9,12 +9,13 @@ import { CommunityPostType } from "@petlife/types";
 import type { CommunityPostDto, PaginatedDto } from "@petlife/types";
 import { communityService } from "@/services/community.service";
 import { LoadFailure } from "@/features/system/LoadFailure";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 /** spec: "avoid endless card clutter" — a plain paged feed with an explicit Load more, never infinite auto-scroll. */
 export function CommunityFeedView() {
   const t = useTranslations("community");
   const tCommon = useTranslations("common");
-  const locale = useLocale() === "en" ? "en" : "fa";
+  const locale = useLocale() as RouteLocale;
 
   const [page, setPage] = useState<PaginatedDto<CommunityPostDto> | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
@@ -22,15 +23,19 @@ export function CommunityFeedView() {
   const [query, setQuery] = useState("");
   const [appliedQuery, setAppliedQuery] = useState("");
   const [type, setType] = useState<CommunityPostType | "">("");
+  const [loading, setLoading] = useState(false);
 
   async function load(nextPage: number, append = false, filters: { q: string; type: CommunityPostType | "" } = { q: appliedQuery, type }) {
     setError(null);
+    setLoading(true);
     try {
       const data = await communityService.listPosts({ page: nextPage, pageSize: 20, q: filters.q || undefined, type: filters.type || undefined });
       setPage((prev) => (append && prev ? { ...data, items: [...prev.items, ...data.items] } : data));
       setPageNumber(nextPage);
     } catch (err) {
       setError(err);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -42,7 +47,6 @@ export function CommunityFeedView() {
   if (error) return <LoadFailure error={error} onRetry={() => load(1)} />;
   if (!page) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
-  const fa = locale === "fa";
   const chooseType = (next: CommunityPostType | "") => { setType(next); void load(1, false, { q: appliedQuery, type: next }); };
 
   return (
@@ -51,7 +55,7 @@ export function CommunityFeedView() {
         <header className="section-head">
           <div>
             <h1>{t("feed.title")}</h1>
-            <p>{fa ? "پرسش، تجربه و خبر از صاحبان حیوانات؛ محترمانه و بدون تبلیغ." : "Questions, stories and news from pet owners — respectful, no ads."}</p>
+            <p>{t("feed.description")}</p>
           </div>
           <Link href="/community/new" className="btn-primary-link">{t("feed.newPost")}</Link>
         </header>
@@ -73,10 +77,11 @@ export function CommunityFeedView() {
             onChange={(e) => chooseType(e.target.value as CommunityPostType | "")}
             options={[{ value: "", label: t("feed.allTypes") }, ...Object.values(CommunityPostType).map((value) => ({ value, label: t(`postType.${value}`) }))]}
           />
-          <Button type="submit" variant="secondary">
+          <Button type="submit" variant="secondary" isLoading={loading}>
             {t("feed.search")}
           </Button>
         </form>
+        {loading && page ? <p role="status" className="text-sm text-text-secondary">{t("feed.loading")}</p> : null}
 
         {page.items.length === 0 ? (
           <EmptyState title={appliedQuery || type ? t("feed.noResults") : t("feed.empty")} />
@@ -88,7 +93,7 @@ export function CommunityFeedView() {
                   <span className="post-row__byline">
                     <Avatar name={post.authorDisplayName} size="sm" />
                     <span className="post-row__author">{post.authorDisplayName}</span>
-                    {post.pet ? <span className="post-row__pet">· {fa ? "با" : "with"} {post.pet.name}</span> : null}
+                    {post.pet ? <span className="post-row__pet">· {t("feed.withPet", { name: post.pet.name })}</span> : null}
                     <span className="post-row__date">· {formatDay(post.createdAt.slice(0, 10), locale, { year: false })}</span>
                     <span className="tag">{t(`postType.${post.type}`)}</span>
                   </span>
@@ -102,15 +107,15 @@ export function CommunityFeedView() {
         )}
 
         {page.items.length < page.total ? (
-          <Button variant="secondary" onClick={() => load(pageNumber + 1, true)}>
-            {t("feed.loadMore")}
+          <Button variant="secondary" isLoading={loading} disabled={loading} onClick={() => load(pageNumber + 1, true)}>
+            {loading ? t("feed.loadingMore") : t("feed.loadMore")}
           </Button>
         ) : null}
       </div>
 
-      <aside className="community-side" aria-label={fa ? "میان‌برهای جامعه" : "Community shortcuts"}>
+      <aside className="community-side" aria-label={t("feed.shortcutsLabel")}>
         <section>
-          <h2>{fa ? "موضوع‌ها" : "Topics"}</h2>
+          <h2>{t("feed.topics")}</h2>
           <div className="community-side__chips">
             <button type="button" aria-pressed={type === ""} onClick={() => chooseType("")}>{t("feed.allTypes")}</button>
             {Object.values(CommunityPostType).map((value) => (
@@ -119,11 +124,11 @@ export function CommunityFeedView() {
           </div>
         </section>
         <section>
-          <h2>{fa ? "همین حالا" : "Right now"}</h2>
+          <h2>{t("feed.rightNow")}</h2>
           <ul className="community-side__links">
-            <li><Link href="/community/messages"><Mail size={16} aria-hidden="true" />{fa ? "پیام‌های من" : "My messages"}</Link></li>
-            <li><Link href="/lost-pets"><Siren size={16} aria-hidden="true" />{fa ? "حیوانات گم‌شده‌ی اطراف" : "Lost pets nearby"}</Link></li>
-            <li><Link href="/animal-support/needs"><HandHeart size={16} aria-hidden="true" />{fa ? "نیازهای حمایت" : "Support needs"}</Link></li>
+            <li><Link href="/community/messages"><Mail size={16} aria-hidden="true" />{t("feed.myMessages")}</Link></li>
+            <li><Link href="/lost-pets"><Siren size={16} aria-hidden="true" />{t("feed.lostPetsNearby")}</Link></li>
+            <li><Link href="/animal-support/needs"><HandHeart size={16} aria-hidden="true" />{t("feed.supportNeeds")}</Link></li>
           </ul>
         </section>
       </aside>
