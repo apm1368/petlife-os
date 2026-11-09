@@ -2,6 +2,22 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
+## Latest verified checkpoint — 2026-11-09 11:26 UTC
+
+- `main` and production now both report `be12ac5d74b043bafad66c091c2b225f3ec210a4` (#207); deployment run `42605474846` completed successfully. Production `/api/health/ready` reports DB and Redis up. Safe `GET /api/shop/products` returns HTTP 200 with zero items: demo products are not exposed, but no legitimate reviewed offer exists to verify catalog visibility/purchase. Customer booking-detail localization is deployed but remains PARTIAL because no authenticated production browser session was available to verify its behavior/layout.
+- #104 itself remains open and conflicting. Replacement PR #208 targets `main`, head `55472363b5067bfbd326478396674da5deed5a26`; exact CI `42607738997` is still running API E2E. Lint, visual/design checks, typecheck, migrations and unit/web tests have passed on that exact head. Local focused BookingDetailView tests passed 15/15; focused ESLint, web typecheck, locale JSON parse and diff check passed. Review decision is blank and GitHub reports `BLOCKED` while the required run is pending; no merge attempted.
+- #208 contains the BK-19 two-hour provider-recorded completion gate, overall score plus three required dimensions, and fa/en/de/es copy for the new review/timing states and dialogs. Its PR description was corrected through the GitHub API after shell quoting had corrupted the initial body; it now accurately lists validations and pending CI. No schema migration is added in this slice.
+- Handoff PR #205 is at head `1114f6321741000da27bf09d9e5bba0682d8e4fe`; exact CI `42608103480` remains in progress (API E2E). Its head includes the previously committed 11:18 checkpoint; update again after #208 CI/deployment status changes.
+- The exact current shop API is still empty (no demo rows; no legitimate offer). No source catalog access/content-rights evidence or Jajiga nationwide coverage is established. Original memorial source-image/CDN privacy remains unverified due inaccessible production bucket/CDN configuration.
+- Disk is critically constrained at about 32 MiB free. Read-only inspection found no project `.next` directory and no active local build/dev server; no cleanup was performed. Payment worktree remains absent from visible worktrees and no payment files were touched. Full authenticated browser verification is unavailable.
+
+### Next actions
+
+1. Wait for #208 exact-head API E2E and build. Fix any actual failures and rerun; if CI succeeds and GitHub permits, merge normally, then verify the automatic deployment SHA and health.
+2. Wait for #205 exact-head CI and refresh its handoff after the feature merge/deployment state changes.
+3. Do not call booking detail or full localization LIVE_VERIFIED without authenticated browser checks; leave it PARTIAL.
+4. Continue independent localization/product work from current `main`, not stale translation PR stacks, and preserve the external-source/privacy boundaries.
+
 ## Latest verified checkpoint — 2026-11-09 11:18 UTC
 
 - `main`: `be12ac5d74b043bafad66c091c2b225f3ec210a4` (#207). Production `/api/health/version` now reports `ff2a73abdd03ef783f409b5d25dbd9a2026b73ba` (`github-42601851619-1`, #206); deployment run `42601851619` succeeded and readiness reports DB/Redis up. Main is ahead of production; deploy run `42605474846` for `be12ac5d…` is still in progress.
