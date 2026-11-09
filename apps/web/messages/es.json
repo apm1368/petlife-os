@@ -2442,6 +2442,63 @@
       "VERIFIED": "Verificado",
       "SUSPENDED": "Suspendido"
     },
+    "eligibilityStatus": {
+      "ELIGIBLE": "Cumple los requisitos",
+      "POSSIBLY_ELIGIBLE": "Podría cumplir los requisitos",
+      "NOT_ELIGIBLE": "No cumple los requisitos",
+      "UNKNOWN": "Desconocido"
+    },
+    "list": {
+      "title": "Seguro para mascotas",
+      "subtitle": "Compara aseguradoras y coberturas: este directorio solo informa y no es una aseguradora.",
+      "empty": "No se encontraron productos de seguro.",
+      "compareSelected": "Comparar productos seleccionados",
+      "viewDetails": "Ver detalles",
+      "selectForCompare": "Seleccionar para comparar",
+      "loading": "Cargando productos de seguro",
+      "annualLimit": "Límite anual",
+      "deductible": "Deducible",
+      "coinsurance": "Tu parte",
+      "percentUnit": "%",
+      "waitingPeriod": "Periodo de espera",
+      "days": "{count, plural, one {# día} other {# días}}",
+      "premiumFrom": "Prima desde"
+    },
+    "detail": {
+      "coverageTitle": "Cobertura",
+      "exclusionsTitle": "Exclusiones: léelas antes de solicitar información",
+      "waitingPeriod": "Periodo de espera: {days} días",
+      "deductible": "Deducible: {amount}",
+      "annualLimit": "Límite anual: {amount}",
+      "premiumRange": "Prima: {min}–{max}",
+      "exclusionsEmpty": "Este producto no tiene exclusiones registradas.",
+      "termsSource": "Fuente: {source}",
+      "checkEligibility": "Comprobar si {petName} cumple los requisitos",
+      "apply": "Iniciar solicitud",
+      "loading": "Cargando detalles del seguro",
+      "applyFailed": "No se pudo enviar la solicitud. Inténtalo de nuevo."
+    },
+    "compare": {
+      "title": "Comparar planes de seguro",
+      "exclusions": "Exclusiones",
+      "loading": "Cargando la comparación de seguros …",
+      "empty": "No se encontraron productos de seguro para esta comparación.",
+      "emptyDescription": "Revisa los productos seleccionados e inténtalo de nuevo."
+    },
+    "eligibility": {
+      "title": "Requisitos para {petName}",
+      "sectionTitle": "Requisitos para esta mascota",
+      "loading": "Comprobando los requisitos del seguro",
+      "loadFailed": "No se pudieron cargar los requisitos del seguro.",
+      "retry": "Comprobar de nuevo",
+      "disclaimer": "Esto no garantiza la aprobación; la decisión final corresponde a la aseguradora.",
+      "reasons": {
+        "SPECIES_NOT_COVERED": "Este producto no cubre la especie de esta mascota.",
+        "PET_AGE_UNKNOWN": "No consta la edad de esta mascota, por lo que no se puede confirmar el requisito de edad.",
+        "PET_BELOW_MINIMUM_AGE": "Esta mascota es menor que la edad mínima cubierta por el producto.",
+        "PET_ABOVE_MAXIMUM_AGE": "Esta mascota supera la edad máxima cubierta por el producto."
+      }
+    },
     "coverageType": {
       "ACCIDENT": "Accidente",
       "ILLNESS": "Enfermedad",

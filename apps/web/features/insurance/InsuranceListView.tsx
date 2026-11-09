@@ -12,12 +12,12 @@ import { LoadFailure } from "@/features/system/LoadFailure";
 import { DiscoveryPage } from "@/features/discovery/DiscoveryPage";
 import { formatCount } from "@/lib/number/format-number";
 import { formatCurrency } from "@/lib/currency/format-currency";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 /** Public discovery — no guard, works for anonymous visitors (spec: "public browsing" for insurance discovery must work without auth). `petId` in the query string is passed through to product detail so a household browsing for a specific pet can check eligibility there. */
 export function InsuranceListView() {
   const t = useTranslations("insurance");
-  const locale = useLocale() as "fa" | "en";
-  const tCommon = useTranslations("common");
+  const locale = useLocale() as RouteLocale;
   const router = useRouter();
   const searchParams = useSearchParams();
   const petId = searchParams.get("petId") ?? undefined;
@@ -50,7 +50,7 @@ export function InsuranceListView() {
   }
 
   if (error) return <LoadFailure error={error} onRetry={load} />;
-  if (!products) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
+  if (!products) return <Skeleton className="h-64 w-full" aria-label={t("list.loading")} />;
 
   return (
     <DiscoveryPage kind="insurance">
@@ -79,11 +79,11 @@ export function InsuranceListView() {
                 <p className="text-metadata text-text-secondary">{product.coverageSummary}</p>
                 {/* The numbers that decide a plan (§36) — only those the insurer has published. */}
                 <dl className="plan-row__facts">
-                  {product.annualLimitIrr !== null ? <div><dt>{locale === "fa" ? "سقف سالانه" : "Annual limit"}</dt><dd>{formatCurrency(product.annualLimitIrr, locale)}</dd></div> : null}
-                  {product.deductibleAmountIrr !== null ? <div><dt>{locale === "fa" ? "فرانشیز" : "Deductible"}</dt><dd>{formatCurrency(product.deductibleAmountIrr, locale)}</dd></div> : null}
-                  {product.coinsurancePercent !== null ? <div><dt>{locale === "fa" ? "سهم شما" : "Coinsurance"}</dt><dd>{formatCount(product.coinsurancePercent, locale)}٪</dd></div> : null}
-                  {product.waitingPeriodDays !== null ? <div><dt>{locale === "fa" ? "دوره‌ی انتظار" : "Waiting period"}</dt><dd>{formatCount(product.waitingPeriodDays, locale)} {locale === "fa" ? "روز" : "days"}</dd></div> : null}
-                  {product.premiumMinIrr !== null ? <div><dt>{locale === "fa" ? "حق بیمه از" : "Premium from"}</dt><dd>{formatCurrency(product.premiumMinIrr, locale)}</dd></div> : null}
+                  {product.annualLimitIrr !== null ? <div><dt>{t("list.annualLimit")}</dt><dd>{formatCurrency(product.annualLimitIrr, locale)}</dd></div> : null}
+                  {product.deductibleAmountIrr !== null ? <div><dt>{t("list.deductible")}</dt><dd>{formatCurrency(product.deductibleAmountIrr, locale)}</dd></div> : null}
+                  {product.coinsurancePercent !== null ? <div><dt>{t("list.coinsurance")}</dt><dd>{formatCount(product.coinsurancePercent, locale)}{t("list.percentUnit")}</dd></div> : null}
+                  {product.waitingPeriodDays !== null ? <div><dt>{t("list.waitingPeriod")}</dt><dd>{t("list.days", { count: product.waitingPeriodDays })}</dd></div> : null}
+                  {product.premiumMinIrr !== null ? <div><dt>{t("list.premiumFrom")}</dt><dd>{formatCurrency(product.premiumMinIrr, locale)}</dd></div> : null}
                 </dl>
                 {product.exclusions.length > 0 ? (
                   <p className="text-metadata text-text-secondary">
@@ -96,7 +96,7 @@ export function InsuranceListView() {
                 <StatusLabel tone={verificationStatusTone(product.status)}>{t(`verificationStatus.${product.status}`)}</StatusLabel>
                 <label className="flex min-h-11 items-center gap-1.5 text-metadata text-text-secondary">
                   <input type="checkbox" checked={selected.includes(product.id)} onChange={() => toggleSelected(product.id)} />
-                  {t("compare.title")}
+                  {t("list.selectForCompare")}
                 </label>
                 <Link href={productHref(product.id)} className="btn-quiet">
                   {t("list.viewDetails")}

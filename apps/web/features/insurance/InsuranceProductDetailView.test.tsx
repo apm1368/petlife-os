@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import type { InsuranceProductDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { insuranceService } from "@/services/insurance.service";
@@ -78,5 +78,40 @@ describe("InsuranceProductDetailView", () => {
 
     await waitFor(() => expect(screen.getByText("Possibly eligible")).toBeTruthy());
     expect(screen.getByText("This is not a guarantee of approval — the insurer makes the final decision.")).toBeTruthy();
+  });
+
+  it.each([
+    ["de", "Versicherungsschutz", "Ausschlüsse — bitte vor einer Anfrage lesen", "Wartezeit: 14 Tage"],
+    ["es", "Cobertura", "Exclusiones: léelas antes de solicitar información", "Periodo de espera: 14 días"],
+  ] as const)("localizes all product detail chrome in %s but preserves insurer terms", async (locale, coverageTitle, exclusionsTitle, waitingPeriod) => {
+    vi.mocked(insuranceService.getProduct).mockResolvedValue(product({ waitingPeriodDays: 14 }));
+
+    renderWithIntl(<InsuranceProductDetailView productId="product-1" />, locale);
+
+    expect(await screen.findByText("Pre-existing conditions")).toBeTruthy();
+    expect(screen.getByText(coverageTitle)).toBeTruthy();
+    expect(screen.getByText(exclusionsTitle)).toBeTruthy();
+    expect(screen.getByText(waitingPeriod)).toBeTruthy();
+    expect(screen.getByText("Covers accidents")).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it.each([
+    ["de", "Die Versicherungsberechtigung konnte nicht geladen werden.", "Erneut prüfen", "Berechtigt"],
+    ["es", "No se pudieron cargar los requisitos del seguro.", "Comprobar de nuevo", "Cumple los requisitos"],
+  ] as const)("recovers from a failed eligibility request in %s", async (locale, message, retry, status) => {
+    searchParams = new URLSearchParams("petId=pet-1");
+    vi.mocked(insuranceService.getProduct).mockResolvedValue(product());
+    vi.mocked(insuranceService.checkEligibility)
+      .mockRejectedValueOnce(new Error("network"))
+      .mockResolvedValueOnce({ status: "ELIGIBLE" as never, reasons: [] });
+
+    renderWithIntl(<InsuranceProductDetailView productId="product-1" />, locale);
+
+    expect(await screen.findByText(message)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: retry }));
+    await waitFor(() => expect(insuranceService.checkEligibility).toHaveBeenCalledTimes(2));
+    expect(await screen.findByText(status)).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
   });
 });

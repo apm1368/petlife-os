@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { ContextSurface, Skeleton, StatusLabel } from "@petlife/ui";
+import { ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
+import type { RouteLocale } from "@/lib/i18n/config";
 import type { InsuranceProductDto } from "@petlife/types";
 import { insuranceService } from "@/services/insurance.service";
 import { verificationStatusTone } from "./insurance-status";
@@ -13,9 +14,8 @@ import { useInstantFormat } from "@/lib/date/use-instant-format";
 /** Side-by-side comparison — never a ranked "best plan" recommendation, and exclusions are shown for every product at the same level as coverage/premium (spec hard UX rule). */
 export function InsuranceCompareView({ productIds }: { productIds: string[] }) {
   const fmt = useInstantFormat();
-  const locale = useLocale() === "en" ? "en" : "fa";
+  const locale = useLocale() as RouteLocale;
   const t = useTranslations("insurance");
-  const tCommon = useTranslations("common");
 
   const [products, setProducts] = useState<InsuranceProductDto[] | null>(null);
   const [error, setError] = useState<unknown>(null);
@@ -35,46 +35,50 @@ export function InsuranceCompareView({ productIds }: { productIds: string[] }) {
   }, [productIds.join(",")]);
 
   if (error) return <LoadFailure error={error} onRetry={load} />;
-  if (!products) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
+  if (!products) return <Skeleton className="h-64 w-full" aria-label={t("compare.loading")} />;
 
   return (
     <div className="flex flex-col gap-5">
       <h1 className="text-page-title text-text-primary">{t("compare.title")}</h1>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {products.map((product) => (
-          <ContextSurface key={product.id} className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <span className="text-body text-text-primary">
-                {product.providerName} — {product.name}
-              </span>
-              <StatusLabel tone={verificationStatusTone(product.status)}>{t(`verificationStatus.${product.status}`)}</StatusLabel>
-            </div>
-            <p className="text-metadata text-text-secondary">{product.coverageSummary}</p>
-            {product.waitingPeriodDays !== null ? <p className="text-metadata text-text-secondary">{t("detail.waitingPeriod", { days: fmt.number(product.waitingPeriodDays) })}</p> : null}
-            {product.deductibleAmountIrr !== null ? (
-              <p className="text-metadata text-text-secondary">{t("detail.deductible", { amount: formatCurrency(product.deductibleAmountIrr, locale) })}</p>
-            ) : null}
-            {product.annualLimitIrr !== null ? <p className="text-metadata text-text-secondary">{t("detail.annualLimit", { amount: formatCurrency(product.annualLimitIrr, locale) })}</p> : null}
-            {product.premiumMinIrr !== null && product.premiumMaxIrr !== null ? (
-              <p className="text-metadata text-text-secondary">{t("detail.premiumRange", { min: formatCurrency(product.premiumMinIrr, locale), max: formatCurrency(product.premiumMaxIrr, locale) })}</p>
-            ) : null}
-            <div className="rounded-md border border-state-urgent p-2">
-              <h2 className="text-metadata font-semibold text-state-urgent">{t("compare.exclusions")}</h2>
-              {product.exclusions.length === 0 ? (
-                <p className="text-metadata text-text-secondary">{t("detail.exclusionsEmpty")}</p>
-              ) : (
-                <ul className="list-inside list-disc">
-                  {product.exclusions.map((exclusion) => (
-                    <li key={exclusion} className="text-metadata text-text-primary">
-                      {exclusion}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </ContextSurface>
-        ))}
-      </div>
+      {products.length === 0 ? (
+        <EmptyState title={t("compare.empty")} description={t("compare.emptyDescription")} />
+      ) : (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {products.map((product) => (
+            <ContextSurface key={product.id} className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-body text-text-primary">
+                  {product.providerName} — {product.name}
+                </span>
+                <StatusLabel tone={verificationStatusTone(product.status)}>{t(`verificationStatus.${product.status}`)}</StatusLabel>
+              </div>
+              <p className="text-metadata text-text-secondary">{product.coverageSummary}</p>
+              {product.waitingPeriodDays !== null ? <p className="text-metadata text-text-secondary">{t("detail.waitingPeriod", { days: fmt.number(product.waitingPeriodDays) })}</p> : null}
+              {product.deductibleAmountIrr !== null ? (
+                <p className="text-metadata text-text-secondary">{t("detail.deductible", { amount: formatCurrency(product.deductibleAmountIrr, locale) })}</p>
+              ) : null}
+              {product.annualLimitIrr !== null ? <p className="text-metadata text-text-secondary">{t("detail.annualLimit", { amount: formatCurrency(product.annualLimitIrr, locale) })}</p> : null}
+              {product.premiumMinIrr !== null && product.premiumMaxIrr !== null ? (
+                <p className="text-metadata text-text-secondary">{t("detail.premiumRange", { min: formatCurrency(product.premiumMinIrr, locale), max: formatCurrency(product.premiumMaxIrr, locale) })}</p>
+              ) : null}
+              <div className="rounded-md border border-state-urgent p-2">
+                <h2 className="text-metadata font-semibold text-state-urgent">{t("compare.exclusions")}</h2>
+                {product.exclusions.length === 0 ? (
+                  <p className="text-metadata text-text-secondary">{t("detail.exclusionsEmpty")}</p>
+                ) : (
+                  <ul className="list-inside list-disc">
+                    {product.exclusions.map((exclusion) => (
+                      <li key={exclusion} className="text-metadata text-text-primary">
+                        {exclusion}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </ContextSurface>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

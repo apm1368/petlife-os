@@ -12,6 +12,7 @@ import { eligibilityStatusTone, verificationStatusTone } from "./insurance-statu
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 /**
  * Spec hard UX rule: exclusions must be highly visible — this renders them
@@ -20,15 +21,15 @@ import { apiErrorText } from "@/lib/errors/api-error-text";
  */
 export function InsuranceProductDetailView({ productId }: { productId: string }) {
   const fmt = useInstantFormat();
-  const locale = useLocale() === "en" ? "en" : "fa";
+  const locale = useLocale() as RouteLocale;
   const t = useTranslations("insurance");
-  const tCommon = useTranslations("common");
   const router = useRouter();
   const searchParams = useSearchParams();
   const petId = searchParams.get("petId") ?? undefined;
 
   const [product, setProduct] = useState<InsuranceProductDto | null>(null);
   const [eligibility, setEligibility] = useState<InsuranceEligibilityResultDto | null>(null);
+  const [eligibilityLoadFailed, setEligibilityLoadFailed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<unknown>(null);
   const [isActing, setIsActing] = useState(false);
@@ -36,11 +37,21 @@ export function InsuranceProductDetailView({ productId }: { productId: string })
   async function load() {
     setError(null);
     setLoadError(null);
+    setEligibilityLoadFailed(false);
+    setProduct(null);
+    setEligibility(null);
     try {
       setProduct(await insuranceService.getProduct(productId));
-      if (petId) setEligibility(await insuranceService.checkEligibility(petId, productId));
     } catch (err) {
       setLoadError(err);
+      return;
+    }
+    if (petId) {
+      try {
+        setEligibility(await insuranceService.checkEligibility(petId, productId));
+      } catch {
+        setEligibilityLoadFailed(true);
+      }
     }
   }
 
@@ -57,14 +68,14 @@ export function InsuranceProductDetailView({ productId }: { productId: string })
       const application = await insuranceService.createApplication(petId, productId);
       router.push(`/pets/${petId}/insurance?applicationId=${application.id}`);
     } catch (err) {
-      setError(apiErrorText(err, undefined, tCommon("genericError")));
+      setError(locale === "fa" || locale === "en" ? apiErrorText(err, locale, t("detail.applyFailed")) : t("detail.applyFailed"));
     } finally {
       setIsActing(false);
     }
   }
 
   if (loadError && !product) return <LoadFailure error={loadError} onRetry={load} />;
-  if (!product) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
+  if (!product) return <Skeleton className="h-64 w-full" aria-label={t("detail.loading")} />;
 
   return (
     <div className="flex flex-col gap-6">
@@ -131,8 +142,13 @@ export function InsuranceProductDetailView({ productId }: { productId: string })
                   ))}
                   <p className="text-metadata text-text-secondary">{t("eligibility.disclaimer")}</p>
                 </>
+              ) : eligibilityLoadFailed ? (
+                <div role="alert" className="flex flex-col gap-2">
+                  <p className="text-metadata text-state-urgent">{t("eligibility.loadFailed")}</p>
+                  <Button variant="secondary" onClick={() => void load()}>{t("eligibility.retry")}</Button>
+                </div>
               ) : (
-                <Skeleton className="h-8 w-full" aria-label={tCommon("loading")} />
+                <Skeleton className="h-8 w-full" aria-label={t("eligibility.loading")} />
               )}
               <Button variant="primary" isLoading={isActing} onClick={handleApply}>
                 {t("detail.apply")}
