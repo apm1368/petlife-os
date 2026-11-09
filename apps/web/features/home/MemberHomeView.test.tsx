@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { petsService } from "@/services/pets.service";
 import { careRemindersService } from "@/services/care-reminders.service";
@@ -33,6 +33,9 @@ describe("MemberHomeView", () => {
     vi.mocked(petsService.getMyAccess).mockReset().mockResolvedValue({ canViewIdentity: true, canViewHealth: true, canViewCareProfile: true } as never);
     vi.mocked(bookingsService.list).mockReset().mockResolvedValue([]);
     vi.mocked(careRemindersService.list).mockReset().mockResolvedValue([]);
+    vi.mocked(commerceService.listOrders).mockReset().mockResolvedValue([]);
+    vi.mocked(travelMarketService.listBookings).mockReset().mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 20 });
+    vi.mocked(subscriptionService.getCurrent).mockReset().mockRejectedValue(Object.assign(new Error("none"), { status: 404 }));
     usePetStore.setState({ householdId: "h1", pets: [PET as never], activePetId: null });
     useSessionStore.setState({ user: { id: "u1", displayName: "مریم رضایی" } as never, status: "authenticated" });
   });
@@ -52,6 +55,29 @@ describe("MemberHomeView", () => {
         expect(value, `glassHomeCopy.${locale}.${key}`).not.toMatch(/[\u0600-\u06FF]/);
       }
     }
+  });
+
+  it.each([
+    ["fa", "در حال بارگذاری داشبورد", "در حال بارگذاری اشتراک", "در حال بارگذاری سفارش‌ها", "در حال بارگذاری سفرها"],
+    ["en", "Loading dashboard", "Loading membership", "Loading orders", "Loading upcoming stays"],
+    ["de", "Übersicht wird geladen", "Mitgliedschaft wird geladen", "Bestellungen werden geladen", "Bevorstehende Aufenthalte werden geladen"],
+    ["es", "Cargando el panel", "Cargando la suscripción", "Cargando pedidos", "Cargando próximas estancias"],
+  ] as const)("labels all dashboard loading regions in %s", async (locale, dashboardLoading, membershipLoading, ordersLoading, tripsLoading) => {
+    vi.mocked(petsService.getOverview).mockImplementationOnce(() => new Promise(() => undefined));
+    vi.mocked(commerceService.listOrders).mockImplementation(() => new Promise(() => undefined));
+    vi.mocked(travelMarketService.listBookings).mockImplementation(() => new Promise(() => undefined));
+    vi.mocked(subscriptionService.getCurrent).mockImplementation(() => new Promise(() => undefined));
+
+    const loadingHome = renderWithIntl(<MemberHomeView />, locale);
+    expect(screen.getByLabelText(dashboardLoading)).toBeTruthy();
+    loadingHome.unmount();
+
+    vi.mocked(petsService.getOverview).mockResolvedValue(overview());
+    renderWithIntl(<MemberHomeView />, locale);
+
+    expect(await screen.findByLabelText(membershipLoading)).toBeTruthy();
+    expect(screen.getByLabelText(ordersLoading)).toBeTruthy();
+    expect(screen.getByLabelText(tripsLoading)).toBeTruthy();
   });
 
   it("shows the member's own pet — not a sample — with Persian digits, falling back to the first pet when none is active", async () => {
@@ -142,6 +168,33 @@ describe("MemberHomeView", () => {
     await screen.findByRole("heading", { name: "پشمک" });
     await screen.findAllByText("This section could not load right now.");
     expect(screen.queryByText("You have no upcoming appointment.")).toBeNull();
+  });
+
+  it("offers a retry in failed membership, order and travel cards", async () => {
+    vi.mocked(petsService.getOverview).mockResolvedValue(overview());
+    vi.mocked(commerceService.listOrders).mockRejectedValueOnce(new Error("offline")).mockResolvedValueOnce([]);
+    vi.mocked(travelMarketService.listBookings).mockRejectedValueOnce(new Error("offline")).mockResolvedValueOnce({ items: [], total: 0, page: 1, pageSize: 20 });
+    vi.mocked(subscriptionService.getCurrent)
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockRejectedValueOnce(Object.assign(new Error("none"), { status: 404 }));
+
+    renderWithIntl(<MemberHomeView />, "en");
+
+    await screen.findByRole("heading", { name: "پشمک" });
+    const ordersSection = screen.getByRole("heading", { name: "Orders" }).closest("section");
+    const tripsSection = screen.getByRole("heading", { name: "Upcoming stays" }).closest("section");
+    const membershipSection = screen.getByRole("heading", { name: "Membership" }).closest("section");
+    expect(ordersSection && await within(ordersSection).findByText("This section could not load right now.")).toBeTruthy();
+    expect(tripsSection && await within(tripsSection).findByText("This section could not load right now.")).toBeTruthy();
+    expect(membershipSection && await within(membershipSection).findByText("This section could not load right now.")).toBeTruthy();
+
+    fireEvent.click(within(ordersSection!).getByRole("button", { name: "Retry" }));
+    fireEvent.click(within(tripsSection!).getByRole("button", { name: "Retry" }));
+    fireEvent.click(within(membershipSection!).getByRole("button", { name: "Retry" }));
+
+    expect(await within(ordersSection!).findByText(/You haven't ordered anything yet/)).toBeTruthy();
+    expect(await within(tripsSection!).findByText("No upcoming stay booked.")).toBeTruthy();
+    expect(await within(membershipSection!).findByRole("link", { name: "See plans" })).toBeTruthy();
   });
 
   it.each([
