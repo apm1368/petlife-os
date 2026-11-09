@@ -2689,6 +2689,30 @@
       "notes": { "title": "Anbieternotizen", "internalOnly": "Nur intern — wird dem Kunden nicht angezeigt.", "label": "Notiz hinzufügen", "placeholder": "Notiz schreiben", "add": "Hinzufügen", "empty": "Noch keine Notizen." },
       "cancelDialog": { "title": "Diese Buchung stornieren?", "body": "Der Halter wird benachrichtigt. Ein durch diese Buchung gewährter temporärer Zugriff wird widerrufen.", "reasonLabel": "Grund (optional)", "reasonPlaceholder": "Warum wird diese Buchung storniert?", "confirm": "Ja, Buchung stornieren" },
       "backToQueue": "Zurück zu den Buchungen", "errors": { "PROVIDER_ACCESS_DENIED": "Du hast keinen Zugriff auf diese Buchung.", "PROVIDER_NOT_VERIFIED": "Deine Organisation muss vor dieser Aktion bestätigt werden.", "BOOKING_NOT_FOUND": "Buchung nicht gefunden.", "INVALID_BOOKING_TRANSITION": "Diese Buchung kann derzeit nicht in diesen Status wechseln.", "BOOKING_NOT_CANCELLABLE": "Diese Buchung kann nicht mehr storniert werden.", "generic": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuche es erneut." }
+    },
+    "team": {
+      "title": "Team",
+      "retry": "Erneut versuchen",
+      "loading": "Wird geladen",
+      "loadFailed": "Das Team konnte nicht geladen werden.",
+      "empty": "Es gibt noch keine Teammitglieder.",
+      "role": { "OWNER": "Inhaber/in", "VET": "Tierarzt/Tierärztin", "STAFF": "Mitarbeiter/in" },
+      "settings": {
+        "title": "Leistungen und öffentliches Profil je Teammitglied",
+        "description": "Wenn einer Leistung keine Personen zugeordnet sind, wird sie von allen buchbaren Teammitgliedern angeboten. Hier werden keine Personaldaten gespeichert.",
+        "emptyStaff": "Es sind keine Teammitglieder zur Konfiguration verfügbar.",
+        "emptyServices": "Es sind keine Leistungen zur Zuordnung verfügbar.",
+        "bookable": "Buchbar",
+        "servicesDelivered": "Angebotene Leistungen",
+        "publicTitle": "Öffentliche Bezeichnung",
+        "publicBio": "Kurze öffentliche Vorstellung",
+        "save": "Speichern",
+        "retry": "Erneut versuchen",
+        "loading": "Team-Einstellungen werden geladen",
+        "loadFailed": "Die Team-Einstellungen konnten nicht geladen werden.",
+        "saveFailed": "Die Änderung konnte nicht gespeichert werden.",
+        "ownerOnly": "Nur Inhaber/innen der Organisation können das Team bearbeiten."
+      }
     }
   },
   "partnerVerification": { "activationRequired": "Die Organisation muss von der Administration bestätigt werden, bevor du Leistungen verwalten oder Angebote erstellen und aktivieren kannst. Die Verifizierung und bestehende Bestellungen kannst du weiterhin verfolgen.", "portalTitle": "Partnerverifizierung", "refreshAccess": "Seite neu laden, um den Freigabestatus zu prüfen" }
