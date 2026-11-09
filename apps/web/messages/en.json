@@ -1205,6 +1205,8 @@
       "title": "Availability",
       "retry": "Retry",
       "loading": "Loading",
+      "loadFailed": "Availability could not be loaded. Check your connection and try again.",
+      "accessDenied": "You do not have permission to manage availability.",
       "day": {
         "sun": "Sun",
         "mon": "Mon",
@@ -1225,7 +1227,9 @@
         "timezone": "Timezone",
         "add": "Add",
         "locationRequired": "A location is required.",
-        "createFailed": "Couldn't create the rule."
+        "createFailed": "Couldn't create the rule.",
+        "updateFailed": "Couldn't update the rule.",
+        "deleteFailed": "Couldn't remove the rule."
       },
       "exceptions": {
         "title": "Time off & extra availability",
@@ -1242,10 +1246,13 @@
         "add": "Add",
         "fieldsRequired": "Location, start, and end are required.",
         "createFailed": "Couldn't create the exception.",
+        "updateFailed": "Couldn't update the exception.",
+        "deleteFailed": "Couldn't remove the exception.",
         "conflictWarning": "{count} confirmed bookings exist in this period. Blocking it will not cancel or move them.",
         "conflictCancel": "Cancel",
         "conflictProceed": "Block anyway"
-      }
+      },
+      "actions": { "edit": "Edit", "cancel": "Cancel", "save": "Save changes" }
     },
     "services": {
       "title": "Services",
