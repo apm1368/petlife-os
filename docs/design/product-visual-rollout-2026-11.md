@@ -22,35 +22,23 @@ Dashboard visual structure follows the reference hierarchy: greeting and pet/hou
 
 ## Coverage matrix and next slices
 
-| Family                           | Reference board(s)                                         | Current routes/components to inspect                                                     | Status                                                                               |
-| -------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| Landing                          | 01 and landing storyboard in `product-design-reference.md` | `/`; `HomeLanding`, `ParkHeader`                                                         | Preserve HERO; not changed in this slice.                                            |
-| Member dashboard/navigation      | 01, 15, approved member-home target                        | `/{locale}/home`; `MemberHomeView`, `GlassMemberHome`, `MemberFrame`, `MemberNavigation` | Shared color correction and dashboard CSS implemented; browser verification pending. |
-| Account/household/pet            | 13, 15                                                     | `/profile`, `/profile/household`, `/pets/*`                                              | Not yet reviewed in this slice.                                                      |
-| Shop/seller/checkout             | 01, 10, 15                                                 | `/shop`, `/cart`, `/checkout`, `/seller/*`                                               | Not yet reviewed in this slice.                                                      |
-| Health/care/clinical             | 08, 09, 11, 12, 15                                         | `/pets/*/health`, `/pets/*/care`, `/care-calendar`, `/provider/*`                        | Not yet reviewed in this slice.                                                      |
-| Support/community/travel/shelter | 07, 15                                                     | `/support`, `/community`, `/travel`, `/animal-support`                                   | Not yet reviewed in this slice.                                                      |
-| Backoffice/operations            | 15                                                         | `/admin/*`, `/seller/*`, `/provider/*`                                                   | Token override corrected; dense tables and role flows still need page-level review.  |
+| Family                           | Reference board(s)                                         | Current routes/components to inspect                                                     | Status                                                                             |
+| -------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Landing                          | 01 and landing storyboard in `product-design-reference.md` | `/`; `HomeLanding`, `ParkHeader`                                                         | Preserve HERO; not changed in this slice.                                          |
+| Member dashboard/navigation      | 01, 15, approved member-home target                        | `/{locale}/home`; `MemberHomeView`, `GlassMemberHome`, `MemberFrame`, `MemberNavigation` | PR #210 merged to main; browser verification and production release pending.       |
+| Account/household/pet            | 13, 15                                                     | `/profile`, `/profile/household`, `/pets/*`                                              | PR #211 open; 43 focused tests pass after rebase; browser verification pending.    |
+| Shop/seller/checkout             | 01, 10, 15                                                 | `/shop`, `/cart`, `/checkout`, `/seller/*`                                               | PR #212 merged; 52 focused tests pass; production release and screenshots pending. |
+| Health/care/clinical             | 08, 09, 11, 12, 15                                         | `/pets/*/health`, `/pets/*/care`, `/care-calendar`, `/provider/*`                        | Health/care shell PR #213 open; clinical page family is next.                      |
+| Support/community/travel/shelter | 07, 15                                                     | `/support`, `/community`, `/travel`, `/animal-support`                                   | Support frame PR #215 open; public help, shelter and other pages remain.           |
+| Backoffice/operations            | 15                                                         | `/admin/*`, `/seller/*`, `/provider/*`                                                   | Shared operator navigation PR #214 open; dense tables and role flows remain.       |
 
 For each remaining family, record actual routes, source board, responsive/theme/language checks and real interaction states before marking it complete. Do not copy illustrative content from boards into production.
 
-## Verification and blockers
+## Verification and blockers — 2026-11-09
 
-- Baseline at start: `origin/main` `fb2f421dae9506ae62cc8f4c896703adc9387b58`; production version endpoint reported the same SHA. This design branch starts from that main SHA.
-- Current branch: `design/shared-dashboard-foundation-2026-11-09`.
-- `pnpm --filter @petlife/web test -- MemberHomeView.test.tsx --reporter=dot`: 302 test files and 1,852 tests passed (Vitest interpreted this invocation as the full web suite; the new active-pet regression was included).
-- `pnpm --filter @petlife/web typecheck`: passed.
-- `pnpm --filter @petlife/web exec eslint features/home/MemberHomeView.tsx features/home/GlassMemberHome.tsx features/home/MemberHomeView.test.tsx`: passed.
-- `git diff --check`: passed.
-- Workspace disk had approximately 20 MiB free, so a full production build and browser capture are not safe until space is available.
-- No browser/CUA tool was available in the managed environment. Existing automated unit tests can still be run; screenshots at mobile/tablet/desktop and rendered light/dark/four-locale checks remain pending and must not be inferred from CSS or component tests.
-- No route family is marked visually complete based only on using the shared colors.
-
-## Integration checkpoint — 2026-11-09
-
-- `main` is `a5c7a6b830130f3e8ad500b83742033345ca3727`, containing PR #210. Its build check passed and it merged through GitHub's normal squash path at 13:45 UTC.
-- Production `/api/health/version` still reports `fb2f421dae9506ae62cc8f4c896703adc9387b58`; readiness is HTTP 200 with database and Redis up. The design work is therefore not yet live-verified.
-- PR #211 (account/household visual slice) remains open on `e992fe6`; its build check was pending at the last check.
-- PR #212 (shop/checkout visual slice) is based on current `main`, head `f7a50ec45692e416db01fbc1e68096bac5e32306`; its build check was pending at the last check.
-- PR #212 targeted tests passed: 5 commerce files / 52 tests, plus web typecheck. No screenshot or production build is available because browser tooling is absent and disk space remains about 20 MiB.
-- Next: resolve #211/#212 CI results, obtain any required review, then continue health/care/clinical board 08/09/11/12 and public landing sections without changing HERO composition.
+- `main` is `54caf0278234dfb4119568d815b586f624c7cc75`. PR #210 passed its build check and merged through GitHub's normal squash path. PR #212 also passed its build check and merged to this main revision.
+- Production `/api/health/version` still reports `fb2f421dae9506ae62cc8f4c896703adc9387b58`; readiness was healthy at the last check. Neither design merge has been verified in production.
+- Latest open design PRs after rebase: #211 `afbc3a64` (account, build pending), #213 `8c89a819` (health/care, build pending), #214 `273a6987` (operator navigation, build pending), #215 `f6414ad7` (support, build pending). #212 is merged.
+- Focused tests rerun after the #212 base change: account 4 files/43 tests, health/care 3 files/37 tests, provider/seller 3 files/27 tests, and support 4 files/17 tests all passed. Commerce 5 files/52 tests and web typecheck passed before #212 merged; CI on #212 passed.
+- Web typecheck and `git diff --check` passed on the latest local batch. The full production build and actual browser screenshots remain blocked: this workspace has very low free space and no browser/CUA runner.
+- Verify screenshots at mobile/tablet/desktop, light/dark, fa/en/de/es, and simplified mode before marking any page visually complete. Preserve the landing HERO exactly; other landing sections remain to be reviewed.
