@@ -2465,5 +2465,21 @@
     "trust": "Vertrauens- und Sicherheitsfälle",
     "memorials": "Tiergedenkseiten",
     "label": "Bereich Tierschutz"
-  }
+  },
+  "provider": {
+    "shell": {
+      "nav": { "home": "Übersicht", "bookings": "Buchungen", "schedule": "Kalender", "availability": "Verfügbarkeit", "services": "Leistungen", "team": "Team", "clinical": "Behandlung", "patients": "Patienten", "sharedRecords": "Geteilte Akten", "waitlist": "Warteliste", "reviews": "Bewertungen", "analytics": "Leistung", "travel": "Reisen und Aufenthalt", "clinicWorkspace": "Klinikverwaltung", "verification": "Nachweisdokumente" },
+      "notAProvider": { "title": "Kein Zugriff auf den Anbieterbereich", "body": "Dein Konto gehört keiner Anbieterorganisation an.", "backToApp": "Zurück zu opetlife" },
+      "chooseOrg": { "title": "Organisation auswählen", "body": "Du gehörst mehreren Anbieterorganisationen an. Wähle aus, in welcher du arbeitest." },
+      "headerRole": "{role}", "role": { "OWNER": "Inhaber/in", "VET": "Tierarzt/Tierärztin", "STAFF": "Mitarbeiter/in" },
+      "switchOrg": "Organisation wechseln", "notVerifiedBanner": "Diese Organisation ist noch nicht bestätigt. Einige Aktionen sind eingeschränkt."
+    },
+    "home": {
+      "title": "Anbieterübersicht", "retry": "Erneut versuchen", "loading": "Wird geladen", "loadFailed": "Die Anbieterübersicht konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.",
+      "attention": { "pendingConfirmation": "{count, plural, one {# ausstehende Bestätigung} other {# ausstehende Bestätigungen}}", "cancellations": "{count, plural, one {# aktuelle Stornierung} other {# aktuelle Stornierungen}}", "availabilityIssues": "{count, plural, one {# Verfügbarkeitskonflikt} other {# Verfügbarkeitskonflikte}}", "allClear": "Alles in Ordnung" },
+      "nextBooking": "Nächste Buchung", "today": "Heute ({count, number})", "noBookingsToday": "Heute gibt es keine Buchungen.", "verificationLink": "Organisationsnachweise und Verifizierung"
+    },
+    "bookingRow": { "respondBy": "Antwort bis " }
+  },
+  "partnerVerification": { "activationRequired": "Die Organisation muss von der Administration bestätigt werden, bevor du Leistungen verwalten oder Angebote erstellen und aktivieren kannst. Die Verifizierung und bestehende Bestellungen kannst du weiterhin verfolgen.", "portalTitle": "Partnerverifizierung", "refreshAccess": "Seite neu laden, um den Freigabestatus zu prüfen" }
 }

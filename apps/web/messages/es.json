@@ -2465,5 +2465,21 @@
     "trust": "Casos de confianza y seguridad",
     "memorials": "Memoriales de mascotas",
     "label": "Sección de apoyo animal"
-  }
+  },
+  "provider": {
+    "shell": {
+      "nav": { "home": "Resumen", "bookings": "Reservas", "schedule": "Agenda", "availability": "Disponibilidad", "services": "Servicios", "team": "Equipo", "clinical": "Atención clínica", "patients": "Pacientes", "sharedRecords": "Historias compartidas", "waitlist": "Lista de espera", "reviews": "Reseñas", "analytics": "Rendimiento", "travel": "Viajes y estancias", "clinicWorkspace": "Gestión de la clínica", "verification": "Documentos de verificación" },
+      "notAProvider": { "title": "Sin acceso al panel de proveedores", "body": "Tu cuenta no pertenece a ninguna organización proveedora.", "backToApp": "Volver a opetlife" },
+      "chooseOrg": { "title": "Elige una organización", "body": "Perteneces a más de una organización proveedora. Elige en cuál trabajar." },
+      "headerRole": "{role}", "role": { "OWNER": "Propietario/a", "VET": "Veterinario/a", "STAFF": "Personal" },
+      "switchOrg": "Cambiar de organización", "notVerifiedBanner": "Esta organización aún no está verificada. Algunas acciones están restringidas."
+    },
+    "home": {
+      "title": "Panel del proveedor", "retry": "Intentar de nuevo", "loading": "Cargando", "loadFailed": "No se pudo cargar el resumen del proveedor. Comprueba la conexión e inténtalo de nuevo.",
+      "attention": { "pendingConfirmation": "{count, plural, one {# confirmación pendiente} other {# confirmaciones pendientes}}", "cancellations": "{count, plural, one {# cancelación reciente} other {# cancelaciones recientes}}", "availabilityIssues": "{count, plural, one {# conflicto de disponibilidad} other {# conflictos de disponibilidad}}", "allClear": "Todo en orden" },
+      "nextBooking": "Próxima reserva", "today": "Hoy ({count, number})", "noBookingsToday": "Hoy no hay reservas.", "verificationLink": "Verificación y documentos de la organización"
+    },
+    "bookingRow": { "respondBy": "Responder antes del " }
+  },
+  "partnerVerification": { "activationRequired": "La administración debe verificar tu organización antes de que puedas gestionar servicios o crear y activar ofertas. Puedes consultar la verificación y los pedidos existentes.", "portalTitle": "Verificación de socios", "refreshAccess": "Recargar la página para comprobar la aprobación" }
 }
