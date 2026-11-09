@@ -2,6 +2,15 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
+## Final Batch 2 release verification — 2026-11-09 17:44 UTC
+
+- `main` and production are both `5ea9545345d0177009d689a412ce38afccbaeaff` (PR #106). Main CI/deploy run [42663826739](https://github.com/apm1368/petlife-os/actions/runs/42663826739) succeeded; production deployment is `github-42663826739-1`. `/api/health/ready` reports database and Redis up.
+- PR #106 merged normally at `5ea95453`; exact-head CI [42661390044](https://github.com/apm1368/petlife-os/actions/runs/42661390044) passed all stages including Prisma migration, API E2E and production build. It includes the additive primary-owner/two-party transfer schema and UI. The deployment script takes a database dump before migrations and has code rollback handling.
+- Safe production unauthenticated probes for household list, ownership pets and a synthetic pet-health summary returned 401; the localized household page shell returned 200. No authenticated QA credentials/browser were present, so private owner/invitation/transfer, cross-household isolation, health document and calendar interactions, visual modes and screenshots remain PARTIAL / NOT LIVE_VERIFIED.
+- Household/pet context privacy fixes from #221 are deployed. Ownership transfer code is deployed. This is not a claim that every household, profile, lifecycle or health flow has been browser-verified.
+- Disk last observed: 462 MiB free. No local DB-backed fresh E2E or production build was attempted. Existing worktrees were preserved; payment-related changes were not touched.
+- Next: obtain controlled non-customer QA access and run the documented authenticated household/pet/health matrix; visually inspect mobile/tablet/desktop, fa/de/en/es, light/dark and simplified mode. Keep every unchecked flow PARTIAL until evidence is recorded.
+
 ## Latest verified checkpoint — 2026-11-09 17:06 UTC
 
 - `main`: `8c4a5c73a0d1cf622096fff8ebaf8fd8472a5f5b` (#221). Production: `a0c3374307982f4b7a9a4ec2c70c1f06e10b5c5b` (`github-42655547432-1`, #211). Production readiness is healthy; run 42658097839 for the #221 main revision is still in progress. Do not mark #221 live yet.

@@ -1,5 +1,13 @@
 # Batch 2 — household, pet context and health QA
 
+## Final release checkpoint — 2026-11-09 17:44 UTC
+
+- Main and production both report `5ea9545345d0177009d689a412ce38afccbaeaff`. Deployment run [42663826739](https://github.com/apm1368/petlife-os/actions/runs/42663826739) completed successfully (`github-42663826739-1`); `/api/health/ready` returns `ok` with database and Redis up.
+- PR #106 merged normally at `5ea95453`. Exact-head run [42661390044](https://github.com/apm1368/petlife-os/actions/runs/42661390044) passed decision parity, lint, visual contract, typecheck, migrations, tests, API E2E and production build. Its ownership-transfer schema was included in the deployed revision after the deployment script's pre-migration backup.
+- Safe production authorization probes after deploy: unauthenticated `GET /api/households`, `/api/pet-ownership/pets` and a synthetic pet health-summary URL each returned HTTP 401 with `UNAUTHENTICATED` and no private payload. `GET /fa/profile/household` returned HTTP 200, which verifies the page shell only—not an authenticated flow.
+- Therefore release/deployment is verified, but household invitation/approval, owner transfer, multi-household isolation, health-document access, care-calendar behavior and visual modes are **PARTIAL / NOT LIVE_VERIFIED** until an authenticated controlled QA account/browser is available. No real user data or mutations were used.
+- Disk was 462 MiB free at last check. No DB image pull or local production build was attempted. Payment worktrees were not edited.
+
 ## Latest checkpoint — 2026-11-09 17:06 UTC
 
 - `main` is `8c4a5c73a0d1cf622096fff8ebaf8fd8472a5f5b` (PR #221). Production currently reports `a0c3374307982f4b7a9a4ec2c70c1f06e10b5c5b` (PR #211 deployment `github-42655547432-1`), with `/api/health/ready` returning database/Redis up. The deployment for #221/main `8c4a5c73` is still in progress (run 42658097839); therefore #221 is not yet production-verified.
