@@ -3,6 +3,7 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import type { SupportCaseDetailDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { adminService } from "@/services/admin.service";
+import { ApiError } from "@/lib/api/client";
 import { AdminSupportCaseDetailView } from "./AdminSupportCaseDetailView";
 
 const push = vi.fn();
@@ -96,5 +97,38 @@ describe("AdminSupportCaseDetailView", () => {
     fireEvent.click(screen.getByRole("button", { name: "In progress" }));
 
     await waitFor(() => expect(adminService.transitionSupportCase).toHaveBeenCalledWith("case-1", "IN_PROGRESS"));
+  });
+
+  it.each([["de", "Anfragende Person: Jane Doe", "Öffentliche Antwort"], ["es", "Solicitante: Jane Doe", "Respuesta pública"]] as const)("renders ticket detail states in %s and formats its timestamp for that locale", async (locale, requester, visibility) => {
+    const { container } = renderWithIntl(<AdminSupportCaseDetailView caseId="case-1" />, locale);
+    await waitFor(() => expect(screen.getByText(requester)).toBeTruthy());
+    expect(screen.getAllByText(visibility).length).toBeGreaterThan(0);
+    expect(screen.queryByText("No internal notes yet.")).toBeNull();
+    expect(screen.getByText(locale === "de" ? "Noch keine internen Notizen." : "Todavía no hay notas internas.")).toBeTruthy();
+    const expectedDate = new Intl.DateTimeFormat(locale, { dateStyle: "short", timeStyle: "short" }).format(new Date(CASE.createdAt));
+    expect(container.textContent).toContain(expectedDate);
+    expect(container.textContent).not.toMatch(/[\u0600-\u06ff]/);
+  });
+
+  it.each([["de", "Die Änderung konnte nicht gespeichert werden"], ["es", "No se pudo guardar el cambio"]] as const)("shows a localized action failure in %s", async (locale, failureText) => {
+    vi.mocked(adminService.transitionSupportCase).mockRejectedValueOnce(new Error("backend exception"));
+    renderWithIntl(<AdminSupportCaseDetailView caseId="case-1" />, locale);
+    await waitFor(() => expect(screen.getByText("Cannot book a vet")).toBeTruthy());
+    fireEvent.click(screen.getByRole("button", { name: locale === "de" ? "In Bearbeitung" : "En curso" }));
+    await waitFor(() => expect(screen.getByText(new RegExp(failureText))).toBeTruthy());
+    expect(screen.queryByText("backend exception")).toBeNull();
+  });
+
+  it.each([["de", 403, "Kein Zugriff"], ["es", 404, "Caso no encontrado"]] as const)("shows the localized detail access/not-found state in %s", async (locale, status, expectedTitle) => {
+    vi.mocked(adminService.getSupportCase).mockRejectedValueOnce(new ApiError({ code: status === 403 ? "FORBIDDEN" : "NOT_FOUND", message: "private backend detail", requestId: "request-2" }, status));
+    renderWithIntl(<AdminSupportCaseDetailView caseId="private-case" />, locale);
+    await waitFor(() => expect(screen.getByText(expectedTitle)).toBeTruthy());
+    expect(screen.queryByText("private backend detail")).toBeNull();
+  });
+
+  it.each([["de", "Noch keine Nachrichten."], ["es", "Todavía no hay mensajes."]] as const)("renders the localized empty conversation state in %s", async (locale, emptyText) => {
+    vi.mocked(adminService.getSupportCase).mockResolvedValueOnce({ ...CASE, messages: [] });
+    renderWithIntl(<AdminSupportCaseDetailView caseId="case-1" />, locale);
+    await waitFor(() => expect(screen.getByText(emptyText)).toBeTruthy());
   });
 });

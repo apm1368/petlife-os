@@ -1,4 +1,6 @@
 {
+  "adminServices": {"unknownValue":"مقدار نامشخص","common":{"all":"همه","confirm":"تأیید","previous":"قبلی","next":"بعدی","hoursAbbreviation":"ساعت"},"nav":{"label":"ناوبری مدیریت خدمات","bookings":"رزروها","services":"خدمات","reviews":"نظرها","analytics":"آمار و فهرست انتظار"},"bookings":{"title":"خدمات و رزروها","searchLabel":"جست‌وجو با شماره، پت یا ارائه‌دهنده","statusLabel":"وضعیت رزرو","number":"شماره","when":"زمان","pet":"پت","provider":"ارائه‌دهنده","service":"خدمت","payment":"پرداخت","amount":"مبلغ","empty":"رزروی پیدا نشد","resultCount":"{count} رزرو"},"detail":{"booking":"رزرو","readOnlyNotice":"این صفحه فقط برای مشاهده است. بازپرداخت از مسیر تأیید مالی و اختلاف‌ها از بخش رسیدگی به اختلاف‌ها پیگیری می‌شوند.","service":"خدمت","when":"زمان","provider":"ارائه‌دهنده","location":"مکان","pet":"پت","customer":"مشتری","bookingMode":"روش رزرو","rejectionReason":"دلیل رد","cancellationReason":"دلیل لغو","rescheduledFrom":"انتقال‌یافته از","rescheduledTo":"انتقال‌یافته به","finance":"خلاصه مالی","snapshottedPrice":"قیمت ثبت‌شده هنگام رزرو","paymentMode":"روش پرداخت","cancellationTerms":"شرایط لغو","paymentIntent":"درخواست پرداخت","refund":"بازپرداخت","reviewTransactions":"مشاهده در تراکنش‌ها","timeline":"روند تغییرات","linkedRecords":"دسترسی، پشتیبانی و سوابق مرتبط","providerAccess":"دسترسی ارائه‌دهنده","consentedHealthRead":"مشاهده سلامت با رضایت","noHealthRead":"بدون دسترسی به اطلاعات سلامت","revoked":"لغوشده","clinicalVisit":"ویزیت درمانی","review":"نظر","supportCase":"درخواست پشتیبانی","support":"پشتیبانی"},"services":{"title":"خدمات ارائه‌دهندگان","provider":"ارائه‌دهنده","service":"خدمت","category":"دسته‌بندی","modePayment":"رزرو / پرداخت","options":"گزینه‌ها","bookings":"رزروها","state":"وضعیت","empty":"هنوز خدمتی ثبت نشده است","active":"فعال","inactive":"غیرفعال","deactivate":"غیرفعال‌کردن","reactivate":"فعال‌کردن","deactivateTitle":"غیرفعال‌کردن خدمت","reactivateTitle":"فعال‌کردن خدمت","toggleNotice":"رزروهای موجود لغو نمی‌شوند؛ فقط ثبت رزروهای جدید متوقف یا از سر گرفته می‌شود. این اقدام در گزارش ثبت خواهد شد."},"reviews":{"title":"نظرهای ارائه‌دهندگان","statusLabel":"وضعیت نظر","published":"منتشرشده","hidden":"پنهان","empty":"نظری وجود ندارد","hiddenBecause":"دلیل پنهان‌سازی:","hide":"پنهان‌کردن","hideTitle":"پنهان‌کردن نظر","hideNotice":"نظر حذف نمی‌شود؛ فقط از نمایش عمومی و میانگین امتیاز کنار گذاشته می‌شود و این اقدام ثبت خواهد شد.","confirmHide":"پنهان‌کردن نظر"},"analytics":{"title":"آمار خدمات ({days} روز) ","bookings":"رزروها","completed":"تکمیل‌شده","cancelled":"لغوشده","noShow":"عدم مراجعه","openRequests":"درخواست‌های باز","rejectedExpired":"ردشده / منقضی","averageRating":"میانگین امتیاز","activeWaitlist":"فهرست انتظار فعال","byCategory":"بر اساس دسته‌بندی","waitlist":"فهرست انتظار","waitlistOrder":"به ترتیب زمان عضویت","waitlistEmpty":"فهرست انتظار خالی است."},"states":{"loadFailedTitle":"بارگذاری انجام نشد","bookingsLoadFailed":"دریافت رزروها ممکن نشد. دوباره تلاش کنید.","bookingsLoading":"در حال بارگذاری رزروهای خدمات…","bookingsAccessDenied":"برای دیدن رزروها به دسترسی services.view نیاز دارید.","detailLoadFailed":"دریافت این رزرو ممکن نشد. دوباره تلاش کنید.","detailLoading":"در حال بارگذاری جزئیات رزرو…","detailAccessDenied":"اجازهٔ دیدن این رزرو را ندارید.","detailNotFound":"رزرو پیدا نشد","servicesLoadFailed":"دریافت خدمات ارائه‌دهنده ممکن نشد. دوباره تلاش کنید.","servicesLoading":"در حال بارگذاری خدمات ارائه‌دهنده…","reviewsLoadFailed":"دریافت نظرهای ارائه‌دهنده ممکن نشد. دوباره تلاش کنید.","reviewsLoading":"در حال بارگذاری نظرهای ارائه‌دهنده…","reviewsAccessDenied":"برای دیدن نظرها به دسترسی services.view نیاز دارید.","analyticsLoadFailed":"دریافت آمار خدمات ممکن نشد. دوباره تلاش کنید.","analyticsLoading":"در حال بارگذاری آمار خدمات…","manageAccessDenied":"برای تغییر این مورد به دسترسی services.manage نیاز دارید.","actionFailed":"انجام این کار ممکن نشد. دوباره تلاش کنید.","offline":"اتصال اینترنت برقرار نیست. اتصال را بررسی و دوباره تلاش کنید."},"bookingStatus":{"HOLD":"موقتاً نگه‌داشته‌شده","PENDING_CONFIRMATION":"در انتظار تأیید","REQUESTED":"درخواست‌شده","AWAITING_PAYMENT":"در انتظار پرداخت","REJECTED":"ردشده","EXPIRED":"منقضی‌شده","RESCHEDULED":"تغییر زمان‌یافته","CONFIRMED":"تأییدشده","CHECKED_IN":"پذیرش‌شده","IN_PROGRESS":"در حال انجام","COMPLETED":"تکمیل‌شده","CANCELLED_BY_USER":"لغوشده توسط مشتری","CANCELLED_BY_PROVIDER":"لغوشده توسط ارائه‌دهنده","NO_SHOW":"عدم مراجعه"},"category":{"VET":"دامپزشکی","GROOMING":"آرایش و پیرایش","TRAINING":"آموزش","WALKING":"پیاده‌روی سگ","SITTING":"نگهداری از پت","BOARDING":"اقامت پت","PET_TAXI":"تاکسی پت","OTHER":"سایر خدمات"},"paymentMode":{"NONE":"بدون پرداخت آنلاین","PAY_AT_PROVIDER":"پرداخت به ارائه‌دهنده","FULL_PREPAYMENT":"پرداخت کامل آنلاین","DEPOSIT":"بیعانهٔ آنلاین"},"bookingMode":{"INSTANT":"رزرو فوری","REQUEST":"درخواست و تأیید ارائه‌دهنده"},"paymentStatus":{"NOT_REQUIRED":"نیازی نیست","PENDING":"در انتظار","AUTHORIZED":"تأیید اولیه","PAID":"پرداخت‌شده","FAILED":"ناموفق","REFUND_PENDING":"در انتظار بازپرداخت","REFUNDED":"بازپرداخت‌شده"},"providerVerification":{"NOT_STARTED":"شروع‌نشده","SUBMITTED":"ارسال‌شده","NEEDS_INFORMATION":"نیازمند اطلاعات بیشتر","UNDER_REVIEW":"در حال بررسی","VERIFIED":"تأییدشده","REJECTED":"ردشده","SUSPENDED":"تعلیق‌شده"},"paymentProvider":{"DEV_SIMULATED":"شبیه‌ساز محیط توسعه","STANDARD_GATEWAY":"درگاه پرداخت","SNAPP_PAY":"اسنپ‌پی","DIGI_PAY":"دیجی‌پی"},"refundStatus":{"REQUESTED":"درخواست‌شده","PROCESSING":"در حال انجام","SUCCEEDED":"بازپرداخت‌شده","FAILED":"ناموفق","CANCELLED":"لغوشده"},"timelineActor":{"USER":"مشتری","PROVIDER":"ارائه‌دهنده","SYSTEM":"سامانه","ADMIN":"پشتیبانی"},"healthScope":{"MINIMAL_VET_CONTEXT":"حداقل اطلاعات دامپزشکی","HEALTH_BASICS":"اطلاعات پایه سلامت","SELECTED_HEALTH_DATA":"اطلاعات سلامت انتخاب‌شده","GROOMING_BASIC":"اطلاعات پایه پیرایش","TRAINING_BASIC":"اطلاعات پایه آموزش","WALKING_BASIC":"اطلاعات پایه پیاده‌روی","SITTING_BASIC":"اطلاعات پایه نگهداری","BOARDING_BASIC":"اطلاعات پایه اقامت","TAXI_BASIC":"اطلاعات پایه جابه‌جایی"},"species":{"DOG":"سگ","CAT":"گربه","BIRD":"پرنده","RABBIT":"خرگوش","RODENT":"جوندگان","FISH":"ماهی","REPTILE":"خزنده","OTHER":"سایر"},"clinicalVisitStatus":{"SCHEDULED":"برنامه‌ریزی‌شده","IN_PROGRESS":"در حال انجام","COMPLETED":"تکمیل‌شده","CANCELLED":"لغوشده","DRAFT":"پیش‌نویس"},"reviewStatus":{"PENDING":"در انتظار","APPROVED":"تأییدشده","REJECTED":"ردشده","PUBLISHED":"منتشرشده","HIDDEN":"پنهان"},"supportStatus":{"OPEN":"باز","IN_PROGRESS":"در حال رسیدگی","WAITING_ON_USER":"در انتظار مشتری","WAITING_ON_INTERNAL":"در انتظار تیم داخلی","RESOLVED":"رسیدگی‌شده","CLOSED":"بسته‌شده"},"waitlistStatus":{"ACTIVE":"فعال","NOTIFIED":"اطلاع‌رسانی‌شده","OFFERED":"پیشنهاد نوبت","BOOKED":"رزروشده","CANCELLED":"لغوشده","EXPIRED":"منقضی‌شده"}},
+  "adminServiceAccess": { "servicesDenied": "اجازهٔ مشاهدهٔ خدمات ارائه‌دهندگان را ندارید.", "analyticsDenied": "اجازهٔ مشاهدهٔ آمار خدمات را ندارید." },
   "adminUsers": {
     "title": "همهٔ کاربران",
     "detailTitle": "پروفایل کاربر",
@@ -1056,6 +1058,7 @@
       "title": "خانه ارائه‌دهنده",
       "retry": "تلاش دوباره",
       "loading": "در حال بارگذاری",
+      "loadFailed": "نمای کلی ارائه‌دهنده بارگیری نشد. اتصال را بررسی کنید و دوباره تلاش کنید.",
       "attention": {
         "pendingConfirmation": "{count, number} در انتظار تأیید",
         "cancellations": "{count, number} لغو اخیر",
@@ -1067,18 +1070,23 @@
       "noBookingsToday": "امروز رزروی وجود ندارد.",
       "verificationLink": "احراز هویت و مدارک مجموعه"
     },
+    "bookingRow": { "respondBy": "پاسخ تا " },
     "bookings": {
       "title": "رزروها",
       "retry": "تلاش دوباره",
       "loading": "در حال بارگذاری",
       "empty": "رزروی یافت نشد.",
+      "loadFailed": "رزروها بارگیری نشدند. اتصال را بررسی کنید و دوباره تلاش کنید.",
+      "accessDenied": "شما اجازه مشاهده این رزروها را ندارید.",
       "filter": {
         "today": "امروز",
         "upcoming": "پیش رو",
         "past": "گذشته",
         "cancelled": "لغوشده",
         "requests": "درخواست‌ها"
-      }
+      },
+      "status": { "HOLD": "رزرو موقت", "PENDING_CONFIRMATION": "در انتظار تأیید", "CONFIRMED": "تأییدشده", "CHECKED_IN": "پذیرش‌شده", "IN_PROGRESS": "در حال انجام", "COMPLETED": "انجام‌شده", "CANCELLED_BY_USER": "لغوشده توسط مشتری", "CANCELLED_BY_PROVIDER": "لغوشده توسط مرکز", "NO_SHOW": "عدم حضور", "REQUESTED": "درخواست‌شده", "AWAITING_PAYMENT": "در انتظار پرداخت", "REJECTED": "ردشده", "EXPIRED": "منقضی‌شده", "RESCHEDULED": "جابجا‌شده" },
+      "paymentStatus": { "NOT_REQUIRED": "نیازی نیست", "PENDING": "در انتظار", "AUTHORIZED": "تأییدشده", "PAID": "پرداخت‌شده", "FAILED": "ناموفق", "REFUND_PENDING": "در انتظار بازگشت وجه", "REFUNDED": "وجه بازگشت داده شد" }
     },
     "bookingDetail": {
       "title": "رزرو",
@@ -1101,7 +1109,8 @@
         "scope": "محدوده",
         "startsAt": "شروع",
         "expiresAt": "انقضا",
-        "openClinicalRecord": "باز کردن پرونده بالینی"
+        "openClinicalRecord": "باز کردن پرونده بالینی",
+        "scopePreset": { "MINIMAL_VET_CONTEXT": "حداقل اطلاعات", "HEALTH_BASICS": "اطلاعات پایه سلامت", "SELECTED_HEALTH_DATA": "اطلاعات منتخب سلامت", "GROOMING_BASIC": "پروفایل مراقبت (پایه آرایش)", "TRAINING_BASIC": "پروفایل مراقبت (پایه آموزش)", "WALKING_BASIC": "پروفایل مراقبت (پایه پیاده‌روی)", "SITTING_BASIC": "پروفایل مراقبت (پایه نگهداری)", "BOARDING_BASIC": "پروفایل مراقبت و وضعیت واکسن (اقامت)", "TAXI_BASIC": "پروفایل مراقبت (پایه تاکسی حیوانات)" }
       },
       "careProfile": {
         "title": "زمینه مراقبتی",
@@ -1117,6 +1126,10 @@
       "actions": {
         "confirm": "تأیید",
         "confirmed": "تأیید شد",
+        "acceptRequest": "پذیرش درخواست",
+        "decline": "رد درخواست",
+        "markNoShow": "ثبت عدم حضور",
+        "startClinicalVisit": "شروع ویزیت بالینی",
         "checkIn": "پذیرش",
         "start": "شروع",
         "complete": "پایان",
@@ -1124,6 +1137,9 @@
       },
       "completionNoteLabel": "یادداشت قابل مشاهده برای صاحب (اختیاری)",
       "completionNotePlaceholder": "مثلاً «آرایش لونا انجام شد.»",
+      "respondBy": "مهلت پاسخ",
+      "followUps": { "legend": "پیگیری‌ها (فقط در صورت نیاز)", "description": "هر پیگیری در مرکز مراقبت صاحب حیوان با منبع «ارائه‌دهنده» ثبت می‌شود. چیزی خودکار زمان‌بندی نمی‌شود.", "typeLabel": "نوع پیگیری", "type": { "FOLLOW_UP": "ویزیت پیگیری", "VACCINATION": "واکسن بعدی", "MEDICATION": "دارو", "MONITORING": "آزمایش یا بررسی", "OTHER": "سایر" }, "titleLabel": "عنوان پیگیری", "dateLabel": "تاریخ سررسید", "remove": "حذف پیگیری", "add": "افزودن پیگیری" },
+      "rejectDialog": { "title": "رد درخواست رزرو", "reasonLabel": "علت (برای مشتری نمایش داده می‌شود)" },
       "notes": {
         "title": "یادداشت‌های ارائه‌دهنده",
         "internalOnly": "فقط داخلی — هرگز به مشتری نشان داده نمی‌شود.",
@@ -1145,7 +1161,8 @@
         "PROVIDER_NOT_VERIFIED": "سازمان شما باید پیش از این اقدام تأیید شود.",
         "BOOKING_NOT_FOUND": "رزرو یافت نشد.",
         "INVALID_BOOKING_TRANSITION": "این رزرو در حال حاضر نمی‌تواند به آن وضعیت برود.",
-        "BOOKING_NOT_CANCELLABLE": "این رزرو دیگر قابل لغو نیست."
+        "BOOKING_NOT_CANCELLABLE": "این رزرو دیگر قابل لغو نیست.",
+        "generic": "اقدام انجام نشد. دوباره تلاش کنید."
       }
     },
     "schedule": {
@@ -1163,6 +1180,8 @@
       "title": "زمان‌های در دسترس",
       "retry": "تلاش دوباره",
       "loading": "در حال بارگذاری",
+      "loadFailed": "زمان‌های در دسترس بارگیری نشدند. اتصال را بررسی کنید و دوباره تلاش کنید.",
+      "accessDenied": "شما اجازه مدیریت زمان‌های در دسترس را ندارید.",
       "day": {
         "sun": "یکشنبه",
         "mon": "دوشنبه",
@@ -1183,7 +1202,9 @@
         "timezone": "منطقه زمانی",
         "add": "افزودن",
         "locationRequired": "مکان الزامی است.",
-        "createFailed": "ایجاد قانون ممکن نشد."
+        "createFailed": "ایجاد قانون ممکن نشد.",
+        "updateFailed": "به‌روزرسانی قانون ممکن نشد.",
+        "deleteFailed": "حذف قانون ممکن نشد."
       },
       "exceptions": {
         "title": "مرخصی و زمان‌های اضافه",
@@ -1200,10 +1221,13 @@
         "add": "افزودن",
         "fieldsRequired": "مکان، شروع و پایان الزامی است.",
         "createFailed": "ایجاد استثنا ممکن نشد.",
+        "updateFailed": "به‌روزرسانی استثنا ممکن نشد.",
+        "deleteFailed": "حذف استثنا ممکن نشد.",
         "conflictWarning": "{count, number} رزرو تأییدشده در این بازه وجود دارد. مسدود کردن آن‌ها را لغو یا جابه‌جا نمی‌کند.",
         "conflictCancel": "انصراف",
         "conflictProceed": "با این حال مسدود شود"
-      }
+      },
+      "actions": { "edit": "ویرایش", "cancel": "لغو", "save": "ذخیره تغییرات" }
     },
     "services": {
       "title": "خدمات",
@@ -2624,12 +2648,14 @@
       "detail": {
         "caseNumber": "درخواست {number}",
         "requester": "درخواست‌دهنده: {name}",
+        "authorType": { "USER": "کاربر", "ADMIN": "مدیر", "SYSTEM": "سامانه" },
         "assignTo": "واگذاری به مدیر",
         "changeStatus": "تغییر وضعیت",
         "messages": "پیام‌ها",
         "composePlaceholder": "پاسخ خود را بنویسید…",
         "visibilityPublic": "پاسخ عمومی",
         "visibilityInternal": "یادداشت داخلی (هرگز برای مشتری ارسال نمی‌شود)",
+        "visibilityLabel": "نوع پیام",
         "send": "ارسال",
         "notes": "یادداشت‌های داخلی",
         "context": {
@@ -2643,12 +2669,29 @@
           "previousCases": "درخواست‌های قبلی این مشتری:",
           "noPreviousCases": "این مشتری درخواست قبلی‌ای ندارد."
         }
+      },
+      "states": {
+        "loading": "در حال بارگذاری درخواست‌های پشتیبانی…",
+        "loadFailed": "بارگذاری درخواست‌های پشتیبانی انجام نشد. دوباره تلاش کنید.",
+        "detailLoadFailed": "بارگذاری این درخواست پشتیبانی انجام نشد. دوباره تلاش کنید.",
+        "accessDeniedTitle": "دسترسی ندارید",
+        "accessDenied": "اجازه مشاهده این درخواست‌های پشتیبانی را ندارید.",
+        "notFoundTitle": "درخواست پیدا نشد",
+        "notFound": "این درخواست پشتیبانی در دسترس نیست.",
+        "empty": "درخواستی پیدا نشد",
+        "emptyDescription": "فیلترها را تغییر دهید یا درخواست تازه‌ای بسازید.",
+        "requiredFields": "شناسه کاربر، موضوع و توضیحات الزامی هستند.",
+        "createFailed": "ساخت درخواست پشتیبانی انجام نشد. دوباره تلاش کنید.",
+        "actionFailed": "ذخیره تغییر انجام نشد. دوباره تلاش کنید.",
+        "noMessages": "هنوز پیامی وجود ندارد.",
+        "noNotes": "هنوز یادداشت داخلی وجود ندارد."
       }
     },
     "disputes": {
       "title": "اختلافات",
       "newDispute": "اختلاف جدید",
       "createTitle": "ثبت اختلاف",
+      "filter": { "status": "فیلتر بر اساس وضعیت", "allStatuses": "همه وضعیت‌ها" },
       "status": {
         "OPEN": "باز",
         "UNDER_REVIEW": "در حال بررسی",
@@ -2683,13 +2726,20 @@
         "addEvidence": "افزودن مدرک",
         "evidencePlaceholder": "شرح مدرک",
         "changeStatus": "تغییر وضعیت",
-        "financialNote": "وضعیت مالی (بازگشت وجه) جدا پیگیری می‌شود — حل اختلاف به‌طور خودکار باعث بازگشت وجه نمی‌شود."
+        "financialNote": "وضعیت مالی (بازگشت وجه) جدا پیگیری می‌شود — حل اختلاف به‌طور خودکار باعث بازگشت وجه نمی‌شود.",
+        "actorType": { "USER": "کاربر", "ADMIN": "مدیر" }
+      },
+      "states": {
+        "loading": "در حال بارگذاری اختلاف‌ها…", "loadFailed": "بارگذاری اختلاف‌ها انجام نشد. دوباره تلاش کنید.", "detailLoadFailed": "بارگذاری این اختلاف انجام نشد. دوباره تلاش کنید.",
+        "accessDeniedTitle": "دسترسی ندارید", "accessDenied": "اجازه مشاهده این اختلاف‌ها را ندارید.", "notFoundTitle": "اختلاف پیدا نشد", "notFound": "این اختلاف در دسترس نیست.",
+        "empty": "اختلافی پیدا نشد", "emptyDescription": "اختلافی با وضعیت انتخاب‌شده وجود ندارد.", "requiredFields": "شناسه موضوع و شرح ادعا الزامی هستند.", "createFailed": "ثبت اختلاف انجام نشد. دوباره تلاش کنید.", "actionFailed": "ذخیره تغییر انجام نشد. دوباره تلاش کنید.", "noEvidence": "هنوز مدرکی ثبت نشده است."
       }
     },
     "trust": {
       "title": "اعتماد و امنیت",
       "newCase": "ایجاد پرونده",
       "createTitle": "ایجاد پرونده اعتماد و امنیت",
+      "filter": { "status": "فیلتر بر اساس وضعیت", "allStatuses": "همه وضعیت‌ها" },
       "status": {
         "OPEN": "باز",
         "UNDER_REVIEW": "در حال بررسی",
@@ -2731,6 +2781,20 @@
         "severity": "شدت",
         "submit": "ایجاد پرونده"
       },
+      "context": {
+        "title": "موضوع پرونده",
+        "missingSubject": "موضوع دیگر وجود ندارد یا خلاصه‌ای برایش تعریف نشده است.",
+        "by": "ثبت‌کننده: {name}",
+        "openPublicPage": "مشاهدهٔ صفحهٔ عمومی",
+        "reportCount": "تعداد گزارش‌ها: {total} · تعداد گزارش‌دهندگان متفاوت: {reporters}",
+        "unknownKind": "موضوع دیگر",
+        "unknownStatus": "وضعیت نامشخص",
+        "unknownReason": "دلیل دیگر یا نامشخص",
+        "subjectKind": { "POST": "پست انجمن", "COMMENT": "نظر انجمن", "SUPPORT_NEED": "درخواست کمک", "LOST_PET_INCIDENT": "گزارش گم‌شدن", "LOST_PET_SIGHTING": "گزارش مشاهده", "ORGANIZATION": "سازمان" },
+        "reportReason": { "SPAM": "هرزنامه", "ABUSE": "سوءاستفاده", "MISINFORMATION": "اطلاعات نادرست", "INAPPROPRIATE": "محتوای نامناسب", "OTHER": "سایر", "SCAM": "کلاهبرداری", "HARASSMENT": "آزار و اذیت", "PERSONAL_INFORMATION": "اطلاعات شخصی", "ANIMAL_WELFARE": "رفاه حیوانات", "DANGEROUS_CONTENT": "محتوای خطرناک" },
+        "reportStatus": { "OPEN": "باز", "ESCALATED": "ارجاع‌شده", "RESOLVED": "رسیدگی‌شده", "DISMISSED": "ردشده" },
+        "subjectStatus": { "OPEN": "باز", "SEARCHING": "در حال جست‌وجو", "SIGHTING_REPORTED": "گزارش مشاهده ثبت شد", "FOUND": "پیدا شد", "REUNITED": "به صاحبش بازگشت", "CLOSED": "بسته‌شده", "SUBMITTED": "ثبت‌شده", "REVIEWED": "بررسی‌شده", "ACCEPTED": "پذیرفته‌شده", "REJECTED": "ردشده", "DRAFT": "پیش‌نویس", "PENDING_REVIEW": "در انتظار بررسی", "PUBLISHED": "منتشرشده", "PARTIALLY_FULFILLED": "بخشی تأمین‌شده", "PAUSED": "متوقف‌شده", "FULFILLED": "تأمین‌شده", "EXPIRED": "منقضی‌شده", "REMOVED": "برداشته‌شده", "HIDDEN": "پنهان‌شده", "VERIFIED": "تأییدشده", "NOT_STARTED": "شروع‌نشده", "UNDER_REVIEW": "در حال بررسی", "NEEDS_INFORMATION": "نیازمند اطلاعات بیشتر", "APPROVED": "تأییدشده", "SUSPENDED": "تعلیق‌شده", "INACTIVE": "غیرفعال" }
+      },
       "detail": {
         "changeStatus": "تغییر وضعیت",
         "actions": "اقدامات انجام‌شده",
@@ -2741,7 +2805,16 @@
         "appellantUserId": "شناسه کاربر معترض",
         "appealReason": "دلیل تجدیدنظر",
         "resolveAppeal": "نتیجه‌گیری تجدیدنظر",
-        "resolution": "نتیجه"
+        "resolution": "نتیجه",
+        "effectBefore": "پیش از اقدام",
+        "effectAfter": "پس از اقدام",
+        "effectField": { "status": "وضعیت", "verificationStatus": "وضعیت احراز", "isPubliclyListed": "نمایش عمومی", "pausedListings": "آگهی‌های متوقف‌شده", "closedAt": "زمان بسته‌شدن" },
+        "yes": "بله",
+        "no": "خیر",
+        "requiredFields": "شناسه موضوع و دلیل الزامی هستند.",
+        "appealRequiredFields": "شناسه کاربر معترض و دلیل تجدیدنظر الزامی هستند.",
+        "resolutionRequired": "پیش از تصمیم‌گیری درباره تجدیدنظر، نتیجه را بنویسید.",
+        "appealFailed": "ثبت یا بررسی تجدیدنظر انجام نشد. دوباره تلاش کنید."
       },
       "appealStatus": {
         "SUBMITTED": "ثبت‌شده",
@@ -2749,7 +2822,8 @@
         "UPHELD": "تأیید شد",
         "OVERTURNED": "رد شد",
         "PARTIALLY_OVERTURNED": "جزئاً رد شد"
-      }
+      },
+      "states": { "loading": "در حال بارگذاری پرونده‌های اعتماد و امنیت…", "loadFailed": "بارگذاری پرونده‌ها انجام نشد. دوباره تلاش کنید.", "detailLoadFailed": "بارگذاری این پرونده انجام نشد. دوباره تلاش کنید.", "accessDeniedTitle": "دسترسی ندارید", "accessDenied": "اجازه مشاهده این پرونده‌ها را ندارید.", "empty": "پرونده‌ای پیدا نشد", "emptyDescription": "پرونده‌ای با وضعیت انتخاب‌شده وجود ندارد.", "createFailed": "ایجاد پرونده انجام نشد. دوباره تلاش کنید.", "actionFailed": "ذخیره تغییر انجام نشد. دوباره تلاش کنید.", "actionNotApplicable": "این اقدام در وضعیت فعلی موضوع قابل اجرا نیست.", "actionForbidden": "نقش شما اجازهٔ این اقدام را ندارد.", "actionNotRecorded": "اقدام ثبت نشد. دوباره تلاش کنید.", "noActions": "هنوز اقدامی ثبت نشده است.", "contextUnavailable": "خلاصه موضوع و گزارش‌ها بارگذاری نشد.", "unknownValue": "مقدار نامشخص", "restored": "با اقدام بعدی بازگردانده شد" }
     },
     "orgs": {
       "providersTitle": "ارائه‌دهندگان",
@@ -2771,19 +2845,57 @@
     },
     "transactions": {
       "title": "تراکنش‌ها",
+      "orderIdLabel": "شناسه سفارش",
       "orderIdPlaceholder": "شناسه سفارش",
       "lookup": "جستجو",
       "paymentIntents": "تراکنش‌های پرداخت",
       "ledgerEntries": "دفتر مالی",
+      "paymentStatus": {
+        "REQUIRES_PAYMENT_METHOD": "نیازمند روش پرداخت",
+        "PENDING": "در انتظار",
+        "AUTHORIZED": "تأیید مجاز",
+        "CAPTURED": "دریافت‌شده",
+        "FAILED": "ناموفق",
+        "CANCELLED": "لغوشده"
+      },
+      "refundStatus": {
+        "REQUESTED": "درخواست‌شده",
+        "PROCESSING": "در حال پردازش",
+        "SUCCEEDED": "بازپرداخت‌شده",
+        "FAILED": "ناموفق",
+        "CANCELLED": "لغوشده"
+      },
+      "ledgerDirection": { "DEBIT": "بدهکار", "CREDIT": "بستانکار" },
+      "ledgerAccount": {
+        "CASH_GATEWAY_RECEIVABLE": "دریافتنی درگاه",
+        "CUSTOMER_PAYMENT_CLEARING": "حساب واسط پرداخت مشتری",
+        "SELLER_PAYABLE": "پرداختنی فروشنده",
+        "REFUND_PAYABLE": "پرداختنی بازپرداخت",
+        "PLATFORM_REVENUE": "درآمد پلتفرم"
+      },
+      "states": {
+        "lookupPrompt": "برای دیدن اطلاعات پرداخت و دفتر مالی، شناسه سفارش را وارد کنید.",
+        "loading": "در حال دریافت اطلاعات مالی سفارش…",
+        "lookupFailedTitle": "دریافت اطلاعات مالی ممکن نشد",
+        "lookupFailed": "اطلاعات مالی این سفارش دریافت نشد. دوباره تلاش کنید.",
+        "offline": "اتصال اینترنت برقرار نیست. اتصال را بررسی کنید و دوباره تلاش کنید.",
+        "accessDenied": "اجازهٔ مشاهدهٔ این اطلاعات مالی را ندارید.",
+        "noPaymentIntents": "برای این سفارش تراکنش پرداختی ثبت نشده است.",
+        "noLedgerEntries": "برای این سفارش ردیفی در دفتر مالی ثبت نشده است.",
+        "actionFailed": "انجام درخواست بازپرداخت ممکن نشد. دوباره تلاش کنید.",
+        "actionDenied": "اجازهٔ انجام این عملیات بازپرداخت را ندارید.",
+        "unknownStatus": "وضعیت نامشخص",
+        "unknownAccount": "حساب نامشخص"
+      },
       "refund": {
         "title": "درخواست بازگشت وجه",
-        "amount": "مبلغ",
+        "amount": "مبلغ به ریال",
         "reason": "دلیل",
         "submit": "ثبت درخواست",
         "approve": "تأیید",
         "reject": "رد",
         "execute": "اجرا",
-        "status": {
+        "approvalStatus": {
           "REQUESTED": "درخواست‌شده",
           "APPROVED": "تأییدشده",
           "REJECTED": "ردشده",
@@ -3562,15 +3674,25 @@
     },
     "feed": {
       "title": "انجمن",
+      "description": "پرسش، تجربه و خبر از صاحبان حیوانات؛ محترمانه و بدون تبلیغ.",
       "newPost": "پست جدید",
       "empty": "هنوز پستی وجود ندارد. اولین نفر باشید که چیزی به اشتراک می‌گذارد.",
       "loadMore": "بیشتر",
+      "loading": "در حال بارگذاری پست‌ها…",
+      "loadingMore": "در حال بارگذاری…",
       "commentsAndReactions": "{comments, plural, one {# نظر} other {# نظر}} · {reactions, plural, one {# واکنش} other {# واکنش}}",
       "searchLabel": "جستجو در پست‌ها",
       "typeLabel": "نوع پست",
       "allTypes": "همه انواع",
       "search": "جستجو",
-      "noResults": "پستی با این جستجو پیدا نشد."
+      "noResults": "پستی با این جستجو پیدا نشد.",
+      "withPet": "همراه {name}",
+      "shortcutsLabel": "میان‌برهای انجمن",
+      "topics": "موضوع‌ها",
+      "rightNow": "همین حالا",
+      "myMessages": "پیام‌های من",
+      "lostPetsNearby": "حیوانات گم‌شدهٔ اطراف",
+      "supportNeeds": "نیازهای حمایت"
     },
     "newPost": {
       "title": "پست جدید",
@@ -3590,6 +3712,36 @@
       "commentLabel": "افزودن نظر",
       "commentSubmit": "ارسال",
       "commentsEmpty": "هنوز نظری ثبت نشده است."
+    }
+  },
+  "communityChat": {
+    "inbox": {
+      "title": "پیام‌ها",
+      "emptyTitle": "هنوز گفت‌وگویی ندارید",
+      "emptyDescription": "از صفحهٔ یک پست یا نمایهٔ یکی از اعضا گفت‌وگو را شروع کنید.",
+      "fallbackMember": "عضو",
+      "youPrefix": "شما:",
+      "unread": "{count} پیام خوانده‌نشده",
+      "failed": "پیام‌ها بارگیری نشد",
+      "noAccess": "به این پیام‌ها دسترسی ندارید.",
+      "stale": "به‌روزرسانی پیام‌ها انجام نشد. گفت‌وگوهای بارگیری‌شده نمایش داده می‌شوند.",
+      "retry": "تلاش دوباره"
+    },
+    "thread": {
+      "allMessages": "همهٔ پیام‌ها",
+      "conversationFallback": "گفت‌وگو",
+      "block": "مسدود کردن",
+      "unblock": "رفع مسدودی",
+      "blocked": "پیام‌رسانی در این گفت‌وگو مسدود است.",
+      "messageLabel": "پیام",
+      "send": "ارسال",
+      "sendFailed": "پیام ارسال نشد. دوباره تلاش کنید.",
+      "blockFailed": "تغییر وضعیت مسدودسازی انجام نشد. دوباره تلاش کنید.",
+      "notFound": "این گفت‌وگو پیدا نشد",
+      "loadFailed": "گفت‌وگو بارگیری نشد",
+      "noAccess": "به این گفت‌وگو دسترسی ندارید.",
+      "retry": "تلاش دوباره",
+      "noMessages": "هنوز پیامی در این گفت‌وگو نیست."
     }
   },
   "memories": {

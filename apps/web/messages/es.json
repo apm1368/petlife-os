@@ -1,4 +1,6 @@
 {
+  "adminServices":{"unknownValue":"Valor no disponible","common":{"all":"Todos","confirm":"Confirmar","previous":"Anterior","next":"Siguiente","hoursAbbreviation":"h"},"nav":{"label":"Navegación de administración de servicios","bookings":"Reservas","services":"Servicios","reviews":"Reseñas","analytics":"Análisis y lista de espera"},"bookings":{"title":"Servicios y reservas","searchLabel":"Buscar por número, mascota o proveedor","statusLabel":"Estado de la reserva","number":"Número","when":"Fecha y hora","pet":"Mascota","provider":"Proveedor","service":"Servicio","payment":"Pago","amount":"Importe","empty":"No se encontraron reservas","resultCount":"{count} reservas"},"detail":{"booking":"Reserva","readOnlyNotice":"Solo lectura. Los reembolsos se tramitan mediante la aprobación financiera y las disputas, desde su módulo correspondiente.","service":"Servicio","when":"Fecha y hora","provider":"Proveedor","location":"Ubicación","pet":"Mascota","customer":"Cliente","bookingMode":"Modalidad de reserva","rejectionReason":"Motivo del rechazo","cancellationReason":"Motivo de la cancelación","rescheduledFrom":"Trasladada desde","rescheduledTo":"Trasladada a","finance":"Resumen financiero","snapshottedPrice":"Precio registrado al reservar","paymentMode":"Modalidad de pago","cancellationTerms":"Condiciones de cancelación","paymentIntent":"Intento de pago","refund":"Reembolso","reviewTransactions":"Ver en transacciones","timeline":"Historial","linkedRecords":"Acceso, soporte y registros relacionados","providerAccess":"Acceso del proveedor","consentedHealthRead":"Consulta de salud con consentimiento","noHealthRead":"Sin acceso a datos de salud","revoked":"revocado","clinicalVisit":"Consulta clínica","review":"Reseña","supportCase":"Caso de soporte","support":"Soporte"},"services":{"title":"Servicios de proveedores","provider":"Proveedor","service":"Servicio","category":"Categoría","modePayment":"Reserva / pago","options":"Opciones","bookings":"Reservas","state":"Estado","empty":"Aún no hay servicios registrados","active":"Activo","inactive":"Inactivo","deactivate":"Desactivar","reactivate":"Reactivar","deactivateTitle":"Desactivar servicio","reactivateTitle":"Reactivar servicio","toggleNotice":"Las reservas existentes no se cancelan; solo se detienen o reanudan las nuevas. La acción queda registrada en la auditoría."},"reviews":{"title":"Reseñas de proveedores","statusLabel":"Estado de la reseña","published":"Publicada","hidden":"Oculta","empty":"No hay reseñas","hiddenBecause":"Oculta porque:","hide":"Ocultar","hideTitle":"Ocultar reseña","hideNotice":"La reseña no se elimina: deja de mostrarse públicamente y de contar en el promedio. La acción queda auditada.","confirmHide":"Ocultar reseña"},"analytics":{"title":"Análisis de servicios ({days} días)","bookings":"Reservas","completed":"Completadas","cancelled":"Canceladas","noShow":"Ausencias","openRequests":"Solicitudes abiertas","rejectedExpired":"Rechazadas / vencidas","averageRating":"Valoración media","activeWaitlist":"Lista de espera activa","byCategory":"Por categoría","waitlist":"Lista de espera","waitlistOrder":"En orden de inscripción","waitlistEmpty":"La lista de espera está vacía."},"states":{"loadFailedTitle":"No se pudo cargar","bookingsLoadFailed":"No se pudieron cargar las reservas. Inténtalo de nuevo.","bookingsLoading":"Cargando reservas de servicios…","bookingsAccessDenied":"Necesitas el permiso services.view para consultar las reservas.","detailLoadFailed":"No se pudo cargar esta reserva. Inténtalo de nuevo.","detailLoading":"Cargando los detalles de la reserva…","detailAccessDenied":"No tienes permiso para consultar esta reserva.","detailNotFound":"No se encontró la reserva","servicesLoadFailed":"No se pudieron cargar los servicios del proveedor. Inténtalo de nuevo.","servicesLoading":"Cargando servicios del proveedor…","reviewsLoadFailed":"No se pudieron cargar las reseñas del proveedor. Inténtalo de nuevo.","reviewsLoading":"Cargando reseñas del proveedor…","reviewsAccessDenied":"Necesitas el permiso services.view para consultar las reseñas.","analyticsLoadFailed":"No se pudo cargar el análisis de servicios. Inténtalo de nuevo.","analyticsLoading":"Cargando análisis de servicios…","manageAccessDenied":"Necesitas el permiso services.manage para cambiar este elemento.","actionFailed":"No se pudo completar la acción. Inténtalo de nuevo.","offline":"No tienes conexión. Comprueba la conexión e inténtalo de nuevo."},"bookingStatus":{"HOLD":"En espera","PENDING_CONFIRMATION":"Pendiente de confirmación","REQUESTED":"Solicitada","AWAITING_PAYMENT":"Pendiente de pago","REJECTED":"Rechazada","EXPIRED":"Vencida","RESCHEDULED":"Reprogramada","CONFIRMED":"Confirmada","CHECKED_IN":"Registrada","IN_PROGRESS":"En curso","COMPLETED":"Completada","CANCELLED_BY_USER":"Cancelada por el cliente","CANCELLED_BY_PROVIDER":"Cancelada por el proveedor","NO_SHOW":"Ausencia"},"category":{"VET":"Veterinaria","GROOMING":"Peluquería y aseo","TRAINING":"Adiestramiento","WALKING":"Paseo de perros","SITTING":"Cuidado de mascotas","BOARDING":"Alojamiento para mascotas","PET_TAXI":"Transporte de mascotas","OTHER":"Otros servicios"},"paymentMode":{"NONE":"Sin pago en línea","PAY_AT_PROVIDER":"Pago al proveedor","FULL_PREPAYMENT":"Pago anticipado completo en línea","DEPOSIT":"Anticipo en línea"},"bookingMode":{"INSTANT":"Reserva inmediata","REQUEST":"Solicitud con confirmación del proveedor"},"paymentStatus":{"NOT_REQUIRED":"No requerido","PENDING":"Pendiente","AUTHORIZED":"Autorizado","PAID":"Pagado","FAILED":"Fallido","REFUND_PENDING":"Reembolso pendiente","REFUNDED":"Reembolsado"},"providerVerification":{"NOT_STARTED":"No iniciado","SUBMITTED":"Enviado","NEEDS_INFORMATION":"Falta información","UNDER_REVIEW":"En revisión","VERIFIED":"Verificado","REJECTED":"Rechazado","SUSPENDED":"Suspendido"},"paymentProvider":{"DEV_SIMULATED":"Simulador de desarrollo","STANDARD_GATEWAY":"Pasarela de pago","SNAPP_PAY":"SnappPay","DIGI_PAY":"DigiPay"},"refundStatus":{"REQUESTED":"Solicitado","PROCESSING":"En curso","SUCCEEDED":"Reembolsado","FAILED":"Fallido","CANCELLED":"Cancelado"},"timelineActor":{"USER":"Cliente","PROVIDER":"Proveedor","SYSTEM":"Sistema","ADMIN":"Soporte"},"healthScope":{"MINIMAL_VET_CONTEXT":"Contexto veterinario mínimo","HEALTH_BASICS":"Información básica de salud","SELECTED_HEALTH_DATA":"Datos de salud seleccionados","GROOMING_BASIC":"Información básica de aseo","TRAINING_BASIC":"Información básica de adiestramiento","WALKING_BASIC":"Información básica de paseos","SITTING_BASIC":"Información básica de cuidado","BOARDING_BASIC":"Información básica de alojamiento","TAXI_BASIC":"Información básica de transporte"},"species":{"DOG":"Perro","CAT":"Gato","BIRD":"Ave","RABBIT":"Conejo","RODENT":"Roedor","FISH":"Pez","REPTILE":"Reptil","OTHER":"Otra especie"},"clinicalVisitStatus":{"SCHEDULED":"Programada","IN_PROGRESS":"En curso","COMPLETED":"Completada","CANCELLED":"Cancelada","DRAFT":"Borrador"},"reviewStatus":{"PENDING":"Pendiente","APPROVED":"Aprobada","REJECTED":"Rechazada","PUBLISHED":"Publicada","HIDDEN":"Oculta"},"supportStatus":{"OPEN":"Abierto","IN_PROGRESS":"En curso","WAITING_ON_USER":"En espera del cliente","WAITING_ON_INTERNAL":"En espera del equipo interno","RESOLVED":"Resuelto","CLOSED":"Cerrado"},"waitlistStatus":{"ACTIVE":"Activa","NOTIFIED":"Notificada","OFFERED":"Turno ofrecido","BOOKED":"Reservada","CANCELLED":"Cancelada","EXPIRED":"Vencida"}},
+  "adminServiceAccess": { "servicesDenied": "No tienes permiso para consultar los servicios de proveedores.", "analyticsDenied": "No tienes permiso para consultar el análisis de servicios." },
   "notifications": {
     "title": "Notificaciones",
     "loading": "Cargando notificaciones…",
@@ -443,6 +445,169 @@
       "TRAVEL_BOOKING": "tu reserva de alojamiento"
     }
   },
+  "adminSettings": {
+    "title": "Configuración de la plataforma",
+    "intro": "Revisa los valores actuales y el historial de cambios. Los cambios sensibles requieren la aprobación de otra persona administradora.",
+    "none": "Sin valor",
+    "enabled": "Activado",
+    "disabled": "Desactivado",
+    "forbidden": "No tienes permiso para ver la configuración.",
+    "loadFailed": "No se pudo cargar la configuración.",
+    "retry": "Reintentar",
+    "loading": "Cargando…",
+    "empty": "No hay configuración para mostrar.",
+    "confirm": "He revisado el valor y las consecuencias de esta acción.",
+    "secondApproval": "Los cambios requieren la aprobación de una segunda persona administradora.",
+    "immediate": "Los cambios confirmados se aplican de inmediato.",
+    "current": "Valor actual",
+    "source": "Origen del valor",
+    "default": "Valor predeterminado del sistema",
+    "override": "Modificación de administración",
+    "pending": "Cambios pendientes",
+    "edit": "Editar valor",
+    "closeEditor": "Cerrar editor",
+    "persianText": "Texto en persa",
+    "englishText": "Texto en inglés",
+    "clearText": "Al borrar ambos textos se elimina el aviso.",
+    "tomanValue": "Valor en toman (hasta un decimal)",
+    "numericValue": "Nuevo valor",
+    "range": "Rango permitido: de {min} a {max}",
+    "reason": "Motivo del cambio (al menos 5 caracteres)",
+    "conflict": "La configuración cambió en el servidor; se conserva tu borrador. Vuelve a cargar el valor actual y revísalo antes de continuar.",
+    "saveFailed": "No se confirmó el envío; se conserva tu borrador. Revisa el historial antes de volver a intentarlo.",
+    "stale": "La versión actual no coincide con la versión base de tu borrador. Compara el valor actual con el propuesto.",
+    "reviewLatest": "He revisado el último valor; conservar este borrador",
+    "propose": "Enviar para aprobación de una segunda persona",
+    "apply": "Aplicar cambio",
+    "reloadCurrent": "Volver a cargar el valor actual",
+    "history": "Historial de cambios y aprobaciones",
+    "settingFilter": "Configuración",
+    "statusFilter": "Estado del cambio",
+    "all": "Todos",
+    "noChanges": "No se encontraron cambios.",
+    "previousValue": "Valor anterior",
+    "proposedValue": "Valor propuesto",
+    "requestedBy": "Solicitado por",
+    "unknown": "No registrado",
+    "noSelfApproval": "No puedes aprobar tu propia solicitud.",
+    "waiting": "A la espera de una persona revisora autorizada",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "page": "Página {page} · {total} cambios",
+    "reviewNote": "Nota de revisión (opcional)",
+    "cancel": "Cancelar mi solicitud",
+    "approve": "Aprobar y aplicar",
+    "reject": "Rechazar cambio",
+    "names": {
+      "platform_announcement": "Aviso público",
+      "auth_googleEnabled": "Disponibilidad del inicio de sesión con Google",
+      "auth_otpEnabled": "Disponibilidad del inicio de sesión con OTP telefónico",
+      "booking_holdTtlSeconds": "Duración de la reserva temporal (segundos)",
+      "commerce_refundApprovalThresholdIrr": "Umbral para la segunda aprobación de reembolsos",
+      "commerce_settlementApprovalThresholdIrr": "Umbral para la segunda aprobación de liquidaciones",
+      "support_firstResponseSlaHours": "Objetivo de tiempo para la primera respuesta de soporte (horas)",
+      "trust_highSeveritySlaHours": "Objetivo de respuesta para reportes de alta gravedad (horas)",
+      "trust_standardSlaHours": "Objetivo de respuesta para reportes estándar (horas)",
+      "privacy_exportsPerDay": "Límite diario de solicitudes de exportación de datos"
+    },
+    "statuses": {
+      "PENDING": "Pendiente de aprobación; aún no aplicado",
+      "APPLIED": "Aplicado",
+      "REJECTED": "Rechazado",
+      "CANCELLED": "Cancelado",
+      "SUPERSEDED": "Sustituido por un cambio más reciente"
+    },
+    "units": { "toman": "tomanes", "seconds": "segundos", "hours": "horas", "perDay": "por día" }
+  },
+  "adminAccess": {
+    "title": "Gestión de accesos de administración",
+    "details": "Detalles del acceso de administración",
+    "intro": "Roles y membresías reales del equipo administrador. Cada cambio requiere un motivo y queda registrado en el servidor.",
+    "loading": "Cargando…",
+    "forbidden": "No tienes acceso a esta sección.",
+    "back": "Volver a administración",
+    "saved": "Cambio de acceso registrado.",
+    "catalogFailed": "No se pudieron cargar los catálogos de roles y permisos; los cambios no estarán disponibles hasta que se carguen.",
+    "retry": "Reintentar",
+    "search": "Buscar por nombre o correo",
+    "role": "Rol",
+    "status": "Estado",
+    "all": "Todos",
+    "apply": "Aplicar filtros",
+    "grant": "Conceder acceso a una cuenta existente",
+    "loadFailed": "No se pudieron cargar las cuentas administradoras.",
+    "notRecorded": "Sin registrar",
+    "unnamed": "Cuenta administradora sin nombre visible",
+    "noEmail": "No hay correo registrado",
+    "lastActive": "Última actividad: {date}",
+    "tableLastActive": "Última actividad",
+    "created": "Membresía desde: {date}",
+    "selfHelp": "No puedes cambiar ni suspender tu propia membresía aquí.",
+    "lastSuperHelp": "Debe permanecer al menos una persona superadministradora activa. Se necesita otra persona superadministradora activa antes de cambiar esta membresía.",
+    "changeRole": "Cambiar rol",
+    "manageScopes": "Gestionar ámbitos de servicio",
+    "serviceScopes": "Ámbitos de servicio",
+    "scopesHelp": "Selecciona todas las áreas de servicio que esta persona administradora puede consultar o modificar. La restricción se aplica de inmediato.",
+    "scopeRequired": "Selecciona al menos un ámbito de servicio.",
+    "noServiceScopes": "No hay ámbitos asignados: el acceso está bloqueado",
+    "suspend": "Suspender acceso",
+    "reactivate": "Reactivar acceso",
+    "effectivePermissions": "Permisos de la membresía",
+    "empty": "Ninguna cuenta administradora coincide con estos filtros.",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "protectedRole": "Rol protegido; solo una persona superadministradora puede asignarlo.",
+    "memberCounts": "Activos: {active} · Suspendidos: {suspended}",
+    "permissionCount": "{count} permisos",
+    "showPermissions": "Mostrar permisos del rol",
+    "permissionCodesHelp": "Se muestran los códigos de permiso exactos para la revisión técnica. Los roles de cada permiso proceden del catálogo del servidor.",
+    "confirm": "Confirmar cambio de acceso",
+    "scopes": "Cambiar ámbitos de servicio",
+    "actionHelp": "El acceso se concede a una cuenta que ya existe; esto no crea una cuenta de inicio de sesión. Los cambios se aplican a partir de la siguiente solicitud.",
+    "email": "Correo de una cuenta existente",
+    "reason": "Motivo (al menos 5 caracteres)",
+    "acknowledge": "He comprobado la identidad de la cuenta, el rol y las consecuencias del cambio.",
+    "waiting": "Guardando…",
+    "cancel": "Cancelar",
+    "saveFailed": "No se guardó el cambio de acceso. Comprueba la cuenta, el permiso y el estado de la membresía.",
+    "roles": {
+      "SUPER_ADMIN": "Superadministración",
+      "ADMIN": "Administración",
+      "SUPPORT": "Soporte",
+      "TRUST_SAFETY": "Confianza y seguridad",
+      "FINANCE": "Finanzas",
+      "OPERATIONS": "Operaciones",
+      "CONTENT": "Contenidos",
+      "VERIFICATION": "Verificación",
+      "READ_ONLY": "Solo lectura",
+      "EDITOR": "Edición",
+      "PARTNER_OPERATIONS": "Operaciones de socios",
+      "CLINIC_OPERATIONS": "Operaciones clínicas",
+      "COMMERCE_OPERATIONS": "Operaciones comerciales",
+      "ANALYTICS": "Analítica",
+      "CONTENT_ADMIN": "Administración de contenidos",
+      "SHOP_ADMIN": "Administración de la tienda",
+      "SERVICE_ADMIN": "Administración por ámbito de servicio",
+      "SUPPORT_AGENT": "Agente de soporte"
+    },
+    "rules": {
+      "ALREADY_ADMIN": "Esta cuenta ya tiene acceso de administración; abre su membresía existente.",
+      "SELF_CHANGE_FORBIDDEN": "No puedes cambiar tu propia membresía.",
+      "LAST_SUPER_ADMIN": "No se puede cambiar la última membresía de superadministración activa.",
+      "PROTECTED_ROLE": "No puedes asignar ni cambiar este rol protegido.",
+      "SERVICE_SCOPES_REQUIRED": "Una persona administradora por ámbito necesita al menos un ámbito de servicio.",
+      "INVALID_SERVICE_SCOPE": "Uno o más ámbitos de servicio seleccionados no son válidos.",
+      "SCOPES_ONLY_FOR_SERVICE_ADMIN": "Los ámbitos de servicio solo se pueden asignar a una persona administradora por ámbito."
+    },
+    "verticals": {
+      "CLINIC": "Clínicas y veterinaria",
+      "GROOMING": "Peluquería y cuidado",
+      "ACCOMMODATION": "Alojamiento y cuidado de mascotas",
+      "INSURANCE": "Seguros"
+    },
+    "statuses": { "ACTIVE": "Activo", "SUSPENDED": "Suspendido" },
+    "tabs": { "admins": "Administradores", "roles": "Roles", "permissions": "Permisos" }
+  },
   "admin": {
     "common": {
       "loading": "Cargando…",
@@ -456,6 +621,57 @@
       "assigneeLabel": "ID del administrador asignado",
       "backToList": "Volver a la lista",
       "search": "Buscar"
+    },
+    "trust": {
+      "title": "Confianza y seguridad", "newCase": "Abrir caso de confianza", "createTitle": "Abrir caso de confianza",
+      "filter": { "status": "Filtrar por estado", "allStatuses": "Todos los estados" },
+      "status": { "OPEN": "Abierto", "UNDER_REVIEW": "En revisión", "RESOLVED": "Resuelto", "CLOSED": "Cerrado" },
+      "severity": { "LOW": "Baja", "MEDIUM": "Media", "HIGH": "Alta", "CRITICAL": "Crítica" },
+      "subjectType": { "USER": "Usuario", "HOUSEHOLD": "Hogar", "PROVIDER": "Proveedor", "SELLER": "Vendedor", "LISTING": "Anuncio", "REVIEW": "Reseña", "COMMUNITY_CONTENT": "Contenido de la comunidad", "PET_INCIDENT": "Incidente de mascota", "SUPPORT_NEED": "Solicitud de ayuda", "LOST_PET_SIGHTING": "Aviso de avistamiento de mascota perdida", "ANIMAL_SUPPORT_ORGANIZATION": "Organización de apoyo animal" },
+      "actionType": { "WARNING": "Advertencia", "RESTRICT": "Restringir", "SUSPEND": "Suspender", "REMOVE_CONTENT": "Retirar contenido", "REQUIRE_REVERIFICATION": "Solicitar nueva verificación", "RESTORE": "Restaurar", "NO_ACTION": "Sin acción" },
+      "form": { "subjectType": "Tipo de asunto", "subjectId": "ID del asunto", "reason": "Motivo", "severity": "Gravedad", "submit": "Abrir caso" },
+      "context": {
+        "title": "Asunto del caso", "missingSubject": "El asunto ya no existe o no tiene un resumen.", "by": "Reportado por: {name}", "openPublicPage": "Abrir página pública", "reportCount": "Informes: {total} · personas que informaron: {reporters}", "unknownKind": "Otro asunto", "unknownStatus": "Estado no disponible", "unknownReason": "Otro motivo o motivo no reconocido",
+        "subjectKind": { "POST": "Publicación de la comunidad", "COMMENT": "Comentario de la comunidad", "SUPPORT_NEED": "Solicitud de ayuda", "LOST_PET_INCIDENT": "Informe de mascota perdida", "LOST_PET_SIGHTING": "Avistamiento", "ORGANIZATION": "Organización" },
+        "reportReason": { "SPAM": "Spam", "ABUSE": "Abuso", "MISINFORMATION": "Información engañosa", "INAPPROPRIATE": "Contenido inapropiado", "OTHER": "Otro", "SCAM": "Estafa", "HARASSMENT": "Acoso", "PERSONAL_INFORMATION": "Información personal", "ANIMAL_WELFARE": "Bienestar animal", "DANGEROUS_CONTENT": "Contenido peligroso" },
+        "reportStatus": { "OPEN": "Abierto", "ESCALATED": "Escalado", "RESOLVED": "Resuelto", "DISMISSED": "Descartado" },
+        "subjectStatus": { "OPEN": "Abierto", "SEARCHING": "En búsqueda", "SIGHTING_REPORTED": "Avistamiento informado", "FOUND": "Encontrado", "REUNITED": "Reunido con su familia", "CLOSED": "Cerrado", "SUBMITTED": "Enviado", "REVIEWED": "Revisado", "ACCEPTED": "Aceptado", "REJECTED": "Rechazado", "DRAFT": "Borrador", "PENDING_REVIEW": "Pendiente de revisión", "PUBLISHED": "Publicado", "PARTIALLY_FULFILLED": "Parcialmente cubierto", "PAUSED": "En pausa", "FULFILLED": "Cubierto", "EXPIRED": "Caducado", "REMOVED": "Retirado", "HIDDEN": "Oculto", "VERIFIED": "Verificado", "NOT_STARTED": "No iniciado", "UNDER_REVIEW": "En revisión", "NEEDS_INFORMATION": "Se necesita más información", "APPROVED": "Aprobado", "SUSPENDED": "Suspendido", "INACTIVE": "Inactivo" }
+      },
+      "detail": { "changeStatus": "Cambiar estado", "actions": "Acciones realizadas", "takeAction": "Aplicar acción", "actionReason": "Motivo", "appeal": "Apelación", "submitAppeal": "Enviar apelación", "appellantUserId": "ID de usuario apelante", "appealReason": "Motivo de la apelación", "resolveAppeal": "Resolver apelación", "resolution": "Resolución", "effectBefore": "Antes", "effectAfter": "Después", "effectField": { "status": "Estado", "verificationStatus": "Verificación", "isPubliclyListed": "Anuncio público", "pausedListings": "Anuncios pausados", "closedAt": "Cerrado el" }, "yes": "Sí", "no": "No", "requiredFields": "El ID del asunto y el motivo son obligatorios.", "appealRequiredFields": "El ID de usuario y el motivo de apelación son obligatorios.", "resolutionRequired": "Escribe una resolución antes de decidir la apelación.", "appealFailed": "No se pudo enviar o resolver la apelación. Inténtalo de nuevo." },
+      "appealStatus": { "SUBMITTED": "Enviada", "UNDER_REVIEW": "En revisión", "UPHELD": "Confirmada", "OVERTURNED": "Revocada", "PARTIALLY_OVERTURNED": "Revocada parcialmente" },
+      "states": { "loading": "Cargando casos de confianza…", "loadFailed": "No se pudieron cargar los casos de confianza. Inténtalo de nuevo.", "detailLoadFailed": "No se pudo cargar este caso de confianza. Inténtalo de nuevo.", "accessDeniedTitle": "Sin acceso", "accessDenied": "No tienes permiso para ver estos casos de confianza.", "empty": "No se encontraron casos de confianza", "emptyDescription": "No hay casos con el estado seleccionado.", "createFailed": "No se pudo abrir el caso. Inténtalo de nuevo.", "actionFailed": "No se pudo guardar el cambio. Inténtalo de nuevo.", "actionNotApplicable": "No se puede aplicar esta acción al estado actual del asunto.", "actionForbidden": "Tu rol no permite realizar esta acción.", "actionNotRecorded": "No se registró la acción. Inténtalo de nuevo.", "noActions": "Todavía no hay acciones registradas.", "contextUnavailable": "No se pudieron cargar el asunto y el resumen de informes.", "unknownValue": "Valor no disponible", "restored": "Restaurado mediante una acción posterior" }
+    },
+    "disputes": {
+      "title": "Disputas",
+      "newDispute": "Nueva disputa",
+      "createTitle": "Abrir disputa",
+      "filter": { "status": "Filtrar por estado", "allStatuses": "Todos los estados" },
+      "status": { "OPEN": "Abierta", "UNDER_REVIEW": "En revisión", "AWAITING_EVIDENCE": "A la espera de pruebas", "RESOLVED_CUSTOMER": "Resuelta a favor del cliente", "RESOLVED_PROVIDER": "Resuelta a favor del proveedor", "RESOLVED_SELLER": "Resuelta a favor del vendedor", "PARTIAL_RESOLUTION": "Resolución parcial", "REJECTED": "Rechazada", "CLOSED": "Cerrada" },
+      "subjectType": { "BOOKING": "Reserva", "ORDER": "Pedido", "PAYMENT": "Pago", "REFUND": "Reembolso", "SHIPMENT": "Envío", "PROVIDER": "Proveedor", "SELLER": "Vendedor" },
+      "form": { "subjectType": "Tipo de asunto", "subjectId": "ID del asunto", "raisedByUserId": "Presentada por (ID de usuario, opcional)", "claim": "Reclamación", "submit": "Abrir disputa" },
+      "detail": { "claim": "Reclamación", "resolution": "Resumen de la resolución", "evidence": "Pruebas", "addEvidence": "Añadir prueba", "evidencePlaceholder": "Descripción de la prueba", "changeStatus": "Cambiar estado", "financialNote": "Los movimientos financieros, incluidos los reembolsos, se gestionan por separado. Resolver una disputa no genera un reembolso automático.", "actorType": { "USER": "Usuario", "ADMIN": "Administración" } },
+      "states": { "loading": "Cargando disputas…", "loadFailed": "No se pudieron cargar las disputas. Inténtalo de nuevo.", "detailLoadFailed": "No se pudo cargar esta disputa. Inténtalo de nuevo.", "accessDeniedTitle": "Sin acceso", "accessDenied": "No tienes permiso para ver estas disputas.", "notFoundTitle": "Disputa no encontrada", "notFound": "Esta disputa no está disponible.", "empty": "No se encontraron disputas", "emptyDescription": "No hay disputas con el estado seleccionado.", "requiredFields": "El ID del asunto y la reclamación son obligatorios.", "createFailed": "No se pudo abrir la disputa. Inténtalo de nuevo.", "actionFailed": "No se pudo guardar el cambio. Inténtalo de nuevo.", "noEvidence": "Todavía no se han añadido pruebas." }
+    },
+    "support": {
+      "title": "Casos de soporte",
+      "newCase": "Nuevo caso",
+      "createTitle": "Crear caso de soporte",
+      "filter": {
+        "allStatuses": "Todos los estados",
+        "allCategories": "Todas las categorías",
+        "searchPlaceholder": "Buscar asunto o número de caso…",
+        "createdFrom": "Creado desde",
+        "createdTo": "Creado hasta"
+      },
+      "status": { "OPEN": "Abierto", "IN_PROGRESS": "En curso", "WAITING_ON_USER": "A la espera del usuario", "WAITING_ON_INTERNAL": "Pendiente de revisión interna", "RESOLVED": "Resuelto", "CLOSED": "Cerrado" },
+      "category": { "ACCOUNT": "Cuenta", "PET": "Mascota", "HEALTH": "Salud", "BOOKING": "Reserva", "SERVICE": "Servicio", "PAYMENT": "Pago", "REFUND": "Reembolso", "ORDER": "Pedido", "DELIVERY": "Entrega", "SELLER": "Vendedor", "PROVIDER": "Proveedor", "MARKETPLACE": "Mercado", "TRUST_SAFETY": "Confianza y seguridad", "OTHER": "Otro" },
+      "priority": { "LOW": "Baja", "NORMAL": "Normal", "HIGH": "Alta", "URGENT": "Urgente" },
+      "form": { "requesterUserId": "ID de usuario solicitante", "subject": "Asunto", "description": "Descripción", "category": "Categoría", "priority": "Prioridad", "submit": "Crear caso" },
+      "detail": {
+        "caseNumber": "Caso {number}", "requester": "Solicitante: {name}", "authorType": { "USER": "Cliente", "ADMIN": "Administración", "SYSTEM": "Sistema" }, "assignTo": "Asignar a administración", "changeStatus": "Cambiar estado", "messages": "Mensajes", "composePlaceholder": "Escribe una respuesta…", "visibilityPublic": "Respuesta pública", "visibilityInternal": "Nota interna (no se envía al cliente)", "visibilityLabel": "Visibilidad", "send": "Enviar", "notes": "Notas internas",
+        "context": { "title": "Contexto", "household": "Hogar: {name}", "pet": "Mascota: {name}", "relatedEntity": "Relacionado con: {summary}", "firstResponseTime": "Primera respuesta después de {minutes} min", "noFirstResponseYet": "Aún no se ha enviado una respuesta", "resolutionTime": "Resuelto después de {minutes} min", "previousCases": "Casos anteriores de esta persona:", "noPreviousCases": "Esta persona no tiene casos anteriores." }
+      },
+      "states": { "loading": "Cargando casos de soporte…", "loadFailed": "No se pudieron cargar los casos de soporte. Inténtalo de nuevo.", "detailLoadFailed": "No se pudo cargar este caso de soporte. Inténtalo de nuevo.", "accessDeniedTitle": "Sin acceso", "accessDenied": "No tienes permiso para ver estos casos de soporte.", "notFoundTitle": "Caso no encontrado", "notFound": "Este caso de soporte no está disponible.", "empty": "No se encontraron casos de soporte", "emptyDescription": "Cambia los filtros o crea un caso nuevo.", "requiredFields": "El ID de usuario, el asunto y la descripción son obligatorios.", "createFailed": "No se pudo crear el caso de soporte. Inténtalo de nuevo.", "actionFailed": "No se pudo guardar el cambio. Inténtalo de nuevo.", "noMessages": "Todavía no hay mensajes.", "noNotes": "Todavía no hay notas internas." }
     },
     "audit": {
       "title": "Registro de auditoría",
@@ -536,6 +752,66 @@
         "finance": "Finanzas",
         "content": "Contenido",
         "system": "Sistema"
+      }
+    },
+    "transactions": {
+      "title": "Transacciones financieras",
+      "orderIdLabel": "Número de pedido",
+      "orderIdPlaceholder": "Introduce el número de pedido",
+      "lookup": "Buscar",
+      "paymentIntents": "Intentos de pago",
+      "ledgerEntries": "Asientos contables",
+      "paymentStatus": {
+        "REQUIRES_PAYMENT_METHOD": "Falta un método de pago",
+        "PENDING": "Pendiente",
+        "AUTHORIZED": "Autorizado",
+        "CAPTURED": "Cobrado",
+        "FAILED": "Fallido",
+        "CANCELLED": "Cancelado"
+      },
+      "refundStatus": {
+        "REQUESTED": "Solicitado",
+        "PROCESSING": "En proceso",
+        "SUCCEEDED": "Reembolsado",
+        "FAILED": "Fallido",
+        "CANCELLED": "Cancelado"
+      },
+      "ledgerDirection": { "DEBIT": "Debe", "CREDIT": "Haber" },
+      "ledgerAccount": {
+        "CASH_GATEWAY_RECEIVABLE": "Cuenta por cobrar al proveedor de pago",
+        "CUSTOMER_PAYMENT_CLEARING": "Cuenta de compensación de pagos de clientes",
+        "SELLER_PAYABLE": "Cuenta por pagar a vendedores",
+        "REFUND_PAYABLE": "Reembolso pendiente de pago",
+        "PLATFORM_REVENUE": "Ingresos de la plataforma"
+      },
+      "states": {
+        "lookupPrompt": "Introduce un número de pedido para consultar sus pagos y asientos contables.",
+        "loading": "Cargando los datos financieros del pedido…",
+        "lookupFailedTitle": "No se pueden consultar los datos financieros",
+        "lookupFailed": "No se pudieron cargar los datos financieros del pedido. Inténtalo de nuevo.",
+        "offline": "No tienes conexión a Internet. Comprueba la conexión e inténtalo de nuevo.",
+        "accessDenied": "No tienes permiso para consultar estos datos financieros.",
+        "noPaymentIntents": "No hay intentos de pago registrados para este pedido.",
+        "noLedgerEntries": "No hay asientos contables registrados para este pedido.",
+        "actionFailed": "No se pudo completar la solicitud de reembolso. Inténtalo de nuevo.",
+        "actionDenied": "No tienes permiso para realizar esta acción de reembolso.",
+        "unknownStatus": "Estado no disponible",
+        "unknownAccount": "Cuenta no disponible"
+      },
+      "refund": {
+        "title": "Solicitar un reembolso",
+        "amount": "Importe en riales",
+        "reason": "Motivo",
+        "submit": "Enviar solicitud",
+        "approve": "Aprobar",
+        "reject": "Rechazar",
+        "execute": "Ejecutar",
+        "approvalStatus": {
+          "REQUESTED": "Solicitado",
+          "APPROVED": "Aprobado",
+          "REJECTED": "Rechazado",
+          "EXECUTED": "Ejecutado"
+        }
       }
     }
   },
@@ -1360,6 +1636,36 @@
       "loading": "Cargando registro"
     }
   },
+  "communityChat": {
+    "inbox": {
+      "title": "Mensajes",
+      "emptyTitle": "Aún no hay conversaciones",
+      "emptyDescription": "Inicia una conversación desde una publicación o el perfil de otra persona.",
+      "fallbackMember": "Miembro",
+      "youPrefix": "Tú:",
+      "unread": "{count, plural, one {# mensaje sin leer} other {# mensajes sin leer}}",
+      "failed": "No se pudieron cargar los mensajes",
+      "noAccess": "No tienes acceso a estos mensajes.",
+      "stale": "No se pudieron actualizar los mensajes. Se muestran las conversaciones cargadas anteriormente.",
+      "retry": "Reintentar"
+    },
+    "thread": {
+      "allMessages": "Todos los mensajes",
+      "conversationFallback": "Conversación",
+      "block": "Bloquear",
+      "unblock": "Desbloquear",
+      "blocked": "La mensajería está bloqueada en esta conversación.",
+      "messageLabel": "Mensaje",
+      "send": "Enviar",
+      "sendFailed": "No se envió el mensaje. Inténtalo de nuevo.",
+      "blockFailed": "No se pudo cambiar el bloqueo. Inténtalo de nuevo.",
+      "notFound": "No se encontró la conversación",
+      "loadFailed": "No se pudo cargar la conversación",
+      "noAccess": "No tienes acceso a esta conversación.",
+      "retry": "Reintentar",
+      "noMessages": "Todavía no hay mensajes en esta conversación."
+    }
+  },
   "memories": {
     "publicMemorial": {
       "title": "Enviar un homenaje",
@@ -1456,6 +1762,8 @@
       "titleLabel": "Título",
       "documentType": "Tipo de documento",
       "download": "Descargar",
+      "void": "Retirar",
+      "voidReason": "Motivo de la retirada",
       "provenanceOwner": "Subido por el hogar",
       "provenanceProvider": "Subido por la clínica veterinaria — verificado",
       "fileRequired": "Selecciona primero el archivo del documento.",
@@ -1659,6 +1967,31 @@
       "species": "Especie: {species}", "breed": "Raza: {breed}", "colorMarkings": "Color y marcas: {markings}", "contact": "Contacto: {contact}",
       "reportSighting": { "title": "Informar de un avistamiento", "dateLabel": "Fecha del avistamiento", "timeLabel": "Hora aproximada", "locationLabel": "¿Dónde la viste?", "descriptionLabel": "Descripción", "privacyNote": "El aviso solo se envía a la persona propietaria. Tu nombre y datos de contacto nunca serán públicos.", "submit": "Enviar avistamiento", "success": "Gracias. El avistamiento se ha enviado para su revisión." },
       "detail": { "unavailableTitle": "Este informe no está disponible", "unavailableDescription": "Es posible que el informe se haya cerrado o eliminado.", "shareText": "{name} está desaparecida{area}. Si la ves, informa del avistamiento.", "shareArea": " cerca de {area}", "species": "Especie", "breed": "Raza", "colorMarkings": "Color y marcas", "approximateAge": "Edad aproximada", "ageYears": "Unos {count} años", "lastSeenAround": "Última vez vista cerca de", "lastSeen": "Última vez vista", "reunited": "{name} ya está en casa. Gracias a todas las personas que ayudaron.", "photoAlt": "Foto de {name}" }
+    }
+  },
+  "community": {
+    "postType": { "GENERAL": "General", "QUESTION": "Pregunta", "LOCAL": "Local", "LOST_PET_SHARE": "Mascota desaparecida", "RESCUE": "Rescate", "ADOPTION": "Adopción", "MEMORY": "Recuerdo" },
+    "feed": {
+      "title": "Comunidad",
+      "description": "Preguntas, experiencias y novedades de personas con mascotas, con respeto y sin publicidad.",
+      "newPost": "Nueva publicación",
+      "empty": "Aún no hay publicaciones. Sé la primera persona en compartir algo.",
+      "loadMore": "Cargar más",
+      "loading": "Cargando publicaciones…",
+      "loadingMore": "Cargando…",
+      "commentsAndReactions": "{comments, plural, one {# comentario} other {# comentarios}} · {reactions, plural, one {# reacción} other {# reacciones}}",
+      "searchLabel": "Buscar publicaciones",
+      "typeLabel": "Tipo de publicación",
+      "allTypes": "Todos los tipos",
+      "search": "Buscar",
+      "noResults": "No hay publicaciones que coincidan con la búsqueda.",
+      "withPet": "con {name}",
+      "shortcutsLabel": "Accesos rápidos de la comunidad",
+      "topics": "Temas",
+      "rightNow": "Ahora mismo",
+      "myMessages": "Mis mensajes",
+      "lostPetsNearby": "Mascotas desaparecidas cerca",
+      "supportNeeds": "Solicitudes de ayuda"
     }
   },
   "publicNavigation": {
@@ -2103,6 +2436,140 @@
       "UNKNOWN": "Se desconoce la disponibilidad."
     }
   },
+  "insurance": {
+    "verificationStatus": {
+      "UNVERIFIED": "Sin verificar",
+      "VERIFIED": "Verificado",
+      "SUSPENDED": "Suspendido"
+    },
+    "coverageType": {
+      "ACCIDENT": "Accidente",
+      "ILLNESS": "Enfermedad",
+      "SURGERY": "Cirugía",
+      "DIAGNOSTICS": "Diagnóstico",
+      "MEDICATION": "Medicamentos",
+      "DENTAL": "Atención dental",
+      "PREVENTIVE": "Atención preventiva",
+      "HOSPITALIZATION": "Hospitalización",
+      "EMERGENCY": "Emergencia",
+      "OTHER": "Otro"
+    }
+  },
+  "adminInsuranceProviders": {
+    "title": "Gestión de aseguradoras",
+    "intro": "Gestiona las aseguradoras, su visibilidad pública y el acceso de sus equipos. Las solicitudes de seguro las decide cada aseguradora.",
+    "loading": "Cargando…",
+    "forbidden": "No tienes acceso a las aseguradoras.",
+    "back": "Todas las aseguradoras",
+    "saved": "Cambios guardados.",
+    "saveFailed": "No se pudo completar la operación. Comprueba los permisos, los datos del formulario y la conexión. Tus datos se conservan.",
+    "loadFailed": "No se pudo cargar la aseguradora o sus miembros.",
+    "retry": "Reintentar",
+    "listed": "Publicación en el directorio activada",
+    "unlisted": "Publicación en el directorio desactivada",
+    "setStatus": "Cambiar el estado a {status}",
+    "hide": "Ocultar del directorio público",
+    "publish": "Activar publicación pública",
+    "members": "Miembros del portal de la aseguradora",
+    "emptyMembers": "No hay miembros registrados.",
+    "unnamed": "Sin nombre visible",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "revoke": "Revocar acceso",
+    "grantTitle": "Conceder o cambiar el acceso de un colaborador",
+    "grantHelp": "Introduce el correo de una cuenta existente de opetlife. El acceso se activa de inmediato o cambia el rol existente.",
+    "email": "Correo electrónico",
+    "role": "Rol del colaborador",
+    "grant": "Guardar acceso del colaborador",
+    "open": "Detalles y miembros",
+    "empty": "No hay aseguradoras registradas.",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "confirmTitle": "Confirmar cambio de acceso o visibilidad",
+    "confirmStatus": "¿Cambiar el estado de esta aseguradora a «{status}»?",
+    "confirmHide": "¿Ocultar esta aseguradora del directorio público?",
+    "confirmPublish": "¿Activar la publicación pública? Seguirán aplicándose la verificación y las reglas del servidor.",
+    "confirmRevoke": "¿Revocar a «{name}» el acceso al portal de esta aseguradora?",
+    "confirm": "Confirmar y continuar",
+    "cancel": "Cancelar",
+    "editProvider": "Editar aseguradora",
+    "createProvider": "Registrar aseguradora",
+    "name": "Nombre de la empresa",
+    "country": "Código de país (dos letras)",
+    "description": "Descripción",
+    "phone": "Teléfono",
+    "website": "Sitio web",
+    "save": "Guardar información",
+    "create": "Registrar aseguradora",
+    "statuses": {
+      "UNVERIFIED": "Sin verificar",
+      "VERIFIED": "Verificada",
+      "SUSPENDED": "Suspendida"
+    },
+    "roles": {
+      "OWNER": "Titular del portal de la aseguradora",
+      "UNDERWRITING": "Evaluación de riesgos",
+      "VIEWER": "Solo lectura"
+    },
+    "products": "Productos de esta aseguradora"
+  },
+  "adminInsuranceProducts": {
+    "title": "Productos de seguro",
+    "back": "Aseguradora y miembros",
+    "loading": "Cargando…",
+    "forbidden": "No tienes acceso a los productos de seguro.",
+    "loadFailed": "No se pudieron cargar los productos de seguro.",
+    "retry": "Reintentar",
+    "saveFailed": "No se pudo completar la operación. Se conservan los datos del formulario. Comprueba los permisos y la conexión.",
+    "saved": "Cambios guardados.",
+    "create": "Crear producto de seguro",
+    "edit": "Editar producto de seguro",
+    "name": "Nombre del producto",
+    "species": "Especies elegibles",
+    "coverage": "Tipos de cobertura",
+    "summary": "Resumen de cobertura",
+    "exclusions": "Exclusiones y límites",
+    "exclusionsHelp": "Un elemento por línea, hasta 100. Dejarlo vacío declara explícitamente una lista vacía; comprueba las condiciones reales de la aseguradora.",
+    "noExclusions": "No hay exclusiones registradas; esto no garantiza cobertura para todos los casos.",
+    "termsSource": "Fuente de las condiciones",
+    "termsUrl": "URL de las condiciones",
+    "save": "Guardar producto",
+    "invalid": "Comprueba los valores: rangos de edad y prima crecientes, porcentajes entre 0 y 100 e importes financieros enteros no negativos.",
+    "clearUnsupported": "Todavía no existe un contrato explícito para borrar un valor numérico existente. Conserva el valor anterior o corrígelo.",
+    "empty": "No hay productos de seguro registrados.",
+    "listed": "Publicación pública activada",
+    "unlisted": "Publicación pública desactivada",
+    "premiumFrom": "Prima mínima registrada: {amount}",
+    "setStatus": "Cambiar el estado a {status}",
+    "hide": "Ocultar producto",
+    "publish": "Activar publicación pública",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "confirmTitle": "Confirmar estado o visibilidad del producto",
+    "confirmBody": "¿Aplicar el cambio seleccionado a «{name}»? Se mantienen las reglas del servidor sobre acceso y visibilidad pública.",
+    "confirm": "Confirmar y continuar",
+    "cancel": "Cancelar",
+    "speciesLabels": {
+      "DOG": "Perro",
+      "CAT": "Gato",
+      "BIRD": "Ave",
+      "RABBIT": "Conejo",
+      "RODENT": "Roedor",
+      "FISH": "Pez",
+      "REPTILE": "Reptil",
+      "OTHER": "Otro"
+    },
+    "fields": {
+      "minAgeMonths": "Edad mínima (meses)",
+      "maxAgeMonths": "Edad máxima (meses)",
+      "waitingPeriodDays": "Período de espera (días)",
+      "deductibleAmountIrr": "Franquicia (IRR)",
+      "annualLimitIrr": "Límite anual (IRR)",
+      "coinsurancePercent": "Porcentaje de copago (%)",
+      "premiumMinIrr": "Prima mínima (IRR)",
+      "premiumMaxIrr": "Prima máxima (IRR)"
+    }
+  },
   "adminAnimalSupportNav": {
     "overview": "Resumen",
     "needs": "Solicitudes de ayuda",
@@ -2115,5 +2582,47 @@
     "trust": "Casos de confianza y seguridad",
     "memorials": "Memoriales de mascotas",
     "label": "Sección de apoyo animal"
-  }
+  },
+  "provider": {
+    "shell": {
+      "nav": { "home": "Resumen", "bookings": "Reservas", "schedule": "Agenda", "availability": "Disponibilidad", "services": "Servicios", "team": "Equipo", "clinical": "Atención clínica", "patients": "Pacientes", "sharedRecords": "Historias compartidas", "waitlist": "Lista de espera", "reviews": "Reseñas", "analytics": "Rendimiento", "travel": "Viajes y estancias", "clinicWorkspace": "Gestión de la clínica", "verification": "Documentos de verificación" },
+      "notAProvider": { "title": "Sin acceso al panel de proveedores", "body": "Tu cuenta no pertenece a ninguna organización proveedora.", "backToApp": "Volver a opetlife" },
+      "chooseOrg": { "title": "Elige una organización", "body": "Perteneces a más de una organización proveedora. Elige en cuál trabajar." },
+      "headerRole": "{role}", "role": { "OWNER": "Propietario/a", "VET": "Veterinario/a", "STAFF": "Personal" },
+      "switchOrg": "Cambiar de organización", "notVerifiedBanner": "Esta organización aún no está verificada. Algunas acciones están restringidas."
+    },
+    "home": {
+      "title": "Panel del proveedor", "retry": "Intentar de nuevo", "loading": "Cargando", "loadFailed": "No se pudo cargar el resumen del proveedor. Comprueba la conexión e inténtalo de nuevo.",
+      "attention": { "pendingConfirmation": "{count, plural, one {# confirmación pendiente} other {# confirmaciones pendientes}}", "cancellations": "{count, plural, one {# cancelación reciente} other {# cancelaciones recientes}}", "availabilityIssues": "{count, plural, one {# conflicto de disponibilidad} other {# conflictos de disponibilidad}}", "allClear": "Todo en orden" },
+      "nextBooking": "Próxima reserva", "today": "Hoy ({count, number})", "noBookingsToday": "Hoy no hay reservas.", "verificationLink": "Verificación y documentos de la organización"
+    },
+    "bookingRow": { "respondBy": "Responder antes del " },
+    "availability": {
+      "title": "Disponibilidad", "retry": "Intentar de nuevo", "loading": "Cargando", "loadFailed": "No se pudo cargar la disponibilidad. Comprueba la conexión e inténtalo de nuevo.", "accessDenied": "No tienes permiso para gestionar la disponibilidad.",
+      "day": { "sun": "dom", "mon": "lun", "tue": "mar", "wed": "mié", "thu": "jue", "fri": "vie", "sat": "sáb" },
+      "rules": { "title": "Horario semanal", "empty": "Aún no hay disponibilidad recurrente configurada.", "delete": "Quitar", "locationId": "ID de ubicación", "dayOfWeek": "Día", "startLocalTime": "Hora de inicio", "endLocalTime": "Hora de fin", "timezone": "Zona horaria", "add": "Añadir", "locationRequired": "La ubicación es obligatoria.", "createFailed": "No se pudo crear la regla.", "updateFailed": "No se pudo actualizar la regla.", "deleteFailed": "No se pudo quitar la regla." },
+      "exceptions": { "title": "Ausencias y disponibilidad adicional", "empty": "No hay excepciones configuradas.", "delete": "Quitar", "startAt": "Inicio", "endAt": "Fin", "typeLabel": "Tipo", "type": { "BLOCKED": "Bloqueado", "AVAILABLE_OVERRIDE": "Disponibilidad adicional" }, "reason": "Motivo (opcional)", "add": "Añadir", "fieldsRequired": "Se requieren la ubicación, la hora de inicio y la hora de fin.", "createFailed": "No se pudo crear la excepción.", "updateFailed": "No se pudo actualizar la excepción.", "deleteFailed": "No se pudo quitar la excepción.", "conflictWarning": "{count, plural, one {Hay # reserva confirmada en este periodo.} other {Hay # reservas confirmadas en este periodo.}} Bloquearlo no las cancelará ni las cambiará.", "conflictCancel": "Cancelar", "conflictProceed": "Bloquear de todos modos" },
+      "actions": { "edit": "Editar", "cancel": "Cancelar", "save": "Guardar cambios" }
+    },
+    "bookings": {
+      "title": "Reservas", "retry": "Intentar de nuevo", "loading": "Cargando reservas", "empty": "No se encontraron reservas.", "loadFailed": "No se pudieron cargar las reservas. Comprueba la conexión e inténtalo de nuevo.", "accessDenied": "No tienes permiso para ver estas reservas.",
+      "filter": { "today": "Hoy", "upcoming": "Próximas", "past": "Anteriores", "cancelled": "Canceladas", "requests": "Solicitudes" },
+      "status": { "HOLD": "Retenida", "PENDING_CONFIRMATION": "Pendiente de confirmación", "CONFIRMED": "Confirmada", "CHECKED_IN": "Registrada", "IN_PROGRESS": "En curso", "COMPLETED": "Completada", "CANCELLED_BY_USER": "Cancelada por el cliente", "CANCELLED_BY_PROVIDER": "Cancelada por el proveedor", "NO_SHOW": "No se presentó", "REQUESTED": "Solicitada", "AWAITING_PAYMENT": "Pendiente de pago", "REJECTED": "Rechazada", "EXPIRED": "Caducada", "RESCHEDULED": "Reprogramada" },
+      "paymentStatus": { "NOT_REQUIRED": "No requerido", "PENDING": "Pendiente", "AUTHORIZED": "Autorizado", "PAID": "Pagado", "FAILED": "Fallido", "REFUND_PENDING": "Reembolso pendiente", "REFUNDED": "Reembolsado" }
+    },
+    "bookingDetail": {
+      "title": "Reserva", "pet": "Mascota", "owner": "Responsable", "service": "Servicio", "location": "Ubicación", "dateTime": "Fecha y hora", "reason": "Motivo", "cancelledReason": "Motivo de cancelación", "completionNote": "Nota de finalización", "respondBy": "Responder antes del",
+      "access": { "title": "Acceso a los datos de la mascota", "state": { "GRANTED": "Acceso concedido", "NO_GRANT": "Sin acceso", "EXPIRED": "Acceso caducado", "REVOKED": "Acceso revocado" }, "scope": "Alcance", "startsAt": "Inicio", "expiresAt": "Caduca", "openClinicalRecord": "Abrir historia clínica", "scopePreset": { "MINIMAL_VET_CONTEXT": "Información mínima", "HEALTH_BASICS": "Datos básicos de salud", "SELECTED_HEALTH_DATA": "Datos de salud seleccionados", "GROOMING_BASIC": "Perfil de cuidados (peluquería básica)", "TRAINING_BASIC": "Perfil de cuidados (adiestramiento básico)", "WALKING_BASIC": "Perfil de cuidados (paseos básicos)", "SITTING_BASIC": "Perfil de cuidados (cuidado básico)", "BOARDING_BASIC": "Perfil de cuidados y vacunas (alojamiento)", "TAXI_BASIC": "Perfil de cuidados (transporte de mascotas)" } },
+      "careProfile": { "title": "Contexto de cuidados", "temperament": "Temperamento", "feeding": "Rutina de alimentación", "specialInstructions": "Instrucciones especiales" },
+      "health": { "title": "Contexto de salud", "allergyState": "Alergias", "vaccinationStatus": "Vacunación" },
+      "actions": { "confirm": "Confirmar", "confirmed": "Confirmada", "acceptRequest": "Aceptar solicitud", "decline": "Rechazar solicitud", "markNoShow": "Marcar como ausencia", "startClinicalVisit": "Iniciar visita clínica", "checkIn": "Registrar llegada", "start": "Iniciar", "complete": "Completar", "cancel": "Cancelar reserva" },
+      "completionNoteLabel": "Nota de finalización visible para la persona responsable (opcional)", "completionNotePlaceholder": "Por ejemplo: se completó el aseo de Luna.",
+      "followUps": { "legend": "Seguimientos (solo si hacen falta)", "description": "Cada seguimiento aparecerá en el Centro de cuidados de la persona responsable como creado por el proveedor. No se programa nada automáticamente.", "typeLabel": "Tipo de seguimiento", "type": { "FOLLOW_UP": "Visita de seguimiento", "VACCINATION": "Próxima vacuna", "MEDICATION": "Medicamento", "MONITORING": "Análisis o revisión", "OTHER": "Otro" }, "titleLabel": "Título del seguimiento", "dateLabel": "Fecha de vencimiento", "remove": "Quitar seguimiento", "add": "Añadir seguimiento" },
+      "rejectDialog": { "title": "Rechazar solicitud de reserva", "reasonLabel": "Motivo (se mostrará al cliente)" },
+      "notes": { "title": "Notas del proveedor", "internalOnly": "Solo para uso interno; nunca se muestran al cliente.", "label": "Añadir una nota", "placeholder": "Escribe una nota", "add": "Añadir", "empty": "Aún no hay notas." },
+      "cancelDialog": { "title": "¿Cancelar esta reserva?", "body": "Se avisará a la persona responsable y se revocará cualquier acceso temporal concedido por esta reserva.", "reasonLabel": "Motivo (opcional)", "reasonPlaceholder": "¿Por qué se cancela esta reserva?", "confirm": "Sí, cancelar la reserva" },
+      "backToQueue": "Volver a las reservas", "errors": { "PROVIDER_ACCESS_DENIED": "No tienes acceso a esta reserva.", "PROVIDER_NOT_VERIFIED": "La organización debe verificarse antes de realizar esta acción.", "BOOKING_NOT_FOUND": "No se encontró la reserva.", "INVALID_BOOKING_TRANSITION": "La reserva no puede cambiar a ese estado ahora.", "BOOKING_NOT_CANCELLABLE": "Esta reserva ya no se puede cancelar.", "generic": "No se pudo completar la acción. Inténtalo de nuevo." }
+    }
+  },
+  "partnerVerification": { "activationRequired": "La administración debe verificar tu organización antes de que puedas gestionar servicios o crear y activar ofertas. Puedes consultar la verificación y los pedidos existentes.", "portalTitle": "Verificación de socios", "refreshAccess": "Recargar la página para comprobar la aprobación" }
 }

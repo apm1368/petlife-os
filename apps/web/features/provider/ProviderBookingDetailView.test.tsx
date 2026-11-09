@@ -136,4 +136,33 @@ describe("ProviderBookingDetailView", () => {
 
     await waitFor(() => expect(providerOsService.cancelBooking).toHaveBeenCalledWith("booking-1", "Staff unavailable"));
   });
+
+  it.each([
+    ["de", "Buchung", "Zugriff auf Haustierdaten", "Kein Zugriff", "Ja, Buchung stornieren"],
+    ["es", "Reserva", "Acceso a los datos de la mascota", "Sin acceso", "Sí, cancelar la reserva"],
+  ] as const)("renders the full booking detail and cancel dialog in %s without translating source notes", async (locale, title, accessTitle, noAccess, confirmCancel) => {
+    const detail = baseDetail({ booking: { ...baseDetail().booking, reasonForVisit: "Owner-authored visit reason" } });
+    vi.mocked(providerOsService.getBooking).mockResolvedValue(detail);
+    vi.mocked(providerOsService.cancelBooking).mockResolvedValue(detail);
+    const view = renderWithIntl(<ProviderBookingDetailView bookingId="booking-1" />, locale);
+
+    await waitFor(() => expect(screen.getByRole("heading", { name: title })).toBeTruthy());
+    expect(screen.getByText(accessTitle)).toBeTruthy();
+    expect(screen.getByText(noAccess)).toBeTruthy();
+    expect(screen.getByText("Owner-authored visit reason")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: locale === "de" ? "Buchung stornieren" : "Cancelar reserva" }));
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(screen.getByRole("button", { name: confirmCancel })).toBeTruthy();
+    expect(view.container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it("uses the translated generic action error rather than exposing raw API text", async () => {
+    vi.mocked(providerOsService.getBooking).mockResolvedValue(baseDetail());
+    vi.mocked(providerOsService.cancelBooking).mockRejectedValue(new Error("raw backend English error"));
+    renderWithIntl(<ProviderBookingDetailView bookingId="booking-1" />, "es");
+    await waitFor(() => expect(screen.getByRole("button", { name: "Cancelar reserva" })).toBeTruthy());
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar reserva" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sí, cancelar la reserva" }));
+    await waitFor(() => expect(screen.getByText("No se pudo completar la acción. Inténtalo de nuevo.")).toBeTruthy());
+  });
 });
