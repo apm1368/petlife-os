@@ -2,6 +2,16 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
+## Batch 3 — central catalog, seller and shop — 2026-11-09 18:25 UTC
+
+- Current `main` is `5abddaa84d7b91df9b1eb501264c3a4be886354e`; production `/api/health/version` reports the same SHA and `/api/health/ready` is healthy. The `feat/shop-seller` PR #103 is updated to `b5ce963e48ae02f6b59dcdf23096af85682db127`, base `main`, mergeable; exact-head CI run `42673343698` is in progress and no review is recorded. Do not reuse its older green run or call it merged/live.
+- PR #103 completes admin product galleries and adds regression coverage for 3-image publication, scoped upload, audit, concurrent upload limits, and deactivation/audit if a published product loses a required image. It also adds explicit `ProductCategory.isDemoRecord` provenance, backfills only the reserved `qa-b4-*` seed prefix, sets the flag in QA seed creation, and excludes marked categories from public discovery. The new category migration is additive.
+- Read-only production checks: `/api/shop/products?page=1&pageSize=10` returned `total: 0`; `/api/shop/categories` returned 13 entries, including 9 `qa-b4-*` QA categories. Thus no demo products were observed, but real-product visibility/purchase is unverified and QA category labels remain visible until PR #103 is released. Do not claim a useful live catalog.
+- Local checks on the PR worktree: Prisma schema validation and `git diff --check` passed. API typecheck could not run because generated Prisma/workspace artifacts are absent in this worktree; the error was repository-wide. Database E2E was not run locally because disk is 277 MiB free and the persistent Compose Postgres volume was left untouched. Exact-head hosted CI is pending and must decide migration, typecheck, unit/E2E and build status.
+- The existing shop design-review evidence contains fa/en desktop/mobile screenshots and prior controlled-browser checks; it is not new visual evidence for the admin gallery changes. Admin commerce is fa/en in the reviewed component; complete de/es whole-page coverage remains PARTIAL. No new screenshots were captured in this batch. The landing HERO was not touched.
+- Digikala remains disabled pending verified official source access and content/image-use rights. No source prices/stock, fake products, offers or providers were imported. Current public shop has no legitimate live seller offer to validate. Existing seller request/offer moderation and commerce flows remain on `main`; the previous commerce QA record is historical and not evidence for this revision.
+- No payment worktree was visible; no payment logic or active database volume was changed. Remaining release actions: finish exact-head CI, inspect latest checks/review/policy, merge only if GitHub permits the normal path, verify the deployed SHA and rerun public category/product API checks. Keep production shop/catalog PARTIAL until a real reviewed product and offer exist and are safely verified.
+
 ## Final Batch 2 release verification — 2026-11-09 17:44 UTC
 
 - `main` and production are both `5ea9545345d0177009d689a412ce38afccbaeaff` (PR #106). Main CI/deploy run [42663826739](https://github.com/apm1368/petlife-os/actions/runs/42663826739) succeeded; production deployment is `github-42663826739-1`. `/api/health/ready` reports database and Redis up.
