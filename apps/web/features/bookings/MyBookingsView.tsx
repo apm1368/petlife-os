@@ -9,26 +9,46 @@ import type { BookingDto, PetDto } from "@petlife/types";
 import { formatDateTimeRange } from "@/lib/date/appointment-date";
 import { bookingsService, type WaitlistEntry } from "@/services/bookings.service";
 import { householdsService } from "@/services/households.service";
-import { bookingStatusLabel, bookingStatusTone, categoryLabel } from "@/features/discovery/labels";
+import { bookingStatusTone } from "@/features/discovery/labels";
 import { BookingFrame } from "./BookingFrame";
 
 type Tab = "upcoming" | "requested" | "past" | "cancelled" | "waitlist";
-const TABS: { key: Tab; fa: string; en: string }[] = [
-  { key: "upcoming", fa: "پیش رو", en: "Upcoming" },
-  { key: "requested", fa: "درخواست‌ها و پرداخت", en: "Requested" },
-  { key: "past", fa: "انجام‌شده", en: "Completed" },
-  { key: "cancelled", fa: "لغو و منقضی", en: "Cancelled" },
-  { key: "waitlist", fa: "لیست انتظار", en: "Waitlist" },
-];
+type Locale = "fa" | "en" | "de" | "es";
+const TAB_KEYS: Tab[] = ["upcoming", "requested", "past", "cancelled", "waitlist"];
+
+const COPY = {
+  fa: { title: "نوبت‌های من", bookService: "رزرو خدمت تازه", tabsLabel: "دسته نوبت‌ها", pet: "حیوان", allPets: "همه", tabs: { upcoming: "پیش رو", requested: "درخواست‌ها و پرداخت", past: "انجام‌شده", cancelled: "لغو و منقضی", waitlist: "لیست انتظار" }, loadError: "نوبت‌ها بارگیری نشد", retry: "تلاش دوباره", loading: "در حال بارگیری", noWaitlist: "در هیچ لیست انتظاری نیستید", waitlistHelp: "وقتی روزی پر است، می‌توانید از صفحه رزرو به لیست انتظار بپیوندید.", openedNotHeld: "زمانی آزاد شد؛ برای رزرو اقدام کنید (برایتان نگه داشته نشده است).", waiting: "در انتظار", booked: "رزرو شد", closed: "بسته شد", book: "رزرو", leaveWaitlist: "خروج از لیست", noBookings: "نوبتی در این بخش نیست", findService: "پیدا کردن خدمت" },
+  en: { title: "My bookings", bookService: "Book a service", tabsLabel: "Booking tabs", pet: "Pet", allPets: "All pets", tabs: { upcoming: "Upcoming", requested: "Requested", past: "Completed", cancelled: "Cancelled", waitlist: "Waitlist" }, loadError: "Bookings could not load", retry: "Retry", loading: "Loading", noWaitlist: "You are not on any waitlist", waitlistHelp: "When a day is full you can join its waitlist from the booking page.", openedNotHeld: "A time opened — book it (it is not held for you).", waiting: "Waiting", booked: "Booked", closed: "Closed", book: "Book", leaveWaitlist: "Leave", noBookings: "No bookings here", findService: "Find a service", bookingTabs: { requested: "Requested", completed: "Completed", cancelled: "Cancelled" } },
+  de: { title: "Meine Buchungen", bookService: "Service buchen", tabsLabel: "Buchungsbereiche", pet: "Tier", allPets: "Alle Tiere", tabs: { upcoming: "Bevorstehend", requested: "Angefragt", past: "Abgeschlossen", cancelled: "Storniert", waitlist: "Warteliste" }, loadError: "Buchungen konnten nicht geladen werden", retry: "Erneut versuchen", loading: "Wird geladen", noWaitlist: "Du stehst auf keiner Warteliste", waitlistHelp: "Wenn ein Tag ausgebucht ist, kannst du dich auf der Buchungsseite auf die Warteliste setzen lassen.", openedNotHeld: "Ein Termin ist frei geworden – buche ihn (er wird nicht für dich reserviert).", waiting: "Wartend", booked: "Gebucht", closed: "Geschlossen", book: "Buchen", leaveWaitlist: "Verlassen", noBookings: "Keine Buchungen in diesem Bereich", findService: "Service suchen", bookingTabs: { requested: "Angefragt", completed: "Abgeschlossen", cancelled: "Storniert" } },
+  es: { title: "Mis reservas", bookService: "Reservar un servicio", tabsLabel: "Secciones de reservas", pet: "Mascota", allPets: "Todas las mascotas", tabs: { upcoming: "Próximas", requested: "Solicitadas", past: "Completadas", cancelled: "Canceladas", waitlist: "Lista de espera" }, loadError: "No se pudieron cargar las reservas", retry: "Reintentar", noWaitlist: "No estás en ninguna lista de espera", waitlistHelp: "Cuando un día está completo, puedes unirte a la lista de espera desde la página de reserva.", openedNotHeld: "Se ha liberado una hora: resérvala (no queda apartada para ti).", waiting: "En espera", booked: "Reservada", closed: "Cerrada", book: "Reservar", leaveWaitlist: "Salir", noBookings: "No hay reservas en esta sección", findService: "Buscar un servicio", bookingTabs: { requested: "Solicitadas", completed: "Completadas", cancelled: "Canceladas" }, loading: "Cargando" },
+} as const;
+
+const CATEGORY_COPY: Record<string, Record<Locale, string>> = {
+  VET: { fa: "دامپزشکی", en: "Veterinary", de: "Tiermedizin", es: "Veterinaria" }, GROOMING: { fa: "آرایش و شست‌وشو", en: "Grooming", de: "Fellpflege", es: "Peluquería" },
+  TRAINING: { fa: "آموزش", en: "Training", de: "Training", es: "Adiestramiento" }, WALKING: { fa: "پیاده‌روی", en: "Dog walking", de: "Gassi-Service", es: "Paseo de perros" },
+  SITTING: { fa: "نگهداری در منزل", en: "Pet sitting", de: "Betreuung zu Hause", es: "Cuidado a domicilio" }, BOARDING: { fa: "پانسیون", en: "Boarding", de: "Tierpension", es: "Residencia" },
+  PET_TAXI: { fa: "تاکسی حیوانات", en: "Pet taxi", de: "Tiertransport", es: "Taxi para mascotas" }, OTHER: { fa: "سایر خدمات", en: "Other service", de: "Weiterer Service", es: "Otro servicio" },
+};
+const OTHER_CATEGORY: Record<Locale, string> = { fa: "سایر خدمات", en: "Other service", de: "Weiterer Service", es: "Otro servicio" };
+const STATUS_COPY: Record<string, Record<Locale, string>> = {
+  HOLD: { fa: "در حال رزرو", en: "Holding", de: "Wird reserviert", es: "En reserva" }, PENDING_CONFIRMATION: { fa: "در انتظار تأیید", en: "Pending confirmation", de: "Wartet auf Bestätigung", es: "Pendiente de confirmación" },
+  REQUESTED: { fa: "درخواست ارسال شد", en: "Requested", de: "Angefragt", es: "Solicitada" }, AWAITING_PAYMENT: { fa: "در انتظار پرداخت", en: "Awaiting payment", de: "Zahlung ausstehend", es: "Pendiente de pago" },
+  REJECTED: { fa: "پذیرفته نشد", en: "Declined", de: "Abgelehnt", es: "Rechazada" }, EXPIRED: { fa: "منقضی شد", en: "Expired", de: "Abgelaufen", es: "Caducada" }, RESCHEDULED: { fa: "منتقل شد", en: "Rescheduled", de: "Verschoben", es: "Reprogramada" },
+  CONFIRMED: { fa: "قطعی", en: "Confirmed", de: "Bestätigt", es: "Confirmada" }, CHECKED_IN: { fa: "پذیرش شد", en: "Checked in", de: "Eingecheckt", es: "Registrada" }, IN_PROGRESS: { fa: "در حال انجام", en: "In progress", de: "In Bearbeitung", es: "En curso" }, COMPLETED: { fa: "انجام شد", en: "Completed", de: "Abgeschlossen", es: "Completada" },
+  CANCELLED_BY_USER: { fa: "لغو توسط شما", en: "Cancelled by you", de: "Von dir storniert", es: "Cancelada por ti" }, CANCELLED_BY_PROVIDER: { fa: "لغو توسط ارائه‌دهنده", en: "Cancelled by provider", de: "Vom Anbieter storniert", es: "Cancelada por el proveedor" }, NO_SHOW: { fa: "عدم حضور", en: "No-show", de: "Nicht erschienen", es: "No presentada" },
+};
+const waitlistCopy = (status: string, copy: (typeof COPY)[Locale]) => status === "NOTIFIED" ? copy.openedNotHeld : status === "ACTIVE" ? copy.waiting : status === "BOOKED" ? copy.booked : copy.closed;
+const statusLabel = (status: string, locale: Locale) => STATUS_COPY[status]?.[locale] ?? ({ fa: "وضعیت به‌روزرسانی شد", en: "Status updated", de: "Status aktualisiert", es: "Estado actualizado" } as const)[locale];
+const categoryLabel = (category: string, locale: Locale) => CATEGORY_COPY[category]?.[locale] ?? OTHER_CATEGORY[locale];
 
 /** One list for every category — vet and marketplace bookings are the same Booking entity. */
 export function MyBookingsView() {
-  const locale = useLocale() as "fa" | "en";
-  const fa = locale === "fa";
+  const locale = useLocale() as Locale;
+  const c = COPY[locale];
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
-  const tab = (TABS.find((t) => t.key === params.get("tab"))?.key ?? "upcoming") as Tab;
+  const tab = (TAB_KEYS.find((key) => key === params.get("tab")) ?? "upcoming") as Tab;
   const petId = params.get("petId") ?? "";
   const [bookings, setBookings] = useState<BookingDto[] | null>(null);
   const [waitlist, setWaitlist] = useState<WaitlistEntry[] | null>(null);
@@ -74,21 +94,21 @@ export function MyBookingsView() {
     <BookingFrame>
     <div className="flex flex-col gap-5">
       <header className="flex flex-wrap items-end justify-between gap-3">
-        <h1 className="text-page-title text-text-primary">{fa ? "نوبت‌های من" : "My bookings"}</h1>
-        <Link href={`/${locale}/services`} className="text-sm font-bold text-brand-natural">{fa ? "رزرو خدمت تازه" : "Book a service"}</Link>
+        <h1 className="text-page-title text-text-primary">{c.title}</h1>
+        <Link href={`/${locale}/services`} className="text-sm font-bold text-brand-natural">{c.bookService}</Link>
       </header>
-      <nav aria-label={fa ? "دسته نوبت‌ها" : "Booking tabs"} className="-mx-1 flex gap-2 overflow-x-auto border-b border-border-subtle pb-2">
-        {TABS.map((t) => (
-          <button key={t.key} type="button" aria-pressed={tab === t.key} onClick={() => setParam({ tab: t.key })} className={`whitespace-nowrap rounded-md px-3 py-2 text-sm ${tab === t.key ? "bg-brand-solid text-on-brand" : "text-text-secondary"}`}>
-            {fa ? t.fa : t.en}
+      <nav aria-label={c.tabsLabel} className="-mx-1 flex gap-2 overflow-x-auto border-b border-border-subtle pb-2">
+        {TAB_KEYS.map((key) => (
+          <button key={key} type="button" aria-pressed={tab === key} onClick={() => setParam({ tab: key })} className={`whitespace-nowrap rounded-md px-3 py-2 text-sm ${tab === key ? "bg-brand-solid text-on-brand" : "text-text-secondary"}`}>
+            {c.tabs[key]}
           </button>
         ))}
       </nav>
       {tab !== "waitlist" && pets.length > 1 ? (
         <label className="flex max-w-xs flex-col gap-1 text-sm">
-          <span className="text-text-secondary">{fa ? "حیوان" : "Pet"}</span>
+          <span className="text-text-secondary">{c.pet}</span>
           <select className="rounded border border-border-subtle bg-surface-base p-2" value={petId} onChange={(e) => setParam({ petId: e.target.value || undefined })}>
-            <option value="">{fa ? "همه" : "All pets"}</option>
+            <option value="">{c.allPets}</option>
             {pets.map((p) => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
@@ -96,13 +116,13 @@ export function MyBookingsView() {
         </label>
       ) : null}
 
-      {error ? <ErrorRecovery title={fa ? "نوبت‌ها بارگیری نشد" : "Bookings could not load"} message="" retryLabel={fa ? "تلاش دوباره" : "Retry"} onRetry={load} /> : null}
+      {error ? <ErrorRecovery title={c.loadError} message="" retryLabel={c.retry} onRetry={load} /> : null}
 
       {tab === "waitlist" ? (
         !waitlist && !error ? (
-          <Skeleton className="h-40 w-full" />
+          <Skeleton className="h-40 w-full" aria-label={c.loading} />
         ) : waitlist?.length === 0 ? (
-          <EmptyState title={fa ? "در هیچ لیست انتظاری نیستید" : "You are not on any waitlist"} description={fa ? "وقتی روزی پر است، می‌توانید از صفحه رزرو به لیست انتظار بپیوندید." : "When a day is full you can join its waitlist from the booking page."} />
+          <EmptyState title={c.noWaitlist} description={c.waitlistHelp} />
         ) : (
           <ul className="divide-y divide-border-subtle">
             {waitlist?.map((w) => (
@@ -110,16 +130,16 @@ export function MyBookingsView() {
                 <div>
                   <p className="font-bold">{w.serviceName} · {w.providerName}</p>
                   <p className="text-sm text-text-secondary">{w.petName} · {formatDateTimeRange(w.windowStart, w.windowEnd, locale, "Asia/Tehran")}</p>
-                  <p className="text-sm">{w.status === "NOTIFIED" ? (fa ? "زمانی آزاد شد؛ برای رزرو اقدام کنید (برایتان نگه داشته نشده است)." : "A time opened — book it (it is not held for you).") : w.status === "ACTIVE" ? (fa ? "در انتظار" : "Waiting") : w.status === "BOOKED" ? (fa ? "رزرو شد" : "Booked") : fa ? "بسته شد" : "Closed"}</p>
+                  <p className="text-sm">{waitlistCopy(w.status, c)}</p>
                 </div>
                 <div className="flex gap-2">
                   {w.status === "NOTIFIED" ? (
                     <Link className="rounded-md bg-brand-solid px-3 py-2 text-sm text-on-brand" href={`/${locale}/providers/${w.providerOrganizationId}/book?serviceId=${w.serviceId}${w.variantId ? `&variantId=${w.variantId}` : ""}&date=${w.windowStart.slice(0, 10)}`}>
-                      {fa ? "رزرو" : "Book"}
+                      {c.book}
                     </Link>
                   ) : null}
                   {w.status === "ACTIVE" || w.status === "NOTIFIED" ? (
-                    <Button variant="ghost" size="sm" onClick={() => void leaveWaitlist(w.id)}>{fa ? "خروج از لیست" : "Leave"}</Button>
+                    <Button variant="ghost" size="sm" onClick={() => void leaveWaitlist(w.id)}>{c.leaveWaitlist}</Button>
                   ) : null}
                 </div>
               </li>
@@ -127,11 +147,11 @@ export function MyBookingsView() {
           </ul>
         )
       ) : !error && !bookings ? (
-        <Skeleton className="h-48 w-full" aria-label={fa ? "در حال بارگیری" : "Loading"} />
+        <Skeleton className="h-48 w-full" aria-label={c.loading} />
       ) : bookings?.length === 0 ? (
         <EmptyState
-          title={fa ? "نوبتی در این بخش نیست" : "No bookings here"}
-          actionLabel={tab === "upcoming" ? (fa ? "پیدا کردن خدمت" : "Find a service") : undefined}
+          title={c.noBookings}
+          actionLabel={tab === "upcoming" ? c.findService : undefined}
           onAction={tab === "upcoming" ? () => router.push(`/${locale}/services`) : undefined}
         />
       ) : (
@@ -140,11 +160,11 @@ export function MyBookingsView() {
             <li key={b.id}>
               <Link href={`/${locale}/bookings/${b.id}`} className="flex flex-wrap items-center justify-between gap-3 py-4">
                 <div>
-                  <p className="font-bold text-text-primary">{b.serviceName ?? b.service?.name ?? categoryLabel(b.category, fa)}{b.variantName ? ` — ${b.variantName}` : ""}</p>
+                  <p className="font-bold text-text-primary">{b.serviceName ?? b.service?.name ?? categoryLabel(b.category, locale)}{b.variantName ? ` — ${b.variantName}` : ""}</p>
                   <p className="text-sm text-text-secondary">{b.provider?.name}{b.bookingNumber ? <> · <span dir="ltr">{b.bookingNumber}</span></> : null}</p>
                   <p className="text-sm text-text-secondary">{formatDateTimeRange(b.startAt, b.endAt, locale, b.timezone)}</p>
                 </div>
-                <StatusLabel tone={bookingStatusTone(b.bookingStatus)}>{bookingStatusLabel(b.bookingStatus, fa)}</StatusLabel>
+                <StatusLabel tone={bookingStatusTone(b.bookingStatus)}>{statusLabel(b.bookingStatus, locale)}</StatusLabel>
               </Link>
             </li>
           ))}
