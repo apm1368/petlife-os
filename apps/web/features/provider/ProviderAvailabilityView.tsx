@@ -8,7 +8,6 @@ import type { ProviderAvailabilityExceptionDto, ProviderAvailabilityRuleDto } fr
 import { ApiError } from "@/lib/api/client";
 import { providerOsService } from "@/services/provider-os.service";
 import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
-import { apiErrorText } from "@/lib/errors/api-error-text";
 
 const DAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
@@ -21,16 +20,16 @@ const DAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
  */
 export function ProviderAvailabilityView() {
   const t = useTranslations("provider.availability");
-  const actions = useTranslations("rollout.records");
+  const actions = useTranslations("provider.availability.actions");
   const [editingRule, setEditingRule] = useState<string | null>(null);
   const [editingException, setEditingException] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const tDay = useTranslations("provider.availability.day");
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as "fa" | "en" | "de" | "es";
 
   const [rules, setRules] = useState<ProviderAvailabilityRuleDto[] | null>(null);
   const [exceptions, setExceptions] = useState<ProviderAvailabilityExceptionDto[] | null>(null);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [locationId, setLocationId] = useState("");
   const [dayOfWeek, setDayOfWeek] = useState("1");
@@ -47,15 +46,15 @@ export function ProviderAvailabilityView() {
   const [exceptionError, setExceptionError] = useState<string | null>(null);
 
   async function load() {
-    setError(false);
+    setError(null);
     try {
       const [ruleRows, exceptionRows] = await Promise.all([providerOsService.listAvailabilityRules(), providerOsService.listAvailabilityExceptions()]);
       setRules(ruleRows);
       setExceptions(exceptionRows);
       if (!locationId && ruleRows[0]) setLocationId(ruleRows[0].locationId);
       if (ruleRows[0]) setTimezone(ruleRows[0].timezone);
-    } catch {
-      setError(true);
+    } catch (err) {
+      setError(err instanceof ApiError && err.status === 403 ? t("accessDenied") : t("loadFailed"));
     }
   }
 
@@ -77,13 +76,13 @@ export function ProviderAvailabilityView() {
       else await providerOsService.createAvailabilityRule(input);
       setEditingRule(null);
       await load();
-    } catch (err) {
-      setRuleError(apiErrorText(err, locale, t("rules.createFailed")));
+    } catch {
+      setRuleError(t(editingRule ? "rules.updateFailed" : "rules.createFailed"));
     } finally { setBusy(false); }
   }
 
   async function deleteRule(id: string) {
-    try { setBusy(true); await providerOsService.deleteAvailabilityRule(id); await load(); } catch (err) { setRuleError(apiErrorText(err, locale, t("rules.createFailed"))); } finally { setBusy(false); }
+    try { setBusy(true); await providerOsService.deleteAvailabilityRule(id); await load(); } catch { setRuleError(t("rules.deleteFailed")); } finally { setBusy(false); }
   }
 
   async function createException(acknowledgeConflict = false) {
@@ -115,15 +114,15 @@ export function ProviderAvailabilityView() {
         setConflictWarning({ count: Number(err.details?.count ?? 0) });
         return;
       }
-      setExceptionError(apiErrorText(err, locale, t("exceptions.createFailed")));
+      setExceptionError(t(editingException ? "exceptions.updateFailed" : "exceptions.createFailed"));
     } finally { setBusy(false); }
   }
 
   async function deleteException(id: string) {
-    try { setBusy(true); await providerOsService.deleteAvailabilityException(id); await load(); } catch (err) { setExceptionError(apiErrorText(err, locale, t("exceptions.createFailed"))); } finally { setBusy(false); }
+    try { setBusy(true); await providerOsService.deleteAvailabilityException(id); await load(); } catch { setExceptionError(t("exceptions.deleteFailed")); } finally { setBusy(false); }
   }
 
-  if (error) return <ErrorRecovery title={t("title")} message="" retryLabel={t("retry")} onRetry={load} />;
+  if (error) return <ErrorRecovery title={t("title")} message={error} retryLabel={t("retry")} onRetry={load} />;
   if (!rules || !exceptions) return <Skeleton className="h-64 w-full" aria-label={t("loading")} />;
 
   return (
