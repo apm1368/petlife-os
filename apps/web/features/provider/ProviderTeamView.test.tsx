@@ -49,8 +49,8 @@ describe("ProviderTeamView", () => {
     const { container } = renderWithIntl(<ProviderTeamView />, locale);
     await waitFor(() => expect(screen.getByText("Dr. Sara Vet")).toBeTruthy());
     expect(screen.getByText(locale === "de" ? "Team" : "Equipo")).toBeTruthy();
-    expect(screen.getByText(locale === "de" ? "Angebotene Leistungen" : "Servicios que ofrece")).toBeTruthy();
-    expect(screen.getByLabelText(locale === "de" ? "Öffentliche Bezeichnung" : "Cargo público")).toBeTruthy();
+    expect(await screen.findByText(locale === "de" ? "Angebotene Leistungen" : "Servicios que ofrece")).toBeTruthy();
+    expect(await screen.findByLabelText(locale === "de" ? "Öffentliche Bezeichnung" : "Cargo público")).toBeTruthy();
     expect(screen.getByText("Original service name")).toBeTruthy();
     expect(screen.getByDisplayValue("Original provider bio")).toBeTruthy();
     expect(container.textContent).not.toMatch(/[\u0600-\u06ff]/);
