@@ -12,6 +12,14 @@ Point-in-time checkpoint only. Recheck GitHub, CI and production before each mer
 - Open PR snapshot: #132–#141 (localization stack) remain based on `feat/i18n-shop-customer` and GitHub reports `DIRTY`; #121, #102, #103, #105, #106, #108, #109 and #59 also report `DIRTY` against their current bases. Their previously green checks are stale and must not be reused. #209 is the only new QA PR in this checkpoint; its review/merge state is pending final-head CI and repository rules.
 - Exact next actions: monitor the newest CI for PR #209 and merge only if it is green and GitHub permits the normal path; retain QA statuses as partial/blocked where credentials, browser, catalog data, provider access or storage/CDN configuration are absent. Resolve stale/dirty product PRs one at a time from current `main`, starting with any independently reviewable, release-relevant fix, and rerun checks on retargeted heads. Do not claim project completion.
 
+## QA regression guard update — 2026-11-09 13:08 UTC
+
+- PR #209 now also includes a regression assertion in `apps/api/test/public-demo-records.e2e-spec.ts`: with `NODE_ENV=test` and `DEPLOYMENT_ENVIRONMENT=production`, the actual public shop list/detail must hide the marked demo product while keeping a reviewed product visible. This covers the deploy-contract branch of demo filtering through HTTP, in addition to the existing helper unit test.
+- The new test file passed focused ESLint locally (`pnpm --filter @petlife/api exec eslint test/public-demo-records.e2e-spec.ts --no-cache`); no local API E2E was attempted because only ~20 MiB of disk remained. Earlier PR #209 CI run 42620120425 passed on its prior head `efca3e2`; that is not a result for the new test commit `98bba21`.
+- At this checkpoint PR #209 head is `98bba21a7140beb089c5c6c873e998b43adb8831`, base `main`. Exact-head CI run 42622604014 is pending; do not merge or report it green until it completes and GitHub permits normal merge. No production code was changed by this PR.
+- The visible worktree list was rechecked: every listed worktree was clean; no payment-named worktree appeared. Preserve this as “not found in current workspace,” not “deleted.” No payment changes were touched.
+- Exact next action: monitor CI for the final PR head after this handoff update; if green and normal merge is allowed, merge #209, then verify the newly merged main/production SHAs. Keep remaining product work and live feature claims at PARTIAL/BLOCKED until their actual routes and user flows are verified.
+
 ## Latest verified checkpoint — 2026-11-09 11:31 UTC
 
 - #208 merged normally by squash at merge SHA `fbea505cf1e49fa60bcf7e40a7fb54499b5e2075`; #104 was closed as superseded without deleting its branch/history. #208 exact-head CI `42607738997` passed lint, design/visual, typecheck, migrations, tests, API E2E and production build. This integrates BK-19 review timing and three criteria into the localized customer booking detail.
