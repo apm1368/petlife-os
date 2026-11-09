@@ -2870,19 +2870,57 @@
     },
     "transactions": {
       "title": "Transactions",
+      "orderIdLabel": "Order ID",
       "orderIdPlaceholder": "Order ID",
       "lookup": "Look up",
       "paymentIntents": "Payment intents",
       "ledgerEntries": "Ledger entries",
+      "paymentStatus": {
+        "REQUIRES_PAYMENT_METHOD": "Payment method required",
+        "PENDING": "Pending",
+        "AUTHORIZED": "Authorized",
+        "CAPTURED": "Captured",
+        "FAILED": "Failed",
+        "CANCELLED": "Cancelled"
+      },
+      "refundStatus": {
+        "REQUESTED": "Requested",
+        "PROCESSING": "Processing",
+        "SUCCEEDED": "Refunded",
+        "FAILED": "Failed",
+        "CANCELLED": "Cancelled"
+      },
+      "ledgerDirection": { "DEBIT": "Debit", "CREDIT": "Credit" },
+      "ledgerAccount": {
+        "CASH_GATEWAY_RECEIVABLE": "Gateway receivable",
+        "CUSTOMER_PAYMENT_CLEARING": "Customer payment clearing",
+        "SELLER_PAYABLE": "Seller payable",
+        "REFUND_PAYABLE": "Refund payable",
+        "PLATFORM_REVENUE": "Platform revenue"
+      },
+      "states": {
+        "lookupPrompt": "Enter an order ID to inspect its payment and ledger records.",
+        "loading": "Loading order financial records…",
+        "lookupFailedTitle": "Financial records unavailable",
+        "lookupFailed": "The order's financial records could not be loaded. Try again.",
+        "offline": "You are offline. Check your connection and try again.",
+        "accessDenied": "You do not have permission to view these financial records.",
+        "noPaymentIntents": "No payment intents are recorded for this order.",
+        "noLedgerEntries": "No ledger entries are recorded for this order.",
+        "actionFailed": "The refund request could not be completed. Try again.",
+        "actionDenied": "You do not have permission to perform this refund action.",
+        "unknownStatus": "Status unavailable",
+        "unknownAccount": "Account unavailable"
+      },
       "refund": {
         "title": "Request refund",
-        "amount": "Amount",
+        "amount": "Amount in Rial",
         "reason": "Reason",
         "submit": "Request",
         "approve": "Approve",
         "reject": "Reject",
         "execute": "Execute",
-        "status": {
+        "approvalStatus": {
           "REQUESTED": "Requested",
           "APPROVED": "Approved",
           "REJECTED": "Rejected",
