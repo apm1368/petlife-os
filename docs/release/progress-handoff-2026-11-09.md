@@ -2,6 +2,47 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
+## Dashboard Batch 1 — post-merge checkpoint, 2026-11-09 15:14 UTC
+
+- PR #219 (`feat(dashboard): show active household context`) merged normally by squash at `4a4623ef01bc01f34737ac748ed782ee4cb71876`. It builds on already-merged #153 dashboard localization and #210 shared dashboard patterns; it did not duplicate their work. The household label uses the existing overview read model and only renders with confirmed `canViewIdentity` permission.
+- PR-head CI [42638498352](https://github.com/apm1368/petlife-os/actions/runs/42638498352) passed. Post-merge main CI/deploy run [42641104811](https://github.com/apm1368/petlife-os/actions/runs/42641104811) had completed lint, design-system/visual, typecheck, migrations and tests; API E2E was still in progress at 15:14 UTC. Do not treat the pending API E2E/build/deploy as green.
+- Current `main`: `4a4623ef01bc01f34737ac748ed782ee4cb71876`. Production version still reported `ad71226127ddf2b6a98c38d443a78805a8a632de` (`github-42634490099-1`); readiness is HTTP 200 with database and Redis up. The new dashboard context is **MERGED_NOT_DEPLOYED**, not LIVE_VERIFIED.
+- Dashboard source: fa/en/de/es UI copy and formatting are implemented in the existing dashboard; the household chip is localized and permission-gated. User/source-created names remain source content; plan names may remain English where no translated source exists. Whole-product translation is not complete. Dashboard saved-preference navigation/refresh is not verified in an authenticated browser.
+- Visual verification is blocked: a fresh local Next capture attempt compiled the locale shell, but `/[locale]/home` did not respond after more than six minutes. The dev server was stopped after free space fell from ~568 MiB to ~466 MiB. No new screenshots exist for this SHA; prior screenshots are historical only. See [dashboard Batch 1 QA](../qa/dashboard-batch1-2026-11-09.md).
+- Production `GET /fa/home` returned 200 anonymously, which confirms route availability only and does not verify authenticated dashboard data. No customer record or mutating production request was used.
+- Next: monitor run 42641104811 through API E2E/build/deploy. If it succeeds, verify production `/api/health/version` equals `4a4623ef…` and readiness remains healthy. Then perform safe authenticated dashboard verification with a QA account/browser; until then retain PARTIAL / NOT LIVE_VERIFIED. Next page-family priority: account/household visual and localization verification.
+
+## Dashboard Batch 1 — production release verification, 2026-11-09 15:26 UTC
+
+- PR #219 is merged at `4a4623ef01bc01f34737ac748ed782ee4cb71876`. Post-merge run [42641104811](https://github.com/apm1368/petlife-os/actions/runs/42641104811) succeeded for lint, design-system/visual checks, typecheck, migrations, unit tests, API E2E, production build and the authorized SSH deployment.
+- Production `/api/health/version` matches that SHA and reports `github-42641104811-1` (`production`); `/api/health/ready` returns 200 with database and Redis up. Anonymous `/fa/home` returns 200, but is not authenticated dashboard evidence.
+- The change is **MERGED_AND_DEPLOYED**, while the member dashboard overall remains **PARTIAL / NOT LIVE_VERIFIED**: no authenticated QA member session was available to verify actual household context, personal dashboard data, saved preference through navigation/refresh, or user-level permissions.
+- Fresh screenshots were not captured. Local Next dev compiled the locale shell but did not return the dashboard route after six minutes; stopped to preserve disk. Available space was about 466 MiB at stop. Existing screenshots are historical only. Details: [dashboard Batch 1 QA](../qa/dashboard-batch1-2026-11-09.md).
+- Next action: use a controlled, non-customer QA member account and a working browser to capture fa RTL/LTR, mobile/desktop, light/dark and simplified-mode views, exercise saved-language navigation/refresh, then update this handoff. Next page-family priority remains account/household.
+
+## Dashboard context follow-up — 2026-11-09 14:48 UTC
+
+- Added a localized active-household label from the existing pet overview read model. It is rendered only when `canViewIdentity` is confirmed and the API supplies a household name; it adds no new API, household switch, or permission change. Commit `beccb7c4099c5b85ce942c1e7371b5c0c212ad00` is on `docs/dashboard-batch1-handoff`, based on `main` `ad712261…`.
+- Dashboard component tests now pass 27/27, including four locale labels, household display, and hidden context without identity permission. Navigation/shell/theme/simplified-display tests pass 32/32 in 5 files. Web typecheck, focused ESLint, and diff check passed. First test run failed because the new Persian key was missing; the key was added and the rerun passed.
+- A docs/QA handoff PR will carry this implementation. It is not merged, CI has not run on the branch, and no deploy is claimed. Main pipeline `42634490099` was still testing/building at last check; production version was still `54caf027…` at the earlier read.
+
+## Production / main recheck — 2026-11-09 14:48 UTC
+
+- Production has advanced to `b7d3d467d470790f842d5f37084d93a4e8f78e8b` (`github-42632542161-1`); `/api/health/ready` is healthy with DB and Redis up. This remains behind `main` at `ad71226127ddf2b6a98c38d443a78805a8a632de`.
+- Main run [42634490099](https://github.com/apm1368/petlife-os/actions/runs/42634490099): lint, design-system/visual, typecheck, migrations and unit tests passed; API E2E is still in progress and production build has not run yet. Continue monitoring; do not mark this release live.
+- QA evidence now records updated production version and the new dashboard context commit. The new feature/handoff branch has no hosted CI result yet.
+
+## Dashboard Batch 1 checkpoint — 2026-11-09 14:40 UTC
+
+- Current `origin/main`: `ad71226127ddf2b6a98c38d443a78805a8a632de` (#214). PR #153 is already merged at `d5599bd82047bd0b47dcc70c4cd6b25537a0a8b0`; dashboard localization was not duplicated. Dashboard visual/shared-pattern work is already merged by #210 at `a5c7a6b830130f3e8ad500b83742033345ca3727`.
+- Production `/api/health/ready` returned HTTP 200 with DB and Redis up. `/api/health/version` reports `54caf0278234dfb4119568d815b586f624c7cc75` (`github-42630751388-1`), behind current main.
+- Exact current-main pipeline/deploy run [42634490099](https://github.com/apm1368/petlife-os/actions/runs/42634490099) is still in progress. At this checkpoint lint, design-system contract/visual stories, typecheck and migrations passed; unit tests, API E2E and production build were still running. Do not mark pending steps or dashboard release as passed/live.
+- Fresh local validation at `ad712261…`: dashboard suite 22/22; member navigation, shell, theme, simplified mode and DesignRoot suites 39/39; focused dashboard ESLint, web typecheck and `git diff --check` passed. Details are recorded in [dashboard Batch 1 QA](../qa/dashboard-batch1-2026-11-09.md).
+- `docs/product/localization-rollout.md` continues to mark dashboard fa/en complete and de/es partial until authenticated browser rendering and saved-preference navigation/refresh are checked. No new dashboard translation implementation was needed.
+- Visual source inspection covered design reference boards 01/15 and the approved member-home target. Existing before/after images in `apps/web/design-review/member-glass/` are historical, not screenshots of this SHA. Fresh authenticated screenshots for light/dark, normal/simple, RTL/LTR and responsive viewports are **BLOCKED**: no authenticated browser session is available and workspace has only 74 MiB free. No production/local build was started. The 2027 visual direction also remains in tension with the older glass target; current app retains the approved glass personal frame while shared tokens and patterns remain in use.
+- Production `/fa/home` returned HTTP 200 anonymously, which does not prove authenticated dashboard behavior. `/fa/login` returned 404 and was not treated as the canonical sign-in path. No customer data, write action, real payment or landing HERO change occurred.
+- Next: monitor run 42634490099 through build/deploy. When complete, verify production SHA and health again. Dashboard remains `PARTIAL / NOT LIVE_VERIFIED` until the deployed SHA and authenticated browser behavior are checked. Do not launch a local browser build until storage capacity is safe.
+
 ## Latest verified checkpoint — 2026-11-09 11:31 UTC
 
 - #208 merged normally by squash at merge SHA `fbea505cf1e49fa60bcf7e40a7fb54499b5e2075`; #104 was closed as superseded without deleting its branch/history. #208 exact-head CI `42607738997` passed lint, design/visual, typecheck, migrations, tests, API E2E and production build. This integrates BK-19 review timing and three criteria into the localized customer booking detail.
