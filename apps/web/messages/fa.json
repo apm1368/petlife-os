@@ -821,6 +821,31 @@
       "calendarAdded": "به تقویم مراقبت شما اضافه شد.",
       "careAccessUntil": "دسترسی مراقبت تا {when} با ارائه‌دهنده به اشتراک گذاشته شده است.",
       "openCalendar": "باز کردن تقویم مراقبت"
+    },
+    "ui": {
+      "cancelFollowing": "لغو این و نوبت‌های بعدی",
+      "fullRefund": "بازگشت کامل: {amount}",
+      "partialRefund": "طبق قوانین، {percent}٪ یعنی {amount} بازگردانده می‌شود.",
+      "refundReview": "بازگشت وجه پس از بررسی مالی انجام می‌شود.",
+      "reasonOptional": "علت (اختیاری)",
+      "keepBooking": "منصرف شدم",
+      "bookingCancelled": "نوبت لغو شد.",
+      "chooseNewTime": "انتخاب زمان جدید",
+      "rescheduleHint": "نوبت فعلی تا وقتی زمان جدید قطعی نشده، حفظ می‌شود. مبلغ و قوانین تغییر نمی‌کند.",
+      "newDay": "روز جدید",
+      "noOpenTimes": "در این روز زمان آزادی نیست.",
+      "bookingRescheduled": "زمان نوبت تغییر کرد.",
+      "confirmNewTime": "تأیید زمان جدید",
+      "reviewThisBooking": "نظر شما درباره این نوبت",
+      "rating": "امتیاز",
+      "reviewText": "متن نظر",
+      "reviewHint": "تجربه‌تان را بنویسید؛ اطلاعات شخصی یا پزشکی ننویسید.",
+      "submitForReview": "ثبت برای بررسی",
+      "reviewAvailableAt": "ثبت نظر دو ساعت پس از پایان خدمت فعال می‌شود: {date}",
+      "timeliness": "به‌موقع بودن",
+      "careAndCommunication": "رفتار و ارتباط با حیوان",
+      "serviceQuality": "کیفیت خدمت",
+      "reviewSubmitted": "نظر شما ثبت شد و پس از بررسی منتشر می‌شود."
     }
   },
   "services": {

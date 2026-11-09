@@ -35,6 +35,7 @@ import type { RouteLocale } from "@/lib/i18n/config";
 
 const CANCELLABLE = new Set(["PENDING_CONFIRMATION", "REQUESTED", "AWAITING_PAYMENT", "CONFIRMED"]);
 const RECURRING_CATEGORIES = new Set(["WALKING", "TRAINING", "GROOMING"]);
+const PROVIDER_REVIEW_DELAY_MS = 2 * 60 * 60 * 1000;
 /**
  * Consumer booking detail — the canonical TRANSACTION detail: identity (number, status), the
  * frozen terms (price, deposit, policy, preparation), timeline, shared data, and only the actions
@@ -264,97 +265,39 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
         {s === "CONFIRMED" && RECURRING_CATEGORIES.has(booking.category) && !booking.bookingSeriesId && booking.paymentMode !== "FULL_PREPAYMENT" && booking.paymentMode !== "DEPOSIT" ? (
           <Button variant="ghost" isLoading={busy} onClick={() => void act(() => bookingsService.recur(booking.id, 4, 1), fa ? "نوبت‌های هفتگی ساخته شد؛ روزهای پر رد شدند." : t("ui.weeklyCreated"))}>{fa ? "تکرار هفتگی (۴ نوبت)" : t("ui.repeatWeekly")}</Button>
         ) : null}
-        {s === "COMPLETED" && !booking.review ? <Button onClick={() => setDialog("review")}>{fa ? "ثبت نظر" : t("ui.leaveReview")}</Button> : null}
+        {s === "COMPLETED" && !booking.review && reviewReady ? <Button onClick={() => setDialog("review")}>{fa ? "ثبت نظر" : t("ui.leaveReview")}</Button> : null}
         {["COMPLETED", "CANCELLED_BY_USER", "CANCELLED_BY_PROVIDER", "EXPIRED", "REJECTED", "NO_SHOW"].includes(s) ? <Link href={rebookHref} className="rounded-md border border-brand-natural px-4 py-2 text-sm font-bold text-brand-natural">{fa ? "رزرو دوباره" : t("ui.bookAgain")}</Link> : null}
         <Link href={`/${locale}/support/new?relatedEntityType=BOOKING&relatedEntityId=${booking.id}&category=BOOKING`} className="px-4 py-2 text-sm text-text-secondary underline">{fa ? "گزارش مشکل به پشتیبانی" : t("getSupport")}</Link>
       </div>
 
-      <Dialog open={dialog === "cancel" || dialog === "cancelFollowing"} onClose={() => setDialog(null)} title={dialog === "cancelFollowing" ? (fa ? "لغو این و نوبت‌های بعدی" : t("ui.cancelFollowing")) : fa ? "لغو نوبت" : t("cancelDialog.title")}>
-        <div className="flex flex-col gap-3">
-          <p className="text-sm">{fa ? "زمان آزاد می‌شود و دسترسی ارائه‌دهنده به اطلاعات حیوان پایان می‌یابد." : t("cancelDialog.body")}</p>
-          {refundPreview ? <p className="text-sm font-bold">{refundPreview.free ? (fa ? `بازگشت کامل: ${formatCurrency(refundPreview.amount, locale)}` : t("ui.fullRefund", { amount: formatCurrency(refundPreview.amount, locale) })) : fa ? `طبق قوانین، ${refundPreview.percent.toLocaleString(locale)}٪ یعنی ${formatCurrency(refundPreview.amount, locale)} بازگردانده می‌شود.` : t("ui.partialRefund", { percent: refundPreview.percent.toLocaleString(locale), amount: formatCurrency(refundPreview.amount, locale) })} {fa ? "بازگشت وجه پس از بررسی مالی انجام می‌شود." : t("ui.refundReview")}</p> : null}
-          <label className="flex flex-col gap-1 text-sm">{fa ? "علت (اختیاری)" : t("ui.reasonOptional")}<input className="rounded border border-border-subtle bg-surface-base p-2" maxLength={500} value={reason} onChange={(e) => setReason(e.target.value)} /></label>
-          {actionError ? <p role="alert" className="text-state-urgent">{actionError}</p> : null}
-          <div className="flex gap-2">
-            <Button variant="ghost" onClick={() => setDialog(null)}>{fa ? "منصرف شدم" : t("ui.keepBooking")}</Button>
-            <Button className="flex-1" isLoading={busy} onClick={() => void act(() => (dialog === "cancelFollowing" ? bookingsService.cancelFollowing(booking.id, reason || undefined) : bookingsService.cancel(booking.id, reason || undefined)), fa ? "نوبت لغو شد." : t("ui.bookingCancelled"))}>{fa ? "بله، لغو شود" : t("cancelDialog.confirm")}</Button>
-          </div>
-        </header>
-
-      <Dialog open={dialog === "reschedule"} onClose={() => setDialog(null)} title={fa ? "انتخاب زمان جدید" : t("ui.chooseNewTime")}>
-        <div className="flex flex-col gap-3">
-          <p className="text-sm text-text-secondary">{fa ? "نوبت فعلی تا وقتی زمان جدید قطعی نشده، حفظ می‌شود. مبلغ و قوانین تغییر نمی‌کند." : t("ui.rescheduleHint")}</p>
-          <DateField label={fa ? "روز جدید" : t("ui.newDay")} min={new Date().toISOString().slice(0, 10)} value={rescheduleDate} onChange={setRescheduleDate} />
-          {rescheduleSlots === null ? <Skeleton className="h-16 w-full" /> : rescheduleSlots.length === 0 ? <p className="text-sm">{fa ? "در این روز زمان آزادی نیست." : t("ui.noOpenTimes")}</p> : (
-            <div className="grid grid-cols-3 gap-2">
-              {rescheduleSlots.map((slot) => (
-                <button key={slot.startAt} type="button" aria-pressed={rescheduleSlot === slot.startAt} onClick={() => setRescheduleSlot(slot.startAt)} className={`rounded border px-2 py-2 text-sm ${rescheduleSlot === slot.startAt ? "border-brand-natural bg-brand-solid text-on-brand" : "border-border-subtle"}`}>
-                  {new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-GB", { hour: "2-digit", minute: "2-digit", timeZone: slot.timezone }).format(new Date(slot.startAt))}
-                </button>
-              ))}
-            </div>
-          )}
-          {actionError ? <p role="alert" className="text-state-urgent">{actionError}</p> : null}
-          <Button disabled={!rescheduleSlot} isLoading={busy} onClick={() => void act(async () => { const moved = await bookingsService.reschedule(booking.id, rescheduleSlot!, randomId()); window.location.assign(`/${locale}/bookings/${moved.id}`); }, fa ? "زمان نوبت تغییر کرد." : t("ui.bookingRescheduled"))}>{fa ? "تأیید زمان جدید" : t("ui.confirmNewTime")}</Button>
-        </div>
-      </Dialog>
-
-      <Dialog open={dialog === "review"} onClose={() => setDialog(null)} title={fa ? "نظر شما درباره این نوبت" : t("ui.reviewThisBooking")}>
-        <div className="flex flex-col gap-3">
-          <fieldset className="flex gap-2">
-            <legend className="mb-1 text-sm">{fa ? "امتیاز" : t("ui.rating")}</legend>
-            {[1, 2, 3, 4, 5].map((n) => (
-              <label key={n} className="flex items-center gap-1 text-sm"><input type="radio" name="rating" checked={rating === n} onChange={() => setRating(n)} />{n.toLocaleString(locale)}★</label>
-            ))}
-          </fieldset>
-          <textarea aria-label={fa ? "متن نظر" : t("ui.reviewText")} className="min-h-24 rounded border border-border-subtle bg-surface-base p-2" maxLength={2000} value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder={fa ? "تجربه‌تان را بنویسید؛ اطلاعات شخصی یا پزشکی ننویسید." : t("ui.reviewHint")} />
-          {actionError ? <p role="alert" className="text-state-urgent">{actionError}</p> : null}
-          <Button isLoading={busy} onClick={() => void act(() => bookingsService.review(booking.id, rating, reviewText.trim() || undefined), fa ? "نظر شما ثبت شد و پس از بررسی منتشر می‌شود." : t("ui.submitForReview"))}>{fa ? "ثبت برای بررسی" : t("ui.submitForReview")}</Button>
-        </div>
-
-        {s === "COMPLETED" && !booking.review && !reviewReady && reviewAvailableAt ? (
-          <p className="text-sm text-text-secondary" role="status">
-            {fa
-              ? `امتیازدهی دو ساعت پس از پایان خدمت فعال می‌شود: ${formatAppointmentDateTime(reviewAvailableAt.toISOString(), locale, booking.timezone)}`
-              : `Rating opens two hours after the service ends: ${formatAppointmentDateTime(reviewAvailableAt.toISOString(), locale, booking.timezone)}`}
-          </p>
-        ) : null}
+      {s === "COMPLETED" && !booking.review && !reviewReady && reviewAvailableAt ? (
+        <p className="text-sm text-text-secondary" role="status">
+          {t("ui.reviewAvailableAt", { date: formatAppointmentDateTime(reviewAvailableAt.toISOString(), locale, booking.timezone) })}
+        </p>
+      ) : null}
 
         <Dialog
           open={dialog === "cancel" || dialog === "cancelFollowing"}
           onClose={() => setDialog(null)}
-          title={
-            dialog === "cancelFollowing"
-              ? fa
-                ? "لغو این و نوبت‌های بعدی"
-                : "Cancel this and following"
-              : fa
-                ? "لغو نوبت"
-                : "Cancel booking"
-          }
+          title={dialog === "cancelFollowing" ? t("ui.cancelFollowing") : t("cancelDialog.title")}
         >
           <div className="flex flex-col gap-3">
             <p className="text-sm">
-              {fa
-                ? "زمان آزاد می‌شود و دسترسی ارائه‌دهنده به اطلاعات حیوان پایان می‌یابد."
-                : "The time is released and the provider's access to your pet's information ends."}
+              {t("cancelDialog.body")}
             </p>
             {refundPreview ? (
               <p className="text-sm font-bold">
                 {refundPreview.free
-                  ? fa
-                    ? `بازگشت کامل: ${formatCurrency(refundPreview.amount, locale)}`
-                    : `Full refund: ${formatCurrency(refundPreview.amount, locale)}`
-                  : fa
-                    ? `طبق قوانین، ${refundPreview.percent.toLocaleString(locale)}٪ یعنی ${formatCurrency(refundPreview.amount, locale)} بازگردانده می‌شود.`
-                    : `Per the terms, ${refundPreview.percent}% (${formatCurrency(refundPreview.amount, locale)}) is refunded.`}{" "}
-                {fa
-                  ? "بازگشت وجه پس از بررسی مالی انجام می‌شود."
-                  : "Refunds are processed after finance review."}
+                  ? t("ui.fullRefund", { amount: formatCurrency(refundPreview.amount, locale) })
+                  : t("ui.partialRefund", {
+                      percent: refundPreview.percent.toLocaleString(locale),
+                      amount: formatCurrency(refundPreview.amount, locale),
+                    })}{" "}
+                {t("ui.refundReview")}
               </p>
             ) : null}
             <label className="flex flex-col gap-1 text-sm">
-              {fa ? "علت (اختیاری)" : "Reason (optional)"}
+              {t("ui.reasonOptional")}
               <input
                 className="rounded border border-border-subtle bg-surface-base p-2"
                 maxLength={500}
@@ -369,7 +312,7 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
             ) : null}
             <div className="flex gap-2">
               <Button variant="ghost" onClick={() => setDialog(null)}>
-                {fa ? "منصرف شدم" : "Keep booking"}
+                {t("ui.keepBooking")}
               </Button>
               <Button
                 className="flex-1"
@@ -380,11 +323,11 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
                       dialog === "cancelFollowing"
                         ? bookingsService.cancelFollowing(booking.id, reason || undefined)
                         : bookingsService.cancel(booking.id, reason || undefined),
-                    fa ? "نوبت لغو شد." : "Booking cancelled.",
+                    t("ui.bookingCancelled"),
                   )
                 }
               >
-                {fa ? "بله، لغو شود" : "Yes, cancel"}
+                {fa ? "بله، لغو شود" : t("cancelDialog.confirm")}
               </Button>
             </div>
           </div>
@@ -393,16 +336,14 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
         <Dialog
           open={dialog === "reschedule"}
           onClose={() => setDialog(null)}
-          title={fa ? "انتخاب زمان جدید" : "Choose a new time"}
+          title={t("ui.chooseNewTime")}
         >
           <div className="flex flex-col gap-3">
             <p className="text-sm text-text-secondary">
-              {fa
-                ? "نوبت فعلی تا وقتی زمان جدید قطعی نشده، حفظ می‌شود. مبلغ و قوانین تغییر نمی‌کند."
-                : "Your current booking is kept until the new time is secured. Price and terms stay the same."}
+              {t("ui.rescheduleHint")}
             </p>
             <DateField
-              label={fa ? "روز جدید" : "New day"}
+              label={t("ui.newDay")}
               min={new Date().toISOString().slice(0, 10)}
               value={rescheduleDate}
               onChange={setRescheduleDate}
@@ -410,7 +351,7 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
             {rescheduleSlots === null ? (
               <Skeleton className="h-16 w-full" />
             ) : rescheduleSlots.length === 0 ? (
-              <p className="text-sm">{fa ? "در این روز زمان آزادی نیست." : "No open times on this day."}</p>
+              <p className="text-sm">{t("ui.noOpenTimes")}</p>
             ) : (
               <div className="grid grid-cols-3 gap-2">
                 {rescheduleSlots.map((slot) => (
@@ -421,7 +362,7 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
                     onClick={() => setRescheduleSlot(slot.startAt)}
                     className={`rounded border px-2 py-2 text-sm ${rescheduleSlot === slot.startAt ? "border-brand-natural bg-brand-solid text-on-brand" : "border-border-subtle"}`}
                   >
-                    {new Intl.DateTimeFormat(fa ? "fa-IR" : "en-GB", {
+                    {new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-GB", {
                       hour: "2-digit",
                       minute: "2-digit",
                       timeZone: slot.timezone,
@@ -444,11 +385,11 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
                     const moved = await bookingsService.reschedule(booking.id, rescheduleSlot!, randomId());
                     window.location.assign(`/${locale}/bookings/${moved.id}`);
                   },
-                  fa ? "زمان نوبت تغییر کرد." : "Booking rescheduled.",
+                  t("ui.bookingRescheduled"),
                 )
               }
             >
-              {fa ? "تأیید زمان جدید" : "Confirm new time"}
+              {t("ui.confirmNewTime")}
             </Button>
           </div>
         </Dialog>
@@ -456,11 +397,11 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
         <Dialog
           open={dialog === "review"}
           onClose={() => setDialog(null)}
-          title={fa ? "نظر شما درباره این نوبت" : "Review this booking"}
+          title={t("ui.reviewThisBooking")}
         >
           <div className="flex flex-col gap-3">
             <fieldset className="flex gap-2">
-              <legend className="mb-1 text-sm">{fa ? "امتیاز" : "Rating"}</legend>
+              <legend className="mb-1 text-sm">{t("ui.rating")}</legend>
               {[1, 2, 3, 4, 5].map((n) => (
                 <label key={n} className="flex items-center gap-1 text-sm">
                   <input type="radio" name="rating" checked={rating === n} onChange={() => setRating(n)} />
@@ -468,38 +409,28 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
                 </label>
               ))}
             </fieldset>
-            <RatingChoices
-              name="timeliness"
-              label={fa ? "به‌موقع بودن" : "Timeliness"}
-              value={timeliness}
-              locale={locale}
-              onChange={setTimeliness}
-            />
+            <RatingChoices name="timeliness" label={t("ui.timeliness")} value={timeliness} locale={locale} onChange={setTimeliness} />
             <RatingChoices
               name="communication"
-              label={fa ? "برخورد با پت" : "Care and communication"}
+              label={t("ui.careAndCommunication")}
               value={communication}
               locale={locale}
               onChange={setCommunication}
             />
             <RatingChoices
               name="quality"
-              label={fa ? "کیفیت خدمت" : "Service quality"}
+              label={t("ui.serviceQuality")}
               value={quality}
               locale={locale}
               onChange={setQuality}
             />
             <textarea
-              aria-label={fa ? "متن نظر" : "Review text"}
+              aria-label={t("ui.reviewText")}
               className="min-h-24 rounded border border-border-subtle bg-surface-base p-2"
               maxLength={2000}
               value={reviewText}
               onChange={(e) => setReviewText(e.target.value)}
-              placeholder={
-                fa
-                  ? "تجربه‌تان را بنویسید؛ اطلاعات شخصی یا پزشکی ننویسید."
-                  : "Describe your experience; avoid personal or medical details."
-              }
+              placeholder={t("ui.reviewHint")}
             />
             {actionError ? (
               <p role="alert" className="text-state-urgent">
@@ -517,13 +448,11 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
                       { quality, communication, timeliness },
                       reviewText.trim() || undefined,
                     ),
-                  fa
-                    ? "نظر شما ثبت شد و پس از بررسی منتشر می‌شود."
-                    : "Your review was submitted and will be published after moderation.",
+                  fa ? "نظر شما ثبت شد و پس از بررسی منتشر می‌شود." : t("ui.reviewSubmitted"),
                 )
               }
             >
-              {fa ? "ثبت برای بررسی" : "Submit for review"}
+              {t("ui.submitForReview")}
             </Button>
           </div>
         </Dialog>

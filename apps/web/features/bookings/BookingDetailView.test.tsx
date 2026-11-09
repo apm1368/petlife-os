@@ -280,12 +280,26 @@ describe("BookingDetailView", () => {
   });
 
   it("lets a completed booking be reviewed once", async () => {
-    vi.mocked(bookingsService.getById).mockResolvedValue({ ...BASE_BOOKING, bookingStatus: "COMPLETED" as never, review: null });
+    vi.mocked(bookingsService.getById).mockResolvedValue({
+      ...BASE_BOOKING,
+      bookingStatus: "COMPLETED" as never,
+      completedAt: new Date(Date.now() - 3 * 60 * 60_000).toISOString(),
+      review: null,
+    });
     renderWithIntl(<BookingDetailView bookingId="booking-1" />, "en");
     fireEvent.click(await screen.findByRole("button", { name: "Leave a review" }));
     expect(screen.getByText("Timeliness")).toBeTruthy();
     expect(screen.getByText("Care and communication")).toBeTruthy();
     expect(screen.getByText("Service quality")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Submit for review" }));
+    await waitFor(() =>
+      expect(bookingsService.review).toHaveBeenCalledWith(
+        "booking-1",
+        5,
+        { quality: 5, communication: 5, timeliness: 5 },
+        undefined,
+      ),
+    );
   });
 
   it("does not offer a review before the two-hour reflection window", async () => {
@@ -298,6 +312,22 @@ describe("BookingDetailView", () => {
     renderWithIntl(<BookingDetailView bookingId="booking-1" />, "en");
     expect(await screen.findByText(/Rating opens two hours after the service ends/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Leave a review" })).toBeNull();
+  });
+
+  it.each([
+    ["de", /Du kannst diesen Dienst zwei Stunden nach seinem Ende bewerten/],
+    ["es", /Podrás valorar este servicio dos horas después de que termine/],
+  ] as const)("localizes the review availability notice in %s", async (locale, expected) => {
+    vi.mocked(bookingsService.getById).mockResolvedValue({
+      ...BASE_BOOKING,
+      bookingStatus: "COMPLETED" as never,
+      completedAt: new Date(Date.now() - 90 * 60_000).toISOString(),
+      review: null,
+    });
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />, locale);
+    expect(await screen.findByText(expected)).toBeTruthy();
+    expect(screen.queryByText(/ثبت نظر دو ساعت/)).toBeNull();
+    expect(screen.queryByRole("button", { name: locale === "de" ? "Bewertung abgeben" : "Escribir una reseña" })).toBeNull();
   });
 
   it("localizes German booking details and cancellation while preserving the German support route", async () => {

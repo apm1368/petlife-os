@@ -911,7 +911,12 @@
       "rating": "Rating",
       "reviewText": "Review text",
       "reviewHint": "Describe your experience; avoid personal or medical details.",
-      "submitForReview": "Submit for review"
+      "submitForReview": "Submit for review",
+      "reviewAvailableAt": "Rating opens two hours after the service ends: {date}",
+      "timeliness": "Timeliness",
+      "careAndCommunication": "Care and communication",
+      "serviceQuality": "Service quality",
+      "reviewSubmitted": "Your review was submitted and will be published after moderation."
     }
   },
   "services": {
