@@ -17,7 +17,7 @@ Point-in-time checkpoint only. Recheck GitHub, CI and production before each mer
 | --- | --- | --- |
 | #201 dashboard loading/retry localization | Merged at `2248f57ba8c100e854d4351294bc98d4a83a3e2d`; its post-merge run was cancelled when #196 advanced main. | Confirm the final `main` CI/deployment; dashboard remains PARTIAL pending authenticated responsive/browser inspection. |
 | #196 provider team localization | Merged at `c1c8bf530c384e7eef08cbeb2c9c78fcb7eecbda`; synchronized-head PR CI passed. | Confirm main CI/deploy and provider route behavior. |
-| #203 account invitation inbox states | Synchronized head `8c1b849ea40ddca261146bdb14f15a36d3ab9403` includes current main and the reconciled handoff. Its refreshed CI is running; GitHub reports mergeable. | Wait for exact-head CI, then merge normally if the repository permits. Account route tests (16), ESLint, typecheck and diff-check passed locally after the sync. |
+| #203 account invitation inbox states | The branch is synchronized with current main and the handoff add/add conflict is resolved. The latest source-code checks after sync passed locally (16 account tests, ESLint, typecheck and diff-check). | Recheck CI on the latest branch head after the documentation-only handoff update; merge normally only when GitHub permits. |
 | #178, #181–#184, #200 | Their branches were updated to the newer main; CI is restarting on updated heads. | Check exact current head/CI/review/merge state before merging; no old-head pass counts. |
 | #202 travel test race | Merged at `3097163505b2e9f664dc7103d31c1e9c762756a9`; PR CI green. | Confirm production release SHA and behavior. |
 
