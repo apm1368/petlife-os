@@ -45,3 +45,12 @@ For each remaining family, record actual routes, source board, responsive/theme/
 - Workspace disk had approximately 20 MiB free, so a full production build and browser capture are not safe until space is available.
 - No browser/CUA tool was available in the managed environment. Existing automated unit tests can still be run; screenshots at mobile/tablet/desktop and rendered light/dark/four-locale checks remain pending and must not be inferred from CSS or component tests.
 - No route family is marked visually complete based only on using the shared colors.
+
+## Integration checkpoint — 2026-11-09
+
+- `main` is `a5c7a6b830130f3e8ad500b83742033345ca3727`, containing PR #210. Its build check passed and it merged through GitHub's normal squash path at 13:45 UTC.
+- Production `/api/health/version` still reports `fb2f421dae9506ae62cc8f4c896703adc9387b58`; readiness is HTTP 200 with database and Redis up. The design work is therefore not yet live-verified.
+- PR #211 (account/household visual slice) remains open on `e992fe6`; its build check was pending at the last check.
+- PR #212 (shop/checkout visual slice) is based on current `main`, head `f7a50ec45692e416db01fbc1e68096bac5e32306`; its build check was pending at the last check.
+- PR #212 targeted tests passed: 5 commerce files / 52 tests, plus web typecheck. No screenshot or production build is available because browser tooling is absent and disk space remains about 20 MiB.
+- Next: resolve #211/#212 CI results, obtain any required review, then continue health/care/clinical board 08/09/11/12 and public landing sections without changing HERO composition.
