@@ -2,7 +2,18 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
-## Latest verified update — 2026-11-09 09:04 UTC
+## Latest verified update — 2026-11-09 09:36 UTC
+
+- `origin/main`: `e29eb59d8427fab4e18cbbb16bf299787005be1f` (PR #183). Production: `bb8ba11238ea28fc0500c941a02a6c32f0e13fb7`, deployment `github-42590818714-1`; `/api/health/version` verified this SHA.
+- PR #200 merged normally at `e4e8ba349aa68616571a70d3069b1e7f04a757ec`. It localizes public insurance discovery/comparison/detail, adds insurer HTTPS website links and validates configured insurer website URLs. Exact-main CI/deploy run `42592488512` was still in CI Build. The legacy `/[locale]/pets/[id]/insurance` application page and APIs remain PARTIAL/X-04 unresolved; no live insurer integration is claimed.
+- PR #183 merged normally at `e29eb59d8427fab4e18cbbb16bf299787005be1f`; synchronized head `bb2b862e82e3a15fd176ae048827794764998bc4` passed exact-head CI `42592847614`. It localizes household invitation/approval failure and unknown-event states. The page remains PARTIAL pending authenticated responsive browser verification.
+- PR #178 (`a5055fede369a70e8bc9b2a3b6a4659e28dc5ca2`), #181 (`c26fdf4a7a1fdb93b0b441ac9f43cf1dc836aeee`) and #184 (`e5988b727af9223aa05f5ed2a847a441f1abed60`) were synced against `e29eb59`; exact-head CI runs `42594081868`, `42594080489` and `42594079873` were in progress. Do not reuse the green runs on their prior heads.
+- #123 was closed as superseded after main was verified to contain its seller-offer translation behavior and translations, with current DE/ES rendering coverage. #122 remains closed/unmerged; its shop discovery/cart implementation is already in main (relevant source components match and current DE/ES commerce catalogs include its keys). No existing branch was force-pushed or discarded.
+- Local verification: full web unit suite passed (297 files / 1,783 tests); web typecheck and targeted ESLint passed. No authenticated production browser checks were performed.
+- Localization remains incomplete; many route families are PARTIAL in the route matrix. German/Spanish SMS templates/delivery are unavailable. Catalog-wide missing-key counts do not establish route/state coverage.
+- Disk: approximately 38 MiB free; no cleanup performed. Existing worktrees/local changes were preserved. No payment worktree was listed; that does not prove earlier payment changes were deleted.
+
+## Earlier verified update — 2026-11-09 09:04 UTC
 
 - `origin/main` and production both report `e7685b3dd7781839552f7c9bb5173bcbcc7f3edf` (PR #204; deployment `github-42587791639-1`). Main CI passed every stage including migrations, unit/API E2E and build. Production `/api/health/version` reports the same SHA; `/api/health/ready` reports DB and Redis up.
 - Safe unauthenticated production smoke: `/fa/auth`, `/en/auth`, `/de/auth`, `/es/auth` each returned HTTP 200 with matching HTML `lang`; stripped server-rendered de/es auth HTML contained no Persian/Arabic text. This does not verify signed-in dashboard or subscription behavior.
@@ -25,11 +36,11 @@ Point-in-time checkpoint only. Recheck GitHub, CI and production before each mer
 
 ## Release state
 
-- `main`: `07c2ac246e344f0eac9e319449801c2e9df88df9`, after #203 merged normally. Production `/api/health/version` last returned `c1c8bf530c384e7eef08cbeb2c9c78fcb7eecbda` (deployment `github-42582860438-1`). Main CI for `07c2ac24` is running as `42584955441`; production release is pending. Recheck before claiming #203 live.
-- Main CI/deploy for #196 (`42582860438`, SHA `c1c8bf5…`) completed successfully; the deployed SHA was verified on production. #202 (`3097163…`) was superseded by that release.
-- #199's first main deployment failed in unit tests due to a race in `TravelFavoritesView.test.tsx`. #202 fixed the test and merged at `3097163505b2e9f664dc7103d31c1e9c762756a9`; its own exact CI passed. The #199 feature is not LIVE_VERIFIED until the current deployment SHA and behavior are checked.
+- `main`: `e29eb59d8427fab4e18cbbb16bf299787005be1f`. Production `/api/health/version`: `bb8ba11238ea28fc0500c941a02a6c32f0e13fb7` (deployment `github-42590818714-1`).
+- Main CI/deploy run `42592488512` for #200 merge `e4e8ba34…` was still in CI Build; deploy run `42594044607` for current main `e29eb59…` was queued. Recheck workflow and production SHA before claiming either revision live.
+- #204 and earlier changes are in production SHA `bb8ba112…`. The previous public auth smoke was unauthenticated and does not verify private user flows.
 - Public shop was last observed empty after demo exclusion. No legitimate reviewed seller offer was available to verify visibility or purchase.
-- Disk is critically low (about 42 MiB free of 7.9 GiB); no cleanup was performed. Avoid full builds, dependency installation, Docker pulls and large browser artifacts.
+- Disk is critically low (about 38 MiB free of 7.9 GiB); no cleanup was performed. Avoid full builds, dependency installation, Docker pulls and large browser artifacts.
 - No payment worktree appeared in `git worktree list`; this does not prove it was deleted. No payment code was changed.
 
 ## Recent integration and PR queue
@@ -40,8 +51,9 @@ Point-in-time checkpoint only. Recheck GitHub, CI and production before each mer
 | #196 provider team localization | Merged at `c1c8bf530c384e7eef08cbeb2c9c78fcb7eecbda`; synchronized-head PR CI passed. | Confirm main CI/deploy and provider route behavior. |
 | #203 account invitation inbox states | Merged at `07c2ac24…`; included in production SHA `e7685b3d…`; anonymous auth routes smoke-tested. | Signed-in invitation behavior remains unverified. |
 | #204 household membership/subscription localization | Merged and deployed at `e7685b3d…`; exact-head CI and deployment passed. | Private flows need authenticated production verification. |
-| #200 insurance localization | Last pushed head `2264bd74…` passed CI; new local URL/privacy and documentation follow-up is unpushed. | Commit/push follow-up, then wait for exact-head CI; legacy app APIs remain X-04 gap. |
-| #178, #181–#184 | Updated to main; fresh exact-head CI is pending/in progress. | Review each diff and merge only after current checks pass. |
+| #200 insurance localization | Merged at `e4e8ba34…`; main CI/deploy not yet verified on production. | Verify deployment SHA; legacy application APIs remain X-04 gap. |
+| #183 household failure/unknown states | Merged at `e29eb59…`; exact-head CI passed. | Verify production release and later authenticated responsive flow. |
+| #178, #181, #184 | Synced against `e29eb59…`; exact-head CI pending/in progress. | Inspect final diff; merge only after current checks pass and GitHub permits normally. |
 | #202 travel test race | Merged at `3097163505b2e9f664dc7103d31c1e9c762756a9`; PR CI green. | Confirm production release SHA and behavior. |
 
 Older stacked PRs remain, including #110→#111, #113→#114, and older shop/booking localization chains. Inspect current bases and conflicts before retargeting; never bypass branch protection.
@@ -58,7 +70,7 @@ Older stacked PRs remain, including #110→#111, #113→#114, and older shop/boo
 
 - Shop remains empty until legitimate, reviewed product and seller-offer data with acceptable content/image provenance exist. Do not re-enable demo records.
 - Jajiga is selected, but the small discovery evidence does not prove nationwide coverage or live availability. Digikala access remains unproven; do not bypass source restrictions.
-- Commit and push the final #200 list-query cleanup and coverage/handoff updates, then recheck exact-head CI and mergeability.
-- Monitor the current exact-head CI runs for #178 and #181–#184; inspect each resulting diff, then merge independently only after checks pass.
+- Verify production deployments for `e4e8ba34…` then `e29eb59…`; check health/version and safe public insurance/auth routes.
+- Monitor exact-head CI for #178, #181 and #184; inspect each resulting diff, then merge independently only when current checks pass and GitHub permits a normal merge.
 - Continue the route-by-route localization work; do not report full four-language completion while the catalog and route matrix still show missing content.
 - Continue route-by-route localization and functional/security work; track remaining page states in the rollout matrix. Do not mark anything LIVE_VERIFIED without merged code, green CI, migration/deploy evidence and observed production behavior.
