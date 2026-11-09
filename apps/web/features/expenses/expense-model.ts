@@ -1,7 +1,8 @@
 import type { PetExpenseCategory, PetExpenseEntryDto, PetExpenseSource } from "@petlife/types";
 import { calendarFromIso, isoFrom, monthLength, type CalendarSystem } from "@/lib/date/jalali";
+import type { RouteLocale } from "@/lib/i18n/config";
 
-export type Locale = "fa" | "en";
+export type Locale = RouteLocale;
 
 export const systemFor = (locale: Locale): CalendarSystem => (locale === "fa" ? "jalali" : "gregorian");
 
@@ -40,21 +41,21 @@ export function parseTomanToIrr(input: string): number | null {
   return irr > 2_000_000_000 ? null : irr;
 }
 
-export const CATEGORY_LABELS: Record<PetExpenseCategory, { fa: string; en: string }> = {
-  FOOD: { fa: "غذا", en: "Food" },
-  VET: { fa: "دامپزشکی", en: "Vet" },
-  MEDICATION: { fa: "دارو", en: "Medication" },
-  GROOMING: { fa: "آرایش و نظافت", en: "Grooming" },
-  TRAINING: { fa: "آموزش", en: "Training" },
-  BOARDING: { fa: "نگهداری و پانسیون", en: "Sitting & boarding" },
-  SUPPLIES: { fa: "لوازم و خرید", en: "Supplies" },
-  INSURANCE: { fa: "بیمه", en: "Insurance" },
-  TRANSPORT: { fa: "حمل‌ونقل", en: "Transport" },
-  OTHER: { fa: "سایر", en: "Other" },
+export const CATEGORY_LABELS: Record<PetExpenseCategory, Record<Locale, string>> = {
+  FOOD: { fa: "غذا", en: "Food", de: "Futter", es: "Alimentación" },
+  VET: { fa: "دامپزشکی", en: "Vet", de: "Tierarzt", es: "Veterinario" },
+  MEDICATION: { fa: "دارو", en: "Medication", de: "Medikamente", es: "Medicamentos" },
+  GROOMING: { fa: "آرایش و نظافت", en: "Grooming", de: "Pflege", es: "Peluquería y aseo" },
+  TRAINING: { fa: "آموزش", en: "Training", de: "Training", es: "Adiestramiento" },
+  BOARDING: { fa: "نگهداری و پانسیون", en: "Sitting & boarding", de: "Betreuung und Pension", es: "Cuidado y residencia" },
+  SUPPLIES: { fa: "لوازم و خرید", en: "Supplies", de: "Zubehör", es: "Suministros" },
+  INSURANCE: { fa: "بیمه", en: "Insurance", de: "Versicherung", es: "Seguro" },
+  TRANSPORT: { fa: "حمل‌ونقل", en: "Transport", de: "Transport", es: "Transporte" },
+  OTHER: { fa: "سایر", en: "Other", de: "Sonstiges", es: "Otros" },
 };
 
-export const SOURCE_LABELS: Record<PetExpenseSource, { fa: string; en: string }> = {
-  MANUAL: { fa: "ثبت دستی", en: "Added by you" },
-  BOOKING: { fa: "رزرو در پت‌لایف", en: "PET LIFE booking" },
-  SHOP: { fa: "خرید از فروشگاه", en: "PET LIFE shop" },
+export const SOURCE_LABELS: Record<PetExpenseSource, Record<Locale, string>> = {
+  MANUAL: { fa: "ثبت دستی", en: "Added by you", de: "Von Ihnen hinzugefügt", es: "Añadido por ti" },
+  BOOKING: { fa: "رزرو در پت‌لایف", en: "PET LIFE booking", de: "PET-LIFE-Buchung", es: "Reserva de PET LIFE" },
+  SHOP: { fa: "خرید از فروشگاه", en: "PET LIFE shop", de: "PET-LIFE-Shop", es: "Tienda de PET LIFE" },
 };

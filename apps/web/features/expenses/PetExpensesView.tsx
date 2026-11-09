@@ -14,7 +14,7 @@ import { calendarFromIso, formatDay, localizeDigits, monthName, todayIso } from 
 import { formatCount } from "@/lib/number/format-number";
 import { CATEGORY_LABELS, SOURCE_LABELS, currentYear, monthlyTotals, parseTomanToIrr, systemFor, yearRange, type Locale } from "./expense-model";
 
-const copy = {
+export const expenseCopy = {
   fa: {
     title: "هزینه‌ها",
     intro: "هر چه برای این حیوان خرج می‌شود، یک‌جا. رزروها و خریدهای فروشگاه پت‌لایف خودکار حساب می‌شوند؛ بقیه را خودتان اضافه کنید.",
@@ -83,11 +83,31 @@ const copy = {
     householdOnly: "Expenses are visible only to members of the household this pet belongs to.",
     share: "Share",
   },
+  de: {
+    title: "Ausgaben",
+    intro: "Alle Ausgaben für dieses Tier an einem Ort. PET-LIFE-Buchungen und Shopkäufe werden automatisch erfasst; weitere Ausgaben können Sie selbst hinzufügen.",
+    prevYear: "Vorjahr", nextYear: "Nächstes Jahr", year: "Jahr", total: "Gesamtausgaben", monthlyAverage: "Monatsdurchschnitt", entriesCount: "Ausgaben",
+    byCategory: "Nach Kategorie", byMonth: "Nach Monat", entries: "Alle Ausgaben", add: "Ausgabe hinzufügen", edit: "Bearbeiten", remove: "Löschen",
+    confirmRemove: "Diese Ausgabe löschen?", yes: "Ja, löschen", no: "Abbrechen", save: "Speichern", close: "Schließen",
+    amount: "Betrag (Toman)", amountHint: "z. B. 250.000", amountError: "Geben Sie einen ganzzahligen Betrag in Toman ein.", category: "Kategorie", date: "Datum", note: "Notiz (optional)",
+    emptyTitle: "Für dieses Jahr sind noch keine Ausgaben erfasst", emptyBody: "Fügen Sie Futter, einen Tierarztbesuch außerhalb von PET LIFE oder andere Ausgaben hinzu, um einen realistischen Überblick zu erhalten.",
+    openBooking: "Buchung ansehen", openOrder: "Bestellung ansehen", loading: "Ausgaben werden geladen", householdOnly: "Ausgaben sind nur für Mitglieder des Haushalts sichtbar, zu dem dieses Tier gehört.", share: "Anteil",
+  },
+  es: {
+    title: "Gastos",
+    intro: "Todos los gastos de esta mascota en un mismo lugar. Las reservas y compras en PET LIFE se cuentan automáticamente; puedes añadir los demás gastos.",
+    prevYear: "Año anterior", nextYear: "Año siguiente", year: "Año", total: "Gasto total", monthlyAverage: "Promedio mensual", entriesCount: "Gastos",
+    byCategory: "Por categoría", byMonth: "Por mes", entries: "Todos los gastos", add: "Añadir gasto", edit: "Editar", remove: "Eliminar",
+    confirmRemove: "¿Eliminar este gasto?", yes: "Sí, eliminar", no: "Cancelar", save: "Guardar", close: "Cerrar",
+    amount: "Importe (tomanes)", amountHint: "p. ej., 250.000", amountError: "Introduce un importe entero en tomanes.", category: "Categoría", date: "Fecha", note: "Nota (opcional)",
+    emptyTitle: "Todavía no hay gastos registrados este año", emptyBody: "Añade comida, una visita veterinaria fuera de PET LIFE u otros gastos para ver el gasto real.",
+    openBooking: "Ver reserva", openOrder: "Ver pedido", loading: "Cargando gastos", householdOnly: "Los gastos solo son visibles para los miembros del hogar al que pertenece esta mascota.", share: "Parte",
+  },
 } as const;
 
 export function PetExpensesView({ petId }: { petId: string }) {
-  const locale = (useLocale() === "fa" ? "fa" : "en") as Locale;
-  const c = copy[locale];
+  const locale = useLocale() as Locale;
+  const c = expenseCopy[locale];
   const system = systemFor(locale);
   const today = todayIso();
   const [year, setYear] = useState(() => currentYear(system, today));
@@ -132,6 +152,7 @@ export function PetExpensesView({ petId }: { petId: string }) {
   const elapsedMonths = year < thisYear ? 12 : year > thisYear ? 0 : calendarFromIso(system, today).month;
   const n = (value: number) => formatCount(value, locale);
   const money = (irr: number) => formatCurrency(irr, locale);
+  const percent = (value: number) => new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 0 }).format(value / 100);
 
   return (
     <div className="flex flex-col gap-6">
@@ -176,7 +197,7 @@ export function PetExpensesView({ petId }: { petId: string }) {
                     <li key={row.category}>
                       <div className="flex justify-between gap-3 text-sm">
                         <span className="text-text-primary">{CATEGORY_LABELS[row.category][locale]}</span>
-                        <span className="text-text-secondary">{money(row.amountIrr)} · {localizeDigits(pct, locale)}٪</span>
+                        <span className="text-text-secondary">{money(row.amountIrr)} · {percent(pct)}</span>
                       </div>
                       <div className="mt-1 h-2 w-full bg-surface-subtle" aria-hidden="true">
                         <div className="h-2 bg-brand-solid" style={{ width: `${Math.max(pct, 2)}%` }} />
@@ -265,7 +286,7 @@ function ExpenseForm({ petId, locale, entry, defaultDay, onClose, onSaved }: {
   onClose: () => void;
   onSaved: () => Promise<void>;
 }) {
-  const c = copy[locale];
+  const c = expenseCopy[locale];
   const [amount, setAmount] = useState(entry ? String(Math.round(entry.amountIrr / 10)) : "");
   const [category, setCategory] = useState<PetExpenseCategory>(entry?.category ?? "FOOD");
   const [day, setDay] = useState(entry?.spentOn ?? defaultDay);
