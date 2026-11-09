@@ -847,6 +847,17 @@
       "careAccessUntil": "Care access shared with the provider until {when}.",
       "openCalendar": "Open Care Calendar"
     },
+    "errors": {
+      "slotUnavailable": "That time was just taken. Please choose another.",
+      "holdExpired": "Your hold expired. Please choose a time again.",
+      "petNotSupported": "This service is not offered for the selected pet.",
+      "petContextIncomplete": "Complete the pet's care or health profile before booking this service.",
+      "addressRequired": "Please choose the service address.",
+      "petAccessDenied": "You are not allowed to book for this pet.",
+      "bookingChanged": "This booking changed state. Please refresh and try again.",
+      "tooManyRequests": "Too many requests. Please try again shortly.",
+      "genericAction": "That did not work. Check your connection and try again."
+    },
     "ui": {
       "loading": "Loading booking…",
       "forbidden": "You do not have access to this booking",

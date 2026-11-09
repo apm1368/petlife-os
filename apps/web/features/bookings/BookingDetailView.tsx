@@ -92,7 +92,26 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
       setNotice(success);
       await load();
     } catch (e) {
-      setActionError(errorMessage(e, fa));
+      if (fa) {
+        setActionError(errorMessage(e, true));
+      } else {
+        const code = e instanceof ApiError ? e.code : "";
+        const errorKey: Record<string, string> = {
+          SLOT_UNAVAILABLE: "slotUnavailable",
+          BOOKING_CONFLICT: "slotUnavailable",
+          HOLD_EXPIRED: "holdExpired",
+          PET_NOT_SUPPORTED: "petNotSupported",
+          PET_CONTEXT_INCOMPLETE: "petContextIncomplete",
+          ADDRESS_REQUIRED: "addressRequired",
+          PET_ACCESS_DENIED: "petAccessDenied",
+          INVALID_BOOKING_TRANSITION: "bookingChanged",
+        };
+        setActionError(e instanceof ApiError && e.status === 429
+          ? t("errors.tooManyRequests")
+          : errorKey[code]
+            ? t(`errors.${errorKey[code]}` as never)
+            : t("errors.genericAction"));
+      }
     } finally {
       setBusy(false);
     }

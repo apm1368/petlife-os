@@ -214,4 +214,17 @@ describe("BookingDetailView", () => {
     expect(screen.getByRole("button", { name: "Pagar de forma segura" })).toBeTruthy();
     expect(screen.getByText(/La reserva solo se confirma cuando la pasarela confirma el pago/)).toBeTruthy();
   });
+
+  it("shows a localized API error in German after a booking action fails", async () => {
+    vi.mocked(bookingsService.getById).mockResolvedValue({ ...BASE_BOOKING, startAt: future, endAt: futureEnd });
+    vi.mocked(bookingsService.cancel).mockRejectedValue(new ApiError({ code: "BOOKING_CONFLICT", message: "raw backend message", requestId: "r" }, 409));
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />, "de");
+
+    fireEvent.click(await screen.findByRole("button", { name: "Buchung stornieren" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ja, Buchung stornieren" }));
+
+    expect((await screen.findByRole("alert")).textContent).toContain("Dieser Termin wurde gerade vergeben. Bitte wähle einen anderen.");
+    expect(screen.queryByText("raw backend message")).toBeNull();
+    expect(screen.queryByText(/این زمان همین حالا/)).toBeNull();
+  });
 });
