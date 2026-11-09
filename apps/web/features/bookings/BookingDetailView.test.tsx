@@ -181,6 +181,29 @@ describe("BookingDetailView", () => {
     expect(await screen.findByText("You do not have access to this booking")).toBeTruthy();
   });
 
+  it("keeps the loading state visible until the booking response arrives", () => {
+    vi.mocked(bookingsService.getById).mockReturnValue(new Promise(() => {}));
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />, "en");
+    expect(screen.getByLabelText("Loading booking…")).toBeTruthy();
+  });
+
+  it("shows not-found state for a missing booking", async () => {
+    vi.mocked(bookingsService.getById).mockRejectedValue(new ApiError({ code: "BOOKING_NOT_FOUND", message: "x", requestId: "r" }, 404));
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />, "en");
+    expect(await screen.findByText("Booking not found")).toBeTruthy();
+  });
+
+  it("offers retry after a booking load error", async () => {
+    vi.mocked(bookingsService.getById)
+      .mockRejectedValueOnce(new ApiError({ code: "TEMPORARY_FAILURE", message: "x", requestId: "r" }, 503))
+      .mockResolvedValueOnce(BASE_BOOKING);
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />, "en");
+
+    expect(await screen.findByText("Booking could not load")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(await screen.findByText("General Vet Visit")).toBeTruthy();
+  });
+
   it("lets a completed booking be reviewed once", async () => {
     vi.mocked(bookingsService.getById).mockResolvedValue({ ...BASE_BOOKING, bookingStatus: "COMPLETED" as never, review: null });
     renderWithIntl(<BookingDetailView bookingId="booking-1" />, "en");
