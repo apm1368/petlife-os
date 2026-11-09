@@ -8,7 +8,7 @@ import { FulfillmentStatus, OrderRefundRequestStatus, OrderStatus } from "@prism
  *   AWAITING_SELLER_PREPARATION, READY_FOR_PICKUP). Cancelling refunds the
  *   full order total immediately through the gateway and restocks.
  * - After dispatch the customer can no longer cancel. Once delivered (within
- *   RETURN_WINDOW_DAYS) or when delivery failed, they may open a refund
+ *   RETURN_WINDOW_HOURS) or when delivery failed, they may open a refund
  *   *request*, which a finance admin reviews. Nothing is refunded
  *   automatically after dispatch.
  */
@@ -18,7 +18,18 @@ export const CUSTOMER_CANCELLABLE_FULFILLMENT: ReadonlySet<FulfillmentStatus> = 
   FulfillmentStatus.READY_FOR_PICKUP,
 ]);
 
-export const RETURN_WINDOW_DAYS = 7;
+/**
+ * The return window is 48 hours from delivery, not a number of days.
+ *
+ * O-04: delivery is confirmed 3 days after dispatch is recorded, and it "starts the 48-hour
+ * return clock"; O-07: a return is accepted within 48 hours of delivery for damage,
+ * mismatch, or expiry. The earlier 7-day value in this file contradicted both, and a wider
+ * window means the platform carries more refund exposure (FE-11: commission is not returned
+ * on a return). The window is measured in hours so the boundary is exactly 48 hours.
+ */
+export const RETURN_WINDOW_HOURS = 48;
+
+export const RETURN_WINDOW_MS = RETURN_WINDOW_HOURS * 3_600_000;
 
 export interface PolicyOrder {
   status: OrderStatus;
@@ -49,5 +60,5 @@ export function canCustomerRequestRefund(
   if (fulfillment.status === FulfillmentStatus.FAILED) return true;
   if (fulfillment.status !== FulfillmentStatus.DELIVERED) return false;
   const deliveredAt = fulfillment.deliveredAt ?? now;
-  return now.getTime() - deliveredAt.getTime() <= RETURN_WINDOW_DAYS * 86_400_000;
+  return now.getTime() - deliveredAt.getTime() <= RETURN_WINDOW_MS;
 }

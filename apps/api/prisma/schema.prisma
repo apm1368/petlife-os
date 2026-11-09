@@ -22,6 +22,8 @@ datasource db {
 enum Locale {
   fa
   en
+  de
+  es
 }
 
 enum ThemePreference {
@@ -37,6 +39,7 @@ enum HouseholdRole {
 
 enum HouseholdInvitationStatus {
   PENDING
+  REQUESTED
   ACCEPTED
   DECLINED
   EXPIRED
@@ -100,6 +103,41 @@ enum PetAccessSource {
   HOUSEHOLD
   MANUAL
   TEMPORARY
+}
+
+/// The lifecycle of a pet-ownership transfer request (ID-01: "ownership transfer needs
+/// both parties' approval"; ID-03: "OptLife does not judge — the registered owner stays
+/// until an official ruling or a written agreement").
+///
+/// PENDING_REVIEW  — the recipient was invited and has not answered yet.
+/// ACCEPTED        — both parties approved; the transfer has been applied.
+/// DECLINED        — the recipient refused. The registered owner is unchanged.
+/// CANCELLED       — the current owner withdrew the request.
+/// EXPIRED         — the recipient did not answer within the window.
+/// DISPUTED        — the parties disagree after a transfer was applied. ID-03 says the
+///                   platform does not adjudicate: the registered owner stays as recorded
+///                   until an official ruling or a written agreement arrives, so this
+///                   state is recorded for audit and never silently reassigns the pet.
+enum PetOwnershipTransferStatus {
+  PENDING_REVIEW
+  ACCEPTED
+  DECLINED
+  CANCELLED
+  EXPIRED
+  DISPUTED
+}
+
+/// What happens to a pet's memories when it moves to a new household (ID-05: "the health
+/// record goes, the memories by the previous owner's choice, the costs do not").
+/// The previous owner decides per transfer, so this is an explicit choice rather than a default.
+enum PetOwnershipMemoryDisposition {
+  /// The new owner receives the pet's memories as they are.
+  TRANSFER
+  /// The new owner receives nothing; the previous owner keeps them.
+  RETAIN
+  /// The new owner receives a read-only copy of the memories, and the previous owner keeps
+  /// the originals. This is the same shape as ID-02's separated-member copy.
+  COPY_READ_ONLY
 }
 
 enum OnboardingChapter {
@@ -544,6 +582,22 @@ enum ProductStatus {
 enum ProductCategoryStatus {
   ACTIVE
   INACTIVE
+}
+
+enum CatalogImportJobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  PARTIAL
+  FAILED
+  CANCELLED
+}
+
+enum CatalogImportItemStatus {
+  IMPORTED
+  NEEDS_REVIEW
+  FAILED
+  DUPLICATE
 }
 
 enum BrandStatus {
@@ -1166,6 +1220,9 @@ model User {
   /// (lowercased) so "Sarah" and "sarah" can never collide.
   username               String?
   normalizedUsername     String?           @unique
+  /// Names entered during password registration; optional for accounts created before these fields existed.
+  firstName              String?
+  lastName               String?
   /// Argon2id hash (see common/password/password-hash.util.ts). Null for an
   /// account that has never set a password (OTP-only / Google-only).
   passwordHash           String?
@@ -1209,6 +1266,7 @@ model User {
   checkouts               Checkout[]
   orders                  Order[]
   sellerMemberships       SellerMembership[]
+  catalogProductRequests CatalogProductRequest[] @relation("RequestedCatalogProducts")
   sellerContext           SellerContextPreference?
   inventoryMovements      InventoryMovement[]
   notifications           Notification[]
@@ -1218,6 +1276,18 @@ model User {
   dataExportRequests      DataExportRequest[]
   accountDeletionRequests AccountDeletionRequest[]
   acceptedInvitations     HouseholdInvitation[]      @relation("AcceptedInvitationUser")
+  requestedInvitations    HouseholdInvitation[]      @relation("RequestedInvitationUser")
+  reviewedInvitations     HouseholdInvitation[]      @relation("ReviewedInvitationUser")
+  /// Pets whose primary owner this user is (ID-01).
+  ownedPets               PetOwnership[]             @relation("PetPrimaryOwner")
+  /// Ownership transfers this user proposed (ID-01, ID-05).
+  proposedOwnershipTransfers PetOwnershipTransfer[]  @relation("TransferProposedBy")
+  /// Ownership transfers addressed to this user (ID-01, ID-05).
+  receivedOwnershipTransfers PetOwnershipTransfer[]  @relation("TransferRecipient")
+  /// Read-only memory copies left for this user after a household separation (ID-02).
+  memoryCopies            PetMemoryCopy[]
+  /// Subscriptions this user is the recorded payer for (ID-07).
+  paidSubscriptions       Subscription[]          @relation("SubscriptionPayer")
 
   adminUser                 AdminUser?
   supportCasesRequested     SupportCase[]
@@ -1237,8 +1307,8 @@ model User {
   blocksMade                UserBlock[]              @relation("BlocksMade")
   blocksReceived            UserBlock[]              @relation("BlocksReceived")
   clinicInvitationsReceived ClinicInvitation[]       @relation("ClinicInvitationsReceived")
-  walletAccount              WalletAccount?
-  cardTransferPayments       CardTransferPayment[]
+  walletAccount             WalletAccount?
+  cardTransferPayments      CardTransferPayment[]
 
   @@map("users")
 }
@@ -1374,8 +1444,14 @@ model HouseholdInvitation {
   invitedByUserId  String                    @db.Uuid
   acceptedByUserId String?                   @db.Uuid
   acceptedBy       User?                     @relation("AcceptedInvitationUser", fields: [acceptedByUserId], references: [id], onDelete: SetNull)
+  requestedByUserId String?                  @db.Uuid
+  requestedBy       User?                    @relation("RequestedInvitationUser", fields: [requestedByUserId], references: [id], onDelete: SetNull)
+  reviewedByUserId String?                   @db.Uuid
+  reviewedBy       User?                     @relation("ReviewedInvitationUser", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
   initialAccess    Json
   expiresAt        DateTime
+  requestedAt      DateTime?
+  reviewedAt       DateTime?
   acceptedAt       DateTime?
   declinedAt       DateTime?
   cancelledAt      DateTime?
@@ -1384,6 +1460,7 @@ model HouseholdInvitation {
 
   @@index([householdId, status])
   @@index([contact, status])
+  @@index([requestedByUserId])
   @@map("household_invitations")
 }
 
@@ -1508,6 +1585,14 @@ model Pet {
   onboardingProgress   OnboardingProgress[]
   interests            UserPetInterest[]
 
+  /// The pet's single primary owner (ID-01). At most one row — the primary owner is
+  /// exactly one person, and a household only grants access to the rest.
+  ownership      PetOwnership?
+  /// Transfer requests raised for this pet (ID-01, ID-05).
+  ownershipTransfers PetOwnershipTransfer[]
+  /// Read-only copies of this pet's memories left for separated members (ID-02).
+  memoryCopies       PetMemoryCopy[]
+
   healthProfile      HealthProfile?
   allergies          Allergy[]
   conditions         Condition[]
@@ -1540,6 +1625,7 @@ model Pet {
   lifecycleTransitions PetLifecycleTransition[]
   lostPetIncidents     LostPetIncident[]
   memories             PetMemory[]
+  memorialSubmissions  PetMemorialSubmission[]
   communityPosts       CommunityPost[]
 
   vitalsRecords          PatientVitalsRecord[]
@@ -1636,6 +1722,112 @@ model PetAccessGrant {
   @@index([source])
   @@index([revokedAt])
   @@map("pet_access_grants")
+}
+
+/// The primary owner of a pet — the single accountable person (ID-01: "Every pet has
+/// exactly one primary owner; the household only grants access").
+///
+/// This row is the source of truth for who owns a pet. Before it existed, ownership was
+/// implied by `Pet.householdId` plus household role, which made "one primary owner" and
+/// "the household only grants access" unenforceable: a household could hold several OWNER
+/// members, and the pet record itself named no owner.
+///
+/// The owner is always a member of the pet's current household. `Pet.householdId` stays
+/// the pet's home household; this table says who inside that household is accountable
+/// for it. Ownership transfer moves the pet to a new household AND moves this row.
+model PetOwnership {
+  id     String @id @default(uuid()) @db.Uuid
+  petId  String @unique @db.Uuid
+  pet    Pet    @relation(fields: [petId], references: [id], onDelete: Cascade)
+  /// The primary owner. Always a member of `Pet.householdId` at the moment it is written.
+  ownerUserId String @db.Uuid
+  owner       User   @relation("PetPrimaryOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
+  /// The household the pet lived in when this ownership row was written. Kept for audit:
+  /// after a transfer the pet's household changes, and this records where it came from.
+  householdId String   @db.Uuid
+  /// When ownership last changed hands, and how.
+  transferredAt      DateTime @default(now())
+  transferReason     String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([ownerUserId])
+  @@map("pet_ownerships")
+}
+
+/// A request to move a pet from its current primary owner to another user (ID-01, ID-05).
+///
+/// The transfer is never applied by a single call: the current owner proposes it and the
+/// recipient must accept (ID-01: "ownership transfer needs both parties' approval"). The
+/// request is the audit record of that two-party agreement — it records who proposed,
+/// who accepted, when, and what each side was told would happen to memories and costs.
+model PetOwnershipTransfer {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  /// The owner at the time the request was made.
+  fromUserId String @db.Uuid
+  fromUser   User   @relation("TransferProposedBy", fields: [fromUserId], references: [id], onDelete: Restrict)
+
+  /// The user asked to take over the pet.
+  toUserId String @db.Uuid
+  toUser   User   @relation("TransferRecipient", fields: [toUserId], references: [id], onDelete: Restrict)
+
+  /// The household the pet lives in now (the source household of the move).
+  fromHouseholdId String   @db.Uuid
+  /// The household the pet will live in once accepted. Must be the recipient's own
+  /// household, or a household they are already a member of.
+  toHouseholdId   String   @db.Uuid
+
+  status PetOwnershipTransferStatus @default(PENDING_REVIEW)
+
+  /// What happens to the pet's memories on acceptance (ID-05: the previous owner chooses).
+  memoryDisposition PetOwnershipMemoryDisposition @default(RETAIN)
+
+  /// The recipient's response, when they answered.
+  respondedAt DateTime?
+  /// The transfer was applied to the pet at this time.
+  appliedAt   DateTime?
+  /// When an unanswered request stops being actionable.
+  expiresAt   DateTime
+
+  /// Free-text context recorded by the parties.
+  note String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([petId, status])
+  @@index([toUserId, status])
+  @@index([fromUserId, status])
+  @@map("pet_ownership_transfers")
+}
+
+/// A read-only copy of a memory left behind for a person who separated from the household
+/// (ID-02: "the separated member keeps a read-only copy of the memories they recorded").
+///
+/// The original memory row stays with the pet and its household. This row points at the
+/// original and records who the copy belongs to, so the separated member can read what
+/// they personally recorded without keeping any write access to the pet.
+model PetMemoryCopy {
+  id String @id @default(uuid()) @db.Uuid
+  /// The original memory. Never deleted — the copy is a grant to read, not a fork of the data.
+  memoryId String   @db.Uuid
+  memory   PetMemory @relation(fields: [memoryId], references: [id], onDelete: Cascade)
+  /// The person the copy is for (the separated member).
+  userId   String   @db.Uuid
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// The household separation that caused the copy.
+  householdId String   @db.Uuid
+  /// The pet the copied memory belongs to, kept so a pet-scoped listing works without a join.
+  petId     String   @db.Uuid
+  pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([memoryId, userId])
+  @@index([userId, createdAt])
+  @@map("pet_memory_copies")
 }
 
 /// Active pet is a per-user, per-household preference — never stored on Pet itself.
@@ -1914,6 +2106,8 @@ model ProviderOrganization {
   name                      String
   type                      ProviderType
   verificationStatus        ProviderVerificationStatus @default(NOT_STARTED)
+  /// Fixture-origin records are safe for local/test flows but must never be surfaced by public production reads.
+  isDemoRecord             Boolean                    @default(false)
   /// ERP-C: partner-side submission time and the last admin note the partner may see (request for info / rejection).
   verificationSubmittedAt   DateTime?
   verificationNote          String?
@@ -2563,6 +2757,7 @@ model SellerOrganization {
   updatedAt DateTime @updatedAt
 
   offers                          SellerOffer[]
+  catalogProductRequests          CatalogProductRequest[]
   orders                          Order[]
   fulfillments                    Fulfillment[]
   shippingQuotes                  ShippingQuote[]
@@ -2632,6 +2827,7 @@ model Brand {
   updatedAt DateTime @updatedAt
 
   products Product[]
+  catalogImportJobs CatalogImportJob[]
 
   @@map("brands")
 }
@@ -2654,6 +2850,8 @@ model ProductCategory {
   updatedAt DateTime @updatedAt
 
   products Product[]
+  catalogProductRequests CatalogProductRequest[]
+  importJobs CatalogImportJob[]
 
   @@map("product_categories")
 }
@@ -2668,6 +2866,8 @@ model ProductCategory {
 /// stay easy to compare and maintain side by side.
 model Product {
   id             String            @id @default(uuid()) @db.Uuid
+  /// Seed/demo catalog fixtures are explicitly excluded from public production discovery.
+  isDemoRecord   Boolean           @default(false)
   /// Batch 4: structured specs [{ label, value }] supplied by manufacturer/seller — never medical claims.
   specifications Json?
   media          ProductMedia[]
@@ -2706,10 +2906,77 @@ model Product {
 
   variants   ProductVariant[]
   orderItems OrderItem[]
+  imports    CatalogImportItem[]
+  catalogProductRequests CatalogProductRequest[] @relation("ResolvedCatalogProductRequests")
 
   @@index([categoryId])
   @@index([status])
   @@map("products")
+}
+
+/// Audited operator-started imports from an external catalog. This stores no
+/// source price or stock as PET LIFE commerce data; imported products have no
+/// variants/offers until a seller creates one through the normal workflow.
+model CatalogImportJob {
+  id               String                 @id @default(uuid()) @db.Uuid
+  status           CatalogImportJobStatus @default(QUEUED)
+  submittedUrls    String[]
+  targetCategoryId String                 @db.Uuid
+  targetCategory   ProductCategory        @relation(fields: [targetCategoryId], references: [id], onDelete: Restrict)
+  targetBrandId    String?                @db.Uuid
+  targetBrand      Brand?                 @relation(fields: [targetBrandId], references: [id], onDelete: SetNull)
+  maxPages         Int                    @default(5)
+  maxProducts      Int                    @default(50)
+  pagesVisited     Int                    @default(0)
+  productsSeen     Int                    @default(0)
+  productsImported Int                    @default(0)
+  productsFailed   Int                    @default(0)
+  cancelRequested  Boolean                @default(false)
+  attempt          Int                    @default(0)
+  nextAttemptAt    DateTime               @default(now())
+  lockedUntil      DateTime?
+  idempotencyKey   String                 @unique
+  requestedById    String                 @db.Uuid
+  lastError        String?
+  startedAt        DateTime?
+  finishedAt       DateTime?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  items CatalogImportItem[]
+
+  @@index([status, nextAttemptAt])
+  @@index([requestedById, createdAt])
+  @@map("catalog_import_jobs")
+}
+
+/// One source identity may be observed in many jobs. New source versions are
+/// staged in pendingSnapshot and require an explicit admin decision; they
+/// never silently overwrite catalog content edited by PET LIFE staff.
+model CatalogImportItem {
+  id              String                  @id @default(uuid()) @db.Uuid
+  jobId           String                  @db.Uuid
+  job             CatalogImportJob        @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  source          String                  @default("DIGIKALA")
+  sourceItemId    String
+  sourceUrl       String
+  sourceSnapshot  Json
+  sourceHash      String
+  pendingSnapshot Json?
+  productId       String?                 @db.Uuid
+  product         Product?                @relation(fields: [productId], references: [id], onDelete: SetNull)
+  status          CatalogImportItemStatus @default(NEEDS_REVIEW)
+  errorCode       String?
+  errorDetail     String?
+  observedAt      DateTime                @default(now())
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  @@unique([jobId, sourceItemId])
+  @@index([source, sourceItemId, createdAt])
+  @@index([jobId, status])
+  @@index([productId])
+  @@map("catalog_import_items")
 }
 
 /// A purchasable unit of a Product (spec section 7) — e.g. "2kg Chicken" vs.
@@ -2753,6 +3020,49 @@ enum SellerOfferModerationStatus {
   PENDING_REVIEW
   APPROVED
   REJECTED
+}
+
+enum CatalogProductRequestStatus {
+  PENDING_REVIEW
+  APPROVED
+  MATCHED_EXISTING
+  REJECTED
+}
+
+/// Seller-originated request to add an absent central product. It never includes seller price or inventory;
+/// decision details and provenance remain attached to the request after approval, match, or rejection.
+model CatalogProductRequest {
+  id                   String @id @default(uuid()) @db.Uuid
+  sellerOrganizationId String @db.Uuid
+  sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
+  requestedByUserId    String @db.Uuid
+  requestedByUser      User @relation("RequestedCatalogProducts", fields: [requestedByUserId], references: [id], onDelete: Restrict)
+  categoryId           String? @db.Uuid
+  category             ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  resolvedProductId    String? @db.Uuid
+  resolvedProduct      Product? @relation("ResolvedCatalogProductRequests", fields: [resolvedProductId], references: [id], onDelete: SetNull)
+  reviewedByAdminId    String? @db.Uuid
+  reviewedByAdmin      AdminUser? @relation("ReviewedCatalogProducts", fields: [reviewedByAdminId], references: [id], onDelete: SetNull)
+
+  requestedTitle       String
+  normalizedTitle      String
+  brandName            String?
+  description          String?
+  specifications       Json?
+  sourceUrl            String?
+  sourceName           String?
+  status               CatalogProductRequestStatus @default(PENDING_REVIEW)
+  decisionReason       String?
+  duplicateReview      Json?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  reviewedAt           DateTime?
+
+  @@index([sellerOrganizationId, status, createdAt], map: "catalog_req_seller_status_created_idx")
+  @@index([status, createdAt])
+  @@index([resolvedProductId])
+  @@index([sellerOrganizationId, normalizedTitle, status], map: "catalog_req_seller_norm_title_status_idx")
+  @@map("catalog_product_requests")
 }
 
 model SellerOffer {
@@ -2922,12 +3232,12 @@ model Checkout {
   updatedAt DateTime  @updatedAt
   expiresAt DateTime?
 
-  reservations     InventoryReservation[]
-  orders           Order[]
-  paymentIntents   PaymentIntent[]
+  reservations        InventoryReservation[]
+  orders              Order[]
+  paymentIntents      PaymentIntent[]
   cardTransferPayment CardTransferPayment?
-  financingIntents FinancingIntent[]
-  shippingQuotes   ShippingQuote[]
+  financingIntents    FinancingIntent[]
+  shippingQuotes      ShippingQuote[]
 
   @@index([userId])
   @@index([cartId])
@@ -3135,18 +3445,18 @@ model ZibalPayment {
 /// A receipt-backed company-card payment. The receipt is an object-storage
 /// key rather than bytes or a public URL; the media layer authorises access.
 model CardTransferPayment {
-  id          String                    @id @default(uuid()) @db.Uuid
-  userId      String                    @db.Uuid
-  user        User                      @relation(fields: [userId], references: [id], onDelete: Restrict)
-  checkoutId  String?                   @unique @db.Uuid
-  checkout    Checkout?                 @relation(fields: [checkoutId], references: [id], onDelete: Restrict)
-  bookingId   String?                   @db.Uuid
-  booking     Booking?                  @relation(fields: [bookingId], references: [id], onDelete: Restrict)
-  status      CardTransferPaymentStatus @default(AWAITING_RECEIPT)
-  idempotencyKey String                  @unique
-  expectedAmount Int
-  receivedAmount Int?
-  currency       String                  @default("IRR")
+  id                      String                    @id @default(uuid()) @db.Uuid
+  userId                  String                    @db.Uuid
+  user                    User                      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  checkoutId              String?                   @unique @db.Uuid
+  checkout                Checkout?                 @relation(fields: [checkoutId], references: [id], onDelete: Restrict)
+  bookingId               String?                   @db.Uuid
+  booking                 Booking?                  @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  status                  CardTransferPaymentStatus @default(AWAITING_RECEIPT)
+  idempotencyKey          String                    @unique
+  expectedAmount          Int
+  receivedAmount          Int?
+  currency                String                    @default("IRR")
   companyCardNumberMasked String
   accountHolderName       String
   receiptObjectKey        String?
@@ -3155,10 +3465,10 @@ model CardTransferPayment {
   reviewAvailableAt       DateTime
   differenceDueAt         DateTime?
   reviewedAt              DateTime?
-  reviewedByAdminId       String?       @db.Uuid
+  reviewedByAdminId       String?                   @db.Uuid
   rejectionReason         String?
-  createdAt               DateTime      @default(now())
-  updatedAt               DateTime      @updatedAt
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
 
   @@index([userId, status])
   @@index([bookingId, status])
@@ -3182,19 +3492,19 @@ model WalletAccount {
 }
 
 model WalletEntry {
-  id                  String             @id @default(uuid()) @db.Uuid
-  walletAccountId     String             @db.Uuid
-  walletAccount       WalletAccount      @relation(fields: [walletAccountId], references: [id], onDelete: Restrict)
-  ledgerTransactionId String?            @unique @db.Uuid
-  ledgerTransaction   LedgerTransaction? @relation(fields: [ledgerTransactionId], references: [id], onDelete: Restrict)
+  id                  String              @id @default(uuid()) @db.Uuid
+  walletAccountId     String              @db.Uuid
+  walletAccount       WalletAccount       @relation(fields: [walletAccountId], references: [id], onDelete: Restrict)
+  ledgerTransactionId String?             @unique @db.Uuid
+  ledgerTransaction   LedgerTransaction?  @relation(fields: [ledgerTransactionId], references: [id], onDelete: Restrict)
   balanceType         WalletBalanceType
   kind                WalletEntryKind
   source              WalletCreditSource?
   amount              Int
   referenceType       String
-  referenceId         String             @db.Uuid
+  referenceId         String              @db.Uuid
   expiresAt           DateTime?
-  createdAt           DateTime           @default(now())
+  createdAt           DateTime            @default(now())
 
   @@index([walletAccountId, balanceType, createdAt])
   @@index([expiresAt])
@@ -3413,22 +3723,22 @@ model LedgerAccount {
 }
 
 model LedgerTransaction {
-  id            String   @id @default(uuid()) @db.Uuid
-  description   String
+  id                          String             @id @default(uuid()) @db.Uuid
+  description                 String
   /// "PAYMENT" | "REFUND" — which financial event this transaction records.
-  referenceType String
-  referenceId   String   @db.Uuid
-  currency      String   @default("IRR")
+  referenceType               String
+  referenceId                 String             @db.Uuid
+  currency                    String             @default("IRR")
   /// A correction never edits an earlier posting: it points to the original
   /// ledger transaction and reverses it with an explicit operational reason.
-  reversesLedgerTransactionId String? @unique @db.Uuid
+  reversesLedgerTransactionId String?            @unique @db.Uuid
   reversesLedgerTransaction   LedgerTransaction? @relation("LedgerReversal", fields: [reversesLedgerTransactionId], references: [id], onDelete: Restrict)
-  reversal                     LedgerTransaction? @relation("LedgerReversal")
-  correctionReason             String?
-  createdAt     DateTime @default(now())
+  reversal                    LedgerTransaction? @relation("LedgerReversal")
+  correctionReason            String?
+  createdAt                   DateTime           @default(now())
 
-  entries LedgerEntry[]
-  walletEntries WalletEntry[]
+  entries            LedgerEntry[]
+  walletEntries      WalletEntry[]
   providerSettlement ProviderSettlement?
 
   @@index([referenceType, referenceId])
@@ -4781,6 +5091,7 @@ model AdminUser {
   trustActions                  TrustAction[]
   reviewedAppeals               Appeal[]
   auditLogs                     AdminAuditLog[]
+  reviewedCatalogProductRequests CatalogProductRequest[] @relation("ReviewedCatalogProducts")
   requestedRefunds              AdminRefundApproval[]             @relation("RequestedRefunds")
   approvedRefunds               AdminRefundApproval[]             @relation("ApprovedRefunds")
   createdCommissionRules        CommissionRule[]
@@ -5330,6 +5641,9 @@ model MediaAsset {
 model Article {
   id String @id @default(uuid()) @db.Uuid
 
+  /// Development and QA seed articles are never public in production, even if a seed accidentally left a locale visible.
+  isDemoRecord Boolean @default(false)
+
   authorId String?        @db.Uuid
   author   ContentAuthor? @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
@@ -5621,6 +5935,8 @@ enum SubscriptionBillingAttemptStatus {
 /// need, unlike a growing article library.
 model SubscriptionPlan {
   id            String                 @id @default(uuid()) @db.Uuid
+  /// Dev-only paid plans/prices are hidden from customer-facing production plan reads.
+  isDemoRecord  Boolean                @default(false)
   code          String                 @unique
   nameFa        String
   nameEn        String
@@ -5770,6 +6086,16 @@ model Subscription {
   id          String    @id @default(uuid()) @db.Uuid
   householdId String    @unique @db.Uuid
   household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  /// The account that pays for this subscription (ID-07: "the payer of recurring items
+  /// transfers to the new owner; it is suspended until their approval").
+  ///
+  /// NULL means "no payer has been designated" and the household's owner is used, which is
+  /// the pre-existing behaviour. Once a payer is recorded, renewal attempts are held
+  /// while an ownership transfer is awaiting that payer's approval — charging the previous
+  /// owner for a household they no longer run is exactly what ID-07 forbids.
+  payerUserId String? @db.Uuid
+  payer       User?   @relation("SubscriptionPayer", fields: [payerUserId], references: [id], onDelete: SetNull)
 
   planId  String                 @db.Uuid
   plan    SubscriptionPlan       @relation("CurrentPlan", fields: [planId], references: [id], onDelete: Restrict)
@@ -7604,6 +7930,13 @@ enum PetMemoryVisibility {
   PUBLIC
 }
 
+enum PetMemorialStatus {
+  PENDING_REVIEW
+  PUBLISHED
+  REJECTED
+  WITHDRAWN
+}
+
 model PetMemory {
   id              String    @id @default(uuid()) @db.Uuid
   petId           String    @db.Uuid
@@ -7630,6 +7963,8 @@ model PetMemory {
   /// spec explicitly asks to "keep extensible" rather than hardcode a list.
   tags String[] @default([])
 
+  memorialSubmissions PetMemorialSubmission[]
+
   /// Handoff 21 — soft-delete/archive per spec: "Memories are personally
   /// meaningful data. Avoid destructive deletion." A non-null value means the
   /// household chose to archive the memory; the row is never hard-deleted by
@@ -7639,9 +7974,60 @@ model PetMemory {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  /// Read-only copies handed to people who separated from the household (ID-02).
+  copies PetMemoryCopy[]
+
   @@index([petId])
   @@index([householdId])
   @@map("pet_memories")
+}
+
+/// A separate, explicitly consented memorial publication. This never flips
+/// the source memory's visibility and the public API exposes only the
+/// display-name snapshot and selected image URL.
+model PetMemorialSubmission {
+  id                   String            @id @default(uuid()) @db.Uuid
+  petId                String            @db.Uuid
+  pet                  Pet               @relation(fields: [petId], references: [id], onDelete: Restrict)
+  ownerUserId          String            @db.Uuid
+  displayName          String            @db.VarChar(120)
+  imageMemoryId        String            @db.Uuid
+  imageMemory          PetMemory         @relation(fields: [imageMemoryId], references: [id], onDelete: Restrict)
+  sourceImageObjectKey String
+  /// Private, opaque copy used only for public memorial delivery; never the source photo URL.
+  publicationObjectKey String
+  consentVersion       String            @db.VarChar(32)
+  consentedAt          DateTime
+  status               PetMemorialStatus @default(PENDING_REVIEW)
+  submittedAt          DateTime          @default(now())
+  reviewedByAdminId    String?           @db.Uuid
+  reviewedAt           DateTime?
+  reviewReason         String?           @db.VarChar(1000)
+  publishedAt          DateTime?
+  withdrawnAt          DateTime?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  @@index([status, submittedAt])
+  @@index([ownerUserId, petId, createdAt])
+  @@map("pet_memorial_submissions")
+}
+
+/// Append-only event history for consent, moderation and withdrawal.
+/// Database triggers enforce immutability; no public endpoint reads this table.
+model PetMemorialAuditEvent {
+  id           String   @id @default(uuid()) @db.Uuid
+  submissionId String   @db.Uuid
+  actorUserId  String?  @db.Uuid
+  actorAdminId String?  @db.Uuid
+  action       String   @db.VarChar(40)
+  fromStatus   String?  @db.VarChar(40)
+  toStatus     String?  @db.VarChar(40)
+  reason       String?  @db.VarChar(1000)
+  createdAt    DateTime @default(now())
+
+  @@index([submissionId, createdAt])
+  @@map("pet_memorial_audit_events")
 }
 
 // ---------------------------------------------------------------------------
@@ -7967,6 +8353,8 @@ enum PetFriendlyPlaceStatus {
 
 model PetFriendlyPlace {
   id               String                   @id @default(uuid()) @db.Uuid
+  /// Imported/test place records are not public production content until reviewed and published.
+  isDemoRecord     Boolean                  @default(false)
   /// Batch 5 — null means "not stated", never "no".
   leashRequired    Boolean?
   waterAvailable   Boolean?
@@ -9101,15 +9489,13 @@ model ProductMedia {
   product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
   variantId String?         @db.Uuid
   variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
-  /// The repository-owned public object key for newly uploaded catalogue
-  /// media. Legacy rows predate the direct-upload flow and may only have a
-  /// stable `url`; new rows always retain the key so a client cannot attach
-  /// an arbitrary hotlink or another product's upload.
+  /// Scoped first-party storage key for new uploads; legacy media may only have a URL.
   objectKey String?         @unique
-  /// Repository-owned or storage-owned public URL; never a third-party
-  /// hotlink. It remains for compatibility with existing catalogue rows.
+  /// Repository-owned or storage-owned path; never a third-party hotlink.
   url       String
   alt       String?
+  /// Original source reference retained for attribution and audit; never used as a remote image hotlink.
+  sourceUrl String?
   sortOrder Int             @default(0)
   createdAt DateTime        @default(now())
 
@@ -11325,4 +11711,230 @@ model PetExpense {
 
   @@index([petId, spentOn])
   @@map("pet_expenses")
+}
+
+// ---------------------------------------------------------------------------
+// Help Center, legal documents and system status (Support & Legal surface).
+//
+// New tables only: nothing here alters an existing table, and none of it touches payment, ledger,
+// wallet, booking, clinical or pet-health data. Editor/actor columns are plain UUID references with
+// no Prisma relation (the same actor-reference convention InsurerMembership.userId uses), so adding
+// these tables needs no back-relation on AdminUser, User or any other pre-existing model.
+//
+// Decisions: AD-07..AD-10 (ticket queues, first-reply target, reopen window — served by the existing
+// SupportCase), GC-02/GC-05/GC-10/GC-12 (consent, authoritative legal text, RTL/LTR, calendars).
+// ---------------------------------------------------------------------------
+
+enum HelpArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum LegalDocumentKind {
+  TERMS_OF_SERVICE
+  PRIVACY_POLICY
+  COOKIE_CONSENT
+  COMMUNITY_GUIDELINES
+  ANIMAL_WELFARE
+  AI_AND_SAFETY
+  PAYMENT_AND_REFUND
+  DELIVERY
+  INSTALLMENT_HELP
+  ACCESSIBILITY
+}
+
+enum SystemIncidentStatus {
+  INVESTIGATING
+  IDENTIFIED
+  MONITORING
+  RESOLVED
+}
+
+enum SystemIncidentImpact {
+  NONE
+  MINOR
+  MAJOR
+  CRITICAL
+}
+
+/// A Help Center section. Titles are per-locale JSON ({ fa, en }) so a category needs no sibling table;
+/// `slug` is the stable URL key and never changes once published.
+model HelpCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  slug        String   @unique
+  titleFa     String
+  titleEn     String?
+  descriptionFa String?
+  descriptionEn String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  articles HelpArticle[]
+
+  @@index([isActive, sortOrder])
+  @@map("help_categories")
+}
+
+/// One Help Center article in one locale. `publishedVersion` points at the HelpArticleVersion the public
+/// reads, so a draft edit never leaks to readers and a rollback is just re-pointing it — the same
+/// "editing and publishing are separate actions" rule the blog follows. An article with nothing
+/// published has publishedVersion = null and is invisible publicly: empty means empty.
+model HelpArticle {
+  id         String       @id @default(uuid()) @db.Uuid
+  categoryId String       @db.Uuid
+  category   HelpCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  locale     Locale
+  slug       String
+  title      String
+  summary    String?
+  body       String
+  status     HelpArticleStatus @default(DRAFT)
+  /// Deep-link keys of the screens this article is "contextual help" for (e.g. "checkout.payment").
+  contextKeys String[] @default([])
+  isFaq      Boolean   @default(false)
+  sortOrder  Int       @default(0)
+  helpfulCount    Int  @default(0)
+  notHelpfulCount Int  @default(0)
+
+  publishedAt      DateTime?
+  publishedVersion Int?
+  /// Actor reference (no relation) — see the header comment.
+  createdByAdminId String   @db.Uuid
+  updatedByAdminId String   @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  versions HelpArticleVersion[]
+
+  @@unique([locale, slug])
+  @@index([categoryId, locale, status])
+  @@index([locale, status, isFaq])
+  @@map("help_articles")
+}
+
+/// An immutable snapshot of a HelpArticle, written on every save. Rollback copies a snapshot back and
+/// writes a NEW version, so history is append-only and no version is ever rewritten.
+model HelpArticleVersion {
+  id            String      @id @default(uuid()) @db.Uuid
+  articleId     String      @db.Uuid
+  article       HelpArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  versionNumber Int
+  editorAdminId String      @db.Uuid
+  changeNote    String?
+  snapshot      Json
+  createdAt     DateTime    @default(now())
+
+  @@unique([articleId, versionNumber])
+  @@index([articleId])
+  @@map("help_article_versions")
+}
+
+/// A legal document in one locale, versioned. The platform NEVER ships legal text it did not receive:
+/// a document with no published version renders an explicit empty state. `effectiveAt` is the date the
+/// published text takes effect and is what the public page shows as "last updated".
+/// GC-05: the English text is the authoritative reference; the Persian is informational.
+model LegalDocument {
+  id     String            @id @default(uuid()) @db.Uuid
+  kind   LegalDocumentKind
+  locale Locale
+  /// The number of the version currently published, or null when nothing is published yet.
+  publishedVersion Int?
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  versions LegalDocumentVersion[]
+
+  @@unique([kind, locale])
+  @@map("legal_documents")
+}
+
+model LegalDocumentVersion {
+  id            String        @id @default(uuid()) @db.Uuid
+  documentId    String        @db.Uuid
+  document      LegalDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  versionNumber Int
+  title         String
+  body          String
+  /// When this text takes effect — shown publicly as the "last updated" date.
+  effectiveAt   DateTime
+  editorAdminId String        @db.Uuid
+  changeNote    String?
+  publishedAt   DateTime?
+  createdAt     DateTime      @default(now())
+
+  @@unique([documentId, versionNumber])
+  @@index([documentId])
+  @@map("legal_document_versions")
+}
+
+/// A public incident on the status page. Components affected are free-form labels, not a table: the
+/// status page reports what the operations team wrote, and an empty list is rendered as "all systems
+/// operational" only when there is genuinely no open incident.
+model SystemIncident {
+  id         String               @id @default(uuid()) @db.Uuid
+  title      String
+  status     SystemIncidentStatus @default(INVESTIGATING)
+  impact     SystemIncidentImpact @default(MINOR)
+  components String[]             @default([])
+  startedAt  DateTime             @default(now())
+  resolvedAt DateTime?
+  createdByAdminId String         @db.Uuid
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+
+  updates SystemIncidentUpdate[]
+
+  @@index([status, startedAt])
+  @@map("system_incidents")
+}
+
+model SystemIncidentUpdate {
+  id         String               @id @default(uuid()) @db.Uuid
+  incidentId String               @db.Uuid
+  incident   SystemIncident       @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  status     SystemIncidentStatus
+  body       String
+  authorAdminId String            @db.Uuid
+  createdAt  DateTime             @default(now())
+
+  @@index([incidentId, createdAt])
+  @@map("system_incident_updates")
+}
+
+/// A scheduled maintenance window shown on the status page and, while active, on the maintenance page.
+model MaintenanceWindow {
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String
+  message   String?
+  startsAt  DateTime
+  endsAt    DateTime
+  createdByAdminId String @db.Uuid
+  cancelledAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startsAt, endsAt])
+  @@map("maintenance_windows")
+}
+
+/// The human hand-off on a support ticket (decision AD-07..AD-10). A request to reach a person is its own
+/// row, linked to the existing SupportCase by id rather than by new columns on it, so SupportCase is not
+/// altered. `referenceNumber` is the value the member is shown and quotes back; it is unique and
+/// generated server-side, never client-supplied.
+model SupportEscalation {
+  id              String   @id @default(uuid()) @db.Uuid
+  referenceNumber String   @unique
+  caseId          String   @db.Uuid
+  requesterUserId String   @db.Uuid
+  reason          String
+  /// Whether the member confirmed the hand-off on the confirmation step.
+  confirmedAt     DateTime
+  createdAt       DateTime @default(now())
+
+  @@index([caseId])
+  @@index([requesterUserId])
+  @@map("support_escalations")
 }

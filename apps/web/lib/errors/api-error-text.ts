@@ -145,15 +145,24 @@ function familyRule(code: string): string | null {
   return null;
 }
 
-const GENERIC = { fa: "انجام نشد. دوباره تلاش کنید.", en: "That didn't work. Please try again." };
+const GENERIC = {
+  fa: "انجام نشد. دوباره تلاش کنید.",
+  en: "That didn't work. Please try again.",
+  de: "Das hat nicht funktioniert. Bitte versuchen Sie es erneut.",
+  es: "No se pudo completar. Inténtalo de nuevo.",
+};
 
 /**
- * The sentence to show for a failed call: localized by error code in fa, the API's own words in en.
- * Without a locale it reads the page language (only ever called from client-side error handlers).
+ * The sentence to show for a failed call. Persian receives a translated error code; English keeps
+ * the API's human-readable sentence. German and Spanish must never leak an English API message, so
+ * they use the caller's localized fallback or a localized generic message. Without a locale, read
+ * the page language (only called from client-side error handlers).
  */
 export function apiErrorText(err: unknown, locale?: string, fallback?: string): string {
-  const fa = (locale ?? (typeof document === "undefined" ? "" : document.documentElement.lang)) === "fa";
+  const currentLocale = locale ?? (typeof document === "undefined" ? "" : document.documentElement.lang);
+  const fa = currentLocale === "fa";
   if (err instanceof ApiError) {
+    if (currentLocale === "de" || currentLocale === "es") return fallback || GENERIC[currentLocale];
     if (!fa) return err.message || fallback || GENERIC.en;
     return validationReasonRule(err) ?? FA[err.code] ?? familyRule(err.code) ?? fallback ?? GENERIC.fa;
   }

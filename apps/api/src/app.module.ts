@@ -21,6 +21,7 @@ import { AccountModule } from "./modules/account/account.module";
 import { UsersModule } from "./modules/users/users.module";
 import { HouseholdsModule } from "./modules/households/households.module";
 import { PetAccessModule } from "./modules/pet-access/pet-access.module";
+import { PetOwnershipModule } from "./modules/pet-ownership/pet-ownership.module";
 import { PetsModule } from "./modules/pets/pets.module";
 import { OnboardingModule } from "./modules/onboarding/onboarding.module";
 import { HomeModule } from "./modules/home/home.module";
@@ -56,6 +57,7 @@ import { MarketplaceModule } from "./modules/commerce/marketplace/marketplace.mo
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { AdminModule } from "./modules/admin/admin.module";
 import { SupportModule } from "./modules/support/support.module";
+import { HelpCenterModule } from "./modules/help-center/help-center.module";
 import { ContentModule } from "./modules/content/content.module";
 import { SubscriptionsModule } from "./modules/subscriptions/subscription.module";
 import { ClinicalHealthModule } from "./modules/clinical-health/clinical-health.module";
@@ -104,6 +106,7 @@ import { PlacesModule } from "./modules/places/places.module";
     UsersModule,
     HouseholdsModule,
     PetAccessModule,
+    PetOwnershipModule,
     PetsModule,
     OnboardingModule,
     HomeModule,
@@ -139,6 +142,7 @@ import { PlacesModule } from "./modules/places/places.module";
     NotificationsModule,
     AdminModule,
     SupportModule,
+    HelpCenterModule,
     ContentModule,
     SubscriptionsModule,
     ClinicalHealthModule,

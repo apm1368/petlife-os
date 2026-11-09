@@ -39,6 +39,7 @@ export class TravelExternalPublicService {
       sourceType: s.sourceType,
       sourceUrl: s.sourceUrl,
       lastSeenAt: seenAt.toISOString(),
+      lastSuccessfulSyncAt: s.lastSuccessfulSyncAt?.toISOString() ?? null,
       dataFreshness: freshnessOf(seenAt, { priceFreshHours: 24, priceAgingHours: Math.max(72, s.source.metadataTtlMinutes / 60) }),
       pet: {
         policyStatus: pet,

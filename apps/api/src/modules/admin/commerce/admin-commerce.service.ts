@@ -574,8 +574,11 @@ export class AdminCommerceService {
    * claim to be ready without the three reviewed, accessible gallery images
    * required by the approved Shop pattern. This is enforced at the domain
    * boundary, not only in the admin browser. */
-  private async assertProductReadyForPublic(productId: string): Promise<void> {
-    const media = await this.prisma.productMedia.findMany({
+  private async assertProductReadyForPublic(
+    productId: string,
+    db: Prisma.TransactionClient | PrismaService = this.prisma,
+  ): Promise<void> {
+    const media = await db.productMedia.findMany({
       where: { productId },
       select: { alt: true },
       orderBy: { sortOrder: "asc" },
@@ -619,7 +622,6 @@ export class AdminCommerceService {
       },
     });
     if (!before) throw new NotFoundApiException("Product", { productId });
-    if (input.status === ProductStatus.ACTIVE) await this.assertProductReadyForPublic(productId);
     if (input.categoryId) {
       const category = await this.prisma.productCategory.findFirst({
         where: { id: input.categoryId, status: "ACTIVE" },
@@ -645,19 +647,27 @@ export class AdminCommerceService {
       ...(input.supportsCat !== undefined ? { supportsCat: input.supportsCat } : {}),
       ...(input.status ? { status: input.status } : {}),
     };
-    const row = await this.prisma.product.update({
-      where: { id: productId },
-      data,
-      select: { id: true, title: true, slug: true, status: true, categoryId: true },
-    });
-    await this.audit.record({
-      adminUserId: admin.adminUserId,
-      action: "product.updated",
-      entityType: "PRODUCT",
-      entityId: productId,
-      beforeSummary: before,
-      afterSummary: row,
-      requestId: httpRequestId,
+    const row = await this.prisma.$transaction(async (tx) => {
+      if (input.status === ProductStatus.ACTIVE) {
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${productId}))`;
+        await this.assertProductReadyForPublic(productId, tx);
+      }
+      const updated = await tx.product.update({
+        where: { id: productId },
+        data,
+        select: { id: true, title: true, slug: true, status: true, categoryId: true },
+      });
+      await this.audit.record({
+        adminUserId: admin.adminUserId,
+        action: "product.updated",
+        entityType: "PRODUCT",
+        entityId: productId,
+        beforeSummary: before,
+        afterSummary: updated,
+        requestId: httpRequestId,
+        tx,
+      });
+      return updated;
     });
     return row;
   }
@@ -674,17 +684,24 @@ export class AdminCommerceService {
       select: { status: true },
     });
     if (!before) throw new NotFoundApiException("Product", { productId });
-    if (status === ProductStatus.ACTIVE) await this.assertProductReadyForPublic(productId);
-    const row = await this.prisma.product.update({ where: { id: productId }, data: { status } });
-    await this.audit.record({
-      adminUserId: admin.adminUserId,
-      action: "product.status_changed",
-      entityType: "PRODUCT",
-      entityId: productId,
-      reason,
-      beforeSummary: { status: before.status },
-      afterSummary: { status },
-      requestId: httpRequestId,
+    const row = await this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${productId}))`;
+      const current = await tx.product.findUnique({ where: { id: productId }, select: { status: true } });
+      if (!current) throw new NotFoundApiException("Product", { productId });
+      if (status === ProductStatus.ACTIVE) await this.assertProductReadyForPublic(productId, tx);
+      const updated = await tx.product.update({ where: { id: productId }, data: { status } });
+      await this.audit.record({
+        adminUserId: admin.adminUserId,
+        action: "product.status_changed",
+        entityType: "PRODUCT",
+        entityId: productId,
+        reason,
+        beforeSummary: { status: current.status },
+        afterSummary: { status },
+        requestId: httpRequestId,
+        tx,
+      });
+      return updated;
     });
     return { id: row.id, status: row.status };
   }
@@ -742,6 +759,10 @@ export class AdminCommerceService {
     }
 
     const row = await this.prisma.$transaction(async (tx) => {
+      // Serialize confirmations for one product. Without a per-product lock,
+      // concurrent confirmations can both observe two images and create a
+      // fourth image, leaving the product impossible to publish under C-03.
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${productId}))`;
       const count = await tx.productMedia.count({ where: { productId } });
       if (count >= 3) {
         throw new ApiException(
@@ -825,6 +846,11 @@ export class AdminCommerceService {
     });
     if (!existing) throw new NotFoundApiException("Product media", { productId, mediaId });
     await this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${productId}))`;
+      const product = await tx.product.findUniqueOrThrow({
+        where: { id: productId },
+        select: { status: true },
+      });
       await tx.productMedia.delete({ where: { id: mediaId } });
       const remaining = await tx.productMedia.findMany({
         where: { productId },
@@ -836,6 +862,23 @@ export class AdminCommerceService {
           tx.productMedia.update({ where: { id: item.id }, data: { sortOrder } }),
         ),
       );
+      // An active product must never remain discoverable after its required
+      // gallery becomes incomplete. Deactivate atomically with the removal
+      // and record the status correction in the same append-only audit log.
+      if (product.status === ProductStatus.ACTIVE && remaining.length !== 3) {
+        await tx.product.update({ where: { id: productId }, data: { status: ProductStatus.INACTIVE } });
+        await this.audit.record({
+          adminUserId: admin.adminUserId,
+          action: "product.status_changed",
+          entityType: "PRODUCT",
+          entityId: productId,
+          reason: "Product gallery became incomplete after an image was removed.",
+          beforeSummary: { status: ProductStatus.ACTIVE },
+          afterSummary: { status: ProductStatus.INACTIVE },
+          requestId: httpRequestId,
+          tx,
+        });
+      }
       await this.audit.record({
         adminUserId: admin.adminUserId,
         action: "product.media_removed",

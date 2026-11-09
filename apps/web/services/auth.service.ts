@@ -15,7 +15,7 @@ export const authService = {
   verifyOtp: (identifier: string, code: string) =>
     apiFetch<{ user: UserDto }>("/auth/verify-otp", { method: "POST", body: { identifier, code } }),
 
-  register: (input: { username: string; password: string; displayName?: string; email?: string }) =>
+  register: (input: { phone: string; firstName: string; lastName: string; username: string; password: string }) =>
     apiFetch<{ user: UserDto }>("/auth/register", { method: "POST", body: input }),
 
   loginPassword: (username: string, password: string) =>

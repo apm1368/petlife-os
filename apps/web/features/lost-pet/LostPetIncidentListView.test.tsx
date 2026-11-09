@@ -4,6 +4,7 @@ import type { LostPetIncidentDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { lostPetService } from "@/services/lost-pet.service";
 import { LostPetIncidentListView } from "./LostPetIncidentListView";
+import { ApiError } from "@/lib/api/client";
 
 vi.mock("@/services/lost-pet.service", () => ({ lostPetService: { list: vi.fn() } }));
 
@@ -67,5 +68,14 @@ describe("LostPetIncidentListView", () => {
     renderWithIntl(<LostPetIncidentListView petId="pet-1" />);
 
     await waitFor(() => expect(screen.getByRole("button", { name: "Try again" })).toBeTruthy());
+  });
+
+  it.each([["de", "Sie haben keinen Zugriff"], ["es", "No tienes acceso"]] as const)("localizes the no-access state in %s", async (locale, title) => {
+    vi.mocked(lostPetService.list).mockRejectedValue(new ApiError({ code: "FORBIDDEN", message: "Forbidden", requestId: "test" }, 403));
+
+    renderWithIntl(<LostPetIncidentListView petId="pet-1" />, locale);
+
+    await waitFor(() => expect(screen.getByRole("heading", { name: title })).toBeTruthy());
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
   });
 });

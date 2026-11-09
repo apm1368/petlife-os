@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, ServiceUnavailableException } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
 import {
   DocumentTooLargeException,
@@ -92,6 +92,64 @@ export class StorageService {
     if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
     const key = `pets/${petId}/${randomUUID()}.${extension}`;
     return this.driver.createUploadTarget(key, contentType);
+  }
+
+  /** Copies a validated, already-public source photo into an independently controlled private memorial asset. */
+  async createPetMemorialPublicationAsset(petId: string, sourceKey: string): Promise<string> {
+    const prefix = `pet-memories-public/${petId}/`;
+    const filename = sourceKey.startsWith(prefix) ? sourceKey.slice(prefix.length) : "";
+    const match = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.(jpe?g|png|webp)$/i.exec(filename);
+    if (!match) throw new Error("Invalid memorial source image object key");
+    const extension = match[2]!.toLowerCase();
+    const contentType = extension === "png" ? "image/png" : extension === "webp" ? "image/webp" : "image/jpeg";
+    const publicationKey = `pet-memorial-assets/${randomUUID()}.${extension}`;
+    try {
+      await this.driver.copyObject(sourceKey, publicationKey, contentType);
+      return publicationKey;
+    } catch {
+      // Storage errors can contain object keys; do not expose them in API errors/logs.
+      throw new ServiceUnavailableException("The selected photo is temporarily unavailable.");
+    }
+  }
+
+  /** Streams only an opaque private publication asset; never accepts the source pet-scoped key. */
+  async openPetMemorialPublicationAsset(key: string) {
+    if (!/^pet-memorial-assets\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpe?g|png|webp)$/i.test(key)) {
+      throw new Error("Invalid memorial publication asset key");
+    }
+    return this.driver.openObject(key);
+  }
+
+  /** Removes only a newly created orphan after its database transaction failed; never the owner's source photo. */
+  async deletePetMemorialPublicationAsset(key: string): Promise<void> {
+    if (!/^pet-memorial-assets\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpe?g|png|webp)$/i.test(key)) {
+      throw new Error("Invalid memorial publication asset key");
+    }
+    await this.driver.deleteObject(key);
+  }
+
+  /** Stores a validated public catalog image fetched by an approved importer. The caller must validate the source URL and bytes first. */
+  async storeCatalogImage(productId: string, contentType: string, bytes: Buffer): Promise<{ url: string; key: string }> {
+    const extensionByType: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+    const extension = extensionByType[contentType];
+    if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
+    if (bytes.length === 0 || bytes.length > 5 * 1024 * 1024) throw new DocumentTooLargeException({ fileSizeBytes: bytes.length, maxBytes: 5 * 1024 * 1024 });
+    const validSignature = contentType === "image/jpeg"
+      ? bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff
+      : contentType === "image/png"
+        ? bytes.length >= 8 && bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+        : bytes.length >= 12 && bytes.toString("ascii", 0, 4) === "RIFF" && bytes.toString("ascii", 8, 12) === "WEBP";
+    if (!validSignature) throw new UnsupportedDocumentTypeException({ contentType, reason: "image-signature-mismatch" });
+    const key = `product-catalog/${productId}/${randomUUID()}.${extension}`;
+    const target = await this.driver.createUploadTarget(key, contentType, bytes.length);
+    await this.driver.putObject(key, bytes, contentType);
+    return { url: target.publicUrl, key };
+  }
+
+  /** Removes an importer-created catalog image when an atomic draft creation fails. */
+  async deleteCatalogImage(key: string): Promise<void> {
+    if (!/^product-catalog\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.(jpg|png|webp)$/i.test(key)) throw new Error("Invalid catalog image key");
+    await this.driver.deleteObject(key);
   }
 
   /**

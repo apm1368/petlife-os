@@ -85,4 +85,14 @@ describe("TicketDetailView", () => {
     expect(screen.queryByPlaceholderText("Write a message…")).toBeNull();
     expect(screen.getByText("Reopen ticket")).toBeTruthy();
   });
+
+  it("localizes Spanish ticket controls and formats dates in Spanish", async () => {
+    renderWithIntl(<TicketDetailView caseId="case-1" />, "es");
+
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Solicitud CASE-000001" })).toBeTruthy());
+    expect(screen.getAllByText("En revisión")).toHaveLength(2);
+    expect(screen.getByText("Conversación")).toBeTruthy();
+    expect(screen.getByPlaceholderText("Escribe un mensaje…")).toBeTruthy();
+    expect(screen.getByText(/Soporte · 1\/1\/26/)).toBeTruthy();
+  });
 });

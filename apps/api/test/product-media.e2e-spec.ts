@@ -229,4 +229,48 @@ describe("Product media administration", () => {
       .send({ status: "ACTIVE", reason: "Should be refused" })
       .expect(409);
   });
+
+  it("deactivates a public product when removing a required gallery image", async () => {
+    const manager = await commerceAdmin();
+    const { product: p } = await product();
+    const ids: string[] = [];
+    for (const alt of ["Front package view", "Ingredients panel", "Product in use"]) {
+      const target = await uploadedTarget(manager, p.id);
+      const confirmed = await manager
+        .post(`/admin/commerce/products/${p.id}/media`)
+        .send({ objectKey: target.key, alt })
+        .expect(201);
+      ids.push(confirmed.body.id);
+    }
+    await manager
+      .patch(`/admin/commerce/products/${p.id}/status`)
+      .send({ status: "ACTIVE", reason: "Complete gallery reviewed" })
+      .expect(200);
+
+    await manager.delete(`/admin/commerce/products/${p.id}/media/${ids[0]}`).expect(200);
+
+    expect((await prisma.product.findUniqueOrThrow({ where: { id: p.id } })).status).toBe("INACTIVE");
+    const statusAudits = await prisma.adminAuditLog.findMany({
+      where: { entityType: "PRODUCT", entityId: p.id, action: "product.status_changed" },
+      select: { afterSummary: true },
+    });
+    expect(statusAudits.some((entry) => JSON.stringify(entry.afterSummary) === '{"status":"INACTIVE"}')).toBe(true);
+  });
+
+  it("serializes concurrent image confirmations and never exceeds three images", async () => {
+    const manager = await commerceAdmin();
+    const { product: p } = await product();
+    const targets = await Promise.all([0, 1, 2, 3].map(() => uploadedTarget(manager, p.id)));
+    const results = await Promise.all(
+      targets.map((target, index) =>
+        manager
+          .post(`/admin/commerce/products/${p.id}/media`)
+          .send({ objectKey: target.key, alt: `Product image ${index + 1}` }),
+      ),
+    );
+
+    expect(results.filter((response) => response.status === 201)).toHaveLength(3);
+    expect(results.filter((response) => response.status === 409)).toHaveLength(1);
+    expect(await prisma.productMedia.count({ where: { productId: p.id } })).toBe(3);
+  });
 });

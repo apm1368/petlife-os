@@ -28,6 +28,7 @@ import { Stepper } from "@/features/shared/Stepper";
 import { formatCount } from "@/lib/number/format-number";
 import { localizeDigits } from "@/lib/date/jalali";
 import { isolate } from "@/lib/text/bidi";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 type Step =
   | "address"
@@ -62,10 +63,14 @@ function toLatinDigits(value: string): string {
  */
 export function CheckoutView() {
   const t = useTranslations("commerce.checkout");
+  const tCart = useTranslations("commerce.cart");
+  const tCompatibility = useTranslations("commerce.compatibility");
   const design = useTranslations("commerce.design");
   const tCommon = useTranslations("common");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as RouteLocale;
+  const errorText = (err: unknown, fallback: string) =>
+    locale === "de" || locale === "es" ? fallback : apiErrorText(err, locale, fallback);
   const progress = (current: number) => (
     <Stepper steps={[t("progress.steps.address"), t("progress.steps.review"), t("progress.steps.shipping"), t("progress.steps.payment")]} current={current} label={t("progress.label")} />
   );
@@ -143,7 +148,9 @@ export function CheckoutView() {
       setDefaultAddress(false);
       setNewAddress({ recipient: "", phone: "", addressLine: "", city: "", postalCode: "", countryCode: "IR" });
     } catch (err) {
-      setAddressError(err instanceof ApiError && err.status < 500 ? err.message : t("address.saveFailed"));
+      // API messages are English implementation text for German and Spanish pages.
+      // Keep errors in the selected UI language instead of leaking backend copy.
+      setAddressError(errorText(err, t("address.saveFailed")));
     } finally {
       setIsCreatingAddress(false);
     }
@@ -165,7 +172,7 @@ export function CheckoutView() {
         router.push(`/${locale}/cart`);
         return;
       }
-      setError(apiErrorText(err, locale, t("createFailed")));
+      setError(errorText(err, t("createFailed")));
       setStep("address");
     }
   }
@@ -178,7 +185,7 @@ export function CheckoutView() {
       setShippingOptions(options);
       setStep("shipping");
     } catch (err) {
-      setError(apiErrorText(err, locale, t("createFailed")));
+      setError(errorText(err, t("createFailed")));
       setStep("review");
     }
   }
@@ -194,7 +201,7 @@ export function CheckoutView() {
       setShippingOptions(options);
       setCheckout(await commerceService.getCheckout(checkout.id));
     } catch (err) {
-      setError(apiErrorText(err, locale, t("createFailed")));
+      setError(errorText(err, t("createFailed")));
     } finally {
       setShippingQuoteSelectingId(null);
     }
@@ -208,7 +215,7 @@ export function CheckoutView() {
       setShippingOptions(options);
       setCheckout(await commerceService.getCheckout(checkout.id));
     } catch (err) {
-      setError(apiErrorText(err, locale, t("createFailed")));
+      setError(errorText(err, t("createFailed")));
     }
   }
 
@@ -220,7 +227,7 @@ export function CheckoutView() {
       setPaymentOptions(options);
       setStep("method");
     } catch (err) {
-      setError(apiErrorText(err, locale, t("createFailed")));
+      setError(errorText(err, t("createFailed")));
       setStep("review");
     }
   }
@@ -232,7 +239,7 @@ export function CheckoutView() {
       await commerceService.createPaymentIntent(checkout.id, provider, paymentIntentIdempotencyKey);
       setStep("payment");
     } catch (err) {
-      setError(apiErrorText(err, locale, t("createFailed")));
+      setError(errorText(err, t("createFailed")));
       setStep("method");
     }
   }
@@ -251,7 +258,7 @@ export function CheckoutView() {
         await loadPlans(intent.id);
       }
     } catch (err) {
-      setError(apiErrorText(err, locale, t("createFailed")));
+      setError(errorText(err, t("createFailed")));
       setStep("method");
     }
   }
@@ -271,7 +278,7 @@ export function CheckoutView() {
       setFinancingIntent(updated);
       setStep("financing-authorize");
     } catch (err) {
-      setError(apiErrorText(err, locale, t("createFailed")));
+      setError(errorText(err, t("createFailed")));
       setStep("financing-plans");
     }
   }
@@ -292,7 +299,7 @@ export function CheckoutView() {
         setStep("financing-declined");
       }
     } catch (err) {
-      setFailureMessage(apiErrorText(err, locale, t("financingDeclined.generic")));
+      setFailureMessage(errorText(err, t("financingDeclined.generic")));
       setStep("financing-declined");
     }
   }
@@ -325,7 +332,7 @@ export function CheckoutView() {
         setStep("failed");
       }
     } catch (err) {
-      setFailureMessage(apiErrorText(err, locale, t("paymentFailed.generic")));
+      setFailureMessage(errorText(err, t("paymentFailed.generic")));
       setStep("failed");
     }
   }
@@ -484,11 +491,15 @@ export function CheckoutView() {
         {progress(1)}
         <h1 className="text-page-title text-text-primary">{t("review.title")}</h1>
 
-        {checkout.validationIssues.map((issue) => (
-          <StatusLabel key={issue.code} tone="attention">
-            {issue.message}
-          </StatusLabel>
-        ))}
+        {checkout.validationIssues.map((issue) => {
+          const productTitle = checkout.sellerGroups.flatMap((group) => group.lines).find((line) => line.id === issue.cartLineId)?.productTitle ?? "";
+          const message = issue.code === "PRICE_CHANGED"
+            ? `${productTitle}: ${tCart("priceChanged")}`
+            : issue.code === "COMPATIBILITY_REVIEW_REQUIRED"
+              ? `${productTitle}: ${tCompatibility("status.NEEDS_REVIEW")}`
+              : tCart("fixIssuesFirst");
+          return <StatusLabel key={`${issue.code}-${issue.cartLineId ?? "order"}`} tone="attention">{message}</StatusLabel>;
+        })}
 
         {checkout.sellerGroups.map((group) => (
           <ContextSurface key={group.sellerOrganization.id} className="flex flex-col gap-2">
@@ -849,7 +860,7 @@ function CheckoutSummary({ cart, checkout }: { cart: CartDto; checkout: Checkout
   const t = useTranslations("commerce.checkout.summary");
   const tCart = useTranslations("commerce.cart");
   const tOrder = useTranslations("commerce.orderDetail");
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as RouteLocale;
   const lines = cart.sellerGroups.flatMap((g) => g.lines);
   return (
     <aside className="flow-summary" aria-label={t("title")}>

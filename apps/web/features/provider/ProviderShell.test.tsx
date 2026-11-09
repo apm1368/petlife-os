@@ -37,6 +37,17 @@ describe("ProviderShell", () => {
     expect(screen.queryByText("content")).toBeNull();
   });
 
+  it.each(["de", "es"] as const)("localizes the provider shell access state and navigation language in %s", async (locale) => {
+    route.pathname = `/${locale}/provider`;
+    vi.mocked(authService.getSession).mockResolvedValue({ user: { id: "u1", email: "not-a-provider@example.com", phone: null, displayName: "Not A Provider", avatarUrl: null, locale, themePreference: "SYSTEM", createdAt: "", updatedAt: "" } });
+    vi.mocked(providerOsService.getContext).mockResolvedValue({ active: null, memberships: [] } satisfies ProviderContextDto);
+
+    renderWithIntl(<ProviderShell><div>content</div></ProviderShell>, locale);
+
+    await waitFor(() => expect(screen.getByText(locale === "de" ? "Kein Zugriff auf den Anbieterbereich" : "Sin acceso al panel de proveedores")).toBeTruthy());
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
   it("shows an organization picker when the user belongs to more than one organization", async () => {
     vi.mocked(authService.getSession).mockResolvedValue({ user: { id: "u1", email: "multi@example.com", phone: null, displayName: "Multi Org", avatarUrl: null, locale: "en", themePreference: "SYSTEM", createdAt: "", updatedAt: "" } });
     vi.mocked(providerOsService.getContext).mockResolvedValue({

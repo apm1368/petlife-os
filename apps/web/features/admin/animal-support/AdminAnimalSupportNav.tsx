@@ -4,19 +4,19 @@ import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 export function AdminAnimalSupportNav() {
   const lang = useLocale();
-  const t = useTranslations("supportOpsNav");
+  const t = useTranslations("adminAnimalSupportNav");
   const pathname = usePathname() ?? "";
-  const ops = useTranslations("supportOps");
   const items = [
     { href: `/${lang}/admin/animal-support`, label: t("overview"), exact: true },
     { href: `/${lang}/admin/animal-support/needs`, label: t("needs") },
     { href: `/${lang}/admin/animal-support/organizations`, label: t("organizations") },
-    { href: `/${lang}/admin/animal-support/rescue-cases`, label: ops("rescues") },
-    { href: `/${lang}/admin/animal-support/campaigns`, label: ops("campaigns") },
+    { href: `/${lang}/admin/animal-support/rescue-cases`, label: t("rescues") },
+    { href: `/${lang}/admin/animal-support/campaigns`, label: t("campaigns") },
     { href: `/${lang}/admin/animal-support/donations`, label: t("donations") },
     { href: `/${lang}/admin/lost-pets`, label: t("lostPets") },
     { href: `/${lang}/admin/community`, label: t("reports") },
     { href: `/${lang}/admin/trust`, label: t("trust") },
+    { href: `/${lang}/admin/pet-memorials`, label: t("memorials") },
   ];
   return (
     <nav aria-label={t("label")} className="mb-4 flex gap-1 overflow-x-auto border-b border-border-subtle">

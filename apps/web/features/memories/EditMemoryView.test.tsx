@@ -76,6 +76,21 @@ describe("EditMemoryView", () => {
 
     await waitFor(() => expect(memoriesService.update).toHaveBeenCalledWith("pet-1", "memory-1", expect.objectContaining({ title: undefined })));
   });
+
+  it.each([
+    ["de", "Erinnerung bearbeiten", "Titel", "Beschreibung", "Änderungen speichern"],
+    ["es", "Editar recuerdo", "Título", "Descripción", "Guardar cambios"],
+  ] as const)("renders the edit form in %s and preserves the authored memory text", async (locale, heading, title, description, submit) => {
+    vi.mocked(memoriesService.get).mockResolvedValue(memory({ title: "A quiet Sunday", description: "He slept all afternoon" }));
+    const { container } = renderWithIntl(<EditMemoryView petId="pet-1" memoryId="memory-1" />, locale);
+
+    await waitFor(() => expect(screen.getByRole("heading", { name: heading })).toBeTruthy());
+    expect((screen.getByLabelText(title) as HTMLInputElement).value).toBe("A quiet Sunday");
+    expect((screen.getByLabelText(description) as HTMLInputElement).value).toBe("He slept all afternoon");
+    expect(screen.getByRole("button", { name: submit })).toBeTruthy();
+    expect((screen.getByLabelText(title) as HTMLInputElement).value).toBe("A quiet Sunday");
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
 });
 
 describe("parseTags", () => {

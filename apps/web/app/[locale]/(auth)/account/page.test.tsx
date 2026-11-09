@@ -33,4 +33,16 @@ describe("phone login", () => {
     expect(await screen.findByText("شماره موبایل معتبر ایران را وارد کنید.")).toBeTruthy();
     expect(authService.requestOtp).not.toHaveBeenCalled();
   });
+
+  it.each([
+    ["de", "Telefonnummer", "Code senden", "Einmalcode", "Bestätigen", "E-Mail oder Telefonnummer ändern"],
+    ["es", "Número de teléfono", "Enviar código", "Código de un solo uso", "Verificar", "Cambiar correo o teléfono"],
+  ] as const)("localizes phone login and OTP controls for %s", async (locale, phoneLabel, send, passcodeLabel, verify, change) => {
+    renderWithIntl(<AccountPage />, locale);
+    fireEvent.change(screen.getByLabelText(phoneLabel), { target: { value: "09123456789" } });
+    fireEvent.click(screen.getByRole("button", { name: send }));
+    expect(await screen.findByLabelText(passcodeLabel)).toBeTruthy();
+    expect(screen.getByRole("button", { name: verify })).toBeTruthy();
+    expect(screen.getByRole("button", { name: change })).toBeTruthy();
+  });
 });

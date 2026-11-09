@@ -2,7 +2,7 @@
 // Keep in sync with apps/api/prisma/schema.prisma enums — this package has no
 // runtime dependency on Prisma so it stays usable from the frontend.
 
-export type Locale = "fa" | "en";
+export type Locale = "fa" | "en" | "de" | "es";
 export type ThemePreference = "SYSTEM" | "LIGHT" | "DARK";
 
 /** VALIDATION_ERROR.details for a pet chip already on file. */
@@ -3523,6 +3523,16 @@ export interface MediaAssetDto {
   createdAt: string;
 }
 
+/** Public content needs display metadata only; admin identity and storage metadata stay private. */
+export interface PublicMediaAssetDto {
+  id: string;
+  url: string;
+  mimeType: string;
+  widthPx: number | null;
+  heightPx: number | null;
+  altText: string | null;
+}
+
 export interface ContentAuthorDto {
   id: string;
   name: string;
@@ -3531,6 +3541,10 @@ export interface ContentAuthorDto {
   createdAt: string;
   updatedAt: string;
 }
+
+export type PublicContentAuthorDto = Omit<ContentAuthorDto, "avatarMediaAsset" | "createdAt" | "updatedAt"> & {
+  avatarMediaAsset: PublicMediaAssetDto | null;
+};
 
 export interface CategoryLocaleDto {
   locale: Locale;
@@ -3651,8 +3665,8 @@ export interface PublicArticleSummaryDto {
   canonicalPath: string;
   title: string;
   excerpt: string | null;
-  coverMediaAsset: MediaAssetDto | null;
-  author: ContentAuthorDto | null;
+  coverMediaAsset: PublicMediaAssetDto | null;
+  author: PublicContentAuthorDto | null;
   category: PublicCategoryDto | null;
   tags: PublicTagDto[];
   publishedAt: string;
@@ -3675,7 +3689,7 @@ export interface PublicArticleReferenceDto {
   canonicalPath: string;
   title: string;
   excerpt: string | null;
-  coverMediaAsset: MediaAssetDto | null;
+  coverMediaAsset: PublicMediaAssetDto | null;
 }
 
 export interface PublicContentBlockDto {
@@ -3686,7 +3700,7 @@ export interface PublicContentBlockDto {
   ctaLabel: string | null;
   ctaHref: string | null;
   linkedArticle: PublicArticleReferenceDto | null;
-  mediaAsset: MediaAssetDto | null;
+  mediaAsset: PublicMediaAssetDto | null;
 }
 
 export interface PublicContentPlacementDto {
@@ -5153,6 +5167,7 @@ export interface InsuranceProductDto {
   providerId: string;
   providerName: string;
   providerLogoUrl: string | null;
+  providerWebsiteUrl: string | null;
   name: string;
   country: string;
   speciesEligibility: PetSpecies[];
@@ -6550,3 +6565,13 @@ export type {
   PartnerVerificationPolicyDto,
   PartnerVerificationDocumentKind,
 } from "./partner-verification";
+
+export type {
+  PetOwnershipDto,
+  PetOwnershipTransferDto,
+  PetOwnershipTransferOutcomeDto,
+  PetMemoryCopyDto,
+  PetMemoryDisposition,
+  PetOwnershipTransferStatusName,
+} from "./ownership";
+export { OWNERSHIP_TRANSFER_EXPIRY_DAYS, PET_MEMORY_DISPOSITIONS, PET_OWNERSHIP_TRANSFER_STATUSES } from "./ownership";

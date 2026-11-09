@@ -1,9 +1,25 @@
-.frame { display:flex; width:min(100%,1180px); margin-inline:auto; flex-direction:column; gap:clamp(28px,4vw,48px); }
-.frame :global(.section-head) { position:relative; padding-block-end:28px; }
-.frame :global(.section-head)::after { position:absolute; inset-inline-start:0; bottom:-1px; width:72px; height:2px; background:var(--brand-natural); content:""; }
-.frame :global(.health-overview__grid) { margin-top:0; }
-.frame :global(.health-overview__aside) { border-inline-start:1px solid var(--border-subtle); padding-inline-start:clamp(20px,3vw,40px); }
+.frame { display:flex; width:min(100%,1180px); margin-inline:auto; flex-direction:column; gap:var(--space-7); }
+.frame :global(.section-head) { position:relative; padding-block-end:var(--space-5); }
+.frame :global(.section-head)::after { position:absolute; inset-inline-start:0; bottom:-1px; width:72px; height:2px; background:var(--brand-primary); content:""; }
+.frame :global(.health-overview) { gap:var(--space-6); }
+.frame :global(.health-overview__grid) { margin-block-start:0; gap:var(--space-6); }
+.frame :global(.health-overview__main), .frame :global(.health-overview__aside) { gap:var(--space-5); }
+.frame :global(.health-overview__aside) { align-self:start; border:0; padding:0; background:transparent; }
+.frame :global(.health-overview__main > section), .frame :global(.health-overview__aside > section) { min-width:0; padding:var(--space-5); border:1px solid var(--border-subtle); border-radius:var(--radius-card); background:var(--surface-raised); box-shadow:var(--shadow-1); }
+.frame :global(.section-title) { margin-block-end:var(--space-4); }
+.frame :global(.stat-row) { border-radius:var(--radius-md); }
+.frame :global(.attention-banner) { border-radius:var(--radius-card); }
+.frame :global(.calm-note) { border-radius:var(--radius-md); }
 .frame :global(.care-rows), .frame :global(.cal-agenda-row) { border-color:var(--border-subtle); }
-.frame :global(.calendar-toolbar) { border-block:1px solid var(--border-subtle); padding-block:16px; }
-@media(max-width:1099px){.frame :global(.health-overview__aside){border-inline-start:0;padding-inline-start:0;border-top:1px solid var(--border-subtle);padding-top:28px}}
-@media(max-width:640px){.frame{gap:28px}.frame :global(.section-head){padding-block-end:20px}.frame :global(.calendar-toolbar){padding-block:12px}}
+.frame :global(.cal-agenda-row) { min-block-size:var(--touch-target-large); transition:background-color var(--dur-1); }
+.frame :global(.cal-agenda-row:hover) { background:var(--surface-sunken); }
+.frame :global(.calendar-toolbar) { gap:var(--space-3); border-block:1px solid var(--border-subtle); padding-block:var(--space-4); }
+.frame :global(.calendar-toolbar__month button) { min-block-size:var(--touch-target-min); }
+.frame :global(.calendar-toolbar__views) { border-radius:var(--radius-md); background:var(--surface-page); }
+.frame :global(.calendar-toolbar__views button) { min-block-size:var(--touch-target-min); }
+.frame :global(.calendar-toolbar__pet select) { min-block-size:var(--touch-target-min); border-radius:var(--radius-md); }
+.frame :global(.cal-day) { border-radius:var(--radius-sm); }
+.frame :global(.cal-day__num) { min-inline-size:var(--touch-target-min); block-size:var(--touch-target-min); margin-block-end:var(--space-1); }
+.frame :global(.cal-chip) { border-radius:var(--radius-sm); }
+@media(max-width:1099px){.frame :global(.health-overview__aside){border-inline-start:0;padding-inline-start:0;border-top:0;padding-block-start:0}}
+@media(max-width:640px){.frame{gap:var(--space-6)}.frame :global(.section-head){padding-block-end:var(--space-4)}.frame :global(.health-overview__main > section),.frame :global(.health-overview__aside > section){padding:var(--space-4)}.frame :global(.calendar-toolbar){padding-block:var(--space-3)}}

@@ -17,7 +17,19 @@ import { usePetStore } from "@/stores/pet-store";
 import { careRemindersService, type CareReminder } from "@/services/care-reminders.service";
 import { careTitle } from "@/features/care/care-labels";
 import { EditPetIdentity } from "./EditPetIdentity";
-import { attentionTitle, eventSourceLabel, eventTitle, formatOverviewDate, severityBarClass, severityLabel, severityTone, collapseLabPanels, mergeCareIntoOverview } from "./overview-labels";
+import {
+  attentionTitle,
+  eventSourceLabel,
+  eventTitle,
+  formatOverviewDate,
+  severityBarClass,
+  severityLabel,
+  severityTone,
+  collapseLabPanels,
+  mergeCareIntoOverview,
+} from "./overview-labels";
+import type { RouteLocale } from "@/lib/i18n/config";
+import styles from "./PetProfileView.module.css";
 
 const copy = {
   fa: {
@@ -102,10 +114,98 @@ const copy = {
     memorialTitle: "Life story and history",
     memorialDescription: "Health history remains respectfully available while memories take priority.",
   },
+  de: {
+    eyebrow: "Zusammengeführte Haustierakte",
+    title: "Was jetzt wichtig ist",
+    description:
+      "Wichtige Pflege, anstehende Ereignisse und aktuelle Vorgeschichte aus tatsächlich gespeicherten Angaben.",
+    attention: "Erfordert Aufmerksamkeit",
+    noAttention: "In den gespeicherten Angaben wurde kein konkreter Handlungsbedarf gefunden.",
+    noAttentionHint:
+      "Das bedeutet nicht, dass alle Gesundheitsinformationen bekannt oder klinisch unauffällig sind.",
+    upcoming: "Anstehend",
+    noUpcoming: "Es wurde kein zukünftiges Ereignis mit Datum erfasst.",
+    recentHealth: "Aktuelle Gesundheit",
+    noHealth: "Es sind noch keine Gesundheitsereignisse verfügbar.",
+    recentActivity: "Aktuelle Aktivitäten",
+    noActivity: "Für dieses Haustier wurden noch keine Aktivitäten erfasst.",
+    recentMemory: "Letzte Erinnerung",
+    noMemory: "Es wurde noch keine Erinnerung erfasst.",
+    useful: "Schnellzugriffe",
+    health: "Gesundheitsakte öffnen",
+    care: "Pflegebereich",
+    document: "Medizinisches Dokument hochladen",
+    memory: "Erinnerung hinzufügen",
+    yearReview: "Jahresrückblick und Geburtstag",
+    careSheet: "Pflegeblatt für Betreuungspersonen",
+    household: "Haushalt",
+    editTitle: "Angaben bearbeiten",
+    name: "Name",
+    breed: "Rasse",
+    cancel: "Abbrechen",
+    save: "Änderungen speichern",
+    loadError: "Die Aktenübersicht konnte nicht geladen werden.",
+    retry: "Erneut versuchen",
+    loading: "Haustierübersicht wird vorbereitet",
+    recordedData: "Erfasste Daten",
+    provider: "Anbieter",
+    owner: "Halter/Haushalt",
+    system: "System",
+    incomplete: "Das Gesundheitsprofil ist unvollständig.",
+    vaccinationOverdue: "Eine Impfung ist überfällig.",
+    vaccinationDue: "Eine Impfung ist bald fällig.",
+    memorialTitle: "Lebensgeschichte und Erinnerungen",
+    memorialDescription:
+      "Die Gesundheitsgeschichte bleibt respektvoll verfügbar; Erinnerungen stehen im Vordergrund.",
+  },
+  es: {
+    eyebrow: "Historial unificado de la mascota",
+    title: "Lo que importa ahora",
+    description:
+      "Cuidados importantes, próximos eventos e historial reciente a partir de información realmente registrada.",
+    attention: "Requiere atención",
+    noAttention: "No se encontraron acciones pendientes en los datos registrados.",
+    noAttentionHint:
+      "Esto no significa que se conozca toda la información de salud ni que todo esté clínicamente normal.",
+    upcoming: "Próximos",
+    noUpcoming: "No hay eventos futuros con fecha registrada.",
+    recentHealth: "Salud reciente",
+    noHealth: "Todavía no hay eventos de salud disponibles.",
+    recentActivity: "Actividad reciente",
+    noActivity: "Todavía no se ha registrado actividad para esta mascota.",
+    recentMemory: "Último recuerdo",
+    noMemory: "Todavía no se ha registrado ningún recuerdo.",
+    useful: "Accesos rápidos",
+    health: "Abrir historial de salud",
+    care: "Centro de cuidados",
+    document: "Subir documento médico",
+    memory: "Añadir recuerdo",
+    yearReview: "Resumen del año y cumpleaños",
+    careSheet: "Ficha de cuidados para cuidadores",
+    household: "Hogar",
+    editTitle: "Editar datos",
+    name: "Nombre",
+    breed: "Raza",
+    cancel: "Cancelar",
+    save: "Guardar cambios",
+    loadError: "No se pudo cargar el resumen del historial.",
+    retry: "Intentar de nuevo",
+    loading: "Preparando el resumen de la mascota",
+    recordedData: "Datos registrados",
+    provider: "Proveedor",
+    owner: "Tutor/a u hogar",
+    system: "Sistema",
+    incomplete: "El perfil de salud está incompleto.",
+    vaccinationOverdue: "Hay una vacuna vencida.",
+    vaccinationDue: "Pronto vence una vacuna.",
+    memorialTitle: "Historia de vida y recuerdos",
+    memorialDescription:
+      "El historial de salud permanece disponible con respeto y los recuerdos tienen prioridad.",
+  },
 } as const;
 
 export function PetProfileView({ petId }: { petId: string }) {
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as RouteLocale;
   const c = copy[locale];
   const t = useTranslations("petOverview");
   const upsertPet = usePetStore((state) => state.upsertPet);
@@ -124,14 +224,18 @@ export function PetProfileView({ petId }: { petId: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const isEditing = searchParams.get("edit") === "identity";
-  const setIsEditing = (on: boolean) => router.replace(on ? `${pathname}?edit=identity` : pathname, { scroll: false });
+  const setIsEditing = (on: boolean) =>
+    router.replace(on ? `${pathname}?edit=identity` : pathname, { scroll: false });
   useEffect(() => {
     let current = true;
     setSnapshot(null);
     setErrorPetId(null);
     void (async () => {
       try {
-        const [overview, access] = await Promise.all([petsService.getOverview(petId), petsService.getMyAccess(petId)]);
+        const [overview, access] = await Promise.all([
+          petsService.getOverview(petId),
+          petsService.getMyAccess(petId),
+        ]);
         if (!current) return;
         let care: CareReminder[] = [];
         let careError = false;
@@ -147,16 +251,22 @@ export function PetProfileView({ petId }: { petId: string }) {
         if (current) setErrorPetId(petId);
       }
     })();
-    return () => { current = false; };
+    return () => {
+      current = false;
+    };
   }, [petId, revision]);
 
-  if (errorPetId === petId) return <ErrorRecovery title={c.loadError} message="" retryLabel={c.retry} onRetry={reload} />;
+  if (errorPetId === petId)
+    return <ErrorRecovery title={c.loadError} message="" retryLabel={c.retry} onRetry={reload} />;
   // The route may change before its effect runs: never render old records/permissions under new links.
-  if (!snapshot || snapshot.petId !== petId) return <Skeleton className="h-96 w-full" aria-label={c.loading} />;
+  if (!snapshot || snapshot.petId !== petId)
+    return <Skeleton className="h-96 w-full" aria-label={c.loading} />;
   const { overview, access, care, careError } = snapshot;
 
   const base = "/" + locale + "/pets/" + petId;
-  const isMemorial = overview.pet.lifecycleStatus === PetLifecycleStatus.DECEASED || overview.pet.lifecycleStatus === PetLifecycleStatus.MEMORIAL;
+  const isMemorial =
+    overview.pet.lifecycleStatus === PetLifecycleStatus.DECEASED ||
+    overview.pet.lifecycleStatus === PetLifecycleStatus.MEMORIAL;
 
   if (isEditing && access.canEditIdentity) {
     return (
@@ -179,98 +289,193 @@ export function PetProfileView({ petId }: { petId: string }) {
   const upcoming = merged.upcoming.slice(0, 5);
 
   return (
-    <div className="pet-overview">
-      <h1 className="sr-only">{isMemorial ? c.memorialTitle : c.title}</h1>
-      <div className="pet-overview__main">
-        {careError ? (
-          <div role="alert" className="grid gap-3 rounded-2xl border border-border-subtle bg-surface-subtle p-4">
-            <p className="text-body text-text-primary">{t("careUnavailable")}</p>
-            <Button variant="secondary" className="w-fit" onClick={reload}>{c.retry}</Button>
-          </div>
-        ) : null}
-        {isMemorial ? (
-          <section className="pet-overview__memorial">
-            <h2>{c.memorialTitle}</h2>
-            <p>{c.memorialDescription}</p>
-          </section>
-        ) : null}
-        {!isMemorial ? (
-          <OverviewSection title={c.attention}>
-            {attention.length === 0 ? (
-              <div className="pet-overview__calm">
-                <p>{careError ? t("careIncomplete") : c.noAttention}</p>
-                {!careError ? <p>{c.noAttentionHint}</p> : null}
-              </div>
+    <div className={styles.page}>
+      <div className="pet-overview">
+        <h1 className="sr-only">{isMemorial ? c.memorialTitle : c.title}</h1>
+        <div className="pet-overview__main">
+          {careError ? (
+            <div
+              role="alert"
+              className="grid gap-3 rounded-2xl border border-border-subtle bg-surface-subtle p-4"
+            >
+              <p className="text-body text-text-primary">{t("careUnavailable")}</p>
+              <Button variant="secondary" className="w-fit" onClick={reload}>
+                {c.retry}
+              </Button>
+            </div>
+          ) : null}
+          {isMemorial ? (
+            <section className="pet-overview__memorial">
+              <h2>{c.memorialTitle}</h2>
+              <p>{c.memorialDescription}</p>
+            </section>
+          ) : null}
+          {!isMemorial ? (
+            <OverviewSection title={c.attention}>
+              {attention.length === 0 ? (
+                <div className="pet-overview__calm">
+                  <p>{careError ? t("careIncomplete") : c.noAttention}</p>
+                  {!careError ? <p>{c.noAttentionHint}</p> : null}
+                </div>
+              ) : (
+                <div className="divide-y divide-border-subtle border-y border-border-subtle">
+                  {attention.map((item) => (
+                    <AttentionRow key={item.id} item={item} base={base} locale={locale} />
+                  ))}
+                </div>
+              )}
+            </OverviewSection>
+          ) : null}
+          {!isMemorial ? (
+            <OverviewSection title={c.upcoming}>
+              <EventList
+                items={upcoming}
+                empty={careError ? t("careIncomplete") : c.noUpcoming}
+                base={base}
+                locale={locale}
+                showSource={false}
+                compact
+              />
+            </OverviewSection>
+          ) : null}
+          <OverviewSection title={c.recentHealth}>
+            <EventList
+              items={collapseLabPanels(overview.recentHealth, locale)}
+              empty={c.noHealth}
+              base={base}
+              locale={locale}
+              compact
+            />
+          </OverviewSection>
+        </div>
+
+        <aside className="pet-overview__aside">
+          <OverviewSection title={c.useful}>
+            <div className="pet-overview__actions">
+              {access.canViewHealth ? <Shortcut href={base + "/health"} label={c.health} /> : null}
+              {access.canViewCareProfile ? <Shortcut href={base + "/care"} label={c.care} /> : null}
+              {access.canEditHealth ? (
+                <Shortcut href={base + "/health/advanced/documents"} label={c.document} />
+              ) : null}
+              <Shortcut href={base + "/memories/new"} label={c.memory} />
+              <Shortcut href={base + "/year-review"} label={c.yearReview} />
+              {access.canViewCareProfile && !isMemorial ? (
+                <Shortcut href={base + "/care-sheet"} label={c.careSheet} />
+              ) : null}
+            </div>
+          </OverviewSection>
+          <OverviewSection title={c.recentActivity}>
+            <EventList
+              items={collapseLabPanels(
+                overview.recentActivity.filter(
+                  (a) =>
+                    a.type !== "MEMORY" &&
+                    !overview.recentHealth.some((h) => h.type === a.type && h.id === a.id),
+                ),
+                locale,
+              )}
+              empty={c.noActivity}
+              base={base}
+              locale={locale}
+              compact
+            />
+          </OverviewSection>
+          <OverviewSection title={c.recentMemory}>
+            {overview.recentMemory ? (
+              <Link href={base + "/memories/" + overview.recentMemory.id} className="pet-overview__memory">
+                <p>
+                  {overview.recentMemory.title ??
+                    formatOverviewDate(overview.recentMemory.occurredAt, locale)}
+                </p>
+                <span>{formatOverviewDate(overview.recentMemory.occurredAt, locale)}</span>
+              </Link>
             ) : (
-              <div className="divide-y divide-border-subtle border-y border-border-subtle">
-                {attention.map((item) => <AttentionRow key={item.id} item={item} base={base} locale={locale} />)}
-              </div>
+              <p className="text-sm text-text-secondary">{c.noMemory}</p>
             )}
           </OverviewSection>
-        ) : null}
-        {!isMemorial ? (
-          <OverviewSection title={c.upcoming}>
-            <EventList items={upcoming} empty={careError ? t("careIncomplete") : c.noUpcoming} base={base} locale={locale} showSource={false} compact />
-          </OverviewSection>
-        ) : null}
-        <OverviewSection title={c.recentHealth}>
-          <EventList items={collapseLabPanels(overview.recentHealth, locale)} empty={c.noHealth} base={base} locale={locale} compact />
-        </OverviewSection>
+          {overview.householdName ? (
+            <p className="pet-overview__household">
+              {c.household}: {overview.householdName}
+            </p>
+          ) : null}
+        </aside>
       </div>
-
-      <aside className="pet-overview__aside">
-        <OverviewSection title={c.useful}>
-          <div className="pet-overview__actions">
-            {access.canViewHealth ? <Shortcut href={base + "/health"} label={c.health} /> : null}
-            {access.canViewCareProfile ? <Shortcut href={base + "/care"} label={c.care} /> : null}
-            {access.canEditHealth ? <Shortcut href={base + "/health/advanced/documents"} label={c.document} /> : null}
-            <Shortcut href={base + "/memories/new"} label={c.memory} />
-            <Shortcut href={base + "/year-review"} label={c.yearReview} />
-            {access.canViewCareProfile && !isMemorial ? <Shortcut href={base + "/care-sheet"} label={c.careSheet} /> : null}
-          </div>
-        </OverviewSection>
-        <OverviewSection title={c.recentActivity}>
-          <EventList items={collapseLabPanels(overview.recentActivity.filter((a) => a.type !== "MEMORY" && !overview.recentHealth.some((h) => h.type === a.type && h.id === a.id)), locale)} empty={c.noActivity} base={base} locale={locale} compact />
-        </OverviewSection>
-        <OverviewSection title={c.recentMemory}>
-          {overview.recentMemory ? (
-            <Link href={base + "/memories/" + overview.recentMemory.id} className="pet-overview__memory">
-              <p>{overview.recentMemory.title ?? formatOverviewDate(overview.recentMemory.occurredAt, locale)}</p>
-              <span>{formatOverviewDate(overview.recentMemory.occurredAt, locale)}</span>
-            </Link>
-          ) : <p className="text-sm text-text-secondary">{c.noMemory}</p>}
-        </OverviewSection>
-        {overview.householdName ? <p className="pet-overview__household">{c.household}: {overview.householdName}</p> : null}
-      </aside>
     </div>
   );
 }
 
 function OverviewSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return <section><h2 className="mb-4 text-section-title text-text-primary">{title}</h2>{children}</section>;
+  return (
+    <section>
+      <h2 className="mb-4 text-section-title text-text-primary">{title}</h2>
+      {children}
+    </section>
+  );
 }
 
-function AttentionRow({ item, base, locale }: { item: PetOverviewAttentionDto; base: string; locale: "fa" | "en" }) {
+function AttentionRow({
+  item,
+  base,
+  locale,
+}: {
+  item: PetOverviewAttentionDto;
+  base: string;
+  locale: RouteLocale;
+}) {
   const label = attentionTitle(item.title, locale);
   const tone = severityTone(item.severity);
   return (
     <Link href={base + item.href} className="grid min-h-20 grid-cols-[auto_1fr_auto] items-center gap-4 py-4">
       <span className={"h-10 w-1 " + severityBarClass(item.severity)} aria-hidden="true" />
-      <div><p className="font-bold text-text-primary">{label}</p>{item.dueAt ? <p className="mt-1 text-xs text-text-secondary">{formatOverviewDate(item.dueAt, locale)}</p> : null}</div>
-      {item.severity === "ATTENTION" ? null : <StatusLabel tone={tone}>{severityLabel(item.severity, locale)}</StatusLabel>}
+      <div>
+        <p className="font-bold text-text-primary">{label}</p>
+        {item.dueAt ? (
+          <p className="mt-1 text-xs text-text-secondary">{formatOverviewDate(item.dueAt, locale)}</p>
+        ) : null}
+      </div>
+      {item.severity === "ATTENTION" ? null : (
+        <StatusLabel tone={tone}>{severityLabel(item.severity, locale)}</StatusLabel>
+      )}
     </Link>
   );
 }
 
-function EventList({ items, empty, base, locale, compact = false, showSource = true }: { items: PetOverviewEventDto[]; empty: string; base: string; locale: "fa" | "en"; compact?: boolean; showSource?: boolean }) {
-  if (items.length === 0) return <p className="border-y border-border-subtle py-5 text-sm text-text-secondary">{empty}</p>;
+function EventList({
+  items,
+  empty,
+  base,
+  locale,
+  compact = false,
+  showSource = true,
+}: {
+  items: PetOverviewEventDto[];
+  empty: string;
+  base: string;
+  locale: RouteLocale;
+  compact?: boolean;
+  showSource?: boolean;
+}) {
+  if (items.length === 0)
+    return <p className="border-y border-border-subtle py-5 text-sm text-text-secondary">{empty}</p>;
   return (
     <div className="divide-y divide-border-subtle border-y border-border-subtle">
       {items.map((item) => {
         const href = item.href.startsWith("/bookings/") ? "/" + locale + item.href : base + item.href;
         return (
-          <Link key={item.type + "-" + item.id} href={href} className={"flex items-center justify-between gap-4 " + (compact ? "min-h-16 py-3" : "min-h-20 py-4")}>
-            <div className="min-w-0"><p className="truncate font-bold text-text-primary">{eventTitle(item.title, locale)}</p><p className="mt-1 text-xs text-text-secondary">{formatOverviewDate(item.occurredAt, locale)}{item.providerName ? " · " + item.providerName : ""}</p></div>
+          <Link
+            key={item.type + "-" + item.id}
+            href={href}
+            className={
+              "flex items-center justify-between gap-4 " + (compact ? "min-h-16 py-3" : "min-h-20 py-4")
+            }
+          >
+            <div className="min-w-0">
+              <p className="truncate font-bold text-text-primary">{eventTitle(item.title, locale)}</p>
+              <p className="mt-1 text-xs text-text-secondary">
+                {formatOverviewDate(item.occurredAt, locale)}
+                {item.providerName ? " · " + item.providerName : ""}
+              </p>
+            </div>
             {showSource ? <StatusLabel tone="neutral">{eventSourceLabel(item, locale)}</StatusLabel> : null}
           </Link>
         );
@@ -280,9 +485,12 @@ function EventList({ items, empty, base, locale, compact = false, showSource = t
 }
 
 function Shortcut({ href, label }: { href: string; label: string }) {
-  return <Link href={href} className="pet-overview__action"><span>{label}</span><span aria-hidden="true" className="dir-flip">←</span></Link>;
+  return (
+    <Link href={href} className="pet-overview__action">
+      <span>{label}</span>
+      <span aria-hidden="true" className="dir-flip">
+        ←
+      </span>
+    </Link>
+  );
 }
-
-
-
-

@@ -89,6 +89,17 @@ export class PetsService {
 
       await this.petAccess.applyHouseholdDefaults(pet.id, householdId, creatorUserId, tx);
 
+      // ID-01: every pet has exactly one primary owner, and that owner is recorded
+      // explicitly rather than inferred from household role. The creator is the
+      // primary owner at creation — they are the one who added the pet and the one
+      // accountable for it. The row is written inside the same transaction as the
+      // pet, so a pet can never exist without an owner.
+      await tx.petOwnership.upsert({
+        where: { petId: pet.id },
+        create: { petId: pet.id, ownerUserId: creatorUserId, householdId, transferredAt: new Date() },
+        update: { ownerUserId: creatorUserId, householdId, transferredAt: new Date() },
+      });
+
       const hasActivePet = await tx.activePetPreference.findUnique({
         where: { userId_householdId: { userId: creatorUserId, householdId } },
       });
@@ -149,7 +160,7 @@ export class PetsService {
             dto.microchipNumber === undefined ? undefined : normalizeMicrochip(dto.microchipNumber),
         },
       });
-      await this.events.publish("PetProfileUpdated", { petId: id }, { tx, aggregateType: "Pet", aggregateId: id });
+      await this.events.publish("PetProfileUpdated", { petId: id, changedFields: Object.keys(dto).sort() }, { tx, aggregateType: "Pet", aggregateId: id });
       return pet;
     }).catch(rethrowDuplicateMicrochip);
   }

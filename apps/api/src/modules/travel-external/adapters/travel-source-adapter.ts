@@ -100,9 +100,9 @@ export interface TravelSourceAdapter {
   /** Low-frequency, few-request check: is the public surface reachable and does it still look like we expect? */
   healthCheck(ctx: ScrapeContext): Promise<HealthCheckResult>;
   discover(ctx: ScrapeContext): Promise<DiscoveryResult>;
-  fetchDetails(ctx: ScrapeContext, externalId: string): Promise<RawListing>;
+  fetchDetails(ctx: ScrapeContext, externalId: string, searchRaw?: RawListing): Promise<RawListing>;
   normalize(raw: RawListing): NormalizedListing;
-  extractPetPolicy(raw: RawListing): PetPolicyObservation;
+  extractPetPolicy(raw: RawListing, searchRaw?: RawListing): PetPolicyObservation;
   extractPrices(raw: RawListing): PriceObservation[];
   extractImages(raw: RawListing): string[];
   /** Optional on-demand date quote (single request) for a member search; absent → cached observations only. */

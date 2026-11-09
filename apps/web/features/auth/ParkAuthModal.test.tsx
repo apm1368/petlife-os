@@ -11,7 +11,7 @@ beforeEach(() => { replace.mockClear(); window.history.replaceState({}, "", "/fa
 afterEach(() => { document.body.style.overflow = ""; });
 
 describe("Park auth overlay", () => {
-  it.each(["fa", "en"] as const)("opens a labelled %s native modal and restores body scrolling on unmount", locale => {
+  it.each(["fa", "en", "de", "es"] as const)("opens a labelled %s native modal and restores body scrolling on unmount", locale => {
     document.body.style.overflow = "clip";
     const { unmount } = renderWithIntl(<ParkAuthModal><input aria-label="Username" /></ParkAuthModal>, locale);
     const dialog = screen.getByRole("dialog", { name: parkAuthCopy[locale].title }) as HTMLDialogElement;
@@ -40,6 +40,8 @@ describe("Park auth overlay", () => {
   it("keeps both new copy dictionaries aligned across locales", () => {
     const keys = (value: object, prefix = ""): string[] => Object.entries(value).flatMap(([key, child]) => typeof child === "object" && child !== null ? keys(child, `${prefix}${key}.`) : [`${prefix}${key}`]).sort();
     expect(keys(parkAuthCopy.fa)).toEqual(keys(parkAuthCopy.en));
+    expect(keys(parkAuthCopy.fa)).toEqual(keys(parkAuthCopy.de));
+    expect(keys(parkAuthCopy.fa)).toEqual(keys(parkAuthCopy.es));
     expect(keys(storyCopy.fa)).toEqual(keys(storyCopy.en));
   });
 });

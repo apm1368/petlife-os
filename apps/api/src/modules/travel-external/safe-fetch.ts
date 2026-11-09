@@ -45,6 +45,8 @@ export interface SafeFetchOptions {
   /** JSON body (POST only). */
   json?: unknown;
   accept?: string;
+  /** Retain original bytes only for callers that validate/store binary media. */
+  includeBytes?: boolean;
 }
 
 /** Retry-After as seconds or an HTTP date → ms (bounded to 24 h); undefined when absent/unparseable. */
@@ -56,8 +58,8 @@ export function parseRetryAfter(v: string | null, now = Date.now()): number | un
 }
 
 /** Reads at most maxBytes from the stream and aborts beyond it — an external server can't exhaust our memory. */
-async function readCapped(res: Response, maxBytes: number, ctrl: AbortController): Promise<string> {
-  if (!res.body) return "";
+async function readCapped(res: Response, maxBytes: number, ctrl: AbortController): Promise<Buffer> {
+  if (!res.body) return Buffer.alloc(0);
   const reader = res.body.getReader();
   const chunks: Uint8Array[] = [];
   let size = 0;
@@ -68,7 +70,7 @@ async function readCapped(res: Response, maxBytes: number, ctrl: AbortController
     if (size > maxBytes) { ctrl.abort(); throw new SourceFetchError("TOO_LARGE", "response too large"); }
     chunks.push(value);
   }
-  return Buffer.concat(chunks).toString("utf8");
+  return Buffer.concat(chunks);
 }
 
 /**
@@ -77,7 +79,7 @@ async function readCapped(res: Response, maxBytes: number, ctrl: AbortController
  * User-Agent, no cookies, no auth. 403/429 and anti-bot pages surface as BLOCKED_BY_SOURCE / RATE_LIMITED (with
  * Retry-After) — callers stop, they never retry around them.
  */
-export async function safeFetch(raw: string, allowedHosts: string[], opts: SafeFetchOptions = { timeoutMs: 10000 }): Promise<{ status: number; body: string; finalUrl: string; contentType: string | null }> {
+export async function safeFetch(raw: string, allowedHosts: string[], opts: SafeFetchOptions = { timeoutMs: 10000 }): Promise<{ status: number; body: string; bodyBytes: Buffer; finalUrl: string; contentType: string | null }> {
   let current = validateSourceUrl(raw, allowedHosts);
   let method = opts.method ?? "GET";
   for (let hop = 0; hop <= 3; hop++) {
@@ -104,16 +106,17 @@ export async function safeFetch(raw: string, allowedHosts: string[], opts: SafeF
       const maxBytes = opts.maxBytes ?? 2_000_000;
       if (Number(res.headers.get("content-length") ?? 0) > maxBytes) throw new SourceFetchError("TOO_LARGE", "response too large");
       if (res.status === 429) throw new SourceFetchError("RATE_LIMITED", "source rate limited us", 429, parseRetryAfter(res.headers.get("retry-after")));
-      let body: string;
+      let bodyBytes: Buffer;
       try {
-        body = await readCapped(res, maxBytes, ctrl);
+        bodyBytes = await readCapped(res, maxBytes, ctrl);
       } catch (e) {
         if (e instanceof SourceFetchError) throw e;
         throw new SourceFetchError(ctrl.signal.aborted ? "TIMEOUT" : "NETWORK", "body read failed");
       }
+      const body = bodyBytes.toString("utf8");
       if (res.status === 403 || /captcha|Request Rejected|ترافیک غیر معمولی/i.test(body.slice(0, 20000))) throw new SourceFetchError("BLOCKED_BY_SOURCE", "source rejected automated access", res.status);
       if (res.status >= 400) throw new SourceFetchError("HTTP_ERROR", `HTTP ${res.status}`, res.status);
-      return { status: res.status, body, finalUrl: current.toString(), contentType: res.headers.get("content-type") };
+      return { status: res.status, body, bodyBytes: opts.includeBytes ? bodyBytes : Buffer.alloc(0), finalUrl: current.toString(), contentType: res.headers.get("content-type") };
     } finally {
       clearTimeout(timer);
     }

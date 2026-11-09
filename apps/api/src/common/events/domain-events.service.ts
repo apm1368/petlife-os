@@ -17,6 +17,9 @@ export const DOMAIN_EVENT_TYPES = [
   "HouseholdInvitationCreated",
   "HouseholdInvitationResent",
   "HouseholdInvitationCancelled",
+  "HouseholdMembershipRequested",
+  "HouseholdMembershipApproved",
+  "HouseholdMembershipRejected",
   "HouseholdInvitationAccepted",
   "HouseholdInvitationDeclined",
   "PetAccessGranted",
@@ -374,6 +377,13 @@ export const DOMAIN_EVENT_TYPES = [
   "HouseholdMemberRemoved",
   "HouseholdMemberLeft",
   "HouseholdMemberRoleChanged",
+  // Household & pet ownership (ID-01, ID-02, ID-03, ID-05, ID-06, ID-07).
+  "PetOwnershipTransferRequested",
+  "PetOwnershipTransferDeclined",
+  "PetOwnershipTransferCancelled",
+  "PetOwnershipTransferExpired",
+  "PetOwnershipDisputed",
+  "PetOwnershipTransferred",
 ] as const;
 
 /**

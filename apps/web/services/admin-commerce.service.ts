@@ -50,6 +50,24 @@ export const adminCommerceService = {
     }),
   listProducts: (input: { status?: string; q?: string; page?: number }) =>
     apiFetch<PaginatedDto<AdminProductRowDto>>(`/admin/commerce/products${qs(input)}`),
+  listProductCategories: () => apiFetch<Array<{ id: string; name: string; slug: string }>>("/admin/commerce/product-categories"),
+  listProductBrands: () => apiFetch<Array<{ id: string; name: string; slug: string }>>("/admin/commerce/product-brands"),
+  catalogImportAvailability: () => apiFetch<{ key: string; enabled: boolean; reason: string }>("/admin/commerce/catalog-imports/availability"),
+  listCatalogImports: () => apiFetch<Array<{
+    id: string; status: string; submittedUrls: string[]; pagesVisited: number; productsSeen: number;
+    productsImported: number; productsFailed: number; lastError: string | null; createdAt: string;
+    targetCategory: { id: string; name: string };
+    items: Array<{ id: string; sourceItemId: string; sourceUrl: string; sourceSnapshot: { title?: string; brandName?: string | null }; pendingSnapshot?: { title?: string; brandName?: string | null } | null; status: string; errorCode: string | null; errorDetail: string | null; product: { id: string; title: string; status: string } | null }>;
+  }>>("/admin/commerce/catalog-imports"),
+  listCatalogProductRequests: () => apiFetch<Array<{ id: string; requestedTitle: string; brandName: string | null; description: string | null; specifications: unknown; sourceUrl: string | null; sourceName: string | null; status: string; decisionReason: string | null; sellerOrganization: { id: string; name: string }; requestedByUser: { id: string; displayName: string | null }; category: { id: string; name: string } | null; duplicateCandidates: Array<{ id: string; title: string; slug: string; status: string; brand: { name: string } | null }> }>>("/admin/commerce/catalog-product-requests"),
+  matchCatalogProductRequest: (id: string, productId: string, reason: string) => apiFetch<unknown>(`/admin/commerce/catalog-product-requests/${id}/match`, { method: "POST", body: { productId, reason } }),
+  approveCatalogProductRequest: (id: string, categoryId: string, reason: string, reviewedDuplicateProductIds: string[]) => apiFetch<unknown>(`/admin/commerce/catalog-product-requests/${id}/approve`, { method: "POST", body: { categoryId, reason, reviewedDuplicateProductIds } }),
+  rejectCatalogProductRequest: (id: string, reason: string) => apiFetch<unknown>(`/admin/commerce/catalog-product-requests/${id}/reject`, { method: "POST", body: { reason } }),
+  createCatalogImport: (input: { urls: string[]; categoryId: string; brandId?: string; maxPages: number; maxProducts: number; idempotencyKey: string }) =>
+    apiFetch("/admin/commerce/catalog-imports", { method: "POST", body: input }),
+  cancelCatalogImport: (id: string) => apiFetch(`/admin/commerce/catalog-imports/${id}/cancel`, { method: "POST" }),
+  applyCatalogSourceUpdate: (id: string, reason: string) => apiFetch(`/admin/commerce/catalog-import-items/${id}/apply-source-update`, { method: "POST", body: { reason } }),
+  rejectCatalogSourceUpdate: (id: string, reason: string) => apiFetch(`/admin/commerce/catalog-import-items/${id}/reject-source-update`, { method: "POST", body: { reason } }),
   setProductStatus: (id: string, status: string, reason: string) =>
     apiFetch<{ id: string; status: string }>(`/admin/commerce/products/${id}/status`, {
       method: "PATCH",

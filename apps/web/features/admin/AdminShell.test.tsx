@@ -42,6 +42,35 @@ describe("AdminShell", () => {
     expect(adminService.getMe).toHaveBeenCalledTimes(2);
   });
 
+  it.each([
+    ["de", "/de/admin/access", "System", "Zugriff und Rollen", "Kein Admin-Zugriff"],
+    ["es", "/es/admin/access", "Sistema", "Acceso y roles", "Sin acceso de administración"],
+  ] as const)("localizes the admin shell and access navigation in %s", async (locale, pathname, group, accessLabel, deniedLabel) => {
+    route.pathname = pathname;
+    vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });
+    vi.mocked(adminService.getMe).mockResolvedValue({
+      isAdmin: true,
+      adminUserId: "audit-admin",
+      displayName: "Admin Name",
+      role: "ADMIN" as never,
+      permissions: ["access.view"] as never,
+    } satisfies AdminSessionContextDto);
+    const { unmount: unmountAdmin } = renderWithIntl(<AdminShell><div>audit page content</div></AdminShell>, locale);
+    await screen.findByText("audit page content");
+    expect(screen.getByRole("button", { name: group }).getAttribute("aria-expanded")).toBe("true");
+    expect(screen.getByRole("link", { name: accessLabel }).getAttribute("href")).toBe(pathname);
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06ff]/);
+    expect(screen.queryByText(/Missing (de|es)/)).toBeNull();
+    unmountAdmin();
+
+    vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });
+    vi.mocked(adminService.getMe).mockResolvedValue({ isAdmin: false, adminUserId: null, displayName: null, role: null, permissions: [] } satisfies AdminSessionContextDto);
+    const { unmount } = renderWithIntl(<AdminShell><div>should not appear</div></AdminShell>, locale);
+    await screen.findByText(deniedLabel);
+    expect(screen.queryByText("should not appear")).toBeNull();
+    unmount();
+  });
+
   it("shows a clear message when the session has no admin access", async () => {
     vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });
     vi.mocked(adminService.getMe).mockResolvedValue({ isAdmin: false, adminUserId: null, displayName: null, role: null, permissions: [] } satisfies AdminSessionContextDto);

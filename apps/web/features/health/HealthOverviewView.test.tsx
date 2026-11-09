@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { NextIntlClientProvider } from "next-intl";
 import {
   HealthAttentionType,
   HealthSeverity,
@@ -10,13 +11,23 @@ import {
   type HealthSummaryDto,
 } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
+import enMessages from "@/messages/en.json";
 import { healthService } from "@/services/health.service";
 import { healthAdvancedService } from "@/services/health-advanced.service";
 import { HealthOverviewView } from "./HealthOverviewView";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
-vi.mock("@/services/health.service", () => ({ healthService: { getSummary: vi.fn(), listAllergies: vi.fn(async () => []), listConditions: vi.fn(async () => []), listMedications: vi.fn(async () => []) } }));
-vi.mock("@/services/care-reminders.service", () => ({ careRemindersService: { list: vi.fn(async () => []) } }));
+vi.mock("@/services/health.service", () => ({
+  healthService: {
+    getSummary: vi.fn(),
+    listAllergies: vi.fn(async () => []),
+    listConditions: vi.fn(async () => []),
+    listMedications: vi.fn(async () => []),
+  },
+}));
+vi.mock("@/services/care-reminders.service", () => ({
+  careRemindersService: { list: vi.fn(async () => []) },
+}));
 vi.mock("@/services/health-advanced.service", () => ({ healthAdvancedService: { getOverview: vi.fn() } }));
 
 const BASE_SUMMARY: HealthSummaryDto = {
@@ -33,7 +44,16 @@ const BASE_SUMMARY: HealthSummaryDto = {
 describe("HealthOverviewView", () => {
   beforeEach(() => {
     vi.mocked(healthService.getSummary).mockReset();
-    vi.mocked(healthAdvancedService.getOverview).mockResolvedValue({ petId: "pet-1", upcomingCare: [], overdueCare: [], activeMedicationsCount: 0, unresolvedCarePlanItemsCount: 0, recentDocuments: [], recentVisits: [], missingInformation: [] });
+    vi.mocked(healthAdvancedService.getOverview).mockResolvedValue({
+      petId: "pet-1",
+      upcomingCare: [],
+      overdueCare: [],
+      activeMedicationsCount: 0,
+      unresolvedCarePlanItemsCount: 0,
+      recentDocuments: [],
+      recentVisits: [],
+      missingInformation: [],
+    });
   });
 
   it("shows a single primary-attention block, not a grid of equal cards, when something needs attention", async () => {
@@ -58,7 +78,7 @@ describe("HealthOverviewView", () => {
 
     renderWithIntl(<HealthOverviewView petId="pet-1" />);
 
-    await waitFor(() => expect(screen.queryByText("Complete")).not.toBeNull());
+    await waitFor(() => expect(screen.queryByText("Core health information is complete")).not.toBeNull());
     expect(screen.queryByText("Vaccination due soon.")).toBeNull();
     expect(screen.queryByText("Vaccination overdue.")).toBeNull();
   });
@@ -87,12 +107,108 @@ describe("HealthOverviewView", () => {
   });
 
   it("names what is on record — active allergies and medications — not just that something is recorded", async () => {
-    vi.mocked(healthService.getSummary).mockResolvedValue({ ...BASE_SUMMARY, allergyState: KnowledgeState.KNOWN_PRESENT, activeMedicationCount: 1 });
-    vi.mocked(healthService.listAllergies).mockResolvedValue([{ name: "Chicken protein", status: "ACTIVE" }, { name: "Old reaction", status: "RESOLVED" }] as never);
-    vi.mocked(healthService.listMedications).mockResolvedValue([{ name: "Apoquel (oclacitinib)", status: "ACTIVE" }] as never);
+    vi.mocked(healthService.getSummary).mockResolvedValue({
+      ...BASE_SUMMARY,
+      allergyState: KnowledgeState.KNOWN_PRESENT,
+      activeMedicationCount: 1,
+    });
+    vi.mocked(healthService.listAllergies).mockResolvedValue([
+      { name: "Chicken protein", status: "ACTIVE" },
+      { name: "Old reaction", status: "RESOLVED" },
+    ] as never);
+    vi.mocked(healthService.listMedications).mockResolvedValue([
+      { name: "Apoquel (oclacitinib)", status: "ACTIVE" },
+    ] as never);
     renderWithIntl(<HealthOverviewView petId="pet-1" />, "en");
     expect(await screen.findByText("Chicken protein")).toBeTruthy();
     expect(screen.queryByText(/Old reaction/)).toBeNull();
     expect(screen.getByText("Apoquel (oclacitinib)")).toBeTruthy();
+  });
+
+  it("does not turn failed health detail requests into an empty record state", async () => {
+    vi.mocked(healthService.getSummary).mockResolvedValue({
+      ...BASE_SUMMARY,
+      allergyState: KnowledgeState.KNOWN_PRESENT,
+    });
+    vi.mocked(healthService.listAllergies).mockRejectedValueOnce(new Error("temporary service failure"));
+
+    renderWithIntl(<HealthOverviewView petId="pet-1" />, "de");
+
+    expect(await screen.findByRole("alert")).toBeTruthy();
+    expect(screen.getByText(/Einige Gesundheitsdetails konnten nicht geladen werden/)).toBeTruthy();
+    expect(screen.getAllByText("Details nicht verfügbar")).toHaveLength(2);
+    expect(screen.queryByText("temporary service failure")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Erneut versuchen" }));
+    await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
+  });
+
+  it("does not render one pet's health summary while the next pet is still loading", async () => {
+    let resolveSecondSummary: ((value: HealthSummaryDto) => void) | undefined;
+    vi.mocked(healthService.getSummary)
+      .mockResolvedValueOnce({ ...BASE_SUMMARY, allergyState: KnowledgeState.KNOWN_PRESENT })
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveSecondSummary = resolve;
+          }),
+      );
+    vi.mocked(healthService.listAllergies).mockResolvedValueOnce([
+      { name: "Peanut allergy", status: "ACTIVE" },
+    ] as never);
+
+    const view = renderWithIntl(<HealthOverviewView petId="pet-1" />, "en");
+    expect(await screen.findByText("Peanut allergy")).toBeTruthy();
+
+    view.rerender(
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <HealthOverviewView petId="pet-2" />
+      </NextIntlClientProvider>,
+    );
+
+    expect(screen.queryByText("Peanut allergy")).toBeNull();
+    expect(screen.queryByRole("link", { name: "Health timeline" })).toBeNull();
+    resolveSecondSummary?.(BASE_SUMMARY);
+  });
+
+  it.each([
+    ["fa", "سلامت", "پرونده پزشکی"],
+    ["en", "Health", "Medical record"],
+    ["de", "Gesundheit", "Medizinische Akte"],
+    ["es", "Salud", "Historia clínica"],
+  ] as const)("renders dashboard-owned overview text in %s", async (locale, title, records) => {
+    vi.mocked(healthService.getSummary).mockResolvedValue(BASE_SUMMARY);
+    renderWithIntl(<HealthOverviewView petId="pet-1" />, locale);
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: records })).toBeTruthy();
+    expect(
+      screen.getByRole("link", {
+        name:
+          locale === "de"
+            ? "Mit einer Tierarztpraxis teilen"
+            : locale === "es"
+              ? "Compartir con una clínica veterinaria"
+              : locale === "fa"
+                ? "اشتراک با دامپزشک"
+                : "Share with a veterinarian",
+      }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("link", {
+        name:
+          locale === "de"
+            ? "Gesundheitsverlauf"
+            : locale === "es"
+              ? "Cronología de salud"
+              : locale === "fa"
+                ? "خط زمانی سلامت"
+                : "Health timeline",
+      }),
+    ).toBeTruthy();
+    if (locale === "de" || locale === "es") {
+      expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+      expect(document.body.textContent).not.toContain("Current status");
+      expect(document.body.textContent).not.toContain("Medical record");
+    }
   });
 });

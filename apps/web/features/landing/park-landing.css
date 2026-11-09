@@ -16,7 +16,7 @@
 .park-header__actions a:hover { text-decoration:underline; text-underline-offset:4px; }
 .park-account-links { background:var(--campaign-cream); color:var(--campaign-plum); border-color:var(--campaign-cream); font-weight:700; }
 .park-account-links a { display:inline-flex; align-items:center; min-height:38px; }
-.park-language { display:grid; place-items:center; min-height:38px; min-width:30px; font-size:11px; }
+.park-language { display:grid; place-items:center; min-height:38px; min-width:30px; padding-inline:6px; color:var(--campaign-ink); background:var(--campaign-cream); border:1px solid var(--campaign-cream); border-radius:6px; font-size:11px; }
 .park-menu-toggle { display:none; background:transparent; border:1px solid color-mix(in srgb,var(--campaign-inverse) 50%,transparent); border-radius:8px; color:inherit; min-height:44px; min-width:44px; align-items:center; justify-content:center; cursor:pointer; }
 .park-mobile-nav { padding:12px 20px 20px; border-top:1px solid color-mix(in srgb,var(--campaign-inverse) 20%,transparent); }
 .park-mobile-nav:not([hidden]) { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
@@ -101,6 +101,7 @@
   .park-header__actions { gap:7px; font-size:11px; }
   .park-account-links { padding:0 8px; gap:3px; min-height:38px; }
   .park-account-links>svg { display:none; }
+  .park-account-separator,.park-account-join { display:none; }
   .park-language { min-width:22px; }
   .park-menu-toggle { min-width:36px; min-height:38px; }
   .park-scene { aspect-ratio:auto; display:flex; flex-direction:column; }
@@ -129,6 +130,16 @@
 .park-landing .hl-split,[dir="ltr"] .park-landing .hl-split { background:var(--campaign-plum); }
 .park-landing .hl-footer__legal { border-color:color-mix(in srgb,var(--campaign-inverse) 25%,transparent); }
 .park-landing .hl-footer__demo { color:color-mix(in srgb,var(--campaign-inverse) 80%,transparent); }
+
+.park-memorial { padding:clamp(48px,7vw,88px) 24px; background:var(--campaign-cream); color:var(--campaign-ink); }
+.park-memorial .park-section-heading { max-width:760px; margin:0 auto 28px; text-align:center; }
+.park-memorial .park-section-heading > p:last-child { max-width:58ch; margin:12px auto 0; }
+.park-memorial__carousel { max-width:720px; margin-inline:auto; display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:clamp(12px,3vw,32px); }
+.park-memorial__slide { text-align:center; }
+.park-memorial__slide img { display:block; width:min(100%,320px); aspect-ratio:1; object-fit:cover; border-radius:24px; margin-inline:auto; }
+.park-memorial__slide h3 { margin:14px 0 0; font-size:1.25rem; }
+.park-memorial__carousel button { min-height:44px; }
+@media (max-width:560px) { .park-memorial { padding-inline:16px; } .park-memorial__carousel { gap:8px; } .park-memorial__carousel button { min-width:44px; padding-inline:8px; font-size:.8rem; } }
 
 @media (prefers-reduced-motion:reduce) {
   .park-pavilions[data-intro="true"] .park-pavilion__light { animation:none; }

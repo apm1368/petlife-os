@@ -242,6 +242,40 @@ describe("CheckoutView", () => {
     push.mockReset();
   });
 
+  it.each([
+    ["de", "Lieferadresse", "Bestellübersicht", "Weiter"],
+    ["es", "Dirección de entrega", "Resumen del pedido", "Continuar"],
+  ] as const)("renders checkout chrome consistently in %s", async (locale, addressTitle, summaryTitle, nextLabel) => {
+    vi.mocked(commerceService.getCart).mockResolvedValue(EMPTY_CART);
+    vi.mocked(addressesService.list).mockResolvedValue([ADDRESS]);
+
+    renderWithIntl(<CheckoutView />, locale);
+
+    expect(await screen.findByRole("heading", { name: addressTitle })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: summaryTitle })).toBeTruthy();
+    expect(screen.getByRole("button", { name: nextLabel })).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+    // Address text is user-authored and intentionally remains in its source language.
+    expect(screen.getAllByText(/Tehran/).length).toBeGreaterThan(0);
+  });
+
+  it("uses the translated generic error instead of leaking an English API message in Spanish", async () => {
+    vi.mocked(commerceService.getCart).mockResolvedValue(EMPTY_CART);
+    vi.mocked(addressesService.list).mockResolvedValue([ADDRESS]);
+    vi.mocked(commerceService.createCheckout).mockRejectedValue(
+      new ApiError({ code: "CHECKOUT_FAILED", message: "The backend error is English.", requestId: "r-locale" }, 400),
+    );
+
+    renderWithIntl(<CheckoutView />, "es");
+    await screen.findByText(/12 Valiasr St\./);
+    fireEvent.click(screen.getByRole("radio"));
+    fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
+
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toBe("No se pudo iniciar el pago. Inténtalo de nuevo.");
+    expect(alert.textContent).not.toContain("The backend error");
+  });
+
   it("routes to the confirmation page on a successful simulated payment", async () => {
     await advanceToPayment();
     vi.mocked(commerceService.pay).mockResolvedValue({ checkout: { ...CHECKOUT, status: "CONFIRMED" as never }, paymentStatus: "SUCCEEDED", orderIds: ["order-1", "order-2"] });
@@ -460,6 +494,43 @@ describe("CheckoutView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Save address" }));
     await waitFor(() => expect(addressesService.update).toHaveBeenCalledWith(ADDRESS.id, expect.objectContaining({ city: "Karaj" })));
     await waitFor(() => expect(screen.queryByLabelText("City")).toBeNull());
+  });
+
+  it.each([
+    ["de", "Die Adresse konnte nicht gespeichert werden."],
+    ["es", "No se pudo guardar la dirección."],
+  ] as const)("does not leak an English backend validation message into %s checkout", async (locale, expectedMessage) => {
+    vi.mocked(commerceService.getCart).mockResolvedValue(EMPTY_CART);
+    vi.mocked(addressesService.list).mockResolvedValue([ADDRESS]);
+    vi.mocked(addressesService.update).mockRejectedValueOnce(new ApiError({ code: "VALIDATION_ERROR", message: "Address line is required", requestId: "request-1" }, 400));
+
+    renderWithIntl(<CheckoutView />, locale);
+    fireEvent.click(await screen.findByRole("button", { name: locale === "de" ? "Ausgewählte Adresse bearbeiten" : "Editar dirección seleccionada" }));
+    fireEvent.click(screen.getByRole("button", { name: locale === "de" ? "Adresse speichern" : "Guardar dirección" }));
+
+    expect((await screen.findByRole("alert")).textContent).toContain(expectedMessage);
+    expect(document.body.textContent).not.toContain("Address line is required");
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it.each([
+    ["de", "Weiter", "Royal Canin Adult Dog Food: Preis seit dem Hinzufügen aktualisiert"],
+    ["es", "Continuar", "Royal Canin Adult Dog Food: El precio se ha actualizado desde que lo añadiste"],
+  ] as const)("localizes checkout validation issues in %s without rewriting product content", async (locale, continueLabel, expectedIssue) => {
+    vi.mocked(commerceService.getCart).mockResolvedValue(EMPTY_CART);
+    vi.mocked(addressesService.list).mockResolvedValue([ADDRESS]);
+    vi.mocked(commerceService.createCheckout).mockResolvedValue({
+      ...CHECKOUT,
+      validationIssues: [{ code: "PRICE_CHANGED", cartLineId: "line-a", message: "Royal Canin Adult Dog Food's price changed since it was added to your cart." }],
+    });
+
+    renderWithIntl(<CheckoutView />, locale);
+    fireEvent.click(await screen.findByRole("button", { name: continueLabel }));
+
+    expect(await screen.findByRole("heading", { name: locale === "de" ? "Bestellung prüfen" : "Revisa tu pedido" })).toBeTruthy();
+    expect(screen.getByText(expectedIssue)).toBeTruthy();
+    expect(document.body.textContent).not.toContain("price changed since it was added");
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
   });
 
 });

@@ -81,6 +81,7 @@ async function seedSubscriptions() {
         descriptionFa: input.descriptionFa,
         descriptionEn: input.descriptionEn,
         isFree: input.isFree,
+        isDemoRecord: !input.isFree,
         sortOrder: input.sortOrder,
         trialDays: input.trialDays,
       },
@@ -91,6 +92,7 @@ async function seedSubscriptions() {
         descriptionFa: input.descriptionFa,
         descriptionEn: input.descriptionEn,
         isFree: input.isFree,
+        isDemoRecord: !input.isFree,
         sortOrder: input.sortOrder,
         trialDays: input.trialDays,
       },
@@ -232,6 +234,7 @@ async function seedCommerce() {
 
   const adultDogFood = await prisma.product.create({
     data: {
+      isDemoRecord: true,
       brandId: royalCanin.id,
       categoryId: foodCategory.id,
       title: "Royal Canin Adult Dog Food",
@@ -253,6 +256,7 @@ async function seedCommerce() {
 
   const kittenFood = await prisma.product.create({
     data: {
+      isDemoRecord: true,
       brandId: royalCanin.id,
       categoryId: foodCategory.id,
       title: "Royal Canin Kitten Food",
@@ -268,6 +272,7 @@ async function seedCommerce() {
 
   const trainingTreats = await prisma.product.create({
     data: {
+      isDemoRecord: true,
       brandId: petLifeBasics.id,
       categoryId: treatsCategory.id,
       title: "Grain-Free Training Treats",
@@ -280,6 +285,7 @@ async function seedCommerce() {
 
   const groomingWipes = await prisma.product.create({
     data: {
+      isDemoRecord: true,
       brandId: petLifeBasics.id,
       categoryId: groomingCategory.id,
       title: "Calming Grooming Wipes",
@@ -293,6 +299,7 @@ async function seedCommerce() {
 
   const travelCarrier = await prisma.product.create({
     data: {
+      isDemoRecord: true,
       brandId: petLifeBasics.id,
       categoryId: accessoriesCategory.id,
       title: "Soft-Sided Travel Carrier",
@@ -356,7 +363,7 @@ async function seedServiceProvider(opts: {
   });
 
   const organization = await prisma.providerOrganization.create({
-    data: { name: opts.orgName, type: opts.orgType, verificationStatus: ProviderVerificationStatus.VERIFIED },
+    data: { name: opts.orgName, type: opts.orgType, verificationStatus: ProviderVerificationStatus.VERIFIED, isDemoRecord: true },
   });
 
   const location = await prisma.providerLocation.create({
@@ -944,6 +951,7 @@ async function main() {
       name: "Tehran Pet Care Clinic",
       type: ProviderType.VET_CLINIC,
       verificationStatus: ProviderVerificationStatus.VERIFIED,
+      isDemoRecord: true,
       description: "General veterinary care for dogs and cats.",
       phone: "+98 21 5555 0100",
     },
