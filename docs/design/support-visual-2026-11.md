@@ -29,7 +29,9 @@ animal-support operational pages are not part of this visual slice.
 - Run support home, create-ticket, ticket-list and thread tests plus web
   typecheck, lint and `git diff --check` on the PR head.
 - Browser screenshots are required before visual completion: light/dark,
-  fa/en/de/es, RTL/LTR and mobile/tablet/desktop. This environment has no
-  browser screenshot runner; production build is blocked by low disk space.
+  fa/en/de/es, RTL/LTR and mobile/tablet/desktop. Playwright and Chromium are
+  available, but no local PR preview was started because disk space is low.
+  The only screenshot in this batch is a production landing reference, not a
+  support-page capture.
 - The current change is an implementation slice, not evidence of full visual
   or localization coverage and not live-verified.
