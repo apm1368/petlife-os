@@ -51,4 +51,24 @@ describe("ProviderBookingsView", () => {
     await waitFor(() => expect(providerOsService.listBookings).toHaveBeenCalledWith({ cancelled: true }));
     await waitFor(() => expect(screen.getByText("No bookings found.")).toBeTruthy());
   });
+
+  it.each([
+    ["de", "Buchungen", "Heute", "Keine Buchungen gefunden."],
+    ["es", "Reservas", "Hoy", "No se encontraron reservas."],
+  ] as const)("renders booking list and empty state in %s without Persian UI", async (locale, title, today, empty) => {
+    vi.mocked(providerOsService.listBookings).mockResolvedValue([]);
+    const view = renderWithIntl(<ProviderBookingsView />, locale);
+    await waitFor(() => expect(screen.getByRole("heading", { name: title })).toBeTruthy());
+    expect(screen.getByRole("button", { name: today }).getAttribute("aria-pressed")).toBe("true");
+    await waitFor(() => expect(screen.getByText(empty)).toBeTruthy());
+    expect(view.container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it.each([["de", "Buchungen konnten nicht geladen werden."], ["es", "No se pudieron cargar las reservas."]] as const)("renders localized load error and retry in %s", async (locale, message) => {
+    vi.mocked(providerOsService.listBookings).mockRejectedValue(new Error("network failure"));
+    renderWithIntl(<ProviderBookingsView />, locale);
+    await waitFor(() => expect(screen.getByText(new RegExp(message))).toBeTruthy());
+    expect(screen.getByRole("button", { name: locale === "de" ? "Erneut versuchen" : "Intentar de nuevo" })).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
 });

@@ -1,4 +1,31 @@
 {
+  "adminServices": {
+    "unknownValue": "Value unavailable",
+    "common": { "all": "All", "confirm": "Confirm", "previous": "Previous", "next": "Next", "hoursAbbreviation": "h" },
+    "nav": { "label": "Services administration navigation", "bookings": "Bookings", "services": "Services", "reviews": "Reviews", "analytics": "Analytics & waitlist" },
+    "bookings": { "title": "Services & bookings", "searchLabel": "Search by number, pet or provider", "statusLabel": "Booking status", "number": "Number", "when": "When", "pet": "Pet", "provider": "Provider", "service": "Service", "payment": "Payment", "amount": "Amount", "empty": "No bookings found", "resultCount": "{count} bookings" },
+    "detail": { "booking": "Booking", "readOnlyNotice": "Read-only. Refunds go through finance approval and disputes through the disputes module.", "service": "Service", "when": "When", "provider": "Provider", "location": "Location", "pet": "Pet", "customer": "Customer", "bookingMode": "Booking mode", "rejectionReason": "Rejection reason", "cancellationReason": "Cancellation reason", "rescheduledFrom": "Moved from", "rescheduledTo": "Moved to", "finance": "Financial summary", "snapshottedPrice": "Snapshotted price", "paymentMode": "Payment mode", "cancellationTerms": "Cancellation terms", "paymentIntent": "Payment intent", "refund": "Refund", "reviewTransactions": "Review in transactions", "timeline": "Timeline", "linkedRecords": "Access, support and linked records", "providerAccess": "Provider access", "consentedHealthRead": "Health read (consented)", "noHealthRead": "No health read", "revoked": "revoked", "clinicalVisit": "Clinical visit", "review": "Review", "supportCase": "Support case", "support": "Support" },
+    "services": { "title": "Provider services", "provider": "Provider", "service": "Service", "category": "Category", "modePayment": "Booking / payment", "options": "Options", "bookings": "Bookings", "state": "State", "empty": "No services have been recorded", "active": "Active", "inactive": "Inactive", "deactivate": "Deactivate", "reactivate": "Reactivate", "deactivateTitle": "Deactivate service", "reactivateTitle": "Reactivate service", "toggleNotice": "Existing bookings are not cancelled; only new bookings are stopped or resumed. This action is recorded in the audit log." },
+    "reviews": { "title": "Provider reviews", "statusLabel": "Review status", "published": "Published", "hidden": "Hidden", "empty": "No reviews", "hiddenBecause": "Hidden because:", "hide": "Hide", "hideTitle": "Hide review", "hideNotice": "The review is not deleted; it is removed from public display and the rating average, and this action is audited.", "confirmHide": "Hide review" },
+    "analytics": { "title": "Services analytics ({days} days)", "bookings": "Bookings", "completed": "Completed", "cancelled": "Cancelled", "noShow": "No-show", "openRequests": "Open requests", "rejectedExpired": "Rejected / expired", "averageRating": "Average rating", "activeWaitlist": "Active waitlist", "byCategory": "By category", "waitlist": "Waitlist", "waitlistOrder": "In joining order", "waitlistEmpty": "The waitlist is empty." },
+    "states": { "loadFailedTitle": "Could not load", "bookingsLoadFailed": "Bookings could not be loaded. Try again.", "bookingsLoading": "Loading service bookings…", "bookingsAccessDenied": "You need services.view permission to view bookings.", "detailLoadFailed": "This booking could not be loaded. Try again.", "detailLoading": "Loading booking details…", "detailAccessDenied": "You do not have permission to view this booking.", "detailNotFound": "Booking not found", "servicesLoadFailed": "Provider services could not be loaded. Try again.", "servicesLoading": "Loading provider services…", "reviewsLoadFailed": "Provider reviews could not be loaded. Try again.", "reviewsLoading": "Loading provider reviews…", "reviewsAccessDenied": "You need services.view permission to view reviews.", "analyticsLoadFailed": "Services analytics could not be loaded. Try again.", "analyticsLoading": "Loading services analytics…", "manageAccessDenied": "You need services.manage permission to change this item.", "actionFailed": "The action could not be completed. Try again.", "offline": "You are offline. Check your connection and try again." },
+    "bookingStatus": { "HOLD": "On hold", "PENDING_CONFIRMATION": "Awaiting confirmation", "REQUESTED": "Requested", "AWAITING_PAYMENT": "Awaiting payment", "REJECTED": "Declined", "EXPIRED": "Expired", "RESCHEDULED": "Rescheduled", "CONFIRMED": "Confirmed", "CHECKED_IN": "Checked in", "IN_PROGRESS": "In progress", "COMPLETED": "Completed", "CANCELLED_BY_USER": "Cancelled by customer", "CANCELLED_BY_PROVIDER": "Cancelled by provider", "NO_SHOW": "No-show" },
+    "category": { "VET": "Veterinary", "GROOMING": "Grooming", "TRAINING": "Training", "WALKING": "Dog walking", "SITTING": "Pet sitting", "BOARDING": "Boarding", "PET_TAXI": "Pet taxi", "OTHER": "Other services" },
+    "paymentMode": { "NONE": "No online payment", "PAY_AT_PROVIDER": "Pay at provider", "FULL_PREPAYMENT": "Full online prepayment", "DEPOSIT": "Online deposit" },
+    "bookingMode": { "INSTANT": "Instant booking", "REQUEST": "Request and provider confirmation" },
+    "paymentStatus": { "NOT_REQUIRED": "Not required", "PENDING": "Pending", "AUTHORIZED": "Authorized", "PAID": "Paid", "FAILED": "Failed", "REFUND_PENDING": "Refund pending", "REFUNDED": "Refunded" },
+    "providerVerification": { "NOT_STARTED": "Not started", "SUBMITTED": "Submitted", "NEEDS_INFORMATION": "More information needed", "UNDER_REVIEW": "Under review", "VERIFIED": "Verified", "REJECTED": "Rejected", "SUSPENDED": "Suspended" },
+    "paymentProvider": { "DEV_SIMULATED": "Development simulator", "STANDARD_GATEWAY": "Payment gateway", "SNAPP_PAY": "SnappPay", "DIGI_PAY": "DigiPay" },
+    "refundStatus": { "REQUESTED": "Requested", "PROCESSING": "Processing", "SUCCEEDED": "Refunded", "FAILED": "Failed", "CANCELLED": "Cancelled" },
+    "timelineActor": { "USER": "Customer", "PROVIDER": "Provider", "SYSTEM": "System", "ADMIN": "Support" },
+    "healthScope": { "MINIMAL_VET_CONTEXT": "Minimum veterinary context", "HEALTH_BASICS": "Health basics", "SELECTED_HEALTH_DATA": "Selected health data", "GROOMING_BASIC": "Basic grooming information", "TRAINING_BASIC": "Basic training information", "WALKING_BASIC": "Basic walking information", "SITTING_BASIC": "Basic sitting information", "BOARDING_BASIC": "Basic boarding information", "TAXI_BASIC": "Basic transport information" },
+    "species": { "DOG": "Dog", "CAT": "Cat", "BIRD": "Bird", "RABBIT": "Rabbit", "RODENT": "Rodent", "FISH": "Fish", "REPTILE": "Reptile", "OTHER": "Other" },
+    "clinicalVisitStatus": { "SCHEDULED": "Scheduled", "IN_PROGRESS": "In progress", "COMPLETED": "Completed", "CANCELLED": "Cancelled", "DRAFT": "Draft" },
+    "reviewStatus": { "PENDING": "Pending", "APPROVED": "Approved", "REJECTED": "Rejected", "PUBLISHED": "Published", "HIDDEN": "Hidden" },
+    "supportStatus": { "OPEN": "Open", "IN_PROGRESS": "In progress", "WAITING_ON_USER": "Waiting for customer", "WAITING_ON_INTERNAL": "Waiting for internal team", "RESOLVED": "Resolved", "CLOSED": "Closed" },
+    "waitlistStatus": { "ACTIVE": "Active", "NOTIFIED": "Notified", "OFFERED": "Slot offered", "BOOKED": "Booked", "CANCELLED": "Cancelled", "EXPIRED": "Expired" }
+  },
+  "adminServiceAccess": { "servicesDenied": "You do not have permission to view provider services.", "analyticsDenied": "You do not have permission to view service analytics." },
   "adminUsers": {
     "title": "All users",
     "detailTitle": "User profile",
@@ -1056,6 +1083,7 @@
       "title": "Provider Home",
       "retry": "Retry",
       "loading": "Loading",
+      "loadFailed": "The provider overview could not be loaded. Check your connection and try again.",
       "attention": {
         "pendingConfirmation": "{count} pending confirmation",
         "cancellations": "{count} recent cancellations",
@@ -1067,18 +1095,23 @@
       "noBookingsToday": "No bookings today.",
       "verificationLink": "Organization verification and documents"
     },
+    "bookingRow": { "respondBy": "Respond by " },
     "bookings": {
       "title": "Bookings",
       "retry": "Retry",
       "loading": "Loading",
       "empty": "No bookings found.",
+      "loadFailed": "Bookings could not be loaded. Check your connection and try again.",
+      "accessDenied": "You do not have permission to view these bookings.",
       "filter": {
         "today": "Today",
         "upcoming": "Upcoming",
         "past": "Past",
         "cancelled": "Cancelled",
         "requests": "Requests"
-      }
+      },
+      "status": { "HOLD": "Held", "PENDING_CONFIRMATION": "Pending confirmation", "CONFIRMED": "Confirmed", "CHECKED_IN": "Checked in", "IN_PROGRESS": "In progress", "COMPLETED": "Completed", "CANCELLED_BY_USER": "Cancelled by customer", "CANCELLED_BY_PROVIDER": "Cancelled by provider", "NO_SHOW": "No-show", "REQUESTED": "Requested", "AWAITING_PAYMENT": "Awaiting payment", "REJECTED": "Declined", "EXPIRED": "Expired", "RESCHEDULED": "Rescheduled" },
+      "paymentStatus": { "NOT_REQUIRED": "Not required", "PENDING": "Pending", "AUTHORIZED": "Authorized", "PAID": "Paid", "FAILED": "Failed", "REFUND_PENDING": "Refund pending", "REFUNDED": "Refunded" }
     },
     "bookingDetail": {
       "title": "Booking",
@@ -1101,7 +1134,8 @@
         "scope": "Scope",
         "startsAt": "Starts",
         "expiresAt": "Expires",
-        "openClinicalRecord": "Open Clinical Record"
+        "openClinicalRecord": "Open Clinical Record",
+        "scopePreset": { "MINIMAL_VET_CONTEXT": "Minimal context", "HEALTH_BASICS": "Health basics", "SELECTED_HEALTH_DATA": "Selected health data", "GROOMING_BASIC": "Care profile (grooming basics)", "TRAINING_BASIC": "Care profile (training basics)", "WALKING_BASIC": "Care profile (walking basics)", "SITTING_BASIC": "Care profile (sitting basics)", "BOARDING_BASIC": "Care profile and vaccination status (boarding)", "TAXI_BASIC": "Care profile (pet taxi basics)" }
       },
       "careProfile": {
         "title": "Care context",
@@ -1117,6 +1151,10 @@
       "actions": {
         "confirm": "Confirm",
         "confirmed": "Confirmed",
+        "acceptRequest": "Accept request",
+        "decline": "Decline request",
+        "markNoShow": "Mark no-show",
+        "startClinicalVisit": "Start clinical visit",
         "checkIn": "Check in",
         "start": "Start",
         "complete": "Complete",
@@ -1124,6 +1162,9 @@
       },
       "completionNoteLabel": "Owner-visible completion note (optional)",
       "completionNotePlaceholder": "e.g. \"Luna's grooming was completed.\"",
+      "respondBy": "Respond by",
+      "followUps": { "legend": "Follow-ups (only if needed)", "description": "Each follow-up appears in the owner's Care Center as provider-created. Nothing is scheduled automatically.", "typeLabel": "Follow-up type", "type": { "FOLLOW_UP": "Follow-up visit", "VACCINATION": "Next vaccination", "MEDICATION": "Medication", "MONITORING": "Lab or review", "OTHER": "Other" }, "titleLabel": "Follow-up title", "dateLabel": "Due date", "remove": "Remove follow-up", "add": "Add follow-up" },
+      "rejectDialog": { "title": "Decline booking request", "reasonLabel": "Reason (shown to the customer)" },
       "notes": {
         "title": "Provider notes",
         "internalOnly": "Internal only — never shown to the customer.",
@@ -1145,7 +1186,8 @@
         "PROVIDER_NOT_VERIFIED": "Your organization must be verified before taking this action.",
         "BOOKING_NOT_FOUND": "Booking not found.",
         "INVALID_BOOKING_TRANSITION": "This booking cannot move to that state right now.",
-        "BOOKING_NOT_CANCELLABLE": "This booking can no longer be cancelled."
+        "BOOKING_NOT_CANCELLABLE": "This booking can no longer be cancelled.",
+        "generic": "The action could not be completed. Please try again."
       }
     },
     "schedule": {
@@ -1163,6 +1205,8 @@
       "title": "Availability",
       "retry": "Retry",
       "loading": "Loading",
+      "loadFailed": "Availability could not be loaded. Check your connection and try again.",
+      "accessDenied": "You do not have permission to manage availability.",
       "day": {
         "sun": "Sun",
         "mon": "Mon",
@@ -1183,7 +1227,9 @@
         "timezone": "Timezone",
         "add": "Add",
         "locationRequired": "A location is required.",
-        "createFailed": "Couldn't create the rule."
+        "createFailed": "Couldn't create the rule.",
+        "updateFailed": "Couldn't update the rule.",
+        "deleteFailed": "Couldn't remove the rule."
       },
       "exceptions": {
         "title": "Time off & extra availability",
@@ -1200,10 +1246,13 @@
         "add": "Add",
         "fieldsRequired": "Location, start, and end are required.",
         "createFailed": "Couldn't create the exception.",
+        "updateFailed": "Couldn't update the exception.",
+        "deleteFailed": "Couldn't remove the exception.",
         "conflictWarning": "{count} confirmed bookings exist in this period. Blocking it will not cancel or move them.",
         "conflictCancel": "Cancel",
         "conflictProceed": "Block anyway"
-      }
+      },
+      "actions": { "edit": "Edit", "cancel": "Cancel", "save": "Save changes" }
     },
     "services": {
       "title": "Services",
@@ -2624,12 +2673,14 @@
       "detail": {
         "caseNumber": "Case {number}",
         "requester": "Requester: {name}",
+        "authorType": { "USER": "Customer", "ADMIN": "Admin", "SYSTEM": "System" },
         "assignTo": "Assign to admin",
         "changeStatus": "Change status",
         "messages": "Messages",
         "composePlaceholder": "Write a reply…",
         "visibilityPublic": "Public reply",
         "visibilityInternal": "Internal note (never sent to the customer)",
+        "visibilityLabel": "Visibility",
         "send": "Send",
         "notes": "Internal notes",
         "context": {
@@ -2643,12 +2694,29 @@
           "previousCases": "Previous tickets from this customer:",
           "noPreviousCases": "No previous tickets from this customer."
         }
+      },
+      "states": {
+        "loading": "Loading support cases…",
+        "loadFailed": "Support cases could not be loaded. Try again.",
+        "detailLoadFailed": "This support case could not be loaded. Try again.",
+        "accessDeniedTitle": "Access denied",
+        "accessDenied": "You do not have permission to view these support cases.",
+        "notFoundTitle": "Case not found",
+        "notFound": "This support case is not available.",
+        "empty": "No support cases found",
+        "emptyDescription": "Adjust the filters or create a new case.",
+        "requiredFields": "Requester user ID, subject, and description are required.",
+        "createFailed": "The support case could not be created. Try again.",
+        "actionFailed": "The change could not be saved. Try again.",
+        "noMessages": "No messages yet.",
+        "noNotes": "No internal notes yet."
       }
     },
     "disputes": {
       "title": "Disputes",
       "newDispute": "New dispute",
       "createTitle": "Open dispute",
+      "filter": { "status": "Filter by status", "allStatuses": "All statuses" },
       "status": {
         "OPEN": "Open",
         "UNDER_REVIEW": "Under review",
@@ -2683,13 +2751,20 @@
         "addEvidence": "Add evidence",
         "evidencePlaceholder": "Statement",
         "changeStatus": "Change status",
-        "financialNote": "Financial state (refunds) is tracked separately — resolving a dispute does not trigger a refund automatically."
+        "financialNote": "Financial state (refunds) is tracked separately — resolving a dispute does not trigger a refund automatically.",
+        "actorType": { "USER": "User", "ADMIN": "Admin" }
+      },
+      "states": {
+        "loading": "Loading disputes…", "loadFailed": "Disputes could not be loaded. Try again.", "detailLoadFailed": "This dispute could not be loaded. Try again.",
+        "accessDeniedTitle": "Access denied", "accessDenied": "You do not have permission to view these disputes.", "notFoundTitle": "Dispute not found", "notFound": "This dispute is not available.",
+        "empty": "No disputes found", "emptyDescription": "There are no disputes with the selected status.", "requiredFields": "Subject ID and claim are required.", "createFailed": "The dispute could not be opened. Try again.", "actionFailed": "The change could not be saved. Try again.", "noEvidence": "No evidence has been added yet."
       }
     },
     "trust": {
       "title": "Trust & Safety",
       "newCase": "Open trust case",
       "createTitle": "Open trust case",
+      "filter": { "status": "Filter by status", "allStatuses": "All statuses" },
       "status": {
         "OPEN": "Open",
         "UNDER_REVIEW": "Under review",
@@ -2731,6 +2806,20 @@
         "severity": "Severity",
         "submit": "Open case"
       },
+      "context": {
+        "title": "Case subject",
+        "missingSubject": "The subject no longer exists or has no summary.",
+        "by": "By {name}",
+        "openPublicPage": "Open public page",
+        "reportCount": "Reports: {total} · distinct reporters: {reporters}",
+        "unknownKind": "Other subject",
+        "unknownStatus": "Status unavailable",
+        "unknownReason": "Other or unrecognized reason",
+        "subjectKind": { "POST": "Community post", "COMMENT": "Community comment", "SUPPORT_NEED": "Support request", "LOST_PET_INCIDENT": "Lost-pet report", "LOST_PET_SIGHTING": "Sighting", "ORGANIZATION": "Organization" },
+        "reportReason": { "SPAM": "Spam", "ABUSE": "Abuse", "MISINFORMATION": "Misinformation", "INAPPROPRIATE": "Inappropriate content", "OTHER": "Other", "SCAM": "Scam", "HARASSMENT": "Harassment", "PERSONAL_INFORMATION": "Personal information", "ANIMAL_WELFARE": "Animal welfare", "DANGEROUS_CONTENT": "Dangerous content" },
+        "reportStatus": { "OPEN": "Open", "ESCALATED": "Escalated", "RESOLVED": "Resolved", "DISMISSED": "Dismissed" },
+        "subjectStatus": { "OPEN": "Open", "SEARCHING": "Searching", "SIGHTING_REPORTED": "Sighting reported", "FOUND": "Found", "REUNITED": "Reunited", "CLOSED": "Closed", "SUBMITTED": "Submitted", "REVIEWED": "Reviewed", "ACCEPTED": "Accepted", "REJECTED": "Rejected", "DRAFT": "Draft", "PENDING_REVIEW": "Pending review", "PUBLISHED": "Published", "PARTIALLY_FULFILLED": "Partially fulfilled", "PAUSED": "Paused", "FULFILLED": "Fulfilled", "EXPIRED": "Expired", "REMOVED": "Removed", "HIDDEN": "Hidden", "VERIFIED": "Verified", "NOT_STARTED": "Not started", "UNDER_REVIEW": "Under review", "NEEDS_INFORMATION": "More information needed", "APPROVED": "Approved", "SUSPENDED": "Suspended", "INACTIVE": "Inactive" }
+      },
       "detail": {
         "changeStatus": "Change status",
         "actions": "Actions taken",
@@ -2741,7 +2830,16 @@
         "appellantUserId": "Appellant user ID",
         "appealReason": "Appeal reason",
         "resolveAppeal": "Resolve appeal",
-        "resolution": "Resolution"
+        "resolution": "Resolution",
+        "effectBefore": "Before",
+        "effectAfter": "After",
+        "effectField": { "status": "Status", "verificationStatus": "Verification", "isPubliclyListed": "Public listing", "pausedListings": "Paused listings", "closedAt": "Closed at" },
+        "yes": "Yes",
+        "no": "No",
+        "requiredFields": "A subject ID and reason are required.",
+        "appealRequiredFields": "An appellant user ID and appeal reason are required.",
+        "resolutionRequired": "Enter a resolution before deciding this appeal.",
+        "appealFailed": "The appeal could not be submitted or resolved. Try again."
       },
       "appealStatus": {
         "SUBMITTED": "Submitted",
@@ -2749,7 +2847,8 @@
         "UPHELD": "Upheld",
         "OVERTURNED": "Overturned",
         "PARTIALLY_OVERTURNED": "Partially overturned"
-      }
+      },
+      "states": { "loading": "Loading trust cases…", "loadFailed": "Trust cases could not be loaded. Try again.", "detailLoadFailed": "This trust case could not be loaded. Try again.", "accessDeniedTitle": "Access denied", "accessDenied": "You do not have permission to view these trust cases.", "empty": "No trust cases found", "emptyDescription": "There are no cases with the selected status.", "createFailed": "The trust case could not be opened. Try again.", "actionFailed": "The change could not be saved. Try again.", "actionNotApplicable": "This action cannot be applied in the subject’s current state.", "actionForbidden": "Your role is not allowed to take this action.", "actionNotRecorded": "The action was not recorded. Try again.", "noActions": "No actions have been recorded yet.", "contextUnavailable": "The subject and report summary could not be loaded.", "unknownValue": "Value unavailable", "restored": "Restored by a later action" }
     },
     "orgs": {
       "providersTitle": "Providers",
@@ -2771,19 +2870,57 @@
     },
     "transactions": {
       "title": "Transactions",
+      "orderIdLabel": "Order ID",
       "orderIdPlaceholder": "Order ID",
       "lookup": "Look up",
       "paymentIntents": "Payment intents",
       "ledgerEntries": "Ledger entries",
+      "paymentStatus": {
+        "REQUIRES_PAYMENT_METHOD": "Payment method required",
+        "PENDING": "Pending",
+        "AUTHORIZED": "Authorized",
+        "CAPTURED": "Captured",
+        "FAILED": "Failed",
+        "CANCELLED": "Cancelled"
+      },
+      "refundStatus": {
+        "REQUESTED": "Requested",
+        "PROCESSING": "Processing",
+        "SUCCEEDED": "Refunded",
+        "FAILED": "Failed",
+        "CANCELLED": "Cancelled"
+      },
+      "ledgerDirection": { "DEBIT": "Debit", "CREDIT": "Credit" },
+      "ledgerAccount": {
+        "CASH_GATEWAY_RECEIVABLE": "Gateway receivable",
+        "CUSTOMER_PAYMENT_CLEARING": "Customer payment clearing",
+        "SELLER_PAYABLE": "Seller payable",
+        "REFUND_PAYABLE": "Refund payable",
+        "PLATFORM_REVENUE": "Platform revenue"
+      },
+      "states": {
+        "lookupPrompt": "Enter an order ID to inspect its payment and ledger records.",
+        "loading": "Loading order financial records…",
+        "lookupFailedTitle": "Financial records unavailable",
+        "lookupFailed": "The order's financial records could not be loaded. Try again.",
+        "offline": "You are offline. Check your connection and try again.",
+        "accessDenied": "You do not have permission to view these financial records.",
+        "noPaymentIntents": "No payment intents are recorded for this order.",
+        "noLedgerEntries": "No ledger entries are recorded for this order.",
+        "actionFailed": "The refund request could not be completed. Try again.",
+        "actionDenied": "You do not have permission to perform this refund action.",
+        "unknownStatus": "Status unavailable",
+        "unknownAccount": "Account unavailable"
+      },
       "refund": {
         "title": "Request refund",
-        "amount": "Amount",
+        "amount": "Amount in Rial",
         "reason": "Reason",
         "submit": "Request",
         "approve": "Approve",
         "reject": "Reject",
         "execute": "Execute",
-        "status": {
+        "approvalStatus": {
           "REQUESTED": "Requested",
           "APPROVED": "Approved",
           "REJECTED": "Rejected",
@@ -3562,15 +3699,25 @@
     },
     "feed": {
       "title": "Community",
+      "description": "Questions, stories and news from pet owners — respectful, no ads.",
       "newPost": "New post",
       "empty": "No posts yet. Be the first to share something.",
       "loadMore": "Load more",
+      "loading": "Loading posts…",
+      "loadingMore": "Loading…",
       "commentsAndReactions": "{comments, plural, one {# comment} other {# comments}} · {reactions, plural, one {# reaction} other {# reactions}}",
       "searchLabel": "Search posts",
       "typeLabel": "Post type",
       "allTypes": "All types",
       "search": "Search",
-      "noResults": "No posts match your search."
+      "noResults": "No posts match your search.",
+      "withPet": "with {name}",
+      "shortcutsLabel": "Community shortcuts",
+      "topics": "Topics",
+      "rightNow": "Right now",
+      "myMessages": "My messages",
+      "lostPetsNearby": "Lost pets nearby",
+      "supportNeeds": "Support needs"
     },
     "newPost": {
       "title": "New post",
