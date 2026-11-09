@@ -49,6 +49,12 @@ Regression coverage added:
 - Safe production probes after deployment: external stay API remains empty (`total: 0`), so no real listing exists to exercise a production outbound redirect; shop categories are four real categories with no `qa-b4-*` entries; public product API remains empty (`total: 0`). No production data was changed.
 - Status: the published-only redirect authorization fix is deployed, and the released route behavior is backed by unit + hosted API E2E tests. A production redirect against a published listing is NOT_TESTED because there is no published listing. Services/provider and booking flows remain PARTIAL pending authenticated/browser verification and real approved provider inventory. Jajiga remains PARTIAL: pilot permissions/content rights and date-specific price/availability were not established; a daily sync is not represented as live availability.
 
+### Subsequent travel route-pattern release
+
+- PR #225 merged normally at `7944df41d990a49364c45f1899bf6e245b43b778`; exact-head CI run `42686274540` and post-merge CI/deploy run `42687726435` passed.
+- Production `/api/health/version` reports SHA `7944df41d990a49364c45f1899bf6e245b43b778`, deployment `github-42687726435-1`; readiness is healthy. `GET /fa/travel` returned HTTP 200. Route-pattern unit coverage passed 7/7. This confirms deployment and route availability, not a browser-level visual inspection.
+- PR #218 was closed as superseded after confirming its same route-pattern change/test/doc were carried by #225; no code was discarded.
+
 ## Remaining gaps
 
 - Real service/provider inventory is absent in the unauthenticated production probe; no customer booking or provider booking state can be verified on production without a controlled QA account and real approved provider data.
