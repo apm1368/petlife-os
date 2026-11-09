@@ -457,6 +457,17 @@
       "backToList": "Zurück zur Liste",
       "search": "Suchen"
     },
+    "disputes": {
+      "title": "Streitfälle",
+      "newDispute": "Neuer Streitfall",
+      "createTitle": "Streitfall eröffnen",
+      "filter": { "status": "Nach Status filtern", "allStatuses": "Alle Status" },
+      "status": { "OPEN": "Offen", "UNDER_REVIEW": "Wird geprüft", "AWAITING_EVIDENCE": "Belege ausstehend", "RESOLVED_CUSTOMER": "Für Kunden entschieden", "RESOLVED_PROVIDER": "Für Anbieter entschieden", "RESOLVED_SELLER": "Für Verkäufer entschieden", "PARTIAL_RESOLUTION": "Teilweise gelöst", "REJECTED": "Abgelehnt", "CLOSED": "Geschlossen" },
+      "subjectType": { "BOOKING": "Buchung", "ORDER": "Bestellung", "PAYMENT": "Zahlung", "REFUND": "Erstattung", "SHIPMENT": "Sendung", "PROVIDER": "Anbieter", "SELLER": "Verkäufer" },
+      "form": { "subjectType": "Bezugstyp", "subjectId": "Bezug-ID", "raisedByUserId": "Eingereicht von (Nutzer-ID, optional)", "claim": "Schilderung", "submit": "Streitfall eröffnen" },
+      "detail": { "claim": "Schilderung", "resolution": "Zusammenfassung der Entscheidung", "evidence": "Belege", "addEvidence": "Beleg hinzufügen", "evidencePlaceholder": "Beschreibung des Belegs", "changeStatus": "Status ändern", "financialNote": "Finanzielle Vorgänge (einschließlich Erstattungen) werden separat verfolgt. Eine Streitfallentscheidung löst keine automatische Erstattung aus.", "actorType": { "USER": "Nutzer", "ADMIN": "Admin" } },
+      "states": { "loading": "Streitfälle werden geladen …", "loadFailed": "Streitfälle konnten nicht geladen werden. Bitte erneut versuchen.", "detailLoadFailed": "Dieser Streitfall konnte nicht geladen werden. Bitte erneut versuchen.", "accessDeniedTitle": "Kein Zugriff", "accessDenied": "Du hast keine Berechtigung, diese Streitfälle anzusehen.", "notFoundTitle": "Streitfall nicht gefunden", "notFound": "Dieser Streitfall ist nicht verfügbar.", "empty": "Keine Streitfälle gefunden", "emptyDescription": "Es gibt keine Streitfälle mit dem gewählten Status.", "requiredFields": "Bezug-ID und Schilderung sind erforderlich.", "createFailed": "Der Streitfall konnte nicht eröffnet werden. Bitte erneut versuchen.", "actionFailed": "Die Änderung konnte nicht gespeichert werden. Bitte erneut versuchen.", "noEvidence": "Noch keine Belege hinzugefügt." }
+    },
     "audit": {
       "title": "Prüfprotokoll",
       "entityType": "Entitätstyp",

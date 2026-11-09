@@ -7,6 +7,7 @@ import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skele
 import { DisputeStatus, DisputeSubjectType, type DisputeDto } from "@petlife/types";
 import { adminService } from "@/services/admin.service";
 import { adminStatusTone } from "./status-tone";
+import { ApiError } from "@/lib/api/client";
 
 const STATUSES = Object.values(DisputeStatus);
 
@@ -18,7 +19,7 @@ export function AdminDisputesView() {
 
   const [disputes, setDisputes] = useState<DisputeDto[] | null>(null);
   const [status, setStatus] = useState<DisputeStatus | "">("");
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<"access" | "failed" | null>(null);
   const [showCreate, setShowCreate] = useState(false);
 
   const [subjectType, setSubjectType] = useState<DisputeSubjectType>(DisputeSubjectType.ORDER);
@@ -26,14 +27,16 @@ export function AdminDisputesView() {
   const [raisedByUserId, setRaisedByUserId] = useState("");
   const [claim, setClaim] = useState("");
   const [creating, setCreating] = useState(false);
+  const [formError, setFormError] = useState(false);
+  const [createError, setCreateError] = useState(false);
 
   async function load() {
-    setError(false);
+    setError(null);
     try {
       const page = await adminService.listDisputes({ status: status || undefined, pageSize: 50 });
       setDisputes(page.items);
-    } catch {
-      setError(true);
+    } catch (cause) {
+      setError(cause instanceof ApiError && [401, 403].includes(cause.status) ? "access" : "failed");
     }
   }
 
@@ -43,12 +46,19 @@ export function AdminDisputesView() {
   }, [status]);
 
   async function createDispute() {
-    if (!subjectId.trim() || !claim.trim()) return;
+    setFormError(false);
+    setCreateError(false);
+    if (!subjectId.trim() || !claim.trim()) {
+      setFormError(true);
+      return;
+    }
     setCreating(true);
     try {
       const created = await adminService.createDispute({ subjectType, subjectId, raisedByUserId: raisedByUserId || undefined, claim });
       setShowCreate(false);
       router.push(`/${locale}/admin/disputes/${created.id}`);
+    } catch {
+      setCreateError(true);
     } finally {
       setCreating(false);
     }
@@ -78,14 +88,17 @@ export function AdminDisputesView() {
           <Button isLoading={creating} onClick={createDispute}>
             {t("form.submit")}
           </Button>
+          {formError ? <p role="alert" className="text-error">{t("states.requiredFields")}</p> : null}
+          {createError ? <p role="alert" className="text-error">{t("states.createFailed")}</p> : null}
         </ContextSurface>
       ) : null}
 
-      <Select label="" placeholder={t("title")} value={status} onChange={(e) => setStatus(e.target.value as DisputeStatus)} options={STATUSES.map((s) => ({ value: s, label: t(`status.${s}`) }))} />
+      <Select label={t("filter.status")} placeholder={t("filter.allStatuses")} value={status} onChange={(e) => setStatus(e.target.value as DisputeStatus)} options={STATUSES.map((s) => ({ value: s, label: t(`status.${s}`) }))} />
 
-      {error ? <ErrorRecovery title={t("title")} message="" retryLabel={tCommon("retry")} onRetry={load} /> : null}
-      {!error && !disputes ? <Skeleton className="h-40 w-full" aria-label={tCommon("loading")} /> : null}
-      {!error && disputes && disputes.length === 0 ? <EmptyState title={tCommon("empty")} /> : null}
+      {error === "access" ? <EmptyState title={t("states.accessDeniedTitle")} description={t("states.accessDenied")} /> : null}
+      {error === "failed" ? <ErrorRecovery title={t("title")} message={t("states.loadFailed")} retryLabel={tCommon("retry")} onRetry={load} /> : null}
+      {!error && !disputes ? <Skeleton className="h-40 w-full" aria-label={t("states.loading")} /> : null}
+      {!error && disputes && disputes.length === 0 ? <EmptyState title={t("states.empty")} description={t("states.emptyDescription")} /> : null}
       {disputes?.map((d) => (
         <button key={d.id} type="button" className="w-full text-start" onClick={() => router.push(`/${locale}/admin/disputes/${d.id}`)}>
           <ContextSurface className="flex items-center justify-between gap-3 py-2.5">

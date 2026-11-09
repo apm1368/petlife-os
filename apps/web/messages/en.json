@@ -2649,6 +2649,7 @@
       "title": "Disputes",
       "newDispute": "New dispute",
       "createTitle": "Open dispute",
+      "filter": { "status": "Filter by status", "allStatuses": "All statuses" },
       "status": {
         "OPEN": "Open",
         "UNDER_REVIEW": "Under review",
@@ -2683,7 +2684,13 @@
         "addEvidence": "Add evidence",
         "evidencePlaceholder": "Statement",
         "changeStatus": "Change status",
-        "financialNote": "Financial state (refunds) is tracked separately — resolving a dispute does not trigger a refund automatically."
+        "financialNote": "Financial state (refunds) is tracked separately — resolving a dispute does not trigger a refund automatically.",
+        "actorType": { "USER": "User", "ADMIN": "Admin" }
+      },
+      "states": {
+        "loading": "Loading disputes…", "loadFailed": "Disputes could not be loaded. Try again.", "detailLoadFailed": "This dispute could not be loaded. Try again.",
+        "accessDeniedTitle": "Access denied", "accessDenied": "You do not have permission to view these disputes.", "notFoundTitle": "Dispute not found", "notFound": "This dispute is not available.",
+        "empty": "No disputes found", "emptyDescription": "There are no disputes with the selected status.", "requiredFields": "Subject ID and claim are required.", "createFailed": "The dispute could not be opened. Try again.", "actionFailed": "The change could not be saved. Try again.", "noEvidence": "No evidence has been added yet."
       }
     },
     "trust": {

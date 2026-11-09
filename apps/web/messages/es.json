@@ -457,6 +457,17 @@
       "backToList": "Volver a la lista",
       "search": "Buscar"
     },
+    "disputes": {
+      "title": "Disputas",
+      "newDispute": "Nueva disputa",
+      "createTitle": "Abrir disputa",
+      "filter": { "status": "Filtrar por estado", "allStatuses": "Todos los estados" },
+      "status": { "OPEN": "Abierta", "UNDER_REVIEW": "En revisión", "AWAITING_EVIDENCE": "A la espera de pruebas", "RESOLVED_CUSTOMER": "Resuelta a favor del cliente", "RESOLVED_PROVIDER": "Resuelta a favor del proveedor", "RESOLVED_SELLER": "Resuelta a favor del vendedor", "PARTIAL_RESOLUTION": "Resolución parcial", "REJECTED": "Rechazada", "CLOSED": "Cerrada" },
+      "subjectType": { "BOOKING": "Reserva", "ORDER": "Pedido", "PAYMENT": "Pago", "REFUND": "Reembolso", "SHIPMENT": "Envío", "PROVIDER": "Proveedor", "SELLER": "Vendedor" },
+      "form": { "subjectType": "Tipo de asunto", "subjectId": "ID del asunto", "raisedByUserId": "Presentada por (ID de usuario, opcional)", "claim": "Reclamación", "submit": "Abrir disputa" },
+      "detail": { "claim": "Reclamación", "resolution": "Resumen de la resolución", "evidence": "Pruebas", "addEvidence": "Añadir prueba", "evidencePlaceholder": "Descripción de la prueba", "changeStatus": "Cambiar estado", "financialNote": "Los movimientos financieros, incluidos los reembolsos, se gestionan por separado. Resolver una disputa no genera un reembolso automático.", "actorType": { "USER": "Usuario", "ADMIN": "Administración" } },
+      "states": { "loading": "Cargando disputas…", "loadFailed": "No se pudieron cargar las disputas. Inténtalo de nuevo.", "detailLoadFailed": "No se pudo cargar esta disputa. Inténtalo de nuevo.", "accessDeniedTitle": "Sin acceso", "accessDenied": "No tienes permiso para ver estas disputas.", "notFoundTitle": "Disputa no encontrada", "notFound": "Esta disputa no está disponible.", "empty": "No se encontraron disputas", "emptyDescription": "No hay disputas con el estado seleccionado.", "requiredFields": "El ID del asunto y la reclamación son obligatorios.", "createFailed": "No se pudo abrir la disputa. Inténtalo de nuevo.", "actionFailed": "No se pudo guardar el cambio. Inténtalo de nuevo.", "noEvidence": "Todavía no se han añadido pruebas." }
+    },
     "audit": {
       "title": "Registro de auditoría",
       "entityType": "Tipo de entidad",
