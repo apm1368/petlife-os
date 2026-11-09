@@ -29,7 +29,7 @@ describe("AdminTrustView", () => {
     const { container } = renderWithIntl(<AdminTrustView />, locale);
     await waitFor(() => expect(screen.getByRole("heading", { name: title })).toBeTruthy());
     expect(screen.getAllByText(status).length).toBeGreaterThan(0);
-    expect(screen.getByText("Repeated late shipments")).toBeTruthy();
+    expect(await screen.findByText("Repeated late shipments")).toBeTruthy();
     expect(container.textContent).not.toMatch(/[\u0600-\u06ff]/);
   });
 
