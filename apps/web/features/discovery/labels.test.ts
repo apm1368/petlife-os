@@ -6,6 +6,12 @@ describe("four-locale booking and discovery labels", () => {
     const locales = ["fa", "en", "de", "es"] as const;
     expect(locales.map((locale) => bookingStatusLabel("CONFIRMED", locale)))
       .toEqual(["قطعی", "Confirmed", "Bestätigt", "Confirmada"]);
+    expect(locales.map((locale) => bookingStatusLabel("NEW_BACKEND_STATE", locale))).toEqual([
+      "وضعیت نامشخص",
+      "Status unavailable",
+      "Status nicht verfügbar",
+      "Estado no disponible",
+    ]);
   });
 
   it("localizes service categories and provider types in every supported locale", () => {

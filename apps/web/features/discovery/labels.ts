@@ -26,12 +26,16 @@ const PROVIDER_TYPE: Record<string, [string, string, string, string]> = {
   TRAVEL_ACCOMMODATION: ["اقامتگاه سفر", "Travel accommodation", "Tierfreundliche Unterkunft", "Alojamiento pet-friendly"],
 };
 
+const UNKNOWN_CATEGORY = ["دستهٔ خدمت نامشخص", "Service category unavailable", "Dienstleistungskategorie nicht verfügbar", "Categoría de servicio no disponible"] as const;
+
 export function categoryLabel(category: string, locale: RouteLocale | boolean): string {
-  return CATEGORY[category]?.[localeIndex(locale)] ?? category;
+  return CATEGORY[category]?.[localeIndex(locale)] ?? UNKNOWN_CATEGORY[localeIndex(locale)];
 }
 
+const UNKNOWN_PROVIDER_TYPE = ["نوع ارائه‌دهنده نامشخص", "Provider type unavailable", "Anbietertyp nicht verfügbar", "Tipo de proveedor no disponible"] as const;
+
 export function providerTypeLabel(type: string, locale: RouteLocale | boolean): string {
-  return PROVIDER_TYPE[type]?.[localeIndex(locale)] ?? type;
+  return PROVIDER_TYPE[type]?.[localeIndex(locale)] ?? UNKNOWN_PROVIDER_TYPE[localeIndex(locale)];
 }
 
 const BOOKING_STATUS: Record<string, [string, string, string, string]> = {
@@ -51,8 +55,10 @@ const BOOKING_STATUS: Record<string, [string, string, string, string]> = {
   NO_SHOW: ["عدم حضور", "No-show", "Nicht erschienen", "No presentado"],
 };
 
+const UNKNOWN_STATUS = ["وضعیت نامشخص", "Status unavailable", "Status nicht verfügbar", "Estado no disponible"] as const;
+
 export function bookingStatusLabel(status: string, locale: RouteLocale | boolean): string {
-  return BOOKING_STATUS[status]?.[localeIndex(locale)] ?? status;
+  return BOOKING_STATUS[status]?.[localeIndex(locale)] ?? UNKNOWN_STATUS[localeIndex(locale)];
 }
 
 export function bookingStatusTone(status: string): "success" | "attention" | "neutral" | "urgent" {
@@ -75,8 +81,10 @@ function localeIndex(locale: RouteLocale | boolean): 0 | 1 | 2 | 3 {
   return locale === "de" ? 2 : 3;
 }
 
+const UNKNOWN_PAYMENT_MODE = ["روش پرداخت نامشخص", "Payment method unavailable", "Zahlungsmethode nicht verfügbar", "Método de pago no disponible"] as const;
+
 export function paymentModeLabel(mode: string, locale: RouteLocale | boolean): string {
-  return PAYMENT_MODE[mode]?.[localeIndex(locale)] ?? mode;
+  return PAYMENT_MODE[mode]?.[localeIndex(locale)] ?? UNKNOWN_PAYMENT_MODE[localeIndex(locale)];
 }
 
 export const TIMELINE_ACTOR: Record<string, [string, string]> = {
