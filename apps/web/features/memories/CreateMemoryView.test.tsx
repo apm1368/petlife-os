@@ -67,4 +67,16 @@ describe("CreateMemoryView", () => {
 
     await waitFor(() => expect(memoriesService.create).toHaveBeenCalledWith("pet-1", expect.objectContaining({ title: undefined })));
   });
+
+  it.each([
+    ["de", "Erinnerung hinzufügen", "Beschreibung", "Erinnerung speichern"],
+    ["es", "Añadir un recuerdo", "Descripción", "Guardar recuerdo"],
+  ] as const)("renders the create form in %s without Persian interface copy", (locale, heading, description, submit) => {
+    const { container } = renderWithIntl(<CreateMemoryView petId="pet-1" />, locale);
+
+    expect(screen.getByRole("heading", { name: heading })).toBeTruthy();
+    expect(screen.getByLabelText(description)).toBeTruthy();
+    expect(screen.getByRole("button", { name: submit })).toBeTruthy();
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
 });
