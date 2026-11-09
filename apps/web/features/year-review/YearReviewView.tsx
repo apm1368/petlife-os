@@ -14,15 +14,15 @@ import { formatDay, localizeDigits, todayIso } from "@/lib/date/jalali";
 import { currentYear, systemFor, yearRange, type Locale } from "@/features/expenses/expense-model";
 import { humanYears, nextBirthday } from "./birthday";
 
-const SERVICE_LABELS: Record<string, [string, string]> = {
-  VET: ["ویزیت دامپزشک", "Vet visits"],
-  GROOMING: ["آرایش و نظافت", "Grooming"],
-  TRAINING: ["آموزش", "Training"],
-  WALKING: ["پیاده‌روی", "Walks"],
-  SITTING: ["نگهداری در خانه", "Pet sitting"],
-  BOARDING: ["پانسیون", "Boarding"],
-  PET_TAXI: ["تاکسی حیوان", "Pet taxi"],
-  OTHER: ["سایر خدمات", "Other services"],
+const SERVICE_LABELS: Record<string, Record<Locale, string>> = {
+  VET: { fa: "ویزیت دامپزشک", en: "Vet visits", de: "Tierarztbesuche", es: "Visitas veterinarias" },
+  GROOMING: { fa: "آرایش و نظافت", en: "Grooming", de: "Fellpflege", es: "Peluquería y aseo" },
+  TRAINING: { fa: "آموزش", en: "Training", de: "Training", es: "Adiestramiento" },
+  WALKING: { fa: "پیاده‌روی", en: "Walks", de: "Spaziergänge", es: "Paseos" },
+  SITTING: { fa: "نگهداری در خانه", en: "Pet sitting", de: "Betreuung zu Hause", es: "Cuidado a domicilio" },
+  BOARDING: { fa: "پانسیون", en: "Boarding", de: "Tierpension", es: "Residencia" },
+  PET_TAXI: { fa: "تاکسی حیوان", en: "Pet taxi", de: "Tiertransport", es: "Taxi para mascotas" },
+  OTHER: { fa: "سایر خدمات", en: "Other services", de: "Weitere Dienstleistungen", es: "Otros servicios" },
 };
 
 const copy = {
@@ -80,10 +80,32 @@ const copy = {
     addMemory: "Add a memory",
     loading: "Preparing the year in review",
   },
+  de: {
+    title: (name: string, year: string) => `${year} mit ${name}`,
+    memorialTitle: (name: string, year: string) => `Erinnerungen an ${name} im Jahr ${year}`,
+    intro: "Ein Rückblick auf die in diesem Jahr erfassten Erlebnisse und Versorgungseinträge – ausschließlich aus der tatsächlichen Akte.",
+    prevYear: "Vorjahr", nextYear: "Nächstes Jahr", memories: "Erinnerungen", photos: "Fotos", care: "Erledigte Pflegeaufgaben", services: "Erhaltene Dienstleistungen", trips: "Reisen", visits: "Tierarztbesuche",
+    highlights: "Besondere Momente", mostCare: "Häufigste Pflege", servicesBreakdown: "Dienstleistungen", destinations: "Reiseziele", birthday: "Geburtstag",
+    birthdayToday: (name: string, n: string) => `${name} wird heute ${n} Jahre alt!`, birthdayIn: (days: string, n: string) => `Noch ${days} Tage bis zum ${n}. Geburtstag`,
+    humanAge: (n: string) => `Etwa ${n} Menschenjahre`, humanNote: "Ein verbreiteter Schätzwert; für Hunde wird die durchschnittliche Größe berücksichtigt.",
+    noBirthDate: "Es ist kein Geburtsdatum erfasst. Mit einem Datum wird hier der Countdown angezeigt.", addBirthDate: "Geburtsdatum eintragen",
+    empty: "Für dieses Jahr ist noch nichts erfasst. Erinnerungen, Pflege und Reisen ergeben nach und nach diesen Rückblick.", addMemory: "Erinnerung hinzufügen", loading: "Jahresrückblick wird vorbereitet",
+  },
+  es: {
+    title: (name: string, year: string) => `${year} con ${name}`,
+    memorialTitle: (name: string, year: string) => `En recuerdo de ${name} en ${year}`,
+    intro: "Un resumen de lo que se registró para esta mascota durante el año, elaborado solo con datos reales del historial.",
+    prevYear: "Año anterior", nextYear: "Año siguiente", memories: "Recuerdos", photos: "Fotos", care: "Cuidados realizados", services: "Servicios recibidos", trips: "Viajes", visits: "Visitas veterinarias",
+    highlights: "Momentos destacados", mostCare: "Cuidados más frecuentes", servicesBreakdown: "Servicios", destinations: "Destinos", birthday: "Cumpleaños",
+    birthdayToday: (name: string, n: string) => `¡${name} cumple ${n} años hoy!`, birthdayIn: (days: string, n: string) => `Faltan ${days} días para cumplir ${n}`,
+    humanAge: (n: string) => `Unos ${n} años humanos`, humanNote: "Una estimación habitual; para perros se usa un promedio de tamaño mediano.",
+    noBirthDate: "No hay fecha de nacimiento registrada. Añádela para mostrar aquí la cuenta atrás.", addBirthDate: "Añadir fecha de nacimiento",
+    empty: "Aún no hay datos de este año. Los recuerdos, cuidados y viajes irán formando este resumen.", addMemory: "Añadir un recuerdo", loading: "Preparando el resumen anual",
+  },
 } as const;
 
 export function YearReviewView({ petId }: { petId: string }) {
-  const locale = (useLocale() === "fa" ? "fa" : "en") as Locale;
+  const locale = useLocale() as Locale;
   const c = copy[locale];
   const system = systemFor(locale);
   const today = todayIso();
@@ -113,7 +135,7 @@ export function YearReviewView({ petId }: { petId: string }) {
   if (error) return <LoadFailure error={error} onRetry={load} />;
   if (!pet || !review) return <Skeleton className="h-80 w-full" aria-label={c.loading} />;
 
-  const n = (value: number) => localizeDigits(value.toLocaleString(locale === "fa" ? "fa-IR" : "en-US"), locale);
+  const n = (value: number) => localizeDigits(value.toLocaleString(locale === "fa" ? "fa-IR" : locale), locale);
   const isMemorial = pet.lifecycleStatus === PetLifecycleStatus.DECEASED || pet.lifecycleStatus === PetLifecycleStatus.MEMORIAL;
   const yearLabel = localizeDigits(year, locale);
   const base = `/${locale}/pets/${petId}`;
@@ -195,13 +217,13 @@ export function YearReviewView({ petId }: { petId: string }) {
             {review.care && review.care.topTypes.length ? (
               <section aria-labelledby="yr-care" className="split-panel">
                 <h2 id="yr-care" className="mb-3 font-semibold text-text-primary">{c.mostCare}</h2>
-                <Breakdown rows={review.care.topTypes.map((t) => [CARE_KINDS[t.type]?.[locale === "fa" ? 0 : 1] ?? t.type, t.count])} n={n} />
+                <Breakdown rows={review.care.topTypes.map((t) => [CARE_KINDS[t.type]?.[{ fa: 0, en: 1, de: 2, es: 3 }[locale]] ?? t.type, t.count])} n={n} />
               </section>
             ) : null}
             {review.services && review.services.byCategory.length ? (
               <section aria-labelledby="yr-services" className="split-panel">
                 <h2 id="yr-services" className="mb-3 font-semibold text-text-primary">{c.servicesBreakdown}</h2>
-                <Breakdown rows={review.services.byCategory.map((s) => [SERVICE_LABELS[s.category]?.[locale === "fa" ? 0 : 1] ?? s.category, s.count])} n={n} />
+                <Breakdown rows={review.services.byCategory.map((s) => [SERVICE_LABELS[s.category]?.[locale] ?? s.category, s.count])} n={n} />
               </section>
             ) : null}
             {review.trips && review.trips.destinations.length ? (

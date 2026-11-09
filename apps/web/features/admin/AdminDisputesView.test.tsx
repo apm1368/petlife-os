@@ -29,7 +29,7 @@ describe("AdminDisputesView", () => {
     const { container } = renderWithIntl(<AdminDisputesView />, locale);
     await waitFor(() => expect(screen.getByRole("heading", { name: title })).toBeTruthy());
     expect(screen.getAllByText(status).length).toBeGreaterThan(0);
-    expect(screen.getByText("Item never arrived")).toBeTruthy();
+    await waitFor(() => expect(screen.getByText("Item never arrived")).toBeTruthy());
     expect(container.textContent).not.toMatch(/[\u0600-\u06ff]/);
   });
 
