@@ -2821,19 +2821,57 @@
     },
     "transactions": {
       "title": "تراکنش‌ها",
+      "orderIdLabel": "شناسه سفارش",
       "orderIdPlaceholder": "شناسه سفارش",
       "lookup": "جستجو",
       "paymentIntents": "تراکنش‌های پرداخت",
       "ledgerEntries": "دفتر مالی",
+      "paymentStatus": {
+        "REQUIRES_PAYMENT_METHOD": "نیازمند روش پرداخت",
+        "PENDING": "در انتظار",
+        "AUTHORIZED": "تأیید مجاز",
+        "CAPTURED": "دریافت‌شده",
+        "FAILED": "ناموفق",
+        "CANCELLED": "لغوشده"
+      },
+      "refundStatus": {
+        "REQUESTED": "درخواست‌شده",
+        "PROCESSING": "در حال پردازش",
+        "SUCCEEDED": "بازپرداخت‌شده",
+        "FAILED": "ناموفق",
+        "CANCELLED": "لغوشده"
+      },
+      "ledgerDirection": { "DEBIT": "بدهکار", "CREDIT": "بستانکار" },
+      "ledgerAccount": {
+        "CASH_GATEWAY_RECEIVABLE": "دریافتنی درگاه",
+        "CUSTOMER_PAYMENT_CLEARING": "حساب واسط پرداخت مشتری",
+        "SELLER_PAYABLE": "پرداختنی فروشنده",
+        "REFUND_PAYABLE": "پرداختنی بازپرداخت",
+        "PLATFORM_REVENUE": "درآمد پلتفرم"
+      },
+      "states": {
+        "lookupPrompt": "برای دیدن اطلاعات پرداخت و دفتر مالی، شناسه سفارش را وارد کنید.",
+        "loading": "در حال دریافت اطلاعات مالی سفارش…",
+        "lookupFailedTitle": "دریافت اطلاعات مالی ممکن نشد",
+        "lookupFailed": "اطلاعات مالی این سفارش دریافت نشد. دوباره تلاش کنید.",
+        "offline": "اتصال اینترنت برقرار نیست. اتصال را بررسی کنید و دوباره تلاش کنید.",
+        "accessDenied": "اجازهٔ مشاهدهٔ این اطلاعات مالی را ندارید.",
+        "noPaymentIntents": "برای این سفارش تراکنش پرداختی ثبت نشده است.",
+        "noLedgerEntries": "برای این سفارش ردیفی در دفتر مالی ثبت نشده است.",
+        "actionFailed": "انجام درخواست بازپرداخت ممکن نشد. دوباره تلاش کنید.",
+        "actionDenied": "اجازهٔ انجام این عملیات بازپرداخت را ندارید.",
+        "unknownStatus": "وضعیت نامشخص",
+        "unknownAccount": "حساب نامشخص"
+      },
       "refund": {
         "title": "درخواست بازگشت وجه",
-        "amount": "مبلغ",
+        "amount": "مبلغ به ریال",
         "reason": "دلیل",
         "submit": "ثبت درخواست",
         "approve": "تأیید",
         "reject": "رد",
         "execute": "اجرا",
-        "status": {
+        "approvalStatus": {
           "REQUESTED": "درخواست‌شده",
           "APPROVED": "تأییدشده",
           "REJECTED": "ردشده",
