@@ -4,6 +4,7 @@ import { renderWithIntl } from "@/test/render-with-intl";
 import { accountService } from "@/services/account.service";
 import { householdsService } from "@/services/households.service";
 import { AccountOverviewView, accountOverviewCopy } from "./AccountOverviewView";
+import { ApiError } from "@/lib/api/client";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }), usePathname: () => "/de/profile" }));
@@ -28,6 +29,16 @@ describe("AccountOverviewView four-locale page copy", () => {
   it("has the same application-copy keys in every supported locale", () => {
     const keys = Object.keys(accountOverviewCopy.fa).sort();
     for (const locale of ["en", "de", "es"] as const) expect(Object.keys(accountOverviewCopy[locale]).sort()).toEqual(keys);
+  });
+
+  it("has localized invitation loading, empty and recovery copy in every locale", () => {
+    const keys = ["invitationsLoading", "noInvitations", "invitationsOffline", "invitationsNoAccess", "loadInvitationsError", "retryInvitations"] as const;
+    for (const locale of ["fa", "en", "de", "es"] as const) {
+      for (const key of keys) expect(accountOverviewCopy[locale][key].length).toBeGreaterThan(0);
+      if (locale === "de" || locale === "es") {
+        for (const key of keys) expect(accountOverviewCopy[locale][key]).not.toMatch(/[\u0600-\u06FF]/);
+      }
+    }
   });
 
   it.each([
@@ -59,7 +70,7 @@ describe("AccountOverviewView four-locale page copy", () => {
     vi.mocked(householdsService.incomingInvitations).mockRejectedValueOnce(new Error("offline"));
     renderWithIntl(<AccountOverviewView />, "es");
     expect(await screen.findByText("Aún no hay un hogar registrado")).toBeTruthy();
-    expect((await screen.findByRole("status")).textContent).toContain("No se pudieron cargar las invitaciones del hogar.");
+    expect((await screen.findByRole("alert")).textContent).toContain("No se pudieron cargar las invitaciones del hogar.");
     expect(document.body.textContent).not.toMatch(/خانواده|دعوت‌های خانواده/);
   });
 
@@ -73,5 +84,30 @@ describe("AccountOverviewView four-locale page copy", () => {
     vi.mocked(accountService.overview).mockRejectedValueOnce(new Error("offline"));
     renderWithIntl(<AccountOverviewView />, locale);
     expect(await screen.findByRole("button", { name: retry })).toBeTruthy();
+  });
+
+  it.each([["de", "Haushaltseinladungen werden geladen"], ["es", "Cargando invitaciones del hogar"]] as const)("shows an accessible invitation loading state in %s", async (locale, label) => {
+    vi.mocked(householdsService.incomingInvitations).mockImplementationOnce(() => new Promise(() => undefined));
+    renderWithIntl(<AccountOverviewView />, locale);
+    expect(await screen.findByLabelText(label)).toBeTruthy();
+  });
+
+  it.each([["de", "Keine Internetverbindung. Stellen Sie die Verbindung wieder her und versuchen Sie es erneut."], ["es", "No hay conexión a internet. Conéctate e inténtalo de nuevo."]] as const)("lets a user retry a recoverable invitation load failure in %s", async (locale, offlineMessage) => {
+    Object.defineProperty(navigator, "onLine", { configurable: true, value: false });
+    vi.mocked(householdsService.incomingInvitations).mockRejectedValueOnce(new Error("network"));
+    renderWithIntl(<AccountOverviewView />, locale);
+    expect(await screen.findByText(offlineMessage)).toBeTruthy();
+    expect(screen.queryByText("network")).toBeNull();
+    Object.defineProperty(navigator, "onLine", { configurable: true, value: true });
+    vi.mocked(householdsService.incomingInvitations).mockResolvedValueOnce([]);
+    fireEvent.click(screen.getByRole("button", { name: accountOverviewCopy[locale].retryInvitations }));
+    expect(await screen.findByText(accountOverviewCopy[locale].noInvitations)).toBeTruthy();
+  });
+
+  it.each(["de", "es"] as const)("renders invitation access-denied feedback without exposing the API message in %s", async (locale) => {
+    vi.mocked(householdsService.incomingInvitations).mockRejectedValueOnce(new ApiError({ code: "FORBIDDEN", message: "private authorization detail", requestId: "r1" }, 403));
+    renderWithIntl(<AccountOverviewView />, locale);
+    expect(await screen.findByText(accountOverviewCopy[locale].invitationsNoAccess)).toBeTruthy();
+    expect(screen.queryByText("private authorization detail")).toBeNull();
   });
 });
