@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
+import { ApiError } from "@/lib/api/client";
 import { householdsService } from "@/services/households.service";
 import type { HouseholdCollaborationDto } from "@/services/account.service";
 import { HouseholdCenterView } from "./HouseholdCenterView";
@@ -99,5 +100,43 @@ describe("HouseholdCenterView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Copy link" }));
     await waitFor(() => expect(writeText).toHaveBeenCalledWith((inviteLink as HTMLInputElement).value));
     expect(screen.getByRole("dialog")).toBeTruthy();
+  });
+
+  it.each([
+    ["de", "Zugriffsereignis"],
+    ["es", "Evento de acceso"],
+  ] as const)("uses a localized safe label for unknown history codes in %s", async (locale, safeLabel) => {
+    vi.mocked(householdsService.collaboration).mockResolvedValue(household({ history: [{ id: "unknown", type: "BACKEND_EVENT_CODE", occurredAt: "2026-02-03T10:00:00.000Z" }] }));
+    renderWithIntl(<HouseholdCenterView />, locale);
+    await screen.findByText("Reza");
+    expect(screen.getByText(safeLabel)).toBeTruthy();
+    expect(screen.queryByText("BACKEND_EVENT_CODE")).toBeNull();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it.each([
+    ["de", "Mitglied einladen", "Mobilnummer des Familienmitglieds", "Einladung speichern", "Die Einladung konnte nicht gesendet werden. Bitte versuchen Sie es erneut."],
+    ["es", "Invitar a un miembro", "Número de móvil del familiar", "Guardar invitación", "No se pudo enviar la invitación. Inténtalo de nuevo."],
+  ] as const)("keeps invitation failure copy in %s instead of showing server text", async (locale, openLabel, phoneLabel, saveLabel, expected) => {
+    vi.mocked(householdsService.invite).mockRejectedValueOnce(new ApiError({ code: "UNKNOWN_INVITE_FAILURE", message: "خطای فارسی سرور", requestId: "test" }, 500));
+    renderWithIntl(<HouseholdCenterView />, locale);
+    fireEvent.click(await screen.findByRole("button", { name: openLabel }));
+    fireEvent.change(screen.getByLabelText(phoneLabel), { target: { value: "0912 345 6789" } });
+    fireEvent.click(screen.getByRole("button", { name: saveLabel }));
+    expect((await screen.findByRole("alert")).textContent).toContain(expected);
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it("localizes a failed membership approval without exposing the API message", async () => {
+    vi.mocked(householdsService.collaboration).mockResolvedValue(household({ invitations: [{
+      id: "request-1", contactMasked: "+98••••5678", status: "REQUESTED", expiresAt: "2026-02-10T10:00:00.000Z", createdAt: "2026-02-01T10:00:00.000Z", requestedAt: "2026-02-02T10:00:00.000Z", initialAccess: [],
+      requester: { id: "u-new", displayName: "Noor", avatarUrl: null, phoneMasked: "+98••••5678", phoneVerified: false },
+    }] }));
+    vi.mocked(householdsService.approveMembershipRequest).mockRejectedValueOnce(new ApiError({ code: "UNKNOWN_APPROVAL_FAILURE", message: "خطای فارسی سرور", requestId: "test" }, 500));
+    renderWithIntl(<HouseholdCenterView />, "es");
+    await screen.findByText("Noor");
+    fireEvent.click(screen.getByRole("button", { name: "Aprobar adhesión" }));
+    expect((await screen.findByRole("status")).textContent).toContain("No se pudo completar. Inténtalo de nuevo.");
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
   });
 });
