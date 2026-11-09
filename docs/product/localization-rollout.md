@@ -67,7 +67,7 @@ Status is per page family, not per shared header. `COMPLETE` means all applicati
 | Authentication and registration | Complete | Complete | Complete | Complete | Existing auth page tests cover translated copy; external SMS delivery/templates remain provider-dependent and are not claimed active. |
 | Household membership and invitations | Partial | Partial | Partial | Partial | PR #158 merged to main at `0b8c4c3`; its synchronized head passed 16 focused tests, typecheck/lint and hosted CI. Production is still behind main; authenticated responsive browser inspection and other household lifecycle states remain open. |
 | Invitation request `/[locale]/invitations/[token]` | Partial | Partial | Partial | Partial | German/Spanish cover request, pending-owner-approval, verified/unverified phone explanation, expiration/revocation/wrong-account/not-found copy and localized date/buttons. Component tests cover de/es output and reject Persian characters; responsive browser inspection is outstanding. |
-| Pet access `/[locale]/profile/household/pets/[petId]/access` | Partial | Partial | Partial | Partial | German/Spanish cover permissions, presets, expiry, revoke confirmation, loading, empty, denied and recoverable error states; 10 rendering tests reject Persian UI. Responsive browser inspection is outstanding. |
+| Pet access `/[locale]/profile/household/pets/[petId]/access` | Partial | Partial | Partial | Partial | Four-locale permission/expiry rendering and German/Spanish create/revoke dialogs and action-error states now have 18 focused tests. The page remains PARTIAL pending authenticated responsive browser inspection and the remaining lifecycle/error states. User/member names remain source data. |
 | Personal account settings `/profile/settings/personal` | Complete | Complete | Complete | Complete | Existing #119 translation slice covers loading/save/contact/appearance states; verification delivery remains external. |
 | Account overview `/[locale]/profile` | Complete | Complete | Complete | Complete | Overview, loading/failure recovery, session/invitation metrics, household summary and invitation request/decline/error copy tested. Invite text clearly says phone matching does not verify the phone and access begins only after owner approval. |
 | Account activity `/[locale]/profile/activity` | Complete | Complete | Complete | Complete | Event names and summaries, filters, safe unknown-event fallback, empty/loading/error/retry and older-page control; locale-specific dates and numbers tested. Event detail values such as device names remain source content. |
@@ -150,6 +150,12 @@ Before marking any additional route complete, record its route/component, all fo
 
 - The invitation route's request/pending states and safe failure-code messages now have explicit German and Spanish translations. Phone-matching copy continues to state that a match is not verification and that no household access is granted before owner approval.
 - Dynamic phone data is preserved, not translated. Expiration timestamps follow the selected locale; Persian Jalali behavior remains intact.
+
+## Pet access page localization verification follow-up
+
+- `/[locale]/profile/household/pets/[petId]/access` keeps permission records and expiry dates in the selected locale (Persian Jalali in fa; Gregorian in en/de/es). German/Spanish rendering tests now cover create-access failure copy and the revoke confirmation before an access grant is revoked.
+- Focused verification totals 18 tests across the page: fa/en/de/es access records and dates plus German/Spanish populated, empty, loading, denied, recoverable, create-failure and revoke-confirmation states. Permission semantics and API requests are unchanged.
+- Decision references: ID-13, ID-21, GC-10 and GC-12. The page remains PARTIAL pending authenticated responsive browser verification and other lifecycle/error states.
 - German/Spanish component tests cover unverified and pending request states, expired-link recovery, translated actions and absence of Persian-script UI. Existing Persian/English behavior and membership business rules are unchanged. Responsive browser inspection remains outstanding, so the route stays PARTIAL.
 
 ## Pet profile follow-up
