@@ -2715,6 +2715,7 @@
       "title": "Trust & Safety",
       "newCase": "Open trust case",
       "createTitle": "Open trust case",
+      "filter": { "status": "Filter by status", "allStatuses": "All statuses" },
       "status": {
         "OPEN": "Open",
         "UNDER_REVIEW": "Under review",
@@ -2756,6 +2757,20 @@
         "severity": "Severity",
         "submit": "Open case"
       },
+      "context": {
+        "title": "Case subject",
+        "missingSubject": "The subject no longer exists or has no summary.",
+        "by": "By {name}",
+        "openPublicPage": "Open public page",
+        "reportCount": "Reports: {total} · distinct reporters: {reporters}",
+        "unknownKind": "Other subject",
+        "unknownStatus": "Status unavailable",
+        "unknownReason": "Other or unrecognized reason",
+        "subjectKind": { "POST": "Community post", "COMMENT": "Community comment", "SUPPORT_NEED": "Support request", "LOST_PET_INCIDENT": "Lost-pet report", "LOST_PET_SIGHTING": "Sighting", "ORGANIZATION": "Organization" },
+        "reportReason": { "SPAM": "Spam", "ABUSE": "Abuse", "MISINFORMATION": "Misinformation", "INAPPROPRIATE": "Inappropriate content", "OTHER": "Other", "SCAM": "Scam", "HARASSMENT": "Harassment", "PERSONAL_INFORMATION": "Personal information", "ANIMAL_WELFARE": "Animal welfare", "DANGEROUS_CONTENT": "Dangerous content" },
+        "reportStatus": { "OPEN": "Open", "ESCALATED": "Escalated", "RESOLVED": "Resolved", "DISMISSED": "Dismissed" },
+        "subjectStatus": { "OPEN": "Open", "SEARCHING": "Searching", "SIGHTING_REPORTED": "Sighting reported", "FOUND": "Found", "REUNITED": "Reunited", "CLOSED": "Closed", "SUBMITTED": "Submitted", "REVIEWED": "Reviewed", "ACCEPTED": "Accepted", "REJECTED": "Rejected", "DRAFT": "Draft", "PENDING_REVIEW": "Pending review", "PUBLISHED": "Published", "PARTIALLY_FULFILLED": "Partially fulfilled", "PAUSED": "Paused", "FULFILLED": "Fulfilled", "EXPIRED": "Expired", "REMOVED": "Removed", "HIDDEN": "Hidden", "VERIFIED": "Verified", "NOT_STARTED": "Not started", "UNDER_REVIEW": "Under review", "NEEDS_INFORMATION": "More information needed", "APPROVED": "Approved", "SUSPENDED": "Suspended", "INACTIVE": "Inactive" }
+      },
       "detail": {
         "changeStatus": "Change status",
         "actions": "Actions taken",
@@ -2766,7 +2781,16 @@
         "appellantUserId": "Appellant user ID",
         "appealReason": "Appeal reason",
         "resolveAppeal": "Resolve appeal",
-        "resolution": "Resolution"
+        "resolution": "Resolution",
+        "effectBefore": "Before",
+        "effectAfter": "After",
+        "effectField": { "status": "Status", "verificationStatus": "Verification", "isPubliclyListed": "Public listing", "pausedListings": "Paused listings", "closedAt": "Closed at" },
+        "yes": "Yes",
+        "no": "No",
+        "requiredFields": "A subject ID and reason are required.",
+        "appealRequiredFields": "An appellant user ID and appeal reason are required.",
+        "resolutionRequired": "Enter a resolution before deciding this appeal.",
+        "appealFailed": "The appeal could not be submitted or resolved. Try again."
       },
       "appealStatus": {
         "SUBMITTED": "Submitted",
@@ -2774,7 +2798,8 @@
         "UPHELD": "Upheld",
         "OVERTURNED": "Overturned",
         "PARTIALLY_OVERTURNED": "Partially overturned"
-      }
+      },
+      "states": { "loading": "Loading trust cases…", "loadFailed": "Trust cases could not be loaded. Try again.", "detailLoadFailed": "This trust case could not be loaded. Try again.", "accessDeniedTitle": "Access denied", "accessDenied": "You do not have permission to view these trust cases.", "empty": "No trust cases found", "emptyDescription": "There are no cases with the selected status.", "createFailed": "The trust case could not be opened. Try again.", "actionFailed": "The change could not be saved. Try again.", "actionNotApplicable": "This action cannot be applied in the subject’s current state.", "actionForbidden": "Your role is not allowed to take this action.", "actionNotRecorded": "The action was not recorded. Try again.", "noActions": "No actions have been recorded yet.", "contextUnavailable": "The subject and report summary could not be loaded.", "unknownValue": "Value unavailable", "restored": "Restored by a later action" }
     },
     "orgs": {
       "providersTitle": "Providers",
