@@ -222,8 +222,8 @@ async function main() {
     categoryIds[c.key] = id(`category:${c.key}`);
     await db.productCategory.upsert({
       where: { id: categoryIds[c.key] },
-      create: { id: categoryIds[c.key], name: c.name, slug: `qa-b4-${c.key}`, parentId: c.parent ? categoryIds[c.parent] : null },
-      update: {},
+      create: { id: categoryIds[c.key], isDemoRecord: true, name: c.name, slug: `qa-b4-${c.key}`, parentId: c.parent ? categoryIds[c.parent] : null },
+      update: { isDemoRecord: true },
     });
   }
   const brandIds: Record<string, string> = {};

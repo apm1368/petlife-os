@@ -2838,6 +2838,8 @@ model Brand {
 /// orphans them to the root level.
 model ProductCategory {
   id       String            @id @default(uuid()) @db.Uuid
+  /// Seed/demo taxonomy entries are excluded from public shop discovery.
+  isDemoRecord Boolean       @default(false)
   parentId String?           @db.Uuid
   parent   ProductCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
   children ProductCategory[] @relation("CategoryHierarchy")
@@ -9489,6 +9491,8 @@ model ProductMedia {
   product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
   variantId String?         @db.Uuid
   variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  /// Scoped first-party storage key for new uploads; legacy media may only have a URL.
+  objectKey String?         @unique
   /// Repository-owned or storage-owned path; never a third-party hotlink.
   url       String
   alt       String?

@@ -99,7 +99,7 @@ describe("P1-a payment infrastructure (e2e)", () => {
   async function assertAllLedgerTransactionsBalanced() {
     // Other E2E suites intentionally create malformed ledger fixtures to prove
     // reconciliation catches them. Validate only the transactions this payment
-    // scenario created; never let a prior suite's fixture contaminate it.
+    // scenario created; never let another suite's fixture contaminate it.
     const transactions = await prisma.ledgerTransaction.findMany({
       where: { createdAt: { gte: ledgerScenarioStartedAt } },
       include: { entries: true },
