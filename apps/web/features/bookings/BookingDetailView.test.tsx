@@ -193,6 +193,9 @@ describe("BookingDetailView", () => {
 
     expect(await screen.findByText("Bestätigt")).toBeTruthy();
     expect(screen.getByText("Haustier")).toBeTruthy();
+    expect(screen.queryByText("قطعی")).toBeNull();
+    expect(screen.queryByText("در حال بارگیری")).toBeNull();
+    expect(screen.getByText("General Vet Visit")).toBeTruthy(); // source content is not machine-translated
     expect(screen.getByRole("link", { name: "Support kontaktieren" }).getAttribute("href")).toBe("/de/support/new?relatedEntityType=BOOKING&relatedEntityId=booking-1&category=BOOKING");
     fireEvent.click(screen.getByRole("button", { name: "Buchung stornieren" }));
     expect(screen.getByText("Diese Buchung stornieren?")).toBeTruthy();
@@ -207,6 +210,7 @@ describe("BookingDetailView", () => {
 
     expect(await screen.findByText("Pendiente de pago")).toBeTruthy();
     expect(screen.getByText("Proveedor")).toBeTruthy();
+    expect(screen.queryByText("در انتظار پرداخت")).toBeNull();
     expect(screen.getByRole("button", { name: "Pagar de forma segura" })).toBeTruthy();
     expect(screen.getByText(/La reserva solo se confirma cuando la pasarela confirma el pago/)).toBeTruthy();
   });
