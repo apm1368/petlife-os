@@ -23,9 +23,10 @@ const STATUS_TONE: Record<string, "success" | "attention" | "urgent" | "neutral"
 };
 
 /** Compact booking-queue row (spec section 11) — Pet/Owner/Service/Time/Location/Booking Status/Payment Status, kept separate on purpose. */
-export function ProviderBookingRow({ booking, locale, onClick }: { booking: ProviderBookingSummaryDto; locale: "fa" | "en"; onClick: () => void }) {
+export function ProviderBookingRow({ booking, locale, onClick }: { booking: ProviderBookingSummaryDto; locale: "fa" | "en" | "de" | "es"; onClick: () => void }) {
   const t = useTranslations("bookingDetail.status");
   const tPayment = useTranslations("bookingDetail.paymentStatus");
+  const tProvider = useTranslations("provider.bookingRow");
 
   return (
     <button type="button" onClick={onClick} className="w-full text-start">
@@ -42,7 +43,7 @@ export function ProviderBookingRow({ booking, locale, onClick }: { booking: Prov
         </p>
         {booking.bookingStatus === "REQUESTED" && booking.requestExpiresAt ? (
           <p className="text-metadata text-state-attention">
-            {locale === "fa" ? "پاسخ تا " : "Respond by "}
+            {tProvider("respondBy")}
             {formatAppointmentDateTime(booking.requestExpiresAt, locale, booking.timezone)}
           </p>
         ) : null}

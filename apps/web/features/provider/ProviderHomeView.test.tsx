@@ -34,6 +34,21 @@ describe("ProviderHomeView", () => {
     expect(screen.getByText("No bookings today.")).toBeTruthy();
   });
 
+  it.each([
+    ["de", "2 ausstehende Bestätigungen", "Heute (0)"],
+    ["es", "2 confirmaciones pendientes", "Hoy (0)"],
+  ] as const)("renders the complete provider home body in %s", async (locale, pending, today) => {
+    vi.mocked(providerOsService.getOverview).mockResolvedValue({ ...BASE_OVERVIEW, pendingConfirmationCount: 2 });
+
+    renderWithIntl(<ProviderHomeView />, locale);
+
+    await waitFor(() => expect(screen.getByText(pending)).toBeTruthy());
+    expect(screen.getByRole("heading", { name: locale === "de" ? "Anbieterübersicht" : "Panel del proveedor" })).toBeTruthy();
+    expect(screen.getByText(today)).toBeTruthy();
+    expect(screen.getByText(locale === "de" ? "Heute gibt es keine Buchungen." : "Hoy no hay reservas.")).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
   it("surfaces attention counts when there are pending confirmations and availability issues", async () => {
     vi.mocked(providerOsService.getOverview).mockResolvedValue({
       ...BASE_OVERVIEW,
@@ -76,5 +91,14 @@ describe("ProviderHomeView", () => {
 
     await waitFor(() => expect(screen.getAllByText("Luna — Sarah").length).toBeGreaterThan(0));
     expect(screen.getByText("Today (1)")).toBeTruthy();
+  });
+
+  it("shows a translated error message and retry action", async () => {
+    vi.mocked(providerOsService.getOverview).mockRejectedValue(new Error("offline"));
+
+    renderWithIntl(<ProviderHomeView />, "de");
+
+    await waitFor(() => expect(screen.getByText("Die Anbieterübersicht konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.")).toBeTruthy());
+    expect(screen.getByRole("button", { name: "Erneut versuchen" })).toBeTruthy();
   });
 });

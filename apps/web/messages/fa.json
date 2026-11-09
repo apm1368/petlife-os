@@ -1058,6 +1058,7 @@
       "title": "خانه ارائه‌دهنده",
       "retry": "تلاش دوباره",
       "loading": "در حال بارگذاری",
+      "loadFailed": "نمای کلی ارائه‌دهنده بارگیری نشد. اتصال را بررسی کنید و دوباره تلاش کنید.",
       "attention": {
         "pendingConfirmation": "{count, number} در انتظار تأیید",
         "cancellations": "{count, number} لغو اخیر",
@@ -1069,6 +1070,7 @@
       "noBookingsToday": "امروز رزروی وجود ندارد.",
       "verificationLink": "احراز هویت و مدارک مجموعه"
     },
+    "bookingRow": { "respondBy": "پاسخ تا " },
     "bookings": {
       "title": "رزروها",
       "retry": "تلاش دوباره",

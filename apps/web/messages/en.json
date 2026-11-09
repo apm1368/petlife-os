@@ -1083,6 +1083,7 @@
       "title": "Provider Home",
       "retry": "Retry",
       "loading": "Loading",
+      "loadFailed": "The provider overview could not be loaded. Check your connection and try again.",
       "attention": {
         "pendingConfirmation": "{count} pending confirmation",
         "cancellations": "{count} recent cancellations",
@@ -1094,6 +1095,7 @@
       "noBookingsToday": "No bookings today.",
       "verificationLink": "Organization verification and documents"
     },
+    "bookingRow": { "respondBy": "Respond by " },
     "bookings": {
       "title": "Bookings",
       "retry": "Retry",
