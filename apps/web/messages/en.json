@@ -3722,6 +3722,36 @@
       "commentsEmpty": "No comments yet."
     }
   },
+  "communityChat": {
+    "inbox": {
+      "title": "Messages",
+      "emptyTitle": "No conversations yet",
+      "emptyDescription": "Start a conversation from a post or a member's profile.",
+      "fallbackMember": "Member",
+      "youPrefix": "You:",
+      "unread": "{count, plural, one {# unread message} other {# unread messages}}",
+      "failed": "Messages could not load",
+      "noAccess": "You don't have access to these messages.",
+      "stale": "Messages could not refresh. Showing the last loaded conversations.",
+      "retry": "Retry"
+    },
+    "thread": {
+      "allMessages": "All messages",
+      "conversationFallback": "Conversation",
+      "block": "Block",
+      "unblock": "Unblock",
+      "blocked": "Messaging is blocked in this conversation.",
+      "messageLabel": "Message",
+      "send": "Send",
+      "sendFailed": "The message wasn't sent. Please try again.",
+      "blockFailed": "The block setting could not be changed. Please try again.",
+      "notFound": "Conversation not found",
+      "loadFailed": "Conversation could not load",
+      "noAccess": "You don't have access to this conversation.",
+      "retry": "Retry",
+      "noMessages": "No messages in this conversation yet."
+    }
+  },
   "memories": {
     "publicMemorial": {
       "title": "Share a memorial",
