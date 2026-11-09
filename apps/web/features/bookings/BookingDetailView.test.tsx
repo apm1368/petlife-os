@@ -181,9 +181,73 @@ describe("BookingDetailView", () => {
     expect(await screen.findByText("You do not have access to this booking")).toBeTruthy();
   });
 
+  it("keeps the loading state visible until the booking response arrives", () => {
+    vi.mocked(bookingsService.getById).mockReturnValue(new Promise(() => {}));
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />, "en");
+    expect(screen.getByLabelText("Loading booking…")).toBeTruthy();
+  });
+
+  it("shows not-found state for a missing booking", async () => {
+    vi.mocked(bookingsService.getById).mockRejectedValue(new ApiError({ code: "BOOKING_NOT_FOUND", message: "x", requestId: "r" }, 404));
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />, "en");
+    expect(await screen.findByText("Booking not found")).toBeTruthy();
+  });
+
+  it("offers retry after a booking load error", async () => {
+    vi.mocked(bookingsService.getById)
+      .mockRejectedValueOnce(new ApiError({ code: "TEMPORARY_FAILURE", message: "x", requestId: "r" }, 503))
+      .mockResolvedValueOnce(BASE_BOOKING);
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />, "en");
+
+    expect(await screen.findByText("Booking could not load")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(await screen.findByText("General Vet Visit")).toBeTruthy();
+  });
+
   it("lets a completed booking be reviewed once", async () => {
     vi.mocked(bookingsService.getById).mockResolvedValue({ ...BASE_BOOKING, bookingStatus: "COMPLETED" as never, review: null });
     renderWithIntl(<BookingDetailView bookingId="booking-1" />, "en");
     expect(await screen.findByRole("button", { name: "Leave a review" })).toBeTruthy();
+  });
+
+  it("localizes German booking details and cancellation while preserving the German support route", async () => {
+    vi.mocked(bookingsService.getById).mockResolvedValue({ ...BASE_BOOKING, startAt: future, endAt: futureEnd, paymentMode: "FULL_PREPAYMENT" as never });
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />, "de");
+
+    expect(await screen.findByText("Bestätigt")).toBeTruthy();
+    expect(screen.getByText("Haustier")).toBeTruthy();
+    expect(screen.queryByText("قطعی")).toBeNull();
+    expect(screen.queryByText("در حال بارگیری")).toBeNull();
+    expect(screen.getByText("General Vet Visit")).toBeTruthy(); // source content is not machine-translated
+    expect(screen.getByRole("link", { name: "Support kontaktieren" }).getAttribute("href")).toBe("/de/support/new?relatedEntityType=BOOKING&relatedEntityId=booking-1&category=BOOKING");
+    fireEvent.click(screen.getByRole("button", { name: "Buchung stornieren" }));
+    expect(screen.getByText("Diese Buchung stornieren?")).toBeTruthy();
+    expect(screen.getByText("Der Anbieter hält diesen Termin dann nicht mehr für dich frei.")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Ja, Buchung stornieren" })).toBeTruthy();
+  });
+
+  it("localizes Spanish awaiting-payment state and keeps the actual pay action", async () => {
+    vi.mocked(bookingsService.getById).mockResolvedValue({ ...BASE_BOOKING, bookingStatus: "AWAITING_PAYMENT" as never, paymentStatus: "PENDING" as never, paymentMode: "DEPOSIT" as never, depositAmount: 2_000_000, priceAmount: 10_000_000, requestExpiresAt: future });
+    vi.mocked(bookingsService.pay).mockResolvedValue(BASE_BOOKING);
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />, "es");
+
+    expect(await screen.findByText("Pendiente de pago")).toBeTruthy();
+    expect(screen.getByText("Proveedor")).toBeTruthy();
+    expect(screen.queryByText("در انتظار پرداخت")).toBeNull();
+    expect(screen.getByRole("button", { name: "Pagar de forma segura" })).toBeTruthy();
+    expect(screen.getByText(/La reserva solo se confirma cuando la pasarela confirma el pago/)).toBeTruthy();
+  });
+
+  it("shows a localized API error in German after a booking action fails", async () => {
+    vi.mocked(bookingsService.getById).mockResolvedValue({ ...BASE_BOOKING, startAt: future, endAt: futureEnd });
+    vi.mocked(bookingsService.cancel).mockRejectedValue(new ApiError({ code: "BOOKING_CONFLICT", message: "raw backend message", requestId: "r" }, 409));
+    renderWithIntl(<BookingDetailView bookingId="booking-1" />, "de");
+
+    fireEvent.click(await screen.findByRole("button", { name: "Buchung stornieren" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ja, Buchung stornieren" }));
+
+    expect((await screen.findByRole("alert")).textContent).toContain("Dieser Termin wurde gerade vergeben. Bitte wähle einen anderen.");
+    expect(screen.queryByText("raw backend message")).toBeNull();
+    expect(screen.queryByText(/این زمان همین حالا/)).toBeNull();
   });
 });
