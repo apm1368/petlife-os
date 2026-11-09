@@ -105,6 +105,21 @@ describe("MemberHomeView", () => {
     expect(screen.getByText("Based on what's recorded, nothing urgent is waiting.")).toBeTruthy();
   });
 
+  it("never shows another selected household pet's appointment in the active pet dashboard", async () => {
+    const sibling = { ...PET, id: "pet-2", name: "Milo" };
+    usePetStore.setState({ householdId: "h1", pets: [PET as never, sibling as never], activePetId: "pet-1" });
+    vi.mocked(petsService.getOverview).mockResolvedValue(overview());
+    vi.mocked(bookingsService.list).mockResolvedValue([{
+      id: "sibling-appointment", petId: "pet-2", serviceName: "Milo's check-up", provider: { name: "Central Vet" },
+      startAt: "2026-11-12T10:00:00Z", location: { timezone: "Asia/Tehran" },
+    }] as never);
+
+    renderWithIntl(<MemberHomeView />, "en");
+
+    expect(await screen.findByText("You have no upcoming appointment.")).toBeTruthy();
+    expect(screen.queryByText("Milo's check-up")).toBeNull();
+  });
+
   it("a member without pets is invited to add one", async () => {
     usePetStore.setState({ householdId: "h1", pets: [], activePetId: null });
     renderWithIntl(<MemberHomeView />, "fa");

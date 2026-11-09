@@ -277,7 +277,8 @@ export function MemberHomeView() {
       setCareFailed(care === null);
       setOverview({ ...ov, ...mergeCareIntoOverview(ov, care ?? [], (item) => careTitle(item, locale)) });
       const sorted = [...(bookings ?? [])].sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
-      setNextBooking(bookings === null ? "failed" : sorted.find((b) => b.petId === petId) ?? sorted[0] ?? null);
+      // The dashboard is scoped to the selected pet. Never fall back to a sibling pet's booking.
+      setNextBooking(bookings === null ? "failed" : sorted.find((b) => b.petId === petId) ?? null);
     } catch (err) {
       if (requestId === loadId.current) setError(err);
     }
