@@ -2532,6 +2532,62 @@
       "VERIFIED": "Verifiziert",
       "SUSPENDED": "Ausgesetzt"
     },
+    "eligibilityStatus": {
+      "ELIGIBLE": "Berechtigt",
+      "POSSIBLY_ELIGIBLE": "Möglicherweise berechtigt",
+      "NOT_ELIGIBLE": "Nicht berechtigt",
+      "UNKNOWN": "Unbekannt"
+    },
+    "list": {
+      "title": "Tierversicherung",
+      "subtitle": "Anbieter und Leistungen vergleichen — dieses Verzeichnis vermittelt nur Informationen und ist kein Versicherer.",
+      "empty": "Keine Versicherungsprodukte gefunden.",
+      "compareSelected": "Ausgewählte Produkte vergleichen",
+      "viewDetails": "Details ansehen",
+      "selectForCompare": "Für den Vergleich auswählen",
+      "loading": "Versicherungsprodukte werden geladen",
+      "annualLimit": "Jahreshöchstleistung",
+      "deductible": "Selbstbeteiligung",
+      "coinsurance": "Ihr Kostenanteil",
+      "percentUnit": "%",
+      "waitingPeriod": "Wartezeit",
+      "days": "{count, plural, one {# Tag} other {# Tage}}",
+      "premiumFrom": "Beitrag ab"
+    },
+    "detail": {
+      "coverageTitle": "Versicherungsschutz",
+      "exclusionsTitle": "Ausschlüsse — vor dem Kontakt mit dem Versicherer lesen",
+      "waitingPeriod": "Wartezeit: {days} Tage",
+      "deductible": "Selbstbeteiligung: {amount}",
+      "annualLimit": "Jahreshöchstleistung: {amount}",
+      "premiumRange": "Versicherungsbeitrag: {min}–{max}",
+      "exclusionsEmpty": "Für dieses Produkt sind keine Ausschlüsse angegeben.",
+      "termsSource": "Quelle: {source}",
+      "visitInsurer": "Zur Website des Versicherers",
+      "insurerWebsiteUnavailable": "Der Versicherer hat keinen Website-Link veröffentlicht.",
+      "loading": "Versicherungsdetails werden geladen"
+    },
+    "compare": {
+      "title": "Versicherungspläne vergleichen",
+      "exclusions": "Ausschlüsse",
+      "loading": "Versicherungsvergleich wird geladen …",
+      "empty": "Für diesen Vergleich wurden keine Versicherungsprodukte gefunden.",
+      "emptyDescription": "Prüfen Sie die ausgewählten Produkte und versuchen Sie es erneut."
+    },
+    "eligibility": {
+      "title": "Berechtigung für {petName}",
+      "sectionTitle": "Berechtigung für dieses Haustier",
+      "loading": "Versicherungsberechtigung wird geprüft",
+      "loadFailed": "Die Versicherungsberechtigung konnte nicht geladen werden.",
+      "retry": "Erneut prüfen",
+      "disclaimer": "Dies ist keine Zusage. Die endgültige Entscheidung trifft der Versicherer.",
+      "reasons": {
+        "SPECIES_NOT_COVERED": "Die Tierart dieses Haustiers ist in diesem Produkt nicht abgedeckt.",
+        "PET_AGE_UNKNOWN": "Das Alter dieses Haustiers ist nicht eingetragen; die Altersberechtigung kann daher nicht bestätigt werden.",
+        "PET_BELOW_MINIMUM_AGE": "Dieses Haustier ist jünger als das für dieses Produkt erforderliche Mindestalter.",
+        "PET_ABOVE_MAXIMUM_AGE": "Dieses Haustier ist älter als das für dieses Produkt zulässige Höchstalter."
+      }
+    },
     "coverageType": {
       "ACCIDENT": "Unfall",
       "ILLNESS": "Krankheit",
