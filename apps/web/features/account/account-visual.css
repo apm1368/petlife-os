@@ -1,0 +1,199 @@
+/* Account and household pages share the warm surfaces and green identity tokens. */
+.account-shell {
+  grid-template-columns: minmax(13rem, 15rem) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-7);
+  padding-block: var(--space-4) var(--space-8);
+}
+
+.account-rail .account-nav {
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-card);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-1);
+}
+
+.account-rail .account-nav > p {
+  margin: 0 0 var(--space-2);
+  padding-inline: var(--space-3);
+  color: var(--text-muted);
+  font-size: var(--font-size-12);
+  font-weight: 650;
+}
+
+.account-rail .account-nav a {
+  min-block-size: var(--touch-target-min);
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  line-height: 1.55;
+  text-decoration: none;
+  white-space: normal;
+}
+
+.account-rail .account-nav a:hover {
+  background: var(--surface-page);
+  color: var(--text-primary);
+}
+
+.account-rail .account-nav a[aria-current="page"] {
+  border-inline-start: 3px solid var(--brand-primary);
+  background: var(--brand-tint);
+  color: var(--brand-primary);
+  font-weight: 650;
+  box-shadow: none;
+}
+
+.account-rail .account-nav a small {
+  display: block;
+  color: inherit;
+  opacity: 0.82;
+  font-size: var(--font-size-12);
+  line-height: 1.5;
+}
+
+.account-rail .account-nav :is(a, button):focus-visible,
+.account-summary-list button:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.account-back {
+  min-block-size: var(--touch-target-min);
+  padding-inline: var(--space-2);
+}
+
+.account-stack {
+  gap: var(--space-6);
+}
+
+.account-page-header {
+  padding-block-end: var(--space-5);
+  border-block-end: 1px solid var(--border-default);
+}
+
+.account-page-header > p {
+  margin-block-end: var(--space-2);
+  color: var(--brand-primary);
+  font-size: var(--font-size-12);
+  font-weight: 650;
+}
+
+.account-page-header h1 {
+  color: var(--text-primary);
+  font-size: clamp(var(--font-size-24), 3vw, var(--font-size-32));
+  line-height: var(--line-height-fa);
+  overflow-wrap: anywhere;
+}
+
+.account-page-header > span {
+  margin-block-start: var(--space-2);
+  color: var(--text-secondary);
+  line-height: var(--line-height-fa);
+}
+
+.account-identity-band {
+  min-inline-size: 0;
+  padding: var(--space-5);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-card);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-1);
+}
+
+.account-identity-band > div {
+  min-inline-size: 0;
+}
+
+.account-identity-band h2 {
+  font-size: var(--font-size-20);
+  overflow-wrap: anywhere;
+}
+
+.account-identity-band p {
+  margin-block-start: var(--space-1);
+  color: var(--text-secondary);
+  font-size: var(--font-size-14);
+  overflow-wrap: anywhere;
+}
+
+.account-attention {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--status-attention);
+  border-inline-start-width: 4px;
+  border-radius: var(--radius-card);
+  background: var(--status-attention-tint);
+}
+
+.account-summary-list {
+  overflow: hidden;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-card);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-1);
+}
+
+.account-summary-list > button {
+  min-block-size: var(--touch-target-large);
+  padding: var(--space-4) var(--space-5);
+  text-align: start;
+}
+
+.account-summary-list > button + button {
+  border-block-start: 1px solid var(--border-default);
+}
+
+.account-summary-list > button:hover {
+  background: var(--surface-page);
+}
+
+.account-summary-list b {
+  font-size: var(--font-size-16);
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.account-summary-list small {
+  color: var(--text-secondary);
+  line-height: var(--line-height-fa);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 56.25rem) {
+  .account-shell {
+    gap: var(--space-4);
+  }
+
+  .account-rail .account-nav {
+    gap: var(--space-1);
+    padding: var(--space-2);
+    scroll-snap-type: inline mandatory;
+  }
+
+  .account-rail .account-nav a {
+    scroll-snap-align: start;
+  }
+
+  .account-rail .account-nav a small {
+    display: none;
+  }
+}
+
+@media (max-width: 38.75rem) {
+  .account-shell {
+    padding-block-start: 0;
+  }
+
+  .account-identity-band,
+  .account-attention {
+    padding: var(--space-4);
+  }
+
+  .account-summary-list > button {
+    gap: var(--space-3);
+    padding-inline: var(--space-4);
+  }
+}

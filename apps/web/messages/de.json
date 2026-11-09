@@ -1,6 +1,257 @@
 {
-  "adminServices":{"unknownValue":"Wert nicht verfügbar","common":{"all":"Alle","confirm":"Bestätigen","previous":"Zurück","next":"Weiter","hoursAbbreviation":"Std."},"nav":{"label":"Navigation der Serviceverwaltung","bookings":"Buchungen","services":"Dienstleistungen","reviews":"Bewertungen","analytics":"Auswertung und Warteliste"},"bookings":{"title":"Dienstleistungen und Buchungen","searchLabel":"Nach Nummer, Tier oder Anbieter suchen","statusLabel":"Buchungsstatus","number":"Nummer","when":"Zeitpunkt","pet":"Tier","provider":"Anbieter","service":"Dienstleistung","payment":"Zahlung","amount":"Betrag","empty":"Keine Buchungen gefunden","resultCount":"{count} Buchungen"},"detail":{"booking":"Buchung","readOnlyNotice":"Nur zur Ansicht. Rückerstattungen laufen über die Finanzfreigabe, Streitfälle über den Bereich für Streitfälle.","service":"Dienstleistung","when":"Zeitpunkt","provider":"Anbieter","location":"Ort","pet":"Tier","customer":"Kundin/Kunde","bookingMode":"Buchungsart","rejectionReason":"Ablehnungsgrund","cancellationReason":"Stornierungsgrund","rescheduledFrom":"Verschoben von","rescheduledTo":"Verschoben auf","finance":"Finanzübersicht","snapshottedPrice":"Zum Buchungszeitpunkt gespeicherter Preis","paymentMode":"Zahlungsart","cancellationTerms":"Stornierungsbedingungen","paymentIntent":"Zahlungsauftrag","refund":"Rückerstattung","reviewTransactions":"In Transaktionen ansehen","timeline":"Verlauf","linkedRecords":"Zugriff, Support und verknüpfte Einträge","providerAccess":"Zugriff des Anbieters","consentedHealthRead":"Gesundheitsdaten mit Einwilligung eingesehen","noHealthRead":"Kein Zugriff auf Gesundheitsdaten","revoked":"widerrufen","clinicalVisit":"Klinischer Termin","review":"Bewertung","supportCase":"Supportfall","support":"Support"},"services":{"title":"Dienstleistungen der Anbieter","provider":"Anbieter","service":"Dienstleistung","category":"Kategorie","modePayment":"Buchung / Zahlung","options":"Optionen","bookings":"Buchungen","state":"Status","empty":"Es wurden noch keine Dienstleistungen erfasst","active":"Aktiv","inactive":"Inaktiv","deactivate":"Deaktivieren","reactivate":"Reaktivieren","deactivateTitle":"Dienstleistung deaktivieren","reactivateTitle":"Dienstleistung reaktivieren","toggleNotice":"Bestehende Buchungen werden nicht storniert; nur neue Buchungen werden gestoppt oder wieder zugelassen. Die Aktion wird protokolliert."},"reviews":{"title":"Anbieterbewertungen","statusLabel":"Bewertungsstatus","published":"Veröffentlicht","hidden":"Ausgeblendet","empty":"Keine Bewertungen","hiddenBecause":"Ausgeblendet, weil:","hide":"Ausblenden","hideTitle":"Bewertung ausblenden","hideNotice":"Die Bewertung wird nicht gelöscht, sondern aus der öffentlichen Ansicht und dem Bewertungsdurchschnitt entfernt. Die Aktion wird protokolliert.","confirmHide":"Bewertung ausblenden"},"analytics":{"title":"Dienstleistungsanalyse ({days} Tage)","bookings":"Buchungen","completed":"Abgeschlossen","cancelled":"Storniert","noShow":"Nicht erschienen","openRequests":"Offene Anfragen","rejectedExpired":"Abgelehnt / abgelaufen","averageRating":"Durchschnittsbewertung","activeWaitlist":"Aktive Warteliste","byCategory":"Nach Kategorie","waitlist":"Warteliste","waitlistOrder":"Nach Beitrittszeitpunkt","waitlistEmpty":"Die Warteliste ist leer."},"states":{"loadFailedTitle":"Laden fehlgeschlagen","bookingsLoadFailed":"Buchungen konnten nicht geladen werden. Bitte erneut versuchen.","bookingsLoading":"Dienstleistungsbuchungen werden geladen …","bookingsAccessDenied":"Zum Anzeigen von Buchungen benötigen Sie die Berechtigung services.view.","detailLoadFailed":"Diese Buchung konnte nicht geladen werden. Bitte erneut versuchen.","detailLoading":"Buchungsdetails werden geladen …","detailAccessDenied":"Sie dürfen diese Buchung nicht ansehen.","detailNotFound":"Buchung nicht gefunden","servicesLoadFailed":"Anbieterdienstleistungen konnten nicht geladen werden. Bitte erneut versuchen.","servicesLoading":"Anbieterdienstleistungen werden geladen …","reviewsLoadFailed":"Anbieterbewertungen konnten nicht geladen werden. Bitte erneut versuchen.","reviewsLoading":"Anbieterbewertungen werden geladen …","reviewsAccessDenied":"Zum Anzeigen von Bewertungen benötigen Sie die Berechtigung services.view.","analyticsLoadFailed":"Die Dienstleistungsanalyse konnte nicht geladen werden. Bitte erneut versuchen.","analyticsLoading":"Dienstleistungsanalyse wird geladen …","manageAccessDenied":"Zum Ändern dieses Eintrags benötigen Sie die Berechtigung services.manage.","actionFailed":"Die Aktion konnte nicht abgeschlossen werden. Bitte erneut versuchen.","offline":"Sie sind offline. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut."},"bookingStatus":{"HOLD":"Vorläufig reserviert","PENDING_CONFIRMATION":"Bestätigung ausstehend","REQUESTED":"Angefragt","AWAITING_PAYMENT":"Zahlung ausstehend","REJECTED":"Abgelehnt","EXPIRED":"Abgelaufen","RESCHEDULED":"Umgebucht","CONFIRMED":"Bestätigt","CHECKED_IN":"Eingecheckt","IN_PROGRESS":"In Bearbeitung","COMPLETED":"Abgeschlossen","CANCELLED_BY_USER":"Von Kundin/Kunde storniert","CANCELLED_BY_PROVIDER":"Vom Anbieter storniert","NO_SHOW":"Nicht erschienen"},"category":{"VET":"Tiermedizin","GROOMING":"Fellpflege","TRAINING":"Training","WALKING":"Gassi-Service","SITTING":"Tierbetreuung","BOARDING":"Unterbringung","PET_TAXI":"Tiertransport","OTHER":"Weitere Dienstleistungen"},"paymentMode":{"NONE":"Keine Onlinezahlung","PAY_AT_PROVIDER":"Zahlung beim Anbieter","FULL_PREPAYMENT":"Vollständige Online-Vorauszahlung","DEPOSIT":"Online-Anzahlung"},"bookingMode":{"INSTANT":"Sofortbuchung","REQUEST":"Anfrage mit Bestätigung durch Anbieter"},"paymentStatus":{"NOT_REQUIRED":"Nicht erforderlich","PENDING":"Ausstehend","AUTHORIZED":"Autorisiert","PAID":"Bezahlt","FAILED":"Fehlgeschlagen","REFUND_PENDING":"Rückerstattung ausstehend","REFUNDED":"Erstattet"},"providerVerification":{"NOT_STARTED":"Nicht begonnen","SUBMITTED":"Eingereicht","NEEDS_INFORMATION":"Weitere Angaben erforderlich","UNDER_REVIEW":"In Prüfung","VERIFIED":"Verifiziert","REJECTED":"Abgelehnt","SUSPENDED":"Gesperrt"},"paymentProvider":{"DEV_SIMULATED":"Entwicklungs-Simulator","STANDARD_GATEWAY":"Zahlungsanbieter","SNAPP_PAY":"SnappPay","DIGI_PAY":"DigiPay"},"refundStatus":{"REQUESTED":"Angefragt","PROCESSING":"In Bearbeitung","SUCCEEDED":"Erstattet","FAILED":"Fehlgeschlagen","CANCELLED":"Storniert"},"timelineActor":{"USER":"Kundin/Kunde","PROVIDER":"Anbieter","SYSTEM":"System","ADMIN":"Support"},"healthScope":{"MINIMAL_VET_CONTEXT":"Mindestens erforderlicher tierärztlicher Kontext","HEALTH_BASICS":"Gesundheitsgrundlagen","SELECTED_HEALTH_DATA":"Ausgewählte Gesundheitsdaten","GROOMING_BASIC":"Grundlegende Fellpflegeangaben","TRAINING_BASIC":"Grundlegende Trainingsangaben","WALKING_BASIC":"Grundlegende Angaben zum Gassi-Service","SITTING_BASIC":"Grundlegende Betreuungsangaben","BOARDING_BASIC":"Grundlegende Unterbringungsangaben","TAXI_BASIC":"Grundlegende Transportangaben"},"species":{"DOG":"Hund","CAT":"Katze","BIRD":"Vogel","RABBIT":"Kaninchen","RODENT":"Nagetier","FISH":"Fisch","REPTILE":"Reptil","OTHER":"Andere Tierart"},"clinicalVisitStatus":{"SCHEDULED":"Geplant","IN_PROGRESS":"In Bearbeitung","COMPLETED":"Abgeschlossen","CANCELLED":"Storniert","DRAFT":"Entwurf"},"reviewStatus":{"PENDING":"Ausstehend","APPROVED":"Genehmigt","REJECTED":"Abgelehnt","PUBLISHED":"Veröffentlicht","HIDDEN":"Ausgeblendet"},"supportStatus":{"OPEN":"Offen","IN_PROGRESS":"In Bearbeitung","WAITING_ON_USER":"Wartet auf Kundin/Kunden","WAITING_ON_INTERNAL":"Wartet auf internes Team","RESOLVED":"Gelöst","CLOSED":"Geschlossen"},"waitlistStatus":{"ACTIVE":"Aktiv","NOTIFIED":"Benachrichtigt","OFFERED":"Termin angeboten","BOOKED":"Gebucht","CANCELLED":"Storniert","EXPIRED":"Abgelaufen"}},
-  "adminServiceAccess": { "servicesDenied": "Sie dürfen die Dienstleistungen der Anbieter nicht ansehen.", "analyticsDenied": "Sie dürfen die Dienstleistungsanalyse nicht ansehen." },
+  "adminServices": {
+    "unknownValue": "Wert nicht verfügbar",
+    "common": {
+      "all": "Alle",
+      "confirm": "Bestätigen",
+      "previous": "Zurück",
+      "next": "Weiter",
+      "hoursAbbreviation": "Std."
+    },
+    "nav": {
+      "label": "Navigation der Serviceverwaltung",
+      "bookings": "Buchungen",
+      "services": "Dienstleistungen",
+      "reviews": "Bewertungen",
+      "analytics": "Auswertung und Warteliste"
+    },
+    "bookings": {
+      "title": "Dienstleistungen und Buchungen",
+      "searchLabel": "Nach Nummer, Tier oder Anbieter suchen",
+      "statusLabel": "Buchungsstatus",
+      "number": "Nummer",
+      "when": "Zeitpunkt",
+      "pet": "Tier",
+      "provider": "Anbieter",
+      "service": "Dienstleistung",
+      "payment": "Zahlung",
+      "amount": "Betrag",
+      "empty": "Keine Buchungen gefunden",
+      "resultCount": "{count} Buchungen"
+    },
+    "detail": {
+      "booking": "Buchung",
+      "readOnlyNotice": "Nur zur Ansicht. Rückerstattungen laufen über die Finanzfreigabe, Streitfälle über den Bereich für Streitfälle.",
+      "service": "Dienstleistung",
+      "when": "Zeitpunkt",
+      "provider": "Anbieter",
+      "location": "Ort",
+      "pet": "Tier",
+      "customer": "Kundin/Kunde",
+      "bookingMode": "Buchungsart",
+      "rejectionReason": "Ablehnungsgrund",
+      "cancellationReason": "Stornierungsgrund",
+      "rescheduledFrom": "Verschoben von",
+      "rescheduledTo": "Verschoben auf",
+      "finance": "Finanzübersicht",
+      "snapshottedPrice": "Zum Buchungszeitpunkt gespeicherter Preis",
+      "paymentMode": "Zahlungsart",
+      "cancellationTerms": "Stornierungsbedingungen",
+      "paymentIntent": "Zahlungsauftrag",
+      "refund": "Rückerstattung",
+      "reviewTransactions": "In Transaktionen ansehen",
+      "timeline": "Verlauf",
+      "linkedRecords": "Zugriff, Support und verknüpfte Einträge",
+      "providerAccess": "Zugriff des Anbieters",
+      "consentedHealthRead": "Gesundheitsdaten mit Einwilligung eingesehen",
+      "noHealthRead": "Kein Zugriff auf Gesundheitsdaten",
+      "revoked": "widerrufen",
+      "clinicalVisit": "Klinischer Termin",
+      "review": "Bewertung",
+      "supportCase": "Supportfall",
+      "support": "Support"
+    },
+    "services": {
+      "title": "Dienstleistungen der Anbieter",
+      "provider": "Anbieter",
+      "service": "Dienstleistung",
+      "category": "Kategorie",
+      "modePayment": "Buchung / Zahlung",
+      "options": "Optionen",
+      "bookings": "Buchungen",
+      "state": "Status",
+      "empty": "Es wurden noch keine Dienstleistungen erfasst",
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "deactivate": "Deaktivieren",
+      "reactivate": "Reaktivieren",
+      "deactivateTitle": "Dienstleistung deaktivieren",
+      "reactivateTitle": "Dienstleistung reaktivieren",
+      "toggleNotice": "Bestehende Buchungen werden nicht storniert; nur neue Buchungen werden gestoppt oder wieder zugelassen. Die Aktion wird protokolliert."
+    },
+    "reviews": {
+      "title": "Anbieterbewertungen",
+      "statusLabel": "Bewertungsstatus",
+      "published": "Veröffentlicht",
+      "hidden": "Ausgeblendet",
+      "empty": "Keine Bewertungen",
+      "hiddenBecause": "Ausgeblendet, weil:",
+      "hide": "Ausblenden",
+      "hideTitle": "Bewertung ausblenden",
+      "hideNotice": "Die Bewertung wird nicht gelöscht, sondern aus der öffentlichen Ansicht und dem Bewertungsdurchschnitt entfernt. Die Aktion wird protokolliert.",
+      "confirmHide": "Bewertung ausblenden"
+    },
+    "analytics": {
+      "title": "Dienstleistungsanalyse ({days} Tage)",
+      "bookings": "Buchungen",
+      "completed": "Abgeschlossen",
+      "cancelled": "Storniert",
+      "noShow": "Nicht erschienen",
+      "openRequests": "Offene Anfragen",
+      "rejectedExpired": "Abgelehnt / abgelaufen",
+      "averageRating": "Durchschnittsbewertung",
+      "activeWaitlist": "Aktive Warteliste",
+      "byCategory": "Nach Kategorie",
+      "waitlist": "Warteliste",
+      "waitlistOrder": "Nach Beitrittszeitpunkt",
+      "waitlistEmpty": "Die Warteliste ist leer."
+    },
+    "states": {
+      "loadFailedTitle": "Laden fehlgeschlagen",
+      "bookingsLoadFailed": "Buchungen konnten nicht geladen werden. Bitte erneut versuchen.",
+      "bookingsLoading": "Dienstleistungsbuchungen werden geladen …",
+      "bookingsAccessDenied": "Zum Anzeigen von Buchungen benötigen Sie die Berechtigung services.view.",
+      "detailLoadFailed": "Diese Buchung konnte nicht geladen werden. Bitte erneut versuchen.",
+      "detailLoading": "Buchungsdetails werden geladen …",
+      "detailAccessDenied": "Sie dürfen diese Buchung nicht ansehen.",
+      "detailNotFound": "Buchung nicht gefunden",
+      "servicesLoadFailed": "Anbieterdienstleistungen konnten nicht geladen werden. Bitte erneut versuchen.",
+      "servicesLoading": "Anbieterdienstleistungen werden geladen …",
+      "reviewsLoadFailed": "Anbieterbewertungen konnten nicht geladen werden. Bitte erneut versuchen.",
+      "reviewsLoading": "Anbieterbewertungen werden geladen …",
+      "reviewsAccessDenied": "Zum Anzeigen von Bewertungen benötigen Sie die Berechtigung services.view.",
+      "analyticsLoadFailed": "Die Dienstleistungsanalyse konnte nicht geladen werden. Bitte erneut versuchen.",
+      "analyticsLoading": "Dienstleistungsanalyse wird geladen …",
+      "manageAccessDenied": "Zum Ändern dieses Eintrags benötigen Sie die Berechtigung services.manage.",
+      "actionFailed": "Die Aktion konnte nicht abgeschlossen werden. Bitte erneut versuchen.",
+      "offline": "Sie sind offline. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut."
+    },
+    "bookingStatus": {
+      "HOLD": "Vorläufig reserviert",
+      "PENDING_CONFIRMATION": "Bestätigung ausstehend",
+      "REQUESTED": "Angefragt",
+      "AWAITING_PAYMENT": "Zahlung ausstehend",
+      "REJECTED": "Abgelehnt",
+      "EXPIRED": "Abgelaufen",
+      "RESCHEDULED": "Umgebucht",
+      "CONFIRMED": "Bestätigt",
+      "CHECKED_IN": "Eingecheckt",
+      "IN_PROGRESS": "In Bearbeitung",
+      "COMPLETED": "Abgeschlossen",
+      "CANCELLED_BY_USER": "Von Kundin/Kunde storniert",
+      "CANCELLED_BY_PROVIDER": "Vom Anbieter storniert",
+      "NO_SHOW": "Nicht erschienen"
+    },
+    "category": {
+      "VET": "Tiermedizin",
+      "GROOMING": "Fellpflege",
+      "TRAINING": "Training",
+      "WALKING": "Gassi-Service",
+      "SITTING": "Tierbetreuung",
+      "BOARDING": "Unterbringung",
+      "PET_TAXI": "Tiertransport",
+      "OTHER": "Weitere Dienstleistungen"
+    },
+    "paymentMode": {
+      "NONE": "Keine Onlinezahlung",
+      "PAY_AT_PROVIDER": "Zahlung beim Anbieter",
+      "FULL_PREPAYMENT": "Vollständige Online-Vorauszahlung",
+      "DEPOSIT": "Online-Anzahlung"
+    },
+    "bookingMode": { "INSTANT": "Sofortbuchung", "REQUEST": "Anfrage mit Bestätigung durch Anbieter" },
+    "paymentStatus": {
+      "NOT_REQUIRED": "Nicht erforderlich",
+      "PENDING": "Ausstehend",
+      "AUTHORIZED": "Autorisiert",
+      "PAID": "Bezahlt",
+      "FAILED": "Fehlgeschlagen",
+      "REFUND_PENDING": "Rückerstattung ausstehend",
+      "REFUNDED": "Erstattet"
+    },
+    "providerVerification": {
+      "NOT_STARTED": "Nicht begonnen",
+      "SUBMITTED": "Eingereicht",
+      "NEEDS_INFORMATION": "Weitere Angaben erforderlich",
+      "UNDER_REVIEW": "In Prüfung",
+      "VERIFIED": "Verifiziert",
+      "REJECTED": "Abgelehnt",
+      "SUSPENDED": "Gesperrt"
+    },
+    "paymentProvider": {
+      "DEV_SIMULATED": "Entwicklungs-Simulator",
+      "STANDARD_GATEWAY": "Zahlungsanbieter",
+      "SNAPP_PAY": "SnappPay",
+      "DIGI_PAY": "DigiPay"
+    },
+    "refundStatus": {
+      "REQUESTED": "Angefragt",
+      "PROCESSING": "In Bearbeitung",
+      "SUCCEEDED": "Erstattet",
+      "FAILED": "Fehlgeschlagen",
+      "CANCELLED": "Storniert"
+    },
+    "timelineActor": {
+      "USER": "Kundin/Kunde",
+      "PROVIDER": "Anbieter",
+      "SYSTEM": "System",
+      "ADMIN": "Support"
+    },
+    "healthScope": {
+      "MINIMAL_VET_CONTEXT": "Mindestens erforderlicher tierärztlicher Kontext",
+      "HEALTH_BASICS": "Gesundheitsgrundlagen",
+      "SELECTED_HEALTH_DATA": "Ausgewählte Gesundheitsdaten",
+      "GROOMING_BASIC": "Grundlegende Fellpflegeangaben",
+      "TRAINING_BASIC": "Grundlegende Trainingsangaben",
+      "WALKING_BASIC": "Grundlegende Angaben zum Gassi-Service",
+      "SITTING_BASIC": "Grundlegende Betreuungsangaben",
+      "BOARDING_BASIC": "Grundlegende Unterbringungsangaben",
+      "TAXI_BASIC": "Grundlegende Transportangaben"
+    },
+    "species": {
+      "DOG": "Hund",
+      "CAT": "Katze",
+      "BIRD": "Vogel",
+      "RABBIT": "Kaninchen",
+      "RODENT": "Nagetier",
+      "FISH": "Fisch",
+      "REPTILE": "Reptil",
+      "OTHER": "Andere Tierart"
+    },
+    "clinicalVisitStatus": {
+      "SCHEDULED": "Geplant",
+      "IN_PROGRESS": "In Bearbeitung",
+      "COMPLETED": "Abgeschlossen",
+      "CANCELLED": "Storniert",
+      "DRAFT": "Entwurf"
+    },
+    "reviewStatus": {
+      "PENDING": "Ausstehend",
+      "APPROVED": "Genehmigt",
+      "REJECTED": "Abgelehnt",
+      "PUBLISHED": "Veröffentlicht",
+      "HIDDEN": "Ausgeblendet"
+    },
+    "supportStatus": {
+      "OPEN": "Offen",
+      "IN_PROGRESS": "In Bearbeitung",
+      "WAITING_ON_USER": "Wartet auf Kundin/Kunden",
+      "WAITING_ON_INTERNAL": "Wartet auf internes Team",
+      "RESOLVED": "Gelöst",
+      "CLOSED": "Geschlossen"
+    },
+    "waitlistStatus": {
+      "ACTIVE": "Aktiv",
+      "NOTIFIED": "Benachrichtigt",
+      "OFFERED": "Termin angeboten",
+      "BOOKED": "Gebucht",
+      "CANCELLED": "Storniert",
+      "EXPIRED": "Abgelaufen"
+    }
+  },
+  "adminServiceAccess": {
+    "servicesDenied": "Sie dürfen die Dienstleistungen der Anbieter nicht ansehen.",
+    "analyticsDenied": "Sie dürfen die Dienstleistungsanalyse nicht ansehen."
+  },
   "notifications": {
     "title": "Benachrichtigungen",
     "loading": "Benachrichtigungen werden geladen …",
@@ -170,28 +421,160 @@
     }
   },
   "careCenter": {
-    "title": "Pflegebereich", "subtitle": "Erinnerungen und Nachsorge für {petName}; Zeiten in der Zeitzone Teheran", "allCare": "Alle Pflegeeinträge",
-    "type": "Art", "due": "Fällig am", "originalDue": "Ursprünglicher Termin", "remindAt": "Erinnerung am", "completedAt": "Erledigt am", "recurrence": "Wiederholung", "source": "Quelle", "notification": "Benachrichtigung", "sent": "Gesendet", "notSent": "Noch nicht gesendet", "relatedRecord": "Zugehörigen Eintrag ansehen",
-    "chooseDay": "Tag auswählen", "timeTehran": "Uhrzeit (Zeitzone Teheran)", "snooze": "Erinnerung verschieben", "reschedule": "Erinnerungszeit ändern", "actionFailed": "Das hat nicht funktioniert. Bitte versuche es erneut.", "loading": "Pflegeerinnerungen werden geladen", "filtersAria": "Pflegefilter", "filters": { "all": "Alle" },
-    "states": { "DUE": "Bald fällig", "OVERDUE": "Überfällig", "UPCOMING": "Anstehend", "COMPLETED": "Erledigt", "SNOOZED": "Verschoben", "CANCELLED": "Abgesagt", "CUSTOM": "Persönlich" }, "unknownState": "Unbekannter Status", "unknownType": "Weitere Pflege", "unknownRecurrence": "Anderer Zeitplan", "unknownSource": "Andere Quelle",
-    "calendar": "Kalender", "careSheet": "Pflegeblatt für Betreuungspersonen", "travelReadiness": "Reisevorbereitung", "create": "Erinnerung erstellen",
-    "empty": { "body": "Erinnerungen können aus Impfungen, Medikamenten und Terminen entstehen. Du kannst auch eine persönliche Erinnerung hinzufügen.", "all": { "title": "Noch keine Pflegeeinträge" }, "due": { "title": "Nichts ist bald fällig" }, "overdue": { "title": "Nichts ist überfällig" }, "upcoming": { "title": "Keine anstehenden Erinnerungen" }, "completed": { "title": "Noch keine erledigte Pflege" }, "snoozed": { "title": "Keine verschobenen Erinnerungen" }, "cancelled": { "title": "Keine abgesagten Erinnerungen" }, "custom": { "title": "Keine persönlichen Erinnerungen" } },
-    "recentlyCompleted": "Kürzlich erledigt", "dailyInstructions": "Tägliche Pflegehinweise", "done": "Erledigt", "reminds": "Erinnert am", "bookVisit": "Termin buchen", "complete": "Erledigen", "tomorrow": "Morgen", "confirmCancel": "Absage bestätigen", "cancelWarning": "Diese Erinnerung wird abgesagt. Danach werden keine weiteren Benachrichtigungen gesendet.", "cancelYes": "Ja, absagen", "cancelKeep": "Behalten", "edit": "Bearbeiten", "laterToday": "Später heute", "cancel": "Absagen", "day": "Tag", "save": "Speichern", "saving": "Wird gespeichert …", "close": "Schließen", "chooseDayAndTime": "Wähle einen Tag und eine Uhrzeit aus.", "saveFailed": "Die Erinnerung konnte nicht gespeichert werden. Bitte versuche es erneut.",
-    "form": { "title": "Titel der Erinnerung", "recurrence": "Wiederholung auswählen", "intervalDays": "Wiederholungsabstand in Tagen", "recurrenceNote": "Monatliche und jährliche Wiederholungen folgen dem gregorianischen Kalender. Trage den medizinischen Zeitpunkt gemäß der tierärztlichen Anweisung ein." },
-    "recurrenceOptions": { "ONCE": "Einmalig", "DAILY": "Täglich", "WEEKLY": "Wöchentlich", "MONTHLY": "Monatlich", "YEARLY": "Jährlich", "CUSTOM": "Benutzerdefinierter Abstand (Tage)" }, "sources": { "USER_CREATED": "Tierhalter", "PROVIDER_CREATED": "Dienstleister", "MEDICAL_RECORD_DERIVED": "Medizinische Akte", "BOOKING_DERIVED": "Termin", "SYSTEM_SCHEDULED": "System" }
+    "title": "Pflegebereich",
+    "subtitle": "Erinnerungen und Nachsorge für {petName}; Zeiten in der Zeitzone Teheran",
+    "allCare": "Alle Pflegeeinträge",
+    "type": "Art",
+    "due": "Fällig am",
+    "originalDue": "Ursprünglicher Termin",
+    "remindAt": "Erinnerung am",
+    "completedAt": "Erledigt am",
+    "recurrence": "Wiederholung",
+    "source": "Quelle",
+    "notification": "Benachrichtigung",
+    "sent": "Gesendet",
+    "notSent": "Noch nicht gesendet",
+    "relatedRecord": "Zugehörigen Eintrag ansehen",
+    "chooseDay": "Tag auswählen",
+    "timeTehran": "Uhrzeit (Zeitzone Teheran)",
+    "snooze": "Erinnerung verschieben",
+    "reschedule": "Erinnerungszeit ändern",
+    "actionFailed": "Das hat nicht funktioniert. Bitte versuche es erneut.",
+    "loading": "Pflegeerinnerungen werden geladen",
+    "filtersAria": "Pflegefilter",
+    "filters": { "all": "Alle" },
+    "states": {
+      "DUE": "Bald fällig",
+      "OVERDUE": "Überfällig",
+      "UPCOMING": "Anstehend",
+      "COMPLETED": "Erledigt",
+      "SNOOZED": "Verschoben",
+      "CANCELLED": "Abgesagt",
+      "CUSTOM": "Persönlich"
+    },
+    "unknownState": "Unbekannter Status",
+    "unknownType": "Weitere Pflege",
+    "unknownRecurrence": "Anderer Zeitplan",
+    "unknownSource": "Andere Quelle",
+    "calendar": "Kalender",
+    "careSheet": "Pflegeblatt für Betreuungspersonen",
+    "travelReadiness": "Reisevorbereitung",
+    "create": "Erinnerung erstellen",
+    "empty": {
+      "body": "Erinnerungen können aus Impfungen, Medikamenten und Terminen entstehen. Du kannst auch eine persönliche Erinnerung hinzufügen.",
+      "all": { "title": "Noch keine Pflegeeinträge" },
+      "due": { "title": "Nichts ist bald fällig" },
+      "overdue": { "title": "Nichts ist überfällig" },
+      "upcoming": { "title": "Keine anstehenden Erinnerungen" },
+      "completed": { "title": "Noch keine erledigte Pflege" },
+      "snoozed": { "title": "Keine verschobenen Erinnerungen" },
+      "cancelled": { "title": "Keine abgesagten Erinnerungen" },
+      "custom": { "title": "Keine persönlichen Erinnerungen" }
+    },
+    "recentlyCompleted": "Kürzlich erledigt",
+    "dailyInstructions": "Tägliche Pflegehinweise",
+    "done": "Erledigt",
+    "reminds": "Erinnert am",
+    "bookVisit": "Termin buchen",
+    "complete": "Erledigen",
+    "tomorrow": "Morgen",
+    "confirmCancel": "Absage bestätigen",
+    "cancelWarning": "Diese Erinnerung wird abgesagt. Danach werden keine weiteren Benachrichtigungen gesendet.",
+    "cancelYes": "Ja, absagen",
+    "cancelKeep": "Behalten",
+    "edit": "Bearbeiten",
+    "laterToday": "Später heute",
+    "cancel": "Absagen",
+    "day": "Tag",
+    "save": "Speichern",
+    "saving": "Wird gespeichert …",
+    "close": "Schließen",
+    "chooseDayAndTime": "Wähle einen Tag und eine Uhrzeit aus.",
+    "saveFailed": "Die Erinnerung konnte nicht gespeichert werden. Bitte versuche es erneut.",
+    "form": {
+      "title": "Titel der Erinnerung",
+      "recurrence": "Wiederholung auswählen",
+      "intervalDays": "Wiederholungsabstand in Tagen",
+      "recurrenceNote": "Monatliche und jährliche Wiederholungen folgen dem gregorianischen Kalender. Trage den medizinischen Zeitpunkt gemäß der tierärztlichen Anweisung ein."
+    },
+    "recurrenceOptions": {
+      "ONCE": "Einmalig",
+      "DAILY": "Täglich",
+      "WEEKLY": "Wöchentlich",
+      "MONTHLY": "Monatlich",
+      "YEARLY": "Jährlich",
+      "CUSTOM": "Benutzerdefinierter Abstand (Tage)"
+    },
+    "sources": {
+      "USER_CREATED": "Tierhalter",
+      "PROVIDER_CREATED": "Dienstleister",
+      "MEDICAL_RECORD_DERIVED": "Medizinische Akte",
+      "BOOKING_DERIVED": "Termin",
+      "SYSTEM_SCHEDULED": "System"
+    }
   },
   "careSuggestions": {
     "title": "Pflegevorschläge der Praxis",
     "intro": "Vorschläge werden nicht automatisch in den Pflegeplan übernommen. Prüfe und bestätige sie zuerst.",
     "listLimit": "Pro Status werden höchstens 100 Vorschläge angezeigt.",
-    "accessFailed": "Deine Zugriffsberechtigung konnte nicht geprüft werden.", "retry": "Erneut versuchen", "loading": "Wird geladen …", "forbidden": "Du hast keinen Zugriff auf das Pflegeprofil dieses Haustiers.", "saved": "Deine Entscheidung wurde gespeichert.",
-    "filter": "Status des Vorschlags", "loadFailed": "Vorschläge konnten nicht geladen werden.", "empty": "Keine Vorschläge mit diesem Status.", "suggestedDate": "Vorgeschlagener Zeitpunkt: {date}", "openReminders": "Erstellte Erinnerung öffnen", "accept": "Prüfen und annehmen", "dismiss": "Vorschlag ablehnen",
-    "confirmAccept": "Aus diesem Vorschlag eine Erinnerung erstellen?", "confirmDismiss": "Diesen Vorschlag ablehnen?", "acceptHelp": "Nach der Bestätigung wird eine persönliche Erinnerung erstellt, sofern es der Tarif zulässt.", "dismissHelp": "Der Vorschlag wird abgelehnt, ohne eine Erinnerung zu erstellen.", "overrideDate": "Alternativer Zeitpunkt (optional, Gerätezeit)", "saveFailed": "Die Entscheidung konnte nicht gespeichert werden. Prüfe Tarif, Zugriff und Verbindung.", "confirm": "Bestätigen und fortfahren", "cancel": "Abbrechen",
-    "providerTitle": "Pflege für das Haustier vorschlagen", "providerIntro": "Nur für einen abgeschlossenen Termin oder Besuch. Die berechtigte Bezugsperson erhält den Vorschlag und muss ihn annehmen, bevor eine Erinnerung erstellt wird.", "providerFailed": "Der Vorschlag wurde nicht bestätigt. Prüfe Termin- oder Besuchsstatus, Zugriff, Datum und Wiederholungsabstand. Deine Eingaben bleiben erhalten.", "providerSaved": "Vorschlag gespeichert. Die Annahme bleibt der Bezugsperson überlassen.",
-    "suggestionTitle": "Titel des Vorschlags", "suggestionType": "Pflegeart", "suggestionDate": "Vorgeschlagener Zeitpunkt (Gerätezeit)", "recurrence": "Vorgeschlagene Wiederholung", "interval": "Wiederholungsabstand (Tage, 1–3650)", "notes": "Notizen (optional)", "providerConfirm": "Ich bestätige, dass ich diesen Pflegevorschlag an die berechtigte Bezugsperson sende.", "providerSubmit": "Vorschlag speichern und senden",
+    "accessFailed": "Deine Zugriffsberechtigung konnte nicht geprüft werden.",
+    "retry": "Erneut versuchen",
+    "loading": "Wird geladen …",
+    "forbidden": "Du hast keinen Zugriff auf das Pflegeprofil dieses Haustiers.",
+    "saved": "Deine Entscheidung wurde gespeichert.",
+    "filter": "Status des Vorschlags",
+    "loadFailed": "Vorschläge konnten nicht geladen werden.",
+    "empty": "Keine Vorschläge mit diesem Status.",
+    "suggestedDate": "Vorgeschlagener Zeitpunkt: {date}",
+    "openReminders": "Erstellte Erinnerung öffnen",
+    "accept": "Prüfen und annehmen",
+    "dismiss": "Vorschlag ablehnen",
+    "confirmAccept": "Aus diesem Vorschlag eine Erinnerung erstellen?",
+    "confirmDismiss": "Diesen Vorschlag ablehnen?",
+    "acceptHelp": "Nach der Bestätigung wird eine persönliche Erinnerung erstellt, sofern es der Tarif zulässt.",
+    "dismissHelp": "Der Vorschlag wird abgelehnt, ohne eine Erinnerung zu erstellen.",
+    "overrideDate": "Alternativer Zeitpunkt (optional, Gerätezeit)",
+    "saveFailed": "Die Entscheidung konnte nicht gespeichert werden. Prüfe Tarif, Zugriff und Verbindung.",
+    "confirm": "Bestätigen und fortfahren",
+    "cancel": "Abbrechen",
+    "providerTitle": "Pflege für das Haustier vorschlagen",
+    "providerIntro": "Nur für einen abgeschlossenen Termin oder Besuch. Die berechtigte Bezugsperson erhält den Vorschlag und muss ihn annehmen, bevor eine Erinnerung erstellt wird.",
+    "providerFailed": "Der Vorschlag wurde nicht bestätigt. Prüfe Termin- oder Besuchsstatus, Zugriff, Datum und Wiederholungsabstand. Deine Eingaben bleiben erhalten.",
+    "providerSaved": "Vorschlag gespeichert. Die Annahme bleibt der Bezugsperson überlassen.",
+    "suggestionTitle": "Titel des Vorschlags",
+    "suggestionType": "Pflegeart",
+    "suggestionDate": "Vorgeschlagener Zeitpunkt (Gerätezeit)",
+    "recurrence": "Vorgeschlagene Wiederholung",
+    "interval": "Wiederholungsabstand (Tage, 1–3650)",
+    "notes": "Notizen (optional)",
+    "providerConfirm": "Ich bestätige, dass ich diesen Pflegevorschlag an die berechtigte Bezugsperson sende.",
+    "providerSubmit": "Vorschlag speichern und senden",
     "statuses": { "PENDING": "Entscheidung ausstehend", "ACCEPTED": "Angenommen", "DISMISSED": "Abgelehnt" },
-    "types": { "VACCINATION": "Impfung", "VET_VISIT": "Tierarztbesuch", "LAB_TEST": "Labortest", "IMAGING": "Bildgebung", "DENTAL": "Zahnbehandlung", "MEDICATION": "Medikament", "MEDICATION_REFILL": "Medikament nachfüllen", "DEWORMING": "Entwurmung", "PARASITE_PREVENTION": "Parasitenprophylaxe", "FOLLOW_UP": "Nachkontrolle", "WEIGHT_CHECK": "Gewichtskontrolle", "DOCUMENT_EXPIRY": "Dokumentablauf", "GROOMING": "Fellpflege", "CUSTOM": "Benutzerdefiniert" },
-    "recurrences": { "ONCE": "Einmalig", "DAILY": "Täglich", "WEEKLY": "Wöchentlich", "WEEKDAYS": "An Werktagen", "MONTHLY": "Monatlich", "YEARLY": "Jährlich", "CUSTOM": "Benutzerdefinierter Abstand" }
+    "types": {
+      "VACCINATION": "Impfung",
+      "VET_VISIT": "Tierarztbesuch",
+      "LAB_TEST": "Labortest",
+      "IMAGING": "Bildgebung",
+      "DENTAL": "Zahnbehandlung",
+      "MEDICATION": "Medikament",
+      "MEDICATION_REFILL": "Medikament nachfüllen",
+      "DEWORMING": "Entwurmung",
+      "PARASITE_PREVENTION": "Parasitenprophylaxe",
+      "FOLLOW_UP": "Nachkontrolle",
+      "WEIGHT_CHECK": "Gewichtskontrolle",
+      "DOCUMENT_EXPIRY": "Dokumentablauf",
+      "GROOMING": "Fellpflege",
+      "CUSTOM": "Benutzerdefiniert"
+    },
+    "recurrences": {
+      "ONCE": "Einmalig",
+      "DAILY": "Täglich",
+      "WEEKLY": "Wöchentlich",
+      "WEEKDAYS": "An Werktagen",
+      "MONTHLY": "Monatlich",
+      "YEARLY": "Jährlich",
+      "CUSTOM": "Benutzerdefinierter Abstand"
+    }
   },
   "providerDiscovery": {
     "allServices": "Alle Dienstleistungen",
@@ -623,34 +1006,220 @@
       "search": "Suchen"
     },
     "trust": {
-      "title": "Vertrauen und Sicherheit", "newCase": "Vertrauensfall eröffnen", "createTitle": "Vertrauensfall eröffnen",
+      "title": "Vertrauen und Sicherheit",
+      "newCase": "Vertrauensfall eröffnen",
+      "createTitle": "Vertrauensfall eröffnen",
       "filter": { "status": "Nach Status filtern", "allStatuses": "Alle Status" },
-      "status": { "OPEN": "Offen", "UNDER_REVIEW": "Wird geprüft", "RESOLVED": "Gelöst", "CLOSED": "Geschlossen" },
-      "severity": { "LOW": "Niedrig", "MEDIUM": "Mittel", "HIGH": "Hoch", "CRITICAL": "Kritisch" },
-      "subjectType": { "USER": "Nutzer", "HOUSEHOLD": "Haushalt", "PROVIDER": "Anbieter", "SELLER": "Verkäufer", "LISTING": "Anzeige", "REVIEW": "Bewertung", "COMMUNITY_CONTENT": "Community-Inhalt", "PET_INCIDENT": "Vorfall mit Haustier", "SUPPORT_NEED": "Hilfegesuch", "LOST_PET_SIGHTING": "Sichtung eines vermissten Haustiers", "ANIMAL_SUPPORT_ORGANIZATION": "Tierschutzorganisation" },
-      "actionType": { "WARNING": "Verwarnung", "RESTRICT": "Einschränken", "SUSPEND": "Sperren", "REMOVE_CONTENT": "Inhalt entfernen", "REQUIRE_REVERIFICATION": "Erneute Verifizierung verlangen", "RESTORE": "Wiederherstellen", "NO_ACTION": "Keine Maßnahme" },
-      "form": { "subjectType": "Bezugstyp", "subjectId": "Bezug-ID", "reason": "Begründung", "severity": "Schweregrad", "submit": "Fall eröffnen" },
-      "context": {
-        "title": "Fallgegenstand", "missingSubject": "Der Gegenstand ist nicht mehr vorhanden oder es gibt keine Zusammenfassung.", "by": "Gemeldet von: {name}", "openPublicPage": "Öffentliche Seite öffnen", "reportCount": "Meldungen: {total} · verschiedene meldende Personen: {reporters}", "unknownKind": "Anderer Gegenstand", "unknownStatus": "Status nicht verfügbar", "unknownReason": "Sonstiger oder unbekannter Grund",
-        "subjectKind": { "POST": "Community-Beitrag", "COMMENT": "Community-Kommentar", "SUPPORT_NEED": "Hilfegesuch", "LOST_PET_INCIDENT": "Meldung über vermisstes Haustier", "LOST_PET_SIGHTING": "Sichtung", "ORGANIZATION": "Organisation" },
-        "reportReason": { "SPAM": "Spam", "ABUSE": "Missbrauch", "MISINFORMATION": "Falschinformation", "INAPPROPRIATE": "Unangemessener Inhalt", "OTHER": "Sonstiges", "SCAM": "Betrug", "HARASSMENT": "Belästigung", "PERSONAL_INFORMATION": "Persönliche Daten", "ANIMAL_WELFARE": "Tierschutz", "DANGEROUS_CONTENT": "Gefährlicher Inhalt" },
-        "reportStatus": { "OPEN": "Offen", "ESCALATED": "Eskaliert", "RESOLVED": "Gelöst", "DISMISSED": "Verworfen" },
-        "subjectStatus": { "OPEN": "Offen", "SEARCHING": "Wird gesucht", "SIGHTING_REPORTED": "Sichtung gemeldet", "FOUND": "Gefunden", "REUNITED": "Wiedervereint", "CLOSED": "Geschlossen", "SUBMITTED": "Eingereicht", "REVIEWED": "Geprüft", "ACCEPTED": "Angenommen", "REJECTED": "Abgelehnt", "DRAFT": "Entwurf", "PENDING_REVIEW": "Prüfung ausstehend", "PUBLISHED": "Veröffentlicht", "PARTIALLY_FULFILLED": "Teilweise erfüllt", "PAUSED": "Pausiert", "FULFILLED": "Erfüllt", "EXPIRED": "Abgelaufen", "REMOVED": "Entfernt", "HIDDEN": "Verborgen", "VERIFIED": "Verifiziert", "NOT_STARTED": "Nicht begonnen", "UNDER_REVIEW": "Wird geprüft", "NEEDS_INFORMATION": "Weitere Angaben erforderlich", "APPROVED": "Genehmigt", "SUSPENDED": "Gesperrt", "INACTIVE": "Inaktiv" }
+      "status": {
+        "OPEN": "Offen",
+        "UNDER_REVIEW": "Wird geprüft",
+        "RESOLVED": "Gelöst",
+        "CLOSED": "Geschlossen"
       },
-      "detail": { "changeStatus": "Status ändern", "actions": "Ergriffene Maßnahmen", "takeAction": "Maßnahme ergreifen", "actionReason": "Begründung", "appeal": "Einspruch", "submitAppeal": "Einspruch einreichen", "appellantUserId": "Nutzer-ID der einspruchführenden Person", "appealReason": "Begründung des Einspruchs", "resolveAppeal": "Einspruch entscheiden", "resolution": "Entscheidung", "effectBefore": "Vorher", "effectAfter": "Nachher", "effectField": { "status": "Status", "verificationStatus": "Verifizierung", "isPubliclyListed": "Öffentliche Anzeige", "pausedListings": "Pausierte Anzeigen", "closedAt": "Geschlossen am" }, "yes": "Ja", "no": "Nein", "requiredFields": "Bezug-ID und Begründung sind erforderlich.", "appealRequiredFields": "Nutzer-ID und Begründung des Einspruchs sind erforderlich.", "resolutionRequired": "Gib eine Entscheidung ein, bevor du über den Einspruch entscheidest.", "appealFailed": "Der Einspruch konnte nicht eingereicht oder entschieden werden. Bitte erneut versuchen." },
-      "appealStatus": { "SUBMITTED": "Eingereicht", "UNDER_REVIEW": "Wird geprüft", "UPHELD": "Bestätigt", "OVERTURNED": "Aufgehoben", "PARTIALLY_OVERTURNED": "Teilweise aufgehoben" },
-      "states": { "loading": "Vertrauensfälle werden geladen …", "loadFailed": "Vertrauensfälle konnten nicht geladen werden. Bitte erneut versuchen.", "detailLoadFailed": "Dieser Vertrauensfall konnte nicht geladen werden. Bitte erneut versuchen.", "accessDeniedTitle": "Kein Zugriff", "accessDenied": "Du hast keine Berechtigung, diese Vertrauensfälle anzusehen.", "empty": "Keine Vertrauensfälle gefunden", "emptyDescription": "Es gibt keine Fälle mit dem gewählten Status.", "createFailed": "Der Vertrauensfall konnte nicht eröffnet werden. Bitte erneut versuchen.", "actionFailed": "Die Änderung konnte nicht gespeichert werden. Bitte erneut versuchen.", "actionNotApplicable": "Diese Maßnahme kann im aktuellen Zustand des Gegenstands nicht angewendet werden.", "actionForbidden": "Deine Rolle darf diese Maßnahme nicht ausführen.", "actionNotRecorded": "Die Maßnahme wurde nicht erfasst. Bitte erneut versuchen.", "noActions": "Es wurden noch keine Maßnahmen erfasst.", "contextUnavailable": "Der Gegenstand und die Meldungsübersicht konnten nicht geladen werden.", "unknownValue": "Wert nicht verfügbar", "restored": "Durch eine spätere Maßnahme wiederhergestellt" }
+      "severity": { "LOW": "Niedrig", "MEDIUM": "Mittel", "HIGH": "Hoch", "CRITICAL": "Kritisch" },
+      "subjectType": {
+        "USER": "Nutzer",
+        "HOUSEHOLD": "Haushalt",
+        "PROVIDER": "Anbieter",
+        "SELLER": "Verkäufer",
+        "LISTING": "Anzeige",
+        "REVIEW": "Bewertung",
+        "COMMUNITY_CONTENT": "Community-Inhalt",
+        "PET_INCIDENT": "Vorfall mit Haustier",
+        "SUPPORT_NEED": "Hilfegesuch",
+        "LOST_PET_SIGHTING": "Sichtung eines vermissten Haustiers",
+        "ANIMAL_SUPPORT_ORGANIZATION": "Tierschutzorganisation"
+      },
+      "actionType": {
+        "WARNING": "Verwarnung",
+        "RESTRICT": "Einschränken",
+        "SUSPEND": "Sperren",
+        "REMOVE_CONTENT": "Inhalt entfernen",
+        "REQUIRE_REVERIFICATION": "Erneute Verifizierung verlangen",
+        "RESTORE": "Wiederherstellen",
+        "NO_ACTION": "Keine Maßnahme"
+      },
+      "form": {
+        "subjectType": "Bezugstyp",
+        "subjectId": "Bezug-ID",
+        "reason": "Begründung",
+        "severity": "Schweregrad",
+        "submit": "Fall eröffnen"
+      },
+      "context": {
+        "title": "Fallgegenstand",
+        "missingSubject": "Der Gegenstand ist nicht mehr vorhanden oder es gibt keine Zusammenfassung.",
+        "by": "Gemeldet von: {name}",
+        "openPublicPage": "Öffentliche Seite öffnen",
+        "reportCount": "Meldungen: {total} · verschiedene meldende Personen: {reporters}",
+        "unknownKind": "Anderer Gegenstand",
+        "unknownStatus": "Status nicht verfügbar",
+        "unknownReason": "Sonstiger oder unbekannter Grund",
+        "subjectKind": {
+          "POST": "Community-Beitrag",
+          "COMMENT": "Community-Kommentar",
+          "SUPPORT_NEED": "Hilfegesuch",
+          "LOST_PET_INCIDENT": "Meldung über vermisstes Haustier",
+          "LOST_PET_SIGHTING": "Sichtung",
+          "ORGANIZATION": "Organisation"
+        },
+        "reportReason": {
+          "SPAM": "Spam",
+          "ABUSE": "Missbrauch",
+          "MISINFORMATION": "Falschinformation",
+          "INAPPROPRIATE": "Unangemessener Inhalt",
+          "OTHER": "Sonstiges",
+          "SCAM": "Betrug",
+          "HARASSMENT": "Belästigung",
+          "PERSONAL_INFORMATION": "Persönliche Daten",
+          "ANIMAL_WELFARE": "Tierschutz",
+          "DANGEROUS_CONTENT": "Gefährlicher Inhalt"
+        },
+        "reportStatus": {
+          "OPEN": "Offen",
+          "ESCALATED": "Eskaliert",
+          "RESOLVED": "Gelöst",
+          "DISMISSED": "Verworfen"
+        },
+        "subjectStatus": {
+          "OPEN": "Offen",
+          "SEARCHING": "Wird gesucht",
+          "SIGHTING_REPORTED": "Sichtung gemeldet",
+          "FOUND": "Gefunden",
+          "REUNITED": "Wiedervereint",
+          "CLOSED": "Geschlossen",
+          "SUBMITTED": "Eingereicht",
+          "REVIEWED": "Geprüft",
+          "ACCEPTED": "Angenommen",
+          "REJECTED": "Abgelehnt",
+          "DRAFT": "Entwurf",
+          "PENDING_REVIEW": "Prüfung ausstehend",
+          "PUBLISHED": "Veröffentlicht",
+          "PARTIALLY_FULFILLED": "Teilweise erfüllt",
+          "PAUSED": "Pausiert",
+          "FULFILLED": "Erfüllt",
+          "EXPIRED": "Abgelaufen",
+          "REMOVED": "Entfernt",
+          "HIDDEN": "Verborgen",
+          "VERIFIED": "Verifiziert",
+          "NOT_STARTED": "Nicht begonnen",
+          "UNDER_REVIEW": "Wird geprüft",
+          "NEEDS_INFORMATION": "Weitere Angaben erforderlich",
+          "APPROVED": "Genehmigt",
+          "SUSPENDED": "Gesperrt",
+          "INACTIVE": "Inaktiv"
+        }
+      },
+      "detail": {
+        "changeStatus": "Status ändern",
+        "actions": "Ergriffene Maßnahmen",
+        "takeAction": "Maßnahme ergreifen",
+        "actionReason": "Begründung",
+        "appeal": "Einspruch",
+        "submitAppeal": "Einspruch einreichen",
+        "appellantUserId": "Nutzer-ID der einspruchführenden Person",
+        "appealReason": "Begründung des Einspruchs",
+        "resolveAppeal": "Einspruch entscheiden",
+        "resolution": "Entscheidung",
+        "effectBefore": "Vorher",
+        "effectAfter": "Nachher",
+        "effectField": {
+          "status": "Status",
+          "verificationStatus": "Verifizierung",
+          "isPubliclyListed": "Öffentliche Anzeige",
+          "pausedListings": "Pausierte Anzeigen",
+          "closedAt": "Geschlossen am"
+        },
+        "yes": "Ja",
+        "no": "Nein",
+        "requiredFields": "Bezug-ID und Begründung sind erforderlich.",
+        "appealRequiredFields": "Nutzer-ID und Begründung des Einspruchs sind erforderlich.",
+        "resolutionRequired": "Gib eine Entscheidung ein, bevor du über den Einspruch entscheidest.",
+        "appealFailed": "Der Einspruch konnte nicht eingereicht oder entschieden werden. Bitte erneut versuchen."
+      },
+      "appealStatus": {
+        "SUBMITTED": "Eingereicht",
+        "UNDER_REVIEW": "Wird geprüft",
+        "UPHELD": "Bestätigt",
+        "OVERTURNED": "Aufgehoben",
+        "PARTIALLY_OVERTURNED": "Teilweise aufgehoben"
+      },
+      "states": {
+        "loading": "Vertrauensfälle werden geladen …",
+        "loadFailed": "Vertrauensfälle konnten nicht geladen werden. Bitte erneut versuchen.",
+        "detailLoadFailed": "Dieser Vertrauensfall konnte nicht geladen werden. Bitte erneut versuchen.",
+        "accessDeniedTitle": "Kein Zugriff",
+        "accessDenied": "Du hast keine Berechtigung, diese Vertrauensfälle anzusehen.",
+        "empty": "Keine Vertrauensfälle gefunden",
+        "emptyDescription": "Es gibt keine Fälle mit dem gewählten Status.",
+        "createFailed": "Der Vertrauensfall konnte nicht eröffnet werden. Bitte erneut versuchen.",
+        "actionFailed": "Die Änderung konnte nicht gespeichert werden. Bitte erneut versuchen.",
+        "actionNotApplicable": "Diese Maßnahme kann im aktuellen Zustand des Gegenstands nicht angewendet werden.",
+        "actionForbidden": "Deine Rolle darf diese Maßnahme nicht ausführen.",
+        "actionNotRecorded": "Die Maßnahme wurde nicht erfasst. Bitte erneut versuchen.",
+        "noActions": "Es wurden noch keine Maßnahmen erfasst.",
+        "contextUnavailable": "Der Gegenstand und die Meldungsübersicht konnten nicht geladen werden.",
+        "unknownValue": "Wert nicht verfügbar",
+        "restored": "Durch eine spätere Maßnahme wiederhergestellt"
+      }
     },
     "disputes": {
       "title": "Streitfälle",
       "newDispute": "Neuer Streitfall",
       "createTitle": "Streitfall eröffnen",
       "filter": { "status": "Nach Status filtern", "allStatuses": "Alle Status" },
-      "status": { "OPEN": "Offen", "UNDER_REVIEW": "Wird geprüft", "AWAITING_EVIDENCE": "Belege ausstehend", "RESOLVED_CUSTOMER": "Für Kunden entschieden", "RESOLVED_PROVIDER": "Für Anbieter entschieden", "RESOLVED_SELLER": "Für Verkäufer entschieden", "PARTIAL_RESOLUTION": "Teilweise gelöst", "REJECTED": "Abgelehnt", "CLOSED": "Geschlossen" },
-      "subjectType": { "BOOKING": "Buchung", "ORDER": "Bestellung", "PAYMENT": "Zahlung", "REFUND": "Erstattung", "SHIPMENT": "Sendung", "PROVIDER": "Anbieter", "SELLER": "Verkäufer" },
-      "form": { "subjectType": "Bezugstyp", "subjectId": "Bezug-ID", "raisedByUserId": "Eingereicht von (Nutzer-ID, optional)", "claim": "Schilderung", "submit": "Streitfall eröffnen" },
-      "detail": { "claim": "Schilderung", "resolution": "Zusammenfassung der Entscheidung", "evidence": "Belege", "addEvidence": "Beleg hinzufügen", "evidencePlaceholder": "Beschreibung des Belegs", "changeStatus": "Status ändern", "financialNote": "Finanzielle Vorgänge (einschließlich Erstattungen) werden separat verfolgt. Eine Streitfallentscheidung löst keine automatische Erstattung aus.", "actorType": { "USER": "Nutzer", "ADMIN": "Admin" } },
-      "states": { "loading": "Streitfälle werden geladen …", "loadFailed": "Streitfälle konnten nicht geladen werden. Bitte erneut versuchen.", "detailLoadFailed": "Dieser Streitfall konnte nicht geladen werden. Bitte erneut versuchen.", "accessDeniedTitle": "Kein Zugriff", "accessDenied": "Du hast keine Berechtigung, diese Streitfälle anzusehen.", "notFoundTitle": "Streitfall nicht gefunden", "notFound": "Dieser Streitfall ist nicht verfügbar.", "empty": "Keine Streitfälle gefunden", "emptyDescription": "Es gibt keine Streitfälle mit dem gewählten Status.", "requiredFields": "Bezug-ID und Schilderung sind erforderlich.", "createFailed": "Der Streitfall konnte nicht eröffnet werden. Bitte erneut versuchen.", "actionFailed": "Die Änderung konnte nicht gespeichert werden. Bitte erneut versuchen.", "noEvidence": "Noch keine Belege hinzugefügt." }
+      "status": {
+        "OPEN": "Offen",
+        "UNDER_REVIEW": "Wird geprüft",
+        "AWAITING_EVIDENCE": "Belege ausstehend",
+        "RESOLVED_CUSTOMER": "Für Kunden entschieden",
+        "RESOLVED_PROVIDER": "Für Anbieter entschieden",
+        "RESOLVED_SELLER": "Für Verkäufer entschieden",
+        "PARTIAL_RESOLUTION": "Teilweise gelöst",
+        "REJECTED": "Abgelehnt",
+        "CLOSED": "Geschlossen"
+      },
+      "subjectType": {
+        "BOOKING": "Buchung",
+        "ORDER": "Bestellung",
+        "PAYMENT": "Zahlung",
+        "REFUND": "Erstattung",
+        "SHIPMENT": "Sendung",
+        "PROVIDER": "Anbieter",
+        "SELLER": "Verkäufer"
+      },
+      "form": {
+        "subjectType": "Bezugstyp",
+        "subjectId": "Bezug-ID",
+        "raisedByUserId": "Eingereicht von (Nutzer-ID, optional)",
+        "claim": "Schilderung",
+        "submit": "Streitfall eröffnen"
+      },
+      "detail": {
+        "claim": "Schilderung",
+        "resolution": "Zusammenfassung der Entscheidung",
+        "evidence": "Belege",
+        "addEvidence": "Beleg hinzufügen",
+        "evidencePlaceholder": "Beschreibung des Belegs",
+        "changeStatus": "Status ändern",
+        "financialNote": "Finanzielle Vorgänge (einschließlich Erstattungen) werden separat verfolgt. Eine Streitfallentscheidung löst keine automatische Erstattung aus.",
+        "actorType": { "USER": "Nutzer", "ADMIN": "Admin" }
+      },
+      "states": {
+        "loading": "Streitfälle werden geladen …",
+        "loadFailed": "Streitfälle konnten nicht geladen werden. Bitte erneut versuchen.",
+        "detailLoadFailed": "Dieser Streitfall konnte nicht geladen werden. Bitte erneut versuchen.",
+        "accessDeniedTitle": "Kein Zugriff",
+        "accessDenied": "Du hast keine Berechtigung, diese Streitfälle anzusehen.",
+        "notFoundTitle": "Streitfall nicht gefunden",
+        "notFound": "Dieser Streitfall ist nicht verfügbar.",
+        "empty": "Keine Streitfälle gefunden",
+        "emptyDescription": "Es gibt keine Streitfälle mit dem gewählten Status.",
+        "requiredFields": "Bezug-ID und Schilderung sind erforderlich.",
+        "createFailed": "Der Streitfall konnte nicht eröffnet werden. Bitte erneut versuchen.",
+        "actionFailed": "Die Änderung konnte nicht gespeichert werden. Bitte erneut versuchen.",
+        "noEvidence": "Noch keine Belege hinzugefügt."
+      }
     },
     "support": {
       "title": "Supportfälle",
@@ -663,15 +1232,80 @@
         "createdFrom": "Erstellt ab",
         "createdTo": "Erstellt bis"
       },
-      "status": { "OPEN": "Offen", "IN_PROGRESS": "In Bearbeitung", "WAITING_ON_USER": "Wartet auf Nutzer", "WAITING_ON_INTERNAL": "Interne Bearbeitung ausstehend", "RESOLVED": "Gelöst", "CLOSED": "Geschlossen" },
-      "category": { "ACCOUNT": "Konto", "PET": "Haustier", "HEALTH": "Gesundheit", "BOOKING": "Buchung", "SERVICE": "Dienstleistung", "PAYMENT": "Zahlung", "REFUND": "Erstattung", "ORDER": "Bestellung", "DELIVERY": "Lieferung", "SELLER": "Verkäufer", "PROVIDER": "Anbieter", "MARKETPLACE": "Marktplatz", "TRUST_SAFETY": "Vertrauen und Sicherheit", "OTHER": "Sonstiges" },
-      "priority": { "LOW": "Niedrig", "NORMAL": "Normal", "HIGH": "Hoch", "URGENT": "Dringend" },
-      "form": { "requesterUserId": "Nutzer-ID der anfragenden Person", "subject": "Betreff", "description": "Beschreibung", "category": "Kategorie", "priority": "Priorität", "submit": "Fall erstellen" },
-      "detail": {
-        "caseNumber": "Fall {number}", "requester": "Anfragende Person: {name}", "authorType": { "USER": "Kunde", "ADMIN": "Admin", "SYSTEM": "System" }, "assignTo": "Admin zuweisen", "changeStatus": "Status ändern", "messages": "Nachrichten", "composePlaceholder": "Antwort schreiben …", "visibilityPublic": "Öffentliche Antwort", "visibilityInternal": "Interne Notiz (wird nicht an Kunden gesendet)", "visibilityLabel": "Sichtbarkeit", "send": "Senden", "notes": "Interne Notizen",
-        "context": { "title": "Kontext", "household": "Haushalt: {name}", "pet": "Haustier: {name}", "relatedEntity": "Bezug: {summary}", "firstResponseTime": "Erste Antwort nach {minutes} Min.", "noFirstResponseYet": "Noch keine Antwort gesendet", "resolutionTime": "Gelöst nach {minutes} Min.", "previousCases": "Frühere Fälle dieser Person:", "noPreviousCases": "Diese Person hat keine früheren Fälle." }
+      "status": {
+        "OPEN": "Offen",
+        "IN_PROGRESS": "In Bearbeitung",
+        "WAITING_ON_USER": "Wartet auf Nutzer",
+        "WAITING_ON_INTERNAL": "Interne Bearbeitung ausstehend",
+        "RESOLVED": "Gelöst",
+        "CLOSED": "Geschlossen"
       },
-      "states": { "loading": "Supportfälle werden geladen …", "loadFailed": "Supportfälle konnten nicht geladen werden. Bitte erneut versuchen.", "detailLoadFailed": "Dieser Supportfall konnte nicht geladen werden. Bitte erneut versuchen.", "accessDeniedTitle": "Kein Zugriff", "accessDenied": "Du hast keine Berechtigung, diese Supportfälle anzusehen.", "notFoundTitle": "Fall nicht gefunden", "notFound": "Dieser Supportfall ist nicht verfügbar.", "empty": "Keine Supportfälle gefunden", "emptyDescription": "Passe die Filter an oder erstelle einen neuen Fall.", "requiredFields": "Nutzer-ID, Betreff und Beschreibung sind erforderlich.", "createFailed": "Der Supportfall konnte nicht erstellt werden. Bitte erneut versuchen.", "actionFailed": "Die Änderung konnte nicht gespeichert werden. Bitte erneut versuchen.", "noMessages": "Noch keine Nachrichten.", "noNotes": "Noch keine internen Notizen." }
+      "category": {
+        "ACCOUNT": "Konto",
+        "PET": "Haustier",
+        "HEALTH": "Gesundheit",
+        "BOOKING": "Buchung",
+        "SERVICE": "Dienstleistung",
+        "PAYMENT": "Zahlung",
+        "REFUND": "Erstattung",
+        "ORDER": "Bestellung",
+        "DELIVERY": "Lieferung",
+        "SELLER": "Verkäufer",
+        "PROVIDER": "Anbieter",
+        "MARKETPLACE": "Marktplatz",
+        "TRUST_SAFETY": "Vertrauen und Sicherheit",
+        "OTHER": "Sonstiges"
+      },
+      "priority": { "LOW": "Niedrig", "NORMAL": "Normal", "HIGH": "Hoch", "URGENT": "Dringend" },
+      "form": {
+        "requesterUserId": "Nutzer-ID der anfragenden Person",
+        "subject": "Betreff",
+        "description": "Beschreibung",
+        "category": "Kategorie",
+        "priority": "Priorität",
+        "submit": "Fall erstellen"
+      },
+      "detail": {
+        "caseNumber": "Fall {number}",
+        "requester": "Anfragende Person: {name}",
+        "authorType": { "USER": "Kunde", "ADMIN": "Admin", "SYSTEM": "System" },
+        "assignTo": "Admin zuweisen",
+        "changeStatus": "Status ändern",
+        "messages": "Nachrichten",
+        "composePlaceholder": "Antwort schreiben …",
+        "visibilityPublic": "Öffentliche Antwort",
+        "visibilityInternal": "Interne Notiz (wird nicht an Kunden gesendet)",
+        "visibilityLabel": "Sichtbarkeit",
+        "send": "Senden",
+        "notes": "Interne Notizen",
+        "context": {
+          "title": "Kontext",
+          "household": "Haushalt: {name}",
+          "pet": "Haustier: {name}",
+          "relatedEntity": "Bezug: {summary}",
+          "firstResponseTime": "Erste Antwort nach {minutes} Min.",
+          "noFirstResponseYet": "Noch keine Antwort gesendet",
+          "resolutionTime": "Gelöst nach {minutes} Min.",
+          "previousCases": "Frühere Fälle dieser Person:",
+          "noPreviousCases": "Diese Person hat keine früheren Fälle."
+        }
+      },
+      "states": {
+        "loading": "Supportfälle werden geladen …",
+        "loadFailed": "Supportfälle konnten nicht geladen werden. Bitte erneut versuchen.",
+        "detailLoadFailed": "Dieser Supportfall konnte nicht geladen werden. Bitte erneut versuchen.",
+        "accessDeniedTitle": "Kein Zugriff",
+        "accessDenied": "Du hast keine Berechtigung, diese Supportfälle anzusehen.",
+        "notFoundTitle": "Fall nicht gefunden",
+        "notFound": "Dieser Supportfall ist nicht verfügbar.",
+        "empty": "Keine Supportfälle gefunden",
+        "emptyDescription": "Passe die Filter an oder erstelle einen neuen Fall.",
+        "requiredFields": "Nutzer-ID, Betreff und Beschreibung sind erforderlich.",
+        "createFailed": "Der Supportfall konnte nicht erstellt werden. Bitte erneut versuchen.",
+        "actionFailed": "Die Änderung konnte nicht gespeichert werden. Bitte erneut versuchen.",
+        "noMessages": "Noch keine Nachrichten.",
+        "noNotes": "Noch keine internen Notizen."
+      }
     },
     "audit": {
       "title": "Prüfprotokoll",
@@ -815,14 +1449,154 @@
       }
     }
   },
-  "adminUsers":{"title":"Alle Nutzerinnen und Nutzer","detailTitle":"Nutzerprofil","intro":"Personen auf der Plattform mit ihren Rollen und verknüpften Unternehmen. Kontaktdaten bleiben maskiert.","search":"Name, E-Mail oder Telefonnummer suchen","kind":"Beziehungstyp","all":"Alle Beziehungen","apply":"Filter anwenden","clear":"Filter zurücksetzen","loading":"Nutzende werden geladen …","failed":"Nutzende konnten nicht geladen werden. Es wurde nichts geändert.","forbidden":"Du darfst dieses Verzeichnis nicht ansehen.","notFound":"Dieses Nutzerkonto wurde nicht gefunden.","retry":"Erneut versuchen","empty":"Keine Nutzerinnen oder Nutzer entsprechen diesen Filtern.","total":"{count} Nutzerkonten","unnamed":"Nutzerkonto ohne Namen","email":"Maskierte E-Mail-Adresse","phone":"Maskierte Mobilnummer","created":"Registriert","lastActive":"Zuletzt aktiv","notRecorded":"Nicht erfasst","relationships":"Rollen und Unternehmen","business":"Mitglied bei {name}","verification":"Unternehmensstatus: {status}","noRoles":"Keine Beziehungen erfasst.","otherRole":"Weitere Rolle","otherStatus":"Weiterer erfasster Status","detail":"Nutzerprofil ansehen","back":"Zur Nutzerliste","households":"Haushalte: {count}","pets":"Tiere: {count}","customer360":"Kundenprofil öffnen","profileSections":"Bereiche des Nutzerprofils","sectionEmpty":"In diesem Bereich gibt es keine Einträge.","unnamedHousehold":"Haushalt ohne Namen","householdSummary":"{members} Mitglieder · {pets} Tiere","otherSpecies":"Andere Tierart","orderItem":"{amount} {currency} · {date}","requestItem":"{category} · {date}","reviewItem":"{kind} · {rating} von 5 · {date}","auditActor":"Erfasst von {name} · {date}","auditEntry":"Administrative Aktion","irr":"IRR","otherCurrency":"Erfasste Währung","otherRequest":"Weitere Dienstleistung","tabs":{"profile":"Übersicht","households":"Haushalte und Tiere","businesses":"Unternehmen","orders":"Bestellungen","requests":"Anfragen","tickets":"Supportfälle","reviews":"Bewertungen","audit":"Auditprotokoll"},"reviewKinds":{"PROVIDER":"Dienstleistungsbewertung","PRODUCT":"Produktbewertung","TRAVEL":"Unterkunftsbewertung"},"species":{"DOG":"Hund","CAT":"Katze","BIRD":"Vogel","RABBIT":"Kaninchen","RODENT":"Nagetier","FISH":"Fisch","REPTILE":"Reptil","OTHER":"Andere"},"requestCategories":{"VET":"Tiermedizin","GROOMING":"Fellpflege","TRAINING":"Training","WALKING":"Gassi-Service","SITTING":"Betreuung","BOARDING":"Unterbringung","PET_TAXI":"Tiertransport","OTHER":"Weitere Dienstleistung"},"pagination":"Seiten der Nutzerliste","previous":"Zurück","next":"Weiter","page":"Seite {page}","kinds":{"ADMIN_INTERNAL":"Interne Administration","CUSTOMER":"Kundschaft / Familie","CLINIC":"Klinik / Tierarztpraxis","GROOMER":"Fellpflege","HOST":"Unterkunftsanbieter","PROVIDER_OTHER":"Weiterer Dienstleister","SHOP":"Shop","INSURER":"Versicherung","NGO":"Tierschutzorganisation"},"roleNames":{"OWNER":"Inhaber/in","MEMBER":"Mitglied","STAFF":"Mitarbeitende","MANAGER":"Verwaltung","VET":"Tierärztin/Tierarzt","VETERINARIAN":"Tierärztin/Tierarzt","CATALOG_MANAGER":"Katalogverwaltung","FULFILLMENT":"Auftragsabwicklung","RECEPTIONIST":"Empfang","ASSISTANT":"Assistenz"},"statuses":{"ACTIVE":"Aktiv","SUSPENDED":"Gesperrt","VERIFIED":"Verifiziert","NOT_STARTED":"Nicht eingereicht","SUBMITTED":"Eingereicht","UNDER_REVIEW":"In Prüfung","NEEDS_INFORMATION":"Weitere Angaben erforderlich","REJECTED":"Abgelehnt","APPROVED":"Genehmigt","PENDING":"Ausstehend","INACTIVE":"Inaktiv"},"manualMessage":{"title":"Nachricht an dieses Nutzerkonto","smsNote":"SMS wird nur versucht, wenn Faraz aktiv ist, die empfangende Person zugestimmt hat und die Benachrichtigungsregeln es erlauben.","subject":"Betreff","message":"Nachricht","attemptSms":"SMS zusätzlich versuchen, wenn zulässig","saved":"Nachricht wurde erfasst.","failed":"Nachricht konnte nicht gesendet werden.","sending":"Wird gesendet …","send":"Nachricht senden"}},
+  "adminUsers": {
+    "title": "Alle Nutzerinnen und Nutzer",
+    "detailTitle": "Nutzerprofil",
+    "intro": "Personen auf der Plattform mit ihren Rollen und verknüpften Unternehmen. Kontaktdaten bleiben maskiert.",
+    "search": "Name, E-Mail oder Telefonnummer suchen",
+    "kind": "Beziehungstyp",
+    "all": "Alle Beziehungen",
+    "apply": "Filter anwenden",
+    "clear": "Filter zurücksetzen",
+    "loading": "Nutzende werden geladen …",
+    "failed": "Nutzende konnten nicht geladen werden. Es wurde nichts geändert.",
+    "forbidden": "Du darfst dieses Verzeichnis nicht ansehen.",
+    "notFound": "Dieses Nutzerkonto wurde nicht gefunden.",
+    "retry": "Erneut versuchen",
+    "empty": "Keine Nutzerinnen oder Nutzer entsprechen diesen Filtern.",
+    "total": "{count} Nutzerkonten",
+    "unnamed": "Nutzerkonto ohne Namen",
+    "email": "Maskierte E-Mail-Adresse",
+    "phone": "Maskierte Mobilnummer",
+    "created": "Registriert",
+    "lastActive": "Zuletzt aktiv",
+    "notRecorded": "Nicht erfasst",
+    "relationships": "Rollen und Unternehmen",
+    "business": "Mitglied bei {name}",
+    "verification": "Unternehmensstatus: {status}",
+    "noRoles": "Keine Beziehungen erfasst.",
+    "otherRole": "Weitere Rolle",
+    "otherStatus": "Weiterer erfasster Status",
+    "detail": "Nutzerprofil ansehen",
+    "back": "Zur Nutzerliste",
+    "households": "Haushalte: {count}",
+    "pets": "Tiere: {count}",
+    "customer360": "Kundenprofil öffnen",
+    "profileSections": "Bereiche des Nutzerprofils",
+    "sectionEmpty": "In diesem Bereich gibt es keine Einträge.",
+    "unnamedHousehold": "Haushalt ohne Namen",
+    "householdSummary": "{members} Mitglieder · {pets} Tiere",
+    "otherSpecies": "Andere Tierart",
+    "orderItem": "{amount} {currency} · {date}",
+    "requestItem": "{category} · {date}",
+    "reviewItem": "{kind} · {rating} von 5 · {date}",
+    "auditActor": "Erfasst von {name} · {date}",
+    "auditEntry": "Administrative Aktion",
+    "irr": "IRR",
+    "otherCurrency": "Erfasste Währung",
+    "otherRequest": "Weitere Dienstleistung",
+    "tabs": {
+      "profile": "Übersicht",
+      "households": "Haushalte und Tiere",
+      "businesses": "Unternehmen",
+      "orders": "Bestellungen",
+      "requests": "Anfragen",
+      "tickets": "Supportfälle",
+      "reviews": "Bewertungen",
+      "audit": "Auditprotokoll"
+    },
+    "reviewKinds": {
+      "PROVIDER": "Dienstleistungsbewertung",
+      "PRODUCT": "Produktbewertung",
+      "TRAVEL": "Unterkunftsbewertung"
+    },
+    "species": {
+      "DOG": "Hund",
+      "CAT": "Katze",
+      "BIRD": "Vogel",
+      "RABBIT": "Kaninchen",
+      "RODENT": "Nagetier",
+      "FISH": "Fisch",
+      "REPTILE": "Reptil",
+      "OTHER": "Andere"
+    },
+    "requestCategories": {
+      "VET": "Tiermedizin",
+      "GROOMING": "Fellpflege",
+      "TRAINING": "Training",
+      "WALKING": "Gassi-Service",
+      "SITTING": "Betreuung",
+      "BOARDING": "Unterbringung",
+      "PET_TAXI": "Tiertransport",
+      "OTHER": "Weitere Dienstleistung"
+    },
+    "pagination": "Seiten der Nutzerliste",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "page": "Seite {page}",
+    "kinds": {
+      "ADMIN_INTERNAL": "Interne Administration",
+      "CUSTOMER": "Kundschaft / Familie",
+      "CLINIC": "Klinik / Tierarztpraxis",
+      "GROOMER": "Fellpflege",
+      "HOST": "Unterkunftsanbieter",
+      "PROVIDER_OTHER": "Weiterer Dienstleister",
+      "SHOP": "Shop",
+      "INSURER": "Versicherung",
+      "NGO": "Tierschutzorganisation"
+    },
+    "roleNames": {
+      "OWNER": "Inhaber/in",
+      "MEMBER": "Mitglied",
+      "STAFF": "Mitarbeitende",
+      "MANAGER": "Verwaltung",
+      "VET": "Tierärztin/Tierarzt",
+      "VETERINARIAN": "Tierärztin/Tierarzt",
+      "CATALOG_MANAGER": "Katalogverwaltung",
+      "FULFILLMENT": "Auftragsabwicklung",
+      "RECEPTIONIST": "Empfang",
+      "ASSISTANT": "Assistenz"
+    },
+    "statuses": {
+      "ACTIVE": "Aktiv",
+      "SUSPENDED": "Gesperrt",
+      "VERIFIED": "Verifiziert",
+      "NOT_STARTED": "Nicht eingereicht",
+      "SUBMITTED": "Eingereicht",
+      "UNDER_REVIEW": "In Prüfung",
+      "NEEDS_INFORMATION": "Weitere Angaben erforderlich",
+      "REJECTED": "Abgelehnt",
+      "APPROVED": "Genehmigt",
+      "PENDING": "Ausstehend",
+      "INACTIVE": "Inaktiv"
+    },
+    "manualMessage": {
+      "title": "Nachricht an dieses Nutzerkonto",
+      "smsNote": "SMS wird nur versucht, wenn Faraz aktiv ist, die empfangende Person zugestimmt hat und die Benachrichtigungsregeln es erlauben.",
+      "subject": "Betreff",
+      "message": "Nachricht",
+      "attemptSms": "SMS zusätzlich versuchen, wenn zulässig",
+      "saved": "Nachricht wurde erfasst.",
+      "failed": "Nachricht konnte nicht gesendet werden.",
+      "sending": "Wird gesendet …",
+      "send": "Nachricht senden"
+    }
+  },
   "subscription": {
     "title": "Mitgliedschaft",
     "plansTitle": "Tarife",
     "viewPlans": "Tarife ansehen",
     "resume": "Mitgliedschaft fortsetzen",
     "cancel": "Mitgliedschaft kündigen",
-    "status": {"TRIALING":"Testphase","ACTIVE":"Aktiv","PAST_DUE":"Zahlungsproblem","GRACE_PERIOD":"Kulanzzeitraum","CANCEL_AT_PERIOD_END":"Kündigung vorgemerkt","CANCELLED":"Gekündigt","EXPIRED":"Abgelaufen"},
+    "status": {
+      "TRIALING": "Testphase",
+      "ACTIVE": "Aktiv",
+      "PAST_DUE": "Zahlungsproblem",
+      "GRACE_PERIOD": "Kulanzzeitraum",
+      "CANCEL_AT_PERIOD_END": "Kündigung vorgemerkt",
+      "CANCELLED": "Gekündigt",
+      "EXPIRED": "Abgelaufen"
+    },
     "trialEndsAt": "Ihre Testphase endet am {date}.",
     "trialDaysRemaining": "Noch {days, number} Tage in Ihrer Testphase.",
     "periodEndsAt": "Der aktuelle Zeitraum endet am {date}.",
@@ -831,14 +1605,28 @@
     "cancelScheduled": "Ihre Mitgliedschaft bleibt bis zum {date} aktiv und endet danach.",
     "downgradeScheduled": "Wechsel zu {plan} am Ende des aktuellen Zeitraums.",
     "entitlements": "Enthaltene Leistungen",
-    "entitlement": {"petsMax":"Tiere","membersMax":"Haushaltsmitglieder","prioritySupport":"Bevorzugter Support","healthDocumentsMax":"Gesundheitsdokumente","healthObservationsMax":"Gesundheitsbeobachtungen","memoriesMax":"Erinnerungen","careReminders":"Pflege- und wiederkehrende Erinnerungen","vetShare":"Zeitlich begrenzte Freigabe für Tierärzte"},
+    "entitlement": {
+      "petsMax": "Tiere",
+      "membersMax": "Haushaltsmitglieder",
+      "prioritySupport": "Bevorzugter Support",
+      "healthDocumentsMax": "Gesundheitsdokumente",
+      "healthObservationsMax": "Gesundheitsbeobachtungen",
+      "memoriesMax": "Erinnerungen",
+      "careReminders": "Pflege- und wiederkehrende Erinnerungen",
+      "vetShare": "Zeitlich begrenzte Freigabe für Tierärzte"
+    },
     "included": "Enthalten",
     "notIncluded": "Nicht enthalten",
     "usageOf": "{used} von {limit}",
     "unlimited": "Unbegrenzt",
     "overridden": "angepasst",
     "durationLabel": "Mitgliedschaftsdauer",
-    "interval": {"monthly":"Monatlich","quarterly":"3 Monate","semiAnnual":"6 Monate","annual":"Jährlich"},
+    "interval": {
+      "monthly": "Monatlich",
+      "quarterly": "3 Monate",
+      "semiAnnual": "6 Monate",
+      "annual": "Jährlich"
+    },
     "currentPlanBadge": "Aktueller Tarif",
     "free": "Kostenlos",
     "notAvailableHere": "In Ihrem Land nicht verfügbar",
@@ -855,8 +1643,19 @@
     "historyBody": "Unabhängig vom Tarif können Sie Profile, Gesundheitsverläufe, Erinnerungen, Bestellungen, Belege und Supportgespräche Ihrer Tiere weiterhin ansehen und Ihre Daten exportieren. Limits gelten nur für neue Einträge.",
     "billingTitle": "Zahlungsverlauf",
     "billingEmpty": "Bisher keine Zahlungen.",
-    "attemptStatus": {"PENDING":"Ausstehend","SUCCEEDED":"Bezahlt","FAILED":"Fehlgeschlagen","REFUNDED":"Erstattet","SIMULATED":"Testzahlung (keine Abbuchung)"},
-    "attemptReason": {"INITIAL":"Erste Zahlung","RENEWAL":"Verlängerung","UPGRADE":"Upgrade","RETRY":"Erneuter Versuch"},
+    "attemptStatus": {
+      "PENDING": "Ausstehend",
+      "SUCCEEDED": "Bezahlt",
+      "FAILED": "Fehlgeschlagen",
+      "REFUNDED": "Erstattet",
+      "SIMULATED": "Testzahlung (keine Abbuchung)"
+    },
+    "attemptReason": {
+      "INITIAL": "Erste Zahlung",
+      "RENEWAL": "Verlängerung",
+      "UPGRADE": "Upgrade",
+      "RETRY": "Erneuter Versuch"
+    },
     "cancelDialogTitle": "Mitgliedschaft kündigen",
     "cancelConsequence1": "Es wird nichts mehr abgebucht. Ihre Mitgliedschaft bleibt bis zum {date} aktiv und endet dann.",
     "cancelConsequence2": "Danach entfallen kostenpflichtige Funktionen und höhere Limits, zum Beispiel für zusätzliche Tiere oder Haushaltsmitglieder.",
@@ -912,7 +1711,12 @@
       "nextOn": "Als Nächstes: {date}",
       "priceChanged": "Preis geändert",
       "unavailable": "Derzeit nicht verfügbar",
-      "status": { "ACTIVE": "Aktiv", "PAUSED": "Pausiert", "CANCELLED": "Gekündigt", "UNKNOWN": "Unbekannter Status" },
+      "status": {
+        "ACTIVE": "Aktiv",
+        "PAUSED": "Pausiert",
+        "CANCELLED": "Gekündigt",
+        "UNKNOWN": "Unbekannter Status"
+      },
       "notAvailableTitle": "Wiederkehrende Lieferung ist für diesen Artikel nicht verfügbar",
       "notAvailableHint": "Der Verkäufer bietet diese Option möglicherweise nicht mehr an.",
       "createTitle": "Wiederkehrende Lieferung einrichten",
@@ -952,10 +1756,17 @@
       "lastOrder": "Letzte Bestellung ansehen",
       "history": "Verlauf",
       "event": {
-        "CREATED": "Erstellt", "UPDATED": "Einstellungen geändert", "SKIPPED": "Lieferung ausgelassen",
-        "PAUSED": "Pausiert", "RESUMED": "Fortgesetzt", "CANCELLED": "Gekündigt",
-        "PRICE_ACCEPTED": "Neuer Preis akzeptiert", "REMINDER_SENT": "Erinnerung gesendet",
-        "CYCLE_PREPARED": "Zum Warenkorb hinzugefügt", "ORDERED": "Bestellt", "OTHER": "Aktualisiert"
+        "CREATED": "Erstellt",
+        "UPDATED": "Einstellungen geändert",
+        "SKIPPED": "Lieferung ausgelassen",
+        "PAUSED": "Pausiert",
+        "RESUMED": "Fortgesetzt",
+        "CANCELLED": "Gekündigt",
+        "PRICE_ACCEPTED": "Neuer Preis akzeptiert",
+        "REMINDER_SENT": "Erinnerung gesendet",
+        "CYCLE_PREPARED": "Zum Warenkorb hinzugefügt",
+        "ORDERED": "Bestellt",
+        "OTHER": "Aktualisiert"
       }
     },
     "favorites": {
@@ -1157,12 +1968,451 @@
         "PROMOTION_EXPIRED": "Angebot abgelaufen"
       }
     },
-    "checkout": {"summary":{"title":"Bestellübersicht","deliveryNext":"Wird im Lieferschritt ausgewählt"},"address":{"title":"Lieferadresse","addNew":"Neue Adresse hinzufügen","addressLine":"Adresse","city":"Stadt","countryCode":"Ländercode","save":"Adresse speichern","noHousehold":"Erstelle zuerst einen Haushalt, um eine Lieferadresse zu speichern.","default":"Standard","postalCodeValue":"Postleitzahl {code}","recipient":"Name des Empfängers","phone":"Mobilnummer","postalCode":"Postleitzahl","postalCodeHint":"10 Ziffern, optional","postalCodeInvalid":"Die Postleitzahl muss 10 Ziffern haben","saveFailed":"Die Adresse konnte nicht gespeichert werden."},"delivery":{"title":"Lieferart","method":{"STANDARD":"Standard","EXPRESS":"Express"},"quotesNext":"Die verfügbaren Kurieroptionen wählst du im nächsten Schritt."},"safetyAck":{"title":"Bitte bestätige, bevor du fortfährst","warning":"Möglicher Sicherheitskonflikt","description":"Mindestens ein Artikel im Warenkorb könnte mit einer bekannten Allergie eines Haustiers in Konflikt stehen. Bestätige, dass du mit der Bestellung fortfahren möchtest.","acknowledge":"Verstanden, fortfahren"},"review":{"title":"Bestellung prüfen","subtotal":"Zwischensumme","delivery":"Lieferung","total":"Gesamt","discount":"Aktionen"},"shipping":{"title":"Lieferung für jeden Verkäufer auswählen","serviceLevel":{"STANDARD":"Standardlieferung","EXPRESS":"Expresslieferung"},"eta":"Lieferung in etwa {hours, plural, one {# Stunde} other {# Stunden}}","selected":"Ausgewählt","unavailable":"Zurzeit sind keine Lieferoptionen verfügbar","refresh":"Lieferoptionen aktualisieren","chooseFirst":"Wähle zuerst eine Lieferoption aus, um fortzufahren."},"payment":{"title":"Zahlung","amountDue":"Fälliger Betrag","devLabel":"Entwicklungszahlung","simulateSuccess":"Erfolgreiche Zahlung simulieren","simulateFailure":"Fehlgeschlagene Zahlung simulieren","simulatePending":"Ausstehende Zahlung simulieren","onlinePayment":"Online bezahlen"},"pending":{"title":"Zahlung ausstehend","status":"Warte auf Bestätigung","description":"Wir warten auf die Bestätigung des Zahlungsanbieters. Das kann einen Moment dauern — prüfe den Status in Kürze erneut.","refresh":"Status prüfen"},"paymentFailed":{"title":"Zahlung fehlgeschlagen","generic":"Die Zahlung konnte nicht abgeschlossen werden.","preserved":"Es wurde nichts abgebucht und dein Warenkorb bleibt erhalten.","returnToCart":"Zum Warenkorb","tryAgain":"Erneut versuchen","chooseInstallments":"Stattdessen Ratenzahlung wählen"},"createFailed":"Der Bezahlvorgang konnte nicht gestartet werden. Bitte versuche es erneut.","method":{"title":"Wie möchtest du bezahlen?","onlinePayment":"Online bezahlen","installments":"Ratenzahlung","chooseProvider":"Tarif auswählen","chooseAnother":"Andere Zahlungsmethode wählen","noneAvailable":"Zurzeit sind keine Zahlungsmethoden verfügbar.","provider":{"DEV_SIMULATED":"Entwicklungs-Gateway","STANDARD_GATEWAY":"Onlinezahlung","SNAPP_PAY":"SnappPay","DIGI_PAY":"DigiPay"}},"financingEligibility":{"title":"Berechtigung wird geprüft","status":{"CHECKING":"Deine Berechtigung wird geprüft …","ELIGIBLE":"Du kannst in Raten zahlen","NOT_ELIGIBLE":"Zurzeit ist keine Ratenzahlung möglich","NEEDS_VERIFICATION":"Zusätzliche Prüfung erforderlich","ERROR":"Die Berechtigung konnte nicht geprüft werden"},"notEligibleHint":"Du kannst weiterhin online bezahlen."},"financingPlans":{"title":"Tarif auswählen","installmentCount":"{count, plural, one {1 Rate} other {# Raten}}","downPayment":"Anzahlung","installmentAmount":"Betrag je Rate","fee":"Gebühr","totalPayable":"Zu zahlender Gesamtbetrag","none":"Zurzeit sind keine Tarife verfügbar."},"financingAuthorize":{"title":"Ratenplan bestätigen","redirectNotice":"Du wirst sicher zu {provider} weitergeleitet.","simulateApprove":"Genehmigung simulieren","simulateDecline":"Ablehnung simulieren","simulatePending":"Ausstehend simulieren","authorize":"Mit Anbieter fortfahren"},"financingDeclined":{"title":"Ratenanfrage wurde nicht genehmigt","generic":"Dieser Ratenplan wurde nicht genehmigt.","tryAnother":"Anderen Anbieter wählen","retry":"Erneut versuchen"},"progress":{"steps":{"address":"Adresse","review":"Prüfen","shipping":"Lieferung","payment":"Zahlung"},"label":"Schritte beim Bezahlen"}},
-    "confirmation": {"title":"Bestellung bestätigt","subtitle":"{count, plural, one {1 Bestellung wurde} other {# Bestellungen wurden}} aufgegeben","orderStatus":{"PENDING":"Ausstehend","CONFIRMED":"Bestätigt","CANCELLED":"Storniert","PARTIALLY_REFUNDED":"Teilweise erstattet","REFUNDED":"Erstattet"},"delivery":"Lieferung","total":"Gesamt","viewOrders":"Meine Bestellungen ansehen","continueShopping":"Weiter einkaufen"},
-    "orderDetail": {"title":"Bestellung","loading":"Wird geladen","retry":"Erneut versuchen","quantityAndUnitPrice":"Menge {quantity} × {price}","forPet":"Für {name}","unknownPet":"ein Tier, das nicht mehr zu diesem Konto gehört","subtotal":"Zwischensumme","delivery":"Lieferung","total":"Gesamt","shippingAddress":"Lieferadresse","fulfillment":"Versand","fulfillmentPlaceholder":"Versandverfolgung folgt später","trackingCode":"Sendungsnummer","estimatedDelivery":"Voraussichtliche Lieferung {when}","lastUpdated":"Zuletzt aktualisiert {when}","trackingUnavailable":"Versandinformationen sind vorübergehend nicht verfügbar","placedAt":"Bestellt am {when}","status":{"PENDING":"Ausstehend","CONFIRMED":"Bestätigt","CANCELLED":"Storniert","PARTIALLY_REFUNDED":"Teilweise erstattet","REFUNDED":"Erstattet"},"paymentStatusLabel":"Zahlungsstatus","financingStatusLabel":"Ratenzahlungsstatus","refunds":{"title":"Erstattungen","requestButton":"Erstattung beantragen","reasonPlaceholder":"Begründung (optional)","submit":"Anfrage senden","requestFailed":"Die Erstattungsanfrage konnte nicht gesendet werden. Bitte versuche es erneut.","none":"Für diese Bestellung gibt es keine Erstattungen.","providerReference":"Referenz des Zahlungsdienstes","requestedAt":"Angefragt am {when}"},"viewPaymentDetails":"Zahlungs- und Ratenzahlungsdetails ansehen","getSupport":"Support kontaktieren","notFound":"Bestellung nicht gefunden","backToOrders":"Zurück zu meinen Bestellungen","cancelledRefunded":"Storniert · erstattet","titleWithSeller":"Bestellung von {seller}","discount":"Rabatte","actionFailed":"Das hat nicht funktioniert. Bitte versuche es erneut.","itemDiscount":"{name}: {amount} Rabatt","cancel":{"available":"Du hast es dir anders überlegt? Du kannst stornieren, bis der Verkäufer das Paket dem Kurier übergibt.","button":"Bestellung stornieren","title":"Diese Bestellung stornieren?","explain":"Der Gesamtbetrag ({amount}) wird auf die ursprüngliche Zahlungsmethode zurückerstattet und die Artikel werden wieder dem Bestand hinzugefügt.","reasonOptional":"Begründung (optional)","keep":"Bestellung behalten","confirm":"Stornieren und erstatten","done":"Bestellung storniert. Die Erstattung wurde veranlasst.","reasonLabel":"Stornierungsgrund"},"refundRequest":{"available":"Gibt es ein Problem mit der Bestellung? Du kannst innerhalb von 7 Tagen nach der Lieferung eine Erstattung beantragen.","availableFailed":"Die Lieferung ist fehlgeschlagen. Du kannst eine Erstattung beantragen.","button":"Erstattung beantragen","title":"Erstattung beantragen","explain":"Unser Team prüft jede Anfrage, in der Regel innerhalb von 2 Werktagen. Bei Genehmigung wird der Betrag auf deine Zahlungsmethode zurückerstattet.","reasonLabel":"Was ist passiert?","describe":"Weitere Angaben (optional)","submit":"Anfrage senden","sent":"Anfrage gesendet. Wir informieren dich, sobald sie geprüft wurde.","sentAt":"Gesendet am {when}","decision":"Hinweis unseres Teams: {reason}","approvedNext":"Genehmigt — die Finanzabteilung bearbeitet deine Erstattung.","withdraw":"Anfrage zurückziehen","withdrawn":"Anfrage zurückgezogen.","reason":{"DAMAGED":"Beschädigt angekommen","WRONG_ITEM":"Falscher Artikel","NOT_AS_DESCRIBED":"Entspricht nicht der Beschreibung","MISSING_ITEMS":"Artikel fehlen","NOT_DELIVERED":"Nicht geliefert","PET_REACTION":"Mein Tier hat darauf reagiert","OTHER":"Sonstiges"},"status":{"PENDING_REVIEW":"Wird geprüft","APPROVED":"Genehmigt","REJECTED":"Abgelehnt","WITHDRAWN":"Zurückgezogen"}},"timeline":{"title":"Bestellverlauf","PENDING":"Bestellung erstellt","CONFIRMED":"Zahlung bestätigt — Bestellung aufgegeben","PREPARING":"Verkäufer bereitet die Bestellung vor","READY_FOR_FULFILLMENT":"Versandbereit","FULFILLED":"Versendet","CANCELLED":"Storniert","PARTIALLY_REFUNDED":"Teilweise erstattet","REFUNDED":"Erstattet"},"review":{"write":"Bewertung schreiben","done":"Danke — deine Bewertung wartet auf Prüfung.","rating":"Deine Bewertung","stars":"{count, plural, one {# Stern} other {# Sterne}}","body":"Wie hat es dir und deinem Tier gefallen? (optional)","cancel":"Abbrechen","submit":"Zur Prüfung senden","failed":"Deine Bewertung konnte nicht gesendet werden."}},
-    "checkout": {"summary":{"title":"Bestellübersicht","deliveryNext":"Wird im Lieferschritt ausgewählt"},"address":{"title":"Lieferadresse","addNew":"Neue Adresse hinzufügen","addressLine":"Adresse","city":"Stadt","countryCode":"Ländercode","save":"Adresse speichern","noHousehold":"Erstelle zuerst einen Haushalt, um eine Lieferadresse zu speichern.","default":"Standard","postalCodeValue":"Postleitzahl {code}","recipient":"Name des Empfängers","phone":"Mobilnummer","postalCode":"Postleitzahl","postalCodeHint":"10 Ziffern, optional","postalCodeInvalid":"Die Postleitzahl muss 10 Ziffern haben","saveFailed":"Die Adresse konnte nicht gespeichert werden."},"delivery":{"title":"Lieferart","method":{"STANDARD":"Standard","EXPRESS":"Express"},"quotesNext":"Die verfügbaren Kurieroptionen wählst du im nächsten Schritt."},"safetyAck":{"title":"Bitte bestätige, bevor du fortfährst","warning":"Möglicher Sicherheitskonflikt","description":"Mindestens ein Artikel im Warenkorb könnte mit einer bekannten Allergie eines Haustiers in Konflikt stehen. Bestätige, dass du mit der Bestellung fortfahren möchtest.","acknowledge":"Verstanden, fortfahren"},"review":{"title":"Bestellung prüfen","subtotal":"Zwischensumme","delivery":"Lieferung","total":"Gesamt","discount":"Aktionen"},"shipping":{"title":"Lieferung für jeden Verkäufer auswählen","serviceLevel":{"STANDARD":"Standardlieferung","EXPRESS":"Expresslieferung"},"eta":"Lieferung in etwa {hours, plural, one {# Stunde} other {# Stunden}}","selected":"Ausgewählt","unavailable":"Zurzeit sind keine Lieferoptionen verfügbar","refresh":"Lieferoptionen aktualisieren","chooseFirst":"Wähle zuerst eine Lieferoption aus, um fortzufahren."},"payment":{"title":"Zahlung","amountDue":"Fälliger Betrag","devLabel":"Entwicklungszahlung","simulateSuccess":"Erfolgreiche Zahlung simulieren","simulateFailure":"Fehlgeschlagene Zahlung simulieren","simulatePending":"Ausstehende Zahlung simulieren","onlinePayment":"Online bezahlen"},"pending":{"title":"Zahlung ausstehend","status":"Warte auf Bestätigung","description":"Wir warten auf die Bestätigung des Zahlungsanbieters. Das kann einen Moment dauern — prüfe den Status in Kürze erneut.","refresh":"Status prüfen"},"paymentFailed":{"title":"Zahlung fehlgeschlagen","generic":"Die Zahlung konnte nicht abgeschlossen werden.","preserved":"Es wurde nichts abgebucht und dein Warenkorb bleibt erhalten.","returnToCart":"Zum Warenkorb","tryAgain":"Erneut versuchen","chooseInstallments":"Stattdessen Ratenzahlung wählen"},"createFailed":"Der Bezahlvorgang konnte nicht gestartet werden. Bitte versuche es erneut.","method":{"title":"Wie möchtest du bezahlen?","onlinePayment":"Online bezahlen","installments":"Ratenzahlung","chooseProvider":"Tarif auswählen","chooseAnother":"Andere Zahlungsmethode wählen","noneAvailable":"Zurzeit sind keine Zahlungsmethoden verfügbar.","provider":{"DEV_SIMULATED":"Entwicklungs-Gateway","STANDARD_GATEWAY":"Onlinezahlung","SNAPP_PAY":"SnappPay","DIGI_PAY":"DigiPay"}},"financingEligibility":{"title":"Berechtigung wird geprüft","status":{"CHECKING":"Deine Berechtigung wird geprüft …","ELIGIBLE":"Du kannst in Raten zahlen","NOT_ELIGIBLE":"Zurzeit ist keine Ratenzahlung möglich","NEEDS_VERIFICATION":"Zusätzliche Prüfung erforderlich","ERROR":"Die Berechtigung konnte nicht geprüft werden"},"notEligibleHint":"Du kannst weiterhin online bezahlen."},"financingPlans":{"title":"Tarif auswählen","installmentCount":"{count, plural, one {1 Rate} other {# Raten}}","downPayment":"Anzahlung","installmentAmount":"Betrag je Rate","fee":"Gebühr","totalPayable":"Zu zahlender Gesamtbetrag","none":"Zurzeit sind keine Tarife verfügbar."},"financingAuthorize":{"title":"Ratenplan bestätigen","redirectNotice":"Du wirst sicher zu {provider} weitergeleitet.","simulateApprove":"Genehmigung simulieren","simulateDecline":"Ablehnung simulieren","simulatePending":"Ausstehend simulieren","authorize":"Mit Anbieter fortfahren"},"financingDeclined":{"title":"Ratenanfrage wurde nicht genehmigt","generic":"Dieser Ratenplan wurde nicht genehmigt.","tryAnother":"Anderen Anbieter wählen","retry":"Erneut versuchen"},"progress":{"steps":{"address":"Adresse","review":"Prüfen","shipping":"Lieferung","payment":"Zahlung"},"label":"Schritte beim Bezahlen"}},
-    "myOrders":{"title":"Meine Bestellungen","loading":"Wird geladen","retry":"Erneut versuchen","empty":"Du hast noch keine Bestellungen aufgegeben.","browseShop":"Zum Shop","itemCount":"{count, plural, one {1 Artikel} other {# Artikel}}","status":{"PENDING":"Ausstehend","CONFIRMED":"Bestätigt","CANCELLED":"Storniert","PARTIALLY_REFUNDED":"Teilweise erstattet","REFUNDED":"Erstattet"},"repeatLink":"Wiederkehrende Lieferungen","soldBy":"Verkauft von {seller}","cancelledRefunded":"Storniert · erstattet","tabs":{"active":"In Bearbeitung ({count})","delivered":"Zugestellt ({count})","closed":"Storniert und erstattet ({count})"},"tabEmpty":{"active":"Keine Bestellungen in Bearbeitung.","delivered":"Noch keine Bestellungen zugestellt.","closed":"Keine stornierten oder erstatteten Bestellungen."}},
-    "statusLabels":{"payment":{"REQUIRES_PAYMENT_METHOD":"Zahlung ausstehend","PENDING":"Ausstehend","AUTHORIZED":"Autorisiert","CAPTURED":"Bezahlt","FAILED":"Fehlgeschlagen","CANCELLED":"Storniert"},"financing":{"CREATED":"Gestartet","ELIGIBILITY_PENDING":"Voraussetzungen werden geprüft","ELIGIBLE":"Berechtigt","NOT_ELIGIBLE":"Nicht berechtigt","PLAN_SELECTED":"Ratenplan ausgewählt","AUTHORIZATION_PENDING":"Genehmigung ausstehend","APPROVED":"Genehmigt","DECLINED":"Abgelehnt","CANCELLED":"Storniert","EXPIRED":"Abgelaufen","REFUND_PENDING":"Erstattung ausstehend","PARTIALLY_REFUNDED":"Teilweise erstattet","REFUNDED":"Erstattet"},"refund":{"REQUESTED":"Angefragt","PROCESSING":"Wird bearbeitet","SUCCEEDED":"Erstattet","FAILED":"Fehlgeschlagen","CANCELLED":"Storniert"},"fulfillment":{"PENDING":"Bestellung eingegangen","AWAITING_SELLER_PREPARATION":"Verkäufer bereitet die Bestellung vor","READY_FOR_PICKUP":"Abholbereit","PICKUP_REQUESTED":"Kurier angefragt","PICKUP_ASSIGNED":"Kurier zugewiesen","ASSIGNED":"Kurier zugewiesen","PICKED_UP":"Abgeholt","IN_TRANSIT":"Unterwegs","OUT_FOR_DELIVERY":"Wird zugestellt","DELIVERED":"Zugestellt","FAILED":"Problem bei der Lieferung","CANCELED":"Storniert"}},
+    "checkout": {
+      "summary": { "title": "Bestellübersicht", "deliveryNext": "Wird im Lieferschritt ausgewählt" },
+      "address": {
+        "title": "Lieferadresse",
+        "addNew": "Neue Adresse hinzufügen",
+        "addressLine": "Adresse",
+        "city": "Stadt",
+        "countryCode": "Ländercode",
+        "save": "Adresse speichern",
+        "noHousehold": "Erstelle zuerst einen Haushalt, um eine Lieferadresse zu speichern.",
+        "default": "Standard",
+        "postalCodeValue": "Postleitzahl {code}",
+        "recipient": "Name des Empfängers",
+        "phone": "Mobilnummer",
+        "postalCode": "Postleitzahl",
+        "postalCodeHint": "10 Ziffern, optional",
+        "postalCodeInvalid": "Die Postleitzahl muss 10 Ziffern haben",
+        "saveFailed": "Die Adresse konnte nicht gespeichert werden."
+      },
+      "delivery": {
+        "title": "Lieferart",
+        "method": { "STANDARD": "Standard", "EXPRESS": "Express" },
+        "quotesNext": "Die verfügbaren Kurieroptionen wählst du im nächsten Schritt."
+      },
+      "safetyAck": {
+        "title": "Bitte bestätige, bevor du fortfährst",
+        "warning": "Möglicher Sicherheitskonflikt",
+        "description": "Mindestens ein Artikel im Warenkorb könnte mit einer bekannten Allergie eines Haustiers in Konflikt stehen. Bestätige, dass du mit der Bestellung fortfahren möchtest.",
+        "acknowledge": "Verstanden, fortfahren"
+      },
+      "review": {
+        "title": "Bestellung prüfen",
+        "subtotal": "Zwischensumme",
+        "delivery": "Lieferung",
+        "total": "Gesamt",
+        "discount": "Aktionen"
+      },
+      "shipping": {
+        "title": "Lieferung für jeden Verkäufer auswählen",
+        "serviceLevel": { "STANDARD": "Standardlieferung", "EXPRESS": "Expresslieferung" },
+        "eta": "Lieferung in etwa {hours, plural, one {# Stunde} other {# Stunden}}",
+        "selected": "Ausgewählt",
+        "unavailable": "Zurzeit sind keine Lieferoptionen verfügbar",
+        "refresh": "Lieferoptionen aktualisieren",
+        "chooseFirst": "Wähle zuerst eine Lieferoption aus, um fortzufahren."
+      },
+      "payment": {
+        "title": "Zahlung",
+        "amountDue": "Fälliger Betrag",
+        "devLabel": "Entwicklungszahlung",
+        "simulateSuccess": "Erfolgreiche Zahlung simulieren",
+        "simulateFailure": "Fehlgeschlagene Zahlung simulieren",
+        "simulatePending": "Ausstehende Zahlung simulieren",
+        "onlinePayment": "Online bezahlen"
+      },
+      "pending": {
+        "title": "Zahlung ausstehend",
+        "status": "Warte auf Bestätigung",
+        "description": "Wir warten auf die Bestätigung des Zahlungsanbieters. Das kann einen Moment dauern — prüfe den Status in Kürze erneut.",
+        "refresh": "Status prüfen"
+      },
+      "paymentFailed": {
+        "title": "Zahlung fehlgeschlagen",
+        "generic": "Die Zahlung konnte nicht abgeschlossen werden.",
+        "preserved": "Es wurde nichts abgebucht und dein Warenkorb bleibt erhalten.",
+        "returnToCart": "Zum Warenkorb",
+        "tryAgain": "Erneut versuchen",
+        "chooseInstallments": "Stattdessen Ratenzahlung wählen"
+      },
+      "createFailed": "Der Bezahlvorgang konnte nicht gestartet werden. Bitte versuche es erneut.",
+      "method": {
+        "title": "Wie möchtest du bezahlen?",
+        "onlinePayment": "Online bezahlen",
+        "installments": "Ratenzahlung",
+        "chooseProvider": "Tarif auswählen",
+        "chooseAnother": "Andere Zahlungsmethode wählen",
+        "noneAvailable": "Zurzeit sind keine Zahlungsmethoden verfügbar.",
+        "provider": {
+          "DEV_SIMULATED": "Entwicklungs-Gateway",
+          "STANDARD_GATEWAY": "Onlinezahlung",
+          "SNAPP_PAY": "SnappPay",
+          "DIGI_PAY": "DigiPay"
+        }
+      },
+      "financingEligibility": {
+        "title": "Berechtigung wird geprüft",
+        "status": {
+          "CHECKING": "Deine Berechtigung wird geprüft …",
+          "ELIGIBLE": "Du kannst in Raten zahlen",
+          "NOT_ELIGIBLE": "Zurzeit ist keine Ratenzahlung möglich",
+          "NEEDS_VERIFICATION": "Zusätzliche Prüfung erforderlich",
+          "ERROR": "Die Berechtigung konnte nicht geprüft werden"
+        },
+        "notEligibleHint": "Du kannst weiterhin online bezahlen."
+      },
+      "financingPlans": {
+        "title": "Tarif auswählen",
+        "installmentCount": "{count, plural, one {1 Rate} other {# Raten}}",
+        "downPayment": "Anzahlung",
+        "installmentAmount": "Betrag je Rate",
+        "fee": "Gebühr",
+        "totalPayable": "Zu zahlender Gesamtbetrag",
+        "none": "Zurzeit sind keine Tarife verfügbar."
+      },
+      "financingAuthorize": {
+        "title": "Ratenplan bestätigen",
+        "redirectNotice": "Du wirst sicher zu {provider} weitergeleitet.",
+        "simulateApprove": "Genehmigung simulieren",
+        "simulateDecline": "Ablehnung simulieren",
+        "simulatePending": "Ausstehend simulieren",
+        "authorize": "Mit Anbieter fortfahren"
+      },
+      "financingDeclined": {
+        "title": "Ratenanfrage wurde nicht genehmigt",
+        "generic": "Dieser Ratenplan wurde nicht genehmigt.",
+        "tryAnother": "Anderen Anbieter wählen",
+        "retry": "Erneut versuchen"
+      },
+      "progress": {
+        "steps": { "address": "Adresse", "review": "Prüfen", "shipping": "Lieferung", "payment": "Zahlung" },
+        "label": "Schritte beim Bezahlen"
+      }
+    },
+    "confirmation": {
+      "title": "Bestellung bestätigt",
+      "subtitle": "{count, plural, one {1 Bestellung wurde} other {# Bestellungen wurden}} aufgegeben",
+      "orderStatus": {
+        "PENDING": "Ausstehend",
+        "CONFIRMED": "Bestätigt",
+        "CANCELLED": "Storniert",
+        "PARTIALLY_REFUNDED": "Teilweise erstattet",
+        "REFUNDED": "Erstattet"
+      },
+      "delivery": "Lieferung",
+      "total": "Gesamt",
+      "viewOrders": "Meine Bestellungen ansehen",
+      "continueShopping": "Weiter einkaufen"
+    },
+    "orderDetail": {
+      "title": "Bestellung",
+      "loading": "Wird geladen",
+      "retry": "Erneut versuchen",
+      "quantityAndUnitPrice": "Menge {quantity} × {price}",
+      "forPet": "Für {name}",
+      "unknownPet": "ein Tier, das nicht mehr zu diesem Konto gehört",
+      "subtotal": "Zwischensumme",
+      "delivery": "Lieferung",
+      "total": "Gesamt",
+      "shippingAddress": "Lieferadresse",
+      "fulfillment": "Versand",
+      "fulfillmentPlaceholder": "Versandverfolgung folgt später",
+      "trackingCode": "Sendungsnummer",
+      "estimatedDelivery": "Voraussichtliche Lieferung {when}",
+      "lastUpdated": "Zuletzt aktualisiert {when}",
+      "trackingUnavailable": "Versandinformationen sind vorübergehend nicht verfügbar",
+      "placedAt": "Bestellt am {when}",
+      "status": {
+        "PENDING": "Ausstehend",
+        "CONFIRMED": "Bestätigt",
+        "CANCELLED": "Storniert",
+        "PARTIALLY_REFUNDED": "Teilweise erstattet",
+        "REFUNDED": "Erstattet"
+      },
+      "paymentStatusLabel": "Zahlungsstatus",
+      "financingStatusLabel": "Ratenzahlungsstatus",
+      "refunds": {
+        "title": "Erstattungen",
+        "requestButton": "Erstattung beantragen",
+        "reasonPlaceholder": "Begründung (optional)",
+        "submit": "Anfrage senden",
+        "requestFailed": "Die Erstattungsanfrage konnte nicht gesendet werden. Bitte versuche es erneut.",
+        "none": "Für diese Bestellung gibt es keine Erstattungen.",
+        "providerReference": "Referenz des Zahlungsdienstes",
+        "requestedAt": "Angefragt am {when}"
+      },
+      "viewPaymentDetails": "Zahlungs- und Ratenzahlungsdetails ansehen",
+      "getSupport": "Support kontaktieren",
+      "notFound": "Bestellung nicht gefunden",
+      "backToOrders": "Zurück zu meinen Bestellungen",
+      "cancelledRefunded": "Storniert · erstattet",
+      "titleWithSeller": "Bestellung von {seller}",
+      "discount": "Rabatte",
+      "actionFailed": "Das hat nicht funktioniert. Bitte versuche es erneut.",
+      "itemDiscount": "{name}: {amount} Rabatt",
+      "cancel": {
+        "available": "Du hast es dir anders überlegt? Du kannst stornieren, bis der Verkäufer das Paket dem Kurier übergibt.",
+        "button": "Bestellung stornieren",
+        "title": "Diese Bestellung stornieren?",
+        "explain": "Der Gesamtbetrag ({amount}) wird auf die ursprüngliche Zahlungsmethode zurückerstattet und die Artikel werden wieder dem Bestand hinzugefügt.",
+        "reasonOptional": "Begründung (optional)",
+        "keep": "Bestellung behalten",
+        "confirm": "Stornieren und erstatten",
+        "done": "Bestellung storniert. Die Erstattung wurde veranlasst.",
+        "reasonLabel": "Stornierungsgrund"
+      },
+      "refundRequest": {
+        "available": "Gibt es ein Problem mit der Bestellung? Du kannst innerhalb von 7 Tagen nach der Lieferung eine Erstattung beantragen.",
+        "availableFailed": "Die Lieferung ist fehlgeschlagen. Du kannst eine Erstattung beantragen.",
+        "button": "Erstattung beantragen",
+        "title": "Erstattung beantragen",
+        "explain": "Unser Team prüft jede Anfrage, in der Regel innerhalb von 2 Werktagen. Bei Genehmigung wird der Betrag auf deine Zahlungsmethode zurückerstattet.",
+        "reasonLabel": "Was ist passiert?",
+        "describe": "Weitere Angaben (optional)",
+        "submit": "Anfrage senden",
+        "sent": "Anfrage gesendet. Wir informieren dich, sobald sie geprüft wurde.",
+        "sentAt": "Gesendet am {when}",
+        "decision": "Hinweis unseres Teams: {reason}",
+        "approvedNext": "Genehmigt — die Finanzabteilung bearbeitet deine Erstattung.",
+        "withdraw": "Anfrage zurückziehen",
+        "withdrawn": "Anfrage zurückgezogen.",
+        "reason": {
+          "DAMAGED": "Beschädigt angekommen",
+          "WRONG_ITEM": "Falscher Artikel",
+          "NOT_AS_DESCRIBED": "Entspricht nicht der Beschreibung",
+          "MISSING_ITEMS": "Artikel fehlen",
+          "NOT_DELIVERED": "Nicht geliefert",
+          "PET_REACTION": "Mein Tier hat darauf reagiert",
+          "OTHER": "Sonstiges"
+        },
+        "status": {
+          "PENDING_REVIEW": "Wird geprüft",
+          "APPROVED": "Genehmigt",
+          "REJECTED": "Abgelehnt",
+          "WITHDRAWN": "Zurückgezogen"
+        }
+      },
+      "timeline": {
+        "title": "Bestellverlauf",
+        "PENDING": "Bestellung erstellt",
+        "CONFIRMED": "Zahlung bestätigt — Bestellung aufgegeben",
+        "PREPARING": "Verkäufer bereitet die Bestellung vor",
+        "READY_FOR_FULFILLMENT": "Versandbereit",
+        "FULFILLED": "Versendet",
+        "CANCELLED": "Storniert",
+        "PARTIALLY_REFUNDED": "Teilweise erstattet",
+        "REFUNDED": "Erstattet"
+      },
+      "review": {
+        "write": "Bewertung schreiben",
+        "done": "Danke — deine Bewertung wartet auf Prüfung.",
+        "rating": "Deine Bewertung",
+        "stars": "{count, plural, one {# Stern} other {# Sterne}}",
+        "body": "Wie hat es dir und deinem Tier gefallen? (optional)",
+        "cancel": "Abbrechen",
+        "submit": "Zur Prüfung senden",
+        "failed": "Deine Bewertung konnte nicht gesendet werden."
+      }
+    },
+    "checkout": {
+      "summary": { "title": "Bestellübersicht", "deliveryNext": "Wird im Lieferschritt ausgewählt" },
+      "address": {
+        "title": "Lieferadresse",
+        "addNew": "Neue Adresse hinzufügen",
+        "addressLine": "Adresse",
+        "city": "Stadt",
+        "countryCode": "Ländercode",
+        "save": "Adresse speichern",
+        "noHousehold": "Erstelle zuerst einen Haushalt, um eine Lieferadresse zu speichern.",
+        "default": "Standard",
+        "postalCodeValue": "Postleitzahl {code}",
+        "recipient": "Name des Empfängers",
+        "phone": "Mobilnummer",
+        "postalCode": "Postleitzahl",
+        "postalCodeHint": "10 Ziffern, optional",
+        "postalCodeInvalid": "Die Postleitzahl muss 10 Ziffern haben",
+        "saveFailed": "Die Adresse konnte nicht gespeichert werden."
+      },
+      "delivery": {
+        "title": "Lieferart",
+        "method": { "STANDARD": "Standard", "EXPRESS": "Express" },
+        "quotesNext": "Die verfügbaren Kurieroptionen wählst du im nächsten Schritt."
+      },
+      "safetyAck": {
+        "title": "Bitte bestätige, bevor du fortfährst",
+        "warning": "Möglicher Sicherheitskonflikt",
+        "description": "Mindestens ein Artikel im Warenkorb könnte mit einer bekannten Allergie eines Haustiers in Konflikt stehen. Bestätige, dass du mit der Bestellung fortfahren möchtest.",
+        "acknowledge": "Verstanden, fortfahren"
+      },
+      "review": {
+        "title": "Bestellung prüfen",
+        "subtotal": "Zwischensumme",
+        "delivery": "Lieferung",
+        "total": "Gesamt",
+        "discount": "Aktionen"
+      },
+      "shipping": {
+        "title": "Lieferung für jeden Verkäufer auswählen",
+        "serviceLevel": { "STANDARD": "Standardlieferung", "EXPRESS": "Expresslieferung" },
+        "eta": "Lieferung in etwa {hours, plural, one {# Stunde} other {# Stunden}}",
+        "selected": "Ausgewählt",
+        "unavailable": "Zurzeit sind keine Lieferoptionen verfügbar",
+        "refresh": "Lieferoptionen aktualisieren",
+        "chooseFirst": "Wähle zuerst eine Lieferoption aus, um fortzufahren."
+      },
+      "payment": {
+        "title": "Zahlung",
+        "amountDue": "Fälliger Betrag",
+        "devLabel": "Entwicklungszahlung",
+        "simulateSuccess": "Erfolgreiche Zahlung simulieren",
+        "simulateFailure": "Fehlgeschlagene Zahlung simulieren",
+        "simulatePending": "Ausstehende Zahlung simulieren",
+        "onlinePayment": "Online bezahlen"
+      },
+      "pending": {
+        "title": "Zahlung ausstehend",
+        "status": "Warte auf Bestätigung",
+        "description": "Wir warten auf die Bestätigung des Zahlungsanbieters. Das kann einen Moment dauern — prüfe den Status in Kürze erneut.",
+        "refresh": "Status prüfen"
+      },
+      "paymentFailed": {
+        "title": "Zahlung fehlgeschlagen",
+        "generic": "Die Zahlung konnte nicht abgeschlossen werden.",
+        "preserved": "Es wurde nichts abgebucht und dein Warenkorb bleibt erhalten.",
+        "returnToCart": "Zum Warenkorb",
+        "tryAgain": "Erneut versuchen",
+        "chooseInstallments": "Stattdessen Ratenzahlung wählen"
+      },
+      "createFailed": "Der Bezahlvorgang konnte nicht gestartet werden. Bitte versuche es erneut.",
+      "method": {
+        "title": "Wie möchtest du bezahlen?",
+        "onlinePayment": "Online bezahlen",
+        "installments": "Ratenzahlung",
+        "chooseProvider": "Tarif auswählen",
+        "chooseAnother": "Andere Zahlungsmethode wählen",
+        "noneAvailable": "Zurzeit sind keine Zahlungsmethoden verfügbar.",
+        "provider": {
+          "DEV_SIMULATED": "Entwicklungs-Gateway",
+          "STANDARD_GATEWAY": "Onlinezahlung",
+          "SNAPP_PAY": "SnappPay",
+          "DIGI_PAY": "DigiPay"
+        }
+      },
+      "financingEligibility": {
+        "title": "Berechtigung wird geprüft",
+        "status": {
+          "CHECKING": "Deine Berechtigung wird geprüft …",
+          "ELIGIBLE": "Du kannst in Raten zahlen",
+          "NOT_ELIGIBLE": "Zurzeit ist keine Ratenzahlung möglich",
+          "NEEDS_VERIFICATION": "Zusätzliche Prüfung erforderlich",
+          "ERROR": "Die Berechtigung konnte nicht geprüft werden"
+        },
+        "notEligibleHint": "Du kannst weiterhin online bezahlen."
+      },
+      "financingPlans": {
+        "title": "Tarif auswählen",
+        "installmentCount": "{count, plural, one {1 Rate} other {# Raten}}",
+        "downPayment": "Anzahlung",
+        "installmentAmount": "Betrag je Rate",
+        "fee": "Gebühr",
+        "totalPayable": "Zu zahlender Gesamtbetrag",
+        "none": "Zurzeit sind keine Tarife verfügbar."
+      },
+      "financingAuthorize": {
+        "title": "Ratenplan bestätigen",
+        "redirectNotice": "Du wirst sicher zu {provider} weitergeleitet.",
+        "simulateApprove": "Genehmigung simulieren",
+        "simulateDecline": "Ablehnung simulieren",
+        "simulatePending": "Ausstehend simulieren",
+        "authorize": "Mit Anbieter fortfahren"
+      },
+      "financingDeclined": {
+        "title": "Ratenanfrage wurde nicht genehmigt",
+        "generic": "Dieser Ratenplan wurde nicht genehmigt.",
+        "tryAnother": "Anderen Anbieter wählen",
+        "retry": "Erneut versuchen"
+      },
+      "progress": {
+        "steps": { "address": "Adresse", "review": "Prüfen", "shipping": "Lieferung", "payment": "Zahlung" },
+        "label": "Schritte beim Bezahlen"
+      }
+    },
+    "myOrders": {
+      "title": "Meine Bestellungen",
+      "loading": "Wird geladen",
+      "retry": "Erneut versuchen",
+      "empty": "Du hast noch keine Bestellungen aufgegeben.",
+      "browseShop": "Zum Shop",
+      "itemCount": "{count, plural, one {1 Artikel} other {# Artikel}}",
+      "status": {
+        "PENDING": "Ausstehend",
+        "CONFIRMED": "Bestätigt",
+        "CANCELLED": "Storniert",
+        "PARTIALLY_REFUNDED": "Teilweise erstattet",
+        "REFUNDED": "Erstattet"
+      },
+      "repeatLink": "Wiederkehrende Lieferungen",
+      "soldBy": "Verkauft von {seller}",
+      "cancelledRefunded": "Storniert · erstattet",
+      "tabs": {
+        "active": "In Bearbeitung ({count})",
+        "delivered": "Zugestellt ({count})",
+        "closed": "Storniert und erstattet ({count})"
+      },
+      "tabEmpty": {
+        "active": "Keine Bestellungen in Bearbeitung.",
+        "delivered": "Noch keine Bestellungen zugestellt.",
+        "closed": "Keine stornierten oder erstatteten Bestellungen."
+      }
+    },
+    "statusLabels": {
+      "payment": {
+        "REQUIRES_PAYMENT_METHOD": "Zahlung ausstehend",
+        "PENDING": "Ausstehend",
+        "AUTHORIZED": "Autorisiert",
+        "CAPTURED": "Bezahlt",
+        "FAILED": "Fehlgeschlagen",
+        "CANCELLED": "Storniert"
+      },
+      "financing": {
+        "CREATED": "Gestartet",
+        "ELIGIBILITY_PENDING": "Voraussetzungen werden geprüft",
+        "ELIGIBLE": "Berechtigt",
+        "NOT_ELIGIBLE": "Nicht berechtigt",
+        "PLAN_SELECTED": "Ratenplan ausgewählt",
+        "AUTHORIZATION_PENDING": "Genehmigung ausstehend",
+        "APPROVED": "Genehmigt",
+        "DECLINED": "Abgelehnt",
+        "CANCELLED": "Storniert",
+        "EXPIRED": "Abgelaufen",
+        "REFUND_PENDING": "Erstattung ausstehend",
+        "PARTIALLY_REFUNDED": "Teilweise erstattet",
+        "REFUNDED": "Erstattet"
+      },
+      "refund": {
+        "REQUESTED": "Angefragt",
+        "PROCESSING": "Wird bearbeitet",
+        "SUCCEEDED": "Erstattet",
+        "FAILED": "Fehlgeschlagen",
+        "CANCELLED": "Storniert"
+      },
+      "fulfillment": {
+        "PENDING": "Bestellung eingegangen",
+        "AWAITING_SELLER_PREPARATION": "Verkäufer bereitet die Bestellung vor",
+        "READY_FOR_PICKUP": "Abholbereit",
+        "PICKUP_REQUESTED": "Kurier angefragt",
+        "PICKUP_ASSIGNED": "Kurier zugewiesen",
+        "ASSIGNED": "Kurier zugewiesen",
+        "PICKED_UP": "Abgeholt",
+        "IN_TRANSIT": "Unterwegs",
+        "OUT_FOR_DELIVERY": "Wird zugestellt",
+        "DELIVERED": "Zugestellt",
+        "FAILED": "Problem bei der Lieferung",
+        "CANCELED": "Storniert"
+      }
+    },
     "price": {
       "was": "Vorher {price}",
       "promotion": "{name} · {percent}% Rabatt"
@@ -1582,6 +2832,9 @@
       "subtitle": "Ein klarer Überblick über Krankengeschichte, aktuellen Zustand und anstehende Versorgung.",
       "attention": "Erfordert Aufmerksamkeit",
       "complete": "Die grundlegenden Gesundheitsangaben sind vollständig",
+      "partialUnavailable": "Einige Gesundheitsdetails konnten nicht geladen werden. Die angezeigten Informationen sind möglicherweise unvollständig.",
+      "detailsUnavailable": "Details nicht verfügbar",
+      "retry": "Erneut versuchen",
       "current": "Aktueller Zustand",
       "records": "Medizinische Akte",
       "care": "Versorgung und Nachsorge",
@@ -2027,40 +3280,158 @@
   "lostPet": {
     "species": { "dog": "Hund", "cat": "Katze", "other": "Andere" },
     "report": {
-      "title": "Vermisstes Haustier melden", "subtitle": "Teile Einzelheiten, damit die Gemeinschaft bei der Suche helfen kann.",
-      "descriptionLabel": "Beschreibung", "descriptionPlaceholder": "Was trug das Tier? Welche besonderen Merkmale hat es?",
-      "lastKnownLocationLabel": "Zuletzt bekannter Ort", "lastSeenAtLabel": "Zuletzt gesehen am", "contactPreferenceLabel": "Wie können Menschen dich erreichen?",
-      "stepsLabel": "Schritte der Meldung", "steps": { "where": "Wo und wann", "photo": "Foto", "describe": "Beschreibung", "contact": "Kontakt", "review": "Überprüfen" },
-      "publicTag": "Öffentlich", "privateTag": "Privat", "approximateArea": "Ungefähre Gegend", "approximateAreaPlaceholder": "Zum Beispiel Stadtviertel oder Hauptstraße",
+      "title": "Vermisstes Haustier melden",
+      "subtitle": "Teile Einzelheiten, damit die Gemeinschaft bei der Suche helfen kann.",
+      "descriptionLabel": "Beschreibung",
+      "descriptionPlaceholder": "Was trug das Tier? Welche besonderen Merkmale hat es?",
+      "lastKnownLocationLabel": "Zuletzt bekannter Ort",
+      "lastSeenAtLabel": "Zuletzt gesehen am",
+      "contactPreferenceLabel": "Wie können Menschen dich erreichen?",
+      "stepsLabel": "Schritte der Meldung",
+      "steps": {
+        "where": "Wo und wann",
+        "photo": "Foto",
+        "describe": "Beschreibung",
+        "contact": "Kontakt",
+        "review": "Überprüfen"
+      },
+      "publicTag": "Öffentlich",
+      "privateTag": "Privat",
+      "approximateArea": "Ungefähre Gegend",
+      "approximateAreaPlaceholder": "Zum Beispiel Stadtviertel oder Hauptstraße",
       "approximateAreaHelp": "Nenne nur ein Viertel oder eine Hauptstraße. Gib keine Wohnadresse an; dieser Text ist öffentlich sichtbar.",
-      "exactLastSeenPlace": "Genauer Ort der letzten Sichtung", "exactPlaceHelp": "Nur du, dein Haushalt und bei Bedarf das Support-Team können diese Angabe sehen.", "approximateTime": "Ungefähre Uhrzeit",
-      "photoHelp": "Wähle ein deutliches Foto des Tieres. Vermeide Gesichter und Hausnummern.", "publicNote": "Hinweis für Personen, die das Tier sehen", "publicNotePlaceholder": "Zum Beispiel: ängstlich; bitte nicht verfolgen, sondern nur eine Sichtung melden.",
-      "privateNote": "Private Notizen", "privateNotePlaceholder": "Zum Beispiel: Mikrochipnummer",
-      "contactPreference": { "inAppMessage": "Nachricht in der App", "maskedContact": "Maskierte Telefonnummer teilen", "publicContact": "Meine Kontaktdaten öffentlich anzeigen" },
-      "contactPreferenceHelp": { "inAppMessage": "Empfohlen: Erhalte Meldungen über opetlife, ohne deine Kontaktdaten anzuzeigen.", "maskedContact": "Andere können dich über opetlife erreichen, ohne deine Telefonnummer zu sehen.", "publicContact": "Eine von dir angegebene Kontaktzeile ist in der öffentlichen Meldung sichtbar." },
-      "publicContactLine": "Öffentliche Kontaktzeile", "publicContactPlaceholder": "Zum Beispiel: 0912***4567 — nur SMS", "publicContactWarning": "Alle können diesen Text sehen. Vermeide nach Möglichkeit eine vollständige Telefonnummer.",
-      "reviewTitle": "Was in der öffentlichen Meldung zu sehen ist", "review": { "area": "Gegend", "when": "Zeitpunkt", "photo": "Foto", "contact": "Kontakt" },
-      "notGiven": "Nicht angegeben", "noPhoto": "Kein Foto", "contactThroughApp": "Über opetlife", "privacyNotice": "Dein genauer Ort, private Notizen, Haushaltsmitglieder und Gesundheitsdaten werden nicht öffentlich angezeigt.",
-      "back": "Zurück", "continue": "Weiter", "photoLabel": "Foto", "submit": "Vermisstes Tier melden"
+      "exactLastSeenPlace": "Genauer Ort der letzten Sichtung",
+      "exactPlaceHelp": "Nur du, dein Haushalt und bei Bedarf das Support-Team können diese Angabe sehen.",
+      "approximateTime": "Ungefähre Uhrzeit",
+      "photoHelp": "Wähle ein deutliches Foto des Tieres. Vermeide Gesichter und Hausnummern.",
+      "publicNote": "Hinweis für Personen, die das Tier sehen",
+      "publicNotePlaceholder": "Zum Beispiel: ängstlich; bitte nicht verfolgen, sondern nur eine Sichtung melden.",
+      "privateNote": "Private Notizen",
+      "privateNotePlaceholder": "Zum Beispiel: Mikrochipnummer",
+      "contactPreference": {
+        "inAppMessage": "Nachricht in der App",
+        "maskedContact": "Maskierte Telefonnummer teilen",
+        "publicContact": "Meine Kontaktdaten öffentlich anzeigen"
+      },
+      "contactPreferenceHelp": {
+        "inAppMessage": "Empfohlen: Erhalte Meldungen über opetlife, ohne deine Kontaktdaten anzuzeigen.",
+        "maskedContact": "Andere können dich über opetlife erreichen, ohne deine Telefonnummer zu sehen.",
+        "publicContact": "Eine von dir angegebene Kontaktzeile ist in der öffentlichen Meldung sichtbar."
+      },
+      "publicContactLine": "Öffentliche Kontaktzeile",
+      "publicContactPlaceholder": "Zum Beispiel: 0912***4567 — nur SMS",
+      "publicContactWarning": "Alle können diesen Text sehen. Vermeide nach Möglichkeit eine vollständige Telefonnummer.",
+      "reviewTitle": "Was in der öffentlichen Meldung zu sehen ist",
+      "review": { "area": "Gegend", "when": "Zeitpunkt", "photo": "Foto", "contact": "Kontakt" },
+      "notGiven": "Nicht angegeben",
+      "noPhoto": "Kein Foto",
+      "contactThroughApp": "Über opetlife",
+      "privacyNotice": "Dein genauer Ort, private Notizen, Haushaltsmitglieder und Gesundheitsdaten werden nicht öffentlich angezeigt.",
+      "back": "Zurück",
+      "continue": "Weiter",
+      "photoLabel": "Foto",
+      "submit": "Vermisstes Tier melden"
     },
-    "list": { "title": "Meldungen zu vermissten Tieren", "reportButton": "Vermisstes Tier melden", "empty": "Es gibt noch keine Meldungen zu vermissten Tieren.", "noLocation": "Kein Ort angegeben", "sightingsCount": "{count, plural, one {# Sichtung} other {# Sichtungen}}", "emptyDescription": "Zurzeit gibt es keine aktiven Meldungen zu vermissten Tieren." },
-    "status": { "OPEN": "Vermisst", "SEARCHING": "Suche läuft", "SIGHTING_REPORTED": "Sichtung gemeldet", "FOUND": "Gefunden", "REUNITED": "Wieder bei der Familie", "CLOSED": "Geschlossen" },
-    "sightingStatus": { "SUBMITTED": "Neu", "REVIEWED": "Geprüft", "ACCEPTED": "Möglicherweise passend", "REJECTED": "Keine Übereinstimmung" },
+    "list": {
+      "title": "Meldungen zu vermissten Tieren",
+      "reportButton": "Vermisstes Tier melden",
+      "empty": "Es gibt noch keine Meldungen zu vermissten Tieren.",
+      "noLocation": "Kein Ort angegeben",
+      "sightingsCount": "{count, plural, one {# Sichtung} other {# Sichtungen}}",
+      "emptyDescription": "Zurzeit gibt es keine aktiven Meldungen zu vermissten Tieren."
+    },
+    "status": {
+      "OPEN": "Vermisst",
+      "SEARCHING": "Suche läuft",
+      "SIGHTING_REPORTED": "Sichtung gemeldet",
+      "FOUND": "Gefunden",
+      "REUNITED": "Wieder bei der Familie",
+      "CLOSED": "Geschlossen"
+    },
+    "sightingStatus": {
+      "SUBMITTED": "Neu",
+      "REVIEWED": "Geprüft",
+      "ACCEPTED": "Möglicherweise passend",
+      "REJECTED": "Keine Übereinstimmung"
+    },
     "detail": {
-      "title": "{name} wird vermisst", "lastKnownLocation": "Zuletzt bekannter Ort: {location}", "privateNotes": "Private Notizen: {notes}",
-      "actions": { "markSearching": "Suche als aktiv markieren", "markFound": "Als gefunden markieren", "reunite": "Wiedervereinigung bestätigen", "share": "In der Gemeinschaft teilen", "close": "Meldung schließen" },
-      "sightingsTitle": "Sichtungen", "sightingsEmpty": "Es wurden noch keine Sichtungen gemeldet.", "anonymousReporter": "Anonym gemeldet", "knownReporter": "Von einer angemeldeten Person gemeldet", "acceptSighting": "Möglicherweise passend", "rejectSighting": "Keine Übereinstimmung",
-      "publicArea": "Öffentliche Gegend", "exactPlacePrivate": "Genauer Ort (privat)", "lastSeen": "Zuletzt gesehen", "shareTitle": "Öffentliche Meldung teilen", "shareDescription": "Die öffentliche Seite zeigt nur die ungefähre Gegend, das Foto und die öffentliche Beschreibung.", "shareText": "{name} wird vermisst. Wenn du das Tier siehst, melde bitte eine Sichtung."
+      "title": "{name} wird vermisst",
+      "lastKnownLocation": "Zuletzt bekannter Ort: {location}",
+      "privateNotes": "Private Notizen: {notes}",
+      "actions": {
+        "markSearching": "Suche als aktiv markieren",
+        "markFound": "Als gefunden markieren",
+        "reunite": "Wiedervereinigung bestätigen",
+        "share": "In der Gemeinschaft teilen",
+        "close": "Meldung schließen"
+      },
+      "sightingsTitle": "Sichtungen",
+      "sightingsEmpty": "Es wurden noch keine Sichtungen gemeldet.",
+      "anonymousReporter": "Anonym gemeldet",
+      "knownReporter": "Von einer angemeldeten Person gemeldet",
+      "acceptSighting": "Möglicherweise passend",
+      "rejectSighting": "Keine Übereinstimmung",
+      "publicArea": "Öffentliche Gegend",
+      "exactPlacePrivate": "Genauer Ort (privat)",
+      "lastSeen": "Zuletzt gesehen",
+      "shareTitle": "Öffentliche Meldung teilen",
+      "shareDescription": "Die öffentliche Seite zeigt nur die ungefähre Gegend, das Foto und die öffentliche Beschreibung.",
+      "shareText": "{name} wird vermisst. Wenn du das Tier siehst, melde bitte eine Sichtung."
     },
     "public": {
-      "list": { "title": "Vermisste Tiere in der Nähe", "subtitle": "Sieh dir offene Meldungen an. Wenn du ein Tier erkennst, öffne die Meldung und trage eine Sichtung ein.", "speciesFilter": "Nach Tierart filtern", "allSpecies": "Alle", "emptyDescription": "Zurzeit gibt es keine aktiven Meldungen zu vermissten Tieren.", "noPhoto": "Kein Foto", "lastSeen": "Zuletzt gesehen: {date}", "paginationLabel": "Meldungsseiten", "previous": "Zurück", "next": "Weiter" },
-      "species": "Tierart: {species}", "breed": "Rasse: {breed}", "colorMarkings": "Farbe und Merkmale: {markings}", "contact": "Kontakt: {contact}",
-      "reportSighting": { "title": "Sichtung melden", "dateLabel": "Am gesehen", "timeLabel": "Ungefähre Uhrzeit", "locationLabel": "Wo hast du das Tier gesehen?", "descriptionLabel": "Beschreibung", "privacyNote": "Deine Meldung geht nur an die Besitzerin oder den Besitzer. Dein Name und deine Kontaktdaten werden nicht öffentlich angezeigt.", "submit": "Sichtung senden", "success": "Danke. Deine Sichtung wurde zur Prüfung eingereicht." },
-      "detail": { "unavailableTitle": "Diese Meldung ist nicht verfügbar", "unavailableDescription": "Die Meldung wurde möglicherweise geschlossen oder entfernt.", "shareText": "{name} wird vermisst{area}. Wenn du das Tier siehst, melde bitte eine Sichtung.", "shareArea": " in der Gegend von {area}", "species": "Tierart", "breed": "Rasse", "colorMarkings": "Farbe und Merkmale", "approximateAge": "Ungefähres Alter", "ageYears": "Etwa {count} Jahre", "lastSeenAround": "Zuletzt gesehen in der Gegend", "lastSeen": "Zuletzt gesehen", "reunited": "{name} ist wieder zu Hause. Danke an alle, die geholfen haben.", "photoAlt": "Foto von {name}" }
+      "list": {
+        "title": "Vermisste Tiere in der Nähe",
+        "subtitle": "Sieh dir offene Meldungen an. Wenn du ein Tier erkennst, öffne die Meldung und trage eine Sichtung ein.",
+        "speciesFilter": "Nach Tierart filtern",
+        "allSpecies": "Alle",
+        "emptyDescription": "Zurzeit gibt es keine aktiven Meldungen zu vermissten Tieren.",
+        "noPhoto": "Kein Foto",
+        "lastSeen": "Zuletzt gesehen: {date}",
+        "paginationLabel": "Meldungsseiten",
+        "previous": "Zurück",
+        "next": "Weiter"
+      },
+      "species": "Tierart: {species}",
+      "breed": "Rasse: {breed}",
+      "colorMarkings": "Farbe und Merkmale: {markings}",
+      "contact": "Kontakt: {contact}",
+      "reportSighting": {
+        "title": "Sichtung melden",
+        "dateLabel": "Am gesehen",
+        "timeLabel": "Ungefähre Uhrzeit",
+        "locationLabel": "Wo hast du das Tier gesehen?",
+        "descriptionLabel": "Beschreibung",
+        "privacyNote": "Deine Meldung geht nur an die Besitzerin oder den Besitzer. Dein Name und deine Kontaktdaten werden nicht öffentlich angezeigt.",
+        "submit": "Sichtung senden",
+        "success": "Danke. Deine Sichtung wurde zur Prüfung eingereicht."
+      },
+      "detail": {
+        "unavailableTitle": "Diese Meldung ist nicht verfügbar",
+        "unavailableDescription": "Die Meldung wurde möglicherweise geschlossen oder entfernt.",
+        "shareText": "{name} wird vermisst{area}. Wenn du das Tier siehst, melde bitte eine Sichtung.",
+        "shareArea": " in der Gegend von {area}",
+        "species": "Tierart",
+        "breed": "Rasse",
+        "colorMarkings": "Farbe und Merkmale",
+        "approximateAge": "Ungefähres Alter",
+        "ageYears": "Etwa {count} Jahre",
+        "lastSeenAround": "Zuletzt gesehen in der Gegend",
+        "lastSeen": "Zuletzt gesehen",
+        "reunited": "{name} ist wieder zu Hause. Danke an alle, die geholfen haben.",
+        "photoAlt": "Foto von {name}"
+      }
     }
   },
   "community": {
-    "postType": { "GENERAL": "Allgemein", "QUESTION": "Frage", "LOCAL": "Lokal", "LOST_PET_SHARE": "Vermisstes Tier", "RESCUE": "Rettung", "ADOPTION": "Adoption", "MEMORY": "Erinnerung" },
+    "postType": {
+      "GENERAL": "Allgemein",
+      "QUESTION": "Frage",
+      "LOCAL": "Lokal",
+      "LOST_PET_SHARE": "Vermisstes Tier",
+      "RESCUE": "Rettung",
+      "ADOPTION": "Adoption",
+      "MEMORY": "Erinnerung"
+    },
     "feed": {
       "title": "Community",
       "description": "Fragen, Erfahrungen und Neuigkeiten von Tierhalterinnen und Tierhaltern — respektvoll und ohne Werbung.",
@@ -2731,43 +4102,240 @@
   },
   "provider": {
     "shell": {
-      "nav": { "home": "Übersicht", "bookings": "Buchungen", "schedule": "Kalender", "availability": "Verfügbarkeit", "services": "Leistungen", "team": "Team", "clinical": "Behandlung", "patients": "Patienten", "sharedRecords": "Geteilte Akten", "waitlist": "Warteliste", "reviews": "Bewertungen", "analytics": "Leistung", "travel": "Reisen und Aufenthalt", "clinicWorkspace": "Klinikverwaltung", "verification": "Nachweisdokumente" },
-      "notAProvider": { "title": "Kein Zugriff auf den Anbieterbereich", "body": "Dein Konto gehört keiner Anbieterorganisation an.", "backToApp": "Zurück zu opetlife" },
-      "chooseOrg": { "title": "Organisation auswählen", "body": "Du gehörst mehreren Anbieterorganisationen an. Wähle aus, in welcher du arbeitest." },
-      "headerRole": "{role}", "role": { "OWNER": "Inhaber/in", "VET": "Tierarzt/Tierärztin", "STAFF": "Mitarbeiter/in" },
-      "switchOrg": "Organisation wechseln", "notVerifiedBanner": "Diese Organisation ist noch nicht bestätigt. Einige Aktionen sind eingeschränkt."
+      "nav": {
+        "home": "Übersicht",
+        "bookings": "Buchungen",
+        "schedule": "Kalender",
+        "availability": "Verfügbarkeit",
+        "services": "Leistungen",
+        "team": "Team",
+        "clinical": "Behandlung",
+        "patients": "Patienten",
+        "sharedRecords": "Geteilte Akten",
+        "waitlist": "Warteliste",
+        "reviews": "Bewertungen",
+        "analytics": "Leistung",
+        "travel": "Reisen und Aufenthalt",
+        "clinicWorkspace": "Klinikverwaltung",
+        "verification": "Nachweisdokumente"
+      },
+      "notAProvider": {
+        "title": "Kein Zugriff auf den Anbieterbereich",
+        "body": "Dein Konto gehört keiner Anbieterorganisation an.",
+        "backToApp": "Zurück zu opetlife"
+      },
+      "chooseOrg": {
+        "title": "Organisation auswählen",
+        "body": "Du gehörst mehreren Anbieterorganisationen an. Wähle aus, in welcher du arbeitest."
+      },
+      "headerRole": "{role}",
+      "role": { "OWNER": "Inhaber/in", "VET": "Tierarzt/Tierärztin", "STAFF": "Mitarbeiter/in" },
+      "switchOrg": "Organisation wechseln",
+      "notVerifiedBanner": "Diese Organisation ist noch nicht bestätigt. Einige Aktionen sind eingeschränkt."
     },
     "home": {
-      "title": "Anbieterübersicht", "retry": "Erneut versuchen", "loading": "Wird geladen", "loadFailed": "Die Anbieterübersicht konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.",
-      "attention": { "pendingConfirmation": "{count, plural, one {# ausstehende Bestätigung} other {# ausstehende Bestätigungen}}", "cancellations": "{count, plural, one {# aktuelle Stornierung} other {# aktuelle Stornierungen}}", "availabilityIssues": "{count, plural, one {# Verfügbarkeitskonflikt} other {# Verfügbarkeitskonflikte}}", "allClear": "Alles in Ordnung" },
-      "nextBooking": "Nächste Buchung", "today": "Heute ({count, number})", "noBookingsToday": "Heute gibt es keine Buchungen.", "verificationLink": "Organisationsnachweise und Verifizierung"
+      "title": "Anbieterübersicht",
+      "retry": "Erneut versuchen",
+      "loading": "Wird geladen",
+      "loadFailed": "Die Anbieterübersicht konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.",
+      "attention": {
+        "pendingConfirmation": "{count, plural, one {# ausstehende Bestätigung} other {# ausstehende Bestätigungen}}",
+        "cancellations": "{count, plural, one {# aktuelle Stornierung} other {# aktuelle Stornierungen}}",
+        "availabilityIssues": "{count, plural, one {# Verfügbarkeitskonflikt} other {# Verfügbarkeitskonflikte}}",
+        "allClear": "Alles in Ordnung"
+      },
+      "nextBooking": "Nächste Buchung",
+      "today": "Heute ({count, number})",
+      "noBookingsToday": "Heute gibt es keine Buchungen.",
+      "verificationLink": "Organisationsnachweise und Verifizierung"
     },
     "bookingRow": { "respondBy": "Antwort bis " },
     "availability": {
-      "title": "Verfügbarkeit", "retry": "Erneut versuchen", "loading": "Wird geladen", "loadFailed": "Die Verfügbarkeit konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.", "accessDenied": "Du darfst die Verfügbarkeit nicht verwalten.",
+      "title": "Verfügbarkeit",
+      "retry": "Erneut versuchen",
+      "loading": "Wird geladen",
+      "loadFailed": "Die Verfügbarkeit konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.",
+      "accessDenied": "Du darfst die Verfügbarkeit nicht verwalten.",
       "day": { "sun": "So", "mon": "Mo", "tue": "Di", "wed": "Mi", "thu": "Do", "fri": "Fr", "sat": "Sa" },
-      "rules": { "title": "Wöchentlicher Zeitplan", "empty": "Es sind noch keine wiederkehrenden Zeiten eingerichtet.", "delete": "Entfernen", "locationId": "Standort-ID", "dayOfWeek": "Wochentag", "startLocalTime": "Startzeit", "endLocalTime": "Endzeit", "timezone": "Zeitzone", "add": "Hinzufügen", "locationRequired": "Ein Standort ist erforderlich.", "createFailed": "Die Regel konnte nicht erstellt werden.", "updateFailed": "Die Regel konnte nicht aktualisiert werden.", "deleteFailed": "Die Regel konnte nicht entfernt werden." },
-      "exceptions": { "title": "Abwesenheit und zusätzliche Verfügbarkeit", "empty": "Keine Ausnahmen eingerichtet.", "delete": "Entfernen", "startAt": "Beginn", "endAt": "Ende", "typeLabel": "Art", "type": { "BLOCKED": "Gesperrt", "AVAILABLE_OVERRIDE": "Zusätzliche Verfügbarkeit" }, "reason": "Grund (optional)", "add": "Hinzufügen", "fieldsRequired": "Standort, Beginn und Ende sind erforderlich.", "createFailed": "Die Ausnahme konnte nicht erstellt werden.", "updateFailed": "Die Ausnahme konnte nicht aktualisiert werden.", "deleteFailed": "Die Ausnahme konnte nicht entfernt werden.", "conflictWarning": "{count, plural, one {In diesem Zeitraum gibt es # bestätigte Buchung.} other {In diesem Zeitraum gibt es # bestätigte Buchungen.}} Eine Sperrung storniert oder verschiebt sie nicht.", "conflictCancel": "Abbrechen", "conflictProceed": "Trotzdem sperren" },
+      "rules": {
+        "title": "Wöchentlicher Zeitplan",
+        "empty": "Es sind noch keine wiederkehrenden Zeiten eingerichtet.",
+        "delete": "Entfernen",
+        "locationId": "Standort-ID",
+        "dayOfWeek": "Wochentag",
+        "startLocalTime": "Startzeit",
+        "endLocalTime": "Endzeit",
+        "timezone": "Zeitzone",
+        "add": "Hinzufügen",
+        "locationRequired": "Ein Standort ist erforderlich.",
+        "createFailed": "Die Regel konnte nicht erstellt werden.",
+        "updateFailed": "Die Regel konnte nicht aktualisiert werden.",
+        "deleteFailed": "Die Regel konnte nicht entfernt werden."
+      },
+      "exceptions": {
+        "title": "Abwesenheit und zusätzliche Verfügbarkeit",
+        "empty": "Keine Ausnahmen eingerichtet.",
+        "delete": "Entfernen",
+        "startAt": "Beginn",
+        "endAt": "Ende",
+        "typeLabel": "Art",
+        "type": { "BLOCKED": "Gesperrt", "AVAILABLE_OVERRIDE": "Zusätzliche Verfügbarkeit" },
+        "reason": "Grund (optional)",
+        "add": "Hinzufügen",
+        "fieldsRequired": "Standort, Beginn und Ende sind erforderlich.",
+        "createFailed": "Die Ausnahme konnte nicht erstellt werden.",
+        "updateFailed": "Die Ausnahme konnte nicht aktualisiert werden.",
+        "deleteFailed": "Die Ausnahme konnte nicht entfernt werden.",
+        "conflictWarning": "{count, plural, one {In diesem Zeitraum gibt es # bestätigte Buchung.} other {In diesem Zeitraum gibt es # bestätigte Buchungen.}} Eine Sperrung storniert oder verschiebt sie nicht.",
+        "conflictCancel": "Abbrechen",
+        "conflictProceed": "Trotzdem sperren"
+      },
       "actions": { "edit": "Bearbeiten", "cancel": "Abbrechen", "save": "Änderungen speichern" }
     },
     "bookings": {
-      "title": "Buchungen", "retry": "Erneut versuchen", "loading": "Buchungen werden geladen", "empty": "Keine Buchungen gefunden.", "loadFailed": "Buchungen konnten nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.", "accessDenied": "Du darfst diese Buchungen nicht ansehen.",
-      "filter": { "today": "Heute", "upcoming": "Bevorstehend", "past": "Vergangen", "cancelled": "Storniert", "requests": "Anfragen" },
-      "status": { "HOLD": "Vorgemerkt", "PENDING_CONFIRMATION": "Bestätigung ausstehend", "CONFIRMED": "Bestätigt", "CHECKED_IN": "Eingecheckt", "IN_PROGRESS": "In Bearbeitung", "COMPLETED": "Abgeschlossen", "CANCELLED_BY_USER": "Vom Kunden storniert", "CANCELLED_BY_PROVIDER": "Vom Anbieter storniert", "NO_SHOW": "Nicht erschienen", "REQUESTED": "Angefragt", "AWAITING_PAYMENT": "Zahlung ausstehend", "REJECTED": "Abgelehnt", "EXPIRED": "Abgelaufen", "RESCHEDULED": "Verschoben" },
-      "paymentStatus": { "NOT_REQUIRED": "Nicht erforderlich", "PENDING": "Ausstehend", "AUTHORIZED": "Autorisiert", "PAID": "Bezahlt", "FAILED": "Fehlgeschlagen", "REFUND_PENDING": "Rückerstattung ausstehend", "REFUNDED": "Erstattet" }
+      "title": "Buchungen",
+      "retry": "Erneut versuchen",
+      "loading": "Buchungen werden geladen",
+      "empty": "Keine Buchungen gefunden.",
+      "loadFailed": "Buchungen konnten nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.",
+      "accessDenied": "Du darfst diese Buchungen nicht ansehen.",
+      "filter": {
+        "today": "Heute",
+        "upcoming": "Bevorstehend",
+        "past": "Vergangen",
+        "cancelled": "Storniert",
+        "requests": "Anfragen"
+      },
+      "status": {
+        "HOLD": "Vorgemerkt",
+        "PENDING_CONFIRMATION": "Bestätigung ausstehend",
+        "CONFIRMED": "Bestätigt",
+        "CHECKED_IN": "Eingecheckt",
+        "IN_PROGRESS": "In Bearbeitung",
+        "COMPLETED": "Abgeschlossen",
+        "CANCELLED_BY_USER": "Vom Kunden storniert",
+        "CANCELLED_BY_PROVIDER": "Vom Anbieter storniert",
+        "NO_SHOW": "Nicht erschienen",
+        "REQUESTED": "Angefragt",
+        "AWAITING_PAYMENT": "Zahlung ausstehend",
+        "REJECTED": "Abgelehnt",
+        "EXPIRED": "Abgelaufen",
+        "RESCHEDULED": "Verschoben"
+      },
+      "paymentStatus": {
+        "NOT_REQUIRED": "Nicht erforderlich",
+        "PENDING": "Ausstehend",
+        "AUTHORIZED": "Autorisiert",
+        "PAID": "Bezahlt",
+        "FAILED": "Fehlgeschlagen",
+        "REFUND_PENDING": "Rückerstattung ausstehend",
+        "REFUNDED": "Erstattet"
+      }
     },
     "bookingDetail": {
-      "title": "Buchung", "pet": "Haustier", "owner": "Halter/in", "service": "Leistung", "location": "Ort", "dateTime": "Datum und Uhrzeit", "reason": "Anliegen", "cancelledReason": "Stornierungsgrund", "completionNote": "Abschlussnotiz", "respondBy": "Antwort bis",
-      "access": { "title": "Zugriff auf Haustierdaten", "state": { "GRANTED": "Zugriff gewährt", "NO_GRANT": "Kein Zugriff", "EXPIRED": "Zugriff abgelaufen", "REVOKED": "Zugriff widerrufen" }, "scope": "Umfang", "startsAt": "Beginnt", "expiresAt": "Läuft ab", "openClinicalRecord": "Klinische Akte öffnen", "scopePreset": { "MINIMAL_VET_CONTEXT": "Minimale Angaben", "HEALTH_BASICS": "Grundlegende Gesundheitsdaten", "SELECTED_HEALTH_DATA": "Ausgewählte Gesundheitsdaten", "GROOMING_BASIC": "Pflegeprofil (Grundlagen Fellpflege)", "TRAINING_BASIC": "Pflegeprofil (Grundlagen Training)", "WALKING_BASIC": "Pflegeprofil (Grundlagen Spaziergänge)", "SITTING_BASIC": "Pflegeprofil (Grundlagen Betreuung)", "BOARDING_BASIC": "Pflegeprofil und Impfstatus (Unterbringung)", "TAXI_BASIC": "Pflegeprofil (Grundlagen Tiertransport)" } },
-      "careProfile": { "title": "Pflegekontext", "temperament": "Temperament", "feeding": "Fütterungsroutine", "specialInstructions": "Besondere Hinweise" },
-      "health": { "title": "Gesundheitskontext", "allergyState": "Allergien", "vaccinationStatus": "Impfstatus" },
-      "actions": { "confirm": "Bestätigen", "confirmed": "Bestätigt", "acceptRequest": "Anfrage annehmen", "decline": "Anfrage ablehnen", "markNoShow": "Als nicht erschienen markieren", "startClinicalVisit": "Klinischen Besuch beginnen", "checkIn": "Einchecken", "start": "Starten", "complete": "Abschließen", "cancel": "Buchung stornieren" },
-      "completionNoteLabel": "Abschlussnotiz für den Halter (optional)", "completionNotePlaceholder": "Zum Beispiel: Fellpflege von Luna abgeschlossen.",
-      "followUps": { "legend": "Nachkontrollen (nur bei Bedarf)", "description": "Jede Nachkontrolle erscheint im Pflegebereich des Halters als vom Anbieter erstellt. Es wird nichts automatisch geplant.", "typeLabel": "Art der Nachkontrolle", "type": { "FOLLOW_UP": "Nachkontrolltermin", "VACCINATION": "Nächste Impfung", "MEDICATION": "Medikament", "MONITORING": "Labor oder Kontrolle", "OTHER": "Sonstiges" }, "titleLabel": "Titel der Nachkontrolle", "dateLabel": "Fälligkeitsdatum", "remove": "Nachkontrolle entfernen", "add": "Nachkontrolle hinzufügen" },
-      "rejectDialog": { "title": "Buchungsanfrage ablehnen", "reasonLabel": "Grund (wird dem Kunden angezeigt)" },
-      "notes": { "title": "Anbieternotizen", "internalOnly": "Nur intern — wird dem Kunden nicht angezeigt.", "label": "Notiz hinzufügen", "placeholder": "Notiz schreiben", "add": "Hinzufügen", "empty": "Noch keine Notizen." },
-      "cancelDialog": { "title": "Diese Buchung stornieren?", "body": "Der Halter wird benachrichtigt. Ein durch diese Buchung gewährter temporärer Zugriff wird widerrufen.", "reasonLabel": "Grund (optional)", "reasonPlaceholder": "Warum wird diese Buchung storniert?", "confirm": "Ja, Buchung stornieren" },
-      "backToQueue": "Zurück zu den Buchungen", "errors": { "PROVIDER_ACCESS_DENIED": "Du hast keinen Zugriff auf diese Buchung.", "PROVIDER_NOT_VERIFIED": "Deine Organisation muss vor dieser Aktion bestätigt werden.", "BOOKING_NOT_FOUND": "Buchung nicht gefunden.", "INVALID_BOOKING_TRANSITION": "Diese Buchung kann derzeit nicht in diesen Status wechseln.", "BOOKING_NOT_CANCELLABLE": "Diese Buchung kann nicht mehr storniert werden.", "generic": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuche es erneut." }
+      "title": "Buchung",
+      "pet": "Haustier",
+      "owner": "Halter/in",
+      "service": "Leistung",
+      "location": "Ort",
+      "dateTime": "Datum und Uhrzeit",
+      "reason": "Anliegen",
+      "cancelledReason": "Stornierungsgrund",
+      "completionNote": "Abschlussnotiz",
+      "respondBy": "Antwort bis",
+      "access": {
+        "title": "Zugriff auf Haustierdaten",
+        "state": {
+          "GRANTED": "Zugriff gewährt",
+          "NO_GRANT": "Kein Zugriff",
+          "EXPIRED": "Zugriff abgelaufen",
+          "REVOKED": "Zugriff widerrufen"
+        },
+        "scope": "Umfang",
+        "startsAt": "Beginnt",
+        "expiresAt": "Läuft ab",
+        "openClinicalRecord": "Klinische Akte öffnen",
+        "scopePreset": {
+          "MINIMAL_VET_CONTEXT": "Minimale Angaben",
+          "HEALTH_BASICS": "Grundlegende Gesundheitsdaten",
+          "SELECTED_HEALTH_DATA": "Ausgewählte Gesundheitsdaten",
+          "GROOMING_BASIC": "Pflegeprofil (Grundlagen Fellpflege)",
+          "TRAINING_BASIC": "Pflegeprofil (Grundlagen Training)",
+          "WALKING_BASIC": "Pflegeprofil (Grundlagen Spaziergänge)",
+          "SITTING_BASIC": "Pflegeprofil (Grundlagen Betreuung)",
+          "BOARDING_BASIC": "Pflegeprofil und Impfstatus (Unterbringung)",
+          "TAXI_BASIC": "Pflegeprofil (Grundlagen Tiertransport)"
+        }
+      },
+      "careProfile": {
+        "title": "Pflegekontext",
+        "temperament": "Temperament",
+        "feeding": "Fütterungsroutine",
+        "specialInstructions": "Besondere Hinweise"
+      },
+      "health": {
+        "title": "Gesundheitskontext",
+        "allergyState": "Allergien",
+        "vaccinationStatus": "Impfstatus"
+      },
+      "actions": {
+        "confirm": "Bestätigen",
+        "confirmed": "Bestätigt",
+        "acceptRequest": "Anfrage annehmen",
+        "decline": "Anfrage ablehnen",
+        "markNoShow": "Als nicht erschienen markieren",
+        "startClinicalVisit": "Klinischen Besuch beginnen",
+        "checkIn": "Einchecken",
+        "start": "Starten",
+        "complete": "Abschließen",
+        "cancel": "Buchung stornieren"
+      },
+      "completionNoteLabel": "Abschlussnotiz für den Halter (optional)",
+      "completionNotePlaceholder": "Zum Beispiel: Fellpflege von Luna abgeschlossen.",
+      "followUps": {
+        "legend": "Nachkontrollen (nur bei Bedarf)",
+        "description": "Jede Nachkontrolle erscheint im Pflegebereich des Halters als vom Anbieter erstellt. Es wird nichts automatisch geplant.",
+        "typeLabel": "Art der Nachkontrolle",
+        "type": {
+          "FOLLOW_UP": "Nachkontrolltermin",
+          "VACCINATION": "Nächste Impfung",
+          "MEDICATION": "Medikament",
+          "MONITORING": "Labor oder Kontrolle",
+          "OTHER": "Sonstiges"
+        },
+        "titleLabel": "Titel der Nachkontrolle",
+        "dateLabel": "Fälligkeitsdatum",
+        "remove": "Nachkontrolle entfernen",
+        "add": "Nachkontrolle hinzufügen"
+      },
+      "rejectDialog": {
+        "title": "Buchungsanfrage ablehnen",
+        "reasonLabel": "Grund (wird dem Kunden angezeigt)"
+      },
+      "notes": {
+        "title": "Anbieternotizen",
+        "internalOnly": "Nur intern — wird dem Kunden nicht angezeigt.",
+        "label": "Notiz hinzufügen",
+        "placeholder": "Notiz schreiben",
+        "add": "Hinzufügen",
+        "empty": "Noch keine Notizen."
+      },
+      "cancelDialog": {
+        "title": "Diese Buchung stornieren?",
+        "body": "Der Halter wird benachrichtigt. Ein durch diese Buchung gewährter temporärer Zugriff wird widerrufen.",
+        "reasonLabel": "Grund (optional)",
+        "reasonPlaceholder": "Warum wird diese Buchung storniert?",
+        "confirm": "Ja, Buchung stornieren"
+      },
+      "backToQueue": "Zurück zu den Buchungen",
+      "errors": {
+        "PROVIDER_ACCESS_DENIED": "Du hast keinen Zugriff auf diese Buchung.",
+        "PROVIDER_NOT_VERIFIED": "Deine Organisation muss vor dieser Aktion bestätigt werden.",
+        "BOOKING_NOT_FOUND": "Buchung nicht gefunden.",
+        "INVALID_BOOKING_TRANSITION": "Diese Buchung kann derzeit nicht in diesen Status wechseln.",
+        "BOOKING_NOT_CANCELLABLE": "Diese Buchung kann nicht mehr storniert werden.",
+        "generic": "Die Aktion konnte nicht abgeschlossen werden. Bitte versuche es erneut."
+      }
     },
     "team": {
       "title": "Team",
@@ -2794,33 +4362,187 @@
       }
     }
   },
-  "partnerVerification": { "activationRequired": "Die Organisation muss von der Administration bestätigt werden, bevor du Leistungen verwalten oder Angebote erstellen und aktivieren kannst. Die Verifizierung und bestehende Bestellungen kannst du weiterhin verfolgen.", "portalTitle": "Partnerverifizierung", "refreshAccess": "Seite neu laden, um den Freigabestatus zu prüfen" },
+  "partnerVerification": {
+    "activationRequired": "Die Organisation muss von der Administration bestätigt werden, bevor du Leistungen verwalten oder Angebote erstellen und aktivieren kannst. Die Verifizierung und bestehende Bestellungen kannst du weiterhin verfolgen.",
+    "portalTitle": "Partnerverifizierung",
+    "refreshAccess": "Seite neu laden, um den Freigabestatus zu prüfen"
+  },
   "customerBookings": {
-    "title": "Meine Buchungen", "bookService": "Dienst buchen", "tabsLabel": "Buchungen", "pet": "Tier", "allPets": "Alle Tiere", "loadFailed": "Buchungen konnten nicht geladen werden", "retry": "Erneut versuchen", "loading": "Wird geladen", "empty": "Keine Buchungen in diesem Bereich", "findService": "Dienst finden",
-    "tabs": { "upcoming": "Bevorstehend", "requested": "Anfragen und Zahlung", "past": "Abgeschlossen", "cancelled": "Storniert und abgelaufen", "waitlist": "Warteliste" },
-    "waitlist": { "empty": "Du stehst auf keiner Warteliste", "emptyHint": "Wenn ein Tag ausgebucht ist, kannst du dich auf der Buchungsseite auf die Warteliste setzen lassen.", "book": "Buchen", "leave": "Warteliste verlassen", "status": { "NOTIFIED": "Ein Termin ist frei geworden – buche ihn jetzt (er wird nicht für dich reserviert).", "ACTIVE": "Wartend", "BOOKED": "Gebucht", "CANCELLED": "Geschlossen" } }
+    "title": "Meine Buchungen",
+    "bookService": "Dienst buchen",
+    "tabsLabel": "Buchungen",
+    "pet": "Tier",
+    "allPets": "Alle Tiere",
+    "loadFailed": "Buchungen konnten nicht geladen werden",
+    "retry": "Erneut versuchen",
+    "loading": "Wird geladen",
+    "empty": "Keine Buchungen in diesem Bereich",
+    "findService": "Dienst finden",
+    "tabs": {
+      "upcoming": "Bevorstehend",
+      "requested": "Anfragen und Zahlung",
+      "past": "Abgeschlossen",
+      "cancelled": "Storniert und abgelaufen",
+      "waitlist": "Warteliste"
+    },
+    "waitlist": {
+      "empty": "Du stehst auf keiner Warteliste",
+      "emptyHint": "Wenn ein Tag ausgebucht ist, kannst du dich auf der Buchungsseite auf die Warteliste setzen lassen.",
+      "book": "Buchen",
+      "leave": "Warteliste verlassen",
+      "status": {
+        "NOTIFIED": "Ein Termin ist frei geworden – buche ihn jetzt (er wird nicht für dich reserviert).",
+        "ACTIVE": "Wartend",
+        "BOOKED": "Gebucht",
+        "CANCELLED": "Geschlossen"
+      }
+    }
   },
   "bookingDetail": {
-    "title": "Buchung", "pet": "Haustier", "provider": "Dienstleister", "service": "Dienstleistung", "location": "Standort", "dropoffLocation": "Abgabeort", "dateTime": "Datum und Uhrzeit", "reason": "Notizen", "cancelledReason": "Stornierungsgrund", "completionNote": "Abschlussnotiz", "cancel": "Buchung stornieren", "getSupport": "Support kontaktieren",
-    "status": { "HOLD": "Vorläufig reserviert", "PENDING_CONFIRMATION": "Bestätigung ausstehend", "CONFIRMED": "Bestätigt", "CHECKED_IN": "Eingecheckt", "IN_PROGRESS": "In Bearbeitung", "COMPLETED": "Abgeschlossen", "CANCELLED_BY_USER": "Von dir storniert", "CANCELLED_BY_PROVIDER": "Vom Anbieter storniert", "NO_SHOW": "Nicht erschienen", "REQUESTED": "Angefragt", "AWAITING_PAYMENT": "Zahlung ausstehend", "REJECTED": "Abgelehnt", "EXPIRED": "Abgelaufen", "RESCHEDULED": "Verschoben" },
-    "paymentStatus": { "NOT_REQUIRED": "Nicht erforderlich", "PENDING": "Ausstehend", "AUTHORIZED": "Autorisiert", "PAID": "Bezahlt", "FAILED": "Fehlgeschlagen", "REFUND_PENDING": "Erstattung ausstehend", "REFUNDED": "Erstattet" },
-    "careAccess": { "title": "Geteilte Pflegeinformationen", "scope": "Umfang", "expiresAt": "Läuft ab", "preset": { "MINIMAL_VET_CONTEXT": "Nur grundlegende Angaben", "HEALTH_BASICS": "Grundlegende Gesundheitsdaten", "SELECTED_HEALTH_DATA": "Ausgewählte Gesundheitsdaten", "GROOMING_BASIC": "Pflegeprofil (Grundlagen zur Fellpflege)", "TRAINING_BASIC": "Pflegeprofil (Grundlagen zum Training)", "WALKING_BASIC": "Pflegeprofil (Grundlagen zum Gassigehen)", "SITTING_BASIC": "Pflegeprofil (Grundlagen zur Betreuung)", "BOARDING_BASIC": "Pflegeprofil und Impfstatus (Grundlagen zur Tierpension)", "TAXI_BASIC": "Pflegeprofil (Grundlagen zum Haustiertaxi)" } },
-    "recurring": { "prompt": "Diese Buchung wöchentlich wiederholen?", "action": "Wöchentlich wiederholen", "started": "{count} wöchentliche Buchungen erstellt." },
-    "cancelDialog": { "title": "Diese Buchung stornieren?", "body": "Der Anbieter hält diesen Termin dann nicht mehr für dich frei.", "careAccessImpact": "Der für diese Buchung geteilte vorübergehende Zugriff auf die Pflegeinformationen wird ebenfalls widerrufen.", "confirm": "Ja, Buchung stornieren" },
-    "confirmedBanner": { "title": "Buchung bestätigt", "calendarAdded": "Zum Pflegekalender hinzugefügt.", "careAccessUntil": "Pflegeinformationen sind bis {when} mit dem Anbieter geteilt.", "openCalendar": "Pflegekalender öffnen" },
-    "errors": { "slotUnavailable": "Dieser Termin wurde gerade vergeben. Bitte wähle einen anderen.", "holdExpired": "Deine Reservierung ist abgelaufen. Bitte wähle erneut einen Termin.", "petNotSupported": "Dieser Dienst wird für das ausgewählte Haustier nicht angeboten.", "petContextIncomplete": "Vervollständige vor der Buchung das Pflege- oder Gesundheitsprofil des Haustiers.", "addressRequired": "Bitte wähle die Adresse für den Dienst aus.", "petAccessDenied": "Du darfst für dieses Haustier keine Buchung vornehmen.", "bookingChanged": "Der Buchungsstatus hat sich geändert. Bitte aktualisiere die Seite und versuche es erneut.", "tooManyRequests": "Zu viele Anfragen. Bitte versuche es gleich noch einmal.", "genericAction": "Das hat nicht funktioniert. Prüfe deine Verbindung und versuche es erneut." },
+    "title": "Buchung",
+    "pet": "Haustier",
+    "provider": "Dienstleister",
+    "service": "Dienstleistung",
+    "location": "Standort",
+    "dropoffLocation": "Abgabeort",
+    "dateTime": "Datum und Uhrzeit",
+    "reason": "Notizen",
+    "cancelledReason": "Stornierungsgrund",
+    "completionNote": "Abschlussnotiz",
+    "cancel": "Buchung stornieren",
+    "getSupport": "Support kontaktieren",
+    "status": {
+      "HOLD": "Vorläufig reserviert",
+      "PENDING_CONFIRMATION": "Bestätigung ausstehend",
+      "CONFIRMED": "Bestätigt",
+      "CHECKED_IN": "Eingecheckt",
+      "IN_PROGRESS": "In Bearbeitung",
+      "COMPLETED": "Abgeschlossen",
+      "CANCELLED_BY_USER": "Von dir storniert",
+      "CANCELLED_BY_PROVIDER": "Vom Anbieter storniert",
+      "NO_SHOW": "Nicht erschienen",
+      "REQUESTED": "Angefragt",
+      "AWAITING_PAYMENT": "Zahlung ausstehend",
+      "REJECTED": "Abgelehnt",
+      "EXPIRED": "Abgelaufen",
+      "RESCHEDULED": "Verschoben"
+    },
+    "paymentStatus": {
+      "NOT_REQUIRED": "Nicht erforderlich",
+      "PENDING": "Ausstehend",
+      "AUTHORIZED": "Autorisiert",
+      "PAID": "Bezahlt",
+      "FAILED": "Fehlgeschlagen",
+      "REFUND_PENDING": "Erstattung ausstehend",
+      "REFUNDED": "Erstattet"
+    },
+    "careAccess": {
+      "title": "Geteilte Pflegeinformationen",
+      "scope": "Umfang",
+      "expiresAt": "Läuft ab",
+      "preset": {
+        "MINIMAL_VET_CONTEXT": "Nur grundlegende Angaben",
+        "HEALTH_BASICS": "Grundlegende Gesundheitsdaten",
+        "SELECTED_HEALTH_DATA": "Ausgewählte Gesundheitsdaten",
+        "GROOMING_BASIC": "Pflegeprofil (Grundlagen zur Fellpflege)",
+        "TRAINING_BASIC": "Pflegeprofil (Grundlagen zum Training)",
+        "WALKING_BASIC": "Pflegeprofil (Grundlagen zum Gassigehen)",
+        "SITTING_BASIC": "Pflegeprofil (Grundlagen zur Betreuung)",
+        "BOARDING_BASIC": "Pflegeprofil und Impfstatus (Grundlagen zur Tierpension)",
+        "TAXI_BASIC": "Pflegeprofil (Grundlagen zum Haustiertaxi)"
+      }
+    },
+    "recurring": {
+      "prompt": "Diese Buchung wöchentlich wiederholen?",
+      "action": "Wöchentlich wiederholen",
+      "started": "{count} wöchentliche Buchungen erstellt."
+    },
+    "cancelDialog": {
+      "title": "Diese Buchung stornieren?",
+      "body": "Der Anbieter hält diesen Termin dann nicht mehr für dich frei.",
+      "careAccessImpact": "Der für diese Buchung geteilte vorübergehende Zugriff auf die Pflegeinformationen wird ebenfalls widerrufen.",
+      "confirm": "Ja, Buchung stornieren"
+    },
+    "confirmedBanner": {
+      "title": "Buchung bestätigt",
+      "calendarAdded": "Zum Pflegekalender hinzugefügt.",
+      "careAccessUntil": "Pflegeinformationen sind bis {when} mit dem Anbieter geteilt.",
+      "openCalendar": "Pflegekalender öffnen"
+    },
+    "errors": {
+      "slotUnavailable": "Dieser Termin wurde gerade vergeben. Bitte wähle einen anderen.",
+      "holdExpired": "Deine Reservierung ist abgelaufen. Bitte wähle erneut einen Termin.",
+      "petNotSupported": "Dieser Dienst wird für das ausgewählte Haustier nicht angeboten.",
+      "petContextIncomplete": "Vervollständige vor der Buchung das Pflege- oder Gesundheitsprofil des Haustiers.",
+      "addressRequired": "Bitte wähle die Adresse für den Dienst aus.",
+      "petAccessDenied": "Du darfst für dieses Haustier keine Buchung vornehmen.",
+      "bookingChanged": "Der Buchungsstatus hat sich geändert. Bitte aktualisiere die Seite und versuche es erneut.",
+      "tooManyRequests": "Zu viele Anfragen. Bitte versuche es gleich noch einmal.",
+      "genericAction": "Das hat nicht funktioniert. Prüfe deine Verbindung und versuche es erneut."
+    },
     "ui": {
-      "loading": "Buchung wird geladen …", "forbidden": "Du hast keinen Zugriff auf diese Buchung", "notFound": "Buchung nicht gefunden", "loadFailed": "Buchung konnte nicht geladen werden", "retry": "Erneut versuchen",
-      "created": { "requested": "Deine Anfrage wurde gesendet", "awaitingPayment": "Buchung vorgemerkt — bezahle zur Bestätigung", "confirmed": "Deine Buchung ist bestätigt" },
-      "myBookings": "Meine Buchungen", "requestedUntil": "Der Dienstleister kann bis {date} antworten. Die Buchung ist noch nicht bestätigt.", "declined": "Der Dienstleister hat die Anfrage abgelehnt", "expired": "Diese Buchung wurde freigegeben, weil sie nicht rechtzeitig bestätigt oder bezahlt wurde.", "rescheduledLink": "Diese Buchung wurde auf einen neuen Termin verlegt → neuen Termin ansehen",
-      "payBy": "Bitte bis {date} bezahlen", "paymentFailed": "Die letzte Zahlung ist fehlgeschlagen. Du kannst es erneut versuchen.", "paymentRecorded": "Zahlungsergebnis erfasst.", "paySecurely": "Sicher bezahlen", "gatewayConfirmation": "Die Buchung wird erst bestätigt, wenn das Zahlungsportal die Zahlung bestätigt.",
-      "price": "Preis", "onRequest": "Auf Anfrage", "discount": "Rabatt", "payment": "Zahlung", "deposit": "Anzahlung", "cancellationTerms": "Stornierungsbedingungen (zum Buchungszeitpunkt)", "refundTerms": "Kostenlose Stornierung bis {hours} Stunden vorher; danach werden {percent} % erstattet.", "preparation": "Vor deinem Besuch",
-      "sharedHealth": "Geteilte Gesundheitsinformationen", "healthSummary": "Gesundheitsübersicht", "everydayCareProfile": "Alltägliches Pflegeprofil", "until": "bis", "timeline": "Verlauf", "actor": { "USER": "Du", "PROVIDER": "Dienstleister", "SYSTEM": "System", "ADMIN": "Support" },
-      "reschedule": "Termin ändern", "cancelFollowing": "Diese und folgende Buchungen stornieren", "weeklyCreated": "Wöchentliche Buchungen erstellt; ausgebuchte Wochen wurden übersprungen.", "repeatWeekly": "Wöchentlich wiederholen (4 Termine)", "leaveReview": "Bewertung abgeben", "bookAgain": "Erneut buchen",
-      "fullRefund": "Vollständige Erstattung: {amount}", "partialRefund": "Gemäß den Bedingungen werden {percent} % ({amount}) erstattet.", "refundReview": "Erstattungen werden nach Prüfung durch die Finanzabteilung bearbeitet.", "reasonOptional": "Grund (optional)", "keepBooking": "Buchung behalten", "bookingCancelled": "Buchung storniert.",
-      "chooseNewTime": "Neuen Termin auswählen", "rescheduleHint": "Deine aktuelle Buchung bleibt bestehen, bis der neue Termin bestätigt ist. Preis und Bedingungen bleiben unverändert.", "newDay": "Neuer Tag", "noOpenTimes": "An diesem Tag sind keine freien Termine verfügbar.", "bookingRescheduled": "Buchung verschoben.", "confirmNewTime": "Neuen Termin bestätigen",
-      "reviewThisBooking": "Diese Buchung bewerten", "rating": "Bewertung", "reviewText": "Bewertungstext", "reviewHint": "Beschreibe deine Erfahrung. Bitte keine persönlichen oder medizinischen Angaben.", "submitForReview": "Zur Prüfung einreichen",
-      "reviewAvailableAt": "Du kannst diesen Dienst zwei Stunden nach seinem Ende bewerten: {date}", "timeliness": "Pünktlichkeit", "careAndCommunication": "Umgang mit dem Tier und Kommunikation", "serviceQuality": "Dienstleistungsqualität", "reviewSubmitted": "Deine Bewertung wurde eingereicht und wird nach der Prüfung veröffentlicht."
+      "loading": "Buchung wird geladen …",
+      "forbidden": "Du hast keinen Zugriff auf diese Buchung",
+      "notFound": "Buchung nicht gefunden",
+      "loadFailed": "Buchung konnte nicht geladen werden",
+      "retry": "Erneut versuchen",
+      "created": {
+        "requested": "Deine Anfrage wurde gesendet",
+        "awaitingPayment": "Buchung vorgemerkt — bezahle zur Bestätigung",
+        "confirmed": "Deine Buchung ist bestätigt"
+      },
+      "myBookings": "Meine Buchungen",
+      "requestedUntil": "Der Dienstleister kann bis {date} antworten. Die Buchung ist noch nicht bestätigt.",
+      "declined": "Der Dienstleister hat die Anfrage abgelehnt",
+      "expired": "Diese Buchung wurde freigegeben, weil sie nicht rechtzeitig bestätigt oder bezahlt wurde.",
+      "rescheduledLink": "Diese Buchung wurde auf einen neuen Termin verlegt → neuen Termin ansehen",
+      "payBy": "Bitte bis {date} bezahlen",
+      "paymentFailed": "Die letzte Zahlung ist fehlgeschlagen. Du kannst es erneut versuchen.",
+      "paymentRecorded": "Zahlungsergebnis erfasst.",
+      "paySecurely": "Sicher bezahlen",
+      "gatewayConfirmation": "Die Buchung wird erst bestätigt, wenn das Zahlungsportal die Zahlung bestätigt.",
+      "price": "Preis",
+      "onRequest": "Auf Anfrage",
+      "discount": "Rabatt",
+      "payment": "Zahlung",
+      "deposit": "Anzahlung",
+      "cancellationTerms": "Stornierungsbedingungen (zum Buchungszeitpunkt)",
+      "refundTerms": "Kostenlose Stornierung bis {hours} Stunden vorher; danach werden {percent} % erstattet.",
+      "preparation": "Vor deinem Besuch",
+      "sharedHealth": "Geteilte Gesundheitsinformationen",
+      "healthSummary": "Gesundheitsübersicht",
+      "everydayCareProfile": "Alltägliches Pflegeprofil",
+      "until": "bis",
+      "timeline": "Verlauf",
+      "actor": { "USER": "Du", "PROVIDER": "Dienstleister", "SYSTEM": "System", "ADMIN": "Support" },
+      "reschedule": "Termin ändern",
+      "cancelFollowing": "Diese und folgende Buchungen stornieren",
+      "weeklyCreated": "Wöchentliche Buchungen erstellt; ausgebuchte Wochen wurden übersprungen.",
+      "repeatWeekly": "Wöchentlich wiederholen (4 Termine)",
+      "leaveReview": "Bewertung abgeben",
+      "bookAgain": "Erneut buchen",
+      "fullRefund": "Vollständige Erstattung: {amount}",
+      "partialRefund": "Gemäß den Bedingungen werden {percent} % ({amount}) erstattet.",
+      "refundReview": "Erstattungen werden nach Prüfung durch die Finanzabteilung bearbeitet.",
+      "reasonOptional": "Grund (optional)",
+      "keepBooking": "Buchung behalten",
+      "bookingCancelled": "Buchung storniert.",
+      "chooseNewTime": "Neuen Termin auswählen",
+      "rescheduleHint": "Deine aktuelle Buchung bleibt bestehen, bis der neue Termin bestätigt ist. Preis und Bedingungen bleiben unverändert.",
+      "newDay": "Neuer Tag",
+      "noOpenTimes": "An diesem Tag sind keine freien Termine verfügbar.",
+      "bookingRescheduled": "Buchung verschoben.",
+      "confirmNewTime": "Neuen Termin bestätigen",
+      "reviewThisBooking": "Diese Buchung bewerten",
+      "rating": "Bewertung",
+      "reviewText": "Bewertungstext",
+      "reviewHint": "Beschreibe deine Erfahrung. Bitte keine persönlichen oder medizinischen Angaben.",
+      "submitForReview": "Zur Prüfung einreichen",
+      "reviewAvailableAt": "Du kannst diesen Dienst zwei Stunden nach seinem Ende bewerten: {date}",
+      "timeliness": "Pünktlichkeit",
+      "careAndCommunication": "Umgang mit dem Tier und Kommunikation",
+      "serviceQuality": "Dienstleistungsqualität",
+      "reviewSubmitted": "Deine Bewertung wurde eingereicht und wird nach der Prüfung veröffentlicht."
     }
   }
 }
