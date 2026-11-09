@@ -496,4 +496,41 @@ describe("CheckoutView", () => {
     await waitFor(() => expect(screen.queryByLabelText("City")).toBeNull());
   });
 
+  it.each([
+    ["de", "Die Adresse konnte nicht gespeichert werden."],
+    ["es", "No se pudo guardar la dirección."],
+  ] as const)("does not leak an English backend validation message into %s checkout", async (locale, expectedMessage) => {
+    vi.mocked(commerceService.getCart).mockResolvedValue(EMPTY_CART);
+    vi.mocked(addressesService.list).mockResolvedValue([ADDRESS]);
+    vi.mocked(addressesService.update).mockRejectedValueOnce(new ApiError({ code: "VALIDATION_ERROR", message: "Address line is required", requestId: "request-1" }, 400));
+
+    renderWithIntl(<CheckoutView />, locale);
+    fireEvent.click(await screen.findByRole("button", { name: locale === "de" ? "Ausgewählte Adresse bearbeiten" : "Editar dirección seleccionada" }));
+    fireEvent.click(screen.getByRole("button", { name: locale === "de" ? "Adresse speichern" : "Guardar dirección" }));
+
+    expect((await screen.findByRole("alert")).textContent).toContain(expectedMessage);
+    expect(document.body.textContent).not.toContain("Address line is required");
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it.each([
+    ["de", "Weiter", "Royal Canin Adult Dog Food: Preis seit dem Hinzufügen aktualisiert"],
+    ["es", "Continuar", "Royal Canin Adult Dog Food: El precio se ha actualizado desde que lo añadiste"],
+  ] as const)("localizes checkout validation issues in %s without rewriting product content", async (locale, continueLabel, expectedIssue) => {
+    vi.mocked(commerceService.getCart).mockResolvedValue(EMPTY_CART);
+    vi.mocked(addressesService.list).mockResolvedValue([ADDRESS]);
+    vi.mocked(commerceService.createCheckout).mockResolvedValue({
+      ...CHECKOUT,
+      validationIssues: [{ code: "PRICE_CHANGED", cartLineId: "line-a", message: "Royal Canin Adult Dog Food's price changed since it was added to your cart." }],
+    });
+
+    renderWithIntl(<CheckoutView />, locale);
+    fireEvent.click(await screen.findByRole("button", { name: continueLabel }));
+
+    expect(await screen.findByRole("heading", { name: locale === "de" ? "Bestellung prüfen" : "Revisa tu pedido" })).toBeTruthy();
+    expect(screen.getByText(expectedIssue)).toBeTruthy();
+    expect(document.body.textContent).not.toContain("price changed since it was added");
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
 });
