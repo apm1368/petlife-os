@@ -2,6 +2,16 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
+## QA checkpoint — 2026-11-09 12:49 UTC
+
+- `main` and production both report `fb2f421dae9506ae62cc8f4c896703adc9387b58`. Production version API returned HTTP 200 for that SHA; readiness returned `ok`, database and Redis up. Exact-main workflow 42614356138 completed successfully.
+- QA record: PR #209, branch `qa/mission-2-full-regression-2026-11-09`, current head at this checkpoint `efca3e2da2b576cca699e7c8eb273e47052c1097`. Its newer CI run 42620120425 was in progress at `Test`; lint, visual/design contract, typecheck and migrations had passed. Do not use the older head's run as final evidence. This handoff update triggers a new final-head CI run.
+- Safe live checks: health/readiness pass; anonymous `/api/admin/audit` is 401; `/api/shop/products` returns HTTP 200 with zero products and zero demo rows. Demo exclusion is verified; real reviewed product visibility and purchase are not, because there are no live catalog items.
+- Locale roots `/fa`, `/en`, `/de`, `/es` return HTTP 200 with expected `lang`/direction metadata. This does not verify complete page translation. Browser screenshot attempt at 390×844 timed out before capture; cause unknown. Authenticated flows, viewport/theme/accessibility matrix and performance were not tested.
+- All inspected worktrees were clean and left untouched. No payment-named worktree is visible; that is not evidence that prior payment work was deleted. No payment files were modified. Disk is critically low at 20 MiB free of 7.9 GiB; no cleanup or local build was attempted.
+- Open PR snapshot: #132–#141 (localization stack) remain based on `feat/i18n-shop-customer` and GitHub reports `DIRTY`; #121, #102, #103, #105, #106, #108, #109 and #59 also report `DIRTY` against their current bases. Their previously green checks are stale and must not be reused. #209 is the only new QA PR in this checkpoint; its review/merge state is pending final-head CI and repository rules.
+- Exact next actions: monitor the newest CI for PR #209 and merge only if it is green and GitHub permits the normal path; retain QA statuses as partial/blocked where credentials, browser, catalog data, provider access or storage/CDN configuration are absent. Resolve stale/dirty product PRs one at a time from current `main`, starting with any independently reviewable, release-relevant fix, and rerun checks on retargeted heads. Do not claim project completion.
+
 ## Latest verified checkpoint — 2026-11-09 11:31 UTC
 
 - #208 merged normally by squash at merge SHA `fbea505cf1e49fa60bcf7e40a7fb54499b5e2075`; #104 was closed as superseded without deleting its branch/history. #208 exact-head CI `42607738997` passed lint, design/visual, typecheck, migrations, tests, API E2E and production build. This integrates BK-19 review timing and three criteria into the localized customer booking detail.
