@@ -1,17 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { useLocalizedRouter as useRouter } from "@/features/navigation/localized-link";
 import { useLocale, useTranslations } from "next-intl";
-import { Button, Skeleton, StatusLabel } from "@petlife/ui";
-import type { InsuranceEligibilityResultDto, InsuranceProductDto } from "@petlife/types";
+import { Skeleton, StatusLabel } from "@petlife/ui";
+import type { InsuranceProductDto } from "@petlife/types";
 import { insuranceService } from "@/services/insurance.service";
 import { LoadFailure } from "@/features/system/LoadFailure";
-import { eligibilityStatusTone, verificationStatusTone } from "./insurance-status";
+import { verificationStatusTone } from "./insurance-status";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
-import { apiErrorText } from "@/lib/errors/api-error-text";
+import type { RouteLocale } from "@/lib/i18n/config";
+
+function safeInsurerWebsite(value: string | null): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Spec hard UX rule: exclusions must be highly visible — this renders them
@@ -20,25 +28,17 @@ import { apiErrorText } from "@/lib/errors/api-error-text";
  */
 export function InsuranceProductDetailView({ productId }: { productId: string }) {
   const fmt = useInstantFormat();
-  const locale = useLocale() === "en" ? "en" : "fa";
+  const locale = useLocale() as RouteLocale;
   const t = useTranslations("insurance");
-  const tCommon = useTranslations("common");
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const petId = searchParams.get("petId") ?? undefined;
 
   const [product, setProduct] = useState<InsuranceProductDto | null>(null);
-  const [eligibility, setEligibility] = useState<InsuranceEligibilityResultDto | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<unknown>(null);
-  const [isActing, setIsActing] = useState(false);
 
   async function load() {
-    setError(null);
     setLoadError(null);
+    setProduct(null);
     try {
       setProduct(await insuranceService.getProduct(productId));
-      if (petId) setEligibility(await insuranceService.checkEligibility(petId, productId));
     } catch (err) {
       setLoadError(err);
     }
@@ -47,24 +47,11 @@ export function InsuranceProductDetailView({ productId }: { productId: string })
   useEffect(() => {
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productId, petId]);
-
-  async function handleApply(): Promise<void> {
-    if (!petId) return;
-    setIsActing(true);
-    setError(null);
-    try {
-      const application = await insuranceService.createApplication(petId, productId);
-      router.push(`/pets/${petId}/insurance?applicationId=${application.id}`);
-    } catch (err) {
-      setError(apiErrorText(err, undefined, tCommon("genericError")));
-    } finally {
-      setIsActing(false);
-    }
-  }
+  }, [productId]);
 
   if (loadError && !product) return <LoadFailure error={loadError} onRetry={load} />;
-  if (!product) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
+  if (!product) return <Skeleton className="h-64 w-full" aria-label={t("detail.loading")} />;
+  const insurerWebsite = safeInsurerWebsite(product.providerWebsiteUrl);
 
   return (
     <div className="flex flex-col gap-6">
@@ -117,28 +104,13 @@ export function InsuranceProductDetailView({ productId }: { productId: string })
                 <p className="fact-line">{t("detail.premiumRange", { min: formatCurrency(product.premiumMinIrr, locale), max: formatCurrency(product.premiumMaxIrr, locale) })}</p>
               ) : null}
           </section>
-          {error ? <p className="text-body text-state-urgent">{error}</p> : null}
-          {petId ? (
-            <section className="split-section flex flex-col gap-3">
-              <h2 className="text-section-title text-text-primary">{t("eligibility.sectionTitle")}</h2>
-              {eligibility ? (
-                <>
-                  <StatusLabel tone={eligibilityStatusTone(eligibility.status)}>{t(`eligibilityStatus.${eligibility.status}`)}</StatusLabel>
-                  {eligibility.reasons.map((reason) => (
-                    <p key={reason} className="text-metadata text-text-secondary">
-                      {t(`eligibility.reasons.${reason}`)}
-                    </p>
-                  ))}
-                  <p className="text-metadata text-text-secondary">{t("eligibility.disclaimer")}</p>
-                </>
-              ) : (
-                <Skeleton className="h-8 w-full" aria-label={tCommon("loading")} />
-              )}
-              <Button variant="primary" isLoading={isActing} onClick={handleApply}>
-                {t("detail.apply")}
-              </Button>
-            </section>
-          ) : null}
+          {insurerWebsite ? (
+            <a className="account-link-button" href={insurerWebsite} target="_blank" rel="noopener noreferrer">
+              {t("detail.visitInsurer")}
+            </a>
+          ) : (
+            <p className="text-metadata text-text-secondary">{t("detail.insurerWebsiteUnavailable")}</p>
+          )}
         </aside>
       </div>
     </div>

@@ -4020,10 +4020,19 @@
       "subtitle": "ارائه‌دهندگان و پوشش‌ها را مقایسه کنید — این ابزار کشف است، نه بیمه‌گر.",
       "empty": "هیچ محصول بیمه‌ای یافت نشد.",
       "compareSelected": "مقایسه موارد انتخاب‌شده",
-      "viewDetails": "مشاهده جزئیات"
+      "viewDetails": "مشاهده جزئیات",
+      "selectForCompare": "انتخاب برای مقایسه",
+      "loading": "در حال بارگذاری محصولات بیمه",
+      "annualLimit": "سقف سالانه",
+      "deductible": "فرانشیز",
+      "coinsurance": "سهم شما",
+      "percentUnit": "٪",
+      "waitingPeriod": "دورهٔ انتظار",
+      "days": "{count, number} روز",
+      "premiumFrom": "حق بیمه از"
     },
     "detail": {
-      "exclusionsTitle": "استثناها — پیش از درخواست بخوانید",
+      "exclusionsTitle": "استثناها — پیش از تماس با بیمه‌گر بخوانید",
       "exclusionsEmpty": "استثنایی برای این محصول ثبت نشده است.",
       "coverageTitle": "پوشش",
       "waitingPeriod": "دوره انتظار: {days} روز",
@@ -4031,16 +4040,23 @@
       "annualLimit": "سقف سالانه: {amount}",
       "premiumRange": "حق بیمه: {min} تا {max}",
       "termsSource": "منبع: {source}",
-      "checkEligibility": "بررسی واجد شرایط بودن برای {petName}",
-      "apply": "شروع درخواست"
+      "visitInsurer": "رفتن به وب‌سایت بیمه‌گر",
+      "insurerWebsiteUnavailable": "بیمه‌گر پیوند وب‌سایت خود را ثبت نکرده است.",
+      "loading": "در حال بارگذاری جزئیات بیمه"
     },
     "compare": {
       "title": "مقایسه طرح‌ها",
-      "exclusions": "استثناها"
+      "exclusions": "استثناها",
+      "loading": "در حال بارگذاری مقایسهٔ بیمه",
+      "empty": "برای مقایسه، محصول بیمه‌ای پیدا نشد.",
+      "emptyDescription": "محصول‌های انتخاب‌شده را بررسی کنید و دوباره تلاش کنید."
     },
     "eligibility": {
       "title": "واجد شرایط بودن برای {petName}",
       "sectionTitle": "واجد شرایط بودن برای این حیوان خانگی",
+      "loading": "در حال بررسی شرایط بیمه",
+      "loadFailed": "بررسی شرایط بیمه بارگذاری نشد.",
+      "retry": "دوباره بررسی کن",
       "disclaimer": "این تضمین تأیید نیست — تصمیم نهایی با بیمه‌گر است.",
       "reasons": {
         "SPECIES_NOT_COVERED": "گونه این حیوان خانگی تحت پوشش این محصول نیست.",

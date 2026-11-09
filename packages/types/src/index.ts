@@ -5167,6 +5167,7 @@ export interface InsuranceProductDto {
   providerId: string;
   providerName: string;
   providerLogoUrl: string | null;
+  providerWebsiteUrl: string | null;
   name: string;
   country: string;
   speciesEligibility: PetSpecies[];
