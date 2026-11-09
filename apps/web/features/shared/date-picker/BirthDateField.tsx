@@ -11,7 +11,7 @@ import { calendarFromIso, isoFrom, localizeDigits, monthLength, monthName, today
  * back, and the browser's native date input is always Gregorian. The value stays an ISO day.
  */
 export function BirthDateField({ label, value, onChange, yearsBack = 30 }: { label: string; value: string; onChange: (iso: string) => void; yearsBack?: number }) {
-  const locale = useLocale() === "fa" ? "fa" : "en";
+  const locale = useLocale() as "fa" | "en" | "de" | "es";
   const t = useTranslations("birthDateField");
   const [system, setSystem] = useState<CalendarSystem>(locale === "fa" ? "jalali" : "gregorian");
   const today = calendarFromIso(system, todayIso());

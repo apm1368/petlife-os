@@ -13,6 +13,8 @@ import { LoadFailure } from "@/features/system/LoadFailure";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
 import { calendarFromIso, localizeDigits, monthName } from "@/lib/date/jalali";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { PetMemorialConsentPanel } from "./PetMemorialConsentPanel";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 type ViewMode = "JOURNAL" | "GALLERY";
 
@@ -31,7 +33,7 @@ type ViewMode = "JOURNAL" | "GALLERY";
 export function MemoriesListView({ petId }: { petId: string }) {
   const fmt = useInstantFormat();
   const t = useTranslations("memories");
-  const locale = useLocale();
+  const locale = useLocale() as RouteLocale;
   const tCommon = useTranslations("common");
 
   const [pet, setPet] = useState<PetDto | null>(null);
@@ -107,7 +109,7 @@ export function MemoriesListView({ petId }: { petId: string }) {
   const dayParts = (iso: string) => {
     const tehranDay = new Date(new Date(iso).getTime() + 3.5 * 3_600_000).toISOString().slice(0, 10);
     const c = calendarFromIso(system, tehranDay);
-    return { day: localizeDigits(c.day, locale === "fa" ? "fa" : "en"), month: monthName(system, c.month, locale === "fa" ? "fa" : "en") };
+    return { day: localizeDigits(c.day, locale), month: monthName(system, c.month, locale) };
   };
 
   return (
@@ -122,6 +124,8 @@ export function MemoriesListView({ petId }: { petId: string }) {
           <Button variant="primary">{t("list.addMemory")}</Button>
         </Link>
       </header>
+
+      {isMemorial ? <PetMemorialConsentPanel petId={petId} petName={pet.name} memories={memories} /> : null}
 
       <div className="mem-filters">
         <Input label={t("list.searchLabel")} value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("list.searchPlaceholder")} />

@@ -57,6 +57,7 @@ import { MarketplaceModule } from "./modules/commerce/marketplace/marketplace.mo
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { AdminModule } from "./modules/admin/admin.module";
 import { SupportModule } from "./modules/support/support.module";
+import { HelpCenterModule } from "./modules/help-center/help-center.module";
 import { ContentModule } from "./modules/content/content.module";
 import { SubscriptionsModule } from "./modules/subscriptions/subscription.module";
 import { ClinicalHealthModule } from "./modules/clinical-health/clinical-health.module";
@@ -141,6 +142,7 @@ import { PlacesModule } from "./modules/places/places.module";
     NotificationsModule,
     AdminModule,
     SupportModule,
+    HelpCenterModule,
     ContentModule,
     SubscriptionsModule,
     ClinicalHealthModule,

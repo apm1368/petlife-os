@@ -11,11 +11,13 @@ import { addressesService } from "@/services/addresses.service";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { ApiError } from "@/lib/api/client";
 import { formatNumber, ProductImage } from "./commerce-ui";
+import type { RouteLocale } from "@/lib/i18n/config";
+import { formatLocaleDate } from "@/lib/i18n/format";
 
-type Locale = "fa" | "en";
+type Locale = RouteLocale;
 
 function day(value: string, locale: Locale) {
-  return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "medium" }).format(new Date(value));
+  return formatLocaleDate(value, locale);
 }
 
 function statusTone(status: RepeatDeliveryDto["status"]): "success" | "neutral" | "attention" {
@@ -31,14 +33,14 @@ export function RepeatDeliveryListView() {
   const router = useRouter();
   const locale = useLocale() as Locale;
   const [items, setItems] = useState<RepeatDeliveryDto[] | null>(null);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<"failed" | "offline" | "noAccess" | null>(null);
 
   async function load() {
-    setError(false);
+    setError(null);
     try {
       setItems(await commerceService.listRepeatDeliveries());
-    } catch {
-      setError(true);
+    } catch (err) {
+      setError(navigator.onLine === false ? "offline" : err instanceof ApiError && (err.status === 401 || err.status === 403) ? "noAccess" : "failed");
     }
   }
 
@@ -46,7 +48,7 @@ export function RepeatDeliveryListView() {
     void load();
   }, []);
 
-  if (error) return <ErrorRecovery title={t("title")} message="" retryLabel={t("retry")} onRetry={load} />;
+  if (error) return <ErrorRecovery title={t(error === "noAccess" ? "accessDeniedTitle" : error === "offline" ? "offlineTitle" : "title")} message={t(error === "noAccess" ? "accessDeniedHint" : error === "offline" ? "offlineHint" : "loadFailed")} retryLabel={t("retry")} onRetry={load} />;
   if (!items) return <Skeleton className="h-64 w-full" aria-label={t("loading")} />;
 
   return (
@@ -66,7 +68,7 @@ export function RepeatDeliveryListView() {
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
                   <div className="flex items-start justify-between gap-2">
                     <p className="truncate text-body font-medium text-text-primary">{item.product.title}</p>
-                    <StatusLabel tone={statusTone(item.status)}>{t(`status.${item.status}`)}</StatusLabel>
+                    <StatusLabel tone={statusTone(item.status)}>{t(`status.${repeatStatusKey(item.status)}`)}</StatusLabel>
                   </div>
                   <p className="text-metadata text-text-secondary">{t("summary", { quantity: formatNumber(item.quantity, locale), days: formatNumber(item.intervalDays, locale), seller: item.sellerOrganization.name })}</p>
                   {item.status === "ACTIVE" ? <p className="text-metadata text-text-primary">{t("nextOn", { date: day(item.nextCycleAt, locale) })}</p> : null}
@@ -100,11 +102,14 @@ export function RepeatDeliveryCreateView() {
   const [offer, setOffer] = useState<SellerOfferDto | null>(null);
   const [product, setProduct] = useState<ProductDetailDto | null>(null);
   const [addresses, setAddresses] = useState<CustomerAddressDto[] | null>(null);
+  const [addressesLoadFailed, setAddressesLoadFailed] = useState(false);
+  const [addressRetry, setAddressRetry] = useState(0);
   const [quantity, setQuantity] = useState(initialQuantity);
   const [intervalDays, setIntervalDays] = useState<number | null>(null);
   const [addressId, setAddressId] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
-  const [loadError, setLoadError] = useState(false);
+  const [loadError, setLoadError] = useState<"notAvailable" | "offline" | "noAccess" | null>(null);
+  const [productRetry, setProductRetry] = useState(0);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -115,25 +120,31 @@ export function RepeatDeliveryCreateView() {
         const detail = await commerceService.getProductDetail(productId);
         const found = detail.offers.find((o) => o.id === offerId && o.repeatDeliveryEligible);
         if (!found) {
-          setLoadError(true);
+          setLoadError("notAvailable");
           return;
         }
         setOffer(found);
         setProduct(detail);
         setIntervalDays(found.repeatIntervalsDays.includes(30) ? 30 : found.repeatIntervalsDays[0] ?? null);
-      } catch {
-        setLoadError(true);
+      } catch (err) {
+        setLoadError(navigator.onLine === false ? "offline" : err instanceof ApiError && (err.status === 401 || err.status === 403) ? "noAccess" : "notAvailable");
       }
     })();
-  }, [offerId, productId]);
+  }, [offerId, productId, productRetry]);
 
   useEffect(() => {
     if (!householdId) return;
+    let active = true;
+    setAddressesLoadFailed(false);
     void addressesService.list(householdId).then((list) => {
+      if (!active) return;
       setAddresses(list);
       setAddressId(list.find((a) => a.isDefault)?.id ?? list[0]?.id ?? "");
+    }).catch(() => {
+      if (active) setAddressesLoadFailed(true);
     });
-  }, [householdId]);
+    return () => { active = false; };
+  }, [householdId, addressRetry]);
 
   async function submit() {
     if (!offer || !intervalDays || !addressId) return;
@@ -143,13 +154,24 @@ export function RepeatDeliveryCreateView() {
       const created = await commerceService.createRepeatDelivery({ sellerOfferId: offer.id, quantity, intervalDays, addressId });
       router.replace(`/${locale}/repeat-delivery/${created.id}`);
     } catch (err) {
-      setError(err instanceof ApiError && err.status < 500 ? err.message : t("saveFailed"));
+      setError(locale !== "fa" && locale !== "en" ? t("saveFailed") : err instanceof ApiError && err.status < 500 ? err.message : t("saveFailed"));
     } finally {
       setSaving(false);
     }
   }
 
-  if (!offerId || !productId || loadError) return <ErrorRecovery title={t("notAvailableTitle")} message={t("notAvailableHint")} retryLabel={t("browse")} onRetry={() => router.push(`/${locale}/shop/products`)} />;
+  if (!offerId || !productId || loadError) {
+    const unavailable = !loadError || loadError === "notAvailable";
+    const title = loadError === "noAccess" ? t("accessDeniedTitle") : loadError === "offline" ? t("offlineTitle") : t("notAvailableTitle");
+    const message = loadError === "noAccess" ? t("accessDeniedHint") : loadError === "offline" ? t("offlineHint") : t("notAvailableHint");
+    return <ErrorRecovery title={title} message={message} retryLabel={unavailable ? t("browse") : t("retry")} onRetry={() => {
+      if (unavailable) router.push(`/${locale}/shop/products`);
+      else {
+        setLoadError(null);
+        setProductRetry((attempt) => attempt + 1);
+      }
+    }} />;
+  }
   if (!offer || !product) return <Skeleton className="h-64 w-full" aria-label={t("loading")} />;
 
   const variant = product.variants.find((v) => v.id === offer.productVariantId);
@@ -169,7 +191,14 @@ export function RepeatDeliveryCreateView() {
 
       <Select label={t("interval")} value={intervalDays ? String(intervalDays) : ""} onChange={(e) => setIntervalDays(Number(e.target.value))} options={offer.repeatIntervalsDays.map((d) => ({ value: String(d), label: t("everyDays", { days: formatNumber(d, locale) }) }))} />
       <Select label={t("quantity")} value={String(quantity)} onChange={(e) => setQuantity(Number(e.target.value))} options={Array.from({ length: 10 }, (_, i) => ({ value: String(i + 1), label: formatNumber(i + 1, locale) }))} />
-      {addresses && addresses.length ? (
+      {addressesLoadFailed ? (
+        <div className="flex flex-col gap-2">
+          <p role="alert" className="text-metadata text-state-urgent">{t("addressesLoadFailed")}</p>
+          <Button variant="secondary" onClick={() => { setAddresses(null); setAddressRetry((attempt) => attempt + 1); }}>{t("retry")}</Button>
+        </div>
+      ) : addresses === null ? (
+        <Skeleton className="h-12 w-full" aria-label={t("loadingAddresses")} />
+      ) : addresses.length ? (
         <Select label={t("address")} value={addressId} onChange={(e) => setAddressId(e.target.value)} options={addresses.map((a) => ({ value: a.id, label: `${a.label ?? a.city} — ${a.addressLine}`.slice(0, 80) }))} />
       ) : (
         <p className="text-body text-text-secondary">{t("needAddress")}</p>
@@ -198,8 +227,10 @@ export function RepeatDeliveryDetailView({ id }: { id: string }) {
   const locale = useLocale() as Locale;
   const { householdId } = useActivePet();
   const [item, setItem] = useState<RepeatDeliveryDto | null>(null);
-  const [addresses, setAddresses] = useState<CustomerAddressDto[]>([]);
-  const [error, setError] = useState<"notFound" | "failed" | null>(null);
+  const [addresses, setAddresses] = useState<CustomerAddressDto[] | null>(null);
+  const [addressesLoadFailed, setAddressesLoadFailed] = useState(false);
+  const [addressRetry, setAddressRetry] = useState(0);
+  const [error, setError] = useState<"notFound" | "failed" | "offline" | "noAccess" | null>(null);
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -209,7 +240,7 @@ export function RepeatDeliveryDetailView({ id }: { id: string }) {
     try {
       setItem(await commerceService.getRepeatDelivery(id));
     } catch (err) {
-      setError(err instanceof ApiError && err.status === 404 ? "notFound" : "failed");
+      setError(err instanceof ApiError && err.status === 404 ? "notFound" : navigator.onLine === false ? "offline" : err instanceof ApiError && (err.status === 401 || err.status === 403) ? "noAccess" : "failed");
     }
   }
 
@@ -219,8 +250,16 @@ export function RepeatDeliveryDetailView({ id }: { id: string }) {
   }, [id]);
 
   useEffect(() => {
-    if (householdId) void addressesService.list(householdId).then(setAddresses).catch(() => setAddresses([]));
-  }, [householdId]);
+    if (!householdId) return;
+    let active = true;
+    setAddressesLoadFailed(false);
+    void addressesService.list(householdId).then((list) => {
+      if (active) setAddresses(list);
+    }).catch(() => {
+      if (active) setAddressesLoadFailed(true);
+    });
+    return () => { active = false; };
+  }, [householdId, addressRetry]);
 
   async function run(action: () => Promise<RepeatDeliveryDto | unknown>, success: string, after?: () => void) {
     setBusy(true);
@@ -232,7 +271,7 @@ export function RepeatDeliveryDetailView({ id }: { id: string }) {
       setNotice(success);
       after?.();
     } catch (err) {
-      setActionError(err instanceof ApiError && err.status < 500 ? err.message : t("saveFailed"));
+      setActionError(locale !== "fa" && locale !== "en" ? t("saveFailed") : err instanceof ApiError && err.status < 500 ? err.message : t("saveFailed"));
       await load();
     } finally {
       setBusy(false);
@@ -240,7 +279,7 @@ export function RepeatDeliveryDetailView({ id }: { id: string }) {
   }
 
   if (error === "notFound") return <ErrorRecovery title={t("notFound")} message="" retryLabel={t("backToList")} onRetry={() => router.push(`/${locale}/repeat-delivery`)} />;
-  if (error) return <ErrorRecovery title={t("title")} message="" retryLabel={t("retry")} onRetry={load} />;
+  if (error) return <ErrorRecovery title={t(error === "noAccess" ? "accessDeniedTitle" : error === "offline" ? "offlineTitle" : "title")} message={t(error === "noAccess" ? "accessDeniedHint" : error === "offline" ? "offlineHint" : "loadFailed")} retryLabel={t("retry")} onRetry={load} />;
   if (!item) return <Skeleton className="h-64 w-full" aria-label={t("loading")} />;
 
   const cancelled = item.status === "CANCELLED";
@@ -256,7 +295,7 @@ export function RepeatDeliveryDetailView({ id }: { id: string }) {
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex items-start justify-between gap-2">
             <h1 className="text-section-title text-text-primary">{item.product.title}</h1>
-            <StatusLabel tone={statusTone(item.status)}>{t(`status.${item.status}`)}</StatusLabel>
+            <StatusLabel tone={statusTone(item.status)}>{t(`status.${repeatStatusKey(item.status)}`)}</StatusLabel>
           </div>
           {item.variantTitle ? <p className="text-metadata text-text-secondary">{item.variantTitle}</p> : null}
           <p className="text-metadata text-text-secondary">{t("soldBy", { seller: item.sellerOrganization.name })}</p>
@@ -315,7 +354,14 @@ export function RepeatDeliveryDetailView({ id }: { id: string }) {
             onChange={(e) => run(() => commerceService.updateRepeatDelivery(id, { quantity: Number(e.target.value) }), t("saved"))}
             options={Array.from({ length: 10 }, (_, i) => ({ value: String(i + 1), label: formatNumber(i + 1, locale) }))}
           />
-          {addresses.length ? (
+          {addressesLoadFailed ? (
+            <div className="flex flex-col gap-2">
+              <p role="alert" className="text-metadata text-state-urgent">{t("addressesLoadFailed")}</p>
+              <Button variant="secondary" disabled={busy} onClick={() => { setAddresses(null); setAddressRetry((attempt) => attempt + 1); }}>{t("retry")}</Button>
+            </div>
+          ) : addresses === null ? (
+            <Skeleton className="h-12 w-full" aria-label={t("loadingAddresses")} />
+          ) : addresses.length ? (
             <Select
               label={t("address")}
               value={item.addressId ?? ""}
@@ -359,7 +405,7 @@ export function RepeatDeliveryDetailView({ id }: { id: string }) {
           <ol className="flex flex-col gap-1.5">
             {item.events.map((event, i) => (
               <li key={`${event.createdAt}-${i}`} className="flex items-center justify-between gap-3 text-metadata">
-                <span className="text-text-primary">{t(`event.${event.type}` as "event.CREATED")}</span>
+                <span className="text-text-primary">{t(`event.${repeatEventKey(event.type)}`)}</span>
                 <span className="text-text-secondary">{day(event.createdAt, locale)}</span>
               </li>
             ))}
@@ -368,4 +414,14 @@ export function RepeatDeliveryDetailView({ id }: { id: string }) {
       ) : null}
     </div>
   );
+}
+
+const repeatStatuses = ["ACTIVE", "PAUSED", "CANCELLED"] as const;
+function repeatStatusKey(status: string): (typeof repeatStatuses)[number] | "UNKNOWN" {
+  return repeatStatuses.includes(status as (typeof repeatStatuses)[number]) ? status as (typeof repeatStatuses)[number] : "UNKNOWN";
+}
+
+const repeatEvents = ["CREATED", "UPDATED", "SKIPPED", "PAUSED", "RESUMED", "CANCELLED", "PRICE_ACCEPTED", "REMINDER_SENT", "CYCLE_PREPARED", "ORDERED"] as const;
+function repeatEventKey(event: string): (typeof repeatEvents)[number] | "OTHER" {
+  return repeatEvents.includes(event as (typeof repeatEvents)[number]) ? event as (typeof repeatEvents)[number] : "OTHER";
 }

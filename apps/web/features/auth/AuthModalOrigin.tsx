@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 import { sanitizeReturnTo } from "@/lib/auth/return-to";
 const Origin = createContext<string | null>(null);
-const authPath = /^\/(fa|en)\/(auth|welcome|register|account)(\/|$)/;
+const authPath = /^\/(fa|en|de|es)\/(auth|welcome|register|account)(\/|$)/;
 
 /** Capture the actual originating URL before Next intercepts the auth link. */
 export function AuthModalOrigin({ children }: { children: ReactNode }) {

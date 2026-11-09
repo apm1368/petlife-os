@@ -1,4 +1,31 @@
 {
+  "adminServices": {
+    "unknownValue": "Value unavailable",
+    "common": { "all": "All", "confirm": "Confirm", "previous": "Previous", "next": "Next", "hoursAbbreviation": "h" },
+    "nav": { "label": "Services administration navigation", "bookings": "Bookings", "services": "Services", "reviews": "Reviews", "analytics": "Analytics & waitlist" },
+    "bookings": { "title": "Services & bookings", "searchLabel": "Search by number, pet or provider", "statusLabel": "Booking status", "number": "Number", "when": "When", "pet": "Pet", "provider": "Provider", "service": "Service", "payment": "Payment", "amount": "Amount", "empty": "No bookings found", "resultCount": "{count} bookings" },
+    "detail": { "booking": "Booking", "readOnlyNotice": "Read-only. Refunds go through finance approval and disputes through the disputes module.", "service": "Service", "when": "When", "provider": "Provider", "location": "Location", "pet": "Pet", "customer": "Customer", "bookingMode": "Booking mode", "rejectionReason": "Rejection reason", "cancellationReason": "Cancellation reason", "rescheduledFrom": "Moved from", "rescheduledTo": "Moved to", "finance": "Financial summary", "snapshottedPrice": "Snapshotted price", "paymentMode": "Payment mode", "cancellationTerms": "Cancellation terms", "paymentIntent": "Payment intent", "refund": "Refund", "reviewTransactions": "Review in transactions", "timeline": "Timeline", "linkedRecords": "Access, support and linked records", "providerAccess": "Provider access", "consentedHealthRead": "Health read (consented)", "noHealthRead": "No health read", "revoked": "revoked", "clinicalVisit": "Clinical visit", "review": "Review", "supportCase": "Support case", "support": "Support" },
+    "services": { "title": "Provider services", "provider": "Provider", "service": "Service", "category": "Category", "modePayment": "Booking / payment", "options": "Options", "bookings": "Bookings", "state": "State", "empty": "No services have been recorded", "active": "Active", "inactive": "Inactive", "deactivate": "Deactivate", "reactivate": "Reactivate", "deactivateTitle": "Deactivate service", "reactivateTitle": "Reactivate service", "toggleNotice": "Existing bookings are not cancelled; only new bookings are stopped or resumed. This action is recorded in the audit log." },
+    "reviews": { "title": "Provider reviews", "statusLabel": "Review status", "published": "Published", "hidden": "Hidden", "empty": "No reviews", "hiddenBecause": "Hidden because:", "hide": "Hide", "hideTitle": "Hide review", "hideNotice": "The review is not deleted; it is removed from public display and the rating average, and this action is audited.", "confirmHide": "Hide review" },
+    "analytics": { "title": "Services analytics ({days} days)", "bookings": "Bookings", "completed": "Completed", "cancelled": "Cancelled", "noShow": "No-show", "openRequests": "Open requests", "rejectedExpired": "Rejected / expired", "averageRating": "Average rating", "activeWaitlist": "Active waitlist", "byCategory": "By category", "waitlist": "Waitlist", "waitlistOrder": "In joining order", "waitlistEmpty": "The waitlist is empty." },
+    "states": { "loadFailedTitle": "Could not load", "bookingsLoadFailed": "Bookings could not be loaded. Try again.", "bookingsLoading": "Loading service bookings…", "bookingsAccessDenied": "You need services.view permission to view bookings.", "detailLoadFailed": "This booking could not be loaded. Try again.", "detailLoading": "Loading booking details…", "detailAccessDenied": "You do not have permission to view this booking.", "detailNotFound": "Booking not found", "servicesLoadFailed": "Provider services could not be loaded. Try again.", "servicesLoading": "Loading provider services…", "reviewsLoadFailed": "Provider reviews could not be loaded. Try again.", "reviewsLoading": "Loading provider reviews…", "reviewsAccessDenied": "You need services.view permission to view reviews.", "analyticsLoadFailed": "Services analytics could not be loaded. Try again.", "analyticsLoading": "Loading services analytics…", "manageAccessDenied": "You need services.manage permission to change this item.", "actionFailed": "The action could not be completed. Try again.", "offline": "You are offline. Check your connection and try again." },
+    "bookingStatus": { "HOLD": "On hold", "PENDING_CONFIRMATION": "Awaiting confirmation", "REQUESTED": "Requested", "AWAITING_PAYMENT": "Awaiting payment", "REJECTED": "Declined", "EXPIRED": "Expired", "RESCHEDULED": "Rescheduled", "CONFIRMED": "Confirmed", "CHECKED_IN": "Checked in", "IN_PROGRESS": "In progress", "COMPLETED": "Completed", "CANCELLED_BY_USER": "Cancelled by customer", "CANCELLED_BY_PROVIDER": "Cancelled by provider", "NO_SHOW": "No-show" },
+    "category": { "VET": "Veterinary", "GROOMING": "Grooming", "TRAINING": "Training", "WALKING": "Dog walking", "SITTING": "Pet sitting", "BOARDING": "Boarding", "PET_TAXI": "Pet taxi", "OTHER": "Other services" },
+    "paymentMode": { "NONE": "No online payment", "PAY_AT_PROVIDER": "Pay at provider", "FULL_PREPAYMENT": "Full online prepayment", "DEPOSIT": "Online deposit" },
+    "bookingMode": { "INSTANT": "Instant booking", "REQUEST": "Request and provider confirmation" },
+    "paymentStatus": { "NOT_REQUIRED": "Not required", "PENDING": "Pending", "AUTHORIZED": "Authorized", "PAID": "Paid", "FAILED": "Failed", "REFUND_PENDING": "Refund pending", "REFUNDED": "Refunded" },
+    "providerVerification": { "NOT_STARTED": "Not started", "SUBMITTED": "Submitted", "NEEDS_INFORMATION": "More information needed", "UNDER_REVIEW": "Under review", "VERIFIED": "Verified", "REJECTED": "Rejected", "SUSPENDED": "Suspended" },
+    "paymentProvider": { "DEV_SIMULATED": "Development simulator", "STANDARD_GATEWAY": "Payment gateway", "SNAPP_PAY": "SnappPay", "DIGI_PAY": "DigiPay" },
+    "refundStatus": { "REQUESTED": "Requested", "PROCESSING": "Processing", "SUCCEEDED": "Refunded", "FAILED": "Failed", "CANCELLED": "Cancelled" },
+    "timelineActor": { "USER": "Customer", "PROVIDER": "Provider", "SYSTEM": "System", "ADMIN": "Support" },
+    "healthScope": { "MINIMAL_VET_CONTEXT": "Minimum veterinary context", "HEALTH_BASICS": "Health basics", "SELECTED_HEALTH_DATA": "Selected health data", "GROOMING_BASIC": "Basic grooming information", "TRAINING_BASIC": "Basic training information", "WALKING_BASIC": "Basic walking information", "SITTING_BASIC": "Basic sitting information", "BOARDING_BASIC": "Basic boarding information", "TAXI_BASIC": "Basic transport information" },
+    "species": { "DOG": "Dog", "CAT": "Cat", "BIRD": "Bird", "RABBIT": "Rabbit", "RODENT": "Rodent", "FISH": "Fish", "REPTILE": "Reptile", "OTHER": "Other" },
+    "clinicalVisitStatus": { "SCHEDULED": "Scheduled", "IN_PROGRESS": "In progress", "COMPLETED": "Completed", "CANCELLED": "Cancelled", "DRAFT": "Draft" },
+    "reviewStatus": { "PENDING": "Pending", "APPROVED": "Approved", "REJECTED": "Rejected", "PUBLISHED": "Published", "HIDDEN": "Hidden" },
+    "supportStatus": { "OPEN": "Open", "IN_PROGRESS": "In progress", "WAITING_ON_USER": "Waiting for customer", "WAITING_ON_INTERNAL": "Waiting for internal team", "RESOLVED": "Resolved", "CLOSED": "Closed" },
+    "waitlistStatus": { "ACTIVE": "Active", "NOTIFIED": "Notified", "OFFERED": "Slot offered", "BOOKED": "Booked", "CANCELLED": "Cancelled", "EXPIRED": "Expired" }
+  },
+  "adminServiceAccess": { "servicesDenied": "You do not have permission to view provider services.", "analyticsDenied": "You do not have permission to view service analytics." },
   "adminUsers": {
     "title": "All users",
     "detailTitle": "User profile",
@@ -119,7 +146,8 @@
       "APPROVED": "Approved",
       "PENDING": "Pending",
       "INACTIVE": "Inactive"
-    }
+    },
+    "manualMessage": {"title": "Send a message to this user", "smsNote": "SMS is attempted only when Faraz is live, the recipient allows it, and notification rules permit it.", "subject": "Title", "message": "Message", "attemptSms": "Also attempt SMS when permitted", "saved": "Message recorded.", "failed": "Message could not be sent.", "sending": "Sending…", "send": "Send message"}
   },
   "common": {
     "appName": "opetlife",
@@ -142,6 +170,7 @@
     "navLostPets": "Lost pets",
     "listSeparator": ", "
   },
+  "filePicker": { "choose": "Choose a file", "chooseMultiple": "Choose files", "none": "No file chosen" },
   "auth": {
     "welcome": {
       "title": "Welcome to opetlife",
@@ -157,13 +186,15 @@
       "emailLabel": "Email address",
       "invalidPhone": "Enter a valid Iranian mobile number.",
       "phoneLabel": "Phone number",
-      "sendCode": "Send code"
+      "sendCode": "Send code",
+      "changeIdentifier": "Change email or phone"
     },
     "otp": {
       "title": "Enter the code",
       "subtitle": "We sent a 6-digit code to {identifier}",
       "resend": "Resend code",
       "resendIn": "Resend in {seconds, number}s",
+      "passcodeLabel": "One-time passcode",
       "verify": "Verify",
       "invalid": "That code is incorrect or has expired.",
       "rateLimited": "Too many attempts. Try again in {seconds, number}s.",
@@ -185,21 +216,29 @@
       "emailLabel": "Email (optional)",
       "submit": "Create account",
       "usernameTaken": "This username is already taken.",
-      "haveAccount": "Already have an account? Log in"
+      "haveAccount": "Already have an account? Log in",
+      "confirmPassword": "Confirm password",
+      "passwordMismatch": "Passwords do not match.",
+      "terms": "I accept opetlife's Terms and Privacy Policy.",
+      "genericError": "Could not create your account. Check the details and try again."
     },
     "forgot": {
       "title": "Reset your password",
       "identifierLabel": "Username or email",
       "submit": "Send reset link",
       "sent": "If an account matches, a reset link has been sent.",
-      "backToLogin": "Back to log in"
+      "backToLogin": "Back to log in",
+      "genericError": "Could not send your request. Please try again."
     },
     "reset": {
       "title": "Choose a new password",
       "newPasswordLabel": "New password",
       "submit": "Reset password",
       "invalidToken": "This reset link is invalid or has expired.",
-      "success": "Your password has been reset. You can now log in."
+      "success": "Your password has been reset. You can now log in.",
+      "confirmPassword": "Confirm password",
+      "passwordMismatch": "Passwords do not match.",
+      "genericError": "Could not reset password. Try again."
     }
   },
   "onboarding": {
@@ -346,6 +385,13 @@
   "subscription": {
     "title": "Subscription",
     "plansTitle": "Plans",
+    "loadErrorTitle": "Subscription could not be loaded",
+    "loadErrorMessage": "Check your connection and try again. No changes were made.",
+    "loadOffline": "You are offline. Reconnect and try again.",
+    "loadForbidden": "You do not have access to this household subscription.",
+    "noHouseholdMessage": "A membership belongs to a household. Create or join a household before managing plans.",
+    "openHouseholds": "Manage households",
+    "noPlans": "No plans are available right now.",
     "viewPlans": "View plans",
     "resume": "Resume subscription",
     "cancel": "Cancel subscription",
@@ -359,6 +405,7 @@
       "EXPIRED": "Expired"
     },
     "trialEndsAt": "Your trial ends on {date}.",
+    "trialDaysRemaining": "{days, number} days left in your trial.",
     "periodEndsAt": "Current period ends on {date}.",
     "pastDueWarning": "We couldn't take the renewal payment. Your plan stays fully active for now — renew from Plans to keep it.",
     "graceWarning": "The renewal payment is still outstanding. Your plan stays active until {date}; renew from Plans before then to keep your benefits.",
@@ -422,7 +469,8 @@
     "cancelKeeps": "Everything already recorded (pets, health history, memories, orders, receipts) stays readable and exportable.",
     "cancelKeeps2": "You can resume before {date} and nothing changes.",
     "cancelConfirm": "Cancel membership",
-    "trialNote": "No payment is taken during the trial."
+    "trialNote": "No payment is taken during the trial.",
+    "planContentEnglish": "Plan names and descriptions are currently available only in English; the original text is shown."
   },
   "pets": {
     "myPets": "My Pets",
@@ -491,18 +539,50 @@
     },
     "overview": {
       "title": "Health",
+      "subtitle": "A clear view of medical history, current status and upcoming care.",
+      "attention": "Needs attention",
+      "complete": "Core health information is complete",
+      "current": "Current status",
+      "records": "Medical record",
+      "care": "Care and follow-up",
       "allergies": "Allergies",
       "conditions": "Conditions",
       "medications": "Medications",
       "vaccination": "Vaccination",
       "activeMedications": "{count} active",
       "noActiveMedications": "None active",
+      "active": "active",
+      "upcoming": "Upcoming care",
+      "overdue": "Overdue",
+      "openPlan": "Open care item",
+      "recentVisits": "Recent visits",
+      "recentDocuments": "Recent documents",
+      "noVisit": "No clinical visit recorded yet",
+      "noDocument": "No medical document recorded yet",
+      "timeline": "Health timeline",
+      "documents": "Medical documents",
+      "labs": "Labs",
+      "imaging": "Imaging",
+      "referrals": "Referrals",
+      "dental": "Dental",
+      "nutrition": "Nutrition",
+      "rehab": "Rehabilitation",
+      "observations": "Owner observations",
+      "visits": "Clinical visits",
+      "open": "View",
+      "shareVet": "Share with a veterinarian",
+      "activity": "Health activity",
+      "sharesLink": "Access links",
+      "moreItems": "and {count} more",
       "completeSetup": "Complete health setup",
       "advancedHealth": "Advanced Health"
     },
     "allergies": {
       "title": "Allergies",
       "empty": "No allergies recorded.",
+      "loadFailed": "Allergies could not be loaded.",
+      "saveFailed": "The allergy could not be saved. Please try again.",
+      "retry": "Retry",
       "addAllergy": "Add allergy",
       "name": "Name",
       "reaction": "Reaction",
@@ -518,6 +598,9 @@
     "conditions": {
       "title": "Conditions",
       "empty": "No conditions recorded.",
+      "loadFailed": "Conditions could not be loaded.",
+      "saveFailed": "The condition could not be saved. Please try again.",
+      "retry": "Retry",
       "addCondition": "Add condition",
       "name": "Name",
       "notes": "Notes",
@@ -528,6 +611,9 @@
     "medications": {
       "title": "Medications",
       "empty": "No medications recorded.",
+      "loadFailed": "Medications could not be loaded.",
+      "saveFailed": "The medication could not be saved. Please try again.",
+      "retry": "Retry",
       "addMedication": "Add medication",
       "name": "Name",
       "dosage": "Dosage",
@@ -544,11 +630,37 @@
     },
     "vaccinationSummary": {
       "title": "Vaccination Summary",
+      "loadFailed": "Vaccination information could not be loaded.",
+      "saveFailed": "Vaccination information could not be saved. Please try again.",
+      "retry": "Retry",
       "status": "Status",
       "nextDueDate": "Next due",
       "lastKnownDate": "Last known",
       "notes": "Notes",
       "save": "Save"
+    },
+    "recordDetail": {
+      "back": "Back to list",
+      "source": "Source",
+      "recorded": "Recorded",
+      "ownerNotice": "This information was recorded by the owner or household and does not replace a provider diagnosis.",
+      "providerNotice": "This record retains provider provenance and cannot be overwritten as owner-authored truth.",
+      "condition": "Health condition",
+      "allergy": "Allergy",
+      "medication": "Medication",
+      "notes": "Notes",
+      "sourceLabel": "Source label",
+      "reaction": "Reaction",
+      "severity": "Recorded severity",
+      "knowledge": "Knowledge state",
+      "dose": "Recorded dose",
+      "frequency": "Frequency",
+      "route": "Route",
+      "instructions": "Instructions",
+      "end": "End",
+      "unavailable": "The record is unavailable.",
+      "retry": "Try again",
+      "loading": "Loading record"
     },
     "nutrition": {
       "title": "Nutrition Basics",
@@ -580,7 +692,8 @@
       "toiletRoutine": "Toilet routine",
       "separationBehavior": "Separation behavior",
       "specialInstructions": "Special instructions",
-      "empty": "Not set up yet."
+      "empty": "Not set up yet.",
+      "saveFailed": "We couldn't save the care profile. Please try again."
     }
   },
   "theme": {
@@ -733,12 +846,92 @@
       "calendarAdded": "Added to your Care Calendar.",
       "careAccessUntil": "Care access shared with the provider until {when}.",
       "openCalendar": "Open Care Calendar"
+    },
+    "errors": {
+      "slotUnavailable": "That time was just taken. Please choose another.",
+      "holdExpired": "Your hold expired. Please choose a time again.",
+      "petNotSupported": "This service is not offered for the selected pet.",
+      "petContextIncomplete": "Complete the pet's care or health profile before booking this service.",
+      "addressRequired": "Please choose the service address.",
+      "petAccessDenied": "You are not allowed to book for this pet.",
+      "bookingChanged": "This booking changed state. Please refresh and try again.",
+      "tooManyRequests": "Too many requests. Please try again shortly.",
+      "genericAction": "That did not work. Check your connection and try again."
+    },
+    "ui": {
+      "loading": "Loading booking…",
+      "forbidden": "You do not have access to this booking",
+      "notFound": "Booking not found",
+      "loadFailed": "Booking could not load",
+      "retry": "Retry",
+      "created": { "requested": "Your request was sent", "awaitingPayment": "Booked — pay to confirm", "confirmed": "Your booking is confirmed" },
+      "myBookings": "My bookings",
+      "requestedUntil": "The provider has until {date} to respond. It is not confirmed yet.",
+      "declined": "The provider declined this request",
+      "expired": "This booking was released because it was not accepted or paid in time.",
+      "rescheduledLink": "This booking moved to a new time → view it",
+      "payBy": "Pay by {date}",
+      "paymentFailed": "The last payment failed. You can try again.",
+      "paymentRecorded": "Payment result recorded.",
+      "paySecurely": "Pay securely",
+      "gatewayConfirmation": "The booking is confirmed only after the gateway confirms payment.",
+      "price": "Price",
+      "onRequest": "On request",
+      "discount": "Discount",
+      "payment": "Payment",
+      "deposit": "deposit",
+      "cancellationTerms": "Cancellation terms (as booked)",
+      "refundTerms": "Free cancellation until {hours} hours before; after that, {percent}% is refunded.",
+      "preparation": "Before you come",
+      "sharedHealth": "Shared health information",
+      "healthSummary": "Health summary",
+      "everydayCareProfile": "Everyday care profile",
+      "until": "until",
+      "timeline": "Timeline",
+      "actor": { "USER": "You", "PROVIDER": "Provider", "SYSTEM": "System", "ADMIN": "Support" },
+      "reschedule": "Reschedule",
+      "cancelFollowing": "Cancel this and following",
+      "weeklyCreated": "Weekly bookings created; unavailable weeks were skipped.",
+      "repeatWeekly": "Repeat weekly (4 visits)",
+      "leaveReview": "Leave a review",
+      "bookAgain": "Book again",
+      "fullRefund": "Full refund: {amount}",
+      "partialRefund": "Per the terms, {percent}% ({amount}) is refunded.",
+      "refundReview": "Refunds are processed after finance review.",
+      "reasonOptional": "Reason (optional)",
+      "keepBooking": "Keep booking",
+      "bookingCancelled": "Booking cancelled.",
+      "chooseNewTime": "Choose a new time",
+      "rescheduleHint": "Your current booking is kept until the new time is secured. Price and terms stay the same.",
+      "newDay": "New day",
+      "noOpenTimes": "No open times on this day.",
+      "bookingRescheduled": "Booking rescheduled.",
+      "confirmNewTime": "Confirm new time",
+      "reviewThisBooking": "Review this booking",
+      "rating": "Rating",
+      "reviewText": "Review text",
+      "reviewHint": "Describe your experience; avoid personal or medical details.",
+      "submitForReview": "Submit for review",
+      "reviewAvailableAt": "Rating opens two hours after the service ends: {date}",
+      "timeliness": "Timeliness",
+      "careAndCommunication": "Care and communication",
+      "serviceQuality": "Service quality",
+      "reviewSubmitted": "Your review was submitted and will be published after moderation."
     }
   },
   "services": {
     "explore": {
       "title": "Explore Services",
       "subtitle": "For {name}",
+      "eyebrow": "Verified professionals, in one place",
+      "heading": "Professional care, near you",
+      "description": "Compare services by open times, area, your pet's needs and experience, then book in a few steps.",
+      "searchLabel": "Search services",
+      "searchPlaceholder": "What service do you need?",
+      "searchButton": "Find care",
+      "chooseService": "Choose a service",
+      "allProvidersIntro": "See every provider at once:",
+      "allServices": "All services",
       "category": {
         "VET": "Veterinary care",
         "GROOMING": "Grooming",
@@ -899,6 +1092,17 @@
       }
     }
   },
+  "careCenter": {
+    "title": "Care center", "subtitle": "{petName}'s reminders and follow-ups; times shown in Tehran time", "allCare": "All care",
+    "type": "Type", "due": "Due", "originalDue": "Original due date", "remindAt": "Remind at", "completedAt": "Completed at", "recurrence": "Recurrence", "source": "Source", "notification": "Notification", "sent": "Sent", "notSent": "Not sent yet", "relatedRecord": "View related record",
+    "chooseDay": "Choose a day", "timeTehran": "Time (Tehran time)", "snooze": "Snooze", "reschedule": "Reschedule", "actionFailed": "That didn't work. Please try again.", "loading": "Loading care reminders", "filtersAria": "Care filters", "filters": { "all": "All" },
+    "states": { "DUE": "Due soon", "OVERDUE": "Overdue", "UPCOMING": "Upcoming", "COMPLETED": "Completed", "SNOOZED": "Snoozed", "CANCELLED": "Cancelled", "CUSTOM": "Personal" }, "unknownState": "Unknown status", "unknownType": "Other care", "unknownRecurrence": "Other schedule", "unknownSource": "Other source",
+    "calendar": "Calendar", "careSheet": "Care sheet for a sitter", "travelReadiness": "Travel readiness", "create": "Create reminder",
+    "empty": { "body": "Reminders can come from vaccinations, medication and bookings. You can also add a personal reminder.", "all": { "title": "No care items yet" }, "due": { "title": "Nothing is due soon" }, "overdue": { "title": "Nothing is overdue" }, "upcoming": { "title": "No upcoming reminders" }, "completed": { "title": "No completed care yet" }, "snoozed": { "title": "No snoozed reminders" }, "cancelled": { "title": "No cancelled reminders" }, "custom": { "title": "No personal reminders" } },
+    "recentlyCompleted": "Recently completed", "dailyInstructions": "Daily care instructions", "done": "Done", "reminds": "Reminds", "bookVisit": "Book a visit", "complete": "Complete", "tomorrow": "Tomorrow", "confirmCancel": "Confirm cancellation", "cancelWarning": "This reminder will be cancelled and no further notifications will be sent.", "cancelYes": "Yes, cancel it", "cancelKeep": "Keep it", "edit": "Edit", "laterToday": "Later today", "cancel": "Cancel", "day": "Day", "save": "Save", "saving": "Saving…", "close": "Close", "chooseDayAndTime": "Choose a day and a time.", "saveFailed": "The reminder could not be saved. Please try again.",
+    "form": { "title": "Reminder title", "recurrence": "Recurrence", "intervalDays": "Repeat interval in days", "recurrenceNote": "Monthly and yearly recurrence follows Gregorian dates. Enter medical timing from your veterinarian's instructions." },
+    "recurrenceOptions": { "ONCE": "Once", "DAILY": "Daily", "WEEKLY": "Weekly", "MONTHLY": "Monthly", "YEARLY": "Yearly", "CUSTOM": "Custom interval (days)" }, "sources": { "USER_CREATED": "Owner", "PROVIDER_CREATED": "Provider", "MEDICAL_RECORD_DERIVED": "Medical record", "BOOKING_DERIVED": "Booking", "SYSTEM_SCHEDULED": "System" }
+  },
   "careCalendar": {
     "title": "Care Calendar",
     "empty": "Nothing scheduled yet.",
@@ -959,6 +1163,7 @@
       "title": "Provider Home",
       "retry": "Retry",
       "loading": "Loading",
+      "loadFailed": "The provider overview could not be loaded. Check your connection and try again.",
       "attention": {
         "pendingConfirmation": "{count} pending confirmation",
         "cancellations": "{count} recent cancellations",
@@ -970,18 +1175,23 @@
       "noBookingsToday": "No bookings today.",
       "verificationLink": "Organization verification and documents"
     },
+    "bookingRow": { "respondBy": "Respond by " },
     "bookings": {
       "title": "Bookings",
       "retry": "Retry",
       "loading": "Loading",
       "empty": "No bookings found.",
+      "loadFailed": "Bookings could not be loaded. Check your connection and try again.",
+      "accessDenied": "You do not have permission to view these bookings.",
       "filter": {
         "today": "Today",
         "upcoming": "Upcoming",
         "past": "Past",
         "cancelled": "Cancelled",
         "requests": "Requests"
-      }
+      },
+      "status": { "HOLD": "Held", "PENDING_CONFIRMATION": "Pending confirmation", "CONFIRMED": "Confirmed", "CHECKED_IN": "Checked in", "IN_PROGRESS": "In progress", "COMPLETED": "Completed", "CANCELLED_BY_USER": "Cancelled by customer", "CANCELLED_BY_PROVIDER": "Cancelled by provider", "NO_SHOW": "No-show", "REQUESTED": "Requested", "AWAITING_PAYMENT": "Awaiting payment", "REJECTED": "Declined", "EXPIRED": "Expired", "RESCHEDULED": "Rescheduled" },
+      "paymentStatus": { "NOT_REQUIRED": "Not required", "PENDING": "Pending", "AUTHORIZED": "Authorized", "PAID": "Paid", "FAILED": "Failed", "REFUND_PENDING": "Refund pending", "REFUNDED": "Refunded" }
     },
     "bookingDetail": {
       "title": "Booking",
@@ -1004,7 +1214,8 @@
         "scope": "Scope",
         "startsAt": "Starts",
         "expiresAt": "Expires",
-        "openClinicalRecord": "Open Clinical Record"
+        "openClinicalRecord": "Open Clinical Record",
+        "scopePreset": { "MINIMAL_VET_CONTEXT": "Minimal context", "HEALTH_BASICS": "Health basics", "SELECTED_HEALTH_DATA": "Selected health data", "GROOMING_BASIC": "Care profile (grooming basics)", "TRAINING_BASIC": "Care profile (training basics)", "WALKING_BASIC": "Care profile (walking basics)", "SITTING_BASIC": "Care profile (sitting basics)", "BOARDING_BASIC": "Care profile and vaccination status (boarding)", "TAXI_BASIC": "Care profile (pet taxi basics)" }
       },
       "careProfile": {
         "title": "Care context",
@@ -1020,6 +1231,10 @@
       "actions": {
         "confirm": "Confirm",
         "confirmed": "Confirmed",
+        "acceptRequest": "Accept request",
+        "decline": "Decline request",
+        "markNoShow": "Mark no-show",
+        "startClinicalVisit": "Start clinical visit",
         "checkIn": "Check in",
         "start": "Start",
         "complete": "Complete",
@@ -1027,6 +1242,9 @@
       },
       "completionNoteLabel": "Owner-visible completion note (optional)",
       "completionNotePlaceholder": "e.g. \"Luna's grooming was completed.\"",
+      "respondBy": "Respond by",
+      "followUps": { "legend": "Follow-ups (only if needed)", "description": "Each follow-up appears in the owner's Care Center as provider-created. Nothing is scheduled automatically.", "typeLabel": "Follow-up type", "type": { "FOLLOW_UP": "Follow-up visit", "VACCINATION": "Next vaccination", "MEDICATION": "Medication", "MONITORING": "Lab or review", "OTHER": "Other" }, "titleLabel": "Follow-up title", "dateLabel": "Due date", "remove": "Remove follow-up", "add": "Add follow-up" },
+      "rejectDialog": { "title": "Decline booking request", "reasonLabel": "Reason (shown to the customer)" },
       "notes": {
         "title": "Provider notes",
         "internalOnly": "Internal only — never shown to the customer.",
@@ -1048,7 +1266,8 @@
         "PROVIDER_NOT_VERIFIED": "Your organization must be verified before taking this action.",
         "BOOKING_NOT_FOUND": "Booking not found.",
         "INVALID_BOOKING_TRANSITION": "This booking cannot move to that state right now.",
-        "BOOKING_NOT_CANCELLABLE": "This booking can no longer be cancelled."
+        "BOOKING_NOT_CANCELLABLE": "This booking can no longer be cancelled.",
+        "generic": "The action could not be completed. Please try again."
       }
     },
     "schedule": {
@@ -1066,6 +1285,8 @@
       "title": "Availability",
       "retry": "Retry",
       "loading": "Loading",
+      "loadFailed": "Availability could not be loaded. Check your connection and try again.",
+      "accessDenied": "You do not have permission to manage availability.",
       "day": {
         "sun": "Sun",
         "mon": "Mon",
@@ -1086,7 +1307,9 @@
         "timezone": "Timezone",
         "add": "Add",
         "locationRequired": "A location is required.",
-        "createFailed": "Couldn't create the rule."
+        "createFailed": "Couldn't create the rule.",
+        "updateFailed": "Couldn't update the rule.",
+        "deleteFailed": "Couldn't remove the rule."
       },
       "exceptions": {
         "title": "Time off & extra availability",
@@ -1103,10 +1326,13 @@
         "add": "Add",
         "fieldsRequired": "Location, start, and end are required.",
         "createFailed": "Couldn't create the exception.",
+        "updateFailed": "Couldn't update the exception.",
+        "deleteFailed": "Couldn't remove the exception.",
         "conflictWarning": "{count} confirmed bookings exist in this period. Blocking it will not cancel or move them.",
         "conflictCancel": "Cancel",
         "conflictProceed": "Block anyway"
-      }
+      },
+      "actions": { "edit": "Edit", "cancel": "Cancel", "save": "Save changes" }
     },
     "services": {
       "title": "Services",
@@ -1131,11 +1357,28 @@
       "title": "Team",
       "retry": "Retry",
       "loading": "Loading",
+      "loadFailed": "The team could not be loaded.",
       "empty": "No team members yet.",
       "role": {
         "OWNER": "Owner",
         "VET": "Vet",
         "STAFF": "Staff"
+      },
+      "settings": {
+        "title": "Services and public profile per member",
+        "description": "A service with no assigned members is offered by every bookable member. No HR data is stored here.",
+        "emptyStaff": "No team members are available to configure.",
+        "emptyServices": "No services are available to assign.",
+        "bookable": "Bookable",
+        "servicesDelivered": "Services delivered",
+        "publicTitle": "Public title",
+        "publicBio": "Short public bio",
+        "save": "Save",
+        "retry": "Retry",
+        "loading": "Loading team settings",
+        "loadFailed": "Team settings could not be loaded.",
+        "saveFailed": "Could not save the change.",
+        "ownerOnly": "Only the organization owner can edit the team."
       }
     }
   },
@@ -1700,8 +1943,13 @@
     "repeat": {
       "title": "Repeat deliveries",
       "loading": "Loading",
+      "loadFailed": "Repeat deliveries could not be loaded. Please try again.",
+      "offlineTitle": "You're offline",
+      "offlineHint": "Reconnect to view your repeat deliveries.",
+      "accessDeniedTitle": "You don't have access",
+      "accessDeniedHint": "Sign in with an account that can view this household's repeat deliveries.",
       "retry": "Retry",
-      "howItWorks": "We remind you two days before each date. You confirm the order at the live price and pay as usual — opetlife never charges you automatically.",
+      "howItWorks": "Before each scheduled date, we send a reminder. You confirm the order at the current price and pay through checkout — opetlife never charges you automatically.",
       "empty": "No repeat deliveries yet",
       "emptyHint": "Look for “Repeat delivery available” on products you buy regularly.",
       "browse": "Browse products",
@@ -1712,7 +1960,8 @@
       "status": {
         "ACTIVE": "Active",
         "PAUSED": "Paused",
-        "CANCELLED": "Cancelled"
+        "CANCELLED": "Cancelled",
+        "UNKNOWN": "Unknown status"
       },
       "notAvailableTitle": "Repeat delivery isn't available for this item",
       "notAvailableHint": "The seller may have stopped offering it.",
@@ -1724,6 +1973,8 @@
       "quantity": "Quantity",
       "address": "Deliver to",
       "needAddress": "Add a delivery address at checkout first.",
+      "loadingAddresses": "Loading addresses",
+      "addressesLoadFailed": "Addresses could not be loaded. Please try again.",
       "noAutopayTitle": "No automatic charges",
       "noAutopay": "You'll get a reminder before each delivery and confirm the order yourself.",
       "create": "Create repeat delivery",
@@ -1760,13 +2011,19 @@
         "PRICE_ACCEPTED": "New price accepted",
         "REMINDER_SENT": "Reminder sent",
         "CYCLE_PREPARED": "Added to cart",
-        "ORDERED": "Ordered"
+        "ORDERED": "Ordered",
+        "OTHER": "Updated"
       }
     },
     "favorites": {
       "title": "Favorites",
       "loading": "Loading",
       "retry": "Retry",
+      "loadFailed": "Saved products could not be loaded. Please try again.",
+      "offlineTitle": "You're offline",
+      "offlineHint": "Reconnect to view your saved products.",
+      "accessDeniedTitle": "You don't have access",
+      "accessDeniedHint": "Sign in with an account that can view these saved products.",
       "empty": "No favorites yet",
       "emptyHint": "Tap the heart on a product to save it here.",
       "browse": "Browse products"
@@ -1847,6 +2104,11 @@
       "title": "Dashboard",
       "loading": "Loading dashboard…",
       "retry": "Retry",
+      "failed": "The seller dashboard could not be loaded.",
+      "offline": "You are offline. Check your connection and try again.",
+      "noAccess": "You do not have permission to view this seller workspace.",
+      "noWorkspace": "No seller workspace is selected.",
+      "noWorkspaceDescription": "Select an authorized seller workspace to see its live orders and offers.",
       "tiles": {
         "ordersRequiringAction": "Orders requiring action",
         "lowStockOffers": "Low-stock offers",
@@ -2146,6 +2408,7 @@
     "loadMore": "Load more",
     "bellLabel": "Notifications",
     "bellLabelUnread": "Notifications, {count} unread",
+    "unreadPrefix": "Unread: ",
     "category": {
       "SECURITY": "Security",
       "HEALTH": "Health",
@@ -2302,6 +2565,27 @@
     }
   },
   "admin": {
+    "memorials": {
+      "title": "Public pet memorials",
+      "description": "Publish only when explicit owner consent is present. Review each name and selected photo; household and health data are not part of this view.",
+      "filter": "Submission status",
+      "empty": "No memorial submissions in this status.",
+      "error": "The memorial queue could not be loaded or the review action failed.",
+      "photoAlt": "Selected photo for {name}",
+      "missingImage": "Selected image is unavailable",
+      "pet": "Pet: {name}",
+      "submitted": "Submitted: {date}",
+      "consentVersion": "Consent text version: {version}",
+      "reason": "Review reason (required)",
+      "approve": "Approve and publish",
+      "reject": "Reject",
+      "status": {
+        "PENDING_REVIEW": "Pending review",
+        "PUBLISHED": "Published",
+        "REJECTED": "Rejected",
+        "WITHDRAWN": "Withdrawn"
+      }
+    },
     "shell": {
       "accessLoadFailed": "Admin permissions could not be loaded. Retry to verify your current access.",
       "title": "opetlife Admin",
@@ -2329,6 +2613,7 @@
         "users": "All users",
         "customers": "Customers",
         "support": "Support",
+        "systemStatus": "System status",
         "disputes": "Disputes",
         "trust": "Trust & Safety",
         "providers": "Providers",
@@ -2340,6 +2625,7 @@
         "sellerFinance": "Seller Finance",
         "reconciliation": "Reconciliation",
         "content": "Content",
+        "helpCenter": "Help Center & Legal",
         "contentNew": "New article",
         "contentCategories": "Categories",
         "contentTags": "Tags",
@@ -2484,12 +2770,14 @@
       "detail": {
         "caseNumber": "Case {number}",
         "requester": "Requester: {name}",
+        "authorType": { "USER": "Customer", "ADMIN": "Admin", "SYSTEM": "System" },
         "assignTo": "Assign to admin",
         "changeStatus": "Change status",
         "messages": "Messages",
         "composePlaceholder": "Write a reply…",
         "visibilityPublic": "Public reply",
         "visibilityInternal": "Internal note (never sent to the customer)",
+        "visibilityLabel": "Visibility",
         "send": "Send",
         "notes": "Internal notes",
         "context": {
@@ -2503,12 +2791,29 @@
           "previousCases": "Previous tickets from this customer:",
           "noPreviousCases": "No previous tickets from this customer."
         }
+      },
+      "states": {
+        "loading": "Loading support cases…",
+        "loadFailed": "Support cases could not be loaded. Try again.",
+        "detailLoadFailed": "This support case could not be loaded. Try again.",
+        "accessDeniedTitle": "Access denied",
+        "accessDenied": "You do not have permission to view these support cases.",
+        "notFoundTitle": "Case not found",
+        "notFound": "This support case is not available.",
+        "empty": "No support cases found",
+        "emptyDescription": "Adjust the filters or create a new case.",
+        "requiredFields": "Requester user ID, subject, and description are required.",
+        "createFailed": "The support case could not be created. Try again.",
+        "actionFailed": "The change could not be saved. Try again.",
+        "noMessages": "No messages yet.",
+        "noNotes": "No internal notes yet."
       }
     },
     "disputes": {
       "title": "Disputes",
       "newDispute": "New dispute",
       "createTitle": "Open dispute",
+      "filter": { "status": "Filter by status", "allStatuses": "All statuses" },
       "status": {
         "OPEN": "Open",
         "UNDER_REVIEW": "Under review",
@@ -2543,13 +2848,20 @@
         "addEvidence": "Add evidence",
         "evidencePlaceholder": "Statement",
         "changeStatus": "Change status",
-        "financialNote": "Financial state (refunds) is tracked separately — resolving a dispute does not trigger a refund automatically."
+        "financialNote": "Financial state (refunds) is tracked separately — resolving a dispute does not trigger a refund automatically.",
+        "actorType": { "USER": "User", "ADMIN": "Admin" }
+      },
+      "states": {
+        "loading": "Loading disputes…", "loadFailed": "Disputes could not be loaded. Try again.", "detailLoadFailed": "This dispute could not be loaded. Try again.",
+        "accessDeniedTitle": "Access denied", "accessDenied": "You do not have permission to view these disputes.", "notFoundTitle": "Dispute not found", "notFound": "This dispute is not available.",
+        "empty": "No disputes found", "emptyDescription": "There are no disputes with the selected status.", "requiredFields": "Subject ID and claim are required.", "createFailed": "The dispute could not be opened. Try again.", "actionFailed": "The change could not be saved. Try again.", "noEvidence": "No evidence has been added yet."
       }
     },
     "trust": {
       "title": "Trust & Safety",
       "newCase": "Open trust case",
       "createTitle": "Open trust case",
+      "filter": { "status": "Filter by status", "allStatuses": "All statuses" },
       "status": {
         "OPEN": "Open",
         "UNDER_REVIEW": "Under review",
@@ -2591,6 +2903,20 @@
         "severity": "Severity",
         "submit": "Open case"
       },
+      "context": {
+        "title": "Case subject",
+        "missingSubject": "The subject no longer exists or has no summary.",
+        "by": "By {name}",
+        "openPublicPage": "Open public page",
+        "reportCount": "Reports: {total} · distinct reporters: {reporters}",
+        "unknownKind": "Other subject",
+        "unknownStatus": "Status unavailable",
+        "unknownReason": "Other or unrecognized reason",
+        "subjectKind": { "POST": "Community post", "COMMENT": "Community comment", "SUPPORT_NEED": "Support request", "LOST_PET_INCIDENT": "Lost-pet report", "LOST_PET_SIGHTING": "Sighting", "ORGANIZATION": "Organization" },
+        "reportReason": { "SPAM": "Spam", "ABUSE": "Abuse", "MISINFORMATION": "Misinformation", "INAPPROPRIATE": "Inappropriate content", "OTHER": "Other", "SCAM": "Scam", "HARASSMENT": "Harassment", "PERSONAL_INFORMATION": "Personal information", "ANIMAL_WELFARE": "Animal welfare", "DANGEROUS_CONTENT": "Dangerous content" },
+        "reportStatus": { "OPEN": "Open", "ESCALATED": "Escalated", "RESOLVED": "Resolved", "DISMISSED": "Dismissed" },
+        "subjectStatus": { "OPEN": "Open", "SEARCHING": "Searching", "SIGHTING_REPORTED": "Sighting reported", "FOUND": "Found", "REUNITED": "Reunited", "CLOSED": "Closed", "SUBMITTED": "Submitted", "REVIEWED": "Reviewed", "ACCEPTED": "Accepted", "REJECTED": "Rejected", "DRAFT": "Draft", "PENDING_REVIEW": "Pending review", "PUBLISHED": "Published", "PARTIALLY_FULFILLED": "Partially fulfilled", "PAUSED": "Paused", "FULFILLED": "Fulfilled", "EXPIRED": "Expired", "REMOVED": "Removed", "HIDDEN": "Hidden", "VERIFIED": "Verified", "NOT_STARTED": "Not started", "UNDER_REVIEW": "Under review", "NEEDS_INFORMATION": "More information needed", "APPROVED": "Approved", "SUSPENDED": "Suspended", "INACTIVE": "Inactive" }
+      },
       "detail": {
         "changeStatus": "Change status",
         "actions": "Actions taken",
@@ -2601,7 +2927,16 @@
         "appellantUserId": "Appellant user ID",
         "appealReason": "Appeal reason",
         "resolveAppeal": "Resolve appeal",
-        "resolution": "Resolution"
+        "resolution": "Resolution",
+        "effectBefore": "Before",
+        "effectAfter": "After",
+        "effectField": { "status": "Status", "verificationStatus": "Verification", "isPubliclyListed": "Public listing", "pausedListings": "Paused listings", "closedAt": "Closed at" },
+        "yes": "Yes",
+        "no": "No",
+        "requiredFields": "A subject ID and reason are required.",
+        "appealRequiredFields": "An appellant user ID and appeal reason are required.",
+        "resolutionRequired": "Enter a resolution before deciding this appeal.",
+        "appealFailed": "The appeal could not be submitted or resolved. Try again."
       },
       "appealStatus": {
         "SUBMITTED": "Submitted",
@@ -2609,7 +2944,8 @@
         "UPHELD": "Upheld",
         "OVERTURNED": "Overturned",
         "PARTIALLY_OVERTURNED": "Partially overturned"
-      }
+      },
+      "states": { "loading": "Loading trust cases…", "loadFailed": "Trust cases could not be loaded. Try again.", "detailLoadFailed": "This trust case could not be loaded. Try again.", "accessDeniedTitle": "Access denied", "accessDenied": "You do not have permission to view these trust cases.", "empty": "No trust cases found", "emptyDescription": "There are no cases with the selected status.", "createFailed": "The trust case could not be opened. Try again.", "actionFailed": "The change could not be saved. Try again.", "actionNotApplicable": "This action cannot be applied in the subject’s current state.", "actionForbidden": "Your role is not allowed to take this action.", "actionNotRecorded": "The action was not recorded. Try again.", "noActions": "No actions have been recorded yet.", "contextUnavailable": "The subject and report summary could not be loaded.", "unknownValue": "Value unavailable", "restored": "Restored by a later action" }
     },
     "orgs": {
       "providersTitle": "Providers",
@@ -2631,19 +2967,57 @@
     },
     "transactions": {
       "title": "Transactions",
+      "orderIdLabel": "Order ID",
       "orderIdPlaceholder": "Order ID",
       "lookup": "Look up",
       "paymentIntents": "Payment intents",
       "ledgerEntries": "Ledger entries",
+      "paymentStatus": {
+        "REQUIRES_PAYMENT_METHOD": "Payment method required",
+        "PENDING": "Pending",
+        "AUTHORIZED": "Authorized",
+        "CAPTURED": "Captured",
+        "FAILED": "Failed",
+        "CANCELLED": "Cancelled"
+      },
+      "refundStatus": {
+        "REQUESTED": "Requested",
+        "PROCESSING": "Processing",
+        "SUCCEEDED": "Refunded",
+        "FAILED": "Failed",
+        "CANCELLED": "Cancelled"
+      },
+      "ledgerDirection": { "DEBIT": "Debit", "CREDIT": "Credit" },
+      "ledgerAccount": {
+        "CASH_GATEWAY_RECEIVABLE": "Gateway receivable",
+        "CUSTOMER_PAYMENT_CLEARING": "Customer payment clearing",
+        "SELLER_PAYABLE": "Seller payable",
+        "REFUND_PAYABLE": "Refund payable",
+        "PLATFORM_REVENUE": "Platform revenue"
+      },
+      "states": {
+        "lookupPrompt": "Enter an order ID to inspect its payment and ledger records.",
+        "loading": "Loading order financial records…",
+        "lookupFailedTitle": "Financial records unavailable",
+        "lookupFailed": "The order's financial records could not be loaded. Try again.",
+        "offline": "You are offline. Check your connection and try again.",
+        "accessDenied": "You do not have permission to view these financial records.",
+        "noPaymentIntents": "No payment intents are recorded for this order.",
+        "noLedgerEntries": "No ledger entries are recorded for this order.",
+        "actionFailed": "The refund request could not be completed. Try again.",
+        "actionDenied": "You do not have permission to perform this refund action.",
+        "unknownStatus": "Status unavailable",
+        "unknownAccount": "Account unavailable"
+      },
       "refund": {
         "title": "Request refund",
-        "amount": "Amount",
+        "amount": "Amount in Rial",
         "reason": "Reason",
         "submit": "Request",
         "approve": "Approve",
         "reject": "Reject",
         "execute": "Execute",
-        "status": {
+        "approvalStatus": {
           "REQUESTED": "Requested",
           "APPROVED": "Approved",
           "REJECTED": "Rejected",
@@ -2705,7 +3079,9 @@
       "entityId": "Entity ID",
       "action": "Action",
       "reason": "Reason",
-      "by": "By {name}"
+      "by": "By {name}",
+      "empty": "No audit events have been recorded yet.",
+      "loadError": "The audit trail could not be loaded. Please try again."
     },
     "sellerFinance": {
       "title": "Seller Finance",
@@ -3060,7 +3436,25 @@
       "void": "Remove",
       "voidReason": "Reason",
       "provenanceOwner": "Uploaded by household",
-      "provenanceProvider": "Uploaded by provider — verified"
+      "provenanceProvider": "Uploaded by provider — verified",
+      "fileRequired": "Choose the document file first.",
+      "uploadFailed": "The document could not be uploaded. Please try again.",
+      "uploaded": "Document uploaded.",
+      "downloadFailed": "Unable to access this file. Check access and try again.",
+      "back": "Back to documents",
+      "loading": "Loading document",
+      "unavailable": "The document is unavailable.",
+      "unavailableMessage": "It may have been removed or you may not have access.",
+      "retry": "Try again",
+      "source": "Source",
+      "ownerSource": "Owner/household",
+      "recordDate": "Record date",
+      "fileType": "File type",
+      "privacy": "Privacy",
+      "privateNotice": "This file is private and has no public object URL. Every download mints a short-lived signed access link.",
+      "previewDownload": "Preview and secure download",
+      "openFile": "Open file",
+      "previewUnavailable": "Preview is unavailable for this file type."
     },
     "labs": {
       "title": "Labs",
@@ -3184,6 +3578,7 @@
     }
   },
   "lostPet": {
+    "species": { "dog": "Dog", "cat": "Cat", "other": "Other" },
     "report": {
       "title": "Report a lost pet",
       "subtitle": "Share details so your community can help you find them.",
@@ -3192,11 +3587,42 @@
       "lastKnownLocationLabel": "Last known location",
       "lastSeenAtLabel": "Last seen at",
       "contactPreferenceLabel": "How should people reach you?",
+      "stepsLabel": "Report steps",
+      "steps": { "where": "Where and when", "photo": "Photo", "describe": "Description", "contact": "Contact", "review": "Review" },
+      "publicTag": "Public",
+      "privateTag": "Private",
+      "approximateArea": "Approximate area",
+      "approximateAreaPlaceholder": "e.g. neighbourhood or main street",
+      "approximateAreaHelp": "Use a neighbourhood or main street only. Never enter a home address; this text appears publicly.",
+      "exactLastSeenPlace": "Exact last-seen place",
+      "exactPlaceHelp": "Visible only to you, your household and support staff when needed.",
+      "approximateTime": "Approximate time",
+      "photoHelp": "Choose a clear photo of the pet. Avoid people's faces and home numbers.",
+      "publicNote": "Note for someone who spots the pet",
+      "publicNotePlaceholder": "For example: shy; please do not chase, just report a sighting.",
+      "privateNote": "Private notes",
+      "privateNotePlaceholder": "For example: microchip number",
       "contactPreference": {
         "inAppMessage": "Message me in the app",
         "maskedContact": "Share a masked phone number",
         "publicContact": "Show my contact publicly"
       },
+      "contactPreferenceHelp": {
+        "inAppMessage": "Recommended: receive reports in opetlife without showing your contact details.",
+        "maskedContact": "People can contact you through opetlife without seeing your phone number.",
+        "publicContact": "A contact line you provide will be visible on the public report."
+      },
+      "publicContactLine": "Public contact line",
+      "publicContactPlaceholder": "For example: 0912***4567 — text only",
+      "publicContactWarning": "Anyone can see this text. Avoid sharing a full phone number.",
+      "reviewTitle": "What the public report will show",
+      "review": { "area": "Area", "when": "When", "photo": "Photo", "contact": "Contact" },
+      "notGiven": "Not provided",
+      "noPhoto": "No photo",
+      "contactThroughApp": "Through opetlife",
+      "privacyNotice": "Your exact location, private notes, household members and health records are not shown publicly.",
+      "back": "Back",
+      "continue": "Continue",
       "photoLabel": "Photo",
       "submit": "Report lost pet"
     },
@@ -3205,7 +3631,8 @@
       "reportButton": "Report lost pet",
       "empty": "No lost pet reports yet.",
       "noLocation": "Location not provided",
-      "sightingsCount": "{count, plural, one {# sighting} other {# sightings}}"
+      "sightingsCount": "{count, plural, one {# sighting} other {# sightings}}",
+      "emptyDescription": "There are no active lost-pet reports right now."
     },
     "status": {
       "OPEN": "Missing",
@@ -3238,11 +3665,25 @@
       "knownReporter": "Reported by a signed-in user",
       "acceptSighting": "Likely match",
       "rejectSighting": "Not a match"
+      ,"publicArea": "Public area",
+      "exactPlacePrivate": "Exact place (private)",
+      "lastSeen": "Last seen",
+      "shareTitle": "Share the public report",
+      "shareDescription": "The public page shows only the approximate area, photo and public description.",
+      "shareText": "{name} is missing. If you see them, please report a sighting."
     },
     "public": {
       "list": {
         "title": "Lost pets nearby",
-        "subtitle": "Browse open lost pet reports. If you recognize a pet, open the report to submit a sighting."
+        "subtitle": "Browse open lost-pet reports. If you recognize a pet, open the report to submit a sighting.",
+        "speciesFilter": "Filter by species",
+        "allSpecies": "All",
+        "emptyDescription": "There are no active lost-pet reports right now.",
+        "noPhoto": "No photo",
+        "lastSeen": "Last seen: {date}",
+        "paginationLabel": "Report pages",
+        "previous": "Previous",
+        "next": "Next"
       },
       "species": "Species: {species}",
       "breed": "Breed: {breed}",
@@ -3250,10 +3691,28 @@
       "contact": "Contact: {contact}",
       "reportSighting": {
         "title": "Report a sighting",
+        "dateLabel": "Date seen",
+        "timeLabel": "Approximate time",
         "locationLabel": "Where did you see them?",
         "descriptionLabel": "Description",
+        "privacyNote": "Your report goes only to the owner; your name and contact details are never made public.",
         "submit": "Submit sighting",
         "success": "Thank you — your sighting has been submitted for review."
+      },
+      "detail": {
+        "unavailableTitle": "This report is not available",
+        "unavailableDescription": "The report may have been closed or removed.",
+        "shareText": "{name} is missing{area}. If you see them, please report a sighting.",
+        "shareArea": " near {area}",
+        "species": "Species",
+        "breed": "Breed",
+        "colorMarkings": "Color and markings",
+        "approximateAge": "Approximate age",
+        "ageYears": "About {count} years",
+        "lastSeenAround": "Last seen around",
+        "lastSeen": "Last seen",
+        "reunited": "{name} is back home. Thank you to everyone who helped.",
+        "photoAlt": "Photo of {name}"
       }
     }
   },
@@ -3337,15 +3796,25 @@
     },
     "feed": {
       "title": "Community",
+      "description": "Questions, stories and news from pet owners — respectful, no ads.",
       "newPost": "New post",
       "empty": "No posts yet. Be the first to share something.",
       "loadMore": "Load more",
+      "loading": "Loading posts…",
+      "loadingMore": "Loading…",
       "commentsAndReactions": "{comments, plural, one {# comment} other {# comments}} · {reactions, plural, one {# reaction} other {# reactions}}",
       "searchLabel": "Search posts",
       "typeLabel": "Post type",
       "allTypes": "All types",
       "search": "Search",
-      "noResults": "No posts match your search."
+      "noResults": "No posts match your search.",
+      "withPet": "with {name}",
+      "shortcutsLabel": "Community shortcuts",
+      "topics": "Topics",
+      "rightNow": "Right now",
+      "myMessages": "My messages",
+      "lostPetsNearby": "Lost pets nearby",
+      "supportNeeds": "Support needs"
     },
     "newPost": {
       "title": "New post",
@@ -3367,7 +3836,61 @@
       "commentsEmpty": "No comments yet."
     }
   },
+  "communityChat": {
+    "inbox": {
+      "title": "Messages",
+      "emptyTitle": "No conversations yet",
+      "emptyDescription": "Start a conversation from a post or a member's profile.",
+      "fallbackMember": "Member",
+      "youPrefix": "You:",
+      "unread": "{count, plural, one {# unread message} other {# unread messages}}",
+      "failed": "Messages could not load",
+      "noAccess": "You don't have access to these messages.",
+      "stale": "Messages could not refresh. Showing the last loaded conversations.",
+      "retry": "Retry"
+    },
+    "thread": {
+      "allMessages": "All messages",
+      "conversationFallback": "Conversation",
+      "block": "Block",
+      "unblock": "Unblock",
+      "blocked": "Messaging is blocked in this conversation.",
+      "messageLabel": "Message",
+      "send": "Send",
+      "sendFailed": "The message wasn't sent. Please try again.",
+      "blockFailed": "The block setting could not be changed. Please try again.",
+      "notFound": "Conversation not found",
+      "loadFailed": "Conversation could not load",
+      "noAccess": "You don't have access to this conversation.",
+      "retry": "Retry",
+      "noMessages": "No messages in this conversation yet."
+    }
+  },
   "memories": {
+    "publicMemorial": {
+      "title": "Share a memorial",
+      "explanation": "You may submit your pet’s name and one photo for the public memorial. It is shown only after review and can be withdrawn by you at any time.",
+      "displayName": "Name shown publicly",
+      "image": "Choose a photo",
+      "chooseImage": "Select a photo",
+      "photoOption": "Photo memory",
+      "noPublicPhoto": "No shareable photo is available. A non-archived photo memory already marked public is required; private memories are never published by this form.",
+      "consent": "I explicitly agree to display “{name}” and the selected photo publicly after admin approval.",
+      "privacy": "No household details, private notes, health records, or account information are published.",
+      "submit": "Submit for review",
+      "withdraw": "Withdraw public consent and remove from the memorial",
+      "ownerOnly": "Only a household owner can manage this public memorial.",
+      "loading": "Loading memorial settings",
+      "error": "The memorial could not be updated. Please retry.",
+      "retry": "Retry",
+      "rejected": "This submission was not approved. You may submit it again after reviewing the note.",
+      "status": {
+        "PENDING_REVIEW": "Waiting for admin review. It is not public yet.",
+        "PUBLISHED": "Published on the public memorial. You can remove it at any time.",
+        "REJECTED": "Not approved.",
+        "WITHDRAWN": "Your public consent was withdrawn; this memorial is no longer listed."
+      }
+    },
     "memoryType": {
       "PHOTO": "Photo",
       "VIDEO": "Video",
@@ -3529,7 +4052,8 @@
       "jurisdiction": "Jurisdiction: {jurisdiction}",
       "verifiedAt": "Last verified {date}",
       "neverVerified": "Never verified",
-      "linkedDocument": "Linked document: {title}"
+      "linkedDocument": "Linked document: {title}",
+      "hubLink": "Trip hub: stays, readiness and places"
     },
     "readiness": {
       "summary": "{ready, number} of {total, number} requirements ready",
@@ -3592,10 +4116,19 @@
       "subtitle": "Compare providers and coverage — this is a discovery tool, not an insurer.",
       "empty": "No insurance products found.",
       "compareSelected": "Compare selected",
-      "viewDetails": "View details"
+      "viewDetails": "View details",
+      "selectForCompare": "Select for comparison",
+      "loading": "Loading insurance products",
+      "annualLimit": "Annual limit",
+      "deductible": "Deductible",
+      "coinsurance": "Your share",
+      "percentUnit": "%",
+      "waitingPeriod": "Waiting period",
+      "days": "{count, plural, one {# day} other {# days}}",
+      "premiumFrom": "Premium from"
     },
     "detail": {
-      "exclusionsTitle": "Exclusions — read before applying",
+      "exclusionsTitle": "Exclusions — read before contacting the insurer",
       "exclusionsEmpty": "No exclusions listed for this product.",
       "coverageTitle": "Coverage",
       "waitingPeriod": "Waiting period: {days} days",
@@ -3603,16 +4136,23 @@
       "annualLimit": "Annual limit: {amount}",
       "premiumRange": "Premium: {min}–{max}",
       "termsSource": "Source: {source}",
-      "checkEligibility": "Check eligibility for {petName}",
-      "apply": "Start application"
+      "visitInsurer": "Visit insurer website",
+      "insurerWebsiteUnavailable": "The insurer has not published a website link.",
+      "loading": "Loading insurance details"
     },
     "compare": {
       "title": "Compare plans",
-      "exclusions": "Exclusions"
+      "exclusions": "Exclusions",
+      "loading": "Loading insurance comparison",
+      "empty": "No insurance products were found for this comparison.",
+      "emptyDescription": "Check the selected products and try again."
     },
     "eligibility": {
       "title": "Eligibility for {petName}",
       "sectionTitle": "Eligibility for this pet",
+      "loading": "Checking insurance eligibility",
+      "loadFailed": "Insurance eligibility could not be loaded.",
+      "retry": "Check again",
       "disclaimer": "This is not a guarantee of approval — the insurer makes the final decision.",
       "reasons": {
         "SPECIES_NOT_COVERED": "This pet's species is not covered by this product.",
@@ -3795,6 +4335,17 @@
     }
   },
   "landing": {
+    "publicMemorial": {
+      "eyebrow": "In loving memory",
+      "title": "Remembering our companions",
+      "description": "Names and photos appear here only after explicit owner consent and admin review.",
+      "empty": "No public memorials have been approved yet.",
+      "loadError": "Public memorials could not be loaded.",
+      "carousel": "Memorial photo slider",
+      "previous": "Previous",
+      "next": "Next",
+      "imageAlt": "Memorial photo of {name}"
+    },
     "hero": {
       "title": "Everything your pet needs, in one place",
       "subtitle": "Find a vet, book an appointment, shop, report a lost pet — without signing up first.",
@@ -3846,6 +4397,8 @@
   "vetPanel": {
     "dashboard": {
       "title": "Clinical board",
+      "offline": "You are offline. Check your connection and try again.",
+      "noAccess": "You do not have permission to view this clinical dashboard.",
       "todaysAppointments": "{count, number} appointments today",
       "openVisits": "{count, number} open visits",
       "overdueTasks": "{count, number} overdue treatments",
@@ -4230,6 +4783,9 @@
       "workers": "Background jobs",
       "empty": "Nothing waiting here.",
       "failed": "This section could not be loaded.",
+      "offline": "You are offline. Check your connection and try again.",
+      "noAccess": "You don't have permission to view this dashboard. Contact your administrator.",
+      "loading": "Loading dashboard information…",
       "retry": "Retry",
       "all": "View all",
       "noPermission": "This area is not available to your role.",
@@ -4255,6 +4811,15 @@
         "redis": "Redis",
         "storage": "File storage",
         "outbox": "Event outbox"
+      },
+      "systemStatus": {
+        "HEALTHY": "Healthy",
+        "DEGRADED": "Degraded",
+        "LAGGING": "Lagging",
+        "DOWN": "Unavailable",
+        "UP": "Available",
+        "RUNNING": "Running",
+        "ERROR": "Error"
       },
       "marketplaceStatements": "Marketplace statements",
       "insuranceProviders": "Insurance provider management",
@@ -4321,7 +4886,8 @@
       "medicationComplexity": "Medication complexity",
       "retractDocument": "Retract document",
       "retractHint": "The document is not deleted. Its retraction reason stays in the record.",
-      "medicationRecord": "Medication record"
+      "medicationRecord": "Medication record",
+      "unknownStatus": "Status updated"
     },
     "share": {
       "group": "Share",
@@ -4421,7 +4987,22 @@
       "stock": "Initial stock",
       "save": "Add offer",
       "failed": "Could not complete the action. Your entries are preserved.",
-      "saved": "Seller offer created."
+      "saved": "Seller offer created.",
+      "requestHelp": "If the product is missing, request it for central-catalog review. A request does not create an offer or set a price or stock.",
+      "requestName": "Product name",
+      "requestBrand": "Brand (optional)",
+      "requestSource": "Reference URL (optional)",
+      "requestDescription": "Product description (optional)",
+      "requestReviewNote": "An administrator checks for duplicates and reviews this request. Your seller price and inventory remain separate.",
+      "requestSubmit": "Request catalog addition",
+      "requestSaved": "Request sent for review.",
+      "requestHistory": "Your catalog requests",
+      "requestStatus": {
+        "PENDING_REVIEW": "Under review",
+        "APPROVED": "Added to central catalog",
+        "MATCHED_EXISTING": "Matched to an existing product",
+        "REJECTED": "Declined"
+      }
     },
     "marketplace": {
       "settings": "Sync settings",
@@ -5115,6 +5696,67 @@
       "CUSTOM": "Custom interval"
     }
   },
+  "travelHub": {
+    "breadcrumb": "Breadcrumb", "myTrips": "My trips", "notFound": "Trip not found", "loadFailed": "Could not load", "loadError": "Please try again.", "retry": "Try again",
+    "phase": { "PLANNING": "Planning", "UPCOMING": "Upcoming", "IN_PROGRESS": "Travelling", "COMPLETED": "Completed", "CANCELLED": "Cancelled" },
+    "tripTo": "Trip to {destination}", "stays": "Stays", "findStay": "Find a stay", "noStays": "No stays in this trip yet.", "nights": "{count, plural, =0 {No nights} one {# night} other {# nights}}",
+    "readiness": "Trip readiness", "readinessCount": "{ready, number} of {total, number} ready", "staleWarning": "Some requirements have not been re-verified recently; check the official source before travelling.", "noRequirements": "No requirements recorded yet.",
+    "documentState": { "FOUND": "Evidence on file", "MISSING": "Missing", "EXPIRING": "Expiring soon", "EXPIRED": "Expired", "UNKNOWN": "Unknown" },
+    "source": "Source", "noSource": "No source recorded", "verified": "verified", "needsRecheck": "needs re-checking", "officialSource": "Official source", "document": "Document", "editRequirements": "Edit requirements and link documents",
+    "suggestionsTitle": "Suggested for this destination", "suggestionsIntro": "From the requirement library opetlife maintains with sources. Added rows start as required until you provide evidence.", "mayBeOutdated": "may be outdated", "addToChecklist": "Add to checklist", "addFailed": "Could not add.", "activity": "Recent activity", "noActivity": "No activity yet.",
+    "bookingStatus": { "HELD": "Dates held", "DRAFT": "Draft", "AWAITING_PROVIDER": "Awaiting the property", "AWAITING_PAYMENT": "Awaiting payment", "CONFIRMED": "Confirmed", "IN_PROGRESS": "Checked in", "COMPLETED": "Completed", "CANCELLED": "Cancelled", "REJECTED": "Declined", "EXPIRED": "Expired", "REFUNDED": "Refunded", "NO_SHOW": "No-show", "MODIFIED": "Replaced by a change", "UNKNOWN": "Unknown" },
+    "insuranceApplicationStatus": { "DRAFT": "Draft", "SUBMITTED": "Submitted", "UNDER_REVIEW": "Under review", "APPROVED": "Approved", "DECLINED": "Declined", "CANCELLED": "Cancelled", "NEEDS_INFORMATION": "Needs information" },
+    "insurance": "Insurance", "companions": "Trip companions", "noInsurance": "No insurance applications for this pet.", "compareInsurance": "Compare insurance", "places": "Places at the destination", "noPlaces": "No places listed in this city yet.", "allPlaces": "All places", "vets": "Vets at the destination", "noVets": "No vets listed in this city yet.", "travelDocuments": "Travel documents", "linked": "linked", "noDocuments": "No travel or vaccination documents on file.", "documents": "Documents", "supportTrip": "Get help with this trip"
+  },
+  "travelMarketplace": {
+    "searchAria": "Search stays",
+    "heroEyebrow": "Travel with your pet",
+    "heroTitle": "Find a stay that welcomes your pet too",
+    "heroDescription": "We show pet rules and availability only as reported by the source. Information can change; confirm directly with the property. This directory does not hold a room or create a reservation.",
+    "destinationsTitle": "Destinations with stays",
+    "destinationsEmpty": "No published stays yet.",
+    "howTitle": "How it works",
+    "rulesTitle": "Compare stated pet rules",
+    "rulesText": "Species, number and weight are compared with the property's stated rules: fits, may not fit, or more information needed. This is not a safety guarantee.",
+    "availabilityTitle": "Confirm availability with the source",
+    "availabilityText": "Availability and price may change. This directory does not reserve a stay; confirm the current details with the listing source.",
+    "readinessTitle": "Prepare for the trip",
+    "readinessText": "Track travel documents in My trips; each requirement includes its source when known.",
+    "relatedAria": "Related links",
+    "myTrips": "My trips",
+    "savedStays": "Saved stays",
+    "petFriendlyPlaces": "Pet-friendly places",
+    "petInsurance": "Pet insurance",
+    "stayCount": "{count, plural, =0 {No stays} one {# stay} other {# stays}}",
+    "destinationLabel": "Destination",
+    "destinationPlaceholder": "City or province",
+    "datesLabel": "Check-in and check-out",
+    "bothDatesRequired": "Choose both check-in and check-out.",
+    "travellingPets": "Travelling pets",
+    "travellingPet": "Travelling pet",
+    "speciesLabel": "Species",
+    "anySpecies": "Any",
+    "dog": "Dog",
+    "cat": "Cat",
+    "other": "Other",
+    "petCount": "Number of pets",
+    "approxWeight": "Approx. weight (kg)",
+    "weightOptional": "Weight (kg) — optional",
+    "searchAction": "Search"
+  },
+  "travelResults": {
+    "allDestinations": "All destinations", "anyDates": "Any dates", "cityHeading": "Stays in {city}", "defaultHeading": "Pet-friendly stays", "editSearch": "Edit search",
+    "favoritesTitle": "Saved stays", "favoritesLoading": "Loading saved stays", "favoritesLoadErrorTitle": "Saved stays could not be loaded", "favoritesLoadErrorMessage": "Check your connection and try again.", "favoritesOfflineTitle": "You are offline", "favoritesOfflineMessage": "Reconnect to the internet and try again.", "favoritesAccessDeniedTitle": "Saved stays are unavailable", "favoritesAccessDeniedMessage": "Sign in to view your saved stays.", "favoritesEmptyTitle": "No saved stays yet", "favoritesEmptyDescription": "Select the heart on a search result to save a stay here.",
+    "datesNote": "Add check-in and check-out dates to see whole-stay totals and availability reported by the listing service.", "filters": "Filters", "sort": "Sort", "view": "View", "list": "List", "map": "Map",
+    "sortOptions": { "RECOMMENDED": "Recommended", "BEST_PET_MATCH": "Best pet match", "PRICE_ASC": "Lowest price", "PRICE_DESC": "Highest price", "RATING": "Top rated" },
+    "bestMatchHelp": "Best pet match shows stays whose stated rules fit first, followed by stays needing more information; each group is sorted by rating and price.",
+    "mapUnavailable": "The map is not available right now", "mapUnavailableHelp": "No map service is connected yet. The same results are listed below, with distances shown where known.",
+    "loadFailed": "Results could not be loaded", "loadError": "Check your connection and try again.", "retry": "Try again", "emptyTitle": "No stays match these choices", "emptyDescription": "Try other dates or fewer filters. Stays reported as full for these dates, or whose stated rules clearly do not fit your pet, are not shown.", "clearFilters": "Clear filters",
+    "resultCount": "{count, plural, =0 {No stays} one {# stay} other {# stays}}", "pages": "Pages", "previous": "Previous", "next": "Next",
+    "compare": "Compare", "compareSelected": "{selected, number} of 3 selected", "clear": "Clear", "pickAtLeast": "Pick at least 2",
+    "conditions": "Conditions", "freeCancellation": "Free cancellation", "noPetFee": "No pet fee", "instantBooking": "Instant booking", "verifiedOnly": "Verified only", "stayType": "Stay type", "maximumTotal": "Maximum total (Toman)", "minimumRating": "Minimum rating", "any": "Any", "amenities": "Amenities", "applyFilters": "Apply filters",
+    "card": { "noPhoto": "No photo provided", "save": "Save", "removeSaved": "Remove from saved", "verified": "Verified", "petRulesUnknown": "Pet rules: not specified", "dogs": "Dogs", "cats": "Cats", "and": "and", "upToWeight": "up to {weight, number} kg", "noPetFee": "no pet fee", "petFee": "pet fee {amount}", "totalStay": "Total for {count, plural, one {# night} other {# nights}}", "includingPetFee": "including pet fee", "freeCancellation": "Free cancellation available", "fromNightly": "From {amount} / night", "requestToBook": "Request to book", "instantBooking": "Instant booking", "compare": "Compare", "fit": "Fits the stated pet rules", "possibleConflict": "May not fit the pet rules", "moreInfo": "More information needed", "distanceKm": "{distance} km" }
+  },
   "externalTravel": {
     "title": "Stays from external sources",
     "detailTitle": "External stay details",
@@ -5158,6 +5800,7 @@
     "datesRequired": "Choose check-in and check-out dates for a trip-specific price.",
     "fromPrice": "Recorded starting rate: from {amount} · {date}. This is not a confirmed price for your selected dates.",
     "lastSeen": "Property last seen: {date}",
+    "lastSuccessfulSync": "Last successful source sync: {date}",
     "capacity": "Reported capacity: {count}",
     "evidence": "Recorded pet acceptance evidence",
     "unavailable": "This stay is currently unavailable in the public directory. It remains in your saved list.",
@@ -5573,7 +6216,7 @@
     "accepted": "Accepted on {date}",
     "withdrawn": "Withdrawn on {date}",
     "otherSource": "Recorded on the account",
-    "limit": "Up to 200 recent events plus older stored versions without recorded events. This section does not change your consents.",
+    "limit": "Up to {limit, number} recent events plus older stored versions without recorded events. This section does not change your consents.",
     "kinds": {
       "TERMS": "Terms of use",
       "PRIVACY": "Privacy",
@@ -5886,6 +6529,8 @@
     "navHint": "Notes explicitly shared by clinics",
     "refresh": "Reload messages",
     "loadFailed": "Information could not be loaded.",
+    "offline": "You are offline. Check your connection and try again.",
+    "noAccess": "You don't have access to these clinic messages. Sign in again or contact the clinic.",
     "retry": "Retry",
     "loading": "Loading…",
     "emptyShared": "No clinic messages have been shared yet.",
@@ -6208,6 +6853,19 @@
     "chooseFile": "Choose image",
     "noFile": "No image selected"
   },
+  "adminAnimalSupportNav": {
+    "overview": "Overview",
+    "needs": "Support requests",
+    "organizations": "Organizations",
+    "rescues": "Rescue cases",
+    "campaigns": "Campaigns",
+    "donations": "Donations",
+    "lostPets": "Lost pets",
+    "reports": "Reports",
+    "trust": "Trust & safety cases",
+    "memorials": "Pet memorials",
+    "label": "Animal support section"
+  },
   "supportOpsNav": {
     "overview": "Overview",
     "needs": "Support requests",
@@ -6216,6 +6874,7 @@
     "lostPets": "Lost pets",
     "reports": "Reports",
     "trust": "Trust & safety cases",
+    "memorials": "Pet memorials",
     "label": "Animal support section"
   },
   "birthDateField": {
@@ -6271,5 +6930,367 @@
         "REJECTED": "Rejected"
       }
     }
+  },
+  "bookingFlow": {
+    "loading": "Loading booking",
+    "notBookable": "This provider cannot be booked",
+    "loadFailed": "Booking could not load",
+    "retry": "Retry",
+    "pageTitle": "Book an appointment",
+    "stepsLabel": "Booking steps",
+    "steps": {
+      "service": "Service",
+      "pets": "Pets",
+      "time": "Time",
+      "details": "Details",
+      "review": "Review"
+    },
+    "holdExpired": "Your hold expired. Please choose the time again.",
+    "holdCountdown": "This time is held for you for {time}.",
+    "chooseAgain": "Choose again",
+    "whichService": "Which service?",
+    "categories": {
+      "VET": "Veterinary care",
+      "GROOMING": "Grooming",
+      "WALKING": "Walking",
+      "SITTING": "Pet sitting",
+      "BOARDING": "Boarding",
+      "TRAINING": "Training",
+      "PET_TAXI": "Pet taxi",
+      "OTHER": "Other"
+    },
+    "duration": "{count, plural, one {# min} other {# min}}",
+    "currencyUnit": "Toman",
+    "priceOnRequest": "Price on request",
+    "option": "Option",
+    "signInPrompt": "Sign in to choose your pet and book. Your selection is kept.",
+    "signInContinue": "Sign in and continue",
+    "noPetsTitle": "You have not added a pet yet",
+    "addPet": "Add a pet",
+    "chooseUpToPets": "Choose up to {count, number} pets",
+    "whichPet": "For which pet?",
+    "petSelectionInfo": "All bookable pets in your household are listed. Selection limit: {count}.",
+    "speciesNotSupported": "This service is not offered for this species",
+    "petLimitReached": "The limit for this service has been reached.",
+    "sameHouseholdRequired": "Pets in one booking must belong to the same household.",
+    "professional": "Professional",
+    "anyProfessional": "Any available professional",
+    "checkInOut": "Check-in and check-out",
+    "day": "Day",
+    "noOpenTimes": "No open times on this day.",
+    "waitlistJoined": "You joined the waitlist. We will notify you if a time opens; nothing is booked automatically.",
+    "joinWaitlist": "Join the waitlist for this day",
+    "time": "Time",
+    "intake": {
+      "VET": "Reason for visit",
+      "GROOMING": "Grooming notes (sensitivities, style)",
+      "WALKING": "Care instructions",
+      "SITTING": "Care instructions",
+      "BOARDING": "Care instructions",
+      "TRAINING": "Training goal",
+      "PET_TAXI": "Pickup and drop-off details",
+      "OTHER": "Notes"
+    },
+    "pickup": "Pickup",
+    "serviceAddress": "Service address",
+    "loadingAddresses": "Loading household addresses",
+    "noSavedAddress": "No saved address; add one in your account.",
+    "dropoff": "Drop-off",
+    "shareHealthTitle": "Share health information with the vet",
+    "shareHealthDescription": "A booking alone never lets the vet see the medical record. You choose.",
+    "shareBasicIdentity": "Basic identity only (name, species, age)",
+    "shareHealthBasics": "Health summary (conditions, allergies, active medications, vaccination status) until 24h after the visit",
+    "chooseHealthSharing": "Choose one of the two options to continue.",
+    "shareSelectedDocuments": "Share selected documents precisely via Share with Vet",
+    "reviewTitle": "Review everything once",
+    "provider": "Provider",
+    "service": "Service",
+    "pet": "Pet",
+    "automaticAssignment": "Assigned automatically",
+    "when": "When",
+    "durationLabel": "Duration",
+    "location": "Location",
+    "price": "Price",
+    "payment": "Payment",
+    "paymentMode": {
+      "NONE": "No online payment",
+      "PAY_AT_PROVIDER": "Pay at the provider",
+      "FULL_PREPAYMENT": "Full online prepayment",
+      "DEPOSIT": "Online deposit"
+    },
+    "bookingType": "Booking type",
+    "requestBooking": "Request; confirmed after the provider accepts",
+    "instantBooking": "Instant",
+    "cancellationLabel": "Cancellation",
+    "cancellationFallback": "Free cancellation up to {hours}h before; {percent}% refund after that.",
+    "preparation": "Preparation",
+    "healthDataShared": "Health data shared",
+    "sharedHealthBasics": "Health summary until 24h after the visit",
+    "sharedBasicIdentity": "Basic identity only",
+    "termsSnapshotNotice": "Price and terms are recorded now; later provider changes do not affect this booking.",
+    "previous": "Back",
+    "holding": "Holding…",
+    "holdTime": "Hold this time",
+    "submitting": "Submitting…",
+    "sendRequest": "Send request",
+    "bookAndPay": "Book and go to payment",
+    "confirmBooking": "Confirm booking",
+    "continue": "Continue",
+    "summaryLabel": "Booking summary",
+    "notChosen": "Not chosen",
+    "summaryCancellationFallback": "Free cancellation up to {hours} hours before.",
+    "errors": {
+      "generic": "That did not work. Check your connection and try again.",
+      "tooManyRequests": "Too many requests; please try again shortly.",
+      "petsLoadFailed": "Your pets could not be loaded.",
+      "addressesLoadFailed": "Addresses for this household could not be loaded.",
+      "slotUnavailable": "That time was just taken. Please choose another.",
+      "holdExpired": "Your hold expired. Please choose a time again.",
+      "petNotSupported": "This service is not offered for the selected pet.",
+      "petContextIncomplete": "This provider requires the pet's care or health profile before booking.",
+      "addressRequired": "Please choose the service address.",
+      "petAccessDenied": "You are not allowed to book for this pet.",
+      "bookingChanged": "This booking changed state. Please refresh."
+    }
+  },
+  "datePicker": {
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "calendarSystem": "Calendar",
+    "chooseDates": "Choose dates",
+    "selectCheckIn": "Choose your check-in day.",
+    "selectCheckOut": "Now choose check-out.",
+    "selectDay": "Choose a day.",
+    "clear": "Clear",
+    "apply": "Apply dates",
+    "range": {
+      "pastOrOutside": "Past or outside the allowed range",
+      "outside": "Outside the allowed range",
+      "minimumNights": "{count, plural, one {Minimum # night} other {Minimum # nights}}",
+      "maximumNights": "{count, plural, one {Maximum # night} other {Maximum # nights}}",
+      "includesUnavailable": "The stay would include an unavailable night",
+      "unavailable": "Unavailable",
+      "checkOutSelected": "Check-out {date}, {count, plural, one {# night} other {# nights}}",
+      "checkInSelected": "Check-in selected; now choose check-out.",
+      "checkInSuffix": ", check-in",
+      "checkOutSuffix": ", check-out"
+    }
+  },
+  "providerDiscovery": {
+    "allServices": "All services",
+    "verifiedOnly": "Verified providers only",
+    "intro": "Real open times and reviews from people who actually booked.",
+    "serviceCategories": "Service categories",
+    "all": "All",
+    "results": "Results",
+    "searching": "Searching…",
+    "providerCount": "{count, plural, one {# provider} other {# providers}}",
+    "loadFailed": "Results could not load",
+    "retry": "Retry",
+    "verified": "Verified",
+    "distanceUnit": "km",
+    "currencyUnit": "Toman",
+    "nextOpening": "Next opening",
+    "noOpening": "No opening in the next 7 days",
+    "noReviews": "No reviews yet",
+    "from": "From",
+    "priceOnRequest": "Price on request",
+    "viewAndBook": "View and book",
+    "mapUnavailable": "Map view is unavailable until a map provider is connected; distances use registered coordinates.",
+    "recommendedOrderNote": "Ordered by availability, rating, experience and distance — there is no paid placement.",
+    "ratingAria": "Rated {average} out of 5 from {count} reviews",
+    "showResults": "{count, plural, one {Show # result} other {Show # results}}",
+    "showResultsFallback": "Show results",
+    "save": "Save {name}",
+    "removeSaved": "Remove {name} from saved",
+    "search": {
+      "label": "Search name or specialty",
+      "placeholder": "Clinic, professional or specialty…",
+      "submit": "Search"
+    },
+    "filters": {
+      "title": "Filters",
+      "active": "Active filters",
+      "remove": "Remove filter {label}",
+      "clear": "Clear",
+      "clearAll": "Clear all",
+      "city": "City",
+      "allCities": "All cities",
+      "date": "Date",
+      "anyDay": "Any day",
+      "pet": "Pet",
+      "maxPrice": "Max price (Toman)",
+      "homeVisit": "Home visit",
+      "homeVisitPlural": "Home visits",
+      "ratedFourPlus": "Rated 4+",
+      "fourStarsAndUp": "4★ and up",
+      "nearMe": "Near me",
+      "locationUnavailable": "Location unavailable; choose a city instead.",
+      "veterinaryService": "Veterinary service",
+      "upTo": "Up to {amount}"
+    },
+    "sort": {
+      "label": "Sort",
+      "RECOMMENDED": "Recommended",
+      "EARLIEST": "Earliest availability",
+      "NEAREST": "Nearest",
+      "TOP_RATED": "Top rated",
+      "LOWEST_PRICE": "Lowest price"
+    },
+    "empty": {
+      "title": "No providers match these filters",
+      "description": "Loosen the filters or choose another city.",
+      "clearFilters": "Clear filters"
+    },
+    "categories": {
+      "VET": "Veterinary",
+      "GROOMING": "Grooming",
+      "TRAINING": "Training",
+      "WALKING": "Dog walking",
+      "SITTING": "Pet sitting",
+      "BOARDING": "Boarding",
+      "PET_TAXI": "Pet taxi"
+    },
+    "providerTypes": {
+      "VET_CLINIC": "Veterinary clinic",
+      "VET_HOSPITAL": "Veterinary hospital",
+      "VETERINARIAN": "Veterinarian",
+      "GROOMER": "Groomer",
+      "TRAINER": "Trainer",
+      "WALKER": "Dog walker",
+      "SITTER": "Pet sitter",
+      "BOARDING": "Boarding",
+      "PET_TAXI": "Pet taxi",
+      "MULTI_SERVICE_PROVIDER": "Multi-service center",
+      "TRAVEL_ACCOMMODATION": "Travel accommodation"
+    },
+    "species": {
+      "DOG": "Dog",
+      "CAT": "Cat",
+      "dogs": "Dogs",
+      "cats": "Cats"
+    },
+    "specialties": {
+      "LAB_TEST": "Laboratory",
+      "IMAGING_STUDY": "Imaging",
+      "DENTAL_CARE": "Dental care",
+      "REHAB_SESSION": "Rehabilitation",
+      "NUTRITION_CONSULT": "Nutrition consultation",
+      "VACCINATION": "Vaccination"
+    }
+  },
+  "providerProfile": {
+    "loading": "Loading provider profile",
+    "notFoundTitle": "This provider is not available",
+    "notFoundDescription": "It may not be verified yet or may have been deactivated.",
+    "loadFailed": "Profile could not load",
+    "retry": "Retry",
+    "verified": "Identity and license verified",
+    "verifiedVet": "Identity and veterinary license verified",
+    "noReviews": "No reviews yet",
+    "ratingSummary": "{average} out of 5 · {count} reviews",
+    "specialties": "Specialties:",
+    "servicesTitle": "Services and prices",
+    "vetServicesTitle": "Appointments and clinical services",
+    "duration": "{count, plural, one {# min} other {# min}}",
+    "atHome": "At home",
+    "approvalRequired": "Provider approval required",
+    "instantBooking": "Instant booking",
+    "options": "Options",
+    "beforeVisit": "Before you come:",
+    "from": "From",
+    "priceOnRequest": "Price on request",
+    "bookService": "Book this",
+    "openingsTitle": "Openings in the next seven days",
+    "service": "Service",
+    "availabilityNote": "Counts show the times the provider has opened. Choose a day to continue booking.",
+    "team": "Team",
+    "veterinarians": "Veterinarians and care team",
+    "veterinarian": "Veterinarian",
+    "specialist": "Specialist",
+    "about": "About",
+    "noDescription": "The provider has not added a description yet.",
+    "petsServed": "Pets served",
+    "notStated": "Not stated",
+    "homeVisits": "Home visits",
+    "available": "Available",
+    "notOffered": "Not offered",
+    "booking": "Booking",
+    "bookingNeedsApproval": "Every booking requires provider confirmation",
+    "gallery": "Gallery",
+    "locationContact": "Location and contact",
+    "travelling": "Travelling?",
+    "petFriendlyStays": "Pet-friendly stays in {city}",
+    "customerReviews": "Customer reviews",
+    "completedBookingReviewRule": "Only customers with a completed booking can review.",
+    "starRating": "{rating} out of 5",
+    "providerResponse": "Provider response:",
+    "policies": "Policies and cancellation",
+    "freeCancellation": "Free cancellation up to {hours}h before; {percent}% refund after that.",
+    "faq": "Frequently asked questions",
+    "bookingPanel": "Booking",
+    "bookAppointment": "Book an appointment",
+    "bookingTermsNote": "Price, payment and cancellation terms are shown before you confirm.",
+    "paymentMode": {
+      "NONE": "No online payment",
+      "PAY_AT_PROVIDER": "Pay at the provider",
+      "FULL_PREPAYMENT": "Full online prepayment",
+      "DEPOSIT": "Online deposit"
+    },
+    "ratingCountSummary": "of 5 · {count} reviews",
+    "completedBookings": "{count, plural, one {# booking completed on opetlife} other {# bookings completed on opetlife}}",
+    "profileSections": "Profile sections",
+    "sections": {
+      "services": "Services",
+      "availability": "Availability",
+      "team": "Team",
+      "veterinarians": "Veterinarians",
+      "about": "About",
+      "location": "Location",
+      "reviews": "Reviews",
+      "policies": "Policies",
+      "faq": "FAQ"
+    },
+    "availability": {
+      "weekLabel": "Openings over the next seven days",
+      "loadFailed": "This week's openings could not load; choose a day while booking.",
+      "availableTimes": "{count, plural, one {# time} other {# times}}",
+      "openTimes": "{count, plural, one {# open time} other {# open times}}",
+      "noOpenTimes": "No open times",
+      "full": "Full"
+    }
+  },
+  "publicNavigation": {
+    "main": "Primary navigation",
+    "explore": "Explore",
+    "closeMenu": "Close menu",
+    "quickAccess": "Quick access",
+    "openApp": "Open app",
+    "logIn": "Log in",
+    "home": "Home",
+    "health": "Health",
+    "services": "Services",
+    "shop": "Shop",
+    "memories": "Memories",
+    "healthAndVet": "Health and veterinary care",
+    "places": "Places",
+    "travel": "Travel",
+    "insurance": "Insurance",
+    "animalSupport": "Animal support",
+    "community": "Community",
+    "blog": "Blog",
+    "productSections": "Product sections",
+    "dashboard": "Dashboard",
+    "myPets": "My pets",
+    "activePet": "Active pet",
+    "care": "Care",
+    "careCalendar": "Care calendar",
+    "cart": "Cart",
+    "checkout": "Checkout",
+    "orders": "Orders",
+    "bookings": "Bookings",
+    "notifications": "Notifications",
+    "notificationPreferences": "Notification preferences",
+    "support": "Support"
   }
 }

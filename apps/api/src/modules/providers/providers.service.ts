@@ -10,6 +10,7 @@ import type { GetAvailabilityDto } from "./dto/get-availability.dto";
 import { SlotGeneratorService } from "./slot-generator.service";
 import { toProviderLocationDto as toLocationDto, toProviderServiceDto as toServiceDto } from "./provider-dto.mapper";
 import { PetAccessService } from "../pet-access/pet-access.service";
+import { excludeDemoRecordsFromPublicReads } from "../../common/public-record-origin";
 
 type OrgWithRelations = ProviderOrganization & { locations: ProviderLocation[]; services: ProviderService[] };
 const VET_PROVIDER_TYPES: ProviderType[] = [ProviderType.VET_CLINIC, ProviderType.VET_HOSPITAL, ProviderType.VETERINARIAN];
@@ -35,6 +36,7 @@ export class ProvidersService {
 
     const where: Prisma.ProviderOrganizationWhereInput = {
       type: { in: VET_PROVIDER_TYPES },
+      ...excludeDemoRecordsFromPublicReads(),
       ...(verifiedOnly ? { verificationStatus: PrismaVerificationStatus.VERIFIED } : {}),
       ...(query.search ? { name: { contains: query.search, mode: "insensitive" } } : {}),
       ...(query.city ? { locations: { some: { city: { equals: query.city, mode: "insensitive" } } } } : {}),
@@ -58,8 +60,8 @@ export class ProvidersService {
   }
 
   async getVetProfile(providerId: string, viewerId?: string): Promise<ProviderProfileDto> {
-    const org = await this.prisma.providerOrganization.findUnique({
-      where: { id: providerId },
+    const org = await this.prisma.providerOrganization.findFirst({
+      where: { id: providerId, ...excludeDemoRecordsFromPublicReads() },
       include: { locations: true, services: true },
     });
     if (!org || !VET_PROVIDER_TYPES.includes(org.type) || org.verificationStatus !== PrismaVerificationStatus.VERIFIED) throw new NotFoundApiException("Provider");
@@ -84,7 +86,13 @@ export class ProvidersService {
   }
 
   async getAvailability(providerId: string, query: GetAvailabilityDto, viewerId?: string): Promise<AvailabilityResponseDto> {
-    const service = await this.prisma.providerService.findUnique({ where: { id: query.serviceId } });
+    const service = await this.prisma.providerService.findFirst({
+      where: {
+        id: query.serviceId,
+        providerOrganizationId: providerId,
+        providerOrganization: excludeDemoRecordsFromPublicReads(),
+      },
+    });
     if (!service || service.providerOrganizationId !== providerId || service.category !== ServiceCategory.VET) throw new NotFoundApiException("Service");
 
     let petCompatible = true;

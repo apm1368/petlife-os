@@ -56,4 +56,25 @@ describe("ProviderDiscoveryView", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Retry" }));
     await waitFor(() => expect(screen.getByText("کلینیک مهر")).toBeTruthy());
   });
+
+  it("localizes German discovery controls and keeps the German provider route", async () => {
+    vi.mocked(discoveryService.search).mockResolvedValue({ total: 1, items: [RESULT] });
+    renderWithIntl(<ProviderDiscoveryView category="VET" />, "de");
+
+    expect(await screen.findByText("Tierarztpraxis")).toBeTruthy();
+    expect(screen.getByRole("search").querySelector("input")?.getAttribute("aria-label")).toBe("Name oder Fachgebiet suchen");
+    expect(screen.getByRole("link", { name: "Tiermedizin" }).getAttribute("href")).toBe("/de/services/VET");
+    expect(screen.getByText("In den nächsten 7 Tagen kein freier Termin")).toBeTruthy();
+    expect(screen.getByText(/100\.000 Toman/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "کلینیک مهر" }).getAttribute("href")).toBe("/de/providers/p1");
+  });
+
+  it("shows Spanish localized empty and recovery actions without fake results", async () => {
+    vi.mocked(discoveryService.search).mockResolvedValue({ total: 0, items: [] });
+    renderWithIntl(<ProviderDiscoveryView category="GROOMING" />, "es");
+
+    expect(await screen.findByText("No hay proveedores que coincidan con estos filtros")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Limpiar filtros" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Peluquería y baño" }).getAttribute("href")).toBe("/es/services/GROOMING");
+  });
 });

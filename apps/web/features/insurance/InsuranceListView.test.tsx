@@ -7,7 +7,6 @@ import { InsuranceListView } from "./InsuranceListView";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
-  useSearchParams: () => new URLSearchParams(),
 }));
 vi.mock("@/services/insurance.service", () => ({ insuranceService: { listProducts: vi.fn() } }));
 
@@ -17,6 +16,7 @@ function product(overrides: Partial<InsuranceProductDto> = {}): InsuranceProduct
     providerId: "provider-1",
     providerName: "Acme Insurance",
     providerLogoUrl: null,
+    providerWebsiteUrl: null,
     name: "Basic Plan",
     country: "IR",
     speciesEligibility: ["DOG"] as never,
@@ -64,5 +64,22 @@ describe("InsuranceListView", () => {
     renderWithIntl(<InsuranceListView />);
 
     await waitFor(() => expect(screen.getByText("No insurance products found.")).toBeTruthy());
+  });
+
+  it.each([
+    ["fa", "بیمه حیوان خانگی", "سقف سالانه", "انتخاب برای مقایسه"],
+    ["en", "Pet insurance", "Annual limit", "Select for comparison"],
+    ["de", "Tierversicherung", "Jahreshöchstleistung", "Für den Vergleich auswählen"],
+    ["es", "Seguro para mascotas", "Límite anual", "Seleccionar para comparar"],
+  ] as const)("localizes the complete product row in %s and formats its amounts", async (locale, title, annualLimit, selectLabel) => {
+    vi.mocked(insuranceService.listProducts).mockResolvedValue(paginated([product({ annualLimitIrr: 12_345_000, coinsurancePercent: 20, waitingPeriodDays: 1 })]));
+
+    renderWithIntl(<InsuranceListView />, locale);
+
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByText(annualLimit)).toBeTruthy();
+    expect(screen.getByLabelText(selectLabel)).toBeTruthy();
+    expect(screen.getByText("Acme Insurance — Basic Plan")).toBeTruthy();
+    if (locale === "de" || locale === "es") expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
   });
 });

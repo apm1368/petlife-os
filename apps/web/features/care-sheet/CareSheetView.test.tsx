@@ -67,4 +67,55 @@ describe("CareSheetView", () => {
     expect(await screen.findByRole("button", { name: "چاپ / ذخیره PDF" })).toBeTruthy();
     expect(screen.getByText("آلرژی‌های فعال")).toBeTruthy();
   });
+
+  it.each([
+    ["de", "Pflegeblatt", "Drucken / als PDF speichern", "Aktive Allergien", "Fütterung", "Notfallkontakt — Name"],
+    ["es", "Ficha de cuidados", "Imprimir / guardar como PDF", "Alergias activas", "Alimentación", "Contacto de emergencia — nombre"],
+  ] as const)("renders the entire printed care sheet UI in %s and preserves health/source text", async (locale, title, print, allergies, feeding, emergency) => {
+    const { container } = renderWithIntl(<CareSheetView petId="p1" />, locale);
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByRole("button", { name: print })).toBeTruthy();
+    expect(screen.getByText(allergies)).toBeTruthy();
+    expect(screen.getByText(feeding)).toBeTruthy();
+    expect(screen.getByText("Twice a day, 120g")).toBeTruthy();
+    expect(screen.getByText("Never off-leash near the road")).toBeTruthy();
+    expect(screen.getByText(/once daily/).textContent).toContain("5,4 mg");
+    expect(screen.getByText("Deworming tablet")).toBeTruthy();
+    expect(screen.getByLabelText(emergency)).toBeTruthy();
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it.each([
+    ["de", "Sie haben keinen Zugriff auf diesen Bereich"],
+    ["es", "No tienes acceso a esta sección"],
+  ] as const)("localizes permission-limited health sections in %s", async (locale, deniedCopy) => {
+    vi.mocked(petsService.getMyAccess).mockResolvedValue({ canViewCareProfile: true, canViewHealth: false } as never);
+    const { container } = renderWithIntl(<CareSheetView petId="p1" />, locale);
+    expect((await screen.findAllByText(new RegExp(deniedCopy))).length).toBeGreaterThan(0);
+    expect(healthService.listAllergies).not.toHaveBeenCalled();
+    expect(screen.queryByText("Chicken")).toBeNull();
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it.each([
+    ["de", "Dieser Bereich konnte nicht geladen werden"],
+    ["es", "No se pudo cargar esta sección"],
+  ] as const)("localizes a partially failed care sheet in %s without discarding available sections", async (locale, failureCopy) => {
+    vi.mocked(careProfileService.get).mockRejectedValue(new Error("offline"));
+    const { container } = renderWithIntl(<CareSheetView petId="p1" />, locale);
+    expect((await screen.findAllByText(new RegExp(failureCopy))).length).toBeGreaterThan(0);
+    expect(screen.getByText("Chicken")).toBeTruthy();
+    expect(screen.getByText("Deworming tablet")).toBeTruthy();
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it.each([
+    ["de", "Pflegeblatt wird vorbereitet"],
+    ["es", "Preparando la ficha de cuidados"],
+  ] as const)("localizes the loading skeleton in %s", (locale, loadingLabel) => {
+    vi.mocked(petsService.getById).mockImplementation(() => new Promise(() => undefined));
+    const { container } = renderWithIntl(<CareSheetView petId="p1" />, locale);
+    expect(screen.getByLabelText(loadingLabel)).toBeTruthy();
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
 });

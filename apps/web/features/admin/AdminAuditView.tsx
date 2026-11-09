@@ -7,7 +7,8 @@ import type { AdminAuditLogDto } from "@petlife/types";
 import { adminService } from "@/services/admin.service";
 
 function formatDate(iso: string, locale: string) {
-  return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "short", timeStyle: "short" }).format(new Date(iso));
+  const dateLocale = locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-US";
+  return new Intl.DateTimeFormat(dateLocale, { dateStyle: "short", timeStyle: "short" }).format(new Date(iso));
 }
 
 export function AdminAuditView() {
@@ -32,21 +33,21 @@ export function AdminAuditView() {
     void load();
   }, []);
 
-  if (error) return <ErrorRecovery title={t("title")} message="" retryLabel={tCommon("retry")} onRetry={load} />;
+  if (error) return <ErrorRecovery title={t("title")} message={t("loadError")} retryLabel={tCommon("retry")} onRetry={load} />;
   if (!logs) return <Skeleton className="h-40 w-full" aria-label={tCommon("loading")} />;
 
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-page-title text-text-primary">{t("title")}</h1>
-      {logs.length === 0 ? <EmptyState title={tCommon("empty")} /> : null}
+      {logs.length === 0 ? <EmptyState title={t("empty")} /> : null}
       {logs.map((log) => (
         <ContextSurface key={log.id} className="flex flex-col gap-1 py-2.5">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-body font-medium text-text-primary">{log.action}</span>
+            <span className="text-body font-medium text-text-primary">{t("action")}: {log.action}</span>
             <span className="text-metadata text-text-secondary">{formatDate(log.createdAt, locale)}</span>
           </div>
           <span className="text-metadata text-text-secondary">
-            {t("entityType")}: {log.entityType} {log.entityId ? `(${log.entityId})` : ""} · {t("by", { name: log.adminUser.displayName })}
+            {t("entityType")}: {log.entityType}{log.entityId ? ` · ${t("entityId")}: ${log.entityId}` : ""} · {t("by", { name: log.adminUser.displayName })}
           </span>
           {log.reason ? <span className="text-metadata text-text-secondary">{t("reason")}: {log.reason}</span> : null}
         </ContextSurface>

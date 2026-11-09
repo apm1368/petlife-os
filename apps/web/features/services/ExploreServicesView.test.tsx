@@ -19,4 +19,24 @@ describe("ExploreServicesView", () => {
     expect(screen.getByText("Pet Taxi")).toBeTruthy();
     expect(screen.getByRole("link", { name: /Veterinary/ }).getAttribute("href")).toBe("/en/services/VET");
   });
+
+  it.each([
+    ["fa", "مراقبت حرفه‌ای، نزدیک شما", "برای Luna", "دامپزشکی", "جست‌وجوی خدمات", "همهٔ خدمات"],
+    ["en", "Professional care, near you", "For Luna", "Veterinary care", "Search services", "All services"],
+    ["de", "Professionelle Betreuung in Ihrer Nähe", "Für Luna", "Tiermedizin", "Dienstleistungen suchen", "Alle Leistungen"],
+    ["es", "Atención profesional cerca de ti", "Para Luna", "Veterinaria", "Buscar servicios", "Todos los servicios"],
+  ] as const)("renders the whole services overview in %s", (locale, heading, petSubtitle, category, searchLabel, allServices) => {
+    renderWithIntl(<ExploreServicesView />, locale);
+
+    expect(screen.getByRole("heading", { level: 1, name: heading })).toBeTruthy();
+    expect(screen.getByText(petSubtitle)).toBeTruthy();
+    expect(screen.getByRole("link", { name: new RegExp(category) })).toBeTruthy();
+    expect(screen.getByLabelText(searchLabel)).toBeTruthy();
+    expect(screen.getByRole("link", { name: allServices })).toBeTruthy();
+    if (locale === "de" || locale === "es") {
+      expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+      expect(document.body.textContent).not.toContain("Professional care, near you");
+      expect(document.body.textContent).not.toContain("Verified professionals, in one place");
+    }
+  });
 });

@@ -166,4 +166,18 @@ describe("PetOwnershipView", () => {
     await screen.findByText("Cookie");
     expect(screen.getByText("در انتظار پاسخ طرف دیگر")).toBeTruthy();
   });
+
+  it.each([
+    ["de", "Tiereigentum", "Antwort der anderen Person ausstehend", "Übertragung zustimmen"],
+    ["es", "Titularidad de la mascota", "Pendiente de respuesta de la otra persona", "Aprobar transferencia"],
+  ] as const)("renders the ownership page in %s without Persian interface text", async (locale, heading, status, approve) => {
+    renderWithIntl(<PetOwnershipView />, locale);
+    await screen.findByRole("heading", { name: heading });
+    expect(screen.getByText(status)).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06ff]/);
+
+    fireEvent.click(screen.getByRole("button", { name: approve }));
+    expect(await screen.findByRole("dialog")).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06ff]/);
+  });
 });

@@ -60,4 +60,21 @@ describe("MyOrdersView", () => {
 
     await waitFor(() => expect(screen.getByText("You haven't placed any orders yet.")).toBeTruthy());
   });
+
+  it.each([["de", "Meine Bestellungen", "Verkauft von"], ["es", "Mis pedidos", "Vendido por"]] as const)("renders localized order history in %s while preserving product and seller names", async (locale, title, sellerPrefix) => {
+    vi.mocked(commerceService.listOrders).mockResolvedValue([ORDER]);
+    renderWithIntl(<MyOrdersView />, locale);
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByText(new RegExp(sellerPrefix))).toBeTruthy();
+    expect(document.body.textContent).toContain("Pet Bazaar Tehran");
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it.each([["de", "Du hast noch keine Bestellungen aufgegeben.", "Zum Shop"], ["es", "Todavía no has realizado ningún pedido.", "Ir a la tienda"]] as const)("renders the localized empty order-history state in %s", async (locale, emptyText, action) => {
+    vi.mocked(commerceService.listOrders).mockResolvedValue([]);
+    renderWithIntl(<MyOrdersView />, locale);
+    expect(await screen.findByText(emptyText)).toBeTruthy();
+    expect(screen.getByRole("button", { name: action })).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
 });

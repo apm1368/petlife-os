@@ -17,6 +17,21 @@ describe("status vocabulary", () => {
     expect(statusLabel(null, "fa")).toBe("");
   });
 
+  it("localizes dashboard statuses in German and Spanish", () => {
+    expect(statusLabel("PENDING", "de", "order")).toBe("Zahlung ausstehend");
+    expect(statusLabel("CONFIRMED", "es", "travelBooking")).toBe("Confirmado");
+    expect(statusLabel("TRIALING", "de", "subscription")).toBe("Testphase");
+    expect(statusLabel("NEW_SERVER_STATE", "es")).toBe("Estado desconocido (new server state)");
+  });
+
+  it("localizes every known pet lifecycle status in German and Spanish", () => {
+    expect(statusLabel("LOST", "de", "lifecycle")).toBe("Vermisst");
+    expect(statusLabel("LOST", "es", "lifecycle")).toBe("Sin localizar");
+    expect(statusLabel("TEMPORARILY_TRANSFERRED", "de", "lifecycle")).toContain("Vorübergehend");
+    expect(statusLabel("DECEASED", "es", "lifecycle")).toBe("Ha fallecido");
+    expect(statusLabel("MEMORIAL", "de", "lifecycle")).toBe("In Erinnerung");
+  });
+
   it("tones follow meaning, not the code text", () => {
     expect(statusTone("OVERDUE", "vaccination")).toBe("urgent");
     expect(statusTone("UP_TO_DATE", "vaccination")).toBe("success");
@@ -26,7 +41,11 @@ describe("status vocabulary", () => {
   it("counts and country names follow the UI language", () => {
     expect(formatCount(1250, "fa")).toBe("۱٬۲۵۰");
     expect(formatCount(1250, "en")).toBe("1,250");
+    expect(formatCount(1250, "de")).toBe("1.250");
+    expect(formatCount(1250, "es")).toBe("1250");
     expect(countryName("IR", "fa")).toBe("ایران");
     expect(countryName("IR", "en")).toBe("Iran");
+    expect(countryName("IR", "de")).toBe("Iran");
+    expect(countryName("IR", "es")).toBe("Irán");
   });
 });

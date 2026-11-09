@@ -46,9 +46,9 @@ export function parseSettingNumber(value: string, money: boolean): number | unde
 }
 function useCopy() {
   const t = useTranslations("adminSettings"),
-    locale = useLocale() as "fa" | "en";
+    locale = useLocale() as "fa" | "en" | "de" | "es";
   const number = (value: number) =>
-    new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US", { maximumFractionDigits: 1 }).format(value);
+    new Intl.NumberFormat(locale === "fa" ? "fa-IR" : locale, { maximumFractionDigits: 1 }).format(value);
   return {
     t,
     locale,

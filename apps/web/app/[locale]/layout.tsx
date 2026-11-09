@@ -3,12 +3,13 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { ToastProvider } from "@petlife/ui";
-import { locales, localeDirection, isAppLocale } from "@/lib/i18n/config";
+import { locales, localeDirection, isRouteLocale } from "@/lib/i18n/config";
 import { themeInitScript } from "@/lib/theme/theme-script";
 import { inter, vazirmatn } from "@/lib/fonts";
 import "../globals.css";
 import { LocalReviewTools } from "@/features/local-preview/LocalReviewTools";
 import { ThemeSync } from "@/features/theme/ThemeSync";
+import { DisplayModeSync } from "@/features/display-mode/DisplayModeSync";
 import { AuthModalOrigin } from "@/features/auth/AuthModalOrigin";
 import { DesignRoot } from "@/features/design-system/DesignRoot";
 import { PageMotion } from "@/features/motion/PageMotion";
@@ -40,7 +41,7 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  if (!isAppLocale(locale)) notFound();
+  if (!isRouteLocale(locale)) notFound();
 
   setRequestLocale(locale);
   const messages = await getMessages();
@@ -54,7 +55,7 @@ export default async function LocaleLayout({
       </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeSync /><ToastProvider><PageMotion><AuthModalOrigin><LocalReviewTools><DesignRoot>{children}{modal}</DesignRoot></LocalReviewTools></AuthModalOrigin></PageMotion></ToastProvider>
+          <ThemeSync /><DisplayModeSync /><ToastProvider><PageMotion><AuthModalOrigin><LocalReviewTools><DesignRoot>{children}{modal}</DesignRoot></LocalReviewTools></AuthModalOrigin></PageMotion></ToastProvider>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -4,12 +4,13 @@ import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
-import { Avatar, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
+import { Avatar, Dialog, ErrorRecovery, Skeleton, StatusLabel } from "@petlife/ui";
 import { PetLifecycleStatus, type PetAccessFlags, type PetDto } from "@petlife/types";
 import { petsService } from "@/services/pets.service";
 import { SystemState, systemStateFor, type SystemStateKind } from "@/features/system/SystemState";
 import { formatAge, formatWeight, speciesLabel } from "./pet-identity";
 import { useActivePet } from "@/hooks/use-active-pet";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 const copy = {
   fa: {
@@ -39,6 +40,7 @@ const copy = {
     lostMessage: "حالت گمشده فعال است؛ اطلاعات پزشکی همچنان خصوصی می‌ماند.",
     transferredMessage: "مراقبت این حیوان موقتاً واگذار شده است؛ سطح دسترسی جاری را بررسی کنید.",
     memorialMessage: "پرونده سلامت برای حفظ سابقه در دسترس است؛ یادها و داستان زندگی در اولویت‌اند.",
+    sex: "جنسیت", male: "نر", female: "ماده", registered: "ثبت شده",
   },
   en: {
     aria: "Pet profile sections",
@@ -67,6 +69,13 @@ const copy = {
     lostMessage: "Lost mode is active; medical information remains private.",
     transferredMessage: "Care is temporarily transferred; review the current access scope.",
     memorialMessage: "Health history remains available; memories and the pet's life story take priority.",
+    sex: "Sex", male: "Male", female: "Female", registered: "Registered",
+  },
+  de: {
+    aria: "Bereiche des Haustierprofils", overview: "Übersicht", health: "Gesundheit", care: "Pflege", documents: "Dokumente", memories: "Erinnerungen", activity: "Aktivitäten", travel: "Reisen", expenses: "Ausgaben", edit: "Angaben bearbeiten", unknownBreed: "Rasse nicht angegeben", unknownAge: "Alter nicht angegeben", weight: "Gewicht", microchip: "Mikrochip", unknown: "Nicht angegeben", loadError: "Dieses Haustierprofil ist nicht verfügbar.", retry: "Erneut versuchen", loading: "Haustierprofil wird geladen", active: "Aktiv", lost: "Vermisst", transferred: "Vorübergehend übergeben", deceased: "Verstorben", memorial: "Erinnerungsseite", lostMessage: "Der Vermisstenmodus ist aktiv; medizinische Informationen bleiben privat.", transferredMessage: "Die Betreuung wurde vorübergehend übergeben. Prüfen Sie den aktuellen Zugriff.", memorialMessage: "Die Gesundheitsgeschichte bleibt verfügbar; Erinnerungen und Lebensgeschichte stehen im Vordergrund.", sex: "Geschlecht", male: "Männlich", female: "Weiblich", registered: "Registriert",
+  },
+  es: {
+    aria: "Secciones del perfil de la mascota", overview: "Resumen", health: "Salud", care: "Cuidados", documents: "Documentos", memories: "Recuerdos", activity: "Actividad", travel: "Viajes", expenses: "Gastos", edit: "Editar datos", unknownBreed: "Raza no indicada", unknownAge: "Edad no indicada", weight: "Peso", microchip: "Microchip", unknown: "No indicado", loadError: "Este perfil de mascota no está disponible.", retry: "Intentar de nuevo", loading: "Cargando perfil de mascota", active: "Activa", lost: "Perdida", transferred: "Transferida temporalmente", deceased: "Fallecida", memorial: "En recuerdo", lostMessage: "El modo de mascota perdida está activo; la información médica sigue siendo privada.", transferredMessage: "El cuidado se ha transferido temporalmente. Revisa el acceso actual.", memorialMessage: "El historial de salud sigue disponible; los recuerdos y su historia de vida tienen prioridad.", sex: "Sexo", male: "Macho", female: "Hembra", registered: "Registrado",
   },
 } as const;
 
@@ -82,12 +91,13 @@ const sections = [
 ] as const;
 
 export function PetContextShell({ petId, children }: { petId: string; children: ReactNode }) {
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as RouteLocale;
   const pathname = usePathname() ?? "";
   const c = copy[locale];
   const [pet, setPet] = useState<PetDto | null>(null);
   const [access, setAccess] = useState<PetAccessFlags | null>(null);
   const [error, setError] = useState<SystemStateKind | null>(null);
+  const [photoOpen, setPhotoOpen] = useState(false);
   const { pets: householdPets, activePetId, switchActivePet } = useActivePet();
   // The pet on screen is the pet in context: keep the header's active-pet control in step with it
   // (household pets only — a pet shared with you from another household never becomes "active").
@@ -133,7 +143,16 @@ export function PetContextShell({ petId, children }: { petId: string; children: 
     <div className="pet-shell">
       <header className="pet-hero">
         <div className="pet-hero__identity">
-          <div className="pet-hero__photo"><Avatar src={pet.photoUrl} name={pet.name} size="lg" /></div>
+          <button
+            type="button"
+            className="pet-hero__photo-button"
+            aria-label={pet.photoUrl ? (locale === "fa" ? `نمایش تصویر بزرگ ${pet.name}` : `View larger photo of ${pet.name}`) : (locale === "fa" ? `تصویر ${pet.name} ثبت نشده` : `No photo set for ${pet.name}`)}
+            disabled={!pet.photoUrl}
+            onClick={() => setPhotoOpen(true)}
+          >
+            <span className="pet-hero__photo"><Avatar src={pet.photoUrl} name={pet.name} size="lg" /></span>
+            {pet.photoUrl ? <span className="pet-hero__photo-hint">{locale === "fa" ? "نمایش تصویر" : "View photo"}</span> : null}
+          </button>
           <div className="min-w-0">
             <div className="pet-hero__title">
               <p className="pet-hero__name">{pet.name}</p>
@@ -144,14 +163,21 @@ export function PetContextShell({ petId, children }: { petId: string; children: 
             </p>
             <dl className="pet-hero__facts">
               <div><dt>{c.weight}</dt><dd>{formatWeight(pet, locale, c.unknown)}</dd></div>
-              {pet.sex && pet.sex !== "UNKNOWN" ? <div><dt>{locale === "fa" ? "جنسیت" : "Sex"}</dt><dd>{pet.sex === "MALE" ? (locale === "fa" ? "نر" : "Male") : locale === "fa" ? "ماده" : "Female"}</dd></div> : null}
+              {pet.sex && pet.sex !== "UNKNOWN" ? <div><dt>{locale === "fa" ? "جنسیت" : locale === "en" ? "Sex" : c.sex}</dt><dd>{pet.sex === "MALE" ? (locale === "fa" ? "نر" : locale === "en" ? "Male" : c.male) : locale === "fa" ? "ماده" : locale === "en" ? "Female" : c.female}</dd></div> : null}
               {/* An identifier, not a headline: say that a chip is registered, never print its number here. */}
-              {pet.microchipNumber ? <div><dt>{c.microchip}</dt><dd>{locale === "fa" ? "ثبت شده" : "Registered"}</dd></div> : null}
+              {pet.microchipNumber ? <div><dt>{c.microchip}</dt><dd>{locale === "fa" ? "ثبت شده" : locale === "en" ? "Registered" : c.registered}</dd></div> : null}
             </dl>
           </div>
         </div>
         {access.canEditIdentity ? <Link className="pet-hero__edit" href={base + "?edit=identity"}>{c.edit}</Link> : null}
       </header>
+
+      {pet.photoUrl ? (
+        <Dialog open={photoOpen} onClose={() => setPhotoOpen(false)} title={pet.name}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- user-owned pet profile image; shown in an accessible lightbox */}
+          <img src={pet.photoUrl} alt={locale === "fa" ? `تصویر ${pet.name}` : `${pet.name}'s photo`} className="pet-hero__photo-expanded" />
+        </Dialog>
+      ) : null}
 
       {lifecycle.message ? (
         <div className={"my-4 border-s-4 px-4 py-3 text-sm leading-7 " + lifecycle.className} role="status">
@@ -178,7 +204,7 @@ export function PetContextShell({ petId, children }: { petId: string; children: 
   );
 }
 
-function lifecyclePresentation(status: PetLifecycleStatus, c: typeof copy.fa | typeof copy.en) {
+function lifecyclePresentation(status: PetLifecycleStatus, c: (typeof copy)[RouteLocale]) {
   if (status === PetLifecycleStatus.LOST) return { label: c.lost, message: c.lostMessage, tone: "attention" as const, className: "border-state-urgent bg-state-urgent/5 text-text-primary" };
   if (status === PetLifecycleStatus.TEMPORARILY_TRANSFERRED) return { label: c.transferred, message: c.transferredMessage, tone: "neutral" as const, className: "border-state-attention bg-state-attention/5 text-text-primary" };
   if (status === PetLifecycleStatus.DECEASED) return { label: c.deceased, message: c.memorialMessage, tone: "neutral" as const, className: "border-[#76638c] bg-surface-subtle text-text-primary" };

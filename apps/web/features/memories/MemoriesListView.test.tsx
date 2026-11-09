@@ -6,7 +6,7 @@ import { memoriesService } from "@/services/memories.service";
 import { petsService } from "@/services/pets.service";
 import { MemoriesListView } from "./MemoriesListView";
 
-vi.mock("@/services/memories.service", () => ({ memoriesService: { list: vi.fn() } }));
+vi.mock("@/services/memories.service", () => ({ memoriesService: { list: vi.fn(), getMemorial: vi.fn(), submitMemorial: vi.fn(), withdrawMemorial: vi.fn() } }));
 vi.mock("@/services/pets.service", () => ({ petsService: { getById: vi.fn() } }));
 
 function pet(overrides: Partial<PetDto> = {}): PetDto {
@@ -58,6 +58,9 @@ describe("MemoriesListView", () => {
   beforeEach(() => {
     vi.mocked(petsService.getById).mockReset();
     vi.mocked(memoriesService.list).mockReset();
+    vi.mocked(memoriesService.getMemorial).mockReset().mockResolvedValue(null);
+    vi.mocked(memoriesService.submitMemorial).mockReset();
+    vi.mocked(memoriesService.withdrawMemorial).mockReset();
   });
 
   it("shows a plain memories heading for an active pet", async () => {
@@ -87,5 +90,25 @@ describe("MemoriesListView", () => {
     renderWithIntl(<MemoriesListView petId="pet-1" />);
 
     await waitFor(() => expect(screen.getByText("No memories yet. Add the first one.")).toBeTruthy());
+  });
+
+  it.each([
+    ["de", "Noch keine Erinnerungen. Fügen Sie die erste hinzu.", "Erinnerungen von Milo", "Januar"],
+    ["es", "Aún no hay recuerdos. Añade el primero.", "Recuerdos de Milo", "enero"],
+  ] as const)("renders the complete list and empty state in %s without translating user content", async (locale, emptyText, heading, month) => {
+    vi.mocked(petsService.getById).mockResolvedValue(pet());
+    vi.mocked(memoriesService.list).mockResolvedValue([memory({ title: "Original user-authored title" })]);
+
+    const { container, unmount } = renderWithIntl(<MemoriesListView petId="pet-1" />, locale);
+    await waitFor(() => expect(screen.getByText(heading)).toBeTruthy());
+    expect(screen.getByText("Original user-authored title")).toBeTruthy();
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+    expect(container.textContent).toContain(month);
+
+    unmount();
+    vi.mocked(memoriesService.list).mockResolvedValue([]);
+    const emptyRender = renderWithIntl(<MemoriesListView petId="pet-1" />, locale);
+    await waitFor(() => expect(screen.getByText(emptyText)).toBeTruthy());
+    expect(emptyRender.container.textContent).not.toMatch(/[\u0600-\u06FF]/);
   });
 });

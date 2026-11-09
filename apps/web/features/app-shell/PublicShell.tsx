@@ -8,11 +8,13 @@ import { Avatar, Button } from "@petlife/ui";
 import { useAppBootstrap } from "@/hooks/use-app-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
+import { DisplayModeToggle } from "@/features/display-mode/DisplayModeToggle";
 import { LocaleSwitcher } from "@/features/locale/LocaleSwitcher";
 import { PublicPrimaryNavigation } from "@/features/navigation/PublicPrimaryNavigation";
 import { useLocalPreview } from "@/features/local-preview/LocalPreviewGate";
 import { PublicFooter } from "./PublicFooter";
 import { MemberFrame } from "./MemberFrame";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 /**
  * The shell for public browsing surfaces (vet/service/shop discovery) —
@@ -28,11 +30,12 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
   useAppBootstrap();
   const user = useSessionStore((s) => s.user);
   const status = useSessionStore((s) => s.status);
-  const t = useTranslations("common");
   const locale = useLocale();
+  const routeLocale = locale as RouteLocale;
+  const publicCopy = useTranslations("publicNavigation");
   const router = useRouter();
   const preview = useLocalPreview();
-  const warmSurface = /^\/(fa|en)\//.test(usePathname() ?? "");
+  const warmSurface = /^\/(fa|en|de|es)\//.test(usePathname() ?? "");
 
   // A signed-in member keeps the member frame on public discovery pages.
   if (!preview && status === "authenticated" && user) return <MemberFrame>{children}</MemberFrame>;
@@ -47,7 +50,8 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
         <div className="public-header-actions flex items-center gap-2">
           <LocaleSwitcher />
           <ThemeToggle />
-          {preview ? <Link href={`/${locale}/home`}>{locale === "fa" ? "ورود به برنامه" : "Open app"}</Link> : status === "authenticated" && user ? (
+          <DisplayModeToggle locale={routeLocale} compact />
+          {preview ? <Link href={`/${locale}/home`}>{publicCopy("openApp")}</Link> : status === "authenticated" && user ? (
             <Link href={`/${locale}/home`}>
               <Avatar name={user.displayName} src={user.avatarUrl} size="sm" />
             </Link>
@@ -61,13 +65,13 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
                 )
               }
             >
-              {t("logIn")}
+              {publicCopy("logIn")}
             </Button>
           )}
         </div>
       </header>
       <main className="public-experience-main">{children}</main>
-      <PublicFooter />
+      <PublicFooter locale={routeLocale} />
     </div>
   );
 }

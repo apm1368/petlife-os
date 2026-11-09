@@ -16,8 +16,28 @@ it("keeps discovery accessible and preserves filters through login", () => {
   window.history.replaceState({}, "", "/en/shop/products?category=food");
   renderWithIntl(<PublicShell>Public products</PublicShell>);
   expect(screen.getByText("Public products")).toBeTruthy();
-  expect(screen.getByRole("link", { name: "opetlife" }).getAttribute("href")).toBe("/en");
+  expect(screen.getAllByRole("link", { name: "opetlife" })[0]?.getAttribute("href")).toBe("/en");
   fireEvent.click(screen.getByRole("button", { name: "Log in" }));
   expect(push).toHaveBeenCalledWith("/en/welcome?returnTo=%2Fen%2Fshop%2Fproducts%3Fcategory%3Dfood");
+  window.history.replaceState({}, "", "/");
+});
+
+it.each([
+  ["de", "Anmelden", "Hauptnavigation", "Startseite", "Entdecken", "Gesundheit und Tiermedizin", "Tiermedizin", "Fußnavigation"],
+  ["es", "Iniciar sesión", "Navegación principal", "Inicio", "Explorar", "Salud y veterinaria", "Veterinaria", "Navegación del pie de página"],
+] as const)("keeps the complete public shell in %s", (locale, login, navigation, home, explore, vet, footerLink, footerLabel) => {
+  window.history.replaceState({}, "", `/${locale}/services/search`);
+  renderWithIntl(<PublicShell>Public services</PublicShell>, locale);
+
+  expect(screen.getByRole("button", { name: login })).toBeTruthy();
+  expect(screen.getByRole("navigation", { name: navigation })).toBeTruthy();
+  expect(screen.getByRole("link", { name: home }).getAttribute("href")).toBe(`/${locale}`);
+  fireEvent.click(screen.getByRole("button", { name: explore }));
+  expect(screen.getByRole("link", { name: vet }).getAttribute("href")).toBe(`/${locale}/vet/find`);
+  expect(screen.getByRole("contentinfo", { name: footerLabel })).toBeTruthy();
+  expect(screen.getByRole("link", { name: footerLink }).getAttribute("href")).toBe(`/${locale}/vet/find`);
+  expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  expect(document.body.textContent).not.toContain("Primary navigation");
+  expect(document.body.textContent).not.toContain("Help Center");
   window.history.replaceState({}, "", "/");
 });

@@ -47,6 +47,17 @@ describe("ProductResultsView", () => {
     expect(screen.getAllByText("Clear filters").length).toBeGreaterThan(0);
   });
 
+  it.each([
+    ["de", "Produkte", "Sortieren nach"],
+    ["es", "Productos", "Ordenar por"],
+  ] as const)("renders translated shop discovery copy for %s", async (locale, title, sortLabel) => {
+    vi.mocked(commerceService.searchProducts).mockResolvedValue(searchResult([productSummary()]));
+    renderWithIntl(<ProductResultsView />, locale);
+    await screen.findByText("Royal Canin Adult Dog Food");
+    expect(screen.getByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByLabelText(sortLabel)).toBeTruthy();
+  });
+
   it("parses structured attribute and price filters from the URL", () => {
     const filters = readProductFilters(new URLSearchParams("q=food&minPrice=10000&attr%5Bsize%5D=10kg&sort=BOGUS&page=3"));
     expect(filters).toMatchObject({ search: "food", minPrice: 10000, attr: { size: "10kg" }, sort: undefined, page: 3 });
