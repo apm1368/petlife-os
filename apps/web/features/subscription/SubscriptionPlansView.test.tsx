@@ -6,8 +6,9 @@ import { subscriptionService } from "@/services/subscription.service";
 import { ApiError } from "@/lib/api/client";
 import { SubscriptionPlansView } from "./SubscriptionPlansView";
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
-vi.mock("@/stores/pet-store", () => ({ usePetStore: (selector: (state: { householdId: string }) => unknown) => selector({ householdId: "household-1" }) }));
+const testState = vi.hoisted(() => ({ householdId: "household-1" as string | null, push: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: testState.push }) }));
+vi.mock("@/stores/pet-store", () => ({ usePetStore: (selector: (state: { householdId: string | null }) => unknown) => selector({ householdId: testState.householdId }) }));
 vi.mock("@/services/subscription.service", () => ({
   subscriptionService: { getPlans: vi.fn(), getCurrent: vi.fn(), startTrial: vi.fn(), subscribe: vi.fn(), upgrade: vi.fn(), scheduleDowngrade: vi.fn() },
 }));
@@ -62,12 +63,26 @@ const FREE_SUB: SubscriptionDto = {
 
 describe("SubscriptionPlansView", () => {
   beforeEach(() => {
+    testState.householdId = "household-1";
+    testState.push.mockReset();
     vi.mocked(subscriptionService.getPlans).mockReset().mockResolvedValue([FREE_PLAN, PLUS_PLAN]);
     vi.mocked(subscriptionService.getCurrent).mockReset().mockResolvedValue(FREE_SUB);
     vi.mocked(subscriptionService.startTrial).mockReset();
     vi.mocked(subscriptionService.subscribe).mockReset();
     vi.mocked(subscriptionService.upgrade).mockReset();
     vi.mocked(subscriptionService.scheduleDowngrade).mockReset();
+  });
+
+  it.each([
+    ["de", "Haushalte verwalten", "Eine Mitgliedschaft gehört zu einem Haushalt. Erstellen Sie einen Haushalt oder treten Sie einem bei, bevor Sie Tarife verwalten."],
+    ["es", "Gestionar hogares", "La membresía pertenece a un hogar. Crea uno o únete a uno antes de gestionar los planes."],
+  ] as const)("guides a person without a household to household management in %s", async (locale, buttonLabel, message) => {
+    testState.householdId = null;
+    renderWithIntl(<SubscriptionPlansView />, locale);
+    expect(await screen.findByText(message)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: buttonLabel }));
+    expect(testState.push).toHaveBeenCalledWith(`/${locale}/profile/household`);
+    expect(subscriptionService.getPlans).not.toHaveBeenCalled();
   });
 
   it("shows the FREE plan alongside paid plans — never hidden", async () => {

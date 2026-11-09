@@ -7,8 +7,9 @@ import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { SubscriptionOverviewView } from "./SubscriptionOverviewView";
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
-vi.mock("@/stores/pet-store", () => ({ usePetStore: (selector: (state: { householdId: string }) => unknown) => selector({ householdId: "household-1" }) }));
+const testState = vi.hoisted(() => ({ householdId: "household-1" as string | null, push: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: testState.push }) }));
+vi.mock("@/stores/pet-store", () => ({ usePetStore: (selector: (state: { householdId: string | null }) => unknown) => selector({ householdId: testState.householdId }) }));
 vi.mock("@/services/subscription.service", () => ({
   subscriptionService: { getCurrent: vi.fn(), getEntitlements: vi.fn(), getUsage: vi.fn(), getBillingHistory: vi.fn(), cancel: vi.fn(), resume: vi.fn() },
 }));
@@ -35,12 +36,27 @@ const USAGE: SubscriptionUsageItemDto[] = [{ key: "pets.max", limit: 2, used: 1,
 
 describe("SubscriptionOverviewView", () => {
   beforeEach(() => {
+    testState.householdId = "household-1";
+    testState.push.mockReset();
     vi.mocked(subscriptionService.getCurrent).mockReset();
     vi.mocked(subscriptionService.getEntitlements).mockReset().mockResolvedValue(ENTITLEMENTS);
     vi.mocked(subscriptionService.getUsage).mockReset().mockResolvedValue(USAGE);
     vi.mocked(subscriptionService.cancel).mockReset();
     vi.mocked(subscriptionService.resume).mockReset();
     vi.mocked(subscriptionService.getBillingHistory).mockReset().mockResolvedValue({ periods: [], attempts: [] });
+  });
+
+  it.each([
+    ["de", "Haushalte verwalten", "Eine Mitgliedschaft gehört zu einem Haushalt. Erstellen Sie einen Haushalt oder treten Sie einem bei, bevor Sie Tarife verwalten."],
+    ["es", "Gestionar hogares", "La membresía pertenece a un hogar. Crea uno o únete a uno antes de gestionar los planes."],
+  ] as const)("guides a person without a household to household management in %s", async (locale, buttonLabel, message) => {
+    testState.householdId = null;
+    vi.mocked(subscriptionService.getCurrent).mockClear();
+    renderWithIntl(<SubscriptionOverviewView />, locale);
+    expect(await screen.findByText(message)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: buttonLabel }));
+    expect(testState.push).toHaveBeenCalledWith(`/${locale}/profile/household`);
+    expect(subscriptionService.getCurrent).not.toHaveBeenCalled();
   });
 
   it("shows the FREE plan, its status, and usage without ever hiding that it is free", async () => {
