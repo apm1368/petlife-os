@@ -43,9 +43,9 @@ describe("AdminShell", () => {
   });
 
   it.each([
-    ["de", "/de/admin/audit", "System", "Prüfprotokoll", "Kein Admin-Zugriff"],
-    ["es", "/es/admin/audit", "Sistema", "Registro de auditoría", "Sin acceso de administración"],
-  ] as const)("localizes the admin shell and audit navigation in %s", async (locale, pathname, group, auditLabel, deniedLabel) => {
+    ["de", "/de/admin/access", "System", "Zugriff und Rollen", "Kein Admin-Zugriff"],
+    ["es", "/es/admin/access", "Sistema", "Acceso y roles", "Sin acceso de administración"],
+  ] as const)("localizes the admin shell and access navigation in %s", async (locale, pathname, group, accessLabel, deniedLabel) => {
     route.pathname = pathname;
     vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });
     vi.mocked(adminService.getMe).mockResolvedValue({
@@ -53,12 +53,13 @@ describe("AdminShell", () => {
       adminUserId: "audit-admin",
       displayName: "Admin Name",
       role: "ADMIN" as never,
-      permissions: ["audit.view"] as never,
+      permissions: ["access.view"] as never,
     } satisfies AdminSessionContextDto);
     const { unmount: unmountAdmin } = renderWithIntl(<AdminShell><div>audit page content</div></AdminShell>, locale);
     await screen.findByText("audit page content");
     expect(screen.getByRole("button", { name: group }).getAttribute("aria-expanded")).toBe("true");
-    expect(screen.getByRole("link", { name: auditLabel }).getAttribute("href")).toBe(pathname);
+    expect(screen.getByRole("link", { name: accessLabel }).getAttribute("href")).toBe(pathname);
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06ff]/);
     expect(screen.queryByText(/Missing (de|es)/)).toBeNull();
     unmountAdmin();
 
