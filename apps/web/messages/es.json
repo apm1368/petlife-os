@@ -1360,6 +1360,93 @@
       "loading": "Cargando registro"
     }
   },
+  "memories": {
+    "publicMemorial": {
+      "title": "Enviar un homenaje",
+      "explanation": "Puedes enviar el nombre de tu mascota y una foto para el homenaje público. Solo se mostrará después de la revisión y puedes retirarlo cuando quieras.",
+      "displayName": "Nombre que se mostrará públicamente",
+      "image": "Elegir una foto",
+      "chooseImage": "Seleccionar una foto",
+      "photoOption": "Recuerdo fotográfico",
+      "noPublicPhoto": "No hay ninguna foto compartible. Se necesita un recuerdo fotográfico no archivado y marcado previamente como público. Este formulario nunca publica recuerdos privados.",
+      "consent": "Acepto expresamente que “{name}” y la foto seleccionada se muestren públicamente tras la aprobación del equipo administrador.",
+      "privacy": "No se publican datos del hogar, notas privadas, historiales de salud ni información de la cuenta.",
+      "submit": "Enviar para revisión",
+      "withdraw": "Retirar el consentimiento público y quitar el homenaje",
+      "ownerOnly": "Solo la persona titular del hogar puede gestionar este homenaje público.",
+      "loading": "Cargando la configuración del homenaje",
+      "error": "No se pudo actualizar el homenaje. Inténtalo de nuevo.",
+      "retry": "Reintentar",
+      "rejected": "No se aprobó el envío. Puedes volver a enviarlo después de revisar la nota.",
+      "status": {
+        "PENDING_REVIEW": "Pendiente de revisión administrativa. Aún no es público.",
+        "PUBLISHED": "Publicado en el homenaje público. Puedes retirarlo cuando quieras.",
+        "REJECTED": "No aprobado.",
+        "WITHDRAWN": "Has retirado tu consentimiento público; el homenaje ya no aparece en la lista."
+      }
+    },
+    "memoryType": {
+      "PHOTO": "Foto",
+      "VIDEO": "Vídeo",
+      "MILESTONE": "Hito",
+      "STORY": "Historia",
+      "BIRTHDAY": "Cumpleaños",
+      "FIRST_DAY": "Primer día en casa",
+      "ADOPTION_DAY": "Día de adopción",
+      "TRAVEL": "Viaje",
+      "ACHIEVEMENT": "Logro",
+      "OTHER": "Otro"
+    },
+    "timelineEntryType": {
+      "MEMORY": "Recuerdo",
+      "HEALTH": "Registro de salud",
+      "LOST_PET_RESOLVED": "Reencuentro",
+      "ADOPTION": "Adopción",
+      "LIFECYCLE": "Acontecimiento vital"
+    },
+    "list": {
+      "title": "Recuerdos de {name}",
+      "memorialTitle": "En recuerdo de {name}",
+      "memorialSubtitle": "Un lugar para conservar los momentos que compartisteis.",
+      "addMemory": "Añadir un recuerdo",
+      "empty": "Aún no hay recuerdos. Añade el primero.",
+      "viewLifeTimeline": "Ver el historial de vida",
+      "searchLabel": "Buscar recuerdos",
+      "searchPlaceholder": "Buscar por título o historia",
+      "tagLabel": "Etiqueta",
+      "allTags": "Todas las etiquetas",
+      "yearLabel": "Año",
+      "allYears": "Todos los años",
+      "viewJournal": "Diario",
+      "viewGallery": "Galería",
+      "showArchived": "Archivados",
+      "hideArchived": "Volver al diario",
+      "emptyFiltered": "Ningún recuerdo coincide con estos filtros.",
+      "emptyArchived": "No hay elementos archivados.",
+      "restore": "Restaurar",
+      "noPhoto": "Sin foto"
+    },
+    "newMemory": {
+      "title": "Añadir un recuerdo",
+      "typeLabel": "Tipo",
+      "titleLabel": "Título",
+      "descriptionLabel": "Descripción",
+      "occurredAtLabel": "Fecha",
+      "locationLabel": "Lugar",
+      "mediaLabel": "Foto",
+      "submit": "Guardar recuerdo",
+      "tagsLabel": "Etiquetas",
+      "tagsHint": "Separa con comas; por ejemplo, cumpleaños, viaje"
+    },
+    "detail": {
+      "edit": "Editar",
+      "archive": "Archivar recuerdo",
+      "restore": "Restaurar recuerdo",
+      "archivedNotice": "Este recuerdo está archivado. Se conserva aquí y puedes restaurarlo cuando quieras."
+    },
+    "timeline": { "title": "Historial de vida", "empty": "Aún no hay nada que mostrar." },
+    "editMemory": { "title": "Editar recuerdo", "submit": "Guardar cambios" }
+  },
   "healthAdvanced": {
     "documents": {
       "title": "Documentos médicos",
