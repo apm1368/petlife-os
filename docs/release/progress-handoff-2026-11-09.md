@@ -1,50 +1,39 @@
 # PET LIFE OS progress handoff — 2026-11-09
 
-This is a timestamped checkpoint, not a completion or readiness claim. Recheck GitHub and production before the next merge or release.
+Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
 ## Release state
 
-- GitHub `main`: `e58d6b642252adf5b4f4a8762a3ad42b5ed81d28`, merged from PR #199.
-- Production `/api/health/version` last returned `deee3c66ad4e7533ee4751a999f2225ff4aa40fa`, deployment `github-42573202647-1`; readiness reported database and Redis up. Deployment for #199 (`42578320335`, head `e58d6b64`) is still running. #199 is merged but NOT yet live-verified.
-- Public shop API last returned an empty catalog. Demo records are excluded, but no legitimate reviewed seller offer exists to verify public visibility or purchase flow.
-- Latest disk check: approximately 44 MiB free on the 7.9 GiB overlay. No cleanup, build, DB-volume removal or history rewrite was performed. Avoid disk-intensive commands until rechecked.
-- No payment worktree was present in `git worktree list`; this is not evidence it was deleted. No payment branch/worktree was edited.
-- Browser capability is unavailable in this execution. Authenticated UI, mobile/responsive and visual verification remain open.
+- `main`: `c1c8bf530c384e7eef08cbeb2c9c78fcb7eecbda` after PRs #201 and #196 merged normally.
+- Production last returned `deee3c66ad4e7533ee4751a999f2225ff4aa40fa` from `/api/health/version` (deployment `github-42573202647-1`). It is behind main. Main CI/deploy for #202's merge (`42580748820`, SHA `3097163…`) had CI green and deploy in progress. A newer main run for #196's merge (`42582860438`, SHA `c1c8bf5…`) was pending. Recheck both; do not assume the older deployment represents current main.
+- #199's first main deployment failed in unit tests due to a race in `TravelFavoritesView.test.tsx`. #202 fixed the test and merged at `3097163505b2e9f664dc7103d31c1e9c762756a9`; its own exact CI passed. The #199 feature is not LIVE_VERIFIED until the current deployment SHA and behavior are checked.
+- Public shop was last observed empty after demo exclusion. No legitimate reviewed seller offer was available to verify visibility or purchase.
+- Disk is critically low (about 43 MiB free of 7.9 GiB); no cleanup was performed. Avoid full builds, dependency installation, Docker pulls and large browser artifacts.
+- No payment worktree appeared in `git worktree list`; this does not prove it was deleted. No payment code was changed.
 
-## Localization state and work
+## Recent integration and PR queue
 
-- `docs/product/localization-rollout.md` is the route-family matrix. Many families remain PARTIAL; English fallback on uncovered de/es keys is not completion. German/Spanish SMS templates and delivery are not implemented or simulated.
-- Dashboard body copy already existed in fa/en/de/es. PR #201 adds localized accessible loading labels and retry affordances for failed membership, order and travel dashboard panels. It remains PARTIAL pending authenticated language-persistence/navigation and RTL/LTR responsive inspection.
-- PR #178 expenses/year-review localization: head `936f4493`, base `main`; CI `42577815035` is running. The previous failure was a race in the main-branch `AdminDisputesView` test; the assertion now awaits API-backed text. Local targeted suite passed 12 tests; targeted ESLint and web typecheck passed. Do not treat hosted CI as green until completed.
-- PR #200 public-insurance localization: head `9cd872ea`, base `main`, CI `42576676909` passed. Review decision not recorded. It only localizes the existing list/detail/compare/eligibility surface; X-04 calls for comparison and a link to the insurer, so the eligibility/application behavior needs separate product-conformance review. No issuance/claims integration is claimed.
-- PR #199 saved-travel localization merged at `e58d6b64`; exact-head CI `42573483288` passed. Deployment is running. The route covers all four locales and explicit loading/empty/error/offline/access states; source listing content remains as authored.
-- PR #196 provider team localization is being synchronized with current `main` on its branch. Current local branch includes merge of remote PR work and #199/main; provider team + availability + locale-parity tests passed 18 tests before the final #199 merge, and targeted ESLint/typecheck passed before that last merge. Hosted CI on the synchronized head is still required before merge.
-- PR #201 dashboard loading/retry localization was opened against `main`; check its actual head and latest CI. The handoff file is duplicated in #201 and #196 while both are open; after #196 merges, retarget #201 and resolve by keeping one current handoff, then rerun CI.
-- PRs #181–#184 had green reported CI on their listed heads; review decisions were empty. PRs #123–#141 and #102–#109 include several old or conflicting bases; inspect and retarget in dependency order rather than assuming prior CI is valid.
+| PR | Status at checkpoint | Next action |
+| --- | --- | --- |
+| #201 dashboard loading/retry localization | Merged at `2248f57ba8c100e854d4351294bc98d4a83a3e2d`; its post-merge run was cancelled when #196 advanced main. | Confirm the final `main` CI/deployment; dashboard remains PARTIAL pending authenticated responsive/browser inspection. |
+| #196 provider team localization | Merged at `c1c8bf530c384e7eef08cbeb2c9c78fcb7eecbda`; synchronized-head PR CI passed. | Confirm main CI/deploy and provider route behavior. |
+| #203 account invitation inbox states | The branch is synchronized with current main and the handoff add/add conflict is resolved. The latest source-code checks after sync passed locally (16 account tests, ESLint, typecheck and diff-check). | Recheck CI on the latest branch head after the documentation-only handoff update; merge normally only when GitHub permits. |
+| #178, #181–#184, #200 | Their branches were updated to the newer main; CI is restarting on updated heads. | Check exact current head/CI/review/merge state before merging; no old-head pass counts. |
+| #202 travel test race | Merged at `3097163505b2e9f664dc7103d31c1e9c762756a9`; PR CI green. | Confirm production release SHA and behavior. |
 
-## Current CI and review checks (last verified)
+Older stacked PRs remain, including #110→#111, #113→#114, and older shop/booking localization chains. Inspect current bases and conflicts before retargeting; never bypass branch protection.
 
-| PR | Base / head at last check | Checks / review |
-|---|---|---|
-| #178 | `main` / `936f4493` | CI running (`42577815035`); review decision empty |
-| #196 | `main` / branch being synchronized | prior CI pass is stale after base change; rerun required |
-| #199 | merged at `e58d6b64` | exact-head CI passed; deploy running |
-| #200 | `main` / `9cd872ea` | CI passed (`42576676909`); review decision empty |
-| #201 | `main` / check live PR head | CI was running on last checked head; review decision empty |
-| #181–#184 | `main` / prior listed heads | CI passed on reported heads; review decision empty; verify before merge |
+## Localization work
 
-## Release queue and next actions
+- PR #203 covers the real `/[locale]/profile` `AccountOverviewView`, not the unused `MemberProfileView`. Household invitation inbox now has fa/en/de/es copy for accessible loading, empty, offline, 401/403 access-denied, generic failure and retry. It preserves the distinction between phone-number match and phone verification and does not grant access before owner approval. Focused tests: 16 passed; targeted ESLint and web typecheck passed. Browser verification remains outstanding.
+- Local branch `feat/i18n-subscription-pages`, commit `65568752` plus a merge of current main, adds de/es translations for `/profile/membership` and `/subscription/plans`, locale-correct dates/counts/currency, offline/access-denied/no-household/empty-plan states, source-language disclosure for plan names/descriptions available only in fa/en, and prevents raw English API messages from appearing in de/es when a localized fallback is supplied. Local tests: overview 12, plans 11, catalog parity + API error tests 7 passed; ESLint, TypeScript and `git diff --check` passed. This branch has not yet been pushed/opened as a PR.
+- `docs/product/localization-rollout.md` is the route-family matrix. Many page families and rendered states remain PARTIAL; a translated header is not complete localization. German/Spanish SMS templates/delivery remain unavailable and must not be simulated.
+- Keep the landing HERO unchanged. Memorial withdrawal does not prove revocation of independent source image URLs or CDN copies; production bucket/CDN access remains unverified.
 
-1. Poll #199 deployment. Verify production version SHA, readiness, then safely verify the saved-stays page only if browser capability becomes available; otherwise leave it merged/not UI-verified.
-2. Finish syncing #196 against actual `origin/main` (`e58d6b64`), preserve provider availability/booking and community entries in the rollout file, rerun provider tests, typecheck, lint and hosted CI. Merge only if GitHub's normal gate permits.
-3. Recheck exact current heads/runs for #178, #200 and #201; inspect failures rather than reusing old-head CI. Preserve #201's dashboard code and consolidate its duplicate handoff after #196 is integrated.
-4. Continue full-page fa/en/de/es coverage from the rollout matrix, prioritizing account/household/pet, health/documents, commerce/checkout, booking/provider, support/legal, community, backoffice and ERP. Never mark a page complete from a translated header alone.
-5. Recheck branch protection and review state before every merge. No bypass or force-push is authorized.
+## External boundaries and next steps
 
-## External and security verification limits
-
-- Production memorial bucket/CDN settings remain inaccessible; withdrawal only stops the memorial asset path, not necessarily old public source URLs or cached copies.
-- Jajiga remains the selected source. A small discovery pilot does not prove nationwide coverage or live availability; link users to the exact source listing for final confirmation.
-- Digikala access was not established; do not bypass restrictions or claim a live importer.
-- No real product offers exist in the last public API check; do not re-enable demo data to fill the shop.
-- No payment worktree was visible; inspect all worktrees/branches again before financial edits.
+- Shop remains empty until legitimate, reviewed product and seller-offer data with acceptable content/image provenance exist. Do not re-enable demo records.
+- Jajiga is selected, but the small discovery evidence does not prove nationwide coverage or live availability. Digikala access remains unproven; do not bypass source restrictions.
+- First resolve PR #203's handoff add/add conflict and rerun exact-head CI. Then publish the subscription localization branch as a separate PR based on current main.
+- Poll the two main release workflows and verify production `/api/health/version`, readiness, and safe public APIs only after deployment completes.
+- Continue route-by-route localization and functional/security work; track remaining page states in the rollout matrix. Do not mark anything LIVE_VERIFIED without merged code, green CI, migration/deploy evidence and observed production behavior.
