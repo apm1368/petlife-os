@@ -1,0 +1,97 @@
+.page :global(.pet-overview) {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(17rem, 0.9fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.page :global(.pet-overview__main),
+.page :global(.pet-overview__aside) {
+  min-width: 0;
+  gap: var(--space-5);
+}
+
+.page :global(.pet-overview__main > section),
+.page :global(.pet-overview__aside > section) {
+  min-width: 0;
+  padding: var(--space-5);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-elevated);
+}
+
+.page :global(.pet-overview__main > section > h2),
+.page :global(.pet-overview__aside > section > h2) {
+  margin-block: 0 var(--space-4);
+}
+
+.page :global(.pet-overview__aside) {
+  position: sticky;
+  inset-block-start: var(--space-5);
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-sunken);
+}
+
+.page :global(.pet-overview__aside > section) {
+  padding: var(--space-4);
+  background: var(--surface-elevated);
+}
+
+.page :global(.pet-overview__actions) {
+  border-block-start: 1px solid var(--border-subtle);
+}
+
+.page :global(.pet-overview__action) {
+  min-block-size: var(--touch-target-min);
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.page :global(.pet-overview__action:focus-visible),
+.page :global(.pet-overview__main a:focus-visible),
+.page :global(.pet-overview__memory:focus-visible) {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.page :global(.pet-overview__calm) {
+  border-inline-start-width: 4px;
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  background: var(--surface-sunken);
+}
+
+.page :global(.pet-overview__memorial) {
+  padding: var(--space-5);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface-elevated);
+}
+
+.page :global(.pet-overview__household) {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 899px) {
+  .page :global(.pet-overview) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+  }
+
+  .page :global(.pet-overview__aside) {
+    position: static;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+}
+
+@media (max-width: 639px) {
+  .page :global(.pet-overview__main > section),
+  .page :global(.pet-overview__aside > section),
+  .page :global(.pet-overview__memorial) {
+    padding: var(--space-4);
+  }
+}
