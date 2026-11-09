@@ -5661,6 +5661,7 @@
   },
   "travelResults": {
     "allDestinations": "همه مقصدها", "anyDates": "بدون تاریخ", "cityHeading": "اقامت در {city}", "defaultHeading": "اقامتگاه‌های دوستدار حیوانات", "editSearch": "تغییر جست‌وجو",
+    "favoritesTitle": "اقامتگاه‌های ذخیره‌شده", "favoritesLoading": "اقامتگاه‌های ذخیره‌شده در حال بارگیری هستند", "favoritesLoadErrorTitle": "اقامتگاه‌های ذخیره‌شده بارگیری نشدند", "favoritesLoadErrorMessage": "اتصال را بررسی کنید و دوباره تلاش کنید.", "favoritesOfflineTitle": "اتصال اینترنت در دسترس نیست", "favoritesOfflineMessage": "پس از وصل شدن اینترنت دوباره تلاش کنید.", "favoritesAccessDeniedTitle": "دسترسی به اقامتگاه‌های ذخیره‌شده ممکن نیست", "favoritesAccessDeniedMessage": "برای دیدن اقامتگاه‌های ذخیره‌شده وارد حساب خود شوید.", "favoritesEmptyTitle": "هنوز اقامتگاهی ذخیره نکرده‌اید", "favoritesEmptyDescription": "با نماد قلب در نتایج جست‌وجو، اقامتگاه‌ها را ذخیره کنید.",
     "datesNote": "برای دیدن جمع کل اقامت و موجودی اعلام‌شده توسط سرویس، تاریخ ورود و خروج را انتخاب کنید.", "filters": "فیلترها", "sort": "مرتب‌سازی", "view": "نمایش", "list": "فهرست", "map": "نقشه",
     "sortOptions": { "RECOMMENDED": "پیشنهادی", "BEST_PET_MATCH": "بیشترین تطابق با حیوان", "PRICE_ASC": "ارزان‌ترین", "PRICE_DESC": "گران‌ترین", "RATING": "بالاترین امتیاز" },
     "bestMatchHelp": "در بیشترین تطابق با حیوان، ابتدا اقامتگاه‌هایی نمایش داده می‌شوند که قوانین اعلام‌شده‌شان جور است و بعد مواردی که اطلاعات بیشتری لازم دارند؛ هر گروه بر اساس امتیاز و قیمت مرتب می‌شود.",
