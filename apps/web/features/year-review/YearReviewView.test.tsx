@@ -66,4 +66,31 @@ describe("YearReviewView", () => {
     const [, from] = vi.mocked(petYearReviewService.get).mock.calls[0]!;
     expect(from.slice(5)).toMatch(/^03-2[01]$/);
   });
+
+  it.each([
+    ["de", "2026 mit Cookie", "Erinnerungen", "Erledigte Pflegeaufgaben", "Entwurmung", "Fellpflege", "Geburtsdatum eintragen"],
+    ["es", "2026 con Cookie", "Recuerdos", "Cuidados realizados", "Desparasitación", "Peluquería y aseo", "Añadir fecha de nacimiento"],
+  ] as const)("renders year-review cards, breakdowns, actions and source content in %s", async (locale, title, memories, care, deworming, grooming, birthDate) => {
+    const { container } = renderWithIntl(<YearReviewView petId="p1" />, locale);
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByText(memories)).toBeTruthy();
+    expect(screen.getByText(care)).toBeTruthy();
+    expect(screen.getByText(deworming)).toBeTruthy();
+    expect(screen.getByText(grooming)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "First snow" }).getAttribute("href")).toBe(`/${locale}/pets/p1/memories/m1`);
+    expect(screen.getByRole("link", { name: birthDate })).toBeTruthy();
+    expect(screen.getByText("Ramsar")).toBeTruthy();
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it.each([
+    ["de", "Für dieses Jahr ist noch nichts erfasst.", "Erinnerung hinzufügen"],
+    ["es", "Aún no hay datos de este año.", "Añadir un recuerdo"],
+  ] as const)("localizes the empty year-review state in %s", async (locale, emptyPrefix, addMemory) => {
+    vi.mocked(petYearReviewService.get).mockResolvedValue({ ...review, memories: { total: 0, photos: 0, highlights: [] }, care: { completed: 0, topTypes: [] }, services: { completed: 0, byCategory: [] }, trips: { count: 0, destinations: [] } });
+    const { container } = renderWithIntl(<YearReviewView petId="p1" />, locale);
+    expect(await screen.findByText(new RegExp(emptyPrefix))).toBeTruthy();
+    expect(screen.getByRole("link", { name: addMemory })).toBeTruthy();
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
 });

@@ -79,4 +79,54 @@ describe("PetExpensesView", () => {
     const [from] = vi.mocked(petExpensesService.list).mock.calls[0]!.slice(1) as string[];
     expect(from!.slice(5)).toMatch(/^03-2[01]$/); // a Jalali year starts at Nowruz
   });
+
+  it.each([
+    ["de", "Ausgaben", "Futter", "Tierarzt", "Ausgabe hinzufügen", "Buchung ansehen"],
+    ["es", "Gastos", "Alimentación", "Veterinario", "Añadir gasto", "Ver reserva"],
+  ] as const)("renders the full expense dashboard in %s without Persian UI and preserves source labels", async (locale, title, food, vet, add, bookingLink) => {
+    const { container } = renderWithIntl(<PetExpensesView petId="p1" />, locale);
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getAllByText(food).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(vet).length).toBeGreaterThan(0);
+    expect(screen.getByText(/15kg bag/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: bookingLink })).toBeTruthy();
+    expect(screen.getByRole("button", { name: add })).toBeTruthy();
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+    expect(petExpensesService.list).toHaveBeenCalledWith("p1", `${year}-01-01`, `${year}-12-31`);
+  });
+
+  it.each([
+    ["de", "Für dieses Jahr sind noch keine Ausgaben erfasst", "Ausgabe hinzufügen", "Betrag (Toman)"],
+    ["es", "Todavía no hay gastos registrados este año", "Añadir gasto", "Importe (tomanes)"],
+  ] as const)("localizes the empty state and add form in %s", async (locale, empty, add, amount) => {
+    vi.mocked(petExpensesService.list).mockResolvedValue({ ...data, totalIrr: 0, byCategory: [], bySource: [], entries: [] });
+    const { container } = renderWithIntl(<PetExpensesView petId="p1" />, locale);
+    expect(await screen.findByText(empty)).toBeTruthy();
+    const emptySection = screen.getByText(empty).closest("section")!;
+    fireEvent.click(within(emptySection).getByRole("button", { name: add }));
+    expect(screen.getByLabelText(amount)).toBeTruthy();
+    expect(screen.getByRole("button", { name: locale === "de" ? "Speichern" : "Guardar" })).toBeTruthy();
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it.each([
+    ["de", "Ausgaben werden geladen", "Ein Fehler ist aufgetreten", "Erneut versuchen"],
+    ["es", "Cargando gastos", "Ha ocurrido un problema", "Reintentar"],
+  ] as const)("localizes loading and recoverable error states in %s", async (locale, loading, errorTitle, retry) => {
+    let release!: (value: PetExpensesDto) => void;
+    vi.mocked(petExpensesService.list).mockImplementation(() => new Promise((resolve) => { release = resolve; }));
+    const loadingState = renderWithIntl(<PetExpensesView petId="p1" />, locale);
+    expect(screen.getByLabelText(loading)).toBeTruthy();
+    release(data);
+    await screen.findByRole("heading", { name: locale === "de" ? "Ausgaben" : "Gastos" });
+    expect(loadingState.container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+    loadingState.unmount();
+
+    vi.mocked(petExpensesService.list).mockRejectedValue(new Error("offline"));
+    const failure = renderWithIntl(<PetExpensesView petId="p1" />, locale);
+    expect(await screen.findByRole("alert")).toBeTruthy();
+    expect(screen.getByText(errorTitle)).toBeTruthy();
+    expect(screen.getByRole("button", { name: retry })).toBeTruthy();
+    expect(failure.container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
 });
