@@ -25,7 +25,9 @@ describe("public memorial landing copy", () => {
     const region = await screen.findByRole("region", { name: title });
     expect(within(region).getByText(title)).toBeTruthy();
     expect(within(region).getByText(/Namen und Fotos|Los nombres y las fotos/)).toBeTruthy();
-    expect(within(region).getByText(empty)).toBeTruthy();
+    // The page fetch is intentionally async; waiting on the empty state avoids
+    // racing the loading skeleton during the full suite.
+    expect(await within(region).findByText(empty)).toBeTruthy();
     expect(region.textContent).not.toMatch(/[\u0600-\u06ff]/);
     expect(region.textContent).not.toMatch(/In loving memory|Remembering our companions|No public memorials/);
   });
