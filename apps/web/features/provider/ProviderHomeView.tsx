@@ -13,7 +13,7 @@ import { ProviderBookingRow } from "./ProviderBookingRow";
 export function ProviderHomeView() {
   const t = useTranslations("provider.home");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as "fa" | "en" | "de" | "es";
 
   const [overview, setOverview] = useState<ProviderOverviewDto | null>(null);
   const [error, setError] = useState(false);
@@ -32,7 +32,7 @@ export function ProviderHomeView() {
     void load();
   }, []);
 
-  if (error) return <ErrorRecovery title={t("title")} message="" retryLabel={t("retry")} onRetry={load} />;
+  if (error) return <ErrorRecovery title={t("title")} message={t("loadFailed")} retryLabel={t("retry")} onRetry={load} />;
   if (!overview) return <Skeleton className="h-64 w-full" aria-label={t("loading")} />;
 
   const attentionItems = [

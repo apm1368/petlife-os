@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import { SupportCaseCategory, type AdminPriority, type SupportCaseStatus, type SupportCaseSummaryDto } from "@petlife/types";
+import { ApiError } from "@/lib/api/client";
 import { adminService } from "@/services/admin.service";
 import { adminStatusTone } from "./status-tone";
 import { DateField } from "@/features/shared/date-picker/DateField";
@@ -23,7 +24,7 @@ export function AdminSupportQueueView() {
   const [search, setSearch] = useState("");
   const [createdFrom, setCreatedFrom] = useState("");
   const [createdTo, setCreatedTo] = useState("");
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<"access" | "failed" | null>(null);
   const [showCreate, setShowCreate] = useState(false);
 
   const [requesterUserId, setRequesterUserId] = useState("");
@@ -32,9 +33,11 @@ export function AdminSupportQueueView() {
   const [category, setCategory] = useState<SupportCaseCategory>(SupportCaseCategory.OTHER);
   const [priority, setPriority] = useState<AdminPriority | "">("");
   const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState(false);
+  const [formError, setFormError] = useState(false);
 
   async function load() {
-    setError(false);
+    setError(null);
     try {
       const page = await adminService.listSupportCases({
         status: status || undefined,
@@ -45,8 +48,8 @@ export function AdminSupportQueueView() {
         pageSize: 50,
       });
       setCases(page.items);
-    } catch {
-      setError(true);
+    } catch (cause) {
+      setError(cause instanceof ApiError && [401, 403].includes(cause.status) ? "access" : "failed");
     }
   }
 
@@ -56,7 +59,12 @@ export function AdminSupportQueueView() {
   }, [status, categoryFilter, createdFrom, createdTo]);
 
   async function createCase() {
-    if (!requesterUserId.trim() || !subject.trim() || !description.trim()) return;
+    setFormError(false);
+    setCreateError(false);
+    if (!requesterUserId.trim() || !subject.trim() || !description.trim()) {
+      setFormError(true);
+      return;
+    }
     setCreating(true);
     try {
       const created = await adminService.createSupportCase({
@@ -68,6 +76,8 @@ export function AdminSupportQueueView() {
       });
       setShowCreate(false);
       router.push(`/${locale}/admin/support/${created.id}`);
+    } catch {
+      setCreateError(true);
     } finally {
       setCreating(false);
     }
@@ -104,6 +114,8 @@ export function AdminSupportQueueView() {
           <Button isLoading={creating} onClick={createCase}>
             {t("form.submit")}
           </Button>
+          {formError ? <p role="alert" className="text-error">{t("states.requiredFields")}</p> : null}
+          {createError ? <p role="alert" className="text-error">{t("states.createFailed")}</p> : null}
         </ContextSurface>
       ) : null}
 
@@ -138,9 +150,10 @@ export function AdminSupportQueueView() {
         <DateField label={t("filter.createdTo")} value={createdTo} onChange={setCreatedTo} />
       </div>
 
-      {error ? <ErrorRecovery title={t("title")} message="" retryLabel={tCommon("retry")} onRetry={load} /> : null}
-      {!error && !cases ? <Skeleton className="h-40 w-full" aria-label={tCommon("loading")} /> : null}
-      {!error && cases && cases.length === 0 ? <EmptyState title={tCommon("empty")} /> : null}
+      {error === "access" ? <EmptyState title={t("states.accessDeniedTitle")} description={t("states.accessDenied")} /> : null}
+      {error === "failed" ? <ErrorRecovery title={t("title")} message={t("states.loadFailed")} retryLabel={tCommon("retry")} onRetry={load} /> : null}
+      {!error && !cases ? <Skeleton className="h-40 w-full" aria-label={t("states.loading")} /> : null}
+      {!error && cases && cases.length === 0 ? <EmptyState title={t("states.empty")} description={t("states.emptyDescription")} /> : null}
       {cases?.map((c) => (
         <button key={c.id} type="button" className="w-full text-start" onClick={() => router.push(`/${locale}/admin/support/${c.id}`)}>
           <ContextSurface className="flex items-center justify-between gap-3 py-2.5">
