@@ -146,7 +146,9 @@ export class TravelExternalPublicService {
 
   /** Logs the click (no booking, no conversion claim) and returns the validated source URL for a 302. */
   async outbound(id: string, userId: string | null, searchContext: Record<string, unknown> | null) {
-    const s = await this.prisma.externalStay.findFirst({ where: { id, status: { not: ExternalStayStatus.HIDDEN } }, include: { source: true } });
+    // A public identifier must not bypass moderation. In particular, DRAFT and
+    // REJECTED records must never become reachable through the redirect route.
+    const s = await this.prisma.externalStay.findFirst({ where: { id, publishState: ExternalPublishState.PUBLISHED, status: { in: VISIBLE } }, include: { source: true } });
     if (!s) throw new NotFoundApiException("External stay");
     const url = assertSourceUrl(s.sourceUrl, s.source.allowedHosts);
     await this.prisma.outboundTravelClick.create({ data: { stayId: s.id, sourceCode: s.source.code, userId, searchContext: (searchContext ?? undefined) as Prisma.InputJsonValue | undefined } });
