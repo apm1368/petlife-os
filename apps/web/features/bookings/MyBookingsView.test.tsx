@@ -49,6 +49,7 @@ const BOOKING: BookingDto = {
 describe("MyBookingsView", () => {
   beforeEach(() => {
     vi.mocked(bookingsService.list).mockReset();
+    vi.mocked(bookingsService.listWaitlist).mockReset();
     params.delete("tab");
     replace.mockReset();
   });
@@ -81,5 +82,48 @@ describe("MyBookingsView", () => {
     vi.mocked(bookingsService.list).mockResolvedValue([]);
     renderWithIntl(<MyBookingsView />, "en");
     await waitFor(() => expect(screen.getByText("No bookings here")).toBeTruthy());
+  });
+
+  it.each([
+    ["de", "Meine Buchungen", "Service buchen", "Bevorstehend", "Angefragt", "Abgeschlossen", "Storniert", "Warteliste", "Keine Buchungen in diesem Bereich", "Service suchen"],
+    ["es", "Mis reservas", "Reservar un servicio", "Próximas", "Solicitadas", "Completadas", "Canceladas", "Lista de espera", "No hay reservas en esta sección", "Buscar un servicio"],
+  ] as const)("localizes the complete empty bookings page in %s", async (locale, title, bookService, upcoming, requested, completed, cancelled, waitlist, empty, findService) => {
+    vi.mocked(bookingsService.list).mockResolvedValue([]);
+    const { container } = renderWithIntl(<MyBookingsView />, locale);
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByRole("link", { name: bookService }).getAttribute("href")).toBe("/" + locale + "/services");
+    for (const label of [upcoming, requested, completed, cancelled, waitlist]) expect(screen.getByRole("button", { name: label })).toBeTruthy();
+    expect(screen.getByText(empty)).toBeTruthy();
+    expect(screen.getByRole("button", { name: findService })).toBeTruthy();
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+    expect(container.textContent).not.toContain("No bookings here");
+  });
+
+  it.each([
+    ["de", "Fellpflege", "Bestätigt", "Meine Buchungen"],
+    ["es", "Peluquería", "Confirmada", "Mis reservas"],
+  ] as const)("localizes booking status and category while preserving source content in %s", async (locale, category, status, title) => {
+    vi.mocked(bookingsService.list).mockResolvedValue([{ ...BOOKING, serviceName: null, service: null }]);
+    const { container } = renderWithIntl(<MyBookingsView />, locale);
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByText(category)).toBeTruthy();
+    expect(screen.getByText(status)).toBeTruthy();
+    expect(screen.getByText(/Happy Paws Grooming/)).toBeTruthy();
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it.each([
+    ["de", "Warteliste", "Ein Termin ist frei geworden", "Buchen", "Verlassen"],
+    ["es", "Lista de espera", "Se ha liberado una hora", "Reservar", "Salir"],
+  ] as const)("localizes waitlist controls and the no-hold warning in %s", async (locale, tab, warning, book, leave) => {
+    params.set("tab", "waitlist");
+    vi.mocked(bookingsService.listWaitlist).mockResolvedValue([{ id: "w1", petId: "pet-1", petName: "Luna", providerOrganizationId: "provider-1", providerName: "Happy Paws", serviceId: "svc-1", serviceName: "Groom", variantId: null, windowStart: "2026-10-01T00:00:00.000Z", windowEnd: "2026-10-01T23:59:00.000Z", status: "NOTIFIED", notifiedAt: null, createdAt: "2026-09-01T00:00:00.000Z" }]);
+    const { container } = renderWithIntl(<MyBookingsView />, locale);
+    expect(await screen.findByText(new RegExp(warning))).toBeTruthy();
+    expect(screen.getByRole("link", { name: book }).getAttribute("href")).toContain("/" + locale + "/providers/provider-1/book");
+    expect(screen.getByRole("button", { name: leave })).toBeTruthy();
+    expect(screen.getByRole("button", { name: tab })).toBeTruthy();
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+    expect(container.textContent).not.toContain("A time opened");
   });
 });
