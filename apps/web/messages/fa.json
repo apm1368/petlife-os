@@ -1180,6 +1180,8 @@
       "title": "زمان‌های در دسترس",
       "retry": "تلاش دوباره",
       "loading": "در حال بارگذاری",
+      "loadFailed": "زمان‌های در دسترس بارگیری نشدند. اتصال را بررسی کنید و دوباره تلاش کنید.",
+      "accessDenied": "شما اجازه مدیریت زمان‌های در دسترس را ندارید.",
       "day": {
         "sun": "یکشنبه",
         "mon": "دوشنبه",
@@ -1200,7 +1202,9 @@
         "timezone": "منطقه زمانی",
         "add": "افزودن",
         "locationRequired": "مکان الزامی است.",
-        "createFailed": "ایجاد قانون ممکن نشد."
+        "createFailed": "ایجاد قانون ممکن نشد.",
+        "updateFailed": "به‌روزرسانی قانون ممکن نشد.",
+        "deleteFailed": "حذف قانون ممکن نشد."
       },
       "exceptions": {
         "title": "مرخصی و زمان‌های اضافه",
@@ -1217,10 +1221,13 @@
         "add": "افزودن",
         "fieldsRequired": "مکان، شروع و پایان الزامی است.",
         "createFailed": "ایجاد استثنا ممکن نشد.",
+        "updateFailed": "به‌روزرسانی استثنا ممکن نشد.",
+        "deleteFailed": "حذف استثنا ممکن نشد.",
         "conflictWarning": "{count, number} رزرو تأییدشده در این بازه وجود دارد. مسدود کردن آن‌ها را لغو یا جابه‌جا نمی‌کند.",
         "conflictCancel": "انصراف",
         "conflictProceed": "با این حال مسدود شود"
-      }
+      },
+      "actions": { "edit": "ویرایش", "cancel": "لغو", "save": "ذخیره تغییرات" }
     },
     "services": {
       "title": "خدمات",
@@ -2855,19 +2862,57 @@
     },
     "transactions": {
       "title": "تراکنش‌ها",
+      "orderIdLabel": "شناسه سفارش",
       "orderIdPlaceholder": "شناسه سفارش",
       "lookup": "جستجو",
       "paymentIntents": "تراکنش‌های پرداخت",
       "ledgerEntries": "دفتر مالی",
+      "paymentStatus": {
+        "REQUIRES_PAYMENT_METHOD": "نیازمند روش پرداخت",
+        "PENDING": "در انتظار",
+        "AUTHORIZED": "تأیید مجاز",
+        "CAPTURED": "دریافت‌شده",
+        "FAILED": "ناموفق",
+        "CANCELLED": "لغوشده"
+      },
+      "refundStatus": {
+        "REQUESTED": "درخواست‌شده",
+        "PROCESSING": "در حال پردازش",
+        "SUCCEEDED": "بازپرداخت‌شده",
+        "FAILED": "ناموفق",
+        "CANCELLED": "لغوشده"
+      },
+      "ledgerDirection": { "DEBIT": "بدهکار", "CREDIT": "بستانکار" },
+      "ledgerAccount": {
+        "CASH_GATEWAY_RECEIVABLE": "دریافتنی درگاه",
+        "CUSTOMER_PAYMENT_CLEARING": "حساب واسط پرداخت مشتری",
+        "SELLER_PAYABLE": "پرداختنی فروشنده",
+        "REFUND_PAYABLE": "پرداختنی بازپرداخت",
+        "PLATFORM_REVENUE": "درآمد پلتفرم"
+      },
+      "states": {
+        "lookupPrompt": "برای دیدن اطلاعات پرداخت و دفتر مالی، شناسه سفارش را وارد کنید.",
+        "loading": "در حال دریافت اطلاعات مالی سفارش…",
+        "lookupFailedTitle": "دریافت اطلاعات مالی ممکن نشد",
+        "lookupFailed": "اطلاعات مالی این سفارش دریافت نشد. دوباره تلاش کنید.",
+        "offline": "اتصال اینترنت برقرار نیست. اتصال را بررسی کنید و دوباره تلاش کنید.",
+        "accessDenied": "اجازهٔ مشاهدهٔ این اطلاعات مالی را ندارید.",
+        "noPaymentIntents": "برای این سفارش تراکنش پرداختی ثبت نشده است.",
+        "noLedgerEntries": "برای این سفارش ردیفی در دفتر مالی ثبت نشده است.",
+        "actionFailed": "انجام درخواست بازپرداخت ممکن نشد. دوباره تلاش کنید.",
+        "actionDenied": "اجازهٔ انجام این عملیات بازپرداخت را ندارید.",
+        "unknownStatus": "وضعیت نامشخص",
+        "unknownAccount": "حساب نامشخص"
+      },
       "refund": {
         "title": "درخواست بازگشت وجه",
-        "amount": "مبلغ",
+        "amount": "مبلغ به ریال",
         "reason": "دلیل",
         "submit": "ثبت درخواست",
         "approve": "تأیید",
         "reject": "رد",
         "execute": "اجرا",
-        "status": {
+        "approvalStatus": {
           "REQUESTED": "درخواست‌شده",
           "APPROVED": "تأییدشده",
           "REJECTED": "ردشده",
@@ -3646,15 +3691,25 @@
     },
     "feed": {
       "title": "انجمن",
+      "description": "پرسش، تجربه و خبر از صاحبان حیوانات؛ محترمانه و بدون تبلیغ.",
       "newPost": "پست جدید",
       "empty": "هنوز پستی وجود ندارد. اولین نفر باشید که چیزی به اشتراک می‌گذارد.",
       "loadMore": "بیشتر",
+      "loading": "در حال بارگذاری پست‌ها…",
+      "loadingMore": "در حال بارگذاری…",
       "commentsAndReactions": "{comments, plural, one {# نظر} other {# نظر}} · {reactions, plural, one {# واکنش} other {# واکنش}}",
       "searchLabel": "جستجو در پست‌ها",
       "typeLabel": "نوع پست",
       "allTypes": "همه انواع",
       "search": "جستجو",
-      "noResults": "پستی با این جستجو پیدا نشد."
+      "noResults": "پستی با این جستجو پیدا نشد.",
+      "withPet": "همراه {name}",
+      "shortcutsLabel": "میان‌برهای انجمن",
+      "topics": "موضوع‌ها",
+      "rightNow": "همین حالا",
+      "myMessages": "پیام‌های من",
+      "lostPetsNearby": "حیوانات گم‌شدهٔ اطراف",
+      "supportNeeds": "نیازهای حمایت"
     },
     "newPost": {
       "title": "پست جدید",
@@ -3674,6 +3729,36 @@
       "commentLabel": "افزودن نظر",
       "commentSubmit": "ارسال",
       "commentsEmpty": "هنوز نظری ثبت نشده است."
+    }
+  },
+  "communityChat": {
+    "inbox": {
+      "title": "پیام‌ها",
+      "emptyTitle": "هنوز گفت‌وگویی ندارید",
+      "emptyDescription": "از صفحهٔ یک پست یا نمایهٔ یکی از اعضا گفت‌وگو را شروع کنید.",
+      "fallbackMember": "عضو",
+      "youPrefix": "شما:",
+      "unread": "{count} پیام خوانده‌نشده",
+      "failed": "پیام‌ها بارگیری نشد",
+      "noAccess": "به این پیام‌ها دسترسی ندارید.",
+      "stale": "به‌روزرسانی پیام‌ها انجام نشد. گفت‌وگوهای بارگیری‌شده نمایش داده می‌شوند.",
+      "retry": "تلاش دوباره"
+    },
+    "thread": {
+      "allMessages": "همهٔ پیام‌ها",
+      "conversationFallback": "گفت‌وگو",
+      "block": "مسدود کردن",
+      "unblock": "رفع مسدودی",
+      "blocked": "پیام‌رسانی در این گفت‌وگو مسدود است.",
+      "messageLabel": "پیام",
+      "send": "ارسال",
+      "sendFailed": "پیام ارسال نشد. دوباره تلاش کنید.",
+      "blockFailed": "تغییر وضعیت مسدودسازی انجام نشد. دوباره تلاش کنید.",
+      "notFound": "این گفت‌وگو پیدا نشد",
+      "loadFailed": "گفت‌وگو بارگیری نشد",
+      "noAccess": "به این گفت‌وگو دسترسی ندارید.",
+      "retry": "تلاش دوباره",
+      "noMessages": "هنوز پیامی در این گفت‌وگو نیست."
     }
   },
   "memories": {

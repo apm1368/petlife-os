@@ -753,6 +753,66 @@
         "content": "Contenido",
         "system": "Sistema"
       }
+    },
+    "transactions": {
+      "title": "Transacciones financieras",
+      "orderIdLabel": "Número de pedido",
+      "orderIdPlaceholder": "Introduce el número de pedido",
+      "lookup": "Buscar",
+      "paymentIntents": "Intentos de pago",
+      "ledgerEntries": "Asientos contables",
+      "paymentStatus": {
+        "REQUIRES_PAYMENT_METHOD": "Falta un método de pago",
+        "PENDING": "Pendiente",
+        "AUTHORIZED": "Autorizado",
+        "CAPTURED": "Cobrado",
+        "FAILED": "Fallido",
+        "CANCELLED": "Cancelado"
+      },
+      "refundStatus": {
+        "REQUESTED": "Solicitado",
+        "PROCESSING": "En proceso",
+        "SUCCEEDED": "Reembolsado",
+        "FAILED": "Fallido",
+        "CANCELLED": "Cancelado"
+      },
+      "ledgerDirection": { "DEBIT": "Debe", "CREDIT": "Haber" },
+      "ledgerAccount": {
+        "CASH_GATEWAY_RECEIVABLE": "Cuenta por cobrar al proveedor de pago",
+        "CUSTOMER_PAYMENT_CLEARING": "Cuenta de compensación de pagos de clientes",
+        "SELLER_PAYABLE": "Cuenta por pagar a vendedores",
+        "REFUND_PAYABLE": "Reembolso pendiente de pago",
+        "PLATFORM_REVENUE": "Ingresos de la plataforma"
+      },
+      "states": {
+        "lookupPrompt": "Introduce un número de pedido para consultar sus pagos y asientos contables.",
+        "loading": "Cargando los datos financieros del pedido…",
+        "lookupFailedTitle": "No se pueden consultar los datos financieros",
+        "lookupFailed": "No se pudieron cargar los datos financieros del pedido. Inténtalo de nuevo.",
+        "offline": "No tienes conexión a Internet. Comprueba la conexión e inténtalo de nuevo.",
+        "accessDenied": "No tienes permiso para consultar estos datos financieros.",
+        "noPaymentIntents": "No hay intentos de pago registrados para este pedido.",
+        "noLedgerEntries": "No hay asientos contables registrados para este pedido.",
+        "actionFailed": "No se pudo completar la solicitud de reembolso. Inténtalo de nuevo.",
+        "actionDenied": "No tienes permiso para realizar esta acción de reembolso.",
+        "unknownStatus": "Estado no disponible",
+        "unknownAccount": "Cuenta no disponible"
+      },
+      "refund": {
+        "title": "Solicitar un reembolso",
+        "amount": "Importe en riales",
+        "reason": "Motivo",
+        "submit": "Enviar solicitud",
+        "approve": "Aprobar",
+        "reject": "Rechazar",
+        "execute": "Ejecutar",
+        "approvalStatus": {
+          "REQUESTED": "Solicitado",
+          "APPROVED": "Aprobado",
+          "REJECTED": "Rechazado",
+          "EXECUTED": "Ejecutado"
+        }
+      }
     }
   },
   "adminUsers":{"title":"Todas las personas usuarias","detailTitle":"Perfil de usuario","intro":"Personas de la plataforma con sus roles y organizaciones vinculadas. Los datos de contacto permanecen parcialmente ocultos.","search":"Buscar nombre, correo o teléfono","kind":"Tipo de relación","all":"Todas las relaciones","apply":"Aplicar filtros","clear":"Borrar filtros","loading":"Cargando usuarios…","failed":"No se pudieron cargar los usuarios. No se ha modificado nada.","forbidden":"No tienes permiso para consultar este directorio.","notFound":"No se encontró esta cuenta.","retry":"Reintentar","empty":"Ninguna persona coincide con estos filtros.","total":"{count} cuentas","unnamed":"Cuenta sin nombre","email":"Correo parcialmente oculto","phone":"Móvil parcialmente oculto","created":"Fecha de registro","lastActive":"Última actividad","notRecorded":"Sin registrar","relationships":"Roles y organizaciones","business":"Miembro de {name}","verification":"Estado de la organización: {status}","noRoles":"No hay relaciones registradas.","otherRole":"Otro rol","otherStatus":"Otro estado registrado","detail":"Ver perfil de usuario","back":"Volver a la lista","households":"Hogares: {count}","pets":"Mascotas: {count}","customer360":"Abrir ficha de cliente","profileSections":"Secciones del perfil","sectionEmpty":"No hay registros en esta sección.","unnamedHousehold":"Hogar sin nombre","householdSummary":"{members} miembros · {pets} mascotas","otherSpecies":"Otra especie","orderItem":"{amount} {currency} · {date}","requestItem":"{category} · {date}","reviewItem":"{kind} · {rating} de 5 · {date}","auditActor":"Registrado por {name} · {date}","auditEntry":"Acción administrativa","irr":"IRR","otherCurrency":"Moneda registrada","otherRequest":"Otro servicio","tabs":{"profile":"Resumen","households":"Hogares y mascotas","businesses":"Organizaciones","orders":"Pedidos","requests":"Solicitudes","tickets":"Casos de soporte","reviews":"Reseñas","audit":"Registro de auditoría"},"reviewKinds":{"PROVIDER":"Reseña de servicio","PRODUCT":"Reseña de producto","TRAVEL":"Reseña de alojamiento"},"species":{"DOG":"Perro","CAT":"Gato","BIRD":"Ave","RABBIT":"Conejo","RODENT":"Roedor","FISH":"Pez","REPTILE":"Reptil","OTHER":"Otra"},"requestCategories":{"VET":"Veterinaria","GROOMING":"Peluquería","TRAINING":"Adiestramiento","WALKING":"Paseo","SITTING":"Cuidado en casa","BOARDING":"Alojamiento","PET_TAXI":"Taxi para mascotas","OTHER":"Otro servicio"},"pagination":"Páginas de la lista","previous":"Anterior","next":"Siguiente","page":"Página {page}","kinds":{"ADMIN_INTERNAL":"Administración interna","CUSTOMER":"Cliente / familia","CLINIC":"Clínica / veterinaria","GROOMER":"Peluquería","HOST":"Alojamiento","PROVIDER_OTHER":"Otro proveedor de servicios","SHOP":"Tienda","INSURER":"Aseguradora","NGO":"Organización de bienestar animal"},"roleNames":{"OWNER":"Titular","MEMBER":"Miembro","STAFF":"Personal","MANAGER":"Responsable","VET":"Veterinario/a","VETERINARIAN":"Veterinario/a","CATALOG_MANAGER":"Gestor/a de catálogo","FULFILLMENT":"Preparación de pedidos","RECEPTIONIST":"Recepción","ASSISTANT":"Asistente"},"statuses":{"ACTIVE":"Activo","SUSPENDED":"Suspendido","VERIFIED":"Verificado","NOT_STARTED":"No enviado","SUBMITTED":"Enviado","UNDER_REVIEW":"En revisión","NEEDS_INFORMATION":"Falta información","REJECTED":"Rechazado","APPROVED":"Aprobado","PENDING":"Pendiente","INACTIVE":"Inactivo"},"manualMessage":{"title":"Mensaje para esta cuenta","smsNote":"Solo se intentará enviar un SMS si Faraz está activo, la persona destinataria ha dado su consentimiento y las reglas de notificación lo permiten.","subject":"Asunto","message":"Mensaje","attemptSms":"Intentar también enviar SMS si está permitido","saved":"El mensaje se ha registrado.","failed":"No se pudo enviar el mensaje.","sending":"Enviando…","send":"Enviar mensaje"}},
@@ -1576,6 +1636,36 @@
       "loading": "Cargando registro"
     }
   },
+  "communityChat": {
+    "inbox": {
+      "title": "Mensajes",
+      "emptyTitle": "Aún no hay conversaciones",
+      "emptyDescription": "Inicia una conversación desde una publicación o el perfil de otra persona.",
+      "fallbackMember": "Miembro",
+      "youPrefix": "Tú:",
+      "unread": "{count, plural, one {# mensaje sin leer} other {# mensajes sin leer}}",
+      "failed": "No se pudieron cargar los mensajes",
+      "noAccess": "No tienes acceso a estos mensajes.",
+      "stale": "No se pudieron actualizar los mensajes. Se muestran las conversaciones cargadas anteriormente.",
+      "retry": "Reintentar"
+    },
+    "thread": {
+      "allMessages": "Todos los mensajes",
+      "conversationFallback": "Conversación",
+      "block": "Bloquear",
+      "unblock": "Desbloquear",
+      "blocked": "La mensajería está bloqueada en esta conversación.",
+      "messageLabel": "Mensaje",
+      "send": "Enviar",
+      "sendFailed": "No se envió el mensaje. Inténtalo de nuevo.",
+      "blockFailed": "No se pudo cambiar el bloqueo. Inténtalo de nuevo.",
+      "notFound": "No se encontró la conversación",
+      "loadFailed": "No se pudo cargar la conversación",
+      "noAccess": "No tienes acceso a esta conversación.",
+      "retry": "Reintentar",
+      "noMessages": "Todavía no hay mensajes en esta conversación."
+    }
+  },
   "memories": {
     "publicMemorial": {
       "title": "Enviar un homenaje",
@@ -1877,6 +1967,31 @@
       "species": "Especie: {species}", "breed": "Raza: {breed}", "colorMarkings": "Color y marcas: {markings}", "contact": "Contacto: {contact}",
       "reportSighting": { "title": "Informar de un avistamiento", "dateLabel": "Fecha del avistamiento", "timeLabel": "Hora aproximada", "locationLabel": "¿Dónde la viste?", "descriptionLabel": "Descripción", "privacyNote": "El aviso solo se envía a la persona propietaria. Tu nombre y datos de contacto nunca serán públicos.", "submit": "Enviar avistamiento", "success": "Gracias. El avistamiento se ha enviado para su revisión." },
       "detail": { "unavailableTitle": "Este informe no está disponible", "unavailableDescription": "Es posible que el informe se haya cerrado o eliminado.", "shareText": "{name} está desaparecida{area}. Si la ves, informa del avistamiento.", "shareArea": " cerca de {area}", "species": "Especie", "breed": "Raza", "colorMarkings": "Color y marcas", "approximateAge": "Edad aproximada", "ageYears": "Unos {count} años", "lastSeenAround": "Última vez vista cerca de", "lastSeen": "Última vez vista", "reunited": "{name} ya está en casa. Gracias a todas las personas que ayudaron.", "photoAlt": "Foto de {name}" }
+    }
+  },
+  "community": {
+    "postType": { "GENERAL": "General", "QUESTION": "Pregunta", "LOCAL": "Local", "LOST_PET_SHARE": "Mascota desaparecida", "RESCUE": "Rescate", "ADOPTION": "Adopción", "MEMORY": "Recuerdo" },
+    "feed": {
+      "title": "Comunidad",
+      "description": "Preguntas, experiencias y novedades de personas con mascotas, con respeto y sin publicidad.",
+      "newPost": "Nueva publicación",
+      "empty": "Aún no hay publicaciones. Sé la primera persona en compartir algo.",
+      "loadMore": "Cargar más",
+      "loading": "Cargando publicaciones…",
+      "loadingMore": "Cargando…",
+      "commentsAndReactions": "{comments, plural, one {# comentario} other {# comentarios}} · {reactions, plural, one {# reacción} other {# reacciones}}",
+      "searchLabel": "Buscar publicaciones",
+      "typeLabel": "Tipo de publicación",
+      "allTypes": "Todos los tipos",
+      "search": "Buscar",
+      "noResults": "No hay publicaciones que coincidan con la búsqueda.",
+      "withPet": "con {name}",
+      "shortcutsLabel": "Accesos rápidos de la comunidad",
+      "topics": "Temas",
+      "rightNow": "Ahora mismo",
+      "myMessages": "Mis mensajes",
+      "lostPetsNearby": "Mascotas desaparecidas cerca",
+      "supportNeeds": "Solicitudes de ayuda"
     }
   },
   "publicNavigation": {
@@ -2482,6 +2597,13 @@
       "nextBooking": "Próxima reserva", "today": "Hoy ({count, number})", "noBookingsToday": "Hoy no hay reservas.", "verificationLink": "Verificación y documentos de la organización"
     },
     "bookingRow": { "respondBy": "Responder antes del " },
+    "availability": {
+      "title": "Disponibilidad", "retry": "Intentar de nuevo", "loading": "Cargando", "loadFailed": "No se pudo cargar la disponibilidad. Comprueba la conexión e inténtalo de nuevo.", "accessDenied": "No tienes permiso para gestionar la disponibilidad.",
+      "day": { "sun": "dom", "mon": "lun", "tue": "mar", "wed": "mié", "thu": "jue", "fri": "vie", "sat": "sáb" },
+      "rules": { "title": "Horario semanal", "empty": "Aún no hay disponibilidad recurrente configurada.", "delete": "Quitar", "locationId": "ID de ubicación", "dayOfWeek": "Día", "startLocalTime": "Hora de inicio", "endLocalTime": "Hora de fin", "timezone": "Zona horaria", "add": "Añadir", "locationRequired": "La ubicación es obligatoria.", "createFailed": "No se pudo crear la regla.", "updateFailed": "No se pudo actualizar la regla.", "deleteFailed": "No se pudo quitar la regla." },
+      "exceptions": { "title": "Ausencias y disponibilidad adicional", "empty": "No hay excepciones configuradas.", "delete": "Quitar", "startAt": "Inicio", "endAt": "Fin", "typeLabel": "Tipo", "type": { "BLOCKED": "Bloqueado", "AVAILABLE_OVERRIDE": "Disponibilidad adicional" }, "reason": "Motivo (opcional)", "add": "Añadir", "fieldsRequired": "Se requieren la ubicación, la hora de inicio y la hora de fin.", "createFailed": "No se pudo crear la excepción.", "updateFailed": "No se pudo actualizar la excepción.", "deleteFailed": "No se pudo quitar la excepción.", "conflictWarning": "{count, plural, one {Hay # reserva confirmada en este periodo.} other {Hay # reservas confirmadas en este periodo.}} Bloquearlo no las cancelará ni las cambiará.", "conflictCancel": "Cancelar", "conflictProceed": "Bloquear de todos modos" },
+      "actions": { "edit": "Editar", "cancel": "Cancelar", "save": "Guardar cambios" }
+    },
     "bookings": {
       "title": "Reservas", "retry": "Intentar de nuevo", "loading": "Cargando reservas", "empty": "No se encontraron reservas.", "loadFailed": "No se pudieron cargar las reservas. Comprueba la conexión e inténtalo de nuevo.", "accessDenied": "No tienes permiso para ver estas reservas.",
       "filter": { "today": "Hoy", "upcoming": "Próximas", "past": "Anteriores", "cancelled": "Canceladas", "requests": "Solicitudes" },

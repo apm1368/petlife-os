@@ -1205,6 +1205,8 @@
       "title": "Availability",
       "retry": "Retry",
       "loading": "Loading",
+      "loadFailed": "Availability could not be loaded. Check your connection and try again.",
+      "accessDenied": "You do not have permission to manage availability.",
       "day": {
         "sun": "Sun",
         "mon": "Mon",
@@ -1225,7 +1227,9 @@
         "timezone": "Timezone",
         "add": "Add",
         "locationRequired": "A location is required.",
-        "createFailed": "Couldn't create the rule."
+        "createFailed": "Couldn't create the rule.",
+        "updateFailed": "Couldn't update the rule.",
+        "deleteFailed": "Couldn't remove the rule."
       },
       "exceptions": {
         "title": "Time off & extra availability",
@@ -1242,10 +1246,13 @@
         "add": "Add",
         "fieldsRequired": "Location, start, and end are required.",
         "createFailed": "Couldn't create the exception.",
+        "updateFailed": "Couldn't update the exception.",
+        "deleteFailed": "Couldn't remove the exception.",
         "conflictWarning": "{count} confirmed bookings exist in this period. Blocking it will not cancel or move them.",
         "conflictCancel": "Cancel",
         "conflictProceed": "Block anyway"
-      }
+      },
+      "actions": { "edit": "Edit", "cancel": "Cancel", "save": "Save changes" }
     },
     "services": {
       "title": "Services",
@@ -2880,19 +2887,57 @@
     },
     "transactions": {
       "title": "Transactions",
+      "orderIdLabel": "Order ID",
       "orderIdPlaceholder": "Order ID",
       "lookup": "Look up",
       "paymentIntents": "Payment intents",
       "ledgerEntries": "Ledger entries",
+      "paymentStatus": {
+        "REQUIRES_PAYMENT_METHOD": "Payment method required",
+        "PENDING": "Pending",
+        "AUTHORIZED": "Authorized",
+        "CAPTURED": "Captured",
+        "FAILED": "Failed",
+        "CANCELLED": "Cancelled"
+      },
+      "refundStatus": {
+        "REQUESTED": "Requested",
+        "PROCESSING": "Processing",
+        "SUCCEEDED": "Refunded",
+        "FAILED": "Failed",
+        "CANCELLED": "Cancelled"
+      },
+      "ledgerDirection": { "DEBIT": "Debit", "CREDIT": "Credit" },
+      "ledgerAccount": {
+        "CASH_GATEWAY_RECEIVABLE": "Gateway receivable",
+        "CUSTOMER_PAYMENT_CLEARING": "Customer payment clearing",
+        "SELLER_PAYABLE": "Seller payable",
+        "REFUND_PAYABLE": "Refund payable",
+        "PLATFORM_REVENUE": "Platform revenue"
+      },
+      "states": {
+        "lookupPrompt": "Enter an order ID to inspect its payment and ledger records.",
+        "loading": "Loading order financial records…",
+        "lookupFailedTitle": "Financial records unavailable",
+        "lookupFailed": "The order's financial records could not be loaded. Try again.",
+        "offline": "You are offline. Check your connection and try again.",
+        "accessDenied": "You do not have permission to view these financial records.",
+        "noPaymentIntents": "No payment intents are recorded for this order.",
+        "noLedgerEntries": "No ledger entries are recorded for this order.",
+        "actionFailed": "The refund request could not be completed. Try again.",
+        "actionDenied": "You do not have permission to perform this refund action.",
+        "unknownStatus": "Status unavailable",
+        "unknownAccount": "Account unavailable"
+      },
       "refund": {
         "title": "Request refund",
-        "amount": "Amount",
+        "amount": "Amount in Rial",
         "reason": "Reason",
         "submit": "Request",
         "approve": "Approve",
         "reject": "Reject",
         "execute": "Execute",
-        "status": {
+        "approvalStatus": {
           "REQUESTED": "Requested",
           "APPROVED": "Approved",
           "REJECTED": "Rejected",
@@ -3671,15 +3716,25 @@
     },
     "feed": {
       "title": "Community",
+      "description": "Questions, stories and news from pet owners — respectful, no ads.",
       "newPost": "New post",
       "empty": "No posts yet. Be the first to share something.",
       "loadMore": "Load more",
+      "loading": "Loading posts…",
+      "loadingMore": "Loading…",
       "commentsAndReactions": "{comments, plural, one {# comment} other {# comments}} · {reactions, plural, one {# reaction} other {# reactions}}",
       "searchLabel": "Search posts",
       "typeLabel": "Post type",
       "allTypes": "All types",
       "search": "Search",
-      "noResults": "No posts match your search."
+      "noResults": "No posts match your search.",
+      "withPet": "with {name}",
+      "shortcutsLabel": "Community shortcuts",
+      "topics": "Topics",
+      "rightNow": "Right now",
+      "myMessages": "My messages",
+      "lostPetsNearby": "Lost pets nearby",
+      "supportNeeds": "Support needs"
     },
     "newPost": {
       "title": "New post",
@@ -3699,6 +3754,36 @@
       "commentLabel": "Add a comment",
       "commentSubmit": "Post",
       "commentsEmpty": "No comments yet."
+    }
+  },
+  "communityChat": {
+    "inbox": {
+      "title": "Messages",
+      "emptyTitle": "No conversations yet",
+      "emptyDescription": "Start a conversation from a post or a member's profile.",
+      "fallbackMember": "Member",
+      "youPrefix": "You:",
+      "unread": "{count, plural, one {# unread message} other {# unread messages}}",
+      "failed": "Messages could not load",
+      "noAccess": "You don't have access to these messages.",
+      "stale": "Messages could not refresh. Showing the last loaded conversations.",
+      "retry": "Retry"
+    },
+    "thread": {
+      "allMessages": "All messages",
+      "conversationFallback": "Conversation",
+      "block": "Block",
+      "unblock": "Unblock",
+      "blocked": "Messaging is blocked in this conversation.",
+      "messageLabel": "Message",
+      "send": "Send",
+      "sendFailed": "The message wasn't sent. Please try again.",
+      "blockFailed": "The block setting could not be changed. Please try again.",
+      "notFound": "Conversation not found",
+      "loadFailed": "Conversation could not load",
+      "noAccess": "You don't have access to this conversation.",
+      "retry": "Retry",
+      "noMessages": "No messages in this conversation yet."
     }
   },
   "memories": {
