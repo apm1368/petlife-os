@@ -29,7 +29,7 @@ describe("public lost-pet pages in all route locales", () => {
 
     expect(await screen.findByRole("heading", { level: 1 })).toBeTruthy();
     expect(screen.getByRole("group")).toBeTruthy();
-    expect(screen.getByText(locale === "de" ? "Zurzeit gibt es keine aktiven Meldungen zu vermissten Tieren." : locale === "es" ? "Ahora mismo no hay informes activos de mascotas perdidas." : locale === "fa" ? "در حال حاضر گزارش فعالی از حیوان گم‌شده ثبت نشده است." : "There are no active lost-pet reports right now.")).toBeTruthy();
+    expect(await screen.findByText(locale === "de" ? "Zurzeit gibt es keine aktiven Meldungen zu vermissten Tieren." : locale === "es" ? "Ahora mismo no hay informes activos de mascotas perdidas." : locale === "fa" ? "در حال حاضر گزارش فعالی از حیوان گم‌شده ثبت نشده است." : "There are no active lost-pet reports right now.")).toBeTruthy();
     if (locale === "de" || locale === "es") expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
   });
 

@@ -8,6 +8,7 @@ import type { ClinicalDashboardDto, TriageLevel } from "@petlife/types";
 import { vetPanelService } from "@/services/vet-panel.service";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { ApiError } from "@/lib/api/client";
 
 /**
  * The clinical whiteboard — "who is in the building and what is overdue".
@@ -41,7 +42,9 @@ export function VetClinicalDashboardView() {
     try {
       setDashboard(await vetPanelService.getDashboard());
     } catch (err) {
-      setError(apiErrorText(err, locale, tCommon("genericError")));
+      if (err instanceof ApiError && (err.status === 401 || err.status === 403)) setError(t("noAccess"));
+      else if (typeof navigator !== "undefined" && !navigator.onLine) setError(t("offline"));
+      else setError(locale === "de" || locale === "es" ? tCommon("genericError") : apiErrorText(err, locale, tCommon("genericError")));
     }
   }
 
