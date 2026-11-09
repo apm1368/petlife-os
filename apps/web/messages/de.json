@@ -476,6 +476,38 @@
       "appealStatus": { "SUBMITTED": "Eingereicht", "UNDER_REVIEW": "Wird geprüft", "UPHELD": "Bestätigt", "OVERTURNED": "Aufgehoben", "PARTIALLY_OVERTURNED": "Teilweise aufgehoben" },
       "states": { "loading": "Vertrauensfälle werden geladen …", "loadFailed": "Vertrauensfälle konnten nicht geladen werden. Bitte erneut versuchen.", "detailLoadFailed": "Dieser Vertrauensfall konnte nicht geladen werden. Bitte erneut versuchen.", "accessDeniedTitle": "Kein Zugriff", "accessDenied": "Du hast keine Berechtigung, diese Vertrauensfälle anzusehen.", "empty": "Keine Vertrauensfälle gefunden", "emptyDescription": "Es gibt keine Fälle mit dem gewählten Status.", "createFailed": "Der Vertrauensfall konnte nicht eröffnet werden. Bitte erneut versuchen.", "actionFailed": "Die Änderung konnte nicht gespeichert werden. Bitte erneut versuchen.", "actionNotApplicable": "Diese Maßnahme kann im aktuellen Zustand des Gegenstands nicht angewendet werden.", "actionForbidden": "Deine Rolle darf diese Maßnahme nicht ausführen.", "actionNotRecorded": "Die Maßnahme wurde nicht erfasst. Bitte erneut versuchen.", "noActions": "Es wurden noch keine Maßnahmen erfasst.", "contextUnavailable": "Der Gegenstand und die Meldungsübersicht konnten nicht geladen werden.", "unknownValue": "Wert nicht verfügbar", "restored": "Durch eine spätere Maßnahme wiederhergestellt" }
     },
+    "disputes": {
+      "title": "Streitfälle",
+      "newDispute": "Neuer Streitfall",
+      "createTitle": "Streitfall eröffnen",
+      "filter": { "status": "Nach Status filtern", "allStatuses": "Alle Status" },
+      "status": { "OPEN": "Offen", "UNDER_REVIEW": "Wird geprüft", "AWAITING_EVIDENCE": "Belege ausstehend", "RESOLVED_CUSTOMER": "Für Kunden entschieden", "RESOLVED_PROVIDER": "Für Anbieter entschieden", "RESOLVED_SELLER": "Für Verkäufer entschieden", "PARTIAL_RESOLUTION": "Teilweise gelöst", "REJECTED": "Abgelehnt", "CLOSED": "Geschlossen" },
+      "subjectType": { "BOOKING": "Buchung", "ORDER": "Bestellung", "PAYMENT": "Zahlung", "REFUND": "Erstattung", "SHIPMENT": "Sendung", "PROVIDER": "Anbieter", "SELLER": "Verkäufer" },
+      "form": { "subjectType": "Bezugstyp", "subjectId": "Bezug-ID", "raisedByUserId": "Eingereicht von (Nutzer-ID, optional)", "claim": "Schilderung", "submit": "Streitfall eröffnen" },
+      "detail": { "claim": "Schilderung", "resolution": "Zusammenfassung der Entscheidung", "evidence": "Belege", "addEvidence": "Beleg hinzufügen", "evidencePlaceholder": "Beschreibung des Belegs", "changeStatus": "Status ändern", "financialNote": "Finanzielle Vorgänge (einschließlich Erstattungen) werden separat verfolgt. Eine Streitfallentscheidung löst keine automatische Erstattung aus.", "actorType": { "USER": "Nutzer", "ADMIN": "Admin" } },
+      "states": { "loading": "Streitfälle werden geladen …", "loadFailed": "Streitfälle konnten nicht geladen werden. Bitte erneut versuchen.", "detailLoadFailed": "Dieser Streitfall konnte nicht geladen werden. Bitte erneut versuchen.", "accessDeniedTitle": "Kein Zugriff", "accessDenied": "Du hast keine Berechtigung, diese Streitfälle anzusehen.", "notFoundTitle": "Streitfall nicht gefunden", "notFound": "Dieser Streitfall ist nicht verfügbar.", "empty": "Keine Streitfälle gefunden", "emptyDescription": "Es gibt keine Streitfälle mit dem gewählten Status.", "requiredFields": "Bezug-ID und Schilderung sind erforderlich.", "createFailed": "Der Streitfall konnte nicht eröffnet werden. Bitte erneut versuchen.", "actionFailed": "Die Änderung konnte nicht gespeichert werden. Bitte erneut versuchen.", "noEvidence": "Noch keine Belege hinzugefügt." }
+    },
+    "support": {
+      "title": "Supportfälle",
+      "newCase": "Neuer Fall",
+      "createTitle": "Supportfall erstellen",
+      "filter": {
+        "allStatuses": "Alle Status",
+        "allCategories": "Alle Kategorien",
+        "searchPlaceholder": "Betreff oder Fallnummer suchen …",
+        "createdFrom": "Erstellt ab",
+        "createdTo": "Erstellt bis"
+      },
+      "status": { "OPEN": "Offen", "IN_PROGRESS": "In Bearbeitung", "WAITING_ON_USER": "Wartet auf Nutzer", "WAITING_ON_INTERNAL": "Interne Bearbeitung ausstehend", "RESOLVED": "Gelöst", "CLOSED": "Geschlossen" },
+      "category": { "ACCOUNT": "Konto", "PET": "Haustier", "HEALTH": "Gesundheit", "BOOKING": "Buchung", "SERVICE": "Dienstleistung", "PAYMENT": "Zahlung", "REFUND": "Erstattung", "ORDER": "Bestellung", "DELIVERY": "Lieferung", "SELLER": "Verkäufer", "PROVIDER": "Anbieter", "MARKETPLACE": "Marktplatz", "TRUST_SAFETY": "Vertrauen und Sicherheit", "OTHER": "Sonstiges" },
+      "priority": { "LOW": "Niedrig", "NORMAL": "Normal", "HIGH": "Hoch", "URGENT": "Dringend" },
+      "form": { "requesterUserId": "Nutzer-ID der anfragenden Person", "subject": "Betreff", "description": "Beschreibung", "category": "Kategorie", "priority": "Priorität", "submit": "Fall erstellen" },
+      "detail": {
+        "caseNumber": "Fall {number}", "requester": "Anfragende Person: {name}", "authorType": { "USER": "Kunde", "ADMIN": "Admin", "SYSTEM": "System" }, "assignTo": "Admin zuweisen", "changeStatus": "Status ändern", "messages": "Nachrichten", "composePlaceholder": "Antwort schreiben …", "visibilityPublic": "Öffentliche Antwort", "visibilityInternal": "Interne Notiz (wird nicht an Kunden gesendet)", "visibilityLabel": "Sichtbarkeit", "send": "Senden", "notes": "Interne Notizen",
+        "context": { "title": "Kontext", "household": "Haushalt: {name}", "pet": "Haustier: {name}", "relatedEntity": "Bezug: {summary}", "firstResponseTime": "Erste Antwort nach {minutes} Min.", "noFirstResponseYet": "Noch keine Antwort gesendet", "resolutionTime": "Gelöst nach {minutes} Min.", "previousCases": "Frühere Fälle dieser Person:", "noPreviousCases": "Diese Person hat keine früheren Fälle." }
+      },
+      "states": { "loading": "Supportfälle werden geladen …", "loadFailed": "Supportfälle konnten nicht geladen werden. Bitte erneut versuchen.", "detailLoadFailed": "Dieser Supportfall konnte nicht geladen werden. Bitte erneut versuchen.", "accessDeniedTitle": "Kein Zugriff", "accessDenied": "Du hast keine Berechtigung, diese Supportfälle anzusehen.", "notFoundTitle": "Fall nicht gefunden", "notFound": "Dieser Supportfall ist nicht verfügbar.", "empty": "Keine Supportfälle gefunden", "emptyDescription": "Passe die Filter an oder erstelle einen neuen Fall.", "requiredFields": "Nutzer-ID, Betreff und Beschreibung sind erforderlich.", "createFailed": "Der Supportfall konnte nicht erstellt werden. Bitte erneut versuchen.", "actionFailed": "Die Änderung konnte nicht gespeichert werden. Bitte erneut versuchen.", "noMessages": "Noch keine Nachrichten.", "noNotes": "Noch keine internen Notizen." }
+    },
     "audit": {
       "title": "Prüfprotokoll",
       "entityType": "Entitätstyp",

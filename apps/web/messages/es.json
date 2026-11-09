@@ -476,6 +476,38 @@
       "appealStatus": { "SUBMITTED": "Enviada", "UNDER_REVIEW": "En revisión", "UPHELD": "Confirmada", "OVERTURNED": "Revocada", "PARTIALLY_OVERTURNED": "Revocada parcialmente" },
       "states": { "loading": "Cargando casos de confianza…", "loadFailed": "No se pudieron cargar los casos de confianza. Inténtalo de nuevo.", "detailLoadFailed": "No se pudo cargar este caso de confianza. Inténtalo de nuevo.", "accessDeniedTitle": "Sin acceso", "accessDenied": "No tienes permiso para ver estos casos de confianza.", "empty": "No se encontraron casos de confianza", "emptyDescription": "No hay casos con el estado seleccionado.", "createFailed": "No se pudo abrir el caso. Inténtalo de nuevo.", "actionFailed": "No se pudo guardar el cambio. Inténtalo de nuevo.", "actionNotApplicable": "No se puede aplicar esta acción al estado actual del asunto.", "actionForbidden": "Tu rol no permite realizar esta acción.", "actionNotRecorded": "No se registró la acción. Inténtalo de nuevo.", "noActions": "Todavía no hay acciones registradas.", "contextUnavailable": "No se pudieron cargar el asunto y el resumen de informes.", "unknownValue": "Valor no disponible", "restored": "Restaurado mediante una acción posterior" }
     },
+    "disputes": {
+      "title": "Disputas",
+      "newDispute": "Nueva disputa",
+      "createTitle": "Abrir disputa",
+      "filter": { "status": "Filtrar por estado", "allStatuses": "Todos los estados" },
+      "status": { "OPEN": "Abierta", "UNDER_REVIEW": "En revisión", "AWAITING_EVIDENCE": "A la espera de pruebas", "RESOLVED_CUSTOMER": "Resuelta a favor del cliente", "RESOLVED_PROVIDER": "Resuelta a favor del proveedor", "RESOLVED_SELLER": "Resuelta a favor del vendedor", "PARTIAL_RESOLUTION": "Resolución parcial", "REJECTED": "Rechazada", "CLOSED": "Cerrada" },
+      "subjectType": { "BOOKING": "Reserva", "ORDER": "Pedido", "PAYMENT": "Pago", "REFUND": "Reembolso", "SHIPMENT": "Envío", "PROVIDER": "Proveedor", "SELLER": "Vendedor" },
+      "form": { "subjectType": "Tipo de asunto", "subjectId": "ID del asunto", "raisedByUserId": "Presentada por (ID de usuario, opcional)", "claim": "Reclamación", "submit": "Abrir disputa" },
+      "detail": { "claim": "Reclamación", "resolution": "Resumen de la resolución", "evidence": "Pruebas", "addEvidence": "Añadir prueba", "evidencePlaceholder": "Descripción de la prueba", "changeStatus": "Cambiar estado", "financialNote": "Los movimientos financieros, incluidos los reembolsos, se gestionan por separado. Resolver una disputa no genera un reembolso automático.", "actorType": { "USER": "Usuario", "ADMIN": "Administración" } },
+      "states": { "loading": "Cargando disputas…", "loadFailed": "No se pudieron cargar las disputas. Inténtalo de nuevo.", "detailLoadFailed": "No se pudo cargar esta disputa. Inténtalo de nuevo.", "accessDeniedTitle": "Sin acceso", "accessDenied": "No tienes permiso para ver estas disputas.", "notFoundTitle": "Disputa no encontrada", "notFound": "Esta disputa no está disponible.", "empty": "No se encontraron disputas", "emptyDescription": "No hay disputas con el estado seleccionado.", "requiredFields": "El ID del asunto y la reclamación son obligatorios.", "createFailed": "No se pudo abrir la disputa. Inténtalo de nuevo.", "actionFailed": "No se pudo guardar el cambio. Inténtalo de nuevo.", "noEvidence": "Todavía no se han añadido pruebas." }
+    },
+    "support": {
+      "title": "Casos de soporte",
+      "newCase": "Nuevo caso",
+      "createTitle": "Crear caso de soporte",
+      "filter": {
+        "allStatuses": "Todos los estados",
+        "allCategories": "Todas las categorías",
+        "searchPlaceholder": "Buscar asunto o número de caso…",
+        "createdFrom": "Creado desde",
+        "createdTo": "Creado hasta"
+      },
+      "status": { "OPEN": "Abierto", "IN_PROGRESS": "En curso", "WAITING_ON_USER": "A la espera del usuario", "WAITING_ON_INTERNAL": "Pendiente de revisión interna", "RESOLVED": "Resuelto", "CLOSED": "Cerrado" },
+      "category": { "ACCOUNT": "Cuenta", "PET": "Mascota", "HEALTH": "Salud", "BOOKING": "Reserva", "SERVICE": "Servicio", "PAYMENT": "Pago", "REFUND": "Reembolso", "ORDER": "Pedido", "DELIVERY": "Entrega", "SELLER": "Vendedor", "PROVIDER": "Proveedor", "MARKETPLACE": "Mercado", "TRUST_SAFETY": "Confianza y seguridad", "OTHER": "Otro" },
+      "priority": { "LOW": "Baja", "NORMAL": "Normal", "HIGH": "Alta", "URGENT": "Urgente" },
+      "form": { "requesterUserId": "ID de usuario solicitante", "subject": "Asunto", "description": "Descripción", "category": "Categoría", "priority": "Prioridad", "submit": "Crear caso" },
+      "detail": {
+        "caseNumber": "Caso {number}", "requester": "Solicitante: {name}", "authorType": { "USER": "Cliente", "ADMIN": "Administración", "SYSTEM": "Sistema" }, "assignTo": "Asignar a administración", "changeStatus": "Cambiar estado", "messages": "Mensajes", "composePlaceholder": "Escribe una respuesta…", "visibilityPublic": "Respuesta pública", "visibilityInternal": "Nota interna (no se envía al cliente)", "visibilityLabel": "Visibilidad", "send": "Enviar", "notes": "Notas internas",
+        "context": { "title": "Contexto", "household": "Hogar: {name}", "pet": "Mascota: {name}", "relatedEntity": "Relacionado con: {summary}", "firstResponseTime": "Primera respuesta después de {minutes} min", "noFirstResponseYet": "Aún no se ha enviado una respuesta", "resolutionTime": "Resuelto después de {minutes} min", "previousCases": "Casos anteriores de esta persona:", "noPreviousCases": "Esta persona no tiene casos anteriores." }
+      },
+      "states": { "loading": "Cargando casos de soporte…", "loadFailed": "No se pudieron cargar los casos de soporte. Inténtalo de nuevo.", "detailLoadFailed": "No se pudo cargar este caso de soporte. Inténtalo de nuevo.", "accessDeniedTitle": "Sin acceso", "accessDenied": "No tienes permiso para ver estos casos de soporte.", "notFoundTitle": "Caso no encontrado", "notFound": "Este caso de soporte no está disponible.", "empty": "No se encontraron casos de soporte", "emptyDescription": "Cambia los filtros o crea un caso nuevo.", "requiredFields": "El ID de usuario, el asunto y la descripción son obligatorios.", "createFailed": "No se pudo crear el caso de soporte. Inténtalo de nuevo.", "actionFailed": "No se pudo guardar el cambio. Inténtalo de nuevo.", "noMessages": "Todavía no hay mensajes.", "noNotes": "Todavía no hay notas internas." }
+    },
     "audit": {
       "title": "Registro de auditoría",
       "entityType": "Tipo de entidad",
