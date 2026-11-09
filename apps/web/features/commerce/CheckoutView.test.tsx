@@ -496,4 +496,21 @@ describe("CheckoutView", () => {
     await waitFor(() => expect(screen.queryByLabelText("City")).toBeNull());
   });
 
+  it.each([
+    ["de", "Die Adresse konnte nicht gespeichert werden."],
+    ["es", "No se pudo guardar la dirección."],
+  ] as const)("does not leak an English backend validation message into %s checkout", async (locale, expectedMessage) => {
+    vi.mocked(commerceService.getCart).mockResolvedValue(EMPTY_CART);
+    vi.mocked(addressesService.list).mockResolvedValue([ADDRESS]);
+    vi.mocked(addressesService.update).mockRejectedValueOnce(new ApiError({ code: "VALIDATION_ERROR", message: "Address line is required", requestId: "request-1" }, 400));
+
+    renderWithIntl(<CheckoutView />, locale);
+    fireEvent.click(await screen.findByRole("button", { name: locale === "de" ? "Ausgewählte Adresse bearbeiten" : "Editar dirección seleccionada" }));
+    fireEvent.click(screen.getByRole("button", { name: locale === "de" ? "Adresse speichern" : "Guardar dirección" }));
+
+    expect((await screen.findByRole("alert")).textContent).toContain(expectedMessage);
+    expect(document.body.textContent).not.toContain("Address line is required");
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
 });

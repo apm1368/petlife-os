@@ -146,7 +146,9 @@ export function CheckoutView() {
       setDefaultAddress(false);
       setNewAddress({ recipient: "", phone: "", addressLine: "", city: "", postalCode: "", countryCode: "IR" });
     } catch (err) {
-      setAddressError(err instanceof ApiError && err.status < 500 ? err.message : t("address.saveFailed"));
+      // API messages are English implementation text for German and Spanish pages.
+      // Keep errors in the selected UI language instead of leaking backend copy.
+      setAddressError(errorText(err, t("address.saveFailed")));
     } finally {
       setIsCreatingAddress(false);
     }
