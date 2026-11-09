@@ -11,7 +11,6 @@ import { AccountPageHeader } from "./AccountNav";
 import { HouseholdNameEditor } from "./HouseholdNameEditor";
 import { ConfirmActionDialog } from "./ConfirmActionDialog";
 import { formatAccountDate, useAccountCopy } from "./account-copy";
-import { apiErrorText } from "@/lib/errors/api-error-text";
 import { normalizeIranPhone } from "@petlife/validation";
 import { ShareBar } from "@/features/shared/ShareBar";
 
@@ -154,8 +153,8 @@ export function HouseholdCenterView() {
             ? t("درخواست عضویت رد شد.", "The membership request was rejected.", "Die Mitgliedschaftsanfrage wurde abgelehnt.", "La solicitud de adhesión fue rechazada.")
             : t("دعوت یا درخواست عضویت لغو شد.", "The invitation or membership request was revoked.", "Die Einladung oder Mitgliedschaftsanfrage wurde widerrufen.", "La invitación o solicitud de adhesión fue revocada."));
       await loadDetail();
-    } catch (err) {
-      setNotice(apiErrorText(err, undefined, t("انجام نشد.", "That didn't work.", "Das hat nicht funktioniert.", "No se pudo completar.")));
+    } catch {
+      setNotice(t("انجام نشد. دوباره تلاش کنید.", "That didn't work. Please try again.", "Die Aktion ist fehlgeschlagen. Bitte versuchen Sie es erneut.", "No se pudo completar. Inténtalo de nuevo."));
     } finally {
       setBusyInvitation(null);
     }
@@ -304,7 +303,7 @@ export function HouseholdCenterView() {
               <div key={event.id}>
                 <span aria-hidden />
                 <p>
-                  <b>{HISTORY_LABELS[event.type] ? t(...HISTORY_LABELS[event.type]!) : event.type}</b>
+                  <b>{HISTORY_LABELS[event.type] ? t(...HISTORY_LABELS[event.type]!) : t("رویداد دسترسی", "Access event", "Zugriffsereignis", "Evento de acceso")}</b>
                   <small>{formatAccountDate(event.occurredAt, locale, true)}</small>
                 </p>
               </div>
@@ -410,7 +409,7 @@ function InviteDialog({ open, onClose, household, onSent }: { open: boolean; onC
           : t("دعوت ثبت شد. پیوند را شخصاً به او بدهید؛ پیامک یا ایمیلی ارسال نشده است. عضویت فقط پس از تأیید شما فعال می‌شود.", "The invitation is saved. Share the link directly; no SMS or email was sent. Membership starts only after your approval.", "Die Einladung wurde gespeichert. Teilen Sie den Link direkt; es wurde keine SMS oder E-Mail gesendet. Die Mitgliedschaft beginnt erst nach Ihrer Zustimmung.", "La invitación se guardó. Comparte el enlace directamente; no se envió ningún SMS ni correo. La adhesión comienza solo después de tu aprobación."),
       );
     } catch (err) {
-      setError(err instanceof ApiError && err.code === "ALREADY_HOUSEHOLD_MEMBER" ? t("این فرد همین حالا عضو خانواده است.", "This person is already in your household.", "Diese Person gehört bereits zu Ihrem Haushalt.", "Esta persona ya pertenece a tu hogar.") : apiErrorText(err, undefined, t("دعوت ارسال نشد.", "The invitation wasn't sent.", "Die Einladung konnte nicht gesendet werden.", "No se pudo enviar la invitación.")));
+      setError(err instanceof ApiError && err.code === "ALREADY_HOUSEHOLD_MEMBER" ? t("این فرد همین حالا عضو خانواده است.", "This person is already in your household.", "Diese Person gehört bereits zu Ihrem Haushalt.", "Esta persona ya pertenece a tu hogar.") : t("دعوت ارسال نشد. دوباره تلاش کنید.", "The invitation wasn't sent. Try again.", "Die Einladung konnte nicht gesendet werden. Bitte versuchen Sie es erneut.", "No se pudo enviar la invitación. Inténtalo de nuevo."));
     } finally {
       setBusy(false);
     }
