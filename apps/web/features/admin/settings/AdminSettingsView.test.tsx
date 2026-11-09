@@ -77,6 +77,48 @@ beforeEach(() => {
 });
 
 describe("settings governance UI", () => {
+  it.each([
+    ["de", "Plattformeinstellungen", "Schwellenwert für zweite Genehmigung einer Erstattung", "Änderungs- und Genehmigungsverlauf", "Genehmigung ausstehend"],
+    ["es", "Configuración de la plataforma", "Umbral para la segunda aprobación de reembolsos", "Historial de cambios y aprobaciones", "Pendiente de aprobación"],
+  ] as const)("renders the complete settings page in %s without Persian UI", async (locale, title, settingTitle, historyTitle, pendingLabel) => {
+    svc.changes.mockResolvedValue({ items: [change], total: 1, page: 1, pageSize: 20 });
+    const { container } = renderWithIntl(<AdminSettingsView />, locale);
+    expect(await screen.findByRole("heading", { name: settingTitle, level: 2 })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: title, level: 1 })).toBeTruthy();
+    expect(screen.getByText(historyTitle)).toBeTruthy();
+    expect(container.textContent).not.toMatch(/[\u0600-\u06ff]/);
+    expect(container.textContent).toContain(new Intl.NumberFormat(locale).format(100000.1));
+    expect(container.textContent).toContain(pendingLabel);
+  });
+
+  it.each([
+    ["de", "Keine Einstellungen vorhanden."],
+    ["es", "No hay configuración para mostrar."],
+  ] as const)("localizes the genuinely empty state in %s", async (locale, emptyText) => {
+    svc.list.mockResolvedValue([]);
+    const { container } = renderWithIntl(<AdminSettingsView />, locale);
+    expect(await screen.findByText(emptyText)).toBeTruthy();
+    expect(container.textContent).not.toMatch(/[\u0600-\u06ff]/);
+  });
+
+  it.each([
+    ["de", "Die Einstellungen konnten nicht geladen werden."],
+    ["es", "No se pudo cargar la configuración."],
+  ] as const)("localizes the fetch-error state in %s", async (locale, failureText) => {
+    svc.list.mockRejectedValue(new Error("network"));
+    renderWithIntl(<AdminSettingsView />, locale);
+    expect(await screen.findByText(failureText)).toBeTruthy();
+  });
+
+  it.each([
+    ["de", "Du darfst die Einstellungen nicht ansehen."],
+    ["es", "No tienes permiso para ver la configuración."],
+  ] as const)("localizes the permission-denied state in %s", async (locale, forbiddenText) => {
+    permissions("settings.manage");
+    renderWithIntl(<AdminSettingsView />, locale);
+    expect(await screen.findByText(forbiddenText)).toBeTruthy();
+  });
+
   it("preserves exact IRR through Persian Toman inputs without accepting unsafe or excessive precision", () => {
     expect(parseSettingNumber("۱۰۰۰۰۰٫۱", true)).toBe(1000001);
     expect(parseSettingNumber("۱۲", false)).toBe(12);

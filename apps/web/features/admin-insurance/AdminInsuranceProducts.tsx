@@ -8,9 +8,10 @@ import {useAdminStore} from "@/stores/admin-store";
 import {adminInsuranceService,type InsuranceProductInput} from "@/services/admin-insurance.service";
 import {InsuranceProductForm,insuranceNumericFields} from "./InsuranceProductForm";
 import {formatCurrency} from "@/lib/currency/format-currency";
+import type {RouteLocale} from "@/lib/i18n/config";
 export function AdminInsuranceProducts({providerId}:{providerId:string}){return <InsuranceProductsContent key={providerId} providerId={providerId}/>}
 function InsuranceProductsContent({providerId}:{providerId:string}){
- const t=useTranslations("adminInsuranceProducts"),statusT=useTranslations("insurance.verificationStatus"),locale=useLocale() as "fa"|"en";
+ const t=useTranslations("adminInsuranceProducts"),statusT=useTranslations("insurance.verificationStatus"),locale=useLocale() as RouteLocale;
  const context=useAdminStore(s=>s.context),view=!!context?.permissions.includes("insurance.view"),manage=!!context?.permissions.includes("insurance.manage");
  const [page,setPage]=useState(1),[rows,setRows]=useState<InsuranceProductDto[]>([]),[total,setTotal]=useState(0),[country,setCountry]=useState(""),[providerName,setProviderName]=useState("");
  const [loading,setLoading]=useState(true),[failed,setFailed]=useState(false),[revision,setRevision]=useState(0),[busy,setBusy]=useState(false),[saveFailed,setSaveFailed]=useState(false),[saved,setSaved]=useState(false),[editing,setEditing]=useState<InsuranceProductDto|null>(null),[creating,setCreating]=useState(false);

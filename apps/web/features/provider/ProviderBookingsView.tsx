@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { EmptyState, ErrorRecovery, Skeleton } from "@petlife/ui";
 import type { ProviderBookingSummaryDto } from "@petlife/types";
+import { ApiError } from "@/lib/api/client";
 import { providerOsService } from "@/services/provider-os.service";
 import { ProviderBookingRow } from "./ProviderBookingRow";
 
@@ -15,19 +16,19 @@ const FILTERS: FilterKey[] = ["requests", "today", "upcoming", "past", "cancelle
 export function ProviderBookingsView() {
   const t = useTranslations("provider.bookings");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as "fa" | "en" | "de" | "es";
 
   const [filter, setFilter] = useState<FilterKey>("today");
   const [bookings, setBookings] = useState<ProviderBookingSummaryDto[] | null>(null);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function load() {
-    setError(false);
+    setError(null);
     setBookings(null);
     try {
       setBookings(await providerOsService.listBookings({ [filter]: true }));
-    } catch {
-      setError(true);
+    } catch (err) {
+      setError(err instanceof ApiError && err.status === 403 ? t("accessDenied") : t("loadFailed"));
     }
   }
 
@@ -46,6 +47,7 @@ export function ProviderBookingsView() {
             key={key}
             type="button"
             onClick={() => setFilter(key)}
+            aria-pressed={filter === key}
             className={
               "shrink-0 rounded-full px-3 py-1.5 text-metadata " +
               (filter === key ? "bg-surface-subtle text-text-primary" : "text-text-secondary")
@@ -56,7 +58,7 @@ export function ProviderBookingsView() {
         ))}
       </div>
 
-      {error ? <ErrorRecovery title={t("title")} message="" retryLabel={t("retry")} onRetry={load} /> : null}
+      {error ? <ErrorRecovery title={t("title")} message={error} retryLabel={t("retry")} onRetry={load} /> : null}
       {!error && !bookings ? <Skeleton className="h-64 w-full" aria-label={t("loading")} /> : null}
       {!error && bookings && bookings.length === 0 ? <EmptyState title={t("empty")} /> : null}
       {!error && bookings && bookings.length > 0 ? (
