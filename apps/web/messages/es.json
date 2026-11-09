@@ -2481,7 +2481,14 @@
       "attention": { "pendingConfirmation": "{count, plural, one {# confirmación pendiente} other {# confirmaciones pendientes}}", "cancellations": "{count, plural, one {# cancelación reciente} other {# cancelaciones recientes}}", "availabilityIssues": "{count, plural, one {# conflicto de disponibilidad} other {# conflictos de disponibilidad}}", "allClear": "Todo en orden" },
       "nextBooking": "Próxima reserva", "today": "Hoy ({count, number})", "noBookingsToday": "Hoy no hay reservas.", "verificationLink": "Verificación y documentos de la organización"
     },
-    "bookingRow": { "respondBy": "Responder antes del " }
+    "bookingRow": { "respondBy": "Responder antes del " },
+    "availability": {
+      "title": "Disponibilidad", "retry": "Intentar de nuevo", "loading": "Cargando", "loadFailed": "No se pudo cargar la disponibilidad. Comprueba la conexión e inténtalo de nuevo.", "accessDenied": "No tienes permiso para gestionar la disponibilidad.",
+      "day": { "sun": "dom", "mon": "lun", "tue": "mar", "wed": "mié", "thu": "jue", "fri": "vie", "sat": "sáb" },
+      "rules": { "title": "Horario semanal", "empty": "Aún no hay disponibilidad recurrente configurada.", "delete": "Quitar", "locationId": "ID de ubicación", "dayOfWeek": "Día", "startLocalTime": "Hora de inicio", "endLocalTime": "Hora de fin", "timezone": "Zona horaria", "add": "Añadir", "locationRequired": "La ubicación es obligatoria.", "createFailed": "No se pudo crear la regla.", "updateFailed": "No se pudo actualizar la regla.", "deleteFailed": "No se pudo quitar la regla." },
+      "exceptions": { "title": "Ausencias y disponibilidad adicional", "empty": "No hay excepciones configuradas.", "delete": "Quitar", "startAt": "Inicio", "endAt": "Fin", "typeLabel": "Tipo", "type": { "BLOCKED": "Bloqueado", "AVAILABLE_OVERRIDE": "Disponibilidad adicional" }, "reason": "Motivo (opcional)", "add": "Añadir", "fieldsRequired": "Se requieren la ubicación, la hora de inicio y la hora de fin.", "createFailed": "No se pudo crear la excepción.", "updateFailed": "No se pudo actualizar la excepción.", "deleteFailed": "No se pudo quitar la excepción.", "conflictWarning": "{count, plural, one {Hay # reserva confirmada en este periodo.} other {Hay # reservas confirmadas en este periodo.}} Bloquearlo no las cancelará ni las cambiará.", "conflictCancel": "Cancelar", "conflictProceed": "Bloquear de todos modos" },
+      "actions": { "edit": "Editar", "cancel": "Cancelar", "save": "Guardar cambios" }
+    }
   },
   "partnerVerification": { "activationRequired": "La administración debe verificar tu organización antes de que puedas gestionar servicios o crear y activar ofertas. Puedes consultar la verificación y los pedidos existentes.", "portalTitle": "Verificación de socios", "refreshAccess": "Recargar la página para comprobar la aprobación" }
 }
