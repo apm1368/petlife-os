@@ -21,6 +21,7 @@ Recheck all heads and review requirements before acting; these states are time-s
 | #200 insurance customer pages | CI passed at `9cd872ead2cd5871b62eb46f30885c372ab71880`, but branch is behind main; no review decision reported. | Update against current main only when appropriate and rerun exact-head CI. Existing insurance eligibility/application scope remains subject to the open decision mismatch recorded in the PR. |
 | #178 expenses | CI passed at `936f44931e5f90cf40bfa6aea3694c90691d86c7`, but branch is behind main; no review decision reported. | Update and rerun exact-head checks before merge. |
 | #202 travel test race | Merged at `3097163505b2e9f664dc7103d31c1e9c762756a9`, exact PR CI green. | Confirm new main pipeline and production deployment. |
+| #203 account invitation inbox states | Base `main`, branch `feat/i18n-account-invitation-states`; opened after 16 focused tests, lint and typecheck passed. | Recheck exact-head CI/review; authenticated responsive browser verification remains outstanding. |
 
 Older stacked PRs and #110→#111 / #113→#114 chains also remain in the repository; inspect current dependency and merge states before retargeting. Do not bypass branch protection.
 
@@ -34,7 +35,7 @@ Older stacked PRs and #110→#111 / #113→#114 chains also remain in the reposi
 
 ## Current local work and next steps
 
-- Current branch `feat/i18n-member-profile-page` contains uncommitted changes to `AccountOverviewView.tsx`, its test, and the rollout matrix. This is an account-invitation-state localization patch on the actual `/profile` route, not a change to the unused `MemberProfileView` component. Preserve these changes.
-- Run the focused test, targeted ESLint, web typecheck and `git diff --check`; then create a small PR against current `main` and document its exact tests and browser limitation.
+- PR #203 (`feat/i18n-account-invitation-states`) contains the account-invitation-state localization patch on the actual `/profile` route, not a change to the unused `MemberProfileView` component. The work and rollout update are committed; preserve the branch.
+- Focused test: 16 passed. Targeted ESLint, web typecheck and `git diff --check` passed on the final source changes before the handoff's status-only edit.
 - Check main workflow `42580748820`; if green and deployment completes, compare production `/api/health/version` SHA and verify safe non-destructive health/product APIs. If it fails, inspect the failing step rather than reporting pending/failed as success.
 - Continue full-page localization by route family, updating the matrix with COMPLETE/PARTIAL/UNTRANSLATED based on page body and all rendered states. Continue functional/security work independently of review-blocked PRs.
