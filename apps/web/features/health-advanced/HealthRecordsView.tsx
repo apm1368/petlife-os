@@ -9,6 +9,7 @@ import type { CarePlanDto, ClinicalProblemDto, EndOfLifeCarePlanDto, MedicalReco
 import { clinicalOwnerService } from "@/services/vet-panel.service";
 import { healthAdvancedService } from "@/services/health-advanced.service";
 import { usePetAccess } from "@/hooks/use-pet-access";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 const SENIOR_FIELDS = { mobilityNotes: "mobility", cognitionNotes: "cognition", medicationComplexityNotes: "medicationComplexity", qualityOfLifeNotes: "quality", monitoringFrequencyText: "monitoring" } as const;
 const CARE_FIELDS = { palliativeCareNotes: "palliative", endOfLifePreferences: "preferences", aftercarePreferences: "aftercare" } as const;
@@ -17,7 +18,7 @@ type Data = { problems: ClinicalProblemDto[]; prescriptions: PrescriptionDto[]; 
 /** Owner-facing reads never call a provider endpoint. Planning does not change pet lifecycle. */
 export function HealthRecordsView({ petId }: { petId: string }) {
   const t = useTranslations("rollout.records");
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as RouteLocale;
   const { access, error: accessError, retry: retryAccess } = usePetAccess(petId);
   const [data, setData] = useState<Data | null>(null);
   const [failed, setFailed] = useState(false);
@@ -57,8 +58,8 @@ export function HealthRecordsView({ petId }: { petId: string }) {
   if (access && !access.canViewHealth) return <EmptyState title={t("noAccess")} />;
   if (failed) return <ErrorRecovery title={t("failed")} message="" retryLabel={t("retry")} onRetry={reload} />;
   if (!data) return <Skeleton className="h-64 w-full" aria-label={t("clinical")} />;
-  const day = (d: string) => new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "medium" }).format(new Date(d));
-  const labels = (value: string) => t.has(`statusLabels.${value}`) ? t(`statusLabels.${value}`) : value;
+  const day = (d: string) => new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : locale, { dateStyle: "medium" }).format(new Date(d));
+  const labels = (value: string) => t.has(`statusLabels.${value}`) ? t(`statusLabels.${value}`) : t("unknownStatus");
   const field = (label: string, value: string, onChange: (v: string) => void, max = 2000) => <label key={label} className="flex flex-col gap-2"><span>{t(label)}</span><textarea rows={3} maxLength={max} className="w-full rounded border border-border-subtle bg-surface-elevated p-3" value={value} onChange={(e) => onChange(e.target.value)} /></label>;
   return <div className="flex flex-col gap-6"><header><h1 className="text-page-title">{t("clinical")}</h1><p className="mt-3 text-metadata text-text-secondary">{t("sources")}</p></header>
     <nav className="flex flex-wrap gap-2" aria-label={t("clinical")}>{(["problems", "prescriptions", "carePlans", "senior", "planning", "corrections"] as const).map((key) => <Button variant={tab === key ? "primary" : "secondary"} key={key} aria-pressed={tab === key} onClick={() => { setTab(key); setSaved(false); setSaveError(false); }}>{t(key)}</Button>)}</nav>
