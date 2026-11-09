@@ -1270,11 +1270,28 @@
       "title": "Team",
       "retry": "Retry",
       "loading": "Loading",
+      "loadFailed": "The team could not be loaded.",
       "empty": "No team members yet.",
       "role": {
         "OWNER": "Owner",
         "VET": "Vet",
         "STAFF": "Staff"
+      },
+      "settings": {
+        "title": "Services and public profile per member",
+        "description": "A service with no assigned members is offered by every bookable member. No HR data is stored here.",
+        "emptyStaff": "No team members are available to configure.",
+        "emptyServices": "No services are available to assign.",
+        "bookable": "Bookable",
+        "servicesDelivered": "Services delivered",
+        "publicTitle": "Public title",
+        "publicBio": "Short public bio",
+        "save": "Save",
+        "retry": "Retry",
+        "loading": "Loading team settings",
+        "loadFailed": "Team settings could not be loaded.",
+        "saveFailed": "Could not save the change.",
+        "ownerOnly": "Only the organization owner can edit the team."
       }
     }
   },
