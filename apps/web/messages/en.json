@@ -5602,6 +5602,7 @@
   },
   "travelResults": {
     "allDestinations": "All destinations", "anyDates": "Any dates", "cityHeading": "Stays in {city}", "defaultHeading": "Pet-friendly stays", "editSearch": "Edit search",
+    "favoritesTitle": "Saved stays", "favoritesLoading": "Loading saved stays", "favoritesLoadErrorTitle": "Saved stays could not be loaded", "favoritesLoadErrorMessage": "Check your connection and try again.", "favoritesOfflineTitle": "You are offline", "favoritesOfflineMessage": "Reconnect to the internet and try again.", "favoritesAccessDeniedTitle": "Saved stays are unavailable", "favoritesAccessDeniedMessage": "Sign in to view your saved stays.", "favoritesEmptyTitle": "No saved stays yet", "favoritesEmptyDescription": "Select the heart on a search result to save a stay here.",
     "datesNote": "Add check-in and check-out dates to see whole-stay totals and availability reported by the listing service.", "filters": "Filters", "sort": "Sort", "view": "View", "list": "List", "map": "Map",
     "sortOptions": { "RECOMMENDED": "Recommended", "BEST_PET_MATCH": "Best pet match", "PRICE_ASC": "Lowest price", "PRICE_DESC": "Highest price", "RATING": "Top rated" },
     "bestMatchHelp": "Best pet match shows stays whose stated rules fit first, followed by stays needing more information; each group is sorted by rating and price.",
