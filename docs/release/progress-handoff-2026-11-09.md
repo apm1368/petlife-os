@@ -2,6 +2,24 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
+## Latest verified checkpoint — 2026-11-09 11:18 UTC
+
+- `main`: `be12ac5d74b043bafad66c091c2b225f3ec210a4` (#207). Production `/api/health/version` now reports `ff2a73abdd03ef783f409b5d25dbd9a2026b73ba` (`github-42601851619-1`, #206); deployment run `42601851619` succeeded and readiness reports DB/Redis up. Main is ahead of production; deploy run `42605474846` for `be12ac5d…` is still in progress.
+- #207 remains MERGED_NOT_DEPLOYED until production reports `be12ac5d…`; the safe public shop API remains empty (no demo products exposed, but no legitimate offer exists to verify visibility or purchase).
+- #104 remains open/conflicting against #207. Replacement PR #208 (`feat/services-review-timing-main`) targets `main`, head `55472363b5067bfbd326478396674da5deed5a26`; its exact CI run `42607738997` is in progress. It imports #104's API review timing and required dimensions while preserving the localized main booking detail. Local fix commit `55472363` localizes the new timing notice, three criteria and cancellation/reschedule/review dialogs in fa/en/de/es; the review button is unavailable until the two-hour gate opens.
+- PR #208 validation completed locally: booking detail test 15/15, focused ESLint passed, web typecheck passed, all four locale JSON files parse, and `git diff --check` passed. Full API E2E/build awaits the exact-head PR CI; no full local build was attempted because free disk is only about 33 MiB. The route remains PARTIAL pending authenticated responsive-browser verification.
+- #205 handoff PR head is `3d79550119035ec808f2ea3fcb58e6dfacaa57f3`; CI run `42606367855` is in progress and merge state is BLOCKED while checks are pending. This checkpoint must be committed and pushed to #205 for the durable handoff to stay current.
+- #178 and #206 are LIVE_VERIFIED by production version SHA `ff2a73ab…` for #206 and DB/Redis readiness. #207 is not yet live. #102/#103/#105/#106/#108/#109/#121 and old localization stacks (#132–#141) remain stale/conflicting; do not reuse their prior green checks.
+- Payment worktree is absent from available worktrees; no payment files were changed. Disk remains critically constrained (about 33 MiB free); no cleanup performed. Authenticated browser/visual tools and production bucket/CDN configuration remain unavailable, so source-image/CDN privacy is unverified.
+
+### Next actions
+
+1. Wait for exact-head CI `42607738997` on #208. Fix actual failures only, rerun, then merge normally if GitHub permits; no bypass.
+2. Monitor #207 deploy `42605474846`; verify production version SHA, readiness and safe shop API after it completes.
+3. Commit and push this checkpoint to #205, then wait for its fresh CI. Merge normally only if allowed.
+4. Continue localization using independent current-main slices; older stacks are stale and require code/diff review and fresh checks, not blind retargeting.
+5. Keep product page families PARTIAL until full-body fa/en/de/es states and authenticated responsive behavior are checked. Preserve external-source, shop-catalog and memorial-image limitations.
+
 ## Latest verified checkpoint — 2026-11-09 11:06 UTC
 
 - `main`: `be12ac5d74b043bafad66c091c2b225f3ec210a4` (#207). #207 passed exact-head CI `42603584243` on `8d805a08…` (lint, design-system/visual, typecheck, migration, full unit/web tests, API E2E and build) and merged normally by squash at 11:00:24 UTC. It localizes customer booking detail/shared booking labels for fa/en/de/es and includes the two-test async memorial empty-state reliability fix. The booking-detail route remains PARTIAL pending authenticated responsive-browser verification.
