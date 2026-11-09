@@ -2,6 +2,16 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
+## Latest verified update — 2026-11-09 09:58 UTC
+
+- `origin/main`: `7ae527e0fef76b44f64345a73429e5b7ec62e87f`, after PR #184 merged normally (`7ae527e0`). Production `/api/health/version` still reports `e4e8ba349aa68616571a70d3069b1e7f04a757ec` / deployment `github-42592488512-1`; the main deployment run for `7ae527e0` (`42597068779`) is pending. Public home returned HTTP 200; no authenticated or feature-specific production verification was performed.
+- PR #181 merged normally at `c445790a9be6e4b6f0c28d93d53e8fd88a460fe6`; its exact-head CI `42594079873` passed. PR #184 merged normally at `7ae527e0fef76b44f64345a73429e5b7ec62e87f`; exact-head CI `42595714934` passed. #184 adds pet-access rendered locale-state coverage; it does not complete the pet-access route's authenticated responsive verification.
+- PR #178 (`feat/i18n-expenses-full-page`) was synchronized through main and its current head is `ce5574f829c6df73f4bce30b562810367e357393`; exact-head CI `42597205731` is IN_PROGRESS. Local focused expenses/year-review/health-record tests passed (48 total), local shared-types build, web typecheck, targeted ESLint and diff checks passed. No merge is claimed while CI is running. Review decision is empty.
+- PR #206 (`fix(i18n): localize checkout address errors`) is open at `1bddee1f362b4b7d5edad3b18aafee1cbd4a38d0`; it changes address-save error presentation to use localized fallback copy for de/es and adds two regressions. Checkout/message-parity tests passed (27), web typecheck, targeted ESLint and diff check passed. No hosted check has been reported yet; no merge/deploy is claimed. Checkout remains PARTIAL pending authenticated responsive inspection and order/backoffice localization.
+- PR #205 handoff CI `42596781353` is IN_PROGRESS on head `055aae3c`; this checkpoint update will require fresh CI. PR #178, #205 and #206 have no recorded review decision. Branch-protection details could not be read via the API (403), but PR #184 merged using the normal squash path; no bypass was used.
+- Disk has 36 MiB free. No cleanup was performed. The payment worktree is not present in the current `git worktree list`; it was not modified and its absence does not establish that prior payment work was deleted.
+- The member dashboard body is already translated and has populated/empty/state coverage in all four locales; rollout status remains PARTIAL because signed-in refresh/navigation, authenticated browser rendering, directionality and responsive behavior have not been verified. No complete-module or LIVE_VERIFIED claim is made.
+
 ## Latest verified update — 2026-11-09 09:36 UTC
 
 - `origin/main`: `e29eb59d8427fab4e18cbbb16bf299787005be1f` (PR #183). Production: `bb8ba11238ea28fc0500c941a02a6c32f0e13fb7`, deployment `github-42590818714-1`; `/api/health/version` verified this SHA.
