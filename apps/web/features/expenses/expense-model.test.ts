@@ -1,10 +1,23 @@
 import { describe, expect, it } from "vitest";
 import type { PetExpenseEntryDto } from "@petlife/types";
-import { currentYear, monthlyTotals, parseTomanToIrr, yearRange } from "./expense-model";
+import { CATEGORY_LABELS, currentYear, monthlyTotals, parseTomanToIrr, SOURCE_LABELS, yearRange } from "./expense-model";
+import { expenseCopy } from "./PetExpensesView";
 
 const entry = (spentOn: string, amountIrr: number): PetExpenseEntryDto => ({ id: spentOn + amountIrr, source: "MANUAL", category: "FOOD", amountIrr, spentOn, note: null, label: null, sourceRecordId: null });
 
 describe("expense model", () => {
+  it("has complete four-locale UI, category and source labels without Persian fallback in de/es", () => {
+    const keys = Object.keys(expenseCopy.en).sort();
+    for (const locale of ["fa", "de", "es"] as const) {
+      expect(Object.keys(expenseCopy[locale]).sort()).toEqual(keys);
+    }
+    for (const locale of ["de", "es"] as const) {
+      expect(Object.values(expenseCopy[locale]).join(" ")).not.toMatch(/[\u0600-\u06FF]/);
+      expect(Object.values(CATEGORY_LABELS).map((labels) => labels[locale]).join(" ")).not.toMatch(/[\u0600-\u06FF]/);
+      expect(Object.values(SOURCE_LABELS).map((labels) => labels[locale]).join(" ")).not.toMatch(/[\u0600-\u06FF]/);
+    }
+  });
+
   it("spans a Jalali year from Nowruz to the last day of Esfand, leap years included", () => {
     expect(yearRange("jalali", 1405)).toEqual({ from: "2026-03-21", to: "2027-03-20" });
     expect(yearRange("jalali", 1403)).toEqual({ from: "2024-03-20", to: "2025-03-20" });

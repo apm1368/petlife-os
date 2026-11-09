@@ -7,7 +7,7 @@ import { SessionService } from "../../common/session/session.service";
 export const ACTIVITY_GROUPS = {
   SECURITY: ["UserAuthenticated", "PasswordChanged", "PasswordResetCompleted", "SessionRevoked", "OtherSessionsRevoked", "AllSessionsRevoked", "ContactChanged", "UnverifiedCredentialsCleared"],
   PRIVACY: ["ConsentChanged", "DataExportRequested", "DataExportReady", "DataExportDownloaded", "AccountDeletionRequested", "AccountDeletionCancelled", "AccountDeletionStateChanged"],
-  HOUSEHOLD: ["HouseholdInvitationAccepted", "HouseholdInvitationDeclined", "HouseholdMemberLeft"],
+  HOUSEHOLD: ["HouseholdInvitationAccepted", "HouseholdInvitationDeclined", "HouseholdMembershipRequested", "HouseholdMembershipApproved", "HouseholdMembershipRejected", "HouseholdMemberLeft"],
   /** Household membership events — shown only to that household's owners, who hold its billing. */
   MEMBERSHIP: ["SubscriptionStarted", "SubscriptionRenewed", "SubscriptionRenewalFailed", "SubscriptionGraceStarted", "SubscriptionExpired", "SubscriptionPlanChanged", "SubscriptionDowngradeScheduled", "SubscriptionCancelRequested", "SubscriptionCancelReversed"],
 } as const;
@@ -29,7 +29,10 @@ export class AccountService {
         include: { household: { include: { _count: { select: { members: true, pets: true } }, subscription: { select: { status: true, currentPeriod: { select: { endAt: true } } } } } } },
       }),
       this.prisma.session.count({ where: { userId, revokedAt: null, expiresAt: { gt: new Date() } } }),
-      this.prisma.householdInvitation.count({ where: { household: { members: { some: { userId } } }, status: "PENDING", expiresAt: { gt: new Date() } } }),
+      this.prisma.householdInvitation.count({ where: {
+        household: { members: { some: { userId, role: "OWNER" } } },
+        OR: [{ status: "PENDING", expiresAt: { gt: new Date() } }, { status: "REQUESTED" }],
+      } }),
     ]);
     return { user, households: memberships.map((membership) => ({ ...membership.household, role: membership.role })), security: { activeSessions }, attention: { pendingInvitations } };
   }

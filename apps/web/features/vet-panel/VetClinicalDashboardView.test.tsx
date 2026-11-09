@@ -3,6 +3,7 @@ import { screen, waitFor } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
 import type { ClinicalDashboardDto, HospitalizationDto, WhiteboardPatientDto } from "@petlife/types";
 import { vetPanelService } from "@/services/vet-panel.service";
+import { ApiError } from "@/lib/api/client";
 import { VetClinicalDashboardView } from "./VetClinicalDashboardView";
 
 const push = vi.fn();
@@ -51,6 +52,7 @@ function whiteboardRow(overrides: Partial<WhiteboardPatientDto> = {}): Whiteboar
 
 describe("VetClinicalDashboardView", () => {
   beforeEach(() => {
+    Object.defineProperty(window.navigator, "onLine", { configurable: true, value: true });
     push.mockReset();
     vi.mocked(vetPanelService.getDashboard).mockReset();
   });
@@ -86,5 +88,58 @@ describe("VetClinicalDashboardView", () => {
     for (const word of ["Revenue", "revenue", "Toman", "IRR"]) {
       expect(text).not.toContain(word);
     }
+  });
+
+  it.each([
+    ["de", "Klinisches Board", "4 Termine heute", "Gerade in der Klinik", "Noch keine Vitalwerte erfasst"],
+    ["es", "Panel clínico", "4 citas hoy", "Ahora en la clínica", "Aún no se han registrado constantes vitales"],
+  ] as const)("renders the clinical dashboard body in %s without Persian UI fallback", async (locale, title, appointments, whiteboard, noVitals) => {
+    vi.mocked(vetPanelService.getDashboard).mockResolvedValue(dashboard({ whiteboard: [whiteboardRow()] }));
+    const { container } = renderWithIntl(<VetClinicalDashboardView />, locale);
+
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByText(appointments)).toBeTruthy();
+    expect(screen.getByText(whiteboard)).toBeTruthy();
+    expect(screen.getByText(noVitals)).toBeTruthy();
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it.each([
+    ["de", "Wird geladen"],
+    ["es", "Cargando"],
+  ] as const)("localizes the clinical dashboard loading state in %s", (locale, loadingLabel) => {
+    vi.mocked(vetPanelService.getDashboard).mockImplementationOnce(() => new Promise(() => undefined));
+    renderWithIntl(<VetClinicalDashboardView />, locale);
+    expect(screen.getByLabelText(loadingLabel)).toBeTruthy();
+  });
+
+  it.each([
+    ["de", "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."],
+    ["es", "Algo salió mal. Inténtalo de nuevo."],
+  ] as const)("shows a localized clinical dashboard load error in %s", async (locale, errorMessage) => {
+    vi.mocked(vetPanelService.getDashboard).mockRejectedValueOnce(new Error("internal English provider detail"));
+    renderWithIntl(<VetClinicalDashboardView />, locale);
+    expect(await screen.findByText(errorMessage)).toBeTruthy();
+    expect(screen.queryByText("internal English provider detail")).toBeNull();
+  });
+
+  it.each([
+    ["de", "Du hast keine Berechtigung für dieses klinische Dashboard."],
+    ["es", "No tienes permiso para ver este panel clínico."],
+  ] as const)("localizes clinical dashboard no-access state in %s", async (locale, message) => {
+    vi.mocked(vetPanelService.getDashboard).mockRejectedValueOnce(new ApiError({ code: "FORBIDDEN", message: "Forbidden in English", requestId: "r2" }, 403));
+    renderWithIntl(<VetClinicalDashboardView />, locale);
+    expect(await screen.findByText(message)).toBeTruthy();
+    expect(screen.queryByText("Forbidden in English")).toBeNull();
+  });
+
+  it.each([
+    ["de", "Du bist offline. Prüfe deine Verbindung und versuche es erneut."],
+    ["es", "No tienes conexión. Comprueba la conexión e inténtalo de nuevo."],
+  ] as const)("shows an explicit clinical dashboard offline state in %s", async (locale, message) => {
+    Object.defineProperty(window.navigator, "onLine", { configurable: true, value: false });
+    vi.mocked(vetPanelService.getDashboard).mockRejectedValueOnce(new Error("Failed to fetch"));
+    renderWithIntl(<VetClinicalDashboardView />, locale);
+    expect(await screen.findByText(message)).toBeTruthy();
   });
 });

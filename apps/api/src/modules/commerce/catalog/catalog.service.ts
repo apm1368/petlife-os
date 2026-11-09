@@ -26,6 +26,7 @@ import { PetAccessService } from "../../pet-access/pet-access.service";
 import { toBrandDto, toCategoryDto, toSellerOfferDto, toVariantDto } from "../commerce-dto.mapper";
 import { PricingService, type EffectivePrice } from "../promotions/pricing.service";
 import { ProductCompatibilityService } from "./product-compatibility.service";
+import { excludeDemoRecordsFromPublicReads } from "../../../common/public-record-origin";
 
 const OFFER_INCLUDE = {
   sellerOrganization: true,
@@ -220,6 +221,7 @@ export class CatalogService {
     const categoryIds = filter.category ? await this.descendantCategoryIds(filter.category) : null;
     const q = filter.search?.trim();
     const where: Prisma.ProductWhereInput = {
+      ...excludeDemoRecordsFromPublicReads(),
       status: ProductStatus.ACTIVE,
       variants: {
         some: {
@@ -386,8 +388,8 @@ export class CatalogService {
   }
 
   async getDetail(userId: string | undefined, productId: string, petId?: string): Promise<ProductDetailDto> {
-    const product = await this.prisma.product.findUnique({
-      where: { id: productId },
+    const product = await this.prisma.product.findFirst({
+      where: { id: productId, ...excludeDemoRecordsFromPublicReads() },
       include: PRODUCT_INCLUDE,
     });
     // Draft, inactive and archived products are not public.
@@ -408,6 +410,7 @@ export class CatalogService {
         : Promise.resolve(null),
       this.prisma.product.findMany({
         where: {
+          ...excludeDemoRecordsFromPublicReads(),
           status: ProductStatus.ACTIVE,
           categoryId: product.categoryId,
           id: { not: product.id },
@@ -478,7 +481,7 @@ export class CatalogService {
   async summariesByIds(userId: string | undefined, productIds: string[]): Promise<ProductSummaryDto[]> {
     if (productIds.length === 0) return [];
     const rows = await this.prisma.product.findMany({
-      where: { id: { in: productIds }, status: ProductStatus.ACTIVE },
+      where: { id: { in: productIds }, status: ProductStatus.ACTIVE, ...excludeDemoRecordsFromPublicReads() },
       include: PRODUCT_INCLUDE,
     });
     const [prices, ratings] = await Promise.all([
@@ -495,8 +498,8 @@ export class CatalogService {
   }
 
   async getOffers(productId: string): Promise<SellerOfferDto[]> {
-    const product = await this.prisma.product.findUnique({
-      where: { id: productId },
+    const product = await this.prisma.product.findFirst({
+      where: { id: productId, ...excludeDemoRecordsFromPublicReads() },
       include: PRODUCT_INCLUDE,
     });
     if (!product || product.status !== ProductStatus.ACTIVE) throw new NotFoundApiException("Product");

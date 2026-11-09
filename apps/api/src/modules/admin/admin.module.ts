@@ -4,6 +4,9 @@ import { AdminTravelService } from "./travel/admin-travel.service";
 import { TravelMarketplaceModule } from "../travel-marketplace/travel-marketplace.module";
 import { AdminCommerceController } from "./commerce/admin-commerce.controller";
 import { AdminCommerceService } from "./commerce/admin-commerce.service";
+import { SellerCatalogReviewService } from "./commerce/seller-catalog-review.service";
+import { CatalogImportService } from "./commerce/catalog-import.service";
+import { CatalogImportWorker } from "./commerce/catalog-import.worker";
 import { PromotionsModule } from "../commerce/promotions/promotions.module";
 import { Module } from "@nestjs/common";
 import { SupportOpsService } from "./support/support-ops.service";
@@ -115,6 +118,9 @@ import { AdminNgoMembersController } from "./animal-support/admin-ngo-members.co
 import { AdminLostPetService } from "./lost-pet/admin-lost-pet.service";
 import { AdminReviewModerationController } from "./reviews/admin-review-moderation.controller";
 import { AdminReviewModerationService } from "./reviews/admin-review-moderation.service";
+import { AdminPetMemorialController } from "./memorials/admin-pet-memorial.controller";
+import { AdminPetMemorialService } from "./memorials/admin-pet-memorial.service";
+import { MemoriesModule } from "../memories/memories.module";
 
 /**
  * The internal-platform module (Handoff 11) — identity/auth, audit
@@ -139,6 +145,7 @@ import { AdminReviewModerationService } from "./reviews/admin-review-moderation.
     CommunityModule,
     BookingModule,
     PaymentsModule,
+    MemoriesModule,
   ],
   controllers: [
     AdminMeController,
@@ -181,6 +188,7 @@ import { AdminReviewModerationService } from "./reviews/admin-review-moderation.
     AdminLostPetController,
     AdminNgoMembersController,
     AdminReviewModerationController,
+    AdminPetMemorialController,
   ],
   providers: [
     SupportOpsService,
@@ -203,12 +211,16 @@ import { AdminReviewModerationService } from "./reviews/admin-review-moderation.
     AdminLostPetService,
     AdminTravelService,
     AdminCommerceService,
+    SellerCatalogReviewService,
+    CatalogImportService,
+    CatalogImportWorker,
     AdminAccessService,
     AdminAuthGuard,
     AdminAuditLogService,
     AdminCustomerService,
     AdminUsersService,
     AdminReviewModerationService,
+    AdminPetMemorialService,
     InternalNoteService,
     SupportCaseService,
     SupportNotificationListener,

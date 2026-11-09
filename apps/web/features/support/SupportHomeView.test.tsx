@@ -33,4 +33,15 @@ describe("SupportHomeView", () => {
 
     expect(push).toHaveBeenCalledWith("/en/support/new");
   });
+
+  it("renders Spanish support copy without changing the locale route", async () => {
+    vi.mocked(supportService.list).mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 3 });
+
+    renderWithIntl(<SupportHomeView />, "es");
+
+    await waitFor(() => expect(screen.getByText("Todavía no tienes solicitudes de soporte.")).toBeTruthy());
+    expect(screen.getByRole("heading", { name: "Ayuda" })).toBeTruthy();
+    screen.getByText("Solicitar ayuda").click();
+    expect(push).toHaveBeenCalledWith("/es/support/new");
+  });
 });

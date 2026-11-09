@@ -38,6 +38,7 @@ export const PRIVATE_OBJECT_KEY_PREFIXES = [
   "health-documents/",
   "pet-observations/",
   "pet-memories-private/",
+  "pet-memorial-assets/",
   "account-exports/",
   "animal-support-verification/",
   "booking-attachments/",

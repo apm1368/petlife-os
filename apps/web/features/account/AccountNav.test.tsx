@@ -26,4 +26,18 @@ describe("AccountNav", () => {
     expect(screen.getByRole("link", { name: /^خانواده و دسترسی/ }).getAttribute("aria-current")).toBe("page");
     expect(screen.getByRole("link", { name: "نمای کلی" }).getAttribute("href")).toBe("/fa/profile");
   });
+
+  it.each([
+    ["de", "Kontoeinstellungen", "Haushalt und Zugriff", "Profil und Einstellungen", "Konto", "Kliniknachrichten für Ihren Haushalt", "Von Kliniken ausdrücklich geteilte Nachrichten"],
+    ["es", "Configuración de la cuenta", "Hogar y acceso", "Perfil y preferencias", "Cuenta", "Mensajes de la clínica para tu hogar", "Notas compartidas expresamente por clínicas"],
+  ] as const)("renders account navigation in %s and keeps the locale in all links", (locale, navName, household, personal, back, clinicTitle, clinicHint) => {
+    pathname = `/${locale}/profile/household`;
+    renderWithIntl(<AccountNav />, locale);
+    expect(screen.getByRole("navigation", { name: navName })).toBeTruthy();
+    expect(screen.getByRole("link", { name: new RegExp(household) }).getAttribute("href")).toBe(`/${locale}/profile/household`);
+    expect(screen.getByRole("link", { name: new RegExp(personal) }).getAttribute("href")).toBe(`/${locale}/profile/personal`);
+    expect(screen.getByRole("link", { name: new RegExp(clinicTitle) }).getAttribute("href")).toBe(`/${locale}/profile/clinic-notes`);
+    expect(screen.getByRole("link", { name: new RegExp(clinicHint) })).toBeTruthy();
+    expect(screen.getByRole("link", { name: new RegExp(`${back}$`) }).getAttribute("href")).toBe(`/${locale}/profile`);
+  });
 });

@@ -7,7 +7,7 @@ import { useSellerStore } from "@/stores/seller-store";
 import { SellerOffersView } from "./SellerOffersView";
 
 vi.mock("@/services/seller-os.service", () => ({
-  sellerOsService: { listOffers: vi.fn(), updateOffer: vi.fn() },
+  sellerOsService: { listOffers: vi.fn(), updateOffer: vi.fn(), listCatalogProductRequests: vi.fn().mockResolvedValue([]), createCatalogProductRequest: vi.fn() },
 }));
 
 const OFFER: SellerOsOfferDto = {
@@ -49,6 +49,7 @@ describe("SellerOffersView", () => {
   beforeEach(() => {
     vi.mocked(sellerOsService.listOffers).mockReset();
     vi.mocked(sellerOsService.updateOffer).mockReset();
+    vi.mocked(sellerOsService.listCatalogProductRequests).mockReset().mockResolvedValue([]);
     useSellerStore.setState({
       context: {
         active: {
@@ -75,6 +76,18 @@ describe("SellerOffersView", () => {
     await waitFor(() => expect(screen.getByText("Grain-Free Treats")).toBeTruthy());
     expect(screen.getByText("Low stock")).toBeTruthy();
     expect(screen.getByText("1 sync error(s)")).toBeTruthy();
+  });
+
+  it.each([
+    ["de", "Angebote", "Verkäuferangebot hinzufügen"],
+    ["es", "Ofertas", "Añadir oferta del vendedor"],
+  ] as const)("localizes the seller catalog offer flow in %s", async (locale, heading, addOffer) => {
+    vi.mocked(sellerOsService.listOffers).mockResolvedValue(page([OFFER]));
+    renderWithIntl(<SellerOffersView />, locale);
+    await waitFor(() => expect(screen.getByRole("heading", { name: heading })).toBeTruthy());
+    expect(screen.getByText(addOffer)).toBeTruthy();
+    expect(screen.getByLabelText(locale === "de" ? "Preis (IRR)" : "Precio (IRR)")).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
   });
 
   it("keeps existing offers visible but directs an unverified seller to verification", async () => {

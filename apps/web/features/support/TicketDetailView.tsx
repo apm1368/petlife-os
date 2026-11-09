@@ -11,7 +11,8 @@ import { apiErrorText } from "@/lib/errors/api-error-text";
 import { SupportFrame } from "./SupportFrame";
 
 function formatDate(iso: string, locale: string) {
-  return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "short", timeStyle: "short" }).format(new Date(iso));
+  const intlLocale = locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-US";
+  return new Intl.DateTimeFormat(intlLocale, { dateStyle: "short", timeStyle: "short" }).format(new Date(iso));
 }
 
 /**
@@ -42,6 +43,11 @@ export function TicketDetailView({ caseId }: { caseId: string }) {
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [reopening, setReopening] = useState(false);
+  const [escalationReason, setEscalationReason] = useState("");
+  const [escalationConfirmed, setEscalationConfirmed] = useState(false);
+  const [escalationRef, setEscalationRef] = useState<string | null>(null);
+  const [escalationError, setEscalationError] = useState(false);
+  const [escalating, setEscalating] = useState(false);
 
   async function load() {
     setError(false);
@@ -80,6 +86,14 @@ export function TicketDetailView({ caseId }: { caseId: string }) {
     } finally {
       setReopening(false);
     }
+  }
+
+  async function escalate() {
+    if (escalationReason.trim().length < 5 || !escalationConfirmed) return;
+    setEscalating(true); setEscalationError(false);
+    try { const result = await supportService.escalate(caseId, escalationReason.trim()); setEscalationRef(result.referenceNumber); }
+    catch { setEscalationError(true); }
+    finally { setEscalating(false); }
   }
 
   if (error) return <ErrorRecovery title={t("tickets.title")} message="" retryLabel={t("retry")} onRetry={load} />;
@@ -155,6 +169,18 @@ export function TicketDetailView({ caseId }: { caseId: string }) {
           <Button variant="secondary" isLoading={reopening} onClick={reopen}>
             {t("detail.reopen")}
           </Button>
+        ) : null}
+        {data.status !== "CLOSED" && data.status !== "RESOLVED" ? (
+          <section className="flex flex-col gap-3 border-t border-border-subtle pt-4">
+            <h2 className="text-section-title text-text-primary">{locale === "fa" ? "درخواست پیگیری توسط کارشناس" : "Request a human follow-up"}</h2>
+            {escalationRef ? <p role="status" className="text-body text-state-positive">{locale === "fa" ? `درخواست پیگیری ثبت شد. کد پیگیری: ${escalationRef}` : `Follow-up requested. Reference: ${escalationRef}`}</p> : <>
+              <label className="text-metadata text-text-secondary" htmlFor="escalation-reason">{locale === "fa" ? "دلیل درخواست" : "Reason for follow-up"}</label>
+              <textarea id="escalation-reason" value={escalationReason} onChange={(e) => setEscalationReason(e.target.value)} rows={3} maxLength={1000} className="rounded-md border border-border-strong bg-surface-elevated p-2 text-body text-text-primary" />
+              <label className="flex items-start gap-2 text-metadata text-text-secondary"><input type="checkbox" checked={escalationConfirmed} onChange={(e) => setEscalationConfirmed(e.target.checked)} /><span>{locale === "fa" ? "تأیید می‌کنم که درخواست من برای ارجاع به کارشناس ثبت شود." : "I confirm that I want this case referred for human follow-up."}</span></label>
+              {escalationError ? <p role="alert" className="text-metadata text-state-urgent">{locale === "fa" ? "ثبت درخواست پیگیری انجام نشد. دوباره تلاش کنید." : "The follow-up request could not be submitted. Try again."}</p> : null}
+              <Button variant="secondary" isLoading={escalating} disabled={!escalationConfirmed || escalationReason.trim().length < 5} onClick={escalate}>{locale === "fa" ? "درخواست پیگیری" : "Request follow-up"}</Button>
+            </>}
+          </section>
         ) : null}
       </ContextSurface>
     </div>

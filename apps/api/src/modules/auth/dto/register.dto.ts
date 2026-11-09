@@ -10,6 +10,23 @@ export class RegisterDto {
   @MinLength(8)
   password!: string;
 
+  /** Optional for compatibility with existing API clients; the registration UI requires it. */
+  @IsOptional()
+  @IsString()
+  @Length(1, 80)
+  firstName?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 80)
+  lastName?: string;
+
+  /** Stored unverified until a user completes the separately configured OTP flow. */
+  @IsOptional()
+  @IsString()
+  @Matches(/^(?:\+98|0098|0)?9\d{9}$/)
+  phone?: string;
+
   @IsOptional()
   @IsString()
   @Length(1, 120)

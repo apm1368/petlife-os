@@ -4,11 +4,11 @@ import { renderWithIntl } from "@/test/render-with-intl";
 import { useAdminStore } from "@/stores/admin-store";
 import { ApiError } from "@/lib/api/client";
 import { adminAnimalSupportService } from "@/services/admin-animal-support.service";
-import { AdminAnimalSupportOverviewView, AdminDonationsView, AdminLostPetDetailView, AdminReportsView } from "./AdminAnimalSupportViews";
+import { AdminAnimalSupportOverviewView, AdminDonationsView, AdminLostPetDetailView, AdminLostPetsView, AdminReportsView } from "./AdminAnimalSupportViews";
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/en/admin/animal-support", useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("@/services/admin-animal-support.service", () => ({
-  adminAnimalSupportService: { overview: vi.fn(), listDonations: vi.fn(), refundDonation: vi.fn(), getLostPet: vi.fn(), revealLostPetLocation: vi.fn(), closeLostPet: vi.fn(), listReports: vi.fn(), escalateReport: vi.fn(), dismissReport: vi.fn() },
+  adminAnimalSupportService: { overview: vi.fn(), listDonations: vi.fn(), refundDonation: vi.fn(), listLostPets: vi.fn(), getLostPet: vi.fn(), revealLostPetLocation: vi.fn(), closeLostPet: vi.fn(), listReports: vi.fn(), escalateReport: vi.fn(), dismissReport: vi.fn() },
 }));
 const svc = vi.mocked(adminAnimalSupportService);
 
@@ -48,6 +48,57 @@ describe("Admin animal support console", () => {
     fireEvent.change(screen.getByLabelText("Reason (recorded in the audit log)"), { target: { value: "Owner asked for help" } });
     fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
     expect(await screen.findByText("Alley 7")).toBeTruthy();
+  });
+
+  it.each([
+    ["de", "Vermisste Tiere", "Öffentliches Gebiet", "Vermisst"],
+    ["es", "Mascotas desaparecidas", "Zona pública", "Desaparecida"],
+  ] as const)("renders the complete lost-pet admin list in %s without Persian UI fallback", async (locale, title, area, status) => {
+    svc.listLostPets.mockResolvedValueOnce({
+      items: [{ id: "i1", petName: "Cookie", publicArea: "Central Park", sightingsCount: 2, status: "OPEN", createdAt: "2026-09-29T00:00:00.000Z" }],
+      total: 1,
+      page: 1,
+      pageSize: 25,
+    } as never);
+    const { container } = renderWithIntl(<AdminLostPetsView />, locale);
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByText(area)).toBeTruthy();
+    expect(screen.getAllByText(status).length).toBeGreaterThan(0);
+    expect(screen.getByPlaceholderText(locale === "de" ? "Name des Tieres oder Gebiet" : "Nombre de la mascota o zona")).toBeTruthy();
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it("shows localized empty, loading and forbidden states for the admin lost-pet queue", async () => {
+    svc.listLostPets.mockResolvedValueOnce({ items: [], total: 0, page: 1, pageSize: 25 } as never);
+    const empty = renderWithIntl(<AdminLostPetsView />, "de");
+    expect(await screen.findByText("Keine Einträge")).toBeTruthy();
+    expect(empty.container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+    empty.unmount();
+
+    svc.listLostPets.mockImplementationOnce(() => new Promise(() => undefined));
+    const loading = renderWithIntl(<AdminLostPetsView />, "es");
+    expect(screen.getByLabelText("Cargando")).toBeTruthy();
+    expect(loading.container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+    loading.unmount();
+
+    svc.listLostPets.mockRejectedValueOnce(new ApiError({ code: "ADMIN_PERMISSION_DENIED", message: "x", requestId: "r" }, 403));
+    const forbidden = renderWithIntl(<AdminLostPetsView />, "de");
+    expect(await screen.findByText("Die Berechtigung „trust.view“ ist erforderlich")).toBeTruthy();
+    expect(forbidden.container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it.each([
+    ["de", "Genauer Standort", "Meldung schließen (falsch oder missbräuchlich)", "Begründung (wird im Prüfprotokoll erfasst)"],
+    ["es", "Ubicación exacta", "Cerrar informe (falso o abusivo)", "Motivo (se registra en el registro de auditoría)"],
+  ] as const)("renders admin lost-pet detail actions and audit dialog in %s", async (locale, exactLocation, closeAction, reasonLabel) => {
+    svc.getLostPet.mockResolvedValueOnce({ id: "i1", pet: { id: "p1", name: "Cookie", species: "DOG" }, status: "OPEN", publicArea: "Central Park", description: "Lost near the park", publicNotes: null, contactPreference: "IN_APP_MESSAGE", photoUrl: null, lastSeenAt: null, exactLocationRecorded: true, createdAt: "2026-09-29T00:00:00.000Z", foundAt: null });
+    const { container } = renderWithIntl(<AdminLostPetDetailView incidentId="i1" />, locale);
+    expect(await screen.findByText(exactLocation)).toBeTruthy();
+    const action = await screen.findByRole("button", { name: closeAction });
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
+    fireEvent.click(action);
+    expect(await screen.findByLabelText(reasonLabel)).toBeTruthy();
+    expect(container.textContent).not.toMatch(/[\u0600-\u06FF]/);
   });
 
   it("reports queue shows the item, not the reporter, and escalates with a reason", async () => {

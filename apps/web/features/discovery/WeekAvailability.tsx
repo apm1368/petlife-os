@@ -5,8 +5,9 @@ import { useEffect, useState } from "react";
 import { Skeleton } from "@petlife/ui";
 import { servicesService } from "@/services/services.service";
 import { formatDateKey } from "@/lib/date/appointment-date";
-import { addDays, calendarFromIso, localizeDigits, monthName, weekday, WEEKDAYS_EN_SHORT, WEEKDAYS_FA } from "@/lib/date/jalali";
-import { formatCount } from "@/lib/number/format-number";
+import { addDays, calendarFromIso, localizeDigits, monthName, weekday, WEEKDAYS_FA } from "@/lib/date/jalali";
+import { useTranslations } from "next-intl";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 const DAYS = 7;
 
@@ -15,7 +16,7 @@ interface Props {
   locationId: string;
   /** First day shown (ISO day key, Tehran calendar). */
   start: string;
-  locale: "fa" | "en";
+  locale: RouteLocale;
   variantId?: string | null;
   providerUserId?: string | null;
   petId?: string;
@@ -32,6 +33,8 @@ interface Props {
  */
 export function WeekAvailability({ serviceId, locationId, start, locale, variantId, providerUserId, petId, selected, onSelect, hrefFor }: Props) {
   const fa = locale === "fa";
+  const t = useTranslations("providerProfile.availability");
+  const dateLocale = locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-GB";
   const [counts, setCounts] = useState<Record<string, number> | null>(null);
   const [failed, setFailed] = useState(false);
 
@@ -59,29 +62,33 @@ export function WeekAvailability({ serviceId, locationId, start, locale, variant
     };
   }, [serviceId, locationId, start, variantId, providerUserId, petId]);
 
-  if (failed) return <p className="week-avail__note">{fa ? "زمان‌های آزاد این هفته بارگیری نشد؛ در مرحلهٔ رزرو روز را انتخاب کنید." : "This week's openings could not load; choose a day while booking."}</p>;
+  if (failed) return <p className="week-avail__note">{t("loadFailed")}</p>;
 
   const days = Array.from({ length: DAYS }, (_, i) => addDays(start, i));
   return (
-    <ol className="week-avail" aria-label={fa ? "زمان‌های آزاد هفت روز آینده" : "Openings over the next seven days"} aria-busy={counts === null}>
+    <ol className="week-avail" aria-label={t("weekLabel")} aria-busy={counts === null}>
       {days.map((day) => {
         const n = counts?.[day] ?? 0;
-        const c = calendarFromIso(fa ? "jalali" : "gregorian", day);
+        const c = fa ? calendarFromIso("jalali", day) : null;
+        const date = new Date(`${day}T12:00:00Z`);
+        const weekdayLabel = fa ? WEEKDAYS_FA[weekday(day)] : new Intl.DateTimeFormat(dateLocale, { weekday: "short", timeZone: "UTC" }).format(date);
+        const dayLabel = fa ? localizeDigits(c!.day, "fa") : new Intl.NumberFormat(dateLocale).format(date.getUTCDate());
+        const monthLabel = fa ? monthName("jalali", c!.month, "fa") : new Intl.DateTimeFormat(dateLocale, { month: "short", timeZone: "UTC" }).format(date);
         const label = (
           <>
-            <span className="week-avail__wd">{fa ? WEEKDAYS_FA[weekday(day)] : WEEKDAYS_EN_SHORT[weekday(day)]}</span>
-            <span className="week-avail__day">{localizeDigits(c.day, locale)} <small>{monthName(fa ? "jalali" : "gregorian", c.month, locale)}</small></span>
-            <span className="week-avail__n">{counts === null ? <Skeleton className="h-3 w-10" /> : n ? (fa ? `${formatCount(n, "fa")} زمان` : `${n} ${n === 1 ? "time" : "times"}`) : fa ? "پر" : "Full"}</span>
+            <span className="week-avail__wd">{weekdayLabel}</span>
+            <span className="week-avail__day">{dayLabel} <small>{monthLabel}</small></span>
+            <span className="week-avail__n">{counts === null ? <Skeleton className="h-3 w-10" /> : n ? t("availableTimes", { count: n }) : t("full")}</span>
           </>
         );
         const state = counts === null ? "loading" : n ? "open" : "full";
-        const aria = counts === null ? undefined : n ? (fa ? `${formatCount(n, "fa")} زمان آزاد` : `${n} open times`) : fa ? "زمان آزاد ندارد" : "No open times";
+        const aria = counts === null ? undefined : n ? t("openTimes", { count: n }) : t("noOpenTimes");
         return (
           <li key={day} data-state={state} data-selected={selected === day || undefined}>
             {state === "open" && hrefFor ? (
-              <Link href={hrefFor(day)} aria-label={`${fa ? WEEKDAYS_FA[weekday(day)] : WEEKDAYS_EN_SHORT[weekday(day)]} ${localizeDigits(c.day, locale)} ${monthName(fa ? "jalali" : "gregorian", c.month, locale)} — ${aria}`}>{label}</Link>
+              <Link href={hrefFor(day)} aria-label={`${weekdayLabel} ${dayLabel} ${monthLabel} — ${aria}`}>{label}</Link>
             ) : onSelect ? (
-              <button type="button" disabled={state !== "open"} aria-pressed={selected === day} aria-label={aria ? `${fa ? WEEKDAYS_FA[weekday(day)] : WEEKDAYS_EN_SHORT[weekday(day)]} ${localizeDigits(c.day, locale)} ${monthName(fa ? "jalali" : "gregorian", c.month, locale)} — ${aria}` : undefined} onClick={() => onSelect(day)}>{label}</button>
+              <button type="button" disabled={state !== "open"} aria-pressed={selected === day} aria-label={aria ? `${weekdayLabel} ${dayLabel} ${monthLabel} — ${aria}` : undefined} onClick={() => onSelect(day)}>{label}</button>
             ) : (
               <span aria-label={aria}>{label}</span>
             )}

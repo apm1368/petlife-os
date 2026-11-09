@@ -5631,7 +5631,7 @@
     },
     {
       "service": "householdsService",
-      "method": "acceptInvitation",
+      "method": "requestMembership",
       "source": "services/households.service.ts",
       "consumers": [
         "features/account/HouseholdInvitationView.tsx"

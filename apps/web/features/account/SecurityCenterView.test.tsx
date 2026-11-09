@@ -54,4 +54,30 @@ describe("SecurityCenterView", () => {
     await waitFor(() => expect(signOut).toHaveBeenCalledWith(true));
     expect(accountService.revokeAllSessions).toHaveBeenCalled();
   });
+
+  it.each([
+    ["de", "Anmeldung, Geräte und Passwort", "Überall abmelden", "Alle Geräte einschließlich dieses Geräts werden sofort abgemeldet."],
+    ["es", "Acceso, dispositivos y contraseña", "Cerrar sesión en todos los dispositivos", "La sesión se cerrará de inmediato en todos los dispositivos, incluido este."],
+  ] as const)("renders the complete security page and confirmation in %s without Persian fallback", async (locale, heading, signOutLabel, consequence) => {
+    renderWithIntl(<SecurityCenterView />, locale);
+    expect(await screen.findByRole("heading", { name: heading })).toBeTruthy();
+    expect(screen.getByText("Chrome · Android")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: locale === "de" ? "Angemeldete Geräte" : "Dispositivos con sesión abierta" })).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+    expect(document.body.textContent).not.toContain("[Missing");
+
+    fireEvent.click(screen.getByRole("button", { name: signOutLabel }));
+    expect(await screen.findByText(consequence)).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it.each([
+    ["de", "Sicherheitsdaten konnten nicht geladen werden."],
+    ["es", "No se pudieron cargar los datos de seguridad."],
+  ] as const)("localizes the error state in %s", async (locale, message) => {
+    vi.mocked(accountService.security).mockRejectedValueOnce(new Error("offline"));
+    renderWithIntl(<SecurityCenterView />, locale);
+    expect(await screen.findByText(message)).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
 });

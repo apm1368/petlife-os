@@ -22,8 +22,9 @@ import { LoadFailure } from "@/features/system/LoadFailure";
 import { careTitle } from "@/features/care/care-labels";
 import { formatAge, formatWeight, speciesLabel } from "@/features/pets/pet-identity";
 import { formatDay, todayIso } from "@/lib/date/jalali";
+import type { RouteLocale } from "@/lib/i18n/config";
 
-type Locale = "fa" | "en";
+type Locale = RouteLocale;
 /** A section either loaded, was not permitted, or failed — the sheet still prints what it has. */
 type Part<T> = { state: "ok"; value: T } | { state: "denied" } | { state: "failed" };
 
@@ -110,6 +111,28 @@ const copy = {
     loading: "Preparing the sheet",
     sourceNote: "Health details come from the opetlife record; nothing listed means nothing recorded, not confirmed absence.",
   },
+  de: {
+    title: "Pflegeblatt",
+    intro: "Alles Wichtige für eine Betreuungsperson auf einer Seite. Drucken oder als PDF speichern und weitergeben.",
+    print: "Drucken / als PDF speichern", printedOn: "Erstellt am", routine: "Tagesablauf", feeding: "Fütterung", toilet: "Toilette", leash: "Leine und Spaziergänge", separation: "Alleinbleiben",
+    temperament: "Wesen", temperamentGeneral: "Allgemein", people: "Umgang mit Menschen", animals: "Umgang mit anderen Tieren", handling: "Empfindlichkeit bei Berührungen", instructions: "Besondere Hinweise",
+    health: "Gesundheitshinweise", allergies: "Aktive Allergien", medications: "Aktuelle Medikamente", conditions: "Aktive Erkrankungen", noneRecorded: "Nichts erfasst.", notRecorded: "Nicht erfasst",
+    upcoming: "Pflege in den nächsten 14 Tagen", noUpcoming: "Für diesen Zeitraum sind keine Erinnerungen erfasst.", denied: "Sie haben keinen Zugriff auf diesen Bereich; er wird nicht in das Pflegeblatt aufgenommen.", failed: "Dieser Bereich konnte nicht geladen werden; er wird nicht in das Pflegeblatt aufgenommen.",
+    stay: "Für diese Betreuung", stayHint: "Wird nicht gespeichert und nur auf diesem Pflegeblatt ausgegeben.", emergencyName: "Notfallkontakt — Name", emergencyPhone: "Notfallkontakt — Telefonnummer", stayNotes: "Hinweise für die Betreuungsperson",
+    severity: { MILD: "Leicht", MODERATE: "Mittel", SEVERE: "Schwer", UNKNOWN: "Schweregrad unbekannt" }, reaction: "Reaktion", weight: "Gewicht", microchip: "Mikrochip vorhanden", unknownBreed: "Rasse nicht erfasst", unknownAge: "Alter nicht erfasst", loading: "Pflegeblatt wird vorbereitet",
+    sourceNote: "Gesundheitsangaben stammen aus der opetlife-Akte. Nicht aufgeführte Angaben wurden nicht erfasst und bedeuten nicht, dass etwas ausgeschlossen ist.",
+  },
+  es: {
+    title: "Ficha de cuidados",
+    intro: "Todo lo que necesita saber la persona cuidadora, en una sola página. Imprímela o guárdala como PDF para compartirla.",
+    print: "Imprimir / guardar como PDF", printedOn: "Preparada el", routine: "Rutina diaria", feeding: "Alimentación", toilet: "Aseo", leash: "Correa y paseos", separation: "Cuando se queda a solas",
+    temperament: "Temperamento", temperamentGeneral: "General", people: "Con las personas", animals: "Con otros animales", handling: "Sensibilidad al contacto", instructions: "Instrucciones especiales",
+    health: "Información de salud", allergies: "Alergias activas", medications: "Medicamentos actuales", conditions: "Afecciones activas", noneRecorded: "No hay datos registrados.", notRecorded: "Sin registrar",
+    upcoming: "Cuidados en los próximos 14 días", noUpcoming: "No hay recordatorios para este periodo.", denied: "No tienes acceso a esta sección; no se incluye en la ficha.", failed: "No se pudo cargar esta sección; no se incluye en la ficha.",
+    stay: "Para esta estancia", stayHint: "No se guarda; solo aparece en esta ficha impresa.", emergencyName: "Contacto de emergencia — nombre", emergencyPhone: "Contacto de emergencia — teléfono", stayNotes: "Notas para la persona cuidadora",
+    severity: { MILD: "Leve", MODERATE: "Moderada", SEVERE: "Grave", UNKNOWN: "Gravedad desconocida" }, reaction: "Reacción", weight: "Peso", microchip: "Tiene microchip", unknownBreed: "Raza sin registrar", unknownAge: "Edad sin registrar", loading: "Preparando la ficha de cuidados",
+    sourceNote: "Los datos de salud proceden del historial de opetlife. Que no aparezca un dato significa que no se registró, no que se haya confirmado su ausencia.",
+  },
 } as const;
 
 async function part<T>(allowed: boolean, load: () => Promise<T>): Promise<Part<T>> {
@@ -130,7 +153,7 @@ interface SheetData {
 }
 
 export function CareSheetView({ petId }: { petId: string }) {
-  const locale = (useLocale() === "fa" ? "fa" : "en") as Locale;
+  const locale = useLocale() as Locale;
   const c = copy[locale];
   const [data, setData] = useState<SheetData | null>(null);
   const [error, setError] = useState<unknown>(null);
@@ -225,7 +248,7 @@ export function CareSheetView({ petId }: { petId: string }) {
         {health.state === "ok" ? (
           <div className="grid gap-4 sm:grid-cols-3">
             <List title={c.allergies} empty={c.noneRecorded} items={health.value.allergies.map((a) => [a.name, [a.severity ? c.severity[a.severity] : null, a.reaction ? `${c.reaction}: ${a.reaction}` : null].filter(Boolean).join(" · ")])} />
-            <List title={c.medications} empty={c.noneRecorded} items={health.value.medications.map((m) => [m.name, [m.dosage !== null ? `${Number(m.dosage).toLocaleString(locale === "fa" ? "fa-IR" : "en-US")}${m.unit ? " " + m.unit : ""}` : null, m.frequencyText, m.instructions].filter(Boolean).join(" · ")])} />
+            <List title={c.medications} empty={c.noneRecorded} items={health.value.medications.map((m) => [m.name, [m.dosage !== null ? `${Number(m.dosage).toLocaleString(locale === "fa" ? "fa-IR" : locale)}${m.unit ? " " + m.unit : ""}` : null, m.frequencyText, m.instructions].filter(Boolean).join(" · ")])} />
             <List title={c.conditions} empty={c.noneRecorded} items={health.value.conditions.map((x) => [x.name, x.notes ?? ""])} />
             <p className="text-xs text-text-secondary sm:col-span-3">{c.sourceNote}</p>
           </div>

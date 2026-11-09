@@ -3,6 +3,7 @@ import { fireEvent, screen } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { discoveryService, type ProviderProfile } from "@/services/discovery.service";
 import { useSessionStore } from "@/stores/session-store";
+import { householdsService } from "@/services/households.service";
 import { BookingFlowView } from "./BookingFlowView";
 
 const params = new URLSearchParams();
@@ -27,6 +28,11 @@ const PROFILE = { id: "p1", name: "کلینیک مهر", type: "VET_CLINIC", ver
 describe("BookingFlowView", () => {
   beforeEach(() => {
     vi.mocked(discoveryService.profile).mockResolvedValue(PROFILE);
+    vi.mocked(householdsService.listMine).mockResolvedValue([{ id: "h1" }] as never);
+    vi.mocked(householdsService.listPets).mockResolvedValue([
+      { id: "pet-1", name: "Cookie", species: "DOG", photoUrl: null },
+      { id: "pet-2", name: "Pistachio", species: "CAT", photoUrl: "https://media.example.test/pistachio.jpg" },
+    ] as never);
     params.delete("serviceId");
     push.mockReset();
   });
@@ -54,5 +60,67 @@ describe("BookingFlowView", () => {
     vi.mocked(discoveryService.profile).mockRejectedValue(new ApiError({ code: "NOT_FOUND", message: "x", requestId: "r" }, 404));
     renderWithIntl(<BookingFlowView providerId="p1" />, "en");
     expect(await screen.findByText("This provider cannot be booked")).toBeTruthy();
+  });
+
+  it.each([
+    ["de", "Termin buchen", "Leistung", "Weiter", "Melde dich an, um dein Tier auszuwählen und zu buchen. Deine Auswahl bleibt erhalten.", "Anmelden und fortfahren"],
+    ["es", "Reservar una cita", "Servicio", "Continuar", "Inicia sesión para elegir tu mascota y reservar. Se conservará tu selección.", "Iniciar sesión y continuar"],
+  ] as const)("renders the booking service and sign-in steps in %s without translating provider-authored names", async (locale, title, serviceStep, continueLabel, prompt, signInLabel) => {
+    useSessionStore.setState({ status: "unauthenticated" });
+    vi.mocked(discoveryService.profile).mockResolvedValue({
+      ...PROFILE,
+      name: "Sample Clinic",
+      services: [{ ...SERVICE, name: "General visit", variants: [{ ...SERVICE.variants[0], name: "At clinic" }] }],
+    } as ProviderProfile);
+
+    renderWithIntl(<BookingFlowView providerId="p1" />, locale);
+
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getAllByText(serviceStep).length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByLabelText(/General visit/));
+    fireEvent.click(screen.getByLabelText(/At clinic/));
+    fireEvent.click(screen.getByRole("button", { name: continueLabel }));
+    expect(await screen.findByText(prompt)).toBeTruthy();
+    expect(screen.getByRole("button", { name: signInLabel })).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
+  });
+
+  it("lists every pet from the owner's household and lets the owner choose any one for a single-pet service", async () => {
+    useSessionStore.setState({ status: "authenticated" });
+    renderWithIntl(<BookingFlowView providerId="p1" />, "en");
+    fireEvent.click(await screen.findByLabelText(/ویزیت عمومی/));
+    fireEvent.click(screen.getByLabelText(/ویزیت در منزل/));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(await screen.findByText("All bookable pets in your household are listed. Selection limit: 1." )).toBeTruthy();
+    expect(screen.getByText("Cookie")).toBeTruthy();
+    expect(screen.getByText("Pistachio")).toBeTruthy();
+    fireEvent.click(screen.getByLabelText("Pistachio"));
+    expect((screen.getByRole("button", { name: "Continue" }) as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it("allows multiple pets only up to the service's configured limit", async () => {
+    vi.mocked(discoveryService.profile).mockResolvedValue({ ...PROFILE, services: [{ ...SERVICE, maxPetsPerBooking: 2 }] } as ProviderProfile);
+    useSessionStore.setState({ status: "authenticated" });
+    renderWithIntl(<BookingFlowView providerId="p1" />, "en");
+    fireEvent.click(await screen.findByLabelText(/ویزیت عمومی/));
+    fireEvent.click(screen.getByLabelText(/ویزیت در منزل/));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(await screen.findByRole("checkbox", { name: /Cookie/ })).toBeTruthy();
+    fireEvent.click(screen.getByRole("checkbox", { name: /Cookie/ }));
+    fireEvent.click(screen.getByRole("checkbox", { name: /Pistachio/ }));
+    expect((screen.getByRole("button", { name: "Continue" }) as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it.each([
+    ["de", "Termin buchen", "Tiermedizin", "30 Min."],
+    ["es", "Reservar una cita", "Atención veterinaria", "30 min"],
+  ] as const)("renders the %s booking flow in the selected locale", async (locale, title, category, duration) => {
+    useSessionStore.setState({ status: "unauthenticated" });
+    renderWithIntl(<BookingFlowView providerId="p1" />, locale);
+
+    expect(await screen.findByRole("heading", { name: title })).toBeTruthy();
+    expect(screen.getByText(new RegExp(`${category} · ${duration}`))).toBeTruthy();
+    expect(screen.getByText(/Toman/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: locale === "de" ? "Weiter" : "Continuar" })).toBeTruthy();
   });
 });

@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Post, Query, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import { Transform, Type } from "class-transformer";
-import { ArrayMaxSize, IsArray, IsIn, IsInt, IsOptional, IsString, IsUUID, Length, Max, Min } from "class-validator";
+import { ArrayMaxSize, IsArray, IsEnum, IsIn, IsInt, IsOptional, IsString, IsUUID, Length, Max, Min } from "class-validator";
 import { Locale } from "@prisma/client";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { CurrentUser } from "../../common/auth/current-user.decorator";
@@ -13,7 +13,7 @@ class SearchQueryDto {
   /** Comma-separated subset of PROVIDER, SERVICE, PRODUCT, TRAVEL_LISTING, PLACE, ARTICLE, SUPPORT_NEED, ORGANIZATION. */
   @IsOptional() @Transform(({ value }) => (typeof value === "string" ? value.split(",").filter(Boolean) : value)) @IsArray() @ArrayMaxSize(8) @IsIn(SEARCH_TYPES, { each: true }) types?: SearchType[];
   @IsOptional() @IsString() @Length(1, 80) city?: string;
-  @IsOptional() @IsIn(["fa", "en"]) locale?: "fa" | "en";
+  @IsOptional() @IsEnum(Locale) locale?: Locale;
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(20) limit?: number;
 }
 class RecordViewDto {
@@ -21,7 +21,7 @@ class RecordViewDto {
   @IsUUID() entityId!: string;
 }
 class LocaleQueryDto {
-  @IsOptional() @IsIn(["fa", "en"]) locale?: "fa" | "en";
+  @IsOptional() @IsEnum(Locale) locale?: Locale;
 }
 
 /** Public search across catalogue types only (never private data). */

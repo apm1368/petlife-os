@@ -11,6 +11,10 @@ const iso = (d: Date | null | undefined) => d?.toISOString() ?? null;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const OPEN_LOST: LostPetIncidentStatus[] = [LostPetIncidentStatus.OPEN, LostPetIncidentStatus.SEARCHING, LostPetIncidentStatus.SIGHTING_REPORTED];
 const FLAGS = ["canViewIdentity", "canEditIdentity", "canViewHealth", "canEditHealth", "canBookCare", "canViewCareProfile", "canEditCareProfile", "canViewLocation", "canManageAccess", "canRecordClinicalData"] as const;
+function maskContact(value: string) {
+  const [local, domain] = value.split("@");
+  return domain ? `${(local ?? "").slice(0, 2)}***@${domain}` : `${value.slice(0, 4)}***${value.slice(-2)}`;
+}
 
 export type PetDiagnosticCode = "NO_ACTIVE_OWNER" | "STALE_HOUSEHOLD_GRANT" | "EXPIRED_GRANT_NOT_REVOKED" | "MEMBER_WITHOUT_GRANT" | "LONG_OPEN_LOST_INCIDENT" | "DELETED_BUT_ACTIVE";
 
@@ -44,7 +48,7 @@ export class AdminPet360Service {
   }
 
   async get(petId: string) {
-    const pet = await this.prisma.pet.findUnique({ where: { id: petId }, include: { household: { include: { members: { include: { user: { select: { id: true, displayName: true, accountStatus: true } } } } } } } });
+    const pet = await this.prisma.pet.findUnique({ where: { id: petId }, include: { household: { include: { members: { include: { user: { select: { id: true, displayName: true, accountStatus: true } } } }, invitations: { where: { status: "PENDING" }, orderBy: { createdAt: "desc" }, select: { id: true, contact: true, createdAt: true, expiresAt: true } } } } } });
     if (!pet) throw new NotFoundApiException("Pet");
     const now = new Date();
     const [grants, documents, docTypes, visits, labs, meds, conditions, allergies, bookings, lost, reminders, trips, insuranceApps, claimPreps, shareCards, healthShares, activity] = await Promise.all([
@@ -64,7 +68,7 @@ export class AdminPet360Service {
       this.prisma.insuranceClaimPrep.count({ where: { petId } }),
       this.prisma.petShareCard.count({ where: { petId, revokedAt: null } }),
       this.prisma.healthShareLink.count({ where: { petId, revokedAt: null, expiresAt: { gt: now } } }),
-      this.prisma.domainEvent.findMany({ where: { aggregateType: "Pet", aggregateId: petId }, orderBy: { occurredAt: "desc" }, take: 20, select: { id: true, type: true, occurredAt: true } }),
+      this.prisma.domainEvent.findMany({ where: { aggregateType: "Pet", aggregateId: petId }, orderBy: { occurredAt: "desc" }, take: 20, select: { id: true, type: true, occurredAt: true, payload: true } }),
     ]);
     const memberIds = new Set(pet.household.members.map((m) => m.userId));
     const activeGrant = (g: (typeof grants)[number]) => !g.revokedAt && (!g.expiresAt || g.expiresAt > now) && (!g.startsAt || g.startsAt <= now);
@@ -80,7 +84,7 @@ export class AdminPet360Service {
     const chip = pet.microchipNumber;
     return {
       identity: { id: pet.id, name: pet.name, species: pet.species, breed: pet.breed, sex: pet.sex, birthDate: iso(pet.birthDate), approximateAgeMonths: pet.approximateAgeMonths, neuteredStatus: pet.neuteredStatus, microchipMasked: chip ? `${chip.slice(0, 3)}***${chip.slice(-3)}` : null, lifecycleStatus: pet.lifecycleStatus, deletedAt: iso(pet.deletedAt), createdAt: iso(pet.createdAt), hasPhoto: Boolean(pet.photoUrl) },
-      household: { id: pet.household.id, name: pet.household.name, city: pet.household.city, members: pet.household.members.map((m) => ({ userId: m.userId, displayName: m.user.displayName, role: m.role, accountStatus: m.user.accountStatus })) },
+      household: { id: pet.household.id, name: pet.household.name, city: pet.household.city, members: pet.household.members.map((m) => ({ userId: m.userId, displayName: m.user.displayName, role: m.role, accountStatus: m.user.accountStatus })), pendingInvitations: pet.household.invitations.map((invitation) => ({ id: invitation.id, contactMasked: maskContact(invitation.contact), createdAt: invitation.createdAt.toISOString(), expiresAt: invitation.expiresAt.toISOString() })) },
       accessGrants: grants.map((g) => ({ id: g.id, user: g.user, source: g.source, reason: g.reason, flags: Object.fromEntries(FLAGS.map((f) => [f, g[f]])), healthScopes: g.healthScopes, startsAt: iso(g.startsAt), expiresAt: iso(g.expiresAt), revokedAt: iso(g.revokedAt), active: activeGrant(g), grantedByUserId: g.grantedByUserId, isHouseholdMember: memberIds.has(g.userId), createdAt: g.createdAt.toISOString() })),
       health: { documents, documentsByType: docTypes.map((d) => ({ documentType: d.documentType, sourceType: d.sourceType, count: d._count._all, latestAt: iso(d._max.createdAt) })), clinicalVisits: visits, labResults: labs, medications: Object.fromEntries(meds.map((m) => [m.status, m._count._all])), conditions, allergies },
       bookings: bookings.map((b) => ({ ...b, startAt: b.startAt.toISOString() })),
@@ -89,7 +93,11 @@ export class AdminPet360Service {
       travel: trips.map((t) => ({ ...t, departAt: t.departAt.toISOString() })),
       insurance: { applications: Object.fromEntries(insuranceApps.map((a) => [a.status, a._count._all])), claimPreps },
       sharing: { activeShareCards: shareCards, activeHealthShares: healthShares },
-      activity: activity.map((a) => ({ id: a.id, type: a.type, at: a.occurredAt.toISOString() })),
+      activity: activity.map((a) => {
+        const payload = a.payload && typeof a.payload === "object" && !Array.isArray(a.payload) ? a.payload as Record<string, unknown> : {};
+        const changedFields = Array.isArray(payload.changedFields) ? payload.changedFields.filter((field): field is string => typeof field === "string" && ["name", "photoUrl", "breed", "sex", "birthDate", "approximateAgeMonths", "latestWeightValue", "latestWeightUnit", "colorMarkings", "neuteredStatus", "microchipNumber"].includes(field)) : undefined;
+        return { id: a.id, type: a.type, at: a.occurredAt.toISOString(), ...(changedFields?.length ? { changedFields, photoChanged: changedFields.includes("photoUrl") } : {}) };
+      }),
       diagnostics,
     };
   }

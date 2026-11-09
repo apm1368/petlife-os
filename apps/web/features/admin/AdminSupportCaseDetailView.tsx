@@ -7,6 +7,7 @@ import { Button, ContextSurface, ErrorRecovery, Input, Select, Skeleton, StatusL
 import { SupportCaseStatus, SupportMessageVisibility, type SupportCaseContextDto, type SupportCaseDetailDto } from "@petlife/types";
 import { adminService } from "@/services/admin.service";
 import { adminStatusTone } from "./status-tone";
+import { ApiError } from "@/lib/api/client";
 
 const STATUSES: SupportCaseStatus[] = [
   SupportCaseStatus.OPEN,
@@ -18,7 +19,8 @@ const STATUSES: SupportCaseStatus[] = [
 ];
 
 function formatDate(iso: string, locale: string) {
-  return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "short", timeStyle: "short" }).format(new Date(iso));
+  const dateLocale = locale === "fa" ? "fa-IR-u-ca-persian" : locale;
+  return new Intl.DateTimeFormat(dateLocale, { dateStyle: "short", timeStyle: "short" }).format(new Date(iso));
 }
 
 export function AdminSupportCaseDetailView({ caseId }: { caseId: string }) {
@@ -29,20 +31,21 @@ export function AdminSupportCaseDetailView({ caseId }: { caseId: string }) {
 
   const [data, setData] = useState<SupportCaseDetailDto | null>(null);
   const [context, setContext] = useState<SupportCaseContextDto | null>(null);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<"access" | "notFound" | "failed" | null>(null);
+  const [actionError, setActionError] = useState(false);
   const [assigneeAdminId, setAssigneeAdminId] = useState("");
   const [messageBody, setMessageBody] = useState("");
   const [visibility, setVisibility] = useState<SupportMessageVisibility>(SupportMessageVisibility.PUBLIC);
   const [noteBody, setNoteBody] = useState("");
 
   async function load() {
-    setError(false);
+    setError(null);
     try {
       const [detail, ctx] = await Promise.all([adminService.getSupportCase(caseId), adminService.getSupportCaseContext(caseId)]);
       setData(detail);
       setContext(ctx);
-    } catch {
-      setError(true);
+    } catch (cause) {
+      setError(cause instanceof ApiError && [401, 403].includes(cause.status) ? "access" : cause instanceof ApiError && cause.status === 404 ? "notFound" : "failed");
     }
   }
 
@@ -53,32 +56,54 @@ export function AdminSupportCaseDetailView({ caseId }: { caseId: string }) {
 
   async function assign() {
     if (!assigneeAdminId.trim()) return;
-    await adminService.assignSupportCase(caseId, assigneeAdminId);
-    setAssigneeAdminId("");
-    await load();
+    setActionError(false);
+    try {
+      await adminService.assignSupportCase(caseId, assigneeAdminId);
+      setAssigneeAdminId("");
+      await load();
+    } catch {
+      setActionError(true);
+    }
   }
 
   async function transition(status: SupportCaseStatus) {
-    await adminService.transitionSupportCase(caseId, status);
-    await load();
+    setActionError(false);
+    try {
+      await adminService.transitionSupportCase(caseId, status);
+      await load();
+    } catch {
+      setActionError(true);
+    }
   }
 
   async function sendMessage() {
     if (!messageBody.trim()) return;
-    await adminService.postSupportMessage(caseId, messageBody, visibility);
-    setMessageBody("");
-    await load();
+    setActionError(false);
+    try {
+      await adminService.postSupportMessage(caseId, messageBody, visibility);
+      setMessageBody("");
+      await load();
+    } catch {
+      setActionError(true);
+    }
   }
 
   async function addNote() {
     if (!noteBody.trim()) return;
-    await adminService.addSupportNote(caseId, noteBody);
-    setNoteBody("");
-    await load();
+    setActionError(false);
+    try {
+      await adminService.addSupportNote(caseId, noteBody);
+      setNoteBody("");
+      await load();
+    } catch {
+      setActionError(true);
+    }
   }
 
-  if (error) return <ErrorRecovery title={t("title")} message="" retryLabel={tCommon("retry")} onRetry={load} />;
-  if (!data) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
+  if (error === "access") return <ContextSurface><h1 className="text-section-title">{t("states.accessDeniedTitle")}</h1><p>{t("states.accessDenied")}</p></ContextSurface>;
+  if (error === "notFound") return <ContextSurface><h1 className="text-section-title">{t("states.notFoundTitle")}</h1><p>{t("states.notFound")}</p></ContextSurface>;
+  if (error === "failed") return <ErrorRecovery title={t("title")} message={t("states.detailLoadFailed")} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (!data) return <Skeleton className="h-64 w-full" aria-label={t("states.loading")} />;
 
   return (
     <div className="flex flex-col gap-4">
@@ -93,6 +118,7 @@ export function AdminSupportCaseDetailView({ caseId }: { caseId: string }) {
       <span className="text-body text-text-primary">{data.subject}</span>
       <span className="text-body text-text-secondary">{data.description}</span>
       <span className="text-metadata text-text-secondary">{t("detail.requester", { name: data.requesterDisplayName })}</span>
+      {actionError ? <p role="alert" className="text-error">{t("states.actionFailed")}</p> : null}
 
       {context ? (
         <ContextSurface className="flex flex-col gap-2">
@@ -134,11 +160,12 @@ export function AdminSupportCaseDetailView({ caseId }: { caseId: string }) {
 
       <ContextSurface className="flex flex-col gap-2">
         <span className="text-section-title text-text-primary">{t("detail.messages")}</span>
+        {data.messages.length === 0 ? <p className="text-metadata text-text-secondary">{t("states.noMessages")}</p> : null}
         {data.messages.map((m) => (
           <div key={m.id} className="flex flex-col gap-0.5 border-t border-border-subtle pt-2 first:border-t-0 first:pt-0">
             <div className="flex items-center gap-2">
               <StatusLabel tone={m.visibility === "INTERNAL" ? "attention" : "neutral"}>{m.visibility === "INTERNAL" ? t("detail.visibilityInternal") : t("detail.visibilityPublic")}</StatusLabel>
-              <span className="text-metadata text-text-secondary">{m.author?.displayName ?? m.authorType} · {formatDate(m.createdAt, locale)}</span>
+              <span className="text-metadata text-text-secondary">{m.author?.displayName ?? t(`detail.authorType.${m.authorType}`)} · {formatDate(m.createdAt, locale)}</span>
             </div>
             <span className="text-body text-text-primary">{m.body}</span>
           </div>
@@ -146,7 +173,7 @@ export function AdminSupportCaseDetailView({ caseId }: { caseId: string }) {
         <Input label={t("detail.composePlaceholder")} placeholder={t("detail.composePlaceholder")} value={messageBody} onChange={(e) => setMessageBody(e.target.value)} />
         <div className="flex items-center gap-3">
           <Select
-            label=""
+            label={t("detail.visibilityLabel")}
             value={visibility}
             onChange={(e) => setVisibility(e.target.value as SupportMessageVisibility)}
             options={[
@@ -161,6 +188,7 @@ export function AdminSupportCaseDetailView({ caseId }: { caseId: string }) {
 
       <ContextSurface className="flex flex-col gap-2">
         <span className="text-section-title text-text-primary">{t("detail.notes")}</span>
+        {data.internalNotes.length === 0 ? <p className="text-metadata text-text-secondary">{t("states.noNotes")}</p> : null}
         {data.internalNotes.map((n) => (
           <div key={n.id} className="flex flex-col gap-0.5 border-t border-border-subtle pt-2 first:border-t-0 first:pt-0">
             <span className="text-body text-text-primary">{n.body}</span>

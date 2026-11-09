@@ -1,4 +1,4 @@
-import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUUID, Length, Max, Min } from "class-validator";
+import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUrl, IsUUID, Length, Max, Min } from "class-validator";
 import { InsuranceCoverageType, InsuranceVerificationStatus, PetSpecies } from "@petlife/types";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
 import { IsObjectKeyFor } from "../../../common/storage-keys/object-key.validator";
@@ -29,6 +29,7 @@ export class CreateInsuranceProviderDto {
 
   @IsOptional()
   @IsString()
+  @IsUrl({ protocols: ["https"], require_protocol: true })
   websiteUrl?: string;
 
   @IsOptional()
@@ -58,6 +59,7 @@ export class UpdateInsuranceProviderDto {
 
   @IsOptional()
   @IsString()
+  @IsUrl({ protocols: ["https"], require_protocol: true })
   websiteUrl?: string;
 
   @IsOptional()

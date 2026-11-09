@@ -1,4 +1,4 @@
-import type { AppLocale } from "@/lib/i18n/config";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 const fa = {
   eyebrow: "زندگی کنار هم، ساده‌تر می‌شود",
@@ -19,6 +19,14 @@ const fa = {
     { title: "وقت بیشتری برای با هم بودن", body: "پیاده‌روی، نظافت و مراقبت روزانه؛ برای روزهایی که دستت پر است.", action: "کشف خدمات مراقبتی", image: "activity", href: "/services" },
     { title: "هم‌سفر همیشگی تو", body: "اقامتگاه‌های پذیرای حیوانات و اطلاعات سفر را پیش از حرکت بررسی کن.", action: "برنامه‌ریزی سفر", image: "travel", href: "/travel" },
   ],
+  publicArticles: {
+    eyebrow: "راهنمایی‌های تأییدشده برای مراقبت بهتر",
+    title: "تازه‌ترین مقاله‌ها",
+    allArticles: "دیدن همهٔ مقاله‌ها",
+    empty: "هنوز مقالهٔ منتشرشده‌ای وجود ندارد.",
+    loadError: "مقاله‌ها بارگذاری نشدند. کمی بعد دوباره تلاش کنید.",
+    retry: "تلاش دوباره",
+  },
   trustEyebrow: "اعتماد، با شفافیت شروع می‌شود", trustTitle: "اطلاعات او، با اختیار تو",
   trust: [
     { title: "اشتراک با اجازهٔ تو", body: "دسترسی به پرونده را خودت تعیین می‌کنی؛ چه کسی، کدام بخش و تا چه زمانی." },
@@ -60,6 +68,14 @@ const en: StoryCopy = {
     { title: "More time together", body: "Walking, grooming and everyday care for the days your hands are full.", action: "Explore care services", image: "activity", href: "/services" },
     { title: "Your favourite travel companion", body: "Check pet-friendly stays and travel information before you leave.", action: "Plan a trip", image: "travel", href: "/travel" },
   ],
+  publicArticles: {
+    eyebrow: "Trusted guidance for better care",
+    title: "Latest articles",
+    allArticles: "See all articles",
+    empty: "There are no published articles yet.",
+    loadError: "Articles could not be loaded. Please try again shortly.",
+    retry: "Try again",
+  },
   trustEyebrow: "Trust starts with transparency", trustTitle: "Their information. Your choice.",
   trust: [
     { title: "Shared with your permission", body: "You decide who can access their record, which parts, and for how long." },
@@ -81,4 +97,86 @@ const en: StoryCopy = {
     { title: "By your side", links: [{ label: "Guides", href: "/guides" }, { label: "Journal", href: "/blog" }, { label: "Community", href: "/community" }, { label: "Support", href: "/support" }] },
   ],
 };
-export const storyCopy: Record<AppLocale, StoryCopy> = { fa, en };
+const de: StoryCopy = {
+  eyebrow: "Gemeinsam wird der Alltag leichter",
+  identityTitle: "Eine Identität für ihre ganze Welt",
+  identityBody: "Cookie ist mehr als ein Name in einer App. Ihr Profil verbindet Gesundheit, Pflege, Termine und Erinnerungen – mit den Informationen, die du selbst einträgst und freigibst.",
+  identityCta: "Profil für mein Tier erstellen", identityMore: "Angebote ansehen", cookie: "Cookie", example: "Ein echtes Tier. Eine eigene Welt.",
+  cookieAlt: "Echtes Foto von Cookie, einem kleinen goldfarbenen Hund, auf ihrem Schlafplatz", appAlt: "Beispielansicht des opetlife-Dashboards", appExample: "App-Vorschau",
+  identityFacts: ["Identität und Angaben", "Gesundheitsakte", "Pflegeplanung", "Gemeinsame Erinnerungen"],
+  howEyebrow: "Vom Kennenlernen bis zur Versorgung", howTitle: "Ein klarer Weg zu mehr Sicherheit",
+  steps: [
+    { title: "Stell dein Tier vor", body: "Trage Namen und Angaben ein. Das Profil beginnt mit dem, was du teilst." },
+    { title: "Finde passende Hilfe", body: "Sieh dir Dienste und Anbieter an und wähle eine passende Option." },
+    { title: "Buche und behalte den Überblick", body: "Verfolge Termine und ihren aktuellen Status in der App." },
+  ],
+  momentsEyebrow: "Für den Alltag und die besonderen Tage", momentsTitle: "Das Leben mit all seinen Momenten",
+  moments: [
+    { title: "Fürsorge beginnt heute", body: "Gesundheitsakte und Tierarzttermine – wenn dein Tier Unterstützung braucht.", action: "Tierarzt finden", image: "vet", href: "/vet/find" },
+    { title: "Mehr Zeit füreinander", body: "Spaziergänge, Pflege und Betreuung für Tage, an denen viel los ist.", action: "Betreuungsangebote entdecken", image: "activity", href: "/services" },
+    { title: "Immer an deiner Seite", body: "Prüfe tierfreundliche Unterkünfte und Reiseinformationen vor der Abfahrt.", action: "Reise planen", image: "travel", href: "/travel" },
+  ],
+  publicArticles: { eyebrow: "Verlässliche Hinweise für bessere Tierpflege", title: "Neueste Artikel", allArticles: "Alle Artikel ansehen", empty: "Es gibt noch keine veröffentlichten Artikel.", loadError: "Artikel konnten nicht geladen werden. Bitte versuchen Sie es später erneut.", retry: "Erneut versuchen" },
+  trustEyebrow: "Vertrauen beginnt mit Klarheit", trustTitle: "Ihre Daten. Deine Entscheidung.",
+  trust: [
+    { title: "Nur mit deiner Erlaubnis", body: "Du bestimmst, wer welche Teile der Akte wie lange sehen darf." },
+    { title: "Quellen bleiben sichtbar", body: "Du siehst, ob eine Information von dir, einer Praxis oder einer anderen Quelle stammt." },
+    { title: "Unbekannt bleibt unbekannt", body: "Nicht erfasste Angaben werden nicht als gesund oder bestätigt dargestellt. Wir raten nicht." },
+  ],
+  supportEyebrow: "Mitgefühl endet nicht an der Haustür", supportTitle: "Für Tiere, die auf Hilfe warten",
+  supportBody: "Sieh den gemeldeten Bedarf von Tierschutzstellen und verfolge, wie du helfen kannst – auch für Tiere, die noch kein Zuhause haben.",
+  supportCta: "Hilfsbedarf ansehen", communityCta: "Community beitreten",
+  partnerEyebrow: "Für Menschen, die sich beruflich kümmern", partnerTitle: "Werde Teil dieser Welt",
+  partnerBody: "Bist du Tierärztin, Dienstleister oder Verkäufer? Hier geht es zum Partnerbereich. Ein Benutzerkonto allein erstellt keine Unternehmensmitgliedschaft; der Zugriff erfordert eine bestätigte Mitgliedschaft.",
+  partnerLogin: "Partner-Login", partnerJoin: "Partnerkonto erstellen",
+  finalTitle: "Ihre Welt beginnt an deiner Seite", finalBody: "Der erste Schritt ist ein Profil für dein Tier.", join: "Konto erstellen", login: "Anmelden",
+  footerDescription: "Gesundheit, Pflege, Dienste und gemeinsame Momente – eine Welt für dich und dein Tier.",
+  footerPartners: "Partner", footerLabel: "Fußnavigation", footerTop: "Zurück zum Park", footerPrivacy: "Datenschutzeinstellungen", footerCredits: "Bildnachweise", footerNotice: "Testversion; angezeigte Informationen können Beispiele enthalten.",
+  footerGroups: [
+    { title: "Dienste", links: [{ label: "Tiermedizin", href: "/vet/find" }, { label: "Tierbedarf", href: "/shop" }, { label: "Fellpflege", href: "/services/GROOMING" }, { label: "Unterkunft und Betreuung", href: "/services/BOARDING" }] },
+    { title: "Gemeinsam leben", links: [{ label: "Reisen", href: "/travel" }, { label: "Tier-Taxi", href: "/services/PET_TAXI" }, { label: "Versicherung", href: "/insurance" }, { label: "Tierschutz", href: "/animal-support/needs" }] },
+    { title: "An deiner Seite", links: [{ label: "Ratgeber", href: "/guides" }, { label: "Magazin", href: "/blog" }, { label: "Community", href: "/community" }, { label: "Support", href: "/support" }] },
+  ],
+};
+const es: StoryCopy = {
+  eyebrow: "La vida juntos, más sencilla",
+  identityTitle: "Una identidad para todo su mundo",
+  identityBody: "Cookie es mucho más que un nombre en una aplicación. Su perfil conecta salud, cuidados, citas y recuerdos con la información que tú decides añadir y compartir.",
+  identityCta: "Crear el perfil de mi mascota", identityMore: "Ver servicios", cookie: "Cookie", example: "Una compañera real. Un mundo propio.",
+  cookieAlt: "Fotografía real de Cookie, una perrita pequeña de color dorado, descansando en su cama", appAlt: "Vista de ejemplo del panel de opetlife", appExample: "Vista previa de la aplicación",
+  identityFacts: ["Identidad y datos", "Historial de salud", "Plan de cuidados", "Recuerdos compartidos"],
+  howEyebrow: "De conocerse a recibir cuidados", howTitle: "Un camino claro para vivir con más tranquilidad",
+  steps: [
+    { title: "Presenta a tu compañera", body: "Añade su nombre y sus datos. El perfil empieza con lo que tú compartes." },
+    { title: "Encuentra la ayuda que necesitas", body: "Consulta servicios y profesionales y elige la opción adecuada." },
+    { title: "Reserva y haz seguimiento", body: "Consulta en la aplicación los detalles y el estado de tus citas." },
+  ],
+  momentsEyebrow: "Para los días normales y los momentos especiales", momentsTitle: "La vida, con todos sus momentos",
+  moments: [
+    { title: "Cuidar empieza hoy", body: "Historial de salud y citas veterinarias para cuando necesita atención.", action: "Buscar veterinario", image: "vet", href: "/vet/find" },
+    { title: "Más tiempo para estar juntos", body: "Paseos, higiene y cuidados para los días en que tienes mucho que hacer.", action: "Descubrir servicios de cuidado", image: "activity", href: "/services" },
+    { title: "Tu compañera de viaje", body: "Consulta alojamientos que aceptan mascotas e información de viaje antes de salir.", action: "Planificar un viaje", image: "travel", href: "/travel" },
+  ],
+  publicArticles: { eyebrow: "Orientación fiable para cuidar mejor", title: "Artículos recientes", allArticles: "Ver todos los artículos", empty: "Todavía no hay artículos publicados.", loadError: "No se pudieron cargar los artículos. Inténtalo de nuevo más tarde.", retry: "Reintentar" },
+  trustEyebrow: "La confianza empieza con transparencia", trustTitle: "Sus datos, tu decisión",
+  trust: [
+    { title: "Compartir con tu permiso", body: "Tú decides quién puede ver cada parte del historial y durante cuánto tiempo." },
+    { title: "Fuentes claras", body: "Puedes saber si cada dato procede de ti, de una clínica o de otra fuente." },
+    { title: "Lo desconocido sigue siendo desconocido", body: "No presentamos datos ausentes como saludables o confirmados. No inventamos respuestas." },
+  ],
+  supportEyebrow: "La solidaridad también continúa fuera de casa", supportTitle: "Para quienes esperan una mano amiga",
+  supportBody: "Consulta las necesidades comunicadas por las organizaciones de protección y descubre cómo ayudar a los animales que aún no tienen hogar.",
+  supportCta: "Ver necesidades de apoyo", communityCta: "Unirse a la comunidad",
+  partnerEyebrow: "Para quienes se dedican profesionalmente al cuidado", partnerTitle: "Forma parte de este mundo",
+  partnerBody: "¿Eres veterinario, proveedor de servicios o vendedor? Aquí puedes acceder al espacio profesional. Crear una cuenta no crea por sí solo una membresía de empresa; el acceso requiere una membresía aprobada.",
+  partnerLogin: "Acceso profesional", partnerJoin: "Crear cuenta profesional",
+  finalTitle: "Su mundo empieza a tu lado", finalBody: "El primer paso es crear un perfil para tu compañera.", join: "Crear cuenta", login: "Iniciar sesión",
+  footerDescription: "Salud, cuidados, servicios y momentos compartidos: un mundo para ti y tu pequeña compañera.",
+  footerPartners: "Profesionales", footerLabel: "Navegación del pie de página", footerTop: "Volver al parque", footerPrivacy: "Ajustes de privacidad", footerCredits: "Créditos de imagen", footerNotice: "Versión de prueba; la información mostrada puede incluir ejemplos.",
+  footerGroups: [
+    { title: "Servicios", links: [{ label: "Veterinaria", href: "/vet/find" }, { label: "Tienda para mascotas", href: "/shop" }, { label: "Peluquería", href: "/services/GROOMING" }, { label: "Alojamiento y cuidados", href: "/services/BOARDING" }] },
+    { title: "Vida juntos", links: [{ label: "Viajes", href: "/travel" }, { label: "Taxi para mascotas", href: "/services/PET_TAXI" }, { label: "Seguro", href: "/insurance" }, { label: "Protección animal", href: "/animal-support/needs" }] },
+    { title: "A tu lado", links: [{ label: "Guías", href: "/guides" }, { label: "Revista", href: "/blog" }, { label: "Comunidad", href: "/community" }, { label: "Ayuda", href: "/support" }] },
+  ],
+};
+export const storyCopy: Record<RouteLocale, StoryCopy> = { fa, en, de, es };

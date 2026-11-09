@@ -97,4 +97,32 @@ describe("CreateTicketView", () => {
 
     await waitFor(() => expect(screen.getByText("That item could not be linked to your support case.")).toBeTruthy());
   });
+
+  it("localizes the ticket form and keeps the German route after submission", async () => {
+    vi.mocked(supportService.create).mockResolvedValue({
+      id: "case-de",
+      caseNumber: "CASE-000003",
+      subject: "Fehlende Lieferung",
+      category: "ORDER" as never,
+      status: "SUBMITTED" as never,
+      householdId: null,
+      petId: null,
+      relatedEntityType: null,
+      relatedEntityId: null,
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+      resolvedAt: null,
+      closedAt: null,
+    });
+
+    renderWithIntl(<CreateTicketView />, "de");
+    expect(screen.getByRole("heading", { name: "Neue Support-Anfrage" })).toBeTruthy();
+
+    fireEvent.change(screen.getByText("Betreff").parentElement!.querySelector("input")!, { target: { value: "Fehlende Lieferung" } });
+    fireEvent.change(screen.getByText("Beschreibe dein Anliegen").parentElement!.querySelector("textarea")!, { target: { value: "Ein Artikel fehlt." } });
+    fireEvent.click(screen.getByText("Anfrage senden"));
+
+    await waitFor(() => expect(supportService.create).toHaveBeenCalledWith(expect.objectContaining({ subject: "Fehlende Lieferung" })));
+    expect(push).toHaveBeenCalledWith("/de/support/tickets/case-de");
+  });
 });

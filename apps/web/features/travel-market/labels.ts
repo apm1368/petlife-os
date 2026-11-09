@@ -4,6 +4,7 @@ import { formatCurrency } from "@/lib/currency/format-currency";
 import { formatDay, localizeDigits } from "@/lib/date/jalali";
 
 export type Lang = "fa" | "en";
+export type LocalizedTravelLocale = Lang | "de" | "es";
 type Pair = [string, string];
 const pick = (p: Pair, lang: Lang) => (lang === "fa" ? p[0] : p[1]);
 
@@ -23,7 +24,13 @@ export const LISTING_TYPE: Record<string, Pair> = {
 };
 /** Stay types a traveller can search for (transport types are not stays). */
 export const STAY_TYPES: TravelListingType[] = ["HOTEL", "PET_FRIENDLY_HOTEL", "ECO_LODGE", "GUESTHOUSE", "RESORT", "VILLA", "APARTMENT", "RESIDENCE", "PET_HOTEL"] as TravelListingType[];
-export const listingTypeLabel = (t: string, lang: Lang) => pick(LISTING_TYPE[t] ?? [t, t], lang);
+const LISTING_TYPE_DE_ES: Record<string, { de: string; es: string }> = {
+  HOTEL: { de: "Hotel", es: "Hotel" }, ECO_LODGE: { de: "Öko-Lodge", es: "Alojamiento ecológico" }, GUESTHOUSE: { de: "Gästehaus", es: "Casa de huéspedes" },
+  RESORT: { de: "Resort", es: "Complejo turístico" }, PET_HOTEL: { de: "Tierhotel", es: "Hotel para mascotas" }, PET_FRIENDLY_HOTEL: { de: "Haustierfreundliches Hotel", es: "Hotel que admite mascotas" },
+  VILLA: { de: "Villa", es: "Villa" }, APARTMENT: { de: "Ferienwohnung", es: "Apartamento" }, RESIDENCE: { de: "Unterkunft", es: "Residencia" }, BOARDING: { de: "Tierpension", es: "Residencia para mascotas" },
+  PET_TAXI: { de: "Haustiertaxi", es: "Taxi para mascotas" }, INTERCITY_TRANSPORT: { de: "Überregionaler Transport", es: "Transporte interurbano" },
+};
+export const listingTypeLabel = (t: string, lang: LocalizedTravelLocale) => lang === "de" || lang === "es" ? LISTING_TYPE_DE_ES[t]?.[lang] ?? t : pick(LISTING_TYPE[t] ?? [t, t], lang);
 
 export const AMENITY: Record<string, Pair> = {
   WIFI: ["اینترنت", "Wi-Fi"],
@@ -45,7 +52,14 @@ export const AMENITY: Record<string, Pair> = {
   RESTAURANT: ["رستوران", "Restaurant"],
   ELEVATOR: ["آسانسور", "Elevator"],
 };
-export const amenityLabel = (a: string, lang: Lang) => pick(AMENITY[a] ?? [a.replace(/_/g, " ").toLowerCase(), a.replace(/_/g, " ").toLowerCase()], lang);
+const AMENITY_DE_ES: Record<string, { de: string; es: string }> = {
+  WIFI: { de: "WLAN", es: "Wi-Fi" }, PARKING: { de: "Parkplatz", es: "Aparcamiento" }, YARD: { de: "Garten", es: "Patio" }, FENCED_YARD: { de: "Eingezäunter Garten", es: "Patio vallado" },
+  POOL: { de: "Pool", es: "Piscina" }, KITCHEN: { de: "Küche", es: "Cocina" }, BREAKFAST: { de: "Frühstück", es: "Desayuno" }, AIR_CONDITIONING: { de: "Klimaanlage", es: "Aire acondicionado" },
+  HEATING: { de: "Heizung", es: "Calefacción" }, PET_BED: { de: "Tierbett", es: "Cama para mascotas" }, PET_BOWLS: { de: "Futter- und Wassernäpfe", es: "Cuencos para agua y comida" },
+  DOG_PARK_NEARBY: { de: "Hundewiese in der Nähe", es: "Parque canino cercano" }, PET_SITTING: { de: "Betreuung für Haustiere", es: "Cuidado de mascotas" }, GROOMING: { de: "Fellpflege", es: "Aseo de mascotas" },
+  VET_ON_CALL: { de: "Tierarzt auf Abruf", es: "Veterinario de guardia" }, WALKING_TRAILS: { de: "Wanderwege", es: "Rutas para pasear" }, RESTAURANT: { de: "Restaurant", es: "Restaurante" }, ELEVATOR: { de: "Aufzug", es: "Ascensor" },
+};
+export const amenityLabel = (a: string, lang: LocalizedTravelLocale) => lang === "de" || lang === "es" ? AMENITY_DE_ES[a]?.[lang] ?? a.replace(/_/g, " ").toLowerCase() : pick(AMENITY[a] ?? [a.replace(/_/g, " ").toLowerCase(), a.replace(/_/g, " ").toLowerCase()], lang);
 
 export const BOOKING_STATUS: Record<string, Pair> = {
   HELD: ["در انتظار تکمیل", "Dates held"],
@@ -174,19 +188,30 @@ export function policyFacts(p: TravelPetPolicyDto | null, lang: Lang): { label: 
   ];
 }
 
-export function stayDates(b: Pick<TravelBookingDto, "checkIn" | "checkOut" | "nights">, lang: Lang): string {
-  const n = lang === "fa" ? `${localizeDigits(b.nights, "fa")} شب` : `${b.nights} night${b.nights === 1 ? "" : "s"}`;
+export function stayDates(b: Pick<TravelBookingDto, "checkIn" | "checkOut" | "nights">, lang: LocalizedTravelLocale): string {
+  const n = lang === "fa"
+    ? `${localizeDigits(b.nights, "fa")} شب`
+    : lang === "de"
+      ? `${b.nights} ${b.nights === 1 ? "Nacht" : "Nächte"}`
+      : lang === "es"
+        ? `${b.nights} ${b.nights === 1 ? "noche" : "noches"}`
+        : `${b.nights} night${b.nights === 1 ? "" : "s"}`;
   // "،" (not "·") between the date and the night count keeps Persian digit runs from reordering in RTL.
   return `${formatDay(b.checkIn.slice(0, 10), lang, { year: false })} — ${formatDay(b.checkOut.slice(0, 10), lang)}${lang === "fa" ? "، " : " · "}${n}`;
 }
 
-export function money(v: number | null | undefined, lang: Lang): string {
+export function money(v: number | null | undefined, lang: LocalizedTravelLocale): string {
   return v === null || v === undefined ? (lang === "fa" ? "—" : "—") : formatCurrency(v, lang);
 }
 
-export function ratingText(avg: number | null, count: number, lang: Lang): string {
+export function ratingText(avg: number | null, count: number, lang: LocalizedTravelLocale): string {
   if (!count || avg === null) return lang === "fa" ? "هنوز نظری ثبت نشده" : "No reviews yet";
-  return lang === "fa" ? `${localizeDigits(avg.toFixed(1), "fa")} از ۵ · ${localizeDigits(count, "fa")} نظر تأییدشده` : `${avg.toFixed(1)} of 5 · ${count} verified review${count === 1 ? "" : "s"}`;
+  if (lang === "fa") return `${localizeDigits(avg.toFixed(1), "fa")} از ۵ · ${localizeDigits(count, "fa")} نظر تأییدشده`;
+  const value = new Intl.NumberFormat(lang, { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(avg);
+  const countLabel = new Intl.NumberFormat(lang).format(count);
+  if (lang === "de") return `${value} von 5 · ${countLabel} verifizierte ${count === 1 ? "Bewertung" : "Bewertungen"}`;
+  if (lang === "es") return `${value} de 5 · ${countLabel} reseñas verificadas`;
+  return `${value} of 5 · ${countLabel} verified review${count === 1 ? "" : "s"}`;
 }
 
 export function countdown(msLeft: number, lang: Lang): string {
