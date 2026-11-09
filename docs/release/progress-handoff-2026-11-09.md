@@ -2,6 +2,24 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
+## Dashboard Batch 1 — post-merge checkpoint, 2026-11-09 15:14 UTC
+
+- PR #219 (`feat(dashboard): show active household context`) merged normally by squash at `4a4623ef01bc01f34737ac748ed782ee4cb71876`. It builds on already-merged #153 dashboard localization and #210 shared dashboard patterns; it did not duplicate their work. The household label uses the existing overview read model and only renders with confirmed `canViewIdentity` permission.
+- PR-head CI [42638498352](https://github.com/apm1368/petlife-os/actions/runs/42638498352) passed. Post-merge main CI/deploy run [42641104811](https://github.com/apm1368/petlife-os/actions/runs/42641104811) had completed lint, design-system/visual, typecheck, migrations and tests; API E2E was still in progress at 15:14 UTC. Do not treat the pending API E2E/build/deploy as green.
+- Current `main`: `4a4623ef01bc01f34737ac748ed782ee4cb71876`. Production version still reported `ad71226127ddf2b6a98c38d443a78805a8a632de` (`github-42634490099-1`); readiness is HTTP 200 with database and Redis up. The new dashboard context is **MERGED_NOT_DEPLOYED**, not LIVE_VERIFIED.
+- Dashboard source: fa/en/de/es UI copy and formatting are implemented in the existing dashboard; the household chip is localized and permission-gated. User/source-created names remain source content; plan names may remain English where no translated source exists. Whole-product translation is not complete. Dashboard saved-preference navigation/refresh is not verified in an authenticated browser.
+- Visual verification is blocked: a fresh local Next capture attempt compiled the locale shell, but `/[locale]/home` did not respond after more than six minutes. The dev server was stopped after free space fell from ~568 MiB to ~466 MiB. No new screenshots exist for this SHA; prior screenshots are historical only. See [dashboard Batch 1 QA](../qa/dashboard-batch1-2026-11-09.md).
+- Production `GET /fa/home` returned 200 anonymously, which confirms route availability only and does not verify authenticated dashboard data. No customer record or mutating production request was used.
+- Next: monitor run 42641104811 through API E2E/build/deploy. If it succeeds, verify production `/api/health/version` equals `4a4623ef…` and readiness remains healthy. Then perform safe authenticated dashboard verification with a QA account/browser; until then retain PARTIAL / NOT LIVE_VERIFIED. Next page-family priority: account/household visual and localization verification.
+
+## Dashboard Batch 1 — production release verification, 2026-11-09 15:26 UTC
+
+- PR #219 is merged at `4a4623ef01bc01f34737ac748ed782ee4cb71876`. Post-merge run [42641104811](https://github.com/apm1368/petlife-os/actions/runs/42641104811) succeeded for lint, design-system/visual checks, typecheck, migrations, unit tests, API E2E, production build and the authorized SSH deployment.
+- Production `/api/health/version` matches that SHA and reports `github-42641104811-1` (`production`); `/api/health/ready` returns 200 with database and Redis up. Anonymous `/fa/home` returns 200, but is not authenticated dashboard evidence.
+- The change is **MERGED_AND_DEPLOYED**, while the member dashboard overall remains **PARTIAL / NOT LIVE_VERIFIED**: no authenticated QA member session was available to verify actual household context, personal dashboard data, saved preference through navigation/refresh, or user-level permissions.
+- Fresh screenshots were not captured. Local Next dev compiled the locale shell but did not return the dashboard route after six minutes; stopped to preserve disk. Available space was about 466 MiB at stop. Existing screenshots are historical only. Details: [dashboard Batch 1 QA](../qa/dashboard-batch1-2026-11-09.md).
+- Next action: use a controlled, non-customer QA member account and a working browser to capture fa RTL/LTR, mobile/desktop, light/dark and simplified-mode views, exercise saved-language navigation/refresh, then update this handoff. Next page-family priority remains account/household.
+
 ## Dashboard context follow-up — 2026-11-09 14:48 UTC
 
 - Added a localized active-household label from the existing pet overview read model. It is rendered only when `canViewIdentity` is confirmed and the API supplies a household name; it adds no new API, household switch, or permission change. Commit `beccb7c4099c5b85ce942c1e7371b5c0c212ad00` is on `docs/dashboard-batch1-handoff`, based on `main` `ad712261…`.

@@ -153,6 +153,12 @@ The public shell now uses explicit `publicNavigation` messages for all four targ
 - Content boundary: pet names, owner-created reminder/memory titles, provider/city names and catalog-managed plan title remain source content. The plan model supplies only Persian/English names, so German/Spanish dashboard labels explicitly say the plan name is shown in English. No translated version is fabricated.
 - Focused tests cover populated and empty dashboard states, locale-specific labels/date output, no known Persian UI fallback in de/es, shared error/retry copy, calendar date output and currency/status formatting. This is a dashboard slice only; it does not localize linked pages or mark those page families complete.
 
+#### Dashboard follow-up — PR #219 merged 2026-11-09
+
+- The dashboard now displays the active household context from its existing read model only when `canViewIdentity` is confirmed. The label has fa/en/de/es copy; no household-switch behavior or API was added.
+- Merge/deployed SHA: `4a4623ef01bc01f34737ac748ed782ee4cb71876`, deployment `github-42641104811-1`. Production version matches; readiness reports DB and Redis up; anonymous `/fa/home` is HTTP 200.
+- The dashboard's application-owned copy has fa/en/de/es implementation and component coverage, but end-to-end account preference persistence and authenticated rendered/visual checks are still unverified. Keep dashboard overall status **PARTIAL**, not LIVE_VERIFIED. This does not affect user-generated or source-authored names, and it does not mean other page families are localized.
+
 The same reviewable batch now includes the account overview route (`/[locale]/profile`): profile summary, security attention counts, household card/actions, invitation inbox, membership and activity links, loading/error/retry states, invitation errors, request confirmation, and phone-verification/owner-approval explanation are fully translated. Number grouping follows the selected locale. This does not mark the other account settings routes or the household management route complete.
 
 Account activity (`/[locale]/profile/activity`) is also covered in this reviewable account slice: filter names, every known event title, method/consent summaries, empty/loading/error, pagination action and date display are translated in all four locales and exercised in German/Spanish rendering tests. Unknown event codes are shown as a localized generic event rather than the raw code. Device/browser descriptions are source values and remain unchanged.
