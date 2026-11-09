@@ -27,6 +27,7 @@ export function toInsuranceProductDto(row: ProductWithProvider): InsuranceProduc
     providerId: row.providerId,
     providerName: row.provider.name,
     providerLogoUrl: resolveObjectUrl(row.provider.logoObjectKey),
+    providerWebsiteUrl: row.provider.websiteUrl,
     name: row.name,
     country: row.country,
     speciesEligibility: row.speciesEligibility as unknown as InsuranceProductDto["speciesEligibility"],

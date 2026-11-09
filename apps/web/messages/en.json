@@ -4045,10 +4045,19 @@
       "subtitle": "Compare providers and coverage — this is a discovery tool, not an insurer.",
       "empty": "No insurance products found.",
       "compareSelected": "Compare selected",
-      "viewDetails": "View details"
+      "viewDetails": "View details",
+      "selectForCompare": "Select for comparison",
+      "loading": "Loading insurance products",
+      "annualLimit": "Annual limit",
+      "deductible": "Deductible",
+      "coinsurance": "Your share",
+      "percentUnit": "%",
+      "waitingPeriod": "Waiting period",
+      "days": "{count, plural, one {# day} other {# days}}",
+      "premiumFrom": "Premium from"
     },
     "detail": {
-      "exclusionsTitle": "Exclusions — read before applying",
+      "exclusionsTitle": "Exclusions — read before contacting the insurer",
       "exclusionsEmpty": "No exclusions listed for this product.",
       "coverageTitle": "Coverage",
       "waitingPeriod": "Waiting period: {days} days",
@@ -4056,16 +4065,23 @@
       "annualLimit": "Annual limit: {amount}",
       "premiumRange": "Premium: {min}–{max}",
       "termsSource": "Source: {source}",
-      "checkEligibility": "Check eligibility for {petName}",
-      "apply": "Start application"
+      "visitInsurer": "Visit insurer website",
+      "insurerWebsiteUnavailable": "The insurer has not published a website link.",
+      "loading": "Loading insurance details"
     },
     "compare": {
       "title": "Compare plans",
-      "exclusions": "Exclusions"
+      "exclusions": "Exclusions",
+      "loading": "Loading insurance comparison",
+      "empty": "No insurance products were found for this comparison.",
+      "emptyDescription": "Check the selected products and try again."
     },
     "eligibility": {
       "title": "Eligibility for {petName}",
       "sectionTitle": "Eligibility for this pet",
+      "loading": "Checking insurance eligibility",
+      "loadFailed": "Insurance eligibility could not be loaded.",
+      "retry": "Check again",
       "disclaimer": "This is not a guarantee of approval — the insurer makes the final decision.",
       "reasons": {
         "SPECIES_NOT_COVERED": "This pet's species is not covered by this product.",
