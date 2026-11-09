@@ -2632,6 +2632,30 @@
       "notes": { "title": "Notas del proveedor", "internalOnly": "Solo para uso interno; nunca se muestran al cliente.", "label": "Añadir una nota", "placeholder": "Escribe una nota", "add": "Añadir", "empty": "Aún no hay notas." },
       "cancelDialog": { "title": "¿Cancelar esta reserva?", "body": "Se avisará a la persona responsable y se revocará cualquier acceso temporal concedido por esta reserva.", "reasonLabel": "Motivo (opcional)", "reasonPlaceholder": "¿Por qué se cancela esta reserva?", "confirm": "Sí, cancelar la reserva" },
       "backToQueue": "Volver a las reservas", "errors": { "PROVIDER_ACCESS_DENIED": "No tienes acceso a esta reserva.", "PROVIDER_NOT_VERIFIED": "La organización debe verificarse antes de realizar esta acción.", "BOOKING_NOT_FOUND": "No se encontró la reserva.", "INVALID_BOOKING_TRANSITION": "La reserva no puede cambiar a ese estado ahora.", "BOOKING_NOT_CANCELLABLE": "Esta reserva ya no se puede cancelar.", "generic": "No se pudo completar la acción. Inténtalo de nuevo." }
+    },
+    "team": {
+      "title": "Equipo",
+      "retry": "Intentar de nuevo",
+      "loading": "Cargando",
+      "loadFailed": "No se pudo cargar el equipo.",
+      "empty": "Aún no hay integrantes del equipo.",
+      "role": { "OWNER": "Propietario/a", "VET": "Veterinario/a", "STAFF": "Personal" },
+      "settings": {
+        "title": "Servicios y perfil público de cada integrante",
+        "description": "Si no se asigna ninguna persona a un servicio, lo ofrecen todos los integrantes que admiten reservas. Aquí no se almacenan datos de recursos humanos.",
+        "emptyStaff": "No hay integrantes del equipo disponibles para configurar.",
+        "emptyServices": "No hay servicios disponibles para asignar.",
+        "bookable": "Disponible para reservas",
+        "servicesDelivered": "Servicios que ofrece",
+        "publicTitle": "Cargo público",
+        "publicBio": "Breve presentación pública",
+        "save": "Guardar",
+        "retry": "Intentar de nuevo",
+        "loading": "Cargando los ajustes del equipo",
+        "loadFailed": "No se pudieron cargar los ajustes del equipo.",
+        "saveFailed": "No se pudo guardar el cambio.",
+        "ownerOnly": "Solo el propietario de la organización puede editar el equipo."
+      }
     }
   },
   "partnerVerification": { "activationRequired": "La administración debe verificar tu organización antes de que puedas gestionar servicios o crear y activar ofertas. Puedes consultar la verificación y los pedidos existentes.", "portalTitle": "Verificación de socios", "refreshAccess": "Recargar la página para comprobar la aprobación" }
