@@ -45,7 +45,7 @@ describe("admin users directory", () => {
   it.each(["de", "es"] as const)("localizes the user directory and profile dates for %s", async locale => {
     renderWithIntl(<AdminUsersView id="user-1" />, locale);
     await screen.findByText(locale === "de" ? "Nutzerprofil" : "Perfil de usuario");
-    fireEvent.click(screen.getByRole("button", { name: locale === "de" ? "Anfragen" : "Solicitudes" }));
+    fireEvent.click(await screen.findByRole("button", { name: locale === "de" ? "Anfragen" : "Solicitudes" }));
     const expected = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(profile.requests[0]!.startAt));
     await screen.findByText(content => content.includes(expected));
   });
