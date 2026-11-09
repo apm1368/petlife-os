@@ -2,6 +2,23 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
+## Latest verified checkpoint — 2026-11-09 11:06 UTC
+
+- `main`: `be12ac5d74b043bafad66c091c2b225f3ec210a4` (#207). #207 passed exact-head CI `42603584243` on `8d805a08…` (lint, design-system/visual, typecheck, migration, full unit/web tests, API E2E and build) and merged normally by squash at 11:00:24 UTC. It localizes customer booking detail/shared booking labels for fa/en/de/es and includes the two-test async memorial empty-state reliability fix. The booking-detail route remains PARTIAL pending authenticated responsive-browser verification.
+- #104 review timing/criteria is not integrated: its exact CI `42604149889` passed on head `6a1961b9…` before #207, but GitHub now reports `CONFLICTING` against current main. The conflict touches `BookingDetailView.tsx` and its test; a local merge experiment showed the dialog sections cannot be accepted wholesale from either side. No conflict resolution was pushed. The local branch `fix/pr104-memorial-empty-state` now contains an unpushed merge experiment and must not be pushed as-is; port the two-hour review delay and three review dimensions into the localized main component, retain localized dialog/state copy, and rerun exact-head CI before considering merge.
+- #206 is merged at main SHA `ff2a73ab…` (exact PR CI `42600039012` passed), but its deployment `42601851619` is still running the SSH deploy step. Current production `/api/health/version` remains `6ff48d6f8dd6697249b78e3d2b5ee36d5d72b0a1` (`github-42599736618-1`, #178), with DB/Redis ready. Deployment run `42605474846` for new main `be12ac5d…` is queued/pending behind the current deployment; do not mark #206/#207 live yet.
+- Safe public shop API check (`GET /api/shop/products`) still returns HTTP 200 with zero items. Demo records are absent, but there is no legitimate reviewed offer to verify visibility or purchase.
+- #205 handoff PR branch has now been merged locally with current main and this checkpoint; push it for a fresh CI run. It is still open until GitHub confirms merge.
+- #178 is deployed and verified at `6ff48d6f…`; #207 is merged but not deployed. #104's prior green check is stale relative to its current conflicting base. #102/#103/#105/#106/#108/#109/#121 and older stacks remain conflicting or depend on stale bases; do not reuse old green checks.
+- Worktree: no uncommitted changes before this checkpoint update. Payment worktree remains absent from the available worktree list; no payment files were changed. Disk is still critically constrained at about 34 MiB free. No cleanup performed. Authenticated browser/visual tools and production bucket/CDN configuration remain unavailable; source-image/CDN privacy is unverified.
+
+### Next actions
+
+1. Push this handoff update to PR #205 and wait for its exact-head CI.
+2. Monitor #206 deployment `42601851619`; once complete, verify production SHA `ff2a73ab…`, health/readiness and shop API. Then monitor deployment `42605474846` and verify SHA `be12ac5d…` before marking #207 live.
+3. Resolve PR #104 by porting its review timing/criteria into the four-locale main component; do not push the local merge experiment. Retest localized review availability and criteria, refresh PR base/head, and require green exact-head CI.
+4. Continue the next independent page-family localization from the route matrix. Keep pages PARTIAL until all application-owned states and responsive authenticated browser behavior are verified.
+
 ## Latest verified checkpoint — 2026-11-09 10:48 UTC
 
 - `origin/main`: `ff2a73abdd03ef783f409b5d25dbd9a2026b73ba` (#206). Production `/api/health/version` reports `6ff48d6f8dd6697249b78e3d2b5ee36d5d72b0a1` (`github-42599736618-1`, #178); health readiness reports DB and Redis up. Deploy run `42601851619` for #206/main is in progress. Production is not yet at current main.
