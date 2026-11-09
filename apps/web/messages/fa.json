@@ -4718,7 +4718,8 @@
       "medicationComplexity": "پیچیدگی داروها",
       "retractDocument": "باطل کردن سند",
       "retractHint": "سند حذف نمی‌شود؛ دلیل ابطال در سابقه باقی می‌ماند.",
-      "medicationRecord": "رکورد دارو"
+      "medicationRecord": "رکورد دارو",
+      "unknownStatus": "وضعیت به‌روزرسانی شد"
     },
     "share": {
       "group": "اشتراک‌گذاری",
