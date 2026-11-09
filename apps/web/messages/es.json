@@ -2819,7 +2819,8 @@
       "reschedule": "Cambiar horario", "cancelFollowing": "Cancelar esta reserva y las siguientes", "weeklyCreated": "Se crearon las reservas semanales; se omitieron las semanas sin disponibilidad.", "repeatWeekly": "Repetir cada semana (4 visitas)", "leaveReview": "Escribir una reseña", "bookAgain": "Reservar otra vez",
       "fullRefund": "Reembolso completo: {amount}", "partialRefund": "Según las condiciones, se reembolsa el {percent} % ({amount}).", "refundReview": "Los reembolsos se tramitan después de la revisión financiera.", "reasonOptional": "Motivo (opcional)", "keepBooking": "Conservar la reserva", "bookingCancelled": "Reserva cancelada.",
       "chooseNewTime": "Elegir otro horario", "rescheduleHint": "La reserva actual se mantiene hasta que se confirme el nuevo horario. El precio y las condiciones no cambian.", "newDay": "Nuevo día", "noOpenTimes": "No hay horarios disponibles este día.", "bookingRescheduled": "Se cambió el horario de la reserva.", "confirmNewTime": "Confirmar nuevo horario",
-      "reviewThisBooking": "Escribir una reseña de esta reserva", "rating": "Puntuación", "reviewText": "Texto de la reseña", "reviewHint": "Describe tu experiencia; no incluyas datos personales ni médicos.", "submitForReview": "Enviar para revisión"
+      "reviewThisBooking": "Escribir una reseña de esta reserva", "rating": "Puntuación", "reviewText": "Texto de la reseña", "reviewHint": "Describe tu experiencia; no incluyas datos personales ni médicos.", "submitForReview": "Enviar para revisión",
+      "reviewAvailableAt": "Podrás valorar este servicio dos horas después de que termine: {date}", "timeliness": "Puntualidad", "careAndCommunication": "Atención y comunicación con la mascota", "serviceQuality": "Calidad del servicio", "reviewSubmitted": "Tu reseña se envió y se publicará después de la moderación."
     }
   }
 }
