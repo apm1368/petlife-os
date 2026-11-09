@@ -28,4 +28,11 @@ describe("apiErrorText", () => {
     expect(apiErrorText(new Error("network"), "en", "Could not save.")).toBe("Could not save.");
     expect(apiErrorText(new Error("network"), "fa")).toBe("انجام نشد. دوباره تلاش کنید.");
   });
+  it("German and Spanish pages do not expose an English API error", () => {
+    const backend = err("INVALID_SUBSCRIPTION_STATUS_TRANSITION", "This subscription status transition is not allowed.");
+    expect(apiErrorText(backend, "de", "Die Aktion ist derzeit nicht möglich.")).toBe("Die Aktion ist derzeit nicht möglich.");
+    expect(apiErrorText(backend, "es", "Ahora no se puede realizar esta acción.")).toBe("Ahora no se puede realizar esta acción.");
+    expect(apiErrorText(backend, "de")).toBe("Das hat nicht funktioniert. Bitte versuchen Sie es erneut.");
+    expect(apiErrorText(backend, "es")).toBe("No se pudo completar. Inténtalo de nuevo.");
+  });
 });

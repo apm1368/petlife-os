@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { Button, ContextSurface, ErrorRecovery, Skeleton } from "@petlife/ui";
 import type { SubscriptionDto, SubscriptionPlanDto } from "@petlife/types";
 import { SubscriptionBillingInterval } from "@petlife/types";
@@ -20,25 +21,26 @@ import { apiErrorText } from "@/lib/errors/api-error-text";
 export function SubscriptionPlansView() {
   const t = useTranslations("subscription");
   const tCommon = useTranslations("common");
+  const router = useRouter();
   const locale = useLocale();
   const householdId = usePetStore((s) => s.householdId);
 
   const [plans, setPlans] = useState<SubscriptionPlanDto[] | null>(null);
   const [sub, setSub] = useState<SubscriptionDto | null>(null);
   const [interval, setInterval_] = useState<SubscriptionBillingInterval>(SubscriptionBillingInterval.MONTHLY);
-  const [error, setError] = useState(false);
+  const [loadFailure, setLoadFailure] = useState<"loadErrorMessage" | "loadOffline" | "loadForbidden" | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [busyPlanId, setBusyPlanId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!householdId) return;
-    setError(false);
+    setLoadFailure(null);
     try {
       const [plansResult, subResult] = await Promise.all([subscriptionService.getPlans(householdId), subscriptionService.getCurrent(householdId)]);
       setPlans([...plansResult].sort((a, b) => a.sortOrder - b.sortOrder));
       setSub(subResult);
-    } catch {
-      setError(true);
+    } catch (err) {
+      setLoadFailure(navigator.onLine === false ? "loadOffline" : err instanceof ApiError && (err.status === 401 || err.status === 403) ? "loadForbidden" : "loadErrorMessage");
     }
   }, [householdId]);
 
@@ -60,24 +62,28 @@ export function SubscriptionPlansView() {
     }
   }
 
-  if (error) return <ErrorRecovery title={t("plansTitle")} message="" retryLabel={tCommon("retry")} onRetry={load} />;
-  if (!plans || !sub || !householdId) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
+  if (loadFailure) return <ErrorRecovery title={t("loadErrorTitle")} message={t(loadFailure)} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (!householdId) return <section className="flex flex-col gap-3"><h1 className="text-page-title text-text-primary">{t("plansTitle")}</h1><p className="text-body text-text-secondary">{t("noHouseholdMessage")}</p><Button variant="secondary" onClick={() => router.push(`/${locale}/profile/household`)}>{t("openHouseholds")}</Button></section>;
+  if (!plans || !sub) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   const onFreePlan = !sub.price;
+  const numberLocale = locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-GB";
+  const currencyLocale = locale === "fa" || locale === "de" || locale === "es" ? locale : "en";
 
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-page-title text-text-primary">{t("plansTitle")}</h1>
+      {plans.length === 0 ? <p className="text-body text-text-secondary">{t("noPlans")}</p> : null}
 
-      <div className="flex gap-2 overflow-x-auto border-b border-border-subtle pb-2" aria-label={t("durationLabel")}>
+      {plans.length > 0 ? <div className="flex gap-2 overflow-x-auto border-b border-border-subtle pb-2" aria-label={t("durationLabel")}>
         {(["MONTHLY", "QUARTERLY", "SEMI_ANNUAL", "ANNUAL"] as const).map((value) => <Button key={value} size="sm" aria-pressed={interval === SubscriptionBillingInterval[value]} variant={interval === SubscriptionBillingInterval[value] ? "primary" : "secondary"} onClick={() => setInterval_(SubscriptionBillingInterval[value])}>
           {t(`interval.${value === "MONTHLY" ? "monthly" : value === "QUARTERLY" ? "quarterly" : value === "SEMI_ANNUAL" ? "semiAnnual" : "annual"}`)}
         </Button>)}
-      </div>
+      </div> : null}
 
       {actionError ? <p className="text-body text-state-urgent">{actionError}</p> : null}
 
-      <div className="flex flex-col gap-3">
+      {plans.length > 0 ? <div className="flex flex-col gap-3">
         {plans.map((plan) => {
           const isCurrent = plan.id === sub.plan.id;
           const price = plan.prices.find((p) => p.billingInterval === interval && p.status === "ACTIVE");
@@ -89,14 +95,15 @@ export function SubscriptionPlansView() {
                 <h2 className="text-section-title text-text-primary">{locale === "fa" ? plan.nameFa : plan.nameEn}</h2>
                 {isCurrent ? <span className="text-metadata text-text-secondary">{t("currentPlanBadge")}</span> : null}
               </div>
+              {locale === "de" || locale === "es" ? <p className="text-metadata text-text-secondary">{t("planContentEnglish")}</p> : null}
               {(locale === "fa" ? plan.descriptionFa : plan.descriptionEn) ? <p className="text-body text-text-secondary">{locale === "fa" ? plan.descriptionFa : plan.descriptionEn}</p> : null}
-              <p className="text-body font-medium text-text-primary">{plan.isFree ? t("free") : price ? formatCurrency(price.amount, locale === "fa" ? "fa" : "en") : t("notAvailableHere")}</p>
+              <p className="text-body font-medium text-text-primary">{plan.isFree ? t("free") : price ? formatCurrency(price.amount, currencyLocale) : t("notAvailableHere")}</p>
 
               <ul className="flex flex-col gap-1">
                 {plan.entitlements.map((entitlement) => (
                   <li key={entitlement.key} className="text-metadata text-text-secondary">
                     {entitlementLabelKey(entitlement.key) ? t(entitlementLabelKey(entitlement.key)!) : entitlement.key}:{" "}
-                    {entitlement.type === "BOOLEAN" ? (entitlement.boolValue ? t("included") : t("notIncluded")) : entitlement.limitValue === null ? t("unlimited") : entitlement.limitValue.toLocaleString(locale === "fa" ? "fa-IR" : "en-US")}
+                    {entitlement.type === "BOOLEAN" ? (entitlement.boolValue ? t("included") : t("notIncluded")) : entitlement.limitValue === null ? t("unlimited") : entitlement.limitValue.toLocaleString(numberLocale)}
                   </li>
                 ))}
               </ul>
@@ -133,7 +140,7 @@ export function SubscriptionPlansView() {
             </ContextSurface>
           );
         })}
-      </div>
+      </div> : null}
     </div>
   );
 }
