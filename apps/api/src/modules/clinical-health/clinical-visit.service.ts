@@ -94,7 +94,15 @@ export class ClinicalVisitService {
       throw new InvalidClinicalVisitTransitionException({ visitId, status: existing.status, action: "updateNotes" });
     }
 
-    const row = await this.prisma.clinicalVisit.update({ where: { id: visitId }, data: dto, include: CLINICAL_VISIT_INCLUDE });
+    const row = await this.prisma.$transaction(async (tx) => {
+      // Enforce editability at the write: completion/voiding can race the preflight read.
+      const claimed = await tx.clinicalVisit.updateMany({
+        where: { id: visitId, petId, providerOrganizationId: ctx.organizationId, status: { in: [ClinicalVisitStatus.DRAFT, ClinicalVisitStatus.IN_PROGRESS] } },
+        data: dto,
+      });
+      if (claimed.count === 0) throw new InvalidClinicalVisitTransitionException({ visitId, action: "updateNotes" });
+      return tx.clinicalVisit.findUniqueOrThrow({ where: { id: visitId }, include: CLINICAL_VISIT_INCLUDE });
+    });
     return toClinicalVisitDto(row);
   }
 
