@@ -38,7 +38,7 @@ For each remaining family, record actual routes, source board, responsive/theme/
 
 - `main` is `54caf0278234dfb4119568d815b586f624c7cc75`. PR #210 passed its build check and merged through GitHub's normal squash path. PR #212 also passed its build check and merged to this main revision.
 - Production `/api/health/version` still reports `fb2f421dae9506ae62cc8f4c896703adc9387b58`; readiness was healthy at the last check. Neither design merge has been verified in production.
-- Latest open design PRs after rebase: #211 `afbc3a64` (account, build pending), #213 `8c89a819` (health/care, build pending), #214 `273a6987` (operator navigation, build pending), #215 `f6414ad7` (support, build pending). #212 is merged.
+- Latest open design PRs after rebase: #211 `afbc3a64` (account, build pending), #213 `8c89a819` (health/care, build pending), #214 `273a6987` (operator navigation, build pending), and #215 (support; this handoff update is included in its latest head, build pending). #212 is merged.
 - Focused tests rerun after the #212 base change: account 4 files/43 tests, health/care 3 files/37 tests, provider/seller 3 files/27 tests, and support 4 files/17 tests all passed. Commerce 5 files/52 tests and web typecheck passed before #212 merged; CI on #212 passed.
 - Web typecheck and `git diff --check` passed on the latest local batch. The full production build and actual browser screenshots remain blocked: this workspace has very low free space and no browser/CUA runner.
 - Verify screenshots at mobile/tablet/desktop, light/dark, fa/en/de/es, and simplified mode before marking any page visually complete. Preserve the landing HERO exactly; other landing sections remain to be reviewed.
