@@ -15,11 +15,11 @@ function flatten(value: unknown, prefix = "", result: Record<string, string> = {
 }
 
 const placeholders = (value: string) => [...value.matchAll(/\{([\w]+)(?:[,}])/g)].map((match) => match[1]).sort();
-const source = flatten({ shell: en.provider.shell, home: en.provider.home, bookingRow: en.provider.bookingRow });
+const source = flatten({ shell: en.provider.shell, home: en.provider.home, bookingRow: en.provider.bookingRow, bookings: en.provider.bookings, bookingDetail: en.provider.bookingDetail });
 
 describe("provider home and shell locale coverage", () => {
   it.each([["fa", fa.provider], ["de", de.provider], ["es", es.provider]] as const)("keeps provider shell and home keys/placeholders aligned in %s", (locale, messages) => {
-    const localized = flatten({ shell: messages.shell, home: messages.home, bookingRow: messages.bookingRow });
+    const localized = flatten({ shell: messages.shell, home: messages.home, bookingRow: messages.bookingRow, bookings: messages.bookings, bookingDetail: messages.bookingDetail });
     expect(Object.keys(localized).sort()).toEqual(Object.keys(source).sort());
     for (const [key, value] of Object.entries(localized)) {
       expect(placeholders(value), `${locale}.${key}`).toEqual(placeholders(source[key]!));
