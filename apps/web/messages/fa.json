@@ -4023,7 +4023,7 @@
       "premiumFrom": "حق بیمه از"
     },
     "detail": {
-      "exclusionsTitle": "استثناها — پیش از درخواست بخوانید",
+      "exclusionsTitle": "استثناها — پیش از تماس با بیمه‌گر بخوانید",
       "exclusionsEmpty": "استثنایی برای این محصول ثبت نشده است.",
       "coverageTitle": "پوشش",
       "waitingPeriod": "دوره انتظار: {days} روز",
@@ -4031,10 +4031,9 @@
       "annualLimit": "سقف سالانه: {amount}",
       "premiumRange": "حق بیمه: {min} تا {max}",
       "termsSource": "منبع: {source}",
-      "checkEligibility": "بررسی واجد شرایط بودن برای {petName}",
-      "apply": "شروع درخواست",
-      "loading": "در حال بارگذاری جزئیات بیمه",
-      "applyFailed": "ارسال درخواست انجام نشد. دوباره تلاش کنید."
+      "visitInsurer": "رفتن به وب‌سایت بیمه‌گر",
+      "insurerWebsiteUnavailable": "بیمه‌گر پیوند وب‌سایت خود را ثبت نکرده است.",
+      "loading": "در حال بارگذاری جزئیات بیمه"
     },
     "compare": {
       "title": "مقایسه طرح‌ها",

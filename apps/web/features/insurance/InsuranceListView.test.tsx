@@ -17,6 +17,7 @@ function product(overrides: Partial<InsuranceProductDto> = {}): InsuranceProduct
     providerId: "provider-1",
     providerName: "Acme Insurance",
     providerLogoUrl: null,
+    providerWebsiteUrl: null,
     name: "Basic Plan",
     country: "IR",
     speciesEligibility: ["DOG"] as never,

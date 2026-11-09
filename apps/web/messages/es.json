@@ -2476,17 +2476,16 @@
     },
     "detail": {
       "coverageTitle": "Cobertura",
-      "exclusionsTitle": "Exclusiones: léelas antes de solicitar información",
+      "exclusionsTitle": "Exclusiones: léelas antes de contactar con la aseguradora",
       "waitingPeriod": "Periodo de espera: {days} días",
       "deductible": "Deducible: {amount}",
       "annualLimit": "Límite anual: {amount}",
       "premiumRange": "Prima: {min}–{max}",
       "exclusionsEmpty": "Este producto no tiene exclusiones registradas.",
       "termsSource": "Fuente: {source}",
-      "checkEligibility": "Comprobar si {petName} cumple los requisitos",
-      "apply": "Iniciar solicitud",
-      "loading": "Cargando detalles del seguro",
-      "applyFailed": "No se pudo enviar la solicitud. Inténtalo de nuevo."
+      "visitInsurer": "Visitar el sitio web de la aseguradora",
+      "insurerWebsiteUnavailable": "La aseguradora no ha publicado un enlace a su sitio web.",
+      "loading": "Cargando detalles del seguro"
     },
     "compare": {
       "title": "Comparar planes de seguro",

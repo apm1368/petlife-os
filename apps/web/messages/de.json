@@ -2476,17 +2476,16 @@
     },
     "detail": {
       "coverageTitle": "Versicherungsschutz",
-      "exclusionsTitle": "Ausschlüsse — bitte vor einer Anfrage lesen",
+      "exclusionsTitle": "Ausschlüsse — vor dem Kontakt mit dem Versicherer lesen",
       "waitingPeriod": "Wartezeit: {days} Tage",
       "deductible": "Selbstbeteiligung: {amount}",
       "annualLimit": "Jahreshöchstleistung: {amount}",
       "premiumRange": "Versicherungsbeitrag: {min}–{max}",
       "exclusionsEmpty": "Für dieses Produkt sind keine Ausschlüsse angegeben.",
       "termsSource": "Quelle: {source}",
-      "checkEligibility": "Berechtigung für {petName} prüfen",
-      "apply": "Anfrage starten",
-      "loading": "Versicherungsdetails werden geladen",
-      "applyFailed": "Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut."
+      "visitInsurer": "Zur Website des Versicherers",
+      "insurerWebsiteUnavailable": "Der Versicherer hat keinen Website-Link veröffentlicht.",
+      "loading": "Versicherungsdetails werden geladen"
     },
     "compare": {
       "title": "Versicherungspläne vergleichen",

@@ -4048,7 +4048,7 @@
       "premiumFrom": "Premium from"
     },
     "detail": {
-      "exclusionsTitle": "Exclusions — read before applying",
+      "exclusionsTitle": "Exclusions — read before contacting the insurer",
       "exclusionsEmpty": "No exclusions listed for this product.",
       "coverageTitle": "Coverage",
       "waitingPeriod": "Waiting period: {days} days",
@@ -4056,10 +4056,9 @@
       "annualLimit": "Annual limit: {amount}",
       "premiumRange": "Premium: {min}–{max}",
       "termsSource": "Source: {source}",
-      "checkEligibility": "Check eligibility for {petName}",
-      "apply": "Start application",
-      "loading": "Loading insurance details",
-      "applyFailed": "The request could not be sent. Please try again."
+      "visitInsurer": "Visit insurer website",
+      "insurerWebsiteUnavailable": "The insurer has not published a website link.",
+      "loading": "Loading insurance details"
     },
     "compare": {
       "title": "Compare plans",
