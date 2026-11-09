@@ -29,7 +29,7 @@ All listed PRs below had no recorded review decision at the last query. `MERGEAB
 | #182 profile settings locale states | `main` / `a4b4783` | pass (`42573824257`) | open, review not recorded |
 | #181 clinical records localization | `main` / `cd87659` | pass (`42573938673`) | open, review not recorded |
 | #178 expenses localization | `main` / `936f449` | running (`42577815035`) | open, review not recorded; earlier failure was an asynchronous test assertion now fixed and pushed |
-| #201 dashboard loading/retry states | `main` / `5ca2e55` | running (`42578040039`) | open, review not recorded; dashboard de/es remains PARTIAL pending browser verification |
+| #201 dashboard loading/retry states | `main` / `fb83ae6` | running (`42578083980`) | open, review not recorded; dashboard de/es remains PARTIAL pending browser verification |
 | #138–#141 | stacked on `feat/i18n-shop-customer` | prior CI pass | conflicting with current base; retarget/resolve only after dependencies and review are addressed |
 | #123–#127 | stacked shop/booking branches | prior CI pass | bases remain stacked; resolve in dependency order, not as independent main PRs |
 | #121 | `main` / `0345abf` | prior CI pass | reported conflicting |
