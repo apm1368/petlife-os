@@ -2,7 +2,18 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
-## Latest verified update — 2026-11-09 08:46 UTC
+## Latest verified update — 2026-11-09 09:04 UTC
+
+- `origin/main` and production both report `e7685b3dd7781839552f7c9bb5173bcbcc7f3edf` (PR #204; deployment `github-42587791639-1`). Main CI passed every stage including migrations, unit/API E2E and build. Production `/api/health/version` reports the same SHA; `/api/health/ready` reports DB and Redis up.
+- Safe unauthenticated production smoke: `/fa/auth`, `/en/auth`, `/de/auth`, `/es/auth` each returned HTTP 200 with matching HTML `lang`; stripped server-rendered de/es auth HTML contained no Persian/Arabic text. This does not verify signed-in dashboard or subscription behavior.
+- #203 and #204 are merged/deployed. Account invitation, household membership and subscription route behavior is not fully LIVE_VERIFIED because authenticated production verification was not performed.
+- #200 last pushed head `2264bd749fa7a6e59910c644f754210e127e801f` passed full hosted CI (`42588637417`). This handoff update includes removal of obsolete pet-ID forwarding from the public insurance list and documents the still-partial legacy pet insurance route. The resulting pushed head needs a new exact-head CI run; do not treat the previous green run as current.
+- Public insurance localization now follows X-04 on its detail page (compare plus outbound HTTPS link), but the legacy `/[locale]/pets/[id]/insurance` page and authenticated application/eligibility APIs still support in-product applications. Fourteen application labels/status keys are absent in de/es; mark this route PARTIAL and treat X-04 as unresolved. No historic application records were deleted.
+- Localization baseline audit of the current catalogs: 6,419 unique keys; fa/en have 0 missing, de/es each lack 2,863 keys and currently receive English catalog fallback. This is a project-wide catalog count, not a count of rendered keys on reachable pages. Route matrix and per-family parity tests remain the completion guard; many families are PARTIAL.
+- Current exact-head CI after branch updates: #178 `b24e4e74…`, #181 `7a0a808e…`, #182 `1bc59f83…`, #183 `72e080b8…`, and #184 `bbecba5f…` are pending/in progress. Do not reuse their older green runs. #121 remains dirty. Older stacked #110→#111, #113→#114 and #123→#141 still need dependency/conflict review.
+- Disk: ~38 MiB free; no `.next`, Turbo or `node_modules/.cache` artifacts were found for safe removal. No cleanup was performed. `git worktree list` shows no payment worktree; none was modified, and absence does not prove deletion.
+
+## Earlier checkpoint — 2026-11-09 08:46 UTC
 
 - `origin/main`: `e7685b3dd7781839552f7c9bb5173bcbcc7f3edf` (PR #204).
 - Production `/api/health/version`: `07c2ac246e344f0eac9e319449801c2e9df88df9` (deployment `github-42584955441-1`). PR #204's main CI/deploy workflow `42587791639` is still running; do not mark #204 live until the endpoint reports its SHA.
@@ -27,10 +38,10 @@ Point-in-time checkpoint only. Recheck GitHub, CI and production before each mer
 | --- | --- | --- |
 | #201 dashboard loading/retry localization | Merged at `2248f57ba8c100e854d4351294bc98d4a83a3e2d`; its post-merge run was cancelled when #196 advanced main. | Confirm the final `main` CI/deployment; dashboard remains PARTIAL pending authenticated responsive/browser inspection. |
 | #196 provider team localization | Merged at `c1c8bf530c384e7eef08cbeb2c9c78fcb7eecbda`; synchronized-head PR CI passed. | Confirm main CI/deploy and provider route behavior. |
-| #203 account invitation inbox states | Merged and production-verified at `07c2ac24…`; its exact-head main deployment run passed. | Authenticated end-to-end account behavior remains unverified. |
-| #204 household membership/subscription localization | Merged at `e7685b3d…`; exact-head PR CI passed; main deploy workflow is pending. | Verify deployed SHA and safely inspect release; do not claim live yet. |
-| #200 insurance localization | Updated branch includes #204 main; fresh CI must run on its latest pushed head. The X-04 customer detail UI now links to insurer only. | Await fresh CI; legacy application/eligibility API routes remain an explicit X-04 gap. |
-| #178, #181–#184 | Old-head CI was green, but all are behind the latest main and require synchronization plus fresh CI. | Do not use old-head passes as evidence for current code. |
+| #203 account invitation inbox states | Merged at `07c2ac24…`; included in production SHA `e7685b3d…`; anonymous auth routes smoke-tested. | Signed-in invitation behavior remains unverified. |
+| #204 household membership/subscription localization | Merged and deployed at `e7685b3d…`; exact-head CI and deployment passed. | Private flows need authenticated production verification. |
+| #200 insurance localization | Last pushed head `2264bd74…` passed CI; new local URL/privacy and documentation follow-up is unpushed. | Commit/push follow-up, then wait for exact-head CI; legacy app APIs remain X-04 gap. |
+| #178, #181–#184 | Updated to main; fresh exact-head CI is pending/in progress. | Review each diff and merge only after current checks pass. |
 | #202 travel test race | Merged at `3097163505b2e9f664dc7103d31c1e9c762756a9`; PR CI green. | Confirm production release SHA and behavior. |
 
 Older stacked PRs remain, including #110→#111, #113→#114, and older shop/booking localization chains. Inspect current bases and conflicts before retargeting; never bypass branch protection.
@@ -38,7 +49,7 @@ Older stacked PRs remain, including #110→#111, #113→#114, and older shop/boo
 ## Localization work
 
 - PR #203 covers the real `/[locale]/profile` `AccountOverviewView`, not the unused `MemberProfileView`. Household invitation inbox now has fa/en/de/es copy for accessible loading, empty, offline, 401/403 access-denied, generic failure and retry. It preserves the distinction between phone-number match and phone verification and does not grant access before owner approval. Focused tests: 16 passed; targeted ESLint and web typecheck passed. Browser verification remains outstanding.
-- PR #204 (`feat/i18n-subscription-pages`) merged at `e7685b3d…`: it adds de/es translations for `/profile/membership` and `/subscription/plans`, locale-correct dates/counts/currency, offline/access-denied/no-household/empty-plan states, source-language disclosure for plan names/descriptions available only in fa/en, and prevents raw English API messages from appearing in de/es when a localized fallback is supplied. Hosted exact-head CI passed; current production deployment is pending. Browser verification is still outstanding.
+- PR #204 (`feat/i18n-subscription-pages`) merged and deployed at `e7685b3d…`: it adds de/es translations for `/profile/membership` and `/subscription/plans`, locale-correct dates/counts/currency, offline/access-denied/no-household/empty-plan states, source-language disclosure for plan names/descriptions available only in fa/en, and prevents raw English API messages from appearing in de/es when a localized fallback is supplied. Hosted exact-head CI passed. Authenticated browser verification is still outstanding.
 - The member dashboard `/[locale]/home` already has full application-owned fa/en/de/es body copy and explicit state/date/number formatting with 21 rendering tests; keep de/es PARTIAL until authenticated navigation/refresh and responsive browser checks are performed. Preserve user- and provider-authored content in its source language.
 - `docs/product/localization-rollout.md` is the route-family matrix. Many page families and rendered states remain PARTIAL; a translated header is not complete localization. German/Spanish SMS templates/delivery remain unavailable and must not be simulated.
 - Keep the landing HERO unchanged. Memorial withdrawal does not prove revocation of independent source image URLs or CDN copies; production bucket/CDN access remains unverified.
@@ -47,6 +58,7 @@ Older stacked PRs remain, including #110→#111, #113→#114, and older shop/boo
 
 - Shop remains empty until legitimate, reviewed product and seller-offer data with acceptable content/image provenance exist. Do not re-enable demo records.
 - Jajiga is selected, but the small discovery evidence does not prove nationwide coverage or live availability. Digikala access remains unproven; do not bypass source restrictions.
-- Poll main release workflow `42587791639`; verify production `/api/health/version`, readiness, and safe public APIs only after deployment completes.
-- Await #200 CI, then continue route-by-route localization; synchronize #178 and #181–#184 individually and rerun affected checks before merge.
+- Commit and push the final #200 list-query cleanup and coverage/handoff updates, then recheck exact-head CI and mergeability.
+- Monitor the current exact-head CI runs for #178 and #181–#184; inspect each resulting diff, then merge independently only after checks pass.
+- Continue the route-by-route localization work; do not report full four-language completion while the catalog and route matrix still show missing content.
 - Continue route-by-route localization and functional/security work; track remaining page states in the rollout matrix. Do not mark anything LIVE_VERIFIED without merged code, green CI, migration/deploy evidence and observed production behavior.

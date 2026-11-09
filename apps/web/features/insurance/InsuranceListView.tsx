@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Button, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { InsuranceProductDto } from "@petlife/types";
@@ -14,13 +14,11 @@ import { formatCount } from "@/lib/number/format-number";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import type { RouteLocale } from "@/lib/i18n/config";
 
-/** Public discovery — no guard, works for anonymous visitors (spec: "public browsing" for insurance discovery must work without auth). `petId` in the query string is passed through to product detail so a household browsing for a specific pet can check eligibility there. */
+/** Public discovery — no guard, works for anonymous visitors (spec: "public browsing" for insurance discovery must work without auth). */
 export function InsuranceListView() {
   const t = useTranslations("insurance");
   const locale = useLocale() as RouteLocale;
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const petId = searchParams.get("petId") ?? undefined;
 
   const [products, setProducts] = useState<InsuranceProductDto[] | null>(null);
   const [error, setError] = useState<unknown>(null);
@@ -46,7 +44,7 @@ export function InsuranceListView() {
   }
 
   function productHref(productId: string): string {
-    return petId ? `/${locale}/insurance/${productId}?petId=${petId}` : `/${locale}/insurance/${productId}`;
+    return `/${locale}/insurance/${productId}`;
   }
 
   if (error) return <LoadFailure error={error} onRetry={load} />;

@@ -7,7 +7,6 @@ import { InsuranceListView } from "./InsuranceListView";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
-  useSearchParams: () => new URLSearchParams(),
 }));
 vi.mock("@/services/insurance.service", () => ({ insuranceService: { listProducts: vi.fn() } }));
 
