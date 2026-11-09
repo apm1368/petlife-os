@@ -119,6 +119,7 @@ overpricing and the product is hidden.
 | C-09 | When pricing and discounting, a warning about the legal collision with overpricing is displayed | Original document |
 | C-10 | Discount codes are created by both OptLife and the seller; the cost falls to the creator (an OptLife code from commission, a seller code from their share) | Owner |
 | C-11 | Delivery time and shipping cost are recorded for every offer | Original document |
+| C-12 | Source imports create drafts only in the central catalogue; source prices, stock and seller offers are not imported, and source changes stay separate from local content until an administrator explicitly approves them | Owner |
 
 ## O — Order, dispatch, delivery, return
 
@@ -1106,6 +1107,7 @@ Every pet has exactly one primary owner and the household only grants access; tr
 | ID-18 | Under 18: no independent account, purchase, wallet, or community; only a household member of a parent with the "carer" role |
 | ID-19 | At an elderly user's request, a member with the "partner owner" role places orders and bookings for them |
 | ID-20 | "Neighbourhood pet": a stray with several carers and no owner, with a vaccine and neutering record |
+| ID-21 | The household owner controls invitations and removal of members from that household. A user may belong to several households at once. Invitations use the phone number and a unique, secret, expiring, revocable, single-use link. After signing in or registering with the invited number, the recipient may only request membership; the owner must explicitly approve. Matching numbers does not prove phone ownership, and this phase sends no SMS/email verification or marks a phone verified. No household, pet or health data/access is exposed before approval. Removing a member revokes only that household's membership and access. This supplements ON-09 and ID-12 and does not change the account-verification definition in ID-15. |
 
 ## Chapter 11 — Cross-module transfers
 
@@ -1241,6 +1243,23 @@ The work is divided by domain with a fixed owner; the shared core first, then th
 | WB-18 | Country and partner flags (GL-12, NX-07, NX-08) are part of phase 1 so that modules are built behind them |
 | WB-19 | The key event impact table (XM-10) and the state machine (OF-01) are written and implemented in phase 1 |
 | WB-20 | The global edition (phase 4) only starts after the foreign company is registered and GL-08 is legally reviewed |
+
+## Owner's supplementary product decisions
+
+| Code | Decision | Effect on earlier decisions |
+| --- | --- | --- |
+| PL-01 | Complete the pet-product catalogue using Digikala information. Admins can provide a product, listing or category URL to retrieve available name, brand, specifications, description, primary image and gallery; the result is a simple product in the OptLife catalogue | Complements C and SH decisions |
+| PL-02 | Import prioritizes completeness, descriptions and brand information. Digikala prices and stock are not the goal and must not be presented as OptLife seller prices or stock | Complements PL-01 and separates catalogue content from seller offers |
+| PL-03 | Add pet-friendly accommodation information from either Jajiga or Jabama; the final source was initially undecided. Refresh retrievable prices and capacity/availability once daily and send users to the same accommodation's source page to book. Show the update time; final results depend on the source site | Complements travel and pet-friendly accommodation decisions |
+| PL-04 | Remove the lock on redesigning the whole landing page. Complete it as a polished product, but do not change the current hero section; other landing sections may change | Replaces the full-landing lock in UX-17 and BO-16 only for the landing; the hero remains protected |
+| PL-05 | Add a public memorial section to the landing: when a pet owner reports that their pet "has joined the angels", small slides may show the pet's name and image to all users | Complements U-01; does not remove the separate memorial page |
+| PL-06 | The landing includes partner invitations, public articles, a short introduction to OptLife and attractive entry points to the site's sections | Completes landing content consistently with PL-04 |
+| PL-07 | Product languages are Persian, English, German and Spanish; Arabic is removed from the target set. Apply this to interface, content, translation needs and tests | Replaces the language set in GL-06, GC-19, IA-09, DS-12 and WB-04; other principles remain |
+| PL-08 | Design all site pages using the owner's identified design reference, except that the current landing hero remains unchanged. Do not guess the reference content before it is accessible and inspected | Complements DS-01 through DS-20 and PL-04 |
+| PL-09 | Sellers select a product from the central catalogue and create their own offer for it. If the product is genuinely absent, the seller requests its addition; an admin checks for missing/duplicate products and adds an approved new product to the catalogue | Complements PL-01/02 and the seller catalogue flow |
+| PL-10 | Jajiga is the selected source for pet-friendly accommodation. Retrieve and refresh available information daily and link to the same Jajiga accommodation as specified by PL-03 | Resolves the source choice left open in PL-03 |
+| PL-11 | The visual design boards supplied by the owner are the reference for all product pages, except that the current landing hero is preserved. The implementable summary is in [the design reference](design/product-design-reference.md). Most images are in the repository and linked there; the separate shop image and emergency images supplied in the latest round have not yet been identified in that folder. Do not infer visual details from unavailable references | Complements PL-08; images were seen in the conversation, but unseen details must not be guessed |
+| PL-12 | In addition to light/dark themes, language switching and responsive design, provide an optional "simplified display" for any user, including users who prefer less clutter. Keep essential information and functionality available and allow users to return to the normal display. This mode is independent of theme and language | Complements DS and PL-07 |
 
 ## Round Two Summary
 

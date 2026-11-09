@@ -2,6 +2,15 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
+## Latest verified checkpoint — 2026-11-09 17:06 UTC
+
+- `main`: `8c4a5c73a0d1cf622096fff8ebaf8fd8472a5f5b` (#221). Production: `a0c3374307982f4b7a9a4ec2c70c1f06e10b5c5b` (`github-42655547432-1`, #211). Production readiness is healthy; run 42658097839 for the #221 main revision is still in progress. Do not mark #221 live yet.
+- #216 is merged and deployed; #211 is merged and deployed; #221 is merged with its exact-head CI green and is awaiting the current main deploy. #106 is open against main at `2c7cdafe8be89c8a2efb8ed9a0e9e1249f3c388a`; its prior CI failed decision-code parity (missing C-12, ID-21, PL-01..PL-12 from the English companion). Current branch adds those translations; parity passes locally and new hosted CI remains pending.
+- Batch 2 web safety verification: 93 tests across ten household/pet/health/care suites, then 28 tests after the final health-state adjustment; ownership PR #106: 35 API and 22 web focused tests, API/web typechecks, targeted lint, schema validation and generation passed. No local DB-backed fresh E2E or authenticated browser/screenshots due workspace capacity/session access limits. Private household/health flows are not LIVE_VERIFIED.
+- Migration/deployment note for #106: additive ownership-transfer schema and backfill, not yet released. Review owner inference against production data and ensure backup/rollback readiness before deployment.
+- No payment changes were modified. Visible workspace has many worktrees; a payment-named worktree was not found. Disk at the last check had less than 1 GB free; avoid local DB image pulls/builds.
+- Next: rerun PR #106 after parity repair; wait for run 42658097839 and verify production version after completion; merge #106 only when current CI is green and GitHub permits normal merge. Then verify authenticated household-owner transfer/request/approval/permissions in controlled QA; otherwise retain PARTIAL/NOT LIVE.
+
 ## Batch 2 — PR and verification update, 2026-11-09 16:25 UTC
 
 - PR #221 (`fix(privacy): isolate household and pet context`) is open against `main`, head `10a5a729`. Its initial exact-head CI is pending. The committed QA record is [batch-2-household-pet-health-2026-11-09.md](../qa/batch-2-household-pet-health-2026-11-09.md).
