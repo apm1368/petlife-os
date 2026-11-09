@@ -457,6 +457,27 @@
       "backToList": "Zurück zur Liste",
       "search": "Suchen"
     },
+    "support": {
+      "title": "Supportfälle",
+      "newCase": "Neuer Fall",
+      "createTitle": "Supportfall erstellen",
+      "filter": {
+        "allStatuses": "Alle Status",
+        "allCategories": "Alle Kategorien",
+        "searchPlaceholder": "Betreff oder Fallnummer suchen …",
+        "createdFrom": "Erstellt ab",
+        "createdTo": "Erstellt bis"
+      },
+      "status": { "OPEN": "Offen", "IN_PROGRESS": "In Bearbeitung", "WAITING_ON_USER": "Wartet auf Nutzer", "WAITING_ON_INTERNAL": "Interne Bearbeitung ausstehend", "RESOLVED": "Gelöst", "CLOSED": "Geschlossen" },
+      "category": { "ACCOUNT": "Konto", "PET": "Haustier", "HEALTH": "Gesundheit", "BOOKING": "Buchung", "SERVICE": "Dienstleistung", "PAYMENT": "Zahlung", "REFUND": "Erstattung", "ORDER": "Bestellung", "DELIVERY": "Lieferung", "SELLER": "Verkäufer", "PROVIDER": "Anbieter", "MARKETPLACE": "Marktplatz", "TRUST_SAFETY": "Vertrauen und Sicherheit", "OTHER": "Sonstiges" },
+      "priority": { "LOW": "Niedrig", "NORMAL": "Normal", "HIGH": "Hoch", "URGENT": "Dringend" },
+      "form": { "requesterUserId": "Nutzer-ID der anfragenden Person", "subject": "Betreff", "description": "Beschreibung", "category": "Kategorie", "priority": "Priorität", "submit": "Fall erstellen" },
+      "detail": {
+        "caseNumber": "Fall {number}", "requester": "Anfragende Person: {name}", "authorType": { "USER": "Kunde", "ADMIN": "Admin", "SYSTEM": "System" }, "assignTo": "Admin zuweisen", "changeStatus": "Status ändern", "messages": "Nachrichten", "composePlaceholder": "Antwort schreiben …", "visibilityPublic": "Öffentliche Antwort", "visibilityInternal": "Interne Notiz (wird nicht an Kunden gesendet)", "visibilityLabel": "Sichtbarkeit", "send": "Senden", "notes": "Interne Notizen",
+        "context": { "title": "Kontext", "household": "Haushalt: {name}", "pet": "Haustier: {name}", "relatedEntity": "Bezug: {summary}", "firstResponseTime": "Erste Antwort nach {minutes} Min.", "noFirstResponseYet": "Noch keine Antwort gesendet", "resolutionTime": "Gelöst nach {minutes} Min.", "previousCases": "Frühere Fälle dieser Person:", "noPreviousCases": "Diese Person hat keine früheren Fälle." }
+      },
+      "states": { "loading": "Supportfälle werden geladen …", "loadFailed": "Supportfälle konnten nicht geladen werden. Bitte erneut versuchen.", "detailLoadFailed": "Dieser Supportfall konnte nicht geladen werden. Bitte erneut versuchen.", "accessDeniedTitle": "Kein Zugriff", "accessDenied": "Du hast keine Berechtigung, diese Supportfälle anzusehen.", "notFoundTitle": "Fall nicht gefunden", "notFound": "Dieser Supportfall ist nicht verfügbar.", "empty": "Keine Supportfälle gefunden", "emptyDescription": "Passe die Filter an oder erstelle einen neuen Fall.", "requiredFields": "Nutzer-ID, Betreff und Beschreibung sind erforderlich.", "createFailed": "Der Supportfall konnte nicht erstellt werden. Bitte erneut versuchen.", "actionFailed": "Die Änderung konnte nicht gespeichert werden. Bitte erneut versuchen.", "noMessages": "Noch keine Nachrichten.", "noNotes": "Noch keine internen Notizen." }
+    },
     "audit": {
       "title": "Prüfprotokoll",
       "entityType": "Entitätstyp",
