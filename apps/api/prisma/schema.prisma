@@ -105,6 +105,41 @@ enum PetAccessSource {
   TEMPORARY
 }
 
+/// The lifecycle of a pet-ownership transfer request (ID-01: "ownership transfer needs
+/// both parties' approval"; ID-03: "OptLife does not judge — the registered owner stays
+/// until an official ruling or a written agreement").
+///
+/// PENDING_REVIEW  — the recipient was invited and has not answered yet.
+/// ACCEPTED        — both parties approved; the transfer has been applied.
+/// DECLINED        — the recipient refused. The registered owner is unchanged.
+/// CANCELLED       — the current owner withdrew the request.
+/// EXPIRED         — the recipient did not answer within the window.
+/// DISPUTED        — the parties disagree after a transfer was applied. ID-03 says the
+///                   platform does not adjudicate: the registered owner stays as recorded
+///                   until an official ruling or a written agreement arrives, so this
+///                   state is recorded for audit and never silently reassigns the pet.
+enum PetOwnershipTransferStatus {
+  PENDING_REVIEW
+  ACCEPTED
+  DECLINED
+  CANCELLED
+  EXPIRED
+  DISPUTED
+}
+
+/// What happens to a pet's memories when it moves to a new household (ID-05: "the health
+/// record goes, the memories by the previous owner's choice, the costs do not").
+/// The previous owner decides per transfer, so this is an explicit choice rather than a default.
+enum PetOwnershipMemoryDisposition {
+  /// The new owner receives the pet's memories as they are.
+  TRANSFER
+  /// The new owner receives nothing; the previous owner keeps them.
+  RETAIN
+  /// The new owner receives a read-only copy of the memories, and the previous owner keeps
+  /// the originals. This is the same shape as ID-02's separated-member copy.
+  COPY_READ_ONLY
+}
+
 enum OnboardingChapter {
   ACCOUNT
   HOUSEHOLD
@@ -1243,6 +1278,16 @@ model User {
   acceptedInvitations     HouseholdInvitation[]      @relation("AcceptedInvitationUser")
   requestedInvitations    HouseholdInvitation[]      @relation("RequestedInvitationUser")
   reviewedInvitations     HouseholdInvitation[]      @relation("ReviewedInvitationUser")
+  /// Pets whose primary owner this user is (ID-01).
+  ownedPets               PetOwnership[]             @relation("PetPrimaryOwner")
+  /// Ownership transfers this user proposed (ID-01, ID-05).
+  proposedOwnershipTransfers PetOwnershipTransfer[]  @relation("TransferProposedBy")
+  /// Ownership transfers addressed to this user (ID-01, ID-05).
+  receivedOwnershipTransfers PetOwnershipTransfer[]  @relation("TransferRecipient")
+  /// Read-only memory copies left for this user after a household separation (ID-02).
+  memoryCopies            PetMemoryCopy[]
+  /// Subscriptions this user is the recorded payer for (ID-07).
+  paidSubscriptions       Subscription[]          @relation("SubscriptionPayer")
 
   adminUser                 AdminUser?
   supportCasesRequested     SupportCase[]
@@ -1540,6 +1585,14 @@ model Pet {
   onboardingProgress   OnboardingProgress[]
   interests            UserPetInterest[]
 
+  /// The pet's single primary owner (ID-01). At most one row — the primary owner is
+  /// exactly one person, and a household only grants access to the rest.
+  ownership      PetOwnership?
+  /// Transfer requests raised for this pet (ID-01, ID-05).
+  ownershipTransfers PetOwnershipTransfer[]
+  /// Read-only copies of this pet's memories left for separated members (ID-02).
+  memoryCopies       PetMemoryCopy[]
+
   healthProfile      HealthProfile?
   allergies          Allergy[]
   conditions         Condition[]
@@ -1669,6 +1722,112 @@ model PetAccessGrant {
   @@index([source])
   @@index([revokedAt])
   @@map("pet_access_grants")
+}
+
+/// The primary owner of a pet — the single accountable person (ID-01: "Every pet has
+/// exactly one primary owner; the household only grants access").
+///
+/// This row is the source of truth for who owns a pet. Before it existed, ownership was
+/// implied by `Pet.householdId` plus household role, which made "one primary owner" and
+/// "the household only grants access" unenforceable: a household could hold several OWNER
+/// members, and the pet record itself named no owner.
+///
+/// The owner is always a member of the pet's current household. `Pet.householdId` stays
+/// the pet's home household; this table says who inside that household is accountable
+/// for it. Ownership transfer moves the pet to a new household AND moves this row.
+model PetOwnership {
+  id     String @id @default(uuid()) @db.Uuid
+  petId  String @unique @db.Uuid
+  pet    Pet    @relation(fields: [petId], references: [id], onDelete: Cascade)
+  /// The primary owner. Always a member of `Pet.householdId` at the moment it is written.
+  ownerUserId String @db.Uuid
+  owner       User   @relation("PetPrimaryOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
+  /// The household the pet lived in when this ownership row was written. Kept for audit:
+  /// after a transfer the pet's household changes, and this records where it came from.
+  householdId String   @db.Uuid
+  /// When ownership last changed hands, and how.
+  transferredAt      DateTime @default(now())
+  transferReason     String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([ownerUserId])
+  @@map("pet_ownerships")
+}
+
+/// A request to move a pet from its current primary owner to another user (ID-01, ID-05).
+///
+/// The transfer is never applied by a single call: the current owner proposes it and the
+/// recipient must accept (ID-01: "ownership transfer needs both parties' approval"). The
+/// request is the audit record of that two-party agreement — it records who proposed,
+/// who accepted, when, and what each side was told would happen to memories and costs.
+model PetOwnershipTransfer {
+  id    String @id @default(uuid()) @db.Uuid
+  petId String @db.Uuid
+  pet   Pet    @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  /// The owner at the time the request was made.
+  fromUserId String @db.Uuid
+  fromUser   User   @relation("TransferProposedBy", fields: [fromUserId], references: [id], onDelete: Restrict)
+
+  /// The user asked to take over the pet.
+  toUserId String @db.Uuid
+  toUser   User   @relation("TransferRecipient", fields: [toUserId], references: [id], onDelete: Restrict)
+
+  /// The household the pet lives in now (the source household of the move).
+  fromHouseholdId String   @db.Uuid
+  /// The household the pet will live in once accepted. Must be the recipient's own
+  /// household, or a household they are already a member of.
+  toHouseholdId   String   @db.Uuid
+
+  status PetOwnershipTransferStatus @default(PENDING_REVIEW)
+
+  /// What happens to the pet's memories on acceptance (ID-05: the previous owner chooses).
+  memoryDisposition PetOwnershipMemoryDisposition @default(RETAIN)
+
+  /// The recipient's response, when they answered.
+  respondedAt DateTime?
+  /// The transfer was applied to the pet at this time.
+  appliedAt   DateTime?
+  /// When an unanswered request stops being actionable.
+  expiresAt   DateTime
+
+  /// Free-text context recorded by the parties.
+  note String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([petId, status])
+  @@index([toUserId, status])
+  @@index([fromUserId, status])
+  @@map("pet_ownership_transfers")
+}
+
+/// A read-only copy of a memory left behind for a person who separated from the household
+/// (ID-02: "the separated member keeps a read-only copy of the memories they recorded").
+///
+/// The original memory row stays with the pet and its household. This row points at the
+/// original and records who the copy belongs to, so the separated member can read what
+/// they personally recorded without keeping any write access to the pet.
+model PetMemoryCopy {
+  id String @id @default(uuid()) @db.Uuid
+  /// The original memory. Never deleted — the copy is a grant to read, not a fork of the data.
+  memoryId String   @db.Uuid
+  memory   PetMemory @relation(fields: [memoryId], references: [id], onDelete: Cascade)
+  /// The person the copy is for (the separated member).
+  userId   String   @db.Uuid
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// The household separation that caused the copy.
+  householdId String   @db.Uuid
+  /// The pet the copied memory belongs to, kept so a pet-scoped listing works without a join.
+  petId     String   @db.Uuid
+  pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([memoryId, userId])
+  @@index([userId, createdAt])
+  @@map("pet_memory_copies")
 }
 
 /// Active pet is a per-user, per-household preference — never stored on Pet itself.
@@ -5928,6 +6087,16 @@ model Subscription {
   householdId String    @unique @db.Uuid
   household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
 
+  /// The account that pays for this subscription (ID-07: "the payer of recurring items
+  /// transfers to the new owner; it is suspended until their approval").
+  ///
+  /// NULL means "no payer has been designated" and the household's owner is used, which is
+  /// the pre-existing behaviour. Once a payer is recorded, renewal attempts are held
+  /// while an ownership transfer is awaiting that payer's approval — charging the previous
+  /// owner for a household they no longer run is exactly what ID-07 forbids.
+  payerUserId String? @db.Uuid
+  payer       User?   @relation("SubscriptionPayer", fields: [payerUserId], references: [id], onDelete: SetNull)
+
   planId  String                 @db.Uuid
   plan    SubscriptionPlan       @relation("CurrentPlan", fields: [planId], references: [id], onDelete: Restrict)
   /// Null while on the FREE plan (no price exists for it).
@@ -7804,6 +7973,9 @@ model PetMemory {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  /// Read-only copies handed to people who separated from the household (ID-02).
+  copies PetMemoryCopy[]
 
   @@index([petId])
   @@index([householdId])

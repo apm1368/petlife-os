@@ -412,6 +412,11 @@ export function HouseholdCenterView() {
           {notice}
         </div>
       ) : null}
+      <div>
+        <Button variant="secondary" size="sm" onClick={() => router.push(`/${locale}/profile/household/ownership`)}>
+          {t("مالکیت پت و انتقال", "Pet ownership & transfers", "Tiereigentum und Übertragungen", "Titularidad y transferencias de mascotas")}
+        </Button>
+      </div>
       {households.length > 1 ? (
         <Select
           label={t("خانواده", "Household", "Haushalt", "Hogar")}

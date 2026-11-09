@@ -1,5 +1,14 @@
 # Batch 2 — household, pet context and health QA
 
+## Latest checkpoint — 2026-11-09 17:06 UTC
+
+- `main` is `8c4a5c73a0d1cf622096fff8ebaf8fd8472a5f5b` (PR #221). Production currently reports `a0c3374307982f4b7a9a4ec2c70c1f06e10b5c5b` (PR #211 deployment `github-42655547432-1`), with `/api/health/ready` returning database/Redis up. The deployment for #221/main `8c4a5c73` is still in progress (run 42658097839); therefore #221 is not yet production-verified.
+- PR #106 ownership-transfer branch was synchronized with current main and its household/pet UI conflicts were resolved without dropping current privacy guards. Current PR head `2c7cdafe8be89c8a2efb8ed9a0e9e1249f3c388a`; its latest CI run 42660561640 failed at decision-code parity because the English companion omitted C-12, ID-21 and PL-01..PL-12. The translations are being added in this PR branch; the parity script passes locally (870 codes in both files). New exact-head hosted CI is required before merge.
+- Ownership-transfer code adds primary-owner and two-party transfer workflows. Its Prisma migration is additive (new ownership/transfer records and nullable subscription payer plus an owner backfill); production membership/owner assumptions still require review before release. No migration is part of #221.
+- The prior 93 focused web tests and 28 post-adjustment focused tests passed, as recorded below. PR #106's focused API ownership/order tests (35), web ownership/household tests (22), API/web typechecks, targeted ESLint, Prisma schema validation/client generation, and local parity/diff checks passed. Database-backed local E2E and authenticated browser/screenshots remain NOT TESTED; hosted CI and controlled QA access are still required.
+- Payment-related worktrees were preserved and not modified. No payment worktree was visible in the inspected workspace; this is not evidence that one was deleted.
+- Status: household/pet context safety is merged and awaiting its production run; primary-owner transfer is awaiting exact-head CI. Health/document/calendar browser and production behavior remain PARTIAL, not LIVE_VERIFIED.
+
 This record covers the client-side privacy and state-handling fixes made after reviewing the existing household, pet and health flows. It does not certify every Batch 2 feature as complete.
 
 ## Baseline and scope

@@ -151,15 +151,16 @@ describe("HouseholdCenterView", () => {
   });
 
   it.each([
-    ["de", "Mitglieder", "Zugriffsverlauf", "Pflegehilfe"],
-    ["es", "Miembros", "Historial de acceso", "Ayudante de cuidados"],
+    ["de", "Mitglieder", "Zugriffsverlauf", "Pflegehilfe", "Tiereigentum und Übertragungen"],
+    ["es", "Miembros", "Historial de acceso", "Ayudante de cuidados", "Titularidad y transferencias de mascotas"],
   ] as const)(
     "renders household and access copy in %s",
-    async (locale, membersHeading, historyHeading, presetLabel) => {
+    async (locale, membersHeading, historyHeading, presetLabel, ownershipLabel) => {
       renderWithIntl(<HouseholdCenterView />, locale);
       await screen.findByText("Reza");
       expect(screen.getByRole("heading", { name: membersHeading })).toBeTruthy();
       expect(screen.getByRole("heading", { name: historyHeading })).toBeTruthy();
+      expect(screen.getByRole("button", { name: ownershipLabel })).toBeTruthy();
       fireEvent.click(
         screen.getByRole("button", { name: locale === "de" ? "Mitglied einladen" : "Invitar a un miembro" }),
       );

@@ -34,6 +34,14 @@ export const NotificationDeepLinks = {
   careItem: (petId: string, careItemId: string) => `/pets/${petId}/care/${careItemId}`,
   /** Locale-free like every other link — the notification centre adds `/{locale}` itself. */
   householdInvitation: (rawToken: string) => `/invitations/${rawToken}`,
+  /**
+   * A pet-ownership transfer waiting for an answer (ID-01).
+   *
+   * The link points at the ownership page itself, which is where the incoming
+   * request is listed — there is no per-transfer page, so a link carrying the
+   * transfer id would land on a 404.
+   */
+  petOwnershipTransfer: (_transferId: string) => `/profile/household/ownership`,
   profileHousehold: () => `/profile/household`,
   profileSecurity: () => `/profile/security`,
   membership: () => `/profile/membership`,
