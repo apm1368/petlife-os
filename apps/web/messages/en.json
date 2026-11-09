@@ -385,6 +385,13 @@
   "subscription": {
     "title": "Subscription",
     "plansTitle": "Plans",
+    "loadErrorTitle": "Subscription could not be loaded",
+    "loadErrorMessage": "Check your connection and try again. No changes were made.",
+    "loadOffline": "You are offline. Reconnect and try again.",
+    "loadForbidden": "You do not have access to this household subscription.",
+    "noHouseholdMessage": "A membership belongs to a household. Create or join a household before managing plans.",
+    "openHouseholds": "Manage households",
+    "noPlans": "No plans are available right now.",
     "viewPlans": "View plans",
     "resume": "Resume subscription",
     "cancel": "Cancel subscription",
@@ -398,6 +405,7 @@
       "EXPIRED": "Expired"
     },
     "trialEndsAt": "Your trial ends on {date}.",
+    "trialDaysRemaining": "{days, number} days left in your trial.",
     "periodEndsAt": "Current period ends on {date}.",
     "pastDueWarning": "We couldn't take the renewal payment. Your plan stays fully active for now — renew from Plans to keep it.",
     "graceWarning": "The renewal payment is still outstanding. Your plan stays active until {date}; renew from Plans before then to keep your benefits.",
@@ -461,7 +469,8 @@
     "cancelKeeps": "Everything already recorded (pets, health history, memories, orders, receipts) stays readable and exportable.",
     "cancelKeeps2": "You can resume before {date} and nothing changes.",
     "cancelConfirm": "Cancel membership",
-    "trialNote": "No payment is taken during the trial."
+    "trialNote": "No payment is taken during the trial.",
+    "planContentEnglish": "Plan names and descriptions are currently available only in English; the original text is shown."
   },
   "pets": {
     "myPets": "My Pets",

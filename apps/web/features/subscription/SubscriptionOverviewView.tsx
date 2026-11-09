@@ -27,7 +27,16 @@ const STATUS_TONE: Record<SubscriptionStatus, StatusTone> = {
 };
 
 function formatDate(iso: string, locale: string): string {
-  return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "medium" }).format(new Date(iso));
+  const intlLocale = locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-GB";
+  return new Intl.DateTimeFormat(intlLocale, { dateStyle: "medium" }).format(new Date(iso));
+}
+
+function numberLocale(locale: string): string {
+  return locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-GB";
+}
+
+function contentLocale(locale: string): "fa" | "en" | "de" | "es" {
+  return locale === "fa" || locale === "de" || locale === "es" ? locale : "en";
 }
 
 /**
@@ -46,7 +55,7 @@ export function SubscriptionOverviewView() {
   const [sub, setSub] = useState<SubscriptionDto | null>(null);
   const [entitlements, setEntitlements] = useState<ResolvedEntitlementDto[] | null>(null);
   const [usage, setUsage] = useState<SubscriptionUsageItemDto[] | null>(null);
-  const [error, setError] = useState(false);
+  const [loadFailure, setLoadFailure] = useState<"loadErrorMessage" | "loadOffline" | "loadForbidden" | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionBusy, setActionBusy] = useState(false);
   const [history, setHistory] = useState<SubscriptionBillingHistoryDto | null>(null);
@@ -55,7 +64,7 @@ export function SubscriptionOverviewView() {
 
   const load = useCallback(async () => {
     if (!householdId) return;
-    setError(false);
+    setLoadFailure(null);
     try {
       const [subResult, entitlementsResult, usageResult] = await Promise.all([
         subscriptionService.getCurrent(householdId),
@@ -73,8 +82,8 @@ export function SubscriptionOverviewView() {
         setHistory(null);
         setIsOwner(!(err instanceof ApiError && err.status === 403));
       }
-    } catch {
-      setError(true);
+    } catch (err) {
+      setLoadFailure(navigator.onLine === false ? "loadOffline" : err instanceof ApiError && (err.status === 401 || err.status === 403) ? "loadForbidden" : "loadErrorMessage");
     }
   }, [householdId]);
 
@@ -104,7 +113,8 @@ export function SubscriptionOverviewView() {
     }
   }
 
-  if (error) return <ErrorRecovery title={t("title")} message="" retryLabel={tCommon("retry")} onRetry={load} />;
+  if (loadFailure) return <ErrorRecovery title={t("loadErrorTitle")} message={t(loadFailure)} retryLabel={tCommon("retry")} onRetry={load} />;
+  if (!householdId) return <section className="flex flex-col gap-3"><h1 className="text-page-title text-text-primary">{t("title")}</h1><p className="text-body text-text-secondary">{t("noHouseholdMessage")}</p><Button variant="secondary" onClick={() => router.push(`/${locale}/profile/household`)}>{t("openHouseholds")}</Button></section>;
   if (!sub || !entitlements || !usage) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   const usageByKey = new Map(usage.map((u) => [u.key, u]));
@@ -123,14 +133,15 @@ export function SubscriptionOverviewView() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-section-title text-text-primary">{locale === "fa" ? sub.plan.nameFa : sub.plan.nameEn}</p>
-                {sub.price ? <p className="text-metadata text-text-secondary">{formatCurrency(sub.price.amount, locale === "fa" ? "fa" : "en")}</p> : null}
+                {locale === "de" || locale === "es" ? <p className="text-metadata text-text-secondary">{t("planContentEnglish")}</p> : null}
+                {sub.price ? <p className="text-metadata text-text-secondary">{formatCurrency(sub.price.amount, contentLocale(locale))}</p> : null}
               </div>
               <StatusLabel tone={STATUS_TONE[sub.status]}>{t(`status.${sub.status}`)}</StatusLabel>
             </div>
 
             {sub.status === SubscriptionStatus.TRIALING && sub.trialEndsAt ? (() => {
               const days = Math.max(0, Math.ceil((Date.parse(sub.trialEndsAt) - Date.now()) / 86_400_000));
-              return <p className="text-body font-semibold text-text-primary">{locale === "fa" ? `${days.toLocaleString("fa-IR")} روز از دوره‌ی آزمایشی باقی مانده است.` : `${days} day${days === 1 ? "" : "s"} left in your trial.`}</p>;
+              return <p className="text-body font-semibold text-text-primary">{t("trialDaysRemaining", { days: new Intl.NumberFormat(numberLocale(locale)).format(days) })}</p>;
             })() : null}
             {sub.status === SubscriptionStatus.TRIALING && sub.trialEndsAt ? <p className="text-body text-text-secondary">{t("trialEndsAt", { date: formatDate(sub.trialEndsAt, locale) })}</p> : null}
             {/* During a trial the period ends with the trial — saying it twice adds nothing. */}
@@ -177,10 +188,10 @@ export function SubscriptionOverviewView() {
                         ? t("included")
                         : t("notIncluded")
                       : usageItem
-                        ? t("usageOf", { used: new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US").format(usageItem.used), limit: usageItem.limit === null ? "∞" : new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US").format(usageItem.limit) })
+                        ? t("usageOf", { used: new Intl.NumberFormat(numberLocale(locale)).format(usageItem.used), limit: usageItem.limit === null ? "∞" : new Intl.NumberFormat(numberLocale(locale)).format(usageItem.limit) })
                         : entitlement.limitValue === null
                           ? t("unlimited")
-                          : entitlement.limitValue.toLocaleString(locale === "fa" ? "fa-IR" : "en-US")}
+                          : entitlement.limitValue.toLocaleString(numberLocale(locale))}
                     {entitlement.overridden ? ` · ${t("overridden")}` : ""}
                   </span>
                 </div>
@@ -205,7 +216,7 @@ export function SubscriptionOverviewView() {
                       {t(`attemptReason.${attempt.reason}`)} · {formatDate(attempt.createdAt, locale)}
                     </span>
                     <span className="flex items-center gap-2">
-                      <span className="text-metadata text-text-secondary">{formatCurrency(attempt.amount, locale === "fa" ? "fa" : "en")}</span>
+                      <span className="text-metadata text-text-secondary">{formatCurrency(attempt.amount, contentLocale(locale))}</span>
                       <StatusLabel tone={attempt.status === "SUCCEEDED" ? "success" : attempt.status === "FAILED" ? "urgent" : "neutral"}>
                         {attempt.status === "SUCCEEDED" && sub.billingMode === "SANDBOX" ? t("attemptStatus.SIMULATED") : t(`attemptStatus.${attempt.status}`)}
                       </StatusLabel>
