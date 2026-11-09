@@ -2624,12 +2624,14 @@
       "detail": {
         "caseNumber": "Case {number}",
         "requester": "Requester: {name}",
+        "authorType": { "USER": "Customer", "ADMIN": "Admin", "SYSTEM": "System" },
         "assignTo": "Assign to admin",
         "changeStatus": "Change status",
         "messages": "Messages",
         "composePlaceholder": "Write a reply…",
         "visibilityPublic": "Public reply",
         "visibilityInternal": "Internal note (never sent to the customer)",
+        "visibilityLabel": "Visibility",
         "send": "Send",
         "notes": "Internal notes",
         "context": {
@@ -2643,6 +2645,22 @@
           "previousCases": "Previous tickets from this customer:",
           "noPreviousCases": "No previous tickets from this customer."
         }
+      },
+      "states": {
+        "loading": "Loading support cases…",
+        "loadFailed": "Support cases could not be loaded. Try again.",
+        "detailLoadFailed": "This support case could not be loaded. Try again.",
+        "accessDeniedTitle": "Access denied",
+        "accessDenied": "You do not have permission to view these support cases.",
+        "notFoundTitle": "Case not found",
+        "notFound": "This support case is not available.",
+        "empty": "No support cases found",
+        "emptyDescription": "Adjust the filters or create a new case.",
+        "requiredFields": "Requester user ID, subject, and description are required.",
+        "createFailed": "The support case could not be created. Try again.",
+        "actionFailed": "The change could not be saved. Try again.",
+        "noMessages": "No messages yet.",
+        "noNotes": "No internal notes yet."
       }
     },
     "disputes": {
