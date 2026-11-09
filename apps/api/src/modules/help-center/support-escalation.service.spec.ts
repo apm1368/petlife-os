@@ -18,8 +18,10 @@ describe("support escalation transaction", () => {
     const { service, tx } = setup();
     const result = await service.escalate("user", "case", { confirm: true, reason: "Help" });
     expect(result.referenceNumber).toBe("ESC-000001");
-    expect(tx.$queryRaw.mock.calls[0][0].join("?")).toContain("FROM support_cases WHERE id = ?::uuid FOR UPDATE");
-    expect(tx.$queryRaw.mock.invocationCallOrder[0]).toBeLessThan(tx.supportEscalation.findFirst.mock.invocationCallOrder[0]);
+    const lockCall = tx.$queryRaw.mock.calls[0];
+    if (!lockCall) throw new Error("Ticket lock was not acquired");
+    expect(lockCall[0].join("?")).toContain("FROM support_cases WHERE id = ?::uuid FOR UPDATE");
+    expect(tx.$queryRaw.mock.invocationCallOrder[0]!).toBeLessThan(tx.supportEscalation.findFirst.mock.invocationCallOrder[0]!);
   });
   it("reuses the escalation found after locking without allocating a new number", async () => {
     const existing = { caseId: "case", referenceNumber: "ESC-000008", confirmedAt: new Date() };
