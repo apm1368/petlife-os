@@ -254,6 +254,16 @@ describe("External pet-friendly stays", () => {
     expect(await db.outboundTravelClick.count({ where: { stayId: stay.id } })).toBe(1);
     expect(await db.booking.count({ where: { notes: { contains: id } } as never }).catch(() => 0)).toBe(0);
 
+    // Knowing a draft/rejected listing UUID must not bypass public moderation via its redirect URL.
+    for (const publishState of ["DRAFT", "REJECTED"] as const) {
+      await db.externalStay.update({ where: { id: stay.id }, data: { publishState } });
+      await get(null, `/travel/external/stays/${stay.id}/out`).expect(404);
+      expect(await db.outboundTravelClick.count({ where: { stayId: stay.id } })).toBe(1);
+    }
+    await db.externalStay.update({ where: { id: stay.id }, data: { publishState: "PUBLISHED" } });
+    await get(null, `/travel/external/stays/${stay.id}/out`).expect(302);
+    expect(await db.outboundTravelClick.count({ where: { stayId: stay.id } })).toBe(2);
+
     const member = await actor("member");
     await send("post", member, `/me/external-stays/${stay.id}/favorite`).expect(201);
     const hh = await db.household.create({ data: { name: "h", members: { create: { userId: member.id, role: "OWNER" } } } });
