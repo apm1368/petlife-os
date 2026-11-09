@@ -2,6 +2,25 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
+## Latest verified checkpoint — 2026-11-09 10:48 UTC
+
+- `origin/main`: `ff2a73abdd03ef783f409b5d25dbd9a2026b73ba` (#206). Production `/api/health/version` reports `6ff48d6f8dd6697249b78e3d2b5ee36d5d72b0a1` (`github-42599736618-1`, #178); health readiness reports DB and Redis up. Deploy run `42601851619` for #206/main is in progress. Production is not yet at current main.
+- Safe anonymous `GET /api/shop/products` returned HTTP 200 and `{items:[], total:0, page:1, pageSize:24, facets:{...}}`. Demo records are not exposed, but there are no legitimate reviewed offers to verify visibility or purchase availability. Do not republish demos.
+- #178 merged at `6ff48d6f…`; exact PR CI `42597205731` passed and deployment run `42599736618` succeeded. #206 merged at `ff2a73ab…`; exact PR CI `42600039012` passed; its production deployment remains in progress.
+- #207 customer-booking localization current head `8d805a08d66805cb44fe628451ae2a297aaf973a`, base `main`, mergeable. Hosted CI run `42603584243` is in progress (lint passed; design-system visual checks currently running). 26 focused booking/localization tests and 2 focused memorial async-state tests passed locally; web typecheck and targeted lint passed before the final test-only correction. Page remains PARTIAL pending exact-head CI and authenticated responsive-browser verification.
+- The #104 exact-head run `42602295740` failed in `PublicPetMemorialSection.test.tsx`, not review-timing code: it asserted the async empty result synchronously while the component still displayed its loading skeleton. #207 now contains a narrow `findByText` wait correction, and the focused test passes. After #207 is merged, sync #104 to `main`, rerun the full CI, inspect/fix any new failures, and only merge if GitHub permits it.
+- #205 handoff PR is open/mergeable; exact CI run `42602108076` was still in progress at last check. Refresh the handoff after this checkpoint commit and do not claim it merged until GitHub confirms.
+- #108/#109/#102/#103/#105/#106 and #121/#132–#141 are open but merge-conflicting; #138–#141 share stale base `feat/i18n-shop-customer`. Ordinary GitHub update-branch requests for #102–#109, #121 and #132–#141 returned conflict (no branch was overwritten). Older dependency chains #110→#111 and #113→#114 still need current-base retargeting after their base PRs are ready. Do not reuse their stale green checks.
+- Disk remains critically constrained (about 34 MiB free; filesystem 100%). No cleanup performed. Existing worktrees were preserved. No payment worktree was present in `git worktree list`; that does not prove the owner's earlier payment work was deleted.
+- Authenticated browser/visual verification is unavailable in this execution environment (`cloud` desktop capability list is empty). Production bucket/CDN configuration is not accessible here; memorial withdrawal cannot be claimed to revoke an independently public source URL or prior cache.
+
+### Immediate next actions
+
+1. Monitor exact-head CI run `42603584243` for #207. If green, attempt a normal squash merge (no bypass); otherwise fix the actual defect and rerun.
+2. Confirm deployment run `42601851619`, then verify production version SHA and shop API again. Mark #206 live only if version equals `ff2a73ab…` and relevant behavior is observed.
+3. Once #207 is merged, update #104 to current `main`, verify the resulting diff and exact-head CI, then merge only if permitted.
+4. Continue localization with the next non-conflicting page family; do not call it complete until all page-owned states render in fa/en/de/es and browser verification is available.
+
 ## Latest verified update — 2026-11-09 09:58 UTC
 
 - `origin/main`: `7ae527e0fef76b44f64345a73429e5b7ec62e87f`, after PR #184 merged normally (`7ae527e0`). Production `/api/health/version` still reports `e4e8ba349aa68616571a70d3069b1e7f04a757ec` / deployment `github-42592488512-1`; the main deployment run for `7ae527e0` (`42597068779`) is pending. Public home returned HTTP 200; no authenticated or feature-specific production verification was performed.
