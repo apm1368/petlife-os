@@ -3629,15 +3629,25 @@
     },
     "feed": {
       "title": "انجمن",
+      "description": "پرسش، تجربه و خبر از صاحبان حیوانات؛ محترمانه و بدون تبلیغ.",
       "newPost": "پست جدید",
       "empty": "هنوز پستی وجود ندارد. اولین نفر باشید که چیزی به اشتراک می‌گذارد.",
       "loadMore": "بیشتر",
+      "loading": "در حال بارگذاری پست‌ها…",
+      "loadingMore": "در حال بارگذاری…",
       "commentsAndReactions": "{comments, plural, one {# نظر} other {# نظر}} · {reactions, plural, one {# واکنش} other {# واکنش}}",
       "searchLabel": "جستجو در پست‌ها",
       "typeLabel": "نوع پست",
       "allTypes": "همه انواع",
       "search": "جستجو",
-      "noResults": "پستی با این جستجو پیدا نشد."
+      "noResults": "پستی با این جستجو پیدا نشد.",
+      "withPet": "همراه {name}",
+      "shortcutsLabel": "میان‌برهای انجمن",
+      "topics": "موضوع‌ها",
+      "rightNow": "همین حالا",
+      "myMessages": "پیام‌های من",
+      "lostPetsNearby": "حیوانات گم‌شدهٔ اطراف",
+      "supportNeeds": "نیازهای حمایت"
     },
     "newPost": {
       "title": "پست جدید",

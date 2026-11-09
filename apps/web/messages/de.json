@@ -1879,6 +1879,31 @@
       "detail": { "unavailableTitle": "Diese Meldung ist nicht verfügbar", "unavailableDescription": "Die Meldung wurde möglicherweise geschlossen oder entfernt.", "shareText": "{name} wird vermisst{area}. Wenn du das Tier siehst, melde bitte eine Sichtung.", "shareArea": " in der Gegend von {area}", "species": "Tierart", "breed": "Rasse", "colorMarkings": "Farbe und Merkmale", "approximateAge": "Ungefähres Alter", "ageYears": "Etwa {count} Jahre", "lastSeenAround": "Zuletzt gesehen in der Gegend", "lastSeen": "Zuletzt gesehen", "reunited": "{name} ist wieder zu Hause. Danke an alle, die geholfen haben.", "photoAlt": "Foto von {name}" }
     }
   },
+  "community": {
+    "postType": { "GENERAL": "Allgemein", "QUESTION": "Frage", "LOCAL": "Lokal", "LOST_PET_SHARE": "Vermisstes Tier", "RESCUE": "Rettung", "ADOPTION": "Adoption", "MEMORY": "Erinnerung" },
+    "feed": {
+      "title": "Community",
+      "description": "Fragen, Erfahrungen und Neuigkeiten von Tierhalterinnen und Tierhaltern — respektvoll und ohne Werbung.",
+      "newPost": "Neuer Beitrag",
+      "empty": "Noch keine Beiträge. Teilen Sie als Erste oder Erster etwas.",
+      "loadMore": "Mehr laden",
+      "loading": "Beiträge werden geladen …",
+      "loadingMore": "Wird geladen …",
+      "commentsAndReactions": "{comments, plural, one {# Kommentar} other {# Kommentare}} · {reactions, plural, one {# Reaktion} other {# Reaktionen}}",
+      "searchLabel": "Beiträge suchen",
+      "typeLabel": "Beitragsart",
+      "allTypes": "Alle Arten",
+      "search": "Suchen",
+      "noResults": "Keine Beiträge zu dieser Suche gefunden.",
+      "withPet": "mit {name}",
+      "shortcutsLabel": "Community-Schnellzugriffe",
+      "topics": "Themen",
+      "rightNow": "Direktzugriff",
+      "myMessages": "Meine Nachrichten",
+      "lostPetsNearby": "Vermisste Tiere in der Nähe",
+      "supportNeeds": "Hilfsanfragen"
+    }
+  },
   "publicNavigation": {
     "main": "Hauptnavigation",
     "explore": "Entdecken",

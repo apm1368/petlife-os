@@ -1879,6 +1879,31 @@
       "detail": { "unavailableTitle": "Este informe no está disponible", "unavailableDescription": "Es posible que el informe se haya cerrado o eliminado.", "shareText": "{name} está desaparecida{area}. Si la ves, informa del avistamiento.", "shareArea": " cerca de {area}", "species": "Especie", "breed": "Raza", "colorMarkings": "Color y marcas", "approximateAge": "Edad aproximada", "ageYears": "Unos {count} años", "lastSeenAround": "Última vez vista cerca de", "lastSeen": "Última vez vista", "reunited": "{name} ya está en casa. Gracias a todas las personas que ayudaron.", "photoAlt": "Foto de {name}" }
     }
   },
+  "community": {
+    "postType": { "GENERAL": "General", "QUESTION": "Pregunta", "LOCAL": "Local", "LOST_PET_SHARE": "Mascota desaparecida", "RESCUE": "Rescate", "ADOPTION": "Adopción", "MEMORY": "Recuerdo" },
+    "feed": {
+      "title": "Comunidad",
+      "description": "Preguntas, experiencias y novedades de personas con mascotas, con respeto y sin publicidad.",
+      "newPost": "Nueva publicación",
+      "empty": "Aún no hay publicaciones. Sé la primera persona en compartir algo.",
+      "loadMore": "Cargar más",
+      "loading": "Cargando publicaciones…",
+      "loadingMore": "Cargando…",
+      "commentsAndReactions": "{comments, plural, one {# comentario} other {# comentarios}} · {reactions, plural, one {# reacción} other {# reacciones}}",
+      "searchLabel": "Buscar publicaciones",
+      "typeLabel": "Tipo de publicación",
+      "allTypes": "Todos los tipos",
+      "search": "Buscar",
+      "noResults": "No hay publicaciones que coincidan con la búsqueda.",
+      "withPet": "con {name}",
+      "shortcutsLabel": "Accesos rápidos de la comunidad",
+      "topics": "Temas",
+      "rightNow": "Ahora mismo",
+      "myMessages": "Mis mensajes",
+      "lostPetsNearby": "Mascotas desaparecidas cerca",
+      "supportNeeds": "Solicitudes de ayuda"
+    }
+  },
   "publicNavigation": {
     "main": "Navegación principal",
     "explore": "Explorar",
