@@ -1101,13 +1101,17 @@
       "retry": "Retry",
       "loading": "Loading",
       "empty": "No bookings found.",
+      "loadFailed": "Bookings could not be loaded. Check your connection and try again.",
+      "accessDenied": "You do not have permission to view these bookings.",
       "filter": {
         "today": "Today",
         "upcoming": "Upcoming",
         "past": "Past",
         "cancelled": "Cancelled",
         "requests": "Requests"
-      }
+      },
+      "status": { "HOLD": "Held", "PENDING_CONFIRMATION": "Pending confirmation", "CONFIRMED": "Confirmed", "CHECKED_IN": "Checked in", "IN_PROGRESS": "In progress", "COMPLETED": "Completed", "CANCELLED_BY_USER": "Cancelled by customer", "CANCELLED_BY_PROVIDER": "Cancelled by provider", "NO_SHOW": "No-show", "REQUESTED": "Requested", "AWAITING_PAYMENT": "Awaiting payment", "REJECTED": "Declined", "EXPIRED": "Expired", "RESCHEDULED": "Rescheduled" },
+      "paymentStatus": { "NOT_REQUIRED": "Not required", "PENDING": "Pending", "AUTHORIZED": "Authorized", "PAID": "Paid", "FAILED": "Failed", "REFUND_PENDING": "Refund pending", "REFUNDED": "Refunded" }
     },
     "bookingDetail": {
       "title": "Booking",
@@ -1130,7 +1134,8 @@
         "scope": "Scope",
         "startsAt": "Starts",
         "expiresAt": "Expires",
-        "openClinicalRecord": "Open Clinical Record"
+        "openClinicalRecord": "Open Clinical Record",
+        "scopePreset": { "MINIMAL_VET_CONTEXT": "Minimal context", "HEALTH_BASICS": "Health basics", "SELECTED_HEALTH_DATA": "Selected health data", "GROOMING_BASIC": "Care profile (grooming basics)", "TRAINING_BASIC": "Care profile (training basics)", "WALKING_BASIC": "Care profile (walking basics)", "SITTING_BASIC": "Care profile (sitting basics)", "BOARDING_BASIC": "Care profile and vaccination status (boarding)", "TAXI_BASIC": "Care profile (pet taxi basics)" }
       },
       "careProfile": {
         "title": "Care context",
@@ -1146,6 +1151,10 @@
       "actions": {
         "confirm": "Confirm",
         "confirmed": "Confirmed",
+        "acceptRequest": "Accept request",
+        "decline": "Decline request",
+        "markNoShow": "Mark no-show",
+        "startClinicalVisit": "Start clinical visit",
         "checkIn": "Check in",
         "start": "Start",
         "complete": "Complete",
@@ -1153,6 +1162,9 @@
       },
       "completionNoteLabel": "Owner-visible completion note (optional)",
       "completionNotePlaceholder": "e.g. \"Luna's grooming was completed.\"",
+      "respondBy": "Respond by",
+      "followUps": { "legend": "Follow-ups (only if needed)", "description": "Each follow-up appears in the owner's Care Center as provider-created. Nothing is scheduled automatically.", "typeLabel": "Follow-up type", "type": { "FOLLOW_UP": "Follow-up visit", "VACCINATION": "Next vaccination", "MEDICATION": "Medication", "MONITORING": "Lab or review", "OTHER": "Other" }, "titleLabel": "Follow-up title", "dateLabel": "Due date", "remove": "Remove follow-up", "add": "Add follow-up" },
+      "rejectDialog": { "title": "Decline booking request", "reasonLabel": "Reason (shown to the customer)" },
       "notes": {
         "title": "Provider notes",
         "internalOnly": "Internal only — never shown to the customer.",
@@ -1174,7 +1186,8 @@
         "PROVIDER_NOT_VERIFIED": "Your organization must be verified before taking this action.",
         "BOOKING_NOT_FOUND": "Booking not found.",
         "INVALID_BOOKING_TRANSITION": "This booking cannot move to that state right now.",
-        "BOOKING_NOT_CANCELLABLE": "This booking can no longer be cancelled."
+        "BOOKING_NOT_CANCELLABLE": "This booking can no longer be cancelled.",
+        "generic": "The action could not be completed. Please try again."
       }
     },
     "schedule": {

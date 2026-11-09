@@ -1076,13 +1076,17 @@
       "retry": "تلاش دوباره",
       "loading": "در حال بارگذاری",
       "empty": "رزروی یافت نشد.",
+      "loadFailed": "رزروها بارگیری نشدند. اتصال را بررسی کنید و دوباره تلاش کنید.",
+      "accessDenied": "شما اجازه مشاهده این رزروها را ندارید.",
       "filter": {
         "today": "امروز",
         "upcoming": "پیش رو",
         "past": "گذشته",
         "cancelled": "لغوشده",
         "requests": "درخواست‌ها"
-      }
+      },
+      "status": { "HOLD": "رزرو موقت", "PENDING_CONFIRMATION": "در انتظار تأیید", "CONFIRMED": "تأییدشده", "CHECKED_IN": "پذیرش‌شده", "IN_PROGRESS": "در حال انجام", "COMPLETED": "انجام‌شده", "CANCELLED_BY_USER": "لغوشده توسط مشتری", "CANCELLED_BY_PROVIDER": "لغوشده توسط مرکز", "NO_SHOW": "عدم حضور", "REQUESTED": "درخواست‌شده", "AWAITING_PAYMENT": "در انتظار پرداخت", "REJECTED": "ردشده", "EXPIRED": "منقضی‌شده", "RESCHEDULED": "جابجا‌شده" },
+      "paymentStatus": { "NOT_REQUIRED": "نیازی نیست", "PENDING": "در انتظار", "AUTHORIZED": "تأییدشده", "PAID": "پرداخت‌شده", "FAILED": "ناموفق", "REFUND_PENDING": "در انتظار بازگشت وجه", "REFUNDED": "وجه بازگشت داده شد" }
     },
     "bookingDetail": {
       "title": "رزرو",
@@ -1105,7 +1109,8 @@
         "scope": "محدوده",
         "startsAt": "شروع",
         "expiresAt": "انقضا",
-        "openClinicalRecord": "باز کردن پرونده بالینی"
+        "openClinicalRecord": "باز کردن پرونده بالینی",
+        "scopePreset": { "MINIMAL_VET_CONTEXT": "حداقل اطلاعات", "HEALTH_BASICS": "اطلاعات پایه سلامت", "SELECTED_HEALTH_DATA": "اطلاعات منتخب سلامت", "GROOMING_BASIC": "پروفایل مراقبت (پایه آرایش)", "TRAINING_BASIC": "پروفایل مراقبت (پایه آموزش)", "WALKING_BASIC": "پروفایل مراقبت (پایه پیاده‌روی)", "SITTING_BASIC": "پروفایل مراقبت (پایه نگهداری)", "BOARDING_BASIC": "پروفایل مراقبت و وضعیت واکسن (اقامت)", "TAXI_BASIC": "پروفایل مراقبت (پایه تاکسی حیوانات)" }
       },
       "careProfile": {
         "title": "زمینه مراقبتی",
@@ -1121,6 +1126,10 @@
       "actions": {
         "confirm": "تأیید",
         "confirmed": "تأیید شد",
+        "acceptRequest": "پذیرش درخواست",
+        "decline": "رد درخواست",
+        "markNoShow": "ثبت عدم حضور",
+        "startClinicalVisit": "شروع ویزیت بالینی",
         "checkIn": "پذیرش",
         "start": "شروع",
         "complete": "پایان",
@@ -1128,6 +1137,9 @@
       },
       "completionNoteLabel": "یادداشت قابل مشاهده برای صاحب (اختیاری)",
       "completionNotePlaceholder": "مثلاً «آرایش لونا انجام شد.»",
+      "respondBy": "مهلت پاسخ",
+      "followUps": { "legend": "پیگیری‌ها (فقط در صورت نیاز)", "description": "هر پیگیری در مرکز مراقبت صاحب حیوان با منبع «ارائه‌دهنده» ثبت می‌شود. چیزی خودکار زمان‌بندی نمی‌شود.", "typeLabel": "نوع پیگیری", "type": { "FOLLOW_UP": "ویزیت پیگیری", "VACCINATION": "واکسن بعدی", "MEDICATION": "دارو", "MONITORING": "آزمایش یا بررسی", "OTHER": "سایر" }, "titleLabel": "عنوان پیگیری", "dateLabel": "تاریخ سررسید", "remove": "حذف پیگیری", "add": "افزودن پیگیری" },
+      "rejectDialog": { "title": "رد درخواست رزرو", "reasonLabel": "علت (برای مشتری نمایش داده می‌شود)" },
       "notes": {
         "title": "یادداشت‌های ارائه‌دهنده",
         "internalOnly": "فقط داخلی — هرگز به مشتری نشان داده نمی‌شود.",
@@ -1149,7 +1161,8 @@
         "PROVIDER_NOT_VERIFIED": "سازمان شما باید پیش از این اقدام تأیید شود.",
         "BOOKING_NOT_FOUND": "رزرو یافت نشد.",
         "INVALID_BOOKING_TRANSITION": "این رزرو در حال حاضر نمی‌تواند به آن وضعیت برود.",
-        "BOOKING_NOT_CANCELLABLE": "این رزرو دیگر قابل لغو نیست."
+        "BOOKING_NOT_CANCELLABLE": "این رزرو دیگر قابل لغو نیست.",
+        "generic": "اقدام انجام نشد. دوباره تلاش کنید."
       }
     },
     "schedule": {
