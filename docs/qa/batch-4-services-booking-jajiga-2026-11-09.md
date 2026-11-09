@@ -35,6 +35,7 @@ Regression coverage added:
 - Outbound moderation plus Jajiga adapter unit suites: PASS, 8/8 tests.
 - API travel E2E: not run locally because there is no local API environment file or active database container, and only 141 MiB remained on the workspace filesystem at the test check. Hosted PR CI is required for the E2E regression.
 - Focused ESLint on the changed service, unit spec and API E2E spec: PASS.
+- Focused web regression suites: PASS, 57/57 across 7 files for service overview, customer booking flow/list/detail, provider bookings, and Jajiga external-stay list/card. Required building the existing `@petlife/types` package artifact in the linked worktree; no application source was changed for that setup.
 - API TypeScript check: BLOCKED by workspace-package build artifacts missing from this linked worktree (baseline errors include unresolved `@petlife/types`, `@petlife/config` and generated Prisma types; no diagnostic pointed at the changed travel service/test files). The hosted CI typecheck is the authoritative check for the PR.
 - Browser screenshots, authenticated booking lifecycle and provider-side role flows: NOT_TESTED. No QA account/browser credentials were available. Do not mark booking/provider UI or visual modes LIVE_VERIFIED.
 - No migration was added. No production mutation, booking, charge or sync was performed.
