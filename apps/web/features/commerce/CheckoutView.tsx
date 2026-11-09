@@ -63,6 +63,8 @@ function toLatinDigits(value: string): string {
  */
 export function CheckoutView() {
   const t = useTranslations("commerce.checkout");
+  const tCart = useTranslations("commerce.cart");
+  const tCompatibility = useTranslations("commerce.compatibility");
   const design = useTranslations("commerce.design");
   const tCommon = useTranslations("common");
   const router = useRouter();
@@ -489,11 +491,15 @@ export function CheckoutView() {
         {progress(1)}
         <h1 className="text-page-title text-text-primary">{t("review.title")}</h1>
 
-        {checkout.validationIssues.map((issue) => (
-          <StatusLabel key={issue.code} tone="attention">
-            {issue.message}
-          </StatusLabel>
-        ))}
+        {checkout.validationIssues.map((issue) => {
+          const productTitle = checkout.sellerGroups.flatMap((group) => group.lines).find((line) => line.id === issue.cartLineId)?.productTitle ?? "";
+          const message = issue.code === "PRICE_CHANGED"
+            ? `${productTitle}: ${tCart("priceChanged")}`
+            : issue.code === "COMPATIBILITY_REVIEW_REQUIRED"
+              ? `${productTitle}: ${tCompatibility("status.NEEDS_REVIEW")}`
+              : tCart("fixIssuesFirst");
+          return <StatusLabel key={`${issue.code}-${issue.cartLineId ?? "order"}`} tone="attention">{message}</StatusLabel>;
+        })}
 
         {checkout.sellerGroups.map((group) => (
           <ContextSurface key={group.sellerOrganization.id} className="flex flex-col gap-2">
