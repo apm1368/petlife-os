@@ -2690,6 +2690,7 @@
       "title": "اعتماد و امنیت",
       "newCase": "ایجاد پرونده",
       "createTitle": "ایجاد پرونده اعتماد و امنیت",
+      "filter": { "status": "فیلتر بر اساس وضعیت", "allStatuses": "همه وضعیت‌ها" },
       "status": {
         "OPEN": "باز",
         "UNDER_REVIEW": "در حال بررسی",
@@ -2731,6 +2732,20 @@
         "severity": "شدت",
         "submit": "ایجاد پرونده"
       },
+      "context": {
+        "title": "موضوع پرونده",
+        "missingSubject": "موضوع دیگر وجود ندارد یا خلاصه‌ای برایش تعریف نشده است.",
+        "by": "ثبت‌کننده: {name}",
+        "openPublicPage": "مشاهدهٔ صفحهٔ عمومی",
+        "reportCount": "تعداد گزارش‌ها: {total} · تعداد گزارش‌دهندگان متفاوت: {reporters}",
+        "unknownKind": "موضوع دیگر",
+        "unknownStatus": "وضعیت نامشخص",
+        "unknownReason": "دلیل دیگر یا نامشخص",
+        "subjectKind": { "POST": "پست انجمن", "COMMENT": "نظر انجمن", "SUPPORT_NEED": "درخواست کمک", "LOST_PET_INCIDENT": "گزارش گم‌شدن", "LOST_PET_SIGHTING": "گزارش مشاهده", "ORGANIZATION": "سازمان" },
+        "reportReason": { "SPAM": "هرزنامه", "ABUSE": "سوءاستفاده", "MISINFORMATION": "اطلاعات نادرست", "INAPPROPRIATE": "محتوای نامناسب", "OTHER": "سایر", "SCAM": "کلاهبرداری", "HARASSMENT": "آزار و اذیت", "PERSONAL_INFORMATION": "اطلاعات شخصی", "ANIMAL_WELFARE": "رفاه حیوانات", "DANGEROUS_CONTENT": "محتوای خطرناک" },
+        "reportStatus": { "OPEN": "باز", "ESCALATED": "ارجاع‌شده", "RESOLVED": "رسیدگی‌شده", "DISMISSED": "ردشده" },
+        "subjectStatus": { "OPEN": "باز", "SEARCHING": "در حال جست‌وجو", "SIGHTING_REPORTED": "گزارش مشاهده ثبت شد", "FOUND": "پیدا شد", "REUNITED": "به صاحبش بازگشت", "CLOSED": "بسته‌شده", "SUBMITTED": "ثبت‌شده", "REVIEWED": "بررسی‌شده", "ACCEPTED": "پذیرفته‌شده", "REJECTED": "ردشده", "DRAFT": "پیش‌نویس", "PENDING_REVIEW": "در انتظار بررسی", "PUBLISHED": "منتشرشده", "PARTIALLY_FULFILLED": "بخشی تأمین‌شده", "PAUSED": "متوقف‌شده", "FULFILLED": "تأمین‌شده", "EXPIRED": "منقضی‌شده", "REMOVED": "برداشته‌شده", "HIDDEN": "پنهان‌شده", "VERIFIED": "تأییدشده", "NOT_STARTED": "شروع‌نشده", "UNDER_REVIEW": "در حال بررسی", "NEEDS_INFORMATION": "نیازمند اطلاعات بیشتر", "APPROVED": "تأییدشده", "SUSPENDED": "تعلیق‌شده", "INACTIVE": "غیرفعال" }
+      },
       "detail": {
         "changeStatus": "تغییر وضعیت",
         "actions": "اقدامات انجام‌شده",
@@ -2741,7 +2756,16 @@
         "appellantUserId": "شناسه کاربر معترض",
         "appealReason": "دلیل تجدیدنظر",
         "resolveAppeal": "نتیجه‌گیری تجدیدنظر",
-        "resolution": "نتیجه"
+        "resolution": "نتیجه",
+        "effectBefore": "پیش از اقدام",
+        "effectAfter": "پس از اقدام",
+        "effectField": { "status": "وضعیت", "verificationStatus": "وضعیت احراز", "isPubliclyListed": "نمایش عمومی", "pausedListings": "آگهی‌های متوقف‌شده", "closedAt": "زمان بسته‌شدن" },
+        "yes": "بله",
+        "no": "خیر",
+        "requiredFields": "شناسه موضوع و دلیل الزامی هستند.",
+        "appealRequiredFields": "شناسه کاربر معترض و دلیل تجدیدنظر الزامی هستند.",
+        "resolutionRequired": "پیش از تصمیم‌گیری درباره تجدیدنظر، نتیجه را بنویسید.",
+        "appealFailed": "ثبت یا بررسی تجدیدنظر انجام نشد. دوباره تلاش کنید."
       },
       "appealStatus": {
         "SUBMITTED": "ثبت‌شده",
@@ -2749,7 +2773,8 @@
         "UPHELD": "تأیید شد",
         "OVERTURNED": "رد شد",
         "PARTIALLY_OVERTURNED": "جزئاً رد شد"
-      }
+      },
+      "states": { "loading": "در حال بارگذاری پرونده‌های اعتماد و امنیت…", "loadFailed": "بارگذاری پرونده‌ها انجام نشد. دوباره تلاش کنید.", "detailLoadFailed": "بارگذاری این پرونده انجام نشد. دوباره تلاش کنید.", "accessDeniedTitle": "دسترسی ندارید", "accessDenied": "اجازه مشاهده این پرونده‌ها را ندارید.", "empty": "پرونده‌ای پیدا نشد", "emptyDescription": "پرونده‌ای با وضعیت انتخاب‌شده وجود ندارد.", "createFailed": "ایجاد پرونده انجام نشد. دوباره تلاش کنید.", "actionFailed": "ذخیره تغییر انجام نشد. دوباره تلاش کنید.", "actionNotApplicable": "این اقدام در وضعیت فعلی موضوع قابل اجرا نیست.", "actionForbidden": "نقش شما اجازهٔ این اقدام را ندارد.", "actionNotRecorded": "اقدام ثبت نشد. دوباره تلاش کنید.", "noActions": "هنوز اقدامی ثبت نشده است.", "contextUnavailable": "خلاصه موضوع و گزارش‌ها بارگذاری نشد.", "unknownValue": "مقدار نامشخص", "restored": "با اقدام بعدی بازگردانده شد" }
     },
     "orgs": {
       "providersTitle": "ارائه‌دهندگان",
