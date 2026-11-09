@@ -99,6 +99,10 @@ export const dashboardCopy = {
     community: "جامعه",
     unavailable: "این بخش الان بارگیری نشد.",
     retry: "تلاش دوباره",
+    loadingDashboard: "در حال بارگذاری داشبورد",
+    loadingMembership: "در حال بارگذاری اشتراک",
+    loadingOrders: "در حال بارگذاری سفارش‌ها",
+    loadingTrips: "در حال بارگذاری سفرها",
     planNameInEnglish: "نام طرح به انگلیسی",
   },
   en: {
@@ -170,6 +174,10 @@ export const dashboardCopy = {
     community: "Community",
     unavailable: "This section could not load right now.",
     retry: "Retry",
+    loadingDashboard: "Loading dashboard",
+    loadingMembership: "Loading membership",
+    loadingOrders: "Loading orders",
+    loadingTrips: "Loading upcoming stays",
     planNameInEnglish: "Plan name in English",
   },
   de: {
@@ -192,6 +200,10 @@ export const dashboardCopy = {
     trips: "Bevorstehende Aufenthalte", noTrips: "Sie haben keinen bevorstehenden Aufenthalt gebucht.", findStay: "Unterkunft finden", explore: "Für Ihr Tier",
     services: "Services", vets: "Tierärzte", shopLink: "Shop", stays: "Reisen und Unterkünfte", community: "Community",
     unavailable: "Dieser Bereich konnte gerade nicht geladen werden.", retry: "Erneut versuchen",
+    loadingDashboard: "Übersicht wird geladen",
+    loadingMembership: "Mitgliedschaft wird geladen",
+    loadingOrders: "Bestellungen werden geladen",
+    loadingTrips: "Bevorstehende Aufenthalte werden geladen",
     planNameInEnglish: "Tarifname auf Englisch",
   },
   es: {
@@ -214,6 +226,10 @@ export const dashboardCopy = {
     trips: "Próximas estancias", noTrips: "No tienes ninguna estancia reservada próximamente.", findStay: "Buscar alojamiento", explore: "Para tu mascota",
     services: "Servicios", vets: "Veterinarios", shopLink: "Tienda", stays: "Viajes y alojamientos", community: "Comunidad",
     unavailable: "No se pudo cargar esta sección en este momento.", retry: "Reintentar",
+    loadingDashboard: "Cargando el panel",
+    loadingMembership: "Cargando la suscripción",
+    loadingOrders: "Cargando pedidos",
+    loadingTrips: "Cargando próximas estancias",
     planNameInEnglish: "Nombre del plan en inglés",
   },
 } as const;
@@ -285,6 +301,25 @@ export function MemberHomeView() {
       .catch((e: { status?: number }) => setMembership(e?.status === 404 ? "none" : "failed"));
   }, [householdId]);
 
+  function retryMembership() {
+    if (!householdId) return;
+    setMembership(null);
+    void subscriptionService
+      .getCurrent(householdId)
+      .then((sub) => setMembership(sub && ["ACTIVE", "TRIALING", "PAST_DUE", "GRACE_PERIOD", "CANCEL_AT_PERIOD_END"].includes(sub.status) ? sub : "none"))
+      .catch((e: { status?: number }) => setMembership(e?.status === 404 ? "none" : "failed"));
+  }
+
+  function retryOrders() {
+    setOrders(null);
+    void commerceService.listOrders().then(setOrders).catch(() => setOrders("failed"));
+  }
+
+  function retryTrips() {
+    setTrips(null);
+    void travelMarketService.listBookings({ scope: "upcoming" }).then((p) => setTrips(p.items)).catch(() => setTrips("failed"));
+  }
+
   const firstName = (user?.displayName ?? "").split(" ")[0] ?? "";
   const today = new Intl.DateTimeFormat(locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-US", { weekday: "long", day: "numeric", month: "long", timeZone: "Asia/Tehran" }).format(new Date());
 
@@ -329,7 +364,7 @@ export function MemberHomeView() {
     );
   }
   if (error) return <LoadFailure error={error} onRetry={load} />;
-  if (!overview) return <Skeleton className="h-72 w-full" aria-label={locale === "fa" ? "در حال بارگذاری" : locale === "de" ? "Wird geladen" : locale === "es" ? "Cargando" : "Loading"} />;
+  if (!overview) return <Skeleton className="h-72 w-full" aria-label={c.loadingDashboard} />;
 
   const pet = overview.pet;
   const petBase = `/${locale}/pets/${pet.id}`;
@@ -415,9 +450,9 @@ export function MemberHomeView() {
               {membership && membership !== "failed" ? <Link href={`/${locale}/subscription`}>{membership === "none" ? c.seePlans : c.manage}</Link> : null}
             </div>
             {membership === null ? (
-              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" aria-label={c.loadingMembership} />
             ) : membership === "failed" ? (
-              <p className="member-home__empty">{c.unavailable}</p>
+              <div role="status"><p className="member-home__empty">{c.unavailable}</p><button type="button" onClick={retryMembership}>{c.retry}</button></div>
             ) : membership === "none" ? (
               <p className="member-home__empty">{c.noMembership}</p>
             ) : (
@@ -436,9 +471,9 @@ export function MemberHomeView() {
               {Array.isArray(orders) && orders.length ? <Link href={`/${locale}/orders`}>{c.allOrders}</Link> : null}
             </div>
             {orders === null ? (
-              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" aria-label={c.loadingOrders} />
             ) : orders === "failed" ? (
-              <p className="member-home__empty">{c.unavailable}</p>
+              <div role="status"><p className="member-home__empty">{c.unavailable}</p><button type="button" onClick={retryOrders}>{c.retry}</button></div>
             ) : orders.length === 0 ? (
               <p className="member-home__empty">{c.noOrders} <Link href={`/${locale}/shop`} className="member-home__inline">{c.shopLink}</Link></p>
             ) : (
@@ -464,9 +499,9 @@ export function MemberHomeView() {
               <Link href={`/${locale}/travel`}>{c.findStay}</Link>
             </div>
             {trips === null ? (
-              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" aria-label={c.loadingTrips} />
             ) : trips === "failed" ? (
-              <p className="member-home__empty">{c.unavailable}</p>
+              <div role="status"><p className="member-home__empty">{c.unavailable}</p><button type="button" onClick={retryTrips}>{c.retry}</button></div>
             ) : trips.length === 0 ? (
               <p className="member-home__empty">{c.noTrips}</p>
             ) : (
