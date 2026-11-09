@@ -10,7 +10,6 @@ import { DisplayModeToggle } from "@/features/display-mode/DisplayModeToggle";
 import { useLocale } from "next-intl";
 import { AccountPageHeader } from "./AccountNav";
 import { useAccountCopy } from "./account-copy";
-import { apiErrorText } from "@/lib/errors/api-error-text";
 import type { RouteLocale } from "@/lib/i18n/config";
 
 type ContactKind = "email" | "phone";
@@ -76,8 +75,11 @@ export function PersonalSettingsView() {
         const path = window.location.pathname.replace(/^\/(fa|en|de|es)(?=\/|$)/, `/${language}`);
         window.location.assign(`${path}${window.location.search}${window.location.hash}`);
       }
-    } catch (err) {
-      setSaveError(apiErrorText(err, undefined, t("ذخیره انجام نشد. دوباره تلاش کنید.", "Could not save. Try again.", "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.", "No se pudo guardar. Inténtalo de nuevo.")));
+    } catch {
+      // API messages are not guaranteed to be translated into the selected
+      // language. Keep failures in the page locale instead of leaking raw
+      // backend copy into a German or Spanish screen.
+      setSaveError(t("ذخیره انجام نشد. دوباره تلاش کنید.", "Could not save. Try again.", "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.", "No se pudo guardar. Inténtalo de nuevo."));
     } finally {
       setSaving(false);
     }
@@ -117,7 +119,12 @@ export function PersonalSettingsView() {
         <div className="security-row">
           <div>
             <b>{t("نمایش ساده", "Simple display")}</b>
-            <p>{t("متن خواناتر و کنترل‌های بزرگ‌تر؛ این انتخاب فقط روی همین دستگاه ذخیره می‌شود و به زبان یا پوسته وابسته نیست.", "Clearer text and larger controls. This choice is saved on this device and is independent of language and theme.")}</p>
+            <p>{t(
+              "متن خواناتر و کنترل‌های بزرگ‌تر؛ این انتخاب فقط روی همین دستگاه ذخیره می‌شود و به زبان یا پوسته وابسته نیست.",
+              "Clearer text and larger controls. This choice is saved on this device and is independent of language and theme.",
+              "Übersichtlichere Texte und größere Bedienelemente. Diese Einstellung wird nur auf diesem Gerät gespeichert und ist unabhängig von Sprache und Darstellung.",
+              "Texto más claro y controles más grandes. Esta opción se guarda solo en este dispositivo y es independiente del idioma y del tema.",
+            )}</p>
           </div>
           <DisplayModeToggle locale={uiLocale} />
         </div>
@@ -211,7 +218,13 @@ function ContactChangeForm({ kind, initial, onDone }: { kind: ContactKind; initi
     if (err.code === "OTP_INVALID") return t("کد درست نیست یا منقضی شده است.", "That code is wrong or has expired.", "Der Code ist falsch oder abgelaufen.", "El código es incorrecto o ha caducado.");
     if (err.code === "CONTACT_UNAVAILABLE") return t("این راه تماس را نمی‌توان برای حساب شما استفاده کرد.", "This contact can't be used for your account.", "Dieser Kontakt kann nicht für Ihr Konto verwendet werden.", "No se puede usar este contacto en tu cuenta.");
     if (err.code === "CONTACT_UNCHANGED") return t("این همان راه تماس تأییدشدهٔ فعلی شماست.", "That's already your verified contact.", "Das ist bereits Ihr bestätigter Kontakt.", "Ese ya es tu contacto verificado.");
-    return err.message;
+    if (err.code === "MESSAGING_PROVIDER_UNAVAILABLE" || err.code === "MESSAGING_PROVIDER_DISABLED" || err.code === "MESSAGING_PROVIDER_NOT_CONFIGURED") {
+      return t("ارسال کد فعلاً در دسترس نیست.", "Code delivery is not available right now.", "Der Codeversand ist derzeit nicht verfügbar.", "El envío del código no está disponible ahora.");
+    }
+    if (err.code === "MESSAGING_SEND_FAILED") {
+      return t("کد ارسال نشد. دوباره تلاش کنید.", "The code could not be sent. Try again.", "Der Code konnte nicht gesendet werden. Bitte versuchen Sie es erneut.", "No se pudo enviar el código. Inténtalo de nuevo.");
+    }
+    return t("درخواست انجام نشد. دوباره تلاش کنید.", "That request didn't work. Please try again.", "Die Anfrage ist fehlgeschlagen. Bitte versuchen Sie es erneut.", "La solicitud no se completó. Inténtalo de nuevo.");
   }
 
   async function sendCode() {
