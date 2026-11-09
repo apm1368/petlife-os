@@ -1456,6 +1456,8 @@
       "titleLabel": "Titel",
       "documentType": "Dokumenttyp",
       "download": "Herunterladen",
+      "void": "Zurückziehen",
+      "voidReason": "Grund für den Rückzug",
       "provenanceOwner": "Vom Haushalt hochgeladen",
       "provenanceProvider": "Von der Tierarztpraxis hochgeladen — bestätigt",
       "fileRequired": "Wählen Sie zuerst die Dokumentdatei aus.",
