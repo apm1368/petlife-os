@@ -4,6 +4,12 @@ packages:
 
 overrides:
   "proxy-addr@<2.0.8": "2.0.8"
+  "body-parser@>=1 <1.20.9": "1.20.9"
+  "qs@>=6 <6.16.1": "6.16.1"
+  "multer@>=2 <2.5.0": "2.5.0"
+  "postcss@>=8 <8.5.23": "8.5.26"
+  "source-map-js@>=1 <1.2.2": "1.2.2"
+  "lodash@>=4 <4.18.0": "4.18.1"
 
 # pnpm 10 reads install policy from the workspace manifest, not package.json.
 # Keeping this here makes local, headless, and GitHub Actions installs agree.

@@ -1,0 +1,40 @@
+{
+  "testId": "QA-DEPS-02",
+  "date": "2026-11-10",
+  "timezone": "UTC",
+  "baselineSha": "0db2284b59f1926f29b28a43f1f5bd7fcc7272b3",
+  "candidateSha": "See commit containing this record and final-head CI",
+  "environment": "Workspace lockfile, registry audit, reused local dependencies; no production writes",
+  "requirement": "Final batch 6 dependency security and regression checks; existing upload/input boundaries",
+  "status": "PARTIAL",
+  "audit": {
+    "method": "pnpm 10.33.0 audit --prod --json",
+    "before": { "critical": 0, "high": 15, "moderate": 15, "low": 2 },
+    "after": { "critical": 0, "high": 3, "moderate": 7, "low": 0 },
+    "actual": "Targeted package advisories disappear from candidate registry audit; not exploit verification",
+    "remainingModules": ["file-type", "next-intl", "@nestjs/core", "brace-expansion", "zod", "minimatch"]
+  },
+  "overrides": {
+    "body-parser@>=1 <1.20.9": "1.20.9",
+    "qs@>=6 <6.16.1": "6.16.1",
+    "multer@>=2 <2.5.0": "2.5.0",
+    "postcss@>=8 <8.5.23": "8.5.26",
+    "source-map-js@>=1 <1.2.2": "1.2.2",
+    "lodash@>=4 <4.18.0": "4.18.1"
+  },
+  "checks": [
+    { "testId": "QA-DEPS-02-A", "status": "PASS", "method": "pnpm install --lockfile-only --ignore-scripts", "actual": "Resolved without installing or modifying shared node_modules" },
+    { "testId": "QA-DEPS-02-B", "status": "PASS", "method": "Compare YAML packages key sets to baseline", "actual": "Only body-parser, multer, qs, source-map-js new versions added; old vulnerable versions and obsolete leaves removed; postcss/lodash converge to already locked versions. Peer-context hashes regenerated." },
+    { "testId": "QA-DEPS-02-C", "status": "PASS", "method": "Focused parser behavior tests on reused old dependency installation", "actual": "Four behavior tests pass: JSON validation/limits, actual gzip bytes/decompressed limit, safe nested form parsing, multipart/size limits. This does not prove candidate package runtime." },
+    { "testId": "QA-DEPS-02-D", "status": "NOT_TESTED", "method": "Fresh hosted full CI: pinned transitive versions plus behavior/API E2E/build", "actual": "Mandatory before merge; version assertion intentionally not run against old local installation. No test.skip in committed suite." },
+    { "testId": "QA-DEPS-02-E", "status": "NOT_TESTED", "method": "Production health/version/critical smoke after protected merge and deploy", "actual": "NOT LIVE" }
+  ],
+  "limitations": [
+    "No exploitation, denial-of-service, production data or real financial transaction used",
+    "Remaining major-version fixes need separate compatibility work",
+    "Local production build/DB E2E capacity-blocked; 49 MiB free after unused 44 MiB .next removal",
+    "First gzip fixture returned 400 because Superagent JSON-serialized Buffer; fixture corrected to raw node:http gzip bytes, then 413 passed",
+    "Baseline and current audit counts may change with registry advisories; rerun before release"
+  ],
+  "nextAction": "Run every parser test on fresh candidate dependency tree in hosted CI; fix real failures, merge only through protection, verify deployed SHA and bounded API/browser smoke."
+}
