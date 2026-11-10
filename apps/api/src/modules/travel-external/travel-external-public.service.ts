@@ -157,7 +157,7 @@ export class TravelExternalPublicService {
 
   async favorite(userId: string, stayId: string, on: boolean) {
     if (on) {
-      if (!(await this.prisma.externalStay.count({ where: { id: stayId, publishState: ExternalPublishState.PUBLISHED } }))) throw new NotFoundApiException("External stay");
+      if (!(await this.prisma.externalStay.count({ where: { id: stayId, publishState: ExternalPublishState.PUBLISHED, status: { in: VISIBLE } } }))) throw new NotFoundApiException("External stay");
       await this.prisma.externalStayFavorite.createMany({ data: [{ userId, stayId }], skipDuplicates: true });
     } else await this.prisma.externalStayFavorite.deleteMany({ where: { userId, stayId } });
     return { stayId, saved: on };
@@ -166,7 +166,11 @@ export class TravelExternalPublicService {
   /** Saved stays stay listed even if the source removed them — marked unavailable rather than silently dropped. */
   async favorites(userId: string) {
     const rows = await this.prisma.externalStayFavorite.findMany({ where: { userId }, include: { stay: { include: { source: true, images: true } } }, orderBy: { createdAt: "desc" } });
-    return rows.map((r) => ({ savedAt: r.createdAt.toISOString(), available: VISIBLE.includes(r.stay.status) && r.stay.publishState === ExternalPublishState.PUBLISHED, stay: this.display(r.stay) }));
+    return rows.map((r) => {
+      const available = VISIBLE.includes(r.stay.status) && r.stay.publishState === ExternalPublishState.PUBLISHED;
+      // Preserve the bookmark/removal handle, never expose unpublished revisions or media.
+      return { savedAt: r.createdAt.toISOString(), available, stay: available ? this.display(r.stay) : { id: r.stay.id } };
+    });
   }
 
   async attachToTrip(userId: string, petId: string, tripId: string, stayId: string, ctx?: AdapterQuoteContext) {
@@ -194,6 +198,6 @@ export class TravelExternalPublicService {
   private async tripStays(tripId: string) {
     const rows = await this.prisma.tripExternalStay.findMany({ where: { tripId }, include: { stay: { include: { source: true, images: true } } } });
     const snaps = await this.prisma.externalStayPriceSnapshot.findMany({ where: { id: { in: rows.map((r) => r.priceSnapshotId).filter((x): x is string => Boolean(x)) } } });
-    return rows.map((r) => ({ state: r.state, reservationConfirmed: false, addedAt: r.createdAt.toISOString(), stay: this.display(r.stay), priceAtAttach: (() => { const sn = snaps.find((x) => x.id === r.priceSnapshotId); return sn ? { priceIrr: sn.priceIrr, observedAt: sn.lastConfirmedAt.toISOString(), checkIn: sn.checkIn?.toISOString().slice(0, 10) ?? null, checkOut: sn.checkOut?.toISOString().slice(0, 10) ?? null, priceType: sn.priceType, guests: sn.guests } : null; })() }));
+    return rows.map((r) => { if (!VISIBLE.includes(r.stay.status) || r.stay.publishState !== ExternalPublishState.PUBLISHED) return { state: r.state, reservationConfirmed: false, addedAt: r.createdAt.toISOString(), available: false, stay: { id: r.stay.id }, priceAtAttach: null }; return ({ available: true, state: r.state, reservationConfirmed: false, addedAt: r.createdAt.toISOString(), stay: this.display(r.stay), priceAtAttach: (() => { const sn = snaps.find((x) => x.id === r.priceSnapshotId); return sn ? { priceIrr: sn.priceIrr, observedAt: sn.lastConfirmedAt.toISOString(), checkIn: sn.checkIn?.toISOString().slice(0, 10) ?? null, checkOut: sn.checkOut?.toISOString().slice(0, 10) ?? null, priceType: sn.priceType, guests: sn.guests } : null; })() }); });
   }
 }

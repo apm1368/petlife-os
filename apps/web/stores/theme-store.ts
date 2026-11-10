@@ -19,12 +19,18 @@ export function applyThemeToDocument(theme: ThemePreference) {
 
 function readInitialTheme(): ThemePreference {
   if (typeof localStorage === "undefined") return "SYSTEM";
-  const stored = localStorage.getItem(STORAGE_KEY);
-  return stored === "LIGHT" || stored === "DARK" ? stored : "SYSTEM";
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored === "LIGHT" || stored === "DARK" ? stored : "SYSTEM";
+  } catch {
+    return "SYSTEM";
+  }
 }
 
 export const useThemeStore = create<ThemeState>((set) => ({
-  theme: readInitialTheme(),
+  // The hydration snapshot must match SSR. The head script paints the saved
+  // theme immediately; ThemeSync restores the interactive state after hydration.
+  theme: "SYSTEM",
   setTheme: (theme) => {
     applyThemeToDocument(theme);
     try {
@@ -36,3 +42,7 @@ export const useThemeStore = create<ThemeState>((set) => ({
     set({ theme });
   },
 }));
+
+export function restoreThemeFromStorage() {
+  useThemeStore.setState({ theme: readInitialTheme() });
+}
