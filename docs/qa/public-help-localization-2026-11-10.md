@@ -10,6 +10,8 @@ One additional capture was unstyled and a later attempt to wait for ten unpublis
 
 Mitigation: make only the `(public)` layout `force-dynamic`, so request HTML references the current build and is not retained in Next's full-route cache. Landing/HERO is in the separate locale root, untouched. Tradeoff: these public shell pages render per request rather than serving cached full HTML; underlying API/source behavior does not change. No bucket/CDN policy, source object or shared-cache purge. Exact cache producer/deployment-transition contribution and any independently cached copies are not established; **do not call this fixed before actual asset and browser retests**. New layout regression plus `tools/public-assets-smoke.py` checks every owned script/CSS reference (not just one common chunk), content type, no redirects and no-store HTML across help/legal/status in fa/en/de/es. Baseline fails; final deployed run is mandatory.
 
+[Exact-SHA baseline asset results](evidence/public-help-localization-2026-11-10/before/assets-82f7067.json): 12 routes, 30 unique assets, 3 bad assets on **one** route; all 12 lack the proposed no-store HTML policy. The 12 failed acceptance rows therefore do **not** mean 12 routes have missing assets or that every public page is broken.
+
 ## Implementation
 
 - Use the existing next-intl catalogs, with the complete `publicHelp` namespace owned by fa/en/de/es. Tests compare **unmerged** leaf sets, so English fallback cannot mask missing German/Spanish keys.
