@@ -1,5 +1,9 @@
 # QA-DEPS-BRACE-01 — compatible tooling patch
 
+## Owner clarification and updated base
+
+The owner explicitly superseded the mandatory independent human security/financial **code review** requirement; this is now recorded as **TC-21**, referencing TC-16/WB-13 in both decision logs without changing TC-16's original row. It does not waive any product-level second-person financial/admin approval, authorization, ledger or audit rule. #244 is normally merged at `464efafd7a0a354c6d773ea8fdfaa588a4ca9091`; this branch merges that exact main normally and preserves the community guard. Earlier review-blocker notes are historical, not current policy. Fresh combined final-head CI is required; prior a1822749 green is not proof for the updated head.
+
 2026-11-10 UTC. Base `40f0045e5dbda0afd974779373fa3fd43d18be3b`; code/isolated retest `29fa9ce88e7311f2601092d444061a481077be0a`. **NOT LIVE; final workspace CI still required.** No application/schema/HERO/permission change.
 
 ## Observed dependency finding
