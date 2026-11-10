@@ -2,6 +2,8 @@
 
 ## Public Help / legal / status remediation — 2026-11-10
 
+Released verification: #240 is merged/deployed at `1f274d7aa9ebf697b950ecb5a1f6357df5e1c881`. Actual owned-asset/current HTML checks pass on 12 fa/en/de/es routes; 36 browser state/layout scenarios and four strengthened real search GET retests pass. Published originals were not created or translated to fill fixtures. This supersedes NOT LIVE below only for observed public states; full published/error/accessibility/authenticated acceptance and the rest of the product remain PARTIAL. Evidence: [final QA checkpoint](../qa/final-6-2026-11-10.md).
+
 `PublicHelpViews` had only fa-versus-English body copy, reproducing English headings on `/de/legal`. A separate slice adds the entire `publicHelp` interface namespace to all four actual catalogs (direct key-parity checks, not merged-fallback tests): help search/topics/FAQ/article states, feedback, ten legal-page labels and publication states, system/incident states, loading/errors/retry, dates and counts. Local 41 tests pass, including stale/duplicate feedback. See [route/state QA record](../qa/public-help-localization-2026-11-10.md).
 
 Status remains **PARTIAL / NOT LIVE** until final-head CI and actual rendered responsive/theme/simple/four-language acceptance. This does not duplicate the customer support-ticket slice. Existing fa/en editorial article/legal editions remain original authored content; de/es UI translation is not a claim of approved German/Spanish legal/article bodies. Source editions are disclosed rather than machine-translated; no SMS templates/delivery are added. Landing HERO unchanged.

@@ -1,0 +1,165 @@
+{
+  "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881",
+  "cases": [
+    {
+      "locale": "fa",
+      "viewport": [
+        390,
+        900
+      ],
+      "status": 200,
+      "layout": {
+        "hero": {
+          "x": 0,
+          "y": 85,
+          "width": 390,
+          "height": 603.375
+        },
+        "image": {
+          "src": "/images/landing/tehran-park.webp",
+          "naturalWidth": 1681,
+          "naturalHeight": 936,
+          "x": 0,
+          "y": 303.375,
+          "width": 390,
+          "height": 385
+        },
+        "copy": {
+          "x": 0,
+          "y": 85,
+          "width": 390,
+          "height": 218.375
+        },
+        "title": {
+          "text": "یک دنیا برای تو و همراهت",
+          "fontSize": "32px",
+          "lineHeight": "51.2px",
+          "x": 16,
+          "y": 107,
+          "width": 358,
+          "height": 51.1875
+        }
+      }
+    },
+    {
+      "locale": "de",
+      "viewport": [
+        390,
+        900
+      ],
+      "status": 200,
+      "layout": {
+        "hero": {
+          "x": 0,
+          "y": 82,
+          "width": 390,
+          "height": 676.15625
+        },
+        "image": {
+          "src": "/images/landing/tehran-park-en.webp",
+          "naturalWidth": 1681,
+          "naturalHeight": 936,
+          "x": 0,
+          "y": 373.15625,
+          "width": 390,
+          "height": 385
+        },
+        "copy": {
+          "x": 0,
+          "y": 82,
+          "width": 390,
+          "height": 291.15625
+        },
+        "title": {
+          "text": "Eine ganze Welt für dich und dein Tier",
+          "fontSize": "32px",
+          "lineHeight": "51.2px",
+          "x": 16,
+          "y": 104,
+          "width": 358,
+          "height": 102.375
+        }
+      }
+    },
+    {
+      "locale": "fa",
+      "viewport": [
+        1440,
+        900
+      ],
+      "status": 200,
+      "layout": {
+        "hero": {
+          "x": 0,
+          "y": 90,
+          "width": 1440,
+          "height": 801.796875
+        },
+        "image": {
+          "src": "/images/landing/tehran-park.webp",
+          "naturalWidth": 1681,
+          "naturalHeight": 936,
+          "x": 0,
+          "y": 90,
+          "width": 1440,
+          "height": 801.796875
+        },
+        "copy": {
+          "x": 288,
+          "y": 118,
+          "width": 864,
+          "height": 234.4375
+        },
+        "title": {
+          "text": "یک دنیا برای تو و همراهت",
+          "fontSize": "64.8px",
+          "lineHeight": "97.2px",
+          "x": 288,
+          "y": 118,
+          "width": 864,
+          "height": 97.1875
+        }
+      }
+    },
+    {
+      "locale": "de",
+      "viewport": [
+        1440,
+        900
+      ],
+      "status": 200,
+      "layout": {
+        "hero": {
+          "x": 0,
+          "y": 87,
+          "width": 1440,
+          "height": 801.796875
+        },
+        "image": {
+          "src": "/images/landing/tehran-park-en.webp",
+          "naturalWidth": 1681,
+          "naturalHeight": 936,
+          "x": 0,
+          "y": 87,
+          "width": 1440,
+          "height": 801.796875
+        },
+        "copy": {
+          "x": 288,
+          "y": 115,
+          "width": 864,
+          "height": 331.625
+        },
+        "title": {
+          "text": "Eine ganze Welt für dich und dein Tier",
+          "fontSize": "64.8px",
+          "lineHeight": "97.2px",
+          "x": 288,
+          "y": 115,
+          "width": 864,
+          "height": 194.375
+        }
+      }
+    }
+  ]
+}
