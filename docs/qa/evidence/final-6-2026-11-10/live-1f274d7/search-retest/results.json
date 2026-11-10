@@ -1,0 +1,142 @@
+[
+  {
+    "testId": "QA-HELP-BROWSER-fa-help",
+    "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881",
+    "dateUtc": "2026-11-10T16:13:37.262893+00:00",
+    "environment": "production, anonymous read-only",
+    "browser": "154.0.8037.57",
+    "viewport": [
+      390,
+      844
+    ],
+    "theme": "LIGHT",
+    "simple": false,
+    "route": "/fa/help",
+    "http": 200,
+    "expected": "هنوز راهنمایی منتشر نشده است.",
+    "expectedStateVisible": true,
+    "searchPass": true,
+    "direction": "rtl",
+    "overflow": false,
+    "pageErrors": [],
+    "badAssets": [],
+    "mutationMethods": [],
+    "observedWallMs": 6814,
+    "navigationTimings": {
+      "responseStartMs": 1224.699999988079,
+      "domContentLoadedMs": 2159.7999999821186,
+      "loadEventMs": 3262.4000000059605
+    },
+    "status": "PASS",
+    "evidence": "fa-help-390.png",
+    "limitations": "Requires genuinely empty/unpublished content; a changed real publication needs change-impact review, not forced empty fixtures. No private/published article workflow or complete accessibility/performance acceptance.",
+    "actualTheme": "light",
+    "actualDisplayMode": null,
+    "searchHttp": 200
+  },
+  {
+    "testId": "QA-HELP-BROWSER-en-help",
+    "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881",
+    "dateUtc": "2026-11-10T16:13:41.620310+00:00",
+    "environment": "production, anonymous read-only",
+    "browser": "154.0.8037.57",
+    "viewport": [
+      390,
+      844
+    ],
+    "theme": "LIGHT",
+    "simple": false,
+    "route": "/en/help",
+    "http": 200,
+    "expected": "No help topics have been published yet.",
+    "expectedStateVisible": true,
+    "searchPass": true,
+    "direction": "ltr",
+    "overflow": false,
+    "pageErrors": [],
+    "badAssets": [],
+    "mutationMethods": [],
+    "observedWallMs": 4166,
+    "navigationTimings": {
+      "responseStartMs": 339,
+      "domContentLoadedMs": 844.8999999761581,
+      "loadEventMs": 1757.7999999821186
+    },
+    "status": "PASS",
+    "evidence": "en-help-390.png",
+    "limitations": "Requires genuinely empty/unpublished content; a changed real publication needs change-impact review, not forced empty fixtures. No private/published article workflow or complete accessibility/performance acceptance.",
+    "actualTheme": "light",
+    "actualDisplayMode": null,
+    "searchHttp": 200
+  },
+  {
+    "testId": "QA-HELP-BROWSER-de-help",
+    "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881",
+    "dateUtc": "2026-11-10T16:13:45.857896+00:00",
+    "environment": "production, anonymous read-only",
+    "browser": "154.0.8037.57",
+    "viewport": [
+      390,
+      844
+    ],
+    "theme": "DARK",
+    "simple": false,
+    "route": "/de/help",
+    "http": 200,
+    "expected": "Es wurden noch keine Hilfethemen veröffentlicht.",
+    "expectedStateVisible": true,
+    "searchPass": true,
+    "direction": "ltr",
+    "overflow": false,
+    "pageErrors": [],
+    "badAssets": [],
+    "mutationMethods": [],
+    "observedWallMs": 4040,
+    "navigationTimings": {
+      "responseStartMs": 360,
+      "domContentLoadedMs": 914.0999999940395,
+      "loadEventMs": 1936.5999999940395
+    },
+    "status": "PASS",
+    "evidence": "de-help-390.png",
+    "limitations": "Requires genuinely empty/unpublished content; a changed real publication needs change-impact review, not forced empty fixtures. No private/published article workflow or complete accessibility/performance acceptance.",
+    "actualTheme": "dark",
+    "actualDisplayMode": null,
+    "searchHttp": 200
+  },
+  {
+    "testId": "QA-HELP-BROWSER-es-help",
+    "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881",
+    "dateUtc": "2026-11-10T16:13:50.047641+00:00",
+    "environment": "production, anonymous read-only",
+    "browser": "154.0.8037.57",
+    "viewport": [
+      390,
+      844
+    ],
+    "theme": "DARK",
+    "simple": true,
+    "route": "/es/help",
+    "http": 200,
+    "expected": "Todavía no se han publicado temas de ayuda.",
+    "expectedStateVisible": true,
+    "searchPass": true,
+    "direction": "ltr",
+    "overflow": false,
+    "pageErrors": [],
+    "badAssets": [],
+    "mutationMethods": [],
+    "observedWallMs": 3999,
+    "navigationTimings": {
+      "responseStartMs": 347.19999998807907,
+      "domContentLoadedMs": 790.5999999940395,
+      "loadEventMs": 2014.5999999940395
+    },
+    "status": "PASS",
+    "evidence": "es-help-390.png",
+    "limitations": "Requires genuinely empty/unpublished content; a changed real publication needs change-impact review, not forced empty fixtures. No private/published article workflow or complete accessibility/performance acceptance.",
+    "actualTheme": "dark",
+    "actualDisplayMode": "simple",
+    "searchHttp": 200
+  }
+]
