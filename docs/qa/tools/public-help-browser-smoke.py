@@ -79,15 +79,16 @@ async def run(args):
                     await page.get_by_text(copy["noMatches"], exact=True).wait_for()
                     search_pass = search_http == 200 and isinstance(search_payload, list) and not search_payload
                 direction = await page.locator("html").get_attribute("dir")
+                main_count = await page.get_by_role("main").count()
                 actual_theme = await page.locator("html").get_attribute("data-theme")
                 actual_display = await page.locator("html").get_attribute("data-display-mode")
                 overflow = await page.evaluate("document.documentElement.scrollWidth>innerWidth")
                 screenshot = f"{locale}-{route.replace('/', '-')}-390.png"
                 await page.screenshot(path=str(output / screenshot), full_page=True)
                 timings = await page.evaluate("""()=>{const n=performance.getEntriesByType('navigation')[0];return n?{responseStartMs:n.responseStart-n.startTime,domContentLoadedMs:n.domContentLoadedEventEnd-n.startTime,loadEventMs:n.loadEventEnd-n.startTime}:null}""")
-                passed = response.status == 200 and expected_visible and search_pass is not False and direction == ("rtl" if locale == "fa" else "ltr") and actual_theme == theme.lower() and (actual_display == "simple") == simple and not overflow and not page_errors and not bad_assets and not mutations
+                passed = response.status == 200 and expected_visible and search_pass is not False and direction == ("rtl" if locale == "fa" else "ltr") and actual_theme == theme.lower() and (actual_display == "simple") == simple and (args.expected_main_count is None or main_count == args.expected_main_count) and not overflow and not page_errors and not bad_assets and not mutations
                 results.append({"testId": f"QA-HELP-BROWSER-{locale}-{route}", "sha": args.expected_sha, "dateUtc": datetime.now(timezone.utc).isoformat(), "environment": "production, anonymous read-only", "browser": browser.version, "viewport": [390, 844], "theme": theme, "simple": simple, "route": f"/{locale}/{route}", "http": response.status, "expected": expected, "expectedStateVisible": expected_visible, "searchPass": search_pass, "direction": direction, "overflow": overflow, "pageErrors": page_errors, "badAssets": bad_assets, "mutationMethods": mutations, "observedWallMs": round((perf_counter() - started) * 1000), "navigationTimings": timings, "status": "PASS" if passed else "FAIL", "evidence": screenshot, "limitations": "Requires genuinely empty/unpublished content; a changed real publication needs change-impact review, not forced empty fixtures. No private/published article workflow or complete accessibility/performance acceptance."})
-                results[-1].update({"actualTheme": actual_theme, "actualDisplayMode": actual_display, "searchHttp": search_http})
+                results[-1].update({"actualTheme": actual_theme, "actualDisplayMode": actual_display, "searchHttp": search_http, "mainLandmarks": main_count})
                 await page.close()
             await context.close()
         # Additional real empty-state layouts in tablet/desktop themes/simple mode.
@@ -104,13 +105,14 @@ async def run(args):
             except Exception:
                 rendered = False
             overflow = await page.evaluate("document.documentElement.scrollWidth>innerWidth")
+            main_count = await page.get_by_role("main").count()
             actual_theme = await page.locator("html").get_attribute("data-theme")
             actual_display = await page.locator("html").get_attribute("data-display-mode")
             evidence = f"{locale}-legal-{width}.png"
             await page.screenshot(path=str(output / evidence), full_page=True)
-            passed = response.status == 200 and rendered and not overflow and actual_theme == theme.lower() and (actual_display == "simple") == simple
+            passed = response.status == 200 and rendered and not overflow and actual_theme == theme.lower() and (actual_display == "simple") == simple and (args.expected_main_count is None or main_count == args.expected_main_count)
             results.append({"testId": f"QA-HELP-LAYOUT-{locale}-{width}", "sha": args.expected_sha, "dateUtc": datetime.now(timezone.utc).isoformat(), "environment": "production, anonymous read-only", "browser": browser.version, "viewport": [width, 900], "theme": theme, "simple": simple, "expectedStateVisible": rendered, "overflow": overflow, "status": "PASS" if passed else "FAIL", "evidence": evidence})
-            results[-1].update({"actualTheme": actual_theme, "actualDisplayMode": actual_display})
+            results[-1].update({"actualTheme": actual_theme, "actualDisplayMode": actual_display, "mainLandmarks": main_count})
             await context.close()
         await browser.close()
     if version() != args.expected_sha:
@@ -126,4 +128,5 @@ if __name__ == "__main__":
     parser.add_argument("--expected-sha", required=True)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--only-search", action="store_true", help="Retest only the four search flows after harness changes")
+    parser.add_argument("--expected-main-count", type=int)
     raise SystemExit(asyncio.run(run(parser.parse_args())))

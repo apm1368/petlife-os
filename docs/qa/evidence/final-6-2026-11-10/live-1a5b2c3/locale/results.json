@@ -1,0 +1,116 @@
+[
+  {
+    "testId": "QA-LOCALE-SWITCH-de",
+    "sha": "1a5b2c3b8d14615b18fdd613e6b0956d6fe9a31b",
+    "dateUtc": "2026-11-10T17:15:58.240821+00:00",
+    "browser": "154.0.8037.57",
+    "environment": "production, anonymous read-only",
+    "viewport": [
+      390,
+      844
+    ],
+    "route": "/de/help/faq?q=qa-route-context",
+    "bodyState": "Es wurden noch keine häufigen Fragen veröffentlicht.",
+    "observed": {
+      "lang": "de",
+      "dir": "ltr",
+      "theme": "dark",
+      "display": "simple"
+    },
+    "selected": "de",
+    "overflow": false,
+    "mutationMethods": [],
+    "status": "PASS",
+    "evidence": "de-after-switch-refresh.png",
+    "limitations": "URL/query and browser-local preferences only; no authenticated account preference saved, no private household/pet context tested"
+  },
+  {
+    "testId": "QA-LOCALE-SWITCH-es",
+    "sha": "1a5b2c3b8d14615b18fdd613e6b0956d6fe9a31b",
+    "dateUtc": "2026-11-10T17:16:00.900106+00:00",
+    "browser": "154.0.8037.57",
+    "environment": "production, anonymous read-only",
+    "viewport": [
+      390,
+      844
+    ],
+    "route": "/es/help/faq?q=qa-route-context",
+    "bodyState": "Todavía no se han publicado preguntas frecuentes.",
+    "observed": {
+      "lang": "es",
+      "dir": "ltr",
+      "theme": "dark",
+      "display": "simple"
+    },
+    "selected": "es",
+    "overflow": false,
+    "mutationMethods": [],
+    "status": "PASS",
+    "evidence": "es-after-switch-refresh.png",
+    "limitations": "URL/query and browser-local preferences only; no authenticated account preference saved, no private household/pet context tested"
+  },
+  {
+    "testId": "QA-LOCALE-SWITCH-en",
+    "sha": "1a5b2c3b8d14615b18fdd613e6b0956d6fe9a31b",
+    "dateUtc": "2026-11-10T17:16:04.611782+00:00",
+    "browser": "154.0.8037.57",
+    "environment": "production, anonymous read-only",
+    "viewport": [
+      390,
+      844
+    ],
+    "route": "/en/help/faq?q=qa-route-context",
+    "bodyState": "No frequently asked questions have been published yet.",
+    "observed": {
+      "lang": "en",
+      "dir": "ltr",
+      "theme": "dark",
+      "display": "simple"
+    },
+    "selected": "en",
+    "overflow": false,
+    "mutationMethods": [],
+    "status": "PASS",
+    "evidence": "en-after-switch-refresh.png",
+    "limitations": "URL/query and browser-local preferences only; no authenticated account preference saved, no private household/pet context tested"
+  },
+  {
+    "testId": "QA-LOCALE-SWITCH-fa",
+    "sha": "1a5b2c3b8d14615b18fdd613e6b0956d6fe9a31b",
+    "dateUtc": "2026-11-10T17:16:07.820877+00:00",
+    "browser": "154.0.8037.57",
+    "environment": "production, anonymous read-only",
+    "viewport": [
+      390,
+      844
+    ],
+    "route": "/fa/help/faq?q=qa-route-context",
+    "bodyState": "هنوز پرسش پرتکراری منتشر نشده است.",
+    "observed": {
+      "lang": "fa",
+      "dir": "rtl",
+      "theme": "dark",
+      "display": "simple"
+    },
+    "selected": "fa",
+    "overflow": false,
+    "mutationMethods": [],
+    "status": "PASS",
+    "evidence": "fa-after-switch-refresh.png",
+    "limitations": "URL/query and browser-local preferences only; no authenticated account preference saved, no private household/pet context tested"
+  },
+  {
+    "testId": "QA-DISPLAY-REVERSIBLE",
+    "sha": "1a5b2c3b8d14615b18fdd613e6b0956d6fe9a31b",
+    "environment": "production, anonymous read-only",
+    "dateUtc": "2026-11-10T17:16:08.006224+00:00",
+    "observed": {
+      "lang": "fa",
+      "theme": "dark",
+      "display": null
+    },
+    "status": "PASS",
+    "evidence": "fa-display-disabled.png",
+    "limitations": "Real UI controls used; no init script reset preferences during navigation/refresh"
+  }
+]
