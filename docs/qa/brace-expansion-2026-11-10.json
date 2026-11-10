@@ -11,6 +11,7 @@
   "versionAfter": "5.0.12",
   "expected": "Same-major patched resolution with existing engine/dependency compatibility and bounded expansion behavior",
   "actual": "Frozen lockfile validation PASS; five isolated actual-package contracts PASS; source syntax/diff PASS; workspace CI pending",
+  "oldInstalledDependencyReproduction": "Existing workspace resolves brace-expansion 5.0.9: same five contracts yield 2 FAIL / 3 PASS, including actual bounds behavior; shared modules preserved",
   "status": "PASS",
   "releaseStatus": "AWAITING_CI_OR_MERGE",
   "auditBefore": {"critical":0,"high":3,"moderate":7,"low":0},

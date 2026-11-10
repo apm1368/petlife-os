@@ -10,6 +10,8 @@ Pin only the installed v5 range to **5.0.12** via existing workspace overrides. 
 
 ## Verification
 
+- Running the same contracts against the preserved existing workspace dependency path (actual installed brace-expansion **5.0.9**) gives **2 FAIL / 3 PASS**: pinned guards and nesting/rewrite bounds fail. This is an expected old-dependency reproduction, not a successful current workspace run. Shared dependencies were not changed to hide that result.
+
 - Five Node contracts PASS against an explicitly isolated `/tmp` project with actual brace-expansion 5.0.12 and minimatch 10.2.6, installed using pnpm 10.33.0. No skips: pinned version/guards, ordinary lint glob/sequence/escaped behavior, tiny bounded nesting/rewrite options, bounded aggregate output and consuming minimatch glob matching.
 - Adversarial fixtures are tiny and run in child processes capped at 64 MiB/1.5 seconds/64 KiB output; no production request, brute force or denial-of-service test. They verify new bounds, not a full historical exploit replay.
 - CI executes the same script against the **actual eslint → parser → minimatch → brace** dependency path after frozen installation, without the local fixture-root environment variable. Local isolated package tests are not falsely described as a full current workspace install.
