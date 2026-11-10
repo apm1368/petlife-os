@@ -34,7 +34,13 @@ const envSchema = z.object({
   APP_VERSION: z.string().default("0.1.0"),
   BUILD_SHA: z.string().default("unknown"),
   BUILD_TIME: z.string().default("unknown"),
-  DEPLOYMENT_ENVIRONMENT: z.string().default("local"),
+  /// Which environment this process actually runs in. TC-04 requires the three
+  /// environments (development, staging, production) to be distinguishable, and
+  /// /health/version must report the real one — a production release that
+  /// advertises "staging" makes staging meaningless as a gate (TC-11).
+  /// `local` is the development default; a server deployment must set it
+  /// explicitly to `staging` or `production`.
+  DEPLOYMENT_ENVIRONMENT: z.enum(["local", "development", "staging", "production"]).default("local"),
   DEPLOYMENT_ID: z.string().default("unknown"),
 
   DATABASE_URL: z.string().min(1),

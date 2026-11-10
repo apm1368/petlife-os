@@ -242,6 +242,16 @@ describe("Help Center, legal pages and status", () => {
       expect(await db.supportEscalation.count({ where: { caseId: t.id } })).toBe(1);
     });
 
+    it("concurrent escalation requests return one persisted reference", async () => {
+      const member = await actor();
+      const t = await ticket(member);
+      const results = await Promise.all(Array.from({ length: 3 }, () =>
+        send("post", member, `/support/cases/${t.id}/escalate`).send({ reason: "Need a person please", confirm: true }).expect(201),
+      ));
+      expect(new Set(results.map((result) => result.body.referenceNumber)).size).toBe(1);
+      expect(await db.supportEscalation.count({ where: { caseId: t.id } })).toBe(1);
+    });
+
     it("answers 404 for someone else's ticket — indistinguishable from one that does not exist", async () => {
       const owner = await actor();
       const intruder = await actor();

@@ -18,7 +18,7 @@ import type {
 } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
-import { adminCommerceService } from "@/services/admin-commerce.service";
+import { adminCommerceService, type ProductMediaDto } from "@/services/admin-commerce.service";
 import { PromotionManager, type PromotionApi } from "@/features/commerce/PromotionManager";
 import {
   DetailRow,
@@ -895,6 +895,13 @@ export function AdminProductsView() {
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [mediaProduct, setMediaProduct] = useState<AdminProductRowDto | null>(null);
+  const [media, setMedia] = useState<ProductMediaDto[]>([]);
+  const [mediaLoading, setMediaLoading] = useState(false);
+  const [mediaBusy, setMediaBusy] = useState(false);
+  const [mediaError, setMediaError] = useState<string | null>(null);
+  const [mediaAlt, setMediaAlt] = useState("");
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
   const load = useCallback(async () => {
     setError(null);
     setData(null);
@@ -929,12 +936,120 @@ export function AdminProductsView() {
           ? fa
             ? "دسترسی commerce.manage لازم است"
             : "commerce.manage permission required"
-          : fa
-            ? "انجام نشد"
-            : "Failed",
+          : e instanceof ApiError && e.code === "PRODUCT_MEDIA_INCOMPLETE"
+            ? fa
+              ? "برای فعال‌سازی، دقیقاً ۳ تصویر با متن جایگزین لازم است."
+              : "Activation requires exactly 3 images with alternative text."
+            : fa
+              ? "انجام نشد"
+              : "Failed",
       );
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function openMedia(product: AdminProductRowDto) {
+    setMediaProduct(product);
+    setMedia([]);
+    setMediaAlt("");
+    setMediaFile(null);
+    setMediaError(null);
+    setMediaLoading(true);
+    try {
+      setMedia(await adminCommerceService.listProductMedia(product.id));
+    } catch (e) {
+      setMediaError(
+        e instanceof ApiError && e.status === 403
+          ? fa
+            ? "دسترسی commerce.view لازم است"
+            : "commerce.view permission required"
+          : fa
+            ? "تصاویر بارگیری نشدند"
+            : "Could not load images",
+      );
+    } finally {
+      setMediaLoading(false);
+    }
+  }
+
+  async function uploadMedia() {
+    if (!mediaProduct || !mediaFile) return;
+    if (mediaAlt.trim().length < 3) {
+      setMediaError(
+        fa ? "برای تصویر یک متن جایگزین روشن بنویسید." : "Write descriptive alternative text for the image.",
+      );
+      return;
+    }
+    setMediaBusy(true);
+    setMediaError(null);
+    try {
+      const target = await adminCommerceService.requestProductMediaUpload(mediaProduct.id, {
+        contentType: mediaFile.type,
+        fileSizeBytes: mediaFile.size,
+      });
+      const uploaded = await fetch(target.uploadUrl, {
+        method: target.method,
+        headers: target.headers,
+        body: mediaFile,
+      });
+      if (!uploaded.ok) throw new Error("UPLOAD_FAILED");
+      await adminCommerceService.confirmProductMediaUpload(mediaProduct.id, {
+        objectKey: target.key,
+        alt: mediaAlt.trim(),
+      });
+      setMedia(await adminCommerceService.listProductMedia(mediaProduct.id));
+      setMediaFile(null);
+      setMediaAlt("");
+      await load();
+    } catch (e) {
+      setMediaError(
+        e instanceof ApiError && e.code === "PRODUCT_MEDIA_LIMIT_REACHED"
+          ? fa
+            ? "هر کالا حداکثر ۳ تصویر دارد."
+            : "A product can have at most 3 images."
+          : fa
+            ? "بارگذاری تصویر انجام نشد. فرمت و حجم فایل را بررسی کنید."
+            : "Image upload failed. Check the file type and size.",
+      );
+    } finally {
+      setMediaBusy(false);
+    }
+  }
+
+  async function reorderMedia(from: number, to: number) {
+    if (!mediaProduct || to < 0 || to >= media.length) return;
+    setMediaBusy(true);
+    setMediaError(null);
+    const next = [...media];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved!);
+    try {
+      setMedia(
+        await adminCommerceService.reorderProductMedia(
+          mediaProduct.id,
+          next.map((item) => item.id),
+        ),
+      );
+    } catch {
+      setMediaError(fa ? "ترتیب تصاویر ذخیره نشد." : "Could not save image order.");
+    } finally {
+      setMediaBusy(false);
+    }
+  }
+
+  async function removeMedia(mediaId: string) {
+    if (!mediaProduct) return;
+    setMediaBusy(true);
+    setMediaError(null);
+    try {
+      await adminCommerceService.removeProductMedia(mediaProduct.id, mediaId);
+      setMedia(await adminCommerceService.listProductMedia(mediaProduct.id));
+      await load();
+    } catch {
+      setMediaError(fa ? "حذف تصویر انجام نشد." : "Could not remove image.");
+    } finally {
+      setMediaBusy(false);
     }
   }
 
@@ -1009,15 +1124,10 @@ export function AdminProductsView() {
                             : "—"}
                         </Td>
                         <Td>
-                          {p.hasMedia ? (
-                            fa ? (
-                              "دارد"
-                            ) : (
-                              "Yes"
-                            )
-                          ) : (
-                            <Tag tone="attention">{fa ? "ندارد" : "Missing"}</Tag>
-                          )}
+                          {num(p.mediaCount, lang)} / 3
+                          {p.mediaCount !== 3 ? (
+                            <Tag tone="attention">{fa ? "نیازمند تکمیل" : "Incomplete"}</Tag>
+                          ) : null}
                         </Td>
                         <Td>
                           <Tag tone={p.status === "ACTIVE" ? "success" : "neutral"}>
@@ -1025,18 +1135,23 @@ export function AdminProductsView() {
                           </Tag>
                         </Td>
                         <Td>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => {
-                              setEditing(p);
-                              setNextStatus(p.status === "ACTIVE" ? "INACTIVE" : "ACTIVE");
-                              setReason("");
-                              setActionError(null);
-                            }}
-                          >
-                            {fa ? "تغییر وضعیت" : "Change status"}
-                          </Button>
+                          <div className="flex flex-wrap gap-1">
+                            <Button size="sm" variant="ghost" onClick={() => void openMedia(p)}>
+                              {fa ? "تصاویر" : "Images"}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                setEditing(p);
+                                setNextStatus(p.status === "ACTIVE" ? "INACTIVE" : "ACTIVE");
+                                setReason("");
+                                setActionError(null);
+                              }}
+                            >
+                              {fa ? "وضعیت" : "Status"}
+                            </Button>
+                          </div>
                         </Td>
                       </tr>
                     ))
@@ -1077,6 +1192,94 @@ export function AdminProductsView() {
           <Button isLoading={busy} disabled={reason.trim().length < 3} onClick={save}>
             {fa ? "ذخیره" : "Save"}
           </Button>
+        </div>
+      </Dialog>
+      <Dialog
+        open={Boolean(mediaProduct)}
+        onClose={() => {
+          setMediaProduct(null);
+          setMediaFile(null);
+          setMediaError(null);
+        }}
+        title={mediaProduct ? (fa ? `تصاویر ${mediaProduct.title}` : `${mediaProduct.title} images`) : ""}
+      >
+        <div className="flex flex-col gap-3">
+          <p className="text-metadata text-text-secondary">
+            {fa
+              ? "برای فعال‌سازی کالا، دقیقاً ۳ تصویر با متن جایگزین لازم است. تصاویر فقط پس از بارگذاری مستقیم در فضای ذخیره‌سازی ثبت می‌شوند."
+              : "Activation requires exactly 3 images with alternative text. Images are recorded only after direct storage upload."}
+          </p>
+          {mediaLoading ? <Skeleton className="h-32 w-full" /> : null}
+          {!mediaLoading && media.length === 0 ? (
+            <EmptyState title={fa ? "تصویری ثبت نشده است" : "No images yet"} />
+          ) : null}
+          {media.map((item, index) => (
+            <div key={item.id} className="flex items-center gap-2 rounded-md border border-border-subtle p-2">
+              {/* Product media comes from the configured first-party storage origin, not an arbitrary remote host. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="h-14 w-14 rounded object-cover" src={item.url} alt={item.alt ?? ""} />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm">{item.alt}</p>
+                <p className="text-metadata text-text-secondary">
+                  {fa ? `تصویر ${num(index + 1, lang)}` : `Image ${index + 1}`}
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={mediaBusy || index === 0}
+                onClick={() => void reorderMedia(index, index - 1)}
+              >
+                {fa ? "بالا" : "Up"}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={mediaBusy || index === media.length - 1}
+                onClick={() => void reorderMedia(index, index + 1)}
+              >
+                {fa ? "پایین" : "Down"}
+              </Button>
+              <Button
+                size="sm"
+                variant="danger"
+                disabled={mediaBusy}
+                onClick={() => void removeMedia(item.id)}
+              >
+                {fa ? "حذف" : "Remove"}
+              </Button>
+            </div>
+          ))}
+          {media.length < 3 ? (
+            <>
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="text-text-secondary">{fa ? "فایل تصویر" : "Image file"}</span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(event) => setMediaFile(event.target.files?.[0] ?? null)}
+                />
+              </label>
+              <Input
+                label={fa ? "متن جایگزین تصویر" : "Image alternative text"}
+                value={mediaAlt}
+                onChange={(event) => setMediaAlt(event.target.value)}
+                placeholder={fa ? "آنچه در تصویر دیده می‌شود" : "What is shown in this image"}
+              />
+              <Button
+                isLoading={mediaBusy}
+                disabled={!mediaFile || mediaAlt.trim().length < 3}
+                onClick={() => void uploadMedia()}
+              >
+                {fa ? "بارگذاری تصویر" : "Upload image"}
+              </Button>
+            </>
+          ) : null}
+          {mediaError ? (
+            <p role="alert" className="text-metadata text-state-urgent">
+              {mediaError}
+            </p>
+          ) : null}
         </div>
       </Dialog>
     </Frame>

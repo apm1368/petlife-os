@@ -89,6 +89,30 @@ describe("MemberHomeView", () => {
     expect(petsService.getOverview).toHaveBeenCalledWith("pet-1");
   });
 
+  it.each([
+    ["fa", "خانوار فعال"],
+    ["en", "Active household"],
+    ["de", "Aktiver Haushalt"],
+    ["es", "Hogar activo"],
+  ] as const)("shows the selected pet's household context in %s", async (locale, label) => {
+    vi.mocked(petsService.getOverview).mockResolvedValue(overview({ householdName: "Garcia family" }));
+    vi.mocked(petsService.getMyAccess).mockResolvedValue({ canViewIdentity: true, canViewHealth: true, canViewCareProfile: true } as never);
+    renderWithIntl(<MemberHomeView />, locale);
+    await screen.findByRole("heading", { name: "پشمک" });
+    expect(await screen.findByText(label)).toBeTruthy();
+    expect(screen.getByRole("group", { name: `${label}: Garcia family` })).toBeTruthy();
+  });
+
+  it("does not reveal household name until identity permission is confirmed", async () => {
+    vi.mocked(petsService.getOverview).mockResolvedValue(overview({ householdName: "Private family" }));
+    vi.mocked(petsService.getMyAccess).mockResolvedValue({ canViewIdentity: false, canViewHealth: false, canViewCareProfile: false } as never);
+    renderWithIntl(<MemberHomeView />, "en");
+    await screen.findByRole("heading", { name: "پشمک" });
+    await waitFor(() => expect(petsService.getMyAccess).toHaveBeenCalledWith("pet-1"));
+    expect(screen.queryByText("Private family")).toBeNull();
+    expect(screen.queryByText("Active household")).toBeNull();
+  });
+
   it("says what needs attention in words; severity codes never reach the page", async () => {
     vi.mocked(petsService.getOverview).mockResolvedValue(overview({ attention: [{ id: "a1", severity: "INFORMATIONAL", title: "HEALTH_PROFILE_INCOMPLETE", dueAt: null, href: "/health" }] }));
     renderWithIntl(<MemberHomeView />, "fa");
@@ -103,6 +127,21 @@ describe("MemberHomeView", () => {
     expect(await screen.findByText("You have no upcoming appointment.")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Find a vet" }).getAttribute("href")).toBe("/en/vet/find");
     expect(screen.getByText("Based on what's recorded, nothing urgent is waiting.")).toBeTruthy();
+  });
+
+  it("never shows another selected household pet's appointment in the active pet dashboard", async () => {
+    const sibling = { ...PET, id: "pet-2", name: "Milo" };
+    usePetStore.setState({ householdId: "h1", pets: [PET as never, sibling as never], activePetId: "pet-1" });
+    vi.mocked(petsService.getOverview).mockResolvedValue(overview());
+    vi.mocked(bookingsService.list).mockResolvedValue([{
+      id: "sibling-appointment", petId: "pet-2", serviceName: "Milo's check-up", provider: { name: "Central Vet" },
+      startAt: "2026-11-12T10:00:00Z", location: { timezone: "Asia/Tehran" },
+    }] as never);
+
+    renderWithIntl(<MemberHomeView />, "en");
+
+    expect(await screen.findByText("You have no upcoming appointment.")).toBeTruthy();
+    expect(screen.queryByText("Milo's check-up")).toBeNull();
   });
 
   it("a member without pets is invited to add one", async () => {

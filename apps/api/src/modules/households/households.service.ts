@@ -398,26 +398,58 @@ export class HouseholdsService {
     const member = await this.prisma.householdMember.findFirst({ where: { id: memberId, householdId } });
     if (!member) throw new NotFoundApiException("Member");
     if (member.userId === actorUserId) throw new ValidationApiException({ field: "memberId", reason: "Use “leave household” to remove yourself." });
-    await this.prisma.$transaction(async (tx) => {
+    const copiedMemories = await this.prisma.$transaction(async (tx) => {
       if (member.role === HouseholdRole.OWNER) await this.assertAnotherOwner(tx, householdId, member.userId);
+      // ID-02: the separated member keeps a read-only copy of the memories THEY
+      // recorded. The originals stay with the pet and the household.
+      const copied = await this.copySeparatedMemories(tx, householdId, member.userId);
       await tx.householdMember.delete({ where: { id: member.id } });
       const revoked = await this.revokeHouseholdGrants(tx, householdId, member.userId, actorUserId);
-      await this.events.publish("HouseholdMemberRemoved", { householdId, userId: member.userId, actorUserId, revokedGrants: revoked }, { tx, aggregateType: "Household", aggregateId: householdId });
+      await this.events.publish("HouseholdMemberRemoved", { householdId, userId: member.userId, actorUserId, revokedGrants: revoked, copiedMemories: copied }, { tx, aggregateType: "Household", aggregateId: householdId });
+      return copied;
     });
     await this.notifications.notify({ userId: member.userId, type: "household.member_removed", category: "HOUSEHOLD", templateParams: {}, deepLink: NotificationDeepLinks.profileHousehold(), entityType: "Household", entityId: householdId }).catch(() => undefined);
-    return { ok: true };
+    return { ok: true, copiedMemories };
   }
 
   async leave(householdId: string, userId: string) {
     const member = await this.prisma.householdMember.findUnique({ where: { householdId_userId: { householdId, userId } } });
     if (!member) throw new HouseholdAccessDeniedException({ householdId });
-    await this.prisma.$transaction(async (tx) => {
+    const copiedMemories = await this.prisma.$transaction(async (tx) => {
       if (member.role === HouseholdRole.OWNER) await this.assertAnotherOwner(tx, householdId, userId);
+      // ID-02: the separated member keeps a read-only copy of the memories THEY
+      // recorded. The originals stay with the pet and the household.
+      const copied = await this.copySeparatedMemories(tx, householdId, userId);
       await tx.householdMember.delete({ where: { id: member.id } });
       const revoked = await this.revokeHouseholdGrants(tx, householdId, userId, userId);
-      await this.events.publish("HouseholdMemberLeft", { householdId, userId, revokedGrants: revoked }, { tx, aggregateType: "Household", aggregateId: householdId });
+      await this.events.publish("HouseholdMemberLeft", { householdId, userId, revokedGrants: revoked, copiedMemories: copied }, { tx, aggregateType: "Household", aggregateId: householdId });
+      // The transaction's result is what the caller sees, so the count must be
+      // returned explicitly — the publish above resolves to undefined.
+      return copied;
     });
-    return { ok: true };
+    return { ok: true, copiedMemories };
+  }
+
+  /**
+   * ID-02: "the separated member keeps a read-only copy of the memories they recorded".
+   *
+   * The copy points at the original memory row, which stays with the pet and its
+   * household — this is a read grant, not a fork of the data, so the memory is never
+   * duplicated or orphaned. Only the memories this person personally recorded are
+   * copied, never the household's whole library. The unique index on
+   * (memoryId, userId) makes a repeated separation idempotent.
+   */
+  private async copySeparatedMemories(tx: Prisma.TransactionClient, householdId: string, userId: string): Promise<number> {
+    const memories = await tx.petMemory.findMany({
+      where: { householdId, createdByUserId: userId },
+      select: { id: true, petId: true },
+    });
+    if (!memories.length) return 0;
+    const result = await tx.petMemoryCopy.createMany({
+      data: memories.map((memory) => ({ memoryId: memory.id, userId, householdId, petId: memory.petId })),
+      skipDuplicates: true,
+    });
+    return result.count;
   }
 
   async changeRole(householdId: string, memberId: string, role: HouseholdRole, actorUserId: string) {

@@ -1,0 +1,174 @@
+[
+  {
+    "locale": "es",
+    "route": "/services",
+    "sha": "e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce",
+    "http": 200,
+    "timeUtc": "2026-11-10T10:00:05.526399+00:00",
+    "viewport": [
+      390,
+      844
+    ],
+    "header": [
+      {
+        "tag": "A",
+        "label": "opetlife",
+        "box": {
+          "x": 16,
+          "y": 12,
+          "width": 112.4375,
+          "height": 44
+        },
+        "centerReachable": true,
+        "coveredBy": "BDI"
+      },
+      {
+        "tag": "BUTTON",
+        "label": "Navegación principal",
+        "box": {
+          "x": 140.4375,
+          "y": 14,
+          "width": 40,
+          "height": 40
+        },
+        "centerReachable": false,
+        "coveredBy": "SELECT"
+      },
+      {
+        "tag": "SELECT",
+        "label": "español",
+        "box": {
+          "x": 106.015625,
+          "y": 16,
+          "width": 88,
+          "height": 36
+        },
+        "centerReachable": true,
+        "coveredBy": "SELECT"
+      },
+      {
+        "tag": "BUTTON",
+        "label": "System → Light",
+        "box": {
+          "x": 202.015625,
+          "y": 14,
+          "width": 25.828125,
+          "height": 40
+        },
+        "centerReachable": true,
+        "coveredBy": "svg"
+      },
+      {
+        "tag": "BUTTON",
+        "label": "Vista sencilla: desactivada",
+        "box": {
+          "x": 235.84375,
+          "y": 16,
+          "width": 43.15625,
+          "height": 36
+        },
+        "centerReachable": true,
+        "coveredBy": "SPAN"
+      },
+      {
+        "tag": "BUTTON",
+        "label": "Iniciar sesión",
+        "box": {
+          "x": 287,
+          "y": 16,
+          "width": 87,
+          "height": 36
+        },
+        "centerReachable": true,
+        "coveredBy": "BUTTON"
+      }
+    ],
+    "screenshot": "es-390-before.png"
+  },
+  {
+    "locale": "fa",
+    "route": "/services",
+    "sha": "e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce",
+    "http": 200,
+    "timeUtc": "2026-11-10T10:00:10.361209+00:00",
+    "viewport": [
+      390,
+      844
+    ],
+    "header": [
+      {
+        "tag": "A",
+        "label": "opetlife",
+        "box": {
+          "x": 261.5625,
+          "y": 12,
+          "width": 112.4375,
+          "height": 46
+        },
+        "centerReachable": true,
+        "coveredBy": "BDI"
+      },
+      {
+        "tag": "BUTTON",
+        "label": "ناوبری اصلی",
+        "box": {
+          "x": 209.5625,
+          "y": 15,
+          "width": 40,
+          "height": 40
+        },
+        "centerReachable": false,
+        "coveredBy": "SELECT"
+      },
+      {
+        "tag": "SELECT",
+        "label": "فارسی",
+        "box": {
+          "x": 174.125,
+          "y": 17,
+          "width": 87,
+          "height": 36
+        },
+        "centerReachable": true,
+        "coveredBy": "SELECT"
+      },
+      {
+        "tag": "BUTTON",
+        "label": "سیستم → روشن",
+        "box": {
+          "x": 126.125,
+          "y": 15,
+          "width": 40,
+          "height": 40
+        },
+        "centerReachable": true,
+        "coveredBy": "svg"
+      },
+      {
+        "tag": "BUTTON",
+        "label": "نمایش ساده: خاموش",
+        "box": {
+          "x": 76.078125,
+          "y": 17,
+          "width": 42.046875,
+          "height": 36
+        },
+        "centerReachable": true,
+        "coveredBy": "SPAN"
+      },
+      {
+        "tag": "BUTTON",
+        "label": "ورود",
+        "box": {
+          "x": 16,
+          "y": 17,
+          "width": 52.078125,
+          "height": 36
+        },
+        "centerReachable": true,
+        "coveredBy": "BUTTON"
+      }
+    ],
+    "screenshot": "fa-390-before.png"
+  }
+]

@@ -62,6 +62,14 @@ button.experience-tile,button.experience-card { width:100%; text-align:start; cu
 .public-site-header { position:sticky; top:0; z-index:30; display:grid; grid-template-columns:auto auto minmax(0,1fr); gap:12px; align-items:center; background:color-mix(in srgb,var(--surface-elevated) 94%,transparent)!important; backdrop-filter:saturate(1.15) blur(10px); }
 .public-header-actions { justify-self:end; }
 .public-primary-navigation { min-width:0; pointer-events:auto; }
+/* Public header mobile reflow: keep navigation clear of preference controls. */
+.public-site-header button,
+.public-site-header select { min-inline-size:var(--touch-target-min); min-block-size:var(--touch-target-min); flex-shrink:0; }
+@media(max-width:639px) {
+  .public-site-header { grid-template-columns:minmax(0,1fr) auto; }
+  .public-header-actions { grid-column:1 / -1; justify-self:stretch; justify-content:space-between; flex-wrap:wrap; min-inline-size:0; }
+}
+/* End public header mobile reflow. */
 .public-footer { display:flex; align-items:center; justify-content:space-between; gap:16px; border-top:1px solid var(--border-subtle); padding:16px max(16px,calc((100vw - 1120px)/2)); color:var(--text-secondary); font-size:.8125rem; }
 .public-footer ul { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px 16px; list-style:none; margin:0; padding:0; }
 .public-footer__brand { display:flex; flex-direction:column; gap:4px; }
@@ -694,7 +702,7 @@ input[type="radio"],input[type="checkbox"]{accent-color:var(--brand-natural)}
 .cal-chip[data-source="BOOKING_DERIVED"]{border-inline-start-color:#7a6bb0;background:color-mix(in srgb,#7a6bb0 10%,var(--surface-elevated))}
 .cal-chip:focus-visible{outline:2px solid var(--focus-ring);outline-offset:1px}
 .cal-more{border:0;background:none;color:var(--brand-natural);font-size:.76rem;font-weight:700;cursor:pointer}
-.cal-agenda-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 4px 14px 16px;padding-inline-start:16px;position:relative}
+.cal-agenda-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding-block:14px;padding-inline-start:16px;padding-inline-end:4px;position:relative}
 .cal-agenda-row::before{content:"";position:absolute;inset-inline-start:2px;top:50%;width:7px;height:7px;border-radius:2px;background:var(--brand-solid);transform:translateY(-50%)}
 .cal-agenda-row[data-status="OVERDUE"]::before{background:var(--state-attention)}
 .cal-agenda-row[data-status="COMPLETED"]::before,.cal-agenda-row[data-status="CANCELLED"]::before{background:var(--border-strong)}

@@ -30,7 +30,10 @@ export function GlassMemberHome({ locale, userName, pet, overview, pets, activeP
     <header className="glass-home__greeting">
       <div><p className="glass-home__eyebrow">opetlife</p><h2>{c.greeting}{userName ? c.nameSeparator + userName : ""}</h2><p>{c.subtitle}</p></div>
       <div className="glass-home__summary"><Bell size={22} aria-hidden="true" /><strong>{count(overview.upcoming.length)}</strong><span>{c.reminders}</span></div>
-      <div className="glass-home__switch"><label htmlFor="glass-pet">{c.choose}</label><select id="glass-pet" disabled={isSwitching} value={activePetId ?? pet.id} onChange={e => onSwitch(e.target.value)}>{pets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select><Link href={`/${locale}/pets/new`}><Plus size={17} aria-hidden="true" />{c.add}</Link></div>
+      <div className="glass-home__switch">
+        {overview.householdName && permission.access?.canViewIdentity ? <div className="glass-home__household" role="group" aria-label={`${c.household}: ${overview.householdName}`}><span>{c.household}</span><strong>{overview.householdName}</strong></div> : null}
+        <label htmlFor="glass-pet">{c.choose}</label><select id="glass-pet" disabled={isSwitching} value={activePetId ?? pet.id} onChange={e => onSwitch(e.target.value)}>{pets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select><Link href={`/${locale}/pets/new`}><Plus size={17} aria-hidden="true" />{c.add}</Link>
+      </div>
     </header>
     <div className="glass-home__grid">
       <aside className="glass-home__identity glass-panel">
@@ -43,7 +46,7 @@ export function GlassMemberHome({ locale, userName, pet, overview, pets, activeP
       </aside>
       <section className="glass-home__calendar glass-panel" aria-labelledby="home-upcoming"><header><div><h2 id="home-upcoming">{c.calendar}</h2><p>{c.upcoming}</p></div><CalendarDays size={24} aria-hidden="true" /></header>
         {careFailed && overview.upcoming.length > 0 ? <p role="status">{c.careError} <button type="button" onClick={onRetryCare}>{c.retry}</button></p> : null}
-        {overview.upcoming.length ? <ol>{overview.upcoming.slice(0, 5).map((item, i) => <li key={`${item.type}-${item.id}`} data-tone={i % 3}><Link href={item.href.startsWith("/bookings/") ? `/${locale}${item.href}` : base + item.href}><CalendarDays size={21} aria-hidden="true" /><div><strong>{eventTitle(item.title, locale)}</strong><time dateTime={item.occurredAt}>{formatOverviewDate(item.occurredAt, locale)}</time>{item.providerName ? <small>{item.providerName}</small> : null}</div><Forward size={18} aria-hidden="true" /></Link></li>)}</ol> : <div className="glass-home__empty"><p>{careFailed ? c.careError : c.empty}</p>{careFailed ? <button type="button" onClick={onRetryCare}>{c.retry}</button> : null}</div>}
+        {overview.upcoming.length ? <ol>{overview.upcoming.slice(0, 5).map((item) => <li key={`${item.type}-${item.id}`}><Link href={item.href.startsWith("/bookings/") ? `/${locale}${item.href}` : base + item.href}><CalendarDays size={21} aria-hidden="true" /><div><strong>{eventTitle(item.title, locale)}</strong><time dateTime={item.occurredAt}>{formatOverviewDate(item.occurredAt, locale)}</time>{item.providerName ? <small>{item.providerName}</small> : null}</div><Forward size={18} aria-hidden="true" /></Link></li>)}</ol> : <div className="glass-home__empty"><p>{careFailed ? c.careError : c.empty}</p>{careFailed ? <button type="button" onClick={onRetryCare}>{c.retry}</button> : null}</div>}
         {permission.access?.canViewCareProfile ? <Link className="glass-home__calendar-link" href={`${base}/care`}>{c.calendarLink}<Forward size={18} aria-hidden="true" /></Link> : null}
       </section>
     </div>

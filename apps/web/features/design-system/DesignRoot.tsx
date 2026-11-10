@@ -15,7 +15,9 @@ export function routePattern(pathname: string) {
   if (/^\/(blog|guides)(\/|$)/.test(path)) return "editorial";
   if (/^\/animal-support(\/|$)/.test(path)) return "classifieds";
   if (/^\/(vet|providers|services)(\/|$)/.test(path)) return /\/book\/?$/.test(path) ? "reservation" : "discovery";
-  if (/^\/(bookings|travel)(\/|$)/.test(path)) return "reservation";
+  if (/^\/bookings(\/|$)/.test(path)) return "reservation";
+  if (/^\/travel\/(book|bookings)(\/|$)/.test(path)) return "reservation";
+  if (/^\/travel(\/|$)/.test(path)) return "discovery";
   if (/^\/(auth|register|welcome|account)(\/|$)/.test(path)) return "auth";
   return "service";
 }

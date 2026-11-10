@@ -223,6 +223,27 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "دسترسی خانوادگی شما پایان یافت", body: "مدیر خانواده شما را از خانواده حذف کرد؛ دسترسی شما به حیوان‌های آن خانواده قطع شد." },
     en: { title: "Your household access ended", body: "A household owner removed you; your access to that household's pets has ended." },
   },
+  // Pet ownership transfer (ID-01, ID-05) — both parties are told what happened.
+  "pet.ownership_transfer_requested": {
+    fa: { title: "درخواست مالکیت پت", body: "{{ownerName}} می‌خواهد مالکیت «{{petName}}» را به شما منتقل کند. برای انتقال باید تأیید کنید." },
+    en: { title: "Pet ownership transfer request", body: "{{ownerName}} wants to transfer ownership of “{{petName}}” to you. You must approve the transfer for it to happen." },
+  },
+  "pet.ownership_transfer_declined": {
+    fa: { title: "انتقال مالکیت پت انجام نشد", body: "پیشنهاد انتقال مالکیت پت پذیرفته نشد؛ مالک ثبت‌شده همان فرد قبلی باقی ماند." },
+    en: { title: "The pet ownership transfer did not happen", body: "The pet ownership transfer was declined; the registered owner remains unchanged." },
+  },
+  "pet.ownership_transfer_cancelled": {
+    fa: { title: "درخواست انتقال مالکیت لغو شد", body: "درخواست انتقال مالکیت پت لغو شد و تغییری در مالکیت انجام نشد." },
+    en: { title: "The ownership transfer request was withdrawn", body: "The pet ownership transfer request was withdrawn and no change was made." },
+  },
+  "pet.ownership_transferred": {
+    fa: { title: "پت به خانوادهٔ دیگری منتقل شد", body: "مالکیت «{{petName}}» با تأیید طرف دیگر منتقل شد. پروندهٔ سلامت همراه پت رفت؛ هزینه‌ها نزد خانوادهٔ شما ماند." },
+    en: { title: "Your pet moved to another household", body: "Ownership of “{{petName}}” was transferred with the other party's approval. The health record moved with the pet; the costs stayed with your household." },
+  },
+  "pet.ownership_received": {
+    fa: { title: "پت به شما منتقل شد", body: "مالکیت «{{petName}}» با تأیید شما به شما منتقل شد و به خانوادهٔ شما پیوست." },
+    en: { title: "A pet was transferred to you", body: "Ownership of “{{petName}}” was transferred to you with your approval and joined your household." },
+  },
   // Batch 8 — security messages (SECURITY category is never suppressible).
   "security.new_sign_in": {
     fa: { title: "ورود تازه به حساب شما", body: "یک ورود تازه با {{device}} ثبت شد. اگر شما نبودید، از بخش امنیت نشست را قطع و رمز را تغییر دهید." },
