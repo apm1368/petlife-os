@@ -96,6 +96,18 @@ describe("Seller offer moderation (W2-10)", () => {
       data: { productId: product.id, sku: `MOD-${randomUUID()}`, title: "1 kg" },
     });
 
+    const offerPath = `/seller-organizations/${seller.id}/offers`;
+    const input = { productVariantId: variant.id, priceAmount: 350_000, initialOnHand: 10 };
+    await db.product.update({ where: { id: product.id }, data: { status: "DRAFT" } });
+    await post(sellerActor, offerPath).send(input).expect(400);
+    await db.product.update({ where: { id: product.id }, data: { status: "ACTIVE" } });
+    await db.productVariant.update({ where: { id: variant.id }, data: { isActive: false } });
+    await post(sellerActor, offerPath).send(input).expect(400);
+    await post(sellerActor, offerPath).send({ ...input, productVariantId: randomUUID() }).expect(400);
+    expect(await db.sellerOffer.count({ where: { sellerOrganizationId: seller.id } })).toBe(0);
+    expect(await db.inventoryItem.count({ where: { sellerOffer: { sellerOrganizationId: seller.id } } })).toBe(0);
+    await db.productVariant.update({ where: { id: variant.id }, data: { isActive: true } });
+
     const created = await post(sellerActor, `/seller-organizations/${seller.id}/offers`)
       .send({
         productVariantId: variant.id,
