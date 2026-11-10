@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import type { RouteLocale } from "@/lib/i18n/config";
+import "./account-visual.css";
 
 /** The canonical Account sections, in order. Membership lives here too, so the account area answers "what do I have?" in one place. */
 export const ACCOUNT_SECTIONS = [

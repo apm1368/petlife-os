@@ -254,6 +254,16 @@ describe("External pet-friendly stays", () => {
     expect(await db.outboundTravelClick.count({ where: { stayId: stay.id } })).toBe(1);
     expect(await db.booking.count({ where: { notes: { contains: id } } as never }).catch(() => 0)).toBe(0);
 
+    // Knowing a draft/rejected listing UUID must not bypass public moderation via its redirect URL.
+    for (const publishState of ["DRAFT", "REJECTED"] as const) {
+      await db.externalStay.update({ where: { id: stay.id }, data: { publishState } });
+      await get(null, `/travel/external/stays/${stay.id}/out`).expect(404);
+      expect(await db.outboundTravelClick.count({ where: { stayId: stay.id } })).toBe(1);
+    }
+    await db.externalStay.update({ where: { id: stay.id }, data: { publishState: "PUBLISHED" } });
+    await get(null, `/travel/external/stays/${stay.id}/out`).expect(302);
+    expect(await db.outboundTravelClick.count({ where: { stayId: stay.id } })).toBe(2);
+
     const member = await actor("member");
     await send("post", member, `/me/external-stays/${stay.id}/favorite`).expect(201);
     const hh = await db.household.create({ data: { name: "h", members: { create: { userId: member.id, role: "OWNER" } } } });
@@ -269,7 +279,12 @@ describe("External pet-friendly stays", () => {
     // Hidden by staff: gone from members, favorite stays but marked unavailable.
     await send("post", root, `/admin/travel/external/listings/${stay.id}/visibility`).send({ action: "hide", reason: "owner complaint" }).expect(201);
     await get(null, `/travel/external/stays/${stay.id}/out`).expect(404);
-    expect((await get(member, "/me/external-stays/favorites").expect(200)).body.find((f: { stay: { id: string } }) => f.stay.id === stay.id)).toMatchObject({ available: false });
+    const unavailableFavorite = (await get(member, "/me/external-stays/favorites").expect(200)).body.find((f: { stay: { id: string } }) => f.stay.id === stay.id);
+    expect(unavailableFavorite).toMatchObject({ available: false });
+    expect(unavailableFavorite.stay).toEqual({ id: stay.id });
+    const unavailablePlan = (await get(member, `/pets/${pet.id}/trips/${trip.id}/external-stays`).expect(200)).body.find((row: { stay: { id: string } }) => row.stay.id === stay.id);
+    expect(unavailablePlan).toMatchObject({ available: false, priceAtAttach: null });
+    expect(unavailablePlan.stay).toEqual({ id: stay.id });
   });
 
   it("admin ERP: daily diff, metrics, duplicate candidates → staff-approved canonical accommodation, source tasks, real sources honest", async () => {

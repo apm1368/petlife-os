@@ -89,6 +89,17 @@ export class PetsService {
 
       await this.petAccess.applyHouseholdDefaults(pet.id, householdId, creatorUserId, tx);
 
+      // ID-01: every pet has exactly one primary owner, and that owner is recorded
+      // explicitly rather than inferred from household role. The creator is the
+      // primary owner at creation — they are the one who added the pet and the one
+      // accountable for it. The row is written inside the same transaction as the
+      // pet, so a pet can never exist without an owner.
+      await tx.petOwnership.upsert({
+        where: { petId: pet.id },
+        create: { petId: pet.id, ownerUserId: creatorUserId, householdId, transferredAt: new Date() },
+        update: { ownerUserId: creatorUserId, householdId, transferredAt: new Date() },
+      });
+
       const hasActivePet = await tx.activePetPreference.findUnique({
         where: { userId_householdId: { userId: creatorUserId, householdId } },
       });

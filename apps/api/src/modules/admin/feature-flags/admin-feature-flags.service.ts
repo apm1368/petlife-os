@@ -149,6 +149,11 @@ export class AdminFeatureFlagsService {
 
   async cancel(actor: ResolvedAdminContext, changeId: string) {
     const change = await this.prisma.$transaction(async (tx) => {
+      const initial = await tx.featureFlagChange.findUnique({ where: { id: changeId } });
+      if (!initial) throw new SettingChangeConflictException({ changeId, reason: "NOT_YOUR_PENDING_CHANGE" });
+      // Review and proposal use this same lock. Re-read after waiting so cancellation
+      // cannot overwrite an approval or a superseding proposal with a stale PENDING read.
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${"feature-flag:" + initial.flagKey}))`;
       const current = await tx.featureFlagChange.findUnique({ where: { id: changeId } });
       if (
         !current ||

@@ -73,6 +73,26 @@ export const adminCommerceService = {
       method: "PATCH",
       body: { status, reason },
     }),
+  listProductMedia: (id: string) => apiFetch<ProductMediaDto[]>(`/admin/commerce/products/${id}/media`),
+  requestProductMediaUpload: (id: string, input: { contentType: string; fileSizeBytes: number }) =>
+    apiFetch<ProductMediaUploadTargetDto>(`/admin/commerce/products/${id}/media/upload-url`, {
+      method: "POST",
+      body: input,
+    }),
+  confirmProductMediaUpload: (id: string, input: { objectKey: string; alt: string; variantId?: string }) =>
+    apiFetch<ProductMediaDto>(`/admin/commerce/products/${id}/media`, {
+      method: "POST",
+      body: input,
+    }),
+  reorderProductMedia: (id: string, mediaIds: string[]) =>
+    apiFetch<ProductMediaDto[]>(`/admin/commerce/products/${id}/media/order`, {
+      method: "PUT",
+      body: { mediaIds },
+    }),
+  removeProductMedia: (id: string, mediaId: string) =>
+    apiFetch<{ removed: true; mediaId: string }>(`/admin/commerce/products/${id}/media/${mediaId}`, {
+      method: "DELETE",
+    }),
   listSellerOffersForModeration: (input: { status?: string; q?: string; page?: number }) =>
     apiFetch<PaginatedDto<AdminSellerOfferModerationDto>>(`/admin/commerce/offers/moderation${qs(input)}`),
   getSellerOfferForModeration: (id: string) =>
@@ -108,3 +128,21 @@ export const adminCommerceService = {
   transitionPromotion: (id: string, status: "ACTIVE" | "PAUSED" | "ENDED") =>
     apiFetch<PromotionDto>(`/admin/commerce/promotions/${id}/status`, { method: "POST", body: { status } }),
 };
+
+export interface ProductMediaDto {
+  id: string;
+  url: string;
+  alt: string | null;
+  variantId: string | null;
+  sortOrder: number;
+  createdAt: string;
+}
+
+export interface ProductMediaUploadTargetDto {
+  key: string;
+  uploadUrl: string;
+  method: "PUT";
+  publicUrl: string;
+  headers?: Record<string, string>;
+  expiresInSeconds: number;
+}

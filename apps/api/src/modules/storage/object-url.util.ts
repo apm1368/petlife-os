@@ -31,6 +31,7 @@ export const PUBLIC_OBJECT_KEY_PREFIXES = [
   "community-media/",
   "support-need-images/",
   "travel-listing-images/",
+  "product-media/",
 ] as const;
 
 /** Private prefixes StorageService mints today — documentation and tests only; privacy is decided by PUBLIC_OBJECT_KEY_PREFIXES. */
@@ -77,7 +78,9 @@ export function resolveObjectUrl(key: string | null): string | null {
   if (!key) return null;
   if (isPassThrough(key)) return key;
   if (isPrivateKey(key)) {
-    throw new Error(`resolveObjectUrl() must never be called with a private object key (got "${key}") — mint a per-request signed download instead.`);
+    throw new Error(
+      `resolveObjectUrl() must never be called with a private object key (got "${key}") — mint a per-request signed download instead.`,
+    );
   }
   const base = process.env.STORAGE_PUBLIC_BASE_URL ?? DEFAULT_STORAGE_PUBLIC_BASE_URL;
   return `${base}/${key}`;
@@ -92,7 +95,9 @@ export function resolveObjectUrls(keys: string[]): string[] {
   return keys
     .filter((key) => {
       if (!isPrivateKey(key)) return true;
-      console.error(`resolveObjectUrls() dropped a private object key from a public payload: "${key.split("/")[0]}/…"`);
+      console.error(
+        `resolveObjectUrls() dropped a private object key from a public payload: "${key.split("/")[0]}/…"`,
+      );
       return false;
     })
     .map((key) => resolveObjectUrl(key))

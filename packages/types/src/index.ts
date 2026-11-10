@@ -6104,6 +6104,9 @@ export interface AdminProductRowDto {
   activeOfferCount: number;
   sellerCount: number;
   rating: RatingSummaryDto;
+  /** Public products require exactly three gallery images; this count lets
+   * admin identify incomplete drafts without inferring it from a boolean. */
+  mediaCount: number;
   hasMedia: boolean;
   createdAt: string;
 }
@@ -6545,7 +6548,11 @@ export interface PetExpensesDto {
 export interface PetYearReviewDto {
   from: string;
   to: string;
-  memories: { total: number; photos: number; highlights: { id: string; title: string; occurredAt: string }[] };
+  memories: {
+    total: number;
+    photos: number;
+    highlights: { id: string; title: string; occurredAt: string }[];
+  };
   care: { completed: number; topTypes: { type: string; count: number }[] } | null;
   services: { completed: number; byCategory: { category: string; count: number }[] } | null;
   trips: { count: number; destinations: string[] } | null;
@@ -6558,3 +6565,13 @@ export type {
   PartnerVerificationPolicyDto,
   PartnerVerificationDocumentKind,
 } from "./partner-verification";
+
+export type {
+  PetOwnershipDto,
+  PetOwnershipTransferDto,
+  PetOwnershipTransferOutcomeDto,
+  PetMemoryCopyDto,
+  PetMemoryDisposition,
+  PetOwnershipTransferStatusName,
+} from "./ownership";
+export { OWNERSHIP_TRANSFER_EXPIRY_DAYS, PET_MEMORY_DISPOSITIONS, PET_OWNERSHIP_TRANSFER_STATUSES } from "./ownership";

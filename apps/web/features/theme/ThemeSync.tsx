@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { applyThemeToDocument, useThemeStore } from "@/stores/theme-store";
+import { applyThemeToDocument, restoreThemeFromStorage, useThemeStore } from "@/stores/theme-store";
 
 /**
  * Theme and language are independent. A language switch is a client navigation into the other
@@ -14,7 +14,12 @@ export function ThemeSync() {
   const theme = useThemeStore((s) => s.theme);
   const pathname = usePathname();
   useEffect(() => {
-    applyThemeToDocument(theme);
+    restoreThemeFromStorage();
+  }, []);
+  useEffect(() => {
+    // Restoration runs first on mount. Read current state rather than the
+    // pre-restoration render snapshot, avoiding removal of the prepaint theme.
+    applyThemeToDocument(useThemeStore.getState().theme);
   }, [theme, pathname]);
   return null;
 }
