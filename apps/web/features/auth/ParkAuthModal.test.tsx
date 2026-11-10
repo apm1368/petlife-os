@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, screen } from "@testing-library/react";
+import Link from "next/link";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { ParkAuthModal } from "./ParkAuthModal";
 import { AuthModalOrigin } from "./AuthModalOrigin";
@@ -27,7 +28,7 @@ describe("Park auth overlay", () => {
   });
   it("closes a multi-step flow to the originating page and preserves its filters", () => {
     window.history.replaceState({}, "", "/fa/services/GROOMING?city=Tehran#results");
-    renderWithIntl(<AuthModalOrigin><a href="/fa/auth" onClick={event => event.preventDefault()}>Sign in</a><ParkAuthModal registration><p>Existing form</p></ParkAuthModal></AuthModalOrigin>);
+    renderWithIntl(<AuthModalOrigin><Link href="/fa/auth" onClick={event => event.preventDefault()}>Sign in</Link><ParkAuthModal registration><p>Existing form</p></ParkAuthModal></AuthModalOrigin>);
     fireEvent.click(screen.getByRole("link", { name: "Sign in" }));
     fireEvent.click(screen.getByRole("button", { name: parkAuthCopy.en.close }));
     expect(replace).toHaveBeenCalledWith("/fa/services/GROOMING?city=Tehran#results", { scroll: false });
