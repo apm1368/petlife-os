@@ -20,6 +20,7 @@ export class UploadsController {
 
   @Put(":token")
   async upload(@Param("token") token: string, @Req() req: Request): Promise<{ ok: true }> {
+    if (this.config.get("STORAGE_DRIVER", { infer: true }) !== "local") throw new NotFoundException();
     const raw = await this.redis.get(`upload-token:${token}`);
     if (!raw) throw new NotFoundException("Upload token expired or invalid");
     const { key, maxBytes: declared } = JSON.parse(raw) as { key: string; maxBytes?: number };

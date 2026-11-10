@@ -24,6 +24,7 @@ export class DownloadsController {
 
   @Get(":token")
   async download(@Param("token") token: string, @Res() res: Response): Promise<void> {
+    if (this.config.get("STORAGE_DRIVER", { infer: true }) !== "local") throw new NotFoundException();
     const key = await this.redis.get(`download-token:${token}`);
     if (!key) throw new NotFoundException("Download link expired or invalid");
 

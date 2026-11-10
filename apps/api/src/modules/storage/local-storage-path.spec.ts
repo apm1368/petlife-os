@@ -27,7 +27,7 @@ describe("local storage containment", () => {
   });
 
   const redis = { get: jest.fn(), set: jest.fn(), del: jest.fn() };
-  const config = { get: jest.fn((name: string) => name === "STORAGE_LOCAL_DIR" ? base : "http://localhost/uploads") };
+  const config = { get: jest.fn((name: string) => name === "STORAGE_DRIVER" ? "local" : name === "STORAGE_LOCAL_DIR" ? base : "http://localhost/uploads") };
   const driver = new LocalStorageDriver(redis as unknown as Redis, config as unknown as ConfigService<AppEnv, true>);
   beforeEach(() => jest.clearAllMocks());
 
@@ -54,6 +54,13 @@ describe("local storage containment", () => {
     await expect(new UploadsController(redis as unknown as Redis, configService).upload("fixture", request as unknown as Request)).rejects.toBeInstanceOf(NotFoundException);
     expect(request.pipe).not.toHaveBeenCalled();
     expect(redis.del).not.toHaveBeenCalled();
+  });
+
+  it("disables local token handlers for S3 before looking up tokens", async () => {
+    const s3 = { get: () => "s3" } as unknown as ConfigService<AppEnv, true>;
+    await expect(new DownloadsController(redis as unknown as Redis, s3).download("fixture", {} as Response)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(new UploadsController(redis as unknown as Redis, s3).upload("fixture", {} as Request)).rejects.toBeInstanceOf(NotFoundException);
+    expect(redis.get).not.toHaveBeenCalled();
   });
 
   it("preserves valid write, copy, read and deletion using only disposable fixture data", async () => {

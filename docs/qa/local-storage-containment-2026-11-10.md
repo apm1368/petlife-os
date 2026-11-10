@@ -8,7 +8,7 @@ The old `normalize(join(base, key)).startsWith(base)` accepts `../storage-other/
 
 ## Fix and evidence
 
-Shared `resolveLocalStoragePath` uses absolute resolution and a path-component-relative boundary. Reject root/empty/NUL/absolute/outside keys, including prefix-sharing siblings. Apply at token issuance, both legacy token handlers and all local read/write/copy/delete operations. Invalid token keys return generic 404 without a file stream. Valid nested keys remain supported.
+Shared `resolveLocalStoragePath` uses absolute resolution and a path-component-relative boundary. Reject root/empty/NUL/absolute/outside keys, including prefix-sharing siblings. Apply at token issuance, both legacy token handlers and all local read/write/copy/delete operations. Invalid token keys return generic 404 without a file stream. Valid nested keys remain supported. Because the module registers the local handlers even for S3, explicitly return 404 in non-local mode before Redis lookup; do not rely only on not issuing local tokens.
 
 | Test | Environment/method | Expected/actual | Status |
 | --- | --- | --- | --- |
@@ -20,7 +20,7 @@ Shared `resolveLocalStoragePath` uses absolute resolution and a path-component-r
 | QA-STORAGE-01-F | Fresh hosted full CI/build/migration/HTTP E2E | Required on final PR head | NOT_TESTED locally |
 | QA-STORAGE-01-G | Production S3/CDN/direct source image/cache behavior | Requires authorized configuration/object-specific access | BLOCKED |
 
-Command from `apps/api`: `jest --runInBand --runTestsByPath src/modules/storage/local-storage-path.spec.ts src/modules/storage/memorial-assets.spec.ts src/modules/storage/object-url.util.spec.ts` — **24 tests / 3 suites passed** on 2026-11-10 UTC. Focused ESLint and API TypeScript results are recorded in the PR. Browser/viewport not applicable to this backend-only change. New tests include handler-level denial, not a claim of fresh HTTP E2E or complete media-security coverage.
+Command from `apps/api`: `jest --runInBand --runTestsByPath src/modules/storage/local-storage-path.spec.ts src/modules/storage/memorial-assets.spec.ts src/modules/storage/object-url.util.spec.ts` — initial **24 tests / 3 suites passed** on 2026-11-10 UTC; final retest adds the S3-mode handler-denial case. Focused ESLint and final test results are recorded in the PR. Local full API TypeScript failed with widespread reused-dependency/config and generated Prisma mismatches; it is not claimed green. Fresh exact-head CI must pass. Browser/viewport not applicable to this backend-only change. New tests include handler-level denial, not a claim of fresh HTTP E2E or complete media-security coverage.
 
 ## Limitations and next action
 
