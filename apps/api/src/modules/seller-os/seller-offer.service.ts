@@ -167,6 +167,11 @@ export class SellerOfferService {
     assertRepeatConfig(dto.repeatDeliveryEligible ?? false, dto.repeatIntervalsDays ?? []);
 
     const created = await this.prisma.$transaction(async (tx) => {
+      const variant = await tx.productVariant.findFirst({
+        where: { id: dto.productVariantId, isActive: true, product: { status: "ACTIVE" } },
+        select: { id: true },
+      });
+      if (!variant) throw new ValidationApiException({ field: "productVariantId", reason: "CATALOG_PRODUCT_NOT_AVAILABLE" });
       const offer = await tx.sellerOffer.create({
         data: {
           sellerOrganizationId: ctx.sellerOrganizationId,
