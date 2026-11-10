@@ -5,11 +5,12 @@ import { ArrowUp } from "@petlife/ui";
 import { Brand } from "@/features/brand/Brand";
 import { storyCopy } from "@/features/landing/story-copy";
 import type { RouteLocale } from "@/lib/i18n/config";
+import "./public-footer.css";
 
 /** Public-route counterpart to the landing footer, sharing its translated copy and destinations. */
 export function PublicFooter({ locale }: { locale: RouteLocale }) {
   const copy = storyCopy[locale];
-  return <footer className="park-footer" aria-label={copy.footerLabel}>
+  return <footer className="park-footer public-route-footer" aria-label={copy.footerLabel}>
     <div className="park-footer__main">
       <div className="park-footer__brand">
         <Link href={`/${locale}`} className="park-brand"><Brand /></Link>
