@@ -51,3 +51,20 @@ jobs:
             export EXPECTED_BUILD_SHA='${{ github.sha }}'
             export EXPECTED_DEPLOYMENT_ENVIRONMENT='production'
             bash scripts/smoke-production.sh
+      # Checking a single common chunk missed stale /de/legal HTML. Inspect every
+      # owned CSS/JS reference on the scoped public routes, from outside the VPS.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Verify public HTML and build assets
+        timeout-minutes: 5
+        run: python3 docs/qa/tools/public-assets-smoke.py --expected-sha '${{ github.sha }}' --output-dir .qa-public-assets
+      - name: Retain public asset verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-assets-${{ github.sha }}
+          path: .qa-public-assets/results.json
+          if-no-files-found: ignore
+          retention-days: 7

@@ -1,0 +1,324 @@
+{
+  "routes": [
+    {
+      "testId": "QA-PUBLIC-ASSETS-fa-help",
+      "route": "/fa/help",
+      "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881",
+      "environment": "production, anonymous read-only",
+      "dateUtc": "2026-11-10T16:06:30.861186+00:00",
+      "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "ownedReferences": 25,
+      "failedAssetPaths": [],
+      "freshHtml": true,
+      "status": "PASS",
+      "limitations": "No browser hydration, private record or content/publication verification"
+    },
+    {
+      "testId": "QA-PUBLIC-ASSETS-fa-legal",
+      "route": "/fa/legal",
+      "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881",
+      "environment": "production, anonymous read-only",
+      "dateUtc": "2026-11-10T16:06:31.659911+00:00",
+      "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "ownedReferences": 25,
+      "failedAssetPaths": [],
+      "freshHtml": true,
+      "status": "PASS",
+      "limitations": "No browser hydration, private record or content/publication verification"
+    },
+    {
+      "testId": "QA-PUBLIC-ASSETS-fa-status",
+      "route": "/fa/status",
+      "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881",
+      "environment": "production, anonymous read-only",
+      "dateUtc": "2026-11-10T16:06:32.269592+00:00",
+      "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "ownedReferences": 25,
+      "failedAssetPaths": [],
+      "freshHtml": true,
+      "status": "PASS",
+      "limitations": "No browser hydration, private record or content/publication verification"
+    },
+    {
+      "testId": "QA-PUBLIC-ASSETS-en-help",
+      "route": "/en/help",
+      "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881",
+      "environment": "production, anonymous read-only",
+      "dateUtc": "2026-11-10T16:06:32.604526+00:00",
+      "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "ownedReferences": 25,
+      "failedAssetPaths": [],
+      "freshHtml": true,
+      "status": "PASS",
+      "limitations": "No browser hydration, private record or content/publication verification"
+    },
+    {
+      "testId": "QA-PUBLIC-ASSETS-en-legal",
+      "route": "/en/legal",
+      "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881",
+      "environment": "production, anonymous read-only",
+      "dateUtc": "2026-11-10T16:06:32.936959+00:00",
+      "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "ownedReferences": 25,
+      "failedAssetPaths": [],
+      "freshHtml": true,
+      "status": "PASS",
+      "limitations": "No browser hydration, private record or content/publication verification"
+    },
+    {
+      "testId": "QA-PUBLIC-ASSETS-en-status",
+      "route": "/en/status",
+      "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881",
+      "environment": "production, anonymous read-only",
+      "dateUtc": "2026-11-10T16:06:33.243701+00:00",
+      "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "ownedReferences": 25,
+      "failedAssetPaths": [],
+      "freshHtml": true,
+      "status": "PASS",
+      "limitations": "No browser hydration, private record or content/publication verification"
+    },
+    {
+      "testId": "QA-PUBLIC-ASSETS-de-help",
+      "route": "/de/help",
+      "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881",
+      "environment": "production, anonymous read-only",
+      "dateUtc": "2026-11-10T16:06:33.883513+00:00",
+      "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "ownedReferences": 25,
+      "failedAssetPaths": [],
+      "freshHtml": true,
+      "status": "PASS",
+      "limitations": "No browser hydration, private record or content/publication verification"
+    },
+    {
+      "testId": "QA-PUBLIC-ASSETS-de-legal",
+      "route": "/de/legal",
+      "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881",
+      "environment": "production, anonymous read-only",
+      "dateUtc": "2026-11-10T16:06:34.201538+00:00",
+      "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "ownedReferences": 25,
+      "failedAssetPaths": [],
+      "freshHtml": true,
+      "status": "PASS",
+      "limitations": "No browser hydration, private record or content/publication verification"
+    },
+    {
+      "testId": "QA-PUBLIC-ASSETS-de-status",
+      "route": "/de/status",
+      "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881",
+      "environment": "production, anonymous read-only",
+      "dateUtc": "2026-11-10T16:06:34.513024+00:00",
+      "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "ownedReferences": 25,
+      "failedAssetPaths": [],
+      "freshHtml": true,
+      "status": "PASS",
+      "limitations": "No browser hydration, private record or content/publication verification"
+    },
+    {
+      "testId": "QA-PUBLIC-ASSETS-es-help",
+      "route": "/es/help",
+      "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881",
+      "environment": "production, anonymous read-only",
+      "dateUtc": "2026-11-10T16:06:34.848071+00:00",
+      "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "ownedReferences": 25,
+      "failedAssetPaths": [],
+      "freshHtml": true,
+      "status": "PASS",
+      "limitations": "No browser hydration, private record or content/publication verification"
+    },
+    {
+      "testId": "QA-PUBLIC-ASSETS-es-legal",
+      "route": "/es/legal",
+      "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881",
+      "environment": "production, anonymous read-only",
+      "dateUtc": "2026-11-10T16:06:35.159532+00:00",
+      "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "ownedReferences": 25,
+      "failedAssetPaths": [],
+      "freshHtml": true,
+      "status": "PASS",
+      "limitations": "No browser hydration, private record or content/publication verification"
+    },
+    {
+      "testId": "QA-PUBLIC-ASSETS-es-status",
+      "route": "/es/status",
+      "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881",
+      "environment": "production, anonymous read-only",
+      "dateUtc": "2026-11-10T16:06:35.555765+00:00",
+      "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "ownedReferences": 25,
+      "failedAssetPaths": [],
+      "freshHtml": true,
+      "status": "PASS",
+      "limitations": "No browser hydration, private record or content/publication verification"
+    }
+  ],
+  "assets": {
+    "https://opetlife.ir/_next/static/chunks/dc27b8ef-acbb56b63ecbc0c5.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/4158-26b6887b482c8bd7.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/main-app-dca73becdf808732.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/4486-cd10121617797e50.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/7323-eeb73dc98aff91fa.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/4538-9205ed09948b68d1.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/8212-bc0171712adb0b2d.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/9221-110e6b8e24a953a7.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/9704-5c664cfacc0ec519.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/4436-bde24a558008e259.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/9158-5923daeaae1522ba.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/app/%5Blocale%5D/(public)/layout-2b5f5a19fd4886d8.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/3173-365a56d68d01fe55.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/app/%5Blocale%5D/(public)/help/page-29702570e39fff5c.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/8391-1d83716fd16b7aef.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/app/%5Blocale%5D/layout-fe0355123db1e671.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/app/%5Blocale%5D/(auth)/layout-85bb0e512108a7fe.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/app/%5Blocale%5D/not-found-840337811d22fd46.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/polyfills-42372ed130431b0a.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/webpack-d0991dda08ee4dba.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/css/32048205d13eb7dd.css": {
+      "http": 200,
+      "contentType": "text/css",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/css/bef8430577880e02.css": {
+      "http": 200,
+      "contentType": "text/css",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/css/583fbdfe8013b83e.css": {
+      "http": 200,
+      "contentType": "text/css",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/css/44e1bb8fa8454e44.css": {
+      "http": 200,
+      "contentType": "text/css",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/css/5d59f755a6d31692.css": {
+      "http": 200,
+      "contentType": "text/css",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/app/%5Blocale%5D/(public)/legal/page-c18be0e40ab81c34.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    },
+    "https://opetlife.ir/_next/static/chunks/app/%5Blocale%5D/(public)/status/page-9083234704bbe892.js": {
+      "http": 200,
+      "contentType": "application/javascript",
+      "direct": true,
+      "status": "PASS"
+    }
+  }
+}

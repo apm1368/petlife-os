@@ -1,0 +1,130 @@
+[
+  {
+    "testId": "QA-AUTH-READONLY-fa",
+    "sha": "82f7067dc737f806b6d6b7b14328868baf5cefba",
+    "dateUtc": "2026-11-10T11:30:07.347183+00:00",
+    "browser": "154.0.8037.57",
+    "viewport": [
+      390,
+      844
+    ],
+    "role": "anonymous",
+    "fixture": "blank registration plus two mismatched dummy passwords; never submitted",
+    "status": "PASS",
+    "http": 200,
+    "submitDisabledInitial": true,
+    "submitDisabledMismatch": true,
+    "localizedMismatchVisible": true,
+    "direction": "rtl",
+    "overflow": false,
+    "loginRoutePreserved": true,
+    "mutationMethods": [],
+    "pageErrors": [],
+    "persianVisibleTextForReview": [
+      "یک دنیا برای تو و همراهت",
+      "ساخت حساب کاربری",
+      "ابتدا شماره همراه را وارد کنید؛ سپس مشخصات حساب را بسازید. شماره همراه در این مرحله تأیید پیامکی نمی‌شود.",
+      "شماره همراه",
+      "نام",
+      "نام خانوادگی",
+      "نام کاربری",
+      "رمز عبور",
+      "نمایش",
+      "تکرار رمز عبور",
+      "رمزها یکسان نیستند.",
+      "نمایش",
+      "شرایط استفاده و سیاست حریم خصوصی opetlife را می‌پذیرم.",
+      "ساخت حساب",
+      "حساب کاربری دارید؟ وارد شوید"
+    ],
+    "evidence": [
+      "fa-register-initial.png",
+      "fa-login.png"
+    ],
+    "limitations": "No account creation/login/session/language persistence or provider delivery tested; visible-text scan is not complete localization acceptance"
+  },
+  {
+    "testId": "QA-AUTH-READONLY-en",
+    "sha": "82f7067dc737f806b6d6b7b14328868baf5cefba",
+    "dateUtc": "2026-11-10T11:30:11.936023+00:00",
+    "browser": "154.0.8037.57",
+    "viewport": [
+      390,
+      844
+    ],
+    "role": "anonymous",
+    "fixture": "blank registration plus two mismatched dummy passwords; never submitted",
+    "status": "PASS",
+    "http": 200,
+    "submitDisabledInitial": true,
+    "submitDisabledMismatch": true,
+    "localizedMismatchVisible": true,
+    "direction": "ltr",
+    "overflow": false,
+    "loginRoutePreserved": true,
+    "mutationMethods": [],
+    "pageErrors": [],
+    "persianVisibleTextForReview": [],
+    "evidence": [
+      "en-register-initial.png",
+      "en-login.png"
+    ],
+    "limitations": "No account creation/login/session/language persistence or provider delivery tested; visible-text scan is not complete localization acceptance"
+  },
+  {
+    "testId": "QA-AUTH-READONLY-de",
+    "sha": "82f7067dc737f806b6d6b7b14328868baf5cefba",
+    "dateUtc": "2026-11-10T11:30:16.570153+00:00",
+    "browser": "154.0.8037.57",
+    "viewport": [
+      390,
+      844
+    ],
+    "role": "anonymous",
+    "fixture": "blank registration plus two mismatched dummy passwords; never submitted",
+    "status": "PASS",
+    "http": 200,
+    "submitDisabledInitial": true,
+    "submitDisabledMismatch": true,
+    "localizedMismatchVisible": true,
+    "direction": "ltr",
+    "overflow": false,
+    "loginRoutePreserved": true,
+    "mutationMethods": [],
+    "pageErrors": [],
+    "persianVisibleTextForReview": [],
+    "evidence": [
+      "de-register-initial.png",
+      "de-login.png"
+    ],
+    "limitations": "No account creation/login/session/language persistence or provider delivery tested; visible-text scan is not complete localization acceptance"
+  },
+  {
+    "testId": "QA-AUTH-READONLY-es",
+    "sha": "82f7067dc737f806b6d6b7b14328868baf5cefba",
+    "dateUtc": "2026-11-10T11:30:21.233330+00:00",
+    "browser": "154.0.8037.57",
+    "viewport": [
+      390,
+      844
+    ],
+    "role": "anonymous",
+    "fixture": "blank registration plus two mismatched dummy passwords; never submitted",
+    "status": "PASS",
+    "http": 200,
+    "submitDisabledInitial": true,
+    "submitDisabledMismatch": true,
+    "localizedMismatchVisible": true,
+    "direction": "ltr",
+    "overflow": false,
+    "loginRoutePreserved": true,
+    "mutationMethods": [],
+    "pageErrors": [],
+    "persianVisibleTextForReview": [],
+    "evidence": [
+      "es-register-initial.png",
+      "es-login.png"
+    ],
+    "limitations": "No account creation/login/session/language persistence or provider delivery tested; visible-text scan is not complete localization acceptance"
+  }
+]
