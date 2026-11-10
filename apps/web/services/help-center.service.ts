@@ -9,6 +9,9 @@ export interface LegalDocument { kind: LegalKind; locale: "fa" | "en"; available
 export interface PublicIncident { id: string; title: string; status: string; impact: string; components: string[]; startedAt: string; resolvedAt: string | null; updates: { id: string; status: string; body: string; createdAt: string }[] }
 export interface PublicStatus { indicator: string; generatedAt: string; openIncidents: PublicIncident[]; recentIncidents: PublicIncident[]; maintenance: { id: string; title: string; message: string | null; startsAt: string; endsAt: string; active: boolean }[]; activeMaintenance: { title: string; message: string | null; endsAt: string } | null }
 
+// Existing editorial policy: these public clients read fa/en source editions.
+// UI localization is independent; do not claim de/es article/legal translations
+// or silently machine-translate approved bodies. Public views disclose originals.
 const localeParam = (locale: string) => `locale=${locale === "fa" ? "fa" : "en"}`;
 
 export const helpCenterService = {
