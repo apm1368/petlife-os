@@ -4,7 +4,7 @@
     "sha": "26a398eae70e02463f36bba57e3bd12480f0ed20",
     "environment": "production frontend + local candidate CSS",
     "liveStatus": "NOT LIVE",
-    "dateUtc": "2026-11-10T10:20:15.928774+00:00",
+    "dateUtc": "2026-11-10T10:25:10.747677+00:00",
     "browser": "154.0.8037.57",
     "role": "anonymous",
     "viewport": [
@@ -170,7 +170,7 @@
     "sha": "26a398eae70e02463f36bba57e3bd12480f0ed20",
     "environment": "production frontend + local candidate CSS",
     "liveStatus": "NOT LIVE",
-    "dateUtc": "2026-11-10T10:20:21.017589+00:00",
+    "dateUtc": "2026-11-10T10:25:16.058399+00:00",
     "browser": "154.0.8037.57",
     "role": "anonymous",
     "viewport": [
@@ -336,7 +336,7 @@
     "sha": "26a398eae70e02463f36bba57e3bd12480f0ed20",
     "environment": "production frontend + local candidate CSS",
     "liveStatus": "NOT LIVE",
-    "dateUtc": "2026-11-10T10:20:25.691767+00:00",
+    "dateUtc": "2026-11-10T10:25:20.750374+00:00",
     "browser": "154.0.8037.57",
     "role": "anonymous",
     "viewport": [
@@ -502,7 +502,7 @@
     "sha": "26a398eae70e02463f36bba57e3bd12480f0ed20",
     "environment": "production frontend + local candidate CSS",
     "liveStatus": "NOT LIVE",
-    "dateUtc": "2026-11-10T10:20:30.712844+00:00",
+    "dateUtc": "2026-11-10T10:25:26.022854+00:00",
     "browser": "154.0.8037.57",
     "role": "anonymous",
     "viewport": [
@@ -523,36 +523,36 @@
       {
         "tag": "BUTTON",
         "label": "Primary navigation",
-        "width": 40,
-        "height": 40,
+        "width": 44,
+        "height": 44,
         "reachable": true
       },
       {
         "tag": "SELECT",
         "label": "English",
         "width": 88,
-        "height": 36,
+        "height": 44,
         "reachable": true
       },
       {
         "tag": "BUTTON",
         "label": "Dark → System",
-        "width": 40,
-        "height": 40,
+        "width": 44,
+        "height": 44,
         "reachable": true
       },
       {
         "tag": "BUTTON",
         "label": "Simple display: off",
-        "width": 43.15625,
-        "height": 36,
+        "width": 44,
+        "height": 44,
         "reachable": true
       },
       {
         "tag": "BUTTON",
         "label": "Log in",
         "width": 69.640625,
-        "height": 36,
+        "height": 44,
         "reachable": true
       }
     ],
@@ -668,7 +668,7 @@
     "sha": "26a398eae70e02463f36bba57e3bd12480f0ed20",
     "environment": "production frontend + local candidate CSS",
     "liveStatus": "NOT LIVE",
-    "dateUtc": "2026-11-10T10:20:36.334035+00:00",
+    "dateUtc": "2026-11-10T10:25:31.701494+00:00",
     "browser": "154.0.8037.57",
     "role": "anonymous",
     "viewport": [
@@ -732,28 +732,28 @@
         "tag": "SELECT",
         "label": "فارسی",
         "width": 87,
-        "height": 36,
+        "height": 44,
         "reachable": true
       },
       {
         "tag": "BUTTON",
         "label": "روشن → تیره",
-        "width": 40,
-        "height": 40,
+        "width": 44,
+        "height": 44,
         "reachable": true
       },
       {
         "tag": "BUTTON",
         "label": "نمایش ساده: خاموش",
-        "width": 42.046875,
-        "height": 36,
+        "width": 44,
+        "height": 44,
         "reachable": true
       },
       {
         "tag": "BUTTON",
         "label": "ورود",
         "width": 52.078125,
-        "height": 36,
+        "height": 44,
         "reachable": true
       }
     ],
@@ -854,7 +854,7 @@
     "sha": "26a398eae70e02463f36bba57e3bd12480f0ed20",
     "environment": "production frontend + local candidate CSS",
     "liveStatus": "NOT LIVE",
-    "dateUtc": "2026-11-10T10:20:41.416675+00:00",
+    "dateUtc": "2026-11-10T10:25:37.349460+00:00",
     "browser": "154.0.8037.57",
     "role": "anonymous",
     "viewport": [
@@ -918,28 +918,28 @@
         "tag": "SELECT",
         "label": "Deutsch",
         "width": 96,
-        "height": 36,
+        "height": 44,
         "reachable": true
       },
       {
         "tag": "BUTTON",
         "label": "Dark → System",
-        "width": 40,
-        "height": 40,
+        "width": 44,
+        "height": 44,
         "reachable": true
       },
       {
         "tag": "BUTTON",
         "label": "Einfache Ansicht: aus",
-        "width": 43.15625,
-        "height": 36,
+        "width": 44,
+        "height": 44,
         "reachable": true
       },
       {
         "tag": "BUTTON",
         "label": "Anmelden",
         "width": 98.6875,
-        "height": 36,
+        "height": 44,
         "reachable": true
       }
     ],

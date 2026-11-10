@@ -13,6 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   const language = isRouteLocale(locale) ? locale : "fa";
   return {
+    metadataBase: new URL("https://opetlife.ir"),
     ...copy[language],
     alternates: { canonical: `/${language}/travel`, languages: Object.fromEntries(locales.map((value) => [value, `/${value}/travel`])) },
   };

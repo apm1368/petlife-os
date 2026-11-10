@@ -78,7 +78,7 @@ async def run(args):
                 await dialog.wait_for(state="hidden")
                 menu_closed = True
             hit_pass = all(control["reachable"] for control in controls)
-            touch_pass = width >= 640 or all(control["width"] >= 44 and control["height"] >= 44 for control in controls if control["tag"] in ["BUTTON", "SELECT"])
+            touch_pass = all(control["width"] >= 44 and control["height"] >= 44 for control in controls if control["tag"] in ["BUTTON", "SELECT"])
             menu_pass = width >= 1024 or (menu_opened and menu_closed and bool(links) and all(link.startswith(f"/{locale}") for link in links))
             translation_pass = None if css else current_theme == expected_theme
             footer = page.locator("footer.public-route-footer")
