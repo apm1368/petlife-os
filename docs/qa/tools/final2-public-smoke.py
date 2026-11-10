@@ -75,12 +75,18 @@ async def run(args):
                   dir:document.documentElement.dir,theme:document.documentElement.dataset.theme,
                   display:document.documentElement.dataset.displayMode||'normal',
                   overflow:document.documentElement.scrollWidth>innerWidth})""")
+                # These anonymous overview/empty-inventory routes contain owned
+                # UI, not patient notes or user posts. Do not persist body text.
+                text = await page.locator("main").inner_text()
+                actual["persianChars"] = sum("\u0600" <= char <= "\u06ff" for char in text)
                 name = f"{locale}-{route.replace('/', '-')}-{width}.png"
                 await page.screenshot(path=str(output / name), full_page=True)
                 actual.update(route=route, viewport=[width, height], browser="Chromium " + browser.version,
                               http=response.status, pageErrors=errors, evidence=name)
                 passed = response.status == 200 and not errors and not actual["overflow"] and actual["lang"] == locale
                 passed = passed and actual["dir"] == ("rtl" if locale == "fa" else "ltr") and actual["theme"] == theme.lower()
+                if locale != "fa":
+                    passed = passed and actual["persianChars"] == 0
                 if locale == "es":
                     passed = passed and actual["display"] == "simple"
                 record(f"FINAL2-PROD-RENDER-{locale}-{route}", actual, passed)
