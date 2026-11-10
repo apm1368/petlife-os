@@ -13,6 +13,8 @@ Isolated React/Vitest environment, real fa/en/de/es catalogs, synthetic publishe
 
 Initial run: **3 failed / 13 passed**, all three new regressions fail on baseline. An old pagination response can likewise append posts into a new topic; a further regression covers that case. This is incorrect UI filtering/loading/recovery, not demonstrated cross-user data exposure or moderation bypass.
 
+Independent browser reproduction also **FAILS** on the deployed baseline JS at the same SHA: General remains selected while the obsolete Question result replaces it. [Bounded fixture result/screenshot](evidence/community-race-2026-11-10/before/results.json). This runs **deployed JavaScript plus intercepted, browser-local synthetic internal GET responses**, not real published posts or provider data. Every unsafe request is aborted; no record is created. It is explicitly **FIXTURE_ONLY_NOT_LIVE_FLOW**, not production feed/API acceptance. The helper waits for the old JSON response and two animation frames before observing the result, rather than accepting the pre-response DOM.
+
 ## Fix and retest
 
 Each request captures an increasing sequence. Only the newest may update posts/page number/error/loading. Effect cleanup invalidates pending results on unmount and React Strict Mode cleanup. HTTP requests are not claimed aborted; late results are ignored. Current failures still use the existing localized retry. No API/authorization/query/publication contract changes, no new translations of authored content.
@@ -30,3 +32,5 @@ tsc --noEmit --incremental false
 ## Integration / next action
 
 Independent branch from current main; #217 is a CSS/wrapper design slice on the same component and must preserve this request-order logic when integrating. Neither requires merging the other first. Fresh exact-head CI/build/E2E is required. No schema migration/financial transaction. After protected merge and authorized deployment, verify exact SHA/readiness, bounded public assets and public community filters without publishing posts; exercise adversarial response ordering only in isolated fixtures. Mark LIVE_VERIFIED only after actual relevant release verification. Private messages, moderation and admin workflows remain separately tested/partial according to their records.
+
+Rerun `python docs/qa/tools/community-feed-race-browser.py --expected-sha DEPLOYED_SHA --output-dir NEW_TEMP_DIR` after deployment to verify deployed JS with the same disposable browser-local timing fixture in fa/en/de/es. Keep this fixture-only evidence separate from real, read-only community API/browser smoke. No write/provider simulation is needed.
