@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 from urllib.request import urlopen
-from playwright.async_api import async_playwright
+from playwright.async_api import async_playwright, expect
 
 BASE = "https://opetlife.ir"
 ROOT = Path(__file__).resolve().parents[3]
@@ -46,8 +46,14 @@ async def run(args):
             if css:
                 await page.add_style_tag(content=css)
                 await page.locator("footer.park-footer").evaluate("el=>el.classList.add('public-route-footer')")
-            await page.wait_for_timeout(700)
             header = page.locator("header.public-site-header")
+            next_key = "dark" if theme == "LIGHT" else "system"
+            expected_theme = catalog["theme"][theme.lower()] + " → " + catalog["theme"][next_key]
+            if not css:
+                # SSR intentionally uses SYSTEM. Wait for the actual saved-state
+                # hydration contract, not a fixed delay or an injected store value.
+                await expect(header.locator(".public-header-actions button").first).to_have_attribute("aria-label", expected_theme, timeout=15000)
+                await expect(page.locator("html")).to_have_attribute("data-theme", theme.lower())
             controls = await header.evaluate("""header => [...header.querySelectorAll('button,select,a')].map(el=>{
                 const r=el.getBoundingClientRect(), top=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
                 return {tag:el.tagName,label:el.getAttribute('aria-label')||el.textContent.trim(),
@@ -57,8 +63,6 @@ async def run(args):
             initial = f"{locale}-{width}-initial.png"
             await page.screenshot(path=str(out / initial))
             current_theme = await header.locator(".public-header-actions button").first.get_attribute("aria-label")
-            next_key = "dark" if theme == "LIGHT" else "system"
-            expected_theme = catalog["theme"][theme.lower()] + " → " + catalog["theme"][next_key]
             menu_opened = menu_closed = None
             links = []
             menu_image = None
