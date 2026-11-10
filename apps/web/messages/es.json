@@ -2525,6 +2525,7 @@
     }
   },
   "bookingFlow": {
+    "serviceMissing": "Este servicio no está disponible",
     "loading": "Cargando la reserva",
     "notBookable": "No se puede reservar con este proveedor",
     "loadFailed": "No se pudo cargar la reserva",
