@@ -89,6 +89,30 @@ describe("MemberHomeView", () => {
     expect(petsService.getOverview).toHaveBeenCalledWith("pet-1");
   });
 
+  it.each([
+    ["fa", "خانوار فعال"],
+    ["en", "Active household"],
+    ["de", "Aktiver Haushalt"],
+    ["es", "Hogar activo"],
+  ] as const)("shows the selected pet's household context in %s", async (locale, label) => {
+    vi.mocked(petsService.getOverview).mockResolvedValue(overview({ householdName: "Garcia family" }));
+    vi.mocked(petsService.getMyAccess).mockResolvedValue({ canViewIdentity: true, canViewHealth: true, canViewCareProfile: true } as never);
+    renderWithIntl(<MemberHomeView />, locale);
+    await screen.findByRole("heading", { name: "پشمک" });
+    expect(await screen.findByText(label)).toBeTruthy();
+    expect(screen.getByRole("group", { name: `${label}: Garcia family` })).toBeTruthy();
+  });
+
+  it("does not reveal household name until identity permission is confirmed", async () => {
+    vi.mocked(petsService.getOverview).mockResolvedValue(overview({ householdName: "Private family" }));
+    vi.mocked(petsService.getMyAccess).mockResolvedValue({ canViewIdentity: false, canViewHealth: false, canViewCareProfile: false } as never);
+    renderWithIntl(<MemberHomeView />, "en");
+    await screen.findByRole("heading", { name: "پشمک" });
+    await waitFor(() => expect(petsService.getMyAccess).toHaveBeenCalledWith("pet-1"));
+    expect(screen.queryByText("Private family")).toBeNull();
+    expect(screen.queryByText("Active household")).toBeNull();
+  });
+
   it("says what needs attention in words; severity codes never reach the page", async () => {
     vi.mocked(petsService.getOverview).mockResolvedValue(overview({ attention: [{ id: "a1", severity: "INFORMATIONAL", title: "HEALTH_PROFILE_INCOMPLETE", dueAt: null, href: "/health" }] }));
     renderWithIntl(<MemberHomeView />, "fa");

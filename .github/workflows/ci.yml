@@ -77,6 +77,9 @@ jobs:
       - name: Generate Prisma client
         run: pnpm --filter @petlife/api db:generate
 
+      - name: Decision-code parity (Persian Decision Log vs English translation)
+        run: node scripts/verify-decision-code-parity.mjs
+
       - name: Lint
         run: pnpm lint
 

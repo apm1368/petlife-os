@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render } from "@testing-library/react";
 import { useThemeStore } from "@/stores/theme-store";
 import { ThemeSync } from "./ThemeSync";
@@ -7,6 +7,19 @@ let pathname = "/fa/home";
 vi.mock("next/navigation", () => ({ usePathname: () => pathname }));
 
 describe("ThemeSync", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    useThemeStore.setState({ theme: "SYSTEM" });
+  });
+
+  it("restores a saved preference after hydration without changing language", () => {
+    localStorage.setItem("petlife-theme", "DARK");
+    document.documentElement.lang = "de";
+    render(<ThemeSync />);
+    expect(useThemeStore.getState().theme).toBe("DARK");
+    expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
+    expect(document.documentElement.lang).toBe("de");
+  });
   it("re-applies the chosen theme after a locale switch re-renders <html>", () => {
     useThemeStore.getState().setTheme("DARK");
     const { rerender } = render(<ThemeSync />);

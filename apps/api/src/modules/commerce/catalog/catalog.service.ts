@@ -102,7 +102,7 @@ export class CatalogService {
 
   async listCategories(): Promise<ProductCategoryDto[]> {
     const categories = await this.prisma.productCategory.findMany({
-      where: { status: "ACTIVE" },
+      where: { status: "ACTIVE", isDemoRecord: false },
       orderBy: { name: "asc" },
     });
     return categories.map(toCategoryDto);
@@ -118,7 +118,7 @@ export class CatalogService {
 
   private async descendantCategoryIds(categoryId: string): Promise<string[]> {
     const all = await this.prisma.productCategory.findMany({
-      where: { status: "ACTIVE" },
+      where: { status: "ACTIVE", isDemoRecord: false },
       select: { id: true, parentId: true },
     });
     const out = new Set([categoryId]);

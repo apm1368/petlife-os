@@ -1,0 +1,361 @@
+[
+  {
+    "testId": "FINAL2-PROD-READY",
+    "environment": "production",
+    "sha": "e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce",
+    "dateUtc": "2026-11-10T04:28:49.596529+00:00",
+    "role": "anonymous",
+    "status": "PASS",
+    "actual": {
+      "status": "ok",
+      "checks": {
+        "database": "up",
+        "redis": "up"
+      }
+    }
+  },
+  {
+    "testId": "FINAL2-PROD-GUARD-1",
+    "environment": "production",
+    "sha": "e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce",
+    "dateUtc": "2026-11-10T04:28:50.068678+00:00",
+    "role": "anonymous",
+    "status": "PASS",
+    "actual": {
+      "path": "/api/bookings",
+      "expectedHttp": 401,
+      "http": 401
+    }
+  },
+  {
+    "testId": "FINAL2-PROD-GUARD-2",
+    "environment": "production",
+    "sha": "e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce",
+    "dateUtc": "2026-11-10T04:28:50.643359+00:00",
+    "role": "anonymous",
+    "status": "PASS",
+    "actual": {
+      "path": "/api/me/external-stays/favorites",
+      "expectedHttp": 401,
+      "http": 401
+    }
+  },
+  {
+    "testId": "FINAL2-PROD-GUARD-3",
+    "environment": "production",
+    "sha": "e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce",
+    "dateUtc": "2026-11-10T04:28:51.243878+00:00",
+    "role": "anonymous",
+    "status": "PASS",
+    "actual": {
+      "path": "/api/travel/external/stays/00000000-0000-4000-8000-000000000001/out",
+      "expectedHttp": 404,
+      "http": 404
+    }
+  },
+  {
+    "testId": "FINAL2-PROD-RENDER-fa-services",
+    "environment": "production",
+    "sha": "e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce",
+    "dateUtc": "2026-11-10T04:28:57.491723+00:00",
+    "role": "anonymous",
+    "status": "PASS",
+    "actual": {
+      "lang": "fa",
+      "dir": "rtl",
+      "theme": "light",
+      "display": "normal",
+      "overflow": false,
+      "persianChars": 366,
+      "route": "services",
+      "viewport": [
+        390,
+        844
+      ],
+      "browser": "Chromium 154.0.8037.57",
+      "http": 200,
+      "pageErrors": [],
+      "evidence": "fa-services-390.png"
+    }
+  },
+  {
+    "testId": "FINAL2-PROD-RENDER-fa-travel/external",
+    "environment": "production",
+    "sha": "e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce",
+    "dateUtc": "2026-11-10T04:29:01.238455+00:00",
+    "role": "anonymous",
+    "status": "PASS",
+    "actual": {
+      "lang": "fa",
+      "dir": "rtl",
+      "theme": "light",
+      "display": "normal",
+      "overflow": false,
+      "persianChars": 603,
+      "route": "travel/external",
+      "viewport": [
+        390,
+        844
+      ],
+      "browser": "Chromium 154.0.8037.57",
+      "http": 200,
+      "pageErrors": [],
+      "evidence": "fa-travel-external-390.png"
+    }
+  },
+  {
+    "testId": "FINAL2-PROD-LEGACY-fa",
+    "environment": "production",
+    "sha": "e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce",
+    "dateUtc": "2026-11-10T04:29:05.547585+00:00",
+    "role": "anonymous",
+    "status": "PASS",
+    "actual": {
+      "route": "services/VET/00000000-0000-4000-8000-000000000001/book",
+      "http": 200,
+      "expectedText": "این خدمت در دسترس نیست",
+      "visible": true,
+      "viewport": [
+        390,
+        844
+      ],
+      "browser": "Chromium 154.0.8037.57",
+      "evidence": "fa-legacy-unavailable-390.png"
+    }
+  },
+  {
+    "testId": "FINAL2-PROD-RENDER-en-services",
+    "environment": "production",
+    "sha": "e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce",
+    "dateUtc": "2026-11-10T04:29:11.153605+00:00",
+    "role": "anonymous",
+    "status": "PASS",
+    "actual": {
+      "lang": "en",
+      "dir": "ltr",
+      "theme": "light",
+      "display": "normal",
+      "overflow": false,
+      "persianChars": 0,
+      "route": "services",
+      "viewport": [
+        1440,
+        900
+      ],
+      "browser": "Chromium 154.0.8037.57",
+      "http": 200,
+      "pageErrors": [],
+      "evidence": "en-services-1440.png"
+    }
+  },
+  {
+    "testId": "FINAL2-PROD-RENDER-en-travel/external",
+    "environment": "production",
+    "sha": "e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce",
+    "dateUtc": "2026-11-10T04:29:15.135922+00:00",
+    "role": "anonymous",
+    "status": "PASS",
+    "actual": {
+      "lang": "en",
+      "dir": "ltr",
+      "theme": "light",
+      "display": "normal",
+      "overflow": false,
+      "persianChars": 0,
+      "route": "travel/external",
+      "viewport": [
+        1440,
+        900
+      ],
+      "browser": "Chromium 154.0.8037.57",
+      "http": 200,
+      "pageErrors": [],
+      "evidence": "en-travel-external-1440.png"
+    }
+  },
+  {
+    "testId": "FINAL2-PROD-LEGACY-en",
+    "environment": "production",
+    "sha": "e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce",
+    "dateUtc": "2026-11-10T04:29:18.960735+00:00",
+    "role": "anonymous",
+    "status": "PASS",
+    "actual": {
+      "route": "services/VET/00000000-0000-4000-8000-000000000001/book",
+      "http": 200,
+      "expectedText": "This service is unavailable",
+      "visible": true,
+      "viewport": [
+        1440,
+        900
+      ],
+      "browser": "Chromium 154.0.8037.57",
+      "evidence": "en-legacy-unavailable-1440.png"
+    }
+  },
+  {
+    "testId": "FINAL2-PROD-RENDER-de-services",
+    "environment": "production",
+    "sha": "e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce",
+    "dateUtc": "2026-11-10T04:29:24.224156+00:00",
+    "role": "anonymous",
+    "status": "PASS",
+    "actual": {
+      "lang": "de",
+      "dir": "ltr",
+      "theme": "dark",
+      "display": "normal",
+      "overflow": false,
+      "persianChars": 0,
+      "route": "services",
+      "viewport": [
+        768,
+        1024
+      ],
+      "browser": "Chromium 154.0.8037.57",
+      "http": 200,
+      "pageErrors": [],
+      "evidence": "de-services-768.png"
+    }
+  },
+  {
+    "testId": "FINAL2-PROD-RENDER-de-travel/external",
+    "environment": "production",
+    "sha": "e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce",
+    "dateUtc": "2026-11-10T04:29:28.051091+00:00",
+    "role": "anonymous",
+    "status": "PASS",
+    "actual": {
+      "lang": "de",
+      "dir": "ltr",
+      "theme": "dark",
+      "display": "normal",
+      "overflow": false,
+      "persianChars": 0,
+      "route": "travel/external",
+      "viewport": [
+        768,
+        1024
+      ],
+      "browser": "Chromium 154.0.8037.57",
+      "http": 200,
+      "pageErrors": [],
+      "evidence": "de-travel-external-768.png"
+    }
+  },
+  {
+    "testId": "FINAL2-PROD-LEGACY-de",
+    "environment": "production",
+    "sha": "e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce",
+    "dateUtc": "2026-11-10T04:29:31.852257+00:00",
+    "role": "anonymous",
+    "status": "PASS",
+    "actual": {
+      "route": "services/VET/00000000-0000-4000-8000-000000000001/book",
+      "http": 200,
+      "expectedText": "Dieser Service ist nicht verfügbar",
+      "visible": true,
+      "viewport": [
+        768,
+        1024
+      ],
+      "browser": "Chromium 154.0.8037.57",
+      "evidence": "de-legacy-unavailable-768.png"
+    }
+  },
+  {
+    "testId": "FINAL2-PROD-RENDER-es-services",
+    "environment": "production",
+    "sha": "e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce",
+    "dateUtc": "2026-11-10T04:29:36.340949+00:00",
+    "role": "anonymous",
+    "status": "PASS",
+    "actual": {
+      "lang": "es",
+      "dir": "ltr",
+      "theme": "dark",
+      "display": "simple",
+      "overflow": false,
+      "persianChars": 0,
+      "route": "services",
+      "viewport": [
+        390,
+        844
+      ],
+      "browser": "Chromium 154.0.8037.57",
+      "http": 200,
+      "pageErrors": [],
+      "evidence": "es-services-390.png"
+    }
+  },
+  {
+    "testId": "FINAL2-PROD-RENDER-es-travel/external",
+    "environment": "production",
+    "sha": "e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce",
+    "dateUtc": "2026-11-10T04:29:39.924741+00:00",
+    "role": "anonymous",
+    "status": "PASS",
+    "actual": {
+      "lang": "es",
+      "dir": "ltr",
+      "theme": "dark",
+      "display": "simple",
+      "overflow": false,
+      "persianChars": 0,
+      "route": "travel/external",
+      "viewport": [
+        390,
+        844
+      ],
+      "browser": "Chromium 154.0.8037.57",
+      "http": 200,
+      "pageErrors": [],
+      "evidence": "es-travel-external-390.png"
+    }
+  },
+  {
+    "testId": "FINAL2-PROD-LEGACY-es",
+    "environment": "production",
+    "sha": "e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce",
+    "dateUtc": "2026-11-10T04:29:44.366850+00:00",
+    "role": "anonymous",
+    "status": "PASS",
+    "actual": {
+      "route": "services/VET/00000000-0000-4000-8000-000000000001/book",
+      "http": 200,
+      "expectedText": "Este servicio no está disponible",
+      "visible": true,
+      "viewport": [
+        390,
+        844
+      ],
+      "browser": "Chromium 154.0.8037.57",
+      "evidence": "es-legacy-unavailable-390.png"
+    }
+  },
+  {
+    "testId": "FINAL2-PROD-SIMPLE-REVERSIBLE",
+    "environment": "production",
+    "sha": "e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce",
+    "dateUtc": "2026-11-10T04:29:44.493147+00:00",
+    "role": "anonymous",
+    "status": "PASS",
+    "actual": {
+      "off": null,
+      "on": "simple",
+      "theme": "dark",
+      "lang": "es"
+    }
+  },
+  {
+    "testId": "FINAL2-PROD-STABLE-SHA",
+    "environment": "production",
+    "sha": "e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce",
+    "dateUtc": "2026-11-10T04:29:45.117123+00:00",
+    "role": "anonymous",
+    "status": "PASS",
+    "actual": {
+      "unchanged": true
+    }
+  }
+]

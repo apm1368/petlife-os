@@ -1,0 +1,214 @@
+[
+  {
+    "lang": "fa",
+    "dir": "rtl",
+    "theme": "light",
+    "display": "normal",
+    "overflow": false,
+    "headings": [
+      "مراقبت حرفه‌ای، نزدیک شما",
+      "انتخاب خدمت"
+    ],
+    "locale": "fa",
+    "route": "services",
+    "viewport": [
+      390,
+      844
+    ],
+    "http": 200,
+    "pageErrors": [
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #423; visit https://react.dev/errors/423 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+    ],
+    "persianChars": 366
+  },
+  {
+    "lang": "fa",
+    "dir": "rtl",
+    "theme": "light",
+    "display": "normal",
+    "overflow": false,
+    "headings": [
+      "اقامتگاه‌های منابع بیرونی",
+      "تاریخ ورود",
+      "تاریخ خروج"
+    ],
+    "locale": "fa",
+    "route": "travel/external",
+    "viewport": [
+      390,
+      844
+    ],
+    "http": 200,
+    "pageErrors": [
+      "Minified React error #329; visit https://react.dev/errors/329 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+    ],
+    "persianChars": 540
+  },
+  {
+    "lang": "en",
+    "dir": "ltr",
+    "theme": "light",
+    "display": "normal",
+    "overflow": false,
+    "headings": [
+      "Professional care, near you",
+      "Choose a service"
+    ],
+    "locale": "en",
+    "route": "services",
+    "viewport": [
+      1440,
+      900
+    ],
+    "http": 200,
+    "pageErrors": [
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #423; visit https://react.dev/errors/423 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+    ],
+    "persianChars": 0
+  },
+  {
+    "lang": "en",
+    "dir": "ltr",
+    "theme": "light",
+    "display": "normal",
+    "overflow": false,
+    "headings": [
+      "Stays from external sources",
+      "Check-in date",
+      "Check-out date"
+    ],
+    "locale": "en",
+    "route": "travel/external",
+    "viewport": [
+      1440,
+      900
+    ],
+    "http": 200,
+    "pageErrors": [
+      "Minified React error #329; visit https://react.dev/errors/329 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+    ],
+    "persianChars": 0
+  },
+  {
+    "lang": "de",
+    "dir": "ltr",
+    "theme": "dark",
+    "display": "normal",
+    "overflow": false,
+    "headings": [
+      "Professionelle Betreuung in Ihrer Nähe",
+      "Leistung auswählen"
+    ],
+    "locale": "de",
+    "route": "services",
+    "viewport": [
+      768,
+      1024
+    ],
+    "http": 200,
+    "pageErrors": [
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #423; visit https://react.dev/errors/423 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+    ],
+    "persianChars": 0
+  },
+  {
+    "lang": "de",
+    "dir": "ltr",
+    "theme": "dark",
+    "display": "normal",
+    "overflow": false,
+    "headings": [
+      "Unterkünfte aus externen Quellen",
+      "Anreise",
+      "Abreise"
+    ],
+    "locale": "de",
+    "route": "travel/external",
+    "viewport": [
+      768,
+      1024
+    ],
+    "http": 200,
+    "pageErrors": [
+      "Minified React error #329; visit https://react.dev/errors/329 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+    ],
+    "persianChars": 0
+  },
+  {
+    "lang": "es",
+    "dir": "ltr",
+    "theme": "dark",
+    "display": "simple",
+    "overflow": false,
+    "headings": [
+      "Atención profesional cerca de ti",
+      "Elige un servicio"
+    ],
+    "locale": "es",
+    "route": "services",
+    "viewport": [
+      390,
+      844
+    ],
+    "http": 200,
+    "pageErrors": [
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #418; visit https://react.dev/errors/418 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "Minified React error #423; visit https://react.dev/errors/423 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+    ],
+    "persianChars": 0
+  },
+  {
+    "lang": "es",
+    "dir": "ltr",
+    "theme": "dark",
+    "display": "simple",
+    "overflow": false,
+    "headings": [
+      "Alojamientos de fuentes externas",
+      "Entrada",
+      "Salida"
+    ],
+    "locale": "es",
+    "route": "travel/external",
+    "viewport": [
+      390,
+      844
+    ],
+    "http": 200,
+    "pageErrors": [
+      "Minified React error #329; visit https://react.dev/errors/329 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+    ],
+    "persianChars": 0
+  }
+]

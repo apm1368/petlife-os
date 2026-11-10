@@ -21,6 +21,7 @@ import { AccountModule } from "./modules/account/account.module";
 import { UsersModule } from "./modules/users/users.module";
 import { HouseholdsModule } from "./modules/households/households.module";
 import { PetAccessModule } from "./modules/pet-access/pet-access.module";
+import { PetOwnershipModule } from "./modules/pet-ownership/pet-ownership.module";
 import { PetsModule } from "./modules/pets/pets.module";
 import { OnboardingModule } from "./modules/onboarding/onboarding.module";
 import { HomeModule } from "./modules/home/home.module";
@@ -105,6 +106,7 @@ import { PlacesModule } from "./modules/places/places.module";
     UsersModule,
     HouseholdsModule,
     PetAccessModule,
+    PetOwnershipModule,
     PetsModule,
     OnboardingModule,
     HomeModule,

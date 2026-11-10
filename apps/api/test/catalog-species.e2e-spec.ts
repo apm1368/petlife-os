@@ -46,4 +46,15 @@ describe("All-species catalog filtering", () => {
     await request(app.getHttpServer()).get("/providers/services?species=UNICORN").expect(400);
     await request(app.getHttpServer()).get("/travel/listings?species=UNICORN").expect(400);
   });
+
+  it("does not publish explicitly marked QA categories in public shop discovery", async () => {
+    const demo = await db.productCategory.create({
+      data: { name: `${marker} QA fixture`, slug: `${marker}-qa-fixture`, isDemoRecord: true },
+    });
+    const response = await request(app.getHttpServer()).get("/shop/categories").expect(200);
+    const categoryIds = response.body.map((category: { id: string }) => category.id);
+    const legitimate = await db.productCategory.findUniqueOrThrow({ where: { slug: marker } });
+    expect(categoryIds).toContain(legitimate.id);
+    expect(categoryIds).not.toContain(demo.id);
+  });
 });
