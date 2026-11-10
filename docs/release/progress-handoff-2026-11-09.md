@@ -2,6 +2,35 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
+## Queue reconciliation — 2026-11-10 11:07 UTC
+
+- Current main is `0db2284b59f1926f29b28a43f1f5bd7fcc7272b3` (#237). Its main CI passed; authorized deploy `42802724808` is in progress, so publication remains pending safe version/browser/API verification. Last observed production baseline was `26a398eae70e02463f36bba57e3bd12480f0ed20`.
+- #237 integrates #229/#230/#227; originals are closed as superseded, not individually merged. Exact PR CI: 320 API unit, 1914 web and 910 API E2E tests passed, plus typecheck, fresh migrations and production build. New mobile navigation/footer/theme labels still await actual production verification. HERO source untouched; four fa/de mobile/desktop before-render baselines captured for post-deploy comparison.
+- #238 local-storage containment/S3-mode token route denial is pending fresh CI on `e30c93e3`; 28 focused tests pass, including three isolated HTTP cases. #239 compatible dependency overrides is pending fresh CI on `d931e24f`; candidate audit is 0 critical/3 high/7 moderate/0 low, not proof of complete security. Both must be integrated only after final-head checks; neither is LIVE_VERIFIED.
+- #215/#217 were normally updated to main and fresh CI is pending. They are partial visual slices without authenticated full-browser acceptance. #209 had only this handoff conflict; retain both dated histories below, preserve its HTTP deploy-environment/demo regression, and rerun fresh CI. Never rely on an older successful head.
+- Local disk recovered to ~200 MiB after removing unused 44 MiB project `.next` and only the registry metadata produced by this task's 10:57 lockfile resolution. Those are regenerable; no source/history/user data/payment work/DB volume was removed. New dependencies were not installed over the shared tree. Full local build/DB tests remain capacity-blocked.
+- Next: verify #237 deployment, then rerun actual public-header/final2 smoke and HERO comparison against the deployed SHA; monitor #238/#239 and the reconciled #209. Protected merge only, no real transactions or unwanted public records. Private QA fixtures, Jajiga extraction/content authorization and original-media bucket/CDN evidence remain unavailable. Whole-product/four-language acceptance is not complete.
+
+### Preserved historical #209 notes (not current status)
+
+## QA checkpoint — 2026-11-09 12:49 UTC
+
+- `main` and production both report `fb2f421dae9506ae62cc8f4c896703adc9387b58`. Production version API returned HTTP 200 for that SHA; readiness returned `ok`, database and Redis up. Exact-main workflow 42614356138 completed successfully.
+- QA record: PR #209, branch `qa/mission-2-full-regression-2026-11-09`, current head at this checkpoint `efca3e2da2b576cca699e7c8eb273e47052c1097`. Its newer CI run 42620120425 was in progress at `Test`; lint, visual/design contract, typecheck and migrations had passed. Do not use the older head's run as final evidence. This handoff update triggers a new final-head CI run.
+- Safe live checks: health/readiness pass; anonymous `/api/admin/audit` is 401; `/api/shop/products` returns HTTP 200 with zero products and zero demo rows. Demo exclusion is verified; real reviewed product visibility and purchase are not, because there are no live catalog items.
+- Locale roots `/fa`, `/en`, `/de`, `/es` return HTTP 200 with expected `lang`/direction metadata. This does not verify complete page translation. Browser screenshot attempt at 390×844 timed out before capture; cause unknown. Authenticated flows, viewport/theme/accessibility matrix and performance were not tested.
+- All inspected worktrees were clean and left untouched. No payment-named worktree is visible; that is not evidence that prior payment work was deleted. No payment files were modified. Disk is critically low at 20 MiB free of 7.9 GiB; no cleanup or local build was attempted.
+- Open PR snapshot: #132–#141 (localization stack) remain based on `feat/i18n-shop-customer` and GitHub reports `DIRTY`; #121, #102, #103, #105, #106, #108, #109 and #59 also report `DIRTY` against their current bases. Their previously green checks are stale and must not be reused. #209 is the only new QA PR in this checkpoint; its review/merge state is pending final-head CI and repository rules.
+- Exact next actions: monitor the newest CI for PR #209 and merge only if it is green and GitHub permits the normal path; retain QA statuses as partial/blocked where credentials, browser, catalog data, provider access or storage/CDN configuration are absent. Resolve stale/dirty product PRs one at a time from current `main`, starting with any independently reviewable, release-relevant fix, and rerun checks on retargeted heads. Do not claim project completion.
+
+## QA regression guard update — 2026-11-09 13:08 UTC
+
+- PR #209 now also includes a regression assertion in `apps/api/test/public-demo-records.e2e-spec.ts`: with `NODE_ENV=test` and `DEPLOYMENT_ENVIRONMENT=production`, the actual public shop list/detail must hide the marked demo product while keeping a reviewed product visible. This covers the deploy-contract branch of demo filtering through HTTP, in addition to the existing helper unit test.
+- The new test file passed focused ESLint locally (`pnpm --filter @petlife/api exec eslint test/public-demo-records.e2e-spec.ts --no-cache`); no local API E2E was attempted because only ~20 MiB of disk remained. Earlier PR #209 CI run 42620120425 passed on its prior head `efca3e2`; that is not a result for the new test commit `98bba21`.
+- At this checkpoint PR #209 head is `98bba21a7140beb089c5c6c873e998b43adb8831`, base `main`. Exact-head CI run 42622604014 is pending; do not merge or report it green until it completes and GitHub permits normal merge. No production code was changed by this PR.
+- The visible worktree list was rechecked: every listed worktree was clean; no payment-named worktree appeared. Preserve this as “not found in current workspace,” not “deleted.” No payment changes were touched.
+- Exact next action: monitor CI for the final PR head after this handoff update; if green and normal merge is allowed, merge #209, then verify the newly merged main/production SHAs. Keep remaining product work and live feature claims at PARTIAL/BLOCKED until their actual routes and user flows are verified.
+
 ## Latest final batch 2 checkpoint — 2026-11-10 04:32 UTC
 
 - **Main and production:** `e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce`, environment production, deployment `github-42753996987-1`. Required main CI and authorized deploy succeeded, 1.4M pre-migration backup reported, no pending migrations, database/Redis readiness up. #231/#233/#234/#235 all merged normally and are included. No feature code from this slice remains awaiting merge; no bypass/force-push or real booking/charge/import performed.
@@ -122,6 +151,7 @@ After successful deployment, run `python docs/qa/tools/final2-public-smoke.py --
 - Visual source inspection covered design reference boards 01/15 and the approved member-home target. Existing before/after images in `apps/web/design-review/member-glass/` are historical, not screenshots of this SHA. Fresh authenticated screenshots for light/dark, normal/simple, RTL/LTR and responsive viewports are **BLOCKED**: no authenticated browser session is available and workspace has only 74 MiB free. No production/local build was started. The 2027 visual direction also remains in tension with the older glass target; current app retains the approved glass personal frame while shared tokens and patterns remain in use.
 - Production `/fa/home` returned HTTP 200 anonymously, which does not prove authenticated dashboard behavior. `/fa/login` returned 404 and was not treated as the canonical sign-in path. No customer data, write action, real payment or landing HERO change occurred.
 - Next: monitor run 42634490099 through build/deploy. When complete, verify production SHA and health again. Dashboard remains `PARTIAL / NOT LIVE_VERIFIED` until the deployed SHA and authenticated browser behavior are checked. Do not launch a local browser build until storage capacity is safe.
+
 
 ## Latest verified checkpoint — 2026-11-09 11:31 UTC
 

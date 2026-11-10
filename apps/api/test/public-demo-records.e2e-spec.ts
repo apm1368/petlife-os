@@ -184,6 +184,7 @@ describe("production public reads exclude seed-origin records", () => {
     ]);
 
     const originalNodeEnv = process.env.NODE_ENV;
+    const originalDeploymentEnvironment = process.env.DEPLOYMENT_ENVIRONMENT;
     process.env.NODE_ENV = "production";
     try {
       const vets = await request(app.getHttpServer()).get("/providers/vets").expect(200);
@@ -221,9 +222,23 @@ describe("production public reads exclude seed-origin records", () => {
       const plans = await app.get(SubscriptionPlanReadService).listForCountry("IR");
       expect(plans.map((plan) => plan.code)).toContain(realPlanCode);
       expect(plans.map((plan) => plan.code)).not.toContain(demoPlanCode);
+
+      // Production's deploy contract sets DEPLOYMENT_ENVIRONMENT. Verify
+      // customer-facing reads still filter demo records when NODE_ENV remains
+      // at the test runtime value instead of relying on this test's first mode.
+      process.env.NODE_ENV = "test";
+      process.env.DEPLOYMENT_ENVIRONMENT = "production";
+      const deployContractProducts = await request(app.getHttpServer()).get("/shop/products").expect(200);
+      const deployContractRows = deployContractProducts.body.items ?? deployContractProducts.body.data ?? deployContractProducts.body;
+      expect(deployContractRows.map((row: { id: string }) => row.id)).toContain(realProduct.id);
+      expect(deployContractRows.map((row: { id: string }) => row.id)).not.toContain(demoProduct.id);
+      await request(app.getHttpServer()).get(`/shop/products/${demoProduct.id}`).expect(404);
+      await request(app.getHttpServer()).get(`/shop/products/${realProduct.id}`).expect(200);
     } finally {
       if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
       else process.env.NODE_ENV = originalNodeEnv;
+      if (originalDeploymentEnvironment === undefined) delete process.env.DEPLOYMENT_ENVIRONMENT;
+      else process.env.DEPLOYMENT_ENVIRONMENT = originalDeploymentEnvironment;
     }
   });
 });
