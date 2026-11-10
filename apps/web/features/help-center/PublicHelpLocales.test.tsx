@@ -25,6 +25,14 @@ function leaves(value: object, prefix = ""): Record<string, string> {
 }
 
 describe("public help/legal/status own catalogs (no merged fallback masking)", () => {
+  it("does not nest a main landmark inside the public shell main", async () => {
+    vi.mocked(helpCenterService.categories).mockResolvedValue([]);
+    vi.mocked(helpCenterService.articles).mockResolvedValue([]);
+    renderWithIntl(<main><HelpCenterHomeView /></main>);
+    expect(await screen.findByText(en.publicHelp.noTopics)).toBeTruthy();
+    expect(screen.getAllByRole("main")).toHaveLength(1);
+  });
+
   it.each(["fa", "en", "de", "es"] as RouteLocale[])("has the entire publicHelp key set in %s", (locale) => {
     const copy = leaves(catalogs[locale]);
     expect(Object.keys(copy).sort()).toEqual(Object.keys(leaves(catalogs.en)).sort());
