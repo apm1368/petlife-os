@@ -2,6 +2,12 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
+## Final booking release running — 2026-11-10 04:10 UTC
+
+#235 passed complete Next 15 CI/build `42752198178` on final head `00acfafba7ee798588e72bb3b29484e78c22a0fd`; the final eight-file diff was inspected after base synchronization and GitHub reported CLEAN. Normal squash merged it at current main `e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce`. Authorized main CI/deploy `42753996987` is running, NOT LIVE yet; production last verified at `b9b43e73572f353aa53ba6f081682282e2b023c3`. The combined release includes #231; no success is attributed to its superseded cancelled pending workflow.
+
+After successful deployment, run `python docs/qa/tools/final2-public-smoke.py --expected-sha e2a38cb5035088e099ef8a5b7e492cd0d0ce24ce --output-dir /tmp/final2-e2a38cb5 --legacy`. It performs only bounded GETs and browser navigation/local display toggles, checks version before/after, public auth guards, four-language services/travel, legacy unavailable-service copy and reversible simple mode. It is not full authenticated booking, accessibility or localization acceptance. Record screenshots/results, verify backup/migration/smoke in the release workflow, append actual outcomes and retain the known source/private-QA/deployment-window limitations.
+
 ## Updated final batch 2 status — 2026-11-10 04:01 UTC
 
 - Main `999be3a9b47b39dae0baeb3842a7cb3f6162d6a2`; production `b9b43e73572f353aa53ba6f081682282e2b023c3` / `github-42750546542-1`. #233 and #234 are deployed, readiness healthy, no pending migrations. Eight public fa/en/de/es services/travel browser retests have zero hydration/page errors and no document overflow, with stored themes and simple mode retained. The bounded saved-theme defect is LIVE_VERIFIED; whole page-family/private flow acceptance remains PARTIAL.
