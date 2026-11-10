@@ -31,7 +31,8 @@ async def run(args):
         with urlopen(BASE + route, timeout=20) as response:
             headers = {key: response.headers.get(key) for key in expected}
             rows.append({"testId": "QA-WEB-HEADERS-" + route, "route": route, "http": response.status, "expected": expected, "observed": headers, "status": "PASS" if response.status == 200 and headers == expected else "FAIL"})
-    copy = json.loads((ROOT / "apps/web/messages/en.json").read_text())["publicHelp"]["noFaq"]
+    catalog = json.loads((ROOT / "apps/web/messages/en.json").read_text())["publicHelp"]
+    copy = catalog["noFaq"]
     async with async_playwright() as p:
         browser = await p.chromium.launch(executable_path="/usr/bin/chromium", args=["--no-sandbox", "--disable-dev-shm-usage"])
         context = await browser.new_context(viewport={"width": 1024, "height": 900})
@@ -58,18 +59,22 @@ async def run(args):
         rows.append({"testId": "QA-WEB-FRAME-SAME", "route": "/en/help/faq", "expected": "Same-origin public frame remains usable", "sameOriginLoaded": same_loaded, "status": "PASS" if same_loaded else "FAIL"})
         cross = await context.new_page()
         blocked = asyncio.Event()
+        cross_documents = []
+        cross.on("response", lambda r: cross_documents.append({"http": r.status, "frameOptions": r.headers.get("x-frame-options"), "csp": r.headers.get("content-security-policy")}) if r.request.resource_type == "document" and r.url == BASE + "/en/help/faq" else None)
         cross.on("console", lambda msg: blocked.set() if "frame-ancestors" in msg.text or "X-Frame-Options" in msg.text else None)
         # New about:blank parent is an opaque, non-site origin. set_content on
         # an already-owned page would retain that origin and be an invalid test.
         await cross.set_content('<h1>QA disposable cross-origin frame</h1><iframe id="qa-cross" title="QA frame" src="https://opetlife.ir/en/help/faq" width="800" height="700"></iframe>')
-        load_task = asyncio.create_task(cross.frame_locator("#qa-cross").get_by_text(copy, exact=True).wait_for(timeout=15000))
+        # A frame-ancestors policy must block the document itself, not merely
+        # make an anonymous API/third-party-storage request fail after rendering.
+        load_task = asyncio.create_task(cross.frame_locator("#qa-cross").get_by_role("heading", name=catalog["faq"], exact=True).wait_for(timeout=15000))
         blocked_task = asyncio.create_task(blocked.wait())
         done, pending = await asyncio.wait([load_task, blocked_task], timeout=16, return_when=asyncio.FIRST_COMPLETED)
         loaded = load_task in done and not load_task.cancelled() and load_task.exception() is None
         for task in pending:
             task.cancel()
         await asyncio.gather(*pending, return_exceptions=True)
-        rows.append({"testId": "QA-WEB-FRAME-CROSS", "route": "/en/help/faq", "expected": "Actual browser refuses framing by a non-site origin", "crossOriginLoaded": loaded, "framePolicyBlocked": blocked.is_set(), "status": "PASS" if blocked.is_set() and not loaded else "FAIL", "limitation": "Public FAQ framing only; no private account, clickjacking exploit or clinical preview acceptance"})
+        rows.append({"testId": "QA-WEB-FRAME-CROSS", "route": "/en/help/faq", "expected": "Actual browser refuses framing by a non-site origin", "crossOriginDocumentHeadingVisible": loaded, "framePolicyBlocked": blocked.is_set(), "documentResponses": cross_documents, "status": "PASS" if blocked.is_set() and not loaded else "FAIL" if loaded else "BLOCKED", "limitation": "Public FAQ document framing only, not full cross-origin API hydration; no private account, clickjacking exploit or clinical preview acceptance. Neither content nor policy signal is inconclusive, not proof of protection."})
         if loaded or blocked.is_set():
             await cross.screenshot(path=str(output / "disposable-cross-origin-frame.png"))
             rows[-1]["evidence"] = "disposable-cross-origin-frame.png"
