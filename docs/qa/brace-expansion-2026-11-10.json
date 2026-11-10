@@ -1,0 +1,22 @@
+{
+  "testId": "QA-DEPS-BRACE-01",
+  "dateUtc": "2026-11-10T17:39:00Z",
+  "domain": "dependency/tooling security",
+  "environment": "pnpm 10.33.0 frozen lockfile + registry audit; isolated actual-package Node tests",
+  "baseSha": "40f0045e5dbda0afd974779373fa3fd43d18be3b",
+  "codeRetestSha": "29fa9ce88e7311f2601092d444061a481077be0a",
+  "path": "packages/eslint-config > typescript-eslint > @typescript-eslint/typescript-estree > minimatch > brace-expansion",
+  "advisoryIdsAddressed": [1240107, 1240111, 1240103],
+  "versionBefore": "5.0.9",
+  "versionAfter": "5.0.12",
+  "expected": "Same-major patched resolution with existing engine/dependency compatibility and bounded expansion behavior",
+  "actual": "Frozen lockfile validation PASS; five isolated actual-package contracts PASS; source syntax/diff PASS; workspace CI pending",
+  "status": "PASS",
+  "releaseStatus": "AWAITING_CI_OR_MERGE",
+  "auditBefore": {"critical":0,"high":3,"moderate":7,"low":0},
+  "auditAfter": {"critical":0,"high":1,"moderate":6,"low":0},
+  "auditExit": "NONZERO_REMAINING_FINDINGS",
+  "evidence": ["brace-expansion-2026-11-10.md", "../../scripts/verify-brace-expansion.cjs", "../../pnpm-lock.yaml"],
+  "limitations": ["Not a demonstrated remote production exploit", "Isolated local package tests are not a full workspace dependency install", "Remaining advisories unresolved", "Production deployment and backup restore drill not verified"],
+  "nextAction": "Fresh exact-head workspace CI; update branch after preceding protected merges; normal merge and authorized pipeline; exact deployed SHA/readiness/assets"
+}
