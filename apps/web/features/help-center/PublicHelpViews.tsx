@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { formatLocaleDate } from "@/lib/i18n/format";
@@ -13,9 +13,10 @@ const legalSlugs = ["terms", "privacy", "cookies", "community-guidelines", "anim
 const legalKinds = ["TERMS_OF_SERVICE", "PRIVACY_POLICY", "COOKIE_CONSENT", "COMMUNITY_GUIDELINES", "ANIMAL_WELFARE", "AI_AND_SAFETY", "PAYMENT_AND_REFUND", "DELIVERY", "INSTALLMENT_HELP", "ACCESSIBILITY"];
 
 function Shell({ title, children, subtitle, titleLang }: { title: string; subtitle?: string; children: ReactNode; titleLang?: "fa" | "en" }) {
+  const titleId = useId();
   const locale = useLocale();
   const t = useTranslations("publicHelp");
-  return <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8"><header className="flex flex-col gap-2"><h1 lang={titleLang} className="text-page-title text-text-primary">{title}</h1>{subtitle ? <p lang={titleLang} className="text-body text-text-secondary">{subtitle}</p> : null}</header>{locale === "de" || locale === "es" ? <p className="text-metadata text-text-secondary">{t("sourceNotice")}</p> : null}{children}</main>;
+  return <section aria-labelledby={titleId} className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8"><header className="flex flex-col gap-2"><h1 id={titleId} lang={titleLang} className="text-page-title text-text-primary">{title}</h1>{subtitle ? <p lang={titleLang} className="text-body text-text-secondary">{subtitle}</p> : null}</header>{locale === "de" || locale === "es" ? <p className="text-metadata text-text-secondary">{t("sourceNotice")}</p> : null}{children}</section>;
 }
 function Failure({ title, retry }: { title: string; retry: () => void }) {
   const t = useTranslations("publicHelp");
@@ -69,7 +70,7 @@ export function HelpArticleView({ slug }: { slug: string }) {
   }, [locale, slug]);
   async function vote(helpful: boolean) { if (voteInFlight.current) return; const epoch = voteEpoch.current; voteInFlight.current = true; setVoteBusy(true); setVoteError(false); try { await helpCenterService.vote(locale, slug, helpful); if (epoch === voteEpoch.current) setVoted(true); } catch { if (epoch === voteEpoch.current) setVoteError(true); } finally { if (epoch === voteEpoch.current) { voteInFlight.current = false; setVoteBusy(false); } } }
   if (error) return <Shell title={t("articleUnavailable")}><p role="alert" className="text-text-secondary">{t("articleUnavailableDescription")}</p><Link href={`/${locale}/help`} className="underline">{t("helpShort")}</Link></Shell>;
-  if (!article) return <main className="mx-auto max-w-4xl px-4 py-8"><Skeleton className="h-72 w-full" aria-label={t("loading")} /></main>;
+  if (!article) return <div className="mx-auto max-w-4xl px-4 py-8"><Skeleton className="h-72 w-full" aria-label={t("loading")} /></div>;
   return <Shell title={article.title} titleLang={locale === "fa" ? "fa" : "en"} subtitle={article.summary ?? undefined}><Link className="text-brand-natural underline" href={`/${locale}/help/categories/${encodeURIComponent(article.category.slug)}`}>{article.category.title}</Link><article lang={locale === "fa" ? "fa" : "en"} dir="auto" className="whitespace-pre-wrap rounded-2xl border border-border-subtle bg-surface-elevated p-5 text-body leading-8 text-text-primary">{article.body}</article><p className="text-metadata text-text-secondary">{t("version", { version: article.version })} · {formatLocaleDate(article.updatedAt, locale, { dateStyle: "medium" })}</p><section className="flex flex-wrap items-center gap-3"><span>{t("helpful")}</span>{voted ? <span role="status">{t("feedbackThanks")}</span> : <><Button variant="secondary" disabled={voteBusy} onClick={() => void vote(true)}>{t("yes")}</Button><Button variant="secondary" disabled={voteBusy} onClick={() => void vote(false)}>{t("no")}</Button></>}{voteError ? <span role="alert">{t("feedbackFailure")}</span> : null}</section><Link href={`/${locale}/support/new`} className="text-brand-natural underline">{t("stillNeedHelp")}</Link></Shell>;
 }
 
@@ -88,7 +89,7 @@ export function LegalDocumentView({ slug }: { slug: string }) {
   }, [locale, slug]);
   const index = legalSlugs.indexOf(slug as (typeof legalSlugs)[number]);
   if (error) return <Shell title={t("documentUnavailable")}><Failure title={t("documentFailure")} retry={load} /></Shell>;
-  if (!document) return <main className="mx-auto max-w-4xl px-4 py-8"><Skeleton aria-label={t("loading")} className="h-64 w-full" /></main>;
+  if (!document) return <div className="mx-auto max-w-4xl px-4 py-8"><Skeleton aria-label={t("loading")} className="h-64 w-full" /></div>;
   const title = document.title ?? (index >= 0 ? (t(`legalTitles.${legalSlugs[index]}`)) : undefined) ?? (t("documentTitle"));
   return <Shell title={title} titleLang={document.title ? document.locale : undefined}>{document.available && document.body ? <><p className="text-metadata text-text-secondary">{t("version", { version: document.version ?? 0 })} · {t("effective")}: {document.effectiveAt ? formatLocaleDate(document.effectiveAt, locale, { dateStyle: "long" }) : "—"}</p><article className="whitespace-pre-wrap rounded-2xl border border-border-subtle bg-surface-elevated p-5 text-body leading-8 text-text-primary">{document.body}</article></> : <EmptyState title={t("documentUnpublished")} />}<Link href={`/${locale}/legal`} className="text-brand-natural underline">{t("allLegal")}</Link></Shell>;
 }

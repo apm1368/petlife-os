@@ -1,0 +1,1038 @@
+[
+  {
+    "testId": "QA-NAV-01-fa-320",
+    "sha": "82f7067dc737f806b6d6b7b14328868baf5cefba",
+    "environment": "production",
+    "liveStatus": "LIVE_VERIFIED",
+    "dateUtc": "2026-11-10T11:28:31.293515+00:00",
+    "browser": "154.0.8037.57",
+    "role": "anonymous",
+    "viewport": [
+      320,
+      900
+    ],
+    "theme": "LIGHT",
+    "simple": false,
+    "status": "PASS",
+    "controls": [
+      {
+        "tag": "A",
+        "label": "opetlife",
+        "width": 232,
+        "height": 46,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "ناوبری اصلی",
+        "width": 44,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "SELECT",
+        "label": "فارسی",
+        "width": 87,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "روشن → تیره",
+        "width": 44,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "نمایش ساده: خاموش",
+        "width": 44,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "ورود",
+        "width": 52.078125,
+        "height": 44,
+        "reachable": true
+      }
+    ],
+    "menuOpened": true,
+    "escapeClosed": true,
+    "links": [
+      "/fa",
+      "/fa/vet/find",
+      "/fa/services",
+      "/fa/shop",
+      "/fa/places",
+      "/fa/travel",
+      "/fa/insurance",
+      "/fa/animal-support",
+      "/fa/community",
+      "/fa/blog",
+      "/fa/vet/find",
+      "/fa/services",
+      "/fa/shop",
+      "/fa/pets/active?view=memories"
+    ],
+    "themeLabel": "روشن → تیره",
+    "expectedThemeLabel": "روشن → تیره",
+    "translationVerified": true,
+    "overflow": false,
+    "pageErrors": [],
+    "footer": {
+      "columns": "136px 136px",
+      "links": [
+        {
+          "href": "/fa",
+          "height": 44
+        },
+        {
+          "href": "/fa#lp-main",
+          "height": 44
+        },
+        {
+          "href": "/fa/vet/find",
+          "height": 44
+        },
+        {
+          "href": "/fa/shop",
+          "height": 44
+        },
+        {
+          "href": "/fa/services/GROOMING",
+          "height": 44
+        },
+        {
+          "href": "/fa/services/BOARDING",
+          "height": 44
+        },
+        {
+          "href": "/fa/travel",
+          "height": 44
+        },
+        {
+          "href": "/fa/services/PET_TAXI",
+          "height": 44
+        },
+        {
+          "href": "/fa/insurance",
+          "height": 44
+        },
+        {
+          "href": "/fa/animal-support/needs",
+          "height": 44
+        },
+        {
+          "href": "/fa/guides",
+          "height": 44
+        },
+        {
+          "href": "/fa/blog",
+          "height": 44
+        },
+        {
+          "href": "/fa/community",
+          "height": 44
+        },
+        {
+          "href": "/fa/support",
+          "height": 44
+        },
+        {
+          "href": "/fa/auth?returnTo=%2Ffa%2Fprovider",
+          "height": 44
+        },
+        {
+          "href": "/fa/register?returnTo=%2Ffa%2Fprovider",
+          "height": 44
+        },
+        {
+          "href": "/fa/profile/privacy",
+          "height": 44
+        },
+        {
+          "href": "/fa/credits",
+          "height": 44
+        }
+      ],
+      "overflow": false
+    },
+    "evidence": [
+      "fa-320-initial.png",
+      "fa-320-menu.png",
+      "fa-320-footer.png"
+    ]
+  },
+  {
+    "testId": "QA-NAV-01-es-390",
+    "sha": "82f7067dc737f806b6d6b7b14328868baf5cefba",
+    "environment": "production",
+    "liveStatus": "LIVE_VERIFIED",
+    "dateUtc": "2026-11-10T11:28:35.807789+00:00",
+    "browser": "154.0.8037.57",
+    "role": "anonymous",
+    "viewport": [
+      390,
+      900
+    ],
+    "theme": "DARK",
+    "simple": true,
+    "status": "PASS",
+    "controls": [
+      {
+        "tag": "A",
+        "label": "opetlife",
+        "width": 298,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "Navegación principal",
+        "width": 48,
+        "height": 48,
+        "reachable": true
+      },
+      {
+        "tag": "SELECT",
+        "label": "español",
+        "width": 88,
+        "height": 48,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "Oscuro → Sistema",
+        "width": 48,
+        "height": 48,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "Vista sencilla: desactivada",
+        "width": 48,
+        "height": 48,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "Iniciar sesión",
+        "width": 120.484375,
+        "height": 48,
+        "reachable": true
+      }
+    ],
+    "menuOpened": true,
+    "escapeClosed": true,
+    "links": [
+      "/es",
+      "/es/vet/find",
+      "/es/services",
+      "/es/shop",
+      "/es/places",
+      "/es/travel",
+      "/es/insurance",
+      "/es/animal-support",
+      "/es/community",
+      "/es/blog",
+      "/es/vet/find",
+      "/es/services",
+      "/es/shop",
+      "/es/pets/active?view=memories"
+    ],
+    "themeLabel": "Oscuro → Sistema",
+    "expectedThemeLabel": "Oscuro → Sistema",
+    "translationVerified": true,
+    "overflow": false,
+    "pageErrors": [],
+    "footer": {
+      "columns": "171px 171px",
+      "links": [
+        {
+          "href": "/es",
+          "height": 48
+        },
+        {
+          "href": "/es#lp-main",
+          "height": 48
+        },
+        {
+          "href": "/es/vet/find",
+          "height": 48
+        },
+        {
+          "href": "/es/shop",
+          "height": 59.5
+        },
+        {
+          "href": "/es/services/GROOMING",
+          "height": 48
+        },
+        {
+          "href": "/es/services/BOARDING",
+          "height": 59.5
+        },
+        {
+          "href": "/es/travel",
+          "height": 48
+        },
+        {
+          "href": "/es/services/PET_TAXI",
+          "height": 48
+        },
+        {
+          "href": "/es/insurance",
+          "height": 48
+        },
+        {
+          "href": "/es/animal-support/needs",
+          "height": 48
+        },
+        {
+          "href": "/es/guides",
+          "height": 48
+        },
+        {
+          "href": "/es/blog",
+          "height": 48
+        },
+        {
+          "href": "/es/community",
+          "height": 48
+        },
+        {
+          "href": "/es/support",
+          "height": 48
+        },
+        {
+          "href": "/es/auth?returnTo=%2Fes%2Fprovider",
+          "height": 48
+        },
+        {
+          "href": "/es/register?returnTo=%2Fes%2Fprovider",
+          "height": 59.5
+        },
+        {
+          "href": "/es/profile/privacy",
+          "height": 48
+        },
+        {
+          "href": "/es/credits",
+          "height": 48
+        }
+      ],
+      "overflow": false
+    },
+    "evidence": [
+      "es-390-initial.png",
+      "es-390-menu.png",
+      "es-390-footer.png"
+    ]
+  },
+  {
+    "testId": "QA-NAV-01-de-390",
+    "sha": "82f7067dc737f806b6d6b7b14328868baf5cefba",
+    "environment": "production",
+    "liveStatus": "LIVE_VERIFIED",
+    "dateUtc": "2026-11-10T11:28:40.818851+00:00",
+    "browser": "154.0.8037.57",
+    "role": "anonymous",
+    "viewport": [
+      390,
+      900
+    ],
+    "theme": "LIGHT",
+    "simple": false,
+    "status": "PASS",
+    "controls": [
+      {
+        "tag": "A",
+        "label": "opetlife",
+        "width": 302,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "Hauptnavigation",
+        "width": 44,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "SELECT",
+        "label": "Deutsch",
+        "width": 96,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "Hell → Dunkel",
+        "width": 44,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "Einfache Ansicht: aus",
+        "width": 44,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "Anmelden",
+        "width": 98.6875,
+        "height": 44,
+        "reachable": true
+      }
+    ],
+    "menuOpened": true,
+    "escapeClosed": true,
+    "links": [
+      "/de",
+      "/de/vet/find",
+      "/de/services",
+      "/de/shop",
+      "/de/places",
+      "/de/travel",
+      "/de/insurance",
+      "/de/animal-support",
+      "/de/community",
+      "/de/blog",
+      "/de/vet/find",
+      "/de/services",
+      "/de/shop",
+      "/de/pets/active?view=memories"
+    ],
+    "themeLabel": "Hell → Dunkel",
+    "expectedThemeLabel": "Hell → Dunkel",
+    "translationVerified": true,
+    "overflow": false,
+    "pageErrors": [],
+    "footer": {
+      "columns": "171px 171px",
+      "links": [
+        {
+          "href": "/de",
+          "height": 44
+        },
+        {
+          "href": "/de#lp-main",
+          "height": 44
+        },
+        {
+          "href": "/de/vet/find",
+          "height": 44
+        },
+        {
+          "href": "/de/shop",
+          "height": 44
+        },
+        {
+          "href": "/de/services/GROOMING",
+          "height": 44
+        },
+        {
+          "href": "/de/services/BOARDING",
+          "height": 56
+        },
+        {
+          "href": "/de/travel",
+          "height": 44
+        },
+        {
+          "href": "/de/services/PET_TAXI",
+          "height": 44
+        },
+        {
+          "href": "/de/insurance",
+          "height": 44
+        },
+        {
+          "href": "/de/animal-support/needs",
+          "height": 44
+        },
+        {
+          "href": "/de/guides",
+          "height": 44
+        },
+        {
+          "href": "/de/blog",
+          "height": 44
+        },
+        {
+          "href": "/de/community",
+          "height": 44
+        },
+        {
+          "href": "/de/support",
+          "height": 44
+        },
+        {
+          "href": "/de/auth?returnTo=%2Fde%2Fprovider",
+          "height": 44
+        },
+        {
+          "href": "/de/register?returnTo=%2Fde%2Fprovider",
+          "height": 44
+        },
+        {
+          "href": "/de/profile/privacy",
+          "height": 44
+        },
+        {
+          "href": "/de/credits",
+          "height": 44
+        }
+      ],
+      "overflow": false
+    },
+    "evidence": [
+      "de-390-initial.png",
+      "de-390-menu.png",
+      "de-390-footer.png"
+    ]
+  },
+  {
+    "testId": "QA-NAV-01-en-768",
+    "sha": "82f7067dc737f806b6d6b7b14328868baf5cefba",
+    "environment": "production",
+    "liveStatus": "LIVE_VERIFIED",
+    "dateUtc": "2026-11-10T11:28:46.107660+00:00",
+    "browser": "154.0.8037.57",
+    "role": "anonymous",
+    "viewport": [
+      768,
+      900
+    ],
+    "theme": "DARK",
+    "simple": false,
+    "status": "PASS",
+    "controls": [
+      {
+        "tag": "A",
+        "label": "opetlife",
+        "width": 112.4375,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "Primary navigation",
+        "width": 44,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "SELECT",
+        "label": "English",
+        "width": 88,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "Dark → System",
+        "width": 44,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "Simple display: off",
+        "width": 44,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "Log in",
+        "width": 69.640625,
+        "height": 44,
+        "reachable": true
+      }
+    ],
+    "menuOpened": true,
+    "escapeClosed": true,
+    "links": [
+      "/en",
+      "/en/vet/find",
+      "/en/services",
+      "/en/shop",
+      "/en/places",
+      "/en/travel",
+      "/en/insurance",
+      "/en/animal-support",
+      "/en/community",
+      "/en/blog",
+      "/en/vet/find",
+      "/en/services",
+      "/en/shop",
+      "/en/pets/active?view=memories"
+    ],
+    "themeLabel": "Dark → System",
+    "expectedThemeLabel": "Dark → System",
+    "translationVerified": true,
+    "overflow": false,
+    "pageErrors": [],
+    "footer": {
+      "columns": "160px 160px 160px 160px",
+      "links": [
+        {
+          "href": "/en",
+          "height": 44
+        },
+        {
+          "href": "/en#lp-main",
+          "height": 44
+        },
+        {
+          "href": "/en/vet/find",
+          "height": 44
+        },
+        {
+          "href": "/en/shop",
+          "height": 44
+        },
+        {
+          "href": "/en/services/GROOMING",
+          "height": 44
+        },
+        {
+          "href": "/en/services/BOARDING",
+          "height": 44
+        },
+        {
+          "href": "/en/travel",
+          "height": 44
+        },
+        {
+          "href": "/en/services/PET_TAXI",
+          "height": 44
+        },
+        {
+          "href": "/en/insurance",
+          "height": 44
+        },
+        {
+          "href": "/en/animal-support/needs",
+          "height": 44
+        },
+        {
+          "href": "/en/guides",
+          "height": 44
+        },
+        {
+          "href": "/en/blog",
+          "height": 44
+        },
+        {
+          "href": "/en/community",
+          "height": 44
+        },
+        {
+          "href": "/en/support",
+          "height": 44
+        },
+        {
+          "href": "/en/auth?returnTo=%2Fen%2Fprovider",
+          "height": 44
+        },
+        {
+          "href": "/en/register?returnTo=%2Fen%2Fprovider",
+          "height": 56
+        },
+        {
+          "href": "/en/profile/privacy",
+          "height": 44
+        },
+        {
+          "href": "/en/credits",
+          "height": 44
+        }
+      ],
+      "overflow": false
+    },
+    "evidence": [
+      "en-768-initial.png",
+      "en-768-menu.png",
+      "en-768-footer.png"
+    ]
+  },
+  {
+    "testId": "QA-NAV-01-fa-1440",
+    "sha": "82f7067dc737f806b6d6b7b14328868baf5cefba",
+    "environment": "production",
+    "liveStatus": "LIVE_VERIFIED",
+    "dateUtc": "2026-11-10T11:28:52.782211+00:00",
+    "browser": "154.0.8037.57",
+    "role": "anonymous",
+    "viewport": [
+      1440,
+      900
+    ],
+    "theme": "LIGHT",
+    "simple": false,
+    "status": "PASS",
+    "controls": [
+      {
+        "tag": "A",
+        "label": "opetlife",
+        "width": 504.890625,
+        "height": 46,
+        "reachable": true
+      },
+      {
+        "tag": "A",
+        "label": "خانه",
+        "width": 46.890625,
+        "height": 46.796875,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "کاوش",
+        "width": 72.765625,
+        "height": 46.796875,
+        "reachable": true
+      },
+      {
+        "tag": "A",
+        "label": "سلامت",
+        "width": 61.375,
+        "height": 46.796875,
+        "reachable": true
+      },
+      {
+        "tag": "A",
+        "label": "خدمات",
+        "width": 61.96875,
+        "height": 46.796875,
+        "reachable": true
+      },
+      {
+        "tag": "A",
+        "label": "فروشگاه",
+        "width": 67.484375,
+        "height": 46.796875,
+        "reachable": true
+      },
+      {
+        "tag": "A",
+        "label": "خاطرات",
+        "width": 63.734375,
+        "height": 46.796875,
+        "reachable": true
+      },
+      {
+        "tag": "SELECT",
+        "label": "فارسی",
+        "width": 87,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "روشن → تیره",
+        "width": 44,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "نمایش ساده: خاموش",
+        "width": 44,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "ورود",
+        "width": 52.078125,
+        "height": 44,
+        "reachable": true
+      }
+    ],
+    "menuOpened": null,
+    "escapeClosed": null,
+    "links": [],
+    "themeLabel": "روشن → تیره",
+    "expectedThemeLabel": "روشن → تیره",
+    "translationVerified": true,
+    "overflow": false,
+    "pageErrors": [],
+    "footer": {
+      "columns": "327.312px 211.172px 211.172px 211.172px 211.156px",
+      "links": [
+        {
+          "href": "/fa",
+          "height": 44
+        },
+        {
+          "href": "/fa#lp-main",
+          "height": 44
+        },
+        {
+          "href": "/fa/vet/find",
+          "height": 44
+        },
+        {
+          "href": "/fa/shop",
+          "height": 44
+        },
+        {
+          "href": "/fa/services/GROOMING",
+          "height": 44
+        },
+        {
+          "href": "/fa/services/BOARDING",
+          "height": 44
+        },
+        {
+          "href": "/fa/travel",
+          "height": 44
+        },
+        {
+          "href": "/fa/services/PET_TAXI",
+          "height": 44
+        },
+        {
+          "href": "/fa/insurance",
+          "height": 44
+        },
+        {
+          "href": "/fa/animal-support/needs",
+          "height": 44
+        },
+        {
+          "href": "/fa/guides",
+          "height": 44
+        },
+        {
+          "href": "/fa/blog",
+          "height": 44
+        },
+        {
+          "href": "/fa/community",
+          "height": 44
+        },
+        {
+          "href": "/fa/support",
+          "height": 44
+        },
+        {
+          "href": "/fa/auth?returnTo=%2Ffa%2Fprovider",
+          "height": 44
+        },
+        {
+          "href": "/fa/register?returnTo=%2Ffa%2Fprovider",
+          "height": 44
+        },
+        {
+          "href": "/fa/profile/privacy",
+          "height": 44
+        },
+        {
+          "href": "/fa/credits",
+          "height": 44
+        }
+      ],
+      "overflow": false
+    },
+    "evidence": [
+      "fa-1440-initial.png",
+      null,
+      "fa-1440-footer.png"
+    ]
+  },
+  {
+    "testId": "QA-NAV-01-de-1440",
+    "sha": "82f7067dc737f806b6d6b7b14328868baf5cefba",
+    "environment": "production",
+    "liveStatus": "LIVE_VERIFIED",
+    "dateUtc": "2026-11-10T11:28:59.458889+00:00",
+    "browser": "154.0.8037.57",
+    "role": "anonymous",
+    "viewport": [
+      1440,
+      900
+    ],
+    "theme": "DARK",
+    "simple": false,
+    "status": "PASS",
+    "controls": [
+      {
+        "tag": "A",
+        "label": "opetlife",
+        "width": 401.8125,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "A",
+        "label": "Startseite",
+        "width": 83.671875,
+        "height": 46.796875,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "Entdecken",
+        "width": 107.578125,
+        "height": 46.796875,
+        "reachable": true
+      },
+      {
+        "tag": "A",
+        "label": "Gesundheit",
+        "width": 95.203125,
+        "height": 46.796875,
+        "reachable": true
+      },
+      {
+        "tag": "A",
+        "label": "Dienstleistungen",
+        "width": 130.09375,
+        "height": 46.796875,
+        "reachable": true
+      },
+      {
+        "tag": "A",
+        "label": "Shop",
+        "width": 56.109375,
+        "height": 46.796875,
+        "reachable": true
+      },
+      {
+        "tag": "A",
+        "label": "Erinnerungen",
+        "width": 107.703125,
+        "height": 46.796875,
+        "reachable": true
+      },
+      {
+        "tag": "SELECT",
+        "label": "Deutsch",
+        "width": 96,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "Dunkel → System",
+        "width": 44,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "Einfache Ansicht: aus",
+        "width": 44,
+        "height": 44,
+        "reachable": true
+      },
+      {
+        "tag": "BUTTON",
+        "label": "Anmelden",
+        "width": 98.6875,
+        "height": 44,
+        "reachable": true
+      }
+    ],
+    "menuOpened": null,
+    "escapeClosed": null,
+    "links": [],
+    "themeLabel": "Dunkel → System",
+    "expectedThemeLabel": "Dunkel → System",
+    "translationVerified": true,
+    "overflow": false,
+    "pageErrors": [],
+    "footer": {
+      "columns": "327.312px 211.172px 211.172px 211.172px 211.156px",
+      "links": [
+        {
+          "href": "/de",
+          "height": 44
+        },
+        {
+          "href": "/de#lp-main",
+          "height": 44
+        },
+        {
+          "href": "/de/vet/find",
+          "height": 44
+        },
+        {
+          "href": "/de/shop",
+          "height": 44
+        },
+        {
+          "href": "/de/services/GROOMING",
+          "height": 44
+        },
+        {
+          "href": "/de/services/BOARDING",
+          "height": 44
+        },
+        {
+          "href": "/de/travel",
+          "height": 44
+        },
+        {
+          "href": "/de/services/PET_TAXI",
+          "height": 44
+        },
+        {
+          "href": "/de/insurance",
+          "height": 44
+        },
+        {
+          "href": "/de/animal-support/needs",
+          "height": 44
+        },
+        {
+          "href": "/de/guides",
+          "height": 44
+        },
+        {
+          "href": "/de/blog",
+          "height": 44
+        },
+        {
+          "href": "/de/community",
+          "height": 44
+        },
+        {
+          "href": "/de/support",
+          "height": 44
+        },
+        {
+          "href": "/de/auth?returnTo=%2Fde%2Fprovider",
+          "height": 44
+        },
+        {
+          "href": "/de/register?returnTo=%2Fde%2Fprovider",
+          "height": 44
+        },
+        {
+          "href": "/de/profile/privacy",
+          "height": 44
+        },
+        {
+          "href": "/de/credits",
+          "height": 44
+        }
+      ],
+      "overflow": false
+    },
+    "evidence": [
+      "de-1440-initial.png",
+      null,
+      "de-1440-footer.png"
+    ]
+  }
+]

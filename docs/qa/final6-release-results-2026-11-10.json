@@ -1,0 +1,53 @@
+{
+  "recordVersion": 1,
+  "date": "2026-11-10",
+  "timezone": "UTC",
+  "repository": "apm1368/petlife-os",
+  "overallProductStatus": "PARTIAL",
+  "productionSha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881",
+  "deployment": "github-42811366130-1",
+  "deploymentRun": "https://github.com/apm1368/petlife-os/actions/runs/42811366130",
+  "localFixSha": "bd8422f7e4c0fdc143fb7b5b18133b5c5e56091c",
+  "evidenceRoot": "evidence/final-6-2026-11-10/live-1f274d7/",
+  "results": [
+    {
+      "testId": "QA-RELEASE-01", "domain": "release", "route": "/api/health/version; /api/health/ready", "role": "anonymous", "decisionCodes": ["TC-04", "TC-11"], "environment": "production", "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881", "method": "Read-only version/readiness requests and exact-main workflow conclusion", "expected": "Intended SHA, production environment and ready status", "actual": "Version/readiness 200, SHA matches, environment production, main workflow CI/deploy success; no new schema migration in this slice", "status": "PASS", "verification": "LIVE_VERIFIED", "evidence": "public/results.json", "nextAction": "Repeat release-critical checks on the next deployed revision; backup restore/dependency rollback drill remains unverified"
+    },
+    {
+      "testId": "QA-PUBLIC-ASSETS-01", "domain": "public reliability", "route": "fa/en/de/es help, legal, status", "role": "anonymous", "decisionCodes": ["GC-09", "GC-10"], "environment": "production", "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881", "method": "public-assets-smoke.py", "expected": "Current-build direct CSS/JS 200, correct MIME, no-store public HTML", "actual": "12 routes PASS, 27 unique assets PASS. Baseline 82f7067 had 3 missing assets on one route and no-store absent on all 12; not 12 broken pages", "status": "PASS", "verification": "LIVE_VERIFIED", "evidence": "assets/results.json", "defectFixPr": "https://github.com/apm1368/petlife-os/pull/240", "nextAction": "Keep automated post-deploy asset gate; do not infer atomic deployment or CDN-wide invalidation"
+    },
+    {
+      "testId": "QA-HELP-LOCALE-01", "domain": "public help/legal/status", "route": "8 page types in fa/en/de/es plus 4 layout variants", "role": "anonymous", "decisionCodes": ["GC-09", "GC-10", "DS-10"], "environment": "production Chromium, no network throttling", "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881", "viewports": [[390,844],[768,900],[1440,900]], "method": "public-help-browser-smoke.py", "fixture": "Existing empty/unpublished content and intentionally absent public slug/UUID; no writes", "expected": "Localized real states, correct direction/theme/simple settings, no overflow, bad assets, page errors or mutation requests", "actual": "36 sampled scenarios PASS. Published article/legal/incident bodies and full failure/accessibility matrices not production-tested", "status": "PASS", "verification": "LIVE_VERIFIED for observed states only", "evidence": "help/results.json", "defectFixPr": "https://github.com/apm1368/petlife-os/pull/240", "nextAction": "Reuse unchanged rendering evidence; obtain isolated published fixtures for missing states; preserve original authored editions"
+    },
+    {
+      "testId": "QA-HELP-SEARCH-02", "domain": "help search", "route": "fa/en/de/es help", "role": "anonymous", "decisionCodes": ["GC-09", "GC-10"], "environment": "production", "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881", "method": "public-help-browser-smoke.py --only-search", "expected": "Wait for real GET 200/empty JSON, then enabled search button and final empty state", "actual": "4 targeted retests PASS. Supersedes premature spinner captures in initial samples; not four additional unique routes. Response.finished background close warning was avoided by awaiting actual JSON instead", "status": "PASS", "verification": "LIVE_VERIFIED", "evidence": "search-retest/results.json", "nextAction": "Retain explicit response/body completion in future search checks"
+    },
+    {
+      "testId": "QA-NAV-01", "domain": "public shell", "route": "services", "role": "anonymous", "decisionCodes": ["DS-10", "GC-09", "GC-10"], "environment": "production", "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881", "viewports": [[320,900],[390,900],[768,900],[1440,900]], "method": "public-header-smoke.py without candidate injection", "expected": "Reachable controls, minimum targets, normal menu/Escape, locale links/theme labels, grouped footer", "actual": "6 scenarios PASS on actual deployed UI; no local CSS injection", "status": "PASS", "verification": "LIVE_VERIFIED", "evidence": "header/results.json", "defectFixPr": "https://github.com/apm1368/petlife-os/pull/237", "nextAction": "Do not generalize to all authenticated navigation or claim WCAG compliance"
+    },
+    {
+      "testId": "QA-AUTH-READONLY", "domain": "registration entry", "route": "fa/en/de/es register → password login", "role": "anonymous", "decisionCodes": ["GC-09", "GC-10"], "environment": "production", "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881", "viewport": [390,844], "method": "auth-readonly-smoke.py", "fixture": "Blank fields and mismatched dummy passwords, never submitted", "expected": "Incomplete/mismatch disabled, localized feedback, correct locale login destination, zero mutation requests", "actual": "4 PASS after explicit navigation wait; no account creation, actual login, provider delivery or account preference save tested", "status": "PASS", "verification": "LIVE_VERIFIED for read-only states", "evidence": "auth/results.json", "nextAction": "Use isolated/authorized fixtures for actual signup/login/session/preference acceptance"
+    },
+    {
+      "testId": "QA-HERO-01", "domain": "landing preservation", "route": "fa/de landing", "role": "anonymous", "decisionCodes": ["GC-10"], "environment": "production", "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881", "viewports": [[390,900],[1440,900]], "method": "hero-layout-smoke.py comparison to before-26a398 JSON", "expected": "Same image URL/natural size, title/copy/image geometry and typography", "actual": "4 comparisons PASS; not a claim of pixel-perfect whole-site or landing header acceptance", "status": "PASS", "verification": "LIVE_VERIFIED for measured composition", "evidence": "hero/results.json", "nextAction": "Preserve HERO; German mobile ParkHeader optional-display clipping remains a separate visual issue"
+    },
+    {
+      "testId": "QA-HOSTED-CI-240", "domain": "automated regressions", "role": "isolated fixtures", "decisionCodes": ["GC-09", "GC-10"], "environment": "GitHub Actions isolated Postgres/Redis", "sha": "46255d62e8d76309e22e2e26dc80074ce2b284ce", "releaseSha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881", "method": "Exact-head CI including lint/typecheck/migrations/tests/build", "expected": "No meaningful regression failures on final head", "actual": "342 API unit, 1952 web, 910 API E2E PASS; main workflow also succeeds. Counts do not prove every route/button/state", "status": "PASS", "evidence": "https://github.com/apm1368/petlife-os/actions/runs/42809382193", "nextAction": "Run final QA integration CI; do not use these counts as current proof for later code changes"
+    },
+    {
+      "testId": "QA-LANDMARK-01", "domain": "accessibility", "route": "public Help views under shell", "role": "isolated render fixture", "decisionCodes": ["GC-10"], "environment": "local real catalogs and React render", "sha": "bd8422f7e4c0fdc143fb7b5b18133b5c5e56091c", "method": "Focused 3-suite Vitest, web ESLint/TypeScript", "expected": "One main landmark with a named page section", "actual": "Reproduction FAIL (2 mains), fix and 43-test retest PASS at 16:22 UTC; lint/typecheck pass. Not yet deployed", "status": "PASS", "verification": "AWAITING_CI_OR_MERGE", "evidence": "features/help-center/PublicHelpLocales.test.tsx", "nextAction": "Require fresh QA PR CI, protected merge/deploy, then inspect actual landmark count"
+    },
+    {
+      "testId": "QA-DEPENDENCY-REMAINDER", "domain": "dependency security", "decisionCodes": [], "environment": "lockfile registry audit, pnpm 10.33", "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881", "method": "pnpm audit --prod --json, refreshed 2026-11-10 16:15 UTC", "expected": "No unresolved high/critical advisories before claiming full security readiness", "actual": "0 critical, 3 high, 7 moderate, 0 low; unresolved major compatibility/reachability work remains. No observed exploit claimed", "status": "FAIL", "nextAction": "Review reachability and safely upgrade remaining Nest/next-intl/Zod/file-type/brace-expansion/minimatch paths; no blanket major upgrade"
+    },
+    {
+      "testId": "QA-DEPENDABOT", "domain": "security alerts", "decisionCodes": [], "environment": "GitHub read-only API", "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881", "method": "List open Dependabot alerts", "expected": "Read configured alerts", "actual": "HTTP 403: Dependabot alerts disabled for repository", "status": "BLOCKED", "nextAction": "Owner/admin may enable alerts through approved settings; registry audit remains available"
+    },
+    {
+      "testId": "QA-SECRETS-HISTORY", "domain": "secrets review", "decisionCodes": [], "environment": "workspace", "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881", "method": "Tool availability and patch review only", "expected": "Dedicated full-history/client-bundle scan", "actual": "gitleaks/osv-scanner absent; no dedicated complete scan performed. No credentials/private data intentionally added by these patches", "status": "NOT_TESTED", "nextAction": "Use an approved scanner with redacted reports; do not claim no historical secrets"
+    },
+    {
+      "testId": "QA-PRODUCTION-PRIVATE", "domain": "household/clinical/commerce/finance", "decisionCodes": [], "environment": "production", "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881", "method": "No active private production tests without approved safe accounts/data", "expected": "Authorized multi-role browser acceptance without customer/financial impact", "actual": "Unavailable approved production fixtures. Existing hosted isolated API E2E is available; authenticated hosted browser fixtures can be extended independently", "status": "BLOCKED", "nextAction": "Extend hosted isolated browser QA; reserve LIVE_VERIFIED for approved production-account checks"
+    }
+  ]
+}
