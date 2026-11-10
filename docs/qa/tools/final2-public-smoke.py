@@ -100,6 +100,15 @@ async def run(args):
                 record(f"FINAL2-PROD-LEGACY-{locale}", {"route": route, "http": response.status,
                     "expectedText": titles[locale], "visible": visible, "viewport": [width, height],
                     "browser": "Chromium " + browser.version, "evidence": name}, response.status == 200 and visible)
+            if locale == "es":
+                toggle = page.locator(".display-mode-toggle").first
+                await toggle.click()
+                off = await page.locator("html").get_attribute("data-display-mode")
+                await toggle.click()
+                on = await page.locator("html").get_attribute("data-display-mode")
+                retained = await page.evaluate("() => ({theme:document.documentElement.dataset.theme,lang:document.documentElement.lang})")
+                record("FINAL2-PROD-SIMPLE-REVERSIBLE", {"off": off, "on": on, **retained},
+                       off is None and on == "simple" and retained == {"theme": "dark", "lang": "es"})
             await context.close()
         await browser.close()
     # Catch deployment races; an old PASS must not be attributed to a new release.
