@@ -4,7 +4,8 @@ import type Redis from "ioredis";
 import type { Request } from "express";
 import { createWriteStream } from "node:fs";
 import { mkdir, rm } from "node:fs/promises";
-import { dirname, join, normalize } from "node:path";
+import { dirname } from "node:path";
+import { resolveLocalStoragePath } from "./local-storage-path";
 import { REDIS_CLIENT } from "../../common/redis/redis.module";
 import type { AppEnv } from "../../config/env";
 import { DEFAULT_UPLOAD_MAX_BYTES, UPLOAD_CEILING_BYTES } from "./local-storage.driver";
@@ -28,8 +29,10 @@ export class UploadsController {
     if (Number(req.headers["content-length"] ?? 0) > maxBytes) throw new PayloadTooLargeException("This file is larger than the size declared for the upload.");
 
     const baseDir = this.config.get("STORAGE_LOCAL_DIR", { infer: true });
-    const destination = normalize(join(baseDir, key));
-    if (!destination.startsWith(normalize(baseDir))) {
+    let destination: string;
+    try {
+      destination = resolveLocalStoragePath(baseDir, key);
+    } catch {
       throw new NotFoundException("Invalid upload key");
     }
 
