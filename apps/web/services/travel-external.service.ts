@@ -9,14 +9,15 @@ export interface ExternalStay {
  rating:number|null;reviewCount:number|null;instantBooking:boolean|"UNKNOWN";descriptionSummary:string|null;images:string[];status:"ACTIVE"|"STALE";lastCheckedAt:string;cta:"VIEW_SOURCE";outboundPath:string;canonicalAccommodationId:string|null;externalDataDisclaimerRequired:boolean;disclaimerFa:string;
  price?:ExternalStayPrice;fromPrice?:{priceType:"FROM_PRICE";priceIrr:number;currency:string;priceBasis:string;observedAt:string;freshness:string}|null;priceFreshness?:string;availabilityStatus?:string;trustLabels?:string[];alternatives?:ExternalStay[];
 }
-export interface TripExternalStay {state:string;reservationConfirmed:false;addedAt:string;stay:ExternalStay;priceAtAttach:{priceIrr:number|null;observedAt:string;checkIn:string|null;checkOut:string|null;priceType:string;guests:number}|null}
+export type TripExternalStay = {state:string;reservationConfirmed:false;addedAt:string;priceAtAttach:{priceIrr:number|null;observedAt:string;checkIn:string|null;checkOut:string|null;priceType:string;guests:number}|null} & ({available?:true;stay:ExternalStay}|{available:false;stay:{id:string}});
+export type ExternalStayFavorite = {savedAt:string;available:true;stay:ExternalStay}|{savedAt:string;available:false;stay:{id:string}};
 function query(input:object){const params=new URLSearchParams();for(const[key,value]of Object.entries(input)){if(value!==undefined&&value!=="")params.set(key,String(value))}const text=params.toString();return text?`?${text}`:""}
 function context(input:ExternalStayContext){return {checkIn:input.checkIn,checkOut:input.checkOut,guests:input.guests,pets:input.pets}}
 export const travelExternalService={
  search:(input:ExternalStaySearch,signal?:AbortSignal)=>apiFetch<{items:ExternalStay[];total:number;page:number;pageSize:number;context:ExternalStayContext|null}>(`/travel/external/stays${query(input)}`,{signal}),
  detail:(id:string,input:ExternalStayContext,signal?:AbortSignal)=>apiFetch<ExternalStay>(`/travel/external/stays/${id}${query(context(input))}`,{signal}),
  outboundUrl:(id:string,input:ExternalStayContext)=>`${API_BASE_URL}/travel/external/stays/${encodeURIComponent(id)}/out${query(context(input))}`,
- favorites:(signal?:AbortSignal)=>apiFetch<{savedAt:string;available:boolean;stay:ExternalStay}[]>("/me/external-stays/favorites",{signal}),
+ favorites:(signal?:AbortSignal)=>apiFetch<ExternalStayFavorite[]>("/me/external-stays/favorites",{signal}),
  favorite:(id:string)=>apiFetch<{stayId:string;saved:boolean}>(`/me/external-stays/${id}/favorite`,{method:"POST"}),
  unfavorite:(id:string)=>apiFetch<{stayId:string;saved:boolean}>(`/me/external-stays/${id}/favorite`,{method:"DELETE"}),
  tripStays:(petId:string,tripId:string,signal?:AbortSignal)=>apiFetch<TripExternalStay[]>(`/pets/${petId}/trips/${tripId}/external-stays`,{signal}),
