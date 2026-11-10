@@ -1,11 +1,14 @@
 import { ConfigService } from "@nestjs/config";
-import { NotFoundException } from "@nestjs/common";
+import { type INestApplication, NotFoundException } from "@nestjs/common";
+import { Test } from "@nestjs/testing";
+import request from "supertest";
 import type Redis from "ioredis";
 import type { Request, Response } from "express";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, normalize, resolve } from "node:path";
 import type { AppEnv } from "../../config/env";
+import { REDIS_CLIENT } from "../../common/redis/redis.module";
 import { DownloadsController } from "./downloads.controller";
 import { UploadsController } from "./uploads.controller";
 import { LocalStorageDriver } from "./local-storage.driver";
@@ -81,5 +84,63 @@ describe("local storage containment", () => {
     } finally {
       await rm(directory, { recursive: true, force: true });
     }
+  });
+});
+
+describe("local storage token HTTP boundary (isolated Nest app)", () => {
+  let app: INestApplication;
+  let directory: string;
+  let mode: string;
+  const redis = { get: jest.fn(), set: jest.fn(), del: jest.fn() };
+
+  beforeAll(async () => {
+    directory = await mkdtemp(join(tmpdir(), "petlife-storage-http-qa-"));
+    const module = await Test.createTestingModule({
+      controllers: [DownloadsController, UploadsController],
+      providers: [
+        { provide: REDIS_CLIENT, useValue: redis },
+        { provide: ConfigService, useValue: { get: (key: string) => key === "STORAGE_DRIVER" ? mode : directory } },
+      ],
+    }).compile();
+    app = module.createNestApplication();
+    await app.init();
+  });
+  beforeEach(() => {
+    mode = "local";
+    jest.clearAllMocks();
+  });
+  afterAll(async () => {
+    await app?.close();
+    if (directory) await rm(directory, { recursive: true, force: true });
+  });
+
+  it("returns HTTP 404 in S3 mode without looking up any local tokens", async () => {
+    mode = "s3";
+    await request(app.getHttpServer()).get("/downloads/fixture").expect(404);
+    await request(app.getHttpServer()).put("/uploads/fixture").send("fixture").expect(404);
+    expect(redis.get).not.toHaveBeenCalled();
+  });
+
+  it("does not reveal escaped token paths or redirect to them", async () => {
+    const invalid = `../${directory.split("/").pop()}-other/private.jpg`;
+    redis.get.mockResolvedValueOnce(invalid);
+    const download = await request(app.getHttpServer()).get("/downloads/fixture").expect(404);
+    expect(JSON.stringify(download.body)).not.toContain(invalid);
+    expect(download.headers.location).toBeUndefined();
+    redis.get.mockResolvedValueOnce(JSON.stringify({ key: invalid }));
+    const upload = await request(app.getHttpServer()).put("/uploads/fixture").send("fixture").expect(404);
+    expect(JSON.stringify(upload.body)).not.toContain(invalid);
+    expect(redis.del).not.toHaveBeenCalled();
+  });
+
+  it("streams a valid private fixture with no-store and no redirect", async () => {
+    const driver = new LocalStorageDriver(redis as unknown as Redis, { get: () => directory } as unknown as ConfigService<AppEnv, true>);
+    await driver.putObject("private/fixture.jpg", Buffer.from("safe-fixture"));
+    redis.get.mockResolvedValueOnce("private/fixture.jpg").mockResolvedValueOnce(JSON.stringify({ filename: "fixture.jpg", contentType: "image/jpeg" }));
+    const response = await request(app.getHttpServer()).get("/downloads/fixture").expect(200);
+    expect(response.headers["cache-control"]).toBe("no-store");
+    expect(response.headers.location).toBeUndefined();
+    expect(response.headers["content-disposition"]).toBe('attachment; filename="fixture.jpg"');
+    expect(response.body.toString()).toBe("safe-fixture");
   });
 });

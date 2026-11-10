@@ -17,10 +17,11 @@ Shared `resolveLocalStoragePath` uses absolute resolution and a path-component-r
 | QA-STORAGE-01-C | Actual upload/download controller methods with mock tokens/requests | Invalid legacy keys produce 404 before response/stream use | PASS |
 | QA-STORAGE-01-D | `mkdtemp` fixture, real filesystem and read stream | Valid write/copy/read/delete; original fixture preserved | PASS |
 | QA-STORAGE-01-E | Existing memorial/object-URL regressions | Opaque memorial copy and private namespace restrictions retained | PASS |
+| QA-STORAGE-01-H | Isolated Nest HTTP app / supertest, no external DB | Non-local endpoints 404 before Redis, escaped keys 404 without path/redirect, valid fixture streams with no-store | PASS |
 | QA-STORAGE-01-F | Fresh hosted full CI/build/migration/HTTP E2E | Required on final PR head | NOT_TESTED locally |
 | QA-STORAGE-01-G | Production S3/CDN/direct source image/cache behavior | Requires authorized configuration/object-specific access | BLOCKED |
 
-Command from `apps/api`: `jest --runInBand --runTestsByPath src/modules/storage/local-storage-path.spec.ts src/modules/storage/memorial-assets.spec.ts src/modules/storage/object-url.util.spec.ts` — initial **24 tests / 3 suites passed** on 2026-11-10 UTC; final retest adds the S3-mode handler-denial case. Focused ESLint and final test results are recorded in the PR. Local full API TypeScript failed with widespread reused-dependency/config and generated Prisma mismatches; it is not claimed green. Fresh exact-head CI must pass. Browser/viewport not applicable to this backend-only change. New tests include handler-level denial, not a claim of fresh HTTP E2E or complete media-security coverage.
+Command from `apps/api`: `jest --runInBand --runTestsByPath src/modules/storage/local-storage-path.spec.ts src/modules/storage/memorial-assets.spec.ts src/modules/storage/object-url.util.spec.ts` — final **28 tests / 3 suites passed** on 2026-11-10 UTC, including the S3-mode handler-denial case and three isolated HTTP tests. Focused ESLint passes. Local full API TypeScript failed with widespread reused-dependency/config and generated Prisma mismatches; it is not claimed green. Fresh exact-head CI must pass. Browser/viewport not applicable to this backend-only change. The HTTP fixture app exercises these actual controllers but not the full app's database, auth/CSRF middleware or S3 network; no complete media-security claim.
 
 ## Limitations and next action
 
