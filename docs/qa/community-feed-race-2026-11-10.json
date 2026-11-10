@@ -1,0 +1,22 @@
+{
+  "testId": "QA-COMMUNITY-RACE-01",
+  "date": "2026-11-10",
+  "timezone": "UTC",
+  "severity": "P2",
+  "route": "/[locale]/community",
+  "role": "anonymous browser, isolated render fixtures",
+  "decisionCodes": ["CM-02", "M-08", "GC-09", "GC-10"],
+  "environment": "Local Vitest/React, real catalogs, deferred mocked internal service; no production writes",
+  "baselineSha": "1a5b2c3b8d14615b18fdd613e6b0956d6fe9a31b",
+  "fixAndRetestSha": "c5865f9a0d6894e02159a291d0005fdd4c414de3",
+  "method": "CommunityFeedView, CommunityPostDetailView, ChatViews focused suites; ESLint; web TypeScript",
+  "expected": "Newest request alone controls current posts, page/error/loading; stale append cannot mix filter results",
+  "actualBefore": "3 new race regressions FAIL, 13 existing tests PASS",
+  "actualRetest": "3 suites / 42 tests PASS, lint/typecheck PASS; includes four-locale response-order and stale pagination regressions",
+  "status": "PASS",
+  "releaseStatus": "AWAITING_CI_OR_MERGE",
+  "evidence": ["community-feed-race-2026-11-10.md", "../../apps/web/features/community/CommunityFeedView.test.tsx"],
+  "affectedDependencies": ["CommunityFeedView filtering/search/pagination", "PR #217 CSS/wrapper integration must preserve request sequence guard"],
+  "limitations": ["Not a production race verification", "No rendered responsive/theme acceptance", "No backend permission or moderation change", "HTTP requests not aborted"],
+  "nextAction": "Fresh exact-head CI then protected merge/deploy, actual SHA and safe public smoke; isolated browser adversarial timing remains useful follow-up"
+}

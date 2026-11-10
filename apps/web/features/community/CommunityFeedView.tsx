@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "@/features/navigation/localized-link";
 import { useLocale, useTranslations } from "next-intl";
 import { Avatar, Button, EmptyState, HandHeart, Input, Mail, Select, Siren, Skeleton } from "@petlife/ui";
@@ -24,23 +24,29 @@ export function CommunityFeedView() {
   const [appliedQuery, setAppliedQuery] = useState("");
   const [type, setType] = useState<CommunityPostType | "">("");
   const [loading, setLoading] = useState(false);
+  const requestSequence = useRef(0);
 
   async function load(nextPage: number, append = false, filters: { q: string; type: CommunityPostType | "" } = { q: appliedQuery, type }) {
+    const request = ++requestSequence.current;
     setError(null);
     setLoading(true);
     try {
       const data = await communityService.listPosts({ page: nextPage, pageSize: 20, q: filters.q || undefined, type: filters.type || undefined });
+      if (request !== requestSequence.current) return;
       setPage((prev) => (append && prev ? { ...data, items: [...prev.items, ...data.items] } : data));
       setPageNumber(nextPage);
     } catch (err) {
+      if (request !== requestSequence.current) return;
       setError(err);
     } finally {
-      setLoading(false);
+      if (request === requestSequence.current) setLoading(false);
     }
   }
 
   useEffect(() => {
     void load(1);
+    // Invalidate pending results on unmount and Strict Mode effect cleanup.
+    return () => { requestSequence.current += 1; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
