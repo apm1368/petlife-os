@@ -6,7 +6,8 @@ import { REDIS_CLIENT } from "../../common/redis/redis.module";
 import type { AppEnv } from "../../config/env";
 import { createReadStream } from "node:fs";
 import { copyFile, mkdir, rm, stat, writeFile } from "node:fs/promises";
-import { dirname, join, normalize } from "node:path";
+import { dirname } from "node:path";
+import { resolveLocalStoragePath } from "./local-storage-path";
 import type { DownloadOptions, DownloadTarget, StorageDriver, UploadTarget } from "./storage-driver.interface";
 
 const UPLOAD_TOKEN_TTL_SECONDS = 15 * 60;
@@ -29,6 +30,7 @@ export class LocalStorageDriver implements StorageDriver {
   ) {}
 
   async createUploadTarget(key: string, contentType: string, maxBytes?: number): Promise<UploadTarget> {
+    this.resolve(key);
     const token = randomUUID();
     await this.redis.set(`upload-token:${token}`, JSON.stringify({ key, contentType, maxBytes: Math.min(maxBytes ?? DEFAULT_UPLOAD_MAX_BYTES, UPLOAD_CEILING_BYTES) }), "EX", UPLOAD_TOKEN_TTL_SECONDS);
 
@@ -44,6 +46,7 @@ export class LocalStorageDriver implements StorageDriver {
 
   /** Dev fallback for private downloads — a token mapped to a key, resolved by DownloadsController, never a stable public path. */
   async createDownloadTarget(key: string, options?: DownloadOptions): Promise<DownloadTarget> {
+    this.resolve(key);
     const token = randomUUID();
     await this.redis.set(`download-token:${token}`, key, "EX", DOWNLOAD_TOKEN_TTL_SECONDS);
     if (options?.filename || options?.contentType) await this.redis.set(`download-meta:${token}`, JSON.stringify(options), "EX", DOWNLOAD_TOKEN_TTL_SECONDS);
@@ -53,10 +56,7 @@ export class LocalStorageDriver implements StorageDriver {
   }
 
   private resolve(key: string): string {
-    const baseDir = normalize(this.config.get("STORAGE_LOCAL_DIR", { infer: true }));
-    const target = normalize(join(baseDir, key));
-    if (!target.startsWith(baseDir)) throw new Error("Invalid storage key");
-    return target;
+    return resolveLocalStoragePath(this.config.get("STORAGE_LOCAL_DIR", { infer: true }), key);
   }
 
   async putObject(key: string, body: Buffer): Promise<void> {

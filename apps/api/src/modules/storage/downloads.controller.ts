@@ -4,7 +4,7 @@ import type Redis from "ioredis";
 import type { Response } from "express";
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
-import { join, normalize } from "node:path";
+import { resolveLocalStoragePath } from "./local-storage-path";
 import { REDIS_CLIENT } from "../../common/redis/redis.module";
 import type { AppEnv } from "../../config/env";
 
@@ -24,12 +24,17 @@ export class DownloadsController {
 
   @Get(":token")
   async download(@Param("token") token: string, @Res() res: Response): Promise<void> {
+    if (this.config.get("STORAGE_DRIVER", { infer: true }) !== "local") throw new NotFoundException();
     const key = await this.redis.get(`download-token:${token}`);
     if (!key) throw new NotFoundException("Download link expired or invalid");
 
     const baseDir = this.config.get("STORAGE_LOCAL_DIR", { infer: true });
-    const source = normalize(join(baseDir, key));
-    if (!source.startsWith(normalize(baseDir))) throw new NotFoundException("Invalid download key");
+    let source: string;
+    try {
+      source = resolveLocalStoragePath(baseDir, key);
+    } catch {
+      throw new NotFoundException("Invalid download key");
+    }
 
     try {
       await stat(source);
