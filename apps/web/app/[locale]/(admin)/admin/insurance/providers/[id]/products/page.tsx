@@ -1,2 +1,5 @@
 import {AdminInsuranceProducts} from "@/features/admin-insurance/AdminInsuranceProducts";
-export default function InsuranceProductsPage({params}:{params:{id:string}}){return <AdminInsuranceProducts providerId={params.id}/>}
+export default async function InsuranceProductsPage({params}:{params:Promise<{id:string}>}) {
+  const { id } = await params;
+  return <AdminInsuranceProducts providerId={id}/>;
+}
