@@ -2,6 +2,14 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
+## Updated final batch 2 status — 2026-11-10 04:01 UTC
+
+- Main `999be3a9b47b39dae0baeb3842a7cb3f6162d6a2`; production `b9b43e73572f353aa53ba6f081682282e2b023c3` / `github-42750546542-1`. #233 and #234 are deployed, readiness healthy, no pending migrations. Eight public fa/en/de/es services/travel browser retests have zero hydration/page errors and no document overflow, with stored themes and simple mode retained. The bounded saved-theme defect is LIVE_VERIFIED; whole page-family/private flow acceptance remains PARTIAL.
+- #231 Next/proxy-addr candidate passed complete CI/build `42750627510` and merged normally at `999be3a9`. Its queued release `42752187146` was cancelled with no jobs started so it can ship in the next booking bundle; no in-flight server deployment was cancelled. It remains MERGED_NOT_DEPLOYED. Candidate audit findings beyond the patched dependencies remain open.
+- #235 scoped legacy service-booking recovery is open, synchronized with current main using GitHub's normal update-branch. Head `00acfafba7ee798588e72bb3b29484e78c22a0fd`, fresh Next 15 CI `42752198178` pending. Fix distinguishes 404 from transient failures, adds localized Retry/loading/unavailable and prevents stale unmounted redirects. Eighteen focused tests passed before base synchronization; only final-head hosted CI can establish the new runtime/build result.
+- Next: monitor #235, merge only after its exact-head checks pass and GitHub permits; deploy the tested merged revision, then verify production SHA, public guards, four-locale saved-theme and legacy booking failure state. A 500 screen observed on a negative-control legacy route during server build later returned 200; record deployment-window risk and retest, do not claim a permanent defect/root cause without evidence. See [full QA and before/after screenshots](../qa/final-2-booking-jajiga-2026-11-10.md).
+- External source permission, authorized private QA account/fixtures, local capacity and original memorial storage/CDN verification blockers remain as recorded below. No real booking/charge/import or user media mutation.
+
 ## Final services/booking/Jajiga checkpoint — 2026-11-10 03:40 UTC
 
 - Main is `b9b43e73572f353aa53ba6f081682282e2b023c3` after normal #233/#234 squashes. Production is independently verified at `156d5745540d625f08d1ce0196dfd55a5fa43966` / `github-42748315022-1`; readiness healthy, pre-migration backup recorded, no pending migrations, deployment smoke passed. #234 main CI/deploy `42750546542` is still pending; do not apply older green checks to it.
