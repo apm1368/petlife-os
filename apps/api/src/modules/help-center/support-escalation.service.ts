@@ -43,10 +43,15 @@ export class SupportEscalationService {
 
     // One live hand-off per ticket: a second tap returns the first reference instead of creating a duplicate,
     // so a double-submit (or a retry after a dropped response) is safe and the member keeps one number to quote.
-    const existing = await this.prisma.supportEscalation.findFirst({ where: { caseId, requesterUserId: userId }, orderBy: { createdAt: "desc" } });
-    if (existing) return this.toDto(existing, supportCase.caseNumber);
-
     const created = await this.prisma.$transaction(async (tx) => {
+      // Lock the ticket, not an escalation row that may not exist on the first request.
+      await tx.$queryRaw`SELECT id FROM support_cases WHERE id = ${caseId}::uuid FOR UPDATE`;
+      const current = await tx.supportCase.findUniqueOrThrow({ where: { id: caseId } });
+      if (current.status === SupportCaseStatus.CLOSED || current.status === SupportCaseStatus.RESOLVED) {
+        throw new ValidationApiException({ field: "caseId", reason: "CASE_NOT_OPEN", status: current.status });
+      }
+      const existing = await tx.supportEscalation.findFirst({ where: { caseId, requesterUserId: userId }, orderBy: { createdAt: "desc" } });
+      if (existing) return existing;
       const rows = await tx.$queryRaw<{ nextval: bigint }[]>`SELECT nextval('support_escalation_number_seq') AS nextval`;
       const referenceNumber = `ESC-${rows[0]!.nextval.toString().padStart(6, "0")}`;
       return tx.supportEscalation.create({ data: { referenceNumber, caseId, requesterUserId: userId, reason: input.reason, confirmedAt: new Date() } });

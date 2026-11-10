@@ -1,4 +1,9 @@
 {
+  "theme": {
+    "system": "System",
+    "light": "Hell",
+    "dark": "Dunkel"
+  },
   "adminServices": {
     "unknownValue": "Wert nicht verfügbar",
     "common": {
