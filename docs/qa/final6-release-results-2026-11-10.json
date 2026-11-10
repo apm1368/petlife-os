@@ -1,5 +1,7 @@
 {
   "recordVersion": 1,
+  "laterCheckpoint": "final6-followup-2026-11-10.json",
+  "checkpointPolicy": "Results below retain their original SHA/time; the linked follow-up records fresh #241 production verification and bounded secrets scans, rather than relabelling old results.",
   "date": "2026-11-10",
   "timezone": "UTC",
   "repository": "apm1368/petlife-os",

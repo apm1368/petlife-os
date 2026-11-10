@@ -1,0 +1,462 @@
+{
+  "scanner": {
+    "name": "gitleaks",
+    "version": "8.30.1",
+    "officialRelease": "https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1",
+    "archiveSha256": "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
+  },
+  "date": "2026-11-10",
+  "timezone": "UTC",
+  "history": {
+    "head": "46cbb16f660ba93c3b9f3e6081218d4bb878cc54",
+    "command": "gitleaks git --redact --ignore-gitleaks-allow --timeout 180 --log-opts=\"--all --full-history -m\"",
+    "scope": "All reachable local refs and merge-parent diffs; not unfetched GitHub refs, dangling objects or ignored/untracked working files",
+    "rawExitCode": 1,
+    "rawMatches": 32,
+    "counts": {
+      "Language names in localization progress prose": 11,
+      "Booking UI-state terminology in workflow prose, not a credential assignment": 4,
+      "Insurance lifecycle terminology in a feature-gap table, not a credential assignment": 2,
+      "Git revision identifier, verified commit object": 15
+    },
+    "confirmedUsableCredentials": 0,
+    "assessment": "All reported matches are documentation prose/revision references after context review; raw scan remains positive, not a clean-zero claim",
+    "findings": [
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/engineering/release-progress-2026-11-07.md",
+        "startLine": 37,
+        "commit": "8ec16c24cd012387b97368513ef944a7f1c3e47f",
+        "fingerprint": "8ec16c24cd012387b97368513ef944a7f1c3e47f:docs/engineering/release-progress-2026-11-07.md:generic-api-key:37",
+        "classification": "Language names in localization progress prose"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/engineering/release-progress-2026-11-07.md",
+        "startLine": 37,
+        "commit": "e1b20f58a1441a5d6200bf7ad463c5545788beef",
+        "fingerprint": "e1b20f58a1441a5d6200bf7ad463c5545788beef:docs/engineering/release-progress-2026-11-07.md:generic-api-key:37",
+        "classification": "Language names in localization progress prose"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/engineering/release-progress-2026-11-07.md",
+        "startLine": 37,
+        "commit": "562b6a51998714bcfae075262d647347a5aa3498",
+        "fingerprint": "562b6a51998714bcfae075262d647347a5aa3498:docs/engineering/release-progress-2026-11-07.md:generic-api-key:37",
+        "classification": "Language names in localization progress prose"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/product/localization-rollout.md",
+        "startLine": 482,
+        "commit": "311b60dea9c0f91c778e67bc3366ae4c1bdd99cf",
+        "fingerprint": "311b60dea9c0f91c778e67bc3366ae4c1bdd99cf:docs/product/localization-rollout.md:generic-api-key:482",
+        "classification": "Booking UI-state terminology in workflow prose, not a credential assignment"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/product/localization-rollout.md",
+        "startLine": 468,
+        "commit": "c33e16ba5e0a2e0616b2fb90189aad030d3c8eba",
+        "fingerprint": "c33e16ba5e0a2e0616b2fb90189aad030d3c8eba:docs/product/localization-rollout.md:generic-api-key:468",
+        "classification": "Booking UI-state terminology in workflow prose, not a credential assignment"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/product/localization-rollout.md",
+        "startLine": 462,
+        "commit": "9ac9daef0a9d0a27c8d1541fe3d7fe255aec6144",
+        "fingerprint": "9ac9daef0a9d0a27c8d1541fe3d7fe255aec6144:docs/product/localization-rollout.md:generic-api-key:462",
+        "classification": "Booking UI-state terminology in workflow prose, not a credential assignment"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/engineering/release-progress-2026-11-07.md",
+        "startLine": 27,
+        "commit": "993730803d95f2106443cbe83b1a247dc1c79d44",
+        "fingerprint": "993730803d95f2106443cbe83b1a247dc1c79d44:docs/engineering/release-progress-2026-11-07.md:generic-api-key:27",
+        "classification": "Language names in localization progress prose"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/engineering/release-progress-2026-11-07.md",
+        "startLine": 27,
+        "commit": "dc22b260ef02f7a8e4d1585ac7b11deb2608794b",
+        "fingerprint": "dc22b260ef02f7a8e4d1585ac7b11deb2608794b:docs/engineering/release-progress-2026-11-07.md:generic-api-key:27",
+        "classification": "Language names in localization progress prose"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/engineering/release-progress-2026-11-07.md",
+        "startLine": 27,
+        "commit": "4d7f4d136ad8a0ba7f26c0da3bfbf3be47bda6fb",
+        "fingerprint": "4d7f4d136ad8a0ba7f26c0da3bfbf3be47bda6fb:docs/engineering/release-progress-2026-11-07.md:generic-api-key:27",
+        "classification": "Language names in localization progress prose"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/engineering/release-progress-2026-11-07.md",
+        "startLine": 27,
+        "commit": "3a36a4dadb03797f60bfbf59f44fc755358d56d0",
+        "fingerprint": "3a36a4dadb03797f60bfbf59f44fc755358d56d0:docs/engineering/release-progress-2026-11-07.md:generic-api-key:27",
+        "classification": "Language names in localization progress prose"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/engineering/release-progress-2026-11-07.md",
+        "startLine": 27,
+        "commit": "0253b01be1069108d54640ba2bb1558bf1901f0d",
+        "fingerprint": "0253b01be1069108d54640ba2bb1558bf1901f0d:docs/engineering/release-progress-2026-11-07.md:generic-api-key:27",
+        "classification": "Language names in localization progress prose"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/engineering/release-progress-2026-11-07.md",
+        "startLine": 27,
+        "commit": "470908a57cda772f0805030400f9d6e571919781",
+        "fingerprint": "470908a57cda772f0805030400f9d6e571919781:docs/engineering/release-progress-2026-11-07.md:generic-api-key:27",
+        "classification": "Language names in localization progress prose"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/engineering/release-progress-2026-11-07.md",
+        "startLine": 27,
+        "commit": "f2d9eb750cf522abc18b267c84b41cae8376b9ca",
+        "fingerprint": "f2d9eb750cf522abc18b267c84b41cae8376b9ca:docs/engineering/release-progress-2026-11-07.md:generic-api-key:27",
+        "classification": "Language names in localization progress prose"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/product/localization-rollout.md",
+        "startLine": 27,
+        "commit": "a89201f149e2c4b11994e5f2436948ffd325bb14",
+        "fingerprint": "a89201f149e2c4b11994e5f2436948ffd325bb14:docs/product/localization-rollout.md:generic-api-key:27",
+        "classification": "Booking UI-state terminology in workflow prose, not a credential assignment"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/engineering/release-progress-2026-11-07.md",
+        "startLine": 27,
+        "commit": "58a8707ccf9c045ce549a88fe4cd99b0936ccb69",
+        "fingerprint": "58a8707ccf9c045ce549a88fe4cd99b0936ccb69:docs/engineering/release-progress-2026-11-07.md:generic-api-key:27",
+        "classification": "Language names in localization progress prose"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/product/implementation-audit.fa.md",
+        "startLine": 241,
+        "commit": "4d70b63e2a04eb7e5ebde08aac4c8964b9a702d3",
+        "fingerprint": "4d70b63e2a04eb7e5ebde08aac4c8964b9a702d3:docs/product/implementation-audit.fa.md:generic-api-key:241",
+        "classification": "Insurance lifecycle terminology in a feature-gap table, not a credential assignment"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/product/implementation-audit.fa.md",
+        "startLine": 240,
+        "commit": "e53c781b0f78c1fcb007073836806a06d46e1acc",
+        "fingerprint": "e53c781b0f78c1fcb007073836806a06d46e1acc:docs/product/implementation-audit.fa.md:generic-api-key:240",
+        "classification": "Insurance lifecycle terminology in a feature-gap table, not a credential assignment"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "apps/web/design-review/approved-rollout/VALIDATION.md",
+        "startLine": 113,
+        "commit": "d0dd9a1600a104ce242b6a5b22678c62fee1fc42",
+        "fingerprint": "d0dd9a1600a104ce242b6a5b22678c62fee1fc42:apps/web/design-review/approved-rollout/VALIDATION.md:generic-api-key:113",
+        "classification": "Git revision identifier, verified commit object"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/ops/codex-access.fa.md",
+        "startLine": 87,
+        "commit": "d0dd9a1600a104ce242b6a5b22678c62fee1fc42",
+        "fingerprint": "d0dd9a1600a104ce242b6a5b22678c62fee1fc42:docs/ops/codex-access.fa.md:generic-api-key:87",
+        "classification": "Git revision identifier, verified commit object"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/ops/codex-access.fa.md",
+        "startLine": 88,
+        "commit": "d0dd9a1600a104ce242b6a5b22678c62fee1fc42",
+        "fingerprint": "d0dd9a1600a104ce242b6a5b22678c62fee1fc42:docs/ops/codex-access.fa.md:generic-api-key:88",
+        "classification": "Git revision identifier, verified commit object"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "apps/web/design-review/approved-rollout/VALIDATION.md",
+        "startLine": 102,
+        "commit": "6b766c256088e49bba73a3021bc3383c1a5ab722",
+        "fingerprint": "6b766c256088e49bba73a3021bc3383c1a5ab722:apps/web/design-review/approved-rollout/VALIDATION.md:generic-api-key:102",
+        "classification": "Git revision identifier, verified commit object"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/ops/codex-access.fa.md",
+        "startLine": 87,
+        "commit": "6b766c256088e49bba73a3021bc3383c1a5ab722",
+        "fingerprint": "6b766c256088e49bba73a3021bc3383c1a5ab722:docs/ops/codex-access.fa.md:generic-api-key:87",
+        "classification": "Git revision identifier, verified commit object"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/ops/codex-access.fa.md",
+        "startLine": 88,
+        "commit": "6b766c256088e49bba73a3021bc3383c1a5ab722",
+        "fingerprint": "6b766c256088e49bba73a3021bc3383c1a5ab722:docs/ops/codex-access.fa.md:generic-api-key:88",
+        "classification": "Git revision identifier, verified commit object"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "apps/web/design-review/approved-rollout/VALIDATION.md",
+        "startLine": 102,
+        "commit": "6bb06766af5f0593f5a6dfbffb18c082b4a5d178",
+        "fingerprint": "6bb06766af5f0593f5a6dfbffb18c082b4a5d178:apps/web/design-review/approved-rollout/VALIDATION.md:generic-api-key:102",
+        "classification": "Git revision identifier, verified commit object"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/ops/codex-access.fa.md",
+        "startLine": 87,
+        "commit": "6bb06766af5f0593f5a6dfbffb18c082b4a5d178",
+        "fingerprint": "6bb06766af5f0593f5a6dfbffb18c082b4a5d178:docs/ops/codex-access.fa.md:generic-api-key:87",
+        "classification": "Git revision identifier, verified commit object"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/ops/codex-access.fa.md",
+        "startLine": 88,
+        "commit": "6bb06766af5f0593f5a6dfbffb18c082b4a5d178",
+        "fingerprint": "6bb06766af5f0593f5a6dfbffb18c082b4a5d178:docs/ops/codex-access.fa.md:generic-api-key:88",
+        "classification": "Git revision identifier, verified commit object"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "apps/web/design-review/approved-rollout/VALIDATION.md",
+        "startLine": 102,
+        "commit": "bf902ba3b15a6f70c42d6ea05b305f975fbbb1d8",
+        "fingerprint": "bf902ba3b15a6f70c42d6ea05b305f975fbbb1d8:apps/web/design-review/approved-rollout/VALIDATION.md:generic-api-key:102",
+        "classification": "Git revision identifier, verified commit object"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/ops/codex-access.fa.md",
+        "startLine": 87,
+        "commit": "bf902ba3b15a6f70c42d6ea05b305f975fbbb1d8",
+        "fingerprint": "bf902ba3b15a6f70c42d6ea05b305f975fbbb1d8:docs/ops/codex-access.fa.md:generic-api-key:87",
+        "classification": "Git revision identifier, verified commit object"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/ops/codex-access.fa.md",
+        "startLine": 88,
+        "commit": "bf902ba3b15a6f70c42d6ea05b305f975fbbb1d8",
+        "fingerprint": "bf902ba3b15a6f70c42d6ea05b305f975fbbb1d8:docs/ops/codex-access.fa.md:generic-api-key:88",
+        "classification": "Git revision identifier, verified commit object"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "apps/web/design-review/approved-rollout/VALIDATION.md",
+        "startLine": 102,
+        "commit": "84044d0d61693129d1c1d2e6c1b5392f7809c054",
+        "fingerprint": "84044d0d61693129d1c1d2e6c1b5392f7809c054:apps/web/design-review/approved-rollout/VALIDATION.md:generic-api-key:102",
+        "classification": "Git revision identifier, verified commit object"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/ops/codex-access.fa.md",
+        "startLine": 87,
+        "commit": "84044d0d61693129d1c1d2e6c1b5392f7809c054",
+        "fingerprint": "84044d0d61693129d1c1d2e6c1b5392f7809c054:docs/ops/codex-access.fa.md:generic-api-key:87",
+        "classification": "Git revision identifier, verified commit object"
+      },
+      {
+        "ruleId": "generic-api-key",
+        "file": "docs/ops/codex-access.fa.md",
+        "startLine": 88,
+        "commit": "84044d0d61693129d1c1d2e6c1b5392f7809c054",
+        "fingerprint": "84044d0d61693129d1c1d2e6c1b5392f7809c054:docs/ops/codex-access.fa.md:generic-api-key:88",
+        "classification": "Git revision identifier, verified commit object"
+      }
+    ]
+  },
+  "publicBundles": {
+    "sha": "1f274d7aa9ebf697b950ecb5a1f6357df5e1c881",
+    "scope": "Only owned assets referenced by the sampled public help/legal/status HTML",
+    "files": 27,
+    "bytes": 1129537,
+    "rawExitCode": 0,
+    "matches": 0,
+    "manifest": [
+      {
+        "file": "asset-00.js",
+        "url": "https://opetlife.ir/_next/static/chunks/dc27b8ef-acbb56b63ecbc0c5.js",
+        "bytes": 173025,
+        "sha256": "613238f8bf3714436895de41e8dcfef28c47300eb628900c3229ef53dd33c596"
+      },
+      {
+        "file": "asset-01.js",
+        "url": "https://opetlife.ir/_next/static/chunks/4158-26b6887b482c8bd7.js",
+        "bytes": 174241,
+        "sha256": "fb3ca1aa6a580e738bd71067aa9888bb568ee90bbcb7a2bc1a03724a88ea4387"
+      },
+      {
+        "file": "asset-02.js",
+        "url": "https://opetlife.ir/_next/static/chunks/main-app-dca73becdf808732.js",
+        "bytes": 573,
+        "sha256": "c836dbb6fd3821a7127c6fb5d18e7082cce2420ad1bcd8136a4cf90896ef09e7"
+      },
+      {
+        "file": "asset-03.js",
+        "url": "https://opetlife.ir/_next/static/chunks/4486-cd10121617797e50.js",
+        "bytes": 189770,
+        "sha256": "3249bda0c15617a2a0d98e72481986b02b025211bf1970f7025ebc23bb1a0598"
+      },
+      {
+        "file": "asset-04.js",
+        "url": "https://opetlife.ir/_next/static/chunks/7323-eeb73dc98aff91fa.js",
+        "bytes": 54185,
+        "sha256": "bbf84ff59eb52f7698bdaba7e8f12802c054ea5b73a05fa50c0c8f4b227cb690"
+      },
+      {
+        "file": "asset-05.js",
+        "url": "https://opetlife.ir/_next/static/chunks/4538-9205ed09948b68d1.js",
+        "bytes": 24203,
+        "sha256": "06b9e29bb9ab1c55fe7f20a22a990aa2c5e9f2cf1e0ff2494551aeff350d5769"
+      },
+      {
+        "file": "asset-06.js",
+        "url": "https://opetlife.ir/_next/static/chunks/8212-bc0171712adb0b2d.js",
+        "bytes": 8563,
+        "sha256": "83f9987f7c2d0ccd25459a0868bdd839063b15d085f6dee87c75d4ec59354df6"
+      },
+      {
+        "file": "asset-07.js",
+        "url": "https://opetlife.ir/_next/static/chunks/9221-110e6b8e24a953a7.js",
+        "bytes": 13667,
+        "sha256": "5b11663539e0c1e3d8bde9401559ae83ddeb05c0f6f2a0fc196db024fd9cf8b3"
+      },
+      {
+        "file": "asset-08.js",
+        "url": "https://opetlife.ir/_next/static/chunks/9704-5c664cfacc0ec519.js",
+        "bytes": 44760,
+        "sha256": "a47f6587c958563d42bf448daecb9ea5f01fc706d52d7e5660b582ad44c9505f"
+      },
+      {
+        "file": "asset-09.js",
+        "url": "https://opetlife.ir/_next/static/chunks/4436-bde24a558008e259.js",
+        "bytes": 8192,
+        "sha256": "da4a7c80589c9213ab8c22f49b4b559311adafb1fbdb0e16dcd4ae8afb0a3209"
+      },
+      {
+        "file": "asset-10.js",
+        "url": "https://opetlife.ir/_next/static/chunks/9158-5923daeaae1522ba.js",
+        "bytes": 46800,
+        "sha256": "b94bc8c4fada129b45bfe57706007b7c5134f72b155394e096f5e3edaa37f5aa"
+      },
+      {
+        "file": "asset-11.js",
+        "url": "https://opetlife.ir/_next/static/chunks/app/%5Blocale%5D/(public)/layout-2b5f5a19fd4886d8.js",
+        "bytes": 25741,
+        "sha256": "3d2811a5f28d8353f2b6a5ee36960f127d7558a4e7431e6b30f98abb9fdd1817"
+      },
+      {
+        "file": "asset-12.js",
+        "url": "https://opetlife.ir/_next/static/chunks/3173-365a56d68d01fe55.js",
+        "bytes": 18401,
+        "sha256": "5328858629b0bdc9574dea9ad2fee0e86bab2f6e864b64af71326f128477fed8"
+      },
+      {
+        "file": "asset-13.js",
+        "url": "https://opetlife.ir/_next/static/chunks/app/%5Blocale%5D/(public)/help/page-29702570e39fff5c.js",
+        "bytes": 216,
+        "sha256": "4a111b22fd15fca3f7be9415a958b623b2abbf344e6f4b2338e4b2e04ffd0ae2"
+      },
+      {
+        "file": "asset-14.js",
+        "url": "https://opetlife.ir/_next/static/chunks/8391-1d83716fd16b7aef.js",
+        "bytes": 9913,
+        "sha256": "5b1d9cddb88252456404fa1596769c84ae170d33d0d87a6eefb46043e83b39cf"
+      },
+      {
+        "file": "asset-15.js",
+        "url": "https://opetlife.ir/_next/static/chunks/app/%5Blocale%5D/layout-fe0355123db1e671.js",
+        "bytes": 16252,
+        "sha256": "ffef9623cf2c21e6cadc11d0aa7386691b1af7db2afa0b13f876275983193bd8"
+      },
+      {
+        "file": "asset-16.js",
+        "url": "https://opetlife.ir/_next/static/chunks/app/%5Blocale%5D/(auth)/layout-85bb0e512108a7fe.js",
+        "bytes": 900,
+        "sha256": "5f6da16b227efde53a2cd5d4f7be8decbfc1a401f9eceea5ce8579660040f201"
+      },
+      {
+        "file": "asset-17.js",
+        "url": "https://opetlife.ir/_next/static/chunks/app/%5Blocale%5D/not-found-840337811d22fd46.js",
+        "bytes": 7123,
+        "sha256": "a3d22787a93b4191b0807afbcc7872d85ba66b68b195718121313f94695c1321"
+      },
+      {
+        "file": "asset-18.js",
+        "url": "https://opetlife.ir/_next/static/chunks/polyfills-42372ed130431b0a.js",
+        "bytes": 112594,
+        "sha256": "0973c1d64c88adc8e3c950410cb58b288f72118d5965b78049438deb8f2f9683"
+      },
+      {
+        "file": "asset-19.js",
+        "url": "https://opetlife.ir/_next/static/chunks/webpack-d0991dda08ee4dba.js",
+        "bytes": 3506,
+        "sha256": "88a7309c1d50e5f68be566559e3e925e5cc2b317b96c1304385667082cb1a78d"
+      },
+      {
+        "file": "asset-20.css",
+        "url": "https://opetlife.ir/_next/static/css/32048205d13eb7dd.css",
+        "bytes": 22128,
+        "sha256": "ec68e92df57343e144695e998a789a713c9aed55c4b2e2ab5a693c35880a1d3a"
+      },
+      {
+        "file": "asset-21.css",
+        "url": "https://opetlife.ir/_next/static/css/bef8430577880e02.css",
+        "bytes": 155804,
+        "sha256": "e6a5791961566f36ed464d03109fb26e45c86e597fc799d1b314dab31915001e"
+      },
+      {
+        "file": "asset-22.css",
+        "url": "https://opetlife.ir/_next/static/css/583fbdfe8013b83e.css",
+        "bytes": 4087,
+        "sha256": "39fbb3aaf879562a1b9a080a3bd1c9f735a0609ac589fc572bb467be216bf09b"
+      },
+      {
+        "file": "asset-23.css",
+        "url": "https://opetlife.ir/_next/static/css/44e1bb8fa8454e44.css",
+        "bytes": 2120,
+        "sha256": "ee90ba72aa51bab9fa638307643c5afaaee38bf741cf89b750b21caa4cd87f2b"
+      },
+      {
+        "file": "asset-24.css",
+        "url": "https://opetlife.ir/_next/static/css/5d59f755a6d31692.css",
+        "bytes": 12341,
+        "sha256": "97cd6c6629a2d0b6709ea5bab0cd577bebff310cd1a45c119c6714f90da0b9d2"
+      },
+      {
+        "file": "asset-25.js",
+        "url": "https://opetlife.ir/_next/static/chunks/app/%5Blocale%5D/(public)/legal/page-c18be0e40ab81c34.js",
+        "bytes": 216,
+        "sha256": "6aad0a1b147250c4e80ed28b05fcdfec8623870b84840ce6584329276d87e8e0"
+      },
+      {
+        "file": "asset-26.js",
+        "url": "https://opetlife.ir/_next/static/chunks/app/%5Blocale%5D/(public)/status/page-9083234704bbe892.js",
+        "bytes": 216,
+        "sha256": "0103f27f9367222784f7d11993361bebc1909db58d69b40f47f4e541195b355b"
+      }
+    ]
+  },
+  "limitations": [
+    "Default pattern scanning is not proof of no secrets",
+    "Private/lazy client bundles outside the sampled references are not scanned",
+    "No candidate credential used or validated against any provider",
+    "No scanner allowlist/baseline was added and no history was rewritten",
+    "Existing server/bucket/CDN/private production configuration remains unverified"
+  ]
+}

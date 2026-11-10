@@ -2,6 +2,8 @@
 
 ## Public Help / legal / status remediation — 2026-11-10
 
+Follow-up at production `1a5b2c3b8d14615b18fdd613e6b0956d6fe9a31b`: 36 refreshed Help/legal/status browser cases PASS, each with one main landmark. Five real-control locale/display cases PASS: same FAQ path/query through fa→de→es→en→fa, dark/simple persistence after refresh, simple-mode reversal independent of language/theme. Browser-local preference only; not authenticated account persistence. [Exact-SHA evidence](../qa/evidence/final-6-2026-11-10/live-1a5b2c3/locale/results.json). Remaining page families and unpublished/published/failure matrices are not thereby complete.
+
 Released verification: #240 is merged/deployed at `1f274d7aa9ebf697b950ecb5a1f6357df5e1c881`. Actual owned-asset/current HTML checks pass on 12 fa/en/de/es routes; 36 browser state/layout scenarios and four strengthened real search GET retests pass. Published originals were not created or translated to fill fixtures. This supersedes NOT LIVE below only for observed public states; full published/error/accessibility/authenticated acceptance and the rest of the product remain PARTIAL. Evidence: [final QA checkpoint](../qa/final-6-2026-11-10.md).
 
 `PublicHelpViews` had only fa-versus-English body copy, reproducing English headings on `/de/legal`. A separate slice adds the entire `publicHelp` interface namespace to all four actual catalogs (direct key-parity checks, not merged-fallback tests): help search/topics/FAQ/article states, feedback, ten legal-page labels and publication states, system/incident states, loading/errors/retry, dates and counts. Local 41 tests pass, including stale/duplicate feedback. See [route/state QA record](../qa/public-help-localization-2026-11-10.md).
