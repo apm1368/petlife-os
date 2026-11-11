@@ -8,6 +8,10 @@ import { parkCopy } from "@/features/landing/park-copy";
 import { parkAuthCopy } from "@/features/auth/park-auth-copy";
 import "@/features/auth/auth.css";
 import "@/features/auth/park-auth.css";
+import type { Metadata } from "next";
+
+/** Authentication and recovery screens must not be indexed. */
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default async function AuthLayout({ children, params }: { children: React.ReactNode; params: Promise<{ locale: string }> }) {
   const { locale } = await params;

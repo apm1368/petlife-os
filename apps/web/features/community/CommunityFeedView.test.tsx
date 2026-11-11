@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import type { CommunityPostDto, PaginatedDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { communityService } from "@/services/community.service";
@@ -37,9 +37,76 @@ function page(items: CommunityPostDto[], total = items.length): PaginatedDto<Com
   return { items, total, page: 1, pageSize: 20 };
 }
 
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason: unknown) => void;
+  const promise = new Promise<T>((yes, no) => { resolve = yes; reject = no; });
+  return { promise, resolve, reject };
+}
+
 describe("CommunityFeedView", () => {
   beforeEach(() => {
     vi.mocked(communityService.listPosts).mockReset();
+  });
+
+  it.each(["fa", "en", "de", "es"] as const)("keeps the newest selected topic when an older response arrives last in %s", async (locale) => {
+    const older = deferred<PaginatedDto<CommunityPostDto>>();
+    const newer = deferred<PaginatedDto<CommunityPostDto>>();
+    vi.mocked(communityService.listPosts).mockResolvedValueOnce(page([post()]))
+      .mockReturnValueOnce(older.promise).mockReturnValueOnce(newer.promise);
+    renderWithIntl(<CommunityFeedView />, locale);
+    await screen.findByText("A good day at the park");
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "QUESTION" } });
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "GENERAL" } });
+    await act(async () => newer.resolve(page([post({ id: "latest", title: "Latest topic result" })])));
+    await act(async () => older.resolve(page([post({ id: "old", title: "Obsolete question result" })])));
+    expect(screen.getByText("Latest topic result")).toBeTruthy();
+    expect(screen.queryByText("Obsolete question result")).toBeNull();
+    expect(communityService.listPosts).toHaveBeenLastCalledWith(expect.objectContaining({ type: "GENERAL", page: 1 }));
+  });
+
+  it("does not append an old page into a newly selected topic", async () => {
+    const older = deferred<PaginatedDto<CommunityPostDto>>();
+    vi.mocked(communityService.listPosts).mockResolvedValueOnce(page([post()], 2))
+      .mockReturnValueOnce(older.promise).mockResolvedValueOnce(page([post({ id: "current", title: "Selected topic" })]));
+    renderWithIntl(<CommunityFeedView />);
+    await screen.findByText("A good day at the park");
+    fireEvent.click(screen.getByRole("button", { name: "Load more" }));
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "QUESTION" } });
+    await screen.findByText("Selected topic");
+    await act(async () => older.resolve({ ...page([post({ id: "old-page", title: "Old next page" })]), page: 2 }));
+    expect(screen.getByText("Selected topic")).toBeTruthy();
+    expect(screen.queryByText("Old next page")).toBeNull();
+  });
+
+  it("does not replace a current result with an obsolete request error", async () => {
+    const older = deferred<PaginatedDto<CommunityPostDto>>();
+    vi.mocked(communityService.listPosts).mockResolvedValueOnce(page([post()]))
+      .mockReturnValueOnce(older.promise).mockResolvedValueOnce(page([post({ title: "Current result" })]));
+    renderWithIntl(<CommunityFeedView />);
+    await screen.findByText("A good day at the park");
+    fireEvent.change(screen.getByLabelText("Post type"), { target: { value: "QUESTION" } });
+    fireEvent.change(screen.getByLabelText("Post type"), { target: { value: "GENERAL" } });
+    await screen.findByText("Current result");
+    await act(async () => older.reject(new Error("obsolete failure")));
+    expect(screen.getByText("Current result")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Try again" })).toBeNull();
+  });
+
+  it("keeps loading until the newest request finishes, not an older one", async () => {
+    const older = deferred<PaginatedDto<CommunityPostDto>>();
+    const newer = deferred<PaginatedDto<CommunityPostDto>>();
+    vi.mocked(communityService.listPosts).mockResolvedValueOnce(page([post()]))
+      .mockReturnValueOnce(older.promise).mockReturnValueOnce(newer.promise);
+    renderWithIntl(<CommunityFeedView />);
+    await screen.findByText("A good day at the park");
+    fireEvent.change(screen.getByLabelText("Post type"), { target: { value: "QUESTION" } });
+    fireEvent.change(screen.getByLabelText("Post type"), { target: { value: "GENERAL" } });
+    await act(async () => older.resolve(page([])));
+    expect(screen.getByRole("status").textContent).toBe("Loading posts…");
+    await act(async () => newer.resolve(page([post({ title: "Done" })])));
+    expect(screen.queryByRole("status")).toBeNull();
+    expect(screen.getByText("Done")).toBeTruthy();
   });
 
   it("shows posts with title, body, comment and reaction counts", async () => {

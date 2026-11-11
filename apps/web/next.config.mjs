@@ -14,6 +14,19 @@ if (process.env.NODE_ENV === "production" && !process.env.NEXT_PUBLIC_API_ORIGIN
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ["@petlife/ui", "@petlife/design-tokens", "@petlife/types", "@petlife/validation"],
+  async headers() {
+    return [{
+      source: "/:path*",
+      headers: [
+        { key: "X-Content-Type-Options", value: "nosniff" },
+        { key: "X-Frame-Options", value: "SAMEORIGIN" },
+        { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        // Framing only: do not pretend this is a complete script CSP or block
+        // current inline hydration, signed document previews or QR camera use.
+        { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
+      ],
+    }];
+  },
   images: {
     remotePatterns: [
       { protocol: "http", hostname: "localhost" },

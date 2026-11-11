@@ -4,7 +4,7 @@ import { isRouteLocale } from "@/lib/i18n/config";
 import { HomeLanding } from "@/features/landing/HomeLanding";
 import "@/features/landing/park-landing.css";
 import "@/features/landing/park-story.css";
-import { parkCopy } from "@/features/landing/park-copy";
+import { publicPageMetadata } from "@/lib/seo/public-metadata";
 
 export async function generateMetadata({
   params,
@@ -13,7 +13,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   if (!isRouteLocale(locale)) notFound();
-  return { title: `opetlife — ${parkCopy[locale].title}`, description: parkCopy[locale].description };
+  return publicPageMetadata(locale, "home");
 }
 
 export default async function RootPage({ params }: { params: Promise<{ locale: string }> }) {
