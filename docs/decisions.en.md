@@ -806,6 +806,7 @@ The current hosting stays, but every external service has an internal fallback. 
 | TC-18 | Parallel execution only for independent modules; shared modules (payment, schema) have only one executor at a time |
 | TC-19 | Every prompt updates the technical document inside the repository (architecture, API, model, this document's codes) |
 | TC-20 | Account deletion reaches anonymisation within 30 days; personal data export within 7 days |
+| TC-21 | Explicit owner clarification, 2026-11-10, consistent with WB-13: independent human **security/financial CODE or PR review** is not a mandatory merge blocker. This supersedes only that human-code-review requirement in TC-16 within this scope; the original history remains. Inspect actual diffs/dependencies, complete relevant automated/security checks, fix confirmed issues and document remaining risks; verify required green CI on the final head and merge only through GitHub's permitted normal protected path, never bypassing protection. Deploy via the authorized pipeline after migration, backup and rollback checks, then verify the deployed SHA and actual safe behavior. This is solely a code-review/merge clarification: product-level second-person approval, segregation of duties, amount/role limits, authorization and audit for **sensitive financial or administrative operations** remain unchanged. Code authors receive no authority to approve those operations. |
 
 ## Chapter 15 — Brand, marketing, growth, and KPI
 
