@@ -1,4 +1,6 @@
 import { createRequire } from "node:module";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { gzipSync } from "node:zlib";
 import { request as httpRequest } from "node:http";
 import type { ErrorRequestHandler, RequestHandler } from "express";
@@ -31,6 +33,24 @@ describe("patched parser compatibility (isolated HTTP fixtures)", () => {
     expect(platformRequire("multer/package.json").version).toBe("2.5.0");
     const bodyRequire = createRequire(platformRequire.resolve("body-parser/package.json"));
     expect(bodyRequire("qs/package.json").version).toBe("6.16.1");
+  });
+
+  it("keeps Nest's magic-number file validation working with the patched parser", async () => {
+    // Nest uses eval(import()) inside a CommonJS package. Exercise it in a real Node process,
+    // since Jest's VM resolver cannot resolve that runtime import the way production Node does.
+    const script = `const { createRequire } = require("node:module");
+      const commonRequire = createRequire(require.resolve("@nestjs/common/package.json"));
+      const parserPath = commonRequire.resolve("file-type");
+      import("@nestjs/common").then(async ({ FileTypeValidator }) => {
+        const validator = new FileTypeValidator({ fileType: "image/png" });
+        const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/pJcAAAAASUVORK5CYII=", "base64");
+        const valid = await validator.isValid({ buffer: png, mimetype: "image/png" });
+        const invalid = await validator.isValid({ buffer: Buffer.from("not an image"), mimetype: "image/png" });
+        console.log(JSON.stringify({ parserPath, valid, invalid }));
+        if (!valid || invalid || !parserPath.includes("file-type@21.3.2")) process.exitCode = 1;
+      }).catch((error) => { console.error(error); process.exitCode = 1; });`;
+    const { stdout } = await promisify(execFile)(process.execPath, ["-e", script], { cwd: process.cwd() });
+    expect(JSON.parse(stdout.trim())).toMatchObject({ valid: true, invalid: false });
   });
 
   it("accepts valid JSON but rejects malformed and oversized bodies", async () => {
