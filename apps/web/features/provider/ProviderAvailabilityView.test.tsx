@@ -112,3 +112,24 @@ it("edits an existing rule without creating a duplicate", async () => {
  await waitFor(()=>expect(providerOsService.updateAvailabilityRule).toHaveBeenCalledWith("r1",expect.objectContaining({endLocalTime:"18:00",timezone:"Asia/Tehran"})));
  expect(providerOsService.createAvailabilityRule).not.toHaveBeenCalled();
 });
+
+it.each([
+  ["en", "Unknown day"],
+  ["fa", "روز نامشخص"],
+  ["de", "Unbekannter Wochentag"],
+  ["es", "Día desconocido"],
+] as const)("labels an invalid persisted weekday safely in %s", async (locale, label) => {
+  vi.mocked(providerOsService.listAvailabilityRules).mockResolvedValue([{
+    id: "invalid-day",
+    locationId: "loc1",
+    dayOfWeek: 9,
+    startLocalTime: "09:00",
+    endLocalTime: "17:00",
+    timezone: "Asia/Tehran",
+  }] as never);
+  vi.mocked(providerOsService.listAvailabilityExceptions).mockResolvedValue([]);
+
+  renderWithIntl(<ProviderAvailabilityView />, locale);
+
+  expect(await screen.findByText(new RegExp(`${label} 09:00–17:00`))).toBeTruthy();
+});

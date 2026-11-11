@@ -498,6 +498,13 @@ Lifecycle actions, status labels, confirmation dialog, owner note, loading/retry
 - Local verification: 23 chat-focused component/catalog tests plus 15 feed-focused tests pass (38 combined); web TypeScript, targeted ESLint, four-catalog JSON parsing and diff checks pass. Exact-head CI passed for PR #198 at `7ccaac43`; it merged to main at `deee3c66`. Production deployment and authenticated responsive browser verification remain open. This slice is PARTIAL and not LIVE_VERIFIED.
 - Decision references: CM-01, CM-02, CM-18, GC-09, GC-10 and GC-12. No membership, moderation, block, message-delivery or access-control rules were changed.
 
+## Provider availability invalid-data state — candidate `next-intl` 4.9.2 upgrade
+
+- The provider availability rule list previously indexed the weekday catalog directly with the persisted API number. An invalid value could produce an undefined message key. This candidate adds explicit fa/en/de/es “unknown weekday” copy rather than silently displaying the wrong day or exposing a raw enum.
+- The scoped page remains **PARTIAL**: component tests cover the page’s localized empty, forbidden, conflict-confirmation and invalid-weekday states, but an authenticated browser visual review with a real provider role was not performed. Do not mark this page visually or functionally complete from the component tests alone.
+- Validation on the candidate tree: provider availability + provider catalog parity tests (17), full web suite (316 files / 2,017 tests), web typecheck, full web lint and production web build passed. The production build used only a local `NEXT_PUBLIC_API_ORIGIN` placeholder and did not contact production.
+- The candidate also moves `next-intl` to fixed release 4.9.2; see `docs/qa/safe-role-localization-design-release-2026-11-11.md`. Hosted exact-head CI, disposable API E2E and production deployment are pending; this is not LIVE_VERIFIED.
+
 ## Owner clinical records — localization batch `feat/i18n-health-records-list-full-page`
 
 - The owner-facing clinical record workspace `/[locale]/pets/[id]/health/clinical` uses the existing `rollout.records` message namespace with complete tab, empty/load/access/save, senior-care and supportive-planning copy in fa/en/de/es. Non-Persian dates now use the active locale, Persian keeps `fa-IR`, and unknown clinical status codes use a localized generic label instead of leaking an enum.
