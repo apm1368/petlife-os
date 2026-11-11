@@ -1,0 +1,64 @@
+/* Shared reel (docs/design/pattern-2026-11/reel.md). Lives inside .opl-landing or .opl-page for its tokens. */
+.opl-reel-sec { background:var(--opl-cream); }
+.opl-reel-grid { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:clamp(28px,5vw,80px); align-items:center; }
+@media (max-width:900px) { .opl-reel-grid { grid-template-columns:minmax(0,1fr); } .opl-reel-wrap { order:-1; } }
+.opl-reel-copy { display:grid; gap:14px; }
+.opl-chapters { list-style:none; margin:8px 0 0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:8px; }
+.opl-chapters button { width:100%; display:flex; align-items:center; gap:10px; min-height:46px; padding:0 14px; border-radius:999px; border:0; background:var(--opl-raised); color:var(--opl-ink-2); font:inherit; font-size:.9rem; font-weight:700; cursor:pointer; text-align:start; box-shadow:0 1px 0 var(--opl-line); transition:background-color .25s,color .25s,transform .25s var(--opl-ease); }
+.opl-chapters button:hover { transform:translateY(-2px); }
+.opl-chapters b { display:grid; place-items:center; width:26px; height:26px; border-radius:50%; background:var(--opl-paper); font-size:.78rem; flex:none; }
+.opl-chapters button.on { background:var(--opl-forest); color:var(--opl-on-forest); }
+.opl-chapters button.on b { background:var(--opl-sun); color:var(--opl-on-sun); }
+.opl-reel-wrap { position:relative; justify-self:center; }
+.opl-reel { position:relative; width:min(340px,80vw); aspect-ratio:9/16; border-radius:36px; overflow:hidden; background:#121412; color:#fff; isolation:isolate; box-shadow:0 0 0 10px var(--opl-raised),0 0 0 11px var(--opl-line),0 44px 80px -34px rgb(var(--opl-sh) / .7); cursor:pointer; }
+.opl-reel__slides { position:absolute; inset:0; }
+.opl-reel__slide { position:absolute; inset:0; opacity:0; transition:opacity .7s var(--opl-ease); }
+.opl-reel__slide.on { opacity:1; }
+.opl-reel__slide svg { width:100%; height:100%; display:block; }
+.opl-reel__bars { position:absolute; inset:12px 14px auto; display:flex; gap:4px; z-index:3; }
+.opl-reel__bars span { flex:1; height:3px; border-radius:3px; background:rgb(0 0 0 / .16); overflow:hidden; }
+.opl-reel.is-dark .opl-reel__bars span { background:rgb(255 255 255 / .28); }
+.opl-reel__bars i { display:block; height:100%; width:0; background:#F2B544; border-radius:3px; }
+.opl-reel__kick { position:absolute; inset-block-start:28px; inset-inline-start:14px; z-index:3; background:#F2B544; color:#3A2A05; font-size:.78rem; font-weight:800; padding:4px 12px; border-radius:999px; }
+.opl-reel__sub { position:absolute; left:50%; transform:translateX(-50%); width:max-content; max-width:calc(100% - 32px); bottom:66px; z-index:3; color:#fff; font-size:1.02rem; font-weight:800; line-height:1.7; text-align:center; background:rgb(20 30 24 / .8); padding:8px 16px; border-radius:18px; backdrop-filter:blur(6px); }
+.opl-reel.playing .opl-reel__sub span { display:inline-block; white-space:pre; animation:oplWordIn .55s var(--opl-ease-emph) both; animation-delay:calc(var(--i) * 110ms + 250ms); }
+@keyframes oplWordIn { from { opacity:0; transform:translateY(10px); } }
+.opl-reel__ctl { position:absolute; inset:auto 14px 16px; z-index:3; display:flex; align-items:center; gap:8px; }
+.opl-reel__music { display:inline-flex; align-items:center; gap:6px; font-size:.76rem; font-weight:700; color:#fff; margin-inline-end:auto; background:rgb(20 30 24 / .55); padding:5px 12px; border-radius:999px; }
+.opl-rbtn { width:38px; height:38px; border-radius:50%; border:0; display:grid; place-items:center; background:rgb(20 30 24 / .55); color:#fff; cursor:pointer; }
+.opl-reel__play { position:absolute; inset:0; z-index:4; display:grid; place-content:center; justify-items:center; gap:12px; border:0; background:rgb(0 0 0 / .24); color:#fff; font:inherit; font-weight:800; font-size:1rem; cursor:pointer; text-shadow:0 1px 10px rgb(0 0 0 / .45); }
+.opl-reel__playbtn { width:86px; height:86px; border-radius:50%; display:grid; place-items:center; background:#F2B544; color:#3A2A05; box-shadow:0 0 0 10px rgb(242 181 68 / .28); animation:oplBreathe 2.4s ease-in-out infinite; }
+.opl-reel__playbtn svg { margin-inline-start:4px; }
+@keyframes oplBreathe { 50% { box-shadow:0 0 0 18px rgb(242 181 68 / .12); } }
+/* scene animation vocabulary (reel.md). Scenes rest fully drawn; .opl-anim plays them in. */
+.opl-reel svg .a-snip, .opl-panel__media svg .a-snip { transform-box:view-box; transform-origin:0 0; }
+.opl-reel svg .a-sprout, .opl-panel__media svg .a-sprout { transform-origin:left bottom; }
+.opl-reel svg .a-ring, .opl-panel__media svg .a-ring { transform-origin:top center; }
+.opl-anim .a-pop, .opl-anim .a-sprout { animation:oplAPop .7s var(--d,0s) cubic-bezier(.34,1.56,.64,1) both; }
+.opl-anim .a-rise { animation:oplARise .7s var(--d,0s) cubic-bezier(.16,1,.3,1) both; }
+.opl-anim .a-draw { stroke-dasharray:1; animation:oplADraw 1s var(--d,0s) cubic-bezier(.65,0,.35,1) both; }
+.opl-anim .a-drop { animation:oplADrop .85s var(--d,0s) cubic-bezier(.34,1.35,.64,1) both; }
+.opl-anim .a-fade { animation:oplAFade .6s var(--d,0s) ease both; }
+.opl-anim .a-up { animation:oplAUp 2.8s var(--d,0s) ease-in infinite; }
+.opl-reel__slide.on .a-float, .opl-panel__media .a-float { animation:oplAFloat 2.4s var(--d,0s) ease-in-out infinite alternate; }
+.opl-reel__slide.on .a-spin, .opl-panel__media .a-spin { animation:oplSpin 7s linear infinite; }
+.opl-reel__slide.on .a-ring, .opl-panel__media .a-ring { animation:oplARing 1.3s ease-in-out infinite; }
+.opl-reel__slide.on .a-pulse, .opl-panel__media .a-pulse { animation:oplAPulse 1.8s var(--d,0s) ease-out infinite; }
+.opl-reel__slide.on .a-twinkle, .opl-panel__media .a-twinkle { animation:oplATw 1.2s var(--d,0s) ease-in-out infinite alternate; }
+.opl-reel__slide.on .a-snip, .opl-panel__media .a-snip { animation:oplASnip .45s ease-in-out infinite alternate; }
+.opl-reel__slide.on .a-beat, .opl-panel__media .a-beat { animation:oplABeat 1s ease-in-out infinite; }
+.opl-paused * { animation-play-state:paused !important; }
+@keyframes oplAPop { from { transform:scale(0); opacity:0; } }
+@keyframes oplARise { from { transform:translateY(40px); opacity:0; } }
+@keyframes oplADraw { from { stroke-dashoffset:1; } to { stroke-dashoffset:0; } }
+@keyframes oplADrop { from { transform:translateY(-320px); } }
+@keyframes oplAFade { from { opacity:0; } }
+@keyframes oplAFloat { to { transform:translateY(-9px); } }
+@keyframes oplARing { 0%,60%,100% { transform:rotate(0); } 15% { transform:rotate(16deg); } 30% { transform:rotate(-14deg); } 45% { transform:rotate(8deg); } }
+@keyframes oplAPulse { 0% { transform:scale(.35); opacity:.9; } 100% { transform:scale(1.7); opacity:0; } }
+@keyframes oplAUp { 0% { transform:translateY(0); opacity:0; } 15% { opacity:1; } 100% { transform:translateY(-230px); opacity:0; } }
+@keyframes oplATw { to { opacity:.3; transform:scale(.7); } }
+@keyframes oplASnip { to { transform:rotate(-16deg); } }
+@keyframes oplABeat { 50% { transform:scale(1.15); } }
+@keyframes oplSpin { to { transform:rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .opl-reel *, .opl-panel__media * { animation:none !important; } }

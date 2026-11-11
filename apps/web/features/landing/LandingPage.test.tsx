@@ -5,6 +5,7 @@ import { routeExists } from "@/test/route-exists";
 import RootPage from "@/app/[locale]/page";
 import AuthPage from "@/app/[locale]/(auth)/auth/page";
 import credits from "./photo-credits.json";
+import { worldOrder } from "./opl/opl-copy";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
@@ -27,14 +28,16 @@ beforeEach(() => {
 const PUBLIC = join(__dirname, "..", "..", "public");
 
 describe("Public landing", () => {
-  it.each(["fa", "en"] as const)("renders the %s landing with one h1, Cookie as the example and real photos only", async (locale) => {
+  it.each(["fa", "en"] as const)("renders the %s landing with one h1, the five questions and only real image files", async (locale) => {
     renderWithIntl(await RootPage({ params: Promise.resolve({ locale }) }), locale);
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
-    expect(document.body.textContent).toMatch(locale === "fa" ? /کوکی/ : /Cookie/);
+    for (const key of worldOrder) expect(document.getElementById(`world-${key}`), key).not.toBeNull();
     const images = Array.from(document.querySelectorAll("img")).map((i) => i.getAttribute("src")!);
-    expect(images.length).toBeGreaterThan(6);
+    expect(images.length).toBeGreaterThan(0);
     for (const src of images) {
-      expect(src, src).toMatch(/\.(webp|jpe?g|png)$/); // photographs, never vector illustrations
+      // Vector illustrations ship inline (pattern-2026-11); every file image must exist on disk.
+      if (src.startsWith("data:image/svg+xml")) continue;
+      expect(src, src).toMatch(/\.(webp|jpe?g|png|svg)$/);
       expect(existsSync(join(PUBLIC, src)), src).toBe(true);
     }
     // No invented promotions: no discount codes or percentages.
