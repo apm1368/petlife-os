@@ -2,6 +2,13 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
+## Update — 2026-11-11 11:06 UTC
+
+- PR #249 is now `LIVE_VERIFIED` for removal of the duplicate API HSTS field: deployment run `43006047882` succeeded at merge SHA `c8de48c205797a192f8c72d803ac9604b47aedcc`. Production version/readiness returned HTTP 200, version matched that SHA, and DB/Redis were up. Anonymous read-only `/api/health/version`, `/api/health/ready`, and `/api/shop/products` each returned exactly one HSTS field and retained CSP, referrer, nosniff, and frame headers. The current single field is `max-age=31536000` (without `includeSubDomains`); public response does not identify whether edge or origin emits it, and direct origin/proxy configuration is unavailable. Do not assert subdomain coverage without infrastructure confirmation. Detailed evidence: [HSTS QA](../qa/api-hsts-duplicate-2026-11-11.md).
+- PR #217 main commit `5bd1b1e70cd71b53cf8c3ce87689194476187aca` exact-head CI `43006079720` passed and its deploy run `43008037716` is still `in_progress` at 11:06 UTC. Production still reports `c8de48c…`; do not mark #217 live until its deployment and safe public community behavior are verified.
+- PR #250 docs handoff is open at head `a0f20e6b98f4de0b51c0947b945e3eaaf7f9bd11` with CI run `43008883670` still running. Its base is main `5bd1b1e7…`; subsequent evidence updates will require a new commit/check run, not a force-push.
+- A fresh registry query contradicted a premature assumption that minimatch `10.2.7` could be installed: pnpm could not resolve that version, and current advisory metadata says minimatch is patched from `11.0.1`. The trial override was removed; `pnpm-lock.yaml` remains unchanged. Keep the tooling advisory open pending tested major compatibility. See [dependency audit QA](../qa/dependency-audit-2026-11-11.md).
+
 ## Latest verified checkpoint — 2026-11-11 11:01 UTC
 
 - GitHub `main` is `5bd1b1e70cd71b53cf8c3ce87689194476187aca`. Production `/api/health/version` remains `9da443e619a44d068c83449a8c33f1e11e9ffcbc`, deployment `github-43003165980-1`; `/api/health/ready` is HTTP 200 with DB/Redis up. Main is therefore ahead of production.
