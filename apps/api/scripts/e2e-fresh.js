@@ -32,20 +32,49 @@ admin.pathname = "/postgres";
 admin.search = "";
 
 const db = new PrismaClient({ datasourceUrl: admin.toString() });
-let dropped = false;
-async function drop() {
-  if (dropped) return;
-  dropped = true;
-  for (const n of [name, `${name.replace(/_test$/, "")}_xdomain_test`]) await db.$executeRawUnsafe(`DROP DATABASE IF EXISTS "${n}" WITH (FORCE)`);
-  await db.$disconnect();
-  console.log(`e2e-fresh: dropped ${name}`);
+let created = false;
+let cleanupPromise;
+function drop() {
+  // A signal and the normal finally block can race. Share a single cleanup,
+  // and never attempt DROP when CREATE did not complete successfully.
+  if (cleanupPromise) return cleanupPromise;
+  cleanupPromise = (async () => {
+    let clean = true;
+    if (created) {
+      for (const n of [name, `${name.replace(/_test$/, "")}_xdomain_test`]) {
+        try {
+          await db.$executeRawUnsafe(`DROP DATABASE IF EXISTS "${n}" WITH (FORCE)`);
+        } catch {
+          clean = false;
+          console.error(`e2e-fresh: failed to drop temporary database ${n}; remove it manually`);
+        }
+      }
+      if (clean) console.log(`e2e-fresh: dropped ${name}`);
+    }
+    try {
+      await db.$disconnect();
+    } catch {
+      clean = false;
+      console.error("e2e-fresh: could not disconnect from the test database server");
+    }
+    return clean;
+  })();
+  return cleanupPromise;
 }
-for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, () => drop().finally(() => process.exit(130)));
+for (const sig of ["SIGINT", "SIGTERM"]) {
+  process.on(sig, () => { void drop().then(() => process.exit(sig === "SIGINT" ? 130 : 143)); });
+}
 
 (async () => {
   let code = 1;
   try {
-    await db.$executeRawUnsafe(`CREATE DATABASE "${name}"`);
+    try {
+      await db.$executeRawUnsafe(`CREATE DATABASE "${name}"`);
+      created = true;
+    } catch {
+      // Prisma connection errors may contain the URL, including credentials.
+      throw new Error("cannot create a temporary test database; check TEST_DATABASE_URL credentials, connectivity and CREATE DATABASE permission");
+    }
     console.log(`e2e-fresh: created ${name}`);
     // The end-to-end suite intentionally exercises every domain in one clean,
     // serial database run.  Its Prisma/Nest test process can exceed Node's
@@ -75,7 +104,7 @@ for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, () => drop().finally(()
   } catch (e) {
     console.error(`e2e-fresh: ${e.message}`);
   } finally {
-    await drop();
+    if (!(await drop())) code = 1;
   }
   process.exit(code);
 })();
