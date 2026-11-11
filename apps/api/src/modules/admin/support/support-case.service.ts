@@ -115,17 +115,29 @@ export class SupportCaseService {
       this.prisma.supportCase.findMany({ where, include: CASE_INCLUDE, orderBy: { createdAt: "desc" }, skip, take }),
       this.prisma.supportCase.count({ where }),
     ]);
-    return toPaginatedDto(rows.map(toSupportCaseSummaryDto), total, page, pageSize);
+    // Fetch requests in one query for this page; consumer-facing DTOs remain separate.
+    const escalations = rows.length ? await this.prisma.supportEscalation.findMany({
+      where: { caseId: { in: rows.map((row) => row.id) } },
+      orderBy: { createdAt: "desc" },
+      select: { caseId: true, referenceNumber: true, reason: true, confirmedAt: true },
+    }) : [];
+    const byCase = new Map<string, (typeof escalations)[number]>();
+    for (const escalation of escalations) if (!byCase.has(escalation.caseId)) byCase.set(escalation.caseId, escalation);
+    return toPaginatedDto(rows.map((row) => {
+      const escalation = byCase.get(row.id);
+      return { ...toSupportCaseSummaryDto(row), humanEscalation: escalation ? { referenceNumber: escalation.referenceNumber, reason: escalation.reason, confirmedAt: escalation.confirmedAt.toISOString() } : null };
+    }), total, page, pageSize);
   }
 
   async get(caseId: string): Promise<SupportCaseDetailDto> {
     const row = await this.prisma.supportCase.findUnique({ where: { id: caseId }, include: { ...CASE_INCLUDE, createdByAdmin: { include: { user: true } } } });
     if (!row) throw new SupportCaseNotFoundException({ caseId });
-    const [messages, internalNotes] = await Promise.all([
+    const [messages, internalNotes, escalation] = await Promise.all([
       this.prisma.supportMessage.findMany({ where: { caseId }, include: { authorUser: true, authorAdmin: { include: { user: true } } }, orderBy: { createdAt: "asc" } }),
       this.notes.listForEntity(InternalNoteEntityType.SUPPORT_CASE, caseId),
+      this.prisma.supportEscalation.findFirst({ where: { caseId }, orderBy: { createdAt: "desc" }, select: { referenceNumber: true, reason: true, confirmedAt: true } }),
     ]);
-    return toSupportCaseDetailDto(row, messages.map(toSupportMessageDto), internalNotes);
+    return { ...toSupportCaseDetailDto(row, messages.map(toSupportMessageDto), internalNotes), humanEscalation: escalation ? { referenceNumber: escalation.referenceNumber, reason: escalation.reason, confirmedAt: escalation.confirmedAt.toISOString() } : null };
   }
 
   /**

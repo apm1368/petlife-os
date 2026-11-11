@@ -242,6 +242,21 @@ describe("Help Center, legal pages and status", () => {
       expect(await db.supportEscalation.count({ where: { caseId: t.id } })).toBe(1);
     });
 
+    it("surfaces the follow-up reason and reference only in the authorized admin queue and detail", async () => {
+      const member = await actor();
+      const support = await actor(AdminRole.SUPPORT);
+      const t = await ticket(member);
+      const reason = "Please contact me about this case";
+      const request = (await send("post", member, `/support/cases/${t.id}/escalate`).send({ reason, confirm: true }).expect(201)).body;
+      const queue = (await get(support, `/admin/support?search=${t.caseNumber}`).expect(200)).body;
+      expect(queue.items.find((row: { id: string }) => row.id === t.id).humanEscalation).toMatchObject({ referenceNumber: request.referenceNumber, reason });
+      const detail = (await get(support, `/admin/support/${t.id}`).expect(200)).body;
+      expect(detail.humanEscalation).toMatchObject({ referenceNumber: request.referenceNumber, reason });
+      const userDetail = (await get(member, `/support/cases/${t.id}`).expect(200)).body;
+      expect(userDetail).not.toHaveProperty("humanEscalation");
+      await get(member, `/admin/support/${t.id}`).expect(403);
+    });
+
     it("concurrent escalation requests return one persisted reference", async () => {
       const member = await actor();
       const t = await ticket(member);

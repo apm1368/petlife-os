@@ -1311,6 +1311,7 @@
       }
     },
     "support": {
+      "humanEscalation": {"label": "Persönliche Bearbeitung angefordert", "reference": "Referenz: {reference}", "submitted": "Angefordert: {date}"},
       "title": "Supportfälle",
       "newCase": "Neuer Fall",
       "createTitle": "Supportfall erstellen",

@@ -162,6 +162,7 @@ export function AdminSupportQueueView() {
               <span className="text-metadata text-text-secondary">{c.subject}</span>
             </div>
             <div className="flex items-center gap-2">
+              {c.humanEscalation ? <StatusLabel tone="attention">{t("humanEscalation.label")}</StatusLabel> : null}
               <StatusLabel tone={adminStatusTone(c.priority)}>{t(`priority.${c.priority}`)}</StatusLabel>
               <StatusLabel tone={adminStatusTone(c.status)}>{t(`status.${c.status}`)}</StatusLabel>
             </div>

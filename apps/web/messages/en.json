@@ -3172,6 +3172,7 @@
       "pets": "{count} pet(s)"
     },
     "support": {
+      "humanEscalation": {"label": "Human follow-up requested", "reference": "Reference: {reference}", "submitted": "Requested: {date}"},
       "title": "Support cases",
       "newCase": "New case",
       "createTitle": "Create support case",

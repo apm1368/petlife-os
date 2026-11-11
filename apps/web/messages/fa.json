@@ -3122,6 +3122,7 @@
       "pets": "{count} حیوان خانگی"
     },
     "support": {
+      "humanEscalation": {"label": "درخواست پیگیری انسانی", "reference": "کد پیگیری: {reference}", "submitted": "ثبت‌شده در: {date}"},
       "title": "درخواست‌های پشتیبانی",
       "newCase": "درخواست جدید",
       "createTitle": "ایجاد درخواست پشتیبانی",

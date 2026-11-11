@@ -2679,6 +2679,8 @@ export interface SupportCaseSummaryDto {
   firstAssignedAt?: string | null;
   firstResponseAt?: string | null;
   reopenCount?: number;
+  /** Admin-only human follow-up request, if one has been recorded. */
+  humanEscalation?: { referenceNumber: string; reason: string; confirmedAt: string } | null;
 }
 
 export interface SupportCaseDetailDto extends SupportCaseSummaryDto {
