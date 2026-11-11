@@ -4248,6 +4248,7 @@
       "rules": {
         "title": "Horario semanal",
         "empty": "Aún no hay disponibilidad recurrente configurada.",
+        "invalidDay": "Día desconocido",
         "delete": "Quitar",
         "locationId": "ID de ubicación",
         "dayOfWeek": "Día",

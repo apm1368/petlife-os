@@ -1751,6 +1751,7 @@
       "rules": {
         "title": "Weekly schedule",
         "empty": "No recurring availability set yet.",
+        "invalidDay": "Unknown day",
         "delete": "Remove",
         "locationId": "Location ID",
         "dayOfWeek": "Day",

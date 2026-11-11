@@ -2,6 +2,12 @@
 
 Status: `PARTIAL`. PR #252 is merged and deployed at production SHA `80983a84ca0e3d35ddf4ca5d57f39ba16aad4205`. Fresh audit of that lockfile reports three moderate advisories remaining. This is a source/configuration applicability review, not an exploit test or formal security assessment.
 
+## Follow-up candidate audit — 2026-11-11
+
+- On an isolated branch from current main `6fd4b60bc7b857b97da3fb70f53e8d599038047a`, the web dependency was upgraded from `next-intl@3.26.5` to `4.9.2`. Registry peer metadata supports the repository’s Next 15 / React 18 combination. The frozen-lockfile web suite (316 files / 2,017 tests), web typecheck, full web lint and production web build passed after the update. See [safe role/localization/design/release checkpoint](safe-role-localization-design-release-2026-11-11.md).
+- A fresh `pnpm audit --prod --audit-level=moderate` on that candidate reported **one** moderate advisory: `@nestjs/core@10.4.22` via `apps__api>@nestjs/core` (GHSA-36xv-jgw5-4q75, fixed upstream `>=11.1.18`). The command exits nonzero for this remaining advisory. The two next-intl advisories no longer appear in the candidate lockfile audit; the prior config assessment remains relevant only to the old deployed lock until this candidate is merged and deployed.
+- This is not deployed remediation yet. No Nest major upgrade, active exploit test, formal penetration test or production API behavior check was performed. A Nest 10-to-11 upgrade is not bundled without compatibility testing.
+
 ## Follow-up remediation — 2026-11-11
 
 - PR #252 head `12a2900ed8e7bd3cb2ddfd1fabbde4f8d7566d69` merged by squash at `80983a84ca0e3d35ddf4ca5d57f39ba16aad4205`, then deployed by run `43020269133`. It pins Nest's transitive `file-type` to `21.3.2`, which clears the two file-type advisories from a fresh audit. A native-Node regression exercises Nest's dynamic magic-number validator against one valid PNG and invalid bytes.

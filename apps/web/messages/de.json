@@ -4250,6 +4250,7 @@
       "rules": {
         "title": "Wöchentlicher Zeitplan",
         "empty": "Es sind noch keine wiederkehrenden Zeiten eingerichtet.",
+        "invalidDay": "Unbekannter Wochentag",
         "delete": "Entfernen",
         "locationId": "Standort-ID",
         "dayOfWeek": "Wochentag",

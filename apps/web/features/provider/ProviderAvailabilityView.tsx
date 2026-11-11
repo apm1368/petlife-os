@@ -10,6 +10,7 @@ import { providerOsService } from "@/services/provider-os.service";
 import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
 
 const DAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+const weekdayKey = (day: number) => DAY_KEYS[day] ?? null;
 
 /**
  * Availability management (spec sections 7-9) — reuses the existing
@@ -26,6 +27,10 @@ export function ProviderAvailabilityView() {
   const [busy, setBusy] = useState(false);
   const tDay = useTranslations("provider.availability.day");
   const locale = useLocale() as "fa" | "en" | "de" | "es";
+  const dayLabel = (day: number) => {
+    const key = weekdayKey(day);
+    return key ? tDay(key) : t("rules.invalidDay");
+  };
 
   const [rules, setRules] = useState<ProviderAvailabilityRuleDto[] | null>(null);
   const [exceptions, setExceptions] = useState<ProviderAvailabilityExceptionDto[] | null>(null);
@@ -135,7 +140,7 @@ export function ProviderAvailabilityView() {
         {rules.map((rule) => (
           <div key={rule.id} className="flex flex-wrap items-center justify-between gap-2 border-t border-border-subtle pt-2">
             <span className="text-body text-text-primary">
-              {tDay(DAY_KEYS[rule.dayOfWeek])} {rule.startLocalTime}–{rule.endLocalTime} ({rule.timezone})
+              {dayLabel(rule.dayOfWeek)} {rule.startLocalTime}–{rule.endLocalTime} ({rule.timezone})
             </span>
             <Button variant="secondary" size="sm" disabled={busy} onClick={() => { setEditingRule(rule.id); setLocationId(rule.locationId); setDayOfWeek(String(rule.dayOfWeek)); setStartLocalTime(rule.startLocalTime); setEndLocalTime(rule.endLocalTime); setTimezone(rule.timezone); }}>{actions("edit")}</Button>
             <Button variant="ghost" size="sm" disabled={busy} onClick={() => deleteRule(rule.id)}>
