@@ -33,13 +33,22 @@ admin.search = "";
 
 const db = new PrismaClient({ datasourceUrl: admin.toString() });
 let created = false;
+let creationPromise;
 let cleanupPromise;
+let stopping = false;
 function drop() {
   // A signal and the normal finally block can race. Share a single cleanup,
-  // and never attempt DROP when CREATE did not complete successfully.
+  // wait for an in-flight CREATE, and only DROP a successfully created DB.
   if (cleanupPromise) return cleanupPromise;
   cleanupPromise = (async () => {
     let clean = true;
+    if (creationPromise) {
+      try {
+        await creationPromise;
+      } catch {
+        // The main path reports the create failure; there is nothing to drop.
+      }
+    }
     if (created) {
       for (const n of [name, `${name.replace(/_test$/, "")}_xdomain_test`]) {
         try {
@@ -62,19 +71,26 @@ function drop() {
   return cleanupPromise;
 }
 for (const sig of ["SIGINT", "SIGTERM"]) {
-  process.on(sig, () => { void drop().then(() => process.exit(sig === "SIGINT" ? 130 : 143)); });
+  process.on(sig, () => {
+    stopping = true;
+    void drop().then(() => process.exit(sig === "SIGINT" ? 130 : 143));
+  });
 }
 
 (async () => {
   let code = 1;
   try {
     try {
-      await db.$executeRawUnsafe(`CREATE DATABASE "${name}"`);
-      created = true;
+      creationPromise = (async () => {
+        await db.$executeRawUnsafe(`CREATE DATABASE "${name}"`);
+        created = true;
+      })();
+      await creationPromise;
     } catch {
       // Prisma connection errors may contain the URL, including credentials.
       throw new Error("cannot create a temporary test database; check TEST_DATABASE_URL credentials, connectivity and CREATE DATABASE permission");
     }
+    if (stopping) return;
     console.log(`e2e-fresh: created ${name}`);
     // The end-to-end suite intentionally exercises every domain in one clean,
     // serial database run.  Its Prisma/Nest test process can exceed Node's
