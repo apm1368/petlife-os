@@ -4,7 +4,7 @@ import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { ConfigService } from "@nestjs/config";
 import cookieParser from "cookie-parser";
-import helmet from "helmet";
+import { apiSecurityHeaders } from "./common/http/api-security-headers";
 import { AppModule } from "./app.module";
 import type { AppEnv } from "./config/env";
 import { mountLocalUploads } from "./modules/storage/local-uploads.mount";
@@ -24,7 +24,7 @@ async function bootstrap() {
   const config = app.get(ConfigService<AppEnv, true>);
 
   applyTrustProxy(app, config.get("TRUST_PROXY", { infer: true }));
-  app.use(helmet());
+  app.use(apiSecurityHeaders);
   app.use(cookieParser());
   app.enableCors({
     origin: config.get("WEB_APP_ORIGIN", { infer: true }).split(","),
