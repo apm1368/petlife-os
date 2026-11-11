@@ -45,7 +45,19 @@ export class CommunityPostService {
     const row = await this.prisma.communityPost.findUnique({ where: { id: postId }, include: POST_INCLUDE });
     if (!row) throw new CommunityPostNotFoundException({ postId });
     if (row.status !== CommunityContentStatus.PUBLISHED) throw new CommunityContentNotVisibleException({ postId });
+    if (await this.isFixtureAuthor(row.authorUserId)) throw new CommunityPostNotFoundException({ postId });
     return row;
+  }
+
+  /** Seed/test actors use RFC-reserved example.test addresses and must never publish fixture content publicly. */
+  private async isFixtureAuthor(userId: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+    return user?.email?.toLowerCase().endsWith("@example.test") ?? false;
+  }
+
+  private async fixtureAuthorIds(): Promise<string[]> {
+    const users = await this.prisma.user.findMany({ where: { email: { endsWith: "@example.test", mode: "insensitive" } }, select: { id: true } });
+    return users.map((user) => user.id);
   }
 
   async create(authorUserId: string, dto: CreateCommunityPostDto) {
@@ -132,6 +144,8 @@ export class CommunityPostService {
       ...(query.region ? { region: { equals: query.region.trim(), mode: "insensitive" } } : {}),
       ...(q ? { OR: [{ title: { contains: q, mode: "insensitive" } }, { body: { contains: q, mode: "insensitive" } }] } : {}),
     };
+    const fixtureAuthorIds = await this.fixtureAuthorIds();
+    if (fixtureAuthorIds.length) where.authorUserId = { notIn: fixtureAuthorIds };
     const [rows, total] = await Promise.all([
       this.prisma.communityPost.findMany({ where, include: POST_INCLUDE, orderBy: { createdAt: "desc" }, skip, take }),
       this.prisma.communityPost.count({ where }),
@@ -192,7 +206,8 @@ export class CommunityPostService {
 
   /** Saved posts that are still published (a removed post silently drops out). */
   async savedPosts(userId: string) {
-    const rows = await this.prisma.communityPostBookmark.findMany({ where: { userId, post: { status: CommunityContentStatus.PUBLISHED } }, orderBy: { createdAt: "desc" }, take: 100, include: { post: { include: POST_INCLUDE } } });
+    const fixtureAuthorIds = await this.fixtureAuthorIds();
+    const rows = await this.prisma.communityPostBookmark.findMany({ where: { userId, post: { status: CommunityContentStatus.PUBLISHED, ...(fixtureAuthorIds.length ? { authorUserId: { notIn: fixtureAuthorIds } } : {}) } }, orderBy: { createdAt: "desc" }, take: 100, include: { post: { include: POST_INCLUDE } } });
     const names = await this.displayNameMap(rows.map((r) => r.post.authorUserId));
     return rows.map((r) => ({ ...toCommunityPostDto(r.post, names.get(r.post.authorUserId) ?? "", null, userId), savedAt: r.createdAt.toISOString() }));
   }
