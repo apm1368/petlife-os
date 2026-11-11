@@ -5,7 +5,7 @@
  * only with --publish — the DRAFT → VISIBLE transition (publishedAt set once, like AdminArticleService).
  *
  *   PETLIFE_IMPORT_CONFIRM=<host of WEB_APP_ORIGIN> \
- *   pnpm --filter @petlife/api exec ts-node scripts/import-article-bundle.ts <bundle-dir> --admin <admin email> [--publish] [--dry-run]
+ *   pnpm --filter @petlife/api exec ts-node scripts/import-article-bundle.ts <bundle-dir> --admin <admin email | first-super-admin> [--publish] [--dry-run]
  *
  * Idempotent: ids are derived from the bundle keys and media file hashes, existing rows are updated in place,
  * nothing is deleted. Media files are copied into the local storage driver's directory under cms/media/,
@@ -62,8 +62,11 @@ async function main() {
   const db = new PrismaClient();
   const stats = { media: 0, articles: 0, locales: 0, published: 0 };
   try {
-    const admin = await db.adminUser.findFirst({ where: { user: { email: adminEmail }, status: "ACTIVE" } });
-    if (!admin) throw new Error(`no active admin with email ${adminEmail}`);
+    // `--admin first-super-admin` attributes the import to the longest-standing active super admin (the owner account).
+    const admin = adminEmail === "first-super-admin"
+      ? await db.adminUser.findFirst({ where: { role: "SUPER_ADMIN", status: "ACTIVE" }, orderBy: { createdAt: "asc" } })
+      : await db.adminUser.findFirst({ where: { user: { email: adminEmail }, status: "ACTIVE" } });
+    if (!admin) throw new Error(`no active admin for ${adminEmail}`);
     const audit = (tx: Prisma.TransactionClient, action: string, entityType: string, entityId: string, afterSummary: Record<string, unknown>) =>
       tx.adminAuditLog.create({ data: { adminUserId: admin.id, action, entityType, entityId, reason: "article bundle import", afterSummary: afterSummary as Prisma.InputJsonValue } });
 
