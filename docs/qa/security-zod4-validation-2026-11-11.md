@@ -1,6 +1,6 @@
 # Zod validation hardening — 2026-11-11
 
-Status: merged at `9da443e619a44d068c83449a8c33f1e11e9ffcbc`; production deployment is queued and **not yet verified live** as of 2026-11-11 10:25 UTC.
+Status: merged at `9da443e619a44d068c83449a8c33f1e11e9ffcbc`; deployed and reported by production at 2026-11-11 11:00 UTC. The focused onboarding endpoint itself was not separately exercised against production.
 
 ## Baseline and finding
 
@@ -22,4 +22,4 @@ After the isolated Zod 4 update, the fresh audit reported 6 moderate advisories:
 - `NEXT_PUBLIC_API_ORIGIN=http://localhost:4000 pnpm build` passed; the first build attempt without this required CI environment variable correctly failed fast. No database schema changed, so no migration is required for this slice.
 - Post-upgrade `pnpm audit --prod --audit-level=high` no longer reported Zod; 6 moderate findings remain.
 
-The branch-level evidence below preceded integration. The merged PR #248 head `cfb478d76554571534b0bed1fa1d34187af6d75a` passed required hosted CI run `43000952182`; it was merged through the normal protected path at `9da443e619a44d068c83449a8c33f1e11e9ffcbc`. Deployment run `43003165980` is waiting behind the preceding deployment; the observed production version still reports `fa6367cf35ce5947ff749a79c09a67afcd1a73ce`. Recheck live SHA and post-deploy behavior before calling this live. No schema migration, production config, transaction, user record, or provider integration was changed.
+The branch-level evidence below preceded integration. The merged PR #248 head `cfb478d76554571534b0bed1fa1d34187af6d75a` passed required hosted CI run `43000952182`; it was merged through the normal protected path at `9da443e619a44d068c83449a8c33f1e11e9ffcbc`. Deployment run `43003165980` completed successfully. At 2026-11-11 11:00 UTC, `/api/health/version` returned HTTP 200 and SHA `9da443e619a44d068c83449a8c33f1e11e9ffcbc` (`github-43003165980-1`), and `/api/health/ready` returned HTTP 200 with database and Redis up. This verifies the deployed revision and health, not a dedicated production onboarding validation request. No schema migration, production config, transaction, user record, or provider integration was changed. The latest fresh audit and source-level applicability assessment are in [dependency audit QA](dependency-audit-2026-11-11.md); six moderate package advisories remain reported and are not claimed fixed.
