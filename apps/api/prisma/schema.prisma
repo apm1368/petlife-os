@@ -11810,11 +11810,24 @@ model HelpArticle {
   updatedAt DateTime @updatedAt
 
   versions HelpArticleVersion[]
+  voteDedup HelpArticleVoteDedup[]
 
   @@unique([locale, slug])
   @@index([categoryId, locale, status])
   @@index([locale, status, isFaq])
   @@map("help_articles")
+}
+
+/// Short-lived pseudonymous vote claims; never stores IP addresses or user agents.
+model HelpArticleVoteDedup {
+  articleId    String      @map("article_id") @db.Uuid
+  article      HelpArticle @relation(fields: [articleId], references: [id], onDelete: Cascade, map: "help_vote_dedup_article_fkey")
+  voteDay      DateTime    @map("vote_day") @db.Date
+  clientDigest String      @map("client_digest") @db.Char(64)
+
+  @@id([articleId, voteDay, clientDigest], map: "help_vote_dedup_pkey")
+  @@index([voteDay], map: "help_vote_dedup_vote_day_idx")
+  @@map("help_vote_dedup")
 }
 
 /// An immutable snapshot of a HelpArticle, written on every save. Rollback copies a snapshot back and

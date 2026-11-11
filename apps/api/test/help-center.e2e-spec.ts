@@ -50,6 +50,25 @@ describe("Help Center, legal pages and status", () => {
       categoryId = (await send("post", publisher, "/admin/help/categories").send({ slug: catSlug, titleFa: "سفارش‌ها", titleEn: "Orders" }).expect(201)).body.id;
     });
 
+    it("counts concurrent anonymous feedback from the same client only once per article and day", async () => {
+      const s = slug("feedback");
+      const saved = (await send("post", editor, "/admin/help/articles").send({ categoryId, locale: "fa", slug: s, title: "راهنما", body: "متن راهنما" }).expect(201)).body;
+      const csrf = extractCookie((await request(server()).get("/health/live")).headers["set-cookie"], "petlife_csrf")!;
+      const vote = (agent: string, helpful: boolean) => request(server()).post(`/help/articles/${s}/vote?locale=fa`).set("Cookie", `petlife_csrf=${csrf}`).set("x-csrf-token", csrf).set("User-Agent", agent).send({ helpful });
+      await vote("same-test-client", true).expect(404);
+      await send("post", publisher, `/admin/help/articles/${saved.id}/publish`).send({}).expect(201);
+      const results = await Promise.all(Array.from({ length: 3 }, () => vote("same-test-client", true)));
+      expect(results.map((result) => result.status)).toEqual([200, 200, 200]);
+      const stored = await db.helpArticle.findUniqueOrThrow({ where: { id: saved.id } });
+      expect(stored.helpfulCount).toBe(1);
+      expect(stored.notHelpfulCount).toBe(0);
+      // Changing the selected answer cannot count a second vote from the same client.
+      await vote("same-test-client", false).expect(200);
+      expect((await db.helpArticle.findUniqueOrThrow({ where: { id: saved.id } })).notHelpfulCount).toBe(0);
+      await vote("different-test-client", false).expect(200);
+      expect((await db.helpArticle.findUniqueOrThrow({ where: { id: saved.id } })).notHelpfulCount).toBe(1);
+    });
+
     it("serves nothing to readers until an article is published", async () => {
       const s = slug("refund");
       const saved = (await send("post", editor, "/admin/help/articles").send({ categoryId, locale: "fa", slug: s, title: "بازپرداخت سفارش", body: "برای بازپرداخت وارد حساب شوید." }).expect(201)).body;

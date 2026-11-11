@@ -1,5 +1,8 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, ServiceUnavailableException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { createHmac } from "node:crypto";
 import { HelpArticleStatus, Locale, Prisma } from "@prisma/client";
+import type { AppEnv } from "../../config/env";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
 import { AdminAuditLogService } from "../admin/audit/admin-audit-log.service";
@@ -56,6 +59,7 @@ export class HelpCenterService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AdminAuditLogService,
+    private readonly config: ConfigService<AppEnv, true>,
   ) {}
 
   private static readonly PUBLIC: Prisma.HelpArticleWhereInput = { status: HelpArticleStatus.PUBLISHED, publishedVersion: { not: null } };
@@ -132,13 +136,28 @@ export class HelpCenterService {
       .map((x) => this.toSummary(x.a));
   }
 
-  /** Records one "was this helpful" vote on a published article; unpublished or unknown articles answer 404. */
-  async vote(locale: Locale, slug: string, helpful: boolean): Promise<{ ok: true }> {
-    const result = await this.prisma.helpArticle.updateMany({
-      where: { ...HelpCenterService.PUBLIC, locale, slug },
-      data: helpful ? { helpfulCount: { increment: 1 } } : { notHelpfulCount: { increment: 1 } },
+  /** Limit repeat votes per article/client/day. Shared IPs can collide; rotating clients can evade it. */
+  async vote(locale: Locale, slug: string, helpful: boolean, client: { ip?: string; userAgent?: string }): Promise<{ ok: true }> {
+    // Express req.ip respects the application's configured trusted proxies; never trust a forwarded header directly.
+    if (!client.ip) throw new ServiceUnavailableException("Feedback is temporarily unavailable");
+    const day = new Date().toISOString().slice(0, 10); // UTC day, also part of the keyed pseudonym
+    const digest = createHmac("sha256", this.config.get("SESSION_SECRET", { infer: true }))
+      .update(JSON.stringify(["help-vote-v1", day, client.ip, (client.userAgent ?? "").slice(0, 512)]))
+      .digest("hex");
+    await this.prisma.$transaction(async (tx) => {
+      const article = await tx.helpArticle.findFirst({ where: { ...HelpCenterService.PUBLIC, locale, slug, category: { isActive: true } }, select: { id: true } });
+      if (!article) throw new NotFoundApiException("HelpArticle");
+      // Indexed, bounded retention: retain only today and yesterday; IP and user agent are never stored.
+      await tx.$executeRaw`DELETE FROM "help_vote_dedup" WHERE "vote_day" < ${day}::date - INTERVAL '1 day'`;
+      const inserted = await tx.$executeRaw`INSERT INTO "help_vote_dedup" ("article_id", "vote_day", "client_digest") VALUES (${article.id}::uuid, ${day}::date, ${digest}) ON CONFLICT DO NOTHING`;
+      if (!inserted) return;
+      const result = await tx.helpArticle.updateMany({
+        where: { id: article.id, ...HelpCenterService.PUBLIC, category: { isActive: true } },
+        data: helpful ? { helpfulCount: { increment: 1 } } : { notHelpfulCount: { increment: 1 } },
+      });
+      // A concurrent unpublish must not leave a dedup record for a vote that was not counted.
+      if (result.count === 0) throw new NotFoundApiException("HelpArticle");
     });
-    if (result.count === 0) throw new NotFoundApiException("HelpArticle");
     return { ok: true };
   }
 
