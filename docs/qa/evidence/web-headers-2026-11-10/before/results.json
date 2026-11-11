@@ -1,0 +1,92 @@
+[
+  {
+    "testId": "QA-WEB-HEADERS-/en/help/faq",
+    "route": "/en/help/faq",
+    "http": 200,
+    "expected": {
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "SAMEORIGIN",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
+      "Content-Security-Policy": "frame-ancestors 'self'"
+    },
+    "observed": {
+      "X-Content-Type-Options": null,
+      "X-Frame-Options": null,
+      "Referrer-Policy": null,
+      "Content-Security-Policy": null
+    },
+    "status": "FAIL",
+    "sha": "40f0045e5dbda0afd974779373fa3fd43d18be3b",
+    "environment": "production public read-only plus disposable browser-local frame parents",
+    "dateUtc": "2026-11-10T18:28:14.010935+00:00",
+    "mutationMethodsAborted": []
+  },
+  {
+    "testId": "QA-WEB-HEADERS-/de/legal",
+    "route": "/de/legal",
+    "http": 200,
+    "expected": {
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "SAMEORIGIN",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
+      "Content-Security-Policy": "frame-ancestors 'self'"
+    },
+    "observed": {
+      "X-Content-Type-Options": null,
+      "X-Frame-Options": null,
+      "Referrer-Policy": null,
+      "Content-Security-Policy": null
+    },
+    "status": "FAIL",
+    "sha": "40f0045e5dbda0afd974779373fa3fd43d18be3b",
+    "environment": "production public read-only plus disposable browser-local frame parents",
+    "dateUtc": "2026-11-10T18:28:14.010958+00:00",
+    "mutationMethodsAborted": []
+  },
+  {
+    "testId": "QA-WEB-HEADERS-/es/register",
+    "route": "/es/register",
+    "http": 200,
+    "expected": {
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "SAMEORIGIN",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
+      "Content-Security-Policy": "frame-ancestors 'self'"
+    },
+    "observed": {
+      "X-Content-Type-Options": null,
+      "X-Frame-Options": null,
+      "Referrer-Policy": null,
+      "Content-Security-Policy": null
+    },
+    "status": "FAIL",
+    "sha": "40f0045e5dbda0afd974779373fa3fd43d18be3b",
+    "environment": "production public read-only plus disposable browser-local frame parents",
+    "dateUtc": "2026-11-10T18:28:14.010961+00:00",
+    "mutationMethodsAborted": []
+  },
+  {
+    "testId": "QA-WEB-FRAME-SAME",
+    "route": "/en/help/faq",
+    "expected": "Same-origin public frame remains usable",
+    "sameOriginLoaded": true,
+    "status": "PASS",
+    "sha": "40f0045e5dbda0afd974779373fa3fd43d18be3b",
+    "environment": "production public read-only plus disposable browser-local frame parents",
+    "dateUtc": "2026-11-10T18:28:14.010963+00:00",
+    "mutationMethodsAborted": []
+  },
+  {
+    "testId": "QA-WEB-FRAME-CROSS",
+    "route": "/en/help/faq",
+    "expected": "Actual browser refuses framing by a non-site origin",
+    "crossOriginDocumentHeadingVisible": false,
+    "framePolicyBlocked": false,
+    "status": "BLOCKED",
+    "limitation": "Public FAQ document framing only, not full cross-origin API hydration; no private account, clickjacking exploit or clinical preview acceptance. Neither content nor policy signal is inconclusive, not proof of protection.",
+    "sha": "40f0045e5dbda0afd974779373fa3fd43d18be3b",
+    "environment": "production public read-only plus disposable browser-local frame parents",
+    "dateUtc": "2026-11-10T18:28:14.010966+00:00",
+    "mutationMethodsAborted": []
+  }
+]

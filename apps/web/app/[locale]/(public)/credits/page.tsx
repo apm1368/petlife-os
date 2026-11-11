@@ -3,6 +3,11 @@ import { notFound } from "next/navigation";
 import { ParkCredits } from "@/features/landing/ParkCredits";
 import { parkCopy } from "@/features/landing/park-copy";
 import credits from "@/features/landing/photo-credits.json";
+import { publicPageMetadata } from "@/lib/seo/public-metadata";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  return publicPageMetadata((await params).locale, "credits");
+}
 
 /** Photo credits — every third-party photograph we publish, its author and licence (CC BY / CC BY-SA require it). */
 export default async function CreditsPage({ params }: { params: Promise<{ locale: string }> }) {

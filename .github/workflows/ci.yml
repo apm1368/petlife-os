@@ -67,6 +67,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Verify patched lint glob parser
+        run: node --test scripts/verify-brace-expansion.cjs
+
       # The deploy workflow is production-only. Keep its observable release metadata and
       # post-deploy smoke contract from drifting back to a staging-labelled release (TC-04).
       - name: Verify production deploy contract

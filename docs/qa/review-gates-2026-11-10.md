@@ -1,5 +1,7 @@
 # Release/review gate checkpoint — 2026-11-10 17:52 UTC
 
+> Superseded for security/financial code PRs by owner decision TC-21 in `docs/decisions.md` (2026-11-10). A separate human code reviewer is not mandatory for that narrow PR scope when diff/dependency inspection, relevant automated/security tests, final-head required CI, and the normal protected merge path are satisfied. Product-level second-person approval for sensitive financial/administrative operations, role separation, limits, audit, and approval controls remain unchanged. The text below records the earlier checkpoint and must not be applied as current policy.
+
 This records an unresolved owner-policy dependency, not an invented GitHub `REVIEW_REQUIRED` result.
 
 - Decision **TC-16** remains in `docs/decisions.md`: financial/security PRs require human review, other PRs reciprocal AI review, with evidence.
