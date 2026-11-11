@@ -1,4 +1,26 @@
 {
+  "blog": {
+    "index": {
+      "title": "Magazin",
+      "allCategories": "Alle",
+      "loading": "Artikel werden geladen",
+      "empty": "Noch keine Artikel. Schau bald wieder vorbei.",
+      "loadMore": "Mehr laden",
+      "retry": "Erneut versuchen",
+      "categoryNotFoundTitle": "Kategorie nicht gefunden",
+      "categoryNotFoundMessage": "Diese Kategorie gibt es nicht oder sie ist nicht verfügbar.",
+      "tagNotFoundTitle": "Thema nicht gefunden",
+      "tagNotFoundMessage": "Dieses Thema gibt es nicht oder es ist nicht verfügbar."
+    },
+    "article": {
+      "loading": "Artikel wird geladen",
+      "published": "Veröffentlicht am {date}",
+      "updated": "Aktualisiert am {date}",
+      "retry": "Erneut versuchen",
+      "notFoundTitle": "Artikel nicht gefunden",
+      "notFoundMessage": "Diesen Artikel gibt es nicht oder er ist gerade nicht verfügbar."
+    }
+  },
   "publicHelp": {
     "failureDescription": "Der Dienst ist nicht erreichbar. Bitte versuchen Sie es erneut.",
     "retry": "Erneut versuchen",
@@ -3197,6 +3219,31 @@
     }
   },
   "rollout": {
+    "editorial": {
+      "eyebrow": "Das opetlife Magazin",
+      "title": "Ein bisschen mehr wissen. Besser zusammen leben.",
+      "description": "Pflege, Alltagsentdeckungen und hilfreiche Ratschläge für das Leben mit deinem Tier.",
+      "search": "Artikel durchsuchen",
+      "searchButton": "Suchen",
+      "related": "Weiterlesen",
+      "tags": "Themen entdecken",
+      "share": "Diesen Artikel teilen",
+      "relatedFailed": "Ähnliche Artikel konnten nicht geladen werden.",
+      "loadFailed": "Der Artikel konnte nicht geladen werden.",
+      "readArticle": "Artikel lesen",
+      "back": "Alle Artikel",
+      "minutes": "Etwa {count} Minuten Lesezeit",
+      "retry": "Erneut versuchen",
+      "guidesLabel": "Ratgeber",
+      "blogLabel": "Magazin",
+      "home": "Startseite",
+      "breadcrumb": "Brotkrümelnavigation",
+      "contents": "In diesem Artikel",
+      "otherLanguages": "In anderen Sprachen lesen",
+      "pageLabel": "Seite {page}",
+      "newer": "Vorherige Seite",
+      "older": "Nächste Seite"
+    },
     "records": {
       "clinical": "Klinische Akte",
       "problems": "Erkrankungsliste",

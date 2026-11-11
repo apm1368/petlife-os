@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { localeHomePath } from "@/lib/seo/site";
 import { Brand } from "@/features/brand/Brand";
 import Link from "next/link";
 import { LockKeyhole, ShieldCheck } from "@petlife/ui";
@@ -21,7 +22,7 @@ export default async function AuthLayout({ children, params }: { children: React
     <aside className="auth-brand-panel" aria-label="opetlife">
       <Image unoptimized src={parkCopy[locale].imageSrc} alt="" fill sizes="(max-width: 820px) 100vw, 50vw" priority />
       <div className="auth-brand-copy">
-        <Link href={`/${locale}`}><Brand /></Link>
+        <Link href={localeHomePath(locale)}><Brand /></Link>
         <h2>{c.tagline}</h2><p>{c.description}</p>
         <div className="auth-trust-row"><span><ShieldCheck size={16} aria-hidden="true" />{c.privacy}</span><span><LockKeyhole size={16} aria-hidden="true" />{c.title}</span></div>
       </div>

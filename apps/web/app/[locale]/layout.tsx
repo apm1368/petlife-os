@@ -13,24 +13,31 @@ import { DisplayModeSync } from "@/features/display-mode/DisplayModeSync";
 import { AuthModalOrigin } from "@/features/auth/AuthModalOrigin";
 import { DesignRoot } from "@/features/design-system/DesignRoot";
 import { PageMotion } from "@/features/motion/PageMotion";
+import { SITE_NAME, SITE_ORIGIN, SITE_TAGLINE } from "@/lib/seo/site";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://opetlife.ir"),
-  title: "opetlife",
-  applicationName: "opetlife",
-  icons: {
-    icon: [
-      { url: "/brand/opetlife/04_app_icon_light.png", media: "(prefers-color-scheme: light)" },
-      { url: "/brand/opetlife/03_app_icon_dark.png", media: "(prefers-color-scheme: dark)" },
-    ],
-    apple: "/brand/opetlife/04_app_icon_light.png",
-  },
-  description: "Your pet's life, in one place.",
-};
+/** Site-wide defaults in the page's own language; every public page that should rank sets its own title, description and canonical. */
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const routeLocale = isRouteLocale(locale) ? locale : "fa";
+  return {
+    metadataBase: new URL(SITE_ORIGIN),
+    title: SITE_NAME[routeLocale],
+    applicationName: "opetlife",
+    icons: {
+      icon: [
+        { url: "/brand/opetlife/04_app_icon_light.png", media: "(prefers-color-scheme: light)" },
+        { url: "/brand/opetlife/03_app_icon_dark.png", media: "(prefers-color-scheme: dark)" },
+      ],
+      apple: "/brand/opetlife/04_app_icon_light.png",
+    },
+    description: SITE_TAGLINE[routeLocale],
+    alternates: { types: { "application/rss+xml": `/${routeLocale}/feed.xml` } },
+  };
+}
 
 export default async function LocaleLayout({
   children,

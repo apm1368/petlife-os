@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { localeHomePath } from "@/lib/seo/site";
 import { ArrowUp } from "@petlife/ui";
 import { Brand } from "@/features/brand/Brand";
 import { storyCopy } from "@/features/landing/story-copy";
@@ -13,7 +14,7 @@ export function PublicFooter({ locale }: { locale: RouteLocale }) {
   return <footer className="park-footer public-route-footer" aria-label={copy.footerLabel}>
     <div className="park-footer__main">
       <div className="park-footer__brand">
-        <Link href={`/${locale}`} className="park-brand"><Brand /></Link>
+        <Link href={localeHomePath(locale)} className="park-brand"><Brand /></Link>
         <p>{copy.footerDescription}</p>
         <Link href={`/${locale}#lp-main`} className="park-footer__back">{copy.footerTop}<ArrowUp size={16} aria-hidden="true" /></Link>
       </div>

@@ -1,5 +1,6 @@
 "use client";
 import { Brand } from "@/features/brand/Brand";
+import { localeHomePath } from "@/lib/seo/site";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -43,7 +44,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
   return (
     <div className={`min-h-screen bg-surface-base ${warmSurface ? "public-shell--commerce" : ""}`}>
       <header className="public-site-header border-b border-border-subtle bg-surface-elevated px-4 py-3">
-        <Link href={`/${locale}`} className="text-section-title text-text-primary">
+        <Link href={localeHomePath(locale)} className="text-section-title text-text-primary">
           <Brand />
         </Link>
         <PublicPrimaryNavigation />

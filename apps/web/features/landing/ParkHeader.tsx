@@ -9,6 +9,7 @@ import { useSessionBootstrap } from "@/hooks/use-session-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
 import { parkCopy } from "./park-copy";
 import { DisplayModeToggle } from "@/features/display-mode/DisplayModeToggle";
+import { localeHomePath } from "@/lib/seo/site";
 
 export function ParkHeader({ locale }: { locale: RouteLocale }) {
   useSessionBootstrap();
@@ -17,21 +18,22 @@ export function ParkHeader({ locale }: { locale: RouteLocale }) {
   const menuButton = useRef<HTMLButtonElement>(null);
   const c = parkCopy[locale];
   const root = `/${locale}`;
+  const home = localeHomePath(locale);
   const languageNames: Record<RouteLocale, string> = { fa: "زبان", en: "Language", de: "Sprache", es: "Idioma" };
   const links = [
-    { href: root, label: c.home },
-    { href: `${root}#park-services`, label: c.services.vet.title },
-    { href: `${root}#park-about`, label: c.about },
-    { href: `${root}#park-partners`, label: c.partners },
+    { href: home, label: c.home },
+    { href: `${home}#park-services`, label: c.services.vet.title },
+    { href: `${home}#park-about`, label: c.about },
+    { href: `${home}#park-partners`, label: c.partners },
   ];
   return <header className="park-header" onKeyDown={event => { if (event.key === "Escape") { setOpen(false); menuButton.current?.focus(); } }}>
     <a href="#lp-main" className="park-skip">{c.skip}</a>
     <div className="park-header__inner">
-      <Link className="park-brand" href={root} aria-label="opetlife">
+      <Link className="park-brand" href={home} aria-label="opetlife">
         <span><Brand /><small>{c.brandTagline}</small></span>
       </Link>
       <nav className="park-desktop-nav" aria-label={c.navLabel}>
-        {links.map(link => <Link key={link.href} href={link.href} aria-current={link.href === root ? "page" : undefined}>{link.label}</Link>)}
+        {links.map(link => <Link key={link.href} href={link.href} aria-current={link.href === home ? "page" : undefined}>{link.label}</Link>)}
       </nav>
       <div className="park-header__actions">
         <div className="park-partner-links">

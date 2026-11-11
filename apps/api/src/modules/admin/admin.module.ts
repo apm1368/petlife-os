@@ -84,6 +84,7 @@ import { AdminSellerAdjustmentService } from "./finance/admin-seller-adjustment.
 import { AdminMarketplaceSettlementService } from "./finance/admin-marketplace-settlement.service";
 import { AdminSellerFinanceController } from "./finance/admin-seller-finance.controller";
 import { AdminArticleService } from "./content/admin-article.service";
+import { IndexNowService } from "../content/indexnow.service";
 import { AdminCategoryService } from "./content/admin-category.service";
 import { AdminTagService } from "./content/admin-tag.service";
 import { AdminContentAuthorService } from "./content/admin-content-author.service";
@@ -239,6 +240,7 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminMarketplaceSettlementService,
     AdminMediaService,
     AdminArticleService,
+    IndexNowService,
     AdminCategoryService,
     AdminTagService,
     AdminContentAuthorService,

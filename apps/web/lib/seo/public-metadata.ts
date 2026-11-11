@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { isRouteLocale, locales, type RouteLocale } from "@/lib/i18n/config";
+import { OG_LOCALE, SITE_NAME, SITE_ORIGIN, SITE_SHARE_IMAGE_PATH, localeHomePath } from "./site";
 
-export const SITE_ORIGIN = "https://opetlife.ir";
+export { SITE_ORIGIN };
 
 type Copy = Record<RouteLocale, { title: string; description: string }>;
 
@@ -128,12 +129,62 @@ const pages = {
   },
   blog: {
     path: "blog",
-    indexable: false,
+    indexable: true,
     copy: {
-      fa: { title: "مقاله‌های اپت‌لایف", description: "مقاله‌های عمومی اپت‌لایف پس از انتشار نمایش داده می‌شوند." },
-      en: { title: "Opetlife articles", description: "Public Opetlife articles are shown when published." },
-      de: { title: "Artikel von opetlife", description: "Öffentliche Artikel von opetlife werden nach ihrer Veröffentlichung angezeigt." },
-      es: { title: "Artículos de opetlife", description: "Los artículos públicos de opetlife se muestran cuando se publican." },
+      fa: { title: "مجله اپت‌لایف | آموزش و نگهداری سگ و گربه", description: "مقاله‌های کاربردی دربارهٔ آموزش، تغذیه، سلامت و نگهداری سگ و گربه؛ نوشته‌شده با نگاه دامپزشکی و قابل اجرا در خانه." },
+      en: { title: "Opetlife magazine | Dog and cat training and care", description: "Practical articles on training, feeding, health and everyday care for dogs and cats, written to be used at home." },
+      de: { title: "opetlife Magazin | Hunde- und Katzenerziehung und Pflege", description: "Praktische Artikel zu Erziehung, Ernährung, Gesundheit und Pflege von Hunden und Katzen – für den Alltag zu Hause." },
+      es: { title: "Revista opetlife | Educación y cuidado de perros y gatos", description: "Artículos prácticos sobre educación, alimentación, salud y cuidados diarios de perros y gatos, para aplicar en casa." },
+    },
+  },
+  guides: {
+    path: "guides",
+    indexable: true,
+    copy: {
+      fa: { title: "راهنماهای مراقبت از سگ و گربه | اپت‌لایف", description: "راهنماهای قدم‌به‌قدم مراقبت از سگ و گربه: واکسن، تغذیه، رفتار و کارهایی که در موقعیت‌های مهم باید انجام دهید." },
+      en: { title: "Dog and cat care guides | Opetlife", description: "Step-by-step dog and cat care guides: vaccines, feeding, behaviour and what to do in the moments that matter." },
+      de: { title: "Pflege-Ratgeber für Hund und Katze | opetlife", description: "Schritt-für-Schritt-Ratgeber für Hund und Katze: Impfungen, Ernährung, Verhalten und was in wichtigen Momenten zu tun ist." },
+      es: { title: "Guías de cuidado de perros y gatos | opetlife", description: "Guías paso a paso para perros y gatos: vacunas, alimentación, comportamiento y qué hacer en los momentos importantes." },
+    },
+  },
+  vetFind: {
+    path: "vet/find",
+    indexable: true,
+    copy: {
+      fa: { title: "پیدا کردن دامپزشک و کلینیک دامپزشکی | اپت‌لایف", description: "دامپزشک‌ها و کلینیک‌های ثبت‌شده در اپت‌لایف را ببینید، اطلاعات و زمان‌های قابل رزرو را بررسی کنید و نوبت بگیرید." },
+      en: { title: "Find a vet or veterinary clinic | Opetlife", description: "Browse vets and veterinary clinics listed on Opetlife, check their details and available times, and request an appointment." },
+      de: { title: "Tierarzt oder Tierklinik finden | opetlife", description: "Finde Tierärzte und Tierkliniken auf opetlife, prüfe Angaben und freie Termine und stelle eine Terminanfrage." },
+      es: { title: "Encuentra un veterinario o clínica | opetlife", description: "Consulta veterinarios y clínicas en opetlife, revisa sus datos y horarios disponibles y solicita una cita." },
+    },
+  },
+  animalSupportCampaigns: {
+    path: "animal-support/campaigns",
+    indexable: true,
+    copy: {
+      fa: { title: "کمپین‌های حمایت از حیوانات | اپت‌لایف", description: "کمپین‌های فعال حمایت از حیوانات بی‌سرپرست و سازمان‌های مردم‌نهاد را ببینید و در آن‌ها مشارکت کنید." },
+      en: { title: "Animal support campaigns | Opetlife", description: "See active campaigns supporting stray and rescued animals and the organisations behind them, and take part." },
+      de: { title: "Tierschutz-Kampagnen | opetlife", description: "Aktive Kampagnen für Streuner und gerettete Tiere und die Organisationen dahinter – informiere dich und hilf mit." },
+      es: { title: "Campañas de apoyo animal | opetlife", description: "Consulta campañas activas para animales callejeros y rescatados, y las organizaciones que las impulsan." },
+    },
+  },
+  animalSupportNeeds: {
+    path: "animal-support/needs",
+    indexable: true,
+    copy: {
+      fa: { title: "نیازهای حیوانات و پناهگاه‌ها | اپت‌لایف", description: "نیازهای ثبت‌شدهٔ پناهگاه‌ها و حامیان حیوانات؛ از غذا و دارو تا سرپناه موقت، و راه‌های کمک کردن." },
+      en: { title: "Animal and shelter needs | Opetlife", description: "Listed needs from shelters and animal helpers, from food and medicine to temporary foster homes, and how to help." },
+      de: { title: "Bedarf von Tieren und Tierheimen | opetlife", description: "Gemeldeter Bedarf von Tierheimen und Helfern – von Futter und Medikamenten bis Pflegestellen – und wie du helfen kannst." },
+      es: { title: "Necesidades de animales y refugios | opetlife", description: "Necesidades publicadas por refugios y protectores, desde comida y medicinas hasta hogares temporales, y cómo ayudar." },
+    },
+  },
+  travelExternal: {
+    path: "travel/external",
+    indexable: true,
+    copy: {
+      fa: { title: "اقامتگاه‌های پذیرای حیوان خانگی | اپت‌لایف", description: "فهرست روزانهٔ اقامتگاه‌هایی که پذیرش حیوان خانگی را اعلام کرده‌اند؛ پیش از رزرو، شرایط را در منبع بررسی کنید." },
+      en: { title: "Stays that accept pets | Opetlife", description: "A daily list of stays that state they accept pets. Check the conditions with the source before booking." },
+      de: { title: "Unterkünfte, die Haustiere erlauben | opetlife", description: "Tägliche Liste von Unterkünften, die Haustiere erlauben. Prüfe die Bedingungen vor der Buchung bei der Quelle." },
+      es: { title: "Alojamientos que aceptan mascotas | opetlife", description: "Lista diaria de alojamientos que indican aceptar mascotas. Confirma las condiciones con la fuente antes de reservar." },
     },
   },
   places: {
@@ -161,12 +212,21 @@ const pages = {
 export type PublicSeoPage = keyof typeof pages;
 
 export const sitemapPages: readonly PublicSeoPage[] = [
-  "home", "services", "community", "lostPets", "animalSupport", "travel", "contact", "credits", "status",
+  "home", "blog", "guides", "services", "vetFind", "community", "lostPets", "animalSupport", "animalSupportCampaigns", "animalSupportNeeds", "travel", "travelExternal", "contact", "credits", "status",
 ];
 
 export function publicPagePath(locale: RouteLocale, page: PublicSeoPage): string {
   const suffix = pages[page].path;
-  return suffix ? `/${locale}/${suffix}` : `/${locale}`;
+  return suffix ? `/${locale}/${suffix}` : localeHomePath(locale);
+}
+
+/** Canonical + reciprocal hreflang for any public path that exists identically in every locale (`suffix` without the locale). */
+export function localizedAlternates(locale: RouteLocale, suffix: string): NonNullable<Metadata["alternates"]> {
+  const path = (language: RouteLocale) => (suffix ? `/${language}/${suffix}` : localeHomePath(language));
+  return {
+    canonical: path(locale),
+    languages: { ...Object.fromEntries(locales.map((language) => [language, path(language)])), "x-default": path("fa") },
+  };
 }
 
 export function publicPageMetadata(localeValue: string, page: PublicSeoPage): Metadata {
@@ -190,12 +250,15 @@ export function publicPageMetadata(localeValue: string, page: PublicSeoPage): Me
     };
     metadata.openGraph = {
       type: "website",
-      siteName: "opetlife",
+      siteName: SITE_NAME[locale],
       title: copy.title,
       description: copy.description,
       url: publicPagePath(locale, page),
-      locale: { fa: "fa_IR", en: "en_US", de: "de_DE", es: "es_ES" }[locale],
+      locale: OG_LOCALE[locale],
+      alternateLocale: locales.filter((l) => l !== locale).map((l) => OG_LOCALE[l]),
+      images: [{ url: SITE_SHARE_IMAGE_PATH, alt: SITE_NAME[locale] }],
     };
+    metadata.twitter = { card: "summary_large_image", title: copy.title, description: copy.description, images: [SITE_SHARE_IMAGE_PATH] };
   }
 
   return metadata;

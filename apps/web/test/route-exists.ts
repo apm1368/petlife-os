@@ -18,7 +18,8 @@ function match(dir: string, segments: string[]): boolean {
   const entries = readdirSync(dir, { withFileTypes: true }).filter((e) => e.isDirectory());
   // Route groups don't consume a URL segment.
   for (const group of entries.filter((e) => e.name.startsWith("("))) if (match(join(dir, group.name), segments)) return true;
-  if (segments.length === 0) return existsSync(join(dir, "page.tsx"));
+  // A page, or a route handler such as the per-language RSS feed (/fa/feed.xml).
+  if (segments.length === 0) return existsSync(join(dir, "page.tsx")) || existsSync(join(dir, "route.ts"));
   const [head, ...rest] = segments;
   const literal = entries.find((e) => e.name === head);
   if (literal && match(join(dir, literal.name), rest)) return true;

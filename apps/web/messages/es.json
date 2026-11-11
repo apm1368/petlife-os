@@ -1,4 +1,26 @@
 {
+  "blog": {
+    "index": {
+      "title": "Revista",
+      "allCategories": "Todos",
+      "loading": "Cargando artículos",
+      "empty": "Aún no hay artículos. Vuelve pronto.",
+      "loadMore": "Cargar más",
+      "retry": "Reintentar",
+      "categoryNotFoundTitle": "Categoría no encontrada",
+      "categoryNotFoundMessage": "Esta categoría no existe o no está disponible.",
+      "tagNotFoundTitle": "Tema no encontrado",
+      "tagNotFoundMessage": "Este tema no existe o no está disponible."
+    },
+    "article": {
+      "loading": "Cargando artículo",
+      "published": "Publicado el {date}",
+      "updated": "Actualizado el {date}",
+      "retry": "Reintentar",
+      "notFoundTitle": "Artículo no encontrado",
+      "notFoundMessage": "Este artículo no existe o no está disponible en este momento."
+    }
+  },
   "publicHelp": {
     "failureDescription": "No se pudo conectar con el servicio. Inténtalo de nuevo.",
     "retry": "Reintentar",
@@ -3187,6 +3209,31 @@
     }
   },
   "rollout": {
+    "editorial": {
+      "eyebrow": "La revista opetlife",
+      "title": "Saber un poco más. Vivir mejor juntos.",
+      "description": "Cuidados, descubrimientos cotidianos y consejos útiles para la vida con tu compañero.",
+      "search": "Buscar artículos",
+      "searchButton": "Buscar",
+      "related": "Sigue leyendo",
+      "tags": "Explora temas",
+      "share": "Comparte este artículo",
+      "relatedFailed": "No se pudieron cargar los artículos relacionados.",
+      "loadFailed": "No se pudo cargar el artículo.",
+      "readArticle": "Leer artículo",
+      "back": "Todos los artículos",
+      "minutes": "Unos {count} minutos de lectura",
+      "retry": "Reintentar",
+      "guidesLabel": "Guías",
+      "blogLabel": "Revista",
+      "home": "Inicio",
+      "breadcrumb": "Ruta de navegación",
+      "contents": "En este artículo",
+      "otherLanguages": "Leer en otros idiomas",
+      "pageLabel": "Página {page}",
+      "newer": "Página anterior",
+      "older": "Página siguiente"
+    },
     "records": {
       "clinical": "Historia clínica",
       "problems": "Lista de afecciones",

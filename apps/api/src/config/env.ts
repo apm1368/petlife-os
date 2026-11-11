@@ -226,6 +226,10 @@ const envSchema = z.object({
   /// generous for a blog cover/body image without a native image-processing
   /// dependency (see README "Media") to pre-compress on the server.
   CMS_MEDIA_MAX_SIZE_BYTES: z.coerce.number().int().positive().default(5_242_880),
+  /// Article videos (mp4/webm motion graphics) are larger than images; capped below the 50 MB upload ceiling.
+  CMS_VIDEO_MAX_SIZE_BYTES: z.coerce.number().int().positive().max(50 * 1024 * 1024).default(40 * 1024 * 1024),
+  /// IndexNow ownership key — public by design (served by the web app at /{key}.txt).
+  INDEXNOW_KEY: z.string().regex(/^[A-Za-z0-9-]{8,128}$/).default("4a0befe853050c1497b259da2760af9f"),
 
   /// Subscription + Membership + Metering (Handoff 16) — how often the
   /// background renewal worker polls for periods whose `endAt` has passed.

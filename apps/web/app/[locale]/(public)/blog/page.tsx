@@ -1,10 +1,11 @@
-import { PublicBlogIndexView } from "@/features/content/PublicBlogIndexView";
-import { publicPageMetadata } from "@/lib/seo/public-metadata";
+import { ArticleIndexRoute, articleIndexMetadataFor } from "@/features/content/article-index-route";
 
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
-  return publicPageMetadata((await params).locale, "blog");
+type Props = { params: Promise<{ locale: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> };
+
+export async function generateMetadata({ params, searchParams }: Props) {
+  return articleIndexMetadataFor((await params).locale, { kind: "blog" }, await searchParams);
 }
 
-export default function BlogIndexPage() {
-  return <PublicBlogIndexView />;
+export default async function BlogIndexPage({ params, searchParams }: Props) {
+  return <ArticleIndexRoute localeParam={(await params).locale} index={{ kind: "blog" }} searchParams={await searchParams} />;
 }

@@ -5,6 +5,7 @@ import { HomeLanding } from "@/features/landing/HomeLanding";
 import "@/features/landing/park-landing.css";
 import "@/features/landing/park-story.css";
 import { publicPageMetadata } from "@/lib/seo/public-metadata";
+import { jsonLdScript, organizationJsonLd } from "@/lib/seo/site";
 
 export async function generateMetadata({
   params,
@@ -19,5 +20,10 @@ export async function generateMetadata({
 export default async function RootPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isRouteLocale(locale)) notFound();
-  return <HomeLanding locale={locale} />;
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd(locale)) }} />
+      <HomeLanding locale={locale} />
+    </>
+  );
 }

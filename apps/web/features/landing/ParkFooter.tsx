@@ -1,4 +1,5 @@
 import { Brand } from "@/features/brand/Brand";
+import { localeHomePath } from "@/lib/seo/site";
 import Link from "next/link";
 import { ArrowUp } from "@petlife/ui";
 import type { RouteLocale } from "@/lib/i18n/config";
@@ -9,7 +10,7 @@ export function ParkFooter({ locale }: { locale: RouteLocale }) {
   return <footer className="park-footer" aria-label={c.footerLabel}>
     <div className="park-footer__main">
       <div className="park-footer__brand">
-        <Link href={`/${locale}`} className="park-brand"><Brand /></Link>
+        <Link href={localeHomePath(locale)} className="park-brand"><Brand /></Link>
         <p>{c.footerDescription}</p>
         <Link href={`/${locale}#lp-main`} className="park-footer__back">{c.footerTop}<ArrowUp size={16} aria-hidden="true" /></Link>
       </div>

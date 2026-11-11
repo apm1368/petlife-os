@@ -1250,44 +1250,44 @@ model User {
   /// billing — updatedAt moves on every profile change, so it cannot answer "when were they last here".
   lastActiveAt           DateTime?
 
-  authIdentities          AuthIdentity[]
-  passwordResetTokens     PasswordResetToken[]
-  sessions                Session[]
-  householdMemberships    HouseholdMember[]
-  petAccessGrants         PetAccessGrant[]
-  activePetPreferences    ActivePetPreference[]
-  onboardingProgress      OnboardingProgress[]
-  petInterests            UserPetInterest[]
-  providerProfiles        ProviderUser[]
-  bookings                Booking[]
-  bookingSeries           BookingSeries[]
-  providerContext         ProviderContextPreference?
-  carts                   Cart[]
-  checkouts               Checkout[]
-  orders                  Order[]
-  sellerMemberships       SellerMembership[]
-  catalogProductRequests CatalogProductRequest[] @relation("RequestedCatalogProducts")
-  sellerContext           SellerContextPreference?
-  inventoryMovements      InventoryMovement[]
-  notifications           Notification[]
-  notificationPreferences NotificationPreference[]
-  notificationQuietHours  NotificationQuietHours?
-  consents                UserConsent[]
-  dataExportRequests      DataExportRequest[]
-  accountDeletionRequests AccountDeletionRequest[]
-  acceptedInvitations     HouseholdInvitation[]      @relation("AcceptedInvitationUser")
-  requestedInvitations    HouseholdInvitation[]      @relation("RequestedInvitationUser")
-  reviewedInvitations     HouseholdInvitation[]      @relation("ReviewedInvitationUser")
+  authIdentities             AuthIdentity[]
+  passwordResetTokens        PasswordResetToken[]
+  sessions                   Session[]
+  householdMemberships       HouseholdMember[]
+  petAccessGrants            PetAccessGrant[]
+  activePetPreferences       ActivePetPreference[]
+  onboardingProgress         OnboardingProgress[]
+  petInterests               UserPetInterest[]
+  providerProfiles           ProviderUser[]
+  bookings                   Booking[]
+  bookingSeries              BookingSeries[]
+  providerContext            ProviderContextPreference?
+  carts                      Cart[]
+  checkouts                  Checkout[]
+  orders                     Order[]
+  sellerMemberships          SellerMembership[]
+  catalogProductRequests     CatalogProductRequest[]    @relation("RequestedCatalogProducts")
+  sellerContext              SellerContextPreference?
+  inventoryMovements         InventoryMovement[]
+  notifications              Notification[]
+  notificationPreferences    NotificationPreference[]
+  notificationQuietHours     NotificationQuietHours?
+  consents                   UserConsent[]
+  dataExportRequests         DataExportRequest[]
+  accountDeletionRequests    AccountDeletionRequest[]
+  acceptedInvitations        HouseholdInvitation[]      @relation("AcceptedInvitationUser")
+  requestedInvitations       HouseholdInvitation[]      @relation("RequestedInvitationUser")
+  reviewedInvitations        HouseholdInvitation[]      @relation("ReviewedInvitationUser")
   /// Pets whose primary owner this user is (ID-01).
-  ownedPets               PetOwnership[]             @relation("PetPrimaryOwner")
+  ownedPets                  PetOwnership[]             @relation("PetPrimaryOwner")
   /// Ownership transfers this user proposed (ID-01, ID-05).
-  proposedOwnershipTransfers PetOwnershipTransfer[]  @relation("TransferProposedBy")
+  proposedOwnershipTransfers PetOwnershipTransfer[]     @relation("TransferProposedBy")
   /// Ownership transfers addressed to this user (ID-01, ID-05).
-  receivedOwnershipTransfers PetOwnershipTransfer[]  @relation("TransferRecipient")
+  receivedOwnershipTransfers PetOwnershipTransfer[]     @relation("TransferRecipient")
   /// Read-only memory copies left for this user after a household separation (ID-02).
-  memoryCopies            PetMemoryCopy[]
+  memoryCopies               PetMemoryCopy[]
   /// Subscriptions this user is the recorded payer for (ID-07).
-  paidSubscriptions       Subscription[]          @relation("SubscriptionPayer")
+  paidSubscriptions          Subscription[]             @relation("SubscriptionPayer")
 
   adminUser                 AdminUser?
   supportCasesRequested     SupportCase[]
@@ -1435,28 +1435,28 @@ model HouseholdMember {
 }
 
 model HouseholdInvitation {
-  id               String                    @id @default(uuid()) @db.Uuid
-  householdId      String                    @db.Uuid
-  household        Household                 @relation(fields: [householdId], references: [id], onDelete: Cascade)
-  contact          String
-  tokenHash        String                    @unique
-  status           HouseholdInvitationStatus @default(PENDING)
-  invitedByUserId  String                    @db.Uuid
-  acceptedByUserId String?                   @db.Uuid
-  acceptedBy       User?                     @relation("AcceptedInvitationUser", fields: [acceptedByUserId], references: [id], onDelete: SetNull)
-  requestedByUserId String?                  @db.Uuid
-  requestedBy       User?                    @relation("RequestedInvitationUser", fields: [requestedByUserId], references: [id], onDelete: SetNull)
-  reviewedByUserId String?                   @db.Uuid
-  reviewedBy       User?                     @relation("ReviewedInvitationUser", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
-  initialAccess    Json
-  expiresAt        DateTime
-  requestedAt      DateTime?
-  reviewedAt       DateTime?
-  acceptedAt       DateTime?
-  declinedAt       DateTime?
-  cancelledAt      DateTime?
-  createdAt        DateTime                  @default(now())
-  updatedAt        DateTime                  @updatedAt
+  id                String                    @id @default(uuid()) @db.Uuid
+  householdId       String                    @db.Uuid
+  household         Household                 @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  contact           String
+  tokenHash         String                    @unique
+  status            HouseholdInvitationStatus @default(PENDING)
+  invitedByUserId   String                    @db.Uuid
+  acceptedByUserId  String?                   @db.Uuid
+  acceptedBy        User?                     @relation("AcceptedInvitationUser", fields: [acceptedByUserId], references: [id], onDelete: SetNull)
+  requestedByUserId String?                   @db.Uuid
+  requestedBy       User?                     @relation("RequestedInvitationUser", fields: [requestedByUserId], references: [id], onDelete: SetNull)
+  reviewedByUserId  String?                   @db.Uuid
+  reviewedBy        User?                     @relation("ReviewedInvitationUser", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  initialAccess     Json
+  expiresAt         DateTime
+  requestedAt       DateTime?
+  reviewedAt        DateTime?
+  acceptedAt        DateTime?
+  declinedAt        DateTime?
+  cancelledAt       DateTime?
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
 
   @@index([householdId, status])
   @@index([contact, status])
@@ -1587,7 +1587,7 @@ model Pet {
 
   /// The pet's single primary owner (ID-01). At most one row — the primary owner is
   /// exactly one person, and a household only grants access to the rest.
-  ownership      PetOwnership?
+  ownership          PetOwnership?
   /// Transfer requests raised for this pet (ID-01, ID-05).
   ownershipTransfers PetOwnershipTransfer[]
   /// Read-only copies of this pet's memories left for separated members (ID-02).
@@ -1736,20 +1736,20 @@ model PetAccessGrant {
 /// the pet's home household; this table says who inside that household is accountable
 /// for it. Ownership transfer moves the pet to a new household AND moves this row.
 model PetOwnership {
-  id     String @id @default(uuid()) @db.Uuid
-  petId  String @unique @db.Uuid
-  pet    Pet    @relation(fields: [petId], references: [id], onDelete: Cascade)
+  id             String   @id @default(uuid()) @db.Uuid
+  petId          String   @unique @db.Uuid
+  pet            Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
   /// The primary owner. Always a member of `Pet.householdId` at the moment it is written.
-  ownerUserId String @db.Uuid
-  owner       User   @relation("PetPrimaryOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
+  ownerUserId    String   @db.Uuid
+  owner          User     @relation("PetPrimaryOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
   /// The household the pet lived in when this ownership row was written. Kept for audit:
   /// after a transfer the pet's household changes, and this records where it came from.
-  householdId String   @db.Uuid
+  householdId    String   @db.Uuid
   /// When ownership last changed hands, and how.
-  transferredAt      DateTime @default(now())
-  transferReason     String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  transferredAt  DateTime @default(now())
+  transferReason String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([ownerUserId])
   @@map("pet_ownerships")
@@ -1775,10 +1775,10 @@ model PetOwnershipTransfer {
   toUser   User   @relation("TransferRecipient", fields: [toUserId], references: [id], onDelete: Restrict)
 
   /// The household the pet lives in now (the source household of the move).
-  fromHouseholdId String   @db.Uuid
+  fromHouseholdId String @db.Uuid
   /// The household the pet will live in once accepted. Must be the recipient's own
   /// household, or a household they are already a member of.
-  toHouseholdId   String   @db.Uuid
+  toHouseholdId   String @db.Uuid
 
   status PetOwnershipTransferStatus @default(PENDING_REVIEW)
 
@@ -1811,19 +1811,19 @@ model PetOwnershipTransfer {
 /// original and records who the copy belongs to, so the separated member can read what
 /// they personally recorded without keeping any write access to the pet.
 model PetMemoryCopy {
-  id String @id @default(uuid()) @db.Uuid
+  id          String    @id @default(uuid()) @db.Uuid
   /// The original memory. Never deleted — the copy is a grant to read, not a fork of the data.
-  memoryId String   @db.Uuid
-  memory   PetMemory @relation(fields: [memoryId], references: [id], onDelete: Cascade)
+  memoryId    String    @db.Uuid
+  memory      PetMemory @relation(fields: [memoryId], references: [id], onDelete: Cascade)
   /// The person the copy is for (the separated member).
-  userId   String   @db.Uuid
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String    @db.Uuid
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   /// The household separation that caused the copy.
-  householdId String   @db.Uuid
+  householdId String    @db.Uuid
   /// The pet the copied memory belongs to, kept so a pet-scoped listing works without a join.
-  petId     String   @db.Uuid
-  pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  petId       String    @db.Uuid
+  pet         Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
 
   @@unique([memoryId, userId])
   @@index([userId, createdAt])
@@ -2107,7 +2107,7 @@ model ProviderOrganization {
   type                      ProviderType
   verificationStatus        ProviderVerificationStatus @default(NOT_STARTED)
   /// Fixture-origin records are safe for local/test flows but must never be surfaced by public production reads.
-  isDemoRecord             Boolean                    @default(false)
+  isDemoRecord              Boolean                    @default(false)
   /// ERP-C: partner-side submission time and the last admin note the partner may see (request for info / rejection).
   verificationSubmittedAt   DateTime?
   verificationNote          String?
@@ -2826,7 +2826,7 @@ model Brand {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  products Product[]
+  products          Product[]
   catalogImportJobs CatalogImportJob[]
 
   @@map("brands")
@@ -2837,12 +2837,12 @@ model Brand {
 /// means removing a parent category never deletes its children, it just
 /// orphans them to the root level.
 model ProductCategory {
-  id       String            @id @default(uuid()) @db.Uuid
+  id           String            @id @default(uuid()) @db.Uuid
   /// Seed/demo taxonomy entries are excluded from public shop discovery.
-  isDemoRecord Boolean       @default(false)
-  parentId String?           @db.Uuid
-  parent   ProductCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
-  children ProductCategory[] @relation("CategoryHierarchy")
+  isDemoRecord Boolean           @default(false)
+  parentId     String?           @db.Uuid
+  parent       ProductCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children     ProductCategory[] @relation("CategoryHierarchy")
 
   name   String
   slug   String                @unique
@@ -2851,9 +2851,9 @@ model ProductCategory {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  products Product[]
+  products               Product[]
   catalogProductRequests CatalogProductRequest[]
-  importJobs CatalogImportJob[]
+  importJobs             CatalogImportJob[]
 
   @@map("product_categories")
 }
@@ -2906,9 +2906,9 @@ model Product {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  variants   ProductVariant[]
-  orderItems OrderItem[]
-  imports    CatalogImportItem[]
+  variants               ProductVariant[]
+  orderItems             OrderItem[]
+  imports                CatalogImportItem[]
   catalogProductRequests CatalogProductRequest[] @relation("ResolvedCatalogProductRequests")
 
   @@index([categoryId])
@@ -3034,31 +3034,31 @@ enum CatalogProductRequestStatus {
 /// Seller-originated request to add an absent central product. It never includes seller price or inventory;
 /// decision details and provenance remain attached to the request after approval, match, or rejection.
 model CatalogProductRequest {
-  id                   String @id @default(uuid()) @db.Uuid
-  sellerOrganizationId String @db.Uuid
+  id                   String             @id @default(uuid()) @db.Uuid
+  sellerOrganizationId String             @db.Uuid
   sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
-  requestedByUserId    String @db.Uuid
-  requestedByUser      User @relation("RequestedCatalogProducts", fields: [requestedByUserId], references: [id], onDelete: Restrict)
-  categoryId           String? @db.Uuid
-  category             ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  resolvedProductId    String? @db.Uuid
-  resolvedProduct      Product? @relation("ResolvedCatalogProductRequests", fields: [resolvedProductId], references: [id], onDelete: SetNull)
-  reviewedByAdminId    String? @db.Uuid
-  reviewedByAdmin      AdminUser? @relation("ReviewedCatalogProducts", fields: [reviewedByAdminId], references: [id], onDelete: SetNull)
+  requestedByUserId    String             @db.Uuid
+  requestedByUser      User               @relation("RequestedCatalogProducts", fields: [requestedByUserId], references: [id], onDelete: Restrict)
+  categoryId           String?            @db.Uuid
+  category             ProductCategory?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  resolvedProductId    String?            @db.Uuid
+  resolvedProduct      Product?           @relation("ResolvedCatalogProductRequests", fields: [resolvedProductId], references: [id], onDelete: SetNull)
+  reviewedByAdminId    String?            @db.Uuid
+  reviewedByAdmin      AdminUser?         @relation("ReviewedCatalogProducts", fields: [reviewedByAdminId], references: [id], onDelete: SetNull)
 
-  requestedTitle       String
-  normalizedTitle      String
-  brandName            String?
-  description          String?
-  specifications       Json?
-  sourceUrl            String?
-  sourceName           String?
-  status               CatalogProductRequestStatus @default(PENDING_REVIEW)
-  decisionReason       String?
-  duplicateReview      Json?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-  reviewedAt           DateTime?
+  requestedTitle  String
+  normalizedTitle String
+  brandName       String?
+  description     String?
+  specifications  Json?
+  sourceUrl       String?
+  sourceName      String?
+  status          CatalogProductRequestStatus @default(PENDING_REVIEW)
+  decisionReason  String?
+  duplicateReview Json?
+  createdAt       DateTime                    @default(now())
+  updatedAt       DateTime                    @updatedAt
+  reviewedAt      DateTime?
 
   @@index([sellerOrganizationId, status, createdAt], map: "catalog_req_seller_status_created_idx")
   @@index([status, createdAt])
@@ -5080,35 +5080,35 @@ model AdminUser {
   updatedAt    DateTime  @updatedAt
   lastActiveAt DateTime?
 
-  assignedSupportCases          SupportCase[]                     @relation("AssignedSupportCases")
-  authoredSupportCases          SupportCase[]                     @relation("CreatedSupportCases")
-  supportMessages               SupportMessage[]
-  internalNotes                 InternalNote[]
-  assignedTasks                 AdminTask[]                       @relation("AssignedTasks")
-  createdTasks                  AdminTask[]                       @relation("CreatedTasks")
-  assignedDisputes              Dispute[]                         @relation("AssignedDisputes")
-  disputeEvidence               DisputeEvidence[]
-  assignedTrustCases            TrustCase[]                       @relation("AssignedTrustCases")
-  openedTrustCases              TrustCase[]                       @relation("OpenedTrustCases")
-  trustActions                  TrustAction[]
-  reviewedAppeals               Appeal[]
-  auditLogs                     AdminAuditLog[]
-  reviewedCatalogProductRequests CatalogProductRequest[] @relation("ReviewedCatalogProducts")
-  requestedRefunds              AdminRefundApproval[]             @relation("RequestedRefunds")
-  approvedRefunds               AdminRefundApproval[]             @relation("ApprovedRefunds")
-  createdCommissionRules        CommissionRule[]
-  initiatedSettlements          SellerSettlement[]                @relation("InitiatedSettlements")
-  approvedSettlements           SellerSettlement[]                @relation("ApprovedSettlements")
-  createdSellerAdjustments      SellerAdjustment[]
-  importedMarketplaceStatements MarketplaceSettlementStatement[]
-  resolvedReconciliations       MarketplaceReconciliationResult[]
-  uploadedMediaAssets           MediaAsset[]
-  createdArticles               Article[]                         @relation("ArticleCreatedBy")
-  lastEditedArticleLocales      ArticleLocale[]                   @relation("ArticleLocaleLastEditedBy")
-  contentVersions               ContentVersion[]
-  updatedContentPlacements      ContentPlacement[]
-  subscriptionChanges           SubscriptionChange[]
-  grantedEntitlementOverrides   SubscriptionEntitlementOverride[]
+  assignedSupportCases           SupportCase[]                     @relation("AssignedSupportCases")
+  authoredSupportCases           SupportCase[]                     @relation("CreatedSupportCases")
+  supportMessages                SupportMessage[]
+  internalNotes                  InternalNote[]
+  assignedTasks                  AdminTask[]                       @relation("AssignedTasks")
+  createdTasks                   AdminTask[]                       @relation("CreatedTasks")
+  assignedDisputes               Dispute[]                         @relation("AssignedDisputes")
+  disputeEvidence                DisputeEvidence[]
+  assignedTrustCases             TrustCase[]                       @relation("AssignedTrustCases")
+  openedTrustCases               TrustCase[]                       @relation("OpenedTrustCases")
+  trustActions                   TrustAction[]
+  reviewedAppeals                Appeal[]
+  auditLogs                      AdminAuditLog[]
+  reviewedCatalogProductRequests CatalogProductRequest[]           @relation("ReviewedCatalogProducts")
+  requestedRefunds               AdminRefundApproval[]             @relation("RequestedRefunds")
+  approvedRefunds                AdminRefundApproval[]             @relation("ApprovedRefunds")
+  createdCommissionRules         CommissionRule[]
+  initiatedSettlements           SellerSettlement[]                @relation("InitiatedSettlements")
+  approvedSettlements            SellerSettlement[]                @relation("ApprovedSettlements")
+  createdSellerAdjustments       SellerAdjustment[]
+  importedMarketplaceStatements  MarketplaceSettlementStatement[]
+  resolvedReconciliations        MarketplaceReconciliationResult[]
+  uploadedMediaAssets            MediaAsset[]
+  createdArticles                Article[]                         @relation("ArticleCreatedBy")
+  lastEditedArticleLocales       ArticleLocale[]                   @relation("ArticleLocaleLastEditedBy")
+  contentVersions                ContentVersion[]
+  updatedContentPlacements       ContentPlacement[]
+  subscriptionChanges            SubscriptionChange[]
+  grantedEntitlementOverrides    SubscriptionEntitlementOverride[]
 
   @@map("admin_users")
 }
@@ -5661,10 +5661,11 @@ model Article {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  locales  ArticleLocale[]
-  tags     ArticleTag[]
-  versions ContentVersion[]
-  blocks   ContentBlock[]
+  locales       ArticleLocale[]
+  tags          ArticleTag[]
+  versions      ContentVersion[]
+  blocks        ContentBlock[]
+  slugRedirects ArticleSlugRedirect[]
 
   @@index([authorId])
   @@index([categoryId])
@@ -5711,6 +5712,24 @@ model ArticleLocale {
   @@unique([locale, slug])
   @@index([locale, status])
   @@map("content_article_locales")
+}
+
+/// An address an article locale used while it was public and no longer uses (its slug was renamed after
+/// publishing). The public site answers the old URL with a permanent redirect to the article's current
+/// address, so links and search results never break. A slug lives either here or on an ArticleLocale, never
+/// both: reusing an old slug for an article locale removes the redirect row in the same transaction.
+model ArticleSlugRedirect {
+  id        String  @id @default(uuid()) @db.Uuid
+  articleId String  @db.Uuid
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  locale    Locale
+  slug      String
+
+  createdAt DateTime @default(now())
+
+  @@unique([locale, slug])
+  @@index([articleId])
+  @@map("content_article_slug_redirects")
 }
 
 model ArticleTag {
@@ -11763,16 +11782,16 @@ enum SystemIncidentImpact {
 /// A Help Center section. Titles are per-locale JSON ({ fa, en }) so a category needs no sibling table;
 /// `slug` is the stable URL key and never changes once published.
 model HelpCategory {
-  id          String   @id @default(uuid()) @db.Uuid
-  slug        String   @unique
-  titleFa     String
-  titleEn     String?
+  id            String   @id @default(uuid()) @db.Uuid
+  slug          String   @unique
+  titleFa       String
+  titleEn       String?
   descriptionFa String?
   descriptionEn String?
-  sortOrder   Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  sortOrder     Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   articles HelpArticle[]
 
@@ -11785,29 +11804,29 @@ model HelpCategory {
 /// "editing and publishing are separate actions" rule the blog follows. An article with nothing
 /// published has publishedVersion = null and is invisible publicly: empty means empty.
 model HelpArticle {
-  id         String       @id @default(uuid()) @db.Uuid
-  categoryId String       @db.Uuid
-  category   HelpCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  locale     Locale
-  slug       String
-  title      String
-  summary    String?
-  body       String
-  status     HelpArticleStatus @default(DRAFT)
+  id              String            @id @default(uuid()) @db.Uuid
+  categoryId      String            @db.Uuid
+  category        HelpCategory      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  locale          Locale
+  slug            String
+  title           String
+  summary         String?
+  body            String
+  status          HelpArticleStatus @default(DRAFT)
   /// Deep-link keys of the screens this article is "contextual help" for (e.g. "checkout.payment").
-  contextKeys String[] @default([])
-  isFaq      Boolean   @default(false)
-  sortOrder  Int       @default(0)
-  helpfulCount    Int  @default(0)
-  notHelpfulCount Int  @default(0)
+  contextKeys     String[]          @default([])
+  isFaq           Boolean           @default(false)
+  sortOrder       Int               @default(0)
+  helpfulCount    Int               @default(0)
+  notHelpfulCount Int               @default(0)
 
   publishedAt      DateTime?
   publishedVersion Int?
   /// Actor reference (no relation) — see the header comment.
-  createdByAdminId String   @db.Uuid
-  updatedByAdminId String   @db.Uuid
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdByAdminId String    @db.Uuid
+  updatedByAdminId String    @db.Uuid
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   versions HelpArticleVersion[]
 
@@ -11839,13 +11858,13 @@ model HelpArticleVersion {
 /// published text takes effect and is what the public page shows as "last updated".
 /// GC-05: the English text is the authoritative reference; the Persian is informational.
 model LegalDocument {
-  id     String            @id @default(uuid()) @db.Uuid
-  kind   LegalDocumentKind
-  locale Locale
+  id               String            @id @default(uuid()) @db.Uuid
+  kind             LegalDocumentKind
+  locale           Locale
   /// The number of the version currently published, or null when nothing is published yet.
   publishedVersion Int?
-  updatedAt DateTime @updatedAt
-  createdAt DateTime @default(now())
+  updatedAt        DateTime          @updatedAt
+  createdAt        DateTime          @default(now())
 
   versions LegalDocumentVersion[]
 
@@ -11876,16 +11895,16 @@ model LegalDocumentVersion {
 /// status page reports what the operations team wrote, and an empty list is rendered as "all systems
 /// operational" only when there is genuinely no open incident.
 model SystemIncident {
-  id         String               @id @default(uuid()) @db.Uuid
-  title      String
-  status     SystemIncidentStatus @default(INVESTIGATING)
-  impact     SystemIncidentImpact @default(MINOR)
-  components String[]             @default([])
-  startedAt  DateTime             @default(now())
-  resolvedAt DateTime?
-  createdByAdminId String         @db.Uuid
-  createdAt  DateTime             @default(now())
-  updatedAt  DateTime             @updatedAt
+  id               String               @id @default(uuid()) @db.Uuid
+  title            String
+  status           SystemIncidentStatus @default(INVESTIGATING)
+  impact           SystemIncidentImpact @default(MINOR)
+  components       String[]             @default([])
+  startedAt        DateTime             @default(now())
+  resolvedAt       DateTime?
+  createdByAdminId String               @db.Uuid
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
 
   updates SystemIncidentUpdate[]
 
@@ -11894,13 +11913,13 @@ model SystemIncident {
 }
 
 model SystemIncidentUpdate {
-  id         String               @id @default(uuid()) @db.Uuid
-  incidentId String               @db.Uuid
-  incident   SystemIncident       @relation(fields: [incidentId], references: [id], onDelete: Cascade)
-  status     SystemIncidentStatus
-  body       String
-  authorAdminId String            @db.Uuid
-  createdAt  DateTime             @default(now())
+  id            String               @id @default(uuid()) @db.Uuid
+  incidentId    String               @db.Uuid
+  incident      SystemIncident       @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  status        SystemIncidentStatus
+  body          String
+  authorAdminId String               @db.Uuid
+  createdAt     DateTime             @default(now())
 
   @@index([incidentId, createdAt])
   @@map("system_incident_updates")
@@ -11908,15 +11927,15 @@ model SystemIncidentUpdate {
 
 /// A scheduled maintenance window shown on the status page and, while active, on the maintenance page.
 model MaintenanceWindow {
-  id        String   @id @default(uuid()) @db.Uuid
-  title     String
-  message   String?
-  startsAt  DateTime
-  endsAt    DateTime
-  createdByAdminId String @db.Uuid
-  cancelledAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String    @id @default(uuid()) @db.Uuid
+  title            String
+  message          String?
+  startsAt         DateTime
+  endsAt           DateTime
+  createdByAdminId String    @db.Uuid
+  cancelledAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   @@index([startsAt, endsAt])
   @@map("maintenance_windows")
