@@ -24,6 +24,13 @@ Point-in-time checkpoint only. Recheck GitHub, CI and production before each mer
 - Disk/worktrees: root overlay remains 0 bytes free; `/dev/shm` retains approximately 1.1 GiB free after frozen installation/tests. No cleanup was performed. Existing worktrees and `/workspace/batch4-travel-outbound` (25 modified files) remain untouched; payment-related work was not identified in inspected worktrees, which is not evidence it was deleted.
 - Existing product gaps remain: four-language full-page acceptance and authenticated rendered design comparison are incomplete; shop has zero real products; real checkout/catalog visibility is not verified; memorial original image/CDN access remains unavailable. No new provider integration/article work was started.
 
+## Update — 2026-11-11 12:13 UTC
+
+- #252's branch was merged (non-destructively) with latest `origin/main` after PR #251 merged, resulting in integration commit `d6a0cdf71b8509ec83f924eafcdb4d1fb772c9dc`. `git diff origin/main...HEAD` confirms the PR's remaining diff is limited to the parser/tooling overrides, their regression, and QA/handoff docs; #251's community code is already in the base, not duplicated.
+- The #252 implementation commit is `16d36221ac90bae1c6af2f81f9a21c022774a326`. Earlier CI success on `189fabe…` and in-progress CI on `16d3622…` do not apply to the merge-with-main head; after pushing the handoff update, verify CI only on the exact current PR head. This security change is not merged or deployed.
+- Main remains `b7055bd99c9629eb018269b21e49da3e25447f38`; its authorized deploy run `43016718715` is still running CI/API E2E. Production's last verified SHA remains `58abc32b0ff7b0c5978b652a953886dfce55301a` (docs-only #250 deployment), readiness 200, DB/Redis up. The public community fixture response is still broken on that SHA until #251's own deployment completes.
+- Fresh audit after #252's two local overrides now has three moderate advisories (two next-intl, one Nest SSE); file-type and minimatch no longer appear. No hostile payloads were tested. Full monorepo lint/typecheck, full API unit tests, API build, pnpm 10 lockfile validation, and parser compatibility test all pass locally on the candidate. Exact hosted CI, merge and deployment remain pending.
+
 ### Immediate next actions
 
 1. Wait for deployment `43016718715`; once complete, verify production SHA/readiness, safe community list/count and fixture detail behavior, and browser locale rendering at fa/de. If the deployment encounters a failure, follow pipeline rollback evidence and do not manually restart services.

@@ -27,6 +27,6 @@ Status: `OPEN_PR / AWAITING_CI_OR_MERGE`; PR #252 includes this parser change pl
 
 ## Limits and release actions
 
-- PR #252 is on local/remote branch `security/file-type-parser-upgrade`, forked from `58abc32b0ff7b0c5978b652a953886dfce55301a`. Its current remote head before the documentation follow-up commit is `189fabe3543243ebb8ce6b45208125ba414f3647`; update this SHA after committing/pushing the follow-up.
-- Hosted CI on `189fabe…` was still running when the follow-up added the minimatch override/docs; that run will be stale for the new commit. Check the new exact PR head CI before merge. After merge/deploy, verify SHA and readiness. No production parser endpoint was identified or called.
+- PR #252 is on branch `security/file-type-parser-upgrade`. Implementation commit `16d36221ac90bae1c6af2f81f9a21c022774a326` contains both overrides; merge commit `d6a0cdf71b8509ec83f924eafcdb4d1fb772c9dc` integrates latest main `b7055bd…` including the independent #251 fix. PR metadata is authoritative for the newest handoff-only head.
+- Hosted CI success on prior head `189fabe…` is stale; CI on `16d3622…` was in progress and is also stale after the main-merge commit. Check the exact current PR head CI before merge. After merge/deploy, verify SHA and readiness. No production parser endpoint was identified or called.
 - This is a dependency remediation, not evidence that a crafted malicious archive or denial-of-service payload was reproduced.
