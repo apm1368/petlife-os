@@ -68,7 +68,9 @@ export const onboardingProgressSchema = z.object({
   status: z.enum(["IN_PROGRESS", "COMPLETED", "SKIPPED"]),
   householdId: z.string().uuid().optional(),
   petId: z.string().uuid().optional(),
-  interests: z.array(z.nativeEnum(PetInterest)).optional(),
+  // There are only eight selectable interests; bound the request rather than
+  // accepting arbitrarily large arrays from untrusted onboarding payloads.
+  interests: z.array(z.nativeEnum(PetInterest)).max(8).optional(),
 });
 
 export type RequestOtpInput = z.infer<typeof requestOtpSchema>;
