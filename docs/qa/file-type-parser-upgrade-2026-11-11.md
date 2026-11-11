@@ -1,6 +1,6 @@
 # Nest file-type parser upgrade QA — 2026-11-11
 
-Status: `IMPLEMENTED_LOCALLY / AWAITING_CI_OR_MERGE`; this is not deployed.
+Status: `OPEN_PR / AWAITING_CI_OR_MERGE`; PR #252 includes this parser change plus a compatible development-tooling minimatch override. Nothing from #252 is deployed.
 
 ## Baseline and finding
 
@@ -12,18 +12,21 @@ Status: `IMPLEMENTED_LOCALLY / AWAITING_CI_OR_MERGE`; this is not deployed.
 ## Change and evidence
 
 - Workspace override pins `file-type@<21.3.2` to `21.3.2`, matching in `pnpm-lock.yaml`.
+- The same PR adds `minimatch@>=7 <11.0.1` → `11.0.1` to clear the tooling-only GHSA without altering legacy v3 consumers. Fresh audit now reports three moderate advisories (two next-intl and one Nest SSE); see [dependency audit](dependency-audit-2026-11-11.md).
 - No upload route, accepted file type, maximum size, or validation rule was loosened. No schema/migration or production data changed.
 - `pnpm --filter @petlife/api exec jest --runInBand --runTestsByPath src/common/parser-compatibility.spec.ts`: **6 passed**, including a real Node subprocess verifying Nest accepts a tiny valid PNG and rejects invalid bytes while resolving the patched parser.
 - `pnpm --filter @petlife/api exec eslint src/common/parser-compatibility.spec.ts`: passed.
 - `pnpm --filter @petlife/api typecheck`: passed.
 - `pnpm --filter @petlife/api build`: passed.
 - `pnpm --filter @petlife/api lint`: passed.
+- Full monorepo `pnpm lint`: passed after both overrides.
+- Full monorepo `pnpm typecheck`: passed after both overrides.
 - `corepack pnpm@10.33.0 install --lockfile-only --frozen-lockfile`: passed (the repository-pinned pnpm version); full local dependency installation was done with pnpm 11.25.0 from the already preserved cache.
-- Fresh `pnpm audit --prod --audit-level=moderate` after the lock update reports **four** moderate advisories and no `file-type` advisories. The four remaining package findings are two `next-intl`, one Nest core SSE, and development-only `minimatch`; see [dependency audit](dependency-audit-2026-11-11.md). Those are not claimed fixed by this patch.
+- Fresh `pnpm audit --prod --audit-level=moderate` after both lock updates reports **three** moderate advisories and no `file-type` or `minimatch` advisory. The remaining package findings are two `next-intl` and one Nest core SSE; those are not claimed fixed by this patch.
 - `git diff --check`: passed.
 
 ## Limits and release actions
 
-- Exact source SHA: local branch `security/file-type-parser-upgrade` forked from `58abc32b0ff7b0c5978b652a953886dfce55301a`; record its final commit SHA after commit/PR creation.
-- Hosted CI, PR merge and production deployment have not yet occurred. Re-run/check the exact final PR head before merge; after deploy, verify SHA and readiness. No production parser endpoint was identified or called.
+- PR #252 is on local/remote branch `security/file-type-parser-upgrade`, forked from `58abc32b0ff7b0c5978b652a953886dfce55301a`. Its current remote head before the documentation follow-up commit is `189fabe3543243ebb8ce6b45208125ba414f3647`; update this SHA after committing/pushing the follow-up.
+- Hosted CI on `189fabe…` was still running when the follow-up added the minimatch override/docs; that run will be stale for the new commit. Check the new exact PR head CI before merge. After merge/deploy, verify SHA and readiness. No production parser endpoint was identified or called.
 - This is a dependency remediation, not evidence that a crafted malicious archive or denial-of-service payload was reproduced.
