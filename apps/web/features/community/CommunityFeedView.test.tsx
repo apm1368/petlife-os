@@ -119,6 +119,24 @@ describe("CommunityFeedView", () => {
     expect(screen.getByText("2 comments · 5 reactions")).toBeTruthy();
   });
 
+  it("keeps Persian plural counts numeric so zero is not rendered as NaN", async () => {
+    vi.mocked(communityService.listPosts).mockResolvedValue(page([post({ commentCount: 0, reactionCount: 0 })]));
+
+    renderWithIntl(<CommunityFeedView />, "fa");
+
+    const meta = await screen.findByText(/نظر.*واکنش/);
+    expect(meta.textContent).toContain("۰");
+    expect(meta.textContent).not.toContain("ناعدد");
+  });
+
+  it.each([["fa", "۱۱ دی"], ["de", "1. Januar"], ["es", "1 de enero"]] as const)("formats the community post date for locale %s", async (locale, expectedDate) => {
+    vi.mocked(communityService.listPosts).mockResolvedValue(page([post({ createdAt: "2026-01-01T00:00:00.000Z" })]));
+    const { container } = renderWithIntl(<CommunityFeedView />, locale);
+
+    await screen.findByText("A good day at the park");
+    expect(container.querySelector(".post-row__date")?.textContent).toContain(expectedDate);
+  });
+
   it("shows a localized empty state when there are no posts", async () => {
     vi.mocked(communityService.listPosts).mockResolvedValue(page([], 0));
 
@@ -142,8 +160,8 @@ describe("CommunityFeedView", () => {
   });
 
   it.each([
-    ["de", "Community", "Fragen, Erfahrungen und Neuigkeiten", "Themen", "Meine Nachrichten", "1 Januar"],
-    ["es", "Comunidad", "Preguntas, experiencias y novedades", "Temas", "Mis mensajes", "1 enero"],
+    ["de", "Community", "Fragen, Erfahrungen und Neuigkeiten", "Themen", "Meine Nachrichten", "1. Januar"],
+    ["es", "Comunidad", "Preguntas, experiencias y novedades", "Temas", "Mis mensajes", "1 de enero"],
   ] as const)("renders the complete feed in %s and preserves authored post content", async (locale, heading, description, topics, myMessages, date) => {
     vi.mocked(communityService.listPosts).mockResolvedValue(page([post({ pet: { id: "pet-1", name: "Milo", species: "DOG" as never, photoUrl: null } as never })]));
 
