@@ -55,6 +55,11 @@ export class CommunityPostService {
     return user?.email?.toLowerCase().endsWith("@example.test") ?? false;
   }
 
+  private async fixtureAuthorIds(): Promise<string[]> {
+    const users = await this.prisma.user.findMany({ where: { email: { endsWith: "@example.test", mode: "insensitive" } }, select: { id: true } });
+    return users.map((user) => user.id);
+  }
+
   async create(authorUserId: string, dto: CreateCommunityPostDto) {
     if (dto.petId) {
       const allowed = await this.petAccess.hasActiveAccess(dto.petId, authorUserId);
@@ -139,11 +144,8 @@ export class CommunityPostService {
       ...(query.region ? { region: { equals: query.region.trim(), mode: "insensitive" } } : {}),
       ...(q ? { OR: [{ title: { contains: q, mode: "insensitive" } }, { body: { contains: q, mode: "insensitive" } }] } : {}),
     };
-    const fixtureAuthors = await this.prisma.user.findMany({
-      where: { email: { endsWith: "@example.test", mode: "insensitive" } },
-      select: { id: true },
-    });
-    if (fixtureAuthors.length) where.authorUserId = { notIn: fixtureAuthors.map((user) => user.id) };
+    const fixtureAuthorIds = await this.fixtureAuthorIds();
+    if (fixtureAuthorIds.length) where.authorUserId = { notIn: fixtureAuthorIds };
     const [rows, total] = await Promise.all([
       this.prisma.communityPost.findMany({ where, include: POST_INCLUDE, orderBy: { createdAt: "desc" }, skip, take }),
       this.prisma.communityPost.count({ where }),
@@ -204,7 +206,8 @@ export class CommunityPostService {
 
   /** Saved posts that are still published (a removed post silently drops out). */
   async savedPosts(userId: string) {
-    const rows = await this.prisma.communityPostBookmark.findMany({ where: { userId, post: { status: CommunityContentStatus.PUBLISHED } }, orderBy: { createdAt: "desc" }, take: 100, include: { post: { include: POST_INCLUDE } } });
+    const fixtureAuthorIds = await this.fixtureAuthorIds();
+    const rows = await this.prisma.communityPostBookmark.findMany({ where: { userId, post: { status: CommunityContentStatus.PUBLISHED, ...(fixtureAuthorIds.length ? { authorUserId: { notIn: fixtureAuthorIds } } : {}) } }, orderBy: { createdAt: "desc" }, take: 100, include: { post: { include: POST_INCLUDE } } });
     const names = await this.displayNameMap(rows.map((r) => r.post.authorUserId));
     return rows.map((r) => ({ ...toCommunityPostDto(r.post, names.get(r.post.authorUserId) ?? "", null, userId), savedAt: r.createdAt.toISOString() }));
   }

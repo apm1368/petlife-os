@@ -16,8 +16,8 @@
 
 ## Fix and retest record
 
-- API change: public list/count filters posts authored by reserved `@example.test` fixture accounts, and public detail/comments paths return the normal not-found response for those fixture posts. Records are not deleted or modified. The filter uses the seed actor’s reserved test email domain; ordinary phone-only users and normal production email domains are not filtered.
-- API regression: E2E test inserts one published `@example.test` fixture post and asserts it is absent from the anonymous list and direct detail returns 404.
+- API change: public list/count filters posts authored by reserved `@example.test` fixture accounts; public detail/comments return the normal not-found response; existing saved-post lists also omit fixture posts. Records are not deleted or modified. The filter uses the seed actor’s reserved test email domain; ordinary phone-only users and normal production email domains are not filtered.
+- API regression: E2E test inserts one published `@example.test` fixture post, bookmarks it as a normal user, and asserts it is absent from the anonymous list, direct detail/comments return 404, and the user’s saved-post list omits it.
 - UI change: keep counts numeric for ICU plural rules; use locale-aware Gregorian date formatting for en/de/es and the `fa-IR-u-ca-persian` Jalali calendar for Persian.
 - Local tests on the working branch: `CommunityFeedView.test.tsx` — 24 passed; focused web ESLint passed; API service/E2E-file ESLint passed; after building shared config/types, API TypeScript check passed. `git diff --check` is required before push.
 - API E2E was not run locally: no local PostgreSQL/Redis listener, Docker CLI, or `DATABASE_URL` is available. The regression test must pass in exact-head hosted CI before merge.

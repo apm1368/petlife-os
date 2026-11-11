@@ -338,15 +338,20 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     await request(app.getHttpServer()).post("/community/posts").send({ type: "GENERAL", body: "should be rejected" }).expect(403);
   });
 
-  it("keeps published fixture posts by reserved example.test actors out of public list and detail APIs", async () => {
+  it("keeps published fixture posts by reserved example.test actors out of public and saved-post APIs", async () => {
+    const { client: viewer, ownerUserId } = await setupHousehold();
     const author = await prisma.user.create({ data: { email: `community-fixture-${unique()}@example.test`, displayName: "Fixture author" } });
     const fixture = await prisma.communityPost.create({
       data: { authorUserId: author.id, type: CommunityPostType.GENERAL, body: "fixture-only community content", status: CommunityContentStatus.PUBLISHED },
     });
+    await prisma.communityPostBookmark.create({ data: { userId: ownerUserId, postId: fixture.id } });
 
     const publicList = await request(app.getHttpServer()).get("/community/posts?pageSize=100").expect(200);
     expect(publicList.body.items.some((post: { id: string }) => post.id === fixture.id)).toBe(false);
     await request(app.getHttpServer()).get(`/community/posts/${fixture.id}`).expect(404);
+    await request(app.getHttpServer()).get(`/community/posts/${fixture.id}/comments`).expect(404);
+    const savedPosts = await viewer.get("/community/saved-posts").expect(200);
+    expect(savedPosts.body.some((post: { id: string }) => post.id === fixture.id)).toBe(false);
   });
 
   // -- Flow K: Community Report + moderation escalation ------------------------
