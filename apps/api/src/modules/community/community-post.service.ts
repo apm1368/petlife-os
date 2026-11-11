@@ -45,7 +45,14 @@ export class CommunityPostService {
     const row = await this.prisma.communityPost.findUnique({ where: { id: postId }, include: POST_INCLUDE });
     if (!row) throw new CommunityPostNotFoundException({ postId });
     if (row.status !== CommunityContentStatus.PUBLISHED) throw new CommunityContentNotVisibleException({ postId });
+    if (await this.isFixtureAuthor(row.authorUserId)) throw new CommunityPostNotFoundException({ postId });
     return row;
+  }
+
+  /** Seed/test actors use RFC-reserved example.test addresses and must never publish fixture content publicly. */
+  private async isFixtureAuthor(userId: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+    return user?.email?.toLowerCase().endsWith("@example.test") ?? false;
   }
 
   async create(authorUserId: string, dto: CreateCommunityPostDto) {
@@ -132,6 +139,11 @@ export class CommunityPostService {
       ...(query.region ? { region: { equals: query.region.trim(), mode: "insensitive" } } : {}),
       ...(q ? { OR: [{ title: { contains: q, mode: "insensitive" } }, { body: { contains: q, mode: "insensitive" } }] } : {}),
     };
+    const fixtureAuthors = await this.prisma.user.findMany({
+      where: { email: { endsWith: "@example.test", mode: "insensitive" } },
+      select: { id: true },
+    });
+    if (fixtureAuthors.length) where.authorUserId = { notIn: fixtureAuthors.map((user) => user.id) };
     const [rows, total] = await Promise.all([
       this.prisma.communityPost.findMany({ where, include: POST_INCLUDE, orderBy: { createdAt: "desc" }, skip, take }),
       this.prisma.communityPost.count({ where }),

@@ -1,6 +1,6 @@
 import { Logger } from "@nestjs/common";
 import type { INestApplication } from "@nestjs/common";
-import { AdminMembershipStatus, AdminRole, PetLifecycleStatus } from "@prisma/client";
+import { AdminMembershipStatus, AdminRole, CommunityContentStatus, CommunityPostType, PetLifecycleStatus } from "@prisma/client";
 import request from "supertest";
 import { createTestApp, extractCookie } from "./test-app";
 import { AdminDonationService } from "../src/modules/animal-support/admin-donation.service";
@@ -336,6 +336,17 @@ describe("Lost Pet + Animal Support + Community + Memories (Handoff 18)", () => 
     expect(publicList.body.items.some((p: { id: string }) => p.id === created.body.id)).toBe(true);
 
     await request(app.getHttpServer()).post("/community/posts").send({ type: "GENERAL", body: "should be rejected" }).expect(403);
+  });
+
+  it("keeps published fixture posts by reserved example.test actors out of public list and detail APIs", async () => {
+    const author = await prisma.user.create({ data: { email: `community-fixture-${unique()}@example.test`, displayName: "Fixture author" } });
+    const fixture = await prisma.communityPost.create({
+      data: { authorUserId: author.id, type: CommunityPostType.GENERAL, body: "fixture-only community content", status: CommunityContentStatus.PUBLISHED },
+    });
+
+    const publicList = await request(app.getHttpServer()).get("/community/posts?pageSize=100").expect(200);
+    expect(publicList.body.items.some((post: { id: string }) => post.id === fixture.id)).toBe(false);
+    await request(app.getHttpServer()).get(`/community/posts/${fixture.id}`).expect(404);
   });
 
   // -- Flow K: Community Report + moderation escalation ------------------------

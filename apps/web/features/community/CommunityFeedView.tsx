@@ -4,12 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import Link from "@/features/navigation/localized-link";
 import { useLocale, useTranslations } from "next-intl";
 import { Avatar, Button, EmptyState, HandHeart, Input, Mail, Select, Siren, Skeleton } from "@petlife/ui";
-import { formatDay, localizeDigits } from "@/lib/date/jalali";
 import { CommunityPostType } from "@petlife/types";
 import type { CommunityPostDto, PaginatedDto } from "@petlife/types";
 import { communityService } from "@/services/community.service";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import type { RouteLocale } from "@/lib/i18n/config";
+import { formatLocaleDate } from "@/lib/i18n/format";
 import styles from "./CommunityFeedView.module.css";
 
 /** spec: "avoid endless card clutter" — a plain paged feed with an explicit Load more, never infinite auto-scroll. */
@@ -102,12 +102,12 @@ export function CommunityFeedView() {
                     <Avatar name={post.authorDisplayName} size="sm" />
                     <span className="post-row__author">{post.authorDisplayName}</span>
                     {post.pet ? <span className="post-row__pet">· {t("feed.withPet", { name: post.pet.name })}</span> : null}
-                    <span className="post-row__date">· {formatDay(post.createdAt.slice(0, 10), locale, { year: false })}</span>
+                    <span className="post-row__date">· {formatLocaleDate(`${post.createdAt.slice(0, 10)}T12:00:00Z`, locale, { day: "numeric", month: "long", timeZone: "UTC" })}</span>
                     <span className="tag">{t(`postType.${post.type}`)}</span>
                   </span>
                   {post.title ? <span className="post-row__title">{post.title}</span> : null}
                   <span className="post-row__body">{post.body}</span>
-                  <span className="post-row__meta">{t("feed.commentsAndReactions", { comments: localizeDigits(post.commentCount, locale), reactions: localizeDigits(post.reactionCount, locale) })}</span>
+                  <span className="post-row__meta">{t("feed.commentsAndReactions", { comments: post.commentCount, reactions: post.reactionCount })}</span>
                 </Link>
               </li>
             ))}
