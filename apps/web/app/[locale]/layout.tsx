@@ -19,6 +19,7 @@ export function generateStaticParams() {
 }
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://opetlife.ir"),
   title: "opetlife",
   applicationName: "opetlife",
   icons: {
