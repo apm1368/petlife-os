@@ -1,0 +1,126 @@
+[
+  {
+    "testId": "QA-COMMUNITY-PUBLIC-fa",
+    "sha": "d2461e598fec4b18e7e4fc5f013b853d771ae02b",
+    "dateUtc": "2026-11-11T09:31:44.298623+00:00",
+    "environment": "Production public real GETs, anonymous, no mocked responses",
+    "browser": "154.0.8037.57",
+    "viewport": [
+      390,
+      844
+    ],
+    "route": "/fa/community",
+    "expected": "Real empty search/filter, localized owned UI/direction/display, no overflow/errors/writes",
+    "http": 200,
+    "searchHttp": 200,
+    "filterHttp": 200,
+    "emptyResponsesConfirmed": true,
+    "selectedType": "QUESTION",
+    "observedHtml": {
+      "lang": "fa",
+      "dir": "rtl",
+      "theme": "light",
+      "display": null
+    },
+    "mixedPersianUi": false,
+    "overflow": false,
+    "pageErrorTypes": [],
+    "mutationMethodsAborted": [],
+    "status": "PASS",
+    "evidence": "fa-390-empty-filter.png",
+    "limitations": "No post creation, moderation, real login, private messages or entire published/error/accessibility acceptance. Persian scan does not prove every translation key correct."
+  },
+  {
+    "testId": "QA-COMMUNITY-PUBLIC-en",
+    "sha": "d2461e598fec4b18e7e4fc5f013b853d771ae02b",
+    "dateUtc": "2026-11-11T09:31:50.427605+00:00",
+    "environment": "Production public real GETs, anonymous, no mocked responses",
+    "browser": "154.0.8037.57",
+    "viewport": [
+      1440,
+      900
+    ],
+    "route": "/en/community",
+    "expected": "Real empty search/filter, localized owned UI/direction/display, no overflow/errors/writes",
+    "http": 200,
+    "searchHttp": 200,
+    "filterHttp": 200,
+    "emptyResponsesConfirmed": true,
+    "selectedType": "QUESTION",
+    "observedHtml": {
+      "lang": "en",
+      "dir": "ltr",
+      "theme": "light",
+      "display": null
+    },
+    "mixedPersianUi": false,
+    "overflow": false,
+    "pageErrorTypes": [],
+    "mutationMethodsAborted": [],
+    "status": "PASS",
+    "evidence": "en-1440-empty-filter.png",
+    "limitations": "No post creation, moderation, real login, private messages or entire published/error/accessibility acceptance. Persian scan does not prove every translation key correct."
+  },
+  {
+    "testId": "QA-COMMUNITY-PUBLIC-de",
+    "sha": "d2461e598fec4b18e7e4fc5f013b853d771ae02b",
+    "dateUtc": "2026-11-11T09:31:56.168130+00:00",
+    "environment": "Production public real GETs, anonymous, no mocked responses",
+    "browser": "154.0.8037.57",
+    "viewport": [
+      768,
+      1024
+    ],
+    "route": "/de/community",
+    "expected": "Real empty search/filter, localized owned UI/direction/display, no overflow/errors/writes",
+    "http": 200,
+    "searchHttp": 200,
+    "filterHttp": 200,
+    "emptyResponsesConfirmed": true,
+    "selectedType": "QUESTION",
+    "observedHtml": {
+      "lang": "de",
+      "dir": "ltr",
+      "theme": "dark",
+      "display": null
+    },
+    "mixedPersianUi": false,
+    "overflow": false,
+    "pageErrorTypes": [],
+    "mutationMethodsAborted": [],
+    "status": "PASS",
+    "evidence": "de-768-empty-filter.png",
+    "limitations": "No post creation, moderation, real login, private messages or entire published/error/accessibility acceptance. Persian scan does not prove every translation key correct."
+  },
+  {
+    "testId": "QA-COMMUNITY-PUBLIC-es",
+    "sha": "d2461e598fec4b18e7e4fc5f013b853d771ae02b",
+    "dateUtc": "2026-11-11T09:32:01.000506+00:00",
+    "environment": "Production public real GETs, anonymous, no mocked responses",
+    "browser": "154.0.8037.57",
+    "viewport": [
+      390,
+      844
+    ],
+    "route": "/es/community",
+    "expected": "Real empty search/filter, localized owned UI/direction/display, no overflow/errors/writes",
+    "http": 200,
+    "searchHttp": 200,
+    "filterHttp": 200,
+    "emptyResponsesConfirmed": true,
+    "selectedType": "QUESTION",
+    "observedHtml": {
+      "lang": "es",
+      "dir": "ltr",
+      "theme": "dark",
+      "display": "simple"
+    },
+    "mixedPersianUi": false,
+    "overflow": false,
+    "pageErrorTypes": [],
+    "mutationMethodsAborted": [],
+    "status": "PASS",
+    "evidence": "es-390-empty-filter.png",
+    "limitations": "No post creation, moderation, real login, private messages or entire published/error/accessibility acceptance. Persian scan does not prove every translation key correct."
+  }
+]
