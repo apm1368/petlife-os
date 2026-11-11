@@ -136,12 +136,14 @@ export class TravelExternalService {
         try {
           if (code === "JAJIGA") {
             // Jajiga's public detail page does not carry the pet-filter evidence or the list's location/capacity.
-            // Re-observe the listing in the allowed search result first; an incomplete page is never a removal signal.
-            const discovery = await adapter.discover(ctx);
+            // Re-observe the listing in the allowed search results (stopping once seen); not being found is never a removal signal.
+            const discovery = await adapter.discover(ctx, { stopAtExternalId: stay.sourceListingId });
             const observed = discovery.items.find((item) => item.externalId === stay.sourceListingId);
             if (!observed) {
               status = ExternalSyncStatus.PARTIAL;
-              fail("NOT_IN_OBSERVED_PAGE", "Listing was not on the currently observed first search page; it was not marked removed.", stay.sourceListingId);
+              fail("NOT_IN_OBSERVED_PAGE", "Listing was not in the currently observed search results; it was not marked removed.", stay.sourceListingId);
+            } else if (adapter.fetchesDetailPages === false) {
+              c[await this.ingestRaw(source, adapter, run.id, observed)]++;
             } else {
               const detail = await adapter.fetchDetails(ctx, observed.externalId, observed);
               c[await this.ingestRaw(source, adapter, run.id, detail, observed)]++;
@@ -163,7 +165,7 @@ export class TravelExternalService {
           c.itemsScanned++;
           try {
             let detail: RawListing | null = null;
-            if (raw.stage === "search" && ctx.http.remaining > 0 && (await this.needsDetails(source, raw.externalId))) {
+            if (raw.stage === "search" && adapter.fetchesDetailPages !== false && ctx.http.remaining > 0 && (await this.needsDetails(source, raw.externalId))) {
               detail = await adapter.fetchDetails(ctx, raw.externalId, raw).catch((e) => { if (e instanceof AdapterError && FATAL.includes(e.category)) throw e; return null; });
             }
             c[await this.ingestRaw(source, adapter, run.id, detail ?? raw, detail ? raw : undefined)]++;

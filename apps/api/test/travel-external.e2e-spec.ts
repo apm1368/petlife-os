@@ -244,6 +244,14 @@ describe("External pet-friendly stays", () => {
     expect(await search("&petPolicy=CONFIRMED_ALLOWED")).toEqual([stay.id]);
     expect(await search("&petPolicy=UNKNOWN")).toEqual([su.id]);
     expect(await search("&petPolicy=ANY")).toEqual(expect.arrayContaining([stay.id, su.id, sn.id]));
+    // The web always sends guests: its capacity condition must not replace the pet-policy condition.
+    expect(await search("&guests=2")).not.toContain(sn.id);
+    expect(await search("&guests=2&petPolicy=CONFIRMED_ALLOWED")).toEqual([stay.id]);
+    expect(await search("&guests=7")).toEqual([]); // every fixture listing sleeps 6
+    // Pagination happens in the database with an exact total and a stable order.
+    const paged = await Promise.all([1, 2].map((p) => get(null, `/travel/external/stays?city=${encodeURIComponent(mcity)}&petPolicy=ANY&pageSize=2&page=${p}`).expect(200).then((r) => r.body)));
+    expect(paged.map((p) => p.total)).toEqual([3, 3]);
+    expect([...paged[0].items, ...paged[1].items].map((i: { id: string }) => i.id).sort()).toEqual([stay.id, su.id, sn.id].sort());
     expect((await get(null, `/travel/external/stays/${su.id}`).expect(200)).body).toMatchObject({ pet: { policyStatus: "UNKNOWN", accepted: "UNKNOWN" }, trustLabels: expect.arrayContaining(["PET_POLICY_UNKNOWN", "AVAILABILITY_UNKNOWN"]) });
     expect(await search("&dogs=true")).toContain(stay.id);
     expect(await search("&cats=true")).not.toContain(stay.id); // UNKNOWN never counts as yes
