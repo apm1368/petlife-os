@@ -1,0 +1,30 @@
+<!-- @dsCard height=288 -->
+<div class="cover">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@600;900&display=swap">
+  <style>
+    .cover{position:relative;width:960px;height:288px;background:var(--paper);overflow:hidden;font-family:var(--font-fa)}
+    .cover svg{position:absolute;inset:0;width:960px;height:288px}
+    .forest{fill:var(--forest)} .sun{fill:var(--sun)} .mint{fill:var(--mint)} .leaf{fill:var(--leaf)} .cream{fill:var(--cream)} .dot{fill:var(--paper)}
+    .name{position:absolute;left:40px;bottom:34px;width:440px;direction:rtl;text-align:right}
+    .name h1{margin:0;font-size:70px;line-height:.98;font-weight:900;color:var(--ink)}
+    .name p{margin:12px 0 0;font-size:14px;font-weight:600;color:var(--ink-3)}
+  </style>
+  <svg viewBox="0 0 960 288" aria-hidden="true">
+    <!-- blocks: forest slab 200×288+ (radius-panel), sun disc r72, mint pill 120×232 (radius-pill), cream tile 152×112 (radius-card), leaf pill 56×128
+         arrangement: one tall slab bleeding off top and bottom, with a disc and pills as satellites, all right of x=480
+         pattern: discs at the space-7 pitch (32px) cut from the slab in paper, because the system is soft and friendly: pill buttons, round paws
+         scales: space-7 32px pitch, space-4 16px gaps, radius-panel 30, radius-card 28, radius-pill half the short side -->
+    <rect class="mint" x="500" y="36" width="120" height="232" rx="60"/>
+    <rect class="forest" x="640" y="-30" width="200" height="348" rx="30"/>
+    <circle class="sun" cx="884" cy="84" r="72"/>
+    <rect class="cream" x="856" y="176" width="152" height="112" rx="28"/>
+    <rect class="leaf" x="540" y="196" width="56" height="128" rx="28"/>
+    <g class="dot">
+      <circle cx="676" cy="60" r="8"/><circle cx="708" cy="60" r="8"/><circle cx="740" cy="60" r="8"/><circle cx="772" cy="60" r="8"/><circle cx="804" cy="60" r="8"/>
+      <circle cx="676" cy="92" r="8"/><circle cx="708" cy="92" r="8"/><circle cx="740" cy="92" r="8"/><circle cx="772" cy="92" r="8"/><circle cx="804" cy="92" r="8"/>
+      <circle cx="676" cy="124" r="8"/><circle cx="708" cy="124" r="8"/><circle cx="740" cy="124" r="8"/><circle cx="772" cy="124" r="8"/><circle cx="804" cy="124" r="8"/>
+    </g>
+  </svg>
+  <div class="name"><h1>الگوی طراحی<br>اپت لایف</h1><p>روشن و گرم، با دکمه‌های نرم، کوکی و ریلزهای تصویرسازی‌شده.</p></div>
+</div>
+<script>/* static cover */</script>

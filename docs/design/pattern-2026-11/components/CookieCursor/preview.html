@@ -1,0 +1,38 @@
+<!-- @dsCard group="Motion" height=230 subtitle="ایستاده، راه رفتن، نشسته و رو به کاربر، تعظیم بازی" -->
+<div dir="rtl" class="demo">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400..900&display=swap">
+  <style>
+    .demo{font-family:var(--font-fa);background:var(--paper);padding:18px;display:flex;flex-wrap:wrap;justify-content:space-around;gap:16px}
+    figure{margin:0;display:grid;justify-items:center;gap:6px}
+    figcaption{font-size:13px;font-weight:700;color:var(--ink-3)}
+    .dog{width:150px;height:120px;overflow:visible}
+    .dog *{transform-box:view-box}
+    .d-flip{transform-origin:60px 50px}
+    .pose-stand{transform-origin:40px 86px}
+    .pose-sit{opacity:0}
+    .dog.sit .pose-sit{opacity:1}.dog.sit .pose-stand{opacity:0}
+    .dog.walk .pose-stand{animation:dbob .17s ease-in-out infinite alternate}
+    @keyframes dbob{to{transform:translateY(-1.8px)}}
+    .dog.bow .pose-stand{transform:rotate(15deg)}
+    .dog.walk .d-a{animation:dleg .34s ease-in-out infinite alternate}
+    .dog.walk .d-b{animation:dleg .34s ease-in-out infinite alternate-reverse}
+    @keyframes dleg{from{transform:rotate(28deg)}to{transform:rotate(-28deg)}}
+    .d-tail,.d-tail2{animation:dwag .34s ease-in-out infinite alternate}
+    .dog.bow .d-tail{animation-duration:.17s}
+    @keyframes dwag{from{transform:rotate(-12deg)}to{transform:rotate(14deg)}}
+    .d-eyes,.d-eyes2{animation:dblink 4.4s infinite}
+    @keyframes dblink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.12)}}
+    .d-tongue{opacity:0}.dog.bow .d-tongue,.dog.look .d-tongue{opacity:1}
+    .dog.look .d-head2{animation:dtilt 2.6s ease-in-out infinite}
+    @keyframes dtilt{0%,100%{transform:rotate(0)}30%,64%{transform:rotate(-13deg)}}
+    @media (prefers-reduced-motion:reduce){.demo *{animation:none!important}}
+  </style>
+  <template id="dogTpl"><svg class="dog" viewBox="0 0 120 96" aria-hidden="true"><ellipse cx="62" cy="90" rx="30" ry="3.6" fill="rgba(60,40,20,.16)"/><g class="d-flip"><g class="pose-stand"><g class="d-tail" style="transform-origin:37px 50px"><path d="M38 51 C27 50 17 41 18 28 C19 22 26 22 27 28 C28 36 33 42 41 46 Z" fill="#E9B676"/><path d="M23 30 C21 37 24 44 31 48" stroke="#F7DDB0" stroke-width="3" fill="none" stroke-linecap="round"/></g><g class="d-b" style="transform-origin:43px 60px"><rect x="39" y="58" width="8" height="27" rx="4" fill="#CF9452"/></g><g class="d-a" style="transform-origin:77px 60px"><rect x="73" y="58" width="8" height="27" rx="4" fill="#CF9452"/></g><path d="M34 53 C34 41 49 38 62 39 C76 40 88 42 88 54 C88 64 78 67 62 67 C46 67 34 64 34 53 Z" fill="#E9B676"/><path d="M37 59 L37 63 q3.5 6 7 1.5 q3.5 6 7 1.5 q3.5 6 7 1.5 q3.5 6 7 1.5 q3.5 6 7 1.5 q3.5 5 7 0 L79 59 Z" fill="#E9B676"/><path d="M79 44 C91 45 94 59 85 66 C80 60 77 52 79 44 Z" fill="#F7DDB0"/><g class="d-a" style="transform-origin:49px 60px"><rect x="45" y="58" width="8" height="27" rx="4" fill="#E9B676"/><ellipse cx="49" cy="84" rx="5.2" ry="3" fill="#F7DDB0"/></g><g class="d-b" style="transform-origin:83px 60px"><rect x="79" y="58" width="8" height="27" rx="4" fill="#E9B676"/><ellipse cx="83" cy="84" rx="5.2" ry="3" fill="#F7DDB0"/></g><path d="M79 39 C86 43 89 51 85 59 C80 56 76 47 79 39 Z" fill="#F59AB8"/><g fill="#fff"><circle cx="81" cy="40.5" r="1.6"/><circle cx="84.5" cy="44.5" r="1.6"/><circle cx="86.5" cy="49.5" r="1.6"/><circle cx="86" cy="54.5" r="1.6"/></g><g style="transform-origin:86px 42px"><path d="M87 21 C91 15 97 17 97 24 Z" fill="#CF9452"/><circle cx="92" cy="32" r="14" fill="#E9B676"/><circle cx="86" cy="40" r="8" fill="#E9B676"/><ellipse cx="104" cy="37" rx="9" ry="6.5" fill="#F7DDB0"/><path class="d-tongue" d="M101 41 q2.5 8 6.5 1.5 z" fill="#F07D93"/><path d="M110 39.5 Q105 43.5 99 40.5" stroke="#2B1D16" stroke-width="1.4" fill="none" stroke-linecap="round"/><ellipse cx="111.5" cy="34.5" rx="3" ry="2.6" fill="#2B1D16"/><g class="d-eyes" style="transform-origin:97px 29px"><circle cx="97" cy="29" r="2.7" fill="#2B1D16"/><circle cx="98" cy="28" r=".95" fill="#fff"/></g><path d="M89 20 q4.5 -4.5 9 0" stroke="#F7DDB0" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M82 21 C75 18 71 29 75 39 C80 41 86 34 86 26 Z" fill="#D99D5C"/></g></g><g class="pose-sit" style="transform-origin:60px 90px"><g class="d-tail2" style="transform-origin:72px 84px"><path d="M71 85 C84 83 95 72 93 57 C91 52 86 54 86 59 C86 68 80 75 69 79 Z" fill="#E9B676"/></g><ellipse cx="45" cy="81" rx="10" ry="9" fill="#DCA466"/><ellipse cx="75" cy="81" rx="10" ry="9" fill="#DCA466"/><path d="M44 89 C40 68 47 52 60 50 C73 52 80 68 76 89 Z" fill="#E9B676"/><ellipse cx="60" cy="67" rx="11" ry="13" fill="#F7DDB0"/><rect x="50" y="68" width="8" height="22" rx="4" fill="#E9B676"/><rect x="62" y="68" width="8" height="22" rx="4" fill="#E9B676"/><ellipse cx="54" cy="89" rx="5.5" ry="3.2" fill="#F7DDB0"/><ellipse cx="66" cy="89" rx="5.5" ry="3.2" fill="#F7DDB0"/><path d="M43 50 Q60 61 77 50 Q75 59 60 62 Q45 59 43 50 Z" fill="#F59AB8"/><g fill="#fff"><circle cx="46.5" cy="54" r="1.7"/><circle cx="53" cy="58" r="1.7"/><circle cx="60" cy="59.5" r="1.7"/><circle cx="67" cy="58" r="1.7"/><circle cx="73.5" cy="54" r="1.7"/></g><g class="d-head2" style="transform-origin:60px 46px"><path d="M46 29 C37 17 38 6 47 10 C52 13 54 22 52 30 Z" fill="#D99D5C"/><path d="M74 29 C83 17 82 6 73 10 C68 13 66 22 68 30 Z" fill="#D99D5C"/><circle cx="60" cy="33" r="16" fill="#E9B676"/><ellipse cx="47.5" cy="40" rx="8" ry="7" fill="#E9B676"/><ellipse cx="72.5" cy="40" rx="8" ry="7" fill="#E9B676"/><ellipse cx="60" cy="41" rx="9" ry="7" fill="#F7DDB0"/><path class="d-tongue" d="M57.5 43.5 q2.5 7 5 0 z" fill="#F07D93"/><path d="M60 40.5 q-3 3.5 -6 1.5 M60 40.5 q3 3.5 6 1.5" stroke="#2B1D16" stroke-width="1.3" fill="none" stroke-linecap="round"/><ellipse cx="60" cy="38" rx="3.6" ry="2.8" fill="#2B1D16"/><g class="d-eyes2" style="transform-origin:60px 31px"><circle cx="53" cy="31" r="3.2" fill="#2B1D16"/><circle cx="67" cy="31" r="3.2" fill="#2B1D16"/><circle cx="54.1" cy="29.9" r="1.1" fill="#fff"/><circle cx="68.1" cy="29.9" r="1.1" fill="#fff"/></g><path d="M55 19 q5 -5 10 0" stroke="#F7DDB0" stroke-width="2.2" fill="none" stroke-linecap="round"/></g></g></g></svg></template>
+  <figure data-cls="stand"><figcaption>ایستاده</figcaption></figure>
+  <figure data-cls="walk"><figcaption>راه رفتن</figcaption></figure>
+  <figure data-cls="sit look"><figcaption>نشسته، رو به کاربر</figcaption></figure>
+  <figure data-cls="bow"><figcaption>تعظیم بازی</figcaption></figure>
+</div>
+<script>
+document.querySelectorAll('[data-cls]').forEach(function(f){var s=document.getElementById('dogTpl').content.firstElementChild.cloneNode(true);s.setAttribute('class','dog '+f.dataset.cls);f.insertBefore(s,f.firstChild);});
+</script>
