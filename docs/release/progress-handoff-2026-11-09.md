@@ -2,6 +2,25 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
+## Latest verified checkpoint — 2026-11-11 10:26 UTC
+
+- GitHub `main` is `9da443e619a44d068c83449a8c33f1e11e9ffcbc`: PR #248 merged normally after exact-head CI `43000952182` passed. The merge error returned by `gh` was local branch cleanup only; GitHub confirms #248 is MERGED. Its Zod upgrade and bounded onboarding interests remove the prior high Zod advisory in the tested lockfile. Six moderate advisories remain; see [security QA](../qa/security-zod4-validation-2026-11-11.md). No schema migration was added.
+- Production still reports `fa6367cf35ce5947ff749a79c09a67afcd1a73ce`, deployment `github-42998033765-1`; DB/Redis readiness is healthy. Main deployment `43000886507` has completed CI/migrations/build but is still in Deploy over SSH; #248 deploy run `43003165980` is queued behind it. Do not mark #248 live until the endpoint reports its SHA.
+- Live read-only `/api/shop/products` remains HTTP 200 and empty (`total: 0`): known demo exclusion persists; no legitimate approved offer or checkout is available to verify. `/sitemap.xml` remains HTTP 200 with 36 static URLs. No full-site SEO acceptance is claimed.
+- Confirmed HSTS issue remains live on `fa6367cf`: `/api/health/version` and `/api/health/ready` return two HSTS fields (edge `max-age=31536000; includeSubDomains`, Helmet `max-age=31536000`); `/health/ready` returns one. PR #249 now includes current main at head `f64e9988ebf6588993f7b846ed87955b5ce535a8`; exact-head CI `43003462007` is in progress. It disables only the duplicate API Helmet HSTS and keeps other Helmet headers. Deployment and live verification remain pending.
+- PR #215 merged normally at `b4ec787b24d80adb3b4f5ce23a18a8c3fabcbce3` after exact-head CI `42999335716` passed. Its production deployment is the in-progress `43000886507`. This support visual slice is not declared visually complete; authenticated screenshot/state checks remain missing.
+- PR #217 has been updated non-destructively with current main through #248; current head `6fd5c237153d8de4d40c3f2422a8ea223acd7506`, exact-head CI `43003447234` in progress. It preserves #244's request-order guard. Keep visual acceptance PARTIAL until rendered multi-viewport/theme/locale evidence exists.
+- The prior 0-byte overlay remains full; `/dev/shm` has about 1.3 GiB free. No artifacts, user data, Git history, database volume or original worktree were cleaned. `/workspace/batch4-travel-outbound`'s 25 modified files remain untouched. Payment refs were found; no payment-named worktree or uncommitted payment files appeared in inspected worktrees, which does not prove earlier work was deleted.
+- A local focused rerun of #249 could not start because the shared `node_modules` is a symlink and pnpm refused its task-state path; hosted exact-head CI is the authoritative pending check. No private-role browser credentials/fixtures were available. Memorial original-image/CDN access remains unverified. Transient deployment 502s remain unreproduced; the workflow serializes deployments without cancellation and exposes a server-side deployment script whose implementation/log root cause is unavailable.
+
+### Immediate next actions
+
+1. Monitor `43000886507`; verify production SHA/readiness and public assets. Then monitor queued `43003165980` and verify SHA/readiness, one HSTS field on API, shop demo exclusion and sitemap.
+2. Wait for exact-head CI `43003462007` and `43003447234`. Merge #249/#217 only after checks pass and GitHub permits normal merge; account for each sequential deployment before calling anything live.
+3. Re-run an authoritative dependency audit after reproducible install/build if disk allows; do not call six moderate advisories fixed or exploitable without evidence.
+4. Continue page-family design/localization in small independent slices. Private browser acceptance requires authorized disposable owner/member/seller/provider/support/admin accounts; no such credentials were available in this checkpoint.
+5. Preserve the empty shop until legitimate reviewed catalog data/offers exist. Keep Digikala/Jajiga source rights, memorial source/CDN privacy, and German/Spanish SMS support as explicit boundaries.
+
 ## Latest checkpoint — 2026-11-11 10:06 UTC
 
 - Current GitHub main is `fa6367cf35ce5947ff749a79c09a67afcd1a73ce`. Production `/api/health/version` matches at deployment `github-42998033765-1`; `/api/health/ready` is 200 with DB and Redis up. The latest deployment ran post-merge CI, migrations, SSH deploy and public HTML/assets smoke successfully. Read-only `/api/shop/products` remains 200 with zero items; no legitimate offer/checkout is available to verify. `/sitemap.xml` remains 200 with 36 static URLs. Canonical API response has duplicate HSTS; PR #249 contains the scoped fix and is not live.
