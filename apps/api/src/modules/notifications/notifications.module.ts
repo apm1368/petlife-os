@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { EmailModule } from "../../common/email/email.module";
 import { NotificationsController } from "./notifications.controller";
 import { NotificationPreferenceController } from "./notification-preference.controller";
 import { NotificationDevController } from "./notification-dev.controller";
@@ -14,6 +15,7 @@ import { FarazSmsAdapter } from "./messaging/faraz-sms.adapter";
 import { SmsPatternTemplateService } from "./sms-pattern-template.service";
 
 @Module({
+  imports: [EmailModule],
   controllers: [NotificationsController, NotificationPreferenceController, NotificationDevController],
   providers: [
     NotificationsService,
@@ -27,6 +29,6 @@ import { SmsPatternTemplateService } from "./sms-pattern-template.service";
     FarazSmsAdapter,
     SmsPatternTemplateService,
   ],
-  exports: [NotificationOrchestratorService, SmsPatternTemplateService],
+  exports: [NotificationOrchestratorService, SmsPatternTemplateService, NotificationDeliveryService, MessagingProviderRegistry],
 })
 export class NotificationsModule {}

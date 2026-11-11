@@ -1,6 +1,7 @@
 import { Brand } from "@/features/brand/Brand";
 import Link from "next/link";
 import { ArrowUp } from "@petlife/ui";
+import { FooterLinkGroup, FooterSiteDetails } from "@/features/site-settings/FooterLinks";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { storyCopy } from "./story-copy";
 
@@ -11,12 +12,10 @@ export function ParkFooter({ locale }: { locale: RouteLocale }) {
       <div className="park-footer__brand">
         <Link href={`/${locale}`} className="park-brand"><Brand /></Link>
         <p>{c.footerDescription}</p>
+        <FooterSiteDetails />
         <Link href={`/${locale}#lp-main`} className="park-footer__back">{c.footerTop}<ArrowUp size={16} aria-hidden="true" /></Link>
       </div>
-      {c.footerGroups.map(group => <nav key={group.title} aria-label={group.title}>
-        <h2>{group.title}</h2>
-        <ul>{group.links.map(link => <li key={link.href}><Link href={`/${locale}${link.href}`}>{link.label}</Link></li>)}</ul>
-      </nav>)}
+      {c.footerGroups.map(group => <FooterLinkGroup key={group.title} title={group.title} links={group.links} locale={locale} />)}
       <nav aria-label={c.footerPartners}>
         <h2>{c.footerPartners}</h2>
         <ul>

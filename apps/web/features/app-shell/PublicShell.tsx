@@ -14,6 +14,7 @@ import { PublicPrimaryNavigation } from "@/features/navigation/PublicPrimaryNavi
 import { useLocalPreview } from "@/features/local-preview/LocalPreviewGate";
 import { PublicFooter } from "./PublicFooter";
 import { MemberFrame } from "./MemberFrame";
+import { PlatformAnnouncement } from "./PlatformAnnouncement";
 import type { RouteLocale } from "@/lib/i18n/config";
 
 /**
@@ -70,7 +71,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
           )}
         </div>
       </header>
-      <main className="public-experience-main">{children}</main>
+      <main className="public-experience-main"><PlatformAnnouncement surface="public" />{children}</main>
       <PublicFooter locale={routeLocale} />
     </div>
   );

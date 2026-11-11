@@ -13,6 +13,7 @@ import { DisplayModeSync } from "@/features/display-mode/DisplayModeSync";
 import { AuthModalOrigin } from "@/features/auth/AuthModalOrigin";
 import { DesignRoot } from "@/features/design-system/DesignRoot";
 import { PageMotion } from "@/features/motion/PageMotion";
+import { MaintenanceGate } from "@/features/site-settings/MaintenanceGate";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -56,7 +57,7 @@ export default async function LocaleLayout({
       </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeSync /><DisplayModeSync /><ToastProvider><PageMotion><AuthModalOrigin><LocalReviewTools><DesignRoot>{children}{modal}</DesignRoot></LocalReviewTools></AuthModalOrigin></PageMotion></ToastProvider>
+          <ThemeSync /><DisplayModeSync /><ToastProvider><PageMotion><AuthModalOrigin><LocalReviewTools><DesignRoot><MaintenanceGate>{children}{modal}</MaintenanceGate></DesignRoot></LocalReviewTools></AuthModalOrigin></PageMotion></ToastProvider>
         </NextIntlClientProvider>
       </body>
     </html>

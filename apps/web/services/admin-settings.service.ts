@@ -1,14 +1,14 @@
 import type { PaginatedDto } from "@petlife/types";
 import { apiFetch } from "@/lib/api/client";
 
-export type SettingValue = number | boolean | { fa?: string; en?: string } | null;
+export type SettingValue = number | boolean | string | { fa?: string; en?: string; de?: string; es?: string } | null;
 export interface PlatformSetting {
   key: string;
   category: string;
-  type: "integer" | "boolean" | "localizedText";
+  type: "integer" | "boolean" | "localizedText" | "text" | "url" | "email" | "enum";
   scope: "PUBLIC" | "INTERNAL";
   highImpact: boolean;
-  constraints: { min: number | null; max: number | null; maxLength: number | null };
+  constraints: { min: number | null; max: number | null; maxLength: number | null; options?: string[] | null };
   description: string;
   value: SettingValue;
   defaultValue: SettingValue;

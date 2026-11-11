@@ -9,6 +9,7 @@ import { useActivePet } from "@/hooks/use-active-pet";
 import { LanguageToggle } from "@/features/locale/LanguageToggle";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { EXPLORE_GROUPS, PRIMARY_DESTINATIONS, currentDestination } from "./consumer-nav";
+import { useHrefFilter } from "@/features/site-settings/site-settings";
 import type { RouteLocale } from "@/lib/i18n/config";
 
 const NAV_COPY: Record<RouteLocale, { main: string; destinations: string; everything: string; addPet: string; activePet: string; petProfile: (name: string) => string; bottom: string; explore: string; preferences: string; support: string; close: string }> = {
@@ -46,6 +47,7 @@ function useDismiss(open: boolean, close: () => void, boundary: React.RefObject<
 
 /** Desktop primary navigation with the Explore mega menu. Hidden below 1024px (the bottom bar takes over). */
 export function PrimaryNav({ canViewHealth = true }: { canViewHealth?: boolean }) {
+  const enabled = useHrefFilter();
   const locale = useLocale() as RouteLocale;
   const c = NAV_COPY[locale];
   const current = currentDestination(usePathKey(locale));
@@ -82,7 +84,7 @@ export function PrimaryNav({ canViewHealth = true }: { canViewHealth?: boolean }
     <div className="member-nav" ref={wrap} onPointerLeave={hover(false)}>
       <nav aria-label={c.main}>
         <ul>
-          {PRIMARY_DESTINATIONS.filter(d => d.key !== "health" || canViewHealth).map((d) =>
+          {PRIMARY_DESTINATIONS.filter(d => enabled(d.href) && (d.key !== "health" || canViewHealth)).map((d) =>
             d.key === "explore" ? (
               <li key={d.key} onPointerEnter={hover(true)}>
                 <button
@@ -125,7 +127,7 @@ export function PrimaryNav({ canViewHealth = true }: { canViewHealth?: boolean }
             <section key={group.key} className="mega__group" style={{ ["--g" as string]: gi }} aria-labelledby={`${panelId}-${group.key}`}>
               <h2 id={`${panelId}-${group.key}`}>{group[locale]}</h2>
               <ul>
-                {group.links.filter(link => canViewHealth || link.href !== "/pets/active?view=health").map(({ href, icon: Icon, ...labels }) => (
+                {group.links.filter(link => enabled(link.href) && (canViewHealth || link.href !== "/pets/active?view=health")).map(({ href, icon: Icon, ...labels }) => (
                   <li key={href}>
                     <Link href={`/${locale}${href}`} className="mega__link" onClick={close}>
                       <span className="mega__icon"><Icon size={18} aria-hidden="true" /></span>
@@ -191,6 +193,7 @@ export function PetContextControl({ compact = false }: { compact?: boolean }) {
 
 /** Below 1024px: five large targets at the thumb; Explore opens a grouped sheet instead of a page. */
 export function MobileTabBar({ canViewHealth = true }: { canViewHealth?: boolean }) {
+  const enabled = useHrefFilter();
   const locale = useLocale() as RouteLocale;
   const c = NAV_COPY[locale];
   const router = useRouter();
@@ -201,7 +204,7 @@ export function MobileTabBar({ canViewHealth = true }: { canViewHealth?: boolean
   return (
     <>
       <nav className="member-tabbar" aria-label={c.bottom}>
-        {PRIMARY_DESTINATIONS.filter((d) => d.mobile && (d.key !== "health" || canViewHealth)).map(({ key, href, icon: Icon, ...labels }) =>
+        {PRIMARY_DESTINATIONS.filter((d) => d.mobile && enabled(d.href) && (d.key !== "health" || canViewHealth)).map(({ key, href, icon: Icon, ...labels }) =>
           key === "explore" ? (
             <button key={key} type="button" aria-haspopup="dialog" aria-expanded={sheet} aria-current={current === key ? "page" : undefined} onClick={() => setSheet(true)}>
               <Compass size={21} aria-hidden="true" />
@@ -227,7 +230,7 @@ export function MobileTabBar({ canViewHealth = true }: { canViewHealth?: boolean
             <section key={group.key}>
               <h3>{group[locale]}</h3>
               <ul>
-                {group.links.filter(link => canViewHealth || link.href !== "/pets/active?view=health").map(({ href, icon: Icon, ...labels }) => (
+                {group.links.filter(link => enabled(link.href) && (canViewHealth || link.href !== "/pets/active?view=health")).map(({ href, icon: Icon, ...labels }) => (
                   <li key={href}>
                     <button type="button" onClick={() => { setSheet(false); router.push(`/${locale}${href}`); }}>
                       <Icon size={20} aria-hidden="true" />

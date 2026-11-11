@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button, ContextSurface, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
-import { DisputeEvidenceActorType, DisputeStatus, type DisputeDto } from "@petlife/types";
+import { DisputeEvidenceActorType, DisputeStatus, type DisputeDto, DISPUTE_NEXT } from "@petlife/types";
 import { adminService } from "@/services/admin.service";
 import { adminStatusTone } from "./status-tone";
 import { ApiError } from "@/lib/api/client";
@@ -120,7 +120,7 @@ export function AdminDisputeDetailView({ disputeId }: { disputeId: string }) {
         <Input label={t("detail.resolution")} value={resolutionSummary} onChange={(e) => setResolutionSummary(e.target.value)} />
         <div className="flex flex-wrap gap-2">
           {STATUSES.map((s) => (
-            <Button key={s} size="sm" aria-pressed={s === data.status} variant={s === data.status ? "primary" : "secondary"} onClick={() => transition(s)} disabled={s === data.status}>
+            <Button key={s} size="sm" aria-pressed={s === data.status} variant={s === data.status ? "primary" : "secondary"} onClick={() => transition(s)} disabled={s === data.status || !(DISPUTE_NEXT[data.status as DisputeStatus] ?? []).includes(s)}>
               {t(`status.${s}`)}
             </Button>
           ))}

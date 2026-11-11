@@ -130,6 +130,8 @@ export type AdminAuditAction =
   | "feature_flag.change_cancelled"
   | "sms_pattern.created"
   | "sms_pattern.updated"
+  | "messaging.test_sms_sent"
+  | "messaging.test_email_sent"
   | "customer.suspended"
   | "customer.unsuspended"
   | "customer.sessions_revoked"

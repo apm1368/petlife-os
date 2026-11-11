@@ -12,6 +12,7 @@ import { useAdminStore } from "@/stores/admin-store";
 import { formatCount } from "@/lib/number/format-number";
 import type { RouteLocale } from "@/lib/i18n/config";
 import "./approved-admin.css";
+import { DashboardInsights } from "./reports/DashboardInsights";
 
 type LoadFailure = "failed" | "offline" | "noAccess";
 type Result<T> = { value: T | null; failure: LoadFailure | null };
@@ -73,6 +74,7 @@ export function AdminDashboardView() {
   return <div className="approved-admin">
     <header className="approved-admin__heading"><div><p>{context?.displayName}</p><h1>{t("title")}</h1><p>{t("subtitle")}</p></div><time dateTime={new Date().toISOString()}>{date(new Date().toISOString())}</time></header>
     <AdminOperationalSearch />
+    {allowed("analytics.view") ? <DashboardInsights /> : null}
     {allowed("verification.manage") && <Link href="/admin/verification" className="underline">{t("verificationQueue")}</Link>}
     {allowed("access.view") && <Link href="/admin/access" className="underline">{t("accessControl")}</Link>}
     {allowed("travel.source.view") && <Link href="/admin/travel/external" className="underline">{t("externalSources")}</Link>}

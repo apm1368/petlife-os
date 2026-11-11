@@ -47,7 +47,7 @@ function WelcomeFlow() {
         <Button variant="primary" onClick={() => router.push(accountUrl("phone"))}>{t("continueWithPhone")}</Button>
         <Button variant="secondary" onClick={() => router.push(accountUrl("email"))}>{t("continueWithEmail")}</Button>
         <Button variant="secondary" onClick={() => router.push(accountUrl("password"))}>{t("continueWithUsername")}</Button>
-        <Button variant="ghost" onClick={() => router.push(registerUrl())}>{t("createAccount")}</Button>
+        {methods?.passwordSignup === false ? null : <Button variant="ghost" onClick={() => router.push(registerUrl())}>{t("createAccount")}</Button>}
       </div>
     </div>
   );
