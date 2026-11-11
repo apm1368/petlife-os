@@ -6486,6 +6486,7 @@
     "lastSuccessfulSync": "Last successful source sync: {date}",
     "capacity": "Reported capacity: {count}",
     "evidence": "Recorded pet acceptance evidence",
+    "evidenceSourceFilter": "Listed in the public “pets allowed” filter on {source}. Species, size and house-rule limits are not published there; confirm them with the host before booking.",
     "unavailable": "This stay is currently unavailable in the public directory. It remains in your saved list.",
     "details": "View details",
     "viewSource": "View and check at source website",
