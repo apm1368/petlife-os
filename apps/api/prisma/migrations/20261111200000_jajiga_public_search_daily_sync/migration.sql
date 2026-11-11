@@ -22,6 +22,8 @@ SET
   "requestDelayMaxMs" = 4000,
   "consecutiveFailures" = 0,
   "circuitOpenUntil" = NULL,
+  -- Due immediately: the worker (10-minute tick) starts the first full sync right after deploy, then daily.
+  "lastRunAt" = NULL,
   "lastErrorCategory" = NULL,
   "lastError" = NULL,
   "robotsCheckedAt" = '2026-11-11T00:00:00.000Z'::TIMESTAMP(3),
