@@ -1,0 +1,22 @@
+[
+  {
+    "testId": "QA-COMMUNITY-RACE-BROWSER-en",
+    "dateUtc": "2026-11-10T17:29:56.945289+00:00",
+    "sha": "1a5b2c3b8d14615b18fdd613e6b0956d6fe9a31b",
+    "environment": "Deployed JS plus isolated browser-local mocked internal GET responses; NOT real API/feed acceptance",
+    "browser": "154.0.8037.57",
+    "viewport": [
+      390,
+      844
+    ],
+    "route": "/en/community",
+    "expected": "GENERAL selected, newest result remains, obsolete result absent after older response completes",
+    "selectedTopic": "GENERAL",
+    "newestVisible": false,
+    "obsoleteVisible": true,
+    "mutationMethodsAborted": [],
+    "status": "FAIL",
+    "verification": "FIXTURE_ONLY_NOT_LIVE_FLOW",
+    "evidence": "en-browser-local-fixture.png"
+  }
+]
