@@ -17,7 +17,7 @@ describe("travel discovery metadata", () => {
       expect(new URL(path, base).href).toBe(`https://opetlife.ir/${routeLocale}/travel`);
     }
     expect(metadata.description).not.toMatch(/real availability|موجودی واقعی/);
-    expect(metadata.description).toMatch(/تأیید|Confirm|Bestätigen|Confirma/);
+    expect(metadata.description).toMatch(/تأیید|Confirm|Bestätig|Confirma/);
     if (locale === "de") expect(metadata.title).toContain("Haustier");
     if (locale === "es") expect(metadata.title).toContain("mascotas");
   });
