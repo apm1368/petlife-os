@@ -2,6 +2,25 @@
 
 Point-in-time checkpoint only. Recheck GitHub, CI and production before each merge or release.
 
+## Update — 2026-11-11 11:57 UTC
+
+- Docs PR #250 was merged normally at `58abc32b0ff7b0c5978b652a953886dfce55301a` after exact-head CI run `43013474999` succeeded on `e62a56075dee0a1af928163f21351671ac19165d`. It has no runtime or migration changes; no deployment is claimed for that documentation merge.
+- `main` is `58abc32b0ff7b0c5978b652a953886dfce55301a`. The latest safe production GETs still report SHA `5bd1b1e70cd71b53cf8c3ce87689194476187aca` (deployment `github-43008037716-1`), readiness HTTP 200 with DB/Redis up, and therefore production currently trails main only by the docs commit.
+- Production community is still exposed to the verified seeded fixture issue: anonymous `GET /api/community/posts?page=1&pageSize=2` returned demo-marked posts; #251 has not merged/deployed. The shop remains HTTP 200 with `total: 0`, `items: []`; QA exclusion remains active but legitimate product visibility/checkout is unverified. `/sitemap.xml` is still HTTP 200. Single HSTS `max-age=31536000` and the previously observed security headers remain in the public API response.
+- PR #251 final head is `83f65a3a3e08138515c6e65af79197fcefb5ed08`, base `5bd1b1e7…`, and is mergeable at the latest metadata read. Exact-head CI `43013699239` has completed lint, design, typecheck, migrations and unit tests; API E2E is still running and build has not started. Do not merge until the whole current-head run is green. If main advances first, update/merge base and rerun checks rather than bypassing mergeability.
+- A separate security candidate branch `security/file-type-parser-upgrade` was created from the current main commit. It pins Nest's vulnerable transitive `file-type@20.4.1` to patched `21.3.2`, with an API parser regression. Focused API test (6), targeted lint, API typecheck/build/lint, pnpm 10.33 frozen lockfile validation and `git diff --check` passed locally. Fresh audit dropped from six to four moderate findings; no `file-type` advisory remains in the new lockfile. This work is local only; hosted CI/PR/deployment are not yet complete. Details: [parser upgrade QA](../qa/file-type-parser-upgrade-2026-11-11.md).
+- Four moderate dependency advisories remain: two `next-intl`, one Nest core SSE and development-only `minimatch`; prior source/config review found the documented vulnerable conditions/features absent, but no exploit tests were run. They remain open, not “fixed.” Current private-role browser accounts/fixtures and local Postgres/Redis remain unavailable; API test actors are available in hosted CI only.
+- Environment: `/` overlay is still completely full (0 free); `/dev/shm` has about 1.1 GiB available. No cleanup was performed. Existing shared worktrees and the dirty `/workspace/batch4-travel-outbound` tree remain preserved; the payment work was not found in inspected refs/worktrees, which does not prove it was deleted. Avoid large builds outside the disposable filesystem.
+- The current deployment pipeline has shown brief read-only 502s during two normal deployments; current root cause remains unavailable because deploy host logs/atomicity are not accessible. Do not reproduce; monitor passively on the next ordinary release.
+
+### Immediate next actions
+
+1. Poll exact-head CI `43013699239` for #251. If green and GitHub permits normal merge, merge with expected head `83f65a3a…`, then passively monitor its ordinary deployment and verify version/readiness plus public list/count, fixture detail/comments and locale rendering. Keep the feed empty if no real posts exist.
+2. Finish the `file-type@21.3.2` branch record with its commit SHA, open/update a reviewable PR, check exact-head CI and merge/deploy only when the normal path allows. Re-run the production audit after its merge.
+3. Resume private-flow fixtures through the existing isolated CI database/browser setup. Local browser verification remains blocked by missing authorized accounts, DB/Redis services, and `DATABASE_URL`.
+4. Continue the existing localization/design backlog without duplicating dashboard/account slices already documented in `docs/product/localization-rollout.md`; authenticated visual comparison remains unverified. Preserve the landing HERO.
+5. Reconcile #215/#217 and older domain PRs only against actual current main diffs and exact-head checks; do not infer current CI from their historic green runs.
+
 ## Update — 2026-11-11 11:37 UTC
 
 - Production and `main` now both report `5bd1b1e70cd71b53cf8c3ce87689194476187aca`; deployment `43008037716` completed successfully after exact main CI (lint, design guard, typecheck, migrations, unit tests, API E2E, build) passed. Production version/readiness returned HTTP 200, DB/Redis healthy. Pipeline completed its 12-route/27-asset public smoke with zero failures.

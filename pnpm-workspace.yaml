@@ -11,6 +11,8 @@ overrides:
   "source-map-js@>=1 <1.2.2": "1.2.2"
   "lodash@>=4 <4.18.0": "4.18.1"
   "brace-expansion@>=5 <5.0.12": "5.0.12"
+  # Nest's FileTypeValidator dynamically imports this parser; keep it on the patched v21 line.
+  "file-type@<21.3.2": "21.3.2"
 
 # pnpm 10 reads install policy from the workspace manifest, not package.json.
 # Keeping this here makes local, headless, and GitHub Actions installs agree.
