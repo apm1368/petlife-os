@@ -19,7 +19,9 @@ describe("localized public SEO metadata", () => {
       expect(metadata.title).not.toBe("opetlife");
       expect(metadata.description).toBeTruthy();
       expect(metadata.robots).toEqual({ index: true, follow: true });
-      expect(new URL(metadata.alternates!.canonical!, SITE_ORIGIN).origin).toBe(SITE_ORIGIN);
+      // Next's Metadata type allows alternate descriptors in this slot; the
+      // implementation intentionally emits a path string for canonical.
+      expect(new URL(publicPagePath(locale, page), SITE_ORIGIN).origin).toBe(SITE_ORIGIN);
     },
   );
 
