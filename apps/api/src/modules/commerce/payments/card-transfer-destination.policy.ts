@@ -32,7 +32,7 @@ export function luhnValid(digits: string): boolean {
 /** "IR" + 24 digits (spaces and Persian digits tolerated), or null. */
 export function normalizeSheba(raw: string | null | undefined): string | null {
   if (!raw) return null;
-  const compact = toLatinDigits(raw).replace(/[\s\-]/g, "").toUpperCase();
+  const compact = toLatinDigits(raw).replace(/[\s-]/g, "").toUpperCase();
   const withPrefix = /^\d{24}$/.test(compact) ? `IR${compact}` : compact;
   return /^IR\d{24}$/.test(withPrefix) ? withPrefix : null;
 }
