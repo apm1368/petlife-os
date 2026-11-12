@@ -38,7 +38,7 @@ import { useSupportPermissions } from "./use-support-permissions";
 /** Persian/Arabic digits are accepted, but money crosses the API as integer IRR. */
 export function tomanToIrr(value: string): number | undefined {
   const ascii = value
-    .replace(/[۰-۹]/g, (c) => String(c.charCodeAt(0) - 1776))
+    .replace(/[۰-۹]/g, (c) => String(c.charCodeAt(0) - 1776)).replace(/[٠-٩]/g, (c) => String(c.charCodeAt(0) - 1632))
     .replace(/[٠-٩]/g, (c) => String(c.charCodeAt(0) - 1632))
     .trim();
   if (!/^\d+$/.test(ascii)) return undefined;

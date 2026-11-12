@@ -24,6 +24,8 @@ enum Locale {
   en
   de
   es
+  ar
+  nl
 }
 
 enum ThemePreference {

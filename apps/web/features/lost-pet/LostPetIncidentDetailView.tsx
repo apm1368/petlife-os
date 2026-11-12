@@ -31,7 +31,7 @@ export function LostPetIncidentDetailView({ petId, incidentId }: { petId: string
   const [loadError, setLoadError] = useState<unknown>(null);
   const [isActing, setIsActing] = useState(false);
   const lang = useLocale() as RouteLocale;
-  const when = (iso: string) => `${formatDay(iso.slice(0, 10), lang, { weekday: true })} ${new Intl.DateTimeFormat(({ fa: "fa-IR-u-ca-persian-nu-arabext", en: "en-GB", de: "de-DE", es: "es-ES" })[lang], { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tehran" }).format(new Date(iso))}`;
+  const when = (iso: string) => `${formatDay(iso.slice(0, 10), lang, { weekday: true })} ${new Intl.DateTimeFormat(({ fa: "fa-IR-u-ca-persian-nu-arabext", en: "en-GB", de: "de-DE", es: "es-ES", ar: "ar", nl: "nl-NL" })[lang], { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tehran" }).format(new Date(iso))}`;
 
   async function load() {
     setError(null);

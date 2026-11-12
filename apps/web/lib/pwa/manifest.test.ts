@@ -15,7 +15,7 @@ describe("installable app manifest", () => {
     expect(manifest.scope).toBe("/");
     expect(manifest.display).toBe("standalone");
     expect(manifest.lang).toBe(locale);
-    expect(manifest.dir).toBe(locale === "fa" ? "rtl" : "ltr");
+    expect(manifest.dir).toBe(locale === "fa" || locale === "ar" ? "rtl" : "ltr");
     expect(manifest.name).toBe(locale === "fa" ? "اپت لایف" : "opetlife");
     expect(manifest.theme_color).toBe("#1F5A3D");
     expect(manifest.background_color).toBe("#FFFBF5");

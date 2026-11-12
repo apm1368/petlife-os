@@ -21,7 +21,7 @@ export function AgeStep({ onNext }: { onNext: (petId: string) => void }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const parsedMonths = Number(approxMonths.replace(/[۰-۹]/g, d => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))));
+  const parsedMonths = Number(approxMonths.replace(/[۰-۹]/g, d => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/[٠-٩]/g, d => String("٠١٢٣٤٥٦٧٨٩".indexOf(d))));
   const validApprox = approxMonths.trim() !== "" && Number.isInteger(parsedMonths) && parsedMonths >= 0 && parsedMonths <= 600;
   const canContinue = useApprox ? validApprox : !!birthDate;
 

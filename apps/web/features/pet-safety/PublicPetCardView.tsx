@@ -11,6 +11,30 @@ const COPY = {
   en: { unavailable: "This card isn't available", unavailableHint: "It may have expired or been revoked.", microchip: "Microchip: ", lost: "This pet is reported lost — view and report a sighting", emergency: "Emergency information", allergies: "Allergies", conditions: "Active conditions", medications: "Current medications", bloodType: "Blood type: ", contact: "Emergency contact: " },
   de: { unavailable: "Diese Karte ist nicht verfügbar", unavailableHint: "Sie ist möglicherweise abgelaufen oder wurde widerrufen.", microchip: "Mikrochip: ", lost: "Dieses Tier wurde als vermisst gemeldet – ansehen und eine Sichtung melden", emergency: "Notfallinformationen", allergies: "Allergien", conditions: "Aktuelle Erkrankungen", medications: "Aktuelle Medikamente", bloodType: "Blutgruppe: ", contact: "Notfallkontakt: " },
   es: { unavailable: "Esta tarjeta no está disponible", unavailableHint: "Puede que haya caducado o se haya revocado.", microchip: "Microchip: ", lost: "Esta mascota está reportada como perdida: ver y avisar de un avistamiento", emergency: "Información de emergencia", allergies: "Alergias", conditions: "Enfermedades activas", medications: "Medicación actual", bloodType: "Grupo sanguíneo: ", contact: "Contacto de emergencia: " },
+  ar: {
+    unavailable: "هذه البطاقة غير متاحة",
+    unavailableHint: "ربما انتهت صلاحيتها أو أُلغيت.",
+    microchip: "الشريحة الإلكترونية: ",
+    lost: "تم الإبلاغ عن فقدان هذا الحيوان الأليف — اعرض البلاغ وأبلغ عن مشاهدة",
+    emergency: "معلومات الطوارئ",
+    allergies: "الحساسية",
+    conditions: "الحالات المرضية النشطة",
+    medications: "الأدوية الحالية",
+    bloodType: "فصيلة الدم: ",
+    contact: "جهة اتصال الطوارئ: "
+  },
+  nl: {
+    unavailable: "Deze kaart is niet beschikbaar",
+    unavailableHint: "Mogelijk is hij verlopen of ingetrokken.",
+    microchip: "Microchip: ",
+    lost: "Dit huisdier is als vermist gemeld — bekijk de melding en meld een waarneming",
+    emergency: "Noodinformatie",
+    allergies: "Allergieën",
+    conditions: "Actieve aandoeningen",
+    medications: "Huidige medicatie",
+    bloodType: "Bloedgroep: ",
+    contact: "Noodcontact: "
+  },
 } as const;
 
 /** Functional only (Codex owns the design): what a QR scan / emergency link shows. Never the full health record. */

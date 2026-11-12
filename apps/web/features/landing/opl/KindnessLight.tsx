@@ -13,7 +13,7 @@ import { observeVisible, prefersReducedMotion } from "./cursor-bus";
 export function KindnessLight() {
   const { locale } = useLanding();
   const s = storyCopy[locale], c = useOplCopy().kindness;
-  const Arrow = locale === "fa" ? ArrowLeft : ArrowRight;
+  const Arrow = (locale === "fa" || locale === "ar") ? ArrowLeft : ArrowRight;
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = box.current;

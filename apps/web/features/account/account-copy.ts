@@ -6,11 +6,11 @@ import type { RouteLocale } from "@/lib/i18n/config";
 export function useAccountCopy() {
   const locale = useLocale() as RouteLocale;
   const fa = locale === "fa";
-  const numberFormat = new Intl.NumberFormat(locale === "fa" ? "fa-IR" : locale);
+  const numberFormat = new Intl.NumberFormat(locale === "fa" ? "fa-IR" : locale === "nl" ? "nl-NL" : locale);
   /** Counts in the locale's digits (Persian digits in fa). */
   const num = (value: number) => numberFormat.format(value);
-  const t = (faText: string, enText: string, deText = enText, esText = enText) =>
-    locale === "fa" ? faText : locale === "de" ? deText : locale === "es" ? esText : enText;
+  const t = (faText: string, enText: string, deText = enText, esText = enText, arText = enText, nlText = enText) =>
+    locale === "fa" ? faText : locale === "de" ? deText : locale === "es" ? esText : locale === "ar" ? arText : locale === "nl" ? nlText : enText;
   return { locale, fa, num, t };
 }
 

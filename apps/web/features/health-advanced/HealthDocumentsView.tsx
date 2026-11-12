@@ -12,7 +12,7 @@ import { FilePicker } from "@/features/shared/FilePicker";
 
 /** spec: "private medical documents must never be publicly exposed" — download always goes through a freshly-minted signed URL, never a stored/cached link. */
 export function HealthDocumentsView({ petId }: { petId: string }) {
-  const locale = useLocale() as "fa" | "en" | "de" | "es";
+  const locale = useLocale() as "fa" | "en" | "de" | "es" | "ar" | "nl";
   const t = useTranslations("healthAdvanced");
   const tCommon = useTranslations("common");
 

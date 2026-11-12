@@ -104,7 +104,7 @@ export function AllergiesView({ petId }: { petId: string }) {
           <div>
             <Link href={`/${locale}/pets/${petId}/health/allergies/${allergy.id}`} className="text-body text-text-primary underline-offset-4 hover:underline">{allergy.name}</Link>
             {allergy.reaction ? <p className="text-metadata text-text-secondary">{allergy.reaction}</p> : null}
-            <p className="text-metadata text-text-secondary">{t("source")}: {statusLabel(allergy.sourceType, locale as "fa" | "en" | "de" | "es", "source")}</p>
+            <p className="text-metadata text-text-secondary">{t("source")}: {statusLabel(allergy.sourceType, locale as "fa" | "en" | "de" | "es" | "ar" | "nl", "source")}</p>
           </div>
           {allergy.severity ? <StatusLabel tone="attention">{t(`severity_${allergy.severity}`)}</StatusLabel> : null}
         </ContextSurface>

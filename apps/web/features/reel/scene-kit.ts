@@ -18,7 +18,7 @@ export function birdInner(kind: BirdKind) {
 }
 
 export function makeKit(locale: RouteLocale) {
-  const rtl = locale === "fa";
+  const rtl = (locale === "fa" || locale === "ar");
   const dir = rtl ? "rtl" : "ltr";
   const X = (x: number) => (rtl ? x : 360 - x);
   const m = (v: number) => (rtl ? v : -v);

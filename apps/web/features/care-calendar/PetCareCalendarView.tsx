@@ -17,8 +17,48 @@ const copy = {
   en: { title:"Care calendar", description:"Reminders and bookings at a glance; times in Tehran time", careCenter:"Care center", previous:"Previous", next:"Next", view:"Calendar view", month:"Month", agenda:"Agenda", selectDay:"Select day", allDays:"All days this month", showMonth:"Show whole month", events:"Event agenda", empty:"No events in this period", pet:"Pet", choosePet:"Choose a pet to view its calendar.", booking:"Care booking", loading:"Loading", weekdays:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"] },
   de: { title:"Pflegekalender", description:"Erinnerungen und Termine auf einen Blick; Zeiten in der Zeitzone Teheran", careCenter:"Pflegebereich", previous:"Vorheriger Monat", next:"Nächster Monat", view:"Kalenderansicht", month:"Monat", agenda:"Agenda", selectDay:"Tag auswählen", allDays:"Alle Tage dieses Monats", showMonth:"Ganzen Monat anzeigen", events:"Terminübersicht", empty:"Keine Ereignisse in diesem Zeitraum", pet:"Haustier", choosePet:"Wähle ein Haustier aus, um den Kalender zu sehen.", booking:"Pflegetermin", loading:"Wird geladen", weekdays:["So","Mo","Di","Mi","Do","Fr","Sa"] },
   es: { title:"Calendario de cuidados", description:"Recordatorios y citas de un vistazo; horas en la zona horaria de Teherán", careCenter:"Centro de cuidados", previous:"Mes anterior", next:"Mes siguiente", view:"Vista del calendario", month:"Mes", agenda:"Agenda", selectDay:"Seleccionar día", allDays:"Todos los días de este mes", showMonth:"Mostrar el mes completo", events:"Agenda de eventos", empty:"No hay eventos en este periodo", pet:"Mascota", choosePet:"Elige una mascota para ver su calendario.", booking:"Cita de cuidados", loading:"Cargando", weekdays:["dom","lun","mar","mié","jue","vie","sáb"] },
+  ar: {
+    title: "تقويم الرعاية",
+    description: "التذكيرات والحجوزات في لمحة؛ الأوقات بتوقيت طهران",
+    careCenter: "مركز الرعاية",
+    previous: "السابق",
+    next: "التالي",
+    view: "عرض التقويم",
+    month: "الشهر",
+    agenda: "القائمة",
+    selectDay: "اختر اليوم",
+    allDays: "كل أيام هذا الشهر",
+    showMonth: "عرض الشهر كاملًا",
+    events: "قائمة الأحداث",
+    empty: "لا أحداث في هذه الفترة",
+    pet: "الحيوان الأليف",
+    choosePet: "اختر حيوانًا أليفًا لعرض تقويمه.",
+    booking: "حجز رعاية",
+    loading: "جارٍ التحميل",
+    weekdays: ["أحد", "اثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"]
+  },
+  nl: {
+    title: "Zorgkalender",
+    description: "Reminders en boekingen in één oogopslag; tijden in Teheraanse tijd",
+    careCenter: "Zorgcentrum",
+    previous: "Vorige",
+    next: "Volgende",
+    view: "Kalenderweergave",
+    month: "Maand",
+    agenda: "Lijst",
+    selectDay: "Dag kiezen",
+    allDays: "Alle dagen van deze maand",
+    showMonth: "Hele maand tonen",
+    events: "Lijst met gebeurtenissen",
+    empty: "Geen gebeurtenissen in deze periode",
+    pet: "Huisdier",
+    choosePet: "Kies een huisdier om de kalender te bekijken.",
+    booking: "Zorgboeking",
+    loading: "Laden",
+    weekdays: ["zo", "ma", "di", "wo", "do", "vr", "za"]
+  },
 } as const;
-const intlLocale: Record<RouteLocale, string> = { fa:"fa-IR-u-ca-persian", en:"en-US", de:"de-DE", es:"es-ES" };
+const intlLocale: Record<RouteLocale, string> = { fa:"fa-IR-u-ca-persian", en:"en-US", de:"de-DE", es:"es-ES", ar: "ar", nl: "nl-NL" };
 export function PetCareCalendarView({petId, toolbar}:{petId:string; toolbar?: ReactNode}) {
   const locale=useLocale() as RouteLocale; const fa=locale==="fa"; const c=copy[locale];
   const [anchor,setAnchor]=useState(()=>new Date()); const [mode,setMode]=useState("MONTH"); const [selected,setSelected]=useState<string|null>(null); const [events,setEvents]=useState<Event[]|null>(null); const [error,setError]=useState<unknown>(null);

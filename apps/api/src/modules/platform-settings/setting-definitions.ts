@@ -3,7 +3,7 @@ import type { AppEnv } from "../../config/env";
 export type SettingCategory = "platform" | "booking" | "commerce" | "support" | "content" | "notifications" | "privacy" | "country" | "auth" | "site" | "social" | "features" | "maintenance";
 export type SettingType = "integer" | "boolean" | "localizedText" | "text" | "url" | "email" | "enum";
 /** Locales a localizedText value may carry. Older values hold fa/en only and stay valid. */
-export const SETTING_LOCALES = ["fa", "en", "de", "es"] as const;
+export const SETTING_LOCALES = ["fa", "en", "de", "es", "ar", "nl"] as const;
 export type SettingScope = "PUBLIC" | "INTERNAL";
 
 export interface SettingDefinition {

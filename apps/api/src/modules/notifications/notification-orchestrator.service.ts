@@ -22,7 +22,7 @@ import type { AppEnv } from "../../config/env";
 import { WebPushService } from "./push/web-push.service";
 import { pushDirection, pushTargetUrl, pushTitle } from "./push/push-payload.util";
 
-const EMAIL_ACTION_LABEL = { fa: "مشاهده در اپت‌لایف", en: "Open in opetlife", de: "In opetlife öffnen", es: "Abrir en opetlife" } as const;
+const EMAIL_ACTION_LABEL = { fa: "مشاهده در اپت‌لایف", en: "Open in opetlife", de: "In opetlife öffnen", es: "Abrir en opetlife", ar: "افتح في opetlife", nl: "Openen in opetlife" } as const;
 
 export interface NotifyInput {
   userId: string;

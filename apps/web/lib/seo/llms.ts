@@ -4,7 +4,7 @@ import { publicPageMetadata, publicPagePath } from "./public-metadata";
 import { richTextToMarkdown } from "./rich-text-text";
 import { SITE_ORIGIN, SITE_TAGLINE, absoluteUrl } from "./site";
 
-const LANGUAGE_HEADING: Record<RouteLocale, string> = { fa: "فارسی (Persian)", en: "English", de: "Deutsch (German)", es: "Español (Spanish)" };
+const LANGUAGE_HEADING: Record<RouteLocale, string> = { fa: "فارسی (Persian)", en: "English", de: "Deutsch (German)", es: "Español (Spanish)", ar: "العربية (Arabic)", nl: "Nederlands (Dutch)" };
 
 const SECTIONS = ["blog", "guides", "services", "vetFind", "lostPets", "animalSupport", "travel", "community", "contact"] as const;
 
@@ -43,7 +43,7 @@ export function buildLlmsTxt(feed: PublicArticleFeedItemDto[]): string {
 
 /** /llms-full.txt: every published article in full, as Markdown, grouped by language. */
 export function buildLlmsFullTxt(feed: PublicArticleFeedItemDto[]): string {
-  const out: string[] = ["# opetlife (اپت‌لایف) — full article text", "", "> Every published opetlife article in Markdown. Source URLs are given for each article; please cite them.", ""];
+  const out: string[] = ["# opetlife (اپت‌لایف) — full article text", "", "> Every published opetlife article in Markdown. Source URLs are given for each article; please cite them.", "", "", ""];
   for (const item of feed) {
     out.push(
       `## ${item.title}`,

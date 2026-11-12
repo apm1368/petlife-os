@@ -6,15 +6,15 @@ import { EXPLORE_GROUPS } from "@/features/navigation/consumer-nav";
 import { useHrefFilter } from "@/features/site-settings/site-settings";
 import type { RouteLocale } from "@/lib/i18n/config";
 
-type Entry = { href: string; icon: typeof House; fa: [string, string]; en: [string, string]; de: [string, string]; es: [string, string] };
+type Entry = { href: string; icon: typeof House; fa: [string, string]; en: [string, string]; de: [string, string]; es: [string, string]; ar: [string, string]; nl: [string, string] };
 
 const MINE: Entry[] = [
-  { href: "/bookings", icon: ClipboardList, fa: ["نوبت‌های من", ""], en: ["My bookings", ""], de: ["Meine Termine", ""], es: ["Mis citas", ""] },
-  { href: "/orders", icon: PackageCheck, fa: ["سفارش‌های من", ""], en: ["My orders", ""], de: ["Meine Bestellungen", ""], es: ["Mis pedidos", ""] },
-  { href: "/travel/trips", icon: Plane, fa: ["سفرهای من", ""], en: ["My trips", ""], de: ["Meine Reisen", ""], es: ["Mis viajes", ""] },
-  { href: "/pets/active?view=memories", icon: Images, fa: ["خاطرات", ""], en: ["Memories", ""], de: ["Erinnerungen", ""], es: ["Recuerdos", ""] },
-  { href: "/pets", icon: HeartPulse, fa: ["حیوانات من", ""], en: ["My pets", ""], de: ["Meine Tiere", ""], es: ["Mis mascotas", ""] },
-  { href: "/support", icon: LifeBuoy, fa: ["پشتیبانی", ""], en: ["Support", ""], de: ["Support", ""], es: ["Soporte", ""] },
+  { href: "/bookings", icon: ClipboardList, fa: ["نوبت‌های من", ""], en: ["My bookings", ""], de: ["Meine Termine", ""], es: ["Mis citas", ""], ar: ["حجوزاتي", ""], nl: ["Mijn boekingen", ""] },
+  { href: "/orders", icon: PackageCheck, fa: ["سفارش‌های من", ""], en: ["My orders", ""], de: ["Meine Bestellungen", ""], es: ["Mis pedidos", ""], ar: ["طلباتي", ""], nl: ["Mijn bestellingen", ""] },
+  { href: "/travel/trips", icon: Plane, fa: ["سفرهای من", ""], en: ["My trips", ""], de: ["Meine Reisen", ""], es: ["Mis viajes", ""], ar: ["رحلاتي", ""], nl: ["Mijn reizen", ""] },
+  { href: "/pets/active?view=memories", icon: Images, fa: ["خاطرات", ""], en: ["Memories", ""], de: ["Erinnerungen", ""], es: ["Recuerdos", ""], ar: ["الذكريات", ""], nl: ["Herinneringen", ""] },
+  { href: "/pets", icon: HeartPulse, fa: ["حیوانات من", ""], en: ["My pets", ""], de: ["Meine Tiere", ""], es: ["Mis mascotas", ""], ar: ["حيواناتي الأليفة", ""], nl: ["Mijn huisdieren", ""] },
+  { href: "/support", icon: LifeBuoy, fa: ["پشتیبانی", ""], en: ["Support", ""], de: ["Support", ""], es: ["Soporte", ""], ar: ["الدعم", ""], nl: ["Ondersteuning", ""] },
 ];
 
 const COPY: Record<RouteLocale, { title: string; description: string; shortcuts: string }> = {
@@ -22,6 +22,8 @@ const COPY: Record<RouteLocale, { title: string; description: string; shortcuts:
   en: { title: "Explore", description: "Everything in opetlife, in one place.", shortcuts: "My shortcuts" },
   de: { title: "Entdecken", description: "Alle Bereiche von opetlife an einem Ort.", shortcuts: "Meine Schnellzugriffe" },
   es: { title: "Explorar", description: "Todo opetlife en un solo lugar.", shortcuts: "Mis accesos directos" },
+  ar: { title: "استكشاف", description: "كل ما في opetlife في مكان واحد.", shortcuts: "اختصاراتي" },
+  nl: { title: "Ontdekken", description: "Alles van opetlife op één plek.", shortcuts: "Mijn snelkoppelingen" },
 };
 
 export function ExploreView() {

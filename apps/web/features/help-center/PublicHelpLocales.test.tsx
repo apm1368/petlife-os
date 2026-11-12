@@ -6,7 +6,6 @@ import fa from "@/messages/fa.json";
 import en from "@/messages/en.json";
 import de from "@/messages/de.json";
 import es from "@/messages/es.json";
-import type { RouteLocale } from "@/lib/i18n/config";
 import { formatLocaleDate } from "@/lib/i18n/format";
 import { helpCenterService } from "@/services/help-center.service";
 import { HelpArticleView, HelpCategoryView, HelpCenterHomeView, HelpFaqView, IncidentDetailView, LegalDocumentView, LegalIndexView, SystemStatusView } from "./PublicHelpViews";
@@ -33,7 +32,7 @@ describe("public help/legal/status own catalogs (no merged fallback masking)", (
     expect(screen.getAllByRole("main")).toHaveLength(1);
   });
 
-  it.each(["fa", "en", "de", "es"] as RouteLocale[])("has the entire publicHelp key set in %s", (locale) => {
+  it.each(["fa", "en", "de", "es"] as const)("has the entire publicHelp key set in %s", (locale) => {
     const copy = leaves(catalogs[locale]);
     expect(Object.keys(copy).sort()).toEqual(Object.keys(leaves(catalogs.en)).sort());
     expect(Object.values(copy).every((value) => value.trim().length > 0)).toBe(true);
@@ -54,7 +53,7 @@ describe("public help/legal/status own catalogs (no merged fallback masking)", (
   });
 });
 
-describe.each(["fa", "en", "de", "es"] as RouteLocale[])("public help/legal/status whole-interface states: %s", (locale) => {
+describe.each(["fa", "en", "de", "es"] as const)("public help/legal/status whole-interface states: %s", (locale) => {
   const copy = catalogs[locale];
   beforeEach(() => vi.resetAllMocks());
 

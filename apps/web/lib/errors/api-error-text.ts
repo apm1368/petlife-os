@@ -150,6 +150,8 @@ const GENERIC = {
   en: "That didn't work. Please try again.",
   de: "Das hat nicht funktioniert. Bitte versuchen Sie es erneut.",
   es: "No se pudo completar. Inténtalo de nuevo.",
+  ar: "لم ينجح ذلك. يُرجى المحاولة مرة أخرى.",
+  nl: "Dat is niet gelukt. Probeer het opnieuw.",
 };
 
 /**

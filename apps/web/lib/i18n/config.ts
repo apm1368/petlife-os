@@ -1,4 +1,4 @@
-export const locales = ["fa", "en", "de", "es"] as const;
+export const locales = ["fa", "en", "de", "es", "ar", "nl"] as const;
 export type RouteLocale = (typeof locales)[number];
 /** Locales with complete copy for the currently localized public/auth surfaces. */
 export type AppLocale = "fa" | "en";
@@ -9,6 +9,8 @@ export const localeDirection: Record<RouteLocale, "rtl" | "ltr"> = {
   en: "ltr",
   de: "ltr",
   es: "ltr",
+  ar: "rtl",
+  nl: "ltr",
 };
 
 export function isAppLocale(value: string): value is AppLocale {

@@ -20,6 +20,8 @@ const TEST_EMAIL: Record<EmailLocale, { subject: string; body: string }> = {
   en: { subject: "opetlife test message", body: "This is a test message from the admin panel. If you can read it, email delivery works." },
   de: { subject: "opetlife-Testnachricht", body: "Dies ist eine Testnachricht aus dem Admin-Bereich. Wenn Sie sie lesen können, funktioniert der E-Mail-Versand." },
   es: { subject: "Mensaje de prueba de opetlife", body: "Este es un mensaje de prueba del panel de administración. Si puedes leerlo, el envío de correo funciona." },
+  ar: { subject: "رسالة تجريبية من opetlife", body: "هذه رسالة تجريبية من لوحة الإدارة. إذا كنت تستطيع قراءتها، فإرسال البريد الإلكتروني يعمل." },
+  nl: { subject: "Testbericht van opetlife", body: "Dit is een testbericht uit het beheerpaneel. Kun je het lezen? Dan werkt het versturen van e-mail." },
 };
 
 /**

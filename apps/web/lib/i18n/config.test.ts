@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { isAppLocale, isRouteLocale, localeDirection, locales } from "./config";
 
 describe("locale config", () => {
-  it("recognizes the four supported route locales", () => {
+  it("recognizes the six supported route locales", () => {
     expect(isAppLocale("fa")).toBe(true);
     expect(isAppLocale("en")).toBe(true);
     expect(isAppLocale("de")).toBe(false);
@@ -10,7 +10,9 @@ describe("locale config", () => {
     expect(isAppLocale("ar")).toBe(false);
     expect(isRouteLocale("de")).toBe(true);
     expect(isRouteLocale("es")).toBe(true);
-    expect(isRouteLocale("ar")).toBe(false);
+    expect(isRouteLocale("ar")).toBe(true);
+    expect(isRouteLocale("nl")).toBe(true);
+    expect(isRouteLocale("tr")).toBe(false);
   });
 
   it("keeps Persian RTL and the other shipped locales LTR", () => {
@@ -20,7 +22,9 @@ describe("locale config", () => {
     expect(localeDirection.es).toBe("ltr");
   });
 
-  it("declares Persian, English, German and Spanish route locales", () => {
-    expect(locales).toEqual(["fa", "en", "de", "es"]);
+  it("declares Persian, English, German, Spanish, Arabic and Dutch route locales; Arabic is right-to-left", () => {
+    expect(locales).toEqual(["fa", "en", "de", "es", "ar", "nl"]);
+    expect(localeDirection.ar).toBe("rtl");
+    expect(localeDirection.nl).toBe("ltr");
   });
 });
