@@ -211,7 +211,7 @@
       "title": "Text message",
       "label": "Message",
       "placeholder": "Your clinic's name is added at the start.",
-      "count": "{count}/420",
+      "count": "{count, number}/420",
       "send": "Send text",
       "sent": "Text sent.",
       "recorded": "Recorded in test mode — not delivered to the phone.",
@@ -1040,7 +1040,7 @@
     "on": "On",
     "off": "Off",
     "twoAdmins": "Needs a second admin",
-    "pendingCount": "{count} awaiting approval",
+    "pendingCount": "{count, number} awaiting approval",
     "languages": {
       "fa": "Persian",
       "en": "English",
@@ -1124,11 +1124,11 @@
     "save": {
       "label": "Save changes",
       "reason": "Note for the audit trail",
-      "button": "Save {count} changes",
+      "button": "Save {count, number} changes",
       "saving": "Saving…",
       "discard": "Discard changes",
-      "applied": "{count} changes applied.",
-      "pending": "{count} changes are waiting for a second admin.",
+      "applied": "{count, number} changes applied.",
+      "pending": "{count, number} changes are waiting for a second admin.",
       "review": "Review in operational settings",
       "error": "“{name}” was not saved: {code}"
     },
@@ -4849,7 +4849,7 @@
         "placeholder": "Add an internal note (never shown to the customer)",
         "submit": "Add note"
       },
-      "pets": "{count} pet(s)"
+      "pets": "{count, number} pet(s)"
     },
     "support": {
       "title": "Support cases",
@@ -4918,9 +4918,9 @@
           "household": "Household: {name}",
           "pet": "Pet: {name}",
           "relatedEntity": "Related to: {summary}",
-          "firstResponseTime": "First response after {minutes} min",
+          "firstResponseTime": "First response after {minutes, number} min",
           "noFirstResponseYet": "No response sent yet",
-          "resolutionTime": "Resolved after {minutes} min",
+          "resolutionTime": "Resolved after {minutes, number} min",
           "previousCases": "Previous tickets from this customer:",
           "noPreviousCases": "No previous tickets from this customer."
         }
@@ -5051,7 +5051,7 @@
         "missingSubject": "The subject no longer exists or has no summary.",
         "by": "By {name}",
         "openPublicPage": "Open public page",
-        "reportCount": "Reports: {total} · distinct reporters: {reporters}",
+        "reportCount": "Reports: {total, number} · distinct reporters: {reporters, number}",
         "unknownKind": "Other subject",
         "unknownStatus": "Status unavailable",
         "unknownReason": "Other or unrecognized reason",
@@ -5432,7 +5432,7 @@
         "copied": "Copied",
         "slugChangeWarning": "This page has been published. If you change the address, the old one permanently redirects to the new one automatically.",
         "serpPreview": "Google results preview",
-        "charCount": "{count} of {max} characters",
+        "charCount": "{count, number} of {max, number} characters",
         "seoTitleHint": "Put the main keyword near the start of the SEO title (60 characters max).",
         "seoDescriptionHint": "120–160 characters; use the keyword naturally.",
         "cover": "Cover image",
@@ -5530,7 +5530,7 @@
         "retry": "Retry",
         "loading": "Loading versions…",
         "empty": "No versions yet.",
-        "version": "Version {number}",
+        "version": "Version {number, number}",
         "restore": "Restore",
         "actionError": "The operation failed. Please retry.",
         "closePreview": "Close preview",
@@ -5584,7 +5584,7 @@
           "HOME_EDUCATION": "Home education",
           "HOME_ANNOUNCEMENT": "Home announcement"
         },
-        "block": "Block {number}",
+        "block": "Block {number, number}",
         "remove": "Remove",
         "linkedArticleId": "Linked article ID (optional)",
         "mediaAssetId": "Media asset ID (optional)",
@@ -5986,12 +5986,12 @@
     "areaAlert": {
       "title": "Lost-pet alerts for my area",
       "body": "When a pet goes missing near you, we'll let you know so you can help if you see them.",
-      "on": "On: you'll hear about reports within {km} km of you.",
+      "on": "On: you'll hear about reports within {km, number} km of you.",
       "enable": "Turn on alerts",
       "update": "Update area",
       "disable": "Turn off",
       "radius": "Area",
-      "km": "{km} km",
+      "km": "{km, number} km",
       "signIn": "Sign in to turn on alerts",
       "privacy": "Your location is only used to find nearby reports and is never shown to anyone.",
       "denied": "The browser didn't allow location access.",
@@ -7112,7 +7112,7 @@
       "breadcrumb": "Breadcrumb",
       "contents": "In this article",
       "otherLanguages": "Read in other languages",
-      "pageLabel": "Page {page}",
+      "pageLabel": "Page {page, number}",
       "newer": "Previous page",
       "older": "Next page",
       "eyebrow": "The opetlife journal",
@@ -9552,7 +9552,7 @@
     "addPet": "Add a pet",
     "chooseUpToPets": "Choose up to {count, number} pets",
     "whichPet": "For which pet?",
-    "petSelectionInfo": "All bookable pets in your household are listed. Selection limit: {count}.",
+    "petSelectionInfo": "All bookable pets in your household are listed. Selection limit: {count, number}.",
     "speciesNotSupported": "This service is not offered for this species",
     "petLimitReached": "The limit for this service has been reached.",
     "sameHouseholdRequired": "Pets in one booking must belong to the same household.",
@@ -10191,7 +10191,7 @@
     "open": "Open",
     "previous": "Previous",
     "next": "Next",
-    "pageOf": "Page {page} of {pages}",
+    "pageOf": "Page {page, number} of {pages, number}",
     "never": "No movements",
     "detail": {
       "back": "All wallets",
@@ -10363,7 +10363,7 @@
     "open": "Open",
     "previous": "Previous",
     "next": "Next",
-    "pageOf": "Page {page} of {pages}",
+    "pageOf": "Page {page, number} of {pages, number}",
     "detail": {
       "back": "All pets",
       "identity": "Identity",
@@ -10379,7 +10379,7 @@
         "created": "Registered",
         "photo": "Photo"
       },
-      "months": "{months} months",
+      "months": "{months, number} months",
       "sex": {
         "MALE": "Male",
         "FEMALE": "Female",
@@ -10423,7 +10423,7 @@
         "MANUAL": "Shared by hand",
         "TEMPORARY": "Temporary"
       },
-      "scopeCount": "{count} permissions",
+      "scopeCount": "{count, number} permissions",
       "states": {
         "active": "Active",
         "revoked": "Revoked",
@@ -10450,14 +10450,14 @@
       },
       "bookings": "Bookings",
       "lost": "Lost reports",
-      "sightings": "{count} sightings",
+      "sightings": "{count, number} sightings",
       "care": "Care reminders",
       "travel": "Trips",
       "insurance": "Insurance",
-      "claimPreps": "{count} claim drafts",
+      "claimPreps": "{count, number} claim drafts",
       "sharing": "Sharing",
-      "shareCards": "{count} active share cards",
-      "healthShares": "{count} active health links",
+      "shareCards": "{count, number} active share cards",
+      "healthShares": "{count, number} active health links",
       "none": "None.",
       "diagnostics": "Data-quality notes",
       "diagnosticCodes": {
@@ -10869,7 +10869,7 @@
       "estimate": "Distance and time are estimates (straight line × road factor).",
       "routed": "Based on the road route",
       "notPriced": "Pet taxi is not available in this city yet.",
-      "distanceTime": "{km} km · about {minutes} min",
+      "distanceTime": "{km, number} km · about {minutes, number} min",
       "payNote": "Online payment is not on yet; pay the driver on arrival.",
       "request": "Request a ride",
       "requesting": "Sending your request…",
@@ -10891,7 +10891,7 @@
         "NO_DRIVER": "No driver found"
       },
       "searchingHint": "Your request went to nearby drivers. If nobody accepts by {time}, we will tell you.",
-      "eta": "About {minutes} min away",
+      "eta": "About {minutes, number} min away",
       "driver": "Driver",
       "call": "Call",
       "positionAt": "Position at {time}",
@@ -10902,7 +10902,7 @@
       "rateComment": "Your comment (optional)",
       "rateSend": "Send rating",
       "rated": "Thanks for rating.",
-      "stars": "{n} of 5",
+      "stars": "{n, number} of 5",
       "receipt": "Ride receipt",
       "receiptLines": {
         "base": "Base fare",
@@ -10932,7 +10932,7 @@
       "locationOff": "Your phone's location is unavailable; requests appear only with a current location.",
       "requests": "Nearby requests",
       "noRequests": "No requests right now. This page updates by itself.",
-      "kmFromYou": "{km} km to pickup",
+      "kmFromYou": "{km, number} km to pickup",
       "pets": "{count, plural, one {# pet} other {# pets}}",
       "accept": "Accept",
       "decline": "Pass",
@@ -11226,7 +11226,7 @@
     },
     "reference": {
       "booking": "Booking",
-      "order": "Order ({count})"
+      "order": "Order ({count, number})"
     },
     "open": "Review",
     "empty": "No receipts with this status.",
@@ -11295,7 +11295,7 @@
       "status": "Status",
       "lastOrder": "Last order"
     },
-    "days": "{count} days",
+    "days": "{count, number} days",
     "empty": "None.",
     "prev": "Previous",
     "next": "Next",

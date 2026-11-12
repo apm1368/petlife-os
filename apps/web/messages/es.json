@@ -211,7 +211,7 @@
       "title": "SMS",
       "label": "Mensaje",
       "placeholder": "El nombre de tu clínica va al principio.",
-      "count": "{count}/420",
+      "count": "{count, number}/420",
       "send": "Enviar SMS",
       "sent": "SMS enviado.",
       "recorded": "Registrado en modo de prueba; no llegó al teléfono.",
@@ -1065,7 +1065,7 @@
     "on": "Activado",
     "off": "Desactivado",
     "twoAdmins": "Requiere un segundo administrador",
-    "pendingCount": "{count} pendientes de aprobación",
+    "pendingCount": "{count, number} pendientes de aprobación",
     "languages": {
       "fa": "Persa",
       "en": "Inglés",
@@ -1149,11 +1149,11 @@
     "save": {
       "label": "Guardar cambios",
       "reason": "Nota para el registro de auditoría",
-      "button": "Guardar {count} cambios",
+      "button": "Guardar {count, number} cambios",
       "saving": "Guardando…",
       "discard": "Descartar cambios",
-      "applied": "{count} cambios aplicados.",
-      "pending": "{count} cambios esperan a un segundo administrador.",
+      "applied": "{count, number} cambios aplicados.",
+      "pending": "{count, number} cambios esperan a un segundo administrador.",
       "review": "Revisar en ajustes operativos",
       "error": "«{name}» no se guardó: {code}"
     },
@@ -3118,7 +3118,7 @@
         "placeholder": "Añade una nota interna (nunca se muestra al cliente)",
         "submit": "Añadir nota"
       },
-      "pets": "{count} mascota(s)"
+      "pets": "{count, number} mascota(s)"
     },
     "orgs": {
       "providersTitle": "Proveedores",
@@ -3380,7 +3380,7 @@
         "retry": "Reintentar",
         "loading": "Cargando versiones…",
         "empty": "Todavía no hay versiones.",
-        "version": "Versión {number}",
+        "version": "Versión {number, number}",
         "restore": "Restaurar",
         "actionError": "La operación falló. Inténtalo de nuevo.",
         "closePreview": "Cerrar vista previa",
@@ -3434,7 +3434,7 @@
           "HOME_EDUCATION": "Formación en el inicio",
           "HOME_ANNOUNCEMENT": "Anuncio en el inicio"
         },
-        "block": "Bloque {number}",
+        "block": "Bloque {number, number}",
         "remove": "Quitar",
         "linkedArticleId": "ID del artículo vinculado (opcional)",
         "mediaAssetId": "ID del recurso multimedia (opcional)",
@@ -3538,7 +3538,7 @@
         "missingSubject": "El asunto ya no existe o no tiene un resumen.",
         "by": "Reportado por: {name}",
         "openPublicPage": "Abrir página pública",
-        "reportCount": "Informes: {total} · personas que informaron: {reporters}",
+        "reportCount": "Informes: {total, number} · personas que informaron: {reporters, number}",
         "unknownKind": "Otro asunto",
         "unknownStatus": "Estado no disponible",
         "unknownReason": "Otro motivo o motivo no reconocido",
@@ -3770,9 +3770,9 @@
           "household": "Hogar: {name}",
           "pet": "Mascota: {name}",
           "relatedEntity": "Relacionado con: {summary}",
-          "firstResponseTime": "Primera respuesta después de {minutes} min",
+          "firstResponseTime": "Primera respuesta después de {minutes, number} min",
           "noFirstResponseYet": "Aún no se ha enviado una respuesta",
-          "resolutionTime": "Resuelto después de {minutes} min",
+          "resolutionTime": "Resuelto después de {minutes, number} min",
           "previousCases": "Casos anteriores de esta persona:",
           "noPreviousCases": "Esta persona no tiene casos anteriores."
         }
@@ -5443,7 +5443,7 @@
     "addPet": "Añadir mascota",
     "chooseUpToPets": "Elige hasta {count, number} mascotas",
     "whichPet": "¿Para qué mascota?",
-    "petSelectionInfo": "Se muestran todas las mascotas reservables de tu hogar. Límite de selección para este servicio: {count}.",
+    "petSelectionInfo": "Se muestran todas las mascotas reservables de tu hogar. Límite de selección para este servicio: {count, number}.",
     "speciesNotSupported": "Este servicio no está disponible para esta especie",
     "petLimitReached": "Has alcanzado el límite de mascotas para este servicio.",
     "sameHouseholdRequired": "Las mascotas de una misma reserva deben pertenecer al mismo hogar.",
@@ -6214,7 +6214,7 @@
       "breadcrumb": "Ruta de navegación",
       "contents": "En este artículo",
       "otherLanguages": "Leer en otros idiomas",
-      "pageLabel": "Página {page}",
+      "pageLabel": "Página {page, number}",
       "newer": "Página anterior",
       "older": "Página siguiente",
       "eyebrow": "El diario de opetlife",
@@ -6759,12 +6759,12 @@
     "areaAlert": {
       "title": "Alertas de mascotas perdidas en mi zona",
       "body": "Cuando una mascota se pierda cerca de ti, te avisaremos para que puedas ayudar si la ves.",
-      "on": "Activadas: recibirás reportes a menos de {km} km.",
+      "on": "Activadas: recibirás reportes a menos de {km, number} km.",
       "enable": "Activar alertas",
       "update": "Actualizar zona",
       "disable": "Desactivar",
       "radius": "Zona",
-      "km": "{km} km",
+      "km": "{km, number} km",
       "signIn": "Inicia sesión para activar alertas",
       "privacy": "Tu ubicación solo se usa para encontrar reportes cercanos y nunca se muestra a nadie.",
       "denied": "El navegador no permitió el acceso a la ubicación.",
@@ -9321,7 +9321,7 @@
     "open": "Abrir",
     "previous": "Anterior",
     "next": "Siguiente",
-    "pageOf": "Página {page} de {pages}",
+    "pageOf": "Página {page, number} de {pages, number}",
     "never": "Sin movimientos",
     "detail": {
       "back": "Todos los monederos",
@@ -9493,7 +9493,7 @@
     "open": "Abrir",
     "previous": "Anterior",
     "next": "Siguiente",
-    "pageOf": "Página {page} de {pages}",
+    "pageOf": "Página {page, number} de {pages, number}",
     "detail": {
       "back": "Todas las mascotas",
       "identity": "Identidad",
@@ -9509,7 +9509,7 @@
         "created": "Registrada",
         "photo": "Foto"
       },
-      "months": "{months} meses",
+      "months": "{months, number} meses",
       "sex": {
         "MALE": "Macho",
         "FEMALE": "Hembra",
@@ -9553,7 +9553,7 @@
         "MANUAL": "Compartido a mano",
         "TEMPORARY": "Temporal"
       },
-      "scopeCount": "{count} permisos",
+      "scopeCount": "{count, number} permisos",
       "states": {
         "active": "Activo",
         "revoked": "Revocado",
@@ -9580,14 +9580,14 @@
       },
       "bookings": "Reservas",
       "lost": "Avisos de pérdida",
-      "sightings": "{count} avistamientos",
+      "sightings": "{count, number} avistamientos",
       "care": "Recordatorios de cuidado",
       "travel": "Viajes",
       "insurance": "Seguro",
-      "claimPreps": "{count} borradores de reclamación",
+      "claimPreps": "{count, number} borradores de reclamación",
       "sharing": "Compartido",
-      "shareCards": "{count} tarjetas activas",
-      "healthShares": "{count} enlaces de salud activos",
+      "shareCards": "{count, number} tarjetas activas",
+      "healthShares": "{count, number} enlaces de salud activos",
       "none": "Ninguno.",
       "diagnostics": "Notas de calidad de datos",
       "diagnosticCodes": {
@@ -9999,7 +9999,7 @@
       "estimate": "La distancia y el tiempo son estimaciones (línea recta × factor de ruta).",
       "routed": "Según la ruta por carretera",
       "notPriced": "El taxi para mascotas aún no está disponible en esta ciudad.",
-      "distanceTime": "{km} km · unos {minutes} min",
+      "distanceTime": "{km, number} km · unos {minutes, number} min",
       "payNote": "El pago en línea aún no está activo; paga al conductor al llegar.",
       "request": "Pedir viaje",
       "requesting": "Enviando la solicitud…",
@@ -10021,7 +10021,7 @@
         "NO_DRIVER": "No se encontró conductor"
       },
       "searchingHint": "Tu solicitud se envió a conductores cercanos. Si nadie la acepta antes de las {time}, te avisaremos.",
-      "eta": "A unos {minutes} min",
+      "eta": "A unos {minutes, number} min",
       "driver": "Conductor",
       "call": "Llamar",
       "positionAt": "Posición a las {time}",
@@ -10032,7 +10032,7 @@
       "rateComment": "Tu comentario (opcional)",
       "rateSend": "Enviar calificación",
       "rated": "Gracias por calificar.",
-      "stars": "{n} de 5",
+      "stars": "{n, number} de 5",
       "receipt": "Recibo del viaje",
       "receiptLines": {
         "base": "Tarifa base",
@@ -10062,7 +10062,7 @@
       "locationOff": "La ubicación de tu teléfono no está disponible; las solicitudes solo aparecen con una ubicación actual.",
       "requests": "Solicitudes cercanas",
       "noRequests": "No hay solicitudes ahora. Esta página se actualiza sola.",
-      "kmFromYou": "{km} km hasta la recogida",
+      "kmFromYou": "{km, number} km hasta la recogida",
       "pets": "{count, plural, one {# mascota} other {# mascotas}}",
       "accept": "Aceptar",
       "decline": "Pasar",
@@ -10356,7 +10356,7 @@
     },
     "reference": {
       "booking": "Cita",
-      "order": "Pedido ({count})"
+      "order": "Pedido ({count, number})"
     },
     "open": "Revisar",
     "empty": "No hay comprobantes con este estado.",
@@ -10425,7 +10425,7 @@
       "status": "Estado",
       "lastOrder": "Último pedido"
     },
-    "days": "{count} días",
+    "days": "{count, number} días",
     "empty": "Ninguna.",
     "prev": "Anterior",
     "next": "Siguiente",

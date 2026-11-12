@@ -211,7 +211,7 @@
       "title": "رسالة نصية",
       "label": "الرسالة",
       "placeholder": "يُضاف اسم عيادتك في بداية الرسالة.",
-      "count": "{count}/420",
+      "count": "{count, number}/420",
       "send": "إرسال رسالة نصية",
       "sent": "أُرسلت الرسالة النصية.",
       "recorded": "سُجّلت في وضع تجريبي — لم تُسلَّم إلى الهاتف.",
@@ -1040,7 +1040,7 @@
     "on": "مفعَّل",
     "off": "معطَّل",
     "twoAdmins": "يتطلب مسؤولًا ثانيًا",
-    "pendingCount": "بانتظار الموافقة: {count}",
+    "pendingCount": "بانتظار الموافقة: {count, number}",
     "languages": {
       "fa": "الفارسية",
       "en": "الإنجليزية",
@@ -1124,11 +1124,11 @@
     "save": {
       "label": "احفظ التغييرات",
       "reason": "ملاحظة لسجل التدقيق",
-      "button": "احفظ التغييرات ({count})",
+      "button": "احفظ التغييرات ({count, number})",
       "saving": "جارٍ الحفظ…",
       "discard": "تجاهل التغييرات",
-      "applied": "التغييرات المطبَّقة: {count}.",
-      "pending": "تغييرات بانتظار مسؤول ثانٍ: {count}.",
+      "applied": "التغييرات المطبَّقة: {count, number}.",
+      "pending": "تغييرات بانتظار مسؤول ثانٍ: {count, number}.",
       "review": "راجعها في الإعدادات التشغيلية",
       "error": "لم يُحفظ «{name}»: {code}"
     },
@@ -4893,7 +4893,7 @@
         "placeholder": "أضف ملاحظة داخلية (لا تظهر للعميل أبدًا)",
         "submit": "أضف ملاحظة"
       },
-      "pets": "{count} حيوان أليف"
+      "pets": "{count, number} حيوان أليف"
     },
     "support": {
       "title": "حالات الدعم",
@@ -4966,9 +4966,9 @@
           "household": "الأسرة: {name}",
           "pet": "الحيوان الأليف: {name}",
           "relatedEntity": "متعلّق بـ: {summary}",
-          "firstResponseTime": "أول رد بعد {minutes} دقيقة",
+          "firstResponseTime": "أول رد بعد {minutes, number} دقيقة",
           "noFirstResponseYet": "لم يُرسل أي رد بعد",
-          "resolutionTime": "حُلّت بعد {minutes} دقيقة",
+          "resolutionTime": "حُلّت بعد {minutes, number} دقيقة",
           "previousCases": "التذاكر السابقة لهذا العميل:",
           "noPreviousCases": "لا توجد تذاكر سابقة لهذا العميل."
         }
@@ -5108,7 +5108,7 @@
         "missingSubject": "الموضوع لم يعد موجودًا أو ليس له ملخص.",
         "by": "بواسطة {name}",
         "openPublicPage": "افتح الصفحة العامة",
-        "reportCount": "البلاغات: {total} · المبلّغون المختلفون: {reporters}",
+        "reportCount": "البلاغات: {total, number} · المبلّغون المختلفون: {reporters, number}",
         "unknownKind": "موضوع آخر",
         "unknownStatus": "الحالة غير متاحة",
         "unknownReason": "سبب آخر أو غير معروف",
@@ -5492,7 +5492,7 @@
         "copied": "تم النسخ",
         "slugChangeWarning": "نُشرت هذه الصفحة. إذا غيّرت العنوان، فسيُعاد توجيه العنوان القديم إلى الجديد تلقائيًا وبشكل دائم.",
         "serpPreview": "معاينة نتائج Google",
-        "charCount": "{count} من {max} حرفًا",
+        "charCount": "{count, number} من {max, number} حرفًا",
         "seoTitleHint": "ضع الكلمة المفتاحية الرئيسية قرب بداية عنوان محركات البحث (60 حرفًا كحد أقصى).",
         "seoDescriptionHint": "من 120 إلى 160 حرفًا؛ استخدم الكلمة المفتاحية بشكل طبيعي.",
         "cover": "صورة الغلاف",
@@ -5590,7 +5590,7 @@
         "retry": "أعد المحاولة",
         "loading": "جارٍ تحميل الإصدارات…",
         "empty": "لا توجد إصدارات بعد.",
-        "version": "الإصدار {number}",
+        "version": "الإصدار {number, number}",
         "restore": "استعِد",
         "actionError": "فشلت العملية. حاول مرة أخرى.",
         "closePreview": "أغلق المعاينة",
@@ -5644,7 +5644,7 @@
           "HOME_EDUCATION": "المحتوى التعليمي في الصفحة الرئيسية",
           "HOME_ANNOUNCEMENT": "إعلان الصفحة الرئيسية"
         },
-        "block": "الكتلة {number}",
+        "block": "الكتلة {number, number}",
         "remove": "احذف",
         "linkedArticleId": "معرّف المقالة المرتبطة (اختياري)",
         "mediaAssetId": "معرّف ملف الوسائط (اختياري)",
@@ -6055,12 +6055,12 @@
     "areaAlert": {
       "title": "تنبيهات الحيوانات الأليفة المفقودة في منطقتي",
       "body": "عندما يُفقد حيوان أليف بالقرب منك، سنُعلمك لتساعد إن رأيته.",
-      "on": "مفعّلة: ستصلك البلاغات ضمن {km} كم منك.",
+      "on": "مفعّلة: ستصلك البلاغات ضمن {km, number} كم منك.",
       "enable": "فعّل التنبيهات",
       "update": "حدّث المنطقة",
       "disable": "أوقف التنبيهات",
       "radius": "المنطقة",
-      "km": "{km} كم",
+      "km": "{km, number} كم",
       "signIn": "سجّل الدخول لتفعيل التنبيهات",
       "privacy": "يُستخدم موقعك فقط للعثور على البلاغات القريبة، ولا يُعرض لأي أحد أبدًا.",
       "denied": "لم يسمح المتصفح بالوصول إلى الموقع.",
@@ -7181,7 +7181,7 @@
       "breadcrumb": "مسار التنقل",
       "contents": "في هذا المقال",
       "otherLanguages": "اقرأ بلغات أخرى",
-      "pageLabel": "الصفحة {page}",
+      "pageLabel": "الصفحة {page, number}",
       "newer": "الصفحة السابقة",
       "older": "الصفحة التالية",
       "eyebrow": "مجلة opetlife",
@@ -9621,7 +9621,7 @@
     "addPet": "إضافة حيوان أليف",
     "chooseUpToPets": "اختر حتى {count, number} من الحيوانات الأليفة",
     "whichPet": "لأي حيوان أليف؟",
-    "petSelectionInfo": "تُعرض جميع الحيوانات الأليفة القابلة للحجز في أسرتك. حد الاختيار: {count}.",
+    "petSelectionInfo": "تُعرض جميع الحيوانات الأليفة القابلة للحجز في أسرتك. حد الاختيار: {count, number}.",
     "speciesNotSupported": "لا تُقدَّم هذه الخدمة لهذه الفصيلة",
     "petLimitReached": "تم بلوغ الحد الأقصى لهذه الخدمة.",
     "sameHouseholdRequired": "يجب أن تنتمي الحيوانات الأليفة في الحجز الواحد إلى الأسرة نفسها.",
@@ -10260,7 +10260,7 @@
     "open": "فتح",
     "previous": "السابق",
     "next": "التالي",
-    "pageOf": "الصفحة {page} من {pages}",
+    "pageOf": "الصفحة {page, number} من {pages, number}",
     "never": "لا توجد حركات",
     "detail": {
       "back": "كل المحافظ",
@@ -10432,7 +10432,7 @@
     "open": "فتح",
     "previous": "السابق",
     "next": "التالي",
-    "pageOf": "الصفحة {page} من {pages}",
+    "pageOf": "الصفحة {page, number} من {pages, number}",
     "detail": {
       "back": "كل الحيوانات الأليفة",
       "identity": "الهوية",
@@ -10448,7 +10448,7 @@
         "created": "تاريخ التسجيل",
         "photo": "الصورة"
       },
-      "months": "{months} شهر",
+      "months": "{months, number} شهر",
       "sex": {
         "MALE": "ذكر",
         "FEMALE": "أنثى",
@@ -10492,7 +10492,7 @@
         "MANUAL": "مشاركة يدوية",
         "TEMPORARY": "مؤقت"
       },
-      "scopeCount": "الصلاحيات: {count}",
+      "scopeCount": "الصلاحيات: {count, number}",
       "states": {
         "active": "نشط",
         "revoked": "مسحوب",
@@ -10519,14 +10519,14 @@
       },
       "bookings": "الحجوزات",
       "lost": "بلاغات الفقدان",
-      "sightings": "المشاهدات: {count}",
+      "sightings": "المشاهدات: {count, number}",
       "care": "تذكيرات الرعاية",
       "travel": "الرحلات",
       "insurance": "التأمين",
-      "claimPreps": "مسودات المطالبات: {count}",
+      "claimPreps": "مسودات المطالبات: {count, number}",
       "sharing": "المشاركة",
-      "shareCards": "بطاقات المشاركة النشطة: {count}",
-      "healthShares": "روابط الصحة النشطة: {count}",
+      "shareCards": "بطاقات المشاركة النشطة: {count, number}",
+      "healthShares": "روابط الصحة النشطة: {count, number}",
       "none": "لا شيء.",
       "diagnostics": "ملاحظات جودة البيانات",
       "diagnosticCodes": {
@@ -10938,7 +10938,7 @@
       "estimate": "المسافة والوقت تقديريان (خط مستقيم × معامل الطريق).",
       "routed": "بناءً على مسار الطريق",
       "notPriced": "تاكسي الحيوانات الأليفة غير متاح في هذه المدينة بعد.",
-      "distanceTime": "{km} كم · نحو {minutes} دقيقة",
+      "distanceTime": "{km, number} كم · نحو {minutes, number} دقيقة",
       "payNote": "الدفع الإلكتروني غير مفعّل بعد؛ ادفع للسائق عند الوصول.",
       "request": "اطلب رحلة",
       "requesting": "جارٍ إرسال طلبك…",
@@ -10960,7 +10960,7 @@
         "NO_DRIVER": "لم يُعثر على سائق"
       },
       "searchingHint": "أُرسل طلبك إلى السائقين القريبين. إذا لم يقبله أحد بحلول {time}، فسنبلغك.",
-      "eta": "على بُعد نحو {minutes} دقيقة",
+      "eta": "على بُعد نحو {minutes, number} دقيقة",
       "driver": "السائق",
       "call": "اتصال",
       "positionAt": "الموقع عند {time}",
@@ -10971,7 +10971,7 @@
       "rateComment": "تعليقك (اختياري)",
       "rateSend": "إرسال التقييم",
       "rated": "شكرًا على تقييمك.",
-      "stars": "{n} من 5",
+      "stars": "{n, number} من 5",
       "receipt": "إيصال الرحلة",
       "receiptLines": {
         "base": "الأجرة الأساسية",
@@ -11001,7 +11001,7 @@
       "locationOff": "موقع هاتفك غير متاح؛ لا تظهر الطلبات إلا مع موقع حالي.",
       "requests": "الطلبات القريبة",
       "noRequests": "لا توجد طلبات حاليًا. تتحدّث هذه الصفحة تلقائيًا.",
-      "kmFromYou": "{km} كم إلى نقطة الانطلاق",
+      "kmFromYou": "{km, number} كم إلى نقطة الانطلاق",
       "pets": "{count, plural, one {# حيوان أليف} other {# حيوانات أليفة}}",
       "accept": "قبول",
       "decline": "رفض",
@@ -11295,7 +11295,7 @@
     },
     "reference": {
       "booking": "حجز",
-      "order": "طلب ({count})"
+      "order": "طلب ({count, number})"
     },
     "open": "مراجعة",
     "empty": "لا توجد إيصالات بهذه الحالة.",
@@ -11364,7 +11364,7 @@
       "status": "الحالة",
       "lastOrder": "آخر طلب"
     },
-    "days": "{count} يوم",
+    "days": "{count, number} يوم",
     "empty": "لا شيء.",
     "prev": "السابق",
     "next": "التالي",

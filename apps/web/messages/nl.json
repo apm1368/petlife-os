@@ -211,7 +211,7 @@
       "title": "Sms-bericht",
       "label": "Bericht",
       "placeholder": "De naam van je praktijk wordt aan het begin toegevoegd.",
-      "count": "{count}/420",
+      "count": "{count, number}/420",
       "send": "Sms versturen",
       "sent": "Sms verstuurd.",
       "recorded": "Vastgelegd in testmodus — niet afgeleverd op de telefoon.",
@@ -1040,7 +1040,7 @@
     "on": "Aan",
     "off": "Uit",
     "twoAdmins": "Tweede beheerder nodig",
-    "pendingCount": "{count} wachten op goedkeuring",
+    "pendingCount": "{count, number} wachten op goedkeuring",
     "languages": {
       "fa": "Perzisch",
       "en": "Engels",
@@ -1124,11 +1124,11 @@
     "save": {
       "label": "Wijzigingen opslaan",
       "reason": "Notitie voor het auditlogboek",
-      "button": "{count} wijzigingen opslaan",
+      "button": "{count, number} wijzigingen opslaan",
       "saving": "Opslaan…",
       "discard": "Wijzigingen verwerpen",
-      "applied": "{count} wijzigingen toegepast.",
-      "pending": "{count} wijzigingen wachten op een tweede beheerder.",
+      "applied": "{count, number} wijzigingen toegepast.",
+      "pending": "{count, number} wijzigingen wachten op een tweede beheerder.",
       "review": "Bekijken in operationele instellingen",
       "error": "“{name}” is niet opgeslagen: {code}"
     },
@@ -4893,7 +4893,7 @@
         "placeholder": "Voeg een interne notitie toe (nooit zichtbaar voor de klant)",
         "submit": "Notitie toevoegen"
       },
-      "pets": "{count} huisdier(en)"
+      "pets": "{count, number} huisdier(en)"
     },
     "support": {
       "title": "Supportzaken",
@@ -4966,9 +4966,9 @@
           "household": "Huishouden: {name}",
           "pet": "Huisdier: {name}",
           "relatedEntity": "Gerelateerd aan: {summary}",
-          "firstResponseTime": "Eerste reactie na {minutes} min",
+          "firstResponseTime": "Eerste reactie na {minutes, number} min",
           "noFirstResponseYet": "Nog geen reactie verstuurd",
-          "resolutionTime": "Opgelost na {minutes} min",
+          "resolutionTime": "Opgelost na {minutes, number} min",
           "previousCases": "Eerdere tickets van deze klant:",
           "noPreviousCases": "Geen eerdere tickets van deze klant."
         }
@@ -5108,7 +5108,7 @@
         "missingSubject": "Het onderwerp bestaat niet meer of heeft geen samenvatting.",
         "by": "Door {name}",
         "openPublicPage": "Openbare pagina openen",
-        "reportCount": "Meldingen: {total} · unieke melders: {reporters}",
+        "reportCount": "Meldingen: {total, number} · unieke melders: {reporters, number}",
         "unknownKind": "Ander onderwerp",
         "unknownStatus": "Status niet beschikbaar",
         "unknownReason": "Andere of onbekende reden",
@@ -5492,7 +5492,7 @@
         "copied": "Gekopieerd",
         "slugChangeWarning": "Deze pagina is gepubliceerd. Als je het adres wijzigt, wordt het oude adres automatisch en permanent doorgestuurd naar het nieuwe.",
         "serpPreview": "Voorbeeld in Google-resultaten",
-        "charCount": "{count} van {max} tekens",
+        "charCount": "{count, number} van {max, number} tekens",
         "seoTitleHint": "Zet het belangrijkste zoekwoord vooraan in de SEO-titel (max. 60 tekens).",
         "seoDescriptionHint": "120–160 tekens; gebruik het zoekwoord op een natuurlijke manier.",
         "cover": "Omslagafbeelding",
@@ -5590,7 +5590,7 @@
         "retry": "Opnieuw proberen",
         "loading": "Versies laden…",
         "empty": "Nog geen versies.",
-        "version": "Versie {number}",
+        "version": "Versie {number, number}",
         "restore": "Herstellen",
         "actionError": "De bewerking is mislukt. Probeer het opnieuw.",
         "closePreview": "Voorbeeld sluiten",
@@ -5644,7 +5644,7 @@
           "HOME_EDUCATION": "Educatie op startpagina",
           "HOME_ANNOUNCEMENT": "Aankondiging op startpagina"
         },
-        "block": "Blok {number}",
+        "block": "Blok {number, number}",
         "remove": "Verwijderen",
         "linkedArticleId": "ID van gekoppeld artikel (optioneel)",
         "mediaAssetId": "Media-ID (optioneel)",
@@ -6055,12 +6055,12 @@
     "areaAlert": {
       "title": "Meldingen over vermiste huisdieren in mijn buurt",
       "body": "Raakt er een huisdier vermist bij jou in de buurt, dan laten we het je weten, zodat je kunt helpen als je het ziet.",
-      "on": "Aan: je hoort over meldingen binnen {km} km van je.",
+      "on": "Aan: je hoort over meldingen binnen {km, number} km van je.",
       "enable": "Meldingen aanzetten",
       "update": "Gebied bijwerken",
       "disable": "Uitzetten",
       "radius": "Gebied",
-      "km": "{km} km",
+      "km": "{km, number} km",
       "signIn": "Log in om meldingen aan te zetten",
       "privacy": "Je locatie wordt alleen gebruikt om meldingen in de buurt te vinden en wordt nooit aan iemand getoond.",
       "denied": "De browser heeft geen locatietoegang gegeven.",
@@ -7181,7 +7181,7 @@
       "breadcrumb": "Kruimelpad",
       "contents": "In dit artikel",
       "otherLanguages": "Lees in andere talen",
-      "pageLabel": "Pagina {page}",
+      "pageLabel": "Pagina {page, number}",
       "newer": "Vorige pagina",
       "older": "Volgende pagina",
       "eyebrow": "Het opetlife-magazine",
@@ -9621,7 +9621,7 @@
     "addPet": "Huisdier toevoegen",
     "chooseUpToPets": "Kies maximaal {count, number} huisdieren",
     "whichPet": "Voor welk huisdier?",
-    "petSelectionInfo": "Alle boekbare huisdieren in je huishouden staan in de lijst. Selectielimiet: {count}.",
+    "petSelectionInfo": "Alle boekbare huisdieren in je huishouden staan in de lijst. Selectielimiet: {count, number}.",
     "speciesNotSupported": "Deze dienst wordt niet aangeboden voor deze soort",
     "petLimitReached": "De limiet voor deze dienst is bereikt.",
     "sameHouseholdRequired": "Huisdieren in één boeking moeten bij hetzelfde huishouden horen.",
@@ -10260,7 +10260,7 @@
     "open": "Openen",
     "previous": "Vorige",
     "next": "Volgende",
-    "pageOf": "Pagina {page} van {pages}",
+    "pageOf": "Pagina {page, number} van {pages, number}",
     "never": "Geen mutaties",
     "detail": {
       "back": "Alle portemonnees",
@@ -10432,7 +10432,7 @@
     "open": "Openen",
     "previous": "Vorige",
     "next": "Volgende",
-    "pageOf": "Pagina {page} van {pages}",
+    "pageOf": "Pagina {page, number} van {pages, number}",
     "detail": {
       "back": "Alle huisdieren",
       "identity": "Identiteit",
@@ -10448,7 +10448,7 @@
         "created": "Geregistreerd",
         "photo": "Foto"
       },
-      "months": "{months} maanden",
+      "months": "{months, number} maanden",
       "sex": {
         "MALE": "Mannetje",
         "FEMALE": "Vrouwtje",
@@ -10492,7 +10492,7 @@
         "MANUAL": "Handmatig gedeeld",
         "TEMPORARY": "Tijdelijk"
       },
-      "scopeCount": "{count} rechten",
+      "scopeCount": "{count, number} rechten",
       "states": {
         "active": "Actief",
         "revoked": "Ingetrokken",
@@ -10519,14 +10519,14 @@
       },
       "bookings": "Boekingen",
       "lost": "Vermissingsmeldingen",
-      "sightings": "{count} waarnemingen",
+      "sightings": "{count, number} waarnemingen",
       "care": "Verzorgingsherinneringen",
       "travel": "Reizen",
       "insurance": "Verzekering",
-      "claimPreps": "{count} concepten voor schadeclaims",
+      "claimPreps": "{count, number} concepten voor schadeclaims",
       "sharing": "Delen",
-      "shareCards": "{count} actieve deelkaarten",
-      "healthShares": "{count} actieve gezondheidslinks",
+      "shareCards": "{count, number} actieve deelkaarten",
+      "healthShares": "{count, number} actieve gezondheidslinks",
       "none": "Geen.",
       "diagnostics": "Notities over datakwaliteit",
       "diagnosticCodes": {
@@ -10938,7 +10938,7 @@
       "estimate": "Afstand en tijd zijn schattingen (rechte lijn × wegfactor).",
       "routed": "Op basis van de route over de weg",
       "notPriced": "De dierentaxi is nog niet beschikbaar in deze stad.",
-      "distanceTime": "{km} km · ongeveer {minutes} min",
+      "distanceTime": "{km, number} km · ongeveer {minutes, number} min",
       "payNote": "Online betalen is nog niet beschikbaar; betaal de chauffeur bij aankomst.",
       "request": "Rit aanvragen",
       "requesting": "Je aanvraag wordt verstuurd…",
@@ -10960,7 +10960,7 @@
         "NO_DRIVER": "Geen chauffeur gevonden"
       },
       "searchingHint": "Je aanvraag is naar chauffeurs in de buurt gestuurd. Als niemand vóór {time} accepteert, laten we het je weten.",
-      "eta": "Nog ongeveer {minutes} min",
+      "eta": "Nog ongeveer {minutes, number} min",
       "driver": "Chauffeur",
       "call": "Bellen",
       "positionAt": "Positie om {time}",
@@ -10971,7 +10971,7 @@
       "rateComment": "Je opmerking (optioneel)",
       "rateSend": "Beoordeling versturen",
       "rated": "Bedankt voor je beoordeling.",
-      "stars": "{n} van 5",
+      "stars": "{n, number} van 5",
       "receipt": "Ritbon",
       "receiptLines": {
         "base": "Starttarief",
@@ -11001,7 +11001,7 @@
       "locationOff": "De locatie van je telefoon is niet beschikbaar; aanvragen verschijnen alleen met een actuele locatie.",
       "requests": "Aanvragen in de buurt",
       "noRequests": "Op dit moment geen aanvragen. Deze pagina werkt zichzelf bij.",
-      "kmFromYou": "{km} km naar ophaaladres",
+      "kmFromYou": "{km, number} km naar ophaaladres",
       "pets": "{count, plural, one {# huisdier} other {# huisdieren}}",
       "accept": "Accepteren",
       "decline": "Overslaan",
@@ -11295,7 +11295,7 @@
     },
     "reference": {
       "booking": "Boeking",
-      "order": "Bestelling ({count})"
+      "order": "Bestelling ({count, number})"
     },
     "open": "Beoordelen",
     "empty": "Geen bonnen met deze status.",
@@ -11364,7 +11364,7 @@
       "status": "Status",
       "lastOrder": "Laatste bestelling"
     },
-    "days": "{count} dagen",
+    "days": "{count, number} dagen",
     "empty": "Geen.",
     "prev": "Vorige",
     "next": "Volgende",

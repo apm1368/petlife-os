@@ -211,7 +211,7 @@
       "title": "SMS",
       "label": "Nachricht",
       "placeholder": "Der Name deiner Klinik steht am Anfang.",
-      "count": "{count}/420",
+      "count": "{count, number}/420",
       "send": "SMS senden",
       "sent": "SMS gesendet.",
       "recorded": "Im Testmodus erfasst – nicht ans Telefon zugestellt.",
@@ -1065,7 +1065,7 @@
     "on": "An",
     "off": "Aus",
     "twoAdmins": "Zweite Freigabe nötig",
-    "pendingCount": "{count} warten auf Freigabe",
+    "pendingCount": "{count, number} warten auf Freigabe",
     "languages": {
       "fa": "Persisch",
       "en": "Englisch",
@@ -1149,11 +1149,11 @@
     "save": {
       "label": "Änderungen speichern",
       "reason": "Notiz für das Protokoll",
-      "button": "{count} Änderungen speichern",
+      "button": "{count, number} Änderungen speichern",
       "saving": "Wird gespeichert…",
       "discard": "Änderungen verwerfen",
-      "applied": "{count} Änderungen übernommen.",
-      "pending": "{count} Änderungen warten auf eine zweite Freigabe.",
+      "applied": "{count, number} Änderungen übernommen.",
+      "pending": "{count, number} Änderungen warten auf eine zweite Freigabe.",
       "review": "In den Betriebseinstellungen prüfen",
       "error": "„{name}“ wurde nicht gespeichert: {code}"
     },
@@ -3123,7 +3123,7 @@
         "placeholder": "Interne Notiz hinzufügen (wird der Kundschaft nie angezeigt)",
         "submit": "Notiz hinzufügen"
       },
-      "pets": "{count} Haustier(e)"
+      "pets": "{count, number} Haustier(e)"
     },
     "orgs": {
       "providersTitle": "Anbieter",
@@ -3385,7 +3385,7 @@
         "retry": "Erneut versuchen",
         "loading": "Versionen werden geladen …",
         "empty": "Noch keine Versionen.",
-        "version": "Version {number}",
+        "version": "Version {number, number}",
         "restore": "Wiederherstellen",
         "actionError": "Der Vorgang ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
         "closePreview": "Vorschau schließen",
@@ -3439,7 +3439,7 @@
           "HOME_EDUCATION": "Ratgeber auf der Startseite",
           "HOME_ANNOUNCEMENT": "Ankündigung auf der Startseite"
         },
-        "block": "Block {number}",
+        "block": "Block {number, number}",
         "remove": "Entfernen",
         "linkedArticleId": "ID des verknüpften Artikels (optional)",
         "mediaAssetId": "Medien-Asset-ID (optional)",
@@ -3543,7 +3543,7 @@
         "missingSubject": "Der Gegenstand ist nicht mehr vorhanden oder es gibt keine Zusammenfassung.",
         "by": "Gemeldet von: {name}",
         "openPublicPage": "Öffentliche Seite öffnen",
-        "reportCount": "Meldungen: {total} · verschiedene meldende Personen: {reporters}",
+        "reportCount": "Meldungen: {total, number} · verschiedene meldende Personen: {reporters, number}",
         "unknownKind": "Anderer Gegenstand",
         "unknownStatus": "Status nicht verfügbar",
         "unknownReason": "Sonstiger oder unbekannter Grund",
@@ -3775,9 +3775,9 @@
           "household": "Haushalt: {name}",
           "pet": "Haustier: {name}",
           "relatedEntity": "Bezug: {summary}",
-          "firstResponseTime": "Erste Antwort nach {minutes} Min.",
+          "firstResponseTime": "Erste Antwort nach {minutes, number} Min.",
           "noFirstResponseYet": "Noch keine Antwort gesendet",
-          "resolutionTime": "Gelöst nach {minutes} Min.",
+          "resolutionTime": "Gelöst nach {minutes, number} Min.",
           "previousCases": "Frühere Fälle dieser Person:",
           "noPreviousCases": "Diese Person hat keine früheren Fälle."
         }
@@ -5453,7 +5453,7 @@
     "addPet": "Tier hinzufügen",
     "chooseUpToPets": "Wähle bis zu {count, number} Tiere aus",
     "whichPet": "Für welches Tier?",
-    "petSelectionInfo": "Alle buchbaren Tiere in deinem Haushalt werden angezeigt. Auswahlgrenze für diese Leistung: {count}.",
+    "petSelectionInfo": "Alle buchbaren Tiere in deinem Haushalt werden angezeigt. Auswahlgrenze für diese Leistung: {count, number}.",
     "speciesNotSupported": "Diese Leistung wird für diese Tierart nicht angeboten",
     "petLimitReached": "Die Höchstzahl für diese Leistung ist erreicht.",
     "sameHouseholdRequired": "Tiere einer Mehrtierbuchung müssen demselben Haushalt angehören.",
@@ -6224,7 +6224,7 @@
       "breadcrumb": "Brotkrümelnavigation",
       "contents": "In diesem Artikel",
       "otherLanguages": "In anderen Sprachen lesen",
-      "pageLabel": "Seite {page}",
+      "pageLabel": "Seite {page, number}",
       "newer": "Vorherige Seite",
       "older": "Nächste Seite",
       "eyebrow": "Das opetlife-Journal",
@@ -6769,12 +6769,12 @@
     "areaAlert": {
       "title": "Hinweise zu vermissten Tieren in meiner Nähe",
       "body": "Wenn in Ihrer Nähe ein Tier vermisst wird, sagen wir Ihnen Bescheid, damit Sie helfen können.",
-      "on": "An: Sie erfahren von Meldungen im Umkreis von {km} km.",
+      "on": "An: Sie erfahren von Meldungen im Umkreis von {km, number} km.",
       "enable": "Hinweise einschalten",
       "update": "Umkreis aktualisieren",
       "disable": "Ausschalten",
       "radius": "Umkreis",
-      "km": "{km} km",
+      "km": "{km, number} km",
       "signIn": "Anmelden, um Hinweise einzuschalten",
       "privacy": "Ihr Standort wird nur verwendet, um Meldungen in der Nähe zu finden, und niemandem angezeigt.",
       "denied": "Der Browser hat den Standortzugriff nicht erlaubt.",
@@ -9323,7 +9323,7 @@
     "open": "Öffnen",
     "previous": "Zurück",
     "next": "Weiter",
-    "pageOf": "Seite {page} von {pages}",
+    "pageOf": "Seite {page, number} von {pages, number}",
     "never": "Keine Bewegungen",
     "detail": {
       "back": "Alle Guthaben",
@@ -9495,7 +9495,7 @@
     "open": "Öffnen",
     "previous": "Zurück",
     "next": "Weiter",
-    "pageOf": "Seite {page} von {pages}",
+    "pageOf": "Seite {page, number} von {pages, number}",
     "detail": {
       "back": "Alle Tiere",
       "identity": "Identität",
@@ -9511,7 +9511,7 @@
         "created": "Registriert",
         "photo": "Foto"
       },
-      "months": "{months} Monate",
+      "months": "{months, number} Monate",
       "sex": {
         "MALE": "Männlich",
         "FEMALE": "Weiblich",
@@ -9555,7 +9555,7 @@
         "MANUAL": "Manuell geteilt",
         "TEMPORARY": "Befristet"
       },
-      "scopeCount": "{count} Rechte",
+      "scopeCount": "{count, number} Rechte",
       "states": {
         "active": "Aktiv",
         "revoked": "Widerrufen",
@@ -9582,14 +9582,14 @@
       },
       "bookings": "Buchungen",
       "lost": "Vermisstenmeldungen",
-      "sightings": "{count} Sichtungen",
+      "sightings": "{count, number} Sichtungen",
       "care": "Pflegeerinnerungen",
       "travel": "Reisen",
       "insurance": "Versicherung",
-      "claimPreps": "{count} Schadensentwürfe",
+      "claimPreps": "{count, number} Schadensentwürfe",
       "sharing": "Freigaben",
-      "shareCards": "{count} aktive Steckbriefe",
-      "healthShares": "{count} aktive Gesundheitslinks",
+      "shareCards": "{count, number} aktive Steckbriefe",
+      "healthShares": "{count, number} aktive Gesundheitslinks",
       "none": "Keine.",
       "diagnostics": "Hinweise zur Datenqualität",
       "diagnosticCodes": {
@@ -10001,7 +10001,7 @@
       "estimate": "Entfernung und Zeit sind Schätzungen (Luftlinie × Straßenfaktor).",
       "routed": "Nach der Straßenroute",
       "notPriced": "Das Tiertaxi ist in dieser Stadt noch nicht verfügbar.",
-      "distanceTime": "{km} km · etwa {minutes} Min.",
+      "distanceTime": "{km, number} km · etwa {minutes, number} Min.",
       "payNote": "Online-Zahlung ist noch nicht aktiv; zahlen Sie beim Fahrer bei Ankunft.",
       "request": "Fahrt anfragen",
       "requesting": "Anfrage wird gesendet…",
@@ -10023,7 +10023,7 @@
         "NO_DRIVER": "Kein Fahrer gefunden"
       },
       "searchingHint": "Ihre Anfrage ging an Fahrer in der Nähe. Nimmt bis {time} niemand an, sagen wir es Ihnen.",
-      "eta": "Etwa {minutes} Min. entfernt",
+      "eta": "Etwa {minutes, number} Min. entfernt",
       "driver": "Fahrer",
       "call": "Anrufen",
       "positionAt": "Position um {time}",
@@ -10034,7 +10034,7 @@
       "rateComment": "Ihr Kommentar (optional)",
       "rateSend": "Bewertung senden",
       "rated": "Danke für Ihre Bewertung.",
-      "stars": "{n} von 5",
+      "stars": "{n, number} von 5",
       "receipt": "Fahrtbeleg",
       "receiptLines": {
         "base": "Grundpreis",
@@ -10064,7 +10064,7 @@
       "locationOff": "Der Standort Ihres Telefons ist nicht verfügbar; Anfragen erscheinen nur mit aktuellem Standort.",
       "requests": "Anfragen in der Nähe",
       "noRequests": "Gerade keine Anfragen. Die Seite aktualisiert sich selbst.",
-      "kmFromYou": "{km} km bis zur Abholung",
+      "kmFromYou": "{km, number} km bis zur Abholung",
       "pets": "{count, plural, one {# Tier} other {# Tiere}}",
       "accept": "Annehmen",
       "decline": "Ablehnen",
@@ -10358,7 +10358,7 @@
     },
     "reference": {
       "booking": "Termin",
-      "order": "Bestellung ({count})"
+      "order": "Bestellung ({count, number})"
     },
     "open": "Prüfen",
     "empty": "Keine Belege mit diesem Status.",
@@ -10427,7 +10427,7 @@
       "status": "Status",
       "lastOrder": "Letzte Bestellung"
     },
-    "days": "{count} Tage",
+    "days": "{count, number} Tage",
     "empty": "Keine.",
     "prev": "Zurück",
     "next": "Weiter",
