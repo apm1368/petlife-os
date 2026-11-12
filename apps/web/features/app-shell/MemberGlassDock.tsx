@@ -1,23 +1,18 @@
 "use client";
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { CalendarDays, HeartPulse, House, Images, PawPrint, ShoppingBag } from "@petlife/ui";
 import type { PetAccessFlags } from "@petlife/types";
 import { useActivePet } from "@/hooks/use-active-pet";
 import { Bird } from "@/features/landing/opl/Bird";
 import { isRouteLocale, type RouteLocale } from "@/lib/i18n/config";
-const copy: Record<RouteLocale, Record<"nav" | "home" | "profile" | "health" | "care" | "memories" | "shop", string>> = {
-  fa: { nav: "بخش‌های من", home: "داشبورد", profile: "پروفایل حیوان", health: "سلامت", care: "مراقبت‌ها", memories: "خاطرات", shop: "فروشگاه" },
-  en: { nav: "My sections", home: "Dashboard", profile: "Pet profile", health: "Health", care: "Care", memories: "Memories", shop: "Shop" },
-  de: { nav: "Meine Bereiche", home: "Übersicht", profile: "Tierprofil", health: "Gesundheit", care: "Pflege", memories: "Erinnerungen", shop: "Shop" },
-  es: { nav: "Mis secciones", home: "Panel", profile: "Perfil de la mascota", health: "Salud", care: "Cuidados", memories: "Recuerdos", shop: "Tienda" },
-};
 /** The side dock of personal records, with a budgie perched on top; links and labels follow the page language. */
 export function MemberGlassDock({ access }: { access: PetAccessFlags | null }) {
   const raw = useLocale();
   const locale: RouteLocale = isRouteLocale(raw) ? raw : "en";
-  const c = copy[locale];
+  const t = useTranslations("pattern2026.member");
+  const c = { nav: t("nav"), home: t("home"), profile: t("profile"), health: t("health"), care: t("care"), memories: t("memories"), shop: t("shop") };
   const pathname = usePathname();
   const { activePet, pets } = useActivePet();
   const pet = activePet ?? pets[0];

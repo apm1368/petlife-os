@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { ArrowLeft, ArrowRight, HandHeart } from "@petlife/ui";
 import { useLanding } from "./LandingShell";
-import { oplCopy } from "./opl-copy";
+import { useOplCopy } from "./opl-copy";
 import { storyCopy } from "../story-copy";
 import { KINDNESS_SRC } from "./kindness-art";
 import { observeVisible, prefersReducedMotion } from "./cursor-bus";
@@ -12,7 +12,7 @@ import { observeVisible, prefersReducedMotion } from "./cursor-bus";
 /** Animal support: the pointer is a warm light that brings colour to a grey illustration. */
 export function KindnessLight() {
   const { locale } = useLanding();
-  const s = storyCopy[locale], c = oplCopy[locale].kindness;
+  const s = storyCopy[locale], c = useOplCopy().kindness;
   const Arrow = locale === "fa" ? ArrowLeft : ArrowRight;
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => {

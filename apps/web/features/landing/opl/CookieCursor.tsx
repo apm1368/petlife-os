@@ -3,8 +3,7 @@
 import { useEffect, useRef } from "react";
 import { DOG_SVG } from "./dog-svg";
 import { cursorBus, mediaMatches, prefersReducedMotion } from "./cursor-bus";
-import { useLanding } from "./LandingShell";
-import { oplCopy } from "./opl-copy";
+import { useOplCopy } from "./opl-copy";
 
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 
@@ -13,8 +12,7 @@ const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
  * sits and looks at the visitor after 1.4 s, plays ball after 6.5 s (never in the memorial). Purely decorative.
  */
 export function CookieCursor() {
-  const { locale } = useLanding();
-  const copy = oplCopy[locale].cookie;
+  const copy = useOplCopy().cookie;
   const host = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const root = host.current;

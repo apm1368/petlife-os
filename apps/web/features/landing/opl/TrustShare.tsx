@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Check, LockKeyhole, ShieldCheck } from "@petlife/ui";
 import { useLanding } from "./LandingShell";
-import { fillVars, oplCopy, withName } from "./opl-copy";
+import { fillVars, useOplCopy, withName } from "./opl-copy";
 import { storyCopy } from "../story-copy";
 import { Bird } from "./Bird";
 
@@ -19,7 +19,7 @@ const HL = ["controls", "source", "unknown"] as const;
 /** The trust principles, shown by letting the visitor try the real health-share options (4 sections, up to 7 days). */
 export function TrustShare() {
   const { locale, name } = useLanding();
-  const s = storyCopy[locale], c = oplCopy[locale].share;
+  const s = storyCopy[locale], c = useOplCopy().share;
   const [on, setOn] = useState<Record<Section, boolean>>({ vaccination: true, allergies: true, medications: false, conditions: false });
   const [dur, setDur] = useState(0);
   const [hl, setHl] = useState<(typeof HL)[number] | "">("");
@@ -35,7 +35,7 @@ export function TrustShare() {
       </div>
       <div className={`opl-share${hl ? ` hl-${hl}` : ""}`}>
         <Bird kind="cockatiel" style={{ top: -40, insetInlineStart: 52 }} />
-        <div className="opl-share__head"><span className="opl-share__title">{withName(c.title, name)}</span><span className="opl-tag">{oplCopy[locale].path.sample}</span></div>
+        <div className="opl-share__head"><span className="opl-share__title">{withName(c.title, name)}</span><span className="opl-tag">{useOplCopy().path.sample}</span></div>
         <div className="opl-share__ctl">
           <div><p className="opl-lbl" id="opl-share-sections">{c.sectionsLabel}</p>
             <div className="opl-toggles" role="group" aria-labelledby="opl-share-sections">{(["vaccination", "allergies", "medications", "conditions"] as Section[]).map((k) =>

@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { familyCopy, familyForPath, type Family } from "./family-copy";
+import { familyForPath, type Family } from "./family-copy";
 import { buildFamilyReel } from "./family-scenes";
+import { familyCopyFor, oplCopyFor } from "@/test/pattern-copy";
 
 const FAMILIES: Family[] = ["care", "services", "shop", "travel", "safe", "together", "learn"];
-const keys = (value: object, prefix = ""): string[] => Object.entries(value).flatMap(([key, child]) =>
-  typeof child === "object" && child !== null ? keys(child, `${prefix}${key}.`) : [`${prefix}${key}`]).sort();
 
 describe("page family reels", () => {
   it.each([
@@ -19,13 +18,9 @@ describe("page family reels", () => {
     expect(familyForPath(path)).toBe(family);
   });
 
-  it("keeps the section reel copy aligned in all four languages", () => {
-    for (const locale of ["en", "de", "es"] as const) expect(keys(familyCopy[locale])).toEqual(keys(familyCopy.fa));
-  });
-
   it.each(["fa", "en", "de", "es"] as const)("builds every %s family reel with a subtitle and chapter for each scene", (locale) => {
     for (const family of FAMILIES) {
-      const reel = buildFamilyReel(family, locale);
+      const reel = buildFamilyReel(family, locale, oplCopyFor(locale), familyCopyFor(locale)[family]);
       expect(reel.scenes.length).toBeGreaterThanOrEqual(5);
       expect(reel.kicks).toHaveLength(reel.scenes.length);
       expect(reel.subs).toHaveLength(reel.scenes.length);

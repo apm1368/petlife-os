@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { PawPrint, Stethoscope, Scissors, House, Plane, CarFront, HandHeart, ShieldCheck } from "@petlife/ui";
 import type { RouteLocale } from "@/lib/i18n/config";
-import { parkCopy, parkDestinations } from "./park-copy";
+import { parkDestinations, useParkCopy } from "./park-copy";
 
 const icons = { shop: PawPrint, vet: Stethoscope, grooming: Scissors, boarding: House, travel: Plane, taxi: CarFront, support: HandHeart, insurance: ShieldCheck };
 // Physical sign icon centers, as percentages of the existing pavilion hit region.
@@ -13,7 +13,7 @@ const iconTop = { shop: 12, vet: 20, grooming: 14, boarding: 17, travel: 18, tax
 export function ParkPavilions({ locale }: { locale: RouteLocale }) {
   const ref = useRef<HTMLElement>(null);
   const [intro, setIntro] = useState(false);
-  const c = parkCopy[locale];
+  const c = useParkCopy(locale);
   useEffect(() => {
     if (!ref.current || typeof IntersectionObserver === "undefined" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let timer: ReturnType<typeof setTimeout> | undefined;

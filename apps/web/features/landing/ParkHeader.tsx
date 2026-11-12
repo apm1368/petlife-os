@@ -9,8 +9,8 @@ import { useSessionBootstrap } from "@/hooks/use-session-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
 import { DisplayModeToggle } from "@/features/display-mode/DisplayModeToggle";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
-import { parkCopy } from "./park-copy";
-import { oplCopy, worldOrder } from "./opl/opl-copy";
+import { useParkCopy } from "./park-copy";
+import { useOplCopy, worldOrder } from "./opl/opl-copy";
 import { localeHomePath } from "@/lib/seo/site";
 
 const WORLD_ICONS = { health: HeartPulse, daily: ShoppingBag, travel: Plane, safe: ShieldCheck, together: Users } as const;
@@ -24,13 +24,12 @@ export function ParkHeader({ locale }: { locale: RouteLocale }) {
   const [scrolled, setScrolled] = useState(false);
   const menuButton = useRef<HTMLButtonElement>(null);
   const ddWrap = useRef<HTMLDivElement>(null);
-  const c = parkCopy[locale];
-  const o = oplCopy[locale];
+  const c = useParkCopy(locale);
+  const o = useOplCopy();
   const root = `/${locale}`;
   // Home and its sections live at the canonical home address (the bare domain for Persian).
   const home = localeHomePath(locale);
   const partnerReturn = encodeURIComponent(`${root}/provider`);
-  const languageNames: Record<RouteLocale, string> = { fa: "زبان", en: "Language", de: "Sprache", es: "Idioma" };
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     const onClick = (e: MouseEvent) => { if (!ddWrap.current?.contains(e.target as Node)) setDd(false); };
@@ -64,8 +63,8 @@ export function ParkHeader({ locale }: { locale: RouteLocale }) {
         {links.map((link) => <Link key={link.href} href={link.href}>{link.label}</Link>)}
       </nav>
       <div className="opl-hact">
-        <label className="sr-only" htmlFor="park-language-select">{languageNames[locale]}</label>
-        <select id="park-language-select" className="opl-lang" aria-label={languageNames[locale]} value={locale} onChange={(event) => {
+        <label className="sr-only" htmlFor="park-language-select">{o.header.language}</label>
+        <select id="park-language-select" className="opl-lang" aria-label={o.header.language} value={locale} onChange={(event) => {
           const url = new URL(window.location.href);
           url.pathname = `/${event.target.value}${url.pathname.replace(/^\/(fa|en|de|es)/, "")}`;
           window.location.assign(url.toString());
