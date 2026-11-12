@@ -1,117 +1,116 @@
 /*
- * ERP glass theme. Scoped to .erp-shell so the consumer site is untouched.
+ * Back office on the approved 2026-11 pattern (docs/design/pattern-2026-11). Scoped to .erp-shell.
  *
- * Every admin page already paints its cards with the semantic surface tokens (bg-surface-elevated, border-subtle…),
- * so redefining those tokens here turns all ~100 back-office pages into frosted panels at once; the rules
- * below add the blur and depth those tokens alone cannot.
+ * The shell root also carries .opl-page, which defines the --opl-* tokens (light, and dark on the site's
+ * data-theme switch with the prefers-color-scheme fallback) and lays them over the design-system tokens
+ * (--surface-*, --border-*, --radius-*), so all ~100 back-office pages take the warm paper and soft cards at
+ * once. The --glass-* names below are the shell's own vocabulary, now expressed in pattern tokens.
  */
 .erp-shell {
-  --glass-blur: 20px;
-  --glass-panel: rgba(255, 253, 249, 0.66);
-  --glass-card: rgba(255, 253, 249, 0.58);
-  --glass-solid: rgba(255, 253, 249, 0.94);
-  --glass-input: rgba(255, 255, 255, 0.55);
-  --glass-hover: rgba(31, 90, 61, 0.07);
-  --glass-border: rgba(255, 255, 255, 0.78);
-  --glass-edge: rgba(31, 90, 61, 0.12);
-  --glass-shadow: 0 22px 50px -30px rgba(23, 70, 47, 0.42), 0 2px 8px -4px rgba(23, 70, 47, 0.1);
-  --glass-honey: #f2b544;
-  --glass-leaf: #7db46c;
-  --glass-forest: #1f5a3d;
+  --glass-blur: 14px;
+  --glass-panel: var(--opl-glass);
+  --glass-card: var(--opl-raised);
+  --glass-solid: var(--opl-raised);
+  --glass-input: var(--opl-raised);
+  --glass-hover: var(--opl-mint);
+  --glass-border: var(--opl-line);
+  --glass-edge: var(--opl-line);
+  --glass-shadow: 0 1px 2px rgb(var(--opl-sh) / 0.06), 0 22px 44px -32px rgb(var(--opl-sh) / 0.42);
+  --brand-solid: var(--opl-forest);
+  --brand-natural: var(--opl-forest-2);
+  --text-primary: var(--opl-ink);
+  --text-secondary: var(--opl-ink-2);
   --chart-1: #1f5a3d;
   --chart-2: #e09a1f;
   --chart-3: #4f9a68;
   --chart-4: #7a6bd1;
   --chart-5: #d4644a;
   --chart-grid: rgba(31, 90, 61, 0.1);
-  --surface-elevated: var(--glass-card);
-  --surface-subtle: rgba(255, 255, 255, 0.42);
-  --border-subtle: var(--glass-edge);
-  --erp-bg: transparent;
-  --erp-card: var(--glass-card);
-  --erp-line: var(--glass-edge);
   min-height: 100dvh;
-  color: var(--text-primary);
+  color: var(--opl-ink);
+  font-family: Vazirmatn, var(--font-sans, Tahoma), system-ui, sans-serif;
   background:
-    radial-gradient(60rem 42rem at 105% -8%, rgba(242, 181, 68, 0.3), transparent 62%),
-    radial-gradient(52rem 40rem at -12% 8%, rgba(125, 180, 108, 0.32), transparent 60%),
-    radial-gradient(64rem 46rem at 50% 118%, rgba(31, 90, 61, 0.2), transparent 62%),
-    #f5f1e8;
+    radial-gradient(680px 360px at 92% 40px, color-mix(in srgb, var(--opl-sun) var(--erp-glow-a, 16%), transparent), transparent 70%),
+    radial-gradient(600px 340px at 0% 260px, color-mix(in srgb, var(--opl-leaf) var(--erp-glow-b, 13%), transparent), transparent 70%),
+    var(--opl-paper);
+  background-attachment: fixed;
+}
+[dir="rtl"] .erp-shell {
+  background:
+    radial-gradient(680px 360px at 8% 40px, color-mix(in srgb, var(--opl-sun) var(--erp-glow-a, 16%), transparent), transparent 70%),
+    radial-gradient(600px 340px at 100% 260px, color-mix(in srgb, var(--opl-leaf) var(--erp-glow-b, 13%), transparent), transparent 70%),
+    var(--opl-paper);
   background-attachment: fixed;
 }
 :root[data-theme="dark"] .erp-shell {
-  --glass-panel: rgba(24, 30, 26, 0.62);
-  --glass-card: rgba(28, 34, 30, 0.52);
-  --glass-solid: rgba(24, 29, 26, 0.96);
-  --glass-input: rgba(255, 255, 255, 0.05);
-  --glass-hover: rgba(125, 180, 108, 0.1);
-  --glass-border: rgba(255, 255, 255, 0.09);
-  --glass-edge: rgba(255, 255, 255, 0.09);
-  --glass-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.75), 0 2px 8px -4px rgba(0, 0, 0, 0.4);
-  --chart-1: #7db46c;
+  --erp-glow-a: 7%;
+  --erp-glow-b: 6%;
+  --chart-1: #8cc79a;
   --chart-2: #f2b544;
   --chart-3: #4fc3a1;
   --chart-4: #a99cf0;
   --chart-5: #f08a70;
   --chart-grid: rgba(255, 255, 255, 0.08);
-  --surface-subtle: rgba(255, 255, 255, 0.04);
-  background:
-    radial-gradient(60rem 42rem at 105% -8%, rgba(242, 181, 68, 0.12), transparent 62%),
-    radial-gradient(52rem 40rem at -12% 8%, rgba(46, 118, 80, 0.34), transparent 60%),
-    radial-gradient(64rem 46rem at 50% 118%, rgba(31, 90, 61, 0.3), transparent 62%),
-    #0e1210;
-  background-attachment: fixed;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .erp-shell {
-    --glass-panel: rgba(24, 30, 26, 0.62);
-    --glass-card: rgba(28, 34, 30, 0.52);
-    --glass-solid: rgba(24, 29, 26, 0.96);
-    --glass-input: rgba(255, 255, 255, 0.05);
-    --glass-hover: rgba(125, 180, 108, 0.1);
-    --glass-border: rgba(255, 255, 255, 0.09);
-    --glass-edge: rgba(255, 255, 255, 0.09);
-    --glass-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.75), 0 2px 8px -4px rgba(0, 0, 0, 0.4);
-    --chart-1: #7db46c;
+    --erp-glow-a: 7%;
+    --erp-glow-b: 6%;
+    --chart-1: #8cc79a;
     --chart-2: #f2b544;
     --chart-3: #4fc3a1;
     --chart-4: #a99cf0;
     --chart-5: #f08a70;
     --chart-grid: rgba(255, 255, 255, 0.08);
-    --surface-subtle: rgba(255, 255, 255, 0.04);
-    background:
-      radial-gradient(60rem 42rem at 105% -8%, rgba(242, 181, 68, 0.12), transparent 62%),
-      radial-gradient(52rem 40rem at -12% 8%, rgba(46, 118, 80, 0.34), transparent 60%),
-      radial-gradient(64rem 46rem at 50% 118%, rgba(31, 90, 61, 0.3), transparent 62%),
-      #0e1210;
-    background-attachment: fixed;
   }
 }
 
-/* Existing pages: every elevated surface becomes a frosted card. */
+/* The design-system layer (approved-patterns.css) paints the admin root and headings for the older theme with
+   0,3,x selectors; these win on the pattern: paper with soft glows, and headings in ink (pattern: text is only
+   ink, ink-2 and ink-3; forest is for brand moments). */
+html .design-root .erp-shell.opl-page {
+  background:
+    radial-gradient(680px 360px at 92% 40px, color-mix(in srgb, var(--opl-sun) var(--erp-glow-a, 16%), transparent), transparent 70%),
+    radial-gradient(600px 340px at 0% 260px, color-mix(in srgb, var(--opl-leaf) var(--erp-glow-b, 13%), transparent), transparent 70%),
+    var(--opl-paper);
+  background-attachment: fixed;
+}
+html[dir="rtl"] .design-root .erp-shell.opl-page {
+  background:
+    radial-gradient(680px 360px at 8% 40px, color-mix(in srgb, var(--opl-sun) var(--erp-glow-a, 16%), transparent), transparent 70%),
+    radial-gradient(600px 340px at 100% 260px, color-mix(in srgb, var(--opl-leaf) var(--erp-glow-b, 13%), transparent), transparent 70%),
+    var(--opl-paper);
+  background-attachment: fixed;
+}
+.erp-shell.opl-page.erp-shell .erp-main :is(h1, h2, h3) { color: var(--opl-ink); }
+.erp-shell.opl-page.erp-shell .erp-main { background: transparent; }
+
+/* Existing pages: every elevated surface is a soft raised card with a hairline edge (no blur: the pattern's
+   cards are solid, and dozens of blurred cards cost scrolling performance). */
 .erp-shell .erp-main :where([class*="bg-surface-elevated"]) {
-  backdrop-filter: blur(16px) saturate(1.45);
-  -webkit-backdrop-filter: blur(16px) saturate(1.45);
-  border-color: var(--glass-border);
+  border-color: var(--opl-line);
   box-shadow: var(--glass-shadow);
 }
 .erp-shell .erp-main :where(.rounded-lg, .rounded-md)[class*="bg-surface-elevated"] { border-radius: 22px; }
-.erp-shell .erp-main :where(input, select, textarea)[class*="bg-surface-elevated"],
 .erp-shell .erp-main :where(input, select, textarea):not([type="checkbox"]):not([type="radio"]) {
-  background-color: var(--glass-input);
-  backdrop-filter: none;
-  box-shadow: none;
+  background-color: var(--opl-raised);
+  box-shadow: inset 0 0 0 1px var(--opl-line);
+  border-color: var(--opl-line);
   border-radius: 14px;
 }
 /* Soft capsule buttons, as on the public site. */
-.erp-shell .erp-main button[class*="rounded-md"][class*="h-11"],
-.erp-shell .erp-main button[class*="rounded-md"][class*="h-9"] { border-radius: 999px; }
-.erp-shell .erp-main button[class*="bg-surface-elevated"] { backdrop-filter: none; box-shadow: none; }
-.erp-shell dialog { --surface-elevated: var(--glass-solid); backdrop-filter: blur(24px); border-radius: 24px; }
-.erp-shell dialog::backdrop { background: rgba(14, 18, 16, 0.35); backdrop-filter: blur(6px); }
+.erp-shell .erp-main :is(button, a)[class*="rounded-md"], .erp-shell .erp-main :is(button, a)[class*="rounded-lg"] { border-radius: 999px; }
+.erp-shell .erp-main :is(button, a).bg-brand-solid { box-shadow: 0 8px 18px -10px rgb(var(--opl-sh) / 0.55); transition: transform 0.25s var(--opl-ease), box-shadow 0.25s var(--opl-ease); }
+@media (hover: hover) { .erp-shell .erp-main :is(button, a).bg-brand-solid:hover { transform: translateY(-1px); } }
+.erp-shell .erp-main button[class*="bg-surface-elevated"] { box-shadow: none; }
+.erp-shell dialog { --surface-elevated: var(--opl-raised); border-radius: 24px; }
+.erp-shell dialog::backdrop { background: rgb(var(--opl-sh) / 0.35); backdrop-filter: blur(6px); }
 .erp-shell .erp-main table { border-collapse: separate; border-spacing: 0; }
-.erp-shell .erp-main thead th { position: sticky; top: 0; background: var(--glass-solid); z-index: 1; }
-.erp-shell .erp-main tbody tr:hover > td { background: var(--glass-hover); }
+/* A table that already sits in a horizontal scroller is a real table again (the design-system rule makes every
+   panel table a block so a bare table can never widen the page; inside a scroller that only shrank the columns). */
+.erp-shell.erp-shell .erp-main :is(.overflow-x-auto, .gx-table-wrap) > table { display: table; width: 100%; max-width: none; overflow: visible; }
+.erp-shell .erp-main thead th { position: sticky; top: 0; background: var(--opl-paper-2); z-index: 1; }
+.erp-shell .erp-main tbody tr:hover > td { background: var(--opl-paper-2); }
 
 /* ---- Shared ERP kit (reports, dashboard, users) ---- */
 .gx-page { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
@@ -119,7 +118,7 @@
 .gx-head h1 { margin: 0; font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.2rem); font-weight: 800; letter-spacing: -0.01em; }
 .gx-head p { margin: 6px 0 0; color: var(--text-secondary); font-size: 0.88rem; line-height: 1.8; }
 .gx-kicker { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 6px; color: var(--brand-natural); font-size: 0.74rem; font-weight: 800; letter-spacing: 0.08em; }
-.gx-card { min-width: 0; padding: 20px; border-radius: 24px; background: var(--glass-card); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); backdrop-filter: blur(16px) saturate(1.45); -webkit-backdrop-filter: blur(16px) saturate(1.45); }
+.gx-card { min-width: 0; padding: 22px; border-radius: 24px; background: var(--glass-card); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); }
 .gx-card > header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; margin-bottom: 14px; }
 .gx-card h2 { margin: 0; font-size: 1.02rem; font-weight: 800; }
 .gx-card header p, .gx-muted { margin: 0; color: var(--text-secondary); font-size: 0.78rem; line-height: 1.7; }
@@ -130,29 +129,30 @@
 .gx-grid--wide { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); }
 @media (max-width: 1100px) { .gx-grid--3, .gx-grid--wide { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 760px) { .gx-grid--2 { grid-template-columns: minmax(0, 1fr); } }
-.gx-kpi { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 16px 18px; border-radius: 22px; background: var(--glass-card); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); backdrop-filter: blur(16px) saturate(1.45); -webkit-backdrop-filter: blur(16px) saturate(1.45); color: inherit; text-decoration: none; }
+.gx-kpi { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 16px 18px; border-radius: 22px; background: var(--glass-card); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); color: inherit; text-decoration: none; transition: transform 0.22s var(--opl-ease), box-shadow 0.22s var(--opl-ease); }
+@media (hover: hover) { a.gx-kpi:hover { transform: translateY(-2px); } }
 .gx-kpi__label { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 0.78rem; font-weight: 600; }
 .gx-kpi__label svg { color: var(--brand-natural); flex: none; }
 .gx-kpi__value { font-size: clamp(1.4rem, 1.1rem + 0.8vw, 1.9rem); font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.2; overflow-wrap: anywhere; }
 .gx-kpi__foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--text-secondary); font-size: 0.74rem; }
-.gx-kpi--accent { background: linear-gradient(140deg, #1f5a3d, #2e7650 60%, #4f8f5a); color: #fff; border-color: transparent; }
-.gx-kpi--accent .gx-kpi__label, .gx-kpi--accent .gx-kpi__foot, .gx-kpi--accent .gx-kpi__label svg { color: rgba(255, 255, 255, 0.85); }
+.gx-kpi--accent { background: var(--opl-forest); color: var(--opl-on-forest); border-color: transparent; }
+.gx-kpi--accent .gx-kpi__label, .gx-kpi--accent .gx-kpi__foot, .gx-kpi--accent .gx-kpi__label svg { color: color-mix(in srgb, var(--opl-on-forest) 82%, transparent); }
 .gx-delta { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 999px; font-size: 0.72rem; font-weight: 800; direction: ltr; unicode-bidi: isolate; }
 .gx-delta--up { background: rgba(79, 154, 104, 0.16); color: #2f7d4c; }
 .gx-delta--down { background: rgba(212, 100, 74, 0.15); color: #b4472f; }
 .gx-delta--flat { background: var(--glass-hover); color: var(--text-secondary); }
-.gx-kpi--accent .gx-delta { background: rgba(255, 255, 255, 0.18); color: #fff; }
+.gx-kpi--accent .gx-delta { background: color-mix(in srgb, var(--opl-on-forest) 18%, transparent); color: var(--opl-on-forest); }
 :root[data-theme="dark"] .gx-delta--up { color: #8fd3a6; }
 :root[data-theme="dark"] .gx-delta--down { color: #f5a08b; }
 
 .gx-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .gx-seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 999px; background: var(--glass-input); border: 1px solid var(--glass-edge); }
 .gx-seg button { min-height: 36px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; cursor: pointer; }
-.gx-seg button[aria-pressed="true"] { background: var(--brand-solid); color: #fff; box-shadow: 0 8px 18px -10px var(--brand-solid); }
+.gx-seg button[aria-pressed="true"] { background: var(--opl-forest); color: var(--opl-on-forest); box-shadow: 0 8px 18px -10px var(--brand-solid); }
 .gx-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--glass-edge); background: var(--glass-input); color: var(--text-primary); font-size: 0.82rem; font-weight: 700; cursor: pointer; text-decoration: none; }
 .gx-btn:hover { border-color: var(--brand-natural); }
-.gx-btn--primary { background: var(--brand-solid); border-color: transparent; color: #fff; }
-.gx-btn--honey { background: #f2b544; border-color: transparent; color: #1e241f; }
+.gx-btn--primary { background: var(--opl-forest); border-color: transparent; color: var(--opl-on-forest); }
+.gx-btn--honey { background: var(--opl-sun); border-color: transparent; color: var(--opl-on-sun); }
 .gx-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .gx-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 0.76rem; color: var(--text-secondary); font-weight: 600; }
 .gx-field input, .gx-field select { min-height: 40px; padding: 0 12px; border-radius: 14px; border: 1px solid var(--glass-edge); background: var(--glass-input); color: var(--text-primary); font: inherit; font-size: 0.85rem; font-weight: 500; }
@@ -252,7 +252,7 @@
 .erp-tabs__tab { position: relative; display: inline-flex; align-items: center; gap: 8px; flex: none; min-height: 44px; padding: 0 14px; border-bottom: 2px solid transparent; color: var(--text-secondary); font-size: 0.84rem; font-weight: 650; text-decoration: none; white-space: nowrap; border-radius: 10px 10px 0 0; transition: color 0.15s, background-color 0.15s; }
 .erp-tabs__tab:hover { color: var(--text-primary); background: var(--glass-hover); }
 .erp-tabs__tab[aria-current="page"] { color: var(--brand-natural); border-bottom-color: var(--brand-solid); font-weight: 800; }
-.erp-tabs__count { min-width: 20px; padding: 0 6px; border-radius: 999px; background: #f2b544; color: #1e241f; font-size: 0.68rem; font-weight: 800; line-height: 1.6; text-align: center; font-variant-numeric: tabular-nums; }
+.erp-tabs__count { min-width: 20px; padding: 0 6px; border-radius: 999px; background: var(--opl-sun); color: var(--opl-on-sun); font-size: 0.68rem; font-weight: 800; line-height: 1.6; text-align: center; font-variant-numeric: tabular-nums; }
 
 /* ---- One page grammar for every back-office page ----
    Pages were written over many batches with their own heading sizes, gaps and filter rows. These rules give
@@ -322,3 +322,11 @@
 .gx-shortcuts svg { flex: none; color: var(--brand-natural); }
 .gx-inline-alert { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-radius: 14px; border: 1px solid rgba(212, 100, 74, 0.4); background: rgba(212, 100, 74, 0.06); font-size: 0.84rem; }
 .gx-inline-alert p { margin: 0; }
+
+@media (max-width: 560px) {
+  .gx-queues { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .gx-queue { flex-direction: column; align-items: flex-start; gap: 8px; min-height: 0; padding: 12px; }
+  .gx-queue__icon { width: 32px; height: 32px; border-radius: 10px; }
+  .gx-queue__count { font-size: 1.25rem; }
+  .gx-card { padding: 16px; border-radius: 20px; }
+}

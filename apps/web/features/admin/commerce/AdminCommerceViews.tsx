@@ -220,7 +220,7 @@ export function AdminCommerceOverviewView() {
         {data ? (
           <>
             <p className="mb-3 text-metadata text-text-secondary">
-              {tr("فقط سفارش‌های پرداخت‌شده در opetlife؛ سفارش‌های لغو یا بازپرداخت‌شده در فروش حساب نمی‌شوند.", "opetlife checkout orders only; cancelled or refunded orders are excluded from sales.")}
+              {tr("فقط سفارش‌های پرداخت‌شده در اپت لایف؛ سفارش‌های لغو یا بازپرداخت‌شده در فروش حساب نمی‌شوند.", "opetlife checkout orders only; cancelled or refunded orders are excluded from sales.")}
             </p>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
               <Kpi label={tr("سفارش", "Orders")} value={num(data.orderCount, lang)} />
