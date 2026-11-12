@@ -73,7 +73,7 @@ export class LostPetNotificationListener {
     });
   }
 
-  @OnEvent("LostPetIncidentOpened")
+  @OnEvent("LostPetIncidentNearbyCheck")
   onIncidentOpenedNearby(payload: { petId: string; incidentId: string }, domainEventId: string): Promise<void> {
     return this.safely("LostPetIncidentOpened (nearby)", async () => {
       const incident = await this.prisma.lostPetIncident.findUnique({

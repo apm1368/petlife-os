@@ -228,6 +228,8 @@ export const DOMAIN_EVENT_TYPES = [
   // Handoff 18: Lost Pet + Animal Support + Community + Memories
   "PetLifecycleTransitioned",
   "LostPetIncidentOpened",
+  /** #290 Q53: published after the opening transaction commits, so the neighbourhood fan-out can read the incident. */
+  "LostPetIncidentNearbyCheck",
   "LostPetSightingSubmitted",
   "LostPetSightingAccepted",
   "LostPetMarkedFound",
