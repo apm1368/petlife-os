@@ -1,4 +1,97 @@
 {
+  "adminHolidays": {
+    "kicker": "Calendario laboral",
+    "title": "Festivos y cierres",
+    "retry": "Reintentar",
+    "cancel": "Cancelar",
+    "yearLabel": "Año persa",
+    "intro": "Los festivos oficiales de Irán, más los días que tu equipo cierra o abre. Los objetivos en horas laborables, como la revisión de verificación en 24 horas, se saltan los días cerrados, y las reservas y las estimaciones de entrega pueden usar el mismo calendario. Los viernes siempre se cierra.",
+    "coverage": {
+      "official": "{count, plural, one {# día cerrado} other {# días cerrados}} este año, del calendario oficial y de los cambios de tu equipo.",
+      "provisional": "Los festivos lunares de este año son provisionales hasta que se publique el calendario oficial. Corrige aquí cualquier día que cambie.",
+      "none": "Todavía no hay lista oficial para este año. Un desarrollador la añade cuando se publique el calendario oficial; mientras tanto, añade los cierres a mano."
+    },
+    "add": {
+      "title": "Añadir un cierre",
+      "help": "Para un día en que la oficina cierra y que no es festivo oficial, como un cierre repentino o un día libre de la empresa.",
+      "date": "Fecha",
+      "name": "Nombre",
+      "namePlaceholder": "Por ejemplo: Oficina cerrada",
+      "submit": "Cerrar este día"
+    },
+    "reason": "Motivo",
+    "reasonPlaceholder": "Por qué haces este cambio (queda en el registro de auditoría)",
+    "list": {
+      "title": "Días cerrados y modificados",
+      "empty": "No hay festivos ni cambios para este año.",
+      "date": "Fecha",
+      "name": "Día",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "status": {
+      "closed": "Cerrado",
+      "open": "Abierto"
+    },
+    "source": {
+      "official": "Festivo oficial",
+      "staffClosure": "Cierre del equipo",
+      "staffOpened": "Abierto por el equipo"
+    },
+    "actions": {
+      "open": "Abrir como día laborable",
+      "undo": "Deshacer el cambio del equipo"
+    },
+    "confirm": {
+      "openTitle": "¿Abrir el {date} como día laborable?",
+      "openBody": "Los objetivos en horas laborables contarán este día y las reservas podrán tratarlo como abierto.",
+      "undoTitle": "¿Deshacer el cambio del {date}?",
+      "undoBody": "El día vuelve a seguir el calendario oficial."
+    },
+    "done": {
+      "closed": "Cierre añadido.",
+      "opened": "Ahora el día es laborable.",
+      "undone": "Cambio deshecho; el día vuelve a seguir el calendario oficial."
+    },
+    "errors": {
+      "generic": "Algo ha fallado. Inténtalo de nuevo.",
+      "closureFields": "Elige una fecha, ponle un nombre y escribe un motivo breve (al menos 5 caracteres).",
+      "reason": "Escribe un motivo breve (al menos 5 caracteres)."
+    },
+    "rules": {
+      "CALENDAR_FRIDAY": "Los viernes siempre se cierra, así que no hay nada que cambiar.",
+      "CALENDAR_ALREADY_OPEN": "Ese día ya es laborable.",
+      "CALENDAR_ALREADY_CLOSED": "Ese día ya es festivo oficial. Para volver a cerrarlo después de abrirlo, deshaz el cambio del equipo.",
+      "CALENDAR_OUT_OF_RANGE": "Elige una fecha desde hace un mes hasta dentro de dos años.",
+      "CALENDAR_NO_STAFF_CHANGE": "Ese día no tiene ningún cambio del equipo."
+    },
+    "names": {
+      "nowruz": "Nouruz (Año Nuevo persa)",
+      "republicDay": "Día de la República Islámica",
+      "natureDay": "Día de la Naturaleza (Sizdah Bedar)",
+      "sadiqMartyrdom": "Martirio del imán Yafar al-Sadiq",
+      "eidAlAdha": "Fiesta del Sacrificio",
+      "khomeini": "Muerte del imán Jomeini",
+      "ghadir": "Fiesta de Ghadir",
+      "khordad15": "Levantamiento del 15 de Jordad",
+      "tasua": "Tasua",
+      "ashura": "Ashura",
+      "arbaeen": "Arbain",
+      "prophetDeath": "Muerte del Profeta y martirio del imán Hasan",
+      "reza": "Martirio del imán Reza",
+      "askari": "Martirio del imán Hasan al-Askari",
+      "mawlid": "Nacimiento del Profeta y del imán Yafar al-Sadiq",
+      "fatima": "Martirio de Fátima al-Zahra",
+      "aliBirth": "Nacimiento del imán Alí (Día del Padre)",
+      "mabath": "Mab'ath (misión del Profeta)",
+      "midShaban": "Mitad de Shabán (nacimiento del imán Mahdi)",
+      "revolution": "Victoria de la Revolución Islámica",
+      "aliMartyrdom": "Martirio del imán Alí",
+      "eidAlFitr": "Fiesta del Fin del Ayuno",
+      "eidAlFitr2": "Festivo por el Fin del Ayuno",
+      "oil": "Día de la Nacionalización del Petróleo"
+    }
+  },
   "adminCustomRoles": {
     "loading": "Cargando roles…",
     "forbidden": "No tienes acceso a los roles.",
@@ -3541,6 +3634,7 @@
         "signingOut": "Cerrando sesión…"
       },
       "tabs": {
+        "holidays": "Festivos y cierres",
         "customRoles": "Roles personalizados",
         "directory": "Directorio",
         "customer360": "Cliente 360°",

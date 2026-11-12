@@ -12083,3 +12083,20 @@ model SupportEscalation {
   @@index([requesterUserId])
   @@map("support_escalations")
 }
+
+/// A staff change to the business calendar (Settings → Holidays and closures): close a day that is normally open
+/// (a sudden closure) or open one of Iran's official holidays as a working day. Official holidays themselves live in
+/// the repo (src/common/time/iran-holidays.data.ts), so nothing at request time depends on a third party.
+model CalendarDayOverride {
+  /// Tehran calendar date.
+  date             DateTime @id @db.Date
+  closed           Boolean
+  title            String
+  reason           String
+  updatedByAdminId String   @db.Uuid
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("calendar_day_overrides")
+}
+

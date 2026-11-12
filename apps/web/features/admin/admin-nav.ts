@@ -283,6 +283,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
         href: "/settings",
         tabs: [
           { href: "/settings", labelKey: "tabs.platformSettings", permission: "settings.view" },
+          { href: "/settings/holidays", labelKey: "tabs.holidays", permission: "settings.view" },
           { href: "/feature-flags", labelKey: "tabs.featureFlags", permission: "settings.view" },
         ],
       },

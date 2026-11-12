@@ -1,4 +1,97 @@
 {
+  "adminHolidays": {
+    "kicker": "Geschäftskalender",
+    "title": "Feiertage und Schließtage",
+    "retry": "Erneut versuchen",
+    "cancel": "Abbrechen",
+    "yearLabel": "Persisches Jahr",
+    "intro": "Die offiziellen Feiertage im Iran sowie alle Tage, die Ihr Team schließt oder öffnet. Ziele in Arbeitsstunden – etwa die Prüfung der Verifizierung innerhalb von 24 Stunden – überspringen geschlossene Tage, und Buchungen und Lieferschätzungen können denselben Kalender nutzen. Freitags ist immer geschlossen.",
+    "coverage": {
+      "official": "{count, plural, one {# geschlossener Tag} other {# geschlossene Tage}} in diesem Jahr, aus dem offiziellen Kalender und den Änderungen Ihres Teams.",
+      "provisional": "Die Mondfeiertage dieses Jahres sind vorläufig, bis der offizielle Kalender erscheint. Korrigieren Sie hier jeden Tag, der sich verschiebt.",
+      "none": "Für dieses Jahr gibt es noch keine offizielle Liste. Ein Entwickler ergänzt sie, sobald der offizielle Kalender erscheint; bis dahin fügen Sie Schließtage von Hand hinzu."
+    },
+    "add": {
+      "title": "Schließtag hinzufügen",
+      "help": "Für einen Tag, an dem das Büro geschlossen ist, der aber kein offizieller Feiertag ist – etwa eine kurzfristige Schließung oder ein Betriebsruhetag.",
+      "date": "Datum",
+      "name": "Bezeichnung",
+      "namePlaceholder": "Zum Beispiel: Büro geschlossen",
+      "submit": "Diesen Tag schließen"
+    },
+    "reason": "Grund",
+    "reasonPlaceholder": "Warum diese Änderung (bleibt im Prüfprotokoll)",
+    "list": {
+      "title": "Geschlossene und geänderte Tage",
+      "empty": "Für dieses Jahr gibt es keine Feiertage oder Änderungen.",
+      "date": "Datum",
+      "name": "Tag",
+      "status": "Status",
+      "actions": "Aktionen"
+    },
+    "status": {
+      "closed": "Geschlossen",
+      "open": "Geöffnet"
+    },
+    "source": {
+      "official": "Offizieller Feiertag",
+      "staffClosure": "Schließung durch das Team",
+      "staffOpened": "Vom Team geöffnet"
+    },
+    "actions": {
+      "open": "Als Arbeitstag öffnen",
+      "undo": "Teamänderung zurücknehmen"
+    },
+    "confirm": {
+      "openTitle": "{date} als Arbeitstag öffnen?",
+      "openBody": "Ziele in Arbeitsstunden zählen diesen Tag mit, und Buchungen können ihn als geöffnet behandeln.",
+      "undoTitle": "Änderung am {date} zurücknehmen?",
+      "undoBody": "Der Tag folgt wieder dem offiziellen Kalender."
+    },
+    "done": {
+      "closed": "Schließtag hinzugefügt.",
+      "opened": "Der Tag ist jetzt ein Arbeitstag.",
+      "undone": "Änderung zurückgenommen; der Tag folgt wieder dem offiziellen Kalender."
+    },
+    "errors": {
+      "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+      "closureFields": "Wählen Sie ein Datum, geben Sie eine Bezeichnung und einen kurzen Grund an (mindestens 5 Zeichen).",
+      "reason": "Geben Sie einen kurzen Grund an (mindestens 5 Zeichen)."
+    },
+    "rules": {
+      "CALENDAR_FRIDAY": "Freitags ist immer geschlossen – hier gibt es nichts zu ändern.",
+      "CALENDAR_ALREADY_OPEN": "Dieser Tag ist bereits ein Arbeitstag.",
+      "CALENDAR_ALREADY_CLOSED": "Das ist bereits ein offizieller Feiertag. Um ihn nach dem Öffnen wieder zu schließen, nehmen Sie die Teamänderung zurück.",
+      "CALENDAR_OUT_OF_RANGE": "Wählen Sie ein Datum von vor einem Monat bis zu zwei Jahren in der Zukunft.",
+      "CALENDAR_NO_STAFF_CHANGE": "An diesem Tag gibt es keine Teamänderung."
+    },
+    "names": {
+      "nowruz": "Nouruz (persisches Neujahr)",
+      "republicDay": "Tag der Islamischen Republik",
+      "natureDay": "Tag der Natur (Sizdah Bedar)",
+      "sadiqMartyrdom": "Martyrium von Imam Dschafar as-Sadiq",
+      "eidAlAdha": "Opferfest",
+      "khomeini": "Todestag von Imam Chomeini",
+      "ghadir": "Ghadir-Fest",
+      "khordad15": "Aufstand vom 15. Chordad",
+      "tasua": "Tasua",
+      "ashura": "Aschura",
+      "arbaeen": "Arbain",
+      "prophetDeath": "Todestag des Propheten und Martyrium von Imam Hasan",
+      "reza": "Martyrium von Imam Reza",
+      "askari": "Martyrium von Imam Hasan al-Askari",
+      "mawlid": "Geburtstag des Propheten und von Imam Dschafar as-Sadiq",
+      "fatima": "Martyrium von Fatima az-Zahra",
+      "aliBirth": "Geburtstag von Imam Ali (Vatertag)",
+      "mabath": "Mab'ath (Berufung des Propheten)",
+      "midShaban": "Mitte Scha'ban (Geburt von Imam Mahdi)",
+      "revolution": "Sieg der Islamischen Revolution",
+      "aliMartyrdom": "Martyrium von Imam Ali",
+      "eidAlFitr": "Fest des Fastenbrechens",
+      "eidAlFitr2": "Feiertag zum Fest des Fastenbrechens",
+      "oil": "Tag der Ölverstaatlichung"
+    }
+  },
   "adminCustomRoles": {
     "loading": "Rollen werden geladen …",
     "forbidden": "Du hast keinen Zugriff auf Rollen.",
@@ -3546,6 +3639,7 @@
         "signingOut": "Abmeldung läuft …"
       },
       "tabs": {
+        "holidays": "Feiertage und Schließtage",
         "customRoles": "Eigene Rollen",
         "directory": "Verzeichnis",
         "customer360": "Kunde 360°",

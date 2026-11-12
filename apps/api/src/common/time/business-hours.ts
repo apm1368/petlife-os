@@ -1,7 +1,8 @@
 /**
  * Working hours in Tehran (fixed UTC+03:30): Saturday–Wednesday 09:00–17:00, Thursday 09:00–13:00, Friday closed.
  * Used for staff service targets such as "partner KYC reviewed within 24 working hours" (market-readiness Q73).
- * Iranian public holidays are not excluded yet, so a target can read as overdue over a holiday weekend.
+ * `closedDays` (Tehran dates, YYYY-MM-DD) removes whole days: Iran's official holidays plus staff closures, as
+ * HolidayCalendarService.closedDays() supplies them. Without it only the weekly pattern applies.
  */
 const OFFSET_MS = 3.5 * 3_600_000;
 const HOUR = 3_600_000;
@@ -16,7 +17,7 @@ const WINDOWS: Record<number, [number, number] | null> = {
   5: null, // Friday
 };
 
-export function businessHoursBetween(start: Date, end: Date): number {
+export function businessHoursBetween(start: Date, end: Date, closedDays?: ReadonlySet<string>): number {
   if (end <= start) return 0;
   const from = start.getTime() + OFFSET_MS;
   const to = end.getTime() + OFFSET_MS;
@@ -26,6 +27,7 @@ export function businessHoursBetween(start: Date, end: Date): number {
   for (let i = 0; day < to && i < 400; i++, day += 86_400_000) {
     const window = WINDOWS[new Date(day).getUTCDay()];
     if (!window) continue;
+    if (closedDays?.has(new Date(day).toISOString().slice(0, 10))) continue;
     const open = day + window[0] * HOUR;
     const close = day + window[1] * HOUR;
     const overlap = Math.min(close, to) - Math.max(open, from);
