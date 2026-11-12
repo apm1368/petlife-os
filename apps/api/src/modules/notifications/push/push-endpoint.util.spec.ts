@@ -43,7 +43,9 @@ describe("push payload text", () => {
     expect(pushTitle("HEALTH", "de")).toBe("Neue Pflege-Erinnerung");
     expect(pushTitle("BOOKING", "es")).toBe("Novedad sobre tu cita");
     expect(pushTitle("SYSTEM", "en")).toBe("New notification on opetlife");
-    expect(pushTitle(null, "nl")).toBe("New notification on opetlife");
+    expect(pushTitle(null, "nl")).toBe("Nieuwe melding op opetlife");
+    expect(pushTitle("HEALTH", "ar")).toBe("تذكير رعاية جديد");
+    expect(pushTitle(null, "tr")).toBe("New notification on opetlife");
     expect(pushTestTitle("fa")).toContain("اپت لایف");
   });
 
