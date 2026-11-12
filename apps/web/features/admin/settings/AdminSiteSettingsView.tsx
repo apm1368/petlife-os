@@ -9,7 +9,7 @@ import { adminSettingsService, type PlatformSetting, type SettingValue } from "@
 import { useAdminStore } from "@/stores/admin-store";
 import "../admin-glass.css";
 
-const LOCALES = ["fa", "en", "de", "es"] as const;
+const LOCALES = ["fa", "en", "de", "es", "ar", "nl"] as const;
 type Loc = (typeof LOCALES)[number];
 type LocalizedValue = Partial<Record<Loc, string>>;
 

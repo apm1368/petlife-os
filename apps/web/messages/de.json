@@ -926,7 +926,9 @@
       "fa": "Persisch",
       "en": "Englisch",
       "de": "Deutsch",
-      "es": "Spanisch"
+      "es": "Spanisch",
+      "ar": "Arabisch",
+      "nl": "Niederländisch"
     },
     "options": {
       "info": "Information",

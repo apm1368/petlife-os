@@ -901,7 +901,9 @@
       "fa": "Perzisch",
       "en": "Engels",
       "de": "Duits",
-      "es": "Spaans"
+      "es": "Spaans",
+      "ar": "Arabisch",
+      "nl": "Nederlands"
     },
     "options": {
       "info": "Informatie",

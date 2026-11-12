@@ -11,6 +11,7 @@ import { LoadFailure } from "@/features/system/LoadFailure";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 import { placeLocation, formatDistanceKm } from "@/features/places/place-format";
 import { DiscoveryPage } from "@/features/discovery/DiscoveryPage";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 const CATEGORIES: PetFriendlyPlaceCategory[] = [
   PetFriendlyPlaceCategory.PARK,
@@ -46,7 +47,7 @@ function placeRules(place: PetFriendlyPlaceDto, fa: boolean): string[] {
 
 /** Public directory — no guard by design; works fully for anonymous visitors (spec: "public browsing" for pet-friendly places must work without auth). */
 export function PlacesListView() {
-  const locale = useLocale() as "fa" | "en";
+  const locale = useLocale() as RouteLocale;
   const t = useTranslations("places");
   const tCommon = useTranslations("common");
 
