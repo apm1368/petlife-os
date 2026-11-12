@@ -10,7 +10,7 @@ import { clinicClientsService } from "@/services/clinic-clients.service";
 /** The owner's side of a clinic's invitation: who invited them and which pets, then an explicit choice to connect. */
 export function ClinicClientInviteView({ token }: { token: string }) {
   const t = useTranslations("clinicClients.join");
-  const [preview, setPreview] = useState<{ clinicName: string; pets: string[]; joined: boolean } | null>(null);
+  const [preview, setPreview] = useState<{ clinicName: string; sentTo: string | null; pets: string[]; joined: boolean } | null>(null);
   const [state, setState] = useState<"loading" | "ready" | "missing" | "failed" | "connected" | "used">("loading");
   const [busy, setBusy] = useState(false);
 
@@ -51,6 +51,7 @@ export function ClinicClientInviteView({ token }: { token: string }) {
         {preview && (state === "ready" || state === "connected") ? (
           <>
             <p className="text-section-title">{t("invitedBy", { clinic: preview.clinicName })}</p>
+            {preview.sentTo ? <p className="text-text-secondary">{t("sentTo", { phone: preview.sentTo })}</p> : null}
             {preview.pets.length ? <p>{t("pets", { pets: preview.pets.join("، ") })}</p> : null}
             <p className="text-text-secondary">{t("explain")}</p>
             {state === "connected" ? (

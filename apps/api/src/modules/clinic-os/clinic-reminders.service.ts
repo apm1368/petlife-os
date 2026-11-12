@@ -57,6 +57,9 @@ export class ClinicRemindersService implements OnModuleInit, OnModuleDestroy {
       const client = await this.prisma.clinicImportedContact.count({ where: { id: dto.contactId, providerOrganizationId: ctx.organizationId } });
       if (!client) throw new NotFoundApiException("ClinicClient");
       if (dto.clientPetId && !(await this.prisma.clinicClientPet.count({ where: { id: dto.clientPetId, contactId: dto.contactId } }))) throw new NotFoundApiException("ClinicClientPet");
+      // At most 20 scheduled reminders per client: no queue of texts piling up on one phone.
+      const open = await this.prisma.clinicReminder.count({ where: { contactId: dto.contactId, status: ClinicReminderStatus.SCHEDULED } });
+      if (open >= 20) throw new ValidationApiException({ field: "contactId", reason: "TOO_MANY_OPEN_REMINDERS", max: 20 });
     }
 
     const now = new Date();

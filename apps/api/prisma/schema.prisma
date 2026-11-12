@@ -10605,6 +10605,8 @@ model ClinicImportedContact {
   linkedUser             User?                @relation("ClinicClientLinkedUser", fields: [linkedUserId], references: [id], onDelete: SetNull)
   inviteToken            String?              @unique
   invitedAt              DateTime?
+  /// Lets the recipient stop the clinic's texts themselves from the link at the end of each text.
+  optOutToken            String?              @unique
   joinedAt               DateTime?
   /// The owner asked the clinic to stop SMS; the clinic can no longer text this number.
   smsOptOutAt            DateTime?

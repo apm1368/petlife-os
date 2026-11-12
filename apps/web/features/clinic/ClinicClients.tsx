@@ -104,7 +104,7 @@ export function ClinicClients({ canRemind }: { canRemind: boolean }) {
 
 function errorKey(e: unknown) {
   const reason = e instanceof ApiError ? (e.details?.reason as string | undefined) : undefined;
-  return reason && ["CLIENT_EXISTS", "INVALID_PHONE", "INVALID_EMAIL", "NO_PHONE", "OPTED_OUT", "CLIENT_DAILY_LIMIT", "CLINIC_DAILY_LIMIT", "ALREADY_JOINED", "LENGTH"].includes(reason)
+  return reason && ["CLIENT_EXISTS", "INVALID_PHONE", "INVALID_EMAIL", "NO_PHONE", "OPTED_OUT", "CLIENT_DAILY_LIMIT", "CLINIC_DAILY_LIMIT", "ALREADY_JOINED", "LENGTH", "TOO_MANY_OPEN_REMINDERS"].includes(reason)
     ? `errors.${reason}`
     : e instanceof ApiError && e.status === 403
       ? "errors.PLAN"

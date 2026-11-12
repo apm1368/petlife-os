@@ -13,6 +13,7 @@ function setup(env: Record<string, unknown> = {}, contact: Record<string, unknow
     clinicImportedContact: {
       findFirst: jest.fn().mockResolvedValue(contact),
       findUnique: jest.fn().mockResolvedValue(contact),
+      findUniqueOrThrow: jest.fn().mockResolvedValue({ optOutToken: "stop123" }),
       create: jest.fn().mockImplementation(({ data }) => Promise.resolve({ id: "c1", ...data, pets: (data.pets?.create ?? []).map((p: object, i: number) => ({ id: `p${i}`, ...p })), linkedUserId: null, invitedAt: null, joinedAt: null, smsOptOutAt: data.smsOptOutAt ?? null, petName: null, species: null, createdAt: new Date() })),
       update: jest.fn().mockResolvedValue({}),
       updateMany: jest.fn().mockResolvedValue({ count: 1 }),
@@ -66,9 +67,38 @@ describe("ClinicClientsService", () => {
     const token = prisma.clinicImportedContact.update.mock.calls[0][0].data.inviteToken as string;
     expect(token).toMatch(/^[A-Za-z0-9_-]{20,}$/);
     expect(sendSms.mock.calls[0][0].body).toContain(`https://opetlife.ir/fa/join/clinic/${token}`);
-    prisma.clinicImportedContact.findUnique.mockResolvedValueOnce({ ...client, inviteToken: token, providerOrganization: { name: "Paw Clinic" } });
+    prisma.clinicImportedContact.findUnique.mockResolvedValueOnce({ ...client, inviteToken: token, invitedAt: new Date(), providerOrganization: { name: "Paw Clinic" } });
     await expect(service.acceptInvite("u1", token)).resolves.toEqual({ clinicName: "Paw Clinic", joined: true });
-    prisma.clinicImportedContact.findUnique.mockResolvedValueOnce({ ...client, linkedUserId: "someone-else", providerOrganization: { name: "Paw Clinic" } });
+    prisma.clinicImportedContact.findUnique.mockResolvedValueOnce({ ...client, linkedUserId: "someone-else", invitedAt: new Date(), providerOrganization: { name: "Paw Clinic" } });
     await expect(service.acceptInvite("u1", token)).rejects.toMatchObject({ code: "CLINIC_CLIENT_CONFLICT" });
   });
+
+  it("ends every text with the recipient's own opt-out link", async () => {
+    const { service, sendSms } = setup({}, client);
+    await service.sendMessage(ctx, "c1", "Hello");
+    expect(sendSms.mock.calls[0][0].body).toMatch(/https:\/\/opetlife\.ir\/fa\/s\/stop123$/);
+  });
+
+  it("caps reminder texts per client per day and records the rest as SKIPPED", async () => {
+    const { service, prisma, sendSms } = setup({}, { ...client, providerOrganization: { name: "Paw Clinic" } });
+    prisma.clinicClientMessage.count.mockResolvedValueOnce(3).mockResolvedValueOnce(3);
+    await service.sendReminderText({ id: "r1", providerOrganizationId: "org1", contactId: "c1", title: "Vaccine due", note: null, clientPetName: "Milo" });
+    expect(sendSms).not.toHaveBeenCalled();
+    expect(prisma.clinicClientMessage.create.mock.calls[0][0].data).toMatchObject({ status: "SKIPPED", failureReason: "DAILY_LIMIT" });
+  });
+
+  it("rotates the invitation link on every send and refuses an expired one", async () => {
+    const { service, prisma } = setup({}, { ...client, inviteToken: "old-token" });
+    await service.invite(ctx, "c1", "en");
+    expect(prisma.clinicImportedContact.update.mock.calls[0][0].data.inviteToken).not.toBe("old-token");
+    prisma.clinicImportedContact.findUnique.mockResolvedValueOnce({ ...client, inviteToken: "t", invitedAt: new Date(Date.now() - 15 * 86400e3), providerOrganization: { name: "Paw Clinic" }, pets: [] });
+    await expect(service.previewInvite("t")).rejects.toMatchObject({ code: "NOT_FOUND" });
+  });
+
+  it("lets the recipient opt out from the link without signing in", async () => {
+    const { service, prisma } = setup({}, { ...client, optOutToken: "stop123", providerOrganization: { name: "Paw Clinic" } });
+    await expect(service.optOut("stop123")).resolves.toEqual({ clinicName: "Paw Clinic", optedOut: true });
+    expect(prisma.clinicImportedContact.update.mock.calls[0][0].data.smsOptOutAt).toBeInstanceOf(Date);
+  });
 });
+

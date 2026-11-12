@@ -349,6 +349,24 @@ export class MyClinicClientInvitesController {
   }
 }
 
+/** A text recipient's own opt-out from a clinic's messages (the link at the end of every clinic text). Public by design. */
+@Controller("public/clinic-sms")
+export class PublicClinicSmsOptOutController {
+  constructor(private readonly clients: ClinicClientsService) {}
+
+  @Get(":token")
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  preview(@Param("token") token: string) {
+    return this.clients.optOutPreview(token);
+  }
+
+  @Post(":token/opt-out")
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  optOut(@Param("token") token: string) {
+    return this.clients.optOut(token);
+  }
+}
+
 /** Owner side: notes a clinic explicitly shared with this member's households. */
 @Controller("me/clinic-notes")
 @UseGuards(SessionAuthGuard)

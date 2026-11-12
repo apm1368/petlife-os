@@ -1,5 +1,14 @@
 {
   "clinicClients": {
+    "optOut": {
+      "title": "Stop clinic texts",
+      "loading": "Checking…",
+      "missing": "This link is not valid.",
+      "failed": "That did not work. Try again.",
+      "explain": "{clinic} sends you texts through opetlife.",
+      "button": "Stop texts from {clinic}",
+      "done": "You will no longer receive texts from {clinic}."
+    },
     "title": "Clients",
     "intro": "Your clinic's own clients: add owners and their pets, text them, set reminders and invite them to opetlife.",
     "add": "Add client",
@@ -74,6 +83,7 @@
       "help": "The invitation is a link. The client connects to your clinic only if they open it and accept while signed in."
     },
     "errors": {
+      "TOO_MANY_OPEN_REMINDERS": "This client already has 20 scheduled reminders.",
       "CLIENT_EXISTS": "A client with this mobile number already exists.",
       "INVALID_PHONE": "Enter a valid Iranian mobile number.",
       "INVALID_EMAIL": "Enter a valid email address.",
@@ -87,9 +97,10 @@
       "GENERIC": "That did not work. Check the details and try again."
     },
     "join": {
+      "sentTo": "Sent to {phone}",
       "title": "Clinic invitation",
       "loading": "Checking the invitation…",
-      "missing": "This invitation link is not valid.",
+      "missing": "This invitation link is not valid or has expired.",
       "failed": "The invitation could not be opened. Try again.",
       "used": "This invitation was already used by another account.",
       "invitedBy": "{clinic} invited you to opetlife.",

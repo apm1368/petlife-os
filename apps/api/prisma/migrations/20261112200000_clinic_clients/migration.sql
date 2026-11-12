@@ -12,8 +12,10 @@ ALTER TABLE "clinic_imported_contacts"
   ADD COLUMN "invitedAt" TIMESTAMP(3),
   ADD COLUMN "joinedAt" TIMESTAMP(3),
   ADD COLUMN "smsOptOutAt" TIMESTAMP(3),
+  ADD COLUMN "optOutToken" TEXT,
   ADD COLUMN "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
 CREATE UNIQUE INDEX "clinic_imported_contacts_inviteToken_key" ON "clinic_imported_contacts"("inviteToken");
+CREATE UNIQUE INDEX "clinic_imported_contacts_optOutToken_key" ON "clinic_imported_contacts"("optOutToken");
 CREATE INDEX "clinic_imported_contacts_linkedUserId_idx" ON "clinic_imported_contacts"("linkedUserId");
 ALTER TABLE "clinic_imported_contacts" ADD CONSTRAINT "clinic_imported_contacts_linkedUserId_fkey" FOREIGN KEY ("linkedUserId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 

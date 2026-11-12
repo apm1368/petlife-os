@@ -1,5 +1,14 @@
 {
   "clinicClients": {
+    "optOut": {
+      "title": "Dejar de recibir SMS de la clínica",
+      "loading": "Comprobando…",
+      "missing": "Este enlace no es válido.",
+      "failed": "No funcionó. Inténtalo de nuevo.",
+      "explain": "{clinic} te envía SMS a través de opetlife.",
+      "button": "Dejar de recibir SMS de {clinic}",
+      "done": "Ya no recibirás SMS de {clinic}."
+    },
     "title": "Clientes",
     "intro": "Los clientes propios de tu clínica: registra a los dueños y sus mascotas, envíales SMS, programa recordatorios e invítalos a opetlife.",
     "add": "Añadir cliente",
@@ -74,6 +83,7 @@
       "help": "La invitación es un enlace. El cliente se conecta con tu clínica solo si lo abre con su sesión iniciada y acepta."
     },
     "errors": {
+      "TOO_MANY_OPEN_REMINDERS": "Este cliente ya tiene 20 recordatorios programados.",
       "CLIENT_EXISTS": "Ya existe un cliente con este número de móvil.",
       "INVALID_PHONE": "Introduce un móvil iraní válido.",
       "INVALID_EMAIL": "Introduce un correo válido.",
@@ -87,9 +97,10 @@
       "GENERIC": "No funcionó. Revisa los datos e inténtalo de nuevo."
     },
     "join": {
+      "sentTo": "Enviado a {phone}",
       "title": "Invitación de la clínica",
       "loading": "Comprobando la invitación…",
-      "missing": "Este enlace de invitación no es válido.",
+      "missing": "Este enlace de invitación no es válido o ha caducado.",
       "failed": "No se pudo abrir la invitación. Inténtalo de nuevo.",
       "used": "Otra cuenta ya usó esta invitación.",
       "invitedBy": "{clinic} te invita a opetlife.",

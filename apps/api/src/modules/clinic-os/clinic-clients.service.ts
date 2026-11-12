@@ -33,7 +33,18 @@ export interface ClientInput {
 /** Anti-spam ceilings for clinic → client texts (on top of the plan's feature gate). */
 const MAX_PER_CLIENT_PER_DAY = 5;
 const MAX_PER_CLINIC_PER_DAY = 300;
+/** Reminder texts have their own ceilings: a clinic (or one compromised staff account) cannot text one phone dozens of times. */
+const MAX_REMINDERS_PER_CLIENT_PER_DAY = 3;
+const MAX_REMINDERS_PER_CLINIC_PER_DAY = 500;
 const MAX_BODY = 480;
+const INVITE_TTL_MS = 14 * 86400e3;
+
+/** 0912•••4567 — enough for an owner to recognise their own number on a forwarded invitation. */
+function maskPhone(e164: string | null): string | null {
+  if (!e164) return null;
+  const national = e164.startsWith("+98") ? `0${e164.slice(3)}` : e164;
+  return `${national.slice(0, 4)}•••${national.slice(-4)}`;
+}
 
 type ContactRow = Prisma.ClinicImportedContactGetPayload<{ include: { pets: true } }>;
 
@@ -177,7 +188,8 @@ export class ClinicClientsService {
     if (!contact.phone) throw new ValidationApiException({ field: "phone", reason: "NO_PHONE" });
     if (contact.smsOptOutAt) throw new ValidationApiException({ field: "phone", reason: "OPTED_OUT" });
     await this.assertWithinDailyCaps(ctx.organizationId, id);
-    const token = contact.inviteToken ?? randomBytes(18).toString("base64url");
+    // A fresh token on every invitation: only the latest text's link works.
+    const token = randomBytes(18).toString("base64url");
     await this.prisma.clinicImportedContact.update({ where: { id }, data: { inviteToken: token, invitedAt: new Date() } });
     const org = await this.prisma.providerOrganization.findUniqueOrThrow({ where: { id: ctx.organizationId }, select: { name: true } });
     const link = `${publicOrigin(this.config.get("WEB_APP_ORIGIN", { infer: true }))}/${locale}/join/clinic/${token}`;
@@ -195,9 +207,15 @@ export class ClinicClientsService {
     if (!contact) return null;
     const pet = reminder.clientPetName ? ` (${reminder.clientPetName})` : "";
     const body = `${contact.providerOrganization.name}: ${reminder.title}${pet}${reminder.note ? ` — ${reminder.note}` : ""}`;
-    if (!contact.phone || contact.smsOptOutAt) {
+    const since = new Date(Date.now() - 86400e3);
+    const [toClient, fromClinic] = await Promise.all([
+      this.prisma.clinicClientMessage.count({ where: { contactId: contact.id, kind: ClinicClientMessageKind.REMINDER, createdAt: { gte: since }, status: { in: [ClinicClientMessageStatus.SENT, ClinicClientMessageStatus.SIMULATED] } } }),
+      this.prisma.clinicClientMessage.count({ where: { providerOrganizationId: reminder.providerOrganizationId, kind: ClinicClientMessageKind.REMINDER, createdAt: { gte: since }, status: { in: [ClinicClientMessageStatus.SENT, ClinicClientMessageStatus.SIMULATED] } } }),
+    ]);
+    const skip = !contact.phone ? "NO_PHONE" : contact.smsOptOutAt ? "OPTED_OUT" : toClient >= MAX_REMINDERS_PER_CLIENT_PER_DAY || fromClinic >= MAX_REMINDERS_PER_CLINIC_PER_DAY ? "DAILY_LIMIT" : null;
+    if (skip || !contact.phone) {
       return this.prisma.clinicClientMessage.create({
-        data: { providerOrganizationId: reminder.providerOrganizationId, contactId: contact.id, kind: ClinicClientMessageKind.REMINDER, body, status: ClinicClientMessageStatus.SKIPPED, failureReason: contact.phone ? "OPTED_OUT" : "NO_PHONE", reminderId: reminder.id },
+        data: { providerOrganizationId: reminder.providerOrganizationId, contactId: contact.id, kind: ClinicClientMessageKind.REMINDER, body, status: ClinicClientMessageStatus.SKIPPED, failureReason: skip ?? "NO_PHONE", reminderId: reminder.id },
       });
     }
     return this.deliverText({ organizationId: reminder.providerOrganizationId, contactId: contact.id, phone: contact.phone, kind: ClinicClientMessageKind.REMINDER, body, reminderId: reminder.id });
@@ -207,20 +225,50 @@ export class ClinicClientsService {
 
   async previewInvite(token: string) {
     const contact = await this.prisma.clinicImportedContact.findUnique({ where: { inviteToken: token }, include: { providerOrganization: { select: { name: true } }, pets: { select: { name: true } } } });
-    if (!contact) throw new NotFoundApiException("ClinicInvite");
-    return { clinicName: contact.providerOrganization.name, pets: [...contact.pets.map((p) => p.name), ...(contact.petName && !contact.pets.length ? [contact.petName] : [])], joined: !!contact.linkedUserId };
+    if (!contact || this.inviteExpired(contact.invitedAt)) throw new NotFoundApiException("ClinicInvite");
+    return { clinicName: contact.providerOrganization.name, sentTo: maskPhone(contact.phone), pets: [...contact.pets.map((p) => p.name), ...(contact.petName && !contact.pets.length ? [contact.petName] : [])], joined: !!contact.linkedUserId };
   }
 
   async acceptInvite(userId: string, token: string) {
     const contact = await this.prisma.clinicImportedContact.findUnique({ where: { inviteToken: token }, include: { providerOrganization: { select: { name: true } } } });
-    if (!contact) throw new NotFoundApiException("ClinicInvite");
+    if (!contact || this.inviteExpired(contact.invitedAt)) throw new NotFoundApiException("ClinicInvite");
     if (contact.linkedUserId && contact.linkedUserId !== userId) throw conflict({ reason: "INVITE_USED" });
-    const linked = await this.prisma.clinicImportedContact.updateMany({ where: { id: contact.id, OR: [{ linkedUserId: null }, { linkedUserId: userId }] }, data: { linkedUserId: userId, joinedAt: contact.joinedAt ?? new Date() } });
+    // Accepting retires the link: a forwarded copy can never be used again.
+    const linked = await this.prisma.clinicImportedContact.updateMany({ where: { id: contact.id, inviteToken: token, OR: [{ linkedUserId: null }, { linkedUserId: userId }] }, data: { linkedUserId: userId, joinedAt: contact.joinedAt ?? new Date(), inviteToken: null } });
     if (!linked.count) throw conflict({ reason: "INVITE_USED" });
     return { clinicName: contact.providerOrganization.name, joined: true };
   }
 
+  /** The recipient's own opt-out, from the link at the end of every clinic text. No sign-in needed. */
+  async optOutPreview(token: string) {
+    const contact = await this.prisma.clinicImportedContact.findUnique({ where: { optOutToken: token }, include: { providerOrganization: { select: { name: true } } } });
+    if (!contact) throw new NotFoundApiException("ClinicOptOut");
+    return { clinicName: contact.providerOrganization.name, optedOut: !!contact.smsOptOutAt };
+  }
+
+  async optOut(token: string) {
+    const contact = await this.prisma.clinicImportedContact.findUnique({ where: { optOutToken: token }, include: { providerOrganization: { select: { name: true } } } });
+    if (!contact) throw new NotFoundApiException("ClinicOptOut");
+    if (!contact.smsOptOutAt) await this.prisma.clinicImportedContact.update({ where: { id: contact.id }, data: { smsOptOutAt: new Date() } });
+    return { clinicName: contact.providerOrganization.name, optedOut: true };
+  }
+
   // ---- internals ----------------------------------------------------------------------------------------------
+
+  private inviteExpired(invitedAt: Date | null) {
+    return !invitedAt || Date.now() - invitedAt.getTime() > INVITE_TTL_MS;
+  }
+
+  /** Every clinic text ends with the recipient's own opt-out link (created on first use). */
+  private async optOutSuffix(contactId: string) {
+    const contact = await this.prisma.clinicImportedContact.findUniqueOrThrow({ where: { id: contactId }, select: { optOutToken: true } });
+    let token = contact.optOutToken;
+    if (!token) {
+      token = randomBytes(9).toString("base64url");
+      await this.prisma.clinicImportedContact.update({ where: { id: contactId }, data: { optOutToken: token } });
+    }
+    return `\nلغو: ${publicOrigin(this.config.get("WEB_APP_ORIGIN", { infer: true }))}/fa/s/${token}`;
+  }
 
   private async deliverText(input: { organizationId: string; contactId: string; phone: string; kind: ClinicClientMessageKind; body: string; sentBy?: string; reminderId?: string }) {
     const mode = this.smsMode();
@@ -231,7 +279,8 @@ export class ClinicClientsService {
       failureReason = "SMS_DISABLED";
     } else {
       try {
-        const result = await this.messaging.resolveActiveSmsProvider().sendSms({ destination: input.phone, body: input.body, templateKey: `clinic.client_${input.kind.toLowerCase()}`, locale: "fa" });
+        const body = `${input.body}${await this.optOutSuffix(input.contactId)}`;
+        const result = await this.messaging.resolveActiveSmsProvider().sendSms({ destination: input.phone, body, templateKey: `clinic.client_${input.kind.toLowerCase()}`, locale: "fa" });
         if (result.status === "SENT") {
           status = mode === "LIVE" ? ClinicClientMessageStatus.SENT : ClinicClientMessageStatus.SIMULATED;
           providerMessageId = result.providerMessageId ?? null;

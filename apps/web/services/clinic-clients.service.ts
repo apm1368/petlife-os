@@ -41,6 +41,8 @@ export const clinicClientsService = {
   message: (id: string, body: string) => apiFetch<{ message: ClinicClientMessage; smsMode: ClinicSmsMode }>(`${base}/${encodeURIComponent(id)}/messages`, { method: "POST", body: { body } }),
   invite: (id: string, locale: "fa" | "en") => apiFetch<{ message: ClinicClientMessage; smsMode: ClinicSmsMode; invitedAt: string }>(`${base}/${encodeURIComponent(id)}/invite`, { method: "POST", body: { locale } }),
   remind: (body: { contactId: string; clientPetId?: string; kind: string; title: string; note?: string; dueAt?: string }) => apiFetch<{ id: string; status: string }>("/provider/clinic/reminders", { method: "POST", body }),
-  previewInvite: (token: string, signal?: AbortSignal) => apiFetch<{ clinicName: string; pets: string[]; joined: boolean }>(`/me/clinic-client-invites/${encodeURIComponent(token)}`, { signal, cache: "no-store" }),
+  previewInvite: (token: string, signal?: AbortSignal) => apiFetch<{ clinicName: string; sentTo: string | null; pets: string[]; joined: boolean }>(`/me/clinic-client-invites/${encodeURIComponent(token)}`, { signal, cache: "no-store" }),
+  optOutPreview: (token: string, signal?: AbortSignal) => apiFetch<{ clinicName: string; optedOut: boolean }>(`/public/clinic-sms/${encodeURIComponent(token)}`, { signal, cache: "no-store" }),
+  optOut: (token: string) => apiFetch<{ clinicName: string; optedOut: boolean }>(`/public/clinic-sms/${encodeURIComponent(token)}/opt-out`, { method: "POST" }),
   acceptInvite: (token: string) => apiFetch<{ clinicName: string; joined: boolean }>(`/me/clinic-client-invites/${encodeURIComponent(token)}/accept`, { method: "POST" }),
 };

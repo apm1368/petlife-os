@@ -1,5 +1,14 @@
 {
   "clinicClients": {
+    "optOut": {
+      "title": "SMS der Klinik abbestellen",
+      "loading": "Wird geprüft …",
+      "missing": "Dieser Link ist ungültig.",
+      "failed": "Das hat nicht geklappt. Versuche es erneut.",
+      "explain": "{clinic} schickt dir SMS über opetlife.",
+      "button": "Keine SMS mehr von {clinic}",
+      "done": "Du erhältst keine SMS mehr von {clinic}."
+    },
     "title": "Kundschaft",
     "intro": "Die eigene Kundschaft deiner Klinik: Halter und ihre Tiere anlegen, ihnen schreiben, Erinnerungen setzen und sie zu opetlife einladen.",
     "add": "Kunde anlegen",
@@ -74,6 +83,7 @@
       "help": "Die Einladung ist ein Link. Die Person verbindet sich nur mit deiner Klinik, wenn sie ihn angemeldet öffnet und zustimmt."
     },
     "errors": {
+      "TOO_MANY_OPEN_REMINDERS": "Für diese Person sind bereits 20 Erinnerungen geplant.",
       "CLIENT_EXISTS": "Es gibt bereits einen Kunden mit dieser Handynummer.",
       "INVALID_PHONE": "Gib eine gültige iranische Handynummer ein.",
       "INVALID_EMAIL": "Gib eine gültige E-Mail-Adresse ein.",
@@ -87,9 +97,10 @@
       "GENERIC": "Das hat nicht geklappt. Prüfe die Angaben und versuche es erneut."
     },
     "join": {
+      "sentTo": "Gesendet an {phone}",
       "title": "Einladung der Klinik",
       "loading": "Einladung wird geprüft …",
-      "missing": "Dieser Einladungslink ist ungültig.",
+      "missing": "Dieser Einladungslink ist ungültig oder abgelaufen.",
       "failed": "Die Einladung ließ sich nicht öffnen. Versuche es erneut.",
       "used": "Diese Einladung wurde bereits von einem anderen Konto genutzt.",
       "invitedBy": "{clinic} lädt dich zu opetlife ein.",
