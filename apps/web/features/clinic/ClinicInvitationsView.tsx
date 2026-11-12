@@ -11,7 +11,9 @@ const ROLE = { fa: { VET: "دامپزشک", STAFF: "کارمند", OWNER: "مد�
 
 /** Functional only (Codex owns the design): the signed-in member's pending clinic invitations, accept or decline. */
 export function ClinicInvitationsView() {
-  const locale = useLocale() === "en" ? "en" : "fa";
+  const routeLocale = useLocale();
+  // Copy here is fa/en only for now: German and Spanish read the English, never the Persian.
+  const locale = routeLocale === "fa" ? "fa" : "en";
   const fa = locale === "fa";
   const router = useRouter();
   const [items, setItems] = useState<ClinicInvitationDto[] | null>(null);
@@ -35,7 +37,7 @@ export function ClinicInvitationsView() {
     try {
       if (action === "accept") {
         await clinicInvitationsService.accept(id);
-        router.push(`/${locale}/provider`);
+        router.push(`/${routeLocale}/provider`);
         return;
       }
       await clinicInvitationsService.decline(id);

@@ -2,6 +2,7 @@ import type { PublicArticleDetailDto, RichTextBlock } from "@petlife/types";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { inlineToText, richTextWordCount } from "./rich-text-text";
 import { LANGUAGE_TAG, SITE_LOGO_PATH, SITE_NAME, SITE_ORIGIN, absoluteUrl, localeHomePath } from "./site";
+import { localizedAuthorName } from "../content/author-name";
 
 const BLOG_LABEL: Record<RouteLocale, string> = { fa: "مجله", en: "Magazine", de: "Magazin", es: "Revista" };
 const GUIDES_LABEL: Record<RouteLocale, string> = { fa: "راهنماها", en: "Guides", de: "Ratgeber", es: "Guías" };
@@ -60,7 +61,7 @@ export function articleJsonLd(locale: RouteLocale, article: PublicArticleDetailD
     datePublished: article.publishedAt,
     dateModified: article.updatedAt,
     inLanguage: LANGUAGE_TAG[locale],
-    author: article.author ? { "@type": "Organization", name: article.author.name, url: `${SITE_ORIGIN}/` } : { "@id": `${SITE_ORIGIN}/#organization` },
+    author: article.author ? { "@type": "Organization", name: localizedAuthorName(article.author.name, locale), url: `${SITE_ORIGIN}/` } : { "@id": `${SITE_ORIGIN}/#organization` },
     publisher: { "@id": `${SITE_ORIGIN}/#organization` },
     isPartOf: { "@type": "Blog", "@id": `${sectionUrl}#blog`, name: `${section === "guides" ? GUIDES_LABEL[locale] : BLOG_LABEL[locale]} ${SITE_NAME[locale]}`, url: sectionUrl },
     articleSection: article.category?.name,

@@ -132,6 +132,96 @@ const COPY = {
     unnamed: "Pet's name",
     noHousehold: "Your household isn't ready yet; refresh the page.",
   },
+  de: {
+    title: "Haustier hinzufügen",
+    intro: "Drei kurze Schritte – nur der erste ist Pflicht, den Rest kannst du später ergänzen.",
+    steps: ["Identität", "Details", "Gesundheitsausweis"],
+    stepsLabel: "Schritte zum Hinzufügen eines Haustiers",
+    species: "Tierart",
+    name: "Name",
+    photo: "Foto",
+    choosePhoto: "Foto auswählen",
+    replacePhoto: "Foto ersetzen",
+    removePhoto: "Foto entfernen",
+    photoHint: "JPG, PNG oder WebP, bis 10 MB. Wird im Profil und auf der Karte des Tiers angezeigt.",
+    photoTooBig: "Das Foto ist größer als 10 MB.",
+    sex: "Geschlecht",
+    sexes: { MALE: "Männlich", FEMALE: "Weiblich", UNKNOWN: "Weiß nicht" },
+    birth: "Geburtsdatum",
+    noBirth: "Ich kenne das genaue Datum nicht – ungefähres Alter",
+    years: "Jahre",
+    months: "Monate",
+    breed: "Rasse",
+    breedHint: "Wähle einen Vorschlag oder gib selbst etwas ein.",
+    breedUnknown: "Rasse unbekannt oder Mischling",
+    color: "Farbe und Merkmale",
+    colorHint: "Zum Beispiel „weiß mit braunem Fleck am linken Ohr“ – das hilft, falls es einmal verloren geht.",
+    weight: "Gewicht",
+    unit: "Einheit",
+    units: { KG: "kg", LB: "lb" },
+    microchip: "Mikrochipnummer",
+    microchipHint: "Meist 15 Ziffern; steht im Impfpass oder auf der Implantatbescheinigung.",
+    neutered: "Kastriert",
+    neuteredOptions: { NEUTERED: "Kastriert", INTACT: "Nicht kastriert", UNKNOWN: "Weiß nicht" },
+    healthNote: "Dieser Schritt ist optional. Dokumente und Impfungen fügst du nach dem Speichern in der Gesundheitsakte hinzu.",
+    back: "Zurück",
+    next: "Weiter",
+    skipSave: "Überspringen und speichern",
+    save: "Haustier speichern",
+    saving: "Wird gespeichert…",
+    needName: "Gib den Namen des Tiers ein.",
+    needAge: "Gib ein Geburtsdatum oder ein ungefähres Alter ein.",
+    failed: "Das Haustier konnte nicht hinzugefügt werden. Bitte versuche es erneut.",
+    photoFailed: "Das Haustier wurde gespeichert, aber das Foto wurde nicht hochgeladen; du kannst es im Profil erneut versuchen.",
+    preview: "Profilvorschau",
+    unnamed: "Name des Tiers",
+    noHousehold: "Dein Haushalt ist noch nicht bereit; lade die Seite neu.",
+  },
+  es: {
+    title: "Añadir una mascota",
+    intro: "Tres pasos cortos: solo el primero es obligatorio; el resto puede esperar.",
+    steps: ["Identidad", "Detalles", "Ficha de salud"],
+    stepsLabel: "Pasos para añadir una mascota",
+    species: "Especie",
+    name: "Nombre",
+    photo: "Foto",
+    choosePhoto: "Elegir una foto",
+    replacePhoto: "Cambiar foto",
+    removePhoto: "Quitar foto",
+    photoHint: "JPG, PNG o WebP, hasta 10 MB. Se muestra en el perfil y en la tarjeta de la mascota.",
+    photoTooBig: "La foto pesa más de 10 MB.",
+    sex: "Sexo",
+    sexes: { MALE: "Macho", FEMALE: "Hembra", UNKNOWN: "No lo sé" },
+    birth: "Fecha de nacimiento",
+    noBirth: "No sé la fecha exacta: edad aproximada",
+    years: "Años",
+    months: "Meses",
+    breed: "Raza",
+    breedHint: "Elige una sugerencia o escribe la tuya.",
+    breedUnknown: "Raza desconocida o mestiza",
+    color: "Color y señas",
+    colorHint: "Por ejemplo, «blanco con una mancha marrón en la oreja izquierda»: ayuda si alguna vez se pierde.",
+    weight: "Peso",
+    unit: "Unidad",
+    units: { KG: "kg", LB: "lb" },
+    microchip: "Número de microchip",
+    microchipHint: "Suele tener 15 dígitos; figura en la cartilla de vacunación o en el certificado de implante.",
+    neutered: "Esterilizado",
+    neuteredOptions: { NEUTERED: "Esterilizado", INTACT: "Sin esterilizar", UNKNOWN: "No lo sé" },
+    healthNote: "Este paso es opcional. Añade documentos y vacunas desde la ficha de salud después de guardar.",
+    back: "Atrás",
+    next: "Continuar",
+    skipSave: "Omitir y guardar",
+    save: "Guardar mascota",
+    saving: "Guardando…",
+    needName: "Escribe el nombre de la mascota.",
+    needAge: "Indica una fecha de nacimiento o una edad aproximada.",
+    failed: "No pudimos añadir esta mascota. Inténtalo de nuevo.",
+    photoFailed: "La mascota se guardó, pero la foto no se subió; puedes intentarlo de nuevo desde el perfil.",
+    preview: "Vista previa del perfil",
+    unnamed: "Nombre de la mascota",
+    noHousehold: "Tu hogar aún no está listo; recarga la página.",
+  },
 } as const;
 
 const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
@@ -143,8 +233,8 @@ const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
  */
 export function AddPetView() {
   const router = useRouter();
-  const locale = useLocale() === "en" ? "en" : "fa";
-  const c = COPY[locale];
+  const locale = useLocale() as keyof typeof COPY;
+  const c = COPY[locale] ?? COPY.en;
   const tDate = useTranslations("birthDateField");
   const fa = locale === "fa";
   const householdId = usePetStore((s) => s.householdId);
@@ -183,7 +273,7 @@ export function AddPetView() {
 
   const approxMonths = (Number(toLatin(ageYears)) || 0) * 12 + (Number(toLatin(ageMonths)) || 0);
   const hasAge = approximate ? ageYears.trim() !== "" || ageMonths.trim() !== "" : Boolean(birthDate);
-  const breedOptions = useMemo(() => BREEDS[species]?.[locale] ?? [], [species, locale]);
+  const breedOptions = useMemo(() => BREEDS[species]?.[locale === "fa" ? "fa" : "en"] ?? [], [species, locale]);
 
   function choosePhoto(file: File | undefined) {
     setPhotoError(null);

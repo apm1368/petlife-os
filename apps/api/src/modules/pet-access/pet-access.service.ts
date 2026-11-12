@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { HouseholdRole, PetAccessSource, type Pet, type Prisma } from "@prisma/client";
 import type { PetAccessFlags } from "@petlife/types";
 import { DomainEventsService } from "../../common/events/domain-events.service";
-import { HouseholdAccessDeniedException, NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
+import { HouseholdAccessDeniedException, NotFoundApiException, PetAccessDeniedException, ValidationApiException } from "../../common/errors/api-exception";
 import { PrismaService } from "../../common/prisma/prisma.service";
 
 /**
@@ -187,6 +187,9 @@ export class PetAccessService {
   }
 
   async revokeGrant(petId: string, grantId: string, actorUserId: string) {
+    // Defence in depth behind PetAccessGuard's canManageAccess: removing someone's access is a management action.
+    const actor = await this.getEffectivePermissions(petId, actorUserId);
+    if (!actor?.canManageAccess) throw new PetAccessDeniedException({ petId, requiredFlag: "canManageAccess" });
     const grant = await this.prisma.petAccessGrant.findFirst({ where: { id: grantId, petId, revokedAt: null }, include: { user: { select: { householdMemberships: { where: { household: { pets: { some: { id: petId } } } }, select: { role: true } } } } } });
     if (!grant) throw new NotFoundApiException("Access grant");
     if (grant.user.householdMemberships.some((membership) => membership.role === HouseholdRole.OWNER)) throw new ValidationApiException({ field: "grantId", reason: "Owner access cannot be revoked." });

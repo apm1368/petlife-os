@@ -8,6 +8,7 @@ import { ValidationApiException } from "../errors/api-exception";
 import { PrismaService } from "../prisma/prisma.service";
 import { signSessionCookie, verifySessionCookie } from "./session-cookie.util";
 import { deviceLabel } from "./device-label.util";
+import { useSecureCookies } from "../http/deployment.util";
 
 export interface SessionUser {
   id: string;
@@ -31,8 +32,7 @@ export class SessionService {
     if (account?.accountStatus === UserAccountStatus.SUSPENDED) throw new AccountSuspendedException();
     const session = await this.prisma.session.create({ data: { userId, userAgent: meta.userAgent, ipAddress: meta.ipAddress, expiresAt: new Date(Date.now() + this.ttlMs) } });
     const cookieValue = signSessionCookie(session.id, this.config.get("SESSION_SECRET", { infer: true }));
-    const isProduction = this.config.get("NODE_ENV", { infer: true }) === "production";
-    res.cookie(this.cookieName, cookieValue, { httpOnly: true, secure: isProduction, sameSite: "lax", path: "/", maxAge: this.ttlMs });
+    res.cookie(this.cookieName, cookieValue, { httpOnly: true, secure: useSecureCookies(this.config), sameSite: "lax", path: "/", maxAge: this.ttlMs });
     return session.id;
   }
 

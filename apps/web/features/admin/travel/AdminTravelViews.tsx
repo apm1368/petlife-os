@@ -12,6 +12,7 @@ import { adminInsuranceOpsService, adminTravelService, type AdminInsuranceApplic
 import { bookingStatusLabel, cancellationSummary, listingTypeLabel, money, paymentStatusLabel, policyFacts, stayDates } from "@/features/travel-market/labels";
 import { DetailRow, EmptyRow, FilterBar, FilterField, Kpi, Panel, PanelTitle, SelectFilter, TableWrap, Tag, Td, TextFilter, Th } from "../console-ui";
 import { copyFor } from "@/features/admin/admin-copy";
+import { externalHref } from "@/lib/url/external-href";
 
 type Lang = "fa" | "en" | "de" | "es";
 const useLang = () => {
@@ -432,7 +433,7 @@ export function AdminTravelRequirementsView() {
                       <tr key={r.id}>
                         <Td><button className="text-start text-brand-natural" onClick={() => setForm({ id: r.id, country: r.country, city: r.city ?? "", requirementType: r.requirementType, title: r.title, description: r.description, source: r.source, sourceUrl: r.sourceUrl ?? "", verifiedAt: r.verifiedAt.slice(0, 10), validUntil: r.validUntil?.slice(0, 10) ?? "", status: r.status, species: r.species })}>{r.title}</button><span className="block text-metadata text-text-secondary">{r.requirementType}</span></Td>
                         <Td>{r.country}{r.city ? ` / ${r.city}` : ""}</Td>
-                        <Td>{r.sourceUrl ? <a className="underline" href={r.sourceUrl} target="_blank" rel="noopener noreferrer">{r.source}</a> : r.source}</Td>
+                        <Td>{externalHref(r.sourceUrl) ? <a className="underline" href={externalHref(r.sourceUrl)!} target="_blank" rel="noopener noreferrer">{r.source}</a> : r.source}</Td>
                         <Td>{formatDay(r.verifiedAt.slice(0, 10), lang)}{r.isStale ? <span className="block"><Tag tone="attention">{tr("نیازمند بازبینی", "Needs review")}</Tag></span> : null}</Td>
                         <Td><Tag tone={r.status === "ACTIVE" ? "success" : r.status === "NEEDS_REVIEW" ? "attention" : "neutral"}>{r.status}</Tag></Td>
                       </tr>

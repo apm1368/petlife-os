@@ -217,6 +217,41 @@ describe("Batch 8 — Account & security", () => {
       expect(await prisma.domainEvent.count({ where: { type: "UnverifiedCredentialsCleared", aggregateId: me.body.id } })).toBe(1);
     });
 
+    it("pre-account-takeover: proving a phone that someone else typed at sign-up locks the stranger out", async () => {
+      const victimPhone = uniquePhone();
+      const username = `squatter_ph_${Date.now()}`;
+      const token = await csrf();
+      const reg = await request(server).post("/auth/register").set("Cookie", `petlife_csrf=${token}`).set("x-csrf-token", token).send({ username, password: "squatter-password-1", phone: victimPhone }).expect(200);
+      const squatter = client({ session: extractCookie(reg.headers["set-cookie"], "petlife_session"), csrf: token });
+      await squatter.get("/me").expect(200);
+
+      // The real owner of the number signs in with an SMS code.
+      const victim = client(await signIn(victimPhone));
+      const me = await victim.get("/me").expect(200);
+      expect(me.body).toMatchObject({ hasPassword: false });
+      // The squatter's session and password no longer work.
+      await squatter.get("/me").expect(401);
+      await passwordLogin(username, "squatter-password-1").then((r) => expect(r.status).toBe(401));
+      expect(await prisma.domainEvent.count({ where: { type: "UnverifiedCredentialsCleared", aggregateId: me.body.id } })).toBe(1);
+    });
+
+    it("pre-account-takeover: a phone typed into an account whose email someone else proved is released, not handed over", async () => {
+      // The account owner proved their email; a phone they never proved sits on the account.
+      const ownerEmail = `b8-proven-${unique()}@example.com`;
+      const accountOwner = client(await signIn(ownerEmail));
+      const ownerId = (await accountOwner.get("/me").expect(200)).body.id as string;
+      const typedPhone = uniquePhone();
+      await prisma.user.update({ where: { id: ownerId }, data: { phone: canonicalIdentifier(typedPhone), phoneVerifiedAt: null } });
+
+      // Whoever really holds that number signs in: they get an account of their own, not the email owner's.
+      const numberHolder = client(await signIn(typedPhone));
+      const holderMe = await numberHolder.get("/me").expect(200);
+      expect(holderMe.body.id).not.toBe(ownerId);
+      expect((await prisma.user.findUniqueOrThrow({ where: { id: ownerId } })).phone).toBeNull();
+      await accountOwner.get("/me").expect(200);
+      expect(await prisma.domainEvent.count({ where: { type: "UnprovenContactReleased", aggregateId: ownerId } })).toBe(1);
+    });
+
     it("an OTP code works once, even when submitted twice at the same moment", async () => {
       const email = `b8-race-${unique()}@example.com`;
       const token = await csrf();

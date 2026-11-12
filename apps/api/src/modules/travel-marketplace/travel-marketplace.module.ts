@@ -16,13 +16,14 @@ import { NotificationsModule } from "../notifications/notifications.module";
 import { TravelPublicController } from "./travel-public.controller";
 import { TravelTravelerController } from "./travel-traveler.controller";
 import { TravelProviderController } from "./travel-provider.controller";
+import { PetAccessModule } from "../pet-access/pet-access.module";
 
 /**
  * Batch 5 — registers the travel marketplace (previously orphaned services)
  * with its public, traveller and partner surfaces.
  */
 @Module({
-  imports: [NotificationsModule, PaymentsModule, LedgerModule, RefundsModule, StorageModule, ProviderOsModule, TravelModule],
+  imports: [NotificationsModule, PaymentsModule, LedgerModule, RefundsModule, StorageModule, ProviderOsModule, TravelModule, PetAccessModule],
   controllers: [TravelPublicController, TravelTravelerController, TravelProviderController],
   providers: [TravelAvailabilityService, TravelBookingService, TravelListingService, TravelSearchService, TravelTripHubService, TravelExpiryWorker, TravelNotificationListener],
   exports: [TravelAvailabilityService, TravelBookingService, TravelListingService, TravelSearchService],

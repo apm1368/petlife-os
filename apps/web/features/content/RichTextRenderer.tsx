@@ -105,7 +105,8 @@ function Inline({ content }: { content: RichTextInline[] }) {
     <>
       {content.map((node, i) => {
         if ("type" in node && node.type === "link") {
-          const isInternal = node.href.startsWith("/");
+          // Only "/path" is internal; "//host" and "/\\host" both leave the site in a browser.
+          const isInternal = /^\/(?![/\\])/.test(node.href);
           return isInternal ? (
             <Link key={i} href={node.href} className="text-brand-natural underline">
               {node.text}

@@ -20,6 +20,7 @@ const SECURITY_EVENT_LABELS: Record<string, [string, string, string, string]> = 
   AllSessionsRevoked: ["خروج از همهٔ دستگاه‌ها", "Signed out everywhere", "Überall abgemeldet", "Sesión cerrada en todos los dispositivos"],
   ContactChanged: ["راه تماس تغییر کرد", "Contact method changed", "Kontaktmethode geändert", "Medio de contacto actualizado"],
   UnverifiedCredentialsCleared: ["رمز تأییدنشده حذف شد", "Unverified password removed", "Unbestätigtes Passwort entfernt", "Se eliminó la contraseña no verificada"],
+  UnprovenContactReleased: ["راه تماس تأییدنشده از حساب برداشته شد", "Unverified contact removed from this account", "Unbestätigter Kontakt aus dem Konto entfernt", "Se quitó un contacto no verificado de la cuenta"],
 };
 
 const SECURITY_DE: Record<string, string> = {
