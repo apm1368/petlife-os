@@ -10406,6 +10406,7 @@
       }
     }
   },
+<<<<<<< HEAD
   "pwa": {
     "install": {
       "title": "Install opetlife on your phone",
@@ -10434,5 +10435,129 @@
     "lostPet": "Anyone who asks for money or a reward before returning a pet is probably a scammer. Meet in a public place and never pay in advance.",
     "donation": "Donate only through this page. opetlife never asks you to transfer a donation to a personal account.",
     "adoption": "Never pay a fee before meeting. See the pet in person and meet somewhere safe."
+=======
+  "aboutPage": {
+    "eyebrow": "About opetlife",
+    "title": "We built opetlife so caring for an animal never has to start from zero",
+    "lede": "A vaccination booklet in a drawer, a vet’s number lost in a chat, a shop that doesn’t know about an allergy, a trip planned around “no pets allowed”. opetlife brings all of it together around one profile of your pet — and keeps it honest.",
+    "chapters": {
+      "label": "On this page",
+      "why": "Why we exist",
+      "connect": "How it fits together",
+      "promises": "What we promise",
+      "values": "How we decide",
+      "contact": "Talk to us"
+    },
+    "why": {
+      "title": "Care shouldn’t depend on remembering everything",
+      "p1": "Living with a dog, a cat or a bird means hundreds of small decisions: when the next vaccine is due, which food suits a sensitive stomach, who can look after them when you travel. Most of that knowledge lives in scattered places — and when it is needed most, it is hard to find.",
+      "p2": "opetlife started from a simple idea: the animal is at the centre, not the app. Everything we build — records, bookings, the shop, travel, rescue — reads from and adds to your pet’s own profile, so each step knows what came before.",
+      "p3": "We write in Persian first, because that is where most of our families live, and in English, German and Spanish for everyone who lives with an animal far from home."
+    },
+    "connect": {
+      "title": "One profile, many helping hands",
+      "lede": "Each part of opetlife does one job well and shares only what you allow.",
+      "steps": {
+        "record": {
+          "title": "Your pet’s record",
+          "body": "Vaccinations, medications, allergies, weight and documents in one health file — with reminders before something is due.",
+          "cta": "Add your pet"
+        },
+        "care": {
+          "title": "Vets and services",
+          "body": "Find clinics, groomers, sitters and pet taxis, see real available times and book; share the health record with a vet for a limited time.",
+          "cta": "Find care"
+        },
+        "shop": {
+          "title": "Shop",
+          "body": "Food, treats and accessories, chosen with your pet’s species and needs in mind.",
+          "cta": "Visit the shop"
+        },
+        "travel": {
+          "title": "Travel",
+          "body": "Pet-friendly stays and trips; every external listing shows its source and when we last checked it.",
+          "cta": "Plan a trip"
+        },
+        "safety": {
+          "title": "Safety",
+          "body": "Lost-pet alerts, a pet ID card and plain comparisons of insurance plans, for the days you hope never come.",
+          "cta": "Lost and found"
+        },
+        "together": {
+          "title": "Community and rescue",
+          "body": "Talk with other owners, support verified rescue groups and see exactly where donations go.",
+          "cta": "Join the community"
+        },
+        "learn": {
+          "title": "Learn",
+          "body": "Practical articles and guides on training, nutrition and health, written to be used at home.",
+          "cta": "Read the magazine"
+        }
+      }
+    },
+    "promises": {
+      "title": "What we promise — and how you can check it",
+      "lede": "Trust shouldn’t be a slogan. These are things the product does, and you can see them for yourself.",
+      "items": {
+        "verified": {
+          "title": "Verified means checked",
+          "body": "Clinics, vets and service providers get a verified badge only after our team has reviewed their documents."
+        },
+        "consent": {
+          "title": "Your pet’s record, your decision",
+          "body": "A health record is shared only when you choose to share it, for a limited time, and you can revoke access at any moment."
+        },
+        "privacy": {
+          "title": "Your data stays yours",
+          "body": "From your privacy centre you can download a copy of your data or ask us to delete it."
+        },
+        "sources": {
+          "title": "Honest about where things come from",
+          "body": "Listings from other websites show their source and when we last checked them; we never present them as our own."
+        },
+        "ledger": {
+          "title": "Donations you can follow",
+          "body": "Every rescue campaign shows a running total built from real transactions — never an estimate."
+        },
+        "credits": {
+          "title": "Credit where it’s due",
+          "body": "Photos and music made by others are credited with their licence on our credits page."
+        }
+      }
+    },
+    "values": {
+      "title": "How we decide what to build",
+      "items": {
+        "animals": {
+          "title": "The animal comes first",
+          "body": "If a feature is good for business but not for the animal, we don’t build it."
+        },
+        "honest": {
+          "title": "Say what we know — and what we don’t",
+          "body": "No made-up availability, no invented reviews, no medical promises. When something is uncertain, we say so."
+        },
+        "simple": {
+          "title": "Simple for every family",
+          "body": "Clear words, large buttons, light and dark themes, and pages that work on any phone."
+        },
+        "kindness": {
+          "title": "Kindness counts",
+          "body": "Rescue, adoption and remembering the animals we have lost are part of opetlife, not an afterthought."
+        }
+      }
+    },
+    "contact": {
+      "title": "Talk to us",
+      "body": "Questions, ideas, a partnership or something that didn’t work as it should: your message reaches our support team, and you’ll see the reply in your support inbox.",
+      "contactCta": "Send a message",
+      "helpCta": "Help centre"
+    },
+    "cta": {
+      "title": "Start with your pet’s profile",
+      "body": "It takes a minute, and everything else builds on it.",
+      "primary": "Create an account",
+      "secondary": "Explore services"
+    }
+>>>>>>> pr-301
   }
 }

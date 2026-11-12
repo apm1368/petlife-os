@@ -9534,6 +9534,7 @@
       }
     }
   },
+<<<<<<< HEAD
   "pwa": {
     "install": {
       "title": "Instala opetlife en tu móvil",
@@ -9562,5 +9563,129 @@
     "lostPet": "Quien pide dinero o una recompensa antes de devolver una mascota probablemente es un estafador. Queda en un lugar público y nunca pagues por adelantado.",
     "donation": "Dona solo a través de esta página. opetlife nunca te pide transferir una donación a una cuenta personal.",
     "adoption": "Nunca pagues nada antes de conocer a la mascota. Visítala en persona y queda en un lugar seguro."
+=======
+  "aboutPage": {
+    "eyebrow": "Sobre opetlife",
+    "title": "Creamos opetlife para que cuidar de un animal nunca vuelva a empezar de cero",
+    "lede": "La cartilla de vacunas en un cajón, el número del veterinario perdido en un chat, una tienda que no sabe nada de una alergia, un viaje planeado alrededor de «no se admiten mascotas». opetlife reúne todo eso en torno a un perfil de tu mascota, y lo mantiene honesto.",
+    "chapters": {
+      "label": "En esta página",
+      "why": "Por qué existimos",
+      "connect": "Cómo encaja todo",
+      "promises": "Lo que prometemos",
+      "values": "Cómo decidimos",
+      "contact": "Habla con nosotros"
+    },
+    "why": {
+      "title": "Cuidar no debería depender de acordarse de todo",
+      "p1": "Vivir con un perro, un gato o un pájaro supone cientos de pequeñas decisiones: cuándo toca la próxima vacuna, qué comida le sienta bien a un estómago sensible, quién lo cuidará cuando viajes. Casi todo ese conocimiento está disperso y, justo cuando más se necesita, cuesta encontrarlo.",
+      "p2": "opetlife nació de una idea sencilla: en el centro está el animal, no la app. Todo lo que creamos (historial, reservas, tienda, viajes, rescate) lee el perfil de tu mascota y lo completa, para que cada paso sepa lo que vino antes.",
+      "p3": "Escribimos primero en persa, porque ahí viven la mayoría de nuestras familias, y en inglés, alemán y español para quienes viven con un animal lejos de casa."
+    },
+    "connect": {
+      "title": "Un perfil, muchas manos que ayudan",
+      "lede": "Cada parte de opetlife hace bien una cosa y solo comparte lo que tú permites.",
+      "steps": {
+        "record": {
+          "title": "El historial de tu mascota",
+          "body": "Vacunas, medicamentos, alergias, peso y documentos en un solo historial de salud, con recordatorios antes de cada fecha.",
+          "cta": "Añadir tu mascota"
+        },
+        "care": {
+          "title": "Veterinarios y servicios",
+          "body": "Encuentra clínicas, peluquería, cuidadores y taxis para mascotas, consulta horarios reales y reserva; comparte el historial con un veterinario durante un tiempo limitado.",
+          "cta": "Buscar ayuda"
+        },
+        "shop": {
+          "title": "Tienda",
+          "body": "Comida, premios y accesorios pensados para la especie y las necesidades de tu mascota.",
+          "cta": "Ir a la tienda"
+        },
+        "travel": {
+          "title": "Viajes",
+          "body": "Alojamientos y viajes que admiten mascotas; cada anuncio externo muestra su fuente y cuándo lo revisamos por última vez.",
+          "cta": "Planear un viaje"
+        },
+        "safety": {
+          "title": "Seguridad",
+          "body": "Avisos de mascotas perdidas, una tarjeta de identificación y comparaciones claras de seguros, para los días que esperamos que nunca lleguen.",
+          "cta": "Perdidos y encontrados"
+        },
+        "together": {
+          "title": "Comunidad y rescate",
+          "body": "Habla con otros dueños, apoya a grupos de rescate verificados y ve exactamente a dónde van las donaciones.",
+          "cta": "Unirte a la comunidad"
+        },
+        "learn": {
+          "title": "Aprender",
+          "body": "Artículos y guías prácticas sobre educación, alimentación y salud, pensados para usarlos en casa.",
+          "cta": "Leer la revista"
+        }
+      }
+    },
+    "promises": {
+      "title": "Lo que prometemos, y cómo puedes comprobarlo",
+      "lede": "La confianza no debería ser un eslogan. Esto es lo que hace el producto, y puedes verlo tú mismo.",
+      "items": {
+        "verified": {
+          "title": "Verificado significa revisado",
+          "body": "Las clínicas, los veterinarios y los proveedores reciben la insignia de verificado solo después de que nuestro equipo revise sus documentos."
+        },
+        "consent": {
+          "title": "El historial de tu mascota, tu decisión",
+          "body": "Un historial de salud solo se comparte cuando tú lo decides, durante un tiempo limitado, y puedes revocar el acceso en cualquier momento."
+        },
+        "privacy": {
+          "title": "Tus datos son tuyos",
+          "body": "Desde tu centro de privacidad puedes descargar una copia de tus datos o pedir que los eliminemos."
+        },
+        "sources": {
+          "title": "Honestos sobre el origen",
+          "body": "Los anuncios de otras webs muestran su fuente y cuándo los revisamos por última vez; nunca los presentamos como propios."
+        },
+        "ledger": {
+          "title": "Donaciones que puedes seguir",
+          "body": "Cada campaña de rescate muestra un total acumulado a partir de transacciones reales, nunca una estimación."
+        },
+        "credits": {
+          "title": "Mérito a quien corresponde",
+          "body": "Las fotos y la música creadas por otros se reconocen con su licencia en nuestra página de créditos."
+        }
+      }
+    },
+    "values": {
+      "title": "Cómo decidimos qué crear",
+      "items": {
+        "animals": {
+          "title": "Primero, el animal",
+          "body": "Si una función es buena para el negocio pero no para el animal, no la creamos."
+        },
+        "honest": {
+          "title": "Decir lo que sabemos, y lo que no",
+          "body": "Sin disponibilidad inventada, sin reseñas falsas, sin promesas médicas. Cuando algo es incierto, lo decimos."
+        },
+        "simple": {
+          "title": "Sencillo para cualquier familia",
+          "body": "Palabras claras, botones grandes, tema claro y oscuro, y páginas que funcionan en cualquier móvil."
+        },
+        "kindness": {
+          "title": "La amabilidad cuenta",
+          "body": "El rescate, la adopción y recordar a los animales que hemos perdido forman parte de opetlife, no son un añadido."
+        }
+      }
+    },
+    "contact": {
+      "title": "Habla con nosotros",
+      "body": "Preguntas, ideas, una colaboración o algo que no funcionó como debía: tu mensaje llega a nuestro equipo de soporte y verás la respuesta en tu bandeja de soporte.",
+      "contactCta": "Enviar un mensaje",
+      "helpCta": "Centro de ayuda"
+    },
+    "cta": {
+      "title": "Empieza por el perfil de tu mascota",
+      "body": "Lleva un minuto, y todo lo demás se construye sobre él.",
+      "primary": "Crear una cuenta",
+      "secondary": "Explorar servicios"
+    }
+>>>>>>> pr-301
   }
 }

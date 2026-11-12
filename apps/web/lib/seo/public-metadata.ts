@@ -217,12 +217,22 @@ const pages = {
       es: { title: "Memoriales de mascotas | opetlife", description: "Recuerdos de compañeros que ya no están, compartidos por sus familias y revisados antes de publicarse." },
     },
   },
+  about: {
+    path: "about",
+    indexable: true,
+    copy: {
+      fa: { title: "درباره اپت‌لایف | چرا هستیم و چه تعهدی داریم", description: "داستان اپت‌لایف: چرا ساخته شد، پرونده، دامپزشکی، فروشگاه، سفر و حمایت چطور کنار هم کار می‌کنند و چه تعهدهایی دربارهٔ اعتماد و حریم خصوصی داریم." },
+      en: { title: "About Opetlife | Why we exist and what we promise", description: "The story behind Opetlife: why we built it, how pet records, vets, the shop, travel and rescue work together, and the promises we keep on trust and privacy." },
+      de: { title: "Über opetlife | Warum es uns gibt und was wir versprechen", description: "Die Geschichte hinter opetlife: warum wir es gebaut haben, wie Gesundheitsakte, Tierärzte, Shop, Reisen und Tierschutz zusammenwirken und was wir bei Vertrauen und Datenschutz versprechen." },
+      es: { title: "Sobre opetlife | Por qué existimos y qué prometemos", description: "La historia de opetlife: por qué lo creamos, cómo funcionan juntos el historial, los veterinarios, la tienda, los viajes y el rescate, y lo que prometemos sobre confianza y privacidad." },
+    },
+  },
 } as const satisfies Record<string, { path: string; indexable: boolean; copy: Copy }>;
 
 export type PublicSeoPage = keyof typeof pages;
 
 export const sitemapPages: readonly PublicSeoPage[] = [
-  "home", "blog", "guides", "services", "vetFind", "community", "lostPets", "animalSupport", "animalSupportCampaigns", "animalSupportNeeds", "travel", "travelExternal", "contact", "credits", "status", "memorials",
+  "home", "blog", "guides", "services", "vetFind", "community", "lostPets", "animalSupport", "animalSupportCampaigns", "animalSupportNeeds", "travel", "travelExternal", "about", "contact", "credits", "status", "memorials",
 ];
 
 export function publicPagePath(locale: RouteLocale, page: PublicSeoPage): string {
