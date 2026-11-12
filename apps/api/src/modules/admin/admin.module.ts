@@ -44,6 +44,8 @@ import { PaymentsModule } from "../commerce/payments/payments.module";
 import { AdminCardTransferController } from "./finance/admin-card-transfer.controller";
 import { AdminShippingController } from "./commerce/admin-shipping.controller";
 import { LogisticsModule } from "../commerce/logistics/logistics.module";
+import { AdminWalletsController } from "./finance/admin-wallets.controller";
+import { AdminWalletsService } from "./finance/admin-wallets.service";
 import { AdminServicesService } from "./services/admin-services.service";
 import { AdminServicesController } from "./services/admin-services.controller";
 import { NotificationsModule } from "../notifications/notifications.module";
@@ -168,6 +170,7 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminFinanceOpsController,
     AdminCardTransferController,
     AdminShippingController,
+    AdminWalletsController,
     AdminPartner360Controller,
     AdminPet360Controller,
     AdminAccessControlController,
@@ -253,6 +256,7 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminRefundService,
     AdminOrgService,
     AdminDashboardService,
+    AdminWalletsService,
     AdminSellerSettlementService,
     AdminSellerAdjustmentService,
     AdminMarketplaceSettlementService,

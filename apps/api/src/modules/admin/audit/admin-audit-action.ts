@@ -238,4 +238,9 @@ export type AdminAuditAction =
   | "pet_memorial.approved"
   | "pet_memorial.rejected"
   | "shipping_method.updated"
-  | "shipment.staff_updated";
+  | "shipment.staff_updated"
+  | "wallet.credited"
+  | "wallet.debited"
+  | "wallet_top_up.approved"
+  | "wallet_top_up.rejected"
+  | "wallet_top_up.receipt_viewed";
