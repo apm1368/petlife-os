@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button, ContextSurface, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
 import { InternalNoteEntityType, type Customer360Dto } from "@petlife/types";
 import { adminService } from "@/services/admin.service";
@@ -138,9 +139,9 @@ function CustomerRecord({ userId, canReveal }: { userId: string; canReveal: bool
             <span className="text-metadata text-text-secondary">{t("pets", { count: h.pets.length })}</span>
             <div className="flex flex-wrap gap-1.5">
               {h.pets.map((p) => (
-                <StatusLabel key={p.id} tone="neutral">
-                  {p.name}
-                </StatusLabel>
+                <Link key={p.id} href={`/${locale}/admin/pets/${p.id}`} className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring">
+                  <StatusLabel tone="neutral">{p.name}</StatusLabel>
+                </Link>
               ))}
             </div>
           </div>

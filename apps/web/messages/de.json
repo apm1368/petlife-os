@@ -3806,7 +3806,8 @@
         "featureFlags": "Funktionsschalter",
         "smsPatterns": "SMS-Vorlagen",
         "verification": "Identität und Dokumente",
-        "wallets": "Guthaben"
+        "wallets": "Guthaben",
+        "pets": "Tiere"
       },
       "navigation": "Admin-Navigation",
       "openMenu": "Menü öffnen",
@@ -9119,6 +9120,221 @@
         "REFUND_OUTSIDE_SYSTEM": "Erstattung außerhalb einer Bestellung",
         "DUPLICATE_CREDIT_REVERSAL": "Doppelte Gutschrift storniert",
         "OTHER": "Andere Korrektur"
+      }
+    }
+  },
+  "adminPets": {
+    "kicker": "Kunden",
+    "title": "Tiere",
+    "subtitle": "Jedes Tier mit Halter und Haushalt. Gesundheit erscheint nur als Anzahl und Datum, nie als klinischer Text.",
+    "search": "Tiername, Name von Halter oder Haushaltsmitglied, ID oder Mikrochip",
+    "searchButton": "Suchen",
+    "speciesFilter": "Tierart",
+    "allSpecies": "Alle",
+    "species": {
+      "DOG": "Hund",
+      "CAT": "Katze",
+      "BIRD": "Vogel",
+      "RABBIT": "Kaninchen",
+      "RODENT": "Nagetier",
+      "FISH": "Fisch",
+      "REPTILE": "Reptil",
+      "OTHER": "Andere"
+    },
+    "lifecycle": {
+      "ACTIVE": "Aktiv",
+      "LOST": "Vermisst",
+      "TEMPORARILY_TRANSFERRED": "Vorübergehend woanders",
+      "DECEASED": "Verstorben",
+      "MEMORIAL": "Gedenken",
+      "deleted": "Gelöscht"
+    },
+    "loading": "Wird geladen…",
+    "failed": "Die Daten konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "forbidden": "Für Tiere brauchen Sie die Berechtigung „Kunden ansehen“.",
+    "empty": "Noch keine Tiere registriert.",
+    "emptySearch": "Kein Tier passt zu dieser Suche.",
+    "columns": {
+      "pet": "Tier",
+      "species": "Art und Rasse",
+      "owner": "Halter",
+      "household": "Haushalt",
+      "family": "Weitere Mitglieder",
+      "status": "Status",
+      "created": "Registriert"
+    },
+    "noOwner": "Kein Halter",
+    "open": "Öffnen",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "pageOf": "Seite {page} von {pages}",
+    "detail": {
+      "back": "Alle Tiere",
+      "identity": "Identität",
+      "fields": {
+        "species": "Tierart",
+        "breed": "Rasse",
+        "sex": "Geschlecht",
+        "birthDate": "Geburtsdatum",
+        "age": "Ungefähres Alter",
+        "neutered": "Kastriert",
+        "microchip": "Mikrochip",
+        "status": "Status",
+        "created": "Registriert",
+        "photo": "Foto"
+      },
+      "months": "{months} Monate",
+      "sex": {
+        "MALE": "Männlich",
+        "FEMALE": "Weiblich",
+        "UNKNOWN": "Unbekannt"
+      },
+      "neutered": {
+        "NEUTERED": "Ja",
+        "INTACT": "Nein",
+        "UNKNOWN": "Unbekannt"
+      },
+      "yes": "Ja",
+      "no": "Nein",
+      "owner": "Halter",
+      "ownerMissing": "Dieser Haushalt hat keinen aktiven Halter.",
+      "openCustomer": "Kundenakte",
+      "household": "Haushalt: {name}",
+      "unnamedHousehold": "Ohne Namen",
+      "family": "Haushaltsmitglieder",
+      "familyEmpty": "Keine weiteren Mitglieder in diesem Haushalt.",
+      "roles": {
+        "OWNER": "Halter",
+        "FAMILY": "Familienmitglied"
+      },
+      "accountStatus": {
+        "ACTIVE": "Aktives Konto",
+        "SUSPENDED": "Gesperrtes Konto"
+      },
+      "invitations": "Offene Einladungen",
+      "invitationExpires": "Läuft ab am {date}",
+      "grants": "Zugriff auf dieses Tier",
+      "grantsEmpty": "Kein Zugriff erfasst.",
+      "grantColumns": {
+        "person": "Person",
+        "source": "Herkunft",
+        "scope": "Rechte",
+        "period": "Zeitraum",
+        "state": "Status"
+      },
+      "sources": {
+        "HOUSEHOLD": "Haushaltsmitgliedschaft",
+        "MANUAL": "Manuell geteilt",
+        "TEMPORARY": "Befristet"
+      },
+      "scopeCount": "{count} Rechte",
+      "states": {
+        "active": "Aktiv",
+        "revoked": "Widerrufen",
+        "inactive": "Nicht aktiv"
+      },
+      "notMember": "Nicht im Haushalt",
+      "revoke": "Zugriff widerrufen",
+      "revokeTitle": "Zugriff von {name} widerrufen",
+      "revokeReason": "Grund (bleibt im Prüfprotokoll)",
+      "revokeConfirm": "Widerrufen",
+      "revokeCancel": "Abbrechen",
+      "revoked": "Zugriff widerrufen.",
+      "revokeFailed": "Der Zugriff konnte nicht widerrufen werden.",
+      "reasonTooShort": "Der Grund braucht mindestens 5 Zeichen.",
+      "ownerGrantNote": "Der Zugriff eines Halters wird hier nie widerrufen.",
+      "health": "Gesundheit (nur Anzahl und Datum)",
+      "healthFields": {
+        "documents": "Medizinische Dokumente",
+        "visits": "Besuche",
+        "labs": "Laborwerte",
+        "conditions": "Erkrankungen",
+        "allergies": "Allergien",
+        "medications": "Medikamente"
+      },
+      "bookings": "Buchungen",
+      "lost": "Vermisstenmeldungen",
+      "sightings": "{count} Sichtungen",
+      "care": "Pflegeerinnerungen",
+      "travel": "Reisen",
+      "insurance": "Versicherung",
+      "claimPreps": "{count} Schadensentwürfe",
+      "sharing": "Freigaben",
+      "shareCards": "{count} aktive Steckbriefe",
+      "healthShares": "{count} aktive Gesundheitslinks",
+      "none": "Keine.",
+      "diagnostics": "Hinweise zur Datenqualität",
+      "diagnosticCodes": {
+        "NO_ACTIVE_OWNER": "Der Haushalt hat keinen aktiven Halter.",
+        "STALE_HOUSEHOLD_GRANT": "Jemand, der den Haushalt verlassen hat, hat noch Zugriff.",
+        "EXPIRED_GRANT_NOT_REVOKED": "Ein befristeter Zugriff ist abgelaufen, aber nie widerrufen worden.",
+        "MEMBER_WITHOUT_GRANT": "Ein Haushaltsmitglied hat keinen aktiven Zugriff.",
+        "LONG_OPEN_LOST_INCIDENT": "Eine Vermisstenmeldung ist seit über 90 Tagen offen.",
+        "DELETED_BUT_ACTIVE": "Das Tier ist gelöscht, aber noch als aktiv markiert."
+      },
+      "activity": "Letzte Aktivität",
+      "changed": "Geändert: {fields}"
+    },
+    "labels": {
+      "bookingStatus": {
+        "HOLD": "Reserviert",
+        "PENDING_CONFIRMATION": "Wartet auf Bestätigung",
+        "REQUESTED": "Angefragt",
+        "AWAITING_PAYMENT": "Wartet auf Zahlung",
+        "REJECTED": "Abgelehnt",
+        "EXPIRED": "Abgelaufen",
+        "RESCHEDULED": "Verschoben",
+        "CONFIRMED": "Bestätigt",
+        "CHECKED_IN": "Eingecheckt",
+        "IN_PROGRESS": "Läuft",
+        "COMPLETED": "Abgeschlossen",
+        "CANCELLED_BY_USER": "Vom Mitglied storniert",
+        "CANCELLED_BY_PROVIDER": "Vom Anbieter storniert",
+        "NO_SHOW": "Nicht erschienen"
+      },
+      "serviceCategory": {
+        "VET": "Tierarzt",
+        "GROOMING": "Pflege",
+        "TRAINING": "Training",
+        "WALKING": "Gassi gehen",
+        "SITTING": "Tiersitting",
+        "BOARDING": "Pension",
+        "PET_TAXI": "Tiertaxi",
+        "OTHER": "Andere"
+      },
+      "lostStatus": {
+        "OPEN": "Offen",
+        "SEARCHING": "Suche läuft",
+        "SIGHTING_REPORTED": "Sichtung gemeldet",
+        "FOUND": "Gefunden",
+        "REUNITED": "Wieder zu Hause",
+        "CLOSED": "Geschlossen"
+      },
+      "tripStatus": {
+        "DRAFT": "Entwurf",
+        "PLANNING": "In Planung",
+        "READY": "Bereit",
+        "IN_PROGRESS": "Unterwegs",
+        "COMPLETED": "Abgeschlossen",
+        "CANCELLED": "Storniert"
+      },
+      "insuranceStatus": {
+        "NEEDS_INFORMATION": "Angaben fehlen",
+        "DRAFT": "Entwurf",
+        "SUBMITTED": "Eingereicht",
+        "UNDER_REVIEW": "In Prüfung",
+        "APPROVED": "Angenommen",
+        "DECLINED": "Abgelehnt",
+        "CANCELLED": "Storniert"
+      },
+      "reminderState": {
+        "UPCOMING": "Anstehend",
+        "DUE": "Fällig",
+        "OVERDUE": "Überfällig",
+        "COMPLETED": "Erledigt",
+        "SNOOZED": "Verschoben",
+        "CANCELLED": "Abgesagt"
       }
     }
   },
