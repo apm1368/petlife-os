@@ -10,6 +10,7 @@ import type { ResolvedProviderContext } from "../provider-os/auth/provider-conte
 import { ClinicEntitlementService } from "./clinic-entitlement.service";
 import { startOfUtcMonth } from "./clinic-subscription.service";
 import { toReminderDto } from "./clinic-customers.service";
+import { ClinicClientsService } from "./clinic-clients.service";
 import type { CreateClinicReminderDto, ListClinicRemindersQueryDto } from "./dto/clinic-os.dto";
 
 const MAX_AHEAD_MS = 366 * 86400e3;
@@ -30,6 +31,7 @@ export class ClinicRemindersService implements OnModuleInit, OnModuleDestroy {
     private readonly prisma: PrismaService,
     private readonly entitlements: ClinicEntitlementService,
     private readonly notifications: NotificationOrchestratorService,
+    private readonly clients: ClinicClientsService,
   ) {}
 
   onModuleInit() {
@@ -45,9 +47,17 @@ export class ClinicRemindersService implements OnModuleInit, OnModuleDestroy {
     const used = await this.prisma.clinicReminder.count({ where: { providerOrganizationId: ctx.organizationId, createdAt: { gte: startOfUtcMonth(new Date()) } } });
     await this.entitlements.assertWithinLimit(ctx.organizationId, "clinic.reminders.monthly.max", used);
 
-    // Only this clinic's own patients — the same 404 for an unknown pet and someone else's.
-    const isPatient = await this.prisma.pet.count({ where: { id: dto.petId, OR: [{ bookings: { some: { providerOrganizationId: ctx.organizationId } } }, { clinicalVisits: { some: { providerOrganizationId: ctx.organizationId } } }] } });
-    if (!isPatient) throw new NotFoundApiException("Pet");
+    if (!!dto.petId === !!dto.contactId) throw new ValidationApiException({ field: "petId", reason: "EXACTLY_ONE_TARGET" });
+    if (dto.petId) {
+      // Only this clinic's own patients — the same 404 for an unknown pet and someone else's.
+      const isPatient = await this.prisma.pet.count({ where: { id: dto.petId, OR: [{ bookings: { some: { providerOrganizationId: ctx.organizationId } } }, { clinicalVisits: { some: { providerOrganizationId: ctx.organizationId } } }] } });
+      if (!isPatient) throw new NotFoundApiException("Pet");
+    } else {
+      // Only this clinic's own clients, and a client pet only of that client.
+      const client = await this.prisma.clinicImportedContact.count({ where: { id: dto.contactId, providerOrganizationId: ctx.organizationId } });
+      if (!client) throw new NotFoundApiException("ClinicClient");
+      if (dto.clientPetId && !(await this.prisma.clinicClientPet.count({ where: { id: dto.clientPetId, contactId: dto.contactId } }))) throw new NotFoundApiException("ClinicClientPet");
+    }
 
     const now = new Date();
     const dueAt = dto.dueAt ? new Date(dto.dueAt) : now;
@@ -56,7 +66,7 @@ export class ClinicRemindersService implements OnModuleInit, OnModuleDestroy {
     if (!title) throw new ValidationApiException({ title: "required" });
 
     const row = await this.prisma.clinicReminder.create({
-      data: { providerOrganizationId: ctx.organizationId, petId: dto.petId, createdByProviderUserId: ctx.providerUserId, kind: dto.kind, title, note: dto.note?.trim() || null, dueAt },
+      data: { providerOrganizationId: ctx.organizationId, petId: dto.petId ?? null, contactId: dto.contactId ?? null, clientPetId: dto.contactId ? (dto.clientPetId ?? null) : null, createdByProviderUserId: ctx.providerUserId, kind: dto.kind, title, note: dto.note?.trim() || null, dueAt },
     });
     if (dueAt <= now) await this.deliver(row.id);
     return toReminderDto(await this.prisma.clinicReminder.findUniqueOrThrow({ where: { id: row.id } }));
@@ -103,9 +113,17 @@ export class ClinicRemindersService implements OnModuleInit, OnModuleDestroy {
     if (!claimed.count) return false;
     const row = await this.prisma.clinicReminder.findUniqueOrThrow({
       where: { id },
-      include: { pet: { select: { name: true, householdId: true, household: { select: { members: { where: { role: "OWNER" }, select: { userId: true } } } } } }, providerOrganization: { select: { name: true } } },
+      include: {
+        pet: { select: { name: true, householdId: true, household: { select: { members: { where: { role: "OWNER" }, select: { userId: true } } } } } },
+        contact: { select: { id: true, linkedUserId: true } },
+        clientPet: { select: { name: true } },
+        providerOrganization: { select: { name: true } },
+      },
     });
-    const owners = row.pet.household.members.map((m) => m.userId);
+    if (!row.pet || !row.petId) return this.deliverToClient(row);
+    const pet = row.pet;
+    const petId = row.petId;
+    const owners = pet.household.members.map((m) => m.userId);
     if (!owners.length) {
       await this.prisma.clinicReminder.update({ where: { id }, data: { status: ClinicReminderStatus.FAILED, recipientCount: 0 } });
       return false;
@@ -115,26 +133,56 @@ export class ClinicRemindersService implements OnModuleInit, OnModuleDestroy {
       const eventId = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-8${hex.slice(17, 20)}-${hex.slice(20)}`;
       await this.prisma.domainEvent.upsert({
         where: { id: eventId },
-        create: { id: eventId, processedAt: new Date(), type: "ClinicReminderSent", aggregateType: "Pet", aggregateId: row.petId, payload: { reminderId: row.id, providerOrganizationId: row.providerOrganizationId, kind: row.kind } },
+        create: { id: eventId, processedAt: new Date(), type: "ClinicReminderSent", aggregateType: "Pet", aggregateId: petId, payload: { reminderId: row.id, providerOrganizationId: row.providerOrganizationId, kind: row.kind } },
         update: {},
       });
       await this.notifications.notify({
         userId,
         type: row.kind === "MESSAGE" ? "clinic.message" : "clinic.reminder",
         category: "HEALTH",
-        petId: row.petId,
-        householdId: row.pet.householdId,
-        deepLink: NotificationDeepLinks.pet(row.petId),
+        petId,
+        householdId: pet.householdId,
+        deepLink: NotificationDeepLinks.pet(petId),
         entityType: "ClinicReminder",
         entityId: row.id,
         domainEventId: eventId,
         actorType: "PROVIDER_ORGANIZATION",
         actorId: row.providerOrganizationId,
-        templateParams: { clinic: row.providerOrganization.name, petName: row.pet.name, title: row.title },
+        templateParams: { clinic: row.providerOrganization.name, petName: pet.name, title: row.title },
         metadata: { kind: row.kind, note: row.note },
       });
     }
     await this.prisma.clinicReminder.update({ where: { id }, data: { recipientCount: owners.length } });
     return true;
+  }
+
+  /**
+   * A reminder for one of the clinic's own clients: a text to their phone (SIMULATED while SMS is in sandbox,
+   * SKIPPED without a phone or after opt-out), plus an in-app notice when they connected their opetlife account.
+   */
+  private async deliverToClient(row: { id: string; providerOrganizationId: string; contactId: string | null; kind: string; title: string; note: string | null; contact: { id: string; linkedUserId: string | null } | null; clientPet: { name: string } | null; providerOrganization: { name: string } }): Promise<boolean> {
+    if (!row.contactId || !row.contact) {
+      await this.prisma.clinicReminder.update({ where: { id: row.id }, data: { status: ClinicReminderStatus.FAILED, recipientCount: 0 } });
+      return false;
+    }
+    const text = await this.clients.sendReminderText({ id: row.id, providerOrganizationId: row.providerOrganizationId, contactId: row.contactId, title: row.title, note: row.note, clientPetName: row.clientPet?.name ?? null });
+    let recipients = text && (text.status === "SENT" || text.status === "SIMULATED") ? 1 : 0;
+    if (row.contact.linkedUserId) {
+      await this.notifications.notify({
+        userId: row.contact.linkedUserId,
+        type: row.kind === "MESSAGE" ? "clinic.message" : "clinic.reminder",
+        category: "HEALTH",
+        deepLink: "/notifications",
+        entityType: "ClinicReminder",
+        entityId: row.id,
+        actorType: "PROVIDER_ORGANIZATION",
+        actorId: row.providerOrganizationId,
+        templateParams: { clinic: row.providerOrganization.name, petName: row.clientPet?.name ?? "", title: row.title },
+        metadata: { kind: row.kind, note: row.note },
+      });
+      recipients = Math.max(recipients, 1);
+    }
+    await this.prisma.clinicReminder.update({ where: { id: row.id }, data: { recipientCount: recipients, ...(recipients ? {} : { status: ClinicReminderStatus.FAILED }) } });
+    return recipients > 0;
   }
 }

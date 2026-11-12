@@ -1,4 +1,108 @@
 {
+  "clinicClients": {
+    "title": "Clientes",
+    "intro": "Los clientes propios de tu clínica: registra a los dueños y sus mascotas, envíales SMS, programa recordatorios e invítalos a opetlife.",
+    "add": "Añadir cliente",
+    "cancel": "Cancelar",
+    "search": "Buscar por nombre, teléfono o mascota",
+    "loading": "Cargando…",
+    "loadFailed": "No se pudieron cargar los clientes.",
+    "forbidden": "Los clientes no están incluidos en el plan de tu clínica.",
+    "retry": "Reintentar",
+    "empty": "Aún no hay clientes. Añade el primero con sus mascotas.",
+    "noMatch": "Ningún cliente coincide con la búsqueda.",
+    "noPets": "Sin mascotas registradas",
+    "noPhone": "Sin teléfono",
+    "status": {
+      "CLINIC_ONLY": "Solo en la clínica",
+      "INVITED": "Invitado",
+      "JOINED": "En opetlife"
+    },
+    "newClient": "Nuevo cliente",
+    "name": "Nombre del dueño",
+    "phone": "Número de móvil",
+    "email": "Correo (opcional)",
+    "notes": "Notas (opcional)",
+    "pets": "Mascotas",
+    "petName": "Nombre de la mascota",
+    "species": "Especie",
+    "birthDate": "Fecha de nacimiento",
+    "addPet": "Añadir mascota",
+    "removePet": "Quitar",
+    "save": "Guardar cliente",
+    "statusLabel": "opetlife",
+    "petRemoved": "Mascota eliminada.",
+    "petAdded": "Mascota añadida.",
+    "saved": "Guardado.",
+    "reminders": "Recordatorios",
+    "anyPet": "Cualquiera de sus mascotas",
+    "reminderSaved": "Recordatorio guardado.",
+    "history": "Mensajes enviados",
+    "noMessages": "Aún no hay mensajes.",
+    "messageStatus": {
+      "SENT": "Enviado",
+      "SIMULATED": "Registrado (modo de prueba)",
+      "FAILED": "Falló",
+      "SKIPPED": "No enviado"
+    },
+    "messageKind": {
+      "MESSAGE": "Mensaje",
+      "REMINDER": "Recordatorio",
+      "INVITE": "Invitación"
+    },
+    "sms": {
+      "live": "El SMS está activo: los mensajes llegan a los teléfonos de tus clientes.",
+      "sandboxTitle": "El SMS está en modo de prueba.",
+      "sandbox": "Los mensajes se registran aquí, pero no llegan a los teléfonos hasta que se conecte la línea SMS de la plataforma.",
+      "offTitle": "El SMS está desactivado.",
+      "off": "Ahora no se pueden enviar mensajes.",
+      "title": "SMS",
+      "label": "Mensaje",
+      "placeholder": "El nombre de tu clínica va al principio.",
+      "count": "{count}/420",
+      "send": "Enviar SMS",
+      "sent": "SMS enviado.",
+      "recorded": "Registrado en modo de prueba; no llegó al teléfono.",
+      "optOut": "Dejar de enviar SMS a este cliente",
+      "optIn": "Volver a permitir SMS"
+    },
+    "invite": {
+      "send": "Invitar a opetlife",
+      "again": "Volver a enviar la invitación",
+      "sent": "Invitación enviada.",
+      "recorded": "Invitación registrada en modo de prueba; no llegó al teléfono.",
+      "help": "La invitación es un enlace. El cliente se conecta con tu clínica solo si lo abre con su sesión iniciada y acepta."
+    },
+    "errors": {
+      "CLIENT_EXISTS": "Ya existe un cliente con este número de móvil.",
+      "INVALID_PHONE": "Introduce un móvil iraní válido.",
+      "INVALID_EMAIL": "Introduce un correo válido.",
+      "NO_PHONE": "Añade un número de móvil para enviarle SMS.",
+      "OPTED_OUT": "Este cliente pidió no recibir SMS.",
+      "CLIENT_DAILY_LIMIT": "Se alcanzó el límite diario para este cliente. Inténtalo mañana.",
+      "CLINIC_DAILY_LIMIT": "Se alcanzó el límite diario de SMS de tu clínica.",
+      "ALREADY_JOINED": "Este cliente ya está en opetlife.",
+      "LENGTH": "Revisa la longitud del nombre o del mensaje.",
+      "PLAN": "No está incluido en el plan de tu clínica.",
+      "GENERIC": "No funcionó. Revisa los datos e inténtalo de nuevo."
+    },
+    "join": {
+      "title": "Invitación de la clínica",
+      "loading": "Comprobando la invitación…",
+      "missing": "Este enlace de invitación no es válido.",
+      "failed": "No se pudo abrir la invitación. Inténtalo de nuevo.",
+      "used": "Otra cuenta ya usó esta invitación.",
+      "invitedBy": "{clinic} te invita a opetlife.",
+      "pets": "Mascotas en su ficha: {pets}",
+      "explain": "Al conectarte, la clínica puede enviarte aquí recordatorios y mensajes. Solo ve lo que ella misma registró.",
+      "connected": "Ya estás conectado con {clinic}.",
+      "addPets": "Añadir tus mascotas",
+      "accept": "Conectar con esta clínica"
+    }
+  },
+  "clinicWorkspace": {
+    "clients": "Clientes"
+  },
   "adminCustomRoles": {
     "loading": "Cargando roles…",
     "forbidden": "No tienes acceso a los roles.",
