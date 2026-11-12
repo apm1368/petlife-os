@@ -4670,7 +4670,9 @@
         "petTaxiDrivers": "Pet-taxi drivers",
         "placeReports": "Place reports",
         "osmImport": "OpenStreetMap",
-        "placeClaims": "Business claims"
+        "placeClaims": "Business claims",
+        "walletCardAccount": "Card-to-card account",
+        "walletCardReceipts": "Card-to-card receipts"
       },
       "palette": {
         "actions": "Quick actions",
@@ -10087,7 +10089,9 @@
       "deadline": "Upload the receipt by {date}.",
       "stepOne": "Transfer the amount to this card with your bank app or an ATM.",
       "stepTwo": "Take a photo or screenshot of the receipt.",
-      "stepThree": "Send the receipt here. Our finance team checks it and adds the money."
+      "stepThree": "Send the receipt here. Our finance team checks it and adds the money.",
+      "bank": "Bank",
+      "sheba": "Sheba"
     },
     "receipt": {
       "choose": "Choose the receipt image",
@@ -11130,5 +11134,119 @@
     },
     "release": "Release from this business",
     "releaseFailed": "Not released: the listing may no longer be held by this business."
+  },
+  "adminCardAccount": {
+    "kicker": "Finance",
+    "title": "Card-to-card account",
+    "subtitle": "The card members pay into for wallet top-ups and card-to-card payments.",
+    "current": "Current account",
+    "source": {
+      "ADMIN": "Set on this page.",
+      "ENV": "From the server settings (not set here yet).",
+      "NONE": "No account is set; card-to-card is off for members."
+    },
+    "readOnly": "Only a super admin with settings.manage can change this account.",
+    "change": "Change the account",
+    "changeHint": "Every change is recorded with its reason and every super admin is notified. Payments already started keep the account they began with.",
+    "fields": {
+      "cardNumber": "Card number (16 digits)",
+      "sheba": "Sheba / IBAN (optional)",
+      "holderName": "Account holder",
+      "bankName": "Bank (optional)",
+      "reason": "Reason for the change"
+    },
+    "confirm": "I confirm this account belongs to opetlife.",
+    "save": "Save the new account",
+    "saving": "Saving…",
+    "saved": "The new account is saved and super admins were notified.",
+    "offReason": "Reason for switching card-to-card off",
+    "switchOff": "Switch card-to-card off",
+    "switchedOff": "Card-to-card is switched off.",
+    "history": "Account history",
+    "noHistory": "No account has been set here yet.",
+    "columns": {
+      "setBy": "Set by",
+      "reason": "Reason",
+      "closed": "Ended"
+    },
+    "activeNow": "Active",
+    "loading": "Loading…",
+    "failed": "Could not load.",
+    "retry": "Retry",
+    "forbidden": "wallet.view permission required.",
+    "errors": {
+      "REASON_TOO_SHORT": "Write a reason of at least 10 characters.",
+      "CONFIRM": "Confirm that the account belongs to opetlife.",
+      "CARD_NUMBER_INVALID": "The card number must be 16 digits.",
+      "CARD_NUMBER_CHECKSUM": "This card number is not valid; check the digits.",
+      "SHEBA_INVALID": "Sheba must be IR followed by 24 digits.",
+      "SHEBA_CHECKSUM": "This Sheba number is not valid.",
+      "CARD_OR_SHEBA_REQUIRED": "Enter a card number or a Sheba.",
+      "HOLDER_REQUIRED": "Enter the account holder.",
+      "SUPER_ADMIN_WITH_SETTINGS_MANAGE_REQUIRED": "Only a super admin can change this account.",
+      "generic": "Not saved; please try again."
+    }
+  },
+  "adminCardReceipts": {
+    "kicker": "Finance",
+    "title": "Card-to-card receipts",
+    "subtitle": "Receipts for order and booking payments; pending ones first, oldest first.",
+    "filter": "Status filter",
+    "status": {
+      "REVIEW_PENDING": "Awaiting review",
+      "UNDERPAID_AWAITING_DIFFERENCE": "Awaiting difference",
+      "AWAITING_RECEIPT": "Awaiting receipt",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "EXPIRED": "Expired",
+      "CANCELLED": "Cancelled",
+      "ALL": "All"
+    },
+    "columns": {
+      "member": "Member",
+      "reference": "For",
+      "amount": "Amount",
+      "uploaded": "Receipt sent",
+      "status": "Status"
+    },
+    "reference": {
+      "booking": "Booking",
+      "order": "Order ({count})"
+    },
+    "open": "Review",
+    "empty": "No receipts with this status.",
+    "loading": "Loading…",
+    "failed": "Could not load.",
+    "retry": "Retry",
+    "forbidden": "finance.view permission required.",
+    "previous": "Previous",
+    "next": "Next",
+    "reviewTitle": "Review the receipt",
+    "receivedSoFar": "received: {amount}",
+    "account": "Paid to",
+    "rejectionReason": "Rejection reason",
+    "viewReceipt": "View the receipt",
+    "receiptOpening": "Opening…",
+    "receiptFailed": "The receipt could not be opened.",
+    "noReceipt": "No receipt has been sent yet.",
+    "availableAt": "Review opens at {date}.",
+    "receivedAmount": "Amount received (toman)",
+    "reason": "Reason (required to reject)",
+    "approve": "Approve",
+    "reject": "Reject",
+    "saving": "Saving…",
+    "readOnly": "Only finance.refund.execute can approve or reject a receipt.",
+    "done": {
+      "APPROVED": "Approved; the member was notified.",
+      "REJECTED": "Rejected; the member was notified.",
+      "UNDERPAID": "Short payment; the member was asked to pay the difference."
+    },
+    "errors": {
+      "amount": "Enter the amount received in toman.",
+      "reason": "To reject, write a reason of at least 5 characters.",
+      "notYet": "Review of this receipt is not open yet.",
+      "notReviewable": "This receipt can no longer be reviewed.",
+      "generic": "Not saved; please try again."
+    }
   }
 }

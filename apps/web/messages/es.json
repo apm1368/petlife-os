@@ -3885,7 +3885,9 @@
         "petTaxiDrivers": "Conductores de taxi",
         "placeReports": "Reportes de lugares",
         "osmImport": "OpenStreetMap",
-        "placeClaims": "Reclamaciones"
+        "placeClaims": "Reclamaciones",
+        "walletCardAccount": "Cuenta de tarjeta",
+        "walletCardReceipts": "Comprobantes de tarjeta"
       },
       "palette": {
         "actions": "Acciones rápidas",
@@ -9217,7 +9219,9 @@
       "deadline": "Sube el comprobante antes del {date}.",
       "stepOne": "Transfiere el importe a esta tarjeta desde tu app bancaria o un cajero.",
       "stepTwo": "Haz una foto o una captura del comprobante.",
-      "stepThree": "Envía aquí el comprobante. Nuestro equipo de finanzas lo revisa y añade el saldo."
+      "stepThree": "Envía aquí el comprobante. Nuestro equipo de finanzas lo revisa y añade el saldo.",
+      "bank": "Banco",
+      "sheba": "Sheba"
     },
     "receipt": {
       "choose": "Elegir la imagen del comprobante",
@@ -10260,5 +10264,119 @@
     },
     "release": "Retirar a este negocio",
     "releaseFailed": "No se retiró: puede que la ficha ya no sea de este negocio."
+  },
+  "adminCardAccount": {
+    "kicker": "Finanzas",
+    "title": "Cuenta de transferencia con tarjeta",
+    "subtitle": "La tarjeta a la que pagan los miembros para recargas del monedero y pagos con tarjeta.",
+    "current": "Cuenta actual",
+    "source": {
+      "ADMIN": "Configurada en esta página.",
+      "ENV": "De la configuración del servidor (aún no se configuró aquí).",
+      "NONE": "No hay cuenta; el pago con tarjeta está desactivado para los miembros."
+    },
+    "readOnly": "Solo un superadministrador con settings.manage puede cambiar esta cuenta.",
+    "change": "Cambiar la cuenta",
+    "changeHint": "Cada cambio se registra con su motivo y se avisa a todos los superadministradores. Los pagos ya iniciados conservan la cuenta con la que empezaron.",
+    "fields": {
+      "cardNumber": "Número de tarjeta (16 dígitos)",
+      "sheba": "Sheba / IBAN (opcional)",
+      "holderName": "Titular de la cuenta",
+      "bankName": "Banco (opcional)",
+      "reason": "Motivo del cambio"
+    },
+    "confirm": "Confirmo que esta cuenta pertenece a opetlife.",
+    "save": "Guardar la nueva cuenta",
+    "saving": "Guardando…",
+    "saved": "La nueva cuenta se guardó y se avisó a los superadministradores.",
+    "offReason": "Motivo para desactivar el pago con tarjeta",
+    "switchOff": "Desactivar el pago con tarjeta",
+    "switchedOff": "El pago con tarjeta está desactivado.",
+    "history": "Historial de cuentas",
+    "noHistory": "Aún no se ha configurado ninguna cuenta aquí.",
+    "columns": {
+      "setBy": "Configurada por",
+      "reason": "Motivo",
+      "closed": "Finalizada"
+    },
+    "activeNow": "Activa",
+    "loading": "Cargando…",
+    "failed": "No se pudo cargar.",
+    "retry": "Reintentar",
+    "forbidden": "Se requiere el permiso wallet.view.",
+    "errors": {
+      "REASON_TOO_SHORT": "Escribe un motivo de al menos 10 caracteres.",
+      "CONFIRM": "Confirma que la cuenta pertenece a opetlife.",
+      "CARD_NUMBER_INVALID": "El número de tarjeta debe tener 16 dígitos.",
+      "CARD_NUMBER_CHECKSUM": "Este número de tarjeta no es válido; revisa los dígitos.",
+      "SHEBA_INVALID": "El Sheba debe ser IR seguido de 24 dígitos.",
+      "SHEBA_CHECKSUM": "Este número Sheba no es válido.",
+      "CARD_OR_SHEBA_REQUIRED": "Introduce un número de tarjeta o un Sheba.",
+      "HOLDER_REQUIRED": "Introduce el titular de la cuenta.",
+      "SUPER_ADMIN_WITH_SETTINGS_MANAGE_REQUIRED": "Solo un superadministrador puede cambiar esta cuenta.",
+      "generic": "No se guardó; inténtalo de nuevo."
+    }
+  },
+  "adminCardReceipts": {
+    "kicker": "Finanzas",
+    "title": "Comprobantes de transferencia con tarjeta",
+    "subtitle": "Comprobantes de pagos de pedidos y citas; primero los pendientes, del más antiguo.",
+    "filter": "Filtro de estado",
+    "status": {
+      "REVIEW_PENDING": "Pendiente de revisión",
+      "UNDERPAID_AWAITING_DIFFERENCE": "Pendiente de diferencia",
+      "AWAITING_RECEIPT": "Pendiente de comprobante",
+      "APPROVED": "Aprobado",
+      "REJECTED": "Rechazado",
+      "EXPIRED": "Caducado",
+      "CANCELLED": "Cancelado",
+      "ALL": "Todos"
+    },
+    "columns": {
+      "member": "Miembro",
+      "reference": "Para",
+      "amount": "Importe",
+      "uploaded": "Comprobante enviado",
+      "status": "Estado"
+    },
+    "reference": {
+      "booking": "Cita",
+      "order": "Pedido ({count})"
+    },
+    "open": "Revisar",
+    "empty": "No hay comprobantes con este estado.",
+    "loading": "Cargando…",
+    "failed": "No se pudo cargar.",
+    "retry": "Reintentar",
+    "forbidden": "Se requiere el permiso finance.view.",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "reviewTitle": "Revisar el comprobante",
+    "receivedSoFar": "recibido: {amount}",
+    "account": "Pagado a",
+    "rejectionReason": "Motivo del rechazo",
+    "viewReceipt": "Ver el comprobante",
+    "receiptOpening": "Abriendo…",
+    "receiptFailed": "No se pudo abrir el comprobante.",
+    "noReceipt": "Aún no se ha enviado comprobante.",
+    "availableAt": "La revisión se abre el {date}.",
+    "receivedAmount": "Importe recibido (tomanes)",
+    "reason": "Motivo (obligatorio para rechazar)",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "saving": "Guardando…",
+    "readOnly": "Solo finance.refund.execute puede aprobar o rechazar comprobantes.",
+    "done": {
+      "APPROVED": "Aprobado; se avisó al miembro.",
+      "REJECTED": "Rechazado; se avisó al miembro.",
+      "UNDERPAID": "Pago insuficiente; se pidió al miembro la diferencia."
+    },
+    "errors": {
+      "amount": "Introduce el importe recibido en tomanes.",
+      "reason": "Para rechazar, escribe un motivo de al menos 5 caracteres.",
+      "notYet": "La revisión de este comprobante aún no está abierta.",
+      "notReviewable": "Este comprobante ya no se puede revisar.",
+      "generic": "No se guardó; inténtalo de nuevo."
+    }
   }
 }

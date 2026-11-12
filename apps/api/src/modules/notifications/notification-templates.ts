@@ -46,6 +46,37 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "حذف حساب شما آمادهٔ اجراست", body: "بررسی درخواست حذف حساب شما تمام شد و حذف به‌زودی انجام می‌شود. اگر نظرتان عوض شده، همین حالا از بخش حریم خصوصی لغو کنید." },
     en: { title: "Your account is ready to be deleted", body: "We've finished reviewing your deletion request and it will be carried out soon. If you've changed your mind, cancel it now from Privacy." },
   },
+  // The company card-to-card account changed: every SUPER_ADMIN hears about it (SECURITY, so in-app + email), because
+  // swapping it would divert member payments.
+  "admin.card_destination_changed": {
+    fa: { title: "حساب کارت‌به‌کارت تغییر کرد", body: "{{actor}} حساب مقصد کارت‌به‌کارت را به {{account}} ({{holder}}) تغییر داد. دلیل: {{reason}}. اگر این تغییر را نمی‌شناسید، فوراً بررسی کنید." },
+    en: { title: "Card-to-card account changed", body: "{{actor}} changed the card-to-card account to {{account}} ({{holder}}). Reason: {{reason}}. If you don't recognise this change, check it now." },
+  },
+  "admin.card_destination_disabled": {
+    fa: { title: "کارت‌به‌کارت خاموش شد", body: "{{actor}} حساب کارت‌به‌کارت را غیرفعال کرد؛ اعضا تا تعیین حساب تازه نمی‌توانند کارت‌به‌کارت پرداخت کنند. دلیل: {{reason}}." },
+    en: { title: "Card-to-card switched off", body: "{{actor}} switched the card-to-card account off; members cannot pay by card-to-card until a new account is set. Reason: {{reason}}." },
+  },
+  // Card-to-card receipts: the member hears finance's decision (wallet top-ups and order/booking payments).
+  "wallet.top_up_credited": {
+    fa: { title: "کیف پول شارژ شد", body: "رسید کارت‌به‌کارت شما تأیید شد و {{amount}} تومان به کیف پولتان اضافه شد." },
+    en: { title: "Wallet topped up", body: "Your card-to-card receipt was approved and {{amount}} toman was added to your wallet." },
+  },
+  "wallet.top_up_rejected": {
+    fa: { title: "رسید شارژ کیف پول پذیرفته نشد", body: "رسید کارت‌به‌کارت شما برای {{amount}} تومان پذیرفته نشد. دلیل: {{reason}}. اگر مبلغ را واریز کرده‌اید، با پشتیبانی تماس بگیرید." },
+    en: { title: "Wallet top-up receipt not accepted", body: "Your card-to-card receipt for {{amount}} toman was not accepted. Reason: {{reason}}. If you did send the money, contact support." },
+  },
+  "payment.card_transfer_approved": {
+    fa: { title: "پرداخت کارت‌به‌کارت تأیید شد", body: "رسید شما برای {{amount}} تومان تأیید شد و پرداخت ثبت شد." },
+    en: { title: "Card-to-card payment approved", body: "Your receipt for {{amount}} toman was approved and the payment is recorded." },
+  },
+  "payment.card_transfer_rejected": {
+    fa: { title: "رسید پرداخت پذیرفته نشد", body: "رسید کارت‌به‌کارت شما برای {{amount}} تومان پذیرفته نشد. دلیل: {{reason}}. می‌توانید دوباره پرداخت کنید یا با پشتیبانی تماس بگیرید." },
+    en: { title: "Payment receipt not accepted", body: "Your card-to-card receipt for {{amount}} toman was not accepted. Reason: {{reason}}. You can pay again or contact support." },
+  },
+  "payment.card_transfer_underpaid": {
+    fa: { title: "مبلغ واریزی کامل نیست", body: "{{received}} تومان دریافت شد؛ برای تکمیل پرداخت {{difference}} تومان دیگر واریز کنید و رسید آن را بفرستید." },
+    en: { title: "Payment is short", body: "We received {{received}} toman; send the remaining {{difference}} toman and upload its receipt to complete the payment." },
+  },
   "booking.confirmed": {
     fa: { title: "نوبت شما تأیید شد", body: "نوبت شما تأیید شد. جزئیات را در اپلیکیشن ببینید.", smsBody: "نوبت شما در پت‌لایف تأیید شد." },
     en: { title: "Your booking is confirmed", body: "Your booking is confirmed. See the app for details.", smsBody: "Your PET LIFE OS booking is confirmed." },

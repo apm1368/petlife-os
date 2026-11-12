@@ -7084,6 +7084,57 @@ export interface WalletTopUpDto {
 export interface WalletCardTransferInstructionsDto {
   cardNumber: string;
   cardHolderName: string;
+  bankName: string | null;
+  /** IR + 24 digits, when the owner set one. */
+  sheba: string | null;
+}
+
+/** One company card-to-card account, masked (admin never sees the full number back). */
+export interface AdminCardTransferDestinationDto {
+  id: string;
+  cardNumberMasked: string | null;
+  shebaMasked: string | null;
+  holderName: string;
+  bankName: string | null;
+  active: boolean;
+  reason: string;
+  createdAt: string;
+  createdBy: string | null;
+  closedAt: string | null;
+  closedBy: string | null;
+  closeReason: string | null;
+}
+
+export type CardTransferPaymentStatusValue = "AWAITING_RECEIPT" | "REVIEW_PENDING" | "APPROVED" | "REJECTED" | "UNDERPAID_AWAITING_DIFFERENCE" | "EXPIRED" | "CANCELLED";
+
+/** A card-to-card payment for an order or a booking, as finance sees it in the receipts queue. */
+export interface AdminCardTransferPaymentDto {
+  id: string;
+  status: CardTransferPaymentStatusValue;
+  member: { userId: string; displayName: string | null };
+  reference: { kind: "ORDER" | "BOOKING"; bookingId: string | null; orderIds: string[] };
+  /** Rials. */
+  expectedAmount: number;
+  receivedAmount: number | null;
+  currency: string;
+  companyCardNumberMasked: string;
+  accountHolderName: string;
+  receiptUploaded: boolean;
+  receiptUploadedAt: string | null;
+  /** Review opens at the next working-hours slot after the upload. */
+  reviewAvailableAt: string;
+  reviewedAt: string | null;
+  rejectionReason: string | null;
+  createdAt: string;
+}
+
+export interface AdminCardTransferDestinationOverviewDto {
+  /** ADMIN = set by the owner here; ENV = the server fallback (none set here yet); NONE = card-to-card is off. */
+  source: "ADMIN" | "ENV" | "NONE";
+  current: { cardNumberMasked: string | null; shebaMasked: string | null; holderName: string; bankName: string | null } | null;
+  /** Only SUPER_ADMIN with settings.manage may change it. */
+  canEdit: boolean;
+  history: AdminCardTransferDestinationDto[];
 }
 
 export interface WalletTopUpStartedDto {

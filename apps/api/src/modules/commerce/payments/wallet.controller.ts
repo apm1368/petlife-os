@@ -42,7 +42,7 @@ export class WalletController {
   @Get()
   async summary(@CurrentUser() user: SessionUser): Promise<WalletSummaryDto> {
     const { balances, expiringSoon } = await this.wallet.summary(user.id);
-    return { balances, expiringSoon, topUp: this.topUps.options() };
+    return { balances, expiringSoon, topUp: await this.topUps.options() };
   }
 
   @Get("entries")
