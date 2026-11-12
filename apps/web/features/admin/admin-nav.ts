@@ -18,6 +18,7 @@ import {
   MapPinned,
   MessagesSquare,
   PawPrint,
+  Receipt,
   ScrollText,
   Settings,
   ShieldAlert,
@@ -112,6 +113,22 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   {
     key: "marketplace",
     modules: [
+      {
+        // Every section's orders in one place, kept apart by tab (owner request; reads only — each section's own
+        // pages still own the actions). The API applies each section's permission and vertical again.
+        key: "orders",
+        labelKey: "nav.orders",
+        icon: Receipt,
+        href: "/orders",
+        tabs: [
+          { href: "/orders", labelKey: "tabs.ordersAll", permission: ["commerce.view", "services.view", "travel.view", "animalSupport.view", "subscription.view"], exact: true },
+          { href: "/orders/shop", labelKey: "tabs.ordersShop", permission: "commerce.view" },
+          { href: "/orders/services", labelKey: "tabs.ordersServices", permission: "services.view" },
+          { href: "/orders/travel", labelKey: "tabs.ordersTravel", permission: "travel.view" },
+          { href: "/orders/donations", labelKey: "tabs.ordersDonations", permission: "animalSupport.view" },
+          { href: "/orders/subscriptions", labelKey: "tabs.ordersSubscriptions", permission: "subscription.view" },
+        ],
+      },
       {
         key: "partners",
         labelKey: "nav.partners",
