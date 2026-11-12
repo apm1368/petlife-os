@@ -150,7 +150,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
         icon: Stethoscope,
         href: "/services",
         tabs: [
-          { href: "/services", labelKey: "tabs.bookings", permission: "services.view", exact: true },
+          { href: "/services", labelKey: "tabs.bookings", permission: "services.view", exact: true, queue: "openProviderNoShows" },
           { href: "/services/catalog", labelKey: "tabs.serviceCatalog", permission: "services.view" },
           { href: "/services/reviews", labelKey: "tabs.reviews", permission: "services.view" },
           { href: "/services/analytics", labelKey: "tabs.analytics", permission: "services.view" },

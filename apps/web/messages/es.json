@@ -2009,6 +2009,9 @@
       "analytics": "Análisis y lista de espera"
     },
     "bookings": {
+      "noShowLabel": "No presentado",
+      "noShowProvider": "El proveedor no se presentó (aviso del miembro)",
+      "noShowOwner": "El dueño no se presentó",
       "title": "Servicios y reservas",
       "searchLabel": "Buscar por número, mascota o proveedor",
       "statusLabel": "Estado de la reserva",
@@ -3107,6 +3110,7 @@
         "URGENT": "Urgente"
       },
       "sources": {
+        "PROVIDER_NO_SHOW": "Proveedor no se presentó",
         "OWNERSHIP_DISPUTE": "Disputa de propiedad",
         "MANUAL": "Entrada manual",
         "TRAVEL_SOURCE": "Fuentes de viaje",
@@ -6257,6 +6261,7 @@
         "allClear": "Todo al día: no hay nada pendiente para tu equipo.",
         "clearList": "Al día: {list}",
         "queue": {
+          "openProviderNoShows": "Avisos de proveedor ausente",
           "openOwnershipDisputes": "Disputas de propiedad",
           "pendingDeletionRequests": "Solicitudes de eliminación de cuenta",
           "openTrustCases": "Casos de confianza y seguridad",

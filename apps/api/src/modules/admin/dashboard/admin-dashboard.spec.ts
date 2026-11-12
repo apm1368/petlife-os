@@ -62,6 +62,7 @@ describe("dashboard permission boundary", () => {
       pendingWalletTopUps: 16,
       pendingDeletionRequests: 17,
       openOwnershipDisputes: 18,
+      openProviderNoShows: 5,
     });
   });
   it("hides vertical queues from an admin scoped to another vertical", async () => {

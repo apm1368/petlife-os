@@ -3210,6 +3210,8 @@ export interface AdminDashboardSummaryDto {
   pendingDeletionRequests: number | null;
   /** Pet ownership transfers in DISPUTED, waiting for staff to record the outcome; customer.view. */
   openOwnershipDisputes: number | null;
+  /** Members' reports that a provider didn't show up, still open as admin tasks; services.view. */
+  openProviderNoShows: number | null;
 }
 
 // ---------------------------------------------------------------------------

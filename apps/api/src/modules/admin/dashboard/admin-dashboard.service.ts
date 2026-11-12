@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import {
   AccountDeletionState,
+  AdminTaskSource,
   PetOwnershipTransferStatus,
   AdminRefundApprovalStatus,
   AdminTaskStatus,
@@ -58,6 +59,7 @@ export class AdminDashboardService {
       pendingWalletTopUps,
       pendingDeletionRequests,
       openOwnershipDisputes,
+      openProviderNoShows,
     ] = await Promise.all([
       when(may("support.view"), () => this.prisma.supportCase.count({ where: { status: { notIn: [SupportCaseStatus.RESOLVED, SupportCaseStatus.CLOSED] } } })),
       when(may("dispute.view"), () => this.prisma.dispute.count({ where: { status: { notIn: [DisputeStatus.CLOSED] } } })),
@@ -85,6 +87,8 @@ export class AdminDashboardService {
       when(may("admin.manage"), () => this.prisma.accountDeletionRequest.count({ where: { state: { in: [AccountDeletionState.REQUESTED, AccountDeletionState.PENDING_RETENTION] } } })),
       // Pet ownership disputes waiting for staff to record an outcome (ID-03).
       when(may("customer.view"), () => this.prisma.petOwnershipTransfer.count({ where: { status: PetOwnershipTransferStatus.DISPUTED } })),
+      // Members' provider no-show reports that staff haven't finished with (their automatic tasks still open).
+      when(may("services.view"), () => this.prisma.adminTask.count({ where: { source: AdminTaskSource.PROVIDER_NO_SHOW, status: { notIn: [AdminTaskStatus.DONE, AdminTaskStatus.CANCELLED] } } })),
     ]);
     return {
       openSupportCases,
@@ -104,6 +108,7 @@ export class AdminDashboardService {
       pendingWalletTopUps,
       pendingDeletionRequests,
       openOwnershipDisputes,
+      openProviderNoShows,
     };
   }
 }
