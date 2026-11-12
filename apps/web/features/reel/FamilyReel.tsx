@@ -13,9 +13,9 @@ import { familyForPath, type Family } from "./family-copy";
 import { buildFamilyReel } from "./family-scenes";
 
 /** Each family keeps its own bird on the reel's top edge. */
-const FAMILY_BIRD: Record<Family, BirdKind> = { services: "budgie", shop: "canary", travel: "cockatiel", safe: "budgie", together: "cockatiel", learn: "canary" };
+const FAMILY_BIRD: Record<Family, BirdKind> = { care: "lovebird", services: "budgie", shop: "canary", travel: "cockatiel", safe: "budgie", together: "cockatiel", learn: "canary" };
 
-/** The reel of the current page family (pattern-2026-11/pages.md), shown at the end of every public page in that family. */
+/** The reel of the current page family (pattern-2026-11/pages.md), shown at the end of every public and member page in that family. */
 export function FamilyReel() {
   const pathname = usePathname() ?? "";
   const raw = useLocale();

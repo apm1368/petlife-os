@@ -1,16 +1,21 @@
 import type { RouteLocale } from "@/lib/i18n/config";
 
-/** Section reels for the public pages (docs/design/pattern-2026-11/pages.md): one reel per page family. */
-export type Family = "services" | "shop" | "travel" | "safe" | "together" | "learn";
+/** Section reels (docs/design/pattern-2026-11/pages.md): one reel per page family, on public and member pages. */
+export type Family = "care" | "services" | "shop" | "travel" | "safe" | "together" | "learn";
 
+/**
+ * Member pages join the family of what they do; personal records and the dashboard have their own "care" reel.
+ * Flows that must stay quiet get none: checkout, onboarding, invitations, and the NGO and insurer workspaces.
+ */
 export function familyForPath(pathname: string): Family | null {
   const path = pathname.replace(/^\/(fa|en|de|es)(?=\/|$)/, "");
-  if (/^\/(services|vet|providers|places)(\/|$)/.test(path)) return "services";
-  if (/^\/shop(\/|$)/.test(path)) return "shop";
+  if (/^\/(home|pets|care-calendar|notifications|profile|subscription|ai)(\/|$)/.test(path)) return "care";
+  if (/^\/(services|vet|providers|places|bookings|explore)(\/|$)/.test(path)) return "services";
+  if (/^\/(shop|cart|orders|repeat-delivery|favorites)(\/|$)/.test(path)) return "shop";
   if (/^\/travel(\/|$)/.test(path)) return "travel";
   if (/^\/(insurance|lost-pets)(\/|$)/.test(path)) return "safe";
-  if (/^\/(community|animal-support)(\/|$)/.test(path)) return "together";
-  if (/^\/(blog|guides|help|contact|status|legal|credits)(\/|$)/.test(path)) return "learn";
+  if (/^\/(community|animal-support|donations)(\/|$)/.test(path)) return "together";
+  if (/^\/(blog|guides|help|contact|status|legal|credits|support)(\/|$)/.test(path)) return "learn";
   return null;
 }
 
@@ -19,6 +24,9 @@ type FamilyText = { eyebrow: string; title: string; lede: string; cta: string; a
 type FamilyCopy = Record<Family, FamilyText>;
 
 const fa: FamilyCopy = {
+  care: { eyebrow: "پروندهٔ همراهت در یک نگاه", title: "همهٔ مراقبت‌ها، یک‌جا", lede: "سلامت، یادآورها و کارهای روزانهٔ همراهت را با خانواده‌ات یک‌جا نگه دار.", cta: "دیدن پرونده",
+    a: { k: "کارهای امروز", s: "غذا، پیاده‌روی و دارو؛ هر کار که انجام شد، تیک می‌خورد." }, b: { k: "با خانواده", s: "اعضای خانواده یک پرونده را می‌بینند و کارها را بین خودشان تقسیم می‌کنند." },
+    labels: { today: "امروز", feed: "غذا", walk: "پیاده‌روی", meds: "دارو", family: "خانواده", shared: "پروندهٔ مشترک", done: "انجام شد" } },
   services: { eyebrow: "خدمات و دامپزشکی در یک نگاه", title: "از جست‌وجو تا نوبت، در ۲۰ ثانیه", lede: "ببین پیدا کردن ارائه‌دهنده و رزرو نوبت در اپت لایف چطور کار می‌کند.", cta: "رزرو نوبت",
     a: { k: "جست‌وجو", s: "خدمت و محدوده را انتخاب کن، ارائه‌دهنده‌ها را ببین." }, b: { k: "رزرو", s: "روز و ساعت را انتخاب کن و نوبتت ثبت می‌شود." },
     labels: { search: "آرایش، دامپزشکی، اقامت…", vet: "دامپزشکی", grooming: "آرایش", boarding: "اقامت", verified: "تأییدشده", provider: "ارائه‌دهنده", month: "تقویم نوبت", confirm: "ثبت نوبت" } },
@@ -40,6 +48,9 @@ const fa: FamilyCopy = {
 };
 
 const en: FamilyCopy = {
+  care: { eyebrow: "Your companion's record at a glance", title: "All of their care, in one place", lede: "Keep health, reminders and daily tasks together, and share them with your family.", cta: "Open the record",
+    a: { k: "Today", s: "Food, walk and medicine; each task gets a tick when it is done." }, b: { k: "With family", s: "Everyone at home sees the same record and shares the tasks." },
+    labels: { today: "Today", feed: "Food", walk: "Walk", meds: "Medicine", family: "Family", shared: "Shared record", done: "Done" } },
   services: { eyebrow: "Services and vets at a glance", title: "From search to booking in 20 seconds", lede: "See how finding a provider and booking an appointment works on opetlife.", cta: "Book an appointment",
     a: { k: "Search", s: "Pick a service and area, then see the providers." }, b: { k: "Booking", s: "Choose a day and time and your booking is in." },
     labels: { search: "Grooming, vets, boarding…", vet: "Vet", grooming: "Grooming", boarding: "Boarding", verified: "Verified", provider: "Provider", month: "Booking calendar", confirm: "Book" } },
@@ -61,6 +72,9 @@ const en: FamilyCopy = {
 };
 
 const de: FamilyCopy = {
+  care: { eyebrow: "Die Akte deines Tieres auf einen Blick", title: "Die ganze Pflege an einem Ort", lede: "Gesundheit, Erinnerungen und tägliche Aufgaben zusammen, geteilt mit deiner Familie.", cta: "Akte öffnen",
+    a: { k: "Heute", s: "Futter, Spaziergang und Medikament; jede erledigte Aufgabe wird abgehakt." }, b: { k: "Mit der Familie", s: "Alle zu Hause sehen dieselbe Akte und teilen sich die Aufgaben." },
+    labels: { today: "Heute", feed: "Futter", walk: "Spaziergang", meds: "Medikament", family: "Familie", shared: "Geteilte Akte", done: "Erledigt" } },
   services: { eyebrow: "Angebote und Tierärzte auf einen Blick", title: "Von der Suche zum Termin in 20 Sekunden", lede: "So funktioniert die Suche nach Anbietern und die Terminbuchung bei opetlife.", cta: "Termin buchen",
     a: { k: "Suche", s: "Angebot und Gegend wählen, Anbieter ansehen." }, b: { k: "Buchung", s: "Tag und Uhrzeit wählen, schon ist der Termin da." },
     labels: { search: "Pflege, Tierarzt, Betreuung…", vet: "Tierarzt", grooming: "Pflege", boarding: "Betreuung", verified: "Geprüft", provider: "Anbieter", month: "Terminkalender", confirm: "Buchen" } },
@@ -82,6 +96,9 @@ const de: FamilyCopy = {
 };
 
 const es: FamilyCopy = {
+  care: { eyebrow: "La ficha de tu compañero de un vistazo", title: "Todos sus cuidados, en un solo lugar", lede: "Salud, recordatorios y tareas diarias juntos, y compartidos con tu familia.", cta: "Abrir la ficha",
+    a: { k: "Hoy", s: "Comida, paseo y medicina; cada tarea se marca cuando está hecha." }, b: { k: "En familia", s: "Todos en casa ven la misma ficha y se reparten las tareas." },
+    labels: { today: "Hoy", feed: "Comida", walk: "Paseo", meds: "Medicina", family: "Familia", shared: "Ficha compartida", done: "Hecho" } },
   services: { eyebrow: "Servicios y veterinarios de un vistazo", title: "De la búsqueda a la cita en 20 segundos", lede: "Así funciona buscar un proveedor y reservar una cita en opetlife.", cta: "Reservar cita",
     a: { k: "Búsqueda", s: "Elige servicio y zona y mira los proveedores." }, b: { k: "Reserva", s: "Elige día y hora y tu cita queda registrada." },
     labels: { search: "Peluquería, veterinario, alojamiento…", vet: "Veterinario", grooming: "Peluquería", boarding: "Alojamiento", verified: "Verificado", provider: "Proveedor", month: "Calendario de citas", confirm: "Reservar" } },

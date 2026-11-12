@@ -18,12 +18,13 @@ function room(id: number, extra: Record<string, unknown> = {}) {
 function apiPage(items: unknown[], page: number, total: number, rules: string[] = ["pet"]) {
   return { meta: { rooms_count: total }, filters: { rules }, rooms: { pagination: { total, count: items.length, page, per_page: 18 }, items } };
 }
-function client(pages: unknown[], robots = ROBOTS) {
-  let budget = 50;
+function client(pages: unknown[], robots = ROBOTS, budget = 50) {
   const getJson = jest.fn(async () => { budget--; const next = pages.shift(); if (next instanceof Error) throw next; return next; });
   const getText = jest.fn(async () => { budget--; return robots; });
-  return { http: { getJson, getText, get remaining() { return budget; } }, maxListings: 10 } as never as Parameters<JajigaPublicWebAdapter["discover"]>[0] & { http: { getJson: jest.Mock; getText: jest.Mock } };
+  const pause = jest.fn(async () => undefined);
+  return { http: { getJson, getText, pause, get remaining() { return budget; } }, maxListings: 10 } as never as Parameters<JajigaPublicWebAdapter["discover"]>[0] & { http: { getJson: jest.Mock; getText: jest.Mock; pause: jest.Mock } };
 }
+const fullPage = (page: number, total: number) => apiPage(Array.from({ length: 18 }, (_, i) => room(3_100_000 + (page - 1) * 18 + i)), page, total);
 
 describe("Jajiga public-web adapter", () => {
   const adapter = new JajigaPublicWebAdapter();
@@ -76,17 +77,36 @@ describe("Jajiga public-web adapter", () => {
     expect(adapter.extractImages(raw!)).toEqual([]);
   });
 
-  it("keeps observed pages when a later page fails, but marks the crawl incomplete", async () => {
-    const ctx = client([apiPage(Array.from({ length: 18 }, (_, i) => room(3_100_000 + i)), 1, 40), new AdapterError("TIMEOUT", "request timed out")]);
+  it("asks again for a page that timed out or got a 5xx, after a pause, and still finishes the walk", async () => {
+    const ctx = client([fullPage(1, 40), new AdapterError("TIMEOUT", "request timed out"), new AdapterError("SOURCE_UNAVAILABLE", "HTTP 502", 502), fullPage(2, 40), apiPage([room(3_200_000)], 3, 40)]);
     const result = await adapter.discover(ctx);
-    expect(result).toMatchObject({ complete: false });
+    expect(result).toMatchObject({ complete: true });
+    expect(result.stoppedEarly).toBeUndefined();
+    expect(result.items).toHaveLength(37);
+    expect(ctx.http.pause.mock.calls).toEqual([[15_000], [45_000]]);
+  });
+
+  it("keeps observed pages when a page keeps failing, and says where and why the crawl stopped", async () => {
+    const timeout = () => new AdapterError("TIMEOUT", "request timed out");
+    const ctx = client([fullPage(1, 40), timeout(), timeout(), timeout()]);
+    const result = await adapter.discover(ctx);
+    expect(result).toMatchObject({ complete: false, stoppedEarly: { category: "TIMEOUT", message: "stopped at page 2 of 3: request timed out" } });
     expect(result.items).toHaveLength(18);
+    expect(ctx.http.getJson).toHaveBeenCalledTimes(4);
+  });
+
+  it("reports a crawl cut short by the request budget instead of passing it off as complete", async () => {
+    const ctx = client([fullPage(1, 90), fullPage(2, 90), fullPage(3, 90)], ROBOTS, 3);
+    const result = await adapter.discover(ctx);
+    expect(result).toMatchObject({ complete: false, stoppedEarly: { category: "BUDGET_EXHAUSTED", message: "request budget used up before page 3 of 5" } });
+    expect(result.items).toHaveLength(36);
   });
 
   it.each(["BLOCKED_EXTERNAL", "RATE_LIMITED"] as const)("stops the whole run on %s, with no retry", async (category) => {
     const ctx = client([apiPage(Array.from({ length: 18 }, (_, i) => room(3_100_000 + i)), 1, 40), new AdapterError(category, "denied")]);
     await expect(adapter.discover(ctx)).rejects.toMatchObject({ category });
     expect(ctx.http.getJson).toHaveBeenCalledTimes(2);
+    expect(ctx.http.pause).not.toHaveBeenCalled();
   });
 
   it("stops paging once a single-listing refresh has seen its listing", async () => {
@@ -94,6 +114,7 @@ describe("Jajiga public-web adapter", () => {
     const result = await adapter.discover(ctx, { stopAtExternalId: "3100004" });
     expect(result.items.at(-1)?.externalId).toBe("3100004");
     expect(result.complete).toBe(false);
+    expect(result.stoppedEarly).toBeUndefined();
     expect(ctx.http.getJson).toHaveBeenCalledTimes(1);
   });
 

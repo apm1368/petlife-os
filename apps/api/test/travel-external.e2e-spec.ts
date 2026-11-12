@@ -8,7 +8,9 @@ import { PrismaService } from "../src/common/prisma/prisma.service";
 import { TRAVEL_SOURCE_ADAPTERS } from "../src/modules/travel-external/adapters/adapter-registry";
 import { FixtureAdapter, type FixturePayload } from "../src/modules/travel-external/adapters/fixture.adapter";
 import { AdapterError } from "../src/modules/travel-external/adapters/travel-source-adapter";
-import { TravelExternalService } from "../src/modules/travel-external/travel-external.service";
+import { TravelExternalService, syncLockKey } from "../src/modules/travel-external/travel-external.service";
+import { REDIS_CLIENT } from "../src/common/redis/redis.module";
+import type Redis from "ioredis";
 
 type Actor = { id: string; cookie: string; csrf: string };
 const DAY = 86400e3;
@@ -109,6 +111,13 @@ describe("External pet-friendly stays", () => {
     fixture.script = { listings: all.slice(1), complete: false };
     await run(root);
     expect(await db.externalStay.findUniqueOrThrow({ where: { id: stay.id } })).toMatchObject({ status: "ACTIVE", missedRuns: 0 });
+    // A crawl that stopped early (a page kept timing out) is PARTIAL with the reason, never a clean success, and ages nobody out.
+    fixture.script = { listings: all.slice(1), stoppedEarly: { category: "TIMEOUT", message: "stopped at page 2 of 3: request timed out" } };
+    const cut = await run(root);
+    expect(cut).toMatchObject({ status: "PARTIAL", failed: 0, listingsDiscovered: 11, errorCategories: { DISCOVERY_INCOMPLETE: 1 } });
+    expect(cut.errors[0].message).toContain("TIMEOUT: stopped at page 2 of 3");
+    expect(await db.externalStay.findUniqueOrThrow({ where: { id: stay.id } })).toMatchObject({ status: "ACTIVE", missedRuns: 0 });
+    expect(await db.externalTravelSource.findUniqueOrThrow({ where: { code: "FIXTURE" } })).toMatchObject({ health: "DEGRADED", lastRunStatus: "PARTIAL", lastErrorCategory: "DISCOVERY_INCOMPLETE", healthReason: expect.stringContaining("Discovery stopped early") });
     fixture.script = { listings: all.slice(1) };
     await run(root);
     expect(await db.externalStay.findUniqueOrThrow({ where: { id: stay.id } })).toMatchObject({ status: "ACTIVE", missedRuns: 1 }); // one miss: still uncertain
@@ -167,6 +176,12 @@ describe("External pet-friendly stays", () => {
     // Stuck runs never lock forever.
     const src0 = await db.externalTravelSource.findUniqueOrThrow({ where: { code: "FIXTURE" } });
     const stuck = await db.externalSyncRun.create({ data: { sourceId: src0.id, kind: "FULL", startedAt: new Date(Date.now() - 3 * 3600e3) } });
+    // While a live run still holds (and refreshes) the source lock, a long run is slow, not stuck.
+    const redis = app.get<Redis>(REDIS_CLIENT);
+    await redis.set(syncLockKey("FIXTURE"), "live-run", "PX", 60_000);
+    await app.get(TravelExternalService).abandonStuckRuns();
+    expect((await db.externalSyncRun.findUniqueOrThrow({ where: { id: stuck.id } })).status).toBe("STARTED");
+    await redis.del(syncLockKey("FIXTURE"));
     await app.get(TravelExternalService).abandonStuckRuns();
     expect((await db.externalSyncRun.findUniqueOrThrow({ where: { id: stuck.id } })).status).toBe("ABANDONED");
     const errs = (await get(root, "/admin/travel/external/errors?source=FIXTURE").expect(200)).body;
