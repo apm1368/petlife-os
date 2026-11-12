@@ -16,6 +16,13 @@ import { articleStatusTone } from "./content-tone";
 
 const LOCALES: ContentLocale[] = ["fa", "en"];
 
+/** Mirrors apps/api content/slug.util.ts. */
+const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+/** Lowercases, turns spaces/underscores into hyphens and drops anything the API would reject. */
+function toSlug(value: string) {
+  return value.trim().toLowerCase().replace(/[\s_]+/g, "-").replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-").replace(/^-|-$/g, "");
+}
+
 /**
  * The article editor (spec: "title, slug, excerpt, body, cover, category,
  * tags, author, locale, SEO, state, preview, save"). `articleId === null`
@@ -150,6 +157,11 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
   async function save() {
     if (localeLoadError || localeLoading || !canAct(articleId ? "content.edit" : "content.create") || (status === ArticleLifecycleStatus.VISIBLE && !canAct("content.publish"))) return;
     setSaveError(null);
+    // The API accepts only lowercase Latin words joined by hyphens (SLUG_PATTERN); say so before a round-trip.
+    if (!SLUG_PATTERN.test(slug)) {
+      setSaveError(t("slugInvalid"));
+      return;
+    }
     const input = { title, slug, excerpt: excerpt || undefined, body, seoTitle: seoTitle || undefined, seoDescription: seoDescription || undefined, changeNote: changeNote || undefined };
     try {
       if (!articleId) {
@@ -276,7 +288,7 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
           </div>
 
           <Input readOnly={!canSave} label={t("titleField")} value={title} onChange={(e) => setTitle(e.target.value)} />
-          <Input readOnly={!canSave} label={t("slug")} value={slug} onChange={(e) => setSlug(e.target.value)} />
+          <Input readOnly={!canSave} label={t("slug")} dir="ltr" value={slug} hint={t("slugHint")} errorMessage={slug && !SLUG_PATTERN.test(slug) ? t("slugInvalid") : undefined} onChange={(e) => setSlug(e.target.value)} onBlur={() => setSlug((value) => toSlug(value))} />
           <Input readOnly={!canSave} label={t("excerpt")} value={excerpt} onChange={(e) => setExcerpt(e.target.value)} />
           <Input readOnly={!canSave} label={t("seoTitle")} value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} />
           <Input readOnly={!canSave} label={t("seoDescription")} value={seoDescription} onChange={(e) => setSeoDescription(e.target.value)} />

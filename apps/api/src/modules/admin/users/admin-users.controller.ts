@@ -32,6 +32,12 @@ export class AdminUsersController {
     return this.users.list(query);
   }
 
+  @Get(":id/behavior")
+  @RequireAdminPermission("customer.view")
+  behavior(@Param("id", ParseUUIDPipe) id: string) {
+    return this.users.getBehavior(id);
+  }
+
   @Get(":id")
   @RequireAdminPermission("customer.view")
   get(@Param("id", ParseUUIDPipe) id: string) {

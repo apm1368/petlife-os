@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useLocale } from "next-intl";
 import { ChevronLeft, ChevronRight, ClipboardList, HeartPulse, House, Images, LifeBuoy, PackageCheck, Plane } from "@petlife/ui";
 import { EXPLORE_GROUPS } from "@/features/navigation/consumer-nav";
+import { useHrefFilter } from "@/features/site-settings/site-settings";
 import type { RouteLocale } from "@/lib/i18n/config";
 
 type Entry = { href: string; icon: typeof House; fa: [string, string]; en: [string, string]; de: [string, string]; es: [string, string] };
@@ -28,6 +29,7 @@ export function ExploreView() {
   const fa = locale === "fa";
   const copy = COPY[locale];
   const Forward = fa ? ChevronLeft : ChevronRight;
+  const enabled = useHrefFilter();
   return (
     <div className="explore">
       <header className="page-intro">
@@ -44,7 +46,7 @@ export function ExploreView() {
         ))}
       </nav>
 
-      {EXPLORE_GROUPS.map((group) => (
+      {EXPLORE_GROUPS.map((group) => ({ ...group, links: group.links.filter((link) => enabled(link.href)) })).filter((group) => group.links.length > 0).map((group) => (
         <section key={group.key} className="explore-group" aria-labelledby={`explore-${group.key}`}>
           <h2 id={`explore-${group.key}`}>{group[locale]}</h2>
           <ul>

@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { EmailModule } from "../../common/email/email.module";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { DevOtpProvider } from "./otp/dev-otp.provider";
@@ -16,6 +17,7 @@ import { ContactChangeController } from "./contact-change.controller";
 import { ContactChangeService } from "./contact-change.service";
 
 @Module({
+  imports: [EmailModule],
   controllers: [AuthController, AuthGoogleController, AuthGoogleDevController, ContactChangeController],
   providers: [
     AuthService,

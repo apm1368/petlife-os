@@ -21,4 +21,17 @@ export const MESSAGING_PROVIDER_CAPABILITIES: Record<MessagingProvider, Messagin
     supportsStatusQuery: false,
     supportsUnicode: true,
   },
+  /// Email providers: SMTP acceptance is the ceiling (SENT); there are no delivery receipts.
+  GMAIL: {
+    supportsDeliveryStatus: false,
+    supportsWebhook: false,
+    supportsStatusQuery: false,
+    supportsUnicode: true,
+  },
+  SMTP: {
+    supportsDeliveryStatus: false,
+    supportsWebhook: false,
+    supportsStatusQuery: false,
+    supportsUnicode: true,
+  },
 };

@@ -1245,3 +1245,21 @@ a.erp-list__row:hover { background:var(--erp-bg); }
 @media (max-width: 1180px) { .erp-top { grid-template-columns:minmax(0,1fr); } .erp-grid { grid-template-columns:minmax(0,1fr) minmax(0,1fr); } }
 @media (max-width: 760px) { .erp-hero { grid-template-columns:minmax(0,1fr); padding:22px; } .erp-grid { grid-template-columns:minmax(0,1fr); } .erp-card { padding:20px; border-radius:22px; } }
 .erp-orbit__tag { fill:#0b1120; stroke:#ffffff24; }
+
+/* Admin-configurable site settings: footer contact, social links, maintenance screen. */
+.site-contact { display:grid; gap:8px; font-style:normal; font-size:.86rem; line-height:1.8; }
+.site-contact p { display:flex; align-items:center; gap:8px; margin:0; flex-wrap:wrap; }
+.site-contact svg { flex:none; color:var(--brand-natural); }
+.site-contact a { text-decoration:underline; text-underline-offset:4px; }
+.site-contact__hint { color:var(--text-secondary); }
+.site-contact--page { padding:20px; border:1px solid var(--border-subtle); border-radius:20px; background:var(--surface-elevated); }
+.site-social { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 0; padding:0; list-style:none; }
+.site-social a { display:inline-flex; align-items:center; min-height:36px; padding:0 14px; border-radius:999px; border:1px solid var(--border-subtle); font-size:.8rem; font-weight:700; text-decoration:none; }
+.site-social a:hover { border-color:var(--brand-natural); color:var(--brand-natural); }
+.site-footer-note { display:grid; gap:4px; margin-top:12px; font-size:.8rem; color:var(--text-secondary); line-height:1.8; }
+.site-footer-note__tagline { font-weight:700; color:var(--text-primary); }
+.site-maintenance { min-height:100dvh; display:grid; place-items:center; padding:24px 16px; background:radial-gradient(50rem 30rem at 100% 0, rgba(242,181,68,.22), transparent 60%), radial-gradient(40rem 30rem at 0 100%, rgba(125,180,108,.25), transparent 60%), var(--surface-base); }
+.site-maintenance__card { display:grid; justify-items:center; gap:14px; max-width:34rem; padding:36px 28px; border-radius:28px; text-align:center; background:var(--surface-elevated); border:1px solid var(--border-subtle); box-shadow:0 30px 60px -40px rgba(23,70,47,.45); }
+.site-maintenance__card h1 { margin:0; font-size:1.5rem; font-weight:800; }
+.site-maintenance__card p { margin:0; color:var(--text-secondary); line-height:1.9; white-space:pre-wrap; }
+.site-maintenance__link { min-height:44px; display:inline-flex; align-items:center; padding:0 20px; border-radius:999px; background:var(--brand-solid); color:#fff; font-weight:700; text-decoration:none; }

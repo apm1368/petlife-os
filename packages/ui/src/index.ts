@@ -35,4 +35,6 @@ export {
   Compass, Images, Plane, BookOpen, LifeBuoy, HandHeart, ClipboardList, Receipt, ShieldPlus, Siren, Newspaper, Paperclip,
   FileText, Plus, Camera, Cat, Bird, Rabbit, Fish, Turtle, Rat, PawPrint, Car, Route, Navigation, Weight,
   Bell, ArrowRight, BedDouble, Fingerprint, Syringe, Pill, Scale, CircleHelp, Check, ChevronDown, Coffee, Hotel, Trees, UtensilsCrossed, Waves,
+  ChartColumn, ChartLine, ChartPie, TrendingUp, TrendingDown, Download, Filter, LogIn, UserPlus, Activity, Wallet, Gauge, Command,
+  MessageSquare, Send, Settings, KeyRound, Store, Ticket, CircleUserRound, Globe, Palette, ToggleLeft, Eye, EyeOff, Save,
 } from "lucide-react";

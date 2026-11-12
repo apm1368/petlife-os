@@ -1,13 +1,15 @@
 "use client";
 import styles from "./AdminShell.module.css";
+import "./admin-glass.css";
 import { Brand } from "@/features/brand/Brand";
 import { LocalPreviewGate } from "@/features/local-preview/LocalPreviewGate";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import type { AdminPermissionName } from "@petlife/types";
+import type { RouteLocale } from "@/lib/i18n/config";
 import {
   Button,
   ClipboardList,
@@ -18,6 +20,8 @@ import {
   SlidersHorizontal,
   House,
   ChevronDown,
+  ChartColumn,
+  Search,
   ContextSurface,
   IconButton,
   Menu,
@@ -40,6 +44,7 @@ const NAV_ITEMS: {
   permission?: AdminPermissionName | AdminPermissionName[];
 }[] = [
   { href: "", labelKey: "nav.dashboard" },
+  { href: "/reports", labelKey: "nav.reports", permission: "analytics.view" },
   { href: "/crm", labelKey: "nav.crm", permission: "customer.view" },
   { href: "/customer-affairs", labelKey: "nav.customerAffairs", permission: "support.view" },
   { href: "/customers", labelKey: "nav.customers", permission: "customer.view" },
@@ -72,8 +77,11 @@ const NAV_ITEMS: {
   { href: "/subscriptions", labelKey: "nav.subscriptions", permission: "subscription.view" },
   { href: "/tasks", labelKey: "nav.tasks", permission: "task.manage" },
   { href: "/access", labelKey: "nav.access", permission: "access.view" },
+  { href: "/access/matrix", labelKey: "nav.accessMatrix", permission: "access.view" },
+  { href: "/site-settings", labelKey: "nav.siteSettings", permission: "settings.view" },
   { href: "/settings", labelKey: "nav.settings", permission: "settings.view" },
   { href: "/feature-flags", labelKey: "nav.featureFlags", permission: "settings.view" },
+  { href: "/messaging", labelKey: "nav.messaging", permission: "system.view" },
   { href: "/sms-patterns", labelKey: "nav.smsPatterns", permission: "system.view" },
   { href: "/audit", labelKey: "nav.audit", permission: "audit.view" },
 ];
@@ -124,8 +132,11 @@ const NAV_GROUPS: { key: string; hrefs: string[] }[] = [
       "/content/placements",
     ],
   },
-  { key: "system", hrefs: ["/access", "/settings", "/feature-flags", "/sms-patterns", "/audit"] },
+  { key: "system", hrefs: ["/site-settings", "/access", "/access/matrix", "/settings", "/feature-flags", "/messaging", "/sms-patterns", "/audit"] },
 ];
+
+/** Rendered above the groups, always visible: the two places every admin starts from. */
+const TOP_LEVEL_HREFS = ["", "/reports"];
 
 const GROUP_ICONS = {
   work: ClipboardList,
@@ -149,6 +160,7 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
   const [sessionState, setSessionState] = useState<SessionState>("loading");
   const [menuOpen, setMenuOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const [trustCount, setTrustCount] = useState<number | null>(null);
   const { isLoading, error: bootstrapError, retry: retryBootstrap } = useAdminBootstrap();
   const context = useAdminStore((s) => s.context);
@@ -178,7 +190,19 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setOpenGroup(null);
+    setPaletteOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setPaletteOpen((open) => !open);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -258,20 +282,36 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
       aria-current={activeHref === item.href ? "page" : undefined}
       className={styles.link}
     >
-      {item.href === "" ? <House size={20} aria-hidden="true" /> : null}
+      {item.href === "" ? <House size={20} aria-hidden="true" /> : item.href === "/reports" ? <ChartColumn size={20} aria-hidden="true" /> : null}
       {t(item.labelKey)}
     </Link>
+  );
+
+  const topLevel = TOP_LEVEL_HREFS.map((h) => visible.get(h)).filter((i): i is NonNullable<typeof i> => Boolean(i));
+  const activeItem = activeHref !== undefined ? visible.get(activeHref) : undefined;
+  const paletteItems: PaletteItem[] = [
+    ...topLevel.map((i) => ({ href: i.href, label: t(i.labelKey), group: t("title") })),
+    ...groups.flatMap((g) => g.items.map((i) => ({ href: i.href, label: t(i.labelKey), group: t(`groups.${g.key}`) }))),
+  ];
+  const initials = (context.displayName || t(`role.${context.role}`)).trim().slice(0, 1).toLocaleUpperCase(locale);
+  const searchButton = (className: string | undefined) => (
+    <button type="button" className={className} onClick={() => setPaletteOpen(true)} aria-keyshortcuts="Control+K Meta+K">
+      <Search size={17} aria-hidden="true" />
+      <span>{t("palette.trigger")}</span>
+      <kbd>Ctrl K</kbd>
+    </button>
   );
 
   return (
     <div className={`erp-shell ${styles.shell}`}>
       <aside className={styles.sidebar}>
         <Link href={`/${locale}/admin`} className={styles.brand}>
-          <Brand />
+          <Brand locale={locale as RouteLocale} />
           <span>{t("title")}</span>
         </Link>
+        {searchButton(styles.search)}
         <nav className={styles.navigation} aria-label={t("navigation")}>
-          {itemLink(visible.get("")!)}
+          {topLevel.map((item) => itemLink(item))}
           {groups.map((g) => {
             const GroupIcon = GROUP_ICONS[g.key as keyof typeof GROUP_ICONS];
             const expanded = openGroup === g.key || (openGroup === null && groupOf(activeHref) === g.key);
@@ -302,6 +342,13 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
+        <div className={styles.sideFooter}>
+          <span className={styles.avatar} aria-hidden="true">{initials}</span>
+          <div className={styles.user}>
+            <span>{context.displayName || t(`role.${context.role}`)}</span>
+            <small>{t(`role.${context.role}`)}</small>
+          </div>
+        </div>
       </aside>
       <div className={styles.workspace}>
         <header className={styles.header}>
@@ -314,21 +361,22 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
               />
             </span>
             <Link href={`/${locale}/admin`} className={styles.headerBrand} aria-label={t("title")}>
-              <Brand compact />
+              <Brand compact locale={locale as RouteLocale} />
             </Link>
             <span className={styles.title}>{t("title")}</span>
+            {activeItem && activeItem.href !== "" ? <span className={styles.crumb}>{t(activeItem.labelKey)}</span> : null}
           </div>
           <div className={styles.tools}>
+            <span className={styles.headerSearch}>
+              <IconButton label={t("palette.trigger")} onClick={() => setPaletteOpen(true)} icon={<Search size={20} aria-hidden="true" />} />
+            </span>
             <LocaleSwitcher />
             <ThemeToggle />
-            <div className={styles.user}>
-              <span>{context.displayName || t(`role.${context.role}`)}</span>
-              <small>{t(`role.${context.role}`)}</small>
-            </div>
           </div>
         </header>
         <main className={`erp-main workspace-main w-full min-w-0 ${styles.main}`}>{children}</main>
       </div>
+      {paletteOpen ? <CommandPalette items={paletteItems} onClose={() => setPaletteOpen(false)} /> : null}
       {menuOpen ? (
         <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} title={t("navigation")}>
           <div className="flex justify-end">
@@ -339,7 +387,7 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
             />
           </div>
           <nav className={styles.sheetNavigation} aria-label={t("navigation")}>
-            {itemLink(visible.get("")!, () => setMenuOpen(false))}
+            <div>{topLevel.map((item) => itemLink(item, () => setMenuOpen(false)))}</div>
             {groups.map((g) => (
               <div key={g.key}>
                 <p>{t(`groups.${g.key}`)}</p>
@@ -349,6 +397,71 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
           </nav>
         </Sheet>
       ) : null}
+    </div>
+  );
+}
+
+type PaletteItem = { href: string; label: string; group: string };
+
+/**
+ * Ctrl/⌘+K jump-to: every page the admin may open, filtered as they type, plus a people search that lands on
+ * the users directory. Arrow keys move, Enter opens, Esc closes.
+ */
+function CommandPalette({ items, onClose }: { items: PaletteItem[]; onClose: () => void }) {
+  const t = useTranslations("admin.shell");
+  const locale = useLocale();
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+  const [index, setIndex] = useState(0);
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => input.current?.focus(), []);
+  const q = query.trim().toLocaleLowerCase(locale);
+  const matches = useMemo(() => {
+    const found = items.filter((i) => !q || i.label.toLocaleLowerCase(locale).includes(q) || i.group.toLocaleLowerCase(locale).includes(q));
+    return q ? [...found, { href: `/users?q=${encodeURIComponent(query.trim())}`, label: t("palette.searchPeople", { query: query.trim() }), group: t("nav.users") }] : found;
+  }, [items, q, query, locale, t]);
+  const open = (href: string) => { onClose(); router.push(`/${locale}/admin${href}`); };
+  return (
+    <div className="gx-palette" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="gx-palette__box" role="dialog" aria-modal="true" aria-label={t("palette.title")}>
+        <div className="gx-palette__input">
+          <Search size={18} aria-hidden="true" />
+          <input
+            ref={input}
+            value={query}
+            role="combobox"
+            aria-expanded="true"
+            aria-controls="admin-palette-list"
+            aria-activedescendant={matches[index] ? `admin-palette-${index}` : undefined}
+            placeholder={t("palette.placeholder")}
+            aria-label={t("palette.placeholder")}
+            onChange={(e) => { setQuery(e.target.value); setIndex(0); }}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") onClose();
+              else if (e.key === "ArrowDown") { e.preventDefault(); setIndex((i) => Math.min(i + 1, matches.length - 1)); }
+              else if (e.key === "ArrowUp") { e.preventDefault(); setIndex((i) => Math.max(i - 1, 0)); }
+              else if (e.key === "Enter" && matches[index]) { e.preventDefault(); open(matches[index].href); }
+            }}
+          />
+        </div>
+        <ul id="admin-palette-list" role="listbox" aria-label={t("palette.title")}>
+          {matches.length === 0 ? <li className="gx-empty">{t("palette.empty")}</li> : matches.map((item, i) => (
+            <li key={`${item.href}-${i}`} role="presentation">
+              <a
+                id={`admin-palette-${i}`}
+                role="option"
+                aria-selected={i === index}
+                href={`/${locale}/admin${item.href}`}
+                onMouseEnter={() => setIndex(i)}
+                onClick={(e) => { e.preventDefault(); open(item.href); }}
+              >
+                <span>{item.label}</span>
+                <small>{item.group}</small>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

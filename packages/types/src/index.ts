@@ -2592,6 +2592,46 @@ export enum TrustCaseStatus {
   CLOSED = "CLOSED",
 }
 
+/**
+ * Allowed case status moves, mirrored from the API's authoritative tables (trust-case-transitions.ts,
+ * dispute-transitions.ts, support-case-transitions.ts; a spec there keeps them equal). The admin UI uses
+ * them only to offer valid next steps — the API still validates every transition.
+ */
+export const TRUST_CASE_NEXT: Record<TrustCaseStatus, TrustCaseStatus[]> = {
+  [TrustCaseStatus.OPEN]: [TrustCaseStatus.UNDER_REVIEW, TrustCaseStatus.CLOSED],
+  [TrustCaseStatus.UNDER_REVIEW]: [TrustCaseStatus.RESOLVED, TrustCaseStatus.CLOSED],
+  [TrustCaseStatus.RESOLVED]: [TrustCaseStatus.CLOSED],
+  [TrustCaseStatus.CLOSED]: [],
+};
+
+const DISPUTE_DECISIONS = [
+  DisputeStatus.RESOLVED_CUSTOMER,
+  DisputeStatus.RESOLVED_PROVIDER,
+  DisputeStatus.RESOLVED_SELLER,
+  DisputeStatus.PARTIAL_RESOLUTION,
+  DisputeStatus.REJECTED,
+];
+export const DISPUTE_NEXT: Record<DisputeStatus, DisputeStatus[]> = {
+  [DisputeStatus.OPEN]: [DisputeStatus.UNDER_REVIEW, DisputeStatus.AWAITING_EVIDENCE, DisputeStatus.REJECTED, DisputeStatus.CLOSED],
+  [DisputeStatus.UNDER_REVIEW]: [DisputeStatus.AWAITING_EVIDENCE, ...DISPUTE_DECISIONS, DisputeStatus.CLOSED],
+  [DisputeStatus.AWAITING_EVIDENCE]: [DisputeStatus.UNDER_REVIEW, ...DISPUTE_DECISIONS, DisputeStatus.CLOSED],
+  [DisputeStatus.RESOLVED_CUSTOMER]: [DisputeStatus.CLOSED],
+  [DisputeStatus.RESOLVED_PROVIDER]: [DisputeStatus.CLOSED],
+  [DisputeStatus.RESOLVED_SELLER]: [DisputeStatus.CLOSED],
+  [DisputeStatus.PARTIAL_RESOLUTION]: [DisputeStatus.CLOSED],
+  [DisputeStatus.REJECTED]: [DisputeStatus.CLOSED],
+  [DisputeStatus.CLOSED]: [],
+};
+
+export const SUPPORT_CASE_NEXT: Record<SupportCaseStatus, SupportCaseStatus[]> = {
+  [SupportCaseStatus.OPEN]: [SupportCaseStatus.IN_PROGRESS, SupportCaseStatus.WAITING_ON_USER, SupportCaseStatus.WAITING_ON_INTERNAL, SupportCaseStatus.RESOLVED, SupportCaseStatus.CLOSED],
+  [SupportCaseStatus.IN_PROGRESS]: [SupportCaseStatus.WAITING_ON_USER, SupportCaseStatus.WAITING_ON_INTERNAL, SupportCaseStatus.RESOLVED, SupportCaseStatus.CLOSED],
+  [SupportCaseStatus.WAITING_ON_USER]: [SupportCaseStatus.IN_PROGRESS, SupportCaseStatus.RESOLVED, SupportCaseStatus.CLOSED],
+  [SupportCaseStatus.WAITING_ON_INTERNAL]: [SupportCaseStatus.IN_PROGRESS, SupportCaseStatus.RESOLVED, SupportCaseStatus.CLOSED],
+  [SupportCaseStatus.RESOLVED]: [SupportCaseStatus.CLOSED, SupportCaseStatus.IN_PROGRESS],
+  [SupportCaseStatus.CLOSED]: [SupportCaseStatus.IN_PROGRESS],
+};
+
 export enum TrustActionType {
   WARNING = "WARNING",
   RESTRICT = "RESTRICT",
@@ -2980,6 +3020,8 @@ export interface AdminUserDirectoryRowDto {
   /** Coarse last-seen stamp (W2-5), null for a user who has not resolved a session since it shipped. */
   lastActiveAt: string | null;
   roles: AdminUserRoleDto[];
+  /** Behaviour roll-up for the row; present on directory list rows. */
+  behavior?: AdminUserBehaviorSummaryDto;
 }
 
 export type AdminUserDirectoryListDto = PaginatedDto<AdminUserDirectoryRowDto>;
@@ -3140,6 +3182,138 @@ export interface AdminDashboardSummaryDto {
   openTrustCases: number | null;
   pendingRefundApprovals: number | null;
   openTasks: number | null;
+}
+
+// ---------------------------------------------------------------------------
+// ERP reports (analytics.view) and customer behaviour
+// ---------------------------------------------------------------------------
+
+export type AdminReportGranularity = "day" | "week" | "month";
+
+/** One headline number for the window, with the same-length window just before it. */
+export interface AdminReportKpiDto {
+  value: number;
+  previous: number;
+  /** (value − previous) / previous; null when the previous window was zero and this one is not. */
+  change: number | null;
+}
+
+export interface AdminReportSeriesPointDto {
+  /** Bucket start, Tehran calendar date (YYYY-MM-DD). */
+  bucket: string;
+  newUsers: number;
+  activeUsers: number;
+  orders: number;
+  gmv: number;
+  serviceBookings: number;
+  travelBookings: number;
+  bookingValue: number;
+}
+
+export interface AdminReportBreakdownRowDto {
+  key: string;
+  count: number;
+  /** IRR, when the row carries money. */
+  amount?: number;
+}
+
+export interface AdminReportTopRowDto {
+  id: string;
+  name: string;
+  count: number;
+  amount: number;
+}
+
+export interface AdminReportCohortDto {
+  /** Signup month, Tehran calendar (YYYY-MM-01). */
+  cohort: string;
+  size: number;
+  /** Share of the cohort that ordered or booked in month 0, 1, 2… after signup (0..1). */
+  retention: number[];
+}
+
+export interface AdminReportOverviewDto {
+  range: {
+    from: string;
+    to: string;
+    previousFrom: string;
+    previousTo: string;
+    granularity: AdminReportGranularity;
+    days: number;
+    timezone: "Asia/Tehran";
+    generatedAt: string;
+  };
+  kpis: {
+    newUsers: AdminReportKpiDto;
+    activeUsers: AdminReportKpiDto;
+    buyers: AdminReportKpiDto;
+    orders: AdminReportKpiDto;
+    gmv: AdminReportKpiDto;
+    averageOrderValue: AdminReportKpiDto;
+    serviceBookings: AdminReportKpiDto;
+    travelBookings: AdminReportKpiDto;
+    bookingValue: AdminReportKpiDto;
+    cancellationRate: AdminReportKpiDto;
+    repeatBuyerRate: AdminReportKpiDto;
+    supportCases: AdminReportKpiDto;
+  };
+  series: AdminReportSeriesPointDto[];
+  breakdowns: {
+    orderStatus: AdminReportBreakdownRowDto[];
+    serviceCategory: AdminReportBreakdownRowDto[];
+    serviceStatus: AdminReportBreakdownRowDto[];
+    travelStatus: AdminReportBreakdownRowDto[];
+    customerSegments: AdminReportBreakdownRowDto[];
+  };
+  funnel: { carts: number; checkouts: number; orders: number; fulfilled: number };
+  top: {
+    sellers: AdminReportTopRowDto[];
+    providers: AdminReportTopRowDto[];
+    products: AdminReportTopRowDto[];
+    /** Null when the caller may not see customer identities (needs customer.view). */
+    customers: AdminReportTopRowDto[] | null;
+  };
+  cohorts: AdminReportCohortDto[];
+}
+
+/** Behaviour segments the users directory and reports share. Computed on read, never stored. */
+export type AdminCustomerSegment = "NEW" | "VIP" | "ACTIVE" | "AT_RISK" | "DORMANT" | "NEVER_PURCHASED";
+
+export interface AdminUserBehaviorSummaryDto {
+  orderCount: number;
+  /** IRR across shop orders, service bookings and stays that were not cancelled, rejected or refunded. */
+  totalSpend: number;
+  lastOrderAt: string | null;
+  serviceBookingCount: number;
+  travelBookingCount: number;
+  lastBookingAt: string | null;
+  cancelledCount: number;
+  noShowCount: number;
+  supportCaseCount: number;
+  segment: AdminCustomerSegment;
+}
+
+export type AdminUserTimelineKind = "ORDER" | "SERVICE_BOOKING" | "TRAVEL_BOOKING" | "SUPPORT_CASE" | "REVIEW" | "SIGN_IN" | "SIGN_UP";
+
+export interface AdminUserTimelineEntryDto {
+  id: string;
+  kind: AdminUserTimelineKind;
+  at: string;
+  status: string | null;
+  /** IRR, when the event carries money. */
+  amount: number | null;
+  /** Short machine label (category, reference, case number…). */
+  label: string | null;
+  /** Admin route the entry opens, relative to /{locale}/admin; null when there is no admin page for it. */
+  href: string | null;
+}
+
+export interface AdminUserBehaviorDto {
+  summary: AdminUserBehaviorSummaryDto;
+  /** Last 12 Tehran calendar months, oldest first. */
+  monthlyActivity: { month: string; orders: number; bookings: number; spend: number }[];
+  favoriteCategories: AdminReportBreakdownRowDto[];
+  timeline: AdminUserTimelineEntryDto[];
 }
 
 /** The admin-domain mirror of AdminPermission (apps/api's own admin-permissions.ts) — kept as a plain string union here since the frontend only ever compares/display-filters against it, never re-derives access decisions (the backend is always the source of truth; hiding a nav item is a convenience, never a security boundary). */

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button, ContextSurface, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
-import { SupportCaseStatus, SupportMessageVisibility, type SupportCaseContextDto, type SupportCaseDetailDto } from "@petlife/types";
+import { SupportCaseStatus, SupportMessageVisibility, type SupportCaseContextDto, type SupportCaseDetailDto, SUPPORT_CASE_NEXT } from "@petlife/types";
 import { adminService } from "@/services/admin.service";
 import { adminStatusTone } from "./status-tone";
 import { ApiError } from "@/lib/api/client";
@@ -152,7 +152,7 @@ export function AdminSupportCaseDetailView({ caseId }: { caseId: string }) {
 
       <ContextSurface className="flex flex-wrap gap-2">
         {STATUSES.map((s) => (
-          <Button key={s} size="sm" aria-pressed={s === data.status} variant={s === data.status ? "primary" : "secondary"} onClick={() => transition(s)} disabled={s === data.status}>
+          <Button key={s} size="sm" aria-pressed={s === data.status} variant={s === data.status ? "primary" : "secondary"} onClick={() => transition(s)} disabled={s === data.status || !(SUPPORT_CASE_NEXT[data.status as SupportCaseStatus] ?? []).includes(s)}>
             {t(`status.${s}`)}
           </Button>
         ))}

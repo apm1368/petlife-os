@@ -9,6 +9,7 @@ import { Button, Input, Mail } from "@petlife/ui";
 import { SupportCaseCategory } from "@petlife/types";
 import { useSessionStore } from "@/stores/session-store";
 import { supportService } from "@/services/support.service";
+import { SiteContact, SocialLinks } from "@/features/site-settings/SiteContact";
 import { buildLoginUrl } from "@/lib/auth/return-to";
 import { ApiError } from "@/lib/api/client";
 import "./contact-design.css";
@@ -51,7 +52,7 @@ export function ContactView() {
   return <section className="contact-scene">
     <Image src={locale === "fa" ? "/images/landing/tehran-park.webp" : "/images/landing/tehran-park-en.webp"} alt="" fill priority sizes="100vw" className="contact-scene__image" />
     <div className="contact-scene__shade" aria-hidden="true" />
-    <header className="contact-scene__heading"><p>{t("eyebrow")}</p><h1>{t("title")}</h1><p>{t("subtitle")}</p></header>
+    <header className="contact-scene__heading"><p>{t("eyebrow")}</p><h1>{t("title")}</h1><p>{t("subtitle")}</p><SiteContact variant="page" /><SocialLinks /></header>
     <div className="contact-glass">
       {sent ? <div role="status" className="contact-success"><Mail size={38} aria-hidden="true" /><h2>{t("sent")}</h2><Link href={`/${locale}/support/tickets/${sent}`}>{t("openTicket")}</Link></div> : <form onSubmit={submit}>
         {user ? <p className="contact-glass__identity">{user.displayName}</p> : <p>{t("signInHint")}</p>}
