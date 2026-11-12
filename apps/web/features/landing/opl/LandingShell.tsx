@@ -27,7 +27,7 @@ export function useLanding(): LandingState {
 }
 
 /** Holds the visitor's pet name and the Cookie cursor switch for the whole landing below the hero. */
-export function LandingShell({ locale, children }: { locale: RouteLocale; children: ReactNode }) {
+export function LandingShell({ locale, children, variant = "landing" }: { locale: RouteLocale; children: ReactNode; variant?: "landing" | "page" }) {
   const [name, setName] = useState("");
   const [species, setSpecies] = useState<Species>("dog");
   const [cookieOn, setCookieOnState] = useState(false);
@@ -44,7 +44,7 @@ export function LandingShell({ locale, children }: { locale: RouteLocale; childr
     },
   }), [locale, name, species, cookieOn]);
   return <LandingContext.Provider value={value}>
-    <div className={`opl-landing${cookieOn ? " is-cookie" : ""}`}>
+    <div className={`${variant === "page" ? "opl-page" : "opl-landing"}${cookieOn ? " is-cookie" : ""}`}>
       {children}
       <HookBar />
       {cookieOn ? <CookieCursor /> : null}
