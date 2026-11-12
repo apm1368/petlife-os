@@ -6,7 +6,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { CircleHelp, IconButton } from "@petlife/ui";
 import { useSessionStore } from "@/stores/session-store";
-import { MobileTabBar, PetContextControl, PrimaryNav } from "@/features/navigation/MemberNavigation";
+import { MobileExploreButton, MobileTabBar, PetContextControl, PrimaryNav } from "@/features/navigation/MemberNavigation";
+import { MobileBackButton } from "@/features/pwa/MobileBackButton";
+import { InstallAppCard } from "@/features/pwa/InstallAppCard";
+import { PullToRefresh } from "@/features/pwa/PullToRefresh";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { DisplayModeToggle } from "@/features/display-mode/DisplayModeToggle";
 import { LanguageToggle } from "@/features/locale/LanguageToggle";
@@ -38,7 +41,9 @@ export function MemberFrame({ children }: { children: React.ReactNode }) {
   const locale = useLocale();
   const routeLocale = isRouteLocale(locale) ? locale : "en";
   const router = useRouter();
-  const glass = memberSurface(usePathname() ?? "") === "glass";
+  const pathname = usePathname() ?? "";
+  const glass = memberSurface(pathname) === "glass";
+  const pathKey = pathname.replace(new RegExp(`^/${locale}(?=/|$)`), "") || "/";
   const user = useSessionStore((s) => s.user);
   const { activePet, pets } = useActivePet();
   const { access } = usePetAccess(activePet?.id ?? pets[0]?.id ?? null);
@@ -50,6 +55,7 @@ export function MemberFrame({ children }: { children: React.ReactNode }) {
         </a>
         <header className="member-header">
           <div className="member-header__bar">
+            <MobileBackButton />
             <Link href={`/${locale}/home`} className="member-header__brand">
               <Brand locale={routeLocale} />
             </Link>
@@ -67,6 +73,9 @@ export function MemberFrame({ children }: { children: React.ReactNode }) {
                   }
                 />
               </span>
+              <span className="member-header__explore-wrap">
+                <MobileExploreButton canViewHealth={access?.canViewHealth === true} />
+              </span>
               <NotificationBell />
               <span className="member-header__secondary">
                 <LanguageToggle />
@@ -79,12 +88,14 @@ export function MemberFrame({ children }: { children: React.ReactNode }) {
         </header>
         <main id="member-main-content" tabIndex={-1} className="workspace-main motion-page">
           <PlatformAnnouncement />
+          {pathKey === "/home" || pathKey === "/profile" ? <InstallAppCard /> : null}
           {children}
           <FamilyReel />
           <div className="member-foot"><CookieToggle /></div>
         </main>
         {glass ? <MemberGlassDock access={access} /> : null}
-        <MobileTabBar canViewHealth={access?.canViewHealth === true} />
+        <MobileTabBar />
+        <PullToRefresh />
       </div>
     </LandingShell>
   );

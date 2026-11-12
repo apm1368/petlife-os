@@ -10168,5 +10168,26 @@
         "CANCELLED": "Cancelled"
       }
     }
+  },
+  "pwa": {
+    "install": {
+      "title": "Install opetlife on your phone",
+      "body": "It opens from your home screen like an app, loads faster and can send you notifications.",
+      "action": "Install app",
+      "later": "Not now",
+      "dismiss": "Close",
+      "iosTitle": "Add opetlife to your iPhone home screen",
+      "iosBody": "In Safari, tap the Share button and choose “Add to Home Screen”. Then open opetlife from your home screen.",
+      "installed": "opetlife is installed."
+    },
+    "header": {
+      "back": "Back",
+      "explore": "Explore everything"
+    },
+    "refresh": {
+      "pull": "Pull to refresh",
+      "release": "Release to refresh",
+      "loading": "Refreshing…"
+    }
   }
 }

@@ -9296,5 +9296,26 @@
         "CANCELLED": "Cancelados"
       }
     }
+  },
+  "pwa": {
+    "install": {
+      "title": "Instala opetlife en tu móvil",
+      "body": "Se abre desde la pantalla de inicio como una app, carga más rápido y puede enviarte notificaciones.",
+      "action": "Instalar app",
+      "later": "Ahora no",
+      "dismiss": "Cerrar",
+      "iosTitle": "Añade opetlife a la pantalla de inicio de tu iPhone",
+      "iosBody": "En Safari, toca el botón Compartir y elige “Añadir a pantalla de inicio”. Luego abre opetlife desde la pantalla de inicio.",
+      "installed": "opetlife está instalada."
+    },
+    "header": {
+      "back": "Atrás",
+      "explore": "Explorar todo"
+    },
+    "refresh": {
+      "pull": "Desliza para actualizar",
+      "release": "Suelta para actualizar",
+      "loading": "Actualizando…"
+    }
   }
 }

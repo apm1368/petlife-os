@@ -9298,5 +9298,26 @@
         "CANCELLED": "Abgesagt"
       }
     }
+  },
+  "pwa": {
+    "install": {
+      "title": "Installiere opetlife auf deinem Handy",
+      "body": "Es öffnet sich wie eine App vom Startbildschirm, lädt schneller und kann dir Benachrichtigungen schicken.",
+      "action": "App installieren",
+      "later": "Später",
+      "dismiss": "Schließen",
+      "iosTitle": "Füge opetlife zum Home-Bildschirm deines iPhones hinzu",
+      "iosBody": "Tippe in Safari auf „Teilen“ und wähle „Zum Home-Bildschirm“. Öffne opetlife danach über den Home-Bildschirm.",
+      "installed": "opetlife ist installiert."
+    },
+    "header": {
+      "back": "Zurück",
+      "explore": "Alles entdecken"
+    },
+    "refresh": {
+      "pull": "Zum Aktualisieren ziehen",
+      "release": "Loslassen zum Aktualisieren",
+      "loading": "Wird aktualisiert…"
+    }
   }
 }
