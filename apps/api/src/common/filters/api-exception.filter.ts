@@ -52,6 +52,15 @@ export class ApiExceptionFilter implements ExceptionFilter {
       status = HttpStatus.NOT_FOUND;
       code = "NOT_FOUND";
       message = "Resource not found.";
+    } else if (exception instanceof Prisma.PrismaClientKnownRequestError && (exception.code === "P2028" || exception.code === "P2024")) {
+      // The database was too busy: an interactive transaction ran past its timeout (P2028, rolled back) or no pool
+      // connection freed up in time (P2024, nothing ran). Nothing was saved, so say so and invite a retry.
+      status = HttpStatus.SERVICE_UNAVAILABLE;
+      code = "SERVICE_BUSY";
+      message = "The server is busy right now. Nothing was saved; please try again in a moment.";
+      details = { retryable: true, prismaCode: exception.code };
+      response.setHeader("Retry-After", "3");
+      this.logger.warn(`[${requestId}] ${exception.code}: ${exception.message}`);
     } else if (isClientHttpError(exception)) {
       // Raised by the body parser before any handler runs (body too large, malformed JSON): the
       // client's fault, so its own 4xx — not a 500 that pages someone.
