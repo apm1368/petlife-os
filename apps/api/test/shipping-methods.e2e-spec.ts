@@ -158,6 +158,7 @@ describe("Shipping methods, seller profiles and the address book (e2e)", () => {
     const link = "https://example.com/track/snappbox-job-1234567890";
     await commerce.post(`/admin/shipping/shipments/${shipment.id}/status`).send({ status: "ASSIGNED", trackingCode: link }).expect(201);
     expect(await prisma.shipment.findUniqueOrThrow({ where: { id: shipment.id } })).toMatchObject({ status: "ASSIGNED", trackingCode: link });
+  });
 
   it("binds a quote to the address it priced: an edited or switched address needs a fresh quote", async () => {
     const commerce = await admin(AdminRole.SUPER_ADMIN);
