@@ -1340,6 +1340,8 @@ model User {
   cardTransferPayments      CardTransferPayment[]
   walletTopUps              WalletTopUp[]
 
+  clinicClientLinks        ClinicImportedContact[]  @relation("ClinicClientLinkedUser")
+
   @@map("users")
 }
 
@@ -10346,8 +10348,13 @@ model ClinicReminder {
   id                      String               @id @default(uuid()) @db.Uuid
   providerOrganizationId  String               @db.Uuid
   providerOrganization    ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
-  petId                   String               @db.Uuid
-  pet                     Pet                  @relation(fields: [petId], references: [id], onDelete: Cascade)
+  /// Exactly one target: a platform pet (petId) or a clinic client (contactId, optionally one of their clinic pets).
+  petId                   String?                @db.Uuid
+  pet                     Pet?                   @relation(fields: [petId], references: [id], onDelete: Cascade)
+  contactId               String?                @db.Uuid
+  contact                 ClinicImportedContact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  clientPetId             String?                @db.Uuid
+  clientPet               ClinicClientPet?       @relation(fields: [clientPetId], references: [id], onDelete: Cascade)
   createdByProviderUserId String               @db.Uuid
   kind                    ClinicReminderKind
   title                   String
@@ -10364,6 +10371,7 @@ model ClinicReminder {
   @@index([status, dueAt])
   @@index([providerOrganizationId, dueAt])
   @@index([petId])
+  @@index([contactId])
   @@map("clinic_reminders")
 }
 
@@ -10652,6 +10660,27 @@ model ClinicCampaign {
 
 /// A contact the clinic imported from its own records (CSV). Clinic-local, never linked or merged with a PET LIFE
 /// account automatically.
+enum ClinicClientSource {
+  IMPORT
+  MANUAL
+}
+
+enum ClinicClientMessageKind {
+  MESSAGE
+  REMINDER
+  INVITE
+}
+
+enum ClinicClientMessageStatus {
+  SENT
+  SIMULATED
+  FAILED
+  SKIPPED
+}
+
+/// A clinic's own client (owner) — added by hand or imported from CSV. Clinic-local: it is not a platform
+/// account. The owner can connect it to their opetlife account only by accepting the clinic's invitation
+/// (inviteToken), which sets linkedUserId; nothing links by phone number behind their back.
 model ClinicImportedContact {
   id                     String               @id @default(uuid()) @db.Uuid
   providerOrganizationId String               @db.Uuid
@@ -10659,14 +10688,69 @@ model ClinicImportedContact {
   name                   String
   phone                  String?
   email                  String?
+  /// Legacy single-pet columns from the CSV import; new pets live in ClinicClientPet.
   petName                String?
   species                String?
   notes                  String?
-  importBatchId          String               @db.Uuid
+  importBatchId          String?              @db.Uuid
+  source                 ClinicClientSource   @default(IMPORT)
+  linkedUserId           String?              @db.Uuid
+  linkedUser             User?                @relation("ClinicClientLinkedUser", fields: [linkedUserId], references: [id], onDelete: SetNull)
+  inviteToken            String?              @unique
+  invitedAt              DateTime?
+  /// Lets the recipient stop the clinic's texts themselves from the link at the end of each text.
+  optOutToken            String?              @unique
+  joinedAt               DateTime?
+  /// The owner asked the clinic to stop SMS; the clinic can no longer text this number.
+  smsOptOutAt            DateTime?
   createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @default(now()) @updatedAt
+
+  pets      ClinicClientPet[]
+  messages  ClinicClientMessage[]
+  reminders ClinicReminder[]
 
   @@index([providerOrganizationId])
+  @@index([linkedUserId])
   @@map("clinic_imported_contacts")
+}
+
+model ClinicClientPet {
+  id        String                @id @default(uuid()) @db.Uuid
+  contactId String                @db.Uuid
+  contact   ClinicImportedContact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  name      String
+  species   String?
+  breed     String?
+  birthDate DateTime?             @db.Date
+  notes     String?
+  createdAt DateTime              @default(now())
+
+  reminders ClinicReminder[]
+
+  @@index([contactId])
+  @@map("clinic_client_pets")
+}
+
+/// Every text a clinic sends to its own client, with what actually happened: SENT by the live provider,
+/// SIMULATED while SMS is in sandbox, FAILED, or SKIPPED (no phone / opted out).
+model ClinicClientMessage {
+  id                     String                    @id @default(uuid()) @db.Uuid
+  providerOrganizationId String                    @db.Uuid
+  contactId              String                    @db.Uuid
+  contact                ClinicImportedContact     @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  kind                   ClinicClientMessageKind
+  body                   String
+  status                 ClinicClientMessageStatus
+  providerMessageId      String?
+  failureReason          String?
+  sentByProviderUserId   String?                   @db.Uuid
+  reminderId             String?                   @db.Uuid
+  createdAt              DateTime                  @default(now())
+
+  @@index([contactId, createdAt])
+  @@index([providerOrganizationId, createdAt])
+  @@map("clinic_client_messages")
 }
 
 // ---------------------------------------------------------------------------
