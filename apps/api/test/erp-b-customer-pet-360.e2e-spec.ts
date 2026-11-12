@@ -110,6 +110,10 @@ describe("ERP-B Customer 360 and Pet 360", () => {
 
     expect((await get(support, `/admin/pets?q=${name}`).expect(200)).body.items.map((p: { id: string }) => p.id)).toEqual([pet.id]);
     expect((await get(support, `/admin/pets?q=${chip}`).expect(200)).body.items.map((p: { id: string }) => p.id)).toEqual([pet.id]);
+    // The pets directory also finds a pet through its people, and names the owner apart from other members.
+    const ownerName = (await db.user.findUniqueOrThrow({ where: { id: owner.id } })).displayName;
+    const byOwner = (await get(support, `/admin/pets?q=${encodeURIComponent(ownerName)}`).expect(200)).body.items.find((p: { id: string }) => p.id === pet.id);
+    expect(byOwner).toMatchObject({ owner: { userId: owner.id, displayName: ownerName }, familyMemberCount: 0, household: { id: hh.id } });
     await get(owner, `/admin/pets/${pet.id}`).expect(403);
     const view = (await get(support, `/admin/pets/${pet.id}`).expect(200)).body;
     expect(view.identity.microchipMasked).toBe(`${chip.slice(0, 3)}***${chip.slice(-3)}`);

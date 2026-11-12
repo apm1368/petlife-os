@@ -4515,7 +4515,8 @@
         "featureFlags": "Feature flags",
         "smsPatterns": "SMS patterns",
         "verification": "Identity and documents",
-        "wallets": "Wallets"
+        "wallets": "Wallets",
+        "pets": "Pets"
       },
       "navigation": "Admin navigation",
       "openMenu": "Open menu",
@@ -9950,6 +9951,221 @@
         "REFUND_OUTSIDE_SYSTEM": "Refund outside an order",
         "DUPLICATE_CREDIT_REVERSAL": "Duplicate credit reversed",
         "OTHER": "Other correction"
+      }
+    }
+  },
+  "adminPets": {
+    "kicker": "Customers",
+    "title": "Pets",
+    "subtitle": "Every pet with its owner and household. Health shows only as counts and dates, never clinical text.",
+    "search": "Pet name, owner or family member name, ID or microchip",
+    "searchButton": "Search",
+    "speciesFilter": "Species",
+    "allSpecies": "All",
+    "species": {
+      "DOG": "Dog",
+      "CAT": "Cat",
+      "BIRD": "Bird",
+      "RABBIT": "Rabbit",
+      "RODENT": "Rodent",
+      "FISH": "Fish",
+      "REPTILE": "Reptile",
+      "OTHER": "Other"
+    },
+    "lifecycle": {
+      "ACTIVE": "Active",
+      "LOST": "Lost",
+      "TEMPORARILY_TRANSFERRED": "Temporarily with someone else",
+      "DECEASED": "Passed away",
+      "MEMORIAL": "Memorial",
+      "deleted": "Deleted"
+    },
+    "loading": "Loading…",
+    "failed": "The data could not be loaded.",
+    "retry": "Retry",
+    "forbidden": "You need the “View customers” permission to see pets.",
+    "empty": "No pets registered yet.",
+    "emptySearch": "No pet matches this search.",
+    "columns": {
+      "pet": "Pet",
+      "species": "Species and breed",
+      "owner": "Owner",
+      "household": "Household",
+      "family": "Other members",
+      "status": "Status",
+      "created": "Registered"
+    },
+    "noOwner": "No owner",
+    "open": "Open",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page} of {pages}",
+    "detail": {
+      "back": "All pets",
+      "identity": "Identity",
+      "fields": {
+        "species": "Species",
+        "breed": "Breed",
+        "sex": "Sex",
+        "birthDate": "Date of birth",
+        "age": "Approximate age",
+        "neutered": "Neutered",
+        "microchip": "Microchip",
+        "status": "Status",
+        "created": "Registered",
+        "photo": "Photo"
+      },
+      "months": "{months} months",
+      "sex": {
+        "MALE": "Male",
+        "FEMALE": "Female",
+        "UNKNOWN": "Unknown"
+      },
+      "neutered": {
+        "NEUTERED": "Yes",
+        "INTACT": "No",
+        "UNKNOWN": "Unknown"
+      },
+      "yes": "Yes",
+      "no": "No",
+      "owner": "Owner",
+      "ownerMissing": "This household has no active owner.",
+      "openCustomer": "Customer record",
+      "household": "Household: {name}",
+      "unnamedHousehold": "Unnamed",
+      "family": "Household members",
+      "familyEmpty": "No other members in this household.",
+      "roles": {
+        "OWNER": "Owner",
+        "FAMILY": "Family member"
+      },
+      "accountStatus": {
+        "ACTIVE": "Active account",
+        "SUSPENDED": "Suspended account"
+      },
+      "invitations": "Pending invitations",
+      "invitationExpires": "Expires {date}",
+      "grants": "Access to this pet",
+      "grantsEmpty": "No access recorded.",
+      "grantColumns": {
+        "person": "Person",
+        "source": "Source",
+        "scope": "Permissions",
+        "period": "Period",
+        "state": "State"
+      },
+      "sources": {
+        "HOUSEHOLD": "Household membership",
+        "MANUAL": "Shared by hand",
+        "TEMPORARY": "Temporary"
+      },
+      "scopeCount": "{count} permissions",
+      "states": {
+        "active": "Active",
+        "revoked": "Revoked",
+        "inactive": "Not active"
+      },
+      "notMember": "Not in the household",
+      "revoke": "Revoke access",
+      "revokeTitle": "Revoke {name}'s access",
+      "revokeReason": "Reason (kept in the audit log)",
+      "revokeConfirm": "Revoke",
+      "revokeCancel": "Cancel",
+      "revoked": "Access revoked.",
+      "revokeFailed": "The access could not be revoked.",
+      "reasonTooShort": "The reason needs at least 5 characters.",
+      "ownerGrantNote": "An owner's access is never revoked here.",
+      "health": "Health (counts and dates only)",
+      "healthFields": {
+        "documents": "Medical documents",
+        "visits": "Visits",
+        "labs": "Lab results",
+        "conditions": "Conditions",
+        "allergies": "Allergies",
+        "medications": "Medications"
+      },
+      "bookings": "Bookings",
+      "lost": "Lost reports",
+      "sightings": "{count} sightings",
+      "care": "Care reminders",
+      "travel": "Trips",
+      "insurance": "Insurance",
+      "claimPreps": "{count} claim drafts",
+      "sharing": "Sharing",
+      "shareCards": "{count} active share cards",
+      "healthShares": "{count} active health links",
+      "none": "None.",
+      "diagnostics": "Data-quality notes",
+      "diagnosticCodes": {
+        "NO_ACTIVE_OWNER": "The household has no active owner.",
+        "STALE_HOUSEHOLD_GRANT": "Someone who left the household still has access.",
+        "EXPIRED_GRANT_NOT_REVOKED": "A temporary access expired but was never revoked.",
+        "MEMBER_WITHOUT_GRANT": "A household member has no active access.",
+        "LONG_OPEN_LOST_INCIDENT": "A lost report has been open for over 90 days.",
+        "DELETED_BUT_ACTIVE": "The pet is deleted but still marked active."
+      },
+      "activity": "Recent activity",
+      "changed": "Changed: {fields}"
+    },
+    "labels": {
+      "bookingStatus": {
+        "HOLD": "On hold",
+        "PENDING_CONFIRMATION": "Awaiting confirmation",
+        "REQUESTED": "Requested",
+        "AWAITING_PAYMENT": "Awaiting payment",
+        "REJECTED": "Declined",
+        "EXPIRED": "Expired",
+        "RESCHEDULED": "Rescheduled",
+        "CONFIRMED": "Confirmed",
+        "CHECKED_IN": "Checked in",
+        "IN_PROGRESS": "In progress",
+        "COMPLETED": "Completed",
+        "CANCELLED_BY_USER": "Cancelled by the member",
+        "CANCELLED_BY_PROVIDER": "Cancelled by the provider",
+        "NO_SHOW": "No-show"
+      },
+      "serviceCategory": {
+        "VET": "Vet",
+        "GROOMING": "Grooming",
+        "TRAINING": "Training",
+        "WALKING": "Walking",
+        "SITTING": "Pet sitting",
+        "BOARDING": "Boarding",
+        "PET_TAXI": "Pet taxi",
+        "OTHER": "Other"
+      },
+      "lostStatus": {
+        "OPEN": "Open",
+        "SEARCHING": "Searching",
+        "SIGHTING_REPORTED": "Sighting reported",
+        "FOUND": "Found",
+        "REUNITED": "Back home",
+        "CLOSED": "Closed"
+      },
+      "tripStatus": {
+        "DRAFT": "Draft",
+        "PLANNING": "Planning",
+        "READY": "Ready",
+        "IN_PROGRESS": "Travelling",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled"
+      },
+      "insuranceStatus": {
+        "NEEDS_INFORMATION": "Needs information",
+        "DRAFT": "Draft",
+        "SUBMITTED": "Submitted",
+        "UNDER_REVIEW": "Under review",
+        "APPROVED": "Approved",
+        "DECLINED": "Declined",
+        "CANCELLED": "Cancelled"
+      },
+      "reminderState": {
+        "UPCOMING": "Upcoming",
+        "DUE": "Due",
+        "OVERDUE": "Overdue",
+        "COMPLETED": "Done",
+        "SNOOZED": "Snoozed",
+        "CANCELLED": "Cancelled"
       }
     }
   }
