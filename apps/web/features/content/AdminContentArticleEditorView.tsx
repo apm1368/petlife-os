@@ -15,7 +15,7 @@ import { RichTextRenderer } from "./RichTextRenderer";
 import { articleStatusTone } from "./content-tone";
 import { SLUG_PATTERN, normalizeSlugInput, slugify } from "./slug";
 
-const LOCALES: ContentLocale[] = ["fa", "en", "de", "es"];
+const LOCALES: ContentLocale[] = ["fa", "en", "de", "es", "ar", "nl"];
 const PUBLIC_ORIGIN = "https://opetlife.ir";
 const SEO_TITLE_MAX = 60;
 const SEO_DESCRIPTION_MAX = 160;

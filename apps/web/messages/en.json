@@ -5229,7 +5229,9 @@
           "de": "German content",
           "es": "Spanish content",
           "fa": "Persian content",
-          "en": "English content"
+          "en": "English content",
+          "ar": "Arabic content",
+          "nl": "Dutch content"
         },
         "titleField": "Title",
         "slug": "Slug",

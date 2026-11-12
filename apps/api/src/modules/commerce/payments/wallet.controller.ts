@@ -17,7 +17,7 @@ class WalletHistoryQueryDto {
 class StartTopUpDto {
   @IsInt() @Min(1) amount!: number;
   @IsIn(Object.values(WalletTopUpRail)) rail!: WalletTopUpRail;
-  @IsOptional() @IsIn(["fa", "en", "de", "es"]) locale?: string;
+  @IsOptional() @IsIn(["fa", "en", "de", "es", "ar", "nl"]) locale?: string;
 }
 
 class ReceiptUploadTargetDto {

@@ -3174,7 +3174,9 @@
         "loading": "Cargando…",
         "localeSectionTitle": {
           "fa": "Contenido en persa",
-          "en": "Contenido en inglés"
+          "en": "Contenido en inglés",
+          "ar": "Contenido en árabe",
+          "nl": "Contenido en neerlandés"
         },
         "titleField": "Título",
         "slug": "Slug",

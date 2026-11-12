@@ -4286,7 +4286,8 @@
       "channels": {
         "EMAIL": "E-mail",
         "IN_APP": "In de app",
-        "SMS": "SMS"
+        "SMS": "SMS",
+        "PUSH": "Push"
       },
       "quietHours": {
         "title": "Stille uren",
@@ -4304,7 +4305,29 @@
       "marketingManage": "Beheren in Privacy",
       "quietHoursHint": "Tijdens stille uren wacht SMS tot het tijdvak voorbij is (dringende meldingen komen wel door). Meldingen in de app komen stil binnen in je inbox.",
       "saveError": "Je voorkeuren zijn niet opgeslagen. Probeer het opnieuw.",
-      "unsaved": "Je hebt niet-opgeslagen wijzigingen."
+      "unsaved": "Je hebt niet-opgeslagen wijzigingen.",
+      "push": {
+        "title": "Meldingen op dit apparaat",
+        "intro": "Verzorgingsherinneringen, afspraken, bestellingen en meldingen over vermiste dieren komen op dit apparaat binnen, ook als opetlife gesloten is. Het vergrendelscherm toont alleen een algemene titel, nooit gezondheidsdetails of de naam van je dier.",
+        "enable": "Meldingen inschakelen",
+        "disable": "Uitschakelen op dit apparaat",
+        "test": "Testmelding sturen",
+        "testSent": "Testmelding verstuurd. Hij komt binnen een paar seconden op dit apparaat binnen.",
+        "testFailed": "De testmelding is niet aangekomen. Zet meldingen uit en weer aan.",
+        "on": "Meldingen staan aan op dit apparaat.",
+        "off": "Meldingen staan uit op dit apparaat.",
+        "denied": "Je browser blokkeert meldingen voor deze site. Sta meldingen voor opetlife.ir toe in de browserinstellingen en open deze pagina opnieuw.",
+        "unsupported": "Deze browser kan geen webmeldingen ontvangen. Probeer Chrome, Edge, Firefox of Samsung Internet.",
+        "iosInstall": "Op de iPhone werken meldingen alleen in de geïnstalleerde app: tik in Safari op Deel → ‘Zet op beginscherm’, open opetlife vanaf je beginscherm en zet hier meldingen aan (iOS 16.4 of nieuwer).",
+        "notConfigured": "Apparaatmeldingen zijn nog niet beschikbaar.",
+        "error": "Dat lukte niet. Probeer het opnieuw.",
+        "devices": "Je andere apparaten",
+        "thisDevice": "Dit apparaat",
+        "unknownDevice": "Apparaat",
+        "added": "Toegevoegd op {date}",
+        "remove": "Verwijderen",
+        "removeLabel": "{device} verwijderen uit meldingsapparaten"
+      }
     }
   },
   "support": {
@@ -5266,7 +5289,9 @@
           "de": "Duitse content",
           "es": "Spaanse content",
           "fa": "Perzische content",
-          "en": "Engelse content"
+          "en": "Engelse content",
+          "ar": "Arabische inhoud",
+          "nl": "Nederlandse inhoud"
         },
         "titleField": "Titel",
         "slug": "Slug",
@@ -10241,6 +10266,27 @@
         "SNOOZED": "Uitgesteld",
         "CANCELLED": "Geannuleerd"
       }
+    }
+  },
+  "pwa": {
+    "install": {
+      "title": "Installeer opetlife op je telefoon",
+      "body": "Het opent als een app vanaf je startscherm, laadt sneller en kan je meldingen sturen.",
+      "action": "App installeren",
+      "later": "Niet nu",
+      "dismiss": "Sluiten",
+      "iosTitle": "Zet opetlife op het beginscherm van je iPhone",
+      "iosBody": "Tik in Safari op Deel en kies ‘Zet op beginscherm’. Open opetlife daarna vanaf je beginscherm.",
+      "installed": "opetlife is geïnstalleerd."
+    },
+    "header": {
+      "back": "Terug",
+      "explore": "Alles ontdekken"
+    },
+    "refresh": {
+      "pull": "Trek om te vernieuwen",
+      "release": "Loslaten om te vernieuwen",
+      "loading": "Vernieuwen…"
     }
   }
 }

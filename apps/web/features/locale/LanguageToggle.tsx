@@ -29,7 +29,7 @@ export function LanguageToggle() {
         router.push((segments.join("/") || "/") + window.location.search + window.location.hash);
       }}
     >
-      {(["fa", "en", "de", "es"] as const).map((code) => <option key={code} value={code}>{names[code]}</option>)}
+      {(["fa", "en", "de", "es", "ar", "nl"] as const).map((code) => <option key={code} value={code}>{names[code]}</option>)}
     </select>
   );
 }

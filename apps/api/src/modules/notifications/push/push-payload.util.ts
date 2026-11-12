@@ -25,7 +25,7 @@ export function pushTargetUrl(webAppOrigin: string | undefined, locale: string, 
   return `${origin}/${locale}${deepLink}`;
 }
 
-type PushLocale = "fa" | "en" | "de" | "es";
+type PushLocale = "fa" | "en" | "de" | "es" | "ar" | "nl";
 
 /**
  * Lock-screen titles. A push carries only one of these and a link — never the notification's own title or body,
@@ -33,25 +33,25 @@ type PushLocale = "fa" | "en" | "de" | "es";
  * what is waiting.
  */
 const CATEGORY_TITLES: Record<string, Record<PushLocale, string>> = {
-  HEALTH: { fa: "یادآور تازهٔ مراقبت", en: "New care reminder", de: "Neue Pflege-Erinnerung", es: "Nuevo recordatorio de cuidado" },
-  BOOKING: { fa: "خبر تازه دربارهٔ نوبت شما", en: "Update on your booking", de: "Neuigkeit zu deinem Termin", es: "Novedad sobre tu cita" },
-  SERVICE: { fa: "خبر تازه دربارهٔ خدمات", en: "Update on a service", de: "Neuigkeit zu einer Dienstleistung", es: "Novedad sobre un servicio" },
-  PAYMENT: { fa: "خبر تازه دربارهٔ پرداخت", en: "Update on a payment", de: "Neuigkeit zu einer Zahlung", es: "Novedad sobre un pago" },
-  COMMERCE: { fa: "خبر تازه دربارهٔ سفارش شما", en: "Update on your order", de: "Neuigkeit zu deiner Bestellung", es: "Novedad sobre tu pedido" },
-  DELIVERY: { fa: "خبر تازه دربارهٔ ارسال", en: "Update on a delivery", de: "Neuigkeit zur Lieferung", es: "Novedad sobre un envío" },
-  SELLER: { fa: "خبر تازه برای فروشگاه شما", en: "Update for your store", de: "Neuigkeit für deinen Shop", es: "Novedad para tu tienda" },
-  MARKETPLACE: { fa: "خبر تازه از فروشگاه", en: "Update from the shop", de: "Neuigkeit aus dem Shop", es: "Novedad de la tienda" },
-  HOUSEHOLD: { fa: "خبر تازه از خانوادهٔ شما", en: "Update from your household", de: "Neuigkeit aus deinem Haushalt", es: "Novedad de tu hogar" },
-  PET_ACCESS: { fa: "خبر تازه دربارهٔ دسترسی به پرونده", en: "Update on pet record access", de: "Neuigkeit zum Zugriff auf eine Tierakte", es: "Novedad sobre el acceso a un historial" },
-  SECURITY: { fa: "هشدار امنیتی حساب", en: "Account security alert", de: "Sicherheitshinweis zu deinem Konto", es: "Aviso de seguridad de tu cuenta" },
-  SUPPORT: { fa: "پاسخ تازه از پشتیبانی", en: "New reply from support", de: "Neue Antwort vom Support", es: "Nueva respuesta de soporte" },
-  SUBSCRIPTION: { fa: "خبر تازه دربارهٔ اشتراک", en: "Update on your membership", de: "Neuigkeit zu deiner Mitgliedschaft", es: "Novedad sobre tu membresía" },
-  LOST_PET: { fa: "هشدار حیوان گم‌شده", en: "Lost pet alert", de: "Vermisst-Meldung", es: "Aviso de mascota perdida" },
-  ANIMAL_SUPPORT: { fa: "خبر تازه از حمایت از حیوانات", en: "Update from animal support", de: "Neuigkeit aus dem Tierschutz", es: "Novedad de apoyo animal" },
-  COMMUNITY: { fa: "پیام تازه در جامعه", en: "New in the community", de: "Neu in der Gemeinschaft", es: "Novedad en la comunidad" },
-  TRAVEL: { fa: "خبر تازه دربارهٔ سفر", en: "Update on your trip", de: "Neuigkeit zu deiner Reise", es: "Novedad sobre tu viaje" },
-  INSURANCE: { fa: "خبر تازه دربارهٔ بیمه", en: "Update on insurance", de: "Neuigkeit zur Versicherung", es: "Novedad sobre el seguro" },
-  MARKETING: { fa: "پیشنهاد تازه از اپت لایف", en: "Something new from opetlife", de: "Neues von opetlife", es: "Novedades de opetlife" },
+  HEALTH: { fa: "یادآور تازهٔ مراقبت", en: "New care reminder", de: "Neue Pflege-Erinnerung", es: "Nuevo recordatorio de cuidado", ar: "تذكير رعاية جديد", nl: "Nieuwe verzorgingsherinnering" },
+  BOOKING: { fa: "خبر تازه دربارهٔ نوبت شما", en: "Update on your booking", de: "Neuigkeit zu deinem Termin", es: "Novedad sobre tu cita", ar: "جديد بخصوص موعدك", nl: "Nieuws over je afspraak" },
+  SERVICE: { fa: "خبر تازه دربارهٔ خدمات", en: "Update on a service", de: "Neuigkeit zu einer Dienstleistung", es: "Novedad sobre un servicio", ar: "جديد بخصوص خدمة", nl: "Nieuws over een dienst" },
+  PAYMENT: { fa: "خبر تازه دربارهٔ پرداخت", en: "Update on a payment", de: "Neuigkeit zu einer Zahlung", es: "Novedad sobre un pago", ar: "جديد بخصوص دفعة", nl: "Nieuws over een betaling" },
+  COMMERCE: { fa: "خبر تازه دربارهٔ سفارش شما", en: "Update on your order", de: "Neuigkeit zu deiner Bestellung", es: "Novedad sobre tu pedido", ar: "جديد بخصوص طلبك", nl: "Nieuws over je bestelling" },
+  DELIVERY: { fa: "خبر تازه دربارهٔ ارسال", en: "Update on a delivery", de: "Neuigkeit zur Lieferung", es: "Novedad sobre un envío", ar: "جديد بخصوص التوصيل", nl: "Nieuws over een levering" },
+  SELLER: { fa: "خبر تازه برای فروشگاه شما", en: "Update for your store", de: "Neuigkeit für deinen Shop", es: "Novedad para tu tienda", ar: "جديد لمتجرك", nl: "Nieuws voor je winkel" },
+  MARKETPLACE: { fa: "خبر تازه از فروشگاه", en: "Update from the shop", de: "Neuigkeit aus dem Shop", es: "Novedad de la tienda", ar: "جديد من المتجر", nl: "Nieuws uit de winkel" },
+  HOUSEHOLD: { fa: "خبر تازه از خانوادهٔ شما", en: "Update from your household", de: "Neuigkeit aus deinem Haushalt", es: "Novedad de tu hogar", ar: "جديد من أسرتك", nl: "Nieuws uit je huishouden" },
+  PET_ACCESS: { fa: "خبر تازه دربارهٔ دسترسی به پرونده", en: "Update on pet record access", de: "Neuigkeit zum Zugriff auf eine Tierakte", es: "Novedad sobre el acceso a un historial", ar: "جديد بخصوص الوصول إلى سجل حيوان", nl: "Nieuws over toegang tot een dierendossier" },
+  SECURITY: { fa: "هشدار امنیتی حساب", en: "Account security alert", de: "Sicherheitshinweis zu deinem Konto", es: "Aviso de seguridad de tu cuenta", ar: "تنبيه أمني لحسابك", nl: "Beveiligingsmelding voor je account" },
+  SUPPORT: { fa: "پاسخ تازه از پشتیبانی", en: "New reply from support", de: "Neue Antwort vom Support", es: "Nueva respuesta de soporte", ar: "رد جديد من الدعم", nl: "Nieuw antwoord van support" },
+  SUBSCRIPTION: { fa: "خبر تازه دربارهٔ اشتراک", en: "Update on your membership", de: "Neuigkeit zu deiner Mitgliedschaft", es: "Novedad sobre tu membresía", ar: "جديد بخصوص عضويتك", nl: "Nieuws over je lidmaatschap" },
+  LOST_PET: { fa: "هشدار حیوان گم‌شده", en: "Lost pet alert", de: "Vermisst-Meldung", es: "Aviso de mascota perdida", ar: "تنبيه حيوان مفقود", nl: "Melding vermist dier" },
+  ANIMAL_SUPPORT: { fa: "خبر تازه از حمایت از حیوانات", en: "Update from animal support", de: "Neuigkeit aus dem Tierschutz", es: "Novedad de apoyo animal", ar: "جديد من دعم الحيوانات", nl: "Nieuws van dierenhulp" },
+  COMMUNITY: { fa: "پیام تازه در جامعه", en: "New in the community", de: "Neu in der Gemeinschaft", es: "Novedad en la comunidad", ar: "جديد في المجتمع", nl: "Nieuw in de community" },
+  TRAVEL: { fa: "خبر تازه دربارهٔ سفر", en: "Update on your trip", de: "Neuigkeit zu deiner Reise", es: "Novedad sobre tu viaje", ar: "جديد بخصوص رحلتك", nl: "Nieuws over je reis" },
+  INSURANCE: { fa: "خبر تازه دربارهٔ بیمه", en: "Update on insurance", de: "Neuigkeit zur Versicherung", es: "Novedad sobre el seguro", ar: "جديد بخصوص التأمين", nl: "Nieuws over verzekering" },
+  MARKETING: { fa: "پیشنهاد تازه از اپت لایف", en: "Something new from opetlife", de: "Neues von opetlife", es: "Novedades de opetlife", ar: "جديد من opetlife", nl: "Nieuw van opetlife" },
 };
 
 const GENERIC_TITLE: Record<PushLocale, string> = {
@@ -59,6 +59,8 @@ const GENERIC_TITLE: Record<PushLocale, string> = {
   en: "New notification on opetlife",
   de: "Neue Benachrichtigung bei opetlife",
   es: "Nueva notificación en opetlife",
+  ar: "إشعار جديد في opetlife",
+  nl: "Nieuwe melding op opetlife",
 };
 
 const TEST_TITLE: Record<PushLocale, string> = {
@@ -66,10 +68,12 @@ const TEST_TITLE: Record<PushLocale, string> = {
   en: "opetlife notifications are on for this device",
   de: "opetlife-Benachrichtigungen sind auf diesem Gerät aktiv",
   es: "Las notificaciones de opetlife están activadas en este dispositivo",
+  ar: "إشعارات opetlife مفعّلة على هذا الجهاز",
+  nl: "opetlife-meldingen staan aan op dit apparaat",
 };
 
 function pushLocale(locale: string): PushLocale {
-  return locale === "fa" || locale === "de" || locale === "es" ? locale : "en";
+  return locale === "fa" || locale === "de" || locale === "es" || locale === "ar" || locale === "nl" ? locale : "en";
 }
 
 /** The only text a push carries: a category-level title in the member's language. */

@@ -103,16 +103,18 @@ export interface MobileTab {
   en: string;
   de: string;
   es: string;
+  ar: string;
+  nl: string;
   icon: NavIcon;
   match: (path: string) => boolean;
 }
 
 export const MOBILE_TABS: MobileTab[] = [
-  { key: "home", href: "/home", fa: "خانه", en: "Home", de: "Start", es: "Inicio", icon: House, match: (p) => p === "/home" },
-  { key: "pets", href: "/pets", fa: "حیوان‌های من", en: "My pets", de: "Meine Tiere", es: "Mis mascotas", icon: PawPrint, match: (p) => starts("/pets", "/vet", "/care-calendar")(p) },
-  { key: "services", href: "/services", fa: "خدمات", en: "Services", de: "Dienste", es: "Servicios", icon: Scissors, match: starts("/services", "/bookings", "/providers") },
-  { key: "shop", href: "/shop", fa: "فروشگاه", en: "Shop", de: "Shop", es: "Tienda", icon: ShoppingBag, match: starts("/shop", "/cart", "/checkout", "/orders", "/repeat-delivery", "/favorites") },
-  { key: "profile", href: "/profile", fa: "پروفایل", en: "Profile", de: "Profil", es: "Perfil", icon: UserRound, match: starts("/profile", "/notifications") },
+  { key: "home", href: "/home", fa: "خانه", en: "Home", de: "Start", es: "Inicio", ar: "الرئيسية", nl: "Start", icon: House, match: (p) => p === "/home" },
+  { key: "pets", href: "/pets", fa: "حیوان‌های من", en: "My pets", de: "Meine Tiere", es: "Mis mascotas", ar: "حيواناتي", nl: "Mijn dieren", icon: PawPrint, match: (p) => starts("/pets", "/vet", "/care-calendar")(p) },
+  { key: "services", href: "/services", fa: "خدمات", en: "Services", de: "Dienste", es: "Servicios", ar: "الخدمات", nl: "Diensten", icon: Scissors, match: starts("/services", "/bookings", "/providers") },
+  { key: "shop", href: "/shop", fa: "فروشگاه", en: "Shop", de: "Shop", es: "Tienda", ar: "المتجر", nl: "Winkel", icon: ShoppingBag, match: starts("/shop", "/cart", "/checkout", "/orders", "/repeat-delivery", "/favorites") },
+  { key: "profile", href: "/profile", fa: "پروفایل", en: "Profile", de: "Profil", es: "Perfil", ar: "الملف", nl: "Profiel", icon: UserRound, match: starts("/profile", "/notifications") },
 ];
 
 export function currentMobileTab(path: string): MobileTab["key"] | null {

@@ -59,5 +59,5 @@ export function isReceiptWindowOver(topUp: { status: WalletTopUpStatus; receiptD
  * Persian home page is the bare domain), so the return lands directly and no redirect can drop Zibal's query. */
 export function walletReturnUrl(webOrigin: string, locale: string): string {
   const origin = webOrigin.split(",")[0]!.trim().replace(/\/$/, "");
-  return `${origin}/${["fa", "en", "de", "es"].includes(locale) ? locale : "fa"}/profile/wallet`;
+  return `${origin}/${["fa", "en", "de", "es", "ar", "nl"].includes(locale) ? locale : "fa"}/profile/wallet`;
 }
