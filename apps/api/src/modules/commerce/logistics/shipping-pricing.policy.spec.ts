@@ -26,6 +26,10 @@ describe("opetlife courier pricing", () => {
     expect(quoteCourier(parseCourierConfig({ ...config, maxKm: 2 }), tajrish, vanak)).toMatchObject({ available: false, reason: "TOO_FAR" });
   });
 
+  it("ignores a map point outside Iran and prices by the city fare instead", () => {
+    expect(quoteCourier(config, tajrish, at("تهران", 0, 0))).toMatchObject({ available: true, priceIrr: 900_000, basis: "CITY_FLAT" });
+  });
+
   it("never goes below the minimum fare", () => {
     const near = at("تهران", 35.8049, 51.4338);
     expect(quoteCourier(config, tajrish, near)).toMatchObject({ available: true, priceIrr: 500_000 });

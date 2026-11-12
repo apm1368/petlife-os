@@ -135,6 +135,36 @@ describe("Shipping methods, seller profiles and the address book (e2e)", () => {
     await commerce.post(`/admin/shipping/shipments/${api.id}/status`).send({ status: "DELIVERED" }).expect(400);
   });
 
+  it("binds a quote to the address it priced: an edited or switched address needs a fresh quote", async () => {
+    const commerce = await admin(AdminRole.SUPER_ADMIN);
+    await commerce.put("/admin/shipping/methods/OPETLIFE_COURIER").send({ enabled: true, config: { cities: ["تهران"], defaultFlatFareIrr: 900_000 } }).expect(200);
+    const { offer } = await sellerWithOffer();
+    const buyer = await signedIn("ship-bind");
+    const household = await buyer.c.post("/households").send({}).expect(201);
+    const near = await buyer.c.post("/addresses").send({ householdId: household.body.id, addressLine: "خیابان شریعتی", city: "تهران", countryCode: "IR", postalCode: "1234567892" }).expect(201);
+    const other = await buyer.c.post("/addresses").send({ householdId: household.body.id, addressLine: "خیابان انقلاب", city: "تهران", countryCode: "IR", postalCode: "1234567893" }).expect(201);
+    await buyer.c.post("/cart/items").send({ offerId: offer.id, quantity: 1 }).expect(201);
+    const checkout = await buyer.c.post("/checkout").send({ addressId: near.body.id }).expect(201);
+    const quoteFor = async () => ((await buyer.c.get(`/checkout/${checkout.body.id}/shipping-quotes`).expect(200)).body[0].quotes as { id: string; provider: string; status: string }[]).find((q) => q.provider === "OPETLIFE_COURIER" && q.status === "AVAILABLE")!;
+    const first = await quoteFor();
+    await buyer.c.post(`/checkout/${checkout.body.id}/shipping-quotes/select`).send({ quoteId: first.id }).expect(201);
+
+    // Editing the saved address after choosing: payment refuses the old quote.
+    await buyer.c.patch(`/addresses/${near.body.id}`).send({ addressLine: "خیابان شریعتی، کوچهٔ دیگر" }).expect(200);
+    const refused = await buyer.c.post(`/checkout/${checkout.body.id}/payment-intent`).send({}).expect(410);
+    expect(refused.body.error.code).toBe("SHIPPING_QUOTE_EXPIRED");
+
+    // Switching the checkout to another address: a quote priced for the first one can't be chosen.
+    const second = await quoteFor();
+    await buyer.c.patch(`/checkout/${checkout.body.id}`).send({ addressId: other.body.id }).expect(200);
+    await buyer.c.post(`/checkout/${checkout.body.id}/shipping-quotes/select`).send({ quoteId: second.id }).expect(410);
+    const fresh = await quoteFor();
+    expect(fresh.id).not.toBe(second.id);
+    await buyer.c.post(`/checkout/${checkout.body.id}/shipping-quotes/select`).send({ quoteId: fresh.id }).expect(201);
+    await buyer.c.post(`/checkout/${checkout.body.id}/payment-intent`).send({}).expect(201);
+    expect((await prisma.checkout.findUniqueOrThrow({ where: { id: checkout.body.id } })).deliveryAddressSnapshot).toMatchObject({ addressLine: "خیابان انقلاب" });
+  });
+
   it("archives an address, hands the default to the next one, and keeps it out of checkout", async () => {
     const member = await signedIn("ship-book");
     const household = await member.c.post("/households").send({}).expect(201);

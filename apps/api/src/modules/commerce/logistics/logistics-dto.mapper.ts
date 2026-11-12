@@ -49,6 +49,16 @@ export function toFulfillmentDto(fulfillment: Fulfillment): FulfillmentDto {
   };
 }
 
+/**
+ * What a buyer may see of a fulfillment: the seller's pickup point is reduced to its city/region (it can be someone's
+ * home); contact, street, postal code, map point and instructions stay with the seller, staff and the courier.
+ */
+export function toBuyerFulfillmentDto(fulfillment: Fulfillment): FulfillmentDto {
+  const dto = toFulfillmentDto(fulfillment);
+  const { city, region, countryCode } = dto.pickupAddress;
+  return { ...dto, pickupAddress: { recipient: null, phone: null, addressLine: null, city, region, countryCode, instructions: null } };
+}
+
 export function toShipmentDto(shipment: Shipment): ShipmentDto {
   return {
     id: shipment.id,
