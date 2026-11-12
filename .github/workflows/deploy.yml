@@ -16,11 +16,78 @@ jobs:
   ci:
     uses: ./.github/workflows/ci.yml
 
-  deploy:
+  # Build the release on GitHub, not on the 3.9 GB VPS: there a full build took 40–60 min under memory pressure and a
+  # half-written .next once took the site's JavaScript down (2026-11-12). The build runs at the same absolute path
+  # as production so nothing path-dependent differs, with the production API origin the server build used.
+  release:
     needs: ci
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      APP: /var/www/petlife-os
+      NEXT_PUBLIC_API_ORIGIN: https://opetlife.ir/api
+      CI: "true"
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Place the source where production builds it
+        run: |
+          sudo mkdir -p "$APP" && sudo chown "$USER" "$APP"
+          cp -a "$GITHUB_WORKSPACE/." "$APP/"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - name: Install dependencies
+        working-directory: /var/www/petlife-os
+        run: pnpm install --frozen-lockfile
+      - name: Build api and web
+        working-directory: /var/www/petlife-os
+        run: |
+          pnpm --filter @petlife/api db:generate
+          pnpm turbo run build --filter=@petlife/api --filter=@petlife/web --concurrency=2
+          test -f apps/api/dist/main.js && test -f apps/web/.next/BUILD_ID
+      - name: Pack the release
+        working-directory: /var/www/petlife-os
+        run: |
+          mkdir -p "$RUNNER_TEMP/release"
+          echo '${{ github.sha }}' > RELEASE_SHA
+          tar --exclude=apps/web/.next/cache -czf "$RUNNER_TEMP/release/release-${{ github.sha }}.tgz" \
+            RELEASE_SHA apps/web/.next apps/api/dist packages/types/dist packages/config/dist
+          cd "$RUNNER_TEMP/release" && sha256sum "release-${{ github.sha }}.tgz" > "release-${{ github.sha }}.tgz.sha256"
+          ls -la "$RUNNER_TEMP/release"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ github.sha }}
+          path: ${{ runner.temp }}/release
+          retention-days: 3
+          if-no-files-found: error
+
+  deploy:
+    needs: [ci, release]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-${{ github.sha }}
+          path: release
+      # CI pushes the build to the box over the same SSH key; the box never has to download it from GitHub.
+      - name: Upload the release to the VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: release/release-${{ github.sha }}.tgz,release/release-${{ github.sha }}.tgz.sha256
+          target: /var/www/petlife-os-releases/incoming
+          strip_components: 1
       - name: Deploy over SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -28,8 +95,8 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script_stop: true
-          # Under memory pressure a full build has taken 40–60 min; a shorter limit ends the job while deploy.sh keeps
-          # running on the server, which frees the deploy-vps group for the next run (see the lock wait below).
+          # With the CI-built release the server step takes minutes; the long limit stays for the local-build
+          # fallback, so a slow build never ends the job while deploy.sh is still running (see the lock wait below).
           command_timeout: 90m
           script: |
             cd /var/www/petlife-os
@@ -54,6 +121,8 @@ jobs:
             # backoffice release trace disagree with the actual destination (TC-04).
             export DEPLOYMENT_ENVIRONMENT='production'
             export DEPLOYMENT_ID='github-${{ github.run_id }}-${{ github.run_attempt }}'
+            # The CI-built release uploaded above; deploy.sh verifies its checksum and sha and swaps it in.
+            export PREBUILT_ARCHIVE='/var/www/petlife-os-releases/incoming/release-${{ github.sha }}.tgz'
             /var/www/petlife-os/deploy.sh
             export EXPECTED_BUILD_SHA='${{ github.sha }}'
             export EXPECTED_DEPLOYMENT_ENVIRONMENT='production'
