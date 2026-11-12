@@ -217,7 +217,7 @@ describe("CommunityFeedView", () => {
   });
 
   it.each([
-    ["de", "Noch keine Beiträge. Teilen Sie als Erste oder Erster etwas."],
+    ["de", "Noch keine Beiträge. Teile als Erste oder Erster etwas."],
     ["es", "Aún no hay publicaciones. Sé la primera persona en compartir algo."],
   ] as const)("renders a genuinely empty feed in %s", async (locale, emptyText) => {
     vi.mocked(communityService.listPosts).mockResolvedValueOnce(page([], 0));

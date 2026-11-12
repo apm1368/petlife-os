@@ -1,5 +1,6 @@
 import type { AdminMembershipStatus, AdminRole, AdminVertical } from "@prisma/client";
 import type { AuthedRequest } from "../../../common/auth/current-user.decorator";
+import type { AdminPermission } from "./admin-permissions";
 
 /**
  * Attached to the request by AdminAuthGuard once the caller's consumer
@@ -17,6 +18,11 @@ export interface ResolvedAdminContext {
   status: AdminMembershipStatus;
   /// Only meaningful for a SERVICE_ADMIN; empty for every other role (see admin-verticals.ts).
   serviceScopes: AdminVertical[];
+  /// Effective permissions: the custom role's set when one is assigned, otherwise the built-in role's. Optional so
+  /// hand-built contexts (tests, internal callers) fall back to ROLE_PERMISSIONS[role] — see adminCan().
+  permissions?: AdminPermission[];
+  /// The assigned custom role, if any (admin/access/roles).
+  customRole?: { id: string; name: string; verticals: AdminVertical[] } | null;
 }
 
 export type AdminAuthedRequest = AuthedRequest & { adminContext?: ResolvedAdminContext };
