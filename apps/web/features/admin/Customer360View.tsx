@@ -11,9 +11,10 @@ import { adminStatusTone } from "./status-tone";
 import { useAdminStore } from "@/stores/admin-store";
 import { ApiError } from "@/lib/api/client";
 import { useStatusText } from "@/lib/status/use-status-text";
+import { intlLocale } from "@/features/admin/admin-copy";
 
 function formatDate(iso: string, locale: string) {
-  return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US").format(new Date(iso));
+  return new Intl.DateTimeFormat(intlLocale(locale)).format(new Date(iso));
 }
 
 export function Customer360View({ userId }: { userId: string }) {

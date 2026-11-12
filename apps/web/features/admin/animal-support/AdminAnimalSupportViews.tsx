@@ -16,6 +16,7 @@ import { DetailRow, EmptyRow, FilterBar, FilterField, Kpi, Panel, PanelTitle, Se
 
 import { AdminOrganizationFunds, AdminSupportOrganizationEditor, AdminSupportOrganizationInfo } from "./AdminSupportOperations";
 import { useSupportPermissions } from "./use-support-permissions";
+import { intlLocale } from "@/features/admin/admin-copy";
 
 type Lang = "fa" | "en";
 const useLang = () => {
@@ -25,7 +26,7 @@ const useLang = () => {
 type LoadError = "forbidden" | "notFound" | "error" | null;
 const toError = (e: unknown): LoadError => (e instanceof ApiError ? (e.status === 403 ? "forbidden" : e.status === 404 ? "notFound" : "error") : "error");
 const day = (iso: string | null | undefined, lang: Lang) => (iso ? formatDateLabel(iso, lang, "Asia/Tehran") : "—");
-const n = (value: number, lang: Lang) => localizeDigits(value.toLocaleString(lang === "fa" ? "fa-IR" : "en-US"), lang);
+const n = (value: number, lang: Lang) => localizeDigits(value.toLocaleString(intlLocale(lang)), lang);
 const errorMessage = (e: unknown, t: (fa: string, en: string) => string) =>
   e instanceof ApiError && e.status === 403 ? t("این کار با نقش شما مجاز نیست.", "Your role isn't allowed to do this.") : e instanceof ApiError && e.status === 409 ? t("این تغییر از وضعیت فعلی مجاز نیست.", "That change isn't allowed from the current state.") : t("انجام نشد؛ دوباره تلاش کنید.", "That didn't work; try again.");
 
