@@ -111,8 +111,8 @@ export function ReelSection({ id, eyebrow, title, lede, scenes, kicks, subs, lab
             <button type="button" className="opl-rbtn" aria-label={playing ? labels.pause : labels.resume} onClick={() => (playing ? pause() : play())}><Svg d={playing ? ICON.pause : ICON.play} /></button>
             <button type="button" className="opl-rbtn" aria-label={muted ? labels.unmute : labels.mute} onClick={() => { const v = !muted; setMuted(v); music.current?.setMuted(v); }}><Svg d={muted ? ICON.mute : ICON.vol} /></button>
           </div>
-          {!started || ended ? <button type="button" className="opl-reel__play" onClick={() => play(ended ? 0 : undefined)} data-ck={labels.play}>
-            <span className="opl-reel__playbtn"><Svg d={ICON.play} size={34} /></span><span>{ended ? labels.replay : labels.play}</span>
+          {!started || ended ? <button type="button" className={`opl-reel__play${ended ? " is-replay" : ""}`} onClick={() => play(ended ? 0 : undefined)} data-ck={labels.play}>
+            <span className="opl-reel__playbtn"><Svg d={ICON.play} size={28} /></span><span className="opl-reel__playlabel">{ended ? labels.replay : labels.play}</span>
           </button> : null}
         </div>
       </div>

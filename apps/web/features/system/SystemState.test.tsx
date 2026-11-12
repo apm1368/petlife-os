@@ -3,6 +3,7 @@ import { screen } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { ApiError } from "@/lib/api/client";
 import { SystemState, systemStateFor } from "./SystemState";
+import { NotFoundFrame } from "./NotFoundFrame";
 
 const apiError = (status: number, code: string, details?: Record<string, unknown>) => new ApiError({ code, message: "SQL constraint pet_access_grants_fk violated at row 42", details, requestId: "r" }, status);
 
@@ -42,4 +43,17 @@ describe("SystemState", () => {
     expect(screen.getByRole("heading", { name: title })).toBeTruthy();
     expect(screen.getByRole("button", { name: retry })).toBeTruthy();
   });
+  it.each([
+    ["fa", "/", "/fa", "بازگشت به خانه"],
+    ["en", "/en", "/en", "Go to home"],
+    ["de", "/de", "/de", "Zur Startseite"],
+    ["es", "/es", "/es", "Volver al inicio"],
+  ] as const)("the 404 frame (%s) sits on the pattern and leads back to the public site, not the member home", (locale, logoHref, homeHref, homeLabel) => {
+    const { container } = renderWithIntl(<NotFoundFrame><SystemState kind="NOT_FOUND" home="site" /></NotFoundFrame>, locale);
+    expect(container.querySelector(".opl-page.opl-boot .opl-boot__card .system-state")).toBeTruthy();
+    expect(container.querySelector(".opl-boot__card .opl-bird")).toBeTruthy();
+    expect(container.querySelector(".opl-boot__home")?.getAttribute("href")).toBe(logoHref);
+    expect(screen.getByRole("link", { name: homeLabel }).getAttribute("href")).toBe(homeHref);
+  });
 });
+
