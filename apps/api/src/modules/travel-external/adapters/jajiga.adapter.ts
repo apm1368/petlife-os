@@ -13,6 +13,9 @@ export const JAJIGA_PET_SEARCH_PAGE = `${ORIGIN}/s?rule%5B0%5D=pet`;
 const PER_PAGE = 18;
 /** Hard ceiling independent of the per-run request budget (~4,500 listings). */
 const MAX_PAGES = 250;
+/** A page that times out or gets a 5xx is asked for again after a pause; a 403/429 never is. */
+const TRANSIENT_PAGE_FAILURES: ReadonlySet<string> = new Set(["TIMEOUT", "SOURCE_UNAVAILABLE"]);
+const PAGE_RETRY_BACKOFF_MS = [15_000, 45_000];
 const MAX_PAGE_BYTES = 2_000_000;
 const PET_MARKER = "is_pet_friendly";
 /** Jajiga quotes prices in toman; PET LIFE stores IRR. */
@@ -213,21 +216,40 @@ export class JajigaPublicWebAdapter implements TravelSourceAdapter {
     }
   }
 
+  /** One search page, re-asked up to twice (15 s, then 45 s later) when it times out or the source answers 5xx. */
+  private async searchPage(ctx: ScrapeContext, page: number): Promise<JajigaSearchApiPage> {
+    for (let attempt = 0; ; attempt++) {
+      try {
+        return parseJajigaSearchApi(await ctx.http.getJson(jajigaPetSearchApiUrl(page)));
+      } catch (e) {
+        const backoff = PAGE_RETRY_BACKOFF_MS[attempt];
+        if (!(e instanceof AdapterError) || !TRANSIENT_PAGE_FAILURES.has(e.category) || backoff === undefined || ctx.http.remaining === 0) throw e;
+        await ctx.http.pause(backoff);
+      }
+    }
+  }
+
   async discover(ctx: ScrapeContext, opts: DiscoveryOptions = {}): Promise<DiscoveryResult> {
     await this.assertRobots(ctx);
     const items: RawListing[] = [];
     const seen = new Set<string>();
     let complete = false;
-    for (let page = 1; page <= MAX_PAGES && ctx.http.remaining > 0; page++) {
+    let stoppedEarly: DiscoveryResult["stoppedEarly"];
+    let pages: number | undefined;
+    for (let page = 1; page <= MAX_PAGES; page++) {
+      const of = pages ? ` of ${pages}` : "";
+      if (ctx.http.remaining <= 0) { stoppedEarly = { category: "BUDGET_EXHAUSTED", message: `request budget used up before page ${page}${of}` }; break; }
       let result: JajigaSearchApiPage;
       try {
-        result = parseJajigaSearchApi(await ctx.http.getJson(jajigaPetSearchApiUrl(page)));
+        result = await this.searchPage(ctx, page);
       } catch (e) {
         // A block or rate limit always stops the run. Any other failure after some pages keeps what was observed,
-        // reported as incomplete so no unseen stay is aged out.
+        // reported as stopped early so the run is not mistaken for a full crawl and no unseen stay is aged out.
         if (!items.length || (e instanceof AdapterError && (e.category === "BLOCKED_EXTERNAL" || e.category === "RATE_LIMITED"))) throw e;
+        stoppedEarly = { category: e instanceof AdapterError ? e.category : "SOURCE_UNAVAILABLE", message: `stopped at page ${page}${of}: ${e instanceof Error ? e.message : "request failed"}` };
         break;
       }
+      pages = Math.max(1, Math.ceil(result.total / result.perPage));
       for (const room of result.items) {
         const id = numericId(room.id);
         // Promotional or placeholder cards without a listing id, repeats caused by re-ordering between pages, and
@@ -240,7 +262,8 @@ export class JajigaPublicWebAdapter implements TravelSourceAdapter {
       if (result.items.length < result.perPage || page * result.perPage >= result.total) { complete = true; break; }
     }
     if (!items.length) throw new AdapterError("MALFORMED", "Jajiga search returned no listing carrying the is_pet_friendly marker");
-    return { items, complete, strategy: this.strategy };
+    if (!complete && !stoppedEarly && !opts.stopAtExternalId) stoppedEarly = { category: "BUDGET_EXHAUSTED", message: `page cap of ${MAX_PAGES} reached${pages ? ` (source reports ${pages} pages)` : ""}` };
+    return { items, complete, ...(stoppedEarly ? { stoppedEarly } : {}), strategy: this.strategy };
   }
 
   /** Optional single-listing read of the public room page; only its title is taken. */

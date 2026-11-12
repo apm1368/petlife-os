@@ -80,6 +80,11 @@ export interface DiscoveryResult {
   items: RawListing[];
   /** True only when the adapter walked its whole configured scope; partial discovery never drives removals. */
   complete: boolean;
+  /**
+   * Why a full walk ended before its scope did (a page that kept timing out, the request budget, the page cap). The
+   * engine reports such a run as PARTIAL instead of letting an unfinished crawl pass as a clean success.
+   */
+  stoppedEarly?: { category: AdapterErrorCategory; message: string };
   strategy: string;
 }
 

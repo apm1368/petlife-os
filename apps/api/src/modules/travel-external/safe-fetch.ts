@@ -83,7 +83,12 @@ export async function safeFetch(raw: string, allowedHosts: string[], opts: SafeF
   let current = validateSourceUrl(raw, allowedHosts);
   let method = opts.method ?? "GET";
   for (let hop = 0; hop <= 3; hop++) {
-    const addrs = await lookup(current.hostname, { all: true }).catch(() => { throw new SourceFetchError("NETWORK", "DNS lookup failed"); });
+    // The resolver gets the same deadline as the request: a hung lookup must not stall a crawl for minutes.
+    let dnsTimer: NodeJS.Timeout | undefined;
+    const addrs = await Promise.race([
+      lookup(current.hostname, { all: true }).catch(() => { throw new SourceFetchError("NETWORK", "DNS lookup failed"); }),
+      new Promise<never>((_, reject) => { dnsTimer = setTimeout(() => reject(new SourceFetchError("TIMEOUT", "DNS lookup timed out")), opts.timeoutMs); }),
+    ]).finally(() => clearTimeout(dnsTimer));
     if (!addrs.length || addrs.some((a) => isPrivateAddress(a.address))) throw new SourceFetchError("PRIVATE_ADDRESS", "host resolves to a private address");
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), opts.timeoutMs);

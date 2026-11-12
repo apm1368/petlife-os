@@ -24,6 +24,9 @@ export class ScrapeHttpClient {
 
   get remaining() { return Math.max(0, this.cfg.maxRequests - this.requests); }
 
+  /** An extra wait in the request queue (back-off before re-asking for a page that timed out); sends nothing. */
+  pause(ms: number) { return this.enqueue(() => this.sleep(ms)); }
+
   getText(url: string, opts: Partial<SafeFetchOptions> = {}) { return this.enqueue(() => this.raw(url, { ...opts, method: "GET" })); }
   getJson<T = unknown>(url: string) { return this.enqueue(async () => this.parse<T>(await this.raw(url, { method: "GET", accept: "application/json" }))); }
   postJson<T = unknown>(url: string, json: unknown) { return this.enqueue(async () => this.parse<T>(await this.raw(url, { method: "POST", json, accept: "application/json" }))); }

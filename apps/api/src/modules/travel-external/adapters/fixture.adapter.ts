@@ -31,7 +31,7 @@ export class FixtureAdapter implements TravelSourceAdapter {
   readonly code = "FIXTURE";
   readonly strategy = "SYNTHETIC_FIXTURE";
   parserReady = true;
-  script: { listings: FixturePayload[]; fail?: AdapterError; detailFail?: Record<string, AdapterError>; complete?: boolean; delayMs?: number; requestsPerListing?: number } = { listings: [] };
+  script: { listings: FixturePayload[]; fail?: AdapterError; detailFail?: Record<string, AdapterError>; complete?: boolean; stoppedEarly?: DiscoveryResult["stoppedEarly"]; delayMs?: number; requestsPerListing?: number } = { listings: [] };
 
   async healthCheck() { return this.script.fail ? { ok: false, category: this.script.fail.category, detail: this.script.fail.message } : { ok: true, detail: "synthetic fixture", schemaOk: true }; }
 
@@ -39,7 +39,8 @@ export class FixtureAdapter implements TravelSourceAdapter {
     if (this.script.delayMs) await new Promise((r) => setTimeout(r, this.script.delayMs));
     if (this.script.fail) throw this.script.fail;
     const items = this.script.listings.slice(0, ctx.maxListings).map((p): RawListing => ({ externalId: p.id, sourceUrl: p.url ?? `https://fixture.example/stay/${p.id}`, payload: p, stage: "details", window: ctx.windows[0] }));
-    return { items, complete: this.script.complete ?? true, strategy: this.strategy };
+    const stoppedEarly = this.script.stoppedEarly;
+    return { items, complete: stoppedEarly ? false : this.script.complete ?? true, ...(stoppedEarly ? { stoppedEarly } : {}), strategy: this.strategy };
   }
 
   async fetchDetails(_ctx: ScrapeContext, id: string): Promise<RawListing> {
