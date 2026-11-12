@@ -1179,6 +1179,10 @@ enum ShippingProvider {
   OPETLIFE_COURIER
   /// Iran Post express (Pishtaz): a fixed price set by staff, no API; staff enter the Post tracking number.
   POST_PISHTAZ
+  /// Snappbox / Alopeyk booked by staff in the courier's regular app (no business API): the member pays opetlife's
+  /// distance-based estimate; staff book the courier in the app and enter its tracking link and status here.
+  SNAPPBOX_APP
+  ALOPEYK_APP
 }
 
 /// A single, fixed value this phase (spec section 4's "fulfillmentType"

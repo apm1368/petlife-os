@@ -39,6 +39,8 @@ const MAP_BY_PROVIDER: Record<ShippingProvider, Record<string, ShipmentStatus>> 
   // Staff-run methods: the back office records the canonical status itself (lowercased), same vocabulary as DEV.
   [ShippingProvider.OPETLIFE_COURIER]: DEV_STATUS_MAP,
   [ShippingProvider.POST_PISHTAZ]: DEV_STATUS_MAP,
+  [ShippingProvider.SNAPPBOX_APP]: DEV_STATUS_MAP,
+  [ShippingProvider.ALOPEYK_APP]: DEV_STATUS_MAP,
 };
 
 /**

@@ -135,6 +135,31 @@ describe("Shipping methods, seller profiles and the address book (e2e)", () => {
     await commerce.post(`/admin/shipping/shipments/${api.id}/status`).send({ status: "DELIVERED" }).expect(400);
   });
 
+  it("offers Snappbox booked in the app at opetlife's estimate, and lets staff share its https tracking link", async () => {
+    const commerce = await admin(AdminRole.SUPER_ADMIN);
+    // Like opetlife's own courier: no price, no switch-on.
+    await commerce.put("/admin/shipping/methods/SNAPPBOX_APP").send({ enabled: true, config: {} }).expect(400);
+    const overview = await commerce.put("/admin/shipping/methods/SNAPPBOX_APP").send({ enabled: true, config: { cities: ["تهران"], defaultFlatFareIrr: 1_100_000 }, reason: "Snappbox app rates" }).expect(200);
+    expect(overview.body.methods.find((m: { provider: string }) => m.provider === "SNAPPBOX_APP")).toMatchObject({ active: true, kind: "MANUAL" });
+
+    const { seller, offer } = await sellerWithOffer();
+    const buyer = await signedIn("ship-app");
+    const household = await buyer.c.post("/households").send({}).expect(201);
+    const address = await buyer.c.post("/addresses").send({ householdId: household.body.id, addressLine: "خیابان آزادی", city: "تهران", countryCode: "IR", postalCode: "1234567891" }).expect(201);
+    await buyer.c.post("/cart/items").send({ offerId: offer.id, quantity: 1 }).expect(201);
+    const checkout = await buyer.c.post("/checkout").send({ addressId: address.body.id }).expect(201);
+    const quotes = (await buyer.c.get(`/checkout/${checkout.body.id}/shipping-quotes`).expect(200)).body[0].quotes as { provider: string; priceIrr: number; pricingBasis: string }[];
+    expect(quotes.find((q) => q.provider === "SNAPPBOX_APP")).toMatchObject({ priceIrr: 1_100_000, pricingBasis: "CITY_FLAT" });
+
+    const order = await prisma.order.create({ data: { userId: buyer.user.id, householdId: household.body.id, sellerOrganizationId: seller.id, subtotalAmount: 1, deliveryAmount: 0, discountAmount: 0, totalAmount: 1, currency: "IRR", shippingAddressSnapshot: { city: "تهران" } } });
+    const fulfillment = await prisma.fulfillment.create({ data: { orderId: order.id, sellerOrgId: seller.id, status: "PICKUP_REQUESTED", pickupAddressSnapshot: {}, deliveryAddressSnapshot: { city: "تهران" } } });
+    const shipment = await prisma.shipment.create({ data: { fulfillmentId: fulfillment.id, provider: ShippingProvider.SNAPPBOX_APP, providerShipmentId: `snappbox-app-${unique()}`, status: "REQUESTED", pickupAddressSnapshot: {}, deliveryAddressSnapshot: {} } });
+    await commerce.post(`/admin/shipping/shipments/${shipment.id}/status`).send({ status: "ASSIGNED", trackingCode: "javascript:alert(1)" }).expect(400);
+    const link = "https://example.com/track/snappbox-job-1234567890";
+    await commerce.post(`/admin/shipping/shipments/${shipment.id}/status`).send({ status: "ASSIGNED", trackingCode: link }).expect(201);
+    expect(await prisma.shipment.findUniqueOrThrow({ where: { id: shipment.id } })).toMatchObject({ status: "ASSIGNED", trackingCode: link });
+  });
+
   it("archives an address, hands the default to the next one, and keeps it out of checkout", async () => {
     const member = await signedIn("ship-book");
     const household = await member.c.post("/households").send({}).expect(201);

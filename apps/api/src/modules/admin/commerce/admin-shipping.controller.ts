@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Put, Query, Req, UseGuards } from "@nestjs/common";
 import { AdminVertical, Prisma, ShipmentStatus, ShippingProvider } from "@prisma/client";
 import { Type } from "class-transformer";
-import { IsBoolean, IsIn, IsInt, IsObject, IsOptional, IsString, Length, Max, Min } from "class-validator";
+import { IsBoolean, IsIn, IsInt, IsObject, IsOptional, IsString, Length, Matches, Max, Min } from "class-validator";
 import type { AdminShipmentListItemDto, AdminShippingOverviewDto, PaginatedDto } from "@petlife/types";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
 import { PrismaService } from "../../../common/prisma/prisma.service";
@@ -34,8 +34,8 @@ const STAFF_STATUSES = [ShipmentStatus.ASSIGNED, ShipmentStatus.PICKED_UP, Shipm
 
 class StaffShipmentUpdateDto {
   @IsIn(STAFF_STATUSES) status!: (typeof STAFF_STATUSES)[number];
-  /** Post Pishtaz tracking number (or a courier's job reference). */
-  @IsOptional() @IsString() @Length(4, 40) trackingCode?: string;
+  /** Post Pishtaz tracking number, a courier's job reference, or the https tracking link a courier app shares. */
+  @IsOptional() @IsString() @Length(4, 300) @Matches(/^(?:[^\s:/]{4,40}|https:\/\/[^\s]+)$/i, { message: "trackingCode must be a short reference or an https link" }) trackingCode?: string;
   @IsOptional() @IsString() @Length(3, 300) note?: string;
 }
 

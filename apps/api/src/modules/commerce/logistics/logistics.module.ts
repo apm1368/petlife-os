@@ -9,7 +9,7 @@ import { ShipmentEventsService } from "./shipment-events.service";
 import { ShippingReconciliationService } from "./shipping-reconciliation.service";
 import { CheckoutShippingController, OrderLogisticsController } from "./shipping.controller";
 import { ShippingWebhooksController } from "./shipping-webhooks.controller";
-import { OpetlifeCourierAdapter, PostPishtazAdapter } from "./manual-shipping.adapters";
+import { AlopeykAppAdapter, OpetlifeCourierAdapter, PostPishtazAdapter, SnappboxAppAdapter } from "./manual-shipping.adapters";
 import { ShippingMethodSettingsService } from "./shipping-method-settings.service";
 
 /**
@@ -30,6 +30,8 @@ import { ShippingMethodSettingsService } from "./shipping-method-settings.servic
     SnappBoxAdapter,
     OpetlifeCourierAdapter,
     PostPishtazAdapter,
+    SnappboxAppAdapter,
+    AlopeykAppAdapter,
     ShippingMethodSettingsService,
     ShippingProviderRegistry,
     FulfillmentTransitionService,

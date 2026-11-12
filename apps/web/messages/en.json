@@ -3279,7 +3279,9 @@
           "ALOPEYK": "Alopeyk",
           "SNAPPBOX": "Snappbox",
           "OPETLIFE_COURIER": "opetlife courier",
-          "POST_PISHTAZ": "Iran Post express (Pishtaz)"
+          "POST_PISHTAZ": "Iran Post express (Pishtaz)",
+          "SNAPPBOX_APP": "Snappbox",
+          "ALOPEYK_APP": "Alopeyk"
         },
         "basis": {
           "API": "Live courier price",
@@ -3526,7 +3528,8 @@
         "failed": "Couldn't submit your review."
       },
       "deliveryMethod": "Delivery: {method}",
-      "postTracking": "Track the parcel on the Post website"
+      "postTracking": "Track the parcel on the Post website",
+      "courierTracking": "Track the courier"
     },
     "statusLabels": {
       "payment": {
@@ -4080,7 +4083,9 @@
         "ALOPEYK": "Alopeyk",
         "SNAPPBOX": "Snappbox",
         "OPETLIFE_COURIER": "opetlife courier",
-        "POST_PISHTAZ": "Iran Post express (Pishtaz)"
+        "POST_PISHTAZ": "Iran Post express (Pishtaz)",
+        "SNAPPBOX_APP": "Snappbox (booked by opetlife)",
+        "ALOPEYK_APP": "Alopeyk (booked by opetlife)"
       },
       "pickup": "Pickup address",
       "pickupHint": "A map point lets the opetlife courier price by distance.",
@@ -9957,7 +9962,9 @@
       "ALOPEYK": "Alopeyk",
       "SNAPPBOX": "Snappbox",
       "OPETLIFE_COURIER": "opetlife courier",
-      "POST_PISHTAZ": "Iran Post express (Pishtaz)"
+      "POST_PISHTAZ": "Iran Post express (Pishtaz)",
+      "SNAPPBOX_APP": "Snappbox — booked in the app",
+      "ALOPEYK_APP": "Alopeyk — booked in the app"
     },
     "kind": {
       "API": "Priced by the courier's API",
@@ -10030,13 +10037,14 @@
       "update": "Update",
       "updateTitle": "Update shipment",
       "newStatus": "New status",
-      "trackingCode": "Post tracking number or courier reference",
+      "trackingCode": "Post tracking number, courier reference or the app's tracking link",
       "note": "Note (optional, in the audit log)",
       "apply": "Apply",
       "cancel": "Cancel",
       "applied": "Shipment updated; the member sees it in tracking.",
       "notApplied": "That status is behind the current one; nothing changed.",
       "failed": "The update failed."
-    }
+    },
+    "appCourierHint": "Members pay the price from these distance/city rules (set them close to what the app charges). After an order, book the courier in the regular app with the pickup and drop-off pins, then paste its tracking link under Shipments and move the status."
   }
 }

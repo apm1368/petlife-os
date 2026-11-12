@@ -19,6 +19,10 @@ import { adminShippingService } from "@/services/admin-shipping.service";
 import { useAdminStore } from "@/stores/admin-store";
 import "./admin-shipping.css";
 
+/** Priced by opetlife's distance/city rules: its own couriers, and Snappbox/Alopeyk booked by staff in their app. */
+const COURIER_STYLE: ShippingProvider[] = [ShippingProvider.OPETLIFE_COURIER, ShippingProvider.SNAPPBOX_APP, ShippingProvider.ALOPEYK_APP];
+const isCourierStyle = (p: ShippingProvider) => COURIER_STYLE.includes(p);
+
 const STAFF_STATUSES = [ShipmentStatus.ASSIGNED, ShipmentStatus.PICKED_UP, ShipmentStatus.IN_TRANSIT, ShipmentStatus.OUT_FOR_DELIVERY, ShipmentStatus.DELIVERED, ShipmentStatus.FAILED];
 
 /** Staff type Toman; the API stores integer rials. */
@@ -121,7 +125,7 @@ function MethodCard({ method, canManage, onSaved }: { method: AdminShippingMetho
     setBusy(true);
     setMessage(null);
     try {
-      const config = method.provider === ShippingProvider.OPETLIFE_COURIER ? courierFromForm(form) : method.provider === ShippingProvider.POST_PISHTAZ ? postFromForm(form) : undefined;
+      const config = isCourierStyle(method.provider) ? courierFromForm(form) : method.provider === ShippingProvider.POST_PISHTAZ ? postFromForm(form) : undefined;
       onSaved(await adminShippingService.updateMethod(method.provider, { enabled, config, reason: reason.trim() || undefined }));
       setMessage({ ok: true, text: t("saved") });
       setReason("");
@@ -146,7 +150,8 @@ function MethodCard({ method, canManage, onSaved }: { method: AdminShippingMetho
       <label className="as-switch">
         <input type="checkbox" checked={enabled} disabled={!canManage} onChange={(e) => setEnabled(e.target.checked)} /> {t("enabled")}
       </label>
-      {method.provider === ShippingProvider.OPETLIFE_COURIER ? (
+      {method.provider === ShippingProvider.SNAPPBOX_APP || method.provider === ShippingProvider.ALOPEYK_APP ? <p className="gx-muted">{t("appCourierHint")}</p> : null}
+      {isCourierStyle(method.provider) ? (
         <div className="as-form">
           {field("cities", t("courier.cities"), "text")}
           <div className="as-row">
@@ -197,7 +202,7 @@ function MethodCard({ method, canManage, onSaved }: { method: AdminShippingMetho
 }
 
 function initialForm(m: AdminShippingMethodDto): Record<string, string> {
-  if (m.provider === ShippingProvider.OPETLIFE_COURIER) {
+  if (isCourierStyle(m.provider)) {
     const c = m.config as OpetlifeCourierConfig;
     return {
       cities: c.cities.join("، "),
@@ -412,7 +417,7 @@ function ShipmentDialog({ shipment, onClose, onDone }: { shipment: AdminShipment
         </label>
         <label className="gx-field">
           <span>{t("shipments.trackingCode")}</span>
-          <input dir="ltr" value={tracking} maxLength={40} onChange={(e) => setTracking(e.target.value)} />
+          <input dir="ltr" value={tracking} maxLength={300} onChange={(e) => setTracking(e.target.value)} />
         </label>
         <label className="gx-field">
           <span>{t("shipments.note")}</span>

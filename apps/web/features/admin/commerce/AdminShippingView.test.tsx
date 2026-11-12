@@ -38,6 +38,22 @@ describe("AdminShippingView", () => {
     expect(screen.getByText("No webhook secret (needed for live mode)")).toBeTruthy();
   });
 
+  it("prices Snappbox booked in the app with the courier rules and tells staff how to book it", async () => {
+    useAdminStore.setState({ context: { permissions: ["commerce.view", "commerce.manage"] } as never });
+    const courierConfig = { cities: [], baseFareIrr: 0, perKmIrr: 0, minFareIrr: 0, maxKm: 40, roadFactor: 1.3, cityFlatFareIrr: {}, defaultFlatFareIrr: 0, pickupMinutes: 45, minutesPerKm: 4 };
+    vi.mocked(adminShippingService.methods).mockResolvedValue({ mode: "sandbox", methods: [{ provider: ShippingProvider.SNAPPBOX_APP, enabled: false, active: false, note: "NEEDS_PRICE", kind: "MANUAL", config: courierConfig, webhookSecretConfigured: null, updatedAt: null }] });
+    renderWithIntl(<AdminShippingView />, "en");
+    const card = (await screen.findByRole("heading", { name: "Snappbox — booked in the app" })).closest("section")!;
+    expect(within(card).getByText(/book the courier in the regular app/)).toBeTruthy();
+    fireEvent.click(within(card).getByLabelText("On"));
+    fireEvent.change(within(card).getByLabelText(/Cities/), { target: { value: "تهران" } });
+    fireEvent.click(within(card).getByRole("button", { name: "Save" }));
+    await waitFor(() => expect(adminShippingService.updateMethod).toHaveBeenCalled());
+    const [provider, body] = vi.mocked(adminShippingService.updateMethod).mock.calls[0]!;
+    expect(provider).toBe(ShippingProvider.SNAPPBOX_APP);
+    expect(body).toMatchObject({ enabled: true, config: { cities: ["تهران"], maxKm: 40 } });
+  });
+
   it("is read-only without commerce.manage", async () => {
     useAdminStore.setState({ context: { permissions: ["commerce.view"] } as never });
     renderWithIntl(<AdminShippingView />, "fa");
