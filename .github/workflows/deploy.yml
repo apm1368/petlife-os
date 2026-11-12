@@ -60,7 +60,7 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/release"
           echo '${{ github.sha }}' > RELEASE_SHA
-          tar --exclude=apps/web/.next/cache --exclude='*.map' -czf "$RUNNER_TEMP/release/release-${{ github.sha }}.tgz" \
+          tar --exclude=apps/web/.next/cache --exclude=apps/web/.next/trace --exclude='*.map' -czf "$RUNNER_TEMP/release/release-${{ github.sha }}.tgz" \
             RELEASE_SHA apps/web/.next apps/api/dist packages/types/dist packages/config/dist
           cd "$RUNNER_TEMP/release" && sha256sum "release-${{ github.sha }}.tgz" > "release-${{ github.sha }}.tgz.sha256"
           ls -la "$RUNNER_TEMP/release"
@@ -116,7 +116,9 @@ jobs:
             # Pull the CI-built release from the deploy-builds pre-release (GitHub's CDN is fast from here; pushes and
             # artifact downloads ran at ~20 KB/s, 2026-11-12). If the download fails, deploy.sh builds locally instead.
             rm -rf /var/www/petlife-os-releases/incoming && mkdir -p /var/www/petlife-os-releases/incoming
-            if timeout 1500 gh release download deploy-builds -R apm1368/petlife-os -p 'release-${{ github.sha }}.tgz*' -D /var/www/petlife-os-releases/incoming --clobber; then export PREBUILT_ARCHIVE='/var/www/petlife-os-releases/incoming/release-${{ github.sha }}.tgz'; else echo "deploy: could not download the CI-built release; building on this host instead"; fi
+            # Parallel range requests (scripts/ops/fetch-release.sh): one connection ran at ~100 KB/s and a 160 MB
+            # archive hit the old 25-minute limit; several together reach ~0.4 MB/s (2026-11-12).
+            if timeout 2700 bash scripts/ops/fetch-release.sh '${{ github.sha }}' /var/www/petlife-os-releases/incoming; then export PREBUILT_ARCHIVE='/var/www/petlife-os-releases/incoming/release-${{ github.sha }}.tgz'; else echo "deploy: could not download the CI-built release; building on this host instead"; fi
             /var/www/petlife-os/deploy.sh
             export EXPECTED_BUILD_SHA='${{ github.sha }}'
             export EXPECTED_DEPLOYMENT_ENVIRONMENT='production'
