@@ -24,6 +24,8 @@ describe("dashboard permission boundary", () => {
       petMemorialSubmission: counter(14),
       placeReport: counter(15),
       walletTopUp: counter(16),
+      pet: counter(40),
+      booking: counter(7),
     };
     return { db, service: new AdminDashboardService(db as unknown as PrismaService) };
   };
@@ -32,6 +34,9 @@ describe("dashboard permission boundary", () => {
     const summary = await service.getSummary(actor(AdminRole.EDITOR));
     expect([summary.openSupportCases, summary.openDisputes, summary.openTrustCases, summary.pendingRefundApprovals, summary.openTasks]).toEqual([null, null, null, null, null]);
     for (const table of [db.supportCase, db.dispute, db.trustCase, db.adminRefundApproval, db.adminTask]) expect(table.count).not.toHaveBeenCalled();
+    // #290 Q97: the launch KPIs belong to analytics.view.
+    expect(summary.launchKpis).toBeNull();
+    expect(db.pet.count).not.toHaveBeenCalled();
   });
   it("allows support counts without finance or trust counts", async () => {
     const { db, service } = setup();
@@ -58,6 +63,7 @@ describe("dashboard permission boundary", () => {
       pendingMemorials: 14,
       openPlaceReports: 15,
       pendingWalletTopUps: 16,
+      launchKpis: { registeredPets: 40, newPetsThisWeek: 40, bookingsThisWeek: 7, bookingsLastWeek: 7 },
     });
   });
   it("hides vertical queues from an admin scoped to another vertical", async () => {

@@ -6233,7 +6233,15 @@
       "insuranceProviders": "Gestión de aseguradoras",
       "externalSources": "Gestión de fuentes de viaje externas",
       "accessControl": "Gestión de acceso de administración",
-      "verificationQueue": "Cola de verificación de socios"
+      "verificationQueue": "Cola de verificación de socios",
+      "launch": {
+        "title": "Objetivo del mes de lanzamiento",
+        "hint": "La medida de éxito del lanzamiento: mascotas registradas y reservas semanales.",
+        "registeredPets": "Mascotas registradas",
+        "thisWeek": "esta semana",
+        "bookingsThisWeek": "Reservas esta semana",
+        "vsLastWeek": "frente a {count} la semana pasada"
+      }
     },
     "adminSearch": {
       "title": "Buscar clientes, pedidos o casos de soporte",

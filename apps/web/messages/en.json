@@ -6880,7 +6880,15 @@
       "insuranceProviders": "Insurance provider management",
       "externalSources": "External travel source operations",
       "accessControl": "Admin access management",
-      "verificationQueue": "Partner verification queue"
+      "verificationQueue": "Partner verification queue",
+      "launch": {
+        "title": "Launch month goal",
+        "hint": "The launch success measure: registered pets and weekly bookings.",
+        "registeredPets": "Registered pets",
+        "thisWeek": "this week",
+        "bookingsThisWeek": "Bookings this week",
+        "vsLastWeek": "vs {count} last week"
+      }
     },
     "records": {
       "clinical": "Clinical records",

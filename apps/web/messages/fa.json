@@ -6830,7 +6830,15 @@
       "insuranceProviders": "مدیریت شرکت‌های بیمه",
       "externalSources": "مدیریت منابع بیرونی سفر",
       "accessControl": "مدیریت دسترسی ادمین‌ها",
-      "verificationQueue": "صف احراز هویت همکاران"
+      "verificationQueue": "صف احراز هویت همکاران",
+      "launch": {
+        "title": "هدف ماه اول",
+        "hint": "شاخص موفقیت لانچ: حیوان‌های ثبت‌شده و نوبت‌های هفتگی.",
+        "registeredPets": "حیوان‌های ثبت‌شده",
+        "thisWeek": "این هفته",
+        "bookingsThisWeek": "نوبت‌های این هفته",
+        "vsLastWeek": "در برابر {count} نوبت هفتهٔ پیش"
+      }
     },
     "records": {
       "clinical": "سوابق بالینی",
