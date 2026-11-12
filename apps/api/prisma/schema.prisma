@@ -1305,6 +1305,7 @@ model User {
   notifications              Notification[]
   notificationPreferences    NotificationPreference[]
   notificationQuietHours     NotificationQuietHours?
+  pushSubscriptions          PushSubscription[]
   consents                   UserConsent[]
   dataExportRequests         DataExportRequest[]
   accountDeletionRequests    AccountDeletionRequest[]
@@ -4838,6 +4839,8 @@ enum MessagingProvider {
   GMAIL
   /// Email through any other SMTP relay.
   SMTP
+  /// Web Push (VAPID) to a browser or an installed app (PWA / Android TWA).
+  WEB_PUSH
 }
 
 /// The addressable, in-app-visible unit — always has exactly one recipient
@@ -4948,6 +4951,31 @@ model NotificationPreference {
 
   @@unique([userId, category, channel])
   @@map("notification_preferences")
+}
+
+/// One browser or installed app (PWA / Android TWA) that agreed to receive Web Push for a member. The endpoint is a
+/// capability URL issued by the browser's push service; only known push-service hosts are accepted (no SSRF), and an
+/// endpoint the push service reports gone (404/410) is deleted. One row per endpoint: when another member signs in
+/// on the same device and opts in, the row moves to them.
+model PushSubscription {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @db.Uuid
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint      String    @unique
+  p256dh        String
+  auth          String
+  /// Short description derived from the user agent ("Chrome · Android"), shown in settings.
+  deviceLabel   String?
+  expiresAt     DateTime?
+  lastSuccessAt DateTime?
+  lastFailureAt DateTime?
+  failureCount  Int       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("push_subscriptions")
 }
 
 /// Deliberately its own singleton-per-user table rather than smearing

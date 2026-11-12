@@ -8,7 +8,7 @@ import { Avatar, ChevronLeft, ChevronRight, Compass, Sheet } from "@petlife/ui";
 import { useActivePet } from "@/hooks/use-active-pet";
 import { LanguageToggle } from "@/features/locale/LanguageToggle";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
-import { EXPLORE_GROUPS, PRIMARY_DESTINATIONS, currentDestination } from "./consumer-nav";
+import { EXPLORE_GROUPS, MOBILE_TABS, PRIMARY_DESTINATIONS, currentDestination, currentMobileTab } from "./consumer-nav";
 import { useHrefFilter } from "@/features/site-settings/site-settings";
 import type { RouteLocale } from "@/lib/i18n/config";
 
@@ -192,7 +192,29 @@ export function PetContextControl({ compact = false }: { compact?: boolean }) {
 }
 
 /** Below 1024px: five large targets at the thumb; Explore opens a grouped sheet instead of a page. */
-export function MobileTabBar({ canViewHealth = true }: { canViewHealth?: boolean }) {
+/**
+ * The app's bottom tab bar below 1024px: Home, My pets, Services, Shop, Profile. Explore (everything else, plus
+ * language and theme) is the compass button in the header, MobileExploreButton.
+ */
+export function MobileTabBar() {
+  const enabled = useHrefFilter();
+  const locale = useLocale() as RouteLocale;
+  const c = NAV_COPY[locale];
+  const current = currentMobileTab(usePathKey(locale));
+  return (
+    <nav className="member-tabbar" aria-label={c.bottom}>
+      {MOBILE_TABS.filter((tab) => enabled(tab.href)).map(({ key, href, icon: Icon, ...labels }) => (
+        <Link key={key} href={`/${locale}${href}`} aria-current={current === key ? "page" : undefined}>
+          <Icon size={21} aria-hidden="true" />
+          <span>{labels[locale]}</span>
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+/** Header compass button below 1024px: opens the Explore sheet (every other destination, language and theme). */
+export function MobileExploreButton({ canViewHealth = true }: { canViewHealth?: boolean }) {
   const enabled = useHrefFilter();
   const locale = useLocale() as RouteLocale;
   const c = NAV_COPY[locale];
@@ -203,21 +225,9 @@ export function MobileTabBar({ canViewHealth = true }: { canViewHealth?: boolean
   useEffect(() => setSheet(false), [pathname]);
   return (
     <>
-      <nav className="member-tabbar" aria-label={c.bottom}>
-        {PRIMARY_DESTINATIONS.filter((d) => d.mobile && enabled(d.href) && (d.key !== "health" || canViewHealth)).map(({ key, href, icon: Icon, ...labels }) =>
-          key === "explore" ? (
-            <button key={key} type="button" aria-haspopup="dialog" aria-expanded={sheet} aria-current={current === key ? "page" : undefined} onClick={() => setSheet(true)}>
-              <Compass size={21} aria-hidden="true" />
-              <span>{labels[locale]}</span>
-            </button>
-          ) : (
-            <Link key={key} href={`/${locale}${href}`} aria-current={current === key ? "page" : undefined}>
-              <Icon size={21} aria-hidden="true" />
-              <span>{labels[locale]}</span>
-            </Link>
-          ),
-        )}
-      </nav>
+      <button type="button" className="member-header__explore" aria-label={c.explore} aria-haspopup="dialog" aria-expanded={sheet} aria-current={current === "explore" ? "page" : undefined} onClick={() => setSheet(true)}>
+        <Compass size={21} aria-hidden="true" />
+      </button>
       <Sheet open={sheet} onClose={() => setSheet(false)} title={c.explore} className="member-explore-panel">
         <div className="explore-sheet">
           <PetContextSheetRow onNavigate={() => setSheet(false)} />

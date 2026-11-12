@@ -1,6 +1,6 @@
 import {
   BookOpen, CalendarDays, Compass, Heart, HandHeart, HeartPulse, House, Images, MapPin, PackageCheck, Plane, Repeat, Scissors, ShieldPlus,
-  ShoppingBag, Siren, Stethoscope, Users, Newspaper,
+  ShoppingBag, Siren, Stethoscope, Users, Newspaper, PawPrint, UserRound,
 } from "@petlife/ui";
 
 export type NavIcon = typeof House;
@@ -88,4 +88,37 @@ export const EXPLORE_GROUPS: ExploreGroup[] = [
 /** Locale-less path ("/pets/x/health") → the primary destination it belongs to, or null (e.g. Account). */
 export function currentDestination(path: string): PrimaryDestination["key"] | null {
   return PRIMARY_DESTINATIONS.find((d) => d.match(path))?.key ?? null;
+}
+
+/**
+ * The phone/tablet bottom bar (below 1024px): the app's five tabs. Explore moves to the header's compass button there,
+ * and Health lives inside My pets. Labels are short enough for a fifth of a 360px screen in every language.
+ */
+export interface MobileTab {
+  key: "home" | "pets" | "services" | "shop" | "profile";
+  href: string;
+  fa: string;
+  en: string;
+  de: string;
+  es: string;
+  icon: NavIcon;
+  match: (path: string) => boolean;
+}
+
+export const MOBILE_TABS: MobileTab[] = [
+  { key: "home", href: "/home", fa: "خانه", en: "Home", de: "Start", es: "Inicio", icon: House, match: (p) => p === "/home" },
+  { key: "pets", href: "/pets", fa: "حیوان‌های من", en: "My pets", de: "Meine Tiere", es: "Mis mascotas", icon: PawPrint, match: (p) => starts("/pets", "/vet", "/care-calendar")(p) },
+  { key: "services", href: "/services", fa: "خدمات", en: "Services", de: "Dienste", es: "Servicios", icon: Scissors, match: starts("/services", "/bookings", "/providers") },
+  { key: "shop", href: "/shop", fa: "فروشگاه", en: "Shop", de: "Shop", es: "Tienda", icon: ShoppingBag, match: starts("/shop", "/cart", "/checkout", "/orders", "/repeat-delivery", "/favorites") },
+  { key: "profile", href: "/profile", fa: "پروفایل", en: "Profile", de: "Profil", es: "Perfil", icon: UserRound, match: starts("/profile", "/notifications") },
+];
+
+export function currentMobileTab(path: string): MobileTab["key"] | null {
+  return MOBILE_TABS.find((tab) => tab.match(path))?.key ?? null;
+}
+
+/** Tab roots (and Explore) need no back button: the bottom bar is the way out. */
+export function isMobileTabRoot(path: string): boolean {
+  const bare = path.split("?")[0]!.replace(/\/$/, "") || "/";
+  return bare === "/" || bare === "/explore" || MOBILE_TABS.some((tab) => tab.href === bare);
 }
