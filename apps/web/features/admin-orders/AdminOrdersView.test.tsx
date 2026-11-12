@@ -64,7 +64,7 @@ describe("Admin Orders", () => {
     renderWithIntl(<AdminOrdersView section="ALL" />);
     fireEvent.click(await screen.findByRole("button", { name: "Kibble House" }));
     expect(nav.replace).toHaveBeenCalledWith("/en/admin/orders?partnerId=s1&partnerName=Kibble+House", { scroll: false });
-    fireEvent.click(screen.getByRole("button", { name: "Sara Buyer" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Sara Buyer" })[0]!);
     expect(nav.replace).toHaveBeenLastCalledWith("/en/admin/orders?customerId=u1&customerName=Sara+Buyer", { scroll: false });
     fireEvent.click(screen.getByRole("button", { name: /Export CSV/ }));
     await waitFor(() => expect(adminOrdersService.exportCsv).toHaveBeenCalledWith(expect.objectContaining({ section: "ALL" })));
