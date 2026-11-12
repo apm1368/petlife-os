@@ -6246,7 +6246,7 @@
       "verificationQueue": "Warteschlange zur Partnerprüfung",
       "launch": {
         "title": "Ziel im Startmonat",
-        "hint": "Der Erfolgsmaßstab zum Start: registrierte Tiere und Buchungen pro Woche.",
+        "hint": "Der Erfolgsmaßstab zum Start: registrierte Tiere und Buchungen pro Woche. Bis die Demodaten bereinigt sind (F4), werden sie mitgezählt.",
         "registeredPets": "Registrierte Tiere",
         "thisWeek": "diese Woche",
         "bookingsThisWeek": "Buchungen diese Woche",

@@ -74,4 +74,13 @@ describe("dashboard permission boundary", () => {
     const stays = { ...actor(AdminRole.SERVICE_ADMIN), serviceScopes: [AdminVertical.ACCOMMODATION] };
     expect((await service.getSummary(stays)).pendingTravelListings).toBe(10);
   });
+  it("keeps the platform-wide launch figures from vertical-scoped roles (#290 Q97)", async () => {
+    const { db, service } = setup();
+    // A custom role with analytics.view but limited to the shop: figures belong to every vertical, so none.
+    const shopAnalyst = { ...actor(AdminRole.ANALYTICS), permissions: ["analytics.view"], customRole: { id: "r", name: "Shop analyst", verticals: [AdminVertical.SHOP] } } as unknown as ResolvedAdminContext;
+    expect((await service.getSummary(shopAnalyst)).launchKpis).toBeNull();
+    expect(db.booking.count).not.toHaveBeenCalled();
+    const allVerticals = { ...actor(AdminRole.ANALYTICS), permissions: ["analytics.view"], customRole: { id: "r2", name: "Analyst", verticals: [] } } as unknown as ResolvedAdminContext;
+    expect((await service.getSummary(allVerticals)).launchKpis).toEqual({ registeredPets: 40, newPetsThisWeek: 40, bookingsThisWeek: 7, bookingsLastWeek: 7 });
+  });
 });

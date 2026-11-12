@@ -22,7 +22,7 @@ import {
 import type { AdminDashboardSummaryDto, AdminLaunchKpisDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { adminCan, type AdminPermission } from "../auth/admin-permissions";
-import { canReachVertical } from "../auth/admin-verticals";
+import { allowedVerticals, canReachVertical } from "../auth/admin-verticals";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 
 /**
@@ -78,7 +78,8 @@ export class AdminDashboardService {
       when(may("trust.view"), () => this.prisma.petMemorialSubmission.count({ where: { status: PetMemorialStatus.PENDING_REVIEW, withdrawnAt: null } })),
       when(may("places.view"), () => this.prisma.placeReport.count({ where: { status: PlaceReportStatus.OPEN } })),
       when(may("wallet.topup.review"), () => this.prisma.walletTopUp.count({ where: { status: WalletTopUpStatus.REVIEW_PENDING } })),
-      may("analytics.view") ? this.launchKpis() : Promise.resolve(null),
+      // Platform-wide figures: only for unscoped roles, so a vertical-limited role never sees other verticals' bookings.
+      may("analytics.view") && allowedVerticals(admin) === null ? this.launchKpis() : Promise.resolve(null),
     ]);
     return {
       openSupportCases,

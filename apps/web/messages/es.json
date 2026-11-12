@@ -6236,7 +6236,7 @@
       "verificationQueue": "Cola de verificación de socios",
       "launch": {
         "title": "Objetivo del mes de lanzamiento",
-        "hint": "La medida de éxito del lanzamiento: mascotas registradas y reservas semanales.",
+        "hint": "La medida de éxito del lanzamiento: mascotas registradas y reservas semanales. Hasta limpiar los datos de demostración (P4), también se cuentan.",
         "registeredPets": "Mascotas registradas",
         "thisWeek": "esta semana",
         "bookingsThisWeek": "Reservas esta semana",

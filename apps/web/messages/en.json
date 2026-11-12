@@ -6883,7 +6883,7 @@
       "verificationQueue": "Partner verification queue",
       "launch": {
         "title": "Launch month goal",
-        "hint": "The launch success measure: registered pets and weekly bookings.",
+        "hint": "The launch success measure: registered pets and weekly bookings. Until the demo data is cleaned up (Q4), it is counted too.",
         "registeredPets": "Registered pets",
         "thisWeek": "this week",
         "bookingsThisWeek": "Bookings this week",
