@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { ConfigService } from "@nestjs/config";
 import type { NextFunction, Request, Response } from "express";
 import type { AppEnv } from "../../config/env";
+import { useSecureCookies } from "../http/deployment.util";
 
 export const CSRF_COOKIE_NAME = "petlife_csrf";
 
@@ -18,10 +19,9 @@ export class CsrfMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction): void {
     const cookies = (req as unknown as { cookies?: Record<string, string> }).cookies;
     if (!cookies?.[CSRF_COOKIE_NAME]) {
-      const isProduction = this.config.get("NODE_ENV", { infer: true }) === "production";
       res.cookie(CSRF_COOKIE_NAME, randomUUID(), {
         httpOnly: false,
-        secure: isProduction,
+        secure: useSecureCookies(this.config),
         sameSite: "lax",
         path: "/",
       });

@@ -25,3 +25,14 @@ describe("rich text validation: video and FAQ blocks", () => {
     expect(() => validateRichTextDocument([{ type: "faq", items: [{ question: "q", answer: [{ type: "link", href: "javascript:alert(1)", text: "x" }] }] }])).toThrow();
   });
 });
+
+describe("isSafeHref", () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { isSafeHref } = require("./rich-text.util") as typeof import("./rich-text.util");
+  it("accepts same-site paths and http(s) links", () => {
+    for (const ok of ["/fa/blog/x", "/en/guides/y?ref=a#faq", "https://www.ive.ir/", "http://example.org/a"]) expect(isSafeHref(ok)).toBe(true);
+  });
+  it("refuses protocol-relative, backslash, script and data links", () => {
+    for (const bad of ["//evil.example", "/\\evil.example", "/\\/evil.example", "/a\\b", "javascript:alert(1)", "data:text/html,x", "mailto:a@b.c", "/a\nb"]) expect(isSafeHref(bad)).toBe(false);
+  });
+});

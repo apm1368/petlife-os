@@ -33,7 +33,7 @@ export class AdminAuthGuard implements CanActivate {
 
     const resolved = await this.adminAccess.resolveAdminContext(user.id);
 
-    const requiredPermissions = this.reflector.get<AdminPermission[] | undefined>(ADMIN_PERMISSION_KEY, context.getHandler());
+    const requiredPermissions = this.reflector.getAllAndOverride<AdminPermission[] | undefined>(ADMIN_PERMISSION_KEY, [context.getHandler(), context.getClass()]);
     if (requiredPermissions && requiredPermissions.length > 0) {
       const satisfied = requiredPermissions.some((permission) => adminCan(resolved, permission));
       if (!satisfied) {

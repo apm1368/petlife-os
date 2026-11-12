@@ -1,11 +1,11 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import { ContactUnavailableException, ContactUnchangedException } from "../../common/errors/api-exception";
 import { toUserDto } from "../users/user.mapper";
 import { classifyIdentifier } from "./identifier.util";
-import { OTP_PROVIDER, type OtpProvider } from "./otp/otp-provider.interface";
+import { OtpService } from "./otp/otp.service";
 
 /**
  * Batch 8 — changing the account email or phone. A new contact only takes
@@ -17,7 +17,7 @@ import { OTP_PROVIDER, type OtpProvider } from "./otp/otp-provider.interface";
 @Injectable()
 export class ContactChangeService {
   constructor(
-    @Inject(OTP_PROVIDER) private readonly otp: OtpProvider,
+    private readonly otp: OtpService,
     private readonly prisma: PrismaService,
     private readonly events: DomainEventsService,
   ) {}
@@ -28,13 +28,14 @@ export class ContactChangeService {
     const current = kind === "email" ? user.email : user.phone;
     const verified = kind === "email" ? user.emailVerifiedAt : user.phoneVerifiedAt;
     if (current === value && verified) throw new ContactUnchangedException();
-    await this.otp.sendOtp(value);
+    // Same cooldown and hourly send budget as sign-in codes, and a code that only confirms this account's change.
+    await this.otp.send(value, { purpose: "contact-change", userId });
     return { ok: true };
   }
 
   async confirm(userId: string, kind: "email" | "phone", rawValue: string, code: string) {
     const value = this.normalize(kind, rawValue);
-    await this.otp.verifyOtp(value, code);
+    await this.otp.verify(value, code, { purpose: "contact-change", userId });
     const before = await this.prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { email: true, phone: true } });
     try {
       const updated = await this.prisma.user.update({

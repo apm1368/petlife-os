@@ -65,6 +65,8 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
   const [locating, setLocating] = useState<"idle" | "busy" | "denied">("idle");
   const [text, setText] = useState(query.q ?? "");
   const [sheet, setSheet] = useState(false);
+  /** Covers that failed to load (a moved file, an expired upload) fall back to the monogram, never a broken image. */
+  const [brokenCovers, setBrokenCovers] = useState<Set<string>>(() => new Set());
 
   const setParam = useCallback(
     (patch: Record<string, string | undefined>) => {
@@ -268,7 +270,7 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
             </p>
             <label className="disc-sort">
               <span>{t("sort.label")}</span>
-              <select value={query.sort} onChange={(e) => (e.target.value === "NEAREST" && query.lat === undefined ? locateMe() : setParam({ sort: e.target.value }))}>
+              <select aria-label={t("sort.label")} value={query.sort} onChange={(e) => (e.target.value === "NEAREST" && query.lat === undefined ? locateMe() : setParam({ sort: e.target.value }))}>
                 {SORTS.map((s) => (
                   <option key={s} value={s}>{t(`sort.${s}`)}</option>
                 ))}
@@ -320,8 +322,8 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
                   return (
                     <li key={p.id} className="disc-row">
                       <div className="disc-row__media">
-                        {p.coverImageUrl ? (
-                          <Image unoptimized src={p.coverImageUrl} alt="" fill sizes="128px" />
+                        {p.coverImageUrl && !brokenCovers.has(p.id) ? (
+                          <Image unoptimized src={p.coverImageUrl} alt="" fill sizes="128px" onError={() => setBrokenCovers((prev) => new Set(prev).add(p.id))} />
                         ) : (
                           // No photo of their own: a monogram, never a stock photo that implies a different place.
                           <span className="provider-monogram" aria-hidden="true">{p.name.trim().charAt(0)}</span>

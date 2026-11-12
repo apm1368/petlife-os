@@ -15,6 +15,7 @@ import { ShareBar } from "@/features/shared/ShareBar";
 import { formatCount } from "@/lib/number/format-number";
 import { headingAnchor, inlineToText } from "@/lib/seo/rich-text-text";
 import "./editorial-design.css";
+import { localizedAuthorName } from "@/lib/content/author-name";
 
 const LANGUAGE_NAMES: Record<string, string> = { fa: "فارسی", en: "English", de: "Deutsch", es: "Español" };
 const DATE_LOCALE: Record<string, string> = { fa: "fa-IR", en: "en-US", de: "de-DE", es: "es-ES" };
@@ -76,7 +77,7 @@ export function PublicBlogArticleView({ slug, section = "blog", initialArticle, 
       </nav>
       <h1>{article.title}</h1>
       <div className="editorial-article__meta">
-        {article.author ? <span>{article.author.name}</span> : null}
+        {article.author ? <span>{localizedAuthorName(article.author.name, locale)}</span> : null}
         {article.estimatedReadingMinutes ? <span>{design("minutes", { count: formatCount(article.estimatedReadingMinutes, locale) })}</span> : null}
         <span><time dateTime={article.publishedAt}>{t("published", { date: dateFormatter.format(new Date(article.publishedAt)) })}</time></span>
         {article.updatedAt.slice(0, 10) !== article.publishedAt.slice(0, 10) ? <span><time dateTime={article.updatedAt}>{t("updated", { date: dateFormatter.format(new Date(article.updatedAt)) })}</time></span> : null}

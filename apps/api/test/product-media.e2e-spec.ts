@@ -105,16 +105,19 @@ describe("Product media administration", () => {
     return { product, variant, category };
   }
 
+  /** A real 1×1 PNG: uploads under an image key must be an image (arbitrary bytes are refused with 415). */
+  const tinyPng = Buffer.from("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d49444154789c6360000002000154a24f5d0000000049454e44ae426082", "hex");
+
   async function uploadedTarget(c: ReturnType<typeof client>, productId: string) {
     const target = await c
       .post(`/admin/commerce/products/${productId}/media/upload-url`)
-      .send({ contentType: "image/png", fileSizeBytes: 4 })
+      .send({ contentType: "image/png", fileSizeBytes: tinyPng.length })
       .expect(201);
     const path = new URL(target.body.uploadUrl).pathname;
     await request(server)
       .put(path)
       .set("Content-Type", "image/png")
-      .send(Buffer.from([1, 2, 3, 4]))
+      .send(tinyPng)
       .expect(200);
     return target.body as { key: string };
   }

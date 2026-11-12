@@ -1,14 +1,15 @@
-import { Controller, Inject, NotFoundException, Param, PayloadTooLargeException, Put, Req } from "@nestjs/common";
+import { Controller, Inject, NotFoundException, Param, PayloadTooLargeException, Put, Req, UnsupportedMediaTypeException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import type Redis from "ioredis";
 import type { Request } from "express";
 import { createWriteStream } from "node:fs";
-import { mkdir, rm } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { resolveLocalStoragePath } from "./local-storage-path";
 import { REDIS_CLIENT } from "../../common/redis/redis.module";
 import type { AppEnv } from "../../config/env";
 import { DEFAULT_UPLOAD_MAX_BYTES, UPLOAD_CEILING_BYTES } from "./local-storage.driver";
+import { detectImageKind, imageKindForKey, stripImageMetadata } from "./image-metadata.util";
 
 /** Local-dev-only endpoint the LocalStorageDriver's upload URLs point at. Not used when STORAGE_DRIVER=s3. */
 @Controller("uploads")
@@ -56,6 +57,18 @@ export class UploadsController {
     if (tooLarge) {
       await rm(destination, { force: true });
       throw new PayloadTooLargeException("This file is larger than the size declared for the upload.");
+    }
+
+    // Photos are served publicly: keep only real images of the claimed type, without EXIF/XMP (GPS, device ids).
+    if (imageKindForKey(key)) {
+      const original = await readFile(destination);
+      const actual = detectImageKind(original);
+      if (!actual) {
+        await rm(destination, { force: true });
+        throw new UnsupportedMediaTypeException("The file is not a JPEG, PNG or WebP image.");
+      }
+      const cleaned = stripImageMetadata(original, actual);
+      if (cleaned && !cleaned.equals(original)) await writeFile(destination, cleaned);
     }
 
     await this.redis.del(`upload-token:${token}`);

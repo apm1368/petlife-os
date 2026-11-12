@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { PublicArticleDetailDto } from "@petlife/types";
 import { locales, type RouteLocale } from "@/lib/i18n/config";
 import { OG_LOCALE, SITE_NAME, SITE_ORIGIN, SITE_SHARE_IMAGE_PATH } from "./site";
+import { localizedAuthorName } from "../content/author-name";
 
 /** Robots directives for pages we want fully previewed — long snippets and large images help both search results and AI citations. */
 export const RICH_INDEX_ROBOTS: Metadata["robots"] = {
@@ -28,7 +29,7 @@ export function articleMetadata(locale: RouteLocale, article: PublicArticleDetai
     title,
     description,
     keywords: article.tags.map((t) => t.name),
-    authors: article.author ? [{ name: article.author.name }] : [{ name: SITE_NAME[locale] }],
+    authors: article.author ? [{ name: localizedAuthorName(article.author.name, locale) }] : [{ name: SITE_NAME[locale] }],
     category: article.category?.name,
     robots: RICH_INDEX_ROBOTS,
     alternates: { canonical: article.canonicalPath, languages, types: { "application/rss+xml": `/${locale}/feed.xml` } },

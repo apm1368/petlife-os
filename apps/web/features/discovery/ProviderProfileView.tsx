@@ -33,6 +33,7 @@ export function ProviderProfileView({ providerId }: { providerId: string }) {
   const [profile, setProfile] = useState<ProviderProfile | null>(null);
   const [state, setState] = useState<"loading" | "ready" | "notFound" | "error">("loading");
   const [weekService, setWeekService] = useState<string | null>(null);
+  const [coverBroken, setCoverBroken] = useState(false);
 
   const load = useCallback(async () => {
     setState("loading");
@@ -91,9 +92,9 @@ export function ProviderProfileView({ providerId }: { providerId: string }) {
   return (
     <article className="pd" data-kind={isVet ? "vet" : "service"}>
       <header className="pd-head">
-        {profile.coverImageUrl ? (
+        {profile.coverImageUrl && !coverBroken ? (
           <div className="pd-head__cover">
-            <Image unoptimized src={profile.coverImageUrl} alt="" fill sizes="(max-width:1024px) 100vw, 1240px" priority />
+            <Image unoptimized src={profile.coverImageUrl} alt="" fill sizes="(max-width:1024px) 100vw, 1240px" priority onError={() => setCoverBroken(true)} />
           </div>
         ) : null}
         <div className="pd-head__identity">

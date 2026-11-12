@@ -30,7 +30,7 @@ export class ProviderAuthGuard implements CanActivate {
 
     const resolved = await this.providerContext.resolveActiveMembership(user.id);
 
-    const requiredRoles = this.reflector.get<ProviderUserRole[] | undefined>(PROVIDER_ROLE_KEY, context.getHandler());
+    const requiredRoles = this.reflector.getAllAndOverride<ProviderUserRole[] | undefined>(PROVIDER_ROLE_KEY, [context.getHandler(), context.getClass()]);
     if (requiredRoles && requiredRoles.length > 0 && !requiredRoles.includes(resolved.role)) {
       throw new ProviderAccessDeniedException({ reason: "INSUFFICIENT_ROLE", requiredRoles, actualRole: resolved.role });
     }

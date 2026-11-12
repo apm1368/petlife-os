@@ -368,6 +368,7 @@ export const DOMAIN_EVENT_TYPES = [
   "InsuranceApplicationNeedsInformation",
   "PlaceReported",
   "UnverifiedCredentialsCleared",
+  "UnprovenContactReleased",
   "ContactChanged",
   "AllSessionsRevoked",
   "DataExportReady",

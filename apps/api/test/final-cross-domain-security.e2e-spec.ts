@@ -323,11 +323,18 @@ describe("Final hardening — cross-domain security", () => {
     const user = await cookieFor((await db.petAccessGrant.findFirstOrThrow({ where: { canManageAccess: true, revokedAt: null } })).userId);
     const target = await call("POST", "/community/posts/upload-url", user).send({ contentType: "image/jpeg", fileSizeBytes: 1000 }).expect(201);
     const token = String(target.body.uploadUrl).split("/uploads/")[1]!;
-    const put = (bytes: number) => request(server()).put(`/uploads/${token}`).set("Cookie", user).set("x-csrf-token", csrf).set("Content-Type", "image/jpeg").send(Buffer.alloc(bytes));
-    const tooBig = await put(64 * 1024);
+    /** A structurally valid JPEG of exactly `bytes` bytes (SOI, one padded APP0 segment, EOI). */
+    const jpegOf = (bytes: number) => {
+      const app0 = Buffer.alloc(bytes - 8, 0);
+      return Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0, (app0.length + 2) >> 8, (app0.length + 2) & 0xff]), app0, Buffer.from([0xff, 0xd9])]);
+    };
+    const putBody = (body: Buffer) => request(server()).put(`/uploads/${token}`).set("Cookie", user).set("x-csrf-token", csrf).set("Content-Type", "image/jpeg").send(body);
+    const tooBig = await putBody(Buffer.alloc(64 * 1024));
     expect(tooBig.status).toBe(413);
     expect(tooBig.body.error.code).toBe("PAYLOAD_TOO_LARGE");
-    await put(1000).expect(200);
+    // Bytes that aren't a JPEG are refused under a .jpg key (no arbitrary file hosting on the public uploads path).
+    expect((await putBody(Buffer.alloc(1000))).status).toBe(415);
+    await putBody(jpegOf(1000)).expect(200);
 
     const malformed = await request(server()).post("/community/posts").set("Cookie", user).set("x-csrf-token", csrf).set("Content-Type", "application/json").send("{not json");
     expect(malformed.status).toBe(400);

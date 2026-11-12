@@ -13,6 +13,7 @@ if (process.env.NODE_ENV === "production" && !process.env.NEXT_PUBLIC_API_ORIGIN
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  poweredByHeader: false,
   transpilePackages: ["@petlife/ui", "@petlife/design-tokens", "@petlife/types", "@petlife/validation"],
   async headers() {
     return [{
@@ -21,17 +22,18 @@ const nextConfig = {
         { key: "X-Content-Type-Options", value: "nosniff" },
         { key: "X-Frame-Options", value: "SAMEORIGIN" },
         { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-        // Framing only: do not pretend this is a complete script CSP or block
+        // Framing, plugins and <base> only: do not pretend this is a complete script CSP or block
         // current inline hydration, signed document previews or QR camera use.
-        { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
+        { key: "Content-Security-Policy", value: "frame-ancestors 'self'; object-src 'none'; base-uri 'self'" },
       ],
     }];
   },
+  // Only the site's own static images go through the optimizer; every remote or uploaded image is rendered with
+  // `unoptimized`. No remotePatterns, so /_next/image cannot be used to fetch arbitrary or internal URLs (blind
+  // SSRF / port probing through localhost:4000, or redirects to it), and one quality so it cannot be made to
+  // re-encode the same image over and over.
   images: {
-    remotePatterns: [
-      { protocol: "http", hostname: "localhost" },
-      { protocol: "https", hostname: "**" },
-    ],
+    qualities: [75],
   },
 };
 
