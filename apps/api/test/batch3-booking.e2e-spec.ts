@@ -707,6 +707,47 @@ describe("Batch 3 — services, booking lifecycle, provider and admin operations
       const money = (await get(first, `/admin/service-bookings/${m.id}/money`).expect(200)).body;
       expect(money).toMatchObject({ paidIrr: 1_000_000, refundedIrr: 600_000, refundableIrr: 400_000, cancellable: false });
     });
+
+    it("refund routes need finance permissions, and executions running together never refund more than was paid", async () => {
+      const c = await clinic({ service: { paymentMode: "FULL_PREPAYMENT", freeCancellationHours: 24, lateCancellationRefundPercent: 50 } });
+      const owner = await actor("owner-parallel");
+      const { pets } = await household(owner);
+      const staff = async (name: string, role: AdminRole) => {
+        const a = await actor(name);
+        await db.adminUser.create({ data: { userId: a.id, role, status: AdminMembershipStatus.ACTIVE } });
+        return a;
+      };
+      const first = await staff("finance-p1", AdminRole.SUPER_ADMIN);
+      const second = await staff("finance-p2", AdminRole.SUPER_ADMIN);
+      // SUPPORT holds services.view and travel.view but no finance permission.
+      const support = await staff("support-p", AdminRole.SUPPORT);
+      const b = await book(owner, pets[0]!.id, c, { hoursAhead: 72 });
+      await post(owner, `/bookings/${b.id}/pay`).set("Idempotency-Key", randomUUID()).send({ mode: "SUCCESS" }).expect(201);
+
+      await post(support, `/admin/service-bookings/${b.id}/refund`).send({ amount: 100_000, reason: "Not a finance user" }).expect(403);
+      const open = async (reason: string) => ((await post(first, `/admin/service-bookings/${b.id}/refund`).send({ amount: 600_000, reason }).expect(201)).body.approvals as { id: string; status: string; reason: string }[]).find((a) => a.reason === reason)!;
+      const a1 = await open("Goodwill, first approval");
+      const a2 = await open("Goodwill, second approval");
+      await patch(support, `/admin/transactions/refund-approvals/${a1.id}/approve`).send({}).expect(403);
+      await patch(support, `/admin/transactions/refund-approvals/${a1.id}/execute`).send({}).expect(403);
+      await patch(second, `/admin/transactions/refund-approvals/${a1.id}/approve`).send({}).expect(200);
+      await patch(second, `/admin/transactions/refund-approvals/${a2.id}/approve`).send({}).expect(200);
+
+      // Two approvals (1.2M together) on a 1M payment, executed at the same moment, and the first one twice.
+      const results = await Promise.all([
+        patch(second, `/admin/transactions/refund-approvals/${a1.id}/execute`).send({}),
+        patch(second, `/admin/transactions/refund-approvals/${a2.id}/execute`).send({}),
+        patch(second, `/admin/transactions/refund-approvals/${a1.id}/execute`).send({}),
+      ]);
+      expect(results.every((r) => r.status < 500)).toBe(true);
+      const intentId = (await db.booking.findUniqueOrThrow({ where: { id: b.id } })).paymentIntentId!;
+      const succeeded = await db.refund.findMany({ where: { paymentIntentId: intentId, status: "SUCCEEDED" } });
+      expect(succeeded.reduce((sum, r) => sum + r.amount, 0)).toBeLessThanOrEqual(1_000_000);
+      expect(succeeded).toHaveLength(1);
+      // Each approval executed at most once.
+      const executed = await db.adminRefundApproval.findMany({ where: { id: { in: [a1.id, a2.id] }, refundId: { not: null } } });
+      expect(executed).toHaveLength(1);
+    });
   });
 
   describe("reschedule, series and rebook", () => {
