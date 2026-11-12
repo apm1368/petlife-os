@@ -135,6 +135,7 @@ export type AdminAuditAction =
   | "admin_role.archived"
   | "admin_user.custom_role_assigned"
   | "admin_user.custom_role_cleared"
+  | "pet_ownership.dispute_closed"
   | "messaging.test_sms_sent"
   | "messaging.test_email_sent"
   | "customer.suspended"

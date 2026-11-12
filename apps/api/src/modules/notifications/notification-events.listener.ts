@@ -75,6 +75,41 @@ export class NotificationEventsListener {
     });
   }
 
+  /** ID-03: the other party hears that the transfer is disputed (the one who raised it already knows). */
+  @OnEvent("PetOwnershipDisputed")
+  onOwnershipDisputed(payload: { transferId: string; petId: string; raisedByUserId: string }, domainEventId: string): Promise<void> {
+    return this.safely("PetOwnershipDisputed", async () => {
+      const transfer = await this.prisma.petOwnershipTransfer.findUnique({ where: { id: payload.transferId }, select: { fromUserId: true, toUserId: true, pet: { select: { name: true } } } });
+      if (!transfer) return;
+      const other = payload.raisedByUserId === transfer.fromUserId ? transfer.toUserId : transfer.fromUserId;
+      const actor = await this.prisma.user.findUnique({ where: { id: payload.raisedByUserId }, select: { displayName: true } });
+      await this.orchestrator.notify({
+        userId: other,
+        type: "pet.ownership_disputed",
+        category: NotificationCategory.HOUSEHOLD,
+        templateParams: { petName: transfer.pet.name, actorName: actor?.displayName ?? "" },
+        deepLink: NotificationDeepLinks.petOwnershipTransfer(payload.transferId),
+        entityType: "PetOwnershipTransfer",
+        entityId: payload.transferId,
+        petId: payload.petId,
+        domainEventId,
+        attemptSms: false,
+      });
+    });
+  }
+
+  /** Staff closed a dispute (Admin → Users → Ownership transfers): both parties hear the outcome. */
+  @OnEvent("PetOwnershipDisputeClosed")
+  onOwnershipDisputeClosed(payload: { transferId: string; petId: string; fromUserId: string; toUserId: string; outcome: "TRANSFER_STANDS" | "OWNER_STAYS" }, domainEventId: string): Promise<void> {
+    return this.safely("PetOwnershipDisputeClosed", async () => {
+      const pet = await this.prisma.pet.findUnique({ where: { id: payload.petId }, select: { name: true } });
+      const type = payload.outcome === "TRANSFER_STANDS" ? "pet.ownership_dispute_closed_stands" : "pet.ownership_dispute_closed_owner_stays";
+      for (const userId of [payload.fromUserId, payload.toUserId]) {
+        await this.orchestrator.notify({ userId, type, category: NotificationCategory.HOUSEHOLD, templateParams: { petName: pet?.name ?? "" }, deepLink: NotificationDeepLinks.petOwnershipTransfer(payload.transferId), entityType: "PetOwnershipTransfer", entityId: payload.transferId, petId: payload.petId, domainEventId, attemptSms: false });
+      }
+    });
+  }
+
   @OnEvent("ServiceBookingConfirmed")
   onBookingConfirmed(payload: BookingEventPayload, domainEventId: string): Promise<void> {
     return this.safely("ServiceBookingConfirmed", async () => {

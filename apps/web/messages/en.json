@@ -1,4 +1,57 @@
 {
+  "adminOwnership": {
+    "kicker": "Pets",
+    "title": "Ownership transfers",
+    "intro": "Every request to move a pet to a new owner, disputed ones first. A dispute never moves the pet: the registered owner stays until an official ruling or a written agreement. Check the parties' documents (via support), then close the dispute with a reason. Both people are told the outcome.",
+    "filterLabel": "Transfer status",
+    "search": "Search",
+    "searchPlaceholder": "Pet or person name",
+    "apply": "Search",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "status": {
+      "DISPUTED": "Disputed",
+      "PENDING_REVIEW": "Waiting for recipient",
+      "ACCEPTED": "Transferred",
+      "DECLINED": "Declined",
+      "CANCELLED": "Cancelled",
+      "EXPIRED": "Expired",
+      "ALL": "All"
+    },
+    "empty": "No transfers match.",
+    "emptyDisputed": "No open disputes.",
+    "registeredOwner": "Registered owner now",
+    "requested": "Requested",
+    "applied": "Transferred on",
+    "notApplied": "Not transferred",
+    "memories": "Memories",
+    "memory": {
+      "TRANSFER": "Go to the new owner",
+      "RETAIN": "Stay with the previous owner",
+      "COPY_READ_ONLY": "Read-only copy for the new owner"
+    },
+    "explain": {
+      "applied": "This transfer had already happened. Closing the dispute keeps it as it is.",
+      "pending": "The recipient hadn't accepted yet. Closing the dispute closes the request; the registered owner stays."
+    },
+    "close": "Close dispute",
+    "reason": "Outcome and reason",
+    "reasonPlaceholder": "For example: purchase contract checked with both parties by phone",
+    "done": {
+      "stands": "Dispute about {pet} closed: the transfer stands. Both parties have been notified.",
+      "ownerStays": "Dispute about {pet} closed: the request is closed and the registered owner stays. Both parties have been notified."
+    },
+    "errors": {
+      "reason": "Write the outcome and reason (at least 5 characters).",
+      "forbidden": "Your role doesn't include customer records.",
+      "load": "Transfers couldn't be loaded.",
+      "generic": "That didn't work. Please try again."
+    },
+    "rules": {
+      "OWNERSHIP_NOT_DISPUTED": "This transfer isn't disputed any more. Refresh the list.",
+      "OWNERSHIP_CHANGED_CONCURRENTLY": "Someone else changed this transfer just now. Refresh the list."
+    }
+  },
   "adminDeletionRequests": {
     "kicker": "Privacy",
     "title": "Account deletion requests",
@@ -4425,6 +4478,7 @@
         "signingOut": "Signing out…"
       },
       "tabs": {
+        "ownershipTransfers": "Ownership transfers",
         "deletionRequests": "Deletion requests",
         "customRoles": "Custom roles",
         "directory": "Directory",
@@ -5074,6 +5128,7 @@
         "URGENT": "Urgent"
       },
       "sources": {
+        "OWNERSHIP_DISPUTE": "Ownership dispute",
         "MANUAL": "Manual entry",
         "TRAVEL_SOURCE": "Travel sources",
         "PARTNER_VERIFICATION": "Partner document review",
@@ -6849,6 +6904,7 @@
         "allClear": "All clear — nothing is waiting on your team.",
         "clearList": "Clear: {list}",
         "queue": {
+          "openOwnershipDisputes": "Ownership disputes",
           "pendingDeletionRequests": "Account deletion requests",
           "openTrustCases": "Trust & safety cases",
           "openDisputes": "Open disputes",

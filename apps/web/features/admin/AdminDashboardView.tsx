@@ -69,6 +69,7 @@ const QUEUES: { key: QueueKey; href: string; permission: string; icon: Icon; ton
   { key: "pendingRefundRequests", href: "/admin/commerce/refund-requests", permission: "commerce.view", icon: Receipt, tone: "attention" },
   { key: "pendingWalletTopUps", href: "/admin/wallets/top-ups", permission: "wallet.view", icon: Wallet, tone: "attention" },
   { key: "pendingDeletionRequests", href: "/admin/privacy/deletion-requests", permission: "admin.manage", icon: KeyRound, tone: "attention" },
+  { key: "openOwnershipDisputes", href: "/admin/ownership-transfers", permission: "customer.view", icon: Gavel, tone: "attention" },
   { key: "openCommunityReports", href: "/admin/community", permission: "trust.view", icon: Siren, tone: "attention" },
   { key: "pendingVerifications", href: "/admin/verification", permission: "verification.manage", icon: BadgeCheck, tone: "neutral" },
   { key: "pendingOfferModeration", href: "/admin/commerce/product-moderation", permission: "commerce.view", icon: ShoppingBag, tone: "neutral" },

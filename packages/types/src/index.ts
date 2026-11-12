@@ -3208,6 +3208,8 @@ export interface AdminDashboardSummaryDto {
   pendingWalletTopUps: number | null;
   /** Account deletion requests waiting on staff (REQUESTED or PENDING_RETENTION); admin.manage only. */
   pendingDeletionRequests: number | null;
+  /** Pet ownership transfers in DISPUTED, waiting for staff to record the outcome; customer.view. */
+  openOwnershipDisputes: number | null;
 }
 
 // ---------------------------------------------------------------------------

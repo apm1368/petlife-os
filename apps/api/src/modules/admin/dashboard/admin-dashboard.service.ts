@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import {
   AccountDeletionState,
+  PetOwnershipTransferStatus,
   AdminRefundApprovalStatus,
   AdminTaskStatus,
   AdminVertical,
@@ -56,6 +57,7 @@ export class AdminDashboardService {
       openPlaceReports,
       pendingWalletTopUps,
       pendingDeletionRequests,
+      openOwnershipDisputes,
     ] = await Promise.all([
       when(may("support.view"), () => this.prisma.supportCase.count({ where: { status: { notIn: [SupportCaseStatus.RESOLVED, SupportCaseStatus.CLOSED] } } })),
       when(may("dispute.view"), () => this.prisma.dispute.count({ where: { status: { notIn: [DisputeStatus.CLOSED] } } })),
@@ -81,6 +83,8 @@ export class AdminDashboardService {
       when(may("wallet.view"), () => this.prisma.walletTopUp.count({ where: { status: WalletTopUpStatus.REVIEW_PENDING } })),
       // Account deletion requests waiting on staff: new ones and those in retention review (execution stays disabled).
       when(may("admin.manage"), () => this.prisma.accountDeletionRequest.count({ where: { state: { in: [AccountDeletionState.REQUESTED, AccountDeletionState.PENDING_RETENTION] } } })),
+      // Pet ownership disputes waiting for staff to record an outcome (ID-03).
+      when(may("customer.view"), () => this.prisma.petOwnershipTransfer.count({ where: { status: PetOwnershipTransferStatus.DISPUTED } })),
     ]);
     return {
       openSupportCases,
@@ -99,6 +103,7 @@ export class AdminDashboardService {
       openPlaceReports,
       pendingWalletTopUps,
       pendingDeletionRequests,
+      openOwnershipDisputes,
     };
   }
 }

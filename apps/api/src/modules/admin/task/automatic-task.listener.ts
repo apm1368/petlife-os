@@ -20,6 +20,12 @@ export class AutomaticTaskListener {
     await this.tasks.raise({ dedupeKey: `privacy-deletion-request:${payload.requestId}`, title: "درخواست حذف حساب برای بررسی", source: AdminTaskSource.PRIVACY_REQUEST, team: "PRIVACY", priority: AdminPriority.HIGH, relatedEntityType: "AccountDeletionRequest", relatedEntityId: payload.requestId, dueAt: new Date(Date.now() + 7 * 86400e3) });
   }
 
+  /** ID-03: a disputed transfer never moves the pet, but someone on staff must look at it and record the outcome. */
+  @OnEvent("PetOwnershipDisputed")
+  async onOwnershipDisputed(payload: { transferId: string; petId: string; raisedByUserId: string }) {
+    await this.tasks.raise({ dedupeKey: `ownership-dispute:${payload.transferId}`, title: "اختلاف در انتقال مالکیت حیوان", description: "یکی از طرفین با انتقال مالکیت مخالفت کرده است. مالک ثبت‌شده تغییر نمی‌کند؛ مدارک را بررسی و نتیجه را ثبت کنید.", source: AdminTaskSource.OWNERSHIP_DISPUTE, team: "SUPPORT", priority: AdminPriority.HIGH, relatedEntityType: "PetOwnershipTransfer", relatedEntityId: payload.transferId, dueAt: new Date(Date.now() + 3 * 86400e3) });
+  }
+
   @OnEvent("CommunityReportSubmitted")
   @OnEvent("ContentReportSubmitted")
   async onReport(payload: { reportId: string; reason?: string; targetType?: string }) {

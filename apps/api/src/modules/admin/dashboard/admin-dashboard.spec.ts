@@ -25,6 +25,7 @@ describe("dashboard permission boundary", () => {
       placeReport: counter(15),
       walletTopUp: counter(16),
       accountDeletionRequest: counter(17),
+      petOwnershipTransfer: counter(18),
     };
     return { db, service: new AdminDashboardService(db as unknown as PrismaService) };
   };
@@ -60,6 +61,7 @@ describe("dashboard permission boundary", () => {
       openPlaceReports: 15,
       pendingWalletTopUps: 16,
       pendingDeletionRequests: 17,
+      openOwnershipDisputes: 18,
     });
   });
   it("hides vertical queues from an admin scoped to another vertical", async () => {
