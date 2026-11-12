@@ -5365,7 +5365,8 @@
       "checkInSelected": "Anreise ausgewählt; wähle jetzt die Abreise.",
       "checkInSuffix": ", Anreise",
       "checkOutSuffix": ", Abreise"
-    }
+    },
+    "year": "Jahr"
   },
   "filePicker": {
     "choose": "Datei auswählen",
@@ -9345,5 +9346,68 @@
       "release": "Loslassen zum Aktualisieren",
       "loading": "Wird aktualisiert…"
     }
+  },
+  "petCard": {
+    "title": "Tierkarte und QR-Code",
+    "intro": "Eine öffentliche Karte für die Marke oder das Halsband von {name}. Wer den Code scannt, sieht nur, was du hier auswählst, und kann dir über opetlife schreiben. Deine Telefonnummer wird nie angezeigt.",
+    "back": "Zurück zum Profil von {name}",
+    "fieldsTitle": "Was die Karte zeigt",
+    "healthGroup": "Gesundheit (für den Fall, dass Finder es wissen müssen)",
+    "fields": {
+      "PHOTO": "Foto",
+      "SPECIES": "Tierart",
+      "BREED": "Rasse",
+      "SEX": "Geschlecht",
+      "AGE": "Alter",
+      "MICROCHIP_STATUS": "Ob ein Mikrochip vorhanden ist (nicht die Nummer)",
+      "ALLERGIES": "Allergien",
+      "CONDITIONS": "Aktuelle Erkrankungen",
+      "MEDICATIONS": "Aktuelle Medikamente",
+      "BLOOD_TYPE": "Blutgruppe",
+      "CRITICAL_NOTES": "Wichtige Hinweise"
+    },
+    "previewTitle": "Wer den Code scannt, sieht",
+    "previewName": "Name: {name}",
+    "previewMessage": "Eine Schaltfläche „Besitzer kontaktieren“ über opetlife",
+    "neverTitle": "Nie angezeigt",
+    "never": "Deine Adresse, Haushaltsmitglieder, Telefonnummer, die Mikrochipnummer, Dokumente und Termine.",
+    "create": "Karte und QR-Code erstellen",
+    "replace": "Neue Karte erstellen",
+    "replaceNote": "Mit einer neuen Karte wird die aktuelle sofort ungültig; ihr alter Code öffnet sich nicht mehr.",
+    "creating": "Wird erstellt…",
+    "createError": "Die Karte wurde nicht erstellt. Versuch es noch einmal.",
+    "readyTitle": "Deine Karte ist fertig",
+    "onceNote": "Dieser Link und Code werden nur jetzt angezeigt. Lade sie herunter oder drucke sie; wenn sie verloren gehen, erstelle eine neue Karte.",
+    "qrLabel": "QR-Code für die Karte von {name}",
+    "download": "QR herunterladen",
+    "print": "Drucken",
+    "copy": "Link kopieren",
+    "copied": "Kopiert",
+    "open": "Karte ansehen",
+    "listTitle": "Karten von {name}",
+    "listEmpty": "Noch keine Karte.",
+    "kind": {
+      "ID_TAG": "Markenkarte",
+      "EMERGENCY": "Notfallkarte"
+    },
+    "state": {
+      "ACTIVE": "Aktiv",
+      "REVOKED": "Widerrufen",
+      "ROTATED": "Ersetzt",
+      "EXPIRED": "Abgelaufen"
+    },
+    "created": "Erstellt am {date}",
+    "ending": "Code endet auf …{hint}",
+    "views": "Aufrufe: {count}",
+    "lastViewed": "Zuletzt angesehen {date}",
+    "revoke": "Karte widerrufen",
+    "revokeConfirm": "Ja, diese Karte widerrufen",
+    "revokeCancel": "Abbrechen",
+    "revoked": "Die Karte ist widerrufen; ihr Code öffnet sich nicht mehr.",
+    "revokeError": "Nicht widerrufen. Versuch es noch einmal.",
+    "noAccess": "Nur wer die Zugriffe auf dieses Tier verwaltet, kann eine Karte erstellen.",
+    "loadError": "Die Kartendaten konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "loading": "Wird geladen…"
   }
 }

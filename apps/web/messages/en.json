@@ -9321,7 +9321,8 @@
       "checkInSelected": "Check-in selected; now choose check-out.",
       "checkInSuffix": ", check-in",
       "checkOutSuffix": ", check-out"
-    }
+    },
+    "year": "Year"
   },
   "providerDiscovery": {
     "allServices": "All services",
@@ -10215,5 +10216,68 @@
       "release": "Release to refresh",
       "loading": "Refreshing…"
     }
+  },
+  "petCard": {
+    "title": "Pet card and QR code",
+    "intro": "A public card for {name}'s tag or collar. Anyone who scans the code sees only what you choose here and can message you through opetlife. Your phone number is never shown.",
+    "back": "Back to {name}'s profile",
+    "fieldsTitle": "What the card shows",
+    "healthGroup": "Health (for when a finder needs to know)",
+    "fields": {
+      "PHOTO": "Photo",
+      "SPECIES": "Species",
+      "BREED": "Breed",
+      "SEX": "Sex",
+      "AGE": "Age",
+      "MICROCHIP_STATUS": "Whether it's microchipped (not the number)",
+      "ALLERGIES": "Allergies",
+      "CONDITIONS": "Active conditions",
+      "MEDICATIONS": "Current medications",
+      "BLOOD_TYPE": "Blood type",
+      "CRITICAL_NOTES": "Critical notes"
+    },
+    "previewTitle": "Anyone who scans the code sees",
+    "previewName": "Name: {name}",
+    "previewMessage": "A “Message the owner” button through opetlife",
+    "neverTitle": "Never shown",
+    "never": "Your address, household members, phone number, the microchip number, documents and bookings.",
+    "create": "Create card and QR code",
+    "replace": "Create a new card",
+    "replaceNote": "Creating a new card stops the current one at once; its old code no longer opens.",
+    "creating": "Creating…",
+    "createError": "The card wasn't created. Try again.",
+    "readyTitle": "Your card is ready",
+    "onceNote": "This link and code are shown only now. Download or print them; if you lose them, create a new card.",
+    "qrLabel": "QR code for {name}'s card",
+    "download": "Download QR",
+    "print": "Print",
+    "copy": "Copy link",
+    "copied": "Copied",
+    "open": "View card",
+    "listTitle": "{name}'s cards",
+    "listEmpty": "No card yet.",
+    "kind": {
+      "ID_TAG": "Tag card",
+      "EMERGENCY": "Emergency card"
+    },
+    "state": {
+      "ACTIVE": "Active",
+      "REVOKED": "Revoked",
+      "ROTATED": "Replaced",
+      "EXPIRED": "Expired"
+    },
+    "created": "Created {date}",
+    "ending": "Code ending …{hint}",
+    "views": "Views: {count}",
+    "lastViewed": "Last viewed {date}",
+    "revoke": "Revoke card",
+    "revokeConfirm": "Yes, revoke this card",
+    "revokeCancel": "Cancel",
+    "revoked": "The card is revoked and its code no longer opens.",
+    "revokeError": "It wasn't revoked. Try again.",
+    "noAccess": "Only someone who manages this pet's access can create its card.",
+    "loadError": "The card details didn't load.",
+    "retry": "Try again",
+    "loading": "Loading…"
   }
 }

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { ShareBar } from "@/features/shared/ShareBar";
-import { formatDay } from "@/lib/date/jalali";
+import { formatTehranDateTime } from "@/lib/date/tehran";
 import { Button, ContextSurface, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { LostPetIncidentDto, LostPetSightingDto } from "@petlife/types";
 import { lostPetService } from "@/services/lost-pet.service";
@@ -31,7 +31,8 @@ export function LostPetIncidentDetailView({ petId, incidentId }: { petId: string
   const [loadError, setLoadError] = useState<unknown>(null);
   const [isActing, setIsActing] = useState(false);
   const lang = useLocale() as RouteLocale;
-  const when = (iso: string) => `${formatDay(iso.slice(0, 10), lang, { weekday: true })} ${new Intl.DateTimeFormat(({ fa: "fa-IR-u-ca-persian-nu-arabext", en: "en-GB", de: "de-DE", es: "es-ES" })[lang], { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tehran" }).format(new Date(iso))}`;
+  // Day and time from the same zone (Tehran), with the zone stated: the UTC day was a day off at night (QA L12).
+  const when = (iso: string) => formatTehranDateTime(iso, lang, { weekday: true, zone: true });
 
   async function load() {
     setError(null);

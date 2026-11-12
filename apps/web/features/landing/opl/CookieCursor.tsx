@@ -28,7 +28,7 @@ export function CookieCursor() {
     const P = { x: fine ? innerWidth / 2 : innerWidth - 110, y: fine ? innerHeight / 2 : innerHeight - 130, last: performance.now(), seen: false, vx: 0, dir: 1, zone: "" };
     const C = { x: fine ? innerWidth / 2 : innerWidth - 90, y: fine ? innerHeight / 2 : innerHeight - 100, lx: 0, ly: 0, side: 1, scale: 1, mode: "" };
     const B = { x: 0, y: 0, fx: 0, fy: 0, tx: 0, ty: 0, t0: 0, dur: 900, on: false };
-    let hoverEl: HTMLElement | null = null, face = 1, bowUntil = 0, dogCls = "", raf = 0;
+    let hoverEl: HTMLElement | null = null, face = 1, bowUntil = 0, dogCls = "", raf = 0, shy = false;
     cursorBus.cookieOn = true;
     const onMove = (e: PointerEvent) => {
       if (e.pointerType === "touch") return;
@@ -38,6 +38,8 @@ export function CookieCursor() {
       const t = e.target as Element | null;
       hoverEl = t?.closest<HTMLElement>("a,button,input,select,[role='radio']") ?? null;
       P.zone = t?.closest<HTMLElement>("[data-zone]")?.dataset.zone ?? "";
+      // Over a form the member is typing or choosing: Cookie stays out of the way (QA L11: it sat on fields and buttons).
+      shy = !!t?.closest("form,fieldset,input,select,textarea,label,[data-ck-shy]");
     };
     const onDown = (e: PointerEvent) => {
       if (e.pointerType !== "touch") return;
@@ -79,7 +81,7 @@ export function CookieCursor() {
     const frame = (now: number) => {
       const idle = now - P.last, calm = P.zone === "calm";
       let tx = P.x - 50 * P.dir, ty = P.y + 14, mode = "follow", lockCx = 0;
-      const lock = fine ? (hoverEl && root.parentElement?.contains(hoverEl) ? hoverEl : cursorBus.stageHover ? cursorBus.activeWorldNode : null) : null;
+      const lock = fine && !shy ? (hoverEl && root.parentElement?.contains(hoverEl) ? hoverEl : cursorBus.stageHover ? cursorBus.activeWorldNode : null) : null;
       if (lock) {
         const r = lock.getBoundingClientRect();
         if (r.width < 360 && r.height < 180) {
@@ -88,9 +90,10 @@ export function CookieCursor() {
           ty = r.top + r.height / 2; mode = "point"; lockCx = r.left + r.width / 2;
         }
       }
-      if (mode !== "point" && P.seen && idle > 1400) mode = idle > 6500 && !calm ? "play" : "look";
+      if (mode !== "point" && P.seen && idle > 1400) mode = idle > 6500 && !calm && !shy ? "play" : "look";
       if (!P.seen && !fine) mode = "look";
       if (mode === "look") { tx = P.x + (fine ? 46 : 0); ty = P.y + (fine ? 34 : 0); }
+      if (shy && mode !== "play") { tx = P.x + 96 * (P.dir || 1); ty = P.y + 72; }
       if (mode === "play") { updateBall(now); const bd = B.tx - B.fx >= 0 ? 1 : -1; tx = B.x - 42 * bd; ty = B.y + 6; } else hideBall();
       const k = mode === "play" ? 0.085 : calm ? 0.06 : 0.14;
       const ax = (tx - C.x) * k, ay = (ty - C.y) * k;
@@ -106,6 +109,7 @@ export function CookieCursor() {
       if (face < 0) cls += " left";
       if (cls !== dogCls) { dogCls = cls; dog.setAttribute("class", `dog ${cls}`); }
       if (C.mode !== mode) { C.mode = mode; ck.dataset.mode = mode; }
+      ck.classList.toggle("shy", shy && mode !== "play");
       if (speed > 0.8 && Math.hypot(C.x - C.lx, C.y - C.ly) > 30) printPaw(Math.atan2(ay, ax));
       let txt = "";
       if (now < cursorBus.sayUntil) txt = cursorBus.sayText;
