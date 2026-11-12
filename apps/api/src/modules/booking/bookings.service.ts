@@ -871,6 +871,18 @@ export class BookingsService {
    * starts at or after the chosen occurrence, each through the same cancel path (policy refund,
    * capacity release, timeline). Earlier and already-attended occurrences are untouched.
    */
+  /** The owner confirms they will attend an upcoming confirmed appointment (offered by the automatic reminders). */
+  async confirmAttendance(userId: string, id: string): Promise<BookingDto> {
+    const booking = await this.prisma.booking.findUnique({ where: { id } });
+    if (!booking) throw new NotFoundApiException("Booking");
+    if (!(await this.petAccess.canActOnBooking(booking, userId))) throw new PetAccessDeniedException({ bookingId: id });
+    if (booking.bookingStatus !== BookingStatus.CONFIRMED || booking.startAt <= new Date()) {
+      throw new ValidationApiException({ field: "bookingStatus", reason: "NOT_UPCOMING_CONFIRMED", status: booking.bookingStatus });
+    }
+    if (!booking.attendanceConfirmedAt) await this.prisma.booking.update({ where: { id }, data: { attendanceConfirmedAt: new Date() } });
+    return this.toDto(await this.loadWithRelations(id));
+  }
+
   async cancelSeriesFrom(userId: string, bookingId: string, reason?: string): Promise<{ cancelledBookingIds: string[] }> {
     const anchor = await this.prisma.booking.findUnique({ where: { id: bookingId } });
     if (!anchor?.bookingSeriesId) throw new NotFoundApiException("Booking series");
@@ -958,6 +970,7 @@ export class BookingsService {
       reasonForVisit: booking.reasonForVisit,
       ownerNotes: booking.ownerNotes,
       cancelledAt: booking.cancelledAt?.toISOString() ?? null,
+      attendanceConfirmedAt: booking.attendanceConfirmedAt?.toISOString() ?? null,
       cancelledReason: booking.cancelledReason,
       cancellationReasonCode: booking.cancellationReasonCode,
       completedAt: booking.completedAt?.toISOString() ?? null,

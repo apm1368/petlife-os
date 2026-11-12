@@ -73,6 +73,7 @@ export const bookingsService = {
 
   getById: (id: string) => apiFetch<BookingDto>(`/bookings/${id}`),
 
+  confirmAttendance: (id: string) => apiFetch<BookingDto>(`/bookings/${encodeURIComponent(id)}/confirm-attendance`, { method: "POST" }),
   cancel: (id: string, reason?: string) =>
     apiFetch<BookingDto>(`/bookings/${id}/cancel`, { method: "POST", body: { reason } }),
 

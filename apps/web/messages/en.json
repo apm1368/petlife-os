@@ -2473,6 +2473,8 @@
       "genericAction": "That did not work. Check your connection and try again."
     },
     "ui": {
+      "confirmAttendance": "I'll be there",
+      "attendanceConfirmed": "You confirmed you'll attend. The provider can see this.",
       "loading": "Loading booking…",
       "forbidden": "You do not have access to this booking",
       "notFound": "Booking not found",
@@ -2875,7 +2877,8 @@
       "noBookingsToday": "No bookings today.",
       "verificationLink": "Organization verification and documents"
     },
-    "bookingRow": { "respondBy": "Respond by " },
+    "bookingRow": {
+      "attendanceConfirmed": "Owner confirmed", "respondBy": "Respond by " },
     "bookings": {
       "title": "Bookings",
       "retry": "Retry",

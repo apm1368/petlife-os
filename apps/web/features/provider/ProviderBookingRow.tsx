@@ -35,7 +35,10 @@ export function ProviderBookingRow({ booking, locale, onClick }: { booking: Prov
           <p className="text-body font-medium text-text-primary">
             {booking.petName} — {booking.ownerDisplayName}
           </p>
-          <StatusLabel tone={STATUS_TONE[booking.bookingStatus] ?? "neutral"}>{t(booking.bookingStatus)}</StatusLabel>
+          <span className="flex flex-wrap items-center gap-1">
+            {booking.bookingStatus === "CONFIRMED" && booking.attendanceConfirmedAt ? <StatusLabel tone="success">{tProvider("attendanceConfirmed")}</StatusLabel> : null}
+            <StatusLabel tone={STATUS_TONE[booking.bookingStatus] ?? "neutral"}>{t(booking.bookingStatus)}</StatusLabel>
+          </span>
         </div>
         <p className="text-metadata text-text-secondary">
           {booking.variantName ? `${booking.serviceName} — ${booking.variantName}` : booking.serviceName}

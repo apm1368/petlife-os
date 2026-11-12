@@ -866,6 +866,8 @@ export interface BookingDto {
   paymentStatus: PaymentStatus;
   reasonForVisit: string | null;
   ownerNotes: string | null;
+  /** When the owner confirmed they will attend (after an automatic reminder or from the booking page). */
+  attendanceConfirmedAt?: string | null;
   cancelledAt: string | null;
   cancelledReason: string | null;
   /** Handoff 05: set only by the Provider OS's POST .../complete transition. */
@@ -1008,6 +1010,8 @@ export interface ProviderAvailabilityExceptionDto {
 export interface ProviderBookingSummaryDto {
   id: string;
   petId: string;
+  /** The owner confirmed they will attend (from the automatic reminder or the booking page). */
+  attendanceConfirmedAt?: string | null;
   petName: string;
   petSpecies: PetSpecies;
   ownerDisplayName: string;
