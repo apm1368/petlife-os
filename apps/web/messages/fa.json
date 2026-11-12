@@ -8332,6 +8332,9 @@
       "SCOPES_ONLY_FOR_SERVICE_ADMIN": "حوزهٔ خدمات فقط برای نقش ادمین خدمات قابل ثبت است."
     },
     "verticals": {
+      "SHOP": "فروشگاه",
+      "CONTENT": "محتوا",
+      "SUPPORT": "پشتیبانی",
       "CLINIC": "کلینیک و دامپزشکی",
       "GROOMING": "آرایش و شست‌وشو",
       "ACCOMMODATION": "اقامت و نگهداری",
