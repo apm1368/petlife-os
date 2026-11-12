@@ -5,14 +5,17 @@ import { vi } from "vitest";
 import sitemap from "./sitemap";
 import { articleEntries } from "@/lib/seo/sitemap-entries";
 
-vi.mock("@/lib/seo/blog-server", () => ({ fetchArticleFeed: async () => [] }));
+const feed = vi.hoisted(() => ({ items: [] as unknown[] }));
+vi.mock("@/lib/seo/blog-server", () => ({ fetchArticleFeed: async () => feed.items }));
 
 describe("public sitemap", () => {
   it("lists only the configured public routes in all four locales with reciprocal alternates", async () => {
+    feed.items = [];
     const entries = await sitemap();
-    expect(entries).toHaveLength(sitemapPages.length * locales.length);
+    const listed = sitemapPages.filter((page) => page !== "blog" && page !== "guides");
+    expect(entries).toHaveLength(listed.length * locales.length);
 
-    for (const page of sitemapPages) {
+    for (const page of listed) {
       for (const locale of locales) {
         const expectedUrl = new URL(publicPagePath(locale, page), SITE_ORIGIN).toString();
         const entry = entries.find((item) => item.url === expectedUrl);
@@ -32,6 +35,13 @@ describe("public sitemap", () => {
     const urls = (await sitemap()).map(({ url }) => url);
     expect(urls.some((url) => /\/(admin|profile|pets|provider|seller|checkout|orders|health-share|pet-card)(\/|$)/.test(url))).toBe(false);
     expect(urls.some((url) => /\/(shop|help|legal|insurance)(\/|$)/.test(url))).toBe(false);
+  });
+
+  it("lists the blog index once it has articles, and guides only when guides exist", async () => {
+    feed.items = [{ articleId: "a1", locale: "fa", slug: "s", canonicalPath: "/fa/blog/s", title: "t", excerpt: null, seoDescription: null, categorySlug: "care-and-health", categoryName: null, tags: [], coverUrl: null, coverAlt: null, videos: [], publishedAt: "2026-11-12T00:00:00.000Z", updatedAt: "2026-11-12T00:00:00.000Z" }];
+    const urls = (await sitemap()).map(({ url }) => url);
+    expect(urls).toContain("https://opetlife.ir/fa/blog");
+    expect(urls.some((url) => url.endsWith("/guides"))).toBe(false);
   });
 
   it("lists each published article locale with its translations, cover and video", () => {

@@ -15,7 +15,12 @@ const absolute = (path: string) => new URL(path, SITE_ORIGIN).toString();
  * help, legal and insurance pages are deliberately omitted.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const pages: MetadataRoute.Sitemap = sitemapPages.flatMap((page) => locales.map((locale) => ({
+  const feed = await fetchArticleFeed();
+  // An article index is only listed once it has articles; empty indexes are noindex and must not be in the sitemap.
+  const hasGuides = feed.some((item) => item.categorySlug === "guides");
+  const hasBlog = feed.some((item) => item.categorySlug !== "guides");
+  const listed = sitemapPages.filter((page) => (page === "guides" ? hasGuides : page === "blog" ? hasBlog : true));
+  const pages: MetadataRoute.Sitemap = listed.flatMap((page) => locales.map((locale) => ({
     url: absolute(publicPagePath(locale, page)),
     changeFrequency: page === "blog" || page === "guides" ? ("daily" as const) : ("weekly" as const),
     priority: page === "home" ? 1 : page === "blog" || page === "guides" ? 0.8 : 0.6,
@@ -26,5 +31,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ]),
     },
   })));
-  return [...pages, ...articleEntries(await fetchArticleFeed())];
+  return [...pages, ...articleEntries(feed)];
 }
