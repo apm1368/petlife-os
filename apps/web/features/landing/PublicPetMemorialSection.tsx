@@ -15,7 +15,7 @@ const CANDLES_KEY = "opl-candles";
 /**
  * Public memorials at twilight, in Persian arches (pattern-2026-11): only owner-consented, admin-approved names and
  * photos. A candle lit here stays on this device only; nothing is counted or sent. On the landing it shows the latest
- * eight; with `page` it is the public /memorials page (market-readiness #290, Q60) and lists every approved memorial.
+ * eight; with `page` it is the public /memorials page (market-readiness #290, Q60) and lists all the API returns (the latest 12).
  */
 export function PublicPetMemorialSection({ page = false }: { page?: boolean } = {}) {
   const t = useTranslations("landing.publicMemorial");

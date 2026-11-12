@@ -24,6 +24,13 @@ describe("LostPetAreaAlertService (#290 Q53)", () => {
     expect(result).toHaveLength(MAX_AREA_ALERT_RECIPIENTS);
   });
 
+  it("stores the alert point to ~1 km, never the member's exact position", async () => {
+    const upsert = jest.fn().mockResolvedValue({ radiusKm: 3 });
+    const service = new LostPetAreaAlertService({ lostPetAreaAlert: { upsert } } as never);
+    await service.set("u1", { latitude: 35.712345, longitude: 51.398765, radiusKm: 3 });
+    expect(upsert.mock.calls[0][0].create).toMatchObject({ latitude: 35.71, longitude: 51.4 });
+  });
+
   it("never returns the stored point, only on/off and the radius", async () => {
     const service = new LostPetAreaAlertService({ lostPetAreaAlert: { findUnique: jest.fn().mockResolvedValue({ radiusKm: 5 }) } } as never);
     expect(await service.get("u1")).toEqual({ active: true, radiusKm: 5 });

@@ -9,6 +9,7 @@ import type { RouteLocale } from "@/lib/i18n/config";
 import { useSessionStore } from "@/stores/session-store";
 import { lostPetService, type LostPetAreaAlert } from "@/services/lost-pet.service";
 import { communityService } from "@/services/community.service";
+import { SafetyTip } from "@/features/shared/SafetyTip";
 
 const RADII = [1, 3, 5, 10] as const;
 
@@ -94,6 +95,7 @@ export function FoundByNeighbours() {
         </div>
         <Link className="btn-primary-link" href={`/${lang}/community/new?type=FOUND_PET`}><PawPrint size={16} aria-hidden="true" />{t("cta")}</Link>
       </div>
+      <SafetyTip kind="lostPet" />
       {posts && posts.length > 0 ? (
         <ul>
           {posts.map((p) => (

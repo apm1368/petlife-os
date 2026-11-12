@@ -15,6 +15,9 @@ export function distanceKm(aLat: number, aLng: number, bLat: number, bLng: numbe
   return 2 * EARTH_KM * Math.asin(Math.min(1, Math.sqrt(h)));
 }
 
+/** ~1.1 km precision. */
+export const roundToKm = (degrees: number) => Math.round(degrees * 100) / 100;
+
 export interface LostPetAreaAlertDto {
   active: boolean;
   radiusKm: number | null;
@@ -35,7 +38,8 @@ export class LostPetAreaAlertService {
   }
 
   async set(userId: string, dto: SetLostPetAreaAlertDto): Promise<LostPetAreaAlertDto> {
-    const data = { latitude: dto.latitude, longitude: dto.longitude, radiusKm: dto.radiusKm };
+    // Stored to ~1 km (2 decimals): enough to match nearby reports, never a member's exact home.
+    const data = { latitude: roundToKm(dto.latitude), longitude: roundToKm(dto.longitude), radiusKm: dto.radiusKm };
     const row = await this.prisma.lostPetAreaAlert.upsert({ where: { userId }, create: { userId, ...data }, update: data, select: { radiusKm: true } });
     return { active: true, radiusKm: row.radiusKm };
   }
@@ -57,6 +61,7 @@ export class LostPetAreaAlertService {
         user: { accountStatus: "ACTIVE" },
       },
       select: { userId: true, latitude: true, longitude: true, radiusKm: true },
+      take: 5000,
     });
     return candidates
       .map((c) => ({ userId: c.userId, km: distanceKm(latitude, longitude, c.latitude, c.longitude), radiusKm: c.radiusKm }))

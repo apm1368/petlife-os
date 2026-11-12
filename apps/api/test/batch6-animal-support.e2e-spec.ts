@@ -283,6 +283,8 @@ describe("Batch 6 — Animal support ecosystem", () => {
       expect((await near.c.get("/me/lost-pet-alert").expect(200)).body).toEqual({ active: true, radiusKm: 3 }); // the point is never echoed
       await near.c.put("/me/lost-pet-alert").send({ latitude: LAT, longitude: LNG, radiusKm: 7 }).expect(400); // radius from a short list only
       const o = await owner("Pashmak");
+      // Brand-new accounts never trigger a neighbourhood fan-out (QA abuse guard); this reporter is two days old.
+      await prisma.user.update({ where: { id: o.userId }, data: { createdAt: new Date(Date.now() - 2 * 24 * 3600 * 1000) } });
       await o.c.put("/me/lost-pet-alert").send({ latitude: LAT, longitude: LNG, radiusKm: 3 }).expect(200);
       const incident = await o.c.post(`/pets/${o.petId}/lost-incidents`).send({ description: "Lost", publicArea: "Eram garden", lastKnownLatitude: LAT, lastKnownLongitude: LNG }).expect(201);
       const deadline = Date.now() + 5000;
@@ -298,6 +300,16 @@ describe("Batch 6 — Animal support ecosystem", () => {
       await new Promise((r) => setTimeout(r, 300));
       expect(await prisma.notification.count({ where: { userId: { in: [far.userId, off.userId, o.userId] }, type: "lost_pet.nearby_opened" } })).toBe(0);
       await request(server).get("/me/lost-pet-alert").expect(401);
+      // One fan-out per pet a day: closing and re-reporting the same pet alerts no one again.
+      await o.c.post(`/pets/${o.petId}/lost-incidents/${incident.body.id}/close`).send({ reason: "test" }).expect(201);
+      await o.c.post(`/pets/${o.petId}/lost-incidents`).send({ description: "Lost again", publicArea: "Eram garden", lastKnownLatitude: LAT, lastKnownLongitude: LNG }).expect(201);
+      await new Promise((r) => setTimeout(r, 600));
+      expect(await prisma.notification.count({ where: { userId: near.userId, type: "lost_pet.nearby_opened" } })).toBe(1);
+      // A report from an account younger than a day alerts no one.
+      const fresh = await owner("Fresh");
+      const fresher = await fresh.c.post(`/pets/${fresh.petId}/lost-incidents`).send({ description: "Lost", lastKnownLatitude: LAT, lastKnownLongitude: LNG }).expect(201);
+      await new Promise((r) => setTimeout(r, 600));
+      expect(await prisma.notification.count({ where: { entityId: fresher.body.id, type: "lost_pet.nearby_opened" } })).toBe(0);
     });
 
     it("admin operations mask the exact location, reveal it only with PII permission and audit every reveal and moderator close", async () => {
@@ -660,6 +672,10 @@ describe("Batch 6 — Animal support ecosystem", () => {
       await a.ops.c.post(`/admin/animal-support/organizations/${a.organizationId}/listing`).send({ isPubliclyListed: true }).expect(201);
       await a.ops.c.patch(`/admin/animal-support/campaigns/${campaign.body.id}/status`).send({ status: "ACTIVE" }).expect(200);
       const donor = await user("b6-donor");
+      // QA review: an ACTIVE campaign stops taking money once its organization leaves VERIFIED.
+      await prisma.animalSupportOrganization.update({ where: { id: a.organizationId }, data: { verificationStatus: "NEEDS_INFORMATION" } });
+      await donor.c.post(`/animal-support/campaigns/${campaign.body.id}/donate`).send({ amountIrr: 7_000_000 }).expect(409);
+      await prisma.animalSupportOrganization.update({ where: { id: a.organizationId }, data: { verificationStatus: "VERIFIED" } });
       await donor.c.post(`/animal-support/campaigns/${campaign.body.id}/donate`).send({ amountIrr: 7_000_000 }).expect(201);
       const donations = await a.owner.c.get("/ngo/donations").expect(200);
       expect(donations.body.balance.restrictedAvailableIrr).toBe(7_000_000);
