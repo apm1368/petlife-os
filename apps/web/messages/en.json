@@ -5864,6 +5864,18 @@
       "commentLabel": "Add a comment",
       "commentSubmit": "Post",
       "commentsEmpty": "No comments yet."
+    },
+    "own": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save changes",
+      "cancel": "Cancel",
+      "titleLabel": "Title",
+      "bodyLabel": "Text",
+      "confirmPost": "Delete this post for everyone? Its comments disappear too.",
+      "confirmComment": "Delete this comment?",
+      "deleteYes": "Yes, delete",
+      "edited": "edited"
     }
   },
   "communityChat": {

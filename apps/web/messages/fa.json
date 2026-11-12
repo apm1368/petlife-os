@@ -5814,6 +5814,18 @@
       "commentLabel": "افزودن نظر",
       "commentSubmit": "ارسال",
       "commentsEmpty": "هنوز نظری ثبت نشده است."
+    },
+    "own": {
+      "edit": "ویرایش",
+      "delete": "حذف",
+      "save": "ذخیرهٔ تغییرها",
+      "cancel": "انصراف",
+      "titleLabel": "عنوان",
+      "bodyLabel": "متن",
+      "confirmPost": "این پست برای همه حذف شود؟ نظرها هم دیگر دیده نمی‌شوند.",
+      "confirmComment": "این نظر حذف شود؟",
+      "deleteYes": "بله، حذف شود",
+      "edited": "ویرایش‌شده"
     }
   },
   "communityChat": {

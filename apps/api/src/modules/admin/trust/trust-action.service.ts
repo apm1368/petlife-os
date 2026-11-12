@@ -121,7 +121,10 @@ export class TrustActionService {
   /** Owner-facing consequences of a moderation effect, through the existing notification listeners. */
   private async publishSubjectEvents(tx: Prisma.TransactionClient, subjectType: TrustSubjectType, subjectId: string, actionType: TrustActionType, effect: TrustEffect | null) {
     if (!effect) return;
-    if (subjectType === TrustSubjectType.SUPPORT_NEED) {
+    if (subjectType === TrustSubjectType.COMMUNITY_CONTENT) {
+      // M6: the author hears when a moderator removes, restricts or restores their post or comment.
+      await this.events.publish("CommunityContentStatusChangedByModerator", { contentId: subjectId, from: effect.before.status, to: effect.after.status, viaTrustAction: actionType }, { tx, aggregateType: "CommunityContent", aggregateId: subjectId });
+    } else if (subjectType === TrustSubjectType.SUPPORT_NEED) {
       await this.events.publish("SupportNeedListingModerated", { listingId: subjectId, from: effect.before.status, to: effect.after.status, viaTrustAction: actionType }, { tx, aggregateType: "SupportNeedListing", aggregateId: subjectId });
     } else if (subjectType === TrustSubjectType.ANIMAL_SUPPORT_ORGANIZATION && "isPubliclyListed" in effect.after) {
       await this.events.publish("AnimalSupportOrganizationModerated", { organizationId: subjectId, suspended: effect.after.isPubliclyListed === false }, { tx, aggregateType: "AnimalSupportOrganization", aggregateId: subjectId });

@@ -6618,6 +6618,18 @@
       "commentLabel": "Añadir un comentario",
       "commentSubmit": "Publicar",
       "commentsEmpty": "Aún no hay comentarios."
+    },
+    "own": {
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "save": "Guardar cambios",
+      "cancel": "Cancelar",
+      "titleLabel": "Título",
+      "bodyLabel": "Texto",
+      "confirmPost": "¿Eliminar esta publicación para todos? Sus comentarios también desaparecen.",
+      "confirmComment": "¿Eliminar este comentario?",
+      "deleteYes": "Sí, eliminar",
+      "edited": "editado"
     }
   },
   "publicNavigation": {

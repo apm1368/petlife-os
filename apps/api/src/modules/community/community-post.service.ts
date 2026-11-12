@@ -7,10 +7,10 @@ import { StorageService } from "../storage/storage.service";
 import { PetAccessService } from "../pet-access/pet-access.service";
 import { NotificationOrchestratorService } from "../notifications/notification-orchestrator.service";
 import { NotificationDeepLinks } from "../notifications/notification-deeplink.util";
-import { CommunityCommentNotFoundException, CommunityInteractionBlockedException, CommunityContentNotVisibleException, CommunityPostNotFoundException, PetAccessDeniedException } from "../../common/errors/api-exception";
+import { CommunityCommentNotFoundException, CommunityInteractionBlockedException, CommunityContentNotVisibleException, CommunityPostNotFoundException, PetAccessDeniedException, ValidationApiException } from "../../common/errors/api-exception";
 import { resolvePagination, toPaginatedDto, type PaginationQueryDto } from "../../common/pagination/pagination.dto";
 import { toCommunityCommentDto, toCommunityPostDto } from "./community-mapper";
-import type { CreateCommunityCommentDto, CreateCommunityPostDto, ListCommunityPostsQueryDto, SetCommunityReactionDto } from "./dto/community.dto";
+import type { CreateCommunityCommentDto, CreateCommunityPostDto, ListCommunityPostsQueryDto, SetCommunityReactionDto, UpdateCommunityCommentDto, UpdateCommunityPostDto } from "./dto/community.dto";
 
 const POST_INCLUDE = { pet: true, _count: { select: { comments: true, reactions: true } } } satisfies Prisma.CommunityPostInclude;
 
@@ -194,6 +194,70 @@ export class CommunityPostService {
     }
     const names = await this.displayNameMap([authorUserId]);
     return toCommunityCommentDto(row, names.get(authorUserId) ?? "", authorUserId);
+  }
+
+  /**
+   * M6 — the author's own controls. Only the author, only while the content is published: hidden content is under
+   * moderation and a removed one is final. Anyone else gets the same 404 as a missing id. Deleting is a soft delete
+   * (status REMOVED + removedByAuthorAt) so reports and moderation history keep their subject.
+   */
+  private async ownPublishedPost(postId: string, userId: string) {
+    const row = await this.prisma.communityPost.findUnique({ where: { id: postId }, select: { id: true, authorUserId: true, status: true, sourceType: true } });
+    if (!row || row.authorUserId !== userId) throw new CommunityPostNotFoundException({ postId });
+    if (row.status !== CommunityContentStatus.PUBLISHED) throw new CommunityContentNotVisibleException({ postId });
+    return row;
+  }
+
+  async updatePost(postId: string, userId: string, dto: UpdateCommunityPostDto) {
+    const own = await this.ownPublishedPost(postId, userId);
+    // A lost-pet or campaign post only presents its source; its text follows the source, not a hand edit.
+    if (own.sourceType !== CommunitySourceType.USER) throw new CommunityContentNotVisibleException({ postId, reason: "SOURCED_POST" });
+    if (dto.body !== undefined && !dto.body.trim()) throw new ValidationApiException({ field: "body", reason: "REQUIRED" });
+    const data: Prisma.CommunityPostUpdateInput = { editedAt: new Date() };
+    if (dto.title !== undefined) data.title = dto.title.trim() || null;
+    if (dto.body !== undefined) data.body = dto.body;
+    if (dto.topics !== undefined) data.topics = dto.topics;
+    if (dto.city !== undefined) data.city = dto.city.trim() || null;
+    if (dto.region !== undefined) data.region = dto.region.trim() || null;
+    const row = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.communityPost.update({ where: { id: postId }, data, include: POST_INCLUDE });
+      await this.events.publish("CommunityPostEdited", { postId, authorUserId: userId }, { tx, aggregateType: "CommunityPost", aggregateId: postId });
+      return updated;
+    });
+    const names = await this.displayNameMap([userId]);
+    return toCommunityPostDto(row, names.get(userId) ?? "", null, userId);
+  }
+
+  async deletePost(postId: string, userId: string) {
+    await this.ownPublishedPost(postId, userId);
+    await this.prisma.$transaction(async (tx) => {
+      await tx.communityPost.update({ where: { id: postId }, data: { status: CommunityContentStatus.REMOVED, removedByAuthorAt: new Date() } });
+      await tx.communityPostBookmark.deleteMany({ where: { postId } });
+      await this.events.publish("CommunityPostDeletedByAuthor", { postId, authorUserId: userId }, { tx, aggregateType: "CommunityPost", aggregateId: postId });
+    });
+    return { deleted: true };
+  }
+
+  private async ownPublishedComment(commentId: string, userId: string) {
+    const row = await this.prisma.communityComment.findUnique({ where: { id: commentId }, select: { id: true, postId: true, authorUserId: true, status: true } });
+    if (!row || row.authorUserId !== userId) throw new CommunityCommentNotFoundException({ commentId });
+    if (row.status !== CommunityContentStatus.PUBLISHED) throw new CommunityContentNotVisibleException({ commentId });
+    return row;
+  }
+
+  async updateComment(commentId: string, userId: string, dto: UpdateCommunityCommentDto) {
+    const own = await this.ownPublishedComment(commentId, userId);
+    await this.getVisiblePostOrThrow(own.postId);
+    if (!dto.body.trim()) throw new ValidationApiException({ field: "body", reason: "REQUIRED" });
+    const row = await this.prisma.communityComment.update({ where: { id: commentId }, data: { body: dto.body, editedAt: new Date() } });
+    const names = await this.displayNameMap([userId]);
+    return toCommunityCommentDto(row, names.get(userId) ?? "", userId);
+  }
+
+  async deleteComment(commentId: string, userId: string) {
+    await this.ownPublishedComment(commentId, userId);
+    await this.prisma.communityComment.update({ where: { id: commentId }, data: { status: CommunityContentStatus.REMOVED, removedByAuthorAt: new Date() } });
+    return { deleted: true };
   }
 
   async setSaved(postId: string, userId: string, on: boolean) {

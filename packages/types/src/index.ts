@@ -5169,6 +5169,8 @@ export interface CommunityPostDto {
   /** Only present when the request is authenticated — the caller's own reaction, if any. */
   viewerReaction: CommunityReactionType | null;
   createdAt: string;
+  /** When the author last changed the text, if ever. */
+  editedAt?: string | null;
   /** Topic tags (fixed vocabulary). */
   topics?: string[];
   /** The first topic (canonical taxonomy), or null. */
@@ -5192,6 +5194,7 @@ export interface CommunityCommentDto {
   /** Published replies, on top-level comments from the comments list. */
   replies?: CommunityCommentDto[];
   createdAt: string;
+  editedAt?: string | null;
 }
 
 export interface CommunityReportDto {
