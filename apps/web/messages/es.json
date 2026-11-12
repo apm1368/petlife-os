@@ -3393,6 +3393,20 @@
     "attachFile": "Adjuntar archivo"
   },
   "commerce": {
+    "categoryNames": {
+      "food": "Comida",
+      "treats": "Premios",
+      "grooming": "Higiene y cuidado",
+      "accessories": "Accesorios",
+      "species-dog": "Perro",
+      "species-cat": "Gato",
+      "species-bird": "Aves",
+      "species-rabbit": "Conejo",
+      "species-rodent": "Roedores",
+      "species-fish": "Peces",
+      "species-reptile": "Reptiles",
+      "species-other": "Otros animales"
+    },
     "repeat": {
       "title": "Entregas periódicas",
       "loading": "Cargando",

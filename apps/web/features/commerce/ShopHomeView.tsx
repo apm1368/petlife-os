@@ -12,6 +12,7 @@ import Link from "next/link";
 import { CommercePage, CommerceArrow } from "./CommercePage";
 import { ShopSidebar } from "./ShopSidebar";
 import { ProductCard } from "./ProductCard";
+import { useCategoryName } from "./category-name";
 
 /** Icons are chosen from the category's own slug, never by list position. */
 function categoryIcon(slug: string) {
@@ -29,6 +30,7 @@ function categoryIcon(slug: string) {
  */
 export function ShopHomeView() {
   const t = useTranslations("commerce.shopHome");
+  const categoryName = useCategoryName();
   const router = useRouter();
   const locale = useLocale();
   const { activePet } = useActivePet();
@@ -99,7 +101,7 @@ export function ShopHomeView() {
                     <Icon size={23} aria-hidden="true" />
                   </span>
                   <div>
-                    <h3>{category.name}</h3>
+                    <h3>{categoryName(category)}</h3>
                   </div>
                 </button>
               );

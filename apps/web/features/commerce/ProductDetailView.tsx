@@ -15,6 +15,7 @@ import { CommercePage } from "./CommercePage";
 import { ProductCard } from "./ProductCard";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { formatLocaleDate } from "@/lib/i18n/format";
+import { useCategoryName } from "./category-name";
 
 const COMPATIBILITY_TONE: Record<string, "success" | "attention" | "urgent" | "neutral"> = {
   COMPATIBLE: "success",
@@ -36,6 +37,7 @@ const MAX_LINE_QUANTITY = 20;
  */
 export function ProductDetailView({ productId }: { productId: string }) {
   const t = useTranslations("commerce.detail");
+  const categoryName = useCategoryName();
   const design = useTranslations("commerce.design");
   const tCompat = useTranslations("commerce.compatibility");
   const router = useRouter();
@@ -211,7 +213,7 @@ export function ProductDetailView({ productId }: { productId: string }) {
         </button>
         <span aria-hidden="true">/</span>
         <button type="button" className="hover:text-text-primary" onClick={() => router.push(`/${locale}/shop/products?category=${product.category.id}`)}>
-          {product.category.name}
+          {categoryName(product.category)}
         </button>
       </nav>
 
