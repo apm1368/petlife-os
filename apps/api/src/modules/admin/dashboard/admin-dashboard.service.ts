@@ -1,6 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import {
   AccountDeletionState,
+  ProductReviewStatus,
+  ProviderReviewStatus,
+  TravelReviewStatus,
   AdminTaskSource,
   PetOwnershipTransferStatus,
   AdminRefundApprovalStatus,
@@ -24,7 +27,7 @@ import {
 import type { AdminDashboardSummaryDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { adminCan, type AdminPermission } from "../auth/admin-permissions";
-import { canReachVertical } from "../auth/admin-verticals";
+import { allowedProviderTypes, canReachVertical } from "../auth/admin-verticals";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 
 /**
@@ -60,6 +63,7 @@ export class AdminDashboardService {
       pendingDeletionRequests,
       openOwnershipDisputes,
       openProviderNoShows,
+      pendingReviews,
     ] = await Promise.all([
       when(may("support.view"), () => this.prisma.supportCase.count({ where: { status: { notIn: [SupportCaseStatus.RESOLVED, SupportCaseStatus.CLOSED] } } })),
       when(may("dispute.view"), () => this.prisma.dispute.count({ where: { status: { notIn: [DisputeStatus.CLOSED] } } })),
@@ -89,6 +93,9 @@ export class AdminDashboardService {
       when(may("customer.view"), () => this.prisma.petOwnershipTransfer.count({ where: { status: PetOwnershipTransferStatus.DISPUTED } })),
       // Members' provider no-show reports that staff haven't finished with (their automatic tasks still open).
       when(may("services.view"), () => this.prisma.adminTask.count({ where: { source: AdminTaskSource.PROVIDER_NO_SHOW, status: { notIn: [AdminTaskStatus.DONE, AdminTaskStatus.CANCELLED] } } })),
+      // Reviews every vertical holds back until a moderator decides (service, product, stay), counted only for the
+      // verticals this admin may moderate; service reviews also respect the provider-type scope.
+      this.pendingReviewCount(admin, may),
     ]);
     return {
       openSupportCases,
@@ -109,6 +116,21 @@ export class AdminDashboardService {
       pendingDeletionRequests,
       openOwnershipDisputes,
       openProviderNoShows,
+      pendingReviews,
     };
+  }
+
+  private async pendingReviewCount(admin: ResolvedAdminContext, may: (permission: AdminPermission, vertical?: AdminVertical) => boolean): Promise<number | null> {
+    const types = allowedProviderTypes(admin);
+    const service = may("services.view") && (types === null || types.length > 0);
+    const product = may("commerce.view", AdminVertical.SHOP);
+    const stay = may("travel.view", AdminVertical.ACCOMMODATION);
+    if (!service && !product && !stay) return null;
+    const [s, p, t] = await Promise.all([
+      service ? this.prisma.providerReview.count({ where: { status: ProviderReviewStatus.PENDING, ...(types === null ? {} : { providerOrganization: { type: { in: types } } }) } }) : 0,
+      product ? this.prisma.productReview.count({ where: { status: ProductReviewStatus.PENDING } }) : 0,
+      stay ? this.prisma.travelReview.count({ where: { status: TravelReviewStatus.PENDING } }) : 0,
+    ]);
+    return s + p + t;
   }
 }

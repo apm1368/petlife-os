@@ -26,6 +26,9 @@ describe("dashboard permission boundary", () => {
       walletTopUp: counter(16),
       accountDeletionRequest: counter(17),
       petOwnershipTransfer: counter(18),
+      providerReview: counter(1),
+      productReview: counter(2),
+      travelReview: counter(4),
     };
     return { db, service: new AdminDashboardService(db as unknown as PrismaService) };
   };
@@ -63,6 +66,7 @@ describe("dashboard permission boundary", () => {
       pendingDeletionRequests: 17,
       openOwnershipDisputes: 18,
       openProviderNoShows: 5,
+      pendingReviews: 7,
     });
   });
   it("hides vertical queues from an admin scoped to another vertical", async () => {
@@ -81,4 +85,13 @@ describe("dashboard permission boundary", () => {
     expect((await service.getSummary(actor(AdminRole.READ_ONLY))).pendingWalletTopUps).toBe(16);
     expect((await service.getSummary(actor(AdminRole.SUPER_ADMIN))).pendingDeletionRequests).toBe(17);
   });
+  it("counts pending reviews only in the verticals an admin may moderate", async () => {
+    const { db, service } = setup();
+    expect((await service.getSummary(actor(AdminRole.EDITOR))).pendingReviews).toBeNull();
+    const shop = await service.getSummary(actor(AdminRole.SHOP_ADMIN));
+    expect(shop.pendingReviews).toBe(2);
+    expect(db.providerReview.count).not.toHaveBeenCalled();
+    expect(db.travelReview.count).not.toHaveBeenCalled();
+  });
 });
+

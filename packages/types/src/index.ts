@@ -3212,6 +3212,8 @@ export interface AdminDashboardSummaryDto {
   openOwnershipDisputes: number | null;
   /** Members' reports that a provider didn't show up, still open as admin tasks; services.view. */
   openProviderNoShows: number | null;
+  /** Service, product and stay reviews waiting for a moderator, in the verticals this admin may moderate. */
+  pendingReviews: number | null;
 }
 
 // ---------------------------------------------------------------------------

@@ -385,6 +385,7 @@ export const DOMAIN_EVENT_TYPES = [
   "PetOwnershipTransferExpired",
   "PetOwnershipDisputed",
   "PetOwnershipDisputeClosed",
+  "ReviewModerated",
   "PetOwnershipTransferred",
 ] as const;
 

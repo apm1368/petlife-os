@@ -62,7 +62,8 @@ function failureKind(error: unknown): LoadFailure {
  * Each is gated by the permission of the list it opens — the API already withholds the count (null), and the
  * page never draws a tile it would not let the admin open.
  */
-const QUEUES: { key: QueueKey; href: string; permission: string; icon: Icon; tone: "urgent" | "attention" | "neutral" }[] = [
+/** `permission` may list several (any one shows the tile); `routes` then picks the list the admin can open. */
+const QUEUES: { key: QueueKey; href: string; permission: string | string[]; routes?: Record<string, string>; icon: Icon; tone: "urgent" | "attention" | "neutral" }[] = [
   { key: "openTrustCases", href: "/admin/trust", permission: "trust.view", icon: ShieldAlert, tone: "urgent" },
   { key: "openDisputes", href: "/admin/disputes", permission: "dispute.view", icon: Gavel, tone: "urgent" },
   { key: "openSupportCases", href: "/admin/support", permission: "support.view", icon: Headset, tone: "attention" },
@@ -72,6 +73,7 @@ const QUEUES: { key: QueueKey; href: string; permission: string; icon: Icon; ton
   { key: "pendingDeletionRequests", href: "/admin/privacy/deletion-requests", permission: "admin.manage", icon: KeyRound, tone: "attention" },
   { key: "openOwnershipDisputes", href: "/admin/ownership-transfers", permission: "customer.view", icon: Gavel, tone: "attention" },
   { key: "openProviderNoShows", href: "/admin/services?noShowParty=PROVIDER", permission: "services.view", icon: Stethoscope, tone: "attention" },
+  { key: "pendingReviews", href: "/admin/services/reviews", permission: ["services.view", "commerce.view", "travel.view"], routes: { "services.view": "/admin/services/reviews", "commerce.view": "/admin/commerce/reviews", "travel.view": "/admin/travel/reviews" }, icon: MessagesSquare, tone: "neutral" },
   { key: "openCommunityReports", href: "/admin/community", permission: "trust.view", icon: Siren, tone: "attention" },
   { key: "pendingVerifications", href: "/admin/verification", permission: "verification.manage", icon: BadgeCheck, tone: "neutral" },
   { key: "pendingOfferModeration", href: "/admin/commerce/product-moderation", permission: "commerce.view", icon: ShoppingBag, tone: "neutral" },
@@ -168,7 +170,12 @@ export function AdminDashboardView() {
     return known[status] ?? status;
   };
 
-  const board = QUEUES.filter((q) => allowed(q.permission) && typeof summary[q.key] === "number").map((q) => ({ ...q, count: summary[q.key] as number }));
+  const may = (p: string | string[]) => (Array.isArray(p) ? p.some(allowed) : allowed(p));
+  const board = QUEUES.filter((q) => may(q.permission) && typeof summary[q.key] === "number").map((q) => ({
+    ...q,
+    href: q.routes ? (Object.entries(q.routes).find(([p]) => allowed(p))?.[1] ?? q.href) : q.href,
+    count: summary[q.key] as number,
+  }));
   const waiting = board.filter((q) => q.count > 0);
   const clear = board.filter((q) => q.count === 0);
   const total = waiting.reduce((sum, q) => sum + q.count, 0);

@@ -250,6 +250,15 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "انتقال مالکیت پت انجام نشد", body: "پیشنهاد انتقال مالکیت پت پذیرفته نشد؛ مالک ثبت‌شده همان فرد قبلی باقی ماند." },
     en: { title: "The pet ownership transfer did not happen", body: "The pet ownership transfer was declined; the registered owner remains unchanged." },
   },
+  // Review moderation outcome for its author (Admin → Reviews). Rejections say why, in the moderator's words.
+  "review.approved": {
+    fa: { title: "نظر شما منتشر شد", body: "نظر شما دربارهٔ «{{subject}}» بررسی و منتشر شد. ممنون که تجربه‌تان را به اشتراک گذاشتید." },
+    en: { title: "Your review is published", body: "Your review of “{{subject}}” was checked and published. Thanks for sharing your experience." },
+  },
+  "review.rejected": {
+    fa: { title: "نظر شما منتشر نشد", body: "نظر شما دربارهٔ «{{subject}}» با قوانین انتشار هم‌خوان نبود و منتشر نشد. دلیل: {{reason}}" },
+    en: { title: "Your review wasn't published", body: "Your review of “{{subject}}” didn't meet the publishing rules and wasn't published. Reason: {{reason}}" },
+  },
   // Ownership disputes (ID-03): the pet never moves on a dispute; staff check the documents and record the outcome.
   "pet.ownership_disputed": {
     fa: { title: "اختلاف دربارهٔ مالکیت «{{petName}}»", body: "{{actorName}} با انتقال مالکیت «{{petName}}» مخالفت کرد. تا بررسی پشتیبانی، مالک ثبت‌شده تغییر نمی‌کند. اگر مدرکی دارید، از بخش پشتیبانی بفرستید." },

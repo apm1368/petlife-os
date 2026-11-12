@@ -6858,6 +6858,7 @@
         "allClear": "همه‌چیز مرتب است؛ هیچ کاری منتظر تیم شما نیست.",
         "clearList": "بدون مورد: {list}",
         "queue": {
+          "pendingReviews": "نظرهای در انتظار بررسی",
           "openProviderNoShows": "گزارش‌های عدم حضور ارائه‌دهنده",
           "openOwnershipDisputes": "اختلاف‌های مالکیت",
           "pendingDeletionRequests": "درخواست‌های حذف حساب",
