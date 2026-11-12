@@ -3887,7 +3887,8 @@
         "osmImport": "OpenStreetMap",
         "placeClaims": "Reclamaciones",
         "walletCardAccount": "Cuenta de tarjeta",
-        "walletCardReceipts": "Comprobantes de tarjeta"
+        "walletCardReceipts": "Comprobantes de tarjeta",
+        "repeatDeliveries": "Entregas periódicas"
       },
       "palette": {
         "actions": "Acciones rápidas",
@@ -10378,5 +10379,44 @@
       "notReviewable": "Este comprobante ya no se puede revisar.",
       "generic": "No se guardó; inténtalo de nuevo."
     }
+  },
+  "adminOrderCancel": {
+    "title": "Cancelar este pedido (soporte)",
+    "hint": "Solo antes de que un mensajero tenga el paquete. El cliente recibe el importe completo al instante; el envío se cancela y el stock vuelve.",
+    "afterDispatch": "El paquete ya está con el mensajero; usa una solicitud de reembolso.",
+    "reason": "Motivo (auditoría)",
+    "reasonRequired": "Escribe un motivo breve.",
+    "cancel": "Cancelar pedido",
+    "confirm": "Sí, cancelar y reembolsar todo",
+    "back": "Volver",
+    "notCancellable": "Ya no se puede cancelar; el mensajero tiene el paquete.",
+    "failed": "No funcionó; inténtalo de nuevo."
+  },
+  "adminRepeatDeliveries": {
+    "title": "Entregas periódicas",
+    "hint": "Programaciones de entrega periódica de los miembros (solo lectura). Los miembros las cambian o cancelan en su cuenta.",
+    "filter": "Estado",
+    "all": "Todas",
+    "status": {
+      "ACTIVE": "Activa",
+      "PAUSED": "En pausa",
+      "CANCELLED": "Cancelada"
+    },
+    "col": {
+      "member": "Miembro",
+      "product": "Producto",
+      "seller": "Vendedor",
+      "every": "Cada",
+      "next": "Próxima entrega",
+      "status": "Estado",
+      "lastOrder": "Último pedido"
+    },
+    "days": "{count} días",
+    "empty": "Ninguna.",
+    "prev": "Anterior",
+    "next": "Siguiente",
+    "forbidden": "Se requiere el permiso commerce.view.",
+    "failed": "No se pudo cargar",
+    "retry": "Reintentar"
   }
 }

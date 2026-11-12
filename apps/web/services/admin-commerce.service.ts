@@ -31,7 +31,11 @@ export const adminCommerceService = {
     refundRequested?: boolean;
     page?: number;
   }) => apiFetch<PaginatedDto<AdminCommerceOrderRowDto>>(`/admin/commerce/orders${qs(input)}`),
+  listRepeatDeliveries: (input: { status?: "ACTIVE" | "PAUSED" | "CANCELLED"; page?: number }) =>
+    apiFetch<PaginatedDto<AdminRepeatDeliveryRow>>(`/admin/commerce/repeat-deliveries${qs(input)}`),
   getOrder: (id: string) => apiFetch<AdminCommerceOrderDetailDto>(`/admin/commerce/orders/${id}`),
+  /** Staff cancel before dispatch: full refund in the same step (commerce.manage, audited). */
+  cancelOrder: (id: string, reason: string) => apiFetch<AdminCommerceOrderDetailDto>(`/admin/commerce/orders/${id}/cancel`, { method: "POST", body: { reason } }),
   listRefundRequests: (input: { status?: string; page?: number }) =>
     apiFetch<PaginatedDto<AdminRefundRequestDto>>(`/admin/commerce/refund-requests${qs(input)}`),
   approveRefundRequest: (id: string, note?: string) =>
@@ -146,3 +150,19 @@ export interface ProductMediaUploadTargetDto {
   headers?: Record<string, string>;
   expiresInSeconds: number;
 }
+
+/** A member's repeat-delivery schedule as staff see it (read-only). */
+export type AdminRepeatDeliveryRow = {
+  id: string;
+  status: "ACTIVE" | "PAUSED" | "CANCELLED";
+  member: { id: string; displayName: string };
+  product: { id: string; title: string; variant: string | null };
+  seller: { id: string; name: string };
+  quantity: number;
+  intervalDays: number;
+  unitPrice: number;
+  city: string | null;
+  nextCycleAt: string;
+  lastOrder: { id: string; status: string; createdAt: string } | null;
+  createdAt: string;
+};

@@ -4672,7 +4672,8 @@
         "osmImport": "OpenStreetMap",
         "placeClaims": "Business claims",
         "walletCardAccount": "Card-to-card account",
-        "walletCardReceipts": "Card-to-card receipts"
+        "walletCardReceipts": "Card-to-card receipts",
+        "repeatDeliveries": "Repeat deliveries"
       },
       "palette": {
         "actions": "Quick actions",
@@ -11248,5 +11249,44 @@
       "notReviewable": "This receipt can no longer be reviewed.",
       "generic": "Not saved; please try again."
     }
+  },
+  "adminOrderCancel": {
+    "title": "Cancel this order (support)",
+    "hint": "Only before a courier has the parcel. The customer gets the full amount back at once; delivery is cancelled and stock returns.",
+    "afterDispatch": "The parcel is with the courier; use a refund request instead.",
+    "reason": "Reason (audit log)",
+    "reasonRequired": "Write a short reason.",
+    "cancel": "Cancel order",
+    "confirm": "Yes, cancel and refund in full",
+    "back": "Back",
+    "notCancellable": "It can no longer be cancelled; the courier has the parcel.",
+    "failed": "That did not work; please try again."
+  },
+  "adminRepeatDeliveries": {
+    "title": "Repeat deliveries",
+    "hint": "Members' repeat-delivery schedules (view only). Members change or cancel them in their account.",
+    "filter": "Status",
+    "all": "All",
+    "status": {
+      "ACTIVE": "Active",
+      "PAUSED": "Paused",
+      "CANCELLED": "Cancelled"
+    },
+    "col": {
+      "member": "Member",
+      "product": "Product",
+      "seller": "Seller",
+      "every": "Every",
+      "next": "Next delivery",
+      "status": "Status",
+      "lastOrder": "Last order"
+    },
+    "days": "{count} days",
+    "empty": "None.",
+    "prev": "Previous",
+    "next": "Next",
+    "forbidden": "commerce.view permission required.",
+    "failed": "Could not load",
+    "retry": "Retry"
   }
 }

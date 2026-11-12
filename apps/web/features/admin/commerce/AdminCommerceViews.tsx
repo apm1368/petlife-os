@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AdminOrderCancelPanel } from "./AdminOrderCancelPanel";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { Button, Dialog, EmptyState, ErrorRecovery, Input, Skeleton } from "@petlife/ui";
@@ -512,6 +513,7 @@ export function AdminCommerceOrderDetailView({ orderId }: { orderId: string }) {
             <DetailRow label={tr("ارسال", "Delivery")}>{formatCurrency(o.deliveryAmount, lang)}</DetailRow>
             <DetailRow label={tr("مبلغ کل", "Total")}>{formatCurrency(o.totalAmount, lang)}</DetailRow>
           </Panel>
+          <AdminOrderCancelPanel orderId={o.id} cancelled={!!o.cancelledAt} fulfillmentStatus={o.fulfillmentStatus ?? null} onDone={() => void load()} />
           <Panel>
             <PanelTitle title={tr("اقلام", "Items")} />
             <ul className="flex flex-col gap-2">
