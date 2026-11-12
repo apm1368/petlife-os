@@ -157,7 +157,7 @@ healthy() {
   curl --fail --silent --show-error --retry 12 --retry-delay 5 --retry-connrefused --retry-all-errors \
     http://127.0.0.1:4000/health/ready >/dev/null &&
     curl --fail --silent --show-error --retry 12 --retry-delay 5 --retry-connrefused --retry-all-errors \
-      http://127.0.0.1:3000/fa >/dev/null
+      http://127.0.0.1:3000/ >/dev/null
 }
 
 # TC-04: this host is the production host behind opetlife.ir, so the environment it

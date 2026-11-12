@@ -33,8 +33,8 @@ console.log(`smoke: release traceability -> ${release.sha} (${release.environmen
 
 check "vet discovery" "${api_base_url}/providers/vets"
 check "service taxonomy" "${api_base_url}/services/categories"
-check "fa landing" "${web_base_url}/fa"
+check "fa landing" "${web_base_url}/"
 check "public api ready" "${public_base_url}/api/health/ready"
-check "public fa landing" "${public_base_url}/fa"
+check "public fa landing" "${public_base_url}/"
 
 echo "smoke: passed"
