@@ -4673,7 +4673,9 @@
         "placeClaims": "Business claims",
         "walletCardAccount": "Card-to-card account",
         "walletCardReceipts": "Card-to-card receipts",
-        "repeatDeliveries": "Repeat deliveries"
+        "repeatDeliveries": "Repeat deliveries",
+        "orderLookup": "Order lookup",
+        "refundApprovals": "Refund approvals"
       },
       "palette": {
         "actions": "Quick actions",
@@ -11288,5 +11290,99 @@
     "forbidden": "commerce.view permission required.",
     "failed": "Could not load",
     "retry": "Retry"
+  },
+  "adminBookingMoney": {
+    "title": "Cancel and refund",
+    "hint": "Cancelling follows the booking's own rules; money goes back only through a finance approval (a second admin above the threshold).",
+    "paid": "Paid online",
+    "refunded": "Refunded",
+    "refundable": "Can still go back",
+    "policy": "Under the cancellation terms",
+    "approvalStatus": {
+      "REQUESTED": "Awaiting approval",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "EXECUTED": "Refunded"
+    },
+    "openQueue": "Approval queue",
+    "cancel": "Cancel as staff",
+    "refund": "Refund",
+    "refundChoice": "What goes back?",
+    "choice": {
+      "POLICY": "Per the cancellation terms ({policy})",
+      "FULL": "Everything ({full})",
+      "AMOUNT": "A set amount",
+      "NONE": "No refund"
+    },
+    "amount": "Amount (IRR)",
+    "reason": "Reason (kept in the audit log)",
+    "confirmCancel": "I confirm the cancellation; the customer and the provider are told.",
+    "confirmRefund": "I confirm this refund request.",
+    "submitCancel": "Cancel booking",
+    "submitRefund": "Request refund",
+    "back": "Back",
+    "needReason": "Write a reason and tick the confirmation.",
+    "needAmount": "Enter a valid amount.",
+    "cancelled": "Booking cancelled.",
+    "refundRequested": "The refund is waiting in the finance approval queue.",
+    "forbidden": "You don't have the permission for this.",
+    "tooMuch": "More than can go back, or this booking can't be cancelled.",
+    "failed": "That didn't work; please try again."
+  },
+  "adminRefundApprovals": {
+    "title": "Refund approvals",
+    "hint": "Shop orders, service bookings and stays. Nobody approves their own request.",
+    "filter": "Status",
+    "all": "All",
+    "status": {
+      "REQUESTED": "Awaiting approval",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "EXECUTED": "Refunded"
+    },
+    "subject": {
+      "ORDER": "Shop order",
+      "BOOKING": "Service booking",
+      "TRAVEL_BOOKING": "Stay"
+    },
+    "columns": {
+      "subject": "For",
+      "amount": "Amount",
+      "reason": "Reason",
+      "requestedBy": "Requested by",
+      "status": "Status"
+    },
+    "empty": "Nothing here.",
+    "approve": "Approve",
+    "reject": "Reject",
+    "execute": "Pay back",
+    "rejectReason": "Reason for rejecting:",
+    "done": {
+      "approve": "Approved.",
+      "reject": "Rejected.",
+      "execute": "Refunded."
+    },
+    "selfApproval": "You can't approve your own request, or this step is no longer allowed.",
+    "forbidden": "finance.view permission required.",
+    "failed": "That didn't work; please try again."
+  },
+  "adminDisputeRefund": {
+    "title": "Outcome with a refund",
+    "hint": "In the customer's favour with money back: the refund goes to the finance approval queue and the dispute is resolved for the customer.",
+    "amount": "Amount (IRR)",
+    "reason": "Reason",
+    "submit": "Resolve with a refund",
+    "approval": "Refund of {amount}: {status}",
+    "status": {
+      "REQUESTED": "Awaiting approval",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "EXECUTED": "Refunded"
+    },
+    "notOpen": "Only for a dispute under review, with the finance permission.",
+    "invalid": "Enter an amount and a reason (at least 5 characters).",
+    "requested": "Refund requested.",
+    "tooMuch": "More than allowed, or this dispute can't end in a refund.",
+    "failed": "That didn't work; please try again."
   }
 }

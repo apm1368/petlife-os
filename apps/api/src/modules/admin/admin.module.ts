@@ -89,6 +89,7 @@ import { AdminTaskService } from "./task/admin-task.service";
 import { AdminTaskController } from "./task/admin-task.controller";
 import { AdminFinanceService } from "./finance/admin-finance.service";
 import { AdminRefundService } from "./finance/admin-refund.service";
+import { AdminBookingMoneyService } from "./finance/admin-booking-money.service";
 import { AdminFinanceController } from "./finance/admin-finance.controller";
 import { AdminOrgService } from "./orgs/admin-org.service";
 import { AdminOrgController } from "./orgs/admin-org.controller";
@@ -269,6 +270,7 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminTaskService,
     AdminFinanceService,
     AdminRefundService,
+    AdminBookingMoneyService,
     AdminOrgService,
     AdminDashboardService,
     OsmDirectoryService,

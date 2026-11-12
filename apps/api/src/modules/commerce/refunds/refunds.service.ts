@@ -37,6 +37,12 @@ export interface RefundExecutionOptions {
   onSucceeded?: (tx: Prisma.TransactionClient, refund: Refund) => Promise<void>;
   /** Batch 6 — recorded on the refund row when an admin (not a customer) requested it. */
   requestedByAdminUserId?: string | null;
+  /**
+   * Standalone payments only: a finance-approved staff refund may follow an earlier refund of the same payment
+   * (e.g. a goodwill part, then the rest on cancellation). The total still can never exceed what was captured, and
+   * the approval row's own lock guarantees each approval executes once.
+   */
+  allowAdditionalRefund?: boolean;
 }
 
 /**
@@ -154,8 +160,9 @@ export class RefundsService {
       // One checkout pays for N seller orders, so the duplicate guard is per
       // order (per payment only for the no-order recovery path), and the sum
       // of live refunds can never exceed what was captured.
-      const liveRefunds = await tx.refund.findMany({ where: { paymentIntentId: intent.id, status: { not: RefundStatus.FAILED } } });
-      if (liveRefunds.some((r) => (orderId ? r.orderId === orderId : true))) {
+      // FAILED and CANCELLED (a superseded request) never moved money, so they neither block nor count.
+      const liveRefunds = await tx.refund.findMany({ where: { paymentIntentId: intent.id, status: { notIn: [RefundStatus.FAILED, RefundStatus.CANCELLED] } } });
+      if (!(options.allowAdditionalRefund && !orderId) && liveRefunds.some((r) => (orderId ? r.orderId === orderId : true))) {
         throw new RefundNotSupportedException({ checkoutId, reason: "A refund for this payment is already in progress or completed" });
       }
       const alreadyRefunded = liveRefunds.reduce((sum, r) => sum + r.amount, 0);

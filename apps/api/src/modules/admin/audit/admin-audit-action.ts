@@ -49,6 +49,8 @@ export type AdminAuditAction =
   | "trust_action.taken"
   | "appeal.submitted"
   | "appeal.resolved"
+  | "service_booking.staff_cancelled"
+  | "travel_booking.staff_cancelled"
   | "admin_refund_approval.requested"
   | "admin_refund_approval.approved"
   | "admin_refund_approval.rejected"

@@ -31,7 +31,8 @@ interface BookingEventPayload {
   householdId?: string;
   providerOrganizationId?: string;
   providerUserId?: string | null;
-  cancelledBy?: "PROVIDER";
+  /** Who cancelled when it was not the member: the provider, or opetlife staff (both then tell the other side). */
+  cancelledBy?: "PROVIDER" | "ADMIN";
 }
 
 @Injectable()

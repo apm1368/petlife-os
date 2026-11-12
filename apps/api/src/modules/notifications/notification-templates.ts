@@ -206,6 +206,14 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "میزبان رزرو را لغو کرد", body: "رزرو شما توسط میزبان لغو شد و مبلغ پرداختی کامل بازگردانده می‌شود." },
     en: { title: "Host cancelled your stay", body: "The host cancelled your stay; anything you paid is refunded in full." },
   },
+  "travel.booking_cancelled_by_staff": {
+    fa: { title: "رزرو شما لغو شد", body: "پشتیبانی اپت لایف این رزرو را لغو کرد. اگر مبلغی پرداخت کرده باشید، بازگشت آن پس از تأیید مالی انجام می‌شود." },
+    en: { title: "Your stay was cancelled", body: "opetlife support cancelled this stay. Anything you paid is refunded once finance approves it." },
+  },
+  "travel.booking_cancelled_by_staff_host": {
+    fa: { title: "یک رزرو لغو شد", body: "پشتیبانی اپت لایف یک رزرو را لغو کرد و تاریخ‌ها آزاد شد." },
+    en: { title: "A booking was cancelled", body: "opetlife support cancelled a stay; the dates were released." },
+  },
   "travel.booking_cancelled_by_traveler": {
     fa: { title: "مهمان رزرو را لغو کرد", body: "یک رزرو توسط مهمان لغو شد و تاریخ‌ها آزاد شد." },
     en: { title: "Guest cancelled", body: "A guest cancelled a stay; the dates were released." },

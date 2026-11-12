@@ -10,6 +10,8 @@ import { RequireAdminPermission } from "../auth/require-admin-permission.decorat
 import { CurrentAdmin } from "../auth/current-admin.decorator";
 import type { AdminAuthedRequest, ResolvedAdminContext } from "../auth/admin-context.types";
 import { AdminTravelService } from "./admin-travel.service";
+import { AdminBookingMoneyService } from "../finance/admin-booking-money.service";
+import { StaffCancelBookingDto, StaffRefundBookingDto } from "../services/admin-services.controller";
 
 class PageDto {
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(1000) page?: number;
@@ -68,7 +70,10 @@ class AnalyticsDto {
 @RequireAdminVertical(AdminVertical.ACCOMMODATION)
 @UseGuards(SessionAuthGuard, AdminAuthGuard)
 export class AdminTravelController {
-  constructor(private readonly travel: AdminTravelService) {}
+  constructor(
+    private readonly travel: AdminTravelService,
+    private readonly money: AdminBookingMoneyService,
+  ) {}
 
   @Get("listings")
   @RequireAdminPermission("travel.view")
@@ -104,6 +109,26 @@ export class AdminTravelController {
   @RequireAdminPermission("travel.view")
   booking(@Param("id", ParseUUIDPipe) id: string) {
     return this.travel.getBooking(id);
+  }
+
+  /** Paid, refunded, refundable and policy amounts, plus this stay's refund approvals. */
+  @Get("bookings/:id/money")
+  @RequireAdminPermission("travel.view")
+  bookingMoney(@Param("id", ParseUUIDPipe) id: string) {
+    return this.money.stayMoney(id);
+  }
+
+  /** Staff cancellation: releases the nights; money goes back only through a finance-approved refund. */
+  @Post("bookings/:id/cancel")
+  @RequireAdminPermission("travel.manage")
+  cancelBooking(@Param("id", ParseUUIDPipe) id: string, @Body() dto: StaffCancelBookingDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
+    return this.money.cancelStay(admin, id, dto, req.requestId);
+  }
+
+  @Post("bookings/:id/refund")
+  @RequireAdminPermission("finance.refund.request")
+  refundBooking(@Param("id", ParseUUIDPipe) id: string, @Body() dto: StaffRefundBookingDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
+    return this.money.refundStay(admin, id, dto, req.requestId);
   }
 
   @Get("reviews")

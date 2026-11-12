@@ -3888,7 +3888,9 @@
         "placeClaims": "Reclamaciones",
         "walletCardAccount": "Cuenta de tarjeta",
         "walletCardReceipts": "Comprobantes de tarjeta",
-        "repeatDeliveries": "Entregas periódicas"
+        "repeatDeliveries": "Entregas periódicas",
+        "orderLookup": "Buscar pedido",
+        "refundApprovals": "Aprobaciones de reembolso"
       },
       "palette": {
         "actions": "Acciones rápidas",
@@ -10418,5 +10420,99 @@
     "forbidden": "Se requiere el permiso commerce.view.",
     "failed": "No se pudo cargar",
     "retry": "Reintentar"
+  },
+  "adminBookingMoney": {
+    "title": "Cancelar y reembolsar",
+    "hint": "La cancelación sigue las reglas de la reserva; el dinero solo se devuelve con aprobación de finanzas (un segundo admin por encima del umbral).",
+    "paid": "Pagado en línea",
+    "refunded": "Reembolsado",
+    "refundable": "Aún reembolsable",
+    "policy": "Según las condiciones de cancelación",
+    "approvalStatus": {
+      "REQUESTED": "Pendiente de aprobación",
+      "APPROVED": "Aprobado",
+      "REJECTED": "Rechazado",
+      "EXECUTED": "Reembolsado"
+    },
+    "openQueue": "Cola de aprobación",
+    "cancel": "Cancelar como equipo",
+    "refund": "Reembolsar",
+    "refundChoice": "¿Qué se devuelve?",
+    "choice": {
+      "POLICY": "Según las condiciones ({policy})",
+      "FULL": "Todo ({full})",
+      "AMOUNT": "Un importe concreto",
+      "NONE": "Sin reembolso"
+    },
+    "amount": "Importe (IRR)",
+    "reason": "Motivo (queda en la auditoría)",
+    "confirmCancel": "Confirmo la cancelación; se avisa al cliente y al proveedor.",
+    "confirmRefund": "Confirmo esta solicitud de reembolso.",
+    "submitCancel": "Cancelar reserva",
+    "submitRefund": "Solicitar reembolso",
+    "back": "Volver",
+    "needReason": "Escribe un motivo y marca la confirmación.",
+    "needAmount": "Introduce un importe válido.",
+    "cancelled": "Reserva cancelada.",
+    "refundRequested": "El reembolso espera en la cola de aprobación de finanzas.",
+    "forbidden": "No tienes permiso para esto.",
+    "tooMuch": "Más de lo reembolsable, o la reserva no se puede cancelar.",
+    "failed": "No funcionó; inténtalo de nuevo."
+  },
+  "adminRefundApprovals": {
+    "title": "Aprobaciones de reembolso",
+    "hint": "Pedidos, citas y estancias. Nadie aprueba su propia solicitud.",
+    "filter": "Estado",
+    "all": "Todos",
+    "status": {
+      "REQUESTED": "Pendiente de aprobación",
+      "APPROVED": "Aprobado",
+      "REJECTED": "Rechazado",
+      "EXECUTED": "Reembolsado"
+    },
+    "subject": {
+      "ORDER": "Pedido de la tienda",
+      "BOOKING": "Cita de servicio",
+      "TRAVEL_BOOKING": "Estancia"
+    },
+    "columns": {
+      "subject": "Para",
+      "amount": "Importe",
+      "reason": "Motivo",
+      "requestedBy": "Solicitado por",
+      "status": "Estado"
+    },
+    "empty": "No hay nada.",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "execute": "Devolver",
+    "rejectReason": "Motivo del rechazo:",
+    "done": {
+      "approve": "Aprobado.",
+      "reject": "Rechazado.",
+      "execute": "Reembolsado."
+    },
+    "selfApproval": "No puedes aprobar tu propia solicitud, o este paso ya no está permitido.",
+    "forbidden": "Se requiere el permiso finance.view.",
+    "failed": "No funcionó; inténtalo de nuevo."
+  },
+  "adminDisputeRefund": {
+    "title": "Resultado con reembolso",
+    "hint": "A favor del cliente con reembolso: el reembolso va a la cola de finanzas y la disputa se resuelve a favor del cliente.",
+    "amount": "Importe (IRR)",
+    "reason": "Motivo",
+    "submit": "Resolver con reembolso",
+    "approval": "Reembolso de {amount}: {status}",
+    "status": {
+      "REQUESTED": "Pendiente de aprobación",
+      "APPROVED": "Aprobado",
+      "REJECTED": "Rechazado",
+      "EXECUTED": "Reembolsado"
+    },
+    "notOpen": "Solo para una disputa en revisión y con permiso de finanzas.",
+    "invalid": "Introduce un importe y un motivo (mín. 5 caracteres).",
+    "requested": "Reembolso solicitado.",
+    "tooMuch": "Más de lo permitido, o esta disputa no admite reembolso.",
+    "failed": "No funcionó; inténtalo de nuevo."
   }
 }

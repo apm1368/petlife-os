@@ -10,6 +10,7 @@ import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
 import { adminServicesService, type AdminBookingDetail, type AdminBookingRow, type AdminReviewRow, type AdminServiceRow, type AdminServicesAnalytics } from "@/services/admin-services.service";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { DetailRow, EmptyRow, FilterBar, FilterField, Kpi, Panel, PanelTitle, SelectFilter, TableWrap, Tag, Td, TextFilter, Th } from "../console-ui";
+import { StaffBookingMoneyPanel } from "../finance/StaffBookingMoneyPanel";
 
 const STATUS_OPTIONS = ["REQUESTED", "AWAITING_PAYMENT", "CONFIRMED", "CHECKED_IN", "IN_PROGRESS", "COMPLETED", "CANCELLED_BY_USER", "CANCELLED_BY_PROVIDER", "REJECTED", "EXPIRED", "RESCHEDULED", "NO_SHOW"];
 const isOffline = () => typeof navigator !== "undefined" && navigator.onLine === false;
@@ -159,6 +160,7 @@ export function AdminServiceBookingDetailView({ bookingId }: { bookingId: string
           <DetailRow label={t("detail.review")}>{b.review ? `${b.review.rating}★ · ${label(`reviewStatus.${b.review.status}`)}` : "—"}</DetailRow>
           {b.supportCases.length ? b.supportCases.map((c) => <DetailRow key={c.id} label={t("detail.supportCase")}><Link href={`/${locale}/admin/support/${c.id}`}>{c.caseNumber}</Link> · {label(`supportStatus.${c.status}`)}</DetailRow>) : <DetailRow label={t("detail.support")}>—</DetailRow>}
         </Panel>
+        <StaffBookingMoneyPanel kind="BOOKING" bookingId={bookingId} />
       </div>
     </div>
   );
