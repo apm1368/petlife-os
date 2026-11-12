@@ -3,8 +3,8 @@ import { act, createEvent, fireEvent, screen, within } from "@testing-library/re
 import { renderWithIntl } from "@/test/render-with-intl";
 import { NextIntlClientProvider } from "next-intl";
 import faMessages from "@/messages/fa.json";
-import { MobileTabBar, PetContextControl, PrimaryNav } from "./MemberNavigation";
-import { currentDestination, EXPLORE_GROUPS, PRIMARY_DESTINATIONS } from "./consumer-nav";
+import { MobileExploreButton, MobileTabBar, PetContextControl, PrimaryNav } from "./MemberNavigation";
+import { currentDestination, currentMobileTab, EXPLORE_GROUPS, isMobileTabRoot, MOBILE_TABS, PRIMARY_DESTINATIONS } from "./consumer-nav";
 
 const routing = vi.hoisted(() => ({ pathname: "/fa/pets/p1/health/labs", push: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: routing.push }), usePathname: () => routing.pathname }));
@@ -152,11 +152,11 @@ describe("member navigation", () => {
 
   it.each(["fa", "en", "de", "es"] as const)("keeps language, appearance, support and current guides reachable in the %s mobile sheet", (locale) => {
     routing.pathname = `/${locale}/home`;
-    renderWithIntl(<MobileTabBar />, locale);
+    renderWithIntl(<><MobileExploreButton /><MobileTabBar /></>, locale);
     const labels = {
-      fa: { home: "داشبورد", explore: "کاوش", preferences: "زبان و ظاهر", language: "زبان", german: "آلمانی", help: "کمک و پشتیبانی", guides: /راهنماها راهنمای عملی/ },
-      en: { home: "Dashboard", explore: "Explore", preferences: "Language and appearance", language: "Language", german: "German", help: "Help and support", guides: /Guides Practical/ },
-      de: { home: "Übersicht", explore: "Entdecken", preferences: "Sprache und Darstellung", language: "Sprache", german: "Deutsch", help: "Hilfe und Support", guides: /Ratgeber Praktische Pflegehinweise/ },
+      fa: { home: "خانه", explore: "کاوش", preferences: "زبان و ظاهر", language: "زبان", german: "آلمانی", help: "کمک و پشتیبانی", guides: /راهنماها راهنمای عملی/ },
+      en: { home: "Home", explore: "Explore", preferences: "Language and appearance", language: "Language", german: "German", help: "Help and support", guides: /Guides Practical/ },
+      de: { home: "Start", explore: "Entdecken", preferences: "Sprache und Darstellung", language: "Sprache", german: "Deutsch", help: "Hilfe und Support", guides: /Ratgeber Praktische Pflegehinweise/ },
       es: { home: "Inicio", explore: "Explorar", preferences: "Idioma y apariencia", language: "Idioma", german: "alemán", help: "Ayuda y soporte", guides: /Guías Consejos prácticos/ },
     }[locale];
     expect(screen.getByRole("link", { name: labels.home }).getAttribute("href")).toBe(`/${locale}/home`);
@@ -171,5 +171,28 @@ describe("member navigation", () => {
     fireEvent.click(within(dialog).getByRole("button", { name: labels.guides }));
     expect(routing.push).toHaveBeenCalledWith(`/${locale}/guides`);
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it.each(["fa", "en", "de", "es"] as const)("gives the %s app bar the five tabs: Home, My pets, Services, Shop, Profile", (locale) => {
+    routing.pathname = `/${locale}/pets/p1/health/labs`;
+    renderWithIntl(<MobileTabBar />, locale);
+    const nav = screen.getByRole("navigation");
+    const links = within(nav).getAllByRole("link");
+    expect(links.map((link) => link.getAttribute("href"))).toEqual(["/home", "/pets", "/services", "/shop", "/profile"].map((href) => `/${locale}${href}`));
+    expect(links.map((link) => link.textContent)).toEqual(MOBILE_TABS.map((tab) => tab[locale]));
+    expect(within(nav).getByRole("link", { current: "page" }).getAttribute("href")).toBe(`/${locale}/pets`);
+    for (const tab of MOBILE_TABS) expect(tab[locale].length, `${locale} ${tab.key}`).toBeLessThanOrEqual(12);
+  });
+
+  it("knows which tab a deep page belongs to and where the back button is not needed", () => {
+    expect(currentMobileTab("/pets/p1/health/labs")).toBe("pets");
+    expect(currentMobileTab("/care-calendar")).toBe("pets");
+    expect(currentMobileTab("/checkout/c1")).toBe("shop");
+    expect(currentMobileTab("/bookings/b1")).toBe("services");
+    expect(currentMobileTab("/profile/notifications")).toBe("profile");
+    expect(currentMobileTab("/travel")).toBeNull();
+    expect(["/home", "/pets", "/services", "/shop", "/profile", "/explore"].every(isMobileTabRoot)).toBe(true);
+    expect(isMobileTabRoot("/pets/p1")).toBe(false);
+    expect(isMobileTabRoot("/profile/security")).toBe(false);
   });
 });
