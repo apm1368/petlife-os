@@ -55,9 +55,9 @@ export function isReceiptWindowOver(topUp: { status: WalletTopUpStatus; receiptD
   return topUp.status === WalletTopUpStatus.AWAITING_RECEIPT && !!topUp.receiptDeadlineAt && topUp.receiptDeadlineAt <= now;
 }
 
-/** Where Zibal sends the member back. Persian lives at the bare domain; other languages under their prefix. */
+/** Where Zibal sends the member back. Member pages live under the locale prefix in every language (only the
+ * Persian home page is the bare domain), so the return lands directly and no redirect can drop Zibal's query. */
 export function walletReturnUrl(webOrigin: string, locale: string): string {
   const origin = webOrigin.split(",")[0]!.trim().replace(/\/$/, "");
-  const prefix = locale === "fa" ? "" : `/${locale}`;
-  return `${origin}${prefix}/profile/wallet`;
+  return `${origin}/${["fa", "en", "de", "es"].includes(locale) ? locale : "fa"}/profile/wallet`;
 }

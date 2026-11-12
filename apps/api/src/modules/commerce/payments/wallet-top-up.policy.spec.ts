@@ -36,8 +36,9 @@ describe("wallet top-up policy", () => {
     expect(isReceiptWindowOver({ status: WalletTopUpStatus.REVIEW_PENDING, receiptDeadlineAt: new Date("2026-11-11T00:00:00Z") }, now)).toBe(false);
   });
 
-  it("sends Persian back to the bare domain and other languages under their prefix", () => {
-    expect(walletReturnUrl("https://opetlife.ir, https://www.opetlife.ir", "fa")).toBe("https://opetlife.ir/profile/wallet");
+  it("returns members to the wallet under their language prefix (member pages are prefixed in Persian too)", () => {
+    expect(walletReturnUrl("https://opetlife.ir, https://www.opetlife.ir", "fa")).toBe("https://opetlife.ir/fa/profile/wallet");
     expect(walletReturnUrl("https://opetlife.ir/", "de")).toBe("https://opetlife.ir/de/profile/wallet");
+    expect(walletReturnUrl("https://opetlife.ir", "xx")).toBe("https://opetlife.ir/fa/profile/wallet");
   });
 });

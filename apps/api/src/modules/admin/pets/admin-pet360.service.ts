@@ -38,13 +38,50 @@ export class AdminPet360Service {
     const digits = term?.replace(/\D/g, "") ?? "";
     const where: Prisma.PetWhereInput = {
       ...(q.species ? { species: q.species as never } : {}),
-      ...(term ? { OR: [...(UUID.test(term) ? [{ id: term }, { householdId: term }] : []), { name: { contains: term, mode: "insensitive" as const } }, ...(digits.length >= 9 ? [{ microchipNormalized: digits }] : [])] } : {}),
+      ...(term
+        ? {
+            OR: [
+              ...(UUID.test(term) ? [{ id: term }, { householdId: term }, { household: { members: { some: { userId: term } } } }] : []),
+              { name: { contains: term, mode: "insensitive" as const } },
+              // A pet is also found through the people it belongs to (owner or any household member, by name).
+              { household: { members: { some: { user: { displayName: { contains: term, mode: "insensitive" as const } } } } } },
+              ...(digits.length >= 9 ? [{ microchipNormalized: digits }] : []),
+            ],
+          }
+        : {}),
     };
     const [rows, total] = await Promise.all([
-      this.prisma.pet.findMany({ where, orderBy: { createdAt: "desc" }, skip, take, include: { household: { select: { id: true, name: true } } } }),
+      this.prisma.pet.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+        include: { household: { select: { id: true, name: true, members: { select: { userId: true, role: true, user: { select: { displayName: true } } } } } } },
+      }),
       this.prisma.pet.count({ where }),
     ]);
-    return toPaginatedDto(rows.map((p) => ({ id: p.id, name: p.name, species: p.species, breed: p.breed, lifecycleStatus: p.lifecycleStatus, deleted: Boolean(p.deletedAt), household: p.household, createdAt: p.createdAt.toISOString() })), total, page, pageSize);
+    return toPaginatedDto(
+      rows.map((p) => {
+        const owner = p.household.members.find((m) => m.role === HouseholdRole.OWNER) ?? null;
+        return {
+          id: p.id,
+          name: p.name,
+          species: p.species,
+          breed: p.breed,
+          lifecycleStatus: p.lifecycleStatus,
+          deleted: Boolean(p.deletedAt),
+          hasPhoto: Boolean(p.photoUrl),
+          household: { id: p.household.id, name: p.household.name },
+          owner: owner ? { userId: owner.userId, displayName: owner.user.displayName } : null,
+          /** Everyone else in the household, apart from the owner. */
+          familyMemberCount: p.household.members.filter((m) => m !== owner).length,
+          createdAt: p.createdAt.toISOString(),
+        };
+      }),
+      total,
+      page,
+      pageSize,
+    );
   }
 
   async get(petId: string) {
