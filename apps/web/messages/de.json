@@ -757,7 +757,10 @@
       "settings_approve": "Sensible Änderungen freigeben",
       "system_view": "Systemstatus ansehen",
       "analytics_view": "Berichte & Analysen",
-      "pet_access_manage": "Zugriff auf Tierakten verwalten"
+      "pet_access_manage": "Zugriff auf Tierakten verwalten",
+      "wallet_view": "Guthaben ansehen",
+      "wallet_adjust": "Guthaben korrigieren",
+      "wallet_topup_review": "Aufladebelege prüfen"
     },
     "domains": {
       "customer": "Kundschaft",
@@ -784,7 +787,8 @@
       "access": "Zugriff",
       "admin": "Admins",
       "settings": "Einstellungen",
-      "system": "System"
+      "system": "System",
+      "wallet": "Guthaben"
     }
   },
   "adminSiteSettings": {
@@ -3592,7 +3596,9 @@
         "platformSettings": "Einstellungen",
         "featureFlags": "Feature-Flags",
         "channels": "Kanäle und Zustellung",
-        "smsPatterns": "SMS-Vorlagen"
+        "smsPatterns": "SMS-Vorlagen",
+        "walletDirectory": "Mitglieder",
+        "walletTopUps": "Aufladebelege"
       },
       "palette": {
         "actions": "Schnellaktionen",
@@ -3681,7 +3687,8 @@
         "settings": "Plattformeinstellungen",
         "featureFlags": "Funktionsschalter",
         "smsPatterns": "SMS-Vorlagen",
-        "verification": "Identität und Dokumente"
+        "verification": "Identität und Dokumente",
+        "wallets": "Guthaben"
       },
       "navigation": "Admin-Navigation",
       "openMenu": "Menü öffnen",
@@ -6050,7 +6057,8 @@
           "pendingSupportNeeds": "Zu prüfende Hilfegesuche",
           "pendingMemorials": "Zu prüfende Gedenkseiten",
           "openPlaceReports": "Ortsmeldungen",
-          "openTasks": "Offene Aufgaben"
+          "openTasks": "Offene Aufgaben",
+          "pendingWalletTopUps": "Aufladebelege"
         }
       },
       "performance": {
@@ -7412,6 +7420,27 @@
     }
   },
   "partnerVerification": {
+    "superseded": "Durch einen neueren Upload ersetzt",
+    "reviewedBy": "von {name}",
+    "caseSummary": "Stand des Falls",
+    "lastDecision": "Letzte Entscheidung",
+    "decidedBy": "{name} · {date}",
+    "decisionReason": "Grund: {reason}",
+    "noDecisionYet": "Noch keine Entscheidung erfasst.",
+    "actorAdmin": "Admin",
+    "actorPartner": "Partner",
+    "documentGeneric": "Dokument",
+    "history": {
+      "title": "Fallverlauf",
+      "hint": "Jede Entscheidung mit ihrem Grund und jedes Öffnen eines privaten Dokuments steht hier – mit der Person, die es getan hat.",
+      "empty": "Noch nichts erfasst.",
+      "statusChanged": "Status: {from} → {to}",
+      "documentAccepted": "{document} angenommen",
+      "documentRejected": "{document} abgelehnt",
+      "documentOpened": "{document} geöffnet",
+      "documentUploaded": "{document} hochgeladen",
+      "submitted": "Zur Prüfung eingereicht"
+    },
     "businessEvidenceRequirement": "Gewerbeschein oder Enamad (ID oder Nachweis)",
     "profileRequired": "Vor dem Einreichen erforderlich",
     "profileRecorded": "Für die Prüfung durch Mitarbeitende erfasst",
@@ -8675,5 +8704,268 @@
       "UNKNOWN": "Laborkennzeichnung nicht angegeben"
     },
     "unnamedImaging": "Körperregion nicht erfasst"
+  },
+  "wallet": {
+    "eyebrow": "Konto",
+    "title": "Guthaben",
+    "description": "Ihr Guthaben, Aufladungen und der Verlauf",
+    "navHint": "Guthaben, Aufladen und Verlauf",
+    "loading": "Guthaben wird geladen…",
+    "failed": "Das Guthaben konnte nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "balance": {
+      "total": "Gesamtguthaben",
+      "purchaseOnly": "Für Einkäufe",
+      "purchaseOnlyHint": "Aufladungen und Geschenke, nur für Einkäufe",
+      "withdrawable": "Auszahlbar",
+      "withdrawableHint": "Rückerstattungen: ausgeben oder auszahlen lassen",
+      "expiring": "{amount} Geschenkguthaben verfällt am {date}."
+    },
+    "topUp": {
+      "title": "Guthaben aufladen",
+      "amountLabel": "Betrag (Toman)",
+      "amountHint": "Von {min} bis {max}",
+      "railLabel": "Zahlungsweg",
+      "rails": {
+        "ZIBAL": "Online-Zahlung (Bank-Gateway)",
+        "CARD_TO_CARD": "Karte-zu-Karte-Überweisung"
+      },
+      "submit": "Aufladen",
+      "submitting": "Wird gestartet…",
+      "redirecting": "Weiterleitung zum Bank-Gateway…",
+      "unavailableTitle": "Aufladen ist bald möglich",
+      "unavailableBody": "Für das Aufladen ist noch kein Zahlungsweg freigeschaltet. Rückerstattungen und Geschenkguthaben kommen trotzdem hier an.",
+      "errors": {
+        "OUT_OF_RANGE": "Der Betrag muss zwischen {min} und {max} liegen.",
+        "TOO_MANY_OPEN_TOP_UPS": "Sie haben bereits drei offene Anfragen. Schließen Sie zuerst eine ab oder brechen Sie sie ab.",
+        "TOP_UP_RAIL_UNAVAILABLE": "Dieser Zahlungsweg ist gerade nicht verfügbar.",
+        "ZIBAL_REQUEST_UNAVAILABLE": "Das Bank-Gateway hat nicht geantwortet. Bitte versuchen Sie es gleich noch einmal.",
+        "generic": "Die Anfrage hat nicht geklappt. Bitte versuchen Sie es erneut."
+      }
+    },
+    "card": {
+      "title": "Überweisen Sie den Betrag auf diese Karte",
+      "number": "Kartennummer",
+      "holder": "Karteninhaber",
+      "amount": "Zu überweisender Betrag",
+      "copy": "Kopieren",
+      "copied": "Kopiert",
+      "deadline": "Laden Sie den Beleg bis {date} hoch.",
+      "stepOne": "Überweisen Sie den Betrag mit Ihrer Banking-App oder am Geldautomaten auf diese Karte.",
+      "stepTwo": "Machen Sie ein Foto oder einen Screenshot des Belegs.",
+      "stepThree": "Senden Sie den Beleg hier. Unser Finanzteam prüft ihn und schreibt das Guthaben gut."
+    },
+    "receipt": {
+      "choose": "Belegbild auswählen",
+      "hint": "JPG, PNG oder WebP, bis 10 MB",
+      "send": "Beleg senden",
+      "sending": "Beleg wird gesendet…",
+      "sent": "Beleg gesendet. Sobald die Buchhaltung ihn geprüft hat, wird das Guthaben gutgeschrieben.",
+      "failed": "Der Beleg konnte nicht gesendet werden. Bitte erneut versuchen.",
+      "expired": "Die Frist für diesen Beleg ist abgelaufen. Bitte starten Sie eine neue Anfrage."
+    },
+    "requests": {
+      "title": "Aufladeanfragen",
+      "status": {
+        "AWAITING_PAYMENT": "Warten auf Zahlung",
+        "AWAITING_RECEIPT": "Beleg ausstehend",
+        "REVIEW_PENDING": "Wird geprüft",
+        "CREDITED": "Gutgeschrieben",
+        "FAILED": "Fehlgeschlagen",
+        "REJECTED": "Abgelehnt",
+        "EXPIRED": "Abgelaufen",
+        "CANCELLED": "Abgebrochen"
+      },
+      "rails": {
+        "ZIBAL": "Online-Zahlung (Bank-Gateway)",
+        "CARD_TO_CARD": "Karte-zu-Karte-Überweisung"
+      },
+      "received": "Gutgeschrieben: {amount}",
+      "reason": "Grund: {reason}",
+      "showCard": "Karte ansehen und Beleg senden",
+      "cancel": "Anfrage abbrechen",
+      "cancelled": "Die Anfrage wurde abgebrochen."
+    },
+    "return": {
+      "verifying": "Ihre Zahlung wird geprüft…",
+      "credited": "Zahlung bestätigt: {amount} wurde Ihrem Guthaben gutgeschrieben.",
+      "failed": "Die Zahlung wurde nicht bestätigt. Falls Geld abgebucht wurde, erstattet die Bank es innerhalb von 72 Stunden.",
+      "unknown": "Das Zahlungsergebnis steht noch nicht fest. Öffnen Sie diese Seite in ein paar Minuten erneut."
+    },
+    "history": {
+      "title": "Verlauf",
+      "empty": "Noch keine Bewegungen.",
+      "more": "Mehr anzeigen",
+      "purpose": {
+        "TOP_UP": "Aufladung",
+        "PURCHASE": "Einkauf",
+        "REFUND": "Erstattung",
+        "ADJUSTMENT": "Korrektur durch unser Team",
+        "EXPIRY": "Geschenkguthaben abgelaufen",
+        "OTHER": "Bewegung"
+      },
+      "bucket": {
+        "PURCHASE_ONLY": "Für Einkäufe",
+        "WITHDRAWABLE": "Auszahlbar"
+      },
+      "reasons": {
+        "GOODWILL": "Kulanzgutschrift",
+        "SERVICE_RECOVERY": "Ausgleich für ein Serviceproblem",
+        "PAYMENT_CORRECTION": "Zahlungskorrektur",
+        "REFUND_OUTSIDE_SYSTEM": "Erstattung außerhalb einer Bestellung",
+        "DUPLICATE_CREDIT_REVERSAL": "Doppelte Gutschrift storniert",
+        "OTHER": "Andere Korrektur"
+      },
+      "expires": "Verfällt am {date}"
+    }
+  },
+  "adminWallets": {
+    "kicker": "Finanzen",
+    "title": "Guthaben der Mitglieder",
+    "subtitle": "Guthaben und Verlauf jedes Mitglieds. Jede Geldbewegung hat einen Grund und steht im Prüfprotokoll.",
+    "search": "Name, E-Mail oder Telefon suchen",
+    "loading": "Wird geladen…",
+    "failed": "Die Daten konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "forbidden": "Dafür brauchen Sie die Berechtigung „Guthaben ansehen“.",
+    "empty": "Noch kein Guthaben hat Bewegungen.",
+    "emptySearch": "Kein Mitglied passt zu dieser Suche.",
+    "columns": {
+      "member": "Mitglied",
+      "contact": "Kontakt",
+      "purchaseOnly": "Für Einkäufe",
+      "withdrawable": "Auszahlbar",
+      "total": "Gesamt",
+      "lastActivity": "Letzte Bewegung"
+    },
+    "open": "Öffnen",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "pageOf": "Seite {page} von {pages}",
+    "never": "Keine Bewegungen",
+    "detail": {
+      "back": "Alle Guthaben",
+      "memberSince": "Mitglied seit {date}",
+      "entries": "Verlauf",
+      "entriesEmpty": "Dieses Guthaben hat noch keine Bewegungen.",
+      "topUps": "Aufladeanfragen",
+      "topUpsEmpty": "Noch keine Anfragen.",
+      "adjustments": "Guthabenkorrekturen",
+      "adjustmentsEmpty": "Noch keine Korrekturen.",
+      "audit": "Prüfprotokoll",
+      "auditEmpty": "Noch nichts protokolliert.",
+      "by": "von {name}",
+      "openCustomer": "Kundenakte"
+    },
+    "adjust": {
+      "title": "Guthaben korrigieren",
+      "hint": "Nur um einen Fehler zu beheben oder auszugleichen. Jede Korrektur wird mit Ihrem Namen, dem Grund und dem Guthaben davor und danach protokolliert.",
+      "direction": "Richtung",
+      "directions": {
+        "CREDIT": "Guthaben erhöhen",
+        "DEBIT": "Guthaben verringern"
+      },
+      "bucket": "Guthabenteil",
+      "buckets": {
+        "PURCHASE_ONLY": "Für Einkäufe",
+        "WITHDRAWABLE": "Auszahlbar"
+      },
+      "amount": "Betrag (Toman)",
+      "reasonCode": "Art des Grundes",
+      "reasonCodes": {
+        "GOODWILL": "Kulanzgutschrift",
+        "SERVICE_RECOVERY": "Ausgleich für ein Serviceproblem",
+        "PAYMENT_CORRECTION": "Zahlungskorrektur",
+        "REFUND_OUTSIDE_SYSTEM": "Erstattung außerhalb einer Bestellung",
+        "DUPLICATE_CREDIT_REVERSAL": "Doppelte Gutschrift storniert",
+        "OTHER": "Andere Korrektur"
+      },
+      "reason": "Erläuterung (bleibt im Prüfprotokoll)",
+      "evidence": "Ticket oder Referenz (optional)",
+      "submit": "Korrektur speichern",
+      "confirm": "„{direction}“ über {amount} in „{bucket}“ buchen? Das wirkt sofort auf das Guthaben.",
+      "confirmYes": "Ja, buchen",
+      "cancel": "Abbrechen",
+      "saving": "Wird gespeichert…",
+      "done": "Korrektur gespeichert.",
+      "noPermission": "Für Korrekturen brauchen Sie die Berechtigung „Guthaben korrigieren“.",
+      "errors": {
+        "INSUFFICIENT_WALLET_BALANCE": "Dieser Guthabenteil reicht dafür nicht aus.",
+        "reasonTooShort": "Die Erläuterung braucht mindestens 5 Zeichen.",
+        "amount": "Geben Sie einen gültigen Betrag ein.",
+        "generic": "Die Korrektur wurde nicht gespeichert."
+      }
+    },
+    "topUps": {
+      "title": "Aufladebelege",
+      "subtitle": "Karte-zu-Karte-Belege der Mitglieder. Bestätigen Sie den Betrag, der wirklich auf dem Firmenkonto angekommen ist – genau dieser wird gutgeschrieben.",
+      "filter": "Status",
+      "all": "Alle",
+      "status": {
+        "AWAITING_PAYMENT": "Warten auf Zahlung",
+        "AWAITING_RECEIPT": "Beleg ausstehend",
+        "REVIEW_PENDING": "Wird geprüft",
+        "CREDITED": "Gutgeschrieben",
+        "FAILED": "Fehlgeschlagen",
+        "REJECTED": "Abgelehnt",
+        "EXPIRED": "Abgelaufen",
+        "CANCELLED": "Abgebrochen"
+      },
+      "rails": {
+        "ZIBAL": "Online-Zahlung (Bank-Gateway)",
+        "CARD_TO_CARD": "Karte-zu-Karte-Überweisung"
+      },
+      "columns": {
+        "member": "Mitglied",
+        "amount": "Angefragt",
+        "rail": "Weg",
+        "status": "Status",
+        "submitted": "Beleg gesendet",
+        "actions": "Aktion"
+      },
+      "empty": "Keine Belege in diesem Status.",
+      "review": "Prüfen",
+      "reviewTitle": "Beleg prüfen",
+      "viewReceipt": "Beleg ansehen",
+      "receiptOpening": "Beleg wird vorbereitet…",
+      "receivedAmount": "Erhaltener Betrag (Toman)",
+      "rejectReason": "Grund der Ablehnung (sieht das Mitglied)",
+      "approve": "Bestätigen und gutschreiben",
+      "reject": "Ablehnen",
+      "approved": "Der Betrag wurde dem Guthaben gutgeschrieben.",
+      "rejected": "Der Beleg wurde abgelehnt.",
+      "noPermission": "Für die Prüfung brauchen Sie die Berechtigung „Aufladebelege prüfen“.",
+      "failed": "Die Prüfung wurde nicht gespeichert.",
+      "close": "Schließen"
+    },
+    "audit": {
+      "wallet_credited": "Guthaben erhöht",
+      "wallet_debited": "Guthaben verringert",
+      "wallet_top_up_approved": "Beleg bestätigt",
+      "wallet_top_up_rejected": "Beleg abgelehnt",
+      "wallet_top_up_receipt_viewed": "Beleg angesehen"
+    },
+    "entry": {
+      "purpose": {
+        "TOP_UP": "Aufladung",
+        "PURCHASE": "Einkauf",
+        "REFUND": "Erstattung",
+        "ADJUSTMENT": "Korrektur durch unser Team",
+        "EXPIRY": "Geschenkguthaben abgelaufen",
+        "OTHER": "Bewegung"
+      },
+      "bucket": {
+        "PURCHASE_ONLY": "Für Einkäufe",
+        "WITHDRAWABLE": "Auszahlbar"
+      },
+      "reasons": {
+        "GOODWILL": "Kulanzgutschrift",
+        "SERVICE_RECOVERY": "Ausgleich für ein Serviceproblem",
+        "PAYMENT_CORRECTION": "Zahlungskorrektur",
+        "REFUND_OUTSIDE_SYSTEM": "Erstattung außerhalb einer Bestellung",
+        "DUPLICATE_CREDIT_REVERSAL": "Doppelte Gutschrift storniert",
+        "OTHER": "Andere Korrektur"
+      }
+    }
   }
 }

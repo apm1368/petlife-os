@@ -6,9 +6,19 @@ const intl = createMiddleware({
   locales,
   defaultLocale,
   localePrefix: "always",
+  // Pages declare their own hreflang alternates in <head> (articles have a different slug per language). next-intl's
+  // generated `Link` header assumed the same path in every locale and contradicted them, so it is off.
+  alternateLinks: false,
 });
 
 const localeSet = new Set<string>(locales);
+
+/** The served language for crawlers and caches, also on documents without a usable <html lang> (e.g. a 404 shell). */
+function withContentLanguage(response: NextResponse, pathname: string) {
+  const first = pathname.split("/")[1] ?? "";
+  if (localeSet.has(first) && !response.headers.has("location")) response.headers.set("Content-Language", first);
+  return response;
+}
 
 /**
  * One URL per page:
@@ -24,7 +34,7 @@ export default function middleware(request: NextRequest) {
   if (pathname === "/") {
     const url = request.nextUrl.clone();
     url.pathname = `/${defaultLocale}`;
-    return NextResponse.rewrite(url);
+    return withContentLanguage(NextResponse.rewrite(url), url.pathname);
   }
 
   if (pathname === `/${defaultLocale}`) {
@@ -41,7 +51,7 @@ export default function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
-  return intl(request);
+  return withContentLanguage(intl(request), pathname);
 }
 
 export const config = {

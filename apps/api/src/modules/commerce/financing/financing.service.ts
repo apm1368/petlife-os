@@ -62,6 +62,7 @@ export class FinancingService {
   /** Idempotent: an existing non-terminal intent for this checkout+provider is reused rather than duplicated. */
   async createIntent(checkoutId: string, amount: number, currency: string, provider: PaymentProvider, client: QueryClient = this.prisma): Promise<FinancingIntent> {
     this.providers.resolve(provider); // throws FINANCING_NOT_AVAILABLE if disabled/unsupported
+    this.providers.assertAuthorizable(provider); // ...or if only a sandbox stub stands behind it
 
     const existing = await client.financingIntent.findFirst({
       where: {
@@ -170,6 +171,8 @@ export class FinancingService {
   async authorize(financingIntentId: string, mode?: FinancingAuthorizeMode): Promise<FinancingAuthorizeOutcome> {
     const intent = await this.getById(financingIntentId);
     const adapter = this.providers.resolve(intent.provider);
+    // Sandbox installment adapters approve whatever is asked: never on a server people use.
+    this.providers.assertAuthorizable(intent.provider);
 
     await this.prisma.financingIntent.update({ where: { id: financingIntentId }, data: { status: FinancingIntentStatus.AUTHORIZATION_PENDING } });
 
