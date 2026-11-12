@@ -1,10 +1,11 @@
 import { isRouteLocale } from "@/lib/i18n/config";
 import { notFound } from "next/navigation";
 import { ParkCredits } from "@/features/landing/ParkCredits";
-import { parkCopy } from "@/features/landing/park-copy";
+import { getTranslations } from "next-intl/server";
+import type { ParkText } from "@/features/landing/park-copy";
 import credits from "@/features/landing/photo-credits.json";
 import { publicPageMetadata } from "@/lib/seo/public-metadata";
-import { REEL_TRACK, musicCreditCopy } from "@/features/reel/reel-track";
+import { REEL_TRACK } from "@/features/reel/reel-track";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   return publicPageMetadata((await params).locale, "credits");
@@ -14,13 +15,12 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function CreditsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isRouteLocale(locale)) notFound();
-  const c = parkCopy[locale];
-  const m = musicCreditCopy[locale];
+  const park = (await getTranslations({ locale, namespace: "pattern2026" })).raw("park") as ParkText;
   return (
     <div className="flex flex-col gap-6">
       <header className="section-head">
         <div>
-          <h1>{c.photoCredits}</h1>
+          <h1>{park.photoCredits}</h1>
 
         </div>
       </header>
@@ -39,14 +39,14 @@ export default async function CreditsPage({ params }: { params: Promise<{ locale
               </span>
             </a>
             <p className="px-4 pb-4 text-metadata text-text-secondary">
-              {parkCopy[locale].processing}{" · "}
-              <a href={c.licenseUrl ?? "https://creativecommons.org/publicdomain/mark/1.0/"} target="_blank" rel="noopener noreferrer" className="underline">{parkCopy[locale].licence}</a>
+              {park.processing}{" · "}
+              <a href={c.licenseUrl ?? "https://creativecommons.org/publicdomain/mark/1.0/"} target="_blank" rel="noopener noreferrer" className="underline">{park.licence}</a>
             </p>
           </li>
         ))}
       </ul>
       <section className="flex flex-col gap-3" aria-labelledby="music-credits-title">
-        <h2 id="music-credits-title" className="text-section-title">{m.heading}</h2>
+        <h2 id="music-credits-title" className="text-section-title">{park.musicTitle}</h2>
         <ul className="row-list">
           <li>
             <a className="row-list__item" href={REEL_TRACK.page} target="_blank" rel="noopener noreferrer">
@@ -56,8 +56,8 @@ export default async function CreditsPage({ params }: { params: Promise<{ locale
               </span>
             </a>
             <p className="px-4 pb-4 text-metadata text-text-secondary">
-              {m.usage}{" · "}
-              <a href={REEL_TRACK.licenseUrl} target="_blank" rel="noopener noreferrer" className="underline">{m.licence}</a>
+              {park.musicUsage}{" · "}
+              <a href={REEL_TRACK.licenseUrl} target="_blank" rel="noopener noreferrer" className="underline">{park.licence}</a>
             </p>
           </li>
         </ul>

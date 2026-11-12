@@ -25,8 +25,6 @@ import { isRouteLocale } from "@/lib/i18n/config";
 import "@/features/landing/opl/opl-landing.css";
 import "@/features/reel/reel.css";
 
-const SKIP = { fa: "رفتن به محتوای صفحه", en: "Skip to content", de: "Zum Inhalt springen", es: "Saltar al contenido" } as const;
-
 /**
  * The one frame a signed-in member sees everywhere — private pages (AppShell) and the public
  * discovery pages (PublicShell). It sits on the 2026-11 pattern (docs/design/pattern-2026-11): warm paper,
@@ -35,6 +33,7 @@ const SKIP = { fa: "رفتن به محتوای صفحه", en: "Skip to content",
  */
 export function MemberFrame({ children }: { children: React.ReactNode }) {
   const t = useTranslations("common");
+  const member = useTranslations("pattern2026.member");
   const locale = useLocale();
   const routeLocale = isRouteLocale(locale) ? locale : "en";
   const router = useRouter();
@@ -46,7 +45,7 @@ export function MemberFrame({ children }: { children: React.ReactNode }) {
     <LandingShell locale={routeLocale} variant="page">
       <div className={`opl-page__body workspace-shell member-shell ${glass ? "member-shell--glass" : "member-shell--service"}`}>
         <a className="member-skip-link" href="#member-main-content">
-          {SKIP[routeLocale]}
+          {member("skip")}
         </a>
         <header className="member-header">
           <div className="member-header__bar">

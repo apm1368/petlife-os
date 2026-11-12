@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { PawPrint } from "@petlife/ui";
 import { useLanding } from "./LandingShell";
-import { oplCopy } from "./opl-copy";
+import { useOplCopy } from "./opl-copy";
 import { storyCopy } from "../story-copy";
 import { formatLocaleNumber } from "@/lib/i18n/format";
 import { observeResize, prefersReducedMotion } from "./cursor-bus";
@@ -13,7 +13,7 @@ const AT = [0.18, 0.5, 0.82];
 /** The three real signup steps; paw prints walk along a path as the visitor scrolls and light each step. */
 export function PathSteps() {
   const { locale, name, species } = useLanding();
-  const s = storyCopy[locale], c = oplCopy[locale];
+  const s = storyCopy[locale], c = useOplCopy();
   const section = useRef<HTMLElement>(null);
   const trail = useRef<HTMLDivElement>(null);
   const [paws, setPaws] = useState<{ x: number; y: number; r: number; t: number }[]>([]);

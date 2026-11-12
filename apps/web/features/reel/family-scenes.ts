@@ -2,8 +2,8 @@ import type { RouteLocale } from "@/lib/i18n/config";
 import type { ReelScene } from "./ReelSection";
 import { D, makeKit } from "./scene-kit";
 import { buildReelScenes } from "@/features/landing/opl/reel-scenes";
-import { oplCopy } from "@/features/landing/opl/opl-copy";
-import { familyCopy, type Family } from "./family-copy";
+import type { OplCopy } from "@/features/landing/opl/opl-copy";
+import type { Family, FamilyText } from "./family-copy";
 
 /** Which landing scenes each family reuses around its two own scenes (A, B). Numbers index the landing reel. */
 const SEQUENCE: Record<Family, (number | "A" | "B")[]> = {
@@ -16,9 +16,8 @@ const SEQUENCE: Record<Family, (number | "A" | "B")[]> = {
   learn: [0, "A", "B", 1],
 };
 
-export function buildFamilyReel(family: Family, locale: RouteLocale): { scenes: ReelScene[]; kicks: string[]; subs: string[]; text: (typeof familyCopy)["fa"][Family] } {
-  const c = oplCopy[locale];
-  const f = familyCopy[locale][family];
+/** Builds a family reel from the page language's copy (`useOplCopy()` and `useFamilyCopy()[family]`). */
+export function buildFamilyReel(family: Family, locale: RouteLocale, c: OplCopy, f: FamilyText): { scenes: ReelScene[]; kicks: string[]; subs: string[]; text: FamilyText } {
   const L = f.labels;
   const k = makeKit(locale);
   const { rtl, X, m, T, G, PAW, HEART, LABEL, logo, digits } = k;

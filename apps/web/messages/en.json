@@ -1,4 +1,587 @@
 {
+  "pattern2026": {
+    "opl": {
+      "brand": "opetlife",
+      "header": {
+        "services": "Services",
+        "allServices": "All services",
+        "allServicesHint": "The full list of providers",
+        "partners": "Partners",
+        "theme": "Switch light and dark mode",
+        "language": "Language"
+      },
+      "world": {
+        "eyebrow": "One identity for their whole world",
+        "title": {
+          "d": "Your companion's world starts here",
+          "n": "{name}'s world starts here"
+        },
+        "lede": "Pick your question to see where opetlife can help. Everything you record stays in their record.",
+        "defaultName": "your companion",
+        "nameLabel": "What's your companion's name?",
+        "namePlaceholder": "For example, Cookie",
+        "speciesLabel": "Kind of companion",
+        "species": {
+          "dog": "Dog",
+          "cat": "Cat",
+          "bird": "Bird",
+          "rabbit": "Rabbit",
+          "other": "Other"
+        },
+        "coreSub": "One record for everything",
+        "worldsLabel": "The five worlds of opetlife",
+        "worlds": {
+          "health": {
+            "q": "Are they doing well?",
+            "name": "Health and care",
+            "ck": "Health first",
+            "desc": "Health records, care reminders and vet appointments live side by side. Everything you record stays in one place, ready to share with a vet when you need to.",
+            "cta": {
+              "d": "Create your companion's record",
+              "n": "Create {name}'s record"
+            },
+            "feats": [
+              {
+                "n": "Health record",
+                "d": "Vaccines, medicines, allergies and visits"
+              },
+              {
+                "n": "Care calendar",
+                "d": "Reminders for daily and monthly routines"
+              },
+              {
+                "n": "Find a vet",
+                "d": "See providers and book an appointment"
+              },
+              {
+                "n": "Share the record",
+                "d": "A temporary, revocable link for your vet"
+              }
+            ]
+          },
+          "daily": {
+            "q": "What do they need today?",
+            "name": "Shopping and services",
+            "ck": "Shopping time?",
+            "desc": "Food and supplies from the pet shop, and services like grooming, boarding and pet taxi from providers, booked and tracked in the same app.",
+            "cta": {
+              "d": "Go to the pet shop",
+              "n": "Go to the pet shop"
+            },
+            "feats": [
+              {
+                "n": "Pet shop",
+                "d": "Food, supplies and care products"
+              },
+              {
+                "n": "Repeat delivery",
+                "d": "Recurring orders at the interval you choose"
+              },
+              {
+                "n": "Grooming",
+                "d": "Book with providers"
+              },
+              {
+                "n": "Boarding and taxi",
+                "d": "For when you're away or need to travel"
+              }
+            ]
+          },
+          "travel": {
+            "q": "Where shall we go together?",
+            "name": "Travel and stays",
+            "ck": "Trip time?",
+            "desc": "Search and compare pet-friendly stays, and keep travel plans and your companion's documents together.",
+            "cta": {
+              "d": "Plan a trip",
+              "n": "Plan a trip"
+            },
+            "feats": [
+              {
+                "n": "Find a stay",
+                "d": "Places that welcome pets"
+              },
+              {
+                "n": "Compare stays",
+                "d": "Rules and amenities side by side"
+              },
+              {
+                "n": "Trip plans",
+                "d": "Trips and their bookings in one place"
+              },
+              {
+                "n": "Travel passport",
+                "d": "Travel documents in your companion's record"
+              }
+            ]
+          },
+          "safe": {
+            "q": "What if something happens?",
+            "name": "Peace of mind",
+            "ck": "Worry less",
+            "desc": "Compare insurance plans, and if your companion goes missing, create a report from their record so the public listing and follow-up happen in one place.",
+            "cta": {
+              "d": "Compare insurance",
+              "n": "Compare insurance"
+            },
+            "feats": [
+              {
+                "n": "Pet insurance",
+                "d": "See and compare plans"
+              },
+              {
+                "n": "Lost pet report",
+                "d": "A public listing and follow-up from their record"
+              },
+              {
+                "n": "ID card",
+                "d": "A shareable card to help them get home"
+              },
+              {
+                "n": "Support",
+                "d": "Open a request and follow the reply"
+              }
+            ]
+          },
+          "together": {
+            "q": "What about everyone else?",
+            "name": "Community and kindness",
+            "ck": "New friends",
+            "desc": "Share experiences with other owners, help animals in need and keep the memories you share.",
+            "cta": {
+              "d": "Join the community",
+              "n": "Join the community"
+            },
+            "feats": [
+              {
+                "n": "Community",
+                "d": "Questions, experiences and conversations"
+              },
+              {
+                "n": "Animal support",
+                "d": "Registered needs of support centres"
+              },
+              {
+                "n": "Memories",
+                "d": "An album of the moments you shared"
+              },
+              {
+                "n": "Year in review",
+                "d": "A summary of a year together"
+              }
+            ]
+          }
+        }
+      },
+      "reel": {
+        "eyebrow": "Wordless, with music and subtitles",
+        "title": "opetlife in 30 seconds",
+        "lede": "Every service in one short reel. Turn the sound on and start from any chapter.",
+        "label": "Service reel",
+        "play": "Play with music",
+        "replay": "Watch again",
+        "pause": "Pause",
+        "resume": "Play",
+        "mute": "Mute",
+        "unmute": "Unmute",
+        "music": "Instrumental music",
+        "chapters": "Reel chapters",
+        "end": "The end"
+      },
+      "path": {
+        "sample": "Example",
+        "name": "Name",
+        "type": "Kind",
+        "photo": "Photo",
+        "added": "Added",
+        "chips": [
+          "Vet",
+          "Grooming",
+          "Boarding",
+          "Taxi"
+        ],
+        "timeline": [
+          "Request sent",
+          "Provider confirms",
+          "Appointment day"
+        ]
+      },
+      "share": {
+        "title": {
+          "d": "Share your companion's health record",
+          "n": "Share {name}'s health record"
+        },
+        "sectionsLabel": "Which parts can they see?",
+        "durationLabel": "How long does it stay open?",
+        "previewLabel": "What your vet sees",
+        "sections": {
+          "vaccination": "Vaccinations",
+          "allergies": "Allergies",
+          "medications": "Medicines",
+          "conditions": "Conditions"
+        },
+        "durations": [
+          "24 hours",
+          "3 days",
+          "7 days"
+        ],
+        "recorded3": "3 records",
+        "recorded1": "1 record",
+        "unknown": "Unknown; not recorded yet",
+        "fromClinic": "From the clinic",
+        "fromYou": "From you",
+        "notRecorded": "Not recorded",
+        "hidden": "Hidden",
+        "foot": "The link stays open for {d} · revocable at any time · you can see how many times it was opened"
+      },
+      "lost": {
+        "title": "If they ever go missing, every minute counts",
+        "body": {
+          "d": "Create a lost pet report from your companion's record so the public listing and follow-up happen in one place.",
+          "n": "Create a lost pet report from {name}'s record so the public listing and follow-up happen in one place."
+        },
+        "cta": "See lost pet listings"
+      },
+      "memorial": {
+        "lightCandle": "Light a candle",
+        "candleLit": "Candle lit",
+        "lightFor": "Light a candle for {name}",
+        "putOut": "Put out the candle for {name}",
+        "newArch": "A place for your companion",
+        "newArchCaption": "Your memorial",
+        "ctaBody": "For a companion who is no longer by your side, make a place to stay; their photos and memories stay in their record.",
+        "cta": "Create a memorial"
+      },
+      "kindness": {
+        "hint": "Move your pointer over the picture",
+        "alt": "Illustration: a hand bringing a bowl of food to a stray dog and cat beside a wooden kennel"
+      },
+      "partners": {
+        "roles": [
+          {
+            "title": "Clinics and vets",
+            "body": "Appointments, patients and the records owners share with you."
+          },
+          {
+            "title": "Service providers",
+            "body": "Services, working calendar, bookings and reviews, from grooming to boarding and travel."
+          },
+          {
+            "title": "Sellers",
+            "body": "Products, inventory, orders and settlements in one panel."
+          },
+          {
+            "title": "Support centres",
+            "body": "Post your centre's needs, follow donations and manage your team."
+          }
+        ]
+      },
+      "final": {
+        "title": {
+          "d": "Your companion's world starts by your side",
+          "n": "{name}'s world starts by your side"
+        },
+        "body": {
+          "d": "Take the first step: a record for your companion.",
+          "n": "Take the first step: a record for {name}."
+        }
+      },
+      "hook": {
+        "text": {
+          "d": "Create your companion's record",
+          "n": "Create {name}'s record"
+        },
+        "start": "Start",
+        "close": "Close"
+      },
+      "cookie": {
+        "show": "Show Cookie",
+        "hide": "Hide Cookie",
+        "hello": "Hi {name}",
+        "play": "Play?",
+        "input": "What's their name?",
+        "go": "Let's go"
+      },
+      "scenes": {
+        "s": [
+          "One world for dogs, cats, birds and every companion.",
+          "Your companion's health record, always at hand.",
+          "Care reminders, right on time.",
+          "Find a nearby vet and book an appointment.",
+          "Food and supplies, with repeat delivery.",
+          "Grooming, bathing and boarding, booked online.",
+          "Pet-friendly stays for your next trip.",
+          "Insurance and lost pet reports, for hard days.",
+          "A kind community, and help for animals in need.",
+          "Their world starts by your side."
+        ],
+        "k": [
+          "opetlife",
+          "Health record",
+          "Care calendar",
+          "Vets",
+          "Pet shop",
+          "Grooming and stays",
+          "Travel",
+          "Peace of mind",
+          "Community",
+          ""
+        ],
+        "tagline": "A world for pets",
+        "healthTitle": "Health record",
+        "healthSub": "One record for everything",
+        "calendarTitle": "Care calendar",
+        "reminderMed": "Morning medicine, 8:00",
+        "reminderVaccine": "Yearly vaccine reminder",
+        "nearestClinic": "Nearest clinic",
+        "booked": "Appointment booked",
+        "repeat": "Repeat delivery",
+        "shop": "Pet shop",
+        "grooming": "Grooming and bathing",
+        "boarding": "Boarding and care",
+        "petFriendly": "Pet-friendly",
+        "insurance": "Pet insurance",
+        "lost": "Lost pet report",
+        "support": "Help animals in need",
+        "start": "Start today"
+      }
+    },
+    "reels": {
+      "care": {
+        "eyebrow": "Your companion's record at a glance",
+        "title": "All of their care, in one place",
+        "lede": "Keep health, reminders and daily tasks together, and share them with your family.",
+        "cta": "Open the record",
+        "a": {
+          "k": "Today",
+          "s": "Food, walk and medicine; each task gets a tick when it is done."
+        },
+        "b": {
+          "k": "With family",
+          "s": "Everyone at home sees the same record and shares the tasks."
+        },
+        "labels": {
+          "today": "Today",
+          "feed": "Food",
+          "walk": "Walk",
+          "meds": "Medicine",
+          "family": "Family",
+          "shared": "Shared record",
+          "done": "Done"
+        }
+      },
+      "services": {
+        "eyebrow": "Services and vets at a glance",
+        "title": "From search to booking in 20 seconds",
+        "lede": "See how finding a provider and booking an appointment works on opetlife.",
+        "cta": "Book an appointment",
+        "a": {
+          "k": "Search",
+          "s": "Pick a service and area, then see the providers."
+        },
+        "b": {
+          "k": "Booking",
+          "s": "Choose a day and time and your booking is in."
+        },
+        "labels": {
+          "search": "Grooming, vets, boarding…",
+          "vet": "Vet",
+          "grooming": "Grooming",
+          "boarding": "Boarding",
+          "verified": "Verified",
+          "provider": "Provider",
+          "month": "Booking calendar",
+          "confirm": "Book"
+        }
+      },
+      "shop": {
+        "eyebrow": "The pet shop at a glance",
+        "title": "Everyday shopping, made easy",
+        "lede": "From choosing products to delivery and repeat orders.",
+        "cta": "See products",
+        "a": {
+          "k": "Products",
+          "s": "See food, supplies and toys side by side."
+        },
+        "b": {
+          "k": "Delivery",
+          "s": "Follow your order to your door."
+        },
+        "labels": {
+          "food": "Food",
+          "bowl": "Bowl",
+          "toy": "Toy",
+          "care": "Care",
+          "cart": "Cart",
+          "onTheWay": "On the way",
+          "delivered": "Delivered"
+        }
+      },
+      "travel": {
+        "eyebrow": "Travel at a glance",
+        "title": "Your favourite travel companion",
+        "lede": "Find and compare pet-friendly stays and keep travel documents at hand.",
+        "cta": "Find a stay",
+        "a": {
+          "k": "Compare",
+          "s": "Compare stays side by side."
+        },
+        "b": {
+          "k": "Passport",
+          "s": "Travel documents, kept in their record."
+        },
+        "labels": {
+          "stayA": "Mountain stay",
+          "stayB": "Seaside stay",
+          "dogs": "Dogs welcome",
+          "cats": "Cats welcome",
+          "yard": "Garden",
+          "passport": "Travel passport",
+          "vaccine": "Vaccine",
+          "microchip": "Microchip"
+        }
+      },
+      "safe": {
+        "eyebrow": "Peace of mind at a glance",
+        "title": "Ready for hard days",
+        "lede": "Compare insurance plans and, if your companion goes missing, publish a listing fast.",
+        "cta": "Compare insurance",
+        "a": {
+          "k": "Plans",
+          "s": "See insurance plans side by side."
+        },
+        "b": {
+          "k": "Lost listing",
+          "s": "Create a listing and share it with everyone."
+        },
+        "labels": {
+          "basic": "Basic",
+          "plus": "Complete",
+          "accident": "Accident",
+          "lost": "Missing",
+          "share": "Share",
+          "seen": "Seen them?"
+        }
+      },
+      "together": {
+        "eyebrow": "Community and support at a glance",
+        "title": "Kindness goes beyond our homes",
+        "lede": "Talk with other owners, help support centres and keep your memories.",
+        "cta": "Join the community",
+        "a": {
+          "k": "Needs",
+          "s": "See the registered needs of centres and help."
+        },
+        "b": {
+          "k": "Memories",
+          "s": "Shared moments, in one album."
+        },
+        "labels": {
+          "food": "Food",
+          "medicine": "Medicine",
+          "shelter": "Shelter",
+          "album": "Memories"
+        }
+      },
+      "learn": {
+        "eyebrow": "Guides and support at a glance",
+        "title": "Every question, a clear answer",
+        "lede": "Reviewed articles, frequent questions and support, side by side.",
+        "cta": "See guides",
+        "a": {
+          "k": "Articles",
+          "s": "Read and save care guides."
+        },
+        "b": {
+          "k": "Support",
+          "s": "Send your question and follow the answer."
+        },
+        "labels": {
+          "guide": "Guide",
+          "journal": "Journal",
+          "faq": "FAQ",
+          "ticket": "Support request",
+          "answered": "Answered"
+        }
+      }
+    },
+    "park": {
+      "title": "A whole world for you and your pet",
+      "description": "Everything your pet needs, in one app",
+      "subline": "A healthier, happier life with your little companion",
+      "explore": "Explore services",
+      "imageAlt": "Tara, with copper curls, walks Cookie into a Tehran park. Pedram pets a black-and-white terrier; service pavilions, Azadi Tower and Milad Tower appear beyond. AI-generated concept artwork.",
+      "destinationsLabel": "Explore park services",
+      "introTitle": "By your side, through every moment",
+      "introBody": "From health and grooming to travel and stays. Everything for a better life with your pet.",
+      "brandTagline": "A world for pets",
+      "partnerSignIn": "Partner sign in",
+      "partnerJoin": "Become a partner",
+      "memberJoin": "Join",
+      "signIn": "Sign in",
+      "dashboard": "My dashboard",
+      "skip": "Skip to main content",
+      "navLabel": "Main navigation",
+      "menuLabel": "Open menu",
+      "closeMenuLabel": "Close menu",
+      "home": "Home",
+      "about": "About us",
+      "partners": "For partners",
+      "photoCredits": "Image credits",
+      "services": {
+        "shop": {
+          "title": "Pet shop",
+          "hint": "Everyday essentials"
+        },
+        "vet": {
+          "title": "Veterinary",
+          "hint": "Health comes first"
+        },
+        "grooming": {
+          "title": "Grooming",
+          "hint": "Look good, feel good"
+        },
+        "boarding": {
+          "title": "Boarding",
+          "hint": "Care while you’re away"
+        },
+        "travel": {
+          "title": "Travel",
+          "hint": "Adventures together"
+        },
+        "taxi": {
+          "title": "Taxi",
+          "hint": "Safe, comfortable rides"
+        },
+        "support": {
+          "title": "Animal support",
+          "hint": "Help animals in need"
+        },
+        "insurance": {
+          "title": "Insurance",
+          "hint": "More peace of mind"
+        }
+      },
+      "creditsTitle": "Tara and Cookie’s park",
+      "shopCredit": "Shop hero: AI-generated photorealistic concept by OpenAI; cropped and re-encoded. Not a real shop or product photograph.",
+      "backdropCredit": "The warm blurred member-panel backdrop is also OpenAI AI-generated artwork, re-encoded for the web; it does not depict a real location.",
+      "creditsBody": "This park is AI-generated concept artwork based on the approved design and reference images of Tara, Pedram and Cookie. It is not a photograph of a real location or evidence that these pavilions exist. Reference images were supplied by the project owner for this design.",
+      "processing": "Cropped/re-encoded",
+      "licence": "Licence and usage terms",
+      "musicTitle": "Music",
+      "musicUsage": "The wordless soundtrack of the site's reels; a 48-second excerpt, faded in and out and re-encoded."
+    },
+    "member": {
+      "nav": "My sections",
+      "home": "Dashboard",
+      "profile": "Pet profile",
+      "health": "Health",
+      "care": "Care",
+      "memories": "Memories",
+      "shop": "Shop",
+      "skip": "Skip to content"
+    }
+  },
   "adminAccessMatrix": {
     "kicker": "Access levels",
     "title": "Role access matrix",
@@ -2366,6 +2949,20 @@
     }
   },
   "commerce": {
+    "categoryNames": {
+      "food": "Food",
+      "treats": "Treats",
+      "grooming": "Grooming",
+      "accessories": "Accessories",
+      "species-dog": "Dog",
+      "species-cat": "Cat",
+      "species-bird": "Bird",
+      "species-rabbit": "Rabbit",
+      "species-rodent": "Rodents",
+      "species-fish": "Fish",
+      "species-reptile": "Reptiles",
+      "species-other": "Other animals"
+    },
     "shopHome": {
       "title": "Shop",
       "subtitle": "For {name}",

@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PawPrint, X } from "@petlife/ui";
 import { useLanding } from "./LandingShell";
-import { oplCopy, withName } from "./opl-copy";
+import { useOplCopy, withName } from "./opl-copy";
 
 /** A soft bottom bar that invites signup once the visitor has scrolled past the five worlds, until the final call. */
 export function HookBar() {
   const { locale, name } = useLanding();
-  const c = oplCopy[locale].hook;
+  const c = useOplCopy().hook;
   const [show, setShow] = useState(false);
   const [closed, setClosed] = useState(false);
   useEffect(() => {

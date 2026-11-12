@@ -15,6 +15,7 @@ import { CommercePage } from "./CommercePage";
 import { ProductCard } from "./ProductCard";
 import { formatNumber } from "./commerce-ui";
 import type { RouteLocale } from "@/lib/i18n/config";
+import { useCategoryName } from "./category-name";
 
 const SORTS: ProductSort[] = ["RECOMMENDED", "NEWEST", "PRICE_ASC", "PRICE_DESC", "TOP_RATED"];
 const PAGE_SIZE = 24;
@@ -55,6 +56,7 @@ export function readProductFilters(params: URLSearchParams): SearchProductsInput
  */
 export function ProductResultsView() {
   const t = useTranslations("commerce.results");
+  const categoryName = useCategoryName();
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -129,7 +131,7 @@ export function ProductResultsView() {
 
   const filterPanel = data ? (
     <div className="commerce-filter-fields">
-      <Select label={t("categories")} value={filters.category ?? ""} onChange={(e) => update({ category: e.target.value || undefined })} options={[{ value: "", label: t("allCategories") }, ...categories.map((c) => ({ value: c.id, label: c.name }))]} />
+      <Select label={t("categories")} value={filters.category ?? ""} onChange={(e) => update({ category: e.target.value || undefined })} options={[{ value: "", label: t("allCategories") }, ...categories.map((c) => ({ value: c.id, label: categoryName(c) }))]} />
       <Select
         label={t("filters.species")}
         value={filters.species ?? ""}
@@ -207,7 +209,7 @@ export function ProductResultsView() {
           <nav aria-label={t("categories")} className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
             <CategoryChip label={t("allCategories")} active={!filters.category} onClick={() => update({ category: undefined })} />
             {(childCategories.length ? childCategories : topCategories).map((c) => (
-              <CategoryChip key={c.id} label={c.name} active={filters.category === c.id} onClick={() => update({ category: c.id })} />
+              <CategoryChip key={c.id} label={categoryName(c)} active={filters.category === c.id} onClick={() => update({ category: c.id })} />
             ))}
           </nav>
         ) : null}

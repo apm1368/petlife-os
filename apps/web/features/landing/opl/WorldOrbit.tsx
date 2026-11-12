@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { ArrowLeft, ArrowRight, Bird as BirdIcon, HeartPulse, PawPrint, Plane, ShieldCheck, ShoppingBag, Users } from "@petlife/ui";
 import { useLanding, type Species } from "./LandingShell";
-import { oplCopy, withName, worldOrder, worldRoutes, type WorldKey } from "./opl-copy";
+import { useOplCopy, withName, worldOrder, worldRoutes, type WorldKey } from "./opl-copy";
 import { buildReelScenes } from "./reel-scenes";
 import { cursorBus, observeResize, prefersReducedMotion, say } from "./cursor-bus";
 import { Bird } from "./Bird";
@@ -17,7 +17,7 @@ const SPECIES: Species[] = ["dog", "cat", "bird", "rabbit", "other"];
 /** The five-question orbit: features grouped by the question a visitor actually has, around their pet's record. */
 export function WorldOrbit() {
   const { locale, name, setName, species, setSpecies } = useLanding();
-  const copy = oplCopy[locale];
+  const copy = useOplCopy();
   const c = copy.world;
   const href = (path: string) => `/${locale}${path}`;
   const Arrow = locale === "fa" ? ArrowLeft : ArrowRight;

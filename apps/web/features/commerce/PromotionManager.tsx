@@ -7,6 +7,7 @@ import type { ProductCategoryDto, PromotionDto, PromotionInput, PromotionScopeNa
 import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { commerceService } from "@/services/commerce.service";
+import { useCategoryName } from "./category-name";
 
 export interface PromotionApi {
   list: () => Promise<PromotionDto[]>;
@@ -247,6 +248,7 @@ function PromotionForm({
   const [endsAt, setEndsAt] = useState(toLocalInput(initial?.endsAt ?? null));
   const [usageLimit, setUsageLimit] = useState(initial?.usageLimit ? String(initial.usageLimit) : "");
   const [categories, setCategories] = useState<ProductCategoryDto[]>([]);
+  const categoryName = useCategoryName();
   const [productQuery, setProductQuery] = useState("");
   const [productResults, setProductResults] = useState<TargetOption[]>(productOptions ?? []);
   const [knownProducts, setKnownProducts] = useState<Record<string, string>>(() => Object.fromEntries((productOptions ?? []).map((p) => [p.id, p.label])));
@@ -348,7 +350,7 @@ function PromotionForm({
               <label key={c.id} className="flex min-h-9 items-center gap-2 text-body text-text-primary">
                 <input type="checkbox" checked={categoryIds.includes(c.id)} onChange={() => setCategoryIds(toggle(categoryIds, c.id))} />
                 {c.parentId ? "— " : ""}
-                {c.name}
+                {categoryName(c)}
               </label>
             ))}
           </fieldset>

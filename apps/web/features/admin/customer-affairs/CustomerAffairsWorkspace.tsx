@@ -88,7 +88,7 @@ export function CustomerAffairsWorkspace() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-page-title text-text-primary">امور مشتریان opetlife</h1>
+          <h1 className="text-page-title text-text-primary">امور مشتریان اپت لایف</h1>
           <p className="mt-0.5 text-metadata text-text-secondary">{SECTION_HINT[section]}</p>
         </div>
         <label className="flex items-center gap-2">

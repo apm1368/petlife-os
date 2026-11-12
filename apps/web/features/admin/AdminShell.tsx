@@ -1,5 +1,6 @@
 "use client";
 import styles from "./AdminShell.module.css";
+import "@/features/landing/opl/opl-landing.css";
 import "./admin-glass.css";
 import { Brand } from "@/features/brand/Brand";
 import { LocalPreviewGate } from "@/features/local-preview/LocalPreviewGate";
@@ -206,7 +207,7 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className={`erp-shell ${styles.shell}`} data-collapsed={collapsed ? "true" : undefined}>
+    <div className={`opl-page erp-shell ${styles.shell}`} data-collapsed={collapsed ? "true" : undefined}>
       <a href="#admin-main" className={styles.skip}>
         {t("skipToContent")}
       </a>

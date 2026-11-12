@@ -1,4 +1,587 @@
 {
+  "pattern2026": {
+    "opl": {
+      "brand": "opetlife",
+      "header": {
+        "services": "Servicios",
+        "allServices": "Todos los servicios",
+        "allServicesHint": "La lista completa de proveedores",
+        "partners": "Socios",
+        "theme": "Cambiar entre modo claro y oscuro",
+        "language": "Idioma"
+      },
+      "world": {
+        "eyebrow": "Una identidad para todo su mundo",
+        "title": {
+          "d": "El mundo de tu compañero empieza aquí",
+          "n": "El mundo de {name} empieza aquí"
+        },
+        "lede": "Elige tu pregunta y descubre dónde te ayuda opetlife. Todo lo que registras se queda en su ficha.",
+        "defaultName": "tu compañero",
+        "nameLabel": "¿Cómo se llama tu compañero?",
+        "namePlaceholder": "Por ejemplo, Cookie",
+        "speciesLabel": "Tipo de compañero",
+        "species": {
+          "dog": "Perro",
+          "cat": "Gato",
+          "bird": "Ave",
+          "rabbit": "Conejo",
+          "other": "Otro"
+        },
+        "coreSub": "Una ficha para todo",
+        "worldsLabel": "Los cinco mundos de opetlife",
+        "worlds": {
+          "health": {
+            "q": "¿Está bien?",
+            "name": "Salud y cuidado",
+            "ck": "Su salud primero",
+            "desc": "La ficha de salud, los recordatorios de cuidado y las citas veterinarias están juntos. Todo lo que registras queda en un solo lugar, listo para compartirlo con tu veterinario cuando haga falta.",
+            "cta": {
+              "d": "Crear la ficha de tu compañero",
+              "n": "Crear la ficha de {name}"
+            },
+            "feats": [
+              {
+                "n": "Ficha de salud",
+                "d": "Vacunas, medicamentos, alergias y visitas"
+              },
+              {
+                "n": "Calendario de cuidado",
+                "d": "Recordatorios de rutinas diarias y mensuales"
+              },
+              {
+                "n": "Buscar veterinario",
+                "d": "Ver proveedores y reservar cita"
+              },
+              {
+                "n": "Compartir la ficha",
+                "d": "Un enlace temporal y revocable para tu veterinario"
+              }
+            ]
+          },
+          "daily": {
+            "q": "¿Qué necesita hoy?",
+            "name": "Compras y servicios",
+            "ck": "¿Vamos de compras?",
+            "desc": "Comida y accesorios de la tienda, y servicios como peluquería, alojamiento y taxi de proveedores, reservados y seguidos en la misma app.",
+            "cta": {
+              "d": "Ir a la tienda",
+              "n": "Ir a la tienda"
+            },
+            "feats": [
+              {
+                "n": "Tienda de mascotas",
+                "d": "Comida, accesorios y productos de cuidado"
+              },
+              {
+                "n": "Envío periódico",
+                "d": "Pedidos repetidos cada cuanto quieras"
+              },
+              {
+                "n": "Peluquería",
+                "d": "Reserva con proveedores"
+              },
+              {
+                "n": "Alojamiento y taxi",
+                "d": "Para cuando no estás o tenéis que moveros"
+              }
+            ]
+          },
+          "travel": {
+            "q": "¿Adónde vamos juntos?",
+            "name": "Viajes y alojamiento",
+            "ck": "¿Nos vamos de viaje?",
+            "desc": "Busca y compara alojamientos que admiten mascotas y guarda juntos los planes de viaje y los documentos de tu compañero.",
+            "cta": {
+              "d": "Planear un viaje",
+              "n": "Planear un viaje"
+            },
+            "feats": [
+              {
+                "n": "Buscar alojamiento",
+                "d": "Lugares que admiten mascotas"
+              },
+              {
+                "n": "Comparar alojamientos",
+                "d": "Normas y servicios lado a lado"
+              },
+              {
+                "n": "Planes de viaje",
+                "d": "Viajes y reservas en un solo lugar"
+              },
+              {
+                "n": "Pasaporte de viaje",
+                "d": "Documentos de viaje en su ficha"
+              }
+            ]
+          },
+          "safe": {
+            "q": "¿Y si pasa algo?",
+            "name": "Tranquilidad",
+            "ck": "Sin preocupaciones",
+            "desc": "Compara seguros y, si tu compañero se pierde, crea un aviso desde su ficha para que la publicación y el seguimiento estén en un solo lugar.",
+            "cta": {
+              "d": "Comparar seguros",
+              "n": "Comparar seguros"
+            },
+            "feats": [
+              {
+                "n": "Seguro para mascotas",
+                "d": "Ver y comparar planes"
+              },
+              {
+                "n": "Aviso de pérdida",
+                "d": "Publicación y seguimiento desde su ficha"
+              },
+              {
+                "n": "Tarjeta de identidad",
+                "d": "Una tarjeta para compartir y volver a casa antes"
+              },
+              {
+                "n": "Ayuda",
+                "d": "Abrir una solicitud y seguir la respuesta"
+              }
+            ]
+          },
+          "together": {
+            "q": "¿Y los demás?",
+            "name": "Comunidad y ayuda",
+            "ck": "Nuevos amigos",
+            "desc": "Comparte experiencias con otros dueños, ayuda a animales que lo necesitan y guarda los recuerdos compartidos.",
+            "cta": {
+              "d": "Unirse a la comunidad",
+              "n": "Unirse a la comunidad"
+            },
+            "feats": [
+              {
+                "n": "Comunidad",
+                "d": "Preguntas, experiencias y conversaciones"
+              },
+              {
+                "n": "Ayuda animal",
+                "d": "Necesidades registradas de los centros"
+              },
+              {
+                "n": "Recuerdos",
+                "d": "Un álbum de los momentos compartidos"
+              },
+              {
+                "n": "Resumen del año",
+                "d": "Un año de vida juntos"
+              }
+            ]
+          }
+        }
+      },
+      "reel": {
+        "eyebrow": "Sin palabras, con música y subtítulos",
+        "title": "opetlife en 30 segundos",
+        "lede": "Todos los servicios en un reel corto. Activa el sonido y empieza por cualquier capítulo.",
+        "label": "Reel de servicios",
+        "play": "Reproducir con música",
+        "replay": "Ver de nuevo",
+        "pause": "Pausa",
+        "resume": "Reproducir",
+        "mute": "Silenciar",
+        "unmute": "Activar sonido",
+        "music": "Música instrumental",
+        "chapters": "Capítulos",
+        "end": "Fin"
+      },
+      "path": {
+        "sample": "Ejemplo",
+        "name": "Nombre",
+        "type": "Tipo",
+        "photo": "Foto",
+        "added": "Añadida",
+        "chips": [
+          "Veterinario",
+          "Peluquería",
+          "Alojamiento",
+          "Taxi"
+        ],
+        "timeline": [
+          "Solicitud enviada",
+          "El proveedor confirma",
+          "Día de la cita"
+        ]
+      },
+      "share": {
+        "title": {
+          "d": "Compartir la ficha de salud de tu compañero",
+          "n": "Compartir la ficha de salud de {name}"
+        },
+        "sectionsLabel": "¿Qué partes pueden ver?",
+        "durationLabel": "¿Cuánto tiempo sigue abierto?",
+        "previewLabel": "Lo que ve tu veterinario",
+        "sections": {
+          "vaccination": "Vacunas",
+          "allergies": "Alergias",
+          "medications": "Medicamentos",
+          "conditions": "Enfermedades"
+        },
+        "durations": [
+          "24 horas",
+          "3 días",
+          "7 días"
+        ],
+        "recorded3": "3 registros",
+        "recorded1": "1 registro",
+        "unknown": "Desconocido; aún sin registrar",
+        "fromClinic": "De la clínica",
+        "fromYou": "Tuyo",
+        "notRecorded": "Sin registrar",
+        "hidden": "Oculto",
+        "foot": "El enlace sigue abierto {d} · revocable en cualquier momento · ves cuántas veces se abrió"
+      },
+      "lost": {
+        "title": "Si alguna vez se pierde, cada minuto cuenta",
+        "body": {
+          "d": "Crea un aviso de pérdida desde la ficha de tu compañero para que la publicación y el seguimiento estén en un solo lugar.",
+          "n": "Crea un aviso de pérdida desde la ficha de {name} para que la publicación y el seguimiento estén en un solo lugar."
+        },
+        "cta": "Ver avisos de mascotas perdidas"
+      },
+      "memorial": {
+        "lightCandle": "Encender una vela",
+        "candleLit": "Vela encendida",
+        "lightFor": "Encender una vela por {name}",
+        "putOut": "Apagar la vela de {name}",
+        "newArch": "Un lugar para tu compañero",
+        "newArchCaption": "Tu recuerdo",
+        "ctaBody": "Para un compañero que ya no está a tu lado, crea un lugar donde quedarse; sus fotos y recuerdos siguen en su ficha.",
+        "cta": "Crear un recuerdo"
+      },
+      "kindness": {
+        "hint": "Pasa el puntero por la imagen",
+        "alt": "Ilustración: una mano lleva un cuenco de comida a un perro y un gato sin hogar junto a una caseta de madera"
+      },
+      "partners": {
+        "roles": [
+          {
+            "title": "Clínicas y veterinarios",
+            "body": "Citas, pacientes y las fichas que los dueños comparten contigo."
+          },
+          {
+            "title": "Proveedores de servicios",
+            "body": "Servicios, agenda, reservas y opiniones, de peluquería a alojamiento y viajes."
+          },
+          {
+            "title": "Vendedores",
+            "body": "Productos, inventario, pedidos y liquidaciones en un solo panel."
+          },
+          {
+            "title": "Centros de ayuda",
+            "body": "Publica las necesidades del centro, sigue las donaciones y gestiona tu equipo."
+          }
+        ]
+      },
+      "final": {
+        "title": {
+          "d": "El mundo de tu compañero empieza a tu lado",
+          "n": "El mundo de {name} empieza a tu lado"
+        },
+        "body": {
+          "d": "El primer paso: una ficha para tu compañero.",
+          "n": "El primer paso: una ficha para {name}."
+        }
+      },
+      "hook": {
+        "text": {
+          "d": "Crear la ficha de tu compañero",
+          "n": "Crear la ficha de {name}"
+        },
+        "start": "Empezar",
+        "close": "Cerrar"
+      },
+      "cookie": {
+        "show": "Mostrar a Cookie",
+        "hide": "Ocultar a Cookie",
+        "hello": "Hola, {name}",
+        "play": "¿Jugamos?",
+        "input": "¿Cómo se llama?",
+        "go": "¡Vamos!"
+      },
+      "scenes": {
+        "s": [
+          "Un mundo para perros, gatos, aves y todos los compañeros.",
+          "La ficha de salud de tu compañero, siempre a mano.",
+          "Recordatorios de cuidado, justo a tiempo.",
+          "Encuentra un veterinario cercano y reserva cita.",
+          "Comida y accesorios, con envío periódico.",
+          "Peluquería, baño y alojamiento, reservados en línea.",
+          "Alojamientos que admiten mascotas para tu próximo viaje.",
+          "Seguro y avisos de pérdida, para los días difíciles.",
+          "Una comunidad amable y ayuda para animales que lo necesitan.",
+          "Su mundo empieza a tu lado."
+        ],
+        "k": [
+          "opetlife",
+          "Ficha de salud",
+          "Calendario",
+          "Veterinarios",
+          "Tienda",
+          "Peluquería y alojamiento",
+          "Viajes",
+          "Tranquilidad",
+          "Comunidad",
+          ""
+        ],
+        "tagline": "Un mundo para las mascotas",
+        "healthTitle": "Ficha de salud",
+        "healthSub": "Una ficha para todo",
+        "calendarTitle": "Calendario de cuidado",
+        "reminderMed": "Medicina de la mañana, 8:00",
+        "reminderVaccine": "Recordatorio de vacuna anual",
+        "nearestClinic": "Clínica más cercana",
+        "booked": "Cita reservada",
+        "repeat": "Envío periódico",
+        "shop": "Tienda",
+        "grooming": "Peluquería y baño",
+        "boarding": "Alojamiento",
+        "petFriendly": "Admite mascotas",
+        "insurance": "Seguro para mascotas",
+        "lost": "Aviso de pérdida",
+        "support": "Ayuda a animales",
+        "start": "Empieza hoy"
+      }
+    },
+    "reels": {
+      "care": {
+        "eyebrow": "La ficha de tu compañero de un vistazo",
+        "title": "Todos sus cuidados, en un solo lugar",
+        "lede": "Salud, recordatorios y tareas diarias juntos, y compartidos con tu familia.",
+        "cta": "Abrir la ficha",
+        "a": {
+          "k": "Hoy",
+          "s": "Comida, paseo y medicina; cada tarea se marca cuando está hecha."
+        },
+        "b": {
+          "k": "En familia",
+          "s": "Todos en casa ven la misma ficha y se reparten las tareas."
+        },
+        "labels": {
+          "today": "Hoy",
+          "feed": "Comida",
+          "walk": "Paseo",
+          "meds": "Medicina",
+          "family": "Familia",
+          "shared": "Ficha compartida",
+          "done": "Hecho"
+        }
+      },
+      "services": {
+        "eyebrow": "Servicios y veterinarios de un vistazo",
+        "title": "De la búsqueda a la cita en 20 segundos",
+        "lede": "Así funciona buscar un proveedor y reservar una cita en opetlife.",
+        "cta": "Reservar cita",
+        "a": {
+          "k": "Búsqueda",
+          "s": "Elige servicio y zona y mira los proveedores."
+        },
+        "b": {
+          "k": "Reserva",
+          "s": "Elige día y hora y tu cita queda registrada."
+        },
+        "labels": {
+          "search": "Peluquería, veterinario, alojamiento…",
+          "vet": "Veterinario",
+          "grooming": "Peluquería",
+          "boarding": "Alojamiento",
+          "verified": "Verificado",
+          "provider": "Proveedor",
+          "month": "Calendario de citas",
+          "confirm": "Reservar"
+        }
+      },
+      "shop": {
+        "eyebrow": "La tienda de un vistazo",
+        "title": "Compras del día a día, sin complicaciones",
+        "lede": "De elegir productos a la entrega y los pedidos periódicos.",
+        "cta": "Ver productos",
+        "a": {
+          "k": "Productos",
+          "s": "Comida, accesorios y juguetes lado a lado."
+        },
+        "b": {
+          "k": "Entrega",
+          "s": "Sigue tu pedido hasta la puerta."
+        },
+        "labels": {
+          "food": "Comida",
+          "bowl": "Cuenco",
+          "toy": "Juguete",
+          "care": "Cuidado",
+          "cart": "Carrito",
+          "onTheWay": "En camino",
+          "delivered": "Entregado"
+        }
+      },
+      "travel": {
+        "eyebrow": "Viajes de un vistazo",
+        "title": "Tu compañero de viaje favorito",
+        "lede": "Encuentra y compara alojamientos que admiten mascotas y lleva sus documentos contigo.",
+        "cta": "Buscar alojamiento",
+        "a": {
+          "k": "Comparar",
+          "s": "Compara alojamientos lado a lado."
+        },
+        "b": {
+          "k": "Pasaporte",
+          "s": "Documentos de viaje, guardados en su ficha."
+        },
+        "labels": {
+          "stayA": "Casa de montaña",
+          "stayB": "Casa de playa",
+          "dogs": "Admite perros",
+          "cats": "Admite gatos",
+          "yard": "Jardín",
+          "passport": "Pasaporte de viaje",
+          "vaccine": "Vacuna",
+          "microchip": "Microchip"
+        }
+      },
+      "safe": {
+        "eyebrow": "Tranquilidad de un vistazo",
+        "title": "Preparados para los días difíciles",
+        "lede": "Compara seguros y, si tu compañero se pierde, publica un aviso enseguida.",
+        "cta": "Comparar seguros",
+        "a": {
+          "k": "Planes",
+          "s": "Mira los planes de seguro lado a lado."
+        },
+        "b": {
+          "k": "Aviso",
+          "s": "Crea un aviso y compártelo con todos."
+        },
+        "labels": {
+          "basic": "Básico",
+          "plus": "Completo",
+          "accident": "Accidentes",
+          "lost": "Perdido",
+          "share": "Compartir",
+          "seen": "¿Lo has visto?"
+        }
+      },
+      "together": {
+        "eyebrow": "Comunidad y ayuda de un vistazo",
+        "title": "La amabilidad va más allá de casa",
+        "lede": "Habla con otros dueños, ayuda a los centros y guarda tus recuerdos.",
+        "cta": "Unirse a la comunidad",
+        "a": {
+          "k": "Necesidades",
+          "s": "Mira las necesidades de los centros y ayuda."
+        },
+        "b": {
+          "k": "Recuerdos",
+          "s": "Momentos compartidos, en un álbum."
+        },
+        "labels": {
+          "food": "Comida",
+          "medicine": "Medicinas",
+          "shelter": "Refugio",
+          "album": "Recuerdos"
+        }
+      },
+      "learn": {
+        "eyebrow": "Guías y ayuda de un vistazo",
+        "title": "Cada pregunta, una respuesta clara",
+        "lede": "Artículos revisados, preguntas frecuentes y ayuda en un solo lugar.",
+        "cta": "Ver guías",
+        "a": {
+          "k": "Artículos",
+          "s": "Lee y guarda guías de cuidado."
+        },
+        "b": {
+          "k": "Ayuda",
+          "s": "Envía tu pregunta y sigue la respuesta."
+        },
+        "labels": {
+          "guide": "Guía",
+          "journal": "Revista",
+          "faq": "Preguntas frecuentes",
+          "ticket": "Solicitud de ayuda",
+          "answered": "Respondida"
+        }
+      }
+    },
+    "park": {
+      "title": "Un mundo entero para ti y tu mascota",
+      "description": "Todo lo que necesita tu mascota, en una sola aplicación",
+      "subline": "Una vida más sana y feliz junto a tu pequeño compañero",
+      "explore": "Explorar servicios",
+      "imageAlt": "Ilustración conceptual generada con IA de un parque en Teherán, con pabellones de servicios y las torres Azadi y Milad.",
+      "destinationsLabel": "Explorar los servicios del parque",
+      "introTitle": "A tu lado en cada momento",
+      "introBody": "De la salud y el cuidado a los viajes y el alojamiento: todo para vivir mejor con tu mascota.",
+      "brandTagline": "Un mundo para las mascotas",
+      "partnerSignIn": "Acceso para profesionales",
+      "partnerJoin": "Hazte colaborador",
+      "memberJoin": "Crear cuenta",
+      "signIn": "Iniciar sesión",
+      "dashboard": "Mi panel",
+      "skip": "Ir al contenido principal",
+      "navLabel": "Navegación principal",
+      "menuLabel": "Abrir menú",
+      "closeMenuLabel": "Cerrar menú",
+      "home": "Inicio",
+      "about": "Quiénes somos",
+      "partners": "Profesionales",
+      "photoCredits": "Créditos de imagen",
+      "services": {
+        "shop": {
+          "title": "Tienda para mascotas",
+          "hint": "Lo esencial cada día"
+        },
+        "vet": {
+          "title": "Veterinaria",
+          "hint": "La salud es lo primero"
+        },
+        "grooming": {
+          "title": "Peluquería",
+          "hint": "Cuidado y bienestar"
+        },
+        "boarding": {
+          "title": "Alojamiento",
+          "hint": "Bien cuidado mientras no estás"
+        },
+        "travel": {
+          "title": "Viajes",
+          "hint": "Aventuras juntos"
+        },
+        "taxi": {
+          "title": "Taxi para mascotas",
+          "hint": "Traslados seguros"
+        },
+        "support": {
+          "title": "Protección animal",
+          "hint": "Ayuda a quien lo necesita"
+        },
+        "insurance": {
+          "title": "Seguro",
+          "hint": "Más tranquilidad"
+        }
+      },
+      "creditsTitle": "El parque de Tara y Cookie",
+      "shopCredit": "Imagen principal de la tienda: concepto fotorrealista generado con IA por OpenAI, recortado y recodificado. No es una tienda ni un producto real.",
+      "backdropCredit": "El fondo cálido y desenfocado del área de miembros también es una imagen generada con IA por OpenAI y recodificada para la web; no representa un lugar real.",
+      "creditsBody": "Este parque es una ilustración conceptual generada con IA a partir del diseño aprobado y las imágenes de referencia de Tara, Pedram y Cookie. No es una fotografía de un lugar real ni demuestra que existan estos pabellones. El propietario del proyecto facilitó las imágenes de referencia para este diseño.",
+      "processing": "Recortada y recodificada",
+      "licence": "Licencia y condiciones de uso",
+      "musicTitle": "Música",
+      "musicUsage": "La música instrumental de los reels del sitio; un fragmento de 48 segundos, con fundido de entrada y salida y recodificado."
+    },
+    "member": {
+      "nav": "Mis secciones",
+      "home": "Panel",
+      "profile": "Perfil de la mascota",
+      "health": "Salud",
+      "care": "Cuidados",
+      "memories": "Recuerdos",
+      "shop": "Tienda",
+      "skip": "Saltar al contenido"
+    }
+  },
   "blog": {
     "index": {
       "title": "Revista",
@@ -3491,6 +4074,20 @@
     "attachFile": "Adjuntar archivo"
   },
   "commerce": {
+    "categoryNames": {
+      "food": "Comida",
+      "treats": "Premios",
+      "grooming": "Higiene y cuidado",
+      "accessories": "Accesorios",
+      "species-dog": "Perro",
+      "species-cat": "Gato",
+      "species-bird": "Aves",
+      "species-rabbit": "Conejo",
+      "species-rodent": "Roedores",
+      "species-fish": "Peces",
+      "species-reptile": "Reptiles",
+      "species-other": "Otros animales"
+    },
     "repeat": {
       "title": "Entregas periódicas",
       "loading": "Cargando",

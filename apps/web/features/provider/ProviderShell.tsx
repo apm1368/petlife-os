@@ -2,6 +2,8 @@
 import { LocalPreviewGate } from "@/features/local-preview/LocalPreviewGate";
 import { VerificationRequiredNotice } from "@/features/partner-verification/VerificationRequiredNotice";
 import { Brand } from "@/features/brand/Brand";
+import type { RouteLocale } from "@/lib/i18n/config";
+import "@/features/landing/opl/opl-landing.css";
 import "@/features/navigation/operator-shell.css";
 
 import { useEffect, useState } from "react";
@@ -136,10 +138,10 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
   });
 
   return (
-    <div className="workspace-shell operator-shell min-h-screen bg-surface-base">
+    <div className="opl-page workspace-shell operator-shell min-h-screen">
       <header className="operator-shell__header">
         <div className="operator-shell__header-inner">
-          <Link href={`/${locale}/home`} className="operator-shell__brand" aria-label="opetlife"><Brand compact /></Link>
+          <Link href={`/${locale}/home`} className="operator-shell__brand" aria-label={locale === "fa" ? "اپت لایف" : "opetlife"}><Brand compact locale={locale as RouteLocale} /></Link>
           <div className="flex flex-col">
             <span className="text-section-title text-text-primary">{active.organizationName}</span>
             <span className="text-metadata text-text-secondary">
@@ -157,14 +159,14 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
         {notVerified ? (
-          <div className="mt-2">
+          <div className="operator-shell__notice">
             <StatusLabel tone="attention">{t("notVerifiedBanner")}</StatusLabel>
             <Link className="ms-3 underline" href={`/${locale}/provider/verification`}>{t("nav.verification")}</Link>
           </div>
         ) : null}
       </header>
 
-      <nav className="operator-shell__nav" aria-label={t("nav.home")}>
+      <div className="operator-shell__nav-band"><nav className="operator-shell__nav" aria-label={t("nav.home")}>
         {NAV_ITEMS.map((item) => {
           const href = `/${locale}/provider${item.href}`;
           const isActive = item.href === "" ? pathname === href : pathname.startsWith(href);
@@ -173,18 +175,15 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
               key={item.href}
               href={href}
               aria-current={isActive ? "page" : undefined}
-              className={
-                "shrink-0 rounded-full px-3 py-1.5 text-metadata " +
-                (isActive ? "bg-surface-subtle text-text-primary" : "text-text-secondary")
-              }
+              className="shrink-0"
             >
               {t(item.labelKey)}
             </Link>
           );
         })}
-      </nav>
+      </nav></div>
 
-      <main className={pathname === `/${locale}/provider` ? "mx-auto max-w-2xl px-4 py-6" : "workspace-main w-full min-w-0 px-4 py-6"}>{verificationRequired ? <VerificationRequiredNotice /> : children}</main>
+      <main className={pathname === `/${locale}/provider` ? "mx-auto max-w-2xl px-4 py-6" : "workspace-main operator-shell__main w-full min-w-0 px-4 py-6"}>{verificationRequired ? <VerificationRequiredNotice /> : children}</main>
     </div>
   );
 }
