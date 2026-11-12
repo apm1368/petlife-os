@@ -26,6 +26,7 @@ const NOT_A_PAGE: readonly RegExp[] = [
   /^\/providers$/,
   /^\/s$/,
   /^\/services\/[^/]+\/[^/]+$/,
+  /^\/shop\/sellers$/,
   /^\/status\/incidents$/,
   /^\/travel\/(book|bookings|stays)$/,
   /^\/vet$/,
