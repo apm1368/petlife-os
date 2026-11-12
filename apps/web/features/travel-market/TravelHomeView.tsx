@@ -10,6 +10,7 @@ import { useSessionStore } from "@/stores/session-store";
 import { TravelSearchForm } from "./TravelSearchForm";
 import { DiscoveryPage } from "@/features/discovery/DiscoveryPage";
 import type { RouteLocale } from "@/lib/i18n/config";
+import { placeName } from "@/lib/i18n/iran-places";
 
 /**
  * TRAVEL DISCOVERY PATTERN — home. Search first; destinations are real listing counts from the
@@ -51,8 +52,8 @@ export function TravelHomeView() {
             {destinations.slice(0, 12).map((d) => (
               <li key={`${d.country}-${d.city}`}>
                 <Link href={`/${lang}/travel/search?city=${encodeURIComponent(d.city)}`} className="dest-grid__item">
-                  <span className="font-bold text-text-primary">{d.city}</span>
-                  <span className="text-metadata text-text-secondary">{d.province ? `${d.province} · ` : ""}{t("stayCount", { count: d.listingCount })}</span>
+                  <span className="font-bold text-text-primary">{placeName(d.city, lang)}</span>
+                  <span className="text-metadata text-text-secondary">{d.province ? `${placeName(d.province, lang)} · ` : ""}{t("stayCount", { count: d.listingCount })}</span>
                 </Link>
               </li>
             ))}

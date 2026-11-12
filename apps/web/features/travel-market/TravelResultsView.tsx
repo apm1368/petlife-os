@@ -15,6 +15,7 @@ import { TravelResultCard } from "./TravelResultCard";
 import { searchStateFromParams, TravelSearchForm } from "./TravelSearchForm";
 import { formatStayRange } from "@/features/shared/date-picker/DateRangePicker";
 import { readChosenPetIds, writeChosenPetIds } from "./use-my-pets";
+import { placeName } from "@/lib/i18n/iran-places";
 
 const SORTS: TravelSort[] = ["RECOMMENDED", "BEST_PET_MATCH", "PRICE_ASC", "PRICE_DESC", "RATING"];
 
@@ -135,7 +136,7 @@ export function TravelResultsView() {
     <div className="flex w-full flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="text-page-title text-text-primary">{search.city ? t("cityHeading", { city: search.city }) : t("defaultHeading")}</h1>
+          <h1 className="text-page-title text-text-primary">{search.city ? t("cityHeading", { city: placeName(search.city, lang) }) : t("defaultHeading")}</h1>
           <p className="text-metadata text-text-secondary">{summary}</p>
         </div>
         <Button variant="secondary" onClick={() => setEditOpen(true)}>{t("editSearch")}</Button>

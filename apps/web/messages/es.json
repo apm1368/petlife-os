@@ -7395,6 +7395,7 @@
       "annualLimit": "Límite anual: {amount}",
       "premiumRange": "Prima: {min}–{max}",
       "exclusionsEmpty": "Este producto no tiene exclusiones registradas.",
+      "insurerLanguageNote": "La aseguradora redactó este texto en persa; lo mostramos sin cambios.",
       "termsSource": "Fuente: {source}",
       "visitInsurer": "Visitar el sitio web de la aseguradora",
       "insurerWebsiteUnavailable": "La aseguradora no ha publicado un enlace a su sitio web.",

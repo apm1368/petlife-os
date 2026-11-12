@@ -7405,6 +7405,7 @@
       "annualLimit": "Jahreshöchstleistung: {amount}",
       "premiumRange": "Versicherungsbeitrag: {min}–{max}",
       "exclusionsEmpty": "Für dieses Produkt sind keine Ausschlüsse angegeben.",
+      "insurerLanguageNote": "Diesen Text hat der Versicherer auf Persisch verfasst; wir zeigen ihn unverändert.",
       "termsSource": "Quelle: {source}",
       "visitInsurer": "Zur Website des Versicherers",
       "insurerWebsiteUnavailable": "Der Versicherer hat keinen Website-Link veröffentlicht.",

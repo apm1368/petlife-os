@@ -6444,6 +6444,7 @@
     "detail": {
       "exclusionsTitle": "Exclusions — read before contacting the insurer",
       "exclusionsEmpty": "No exclusions listed for this product.",
+      "insurerLanguageNote": "The insurer wrote this text in Persian; we show it unchanged.",
       "coverageTitle": "Coverage",
       "waitingPeriod": "Waiting period: {days} days",
       "deductible": "Deductible: {amount}",

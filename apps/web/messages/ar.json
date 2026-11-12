@@ -6513,6 +6513,7 @@
     "detail": {
       "exclusionsTitle": "الاستثناءات — اقرأها قبل التواصل مع شركة التأمين",
       "exclusionsEmpty": "لا توجد استثناءات مدرجة لهذا المنتج.",
+      "insurerLanguageNote": "كتبت شركة التأمين هذا النص بالفارسية، ونعرضه كما هو.",
       "coverageTitle": "التغطية",
       "waitingPeriod": "فترة الانتظار: {days} يوم",
       "deductible": "مبلغ التحمّل: {amount}",

@@ -722,3 +722,34 @@ export function renderNotificationTemplate(key: string, locale: Locale, params: 
     smsBody: variant.smsBody ? interpolate(variant.smsBody, params) : null,
   };
 }
+
+/** Where the parameters a notification was rendered with are kept, so the inbox can show it again in another language. */
+export const TEMPLATE_PARAMS_METADATA_KEY = "templateParams";
+
+/**
+ * A notification is rendered once, in the recipient's account language, when it is created. Someone reading
+ * the inbox in another UI language (a Persian account browsing /en) gets the same notification re-rendered
+ * from the code template, if it can be rendered fully. That is possible when the template has no parameters
+ * or when the parameters were stored with it. Otherwise the stored text is returned unchanged.
+ */
+export function notificationCopyFor(
+  row: { type: string; locale: string; title: string; body: string; metadata?: unknown },
+  viewerLocale: string | undefined,
+): { title: string; body: string } {
+  const stored = { title: row.title, body: row.body };
+  if (!viewerLocale) return stored;
+  const target: Locale = viewerLocale === "fa" ? "fa" : "en";
+  const storedAs: Locale = row.locale === "fa" ? "fa" : "en";
+  const entry = TEMPLATES[row.type];
+  if (target === storedAs || !entry) return stored;
+  const variant = entry[target];
+  if (!variant) return stored;
+  const raw = row.metadata && typeof row.metadata === "object" ? (row.metadata as Record<string, unknown>)[TEMPLATE_PARAMS_METADATA_KEY] : undefined;
+  const params: TemplateParams = {};
+  if (raw && typeof raw === "object") {
+    for (const [k, v] of Object.entries(raw as Record<string, unknown>)) if (typeof v === "string" || typeof v === "number") params[k] = v;
+  }
+  const needed = [...`${variant.title} ${variant.body}`.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]!);
+  if (needed.some((k) => !(k in params))) return stored;
+  return { title: interpolate(variant.title, params), body: interpolate(variant.body, params) };
+}

@@ -6368,6 +6368,7 @@
     "detail": {
       "exclusionsTitle": "استثناها — پیش از تماس با بیمه‌گر بخوانید",
       "exclusionsEmpty": "استثنایی برای این محصول ثبت نشده است.",
+      "insurerLanguageNote": "این متن را بیمه‌گر به فارسی نوشته است.",
       "coverageTitle": "پوشش",
       "waitingPeriod": "دوره انتظار: {days} روز",
       "deductible": "فرانشیز: {amount}",

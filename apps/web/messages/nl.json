@@ -6513,6 +6513,7 @@
     "detail": {
       "exclusionsTitle": "Uitsluitingen — lees dit voordat je contact opneemt met de verzekeraar",
       "exclusionsEmpty": "Geen uitsluitingen vermeld voor dit product.",
+      "insurerLanguageNote": "De verzekeraar schreef deze tekst in het Perzisch; we tonen hem ongewijzigd.",
       "coverageTitle": "Dekking",
       "waitingPeriod": "Wachttijd: {days} dagen",
       "deductible": "Eigen risico: {amount}",

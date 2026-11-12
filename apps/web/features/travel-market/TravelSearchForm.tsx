@@ -9,6 +9,8 @@ import { DateRangeField, type DateRangeValue } from "@/features/shared/date-pick
 import { addDays, isIsoDay, todayIso } from "@/lib/date/jalali";
 import { travelMarketService } from "@/services/travel-marketplace.service";
 import { petWeightKg, readChosenPetIds, useMyPets, writeChosenPetIds } from "./use-my-pets";
+import { placeName } from "@/lib/i18n/iran-places";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 export interface TravelSearchState {
   city: string;
@@ -114,7 +116,7 @@ export function TravelSearchForm({ initial, compact = false, onSubmitted }: { in
         />
         <datalist id={listId}>
           {suggestions.map((d) => (
-            <option key={`${d.country}-${d.city}`} value={d.city}>{`${d.province ? `${d.province} · ` : ""}${t("stayCount", { count: d.listingCount })}`}</option>
+            <option key={`${d.country}-${d.city}`} value={d.city}>{`${d.province ? `${placeName(d.province, lang as RouteLocale)} · ` : ""}${t("stayCount", { count: d.listingCount })}`}</option>
           ))}
         </datalist>
       </label>

@@ -52,14 +52,14 @@ export function NotificationCenterView() {
   const load = useCallback(async () => {
     setError(false);
     try {
-      const result = await notificationsService.list(1, PAGE_SIZE);
+      const result = await notificationsService.list(1, PAGE_SIZE, locale);
       setItems(result.items);
       setTotal(result.total);
       setPage(1);
     } catch {
       setError(true);
     }
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     void load();
@@ -68,7 +68,7 @@ export function NotificationCenterView() {
   async function loadMore() {
     setLoadingMore(true);
     try {
-      const result = await notificationsService.list(page + 1, PAGE_SIZE);
+      const result = await notificationsService.list(page + 1, PAGE_SIZE, locale);
       setItems((prev) => [...(prev ?? []), ...result.items]);
       setTotal(result.total);
       setPage((p) => p + 1);

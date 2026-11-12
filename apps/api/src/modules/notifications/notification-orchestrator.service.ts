@@ -16,7 +16,7 @@ import { getCountryConfig } from "../../common/country/country-config";
 import { maskPhone } from "../../common/phone/phone-normalizer";
 import { NotificationPreferenceService } from "./notification-preference.service";
 import { NotificationDeliveryService } from "./notification-delivery.service";
-import { renderNotificationTemplate } from "./notification-templates";
+import { renderNotificationTemplate, TEMPLATE_PARAMS_METADATA_KEY } from "./notification-templates";
 import { isWithinQuietHours, nextQuietHoursEndUtc } from "./notification-quiet-hours.util";
 import type { AppEnv } from "../../config/env";
 import { WebPushService } from "./push/web-push.service";
@@ -69,6 +69,13 @@ export interface NotifyInput {
  * an already-existing notification — this method enforces that by simply
  * returning early.
  */
+/** The caller's metadata plus the template parameters, so the inbox can re-render the copy in the reader's language. */
+function storedMetadata(metadata: Record<string, unknown> | undefined, templateParams: Record<string, string | number> | undefined): Prisma.InputJsonValue | undefined {
+  const params = templateParams && Object.keys(templateParams).length > 0 ? { [TEMPLATE_PARAMS_METADATA_KEY]: templateParams } : {};
+  if (!metadata && !Object.keys(params).length) return undefined;
+  return { ...(metadata ?? {}), ...params } as Prisma.InputJsonValue;
+}
+
 @Injectable()
 export class NotificationOrchestratorService {
   constructor(
@@ -119,7 +126,7 @@ export class NotificationOrchestratorService {
           entityId: input.entityId ?? null,
           actorType: input.actorType ?? null,
           actorId: input.actorId ?? null,
-          metadata: input.metadata ? (input.metadata as Prisma.InputJsonValue) : undefined,
+          metadata: storedMetadata(input.metadata, input.templateParams),
         },
       });
     } catch (error) {
