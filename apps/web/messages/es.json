@@ -8486,7 +8486,9 @@
         "APPROVED": "Tu solicitud fue aprobada.",
         "REJECTED": "Tu solicitud no fue aceptada.",
         "WITHDRAWN": "Solicitud retirada."
-      }
+      },
+      "refresh": "Hecho: actualizar mi solicitud",
+      "limit": "Puedes tener como máximo 5 solicitudes abiertas; espera la revisión."
     }
   },
   "healthDepth": {
@@ -9374,7 +9376,7 @@
     "reject": "Rechazar",
     "reason": "Motivo (auditoría)",
     "decided": "Guardado.",
-    "decideFailed": "No se guardó: la aprobación requiere un negocio verificado.",
+    "decideFailed": "No se guardó: el negocio de la solicitud debe estar verificado y la ficha no puede estar suspendida.",
     "form": {
       "title": "Añadir o editar ciudad",
       "hint": "El recuadro de la ciudad (máx. 1,5° por lado). El nombre es el que muestra el filtro de ciudad.",
@@ -9391,6 +9393,22 @@
       "deactivate": "Pausar",
       "yes": "Sí",
       "no": "No"
-    }
+    },
+    "claimsHint": "Aprueba solo para el negocio indicado en la solicitud y ya verificado. Compara sus datos KYC con las etiquetas de OpenStreetMap de la ficha.",
+    "claimTabs": {
+      "PENDING": "Pendientes",
+      "APPROVED": "Aprobadas"
+    },
+    "approvedEmpty": "Aún no se ha entregado ninguna ficha.",
+    "compare": {
+      "business": "Negocio (KYC)",
+      "listing": "Esta ficha en OpenStreetMap",
+      "contact": "Contacto",
+      "phone": "Teléfono",
+      "address": "Dirección",
+      "website": "Sitio web"
+    },
+    "release": "Retirar a este negocio",
+    "releaseFailed": "No se retiró: puede que la ficha ya no sea de este negocio."
   }
 }

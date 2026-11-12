@@ -28,7 +28,8 @@ export interface OsmPlaceCandidate {
 /** Everything the directory takes from OpenStreetMap, in one Overpass request per city bounding box. */
 export function overpassQuery(bbox: { south: number; west: number; north: number; east: number }): string {
   const b = `${bbox.south},${bbox.west},${bbox.north},${bbox.east}`;
-  return `[out:json][timeout:90];
+  // maxsize caps what Overpass will build for us (32 MiB), the same cap the reader applies.
+  return `[out:json][timeout:90][maxsize:33554432];
 (
   nwr["amenity"="veterinary"](${b});
   nwr["shop"="pet"](${b});

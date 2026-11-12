@@ -11,7 +11,7 @@ import { useAdminStore } from "@/stores/admin-store";
 import { EmptyRow, Panel, PanelTitle, TableWrap, Tag, Td, Th } from "../console-ui";
 import { copyFor } from "@/features/admin/admin-copy";
 
-const REASON: Record<string, [string, string]> = { CLOSED_PERMANENTLY: ["بسته شده", "Closed"], NOT_PET_FRIENDLY: ["دیگر حیوان نمی‌پذیرد", "No longer pet-friendly"], WRONG_LOCATION: ["مکان نادرست", "Wrong location"], WRONG_DETAILS: ["اطلاعات نادرست", "Wrong details"], OTHER: ["سایر", "Other"] };
+const REASON: Record<string, [string, string]> = { CLOSED_PERMANENTLY: ["بسته شده", "Closed"], NOT_PET_FRIENDLY: ["دیگر حیوان نمی‌پذیرد", "No longer pet-friendly"], WRONG_LOCATION: ["مکان نادرست", "Wrong location"], WRONG_DETAILS: ["اطلاعات نادرست", "Wrong details"], CLAIMED_BY_SOMEONE_ELSE: ["ادعای مالکیت نادرست (تحویل از درخواست‌های مالکیت)", "Wrong business claim (release it under Business claims)"], OTHER: ["سایر", "Other"] };
 
 /** MAP/PLACES admin: user reports queue first, then the directory with verification and listing toggles (both audited). */
 export function AdminPlacesView() {

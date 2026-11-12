@@ -8488,7 +8488,9 @@
         "APPROVED": "Ihre Anfrage wurde bestätigt.",
         "REJECTED": "Ihre Anfrage wurde nicht angenommen.",
         "WITHDRAWN": "Anfrage zurückgezogen."
-      }
+      },
+      "refresh": "Erledigt – Antrag aktualisieren",
+      "limit": "Höchstens 5 offene Anträge; bitte die Prüfung abwarten."
     }
   },
   "healthDepth": {
@@ -9376,7 +9378,7 @@
     "reject": "Ablehnen",
     "reason": "Grund (Prüfprotokoll)",
     "decided": "Gespeichert.",
-    "decideFailed": "Nicht gespeichert: Bestätigung braucht ein geprüftes Unternehmen.",
+    "decideFailed": "Nicht gespeichert: Das Unternehmen des Antrags muss geprüft sein und der Eintrag darf nicht gesperrt sein.",
     "form": {
       "title": "Stadt hinzufügen oder bearbeiten",
       "hint": "Begrenzungsrahmen der Stadt (höchstens 1,5° je Richtung). Der Stadtname ist der, den der Stadtfilter zeigt.",
@@ -9393,6 +9395,22 @@
       "deactivate": "Pausieren",
       "yes": "Ja",
       "no": "Nein"
-    }
+    },
+    "claimsHint": "Nur für das im Antrag genannte, geprüfte Unternehmen bestätigen. KYC-Angaben mit den OpenStreetMap-Tags des Eintrags vergleichen.",
+    "claimTabs": {
+      "PENDING": "Zu prüfen",
+      "APPROVED": "Bestätigt"
+    },
+    "approvedEmpty": "Noch kein Eintrag übergeben.",
+    "compare": {
+      "business": "Unternehmen (KYC)",
+      "listing": "Dieser Eintrag in OpenStreetMap",
+      "contact": "Ansprechperson",
+      "phone": "Telefon",
+      "address": "Adresse",
+      "website": "Website"
+    },
+    "release": "Von diesem Unternehmen zurücknehmen",
+    "releaseFailed": "Nicht zurückgenommen: der Eintrag gehört vielleicht nicht mehr diesem Unternehmen."
   }
 }

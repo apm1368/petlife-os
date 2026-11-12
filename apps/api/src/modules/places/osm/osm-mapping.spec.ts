@@ -20,6 +20,6 @@ describe("OpenStreetMap → directory mapping", () => {
 
   it("asks Overpass for every tag family inside the box", () => {
     const q = overpassQuery({ south: 35.5, west: 51, north: 35.9, east: 51.6 });
-    for (const part of ['"amenity"="veterinary"', '"shop"="pet"', '"shop"="pet_grooming"', '"amenity"="animal_boarding"', '"amenity"="animal_shelter"', '"leisure"="dog_park"', "35.5,51,35.9,51.6", "out center tags"]) expect(q).toContain(part);
+    for (const part of ['"amenity"="veterinary"', '"shop"="pet"', '"shop"="pet_grooming"', '"amenity"="animal_boarding"', '"amenity"="animal_shelter"', '"leisure"="dog_park"', "35.5,51,35.9,51.6", "out center tags", "[maxsize:33554432]"]) expect(q).toContain(part);
   });
 });

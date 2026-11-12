@@ -59,11 +59,34 @@ export type OsmImportRunDto = { id: string; status: "RUNNING" | "SUCCEEDED" | "F
 export type OsmSyncAreaDto = { id: string; city: string; province: string | null; south: number; west: number; north: number; east: number; active: boolean; lastRunAt: string | null; listedPlaces: number; lastRun: OsmImportRunDto | null };
 export type PlaceClaimQueueItemDto = {
   id: string;
-  place: { id: string; name: string; city: string; category: PetFriendlyPlaceCategory; source: string };
+  status: "PENDING" | "APPROVED" | "REJECTED" | "WITHDRAWN";
+  place: {
+    id: string;
+    name: string;
+    city: string;
+    category: PetFriendlyPlaceCategory;
+    source: string;
+    phone: string | null;
+    website: string | null;
+    address: string | null;
+    claimedByThisClaim: boolean;
+    /** The listing's OpenStreetMap tags staff compare with the business's KYC details. */
+    osmTags: Record<string, string>;
+  };
   claimant: string | null;
-  organization: { id: string; name: string; verificationStatus: string } | null;
+  organization: {
+    id: string;
+    name: string;
+    verificationStatus: string;
+    phone: string | null;
+    website: string | null;
+    address: { addressLine: string; city: string; phone: string | null } | null;
+    kycContact: { name: string; landline: string } | null;
+  } | null;
   message: string | null;
+  decisionReason: string | null;
   createdAt: string;
+  decidedAt: string | null;
 };
 
 /** OpenStreetMap seeding (city areas, runs) and the business-claim queue. */
@@ -71,6 +94,7 @@ export const adminPlacesOsmService = {
   areas: () => apiFetch<OsmSyncAreaDto[]>(`/admin/places/osm/areas`),
   saveArea: (input: { city: string; province?: string; south: number; west: number; north: number; east: number; active: boolean }) => apiFetch<OsmSyncAreaDto[]>(`/admin/places/osm/areas`, { method: "PUT", body: input }),
   run: (areaId: string) => apiFetch<{ started: boolean }>(`/admin/places/osm/areas/${areaId}/run`, { method: "POST" }),
-  claims: (page = 1) => apiFetch<PaginatedDto<PlaceClaimQueueItemDto>>(`/admin/places/claims?page=${page}`),
+  claims: (status: "PENDING" | "APPROVED" = "PENDING", page = 1) => apiFetch<PaginatedDto<PlaceClaimQueueItemDto>>(`/admin/places/claims?status=${status}&page=${page}`),
+  release: (placeId: string, reason: string) => apiFetch<{ placeId: string; released: boolean }>(`/admin/places/${placeId}/release-claim`, { method: "POST", body: { reason } }),
   decide: (claimId: string, approve: boolean, reason: string) => apiFetch<{ id: string; status: string }>(`/admin/places/claims/${claimId}/decision`, { method: "POST", body: { approve, reason } }),
 };

@@ -5,6 +5,7 @@ import { renderWithIntl } from "@/test/render-with-intl";
 import { placesService } from "@/services/places.service";
 import { useSessionStore } from "@/stores/session-store";
 import { PlaceDetailView } from "./PlaceDetailView";
+import { telHref } from "./PlaceOsm";
 
 vi.mock("@/services/places.service", () => ({ placesService: { get: vi.fn(), addFavorite: vi.fn(), removeFavorite: vi.fn(), claim: vi.fn(), myClaim: vi.fn() } }));
 
@@ -85,5 +86,14 @@ describe("OpenStreetMap listings on the place page", () => {
     expect(await screen.findByText(/managed by the business itself/)).toBeTruthy();
     expect(screen.queryByText("From OpenStreetMap · not verified yet")).toBeNull();
     expect(screen.queryByRole("button", { name: "Claim it" })).toBeNull();
+  });
+
+  it("builds safe links: Persian digits dial, and a non-http website is not linked", async () => {
+    expect(telHref("۰۲۱ ۸۸۸۸ ۱۲۳۴")).toBe("tel:02188881234");
+    expect(telHref("—")).toBeNull();
+    vi.mocked(placesService.get).mockResolvedValue(vet({ website: "javascript:alert(1)", phone: "۰۲۱ ۸۸۸۸ ۱۲۳۴" }));
+    renderWithIntl(<PlaceDetailView placeId="place-osm" />);
+    expect((await screen.findByRole("link", { name: "۰۲۱ ۸۸۸۸ ۱۲۳۴" })).getAttribute("href")).toBe("tel:02188881234");
+    expect(screen.queryByText(/javascript/)).toBeNull();
   });
 });

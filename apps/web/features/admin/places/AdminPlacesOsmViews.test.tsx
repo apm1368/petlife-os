@@ -5,7 +5,7 @@ import { adminPlacesOsmService, type OsmSyncAreaDto, type PlaceClaimQueueItemDto
 import { useAdminStore } from "@/stores/admin-store";
 import { AdminOsmAreasView, AdminPlaceClaimsView } from "./AdminPlacesOsmViews";
 
-vi.mock("@/services/places.service", () => ({ adminPlacesOsmService: { areas: vi.fn(), saveArea: vi.fn(), run: vi.fn(), claims: vi.fn(), decide: vi.fn() } }));
+vi.mock("@/services/places.service", () => ({ adminPlacesOsmService: { areas: vi.fn(), saveArea: vi.fn(), run: vi.fn(), claims: vi.fn(), decide: vi.fn(), release: vi.fn() } }));
 
 function admin(permissions: string[]) {
   useAdminStore.setState({ status: "ready", context: { isAdmin: true, adminUserId: "admin-1", displayName: "Admin", role: "OPERATIONS", permissions } as never });
@@ -25,13 +25,16 @@ const area: OsmSyncAreaDto = {
   lastRun: { id: "run-1", status: "SUCCEEDED", fetched: 130, created: 118, updated: 2, linked: 3, skipped: 7, hidden: 0, error: null, startedAt: "2026-11-13T02:00:00.000Z", finishedAt: "2026-11-13T02:01:00.000Z" },
 };
 
-const claim = (verificationStatus: string | null): PlaceClaimQueueItemDto => ({
+const claim = (verificationStatus: string | null, status: PlaceClaimQueueItemDto["status"] = "PENDING"): PlaceClaimQueueItemDto => ({
   id: "claim-1",
-  place: { id: "place-1", name: "Vet One", city: "Tehran", category: "VETERINARY" as never, source: "OSM" },
+  status,
+  place: { id: "place-1", name: "Vet One", city: "Tehran", category: "VETERINARY" as never, source: "OSM", phone: "+98 21 000 0000", website: null, address: null, claimedByThisClaim: status === "APPROVED", osmTags: { name: "Vet One", phone: "+98 21 000 0000", "addr:street": "Valiasr" } },
   claimant: "Dr. Owner",
-  organization: verificationStatus ? { id: "org-1", name: "Vet One Clinic", verificationStatus } : null,
+  organization: verificationStatus ? { id: "org-1", name: "Vet One Clinic", verificationStatus, phone: "+98 21 000 0000", website: null, address: { addressLine: "Valiasr 12", city: "Tehran", phone: null }, kycContact: { name: "Sara Rahimi", landline: "02100000000" } } : null,
   message: "This is my clinic",
+  decisionReason: status === "APPROVED" ? "KYC matches" : null,
   createdAt: "2026-11-13T03:00:00.000Z",
+  decidedAt: null,
 });
 
 describe("Admin OpenStreetMap areas", () => {
@@ -69,6 +72,9 @@ describe("Admin business claims", () => {
     vi.mocked(adminPlacesOsmService.decide).mockResolvedValue({ id: "claim-1", status: "REJECTED" });
     renderWithIntl(<AdminPlaceClaimsView />);
     expect(await screen.findByText("KYC not finished")).toBeTruthy();
+    // The business's KYC details sit next to the listing's OpenStreetMap tags.
+    expect(screen.getByText(/Sara Rahimi/)).toBeTruthy();
+    expect(screen.getByText("addr:street")).toBeTruthy();
     expect((screen.getByRole("button", { name: "Approve" }) as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: "Reject" }));
     expect(adminPlacesOsmService.decide).not.toHaveBeenCalled();
@@ -86,5 +92,16 @@ describe("Admin business claims", () => {
     fireEvent.click(screen.getByRole("button", { name: "Approve" }));
     await waitFor(() => expect(adminPlacesOsmService.decide).toHaveBeenCalledWith("claim-1", true, "KYC passed, same address"));
     expect(await screen.findByText("No claims waiting.")).toBeTruthy();
+  });
+
+  it("releases an approved claim with a reason", async () => {
+    admin(["places.view", "places.manage"]);
+    vi.mocked(adminPlacesOsmService.claims).mockImplementation(async (status) => ({ items: status === "APPROVED" ? [claim("VERIFIED", "APPROVED")] : [], total: 1, page: 1, pageSize: 20 }));
+    vi.mocked(adminPlacesOsmService.release).mockResolvedValue({ placeId: "place-1", released: true });
+    renderWithIntl(<AdminPlaceClaimsView />);
+    fireEvent.click(await screen.findByRole("tab", { name: "Approved" }));
+    fireEvent.change(await screen.findByLabelText("Reason (audit log)"), { target: { value: "The real owner disputed it" } });
+    fireEvent.click(screen.getByRole("button", { name: "Release from this business" }));
+    await waitFor(() => expect(adminPlacesOsmService.release).toHaveBeenCalledWith("place-1", "The real owner disputed it"));
   });
 });

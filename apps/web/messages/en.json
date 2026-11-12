@@ -6250,7 +6250,9 @@
         "APPROVED": "Your claim was approved.",
         "REJECTED": "Your claim was not accepted.",
         "WITHDRAWN": "Claim withdrawn."
-      }
+      },
+      "refresh": "I've done that — update my claim",
+      "limit": "You can have at most 5 open claims; please wait for review."
     }
   },
   "supportNeeds": {
@@ -10246,7 +10248,7 @@
     "reject": "Reject",
     "reason": "Reason (audit log)",
     "decided": "Saved.",
-    "decideFailed": "Not saved: approval needs a KYC-verified business.",
+    "decideFailed": "Not saved: approval needs the claim's own business to be KYC-verified, and the listing not suspended.",
     "form": {
       "title": "Add or edit a city",
       "hint": "The city's bounding box (at most 1.5° each way). The city name is the one the city filter shows.",
@@ -10263,6 +10265,22 @@
       "deactivate": "Pause",
       "yes": "Yes",
       "no": "No"
-    }
+    },
+    "claimsHint": "Approve only for the business named on the claim, once its KYC is verified. Compare its KYC details with this listing's OpenStreetMap tags.",
+    "claimTabs": {
+      "PENDING": "Waiting for review",
+      "APPROVED": "Approved"
+    },
+    "approvedEmpty": "No listing has been handed over yet.",
+    "compare": {
+      "business": "Business (KYC)",
+      "listing": "This listing in OpenStreetMap",
+      "contact": "Contact",
+      "phone": "Phone",
+      "address": "Address",
+      "website": "Website"
+    },
+    "release": "Release from this business",
+    "releaseFailed": "Not released: the listing may no longer be held by this business."
   }
 }

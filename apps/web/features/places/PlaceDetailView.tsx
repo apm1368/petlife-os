@@ -11,7 +11,8 @@ import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 import { placeLocation } from "@/features/places/place-format";
-import { isClaimable, isOsmUnclaimed, OsmAttribution, PlaceClaimPanel } from "@/features/places/PlaceOsm";
+import { isClaimable, isOsmUnclaimed, OsmAttribution, PlaceClaimPanel, telHref } from "@/features/places/PlaceOsm";
+import { externalHref } from "@/lib/url/external-href";
 
 export function PlaceDetailView({ placeId }: { placeId: string }) {
   const t = useTranslations("places");
@@ -138,8 +139,8 @@ export function PlaceDetailView({ placeId }: { placeId: string }) {
         <aside className="split-aside">
           <section className="split-panel flex flex-col gap-3">
             <p className="text-body text-text-primary">{place.address ?? placeLocation(place, lang)}</p>
-            {place.phone ? <p className="text-sm">{t("osm.phone")}: <a dir="ltr" className="underline" href={`tel:${place.phone.replace(/[^+0-9]/g, "")}`}>{place.phone}</a></p> : null}
-            {place.website ? <p className="text-sm">{t("osm.website")}: <a dir="ltr" className="underline break-all" href={place.website} target="_blank" rel="nofollow noopener noreferrer ugc">{place.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}</a></p> : null}
+            {place.phone && telHref(place.phone) ? <p className="text-sm">{t("osm.phone")}: <a dir="ltr" className="underline" href={telHref(place.phone)!}>{place.phone}</a></p> : null}
+            {externalHref(place.website) ? <p className="text-sm">{t("osm.website")}: <a dir="ltr" className="underline break-all" href={externalHref(place.website)!} target="_blank" rel="nofollow noopener noreferrer ugc">{place.website!.replace(/^https?:\/\//, "").replace(/\/$/, "")}</a></p> : null}
             {error ? <p className="text-body text-state-urgent">{error}</p> : null}
             {requiresAuth ? <p className="text-body text-text-secondary">{t("favorites.signInPrompt")}</p> : null}
 
@@ -164,6 +165,7 @@ export function PlaceDetailView({ placeId }: { placeId: string }) {
                     <option value="NOT_PET_FRIENDLY">{fa ? "دیگر حیوان نمی‌پذیرد" : "No longer pet-friendly"}</option>
                     <option value="CLOSED_PERMANENTLY">{fa ? "برای همیشه بسته شده" : "Permanently closed"}</option>
                     <option value="WRONG_LOCATION">{fa ? "مکان نادرست" : "Wrong location"}</option>
+                    {place.claimed ? <option value="CLAIMED_BY_SOMEONE_ELSE">{fa ? "این کسب‌وکار من است و شخص دیگری آن را تحویل گرفته" : "This is my business and someone else claimed it"}</option> : null}
                     <option value="OTHER">{fa ? "سایر" : "Other"}</option>
                   </select>
                 </label>

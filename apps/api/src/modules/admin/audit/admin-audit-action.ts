@@ -245,4 +245,5 @@ export type AdminAuditAction =
   | "osm_area.updated"
   | "osm_area.run_requested"
   | "place_claim.approved"
-  | "place_claim.rejected";
+  | "place_claim.rejected"
+  | "place_claim.released";

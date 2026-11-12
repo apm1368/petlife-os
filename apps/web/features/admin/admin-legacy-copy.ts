@@ -312,6 +312,7 @@ export const LEGACY_COPY: Readonly<Record<string, readonly [de: string, es: stri
   "List": ["Einblenden", "Publicar"],
   "Closed": ["Geschlossen", "Cerrado"],
   "No longer pet-friendly": ["Nicht mehr tierfreundlich", "Ya no admite mascotas"],
+  "Wrong business claim (release it under Business claims)": ["Falsche Unternehmensübernahme (unter Übernahmen freigeben)", "Reclamación de negocio errónea (libérala en Reclamaciones)"],
   "Wrong location": ["Falscher Standort", "Ubicación incorrecta"],
   "Wrong details": ["Falsche Angaben", "Datos incorrectos"],
   "Other": ["Sonstiges", "Otro"],

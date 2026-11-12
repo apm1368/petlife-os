@@ -11,8 +11,29 @@ const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 /** One area per tick, ticks an hour apart: at most one Overpass request an hour (fair use). */
 const TICK_MS = 60 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 120_000;
+/** Largest Overpass answer we read (a city box is a few MB); the query asks Overpass for the same cap. */
+export const MAX_OVERPASS_BYTES = 32 * 1024 * 1024;
 
 export class OverpassRateLimitedError extends Error {}
+
+/** The response body as text, refusing to read past `max` bytes. */
+async function readCapped(res: Response, max: number): Promise<string> {
+  if (!res.body) return "";
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > max) {
+      await reader.cancel().catch(() => undefined);
+      throw new Error("Overpass answer too large");
+    }
+    chunks.push(value);
+  }
+  return Buffer.concat(chunks.map((c) => Buffer.from(c))).toString("utf8");
+}
 
 type Counts = { fetched: number; created: number; updated: number; linked: number; skipped: number; hidden: number };
 
@@ -39,6 +60,11 @@ export class OsmDirectoryService implements OnModuleInit, OnModuleDestroy {
     if (this.timer) clearInterval(this.timer);
   }
 
+  /** A run is under way in this process (the admin "run now" refuses while it is). */
+  isRunning(): boolean {
+    return this.running;
+  }
+
   /** The oldest active area that is due (never run, or last run over a week ago), claimed atomically. */
   async tick(now = new Date()): Promise<string | null> {
     if (this.running) return null;
@@ -52,11 +78,13 @@ export class OsmDirectoryService implements OnModuleInit, OnModuleDestroy {
     return this.run(due);
   }
 
-  async run(area: OsmSyncArea, requestedByAdminId?: string, fetchElements: (area: OsmSyncArea) => Promise<OsmElement[]> = (a) => this.fetchOverpass(a)): Promise<string> {
+  /** Never rejects: every failure is recorded on the run (when it exists) and the area retried in about an hour. */
+  async run(area: OsmSyncArea, requestedByAdminId?: string, fetchElements: (area: OsmSyncArea) => Promise<OsmElement[]> = (a) => this.fetchOverpass(a)): Promise<string | null> {
     this.running = true;
-    const run = await this.prisma.osmImportRun.create({ data: { areaId: area.id, status: "RUNNING", requestedByAdminId } });
     const counts: Counts = { fetched: 0, created: 0, updated: 0, linked: 0, skipped: 0, hidden: 0 };
+    let run: { id: string } | null = null;
     try {
+      run = await this.prisma.osmImportRun.create({ data: { areaId: area.id, status: "RUNNING", requestedByAdminId }, select: { id: true } });
       const elements = await fetchElements(area);
       counts.fetched = elements.length;
       const seen = new Set<string>();
@@ -76,14 +104,15 @@ export class OsmDirectoryService implements OnModuleInit, OnModuleDestroy {
       this.logger.log(`OSM directory ${area.city}: ${JSON.stringify(counts)}`);
     } catch (error) {
       const limited = error instanceof OverpassRateLimitedError;
-      await this.prisma.osmImportRun.update({ where: { id: run.id }, data: { status: limited ? "RATE_LIMITED" : "FAILED", ...counts, error: error instanceof Error ? error.message.slice(0, 500) : String(error), finishedAt: new Date() } });
+      const message = error instanceof Error ? error.message.slice(0, 500) : String(error);
+      if (run) await this.prisma.osmImportRun.update({ where: { id: run.id }, data: { status: limited ? "RATE_LIMITED" : "FAILED", ...counts, error: message, finishedAt: new Date() } }).catch(() => undefined);
       // Let a failed area come round again in an hour rather than in a week.
-      await this.prisma.osmSyncArea.update({ where: { id: area.id }, data: { lastRunAt: new Date(Date.now() - WEEK_MS + TICK_MS) } });
+      await this.prisma.osmSyncArea.update({ where: { id: area.id }, data: { lastRunAt: new Date(Date.now() - WEEK_MS + TICK_MS) } }).catch(() => undefined);
       this.logger.warn(`OSM directory ${area.city} ${limited ? "rate-limited" : "failed"}: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       this.running = false;
     }
-    return run.id;
+    return run?.id ?? null;
   }
 
   private async fetchOverpass(area: OsmSyncArea): Promise<OsmElement[]> {
@@ -92,10 +121,13 @@ export class OsmDirectoryService implements OnModuleInit, OnModuleDestroy {
       headers: { "content-type": "application/x-www-form-urlencoded", "user-agent": USER_AGENT, accept: "application/json" },
       body: `data=${encodeURIComponent(overpassQuery(area))}`,
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      redirect: "error",
     });
     if (res.status === 429 || res.status === 504) throw new OverpassRateLimitedError(`Overpass answered ${res.status}`);
     if (!res.ok) throw new Error(`Overpass answered ${res.status}`);
-    const body = (await res.json()) as { elements?: OsmElement[]; remark?: string };
+    const declared = Number(res.headers.get("content-length") ?? 0);
+    if (declared > MAX_OVERPASS_BYTES) throw new Error("Overpass answer too large");
+    const body = JSON.parse(await readCapped(res, MAX_OVERPASS_BYTES)) as { elements?: OsmElement[]; remark?: string };
     if (body.remark && /runtime error|timed out|rate_limited/i.test(body.remark)) throw new OverpassRateLimitedError(body.remark.slice(0, 200));
     return (body.elements ?? []).filter((e) => e && (e.type === "node" || e.type === "way" || e.type === "relation"));
   }

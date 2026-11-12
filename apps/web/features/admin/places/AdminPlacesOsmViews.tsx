@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button, EmptyState, ErrorRecovery, Input, Skeleton } from "@petlife/ui";
 import { ApiError } from "@/lib/api/client";
@@ -152,6 +152,7 @@ export function AdminPlaceClaimsView() {
   const tPlaces = useTranslations("places");
   const lang = useLocale() as Lang;
   const { status, canRead, canManage } = usePlacesAccess();
+  const [tab, setTab] = useState<"PENDING" | "APPROVED">("PENDING");
   const [claims, setClaims] = useState<PlaceClaimQueueItemDto[] | null>(null);
   const [error, setError] = useState<"forbidden" | "error" | null>(null);
   const [reasons, setReasons] = useState<Record<string, string>>({});
@@ -161,25 +162,27 @@ export function AdminPlaceClaimsView() {
   const load = useCallback(async () => {
     if (!canRead) return;
     setError(null);
+    setClaims(null);
     try {
-      setClaims((await adminPlacesOsmService.claims()).items);
+      setClaims((await adminPlacesOsmService.claims(tab)).items);
     } catch (e) {
       setError(e instanceof ApiError && e.status === 403 ? "forbidden" : "error");
     }
-  }, [canRead]);
+  }, [canRead, tab]);
   useEffect(() => void load(), [load]);
 
-  async function decide(claim: PlaceClaimQueueItemDto, approve: boolean) {
+  async function act(claim: PlaceClaimQueueItemDto, action: "approve" | "reject" | "release") {
     const reason = reasons[claim.id]?.trim() ?? "";
     if (reason.length < 3) return setMsg({ tone: "bad", text: t("reason") });
     setBusy(claim.id);
     setMsg(null);
     try {
-      await adminPlacesOsmService.decide(claim.id, approve, reason);
+      if (action === "release") await adminPlacesOsmService.release(claim.place.id, reason);
+      else await adminPlacesOsmService.decide(claim.id, action === "approve", reason);
       setMsg({ tone: "ok", text: t("decided") });
       await load();
     } catch {
-      setMsg({ tone: "bad", text: t("decideFailed") });
+      setMsg({ tone: "bad", text: action === "release" ? t("releaseFailed") : t("decideFailed") });
     } finally {
       setBusy(null);
     }
@@ -192,10 +195,18 @@ export function AdminPlaceClaimsView() {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-page-title">{t("claimsTitle")}</h1>
+      <p className="text-sm text-text-secondary">{t("claimsHint")}</p>
+      <div className="flex gap-2" role="tablist" aria-label={t("claimsTitle")}>
+        {(["PENDING", "APPROVED"] as const).map((k) => (
+          <Button key={k} size="sm" role="tab" aria-selected={tab === k} variant={tab === k ? "primary" : "ghost"} onClick={() => { setTab(k); setMsg(null); }}>{t(`claimTabs.${k}`)}</Button>
+        ))}
+      </div>
       {msg ? <p role={msg.tone === "bad" ? "alert" : "status"} className={`text-sm ${msg.tone === "bad" ? "text-state-urgent" : "text-state-success"}`}>{msg.text}</p> : null}
-      {!claims ? <Skeleton className="h-40" /> : claims.length === 0 ? <EmptyState title={t("claimsEmpty")} /> : (
+      {!claims ? <Skeleton className="h-40" /> : claims.length === 0 ? <EmptyState title={tab === "PENDING" ? t("claimsEmpty") : t("approvedEmpty")} /> : (
         <ul className="flex flex-col gap-3">{claims.map((c) => {
-          const verified = c.organization?.verificationStatus === "VERIFIED";
+          const org = c.organization;
+          const verified = org?.verificationStatus === "VERIFIED";
+          const osmEntries = Object.entries(c.place.osmTags);
           return (
             <li key={c.id}>
               <Panel className="flex flex-col gap-2 text-sm">
@@ -205,16 +216,41 @@ export function AdminPlaceClaimsView() {
                   {" · "}{formatDay(c.createdAt.slice(0, 10), lang)}
                 </p>
                 <p>{t("claimColumns.claimant")}: {c.claimant ?? "—"}</p>
-                <p>
-                  {t("claimColumns.organization")}: {c.organization ? c.organization.name : t("noOrganization")}{" "}
-                  <Tag tone={verified ? "success" : "attention"}>{verified ? t("kyc.VERIFIED") : t("kyc.other")}</Tag>
-                </p>
                 {c.message ? <p className="text-text-secondary">{t("claimColumns.message")}: {c.message}</p> : null}
-                {canManage ? (
+                <div className="grid gap-3 md:grid-cols-2">
+                  <section aria-label={t("compare.business")} className="rounded-md border border-border-subtle p-3">
+                    <h2 className="mb-1 font-bold">{t("compare.business")}</h2>
+                    {org ? (
+                      <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
+                        <dt className="text-text-secondary">{t("claimColumns.organization")}</dt><dd>{org.name} <Tag tone={verified ? "success" : "attention"}>{verified ? t("kyc.VERIFIED") : t("kyc.other")}</Tag></dd>
+                        {org.kycContact ? <><dt className="text-text-secondary">{t("compare.contact")}</dt><dd>{org.kycContact.name} · <span dir="ltr">{org.kycContact.landline}</span></dd></> : null}
+                        {org.phone ? <><dt className="text-text-secondary">{t("compare.phone")}</dt><dd dir="ltr">{org.phone}</dd></> : null}
+                        {org.address ? <><dt className="text-text-secondary">{t("compare.address")}</dt><dd>{org.address.addressLine}، {org.address.city}{org.address.phone ? <> · <span dir="ltr">{org.address.phone}</span></> : null}</dd></> : null}
+                        {org.website ? <><dt className="text-text-secondary">{t("compare.website")}</dt><dd dir="ltr" className="break-all">{org.website}</dd></> : null}
+                      </dl>
+                    ) : <p className="text-text-secondary">{t("noOrganization")}</p>}
+                  </section>
+                  <section aria-label={t("compare.listing")} className="rounded-md border border-border-subtle p-3">
+                    <h2 className="mb-1 font-bold">{t("compare.listing")}</h2>
+                    {osmEntries.length ? (
+                      <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">{osmEntries.map(([k, v]) => <Fragment key={k}><dt className="text-text-secondary" dir="ltr">{k}</dt><dd className="break-all">{v}</dd></Fragment>)}</dl>
+                    ) : (
+                      <p className="text-text-secondary">{[c.place.phone, c.place.website, c.place.address].filter(Boolean).join(" · ") || "—"}</p>
+                    )}
+                  </section>
+                </div>
+                {c.decisionReason && tab === "APPROVED" ? <p className="text-text-secondary">{t("reason")}: {c.decisionReason}</p> : null}
+                {canManage && (tab === "PENDING" || c.place.claimedByThisClaim) ? (
                   <div className="flex flex-wrap items-end gap-2">
                     <Input label={t("reason")} value={reasons[c.id] ?? ""} onChange={(e) => setReasons({ ...reasons, [c.id]: e.target.value })} />
-                    <Button size="sm" disabled={!verified || busy !== null} onClick={() => void decide(c, true)}>{t("approve")}</Button>
-                    <Button size="sm" variant="ghost" disabled={busy !== null} onClick={() => void decide(c, false)}>{t("reject")}</Button>
+                    {tab === "PENDING" ? (
+                      <>
+                        <Button size="sm" disabled={!verified || busy !== null} onClick={() => void act(c, "approve")}>{t("approve")}</Button>
+                        <Button size="sm" variant="ghost" disabled={busy !== null} onClick={() => void act(c, "reject")}>{t("reject")}</Button>
+                      </>
+                    ) : (
+                      <Button size="sm" variant="danger" disabled={busy !== null} onClick={() => void act(c, "release")}>{t("release")}</Button>
+                    )}
                   </div>
                 ) : null}
               </Panel>

@@ -61,6 +61,11 @@ describe("OpenStreetMap directory (e2e)", () => {
     await post(staff, `/admin/places/claims/${claimId}/decision`).send({ approve: true, reason: "Looks right" }).expect(400);
     const org = await db.providerOrganization.create({ data: { name: "Vet One Clinic", type: "VET_CLINIC", verificationStatus: "VERIFIED" } });
     await db.providerUser.create({ data: { userId: owner.id, providerOrganizationId: org.id, role: ProviderUserRole.OWNER } });
+    // Still refused: the claim was filed without a business; the claimant refreshes it to name their verified one.
+    await post(staff, `/admin/places/claims/${claimId}/decision`).send({ approve: true, reason: "KYC passed" }).expect(400);
+    expect((await post(owner, `/places/${vetRow.id}/claim`).send({}).expect(201)).body).toMatchObject({ claimId, nextStep: "AWAITING_REVIEW" });
+    const queued = (await get(staff, "/admin/places/claims").expect(200)).body.items.find((c: { id: string }) => c.id === claimId);
+    expect(queued).toMatchObject({ organization: { id: org.id, name: "Vet One Clinic", verificationStatus: "VERIFIED" }, place: { osmTags: { name: "Vet One", phone: "+98 21 000 0000" } } });
     await post(staff, `/admin/places/claims/${claimId}/decision`).send({ approve: true, reason: "KYC passed, same address" }).expect(201);
     const claimed = await db.petFriendlyPlace.findUniqueOrThrow({ where: { id: vetRow.id } });
     expect(claimed).toMatchObject({ claimedByProviderOrganizationId: org.id, status: "VERIFIED" });
@@ -71,6 +76,52 @@ describe("OpenStreetMap directory (e2e)", () => {
     const shopRow = await db.petFriendlyPlace.findFirstOrThrow({ where: { osmId: BigInt(id + 1) } });
     expect(shopRow).toMatchObject({ isPubliclyListed: false });
     expect(shopRow.osmMissingSince).not.toBeNull();
+  });
+
+  it("approves only for the claim's own verified business, refuses suspended places, caps open claims, and can release a claim", async () => {
+    const area = await db.osmSyncArea.create({ data: { city: `${city}-4`, south: base, west: 52, north: base + 0.1, east: 52.1, active: false } });
+    const first = Math.floor(Math.random() * 1e9);
+    const shops: OsmElement[] = Array.from({ length: 8 }, (_, i) => ({ type: "node", id: first + i, lat: base + 0.01 * (i + 1), lon: 52.05, tags: { shop: "pet", name: `Shop ${i}`, phone: `+98 21 111 000${i}` } }));
+    await osm.run(area, undefined, async () => shops);
+    const places = await db.petFriendlyPlace.findMany({ where: { osmId: { in: shops.map((s) => BigInt(s.id)) } }, orderBy: { name: "asc" } });
+    expect(places).toHaveLength(8);
+    const staff = await actor("staff-4");
+    await db.adminUser.create({ data: { userId: staff.id, role: AdminRole.SUPER_ADMIN, status: AdminMembershipStatus.ACTIVE } });
+
+    // A claim filed while the member's business was unverified names that business; owning another, verified one
+    // later does not let staff approve it until the member refreshes the claim.
+    const member = await actor("Claimant A");
+    const unverified = await db.providerOrganization.create({ data: { name: "Shop Zero (pending)", type: "GROOMER", verificationStatus: "UNDER_REVIEW" } });
+    await db.providerUser.create({ data: { userId: member.id, providerOrganizationId: unverified.id, role: ProviderUserRole.OWNER } });
+    const claim = (await post(member, `/places/${places[0]!.id}/claim`).send({}).expect(201)).body;
+    expect(claim).toMatchObject({ nextStep: "COMPLETE_VERIFICATION" });
+    const verified = await db.providerOrganization.create({ data: { name: "Shop Zero", type: "GROOMER", verificationStatus: "VERIFIED" } });
+    await db.providerUser.create({ data: { userId: member.id, providerOrganizationId: verified.id, role: ProviderUserRole.OWNER } });
+    await post(staff, `/admin/places/claims/${claim.claimId}/decision`).send({ approve: true, reason: "Looks right" }).expect(400);
+    await post(member, `/places/${places[0]!.id}/claim`).send({}).expect(201);
+    await post(staff, `/admin/places/claims/${claim.claimId}/decision`).send({ approve: true, reason: "KYC matches the OSM phone" }).expect(201);
+    expect(await db.petFriendlyPlace.findUniqueOrThrow({ where: { id: places[0]!.id } })).toMatchObject({ claimedByProviderOrganizationId: verified.id, status: "VERIFIED" });
+
+    // Released after a dispute: back to an unverified OSM listing, the approved claim withdrawn.
+    const approved = (await get(staff, "/admin/places/claims?status=APPROVED").expect(200)).body.items.find((c: { id: string }) => c.id === claim.claimId);
+    expect(approved).toMatchObject({ status: "APPROVED", place: { claimedByThisClaim: true } });
+    await post(staff, `/admin/places/${places[0]!.id}/release-claim`).send({ reason: "The real owner disputed it" }).expect(201);
+    expect(await db.petFriendlyPlace.findUniqueOrThrow({ where: { id: places[0]!.id } })).toMatchObject({ claimedByProviderOrganizationId: null, status: "UNVERIFIED", verificationSource: "OPENSTREETMAP" });
+    expect(await db.placeClaim.findUniqueOrThrow({ where: { id: claim.claimId } })).toMatchObject({ status: "WITHDRAWN" });
+    expect(await db.adminAuditLog.count({ where: { action: "place_claim.released", entityId: places[0]!.id } })).toBe(1);
+    await post(staff, `/admin/places/${places[0]!.id}/release-claim`).send({ reason: "Again" }).expect(400);
+
+    // A suspended listing cannot be claimed.
+    await post(staff, `/admin/places/${places[1]!.id}/verification`).send({ status: "SUSPENDED" }).expect(201);
+    const other = await actor("Claimant B");
+    await post(other, `/places/${places[1]!.id}/claim`).send({}).expect(400);
+
+    // At most five open claims per member.
+    for (const place of places.slice(2, 7)) await post(other, `/places/${place.id}/claim`).send({}).expect(201);
+    const limited = await post(other, `/places/${places[7]!.id}/claim`).send({}).expect(400);
+    expect(limited.body.error.details).toMatchObject({ reason: "OPEN_CLAIMS_LIMIT" });
+    // Refreshing an open claim is not a new one.
+    await post(other, `/places/${places[2]!.id}/claim`).send({ message: "Still mine" }).expect(201);
   });
 
   it("keeps what staff changed through a re-sync and never gives an unclaimed import the verified badge by hand", async () => {

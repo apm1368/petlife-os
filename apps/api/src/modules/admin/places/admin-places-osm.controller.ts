@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Put, Query, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Logger, Param, ParseUUIDPipe, Post, Put, Query, Req, UseGuards } from "@nestjs/common";
 import { Type } from "class-transformer";
-import { IsBoolean, IsInt, IsLatitude, IsLongitude, IsOptional, IsString, Length, Max, Min } from "class-validator";
+import { IsBoolean, IsIn, IsInt, IsLatitude, IsLongitude, IsOptional, IsString, Length, Max, Min } from "class-validator";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { ValidationApiException } from "../../../common/errors/api-exception";
@@ -22,9 +22,14 @@ class AreaDto {
   @IsBoolean() active!: boolean;
 }
 
-class PageDto {
+class ClaimsQueryDto {
+  @IsOptional() @IsIn(["PENDING", "APPROVED"]) status?: "PENDING" | "APPROVED";
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) page?: number;
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100) pageSize?: number;
+}
+
+class ReleaseClaimDto {
+  @IsString() @Length(3, 500) reason!: string;
 }
 
 class DecideClaimDto {
@@ -36,6 +41,8 @@ class DecideClaimDto {
 @Controller("admin/places")
 @UseGuards(SessionAuthGuard, AdminAuthGuard)
 export class AdminPlacesOsmController {
+  private readonly logger = new Logger(AdminPlacesOsmController.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly osm: OsmDirectoryService,
@@ -80,18 +87,19 @@ export class AdminPlacesOsmController {
     const area = await this.prisma.osmSyncArea.findUnique({ where: { id } });
     if (!area) throw new ValidationApiException({ field: "area", reason: "NOT_FOUND" });
     const running = await this.prisma.osmImportRun.findFirst({ where: { status: "RUNNING", startedAt: { gt: new Date(Date.now() - 15 * 60 * 1000) } } });
-    if (running) throw new ValidationApiException({ field: "run", reason: "ANOTHER_RUN_IN_PROGRESS" });
+    if (running || this.osm.isRunning()) throw new ValidationApiException({ field: "run", reason: "ANOTHER_RUN_IN_PROGRESS" });
     const recent = await this.prisma.osmImportRun.findFirst({ where: { areaId: id, startedAt: { gt: new Date(Date.now() - 10 * 60 * 1000) } } });
     if (recent) throw new ValidationApiException({ field: "run", reason: "RAN_RECENTLY" });
     await this.audit.record({ adminUserId: admin.adminUserId, action: "osm_area.run_requested", entityType: "OsmSyncArea", entityId: id, requestId: request.requestId });
-    void this.osm.run(area, admin.adminUserId);
+    // Runs in the background; run() records its own failures, and nothing may surface as an unhandled rejection.
+    void this.osm.run(area, admin.adminUserId).catch((error: unknown) => this.logger.error(`OSM run for ${area.city} failed to start`, error instanceof Error ? error.stack : String(error)));
     return { started: true };
   }
 
   @Get("claims")
   @RequireAdminPermission("places.view")
-  pendingClaims(@Query() query: PageDto) {
-    return this.claims.listPending(query.page ?? 1, query.pageSize ?? 20);
+  claimsQueue(@Query() query: ClaimsQueryDto) {
+    return this.claims.list(query.status ?? "PENDING", query.page ?? 1, query.pageSize ?? 20);
   }
 
   @Post("claims/:id/decision")
@@ -103,5 +111,16 @@ export class AdminPlacesOsmController {
       return decided;
     });
     return { id: claim.id, status: claim.status };
+  }
+
+  /** Takes a listing back from the business that claimed it (wrong approval, or the real owner's dispute upheld). */
+  @Post(":placeId/release-claim")
+  @RequireAdminPermission("places.manage")
+  async releaseClaim(@CurrentAdmin() admin: ResolvedAdminContext, @Param("placeId", ParseUUIDPipe) placeId: string, @Body() dto: ReleaseClaimDto, @Req() request: AdminAuthedRequest) {
+    return this.prisma.$transaction(async (tx) => {
+      const released = await this.claims.release(tx, admin.adminUserId, placeId, dto.reason);
+      await this.audit.record({ adminUserId: admin.adminUserId, action: "place_claim.released", entityType: "PetFriendlyPlace", entityId: placeId, reason: dto.reason, beforeSummary: { claimedByProviderOrganizationId: released.releasedFromOrganizationId }, afterSummary: { claimedByProviderOrganizationId: null, status: released.status }, requestId: request.requestId, tx });
+      return { placeId, released: true };
+    });
   }
 }
