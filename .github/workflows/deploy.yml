@@ -24,6 +24,8 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: write
     env:
       APP: /var/www/petlife-os
       NEXT_PUBLIC_API_ORIGIN: https://opetlife.ir/api
@@ -58,36 +60,26 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/release"
           echo '${{ github.sha }}' > RELEASE_SHA
-          tar --exclude=apps/web/.next/cache -czf "$RUNNER_TEMP/release/release-${{ github.sha }}.tgz" \
+          tar --exclude=apps/web/.next/cache --exclude='*.map' -czf "$RUNNER_TEMP/release/release-${{ github.sha }}.tgz" \
             RELEASE_SHA apps/web/.next apps/api/dist packages/types/dist packages/config/dist
           cd "$RUNNER_TEMP/release" && sha256sum "release-${{ github.sha }}.tgz" > "release-${{ github.sha }}.tgz.sha256"
           ls -la "$RUNNER_TEMP/release"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-${{ github.sha }}
-          path: ${{ runner.temp }}/release
-          retention-days: 3
-          if-no-files-found: error
+      # The VPS downloads the archive from GitHub's release CDN: from Iran that runs at ~0.4 MB/s, while artifact
+      # storage and pushes to the box ran at ~20 KB/s (2026-11-12). One internal pre-release holds the newest builds.
+      - name: Publish the archive for the VPS
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh release view deploy-builds -R "$REPO" >/dev/null 2>&1 || gh release create deploy-builds -R "$REPO" --prerelease --title "Deploy builds (internal)" --notes "CI-built release archives the production server downloads. Not for users; only the newest builds are kept."
+          gh release upload deploy-builds -R "$REPO" --clobber "$RUNNER_TEMP/release/release-${{ github.sha }}.tgz" "$RUNNER_TEMP/release/release-${{ github.sha }}.tgz.sha256"
+          gh release view deploy-builds -R "$REPO" --json assets --jq '.assets | sort_by(.createdAt) | reverse | .[6:] | .[].name' | while read -r asset; do gh release delete-asset deploy-builds "$asset" -R "$REPO" -y; done
 
   deploy:
     needs: [ci, release]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: release-${{ github.sha }}
-          path: release
-      # CI pushes the build to the box over the same SSH key; the box never has to download it from GitHub.
-      - name: Upload the release to the VPS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          source: release/release-${{ github.sha }}.tgz,release/release-${{ github.sha }}.tgz.sha256
-          target: /var/www/petlife-os-releases/incoming
-          strip_components: 1
       - name: Deploy over SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -121,8 +113,10 @@ jobs:
             # backoffice release trace disagree with the actual destination (TC-04).
             export DEPLOYMENT_ENVIRONMENT='production'
             export DEPLOYMENT_ID='github-${{ github.run_id }}-${{ github.run_attempt }}'
-            # The CI-built release uploaded above; deploy.sh verifies its checksum and sha and swaps it in.
-            export PREBUILT_ARCHIVE='/var/www/petlife-os-releases/incoming/release-${{ github.sha }}.tgz'
+            # Pull the CI-built release from the deploy-builds pre-release (GitHub's CDN is fast from here; pushes and
+            # artifact downloads ran at ~20 KB/s, 2026-11-12). If the download fails, deploy.sh builds locally instead.
+            rm -rf /var/www/petlife-os-releases/incoming && mkdir -p /var/www/petlife-os-releases/incoming
+            if timeout 1500 gh release download deploy-builds -R apm1368/petlife-os -p 'release-${{ github.sha }}.tgz*' -D /var/www/petlife-os-releases/incoming --clobber; then export PREBUILT_ARCHIVE='/var/www/petlife-os-releases/incoming/release-${{ github.sha }}.tgz'; else echo "deploy: could not download the CI-built release; building on this host instead"; fi
             /var/www/petlife-os/deploy.sh
             export EXPECTED_BUILD_SHA='${{ github.sha }}'
             export EXPECTED_DEPLOYMENT_ENVIRONMENT='production'
