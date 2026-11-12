@@ -92,6 +92,56 @@
       "oil": "Tag der Ölverstaatlichung"
     }
   },
+  "adminDeletionRequests": {
+    "kicker": "Datenschutz",
+    "title": "Anträge auf Kontolöschung",
+    "intro": "Mitglieder, die ihr Konto löschen lassen möchten. Prüfen Sie jeden Antrag: zuerst in die Aufbewahrungsprüfung, dann als bereit markieren, sobald die Aufbewahrungsrichtlinie freigegeben ist. Mitglieder können bis zur Ausführung stornieren und werden bei jedem Schritt benachrichtigt.",
+    "executionDisabled": "Die Löschung selbst ist abgeschaltet, bis eine Aufbewahrungsrichtlinie freigegeben ist – hier wird nichts gelöscht.",
+    "retry": "Erneut versuchen",
+    "cancel": "Abbrechen",
+    "filterLabel": "Status des Antrags",
+    "state": {
+      "REQUESTED": "Neu",
+      "PENDING_RETENTION": "Aufbewahrungsprüfung",
+      "READY_FOR_EXECUTION": "Bereit",
+      "CANCELLED": "Vom Mitglied storniert",
+      "COMPLETED": "Abgeschlossen"
+    },
+    "empty": {
+      "REQUESTED": "Keine neuen Anträge.",
+      "PENDING_RETENTION": "Nichts in der Aufbewahrungsprüfung.",
+      "READY_FOR_EXECUTION": "Nichts bereit zur Löschung.",
+      "CANCELLED": "Keine stornierten Anträge.",
+      "COMPLETED": "Keine abgeschlossenen Löschungen."
+    },
+    "requested": "Beantragt am {date} · {days, plural, =0 {heute} one {vor # Tag} other {vor # Tagen}}",
+    "impact": "{households, plural, one {# Haushalt} other {# Haushalte}} · {pets, plural, one {# Tier} other {# Tiere}} · {shared, plural, =0 {mit niemandem geteilt} one {# mit anderen geteilt} other {# mit anderen geteilt}}",
+    "noImpact": "Keine Haushalte oder Tiere erfasst.",
+    "soleOwner": "Alleiniger Eigentümer eines Haushalts mit weiteren Mitgliedern: Das Eigentum muss zuerst an jemand anderen übergehen.",
+    "lastChange": "Letzter Schritt am {date}",
+    "note": "Notiz (optional)",
+    "notePlaceholder": "Zum Beispiel: Rechnungen bleiben gemäß Steuerrecht bis 1408 erhalten",
+    "explain": {
+      "PENDING_RETENTION": "Startet die Aufbewahrungsprüfung: Sie prüfen, welche Daten gesetzlich aufbewahrt werden müssen. Das Mitglied erfährt, dass sein Antrag geprüft wird.",
+      "READY_FOR_EXECUTION": "Schließt die Prüfung ab. Nur möglich, wenn eine Aufbewahrungsrichtlinie freigegeben ist. Das Mitglied erfährt, dass die Löschung bald erfolgt, und kann noch stornieren."
+    },
+    "action": {
+      "PENDING_RETENTION": "Aufbewahrungsprüfung starten",
+      "READY_FOR_EXECUTION": "Als bereit zur Löschung markieren"
+    },
+    "done": {
+      "PENDING_RETENTION": "Der Antrag von {name} ist in der Aufbewahrungsprüfung; das Mitglied wurde benachrichtigt.",
+      "READY_FOR_EXECUTION": "Der Antrag von {name} ist bereit; das Mitglied wurde benachrichtigt."
+    },
+    "errors": {
+      "forbidden": "Nur ein Super-Admin kann Löschanträge bearbeiten.",
+      "load": "Die Löschanträge konnten nicht geladen werden.",
+      "generic": "Das hat nicht funktioniert. Bitte versuchen Sie es erneut.",
+      "RETENTION_POLICY_NOT_APPROVED": "Noch nicht: Erst muss eine Aufbewahrungsrichtlinie freigegeben werden.",
+      "INVALID_TRANSITION": "Dieser Antrag ist bereits weiter. Aktualisieren Sie die Liste.",
+      "CHANGED_CONCURRENTLY": "Jemand anderes hat diesen Antrag gerade geändert. Aktualisieren Sie die Liste."
+    }
+  },
   "clinicClients": {
     "optOut": {
       "title": "SMS der Klinik abbestellen",
@@ -3091,6 +3141,7 @@
       "page": "Seite {page}"
     },
     "tasks": {
+      "openRelated": "Antrag öffnen",
       "title": "Aufgaben",
       "newTask": "Neue Aufgabe",
       "createTitle": "Aufgabe erstellen",
@@ -3778,6 +3829,7 @@
       },
       "tabs": {
         "holidays": "Feiertage und Schließtage",
+        "deletionRequests": "Löschanträge",
         "customRoles": "Eigene Rollen",
         "directory": "Verzeichnis",
         "customer360": "Kunde 360°",
@@ -6278,6 +6330,7 @@
         "allClear": "Alles erledigt – auf dein Team wartet nichts.",
         "clearList": "Erledigt: {list}",
         "queue": {
+          "pendingDeletionRequests": "Anträge auf Kontolöschung",
           "openTrustCases": "Fälle zu Vertrauen und Sicherheit",
           "openDisputes": "Offene Streitfälle",
           "openSupportCases": "Offene Supportfälle",

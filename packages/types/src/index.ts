@@ -3206,6 +3206,8 @@ export interface AdminDashboardSummaryDto {
   openPlaceReports: number | null;
   /** Card-to-card wallet top-up receipts waiting for finance. */
   pendingWalletTopUps: number | null;
+  /** Account deletion requests waiting on staff (REQUESTED or PENDING_RETENTION); admin.manage only. */
+  pendingDeletionRequests: number | null;
 }
 
 // ---------------------------------------------------------------------------

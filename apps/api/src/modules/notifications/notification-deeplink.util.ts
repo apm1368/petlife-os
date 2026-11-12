@@ -22,6 +22,7 @@ export const NotificationDeepLinks = {
   /** A failed payment is retried from the cart (there is no page at /checkout/:id). */
   cart: () => `/cart`,
   myOrders: () => `/orders`,
+  privacy: () => `/profile/privacy`,
   travelBooking: (bookingId: string) => `/travel/bookings/${bookingId}`,
   providerTravelBooking: (bookingId: string) => `/provider/travel/bookings/${bookingId}`,
   providerTravelListing: (listingId: string) => `/provider/travel/listings/${listingId}`,

@@ -91,6 +91,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
         tabs: [
           { href: "/users", labelKey: "tabs.directory", permission: "customer.view" },
           { href: "/customers", labelKey: "tabs.customer360", permission: "customer.view" },
+          { href: "/privacy/deletion-requests", labelKey: "tabs.deletionRequests", permission: "admin.manage", queue: "pendingDeletionRequests" },
         ],
       },
       // Each pet with its owner and household members (Pet 360); health appears as counts only.
