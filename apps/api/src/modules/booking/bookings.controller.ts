@@ -104,7 +104,7 @@ export class BookingsController {
   }
 
   @Get("bookings/:id")
-  getById(@CurrentUser() user: SessionUser, @Param("id") id: string) {
+  getById(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string) {
     return this.bookingsService.getById(user.id, id);
   }
 
@@ -124,12 +124,12 @@ export class BookingsController {
   }
 
   @Post("bookings/:id/cancel")
-  cancel(@CurrentUser() user: SessionUser, @Param("id") id: string, @Body() dto: CancelBookingDto) {
+  cancel(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string, @Body() dto: CancelBookingDto) {
     return this.bookingsService.cancel(user.id, id, dto);
   }
 
   @Post("bookings/:id/confirm-attendance")
-  confirmAttendance(@CurrentUser() user: SessionUser, @Param("id") id: string) {
+  confirmAttendance(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string) {
     return this.bookingsService.confirmAttendance(user.id, id);
   }
 
@@ -151,7 +151,7 @@ export class BookingsController {
   }
 
   @Post("bookings/:id/recur")
-  recur(@CurrentUser() user: SessionUser, @Param("id") id: string, @Body() dto: CreateSeriesDto) {
+  recur(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string, @Body() dto: CreateSeriesDto) {
     return this.bookingsService.createWeeklySeries(user.id, id, dto.occurrences, dto.intervalWeeks ?? 1);
   }
 }
