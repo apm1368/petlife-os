@@ -1,11 +1,12 @@
-import Image from "next/image";
 import { Brand } from "@/features/brand/Brand";
 import Link from "next/link";
 import { LockKeyhole, ShieldCheck } from "@petlife/ui";
 import { notFound } from "next/navigation";
 import { isRouteLocale } from "@/lib/i18n/config";
-import { parkCopy } from "@/features/landing/park-copy";
+import { AuthLogoScene } from "@/features/auth/AuthLogoScene";
 import { parkAuthCopy } from "@/features/auth/park-auth-copy";
+import "@/features/landing/opl/opl-landing.css";
+import "@/features/reel/reel.css";
 import "@/features/auth/auth.css";
 import "@/features/auth/park-auth.css";
 import type { Metadata } from "next";
@@ -19,9 +20,9 @@ export default async function AuthLayout({ children, params }: { children: React
   const c = parkAuthCopy[locale];
   return <div className="auth-frame park-auth-page">
     <aside className="auth-brand-panel" aria-label="opetlife">
-      <Image unoptimized src={parkCopy[locale].imageSrc} alt="" fill sizes="(max-width: 820px) 100vw, 50vw" priority />
+      <AuthLogoScene locale={locale} />
       <div className="auth-brand-copy">
-        <Link href={`/${locale}`}><Brand /></Link>
+        <Link href={`/${locale}`}><Brand locale={locale} /></Link>
         <h2>{c.tagline}</h2><p>{c.description}</p>
         <div className="auth-trust-row"><span><ShieldCheck size={16} aria-hidden="true" />{c.privacy}</span><span><LockKeyhole size={16} aria-hidden="true" />{c.title}</span></div>
       </div>
