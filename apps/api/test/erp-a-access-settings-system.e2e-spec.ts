@@ -97,7 +97,7 @@ describe("ERP-A access control, settings, system", () => {
   it("custom roles: SUPER_ADMIN defines per-section access, members get exactly it on their next request, and role management is never delegable", async () => {
     const root = await actor("root", AdminRole.SUPER_ADMIN);
     const admin = await actor("plain admin", AdminRole.ADMIN);
-    const staff = await actor("shop staff", AdminRole.SUPPORT);
+    const staff = await actor("content editor", AdminRole.EDITOR);
     const body = { name: `Shop desk ${randomUUID().slice(0, 6)}`, description: "Runs the shop", permissions: ["commerce.view", "commerce.manage"], verticals: ["SHOP"], reason: "Shop team gets its own role" };
     await send("post", admin, "/admin/access/custom-roles").send(body).expect(403);
     await send("post", root, "/admin/access/custom-roles").send({ ...body, permissions: ["admin.manage"] }).expect(409);
@@ -107,14 +107,14 @@ describe("ERP-A access control, settings, system", () => {
     await send("post", root, "/admin/access/custom-roles").send({ ...body, name: body.name.toUpperCase() }).expect(409);
     expect((await get(admin, "/admin/access/custom-roles").expect(200)).body.some((r: { id: string }) => r.id === role.id)).toBe(true);
 
-    // Before: SUPPORT reaches support, not the shop.
-    await get(staff, "/admin/support").expect(200);
+    // Before: an EDITOR reaches content, not the shop.
+    await get(staff, "/admin/content/articles").expect(200);
     await get(staff, "/admin/commerce/orders").expect(403);
     await send("put", root, `/admin/access/admins/${root.adminUserId}/custom-role`).send({ customRoleId: role.id, reason: "Self change attempt" }).expect(409);
     await send("put", root, `/admin/access/admins/${staff.adminUserId}/custom-role`).send({ customRoleId: role.id, reason: "Moves to the shop desk" }).expect(200);
-    // After: exactly the role's permissions — the shop opens, support closes — with no new session.
+    // After: exactly the role's permissions — the shop opens, content closes — with no new session.
     await get(staff, "/admin/commerce/orders").expect(200);
-    await get(staff, "/admin/support").expect(403);
+    await get(staff, "/admin/content/articles").expect(403);
     const me = (await get(staff, "/admin/me").expect(200)).body;
     expect(me).toMatchObject({ customRoleName: body.name });
     expect([...me.permissions].sort()).toEqual(["commerce.manage", "commerce.view"]);
@@ -125,8 +125,8 @@ describe("ERP-A access control, settings, system", () => {
     await send("put", root, `/admin/access/custom-roles/${role.id}`).send({ ...body, permissions: ["commerce.view"], reason: "Read only for now" }).expect(200);
     expect((await get(staff, "/admin/me").expect(200)).body.permissions).toEqual(["commerce.view"]);
     await send("post", root, `/admin/access/custom-roles/${role.id}/archive`).send({ reason: "No longer needed" }).expect(409);
-    await send("put", root, `/admin/access/admins/${staff.adminUserId}/custom-role`).send({ customRoleId: null, reason: "Back to support" }).expect(200);
-    await get(staff, "/admin/support").expect(200);
+    await send("put", root, `/admin/access/admins/${staff.adminUserId}/custom-role`).send({ customRoleId: null, reason: "Back to content" }).expect(200);
+    await get(staff, "/admin/content/articles").expect(200);
     await send("post", root, `/admin/access/custom-roles/${role.id}/archive`).send({ reason: "No longer needed" }).expect(201);
     await send("put", root, `/admin/access/admins/${staff.adminUserId}/custom-role`).send({ customRoleId: role.id, reason: "Archived role" }).expect(409);
     // The database refuses what the service refuses, even for a direct write.
