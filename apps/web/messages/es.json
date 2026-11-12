@@ -3445,7 +3445,7 @@
       "loadError": "No se pudo cargar el registro de auditoría. Inténtalo de nuevo."
     },
     "shell": {
-      "console": "Gestión",
+      "console": "Admin",
       "skipToContent": "Saltar al contenido",
       "collapseSidebar": "Contraer la barra lateral",
       "expandSidebar": "Expandir la barra lateral",
