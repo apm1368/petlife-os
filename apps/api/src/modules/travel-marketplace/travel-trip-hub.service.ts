@@ -9,6 +9,7 @@ import { TravelRequirementService } from "../travel/travel-requirement.service";
 import { toRuleDto } from "../admin/travel/admin-travel.service";
 import { TravelBookingService } from "./travel-booking.service";
 import { TravelSearchService } from "./travel-search.service";
+import { PetAccessService } from "../pet-access/pet-access.service";
 
 const EXPIRING_WITHIN_DAYS = 30;
 
@@ -38,26 +39,37 @@ export class TravelTripHubService {
     private readonly requirements: TravelRequirementService,
     private readonly bookings: TravelBookingService,
     private readonly search: TravelSearchService,
+    private readonly petAccess: PetAccessService,
   ) {}
 
   private async householdIds(userId: string): Promise<string[]> {
     return (await this.prisma.householdMember.findMany({ where: { userId }, select: { householdId: true } })).map((m) => m.householdId);
   }
 
+  /**
+   * Household membership alone is not access to every pet in it: like the household pet list, a trip is only
+   * visible to someone who can see that pet (canViewIdentity), and its health documents and insurance only to
+   * someone who can read the pet's health (canViewHealth).
+   */
   private async loadTrip(userId: string, tripId: string) {
     const trip = await this.prisma.trip.findUnique({ where: { id: tripId }, include: { pet: true, _count: { select: { requirements: true } } } });
     if (!trip || !(await this.householdIds(userId)).includes(trip.householdId)) throw new TripNotFoundException({ tripId });
-    return trip;
+    const access = await this.petAccess.getEffectivePermissions(trip.petId, userId);
+    if (!access?.canViewIdentity) throw new TripNotFoundException({ tripId });
+    return Object.assign(trip, { canViewHealth: access.canViewHealth });
   }
 
   async listTrips(userId: string, scope?: "upcoming" | "past"): Promise<TripListItemDto[]> {
     const households = await this.householdIds(userId);
-    const trips = await this.prisma.trip.findMany({
+    const all = await this.prisma.trip.findMany({
       where: { householdId: { in: households } },
       include: { pet: { select: { name: true } }, requirements: { select: { status: true } }, travelBookings: { select: { status: true } } },
       orderBy: [{ departAt: "asc" }, { id: "asc" }],
       take: 200,
     });
+    const visiblePets = new Set<string>();
+    for (const petId of new Set(all.map((t) => t.petId))) if ((await this.petAccess.getEffectivePermissions(petId, userId))?.canViewIdentity) visiblePets.add(petId);
+    const trips = all.filter((t) => visiblePets.has(t.petId));
     const live: TravelBookingStatus[] = [TravelBookingStatus.CONFIRMED, TravelBookingStatus.IN_PROGRESS, TravelBookingStatus.COMPLETED];
     const items = trips.map((t) => {
       const phase = tripPhase(t, t.travelBookings.some((b) => live.includes(b.status)));
@@ -88,13 +100,13 @@ export class TravelTripHubService {
     const [summary, readiness, documents, insurance, cityPlaces, favorites, vets, bookingEvents, insuranceEvents, rules] = await Promise.all([
       this.bookings.getTripTravelSummary(tripId, trip.householdId),
       this.requirements.getReadinessSummary(trip.petId, tripId),
-      this.prisma.medicalDocument.findMany({
+      !trip.canViewHealth ? Promise.resolve([]) : this.prisma.medicalDocument.findMany({
         where: { petId: trip.petId, voidedAt: null, documentType: { in: [MedicalDocumentType.TRAVEL_DOCUMENT, MedicalDocumentType.VACCINATION_CERTIFICATE] } },
         select: { id: true, title: true, documentType: true, uploadedAt: true, travelRequirements: { where: { tripId }, select: { id: true } } },
         orderBy: { uploadedAt: "desc" },
         take: 30,
       }),
-      this.prisma.insuranceApplication.findMany({ where: { petId: trip.petId }, include: { product: { include: { provider: { select: { name: true } } } } }, orderBy: { createdAt: "desc" }, take: 10 }),
+      !trip.canViewHealth ? Promise.resolve([]) : this.prisma.insuranceApplication.findMany({ where: { petId: trip.petId }, include: { product: { include: { provider: { select: { name: true } } } } }, orderBy: { createdAt: "desc" }, take: 10 }),
       city
         ? this.prisma.petFriendlyPlace.findMany({ where: { city: { equals: city, mode: "insensitive" }, isPubliclyListed: true, status: { not: PetFriendlyPlaceStatus.SUSPENDED } }, select: { id: true, name: true, category: true, city: true }, orderBy: [{ name: "asc" }], take: 6 })
         : Promise.resolve([]),
@@ -103,7 +115,7 @@ export class TravelTripHubService {
         : Promise.resolve([]),
       city ? this.search.nearbyVets(city, null, null) : Promise.resolve([]),
       this.prisma.travelBookingEvent.findMany({ where: { booking: { tripId } }, include: { booking: { select: { id: true, reference: true } } }, orderBy: { createdAt: "desc" }, take: 20 }),
-      this.prisma.insuranceApplicationEvent.findMany({ where: { application: { petId: trip.petId }, createdAt: { gte: trip.createdAt } }, include: { application: { select: { id: true } } }, orderBy: { createdAt: "desc" }, take: 10 }),
+      !trip.canViewHealth ? Promise.resolve([]) : this.prisma.insuranceApplicationEvent.findMany({ where: { application: { petId: trip.petId }, createdAt: { gte: trip.createdAt } }, include: { application: { select: { id: true } } }, orderBy: { createdAt: "desc" }, take: 10 }),
       this.prisma.travelRequirementRule.findMany({ where: { country: trip.destinationCountry.toUpperCase(), status: TravelRequirementRuleStatus.ACTIVE, OR: [{ city: null }, ...(city ? [{ city: { equals: city, mode: "insensitive" as const } }] : [])] }, orderBy: [{ requirementType: "asc" }] }),
     ]);
 

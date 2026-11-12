@@ -37,6 +37,7 @@ import { BOOKING_INCLUDE, toTravelBookingDto, type BookingWithRelations } from "
 import { INVENTORY_HOLDING_STATUSES, TravelAvailabilityService } from "./travel-availability.service";
 import { resolveStayRange, toDateKey, toUtcMidnight } from "./travel-date.util";
 import { decideTravelRefund, toKg, type PetFacts, type RatePlanTerms } from "./travel-pricing.util";
+import { PetAccessService } from "../pet-access/pet-access.service";
 
 export class TravelActionNotAllowedException extends ApiException {
   constructor(code: string, message: string, details?: Record<string, unknown>) {
@@ -104,6 +105,7 @@ export class TravelBookingService {
     private readonly ledger: LedgerService,
     private readonly refunds: RefundsService,
     private readonly storage: StorageService,
+    private readonly petAccess: PetAccessService,
   ) {}
 
   // --- Access -----------------------------------------------------------------
@@ -154,6 +156,8 @@ export class TravelBookingService {
     });
     // A pet id the caller cannot see is never silently dropped.
     if (rows.length !== new Set(petIds).size) throw new NotFoundApiException("Pet");
+    // Household membership is not access to every pet: the caller must be able to see each one.
+    for (const row of rows) if (!(await this.petAccess.getEffectivePermissions(row.id, userId))?.canViewIdentity) throw new NotFoundApiException("Pet");
     const householdIds = new Set(rows.map((r) => r.householdId));
     if (householdIds.size > 1) throw new ValidationApiException({ field: "petIds", reason: "PETS_FROM_DIFFERENT_HOUSEHOLDS" });
     return {
@@ -728,6 +732,8 @@ export class TravelBookingService {
     const doc = await this.prisma.medicalDocument.findUnique({ where: { id: input.medicalDocumentId }, select: { petId: true, householdId: true, voidedAt: true } });
     const bookingPetIds = new Set(row.pets.map((p) => p.petId));
     if (!doc || doc.voidedAt || doc.householdId !== row.householdId || !bookingPetIds.has(doc.petId)) throw new NotFoundApiException("Document");
+    // Sending a medical document to a host is a health-data disclosure: only someone who may read that pet's health can do it.
+    if (!(await this.petAccess.getEffectivePermissions(doc.petId, userId))?.canViewHealth) throw new NotFoundApiException("Document");
     const expiresAt = new Date(row.checkOut.getTime() + 86_400_000);
     await this.prisma.travelBookingDocumentShare.upsert({
       where: { bookingId_medicalDocumentId: { bookingId, medicalDocumentId: input.medicalDocumentId } },

@@ -11,6 +11,7 @@ import { classifyLoginIdentifier } from "../identifier.util";
 import { IDENTIFIER_LIMITS, IdentifierRateLimiter } from "../../../common/rate-limit/identifier-rate-limiter.service";
 import { EmailGatewayService } from "../../../common/email/email-gateway.service";
 import { publicOrigin, renderEmail, type EmailLocale } from "../../../common/email/email-layout";
+import { isLiveDeployment } from "../../../common/http/deployment.util";
 
 const RESET_COPY: Record<EmailLocale, { subject: string; body: (minutes: number) => string; action: string }> = {
   fa: { subject: "بازیابی رمز عبور اپت‌لایف", body: (m) => `درخواستی برای تغییر رمز عبور حساب شما ثبت شد. برای انتخاب رمز تازه روی دکمهٔ زیر بزنید. این پیوند تا ${m} دقیقه معتبر است.\n\nاگر شما این درخواست را نداده‌اید، این پیام را نادیده بگیرید؛ رمز فعلی شما تغییری نمی‌کند.`, action: "انتخاب رمز تازه" },
@@ -87,8 +88,8 @@ export class AuthPasswordResetService {
     // stores its hash, and there is no real mail provider wired in yet (see class
     // doc comment). Gate the actual token behind a runtime check rather than
     // trusting call sites to never invoke this path in production.
-    if (this.config.get("NODE_ENV", { infer: true }) === "production") {
-      this.logger.warn(`[DEV PASSWORD RESET] insecure development reset-token delivery was invoked in production for userId=${user.id} — no token was logged, and no email was sent. Configure a real mail provider before accepting production traffic.`);
+    if (isLiveDeployment(this.config)) {
+      this.logger.warn(`[DEV PASSWORD RESET] insecure development reset-token delivery was invoked on a live deployment for userId=${user.id} — no token was logged, and no email was sent. Configure a real mail provider before accepting production traffic.`);
       return;
     }
     this.logger.log(`[DEV PASSWORD RESET] userId=${user.id} token=${rawToken} (expires in ${ttlMinutes}m)`);

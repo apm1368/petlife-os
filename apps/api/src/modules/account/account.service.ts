@@ -5,7 +5,7 @@ import { SessionService } from "../../common/session/session.service";
 
 /** Batch 8 — account activity groups. Only events about this person (their own User aggregate, or naming them as the actor); never another member's household activity. */
 export const ACTIVITY_GROUPS = {
-  SECURITY: ["UserAuthenticated", "PasswordChanged", "PasswordResetCompleted", "SessionRevoked", "OtherSessionsRevoked", "AllSessionsRevoked", "ContactChanged", "UnverifiedCredentialsCleared"],
+  SECURITY: ["UserAuthenticated", "PasswordChanged", "PasswordResetCompleted", "SessionRevoked", "OtherSessionsRevoked", "AllSessionsRevoked", "ContactChanged", "UnverifiedCredentialsCleared", "UnprovenContactReleased"],
   PRIVACY: ["ConsentChanged", "DataExportRequested", "DataExportReady", "DataExportDownloaded", "AccountDeletionRequested", "AccountDeletionCancelled", "AccountDeletionStateChanged"],
   HOUSEHOLD: ["HouseholdInvitationAccepted", "HouseholdInvitationDeclined", "HouseholdMembershipRequested", "HouseholdMembershipApproved", "HouseholdMembershipRejected", "HouseholdMemberLeft"],
   /** Household membership events — shown only to that household's owners, who hold its billing. */
@@ -51,7 +51,7 @@ export class AccountService {
         providers,
       },
       sessions,
-      activity: await this.activity(userId, ["UserAuthenticated", "PasswordChanged", "PasswordResetCompleted", "SessionRevoked", "OtherSessionsRevoked", "AllSessionsRevoked", "ContactChanged", "UnverifiedCredentialsCleared"]),
+      activity: await this.activity(userId, ["UserAuthenticated", "PasswordChanged", "PasswordResetCompleted", "SessionRevoked", "OtherSessionsRevoked", "AllSessionsRevoked", "ContactChanged", "UnverifiedCredentialsCleared", "UnprovenContactReleased"]),
     };
   }
 

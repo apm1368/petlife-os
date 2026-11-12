@@ -19,7 +19,13 @@ describe("web response-header security boundary", () => {
   it("allows same-origin framing but denies arbitrary third-party framing", async () => {
     const headers = await ownedHeaders();
     expect(headers["x-frame-options"]).toBe("SAMEORIGIN");
-    expect(headers["content-security-policy"]).toBe("frame-ancestors 'self'");
+    expect(headers["content-security-policy"]).toBe("frame-ancestors 'self'; object-src 'none'; base-uri 'self'");
+  });
+
+  it("does not advertise the framework or proxy arbitrary remote images", () => {
+    expect(config.poweredByHeader).toBe(false);
+    expect(config.images?.remotePatterns ?? []).toEqual([]);
+    expect(config.images?.qualities).toEqual([75]);
   });
 
   it("does not silently block existing scripts, private media or device controls", async () => {

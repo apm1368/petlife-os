@@ -10,6 +10,7 @@ import { formatDay, localizeDigits } from "@/lib/date/jalali";
 import { travelMarketService } from "@/services/travel-marketplace.service";
 import { requirementStatusTone } from "@/features/travel/travel-status";
 import { bookingStatusTone } from "./labels";
+import { externalHref } from "@/lib/url/external-href";
 
 const DOC_STATE: Record<string, { key: string; tone: "success" | "attention" | "higherConcern" | "neutral" }> = {
   FOUND: { key: "FOUND", tone: "success" },
@@ -119,7 +120,7 @@ export function TripHubView({ tripId }: { tripId: string }) {
                       {r.verifiedAt ? ` · ${th("verified")} ${tripDate(r.verifiedAt, lang)}` : ""}
                       {r.isStale ? ` · ${th("needsRecheck")}` : ""}
                     </span>
-                    {r.sourceUrl ? <a className="w-fit text-metadata underline" href={r.sourceUrl} target="_blank" rel="noopener noreferrer">{th("officialSource")}</a> : null}
+                    {externalHref(r.sourceUrl) ? <a className="w-fit text-metadata underline" href={externalHref(r.sourceUrl)!} target="_blank" rel="noopener noreferrer">{th("officialSource")}</a> : null}
                     {r.linkedMedicalDocumentTitle ? <span className="text-metadata">{th("document")}: {r.linkedMedicalDocumentTitle}</span> : null}
                   </li>
                 );

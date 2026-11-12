@@ -8,6 +8,7 @@ import { generateOAuthToken, signOAuthState, verifyOAuthState } from "../../../c
 import { GoogleAuthFailedException } from "../../../common/errors/api-exception";
 import { GoogleOAuthClient } from "./google-oauth.client";
 import { AuthGoogleService } from "./auth-google.service";
+import { useSecureCookies } from "../../../common/http/deployment.util";
 
 export const OAUTH_STATE_COOKIE_NAME = "petlife_oauth_state";
 
@@ -30,8 +31,8 @@ export class AuthGoogleController {
     return this.config.get("WEB_APP_ORIGIN", { infer: true }).split(",")[0]!;
   }
 
-  private get isProduction(): boolean {
-    return this.config.get("NODE_ENV", { infer: true }) === "production";
+  private get secureCookies(): boolean {
+    return useSecureCookies(this.config);
   }
 
   @Get()
@@ -47,7 +48,7 @@ export class AuthGoogleController {
     );
     res.cookie(OAUTH_STATE_COOKIE_NAME, cookieValue, {
       httpOnly: true,
-      secure: this.isProduction,
+      secure: this.secureCookies,
       sameSite: "lax",
       path: "/",
       maxAge: 10 * 60 * 1000,

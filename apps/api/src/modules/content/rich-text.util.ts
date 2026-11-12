@@ -8,7 +8,9 @@ const CALLOUT_TONES = ["info", "warning"];
 
 /** http(s):// or a same-origin relative path only — never javascript:/data:/anything else (spec: "prevent arbitrary script injection"). Mirrors the exact allow-list ContentBlockLocale.ctaHref validation uses. */
 export function isSafeHref(href: string): boolean {
-  if (href.startsWith("/") && !href.startsWith("//")) return true;
+  // "/\\host" is turned into "//host" by browsers, so a backslash right after the slash is as off-site as "//".
+  if (/^\/(?![/\\])/.test(href)) return !href.includes("\\") && ![...href].some((char) => char.charCodeAt(0) < 0x20);
+  if (href.startsWith("/")) return false;
   try {
     const url = new URL(href);
     return url.protocol === "http:" || url.protocol === "https:";

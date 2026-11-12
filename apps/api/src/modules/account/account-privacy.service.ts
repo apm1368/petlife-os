@@ -1,10 +1,10 @@
 import { PlatformSettingsService } from "../platform-settings/platform-settings.service";
-import { Inject, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { AccountDeletionState, ConsentKind, HouseholdRole, PrivacyRequestStatus, type Prisma } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import { ConsentRequiredException, DeletionBlockedException, ExportLimitReachedException, NotFoundApiException, ReauthenticationRequiredException, ValidationApiException } from "../../common/errors/api-exception";
-import { OTP_PROVIDER, type OtpProvider } from "../auth/otp/otp-provider.interface";
+import { OtpService } from "../auth/otp/otp.service";
 import { verifyPassword } from "../../common/password/password-hash.util";
 import { isGrantActive } from "../pet-access/pet-access.service";
 import { AccountExportService, EXPORT_AVAILABLE_DAYS } from "./account-export.service";
@@ -37,7 +37,7 @@ export class AccountPrivacyService {
     private readonly prisma: PrismaService,
     private readonly events: DomainEventsService,
     private readonly exports: AccountExportService,
-    @Inject(OTP_PROVIDER) private readonly otp: OtpProvider,
+    private readonly otp: OtpService,
     private readonly settings: PlatformSettingsService,
   ) {}
 
@@ -242,7 +242,7 @@ export class AccountPrivacyService {
   async sendDeletionCode(userId: string) {
     const contact = await this.codeContact(userId);
     if (!contact) throw new ReauthenticationRequiredException({ method: "password" });
-    await this.otp.sendOtp(contact);
+    await this.otp.send(contact, { purpose: "account-deletion", userId });
     return { sentTo: maskContact(contact) };
   }
 
@@ -280,7 +280,7 @@ export class AccountPrivacyService {
       const contact = await this.codeContact(userId);
       if (!contact) throw new ReauthenticationRequiredException({ method: "password" });
       try {
-        await this.otp.verifyOtp(contact, code);
+        await this.otp.verify(contact, code, { purpose: "account-deletion", userId });
         return;
       } catch {
         throw new ReauthenticationRequiredException({ method: "code" });

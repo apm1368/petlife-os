@@ -40,9 +40,19 @@ export class CardTransferPaymentService {
     return { companyCardNumberMasked: `${"•".repeat(Math.max(0, digits.length - 4))}${digits.slice(-4)}`, accountHolderName: holder };
   }
 
+  /**
+   * An idempotent replay returns the caller's own earlier row — never another member's: a key is client-chosen,
+   * so a row found under it that belongs to someone else is a conflict, not a replay.
+   */
+  private async ownReplay(userId: string, idempotencyKey: string) {
+    const existing = await this.prisma.cardTransferPayment.findUnique({ where: { idempotencyKey: idempotencyKey.trim() } });
+    if (existing && existing.userId !== userId) throw new ValidationApiException({ field: "idempotencyKey", reason: "CONFLICT" });
+    return existing;
+  }
+
   async startForCheckout(userId: string, checkoutId: string, idempotencyKey: string) {
     if (!idempotencyKey?.trim()) throw new ValidationApiException({ field: "idempotencyKey", reason: "REQUIRED" });
-    const existing = await this.prisma.cardTransferPayment.findUnique({ where: { idempotencyKey } });
+    const existing = await this.ownReplay(userId, idempotencyKey);
     if (existing) return existing;
     const checkout = await this.prisma.checkout.findFirst({ where: { id: checkoutId, userId } });
     if (!checkout) throw new ValidationApiException({ field: "checkoutId", reason: "NOT_FOUND" });
@@ -77,7 +87,7 @@ export class CardTransferPaymentService {
 
   async startForBooking(userId: string, bookingId: string, idempotencyKey: string) {
     if (!idempotencyKey?.trim()) throw new ValidationApiException({ field: "idempotencyKey", reason: "REQUIRED" });
-    const existing = await this.prisma.cardTransferPayment.findUnique({ where: { idempotencyKey } });
+    const existing = await this.ownReplay(userId, idempotencyKey);
     if (existing) return existing;
     const booking = await this.prisma.booking.findFirst({ where: { id: bookingId, userId } });
     if (!booking) throw new ValidationApiException({ field: "bookingId", reason: "NOT_FOUND" });

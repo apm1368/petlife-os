@@ -76,7 +76,7 @@ export class PublicPlacesReadService {
   async nearby(query: NearbyPetFriendlyPlacesQueryDto, userId?: string) {
     const { page, pageSize, skip, take } = resolvePagination(query);
     const radiusMeters = query.radiusMeters ?? DEFAULT_RADIUS_METERS;
-    const includeDemoRecords = process.env.NODE_ENV !== "production";
+    const includeDemoRecords = !("isDemoRecord" in excludeDemoRecordsFromPublicReads());
 
     const nearbyRows = await this.prisma.$queryRaw<NearbyRow[]>`
       SELECT id, ST_Distance(location, ST_SetSRID(ST_MakePoint(${query.longitude}, ${query.latitude}), 4326)::geography) AS distance_meters
@@ -110,7 +110,7 @@ export class PublicPlacesReadService {
   }
 
   private async countNearby(query: NearbyPetFriendlyPlacesQueryDto, radiusMeters: number) {
-    const includeDemoRecords = process.env.NODE_ENV !== "production";
+    const includeDemoRecords = !("isDemoRecord" in excludeDemoRecordsFromPublicReads());
     const rows = await this.prisma.$queryRaw<{ count: bigint }[]>`
       SELECT COUNT(*) AS count
       FROM pet_friendly_places

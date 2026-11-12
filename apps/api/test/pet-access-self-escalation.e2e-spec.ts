@@ -15,7 +15,7 @@ describe("Pet access grants: no self-escalation", () => {
   let householdId: string, petId: string, managerGrantId: string;
   const DAY = 86_400_000;
   const managerExpiry = new Date(Date.now() + 2 * DAY);
-  type Client = { id: string; post: (p: string) => request.Test; patch: (p: string) => request.Test };
+  type Client = { id: string; get: (p: string) => request.Test; post: (p: string) => request.Test; patch: (p: string) => request.Test; delete: (p: string) => request.Test };
   let owner: Client, manager: Client, target: Client;
 
   const FLAGS_NONE = {
@@ -31,7 +31,7 @@ describe("Pet access grants: no self-escalation", () => {
     const cookie = `petlife_session=${signSessionCookie(session.id, process.env.SESSION_SECRET!)}; petlife_csrf=${csrf}`;
     const server = app.getHttpServer();
     const withAuth = (t: request.Test) => t.set("Cookie", cookie).set("x-csrf-token", csrf);
-    return { id: user.id, post: (p) => withAuth(request(server).post(p)), patch: (p) => withAuth(request(server).patch(p)) };
+    return { id: user.id, get: (p) => withAuth(request(server).get(p)), post: (p) => withAuth(request(server).post(p)), patch: (p) => withAuth(request(server).patch(p)), delete: (p) => withAuth(request(server).delete(p)) };
   }
 
   beforeAll(async () => {
@@ -82,5 +82,22 @@ describe("Pet access grants: no self-escalation", () => {
 
     await owner.post(`/pets/${petId}/access-grants`).send({ userId: target.id, ...identityOnly, reason: "VET_BOOKING" }).expect(400);
     await owner.post(`/pets/${petId}/access-grants`).send({ userId: target.id, ...identityOnly, reason: "EXPLICIT_VET_SHARE" }).expect(400);
+  });
+
+  it("someone without canManageAccess can neither list a pet's grants nor revoke them", async () => {
+    // `viewer` holds identity-only access — the class-level @RequirePetAccess("canManageAccess") must apply to every route.
+    const viewer = await member("viewer", HouseholdRole.FAMILY);
+    await db.petAccessGrant.create({ data: { petId, userId: viewer.id, source: PetAccessSource.MANUAL, grantedByUserId: owner.id, ...identityOnly } });
+    const sitter = await db.petAccessGrant.create({ data: { petId, userId: target.id, source: PetAccessSource.TEMPORARY, grantedByUserId: owner.id, reason: "Pet sitter", expiresAt: new Date(Date.now() + DAY), ...identityOnly } });
+
+    const listed = await viewer.get(`/pets/${petId}/access-grants`).expect(403);
+    expect(listed.body.error.code).toBe("PET_ACCESS_DENIED");
+    await viewer.delete(`/pets/${petId}/access-grants/${sitter.id}`).expect(403);
+    expect((await db.petAccessGrant.findUniqueOrThrow({ where: { id: sitter.id } })).revokedAt).toBeNull();
+
+    // The owner and a manager still can.
+    await owner.get(`/pets/${petId}/access-grants`).expect(200);
+    await manager.get(`/pets/${petId}/access-grants`).expect(200);
+    await owner.delete(`/pets/${petId}/access-grants/${sitter.id}`).expect(200);
   });
 });

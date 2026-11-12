@@ -40,7 +40,22 @@ export interface ApiFetchOptions {
   cache?: RequestCache;
 }
 
+/**
+ * Route params reach API paths unencoded, and Next decodes `%2F`/`%23` inside them, so a crafted link such as
+ * `/fa/community/messages/..%2F..%2Fsomething%23` would otherwise make the visitor's browser call a different API
+ * route with their session cookie and CSRF header. A path is used only when it has no dot segments, backslashes,
+ * fragments or control characters; anything else is refused before a request is made.
+ */
+export function assertSafeApiPath(path: string): void {
+  const pathname = path.split("?")[0] ?? "";
+  const dotSegment = (segment: string) => /^(?:\.|%2e){1,2}$/i.test(segment);
+  const controlChar = [...path].some((char) => char.charCodeAt(0) < 0x20);
+  const unsafe = !pathname.startsWith("/") || pathname.startsWith("//") || /[\\#]/.test(path) || controlChar || pathname.split("/").some(dotSegment);
+  if (unsafe) throw new ApiError({ code: "INVALID_API_PATH", message: "Invalid request path", requestId: "client" }, 400);
+}
+
 async function send<T>(path: string, options: ApiFetchOptions): Promise<{ response: Response; payload: T | undefined }> {
+  assertSafeApiPath(path);
   const method = options.method ?? "GET";
   const headers: Record<string, string> = {};
 

@@ -39,7 +39,7 @@ export class SellerAuthGuard implements CanActivate {
 
     const resolved = await this.sellerAccess.resolveMembership(user.id, sellerId);
 
-    const requiredRoles = this.reflector.get<SellerMembershipRole[] | undefined>(SELLER_ROLE_KEY, context.getHandler());
+    const requiredRoles = this.reflector.getAllAndOverride<SellerMembershipRole[] | undefined>(SELLER_ROLE_KEY, [context.getHandler(), context.getClass()]);
     if (requiredRoles && requiredRoles.length > 0 && !roleSatisfies(resolved.role, requiredRoles)) {
       throw new SellerAccessDeniedException({ reason: "INSUFFICIENT_ROLE", requiredRoles, actualRole: resolved.role });
     }

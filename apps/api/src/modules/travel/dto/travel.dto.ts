@@ -1,4 +1,4 @@
-import { IsBoolean, IsDateString, IsEnum, IsInt, IsOptional, IsString, IsUUID, Length, Min } from "class-validator";
+import { IsBoolean, IsDateString, IsEnum, IsInt, IsOptional, IsString, IsUUID, Length, Min, Matches } from "class-validator";
 import { TravelMode, TravelRequirementStatus, TravelRequirementType, TripStatus } from "@petlife/types";
 
 export class CreateTripDto {
@@ -88,6 +88,9 @@ export class CreateTravelRequirementDto {
   @IsOptional()
   @IsString()
   @Length(0, 500)
+  // Empty clears it; anything else must be a plain http(s) link — it is rendered as an href for every household
+  // member and for staff, so `javascript:`/`data:` URLs must never be stored.
+  @Matches(/^(?:https?:\/\/[^\s]+)?$/i, { message: "sourceUrl must be an http(s) URL" })
   sourceUrl?: string;
 
   @IsOptional()
@@ -114,6 +117,9 @@ export class UpdateTravelRequirementDto {
   @IsOptional()
   @IsString()
   @Length(0, 500)
+  // Empty clears it; anything else must be a plain http(s) link — it is rendered as an href for every household
+  // member and for staff, so `javascript:`/`data:` URLs must never be stored.
+  @Matches(/^(?:https?:\/\/[^\s]+)?$/i, { message: "sourceUrl must be an http(s) URL" })
   sourceUrl?: string;
 
   @IsOptional()
