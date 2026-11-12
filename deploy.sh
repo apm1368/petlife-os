@@ -229,6 +229,7 @@ rollback() {
   rm -rf apps/api/dist apps/web/.next
   cp -a "$RELEASE_DIR/previous/api-dist" apps/api/dist
   cp -a "$RELEASE_DIR/previous/web-next" apps/web/.next
+  rm -rf apps/web/.next/server/route-cache
   reload_apps
   if healthy; then
     echo "deploy: FAILED; previous build restored and healthy. Git HEAD is ${SHA:0:7}, but the running code is the previous build." >&2
@@ -275,6 +276,10 @@ if [ ! -f apps/api/dist/main.js ] || [ ! -f apps/web/.next/BUILD_ID ]; then
   echo "deploy: build finished without apps/api/dist/main.js or apps/web/.next/BUILD_ID" >&2
   rollback
 fi
+# Next 15.5 persists runtime page renders in .next/server/route-cache, keyed by route rather than by build.
+# Entries the previous release wrote (or that a rollback restored) would otherwise keep being served for fully
+# static pages such as the landing, hiding this release's prerenders indefinitely. Start every release clean.
+rm -rf apps/web/.next/server/route-cache
 
 # startOrReload applies ecosystem.config.js (and the BUILD_* env exported by deploy.yml) without the
 # delete+start gap; it starts the apps when they are not registered yet.
