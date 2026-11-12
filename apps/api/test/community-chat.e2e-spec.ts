@@ -42,6 +42,20 @@ describe("Community chat", () => {
     expect(notes[0]!.deepLink).toBe(`/community/messages/${a.id}`);
   });
 
+  it("#290 Q52: a member can message a post's author from the post — same pair conversation, no contacts, never self, only published posts", async () => {
+    const author = await actor("Neda"), reader = await actor("Reza");
+    const post = { body: await db.communityPost.create({ data: { authorUserId: author.id, type: "ADOPTION", title: "Kitten needs a home", body: "Two months old, vaccinated." } }) };
+    const fromPost = (await reader.post(`/chat/conversations/for-post/${post.body.id}`).expect(201)).body;
+    expect(fromPost.otherMember).toMatchObject({ id: author.id, displayName: "Neda" });
+    expect(JSON.stringify(fromPost)).not.toMatch(/@example\.com/);
+    const direct = (await reader.post("/chat/conversations").send({ participantUserId: author.id }).expect(201)).body;
+    expect(direct.id).toBe(fromPost.id);
+    await author.post(`/chat/conversations/for-post/${post.body.id}`).expect(400);
+    await reader.post(`/chat/conversations/for-post/${randomUUID()}`).expect(404);
+    await db.communityPost.update({ where: { id: post.body.id }, data: { status: "REMOVED" } });
+    await reader.post(`/chat/conversations/for-post/${post.body.id}`).expect(404);
+  });
+
   it("only participants can read or write — everyone else gets the same 404 as a missing conversation", async () => {
     const x = await actor("x"), y = await actor("y"), outsider = await actor("outsider");
     const c = (await x.post("/chat/conversations").send({ participantUserId: y.id }).expect(201)).body;

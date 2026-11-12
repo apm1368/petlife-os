@@ -6621,6 +6621,30 @@
       "commentLabel": "Añadir un comentario",
       "commentSubmit": "Publicar",
       "commentsEmpty": "Aún no hay comentarios."
+    },
+    "contact": {
+      "message": "Escribir a quien publicó",
+      "adopt": "Solicitar adopción",
+      "signIn": "Inicia sesión para enviar un mensaje",
+      "private": "La conversación se queda dentro de opetlife; los números de teléfono nunca se muestran.",
+      "screening": {
+        "title": "Unas preguntas rápidas para adoptar",
+        "hint": "Tus respuestas se envían como primer mensaje para que se pueda elegir con cuidado.",
+        "intro": "Hola, me gustaría adoptar a esta mascota.",
+        "home": "Dónde vives",
+        "homes": {
+          "apartment": "Apartamento",
+          "houseWithYard": "Casa con jardín",
+          "other": "Otro"
+        },
+        "experience": "Experiencia con mascotas",
+        "otherPets": "Otras mascotas en casa",
+        "why": "Por qué quieres adoptar",
+        "visit": "Puedo conocerla en persona",
+        "visitYes": "Puedo ir a conocerla en persona.",
+        "send": "Enviar solicitud",
+        "cancel": "Cancelar"
+      }
     }
   },
   "publicNavigation": {

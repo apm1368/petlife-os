@@ -5867,6 +5867,30 @@
       "commentLabel": "Add a comment",
       "commentSubmit": "Post",
       "commentsEmpty": "No comments yet."
+    },
+    "contact": {
+      "message": "Message the poster",
+      "adopt": "Ask to adopt",
+      "signIn": "Sign in to send a message",
+      "private": "The conversation stays inside opetlife; phone numbers are never shown.",
+      "screening": {
+        "title": "A few quick questions for adoption",
+        "hint": "Your answers are sent as your first message, so the poster can choose carefully.",
+        "intro": "Hello, I'd like to adopt this pet.",
+        "home": "Where you live",
+        "homes": {
+          "apartment": "Apartment",
+          "houseWithYard": "House with a yard",
+          "other": "Other"
+        },
+        "experience": "Experience with pets",
+        "otherPets": "Other pets at home",
+        "why": "Why you want to adopt",
+        "visit": "I can meet in person",
+        "visitYes": "I can come and meet them in person.",
+        "send": "Send request",
+        "cancel": "Cancel"
+      }
     }
   },
   "communityChat": {

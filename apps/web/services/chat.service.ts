@@ -15,6 +15,8 @@ export interface ChatMessageDto { id: string; body: string; senderIsMe: boolean;
 
 export const chatService = {
   open: (participantUserId: string) => apiFetch<ChatConversationSummary>("/chat/conversations", { method: "POST", body: { participantUserId } }),
+  /** #290 Q52: message a community post's author from the post; no contact details are exchanged. */
+  openForPost: (postId: string) => apiFetch<ChatConversationSummary>(`/chat/conversations/for-post/${postId}`, { method: "POST" }),
   list: () => apiFetch<ChatConversationSummary[]>("/chat/conversations"),
   messages: (id: string, before?: string) => apiFetch<{ items: ChatMessageDto[]; hasMore: boolean }>(`/chat/conversations/${id}/messages${before ? `?before=${encodeURIComponent(before)}` : ""}`),
   send: (id: string, body: string) => apiFetch<ChatMessageDto>(`/chat/conversations/${id}/messages`, { method: "POST", body: { body } }),

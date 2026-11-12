@@ -54,6 +54,17 @@ export class ChatService {
     }
   }
 
+  /**
+   * #290 Q52 ("chat with the advertiser, number hidden"): open the conversation with a community post's author
+   * from the post itself, without the caller ever learning a contact detail. Only published posts; never yourself.
+   */
+  async openForPost(userId: string, postId: string) {
+    const post = await this.prisma.communityPost.findUnique({ where: { id: postId }, select: { authorUserId: true, status: true } });
+    if (!post || post.status !== CommunityContentStatus.PUBLISHED) throw new NotFoundApiException("Post");
+    if (post.authorUserId === userId) throw new ValidationApiException({ field: "postId", reason: "CANNOT_MESSAGE_SELF" });
+    return this.open(userId, post.authorUserId);
+  }
+
   private async unreadCount(conversationId: string, userId: string, lastReadAt: Date | null, clearedAt: Date | null = null) {
     const after = [lastReadAt, clearedAt].filter((d): d is Date => Boolean(d)).sort((a, b) => b.getTime() - a.getTime())[0];
     return this.prisma.chatMessage.count({ where: { conversationId, status: CommunityContentStatus.PUBLISHED, senderUserId: { not: userId }, ...(after ? { createdAt: { gt: after } } : {}) } });

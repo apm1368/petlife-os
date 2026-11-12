@@ -6631,6 +6631,30 @@
       "commentLabel": "Kommentar hinzufügen",
       "commentSubmit": "Senden",
       "commentsEmpty": "Noch keine Kommentare."
+    },
+    "contact": {
+      "message": "Nachricht an den Verfasser",
+      "adopt": "Adoption anfragen",
+      "signIn": "Anmelden, um eine Nachricht zu senden",
+      "private": "Das Gespräch bleibt in opetlife; Telefonnummern werden nie angezeigt.",
+      "screening": {
+        "title": "Ein paar kurze Fragen zur Adoption",
+        "hint": "Ihre Antworten werden als erste Nachricht gesendet, damit sorgfältig entschieden werden kann.",
+        "intro": "Hallo, ich möchte dieses Tier gern adoptieren.",
+        "home": "Wohnsituation",
+        "homes": {
+          "apartment": "Wohnung",
+          "houseWithYard": "Haus mit Garten",
+          "other": "Andere"
+        },
+        "experience": "Erfahrung mit Tieren",
+        "otherPets": "Andere Tiere im Haushalt",
+        "why": "Warum Sie adoptieren möchten",
+        "visit": "Ich kann mich persönlich treffen",
+        "visitYes": "Ich kann vorbeikommen und das Tier persönlich kennenlernen.",
+        "send": "Anfrage senden",
+        "cancel": "Abbrechen"
+      }
     }
   },
   "publicNavigation": {
