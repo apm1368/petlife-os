@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { DemoRecordTag } from "@/features/admin/DemoRecordTag";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
@@ -78,7 +79,7 @@ export function AdminContentArticleListView() {
                   </StatusLabel>
                 ))}
               </div>
-              <span className="text-body font-medium text-text-primary">{article.locales[0]?.title ?? t("untitled")}</span>
+              <span className="text-body font-medium text-text-primary">{article.locales[0]?.title ?? t("untitled")}<DemoRecordTag isDemoRecord={article.isDemoRecord} /></span>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-metadata text-text-secondary">
                 {article.category ? <span>{article.category.name}</span> : null}
                 {article.author ? <span>{article.author.name}</span> : null}

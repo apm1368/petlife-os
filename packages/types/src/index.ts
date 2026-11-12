@@ -3164,6 +3164,8 @@ export interface AdminOrderFinancialsDto {
 
 /** Minimal admin-facing org summaries, used to locate a Provider/Seller for verification overrides or as a TrustCase subject — never the seller/provider's own operational DTOs, which carry fields (context, membership) an internal admin view has no use for. */
 export interface AdminProviderOrgSummaryDto {
+  /** Demo/showcase content: hidden from the public site in production; staff see it labelled. */
+  isDemoRecord?: boolean;
   id: string;
   name: string;
   type: string;
@@ -3823,6 +3825,8 @@ export interface AdminArticleLocaleAvailabilityDto {
 }
 
 export interface AdminArticleListItemDto {
+  /** Demo/showcase content: hidden from the public site in production; staff see it labelled. */
+  isDemoRecord?: boolean;
   id: string;
   author: ContentAuthorDto | null;
   category: PublicCategoryDto | null;
@@ -5529,6 +5533,8 @@ export enum PetFriendlyPlaceStatus {
 }
 
 export interface PetFriendlyPlaceDto {
+  /** Demo/showcase content: hidden from the public site in production; staff see it labelled. */
+  isDemoRecord?: boolean;
   id: string;
   name: string;
   category: PetFriendlyPlaceCategory;
@@ -6362,6 +6368,8 @@ export interface AdminRefundRequestDto {
 }
 
 export interface AdminProductRowDto {
+  /** Demo/showcase content: hidden from the public site in production; staff see it labelled. */
+  isDemoRecord?: boolean;
   id: string;
   title: string;
   status: ProductStatus;

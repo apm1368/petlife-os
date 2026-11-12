@@ -39,5 +39,6 @@ export function toPetFriendlyPlaceDto(row: PetFriendlyPlace, options: { distance
     openingHours: (row.openingHours as unknown as { day: number; open: string; close: string }[] | null) ?? null,
     province: row.province,
     createdAt: row.createdAt.toISOString(),
+    isDemoRecord: row.isDemoRecord,
   };
 }

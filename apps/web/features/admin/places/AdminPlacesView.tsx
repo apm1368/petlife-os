@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { DemoRecordTag } from "../DemoRecordTag";
 import { useLocale } from "next-intl";
 import { Button, EmptyState, ErrorRecovery, Input, Skeleton } from "@petlife/ui";
 import type { PetFriendlyPlaceDto } from "@petlife/types";
@@ -116,7 +117,7 @@ export function AdminPlacesView() {
               <thead><tr><Th>{tr("نام", "Name")}</Th><Th>{tr("شهر", "City")}</Th><Th>{tr("وضعیت", "Status")}</Th><Th>{tr("عمومی", "Public")}</Th><Th>{tr("اقدام", "Actions")}</Th></tr></thead>
               <tbody>{places.length === 0 ? <EmptyRow colSpan={5} label={tr("مکانی نیست", "No places")} /> : places.map((p) => (
                 <tr key={p.id}>
-                  <Td>{editingPlaceId === p.id ? <Input label={tr("نام مکان", "Place name")} value={nameDraft} onChange={(e) => setNameDraft(e.target.value)} /> : p.name}</Td><Td>{p.city}</Td>
+                  <Td>{editingPlaceId === p.id ? <Input label={tr("نام مکان", "Place name")} value={nameDraft} onChange={(e) => setNameDraft(e.target.value)} /> : <>{p.name}<DemoRecordTag isDemoRecord={p.isDemoRecord} /></>}</Td><Td>{p.city}</Td>
                   <Td><Tag tone={p.status === "VERIFIED" ? "success" : p.status === "SUSPENDED" ? "urgent" : "neutral"}>{p.status}</Tag></Td>
                   <Td>{p.isPubliclyListed ? "✓" : "—"}</Td>
                   <Td>{canManage ? <div className="flex flex-wrap gap-1">

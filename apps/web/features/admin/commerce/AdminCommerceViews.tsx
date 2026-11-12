@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { DemoRecordTag } from "../DemoRecordTag";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { Button, Dialog, EmptyState, ErrorRecovery, Input, Skeleton } from "@petlife/ui";
@@ -1035,6 +1036,7 @@ export function AdminProductsView() {
                           <Link className="text-brand-natural" href={`/${lang}/shop/products/${p.id}`}>
                             {p.title}
                           </Link>
+                          <DemoRecordTag isDemoRecord={p.isDemoRecord} />
                           {p.brandName ? (
                             <span className="block text-metadata text-text-secondary">{p.brandName}</span>
                           ) : null}

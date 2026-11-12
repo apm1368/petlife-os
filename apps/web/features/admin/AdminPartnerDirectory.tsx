@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { DemoRecordTag } from "./DemoRecordTag";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
@@ -103,7 +104,7 @@ export function AdminPartnerDirectory({ kind }: { kind: "provider" | "seller" })
                   result.items.map((org) => (
                     <ContextSurface key={org.id} className="flex min-w-0 flex-col gap-2">
                       <div className="flex flex-wrap items-center justify-between gap-3">
-                        <span className="min-w-0 text-body font-medium text-text-primary">{org.name}</span>
+                        <span className="min-w-0 text-body font-medium text-text-primary">{org.name}<DemoRecordTag isDemoRecord={(org as { isDemoRecord?: boolean }).isDemoRecord} /></span>
                         <div className="flex flex-wrap gap-2">
                           {"status" in org && (
                             <StatusLabel tone={adminStatusTone(org.status)}>

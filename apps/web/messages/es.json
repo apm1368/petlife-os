@@ -3898,6 +3898,10 @@
           "EXECUTED": "Ejecutado"
         }
       }
+    },
+    "demoRecord": {
+      "label": "Demo: oculto en el sitio público",
+      "hint": "Datos de ejemplo para demos y pruebas. El sitio público nunca los muestra, aunque aquí figuren como verificados o públicos."
     }
   },
   "adminUsers": {
