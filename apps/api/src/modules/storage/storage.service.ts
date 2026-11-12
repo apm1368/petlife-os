@@ -255,9 +255,10 @@ export class StorageService {
   async createCmsMediaUploadTarget(
     contentType: string,
     extension: string,
+    maxBytes?: number,
   ): Promise<UploadTarget & { key: string }> {
     const key = `cms/media/${randomUUID()}.${extension}`;
-    const target = await this.driver.createUploadTarget(key, contentType);
+    const target = await this.driver.createUploadTarget(key, contentType, maxBytes);
     return { ...target, key };
   }
 

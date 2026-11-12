@@ -1,5 +1,6 @@
 "use client";
 import { Brand } from "@/features/brand/Brand";
+import { localeHomePath } from "@/lib/seo/site";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -44,7 +45,7 @@ export function LandingHeader({ locale, copy }: { locale: AppLocale; copy: Landi
     <header className="lp-header" data-scrolled={scrolled}>
       <a className="lp-skip" href="#lp-main">{copy.actions.skip}</a>
       <div className="lp-header__inner">
-        <Link href={`/${locale}`} className="lp-brand" aria-label="opetlife">
+        <Link href={localeHomePath(locale)} className="lp-brand" aria-label="opetlife">
           <Brand />
         </Link>
         <nav aria-label={copy.nav.label} className="lp-nav">

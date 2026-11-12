@@ -15,7 +15,7 @@ import { AdminContentAuthorService } from "./admin-content-author.service";
 import { AdminMediaService } from "./admin-media.service";
 import { AdminContentVersionService } from "./admin-content-version.service";
 import { AdminContentPlacementService } from "./admin-content-placement.service";
-import { CreateArticleDto, ListArticlesQueryDto, SaveArticleLocaleDto, UpdateArticleDto } from "./dto/admin-article.dto";
+import { CreateArticleDto, ListArticlesQueryDto, SaveArticleLocaleDto, UpdateArticleDto, CheckArticleSlugQueryDto } from "./dto/admin-article.dto";
 import { SaveCategoryDto, SaveTagDto } from "./dto/admin-taxonomy.dto";
 import { ContentAuthorInputDto, UpdateContentAuthorDto } from "./dto/admin-content-author.dto";
 import { ConfirmMediaUploadDto, RequestMediaUploadDto, UpdateMediaMetadataDto } from "./dto/admin-media.dto";
@@ -50,6 +50,13 @@ export class AdminContentController {
   @RequireAdminPermission("content.view")
   listArticles(@Query() query: ListArticlesQueryDto) {
     return this.articles.list(query);
+  }
+
+  /** The editor's URL builder: is this slug valid and free in this locale, and what public path will it get. */
+  @Get("articles/slug-check")
+  @RequireAdminPermission("content.view")
+  checkArticleSlug(@Query() query: CheckArticleSlugQueryDto) {
+    return this.articles.checkSlug(query.locale, query.slug, query.articleId, query.categoryId === undefined ? undefined : query.categoryId || null);
   }
 
   @Get("articles/:id")

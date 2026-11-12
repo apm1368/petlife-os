@@ -10,6 +10,7 @@ import "@/features/reel/reel.css";
 import "@/features/auth/auth.css";
 import "@/features/auth/park-auth.css";
 import type { Metadata } from "next";
+import { localeHomePath } from "@/lib/seo/site";
 
 /** Authentication and recovery screens must not be indexed. */
 export const metadata: Metadata = { robots: { index: false, follow: false } };
@@ -22,7 +23,7 @@ export default async function AuthLayout({ children, params }: { children: React
     <aside className="auth-brand-panel" aria-label="opetlife">
       <AuthLogoScene locale={locale} />
       <div className="auth-brand-copy">
-        <Link href={`/${locale}`}><Brand locale={locale} /></Link>
+        <Link href={localeHomePath(locale)}><Brand locale={locale} /></Link>
         <h2>{c.tagline}</h2><p>{c.description}</p>
         <div className="auth-trust-row"><span><ShieldCheck size={16} aria-hidden="true" />{c.privacy}</span><span><LockKeyhole size={16} aria-hidden="true" />{c.title}</span></div>
       </div>

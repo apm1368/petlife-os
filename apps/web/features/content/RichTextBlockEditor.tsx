@@ -2,20 +2,46 @@
 
 import { useTranslations } from "next-intl";
 import { Button, Input, Select } from "@petlife/ui";
-import type { RichTextBlock, RichTextDocument } from "@petlife/types";
+import type { RichTextBlock, RichTextDocument, RichTextInline } from "@petlife/types";
 
 type BlockType = RichTextBlock["type"];
 
+const INLINE_TOKEN = /\*\*(.+?)\*\*|\[([^\]]+)\]\(([^)\s]+)\)/g;
+
+/** Inline content as editable text: **bold** and [link text](/fa/blog/slug) round-trip; other marks are kept as plain text. */
+export function inlineToEditable(content: RichTextInline[]): string {
+  return content
+    .map((node) => {
+      if ("type" in node && node.type === "link") return `[${node.text}](${node.href})`;
+      const marks = "marks" in node ? node.marks ?? [] : [];
+      return marks.includes("bold") ? `**${node.text}**` : node.text;
+    })
+    .join("");
+}
+
+export function editableToInline(text: string): RichTextInline[] {
+  const out: RichTextInline[] = [];
+  let last = 0;
+  for (const match of text.matchAll(INLINE_TOKEN)) {
+    if (match.index! > last) out.push({ text: text.slice(last, match.index) });
+    if (match[1] !== undefined) out.push({ text: match[1], marks: ["bold"] });
+    else out.push({ type: "link", text: match[2]!, href: match[3]! });
+    last = match.index! + match[0].length;
+  }
+  if (last < text.length || out.length === 0) out.push({ text: text.slice(last) });
+  return out;
+}
+
 function blockText(block: RichTextBlock): string {
-  if (block.type === "list") return block.items.map((item) => item.map((n) => n.text).join("")).join("\n");
-  if (block.type === "image") return "";
-  return block.content.map((n) => n.text).join("");
+  if (block.type === "list") return block.items.map(inlineToEditable).join("\n");
+  if (block.type === "image" || block.type === "video" || block.type === "faq") return "";
+  return inlineToEditable(block.content);
 }
 
 function withText(block: RichTextBlock, text: string): RichTextBlock {
-  if (block.type === "list") return { ...block, items: text.split("\n").filter((l) => l.trim().length > 0).map((line) => [{ text: line }]) };
-  if (block.type === "image") return block;
-  return { ...block, content: [{ text }] };
+  if (block.type === "list") return { ...block, items: text.split("\n").filter((l) => l.trim().length > 0).map(editableToInline) };
+  if (block.type === "image" || block.type === "video" || block.type === "faq") return block;
+  return { ...block, content: editableToInline(text) };
 }
 
 function emptyBlock(type: BlockType): RichTextBlock {
@@ -32,14 +58,20 @@ function emptyBlock(type: BlockType): RichTextBlock {
       return { type: "callout", tone: "info", content: [{ text: "" }] };
     case "image":
       return { type: "image", mediaAssetId: "", alt: "" };
+    case "video":
+      return { type: "video", mediaAssetId: "", title: "" };
+    case "faq":
+      return { type: "faq", items: [{ question: "", answer: [{ text: "" }] }] };
   }
 }
 
+const TEXTAREA = "min-h-[70px] rounded-md border border-border-strong bg-surface-elevated px-3 py-2 text-body text-text-primary";
+
 /**
  * A deliberately minimal, block-based structured editor (spec: "avoid a
- * massive block-builder system in H15") — no inline bold/italic/link
- * toolbar this phase (see README "Editor format"); each text block is one
- * plain-text run. Reordering is up/down buttons, not drag-and-drop, so the
+ * massive block-builder system in H15"). Text blocks are edited as plain
+ * text where **bold** and [link text](/path) are kept, so internal links
+ * survive an edit. Reordering is up/down buttons, not drag-and-drop, so the
  * whole editor stays keyboard-usable without a new dependency.
  */
 export function RichTextBlockEditor({ value, onChange }: { value: RichTextDocument; onChange: (next: RichTextDocument) => void }) {
@@ -104,21 +136,44 @@ export function RichTextBlockEditor({ value, onChange }: { value: RichTextDocume
               <Input label={t("altText")} value={block.alt} onChange={(e) => update(i, { ...block, alt: e.target.value })} className="min-w-[220px] flex-1" />
               <Input label={t("caption")} value={block.caption ?? ""} onChange={(e) => update(i, { ...block, caption: e.target.value })} className="min-w-[220px] flex-1" />
             </div>
+          ) : block.type === "video" ? (
+            <div className="flex flex-wrap gap-2">
+              <Input label={t("mediaAssetId")} value={block.mediaAssetId} onChange={(e) => update(i, { ...block, mediaAssetId: e.target.value })} className="min-w-[220px]" />
+              <Input label={t("videoTitle")} value={block.title} onChange={(e) => update(i, { ...block, title: e.target.value })} className="min-w-[220px] flex-1" />
+              <Input label={t("videoDescription")} value={block.description ?? ""} onChange={(e) => update(i, { ...block, description: e.target.value || undefined })} className="min-w-[220px] flex-1" />
+              <Input label={t("posterMediaAssetId")} value={block.posterMediaAssetId ?? ""} onChange={(e) => update(i, { ...block, posterMediaAssetId: e.target.value || undefined })} className="min-w-[220px]" />
+              <Input label={t("durationSeconds")} type="number" min={1} value={block.durationSeconds ? String(block.durationSeconds) : ""} onChange={(e) => update(i, { ...block, durationSeconds: e.target.value ? Number(e.target.value) : undefined })} className="w-[140px]" />
+              <Input label={t("caption")} value={block.caption ?? ""} onChange={(e) => update(i, { ...block, caption: e.target.value || undefined })} className="min-w-[220px] flex-1" />
+            </div>
+          ) : block.type === "faq" ? (
+            <div className="flex flex-col gap-3">
+              {block.items.map((item, j) => (
+                <div key={j} className="flex flex-col gap-1.5 rounded-md bg-surface-elevated p-2">
+                  <Input label={t("faqQuestion")} value={item.question} onChange={(e) => update(i, { ...block, items: block.items.map((it, k) => (k === j ? { ...it, question: e.target.value } : it)) })} />
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-metadata text-text-secondary">{t("faqAnswer")}</span>
+                    <textarea className={TEXTAREA} value={inlineToEditable(item.answer)} onChange={(e) => update(i, { ...block, items: block.items.map((it, k) => (k === j ? { ...it, answer: editableToInline(e.target.value) } : it)) })} />
+                  </label>
+                  <Button type="button" size="sm" variant="ghost" disabled={block.items.length === 1} onClick={() => update(i, { ...block, items: block.items.filter((_, k) => k !== j) })}>
+                    {t("removeFaqItem")}
+                  </Button>
+                </div>
+              ))}
+              <Button type="button" size="sm" variant="secondary" onClick={() => update(i, { ...block, items: [...block.items, { question: "", answer: [{ text: "" }] }] })}>
+                {t("addFaqItem")}
+              </Button>
+            </div>
           ) : (
             <label className="flex flex-col gap-1.5">
               <span className="sr-only">{t(`blockType.${block.type}`)}</span>
-              <textarea
-                className="min-h-[70px] rounded-md border border-border-strong bg-surface-elevated px-3 py-2 text-body text-text-primary"
-                value={blockText(block)}
-                onChange={(e) => update(i, withText(block, e.target.value))}
-              />
+              <textarea className={TEXTAREA} value={blockText(block)} onChange={(e) => update(i, withText(block, e.target.value))} />
             </label>
           )}
         </div>
       ))}
 
       <div className="flex flex-wrap gap-2">
-        {(["paragraph", "heading", "list", "quote", "callout", "image"] as BlockType[]).map((type) => (
+        {(["paragraph", "heading", "list", "quote", "callout", "image", "video", "faq"] as BlockType[]).map((type) => (
           <Button key={type} type="button" size="sm" variant="secondary" onClick={() => add(type)}>
             {t("addBlock", { type: t(`blockType.${type}`) })}
           </Button>

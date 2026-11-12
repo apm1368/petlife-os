@@ -5,6 +5,7 @@ import { FooterLinkGroup, FooterSiteDetails } from "@/features/site-settings/Foo
 import type { RouteLocale } from "@/lib/i18n/config";
 import { storyCopy } from "./story-copy";
 import { CookieToggle } from "./opl/CookieToggle";
+import { localeHomePath } from "@/lib/seo/site";
 
 export function ParkFooter({ locale }: { locale: RouteLocale }) {
   const c = storyCopy[locale];
@@ -12,7 +13,7 @@ export function ParkFooter({ locale }: { locale: RouteLocale }) {
     <div className="opl-wrap">
       <div className="opl-foot__grid">
         <div className="opl-foot__brand">
-          <Link href={`/${locale}`} className="opl-brand"><Brand locale={locale} /></Link>
+          <Link href={localeHomePath(locale)} className="opl-brand"><Brand locale={locale} /></Link>
           <p>{c.footerDescription}</p>
           <FooterSiteDetails />
           <Link href={`/${locale}#lp-main`} className="opl-foot__back">{c.footerTop}<ArrowUp size={16} aria-hidden="true" /></Link>
