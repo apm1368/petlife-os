@@ -4,6 +4,7 @@ import { NotificationCategory, NotificationPriority } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotificationDeepLinks } from "../notifications/notification-deeplink.util";
 import { NotificationOrchestratorService } from "../notifications/notification-orchestrator.service";
+import { LostPetAreaAlertService } from "./lost-pet-area-alert.service";
 
 /**
  * H10 integration for Lost Pet (spec: "Reuse H10 NotificationOrchestrator...
@@ -12,6 +13,10 @@ import { NotificationOrchestratorService } from "../notifications/notification-o
  * same notifyHousehold shape ClinicalHealthNotificationListener already
  * established. `Notification.@@unique([domainEventId, type, userId])`
  * makes this safe against duplicate event delivery.
+ *
+ * #290 Q53 adds one opt-in exception: members who switched on a neighbourhood alert hear about a new report whose
+ * private last-seen point falls inside their own radius (capped, nearest first). They get the public page only,
+ * with the pet's name and the owner's public area; never the coordinates, the household or any contact.
  */
 @Injectable()
 export class LostPetNotificationListener {
@@ -20,6 +25,7 @@ export class LostPetNotificationListener {
   constructor(
     private readonly orchestrator: NotificationOrchestratorService,
     private readonly prisma: PrismaService,
+    private readonly areaAlerts: LostPetAreaAlertService,
   ) {}
 
   private async safely(label: string, run: () => Promise<void>): Promise<void> {
@@ -57,6 +63,32 @@ export class LostPetNotificationListener {
   onIncidentOpened(payload: { petId: string; incidentId: string }, domainEventId: string): Promise<void> {
     return this.safely("LostPetIncidentOpened", async () => {
       await this.notifyHousehold(payload.petId, "lost_pet.incident_opened", payload.incidentId, domainEventId);
+    });
+  }
+
+  @OnEvent("LostPetIncidentOpened")
+  onIncidentOpenedNearby(payload: { petId: string; incidentId: string }, domainEventId: string): Promise<void> {
+    return this.safely("LostPetIncidentOpened (nearby)", async () => {
+      const incident = await this.prisma.lostPetIncident.findUnique({
+        where: { id: payload.incidentId },
+        select: { status: true, householdId: true, lastKnownLatitude: true, lastKnownLongitude: true, publicArea: true, pet: { select: { name: true } } },
+      });
+      if (!incident || incident.status !== "OPEN" || incident.lastKnownLatitude == null || incident.lastKnownLongitude == null) return;
+      const household = await this.prisma.householdMember.findMany({ where: { householdId: incident.householdId }, select: { userId: true } });
+      const recipients = await this.areaAlerts.recipientsNear(incident.lastKnownLatitude, incident.lastKnownLongitude, household.map((m) => m.userId));
+      for (const userId of recipients) {
+        await this.orchestrator.notify({
+          userId,
+          type: "lost_pet.nearby_opened",
+          category: NotificationCategory.LOST_PET,
+          priority: NotificationPriority.NORMAL,
+          templateParams: { petName: incident.pet.name, area: incident.publicArea?.trim() || "—" },
+          entityType: "LostPetIncident",
+          entityId: payload.incidentId,
+          deepLink: NotificationDeepLinks.publicLostIncident(payload.incidentId),
+          domainEventId,
+        });
+      }
     });
   }
 

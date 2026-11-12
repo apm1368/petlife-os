@@ -52,6 +52,8 @@ export const NotificationDeepLinks = {
   sellerSettlementDetail: (settlementId: string) => `/seller/finance/settlements/${settlementId}`,
   notificationCenter: () => `/notifications`,
   lostIncident: (petId: string, incidentId: string) => `/pets/${petId}/lost/${incidentId}`,
+  /** The public report page, for neighbours who are not in the household. */
+  publicLostIncident: (incidentId: string) => `/lost-pets/${incidentId}`,
   supportNeedManage: (listingId: string) => `/animal-support/needs/${listingId}/manage`,
   supportNeed: (listingId: string) => `/animal-support/needs/${listingId}`,
   supportOrganization: (organizationId: string) => `/animal-support/organizations/${organizationId}`,
