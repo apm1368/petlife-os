@@ -6,10 +6,12 @@ import { locales } from "@/lib/i18n/config";
 
 /** Language names in the language of the current page, so the visible UI never mixes languages. */
 const LANGUAGE_NAMES: Record<string, Record<string, string>> = {
-  fa: { fa: "فارسی", en: "انگلیسی", de: "آلمانی", es: "اسپانیایی" },
-  en: { fa: "Persian", en: "English", de: "German", es: "Spanish" },
-  de: { fa: "Persisch", en: "Englisch", de: "Deutsch", es: "Spanisch" },
-  es: { fa: "persa", en: "inglés", de: "alemán", es: "español" },
+  fa: { fa: "فارسی", en: "انگلیسی", de: "آلمانی", es: "اسپانیایی", ar: "عربی", nl: "هلندی" },
+  en: { fa: "Persian", en: "English", de: "German", es: "Spanish", ar: "Arabic", nl: "Dutch" },
+  de: { fa: "Persisch", en: "Englisch", de: "Deutsch", es: "Spanisch", ar: "Arabisch", nl: "Niederländisch" },
+  es: { fa: "persa", en: "inglés", de: "alemán", es: "español", ar: "árabe", nl: "neerlandés" },
+  ar: { fa: "الفارسية", en: "الإنجليزية", de: "الألمانية", es: "الإسبانية", ar: "العربية", nl: "الهولندية" },
+  nl: { fa: "Perzisch", en: "Engels", de: "Duits", es: "Spaans", ar: "Arabisch", nl: "Nederlands" },
 };
 
 /** Swaps the leading locale path segment, preserving the rest of the URL. */

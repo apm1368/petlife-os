@@ -1,7 +1,7 @@
 import type { RouteLocale } from "@/lib/i18n/config";
 
-const NUMBER_LOCALE: Record<RouteLocale, string> = { fa: "fa-IR", en: "en-GB", de: "de-DE", es: "es-ES" };
-const DATE_LOCALE: Record<RouteLocale, string> = { fa: "fa-IR-u-ca-persian", en: "en-GB", de: "de-DE", es: "es-ES" };
+const NUMBER_LOCALE: Record<RouteLocale, string> = { fa: "fa-IR", en: "en-GB", de: "de-DE", es: "es-ES", ar: "ar", nl: "nl-NL" };
+const DATE_LOCALE: Record<RouteLocale, string> = { fa: "fa-IR-u-ca-persian", en: "en-GB", de: "de-DE", es: "es-ES", ar: "ar", nl: "nl-NL" };
 
 export function asLocale(value: string): RouteLocale {
   return value === "en" || value === "de" || value === "es" ? value : "fa";

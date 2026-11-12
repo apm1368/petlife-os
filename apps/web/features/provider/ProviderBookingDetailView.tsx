@@ -46,7 +46,7 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
   const tVaccination = useTranslations("health.vaccinationStatus");
   const tCommon = useTranslations("common");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en" | "de" | "es";
+  const locale = useLocale() as "fa" | "en" | "de" | "es" | "ar" | "nl";
 
   const [detail, setDetail] = useState<ProviderBookingDetailDto | null>(null);
   const [error, setError] = useState<string | null>(null);

@@ -61,9 +61,15 @@ const COPY = {
   es: {
     title: "Editar datos", photo: "Foto", choose: "Elegir una foto", replace: "Cambiar foto", remove: "Quitar foto", photoHint: "JPG, PNG o WebP, hasta 10 MB.", tooBig: "La foto supera los 10 MB.", name: "Nombre", sex: "Sexo", sexes: { MALE: "Macho", FEMALE: "Hembra", UNKNOWN: "No lo sé" }, birth: "Fecha de nacimiento", breed: "Raza", color: "Color y marcas", weight: "Peso", units: { KG: "kg", LB: "lb" }, microchip: "Número de microchip", neutered: "Esterilización", neuteredOptions: { NEUTERED: "Esterilizada", INTACT: "No esterilizada", UNKNOWN: "No lo sé" }, cancel: "Cancelar", save: "Guardar", failed: "No se pudo guardar. Inténtalo de nuevo.", photoFailed: "No se pudo subir la foto; no se guardó ningún cambio. Inténtalo de nuevo.",
   },
+  ar: {
+    title: "تعديل البيانات", photo: "الصورة", choose: "اختر صورة", replace: "استبدال الصورة", remove: "إزالة الصورة", photoHint: "JPG أو PNG أو WebP، حتى 10 ميغابايت.", tooBig: "حجم الصورة أكبر من 10 ميغابايت.", name: "الاسم", sex: "الجنس", sexes: { MALE: "ذكر", FEMALE: "أنثى", UNKNOWN: "غير متأكد" }, birth: "تاريخ الميلاد", breed: "السلالة", color: "اللون والعلامات", weight: "الوزن", units: { KG: "كغ", LB: "رطل" }, microchip: "رقم الشريحة الإلكترونية", neutered: "التعقيم", neuteredOptions: { NEUTERED: "معقّم", INTACT: "غير معقّم", UNKNOWN: "غير متأكد" }, cancel: "إلغاء", save: "حفظ", failed: "تعذّر الحفظ. حاول مرة أخرى.", photoFailed: "لم تُرفع الصورة، لذا لم يُحفظ أي من التغييرات. حاول مرة أخرى.",
+  },
+  nl: {
+    title: "Gegevens bewerken", photo: "Foto", choose: "Kies een foto", replace: "Foto vervangen", remove: "Foto verwijderen", photoHint: "JPG, PNG of WebP, maximaal 10 MB.", tooBig: "De foto is groter dan 10 MB.", name: "Naam", sex: "Geslacht", sexes: { MALE: "Mannetje", FEMALE: "Vrouwtje", UNKNOWN: "Weet ik niet" }, birth: "Geboortedatum", breed: "Ras", color: "Kleur en aftekening", weight: "Gewicht", units: { KG: "kg", LB: "lb" }, microchip: "Chipnummer", neutered: "Gesteriliseerd", neuteredOptions: { NEUTERED: "Gesteriliseerd", INTACT: "Niet gesteriliseerd", UNKNOWN: "Weet ik niet" }, cancel: "Annuleren", save: "Opslaan", failed: "Opslaan is niet gelukt. Probeer het opnieuw.", photoFailed: "De foto is niet geüpload, dus er zijn geen wijzigingen opgeslagen. Probeer het opnieuw.",
+  },
 } as const;
 
-const toLatin = (v: string) => v.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace("٫", ".");
+const toLatin = (v: string) => v.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d))).replace("٫", ".");
 
 /**
  * The pet's identity in one form — the same fields as adding a pet, prefilled. The photo is uploaded

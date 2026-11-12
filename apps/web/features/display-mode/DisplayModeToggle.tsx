@@ -9,6 +9,8 @@ const displayCopy: Record<RouteLocale, { label: string; on: string; off: string 
   en: { label: "Simple display", on: "on", off: "off" },
   de: { label: "Einfache Ansicht", on: "ein", off: "aus" },
   es: { label: "Vista sencilla", on: "activada", off: "desactivada" },
+  ar: { label: "العرض المبسّط", on: "مفعّل", off: "معطّل" },
+  nl: { label: "Eenvoudige weergave", on: "aan", off: "uit" },
 };
 
 export function DisplayModeToggle({ locale, compact = false }: { locale: RouteLocale; compact?: boolean }) {

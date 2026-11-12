@@ -36,7 +36,7 @@ import {
 } from "../console-ui";
 import { copyFor, intlLocale, pickCopy } from "@/features/admin/admin-copy";
 
-type Lang = "fa" | "en" | "de" | "es";
+type Lang = "fa" | "en" | "de" | "es" | "ar" | "nl";
 type LoadError = "forbidden" | "notFound" | "error" | null;
 
 function useLang() {

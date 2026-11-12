@@ -4,10 +4,12 @@ import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 
 const localeNames = {
-  fa: { label: "زبان", fa: "فارسی", en: "انگلیسی", de: "آلمانی", es: "اسپانیایی" },
-  en: { label: "Language", fa: "Persian", en: "English", de: "German", es: "Spanish" },
-  de: { label: "Sprache", fa: "Persisch", en: "Englisch", de: "Deutsch", es: "Spanisch" },
-  es: { label: "Idioma", fa: "persa", en: "inglés", de: "alemán", es: "español" },
+  fa: { label: "زبان", fa: "فارسی", en: "انگلیسی", de: "آلمانی", es: "اسپانیایی", ar: "عربی", nl: "هلندی" },
+  en: { label: "Language", fa: "Persian", en: "English", de: "German", es: "Spanish", ar: "Arabic", nl: "Dutch" },
+  de: { label: "Sprache", fa: "Persisch", en: "Englisch", de: "Deutsch", es: "Spanisch", ar: "Arabisch", nl: "Niederländisch" },
+  es: { label: "Idioma", fa: "persa", en: "inglés", de: "alemán", es: "español", ar: "árabe", nl: "neerlandés" },
+  ar: { label: "اللغة", fa: "الفارسية", en: "الإنجليزية", de: "الألمانية", es: "الإسبانية", ar: "العربية", nl: "الهولندية" },
+  nl: { label: "Taal", fa: "Perzisch", en: "Engels", de: "Duits", es: "Spaans", ar: "Arabisch", nl: "Nederlands" },
 } as const;
 
 /** Changes only the locale path segment, retaining the current page, query, fragment and theme. */

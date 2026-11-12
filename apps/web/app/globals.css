@@ -607,7 +607,7 @@ input[type="radio"],input[type="checkbox"]{accent-color:var(--brand-natural)}
 
 /* Persian is a joined script: any tracking pulls letters apart ("م ر ک ز"). Eyebrows and labels keep
    their tracking in English only. */
-:lang(fa),:lang(fa)::before,:lang(fa)::after{letter-spacing:0!important}
+:lang(fa),:lang(fa)::before,:lang(fa)::after,:lang(ar),:lang(ar)::before,:lang(ar)::after{letter-spacing:0!important}
 .account-identity-band>:first-child{flex:none}
 /* Account menu preferences: language and appearance as compact segmented controls. */
 .account-menu__prefs{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 12px;border-bottom:1px solid var(--border-subtle)}

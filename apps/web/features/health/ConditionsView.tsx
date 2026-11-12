@@ -91,7 +91,7 @@ export function ConditionsView({ petId }: { petId: string }) {
             {t(`status_${condition.status}`)}
           </StatusLabel>
           {condition.sourceType !== SourceType.OWNER ? (
-            <span className="text-metadata text-text-secondary">{statusLabel(condition.sourceType, locale as "fa" | "en" | "de" | "es", "source")}</span>
+            <span className="text-metadata text-text-secondary">{statusLabel(condition.sourceType, locale as "fa" | "en" | "de" | "es" | "ar" | "nl", "source")}</span>
           ) : null}
         </ContextSurface>
       ))}

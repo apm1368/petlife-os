@@ -32,7 +32,7 @@ describe("PersonalSettingsView — account locale and theme preferences", () => 
     renderWithIntl(<PersonalSettingsView />, "en");
     const language = (await screen.findByLabelText("Language")) as HTMLSelectElement;
     expect(language.value).toBe("fa");
-    expect([...language.options].map((option) => option.value)).toEqual(["fa", "en", "de", "es"]);
+    expect([...language.options].map((option) => option.value)).toEqual(["fa", "en", "de", "es", "ar", "nl"]);
     expect((screen.getByLabelText("Appearance") as HTMLSelectElement).value).toBe("LIGHT");
   });
 

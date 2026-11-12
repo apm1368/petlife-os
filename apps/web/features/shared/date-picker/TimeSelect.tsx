@@ -18,7 +18,7 @@ export function TimeSelect({ label, value, onChange }: { label: string; value: s
       label={label}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      options={[{ value: "", label: ({ fa: "نامشخص", en: "Not sure", de: "Nicht sicher", es: "No estoy seguro" })[locale] }, ...slots.map((s) => ({ value: s, label: localizeDigits(s, locale) }))]}
+      options={[{ value: "", label: ({ fa: "نامشخص", en: "Not sure", de: "Nicht sicher", es: "No estoy seguro", ar: "غير محدد", nl: "Niet zeker" })[locale] }, ...slots.map((s) => ({ value: s, label: localizeDigits(s, locale) }))]}
     />
   );
 }

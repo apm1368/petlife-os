@@ -14,7 +14,7 @@ import { DetailRow, EmptyRow, FilterBar, FilterField, Kpi, Panel, PanelTitle, Se
 import { copyFor } from "@/features/admin/admin-copy";
 import { externalHref } from "@/lib/url/external-href";
 
-type Lang = "fa" | "en" | "de" | "es";
+type Lang = "fa" | "en" | "de" | "es" | "ar" | "nl";
 const useLang = () => {
   const lang = useLocale() as Lang;
   return { lang, fa: lang === "fa", ...copyFor(lang) };

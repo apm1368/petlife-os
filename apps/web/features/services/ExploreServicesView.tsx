@@ -29,7 +29,7 @@ export function ExploreServicesView() {
   const t = useTranslations("services.explore");
   const { activePet } = useActivePet();
   const [text, setText] = useState("");
-  const Go = locale === "fa" ? ChevronLeft : ChevronRight;
+  const Go = (locale === "fa" || locale === "ar") ? ChevronLeft : ChevronRight;
   return (
     <DiscoveryPage kind="services"><div className="disc">
       <header className="disc-head">

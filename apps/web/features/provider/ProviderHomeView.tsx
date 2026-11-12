@@ -13,7 +13,7 @@ import { ProviderBookingRow } from "./ProviderBookingRow";
 export function ProviderHomeView() {
   const t = useTranslations("provider.home");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en" | "de" | "es";
+  const locale = useLocale() as "fa" | "en" | "de" | "es" | "ar" | "nl";
 
   const [overview, setOverview] = useState<ProviderOverviewDto | null>(null);
   const [error, setError] = useState(false);

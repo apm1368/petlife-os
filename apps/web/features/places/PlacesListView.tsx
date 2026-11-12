@@ -132,7 +132,7 @@ export function PlacesListView() {
           {places.map((place) => {
             const Icon = CATEGORY_ICON[place.category] ?? MapPin;
             const rules = placeRules(place, locale === "fa");
-            const Go = locale === "fa" ? ChevronLeft : ChevronRight;
+            const Go = (locale === "fa" || locale === "ar") ? ChevronLeft : ChevronRight;
             return (
               <li key={place.id}>
                 <Link href={`/${locale}/places/${place.id}`} className="place-row">

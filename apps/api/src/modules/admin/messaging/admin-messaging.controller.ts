@@ -22,7 +22,7 @@ class TestSmsDto {
 
 class TestEmailDto {
   @IsEmail() to!: string;
-  @IsOptional() @IsIn(["fa", "en", "de", "es"]) locale?: "fa" | "en" | "de" | "es";
+  @IsOptional() @IsIn(["fa", "en", "de", "es", "ar", "nl"]) locale?: "fa" | "en" | "de" | "es" | "ar" | "nl";
 }
 
 /** Messaging console. Reading needs system.view; sending a test needs settings.manage and is audited. */

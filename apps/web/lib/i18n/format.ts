@@ -5,6 +5,8 @@ const intlLocale: Record<RouteLocale, string> = {
   en: "en-GB",
   de: "de-DE",
   es: "es-ES",
+  ar: "ar",
+  nl: "nl-NL",
 };
 
 export function formatLocaleNumber(value: number, locale: RouteLocale, options?: Intl.NumberFormatOptions): string {

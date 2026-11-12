@@ -17,6 +17,8 @@ const NAV_COPY: Record<RouteLocale, { main: string; destinations: string; everyt
   en: { main: "Main menu", destinations: "opetlife destinations", everything: "Everything in opetlife", addPet: "Add a pet", activePet: "Active pet", petProfile: (name) => `${name}'s profile`, bottom: "Bottom menu", explore: "Explore", preferences: "Language and appearance", support: "Help and support", close: "Close" },
   de: { main: "Hauptmenü", destinations: "opetlife-Bereiche", everything: "Alle Bereiche von opetlife", addPet: "Tier hinzufügen", activePet: "Aktives Tier", petProfile: (name) => `Profil von ${name}`, bottom: "Untere Navigation", explore: "Entdecken", preferences: "Sprache und Darstellung", support: "Hilfe und Support", close: "Schließen" },
   es: { main: "Menú principal", destinations: "Secciones de opetlife", everything: "Todo opetlife", addPet: "Añadir mascota", activePet: "Mascota activa", petProfile: (name) => `Perfil de ${name}`, bottom: "Menú inferior", explore: "Explorar", preferences: "Idioma y apariencia", support: "Ayuda y soporte", close: "Cerrar" },
+  ar: { main: "القائمة الرئيسية", destinations: "أقسام opetlife", everything: "كل ما في opetlife", addPet: "أضف حيوانًا أليفًا", activePet: "الحيوان الأليف النشط", petProfile: (name) => `ملف ${name}`, bottom: "القائمة السفلية", explore: "استكشاف", preferences: "اللغة والمظهر", support: "المساعدة والدعم", close: "إغلاق" },
+  nl: { main: "Hoofdmenu", destinations: "opetlife-onderdelen", everything: "Alles in opetlife", addPet: "Huisdier toevoegen", activePet: "Actief huisdier", petProfile: (name) => `Profiel van ${name}`, bottom: "Onderste menu", explore: "Ontdekken", preferences: "Taal en weergave", support: "Hulp en ondersteuning", close: "Sluiten" },
 };
 
 const usePathKey = (locale: string) => (usePathname() ?? "").replace(new RegExp(`^/${locale}`), "") || "/";
@@ -78,7 +80,7 @@ export function PrimaryNav({ canViewHealth = true }: { canViewHealth?: boolean }
     if (!next && panel.current?.contains(document.activeElement)) return;
     hoverTimer.current = setTimeout(() => setOpen(next), next ? 90 : 180);
   };
-  const Forward = locale === "fa" ? ChevronLeft : ChevronRight;
+  const Forward = (locale === "fa" || locale === "ar") ? ChevronLeft : ChevronRight;
 
   return (
     <div className="member-nav" ref={wrap} onPointerLeave={hover(false)}>

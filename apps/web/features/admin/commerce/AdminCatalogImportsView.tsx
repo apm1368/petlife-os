@@ -8,7 +8,7 @@ import { adminCommerceService } from "@/services/admin-commerce.service";
 import { Panel, PanelTitle, Tag } from "../console-ui";
 import { copyFor } from "@/features/admin/admin-copy";
 
-type Lang = "fa" | "en" | "de" | "es";
+type Lang = "fa" | "en" | "de" | "es" | "ar" | "nl";
 type Category = { id: string; name: string; slug: string };
 type Brand = { id: string; name: string; slug: string };
 type ImportRow = Awaited<ReturnType<typeof adminCommerceService.listCatalogImports>>[number];

@@ -16,7 +16,7 @@ import { formatNumber, StarRow } from "./commerce-ui";
 import type { RouteLocale } from "@/lib/i18n/config";
 
 function dateTime(value: string, locale: RouteLocale, withTime = true) {
-  const intlLocale: Record<RouteLocale, string> = { fa: "fa-IR-u-ca-persian", en: "en-GB", de: "de-DE", es: "es-ES" };
+  const intlLocale: Record<RouteLocale, string> = { fa: "fa-IR-u-ca-persian", en: "en-GB", de: "de-DE", es: "es-ES", ar: "ar", nl: "nl-NL" };
   return new Intl.DateTimeFormat(intlLocale[locale], withTime ? { dateStyle: "medium", timeStyle: "short" } : { dateStyle: "medium" }).format(new Date(value));
 }
 

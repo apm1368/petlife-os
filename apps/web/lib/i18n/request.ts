@@ -6,13 +6,11 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const requested = await requestLocale;
   const locale = requested && isRouteLocale(requested) ? requested : defaultLocale;
 
-  // German and Spanish are being rolled out by page family. Until a page's
-  // messages are translated, use the English catalog rather than rendering
-  // missing-key errors. Inline fa/en-only copy on unfinished pages is still
-  // an acknowledged coverage gap, not a claim of full translation.
+  // German, Spanish, Arabic and Dutch apply their catalogs over the complete English one, so a key not yet
+  // translated shows English rather than a missing-key error.
   const messagesLocale = locale === "fa" ? "fa" : "en";
   const fallback = (await import(`../../messages/${messagesLocale}.json`)).default;
-  const localized = locale === "de" || locale === "es"
+  const localized = locale === "de" || locale === "es" || locale === "ar" || locale === "nl"
     ? (await import(`../../messages/${locale}.json`)).default
     : {};
   return {

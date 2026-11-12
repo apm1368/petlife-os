@@ -188,8 +188,8 @@ function Field({ row, value, disabled, onChange }: { row: PlatformSetting; value
           {LOCALES.map((l) => (
             <label key={l} className="gx-field"><span>{t(`languages.${l}`)}</span>
               {long
-                ? <textarea dir={l === "fa" ? "rtl" : "ltr"} lang={l} rows={3} maxLength={row.constraints.maxLength ?? 280} disabled={disabled} value={v[l] ?? ""} onChange={(e) => onChange({ ...v, [l]: e.target.value } as SettingValue)} style={{ minHeight: 80, padding: 10, borderRadius: 14, border: "1px solid var(--glass-edge)", background: "var(--glass-input)", color: "var(--text-primary)", font: "inherit", fontSize: ".85rem" }} />
-                : <input dir={l === "fa" ? "rtl" : "ltr"} lang={l} maxLength={row.constraints.maxLength ?? 280} disabled={disabled} value={v[l] ?? ""} onChange={(e) => onChange({ ...v, [l]: e.target.value } as SettingValue)} />}
+                ? <textarea dir={(l === "fa" || l === "ar") ? "rtl" : "ltr"} lang={l} rows={3} maxLength={row.constraints.maxLength ?? 280} disabled={disabled} value={v[l] ?? ""} onChange={(e) => onChange({ ...v, [l]: e.target.value } as SettingValue)} style={{ minHeight: 80, padding: 10, borderRadius: 14, border: "1px solid var(--glass-edge)", background: "var(--glass-input)", color: "var(--text-primary)", font: "inherit", fontSize: ".85rem" }} />
+                : <input dir={(l === "fa" || l === "ar") ? "rtl" : "ltr"} lang={l} maxLength={row.constraints.maxLength ?? 280} disabled={disabled} value={v[l] ?? ""} onChange={(e) => onChange({ ...v, [l]: e.target.value } as SettingValue)} />}
             </label>
           ))}
         </div>

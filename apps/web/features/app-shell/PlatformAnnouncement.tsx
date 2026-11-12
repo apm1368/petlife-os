@@ -59,11 +59,12 @@ export function PlatformAnnouncement({ surface = "member" }: { surface?: "member
       </aside>
     );
   if (!notice) return null;
-  type Lang = "fa" | "en" | "de" | "es";
-  const language = notice[locale as Lang]?.trim()
-    ? locale
-    : (["en", "fa", "de", "es"] as const).find((key) => notice[key]?.trim());
-  const text = language ? notice[language as Lang] : null;
+  type Lang = "fa" | "en" | "de" | "es" | "ar" | "nl";
+  const byLang = notice as Partial<Record<Lang, string>>;
+  const language = byLang[locale as Lang]?.trim()
+    ? (locale as Lang)
+    : (["en", "fa", "de", "es", "ar", "nl"] as const).find((key) => byLang[key]?.trim());
+  const text = language ? byLang[language] : null;
   const href = extra.link ? (extra.link.startsWith("/") ? `/${locale}${extra.link}` : extra.link) : null;
   return text ? (
     <aside

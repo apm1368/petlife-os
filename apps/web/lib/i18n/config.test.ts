@@ -20,7 +20,9 @@ describe("locale config", () => {
     expect(localeDirection.es).toBe("ltr");
   });
 
-  it("declares Persian, English, German and Spanish route locales", () => {
-    expect(locales).toEqual(["fa", "en", "de", "es"]);
+  it("declares Persian, English, German, Spanish, Arabic and Dutch route locales; Arabic is right-to-left", () => {
+    expect(locales).toEqual(["fa", "en", "de", "es", "ar", "nl"]);
+    expect(localeDirection.ar).toBe("rtl");
+    expect(localeDirection.nl).toBe("ltr");
   });
 });
