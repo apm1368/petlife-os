@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseEnumPipe, ParseUUIDPipe, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseEnumPipe, ParseUUIDPipe, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import { ProviderUserRole } from "@prisma/client";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
@@ -18,7 +18,8 @@ import { ClinicRemindersService } from "./clinic-reminders.service";
 import { ClinicFinanceService } from "./clinic-finance.service";
 import { ClinicTeamService } from "./clinic-team.service";
 import { ClinicOperationsService } from "./clinic-operations.service";
-import { AddClinicBranchDto, AddClinicStaffDto, AddCustomerNoteDto, AssignAppointmentDto, AssignClinicPlanDto, CampaignPreviewDto, CreateClinicTaskDto, CreateTagDto, ImportContactsDto, ListClinicTasksQueryDto, ListContactsQueryDto, QueueQueryDto, SendCampaignDto, ClinicFinanceReportQueryDto, CreateClinicReminderDto, ListClinicCustomersQueryDto, ListClinicRemindersQueryDto } from "./dto/clinic-os.dto";
+import { ClinicClientsService } from "./clinic-clients.service";
+import { AddClinicBranchDto, AddClinicStaffDto, AddCustomerNoteDto, AssignAppointmentDto, AssignClinicPlanDto, CampaignPreviewDto, CreateClinicTaskDto, CreateTagDto, ImportContactsDto, ListClinicTasksQueryDto, ListContactsQueryDto, QueueQueryDto, SendCampaignDto, ClinicFinanceReportQueryDto, CreateClinicReminderDto, ListClinicCustomersQueryDto, ListClinicRemindersQueryDto, ClinicClientDto, ClinicClientPetDto, ClinicClientMessageDto, InviteClinicClientDto, ListClinicClientsQueryDto } from "./dto/clinic-os.dto";
 
 /** Clinic OS endpoints for the caller's active provider organisation. Appointments and medical records reuse /provider/bookings and /provider/clinical. */
 @Controller("provider/clinic")
@@ -31,7 +32,57 @@ export class ClinicOsController {
     private readonly finance: ClinicFinanceService,
     private readonly team: ClinicTeamService,
     private readonly ops: ClinicOperationsService,
+    private readonly clients: ClinicClientsService,
   ) {}
+
+  // ---- The clinic's own clients: owners and pets it adds itself, texts, invitations
+  @Get("clients")
+  listClients(@CurrentProviderContext() ctx: ResolvedProviderContext, @Query() query: ListClinicClientsQueryDto) {
+    return this.clients.list(ctx, query.q);
+  }
+
+  @Get("clients/sms-status")
+  smsStatus() {
+    return { smsMode: this.clients.smsMode() };
+  }
+
+  @Post("clients")
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
+  createClient(@CurrentProviderContext() ctx: ResolvedProviderContext, @Body() dto: ClinicClientDto) {
+    return this.clients.create(ctx, dto);
+  }
+
+  @Get("clients/:id")
+  getClient(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("id", ParseUUIDPipe) id: string) {
+    return this.clients.get(ctx, id);
+  }
+
+  @Patch("clients/:id")
+  updateClient(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("id", ParseUUIDPipe) id: string, @Body() dto: ClinicClientDto) {
+    return this.clients.update(ctx, id, dto);
+  }
+
+  @Post("clients/:id/pets")
+  addClientPet(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("id", ParseUUIDPipe) id: string, @Body() dto: ClinicClientPetDto) {
+    return this.clients.addPet(ctx, id, dto);
+  }
+
+  @Delete("clients/:id/pets/:petId")
+  removeClientPet(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("id", ParseUUIDPipe) id: string, @Param("petId", ParseUUIDPipe) petId: string) {
+    return this.clients.removePet(ctx, id, petId);
+  }
+
+  @Post("clients/:id/messages")
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  messageClient(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("id", ParseUUIDPipe) id: string, @Body() dto: ClinicClientMessageDto) {
+    return this.clients.sendMessage(ctx, id, dto.body);
+  }
+
+  @Post("clients/:id/invite")
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  inviteClient(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("id", ParseUUIDPipe) id: string, @Body() dto: InviteClinicClientDto) {
+    return this.clients.invite(ctx, id, dto.locale ?? "fa");
+  }
 
   // ---- CRM: notes & tags (clinic-local)
   @Get("customers/:householdId/notes")
@@ -276,6 +327,43 @@ export class MyClinicInvitationsController {
   @Post(":invitationId/decline")
   decline(@CurrentUser() user: SessionUser, @Param("invitationId", ParseUUIDPipe) invitationId: string) {
     return this.team.decline(user.id, invitationId);
+  }
+}
+
+/** The owner's side of a clinic's invitation: preview who invited them, then connect the clinic's record to their account. */
+@Controller("me/clinic-client-invites")
+@UseGuards(SessionAuthGuard)
+export class MyClinicClientInvitesController {
+  constructor(private readonly clients: ClinicClientsService) {}
+
+  @Get(":token")
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  preview(@Param("token") token: string) {
+    return this.clients.previewInvite(token);
+  }
+
+  @Post(":token/accept")
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  accept(@CurrentUser() user: SessionUser, @Param("token") token: string) {
+    return this.clients.acceptInvite(user.id, token);
+  }
+}
+
+/** A text recipient's own opt-out from a clinic's messages (the link at the end of every clinic text). Public by design. */
+@Controller("public/clinic-sms")
+export class PublicClinicSmsOptOutController {
+  constructor(private readonly clients: ClinicClientsService) {}
+
+  @Get(":token")
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  preview(@Param("token") token: string) {
+    return this.clients.optOutPreview(token);
+  }
+
+  @Post(":token/opt-out")
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  optOut(@Param("token") token: string) {
+    return this.clients.optOut(token);
   }
 }
 

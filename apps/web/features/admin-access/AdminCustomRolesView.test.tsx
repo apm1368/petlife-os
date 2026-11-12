@@ -44,7 +44,9 @@ describe("AdminCustomRolesView", () => {
 
   it("builds a role section by section and never offers admin.manage", async () => {
     renderWithIntl(<AdminCustomRolesView />);
-    fireEvent.click(await screen.findByRole("button", { name: "New role" }));
+    // "New role" is enabled only once the permission catalogue has loaded (same request as the role list).
+    await screen.findByRole("heading", { name: "Shop desk" });
+    fireEvent.click(screen.getByRole("button", { name: "New role" }));
     expect(screen.queryByText("Administrators")).toBeNull();
     fireEvent.change(screen.getByLabelText("Role name"), { target: { value: "Support desk" } });
     fireEvent.click(within(screen.getByRole("radiogroup", { name: "Customers" })).getByRole("radio", { name: "View" }));
@@ -60,7 +62,8 @@ describe("AdminCustomRolesView", () => {
 
   it("asks for a name, a permission and a reason before saving", async () => {
     renderWithIntl(<AdminCustomRolesView />);
-    fireEvent.click(await screen.findByRole("button", { name: "New role" }));
+    await screen.findByRole("heading", { name: "Shop desk" });
+    fireEvent.click(screen.getByRole("button", { name: "New role" }));
     fireEvent.click(screen.getByRole("button", { name: "Save role" }));
     expect((await screen.findByRole("alert")).textContent).toContain("Add a name");
     expect(adminAccessService.createCustomRole).not.toHaveBeenCalled();
