@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable, Logger } from "@nestjs/common";
-import { AdminPriority, AdminTaskSource, CatalogImportItemStatus, CatalogImportJobStatus, Prisma, ProductStatus } from "@prisma/client";
+import { AdminPriority, AdminTaskSource, CatalogImportItemStatus, CatalogImportJobStatus, Prisma, ProductStatus, WeightUnit } from "@prisma/client";
 import { createHash, randomUUID } from "node:crypto";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { ApiException, NotFoundApiException } from "../../../common/errors/api-exception";
@@ -11,6 +11,12 @@ import { StorageService } from "../../storage/storage.service";
 import { safeFetch, SourceFetchError } from "../../travel-external/safe-fetch";
 import { canonicalDigikalaInput, parseDigikalaCatalogPage, type DigikalaProductSnapshot } from "./digikala-catalog.parser";
 import { robotsDisallowsPath } from "./digikala-robots";
+import { DIGIKALA_FACTS_HOSTS, DIGIKALA_FACTS_MODE, factsDetailUrl, factsListUrl, parseFactsDetail, parseFactsList, type DigikalaFactsSnapshot } from "./digikala-facts";
+
+/** The one-time facts run (owner, 2026-11-12): at most this many products, one request every few seconds. */
+const FACTS_MAX_PRODUCTS = 3000;
+const FACTS_DEFAULT_PRODUCTS = 1000;
+const FACTS_MAX_PAGES = 500;
 
 const HOSTS = ["digikala.com"];
 const MAX_URLS = 20;
@@ -128,7 +134,8 @@ export class CatalogImportService {
         where: { id: job.requestedById, status: "ACTIVE" },
         select: { userId: true },
       });
-      if (requester && (await this.flags.evaluate(DIGIKALA_CATALOG_IMPORT_FLAG, { userId: requester.userId })).enabled) {
+      // The facts-only run was approved by the owner directly; the page/image importer still needs its flag.
+      if (requester && (job.mode === DIGIKALA_FACTS_MODE || (await this.flags.evaluate(DIGIKALA_CATALOG_IMPORT_FLAG, { userId: requester.userId })).enabled)) {
         candidate = job;
         break;
       }
@@ -140,7 +147,7 @@ export class CatalogImportService {
     const locked = await this.prisma.catalogImportJob.updateMany({ where: claimWhere, data: { status: CatalogImportJobStatus.RUNNING, startedAt: now, lockedUntil: new Date(now.getTime() + 10 * 60_000), attempt: { increment: 1 }, lastError: null } });
     if (!locked.count) return false;
     try {
-      await this.runJob(candidate.id);
+      await (candidate.mode === DIGIKALA_FACTS_MODE ? this.runFactsJob(candidate.id) : this.runJob(candidate.id));
     } catch (e) {
       const attempt = candidate.attempt + 1;
       const permanent = e instanceof CatalogImportBlockedError || e instanceof SourceFetchError && ["BLOCKED_BY_SOURCE", "RATE_LIMITED", "HOST_NOT_ALLOWED", "PRIVATE_ADDRESS"].includes(e.category);
@@ -293,6 +300,123 @@ export class CatalogImportService {
       await Promise.all(stored.map((media) => this.storage.deleteCatalogImage(media.key).catch(() => undefined)));
       throw e;
     }
+  }
+
+  /** Pause between Digikala requests (fair use); 0 in tests. */
+  factsDelayMs = process.env.NODE_ENV === "test" ? 0 : 3_000;
+
+  /**
+   * Queues the one-time Digikala pet import, facts only (owner decision 2026-11-12). Refused once a facts run has
+   * finished or is under way, so it really happens once; a failed or cancelled run may be queued again.
+   */
+  async createFactsJob(admin: ResolvedAdminContext, input: { categoryId: string; brandId?: string; maxProducts?: number; idempotencyKey: string }, requestId?: string) {
+    const prior = await this.prisma.catalogImportJob.findUnique({ where: { idempotencyKey: input.idempotencyKey } });
+    if (prior) return prior;
+    const category = await this.prisma.productCategory.findFirst({ where: { id: input.categoryId, status: "ACTIVE" }, select: { id: true } });
+    if (!category) throw new NotFoundApiException("Active product category", { categoryId: input.categoryId });
+    if (input.brandId) {
+      const brand = await this.prisma.brand.findFirst({ where: { id: input.brandId, status: "ACTIVE" }, select: { id: true } });
+      if (!brand) throw new NotFoundApiException("Active brand", { brandId: input.brandId });
+    }
+    const existing = await this.prisma.catalogImportJob.findFirst({ where: { mode: DIGIKALA_FACTS_MODE, status: { in: [CatalogImportJobStatus.QUEUED, CatalogImportJobStatus.RUNNING, CatalogImportJobStatus.COMPLETED, CatalogImportJobStatus.PARTIAL] } }, select: { id: true } });
+    if (existing) throw new ApiException("DIGIKALA_FACTS_ALREADY_RUN", "The one-time Digikala facts import has already run or is running.", HttpStatus.CONFLICT, { jobId: existing.id });
+    const maxProducts = Math.min(FACTS_MAX_PRODUCTS, Math.max(1, input.maxProducts ?? FACTS_DEFAULT_PRODUCTS));
+    const row = await this.prisma.catalogImportJob.create({ data: {
+      mode: DIGIKALA_FACTS_MODE, submittedUrls: [factsListUrl(1)], targetCategoryId: category.id, targetBrandId: input.brandId ?? null,
+      maxPages: FACTS_MAX_PAGES, maxProducts, requestedById: admin.adminUserId, idempotencyKey: input.idempotencyKey,
+    } });
+    await this.audit.record({ adminUserId: admin.adminUserId, action: "catalog_import.queued", entityType: "CATALOG_IMPORT_JOB", entityId: row.id, afterSummary: { mode: DIGIKALA_FACTS_MODE, categoryId: row.targetCategoryId, maxProducts }, requestId });
+    return row;
+  }
+
+  private async fetchFactsJson(url: string): Promise<unknown> {
+    if (this.factsDelayMs) await new Promise((resolve) => setTimeout(resolve, this.factsDelayMs));
+    const response = await safeFetch(url, DIGIKALA_FACTS_HOSTS, { timeoutMs: 15_000, maxBytes: 3_000_000, accept: "application/json" });
+    let body: unknown;
+    try { body = JSON.parse(response.body); } catch { throw new CatalogImportBlockedError("Digikala did not return JSON; import stopped."); }
+    const status = (body as { status?: unknown } | null)?.status;
+    if (typeof status === "number" && status !== 200) throw new CatalogImportBlockedError(`Digikala answered status ${status}; import stopped.`);
+    return body;
+  }
+
+  /** Same name (Persian or English) as an active opetlife brand, or nothing; brands are never created here. */
+  private async matchBrand(snapshot: DigikalaFactsSnapshot): Promise<string | null> {
+    const names = [snapshot.brandName, snapshot.brandNameEn].filter((n): n is string => !!n);
+    if (!names.length) return null;
+    const brand = await this.prisma.brand.findFirst({ where: { status: "ACTIVE", OR: names.map((name) => ({ name: { equals: name, mode: "insensitive" as const } })) }, select: { id: true } });
+    return brand?.id ?? null;
+  }
+
+  private async ingestFacts(job: { id: string; targetCategoryId: string; targetBrandId: string | null }, snapshot: DigikalaFactsSnapshot): Promise<"IMPORTED" | "DUPLICATE"> {
+    const brandId = job.targetBrandId ?? (await this.matchBrand(snapshot));
+    // An unmatched brand stays visible to staff as a spec until they add the brand.
+    const specifications = !brandId && snapshot.brandName ? [{ label: "برند", value: snapshot.brandName }, ...snapshot.specifications] : snapshot.specifications;
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        const product = await tx.product.create({ data: {
+          title: snapshot.title, slug: `digikala-${snapshot.sourceItemId}`, description: null,
+          specifications: specifications as unknown as Prisma.InputJsonValue,
+          categoryId: job.targetCategoryId, brandId, status: ProductStatus.DRAFT,
+          supportsDog: snapshot.supportsDog, supportsCat: snapshot.supportsCat,
+          variants: { create: { sku: `DK-${snapshot.sourceItemId}`, ...(snapshot.weightKg ? { weightValue: snapshot.weightKg, weightUnit: WeightUnit.KG } : {}) } },
+        }, select: { id: true } });
+        await tx.catalogImportItem.create({ data: { jobId: job.id, source: "DIGIKALA", sourceItemId: snapshot.sourceItemId, sourceUrl: snapshot.sourceUrl, sourceSnapshot: snapshot as unknown as Prisma.InputJsonValue, sourceHash: hash(snapshot), productId: product.id, status: CatalogImportItemStatus.IMPORTED } });
+      });
+      return "IMPORTED";
+    } catch (e) {
+      if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002")) throw e;
+      await this.prisma.catalogImportItem.create({ data: { jobId: job.id, source: "DIGIKALA", sourceItemId: snapshot.sourceItemId, sourceUrl: snapshot.sourceUrl, sourceSnapshot: snapshot as unknown as Prisma.InputJsonValue, sourceHash: hash(snapshot), status: CatalogImportItemStatus.DUPLICATE, errorCode: "ALREADY_IN_CATALOG" } }).catch(() => undefined);
+      return "DUPLICATE";
+    }
+  }
+
+  /**
+   * Walks Digikala's pet category best-sellers page by page and reads each product's facts. Resumes after a retry
+   * (products already recorded are skipped). A 403/429/captcha/non-JSON answer stops the run; nothing is retried
+   * around a block.
+   */
+  private async runFactsJob(jobId: string) {
+    const job = await this.prisma.catalogImportJob.findUniqueOrThrow({ where: { id: jobId } });
+    let page = Math.max(1, job.pagesVisited);
+    let pages = job.pagesVisited;
+    let seen = job.productsSeen;
+    let failed = job.productsFailed;
+    let lastPage = job.maxPages;
+    while (seen < job.maxProducts && page <= lastPage) {
+      const list = parseFactsList(await this.fetchFactsJson(factsListUrl(page)));
+      if (list.totalPages) lastPage = Math.min(lastPage, list.totalPages);
+      pages = Math.max(pages, page);
+      if (!list.items.length) break;
+      for (const ref of list.items) {
+        if (seen >= job.maxProducts) break;
+        const known = await this.prisma.catalogImportItem.findFirst({ where: { source: "DIGIKALA", sourceItemId: ref.id }, select: { id: true } });
+        if (known) continue;
+        seen++;
+        try {
+          const snapshot = parseFactsDetail(await this.fetchFactsJson(factsDetailUrl(ref.id)), ref);
+          if (!snapshot) {
+            failed++;
+            await this.prisma.catalogImportItem.create({ data: { jobId, source: "DIGIKALA", sourceItemId: ref.id, sourceUrl: `https://www.digikala.com/product/dkp-${ref.id}/`, sourceSnapshot: ref as unknown as Prisma.InputJsonValue, sourceHash: hash(ref), status: CatalogImportItemStatus.FAILED, errorCode: "UNREADABLE_PRODUCT" } }).catch(() => undefined);
+          } else {
+            await this.ingestFacts(job, snapshot);
+          }
+        } catch (e) {
+          failed++;
+          const detail = e instanceof Error ? e.message.slice(0, 250) : "unknown";
+          await this.prisma.catalogImportItem.create({ data: { jobId, source: "DIGIKALA", sourceItemId: ref.id, sourceUrl: `https://www.digikala.com/product/dkp-${ref.id}/`, sourceSnapshot: ref as unknown as Prisma.InputJsonValue, sourceHash: hash(ref), status: CatalogImportItemStatus.FAILED, errorCode: "IMPORT_ITEM_FAILED", errorDetail: detail } }).catch(() => undefined);
+          if (e instanceof CatalogImportBlockedError || (e instanceof SourceFetchError && ["BLOCKED_BY_SOURCE", "RATE_LIMITED"].includes(e.category))) throw e;
+        }
+        const imported = await this.prisma.catalogImportItem.count({ where: { jobId, status: CatalogImportItemStatus.IMPORTED } });
+        await this.bumpProgress(jobId, pages, seen, imported, failed);
+        if (await this.cancelRequested(jobId)) break;
+      }
+      if (await this.cancelRequested(jobId)) break;
+      page++;
+    }
+    const cancelled = await this.cancelRequested(jobId);
+    const imported = await this.prisma.catalogImportItem.count({ where: { jobId, status: CatalogImportItemStatus.IMPORTED } });
+    const status = cancelled ? CatalogImportJobStatus.CANCELLED : imported === 0 ? CatalogImportJobStatus.FAILED : failed > 0 ? CatalogImportJobStatus.PARTIAL : CatalogImportJobStatus.COMPLETED;
+    await this.prisma.catalogImportJob.update({ where: { id: jobId }, data: { status, pagesVisited: pages, productsSeen: seen, productsImported: imported, productsFailed: failed, lockedUntil: null, finishedAt: new Date() } });
   }
 
   async applyIncomingSnapshot(admin: ResolvedAdminContext, itemId: string, reason: string, requestId?: string) {

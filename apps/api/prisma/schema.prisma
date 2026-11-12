@@ -3014,6 +3014,9 @@ model Product {
 model CatalogImportJob {
   id               String                 @id @default(uuid()) @db.Uuid
   status           CatalogImportJobStatus @default(QUEUED)
+  /// PAGES = staff-submitted Digikala pages (flag-gated, photos); DIGIKALA_FACTS = the owner's one-time pet-category
+  /// facts run (no photos, no descriptions).
+  mode             String                 @default("PAGES")
   submittedUrls    String[]
   targetCategoryId String                 @db.Uuid
   targetCategory   ProductCategory        @relation(fields: [targetCategoryId], references: [id], onDelete: Restrict)

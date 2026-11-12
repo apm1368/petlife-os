@@ -10524,5 +10524,23 @@
     "requested": "Erstattung angefragt.",
     "tooMuch": "Mehr als erlaubt, oder dieser Streitfall erlaubt keine Erstattung.",
     "failed": "Das hat nicht geklappt; bitte erneut versuchen."
+  },
+  "adminDigikalaFacts": {
+    "title": "Einmaliger Digikala-Tierbedarf-Import (nur Fakten)",
+    "hint": "Die meistverkauften Produkte der Digikala-Kategorie Tierbedarf kommen einmalig als Entwürfe in den Katalog.",
+    "rules": {
+      "facts": "Name, Marke, Kategorie, technische Daten und Gewicht werden übernommen.",
+      "noContent": "Fotos und Beschreibungen von Digikala werden nicht kopiert; vor dem Veröffentlichen eigene Texte und Bilder ergänzen.",
+      "reference": "Preis und Bestand von Digikala bleiben nur als Referenz im Importprotokoll; sie sind nicht unser Verkaufspreis.",
+      "pace": "Er läuft langsam (eine Anfrage alle 3 Sekunden) und stoppt, wenn Digikala blockiert."
+    },
+    "category": "Zielkategorie im Katalog",
+    "maxProducts": "Höchstzahl Produkte (bis 3000)",
+    "start": "Einmaligen Import starten",
+    "started": "In der Warteschlange; der Fortschritt erscheint in der Auftragsliste.",
+    "alreadyRun": "Dieser Import ist bereits gelaufen oder läuft gerade.",
+    "invalid": "Wählen Sie eine Kategorie und eine Zahl von 1 bis 3000.",
+    "forbidden": "Berechtigung commerce.manage erforderlich.",
+    "failed": "Konnte nicht starten; bitte erneut versuchen."
   }
 }
