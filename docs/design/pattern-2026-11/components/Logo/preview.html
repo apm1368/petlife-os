@@ -1,0 +1,25 @@
+<!-- @dsCard group="Brand" height=230 subtitle="نشانه، نسخهٔ فارسی، روی رنگ برند و آیکون اپ" -->
+<div dir="rtl" class="demo">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@600;900&display=swap">
+  <style>
+    .demo{font-family:var(--font-fa);background:var(--paper);padding:18px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    .t{border-radius:var(--radius-card);background:var(--raised);box-shadow:0 1px 0 var(--line);display:grid;place-items:center;min-height:180px;padding:16px}
+    .t.dark{background:var(--forest)}
+    .mk{width:150px;color:var(--forest);--nose:#1E241F}
+    .dark .mk,.icon .mk{color:var(--on-forest);--nose:var(--sun)}
+    .lock{display:flex;align-items:center;gap:10px}
+    .lock .mk{width:80px}
+    .lock b{font-size:26px;font-weight:900;color:var(--forest)}
+    .dark .lock b{color:var(--on-forest)}
+    .icon{width:96px;height:96px;border-radius:22%;background:var(--forest);display:grid;place-items:center}
+    .icon .mk{width:72px}
+  </style>
+  <div class="t"><svg class="mk" data-mark></svg></div>
+  <div class="t"><div class="lock"><svg class="mk" data-mark></svg><b>اپت لایف</b></div></div>
+  <div class="t dark"><div class="lock"><svg class="mk" data-mark></svg><b>اپت لایف</b></div></div>
+  <div class="t"><div class="icon"><svg class="mk" data-mark></svg></div></div>
+</div>
+<script>
+var M='<path d="M19.9 51.8 L16 27 L39.6 36.6 Z" fill="currentColor" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/><path d="M76.1 51.8 L80 27 L56.4 36.6 Z" fill="currentColor" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/><circle cx="48" cy="68" r="26" fill="none" stroke="currentColor" stroke-width="13"/><ellipse cx="40.5" cy="65" rx="3" ry="3.6" fill="currentColor"/><ellipse cx="55.5" cy="65" rx="3" ry="3.6" fill="currentColor"/><path d="M45 72 h6 l-3 3.6 z" fill="#F2B544"/><rect x="92" y="36" width="13" height="84" rx="6.5" fill="currentColor"/><circle cx="122" cy="68" r="26" fill="none" stroke="currentColor" stroke-width="13"/><ellipse cx="157" cy="66" rx="6" ry="5" fill="var(--nose)"/><circle cx="130" cy="62" r="3.4" fill="currentColor"/><path d="M109 38 C100 34 91 43 95 60 C98 72 106 77 110 70 C113 63 112 51 117 42 Z" fill="#F2B544"/><rect x="170" y="22" width="13" height="78.5" rx="6.5" fill="currentColor"/><path d="M176.5 26 C176 12 186 3 198 3 C198 16 190 25 176.5 26 Z" fill="#7DB46C"/>';
+document.querySelectorAll('[data-mark]').forEach(function(s){s.setAttribute('viewBox','10 0 192 124');s.innerHTML=M;});
+</script>
