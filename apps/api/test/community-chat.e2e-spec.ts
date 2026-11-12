@@ -26,7 +26,8 @@ describe("Community chat", () => {
     const a = (await maryam.post("/chat/conversations").send({ participantUserId: sara.id }).expect(201)).body;
     const b = (await sara.post("/chat/conversations").send({ participantUserId: maryam.id }).expect(201)).body;
     expect(b.id).toBe(a.id);
-    expect(a.otherMember).toEqual({ id: sara.id, displayName: "سارا", avatarUrl: null });
+    // Until sara writes here, maryam sees only her public first name, no id (QA review of #306).
+    expect(a.otherMember).toEqual({ id: null, displayName: "سارا", avatarUrl: null });
     expect(JSON.stringify(a)).not.toMatch(/@example\.com/); // no contact data
     await maryam.post(`/chat/conversations/${a.id}/messages`).send({ body: "  سلام! پشمک امروز چطور است؟  " }).expect(201);
     await maryam.post(`/chat/conversations/${a.id}/messages`).send({ body: "عکسش را دیدم." }).expect(201);
@@ -45,15 +46,25 @@ describe("Community chat", () => {
   it("#290 Q52: a member can message a post's author from the post — same pair conversation, no contacts, never self, only published posts", async () => {
     const author = await actor("Neda"), reader = await actor("Reza");
     const post = { body: await db.communityPost.create({ data: { authorUserId: author.id, type: "ADOPTION", title: "Kitten needs a home", body: "Two months old, vaccinated." } }) };
+    await db.user.update({ where: { id: author.id }, data: { displayName: "Neda Ahmadi" } });
     const fromPost = (await reader.post(`/chat/conversations/for-post/${post.body.id}`).expect(201)).body;
-    expect(fromPost.otherMember).toMatchObject({ id: author.id, displayName: "Neda" });
-    expect(JSON.stringify(fromPost)).not.toMatch(/@example\.com/);
+    // Before the author replies: public first name only, no id (QA review of #306); never a contact.
+    expect(fromPost.otherMember).toEqual({ id: null, displayName: "Neda", avatarUrl: null });
+    expect(JSON.stringify(fromPost)).not.toMatch(/@example\.com|Ahmadi/);
+    // A bare open leaves no empty thread in the author's inbox.
+    expect((await author.get("/chat/conversations").expect(200)).body).toEqual([]);
+    await author.post(`/chat/conversations/${fromPost.id}/messages`).send({ body: "Hi!" }).expect(201);
+    const afterReply = (await reader.get("/chat/conversations").expect(200)).body;
+    expect(JSON.stringify(afterReply)).toContain(author.id);
     const direct = (await reader.post("/chat/conversations").send({ participantUserId: author.id }).expect(201)).body;
     expect(direct.id).toBe(fromPost.id);
     await author.post(`/chat/conversations/for-post/${post.body.id}`).expect(400);
     await reader.post(`/chat/conversations/for-post/${randomUUID()}`).expect(404);
     await db.communityPost.update({ where: { id: post.body.id }, data: { status: "REMOVED" } });
     await reader.post(`/chat/conversations/for-post/${post.body.id}`).expect(404);
+    // Posts shared on behalf of a lost-pet report or a campaign are not a private inbox.
+    const shared = await db.communityPost.create({ data: { authorUserId: author.id, type: "RESCUE", body: "Campaign update", sourceType: "SUPPORT_CAMPAIGN" } });
+    await reader.post(`/chat/conversations/for-post/${shared.id}`).expect(400);
   });
 
   it("only participants can read or write — everyone else gets the same 404 as a missing conversation", async () => {

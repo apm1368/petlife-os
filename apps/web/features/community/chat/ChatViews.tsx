@@ -108,11 +108,12 @@ export function ChatThreadView({ conversationId }: { conversationId: string }) {
   }
 
   async function toggleBlock() {
-    if (!meta?.otherMember) return;
+    const otherId = meta?.otherMember?.id;
+    if (!otherId) return;
     setBlockBusy(true);
     setActionError(null);
     try {
-      await (meta.blockedByMe ? chatService.unblock(meta.otherMember.id) : chatService.block(meta.otherMember.id));
+      await (meta.blockedByMe ? chatService.unblock(otherId) : chatService.block(otherId));
       await load();
     } catch {
       setActionError(t("blockFailed"));
@@ -130,7 +131,7 @@ export function ChatThreadView({ conversationId }: { conversationId: string }) {
       <header className="chat-thread__head">
         <Link href={`/${locale}/community/messages`}>{t("allMessages")}</Link>
         <h1>{meta?.otherMember?.displayName ?? t("conversationFallback")}</h1>
-        {meta?.otherMember ? <Button variant="ghost" isLoading={blockBusy} onClick={() => void toggleBlock()}>{meta.blockedByMe ? t("unblock") : t("block")}</Button> : null}
+        {meta?.otherMember?.id ? <Button variant="ghost" isLoading={blockBusy} onClick={() => void toggleBlock()}>{meta.blockedByMe ? t("unblock") : t("block")}</Button> : null}
       </header>
       {actionError ? <p role="alert">{actionError}</p> : null}
       <ol className="chat-thread__messages">

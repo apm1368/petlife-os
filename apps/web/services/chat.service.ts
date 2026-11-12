@@ -2,7 +2,8 @@ import { apiFetch } from "@/lib/api/client";
 
 export interface ChatConversationSummary {
   id: string;
-  otherMember: { id: string; displayName: string; avatarUrl: string | null } | null;
+  /** id is null until the other member has written in this conversation (only their public first name until then). */
+  otherMember: { id: string | null; displayName: string; avatarUrl: string | null } | null;
   lastMessage: { id: string; body: string; senderIsMe: boolean; createdAt: string } | null;
   unreadCount: number;
   blocked: boolean;
