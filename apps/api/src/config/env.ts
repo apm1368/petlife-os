@@ -296,9 +296,14 @@ function validateShippingConfig(env: AppEnv): void {
   const missing: string[] = [];
   if (env.ALOPEYK_ENABLED && !(env.ALOPEYK_API_BASE_URL && env.ALOPEYK_API_KEY)) missing.push("ALOPEYK_API_BASE_URL/ALOPEYK_API_KEY");
   if (env.SNAPPBOX_ENABLED && !(env.SNAPPBOX_API_BASE_URL && env.SNAPPBOX_API_KEY)) missing.push("SNAPPBOX_API_BASE_URL/SNAPPBOX_API_KEY");
+  // Courier callbacks move shipments (up to DELIVERED); each enabled courier needs a webhook secret to verify them.
+  const strongSecret = (value: string | undefined) => (value?.trim().length ?? 0) >= 32;
+  if (env.ALOPEYK_ENABLED && !strongSecret(env.ALOPEYK_WEBHOOK_SECRET)) missing.push("ALOPEYK_WEBHOOK_SECRET (32+ characters)");
+  if (env.SNAPPBOX_ENABLED && !strongSecret(env.SNAPPBOX_WEBHOOK_SECRET)) missing.push("SNAPPBOX_WEBHOOK_SECRET (32+ characters)");
   if (missing.length > 0) {
     throw new Error(`SHIPPING_MODE=production requires credentials for every enabled provider. Missing: ${missing.join(", ")}`);
   }
+  if (env.DEV_SHIPPING_ENABLED) throw new Error("SHIPPING_MODE=production cannot run with DEV_SHIPPING_ENABLED=true (the simulated courier).");
 }
 
 /// Handoff 09 (spec section 58) — "no fake production success" applies here
