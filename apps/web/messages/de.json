@@ -3713,7 +3713,8 @@
         "channels": "Kanäle und Zustellung",
         "smsPatterns": "SMS-Vorlagen",
         "walletDirectory": "Mitglieder",
-        "walletTopUps": "Aufladebelege"
+        "walletTopUps": "Aufladebelege",
+        "repeatDeliveries": "Liefer-Abos"
       },
       "palette": {
         "actions": "Schnellaktionen",
@@ -9301,5 +9302,44 @@
         "CANCELLED": "Abgesagt"
       }
     }
+  },
+  "adminOrderCancel": {
+    "title": "Bestellung stornieren (Support)",
+    "hint": "Nur bevor ein Kurier das Paket hat. Der Kunde erhält sofort den vollen Betrag zurück; die Lieferung wird storniert und der Bestand zurückgebucht.",
+    "afterDispatch": "Das Paket ist beim Kurier; bitte stattdessen eine Erstattung beantragen.",
+    "reason": "Grund (Prüfprotokoll)",
+    "reasonRequired": "Bitte einen kurzen Grund angeben.",
+    "cancel": "Bestellung stornieren",
+    "confirm": "Ja, stornieren und voll erstatten",
+    "back": "Zurück",
+    "notCancellable": "Nicht mehr stornierbar; der Kurier hat das Paket.",
+    "failed": "Das hat nicht geklappt; bitte erneut versuchen."
+  },
+  "adminRepeatDeliveries": {
+    "title": "Wiederkehrende Lieferungen",
+    "hint": "Liefer-Abos der Mitglieder (nur Ansicht). Mitglieder ändern oder kündigen sie in ihrem Konto.",
+    "filter": "Status",
+    "all": "Alle",
+    "status": {
+      "ACTIVE": "Aktiv",
+      "PAUSED": "Pausiert",
+      "CANCELLED": "Gekündigt"
+    },
+    "col": {
+      "member": "Mitglied",
+      "product": "Produkt",
+      "seller": "Verkäufer",
+      "every": "Alle",
+      "next": "Nächste Lieferung",
+      "status": "Status",
+      "lastOrder": "Letzte Bestellung"
+    },
+    "days": "{count} Tage",
+    "empty": "Keine.",
+    "prev": "Zurück",
+    "next": "Weiter",
+    "forbidden": "Berechtigung commerce.view erforderlich.",
+    "failed": "Konnte nicht laden",
+    "retry": "Erneut versuchen"
   }
 }

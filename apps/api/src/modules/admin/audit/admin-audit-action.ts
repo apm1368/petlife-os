@@ -9,6 +9,7 @@
  */
 export type AdminAuditAction =
   | "user.message_sent"
+  | "order.cancelled_by_staff"
   | "product.created"
   | "product.updated"
   | "product.media_added"
