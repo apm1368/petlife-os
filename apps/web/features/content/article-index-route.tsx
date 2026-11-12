@@ -8,7 +8,8 @@ import { articleListJsonLd } from "@/lib/seo/article-jsonld";
 import { publicPageMetadata } from "@/lib/seo/public-metadata";
 import { SITE_NAME, absoluteUrl, jsonLdScript } from "@/lib/seo/site";
 import { GUIDE_CATEGORY_SLUG } from "./content-sections";
-import { ARTICLE_INDEX_PAGE_SIZE, PublicBlogIndexView } from "./PublicBlogIndexView";
+import { PublicBlogIndexView } from "./PublicBlogIndexView";
+import { ARTICLE_INDEX_PAGE_SIZE } from "./content-sections";
 
 export type IndexKind = { kind: "blog" } | { kind: "guides" } | { kind: "category"; slug: string } | { kind: "tag"; slug: string };
 
