@@ -34,4 +34,11 @@ export const MESSAGING_PROVIDER_CAPABILITIES: Record<MessagingProvider, Messagin
     supportsStatusQuery: false,
     supportsUnicode: true,
   },
+  /// Web Push: a 201 from the push service means accepted for delivery (SENT); there are no read receipts.
+  WEB_PUSH: {
+    supportsDeliveryStatus: false,
+    supportsWebhook: false,
+    supportsStatusQuery: false,
+    supportsUnicode: true,
+  },
 };
