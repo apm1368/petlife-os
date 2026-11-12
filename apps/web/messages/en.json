@@ -4166,7 +4166,7 @@
       }
     },
     "shell": {
-      "console": "Back office",
+      "console": "Admin",
       "skipToContent": "Skip to content",
       "collapseSidebar": "Collapse sidebar",
       "expandSidebar": "Expand sidebar",
