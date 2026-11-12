@@ -148,7 +148,7 @@ html[dir="rtl"] .design-root .erp-shell.opl-page {
 .gx-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .gx-seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 999px; background: var(--glass-input); border: 1px solid var(--glass-edge); }
 .gx-seg button { min-height: 36px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; cursor: pointer; }
-.gx-seg button[aria-pressed="true"] { background: var(--opl-forest); color: var(--opl-on-forest); box-shadow: 0 8px 18px -10px var(--brand-solid); }
+.gx-seg button:is([aria-pressed="true"], [aria-checked="true"]) { background: var(--opl-forest); color: var(--opl-on-forest); box-shadow: 0 8px 18px -10px var(--brand-solid); }
 .gx-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--glass-edge); background: var(--glass-input); color: var(--text-primary); font-size: 0.82rem; font-weight: 700; cursor: pointer; text-decoration: none; }
 .gx-btn:hover { border-color: var(--brand-natural); }
 .gx-btn--primary { background: var(--opl-forest); border-color: transparent; color: var(--opl-on-forest); }
@@ -329,4 +329,33 @@ html[dir="rtl"] .design-root .erp-shell.opl-page {
   .gx-queue__icon { width: 32px; height: 32px; border-radius: 10px; }
   .gx-queue__count { font-size: 1.25rem; }
   .gx-card { padding: 16px; border-radius: 20px; }
+}
+
+/* ---- Custom roles ---- */
+.gx-inline-note { margin: 0; padding: 12px 16px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--opl-forest) 30%, transparent); background: var(--opl-mint); color: var(--opl-forest); font-size: 0.84rem; }
+.gx-role-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
+.gx-role-list > li { display: flex; flex-direction: column; gap: 12px; }
+.gx-role-list > li > header { margin-bottom: 0; align-items: flex-start; }
+.gx-role-summary { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.gx-role-summary li { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--opl-paper-2); border: 1px solid var(--opl-line); font-size: 0.74rem; }
+.gx-role-summary b { color: var(--opl-forest); font-weight: 750; }
+.gx-role-archive { display: grid; gap: 10px; padding-top: 12px; border-top: 1px solid var(--opl-line); }
+.gx-role-editor { display: flex; flex-direction: column; gap: 18px; }
+.gx-role-editor > header { margin-bottom: 0; }
+.gx-role-editor__basics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.gx-role-editor__verticals, .gx-role-section { margin: 0; padding: 14px 16px; border: 1px solid var(--opl-line); border-radius: 18px; display: grid; gap: 8px; min-width: 0; }
+.gx-role-editor__verticals legend, .gx-role-section legend { padding-inline: 6px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.04em; color: var(--opl-ink-2); }
+.gx-role-domain { border-bottom: 1px solid var(--opl-line); padding-block: 8px; }
+.gx-role-domain:last-child { border-bottom: 0; }
+.gx-role-domain__row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.gx-role-domain__name { flex: 1 1 150px; min-width: 0; font-size: 0.88rem; font-weight: 700; }
+.gx-role-domain__more { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--opl-line); background: var(--opl-raised); color: var(--opl-ink-2); cursor: pointer; }
+.gx-role-domain__more[aria-expanded="true"] svg { transform: rotate(180deg); }
+.gx-role-domain__perms { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 6px 16px; margin: 10px 0 2px; padding: 0; list-style: none; }
+.gx-role-domain__perms label { display: flex; align-items: center; gap: 8px; min-height: 36px; font-size: 0.8rem; cursor: pointer; }
+.gx-role-domain__perms input { width: 18px; height: 18px; accent-color: var(--opl-forest); flex: none; }
+.gx-role-domain__perms bdi { margin-inline-start: auto; color: var(--opl-ink-3); font-size: 0.68rem; font-family: ui-monospace, monospace; }
+@media (max-width: 640px) {
+  .gx-role-editor__basics { grid-template-columns: minmax(0, 1fr); }
+  .gx-role-domain__perms bdi { display: none; }
 }

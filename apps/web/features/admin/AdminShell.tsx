@@ -188,7 +188,7 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const roleLabel = t.has(`role.${context.role}`) ? t(`role.${context.role}`) : String(context.role ?? "").replace(/_/g, " ");
+  const roleLabel = context.customRoleName || (t.has(`role.${context.role}`) ? t(`role.${context.role}`) : String(context.role ?? "").replace(/_/g, " "));
   const displayName = context.displayName || roleLabel;
   const formatCount = (value: number) => new Intl.NumberFormat(NUMBER_LOCALE[locale] ?? "en-GB").format(value);
   const href = (path: string) => `/${locale}/admin${path}`;

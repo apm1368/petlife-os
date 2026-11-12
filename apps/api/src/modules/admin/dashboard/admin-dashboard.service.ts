@@ -19,7 +19,7 @@ import {
 } from "@prisma/client";
 import type { AdminDashboardSummaryDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
-import { roleHasPermission, type AdminPermission } from "../auth/admin-permissions";
+import { adminCan, type AdminPermission } from "../auth/admin-permissions";
 import { canReachVertical } from "../auth/admin-verticals";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 
@@ -34,7 +34,7 @@ export class AdminDashboardService {
 
   async getSummary(admin: ResolvedAdminContext): Promise<AdminDashboardSummaryDto> {
     const may = (permission: AdminPermission, vertical?: AdminVertical) =>
-      roleHasPermission(admin.role, permission) && (!vertical || canReachVertical(admin, vertical));
+      adminCan(admin, permission) && (!vertical || canReachVertical(admin, vertical));
     const when = (allowed: boolean, count: () => Promise<number>) => (allowed ? count() : Promise.resolve(null));
     const awaitingStaff = [ProviderVerificationStatus.SUBMITTED, ProviderVerificationStatus.UNDER_REVIEW];
     const [

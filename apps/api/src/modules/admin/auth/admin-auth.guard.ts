@@ -2,7 +2,7 @@ import { Injectable, type CanActivate, type ExecutionContext } from "@nestjs/com
 import { Reflector } from "@nestjs/core";
 import { UnauthenticatedException, AdminAccessDeniedException } from "../../../common/errors/api-exception";
 import { AdminAccessService } from "./admin-access.service";
-import { roleHasPermission, type AdminPermission } from "./admin-permissions";
+import { adminCan, type AdminPermission } from "./admin-permissions";
 import { ADMIN_PERMISSION_KEY } from "./require-admin-permission.decorator";
 import { ADMIN_VERTICAL_KEY } from "./require-admin-vertical.decorator";
 import { allowedVerticals } from "./admin-verticals";
@@ -35,7 +35,7 @@ export class AdminAuthGuard implements CanActivate {
 
     const requiredPermissions = this.reflector.get<AdminPermission[] | undefined>(ADMIN_PERMISSION_KEY, context.getHandler());
     if (requiredPermissions && requiredPermissions.length > 0) {
-      const satisfied = requiredPermissions.some((permission) => roleHasPermission(resolved.role, permission));
+      const satisfied = requiredPermissions.some((permission) => adminCan(resolved, permission));
       if (!satisfied) {
         throw new AdminAccessDeniedException({ reason: "INSUFFICIENT_PERMISSION", requiredPermissions, role: resolved.role });
       }
