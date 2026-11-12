@@ -8332,6 +8332,9 @@
       "SCOPES_ONLY_FOR_SERVICE_ADMIN": "حوزهٔ خدمات فقط برای نقش ادمین خدمات قابل ثبت است."
     },
     "verticals": {
+      "SHOP": "فروشگاه",
+      "CONTENT": "محتوا",
+      "SUPPORT": "پشتیبانی",
       "CLINIC": "کلینیک و دامپزشکی",
       "GROOMING": "آرایش و شست‌وشو",
       "ACCOMMODATION": "اقامت و نگهداری",
@@ -8348,6 +8351,27 @@
     }
   },
   "partnerVerification": {
+    "superseded": "با بارگذاری جدیدتر جایگزین شده",
+    "reviewedBy": "توسط {name}",
+    "caseSummary": "وضعیت فعلی پرونده",
+    "lastDecision": "آخرین تصمیم",
+    "decidedBy": "{name} · {date}",
+    "decisionReason": "دلیل: {reason}",
+    "noDecisionYet": "هنوز تصمیمی ثبت نشده است.",
+    "actorAdmin": "مدیر",
+    "actorPartner": "شریک",
+    "documentGeneric": "مدرک",
+    "history": {
+      "title": "سابقهٔ پرونده",
+      "hint": "هر تصمیم با دلیلش و هر بار باز کردن مدرک خصوصی، با نام انجام‌دهنده، اینجا ثبت است.",
+      "empty": "هنوز چیزی ثبت نشده است.",
+      "statusChanged": "وضعیت: {from} ← {to}",
+      "documentAccepted": "{document} پذیرفته شد",
+      "documentRejected": "{document} رد شد",
+      "documentOpened": "{document} باز شد",
+      "documentUploaded": "{document} بارگذاری شد",
+      "submitted": "برای بررسی ارسال شد"
+    },
     "businessEvidenceRequirement": "مجوز کسب‌وکار یا اینماد (شناسه یا مدرک)",
     "profileRequired": "برای ارسال پرونده الزامی است",
     "profileRecorded": "ثبت‌شده برای بررسی کارشناس",

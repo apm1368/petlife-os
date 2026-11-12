@@ -2755,6 +2755,9 @@
       "SCOPES_ONLY_FOR_SERVICE_ADMIN": "Dienstbereiche können nur einem Admin mit Dienstbereich zugewiesen werden."
     },
     "verticals": {
+      "SHOP": "Shop",
+      "CONTENT": "Inhalte",
+      "SUPPORT": "Support",
       "CLINIC": "Kliniken und Tierarztpraxen",
       "GROOMING": "Fellpflege",
       "ACCOMMODATION": "Unterkünfte und Tierbetreuung",
@@ -7409,6 +7412,27 @@
     }
   },
   "partnerVerification": {
+    "superseded": "Durch einen neueren Upload ersetzt",
+    "reviewedBy": "von {name}",
+    "caseSummary": "Stand des Falls",
+    "lastDecision": "Letzte Entscheidung",
+    "decidedBy": "{name} · {date}",
+    "decisionReason": "Grund: {reason}",
+    "noDecisionYet": "Noch keine Entscheidung erfasst.",
+    "actorAdmin": "Admin",
+    "actorPartner": "Partner",
+    "documentGeneric": "Dokument",
+    "history": {
+      "title": "Fallverlauf",
+      "hint": "Jede Entscheidung mit ihrem Grund und jedes Öffnen eines privaten Dokuments steht hier – mit der Person, die es getan hat.",
+      "empty": "Noch nichts erfasst.",
+      "statusChanged": "Status: {from} → {to}",
+      "documentAccepted": "{document} angenommen",
+      "documentRejected": "{document} abgelehnt",
+      "documentOpened": "{document} geöffnet",
+      "documentUploaded": "{document} hochgeladen",
+      "submitted": "Zur Prüfung eingereicht"
+    },
     "businessEvidenceRequirement": "Gewerbeschein oder Enamad (ID oder Nachweis)",
     "profileRequired": "Vor dem Einreichen erforderlich",
     "profileRecorded": "Für die Prüfung durch Mitarbeitende erfasst",

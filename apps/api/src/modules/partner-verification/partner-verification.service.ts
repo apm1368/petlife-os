@@ -200,7 +200,62 @@ export class PartnerVerificationService {
 
   async adminDetail(s: Subject) {
     const [o, st, profile] = await Promise.all([this.org(s), this.status(s), this.profile(s)]);
-    return { subjectType: s.type, id: o.id, name: o.name, kind: o.kind, ...st, profile, allowedTransitions: ADMIN_TRANSITIONS[o.verificationStatus].filter(to => to !== VS.VERIFIED || (st.policy.missingForApproval.length === 0 && st.policy.missingProfileFields.length === 0)) };
+    const { history, lastDecision, reviewerNames } = await this.caseHistory(s, st.documents, st.submittedAt);
+    return {
+      subjectType: s.type, id: o.id, name: o.name, kind: o.kind, ...st,
+      documents: st.documents.map((d) => ({ ...d, reviewedByName: d.reviewedByAdminId ? reviewerNames.get(d.reviewedByAdminId) ?? null : null })),
+      profile, history, lastDecision,
+      allowedTransitions: ADMIN_TRANSITIONS[o.verificationStatus].filter(to => to !== VS.VERIFIED || (st.policy.missingForApproval.length === 0 && st.policy.missingProfileFields.length === 0)),
+    };
+  }
+
+  /**
+   * One readable case history for the admin view: every staff decision from the audit log (status changes with
+   * their reasons, document reviews, and every opening of a private document — who, when, why), plus the
+   * partner's own uploads and submission, newest first. Reviewer names come from the admin directory.
+   */
+  private async caseHistory(s: Subject, documents: { id: string; kind: string; createdAt: string }[], submittedAt: string | null) {
+    const entityType = s.type === PartnerSubjectType.PROVIDER ? "PROVIDER_ORGANIZATION" : "SELLER_ORGANIZATION";
+    const logs = await this.prisma.adminAuditLog.findMany({
+      where: { entityType, entityId: s.id, action: { in: ["verification.status_changed", "verification.document_reviewed", "verification.document_opened"] } },
+      orderBy: { createdAt: "desc" },
+      take: 200,
+      include: { adminUser: { select: { id: true, user: { select: { displayName: true } } } } },
+    });
+    const kindOf = new Map(documents.map((d) => [d.id, d.kind]));
+    const summary = (value: unknown) => (value && typeof value === "object" ? (value as Record<string, unknown>) : {});
+    const text = (value: unknown) => (typeof value === "string" ? value : null);
+    const staff = logs.map((l) => {
+      const before = summary(l.beforeSummary);
+      const after = summary(l.afterSummary);
+      const documentId = text(after.documentId);
+      return {
+        id: l.id,
+        at: l.createdAt.toISOString(),
+        kind: l.action === "verification.status_changed" ? ("STATUS_CHANGED" as const) : l.action === "verification.document_reviewed" ? ("DOCUMENT_REVIEWED" as const) : ("DOCUMENT_OPENED" as const),
+        actor: "ADMIN" as const,
+        actorName: l.adminUser.user.displayName,
+        reason: l.reason,
+        from: text(before.verificationStatus),
+        to: text(after.verificationStatus),
+        documentId,
+        documentKind: text(after.kind) ?? (documentId ? kindOf.get(documentId) ?? null : null),
+        decision: text(after.decision),
+      };
+    });
+    const partner = [
+      ...documents.map((d) => ({ id: `upload-${d.id}`, at: d.createdAt, kind: "DOCUMENT_UPLOADED" as const, actor: "PARTNER" as const, actorName: null, reason: null, from: null, to: null, documentId: d.id, documentKind: d.kind, decision: null })),
+      ...(submittedAt ? [{ id: "submitted", at: submittedAt, kind: "SUBMITTED" as const, actor: "PARTNER" as const, actorName: null, reason: null, from: null, to: null, documentId: null, documentKind: null, decision: null }] : []),
+    ];
+    const history = [...staff, ...partner].sort((a, b) => b.at.localeCompare(a.at));
+    const decision = staff.find((h) => h.kind === "STATUS_CHANGED");
+    const lastDecision = decision ? { at: decision.at, by: decision.actorName, from: decision.from, to: decision.to, reason: decision.reason } : null;
+    const reviewerNames = new Map(logs.map((l) => [l.adminUser.id, l.adminUser.user.displayName] as const));
+    const missing = [...new Set((await this.prisma.partnerVerificationDocument.findMany({ where: { subjectType: s.type, subjectId: s.id, reviewedByAdminId: { not: null } }, select: { reviewedByAdminId: true } })).map((d) => d.reviewedByAdminId!))].filter((id) => !reviewerNames.has(id));
+    if (missing.length) {
+      for (const a of await this.prisma.adminUser.findMany({ where: { id: { in: missing } }, select: { id: true, user: { select: { displayName: true } } } })) reviewerNames.set(a.id, a.user.displayName);
+    }
+    return { history, lastDecision, reviewerNames };
   }
 
   async documentDownload(admin: ResolvedAdminContext, documentId: string, reason: string) {
