@@ -2750,6 +2750,9 @@
       "SCOPES_ONLY_FOR_SERVICE_ADMIN": "Los ámbitos de servicio solo se pueden asignar a una persona administradora por ámbito."
     },
     "verticals": {
+      "SHOP": "Tienda",
+      "CONTENT": "Contenido",
+      "SUPPORT": "Soporte",
       "CLINIC": "Clínicas y veterinaria",
       "GROOMING": "Peluquería y cuidado",
       "ACCOMMODATION": "Alojamiento y cuidado de mascotas",

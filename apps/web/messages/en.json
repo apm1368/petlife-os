@@ -8382,6 +8382,9 @@
       "SCOPES_ONLY_FOR_SERVICE_ADMIN": "Service scopes can only be assigned to a service administrator."
     },
     "verticals": {
+      "SHOP": "Shop",
+      "CONTENT": "Content",
+      "SUPPORT": "Support",
       "CLINIC": "Clinic and veterinary",
       "GROOMING": "Grooming",
       "ACCOMMODATION": "Accommodation and pet care",
