@@ -33,7 +33,6 @@ import {
   type UpdateSupportOrganizationInput,
 } from "@/services/admin-animal-support.service";
 import { Panel, PanelTitle, DetailRow } from "../console-ui";
-import { AdminAnimalSupportNav } from "./AdminAnimalSupportNav";
 import { useSupportPermissions } from "./use-support-permissions";
 
 /** Persian/Arabic digits are accepted, but money crosses the API as integer IRR. */
@@ -68,7 +67,6 @@ function Failure({ error, retry }: { error: unknown; retry: () => void }) {
 function Frame({ children }: { children: ReactNode }) {
   return (
     <div className="min-w-0 space-y-4 break-words">
-      <AdminAnimalSupportNav />
       {children}
     </div>
   );
