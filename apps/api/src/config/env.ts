@@ -267,6 +267,18 @@ const envSchema = z.object({
    * great-circle estimate for test servers — never a route distance.
    */
   TRANSPORT_DISTANCE_MODE: z.enum(["unavailable", "straight_line_demo"]).default("unavailable"),
+
+  /**
+   * Maps for the on-demand pet taxi and address pins. "none" draws OpenStreetMap-style tiles and prices from a
+   * straight-line estimate (always labelled as an estimate). "neshan" (Iranian, reachable in Iran) and "google"
+   * use the provider's distance matrix and place search with a server key; their browser keys are public by design.
+   */
+  MAPS_PROVIDER: z.enum(["none", "neshan", "google"]).default("none"),
+  NESHAN_SERVICE_KEY: z.string().optional(),
+  GOOGLE_MAPS_SERVER_KEY: z.string().optional(),
+  GOOGLE_MAPS_BROWSER_KEY: z.string().optional(),
+  MAP_TILE_URL: z.string().default("https://tile.openstreetmap.org/{z}/{x}/{y}.png"),
+  MAP_TILE_ATTRIBUTION: z.string().default("© OpenStreetMap contributors"),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;

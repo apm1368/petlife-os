@@ -1,0 +1,58 @@
+/* Pet taxi (member + driver) — 2026-11 pattern tokens, light and dark, phone first. */
+.pet-taxi { display: grid; gap: var(--space-5); max-inline-size: 60rem; margin-inline: auto; padding-block: var(--space-4) var(--space-8); }
+.pet-taxi__head h1 { margin: 0; font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.1rem); color: var(--text-primary); }
+.pet-taxi__head p { margin: var(--space-1) 0 0; color: var(--text-secondary); line-height: 1.7; }
+.pet-taxi__panel { display: grid; gap: var(--space-3); padding: var(--space-4); border-radius: var(--radius-card); border: 1px solid var(--border-default); background: var(--surface-raised); box-shadow: var(--shadow-1); }
+.pet-taxi__panel h2 { margin: 0; font-size: 1.1rem; color: var(--text-primary); }
+.pet-taxi__map { block-size: clamp(16rem, 50vh, 26rem); }
+.pet-taxi__pickers { display: flex; flex-wrap: wrap; align-items: end; gap: var(--space-2); }
+.pet-taxi__field, .pet-taxi__select { display: grid; gap: 4px; flex: 1 1 12rem; color: var(--text-secondary); font-size: var(--font-size-14, 0.875rem); }
+.pet-taxi__field input, .pet-taxi__select select, .pet-taxi__rate input {
+  min-block-size: var(--touch-target-min, 44px); padding: 0 var(--space-3); border-radius: 12px;
+  border: 1px solid var(--border-default); background: var(--surface-page); color: var(--text-primary); font: inherit;
+}
+.pet-taxi__search { position: relative; display: flex; align-items: end; gap: var(--space-2); flex: 2 1 16rem; }
+.pet-taxi__results { position: absolute; inset-block-start: 100%; inset-inline: 0; z-index: 5; list-style: none; margin: 4px 0 0; padding: 4px; border-radius: 12px; border: 1px solid var(--border-default); background: var(--surface-raised); box-shadow: var(--shadow-1); max-block-size: 16rem; overflow: auto; }
+.pet-taxi__results button { display: grid; inline-size: 100%; text-align: start; padding: 8px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--text-primary); cursor: pointer; }
+.pet-taxi__results button:hover, .pet-taxi__results button:focus-visible { background: var(--brand-tint); }
+.pet-taxi__results small { color: var(--text-muted); }
+.pet-taxi__legs { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+.pet-taxi__legs li { display: flex; align-items: center; gap: var(--space-2); color: var(--text-primary); }
+.pet-taxi__dot { inline-size: 12px; block-size: 12px; border-radius: 50%; flex: none; }
+.pet-taxi__dot--pickup { background: #2f7d4c; }
+.pet-taxi__dot--dropoff { background: #c2410c; }
+.pet-taxi__link { margin-inline-start: auto; border: 0; background: none; color: var(--brand-primary); font: inherit; cursor: pointer; text-decoration: underline; }
+.pet-taxi__details { display: grid; gap: var(--space-3); }
+.pet-taxi__choices { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; border: 0; }
+.pet-taxi__choices--stack { display: grid; }
+.pet-taxi__choices legend { margin-block-end: var(--space-2); color: var(--text-secondary); font-weight: 650; }
+.pet-taxi__choices label { display: inline-flex; align-items: center; gap: var(--space-2); min-block-size: var(--touch-target-min, 44px); padding: var(--space-2) var(--space-3); border-radius: 14px; border: 1px solid var(--border-default); background: var(--surface-page); color: var(--text-primary); cursor: pointer; }
+.pet-taxi__choices label.is-selected { border-color: var(--brand-primary); background: var(--brand-tint); }
+.pet-taxi__choices input { accent-color: var(--brand-primary); }
+.pet-taxi__quote p { margin: 0; color: var(--text-secondary); }
+.pet-taxi__fare { font-size: 1.15rem; color: var(--text-primary) !important; }
+.pet-taxi__muted { color: var(--text-muted) !important; font-size: var(--font-size-14, 0.875rem); margin: 0; }
+.pet-taxi__error { margin: 0; color: var(--state-urgent, #b3261e); }
+.pet-taxi__status { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.pet-taxi__driver { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3); border-radius: 14px; background: var(--surface-page); }
+.pet-taxi__driver div { display: grid; gap: 2px; }
+.pet-taxi__driver small { color: var(--text-muted); }
+.pet-taxi__call { display: inline-flex; align-items: center; min-block-size: var(--touch-target-min, 44px); padding: 0 var(--space-4); border-radius: 999px; background: var(--brand-primary); color: #fff; font-weight: 700; text-decoration: none; }
+.pet-taxi__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.pet-taxi__history { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+.pet-taxi__history > li { display: grid; gap: 4px; padding: var(--space-3); border-radius: 14px; border: 1px solid var(--border-subtle, var(--border-default)); }
+.pet-taxi__history small { color: var(--text-muted); }
+.pet-taxi__receipt { display: grid; gap: 4px; margin: var(--space-2) 0 0; }
+.pet-taxi__receipt div { display: flex; justify-content: space-between; gap: var(--space-3); color: var(--text-secondary); }
+.pet-taxi__receipt dd { margin: 0; font-variant-numeric: tabular-nums; }
+.pet-taxi__total { color: var(--text-primary) !important; font-weight: 700; border-block-start: 1px solid var(--border-default); padding-block-start: 4px; }
+.pet-taxi__rate { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.pet-taxi__stars button { border: 0; background: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; min-inline-size: 36px; min-block-size: 36px; }
+.pet-taxi__stars button.is-on { color: #e0a100; }
+.pet-taxi__request { display: grid; gap: var(--space-2); padding: var(--space-3); border-radius: 14px; border: 1px solid var(--border-default); background: var(--surface-page); }
+.pet-taxi__switch { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.pet-taxi__online { display: inline-flex; align-items: center; gap: var(--space-2); font-weight: 700; color: var(--text-primary); }
+.pet-taxi__online::before { content: ""; inline-size: 10px; block-size: 10px; border-radius: 50%; background: var(--text-muted); }
+.pet-taxi__online.is-on::before { background: #2f7d4c; box-shadow: 0 0 0 4px rgba(47, 125, 76, 0.2); }
+.pet-taxi__nav { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.pet-taxi__nav a { display: inline-flex; align-items: center; min-block-size: var(--touch-target-min, 44px); padding: 0 var(--space-3); border-radius: 999px; border: 1px solid var(--border-default); color: var(--text-primary); text-decoration: none; }

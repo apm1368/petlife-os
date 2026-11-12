@@ -49,6 +49,7 @@ function readQuery(params: URLSearchParams, category?: string): DiscoveryQuery {
  * is listed above the results with its own remove control.
  */
 export function ProviderDiscoveryView({ category }: { category?: string }) {
+  const tTaxi = useTranslations("petTaxi.member");
   const locale = useLocale() as RouteLocale;
   const fa = locale === "fa";
   const t = useTranslations("providerDiscovery");
@@ -208,6 +209,14 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
         </button>
       </div>
       {locating === "denied" ? <p role="status" className="disc-note">{t("filters.locationUnavailable")}</p> : null}
+      {category === "PET_TAXI" ? (
+        <p className="disc-note">
+          <Link href={`/${locale}/pet-taxi`} className="font-semibold underline">
+            {tTaxi("requestNow")}
+          </Link>{" "}
+          · {tTaxi("requestNowHint")}
+        </p>
+      ) : null}
       {category === "VET" ? (
         <fieldset className="disc-field">
           <legend>{t("filters.veterinaryService")}</legend>

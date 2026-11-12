@@ -146,6 +146,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
         tabs: [
           { href: "/services", labelKey: "tabs.bookings", permission: "services.view", exact: true },
           { href: "/services/catalog", labelKey: "tabs.serviceCatalog", permission: "services.view" },
+          { href: "/services/pet-taxi", labelKey: "tabs.petTaxi", permission: "services.view" },
           { href: "/services/reviews", labelKey: "tabs.reviews", permission: "services.view" },
           { href: "/services/analytics", labelKey: "tabs.analytics", permission: "services.view" },
         ],

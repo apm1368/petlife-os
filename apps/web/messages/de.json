@@ -3592,7 +3592,8 @@
         "platformSettings": "Einstellungen",
         "featureFlags": "Feature-Flags",
         "channels": "Kanäle und Zustellung",
-        "smsPatterns": "SMS-Vorlagen"
+        "smsPatterns": "SMS-Vorlagen",
+        "petTaxi": "Tiertaxi"
       },
       "palette": {
         "actions": "Schnellaktionen",
@@ -7165,7 +7166,8 @@
         "analytics": "Leistung",
         "travel": "Reisen und Aufenthalt",
         "clinicWorkspace": "Klinikverwaltung",
-        "verification": "Nachweisdokumente"
+        "verification": "Nachweisdokumente",
+        "petTaxi": "Tiertaxi"
       },
       "notAProvider": {
         "title": "Kein Zugriff auf den Anbieterbereich",
@@ -8696,5 +8698,178 @@
       "UNKNOWN": "Laborkennzeichnung nicht angegeben"
     },
     "unnamedImaging": "Körperregion nicht erfasst"
+  },
+  "petTaxi": {
+    "member": {
+      "title": "Tiertaxi",
+      "subtitle": "Tippen Sie Start und Ziel auf der Karte an, sehen Sie den Preis und verfolgen Sie Ihren Fahrer live.",
+      "map": "Karte",
+      "zoomIn": "Vergrößern",
+      "zoomOut": "Verkleinern",
+      "loading": "Wird geladen…",
+      "failed": "Konnte nicht geladen werden.",
+      "retry": "Erneut versuchen",
+      "step": {
+        "pickup": "Tippen Sie den Abholort an",
+        "dropoff": "Tippen Sie das Ziel an",
+        "details": "Tiere und Fahrzeug"
+      },
+      "pickup": "Abholung",
+      "dropoff": "Ziel",
+      "pinned": "Auf der Karte gewählter Punkt",
+      "myLocation": "Mein aktueller Standort",
+      "locating": "Standort wird ermittelt…",
+      "locationDenied": "Kein Standortzugriff; tippen Sie stattdessen auf die Karte.",
+      "savedAddresses": "Gespeicherte Adressen",
+      "search": "Ort suchen",
+      "searchNone": "Kein Ort gefunden.",
+      "city": "Abholstadt",
+      "note": "Hinweis für den Fahrer (Etage, Klingel…)",
+      "change": "Ändern",
+      "pets": "Welche Tiere fahren mit?",
+      "noPets": "Legen Sie zuerst Ihr Tier an, um eine Fahrt zu buchen.",
+      "carrier": "Wie Ihr Tier reist",
+      "carrierSize": {
+        "SMALL": "Klein: Katze oder kleiner Hund in der Box",
+        "MEDIUM": "Mittel: mittelgroßer Hund in einer Kofferraumbox",
+        "LARGE": "Groß: großer Hund oder mehrere Tiere"
+      },
+      "quote": "Fahrpreis",
+      "quoting": "Fahrpreis wird berechnet…",
+      "estimate": "Entfernung und Zeit sind Schätzungen (Luftlinie × Straßenfaktor).",
+      "routed": "Nach der Straßenroute",
+      "notPriced": "Das Tiertaxi ist in dieser Stadt noch nicht verfügbar.",
+      "distanceTime": "{km} km · etwa {minutes} Min.",
+      "payNote": "Online-Zahlung ist noch nicht aktiv; zahlen Sie beim Fahrer bei Ankunft.",
+      "request": "Fahrt anfragen",
+      "requesting": "Anfrage wird gesendet…",
+      "errors": {
+        "RIDE_ALREADY_OPEN": "Sie haben bereits eine offene Fahrt.",
+        "TOO_CLOSE": "Start und Ziel liegen zu nah beieinander.",
+        "TOO_FAR": "Diese Strecke ist zu lang für das Tiertaxi.",
+        "NOT_PRICED": "Das Tiertaxi ist in dieser Stadt noch nicht verfügbar.",
+        "generic": "Das hat nicht geklappt. Bitte erneut versuchen."
+      },
+      "status": {
+        "SEARCHING": "Fahrer wird gesucht",
+        "DRIVER_ASSIGNED": "Fahrer ist unterwegs",
+        "ARRIVING": "Fahrer ist da",
+        "PICKED_UP": "Unterwegs zum Ziel",
+        "COMPLETED": "Angekommen",
+        "CANCELLED_BY_MEMBER": "Storniert",
+        "CANCELLED_BY_DRIVER": "Vom Fahrer storniert",
+        "NO_DRIVER": "Kein Fahrer gefunden"
+      },
+      "searchingHint": "Ihre Anfrage ging an Fahrer in der Nähe. Nimmt bis {time} niemand an, sagen wir es Ihnen.",
+      "eta": "Etwa {minutes} Min. entfernt",
+      "driver": "Fahrer",
+      "call": "Anrufen",
+      "positionAt": "Position um {time}",
+      "cancel": "Fahrt stornieren",
+      "cancelConfirm": "Diese Fahrt stornieren?",
+      "newRide": "Neue Fahrt",
+      "rate": "Fahrt bewerten",
+      "rateComment": "Ihr Kommentar (optional)",
+      "rateSend": "Bewertung senden",
+      "rated": "Danke für Ihre Bewertung.",
+      "stars": "{n} von 5",
+      "receipt": "Fahrtbeleg",
+      "receiptLines": {
+        "base": "Grundpreis",
+        "distance": "Strecke",
+        "time": "Zeit",
+        "carrier": "Transportart",
+        "extraPets": "Weitere Tiere",
+        "minimum": "Mindestpreis angewendet",
+        "total": "Gesamt"
+      },
+      "history": "Frühere Fahrten",
+      "historyEmpty": "Noch keine Fahrten.",
+      "requestNow": "Jetzt ein Tiertaxi rufen",
+      "requestNowHint": "auf der Karte, mit sofortigem Preis und Live-Verfolgung"
+    },
+    "driver": {
+      "title": "Tiertaxi: Fahrer",
+      "subtitle": "Gehen Sie online, um Anfragen in der Nähe zu sehen. Ihre Position wird nur online gesendet.",
+      "notEligible": {
+        "NOT_PET_TAXI": "Nur für Tiertaxi-Anbieter.",
+        "NOT_VERIFIED": "Sie können online gehen, sobald Ihre Unterlagen geprüft sind."
+      },
+      "online": "Sie sind online",
+      "offline": "Sie sind offline",
+      "goOnline": "Online gehen",
+      "goOffline": "Offline gehen",
+      "locationOff": "Standort nicht verfügbar; Anfragen ohne Entfernung.",
+      "requests": "Anfragen in der Nähe",
+      "noRequests": "Gerade keine Anfragen. Die Seite aktualisiert sich selbst.",
+      "kmFromYou": "{km} km bis zur Abholung",
+      "pets": "{count, plural, one {# Tier} other {# Tiere}}",
+      "accept": "Annehmen",
+      "decline": "Ablehnen",
+      "taken": "Ein anderer Fahrer hat diese Anfrage übernommen.",
+      "activeRide": "Aktuelle Fahrt",
+      "passenger": "Fahrgast",
+      "navigate": "Navigation",
+      "next": {
+        "ARRIVING": "Ich bin da",
+        "PICKED_UP": "Tier abgeholt",
+        "COMPLETED": "Abgeliefert"
+      },
+      "release": "Ich schaffe es nicht",
+      "releaseReason": "Grund (die Fahrt geht an andere Fahrer zurück)",
+      "fare": "Fahrpreis: {amount}",
+      "collect": "Fahrpreis bei Ablieferung kassieren.",
+      "failed": "Das hat nicht geklappt. Bitte erneut versuchen."
+    }
+  },
+  "adminPetTaxi": {
+    "kicker": "Dienste",
+    "title": "Tiertaxi",
+    "subtitle": "Fahrpreise je Stadt („*“ = alle anderen Städte) und laufende Fahrten.",
+    "loading": "Wird geladen…",
+    "failed": "Die Daten konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "forbidden": "Dafür brauchen Sie „Dienste ansehen“.",
+    "onlineDrivers": "Fahrer online",
+    "rules": "Fahrpreise",
+    "noRules": "Noch keine Fahrpreise; ohne sie nennt das Tiertaxi keinen Preis.",
+    "fields": {
+      "city": "Stadt („*“ für Standard)",
+      "base": "Grundpreis (Toman)",
+      "perKm": "Pro km (Toman)",
+      "perMinute": "Pro Minute (Toman)",
+      "minimum": "Minimum (Toman)",
+      "medium": "Zuschlag mittel %",
+      "large": "Zuschlag groß %",
+      "extraPet": "Jedes weitere Tier (Toman)",
+      "active": "Aktiv",
+      "reason": "Grund (Prüfprotokoll)"
+    },
+    "add": "Neuer Stadtpreis",
+    "save": "Speichern",
+    "saved": "Gespeichert.",
+    "saveFailed": "Nicht gespeichert. Zahlen prüfen.",
+    "readOnly": "Nur „Dienste verwalten“ kann Preise ändern.",
+    "rides": "Fahrten der letzten 24 Stunden",
+    "noRides": "Keine Fahrten.",
+    "columns": {
+      "member": "Mitglied",
+      "driver": "Fahrer",
+      "route": "Strecke",
+      "fare": "Preis",
+      "status": "Status",
+      "rating": "Bewertung"
+    },
+    "status": {
+      "SEARCHING": "Fahrer wird gesucht",
+      "DRIVER_ASSIGNED": "Fahrer ist unterwegs",
+      "ARRIVING": "Fahrer ist da",
+      "PICKED_UP": "Unterwegs zum Ziel",
+      "COMPLETED": "Angekommen",
+      "CANCELLED_BY_MEMBER": "Storniert",
+      "CANCELLED_BY_DRIVER": "Vom Fahrer storniert",
+      "NO_DRIVER": "Kein Fahrer gefunden"
+    },
+    "disputesHint": "Beschwerden zu einer Fahrt laufen über „Streitfälle“."
   }
 }

@@ -2721,7 +2721,8 @@
         "analytics": "Performance",
         "travel": "Travel & stays",
         "clinicWorkspace": "Clinic workspace",
-        "verification": "Verification documents"
+        "verification": "Verification documents",
+        "petTaxi": "Pet taxi"
       },
       "notAProvider": {
         "title": "No provider access",
@@ -4307,7 +4308,8 @@
         "platformSettings": "Settings",
         "featureFlags": "Feature flags",
         "channels": "Channels & delivery",
-        "smsPatterns": "SMS patterns"
+        "smsPatterns": "SMS patterns",
+        "petTaxi": "Pet taxi"
       },
       "palette": {
         "actions": "Quick actions",
@@ -9568,5 +9570,178 @@
         "OTHER": "Other"
       }
     }
+  },
+  "petTaxi": {
+    "member": {
+      "title": "Pet taxi",
+      "subtitle": "Tap your pickup and destination on the map, see the fare, and follow your driver live.",
+      "map": "Map",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "loading": "Loading…",
+      "failed": "Could not load.",
+      "retry": "Try again",
+      "step": {
+        "pickup": "Tap your pickup on the map",
+        "dropoff": "Tap your destination on the map",
+        "details": "Pets and vehicle"
+      },
+      "pickup": "Pickup",
+      "dropoff": "Destination",
+      "pinned": "Point picked on the map",
+      "myLocation": "My current location",
+      "locating": "Finding you…",
+      "locationDenied": "Location access was not given; tap the map instead.",
+      "savedAddresses": "Saved addresses",
+      "search": "Search a place",
+      "searchNone": "No place found.",
+      "city": "Pickup city",
+      "note": "Note for the driver (floor, bell…)",
+      "change": "Change",
+      "pets": "Which pets are riding?",
+      "noPets": "Add your pet first to request a ride.",
+      "carrier": "How your pet travels",
+      "carrierSize": {
+        "SMALL": "Small: cat or small dog in a carrier",
+        "MEDIUM": "Medium: medium dog in a boot crate",
+        "LARGE": "Large: big dog or several pets"
+      },
+      "quote": "Fare",
+      "quoting": "Working out the fare…",
+      "estimate": "Distance and time are estimates (straight line × road factor).",
+      "routed": "Based on the road route",
+      "notPriced": "Pet taxi is not available in this city yet.",
+      "distanceTime": "{km} km · about {minutes} min",
+      "payNote": "Online payment is not on yet; pay the driver on arrival.",
+      "request": "Request a ride",
+      "requesting": "Sending your request…",
+      "errors": {
+        "RIDE_ALREADY_OPEN": "You already have an open ride.",
+        "TOO_CLOSE": "Pickup and destination are too close.",
+        "TOO_FAR": "This trip is too long for the pet taxi.",
+        "NOT_PRICED": "Pet taxi is not available in this city yet.",
+        "generic": "That did not work. Please try again."
+      },
+      "status": {
+        "SEARCHING": "Finding a driver",
+        "DRIVER_ASSIGNED": "Driver on the way",
+        "ARRIVING": "Driver has arrived",
+        "PICKED_UP": "On the way to the destination",
+        "COMPLETED": "Arrived",
+        "CANCELLED_BY_MEMBER": "Cancelled",
+        "CANCELLED_BY_DRIVER": "Cancelled by the driver",
+        "NO_DRIVER": "No driver found"
+      },
+      "searchingHint": "Your request went to nearby drivers. If nobody accepts by {time}, we will tell you.",
+      "eta": "About {minutes} min away",
+      "driver": "Driver",
+      "call": "Call",
+      "positionAt": "Position at {time}",
+      "cancel": "Cancel ride",
+      "cancelConfirm": "Cancel this ride?",
+      "newRide": "New ride",
+      "rate": "Rate this ride",
+      "rateComment": "Your comment (optional)",
+      "rateSend": "Send rating",
+      "rated": "Thanks for rating.",
+      "stars": "{n} of 5",
+      "receipt": "Ride receipt",
+      "receiptLines": {
+        "base": "Base fare",
+        "distance": "Distance",
+        "time": "Time",
+        "carrier": "Carrier",
+        "extraPets": "Extra pets",
+        "minimum": "Minimum fare applied",
+        "total": "Total"
+      },
+      "history": "Past rides",
+      "historyEmpty": "No rides yet.",
+      "requestNow": "Request a pet taxi now",
+      "requestNowHint": "on a map, with an instant fare and live driver tracking"
+    },
+    "driver": {
+      "title": "Pet taxi: driver",
+      "subtitle": "Go online to see nearby requests. Your phone's position is sent only while you are online.",
+      "notEligible": {
+        "NOT_PET_TAXI": "This is only for pet-taxi providers.",
+        "NOT_VERIFIED": "You can go online once your provider documents are verified."
+      },
+      "online": "You are online",
+      "offline": "You are offline",
+      "goOnline": "Go online",
+      "goOffline": "Go offline",
+      "locationOff": "Your phone's location is unavailable; requests show without distance.",
+      "requests": "Nearby requests",
+      "noRequests": "No requests right now. This page updates by itself.",
+      "kmFromYou": "{km} km to pickup",
+      "pets": "{count, plural, one {# pet} other {# pets}}",
+      "accept": "Accept",
+      "decline": "Pass",
+      "taken": "Another driver took this request.",
+      "activeRide": "Current ride",
+      "passenger": "Passenger",
+      "navigate": "Navigate",
+      "next": {
+        "ARRIVING": "I've arrived",
+        "PICKED_UP": "Pet picked up",
+        "COMPLETED": "Delivered"
+      },
+      "release": "I can't make it",
+      "releaseReason": "Reason (the ride goes back to other drivers)",
+      "fare": "Fare: {amount}",
+      "collect": "Collect the fare on delivery.",
+      "failed": "That did not work. Please try again."
+    }
+  },
+  "adminPetTaxi": {
+    "kicker": "Services",
+    "title": "Pet taxi",
+    "subtitle": "Fares per city (“*” means every other city) and rides in progress.",
+    "loading": "Loading…",
+    "failed": "The data could not be loaded.",
+    "retry": "Retry",
+    "forbidden": "You need the “View services” permission.",
+    "onlineDrivers": "Drivers online",
+    "rules": "Fares",
+    "noRules": "No fares yet; the pet taxi quotes nothing until one exists.",
+    "fields": {
+      "city": "City (“*” for the default)",
+      "base": "Base fare (Toman)",
+      "perKm": "Per km (Toman)",
+      "perMinute": "Per minute (Toman)",
+      "minimum": "Minimum (Toman)",
+      "medium": "Medium surcharge %",
+      "large": "Large surcharge %",
+      "extraPet": "Each extra pet (Toman)",
+      "active": "Active",
+      "reason": "Reason (audit log)"
+    },
+    "add": "New city fare",
+    "save": "Save",
+    "saved": "Saved.",
+    "saveFailed": "Not saved. Check the numbers.",
+    "readOnly": "Only “Manage services” can change fares.",
+    "rides": "Rides in the last 24 hours",
+    "noRides": "No rides.",
+    "columns": {
+      "member": "Member",
+      "driver": "Driver",
+      "route": "Route",
+      "fare": "Fare",
+      "status": "Status",
+      "rating": "Rating"
+    },
+    "status": {
+      "SEARCHING": "Finding a driver",
+      "DRIVER_ASSIGNED": "Driver on the way",
+      "ARRIVING": "Driver has arrived",
+      "PICKED_UP": "On the way to the destination",
+      "COMPLETED": "Arrived",
+      "CANCELLED_BY_MEMBER": "Cancelled",
+      "CANCELLED_BY_DRIVER": "Cancelled by the driver",
+      "NO_DRIVER": "No driver found"
+    },
+    "disputesHint": "Complaints about a ride are handled in Disputes."
   }
 }

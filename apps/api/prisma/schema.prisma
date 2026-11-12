@@ -1309,6 +1309,7 @@ model User {
   clinicInvitationsReceived ClinicInvitation[]       @relation("ClinicInvitationsReceived")
   walletAccount             WalletAccount?
   cardTransferPayments      CardTransferPayment[]
+  petTaxiRides              PetTaxiRide[]
 
   @@map("users")
 }
@@ -11989,4 +11990,134 @@ model SupportEscalation {
   @@index([caseId])
   @@index([requesterUserId])
   @@map("support_escalations")
+}
+
+// ---------------------------------------------------------------------------
+// On-demand pet taxi (Uber/Snapp-style), next to the scheduled pet-taxi booking. A member asks for a ride now,
+// online drivers of verified PET_TAXI organizations see it, the first to accept takes it, and both sides follow it
+// live (the driver's phone browser reports its position; the member's page polls).
+// ---------------------------------------------------------------------------
+
+enum PetTaxiCarrierSize {
+  /// Cats, small dogs: a carrier on the seat.
+  SMALL
+  /// Medium dogs: a crate in the boot.
+  MEDIUM
+  /// Large dogs or several pets: a van or a large crate.
+  LARGE
+}
+
+enum PetTaxiRideStatus {
+  SEARCHING
+  DRIVER_ASSIGNED
+  ARRIVING
+  PICKED_UP
+  COMPLETED
+  CANCELLED_BY_MEMBER
+  CANCELLED_BY_DRIVER
+  NO_DRIVER
+}
+
+/// Fare rules per city ("*" is the default for every other city), set by staff. Integer rials.
+model PetTaxiFareRule {
+  id                     String   @id @default(uuid()) @db.Uuid
+  city                   String   @unique
+  baseFareIrr            Int
+  perKmIrr               Int
+  perMinuteIrr           Int      @default(0)
+  minimumFareIrr         Int      @default(0)
+  /// Extra for a crate in the boot / a large vehicle, as a percentage of the distance fare.
+  mediumSurchargePercent Int      @default(15)
+  largeSurchargePercent  Int      @default(35)
+  /// Each pet after the first.
+  extraPetIrr            Int      @default(0)
+  active                 Boolean  @default(true)
+  updatedByAdminId       String?  @db.Uuid
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@map("pet_taxi_fare_rules")
+}
+
+/// Whether a pet-taxi driver is taking rides, and where their phone last said they are.
+model PetTaxiDriverPresence {
+  providerUserId         String    @id @db.Uuid
+  userId                 String    @db.Uuid
+  providerOrganizationId String    @db.Uuid
+  online                 Boolean   @default(false)
+  latitude               Float?
+  longitude              Float?
+  locatedAt              DateTime?
+  updatedAt              DateTime  @updatedAt
+
+  @@index([online, locatedAt])
+  @@map("pet_taxi_driver_presence")
+}
+
+model PetTaxiRide {
+  id                     String             @id @default(uuid()) @db.Uuid
+  userId                 String             @db.Uuid
+  user                   User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  householdId            String?            @db.Uuid
+  petIds                 String[]           @db.Uuid
+  carrierSize            PetTaxiCarrierSize
+  idempotencyKey         String             @unique
+
+  pickupLabel            String
+  pickupLatitude         Float
+  pickupLongitude        Float
+  pickupCity             String?
+  pickupNote             String?
+  dropoffLabel           String
+  dropoffLatitude        Float
+  dropoffLongitude       Float
+
+  distanceMeters         Int
+  durationSeconds        Int
+  /// GOOGLE, NESHAN or STRAIGHT_LINE_ESTIMATE (shown to both sides as an estimate).
+  routeSource            String
+  fareIrr                Int
+  fareBreakdown          Json
+  fareRuleCity           String
+
+  status                 PetTaxiRideStatus  @default(SEARCHING)
+  searchExpiresAt        DateTime
+  providerOrganizationId String?            @db.Uuid
+  driverProviderUserId   String?            @db.Uuid
+  driverUserId           String?            @db.Uuid
+  driverLatitude         Float?
+  driverLongitude        Float?
+  driverLocatedAt        DateTime?
+
+  assignedAt             DateTime?
+  arrivingAt             DateTime?
+  pickedUpAt             DateTime?
+  completedAt            DateTime?
+  cancelledAt            DateTime?
+  cancelReason           String?
+
+  rating                 Int?
+  ratingComment          String?
+  ratedAt                DateTime?
+
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  declines               PetTaxiRideDecline[]
+
+  @@index([status, searchExpiresAt])
+  @@index([userId, createdAt])
+  @@index([driverProviderUserId, status])
+  @@map("pet_taxi_rides")
+}
+
+/// A driver who passed on a request is not shown it again.
+model PetTaxiRideDecline {
+  rideId         String      @db.Uuid
+  ride           PetTaxiRide @relation(fields: [rideId], references: [id], onDelete: Cascade)
+  providerUserId String      @db.Uuid
+  createdAt      DateTime    @default(now())
+
+  @@id([rideId, providerUserId])
+  @@map("pet_taxi_ride_declines")
 }

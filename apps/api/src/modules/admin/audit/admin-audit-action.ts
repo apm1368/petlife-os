@@ -236,4 +236,5 @@ export type AdminAuditAction =
   | "place_report.resolved"
   | "place_report.dismissed"
   | "pet_memorial.approved"
-  | "pet_memorial.rejected";
+  | "pet_memorial.rejected"
+  | "pet_taxi_fare.updated";
