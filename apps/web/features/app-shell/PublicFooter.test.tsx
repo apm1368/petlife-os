@@ -17,6 +17,7 @@ describe("public footer destinations", () => {
     }
     expect(within(footer).getByRole("link", { name: copy.footerPrivacy }).getAttribute("href")).toBe(`/${locale}/profile/privacy`);
     expect(within(footer).getByRole("link", { name: copy.partnerLogin }).getAttribute("href")).toBe(`/${locale}/auth?returnTo=${encodeURIComponent(`/${locale}/provider`)}`);
-    for (const link of within(footer).getAllByRole("link")) expect(link.getAttribute("href")).toMatch(new RegExp(`^/${locale}(?:/|#|$)`));
+    // The Persian brand link goes to the bare domain, the canonical Persian home.
+    for (const link of within(footer).getAllByRole("link")) expect(link.getAttribute("href")).toMatch(new RegExp(locale === "fa" ? "^(?:/fa(?:/|#|$)|/$)" : `^/${locale}(?:/|#|$)`));
   });
 });

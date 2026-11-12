@@ -55,6 +55,8 @@ describe("Public landing", () => {
         expect(fragment, href).toBeTruthy();
         continue;
       }
+      // The Persian home is served at the bare domain ("/"), every other page under its locale prefix.
+      if (path === "/") continue;
       expect(path, `${link.textContent} → ${href}`).toMatch(/^\/(fa|en)(\/|$)/);
       expect(routeExists(path), `${link.textContent} → ${href}`).toBe(true);
     }
