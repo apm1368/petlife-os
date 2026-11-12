@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#FFFBF5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121512" media="(prefers-color-scheme: dark)">
+<title>اپت لایف</title>
+<style>
+  :root { --paper:#FFFBF5; --raised:#FFFFFF; --ink:#1E241F; --ink-2:#4F574F; --line:#F0E7D9; --forest:#1F5A3D; --on-forest:#FFFDF8; --mint:#EEF7EC; color-scheme: light dark; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --paper:#121512; --raised:#1C211C; --ink:#F1EDE4; --ink-2:#C2C6BC; --line:#2A2F29; --forest:#8CC79A; --on-forest:#0F1A12; --mint:#15241A; } }
+  :root[data-theme="dark"] { --paper:#121512; --raised:#1C211C; --ink:#F1EDE4; --ink-2:#C2C6BC; --line:#2A2F29; --forest:#8CC79A; --on-forest:#0F1A12; --mint:#15241A; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: var(--paper); color: var(--ink); }
+  body { display: grid; place-items: center; min-height: 100dvh; padding: max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    font-family: Vazirmatn, Tahoma, system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.8; }
+  main { width: min(100%, 420px); padding: 32px 24px; border: 1px solid var(--line); border-radius: 28px; background: var(--raised); text-align: center; box-shadow: 0 24px 60px -40px rgb(31 90 61 / .45); }
+  .mark { display: grid; place-items: center; width: 84px; height: 84px; margin: 0 auto 18px; border-radius: 26px; background: var(--mint); }
+  .mark img { width: 60px; height: auto; }
+  h1 { margin: 0 0 8px; font-size: 1.3rem; line-height: 1.5; }
+  p { margin: 0 0 22px; color: var(--ink-2); }
+  button { min-height: 48px; min-width: 160px; padding: 0 26px; border: 0; border-radius: 999px; background: var(--forest); color: var(--on-forest); font: inherit; font-weight: 700; cursor: pointer; }
+  button:focus-visible { outline: 3px solid var(--forest); outline-offset: 3px; }
+</style>
+<script>
+  try { var t = localStorage.getItem("petlife-theme"); if (t === "LIGHT" || t === "DARK") document.documentElement.setAttribute("data-theme", t.toLowerCase()); } catch (e) {}
+</script>
+</head>
+<body>
+<main>
+  <div class="mark"><img src="/brand/opl/mark-color.svg" alt="" width="60" height="40"></div>
+  <h1 id="title">اینترنت در دسترس نیست</h1>
+  <p id="body">این صفحه بدون اینترنت باز نمی‌شود. وقتی دوباره وصل شدید، دوباره امتحان کنید.</p>
+  <button id="retry" type="button">دوباره امتحان کنید</button>
+</main>
+<script>
+  (function () {
+    var copy = {
+      fa: ["اپت لایف", "اینترنت در دسترس نیست", "این صفحه بدون اینترنت باز نمی‌شود. وقتی دوباره وصل شدید، دوباره امتحان کنید.", "دوباره امتحان کنید", "rtl"],
+      ar: ["opetlife", "لا يوجد اتصال بالإنترنت", "لا يمكن فتح هذه الصفحة دون اتصال. حاول مرة أخرى عند عودة الاتصال.", "حاول مرة أخرى", "rtl"],
+      en: ["opetlife", "You're offline", "This page can't open without a connection. Try again once you're back online.", "Try again", "ltr"],
+      de: ["opetlife", "Keine Internetverbindung", "Diese Seite lässt sich ohne Verbindung nicht öffnen. Versuch es noch einmal, sobald du wieder online bist.", "Erneut versuchen", "ltr"],
+      es: ["opetlife", "No hay conexión", "Esta página no se puede abrir sin conexión. Vuelve a intentarlo cuando tengas internet.", "Reintentar", "ltr"],
+      nl: ["opetlife", "Geen internetverbinding", "Deze pagina opent niet zonder verbinding. Probeer het opnieuw zodra je weer online bent.", "Opnieuw proberen", "ltr"]
+    };
+    var first = (location.pathname.split("/")[1] || "fa").toLowerCase();
+    var c = copy[first] || copy.fa;
+    var lang = copy[first] ? first : "fa";
+    document.documentElement.lang = lang;
+    document.documentElement.dir = c[4];
+    document.title = c[0];
+    document.getElementById("title").textContent = c[1];
+    document.getElementById("body").textContent = c[2];
+    var retry = document.getElementById("retry");
+    retry.textContent = c[3];
+    retry.addEventListener("click", function () { location.reload(); });
+    window.addEventListener("online", function () { location.reload(); });
+  })();
+</script>
+</body>
+</html>
