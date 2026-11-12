@@ -2644,6 +2644,9 @@ model Booking {
   /// Pet taxi only — immutable route and fare snapshot taken when the booking is made.
   transportRoute     BookingTransportRoute?
 
+  /// Staff refunds of this booking (finance two-person control).
+  adminRefundApprovals AdminRefundApproval[]
+
   @@index([petId])
   @@index([householdId])
   @@index([userId])
@@ -5149,6 +5152,13 @@ enum AppealStatus {
   WITHDRAWN
 }
 
+/// What an AdminRefundApproval refunds.
+enum AdminRefundSubjectType {
+  ORDER
+  BOOKING
+  TRAVEL_BOOKING
+}
+
 /// Two-person control foundation for high-risk refunds (spec: "refund above
 /// threshold -> REQUESTED -> APPROVED -> EXECUTED"). Below
 /// `ADMIN_REFUND_APPROVAL_THRESHOLD_IRR`, a single FINANCE-permission admin
@@ -5514,8 +5524,14 @@ model Appeal {
 /// approval rows for the same logical request.
 model AdminRefundApproval {
   id      String @id @default(uuid()) @db.Uuid
-  orderId String @db.Uuid
-  order   Order  @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  /// What is refunded: a shop order, a service booking or a travel stay; exactly one matching id is set (DB CHECK).
+  subjectType     AdminRefundSubjectType @default(ORDER)
+  orderId         String?                @db.Uuid
+  order           Order?                 @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  bookingId       String?                @db.Uuid
+  booking         Booking?               @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  travelBookingId String?                @db.Uuid
+  travelBooking   TravelBooking?         @relation(fields: [travelBookingId], references: [id], onDelete: Restrict)
 
   amount         Int
   reason         String
@@ -5535,6 +5551,8 @@ model AdminRefundApproval {
   executedAt DateTime?
 
   @@index([orderId])
+  @@index([bookingId])
+  @@index([travelBookingId])
   @@index([status])
   @@map("admin_refund_approvals")
 }
@@ -8872,6 +8890,9 @@ model TravelBooking {
 
   pets         TravelBookingPet[]
   bookedNights TravelBookedNight[]
+
+  /// Staff refunds of this stay (finance two-person control).
+  adminRefundApprovals AdminRefundApproval[]
 
   @@index([householdId, status])
   @@index([listingId, status])

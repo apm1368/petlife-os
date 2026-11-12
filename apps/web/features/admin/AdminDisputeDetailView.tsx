@@ -7,6 +7,7 @@ import { Button, ContextSurface, ErrorRecovery, Input, Skeleton, StatusLabel } f
 import { DisputeEvidenceActorType, DisputeStatus, type DisputeDto, DISPUTE_NEXT } from "@petlife/types";
 import { adminService } from "@/services/admin.service";
 import { adminStatusTone } from "./status-tone";
+import { DisputeRefundPanel } from "./finance/DisputeRefundPanel";
 import { ApiError } from "@/lib/api/client";
 
 const STATUSES = Object.values(DisputeStatus);
@@ -126,6 +127,7 @@ export function AdminDisputeDetailView({ disputeId }: { disputeId: string }) {
           ))}
         </div>
       </ContextSurface>
+      <DisputeRefundPanel disputeId={disputeId} subjectType={data.subjectType} status={data.status} />
     </div>
   );
 }

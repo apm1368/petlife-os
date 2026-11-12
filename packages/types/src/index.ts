@@ -2890,9 +2890,15 @@ export interface TrustCaseDto {
 }
 
 /** Wraps (never replaces) RefundsService.request() — see the AdminRefundApproval model's own doc comment. `refundId` is set only once EXECUTED actually calls the refund flow. */
+export type AdminRefundSubjectType = "ORDER" | "BOOKING" | "TRAVEL_BOOKING";
+
 export interface AdminRefundApprovalDto {
   id: string;
-  orderId: string;
+  /** What is refunded; exactly the matching id below is set. */
+  subjectType: AdminRefundSubjectType;
+  orderId: string | null;
+  bookingId: string | null;
+  travelBookingId: string | null;
   amount: number;
   reason: string;
   status: AdminRefundApprovalStatus;
@@ -2904,7 +2910,22 @@ export interface AdminRefundApprovalDto {
   executedAt: string | null;
 }
 
-export interface AdminAuditLogDto {
+/** Money on a service booking or stay as staff see it before cancelling or refunding (all rials). */
+export interface AdminBookingMoneyDto {
+  kind: "BOOKING" | "TRAVEL_BOOKING";
+  bookingId: string;
+  reference: string | null;
+  status: string;
+  paymentStatus: string;
+  /** Captured online; card-to-card or pay-at-provider money is not refundable from here. */
+  paidIrr: number;
+  refundedIrr: number;
+  refundableIrr: number;
+  /** What the booking's own cancellation terms would give back now. */
+  policyRefundIrr: number;
+  cancellable: boolean;
+  approvals: AdminRefundApprovalDto[];
+}
   id: string;
   adminUser: AdminActorSummaryDto;
   action: string;

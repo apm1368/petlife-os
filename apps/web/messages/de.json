@@ -3713,7 +3713,9 @@
         "channels": "Kanäle und Zustellung",
         "smsPatterns": "SMS-Vorlagen",
         "walletDirectory": "Mitglieder",
-        "walletTopUps": "Aufladebelege"
+        "walletTopUps": "Aufladebelege",
+        "orderLookup": "Bestellsuche",
+        "refundApprovals": "Erstattungsfreigaben"
       },
       "palette": {
         "actions": "Schnellaktionen",
@@ -9301,5 +9303,99 @@
         "CANCELLED": "Abgesagt"
       }
     }
+  },
+  "adminBookingMoney": {
+    "title": "Stornieren und erstatten",
+    "hint": "Die Stornierung folgt den Regeln der Buchung; Geld fließt nur nach Finanzfreigabe zurück (über dem Schwellenwert durch eine zweite Person).",
+    "paid": "Online bezahlt",
+    "refunded": "Erstattet",
+    "refundable": "Noch erstattbar",
+    "policy": "Laut Stornobedingungen",
+    "approvalStatus": {
+      "REQUESTED": "Wartet auf Freigabe",
+      "APPROVED": "Freigegeben",
+      "REJECTED": "Abgelehnt",
+      "EXECUTED": "Erstattet"
+    },
+    "openQueue": "Freigabeliste",
+    "cancel": "Als Team stornieren",
+    "refund": "Erstatten",
+    "refundChoice": "Was wird erstattet?",
+    "choice": {
+      "POLICY": "Laut Stornobedingungen ({policy})",
+      "FULL": "Alles ({full})",
+      "AMOUNT": "Fester Betrag",
+      "NONE": "Keine Erstattung"
+    },
+    "amount": "Betrag (IRR)",
+    "reason": "Grund (im Prüfprotokoll)",
+    "confirmCancel": "Ich bestätige die Stornierung; Kunde und Anbieter werden informiert.",
+    "confirmRefund": "Ich bestätige diese Erstattungsanfrage.",
+    "submitCancel": "Buchung stornieren",
+    "submitRefund": "Erstattung anfragen",
+    "back": "Zurück",
+    "needReason": "Grund angeben und Bestätigung anhaken.",
+    "needAmount": "Gültigen Betrag eingeben.",
+    "cancelled": "Buchung storniert.",
+    "refundRequested": "Die Erstattung wartet auf Finanzfreigabe.",
+    "forbidden": "Dafür fehlt die Berechtigung.",
+    "tooMuch": "Mehr als erstattbar, oder die Buchung ist nicht stornierbar.",
+    "failed": "Das hat nicht geklappt; bitte erneut versuchen."
+  },
+  "adminRefundApprovals": {
+    "title": "Erstattungsfreigaben",
+    "hint": "Bestellungen, Termine und Aufenthalte. Niemand gibt die eigene Anfrage frei.",
+    "filter": "Status",
+    "all": "Alle",
+    "status": {
+      "REQUESTED": "Wartet auf Freigabe",
+      "APPROVED": "Freigegeben",
+      "REJECTED": "Abgelehnt",
+      "EXECUTED": "Erstattet"
+    },
+    "subject": {
+      "ORDER": "Shop-Bestellung",
+      "BOOKING": "Termin",
+      "TRAVEL_BOOKING": "Aufenthalt"
+    },
+    "columns": {
+      "subject": "Betrifft",
+      "amount": "Betrag",
+      "reason": "Grund",
+      "requestedBy": "Angefragt von",
+      "status": "Status"
+    },
+    "empty": "Nichts vorhanden.",
+    "approve": "Freigeben",
+    "reject": "Ablehnen",
+    "execute": "Auszahlen",
+    "rejectReason": "Ablehnungsgrund:",
+    "done": {
+      "approve": "Freigegeben.",
+      "reject": "Abgelehnt.",
+      "execute": "Erstattet."
+    },
+    "selfApproval": "Die eigene Anfrage kann nicht freigegeben werden, oder dieser Schritt ist nicht mehr möglich.",
+    "forbidden": "Berechtigung finance.view erforderlich.",
+    "failed": "Das hat nicht geklappt; bitte erneut versuchen."
+  },
+  "adminDisputeRefund": {
+    "title": "Ergebnis mit Erstattung",
+    "hint": "Zugunsten des Kunden mit Erstattung: die Erstattung geht in die Finanzfreigabe, der Streitfall wird für den Kunden gelöst.",
+    "amount": "Betrag (IRR)",
+    "reason": "Grund",
+    "submit": "Mit Erstattung lösen",
+    "approval": "Erstattung von {amount}: {status}",
+    "status": {
+      "REQUESTED": "Wartet auf Freigabe",
+      "APPROVED": "Freigegeben",
+      "REJECTED": "Abgelehnt",
+      "EXECUTED": "Erstattet"
+    },
+    "notOpen": "Nur für einen laufenden Streitfall und mit Finanzberechtigung.",
+    "invalid": "Betrag und Grund (mind. 5 Zeichen) angeben.",
+    "requested": "Erstattung angefragt.",
+    "tooMuch": "Mehr als erlaubt, oder dieser Streitfall erlaubt keine Erstattung.",
+    "failed": "Das hat nicht geklappt; bitte erneut versuchen."
   }
 }

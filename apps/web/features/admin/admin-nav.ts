@@ -218,7 +218,16 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   {
     key: "finance",
     modules: [
-      { key: "transactions", labelKey: "nav.transactions", icon: ArrowLeftRight, href: "/transactions", permission: "finance.view", queue: "pendingRefundApprovals" },
+      {
+        key: "transactions",
+        labelKey: "nav.transactions",
+        icon: ArrowLeftRight,
+        href: "/transactions",
+        tabs: [
+          { href: "/transactions", labelKey: "tabs.orderLookup", permission: "finance.view", exact: true },
+          { href: "/transactions/refund-approvals", labelKey: "tabs.refundApprovals", permission: "finance.view", queue: "pendingRefundApprovals" },
+        ],
+      },
       {
         key: "sellerFinance",
         labelKey: "nav.sellerFinance",

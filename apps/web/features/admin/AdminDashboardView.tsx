@@ -65,7 +65,7 @@ const QUEUES: { key: QueueKey; href: string; permission: string; icon: Icon; ton
   { key: "openTrustCases", href: "/admin/trust", permission: "trust.view", icon: ShieldAlert, tone: "urgent" },
   { key: "openDisputes", href: "/admin/disputes", permission: "dispute.view", icon: Gavel, tone: "urgent" },
   { key: "openSupportCases", href: "/admin/support", permission: "support.view", icon: Headset, tone: "attention" },
-  { key: "pendingRefundApprovals", href: "/admin/transactions", permission: "finance.view", icon: ArrowLeftRight, tone: "attention" },
+  { key: "pendingRefundApprovals", href: "/admin/transactions/refund-approvals", permission: "finance.view", icon: ArrowLeftRight, tone: "attention" },
   { key: "pendingRefundRequests", href: "/admin/commerce/refund-requests", permission: "commerce.view", icon: Receipt, tone: "attention" },
   { key: "pendingWalletTopUps", href: "/admin/wallets/top-ups", permission: "wallet.topup.review", icon: Wallet, tone: "attention" },
   { key: "openCommunityReports", href: "/admin/community", permission: "trust.view", icon: Siren, tone: "attention" },

@@ -12,6 +12,7 @@ import { adminInsuranceOpsService, adminTravelService, type AdminInsuranceApplic
 import { bookingStatusLabel, cancellationSummary, listingTypeLabel, money, paymentStatusLabel, policyFacts, stayDates } from "@/features/travel-market/labels";
 import { DetailRow, EmptyRow, FilterBar, FilterField, Kpi, Panel, PanelTitle, SelectFilter, TableWrap, Tag, Td, TextFilter, Th } from "../console-ui";
 import { copyFor } from "@/features/admin/admin-copy";
+import { StaffBookingMoneyPanel } from "../finance/StaffBookingMoneyPanel";
 import { externalHref } from "@/lib/url/external-href";
 
 type Lang = "fa" | "en" | "de" | "es";
@@ -310,6 +311,7 @@ export function AdminTravelBookingDetailView({ bookingId }: { bookingId: string 
           <PanelTitle title={tr("تاریخچه", "Timeline")} />
           {b.timeline.map((e, i) => <DetailRow key={i} label={new Intl.DateTimeFormat(tr("fa-IR-u-ca-persian", "en-GB"), { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Tehran" }).format(new Date(e.createdAt))}>{`${e.actorType} → ${bookingStatusLabel(e.toStatus, pairLang(lang))}${e.reason ? ` (${e.reason})` : ""}`}</DetailRow>)}
         </Panel>
+        <StaffBookingMoneyPanel kind="TRAVEL_BOOKING" bookingId={bookingId} />
       </div>
     </div>
   );
