@@ -19,6 +19,8 @@ async function bootstrap() {
   await waitForDatabase(process.env.DATABASE_URL, { timeoutMs: BOOT_DB_WAIT_MS });
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ["log", "warn", "error"],
+    // Keeps the exact request bytes beside the parsed body, so provider webhook signatures can be checked.
+    rawBody: true,
   });
 
   const config = app.get(ConfigService<AppEnv, true>);

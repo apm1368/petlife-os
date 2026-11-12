@@ -3204,6 +3204,8 @@ export interface AdminDashboardSummaryDto {
   pendingMemorials: number | null;
   /** User reports about wrong place data. */
   openPlaceReports: number | null;
+  /** Card-to-card wallet top-up receipts waiting for finance. */
+  pendingWalletTopUps: number | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -3397,6 +3399,9 @@ export type AdminPermissionName =
   | "customer.sessions.revoke"
   | "pet.access.manage"
   | "finance.reconcile"
+  | "wallet.view"
+  | "wallet.adjust"
+  | "wallet.topup.review"
   | "travel.source.view"
   | "travel.source.manage"
   | "travel.sync.run"
@@ -6837,3 +6842,221 @@ export type {
   PetOwnershipTransferStatusName,
 } from "./ownership";
 export { OWNERSHIP_TRANSFER_EXPIRY_DAYS, PET_MEMORY_DISPOSITIONS, PET_OWNERSHIP_TRANSFER_STATUSES } from "./ownership";
+
+// ---------------------------------------------------------------------------
+// Member wallet (balances are always derived from append-only entries)
+// ---------------------------------------------------------------------------
+
+export type WalletBalanceTypeValue = "WITHDRAWABLE" | "PURCHASE_ONLY";
+export type WalletEntryKindValue = "CREDIT" | "DEBIT" | "EXPIRY";
+export type WalletCreditSourceValue = "REFUND" | "TOP_UP" | "GIFT" | "OVERPAYMENT" | "DUPLICATE_PAYMENT" | "MANUAL_CORRECTION";
+export type WalletTopUpRailValue = "ZIBAL" | "CARD_TO_CARD";
+export type WalletTopUpStatusValue = "AWAITING_PAYMENT" | "AWAITING_RECEIPT" | "REVIEW_PENDING" | "CREDITED" | "FAILED" | "REJECTED" | "EXPIRED" | "CANCELLED";
+export type WalletAdjustmentDirectionValue = "CREDIT" | "DEBIT";
+export type WalletAdjustmentReasonCode = "GOODWILL" | "SERVICE_RECOVERY" | "PAYMENT_CORRECTION" | "REFUND_OUTSIDE_SYSTEM" | "DUPLICATE_CREDIT_REVERSAL" | "OTHER";
+
+export interface WalletBalancesDto {
+  /** Top-ups and gifts: spendable on purchases only. */
+  purchaseOnly: number;
+  /** Refund money: spendable, and the only part that may later be paid out. */
+  withdrawable: number;
+  total: number;
+  currency: string;
+}
+
+export interface WalletTopUpOptionsDto {
+  /** Rails that can take money right now; empty means top-up is not open yet. */
+  rails: WalletTopUpRailValue[];
+  minAmount: number;
+  maxAmount: number;
+  presets: number[];
+}
+
+export interface WalletSummaryDto {
+  balances: WalletBalancesDto;
+  /** Gift credit that expires within 30 days, soonest first. */
+  expiringSoon: { amount: number; expiresAt: string }[];
+  topUp: WalletTopUpOptionsDto;
+}
+
+export interface WalletEntryDto {
+  id: string;
+  kind: WalletEntryKindValue;
+  balanceType: WalletBalanceTypeValue;
+  source: WalletCreditSourceValue | null;
+  /** Positive for money in, negative for money out. */
+  signedAmount: number;
+  /** What the movement was for: TOP_UP, PURCHASE, REFUND, ADJUSTMENT, EXPIRY or OTHER. */
+  purpose: "TOP_UP" | "PURCHASE" | "REFUND" | "ADJUSTMENT" | "EXPIRY" | "OTHER";
+  /** A staff adjustment's reason, shown to the member so a correction is never silent. */
+  note: string | null;
+  expiresAt: string | null;
+  createdAt: string;
+}
+
+export interface WalletEntryPageDto {
+  items: WalletEntryDto[];
+  nextCursor: string | null;
+}
+
+export interface WalletTopUpDto {
+  id: string;
+  rail: WalletTopUpRailValue;
+  status: WalletTopUpStatusValue;
+  amount: number;
+  receivedAmount: number | null;
+  currency: string;
+  receiptUploaded: boolean;
+  receiptDeadlineAt: string | null;
+  rejectionReason: string | null;
+  createdAt: string;
+  creditedAt: string | null;
+}
+
+/** Returned when a card-to-card top-up starts: where to send the money. */
+export interface WalletCardTransferInstructionsDto {
+  cardNumber: string;
+  cardHolderName: string;
+}
+
+export interface WalletTopUpStartedDto {
+  topUp: WalletTopUpDto;
+  /** Zibal: send the browser here. */
+  redirectUrl: string | null;
+  /** Card to card: the card to transfer to. */
+  cardTransfer: WalletCardTransferInstructionsDto | null;
+}
+
+export interface WalletReceiptUploadTargetDto {
+  uploadUrl: string;
+  method: "PUT";
+  headers?: Record<string, string>;
+  key: string;
+  expiresInSeconds: number;
+}
+
+export interface AdminWalletListItemDto {
+  userId: string;
+  displayName: string | null;
+  email: string | null;
+  phone: string | null;
+  balances: WalletBalancesDto;
+  lastActivityAt: string | null;
+}
+
+export interface AdminWalletAdjustmentDto {
+  id: string;
+  direction: WalletAdjustmentDirectionValue;
+  balanceType: WalletBalanceTypeValue;
+  amount: number;
+  reasonCode: string;
+  reason: string;
+  evidenceReference: string | null;
+  createdBy: { adminUserId: string; displayName: string | null };
+  createdAt: string;
+}
+
+export interface AdminWalletTopUpDto extends WalletTopUpDto {
+  userId: string;
+  userDisplayName: string | null;
+  cardNumberMasked: string | null;
+  receiptUploadedAt: string | null;
+  reviewedAt: string | null;
+  reviewedBy: string | null;
+  failureCode: string | null;
+}
+
+export interface AdminWalletAuditDto {
+  id: string;
+  action: string;
+  reason: string | null;
+  adminDisplayName: string | null;
+  createdAt: string;
+}
+
+export interface AdminWalletDetailDto {
+  user: { id: string; displayName: string | null; email: string | null; phone: string | null; createdAt: string };
+  balances: WalletBalancesDto;
+  entries: WalletEntryDto[];
+  topUps: AdminWalletTopUpDto[];
+  adjustments: AdminWalletAdjustmentDto[];
+  audit: AdminWalletAuditDto[];
+}
+
+// ---------------------------------------------------------------------------
+// Admin "Pets" section (GET /admin/pets, GET /admin/pets/:id) — operational metadata, never clinical text
+// ---------------------------------------------------------------------------
+
+export interface AdminPetDirectoryItemDto {
+  id: string;
+  name: string;
+  species: PetSpecies;
+  breed: string | null;
+  lifecycleStatus: PetLifecycleStatus;
+  deleted: boolean;
+  hasPhoto: boolean;
+  household: { id: string; name: string | null };
+  owner: { userId: string; displayName: string } | null;
+  /** Household members other than the owner. */
+  familyMemberCount: number;
+  createdAt: string;
+}
+
+export type AdminPetDiagnosticCode = "NO_ACTIVE_OWNER" | "STALE_HOUSEHOLD_GRANT" | "EXPIRED_GRANT_NOT_REVOKED" | "MEMBER_WITHOUT_GRANT" | "LONG_OPEN_LOST_INCIDENT" | "DELETED_BUT_ACTIVE";
+
+export interface AdminPet360Dto {
+  identity: {
+    id: string;
+    name: string;
+    species: PetSpecies;
+    breed: string | null;
+    sex: string | null;
+    birthDate: string | null;
+    approximateAgeMonths: number | null;
+    neuteredStatus: string | null;
+    microchipMasked: string | null;
+    lifecycleStatus: PetLifecycleStatus;
+    deletedAt: string | null;
+    createdAt: string | null;
+    hasPhoto: boolean;
+  };
+  household: {
+    id: string;
+    name: string | null;
+    city: string | null;
+    members: { userId: string; displayName: string; role: string; accountStatus: string }[];
+    pendingInvitations: { id: string; contactMasked: string; createdAt: string; expiresAt: string }[];
+  };
+  accessGrants: {
+    id: string;
+    user: { id: string; displayName: string };
+    source: string;
+    reason: string | null;
+    flags: Record<string, boolean>;
+    healthScopes: string[];
+    startsAt: string | null;
+    expiresAt: string | null;
+    revokedAt: string | null;
+    active: boolean;
+    grantedByUserId: string | null;
+    isHouseholdMember: boolean;
+    createdAt: string;
+  }[];
+  health: {
+    documents: number;
+    documentsByType: { documentType: string; sourceType: string; count: number; latestAt: string | null }[];
+    clinicalVisits: number;
+    labResults: number;
+    medications: Record<string, number>;
+    conditions: number;
+    allergies: number;
+  };
+  bookings: { id: string; category: string; bookingStatus: string; startAt: string; providerOrganizationId: string | null }[];
+  lostIncidents: { id: string; status: string; publicArea: string | null; lastSeenAt: string | null; createdAt: string; reunitedAt: string | null; closedAt: string | null; sightings: number }[];
+  care: { reminders: Record<string, number> };
+  travel: { id: string; status: string; destinationCountry: string | null; destinationCity: string | null; departAt: string }[];
+  insurance: { applications: Record<string, number>; claimPreps: number };
+  sharing: { activeShareCards: number; activeHealthShares: number };
+  activity: { id: string; type: string; at: string; changedFields?: string[]; photoChanged?: boolean }[];
+  diagnostics: { code: AdminPetDiagnosticCode; severity: "WARNING" | "INFO"; entityId?: string; detail?: Record<string, unknown> }[];
+}

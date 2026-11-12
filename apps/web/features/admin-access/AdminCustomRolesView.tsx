@@ -25,7 +25,7 @@ const SECTIONS: { key: string; domains: string[] }[] = [
   { key: "customers", domains: ["customer", "support", "dispute", "subscription", "pet"] },
   { key: "marketplace", domains: ["verification", "commerce", "promotions", "services", "travel", "insurance", "places"] },
   { key: "trust", domains: ["trust", "animalSupport"] },
-  { key: "finance", domains: ["finance", "sellerFinance", "settlement"] },
+  { key: "finance", domains: ["finance", "sellerFinance", "settlement", "wallet"] },
   { key: "content", domains: ["content"] },
   { key: "system", domains: ["settings", "access", "audit", "system"] },
 ];
