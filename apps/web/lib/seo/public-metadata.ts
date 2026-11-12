@@ -321,6 +321,8 @@ const pages = {
       en: { title: "Pet memorials | Opetlife", description: "Remembering companions who have passed, shared by their families and reviewed before they appear." },
       de: { title: "Gedenkseite für Haustiere | opetlife", description: "Erinnerungen an verstorbene Tiere, von ihren Familien geteilt und vor der Veröffentlichung geprüft." },
       es: { title: "Memoriales de mascotas | opetlife", description: "Recuerdos de compañeros que ya no están, compartidos por sus familias y revisados antes de publicarse." },
+      ar: { title: "تذكارات الحيوانات الأليفة | Opetlife", description: "نستذكر رفاقًا رحلوا، تشاركها عائلاتهم وتُراجَع قبل نشرها." },
+      nl: { title: "Herdenkingen voor huisdieren | Opetlife", description: "Ter herinnering aan overleden dieren, gedeeld door hun families en beoordeeld voordat ze verschijnen." },
     },
   },
   about: {
@@ -331,6 +333,8 @@ const pages = {
       en: { title: "About Opetlife | Why we exist and what we promise", description: "The story behind Opetlife: why we built it, how pet records, vets, the shop, travel and rescue work together, and the promises we keep on trust and privacy." },
       de: { title: "Über opetlife | Warum es uns gibt und was wir versprechen", description: "Die Geschichte hinter opetlife: warum wir es gebaut haben, wie Gesundheitsakte, Tierärzte, Shop, Reisen und Tierschutz zusammenwirken und was wir bei Vertrauen und Datenschutz versprechen." },
       es: { title: "Sobre opetlife | Por qué existimos y qué prometemos", description: "La historia de opetlife: por qué lo creamos, cómo funcionan juntos el historial, los veterinarios, la tienda, los viajes y el rescate, y lo que prometemos sobre confianza y privacidad." },
+      ar: { title: "عن Opetlife | لماذا وُجدنا وما الذي نتعهّد به", description: "قصة Opetlife: لماذا أنشأناه، وكيف تتكامل سجلات الحيوانات الأليفة والأطباء البيطريون والمتجر والسفر والإنقاذ، والوعود التي نلتزم بها في الثقة والخصوصية." },
+      nl: { title: "Over Opetlife | Waarom we bestaan en wat we beloven", description: "Het verhaal van Opetlife: waarom we het bouwden, hoe dossiers, dierenartsen, winkel, reizen en opvang samenwerken en onze beloftes over vertrouwen en privacy." },
     },
   },
 } as const satisfies Record<string, { path: string; indexable: boolean; copy: Copy }>;

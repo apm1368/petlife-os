@@ -9,7 +9,7 @@ import { adminPlacesOsmService, type OsmSyncAreaDto, type PlaceClaimQueueItemDto
 import { useAdminStore } from "@/stores/admin-store";
 import { EmptyRow, Panel, PanelTitle, TableWrap, Tag, Td, Th } from "../console-ui";
 
-type Lang = "fa" | "en" | "de" | "es";
+type Lang = "fa" | "en" | "de" | "es" | "ar" | "nl";
 
 function usePlacesAccess() {
   const context = useAdminStore((state) => state.context);

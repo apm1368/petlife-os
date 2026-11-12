@@ -18,7 +18,7 @@ type Outcome = Awaited<ReturnType<typeof adminBookingMoneyService.disputeOutcome
  */
 export function DisputeRefundPanel({ disputeId, subjectType, status, onResolved }: { disputeId: string; subjectType: string; status: string; onResolved?: () => void }) {
   const t = useTranslations("adminDisputeRefund");
-  const locale = useLocale() as "fa" | "en" | "de" | "es";
+  const locale = useLocale() as "fa" | "en" | "de" | "es" | "ar" | "nl";
   const canRequest = useAdminStore((s) => (s.context?.permissions ?? []).includes("finance.refund.request" as never));
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [amount, setAmount] = useState("");
