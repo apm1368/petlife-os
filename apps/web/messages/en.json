@@ -4667,7 +4667,10 @@
         "walletTopUps": "Top-up receipts",
         "shipping": "Shipping",
         "petTaxi": "Pet taxi",
-        "petTaxiDrivers": "Pet-taxi drivers"
+        "petTaxiDrivers": "Pet-taxi drivers",
+        "placeReports": "Place reports",
+        "osmImport": "OpenStreetMap",
+        "placeClaims": "Business claims"
       },
       "palette": {
         "actions": "Quick actions",
@@ -6478,7 +6481,13 @@
       "BEACH": "Beach",
       "VENUE": "Venue",
       "SERVICE": "Service",
-      "OTHER": "Other"
+      "OTHER": "Other",
+      "VETERINARY": "Vet",
+      "PET_SHOP": "Pet shop",
+      "GROOMING": "Grooming",
+      "BOARDING": "Boarding",
+      "SHELTER": "Shelter",
+      "DOG_PARK": "Dog park"
     },
     "list": {
       "search": "Search",
@@ -6505,6 +6514,38 @@
       "title": "Saved places",
       "empty": "You haven't saved any places yet.",
       "signInPrompt": "Sign in to save your favorite places."
+    },
+    "osm": {
+      "label": "From OpenStreetMap · not verified yet",
+      "explain": "This listing comes from the open map OpenStreetMap and opetlife has not checked it yet. Contact the place before you go.",
+      "attribution": "© OpenStreetMap contributors",
+      "viewOnOsm": "View on OpenStreetMap",
+      "phone": "Phone",
+      "website": "Website",
+      "managed": "This page is managed by the business itself, whose identity is verified."
+    },
+    "claim": {
+      "title": "Is this your business?",
+      "body": "Claim this page to keep its details up to date yourself and earn the verified badge.",
+      "button": "Claim it",
+      "sending": "Sending…",
+      "signIn": "Sign in to claim it",
+      "failed": "That did not work. Please try again.",
+      "next": {
+        "CREATE_PARTNER_ACCOUNT": "Request saved. Next: create a partner (business) account and send your documents for verification.",
+        "COMPLETE_VERIFICATION": "Request saved. Next: finish your business verification in the partner panel.",
+        "AWAITING_REVIEW": "Request saved. The opetlife team will review it and let you know."
+      },
+      "goPartner": "Create a partner account",
+      "goVerification": "Go to verification",
+      "status": {
+        "PENDING": "Your claim is being reviewed.",
+        "APPROVED": "Your claim was approved.",
+        "REJECTED": "Your claim was not accepted.",
+        "WITHDRAWN": "Claim withdrawn."
+      },
+      "refresh": "I've done that — update my claim",
+      "limit": "You can have at most 5 open claims; please wait for review."
     }
   },
   "supportNeeds": {
@@ -11016,5 +11057,78 @@
     "notFound": "This store was not found.",
     "backToShop": "Back to the shop",
     "protection": "Buying from this seller follows the same opetlife refund and secure-payment rules."
+  },
+  "adminPlacesOsm": {
+    "osmTitle": "OpenStreetMap import",
+    "osmHint": "Each city is refreshed weekly with one gentle Overpass request. Imported places show as unverified until the business claims them.",
+    "columns": {
+      "city": "City",
+      "active": "Active",
+      "listed": "Listed places",
+      "lastRun": "Last run",
+      "result": "Result"
+    },
+    "result": "{created} new, {updated} updated, {hidden} hidden",
+    "status": {
+      "RUNNING": "Running",
+      "SUCCEEDED": "Done",
+      "FAILED": "Failed",
+      "RATE_LIMITED": "Overpass busy; retrying later"
+    },
+    "never": "Not run yet",
+    "runNow": "Run now",
+    "started": "Started; check back in a few minutes.",
+    "runFailed": "Not now: another run is in progress or this area just ran.",
+    "claimsTitle": "Business claims",
+    "claimsEmpty": "No claims waiting.",
+    "claimColumns": {
+      "place": "Place",
+      "claimant": "Claimant",
+      "organization": "Business",
+      "message": "Message"
+    },
+    "noOrganization": "No partner account yet",
+    "kyc": {
+      "VERIFIED": "KYC verified",
+      "other": "KYC not finished"
+    },
+    "approve": "Approve",
+    "reject": "Reject",
+    "reason": "Reason (audit log)",
+    "decided": "Saved.",
+    "decideFailed": "Not saved: approval needs the claim's own business to be KYC-verified, and the listing not suspended.",
+    "form": {
+      "title": "Add or edit a city",
+      "hint": "The city's bounding box (at most 1.5° each way). The city name is the one the city filter shows.",
+      "province": "Province",
+      "south": "South (lat)",
+      "west": "West (lng)",
+      "north": "North (lat)",
+      "east": "East (lng)",
+      "save": "Save",
+      "saved": "Saved.",
+      "saveFailed": "Not saved: check the box (south below north, west below east, at most 1.5°).",
+      "edit": "Edit",
+      "activate": "Activate",
+      "deactivate": "Pause",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "claimsHint": "Approve only for the business named on the claim, once its KYC is verified. Compare its KYC details with this listing's OpenStreetMap tags.",
+    "claimTabs": {
+      "PENDING": "Waiting for review",
+      "APPROVED": "Approved"
+    },
+    "approvedEmpty": "No listing has been handed over yet.",
+    "compare": {
+      "business": "Business (KYC)",
+      "listing": "This listing in OpenStreetMap",
+      "contact": "Contact",
+      "phone": "Phone",
+      "address": "Address",
+      "website": "Website"
+    },
+    "release": "Release from this business",
+    "releaseFailed": "Not released: the listing may no longer be held by this business."
   }
 }

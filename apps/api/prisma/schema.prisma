@@ -8595,6 +8595,14 @@ enum PetFriendlyPlaceCategory {
   VENUE
   SERVICE
   OTHER
+  /// Seeded from OpenStreetMap (amenity=veterinary / shop=pet / shop=pet_grooming / animal_boarding /
+  /// animal_shelter / leisure=dog_park); also usable for staff-added places.
+  VETERINARY
+  PET_SHOP
+  GROOMING
+  BOARDING
+  SHELTER
+  DOG_PARK
 }
 
 enum PetFriendlyPlaceStatus {
@@ -8653,13 +8661,35 @@ model PetFriendlyPlace {
   status             PetFriendlyPlaceStatus @default(UNVERIFIED)
   isPubliclyListed   Boolean                @default(false)
 
+  /// MANUAL (staff/members) or OSM: imported from OpenStreetMap (ODbL, "© OpenStreetMap contributors"), shown as an
+  /// unclaimed, unverified listing until a KYC-verified business claims it.
+  source          String    @default("MANUAL")
+  /// node | way | relation, and the OSM id: the key for weekly re-sync and de-duplication.
+  osmType         String?
+  osmId           BigInt?
+  osmTags         Json?
+  osmSyncedAt     DateTime?
+  /// Set when a re-sync no longer finds the object in OpenStreetMap (the listing is hidden, not deleted).
+  osmMissingSince DateTime?
+  /// Fields staff changed by hand on an OSM listing; the weekly re-sync leaves them alone.
+  osmEditedFields String[]  @default([])
+  /// Business contact exactly as published in the OSM tags (no other source).
+  phone           String?
+  website         String?
+  /// A verified partner that claimed this listing; re-sync never overwrites a claimed listing.
+  claimedByProviderOrganizationId String?   @db.Uuid
+  claimedAt                       DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   favorites PetFriendlyPlaceFavorite[]
+  claims    PlaceClaim[]
 
+  @@unique([osmType, osmId])
   @@index([country, city])
   @@index([category])
+  @@index([source, city])
   @@map("pet_friendly_places")
 }
 
@@ -12452,4 +12482,75 @@ model PetTaxiRideDecline {
 
   @@id([rideId, providerUserId])
   @@map("pet_taxi_ride_declines")
+// ---------------------------------------------------------------------------
+// OpenStreetMap directory seeding (vets, pet shops, grooming, boarding, shelters, dog-friendly parks/cafés)
+// ---------------------------------------------------------------------------
+
+enum PlaceClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
+/// "Is this your business?": a member asks to take over a listing. Approval needs the business to have passed
+/// partner KYC (a VERIFIED provider organization); then the listing is theirs and re-sync stops touching it.
+model PlaceClaim {
+  id                     String           @id @default(uuid()) @db.Uuid
+  placeId                String           @db.Uuid
+  place                  PetFriendlyPlace @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  userId                 String           @db.Uuid
+  providerOrganizationId String?          @db.Uuid
+  status                 PlaceClaimStatus @default(PENDING)
+  message                String?
+  decisionReason         String?
+  decidedByAdminId       String?          @db.Uuid
+  decidedAt              DateTime?
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+
+  @@index([status, createdAt])
+  @@index([placeId])
+  @@index([userId])
+  @@map("place_claims")
+}
+
+/// A city (bounding box) re-synced weekly from the Overpass API, one area per worker tick (fair use).
+model OsmSyncArea {
+  id        String    @id @default(uuid()) @db.Uuid
+  city      String    @unique
+  province  String?
+  south     Float
+  west      Float
+  north     Float
+  east      Float
+  active    Boolean   @default(true)
+  lastRunAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  runs OsmImportRun[]
+
+  @@map("osm_sync_areas")
+}
+
+model OsmImportRun {
+  id                 String      @id @default(uuid()) @db.Uuid
+  areaId             String      @db.Uuid
+  area               OsmSyncArea @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  /// RUNNING | SUCCEEDED | FAILED | RATE_LIMITED
+  status             String
+  fetched            Int         @default(0)
+  created            Int         @default(0)
+  updated            Int         @default(0)
+  linked             Int         @default(0)
+  skipped            Int         @default(0)
+  hidden             Int         @default(0)
+  error              String?
+  requestedByAdminId String?     @db.Uuid
+  startedAt          DateTime    @default(now())
+  finishedAt         DateTime?
+
+  @@index([areaId, startedAt])
+  @@map("osm_import_runs")
 }

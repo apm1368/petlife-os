@@ -11,7 +11,8 @@ export class OpeningHoursDto {
 }
 
 export class ReportPlaceDto {
-  @IsIn(["CLOSED_PERMANENTLY", "NOT_PET_FRIENDLY", "WRONG_LOCATION", "WRONG_DETAILS", "OTHER"]) reason!: string;
+  // CLAIMED_BY_SOMEONE_ELSE: the real owner disputes a business claim on the listing (staff can release it).
+  @IsIn(["CLOSED_PERMANENTLY", "NOT_PET_FRIENDLY", "WRONG_LOCATION", "WRONG_DETAILS", "CLAIMED_BY_SOMEONE_ELSE", "OTHER"]) reason!: string;
   @IsOptional() @IsString() @Length(0, 1000) details?: string;
 }
 

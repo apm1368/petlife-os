@@ -186,7 +186,17 @@ export const ADMIN_SECTIONS: AdminSection[] = [
           { href: "/insurance/providers", labelKey: "tabs.insuranceProviders", permission: "insurance.view" },
         ],
       },
-      { key: "places", labelKey: "nav.places", icon: MapPinned, href: "/places", permission: "places.view", queue: "openPlaceReports" },
+      {
+        key: "places",
+        labelKey: "nav.places",
+        icon: MapPinned,
+        href: "/places",
+        tabs: [
+          { href: "/places", labelKey: "tabs.placeReports", permission: "places.view", exact: true, queue: "openPlaceReports" },
+          { href: "/places/osm", labelKey: "tabs.osmImport", permission: "places.view" },
+          { href: "/places/claims", labelKey: "tabs.placeClaims", permission: "places.view" },
+        ],
+      },
     ],
   },
   {
