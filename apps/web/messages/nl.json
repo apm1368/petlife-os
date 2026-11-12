@@ -1,4 +1,147 @@
 {
+  "adminHolidays": {
+    "kicker": "Bedrijfskalender",
+    "title": "Feestdagen en sluitingsdagen",
+    "retry": "Opnieuw proberen",
+    "cancel": "Annuleren",
+    "yearLabel": "Perzisch jaar",
+    "intro": "De officiële feestdagen van Iran, plus elke dag waarop je team sluit of juist opengaat. Doelen in werkuren, zoals de verificatiecontrole binnen 24 uur, slaan gesloten dagen over, en boekingen en bezorgschattingen kunnen dezelfde kalender gebruiken. Op vrijdag is het altijd gesloten.",
+    "coverage": {
+      "official": "{count, plural, one {# gesloten dag} other {# gesloten dagen}} dit jaar, uit de officiële kalender en de wijzigingen van je team.",
+      "provisional": "De maanfeestdagen van dit jaar zijn voorlopig tot de officiële kalender is gepubliceerd. Verschuift er een dag, corrigeer die dan hier.",
+      "none": "Er is nog geen officiële lijst voor dit jaar. Een ontwikkelaar voegt die toe zodra de officiële kalender is gepubliceerd; voeg tot die tijd sluitingsdagen handmatig toe."
+    },
+    "add": {
+      "title": "Sluitingsdag toevoegen",
+      "help": "Voor een dag waarop het kantoor dicht is maar die geen officiële feestdag is, zoals een onverwachte sluiting of een vrije bedrijfsdag.",
+      "date": "Datum",
+      "name": "Naam",
+      "namePlaceholder": "Bijvoorbeeld: kantoor gesloten",
+      "submit": "Deze dag sluiten"
+    },
+    "reason": "Reden",
+    "reasonPlaceholder": "Waarom deze wijziging (blijft in de auditlog)",
+    "list": {
+      "title": "Gesloten en gewijzigde dagen",
+      "empty": "Geen feestdagen of wijzigingen voor dit jaar.",
+      "date": "Datum",
+      "name": "Dag",
+      "status": "Status",
+      "actions": "Acties"
+    },
+    "status": {
+      "closed": "Gesloten",
+      "open": "Open"
+    },
+    "source": {
+      "official": "Officiële feestdag",
+      "staffClosure": "Sluiting door het team",
+      "staffOpened": "Geopend door het team"
+    },
+    "actions": {
+      "open": "Openen als werkdag",
+      "undo": "Teamwijziging ongedaan maken"
+    },
+    "confirm": {
+      "openTitle": "{date} openen als werkdag?",
+      "openBody": "Doelen in werkuren tellen deze dag dan mee, en boekingen kunnen hem als open behandelen.",
+      "undoTitle": "De wijziging op {date} ongedaan maken?",
+      "undoBody": "De dag volgt weer de officiële kalender."
+    },
+    "done": {
+      "closed": "Sluitingsdag toegevoegd.",
+      "opened": "De dag is nu een werkdag.",
+      "undone": "Wijziging ongedaan gemaakt; de dag volgt weer de officiële kalender."
+    },
+    "errors": {
+      "generic": "Er ging iets mis. Probeer het opnieuw.",
+      "closureFields": "Kies een datum, geef de dag een naam en schrijf een korte reden (minstens 5 tekens).",
+      "reason": "Schrijf een korte reden (minstens 5 tekens)."
+    },
+    "rules": {
+      "CALENDAR_FRIDAY": "Op vrijdag is het altijd gesloten, dus er valt niets te wijzigen.",
+      "CALENDAR_ALREADY_OPEN": "Die dag is al een werkdag.",
+      "CALENDAR_ALREADY_CLOSED": "Dat is al een officiële feestdag. Wil je de dag weer sluiten nadat je hem hebt geopend, maak dan de teamwijziging ongedaan.",
+      "CALENDAR_OUT_OF_RANGE": "Kies een datum vanaf een maand geleden tot twee jaar vooruit.",
+      "CALENDAR_NO_STAFF_CHANGE": "Er is geen teamwijziging op die dag."
+    },
+    "names": {
+      "nowruz": "Nowruz (Perzisch nieuwjaar)",
+      "republicDay": "Dag van de Islamitische Republiek",
+      "natureDay": "Dag van de natuur (Sizdah Bedar)",
+      "sadiqMartyrdom": "Martelaarschap van imam Ja'far al-Sadiq",
+      "eidAlAdha": "Offerfeest (Eid al-Adha)",
+      "khomeini": "Sterfdag van imam Khomeini",
+      "ghadir": "Eid al-Ghadir",
+      "khordad15": "Opstand van 15 Khordad",
+      "tasua": "Tasua",
+      "ashura": "Ashura",
+      "arbaeen": "Arbaeen",
+      "prophetDeath": "Sterfdag van de Profeet en martelaarschap van imam Hasan",
+      "reza": "Martelaarschap van imam Reza",
+      "askari": "Martelaarschap van imam Hasan al-Askari",
+      "mawlid": "Geboorte van de Profeet en imam Ja'far al-Sadiq",
+      "fatima": "Martelaarschap van Fatima al-Zahra",
+      "aliBirth": "Geboorte van imam Ali (Vaderdag)",
+      "mabath": "Mab'ath (roeping van de Profeet)",
+      "midShaban": "Midden-Sha'ban (geboorte van imam Mahdi)",
+      "revolution": "Overwinning van de Islamitische Revolutie",
+      "aliMartyrdom": "Martelaarschap van imam Ali",
+      "eidAlFitr": "Suikerfeest (Eid al-Fitr)",
+      "eidAlFitr2": "Suikerfeest (vrije dag)",
+      "oil": "Dag van de nationalisatie van de olie"
+    }
+  },
+  "adminDeletionRequests": {
+    "kicker": "Privacy",
+    "title": "Verzoeken tot accountverwijdering",
+    "intro": "Leden die hebben gevraagd hun account te verwijderen. Beoordeel elk verzoek: zet het in bewaarcontrole en markeer het als gereed zodra het bewaarbeleid is goedgekeurd. Leden kunnen annuleren tot de verwijdering is uitgevoerd en krijgen bij elke stap een melding.",
+    "executionDisabled": "Het verwijderen zelf staat uit totdat er een bewaarbeleid is goedgekeurd, dus niets hier verwijdert gegevens.",
+    "retry": "Opnieuw proberen",
+    "cancel": "Annuleren",
+    "filterLabel": "Status van verzoek",
+    "state": {
+      "REQUESTED": "Nieuw",
+      "PENDING_RETENTION": "Bewaarcontrole",
+      "READY_FOR_EXECUTION": "Gereed",
+      "CANCELLED": "Geannuleerd door lid",
+      "COMPLETED": "Voltooid"
+    },
+    "empty": {
+      "REQUESTED": "Geen nieuwe verzoeken.",
+      "PENDING_RETENTION": "Niets in bewaarcontrole.",
+      "READY_FOR_EXECUTION": "Niets klaar voor verwijdering.",
+      "CANCELLED": "Geen geannuleerde verzoeken.",
+      "COMPLETED": "Geen voltooide verwijderingen."
+    },
+    "requested": "Aangevraagd op {date} · {days, plural, =0 {vandaag} one {# dag geleden} other {# dagen geleden}}",
+    "impact": "{households, plural, one {# huishouden} other {# huishoudens}} · {pets, plural, one {# huisdier} other {# huisdieren}} · {shared, plural, =0 {met niemand gedeeld} one {# gedeeld met anderen} other {# gedeeld met anderen}}",
+    "noImpact": "Geen huishoudens of huisdieren geregistreerd.",
+    "soleOwner": "Enige eigenaar van een huishouden met andere leden: het eigendom moet eerst naar iemand anders.",
+    "lastChange": "Laatste stap op {date}",
+    "note": "Notitie (optioneel)",
+    "notePlaceholder": "Bijvoorbeeld: facturen bewaard voor de belastingwet tot 1408",
+    "explain": {
+      "PENDING_RETENTION": "Start de bewaarcontrole: je controleert welke gegevens volgens de wet bewaard moeten blijven. Het lid krijgt te horen dat het verzoek wordt beoordeeld.",
+      "READY_FOR_EXECUTION": "Markeert de controle als afgerond. Kan pas als er een bewaarbeleid is goedgekeurd. Het lid hoort dat de verwijdering binnenkort plaatsvindt en kan nog annuleren."
+    },
+    "action": {
+      "PENDING_RETENTION": "Bewaarcontrole starten",
+      "READY_FOR_EXECUTION": "Markeren als klaar voor verwijdering"
+    },
+    "done": {
+      "PENDING_RETENTION": "Het verzoek van {name} staat in bewaarcontrole; er is een melding verstuurd.",
+      "READY_FOR_EXECUTION": "Het verzoek van {name} is gereed; er is een melding verstuurd."
+    },
+    "errors": {
+      "forbidden": "Alleen een superadmin kan verwijderverzoeken afhandelen.",
+      "load": "Verwijderverzoeken konden niet worden geladen.",
+      "generic": "Dat is niet gelukt. Probeer het opnieuw.",
+      "RETENTION_POLICY_NOT_APPROVED": "Nog niet: er moet eerst een bewaarbeleid zijn goedgekeurd voordat een verzoek als gereed kan worden gemarkeerd.",
+      "INVALID_TRANSITION": "Dit verzoek is al verder. Vernieuw de lijst.",
+      "CHANGED_CONCURRENTLY": "Iemand anders heeft dit verzoek net gewijzigd. Vernieuw de lijst."
+    }
+  },
   "clinicClients": {
     "optOut": {
       "title": "Sms-berichten van de praktijk stoppen",
@@ -746,7 +889,8 @@
       "processing": "Bijgesneden/opnieuw gecodeerd",
       "licence": "Licentie en gebruiksvoorwaarden",
       "musicTitle": "Muziek",
-      "musicUsage": "De instrumentale soundtrack van de video's op de site; een fragment van 48 seconden, met fade-in en fade-out en opnieuw gecodeerd."
+      "musicUsage": "De instrumentale soundtrack van de video's op de site; een fragment van 48 seconden, met fade-in en fade-out en opnieuw gecodeerd.",
+      "musicUsageVideo": "De instrumentale soundtrack van de video van één minuut “10 zoekvragen van honden- en kattenbaasjes” op de blog en sociale media; een fragment van 60 seconden, met fade-out en opnieuw gecodeerd."
     },
     "member": {
       "nav": "Mijn onderdelen",
@@ -2876,7 +3020,8 @@
         "analytics": "Prestaties",
         "travel": "Reizen en verblijven",
         "clinicWorkspace": "Werkruimte kliniek",
-        "verification": "Verificatiedocumenten"
+        "verification": "Verificatiedocumenten",
+        "petTaxi": "Huisdiertaxi"
       },
       "notAProvider": {
         "title": "Geen toegang als aanbieder",
@@ -3339,7 +3484,16 @@
       "reviewsVerifiedOnly": "Alleen klanten die het product hebben ontvangen, kunnen een review schrijven.",
       "verifiedPurchase": "Geverifieerde aankoop",
       "moreReviews": "Meer reviews tonen",
-      "related": "Meer uit deze categorie"
+      "related": "Meer uit deze categorie",
+      "trust": {
+        "title": "Veilig winkelen op opetlife",
+        "verified": "Elke verkoper hier heeft zijn identiteit en documenten bij opetlife laten verifiëren.",
+        "returns": "Komt een artikel beschadigd, verkeerd of over de datum aan? Vraag dan binnen {hours} uur na levering een terugbetaling aan; ons team beoordeelt het.",
+        "protection": "Je betaalt via opetlife; komt de bestelling nooit aan, dan kun je je geld terugvragen.",
+        "shipsFrom": "Verzonden vanuit {city}",
+        "sellerRating": "Verkopersscore {average} van 5 ({count, plural, one {# beoordeling} other {# beoordelingen}})",
+        "visitStore": "Bekijk de winkel van {seller}"
+      }
     },
     "cart": {
       "title": "Winkelwagen",
@@ -3426,13 +3580,33 @@
         "title": "Kies de bezorging per verkoper",
         "serviceLevel": {
           "STANDARD": "Standaardbezorging",
-          "EXPRESS": "Expressbezorging"
+          "EXPRESS": "Expressbezorging",
+          "COURIER": "Koerier",
+          "POST_PISHTAZ": "Expresspost"
         },
         "eta": "Bezorgd in ongeveer {hours, plural, one {# uur} other {# uur}}",
         "selected": "Gekozen",
         "unavailable": "Momenteel geen bezorgopties beschikbaar",
         "refresh": "Bezorgopties vernieuwen",
-        "chooseFirst": "Kies een bezorgoptie om door te gaan."
+        "chooseFirst": "Kies een bezorgoptie om door te gaan.",
+        "provider": {
+          "DEV": "Testkoerier",
+          "ALOPEYK": "Alopeyk",
+          "SNAPPBOX": "Snappbox",
+          "OPETLIFE_COURIER": "opetlife-koerier",
+          "POST_PISHTAZ": "Iraanse Post expres (Pishtaz)",
+          "SNAPPBOX_APP": "Snappbox",
+          "ALOPEYK_APP": "Alopeyk"
+        },
+        "basis": {
+          "API": "Actuele koeriersprijs",
+          "SANDBOX_ESTIMATE": "Testschatting: de koerier is nog niet gevraagd",
+          "DISTANCE_ESTIMATE": "Geschat op basis van afstand",
+          "CITY_FLAT": "Vast stadstarief",
+          "FIXED_PRICE": "Vast tarief"
+        },
+        "etaDays": "Aankomst in ongeveer {days, plural, one {# werkdag} other {# werkdagen}}",
+        "sandboxNote": "Verzending staat voorlopig in testmodus: prijzen van Alopeyk en Snappbox zijn schattingen en er wordt geen koerier gestuurd."
       },
       "payment": {
         "title": "Betaling",
@@ -3667,7 +3841,10 @@
         "cancel": "Annuleren",
         "submit": "Insturen ter beoordeling",
         "failed": "Je review kon niet worden verstuurd."
-      }
+      },
+      "deliveryMethod": "Bezorging: {method}",
+      "postTracking": "Volg het pakket op de website van de Post",
+      "courierTracking": "Volg de koerier"
     },
     "statusLabels": {
       "payment": {
@@ -3885,7 +4062,8 @@
         "team": "Team",
         "settings": "Instellingen",
         "finance": "Financiën",
-        "promotions": "Promoties"
+        "promotions": "Promoties",
+        "shipping": "Verzending"
       },
       "notASeller": {
         "title": "Geen verkoperstoegang",
@@ -4206,6 +4384,44 @@
           "ADJUSTMENT": "Correctie"
         }
       }
+    },
+    "shipping": {
+      "title": "Verzending",
+      "subtitle": "De methoden die je kopers aanbiedt en het adres waar koeriers pakketten ophalen.",
+      "loading": "Laden…",
+      "failed": "Verzendinstellingen konden niet worden geladen.",
+      "methods": "Verzendmethoden",
+      "methodsHint": "Kies je er geen, dan wordt elke methode aangeboden die opetlife heeft aangezet.",
+      "noneActive": "opetlife heeft nog geen verzendmethode aangezet.",
+      "provider": {
+        "DEV": "Testkoerier",
+        "ALOPEYK": "Alopeyk",
+        "SNAPPBOX": "Snappbox",
+        "OPETLIFE_COURIER": "opetlife-koerier",
+        "POST_PISHTAZ": "Iraanse Post expres (Pishtaz)",
+        "SNAPPBOX_APP": "Snappbox (geboekt door opetlife)",
+        "ALOPEYK_APP": "Alopeyk (geboekt door opetlife)"
+      },
+      "pickup": "Ophaaladres",
+      "pickupHint": "Met een kaartpunt kan de opetlife-koerier de prijs op afstand baseren.",
+      "fields": {
+        "contactName": "Naam contactpersoon",
+        "phone": "Telefoon",
+        "city": "Stad",
+        "region": "Provincie",
+        "area": "Buurt",
+        "addressLine": "Volledig adres",
+        "postalCode": "Postcode van 10 cijfers",
+        "instructions": "Notitie voor de koerier"
+      },
+      "useLocation": "Huidige locatie gebruiken",
+      "clearLocation": "Kaartpunt verwijderen",
+      "locationDenied": "Er is geen toegang tot je locatie gegeven.",
+      "save": "Verzendinstellingen opslaan",
+      "saving": "Opslaan…",
+      "saved": "Opgeslagen.",
+      "saveFailed": "Niet opgeslagen. Controleer de velden (postcode: 10 cijfers).",
+      "readOnly": "Alleen een winkelbeheerder kan dit wijzigen."
     }
   },
   "notifications": {
@@ -4444,6 +4660,8 @@
         "signingOut": "Bezig met uitloggen…"
       },
       "tabs": {
+        "holidays": "Feestdagen en sluitingen",
+        "deletionRequests": "Verwijderverzoeken",
         "customRoles": "Aangepaste rollen",
         "directory": "Gebruikerslijst",
         "customer360": "Klant 360",
@@ -4497,7 +4715,18 @@
         "channels": "Kanalen en bezorging",
         "smsPatterns": "SMS-sjablonen",
         "walletDirectory": "Portemonnees van leden",
-        "walletTopUps": "Opwaardeerbewijzen"
+        "walletTopUps": "Opwaardeerbewijzen",
+        "shipping": "Verzending",
+        "petTaxi": "Huisdiertaxi",
+        "petTaxiDrivers": "Chauffeurs huisdiertaxi",
+        "placeReports": "Meldingen over plekken",
+        "osmImport": "OpenStreetMap",
+        "placeClaims": "Bedrijfsclaims",
+        "walletCardAccount": "Rekening voor kaart-naar-kaartoverschrijving",
+        "walletCardReceipts": "Ontvangstbewijzen kaart-naar-kaartoverschrijving",
+        "repeatDeliveries": "Herhaalleveringen",
+        "orderLookup": "Bestelling opzoeken",
+        "refundApprovals": "Goedkeuring van terugbetalingen"
       },
       "palette": {
         "actions": "Snelle acties",
@@ -5073,6 +5302,7 @@
       }
     },
     "tasks": {
+      "openRelated": "Verzoek openen",
       "title": "Taken",
       "newTask": "Nieuwe taak",
       "createTitle": "Taak aanmaken",
@@ -5727,7 +5957,11 @@
       "back": "Terug",
       "continue": "Doorgaan",
       "photoLabel": "Foto",
-      "submit": "Vermist huisdier melden"
+      "submit": "Vermist huisdier melden",
+      "useMyLocation": "Mijn huidige locatie gebruiken",
+      "useMyLocationHelp": "Ben je op de plek waar het dier het laatst is gezien? Sla de locatie dan op, zodat buren die meldingen hebben aangezet het horen. Het exacte punt blijft privé.",
+      "locationSaved": "Locatie opgeslagen",
+      "locationDenied": "Locatietoegang is niet toegestaan; je kunt zonder doorgaan."
     },
     "list": {
       "title": "Meldingen van vermiste huisdieren",
@@ -5817,6 +6051,27 @@
         "reunited": "{name} is weer thuis. Bedankt aan iedereen die heeft geholpen.",
         "photoAlt": "Foto van {name}"
       }
+    },
+    "areaAlert": {
+      "title": "Meldingen over vermiste huisdieren in mijn buurt",
+      "body": "Raakt er een huisdier vermist bij jou in de buurt, dan laten we het je weten, zodat je kunt helpen als je het ziet.",
+      "on": "Aan: je hoort over meldingen binnen {km} km van je.",
+      "enable": "Meldingen aanzetten",
+      "update": "Gebied bijwerken",
+      "disable": "Uitzetten",
+      "radius": "Gebied",
+      "km": "{km} km",
+      "signIn": "Log in om meldingen aan te zetten",
+      "privacy": "Je locatie wordt alleen gebruikt om meldingen in de buurt te vinden en wordt nooit aan iemand getoond.",
+      "denied": "De browser heeft geen locatietoegang gegeven.",
+      "failed": "Opslaan is mislukt. Probeer het opnieuw."
+    },
+    "found": {
+      "title": "Door buren gevonden huisdieren",
+      "subtitle": "Een huisdier gevonden? Plaats het hier, zodat de familie het kan herkennen.",
+      "cta": "Ik heb een huisdier gevonden",
+      "empty": "Op dit moment geen berichten over gevonden huisdieren.",
+      "untitled": "Gevonden huisdier"
     }
   },
   "animalSupport": {
@@ -5878,7 +6133,8 @@
       "LOST_PET_SHARE": "Vermist huisdier",
       "RESCUE": "Redding",
       "ADOPTION": "Adoptie",
-      "MEMORY": "Herinnering"
+      "MEMORY": "Herinnering",
+      "FOUND_PET": "Gevonden huisdier"
     },
     "reaction": {
       "LIKE": "Leuk",
@@ -5937,6 +6193,30 @@
       "commentLabel": "Reactie toevoegen",
       "commentSubmit": "Plaatsen",
       "commentsEmpty": "Nog geen reacties."
+    },
+    "contact": {
+      "message": "Stuur de plaatser een bericht",
+      "adopt": "Adoptie aanvragen",
+      "signIn": "Log in om een bericht te sturen",
+      "private": "Het gesprek blijft binnen opetlife; telefoonnummers worden nooit getoond.",
+      "screening": {
+        "title": "Een paar korte vragen voor adoptie",
+        "hint": "Je antwoorden worden als je eerste bericht verstuurd, zodat de plaatser zorgvuldig kan kiezen.",
+        "intro": "Hallo, ik wil dit huisdier graag adopteren.",
+        "home": "Waar je woont",
+        "homes": {
+          "apartment": "Appartement",
+          "houseWithYard": "Huis met tuin",
+          "other": "Anders"
+        },
+        "experience": "Ervaring met huisdieren",
+        "otherPets": "Andere huisdieren thuis",
+        "why": "Waarom je wilt adopteren",
+        "visit": "Ik kan persoonlijk kennismaken",
+        "visitYes": "Ik kan langskomen om persoonlijk kennis te maken.",
+        "send": "Aanvraag versturen",
+        "cancel": "Annuleren"
+      }
     }
   },
   "communityChat": {
@@ -6284,7 +6564,13 @@
       "BEACH": "Strand",
       "VENUE": "Evenementenlocatie",
       "SERVICE": "Dienst",
-      "OTHER": "Overig"
+      "OTHER": "Overig",
+      "VETERINARY": "Dierenarts",
+      "PET_SHOP": "Dierenwinkel",
+      "GROOMING": "Trimsalon",
+      "BOARDING": "Dierenpension",
+      "SHELTER": "Asiel",
+      "DOG_PARK": "Hondenpark"
     },
     "list": {
       "search": "Zoeken",
@@ -6311,6 +6597,38 @@
       "title": "Opgeslagen plekken",
       "empty": "Je hebt nog geen plekken opgeslagen.",
       "signInPrompt": "Log in om je favoriete plekken op te slaan."
+    },
+    "osm": {
+      "label": "Van OpenStreetMap · nog niet geverifieerd",
+      "explain": "Deze vermelding komt van de open kaart OpenStreetMap en is nog niet door opetlife gecontroleerd. Neem contact op met de plek voordat je gaat.",
+      "attribution": "© OpenStreetMap-bijdragers",
+      "viewOnOsm": "Bekijken op OpenStreetMap",
+      "phone": "Telefoon",
+      "website": "Website",
+      "managed": "Deze pagina wordt beheerd door het bedrijf zelf, waarvan de identiteit is geverifieerd."
+    },
+    "claim": {
+      "title": "Is dit jouw bedrijf?",
+      "body": "Claim deze pagina om de gegevens zelf actueel te houden en de verificatiebadge te krijgen.",
+      "button": "Claimen",
+      "sending": "Versturen…",
+      "signIn": "Log in om te claimen",
+      "failed": "Dat is niet gelukt. Probeer het opnieuw.",
+      "next": {
+        "CREATE_PARTNER_ACCOUNT": "Verzoek opgeslagen. Volgende stap: maak een partneraccount (zakelijk) aan en stuur je documenten ter verificatie.",
+        "COMPLETE_VERIFICATION": "Verzoek opgeslagen. Volgende stap: rond de verificatie van je bedrijf af in het partnerpanel.",
+        "AWAITING_REVIEW": "Verzoek opgeslagen. Het opetlife-team beoordeelt het en laat het je weten."
+      },
+      "goPartner": "Partneraccount aanmaken",
+      "goVerification": "Naar verificatie",
+      "status": {
+        "PENDING": "Je claim wordt beoordeeld.",
+        "APPROVED": "Je claim is goedgekeurd.",
+        "REJECTED": "Je claim is niet geaccepteerd.",
+        "WITHDRAWN": "Claim ingetrokken."
+      },
+      "refresh": "Gedaan — werk mijn claim bij",
+      "limit": "Je kunt maximaal 5 openstaande claims hebben; wacht op de beoordeling."
     }
   },
   "supportNeeds": {
@@ -6893,6 +7211,7 @@
         "allClear": "Alles op orde — er wacht niets op je team.",
         "clearList": "Leeg: {list}",
         "queue": {
+          "pendingDeletionRequests": "Verzoeken tot accountverwijdering",
           "openTrustCases": "Vertrouwens- en veiligheidszaken",
           "openDisputes": "Openstaande geschillen",
           "openSupportCases": "Openstaande supportzaken",
@@ -6976,7 +7295,15 @@
       "insuranceProviders": "Beheer van verzekeraars",
       "externalSources": "Beheer van externe reisbronnen",
       "accessControl": "Beheer van beheerderstoegang",
-      "verificationQueue": "Wachtrij partnerverificatie"
+      "verificationQueue": "Wachtrij partnerverificatie",
+      "launch": {
+        "title": "Doel voor de lanceermaand",
+        "hint": "De succesmaatstaf voor de lancering: geregistreerde huisdieren en wekelijkse boekingen. Totdat de demodata zijn opgeschoond (Q4), tellen die ook mee.",
+        "registeredPets": "Geregistreerde huisdieren",
+        "thisWeek": "deze week",
+        "bookingsThisWeek": "Boekingen deze week",
+        "vsLastWeek": "tegenover {count} vorige week"
+      }
     },
     "records": {
       "clinical": "Klinische dossiers",
@@ -8594,6 +8921,7 @@
       "SUPPORT_AGENT": "Supportmedewerker"
     },
     "rules": {
+      "UNVERIFIED_CONTACT": "Beheerderstoegang kan alleen naar een account met een geverifieerd e-mailadres.",
       "ALREADY_ADMIN": "Dit account is al beheerder; open het bestaande lidmaatschap.",
       "SELF_CHANGE_FORBIDDEN": "Je kunt je eigen lidmaatschap niet wijzigen.",
       "LAST_SUPER_ADMIN": "De laatste actieve superbeheerder kan niet worden gewijzigd.",
@@ -8622,6 +8950,10 @@
     }
   },
   "partnerVerification": {
+    "sla": {
+      "overdue": "Over de streeftermijn van 24 werkuren",
+      "progress": "{hours} van {target} werkuren gebruikt"
+    },
     "superseded": "Vervangen door een nieuwere upload",
     "reviewedBy": "door {name}",
     "caseSummary": "Stand van deze zaak",
@@ -9838,7 +10170,9 @@
       "deadline": "Upload het betaalbewijs uiterlijk {date}.",
       "stepOne": "Maak het bedrag over naar deze kaart met je bankapp of bij een geldautomaat.",
       "stepTwo": "Maak een foto of screenshot van het betaalbewijs.",
-      "stepThree": "Stuur het betaalbewijs hier in. Ons financiële team controleert het en voegt het geld toe."
+      "stepThree": "Stuur het betaalbewijs hier in. Ons financiële team controleert het en voegt het geld toe.",
+      "bank": "Bank",
+      "sheba": "Sheba"
     },
     "receipt": {
       "choose": "Kies de afbeelding van het betaalbewijs",
@@ -10288,5 +10622,866 @@
       "release": "Loslaten om te vernieuwen",
       "loading": "Vernieuwen…"
     }
+  },
+  "safety": {
+    "title": "Bescherm jezelf tegen oplichting",
+    "contact": "Betaal alleen binnen opetlife. Doe nooit een kaart-naar-kaartoverschrijving buiten de site en deel nooit een verificatiecode of wachtwoord.",
+    "payment": "Betaal alleen op deze pagina. opetlife vraagt je nooit geld over te maken naar een persoonlijke rekening of een verificatiecode te delen.",
+    "lostPet": "Wie geld of een beloning vraagt voordat het huisdier wordt teruggebracht, is waarschijnlijk een oplichter. Spreek af op een openbare plek en betaal nooit vooraf.",
+    "donation": "Doneer alleen via deze pagina. opetlife vraagt je nooit een donatie over te maken naar een persoonlijke rekening.",
+    "adoption": "Betaal nooit kosten vóór een ontmoeting. Bekijk het huisdier persoonlijk en spreek af op een veilige plek."
+  },
+  "aboutPage": {
+    "eyebrow": "Over opetlife",
+    "title": "We bouwden opetlife zodat de zorg voor een dier nooit bij nul hoeft te beginnen",
+    "lede": "Een vaccinatieboekje in een la, het nummer van een dierenarts kwijt in een chat, een winkel die niets weet van een allergie, een reis die je plant rond “huisdieren niet toegestaan”. opetlife brengt het allemaal samen rond één profiel van je huisdier — en houdt het eerlijk.",
+    "chapters": {
+      "label": "Op deze pagina",
+      "why": "Waarom we bestaan",
+      "connect": "Hoe alles samenhangt",
+      "promises": "Wat we beloven",
+      "values": "Hoe we beslissen",
+      "contact": "Praat met ons"
+    },
+    "why": {
+      "title": "Zorg mag niet afhangen van alles kunnen onthouden",
+      "p1": "Leven met een hond, een kat of een vogel betekent honderden kleine beslissingen: wanneer de volgende vaccinatie nodig is, welk voer past bij een gevoelige maag, wie voor ze kan zorgen als je op reis gaat. Het meeste van die kennis ligt verspreid op allerlei plekken — en juist wanneer je het het hardst nodig hebt, is het moeilijk te vinden.",
+      "p2": "opetlife begon met een eenvoudig idee: het dier staat centraal, niet de app. Alles wat we bouwen — dossiers, boekingen, de winkel, reizen, opvang — leest uit het eigen profiel van je huisdier en vult het aan, zodat elke stap weet wat eraan voorafging.",
+      "p3": "We schrijven eerst in het Perzisch, omdat dat de taal is van de meeste van onze gezinnen, en daarnaast in het Engels, Duits, Spaans, Arabisch en Nederlands voor iedereen die ver van huis met een dier leeft."
+    },
+    "connect": {
+      "title": "Eén profiel, veel helpende handen",
+      "lede": "Elk onderdeel van opetlife doet één ding goed en deelt alleen wat jij toestaat.",
+      "steps": {
+        "record": {
+          "title": "Het dossier van je huisdier",
+          "body": "Vaccinaties, medicijnen, allergieën, gewicht en documenten in één gezondheidsdossier — met herinneringen voordat er iets moet gebeuren.",
+          "cta": "Voeg je huisdier toe"
+        },
+        "care": {
+          "title": "Dierenartsen en diensten",
+          "body": "Vind klinieken, trimmers, oppassers en dierentaxi’s, bekijk echte beschikbare tijden en boek; deel het gezondheidsdossier voor beperkte tijd met een dierenarts.",
+          "cta": "Vind zorg"
+        },
+        "shop": {
+          "title": "Winkel",
+          "body": "Voer, snacks en accessoires, gekozen met de soort en de behoeften van je huisdier in gedachten.",
+          "cta": "Naar de winkel"
+        },
+        "travel": {
+          "title": "Reizen",
+          "body": "Huisdiervriendelijke verblijven en reizen; elke externe advertentie toont de bron en wanneer we die voor het laatst hebben gecontroleerd.",
+          "cta": "Plan een reis"
+        },
+        "safety": {
+          "title": "Veiligheid",
+          "body": "Meldingen van vermiste huisdieren, een ID-kaart voor je huisdier en heldere vergelijkingen van verzekeringen, voor de dagen waarvan je hoopt dat ze nooit komen.",
+          "cta": "Vermist en gevonden"
+        },
+        "together": {
+          "title": "Community en opvang",
+          "body": "Praat met andere baasjes, steun geverifieerde opvangorganisaties en zie precies waar donaties naartoe gaan.",
+          "cta": "Word lid van de community"
+        },
+        "learn": {
+          "title": "Leren",
+          "body": "Praktische artikelen en gidsen over training, voeding en gezondheid, geschreven om thuis mee aan de slag te gaan.",
+          "cta": "Lees het magazine"
+        }
+      }
+    },
+    "promises": {
+      "title": "Wat we beloven — en hoe je het zelf kunt controleren",
+      "lede": "Vertrouwen hoort geen slogan te zijn. Dit zijn dingen die het product doet, en je kunt ze met eigen ogen zien.",
+      "items": {
+        "verified": {
+          "title": "Geverifieerd betekent gecontroleerd",
+          "body": "Klinieken, dierenartsen en dienstverleners krijgen pas de badge “geverifieerd” nadat ons team hun documenten heeft beoordeeld."
+        },
+        "consent": {
+          "title": "Het dossier van je huisdier, jouw beslissing",
+          "body": "Een gezondheidsdossier wordt alleen gedeeld als jij daarvoor kiest, voor beperkte tijd, en je kunt de toegang op elk moment intrekken."
+        },
+        "privacy": {
+          "title": "Je gegevens blijven van jou",
+          "body": "In je privacycentrum kun je een kopie van je gegevens downloaden of ons vragen ze te verwijderen."
+        },
+        "sources": {
+          "title": "Eerlijk over waar dingen vandaan komen",
+          "body": "Advertenties van andere websites tonen hun bron en wanneer we ze voor het laatst hebben gecontroleerd; we presenteren ze nooit als onze eigen."
+        },
+        "ledger": {
+          "title": "Donaties die je kunt volgen",
+          "body": "Elke opvangcampagne toont een actueel totaal dat is opgebouwd uit echte transacties — nooit een schatting."
+        },
+        "credits": {
+          "title": "Eer wie eer toekomt",
+          "body": "Foto’s en muziek die door anderen zijn gemaakt, staan met hun licentie vermeld op onze pagina met bronvermeldingen."
+        }
+      }
+    },
+    "values": {
+      "title": "Hoe we beslissen wat we bouwen",
+      "items": {
+        "animals": {
+          "title": "Het dier komt eerst",
+          "body": "Als een functie goed is voor het bedrijf maar niet voor het dier, bouwen we die niet."
+        },
+        "honest": {
+          "title": "Zeggen wat we weten — en wat niet",
+          "body": "Geen verzonnen beschikbaarheid, geen nepreviews, geen medische beloftes. Als iets onzeker is, zeggen we dat."
+        },
+        "simple": {
+          "title": "Eenvoudig voor elk gezin",
+          "body": "Duidelijke woorden, grote knoppen, een licht en een donker thema, en pagina’s die op elke telefoon werken."
+        },
+        "kindness": {
+          "title": "Vriendelijkheid telt",
+          "body": "Opvang, adoptie en het herdenken van de dieren die we zijn verloren horen bij opetlife en zijn geen bijzaak."
+        }
+      }
+    },
+    "contact": {
+      "title": "Praat met ons",
+      "body": "Vragen, ideeën, een samenwerking of iets wat niet werkte zoals het hoort: je bericht komt bij ons supportteam terecht en je ziet het antwoord in je supportinbox.",
+      "contactCta": "Stuur een bericht",
+      "helpCta": "Helpcentrum"
+    },
+    "cta": {
+      "title": "Begin met het profiel van je huisdier",
+      "body": "Het kost een minuut, en al het andere bouwt erop voort.",
+      "primary": "Maak een account aan",
+      "secondary": "Ontdek diensten"
+    }
+  },
+  "addressBook": {
+    "eyebrow": "Account",
+    "title": "Adressen",
+    "description": "De bezorgadressen van je huishouden, gebruikt door koeriers en de post.",
+    "navHint": "Bezorgadressen en standaardadres",
+    "loading": "Adressen laden…",
+    "failed": "De adressen konden niet worden geladen.",
+    "noHousehold": "Maak eerst een huishouden aan om adressen op te slaan.",
+    "empty": "Nog geen adressen opgeslagen.",
+    "add": "Adres toevoegen",
+    "edit": "Bewerken",
+    "remove": "Verwijderen",
+    "removeConfirm": "Dit adres verwijderen? Eerdere bestellingen houden hun eigen kopie.",
+    "removed": "Adres verwijderd.",
+    "makeDefault": "Als standaard instellen",
+    "default": "Standaard",
+    "save": "Adres opslaan",
+    "saving": "Opslaan…",
+    "saved": "Adres opgeslagen.",
+    "cancel": "Annuleren",
+    "failedSave": "Het adres is niet opgeslagen. Controleer de velden.",
+    "fields": {
+      "label": "Label (bijv. thuis, werk)",
+      "recipient": "Ontvanger",
+      "phone": "Telefoon",
+      "city": "Stad",
+      "region": "Provincie",
+      "area": "Wijk",
+      "addressLine": "Volledig adres (straat, steeg, huisnummer, appartement)",
+      "postalCode": "Postcode van 10 cijfers",
+      "instructions": "Notitie voor de koerier (optioneel)",
+      "isDefault": "Gebruiken als standaardadres"
+    },
+    "location": {
+      "use": "Mijn huidige locatie gebruiken",
+      "locating": "Je locatie zoeken…",
+      "set": "Kaartpunt opgeslagen; de opetlife-koerier kan de prijs nauwkeuriger berekenen.",
+      "clear": "Kaartpunt verwijderen",
+      "denied": "Geen toegang tot je locatie. Je kunt ook zonder doorgaan.",
+      "hasPoint": "Heeft een kaartpunt"
+    }
+  },
+  "adminShipping": {
+    "kicker": "Winkel",
+    "title": "Verzendmethoden",
+    "subtitle": "Welke methoden bij het afrekenen worden aangeboden, tegen welke prijs, en hoe elke zending ervoor staat.",
+    "loading": "Laden…",
+    "failed": "De gegevens konden niet worden geladen.",
+    "retry": "Opnieuw proberen",
+    "forbidden": "Je hebt het recht “Winkel bekijken” nodig om verzending te zien.",
+    "mode": {
+      "sandbox": "Testmodus: Alopeyk en Snappbox geven alleen schattingen en er wordt geen koerier gestuurd.",
+      "production": "Livemodus: de prijzen komen van de koeriers."
+    },
+    "provider": {
+      "DEV": "Testkoerier",
+      "ALOPEYK": "Alopeyk",
+      "SNAPPBOX": "Snappbox",
+      "OPETLIFE_COURIER": "opetlife-koerier",
+      "POST_PISHTAZ": "Iraanse Post expres (Pishtaz)",
+      "SNAPPBOX_APP": "Snappbox — geboekt in de app",
+      "ALOPEYK_APP": "Alopeyk — geboekt in de app"
+    },
+    "kind": {
+      "API": "Prijs via de API van de koerier",
+      "MANUAL": "Prijs bepaald door opetlife"
+    },
+    "active": "Aangeboden bij het afrekenen",
+    "inactive": "Niet aangeboden bij het afrekenen",
+    "notes": {
+      "NEEDS_PRICE": "Stel eerst een prijs in.",
+      "SWITCHED_OFF": "Uitgezet door medewerkers.",
+      "DISABLED_IN_ENV": "Uitgeschakeld in de serverinstellingen.",
+      "SANDBOX": "Testschattingen totdat de API-sleutels zijn ingesteld."
+    },
+    "webhook": {
+      "yes": "Webhookgeheim ingesteld",
+      "no": "Geen webhookgeheim (nodig voor livemodus)"
+    },
+    "enabled": "Aan",
+    "save": "Opslaan",
+    "saving": "Opslaan…",
+    "saved": "Opgeslagen.",
+    "saveFailed": "Niet opgeslagen. Als de methode aan staat, is een geldige prijs nodig.",
+    "reason": "Reden (wordt bewaard in het auditlog)",
+    "readOnly": "Alleen met “Winkel beheren” kun je dit wijzigen.",
+    "courier": {
+      "cities": "Bediende steden (kommagescheiden; leeg = alle)",
+      "baseFare": "Basistarief (toman)",
+      "perKm": "Per km (toman)",
+      "minFare": "Minimumtarief (toman)",
+      "maxKm": "Maximale afstand (km)",
+      "roadFactor": "Wegfactor (hemelsbreed ×)",
+      "defaultFlat": "Vast tarief zonder kaartpunt (toman, 0 = geen)",
+      "cityFares": "Vast tarief per stad (één per regel: stad=toman)",
+      "pickupMinutes": "Minuten tot ophalen",
+      "minutesPerKm": "Minuten per km"
+    },
+    "post": {
+      "fixedPrice": "Vaste prijs (toman)",
+      "includedKg": "Inbegrepen gewicht (kg)",
+      "perExtraKg": "Per extra kilo (toman)",
+      "etaMin": "Snelste levering (dagen)",
+      "etaMax": "Langzaamste levering (dagen)"
+    },
+    "shipments": {
+      "title": "Zendingen",
+      "hint": "Medewerkers zetten zendingen van de opetlife-koerier en de Post door; Alopeyk en Snappbox melden zelf hun status.",
+      "allMethods": "Alle methoden",
+      "allStatuses": "Alle statussen",
+      "empty": "Geen zendingen.",
+      "columns": {
+        "method": "Methode",
+        "seller": "Verkoper",
+        "city": "Bestemming",
+        "status": "Status",
+        "tracking": "Trackingcode",
+        "updated": "Laatste wijziging"
+      },
+      "status": {
+        "CREATED": "Aangemaakt",
+        "REQUESTED": "Koerier aangevraagd",
+        "ASSIGNED": "Koerier toegewezen",
+        "PICKED_UP": "Opgehaald",
+        "IN_TRANSIT": "Onderweg",
+        "OUT_FOR_DELIVERY": "Bezorger onderweg",
+        "DELIVERED": "Bezorgd",
+        "FAILED": "Mislukt",
+        "CANCELED": "Geannuleerd",
+        "UNKNOWN": "Onbekend"
+      },
+      "update": "Bijwerken",
+      "updateTitle": "Zending bijwerken",
+      "newStatus": "Nieuwe status",
+      "trackingCode": "Trackingnummer van de Post, referentie van de koerier of de trackinglink van de app",
+      "note": "Notitie (optioneel, in het auditlog)",
+      "apply": "Toepassen",
+      "cancel": "Annuleren",
+      "applied": "Zending bijgewerkt; het lid ziet dit bij de tracking.",
+      "notApplied": "Die status komt vóór de huidige; er is niets gewijzigd.",
+      "failed": "Bijwerken is mislukt."
+    },
+    "appCourierHint": "Leden betalen de prijs volgens deze afstands-/stadsregels (stel ze in op ongeveer wat de app rekent). Boek na een bestelling de koerier in de gewone app met de ophaal- en afleverpin, plak daarna de trackinglink onder Zendingen en zet de status door."
+  },
+  "petTaxi": {
+    "member": {
+      "title": "Dierentaxi",
+      "subtitle": "Tik je ophaaladres en bestemming aan op de kaart, bekijk de ritprijs en volg je chauffeur live.",
+      "map": "Kaart",
+      "zoomIn": "Inzoomen",
+      "zoomOut": "Uitzoomen",
+      "loading": "Laden…",
+      "failed": "Laden mislukt.",
+      "retry": "Opnieuw proberen",
+      "step": {
+        "pickup": "Tik je ophaaladres aan op de kaart",
+        "dropoff": "Tik je bestemming aan op de kaart",
+        "details": "Huisdieren en voertuig"
+      },
+      "pickup": "Ophaaladres",
+      "dropoff": "Bestemming",
+      "pinned": "Punt gekozen op de kaart",
+      "myLocation": "Mijn huidige locatie",
+      "locating": "Je locatie zoeken…",
+      "locationDenied": "Geen toegang tot je locatie; tik in plaats daarvan op de kaart.",
+      "savedAddresses": "Opgeslagen adressen",
+      "search": "Zoek een plek",
+      "searchNone": "Geen plek gevonden.",
+      "city": "Ophaalstad",
+      "note": "Notitie voor de chauffeur (verdieping, bel…)",
+      "change": "Wijzigen",
+      "pets": "Welke huisdieren rijden mee?",
+      "noPets": "Voeg eerst je huisdier toe om een rit aan te vragen.",
+      "carrier": "Hoe je huisdier reist",
+      "carrierSize": {
+        "SMALL": "Klein: kat of kleine hond in een reismand",
+        "MEDIUM": "Middel: middelgrote hond in een bench in de kofferbak",
+        "LARGE": "Groot: grote hond of meerdere huisdieren"
+      },
+      "quote": "Ritprijs",
+      "quoting": "Ritprijs berekenen…",
+      "estimate": "Afstand en tijd zijn schattingen (rechte lijn × wegfactor).",
+      "routed": "Op basis van de route over de weg",
+      "notPriced": "De dierentaxi is nog niet beschikbaar in deze stad.",
+      "distanceTime": "{km} km · ongeveer {minutes} min",
+      "payNote": "Online betalen is nog niet beschikbaar; betaal de chauffeur bij aankomst.",
+      "request": "Rit aanvragen",
+      "requesting": "Je aanvraag wordt verstuurd…",
+      "errors": {
+        "RIDE_ALREADY_OPEN": "Je hebt al een openstaande rit.",
+        "TOO_CLOSE": "Ophaaladres en bestemming liggen te dicht bij elkaar.",
+        "TOO_FAR": "Deze rit is te lang voor de dierentaxi.",
+        "NOT_PRICED": "De dierentaxi is nog niet beschikbaar in deze stad.",
+        "generic": "Dat is niet gelukt. Probeer het opnieuw."
+      },
+      "status": {
+        "SEARCHING": "Chauffeur zoeken",
+        "DRIVER_ASSIGNED": "Chauffeur is onderweg",
+        "ARRIVING": "Chauffeur is er",
+        "PICKED_UP": "Onderweg naar de bestemming",
+        "COMPLETED": "Aangekomen",
+        "CANCELLED_BY_MEMBER": "Geannuleerd",
+        "CANCELLED_BY_DRIVER": "Geannuleerd door de chauffeur",
+        "NO_DRIVER": "Geen chauffeur gevonden"
+      },
+      "searchingHint": "Je aanvraag is naar chauffeurs in de buurt gestuurd. Als niemand vóór {time} accepteert, laten we het je weten.",
+      "eta": "Nog ongeveer {minutes} min",
+      "driver": "Chauffeur",
+      "call": "Bellen",
+      "positionAt": "Positie om {time}",
+      "cancel": "Rit annuleren",
+      "cancelConfirm": "Deze rit annuleren?",
+      "newRide": "Nieuwe rit",
+      "rate": "Beoordeel deze rit",
+      "rateComment": "Je opmerking (optioneel)",
+      "rateSend": "Beoordeling versturen",
+      "rated": "Bedankt voor je beoordeling.",
+      "stars": "{n} van 5",
+      "receipt": "Ritbon",
+      "receiptLines": {
+        "base": "Starttarief",
+        "distance": "Afstand",
+        "time": "Tijd",
+        "carrier": "Vervoerswijze",
+        "extraPets": "Extra huisdieren",
+        "minimum": "Minimumtarief toegepast",
+        "total": "Totaal"
+      },
+      "history": "Eerdere ritten",
+      "historyEmpty": "Nog geen ritten.",
+      "requestNow": "Vraag nu een dierentaxi aan",
+      "requestNowHint": "op de kaart, met een directe ritprijs en je chauffeur live volgen"
+    },
+    "driver": {
+      "title": "Dierentaxi: chauffeur",
+      "subtitle": "Ga online om aanvragen in de buurt te zien. De positie van je telefoon wordt alleen verstuurd zolang je online bent.",
+      "notEligible": {
+        "NOT_PET_TAXI": "Dit is alleen voor aanbieders van dierentaxi's.",
+        "NOT_VERIFIED": "Je kunt online gaan zodra je documenten als aanbieder zijn geverifieerd."
+      },
+      "online": "Je bent online",
+      "offline": "Je bent offline",
+      "goOnline": "Online gaan",
+      "goOffline": "Offline gaan",
+      "locationOff": "De locatie van je telefoon is niet beschikbaar; aanvragen verschijnen alleen met een actuele locatie.",
+      "requests": "Aanvragen in de buurt",
+      "noRequests": "Op dit moment geen aanvragen. Deze pagina werkt zichzelf bij.",
+      "kmFromYou": "{km} km naar ophaaladres",
+      "pets": "{count, plural, one {# huisdier} other {# huisdieren}}",
+      "accept": "Accepteren",
+      "decline": "Overslaan",
+      "taken": "Een andere chauffeur heeft deze aanvraag al aangenomen.",
+      "activeRide": "Huidige rit",
+      "passenger": "Passagier",
+      "navigate": "Navigeren",
+      "next": {
+        "ARRIVING": "Ik ben er",
+        "PICKED_UP": "Huisdier opgehaald",
+        "COMPLETED": "Afgeleverd"
+      },
+      "release": "Het lukt me niet",
+      "releaseReason": "Reden (de rit gaat terug naar andere chauffeurs)",
+      "fare": "Ritprijs: {amount}",
+      "collect": "Ontvang de ritprijs bij aflevering.",
+      "failed": "Dat is niet gelukt. Probeer het opnieuw.",
+      "driverStatus": {
+        "NONE": "Je bent nog niet als chauffeur geregistreerd. Vraag de eigenaar van je organisatie om je toe te voegen met je rijbewijs en voertuig.",
+        "NONE_OWNER": "Om online te gaan, registreer je jezelf of je chauffeurs hieronder met rijbewijs en voertuig; het opetlife-team controleert ze.",
+        "PENDING": "Het opetlife-team controleert je gegevens; je kunt online gaan zodra ze zijn geverifieerd.",
+        "VERIFIED": "Je bent geverifieerd.",
+        "SUSPENDED": "Je mag voorlopig niet rijden."
+      },
+      "around": "Rond {city}",
+      "approxArea": "Globale omgeving",
+      "approxHint": "Na het accepteren zie je het exacte adres en de notitie.",
+      "roster": {
+        "title": "Je chauffeurs",
+        "hint": "Elke chauffeur wordt geregistreerd met rijbewijs en kenteken en kan pas online gaan nadat het opetlife-team de chauffeur heeft geverifieerd. Gewijzigde gegevens worden opnieuw gecontroleerd.",
+        "member": "Teamlid",
+        "licenceNumber": "Rijbewijsnummer",
+        "vehiclePlate": "Kenteken",
+        "vehicleDescription": "Voertuig (model en kleur)",
+        "save": "Ter controle versturen",
+        "saved": "Opgeslagen; het wordt gecontroleerd.",
+        "failed": "Dat is niet gelukt. Probeer het opnieuw.",
+        "incomplete": "Vul alle velden in.",
+        "empty": "Nog geen chauffeurs geregistreerd.",
+        "status": {
+          "PENDING": "Wacht op controle",
+          "VERIFIED": "Geverifieerd",
+          "SUSPENDED": "Geschorst"
+        }
+      }
+    }
+  },
+  "adminPetTaxi": {
+    "kicker": "Diensten",
+    "title": "Dierentaxi",
+    "subtitle": "Tarieven per stad (“*” betekent alle andere steden) en lopende ritten.",
+    "loading": "Laden…",
+    "failed": "De gegevens konden niet worden geladen.",
+    "retry": "Opnieuw proberen",
+    "forbidden": "Je hebt de machtiging “Diensten bekijken” nodig.",
+    "onlineDrivers": "Chauffeurs online",
+    "rules": "Tarieven",
+    "noRules": "Nog geen tarieven; de dierentaxi geeft geen prijs tot er een tarief is.",
+    "fields": {
+      "city": "Stad (“*” voor de standaard)",
+      "base": "Starttarief (toman)",
+      "perKm": "Per km (toman)",
+      "perMinute": "Per minuut (toman)",
+      "minimum": "Minimum (toman)",
+      "medium": "Toeslag middelgroot %",
+      "large": "Toeslag groot %",
+      "extraPet": "Per extra huisdier (toman)",
+      "active": "Actief",
+      "reason": "Reden (auditlog)",
+      "south": "Kader zuid (breedtegraad)",
+      "west": "Kader west (lengtegraad)",
+      "north": "Kader noord (breedtegraad)",
+      "east": "Kader oost (lengtegraad)"
+    },
+    "add": "Nieuw stadstarief",
+    "save": "Opslaan",
+    "saved": "Opgeslagen.",
+    "saveFailed": "Niet opgeslagen. Controleer de getallen.",
+    "readOnly": "Alleen met “Diensten beheren” kun je tarieven wijzigen.",
+    "rides": "Ritten in de afgelopen 24 uur",
+    "noRides": "Geen ritten.",
+    "columns": {
+      "member": "Lid",
+      "driver": "Chauffeur",
+      "route": "Route",
+      "fare": "Ritprijs",
+      "status": "Status",
+      "rating": "Beoordeling"
+    },
+    "status": {
+      "SEARCHING": "Chauffeur zoeken",
+      "DRIVER_ASSIGNED": "Chauffeur onderweg",
+      "ARRIVING": "Chauffeur is er",
+      "PICKED_UP": "Onderweg naar de bestemming",
+      "COMPLETED": "Aangekomen",
+      "CANCELLED_BY_MEMBER": "Geannuleerd",
+      "CANCELLED_BY_DRIVER": "Geannuleerd door de chauffeur",
+      "NO_DRIVER": "Geen chauffeur gevonden"
+    },
+    "disputesHint": "Klachten over een rit worden afgehandeld bij Geschillen.",
+    "boxHint": "Het tarief van deze stad geldt voor ritten waarvan het ophaalpunt binnen dit kader ligt (maximaal 3°). De stad die een lid intypt, heeft geen invloed op de prijs.",
+    "boxRequired": "Een stadstarief heeft alle vier de kadercoördinaten nodig.",
+    "drivers": {
+      "kicker": "Dierentaxi",
+      "title": "Chauffeurs",
+      "subtitle": "Controleer het rijbewijs en voertuig van elke chauffeur; alleen geverifieerde chauffeurs kunnen online gaan.",
+      "loading": "Laden…",
+      "failed": "Dat is niet gelukt. Probeer het opnieuw.",
+      "retry": "Opnieuw proberen",
+      "forbidden": "Machtiging services.view vereist.",
+      "empty": "Nog geen chauffeurs geregistreerd.",
+      "columns": {
+        "name": "Chauffeur",
+        "organization": "Organisatie",
+        "licence": "Rijbewijs",
+        "vehicle": "Voertuig",
+        "status": "Status",
+        "decision": "Besluit"
+      },
+      "status": {
+        "PENDING": "Wacht op controle",
+        "VERIFIED": "Geverifieerd",
+        "SUSPENDED": "Geschorst"
+      },
+      "reason": "Reden (auditlog)",
+      "reasonRequired": "Schrijf een reden voor het besluit.",
+      "verify": "Verifiëren",
+      "suspend": "Schorsen",
+      "decided": "Opgeslagen.",
+      "orgNotVerified": "organisatie nog niet geverifieerd"
+    }
+  },
+  "sellerStorefront": {
+    "verified": "Geverifieerde verkoper",
+    "since": "Op opetlife sinds {date}",
+    "rating": "{average} van 5 op basis van {count, plural, one {# beoordeling} other {# beoordelingen}}",
+    "noRating": "Nog geen beoordelingen",
+    "city": "Uit {city}",
+    "products": "{count, plural, one {# product} other {# producten}}",
+    "empty": "Deze verkoper heeft op dit moment geen producten te koop.",
+    "notFound": "Deze winkel is niet gevonden.",
+    "backToShop": "Terug naar de winkel",
+    "protection": "Voor kopen bij deze verkoper gelden dezelfde opetlife-regels voor terugbetaling en veilig betalen."
+  },
+  "adminPlacesOsm": {
+    "osmTitle": "OpenStreetMap-import",
+    "osmHint": "Elke stad wordt wekelijks ververst met één rustige Overpass-aanvraag. Geïmporteerde plekken worden als niet-geverifieerd getoond totdat het bedrijf ze claimt.",
+    "columns": {
+      "city": "Stad",
+      "active": "Actief",
+      "listed": "Vermelde plekken",
+      "lastRun": "Laatste run",
+      "result": "Resultaat"
+    },
+    "result": "{created} nieuw, {updated} bijgewerkt, {hidden} verborgen",
+    "status": {
+      "RUNNING": "Bezig",
+      "SUCCEEDED": "Klaar",
+      "FAILED": "Mislukt",
+      "RATE_LIMITED": "Overpass is bezet; later opnieuw"
+    },
+    "never": "Nog niet uitgevoerd",
+    "runNow": "Nu uitvoeren",
+    "started": "Gestart; kijk over een paar minuten terug.",
+    "runFailed": "Nu niet: er loopt al een andere run of dit gebied is net uitgevoerd.",
+    "claimsTitle": "Bedrijfsclaims",
+    "claimsEmpty": "Geen claims in afwachting.",
+    "claimColumns": {
+      "place": "Plek",
+      "claimant": "Aanvrager",
+      "organization": "Bedrijf",
+      "message": "Bericht"
+    },
+    "noOrganization": "Nog geen partneraccount",
+    "kyc": {
+      "VERIFIED": "KYC geverifieerd",
+      "other": "KYC niet afgerond"
+    },
+    "approve": "Goedkeuren",
+    "reject": "Afwijzen",
+    "reason": "Reden (auditlog)",
+    "decided": "Opgeslagen.",
+    "decideFailed": "Niet opgeslagen: voor goedkeuring moet het bedrijf van de claim zelf KYC-geverifieerd zijn en mag de vermelding niet geschorst zijn.",
+    "form": {
+      "title": "Stad toevoegen of bewerken",
+      "hint": "Het kader van de stad (maximaal 1,5° in elke richting). De stadsnaam is de naam die het stadsfilter toont.",
+      "province": "Provincie",
+      "south": "Zuid (breedtegraad)",
+      "west": "West (lengtegraad)",
+      "north": "Noord (breedtegraad)",
+      "east": "Oost (lengtegraad)",
+      "save": "Opslaan",
+      "saved": "Opgeslagen.",
+      "saveFailed": "Niet opgeslagen: controleer het kader (zuid onder noord, west onder oost, maximaal 1,5°).",
+      "edit": "Bewerken",
+      "activate": "Activeren",
+      "deactivate": "Pauzeren",
+      "yes": "Ja",
+      "no": "Nee"
+    },
+    "claimsHint": "Keur alleen goed voor het bedrijf dat op de claim staat, zodra de KYC is geverifieerd. Vergelijk de KYC-gegevens met de OpenStreetMap-tags van deze vermelding.",
+    "claimTabs": {
+      "PENDING": "Wacht op beoordeling",
+      "APPROVED": "Goedgekeurd"
+    },
+    "approvedEmpty": "Er is nog geen vermelding overgedragen.",
+    "compare": {
+      "business": "Bedrijf (KYC)",
+      "listing": "Deze vermelding in OpenStreetMap",
+      "contact": "Contact",
+      "phone": "Telefoon",
+      "address": "Adres",
+      "website": "Website"
+    },
+    "release": "Loskoppelen van dit bedrijf",
+    "releaseFailed": "Niet losgekoppeld: de vermelding is mogelijk niet meer van dit bedrijf."
+  },
+  "adminCardAccount": {
+    "kicker": "Financiën",
+    "title": "Kaartrekening voor kaart-naar-kaart",
+    "subtitle": "De kaart waarop leden betalen om hun portemonnee op te waarderen en voor kaart-naar-kaartbetalingen.",
+    "current": "Huidige rekening",
+    "source": {
+      "ADMIN": "Ingesteld op deze pagina.",
+      "ENV": "Uit de serverinstellingen (hier nog niet ingesteld).",
+      "NONE": "Er is geen rekening ingesteld; kaart-naar-kaart staat uit voor leden."
+    },
+    "readOnly": "Alleen een superbeheerder met settings.manage kan deze rekening wijzigen.",
+    "change": "Rekening wijzigen",
+    "changeHint": "Elke wijziging wordt met de reden vastgelegd en elke superbeheerder krijgt een melding. Betalingen die al zijn gestart, houden de rekening waarmee ze begonnen.",
+    "fields": {
+      "cardNumber": "Kaartnummer (16 cijfers)",
+      "sheba": "Sheba / IBAN (optioneel)",
+      "holderName": "Rekeninghouder",
+      "bankName": "Bank (optioneel)",
+      "reason": "Reden van de wijziging"
+    },
+    "confirm": "Ik bevestig dat deze rekening van opetlife is.",
+    "save": "Nieuwe rekening opslaan",
+    "saving": "Opslaan…",
+    "saved": "De nieuwe rekening is opgeslagen en de superbeheerders hebben een melding gekregen.",
+    "offReason": "Reden om kaart-naar-kaart uit te zetten",
+    "switchOff": "Kaart-naar-kaart uitzetten",
+    "switchedOff": "Kaart-naar-kaart staat uit.",
+    "history": "Rekeninggeschiedenis",
+    "noHistory": "Hier is nog geen rekening ingesteld.",
+    "columns": {
+      "setBy": "Ingesteld door",
+      "reason": "Reden",
+      "closed": "Beëindigd"
+    },
+    "activeNow": "Actief",
+    "loading": "Laden…",
+    "failed": "Laden mislukt.",
+    "retry": "Opnieuw proberen",
+    "forbidden": "Machtiging wallet.view vereist.",
+    "errors": {
+      "REASON_TOO_SHORT": "Schrijf een reden van minstens 10 tekens.",
+      "CONFIRM": "Bevestig dat de rekening van opetlife is.",
+      "CARD_NUMBER_INVALID": "Het kaartnummer moet uit 16 cijfers bestaan.",
+      "CARD_NUMBER_CHECKSUM": "Dit kaartnummer is niet geldig; controleer de cijfers.",
+      "SHEBA_INVALID": "Sheba moet bestaan uit IR, gevolgd door 24 cijfers.",
+      "SHEBA_CHECKSUM": "Dit Sheba-nummer is niet geldig.",
+      "CARD_OR_SHEBA_REQUIRED": "Vul een kaartnummer of Sheba in.",
+      "HOLDER_REQUIRED": "Vul de rekeninghouder in.",
+      "SUPER_ADMIN_WITH_SETTINGS_MANAGE_REQUIRED": "Alleen een superbeheerder kan deze rekening wijzigen.",
+      "generic": "Niet opgeslagen; probeer het opnieuw."
+    }
+  },
+  "adminCardReceipts": {
+    "kicker": "Financiën",
+    "title": "Bonnen van kaart-naar-kaartoverschrijvingen",
+    "subtitle": "Bonnen voor betalingen van bestellingen en boekingen; openstaande eerst, oudste eerst.",
+    "filter": "Statusfilter",
+    "status": {
+      "REVIEW_PENDING": "Wacht op beoordeling",
+      "UNDERPAID_AWAITING_DIFFERENCE": "Wacht op verschil",
+      "AWAITING_RECEIPT": "Wacht op bon",
+      "APPROVED": "Goedgekeurd",
+      "REJECTED": "Afgewezen",
+      "EXPIRED": "Verlopen",
+      "CANCELLED": "Geannuleerd",
+      "ALL": "Alle"
+    },
+    "columns": {
+      "member": "Lid",
+      "reference": "Voor",
+      "amount": "Bedrag",
+      "uploaded": "Bon verstuurd",
+      "status": "Status"
+    },
+    "reference": {
+      "booking": "Boeking",
+      "order": "Bestelling ({count})"
+    },
+    "open": "Beoordelen",
+    "empty": "Geen bonnen met deze status.",
+    "loading": "Laden…",
+    "failed": "Laden mislukt.",
+    "retry": "Opnieuw",
+    "forbidden": "Recht finance.view vereist.",
+    "previous": "Vorige",
+    "next": "Volgende",
+    "reviewTitle": "Bon beoordelen",
+    "receivedSoFar": "ontvangen: {amount}",
+    "account": "Betaald aan",
+    "rejectionReason": "Reden van afwijzing",
+    "viewReceipt": "Bon bekijken",
+    "receiptOpening": "Openen…",
+    "receiptFailed": "De bon kon niet worden geopend.",
+    "noReceipt": "Er is nog geen bon verstuurd.",
+    "availableAt": "Beoordeling opent op {date}.",
+    "receivedAmount": "Ontvangen bedrag (toman)",
+    "reason": "Reden (verplicht bij afwijzen)",
+    "approve": "Goedkeuren",
+    "reject": "Afwijzen",
+    "saving": "Opslaan…",
+    "readOnly": "Alleen met finance.refund.execute kun je een bon goedkeuren of afwijzen.",
+    "done": {
+      "APPROVED": "Goedgekeurd; het lid is op de hoogte gebracht.",
+      "REJECTED": "Afgewezen; het lid is op de hoogte gebracht.",
+      "UNDERPAID": "Te weinig betaald; het lid is gevraagd het verschil te betalen."
+    },
+    "errors": {
+      "amount": "Vul het ontvangen bedrag in toman in.",
+      "reason": "Schrijf om af te wijzen een reden van minstens 5 tekens.",
+      "notYet": "De beoordeling van deze bon is nog niet geopend.",
+      "notReviewable": "Deze bon kan niet meer worden beoordeeld.",
+      "generic": "Niet opgeslagen; probeer het opnieuw."
+    }
+  },
+  "adminOrderCancel": {
+    "title": "Deze bestelling annuleren (support)",
+    "hint": "Alleen voordat een koerier het pakket heeft. De klant krijgt meteen het volledige bedrag terug; de bezorging wordt geannuleerd en de voorraad komt terug.",
+    "afterDispatch": "Het pakket is bij de koerier; dien in plaats daarvan een terugbetalingsverzoek in.",
+    "reason": "Reden (auditlog)",
+    "reasonRequired": "Schrijf een korte reden.",
+    "cancel": "Bestelling annuleren",
+    "confirm": "Ja, annuleren en volledig terugbetalen",
+    "back": "Terug",
+    "notCancellable": "Annuleren kan niet meer; de koerier heeft het pakket.",
+    "failed": "Dat is niet gelukt; probeer het opnieuw."
+  },
+  "adminRepeatDeliveries": {
+    "title": "Herhaalbezorgingen",
+    "hint": "Schema's voor herhaalbezorging van leden (alleen bekijken). Leden wijzigen of annuleren ze in hun account.",
+    "filter": "Status",
+    "all": "Alle",
+    "status": {
+      "ACTIVE": "Actief",
+      "PAUSED": "Gepauzeerd",
+      "CANCELLED": "Geannuleerd"
+    },
+    "col": {
+      "member": "Lid",
+      "product": "Product",
+      "seller": "Verkoper",
+      "every": "Elke",
+      "next": "Volgende bezorging",
+      "status": "Status",
+      "lastOrder": "Laatste bestelling"
+    },
+    "days": "{count} dagen",
+    "empty": "Geen.",
+    "prev": "Vorige",
+    "next": "Volgende",
+    "forbidden": "Machtiging commerce.view vereist.",
+    "failed": "Laden mislukt",
+    "retry": "Opnieuw proberen"
+  },
+  "adminBookingMoney": {
+    "title": "Annuleren en terugbetalen",
+    "hint": "Annuleren volgt de eigen regels van de boeking; geld gaat alleen terug via een financiële goedkeuring (boven de drempel door een tweede beheerder).",
+    "paid": "Online betaald",
+    "refunded": "Terugbetaald",
+    "refundable": "Kan nog terug",
+    "policy": "Volgens de annuleringsvoorwaarden",
+    "approvalStatus": {
+      "REQUESTED": "Wacht op goedkeuring",
+      "APPROVED": "Goedgekeurd",
+      "REJECTED": "Afgewezen",
+      "EXECUTED": "Terugbetaald"
+    },
+    "openQueue": "Goedkeuringswachtrij",
+    "cancel": "Annuleren als medewerker",
+    "refund": "Terugbetalen",
+    "refundChoice": "Wat gaat er terug?",
+    "choice": {
+      "POLICY": "Volgens de annuleringsvoorwaarden ({policy})",
+      "FULL": "Alles ({full})",
+      "AMOUNT": "Een bepaald bedrag",
+      "NONE": "Geen terugbetaling"
+    },
+    "amount": "Bedrag (IRR)",
+    "reason": "Reden (blijft in de auditlog)",
+    "confirmCancel": "Ik bevestig de annulering; de klant en de aanbieder krijgen bericht.",
+    "confirmRefund": "Ik bevestig dit terugbetalingsverzoek.",
+    "submitCancel": "Boeking annuleren",
+    "submitRefund": "Terugbetaling aanvragen",
+    "back": "Terug",
+    "needReason": "Schrijf een reden en vink de bevestiging aan.",
+    "needAmount": "Vul een geldig bedrag in.",
+    "cancelled": "Boeking geannuleerd.",
+    "refundRequested": "De terugbetaling wacht in de financiële goedkeuringswachtrij.",
+    "forbidden": "Je hebt hiervoor geen machtiging.",
+    "tooMuch": "Meer dan er terug kan, of deze boeking kan niet worden geannuleerd.",
+    "failed": "Dat is niet gelukt; probeer het opnieuw."
+  },
+  "adminRefundApprovals": {
+    "title": "Goedkeuring van terugbetalingen",
+    "hint": "Winkelbestellingen, dienstboekingen en verblijven. Niemand keurt zijn eigen verzoek goed.",
+    "filter": "Status",
+    "all": "Alle",
+    "status": {
+      "REQUESTED": "Wacht op goedkeuring",
+      "APPROVED": "Goedgekeurd",
+      "REJECTED": "Afgewezen",
+      "EXECUTED": "Terugbetaald"
+    },
+    "subject": {
+      "ORDER": "Winkelbestelling",
+      "BOOKING": "Dienstboeking",
+      "TRAVEL_BOOKING": "Verblijf"
+    },
+    "columns": {
+      "subject": "Betreft",
+      "amount": "Bedrag",
+      "reason": "Reden",
+      "requestedBy": "Aangevraagd door",
+      "status": "Status"
+    },
+    "empty": "Hier is niets.",
+    "approve": "Goedkeuren",
+    "reject": "Afwijzen",
+    "execute": "Terugbetalen",
+    "rejectReason": "Reden van afwijzing:",
+    "done": {
+      "approve": "Goedgekeurd.",
+      "reject": "Afgewezen.",
+      "execute": "Terugbetaald."
+    },
+    "selfApproval": "Je kunt je eigen verzoek niet goedkeuren, of deze stap is niet meer toegestaan.",
+    "forbidden": "Recht finance.view vereist.",
+    "failed": "Dat is niet gelukt; probeer het opnieuw."
+  },
+  "adminDisputeRefund": {
+    "title": "Uitkomst met terugbetaling",
+    "hint": "In het voordeel van de klant met geld terug: de terugbetaling gaat naar de financiële goedkeuringswachtrij en het geschil wordt in het voordeel van de klant opgelost.",
+    "amount": "Bedrag (IRR)",
+    "reason": "Reden",
+    "submit": "Oplossen met terugbetaling",
+    "approval": "Terugbetaling van {amount}: {status}",
+    "status": {
+      "REQUESTED": "Wacht op goedkeuring",
+      "APPROVED": "Goedgekeurd",
+      "REJECTED": "Afgewezen",
+      "EXECUTED": "Terugbetaald"
+    },
+    "notOpen": "Alleen voor een geschil in behandeling, met de financiële machtiging.",
+    "invalid": "Vul een bedrag en een reden in (minstens 5 tekens).",
+    "requested": "Terugbetaling aangevraagd.",
+    "tooMuch": "Meer dan toegestaan, of dit geschil kan niet eindigen met een terugbetaling.",
+    "failed": "Dat is niet gelukt; probeer het opnieuw."
+  },
+  "adminDigikalaFacts": {
+    "title": "Eenmalige import van huisdierproducten van Digikala (alleen feitelijke gegevens)",
+    "hint": "De bestverkochte producten uit de huisdiercategorie van Digikala komen eenmalig als concepten in de catalogus.",
+    "rules": {
+      "facts": "Naam, merk, categorie, specificaties en gewicht worden geïmporteerd.",
+      "noContent": "Foto's en beschrijvingen van Digikala worden niet gekopieerd; voeg vóór publicatie onze eigen tekst en afbeeldingen toe.",
+      "reference": "De prijs en voorraad van Digikala blijven alleen ter referentie in het importrecord; dat is niet onze verkoopprijs.",
+      "pace": "Het loopt langzaam (één verzoek per 3 seconden) en stopt als Digikala het blokkeert."
+    },
+    "category": "Doelcategorie in de catalogus",
+    "maxProducts": "Maximaal aantal producten (tot 3000)",
+    "start": "Eenmalige import starten",
+    "started": "In de wachtrij; de voortgang staat in de takenlijst.",
+    "alreadyRun": "Deze import is al uitgevoerd of loopt nog.",
+    "invalid": "Kies een categorie en een aantal van 1 tot 3000.",
+    "forbidden": "Recht commerce.manage vereist.",
+    "failed": "Starten mislukt; probeer het opnieuw."
   }
 }
