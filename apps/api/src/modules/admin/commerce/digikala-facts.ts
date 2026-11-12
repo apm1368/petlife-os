@@ -107,8 +107,8 @@ export function parseFactsDetail(body: unknown, ref: DigikalaListRef): DigikalaF
     for (const attr of arr(obj(group)?.attributes)) {
       const a = obj(attr);
       const label = clean(a?.title, 80);
-      const values = arr(a?.values).map((v) => clean(v, 120)).filter((v): v is string => !!v);
-      // Short factual attributes only; anything long reads like prose and is left out.
+      // Short factual attributes only: measured before any trimming, so prose is left out rather than cut.
+      const values = arr(a?.values).map((v) => clean(v, 10_000)).filter((v): v is string => !!v);
       const value = values.join("، ");
       if (label && value && value.length <= 160 && !specifications.some((s) => s.label === label)) specifications.push({ label, value });
       if (specifications.length >= 30) break;
