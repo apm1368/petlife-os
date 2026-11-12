@@ -17,7 +17,7 @@ import { ShareBar } from "@/features/shared/ShareBar";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 import { SafetyTip } from "@/features/shared/SafetyTip";
-import { placeName, quantityUnitName } from "@/lib/i18n/iran-places";
+import { placeName } from "@/lib/i18n/iran-places";
 import type { RouteLocale } from "@/lib/i18n/config";
 
 const HELP_TYPES: SupportNeedCategory[] = [
@@ -139,7 +139,7 @@ export function SupportNeedDetailView({ listingId }: { listingId: string }) {
         {listing.animalType ? <p className="text-metadata text-text-secondary">{t("detail.animalType", { type: listing.animalType })}</p> : null}
         {summary && summary.neededQuantity !== null ? (
           <p className="text-body text-text-primary">
-            {t("list.progress", { fulfilled: localizeDigits(summary.fulfilledQuantity, locale === "fa" ? "fa" : "en"), needed: localizeDigits(summary.neededQuantity, locale === "fa" ? "fa" : "en"), unit: quantityUnitName(listing.quantityUnit, locale as RouteLocale) })}
+            {t("list.progress", { fulfilled: localizeDigits(summary.fulfilledQuantity, locale === "fa" ? "fa" : "en"), needed: localizeDigits(summary.neededQuantity, locale === "fa" ? "fa" : "en"), unit: listing.quantityUnit ?? "" })}
           </p>
         ) : null}
         {summary ? <p className="text-metadata text-text-secondary">{t("detail.offerCounts", { pending: summary.pendingOffers, accepted: summary.acceptedOffers, completed: summary.completedOffers })}</p> : null}

@@ -13,6 +13,7 @@ import { apiErrorText } from "@/lib/errors/api-error-text";
 import { placeLocation } from "@/features/places/place-format";
 import { isClaimable, isOsmUnclaimed, OsmAttribution, PlaceClaimPanel, telHref } from "@/features/places/PlaceOsm";
 import { externalHref } from "@/lib/url/external-href";
+import { placeName } from "@/lib/i18n/iran-places";
 
 export function PlaceDetailView({ placeId }: { placeId: string }) {
   const t = useTranslations("places");
@@ -148,7 +149,7 @@ export function PlaceDetailView({ placeId }: { placeId: string }) {
               {place.isFavorited ? t("detail.removeFavorite") : t("detail.addFavorite")}
             </Button>
 
-            <Link className="text-sm underline" href={`/${lang}/travel/search?city=${encodeURIComponent(place.city)}`}>{fa ? `اقامتگاه‌های دوستدار حیوانات در ${place.city}` : `Pet-friendly stays in ${place.city}`}</Link>
+            <Link className="text-sm underline" href={`/${lang}/travel/search?city=${encodeURIComponent(place.city)}`}>{fa ? `اقامتگاه‌های دوستدار حیوانات در ${place.city}` : `Pet-friendly stays in ${placeName(place.city, lang)}`}</Link>
           </section>
           {isClaimable(place) ? <PlaceClaimPanel place={place} /> : null}
           <section className="flex flex-col gap-2" aria-label={fa ? "گزارش اطلاعات نادرست" : "Report incorrect information"}>

@@ -82,38 +82,6 @@ export function placeName(name: string | null | undefined, locale: RouteLocale):
   return locale === "en" ? names.en : locale === "ar" ? names.ar : names[locale] ?? names.en;
 }
 
-type UnitNames = Record<Exclude<RouteLocale, "fa">, string>;
-
-/** Units NGOs and rescuers type for a need's quantity ("4 of 10 بسته covered"). Plural forms, because they follow a total. */
-const UNITS: Record<string, UnitNames> = {
-  "بسته": { en: "packs", de: "Packungen", es: "paquetes", ar: "عبوات", nl: "pakken" },
-  "کیلو": { en: "kg", de: "kg", es: "kg", ar: "كغ", nl: "kg" },
-  "کیلوگرم": { en: "kg", de: "kg", es: "kg", ar: "كغ", nl: "kg" },
-  "گرم": { en: "g", de: "g", es: "g", ar: "غ", nl: "g" },
-  "عدد": { en: "items", de: "Stück", es: "unidades", ar: "قطع", nl: "stuks" },
-  "کیسه": { en: "bags", de: "Säcke", es: "sacos", ar: "أكياس", nl: "zakken" },
-  "قوطی": { en: "cans", de: "Dosen", es: "latas", ar: "علب", nl: "blikken" },
-  "لیتر": { en: "litres", de: "Liter", es: "litros", ar: "لترات", nl: "liter" },
-  "جعبه": { en: "boxes", de: "Kartons", es: "cajas", ar: "صناديق", nl: "dozen" },
-  "کارتن": { en: "boxes", de: "Kartons", es: "cajas", ar: "صناديق", nl: "dozen" },
-  "بطری": { en: "bottles", de: "Flaschen", es: "botellas", ar: "زجاجات", nl: "flessen" },
-  "دوز": { en: "doses", de: "Dosen", es: "dosis", ar: "جرعات", nl: "doses" },
-  "پتو": { en: "blankets", de: "Decken", es: "mantas", ar: "بطانيات", nl: "dekens" },
-  "قلاده": { en: "collars", de: "Halsbänder", es: "collares", ar: "أطواق", nl: "halsbanden" },
-  "قفس": { en: "crates", de: "Transportboxen", es: "transportines", ar: "أقفاص", nl: "benches" },
-  "ساعت": { en: "hours", de: "Stunden", es: "horas", ar: "ساعات", nl: "uur" },
-  "روز": { en: "days", de: "Tage", es: "días", ar: "أيام", nl: "dagen" },
-  "نفر": { en: "people", de: "Personen", es: "personas", ar: "أشخاص", nl: "personen" },
-};
-
-const UNIT_INDEX = new Map(Object.entries(UNITS).map(([fa, names]) => [normalize(fa), names]));
-
-export function quantityUnitName(unit: string | null | undefined, locale: RouteLocale): string {
-  if (!unit) return "";
-  if (locale === "fa") return unit;
-  return UNIT_INDEX.get(normalize(unit))?.[locale] ?? unit;
-}
-
 const PERSIAN_SCRIPT = /[؀-ۿ]/;
 
 /**
@@ -123,4 +91,15 @@ const PERSIAN_SCRIPT = /[؀-ۿ]/;
  */
 export function persianSourceProps(text: string | null | undefined, locale: RouteLocale): { lang?: "fa"; dir?: "rtl" } {
   return locale !== "fa" && text && PERSIAN_SCRIPT.test(text) ? { lang: "fa", dir: "rtl" } : {};
+}
+
+const REVERSE = new Map<string, string>();
+for (const [fa, names] of Object.entries(PLACES)) {
+  for (const n of [names.en, names.ar, names.de, names.es, names.nl]) if (n) REVERSE.set(n.toLocaleLowerCase("en"), fa);
+}
+
+/** A place name someone typed in any UI language ("Tehran", "Teherán") → the Persian value stored in listings, for search filters. */
+export function placeQuery(input: string): string {
+  const q = input.trim();
+  return REVERSE.get(q.toLocaleLowerCase("en")) ?? q;
 }

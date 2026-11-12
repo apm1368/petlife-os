@@ -13,6 +13,7 @@ import { placeLocation, formatDistanceKm } from "@/features/places/place-format"
 import { DiscoveryPage } from "@/features/discovery/DiscoveryPage";
 import { isOsmUnclaimed, OsmAttribution } from "@/features/places/PlaceOsm";
 import { localeDirection, type RouteLocale } from "@/lib/i18n/config";
+import { placeQuery } from "@/lib/i18n/iran-places";
 
 const CATEGORIES: PetFriendlyPlaceCategory[] = [
   PetFriendlyPlaceCategory.VETERINARY,
@@ -70,7 +71,7 @@ export function PlacesListView() {
     setError(null);
     setLoadError(null);
     try {
-      const result = await placesService.list({ city: city.trim() || undefined, category: category || undefined, pageSize: 50 });
+      const result = await placesService.list({ city: placeQuery(city) || undefined, category: category || undefined, pageSize: 50 });
       setPlaces(result.items);
     } catch (err) {
       setLoadError(err);

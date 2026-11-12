@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { persianSourceProps, placeName, quantityUnitName } from "./iran-places";
+import { persianSourceProps, placeName, placeQuery } from "./iran-places";
 
 describe("placeName", () => {
   it("keeps Persian on fa and localizes known provinces and cities elsewhere", () => {
@@ -19,20 +19,20 @@ describe("placeName", () => {
   });
 });
 
-describe("quantityUnitName", () => {
-  it("localizes common units and leaves the rest as typed", () => {
-    expect(quantityUnitName("بسته", "en")).toBe("packs");
-    expect(quantityUnitName("بسته", "fa")).toBe("بسته");
-    expect(quantityUnitName("کیلوگرم", "de")).toBe("kg");
-    expect(quantityUnitName("بطری", "es")).toBe("botellas");
-    expect(quantityUnitName("سینی", "en")).toBe("سینی");
-  });
-});
-
 describe("persianSourceProps", () => {
   it("marks Persian partner text outside fa only", () => {
     expect(persianSourceProps("پوشش هزینهٔ درمان", "en")).toEqual({ lang: "fa", dir: "rtl" });
     expect(persianSourceProps("پوشش هزینهٔ درمان", "fa")).toEqual({});
     expect(persianSourceProps("Treatment cover", "en")).toEqual({});
+  });
+});
+
+describe("placeQuery", () => {
+  it("turns a name typed in any UI language into the stored Persian value", () => {
+    expect(placeQuery("Tehran")).toBe("تهران");
+    expect(placeQuery(" teherán ")).toBe("تهران");
+    expect(placeQuery("Oost-Azerbeidzjan")).toBe("آذربایجان شرقی");
+    expect(placeQuery("تهران")).toBe("تهران");
+    expect(placeQuery("Lavasan")).toBe("Lavasan");
   });
 });

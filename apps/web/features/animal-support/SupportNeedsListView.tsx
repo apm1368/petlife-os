@@ -10,7 +10,7 @@ import { supportNeedsService, type SupportNeedLocationDto } from "@/services/sup
 import { formatDay, localizeDigits } from "@/lib/date/jalali";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { AnimalSupportNav } from "./AnimalSupportNav";
-import { placeName, quantityUnitName } from "@/lib/i18n/iran-places";
+import { placeName } from "@/lib/i18n/iran-places";
 
 const NEED_ICON: Record<SupportNeedCategory, typeof HandHeart> = {
   FOOD: Bone, MEDICINE: Pill, VETERINARY_CARE: Stethoscope, TEMPORARY_HOME: House, FOSTER: House, TRANSPORT: CarFront,
@@ -204,7 +204,7 @@ export function SupportNeedsListView() {
                     {pct !== null ? (
                       <span className="need-row__progress">
                         <span className="need-row__bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={fa ? "میزان تأمین" : "Fulfilled"}><span style={{ width: `${pct}%` }} /></span>
-                        <span>{t("list.progress", { fulfilled: localizeDigits(listing.fulfilledQuantity, locale), needed: localizeDigits(listing.neededQuantity!, locale), unit: quantityUnitName(listing.quantityUnit, locale) })}</span>
+                        <span>{t("list.progress", { fulfilled: localizeDigits(listing.fulfilledQuantity, locale), needed: localizeDigits(listing.neededQuantity!, locale), unit: listing.quantityUnit ?? "" })}</span>
                       </span>
                     ) : null}
                   </span>
