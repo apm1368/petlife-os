@@ -2745,7 +2745,7 @@
       "SUPPORT_AGENT": "Agente de soporte"
     },
     "rules": {
-      "UNVERIFIED_CONTACT": "El acceso de administración solo puede darse a una cuenta con correo o móvil verificado.",
+      "UNVERIFIED_CONTACT": "El acceso de administración solo puede darse a una cuenta con el correo verificado.",
       "ALREADY_ADMIN": "Esta cuenta ya tiene acceso de administración; abre su membresía existente.",
       "SELF_CHANGE_FORBIDDEN": "No puedes cambiar tu propia membresía.",
       "LAST_SUPER_ADMIN": "No se puede cambiar la última membresía de superadministración activa.",

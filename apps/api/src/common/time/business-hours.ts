@@ -1,6 +1,7 @@
 /**
  * Working hours in Tehran (fixed UTC+03:30): Saturday–Wednesday 09:00–17:00, Thursday 09:00–13:00, Friday closed.
  * Used for staff service targets such as "partner KYC reviewed within 24 working hours" (market-readiness Q73).
+ * Iranian public holidays are not excluded yet, so a target can read as overdue over a holiday weekend.
  */
 const OFFSET_MS = 3.5 * 3_600_000;
 const HOUR = 3_600_000;

@@ -77,6 +77,9 @@ describe("ERP-A access control, settings, system", () => {
     // Admin access only for a proven email or mobile (market-readiness Q76).
     const unverified = await db.user.create({ data: { displayName: "unverified", email: `erpa-unverified-${randomUUID()}@example.com` } });
     expect((await send("post", root, "/admin/access/admins").send({ email: unverified.email, role: "SUPPORT", reason: "should be refused" }).expect(409)).body.error.details.rule).toBe("UNVERIFIED_CONTACT");
+    // A verified phone never vouches for an unverified email (someone could register a future admin's email).
+    const phoneOnly = await db.user.create({ data: { displayName: "phone only", email: `erpa-phone-only-${randomUUID()}@example.com`, phone: `+989${randomUUID().replace(/\D/g, "").padEnd(9, "1").slice(0, 9)}`, phoneVerifiedAt: new Date() } });
+    expect((await send("post", root, "/admin/access/admins").send({ email: phoneOnly.email, role: "SUPPORT", reason: "should be refused" }).expect(409)).body.error.details.rule).toBe("UNVERIFIED_CONTACT");
     const granted = (await send("post", root, "/admin/access/admins").send({ email: candidate.email.toUpperCase(), role: "SUPPORT", reason: "new support hire" }).expect(201)).body;
     expect(granted).toMatchObject({ role: "SUPPORT", status: "ACTIVE" });
     expect((await send("post", root, "/admin/access/admins").send({ email: candidate.email, role: "FINANCE", reason: "duplicate grant" }).expect(409)).body.error.details.rule).toBe("ALREADY_ADMIN");

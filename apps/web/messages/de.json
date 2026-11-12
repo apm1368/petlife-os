@@ -2750,7 +2750,7 @@
       "SUPPORT_AGENT": "Supportmitarbeitende"
     },
     "rules": {
-      "UNVERIFIED_CONTACT": "Admin-Zugriff gibt es nur für Konten mit bestätigter E-Mail oder Handynummer.",
+      "UNVERIFIED_CONTACT": "Admin-Zugriff gibt es nur für Konten mit bestätigter E-Mail-Adresse.",
       "ALREADY_ADMIN": "Dieses Konto ist bereits Admin. Öffne die bestehende Mitgliedschaft.",
       "SELF_CHANGE_FORBIDDEN": "Du kannst deine eigene Mitgliedschaft nicht ändern.",
       "LAST_SUPER_ADMIN": "Die letzte aktive Superadmin-Mitgliedschaft kann nicht geändert werden.",

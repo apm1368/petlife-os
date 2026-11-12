@@ -8381,7 +8381,7 @@
       "SUPPORT_AGENT": "Support agent"
     },
     "rules": {
-      "UNVERIFIED_CONTACT": "Admin access can only go to an account with a verified email or mobile.",
+      "UNVERIFIED_CONTACT": "Admin access can only go to an account whose email address has been verified.",
       "ALREADY_ADMIN": "This account is already an admin; open its existing membership.",
       "SELF_CHANGE_FORBIDDEN": "You cannot change your own membership.",
       "LAST_SUPER_ADMIN": "The last active super admin cannot be changed.",
