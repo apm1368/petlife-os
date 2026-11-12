@@ -79,7 +79,11 @@ export type AdminPermission =
   | "travel.source.manage"
   | "travel.sync.run"
   | "travel.listing.manage"
-  | "travel.override.manage";
+  | "travel.override.manage"
+  // Member wallets — view balances/history, correct a balance with a reason, review card-to-card top-up receipts
+  | "wallet.view"
+  | "wallet.adjust"
+  | "wallet.topup.review";
 
 export const ALL_PERMISSIONS: AdminPermission[] = [
   "customer.view",
@@ -144,6 +148,9 @@ export const ALL_PERMISSIONS: AdminPermission[] = [
   "travel.sync.run",
   "travel.listing.manage",
   "travel.override.manage",
+  "wallet.view",
+  "wallet.adjust",
+  "wallet.topup.review",
 ];
 
 const READ_ONLY_PERMISSIONS: AdminPermission[] = [
@@ -167,6 +174,7 @@ const READ_ONLY_PERMISSIONS: AdminPermission[] = [
   "system.view",
   "analytics.view",
   "travel.source.view",
+  "wallet.view",
 ];
 
 /**
@@ -240,12 +248,14 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "travel.sync.run",
     "travel.listing.manage",
     "travel.override.manage",
+    // Sees wallets; moving wallet money (corrections, crediting a receipt) is FINANCE-only, like refund execution.
+    "wallet.view",
   ],
   // spec: "SUPPORT: view may be allowed if needed, manage should NOT be
   // granted by default" — SUPPORT can see a household's subscription state
   // (needed for the H13 support context panel) but can never cancel, grant
   // a trial, or override an entitlement.
-  [AdminRole.SUPPORT]: ["customer.view", "customer.sessions.revoke", "pet.access.manage", "support.view", "support.manage", "dispute.view", "dispute.manage", "task.manage", "subscription.view", "services.view", "commerce.view", "travel.view", "insurance.applications.view"],
+  [AdminRole.SUPPORT]: ["customer.view", "customer.sessions.revoke", "pet.access.manage", "support.view", "support.manage", "dispute.view", "dispute.manage", "task.manage", "subscription.view", "services.view", "commerce.view", "travel.view", "insurance.applications.view", "wallet.view"],
   // Review moderation is a trust action, so TRUST_SAFETY can hide provider reviews.
   [AdminRole.TRUST_SAFETY]: ["customer.view", "customer.pii.reveal", "customer.account.manage", "customer.sessions.revoke", "support.view", "dispute.view", "dispute.manage", "trust.view", "trust.manage", "task.manage", "services.view", "services.manage", "commerce.view", "commerce.manage", "travel.view", "travel.manage"],
   // Payout execution ("settlement.pay") is FINANCE-only, mirroring
@@ -265,6 +275,9 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "settlement.pay",
     "settlement.adjust",
     "finance.reconcile",
+    "wallet.view",
+    "wallet.adjust",
+    "wallet.topup.review",
     // spec: "FINANCE: appropriate billing visibility" — read-only; plan/price
     // management and subscription mutations stay ADMIN/SUPER_ADMIN-only.
     "subscription.view",

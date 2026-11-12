@@ -32,6 +32,7 @@ import {
   Skeleton,
   SlidersHorizontal,
   StatusLabel,
+  Wallet,
 } from "@petlife/ui";
 import type { AdminTaskDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
@@ -66,6 +67,7 @@ const QUEUES: { key: QueueKey; href: string; permission: string; icon: Icon; ton
   { key: "openSupportCases", href: "/admin/support", permission: "support.view", icon: Headset, tone: "attention" },
   { key: "pendingRefundApprovals", href: "/admin/transactions", permission: "finance.view", icon: ArrowLeftRight, tone: "attention" },
   { key: "pendingRefundRequests", href: "/admin/commerce/refund-requests", permission: "commerce.view", icon: Receipt, tone: "attention" },
+  { key: "pendingWalletTopUps", href: "/admin/wallets/top-ups", permission: "wallet.topup.review", icon: Wallet, tone: "attention" },
   { key: "openCommunityReports", href: "/admin/community", permission: "trust.view", icon: Siren, tone: "attention" },
   { key: "pendingVerifications", href: "/admin/verification", permission: "verification.manage", icon: BadgeCheck, tone: "neutral" },
   { key: "pendingOfferModeration", href: "/admin/commerce/product-moderation", permission: "commerce.view", icon: ShoppingBag, tone: "neutral" },

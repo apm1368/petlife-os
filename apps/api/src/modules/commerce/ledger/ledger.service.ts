@@ -22,6 +22,7 @@ const SEEDED_ACCOUNTS: { code: LedgerAccountCode; name: string }[] = [
   { code: LedgerAccountCode.WALLET_WITHDRAWABLE_LIABILITY, name: "Wallet Withdrawable Liability" },
   { code: LedgerAccountCode.WALLET_PURCHASE_LIABILITY, name: "Wallet Purchase-only Liability" },
   { code: LedgerAccountCode.CARD_TRANSFER_RECEIVABLE, name: "Card Transfer Receivable" },
+  { code: LedgerAccountCode.WALLET_ADJUSTMENT, name: "Wallet Adjustments (staff corrections)" },
   { code: LedgerAccountCode.PROVIDER_PAYABLE, name: "Provider Payable" },
   { code: LedgerAccountCode.CPC_RECEIVABLE, name: "CPC Receivable" },
   { code: LedgerAccountCode.PAWMA_REWARD_LIABILITY, name: "Pawma Reward Liability" },

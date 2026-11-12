@@ -735,7 +735,10 @@
       "settings_approve": "تأیید تغییرات حساس",
       "system_view": "مشاهدهٔ وضعیت سیستم",
       "analytics_view": "گزارش‌ها و تحلیل",
-      "pet_access_manage": "مدیریت دسترسی به پرونده حیوان"
+      "pet_access_manage": "مدیریت دسترسی به پرونده حیوان",
+      "wallet_view": "دیدن کیف پول‌ها",
+      "wallet_adjust": "اصلاح موجودی",
+      "wallet_topup_review": "بررسی رسیدهای افزایش اعتبار"
     },
     "domains": {
       "customer": "مشتریان",
@@ -762,7 +765,8 @@
       "access": "دسترسی",
       "admin": "مدیران",
       "settings": "تنظیمات",
-      "system": "سیستم"
+      "system": "سیستم",
+      "wallet": "کیف پول"
     }
   },
   "adminSiteSettings": {
@@ -4257,7 +4261,9 @@
         "platformSettings": "تنظیمات",
         "featureFlags": "پرچم‌های ویژگی",
         "channels": "کانال‌ها و ارسال",
-        "smsPatterns": "الگوهای پیامک"
+        "smsPatterns": "الگوهای پیامک",
+        "walletDirectory": "کیف پول کاربران",
+        "walletTopUps": "رسیدهای افزایش اعتبار"
       },
       "palette": {
         "actions": "اقدام‌های سریع",
@@ -4346,7 +4352,8 @@
         "settings": "تنظیمات سامانه",
         "featureFlags": "کنترل انتشار",
         "smsPatterns": "الگوهای پیامک",
-        "verification": "بررسی هویت و مدارک"
+        "verification": "بررسی هویت و مدارک",
+        "wallets": "کیف پول‌ها"
       },
       "navigation": "ناوبری مدیریت",
       "openMenu": "باز کردن منو",
@@ -6637,7 +6644,8 @@
           "pendingSupportNeeds": "درخواست‌های کمک در انتظار بررسی",
           "pendingMemorials": "یادبودهای در انتظار بررسی",
           "openPlaceReports": "گزارش‌های مکان",
-          "openTasks": "کارهای باز"
+          "openTasks": "کارهای باز",
+          "pendingWalletTopUps": "رسیدهای افزایش اعتبار"
         }
       },
       "performance": {
@@ -9516,6 +9524,269 @@
         "BOARDING": "پانسیون",
         "PET_TAXI": "تاکسی حیوانات",
         "OTHER": "سایر خدمات"
+      }
+    }
+  },
+  "wallet": {
+    "eyebrow": "حساب کاربری",
+    "title": "کیف پول",
+    "description": "موجودی، افزایش اعتبار و تاریخچهٔ کیف پول شما",
+    "navHint": "موجودی، افزایش اعتبار و تاریخچه",
+    "loading": "در حال بارگذاری کیف پول…",
+    "failed": "کیف پول بارگذاری نشد.",
+    "retry": "تلاش دوباره",
+    "balance": {
+      "total": "موجودی کل",
+      "purchaseOnly": "برای خرید",
+      "purchaseOnlyHint": "افزایش اعتبار و هدیه؛ فقط برای خرید",
+      "withdrawable": "قابل برداشت",
+      "withdrawableHint": "بازپرداخت سفارش‌ها؛ برای خرید یا برداشت",
+      "expiring": "{amount} از اعتبار هدیه تا {date} منقضی می‌شود."
+    },
+    "topUp": {
+      "title": "افزایش اعتبار",
+      "amountLabel": "مبلغ (تومان)",
+      "amountHint": "از {min} تا {max}",
+      "railLabel": "روش پرداخت",
+      "rails": {
+        "ZIBAL": "پرداخت آنلاین (درگاه بانکی)",
+        "CARD_TO_CARD": "کارت به کارت"
+      },
+      "submit": "افزایش اعتبار",
+      "submitting": "در حال ثبت…",
+      "redirecting": "در حال انتقال به درگاه بانکی…",
+      "unavailableTitle": "افزایش اعتبار به‌زودی باز می‌شود",
+      "unavailableBody": "هنوز روش پرداختی برای افزایش اعتبار فعال نشده است. بازپرداخت سفارش‌ها و اعتبار هدیه همچنان به همین کیف پول واریز می‌شوند.",
+      "errors": {
+        "OUT_OF_RANGE": "مبلغ باید بین {min} و {max} باشد.",
+        "TOO_MANY_OPEN_TOP_UPS": "سه درخواست باز دارید؛ ابتدا یکی را کامل یا لغو کنید.",
+        "TOP_UP_RAIL_UNAVAILABLE": "این روش پرداخت الان در دسترس نیست.",
+        "ZIBAL_REQUEST_UNAVAILABLE": "درگاه بانکی پاسخ نداد. کمی بعد دوباره امتحان کنید.",
+        "generic": "درخواست ثبت نشد. دوباره امتحان کنید."
+      }
+    },
+    "card": {
+      "title": "مبلغ را به این کارت واریز کنید",
+      "number": "شماره کارت",
+      "holder": "به نام",
+      "amount": "مبلغ واریز",
+      "copy": "کپی",
+      "copied": "کپی شد",
+      "deadline": "رسید را تا {date} بارگذاری کنید.",
+      "stepOne": "مبلغ را با اپ بانک یا خودپرداز به این کارت واریز کنید.",
+      "stepTwo": "از رسید عکس یا اسکرین‌شات بگیرید.",
+      "stepThree": "رسید را همین‌جا بفرستید؛ تیم مالی آن را بررسی و موجودی را شارژ می‌کند."
+    },
+    "receipt": {
+      "choose": "انتخاب تصویر رسید",
+      "hint": "JPG، PNG یا WebP، حداکثر ۱۰ مگابایت",
+      "send": "ارسال رسید",
+      "sending": "در حال ارسال رسید…",
+      "sent": "رسید شما ارسال شد. پس از بررسی تیم مالی، موجودی شارژ می‌شود.",
+      "failed": "ارسال رسید انجام نشد. دوباره امتحان کنید.",
+      "expired": "مهلت ارسال رسید این درخواست تمام شده است. یک درخواست تازه ثبت کنید."
+    },
+    "requests": {
+      "title": "درخواست‌های افزایش اعتبار",
+      "status": {
+        "AWAITING_PAYMENT": "در انتظار پرداخت",
+        "AWAITING_RECEIPT": "در انتظار رسید",
+        "REVIEW_PENDING": "در حال بررسی",
+        "CREDITED": "واریز شد",
+        "FAILED": "ناموفق",
+        "REJECTED": "رد شد",
+        "EXPIRED": "منقضی شد",
+        "CANCELLED": "لغو شد"
+      },
+      "rails": {
+        "ZIBAL": "پرداخت آنلاین (درگاه بانکی)",
+        "CARD_TO_CARD": "کارت به کارت"
+      },
+      "received": "واریزشده: {amount}",
+      "reason": "دلیل: {reason}",
+      "showCard": "دیدن کارت و ارسال رسید",
+      "cancel": "لغو درخواست",
+      "cancelled": "درخواست لغو شد."
+    },
+    "return": {
+      "verifying": "در حال بررسی پرداخت…",
+      "credited": "پرداخت تأیید شد و {amount} به کیف پول شما اضافه شد.",
+      "failed": "پرداخت تأیید نشد. اگر مبلغی از حساب شما کم شده باشد، بانک آن را طی ۷۲ ساعت برمی‌گرداند.",
+      "unknown": "نتیجهٔ پرداخت هنوز مشخص نیست. چند دقیقهٔ دیگر همین صفحه را دوباره باز کنید."
+    },
+    "history": {
+      "title": "تاریخچه",
+      "empty": "هنوز تراکنشی در کیف پول شما ثبت نشده است.",
+      "more": "نمایش بیشتر",
+      "purpose": {
+        "TOP_UP": "افزایش اعتبار",
+        "PURCHASE": "خرید",
+        "REFUND": "بازپرداخت",
+        "ADJUSTMENT": "اصلاح توسط تیم ما",
+        "EXPIRY": "انقضای اعتبار هدیه",
+        "OTHER": "تراکنش"
+      },
+      "bucket": {
+        "PURCHASE_ONLY": "برای خرید",
+        "WITHDRAWABLE": "قابل برداشت"
+      },
+      "reasons": {
+        "GOODWILL": "اعتبار جبرانی",
+        "SERVICE_RECOVERY": "جبران مشکل یک خدمت",
+        "PAYMENT_CORRECTION": "اصلاح پرداخت",
+        "REFUND_OUTSIDE_SYSTEM": "بازپرداخت خارج از سفارش",
+        "DUPLICATE_CREDIT_REVERSAL": "برگشت واریز تکراری",
+        "OTHER": "اصلاح دیگر"
+      },
+      "expires": "انقضا: {date}"
+    }
+  },
+  "adminWallets": {
+    "kicker": "مالی",
+    "title": "کیف پول کاربران",
+    "subtitle": "موجودی و تاریخچهٔ کیف پول هر کاربر. هر جابه‌جایی پول دلیل دارد و در گزارش ممیزی ثبت می‌شود.",
+    "search": "جستجوی نام، ایمیل یا شماره",
+    "loading": "در حال بارگذاری…",
+    "failed": "اطلاعات بارگذاری نشد.",
+    "retry": "تلاش دوباره",
+    "forbidden": "برای دیدن کیف پول‌ها به دسترسی «دیدن کیف پول‌ها» نیاز دارید.",
+    "empty": "هنوز هیچ کیف پولی تراکنش ندارد.",
+    "emptySearch": "کاربری با این جستجو پیدا نشد.",
+    "columns": {
+      "member": "کاربر",
+      "contact": "راه تماس",
+      "purchaseOnly": "برای خرید",
+      "withdrawable": "قابل برداشت",
+      "total": "موجودی کل",
+      "lastActivity": "آخرین تراکنش"
+    },
+    "open": "باز کردن",
+    "previous": "قبلی",
+    "next": "بعدی",
+    "pageOf": "صفحهٔ {page} از {pages}",
+    "never": "بدون تراکنش",
+    "detail": {
+      "back": "همهٔ کیف پول‌ها",
+      "memberSince": "عضو از {date}",
+      "entries": "تاریخچه",
+      "entriesEmpty": "این کیف پول هنوز تراکنشی ندارد.",
+      "topUps": "درخواست‌های افزایش اعتبار",
+      "topUpsEmpty": "درخواستی ثبت نشده است.",
+      "adjustments": "اصلاح‌های موجودی",
+      "adjustmentsEmpty": "اصلاحی ثبت نشده است.",
+      "audit": "گزارش ممیزی",
+      "auditEmpty": "موردی ثبت نشده است.",
+      "by": "توسط {name}",
+      "openCustomer": "پروندهٔ کاربر"
+    },
+    "adjust": {
+      "title": "اصلاح موجودی",
+      "hint": "فقط برای اصلاح اشتباه یا جبران. هر اصلاح با نام شما، دلیل و موجودی قبل و بعد در گزارش ممیزی ثبت می‌شود.",
+      "direction": "نوع اصلاح",
+      "directions": {
+        "CREDIT": "افزایش موجودی",
+        "DEBIT": "کاهش موجودی"
+      },
+      "bucket": "بخش کیف پول",
+      "buckets": {
+        "PURCHASE_ONLY": "برای خرید",
+        "WITHDRAWABLE": "قابل برداشت"
+      },
+      "amount": "مبلغ (تومان)",
+      "reasonCode": "دسته‌بندی دلیل",
+      "reasonCodes": {
+        "GOODWILL": "اعتبار جبرانی",
+        "SERVICE_RECOVERY": "جبران مشکل یک خدمت",
+        "PAYMENT_CORRECTION": "اصلاح پرداخت",
+        "REFUND_OUTSIDE_SYSTEM": "بازپرداخت خارج از سفارش",
+        "DUPLICATE_CREDIT_REVERSAL": "برگشت واریز تکراری",
+        "OTHER": "اصلاح دیگر"
+      },
+      "reason": "توضیح (در گزارش ممیزی می‌ماند)",
+      "evidence": "شمارهٔ تیکت یا مرجع (اختیاری)",
+      "submit": "ثبت اصلاح",
+      "confirm": "{direction} به مبلغ {amount} در بخش «{bucket}» ثبت شود؟ این کار بلافاصله روی موجودی اعمال می‌شود.",
+      "confirmYes": "بله، ثبت شود",
+      "cancel": "انصراف",
+      "saving": "در حال ثبت…",
+      "done": "اصلاح ثبت شد.",
+      "noPermission": "اصلاح موجودی فقط با دسترسی «اصلاح موجودی» ممکن است.",
+      "errors": {
+        "INSUFFICIENT_WALLET_BALANCE": "موجودی این بخش برای این کاهش کافی نیست.",
+        "reasonTooShort": "توضیح باید دست‌کم ۵ نویسه باشد.",
+        "amount": "مبلغ معتبر وارد کنید.",
+        "generic": "اصلاح ثبت نشد."
+      }
+    },
+    "topUps": {
+      "title": "رسیدهای افزایش اعتبار",
+      "subtitle": "رسیدهای کارت به کارت کاربران. مبلغی را تأیید کنید که واقعاً به حساب شرکت رسیده است؛ همان مبلغ واریز می‌شود.",
+      "filter": "وضعیت",
+      "all": "همه",
+      "status": {
+        "AWAITING_PAYMENT": "در انتظار پرداخت",
+        "AWAITING_RECEIPT": "در انتظار رسید",
+        "REVIEW_PENDING": "در حال بررسی",
+        "CREDITED": "واریز شد",
+        "FAILED": "ناموفق",
+        "REJECTED": "رد شد",
+        "EXPIRED": "منقضی شد",
+        "CANCELLED": "لغو شد"
+      },
+      "rails": {
+        "ZIBAL": "پرداخت آنلاین (درگاه بانکی)",
+        "CARD_TO_CARD": "کارت به کارت"
+      },
+      "columns": {
+        "member": "کاربر",
+        "amount": "مبلغ درخواستی",
+        "rail": "روش",
+        "status": "وضعیت",
+        "submitted": "ارسال رسید",
+        "actions": "اقدام"
+      },
+      "empty": "رسیدی در این وضعیت نیست.",
+      "review": "بررسی",
+      "reviewTitle": "بررسی رسید",
+      "viewReceipt": "دیدن رسید",
+      "receiptOpening": "در حال آماده‌سازی رسید…",
+      "receivedAmount": "مبلغ دریافتی (تومان)",
+      "rejectReason": "دلیل رد (به کاربر نشان داده می‌شود)",
+      "approve": "تأیید و واریز",
+      "reject": "رد رسید",
+      "approved": "مبلغ به کیف پول کاربر واریز شد.",
+      "rejected": "رسید رد شد.",
+      "noPermission": "بررسی رسید فقط با دسترسی «بررسی رسیدهای افزایش اعتبار» ممکن است.",
+      "failed": "بررسی ثبت نشد.",
+      "close": "بستن"
+    },
+    "audit": {
+      "wallet_credited": "افزایش موجودی",
+      "wallet_debited": "کاهش موجودی",
+      "wallet_top_up_approved": "تأیید رسید",
+      "wallet_top_up_rejected": "رد رسید",
+      "wallet_top_up_receipt_viewed": "مشاهدهٔ رسید"
+    },
+    "entry": {
+      "purpose": {
+        "TOP_UP": "افزایش اعتبار",
+        "PURCHASE": "خرید",
+        "REFUND": "بازپرداخت",
+        "ADJUSTMENT": "اصلاح توسط تیم ما",
+        "EXPIRY": "انقضای اعتبار هدیه",
+        "OTHER": "تراکنش"
+      },
+      "bucket": {
+        "PURCHASE_ONLY": "برای خرید",
+        "WITHDRAWABLE": "قابل برداشت"
+      },
+      "reasons": {
+        "GOODWILL": "اعتبار جبرانی",
+        "SERVICE_RECOVERY": "جبران مشکل یک خدمت",
+        "PAYMENT_CORRECTION": "اصلاح پرداخت",
+        "REFUND_OUTSIDE_SYSTEM": "بازپرداخت خارج از سفارش",
+        "DUPLICATE_CREDIT_REVERSAL": "برگشت واریز تکراری",
+        "OTHER": "اصلاح دیگر"
       }
     }
   }
