@@ -48,17 +48,19 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
 
   return (
     <LandingShell locale={routeLocale} variant="page">
-      <div className={`min-h-screen bg-surface-base ${warmSurface ? "public-shell--commerce" : ""}`}>
+      <div className={`opl-page__body min-h-screen bg-surface-base ${warmSurface ? "public-shell--commerce" : ""}`}>
         <header className="public-site-header opl-hdr opl-public-hdr">
           <div className="opl-wrap opl-hdr__in">
             <Link href={`/${locale}`} className="opl-brand">
               <Brand locale={routeLocale} />
             </Link>
-            <PublicPrimaryNavigation />
+            <PublicPrimaryNavigation menuExtra={<><LocaleSwitcher /><ThemeToggle /><DisplayModeToggle locale={routeLocale} compact /></>} />
             <div className="public-header-actions opl-hact">
-              <LocaleSwitcher />
-              <ThemeToggle />
-              <DisplayModeToggle locale={routeLocale} compact />
+              <span className="opl-hprefs">
+                <LocaleSwitcher />
+                <ThemeToggle />
+                <DisplayModeToggle locale={routeLocale} compact />
+              </span>
               {preview ? <Link className="opl-btn soft sm" href={`/${locale}/home`}>{publicCopy("openApp")}</Link> : status === "authenticated" && user ? (
                 <Link href={`/${locale}/home`}>
                   <Avatar name={user.displayName} src={user.avatarUrl} size="sm" />

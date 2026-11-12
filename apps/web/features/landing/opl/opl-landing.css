@@ -385,9 +385,21 @@
 }
 
 /* public pages: the shared header keeps its own navigation and actions inside the glass bar */
-.opl-public-hdr .opl-hdr__in { flex-wrap:wrap; }
-.opl-public-hdr .opl-hact { margin-inline-start:auto; }
+/* One row at every width: the old public grid is switched off, the full menu folds into the sheet below 1280px,
+   and on phones language/theme/display move into that sheet too. */
+.opl-public-hdr.public-site-header { display:block; }
+.opl-public-hdr .opl-hdr__in { flex-wrap:nowrap; }
+.opl-public-hdr .public-primary-navigation { flex:1 1 auto; min-width:0; display:flex; justify-content:center; }
+.opl-public-hdr .opl-hact { margin-inline-start:auto; flex-wrap:nowrap; justify-content:flex-end; grid-column:auto; }
 .opl-public-hdr .opl-hact > * { flex:none; }
+.opl-hprefs { display:inline-flex; align-items:center; gap:4px; }
+@media (max-width:1279px) {
+  .opl-public-hdr .public-primary-navigation > nav { display:none !important; }
+  .opl-public-hdr .public-primary-navigation > .lg\:hidden { display:block !important; }
+  .opl-public-hdr .public-primary-navigation { justify-content:flex-end; }
+}
+@media (max-width:639px) { .opl-public-hdr .opl-hprefs { display:none; } .opl-public-hdr .opl-hdr__in { gap:8px; } }
+.public-menu-prefs { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:8px; padding-top:16px; border-top:1px solid var(--border-subtle); }
 
 /* ---- Public page bodies (pages.md §shared): the pattern laid over the design-system tokens, so every page
    in a family gets the warm paper, soft cards and capsule buttons in both themes without per-page forks. ---- */
@@ -397,19 +409,23 @@
   --border-default:var(--opl-line); --border-subtle:var(--opl-line); --border-strong:var(--opl-line-2);
   --radius-lg:20px; --radius-card:24px; --radius-media:22px;
 }
-.opl-page #lp-main { position:relative; isolation:isolate; padding-bottom:8px;
+.opl-page__body { position:relative; isolation:isolate;
   background:
-    radial-gradient(640px 340px at 92% -40px, color-mix(in srgb,var(--opl-sun) 16%,transparent), transparent 70%),
-    radial-gradient(560px 320px at 0% 160px, color-mix(in srgb,var(--opl-leaf) 13%,transparent), transparent 70%); }
-[dir="rtl"] .opl-page #lp-main { background:
-    radial-gradient(640px 340px at 8% -40px, color-mix(in srgb,var(--opl-sun) 16%,transparent), transparent 70%),
-    radial-gradient(560px 320px at 100% 160px, color-mix(in srgb,var(--opl-leaf) 13%,transparent), transparent 70%); }
-/* A quiet trail of paw prints down the outer edge, as if Cookie walked the page first. */
-.opl-page #lp-main::before { content:""; position:absolute; z-index:-1; inset-block:24px 0; inset-inline-end:max(6px,calc((100vw - 1320px) / 2 - 64px)); width:46px; pointer-events:none; opacity:.55;
+    radial-gradient(680px 360px at 92% 40px, color-mix(in srgb,var(--opl-sun) var(--opl-glow-a,16%),transparent), transparent 70%),
+    radial-gradient(600px 340px at 0% 260px, color-mix(in srgb,var(--opl-leaf) var(--opl-glow-b,13%),transparent), transparent 70%),
+    var(--opl-paper) !important; }
+[dir="rtl"] .opl-page__body { background:
+    radial-gradient(680px 360px at 8% 40px, color-mix(in srgb,var(--opl-sun) var(--opl-glow-a,16%),transparent), transparent 70%),
+    radial-gradient(600px 340px at 100% 260px, color-mix(in srgb,var(--opl-leaf) var(--opl-glow-b,13%),transparent), transparent 70%),
+    var(--opl-paper) !important; }
+:root[data-theme="dark"] .opl-page__body { --opl-glow-a:7%; --opl-glow-b:6%; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .opl-page__body { --opl-glow-a:7%; --opl-glow-b:6%; } }
+/* A quiet trail of paw prints in the outer gutter, as if Cookie walked the page first (wide screens only). */
+.opl-page__body::before { content:""; position:absolute; z-index:-1; inset-block:140px 0; inset-inline-end:max(8px,calc((100% - 1180px) / 2 - 64px)); width:46px; pointer-events:none; opacity:.6;
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='190' viewBox='0 0 46 190'%3E%3Cg fill='%23E9D9BF'%3E%3Cg transform='translate(12 26) rotate(-12)'%3E%3Cellipse cx='0' cy='6' rx='7' ry='6'/%3E%3Ccircle cx='-7' cy='-4' r='2.6'/%3E%3Ccircle cx='-2.4' cy='-8' r='2.6'/%3E%3Ccircle cx='2.4' cy='-8' r='2.6'/%3E%3Ccircle cx='7' cy='-4' r='2.6'/%3E%3C/g%3E%3Cg transform='translate(32 118) rotate(10)'%3E%3Cellipse cx='0' cy='6' rx='7' ry='6'/%3E%3Ccircle cx='-7' cy='-4' r='2.6'/%3E%3Ccircle cx='-2.4' cy='-8' r='2.6'/%3E%3Ccircle cx='2.4' cy='-8' r='2.6'/%3E%3Ccircle cx='7' cy='-4' r='2.6'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat-y; }
-:root[data-theme="dark"] .opl-page #lp-main::before { opacity:.16; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .opl-page #lp-main::before { opacity:.16; } }
-@media (max-width: 899px) { .opl-page #lp-main::before { display:none; } }
+:root[data-theme="dark"] .opl-page__body::before { opacity:.14; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .opl-page__body::before { opacity:.14; } }
+@media (max-width: 1299px) { .opl-page__body::before { display:none; } }
 /* Soft capsule buttons everywhere on the page (the approved button theme), inputs keep a soft rounded box. */
 .opl-page main :is(button,a).rounded-md, .opl-page main :is(button,a).rounded-lg, .opl-page main :is(button,a).rounded-xl { border-radius:999px; }
 .opl-page main :is(input,select,textarea).rounded-md { border-radius:14px; }
