@@ -2883,6 +2883,7 @@
       "SUPPORT_AGENT": "Agente de soporte"
     },
     "rules": {
+      "UNVERIFIED_CONTACT": "El acceso de administración solo puede darse a una cuenta con el correo verificado.",
       "ALREADY_ADMIN": "Esta cuenta ya tiene acceso de administración; abre su membresía existente.",
       "SELF_CHANGE_FORBIDDEN": "No puedes cambiar tu propia membresía.",
       "LAST_SUPER_ADMIN": "No se puede cambiar la última membresía de superadministración activa.",
@@ -7558,6 +7559,10 @@
     }
   },
   "partnerVerification": {
+    "sla": {
+      "overdue": "Fuera del objetivo de 24 horas laborables",
+      "progress": "{hours} de {target} horas laborables usadas"
+    },
     "superseded": "Sustituido por una carga más reciente",
     "reviewedBy": "por {name}",
     "caseSummary": "Estado del caso",

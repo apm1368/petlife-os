@@ -8521,6 +8521,7 @@
       "SUPPORT_AGENT": "Support agent"
     },
     "rules": {
+      "UNVERIFIED_CONTACT": "Admin access can only go to an account whose email address has been verified.",
       "ALREADY_ADMIN": "This account is already an admin; open its existing membership.",
       "SELF_CHANGE_FORBIDDEN": "You cannot change your own membership.",
       "LAST_SUPER_ADMIN": "The last active super admin cannot be changed.",
@@ -8549,6 +8550,10 @@
     }
   },
   "partnerVerification": {
+    "sla": {
+      "overdue": "Past the 24-working-hour target",
+      "progress": "{hours} of {target} working hours used"
+    },
     "superseded": "Replaced by a newer upload",
     "reviewedBy": "by {name}",
     "caseSummary": "Where this case stands",
