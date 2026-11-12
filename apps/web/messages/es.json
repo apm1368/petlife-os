@@ -8965,5 +8965,13 @@
         "OTHER": "Otra corrección"
       }
     }
+  },
+  "safety": {
+    "title": "Protégete de las estafas",
+    "contact": "Paga solo dentro de opetlife. Nunca hagas transferencias fuera del sitio ni compartas códigos de verificación o contraseñas.",
+    "payment": "Paga solo en esta página. opetlife nunca te pide transferir dinero a una cuenta personal ni compartir un código de verificación.",
+    "lostPet": "Quien pide dinero o una recompensa antes de devolver una mascota probablemente es un estafador. Queda en un lugar público y nunca pagues por adelantado.",
+    "donation": "Dona solo a través de esta página. opetlife nunca te pide transferir una donación a una cuenta personal.",
+    "adoption": "Nunca pagues nada antes de conocer a la mascota. Visítala en persona y queda en un lugar seguro."
   }
 }

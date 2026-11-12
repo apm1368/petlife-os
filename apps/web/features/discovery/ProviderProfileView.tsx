@@ -12,6 +12,7 @@ import { formatCount } from "@/lib/number/format-number";
 import { todayIso } from "@/lib/date/jalali";
 import { WeekAvailability } from "./WeekAvailability";
 import type { RouteLocale } from "@/lib/i18n/config";
+import { SafetyTip } from "@/features/shared/SafetyTip";
 
 type Service = ProviderProfile["services"][number];
 
@@ -233,6 +234,7 @@ export function ProviderProfileView({ providerId }: { providerId: string }) {
               ))}
               {profile.phone ? <li><Phone size={16} aria-hidden="true" /><a href={`tel:${profile.phone}`} dir="ltr">{profile.phone}</a></li> : null}
             </ul>
+            <SafetyTip kind="contact" />
             {profile.type === "VET_CLINIC" && profile.locations[0]?.city ? (
               <p className="pd-muted">
                 {t("travelling")} {" "}

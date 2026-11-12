@@ -142,3 +142,11 @@
 
 /* Inside the member frame the section reel sits in the padded content column: round its band like the cards around it. */
 .member-shell .workspace-main .opl-family-reel { border-radius:32px; }
+
+/* ---- Anti-scam tip (market-readiness Q59), on every contact and payment surface. ---- */
+.safety-tip { display:flex; align-items:flex-start; gap:10px; margin:4px 0; padding:12px 14px; border:1px solid color-mix(in srgb,var(--opl-sun,#F2B544) 45%,var(--opl-line,var(--border-subtle))); border-radius:18px;
+  background:color-mix(in srgb,var(--opl-sun,#F2B544) 12%,var(--opl-raised,var(--surface-elevated))); color:var(--opl-ink,var(--text-primary)); }
+.safety-tip__icon { flex:none; margin-top:2px; color:var(--opl-forest,var(--brand-primary)); }
+.safety-tip p { display:flex; flex-direction:column; gap:2px; margin:0; font-size:.88rem; line-height:1.75; }
+.safety-tip strong { font-weight:800; }
+.safety-tip span { color:var(--opl-ink-2,var(--text-secondary)); }

@@ -7,7 +7,7 @@ import { AdminAuditLogService } from "../admin/audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../admin/auth/admin-context.types";
 import { DonationLedgerService } from "./donation-ledger.service";
 import { CommunityPostService } from "../community/community-post.service";
-import { AnimalSupportOrganizationNotFoundException, SupportCampaignNotFoundException } from "../../common/errors/api-exception";
+import { AnimalSupportOrganizationNotFoundException, SupportCampaignNotFoundException, SupportCampaignOrganizationNotVerifiedException } from "../../common/errors/api-exception";
 import { resolvePagination, toPaginatedDto } from "../../common/pagination/pagination.dto";
 import { toSupportCampaignDto, toSupportCampaignUpdateDto } from "./animal-support-mapper";
 import type { CreateSupportCampaignDto, ListSupportCampaignsQueryDto, PostSupportCampaignUpdateDto, UpdateSupportCampaignStatusDto } from "./dto/animal-support.dto";
@@ -95,6 +95,13 @@ export class SupportCampaignService {
     const row = await this.prisma.$transaction(async (tx) => {
       const existing = await tx.supportCampaign.findUnique({ where: { id } });
       if (!existing) throw new SupportCampaignNotFoundException({ campaignId: id });
+      if (dto.status === "ACTIVE") {
+        // Q55: a campaign takes donations only while its organization is verified; drafts stay allowed.
+        const org = await tx.animalSupportOrganization.findUnique({ where: { id: existing.organizationId }, select: { verificationStatus: true } });
+        if (org?.verificationStatus !== "VERIFIED") {
+          throw new SupportCampaignOrganizationNotVerifiedException({ campaignId: id, organizationId: existing.organizationId, verificationStatus: org?.verificationStatus ?? null });
+        }
+      }
       const updated = await tx.supportCampaign.update({ where: { id }, data: { status: dto.status }, include: CAMPAIGN_INCLUDE });
       await this.audit.record({
         adminUserId: admin.adminUserId,

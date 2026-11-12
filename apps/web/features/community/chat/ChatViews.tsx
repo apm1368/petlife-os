@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Button, EmptyState, ErrorRecovery, Skeleton } from "@petlife/ui";
 import { ApiError } from "@/lib/api/client";
 import { chatService, type ChatConversationSummary, type ChatMessageDto } from "@/services/chat.service";
+import { SafetyTip } from "@/features/shared/SafetyTip";
 
 const POLL_MS = 10_000;
 
@@ -141,12 +142,15 @@ export function ChatThreadView({ conversationId }: { conversationId: string }) {
       {meta?.blocked ? (
         <p role="status" className="chat-thread__blocked">{t("blocked")}</p>
       ) : (
+        <>
+        <SafetyTip kind="contact" />
         <form className="chat-thread__compose" onSubmit={(e) => { e.preventDefault(); void send(); }}>
           <label className="sr-only" htmlFor="chat-body">{t("messageLabel")}</label>
           <textarea id="chat-body" dir="auto" maxLength={2000} value={text} onChange={(e) => setText(e.target.value)} />
           <Button type="submit" variant="primary" isLoading={busy} disabled={!text.trim()}>{t("send")}</Button>
           {sendError ? <p role="alert">{sendError}</p> : null}
         </form>
+        </>
       )}
     </section>
   );
