@@ -26,9 +26,17 @@
 .opl-reel__ctl { position:absolute; inset:auto 14px 16px; z-index:3; display:flex; align-items:center; gap:8px; }
 .opl-reel__music { display:inline-flex; align-items:center; gap:6px; font-size:.76rem; font-weight:700; color:#fff; margin-inline-end:auto; background:rgb(20 30 24 / .55); padding:5px 12px; border-radius:999px; }
 .opl-rbtn { width:38px; height:38px; border-radius:50%; border:0; display:grid; place-items:center; background:rgb(20 30 24 / .55); color:#fff; cursor:pointer; }
-.opl-reel__play { position:absolute; inset:0; z-index:4; display:grid; place-content:center; justify-items:center; gap:12px; border:0; background:rgb(0 0 0 / .24); color:#fff; font:inherit; font-weight:800; font-size:1rem; cursor:pointer; text-shadow:0 1px 10px rgb(0 0 0 / .45); }
-.opl-reel__playbtn { width:86px; height:86px; border-radius:50%; display:grid; place-items:center; background:#F2B544; color:#3A2A05; box-shadow:0 0 0 10px rgb(242 181 68 / .28); animation:oplBreathe 2.4s ease-in-out infinite; }
-.opl-reel__playbtn svg { margin-inline-start:4px; }
+/* The start button sits in the calm band between the logo scene's tagline (y≈400 of 640) and the subtitle, so it never
+   covers the wordmark; the label is for screen readers. After the last scene a small "replay" capsule waits at the top,
+   clear of the outro's own button. No scrim: the poster keeps its real colours. */
+.opl-reel__play { position:absolute; inset:0; z-index:4; display:block; border:0; padding:0; background:transparent; color:#fff; font:inherit; font-weight:800; cursor:pointer; }
+.opl-reel__playbtn { position:absolute; left:50%; top:68.4%; translate:-50% -50%; width:64px; height:64px; border-radius:50%; display:grid; place-items:center; background:#F2B544; color:#3A2A05; box-shadow:0 0 0 6px rgb(242 181 68 / .3),0 14px 26px -12px rgb(60 40 0 / .55); animation:oplBreathe 2.4s ease-in-out infinite; }
+.opl-reel__playbtn svg { margin-inline-start:3px; }
+@media (max-width:420px) { .opl-reel__playbtn { width:54px; height:54px; } }
+.opl-reel__playlabel { position:absolute; clip-path:inset(50%); width:1px; height:1px; overflow:hidden; white-space:nowrap; }
+.opl-reel__play.is-replay .opl-reel__playbtn { display:none; }
+.opl-reel__play.is-replay .opl-reel__playlabel { clip-path:none; width:auto; height:auto; overflow:visible; top:30px; left:50%; translate:-50% 0; display:inline-flex; align-items:center; gap:6px; padding:6px 16px; border-radius:999px; background:#F2B544; color:#3A2A05; font-size:.85rem; box-shadow:0 10px 22px -12px rgb(0 0 0 / .6); }
+.opl-reel__play.is-replay .opl-reel__playlabel::before { content:"↻"; font-size:1rem; line-height:1; }
 @keyframes oplBreathe { 50% { box-shadow:0 0 0 18px rgb(242 181 68 / .12); } }
 /* scene animation vocabulary (reel.md). Scenes rest fully drawn; .opl-anim plays them in. */
 .opl-reel svg .a-snip, .opl-panel__media svg .a-snip { transform-box:view-box; transform-origin:0 0; }
