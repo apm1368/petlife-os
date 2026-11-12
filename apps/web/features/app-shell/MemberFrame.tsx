@@ -23,6 +23,7 @@ import { CookieToggle } from "@/features/landing/opl/CookieToggle";
 import { FamilyReel } from "@/features/reel/FamilyReel";
 import { isRouteLocale } from "@/lib/i18n/config";
 import "@/features/landing/opl/opl-landing.css";
+import "@/features/landing/opl/opl-body.css";
 import "@/features/reel/reel.css";
 
 /**

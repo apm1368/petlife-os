@@ -1,0 +1,144 @@
+/* The 2026-11 pattern for page bodies (docs/design/pattern-2026-11/pages.md, "تعریف تمام‌شده").
+   The page frames already carry the pattern; the bodies still used the old editorial vocabulary: hairline rows,
+   heads with an underline accent, empty states between two rules, square no-photo boxes and underlined tabs.
+   This layer restyles that shared vocabulary once, so all public and member pages read as one pattern in light and
+   dark: page heads with a sun mark, soft raised cards for list rows, a card for filters, capsule tabs and buttons, warm
+   empty states and paw placeholders. Scoped to .opl-page__body (public + member frames), so the landing, the auth
+   frame and the operational panels keep their own styling. Only presentation: markup, data and behaviour are unchanged. */
+
+.opl-page__body main {
+  --opl-card-shadow:0 1px 0 rgb(var(--opl-sh) / .03), 0 16px 34px -30px rgb(var(--opl-sh) / .55);
+}
+
+/* ---- Page heads: no rule underneath, a small sun capsule above the title, the pattern's heading weight. ---- */
+.opl-page__body main :is(.section-head, .disc-head, .page-intro) { border-bottom:0; padding-bottom:4px; }
+.opl-page__body main :is(.section-head, .disc-head)::after { display:none; }
+.opl-page__body main :is(.section-head, .disc-head, .page-intro) h1 { color:var(--opl-ink); font-weight:850; }
+.opl-page__body main :is(.section-head, .disc-head, .page-intro) h1::before {
+  content:""; display:block; width:34px; height:6px; margin-bottom:14px; border-radius:999px;
+  background:linear-gradient(90deg, var(--opl-sun) 0 70%, var(--opl-leaf) 70% 100%);
+}
+.opl-page__body main :is(.section-head, .disc-head, .page-intro) p { color:var(--opl-ink-2); }
+
+/* ---- Filters sit in one soft card instead of between two rules. ---- */
+.opl-page__body main .filter-band {
+  padding:16px 18px; border:1px solid var(--opl-line); border-radius:24px; background:var(--opl-raised); box-shadow:var(--opl-card-shadow);
+}
+
+/* ---- List rows become soft raised cards with breathing room between them. ---- */
+.opl-page__body main :is(.disc-list, .place-rows) { border-top:0; display:flex; flex-direction:column; gap:12px; }
+.opl-page__body main ul.flex.flex-col:has(> .plan-row) { gap:12px; }
+.opl-page__body main :is(.plan-row, .disc-row, .place-row, .need-row, .post-row, .org-row, .req-row) {
+  padding:20px 22px; border:1px solid var(--opl-line); border-radius:24px; background:var(--opl-raised); box-shadow:var(--opl-card-shadow);
+  transition:border-color .2s, box-shadow .25s var(--opl-ease), transform .25s var(--opl-ease);
+}
+.opl-page__body main :is(.plan-row, .req-row):last-child { border-bottom:1px solid var(--opl-line); }
+.opl-page__body main :is(.need-row, .post-row, .org-row, .req-row) + :is(.need-row, .post-row, .org-row, .req-row) { margin-top:12px; }
+@media (hover:hover) {
+  .opl-page__body main :is(.plan-row, .disc-row, .place-row, .need-row, .post-row, .org-row):hover {
+    background:var(--opl-raised); border-color:var(--opl-line-2); transform:translateY(-2px); box-shadow:0 22px 40px -30px rgb(var(--opl-sh) / .6);
+  }
+}
+@media (prefers-reduced-motion:reduce) { .opl-page__body main :is(.plan-row, .disc-row, .place-row, .need-row, .post-row, .org-row):hover { transform:none; } }
+.opl-page__body main .disc-row:has(.disc-row__link:focus-visible) { border-radius:24px; outline:3px solid var(--opl-sun); outline-offset:2px; }
+
+/* Dense lists (settings, menus, indexes) stay rows, held together in one card. */
+.opl-page__body main :is(.row-list, .index-list) { padding:4px 18px; border:1px solid var(--opl-line); border-radius:24px; background:var(--opl-raised); box-shadow:var(--opl-card-shadow); }
+.opl-page__body main :is(.row-list__item, .index-list > a) { border-bottom-color:var(--opl-line); }
+.opl-page__body main :is(.row-list__item, .index-list > a):last-child { border-bottom:0; }
+.opl-page__body main .row-list__item:hover { background:transparent; color:var(--opl-forest); }
+
+/* ---- Tabs and category strips: capsules instead of underlines. ---- */
+.opl-page__body main :is(.disc-cats, .section-tabs) { gap:6px; padding:4px; border:1px solid var(--opl-line); border-radius:999px; background:var(--opl-raised); }
+.opl-page__body main :is(.disc-cats, .section-tabs) a { padding:9px 16px; border:0; border-radius:999px; color:var(--opl-ink-2); font-weight:650; }
+.opl-page__body main :is(.disc-cats, .section-tabs) a:hover { background:var(--opl-mint); color:var(--opl-forest); }
+.opl-page__body main :is(.disc-cats, .section-tabs) a[aria-current="page"] { background:var(--opl-forest); color:var(--opl-on-forest); border:0; }
+.opl-page__body main .disc-cats a[aria-current="page"]::after { display:none; }
+.opl-page__body main .disc-segment { border-radius:999px; border-color:var(--opl-line); background:var(--opl-cream); }
+.opl-page__body main .disc-segment button { border-radius:999px; }
+.opl-page__body main .disc-chips button[aria-pressed="true"] { border-color:var(--opl-forest); background:var(--opl-mint); color:var(--opl-forest); }
+
+/* ---- Buttons and links styled as buttons are capsules everywhere in the body. ---- */
+.opl-page__body main :is(.btn-primary-link, .btn-quiet, a.rounded, button.rounded, a.rounded-2xl, button.rounded-2xl) { border-radius:999px; }
+.opl-page__body main .btn-primary-link { box-shadow:0 8px 18px -10px rgb(var(--opl-sh) / .55); }
+
+/* ---- Soft panels: the old 12–16px boxes take the card radius and the pattern edge. ---- */
+.opl-page__body main :is(.split-panel, .lab-band) { border-radius:22px; }
+.opl-page__body main .attention-banner { border-radius:20px; }
+.opl-page__body main .rounded-lg.border { border-color:var(--opl-line); }
+
+/* ---- Empty states: a warm card with a quiet paw trail, not a gap between two rules. ---- */
+.opl-page__body main .ds-empty {
+  position:relative; overflow:hidden; padding:44px 24px; border:1px dashed var(--opl-line-2); border-radius:28px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60' viewBox='0 0 120 60'%3E%3Cg fill='%23E9D9BF'%3E%3Cg transform='translate(22 36) rotate(-14)'%3E%3Cellipse cx='0' cy='5' rx='6' ry='5'/%3E%3Ccircle cx='-6' cy='-3' r='2.2'/%3E%3Ccircle cx='-2' cy='-7' r='2.2'/%3E%3Ccircle cx='2' cy='-7' r='2.2'/%3E%3Ccircle cx='6' cy='-3' r='2.2'/%3E%3C/g%3E%3Cg transform='translate(92 20) rotate(12)'%3E%3Cellipse cx='0' cy='5' rx='6' ry='5'/%3E%3Ccircle cx='-6' cy='-3' r='2.2'/%3E%3Ccircle cx='-2' cy='-7' r='2.2'/%3E%3Ccircle cx='2' cy='-7' r='2.2'/%3E%3Ccircle cx='6' cy='-3' r='2.2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") 18px 14px / 120px 60px no-repeat,
+    var(--opl-cream);
+}
+.opl-page__body main .ds-empty > span:first-child { background:var(--opl-mint); color:var(--opl-forest); }
+.opl-page__body main .ds-empty h3 { color:var(--opl-ink); font-weight:800; }
+:root[data-theme="dark"] .opl-page__body main .ds-empty { background-image:none; }
+@media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) .opl-page__body main .ds-empty { background-image:none; } }
+
+/* ---- No-photo placeholders: cream with a paw instead of an empty box. ---- */
+.opl-page__body .opl-nophoto {
+  flex-direction:column; gap:8px; background:var(--opl-cream) !important; color:var(--opl-ink-3) !important;
+}
+.opl-page__body .opl-nophoto::before {
+  content:""; width:44px; height:44px; border-radius:50%;
+  background:var(--opl-mint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='-22 -22 44 44'%3E%3Cg fill='%237DB46C'%3E%3Cellipse cx='0' cy='5' rx='7' ry='6'/%3E%3Ccircle cx='-7' cy='-4' r='2.6'/%3E%3Ccircle cx='-2.4' cy='-8' r='2.6'/%3E%3Ccircle cx='2.4' cy='-8' r='2.6'/%3E%3Ccircle cx='7' cy='-4' r='2.6'/%3E%3C/g%3E%3C/svg%3E") center / 44px no-repeat;
+}
+
+/* ---- The travel band: the pattern's forest card with a sun glow, rounded like every other card. ---- */
+.opl-page__body main .travel-hero {
+  border:0; border-radius:28px;
+  background:radial-gradient(520px 260px at 100% 0%, rgb(242 181 68 / .26), transparent 70%), linear-gradient(135deg, #1F5A3D, #2E7650);
+}
+[dir="rtl"] .opl-page__body main .travel-hero { background:radial-gradient(520px 260px at 0% 0%, rgb(242 181 68 / .26), transparent 70%), linear-gradient(225deg, #1F5A3D, #2E7650); }
+:root[data-theme="dark"] .opl-page__body main .travel-hero { background:radial-gradient(520px 260px at 100% 0%, rgb(242 181 68 / .12), transparent 70%), linear-gradient(135deg, #18291E, #1F3527); }
+@media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) .opl-page__body main .travel-hero { background:radial-gradient(520px 260px at 100% 0%, rgb(242 181 68 / .12), transparent 70%), linear-gradient(135deg, #18291E, #1F3527); } }
+
+@media (max-width:650px) {
+  .opl-page__body main :is(.plan-row, .disc-row, .place-row, .need-row, .post-row, .org-row, .req-row) { padding:16px; border-radius:20px; }
+  .opl-page__body main .filter-band { padding:14px; border-radius:20px; }
+  .opl-page__body main :is(.disc-cats, .section-tabs) { border-radius:22px; }
+}
+
+/* ---- Member boot and failure screens (AppShell): the opl mark breathing on warm paper, before the frame mounts. ---- */
+.opl-boot { min-height:100dvh; display:grid; place-content:center; justify-items:center; gap:22px; padding:24px; color:var(--opl-ink);
+  background:radial-gradient(520px 300px at 50% 38%, color-mix(in srgb,var(--opl-sun) 16%,transparent), transparent 70%), var(--opl-paper); }
+.opl-boot__mark { display:inline-flex; color:var(--opl-forest); animation:oplBootBreathe 2.2s ease-in-out infinite; }
+.opl-boot .skeleton, .opl-boot [class*="animate-pulse"] { background:var(--opl-line); }
+.opl-boot__card { display:grid; justify-items:center; gap:18px; width:min(520px,100%); padding:32px 24px; border:1px solid var(--opl-line); border-radius:28px; background:var(--opl-raised); box-shadow:0 24px 48px -36px rgb(var(--opl-sh) / .55); }
+@keyframes oplBootBreathe { 50% { transform:scale(1.04); opacity:.82; } }
+@media (prefers-reduced-motion:reduce) { .opl-boot__mark { animation:none; } }
+.opl-boot__home { display:inline-flex; color:var(--opl-forest); border-radius:999px; }
+.opl-boot__home:focus-visible { outline:3px solid var(--opl-sun); outline-offset:4px; }
+.opl-boot__card--perch { position:relative; }
+
+/* ---- System states (404, no access, expired link) wherever the pattern is on. ---- */
+:is(.opl-page__body, .opl-boot) .system-state__icon { width:64px; height:64px; background:var(--opl-mint); color:var(--opl-forest); font-size:1.5rem; }
+:is(.opl-page__body, .opl-boot) .system-state--attention .system-state__icon { background:color-mix(in srgb,var(--opl-sun) 22%,var(--opl-raised)); color:#8A5A00; }
+:is(.opl-page__body, .opl-boot) .system-state h1 { color:var(--opl-ink); font-weight:850; font-size:1.45rem; }
+:is(.opl-page__body, .opl-boot) .system-state p { color:var(--opl-ink-2); }
+:is(.opl-page__body, .opl-boot) .system-state__link { padding:0 18px; border-radius:999px; background:var(--opl-mint); color:var(--opl-forest); }
+:is(.opl-page__body, .opl-boot) .system-state__link:hover { background:color-mix(in srgb,var(--opl-leaf) 24%,var(--opl-mint)); }
+.opl-boot .system-state { margin:0; padding:0; }
+:root[data-theme="dark"] :is(.opl-page__body, .opl-boot) .system-state--attention .system-state__icon { color:var(--opl-sun); }
+@media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) :is(.opl-page__body, .opl-boot) .system-state--attention .system-state__icon { color:var(--opl-sun); } }
+
+/* ---- Shop: product cards end in a mint capsule (no bleed bar), soft hero and category tiles. ---- */
+.opl-page__body .commerce-product { border-color:var(--opl-line); border-radius:26px; padding:10px; box-shadow:var(--opl-card-shadow, 0 16px 34px -30px rgb(var(--opl-sh) / .55)); }
+.opl-page__body .commerce-product__photo { border-radius:20px; }
+.opl-page__body .commerce-product__body { width:100%; padding:16px 8px 4px; }
+.opl-page__body .commerce-product__action { align-self:stretch; margin:12px 0 4px; padding:6px; padding-inline-start:16px; border:0; border-radius:999px; background:var(--opl-mint); color:var(--opl-forest); }
+.opl-page__body .commerce-product__arrow { width:36px; height:36px; box-shadow:none; background:var(--opl-forest); color:var(--opl-on-forest); transition:transform .25s var(--opl-ease); }
+@media (hover:hover) { .opl-page__body .commerce-product:hover .commerce-product__arrow { transform:translateX(3px); } [dir="rtl"] .opl-page__body .commerce-product:hover .commerce-product__arrow { transform:translateX(-3px); } }
+.opl-page__body :is(.commerce-cta, .shop-repeat a) { border-radius:999px; }
+.opl-page__body .shop-hero { border-radius:28px; }
+.opl-page__body .shop-category { border-color:var(--opl-line); border-radius:22px; }
+.opl-page__body .shop-category__icon { border-radius:50%; background:var(--opl-mint); color:var(--opl-forest); }
+.opl-page__body :is(.commerce-sidebar, .commerce-cart__summary, .commerce-detail .product-layout__buy) { border-color:var(--opl-line); border-radius:26px; }
+.opl-page__body .shop-repeat { border-radius:26px; background:var(--opl-cream); }
+
+/* Inside the member frame the section reel sits in the padded content column: round its band like the cards around it. */
+.member-shell .workspace-main .opl-family-reel { border-radius:32px; }
