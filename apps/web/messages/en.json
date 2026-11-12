@@ -10171,5 +10171,13 @@
         "CANCELLED": "Cancelled"
       }
     }
+  },
+  "safety": {
+    "title": "Stay safe from scams",
+    "contact": "Pay only inside opetlife. Never send a card-to-card transfer outside the site, and never share a verification code or password.",
+    "payment": "Pay only on this page. opetlife never asks you to transfer money to a personal account or to share a verification code.",
+    "lostPet": "Anyone who asks for money or a reward before returning a pet is probably a scammer. Meet in a public place and never pay in advance.",
+    "donation": "Donate only through this page. opetlife never asks you to transfer a donation to a personal account.",
+    "adoption": "Never pay a fee before meeting. See the pet in person and meet somewhere safe."
   }
 }

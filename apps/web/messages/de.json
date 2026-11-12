@@ -9301,5 +9301,13 @@
         "CANCELLED": "Abgesagt"
       }
     }
+  },
+  "safety": {
+    "title": "Schützen Sie sich vor Betrug",
+    "contact": "Bezahlen Sie nur über opetlife. Überweisen Sie nie Geld außerhalb der Website und geben Sie nie Bestätigungscodes oder Passwörter weiter.",
+    "payment": "Bezahlen Sie nur auf dieser Seite. opetlife fordert Sie nie auf, Geld auf ein Privatkonto zu überweisen oder einen Bestätigungscode zu nennen.",
+    "lostPet": "Wer vor der Rückgabe eines Tieres Geld oder Finderlohn verlangt, ist wahrscheinlich ein Betrüger. Treffen Sie sich an einem öffentlichen Ort und zahlen Sie nie im Voraus.",
+    "donation": "Spenden Sie nur über diese Seite. opetlife fordert Sie nie auf, eine Spende auf ein Privatkonto zu überweisen.",
+    "adoption": "Zahlen Sie nie vor dem ersten Treffen. Sehen Sie sich das Tier persönlich an und treffen Sie sich an einem sicheren Ort."
   }
 }

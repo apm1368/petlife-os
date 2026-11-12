@@ -29,6 +29,7 @@ import { formatCount } from "@/lib/number/format-number";
 import { localizeDigits } from "@/lib/date/jalali";
 import { isolate } from "@/lib/text/bidi";
 import type { RouteLocale } from "@/lib/i18n/config";
+import { SafetyTip } from "@/features/shared/SafetyTip";
 
 type Step =
   | "address"
@@ -604,6 +605,7 @@ export function CheckoutView() {
       <div className="flex flex-col gap-5">
         {progress(3)}
         <h1 className="text-page-title text-text-primary">{t("method.title")}</h1>
+        <SafetyTip kind="payment" />
         {error ? (
           <p role="alert" className="text-metadata text-state-urgent">
             {error}

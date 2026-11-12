@@ -207,12 +207,22 @@ const pages = {
       es: { title: "Comparación de seguros para mascotas | opetlife", description: "Consulta la información publicada de aseguradoras y planes; confirma las condiciones con la aseguradora." },
     },
   },
+  memorials: {
+    path: "memorials",
+    indexable: true,
+    copy: {
+      fa: { title: "یادبود حیوانات خانگی | اپت‌لایف", description: "یادبود همراهانی که رفته‌اند؛ فقط با اجازهٔ صاحبشان و پس از بررسی." },
+      en: { title: "Pet memorials | Opetlife", description: "Remembering companions who have passed, shared by their families and reviewed before they appear." },
+      de: { title: "Gedenkseite für Haustiere | opetlife", description: "Erinnerungen an verstorbene Tiere, von ihren Familien geteilt und vor der Veröffentlichung geprüft." },
+      es: { title: "Memoriales de mascotas | opetlife", description: "Recuerdos de compañeros que ya no están, compartidos por sus familias y revisados antes de publicarse." },
+    },
+  },
 } as const satisfies Record<string, { path: string; indexable: boolean; copy: Copy }>;
 
 export type PublicSeoPage = keyof typeof pages;
 
 export const sitemapPages: readonly PublicSeoPage[] = [
-  "home", "blog", "guides", "services", "vetFind", "community", "lostPets", "animalSupport", "animalSupportCampaigns", "animalSupportNeeds", "travel", "travelExternal", "contact", "credits", "status",
+  "home", "blog", "guides", "services", "vetFind", "community", "lostPets", "animalSupport", "animalSupportCampaigns", "animalSupportNeeds", "travel", "travelExternal", "contact", "credits", "status", "memorials",
 ];
 
 export function publicPagePath(locale: RouteLocale, page: PublicSeoPage): string {

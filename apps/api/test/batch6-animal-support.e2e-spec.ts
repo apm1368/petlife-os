@@ -623,6 +623,9 @@ describe("Batch 6 — Animal support ecosystem", () => {
     it("the portal shows ledger-derived donations without donor identity, and verification is submitted with private documents", async () => {
       const a = await ngo();
       const campaign = await a.ops.c.post(`/admin/animal-support/organizations/${a.organizationId}/campaigns`).send({ title: "Surgery fund", description: "For surgeries", fundType: "RESTRICTED" }).expect(201);
+      // Market-readiness Q55: a draft is fine, but an unverified organization cannot take a campaign live.
+      const blocked = await a.ops.c.patch(`/admin/animal-support/campaigns/${campaign.body.id}/status`).send({ status: "ACTIVE" }).expect(409);
+      expect(blocked.body.error.code).toBe("SUPPORT_CAMPAIGN_ORGANIZATION_NOT_VERIFIED");
       await a.ops.c.post(`/admin/animal-support/organizations/${a.organizationId}/verification`).send({ verificationStatus: "VERIFIED" }).expect(201);
       await a.ops.c.post(`/admin/animal-support/organizations/${a.organizationId}/listing`).send({ isPubliclyListed: true }).expect(201);
       await a.ops.c.patch(`/admin/animal-support/campaigns/${campaign.body.id}/status`).send({ status: "ACTIVE" }).expect(200);

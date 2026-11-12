@@ -12,6 +12,7 @@ import { useSessionStore } from "@/stores/session-store";
 import { ReportContentPanel } from "@/features/shared/ReportContentPanel";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 import { CommunityFrame } from "./CommunityFrame";
+import { SafetyTip } from "@/features/shared/SafetyTip";
 
 const REACTIONS: CommunityReactionType[] = [CommunityReactionType.LIKE, CommunityReactionType.LOVE, CommunityReactionType.HELPFUL];
 
@@ -116,6 +117,8 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
             </Button>
           ))}
         </div>
+
+        {post.type === "ADOPTION" ? <SafetyTip kind="adoption" /> : post.type === "LOST_PET_SHARE" ? <SafetyTip kind="lostPet" /> : post.type === "RESCUE" ? <SafetyTip kind="donation" /> : null}
 
         <ReportContentPanel successMessage={t("post.reportSuccess")} submit={(reason, details) => communityService.reportPost(postId, reason, details)} />
 
