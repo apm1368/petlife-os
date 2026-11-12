@@ -167,7 +167,7 @@ export class CheckoutService {
 
   private async assertAddressOwned(userId: string, addressId: string): Promise<string> {
     const address = await this.prisma.customerAddress.findUnique({ where: { id: addressId } });
-    if (!address) throw new ValidationApiException({ field: "addressId", reason: "Address not found" });
+    if (!address || address.archivedAt) throw new ValidationApiException({ field: "addressId", reason: "Address not found" });
     const membership = await this.prisma.householdMember.findUnique({
       where: { householdId_userId: { householdId: address.householdId, userId } },
     });
@@ -515,6 +515,11 @@ export class CheckoutService {
                 countryCode: address.countryCode,
                 recipient: address.recipient,
                 phone: address.phone,
+                instructions: address.instructions,
+                area: address.area,
+                postalCode: address.postalCode,
+                latitude: address.latitude,
+                longitude: address.longitude,
               }
             : null,
           deliveryAmountBySeller,

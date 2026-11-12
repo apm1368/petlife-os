@@ -20,6 +20,9 @@ export function toAddressSnapshotDto(json: unknown): AddressSnapshotDto {
     region: snapshot.region ?? null,
     countryCode: snapshot.countryCode ?? null,
     instructions: snapshot.instructions ?? null,
+    ...(snapshot.area ? { area: snapshot.area } : {}),
+    ...(snapshot.postalCode ? { postalCode: snapshot.postalCode } : {}),
+    ...(typeof snapshot.latitude === "number" && typeof snapshot.longitude === "number" ? { latitude: snapshot.latitude, longitude: snapshot.longitude } : {}),
   };
 }
 
@@ -76,5 +79,6 @@ export function toShippingQuoteDto(quote: ShippingQuote): ShippingQuoteDto {
     status: quote.status as unknown as ShippingQuoteDto["status"],
     expiresAt: quote.expiresAt.toISOString(),
     createdAt: quote.createdAt.toISOString(),
+    pricingBasis: (quote.pricingBasis as ShippingQuoteDto["pricingBasis"]) ?? null,
   };
 }

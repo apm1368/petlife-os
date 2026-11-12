@@ -547,25 +547,55 @@ export function CheckoutView() {
           </p>
         ) : null}
 
+        {(shippingOptions ?? []).some((group) => group.quotes.some((q) => q.pricingBasis === "SANDBOX_ESTIMATE")) ? (
+          <p className="text-metadata text-text-secondary" role="note">
+            {t("shipping.sandboxNote")}
+          </p>
+        ) : null}
+
         {(shippingOptions ?? []).map((group) => {
-          const bestByServiceLevel = new Map<string, ShippingQuoteDto>();
-          for (const quote of group.quotes) if (!bestByServiceLevel.has(quote.serviceLevel)) bestByServiceLevel.set(quote.serviceLevel, quote);
+          // One row per method and service level (couriers may return several quotes); cheapest first.
+          const byMethod = new Map<string, ShippingQuoteDto>();
+          for (const quote of group.quotes) {
+            const key = `${quote.provider}:${quote.serviceLevel}`;
+            const current = byMethod.get(key);
+            if (!current || quote.status === "SELECTED" || (current.status !== "SELECTED" && quote.priceIrr < current.priceIrr)) byMethod.set(key, quote);
+          }
+          const options = [...byMethod.values()].sort((a, b) => a.priceIrr - b.priceIrr);
           const selected = group.quotes.find((q) => q.status === "SELECTED");
 
           return (
             <div key={group.sellerOrganization.id} className="flex flex-col gap-2">
               <p className="text-section-title text-text-primary">{group.sellerOrganization.name}</p>
-              {[...bestByServiceLevel.values()].length === 0 ? <StatusLabel tone="attention">{t("shipping.unavailable")}</StatusLabel> : null}
-              {[...bestByServiceLevel.values()].map((quote) => {
-                const isSelected = quote.id === selected?.id || quote.serviceLevel === selected?.serviceLevel;
+              {options.length === 0 ? <StatusLabel tone="attention">{t("shipping.unavailable")}</StatusLabel> : null}
+              {options.map((quote) => {
+                const isSelected = quote.id === selected?.id;
                 const isLoading = shippingQuoteSelectingId === quote.id;
+                const minutes = quote.estimatedDeliveryMinutes;
+                const providerKey = `shipping.provider.${quote.provider}`;
+                const levelKey = `shipping.serviceLevel.${quote.serviceLevel}`;
                 return (
-                  <button key={quote.id} type="button" className="w-full text-start" disabled={isLoading} onClick={() => selectShippingQuote(quote.id)}>
+                  <button key={quote.id} type="button" className="w-full text-start" disabled={isLoading} aria-pressed={isSelected} onClick={() => selectShippingQuote(quote.id)}>
                     <ContextSurface className={`flex items-center justify-between gap-3 ${isSelected ? "border-brand-mint" : ""}`}>
                       <div className="flex flex-col">
-                        <span className="text-body text-text-primary">{t(`shipping.serviceLevel.${quote.serviceLevel}` as "shipping.serviceLevel.STANDARD" | "shipping.serviceLevel.EXPRESS")}</span>
-                        {quote.estimatedDeliveryMinutes != null ? (
-                          <span className="text-metadata text-text-secondary">{t("shipping.eta", { hours: Math.max(1, Math.round(quote.estimatedDeliveryMinutes / 60)) })}</span>
+                        {/* Couriers with service levels lead with the level; staff-run methods lead with their own name. */}
+                        <span className="text-body text-text-primary">
+                          {t.has(levelKey) && quote.serviceLevel !== "COURIER" && quote.serviceLevel !== "POST_PISHTAZ"
+                            ? t(levelKey as "shipping.serviceLevel.STANDARD")
+                            : t.has(providerKey)
+                              ? t(providerKey as "shipping.provider.DEV")
+                              : quote.provider}
+                        </span>
+                        {t.has(levelKey) && quote.serviceLevel !== "COURIER" && quote.serviceLevel !== "POST_PISHTAZ" && t.has(providerKey) ? (
+                          <span className="text-metadata text-text-secondary">{t(providerKey as "shipping.provider.DEV")}</span>
+                        ) : null}
+                        {minutes != null ? (
+                          <span className="text-metadata text-text-secondary">
+                            {quote.serviceLevel === "POST_PISHTAZ" || minutes > 48 * 60 ? t("shipping.etaDays", { days: Math.ceil(minutes / (24 * 60)) }) : t("shipping.eta", { hours: Math.max(1, Math.round(minutes / 60)) })}
+                          </span>
+                        ) : null}
+                        {quote.pricingBasis && quote.pricingBasis !== "API" ? (
+                          <span className="text-metadata text-text-secondary">{t(`shipping.basis.${quote.pricingBasis}` as "shipping.basis.API")}</span>
                         ) : null}
                       </div>
                       <div className="flex items-center gap-2">

@@ -33,4 +33,19 @@ export const SHIPPING_PROVIDER_CAPABILITIES: Record<ShippingProvider, ShippingPr
     supportsStatusQuery: true,
     supportsTracking: true,
   },
+  // Priced and run by opetlife staff: no courier API to query and nothing calls back.
+  OPETLIFE_COURIER: {
+    supportsQuote: true,
+    supportsCancel: true,
+    supportsWebhook: false,
+    supportsStatusQuery: false,
+    supportsTracking: true,
+  },
+  POST_PISHTAZ: {
+    supportsQuote: true,
+    supportsCancel: true,
+    supportsWebhook: false,
+    supportsStatusQuery: false,
+    supportsTracking: true,
+  },
 };

@@ -3261,13 +3261,31 @@
         "title": "Choose delivery for each seller",
         "serviceLevel": {
           "STANDARD": "Standard delivery",
-          "EXPRESS": "Express delivery"
+          "EXPRESS": "Express delivery",
+          "COURIER": "Courier",
+          "POST_PISHTAZ": "Express post"
         },
         "eta": "Arrives in about {hours, plural, one {# hour} other {# hours}}",
         "selected": "Selected",
         "unavailable": "No delivery options available right now",
         "refresh": "Refresh delivery options",
-        "chooseFirst": "Choose a delivery option to continue."
+        "chooseFirst": "Choose a delivery option to continue.",
+        "provider": {
+          "DEV": "Test courier",
+          "ALOPEYK": "Alopeyk",
+          "SNAPPBOX": "Snappbox",
+          "OPETLIFE_COURIER": "opetlife courier",
+          "POST_PISHTAZ": "Iran Post express (Pishtaz)"
+        },
+        "basis": {
+          "API": "Live courier price",
+          "SANDBOX_ESTIMATE": "Test estimate: the courier was not asked yet",
+          "DISTANCE_ESTIMATE": "Estimated from distance",
+          "CITY_FLAT": "Flat city fare",
+          "FIXED_PRICE": "Fixed tariff"
+        },
+        "etaDays": "Arrives in about {days, plural, one {# working day} other {# working days}}",
+        "sandboxNote": "Shipping is in test mode for now: Alopeyk and Snappbox prices are estimates and no courier is sent."
       },
       "payment": {
         "title": "Payment",
@@ -3502,7 +3520,9 @@
         "cancel": "Cancel",
         "submit": "Submit for review",
         "failed": "Couldn't submit your review."
-      }
+      },
+      "deliveryMethod": "Delivery: {method}",
+      "postTracking": "Track the parcel on the Post website"
     },
     "statusLabels": {
       "payment": {
@@ -3720,7 +3740,8 @@
         "team": "Team",
         "settings": "Settings",
         "finance": "Finance",
-        "promotions": "Promotions"
+        "promotions": "Promotions",
+        "shipping": "Shipping"
       },
       "notASeller": {
         "title": "No seller access",
@@ -4041,6 +4062,42 @@
           "ADJUSTMENT": "Adjustment"
         }
       }
+    },
+    "shipping": {
+      "title": "Shipping",
+      "subtitle": "The methods you offer buyers and the address couriers collect parcels from.",
+      "loading": "Loading…",
+      "failed": "Shipping settings could not be loaded.",
+      "methods": "Shipping methods",
+      "methodsHint": "If you pick none, every method opetlife has switched on is offered.",
+      "noneActive": "No shipping method is switched on at opetlife yet.",
+      "provider": {
+        "DEV": "Test courier",
+        "ALOPEYK": "Alopeyk",
+        "SNAPPBOX": "Snappbox",
+        "OPETLIFE_COURIER": "opetlife courier",
+        "POST_PISHTAZ": "Iran Post express (Pishtaz)"
+      },
+      "pickup": "Pickup address",
+      "pickupHint": "A map point lets the opetlife courier price by distance.",
+      "fields": {
+        "contactName": "Contact name",
+        "phone": "Phone",
+        "city": "City",
+        "region": "Province",
+        "area": "Neighbourhood",
+        "addressLine": "Full address",
+        "postalCode": "10-digit postal code",
+        "instructions": "Note for the courier"
+      },
+      "useLocation": "Use current location",
+      "clearLocation": "Remove map point",
+      "locationDenied": "Location access was not given.",
+      "save": "Save shipping settings",
+      "saving": "Saving…",
+      "saved": "Saved.",
+      "saveFailed": "Not saved. Check the fields (postal code: 10 digits).",
+      "readOnly": "Only a store admin can change this."
     }
   },
   "notifications": {
@@ -4307,7 +4364,8 @@
         "platformSettings": "Settings",
         "featureFlags": "Feature flags",
         "channels": "Channels & delivery",
-        "smsPatterns": "SMS patterns"
+        "smsPatterns": "SMS patterns",
+        "shipping": "Shipping"
       },
       "palette": {
         "actions": "Quick actions",
@@ -9567,6 +9625,147 @@
         "PET_TAXI": "Pet taxi",
         "OTHER": "Other"
       }
+    }
+  },
+  "addressBook": {
+    "eyebrow": "Account",
+    "title": "Addresses",
+    "description": "Your household's delivery addresses, used by couriers and the post.",
+    "navHint": "Delivery addresses and default",
+    "loading": "Loading addresses…",
+    "failed": "The addresses could not be loaded.",
+    "noHousehold": "Create a household first to save addresses.",
+    "empty": "No addresses saved yet.",
+    "add": "Add address",
+    "edit": "Edit",
+    "remove": "Remove",
+    "removeConfirm": "Remove this address? Past orders keep their own copy.",
+    "removed": "Address removed.",
+    "makeDefault": "Make default",
+    "default": "Default",
+    "save": "Save address",
+    "saving": "Saving…",
+    "saved": "Address saved.",
+    "cancel": "Cancel",
+    "failedSave": "The address was not saved. Check the fields.",
+    "fields": {
+      "label": "Label (e.g. home, work)",
+      "recipient": "Recipient",
+      "phone": "Phone",
+      "city": "City",
+      "region": "Province",
+      "area": "Neighbourhood",
+      "addressLine": "Full address (street, alley, number, unit)",
+      "postalCode": "10-digit postal code",
+      "instructions": "Note for the courier (optional)",
+      "isDefault": "Use as default address"
+    },
+    "location": {
+      "use": "Use my current location",
+      "locating": "Finding your location…",
+      "set": "Map point saved; the opetlife courier can price more precisely.",
+      "clear": "Remove map point",
+      "denied": "Location access was not given. You can continue without it.",
+      "hasPoint": "Has a map point"
+    }
+  },
+  "adminShipping": {
+    "kicker": "Shop",
+    "title": "Shipping methods",
+    "subtitle": "Which methods checkout offers, at what price, and where every shipment stands.",
+    "loading": "Loading…",
+    "failed": "The data could not be loaded.",
+    "retry": "Retry",
+    "forbidden": "You need the “View shop” permission to see shipping.",
+    "mode": {
+      "sandbox": "Test mode: Alopeyk and Snappbox only give estimates and no courier is sent.",
+      "production": "Live mode: prices come from the couriers."
+    },
+    "provider": {
+      "DEV": "Test courier",
+      "ALOPEYK": "Alopeyk",
+      "SNAPPBOX": "Snappbox",
+      "OPETLIFE_COURIER": "opetlife courier",
+      "POST_PISHTAZ": "Iran Post express (Pishtaz)"
+    },
+    "kind": {
+      "API": "Priced by the courier's API",
+      "MANUAL": "Priced by opetlife"
+    },
+    "active": "Offered at checkout",
+    "inactive": "Not offered at checkout",
+    "notes": {
+      "NEEDS_PRICE": "Set a price first.",
+      "SWITCHED_OFF": "Switched off by staff.",
+      "DISABLED_IN_ENV": "Off in the server settings.",
+      "SANDBOX": "Test estimates until API keys are set."
+    },
+    "webhook": {
+      "yes": "Webhook secret set",
+      "no": "No webhook secret (needed for live mode)"
+    },
+    "enabled": "On",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved.",
+    "saveFailed": "Not saved. If it is on, it needs a valid price.",
+    "reason": "Reason (kept in the audit log)",
+    "readOnly": "Only “Manage shop” can change this.",
+    "courier": {
+      "cities": "Cities served (comma separated; empty = all)",
+      "baseFare": "Base fare (Toman)",
+      "perKm": "Per km (Toman)",
+      "minFare": "Minimum fare (Toman)",
+      "maxKm": "Maximum distance (km)",
+      "roadFactor": "Road factor (straight line ×)",
+      "defaultFlat": "Flat fare without a map point (Toman, 0 = none)",
+      "cityFares": "Flat fare per city (one per line: city=Toman)",
+      "pickupMinutes": "Minutes to pick up",
+      "minutesPerKm": "Minutes per km"
+    },
+    "post": {
+      "fixedPrice": "Fixed price (Toman)",
+      "includedKg": "Weight included (kg)",
+      "perExtraKg": "Each extra kilo (Toman)",
+      "etaMin": "Fastest delivery (days)",
+      "etaMax": "Slowest delivery (days)"
+    },
+    "shipments": {
+      "title": "Shipments",
+      "hint": "Staff move opetlife-courier and Post shipments; Alopeyk and Snappbox report their own status.",
+      "allMethods": "All methods",
+      "allStatuses": "All statuses",
+      "empty": "No shipments.",
+      "columns": {
+        "method": "Method",
+        "seller": "Seller",
+        "city": "Destination",
+        "status": "Status",
+        "tracking": "Tracking",
+        "updated": "Last change"
+      },
+      "status": {
+        "CREATED": "Created",
+        "REQUESTED": "Courier requested",
+        "ASSIGNED": "Courier assigned",
+        "PICKED_UP": "Picked up",
+        "IN_TRANSIT": "In transit",
+        "OUT_FOR_DELIVERY": "Out for delivery",
+        "DELIVERED": "Delivered",
+        "FAILED": "Failed",
+        "CANCELED": "Cancelled",
+        "UNKNOWN": "Unknown"
+      },
+      "update": "Update",
+      "updateTitle": "Update shipment",
+      "newStatus": "New status",
+      "trackingCode": "Post tracking number or courier reference",
+      "note": "Note (optional, in the audit log)",
+      "apply": "Apply",
+      "cancel": "Cancel",
+      "applied": "Shipment updated; the member sees it in tracking.",
+      "notApplied": "That status is behind the current one; nothing changed.",
+      "failed": "The update failed."
     }
   }
 }

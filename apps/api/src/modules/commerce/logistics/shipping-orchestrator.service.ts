@@ -17,6 +17,26 @@ import { FulfillmentTransitionService } from "./fulfillment-transition.service";
 import { ShippingProviderRegistry } from "./shipping-provider-registry.service";
 import { toAddressSnapshotDto, toShippingQuoteDto } from "./logistics-dto.mapper";
 import { buildShippingPackage } from "./shipping-package.util";
+import { ShippingMethodSettingsService } from "./shipping-method-settings.service";
+import type { SellerShippingProfile } from "@prisma/client";
+
+/** A seller's pickup point: its shipping profile when filled in, otherwise just its name and city. */
+export function pickupFromProfile(seller: { name: string; city: string | null; countryCode: string }, profile: SellerShippingProfile | null): AddressSnapshotDto {
+  if (!profile?.pickupAddressLine && !profile?.pickupCity) return { recipient: seller.name, phone: null, addressLine: null, city: seller.city, region: null, countryCode: seller.countryCode, instructions: null };
+  return {
+    recipient: profile.pickupContactName ?? seller.name,
+    phone: profile.pickupPhone,
+    addressLine: profile.pickupAddressLine,
+    city: profile.pickupCity ?? seller.city,
+    region: profile.pickupRegion,
+    countryCode: seller.countryCode,
+    instructions: profile.pickupInstructions,
+    area: profile.pickupArea,
+    postalCode: profile.pickupPostalCode,
+    latitude: profile.pickupLatitude,
+    longitude: profile.pickupLongitude,
+  };
+}
 
 function isUniqueConstraintViolation(error: unknown): boolean {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
@@ -44,6 +64,7 @@ export class ShippingOrchestrator {
     private readonly shippingProviders: ShippingProviderRegistry,
     private readonly transitions: FulfillmentTransitionService,
     private readonly events: DomainEventsService,
+    private readonly methods: ShippingMethodSettingsService,
   ) {}
 
   // ---------------------------------------------------------------------
@@ -121,14 +142,20 @@ export class ShippingOrchestrator {
         }
       }
     }
-    return [...bySeller.values()];
+    const contexts = [...bySeller.values()];
+    if (contexts.length) {
+      const profiles = await this.prisma.sellerShippingProfile.findMany({ where: { sellerOrganizationId: { in: contexts.map((c) => c.sellerOrgId) } } });
+      const byId = new Map(profiles.map((p) => [p.sellerOrganizationId, p]));
+      for (const context of contexts) context.pickupAddress = pickupFromProfile(context.sellerOrganization as never, byId.get(context.sellerOrgId) ?? null);
+    }
+    return contexts;
   }
 
   private async loadDeliveryAddress(checkout: { addressId: string | null }): Promise<AddressSnapshotDto> {
     if (!checkout.addressId) return { recipient: null, phone: null, addressLine: null, city: null, region: null, countryCode: null, instructions: null };
     const address = await this.prisma.customerAddress.findUnique({ where: { id: checkout.addressId } });
     if (!address) return { recipient: null, phone: null, addressLine: null, city: null, region: null, countryCode: null, instructions: null };
-    return { recipient: address.recipient, phone: address.phone, addressLine: address.addressLine, city: address.city, region: address.region, countryCode: address.countryCode, instructions: address.instructions };
+    return { recipient: address.recipient, phone: address.phone, addressLine: address.addressLine, city: address.city, region: address.region, countryCode: address.countryCode, instructions: address.instructions, area: address.area, postalCode: address.postalCode, latitude: address.latitude, longitude: address.longitude };
   }
 
   private async requestFreshQuotes(checkoutId: string, seller: SellerContext, deliveryAddress: AddressSnapshotDto): Promise<ShippingQuote[]> {
@@ -136,8 +163,10 @@ export class ShippingOrchestrator {
       seller.shippingPackageLines.map((l) => ({ quantity: l.quantity, unitPriceAmount: l.unitPriceAmount, variantWeightValue: l.variantWeightValue, variantWeightUnit: l.variantWeightUnit as never })),
     );
     const created: ShippingQuote[] = [];
+    const allowed = await this.methods.providersFor(seller.sellerOrgId);
+    const sandbox = this.methods.mode() === "sandbox";
     for (const gateway of this.shippingProviders.listEnabled()) {
-      if (!gateway.capabilities.supportsQuote) continue;
+      if (!gateway.capabilities.supportsQuote || !allowed.has(gateway.provider)) continue;
       const result = await gateway.getQuote({ pickupAddress: seller.pickupAddress, deliveryAddress, shippingPackage });
       if (result.status !== "AVAILABLE") continue;
       for (const option of result.quotes) {
@@ -151,6 +180,7 @@ export class ShippingOrchestrator {
             estimatedPickupMinutes: option.estimatedPickupMinutes,
             estimatedDeliveryMinutes: option.estimatedDeliveryMinutes,
             providerQuoteId: option.providerQuoteId,
+            pricingBasis: option.pricingBasis ?? (sandbox || gateway.provider === ShippingProvider.DEV ? "SANDBOX_ESTIMATE" : "API"),
             status: ShippingQuoteStatus.AVAILABLE,
             expiresAt: new Date(Date.now() + option.expiresInMinutes * 60_000),
           },
@@ -249,8 +279,8 @@ export class ShippingOrchestrator {
   async createFulfillmentsForOrders(tx: Prisma.TransactionClient, checkoutId: string, orders: { id: string; sellerOrganizationId: string }[]): Promise<void> {
     for (const order of orders) {
       const fullOrder = await tx.order.findUniqueOrThrow({ where: { id: order.id } });
-      const seller = await tx.sellerOrganization.findUniqueOrThrow({ where: { id: order.sellerOrganizationId } });
-      const pickupAddress: AddressSnapshotDto = { recipient: seller.name, phone: null, addressLine: null, city: seller.city, region: null, countryCode: seller.countryCode, instructions: null };
+      const seller = await tx.sellerOrganization.findUniqueOrThrow({ where: { id: order.sellerOrganizationId }, include: { shippingProfile: true } });
+      const pickupAddress: AddressSnapshotDto = pickupFromProfile(seller, seller.shippingProfile);
       const deliveryAddress = toAddressSnapshotDto(fullOrder.shippingAddressSnapshot);
 
       let fulfillment: Fulfillment;

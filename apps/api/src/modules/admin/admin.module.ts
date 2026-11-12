@@ -42,6 +42,8 @@ import { AdminSystemController } from "./system/admin-system.controller";
 import { BookingModule } from "../booking/booking.module";
 import { PaymentsModule } from "../commerce/payments/payments.module";
 import { AdminCardTransferController } from "./finance/admin-card-transfer.controller";
+import { AdminShippingController } from "./commerce/admin-shipping.controller";
+import { LogisticsModule } from "../commerce/logistics/logistics.module";
 import { AdminServicesService } from "./services/admin-services.service";
 import { AdminServicesController } from "./services/admin-services.controller";
 import { NotificationsModule } from "../notifications/notifications.module";
@@ -154,6 +156,7 @@ import { MemoriesModule } from "../memories/memories.module";
     CommunityModule,
     BookingModule,
     PaymentsModule,
+    LogisticsModule,
     MemoriesModule,
   ],
   controllers: [
@@ -164,6 +167,7 @@ import { MemoriesModule } from "../memories/memories.module";
     UserSupportAttachmentsController,
     AdminFinanceOpsController,
     AdminCardTransferController,
+    AdminShippingController,
     AdminPartner360Controller,
     AdminPet360Controller,
     AdminAccessControlController,

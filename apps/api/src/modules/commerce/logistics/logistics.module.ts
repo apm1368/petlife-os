@@ -9,6 +9,8 @@ import { ShipmentEventsService } from "./shipment-events.service";
 import { ShippingReconciliationService } from "./shipping-reconciliation.service";
 import { CheckoutShippingController, OrderLogisticsController } from "./shipping.controller";
 import { ShippingWebhooksController } from "./shipping-webhooks.controller";
+import { OpetlifeCourierAdapter, PostPishtazAdapter } from "./manual-shipping.adapters";
+import { ShippingMethodSettingsService } from "./shipping-method-settings.service";
 
 /**
  * Delivery & Logistics Core (Handoff 08) — a self-contained module that
@@ -26,12 +28,15 @@ import { ShippingWebhooksController } from "./shipping-webhooks.controller";
     DevShippingAdapter,
     AloPeykAdapter,
     SnappBoxAdapter,
+    OpetlifeCourierAdapter,
+    PostPishtazAdapter,
+    ShippingMethodSettingsService,
     ShippingProviderRegistry,
     FulfillmentTransitionService,
     ShipmentEventsService,
     ShippingOrchestrator,
     ShippingReconciliationService,
   ],
-  exports: [ShippingOrchestrator, ShippingReconciliationService, FulfillmentTransitionService, ShipmentEventsService, ShippingProviderRegistry, DevShippingAdapter],
+  exports: [ShippingMethodSettingsService, ShippingOrchestrator, ShippingReconciliationService, FulfillmentTransitionService, ShipmentEventsService, ShippingProviderRegistry, DevShippingAdapter],
 })
 export class LogisticsModule {}
