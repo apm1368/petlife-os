@@ -2220,7 +2220,8 @@
       "channels": {
         "EMAIL": "E-Mail",
         "IN_APP": "In der App",
-        "SMS": "SMS"
+        "SMS": "SMS",
+        "PUSH": "Push"
       },
       "quietHours": {
         "title": "Ruhezeiten",
@@ -2238,7 +2239,29 @@
       "marketingManage": "Im Datenschutz verwalten",
       "quietHoursHint": "Während der Ruhezeiten werden SMS bis zum Ende des Zeitfensters zurückgestellt (dringende Meldungen kommen weiterhin an). In-App-Mitteilungen erscheinen ohne Ton in deinem Posteingang.",
       "saveError": "Deine Einstellungen konnten nicht gespeichert werden. Bitte versuche es erneut.",
-      "unsaved": "Du hast ungespeicherte Änderungen."
+      "unsaved": "Du hast ungespeicherte Änderungen.",
+      "push": {
+        "title": "Benachrichtigungen auf diesem Gerät",
+        "intro": "Pflege-Erinnerungen, Termine, Bestellungen und Vermisst-Meldungen erreichen dieses Gerät, auch wenn opetlife geschlossen ist. Auf dem Sperrbildschirm steht nur ein allgemeiner Titel, nie Gesundheitsdetails oder der Name deines Tiers.",
+        "enable": "Benachrichtigungen einschalten",
+        "disable": "Auf diesem Gerät ausschalten",
+        "test": "Test-Benachrichtigung senden",
+        "testSent": "Test-Benachrichtigung gesendet. Sie sollte in ein paar Sekunden auf diesem Gerät ankommen.",
+        "testFailed": "Die Test-Benachrichtigung kam nicht an. Schalte die Benachrichtigungen aus und wieder ein.",
+        "on": "Benachrichtigungen sind auf diesem Gerät eingeschaltet.",
+        "off": "Benachrichtigungen sind auf diesem Gerät ausgeschaltet.",
+        "denied": "Dein Browser blockiert Benachrichtigungen für diese Seite. Erlaube Benachrichtigungen für opetlife.ir in den Browser-Einstellungen und öffne die Seite neu.",
+        "unsupported": "Dieser Browser kann keine Web-Benachrichtigungen empfangen. Probier Chrome, Edge, Firefox oder Samsung Internet.",
+        "iosInstall": "Auf dem iPhone funktionieren Benachrichtigungen nur in der installierten App: Tippe in Safari auf „Teilen“ → „Zum Home-Bildschirm“, öffne opetlife vom Home-Bildschirm und schalte die Benachrichtigungen hier ein (ab iOS 16.4).",
+        "notConfigured": "Geräte-Benachrichtigungen sind noch nicht verfügbar.",
+        "error": "Das hat nicht geklappt. Versuch es noch einmal.",
+        "devices": "Deine anderen Geräte",
+        "thisDevice": "Dieses Gerät",
+        "unknownDevice": "Gerät",
+        "added": "Hinzugefügt am {date}",
+        "remove": "Entfernen",
+        "removeLabel": "{device} aus den Benachrichtigungsgeräten entfernen"
+      }
     }
   },
   "auth": {
@@ -9302,6 +9325,27 @@
         "SNOOZED": "Verschoben",
         "CANCELLED": "Abgesagt"
       }
+    }
+  },
+  "pwa": {
+    "install": {
+      "title": "Installiere opetlife auf deinem Handy",
+      "body": "Es öffnet sich wie eine App vom Startbildschirm, lädt schneller und kann dir Benachrichtigungen schicken.",
+      "action": "App installieren",
+      "later": "Später",
+      "dismiss": "Schließen",
+      "iosTitle": "Füge opetlife zum Home-Bildschirm deines iPhones hinzu",
+      "iosBody": "Tippe in Safari auf „Teilen“ und wähle „Zum Home-Bildschirm“. Öffne opetlife danach über den Home-Bildschirm.",
+      "installed": "opetlife ist installiert."
+    },
+    "header": {
+      "back": "Zurück",
+      "explore": "Alles entdecken"
+    },
+    "refresh": {
+      "pull": "Zum Aktualisieren ziehen",
+      "release": "Loslassen zum Aktualisieren",
+      "loading": "Wird aktualisiert…"
     }
   },
   "adminBookingMoney": {

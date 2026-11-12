@@ -4240,7 +4240,8 @@
       "channels": {
         "EMAIL": "Email",
         "IN_APP": "In-app",
-        "SMS": "SMS"
+        "SMS": "SMS",
+        "PUSH": "Push"
       },
       "quietHours": {
         "title": "Quiet hours",
@@ -4258,7 +4259,29 @@
       "marketingManage": "Manage in Privacy",
       "quietHoursHint": "During quiet hours, SMS waits until the window ends (urgent alerts still come through). In-app notifications arrive silently in your inbox.",
       "saveError": "Your preferences weren't saved. Try again.",
-      "unsaved": "You have unsaved changes."
+      "unsaved": "You have unsaved changes.",
+      "push": {
+        "title": "Notifications on this device",
+        "intro": "Care reminders, bookings, orders and lost-pet alerts reach this device even when opetlife is closed. The lock screen shows only a general title, never health details or your pet's name.",
+        "enable": "Turn on notifications",
+        "disable": "Turn off on this device",
+        "test": "Send a test notification",
+        "testSent": "Test notification sent. It should arrive on this device in a few seconds.",
+        "testFailed": "The test notification didn't arrive. Turn notifications off and on again.",
+        "on": "Notifications are on for this device.",
+        "off": "Notifications are off for this device.",
+        "denied": "Your browser blocks notifications for this site. Allow notifications for opetlife.ir in the browser settings, then reopen this page.",
+        "unsupported": "This browser can't receive web notifications. Try Chrome, Edge, Firefox or Samsung Internet.",
+        "iosInstall": "On iPhone, notifications work only in the installed app: in Safari tap Share → “Add to Home Screen”, open opetlife from your home screen and turn notifications on here (iOS 16.4 or later).",
+        "notConfigured": "Device notifications aren't available yet.",
+        "error": "That didn't work. Try again.",
+        "devices": "Your other devices",
+        "thisDevice": "This device",
+        "unknownDevice": "Device",
+        "added": "Added {date}",
+        "remove": "Remove",
+        "removeLabel": "Remove {device} from notification devices"
+      }
     }
   },
   "support": {
@@ -10172,6 +10195,27 @@
         "SNOOZED": "Snoozed",
         "CANCELLED": "Cancelled"
       }
+    }
+  },
+  "pwa": {
+    "install": {
+      "title": "Install opetlife on your phone",
+      "body": "It opens from your home screen like an app, loads faster and can send you notifications.",
+      "action": "Install app",
+      "later": "Not now",
+      "dismiss": "Close",
+      "iosTitle": "Add opetlife to your iPhone home screen",
+      "iosBody": "In Safari, tap the Share button and choose “Add to Home Screen”. Then open opetlife from your home screen.",
+      "installed": "opetlife is installed."
+    },
+    "header": {
+      "back": "Back",
+      "explore": "Explore everything"
+    },
+    "refresh": {
+      "pull": "Pull to refresh",
+      "release": "Release to refresh",
+      "loading": "Refreshing…"
     }
   },
   "adminBookingMoney": {
