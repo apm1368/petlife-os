@@ -11,7 +11,7 @@ import { RequireSellerRole } from "./auth/require-seller-role.decorator";
 import { CurrentSellerContext } from "./auth/current-seller-context.decorator";
 import type { ResolvedSellerContext } from "./auth/seller-context.types";
 
-const SELLABLE = [ShippingProvider.OPETLIFE_COURIER, ShippingProvider.SNAPPBOX, ShippingProvider.ALOPEYK, ShippingProvider.POST_PISHTAZ];
+const SELLABLE = [ShippingProvider.OPETLIFE_COURIER, ShippingProvider.SNAPPBOX, ShippingProvider.ALOPEYK, ShippingProvider.SNAPPBOX_APP, ShippingProvider.ALOPEYK_APP, ShippingProvider.POST_PISHTAZ];
 
 class UpdateSellerShippingDto {
   @IsArray() @ArrayMaxSize(8) @IsIn(SELLABLE, { each: true }) offeredProviders!: ShippingProvider[];

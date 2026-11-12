@@ -4993,7 +4993,8 @@
         "failed": "No se pudo enviar la reseña."
       },
       "deliveryMethod": "Envío: {method}",
-      "postTracking": "Seguir el envío en la web de Correos"
+      "postTracking": "Seguir el envío en la web de Correos",
+      "courierTracking": "Seguir al mensajero"
     },
     "checkout": {
       "summary": { "title": "Resumen del pedido", "deliveryNext": "Se elige en el paso de entrega" },
@@ -5045,7 +5046,9 @@
           "ALOPEYK": "Alopeyk",
           "SNAPPBOX": "Snappbox",
           "OPETLIFE_COURIER": "Mensajero de opetlife",
-          "POST_PISHTAZ": "Correo exprés de Irán (Pishtaz)"
+          "POST_PISHTAZ": "Correo exprés de Irán (Pishtaz)",
+          "SNAPPBOX_APP": "Snappbox",
+          "ALOPEYK_APP": "Alopeyk"
         },
         "basis": {
           "API": "Precio actual del mensajero",
@@ -6969,7 +6972,9 @@
         "ALOPEYK": "Alopeyk",
         "SNAPPBOX": "Snappbox",
         "OPETLIFE_COURIER": "Mensajero de opetlife",
-        "POST_PISHTAZ": "Correo exprés de Irán (Pishtaz)"
+        "POST_PISHTAZ": "Correo exprés de Irán (Pishtaz)",
+        "SNAPPBOX_APP": "Snappbox (reservado por opetlife)",
+        "ALOPEYK_APP": "Alopeyk (reservado por opetlife)"
       },
       "pickup": "Dirección de recogida",
       "pickupHint": "Un punto en el mapa permite al mensajero de opetlife calcular por distancia.",
@@ -9865,7 +9870,9 @@
       "ALOPEYK": "Alopeyk",
       "SNAPPBOX": "Snappbox",
       "OPETLIFE_COURIER": "Mensajero de opetlife",
-      "POST_PISHTAZ": "Correo exprés de Irán (Pishtaz)"
+      "POST_PISHTAZ": "Correo exprés de Irán (Pishtaz)",
+      "SNAPPBOX_APP": "Snappbox — reservado en la app",
+      "ALOPEYK_APP": "Alopeyk — reservado en la app"
     },
     "kind": {
       "API": "Precio por la API del mensajero",
@@ -9938,14 +9945,15 @@
       "update": "Actualizar",
       "updateTitle": "Actualizar envío",
       "newStatus": "Nuevo estado",
-      "trackingCode": "Número de seguimiento de Correos o referencia del mensajero",
+      "trackingCode": "Número de seguimiento de correos, referencia del mensajero o enlace de seguimiento de la app",
       "note": "Nota (opcional, en el registro de auditoría)",
       "apply": "Aplicar",
       "cancel": "Cancelar",
       "applied": "Envío actualizado; el miembro lo ve en el seguimiento.",
       "notApplied": "Ese estado es anterior al actual; no cambió nada.",
       "failed": "La actualización falló."
-    }
+    },
+    "appCourierHint": "Los miembros pagan el precio de estas reglas de distancia/ciudad (ajústalas cerca de lo que cobra la app). Tras un pedido, reserva el mensajero en la app normal con los pines de recogida y entrega, pega el enlace de seguimiento en Envíos y avanza el estado."
   },
   "petTaxi": {
     "member": {

@@ -138,7 +138,16 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
             ) : null}
             {tracking?.shipment?.trackingCode ? (
               <p className="text-metadata text-text-secondary">
-                {t("trackingCode")}: <span dir="ltr">{tracking.shipment.trackingCode}</span>
+                {/^https:\/\//i.test(tracking.shipment.trackingCode) ? (
+                  // Snappbox/Alopeyk booked in their app share a live tracking link.
+                  <a href={tracking.shipment.trackingCode} target="_blank" rel="noopener noreferrer nofollow" className="underline">
+                    {t("courierTracking")}
+                  </a>
+                ) : (
+                  <>
+                    {t("trackingCode")}: <span dir="ltr">{tracking.shipment.trackingCode}</span>
+                  </>
+                )}
                 {tracking.shipment.provider === "POST_PISHTAZ" ? (
                   <>
                     {" · "}

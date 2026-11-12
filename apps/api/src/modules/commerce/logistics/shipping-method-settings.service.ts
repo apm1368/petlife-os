@@ -7,10 +7,20 @@ import { ValidationApiException } from "../../../common/errors/api-exception";
 import type { AppEnv } from "../../../config/env";
 import { courierConfigUsable, parseCourierConfig, parsePostConfig, postConfigUsable } from "./shipping-pricing.policy";
 
+/** Couriers priced by opetlife's distance/city rules: its own riders, and Snappbox/Alopeyk booked by staff in their regular app. */
+export const COURIER_STYLE_PROVIDERS: ReadonlySet<ShippingProvider> = new Set([ShippingProvider.OPETLIFE_COURIER, ShippingProvider.SNAPPBOX_APP, ShippingProvider.ALOPEYK_APP]);
 /** Methods opetlife prices and runs itself (no courier API, staff move the shipment). */
-export const MANUAL_PROVIDERS: ReadonlySet<ShippingProvider> = new Set([ShippingProvider.OPETLIFE_COURIER, ShippingProvider.POST_PISHTAZ]);
+export const MANUAL_PROVIDERS: ReadonlySet<ShippingProvider> = new Set([...COURIER_STYLE_PROVIDERS, ShippingProvider.POST_PISHTAZ]);
 /** The order methods are offered in. */
-export const METHOD_ORDER: ShippingProvider[] = [ShippingProvider.OPETLIFE_COURIER, ShippingProvider.SNAPPBOX, ShippingProvider.ALOPEYK, ShippingProvider.POST_PISHTAZ, ShippingProvider.DEV];
+export const METHOD_ORDER: ShippingProvider[] = [
+  ShippingProvider.OPETLIFE_COURIER,
+  ShippingProvider.SNAPPBOX_APP,
+  ShippingProvider.ALOPEYK_APP,
+  ShippingProvider.SNAPPBOX,
+  ShippingProvider.ALOPEYK,
+  ShippingProvider.POST_PISHTAZ,
+  ShippingProvider.DEV,
+];
 
 /**
  * Staff-managed shipping methods. A manual method (opetlife courier, Post Pishtaz) is offered only when staff switch it
@@ -40,8 +50,9 @@ export class ShippingMethodSettingsService {
     return new Map(rows.map((r) => [r.provider, r]));
   }
 
-  async courierConfig(): Promise<{ enabled: boolean; config: OpetlifeCourierConfig }> {
-    const row = await this.prisma.shippingMethodSetting.findUnique({ where: { provider: ShippingProvider.OPETLIFE_COURIER } });
+  /** Distance/city pricing for opetlife's own couriers, or for Snappbox/Alopeyk booked in their app. */
+  async courierConfig(provider: ShippingProvider = ShippingProvider.OPETLIFE_COURIER): Promise<{ enabled: boolean; config: OpetlifeCourierConfig }> {
+    const row = await this.prisma.shippingMethodSetting.findUnique({ where: { provider } });
     const config = parseCourierConfig(row?.config);
     return { enabled: !!row?.enabled && courierConfigUsable(config), config };
   }
@@ -64,7 +75,7 @@ export class ShippingMethodSettingsService {
     const active = new Set<ShippingProvider>();
     for (const provider of METHOD_ORDER) {
       const row = rows.get(provider);
-      if (provider === ShippingProvider.OPETLIFE_COURIER) {
+      if (COURIER_STYLE_PROVIDERS.has(provider)) {
         if (row?.enabled && courierConfigUsable(parseCourierConfig(row.config))) active.add(provider);
       } else if (provider === ShippingProvider.POST_PISHTAZ) {
         if (row?.enabled && postConfigUsable(parsePostConfig(row.config))) active.add(provider);
@@ -85,7 +96,7 @@ export class ShippingMethodSettingsService {
       const manual = MANUAL_PROVIDERS.has(provider);
       let note: string | null = null;
       if (manual) {
-        const usable = provider === ShippingProvider.OPETLIFE_COURIER ? courierConfigUsable(parseCourierConfig(row?.config)) : postConfigUsable(parsePostConfig(row?.config));
+        const usable = COURIER_STYLE_PROVIDERS.has(provider) ? courierConfigUsable(parseCourierConfig(row?.config)) : postConfigUsable(parsePostConfig(row?.config));
         if (!usable) note = "NEEDS_PRICE";
         else if (!row?.enabled) note = "SWITCHED_OFF";
       } else if (!this.envEnabled(provider)) note = "DISABLED_IN_ENV";
@@ -97,7 +108,7 @@ export class ShippingMethodSettingsService {
         active: active.has(provider),
         note,
         kind: manual ? "MANUAL" : "API",
-        config: provider === ShippingProvider.OPETLIFE_COURIER ? parseCourierConfig(row?.config) : provider === ShippingProvider.POST_PISHTAZ ? parsePostConfig(row?.config) : {},
+        config: COURIER_STYLE_PROVIDERS.has(provider) ? parseCourierConfig(row?.config) : provider === ShippingProvider.POST_PISHTAZ ? parsePostConfig(row?.config) : {},
         webhookSecretConfigured: provider === ShippingProvider.ALOPEYK ? secret("ALOPEYK_WEBHOOK_SECRET") : provider === ShippingProvider.SNAPPBOX ? secret("SNAPPBOX_WEBHOOK_SECRET") : null,
         updatedAt: row?.updatedAt.toISOString() ?? null,
       };
@@ -108,7 +119,7 @@ export class ShippingMethodSettingsService {
   /** Writes one method's switch and rules; the caller audits it in the same transaction. */
   async update(tx: Prisma.TransactionClient, adminUserId: string, provider: ShippingProvider, input: { enabled: boolean; config?: unknown }) {
     let config: Prisma.InputJsonValue = {};
-    if (provider === ShippingProvider.OPETLIFE_COURIER) {
+    if (COURIER_STYLE_PROVIDERS.has(provider)) {
       const parsed = parseCourierConfig(input.config);
       if (input.enabled && !courierConfigUsable(parsed)) throw new ValidationApiException({ field: "config", reason: "NEEDS_PRICE" });
       config = parsed as unknown as Prisma.InputJsonValue;

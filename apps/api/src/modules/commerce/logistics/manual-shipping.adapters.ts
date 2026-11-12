@@ -25,25 +25,26 @@ const QUOTE_MINUTES = 30;
  */
 @Injectable()
 export class OpetlifeCourierAdapter implements ShippingGateway {
-  readonly provider = ShippingProvider.OPETLIFE_COURIER;
+  readonly provider: ShippingProvider = ShippingProvider.OPETLIFE_COURIER;
   readonly capabilities = SHIPPING_PROVIDER_CAPABILITIES[ShippingProvider.OPETLIFE_COURIER];
+  protected readonly idPrefix: string = "opl";
 
-  constructor(private readonly methods: ShippingMethodSettingsService) {}
+  constructor(protected readonly methods: ShippingMethodSettingsService) {}
 
   async getQuote(input: ShippingQuoteRequestInput): Promise<ShippingQuoteRequestResult> {
-    const { enabled, config } = await this.methods.courierConfig();
+    const { enabled, config } = await this.methods.courierConfig(this.provider);
     if (!enabled) return { status: "UNAVAILABLE", quotes: [], unavailableReason: "NOT_ENABLED" };
     const quote = quoteCourier(config, input.pickupAddress, input.deliveryAddress);
     if (!quote.available) return { status: "UNAVAILABLE", quotes: [], unavailableReason: quote.reason };
     return {
       status: "AVAILABLE",
-      quotes: [{ serviceLevel: "COURIER", priceIrr: quote.priceIrr, estimatedPickupMinutes: quote.pickupMinutes, estimatedDeliveryMinutes: quote.deliveryMinutes, providerQuoteId: `opl-quote-${randomUUID()}`, expiresInMinutes: QUOTE_MINUTES, pricingBasis: quote.basis }],
+      quotes: [{ serviceLevel: "COURIER", priceIrr: quote.priceIrr, estimatedPickupMinutes: quote.pickupMinutes, estimatedDeliveryMinutes: quote.deliveryMinutes, providerQuoteId: `${this.idPrefix}-quote-${randomUUID()}`, expiresInMinutes: QUOTE_MINUTES, pricingBasis: quote.basis }],
     };
   }
 
   async createShipment(input: CreateShipmentInput): Promise<CreateShipmentResult> {
     void input;
-    return { status: "CREATED", providerShipmentId: `opl-${randomUUID()}` };
+    return { status: "CREATED", providerShipmentId: `${this.idPrefix}-${randomUUID()}` };
   }
 
   async getShipmentStatus(_providerShipmentId: string): Promise<ShipmentStatusResult> {
@@ -98,4 +99,24 @@ export class PostPishtazAdapter implements ShippingGateway {
   async handleWebhook(_input: ShippingWebhookInput): Promise<ShippingWebhookResult> {
     return { valid: false };
   }
+}
+
+/**
+ * Snappbox booked by staff in its regular app (the owner's choice until a business API contract exists): the member
+ * pays opetlife's distance/city estimate for it, staff book the courier in the app, then enter its tracking link and
+ * move the status here. Nothing logs in to Snappbox on our behalf.
+ */
+@Injectable()
+export class SnappboxAppAdapter extends OpetlifeCourierAdapter {
+  override readonly provider = ShippingProvider.SNAPPBOX_APP;
+  override readonly capabilities = SHIPPING_PROVIDER_CAPABILITIES[ShippingProvider.SNAPPBOX_APP];
+  protected override readonly idPrefix = "snappbox-app";
+}
+
+/** Alopeyk booked by staff in its regular app; same flow as SnappboxAppAdapter. */
+@Injectable()
+export class AlopeykAppAdapter extends OpetlifeCourierAdapter {
+  override readonly provider = ShippingProvider.ALOPEYK_APP;
+  override readonly capabilities = SHIPPING_PROVIDER_CAPABILITIES[ShippingProvider.ALOPEYK_APP];
+  protected override readonly idPrefix = "alopeyk-app";
 }

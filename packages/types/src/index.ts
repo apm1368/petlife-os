@@ -1845,6 +1845,8 @@ export enum ShippingProvider {
   OPETLIFE_COURIER = "OPETLIFE_COURIER",
   /** Iran Post express (Pishtaz): staff-set fixed price, staff-entered tracking number. */
   POST_PISHTAZ = "POST_PISHTAZ",
+  SNAPPBOX_APP = "SNAPPBOX_APP",
+  ALOPEYK_APP = "ALOPEYK_APP",
 }
 
 export enum FulfillmentStatus {

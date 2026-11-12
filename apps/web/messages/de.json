@@ -5003,7 +5003,8 @@
         "failed": "Deine Bewertung konnte nicht gesendet werden."
       },
       "deliveryMethod": "Versand: {method}",
-      "postTracking": "Sendung auf der Website der Post verfolgen"
+      "postTracking": "Sendung auf der Website der Post verfolgen",
+      "courierTracking": "Kurier verfolgen"
     },
     "checkout": {
       "summary": { "title": "Bestellübersicht", "deliveryNext": "Wird im Lieferschritt ausgewählt" },
@@ -5055,7 +5056,9 @@
           "ALOPEYK": "Alopeyk",
           "SNAPPBOX": "Snappbox",
           "OPETLIFE_COURIER": "opetlife-Kurier",
-          "POST_PISHTAZ": "Iranische Post Express (Pishtaz)"
+          "POST_PISHTAZ": "Iranische Post Express (Pishtaz)",
+          "SNAPPBOX_APP": "Snappbox",
+          "ALOPEYK_APP": "Alopeyk"
         },
         "basis": {
           "API": "Aktueller Kurierpreis",
@@ -6979,7 +6982,9 @@
         "ALOPEYK": "Alopeyk",
         "SNAPPBOX": "Snappbox",
         "OPETLIFE_COURIER": "opetlife-Kurier",
-        "POST_PISHTAZ": "Iranische Post Express (Pishtaz)"
+        "POST_PISHTAZ": "Iranische Post Express (Pishtaz)",
+        "SNAPPBOX_APP": "Snappbox (von opetlife gebucht)",
+        "ALOPEYK_APP": "Alopeyk (von opetlife gebucht)"
       },
       "pickup": "Abholadresse",
       "pickupHint": "Ein Kartenpunkt lässt den opetlife-Kurier nach Entfernung rechnen.",
@@ -9867,7 +9872,9 @@
       "ALOPEYK": "Alopeyk",
       "SNAPPBOX": "Snappbox",
       "OPETLIFE_COURIER": "opetlife-Kurier",
-      "POST_PISHTAZ": "Iranische Post Express (Pishtaz)"
+      "POST_PISHTAZ": "Iranische Post Express (Pishtaz)",
+      "SNAPPBOX_APP": "Snappbox — in der App gebucht",
+      "ALOPEYK_APP": "Alopeyk — in der App gebucht"
     },
     "kind": {
       "API": "Preis über die Kurier-API",
@@ -9940,14 +9947,15 @@
       "update": "Aktualisieren",
       "updateTitle": "Sendung aktualisieren",
       "newStatus": "Neuer Status",
-      "trackingCode": "Post-Sendungsnummer oder Kurierreferenz",
+      "trackingCode": "Post-Sendungsnummer, Kurierreferenz oder Tracking-Link der App",
       "note": "Notiz (optional, im Prüfprotokoll)",
       "apply": "Übernehmen",
       "cancel": "Abbrechen",
       "applied": "Sendung aktualisiert; das Mitglied sieht es in der Verfolgung.",
       "notApplied": "Dieser Status liegt hinter dem aktuellen; nichts geändert.",
       "failed": "Die Aktualisierung ist fehlgeschlagen."
-    }
+    },
+    "appCourierHint": "Mitglieder zahlen den Preis aus diesen Entfernungs-/Stadtregeln (nah an den App-Preisen einstellen). Nach einer Bestellung den Kurier in der normalen App mit Abhol- und Zielpin buchen, dann den Tracking-Link unter Sendungen eintragen und den Status weiterschalten."
   },
   "petTaxi": {
     "member": {
