@@ -3518,7 +3518,7 @@ model WalletAccount {
   currency  String   @default("IRR")
   createdAt DateTime @default(now())
 
-  entries     WalletEntry[]
+  entries WalletEntry[]
   adjustments WalletAdjustment[]
 
   @@map("wallet_accounts")
