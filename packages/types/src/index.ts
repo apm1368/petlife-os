@@ -7102,6 +7102,177 @@ export interface AdminWalletDetailDto {
 }
 
 // ---------------------------------------------------------------------------
+// On-demand pet taxi (Uber/Snapp-style) and maps
+// ---------------------------------------------------------------------------
+
+export interface MapsClientConfigDto {
+  provider: "none" | "neshan" | "google";
+  tileUrl: string;
+  tileAttribution: string;
+  googleBrowserKey: string | null;
+  search: boolean;
+  /** Routes are straight-line estimates (no routing provider configured or reachable). */
+  estimatesOnly: boolean;
+}
+
+export interface MapPlaceDto {
+  label: string;
+  address: string | null;
+  city: string | null;
+  latitude: number;
+  longitude: number;
+}
+
+export type PetTaxiCarrierSizeValue = "SMALL" | "MEDIUM" | "LARGE";
+export type PetTaxiRideStatusValue = "SEARCHING" | "DRIVER_ASSIGNED" | "ARRIVING" | "PICKED_UP" | "COMPLETED" | "CANCELLED_BY_MEMBER" | "CANCELLED_BY_DRIVER" | "NO_DRIVER";
+export type PetTaxiRouteSource = "GOOGLE" | "NESHAN" | "STRAIGHT_LINE_ESTIMATE";
+
+export interface PetTaxiPointDto {
+  label: string;
+  latitude: number;
+  longitude: number;
+  city?: string | null;
+  note?: string | null;
+}
+
+export interface PetTaxiFareBreakdownDto {
+  baseIrr: number;
+  distanceIrr: number;
+  timeIrr: number;
+  carrierIrr: number;
+  extraPetsIrr: number;
+  minimumApplied: boolean;
+  km: number;
+  minutes: number;
+}
+
+export interface PetTaxiQuoteDto {
+  available: boolean;
+  /** NOT_PRICED: no fare rule for this city yet. */
+  reason: "NOT_PRICED" | null;
+  fareIrr: number | null;
+  breakdown: PetTaxiFareBreakdownDto | null;
+  distanceMeters: number;
+  durationSeconds: number;
+  routeSource: PetTaxiRouteSource;
+  fareRuleCity: string | null;
+}
+
+export interface PetTaxiRideDto {
+  id: string;
+  status: PetTaxiRideStatusValue;
+  carrierSize: PetTaxiCarrierSizeValue;
+  petIds: string[];
+  pickup: PetTaxiPointDto;
+  dropoff: PetTaxiPointDto;
+  fareIrr: number;
+  breakdown: PetTaxiFareBreakdownDto;
+  distanceMeters: number;
+  durationSeconds: number;
+  routeSource: PetTaxiRouteSource;
+  searchExpiresAt: string;
+  /** Shown to the member once a driver accepts. */
+  driver: { name: string; organizationName: string; phone: string | null; latitude: number | null; longitude: number | null; locatedAt: string | null } | null;
+  /** Shown to the driver once they accept. */
+  member: { name: string; phone: string | null } | null;
+  /** Straight-line estimate to the pickup (before pickup) or to the drop-off (after). */
+  etaSeconds: number | null;
+  assignedAt: string | null;
+  arrivingAt: string | null;
+  pickedUpAt: string | null;
+  completedAt: string | null;
+  cancelledAt: string | null;
+  cancelReason: string | null;
+  rating: number | null;
+  ratingComment: string | null;
+  createdAt: string;
+}
+
+export interface PetTaxiRequestDto {
+  id: string;
+  /** Before accepting, pickup and drop-off are a ~500 m grid point plus the city: no address label, no note. */
+  approximate: boolean;
+  pickup: PetTaxiPointDto;
+  dropoff: PetTaxiPointDto;
+  carrierSize: PetTaxiCarrierSizeValue;
+  petCount: number;
+  fareIrr: number;
+  distanceMeters: number;
+  durationSeconds: number;
+  /** Straight-line km from the driver's fresh position to the approximate pickup, rounded to half a km. */
+  kmFromYou: number | null;
+  searchExpiresAt: string;
+}
+
+export type PetTaxiDriverStatusValue = "PENDING" | "VERIFIED" | "SUSPENDED";
+
+/** One person a pet-taxi organization lets drive, with the staff check of their licence and vehicle. */
+export interface PetTaxiDriverDto {
+  id: string;
+  providerUserId: string;
+  name: string;
+  licenceNumber: string;
+  vehiclePlate: string;
+  vehicleDescription: string;
+  status: PetTaxiDriverStatusValue;
+  statusReason: string | null;
+  verifiedAt: string | null;
+  createdAt: string;
+}
+
+/** The owner's view: registered drivers and the members (owner/staff) who could be registered. */
+export interface PetTaxiDriversDto {
+  drivers: PetTaxiDriverDto[];
+  members: { providerUserId: string; name: string; role: "OWNER" | "STAFF" }[];
+}
+
+export interface AdminPetTaxiDriverDto extends PetTaxiDriverDto {
+  organizationName: string;
+  organizationVerified: boolean;
+}
+
+export interface PetTaxiDriverStateDto {
+  /** False when this organization is not a verified pet-taxi provider. */
+  eligible: boolean;
+  reason: "NOT_PET_TAXI" | "NOT_VERIFIED" | null;
+  /** This person may go online: a driving role and a staff-verified driver record. */
+  canDrive: boolean;
+  /** The organization owner, who registers drivers. */
+  isOwner: boolean;
+  /** This person's own driver record in this organization, if registered. */
+  driver: PetTaxiDriverDto | null;
+  online: boolean;
+  organizationName: string;
+  activeRide: PetTaxiRideDto | null;
+  requests: PetTaxiRequestDto[];
+}
+
+export interface AdminPetTaxiFareRuleDto {
+  id: string;
+  city: string;
+  baseFareIrr: number;
+  perKmIrr: number;
+  perMinuteIrr: number;
+  minimumFareIrr: number;
+  mediumSurchargePercent: number;
+  largeSurchargePercent: number;
+  extraPetIrr: number;
+  /** The city's bounding box (null for "*"). */
+  south: number | null;
+  west: number | null;
+  north: number | null;
+  east: number | null;
+  active: boolean;
+  updatedAt: string;
+}
+
+export interface AdminPetTaxiOverviewDto {
+  rules: AdminPetTaxiFareRuleDto[];
+  onlineDrivers: number;
+  rides: (PetTaxiRideDto & { memberName: string; driverName: string | null })[];
+}
+
+// ---------------------------------------------------------------------------
 // Admin "Pets" section (GET /admin/pets, GET /admin/pets/:id) — operational metadata, never clinical text
 // ---------------------------------------------------------------------------
 

@@ -3885,7 +3885,9 @@
         "smsPatterns": "SMS-Vorlagen",
         "walletDirectory": "Mitglieder",
         "walletTopUps": "Aufladebelege",
-        "shipping": "Versand"
+        "shipping": "Versand",
+        "petTaxi": "Tiertaxi",
+        "petTaxiDrivers": "Tiertaxi-Fahrer:innen"
       },
       "palette": {
         "actions": "Schnellaktionen",
@@ -7579,7 +7581,8 @@
         "analytics": "Leistung",
         "travel": "Reisen und Aufenthalt",
         "clinicWorkspace": "Klinikverwaltung",
-        "verification": "Nachweisdokumente"
+        "verification": "Nachweisdokumente",
+        "petTaxi": "Tiertaxi"
       },
       "notAProvider": {
         "title": "Kein Zugriff auf den Anbieterbereich",
@@ -9887,6 +9890,242 @@
       "applied": "Sendung aktualisiert; das Mitglied sieht es in der Verfolgung.",
       "notApplied": "Dieser Status liegt hinter dem aktuellen; nichts geändert.",
       "failed": "Die Aktualisierung ist fehlgeschlagen."
+    }
+  },
+  "petTaxi": {
+    "member": {
+      "title": "Tiertaxi",
+      "subtitle": "Tippen Sie Start und Ziel auf der Karte an, sehen Sie den Preis und verfolgen Sie Ihren Fahrer live.",
+      "map": "Karte",
+      "zoomIn": "Vergrößern",
+      "zoomOut": "Verkleinern",
+      "loading": "Wird geladen…",
+      "failed": "Konnte nicht geladen werden.",
+      "retry": "Erneut versuchen",
+      "step": {
+        "pickup": "Tippen Sie den Abholort an",
+        "dropoff": "Tippen Sie das Ziel an",
+        "details": "Tiere und Fahrzeug"
+      },
+      "pickup": "Abholung",
+      "dropoff": "Ziel",
+      "pinned": "Auf der Karte gewählter Punkt",
+      "myLocation": "Mein aktueller Standort",
+      "locating": "Standort wird ermittelt…",
+      "locationDenied": "Kein Standortzugriff; tippen Sie stattdessen auf die Karte.",
+      "savedAddresses": "Gespeicherte Adressen",
+      "search": "Ort suchen",
+      "searchNone": "Kein Ort gefunden.",
+      "city": "Abholstadt",
+      "note": "Hinweis für den Fahrer (Etage, Klingel…)",
+      "change": "Ändern",
+      "pets": "Welche Tiere fahren mit?",
+      "noPets": "Legen Sie zuerst Ihr Tier an, um eine Fahrt zu buchen.",
+      "carrier": "Wie Ihr Tier reist",
+      "carrierSize": {
+        "SMALL": "Klein: Katze oder kleiner Hund in der Box",
+        "MEDIUM": "Mittel: mittelgroßer Hund in einer Kofferraumbox",
+        "LARGE": "Groß: großer Hund oder mehrere Tiere"
+      },
+      "quote": "Fahrpreis",
+      "quoting": "Fahrpreis wird berechnet…",
+      "estimate": "Entfernung und Zeit sind Schätzungen (Luftlinie × Straßenfaktor).",
+      "routed": "Nach der Straßenroute",
+      "notPriced": "Das Tiertaxi ist in dieser Stadt noch nicht verfügbar.",
+      "distanceTime": "{km} km · etwa {minutes} Min.",
+      "payNote": "Online-Zahlung ist noch nicht aktiv; zahlen Sie beim Fahrer bei Ankunft.",
+      "request": "Fahrt anfragen",
+      "requesting": "Anfrage wird gesendet…",
+      "errors": {
+        "RIDE_ALREADY_OPEN": "Sie haben bereits eine offene Fahrt.",
+        "TOO_CLOSE": "Start und Ziel liegen zu nah beieinander.",
+        "TOO_FAR": "Diese Strecke ist zu lang für das Tiertaxi.",
+        "NOT_PRICED": "Das Tiertaxi ist in dieser Stadt noch nicht verfügbar.",
+        "generic": "Das hat nicht geklappt. Bitte erneut versuchen."
+      },
+      "status": {
+        "SEARCHING": "Fahrer wird gesucht",
+        "DRIVER_ASSIGNED": "Fahrer ist unterwegs",
+        "ARRIVING": "Fahrer ist da",
+        "PICKED_UP": "Unterwegs zum Ziel",
+        "COMPLETED": "Angekommen",
+        "CANCELLED_BY_MEMBER": "Storniert",
+        "CANCELLED_BY_DRIVER": "Vom Fahrer storniert",
+        "NO_DRIVER": "Kein Fahrer gefunden"
+      },
+      "searchingHint": "Ihre Anfrage ging an Fahrer in der Nähe. Nimmt bis {time} niemand an, sagen wir es Ihnen.",
+      "eta": "Etwa {minutes} Min. entfernt",
+      "driver": "Fahrer",
+      "call": "Anrufen",
+      "positionAt": "Position um {time}",
+      "cancel": "Fahrt stornieren",
+      "cancelConfirm": "Diese Fahrt stornieren?",
+      "newRide": "Neue Fahrt",
+      "rate": "Fahrt bewerten",
+      "rateComment": "Ihr Kommentar (optional)",
+      "rateSend": "Bewertung senden",
+      "rated": "Danke für Ihre Bewertung.",
+      "stars": "{n} von 5",
+      "receipt": "Fahrtbeleg",
+      "receiptLines": {
+        "base": "Grundpreis",
+        "distance": "Strecke",
+        "time": "Zeit",
+        "carrier": "Transportart",
+        "extraPets": "Weitere Tiere",
+        "minimum": "Mindestpreis angewendet",
+        "total": "Gesamt"
+      },
+      "history": "Frühere Fahrten",
+      "historyEmpty": "Noch keine Fahrten.",
+      "requestNow": "Jetzt ein Tiertaxi rufen",
+      "requestNowHint": "auf der Karte, mit sofortigem Preis und Live-Verfolgung"
+    },
+    "driver": {
+      "title": "Tiertaxi: Fahrer",
+      "subtitle": "Gehen Sie online, um Anfragen in der Nähe zu sehen. Ihre Position wird nur online gesendet.",
+      "notEligible": {
+        "NOT_PET_TAXI": "Nur für Tiertaxi-Anbieter.",
+        "NOT_VERIFIED": "Sie können online gehen, sobald Ihre Unterlagen geprüft sind."
+      },
+      "online": "Sie sind online",
+      "offline": "Sie sind offline",
+      "goOnline": "Online gehen",
+      "goOffline": "Offline gehen",
+      "locationOff": "Der Standort Ihres Telefons ist nicht verfügbar; Anfragen erscheinen nur mit aktuellem Standort.",
+      "requests": "Anfragen in der Nähe",
+      "noRequests": "Gerade keine Anfragen. Die Seite aktualisiert sich selbst.",
+      "kmFromYou": "{km} km bis zur Abholung",
+      "pets": "{count, plural, one {# Tier} other {# Tiere}}",
+      "accept": "Annehmen",
+      "decline": "Ablehnen",
+      "taken": "Ein anderer Fahrer hat diese Anfrage übernommen.",
+      "activeRide": "Aktuelle Fahrt",
+      "passenger": "Fahrgast",
+      "navigate": "Navigation",
+      "next": {
+        "ARRIVING": "Ich bin da",
+        "PICKED_UP": "Tier abgeholt",
+        "COMPLETED": "Abgeliefert"
+      },
+      "release": "Ich schaffe es nicht",
+      "releaseReason": "Grund (die Fahrt geht an andere Fahrer zurück)",
+      "fare": "Fahrpreis: {amount}",
+      "collect": "Fahrpreis bei Ablieferung kassieren.",
+      "failed": "Das hat nicht geklappt. Bitte erneut versuchen.",
+      "driverStatus": {
+        "NONE": "Sie sind noch nicht als Fahrer:in registriert. Bitten Sie die Inhaberin/den Inhaber, Sie mit Führerschein und Fahrzeug einzutragen.",
+        "NONE_OWNER": "Um online zu gehen, tragen Sie sich oder Ihre Fahrer:innen unten mit Führerschein und Fahrzeug ein; das opetlife-Team prüft das.",
+        "PENDING": "Das opetlife-Team prüft Ihre Angaben; nach der Bestätigung können Sie online gehen.",
+        "VERIFIED": "Sie sind geprüft.",
+        "SUSPENDED": "Ihre Fahrberechtigung ist vorerst gesperrt."
+      },
+      "around": "Rund um {city}",
+      "approxArea": "Ungefähres Gebiet",
+      "approxHint": "Die genaue Adresse und Notiz sehen Sie nach dem Annehmen.",
+      "roster": {
+        "title": "Ihre Fahrer:innen",
+        "hint": "Jede Fahrerin/jeder Fahrer wird mit Führerschein und Kennzeichen eingetragen und kann erst nach der Prüfung durch opetlife online gehen. Geänderte Angaben werden erneut geprüft.",
+        "member": "Teammitglied",
+        "licenceNumber": "Führerscheinnummer",
+        "vehiclePlate": "Kennzeichen",
+        "vehicleDescription": "Fahrzeug (Modell und Farbe)",
+        "save": "Zur Prüfung senden",
+        "saved": "Gespeichert; wird geprüft.",
+        "failed": "Das hat nicht geklappt. Bitte erneut versuchen.",
+        "incomplete": "Bitte alle Felder ausfüllen.",
+        "empty": "Noch keine Fahrer:innen eingetragen.",
+        "status": {
+          "PENDING": "Prüfung ausstehend",
+          "VERIFIED": "Geprüft",
+          "SUSPENDED": "Gesperrt"
+        }
+      }
+    }
+  },
+  "adminPetTaxi": {
+    "kicker": "Dienste",
+    "title": "Tiertaxi",
+    "subtitle": "Fahrpreise je Stadt („*“ = alle anderen Städte) und laufende Fahrten.",
+    "loading": "Wird geladen…",
+    "failed": "Die Daten konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "forbidden": "Dafür brauchen Sie „Dienste ansehen“.",
+    "onlineDrivers": "Fahrer online",
+    "rules": "Fahrpreise",
+    "noRules": "Noch keine Fahrpreise; ohne sie nennt das Tiertaxi keinen Preis.",
+    "fields": {
+      "city": "Stadt („*“ für Standard)",
+      "base": "Grundpreis (Toman)",
+      "perKm": "Pro km (Toman)",
+      "perMinute": "Pro Minute (Toman)",
+      "minimum": "Minimum (Toman)",
+      "medium": "Zuschlag mittel %",
+      "large": "Zuschlag groß %",
+      "extraPet": "Jedes weitere Tier (Toman)",
+      "active": "Aktiv",
+      "reason": "Grund (Prüfprotokoll)",
+      "south": "Rahmen Süd (Breite)",
+      "west": "Rahmen West (Länge)",
+      "north": "Rahmen Nord (Breite)",
+      "east": "Rahmen Ost (Länge)"
+    },
+    "add": "Neuer Stadtpreis",
+    "save": "Speichern",
+    "saved": "Gespeichert.",
+    "saveFailed": "Nicht gespeichert. Zahlen prüfen.",
+    "readOnly": "Nur „Dienste verwalten“ kann Preise ändern.",
+    "rides": "Fahrten der letzten 24 Stunden",
+    "noRides": "Keine Fahrten.",
+    "columns": {
+      "member": "Mitglied",
+      "driver": "Fahrer",
+      "route": "Strecke",
+      "fare": "Preis",
+      "status": "Status",
+      "rating": "Bewertung"
+    },
+    "status": {
+      "SEARCHING": "Fahrer wird gesucht",
+      "DRIVER_ASSIGNED": "Fahrer ist unterwegs",
+      "ARRIVING": "Fahrer ist da",
+      "PICKED_UP": "Unterwegs zum Ziel",
+      "COMPLETED": "Angekommen",
+      "CANCELLED_BY_MEMBER": "Storniert",
+      "CANCELLED_BY_DRIVER": "Vom Fahrer storniert",
+      "NO_DRIVER": "Kein Fahrer gefunden"
+    },
+    "disputesHint": "Beschwerden zu einer Fahrt laufen über „Streitfälle“.",
+    "boxHint": "Der Tarif dieser Stadt gilt für Fahrten, deren Abholort in diesem Rahmen liegt (höchstens 3°). Die von Mitgliedern eingegebene Stadt beeinflusst den Preis nicht.",
+    "boxRequired": "Ein Stadttarif braucht alle vier Rahmenkoordinaten.",
+    "drivers": {
+      "kicker": "Tiertaxi",
+      "title": "Fahrer:innen",
+      "subtitle": "Prüfen Sie Führerschein und Fahrzeug jeder Person; nur geprüfte Fahrer:innen können online gehen.",
+      "loading": "Wird geladen…",
+      "failed": "Das hat nicht geklappt. Bitte erneut versuchen.",
+      "retry": "Erneut versuchen",
+      "forbidden": "Berechtigung services.view erforderlich.",
+      "empty": "Noch keine Fahrer:innen eingetragen.",
+      "columns": {
+        "name": "Fahrer:in",
+        "organization": "Organisation",
+        "licence": "Führerschein",
+        "vehicle": "Fahrzeug",
+        "status": "Status",
+        "decision": "Entscheidung"
+      },
+      "status": {
+        "PENDING": "Prüfung ausstehend",
+        "VERIFIED": "Geprüft",
+        "SUSPENDED": "Gesperrt"
+      },
+      "reason": "Grund (Prüfprotokoll)",
+      "reasonRequired": "Bitte einen Grund angeben.",
+      "verify": "Bestätigen",
+      "suspend": "Sperren",
+      "decided": "Gespeichert.",
+      "orgNotVerified": "Organisation noch nicht geprüft"
     }
   }
 }

@@ -3880,7 +3880,9 @@
         "smsPatterns": "Plantillas SMS",
         "walletDirectory": "Miembros",
         "walletTopUps": "Comprobantes de recarga",
-        "shipping": "Envíos"
+        "shipping": "Envíos",
+        "petTaxi": "Taxi para mascotas",
+        "petTaxiDrivers": "Conductores de taxi"
       },
       "palette": {
         "actions": "Acciones rápidas",
@@ -7569,7 +7571,8 @@
         "analytics": "Rendimiento",
         "travel": "Viajes y estancias",
         "clinicWorkspace": "Gestión de la clínica",
-        "verification": "Documentos de verificación"
+        "verification": "Documentos de verificación",
+        "petTaxi": "Taxi para mascotas"
       },
       "notAProvider": {
         "title": "Sin acceso al panel de proveedores",
@@ -9885,6 +9888,242 @@
       "applied": "Envío actualizado; el miembro lo ve en el seguimiento.",
       "notApplied": "Ese estado es anterior al actual; no cambió nada.",
       "failed": "La actualización falló."
+    }
+  },
+  "petTaxi": {
+    "member": {
+      "title": "Taxi para mascotas",
+      "subtitle": "Marca la recogida y el destino en el mapa, ve la tarifa y sigue a tu conductor en vivo.",
+      "map": "Mapa",
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar",
+      "loading": "Cargando…",
+      "failed": "No se pudo cargar.",
+      "retry": "Reintentar",
+      "step": {
+        "pickup": "Marca la recogida en el mapa",
+        "dropoff": "Marca el destino en el mapa",
+        "details": "Mascotas y vehículo"
+      },
+      "pickup": "Recogida",
+      "dropoff": "Destino",
+      "pinned": "Punto elegido en el mapa",
+      "myLocation": "Mi ubicación actual",
+      "locating": "Buscando tu ubicación…",
+      "locationDenied": "No se dio acceso a la ubicación; marca en el mapa.",
+      "savedAddresses": "Direcciones guardadas",
+      "search": "Buscar un lugar",
+      "searchNone": "No se encontró ningún lugar.",
+      "city": "Ciudad de recogida",
+      "note": "Nota para el conductor (piso, timbre…)",
+      "change": "Cambiar",
+      "pets": "¿Qué mascotas viajan?",
+      "noPets": "Añade primero tu mascota para pedir un viaje.",
+      "carrier": "Cómo viaja tu mascota",
+      "carrierSize": {
+        "SMALL": "Pequeño: gato o perro pequeño en transportín",
+        "MEDIUM": "Mediano: perro mediano en una caja en el maletero",
+        "LARGE": "Grande: perro grande o varias mascotas"
+      },
+      "quote": "Tarifa",
+      "quoting": "Calculando la tarifa…",
+      "estimate": "La distancia y el tiempo son estimaciones (línea recta × factor de ruta).",
+      "routed": "Según la ruta por carretera",
+      "notPriced": "El taxi para mascotas aún no está disponible en esta ciudad.",
+      "distanceTime": "{km} km · unos {minutes} min",
+      "payNote": "El pago en línea aún no está activo; paga al conductor al llegar.",
+      "request": "Pedir viaje",
+      "requesting": "Enviando la solicitud…",
+      "errors": {
+        "RIDE_ALREADY_OPEN": "Ya tienes un viaje abierto.",
+        "TOO_CLOSE": "La recogida y el destino están demasiado cerca.",
+        "TOO_FAR": "Este viaje es demasiado largo para el taxi de mascotas.",
+        "NOT_PRICED": "El taxi para mascotas aún no está disponible en esta ciudad.",
+        "generic": "No funcionó. Inténtalo de nuevo."
+      },
+      "status": {
+        "SEARCHING": "Buscando conductor",
+        "DRIVER_ASSIGNED": "El conductor va en camino",
+        "ARRIVING": "El conductor ha llegado",
+        "PICKED_UP": "Camino al destino",
+        "COMPLETED": "Llegaste",
+        "CANCELLED_BY_MEMBER": "Cancelado",
+        "CANCELLED_BY_DRIVER": "Cancelado por el conductor",
+        "NO_DRIVER": "No se encontró conductor"
+      },
+      "searchingHint": "Tu solicitud se envió a conductores cercanos. Si nadie la acepta antes de las {time}, te avisaremos.",
+      "eta": "A unos {minutes} min",
+      "driver": "Conductor",
+      "call": "Llamar",
+      "positionAt": "Posición a las {time}",
+      "cancel": "Cancelar viaje",
+      "cancelConfirm": "¿Cancelar este viaje?",
+      "newRide": "Nuevo viaje",
+      "rate": "Califica este viaje",
+      "rateComment": "Tu comentario (opcional)",
+      "rateSend": "Enviar calificación",
+      "rated": "Gracias por calificar.",
+      "stars": "{n} de 5",
+      "receipt": "Recibo del viaje",
+      "receiptLines": {
+        "base": "Tarifa base",
+        "distance": "Distancia",
+        "time": "Tiempo",
+        "carrier": "Transporte",
+        "extraPets": "Mascotas extra",
+        "minimum": "Se aplicó la tarifa mínima",
+        "total": "Total"
+      },
+      "history": "Viajes anteriores",
+      "historyEmpty": "Aún no hay viajes.",
+      "requestNow": "Pedir un taxi para mascotas ahora",
+      "requestNowHint": "en el mapa, con tarifa al instante y seguimiento en vivo"
+    },
+    "driver": {
+      "title": "Taxi para mascotas: conductor",
+      "subtitle": "Conéctate para ver solicitudes cercanas. La posición de tu teléfono solo se envía mientras estás en línea.",
+      "notEligible": {
+        "NOT_PET_TAXI": "Solo para proveedores de taxi para mascotas.",
+        "NOT_VERIFIED": "Podrás conectarte cuando se verifiquen tus documentos."
+      },
+      "online": "Estás en línea",
+      "offline": "Estás desconectado",
+      "goOnline": "Conectarme",
+      "goOffline": "Desconectarme",
+      "locationOff": "La ubicación de tu teléfono no está disponible; las solicitudes solo aparecen con una ubicación actual.",
+      "requests": "Solicitudes cercanas",
+      "noRequests": "No hay solicitudes ahora. Esta página se actualiza sola.",
+      "kmFromYou": "{km} km hasta la recogida",
+      "pets": "{count, plural, one {# mascota} other {# mascotas}}",
+      "accept": "Aceptar",
+      "decline": "Pasar",
+      "taken": "Otro conductor tomó esta solicitud.",
+      "activeRide": "Viaje actual",
+      "passenger": "Pasajero",
+      "navigate": "Navegar",
+      "next": {
+        "ARRIVING": "He llegado",
+        "PICKED_UP": "Mascota recogida",
+        "COMPLETED": "Entregado"
+      },
+      "release": "No puedo ir",
+      "releaseReason": "Motivo (el viaje vuelve a otros conductores)",
+      "fare": "Tarifa: {amount}",
+      "collect": "Cobra la tarifa al entregar.",
+      "failed": "No funcionó. Inténtalo de nuevo.",
+      "driverStatus": {
+        "NONE": "Aún no estás registrado como conductor. Pide al titular de tu organización que te añada con tu permiso y vehículo.",
+        "NONE_OWNER": "Para conectarte, registra abajo a ti o a tus conductores con permiso y vehículo; el equipo de opetlife lo revisa.",
+        "PENDING": "El equipo de opetlife está revisando tus datos; podrás conectarte cuando estén verificados.",
+        "VERIFIED": "Estás verificado.",
+        "SUSPENDED": "Tu actividad como conductor está suspendida por ahora."
+      },
+      "around": "Alrededor de {city}",
+      "approxArea": "Zona aproximada",
+      "approxHint": "Verás la dirección exacta y la nota después de aceptar.",
+      "roster": {
+        "title": "Tus conductores",
+        "hint": "Cada conductor se registra con permiso y matrícula y no puede conectarse hasta que opetlife lo verifique. Los datos cambiados se revisan de nuevo.",
+        "member": "Miembro del equipo",
+        "licenceNumber": "Número de permiso",
+        "vehiclePlate": "Matrícula",
+        "vehicleDescription": "Vehículo (modelo y color)",
+        "save": "Enviar a revisión",
+        "saved": "Guardado; se revisará.",
+        "failed": "No funcionó. Inténtalo de nuevo.",
+        "incomplete": "Completa todos los campos.",
+        "empty": "Aún no hay conductores registrados.",
+        "status": {
+          "PENDING": "Pendiente de revisión",
+          "VERIFIED": "Verificado",
+          "SUSPENDED": "Suspendido"
+        }
+      }
+    }
+  },
+  "adminPetTaxi": {
+    "kicker": "Servicios",
+    "title": "Taxi para mascotas",
+    "subtitle": "Tarifas por ciudad («*» = todas las demás) y viajes en curso.",
+    "loading": "Cargando…",
+    "failed": "No se pudieron cargar los datos.",
+    "retry": "Reintentar",
+    "forbidden": "Necesitas el permiso «Ver servicios».",
+    "onlineDrivers": "Conductores en línea",
+    "rules": "Tarifas",
+    "noRules": "Aún no hay tarifas; el taxi no cotiza hasta que exista una.",
+    "fields": {
+      "city": "Ciudad («*» para la predeterminada)",
+      "base": "Tarifa base (tomanes)",
+      "perKm": "Por km (tomanes)",
+      "perMinute": "Por minuto (tomanes)",
+      "minimum": "Mínimo (tomanes)",
+      "medium": "Recargo mediano %",
+      "large": "Recargo grande %",
+      "extraPet": "Cada mascota extra (tomanes)",
+      "active": "Activa",
+      "reason": "Motivo (auditoría)",
+      "south": "Recuadro sur (lat)",
+      "west": "Recuadro oeste (long)",
+      "north": "Recuadro norte (lat)",
+      "east": "Recuadro este (long)"
+    },
+    "add": "Nueva tarifa de ciudad",
+    "save": "Guardar",
+    "saved": "Guardado.",
+    "saveFailed": "No se guardó. Revisa los números.",
+    "readOnly": "Solo «Gestionar servicios» puede cambiar tarifas.",
+    "rides": "Viajes de las últimas 24 horas",
+    "noRides": "No hay viajes.",
+    "columns": {
+      "member": "Miembro",
+      "driver": "Conductor",
+      "route": "Ruta",
+      "fare": "Tarifa",
+      "status": "Estado",
+      "rating": "Calificación"
+    },
+    "status": {
+      "SEARCHING": "Buscando conductor",
+      "DRIVER_ASSIGNED": "El conductor va en camino",
+      "ARRIVING": "El conductor ha llegado",
+      "PICKED_UP": "Camino al destino",
+      "COMPLETED": "Llegaste",
+      "CANCELLED_BY_MEMBER": "Cancelado",
+      "CANCELLED_BY_DRIVER": "Cancelado por el conductor",
+      "NO_DRIVER": "No se encontró conductor"
+    },
+    "disputesHint": "Las quejas sobre un viaje se gestionan en Disputas.",
+    "boxHint": "La tarifa de esta ciudad se aplica a viajes cuya recogida está dentro de este recuadro (máx. 3°). La ciudad que escribe el usuario no afecta al precio.",
+    "boxRequired": "Una tarifa de ciudad necesita las cuatro coordenadas del recuadro.",
+    "drivers": {
+      "kicker": "Taxi para mascotas",
+      "title": "Conductores",
+      "subtitle": "Revisa el permiso y vehículo de cada conductor; solo los verificados pueden conectarse.",
+      "loading": "Cargando…",
+      "failed": "No funcionó. Inténtalo de nuevo.",
+      "retry": "Reintentar",
+      "forbidden": "Se requiere el permiso services.view.",
+      "empty": "Aún no hay conductores registrados.",
+      "columns": {
+        "name": "Conductor",
+        "organization": "Organización",
+        "licence": "Permiso",
+        "vehicle": "Vehículo",
+        "status": "Estado",
+        "decision": "Decisión"
+      },
+      "status": {
+        "PENDING": "Pendiente de revisión",
+        "VERIFIED": "Verificado",
+        "SUSPENDED": "Suspendido"
+      },
+      "reason": "Motivo (auditoría)",
+      "reasonRequired": "Escribe un motivo.",
+      "verify": "Verificar",
+      "suspend": "Suspender",
+      "decided": "Guardado.",
+      "orgNotVerified": "organización aún no verificada"
     }
   }
 }
