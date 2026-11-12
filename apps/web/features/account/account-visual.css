@@ -163,7 +163,10 @@
 }
 
 @media (max-width: 56.25rem) {
+  /* One column on phones and narrow tablets: the base rule above fixes two columns and, loading after
+     globals.css, would otherwise win over its single-column breakpoint and squeeze every account page. */
   .account-shell {
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-4);
   }
 
