@@ -433,7 +433,17 @@ export class BookingsService {
       take: 200,
     });
 
-    return bookings.map((b) => this.toDto(b));
+    // Household membership is not access to every pet's bookings (notes, addresses, outcomes): a member sees their
+    // own bookings and those of pets they may act on for bookings — the same rule as opening one booking.
+    const mayActOnPet = new Map<string, boolean>();
+    const visible: typeof bookings = [];
+    for (const b of bookings) {
+      if (b.userId === userId) { visible.push(b); continue; }
+      const key = `${b.householdId}:${b.petId}`;
+      if (!mayActOnPet.has(key)) mayActOnPet.set(key, await this.petAccess.canActOnBooking({ userId: "", petId: b.petId, householdId: b.householdId }, userId));
+      if (mayActOnPet.get(key)) visible.push(b);
+    }
+    return visible.map((b) => this.toDto(b));
   }
 
   async getById(userId: string, id: string): Promise<BookingDto> {
@@ -499,8 +509,8 @@ export class BookingsService {
   async reportProviderNoShow(userId: string, id: string): Promise<BookingDto> {
     const booking = await this.prisma.booking.findUnique({ where: { id } });
     if (!booking) throw new NotFoundApiException("Booking");
-    const effective = await this.petAccess.getEffectivePermissions(booking.petId, userId);
-    if (booking.userId !== userId && !effective?.canBookCare) throw new PetAccessDeniedException({ bookingId: id });
+    // Same rule as opening the booking: a care-handoff sitter's temporary grant or a provider's system grant never qualifies.
+    if (!(await this.petAccess.canActOnBooking(booking, userId))) throw new PetAccessDeniedException({ bookingId: id });
     if (booking.bookingStatus !== BookingStatus.CONFIRMED) throw new InvalidBookingTransitionException({ bookingId: id, from: booking.bookingStatus, to: BookingStatus.NO_SHOW });
     if (Date.now() < booking.startAt.getTime() + 30 * 60_000) throw new ValidationApiException({ field: "startAt", reason: "TOO_EARLY_TO_REPORT" });
     await this.prisma.$transaction(async (tx) => {
@@ -517,9 +527,8 @@ export class BookingsService {
     const booking = await this.prisma.booking.findUnique({ where: { id } });
     if (!booking) throw new NotFoundApiException("Booking");
 
-    const effective = await this.petAccess.getEffectivePermissions(booking.petId, userId);
-    const canCancel = booking.userId === userId || Boolean(effective?.canBookCare);
-    if (!canCancel) throw new PetAccessDeniedException({ bookingId: id });
+    // Same rule as opening the booking: a care-handoff sitter's temporary grant or a provider's system grant never qualifies.
+    if (!(await this.petAccess.canActOnBooking(booking, userId))) throw new PetAccessDeniedException({ bookingId: id });
 
     if (!CANCELLABLE_STATUSES.includes(booking.bookingStatus)) {
       throw new BookingNotCancellableException({ bookingId: id, status: booking.bookingStatus });
@@ -629,8 +638,7 @@ export class BookingsService {
   async reschedule(userId: string, id: string, dto: RescheduleBookingDto): Promise<BookingDto> {
     const booking = await this.prisma.booking.findUnique({ where: { id }, include: { additionalPets: true, petAccess: { include: { petAccessGrant: true } } } });
     if (!booking) throw new NotFoundApiException("Booking");
-    const effective = await this.petAccess.getEffectivePermissions(booking.petId, userId);
-    if (booking.userId !== userId && !effective?.canBookCare) throw new PetAccessDeniedException({ bookingId: id });
+    if (!(await this.petAccess.canActOnBooking(booking, userId))) throw new PetAccessDeniedException({ bookingId: id });
     if (booking.bookingStatus !== BookingStatus.CONFIRMED || booking.startAt <= new Date()) {
       throw new InvalidBookingTransitionException({ bookingId: id, from: booking.bookingStatus, to: BookingStatus.RESCHEDULED });
     }
@@ -866,8 +874,7 @@ export class BookingsService {
   async cancelSeriesFrom(userId: string, bookingId: string, reason?: string): Promise<{ cancelledBookingIds: string[] }> {
     const anchor = await this.prisma.booking.findUnique({ where: { id: bookingId } });
     if (!anchor?.bookingSeriesId) throw new NotFoundApiException("Booking series");
-    const effective = await this.petAccess.getEffectivePermissions(anchor.petId, userId);
-    if (anchor.userId !== userId && !effective?.canBookCare) throw new PetAccessDeniedException({ bookingId });
+    if (!(await this.petAccess.canActOnBooking(anchor, userId))) throw new PetAccessDeniedException({ bookingId });
     const occurrences = await this.prisma.booking.findMany({
       where: { bookingSeriesId: anchor.bookingSeriesId, startAt: { gte: anchor.startAt }, bookingStatus: { in: CANCELLABLE_STATUSES } },
       orderBy: { startAt: "asc" },

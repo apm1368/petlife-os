@@ -11,8 +11,9 @@ Scope: the whole site except the admin back office UI (admin API authorization w
   flags, public API payloads, the image optimizer, listening ports and firewall, nginx config.
 - **HTTP crawl** of 617 non-admin URLs in four locales (status, `lang`/`dir`, untranslated keys, Persian on
   Latin pages and the reverse, de/es strings identical to English). All 617 answered 200 (one expected 308).
-- **Browser pass** (Playwright, 35 pages × 4 locales × mobile 390px + desktop 1366px = 280 loads): page errors,
-  console errors, failed requests, horizontal overflow, broken images, axe WCAG 2 A/AA (serious/critical).
+- **Browser passes** (Playwright, axe WCAG 2 A/AA serious/critical): 35 pages × 4 locales at desktop width
+  (140), the same at a real 390px mobile viewport (140), and 16 pages × 4 locales in dark mode on mobile (64).
+  Checked page errors, console errors, failed requests, horizontal overflow and broken images.
 - **Catalog check** of `messages/{de,es}.json` against `en.json`, and of inline fa/en copy in components.
 - Live database read-only checks (counts only): seed accounts, stored photo metadata.
 
@@ -31,6 +32,7 @@ Scope: the whole site except the admin back office UI (admin API authorization w
 | Medium | Seller ADMIN could promote themselves to OWNER and demote/remove the real owner, or re-invite the owner at a lower role. | Only an OWNER may grant, change or remove OWNER. Unit spec. |
 | Low | Stored `javascript:` URL in travel requirement `sourceUrl` rendered as a link to household members and staff. | DTO accepts only http(s); `externalHref()` guard on every data-driven external link touched. |
 | Low | Bearer tokens (invites, pet cards, health shares, downloads) and query strings written to request logs. | Logger writes the route template (`/health-shares/:token`). |
+| Low | A care-handoff sitter (temporary grant) could cancel, reschedule or report no-show on bookings, and the booking list showed every household pet's bookings regardless of grants. | Booking mutations and the list use the same rule as opening one booking (`canActOnBooking`). |
 | Low | Card-transfer idempotent replay could return another member's payment row. | Replay scoped to the caller; foreign key → conflict. |
 | Low | No password length ceiling on register/change/reset (Argon2id 64 MiB per hash). | 200 chars, same as sign-in. |
 | Low | Web client accepted API paths with `..`/`%2e%2e`/`#`/`\` from decoded route params (one-link CSRF shape). | `assertSafeApiPath()` in `apiFetch`. |
@@ -50,8 +52,10 @@ Scope: the whole site except the admin back office UI (admin API authorization w
   JSON-LD → `localizedAuthorName()` shows the Latin half outside `/fa`.
 - Broken provider cover images (demo rows point at files removed in the redesign) now fall back to the monogram;
   the seed no longer references them.
-- Browser pass: **no page errors, no horizontal overflow** on any of the 280 loads; the only console error is the
-  expected 401 from `/api/auth/session` for anonymous visitors.
+- Browser passes: **no page errors and no horizontal overflow at 390px** (three overflow hits were taken during
+  a deploy's reload window and were clean on re-check); the only console error is the expected 401 from
+  `/api/auth/session` for anonymous visitors. Remaining axe items: home-page step text and dark-mode muted rows
+  below 4.5:1 contrast, and the discovery sort `<select>` without a label.
 
 ## Open items
 
