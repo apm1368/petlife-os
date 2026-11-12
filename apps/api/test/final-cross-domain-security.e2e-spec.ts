@@ -46,6 +46,8 @@ const PUBLIC_GET = new Set([
   "/insurance/providers/:providerId",
   "/lost-pets/:incidentId",
   "/places/:placeId",
+  // The caller's own business claim on a public listing (null for anyone who has not claimed it).
+  "/places/:placeId/claim",
   "/provider-services/:serviceId",
   "/provider-services/:serviceId/availability",
   "/provider-services/:serviceId/intake-form",
@@ -68,6 +70,8 @@ const OWN_ACTION = new Set([
   "DELETE /community/posts/:postId/save",
   "POST /places/favorites/:placeId",
   "DELETE /places/favorites/:placeId",
+  // "Is this your business? Claim it": files the caller's own claim; approval still needs a KYC-verified business.
+  "POST /places/:placeId/claim",
   "PUT /travel/listings/:id/favorite",
   "DELETE /travel/listings/:id/favorite",
   "PUT /shop/products/:id/favorite",
