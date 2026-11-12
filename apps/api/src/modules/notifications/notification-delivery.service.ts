@@ -13,6 +13,22 @@ import type { AppEnv } from "../../config/env";
 import { MessagingProviderRegistry } from "./messaging/messaging-provider-registry.service";
 import { EmailGatewayService } from "../../common/email/email-gateway.service";
 import { publicOrigin, renderEmail, type EmailLocale } from "../../common/email/email-layout";
+import { WebPushService, type PushPayload, type PushSendOutcome } from "./push/web-push.service";
+import { PushSubscriptionService } from "./push/push-subscription.service";
+
+interface PushDeliveryMeta {
+  userId?: string;
+  title?: string;
+  body?: string;
+  url?: string;
+  locale?: string;
+  dir?: "rtl" | "ltr";
+  category?: string;
+  silent?: boolean;
+  urgency?: "high" | "normal";
+  /** Subscription ids already reached by an earlier attempt; a retry never sends to them twice. */
+  sentTo?: string[];
+}
 
 /** Exponential backoff, capped — 30s, 60s, 120s, ... never a wait so long a bounded-attempt policy feels indefinite. */
 function backoffSeconds(attemptCount: number): number {
@@ -39,6 +55,8 @@ export class NotificationDeliveryService {
     private readonly events: DomainEventsService,
     private readonly config: ConfigService<AppEnv, true>,
     private readonly email: EmailGatewayService,
+    private readonly webPush: WebPushService,
+    private readonly pushSubscriptions: PushSubscriptionService,
   ) {}
 
   /** No-op (returns false) if the row is not currently PENDING/QUEUED — already claimed by a concurrent caller, or already terminal. */
@@ -58,6 +76,7 @@ export class NotificationDeliveryService {
 
     const delivery = await this.prisma.notificationDelivery.findUniqueOrThrow({ where: { id: deliveryId } });
     if (delivery.channel === NotificationChannel.EMAIL) return this.attemptEmail(delivery);
+    if (delivery.channel === NotificationChannel.PUSH) return this.attemptPush(delivery);
     const meta =
       (delivery.metadata as {
         destination?: string;
@@ -175,6 +194,70 @@ export class NotificationDeliveryService {
       }
     } catch (error) {
       this.logger.error(`Email delivery ${delivery.id} threw unexpectedly`, error instanceof Error ? error.stack : undefined);
+      await this.scheduleTransientRetry(delivery.id, delivery.attemptCount, "UNEXPECTED_ERROR", error instanceof Error ? error.message : String(error), provider);
+    }
+    return true;
+  }
+
+  /**
+   * Push twin of the SMS/email paths: one delivery row covers all of the member's devices. Each device's outcome
+   * updates its subscription (a gone endpoint is deleted). Devices still failing transiently are retried with the
+   * same backoff and attempt budget; a device already reached is never sent to again. SENT once any device got it.
+   */
+  private async attemptPush(delivery: { id: string; notificationId: string; attemptCount: number; metadata: Prisma.JsonValue }): Promise<boolean> {
+    const meta = (delivery.metadata as PushDeliveryMeta | null) ?? {};
+    if (!meta.userId || !meta.title || !meta.url) {
+      await this.markPermanentFailure(delivery.id, "MISSING_DESTINATION_OR_BODY", "The delivery was missing a recipient, title or link.");
+      return true;
+    }
+    const provider = MessagingProvider.WEB_PUSH;
+    try {
+      const sentTo = new Set(meta.sentTo ?? []);
+      const devices = await this.prisma.pushSubscription.findMany({ where: { userId: meta.userId } });
+      const payload: PushPayload = {
+        id: delivery.notificationId,
+        title: meta.title,
+        body: meta.body ?? "",
+        url: meta.url,
+        lang: meta.locale ?? "fa",
+        dir: meta.dir ?? "rtl",
+        silent: meta.silent ?? false,
+        category: meta.category,
+      };
+      let transient: Extract<PushSendOutcome, { status: "TRANSIENT" }> | null = null;
+      let rejected: Extract<PushSendOutcome, { status: "PERMANENT" | "GONE" }> | null = null;
+      for (const device of devices.filter((d) => !sentTo.has(d.id))) {
+        const outcome = await this.webPush.send(device, payload, { urgency: meta.urgency ?? "normal" });
+        await this.pushSubscriptions.record(device, outcome);
+        if (outcome.status === "SENT") sentTo.add(device.id);
+        else if (outcome.status === "TRANSIENT") transient = outcome;
+        else rejected = outcome;
+      }
+      const metadata = { ...meta, sentTo: [...sentTo] } as Prisma.InputJsonValue;
+      const maxAttempts = this.config.get("NOTIFICATION_MAX_DELIVERY_ATTEMPTS", { infer: true });
+      if (transient && (sentTo.size === 0 || delivery.attemptCount < maxAttempts)) {
+        await this.scheduleTransientRetry(delivery.id, delivery.attemptCount, transient.code, transient.message, provider, metadata);
+      } else if (sentTo.size > 0) {
+        await this.prisma.notificationDelivery.update({
+          where: { id: delivery.id },
+          data: {
+            status: NotificationDeliveryStatus.SENT,
+            provider,
+            destinationMasked: `${sentTo.size} device${sentTo.size === 1 ? "" : "s"}`,
+            failureKind: null,
+            failureCode: null,
+            failureMessage: null,
+            metadata,
+          },
+        });
+        await this.events.publish("NotificationDeliverySucceeded", { deliveryId: delivery.id, notificationId: delivery.notificationId, provider });
+      } else if (devices.length === 0 || rejected?.status === "GONE") {
+        await this.markPermanentFailure(delivery.id, rejected?.code ?? "NO_PUSH_SUBSCRIPTION", "No subscribed device could receive this notification.", provider, metadata);
+      } else {
+        await this.markPermanentFailure(delivery.id, rejected?.code ?? "PUSH_REJECTED", rejected && "message" in rejected ? rejected.message : "The push service rejected this message.", provider, metadata);
+      }
+    } catch (error) {
+      this.logger.error(`Push delivery ${delivery.id} threw unexpectedly`, error instanceof Error ? error.stack : undefined);
       await this.scheduleTransientRetry(delivery.id, delivery.attemptCount, "UNEXPECTED_ERROR", error instanceof Error ? error.message : String(error), provider);
     }
     return true;

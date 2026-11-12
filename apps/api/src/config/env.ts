@@ -205,6 +205,17 @@ const envSchema = z.object({
   SMTP_USER: z.string().min(1).optional(),
   SMTP_PASSWORD: z.string().min(1).optional(),
   EMAIL_TIMEOUT_MS: z.coerce.number().int().min(1000).max(60_000).default(15_000),
+  /// Web Push (VAPID) for browsers, installed PWAs and the Android app (TWA). Generate a pair once with
+  /// `npx web-push generate-vapid-keys` and keep both only in apps/api/.env (the private key must never reach git).
+  /// Without both keys the PUSH channel reports NOT_CONFIGURED and nothing is sent. Rotating the pair silently
+  /// invalidates every existing browser subscription, so do it only on a key leak.
+  WEB_PUSH_VAPID_PUBLIC_KEY: z.string().regex(/^[A-Za-z0-9_-]{80,100}$/, "must be a base64url P-256 public key").optional(),
+  WEB_PUSH_VAPID_PRIVATE_KEY: z.string().regex(/^[A-Za-z0-9_-]{40,50}$/, "must be a base64url P-256 private key").optional(),
+  /// Contact the push services may use about this sender (mailto: or https:); Apple rejects localhost.
+  WEB_PUSH_SUBJECT: z.string().regex(/^(mailto:|https:\/\/)/, "must start with mailto: or https://").default("https://opetlife.ir"),
+  /// How long a push service keeps an undelivered message for an offline device.
+  WEB_PUSH_TTL_SECONDS: z.coerce.number().int().min(60).max(2_419_200).default(86_400),
+  WEB_PUSH_TIMEOUT_MS: z.coerce.number().int().min(1000).max(30_000).default(10_000),
   /// How many times a TRANSIENT delivery failure is retried before the
   /// delivery is marked FAILED for good (spec: "do not infinitely retry").
   NOTIFICATION_MAX_DELIVERY_ATTEMPTS: z.coerce.number().int().positive().default(3),
@@ -327,8 +338,16 @@ function validateEmailConfig(env: AppEnv): void {
   if (missing.length > 0) throw new Error(`EMAIL_PROVIDER=${env.EMAIL_PROVIDER} requires: ${missing.join(", ")}`);
 }
 
+/** Web Push needs both halves of the VAPID pair; one without the other is a typo, not a choice. */
+function validateWebPushConfig(env: AppEnv): void {
+  if (Boolean(env.WEB_PUSH_VAPID_PUBLIC_KEY) !== Boolean(env.WEB_PUSH_VAPID_PRIVATE_KEY)) {
+    throw new Error("WEB_PUSH_VAPID_PUBLIC_KEY and WEB_PUSH_VAPID_PRIVATE_KEY must be set together");
+  }
+}
+
 function validateMessagingConfig(env: AppEnv): void {
   validateEmailConfig(env);
+  validateWebPushConfig(env);
   if (env.MESSAGING_SANDBOX_MODE !== "production") return;
   const missing: string[] = [];
   if (env.MESSAGING_PROVIDER !== "faraz") missing.push("MESSAGING_PROVIDER=faraz");
