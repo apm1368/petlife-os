@@ -70,6 +70,7 @@ export class SupportCaseService {
   ) {}
 
   async create(admin: ResolvedAdminContext, dto: CreateSupportCaseDto, requestId?: string): Promise<SupportCaseSummaryDto> {
+    const after: Array<() => Promise<void>> = [];
     const created = await this.prisma.$transaction(async (tx) => {
       const rows = await tx.$queryRaw<{ nextval: bigint }[]>`SELECT nextval('support_case_number_seq') AS nextval`;
       // A sequence's nextval() always returns exactly one row — the
@@ -94,10 +95,11 @@ export class SupportCaseService {
         include: CASE_INCLUDE,
       });
 
-      await this.events.publish("SupportCaseCreated", { caseId: row.id, caseNumber, requesterUserId: row.requesterUserId }, { tx, aggregateType: "SupportCase", aggregateId: row.id });
+      after.push(await this.events.stage("SupportCaseCreated", { caseId: row.id, caseNumber, requesterUserId: row.requesterUserId }, { tx, aggregateType: "SupportCase", aggregateId: row.id }));
       await this.auditLog.record({ adminUserId: admin.adminUserId, action: "support_case.created", entityType: "SUPPORT_CASE", entityId: row.id, requestId, tx });
       return row;
     });
+    for (const dispatch of after) await dispatch();
 
     return toSupportCaseSummaryDto(created);
   }
@@ -275,6 +277,7 @@ export class SupportCaseService {
       throw new AdminAccessDeniedException({ reason: "ASSIGNEE_NOT_ACTIVE_ADMIN", assigneeAdminId });
     }
 
+    const after: Array<() => Promise<void>> = [];
     const updated = await this.prisma.$transaction(async (tx) => {
       const existing = await tx.supportCase.findUnique({ where: { id: caseId } });
       if (!existing) throw new SupportCaseNotFoundException({ caseId });
@@ -285,15 +288,17 @@ export class SupportCaseService {
       // a status transition, any ACTIVE admin is always a valid assignee).
       const firstAssigned = await tx.supportCase.findUniqueOrThrow({ where: { id: caseId }, select: { firstAssignedAt: true } });
       const row = await tx.supportCase.update({ where: { id: caseId }, data: { assignedAdminId: assigneeAdminId, ...(firstAssigned.firstAssignedAt ? {} : { firstAssignedAt: new Date() }) }, include: CASE_INCLUDE });
-      await this.events.publish("SupportCaseAssigned", { caseId, assigneeAdminId, previousAssigneeAdminId: existing.assignedAdminId }, { tx, aggregateType: "SupportCase", aggregateId: caseId });
+      after.push(await this.events.stage("SupportCaseAssigned", { caseId, assigneeAdminId, previousAssigneeAdminId: existing.assignedAdminId }, { tx, aggregateType: "SupportCase", aggregateId: caseId }));
       await this.auditLog.record({ adminUserId: admin.adminUserId, action: "support_case.assigned", entityType: "SUPPORT_CASE", entityId: caseId, afterSummary: { assigneeAdminId }, requestId, tx });
       return row;
     });
+    for (const dispatch of after) await dispatch();
 
     return toSupportCaseSummaryDto(updated);
   }
 
   async transition(admin: ResolvedAdminContext, caseId: string, to: SupportCaseStatus, requestId?: string): Promise<SupportCaseSummaryDto> {
+    const after: Array<() => Promise<void>> = [];
     const updated = await this.prisma.$transaction(async (tx) => {
       const [locked] = await tx.$queryRaw<{ id: string }[]>`SELECT "id" FROM "support_cases" WHERE "id" = ${caseId}::uuid FOR UPDATE`;
       if (!locked) throw new SupportCaseNotFoundException({ caseId });
@@ -313,12 +318,12 @@ export class SupportCaseService {
 
       const row = await tx.supportCase.update({ where: { id: caseId }, data, include: CASE_INCLUDE });
 
-      await this.events.publish("SupportCaseStatusChanged", { caseId, from: current.status, to }, { tx, aggregateType: "SupportCase", aggregateId: caseId });
+      after.push(await this.events.stage("SupportCaseStatusChanged", { caseId, from: current.status, to }, { tx, aggregateType: "SupportCase", aggregateId: caseId }));
       if (to === SupportCaseStatus.RESOLVED) {
-        await this.events.publish("SupportCaseResolved", { caseId, caseNumber: row.caseNumber, requesterUserId: row.requesterUserId }, { tx, aggregateType: "SupportCase", aggregateId: caseId });
+        after.push(await this.events.stage("SupportCaseResolved", { caseId, caseNumber: row.caseNumber, requesterUserId: row.requesterUserId }, { tx, aggregateType: "SupportCase", aggregateId: caseId }));
       }
       if (to === SupportCaseStatus.CLOSED) {
-        await this.events.publish("SupportCaseClosed", { caseId, requesterUserId: row.requesterUserId }, { tx, aggregateType: "SupportCase", aggregateId: caseId });
+        after.push(await this.events.stage("SupportCaseClosed", { caseId, requesterUserId: row.requesterUserId }, { tx, aggregateType: "SupportCase", aggregateId: caseId }));
       }
       await this.auditLog.record({
         adminUserId: admin.adminUserId,
@@ -333,11 +338,13 @@ export class SupportCaseService {
 
       return row;
     });
+    for (const dispatch of after) await dispatch();
 
     return toSupportCaseSummaryDto(updated);
   }
 
   async postMessage(admin: ResolvedAdminContext, caseId: string, body: string, visibility: SupportMessageVisibility, requestId?: string): Promise<SupportMessageDto> {
+    const after: Array<() => Promise<void>> = [];
     const message = await this.prisma.$transaction(async (tx) => {
       const supportCase = await tx.supportCase.findUnique({ where: { id: caseId } });
       if (!supportCase) throw new SupportCaseNotFoundException({ caseId });
@@ -364,16 +371,17 @@ export class SupportCaseService {
       // notification fan-out below only ever fires for PUBLIC messages, by
       // construction: an INTERNAL message never reaches NotifyInput at all.
       if (visibility === SupportMessageVisibility.PUBLIC) {
-        await this.events.publish(
+        after.push(await this.events.stage(
           "SupportMessagePosted",
           { caseId, caseNumber: supportCase.caseNumber, requesterUserId: supportCase.requesterUserId, visibility, authorType: SupportMessageAuthorType.ADMIN },
           { tx, aggregateType: "SupportCase", aggregateId: caseId },
-        );
+        ));
       }
       await this.auditLog.record({ adminUserId: admin.adminUserId, action: "support_message.posted", entityType: "SUPPORT_CASE", entityId: caseId, afterSummary: { visibility }, requestId, tx });
 
       return created;
     });
+    for (const dispatch of after) await dispatch();
 
     return toSupportMessageDto(message);
   }
@@ -445,6 +453,7 @@ export class SupportCaseService {
   async createAsUser(userId: string, input: CreateSupportCaseAsUserInput): Promise<SupportCaseUserSummaryDto> {
     await this.assertUserOwnsReferences(userId, input);
 
+    const after: Array<() => Promise<void>> = [];
     const created = await this.prisma.$transaction(async (tx) => {
       const rows = await tx.$queryRaw<{ nextval: bigint }[]>`SELECT nextval('support_case_number_seq') AS nextval`;
       const caseNumber = `CASE-${rows[0]!.nextval.toString().padStart(6, "0")}`;
@@ -464,9 +473,10 @@ export class SupportCaseService {
         include: CASE_INCLUDE,
       });
 
-      await this.events.publish("SupportCaseCreated", { caseId: row.id, caseNumber, requesterUserId: userId }, { tx, aggregateType: "SupportCase", aggregateId: row.id });
+      after.push(await this.events.stage("SupportCaseCreated", { caseId: row.id, caseNumber, requesterUserId: userId }, { tx, aggregateType: "SupportCase", aggregateId: row.id }));
       return row;
     });
+    for (const dispatch of after) await dispatch();
 
     return toSupportCaseUserSummaryDto(created);
   }
@@ -502,6 +512,7 @@ export class SupportCaseService {
   }
 
   async postMessageAsUser(userId: string, caseId: string, body: string): Promise<SupportMessageDto> {
+    const after: Array<() => Promise<void>> = [];
     const message = await this.prisma.$transaction(async (tx) => {
       const supportCase = await tx.supportCase.findUnique({ where: { id: caseId } });
       if (!supportCase || supportCase.requesterUserId !== userId) throw new SupportCaseNotFoundException({ caseId });
@@ -521,25 +532,26 @@ export class SupportCaseService {
       // general rule.
       if (supportCase.status === SupportCaseStatus.WAITING_ON_USER) {
         await tx.supportCase.update({ where: { id: caseId }, data: { status: SupportCaseStatus.IN_PROGRESS } });
-        await this.events.publish(
+        after.push(await this.events.stage(
           "SupportCaseStatusChanged",
           { caseId, from: SupportCaseStatus.WAITING_ON_USER, to: SupportCaseStatus.IN_PROGRESS },
           { tx, aggregateType: "SupportCase", aggregateId: caseId },
-        );
+        ));
       }
 
       // Published for completeness (e.g. a future admin-side "customer
       // replied" indicator) but never notifies the requester — see the
       // authorType guard in SupportNotificationListener.onMessagePosted: a
       // user should never be notified about their own message.
-      await this.events.publish(
+      after.push(await this.events.stage(
         "SupportMessagePosted",
         { caseId, caseNumber: supportCase.caseNumber, requesterUserId: supportCase.requesterUserId, visibility: SupportMessageVisibility.PUBLIC, authorType: SupportMessageAuthorType.USER },
         { tx, aggregateType: "SupportCase", aggregateId: caseId },
-      );
+      ));
 
       return created;
     });
+    for (const dispatch of after) await dispatch();
 
     return toSupportMessageDto(message);
   }
@@ -554,6 +566,7 @@ export class SupportCaseService {
    * blur who is allowed to trigger which edge.
    */
   async reopen(userId: string, caseId: string): Promise<SupportCaseUserSummaryDto> {
+    const after: Array<() => Promise<void>> = [];
     const updated = await this.prisma.$transaction(async (tx) => {
       const [locked] = await tx.$queryRaw<{ id: string }[]>`SELECT "id" FROM "support_cases" WHERE "id" = ${caseId}::uuid FOR UPDATE`;
       if (!locked) throw new SupportCaseNotFoundException({ caseId });
@@ -566,11 +579,12 @@ export class SupportCaseService {
 
       const row = await tx.supportCase.update({ where: { id: caseId }, data: { status: SupportCaseStatus.OPEN, reopenCount: { increment: 1 } }, include: CASE_INCLUDE });
 
-      await this.events.publish("SupportCaseReopened", { caseId, from: current.status, requesterUserId: userId }, { tx, aggregateType: "SupportCase", aggregateId: caseId });
-      await this.events.publish("SupportCaseStatusChanged", { caseId, from: current.status, to: SupportCaseStatus.OPEN }, { tx, aggregateType: "SupportCase", aggregateId: caseId });
+      after.push(await this.events.stage("SupportCaseReopened", { caseId, from: current.status, requesterUserId: userId }, { tx, aggregateType: "SupportCase", aggregateId: caseId }));
+      after.push(await this.events.stage("SupportCaseStatusChanged", { caseId, from: current.status, to: SupportCaseStatus.OPEN }, { tx, aggregateType: "SupportCase", aggregateId: caseId }));
 
       return row;
     });
+    for (const dispatch of after) await dispatch();
 
     return toSupportCaseUserSummaryDto(updated);
   }

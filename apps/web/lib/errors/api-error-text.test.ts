@@ -35,4 +35,12 @@ describe("apiErrorText", () => {
     expect(apiErrorText(backend, "de")).toBe("Das hat nicht funktioniert. Bitte versuchen Sie es erneut.");
     expect(apiErrorText(backend, "es")).toBe("No se pudo completar. Inténtalo de nuevo.");
   });
+  it("a busy server says nothing was saved and to retry, in every language", () => {
+    const busy = err("SERVICE_BUSY", "The server is busy right now. Nothing was saved; please try again in a moment.");
+    expect(apiErrorText(busy, "fa")).toContain("چیزی ذخیره نشد");
+    expect(apiErrorText(busy, "en")).toContain("Nothing was saved");
+    expect(apiErrorText(busy, "de", "Ticket konnte nicht erstellt werden.")).toContain("nichts gespeichert");
+    expect(apiErrorText(busy, "es")).toContain("no se ha guardado nada");
+  });
 });
+
