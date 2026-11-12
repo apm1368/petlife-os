@@ -23,3 +23,10 @@ CREATE INDEX "admin_refund_approvals_travelBookingId_idx" ON "admin_refund_appro
 -- AddForeignKey
 ALTER TABLE "admin_refund_approvals" ADD CONSTRAINT "admin_refund_approvals_bookingId_fkey" FOREIGN KEY ("bookingId") REFERENCES "bookings"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE "admin_refund_approvals" ADD CONSTRAINT "admin_refund_approvals_travelBookingId_fkey" FOREIGN KEY ("travelBookingId") REFERENCES "travel_bookings"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- Staff cancellations carry their own structured reason code.
+ALTER TABLE "bookings" DROP CONSTRAINT "bookings_cancellation_reason_code";
+ALTER TABLE "bookings" ADD CONSTRAINT "bookings_cancellation_reason_code" CHECK ("cancellationReasonCode" IS NULL OR "cancellationReasonCode" IN (
+  'OWNER_CHANGED_PLANS', 'OWNER_PET_UNWELL', 'OWNER_FOUND_ALTERNATIVE', 'OWNER_OTHER',
+  'PROVIDER_UNAVAILABLE', 'PROVIDER_VEHICLE_ISSUE', 'PROVIDER_SAFETY_CONCERN', 'PROVIDER_OTHER',
+  'SYSTEM_EXPIRED', 'SYSTEM_PAYMENT_FAILED', 'SYSTEM_STAFF_CANCELLED'));
