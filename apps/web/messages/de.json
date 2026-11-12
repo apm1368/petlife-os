@@ -2755,6 +2755,9 @@
       "SCOPES_ONLY_FOR_SERVICE_ADMIN": "Dienstbereiche können nur einem Admin mit Dienstbereich zugewiesen werden."
     },
     "verticals": {
+      "SHOP": "Shop",
+      "CONTENT": "Inhalte",
+      "SUPPORT": "Support",
       "CLINIC": "Kliniken und Tierarztpraxen",
       "GROOMING": "Fellpflege",
       "ACCOMMODATION": "Unterkünfte und Tierbetreuung",
