@@ -1,4 +1,54 @@
 {
+  "adminDeletionRequests": {
+    "kicker": "Privacy",
+    "title": "Account deletion requests",
+    "intro": "Members who asked to delete their account. Review each one: move it to retention review, then mark it ready once the retention policy is approved. Members can cancel until deletion is carried out, and they get a notice at each step.",
+    "executionDisabled": "Deletion itself is switched off until a retention policy is approved, so nothing here deletes data.",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "filterLabel": "Request state",
+    "state": {
+      "REQUESTED": "New",
+      "PENDING_RETENTION": "Retention review",
+      "READY_FOR_EXECUTION": "Ready",
+      "CANCELLED": "Cancelled by member",
+      "COMPLETED": "Completed"
+    },
+    "empty": {
+      "REQUESTED": "No new requests.",
+      "PENDING_RETENTION": "Nothing in retention review.",
+      "READY_FOR_EXECUTION": "Nothing ready for deletion.",
+      "CANCELLED": "No cancelled requests.",
+      "COMPLETED": "No completed deletions."
+    },
+    "requested": "Requested {date} · {days, plural, =0 {today} one {# day ago} other {# days ago}}",
+    "impact": "{households, plural, one {# household} other {# households}} · {pets, plural, one {# pet} other {# pets}} · {shared, plural, =0 {not shared with anyone} one {# shared with others} other {# shared with others}}",
+    "noImpact": "No households or pets recorded.",
+    "soleOwner": "Sole owner of a household that has other members: ownership has to move to someone else first.",
+    "lastChange": "Last step {date}",
+    "note": "Note (optional)",
+    "notePlaceholder": "For example: invoices kept for tax law until 1408",
+    "explain": {
+      "PENDING_RETENTION": "Starts the retention review: you check which records the law requires keeping. The member is told their request is being reviewed.",
+      "READY_FOR_EXECUTION": "Marks the review done. Only possible once a retention policy is approved. The member is told deletion will happen soon and can still cancel."
+    },
+    "action": {
+      "PENDING_RETENTION": "Start retention review",
+      "READY_FOR_EXECUTION": "Mark ready for deletion"
+    },
+    "done": {
+      "PENDING_RETENTION": "{name}'s request is in retention review; they've been notified.",
+      "READY_FOR_EXECUTION": "{name}'s request is ready; they've been notified."
+    },
+    "errors": {
+      "forbidden": "Only a super admin can handle deletion requests.",
+      "load": "Deletion requests couldn't be loaded.",
+      "generic": "That didn't work. Please try again.",
+      "RETENTION_POLICY_NOT_APPROVED": "Not yet: a retention policy has to be approved before any request can be marked ready.",
+      "INVALID_TRANSITION": "This request has moved on already. Refresh the list.",
+      "CHANGED_CONCURRENTLY": "Someone else changed this request just now. Refresh the list."
+    }
+  },
   "clinicClients": {
     "optOut": {
       "title": "Stop clinic texts",
@@ -4375,6 +4425,7 @@
         "signingOut": "Signing out…"
       },
       "tabs": {
+        "deletionRequests": "Deletion requests",
         "customRoles": "Custom roles",
         "directory": "Directory",
         "customer360": "Customer 360",
@@ -4988,6 +5039,7 @@
       }
     },
     "tasks": {
+      "openRelated": "Open the request",
       "title": "Tasks",
       "newTask": "New task",
       "createTitle": "Create task",
@@ -6797,6 +6849,7 @@
         "allClear": "All clear — nothing is waiting on your team.",
         "clearList": "Clear: {list}",
         "queue": {
+          "pendingDeletionRequests": "Account deletion requests",
           "openTrustCases": "Trust & safety cases",
           "openDisputes": "Open disputes",
           "openSupportCases": "Open support cases",

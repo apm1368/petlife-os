@@ -1,4 +1,54 @@
 {
+  "adminDeletionRequests": {
+    "kicker": "Privacidad",
+    "title": "Solicitudes de eliminación de cuenta",
+    "intro": "Miembros que han pedido eliminar su cuenta. Revisa cada una: pásala a revisión de conservación y márcala como lista cuando se apruebe la política de conservación. El miembro puede cancelar hasta que se ejecute y recibe un aviso en cada paso.",
+    "executionDisabled": "La eliminación en sí está desactivada hasta que se apruebe una política de conservación; aquí no se borra ningún dato.",
+    "retry": "Reintentar",
+    "cancel": "Cancelar",
+    "filterLabel": "Estado de la solicitud",
+    "state": {
+      "REQUESTED": "Nueva",
+      "PENDING_RETENTION": "Revisión de conservación",
+      "READY_FOR_EXECUTION": "Lista",
+      "CANCELLED": "Cancelada por el miembro",
+      "COMPLETED": "Completada"
+    },
+    "empty": {
+      "REQUESTED": "No hay solicitudes nuevas.",
+      "PENDING_RETENTION": "Nada en revisión de conservación.",
+      "READY_FOR_EXECUTION": "Nada listo para eliminar.",
+      "CANCELLED": "No hay solicitudes canceladas.",
+      "COMPLETED": "No hay eliminaciones completadas."
+    },
+    "requested": "Solicitada el {date} · {days, plural, =0 {hoy} one {hace # día} other {hace # días}}",
+    "impact": "{households, plural, one {# hogar} other {# hogares}} · {pets, plural, one {# mascota} other {# mascotas}} · {shared, plural, =0 {sin compartir con nadie} one {# compartido con otros} other {# compartidos con otros}}",
+    "noImpact": "No hay hogares ni mascotas registrados.",
+    "soleOwner": "Es el único propietario de un hogar con otros miembros: primero hay que pasar la propiedad a otra persona.",
+    "lastChange": "Último paso el {date}",
+    "note": "Nota (opcional)",
+    "notePlaceholder": "Por ejemplo: facturas conservadas por ley fiscal hasta 1408",
+    "explain": {
+      "PENDING_RETENTION": "Inicia la revisión de conservación: compruebas qué datos obliga la ley a conservar. Se avisa al miembro de que su solicitud está en revisión.",
+      "READY_FOR_EXECUTION": "Da por terminada la revisión. Solo es posible con una política de conservación aprobada. Se avisa al miembro de que la eliminación se hará pronto; aún puede cancelar."
+    },
+    "action": {
+      "PENDING_RETENTION": "Iniciar revisión de conservación",
+      "READY_FOR_EXECUTION": "Marcar lista para eliminar"
+    },
+    "done": {
+      "PENDING_RETENTION": "La solicitud de {name} está en revisión de conservación; se le ha avisado.",
+      "READY_FOR_EXECUTION": "La solicitud de {name} está lista; se le ha avisado."
+    },
+    "errors": {
+      "forbidden": "Solo un superadministrador puede gestionar las solicitudes de eliminación.",
+      "load": "No se han podido cargar las solicitudes de eliminación.",
+      "generic": "No ha funcionado. Inténtalo de nuevo.",
+      "RETENTION_POLICY_NOT_APPROVED": "Todavía no: antes hay que aprobar una política de conservación.",
+      "INVALID_TRANSITION": "Esta solicitud ya ha avanzado. Actualiza la lista.",
+      "CHANGED_CONCURRENTLY": "Otra persona acaba de cambiar esta solicitud. Actualiza la lista."
+    }
+  },
   "clinicClients": {
     "optOut": {
       "title": "Dejar de recibir SMS de la clínica",
@@ -2969,6 +3019,7 @@
       "page": "Página {page}"
     },
     "tasks": {
+      "openRelated": "Abrir la solicitud",
       "title": "Tareas",
       "newTask": "Nueva tarea",
       "createTitle": "Crear tarea",
@@ -3655,6 +3706,7 @@
         "signingOut": "Cerrando sesión…"
       },
       "tabs": {
+        "deletionRequests": "Solicitudes de eliminación",
         "customRoles": "Roles personalizados",
         "directory": "Directorio",
         "customer360": "Cliente 360°",
@@ -6150,6 +6202,7 @@
         "allClear": "Todo al día: no hay nada pendiente para tu equipo.",
         "clearList": "Al día: {list}",
         "queue": {
+          "pendingDeletionRequests": "Solicitudes de eliminación de cuenta",
           "openTrustCases": "Casos de confianza y seguridad",
           "openDisputes": "Disputas abiertas",
           "openSupportCases": "Casos de soporte abiertos",

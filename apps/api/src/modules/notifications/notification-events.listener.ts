@@ -51,6 +51,30 @@ export class NotificationEventsListener {
     }
   }
 
+  /**
+   * Staff moved the member's account deletion request on (Admin → Users → Deletion requests). The member hears about
+   * each step so a request never just goes quiet; cancelling stays theirs until execution. SECURITY, so it can't be
+   * muted, and never by SMS.
+   */
+  @OnEvent("AccountDeletionStateChanged")
+  onAccountDeletionStateChanged(payload: { userId: string; requestId: string; from: string; to: string }, domainEventId: string): Promise<void> {
+    const type = ({ PENDING_RETENTION: "account.deletion_under_review", READY_FOR_EXECUTION: "account.deletion_ready" } as Record<string, string>)[payload.to];
+    if (!type) return Promise.resolve();
+    return this.safely("AccountDeletionStateChanged", async () => {
+      await this.orchestrator.notify({
+        userId: payload.userId,
+        type,
+        category: NotificationCategory.SECURITY,
+        priority: NotificationPriority.HIGH,
+        deepLink: NotificationDeepLinks.privacy(),
+        entityType: "AccountDeletionRequest",
+        entityId: payload.requestId,
+        domainEventId,
+        attemptSms: false,
+      });
+    });
+  }
+
   @OnEvent("ServiceBookingConfirmed")
   onBookingConfirmed(payload: BookingEventPayload, domainEventId: string): Promise<void> {
     return this.safely("ServiceBookingConfirmed", async () => {

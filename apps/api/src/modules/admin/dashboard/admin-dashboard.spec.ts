@@ -24,6 +24,7 @@ describe("dashboard permission boundary", () => {
       petMemorialSubmission: counter(14),
       placeReport: counter(15),
       walletTopUp: counter(16),
+      accountDeletionRequest: counter(17),
     };
     return { db, service: new AdminDashboardService(db as unknown as PrismaService) };
   };
@@ -58,6 +59,7 @@ describe("dashboard permission boundary", () => {
       pendingMemorials: 14,
       openPlaceReports: 15,
       pendingWalletTopUps: 16,
+      pendingDeletionRequests: 17,
     });
   });
   it("hides vertical queues from an admin scoped to another vertical", async () => {
@@ -67,5 +69,13 @@ describe("dashboard permission boundary", () => {
     expect(db.travelListing.count).not.toHaveBeenCalled();
     const stays = { ...actor(AdminRole.SERVICE_ADMIN), serviceScopes: [AdminVertical.ACCOMMODATION] };
     expect((await service.getSummary(stays)).pendingTravelListings).toBe(10);
+  });
+  it("shows deletion requests only to admins who manage access, and top-ups to anyone who may open Wallets", async () => {
+    const { db, service } = setup();
+    const admin = await service.getSummary(actor(AdminRole.ADMIN));
+    expect(admin.pendingDeletionRequests).toBeNull();
+    expect(db.accountDeletionRequest.count).not.toHaveBeenCalled();
+    expect((await service.getSummary(actor(AdminRole.READ_ONLY))).pendingWalletTopUps).toBe(16);
+    expect((await service.getSummary(actor(AdminRole.SUPER_ADMIN))).pendingDeletionRequests).toBe(17);
   });
 });
