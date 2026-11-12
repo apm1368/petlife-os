@@ -17,8 +17,11 @@ export function say(text: string, ms = 1600) {
   cursorBus.sayUntil = performance.now() + ms;
 }
 
-export const prefersReducedMotion = () =>
-  typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+/** Media query that answers false where matchMedia is missing (server, test environments). */
+export const mediaMatches = (query: string) =>
+  typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia(query).matches;
+
+export const prefersReducedMotion = () => mediaMatches("(prefers-reduced-motion: reduce)");
 
 /** ResizeObserver with a window-resize fallback (older browsers, test environments). Returns a disconnect function. */
 export function observeResize(el: Element, cb: () => void): () => void {

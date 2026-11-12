@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { DOG_SVG } from "./dog-svg";
-import { cursorBus, prefersReducedMotion } from "./cursor-bus";
+import { cursorBus, mediaMatches, prefersReducedMotion } from "./cursor-bus";
 import { useLanding } from "./LandingShell";
 import { oplCopy } from "./opl-copy";
 
@@ -26,7 +26,7 @@ export function CookieCursor() {
     const ball = root.querySelector<HTMLDivElement>(".opl-ck-ball")!;
     const prints = root.querySelector<HTMLDivElement>(".opl-ck-prints")!;
     const dog = body.querySelector<SVGSVGElement>("svg")!;
-    const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    const fine = mediaMatches("(hover: hover) and (pointer: fine)");
     const P = { x: fine ? innerWidth / 2 : innerWidth - 110, y: fine ? innerHeight / 2 : innerHeight - 130, last: performance.now(), seen: false, vx: 0, dir: 1, zone: "" };
     const C = { x: fine ? innerWidth / 2 : innerWidth - 90, y: fine ? innerHeight / 2 : innerHeight - 100, lx: 0, ly: 0, side: 1, scale: 1, mode: "" };
     const B = { x: 0, y: 0, fx: 0, fy: 0, tx: 0, ty: 0, t0: 0, dur: 900, on: false };
