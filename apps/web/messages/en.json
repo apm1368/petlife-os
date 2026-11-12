@@ -2366,6 +2366,20 @@
     }
   },
   "commerce": {
+    "categoryNames": {
+      "food": "Food",
+      "treats": "Treats",
+      "grooming": "Grooming",
+      "accessories": "Accessories",
+      "species-dog": "Dog",
+      "species-cat": "Cat",
+      "species-bird": "Bird",
+      "species-rabbit": "Rabbit",
+      "species-rodent": "Rodents",
+      "species-fish": "Fish",
+      "species-reptile": "Reptiles",
+      "species-other": "Other animals"
+    },
     "shopHome": {
       "title": "Shop",
       "subtitle": "For {name}",
