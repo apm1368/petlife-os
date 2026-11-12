@@ -1,4 +1,116 @@
 {
+  "clinicClients": {
+    "optOut": {
+      "title": "Sms-berichten van de praktijk stoppen",
+      "loading": "Controleren…",
+      "missing": "Deze link is niet geldig.",
+      "failed": "Dat is niet gelukt. Probeer het opnieuw.",
+      "explain": "{clinic} stuurt je sms-berichten via opetlife.",
+      "button": "Sms-berichten van {clinic} stoppen",
+      "done": "Je ontvangt geen sms-berichten meer van {clinic}."
+    },
+    "title": "Klanten",
+    "intro": "De eigen klanten van je praktijk: voeg eigenaren en hun huisdieren toe, stuur ze een sms, stel herinneringen in en nodig ze uit voor opetlife.",
+    "add": "Klant toevoegen",
+    "cancel": "Annuleren",
+    "search": "Zoeken op naam, telefoon of huisdier",
+    "loading": "Laden…",
+    "loadFailed": "Klanten konden niet worden geladen.",
+    "forbidden": "Klanten zitten niet in het pakket van je praktijk.",
+    "retry": "Opnieuw proberen",
+    "empty": "Nog geen klanten. Voeg je eerste klant en hun huisdieren toe.",
+    "noMatch": "Geen klant gevonden voor deze zoekopdracht.",
+    "noPets": "Geen huisdieren geregistreerd",
+    "noPhone": "Geen telefoon",
+    "status": {
+      "CLINIC_ONLY": "Alleen bij de praktijk",
+      "INVITED": "Uitgenodigd",
+      "JOINED": "Op opetlife"
+    },
+    "newClient": "Nieuwe klant",
+    "name": "Naam van de eigenaar",
+    "phone": "Mobiel nummer",
+    "email": "E-mail (optioneel)",
+    "notes": "Notities (optioneel)",
+    "pets": "Huisdieren",
+    "petName": "Naam van het huisdier",
+    "species": "Soort",
+    "birthDate": "Geboortedatum",
+    "addPet": "Huisdier toevoegen",
+    "removePet": "Verwijderen",
+    "save": "Klant opslaan",
+    "statusLabel": "opetlife",
+    "petRemoved": "Huisdier verwijderd.",
+    "petAdded": "Huisdier toegevoegd.",
+    "saved": "Opgeslagen.",
+    "reminders": "Herinneringen",
+    "anyPet": "Elk van hun huisdieren",
+    "reminderSaved": "Herinnering opgeslagen.",
+    "history": "Verzonden berichten",
+    "noMessages": "Nog geen berichten.",
+    "messageStatus": {
+      "SENT": "Verzonden",
+      "SIMULATED": "Vastgelegd (testmodus)",
+      "FAILED": "Mislukt",
+      "SKIPPED": "Niet verzonden"
+    },
+    "messageKind": {
+      "MESSAGE": "Bericht",
+      "REMINDER": "Herinnering",
+      "INVITE": "Uitnodiging"
+    },
+    "sms": {
+      "live": "Sms staat aan: berichten komen aan op de telefoons van je klanten.",
+      "sandboxTitle": "Sms staat in testmodus.",
+      "sandbox": "Berichten worden hier vastgelegd, maar komen pas op telefoons aan zodra de sms-lijn van het platform is gekoppeld.",
+      "offTitle": "Sms staat uit.",
+      "off": "Berichten kunnen nu niet worden verzonden.",
+      "title": "Sms-bericht",
+      "label": "Bericht",
+      "placeholder": "De naam van je praktijk wordt aan het begin toegevoegd.",
+      "count": "{count}/420",
+      "send": "Sms versturen",
+      "sent": "Sms verstuurd.",
+      "recorded": "Vastgelegd in testmodus — niet afgeleverd op de telefoon.",
+      "optOut": "Sms naar deze klant stoppen",
+      "optIn": "Sms weer toestaan"
+    },
+    "invite": {
+      "send": "Uitnodigen voor opetlife",
+      "again": "Uitnodiging opnieuw versturen",
+      "sent": "Uitnodiging verstuurd.",
+      "recorded": "Uitnodiging vastgelegd in testmodus — niet afgeleverd op de telefoon.",
+      "help": "De uitnodiging is een link. De klant wordt pas aan je praktijk gekoppeld als die de link opent en ingelogd accepteert."
+    },
+    "errors": {
+      "TOO_MANY_OPEN_REMINDERS": "Deze klant heeft al 20 geplande herinneringen.",
+      "CLIENT_EXISTS": "Er bestaat al een klant met dit mobiele nummer.",
+      "INVALID_PHONE": "Voer een geldig Iraans mobiel nummer in.",
+      "INVALID_EMAIL": "Voer een geldig e-mailadres in.",
+      "NO_PHONE": "Voeg een mobiel nummer toe om deze klant een sms te sturen.",
+      "OPTED_OUT": "Deze klant wil geen sms-berichten ontvangen.",
+      "CLIENT_DAILY_LIMIT": "Daglimiet voor deze klant bereikt. Probeer het morgen opnieuw.",
+      "CLINIC_DAILY_LIMIT": "De dagelijkse sms-limiet van je praktijk is bereikt.",
+      "ALREADY_JOINED": "Deze klant zit al op opetlife.",
+      "LENGTH": "Controleer de lengte van de naam of het bericht.",
+      "PLAN": "Dit zit niet in het pakket van je praktijk.",
+      "GENERIC": "Dat is niet gelukt. Controleer de gegevens en probeer het opnieuw."
+    },
+    "join": {
+      "sentTo": "Verstuurd naar {phone}",
+      "title": "Uitnodiging van een praktijk",
+      "loading": "Uitnodiging controleren…",
+      "missing": "Deze uitnodigingslink is niet geldig of verlopen.",
+      "failed": "De uitnodiging kon niet worden geopend. Probeer het opnieuw.",
+      "used": "Deze uitnodiging is al door een ander account gebruikt.",
+      "invitedBy": "{clinic} heeft je uitgenodigd voor opetlife.",
+      "pets": "Huisdieren in het dossier: {pets}",
+      "explain": "Door te koppelen kan de praktijk je hier herinneringen en berichten sturen. De praktijk ziet alleen wat ze zelf al heeft vastgelegd.",
+      "connected": "Je bent nu gekoppeld aan {clinic}.",
+      "addPets": "Voeg je huisdieren toe",
+      "accept": "Koppelen met deze praktijk"
+    }
+  },
   "adminCustomRoles": {
     "loading": "Rollen laden…",
     "forbidden": "Je hebt geen toegang tot rollen.",
@@ -735,7 +847,10 @@
       "settings_approve": "Gevoelige wijzigingen goedkeuren",
       "system_view": "Systeemstatus bekijken",
       "analytics_view": "Rapporten en analyses",
-      "pet_access_manage": "Toegang tot huisdierdossiers beheren"
+      "pet_access_manage": "Toegang tot huisdierdossiers beheren",
+      "wallet_view": "Portemonnees bekijken",
+      "wallet_adjust": "Saldi corrigeren",
+      "wallet_topup_review": "Opwaardeerbewijzen beoordelen"
     },
     "domains": {
       "customer": "Klanten",
@@ -762,7 +877,8 @@
       "access": "Toegang",
       "admin": "Beheerders",
       "settings": "Instellingen",
-      "system": "Systeem"
+      "system": "Systeem",
+      "wallet": "Portemonnees"
     }
   },
   "adminSiteSettings": {
@@ -4351,7 +4467,9 @@
         "platformSettings": "Instellingen",
         "featureFlags": "Featureflags",
         "channels": "Kanalen en bezorging",
-        "smsPatterns": "SMS-sjablonen"
+        "smsPatterns": "SMS-sjablonen",
+        "walletDirectory": "Portemonnees van leden",
+        "walletTopUps": "Opwaardeerbewijzen"
       },
       "palette": {
         "actions": "Snelle acties",
@@ -4440,7 +4558,9 @@
         "settings": "Platforminstellingen",
         "featureFlags": "Featureflags",
         "smsPatterns": "SMS-sjablonen",
-        "verification": "Identiteit en documenten"
+        "verification": "Identiteit en documenten",
+        "wallets": "Portemonnees",
+        "pets": "Huisdieren"
       },
       "navigation": "Beheernavigatie",
       "openMenu": "Menu openen",
@@ -6756,7 +6876,8 @@
           "pendingSupportNeeds": "Te beoordelen hulpverzoeken",
           "pendingMemorials": "Te beoordelen herdenkingen",
           "openPlaceReports": "Meldingen over plekken",
-          "openTasks": "Openstaande taken"
+          "openTasks": "Openstaande taken",
+          "pendingWalletTopUps": "Opwaardeerbewijzen"
         }
       },
       "performance": {
@@ -7068,6 +7189,7 @@
     }
   },
   "clinicWorkspace": {
+    "clients": "Klanten",
     "title": "Werkruimte van de praktijk",
     "intro": "Afspraken, opvolgtaken en klanten van de praktijk in één gedeelde werkruimte.",
     "queue": "Bezoekwachtrij",
@@ -9635,6 +9757,484 @@
         "BOARDING": "Pension",
         "PET_TAXI": "Dierentaxi",
         "OTHER": "Overig"
+      }
+    }
+  },
+  "wallet": {
+    "eyebrow": "Account",
+    "title": "Portemonnee",
+    "description": "Je saldo, opwaarderingen en portemonneegeschiedenis",
+    "navHint": "Saldo, opwaarderingen en geschiedenis",
+    "loading": "Je portemonnee laden…",
+    "failed": "De portemonnee kon niet worden geladen.",
+    "retry": "Opnieuw proberen",
+    "balance": {
+      "total": "Totaal saldo",
+      "purchaseOnly": "Voor aankopen",
+      "purchaseOnlyHint": "Opwaarderingen en cadeaus, alleen voor aankopen",
+      "withdrawable": "Opneembaar",
+      "withdrawableHint": "Terugbetalingen van bestellingen: besteed ze of neem ze op",
+      "expiring": "{amount} aan cadeautegoed verloopt op {date}."
+    },
+    "topUp": {
+      "title": "Opwaarderen",
+      "amountLabel": "Bedrag (toman)",
+      "amountHint": "Van {min} tot {max}",
+      "railLabel": "Betaalmethode",
+      "rails": {
+        "ZIBAL": "Online betalen (betaalpagina van de bank)",
+        "CARD_TO_CARD": "Overboeking van kaart naar kaart"
+      },
+      "submit": "Opwaarderen",
+      "submitting": "Starten…",
+      "redirecting": "Je gaat naar de betaalpagina van de bank…",
+      "unavailableTitle": "Opwaarderen kan binnenkort",
+      "unavailableBody": "Er is nog geen betaalmethode beschikbaar om op te waarderen. Terugbetalingen van bestellingen en cadeautegoed komen nog steeds in deze portemonnee binnen.",
+      "errors": {
+        "OUT_OF_RANGE": "Het bedrag moet tussen {min} en {max} liggen.",
+        "TOO_MANY_OPEN_TOP_UPS": "Je hebt al drie openstaande aanvragen. Rond er eerst een af of annuleer er een.",
+        "TOP_UP_RAIL_UNAVAILABLE": "Deze betaalmethode is nu niet beschikbaar.",
+        "ZIBAL_REQUEST_UNAVAILABLE": "De betaalpagina van de bank reageerde niet. Probeer het zo opnieuw.",
+        "generic": "De aanvraag is niet gelukt. Probeer het opnieuw."
+      }
+    },
+    "card": {
+      "title": "Maak het bedrag over naar deze kaart",
+      "number": "Kaartnummer",
+      "holder": "Kaarthouder",
+      "amount": "Over te maken bedrag",
+      "copy": "Kopiëren",
+      "copied": "Gekopieerd",
+      "deadline": "Upload het betaalbewijs uiterlijk {date}.",
+      "stepOne": "Maak het bedrag over naar deze kaart met je bankapp of bij een geldautomaat.",
+      "stepTwo": "Maak een foto of screenshot van het betaalbewijs.",
+      "stepThree": "Stuur het betaalbewijs hier in. Ons financiële team controleert het en voegt het geld toe."
+    },
+    "receipt": {
+      "choose": "Kies de afbeelding van het betaalbewijs",
+      "hint": "JPG, PNG of WebP, max. 10 MB",
+      "send": "Betaalbewijs versturen",
+      "sending": "Betaalbewijs versturen…",
+      "sent": "Betaalbewijs verstuurd. Zodra de financiële afdeling het heeft gecontroleerd, wordt het geld toegevoegd.",
+      "failed": "Het betaalbewijs kon niet worden verstuurd. Probeer het opnieuw.",
+      "expired": "De termijn om dit betaalbewijs te sturen is verstreken. Start een nieuwe aanvraag."
+    },
+    "requests": {
+      "title": "Opwaardeeraanvragen",
+      "status": {
+        "AWAITING_PAYMENT": "Wacht op betaling",
+        "AWAITING_RECEIPT": "Wacht op betaalbewijs",
+        "REVIEW_PENDING": "Wordt gecontroleerd",
+        "CREDITED": "Toegevoegd",
+        "FAILED": "Mislukt",
+        "REJECTED": "Afgewezen",
+        "EXPIRED": "Verlopen",
+        "CANCELLED": "Geannuleerd"
+      },
+      "rails": {
+        "ZIBAL": "Online betalen (betaalpagina van de bank)",
+        "CARD_TO_CARD": "Overboeking van kaart naar kaart"
+      },
+      "received": "Toegevoegd: {amount}",
+      "reason": "Reden: {reason}",
+      "showCard": "Kaart bekijken en betaalbewijs sturen",
+      "cancel": "Aanvraag annuleren",
+      "cancelled": "De aanvraag is geannuleerd."
+    },
+    "return": {
+      "verifying": "Je betaling controleren…",
+      "credited": "Betaling bevestigd: {amount} is aan je portemonnee toegevoegd.",
+      "failed": "De betaling is niet bevestigd. Is er geld van je rekening afgeschreven, dan stort de bank het binnen 72 uur terug.",
+      "unknown": "De uitkomst van de betaling is nog niet bekend. Open deze pagina over een paar minuten opnieuw."
+    },
+    "history": {
+      "title": "Geschiedenis",
+      "empty": "Nog geen mutaties in je portemonnee.",
+      "more": "Meer tonen",
+      "purpose": {
+        "TOP_UP": "Opwaardering",
+        "PURCHASE": "Aankoop",
+        "REFUND": "Terugbetaling",
+        "ADJUSTMENT": "Correctie door ons team",
+        "EXPIRY": "Cadeautegoed verlopen",
+        "OTHER": "Mutatie"
+      },
+      "bucket": {
+        "PURCHASE_ONLY": "Voor aankopen",
+        "WITHDRAWABLE": "Opneembaar"
+      },
+      "reasons": {
+        "GOODWILL": "Coulancetegoed",
+        "SERVICE_RECOVERY": "Compensatie voor een probleem met een dienst",
+        "PAYMENT_CORRECTION": "Betalingscorrectie",
+        "REFUND_OUTSIDE_SYSTEM": "Terugbetaling buiten een bestelling",
+        "DUPLICATE_CREDIT_REVERSAL": "Dubbele bijschrijving teruggedraaid",
+        "OTHER": "Andere correctie"
+      },
+      "expires": "Verloopt op {date}"
+    }
+  },
+  "adminWallets": {
+    "kicker": "Financiën",
+    "title": "Portemonnees van leden",
+    "subtitle": "Saldo en geschiedenis van de portemonnee van elk lid. Elke geldmutatie heeft een reden en wordt in het auditlog vastgelegd.",
+    "search": "Zoek op naam, e-mail of telefoon",
+    "loading": "Laden…",
+    "failed": "De gegevens konden niet worden geladen.",
+    "retry": "Opnieuw proberen",
+    "forbidden": "Je hebt het recht “Portemonnees bekijken” nodig om dit te zien.",
+    "empty": "Nog geen enkele portemonnee heeft mutaties.",
+    "emptySearch": "Geen lid gevonden voor deze zoekopdracht.",
+    "columns": {
+      "member": "Lid",
+      "contact": "Contact",
+      "purchaseOnly": "Voor aankopen",
+      "withdrawable": "Opneembaar",
+      "total": "Totaal",
+      "lastActivity": "Laatste mutatie"
+    },
+    "open": "Openen",
+    "previous": "Vorige",
+    "next": "Volgende",
+    "pageOf": "Pagina {page} van {pages}",
+    "never": "Geen mutaties",
+    "detail": {
+      "back": "Alle portemonnees",
+      "memberSince": "Lid sinds {date}",
+      "entries": "Geschiedenis",
+      "entriesEmpty": "Deze portemonnee heeft nog geen mutaties.",
+      "topUps": "Opwaardeeraanvragen",
+      "topUpsEmpty": "Nog geen aanvragen.",
+      "adjustments": "Saldocorrecties",
+      "adjustmentsEmpty": "Nog geen correcties.",
+      "audit": "Auditlog",
+      "auditEmpty": "Nog niets vastgelegd.",
+      "by": "door {name}",
+      "openCustomer": "Klantdossier"
+    },
+    "adjust": {
+      "title": "Saldo corrigeren",
+      "hint": "Alleen om een fout te herstellen of goed te maken. Elke correctie wordt vastgelegd met je naam, de reden en het saldo ervoor en erna.",
+      "direction": "Richting",
+      "directions": {
+        "CREDIT": "Geld toevoegen",
+        "DEBIT": "Geld afschrijven"
+      },
+      "bucket": "Deel van de portemonnee",
+      "buckets": {
+        "PURCHASE_ONLY": "Voor aankopen",
+        "WITHDRAWABLE": "Opneembaar"
+      },
+      "amount": "Bedrag (toman)",
+      "reasonCode": "Soort reden",
+      "reasonCodes": {
+        "GOODWILL": "Coulancetegoed",
+        "SERVICE_RECOVERY": "Compensatie voor een probleem met een dienst",
+        "PAYMENT_CORRECTION": "Betalingscorrectie",
+        "REFUND_OUTSIDE_SYSTEM": "Terugbetaling buiten een bestelling",
+        "DUPLICATE_CREDIT_REVERSAL": "Dubbele bijschrijving teruggedraaid",
+        "OTHER": "Andere correctie"
+      },
+      "reason": "Toelichting (blijft in het auditlog)",
+      "evidence": "Ticket of referentie (optioneel)",
+      "submit": "Correctie opslaan",
+      "confirm": "“{direction}” van {amount} in “{bucket}” vastleggen? Dit wordt direct op het saldo toegepast.",
+      "confirmYes": "Ja, vastleggen",
+      "cancel": "Annuleren",
+      "saving": "Opslaan…",
+      "done": "Correctie opgeslagen.",
+      "noPermission": "Voor het corrigeren van een saldo heb je het recht “Saldi corrigeren” nodig.",
+      "errors": {
+        "INSUFFICIENT_WALLET_BALANCE": "Er staat niet zoveel in dit deel van de portemonnee.",
+        "reasonTooShort": "De toelichting moet minstens 5 tekens bevatten.",
+        "amount": "Voer een geldig bedrag in.",
+        "generic": "De correctie is niet opgeslagen."
+      }
+    },
+    "topUps": {
+      "title": "Opwaardeerbewijzen",
+      "subtitle": "Betaalbewijzen van kaart-naar-kaartoverboekingen van leden. Bevestig het bedrag dat echt op de bedrijfsrekening is binnengekomen: dat bedrag wordt toegevoegd.",
+      "filter": "Status",
+      "all": "Alle",
+      "status": {
+        "AWAITING_PAYMENT": "Wacht op betaling",
+        "AWAITING_RECEIPT": "Wacht op betaalbewijs",
+        "REVIEW_PENDING": "Wordt gecontroleerd",
+        "CREDITED": "Toegevoegd",
+        "FAILED": "Mislukt",
+        "REJECTED": "Afgewezen",
+        "EXPIRED": "Verlopen",
+        "CANCELLED": "Geannuleerd"
+      },
+      "rails": {
+        "ZIBAL": "Online betalen (betaalpagina van de bank)",
+        "CARD_TO_CARD": "Overboeking van kaart naar kaart"
+      },
+      "columns": {
+        "member": "Lid",
+        "amount": "Gevraagd",
+        "rail": "Methode",
+        "status": "Status",
+        "submitted": "Betaalbewijs verstuurd",
+        "actions": "Actie"
+      },
+      "empty": "Geen betaalbewijzen met deze status.",
+      "review": "Beoordelen",
+      "reviewTitle": "Betaalbewijs beoordelen",
+      "viewReceipt": "Betaalbewijs bekijken",
+      "receiptOpening": "Betaalbewijs voorbereiden…",
+      "receivedAmount": "Ontvangen bedrag (toman)",
+      "rejectReason": "Reden van afwijzing (zichtbaar voor het lid)",
+      "approve": "Goedkeuren en toevoegen",
+      "reject": "Afwijzen",
+      "approved": "Het geld is aan de portemonnee van het lid toegevoegd.",
+      "rejected": "Het betaalbewijs is afgewezen.",
+      "noPermission": "Voor het beoordelen van betaalbewijzen heb je het recht “Opwaardeerbewijzen beoordelen” nodig.",
+      "failed": "De beoordeling is niet opgeslagen.",
+      "close": "Sluiten"
+    },
+    "audit": {
+      "wallet_credited": "Saldo verhoogd",
+      "wallet_debited": "Saldo verlaagd",
+      "wallet_top_up_approved": "Betaalbewijs goedgekeurd",
+      "wallet_top_up_rejected": "Betaalbewijs afgewezen",
+      "wallet_top_up_receipt_viewed": "Betaalbewijs bekeken"
+    },
+    "entry": {
+      "purpose": {
+        "TOP_UP": "Opwaardering",
+        "PURCHASE": "Aankoop",
+        "REFUND": "Terugbetaling",
+        "ADJUSTMENT": "Correctie door ons team",
+        "EXPIRY": "Cadeautegoed verlopen",
+        "OTHER": "Mutatie"
+      },
+      "bucket": {
+        "PURCHASE_ONLY": "Voor aankopen",
+        "WITHDRAWABLE": "Opneembaar"
+      },
+      "reasons": {
+        "GOODWILL": "Coulancetegoed",
+        "SERVICE_RECOVERY": "Compensatie voor een probleem met een dienst",
+        "PAYMENT_CORRECTION": "Betalingscorrectie",
+        "REFUND_OUTSIDE_SYSTEM": "Terugbetaling buiten een bestelling",
+        "DUPLICATE_CREDIT_REVERSAL": "Dubbele bijschrijving teruggedraaid",
+        "OTHER": "Andere correctie"
+      }
+    }
+  },
+  "adminPets": {
+    "kicker": "Klanten",
+    "title": "Huisdieren",
+    "subtitle": "Elk huisdier met eigenaar en huishouden. Gezondheid wordt alleen als aantallen en datums getoond, nooit als klinische tekst.",
+    "search": "Naam van huisdier, eigenaar of gezinslid, ID of microchip",
+    "searchButton": "Zoeken",
+    "speciesFilter": "Soort",
+    "allSpecies": "Alle",
+    "species": {
+      "DOG": "Hond",
+      "CAT": "Kat",
+      "BIRD": "Vogel",
+      "RABBIT": "Konijn",
+      "RODENT": "Knaagdier",
+      "FISH": "Vis",
+      "REPTILE": "Reptiel",
+      "OTHER": "Overig"
+    },
+    "lifecycle": {
+      "ACTIVE": "Actief",
+      "LOST": "Vermist",
+      "TEMPORARILY_TRANSFERRED": "Tijdelijk bij iemand anders",
+      "DECEASED": "Overleden",
+      "MEMORIAL": "In memoriam",
+      "deleted": "Verwijderd"
+    },
+    "loading": "Laden…",
+    "failed": "De gegevens konden niet worden geladen.",
+    "retry": "Opnieuw proberen",
+    "forbidden": "Je hebt het recht “Klanten bekijken” nodig om huisdieren te zien.",
+    "empty": "Nog geen huisdieren geregistreerd.",
+    "emptySearch": "Geen huisdier gevonden voor deze zoekopdracht.",
+    "columns": {
+      "pet": "Huisdier",
+      "species": "Soort en ras",
+      "owner": "Eigenaar",
+      "household": "Huishouden",
+      "family": "Andere leden",
+      "status": "Status",
+      "created": "Geregistreerd"
+    },
+    "noOwner": "Geen eigenaar",
+    "open": "Openen",
+    "previous": "Vorige",
+    "next": "Volgende",
+    "pageOf": "Pagina {page} van {pages}",
+    "detail": {
+      "back": "Alle huisdieren",
+      "identity": "Identiteit",
+      "fields": {
+        "species": "Soort",
+        "breed": "Ras",
+        "sex": "Geslacht",
+        "birthDate": "Geboortedatum",
+        "age": "Geschatte leeftijd",
+        "neutered": "Gecastreerd of gesteriliseerd",
+        "microchip": "Microchip",
+        "status": "Status",
+        "created": "Geregistreerd",
+        "photo": "Foto"
+      },
+      "months": "{months} maanden",
+      "sex": {
+        "MALE": "Mannetje",
+        "FEMALE": "Vrouwtje",
+        "UNKNOWN": "Onbekend"
+      },
+      "neutered": {
+        "NEUTERED": "Ja",
+        "INTACT": "Nee",
+        "UNKNOWN": "Onbekend"
+      },
+      "yes": "Ja",
+      "no": "Nee",
+      "owner": "Eigenaar",
+      "ownerMissing": "Dit huishouden heeft geen actieve eigenaar.",
+      "openCustomer": "Klantdossier",
+      "household": "Huishouden: {name}",
+      "unnamedHousehold": "Naamloos",
+      "family": "Leden van het huishouden",
+      "familyEmpty": "Geen andere leden in dit huishouden.",
+      "roles": {
+        "OWNER": "Eigenaar",
+        "FAMILY": "Gezinslid"
+      },
+      "accountStatus": {
+        "ACTIVE": "Actief account",
+        "SUSPENDED": "Geschorst account"
+      },
+      "invitations": "Openstaande uitnodigingen",
+      "invitationExpires": "Verloopt op {date}",
+      "grants": "Toegang tot dit huisdier",
+      "grantsEmpty": "Geen toegang vastgelegd.",
+      "grantColumns": {
+        "person": "Persoon",
+        "source": "Bron",
+        "scope": "Rechten",
+        "period": "Periode",
+        "state": "Status"
+      },
+      "sources": {
+        "HOUSEHOLD": "Lidmaatschap van het huishouden",
+        "MANUAL": "Handmatig gedeeld",
+        "TEMPORARY": "Tijdelijk"
+      },
+      "scopeCount": "{count} rechten",
+      "states": {
+        "active": "Actief",
+        "revoked": "Ingetrokken",
+        "inactive": "Niet actief"
+      },
+      "notMember": "Niet in het huishouden",
+      "revoke": "Toegang intrekken",
+      "revokeTitle": "Toegang van {name} intrekken",
+      "revokeReason": "Reden (blijft in het auditlog)",
+      "revokeConfirm": "Intrekken",
+      "revokeCancel": "Annuleren",
+      "revoked": "Toegang ingetrokken.",
+      "revokeFailed": "De toegang kon niet worden ingetrokken.",
+      "reasonTooShort": "De reden moet minstens 5 tekens bevatten.",
+      "ownerGrantNote": "De toegang van een eigenaar wordt hier nooit ingetrokken.",
+      "health": "Gezondheid (alleen aantallen en datums)",
+      "healthFields": {
+        "documents": "Medische documenten",
+        "visits": "Bezoeken",
+        "labs": "Labuitslagen",
+        "conditions": "Aandoeningen",
+        "allergies": "Allergieën",
+        "medications": "Medicijnen"
+      },
+      "bookings": "Boekingen",
+      "lost": "Vermissingsmeldingen",
+      "sightings": "{count} waarnemingen",
+      "care": "Verzorgingsherinneringen",
+      "travel": "Reizen",
+      "insurance": "Verzekering",
+      "claimPreps": "{count} concepten voor schadeclaims",
+      "sharing": "Delen",
+      "shareCards": "{count} actieve deelkaarten",
+      "healthShares": "{count} actieve gezondheidslinks",
+      "none": "Geen.",
+      "diagnostics": "Notities over datakwaliteit",
+      "diagnosticCodes": {
+        "NO_ACTIVE_OWNER": "Het huishouden heeft geen actieve eigenaar.",
+        "STALE_HOUSEHOLD_GRANT": "Iemand die het huishouden heeft verlaten, heeft nog toegang.",
+        "EXPIRED_GRANT_NOT_REVOKED": "Een tijdelijke toegang is verlopen maar nooit ingetrokken.",
+        "MEMBER_WITHOUT_GRANT": "Een lid van het huishouden heeft geen actieve toegang.",
+        "LONG_OPEN_LOST_INCIDENT": "Een vermissingsmelding staat al meer dan 90 dagen open.",
+        "DELETED_BUT_ACTIVE": "Het huisdier is verwijderd maar staat nog als actief."
+      },
+      "activity": "Recente activiteit",
+      "changed": "Gewijzigd: {fields}"
+    },
+    "labels": {
+      "bookingStatus": {
+        "HOLD": "Tijdelijk gereserveerd",
+        "PENDING_CONFIRMATION": "Wacht op bevestiging",
+        "REQUESTED": "Aangevraagd",
+        "AWAITING_PAYMENT": "Wacht op betaling",
+        "REJECTED": "Afgewezen",
+        "EXPIRED": "Verlopen",
+        "RESCHEDULED": "Verzet",
+        "CONFIRMED": "Bevestigd",
+        "CHECKED_IN": "Ingecheckt",
+        "IN_PROGRESS": "Bezig",
+        "COMPLETED": "Afgerond",
+        "CANCELLED_BY_USER": "Geannuleerd door het lid",
+        "CANCELLED_BY_PROVIDER": "Geannuleerd door de aanbieder",
+        "NO_SHOW": "Niet verschenen"
+      },
+      "serviceCategory": {
+        "VET": "Dierenarts",
+        "GROOMING": "Trimmen",
+        "TRAINING": "Training",
+        "WALKING": "Uitlaten",
+        "SITTING": "Oppassen",
+        "BOARDING": "Pension",
+        "PET_TAXI": "Dierentaxi",
+        "OTHER": "Overig"
+      },
+      "lostStatus": {
+        "OPEN": "Open",
+        "SEARCHING": "Wordt gezocht",
+        "SIGHTING_REPORTED": "Waarneming gemeld",
+        "FOUND": "Gevonden",
+        "REUNITED": "Weer thuis",
+        "CLOSED": "Gesloten"
+      },
+      "tripStatus": {
+        "DRAFT": "Concept",
+        "PLANNING": "In planning",
+        "READY": "Klaar",
+        "IN_PROGRESS": "Onderweg",
+        "COMPLETED": "Afgerond",
+        "CANCELLED": "Geannuleerd"
+      },
+      "insuranceStatus": {
+        "NEEDS_INFORMATION": "Informatie nodig",
+        "DRAFT": "Concept",
+        "SUBMITTED": "Ingediend",
+        "UNDER_REVIEW": "In behandeling",
+        "APPROVED": "Goedgekeurd",
+        "DECLINED": "Afgewezen",
+        "CANCELLED": "Geannuleerd"
+      },
+      "reminderState": {
+        "UPCOMING": "Binnenkort",
+        "DUE": "Nu aan de beurt",
+        "OVERDUE": "Te laat",
+        "COMPLETED": "Gedaan",
+        "SNOOZED": "Uitgesteld",
+        "CANCELLED": "Geannuleerd"
       }
     }
   }
