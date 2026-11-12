@@ -59,7 +59,7 @@ describe("Digikala facts (one-time pet import)", () => {
     expect(text).not.toContain("dkstatics");
     expect(text).not.toContain("Digikala's own");
     // "Miscellaneous" is not a brand.
-    expect(parseFactsDetail(detail(1, "ظرف آب", { brand: { title_fa: "متفرقه", title_en: "Miscellaneous" } }), { id: "1", referencePriceIrr: null, referenceStock: null, marketable: true })).toMatchObject({ brandName: null, supportsDog: true, supportsCat: true });
+    expect(parseFactsDetail(detail(1, "ظرف آب", { brand: { title_fa: "متفرقه", title_en: "Miscellaneous" }, category: { title_fa: "ظرف آب و غذا" }, breadcrumb: [{ title: "پت شاپ" }, { title: "ظرف آب و غذا" }] }), { id: "1", referencePriceIrr: null, referenceStock: null, marketable: true })).toMatchObject({ brandName: null, supportsDog: true, supportsCat: true });
   });
 
   it("imports drafts with a weighted variant, skips known products, and stops on a block", async () => {
