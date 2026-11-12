@@ -2485,6 +2485,8 @@
       "genericAction": "لم ينجح ذلك. تحقّق من اتصالك وأعد المحاولة."
     },
     "ui": {
+      "confirmAttendance": "سأحضر",
+      "attendanceConfirmed": "أكّدت حضورك، ويمكن لمقدّم الخدمة رؤية ذلك.",
       "loading": "جارٍ تحميل الحجز…",
       "forbidden": "ليس لديك وصول إلى هذا الحجز",
       "notFound": "الحجز غير موجود",
@@ -2911,6 +2913,7 @@
       "verificationLink": "التحقق من المنظمة والمستندات"
     },
     "bookingRow": {
+      "attendanceConfirmed": "أكّد المالك الحضور",
       "respondBy": "الرد قبل "
     },
     "bookings": {

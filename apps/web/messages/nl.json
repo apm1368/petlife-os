@@ -2485,6 +2485,8 @@
       "genericAction": "Dat is niet gelukt. Controleer je verbinding en probeer het opnieuw."
     },
     "ui": {
+      "confirmAttendance": "Ik kom",
+      "attendanceConfirmed": "Je hebt bevestigd dat je komt. De aanbieder kan dit zien.",
       "loading": "Boeking laden…",
       "forbidden": "Je hebt geen toegang tot deze boeking",
       "notFound": "Boeking niet gevonden",
@@ -2911,6 +2913,7 @@
       "verificationLink": "Verificatie en documenten van de organisatie"
     },
     "bookingRow": {
+      "attendanceConfirmed": "Eigenaar heeft bevestigd",
       "respondBy": "Reageer vóór "
     },
     "bookings": {
