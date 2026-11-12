@@ -26,6 +26,13 @@ describe("URL normalisation middleware", () => {
     expect(run("/Fa").headers.get("location")).toBe("https://opetlife.ir/");
   });
 
+  it("permanently sends enum-style service categories to their lowercase slug, keeping the query", () => {
+    expect(run("/fa/services/GROOMING").headers.get("location")).toBe("https://opetlife.ir/fa/services/grooming");
+    expect(run("/en/services/PET_TAXI?city=Tehran").headers.get("location")).toBe("https://opetlife.ir/en/services/pet-taxi?city=Tehran");
+    expect(run("/de/services/grooming").headers.get("location")).toBeNull();
+    expect(run("/de/services/search").headers.get("location")).toBeNull();
+  });
+
   it("leaves localized pages alone", () => {
     const res = run("/en/blog");
     expect(res.status).toBe(200);
