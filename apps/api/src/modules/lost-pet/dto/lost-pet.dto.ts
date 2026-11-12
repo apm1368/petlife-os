@@ -134,3 +134,17 @@ export class ListPublicLostPetsQueryDto {
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(48) pageSize?: number;
   @IsOptional() @IsIn(["DOG", "CAT", "OTHER"]) species?: "DOG" | "CAT" | "OTHER";
 }
+
+/** #290 Q53: the member's own alert area. The point stays private; only the radius is chosen from a short list. */
+export class SetLostPetAreaAlertDto {
+  @IsLatitude()
+  latitude!: number;
+
+  @IsLongitude()
+  longitude!: number;
+
+  @Type(() => Number)
+  @IsInt()
+  @IsIn([1, 3, 5, 10])
+  radiusKm!: number;
+}

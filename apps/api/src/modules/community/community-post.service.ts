@@ -7,7 +7,7 @@ import { StorageService } from "../storage/storage.service";
 import { PetAccessService } from "../pet-access/pet-access.service";
 import { NotificationOrchestratorService } from "../notifications/notification-orchestrator.service";
 import { NotificationDeepLinks } from "../notifications/notification-deeplink.util";
-import { CommunityCommentNotFoundException, CommunityInteractionBlockedException, CommunityContentNotVisibleException, CommunityPostNotFoundException, PetAccessDeniedException } from "../../common/errors/api-exception";
+import { DailyLimitReachedException, CommunityCommentNotFoundException, CommunityInteractionBlockedException, CommunityContentNotVisibleException, CommunityPostNotFoundException, PetAccessDeniedException } from "../../common/errors/api-exception";
 import { resolvePagination, toPaginatedDto, type PaginationQueryDto } from "../../common/pagination/pagination.dto";
 import { toCommunityCommentDto, toCommunityPostDto } from "./community-mapper";
 import type { CreateCommunityCommentDto, CreateCommunityPostDto, ListCommunityPostsQueryDto, SetCommunityReactionDto } from "./dto/community.dto";
@@ -61,6 +61,12 @@ export class CommunityPostService {
   }
 
   async create(authorUserId: string, dto: CreateCommunityPostDto) {
+    // #290 Q54 + QA review: found-pet posts show prominently on /lost-pets, so a member may post at most 3 a day
+    // ("found your pet, pay me" is a classic scam).
+    if (dto.type === CommunityPostType.FOUND_PET) {
+      const today = await this.prisma.communityPost.count({ where: { authorUserId, type: CommunityPostType.FOUND_PET, createdAt: { gte: new Date(Date.now() - 24 * 3600 * 1000) } } });
+      if (today >= 3) throw new DailyLimitReachedException({ action: "FOUND_PET_POST", limit: 3 });
+    }
     if (dto.petId) {
       const allowed = await this.petAccess.hasActiveAccess(dto.petId, authorUserId);
       if (!allowed) throw new PetAccessDeniedException({ petId: dto.petId });

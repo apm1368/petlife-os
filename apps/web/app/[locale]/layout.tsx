@@ -42,6 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title: SITE_NAME[routeLocale],
     applicationName: "opetlife",
     manifest: manifestPath(routeLocale),
+    appleWebApp: { capable: true, title: "opetlife", statusBarStyle: "default" },
     icons: {
       icon: [
         { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },

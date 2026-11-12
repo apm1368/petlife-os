@@ -6607,7 +6607,11 @@
       "back": "Atrás",
       "continue": "Continuar",
       "photoLabel": "Foto",
-      "submit": "Informar de la mascota perdida"
+      "submit": "Informar de la mascota perdida",
+      "useMyLocation": "Usar mi ubicación actual",
+      "useMyLocationHelp": "Si estás donde se vio por última vez, guarda la ubicación para que los vecinos con alertas activadas se enteren. El punto exacto es privado.",
+      "locationSaved": "Ubicación guardada",
+      "locationDenied": "No se permitió el acceso a la ubicación; puedes continuar sin ella."
     },
     "list": {
       "title": "Informes de mascotas perdidas",
@@ -6697,6 +6701,27 @@
         "reunited": "{name} ya está en casa. Gracias a todas las personas que ayudaron.",
         "photoAlt": "Foto de {name}"
       }
+    },
+    "areaAlert": {
+      "title": "Alertas de mascotas perdidas en mi zona",
+      "body": "Cuando una mascota se pierda cerca de ti, te avisaremos para que puedas ayudar si la ves.",
+      "on": "Activadas: recibirás reportes a menos de {km} km.",
+      "enable": "Activar alertas",
+      "update": "Actualizar zona",
+      "disable": "Desactivar",
+      "radius": "Zona",
+      "km": "{km} km",
+      "signIn": "Inicia sesión para activar alertas",
+      "privacy": "Tu ubicación solo se usa para encontrar reportes cercanos y nunca se muestra a nadie.",
+      "denied": "El navegador no permitió el acceso a la ubicación.",
+      "failed": "No se pudo guardar. Inténtalo de nuevo."
+    },
+    "found": {
+      "title": "Mascotas encontradas por vecinos",
+      "subtitle": "¿Encontraste una mascota? Publícala aquí para que su familia la reconozca.",
+      "cta": "Encontré una mascota",
+      "empty": "Por ahora no hay mascotas encontradas.",
+      "untitled": "Mascota encontrada"
     }
   },
   "community": {
@@ -6707,7 +6732,8 @@
       "LOST_PET_SHARE": "Mascota desaparecida",
       "RESCUE": "Rescate",
       "ADOPTION": "Adopción",
-      "MEMORY": "Recuerdo"
+      "MEMORY": "Recuerdo",
+      "FOUND_PET": "Mascota encontrada"
     },
     "feed": {
       "title": "Comunidad",
@@ -6766,6 +6792,30 @@
       "commentLabel": "Añadir un comentario",
       "commentSubmit": "Publicar",
       "commentsEmpty": "Aún no hay comentarios."
+    },
+    "contact": {
+      "message": "Escribir a quien publicó",
+      "adopt": "Solicitar adopción",
+      "signIn": "Inicia sesión para enviar un mensaje",
+      "private": "La conversación se queda dentro de opetlife; los números de teléfono nunca se muestran.",
+      "screening": {
+        "title": "Unas preguntas rápidas para adoptar",
+        "hint": "Tus respuestas se envían como primer mensaje para que se pueda elegir con cuidado.",
+        "intro": "Hola, me gustaría adoptar a esta mascota.",
+        "home": "Dónde vives",
+        "homes": {
+          "apartment": "Apartamento",
+          "houseWithYard": "Casa con jardín",
+          "other": "Otro"
+        },
+        "experience": "Experiencia con mascotas",
+        "otherPets": "Otras mascotas en casa",
+        "why": "Por qué quieres adoptar",
+        "visit": "Puedo conocerla en persona",
+        "visitYes": "Puedo ir a conocerla en persona.",
+        "send": "Enviar solicitud",
+        "cancel": "Cancelar"
+      }
     }
   },
   "publicNavigation": {
@@ -9495,5 +9545,13 @@
       "release": "Suelta para actualizar",
       "loading": "Actualizando…"
     }
+  },
+  "safety": {
+    "title": "Protégete de las estafas",
+    "contact": "Paga solo dentro de opetlife. Nunca hagas transferencias fuera del sitio ni compartas códigos de verificación o contraseñas.",
+    "payment": "Paga solo en esta página. opetlife nunca te pide transferir dinero a una cuenta personal ni compartir un código de verificación.",
+    "lostPet": "Quien pide dinero o una recompensa antes de devolver una mascota probablemente es un estafador. Queda en un lugar público y nunca pagues por adelantado.",
+    "donation": "Dona solo a través de esta página. opetlife nunca te pide transferir una donación a una cuenta personal.",
+    "adoption": "Nunca pagues nada antes de conocer a la mascota. Visítala en persona y queda en un lugar seguro."
   }
 }

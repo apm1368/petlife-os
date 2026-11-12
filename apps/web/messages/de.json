@@ -6617,7 +6617,11 @@
       "back": "Zurück",
       "continue": "Weiter",
       "photoLabel": "Foto",
-      "submit": "Vermisstes Tier melden"
+      "submit": "Vermisstes Tier melden",
+      "useMyLocation": "Meinen aktuellen Standort verwenden",
+      "useMyLocationHelp": "Wenn Sie dort sind, wo das Tier zuletzt gesehen wurde, speichern Sie den Standort, damit Nachbarn mit eingeschalteten Hinweisen davon erfahren. Der genaue Punkt bleibt privat.",
+      "locationSaved": "Standort gespeichert",
+      "locationDenied": "Standortzugriff wurde nicht erlaubt; Sie können ohne ihn fortfahren."
     },
     "list": {
       "title": "Meldungen zu vermissten Tieren",
@@ -6707,6 +6711,27 @@
         "reunited": "{name} ist wieder zu Hause. Danke an alle, die geholfen haben.",
         "photoAlt": "Foto von {name}"
       }
+    },
+    "areaAlert": {
+      "title": "Hinweise zu vermissten Tieren in meiner Nähe",
+      "body": "Wenn in Ihrer Nähe ein Tier vermisst wird, sagen wir Ihnen Bescheid, damit Sie helfen können.",
+      "on": "An: Sie erfahren von Meldungen im Umkreis von {km} km.",
+      "enable": "Hinweise einschalten",
+      "update": "Umkreis aktualisieren",
+      "disable": "Ausschalten",
+      "radius": "Umkreis",
+      "km": "{km} km",
+      "signIn": "Anmelden, um Hinweise einzuschalten",
+      "privacy": "Ihr Standort wird nur verwendet, um Meldungen in der Nähe zu finden, und niemandem angezeigt.",
+      "denied": "Der Browser hat den Standortzugriff nicht erlaubt.",
+      "failed": "Konnte nicht gespeichert werden. Bitte erneut versuchen."
+    },
+    "found": {
+      "title": "Von Nachbarn gefundene Tiere",
+      "subtitle": "Ein Tier gefunden? Posten Sie es hier, damit seine Familie es erkennt.",
+      "cta": "Ich habe ein Tier gefunden",
+      "empty": "Zurzeit keine Fundmeldungen.",
+      "untitled": "Gefundenes Tier"
     }
   },
   "community": {
@@ -6717,7 +6742,8 @@
       "LOST_PET_SHARE": "Vermisstes Tier",
       "RESCUE": "Rettung",
       "ADOPTION": "Adoption",
-      "MEMORY": "Erinnerung"
+      "MEMORY": "Erinnerung",
+      "FOUND_PET": "Tier gefunden"
     },
     "feed": {
       "title": "Community",
@@ -6776,6 +6802,30 @@
       "commentLabel": "Kommentar hinzufügen",
       "commentSubmit": "Senden",
       "commentsEmpty": "Noch keine Kommentare."
+    },
+    "contact": {
+      "message": "Nachricht an den Verfasser",
+      "adopt": "Adoption anfragen",
+      "signIn": "Anmelden, um eine Nachricht zu senden",
+      "private": "Das Gespräch bleibt in opetlife; Telefonnummern werden nie angezeigt.",
+      "screening": {
+        "title": "Ein paar kurze Fragen zur Adoption",
+        "hint": "Ihre Antworten werden als erste Nachricht gesendet, damit sorgfältig entschieden werden kann.",
+        "intro": "Hallo, ich möchte dieses Tier gern adoptieren.",
+        "home": "Wohnsituation",
+        "homes": {
+          "apartment": "Wohnung",
+          "houseWithYard": "Haus mit Garten",
+          "other": "Andere"
+        },
+        "experience": "Erfahrung mit Tieren",
+        "otherPets": "Andere Tiere im Haushalt",
+        "why": "Warum Sie adoptieren möchten",
+        "visit": "Ich kann mich persönlich treffen",
+        "visitYes": "Ich kann vorbeikommen und das Tier persönlich kennenlernen.",
+        "send": "Anfrage senden",
+        "cancel": "Abbrechen"
+      }
     }
   },
   "publicNavigation": {
@@ -9497,5 +9547,13 @@
       "release": "Loslassen zum Aktualisieren",
       "loading": "Wird aktualisiert…"
     }
+  },
+  "safety": {
+    "title": "Schützen Sie sich vor Betrug",
+    "contact": "Bezahlen Sie nur über opetlife. Überweisen Sie nie Geld außerhalb der Website und geben Sie nie Bestätigungscodes oder Passwörter weiter.",
+    "payment": "Bezahlen Sie nur auf dieser Seite. opetlife fordert Sie nie auf, Geld auf ein Privatkonto zu überweisen oder einen Bestätigungscode zu nennen.",
+    "lostPet": "Wer vor der Rückgabe eines Tieres Geld oder Finderlohn verlangt, ist wahrscheinlich ein Betrüger. Treffen Sie sich an einem öffentlichen Ort und zahlen Sie nie im Voraus.",
+    "donation": "Spenden Sie nur über diese Seite. opetlife fordert Sie nie auf, eine Spende auf ein Privatkonto zu überweisen.",
+    "adoption": "Zahlen Sie nie vor dem ersten Treffen. Sehen Sie sich das Tier persönlich an und treffen Sie sich an einem sicheren Ort."
   }
 }

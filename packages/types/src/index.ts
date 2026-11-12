@@ -5101,6 +5101,7 @@ export enum CommunityPostType {
   RESCUE = "RESCUE",
   ADOPTION = "ADOPTION",
   MEMORY = "MEMORY",
+  FOUND_PET = "FOUND_PET",
 }
 
 export enum CommunityContentStatus {

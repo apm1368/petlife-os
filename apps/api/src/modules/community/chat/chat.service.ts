@@ -1,11 +1,16 @@
 import { Injectable } from "@nestjs/common";
-import { CommunityContentStatus, Prisma } from "@prisma/client";
+import { CommunityContentStatus, CommunitySourceType, Prisma } from "@prisma/client";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
-import { ChatBlockedException, NotFoundApiException, ValidationApiException } from "../../../common/errors/api-exception";
+import { ChatBlockedException, DailyLimitReachedException, NotFoundApiException, ValidationApiException } from "../../../common/errors/api-exception";
+import { publicAuthorName } from "../community-mapper";
 
 export const CHAT_MESSAGE_MAX = 2000;
 const PAGE_MAX = 50;
+const DAY_MS = 24 * 3600 * 1000;
+/** New conversations a member may start a day (QA review of #306: no mass first contact); fewer for new accounts. */
+const NEW_CONVERSATIONS_PER_DAY = 20;
+const NEW_CONVERSATIONS_PER_DAY_NEW_ACCOUNT = 5;
 
 const pairKey = (a: string, b: string) => (a < b ? `${a}:${b}` : `${b}:${a}`);
 
@@ -42,6 +47,7 @@ export class ChatService {
       await this.prisma.chatParticipant.updateMany({ where: { conversationId: existing.id, userId, hiddenAt: { not: null } }, data: { hiddenAt: null } });
       return this.summary(existing.id, userId);
     }
+    await this.assertMayStartConversation(userId);
     try {
       const created = await this.prisma.chatConversation.create({ data: { pairKey: key, participants: { create: [{ userId }, { userId: participantUserId }] } } });
       return this.summary(created.id, userId);
@@ -54,6 +60,33 @@ export class ChatService {
     }
   }
 
+  /**
+   * #290 Q52 ("chat with the advertiser, number hidden"): open the conversation with a community post's author
+   * from the post itself, without the caller ever learning a contact detail. Only published posts; never yourself.
+   */
+  async openForPost(userId: string, postId: string) {
+    const post = await this.prisma.communityPost.findUnique({ where: { id: postId }, select: { authorUserId: true, status: true, sourceType: true } });
+    if (!post || post.status !== CommunityContentStatus.PUBLISHED) throw new NotFoundApiException("Post");
+    // Posts shared from a lost-pet report or a campaign are authored by a staff or household account on its behalf;
+    // they are not a private inbox (QA review of #306).
+    if (post.sourceType !== CommunitySourceType.USER) throw new ValidationApiException({ field: "postId", reason: "POST_NOT_MESSAGEABLE" });
+    if (post.authorUserId === userId) throw new ValidationApiException({ field: "postId", reason: "CANNOT_MESSAGE_SELF" });
+    const author = await this.prisma.user.findUnique({ where: { id: post.authorUserId }, select: { accountStatus: true } });
+    if (!author || author.accountStatus !== "ACTIVE") throw new NotFoundApiException("Post");
+    return this.open(userId, post.authorUserId);
+  }
+
+  private async assertMayStartConversation(userId: string) {
+    const since = new Date(Date.now() - DAY_MS);
+    const [me, started] = await Promise.all([
+      this.prisma.user.findUnique({ where: { id: userId }, select: { createdAt: true } }),
+      this.prisma.chatParticipant.count({ where: { userId, joinedAt: { gte: since } } }),
+    ]);
+    const isNew = !me || me.createdAt > new Date(Date.now() - 7 * DAY_MS);
+    const limit = isNew ? NEW_CONVERSATIONS_PER_DAY_NEW_ACCOUNT : NEW_CONVERSATIONS_PER_DAY;
+    if (started >= limit) throw new DailyLimitReachedException({ action: "CHAT_NEW_CONVERSATION", limit });
+  }
+
   private async unreadCount(conversationId: string, userId: string, lastReadAt: Date | null, clearedAt: Date | null = null) {
     const after = [lastReadAt, clearedAt].filter((d): d is Date => Boolean(d)).sort((a, b) => b.getTime() - a.getTime())[0];
     return this.prisma.chatMessage.count({ where: { conversationId, status: CommunityContentStatus.PUBLISHED, senderUserId: { not: userId }, ...(after ? { createdAt: { gt: after } } : {}) } });
@@ -61,17 +94,20 @@ export class ChatService {
 
   private async summary(conversationId: string, userId: string) {
     const { row, otherUserId } = await this.participation(conversationId, userId);
-    const [other, last, unread, blocked, blockedByMe] = await Promise.all([
+    const [other, last, unread, blocked, blockedByMe, otherSpoke] = await Promise.all([
       otherUserId ? this.prisma.user.findUnique({ where: { id: otherUserId }, select: { id: true, displayName: true, avatarUrl: true } }) : null,
       this.prisma.chatMessage.findFirst({ where: { conversationId, status: CommunityContentStatus.PUBLISHED, ...(row.clearedAt ? { createdAt: { gt: row.clearedAt } } : {}) }, orderBy: { createdAt: "desc" } }),
       this.unreadCount(conversationId, userId, row.lastReadAt, row.clearedAt),
       otherUserId ? this.isBlockedBetween(userId, otherUserId) : false,
       otherUserId ? this.prisma.userBlock.count({ where: { blockerUserId: userId, blockedUserId: otherUserId } }).then((n) => n > 0) : false,
+      otherUserId ? this.prisma.chatMessage.count({ where: { conversationId, senderUserId: otherUserId } }).then((n) => n > 0) : false,
     ]);
     return {
       id: conversationId,
       // Only the public profile bits of the other member — never contacts or account data.
-      otherMember: other ? { id: other.id, displayName: other.displayName, avatarUrl: other.avatarUrl } : null,
+      // Until the other member has written here, only their public first name — no id, no full name (community
+      // rule; QA review of #306). After they reply, the usual public profile bits (id for blocking).
+      otherMember: other ? (otherSpoke ? { id: other.id, displayName: other.displayName, avatarUrl: other.avatarUrl } : { id: null, displayName: publicAuthorName(other.displayName), avatarUrl: other.avatarUrl }) : null,
       lastMessage: last ? { id: last.id, body: last.body, senderIsMe: last.senderUserId === userId, createdAt: last.createdAt.toISOString() } : null,
       unreadCount: unread,
       /** A block in either direction — messaging is closed. */
@@ -87,7 +123,8 @@ export class ChatService {
 
   /** The inbox (default) or the archive; conversations deleted-for-self appear in neither. */
   async list(userId: string, archived = false) {
-    const rows = await this.prisma.chatParticipant.findMany({ where: { userId, hiddenAt: null, archivedAt: archived ? { not: null } : null }, include: { conversation: true }, orderBy: { conversation: { lastMessageAt: { sort: "desc", nulls: "last" } } }, take: 100 });
+    // A conversation with no message yet stays out of both inboxes (QA review of #306: no empty threads from a bare open).
+    const rows = await this.prisma.chatParticipant.findMany({ where: { userId, hiddenAt: null, archivedAt: archived ? { not: null } : null, conversation: { lastMessageAt: { not: null } } }, include: { conversation: true }, orderBy: { conversation: { lastMessageAt: { sort: "desc", nulls: "last" } } }, take: 100 });
     return Promise.all(rows.map((r) => this.summary(r.conversationId, userId)));
   }
 

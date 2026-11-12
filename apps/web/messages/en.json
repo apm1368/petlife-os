@@ -5800,7 +5800,11 @@
       "back": "Back",
       "continue": "Continue",
       "photoLabel": "Photo",
-      "submit": "Report lost pet"
+      "submit": "Report lost pet",
+      "useMyLocation": "Use my current location",
+      "useMyLocationHelp": "If you are where they were last seen, save the location so neighbours who turned on alerts hear about it. The exact point stays private.",
+      "locationSaved": "Location saved",
+      "locationDenied": "Location access wasn't allowed; you can continue without it."
     },
     "list": {
       "title": "Lost pet reports",
@@ -5890,6 +5894,27 @@
         "reunited": "{name} is back home. Thank you to everyone who helped.",
         "photoAlt": "Photo of {name}"
       }
+    },
+    "areaAlert": {
+      "title": "Lost-pet alerts for my area",
+      "body": "When a pet goes missing near you, we'll let you know so you can help if you see them.",
+      "on": "On: you'll hear about reports within {km} km of you.",
+      "enable": "Turn on alerts",
+      "update": "Update area",
+      "disable": "Turn off",
+      "radius": "Area",
+      "km": "{km} km",
+      "signIn": "Sign in to turn on alerts",
+      "privacy": "Your location is only used to find nearby reports and is never shown to anyone.",
+      "denied": "The browser didn't allow location access.",
+      "failed": "Couldn't save. Please try again."
+    },
+    "found": {
+      "title": "Pets found by neighbours",
+      "subtitle": "Found a pet? Post it here so its family can recognise it.",
+      "cta": "I found a pet",
+      "empty": "No found-pet posts right now.",
+      "untitled": "Found pet"
     }
   },
   "animalSupport": {
@@ -5951,7 +5976,8 @@
       "LOST_PET_SHARE": "Lost pet",
       "RESCUE": "Rescue",
       "ADOPTION": "Adoption",
-      "MEMORY": "Memory"
+      "MEMORY": "Memory",
+      "FOUND_PET": "Found pet"
     },
     "reaction": {
       "LIKE": "Like",
@@ -6010,6 +6036,30 @@
       "commentLabel": "Add a comment",
       "commentSubmit": "Post",
       "commentsEmpty": "No comments yet."
+    },
+    "contact": {
+      "message": "Message the poster",
+      "adopt": "Ask to adopt",
+      "signIn": "Sign in to send a message",
+      "private": "The conversation stays inside opetlife; phone numbers are never shown.",
+      "screening": {
+        "title": "A few quick questions for adoption",
+        "hint": "Your answers are sent as your first message, so the poster can choose carefully.",
+        "intro": "Hello, I'd like to adopt this pet.",
+        "home": "Where you live",
+        "homes": {
+          "apartment": "Apartment",
+          "houseWithYard": "House with a yard",
+          "other": "Other"
+        },
+        "experience": "Experience with pets",
+        "otherPets": "Other pets at home",
+        "why": "Why you want to adopt",
+        "visit": "I can meet in person",
+        "visitYes": "I can come and meet them in person.",
+        "send": "Send request",
+        "cancel": "Cancel"
+      }
     }
   },
   "communityChat": {
@@ -10367,5 +10417,13 @@
       "release": "Release to refresh",
       "loading": "Refreshing…"
     }
+  },
+  "safety": {
+    "title": "Stay safe from scams",
+    "contact": "Pay only inside opetlife. Never send a card-to-card transfer outside the site, and never share a verification code or password.",
+    "payment": "Pay only on this page. opetlife never asks you to transfer money to a personal account or to share a verification code.",
+    "lostPet": "Anyone who asks for money or a reward before returning a pet is probably a scammer. Meet in a public place and never pay in advance.",
+    "donation": "Donate only through this page. opetlife never asks you to transfer a donation to a personal account.",
+    "adoption": "Never pay a fee before meeting. See the pet in person and meet somewhere safe."
   }
 }

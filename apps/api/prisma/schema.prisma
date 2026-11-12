@@ -1340,6 +1340,7 @@ model User {
   walletAccount             WalletAccount?
   cardTransferPayments      CardTransferPayment[]
   walletTopUps              WalletTopUp[]
+  lostPetAreaAlert          LostPetAreaAlert?
 
   clinicClientLinks        ClinicImportedContact[]  @relation("ClinicClientLinkedUser")
 
@@ -7289,6 +7290,22 @@ enum LostPetSightingStatus {
 /// LostPetIncidentService, not a DB constraint, since "at a time" needs a
 /// status-aware check a partial unique index can express but a plain unique
 /// column cannot without excluding CLOSED/REUNITED rows.
+/// #290 Q53: a member's opt-in "tell me when a pet goes missing near me" area. The point and radius are private to
+/// the member: only used server-side to match new lost-pet reports, never returned to anyone else.
+model LostPetAreaAlert {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @unique @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  latitude  Float
+  longitude Float
+  radiusKm  Int      @default(3)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([latitude, longitude])
+  @@map("lost_pet_area_alerts")
+}
+
 model LostPetIncident {
   id          String    @id @default(uuid()) @db.Uuid
   petId       String    @db.Uuid
@@ -7915,6 +7932,8 @@ enum CommunityPostType {
   RESCUE
   ADOPTION
   MEMORY
+  /// #290 Q54: a finder posts a pet they found, so its family can recognise it.
+  FOUND_PET
 }
 
 /// The actual moderation outcome lives here (never a second status

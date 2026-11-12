@@ -3,14 +3,8 @@
 import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { locales } from "@/lib/i18n/config";
+import { LANGUAGE_NAMES, languageOptionName } from "./locale-names";
 
-/** Language names in the language of the current page, so the visible UI never mixes languages. */
-const LANGUAGE_NAMES: Record<string, Record<string, string>> = {
-  fa: { fa: "فارسی", en: "انگلیسی", de: "آلمانی", es: "اسپانیایی" },
-  en: { fa: "Persian", en: "English", de: "German", es: "Spanish" },
-  de: { fa: "Persisch", en: "Englisch", de: "Deutsch", es: "Spanisch" },
-  es: { fa: "persa", en: "inglés", de: "alemán", es: "español" },
-};
 
 /** Swaps the leading locale path segment, preserving the rest of the URL. */
 export function LocaleSwitcher() {
@@ -28,14 +22,14 @@ export function LocaleSwitcher() {
 
   return (
     <select
-      aria-label={LANGUAGE_NAMES[locale]?.[locale] ?? "Language"}
+      aria-label={LANGUAGE_NAMES[locale as keyof typeof LANGUAGE_NAMES]?.label ?? "Language"}
       value={locale}
       onChange={(e) => onChange(e.target.value)}
       className="h-9 rounded-md border border-border-strong bg-surface-elevated px-2 text-metadata text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
     >
       {locales.map((l) => (
         <option key={l} value={l}>
-          {LANGUAGE_NAMES[locale]?.[l] ?? LANGUAGE_NAMES.en?.[l] ?? l}
+          {languageOptionName(locale, l)}
         </option>
       ))}
     </select>
