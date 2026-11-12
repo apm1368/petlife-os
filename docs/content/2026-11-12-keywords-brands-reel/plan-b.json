@@ -1,0 +1,334 @@
+{
+ "batch": "2026-11-b (service keywords + brand guide)",
+ "note": "Articles 21-31. Category 'services' is new in this batch. Service/shop links are site pages, not articles.",
+ "articles": [
+  {
+   "id": 21,
+   "pillar": "care",
+   "species": "both",
+   "tags": [
+    "dog",
+    "cat",
+    "health",
+    "emergency"
+   ],
+   "vetReview": true,
+   "slugs": {
+    "fa": "24-hour-vet-guide",
+    "en": "24-hour-vet-guide",
+    "de": "tierarzt-notdienst",
+    "es": "veterinario-24-horas"
+   },
+   "focus": {
+    "fa": "دامپزشکی شبانه روزی",
+    "en": "24-hour emergency vet",
+    "de": "Tierarzt Notdienst",
+    "es": "veterinario 24 horas"
+   },
+   "targets": [
+    "/{l}/vet/find",
+    "/{l}/services/PET_TAXI"
+   ]
+  },
+  {
+   "id": 22,
+   "pillar": "services",
+   "species": "both",
+   "tags": [
+    "dog",
+    "cat",
+    "shopping"
+   ],
+   "slugs": {
+    "fa": "online-pet-shop-guide",
+    "en": "online-pet-shop-guide",
+    "de": "tierbedarf-online-kaufen",
+    "es": "tienda-mascotas-online"
+   },
+   "focus": {
+    "fa": "پت شاپ آنلاین",
+    "en": "online pet shop",
+    "de": "Tierbedarf online kaufen",
+    "es": "tienda de mascotas online"
+   },
+   "targets": [
+    "/{l}/shop",
+    "/{l}/shop/products?category=food"
+   ]
+  },
+  {
+   "id": 23,
+   "pillar": "care",
+   "species": "cat",
+   "tags": [
+    "cat",
+    "kitten",
+    "nutrition",
+    "shopping"
+   ],
+   "vetReview": true,
+   "slugs": {
+    "fa": "best-dry-cat-food",
+    "en": "best-dry-cat-food",
+    "de": "trockenfutter-katze-ratgeber",
+    "es": "mejor-pienso-gatos"
+   },
+   "focus": {
+    "fa": "غذای خشک گربه",
+    "en": "best dry cat food",
+    "de": "Trockenfutter Katze",
+    "es": "mejor pienso para gatos"
+   },
+   "targets": [
+    "/{l}/shop/products?category=food&species=CAT"
+   ]
+  },
+  {
+   "id": 24,
+   "pillar": "care",
+   "species": "dog",
+   "tags": [
+    "dog",
+    "puppy",
+    "nutrition",
+    "shopping"
+   ],
+   "vetReview": true,
+   "slugs": {
+    "fa": "best-dry-dog-food",
+    "en": "best-dry-dog-food",
+    "de": "trockenfutter-hund-ratgeber",
+    "es": "mejor-pienso-perros"
+   },
+   "focus": {
+    "fa": "غذای خشک سگ",
+    "en": "best dry dog food",
+    "de": "Trockenfutter Hund",
+    "es": "mejor pienso para perros"
+   },
+   "targets": [
+    "/{l}/shop/products?category=food&species=DOG"
+   ]
+  },
+  {
+   "id": 25,
+   "pillar": "services",
+   "species": "cat",
+   "tags": [
+    "cat",
+    "kitten",
+    "shopping"
+   ],
+   "slugs": {
+    "fa": "cat-litter-types",
+    "en": "cat-litter-types",
+    "de": "katzenstreu-arten",
+    "es": "tipos-arena-gatos"
+   },
+   "focus": {
+    "fa": "خاک گربه",
+    "en": "types of cat litter",
+    "de": "Katzenstreu Arten",
+    "es": "tipos de arena para gatos"
+   },
+   "targets": [
+    "/{l}/shop/products?category=accessories&species=CAT"
+   ]
+  },
+  {
+   "id": 26,
+   "pillar": "services",
+   "species": "both",
+   "tags": [
+    "dog",
+    "cat",
+    "services",
+    "travel"
+   ],
+   "slugs": {
+    "fa": "pet-boarding-guide",
+    "en": "pet-boarding-guide",
+    "de": "tierpension-hund-katze",
+    "es": "residencia-perros-gatos"
+   },
+   "focus": {
+    "fa": "پانسیون سگ",
+    "en": "dog and cat boarding",
+    "de": "Tierpension",
+    "es": "residencia para perros y gatos"
+   },
+   "targets": [
+    "/{l}/services/BOARDING",
+    "/{l}/services/SITTING",
+    "/{l}/travel"
+   ]
+  },
+  {
+   "id": 27,
+   "pillar": "services",
+   "species": "dog",
+   "tags": [
+    "dog",
+    "services",
+    "grooming"
+   ],
+   "slugs": {
+    "fa": "dog-grooming-guide",
+    "en": "dog-grooming-guide",
+    "de": "hundefriseur-ratgeber",
+    "es": "peluqueria-canina"
+   },
+   "focus": {
+    "fa": "آرایشگاه سگ",
+    "en": "dog grooming",
+    "de": "Hundefriseur",
+    "es": "peluquería canina"
+   },
+   "targets": [
+    "/{l}/services/GROOMING",
+    "/{l}/shop/products?category=grooming&species=DOG"
+   ]
+  },
+  {
+   "id": 28,
+   "pillar": "services",
+   "species": "both",
+   "tags": [
+    "dog",
+    "cat",
+    "services",
+    "travel"
+   ],
+   "slugs": {
+    "fa": "pet-taxi-guide",
+    "en": "pet-taxi-guide",
+    "de": "tiertaxi-ratgeber",
+    "es": "taxi-mascotas"
+   },
+   "focus": {
+    "fa": "پت تاکسی",
+    "en": "pet taxi",
+    "de": "Tiertaxi",
+    "es": "taxi para mascotas"
+   },
+   "targets": [
+    "/{l}/services/PET_TAXI",
+    "/{l}/vet/find",
+    "/{l}/travel"
+   ]
+  },
+  {
+   "id": 29,
+   "pillar": "training",
+   "species": "dog",
+   "tags": [
+    "dog",
+    "puppy",
+    "training",
+    "services"
+   ],
+   "slugs": {
+    "fa": "choose-dog-trainer",
+    "en": "choose-dog-trainer",
+    "de": "hundetrainer-finden",
+    "es": "elegir-adiestrador-canino"
+   },
+   "focus": {
+    "fa": "مربی سگ",
+    "en": "how to choose a dog trainer",
+    "de": "Hundetrainer finden",
+    "es": "adiestrador canino"
+   },
+   "targets": [
+    "/{l}/services/TRAINING"
+   ]
+  },
+  {
+   "id": 30,
+   "pillar": "services",
+   "species": "both",
+   "tags": [
+    "dog",
+    "cat",
+    "services",
+    "health"
+   ],
+   "slugs": {
+    "fa": "pet-insurance-guide",
+    "en": "pet-insurance-guide",
+    "de": "tierkrankenversicherung-ratgeber",
+    "es": "seguro-mascotas"
+   },
+   "focus": {
+    "fa": "بیمه حیوانات خانگی",
+    "en": "pet insurance",
+    "de": "Tierkrankenversicherung",
+    "es": "seguro para mascotas"
+   },
+   "targets": [
+    "/{l}/insurance",
+    "/{l}/insurance/compare",
+    "/{l}/vet/find"
+   ]
+  },
+  {
+   "id": 31,
+   "pillar": "services",
+   "species": "both",
+   "tags": [
+    "dog",
+    "cat",
+    "nutrition",
+    "shopping",
+    "brands"
+   ],
+   "slugs": {
+    "fa": "top-pet-food-and-gear-brands",
+    "en": "top-pet-food-and-gear-brands",
+    "de": "tierfutter-zubehoer-marken",
+    "es": "marcas-pienso-accesorios-mascotas"
+   },
+   "focus": {
+    "fa": "بهترین برند غذای گربه و سگ",
+    "en": "best pet food brands",
+    "de": "Tierfutter Marken",
+    "es": "mejores marcas de pienso"
+   },
+   "targets": [
+    "/{l}/shop",
+    "/{l}/shop/products?category=food",
+    "/{l}/shop/products?category=accessories"
+   ]
+  },
+  {
+   "id": 32,
+   "pillar": "services",
+   "species": "both",
+   "tags": [
+    "dog",
+    "cat",
+    "services",
+    "shopping"
+   ],
+   "slugs": {
+    "fa": "pet-owner-top-searches",
+    "en": "pet-owner-top-searches",
+    "de": "haeufigste-suchen-tierhalter",
+    "es": "busquedas-frecuentes-mascotas"
+   },
+   "focus": {
+    "fa": "جست‌وجوهای پرتکرار صاحبان سگ و گربه",
+    "en": "what pet owners search most",
+    "de": "häufigste Suchanfragen von Tierhaltern",
+    "es": "lo que más buscan los dueños de mascotas"
+   },
+   "targets": [
+    "/{l}/vet/find",
+    "/{l}/shop",
+    "/{l}/services"
+   ],
+   "hub": true,
+   "video": "reel"
+  }
+ ]
+}
