@@ -23,6 +23,7 @@ export function toProviderBookingSummaryDto(booking: ProviderBookingRow): Provid
     bookingNumber: booking.bookingNumber,
     variantName: booking.variantNameSnapshot,
     requestExpiresAt: booking.requestExpiresAt?.toISOString() ?? null,
+    attendanceConfirmedAt: booking.attendanceConfirmedAt?.toISOString() ?? null,
     resourceId: booking.resourceId,
     paymentMode: booking.paymentMode as unknown as ProviderBookingSummaryDto["paymentMode"],
   };

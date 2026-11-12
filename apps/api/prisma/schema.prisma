@@ -2559,6 +2559,11 @@ model Booking {
   bookingSeries   BookingSeries? @relation(fields: [bookingSeriesId], references: [id], onDelete: SetNull)
 
   startAt  DateTime
+  /// Automatic appointment reminders (booking-reminder.worker.ts): set when each one was handled, sent or skipped.
+  reminder24hSentAt     DateTime?
+  reminder2hSentAt      DateTime?
+  /// The owner tapped "I'll be there" — shown to the provider.
+  attendanceConfirmedAt DateTime?
   endAt    DateTime
   /// The provider location's timezone at booking time — authoritative for
   /// this appointment's local time, independent of the viewer's own locale.
