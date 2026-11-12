@@ -45,6 +45,7 @@ export const PRIVATE_OBJECT_KEY_PREFIXES = [
   "booking-attachments/",
   "support-attachments/",
   "partner-verification/",
+  "wallet-top-up-receipts/",
 ] as const;
 
 /** Repository-owned static assets (demo/QA media shipped with the web app) and absolute URLs are not object keys. */

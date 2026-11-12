@@ -3200,6 +3200,8 @@ export interface AdminDashboardSummaryDto {
   pendingMemorials: number | null;
   /** User reports about wrong place data. */
   openPlaceReports: number | null;
+  /** Card-to-card wallet top-up receipts waiting for finance. */
+  pendingWalletTopUps: number | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -3393,6 +3395,9 @@ export type AdminPermissionName =
   | "customer.sessions.revoke"
   | "pet.access.manage"
   | "finance.reconcile"
+  | "wallet.view"
+  | "wallet.adjust"
+  | "wallet.topup.review"
   | "travel.source.view"
   | "travel.source.manage"
   | "travel.sync.run"
@@ -6833,6 +6838,146 @@ export type {
   PetOwnershipTransferStatusName,
 } from "./ownership";
 export { OWNERSHIP_TRANSFER_EXPIRY_DAYS, PET_MEMORY_DISPOSITIONS, PET_OWNERSHIP_TRANSFER_STATUSES } from "./ownership";
+
+// ---------------------------------------------------------------------------
+// Member wallet (balances are always derived from append-only entries)
+// ---------------------------------------------------------------------------
+
+export type WalletBalanceTypeValue = "WITHDRAWABLE" | "PURCHASE_ONLY";
+export type WalletEntryKindValue = "CREDIT" | "DEBIT" | "EXPIRY";
+export type WalletCreditSourceValue = "REFUND" | "TOP_UP" | "GIFT" | "OVERPAYMENT" | "DUPLICATE_PAYMENT" | "MANUAL_CORRECTION";
+export type WalletTopUpRailValue = "ZIBAL" | "CARD_TO_CARD";
+export type WalletTopUpStatusValue = "AWAITING_PAYMENT" | "AWAITING_RECEIPT" | "REVIEW_PENDING" | "CREDITED" | "FAILED" | "REJECTED" | "EXPIRED" | "CANCELLED";
+export type WalletAdjustmentDirectionValue = "CREDIT" | "DEBIT";
+export type WalletAdjustmentReasonCode = "GOODWILL" | "SERVICE_RECOVERY" | "PAYMENT_CORRECTION" | "REFUND_OUTSIDE_SYSTEM" | "DUPLICATE_CREDIT_REVERSAL" | "OTHER";
+
+export interface WalletBalancesDto {
+  /** Top-ups and gifts: spendable on purchases only. */
+  purchaseOnly: number;
+  /** Refund money: spendable, and the only part that may later be paid out. */
+  withdrawable: number;
+  total: number;
+  currency: string;
+}
+
+export interface WalletTopUpOptionsDto {
+  /** Rails that can take money right now; empty means top-up is not open yet. */
+  rails: WalletTopUpRailValue[];
+  minAmount: number;
+  maxAmount: number;
+  presets: number[];
+}
+
+export interface WalletSummaryDto {
+  balances: WalletBalancesDto;
+  /** Gift credit that expires within 30 days, soonest first. */
+  expiringSoon: { amount: number; expiresAt: string }[];
+  topUp: WalletTopUpOptionsDto;
+}
+
+export interface WalletEntryDto {
+  id: string;
+  kind: WalletEntryKindValue;
+  balanceType: WalletBalanceTypeValue;
+  source: WalletCreditSourceValue | null;
+  /** Positive for money in, negative for money out. */
+  signedAmount: number;
+  /** What the movement was for: TOP_UP, PURCHASE, REFUND, ADJUSTMENT, EXPIRY or OTHER. */
+  purpose: "TOP_UP" | "PURCHASE" | "REFUND" | "ADJUSTMENT" | "EXPIRY" | "OTHER";
+  /** A staff adjustment's reason, shown to the member so a correction is never silent. */
+  note: string | null;
+  expiresAt: string | null;
+  createdAt: string;
+}
+
+export interface WalletEntryPageDto {
+  items: WalletEntryDto[];
+  nextCursor: string | null;
+}
+
+export interface WalletTopUpDto {
+  id: string;
+  rail: WalletTopUpRailValue;
+  status: WalletTopUpStatusValue;
+  amount: number;
+  receivedAmount: number | null;
+  currency: string;
+  receiptUploaded: boolean;
+  receiptDeadlineAt: string | null;
+  rejectionReason: string | null;
+  createdAt: string;
+  creditedAt: string | null;
+}
+
+/** Returned when a card-to-card top-up starts: where to send the money. */
+export interface WalletCardTransferInstructionsDto {
+  cardNumber: string;
+  cardHolderName: string;
+}
+
+export interface WalletTopUpStartedDto {
+  topUp: WalletTopUpDto;
+  /** Zibal: send the browser here. */
+  redirectUrl: string | null;
+  /** Card to card: the card to transfer to. */
+  cardTransfer: WalletCardTransferInstructionsDto | null;
+}
+
+export interface WalletReceiptUploadTargetDto {
+  uploadUrl: string;
+  method: "PUT";
+  headers?: Record<string, string>;
+  key: string;
+  expiresInSeconds: number;
+}
+
+export interface AdminWalletListItemDto {
+  userId: string;
+  displayName: string | null;
+  email: string | null;
+  phone: string | null;
+  balances: WalletBalancesDto;
+  lastActivityAt: string | null;
+}
+
+export interface AdminWalletAdjustmentDto {
+  id: string;
+  direction: WalletAdjustmentDirectionValue;
+  balanceType: WalletBalanceTypeValue;
+  amount: number;
+  reasonCode: string;
+  reason: string;
+  evidenceReference: string | null;
+  createdBy: { adminUserId: string; displayName: string | null };
+  createdAt: string;
+}
+
+export interface AdminWalletTopUpDto extends WalletTopUpDto {
+  userId: string;
+  userDisplayName: string | null;
+  cardNumberMasked: string | null;
+  receiptUploadedAt: string | null;
+  reviewedAt: string | null;
+  reviewedBy: string | null;
+  failureCode: string | null;
+}
+
+export interface AdminWalletAuditDto {
+  id: string;
+  action: string;
+  reason: string | null;
+  adminDisplayName: string | null;
+  createdAt: string;
+}
+
+export interface AdminWalletDetailDto {
+  user: { id: string; displayName: string | null; email: string | null; phone: string | null; createdAt: string };
+  balances: WalletBalancesDto;
+  entries: WalletEntryDto[];
+  topUps: AdminWalletTopUpDto[];
+  adjustments: AdminWalletAdjustmentDto[];
+  audit: AdminWalletAuditDto[];
+}
 
 // ---------------------------------------------------------------------------
 // On-demand pet taxi (Uber/Snapp-style) and maps

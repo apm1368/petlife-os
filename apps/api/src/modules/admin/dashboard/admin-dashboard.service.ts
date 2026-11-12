@@ -16,6 +16,7 @@ import {
   SupportNeedStatus,
   TravelListingStatus,
   TrustCaseStatus,
+  WalletTopUpStatus,
 } from "@prisma/client";
 import type { AdminDashboardSummaryDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
@@ -52,6 +53,7 @@ export class AdminDashboardService {
       openCommunityReports,
       pendingMemorials,
       openPlaceReports,
+      pendingWalletTopUps,
     ] = await Promise.all([
       when(may("support.view"), () => this.prisma.supportCase.count({ where: { status: { notIn: [SupportCaseStatus.RESOLVED, SupportCaseStatus.CLOSED] } } })),
       when(may("dispute.view"), () => this.prisma.dispute.count({ where: { status: { notIn: [DisputeStatus.CLOSED] } } })),
@@ -73,6 +75,7 @@ export class AdminDashboardService {
       when(may("trust.view"), () => this.prisma.communityReport.count({ where: { status: { in: [CommunityReportStatus.OPEN, CommunityReportStatus.ESCALATED] } } })),
       when(may("trust.view"), () => this.prisma.petMemorialSubmission.count({ where: { status: PetMemorialStatus.PENDING_REVIEW, withdrawnAt: null } })),
       when(may("places.view"), () => this.prisma.placeReport.count({ where: { status: PlaceReportStatus.OPEN } })),
+      when(may("wallet.topup.review"), () => this.prisma.walletTopUp.count({ where: { status: WalletTopUpStatus.REVIEW_PENDING } })),
     ]);
     return {
       openSupportCases,
@@ -89,6 +92,7 @@ export class AdminDashboardService {
       openCommunityReports,
       pendingMemorials,
       openPlaceReports,
+      pendingWalletTopUps,
     };
   }
 }
