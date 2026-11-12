@@ -1320,6 +1320,13 @@ export class SupportCampaignOrganizationNotVerifiedException extends ApiExceptio
   }
 }
 
+/** A per-member daily cap on an action that reaches other members (abuse/spam guard). */
+export class DailyLimitReachedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("DAILY_LIMIT_REACHED", "You have reached today's limit for this action. Please try again tomorrow.", HttpStatus.TOO_MANY_REQUESTS, details);
+  }
+}
+
 export class SupportCampaignNotAcceptingDonationsException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("SUPPORT_CAMPAIGN_NOT_ACCEPTING_DONATIONS", "This campaign is not currently accepting donations.", HttpStatus.CONFLICT, details);

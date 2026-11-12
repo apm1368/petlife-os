@@ -399,10 +399,10 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "گزارش گم‌شدن حیوان خانگی ثبت شد", body: "گزارش گم‌شدن {{petName}} ثبت شد. اعضای خانواده مطلع شدند.", smsBody: "گزارش گم‌شدن {{petName}} در پت‌لایف ثبت شد." },
     en: { title: "Lost pet report created", body: "A lost pet report for {{petName}} was created. Household members have been notified.", smsBody: "A lost pet report for {{petName}} was created in PET LIFE OS." },
   },
-  /** #290 Q53: opt-in neighbourhood alert; public facts only (name and the owner's public area). */
+  /** #290 Q53: opt-in neighbourhood alert; public facts only (name and the owner's public area); in-app only, no smsBody. */
   "lost_pet.nearby_opened": {
-    fa: { title: "حیوانی نزدیک شما گم شده", body: "{{petName}} در محدودهٔ {{area}} گم شده است. اگر دیدیدش، در صفحهٔ گزارش خبر بدهید.", smsBody: "{{petName}} نزدیک شما گم شده است. جزئیات در اپت لایف." },
-    en: { title: "A pet is missing near you", body: "{{petName}} went missing around {{area}}. If you see them, report it on the lost-pet page.", smsBody: "{{petName}} is missing near you. Details on opetlife." },
+    fa: { title: "حیوانی نزدیک شما گم شده", body: "{{petName}} در محدودهٔ {{area}} گم شده است. اگر دیدیدش، در صفحهٔ گزارش خبر بدهید." },
+    en: { title: "A pet is missing near you", body: "{{petName}} went missing around {{area}}. If you see them, report it on the lost-pet page." },
   },
   "lost_pet.sighting_submitted": {
     fa: { title: "گزارش مشاهده جدید", body: "یک گزارش مشاهده جدید برای {{petName}} ثبت شد.", smsBody: "یک گزارش مشاهده جدید برای {{petName}} در پت‌لایف ثبت شد." },
