@@ -82,7 +82,7 @@ describe("NotificationCenterView", () => {
     await waitFor(() => expect(screen.getByText("Load more")).toBeTruthy());
 
     fireEvent.click(screen.getByText("Load more"));
-    await waitFor(() => expect(notificationsService.list).toHaveBeenCalledWith(2, 20));
+    await waitFor(() => expect(notificationsService.list).toHaveBeenCalledWith(2, 20, "en"));
   });
 
   it("localizes Spanish notification chrome and formats its timestamp in Spanish", async () => {
