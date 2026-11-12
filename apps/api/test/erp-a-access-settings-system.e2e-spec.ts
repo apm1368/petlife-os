@@ -108,7 +108,7 @@ describe("ERP-A access control, settings, system", () => {
 
     const ann = list.find((s: { key: string }) => s.key === "platform.announcement");
     const text = { fa: `اطلاعیه ${randomUUID().slice(0, 6)}`, en: "Scheduled maintenance tonight" };
-    await send("put", admin, "/admin/settings/platform.announcement").send({ value: { fa: "x", de: "y" }, baseVersion: ann.version, reason: "bad locale" }).expect(400);
+    await send("put", admin, "/admin/settings/platform.announcement").send({ value: { fa: "x", fr: "y" }, baseVersion: ann.version, reason: "bad locale" }).expect(400);
     await send("put", admin, "/admin/settings/unknown.key").send({ value: 1, baseVersion: 0, reason: "nope nope" }).expect(404);
     const applied = (await send("put", admin, "/admin/settings/platform.announcement").send({ value: text, baseVersion: ann.version, reason: "maintenance notice" }).expect(200)).body;
     expect(applied.status).toBe("APPLIED");
@@ -151,7 +151,7 @@ describe("ERP-A access control, settings, system", () => {
     expect(health.components.outbox).toHaveProperty("pending");
     const integrations = (await get(ro, "/admin/system/integrations").expect(200)).body;
     const status = Object.fromEntries(integrations.items.map((i: { key: string; status: string }) => [i.key, i.status]));
-    expect(status).toMatchObject({ TLS: "NOT_CONFIGURED", OTP: "SANDBOX", PAYMENT: "SANDBOX", MAPS: "NOT_IMPLEMENTED", EMAIL: "NOT_IMPLEMENTED" });
+    expect(status).toMatchObject({ TLS: "NOT_CONFIGURED", OTP: "SANDBOX", PAYMENT: "SANDBOX", MAPS: "NOT_IMPLEMENTED", EMAIL: "NOT_CONFIGURED" });
     const text = JSON.stringify([health, integrations]);
     for (const secret of [process.env.SESSION_SECRET!, process.env.CSRF_SECRET!]) expect(text).not.toContain(secret);
     expect(text).not.toMatch(/postgres(ql)?:\/\/|redis:\/\//);
