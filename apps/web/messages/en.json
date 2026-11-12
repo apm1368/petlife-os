@@ -6843,7 +6843,7 @@
       },
       "shortcuts": "Shortcuts",
       "healthLink": "Status page",
-      "workersSummary": "{running} of {total} background jobs running",
+      "workersSummary": "{running} of {total} background jobs healthy",
       "priority": {
         "URGENT": "Urgent",
         "HIGH": "High"
