@@ -1,4 +1,97 @@
 {
+  "adminHolidays": {
+    "kicker": "Business calendar",
+    "title": "Holidays and closures",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "yearLabel": "Persian year",
+    "intro": "Iran's official public holidays, plus any day your team closes or opens. Working-hour targets such as the 24-hour verification review skip closed days, and bookings and delivery estimates can read the same calendar. Fridays are always closed.",
+    "coverage": {
+      "official": "{count, plural, one {# closed day} other {# closed days}} this year, from the official calendar and your team's changes.",
+      "provisional": "Lunar holidays for this year are provisional until the official calendar is published. Correct any day here if it moves.",
+      "none": "There's no official list for this year yet. A developer adds it once the official calendar is published; until then, add closures by hand."
+    },
+    "add": {
+      "title": "Add a closure",
+      "help": "For a day the office is closed that isn't an official holiday, such as a sudden closure or a company day off.",
+      "date": "Date",
+      "name": "Name",
+      "namePlaceholder": "For example: Office closed",
+      "submit": "Close this day"
+    },
+    "reason": "Reason",
+    "reasonPlaceholder": "Why this change (kept in the audit log)",
+    "list": {
+      "title": "Closed and changed days",
+      "empty": "No holidays or changes for this year.",
+      "date": "Date",
+      "name": "Day",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "closed": "Closed",
+      "open": "Open"
+    },
+    "source": {
+      "official": "Official holiday",
+      "staffClosure": "Team closure",
+      "staffOpened": "Opened by the team"
+    },
+    "actions": {
+      "open": "Open as a working day",
+      "undo": "Undo team change"
+    },
+    "confirm": {
+      "openTitle": "Open {date} as a working day?",
+      "openBody": "Working-hour targets will count this day, and bookings may treat it as open.",
+      "undoTitle": "Undo the change on {date}?",
+      "undoBody": "The day goes back to the official calendar."
+    },
+    "done": {
+      "closed": "Closure added.",
+      "opened": "The day is now a working day.",
+      "undone": "Change undone; the day follows the official calendar again."
+    },
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "closureFields": "Pick a date, give it a name, and write a short reason (at least 5 characters).",
+      "reason": "Write a short reason (at least 5 characters)."
+    },
+    "rules": {
+      "CALENDAR_FRIDAY": "Fridays are always closed, so there's nothing to change.",
+      "CALENDAR_ALREADY_OPEN": "That day is already a working day.",
+      "CALENDAR_ALREADY_CLOSED": "That's already an official holiday. To close it again after opening it, undo the team change.",
+      "CALENDAR_OUT_OF_RANGE": "Pick a date from a month ago up to two years ahead.",
+      "CALENDAR_NO_STAFF_CHANGE": "There's no team change on that day."
+    },
+    "names": {
+      "nowruz": "Nowruz (Persian New Year)",
+      "republicDay": "Islamic Republic Day",
+      "natureDay": "Nature Day (Sizdah Bedar)",
+      "sadiqMartyrdom": "Martyrdom of Imam Ja'far al-Sadiq",
+      "eidAlAdha": "Eid al-Adha",
+      "khomeini": "Death of Imam Khomeini",
+      "ghadir": "Eid al-Ghadir",
+      "khordad15": "15 Khordad uprising",
+      "tasua": "Tasua",
+      "ashura": "Ashura",
+      "arbaeen": "Arbaeen",
+      "prophetDeath": "Death of the Prophet and martyrdom of Imam Hasan",
+      "reza": "Martyrdom of Imam Reza",
+      "askari": "Martyrdom of Imam Hasan al-Askari",
+      "mawlid": "Birth of the Prophet and Imam Ja'far al-Sadiq",
+      "fatima": "Martyrdom of Fatima al-Zahra",
+      "aliBirth": "Birth of Imam Ali (Father's Day)",
+      "mabath": "Mab'ath (the Prophet's mission)",
+      "midShaban": "Mid-Sha'ban (birth of Imam Mahdi)",
+      "revolution": "Victory of the Islamic Revolution",
+      "aliMartyrdom": "Martyrdom of Imam Ali",
+      "eidAlFitr": "Eid al-Fitr",
+      "eidAlFitr2": "Eid al-Fitr holiday",
+      "oil": "Oil Nationalization Day"
+    }
+  },
   "clinicClients": {
     "optOut": {
       "title": "Stop clinic texts",
@@ -4398,6 +4491,7 @@
         "signingOut": "Signing out…"
       },
       "tabs": {
+        "holidays": "Holidays and closures",
         "customRoles": "Custom roles",
         "directory": "Directory",
         "customer360": "Customer 360",

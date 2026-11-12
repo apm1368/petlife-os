@@ -54,6 +54,8 @@ import { StorageModule } from "../storage/storage.module";
 import { AdminAccessService } from "./auth/admin-access.service";
 import { AdminAuthGuard } from "./auth/admin-auth.guard";
 import { AdminMeController } from "./auth/admin-me.controller";
+import { AdminCalendarController } from "./calendar/admin-calendar.controller";
+import { AdminCalendarService } from "./calendar/admin-calendar.service";
 import { AdminAuditLogService } from "./audit/admin-audit-log.service";
 import { AdminCustomerService } from "./customer/admin-customer.service";
 import { AdminCustomerController } from "./customer/admin-customer.controller";
@@ -162,6 +164,7 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminReportsController,
     AdminMessagingController,
     AdminMeController,
+    AdminCalendarController,
     AdminSupportOpsController,
     UserSupportAttachmentsController,
     AdminFinanceOpsController,
@@ -220,6 +223,7 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminPet360Service,
     AdminCustomerOverviewService,
     AdminAccessControlService,
+    AdminCalendarService,
     AdminCustomRolesService,
     AdminSettingsService,
     AdminFeatureFlagsService,
