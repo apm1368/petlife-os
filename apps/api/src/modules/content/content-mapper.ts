@@ -113,9 +113,20 @@ export function toPublicTagDto(locale: TagLocale): PublicTagDto {
  * itself never has to look anything up.
  */
 export async function resolveRichTextMedia(prisma: PrismaService, body: RichTextDocument): Promise<RichTextDocument> {
-  const mediaAssetIds = [...new Set(body.filter((b) => b.type === "image").map((b) => b.mediaAssetId))];
+  const referenced = body.flatMap((b) => (b.type === "image" ? [b.mediaAssetId] : b.type === "video" ? [b.mediaAssetId, b.posterMediaAssetId ?? ""] : []));
+  const mediaAssetIds = [...new Set(referenced.filter((id) => UUID_PATTERN.test(id)))];
   if (mediaAssetIds.length === 0) return body;
   const rows = await prisma.mediaAsset.findMany({ where: { id: { in: mediaAssetIds } } });
-  const urlById = new Map(rows.map((r) => [r.id, r.url]));
-  return body.map((block) => (block.type === "image" ? { ...block, url: urlById.get(block.mediaAssetId) } : block));
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  return body.map((block) => {
+    if (block.type === "image") return { ...block, url: byId.get(block.mediaAssetId)?.url };
+    if (block.type === "video") {
+      const video = byId.get(block.mediaAssetId);
+      const poster = block.posterMediaAssetId ? byId.get(block.posterMediaAssetId) : undefined;
+      return { ...block, url: video?.url, mimeType: video?.mimeType, posterUrl: poster?.url };
+    }
+    return block;
+  });
 }
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

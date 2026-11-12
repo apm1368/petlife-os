@@ -25,7 +25,13 @@ describe("localized public SEO metadata", () => {
     },
   );
 
-  it.each(["shop", "help", "legal", "blog", "places", "insurance"] as const)(
+  it("serves the Persian home at the bare domain and every other locale under its prefix", () => {
+    expect(publicPagePath("fa", "home")).toBe("/");
+    expect(publicPagePath("en", "home")).toBe("/en");
+    expect(publicPagePath("fa", "blog")).toBe("/fa/blog");
+  });
+
+  it.each(["shop", "help", "legal", "places", "insurance"] as const)(
     "keeps currently empty or unpublished %s out of search results",
     (page) => {
       const metadata = publicPageMetadata("de", page);

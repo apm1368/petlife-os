@@ -1,6 +1,13 @@
-import { PublicBlogCategoryView } from "@/features/content/PublicBlogCategoryView";
+import { ArticleIndexRoute, articleIndexMetadataFor } from "@/features/content/article-index-route";
 
-export default async function BlogCategoryPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  return <PublicBlogCategoryView slug={slug} />;
+type Props = { params: Promise<{ locale: string; slug: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> };
+
+export async function generateMetadata({ params, searchParams }: Props) {
+  const { locale, slug } = await params;
+  return articleIndexMetadataFor(locale, { kind: "category", slug }, await searchParams);
+}
+
+export default async function BlogCategoryPage({ params, searchParams }: Props) {
+  const { locale, slug } = await params;
+  return <ArticleIndexRoute localeParam={locale} index={{ kind: "category", slug }} searchParams={await searchParams} />;
 }

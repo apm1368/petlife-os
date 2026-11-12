@@ -1,6 +1,6 @@
 import { IsIn, IsInt, IsOptional, IsString, Min, MaxLength } from "class-validator";
 
-const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "video/mp4", "video/webm"];
 
 export class RequestMediaUploadDto {
   @IsIn(ALLOWED_MIME_TYPES)

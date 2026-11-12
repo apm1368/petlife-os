@@ -11,6 +11,7 @@ import { DisplayModeToggle } from "@/features/display-mode/DisplayModeToggle";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { parkCopy } from "./park-copy";
 import { oplCopy, worldOrder } from "./opl/opl-copy";
+import { localeHomePath } from "@/lib/seo/site";
 
 const WORLD_ICONS = { health: HeartPulse, daily: ShoppingBag, travel: Plane, safe: ShieldCheck, together: Users } as const;
 
@@ -26,6 +27,8 @@ export function ParkHeader({ locale }: { locale: RouteLocale }) {
   const c = parkCopy[locale];
   const o = oplCopy[locale];
   const root = `/${locale}`;
+  // Home and its sections live at the canonical home address (the bare domain for Persian).
+  const home = localeHomePath(locale);
   const partnerReturn = encodeURIComponent(`${root}/provider`);
   const languageNames: Record<RouteLocale, string> = { fa: "زبان", en: "Language", de: "Sprache", es: "Idioma" };
   useEffect(() => {
@@ -38,21 +41,21 @@ export function ParkHeader({ locale }: { locale: RouteLocale }) {
   }, []);
   const links = [
     { href: `${root}/vet/find`, label: c.services.vet.title },
-    { href: `${root}#park-about`, label: c.about },
-    { href: `${root}#park-partners`, label: c.partners },
+    { href: `${home}#park-about`, label: c.about },
+    { href: `${home}#park-partners`, label: c.partners },
   ];
   return <header className={`opl-hdr${scrolled ? " scrolled" : ""}`} onKeyDown={(event) => { if (event.key === "Escape") { setDd(false); if (open) { setOpen(false); menuButton.current?.focus(); } } }}>
     <a href="#lp-main" className="opl-skip">{c.skip}</a>
     <div className="opl-wrap opl-hdr__in">
-      <Link className="opl-brand" href={root} aria-label={o.brand}>
+      <Link className="opl-brand" href={home} aria-label={o.brand}>
         <Brand locale={locale} /><small>{c.brandTagline}</small>
       </Link>
       <nav className="opl-hnav" aria-label={c.navLabel}>
-        <Link href={root} aria-current="page" className="on">{c.home}</Link>
+        <Link href={home} aria-current="page" className="on">{c.home}</Link>
         <div ref={ddWrap} className="opl-hnav__dd">
           <button type="button" aria-expanded={dd} aria-controls="opl-services-menu" onClick={() => setDd((v) => !v)}>{o.header.services}<ChevronDown size={16} aria-hidden="true" /></button>
           <div id="opl-services-menu" className="opl-dd" hidden={!dd}>
-            {worldOrder.map((key) => { const Icon = WORLD_ICONS[key], w = o.world.worlds[key]; return <Link key={key} href={`${root}#world-${key}`} onClick={() => setDd(false)}>
+            {worldOrder.map((key) => { const Icon = WORLD_ICONS[key], w = o.world.worlds[key]; return <Link key={key} href={`${home}#world-${key}`} onClick={() => setDd(false)}>
               <span className="opl-dd__ic"><Icon size={20} aria-hidden="true" /></span><span><b>{w.name}</b><small>{w.q}</small></span>
             </Link>; })}
             <Link href={`${root}/services`} onClick={() => setDd(false)}><span className="opl-dd__ic"><Sparkles size={20} aria-hidden="true" /></span><span><b>{o.header.allServices}</b><small>{o.header.allServicesHint}</small></span></Link>
@@ -83,8 +86,8 @@ export function ParkHeader({ locale }: { locale: RouteLocale }) {
     </div>
     <nav id="park-mobile-nav" className="opl-msheet" aria-label={c.navLabel} hidden={!open}>
       <div className="opl-wrap opl-msheet__in">
-        {[{ href: root, label: c.home }, ...links].map((link) => <Link key={link.href} href={link.href} onClick={() => setOpen(false)}>{link.label}</Link>)}
-        {worldOrder.map((key) => <Link key={key} href={`${root}#world-${key}`} onClick={() => setOpen(false)}>{o.world.worlds[key].name}</Link>)}
+        {[{ href: home, label: c.home }, ...links].map((link) => <Link key={link.href} href={link.href} onClick={() => setOpen(false)}>{link.label}</Link>)}
+        {worldOrder.map((key) => <Link key={key} href={`${home}#world-${key}`} onClick={() => setOpen(false)}>{o.world.worlds[key].name}</Link>)}
         <Link href={`${root}/auth`} onClick={() => setOpen(false)}>{c.signIn}</Link>
         <Link href={`${root}/register`} onClick={() => setOpen(false)}>{c.memberJoin}</Link>
         <Link href={`${root}/auth?returnTo=${partnerReturn}`} onClick={() => setOpen(false)}>{c.partnerSignIn}</Link>

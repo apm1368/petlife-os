@@ -1,4 +1,26 @@
 {
+  "blog": {
+    "index": {
+      "title": "Revista",
+      "allCategories": "Todos",
+      "loading": "Cargando artículos",
+      "empty": "Aún no hay artículos. Vuelve pronto.",
+      "loadMore": "Cargar más",
+      "retry": "Reintentar",
+      "categoryNotFoundTitle": "Categoría no encontrada",
+      "categoryNotFoundMessage": "Esta categoría no existe o no está disponible.",
+      "tagNotFoundTitle": "Tema no encontrado",
+      "tagNotFoundMessage": "Este tema no existe o no está disponible."
+    },
+    "article": {
+      "loading": "Cargando artículo",
+      "published": "Publicado el {date}",
+      "updated": "Actualizado el {date}",
+      "retry": "Reintentar",
+      "notFoundTitle": "Artículo no encontrado",
+      "notFoundMessage": "Este artículo no existe o no está disponible en este momento."
+    }
+  },
   "adminAccessMatrix": {
     "kicker": "Niveles de acceso",
     "title": "Matriz de acceso por rol",
@@ -4884,6 +4906,15 @@
   },
   "rollout": {
     "editorial": {
+      "guidesLabel": "Guías",
+      "blogLabel": "Revista",
+      "home": "Inicio",
+      "breadcrumb": "Ruta de navegación",
+      "contents": "En este artículo",
+      "otherLanguages": "Leer en otros idiomas",
+      "pageLabel": "Página {page}",
+      "newer": "Página anterior",
+      "older": "Página siguiente",
       "eyebrow": "El diario de opetlife",
       "title": "Un poco de conocimiento. Una mejor vida juntos.",
       "description": "Cuidados, descubrimientos cotidianos y consejos útiles para la vida con tu compañero.",

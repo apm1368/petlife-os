@@ -56,7 +56,7 @@ export function AdminContentArticleListView() {
           label={t("localeFilter")}
           value={localeFilter}
           onChange={(e) => setLocaleFilter(e.target.value as Locale | "")}
-          options={[{ value: "", label: t("any") }, { value: "fa", label: "فارسی" }, { value: "en", label: "English" }]}
+          options={[{ value: "", label: t("any") }, { value: "fa", label: "فارسی" }, { value: "en", label: "English" }, { value: "de", label: "Deutsch" }, { value: "es", label: "Español" }]}
         />
         <Button variant="secondary" onClick={load}>
           {t("applyFilters")}
