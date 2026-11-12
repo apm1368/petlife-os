@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { isAppLocale, isRouteLocale, localeDirection, locales } from "./config";
 
 describe("locale config", () => {
-  it("recognizes the four supported route locales", () => {
+  it("recognizes the six supported route locales", () => {
     expect(isAppLocale("fa")).toBe(true);
     expect(isAppLocale("en")).toBe(true);
     expect(isAppLocale("de")).toBe(false);
@@ -10,7 +10,9 @@ describe("locale config", () => {
     expect(isAppLocale("ar")).toBe(false);
     expect(isRouteLocale("de")).toBe(true);
     expect(isRouteLocale("es")).toBe(true);
-    expect(isRouteLocale("ar")).toBe(false);
+    expect(isRouteLocale("ar")).toBe(true);
+    expect(isRouteLocale("nl")).toBe(true);
+    expect(isRouteLocale("tr")).toBe(false);
   });
 
   it("keeps Persian RTL and the other shipped locales LTR", () => {

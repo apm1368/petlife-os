@@ -66,7 +66,7 @@ describe("PersonalSettingsView — account locale and theme preferences", () => 
     expect(screen.getByText(emailLabel)).toBeTruthy();
     expect(screen.getByText(new RegExp(displayDescription))).toBeTruthy();
     expect(screen.getByText(locale === "de" ? "Nicht verifiziert" : "No verificado")).toBeTruthy();
-    expect((document.body.textContent ?? "").replace("فارسی", "")).not.toMatch(/[\u0600-\u06FF]/);
+    expect((document.body.textContent ?? "").replace("فارسی", "").replace("العربية", "")).not.toMatch(/[\u0600-\u06FF]/);
   });
 
   it.each([
@@ -79,7 +79,7 @@ describe("PersonalSettingsView — account locale and theme preferences", () => 
     expect(screen.getByText(message)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: locale === "de" ? "Erneut versuchen" : "Reintentar" }));
     expect(await screen.findByLabelText(locale === "de" ? "Anzeigename" : "Nombre visible")).toBeTruthy();
-    expect((document.body.textContent ?? "").replace("فارسی", "")).not.toMatch(/[\u0600-\u06FF]/);
+    expect((document.body.textContent ?? "").replace("فارسی", "").replace("العربية", "")).not.toMatch(/[\u0600-\u06FF]/);
   });
 
   it.each([
@@ -92,7 +92,7 @@ describe("PersonalSettingsView — account locale and theme preferences", () => 
     fireEvent.change(name, { target: { value: "Sara Example" } });
     fireEvent.click(screen.getByRole("button", { name: locale === "de" ? "Änderungen speichern" : "Guardar cambios" }));
     expect((await screen.findByRole("alert")).textContent).toContain(expected);
-    expect((document.body.textContent ?? "").replace("فارسی", "")).not.toMatch(/[\u0600-\u06FF]/);
+    expect((document.body.textContent ?? "").replace("فارسی", "").replace("العربية", "")).not.toMatch(/[\u0600-\u06FF]/);
   });
 
   it.each([
@@ -106,6 +106,6 @@ describe("PersonalSettingsView — account locale and theme preferences", () => 
     fireEvent.change(screen.getByLabelText(inputLabel), { target: { value: "new@example.com" } });
     fireEvent.click(screen.getByRole("button", { name: sendLabel }));
     expect((await screen.findByRole("alert")).textContent).toContain(expected);
-    expect((document.body.textContent ?? "").replace("فارسی", "")).not.toMatch(/[\u0600-\u06FF]/);
+    expect((document.body.textContent ?? "").replace("فارسی", "").replace("العربية", "")).not.toMatch(/[\u0600-\u06FF]/);
   });
 });
