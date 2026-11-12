@@ -62,7 +62,7 @@ describe("member navigation", () => {
     fireEvent.keyDown(explore, { key: "ArrowDown" });
     expect(explore.getAttribute("aria-expanded")).toBe("true");
     expect(screen.getByRole("link", { name: /سفر و اقامت/ }).getAttribute("href")).toBe("/fa/travel");
-    const destinations = screen.getByRole("navigation", { name: "بخش‌های opetlife" });
+    const destinations = screen.getByRole("navigation", { name: "بخش‌های اپت لایف" });
     expect(document.activeElement).toBe(within(destinations).getAllByRole("link")[0]);
     fireEvent.keyDown(document, { key: "Escape" });
     expect(explore.getAttribute("aria-expanded")).toBe("false");
