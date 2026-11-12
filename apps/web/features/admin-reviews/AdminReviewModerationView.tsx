@@ -14,6 +14,7 @@ import { formatDay } from "@/lib/date/jalali";
 import { adminReviewModerationService } from "@/services/admin-review-moderation.service";
 import { useAdminStore } from "@/stores/admin-store";
 import { FilterBar, FilterField, Panel, SelectFilter, Tag, TextFilter } from "../admin/console-ui";
+import { copyFor, type Tr } from "@/features/admin/admin-copy";
 
 type Decision = { row: AdminReviewModerationRowDto; kind: "APPROVED" | "REJECTED" };
 const VERTICALS: AdminReviewVertical[] = ["SERVICE", "PRODUCT", "TRAVEL"];
@@ -21,31 +22,29 @@ const STATUSES: AdminReviewModerationStatus[] = ["PENDING", "APPROVED", "REJECTE
 const PERMISSION = { SERVICE: "services", PRODUCT: "commerce", TRAVEL: "travel" } as const;
 const PATH = { SERVICE: "services/reviews", PRODUCT: "commerce/reviews", TRAVEL: "travel/reviews" } as const;
 
-function copy(fa: boolean) {
+function copy(tr: Tr) {
   return {
-    title: fa ? "مدیریت و تأیید نظرها" : "Review moderation",
-    subtitle: fa
-      ? "نظرهای تازه تا زمان تأیید در سایت عمومی و میانگین امتیاز دیده نمی‌شوند."
-      : "New reviews stay out of public pages and rating averages until approved.",
+    title: tr("مدیریت و تأیید نظرها", "Review moderation"),
+    subtitle: tr("نظرهای تازه تا زمان تأیید در سایت عمومی و میانگین امتیاز دیده نمی‌شوند.", "New reviews stay out of public pages and rating averages until approved."),
     vertical: {
-      SERVICE: fa ? "خدمات" : "Services",
-      PRODUCT: fa ? "محصولات" : "Products",
-      TRAVEL: fa ? "سفر و اقامت" : "Travel & stays",
+      SERVICE: tr("خدمات", "Services"),
+      PRODUCT: tr("محصولات", "Products"),
+      TRAVEL: tr("سفر و اقامت", "Travel & stays"),
     },
     status: {
-      PENDING: fa ? "در انتظار" : "Pending",
-      APPROVED: fa ? "تأییدشده" : "Approved",
-      REJECTED: fa ? "ردشده" : "Rejected",
-      PUBLISHED: fa ? "منتشرشدهٔ قدیمی" : "Legacy published",
-      HIDDEN: fa ? "پنهان‌شده" : "Hidden",
+      PENDING: tr("در انتظار", "Pending"),
+      APPROVED: tr("تأییدشده", "Approved"),
+      REJECTED: tr("ردشده", "Rejected"),
+      PUBLISHED: tr("منتشرشدهٔ قدیمی", "Legacy published"),
+      HIDDEN: tr("پنهان‌شده", "Hidden"),
     },
   };
 }
 
 export function AdminReviewModerationView({ initialVertical }: { initialVertical: AdminReviewVertical }) {
-  const locale = useLocale() as "fa" | "en";
-  const fa = locale === "fa";
-  const text = copy(fa);
+  const locale = useLocale() as "fa" | "en" | "de" | "es";
+  const { tr, trf } = copyFor(locale);
+  const text = copy(tr);
   const context = useAdminStore((state) => state.context);
   const adminStatus = useAdminStore((state) => state.status);
   const allowed = useMemo(
@@ -131,12 +130,8 @@ export function AdminReviewModerationView({ initialVertical }: { initialVertical
     } catch (cause) {
       setActionError(
         cause instanceof ApiError && cause.status === 403
-          ? fa
-            ? "مجوز اقدام روی این حوزه یا رکورد را ندارید."
-            : "You cannot act on this vertical or record."
-          : fa
-            ? "اقدام انجام نشد؛ دوباره تلاش کنید."
-            : "The action failed. Please retry.",
+          ? tr("مجوز اقدام روی این حوزه یا رکورد را ندارید.", "You cannot act on this vertical or record.")
+          : tr("اقدام انجام نشد؛ دوباره تلاش کنید.", "The action failed. Please retry."),
       );
     } finally {
       setBusy(false);
@@ -147,7 +142,7 @@ export function AdminReviewModerationView({ initialVertical }: { initialVertical
   if (!allowed.has(initialVertical) || error === "forbidden")
     return (
       <EmptyState
-        title={fa ? "دسترسی مشاهدهٔ نظرهای این حوزه را ندارید" : "You cannot view reviews in this vertical"}
+        title={tr("دسترسی مشاهدهٔ نظرهای این حوزه را ندارید", "You cannot view reviews in this vertical")}
       />
     );
 
@@ -158,7 +153,7 @@ export function AdminReviewModerationView({ initialVertical }: { initialVertical
         <p className="mt-1 max-w-3xl text-sm text-text-secondary">{text.subtitle}</p>
       </header>
       <nav
-        aria-label={fa ? "حوزهٔ نظرها" : "Review vertical"}
+        aria-label={tr("حوزهٔ نظرها", "Review vertical")}
         className="flex gap-1 overflow-x-auto border-b border-border-subtle"
       >
         {VERTICALS.filter((vertical) => allowed.has(vertical)).map((vertical) => (
@@ -174,7 +169,7 @@ export function AdminReviewModerationView({ initialVertical }: { initialVertical
       </nav>
       <Panel>
         <FilterBar>
-          <FilterField label={fa ? "جست‌وجوی متن، نویسنده یا مقصد" : "Search text, author or target"}>
+          <FilterField label={tr("جست‌وجوی متن، نویسنده یا مقصد", "Search text, author or target")}>
             <TextFilter
               value={q}
               onChange={(value) => {
@@ -183,7 +178,7 @@ export function AdminReviewModerationView({ initialVertical }: { initialVertical
               }}
             />
           </FilterField>
-          <FilterField label={fa ? "وضعیت" : "Status"}>
+          <FilterField label={tr("وضعیت", "Status")}>
             <SelectFilter
               value={status}
               onChange={(value) => {
@@ -196,15 +191,15 @@ export function AdminReviewModerationView({ initialVertical }: { initialVertical
         </FilterBar>
         {error === "load" ? (
           <ErrorRecovery
-            title={fa ? "صف نظرها بارگیری نشد" : "Could not load the review queue"}
+            title={tr("صف نظرها بارگیری نشد", "Could not load the review queue")}
             message=""
-            retryLabel={fa ? "تلاش دوباره" : "Retry"}
+            retryLabel={tr("تلاش دوباره", "Retry")}
             onRetry={() => void load()}
           />
         ) : null}
         {!data && !error ? <Skeleton className="h-64" /> : null}
         {data && data.items.length === 0 ? (
-          <EmptyState title={fa ? "نظری با این فیلتر پیدا نشد" : "No reviews match these filters"} />
+          <EmptyState title={tr("نظری با این فیلتر پیدا نشد", "No reviews match these filters")} />
         ) : null}
         {data?.items.length ? (
           <ul className="divide-y divide-border-subtle">
@@ -232,7 +227,7 @@ export function AdminReviewModerationView({ initialVertical }: { initialVertical
                     {row.authorName} · {formatDay(row.createdAt.slice(0, 10), locale)}
                   </p>
                   <p className="mt-2 whitespace-pre-wrap text-sm">
-                    {row.body || (fa ? "بدون متن" : "No written review")}
+                    {row.body || (tr("بدون متن", "No written review"))}
                   </p>
                   {row.labels.length ? (
                     <div className="mt-2 flex flex-wrap gap-1">
@@ -243,7 +238,7 @@ export function AdminReviewModerationView({ initialVertical }: { initialVertical
                   ) : null}
                   {row.moderationReason ? (
                     <p className="mt-2 text-sm text-text-secondary">
-                      <strong>{fa ? "یادداشت تصمیم: " : "Decision note: "}</strong>
+                      <strong>{tr("یادداشت تصمیم: ", "Decision note: ")}</strong>
                       {row.moderationReason}
                     </p>
                   ) : null}
@@ -256,7 +251,7 @@ export function AdminReviewModerationView({ initialVertical }: { initialVertical
                       disabled={row.status === "APPROVED"}
                       onClick={() => openDecision(row, "APPROVED")}
                     >
-                      {fa ? "تأیید" : "Approve"}
+                      {tr("تأیید", "Approve")}
                     </Button>
                     <Button
                       size="sm"
@@ -264,7 +259,7 @@ export function AdminReviewModerationView({ initialVertical }: { initialVertical
                       disabled={row.status === "REJECTED"}
                       onClick={() => openDecision(row, "REJECTED")}
                     >
-                      {fa ? "رد" : "Reject"}
+                      {tr("رد", "Reject")}
                     </Button>
                   </div>
                 ) : null}
@@ -280,10 +275,10 @@ export function AdminReviewModerationView({ initialVertical }: { initialVertical
               disabled={page <= 1}
               onClick={() => setPage((value) => Math.max(1, value - 1))}
             >
-              {fa ? "قبلی" : "Previous"}
+              {tr("قبلی", "Previous")}
             </Button>
             <span className="text-sm text-text-secondary">
-              {fa ? `صفحه ${data.page}` : `Page ${data.page}`}
+              {trf("صفحه {page}", "Page {page}", { page: data.page })}
             </span>
             <Button
               size="sm"
@@ -291,7 +286,7 @@ export function AdminReviewModerationView({ initialVertical }: { initialVertical
               disabled={page * data.pageSize >= data.total}
               onClick={() => setPage((value) => value + 1)}
             >
-              {fa ? "بعدی" : "Next"}
+              {tr("بعدی", "Next")}
             </Button>
           </div>
         ) : null}
@@ -301,38 +296,26 @@ export function AdminReviewModerationView({ initialVertical }: { initialVertical
         onClose={() => !busy && setDecision(null)}
         title={
           decision?.kind === "APPROVED"
-            ? fa
-              ? "تأیید نظر"
-              : "Approve review"
-            : fa
-              ? "رد نظر"
-              : "Reject review"
+            ? tr("تأیید نظر", "Approve review")
+            : tr("رد نظر", "Reject review")
         }
       >
         <div className="flex flex-col gap-3">
           <p className="text-sm text-text-secondary">
             {decision?.kind === "APPROVED"
-              ? fa
-                ? "پس از تأیید، نظر در سایت عمومی و میانگین امتیاز وارد می‌شود."
-                : "Approval adds this review to public pages and rating averages."
-              : fa
-                ? "نظر حذف نمی‌شود؛ دلیل تصمیم و سابقهٔ ممیزی نگه‌داری می‌شود."
-                : "The review is retained with its reason and audit history."}
+              ? tr("پس از تأیید، نظر در سایت عمومی و میانگین امتیاز وارد می‌شود.", "Approval adds this review to public pages and rating averages.")
+              : tr("نظر حذف نمی‌شود؛ دلیل تصمیم و سابقهٔ ممیزی نگه‌داری می‌شود.", "The review is retained with its reason and audit history.")}
           </p>
           <Input
-            label={fa ? "برچسب‌ها (با ویرگول جدا کنید)" : "Labels (comma-separated)"}
+            label={tr("برچسب‌ها (با ویرگول جدا کنید)", "Labels (comma-separated)")}
             value={labels}
             onChange={(event) => setLabels(event.target.value)}
           />
           <Input
             label={
               decision?.kind === "REJECTED"
-                ? fa
-                  ? "دلیل رد (الزامی)"
-                  : "Rejection reason (required)"
-                : fa
-                  ? "یادداشت (اختیاری)"
-                  : "Note (optional)"
+                ? tr("دلیل رد (الزامی)", "Rejection reason (required)")
+                : tr("یادداشت (اختیاری)", "Note (optional)")
             }
             value={reason}
             onChange={(event) => setReason(event.target.value)}
@@ -349,12 +332,8 @@ export function AdminReviewModerationView({ initialVertical }: { initialVertical
             onClick={() => void submit()}
           >
             {decision?.kind === "APPROVED"
-              ? fa
-                ? "تأیید و انتشار"
-                : "Approve and publish"
-              : fa
-                ? "ثبت رد"
-                : "Reject review"}
+              ? tr("تأیید و انتشار", "Approve and publish")
+              : tr("ثبت رد", "Reject review")}
           </Button>
         </div>
       </Dialog>

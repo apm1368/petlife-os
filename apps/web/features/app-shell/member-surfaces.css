@@ -52,7 +52,9 @@
 .member-shell--glass .member-home__next { background:var(--opl-mint); border-radius:20px; }
 .member-shell--glass .member-home__attention .member-home__calm { background:transparent; }
 .member-shell--glass .pet-hero { border-radius:28px; }
-.member-shell--glass .pet-tabs { background:var(--opl-raised); border:1px solid var(--opl-line); border-radius:999px; padding:4px; }
+/* The pet tabs are a capsule inside the content column (not full-bleed under the dock) and stick below the 74px header. */
+.member-shell .pet-tabs { top:86px; }
+.member-shell--glass .pet-tabs { margin-inline:0; background:var(--opl-raised); border:1px solid var(--opl-line); border-radius:999px; padding:4px; }
 .member-shell--glass .pet-tabs :is(a,button) { border-radius:999px; }
 .member-shell .glass-home :is(button, .glass-home__switch a) { border-radius:999px; }
 .member-shell .glass-home :is(.glass-home__sections, .glass-home__attention, .glass-home__calendar ol) { border-radius:20px; }
@@ -71,7 +73,7 @@
 .member-shell .member-tabbar > [aria-current="page"] { background:var(--opl-mint); color:var(--opl-forest); }
 
 @media (max-width:1023px) { .glass-dock { display:none; } .member-shell--glass .workspace-main { padding:24px 20px 100px; } }
-@media (max-width:767px) { .member-shell .member-header__bar { height:64px; } .member-shell .mega { max-height:calc(100dvh - 64px); } }
+@media (max-width:767px) { .member-shell .member-header__bar { height:64px; } .member-shell .mega { max-height:calc(100dvh - 64px); } .member-shell .pet-tabs { top:72px; } }
 @media (max-width:650px) {
   .member-shell--glass .workspace-main { padding:20px 16px 100px; }
   .member-shell--glass .member-home__layout { grid-template-columns:minmax(0,1fr); }

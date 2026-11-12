@@ -16,7 +16,7 @@ import { DetailRow, EmptyRow, FilterBar, FilterField, Kpi, Panel, PanelTitle, Se
 
 import { AdminOrganizationFunds, AdminSupportOrganizationEditor, AdminSupportOrganizationInfo } from "./AdminSupportOperations";
 import { useSupportPermissions } from "./use-support-permissions";
-import { AdminAnimalSupportNav } from "./AdminAnimalSupportNav";
+import { intlLocale } from "@/features/admin/admin-copy";
 
 type Lang = "fa" | "en";
 const useLang = () => {
@@ -26,7 +26,7 @@ const useLang = () => {
 type LoadError = "forbidden" | "notFound" | "error" | null;
 const toError = (e: unknown): LoadError => (e instanceof ApiError ? (e.status === 403 ? "forbidden" : e.status === 404 ? "notFound" : "error") : "error");
 const day = (iso: string | null | undefined, lang: Lang) => (iso ? formatDateLabel(iso, lang, "Asia/Tehran") : "—");
-const n = (value: number, lang: Lang) => localizeDigits(value.toLocaleString(lang === "fa" ? "fa-IR" : "en-US"), lang);
+const n = (value: number, lang: Lang) => localizeDigits(value.toLocaleString(intlLocale(lang)), lang);
 const errorMessage = (e: unknown, t: (fa: string, en: string) => string) =>
   e instanceof ApiError && e.status === 403 ? t("این کار با نقش شما مجاز نیست.", "Your role isn't allowed to do this.") : e instanceof ApiError && e.status === 409 ? t("این تغییر از وضعیت فعلی مجاز نیست.", "That change isn't allowed from the current state.") : t("انجام نشد؛ دوباره تلاش کنید.", "That didn't work; try again.");
 
@@ -128,7 +128,6 @@ function reportTarget(report: CommunityReportDto): { label: [string, string]; hr
 
 // ---------------------------------------------------------------- shared pieces
 
-export { AdminAnimalSupportNav } from "./AdminAnimalSupportNav";
 
 function LoadState({ error, perm, onRetry, locale }: { error: LoadError; perm: string; onRetry: () => void; locale?: RouteLocale }) {
   const { t: legacyT } = useLang();
@@ -218,7 +217,6 @@ export function AdminAnimalSupportOverviewView() {
   }, [load]);
   return (
     <div>
-      <AdminAnimalSupportNav />
       <h1 className="mb-4 text-page-title text-text-primary">{t("حمایت از حیوانات", "Animal support")}</h1>
       {error ? <LoadState error={error} perm="animalSupport.view" onRetry={load} /> : !data ? <Skeleton className="h-40 w-full" aria-label={t("در حال بارگذاری", "Loading")} /> : (
         <div className="flex flex-col gap-4">
@@ -267,7 +265,6 @@ export function AdminSupportNeedsView() {
   }, [load]);
   return (
     <div>
-      <AdminAnimalSupportNav />
       <h1 className="mb-4 text-page-title text-text-primary">{t("درخواست‌های کمک", "Support requests")}</h1>
       <FilterBar>
         <FilterField label={t("وضعیت", "Status")}>
@@ -313,8 +310,8 @@ export function AdminSupportNeedDetailView({ needId }: { needId: string }) {
   useEffect(() => {
     void load();
   }, [load]);
-  if (error) return <div><AdminAnimalSupportNav /><LoadState error={error} perm="trust.view" onRetry={load} /></div>;
-  if (!need) return <div><AdminAnimalSupportNav /><Skeleton className="h-40 w-full" aria-label={t("در حال بارگذاری", "Loading")} /></div>;
+  if (error) return <div><LoadState error={error} perm="trust.view" onRetry={load} /></div>;
+  if (!need) return <div><Skeleton className="h-40 w-full" aria-label={t("در حال بارگذاری", "Loading")} /></div>;
   const review = (status: string) => async (note: string) => {
     setNeed(await adminAnimalSupportService.reviewNeed(need.id, status, note));
   };
@@ -325,7 +322,6 @@ export function AdminSupportNeedDetailView({ needId }: { needId: string }) {
   })[to]?.includes(need.status) && permissions.trustManage;
   return (
     <div>
-      <AdminAnimalSupportNav />
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <h1 className="text-page-title text-text-primary">{need.title}</h1>
         <StatusTag map={NEED_STATUS} value={need.status} />
@@ -381,7 +377,6 @@ export function AdminOrganizationsView() {
   }, [load]);
   return (
     <div>
-      <AdminAnimalSupportNav />
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-page-title text-text-primary">{t("سازمان‌ها و پناهگاه‌ها", "Organizations & shelters")}</h1>
         {permissions.manage && <Button size="sm" onClick={() => setCreating((v) => !v)}>{t("سازمان جدید", "New organization")}</Button>}
@@ -465,8 +460,8 @@ export function AdminOrganizationDetailView({ organizationId }: { organizationId
   useEffect(() => {
     void load();
   }, [load]);
-  if (error) return <div><AdminAnimalSupportNav /><LoadState error={error} perm="animalSupport.view" onRetry={load} /></div>;
-  if (!org || !members) return <div><AdminAnimalSupportNav /><Skeleton className="h-40 w-full" aria-label={t("در حال بارگذاری", "Loading")} /></div>;
+  if (error) return <div><LoadState error={error} perm="animalSupport.view" onRetry={load} /></div>;
+  if (!org || !members) return <div><Skeleton className="h-40 w-full" aria-label={t("در حال بارگذاری", "Loading")} /></div>;
   const run = async (fn: () => Promise<unknown>, done: string) => {
     setNotice(null);
     try {
@@ -480,7 +475,6 @@ export function AdminOrganizationDetailView({ organizationId }: { organizationId
   };
   return (
     <div>
-      <AdminAnimalSupportNav />
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <h1 className="text-page-title text-text-primary">{org.name}</h1>
         <StatusTag map={VERIFICATION} value={org.verificationStatus} />
@@ -561,7 +555,6 @@ export function AdminDonationsView() {
   }, [load]);
   return (
     <div>
-      <AdminAnimalSupportNav />
       <h1 className="mb-2 text-page-title text-text-primary">{t("کمک‌های مالی", "Donations")}</h1>
       <p className="mb-4 text-metadata text-text-secondary">{t("بازپرداخت از طریق درگاه انجام می‌شود و فقط پس از تأیید درگاه، دفتر کل و مانده سازمان اصلاح می‌شوند. فقط نقش مالی مجاز است.", "Refunds go through the payment gateway; the ledger and the organization's balance change only after the gateway confirms. Finance role only.")}</p>
       {notice ? <p role="status" className="mb-3 text-metadata text-text-secondary">{notice}</p> : null}
@@ -618,7 +611,6 @@ export function AdminLostPetsView() {
   }, [load]);
   return (
     <div>
-      <AdminAnimalSupportNav />
       <h1 className="mb-2 text-page-title text-text-primary">{t("حیوانات گم‌شده", "Lost pets", "Vermisste Tiere", "Mascotas desaparecidas")}</h1>
       <p className="mb-4 text-metadata text-text-secondary">{t("موقعیت دقیق پنهان است؛ نمایش آن نیاز به مجوز دادهٔ شخصی دارد و ثبت می‌شود.", "Exact locations are masked; revealing one needs the personal-data permission and is audited.", "Genaue Standorte sind verborgen. Ihre Anzeige erfordert die Berechtigung für personenbezogene Daten und wird protokolliert.", "Las ubicaciones exactas están ocultas. Mostrarlas requiere el permiso para datos personales y queda registrado.")}</p>
       <FilterBar>
@@ -668,12 +660,11 @@ export function AdminLostPetDetailView({ incidentId }: { incidentId: string }) {
   useEffect(() => {
     void load();
   }, [load]);
-  if (error) return <div><AdminAnimalSupportNav /><LoadState error={error} perm="trust.view" onRetry={load} locale={locale} /></div>;
-  if (!row) return <div><AdminAnimalSupportNav /><Skeleton className="h-40 w-full" aria-label={t("در حال بارگذاری", "Loading", "Wird geladen", "Cargando")} /></div>;
+  if (error) return <div><LoadState error={error} perm="trust.view" onRetry={load} locale={locale} /></div>;
+  if (!row) return <div><Skeleton className="h-40 w-full" aria-label={t("در حال بارگذاری", "Loading", "Wird geladen", "Cargando")} /></div>;
   const closable = ["OPEN", "SEARCHING", "SIGHTING_REPORTED", "FOUND"].includes(row.status);
   return (
     <div>
-      <AdminAnimalSupportNav />
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <h1 className="text-page-title text-text-primary">{row.pet.name}</h1>
         <AdminLostPetStatusTag value={row.status} locale={locale} />
@@ -732,7 +723,6 @@ export function AdminReportsView() {
   }, [load]);
   return (
     <div>
-      <AdminAnimalSupportNav />
       <h1 className="mb-2 text-page-title text-text-primary">{t("گزارش‌های کاربران", "User reports")}</h1>
       <p className="mb-4 text-metadata text-text-secondary">{t("ارجاع، پروندهٔ اعتماد و ایمنی را باز یا به پروندهٔ باز همان مورد وصل می‌کند؛ تصمیم نهایی در پرونده گرفته می‌شود. هویت گزارش‌دهنده نمایش داده نمی‌شود.", "Escalating opens a trust & safety case, or joins the open case for the same item; decisions are taken on the case. Reporter identity isn't shown.")}</p>
       {notice ? <p role="status" className="mb-3 text-metadata text-text-secondary">{notice}</p> : null}

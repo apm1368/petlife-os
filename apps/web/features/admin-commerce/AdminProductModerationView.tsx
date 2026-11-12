@@ -10,8 +10,8 @@ import {
 } from "@petlife/types";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { adminCommerceService } from "@/services/admin-commerce.service";
-import { AdminCommerceNav } from "@/features/admin/commerce/AdminCommerceViews";
 import { EmptyRow, TableWrap, Td, Th } from "@/features/admin/console-ui";
+import { intlLocale } from "@/features/admin/admin-copy";
 
 const STATUSES: SellerOfferModerationStatus[] = [
   SellerOfferModerationStatus.PENDING_REVIEW,
@@ -97,7 +97,6 @@ export function AdminProductModerationView() {
   return (
     <div>
       <h1 className="mb-3 text-page-title text-text-primary">{t("title")}</h1>
-      <AdminCommerceNav />
       <p className="mb-4 text-body-sm text-text-secondary">{t("subtitle")}</p>
 
       <ContextSurface className="mb-4 flex flex-wrap items-end gap-3">
@@ -166,7 +165,7 @@ export function AdminProductModerationView() {
                         </StatusLabel>
                       </Td>
                       <Td>
-                        {new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", {
+                        {new Intl.DateTimeFormat(intlLocale(locale), {
                           dateStyle: "medium",
                           timeStyle: "short",
                         }).format(new Date(row.createdAt))}
@@ -226,7 +225,7 @@ export function AdminProductModerationView() {
             </div>
             <div>
               <dt className="text-metadata text-text-secondary">{t("available")}</dt>
-              <dd>{detail.availableQuantity.toLocaleString(locale === "fa" ? "fa-IR" : "en-US")}</dd>
+              <dd>{detail.availableQuantity.toLocaleString(intlLocale(locale))}</dd>
             </div>
             <div>
               <dt className="text-metadata text-text-secondary">{t("sku")}</dt>

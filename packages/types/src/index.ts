@@ -3182,6 +3182,24 @@ export interface AdminDashboardSummaryDto {
   openTrustCases: number | null;
   pendingRefundApprovals: number | null;
   openTasks: number | null;
+  /** Provider and seller organisations whose verification waits on staff (SUBMITTED or UNDER_REVIEW). */
+  pendingVerifications: number | null;
+  /** Shop refund requests awaiting a decision. */
+  pendingRefundRequests: number | null;
+  /** Seller offers awaiting moderation. */
+  pendingOfferModeration: number | null;
+  /** Seller requests to add a product to the central catalogue. */
+  pendingCatalogRequests: number | null;
+  /** Stay listings submitted for review. */
+  pendingTravelListings: number | null;
+  /** Animal-support requests awaiting moderation. */
+  pendingSupportNeeds: number | null;
+  /** Community reports still OPEN or ESCALATED. */
+  openCommunityReports: number | null;
+  /** Memorial submissions awaiting review. */
+  pendingMemorials: number | null;
+  /** User reports about wrong place data. */
+  openPlaceReports: number | null;
 }
 
 // ---------------------------------------------------------------------------

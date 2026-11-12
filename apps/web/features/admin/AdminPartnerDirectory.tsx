@@ -9,6 +9,7 @@ import { useAdminStore } from "@/stores/admin-store";
 import { useStatusText } from "@/lib/status/use-status-text";
 import { ApiError } from "@/lib/api/client";
 import { adminStatusTone } from "./status-tone";
+import { intlLocale } from "@/features/admin/admin-copy";
 
 type Organization = AdminProviderOrgSummaryDto | AdminSellerOrgSummaryDto;
 export function AdminPartnerDirectory({ kind }: { kind: "provider" | "seller" }) {
@@ -47,7 +48,7 @@ export function AdminPartnerDirectory({ kind }: { kind: "provider" | "seller" })
       active = false;
     };
   }, [canRead, kind, query, page, revision]);
-  const number = (value: number) => new Intl.NumberFormat(locale === "fa" ? "fa-IR" : "en-US").format(value);
+  const number = (value: number) => new Intl.NumberFormat(intlLocale(locale)).format(value);
   return (
     <div className="flex min-w-0 flex-col gap-4 break-words">
       <h1 className="text-page-title text-text-primary">

@@ -10,9 +10,10 @@ import { SubscriptionEntitlementType } from "@petlife/types";
 import { adminSubscriptionService } from "@/services/admin-subscription.service";
 import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
+import { intlLocale } from "@/features/admin/admin-copy";
 
 function formatDate(iso: string, locale: string): string {
-  return new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(iso));
+  return new Intl.DateTimeFormat(intlLocale(locale), { dateStyle: "medium", timeStyle: "short" }).format(new Date(iso));
 }
 
 /** spec: "inspect household subscription/billing attempts/entitlement resolution/usage, cancel subscription, grant/revoke a controlled manual entitlement override." */
@@ -190,8 +191,8 @@ export function AdminSubscriptionHouseholdDetailView({ householdId }: { househol
             value={overrideType}
             onChange={(e) => setOverrideType(e.target.value as SubscriptionEntitlementType)}
             options={[
-              { value: SubscriptionEntitlementType.LIMIT, label: locale === "fa" ? "سقف عددی" : "Numeric limit" },
-              { value: SubscriptionEntitlementType.BOOLEAN, label: locale === "fa" ? "روشن/خاموش" : "On/off" },
+              { value: SubscriptionEntitlementType.LIMIT, label: ({ fa: "سقف عددی", de: "Zahlenlimit", es: "Límite numérico" } as Record<string, string>)[locale] ?? "Numeric limit" },
+              { value: SubscriptionEntitlementType.BOOLEAN, label: ({ fa: "روشن/خاموش", de: "Ein/Aus", es: "Activado/desactivado" } as Record<string, string>)[locale] ?? "On/off" },
             ]}
             className="min-w-32"
           />
