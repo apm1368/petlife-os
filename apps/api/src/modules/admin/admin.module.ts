@@ -54,6 +54,13 @@ import { StorageModule } from "../storage/storage.module";
 import { AdminAccessService } from "./auth/admin-access.service";
 import { AdminAuthGuard } from "./auth/admin-auth.guard";
 import { AdminMeController } from "./auth/admin-me.controller";
+import { AdminOrdersController } from "./orders/admin-orders.controller";
+import { AdminOrdersService } from "./orders/admin-orders.service";
+import { ShopOrdersAdapter } from "./orders/shop-orders.adapter";
+import { ServiceBookingsAdapter } from "./orders/service-bookings.adapter";
+import { TravelBookingsAdapter } from "./orders/travel-bookings.adapter";
+import { DonationsAdapter } from "./orders/donations.adapter";
+import { SubscriptionsAdapter } from "./orders/subscriptions.adapter";
 import { AdminAuditLogService } from "./audit/admin-audit-log.service";
 import { AdminCustomerService } from "./customer/admin-customer.service";
 import { AdminCustomerController } from "./customer/admin-customer.controller";
@@ -162,6 +169,7 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminReportsController,
     AdminMessagingController,
     AdminMeController,
+    AdminOrdersController,
     AdminSupportOpsController,
     UserSupportAttachmentsController,
     AdminFinanceOpsController,
@@ -220,6 +228,12 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminPet360Service,
     AdminCustomerOverviewService,
     AdminAccessControlService,
+    AdminOrdersService,
+    ShopOrdersAdapter,
+    ServiceBookingsAdapter,
+    TravelBookingsAdapter,
+    DonationsAdapter,
+    SubscriptionsAdapter,
     AdminCustomRolesService,
     AdminSettingsService,
     AdminFeatureFlagsService,

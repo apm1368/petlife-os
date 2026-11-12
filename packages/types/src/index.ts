@@ -3357,6 +3357,7 @@ export type AdminPermissionName =
   | "finance.refund.execute"
   | "task.manage"
   | "audit.view"
+  | "orders.export"
   | "admin.manage"
   | "sellerFinance.view"
   | "settlement.calculate"
@@ -7059,4 +7060,60 @@ export interface AdminPet360Dto {
   sharing: { activeShareCards: number; activeHealthShares: number };
   activity: { id: string; type: string; at: string; changedFields?: string[]; photoChanged?: boolean }[];
   diagnostics: { code: AdminPetDiagnosticCode; severity: "WARNING" | "INFO"; entityId?: string; detail?: Record<string, unknown> }[];
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Admin Orders: one place for every order-like record, kept apart by section.
+// ---------------------------------------------------------------------------------------------------------------
+
+export type AdminOrderSection = "SHOP" | "SERVICES" | "PET_TAXI" | "TRAVEL" | "DONATIONS" | "SUBSCRIPTIONS";
+/** Normalized lifecycle across sections, for the "All" overview; each row also keeps its own status. */
+export type AdminOrderStage = "OPEN" | "COMPLETED" | "CANCELLED";
+export type AdminOrderPaymentState = "PAID" | "PENDING" | "FAILED" | "REFUNDED" | "PARTIALLY_REFUNDED" | "NOT_REQUIRED" | "ON_ARRIVAL" | "UNKNOWN";
+export type AdminOrderPartnerKind = "SELLER" | "PROVIDER" | "DRIVER" | "NGO" | "PLATFORM";
+
+export interface AdminOrderRowDto {
+  section: AdminOrderSection;
+  id: string;
+  /** Human reference: PL-…, PL-B-…, TR-…, or the id's first 8 characters where a section has none. */
+  number: string;
+  createdAt: string;
+  /** The section's own status value (labelled per section). */
+  status: string;
+  stage: AdminOrderStage;
+  partner: { kind: AdminOrderPartnerKind; id: string | null; name: string } | null;
+  /** Up to three lines; `nameFa` where the record keeps a Persian name too (subscription plans). */
+  items: Array<{ name: string; nameFa?: string | null; variant: string | null; quantity: number }>;
+  itemCount: number;
+  customer: { userId: string | null; name: string | null; phoneMasked: string | null; anonymous: boolean } | null;
+  amounts: { subtotalIrr: number | null; shippingIrr: number | null; discountIrr: number | null; commissionIrr: number | null; totalIrr: number };
+  payment: { state: AdminOrderPaymentState; method: string | null; provider: string | null };
+  fulfilment: { status: string | null; method: string | null; trackingCode: string | null; scheduledAt: string | null };
+  city: string | null;
+}
+
+export interface AdminOrderDetailDto extends AdminOrderRowDto {
+  lines: Array<{ name: string; variant: string | null; sku: string | null; quantity: number; unitPriceIrr: number | null; totalIrr: number | null }>;
+  timeline: Array<{ at: string; from: string | null; to: string; actor: string | null; reason: string | null }>;
+  payments: Array<{ id: string; provider: string; rail: string | null; status: string; amountIrr: number; createdAt: string }>;
+  refunds: Array<{ id: string; status: string; amountIrr: number; reason: string | null; createdAt: string; completedAt: string | null }>;
+  shipment: { provider: string; status: string; trackingCode: string | null; estimatedDeliveryAt: string | null; actualDeliveryAt: string | null } | null;
+  /** Full delivery or service address; the recipient's phone stays masked. */
+  address: { line: string | null; city: string | null; region: string | null; recipient: string | null; phoneMasked: string | null } | null;
+  supportCases: Array<{ id: string; caseNumber: string; subject: string; status: string }>;
+  /** Section facts worth a line each (pet, nights, guests, campaign, plan interval…), as key → value. */
+  facts: Array<{ key: string; value: string | number | null }>;
+  /** The section's existing admin page for this record, if there is one. */
+  legacyHref: string | null;
+}
+
+export interface AdminOrdersPageDto {
+  section: AdminOrderSection | "ALL";
+  /** Sections this admin may see, with the number of rows matching the current filters in each. */
+  sections: Array<{ section: AdminOrderSection; total: number }>;
+  items: AdminOrderRowDto[];
+  /** Pass as `before` for the next page; null on the last page. */
+  nextCursor: string | null;
+  canExport: boolean;
+  canRevealPii: boolean;
 }

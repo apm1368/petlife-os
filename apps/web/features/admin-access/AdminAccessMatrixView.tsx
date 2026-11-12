@@ -9,7 +9,7 @@ import { adminAccessService, type AdminPermissionDefinition, type AdminRole, typ
 import { useAdminStore } from "@/stores/admin-store";
 import "@/features/admin/admin-glass.css";
 
-const DOMAIN_ORDER = ["customer", "support", "dispute", "trust", "verification", "finance", "sellerFinance", "settlement", "subscription", "commerce", "promotions", "services", "travel", "insurance", "places", "animalSupport", "content", "pet", "task", "analytics", "audit", "access", "admin", "settings", "system"];
+const DOMAIN_ORDER = ["customer", "support", "dispute", "trust", "verification", "orders", "finance", "sellerFinance", "settlement", "subscription", "commerce", "promotions", "services", "travel", "insurance", "places", "animalSupport", "content", "pet", "task", "analytics", "audit", "access", "admin", "settings", "system"];
 
 /**
  * Access levels at a glance: every role against every permission, grouped by business area, with member counts.

@@ -1,0 +1,66 @@
+/* Admin → Orders */
+.gx-orders-sections { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.gx-orders-sections li { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px 6px 6px; border-radius: 999px; border: 1px solid var(--glass-border); background: var(--glass-card); }
+.gx-orders-sections b { font-size: 0.86rem; }
+.gx-orders-chip { display: inline-flex; align-items: center; margin-top: 4px; padding: 2px 9px; border-radius: 999px; font-size: 0.7rem; font-weight: 800; white-space: nowrap; background: var(--glass-hover); color: var(--text-secondary); }
+.gx-orders-sections .gx-orders-chip { margin-top: 0; }
+.gx-orders-chip--SHOP { background: color-mix(in srgb, #e09a1f 18%, transparent); color: #8a5a00; }
+.gx-orders-chip--SERVICES { background: color-mix(in srgb, #4f9a68 18%, transparent); color: #2f7d4c; }
+.gx-orders-chip--PET_TAXI { background: color-mix(in srgb, #3b82c4 18%, transparent); color: #24618f; }
+.gx-orders-chip--TRAVEL { background: color-mix(in srgb, #7a6bd1 18%, transparent); color: #5b4db8; }
+.gx-orders-chip--DONATIONS { background: color-mix(in srgb, #d4644a 16%, transparent); color: #b4472f; }
+.gx-orders-chip--SUBSCRIPTIONS { background: color-mix(in srgb, #2b8a8a 16%, transparent); color: #1f6b6b; }
+:root[data-theme="dark"] .gx-orders-chip--SHOP { color: #f2c06a; }
+:root[data-theme="dark"] .gx-orders-chip--SERVICES { color: #8fd3a6; }
+:root[data-theme="dark"] .gx-orders-chip--PET_TAXI { color: #9cc8ee; }
+:root[data-theme="dark"] .gx-orders-chip--TRAVEL { color: #b9aef5; }
+:root[data-theme="dark"] .gx-orders-chip--DONATIONS { color: #f5a08b; }
+:root[data-theme="dark"] .gx-orders-chip--SUBSCRIPTIONS { color: #8fd8d8; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .gx-orders-chip--SHOP { color: #f2c06a; }
+  :root:not([data-theme="light"]) .gx-orders-chip--SERVICES { color: #8fd3a6; }
+  :root:not([data-theme="light"]) .gx-orders-chip--PET_TAXI { color: #9cc8ee; }
+  :root:not([data-theme="light"]) .gx-orders-chip--TRAVEL { color: #b9aef5; }
+  :root:not([data-theme="light"]) .gx-orders-chip--DONATIONS { color: #f5a08b; }
+  :root:not([data-theme="light"]) .gx-orders-chip--SUBSCRIPTIONS { color: #8fd8d8; }
+}
+
+.gx-orders-filters { display: grid; gap: 12px; grid-template-columns: minmax(220px, 2fr) repeat(5, minmax(120px, 1fr)) auto; align-items: end; }
+@media (max-width: 1180px) { .gx-orders-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); } .gx-orders-search { grid-column: 1 / -1; } }
+@media (max-width: 560px) { .gx-orders-filters { grid-template-columns: 1fr 1fr; } }
+.gx-orders-searchbox { position: relative; display: block; }
+.gx-orders-searchbox svg { position: absolute; inset-inline-start: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); }
+.gx-orders-searchbox input { width: 100%; padding-inline-start: 36px; }
+.gx-orders-filteractions { display: flex; flex-wrap: wrap; gap: 8px; }
+.gx-orders-active { grid-column: 1 / -1; }
+.gx-orders-active .gx-chip { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+
+.gx-orders-table td { vertical-align: top; }
+.gx-orders-table td > small { display: block; margin-top: 2px; font-size: 0.72rem; }
+.gx-orders-table td .gx-tag + small { margin-top: 4px; }
+.gx-orders-number { padding: 0; border: 0; background: none; cursor: pointer; font-weight: 800; font-size: 0.82rem; }
+.gx-orders-table button.gx-link { padding: 0; border: 0; background: none; cursor: pointer; text-align: start; font: inherit; font-weight: 700; color: var(--brand-natural); }
+.gx-orders-items { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; max-width: 280px; }
+.gx-orders-more { display: flex; justify-content: center; margin-top: 14px; }
+
+.gx-orders-drawer { width: min(100vw, 720px); }
+.gx-orders-drawer__body { display: grid; gap: 18px; padding: 4px 2px 24px; background: transparent; }
+.gx-orders-drawer__head { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
+.gx-orders-drawer__head h2 { margin: 2px 0; font-size: 1.15rem; }
+.gx-orders-drawer__head p { margin: 0; }
+.gx-orders-drawer section { display: grid; gap: 8px; }
+.gx-orders-drawer h3 { margin: 0; }
+.gx-orders-sub { margin: 6px 0 0; font-size: 0.82rem; }
+.gx-orders-summary, .gx-orders-facts, .gx-orders-money { display: grid; gap: 8px 16px; margin: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 520px) { .gx-orders-summary, .gx-orders-facts { grid-template-columns: 1fr; } }
+.gx-orders-summary dt, .gx-orders-facts dt, .gx-orders-money dt { font-size: 0.74rem; color: var(--text-secondary); font-weight: 700; }
+.gx-orders-summary dd, .gx-orders-facts dd, .gx-orders-money dd { margin: 0; overflow-wrap: anywhere; }
+.gx-orders-money { grid-template-columns: 1fr auto; max-width: 360px; margin-inline-start: auto; }
+.gx-orders-money > div { display: contents; }
+.gx-orders-money__total dt, .gx-orders-money__total dd { font-weight: 800; color: var(--text-primary); }
+.gx-orders-address { font-style: normal; }
+.gx-orders-reveal { display: grid; gap: 8px; }
+.gx-orders-reveal p { margin: 0; font-size: 0.78rem; }
+.gx-orders-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.gx-orders-timeline { margin: 0; }
+.gx-orders-timeline p { margin: 2px 0 0; }

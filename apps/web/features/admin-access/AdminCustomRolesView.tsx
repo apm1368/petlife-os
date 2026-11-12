@@ -23,7 +23,7 @@ import {
 const SECTIONS: { key: string; domains: string[] }[] = [
   { key: "overview", domains: ["analytics", "task"] },
   { key: "customers", domains: ["customer", "support", "dispute", "subscription", "pet"] },
-  { key: "marketplace", domains: ["verification", "commerce", "promotions", "services", "travel", "insurance", "places"] },
+  { key: "marketplace", domains: ["verification", "orders", "commerce", "promotions", "services", "travel", "insurance", "places"] },
   { key: "trust", domains: ["trust", "animalSupport"] },
   { key: "finance", domains: ["finance", "sellerFinance", "settlement", "wallet"] },
   { key: "content", domains: ["content"] },

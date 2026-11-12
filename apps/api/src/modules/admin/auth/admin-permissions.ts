@@ -26,6 +26,7 @@ export type AdminPermission =
   | "finance.refund.execute"
   | "task.manage"
   | "audit.view"
+  | "orders.export"
   | "admin.manage"
   | "sellerFinance.view"
   | "settlement.calculate"
@@ -101,6 +102,7 @@ export const ALL_PERMISSIONS: AdminPermission[] = [
   "finance.refund.execute",
   "task.manage",
   "audit.view",
+  "orders.export",
   "admin.manage",
   "sellerFinance.view",
   "settlement.calculate",
@@ -192,6 +194,8 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
   [AdminRole.SUPER_ADMIN]: ALL_PERMISSIONS,
   [AdminRole.ADMIN]: [
     "customer.view",
+    // Admin → Orders CSV export (masked contacts, audited); each section still needs its own view permission.
+    "orders.export",
     "customer.pii.reveal",
     "support.view",
     "support.manage",
@@ -264,6 +268,8 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
   // settlement authority" — FINANCE is the only role with the full set).
   [AdminRole.FINANCE]: [
     "customer.view",
+    // Admin → Orders CSV export (masked contacts, audited); each section still needs its own view permission.
+    "orders.export",
     "finance.view",
     "finance.refund.request",
     "finance.refund.approve",
@@ -291,6 +297,8 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
   ],
   [AdminRole.OPERATIONS]: [
     "customer.view",
+    // Admin → Orders CSV export (masked contacts, audited); each section still needs its own view permission.
+    "orders.export",
     "support.view",
     "dispute.view",
     "trust.view",
