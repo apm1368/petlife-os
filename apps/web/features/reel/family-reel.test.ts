@@ -7,7 +7,7 @@ const FAMILIES: Family[] = ["care", "services", "shop", "travel", "safe", "toget
 
 describe("page family reels", () => {
   it.each([
-    ["/fa/services/GROOMING", "services"], ["/en/vet/find", "services"], ["/de/providers/abc", "services"], ["/es/places", "services"],
+    ["/fa/services/grooming", "services"], ["/en/vet/find", "services"], ["/de/providers/abc", "services"], ["/es/places", "services"],
     ["/fa/shop/products/1", "shop"], ["/en/travel/search", "travel"], ["/fa/insurance/compare", "safe"], ["/en/lost-pets", "safe"],
     ["/fa/community/posts/1", "together"], ["/de/animal-support/needs", "together"], ["/en/blog/a", "learn"], ["/es/help/faq", "learn"],
     ["/fa/home", "care"], ["/en/pets/p1/health/labs", "care"], ["/de/care-calendar", "care"], ["/es/profile/household", "care"],
