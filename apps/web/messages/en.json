@@ -10171,5 +10171,23 @@
         "CANCELLED": "Cancelled"
       }
     }
+  },
+  "adminDigikalaFacts": {
+    "title": "One-time Digikala pet import (facts only)",
+    "hint": "Digikala's best-selling pet-category products come into the catalog once, as drafts.",
+    "rules": {
+      "facts": "Name, brand, category, specifications and weight are imported.",
+      "noContent": "Digikala's photos and descriptions are not copied; add our own text and images before publishing.",
+      "reference": "Digikala's price and stock stay on the import record as a reference only; they are not our selling price.",
+      "pace": "It runs slowly (one request every 3 seconds) and stops if Digikala blocks it."
+    },
+    "category": "Destination catalog category",
+    "maxProducts": "Maximum products (up to 3000)",
+    "start": "Start the one-time import",
+    "started": "Queued; progress shows in the jobs list.",
+    "alreadyRun": "This import has already run or is running.",
+    "invalid": "Choose a category and a number from 1 to 3000.",
+    "forbidden": "commerce.manage permission required.",
+    "failed": "Could not start; please try again."
   }
 }

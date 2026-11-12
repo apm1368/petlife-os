@@ -110,6 +110,14 @@ class CatalogImportCreateDto {
   @IsUUID() idempotencyKey!: string;
 }
 
+/** The owner's one-time Digikala pet-category import, facts only. */
+class DigikalaFactsImportDto {
+  @IsUUID() categoryId!: string;
+  @IsOptional() @IsUUID() brandId?: string;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(3000) maxProducts?: number;
+  @IsUUID() idempotencyKey!: string;
+}
+
 class DecisionNoteDto {
   @IsOptional() @IsString() @MaxLength(500) note?: string;
 }
@@ -315,6 +323,12 @@ export class AdminCommerceController {
     @Req() req: AdminAuthedRequest,
   ) {
     return this.catalogImports.createJob(admin, dto, req.requestId);
+  }
+
+  @Post("catalog-imports/digikala-facts")
+  @RequireAdminPermission("commerce.manage")
+  createDigikalaFactsImport(@Body() dto: DigikalaFactsImportDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
+    return this.catalogImports.createFactsJob(admin, dto, req.requestId);
   }
 
   @Post("catalog-imports/:id/cancel")
