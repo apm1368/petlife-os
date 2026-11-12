@@ -258,7 +258,9 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
 
       {actionError && !dialog ? <p role="alert" className="text-state-urgent">{actionError}</p> : null}
 
+      {s === "CONFIRMED" && upcoming && booking.attendanceConfirmedAt ? <p role="status" className="text-state-success">{t("ui.attendanceConfirmed")}</p> : null}
       <div className="flex flex-wrap gap-2">
+        {s === "CONFIRMED" && upcoming && !booking.attendanceConfirmedAt ? <Button isLoading={busy} onClick={() => void act(() => bookingsService.confirmAttendance(booking.id), t("ui.attendanceConfirmed"))}>{t("ui.confirmAttendance")}</Button> : null}
         {s === "CONFIRMED" && upcoming && !["SITTING", "BOARDING"].includes(booking.category) ? <Button variant="secondary" onClick={() => { setRescheduleDate(booking.startAt.slice(0, 10)); setDialog("reschedule"); }}>{fa ? "تغییر زمان" : t("ui.reschedule")}</Button> : null}
         {CANCELLABLE.has(s) ? <Button variant="secondary" onClick={() => setDialog("cancel")}>{fa ? "لغو نوبت" : t("cancel")}</Button> : null}
         {booking.bookingSeriesId && CANCELLABLE.has(s) ? <Button variant="ghost" onClick={() => setDialog("cancelFollowing")}>{fa ? "لغو این و نوبت‌های بعدی" : t("ui.cancelFollowing")}</Button> : null}

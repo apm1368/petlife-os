@@ -7344,7 +7344,8 @@
       "noBookingsToday": "Heute gibt es keine Buchungen.",
       "verificationLink": "Organisationsnachweise und Verifizierung"
     },
-    "bookingRow": { "respondBy": "Antwort bis " },
+    "bookingRow": {
+      "attendanceConfirmed": "Teilnahme bestätigt", "respondBy": "Antwort bis " },
     "availability": {
       "title": "Verfügbarkeit",
       "retry": "Erneut versuchen",
@@ -7891,6 +7892,8 @@
       "genericAction": "Das hat nicht funktioniert. Prüfe deine Verbindung und versuche es erneut."
     },
     "ui": {
+      "confirmAttendance": "Ich komme",
+      "attendanceConfirmed": "Du hast deine Teilnahme bestätigt. Der Anbieter sieht das.",
       "loading": "Buchung wird geladen …",
       "forbidden": "Du hast keinen Zugriff auf diese Buchung",
       "notFound": "Buchung nicht gefunden",

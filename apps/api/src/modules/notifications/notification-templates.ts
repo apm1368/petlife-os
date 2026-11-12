@@ -41,6 +41,15 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "نوبت شما تأیید شد", body: "نوبت شما تأیید شد. جزئیات را در اپلیکیشن ببینید.", smsBody: "نوبت شما در پت‌لایف تأیید شد." },
     en: { title: "Your booking is confirmed", body: "Your booking is confirmed. See the app for details.", smsBody: "Your PET LIFE OS booking is confirmed." },
   },
+  // Automatic appointment reminders (booking-reminder.worker.ts). The SMS names only the pet, the provider and the time.
+  "booking.reminder_24h": {
+    fa: { title: "یادآور نوبت فردا", body: "نوبت {{petName}} در {{providerName}} فردا ساعت {{time}} است. حضور را تأیید کنید یا در صورت نیاز زمان را تغییر دهید.", smsBody: "یادآور اپت لایف: نوبت {{petName}} در {{providerName}} فردا ساعت {{time}}." },
+    en: { title: "Appointment tomorrow", body: "{{petName}}'s appointment at {{providerName}} is tomorrow at {{time}}. Confirm you'll attend, or reschedule if you need to.", smsBody: "opetlife reminder: {{petName}} at {{providerName}} tomorrow at {{time}}." },
+  },
+  "booking.reminder_2h": {
+    fa: { title: "نوبت تا دو ساعت دیگر", body: "نوبت {{petName}} در {{providerName}} ساعت {{time}} است.", smsBody: "یادآور اپت لایف: نوبت {{petName}} در {{providerName}} ساعت {{time}}." },
+    en: { title: "Appointment in two hours", body: "{{petName}}'s appointment at {{providerName}} is at {{time}}.", smsBody: "opetlife reminder: {{petName}} at {{providerName}} at {{time}}." },
+  },
   "booking.cancelled": {
     fa: { title: "نوبت شما لغو شد", body: "نوبت شما لغو شد.", smsBody: "نوبت شما در پت‌لایف لغو شد." },
     en: { title: "Your booking was cancelled", body: "Your booking was cancelled.", smsBody: "Your PET LIFE OS booking was cancelled." },

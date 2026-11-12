@@ -2460,6 +2460,8 @@
       "openCalendar": "باز کردن تقویم مراقبت"
     },
     "ui": {
+      "confirmAttendance": "حضورم را تأیید می‌کنم",
+      "attendanceConfirmed": "حضورتان را تأیید کردید؛ ارائه‌دهنده این را می‌بیند.",
       "cancelFollowing": "لغو این و نوبت‌های بعدی",
       "fullRefund": "بازگشت کامل: {amount}",
       "partialRefund": "طبق قوانین، {percent}٪ یعنی {amount} بازگردانده می‌شود.",
@@ -2823,7 +2825,8 @@
       "noBookingsToday": "امروز رزروی وجود ندارد.",
       "verificationLink": "احراز هویت و مدارک مجموعه"
     },
-    "bookingRow": { "respondBy": "پاسخ تا " },
+    "bookingRow": {
+      "attendanceConfirmed": "صاحب پت حضور را تأیید کرده", "respondBy": "پاسخ تا " },
     "bookings": {
       "title": "رزروها",
       "retry": "تلاش دوباره",
