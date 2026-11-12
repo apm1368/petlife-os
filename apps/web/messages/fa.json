@@ -2028,7 +2028,7 @@
       "notAProvider": {
         "title": "دسترسی ارائه‌دهنده ندارید",
         "body": "حساب شما عضو هیچ سازمان ارائه‌دهنده‌ای نیست.",
-        "backToApp": "بازگشت به opetlife"
+        "backToApp": "بازگشت به اپت لایف"
       },
       "chooseOrg": {
         "title": "یک سازمان را انتخاب کنید",
@@ -3013,7 +3013,7 @@
       "notASeller": {
         "title": "عدم دسترسی فروشنده",
         "body": "حساب شما عضو هیچ سازمان فروشنده‌ای نیست.",
-        "backToApp": "بازگشت به opetlife"
+        "backToApp": "بازگشت به اپت لایف"
       },
       "chooseOrg": {
         "title": "انتخاب فروشنده",
@@ -3055,7 +3055,7 @@
       "recentOrders": "سفارش‌های اخیر",
       "noRecentOrders": "هنوز سفارشی ثبت نشده است.",
       "marketplaceOrderLabel": "سفارش {provider}",
-      "petlifeOrderLabel": "سفارش opetlife",
+      "petlifeOrderLabel": "سفارش اپت لایف",
       "itemCount": "{count, plural, one {# قلم} other {# قلم}}",
       "verificationLink": "احراز هویت و مدارک مجموعه"
     },
@@ -3065,10 +3065,10 @@
       "retry": "تلاش مجدد",
       "empty": "هنوز سفارشی ثبت نشده است.",
       "sourceMarketplace": "{provider}",
-      "sourcePetlife": "opetlife",
+      "sourcePetlife": "اپت لایف",
       "externalOrderId": "شناسه سفارش خارجی: {id}",
       "paymentSource": {
-        "PETLIFE_PAYMENT": "پرداخت از طریق opetlife",
+        "PETLIFE_PAYMENT": "پرداخت از طریق اپت لایف",
         "MARKETPLACE_COLLECTED": "دریافت شده توسط بازارگاه",
         "CASH_ON_DELIVERY": "پرداخت در محل",
         "UNKNOWN": "منبع پرداخت نامشخص"
@@ -3079,10 +3079,10 @@
       "loading": "در حال بارگذاری سفارش…",
       "retry": "تلاش مجدد",
       "sourceMarketplace": "{provider}",
-      "sourcePetlife": "opetlife",
+      "sourcePetlife": "اپت لایف",
       "externalOrderId": "شناسه سفارش خارجی: {id}",
       "paymentSource": {
-        "PETLIFE_PAYMENT": "پرداخت از طریق opetlife",
+        "PETLIFE_PAYMENT": "پرداخت از طریق اپت لایف",
         "MARKETPLACE_COLLECTED": "دریافت شده توسط بازارگاه",
         "CASH_ON_DELIVERY": "پرداخت در محل",
         "UNKNOWN": "منبع پرداخت نامشخص"
@@ -3129,7 +3129,7 @@
         "REJECTED": "رد شد",
         "WITHDRAWN": "لغو شد"
       },
-      "refundRequestsNote": "درخواست‌ها را opetlife بررسی می‌کند؛ مبلغ بازپرداخت‌های تأییدشده از تسویه شما کسر می‌شود."
+      "refundRequestsNote": "درخواست‌ها را اپت لایف بررسی می‌کند؛ مبلغ بازپرداخت‌های تأییدشده از تسویه شما کسر می‌شود."
     },
     "offers": {
       "title": "پیشنهادها",
@@ -3188,7 +3188,7 @@
       "resync": "همگام‌سازی مجدد",
       "publish": "انتشار",
       "reconcile": "تطبیق",
-      "inventoryMismatch": "موجودی منتشرشده ({published}) با موجودی opetlife ({canonical}) تفاوت دارد.",
+      "inventoryMismatch": "موجودی منتشرشده ({published}) با موجودی اپت لایف ({canonical}) تفاوت دارد.",
       "noDiscrepancy": "مغایرتی یافت نشد.",
       "discrepancy": {
         "INVENTORY_MISMATCH": "مغایرت موجودی یافت شد.",
@@ -3204,7 +3204,7 @@
       "retry": "تلاش مجدد",
       "invite": "دعوت عضو جدید",
       "inviteIdentifier": "ایمیل یا شماره تماس",
-      "inviteHint": "باید از قبل حساب opetlife داشته باشد.",
+      "inviteHint": "باید از قبل حساب اپت لایف داشته باشد.",
       "role": "نقش",
       "inviteAction": "دعوت",
       "inviteFailed": "دعوت این فرد ممکن نشد.",
@@ -3229,7 +3229,7 @@
       "title": "تنظیمات",
       "loading": "در حال بارگذاری تنظیمات…",
       "retry": "تلاش مجدد",
-      "verificationNote": "جزئیات حقوقی و تأییدیه توسط بازبینی opetlife مدیریت می‌شود و از اینجا قابل ویرایش نیست.",
+      "verificationNote": "جزئیات حقوقی و تأییدیه توسط بازبینی اپت لایف مدیریت می‌شود و از اینجا قابل ویرایش نیست.",
       "supportEmail": "ایمیل پشتیبانی",
       "supportPhone": "تلفن پشتیبانی",
       "city": "شهر",
@@ -3615,11 +3615,11 @@
         "searchPeople": "جست‌وجوی «{query}» در کاربران"
       },
       "accessLoadFailed": "دریافت مجوزهای ادمین ممکن نشد. برای بررسی دسترسی فعلی دوباره تلاش کنید.",
-      "title": "مدیریت opetlife",
+      "title": "مدیریت اپت لایف",
       "notAnAdmin": {
         "title": "دسترسی مدیریتی ندارید",
         "body": "حساب شما به بخش مدیریت داخلی دسترسی ندارد.",
-        "backToApp": "بازگشت به opetlife"
+        "backToApp": "بازگشت به اپت لایف"
       },
       "role": {
         "PARTNER_OPERATIONS": "عملیات شرکا",
@@ -6374,7 +6374,7 @@
     "limitReached": "ظرفیت طرح فعلی تکمیل شده است.",
     "alreadyMember": "این حساب از قبل عضو تیم است.",
     "invitationConflict": "وضعیت دعوت تغییر کرده؛ فهرست را دوباره دریافت کنید.",
-    "notFound": "حساب یا مورد انتخاب‌شده پیدا نشد. برای دعوت، حساب opetlife باید از قبل وجود داشته باشد.",
+    "notFound": "حساب یا مورد انتخاب‌شده پیدا نشد. برای دعوت، حساب اپت لایف باید از قبل وجود داشته باشد.",
     "accessDenied": "اجازه این عملیات را ندارید.",
     "staffUsage": "اعضا: {used} · دعوت‌های در انتظار: {pending} · ظرفیت: {limit}",
     "branchUsage": "شعب: {used} · ظرفیت: {limit}",
@@ -6415,7 +6415,7 @@
   },
   "clinicContacts": {
     "title": "مخاطبان کلینیک",
-    "intro": "مخاطبان واردشده متعلق به همین کلینیک‌اند و با حساب‌های opetlife ادغام نمی‌شوند.",
+    "intro": "مخاطبان واردشده متعلق به همین کلینیک‌اند و با حساب‌های اپت لایف ادغام نمی‌شوند.",
     "search": "جست‌وجوی نام، پت یا شماره تماس",
     "listLimit": "حداکثر ۲۰۰ مخاطب مطابق جست‌وجو نمایش داده می‌شود.",
     "loadFailed": "دریافت مخاطبان ناموفق بود.",
@@ -6630,7 +6630,7 @@
     "inactive": "غیرفعال",
     "revoke": "لغو دسترسی",
     "grantTitle": "اعطا یا تغییر دسترسی همکار",
-    "grantHelp": "ایمیل حساب موجود opetlife را وارد کنید. این عملیات دسترسی را بلافاصله فعال یا نقش قبلی را تغییر می‌دهد.",
+    "grantHelp": "ایمیل حساب موجود اپت لایف را وارد کنید. این عملیات دسترسی را بلافاصله فعال یا نقش قبلی را تغییر می‌دهد.",
     "email": "ایمیل",
     "role": "نقش همکار",
     "grant": "ثبت دسترسی همکار",
@@ -7851,7 +7851,7 @@
     "requirementAccepted": "پذیرفته و معتبر",
     "requirementPending": "در انتظار بررسی",
     "requirementMissing": "نیازمند مدرک معتبر",
-    "manualPolicyNotice": "این سیاست داخلی opetlife و بررسی دستی مدارک است؛ استعلام رسمی هویت یا مجوز انجام نمی‌شود.",
+    "manualPolicyNotice": "این سیاست داخلی اپت لایف و بررسی دستی مدارک است؛ استعلام رسمی هویت یا مجوز انجام نمی‌شود.",
     "policyUnavailable": "چک‌لیست مدارک از سرور دریافت نشده؛ تأیید مجموعه تا دریافت سیاست ممکن نیست.",
     "simpleGuide": "برای هر همکار ابتدا مدارک را باز کنید و بررسی کنید؛ سپس تأیید، رد یا درخواست اصلاح را با توضیح ثبت کنید. این بررسی دستی مدارک است و به سامانهٔ استعلام رسمی متصل نیست.",
     "rowPartner": "مشخصات همکار",
@@ -8600,7 +8600,7 @@
       "DEPOSIT": "پیش‌پرداخت آنلاین"
     },
     "ratingCountSummary": "از ۵ · {count} نظر",
-    "completedBookings": "{count, number} نوبت انجام‌شده در opetlife",
+    "completedBookings": "{count, number} نوبت انجام‌شده در اپت لایف",
     "profileSections": "بخش‌های پروفایل",
     "sections": {
       "services": "خدمات",

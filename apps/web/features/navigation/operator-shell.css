@@ -1,21 +1,43 @@
-/* Shared operational header for provider and seller workspaces.
-   It intentionally uses the existing product mark and semantic tokens rather
-   than introducing a separate brand or a consumer-style card dashboard. */
+/* Seller and provider workspaces on the approved 2026-11 pattern (docs/design/pattern-2026-11).
+   The shell root also carries .opl-page (opl-landing.css), which defines the --opl-* tokens in light and dark
+   and lays them over the design-system tokens, so the pages inside take the warm paper, soft raised cards and
+   capsule buttons; this file shapes only the frame: the glass header and the capsule section navigation. */
+.operator-shell {
+  color: var(--opl-ink);
+  font-family: Vazirmatn, var(--font-sans, Tahoma), system-ui, sans-serif;
+  background:
+    radial-gradient(680px 360px at 92% 40px, color-mix(in srgb, var(--opl-sun) var(--op-glow-a, 16%), transparent), transparent 70%),
+    radial-gradient(600px 340px at 0% 260px, color-mix(in srgb, var(--opl-leaf) var(--op-glow-b, 13%), transparent), transparent 70%),
+    var(--opl-paper) !important;
+}
+[dir="rtl"] .operator-shell {
+  background:
+    radial-gradient(680px 360px at 8% 40px, color-mix(in srgb, var(--opl-sun) var(--op-glow-a, 16%), transparent), transparent 70%),
+    radial-gradient(600px 340px at 100% 260px, color-mix(in srgb, var(--opl-leaf) var(--op-glow-b, 13%), transparent), transparent 70%),
+    var(--opl-paper) !important;
+}
+:root[data-theme="dark"] .operator-shell { --op-glow-a: 7%; --op-glow-b: 6%; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .operator-shell { --op-glow-a: 7%; --op-glow-b: 6%; } }
+
 .operator-shell__header {
   position: sticky;
-  top: 0;
-  z-index: 30;
-  border-bottom: 1px solid var(--border-subtle);
-  background: color-mix(in srgb, var(--surface-base) 94%, transparent);
-  backdrop-filter: saturate(1.15) blur(10px);
+  top: env(safe-area-inset-top, 0px);
+  z-index: 65;
+  border-bottom: 1px solid var(--opl-line);
+  background: var(--opl-glass);
+  backdrop-filter: saturate(1.4) blur(14px);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  box-shadow: 0 12px 30px -26px rgb(var(--opl-sh) / 0.45);
 }
 
 .operator-shell__header-inner {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  min-height: 64px;
-  padding: var(--space-2) var(--space-4);
+  gap: 12px;
+  min-height: 74px;
+  max-width: 1440px;
+  margin-inline: auto;
+  padding: 8px var(--opl-gutter, 16px);
 }
 
 .operator-shell__brand {
@@ -24,57 +46,63 @@
   align-items: center;
   min-width: 44px;
   min-height: 44px;
-  color: var(--text-primary);
+  color: var(--opl-forest);
+  text-decoration: none;
 }
 
-.operator-shell__brand img { width: 28px; height: 28px; }
-
 .operator-shell__header-inner > :nth-child(2) { min-width: 0; flex: 1; }
+.operator-shell__header-inner > :nth-child(2) > * { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .operator-shell__header-inner > :nth-child(3) { flex: none; }
+.operator-shell__header-inner :is(button, a, select) { border-radius: 999px; }
+.operator-shell__notice { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; max-width: 1440px; margin-inline: auto; padding: 0 var(--opl-gutter, 16px) 10px; }
 
 .operator-shell__nav {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: 4px;
+  max-width: 1440px;
+  margin-inline: auto;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
-  border-bottom: 1px solid var(--border-subtle);
-  padding: var(--space-2) var(--space-4);
-  background: var(--surface-base);
+  scrollbar-width: none;
+  padding: 10px var(--opl-gutter, 16px);
 }
+.operator-shell__nav::-webkit-scrollbar { display: none; }
+.operator-shell__nav-band { border-bottom: 1px solid var(--opl-line); background: color-mix(in srgb, var(--opl-paper-2) 88%, transparent); }
 
 .operator-shell__nav a {
   display: inline-flex;
   flex: none;
   align-items: center;
-  min-block-size: var(--touch-target-min);
-  border: 1px solid transparent;
-  border-radius: var(--radius-pill);
-  padding-inline: var(--space-3);
-  transition: border-color var(--dur-1), background-color var(--dur-1), color var(--dur-1);
+  min-block-size: 40px;
+  border-radius: 999px;
+  padding-inline: 15px;
+  color: var(--opl-ink-2);
+  font-size: 0.9rem;
+  font-weight: 650;
+  text-decoration: none;
+  transition: background-color 0.18s var(--opl-ease, ease), color 0.18s var(--opl-ease, ease);
 }
-.operator-shell__nav a:hover { background: var(--surface-sunken); color: var(--text-primary); }
+.operator-shell__nav a:hover { background: var(--opl-mint); color: var(--opl-forest); }
 .operator-shell__nav a[aria-current="page"] {
-  border-color: var(--border-interactive);
-  background: var(--brand-tint);
-  color: var(--brand-primary);
-  font-weight: 700;
+  background: var(--opl-forest);
+  color: var(--opl-on-forest);
+  font-weight: 750;
+  box-shadow: 0 8px 18px -12px rgb(var(--opl-sh) / 0.6);
 }
 
-.operator-shell :is(a, button):focus-visible {
-  outline: 3px solid var(--focus-ring);
+.operator-shell__main { max-width: 1440px; margin-inline: auto; }
+.operator-shell main :where([class*="bg-surface-elevated"]) { border-color: var(--opl-line); box-shadow: 0 1px 2px rgb(var(--opl-sh) / 0.06), 0 22px 44px -32px rgb(var(--opl-sh) / 0.42); }
+.operator-shell main :where(.rounded-lg, .rounded-md)[class*="bg-surface-elevated"] { border-radius: 22px; }
+
+.operator-shell :is(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--opl-sun);
   outline-offset: 3px;
 }
 
-@media (min-width: 768px) {
-  .operator-shell__header-inner,
-  .operator-shell__nav { padding-inline: clamp(20px, 3vw, 40px); }
-}
-
 @media (max-width: 520px) {
-  .operator-shell__header-inner { gap: var(--space-2); padding-inline: var(--space-3); }
-  .operator-shell__header-inner > :nth-child(2) { font-size: .94em; }
-  .operator-shell__nav { padding-inline: var(--space-3); }
+  .operator-shell__header-inner { gap: 8px; min-height: 64px; }
+  .operator-shell__header-inner > :nth-child(2) { font-size: 0.94em; }
 }
 
 @media (prefers-reduced-motion: reduce) {

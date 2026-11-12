@@ -44,7 +44,7 @@ export function InsurerHomeView() {
   }, [state]);
 
   if (state === "loading") return <Skeleton className="h-64" />;
-  if (state === "forbidden") return <EmptyState title={fa ? "شما عضو هیچ بیمه‌گری در opetlife نیستید" : "You are not a member of an insurer on opetlife"} description={fa ? "دسترسی را مدیر بیمه‌گر یا تیم opetlife اعطا می‌کند." : "Access is granted by your insurer's admin or the opetlife team."} />;
+  if (state === "forbidden") return <EmptyState title={fa ? "شما عضو هیچ بیمه‌گری در اپت لایف نیستید" : "You are not a member of an insurer on opetlife"} description={fa ? "دسترسی را مدیر بیمه‌گر یا تیم اپت لایف اعطا می‌کند." : "Access is granted by your insurer's admin or the opetlife team."} />;
   if (state === "error" || !me) return <ErrorRecovery title={fa ? "بارگیری نشد" : "Could not load"} message="" retryLabel={fa ? "تلاش دوباره" : "Try again"} onRetry={() => location.reload()} />;
 
   return (
@@ -73,7 +73,7 @@ export function InsurerHomeView() {
         <ContextSurface>
           <h2 className="mb-2 font-bold">{fa ? "محصولات" : "Products"}</h2>
           {products === null ? <Skeleton className="h-20" /> : products.length === 0 ? <p className="text-sm text-text-secondary">—</p> : products.map((p) => <p key={p.id} className="text-sm">{p.name} · {p.status}{p.isPubliclyListed ? "" : fa ? " · غیرعمومی" : " · unlisted"} · {fa ? `${localizeDigits(p._count.applications, "fa")} درخواست` : `${p._count.applications} applications`}</p>)}
-          <p className="mt-2 text-metadata text-text-secondary">{fa ? "ویرایش محصولات از طریق تیم opetlife انجام می‌شود." : "Product changes go through the opetlife team."}</p>
+          <p className="mt-2 text-metadata text-text-secondary">{fa ? "ویرایش محصولات از طریق تیم اپت لایف انجام می‌شود." : "Product changes go through the opetlife team."}</p>
         </ContextSurface>
         <ContextSurface>
           <h2 className="mb-2 font-bold">{fa ? "تیم" : "Team"}</h2>

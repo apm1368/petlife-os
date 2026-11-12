@@ -2,6 +2,8 @@
 import { LocalPreviewGate } from "@/features/local-preview/LocalPreviewGate";
 import { SellerPreviewContent } from "@/features/local-preview/SellerPreviewContent";
 import { Brand } from "@/features/brand/Brand";
+import type { RouteLocale } from "@/lib/i18n/config";
+import "@/features/landing/opl/opl-landing.css";
 import "@/features/navigation/operator-shell.css";
 
 import { useEffect, useState } from "react";
@@ -122,10 +124,10 @@ function LiveSellerShell({ children }: { children: React.ReactNode }) {
   const suspended = active.sellerStatus === "SUSPENDED" || active.sellerStatus === "RESTRICTED" || active.sellerStatus === "CLOSED";
 
   return (
-    <div className="workspace-shell operator-shell min-h-screen bg-surface-base">
+    <div className="opl-page workspace-shell operator-shell min-h-screen">
       <header className="operator-shell__header">
         <div className="operator-shell__header-inner">
-          <Link href={`/${locale}/home`} className="operator-shell__brand" aria-label="opetlife"><Brand compact /></Link>
+          <Link href={`/${locale}/home`} className="operator-shell__brand" aria-label={locale === "fa" ? "اپت لایف" : "opetlife"}><Brand compact locale={locale as RouteLocale} /></Link>
           <div className="flex flex-col">
             <span className="text-section-title text-text-primary">{active.organizationName}</span>
             <span className="text-metadata text-text-secondary">{t("headerRole", { role: t(`role.${active.role}`) })}</span>
@@ -141,25 +143,25 @@ function LiveSellerShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
         {suspended ? (
-          <div className="mt-2">
+          <div className="operator-shell__notice">
             <StatusLabel tone="urgent">{t("suspendedBanner")}</StatusLabel>
           </div>
         ) : null}
       </header>
 
-      <nav className="operator-shell__nav" aria-label={t("nav.overview")}>
+      <div className="operator-shell__nav-band"><nav className="operator-shell__nav" aria-label={t("nav.overview")}>
         {NAV_ITEMS.map((item) => {
           const href = `/${locale}/seller${item.href}`;
           const isActive = item.href === "" ? pathname === href : pathname.startsWith(href);
           return (
-            <Link key={item.href} href={href} className={"shrink-0 rounded-full px-3 py-1.5 text-metadata " + (isActive ? "bg-surface-subtle text-text-primary" : "text-text-secondary")}>
+            <Link key={item.href} href={href} aria-current={isActive ? "page" : undefined} className="shrink-0">
               {t(item.labelKey)}
             </Link>
           );
         })}
-      </nav>
+      </nav></div>
 
-      <main className={pathname === `/${locale}/seller` ? "mx-auto max-w-3xl px-4 py-6" : "workspace-main w-full min-w-0 px-4 py-6"}>{children}</main>
+      <main className={pathname === `/${locale}/seller` ? "mx-auto max-w-3xl px-4 py-6" : "workspace-main operator-shell__main w-full min-w-0 px-4 py-6"}>{children}</main>
     </div>
   );
 }
