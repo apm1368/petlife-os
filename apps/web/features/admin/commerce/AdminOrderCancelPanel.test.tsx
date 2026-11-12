@@ -17,8 +17,8 @@ describe("AdminOrderCancelPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: "Cancel order" }));
     fireEvent.click(screen.getByRole("button", { name: "Yes, cancel and refund in full" }));
     expect(await screen.findByText("Write a short reason.")).toBeTruthy();
+    // The confirmation stays open after the missing-reason error.
     fireEvent.change(screen.getByLabelText("Reason (audit log)"), { target: { value: "Customer asked by phone" } });
-    fireEvent.click(screen.getByRole("button", { name: "Cancel order" }));
     fireEvent.click(screen.getByRole("button", { name: "Yes, cancel and refund in full" }));
     await waitFor(() => expect(adminCommerceService.cancelOrder).toHaveBeenCalledWith("o1", "Customer asked by phone"));
     expect(onDone).toHaveBeenCalled();
