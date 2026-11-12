@@ -1,0 +1,75 @@
+/* Installable app (PWA): install card, push opt-in, pull to refresh, and the phone app shell of the member area.
+   Pattern 2026-11 tokens (opl-landing.css), light and dark. Desktop (≥ 1024px) is unchanged. */
+
+/* Install card (member home and profile). */
+.opl-install { position:relative; display:flex; gap:16px; align-items:flex-start; margin:0 0 20px; padding:18px 20px; border:1px solid var(--opl-line); border-radius:24px; background:linear-gradient(135deg,var(--opl-mint),var(--opl-paper-2) 70%); color:var(--opl-ink); box-shadow:0 18px 40px -32px rgb(var(--opl-sh) / .55); }
+.opl-install__icon { flex:none; width:56px; height:56px; border-radius:16px; box-shadow:0 6px 16px -10px rgb(var(--opl-sh) / .6); }
+.opl-install__text { flex:1; min-width:0; padding-inline-end:28px; }
+.opl-install__text h2 { margin:0 0 4px; font-size:1.02rem; font-weight:800; line-height:1.5; }
+.opl-install__text p { margin:0 0 12px; color:var(--opl-ink-2); font-size:.92rem; line-height:1.75; }
+.opl-install__actions { display:flex; flex-wrap:wrap; gap:8px; }
+.opl-install__actions .opl-btn { min-height:44px; }
+.opl-install__close { position:absolute; top:10px; inset-inline-end:10px; display:grid; place-items:center; width:44px; height:44px; border:0; border-radius:999px; background:transparent; color:var(--opl-ink-2); cursor:pointer; }
+.opl-install__close:hover { background:var(--opl-raised); color:var(--opl-ink); }
+.opl-install__done { margin:0 0 16px; padding:12px 16px; border-radius:16px; background:var(--opl-mint); color:var(--opl-forest); font-weight:700; }
+
+/* Push opt-in card (notification settings). */
+.opl-push__head { display:flex; gap:12px; align-items:flex-start; }
+.opl-push__head p { margin-top:2px; line-height:1.75; }
+.opl-push__icon { flex:none; display:grid; place-items:center; width:40px; height:40px; border-radius:14px; background:var(--opl-mint); color:var(--opl-forest); }
+.opl-push__state { margin:0; font-size:.92rem; font-weight:700; color:var(--opl-ink-2); }
+.opl-push__state[data-on="true"] { color:var(--opl-forest); }
+.opl-push__note { margin:0; padding:12px 14px; border-radius:16px; background:var(--opl-cream); color:var(--opl-ink-2); font-size:.9rem; line-height:1.75; }
+.opl-push__actions { display:flex; flex-wrap:wrap; gap:8px; }
+.opl-push__actions .opl-btn { min-height:44px; }
+.opl-push__actions .opl-btn:disabled { opacity:.6; cursor:progress; transform:none; }
+.opl-push__devices ul { margin:8px 0 0; padding:0; list-style:none; border-top:1px solid var(--opl-line); }
+.opl-push__devices li { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:56px; border-bottom:1px solid var(--opl-line); }
+.opl-push__devices li > span { display:flex; flex-direction:column; min-width:0; }
+.opl-push__devices strong { font-size:.92rem; font-weight:650; color:var(--opl-ink); }
+.opl-push__devices small { font-size:.8rem; color:var(--opl-ink-3); }
+.opl-push__remove { display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:0 14px; border:0; border-radius:999px; background:transparent; color:var(--opl-ink-2); font:inherit; font-size:.88rem; cursor:pointer; }
+.opl-push__remove:hover { background:var(--opl-mint); color:var(--opl-forest); }
+
+/* Pull to refresh (installed app on phones only). */
+.opl-ptr { position:fixed; top:calc(env(safe-area-inset-top) + 8px); left:50%; z-index:60; display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border:1px solid var(--opl-line); border-radius:999px; background:var(--opl-raised); color:var(--opl-forest); font-size:.85rem; font-weight:700; box-shadow:0 12px 28px -18px rgb(var(--opl-sh) / .6); pointer-events:none; }
+.opl-ptr__spinner { display:grid; place-items:center; }
+.opl-ptr__spinner.is-spinning { animation:oplPtrSpin .8s linear infinite; }
+@keyframes oplPtrSpin { to { transform:rotate(360deg); } }
+@media (prefers-reduced-motion:reduce) { .opl-ptr__spinner.is-spinning { animation:none; } }
+
+/* Header controls the app shell adds: back (phones) and Explore (where the bottom bar shows). */
+.member-shell .member-header__back,
+.member-shell .member-header__explore { display:none; place-items:center; flex:none; width:44px; height:44px; border:0; border-radius:999px; background:transparent; color:var(--opl-ink); cursor:pointer; }
+.member-shell .member-header__back:hover,
+.member-shell .member-header__explore:hover,
+.member-shell .member-header__explore[aria-expanded="true"] { background:var(--opl-mint); color:var(--opl-forest); }
+.member-shell .member-header__explore-wrap { display:none; }
+@media (max-width:1023px) {
+  .member-shell .member-header__explore-wrap { display:inline-flex; }
+  .member-shell .member-header__explore { display:grid; }
+  /* Content never hides under the bottom bar (and the home indicator below it). */
+  .member-shell .workspace-main { padding-bottom:calc(96px + env(safe-area-inset-bottom)); }
+}
+
+/* The phone app shell (≤ 768px). */
+@media (max-width:768px) {
+  .member-shell { overflow-x:clip; }
+  .member-shell .member-header { padding-top:env(safe-area-inset-top); }
+  .member-shell .member-header__bar { padding-inline:max(12px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-right)); gap:4px; }
+  .member-shell .member-header__back { display:grid; margin-inline-start:-6px; }
+  .member-shell .member-header__back + .member-header__brand { min-width:0; }
+  .member-shell .member-header__brand { min-height:44px; }
+  .member-shell .member-tabbar { padding-inline:max(6px, env(safe-area-inset-left)) max(6px, env(safe-area-inset-right)); }
+  .member-shell .member-tabbar > a { min-height:56px; padding-inline:2px; }
+  .member-shell .member-tabbar > a > span { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.72rem; }
+  .member-shell .member-header__tools :is(button, a) { min-width:44px; min-height:44px; }
+  .opl-install { padding:16px; gap:12px; border-radius:20px; }
+  .opl-install__icon { width:48px; height:48px; border-radius:14px; }
+}
+
+/* Installed app: no browser chrome above, so the page should not rubber-band the whole body away. */
+@media (display-mode:standalone) {
+  html { overscroll-behavior-y:none; }
+  .member-shell .member-header { -webkit-user-select:none; user-select:none; }
+}

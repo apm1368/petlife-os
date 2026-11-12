@@ -2215,7 +2215,8 @@
       "channels": {
         "EMAIL": "Correo",
         "IN_APP": "En la aplicación",
-        "SMS": "SMS"
+        "SMS": "SMS",
+        "PUSH": "Push"
       },
       "quietHours": {
         "title": "Horas de silencio",
@@ -2233,7 +2234,29 @@
       "marketingManage": "Gestionar en Privacidad",
       "quietHoursHint": "Durante las horas de silencio, los SMS esperan hasta que termine el intervalo (las alertas urgentes siguen llegando). Las notificaciones de la aplicación aparecen en la bandeja sin sonido.",
       "saveError": "No se pudieron guardar tus preferencias. Inténtalo de nuevo.",
-      "unsaved": "Tienes cambios sin guardar."
+      "unsaved": "Tienes cambios sin guardar.",
+      "push": {
+        "title": "Notificaciones en este dispositivo",
+        "intro": "Los recordatorios de cuidado, citas, pedidos y avisos de mascotas perdidas llegan a este dispositivo aunque opetlife esté cerrada. La pantalla de bloqueo solo muestra un título general, nunca detalles de salud ni el nombre de tu mascota.",
+        "enable": "Activar notificaciones",
+        "disable": "Desactivar en este dispositivo",
+        "test": "Enviar una notificación de prueba",
+        "testSent": "Notificación de prueba enviada. Debería llegar a este dispositivo en unos segundos.",
+        "testFailed": "La notificación de prueba no llegó. Desactiva las notificaciones y vuelve a activarlas.",
+        "on": "Las notificaciones están activadas en este dispositivo.",
+        "off": "Las notificaciones están desactivadas en este dispositivo.",
+        "denied": "Tu navegador bloquea las notificaciones de este sitio. Permite las notificaciones de opetlife.ir en los ajustes del navegador y vuelve a abrir esta página.",
+        "unsupported": "Este navegador no puede recibir notificaciones web. Prueba Chrome, Edge, Firefox o Samsung Internet.",
+        "iosInstall": "En iPhone, las notificaciones solo funcionan en la app instalada: en Safari toca Compartir → “Añadir a pantalla de inicio”, abre opetlife desde la pantalla de inicio y activa aquí las notificaciones (iOS 16.4 o posterior).",
+        "notConfigured": "Las notificaciones en el dispositivo aún no están disponibles.",
+        "error": "No se pudo hacer. Inténtalo de nuevo.",
+        "devices": "Tus otros dispositivos",
+        "thisDevice": "Este dispositivo",
+        "unknownDevice": "Dispositivo",
+        "added": "Añadido el {date}",
+        "remove": "Quitar",
+        "removeLabel": "Quitar {device} de los dispositivos de notificación"
+      }
     }
   },
   "auth": {
@@ -9298,6 +9321,27 @@
         "SNOOZED": "Pospuestos",
         "CANCELLED": "Cancelados"
       }
+    }
+  },
+  "pwa": {
+    "install": {
+      "title": "Instala opetlife en tu móvil",
+      "body": "Se abre desde la pantalla de inicio como una app, carga más rápido y puede enviarte notificaciones.",
+      "action": "Instalar app",
+      "later": "Ahora no",
+      "dismiss": "Cerrar",
+      "iosTitle": "Añade opetlife a la pantalla de inicio de tu iPhone",
+      "iosBody": "En Safari, toca el botón Compartir y elige “Añadir a pantalla de inicio”. Luego abre opetlife desde la pantalla de inicio.",
+      "installed": "opetlife está instalada."
+    },
+    "header": {
+      "back": "Atrás",
+      "explore": "Explorar todo"
+    },
+    "refresh": {
+      "pull": "Desliza para actualizar",
+      "release": "Suelta para actualizar",
+      "loading": "Actualizando…"
     }
   }
 }
