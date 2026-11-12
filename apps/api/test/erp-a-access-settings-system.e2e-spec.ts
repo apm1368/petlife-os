@@ -18,7 +18,7 @@ describe("ERP-A access control, settings, system", () => {
 
   async function actor(name: string, role?: AdminRole): Promise<Actor> {
     const email = `erpa-${randomUUID()}@example.com`;
-    const user = await db.user.create({ data: { displayName: name, email } });
+    const user = await db.user.create({ data: { displayName: name, email, emailVerifiedAt: new Date() } });
     const admin = role ? await db.adminUser.create({ data: { userId: user.id, role, status: AdminMembershipStatus.ACTIVE } }) : null;
     const session = await db.session.create({ data: { userId: user.id, expiresAt: new Date(Date.now() + 86400000) } });
     const res = await request(server()).get("/health/live");
@@ -74,6 +74,9 @@ describe("ERP-A access control, settings, system", () => {
 
     await send("post", admin, "/admin/access/admins").send({ email: candidate.email, role: "SUPPORT", reason: "new support hire" }).expect(403);
     await send("post", root, "/admin/access/admins").send({ email: candidate.email, role: "SUPPORT" }).expect(400); // reason required
+    // Admin access only for a proven email or mobile (market-readiness Q76).
+    const unverified = await db.user.create({ data: { displayName: "unverified", email: `erpa-unverified-${randomUUID()}@example.com` } });
+    expect((await send("post", root, "/admin/access/admins").send({ email: unverified.email, role: "SUPPORT", reason: "should be refused" }).expect(409)).body.error.details.rule).toBe("UNVERIFIED_CONTACT");
     const granted = (await send("post", root, "/admin/access/admins").send({ email: candidate.email.toUpperCase(), role: "SUPPORT", reason: "new support hire" }).expect(201)).body;
     expect(granted).toMatchObject({ role: "SUPPORT", status: "ACTIVE" });
     expect((await send("post", root, "/admin/access/admins").send({ email: candidate.email, role: "FINANCE", reason: "duplicate grant" }).expect(409)).body.error.details.rule).toBe("ALREADY_ADMIN");

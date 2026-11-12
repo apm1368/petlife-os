@@ -79,8 +79,10 @@ export class AdminAccessControlService {
 
   /** Grant admin access to an existing member account (by email). Never creates a login. */
   async grant(actor: ResolvedAdminContext, input: { email: string; role: AdminRole; reason: string; serviceScopes?: AdminVertical[] }) {
-    const user = await this.prisma.user.findFirst({ where: { email: { equals: input.email.trim(), mode: "insensitive" } }, select: { id: true } });
+    const user = await this.prisma.user.findFirst({ where: { email: { equals: input.email.trim(), mode: "insensitive" } }, select: { id: true, emailVerifiedAt: true, phoneVerifiedAt: true } });
     if (!user) throw new NotFoundApiException("User");
+    // Admin access only for an account whose email or mobile has been proven (market-readiness Q76).
+    if (!user.emailVerifiedAt && !user.phoneVerifiedAt) throw new AdminGovernanceRuleException({ rule: "UNVERIFIED_CONTACT" });
     this.assertMayAssign(actor, input.role);
     const serviceScopes = this.validScopes(input.role, input.serviceScopes ?? []);
     return this.mutate(actor, async (tx) => {
