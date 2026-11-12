@@ -10,7 +10,7 @@ import type {
   AdminReportTopRowDto,
 } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
-import { roleHasPermission } from "../auth/admin-permissions";
+import { adminCan } from "../auth/admin-permissions";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 import { CUSTOMER_METRIC_CTES, CUSTOMER_METRIC_JOINS, LIVE_BOOKING, LIVE_ORDER, LIVE_STAY, SEGMENTS, customerMetricColumns } from "./customer-metrics.sql";
 import { bucketKeys, delta, resolveReportRange, type ResolvedReportRange } from "./report-range";
@@ -59,7 +59,7 @@ export class AdminReportsService {
   async overview(admin: ResolvedAdminContext, range: ResolvedReportRange, now = new Date()): Promise<AdminReportOverviewDto> {
     const current: Window = { start: range.startUtc, end: range.endUtc };
     const previous: Window = { start: range.previousStartUtc, end: range.previousEndUtc };
-    const canSeeCustomers = roleHasPermission(admin.role, "customer.view");
+    const canSeeCustomers = adminCan(admin, "customer.view");
     const [cur, prev, series, breakdowns, funnel, sellers, providers, products, customers, segments, cohorts] = await Promise.all([
       this.totals(current),
       this.totals(previous),

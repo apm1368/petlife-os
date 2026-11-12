@@ -29,6 +29,8 @@ import { AdminPet360Controller } from "./pets/admin-pet360.controller";
 import { AdminCustomerOverviewService } from "./customer/admin-customer-overview.service";
 import { AdminAccessControlService } from "./access/admin-access-control.service";
 import { AdminAccessControlController } from "./access/admin-access-control.controller";
+import { AdminCustomRolesController } from "./access/admin-custom-roles.controller";
+import { AdminCustomRolesService } from "./access/admin-custom-roles.service";
 import { AdminSettingsService } from "./settings/admin-settings.service";
 import { AdminSettingsController } from "./settings/admin-settings.controller";
 import { AdminFeatureFlagsController } from "./feature-flags/admin-feature-flags.controller";
@@ -165,6 +167,7 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminPartner360Controller,
     AdminPet360Controller,
     AdminAccessControlController,
+    AdminCustomRolesController,
     AdminSettingsController,
     AdminFeatureFlagsController,
     AdminSmsPatternsController,
@@ -214,6 +217,7 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminPet360Service,
     AdminCustomerOverviewService,
     AdminAccessControlService,
+    AdminCustomRolesService,
     AdminSettingsService,
     AdminFeatureFlagsService,
     AdminSmsPatternsService,

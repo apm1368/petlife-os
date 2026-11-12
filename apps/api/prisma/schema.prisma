@@ -5070,6 +5070,28 @@ enum AdminRefundApprovalStatus {
 /// implicit access through normal user session alone"). Mirrors
 /// SellerMembership/ProviderUser's own shape (role + status keyed to a
 /// real User) rather than inventing a parallel credential system.
+/// A role the owner defines in the back office: a named set of admin permissions, optionally limited to some
+/// verticals. Members take exactly these permissions (the built-in role is kept on the membership and comes back when
+/// the custom role is cleared). It can never carry admin.manage, so role management itself stays with SUPER_ADMIN.
+model AdminCustomRole {
+  id               String          @id @default(uuid()) @db.Uuid
+  name             String
+  description      String?
+  permissions      String[]
+  /// Empty means every vertical.
+  verticals        AdminVertical[] @default([])
+  archivedAt       DateTime?
+  createdByAdminId String          @db.Uuid
+  updatedByAdminId String          @db.Uuid
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  members AdminUser[]
+
+  @@index([archivedAt])
+  @@map("admin_custom_roles")
+}
+
 model AdminUser {
   id            String                @id @default(uuid()) @db.Uuid
   userId        String                @unique @db.Uuid
@@ -5079,6 +5101,10 @@ model AdminUser {
   /// Only read for SERVICE_ADMIN, whose vertical is not implied by its role. Empty for every other
   /// role: an empty list never widens access, it just leaves the role's own verticals in charge.
   serviceScopes AdminVertical[]       @default([])
+  /// Owner-defined role (admin/access/roles). While set, it decides this admin's permissions and verticals instead of
+  /// the built-in role; clearing it restores the built-in role. Never set on a SUPER_ADMIN.
+  customRoleId  String?               @db.Uuid
+  customRole    AdminCustomRole?      @relation(fields: [customRoleId], references: [id], onDelete: Restrict)
 
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -5114,6 +5140,7 @@ model AdminUser {
   subscriptionChanges            SubscriptionChange[]
   grantedEntitlementOverrides    SubscriptionEntitlementOverride[]
 
+  @@index([customRoleId])
   @@map("admin_users")
 }
 

@@ -26,7 +26,7 @@ export function TravelResultCard({ item, href, onFavorite, compareOn, onCompare,
           // eslint-disable-next-line @next/next/no-img-element
           <img src={item.coverUrl} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
         ) : (
-          <span className="absolute inset-0 flex items-center justify-center text-metadata text-text-secondary">{t("noPhoto")}</span>
+          <span className="opl-nophoto absolute inset-0 flex items-center justify-center text-metadata text-text-secondary">{t("noPhoto")}</span>
         )}
         {onFavorite ? (
           <button type="button" onClick={onFavorite} aria-pressed={item.favorited} aria-label={item.favorited ? t("removeSaved") : t("save")} className="absolute end-2 top-2 flex h-11 w-11 items-center justify-center rounded-full bg-surface-elevated/90 text-text-primary shadow focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">

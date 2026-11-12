@@ -3400,12 +3400,27 @@ export type AdminPermissionName =
   | "travel.override.manage";
 
 /** Never throws (mirrors SellerContextDto's own "resolve once, always succeeds" shape) — `isAdmin: false` is a normal, expected resolution for the overwhelming majority of authenticated sessions, not an error state. */
+/** An owner-defined admin role: a named permission set, optionally limited to verticals (empty = every vertical). */
+export interface AdminCustomRoleDto {
+  id: string;
+  name: string;
+  description: string | null;
+  permissions: string[];
+  verticals: string[];
+  members: number;
+  archivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AdminSessionContextDto {
   isAdmin: boolean;
   adminUserId: string | null;
   displayName: string | null;
   role: AdminRole | null;
   permissions: AdminPermissionName[];
+  /** Set when an owner-defined custom role decides this admin's access (admin/access/roles). */
+  customRoleName?: string | null;
 }
 
 /** Current server permissions, refreshed on every request; never grants access itself. */

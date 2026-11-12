@@ -8,6 +8,9 @@ import { useEffect } from "react";
 import { ErrorRecovery, Skeleton } from "@petlife/ui";
 import { useAppBootstrap } from "@/hooks/use-app-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
+import { Brand } from "@/features/brand/Brand";
+import { isRouteLocale } from "@/lib/i18n/config";
+import "@/features/landing/opl/opl-landing.css";
 
 function LiveAppShell({ children }: { children: React.ReactNode }) {
   const { isLoading, error, retry } = useAppBootstrap();
@@ -17,6 +20,7 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
   const tErrors = useTranslations("errors");
   const locale = useLocale();
   const pathname = usePathname();
+  const routeLocale = isRouteLocale(locale) ? locale : "en";
 
   useEffect(() => {
     if (!isLoading && !error && status === "unauthenticated") {
@@ -29,16 +33,20 @@ function LiveAppShell({ children }: { children: React.ReactNode }) {
 
   if (error) {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-6">
-        <ErrorRecovery title={tErrors("generic")} message="" retryLabel={t("retry")} onRetry={retry} />
-      </main>
+      <div className="opl-page opl-boot">
+        <main className="opl-boot__card">
+          <Brand locale={routeLocale} />
+          <ErrorRecovery title={tErrors("generic")} message="" retryLabel={t("retry")} onRetry={retry} />
+        </main>
+      </div>
     );
   }
 
   if (isLoading || status !== "authenticated") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface-base">
-        <Skeleton className="h-8 w-40" aria-label={t("loading")} />
+      <div className="opl-page opl-boot" role="status" aria-label={t("loading")}>
+        <span className="opl-boot__mark"><Brand locale={routeLocale} /></span>
+        <Skeleton className="h-2 w-28 rounded-full" />
       </div>
     );
   }

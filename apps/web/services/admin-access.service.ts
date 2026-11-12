@@ -1,8 +1,13 @@
 import {apiFetch} from "@/lib/api/client";
+import type {AdminCustomRoleDto} from "@petlife/types";
+export type {AdminCustomRoleDto};
 export type AdminRole="SUPER_ADMIN"|"ADMIN"|"SUPPORT"|"TRUST_SAFETY"|"FINANCE"|"OPERATIONS"|"CONTENT"|"VERIFICATION"|"READ_ONLY"|"EDITOR"|"PARTNER_OPERATIONS"|"CLINIC_OPERATIONS"|"COMMERCE_OPERATIONS"|"ANALYTICS"|"CONTENT_ADMIN"|"SHOP_ADMIN"|"SERVICE_ADMIN"|"SUPPORT_AGENT";
 export type AdminServiceVertical="CLINIC"|"GROOMING"|"ACCOMMODATION"|"INSURANCE";
+export type AdminVertical=AdminServiceVertical|"SHOP"|"CONTENT"|"SUPPORT";
+export const adminVerticals:AdminVertical[]=["SHOP","CLINIC","GROOMING","ACCOMMODATION","INSURANCE","CONTENT","SUPPORT"];
+export interface AdminCustomRoleInput {name:string;description?:string;permissions:string[];verticals:AdminVertical[];reason:string}
 export const adminServiceVerticals:AdminServiceVertical[]=["CLINIC","GROOMING","ACCOMMODATION","INSURANCE"];
-export interface AdminMembership {id:string;userId:string;displayName:string|null;emailMasked:string|null;role:AdminRole;serviceScopes:AdminServiceVertical[];status:"ACTIVE"|"SUSPENDED";createdAt:string;updatedAt:string;lastActiveAt:string|null;permissions?:string[]}
+export interface AdminMembership {id:string;userId:string;displayName:string|null;emailMasked:string|null;role:AdminRole;serviceScopes:AdminServiceVertical[];customRole?:{id:string;name:string}|null;status:"ACTIVE"|"SUSPENDED";createdAt:string;updatedAt:string;lastActiveAt:string|null;permissions?:string[]}
 export interface AdminRoleDefinition {role:AdminRole;protected:boolean;permissions:string[];activeMembers:number;suspendedMembers:number}
 export interface AdminPermissionDefinition {permission:string;domain:string;roles:AdminRole[]}
 const base="/admin/access";
@@ -15,5 +20,10 @@ export const adminAccessService={
  changeRole:(id:string,role:AdminRole,reason:string,serviceScopes:AdminServiceVertical[]=[])=>apiFetch<AdminMembership>(`${base}/admins/${encodeURIComponent(id)}/role`,{method:"POST",body:{role,reason,serviceScopes}}),
  changeScopes:(id:string,serviceScopes:AdminServiceVertical[],reason:string)=>apiFetch<AdminMembership>(`${base}/admins/${encodeURIComponent(id)}/scopes`,{method:"POST",body:{serviceScopes,reason}}),
  suspend:(id:string,reason:string)=>apiFetch<AdminMembership>(`${base}/admins/${encodeURIComponent(id)}/suspend`,{method:"POST",body:{reason}}),
+ customRoles:(signal?:AbortSignal)=>apiFetch<AdminCustomRoleDto[]>(`${base}/custom-roles`,{signal,cache:"no-store"}),
+ createCustomRole:(input:AdminCustomRoleInput)=>apiFetch<AdminCustomRoleDto>(`${base}/custom-roles`,{method:"POST",body:input}),
+ updateCustomRole:(id:string,input:AdminCustomRoleInput)=>apiFetch<AdminCustomRoleDto>(`${base}/custom-roles/${encodeURIComponent(id)}`,{method:"PUT",body:input}),
+ archiveCustomRole:(id:string,reason:string)=>apiFetch<AdminCustomRoleDto>(`${base}/custom-roles/${encodeURIComponent(id)}/archive`,{method:"POST",body:{reason}}),
+ assignCustomRole:(adminId:string,customRoleId:string|null,reason:string)=>apiFetch<{adminUserId:string;customRole:{id:string;name:string}|null}>(`${base}/admins/${encodeURIComponent(adminId)}/custom-role`,{method:"PUT",body:{customRoleId,reason}}),
  reactivate:(id:string,reason:string)=>apiFetch<AdminMembership>(`${base}/admins/${encodeURIComponent(id)}/reactivate`,{method:"POST",body:{reason}}),
 };

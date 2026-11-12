@@ -57,7 +57,7 @@ export function PublicLostPetListView() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={incident.primaryPhotoUrl} alt={incident.petName} loading="lazy" decoding="async" className="aspect-[4/3] w-full rounded-md object-cover" />
                   ) : (
-                    <div className="flex aspect-[4/3] items-center justify-center rounded-md bg-surface-subtle text-metadata text-text-secondary">{t("public.list.noPhoto")}</div>
+                    <div className="opl-nophoto flex aspect-[4/3] items-center justify-center rounded-md bg-surface-subtle text-metadata text-text-secondary">{t("public.list.noPhoto")}</div>
                   )}
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-bold text-text-primary">{incident.petName}</span>

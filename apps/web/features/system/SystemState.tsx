@@ -48,6 +48,7 @@ export function SystemState({
   secondary,
   onRetry,
   returnTo,
+  home = "member",
 }: {
   kind: SystemStateKind;
   /** Optional safe override (still product copy, never an API message). */
@@ -57,6 +58,8 @@ export function SystemState({
   secondary?: SystemStateAction;
   onRetry?: () => void;
   returnTo?: string;
+  /** Where "back home" leads: the member home (default) or the public site, for pages a visitor may reach signed out. */
+  home?: "member" | "site";
 }) {
   const locale = useLocale();
   const copy = COPY[kind];
@@ -70,7 +73,7 @@ export function SystemState({
       : onRetry
         ? { label: labels.retry, onClick: onRetry }
         : undefined);
-  const secondAction: SystemStateAction = secondary ?? { label: labels.home, href: `/${locale}/home` };
+  const secondAction: SystemStateAction = secondary ?? { label: labels.home, href: home === "site" ? `/${locale}` : `/${locale}/home` };
 
   return (
     <section className={`system-state system-state--${copy.severity}`} role={kind === "GENERIC_RETRYABLE_ERROR" ? "alert" : "status"} data-kind={kind}>

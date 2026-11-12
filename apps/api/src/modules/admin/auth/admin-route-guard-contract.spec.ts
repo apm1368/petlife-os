@@ -59,6 +59,7 @@ describe("admin route guard contract", () => {
     const dashboard = routed.find(({ file }) => file === join("dashboard", "admin-dashboard.controller.ts"))?.source ?? "";
     expect(dashboard).toContain("@UseGuards(SessionAuthGuard, AdminAuthGuard)");
     const dashboardService = await readFile(join(adminModuleRoot, "dashboard", "admin-dashboard.service.ts"), "utf8");
-    expect(dashboardService).toContain("roleHasPermission");
+    // Each dashboard count is gated by the admin's effective permissions (built-in or custom role).
+    expect(dashboardService).toContain("adminCan(admin, permission)");
   });
 });
