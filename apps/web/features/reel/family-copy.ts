@@ -15,7 +15,7 @@ export function familyForPath(pathname: string): Family | null {
   if (/^\/(shop|cart|orders|repeat-delivery|favorites)(\/|$)/.test(path)) return "shop";
   if (/^\/travel(\/|$)/.test(path)) return "travel";
   if (/^\/(insurance|lost-pets)(\/|$)/.test(path)) return "safe";
-  if (/^\/(community|animal-support|donations)(\/|$)/.test(path)) return "together";
+  if (/^\/(community|animal-support|donations|about)(\/|$)/.test(path)) return "together";
   if (/^\/(blog|guides|help|contact|status|legal|credits|support)(\/|$)/.test(path)) return "learn";
   return null;
 }

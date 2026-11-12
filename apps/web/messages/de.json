@@ -9082,5 +9082,128 @@
         "OTHER": "Andere Korrektur"
       }
     }
+  },
+  "aboutPage": {
+    "eyebrow": "Über opetlife",
+    "title": "Wir haben opetlife gebaut, damit die Sorge um ein Tier nie wieder bei null anfängt",
+    "lede": "Der Impfpass in einer Schublade, die Nummer der Tierarztpraxis irgendwo in einem Chat, ein Shop, der nichts von der Allergie weiß, eine Reise, die um „Haustiere nicht erlaubt“ herum geplant wird. opetlife bringt all das rund um ein Profil deines Tieres zusammen – und bleibt dabei ehrlich.",
+    "chapters": {
+      "label": "Auf dieser Seite",
+      "why": "Warum es uns gibt",
+      "connect": "Wie alles zusammenpasst",
+      "promises": "Was wir versprechen",
+      "values": "Wie wir entscheiden",
+      "contact": "Sprich mit uns"
+    },
+    "why": {
+      "title": "Fürsorge sollte nicht davon abhängen, an alles zu denken",
+      "p1": "Mit einem Hund, einer Katze oder einem Vogel zu leben bedeutet Hunderte kleiner Entscheidungen: Wann ist die nächste Impfung fällig, welches Futter verträgt ein empfindlicher Magen, wer kümmert sich, wenn du verreist? Dieses Wissen liegt meist verstreut – und ist genau dann schwer zu finden, wenn man es am dringendsten braucht.",
+      "p2": "opetlife begann mit einer einfachen Idee: Im Mittelpunkt steht das Tier, nicht die App. Alles, was wir bauen – Gesundheitsakte, Buchungen, Shop, Reisen, Tierschutz – liest aus dem Profil deines Tieres und ergänzt es, damit jeder Schritt weiß, was vorher war.",
+      "p3": "Wir schreiben zuerst auf Persisch, weil dort die meisten unserer Familien zu Hause sind, und auf Englisch, Deutsch und Spanisch für alle, die fern der Heimat mit einem Tier leben."
+    },
+    "connect": {
+      "title": "Ein Profil, viele helfende Hände",
+      "lede": "Jeder Teil von opetlife macht eine Sache gut und teilt nur, was du erlaubst.",
+      "steps": {
+        "record": {
+          "title": "Die Akte deines Tieres",
+          "body": "Impfungen, Medikamente, Allergien, Gewicht und Dokumente in einer Gesundheitsakte – mit Erinnerungen, bevor etwas fällig wird.",
+          "cta": "Tier hinzufügen"
+        },
+        "care": {
+          "title": "Tierärzte und Services",
+          "body": "Finde Praxen, Fellpflege, Betreuung und Haustiertaxis, sieh echte freie Zeiten und buche; teile die Gesundheitsakte zeitlich begrenzt mit einer Praxis.",
+          "cta": "Hilfe finden"
+        },
+        "shop": {
+          "title": "Shop",
+          "body": "Futter, Leckerlis und Zubehör – passend zu Tierart und Bedürfnissen deines Tieres.",
+          "cta": "Zum Shop"
+        },
+        "travel": {
+          "title": "Reisen",
+          "body": "Haustierfreundliche Unterkünfte und Reisen; jedes externe Angebot zeigt seine Quelle und wann wir es zuletzt geprüft haben.",
+          "cta": "Reise planen"
+        },
+        "safety": {
+          "title": "Sicherheit",
+          "body": "Vermisstenmeldungen, ein Tierausweis und klare Vergleiche von Versicherungstarifen – für die Tage, die hoffentlich nie kommen.",
+          "cta": "Vermisst und gefunden"
+        },
+        "together": {
+          "title": "Gemeinschaft und Tierschutz",
+          "body": "Tausche dich mit anderen aus, unterstütze verifizierte Tierschutzgruppen und sieh genau, wohin Spenden gehen.",
+          "cta": "Zur Community"
+        },
+        "learn": {
+          "title": "Lernen",
+          "body": "Praktische Artikel und Ratgeber zu Erziehung, Ernährung und Gesundheit – für den Alltag zu Hause.",
+          "cta": "Zum Magazin"
+        }
+      }
+    },
+    "promises": {
+      "title": "Was wir versprechen – und wie du es prüfen kannst",
+      "lede": "Vertrauen sollte kein Slogan sein. Das hier tut das Produkt, und du kannst es selbst sehen.",
+      "items": {
+        "verified": {
+          "title": "Verifiziert heißt geprüft",
+          "body": "Praxen, Tierärzte und Anbieter erhalten das Verifiziert-Abzeichen erst, nachdem unser Team ihre Unterlagen geprüft hat."
+        },
+        "consent": {
+          "title": "Die Akte deines Tieres, deine Entscheidung",
+          "body": "Eine Gesundheitsakte wird nur geteilt, wenn du es willst, zeitlich begrenzt, und du kannst den Zugriff jederzeit widerrufen."
+        },
+        "privacy": {
+          "title": "Deine Daten bleiben deine",
+          "body": "In deinem Datenschutzbereich kannst du eine Kopie deiner Daten herunterladen oder ihre Löschung beantragen."
+        },
+        "sources": {
+          "title": "Ehrlich, woher etwas kommt",
+          "body": "Angebote anderer Websites zeigen ihre Quelle und wann wir sie zuletzt geprüft haben; wir geben sie nie als unsere eigenen aus."
+        },
+        "ledger": {
+          "title": "Spenden, die du nachverfolgen kannst",
+          "body": "Jede Tierschutzkampagne zeigt einen laufenden Gesamtbetrag aus echten Transaktionen – nie eine Schätzung."
+        },
+        "credits": {
+          "title": "Ehre, wem Ehre gebührt",
+          "body": "Fotos und Musik von anderen nennen wir mit ihrer Lizenz auf unserer Seite mit Nachweisen."
+        }
+      }
+    },
+    "values": {
+      "title": "Wie wir entscheiden, was wir bauen",
+      "items": {
+        "animals": {
+          "title": "Das Tier zuerst",
+          "body": "Wenn eine Funktion gut fürs Geschäft, aber nicht fürs Tier ist, bauen wir sie nicht."
+        },
+        "honest": {
+          "title": "Sagen, was wir wissen – und was nicht",
+          "body": "Keine erfundene Verfügbarkeit, keine ausgedachten Bewertungen, keine medizinischen Versprechen. Wo etwas unsicher ist, sagen wir das."
+        },
+        "simple": {
+          "title": "Einfach für jede Familie",
+          "body": "Klare Worte, große Schaltflächen, helles und dunkles Design und Seiten, die auf jedem Handy funktionieren."
+        },
+        "kindness": {
+          "title": "Freundlichkeit zählt",
+          "body": "Rettung, Adoption und das Erinnern an Tiere, die wir verloren haben, gehören zu opetlife – nicht an den Rand."
+        }
+      }
+    },
+    "contact": {
+      "title": "Sprich mit uns",
+      "body": "Fragen, Ideen, eine Partnerschaft oder etwas, das nicht so funktioniert hat, wie es sollte: Deine Nachricht erreicht unser Support-Team, und die Antwort findest du in deinem Support-Postfach.",
+      "contactCta": "Nachricht senden",
+      "helpCta": "Hilfe-Center"
+    },
+    "cta": {
+      "title": "Fang mit dem Profil deines Tieres an",
+      "body": "Es dauert eine Minute, und alles andere baut darauf auf.",
+      "primary": "Konto erstellen",
+      "secondary": "Services entdecken"
+    }
   }
 }
