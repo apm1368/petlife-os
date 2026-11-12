@@ -1,5 +1,5 @@
 /* opetlife public pattern (docs/design/pattern-2026-11). Warm light theme with a designed dark theme on the site's data-theme switch. */
-.opl-landing, .opl-page {
+.opl-landing, .opl-page, .park-auth, .park-auth-page {
   --opl-paper:#FFFBF5; --opl-paper-2:#FFFDFA; --opl-cream:#FDF4E6; --opl-mint:#EEF7EC; --opl-apricot-bg:#FFF0E4;
   --opl-raised:#FFFFFF; --opl-ink:#1E241F; --opl-ink-2:#4F574F; --opl-ink-3:#6B726A; --opl-line:#F0E7D9; --opl-line-2:#DED2BF;
   --opl-forest:#1F5A3D; --opl-forest-2:#2E7650; --opl-on-forest:#FFFDF8; --opl-leaf:#7DB46C;
@@ -8,27 +8,30 @@
   --opl-glass:rgb(255 251 245 / .86); --opl-sh:46 40 28;
   --opl-ease:cubic-bezier(.2,.8,.2,1); --opl-ease-emph:cubic-bezier(.16,1,.3,1);
   --opl-gutter:clamp(16px,4vw,48px);
-  background:var(--opl-paper); color:var(--opl-ink); font-family:Vazirmatn,var(--font-sans,Tahoma),system-ui,sans-serif; line-height:1.85;
 }
-:root[data-theme="dark"] .opl-landing, :root[data-theme="dark"] .opl-page {
+.opl-landing { background:var(--opl-paper); color:var(--opl-ink); font-family:Vazirmatn,var(--font-sans,Tahoma),system-ui,sans-serif; line-height:1.85; }
+.opl-page .opl-hdr, .opl-family-reel { font-family:Vazirmatn,var(--font-sans,Tahoma),system-ui,sans-serif; line-height:1.85; color:var(--opl-ink); }
+.opl-family-reel { background:var(--opl-cream); }
+:root[data-theme="dark"] :is(.opl-landing, .opl-page, .park-auth, .park-auth-page) {
   --opl-paper:#121512; --opl-paper-2:#161A16; --opl-cream:#1D1B15; --opl-mint:#15241A; --opl-apricot-bg:#2A1F17;
   --opl-raised:#1C211C; --opl-ink:#F1EDE4; --opl-ink-2:#C2C6BC; --opl-ink-3:#9CA196; --opl-line:#2A2F29; --opl-line-2:#3E453C;
   --opl-forest:#8CC79A; --opl-forest-2:#7CC090; --opl-on-forest:#0F1A12; --opl-plum:#CDB0DB; --opl-plum-bg:#2A2230;
   --opl-glass:rgb(18 21 18 / .84); --opl-sh:0 0 0;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .opl-landing, :root:not([data-theme="light"]) .opl-page {
+  :root:not([data-theme="light"]) :is(.opl-landing, .opl-page, .park-auth, .park-auth-page) {
     --opl-paper:#121512; --opl-paper-2:#161A16; --opl-cream:#1D1B15; --opl-mint:#15241A; --opl-apricot-bg:#2A1F17;
     --opl-raised:#1C211C; --opl-ink:#F1EDE4; --opl-ink-2:#C2C6BC; --opl-ink-3:#9CA196; --opl-line:#2A2F29; --opl-line-2:#3E453C;
     --opl-forest:#8CC79A; --opl-forest-2:#7CC090; --opl-on-forest:#0F1A12; --opl-plum:#CDB0DB; --opl-plum-bg:#2A2230;
     --opl-glass:rgb(18 21 18 / .84); --opl-sh:0 0 0;
   }
 }
-.opl-landing { position:relative; overflow-x:clip; }
+.opl-landing, .opl-page { position:relative; overflow-x:clip; }
 .opl-wrap { max-width:1220px; margin-inline:auto; padding-left:max(var(--opl-gutter),env(safe-area-inset-left,0px)); padding-right:max(var(--opl-gutter),env(safe-area-inset-right,0px)); }
 .opl-sec { position:relative; padding-block:clamp(72px,10vw,128px); scroll-margin-top:84px; }
-.opl-landing h2, .opl-landing h3, .opl-page h2, .opl-page h3 { margin:0; text-wrap:balance; }
-.opl-landing p, .opl-page p { margin:0; }
+/* Page content keeps its own spacing; only the pattern parts on public pages are reset. */
+.opl-landing h2, .opl-landing h3, :is(.opl-hdr,.opl-family-reel,.opl-foot) :is(h2,h3) { margin:0; text-wrap:balance; }
+.opl-landing p, :is(.opl-hdr,.opl-family-reel,.opl-foot) p { margin:0; }
 .opl-head { display:grid; gap:12px; margin-block-end:clamp(32px,5vw,56px); }
 .opl-head.center { justify-items:center; text-align:center; }
 .opl-eyebrow { display:inline-flex; align-items:center; gap:8px; font-size:.9rem; font-weight:700; color:var(--opl-forest-2); }
@@ -344,7 +347,7 @@
 .opl-ck-dot.hide { opacity:0; }
 .opl-ck-ball { position:fixed; left:0; top:0; width:20px; height:20px; margin:-10px 0 0 -10px; border-radius:50%; background:radial-gradient(circle at 35% 35%,#F4F77A,#C9D93A 60%,#9DB22A); box-shadow:inset 0 0 0 1.5px rgb(255 255 255 / .6),0 6px 10px -4px rgb(0 0 0 / .3); z-index:89; pointer-events:none; opacity:0; transition:opacity .3s; }
 .opl-ck-ball.on { opacity:1; }
-@media (hover:hover) and (pointer:fine) { .opl-landing.is-cookie, .opl-landing.is-cookie * { cursor:none; } .opl-landing.is-cookie :is(a,button,select,label,[role="radio"]) { cursor:pointer; } .opl-landing.is-cookie input { cursor:text; } }
+@media (hover:hover) and (pointer:fine) { :is(.opl-landing,.opl-page).is-cookie, :is(.opl-landing,.opl-page).is-cookie * { cursor:none; } :is(.opl-landing,.opl-page).is-cookie :is(a,button,select,label,summary,[role="radio"],[role="button"],[role="tab"]) { cursor:pointer; } :is(.opl-landing,.opl-page).is-cookie :is(input,textarea) { cursor:text; } }
 .dog { display:block; width:96px; height:77px; overflow:visible; }
 .dog * { transform-box:view-box; }
 .d-flip { transform-origin:60px 50px; transition:transform .22s var(--opl-ease); }
@@ -380,3 +383,52 @@
   .opl-landing *, .opl-landing *::before, .opl-landing *::after, .opl-page *, .opl-page *::before, .opl-page *::after { animation:none !important; transition:none !important; }
   .opl-step, .opl-tp { opacity:1; transform:none; }
 }
+
+/* public pages: the shared header keeps its own navigation and actions inside the glass bar */
+/* One row at every width: the old public grid is switched off, the full menu folds into the sheet below 1280px,
+   and on phones language/theme/display move into that sheet too. */
+.opl-public-hdr.public-site-header { display:block; }
+.opl-public-hdr .opl-hdr__in { flex-wrap:nowrap; }
+.opl-public-hdr .public-primary-navigation { flex:1 1 auto; min-width:0; display:flex; justify-content:center; }
+.opl-public-hdr .opl-hact { margin-inline-start:auto; flex-wrap:nowrap; justify-content:flex-end; grid-column:auto; }
+.opl-public-hdr .opl-hact > * { flex:none; }
+.opl-hprefs { display:inline-flex; align-items:center; gap:4px; }
+@media (max-width:1279px) {
+  .opl-public-hdr .public-primary-navigation > nav { display:none !important; }
+  .opl-public-hdr .public-primary-navigation > .lg\:hidden { display:block !important; }
+  .opl-public-hdr .public-primary-navigation { justify-content:flex-end; }
+}
+@media (max-width:639px) { .opl-public-hdr .opl-hprefs { display:none; } .opl-public-hdr .opl-hdr__in { gap:8px; } }
+.public-menu-prefs { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:8px; padding-top:16px; border-top:1px solid var(--border-subtle); }
+
+/* ---- Public page bodies (pages.md §shared): the pattern laid over the design-system tokens, so every page
+   in a family gets the warm paper, soft cards and capsule buttons in both themes without per-page forks. ---- */
+.opl-page {
+  --surface-page:var(--opl-paper); --surface-raised:var(--opl-raised); --surface-sunken:var(--opl-cream);
+  --surface-base:var(--surface-page); --surface-elevated:var(--surface-raised); --surface-subtle:var(--surface-sunken);
+  --border-default:var(--opl-line); --border-subtle:var(--opl-line); --border-strong:var(--opl-line-2);
+  --radius-lg:20px; --radius-card:24px; --radius-media:22px;
+}
+.opl-page__body { position:relative; isolation:isolate;
+  background:
+    radial-gradient(680px 360px at 92% 40px, color-mix(in srgb,var(--opl-sun) var(--opl-glow-a,16%),transparent), transparent 70%),
+    radial-gradient(600px 340px at 0% 260px, color-mix(in srgb,var(--opl-leaf) var(--opl-glow-b,13%),transparent), transparent 70%),
+    var(--opl-paper) !important; }
+[dir="rtl"] .opl-page__body { background:
+    radial-gradient(680px 360px at 8% 40px, color-mix(in srgb,var(--opl-sun) var(--opl-glow-a,16%),transparent), transparent 70%),
+    radial-gradient(600px 340px at 100% 260px, color-mix(in srgb,var(--opl-leaf) var(--opl-glow-b,13%),transparent), transparent 70%),
+    var(--opl-paper) !important; }
+:root[data-theme="dark"] .opl-page__body { --opl-glow-a:7%; --opl-glow-b:6%; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .opl-page__body { --opl-glow-a:7%; --opl-glow-b:6%; } }
+/* A quiet trail of paw prints in the outer gutter, as if Cookie walked the page first (wide screens only). */
+.opl-page__body::before { content:""; position:absolute; z-index:-1; inset-block:140px 0; inset-inline-end:max(8px,calc((100% - 1180px) / 2 - 64px)); width:46px; pointer-events:none; opacity:.6;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='190' viewBox='0 0 46 190'%3E%3Cg fill='%23E9D9BF'%3E%3Cg transform='translate(12 26) rotate(-12)'%3E%3Cellipse cx='0' cy='6' rx='7' ry='6'/%3E%3Ccircle cx='-7' cy='-4' r='2.6'/%3E%3Ccircle cx='-2.4' cy='-8' r='2.6'/%3E%3Ccircle cx='2.4' cy='-8' r='2.6'/%3E%3Ccircle cx='7' cy='-4' r='2.6'/%3E%3C/g%3E%3Cg transform='translate(32 118) rotate(10)'%3E%3Cellipse cx='0' cy='6' rx='7' ry='6'/%3E%3Ccircle cx='-7' cy='-4' r='2.6'/%3E%3Ccircle cx='-2.4' cy='-8' r='2.6'/%3E%3Ccircle cx='2.4' cy='-8' r='2.6'/%3E%3Ccircle cx='7' cy='-4' r='2.6'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat-y; }
+:root[data-theme="dark"] .opl-page__body::before { opacity:.14; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .opl-page__body::before { opacity:.14; } }
+@media (max-width: 1299px) { .opl-page__body::before { display:none; } }
+/* Soft capsule buttons everywhere on the page (the approved button theme), inputs keep a soft rounded box. */
+.opl-page main :is(button,a).rounded-md, .opl-page main :is(button,a).rounded-lg, .opl-page main :is(button,a).rounded-xl { border-radius:999px; }
+.opl-page main :is(input,select,textarea).rounded-md { border-radius:14px; }
+.opl-page main :is(button,a).bg-brand-solid { box-shadow:0 8px 18px -10px rgb(var(--opl-sh) / .55); transition:transform .25s var(--opl-ease),box-shadow .25s var(--opl-ease),background-color .2s; }
+@media (hover:hover) { .opl-page main :is(button,a).bg-brand-solid:hover { transform:translateY(-1px); box-shadow:0 12px 22px -10px rgb(var(--opl-sh) / .6); } }
+.opl-family-reel { position:relative; }

@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { ChevronDown, IconButton, Menu, X, Sheet } from "@petlife/ui";
 import { exploreDestinations, globalDestinations, type NavigationItem } from "./ProductNavigation";
 
-export function PublicPrimaryNavigation() {
+/** `menuExtra` (language, theme, display) renders in the mobile sheet only while it is open, so the header can drop those controls on phones. */
+export function PublicPrimaryNavigation({ menuExtra }: { menuExtra?: ReactNode } = {}) {
   const locale = useLocale(); const localizedPath = usePathname();
   const pathname = (localizedPath ?? `/${locale}`).replace(new RegExp(`^/${locale}`), "") || "/";
   const t = useTranslations("publicNavigation");
@@ -44,6 +45,7 @@ export function PublicPrimaryNavigation() {
         <p className="mt-4 border-b border-border-subtle px-3 pb-2 text-metadata font-semibold text-text-primary">{t("quickAccess")}</p>
         {globalDestinations.slice(1).map((item) => link(item, true))}
       </nav>
+      {open && menuExtra ? <div className="public-menu-prefs">{menuExtra}</div> : null}
     </Sheet>
   </div>;
 }

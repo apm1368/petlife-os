@@ -107,7 +107,7 @@ export function ProviderProfileView({ providerId }: { providerId: string }) {
               {profile.verified ? <span className="pd-head__verified"><BadgeCheck size={16} aria-hidden="true" />{fa ? (isVet ? "هویت و پروانهٔ دامپزشکی تأییدشده" : "هویت و مجوز تأییدشده") : t(isVet ? "verifiedVet" : "verified")}</span> : null}
               {place ? <span><MapPin size={15} aria-hidden="true" />{place}</span> : null}
               {ratingText ? <span><Star size={15} aria-hidden="true" className="pd-star" />{ratingText}</span> : <span>{fa ? "هنوز نظری ثبت نشده" : t("noReviews")}</span>}
-              {profile.completedBookings ? <span>{fa ? `${formatCount(profile.completedBookings, "fa")} نوبت انجام‌شده در opetlife` : t("completedBookings", { count: profile.completedBookings })}</span> : null}
+              {profile.completedBookings ? <span>{fa ? `${formatCount(profile.completedBookings, "fa")} نوبت انجام‌شده در اپت لایف` : t("completedBookings", { count: profile.completedBookings })}</span> : null}
             </p>
             {isVet && profile.specialties.length ? (
               <p className="pd-head__specialties"><span>{fa ? "تخصص‌ها:" : t("specialties")}</span> {profile.specialties.map((specialty) => discoveryT.has(`specialties.${specialty}`) ? discoveryT(`specialties.${specialty}`) : specialty).join(sep)}</p>

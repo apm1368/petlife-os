@@ -18,7 +18,7 @@ const MINE: Entry[] = [
 ];
 
 const COPY: Record<RouteLocale, { title: string; description: string; shortcuts: string }> = {
-  fa: { title: "کاوش", description: "همهٔ بخش‌های opetlife در یک جا.", shortcuts: "میان‌برهای من" },
+  fa: { title: "کاوش", description: "همهٔ بخش‌های اپت لایف در یک جا.", shortcuts: "میان‌برهای من" },
   en: { title: "Explore", description: "Everything in opetlife, in one place.", shortcuts: "My shortcuts" },
   de: { title: "Entdecken", description: "Alle Bereiche von opetlife an einem Ort.", shortcuts: "Meine Schnellzugriffe" },
   es: { title: "Explorar", description: "Todo opetlife en un solo lugar.", shortcuts: "Mis accesos directos" },
