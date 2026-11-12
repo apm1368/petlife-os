@@ -270,7 +270,7 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
             </p>
             <label className="disc-sort">
               <span>{t("sort.label")}</span>
-              <select value={query.sort} onChange={(e) => (e.target.value === "NEAREST" && query.lat === undefined ? locateMe() : setParam({ sort: e.target.value }))}>
+              <select aria-label={t("sort.label")} value={query.sort} onChange={(e) => (e.target.value === "NEAREST" && query.lat === undefined ? locateMe() : setParam({ sort: e.target.value }))}>
                 {SORTS.map((s) => (
                   <option key={s} value={s}>{t(`sort.${s}`)}</option>
                 ))}
