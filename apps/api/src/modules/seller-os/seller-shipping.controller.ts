@@ -4,6 +4,7 @@ import { ArrayMaxSize, IsArray, IsIn, IsLatitude, IsLongitude, IsOptional, IsStr
 import type { SellerShippingProfileDto } from "@petlife/types";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { DomainEventsService } from "../../common/events/domain-events.service";
 import { ShippingMethodSettingsService } from "../commerce/logistics/shipping-method-settings.service";
 import { SellerAuthGuard } from "./auth/seller-auth.guard";
 import { RequireSellerRole } from "./auth/require-seller-role.decorator";
@@ -30,7 +31,11 @@ class UpdateSellerShippingDto {
 @Controller("seller-organizations/:sellerId/shipping-profile")
 @UseGuards(SessionAuthGuard, SellerAuthGuard)
 export class SellerShippingController {
-  constructor(private readonly prisma: PrismaService, private readonly methods: ShippingMethodSettingsService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly methods: ShippingMethodSettingsService,
+    private readonly events: DomainEventsService,
+  ) {}
 
   private async dto(sellerOrganizationId: string): Promise<SellerShippingProfileDto> {
     const [profile, active] = await Promise.all([this.prisma.sellerShippingProfile.findUnique({ where: { sellerOrganizationId } }), this.methods.activeProviders()]);
@@ -75,7 +80,13 @@ export class SellerShippingController {
       pickupLongitude: dto.longitude ?? null,
       pickupInstructions: dto.instructions?.trim() || null,
     };
-    await this.prisma.sellerShippingProfile.upsert({ where: { sellerOrganizationId: ctx.sellerOrganizationId }, create: { sellerOrganizationId: ctx.sellerOrganizationId, ...data }, update: data });
+    await this.prisma.$transaction(async (tx) => {
+      const before = await tx.sellerShippingProfile.findUnique({ where: { sellerOrganizationId: ctx.sellerOrganizationId } });
+      await tx.sellerShippingProfile.upsert({ where: { sellerOrganizationId: ctx.sellerOrganizationId }, create: { sellerOrganizationId: ctx.sellerOrganizationId, ...data }, update: data });
+      // Pickup points drive courier prices, so every change keeps who made it and what it was before.
+      const pick = (p: typeof data | null) => (p ? { offeredProviders: p.offeredProviders, city: p.pickupCity, area: p.pickupArea, addressLine: p.pickupAddressLine, latitude: p.pickupLatitude, longitude: p.pickupLongitude } : null);
+      await this.events.publish("SellerShippingProfileChanged", { sellerOrganizationId: ctx.sellerOrganizationId, changedByUserId: ctx.userId, before: pick(before), after: pick(data) }, { tx, aggregateType: "SellerOrganization", aggregateId: ctx.sellerOrganizationId });
+    });
     return this.dto(ctx.sellerOrganizationId);
   }
 }

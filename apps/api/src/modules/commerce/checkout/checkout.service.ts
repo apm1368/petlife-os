@@ -48,6 +48,7 @@ import { FinancingProviderRegistry } from "../financing/financing-provider-regis
 import { LedgerService } from "../ledger/ledger.service";
 import { RefundsService } from "../refunds/refunds.service";
 import { ShippingOrchestrator } from "../logistics/shipping-orchestrator.service";
+import { deliveryAddressFingerprint } from "../logistics/delivery-address-fingerprint";
 import { SellerFinanceService } from "../../seller-finance/seller-finance.service";
 import { InventoryReservationService, RESERVATION_TTL_MINUTES } from "./inventory-reservation.service";
 import type { CreateCheckoutDto, PayCheckoutDto, UpdateCheckoutDto } from "./dto/checkout.dto";
@@ -146,6 +147,23 @@ function computeValidationIssues(cart: Pick<CartDto, "sellerGroups">): CheckoutV
  * product metadata marks hard block" — POTENTIAL_SAFETY_CONFLICT is the one
  * status this phase treats as that hard block.
  */
+/** The delivery fields an order keeps (and a payment freezes) from a saved address. */
+function toOrderAddress(address: { addressLine: string | null; city: string | null; region: string | null; countryCode: string | null; recipient: string | null; phone: string | null; instructions: string | null; area?: string | null; postalCode?: string | null; latitude?: number | null; longitude?: number | null }) {
+  return {
+    addressLine: address.addressLine,
+    city: address.city,
+    region: address.region,
+    countryCode: address.countryCode,
+    recipient: address.recipient,
+    phone: address.phone,
+    instructions: address.instructions,
+    area: address.area ?? null,
+    postalCode: address.postalCode ?? null,
+    latitude: address.latitude ?? null,
+    longitude: address.longitude ?? null,
+  };
+}
+
 @Injectable()
 export class CheckoutService {
   constructor(
@@ -314,6 +332,20 @@ export class CheckoutService {
       where: { checkoutId, status: "SELECTED", expiresAt: { lte: new Date() } },
     });
     if (expiredSelected) throw new ShippingQuoteExpiredException({ checkoutId, quoteId: expiredSelected.id });
+    // A quote is only good for the address it priced: another address, or an edit of this one, needs a fresh quote.
+    const checkout = await this.prisma.checkout.findUnique({ where: { id: checkoutId }, select: { addressId: true } });
+    const address = checkout?.addressId ? await this.prisma.customerAddress.findUnique({ where: { id: checkout.addressId } }) : null;
+    const fingerprint = deliveryAddressFingerprint(address);
+    const otherAddress = await this.prisma.shippingQuote.findFirst({
+      where: { checkoutId, status: "SELECTED", OR: [{ deliveryAddressFingerprint: null }, { deliveryAddressFingerprint: { not: fingerprint } }] },
+    });
+    if (otherAddress) throw new ShippingQuoteExpiredException({ checkoutId, quoteId: otherAddress.id, reason: "ADDRESS_CHANGED" });
+    // Freeze the address the quotes were checked against: the order ships there even if the saved address is edited
+    // between now and the payment result.
+    await this.prisma.checkout.update({
+      where: { id: checkoutId },
+      data: { deliveryAddressSnapshot: address ? (toOrderAddress(address) as unknown as Prisma.InputJsonValue) : Prisma.DbNull },
+    });
   }
 
   async createPaymentIntent(
@@ -413,6 +445,7 @@ export class CheckoutService {
         reason: "Create a payment intent before paying",
       });
 
+    await this.assertNoExpiredSelectedShippingQuotes(id);
     const outcome = await this.payments.charge(intent.id, dto.mode);
 
     let orderIds: string[] = [];
@@ -473,9 +506,14 @@ export class CheckoutService {
     const lines = checkout.pricedLinesSnapshot
       ? (checkout.pricedLinesSnapshot as unknown as CartLineDto[])
       : allLines(await this.cart.getCart(checkout.userId));
-    const address = checkout.addressId
-      ? await this.prisma.customerAddress.findUnique({ where: { id: checkout.addressId } })
-      : null;
+    // The address frozen when payment started (see assertNoExpiredSelectedShippingQuotes); legacy checkouts read the
+    // saved address.
+    const frozen = checkout.deliveryAddressSnapshot as unknown as ReturnType<typeof toOrderAddress> | null;
+    const address = frozen
+      ? frozen
+      : checkout.addressId
+        ? await this.prisma.customerAddress.findUnique({ where: { id: checkout.addressId } })
+        : null;
     const selectedQuotes = await this.prisma.shippingQuote.findMany({
       where: { checkoutId, status: "SELECTED" },
     });
@@ -507,21 +545,7 @@ export class CheckoutService {
           },
           lines,
           checkout.addressId,
-          address
-            ? {
-                addressLine: address.addressLine,
-                city: address.city,
-                region: address.region,
-                countryCode: address.countryCode,
-                recipient: address.recipient,
-                phone: address.phone,
-                instructions: address.instructions,
-                area: address.area,
-                postalCode: address.postalCode,
-                latitude: address.latitude,
-                longitude: address.longitude,
-              }
-            : null,
+          address ? toOrderAddress(address) : null,
           deliveryAmountBySeller,
         );
         const createdOrders = await tx.order.findMany({
@@ -713,6 +737,7 @@ export class CheckoutService {
       throw new PaymentAlreadyCompletedException({ checkoutId });
     await this.loadOwnedFinancingIntent(userId, checkoutId, financingId);
 
+    await this.assertNoExpiredSelectedShippingQuotes(checkoutId);
     const outcome = await this.financing.authorize(financingId, mode);
 
     let orderIds: string[] = [];

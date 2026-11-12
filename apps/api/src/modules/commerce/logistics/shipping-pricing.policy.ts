@@ -73,8 +73,12 @@ export function haversineKm(a: { latitude: number; longitude: number }, b: { lat
   return 2 * 6371 * Math.asin(Math.sqrt(h));
 }
 
+/** Iran's bounding box: a map point outside it is not a real pickup/drop-off here, so it never drives a distance price. */
+const IRAN = { south: 25, north: 40, west: 44, east: 63.5 };
 const point = (a: AddressSnapshotDto) =>
-  typeof a.latitude === "number" && typeof a.longitude === "number" && Number.isFinite(a.latitude) && Number.isFinite(a.longitude) ? { latitude: a.latitude, longitude: a.longitude } : null;
+  typeof a.latitude === "number" && typeof a.longitude === "number" && Number.isFinite(a.latitude) && Number.isFinite(a.longitude) && a.latitude >= IRAN.south && a.latitude <= IRAN.north && a.longitude >= IRAN.west && a.longitude <= IRAN.east
+    ? { latitude: a.latitude, longitude: a.longitude }
+    : null;
 const sameCity = (a: string | null | undefined, b: string | null | undefined) => !!a && !!b && cleanCity(a) === cleanCity(b);
 /** Round up to the next 1,000 toman, as couriers quote. */
 const roundIrr = (irr: number) => Math.ceil(irr / 10_000) * 10_000;

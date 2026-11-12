@@ -125,9 +125,33 @@ export class AdminShippingController {
     const shipment = await this.prisma.shipment.findUnique({ where: { id } });
     if (!shipment) throw new ValidationApiException({ field: "shipment", reason: "NOT_FOUND" });
     if (!MANUAL_PROVIDERS.has(shipment.provider)) throw new ValidationApiException({ field: "shipment", reason: "COURIER_REPORTS_ITS_OWN_STATUS" });
-    if (dto.trackingCode && dto.trackingCode.trim() !== shipment.trackingCode) {
-      await this.prisma.shipment.update({ where: { id }, data: { trackingCode: dto.trackingCode.trim() } });
-    }
+    // Staff often skip steps (a Post parcel goes from "requested" straight to "in transit" at the post office). The
+    // order's fulfillment only moves one step at a time, so walk every step in between, in order.
+    const order: ShipmentStatus[] = [ShipmentStatus.CREATED, ShipmentStatus.REQUESTED, ShipmentStatus.ASSIGNED, ShipmentStatus.PICKED_UP, ShipmentStatus.IN_TRANSIT, ShipmentStatus.OUT_FOR_DELIVERY, ShipmentStatus.DELIVERED];
+    const from = order.indexOf(shipment.status);
+    const to = order.indexOf(dto.status);
+    const steps = dto.status === ShipmentStatus.FAILED || from < 0 || to <= from ? [dto.status] : order.slice(from + 1, to + 1);
+    // Tracking, every status step and the audit row land together or not at all.
+    const applied = await this.prisma.$transaction(async (tx) => {
+      if (dto.trackingCode && dto.trackingCode.trim() !== shipment.trackingCode) {
+        await tx.shipment.update({ where: { id }, data: { trackingCode: dto.trackingCode.trim() } });
+      }
+      let moved = false;
+      for (const step of steps) moved = (await this.orchestrator.applyShipmentStatus(id, step, tx)).applied || moved;
+      await this.audit.record({
+        adminUserId: admin.adminUserId,
+        action: "shipment.staff_updated",
+        entityType: "Shipment",
+        entityId: id,
+        reason: dto.note?.trim() || undefined,
+        beforeSummary: { status: shipment.status, trackingCode: shipment.trackingCode },
+        afterSummary: { status: dto.status, applied: moved, trackingCode: dto.trackingCode?.trim() ?? shipment.trackingCode },
+        requestId: request.requestId,
+        tx,
+      });
+      return moved;
+    });
+    // The member's tracking timeline entry, once the change is committed.
     const occurredAt = new Date();
     await this.shipmentEvents.recordIfNew({
       shipmentId: id,
@@ -137,24 +161,6 @@ export class AdminShippingController {
       providerStatus: dto.status.toLowerCase(),
       canonicalStatus: dto.status,
       occurredAt,
-    });
-    // Staff often skip steps (a Post parcel goes from "requested" straight to "in transit" at the post office). The
-    // order's fulfillment only moves one step at a time, so walk every step in between, in order.
-    const order: ShipmentStatus[] = [ShipmentStatus.CREATED, ShipmentStatus.REQUESTED, ShipmentStatus.ASSIGNED, ShipmentStatus.PICKED_UP, ShipmentStatus.IN_TRANSIT, ShipmentStatus.OUT_FOR_DELIVERY, ShipmentStatus.DELIVERED];
-    const from = order.indexOf(shipment.status);
-    const to = order.indexOf(dto.status);
-    const steps = dto.status === ShipmentStatus.FAILED || from < 0 || to <= from ? [dto.status] : order.slice(from + 1, to + 1);
-    let applied = false;
-    for (const step of steps) applied = (await this.orchestrator.applyShipmentStatus(id, step)).applied || applied;
-    await this.audit.record({
-      adminUserId: admin.adminUserId,
-      action: "shipment.staff_updated",
-      entityType: "Shipment",
-      entityId: id,
-      reason: dto.note?.trim() || undefined,
-      beforeSummary: { status: shipment.status, trackingCode: shipment.trackingCode },
-      afterSummary: { status: dto.status, applied, trackingCode: dto.trackingCode?.trim() ?? shipment.trackingCode },
-      requestId: request.requestId,
     });
     return { applied };
   }

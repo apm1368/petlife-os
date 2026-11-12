@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { Prisma, ShippingProvider } from "@prisma/client";
+import { Prisma, ShippingProvider, ShippingQuoteStatus } from "@prisma/client";
 import type { AdminShippingMethodDto, AdminShippingOverviewDto, OpetlifeCourierConfig, PostPishtazConfig } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { ValidationApiException } from "../../../common/errors/api-exception";
@@ -134,6 +134,10 @@ export class ShippingMethodSettingsService {
       create: { provider, enabled: input.enabled, config, updatedByAdminId: adminUserId },
       update: { enabled: input.enabled, config, updatedByAdminId: adminUserId },
     });
+    // New prices or a method switched off: quotes not yet paid for stop being valid now, so checkout asks the member
+    // to refresh instead of charging an old price (a selected one is refused at payment, see CheckoutService).
+    const now = new Date();
+    await tx.shippingQuote.updateMany({ where: { provider, orderId: null, status: { in: [ShippingQuoteStatus.AVAILABLE, ShippingQuoteStatus.SELECTED] }, expiresAt: { gt: now } }, data: { expiresAt: now } });
     return { before, after };
   }
 }

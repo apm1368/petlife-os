@@ -3308,6 +3308,9 @@ model Checkout {
   promotionCode       String?
   /// Batch 4: the priced lines (CartLineDto[]) frozen when the checkout was created. Orders are built from this, never from the mutable cart, so the order always equals what was charged.
   pricedLinesSnapshot Json?
+  /// The delivery address frozen when payment starts: the order ships to what the quote priced, even if the
+  /// member edits the saved address afterwards.
+  deliveryAddressSnapshot Json?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -4341,6 +4344,8 @@ model ShippingQuote {
   providerQuoteId String?
   /// How the price was reached, shown to the member: API, SANDBOX_ESTIMATE, DISTANCE_ESTIMATE, CITY_FLAT or FIXED_PRICE.
   pricingBasis    String?
+  /// The checkout address this quote was priced for (see delivery-address-fingerprint.ts); a different one = stale.
+  deliveryAddressFingerprint String?
 
   status    ShippingQuoteStatus @default(AVAILABLE)
   expiresAt DateTime
