@@ -1,7 +1,7 @@
 /* Back-office shell: sectioned sidebar (collapsible to an icon rail), sticky top bar with breadcrumbs, then the
    page. Colours come from admin-glass.css tokens (--glass-*), which follow the light and dark themes.
    Spacing is on a 4px grid; interactive targets are at least 40px tall. */
-.shell { --side-w: 264px; display:flex; gap:16px; min-height:100dvh; min-width:0; padding:16px; }
+.shell { --side-w: 272px; display:flex; gap:16px; min-height:100dvh; min-width:0; padding:16px; }
 .shell[data-collapsed="true"] { --side-w: 76px; }
 .skip { position:absolute; inset-inline-start:16px; top:-60px; z-index:90; padding:10px 16px; border-radius:12px; background:var(--opl-sun); color:var(--opl-on-sun); font-weight:700; text-decoration:none; }
 .skip:focus { top:16px; }
@@ -9,8 +9,8 @@
 /* ---- Sidebar ---- */
 .sidebar { position:sticky; top:16px; align-self:flex-start; display:flex; flex-direction:column; gap:12px; width:var(--side-w); flex:0 0 var(--side-w); height:calc(100dvh - 32px); padding:14px 10px 10px; border-radius:24px; background:var(--glass-panel); border:1px solid var(--glass-border); box-shadow:var(--glass-shadow); backdrop-filter:blur(var(--glass-blur)) saturate(1.6); -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(1.6); color:var(--text-primary); transition:width .2s ease, flex-basis .2s ease; }
 .sidebarTop { display:flex; align-items:center; justify-content:space-between; gap:6px; min-height:44px; padding-inline:6px 2px; }
-.brand { display:flex; align-items:center; gap:10px; min-width:0; color:inherit; text-decoration:none; }
-.brand > span:last-child { padding:2px 8px; border-radius:999px; background:var(--opl-mint); color:var(--opl-forest); font-size:.68rem; font-weight:800; letter-spacing:.06em; white-space:nowrap; }
+.brand { display:flex; align-items:center; gap:8px; min-width:0; flex:1; overflow:hidden; color:inherit; text-decoration:none; }
+.brand > span:last-child { min-width:0; padding:2px 7px; border-radius:999px; background:var(--opl-mint); color:var(--opl-forest); font-size:.64rem; font-weight:800; letter-spacing:.04em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .collapse { display:grid; place-items:center; flex:none; width:36px; height:36px; border:0; border-radius:10px; background:transparent; color:var(--text-secondary); cursor:pointer; }
 .collapse:hover { background:var(--glass-hover); color:var(--text-primary); }
 [dir="rtl"] .collapse svg { transform:scaleX(-1); }
@@ -25,7 +25,7 @@
 .link:hover { background:var(--opl-mint); color:var(--opl-forest); }
 .link:hover > svg { color:var(--opl-forest); }
 .link > svg { flex:none; color:var(--text-secondary); }
-.linkLabel { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.linkLabel { flex:1; min-width:0; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; line-height:1.35; overflow-wrap:anywhere; }
 .link[aria-current="page"] { background:var(--opl-forest); color:var(--opl-on-forest); font-weight:750; box-shadow:0 8px 18px -12px rgb(var(--opl-sh) / .6); }
 .link[aria-current="page"] > svg { color:var(--opl-on-forest); }
 .count { flex:none; min-width:22px; padding:1px 7px; border-radius:999px; background:var(--opl-sun); color:var(--opl-on-sun); font-size:.7rem; font-weight:800; text-align:center; font-variant-numeric:tabular-nums; }

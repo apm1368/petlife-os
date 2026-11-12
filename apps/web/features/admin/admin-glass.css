@@ -65,6 +65,26 @@
   }
 }
 
+/* The design-system layer (approved-patterns.css) paints the admin root and headings for the older theme with
+   0,3,x selectors; these win on the pattern: paper with soft glows, and headings in ink (pattern: text is only
+   ink, ink-2 and ink-3; forest is for brand moments). */
+html .design-root .erp-shell.opl-page {
+  background:
+    radial-gradient(680px 360px at 92% 40px, color-mix(in srgb, var(--opl-sun) var(--erp-glow-a, 16%), transparent), transparent 70%),
+    radial-gradient(600px 340px at 0% 260px, color-mix(in srgb, var(--opl-leaf) var(--erp-glow-b, 13%), transparent), transparent 70%),
+    var(--opl-paper);
+  background-attachment: fixed;
+}
+html[dir="rtl"] .design-root .erp-shell.opl-page {
+  background:
+    radial-gradient(680px 360px at 8% 40px, color-mix(in srgb, var(--opl-sun) var(--erp-glow-a, 16%), transparent), transparent 70%),
+    radial-gradient(600px 340px at 100% 260px, color-mix(in srgb, var(--opl-leaf) var(--erp-glow-b, 13%), transparent), transparent 70%),
+    var(--opl-paper);
+  background-attachment: fixed;
+}
+.erp-shell.opl-page.erp-shell .erp-main :is(h1, h2, h3) { color: var(--opl-ink); }
+.erp-shell.opl-page.erp-shell .erp-main { background: transparent; }
+
 /* Existing pages: every elevated surface is a soft raised card with a hairline edge (no blur: the pattern's
    cards are solid, and dozens of blurred cards cost scrolling performance). */
 .erp-shell .erp-main :where([class*="bg-surface-elevated"]) {
@@ -86,6 +106,9 @@
 .erp-shell dialog { --surface-elevated: var(--opl-raised); border-radius: 24px; }
 .erp-shell dialog::backdrop { background: rgb(var(--opl-sh) / 0.35); backdrop-filter: blur(6px); }
 .erp-shell .erp-main table { border-collapse: separate; border-spacing: 0; }
+/* A table that already sits in a horizontal scroller is a real table again (the design-system rule makes every
+   panel table a block so a bare table can never widen the page; inside a scroller that only shrank the columns). */
+.erp-shell.erp-shell .erp-main :is(.overflow-x-auto, .gx-table-wrap) > table { display: table; width: 100%; max-width: none; overflow: visible; }
 .erp-shell .erp-main thead th { position: sticky; top: 0; background: var(--opl-paper-2); z-index: 1; }
 .erp-shell .erp-main tbody tr:hover > td { background: var(--opl-paper-2); }
 
@@ -299,3 +322,11 @@
 .gx-shortcuts svg { flex: none; color: var(--brand-natural); }
 .gx-inline-alert { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-radius: 14px; border: 1px solid rgba(212, 100, 74, 0.4); background: rgba(212, 100, 74, 0.06); font-size: 0.84rem; }
 .gx-inline-alert p { margin: 0; }
+
+@media (max-width: 560px) {
+  .gx-queues { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .gx-queue { flex-direction: column; align-items: flex-start; gap: 8px; min-height: 0; padding: 12px; }
+  .gx-queue__icon { width: 32px; height: 32px; border-radius: 10px; }
+  .gx-queue__count { font-size: 1.25rem; }
+  .gx-card { padding: 16px; border-radius: 20px; }
+}

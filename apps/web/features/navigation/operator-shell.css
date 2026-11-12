@@ -92,6 +92,9 @@
 }
 
 .operator-shell__main { max-width: 1440px; margin-inline: auto; }
+.operator-shell.opl-page.operator-shell main :is(h1, h2, h3) { color: var(--opl-ink); }
+.operator-shell.opl-page.operator-shell :is(main, .workspace-main) { background: transparent; }
+.operator-shell.operator-shell main .overflow-x-auto > table { display: table; width: 100%; max-width: none; overflow: visible; }
 .operator-shell main :where([class*="bg-surface-elevated"]) { border-color: var(--opl-line); box-shadow: 0 1px 2px rgb(var(--opl-sh) / 0.06), 0 22px 44px -32px rgb(var(--opl-sh) / 0.42); }
 .operator-shell main :where(.rounded-lg, .rounded-md)[class*="bg-surface-elevated"] { border-radius: 22px; }
 
