@@ -2926,6 +2926,8 @@ export interface AdminBookingMoneyDto {
   cancellable: boolean;
   approvals: AdminRefundApprovalDto[];
 }
+
+export interface AdminAuditLogDto {
   id: string;
   adminUser: AdminActorSummaryDto;
   action: string;
