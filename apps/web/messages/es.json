@@ -2854,6 +2854,9 @@
       "SCOPES_ONLY_FOR_SERVICE_ADMIN": "Los ámbitos de servicio solo se pueden asignar a una persona administradora por ámbito."
     },
     "verticals": {
+      "SHOP": "Tienda",
+      "CONTENT": "Contenido",
+      "SUPPORT": "Soporte",
       "CLINIC": "Clínicas y veterinaria",
       "GROOMING": "Peluquería y cuidado",
       "ACCOMMODATION": "Alojamiento y cuidado de mascotas",
@@ -7511,6 +7514,27 @@
     }
   },
   "partnerVerification": {
+    "superseded": "Sustituido por una carga más reciente",
+    "reviewedBy": "por {name}",
+    "caseSummary": "Estado del caso",
+    "lastDecision": "Última decisión",
+    "decidedBy": "{name} · {date}",
+    "decisionReason": "Motivo: {reason}",
+    "noDecisionYet": "Aún no se ha registrado ninguna decisión.",
+    "actorAdmin": "Administración",
+    "actorPartner": "Socio",
+    "documentGeneric": "Documento",
+    "history": {
+      "title": "Historial del caso",
+      "hint": "Aquí figura cada decisión con su motivo y cada apertura de un documento privado, con quién la hizo.",
+      "empty": "Aún no hay nada registrado.",
+      "statusChanged": "Estado: {from} → {to}",
+      "documentAccepted": "{document} aceptado",
+      "documentRejected": "{document} rechazado",
+      "documentOpened": "{document} abierto",
+      "documentUploaded": "{document} cargado",
+      "submitted": "Enviado a revisión"
+    },
     "businessEvidenceRequirement": "Licencia comercial o Enamad (ID o prueba)",
     "profileRequired": "Obligatorio antes del envío",
     "profileRecorded": "Registrado para la revisión del equipo",

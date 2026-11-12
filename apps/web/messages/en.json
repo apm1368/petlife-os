@@ -8484,6 +8484,9 @@
       "SCOPES_ONLY_FOR_SERVICE_ADMIN": "Service scopes can only be assigned to a service administrator."
     },
     "verticals": {
+      "SHOP": "Shop",
+      "CONTENT": "Content",
+      "SUPPORT": "Support",
       "CLINIC": "Clinic and veterinary",
       "GROOMING": "Grooming",
       "ACCOMMODATION": "Accommodation and pet care",
@@ -8500,6 +8503,27 @@
     }
   },
   "partnerVerification": {
+    "superseded": "Replaced by a newer upload",
+    "reviewedBy": "by {name}",
+    "caseSummary": "Where this case stands",
+    "lastDecision": "Last decision",
+    "decidedBy": "{name} · {date}",
+    "decisionReason": "Reason: {reason}",
+    "noDecisionYet": "No decision has been recorded yet.",
+    "actorAdmin": "Admin",
+    "actorPartner": "Partner",
+    "documentGeneric": "Document",
+    "history": {
+      "title": "Case history",
+      "hint": "Every decision with its reason, and every opening of a private document, is listed here with who did it.",
+      "empty": "Nothing recorded yet.",
+      "statusChanged": "Status: {from} → {to}",
+      "documentAccepted": "{document} accepted",
+      "documentRejected": "{document} rejected",
+      "documentOpened": "{document} opened",
+      "documentUploaded": "{document} uploaded",
+      "submitted": "Sent for review"
+    },
     "businessEvidenceRequirement": "Business license or Enamad (ID or evidence)",
     "profileRequired": "Required before submission",
     "profileRecorded": "Recorded for staff review",
