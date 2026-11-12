@@ -9,7 +9,9 @@ function leaves(node: unknown, path = ""): [string, string][] {
   if (Array.isArray(node)) return node.flatMap((item, i) => leaves(item, `${path}[${i}]`));
   return Object.entries(node as Tree).flatMap(([key, value]) => leaves(value, path ? `${path}.${key}` : key));
 }
-const args = (s: string) => [...s.matchAll(/\{\s*([A-Za-z_]\w*)\s*[,}]/g)].map((m) => m[1]).sort();
+// A plural branch body such as `=0 {today}` or `one {# day}` is message text, not a placeholder.
+const isBranchBody = (s: string, at: number) => /(=\d+|\b(zero|one|two|few|many|other))\s*$/.test(s.slice(0, at));
+const args = (s: string) => [...s.matchAll(/\{\s*([A-Za-z_]\w*)\s*[,}]/g)].filter((m) => !isBranchBody(s, m.index ?? 0)).map((m) => m[1]).sort();
 const enLeaves = new Map(leaves(en));
 
 /** Arabic and Dutch are full site languages (2026-11-12): complete catalogs, same ICU arguments, the right script. */
