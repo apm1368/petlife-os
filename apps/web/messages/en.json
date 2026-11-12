@@ -3178,7 +3178,16 @@
       "reviewsVerifiedOnly": "Only customers who received the product can review it.",
       "verifiedPurchase": "Verified purchase",
       "moreReviews": "Show more reviews",
-      "related": "More from this category"
+      "related": "More from this category",
+      "trust": {
+        "title": "Shopping safely on opetlife",
+        "verified": "Every seller here has verified their identity and documents with opetlife.",
+        "returns": "If an item arrives damaged, wrong or expired, request a refund within {hours} hours of delivery; our team reviews it.",
+        "protection": "You pay through opetlife; if the order never arrives, you can request your money back.",
+        "shipsFrom": "Ships from {city}",
+        "sellerRating": "Seller rating {average} of 5 ({count, plural, one {# review} other {# reviews}})",
+        "visitStore": "Visit {seller}'s store"
+      }
     },
     "cart": {
       "title": "Cart",
@@ -9839,5 +9848,17 @@
         "OTHER": "Other correction"
       }
     }
+  },
+  "sellerStorefront": {
+    "verified": "Verified seller",
+    "since": "On opetlife since {date}",
+    "rating": "{average} of 5 from {count, plural, one {# review} other {# reviews}}",
+    "noRating": "No reviews yet",
+    "city": "From {city}",
+    "products": "{count, plural, one {# product} other {# products}}",
+    "empty": "This seller has no products on sale right now.",
+    "notFound": "This store was not found.",
+    "backToShop": "Back to the shop",
+    "protection": "Buying from this seller follows the same opetlife refund and secure-payment rules."
   }
 }

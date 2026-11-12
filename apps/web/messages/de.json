@@ -4408,7 +4408,16 @@
       "reviewsVerifiedOnly": "Nur Kunden, die das Produkt erhalten haben, können es bewerten.",
       "verifiedPurchase": "Verifizierter Kauf",
       "moreReviews": "Weitere Bewertungen anzeigen",
-      "related": "Weitere Produkte aus dieser Kategorie"
+      "related": "Weitere Produkte aus dieser Kategorie",
+      "trust": {
+        "title": "Sicher einkaufen bei opetlife",
+        "verified": "Alle Verkäufer hier haben Identität und Unterlagen bei opetlife bestätigt.",
+        "returns": "Kommt ein Artikel beschädigt, falsch oder abgelaufen an, beantragen Sie innerhalb von {hours} Stunden nach Zustellung eine Erstattung; unser Team prüft sie.",
+        "protection": "Sie zahlen über opetlife; kommt die Bestellung nie an, können Sie Ihr Geld zurückfordern.",
+        "shipsFrom": "Versand aus {city}",
+        "sellerRating": "Verkäuferbewertung {average} von 5 ({count, plural, one {# Bewertung} other {# Bewertungen}})",
+        "visitStore": "Shop von {seller} ansehen"
+      }
     },
     "cart": {
       "title": "Warenkorb",
@@ -8967,5 +8976,17 @@
         "OTHER": "Andere Korrektur"
       }
     }
+  },
+  "sellerStorefront": {
+    "verified": "Geprüfter Verkäufer",
+    "since": "Bei opetlife seit {date}",
+    "rating": "{average} von 5 aus {count, plural, one {# Bewertung} other {# Bewertungen}}",
+    "noRating": "Noch keine Bewertungen",
+    "city": "Aus {city}",
+    "products": "{count, plural, one {# Produkt} other {# Produkte}}",
+    "empty": "Dieser Verkäufer bietet gerade keine Produkte an.",
+    "notFound": "Dieser Shop wurde nicht gefunden.",
+    "backToShop": "Zurück zum Shop",
+    "protection": "Käufe bei diesem Verkäufer folgen denselben Erstattungs- und Zahlungsregeln von opetlife."
   }
 }

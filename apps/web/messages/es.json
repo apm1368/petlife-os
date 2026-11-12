@@ -4398,7 +4398,16 @@
       "reviewsVerifiedOnly": "Solo pueden opinar quienes hayan recibido el producto.",
       "verifiedPurchase": "Compra verificada",
       "moreReviews": "Ver más reseñas",
-      "related": "Más productos de esta categoría"
+      "related": "Más productos de esta categoría",
+      "trust": {
+        "title": "Compra segura en opetlife",
+        "verified": "Todos los vendedores verificaron su identidad y documentos con opetlife.",
+        "returns": "Si un artículo llega dañado, equivocado o caducado, pide el reembolso dentro de {hours} horas tras la entrega; nuestro equipo lo revisa.",
+        "protection": "Pagas a través de opetlife; si el pedido no llega, puedes pedir que te devolvamos el dinero.",
+        "shipsFrom": "Se envía desde {city}",
+        "sellerRating": "Valoración del vendedor {average} de 5 ({count, plural, one {# reseña} other {# reseñas}})",
+        "visitStore": "Ver la tienda de {seller}"
+      }
     },
     "cart": {
       "title": "Carrito",
@@ -8965,5 +8974,17 @@
         "OTHER": "Otra corrección"
       }
     }
+  },
+  "sellerStorefront": {
+    "verified": "Vendedor verificado",
+    "since": "En opetlife desde {date}",
+    "rating": "{average} de 5 de {count, plural, one {# reseña} other {# reseñas}}",
+    "noRating": "Aún no hay reseñas",
+    "city": "Desde {city}",
+    "products": "{count, plural, one {# producto} other {# productos}}",
+    "empty": "Este vendedor no tiene productos a la venta ahora.",
+    "notFound": "No se encontró esta tienda.",
+    "backToShop": "Volver a la tienda",
+    "protection": "Comprar a este vendedor sigue las mismas reglas de reembolso y pago seguro de opetlife."
   }
 }

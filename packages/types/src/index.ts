@@ -1438,6 +1438,9 @@ export interface SellerOrganizationSummaryDto {
   verificationStatus: SellerVerificationStatus;
   status: SellerStatus;
   city: string | null;
+  /** Public storefront address (/shop/sellers/{slug}) and logo, when the seller has them. */
+  slug?: string | null;
+  logoUrl?: string | null;
 }
 
 export interface SellerOfferDto {
@@ -1524,6 +1527,30 @@ export interface ProductSummaryDto {
   supportedSpecies?: Array<`${PetSpecies}`>;
 }
 
+/** Facts that help a shopper trust an offer: only what the platform actually enforces or has measured. */
+export interface ProductTrustDto {
+  /** The platform's refund window after delivery (damaged, wrong or expired items), in hours. */
+  returnWindowHours: number;
+  /** Published review averages per seller (from verified purchases); a seller without reviews is absent. */
+  sellerRatings: Record<string, { average: number; count: number }>;
+}
+
+export interface PublicSellerStorefrontDto {
+  seller: {
+    id: string;
+    slug: string | null;
+    name: string;
+    logoUrl: string | null;
+    description: string | null;
+    city: string | null;
+    verified: boolean;
+    memberSince: string;
+    rating: { average: number; count: number } | null;
+  };
+  products: ProductSummaryDto[];
+  total: number;
+}
+
 export interface ProductDetailDto {
   id: string;
   title: string;
@@ -1545,6 +1572,7 @@ export interface ProductDetailDto {
   reviews: ProductReviewDto[];
   related: ProductSummaryDto[];
   favorited: boolean;
+  trust?: ProductTrustDto;
   supportsDog: boolean;
   supportsCat: boolean;
   supportedSpecies?: Array<`${PetSpecies}`>;
