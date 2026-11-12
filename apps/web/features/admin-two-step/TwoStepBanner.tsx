@@ -1,7 +1,7 @@
 "use client";
 
 import "./two-step.css";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { ShieldCheck } from "@petlife/ui";
 import type { AdminTwoStepGateDto } from "@petlife/types";
@@ -14,15 +14,16 @@ const DISMISS_KEY = "opl.admin.twoStepBanner";
 export function TwoStepBanner({ gate }: { gate: AdminTwoStepGateDto }) {
   const t = useTranslations("adminTwoStep");
   const format = useTwoStepFormat();
-  const [dismissed, setDismissed] = useState(true);
-  useEffect(() => {
+  // The shell only renders after its client-side bootstrap, so reading sessionStorage on first render is safe.
+  const [dismissed, setDismissed] = useState(() => {
+    if (gate.enforced) return false;
     try {
-      setDismissed(!gate.enforced && window.sessionStorage.getItem(DISMISS_KEY) === "1");
+      return window.sessionStorage.getItem(DISMISS_KEY) === "1";
     } catch {
-      setDismissed(false);
+      return false;
     }
-  }, [gate.enforced]);
-  if (gate.enrolled || dismissed) return null;
+  });
+  if (gate.enrolled || (dismissed && !gate.enforced)) return null;
   return (
     <div className="gx-twostep-banner" role="note">
       <ShieldCheck size={18} aria-hidden="true" />

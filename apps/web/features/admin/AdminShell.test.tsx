@@ -57,7 +57,7 @@ describe("AdminShell", () => {
     signIn(["customer.view"], { twoStep: { enrolled: false, verified: false, enforced: true, graceEndsAt: "2026-11-20T08:00:00.000Z", required: "NONE" } });
     renderWithIntl(<AdminShell><div>private content</div></AdminShell>);
     expect(await screen.findByText("private content")).toBeTruthy();
-    expect(screen.getByRole("note").textContent).toContain("Two-step sign-in is required. Turn it on before");
+    expect((await screen.findByRole("note")).textContent).toContain("Two-step sign-in is required. Turn it on before");
     expect(screen.getByRole("link", { name: "Turn it on" }).getAttribute("href")).toBe("/en/admin/two-step");
   });
 
