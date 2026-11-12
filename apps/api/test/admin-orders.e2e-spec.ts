@@ -123,7 +123,7 @@ describe("Admin Orders", () => {
     const res = await get(ops, `/admin/orders/export?customerId=${buyer.id}&q=0${national}`).expect(200);
     expect(res.headers["content-type"]).toMatch(/text\/csv/);
     expect(res.headers["content-disposition"]).toMatch(/attachment; filename="opetlife-orders-all-/);
-    expect(res.text.startsWith("﻿section,number,created_at")).toBe(true);
+    expect(res.text.startsWith("\uFEFFsection,number,created_at")).toBe(true);
     expect(res.text).toContain(shopRow.number);
     expect(res.text).toContain(bookingNumber);
     expect(res.text).not.toContain(national);

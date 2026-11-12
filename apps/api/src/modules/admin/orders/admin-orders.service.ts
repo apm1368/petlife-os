@@ -158,6 +158,6 @@ export class AdminOrdersService {
       afterSummary: { section, rows: capped.length, truncated: rows.length > EXPORT_MAX_ROWS, filters: { ...filters, from: filters.from?.toISOString(), to: filters.to?.toISOString(), search: query.q ? "yes" : "no" } },
     });
     const stamp = new Date().toISOString().slice(0, 10);
-    return { filename: `opetlife-orders-${section.toLowerCase()}-${stamp}.csv`, csv: `﻿${csv}`, rows: capped.length };
+    return { filename: `opetlife-orders-${section.toLowerCase()}-${stamp}.csv`, csv: `\uFEFF${csv}`, rows: capped.length };
   }
 }
