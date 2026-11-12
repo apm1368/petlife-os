@@ -2,29 +2,45 @@ import { NextIntlClientProvider } from "next-intl";
 import en from "@/messages/en.json";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
-import type { AdminSessionContextDto, UserDto } from "@petlife/types";
+import type { AdminDashboardSummaryDto, AdminSessionContextDto, UserDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { authService } from "@/services/auth.service";
 import { adminService } from "@/services/admin.service";
 import { useAdminStore } from "@/stores/admin-store";
 import { AdminShell } from "./AdminShell";
+import { resetQueues } from "./admin-queues";
 
 const route = vi.hoisted(() => ({ pathname: "/en/admin" }));
+const push = vi.hoisted(() => vi.fn());
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  useRouter: () => ({ push, replace: vi.fn() }),
   usePathname: () => route.pathname,
 }));
-vi.mock("@/services/auth.service", () => ({ authService: { getSession: vi.fn() } }));
-vi.mock("@/services/admin.service", () => ({ adminService: { getMe: vi.fn(), getTrustQueueSummary: vi.fn() } }));
+vi.mock("@/services/auth.service", () => ({ authService: { getSession: vi.fn(), logout: vi.fn() } }));
+vi.mock("@/services/admin.service", () => ({ adminService: { getMe: vi.fn(), getDashboard: vi.fn(), search: vi.fn() } }));
 
 const SESSION_USER: UserDto = { id: "u1", email: "admin@example.com", phone: null, displayName: "An Admin", avatarUrl: null, locale: "en", themePreference: "SYSTEM", createdAt: "", updatedAt: "" };
+const NO_QUEUES: AdminDashboardSummaryDto = {
+  openSupportCases: null, openDisputes: null, openTrustCases: null, pendingRefundApprovals: null, openTasks: null,
+  pendingVerifications: null, pendingRefundRequests: null, pendingOfferModeration: null, pendingCatalogRequests: null,
+  pendingTravelListings: null, pendingSupportNeeds: null, openCommunityReports: null, pendingMemorials: null, openPlaceReports: null,
+};
+
+function signIn(permissions: string[], extra: Partial<AdminSessionContextDto> = {}) {
+  vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });
+  vi.mocked(adminService.getMe).mockResolvedValue({ isAdmin: true, adminUserId: "admin-1", displayName: "Reader", role: "SUPPORT" as never, permissions: permissions as never, ...extra });
+}
+const sidebar = () => screen.getByRole("complementary");
 
 describe("AdminShell", () => {
   beforeEach(() => {
     route.pathname = "/en/admin";
+    push.mockReset();
+    resetQueues();
     vi.mocked(authService.getSession).mockReset();
     vi.mocked(adminService.getMe).mockReset();
-    vi.mocked(adminService.getTrustQueueSummary).mockReset().mockResolvedValue({ total: 0 } as never);
+    vi.mocked(adminService.getDashboard).mockReset().mockResolvedValue(NO_QUEUES);
+    vi.mocked(adminService.search).mockReset().mockResolvedValue({ customers: [], orders: [], supportCases: [], searched: { customers: true, orders: false, supportCases: false } });
     useAdminStore.setState({ context: null, status: "idle" });
   });
 
@@ -43,23 +59,18 @@ describe("AdminShell", () => {
   });
 
   it.each([
-    ["de", "/de/admin/access", "System", "Zugriff und Rollen", "Kein Admin-Zugriff"],
-    ["es", "/es/admin/access", "Sistema", "Acceso y roles", "Sin acceso de administración"],
-  ] as const)("localizes the admin shell and access navigation in %s", async (locale, pathname, group, accessLabel, deniedLabel) => {
+    ["de", "/de/admin/access", "System", "Zugriff und Rollen", "Berechtigungsmatrix", "Kein Admin-Zugriff"],
+    ["es", "/es/admin/access", "Sistema", "Acceso y roles", "Matriz de permisos", "Sin acceso de administración"],
+  ] as const)("localizes the shell, its breadcrumbs and module tabs in %s", async (locale, pathname, group, accessLabel, matrixTab, deniedLabel) => {
     route.pathname = pathname;
-    vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });
-    vi.mocked(adminService.getMe).mockResolvedValue({
-      isAdmin: true,
-      adminUserId: "audit-admin",
-      displayName: "Admin Name",
-      role: "ADMIN" as never,
-      permissions: ["access.view"] as never,
-    } satisfies AdminSessionContextDto);
+    signIn(["access.view"], { adminUserId: "audit-admin", displayName: "Admin Name", role: "ADMIN" as never });
     const { unmount: unmountAdmin } = renderWithIntl(<AdminShell><div>audit page content</div></AdminShell>, locale);
     await screen.findByText("audit page content");
-    expect(screen.getByRole("button", { name: group }).getAttribute("aria-expanded")).toBe("true");
-    expect(screen.getByRole("link", { name: accessLabel }).getAttribute("href")).toBe(pathname);
-    expect(document.body.textContent).not.toMatch(/[\u0600-\u06ff]/);
+    expect(within(sidebar()).getByRole("group", { name: group })).toBeTruthy();
+    expect(within(sidebar()).getByRole("link", { name: accessLabel }).getAttribute("href")).toBe(pathname);
+    expect(within(sidebar()).getByRole("link", { name: accessLabel }).getAttribute("aria-current")).toBe("page");
+    expect(screen.getByRole("link", { name: matrixTab }).getAttribute("href")).toBe(`${pathname}/matrix`);
+    expect(document.body.textContent).not.toMatch(/[؀-ۿ]/);
     expect(screen.queryByText(/Missing (de|es)/)).toBeNull();
     unmountAdmin();
 
@@ -74,147 +85,125 @@ describe("AdminShell", () => {
   it("shows a clear message when the session has no admin access", async () => {
     vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });
     vi.mocked(adminService.getMe).mockResolvedValue({ isAdmin: false, adminUserId: null, displayName: null, role: null, permissions: [] } satisfies AdminSessionContextDto);
-
-    renderWithIntl(
-      <AdminShell>
-        <div>content</div>
-      </AdminShell>,
-    );
-
+    renderWithIntl(<AdminShell><div>content</div></AdminShell>);
     await waitFor(() => expect(screen.getByText("No admin access")).toBeTruthy());
     expect(screen.queryByText("content")).toBeNull();
   });
 
-  it("shows the shell with only the nav items the resolved permissions allow", async () => {
-    vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });
-    vi.mocked(adminService.getMe).mockResolvedValue({
-      isAdmin: true,
-      adminUserId: "admin-1",
-      displayName: "Support Agent",
-      role: "SUPPORT" as never,
-      permissions: ["customer.view", "support.view", "support.manage", "dispute.view", "dispute.manage", "task.manage"] as never,
-    } satisfies AdminSessionContextDto);
-
-    renderWithIntl(
-      <AdminShell>
-        <div>content</div>
-      </AdminShell>,
-    );
-
-    await waitFor(() => expect(screen.getByText("content")).toBeTruthy());
-    // Items live in job groups (dropdown pills); open the one that holds support work.
-    fireEvent.click(screen.getByRole("button", { name: "Customers & trust" }));
-    expect(screen.getByRole("link", { name: "Support" })).toBeTruthy();
-    expect(adminService.getTrustQueueSummary).not.toHaveBeenCalled();
-    expect(screen.getByRole("link", { name: "All users" }).getAttribute("href")).toBe("/en/admin/users");
-    expect(screen.getByText("Disputes")).toBeTruthy();
-    // SUPPORT has neither finance.view nor audit.view — those groups and items must not render at all.
-    expect(screen.queryByRole("button", { name: "Finance" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "System" })).toBeNull();
-    expect(screen.queryByText("Transactions")).toBeNull();
-    expect(screen.queryByText("Audit")).toBeNull();
-    // Decision 5: the sample-data CRM / customer-affairs workspaces are never offered to a real admin, even one
-    // holding the permissions they used to be listed under.
-    fireEvent.click(screen.getByRole("button", { name: "Daily work" }));
-    expect(screen.getByText("Tasks")).toBeTruthy();
+  it("lists every section expanded, showing only the modules the resolved permissions allow", async () => {
+    signIn(["customer.view", "support.view", "support.manage", "dispute.view", "dispute.manage", "task.manage"]);
+    renderWithIntl(<AdminShell><div>content</div></AdminShell>);
+    await screen.findByText("content");
+    const nav = within(sidebar());
+    expect(nav.getByRole("group", { name: "Customers" })).toBeTruthy();
+    expect(nav.getByRole("link", { name: "Support" }).getAttribute("href")).toBe("/en/admin/support");
+    expect(nav.getByRole("link", { name: "Users" }).getAttribute("href")).toBe("/en/admin/users");
+    expect(nav.getByRole("link", { name: "Disputes" })).toBeTruthy();
+    expect(nav.getByRole("link", { name: "Tasks" })).toBeTruthy();
+    // SUPPORT has neither finance.view nor audit.view — those sections and modules must not render at all.
+    expect(nav.queryByRole("group", { name: "Finance" })).toBeNull();
+    expect(nav.queryByText("Transactions")).toBeNull();
+    expect(nav.queryByText("Audit")).toBeNull();
+    // Decision 5: the sample-data CRM / customer-affairs workspaces are never offered to a real admin.
     expect(screen.queryByText("CRM")).toBeNull();
     expect(screen.queryByText("Customer Affairs")).toBeNull();
+    expect(adminService.getDashboard).toHaveBeenCalledTimes(1);
   });
 
-  it("shows every nav item for a SUPER_ADMIN with every permission", async () => {
-    vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });
-    vi.mocked(adminService.getMe).mockResolvedValue({
-      isAdmin: true,
-      adminUserId: "admin-2",
-      displayName: "Root Admin",
-      role: "SUPER_ADMIN" as never,
-      permissions: [
-        "customer.view",
-        "customer.pii.reveal",
-        "support.view",
-        "support.manage",
-        "dispute.view",
-        "dispute.manage",
-        "trust.view",
-        "trust.manage",
-        "verification.manage",
-        "finance.view",
-        "finance.refund.request",
-        "finance.refund.approve",
-        "finance.refund.execute",
-        "task.manage",
-        "audit.view",
-        "admin.manage",
-      ] as never,
-    } satisfies AdminSessionContextDto);
-
-    renderWithIntl(
-      <AdminShell>
-        <div>content</div>
-      </AdminShell>,
-    );
-
-    await waitFor(() => expect(screen.getByText("content")).toBeTruthy());
-    fireEvent.click(screen.getByRole("button", { name: "Finance" }));
-    expect(screen.getByText("Transactions")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "System" }));
-    expect(screen.getByText("Audit")).toBeTruthy();
+  it("shows every module for a SUPER_ADMIN with every permission", async () => {
+    signIn(["customer.view", "support.view", "dispute.view", "trust.view", "verification.manage", "finance.view", "task.manage", "audit.view", "admin.manage"], { role: "SUPER_ADMIN" as never });
+    renderWithIntl(<AdminShell><div>content</div></AdminShell>);
+    await screen.findByText("content");
+    const nav = within(sidebar());
+    expect(nav.getByRole("group", { name: "Finance" })).toBeTruthy();
+    expect(nav.getByText("Transactions")).toBeTruthy();
+    expect(nav.getByText("Audit")).toBeTruthy();
+    expect(nav.getByRole("link", { name: "Partners & verification" }).getAttribute("href")).toBe("/en/admin/verification");
   });
-  it("offers read-only partner directories to customer viewers without verification permission", async () => {
-    vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });
-    vi.mocked(adminService.getMe).mockResolvedValue({ isAdmin:true, adminUserId:"a1", displayName:"Reader", role:"SUPPORT" as never, permissions:["customer.view"] as never } satisfies AdminSessionContextDto);
+
+  it("lands a module on the first tab the admin may open", async () => {
+    signIn(["customer.view"]);
     renderWithIntl(<AdminShell><div>read-only shell</div></AdminShell>);
     await screen.findByText("read-only shell");
-    fireEvent.click(screen.getByRole("button",{name:"Network"}));
-    expect(screen.getByRole("link",{name:"Providers"}).getAttribute("href")).toBe("/en/admin/providers");
-    expect(screen.getByRole("link",{name:"Sellers"}).getAttribute("href")).toBe("/en/admin/sellers");
-    expect(screen.queryByRole("link",{name:"Services"})).toBeNull();
+    expect(within(sidebar()).getByRole("link", { name: "Partners & verification" }).getAttribute("href")).toBe("/en/admin/providers");
+    expect(within(sidebar()).queryByRole("link", { name: "Services & bookings" })).toBeNull();
   });
 
   it("offers settings with view permission without exposing other system tools", async () => {
-    vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });
-    vi.mocked(adminService.getMe).mockResolvedValue({
-      isAdmin: true, adminUserId: "admin-viewer", displayName: "Settings reader",
-      role: "SUPPORT" as never, permissions: ["settings.view"] as never,
-    } satisfies AdminSessionContextDto);
+    signIn(["settings.view"]);
     renderWithIntl(<AdminShell><div>settings shell</div></AdminShell>);
     await screen.findByText("settings shell");
-    fireEvent.click(screen.getByRole("button", { name: "System" }));
-    expect(screen.getByRole("link", { name: "Platform settings" }).getAttribute("href")).toBe("/en/admin/settings");
-    expect(screen.queryByText("Audit")).toBeNull();
-    expect(screen.queryByText("Admin users")).toBeNull();
+    const nav = within(sidebar());
+    expect(nav.getByRole("link", { name: "Platform settings" }).getAttribute("href")).toBe("/en/admin/settings");
+    expect(nav.getByRole("link", { name: "Site settings" }).getAttribute("href")).toBe("/en/admin/site-settings");
+    expect(nav.queryByText("Audit")).toBeNull();
+    expect(nav.queryByText("Access & roles")).toBeNull();
   });
 
-  it("expands the current route group and marks only its page as current", async () => {
+  it("marks the current module, draws its tabs and breadcrumbs, and follows route changes", async () => {
     route.pathname = "/en/admin/providers/organization-1";
-    vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });
-    vi.mocked(adminService.getMe).mockResolvedValue({ isAdmin: true, adminUserId: "reader", displayName: "Reader", role: "SUPPORT" as never, permissions: ["customer.view"] as never });
+    signIn(["customer.view"]);
     const view = renderWithIntl(<AdminShell><div>provider content</div></AdminShell>);
     await screen.findByText("provider content");
-    expect(screen.getByRole("button", { name: "Network" }).getAttribute("aria-expanded")).toBe("true");
-    expect(screen.getByRole("link", { name: "Providers" }).getAttribute("aria-current")).toBe("page");
-    expect(screen.getByRole("link", { name: "Dashboard" }).getAttribute("aria-current")).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Network" }));
-    expect(screen.getByRole("button", { name: "Network" }).getAttribute("aria-expanded")).toBe("false");
+    expect(within(sidebar()).getByRole("link", { name: "Partners & verification" }).getAttribute("aria-current")).toBe("page");
+    expect(within(sidebar()).getByRole("link", { name: "Dashboard" }).getAttribute("aria-current")).toBeNull();
+    const tabs = within(screen.getByRole("navigation", { name: "Partners & verification sections" }));
+    expect(tabs.getByRole("link", { name: "Providers" }).getAttribute("aria-current")).toBe("page");
+    expect(tabs.getByRole("link", { name: "Sellers" }).getAttribute("aria-current")).toBeNull();
+    const crumbs = screen.getByRole("navigation", { name: "Breadcrumb" });
+    expect(crumbs.textContent).toBe("AdminMarketplacePartners & verificationProvidersDetails");
     route.pathname = "/en/admin/sellers/seller-1";
     view.rerender(<NextIntlClientProvider locale="en" messages={en}><AdminShell><div>seller content</div></AdminShell></NextIntlClientProvider>);
-    await waitFor(() => expect(screen.getByRole("button", { name: "Network" }).getAttribute("aria-expanded")).toBe("true"));
-    expect(screen.getByRole("link", { name: "Sellers" }).getAttribute("aria-current")).toBe("page");
+    await waitFor(() => expect(within(screen.getByRole("navigation", { name: "Partners & verification sections" })).getByRole("link", { name: "Sellers" }).getAttribute("aria-current")).toBe("page"));
+  });
+
+  it("puts waiting-queue counts on modules and tabs", async () => {
+    route.pathname = "/en/admin/trust";
+    signIn(["trust.view", "support.view"]);
+    vi.mocked(adminService.getDashboard).mockResolvedValue({ ...NO_QUEUES, openSupportCases: 7, openTrustCases: 2, openCommunityReports: 3, pendingMemorials: 0 });
+    renderWithIntl(<AdminShell><div>trust content</div></AdminShell>);
+    await screen.findByText("trust content");
+    await waitFor(() => expect(within(sidebar()).getByRole("link", { name: /Support.*7 waiting/ })).toBeTruthy());
+    expect(within(sidebar()).getByRole("link", { name: /Trust & Safety.*5 waiting/ })).toBeTruthy();
+    const tabs = within(screen.getByRole("navigation", { name: "Trust & Safety sections" }));
+    expect(tabs.getByRole("link", { name: /User reports.*3 waiting/ })).toBeTruthy();
+    expect(tabs.getByRole("link", { name: "Memorials" })).toBeTruthy();
+  });
+
+  it("opens the command palette with Ctrl+K and jumps to a filtered page", async () => {
+    signIn(["customer.view", "dispute.view"]);
+    renderWithIntl(<AdminShell><div>palette content</div></AdminShell>);
+    await screen.findByText("palette content");
+    fireEvent.keyDown(window, { key: "k", ctrlKey: true });
+    const dialog = await screen.findByRole("dialog", { name: "Quick search" });
+    fireEvent.change(within(dialog).getByRole("combobox"), { target: { value: "disp" } });
+    const option = within(dialog).getByRole("option", { name: "Disputes" });
+    fireEvent.click(option);
+    expect(push).toHaveBeenCalledWith("/en/admin/disputes");
+    expect(screen.queryByRole("dialog", { name: "Quick search" })).toBeNull();
   });
 
   it("keeps mobile navigation permission-filtered and closes after choosing a page", async () => {
-    vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });
-    vi.mocked(adminService.getMe).mockResolvedValue({ isAdmin: true, adminUserId: "reader", displayName: "Reader", role: "SUPPORT" as never, permissions: ["customer.view"] as never });
+    signIn(["customer.view"]);
     renderWithIntl(<AdminShell><div>mobile content</div></AdminShell>);
     await screen.findByText("mobile content");
     fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
     const dialog = screen.getByRole("dialog");
     expect(within(dialog).queryByRole("link", { name: "Transactions" })).toBeNull();
     expect(within(dialog).queryByRole("link", { name: "CRM" })).toBeNull();
-    const providerLink = within(dialog).getByRole("link", { name: "Providers" });
-    providerLink.addEventListener("click", event => event.preventDefault(), { once: true });
-    fireEvent.click(providerLink);
+    const partners = within(dialog).getByRole("link", { name: "Partners & verification" });
+    partners.addEventListener("click", (event) => event.preventDefault(), { once: true });
+    fireEvent.click(partners);
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
+  it("offers sign-out from the account menu", async () => {
+    signIn(["customer.view"], { displayName: "Reader" });
+    renderWithIntl(<AdminShell><div>account content</div></AdminShell>);
+    await screen.findByText("account content");
+    fireEvent.click(within(sidebar()).getByRole("button", { name: "Account menu for Reader" }));
+    const menu = screen.getByRole("menu", { name: "Account" });
+    expect(within(menu).getByRole("menuitem", { name: "Sign out" })).toBeTruthy();
+    expect(within(menu).getByRole("menuitem", { name: "View site" }).getAttribute("href")).toBe("/en");
+  });
 });

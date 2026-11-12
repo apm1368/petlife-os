@@ -10,7 +10,6 @@ import {
 } from "@petlife/types";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { adminCommerceService } from "@/services/admin-commerce.service";
-import { AdminCommerceNav } from "@/features/admin/commerce/AdminCommerceViews";
 import { EmptyRow, TableWrap, Td, Th } from "@/features/admin/console-ui";
 
 const STATUSES: SellerOfferModerationStatus[] = [
@@ -97,7 +96,6 @@ export function AdminProductModerationView() {
   return (
     <div>
       <h1 className="mb-3 text-page-title text-text-primary">{t("title")}</h1>
-      <AdminCommerceNav />
       <p className="mb-4 text-body-sm text-text-secondary">{t("subtitle")}</p>
 
       <ContextSurface className="mb-4 flex flex-wrap items-end gap-3">
