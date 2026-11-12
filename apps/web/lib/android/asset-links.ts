@@ -9,7 +9,10 @@
  */
 export const ANDROID_PACKAGE_NAME = "ir.opetlife.app";
 
-export const ANDROID_CERT_FINGERPRINTS: readonly string[] = [];
+export const ANDROID_CERT_FINGERPRINTS: readonly string[] = [
+  // Upload key, created 2026-11-12 (signs the Cafe Bazaar / Myket APK and the AAB uploaded to Google Play).
+  "E1:97:64:CB:E7:B6:74:27:44:B0:EA:0A:9B:9E:37:45:E4:F5:F8:2A:50:52:FB:19:CE:3A:F2:7B:CF:A6:D3:6D",
+];
 
 const FINGERPRINT = /^([0-9A-F]{2}:){31}[0-9A-F]{2}$/;
 
