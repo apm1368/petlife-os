@@ -9534,7 +9534,6 @@
       }
     }
   },
-<<<<<<< HEAD
   "pwa": {
     "install": {
       "title": "Instala opetlife en tu móvil",
@@ -9563,7 +9562,7 @@
     "lostPet": "Quien pide dinero o una recompensa antes de devolver una mascota probablemente es un estafador. Queda en un lugar público y nunca pagues por adelantado.",
     "donation": "Dona solo a través de esta página. opetlife nunca te pide transferir una donación a una cuenta personal.",
     "adoption": "Nunca pagues nada antes de conocer a la mascota. Visítala en persona y queda en un lugar seguro."
-=======
+  },
   "aboutPage": {
     "eyebrow": "Sobre opetlife",
     "title": "Creamos opetlife para que cuidar de un animal nunca vuelva a empezar de cero",
@@ -9686,6 +9685,5 @@
       "primary": "Crear una cuenta",
       "secondary": "Explorar servicios"
     }
->>>>>>> pr-301
   }
 }

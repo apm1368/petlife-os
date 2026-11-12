@@ -9536,7 +9536,6 @@
       }
     }
   },
-<<<<<<< HEAD
   "pwa": {
     "install": {
       "title": "Installiere opetlife auf deinem Handy",
@@ -9565,7 +9564,7 @@
     "lostPet": "Wer vor der Rückgabe eines Tieres Geld oder Finderlohn verlangt, ist wahrscheinlich ein Betrüger. Treffen Sie sich an einem öffentlichen Ort und zahlen Sie nie im Voraus.",
     "donation": "Spenden Sie nur über diese Seite. opetlife fordert Sie nie auf, eine Spende auf ein Privatkonto zu überweisen.",
     "adoption": "Zahlen Sie nie vor dem ersten Treffen. Sehen Sie sich das Tier persönlich an und treffen Sie sich an einem sicheren Ort."
-=======
+  },
   "aboutPage": {
     "eyebrow": "Über opetlife",
     "title": "Wir haben opetlife gebaut, damit die Sorge um ein Tier nie wieder bei null anfängt",
@@ -9688,6 +9687,5 @@
       "primary": "Konto erstellen",
       "secondary": "Services entdecken"
     }
->>>>>>> pr-301
   }
 }

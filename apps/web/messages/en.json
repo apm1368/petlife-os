@@ -10406,7 +10406,6 @@
       }
     }
   },
-<<<<<<< HEAD
   "pwa": {
     "install": {
       "title": "Install opetlife on your phone",
@@ -10435,7 +10434,7 @@
     "lostPet": "Anyone who asks for money or a reward before returning a pet is probably a scammer. Meet in a public place and never pay in advance.",
     "donation": "Donate only through this page. opetlife never asks you to transfer a donation to a personal account.",
     "adoption": "Never pay a fee before meeting. See the pet in person and meet somewhere safe."
-=======
+  },
   "aboutPage": {
     "eyebrow": "About opetlife",
     "title": "We built opetlife so caring for an animal never has to start from zero",
@@ -10558,6 +10557,5 @@
       "primary": "Create an account",
       "secondary": "Explore services"
     }
->>>>>>> pr-301
   }
 }
