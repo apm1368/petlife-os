@@ -28,12 +28,15 @@ describe("apiErrorText", () => {
     expect(apiErrorText(new Error("network"), "en", "Could not save.")).toBe("Could not save.");
     expect(apiErrorText(new Error("network"), "fa")).toBe("انجام نشد. دوباره تلاش کنید.");
   });
-  it("German and Spanish pages do not expose an English API error", () => {
+  it("German, Spanish, Arabic and Dutch pages do not expose an English API error", () => {
     const backend = err("INVALID_SUBSCRIPTION_STATUS_TRANSITION", "This subscription status transition is not allowed.");
     expect(apiErrorText(backend, "de", "Die Aktion ist derzeit nicht möglich.")).toBe("Die Aktion ist derzeit nicht möglich.");
     expect(apiErrorText(backend, "es", "Ahora no se puede realizar esta acción.")).toBe("Ahora no se puede realizar esta acción.");
     expect(apiErrorText(backend, "de")).toBe("Das hat nicht funktioniert. Bitte versuchen Sie es erneut.");
     expect(apiErrorText(backend, "es")).toBe("No se pudo completar. Inténtalo de nuevo.");
+    expect(apiErrorText(backend, "ar")).toBe("لم ينجح ذلك. يُرجى المحاولة مرة أخرى.");
+    expect(apiErrorText(backend, "nl", "Deze actie kan nu niet.")).toBe("Deze actie kan nu niet.");
+    expect(apiErrorText(new Error("network"), "nl")).toBe("Dat is niet gelukt. Probeer het opnieuw.");
   });
   it("a busy server says nothing was saved and to retry, in every language", () => {
     const busy = err("SERVICE_BUSY", "The server is busy right now. Nothing was saved; please try again in a moment.");
@@ -41,6 +44,8 @@ describe("apiErrorText", () => {
     expect(apiErrorText(busy, "en")).toContain("Nothing was saved");
     expect(apiErrorText(busy, "de", "Ticket konnte nicht erstellt werden.")).toContain("nichts gespeichert");
     expect(apiErrorText(busy, "es")).toContain("no se ha guardado nada");
+    expect(apiErrorText(busy, "ar")).toContain("لم يُحفظ أي شيء");
+    expect(apiErrorText(busy, "nl")).toContain("niets opgeslagen");
   });
 });
 
