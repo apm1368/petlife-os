@@ -216,9 +216,10 @@ describe("Pet taxi on demand (e2e)", () => {
 
   it("coarsens the places of rides that ended more than 30 days ago", async () => {
     const { owner, petId } = await member();
-    const base = { userId: owner.id, petIds: [petId], carrierSize: "SMALL" as const, pickupLabel: "Home, Valiasr St 12", pickupLatitude: 35.80483, pickupLongitude: 51.43441, pickupNote: "Ring twice", dropoffLabel: "Clinic", dropoffLatitude: 35.69971, dropoffLongitude: 51.33802, distanceMeters: 15_000, durationSeconds: 2_400, routeSource: "STRAIGHT_LINE_ESTIMATE", fareIrr: 1_000_000, fareBreakdown: {}, fareRuleCity: "*", searchExpiresAt: new Date(), status: "COMPLETED" as const };
-    const old = await db.petTaxiRide.create({ data: { ...base, idempotencyKey: randomUUID(), completedAt: new Date(Date.now() - 40 * 86_400_000), driverLatitude: 35.7, driverLongitude: 51.34 } });
-    const recent = await db.petTaxiRide.create({ data: { ...base, idempotencyKey: randomUUID(), completedAt: new Date(Date.now() - 2 * 86_400_000) } });
+    const base = { userId: owner.id, petIds: [petId], carrierSize: "SMALL" as const, pickupLabel: "Home, Valiasr St 12", pickupLatitude: 35.80483, pickupLongitude: 51.43441, pickupNote: "Ring twice", dropoffLabel: "Clinic", dropoffLatitude: 35.69971, dropoffLongitude: 51.33802, distanceMeters: 15_000, durationSeconds: 2_400, routeSource: "STRAIGHT_LINE_ESTIMATE", fareIrr: 1_000_000, fareBreakdown: {}, fareRuleCity: "*", searchExpiresAt: new Date(), status: "CANCELLED_BY_MEMBER" as const };
+    // Finished rides without a driver row (a member cancellation) keep the driver check constraint satisfied.
+    const old = await db.petTaxiRide.create({ data: { ...base, idempotencyKey: randomUUID(), cancelledAt: new Date(Date.now() - 40 * 86_400_000), driverLatitude: 35.7, driverLongitude: 51.34 } });
+    const recent = await db.petTaxiRide.create({ data: { ...base, idempotencyKey: randomUUID(), cancelledAt: new Date(Date.now() - 2 * 86_400_000) } });
     await app.get(PetTaxiService).applyRetention();
     expect(await db.petTaxiRide.findUniqueOrThrow({ where: { id: old.id } })).toMatchObject({ pickupLabel: "", pickupNote: null, dropoffLabel: "", pickupLatitude: 35.8, pickupLongitude: 51.43, driverLatitude: null, driverLongitude: null });
     expect((await db.petTaxiRide.findUniqueOrThrow({ where: { id: old.id } })).coordinatesRedactedAt).not.toBeNull();
