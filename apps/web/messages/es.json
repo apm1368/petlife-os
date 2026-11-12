@@ -1042,7 +1042,7 @@
   "adminMessaging": {
     "kicker": "SMS y correo",
     "title": "Centro de mensajería",
-    "subtitle": "Estado de los SMS con plantilla (FarazSMS) y del correo (Gmail), envíos de prueba y registro de todos los mensajes enviados.",
+    "subtitle": "Estado de los SMS y del correo (Gmail), envíos de prueba y registro de todos los mensajes enviados.",
     "patterns": "Plantillas SMS",
     "refresh": "Actualizar",
     "loading": "Cargando…",
@@ -1064,6 +1064,7 @@
       "title": "SMS con plantilla",
       "provider": "Proveedor",
       "devProvider": "Simulador de desarrollo",
+      "kavenegarProvider": "Kavenegar",
       "mode": "Modo",
       "modes": {
         "sandbox": "Pruebas",
@@ -1074,6 +1075,7 @@
       "bindings": "Plantillas activas del panel",
       "check": {
         "apiKey": "Clave API de FarazSMS",
+        "apiKeyKavenegar": "Clave API de Kavenegar",
         "sender": "Número de la línea remitente",
         "otpPattern": "Plantilla de código de un solo uso",
         "notificationPattern": "Plantilla de notificaciones (o plantillas del panel)",
@@ -1124,6 +1126,10 @@
       "sms2": "Crea una plantilla de código de un solo uso con la variable code y anota su código cuando se apruebe.",
       "sms3": "Crea una plantilla de notificaciones con la variable message; los mensajes concretos pueden tener su propia plantilla en Plantillas SMS.",
       "sms4": "Guarda los valores en el servidor; el siguiente despliegue activa el envío real automáticamente.",
+      "kavenegarTitle": "SMS (Kavenegar)",
+      "kavenegar1": "Copia la clave API en el panel de Kavenegar y anota el número de tu línea remitente.",
+      "kavenegar2": "Opcional (servicio avanzado): crea una plantilla Verify con nombre en inglés (p. ej. opetlifeotp) cuyo texto contenga %token; sin ella, los códigos de acceso se envían como texto simple desde tu línea remitente.",
+      "kavenegar3": "Las notificaciones se envían como texto simple y no necesitan plantilla.",
       "emailTitle": "Correo (Gmail)",
       "email1": "Activa la verificación en dos pasos de la cuenta de Google.",
       "email2": "Crea una contraseña de aplicación en Seguridad › Contraseñas de aplicaciones (16 caracteres).",
@@ -4149,7 +4155,7 @@
     },
     "manualMessage": {
       "title": "Mensaje para esta cuenta",
-      "smsNote": "Solo se intentará enviar un SMS si Faraz está activo, la persona destinataria ha dado su consentimiento y las reglas de notificación lo permiten.",
+      "smsNote": "Solo se intentará enviar un SMS si el envío real de SMS está activo, la persona destinataria ha dado su consentimiento y las reglas de notificación lo permiten.",
       "subject": "Asunto",
       "message": "Mensaje",
       "attemptSms": "Intentar también enviar SMS si está permitido",

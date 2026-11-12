@@ -30,11 +30,11 @@ export class NotificationPreferenceService {
     return Boolean(latest?.grantedAt && !latest.revokedAt);
   }
 
-  /** Whether each channel reaches people. SMS uses the selected dev or Faraz Pattern API adapter. */
+  /** Whether each channel reaches people. SMS uses the selected dev, Faraz or Kavenegar adapter. */
   private channelDelivery(): NonNullable<NotificationPreferencesDto["channels"]> {
     type Row = NonNullable<NotificationPreferencesDto["channels"]>[number];
     const provider = this.config.get("MESSAGING_PROVIDER", { infer: true });
-    const smsLive = provider === "faraz" && this.config.get("MESSAGING_SANDBOX_MODE", { infer: true }) === "production";
+    const smsLive = (provider === "faraz" || provider === "kavenegar") && this.config.get("MESSAGING_SANDBOX_MODE", { infer: true }) === "production";
     const email = this.config.get("EMAIL_PROVIDER", { infer: true });
     const emailLive =
       (email === "gmail" && Boolean(this.config.get("GMAIL_USER", { infer: true }) && this.config.get("GMAIL_APP_PASSWORD", { infer: true }))) ||
@@ -42,7 +42,7 @@ export class NotificationPreferenceService {
     return [
       { channel: NotificationChannel.IN_APP as unknown as Row["channel"], delivery: "LIVE" },
       // Live Faraz sending used to be reported as NOT_CONFIGURED; members now see the real state.
-      { channel: NotificationChannel.SMS as unknown as Row["channel"], delivery: smsLive ? "LIVE" : provider === "dev" || provider === "faraz" ? "SANDBOX" : "NOT_CONFIGURED" },
+      { channel: NotificationChannel.SMS as unknown as Row["channel"], delivery: smsLive ? "LIVE" : "SANDBOX" },
       { channel: NotificationChannel.EMAIL as unknown as Row["channel"], delivery: emailLive ? "LIVE" : email === "dev" ? "SANDBOX" : "NOT_CONFIGURED" },
     ];
   }

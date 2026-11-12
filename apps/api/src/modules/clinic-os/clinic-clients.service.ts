@@ -69,9 +69,14 @@ export class ClinicClientsService {
 
   smsMode(): SmsMode {
     const provider = this.config.get("MESSAGING_PROVIDER", { infer: true });
-    const enabled = provider === "faraz" ? this.config.get("FARAZ_SMS_ENABLED", { infer: true }) : this.config.get("DEV_MESSAGING_ENABLED", { infer: true });
+    const enabled =
+      provider === "faraz"
+        ? this.config.get("FARAZ_SMS_ENABLED", { infer: true })
+        : provider === "kavenegar"
+          ? this.config.get("KAVENEGAR_ENABLED", { infer: true })
+          : this.config.get("DEV_MESSAGING_ENABLED", { infer: true });
     if (!enabled) return "OFF";
-    return provider === "faraz" && this.config.get("MESSAGING_SANDBOX_MODE", { infer: true }) === "production" ? "LIVE" : "SANDBOX";
+    return provider !== "dev" && this.config.get("MESSAGING_SANDBOX_MODE", { infer: true }) === "production" ? "LIVE" : "SANDBOX";
   }
 
   async list(ctx: ResolvedProviderContext, q?: string) {

@@ -12,7 +12,7 @@ import "../admin-glass.css";
 
 const STATUSES = ["", "SENT", "DELIVERED", "PENDING", "QUEUED", "FAILED", "SKIPPED"] as const;
 
-/** Messaging console: SMS (Faraz pattern API) and email (Gmail/SMTP) status, audited test sends and the delivery log. */
+/** Messaging console: SMS (Faraz pattern API or Kavenegar) and email (Gmail/SMTP) status, audited test sends and the delivery log. */
 export function AdminMessagingView() {
   const t = useTranslations("adminMessaging");
   const locale = asLocale(useLocale());
@@ -36,6 +36,7 @@ export function AdminMessagingView() {
   if (!context) return <div className="gx-skel" style={{ height: 240 }} aria-label={t("loading")} />;
   if (!canView || failed === "forbidden") return <section className="gx-card" role="alert"><h1>{t("title")}</h1><p className="gx-muted">{t("forbidden")}</p></section>;
   const num = (v: number) => fmtNumber(v, locale);
+  const kavenegar = status?.sms.setupProvider === "kavenegar";
   const stat = (channel: string, s: string) => status?.last7Days.filter((r) => r.channel === channel && (s === "*" || r.status === s)).reduce((a, r) => a + r.count, 0) ?? 0;
 
   return (
@@ -61,7 +62,7 @@ export function AdminMessagingView() {
                 <Badge live={status.sms.live} sandbox={status.sms.mode === "sandbox"} />
               </header>
               <dl className="gx-grid gx-grid--2" style={{ gap: 10 }}>
-                <Fact label={t("sms.provider")} value={status.sms.provider === "faraz" ? "Faraz" : t("sms.devProvider")} />
+                <Fact label={t("sms.provider")} value={status.sms.provider === "faraz" ? "Faraz" : status.sms.provider === "kavenegar" ? t("sms.kavenegarProvider") : t("sms.devProvider")} />
                 <Fact label={t("sms.mode")} value={t(`sms.modes.${status.sms.mode}`)} />
                 <Fact label={t("sms.sender")} value={status.sms.senderMasked ? <bdi dir="ltr">{status.sms.senderMasked}</bdi> : t("notSet")} />
                 <Fact label={t("sms.otp")} value={status.sms.otpLive ? t("on") : t("devOnly")} />
@@ -70,7 +71,13 @@ export function AdminMessagingView() {
                 <Fact label={t("sent7")} value={num(stat("SMS", "SENT") + stat("SMS", "DELIVERED"))} />
                 <Fact label={t("failed7")} value={num(stat("SMS", "FAILED"))} />
               </dl>
-              <Checklist items={[
+              <Checklist items={kavenegar ? [
+                // Kavenegar notifications are plain text, so there is no notification pattern to check.
+                { ok: status.sms.apiKeyConfigured, label: t("sms.check.apiKeyKavenegar") },
+                { ok: Boolean(status.sms.senderMasked), label: t("sms.check.sender") },
+                { ok: status.sms.otpPatternConfigured, label: t("sms.check.otpPattern") },
+                { ok: status.sms.live, label: t("sms.check.production") },
+              ] : [
                 { ok: status.sms.apiKeyConfigured, label: t("sms.check.apiKey") },
                 { ok: Boolean(status.sms.senderMasked), label: t("sms.check.sender") },
                 { ok: status.sms.otpPatternConfigured, label: t("sms.check.otpPattern") },
@@ -105,7 +112,9 @@ export function AdminMessagingView() {
             <section className="gx-card">
               <header><h2><ShieldCheck size={18} aria-hidden="true" style={{ display: "inline", marginInlineEnd: 8 }} />{t("setup.title")}</h2><p>{t("setup.hint")}</p></header>
               <div className="gx-grid gx-grid--2">
-                {!status.sms.live ? <SetupSteps title={t("setup.smsTitle")} steps={[t("setup.sms1"), t("setup.sms2"), t("setup.sms3"), t("setup.sms4")]} env={["FARAZ_SMS_API_KEY", "FARAZ_SMS_SENDER", "FARAZ_SMS_OTP_PATTERN_CODE", "FARAZ_SMS_NOTIFICATION_PATTERN_CODE"]} /> : null}
+                {!status.sms.live ? (kavenegar
+                  ? <SetupSteps title={t("setup.kavenegarTitle")} steps={[t("setup.kavenegar1"), t("setup.kavenegar2"), t("setup.kavenegar3"), t("setup.sms4")]} env={["KAVENEGAR_ENABLED=true", "KAVENEGAR_API_KEY", "KAVENEGAR_SENDER", "KAVENEGAR_OTP_TEMPLATE", "OTP_PROVIDER=kavenegar", "MESSAGING_PROVIDER=kavenegar", "MESSAGING_SANDBOX_MODE=production"]} />
+                  : <SetupSteps title={t("setup.smsTitle")} steps={[t("setup.sms1"), t("setup.sms2"), t("setup.sms3"), t("setup.sms4")]} env={["FARAZ_SMS_API_KEY", "FARAZ_SMS_SENDER", "FARAZ_SMS_OTP_PATTERN_CODE", "FARAZ_SMS_NOTIFICATION_PATTERN_CODE"]} />) : null}
                 {!status.email.live ? <SetupSteps title={t("setup.emailTitle")} steps={[t("setup.email1"), t("setup.email2"), t("setup.email3")]} env={["EMAIL_PROVIDER=gmail", "GMAIL_USER", "GMAIL_APP_PASSWORD", "EMAIL_FROM_NAME"]} /> : null}
               </div>
               <p className="gx-muted" style={{ marginTop: 12 }}>{t("setup.secrets")}</p>

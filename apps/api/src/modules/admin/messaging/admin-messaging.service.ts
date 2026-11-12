@@ -47,13 +47,24 @@ export class AdminMessagingService {
       this.prisma.notificationDelivery.findFirst({ where: { channel: NotificationChannel.SMS, status: NotificationDeliveryStatus.SENT }, orderBy: { lastAttemptAt: "desc" }, select: { lastAttemptAt: true } }),
       this.prisma.notificationDelivery.findFirst({ where: { channel: NotificationChannel.EMAIL, status: NotificationDeliveryStatus.SENT }, orderBy: { lastAttemptAt: "desc" }, select: { lastAttemptAt: true } }),
     ]);
-    const smsMissing = [
-      !e("FARAZ_SMS_API_KEY") && "FARAZ_SMS_API_KEY",
-      !e("FARAZ_SMS_SENDER") && "FARAZ_SMS_SENDER",
-      !e("FARAZ_SMS_NOTIFICATION_PATTERN_CODE") && "FARAZ_SMS_NOTIFICATION_PATTERN_CODE",
-      !e("FARAZ_SMS_OTP_PATTERN_CODE") && "FARAZ_SMS_OTP_PATTERN_CODE",
-    ].filter((x): x is string => Boolean(x));
-    const smsLive = e("MESSAGING_PROVIDER") === "faraz" && e("MESSAGING_SANDBOX_MODE") === "production";
+    // The setup checklist follows whichever real SMS provider is chosen for notifications or sign-in codes.
+    const kavenegar = e("MESSAGING_PROVIDER") === "kavenegar" || e("OTP_PROVIDER") === "kavenegar";
+    const smsMissing = (
+      kavenegar
+        ? [
+            !e("KAVENEGAR_ENABLED") && "KAVENEGAR_ENABLED=true",
+            !e("KAVENEGAR_API_KEY") && "KAVENEGAR_API_KEY",
+            // A sender line is needed for notifications and for plain-text codes (the account has no default line).
+            !e("KAVENEGAR_SENDER") && (e("MESSAGING_PROVIDER") === "kavenegar" || !e("KAVENEGAR_OTP_TEMPLATE")) && "KAVENEGAR_SENDER",
+          ]
+        : [
+            !e("FARAZ_SMS_API_KEY") && "FARAZ_SMS_API_KEY",
+            !e("FARAZ_SMS_SENDER") && "FARAZ_SMS_SENDER",
+            !e("FARAZ_SMS_NOTIFICATION_PATTERN_CODE") && "FARAZ_SMS_NOTIFICATION_PATTERN_CODE",
+            !e("FARAZ_SMS_OTP_PATTERN_CODE") && "FARAZ_SMS_OTP_PATTERN_CODE",
+          ]
+    ).filter((x): x is string => Boolean(x));
+    const smsLive = (e("MESSAGING_PROVIDER") === "faraz" || e("MESSAGING_PROVIDER") === "kavenegar") && e("MESSAGING_SANDBOX_MODE") === "production";
     const emailStatus = this.email.status();
     return {
       checkedAt: new Date().toISOString(),
@@ -62,11 +73,14 @@ export class AdminMessagingService {
         mode: e("MESSAGING_SANDBOX_MODE"),
         otpProvider: e("OTP_PROVIDER"),
         live: smsLive,
-        otpLive: e("OTP_PROVIDER") === "faraz",
-        senderMasked: mask(e("FARAZ_SMS_SENDER")),
-        apiKeyConfigured: Boolean(e("FARAZ_SMS_API_KEY")),
-        otpPatternConfigured: Boolean(e("FARAZ_SMS_OTP_PATTERN_CODE")),
-        notificationPatternConfigured: Boolean(e("FARAZ_SMS_NOTIFICATION_PATTERN_CODE")),
+        otpLive: e("OTP_PROVIDER") === "faraz" || e("OTP_PROVIDER") === "kavenegar",
+        setupProvider: kavenegar ? ("kavenegar" as const) : ("faraz" as const),
+        senderMasked: mask(kavenegar ? e("KAVENEGAR_SENDER") : e("FARAZ_SMS_SENDER")),
+        apiKeyConfigured: Boolean(kavenegar ? e("KAVENEGAR_API_KEY") : e("FARAZ_SMS_API_KEY")),
+        // Kavenegar sends codes through a Verify template when one is set, else as plain text from the sender line.
+        otpPatternConfigured: kavenegar ? Boolean(e("KAVENEGAR_OTP_TEMPLATE") || e("KAVENEGAR_SENDER")) : Boolean(e("FARAZ_SMS_OTP_PATTERN_CODE")),
+        // Kavenegar notifications are plain text and need no pattern.
+        notificationPatternConfigured: kavenegar ? true : Boolean(e("FARAZ_SMS_NOTIFICATION_PATTERN_CODE")),
         activePatternBindings: bindings,
         missingConfiguration: smsMissing,
         lastSentAt: lastSms?.lastAttemptAt?.toISOString() ?? null,

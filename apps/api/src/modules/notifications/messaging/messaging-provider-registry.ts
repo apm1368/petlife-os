@@ -21,6 +21,14 @@ export const MESSAGING_PROVIDER_CAPABILITIES: Record<MessagingProvider, Messagin
     supportsStatusQuery: false,
     supportsUnicode: true,
   },
+  /// Kavenegar returns a message id and has a status endpoint and delivery webhooks, but none are wired yet,
+  /// so SENT (accepted/queued) is the honest ceiling here too.
+  KAVENEGAR: {
+    supportsDeliveryStatus: false,
+    supportsWebhook: false,
+    supportsStatusQuery: false,
+    supportsUnicode: true,
+  },
   /// Email providers: SMTP acceptance is the ceiling (SENT); there are no delivery receipts.
   GMAIL: {
     supportsDeliveryStatus: false,

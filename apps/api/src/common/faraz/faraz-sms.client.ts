@@ -1,6 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import type { AppEnv } from "../../config/env";
+import { toDomesticMobile } from "../sms/domestic-mobile";
+
+export { toDomesticMobile };
 
 export interface FarazPatternSendInput {
   patternCode: string;
@@ -61,11 +64,6 @@ export class FarazSmsClient {
   }
 }
 
-export function toDomesticMobile(value: string): string | null {
-  if (/^\+989\d{9}$/.test(value)) return `0${value.slice(3)}`;
-  if (/^09\d{9}$/.test(value)) return value;
-  return null;
-}
 
 function classifyHttpFailure(status: number): FarazPatternSendResult {
   const transient = status === 408 || status === 425 || status === 429 || status >= 500;

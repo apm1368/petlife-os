@@ -1042,7 +1042,7 @@
   "adminMessaging": {
     "kicker": "SMS und E-Mail",
     "title": "Nachrichtenzentrale",
-    "subtitle": "Status von Pattern-SMS (FarazSMS) und E-Mail (Gmail), Testversand und Protokoll aller gesendeten Nachrichten.",
+    "subtitle": "Status von SMS und E-Mail (Gmail), Testversand und Protokoll aller gesendeten Nachrichten.",
     "patterns": "SMS-Vorlagen",
     "refresh": "Aktualisieren",
     "loading": "Wird geladen…",
@@ -1064,6 +1064,7 @@
       "title": "Pattern-SMS",
       "provider": "Anbieter",
       "devProvider": "Entwicklungssimulator",
+      "kavenegarProvider": "Kavenegar",
       "mode": "Modus",
       "modes": {
         "sandbox": "Testmodus",
@@ -1074,6 +1075,7 @@
       "bindings": "Aktive Panel-Vorlagen",
       "check": {
         "apiKey": "FarazSMS-API-Schlüssel",
+        "apiKeyKavenegar": "Kavenegar-API-Schlüssel",
         "sender": "Absendernummer",
         "otpPattern": "Vorlage für Einmalcodes",
         "notificationPattern": "Vorlage für Benachrichtigungen (oder Panel-Vorlagen)",
@@ -1124,6 +1126,10 @@
       "sms2": "Erstellen Sie eine Einmalcode-Vorlage mit der Variable code und notieren Sie nach der Freigabe den Vorlagencode.",
       "sms3": "Erstellen Sie eine Benachrichtigungsvorlage mit der Variable message; einzelne Nachrichten können unter SMS-Vorlagen eine eigene erhalten.",
       "sms4": "Hinterlegen Sie die Werte auf dem Server; das nächste Deployment schaltet den Live-Versand automatisch ein.",
+      "kavenegarTitle": "SMS (Kavenegar)",
+      "kavenegar1": "Kopieren Sie im Kavenegar-Panel den API-Schlüssel und notieren Sie Ihre Absendernummer.",
+      "kavenegar2": "Optional (erweiterter Dienst): Legen Sie eine Verify-Vorlage mit englischem Namen (z. B. opetlifeotp) an, deren Text %token enthält; ohne sie werden Anmeldecodes als Klartext von Ihrer Absenderleitung gesendet.",
+      "kavenegar3": "Benachrichtigungen werden als Klartext versendet und brauchen keine Vorlage.",
       "emailTitle": "E-Mail (Gmail)",
       "email1": "Aktivieren Sie die Bestätigung in zwei Schritten für das Google-Konto.",
       "email2": "Erstellen Sie unter Sicherheit › App-Passwörter ein App-Passwort (16 Zeichen).",
@@ -4154,7 +4160,7 @@
     },
     "manualMessage": {
       "title": "Nachricht an dieses Nutzerkonto",
-      "smsNote": "SMS wird nur versucht, wenn Faraz aktiv ist, die empfangende Person zugestimmt hat und die Benachrichtigungsregeln es erlauben.",
+      "smsNote": "SMS wird nur versucht, wenn der Live-SMS-Versand aktiv ist, die empfangende Person zugestimmt hat und die Benachrichtigungsregeln es erlauben.",
       "subject": "Betreff",
       "message": "Nachricht",
       "attemptSms": "SMS zusätzlich versuchen, wenn zulässig",

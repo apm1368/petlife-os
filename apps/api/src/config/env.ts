@@ -54,7 +54,7 @@ const envSchema = z.object({
 
   CSRF_SECRET: z.string().min(16),
 
-  OTP_PROVIDER: z.enum(["dev", "faraz"]).default("dev"),
+  OTP_PROVIDER: z.enum(["dev", "faraz", "kavenegar"]).default("dev"),
   OTP_LENGTH: z.coerce.number().int().min(4).max(8).default(6),
   OTP_TTL_SECONDS: z.coerce.number().int().positive().default(300),
   OTP_RESEND_COOLDOWN_SECONDS: z.coerce.number().int().positive().default(30),
@@ -177,7 +177,7 @@ const envSchema = z.object({
 
   /// FarazSMS official Pattern API: https://docs.farazsms.com/service/post-ws-v1-sms-pattern
   /// Secrets and panel-specific pattern UIDs stay in the server environment.
-  MESSAGING_PROVIDER: z.enum(["dev", "faraz"]).default("dev"),
+  MESSAGING_PROVIDER: z.enum(["dev", "faraz", "kavenegar"]).default("dev"),
   MESSAGING_SANDBOX_MODE: z.enum(["sandbox", "production"]).default("sandbox"),
   DEV_MESSAGING_ENABLED: flag(true),
   FARAZ_SMS_ENABLED: flag(true),
@@ -189,6 +189,19 @@ const envSchema = z.object({
   FARAZ_SMS_NOTIFICATION_PATTERN_CODE: z.string().min(1).optional(),
   FARAZ_SMS_NOTIFICATION_BODY_ATTRIBUTE: z.string().min(1).default("message"),
   FARAZ_SMS_TIMEOUT_MS: z.coerce.number().int().min(1000).max(30_000).default(5000),
+
+  /// Kavenegar REST API: https://kavenegar.com/rest.html. One-time codes go through Verify Lookup when
+  /// KAVENEGAR_OTP_TEMPLATE names a template approved in the panel (its text holds %token; Verify needs the
+  /// account's "advanced service", else 426); without a template they go as plain text from KAVENEGAR_SENDER.
+  /// Notifications always go as plain text from KAVENEGAR_SENDER. The API key sits in the request path, so it
+  /// must never reach a log or an error.
+  KAVENEGAR_ENABLED: flag(false),
+  KAVENEGAR_BASE_URL: z.string().url().default("https://api.kavenegar.com"),
+  KAVENEGAR_API_KEY: z.string().min(1).optional(),
+  KAVENEGAR_SENDER: z.string().regex(/^\d{4,20}$/, "KAVENEGAR_SENDER must be the line number (digits only)").optional(),
+  /// Optional Verify template name (English letters and digits, no spaces or underscores, e.g. opetlifeotp).
+  KAVENEGAR_OTP_TEMPLATE: z.string().regex(/^[A-Za-z0-9-]{1,64}$/, "KAVENEGAR_OTP_TEMPLATE must be English letters/digits without spaces or underscores").optional(),
+  KAVENEGAR_TIMEOUT_MS: z.coerce.number().int().min(1000).max(30_000).default(5000),
 
   /// Email channel. "gmail" sends through smtp.gmail.com with a Google App Password (2-step verification must be
   /// on for that account); "smtp" is any SMTP relay; "dev" only logs; "disabled" (the default) sends nothing.
@@ -336,9 +349,16 @@ function validateMessagingConfig(env: AppEnv): void {
   validateEmailConfig(env);
   if (env.MESSAGING_SANDBOX_MODE !== "production") return;
   const missing: string[] = [];
-  if (env.MESSAGING_PROVIDER !== "faraz") missing.push("MESSAGING_PROVIDER=faraz");
-  if (!env.FARAZ_SMS_ENABLED) missing.push("FARAZ_SMS_ENABLED=true");
-  if (!(env.FARAZ_SMS_API_KEY && env.FARAZ_SMS_SENDER && env.FARAZ_SMS_NOTIFICATION_PATTERN_CODE)) missing.push("FARAZ_SMS_API_KEY/FARAZ_SMS_SENDER/FARAZ_SMS_NOTIFICATION_PATTERN_CODE");
+  if (env.MESSAGING_PROVIDER === "kavenegar") {
+    if (!env.KAVENEGAR_ENABLED) missing.push("KAVENEGAR_ENABLED=true");
+    // The account has no default sender, so plain-text notifications need an explicit line.
+    if (!(env.KAVENEGAR_API_KEY && env.KAVENEGAR_SENDER)) missing.push("KAVENEGAR_API_KEY/KAVENEGAR_SENDER");
+  } else if (env.MESSAGING_PROVIDER === "faraz") {
+    if (!env.FARAZ_SMS_ENABLED) missing.push("FARAZ_SMS_ENABLED=true");
+    if (!(env.FARAZ_SMS_API_KEY && env.FARAZ_SMS_SENDER && env.FARAZ_SMS_NOTIFICATION_PATTERN_CODE)) missing.push("FARAZ_SMS_API_KEY/FARAZ_SMS_SENDER/FARAZ_SMS_NOTIFICATION_PATTERN_CODE");
+  } else {
+    missing.push("MESSAGING_PROVIDER=faraz|kavenegar");
+  }
   if (missing.length > 0) {
     throw new Error(`MESSAGING_SANDBOX_MODE=production requires credentials for every enabled provider. Missing: ${missing.join(", ")}`);
   }
@@ -379,6 +399,9 @@ function validateOtpConfig(env: AppEnv): void {
   }
   if (env.OTP_PROVIDER === "faraz" && !(env.FARAZ_SMS_API_KEY && env.FARAZ_SMS_SENDER && env.FARAZ_SMS_OTP_PATTERN_CODE)) {
     throw new Error("OTP_PROVIDER=faraz requires FARAZ_SMS_API_KEY, FARAZ_SMS_SENDER and FARAZ_SMS_OTP_PATTERN_CODE.");
+  }
+  if (env.OTP_PROVIDER === "kavenegar" && !(env.KAVENEGAR_ENABLED && env.KAVENEGAR_API_KEY && (env.KAVENEGAR_OTP_TEMPLATE || env.KAVENEGAR_SENDER))) {
+    throw new Error("OTP_PROVIDER=kavenegar requires KAVENEGAR_ENABLED=true, KAVENEGAR_API_KEY and either KAVENEGAR_OTP_TEMPLATE (Verify Lookup) or KAVENEGAR_SENDER (plain-text code).");
   }
 }
 

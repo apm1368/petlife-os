@@ -4782,6 +4782,8 @@ enum NotificationFailureKind {
 enum MessagingProvider {
   DEV
   FARAZ
+  /// Kavenegar: Verify Lookup for one-time codes, plain-text sms/send for notifications.
+  KAVENEGAR
   /// Email through smtp.gmail.com with an App Password.
   GMAIL
   /// Email through any other SMTP relay.

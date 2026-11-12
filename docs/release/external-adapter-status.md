@@ -7,6 +7,7 @@ successful live operation for an adapter whose status is not `LIVE`.
 | --- | --- | --- | --- |
 | Google OAuth/OIDC | `NOT_CONFIGURED` | `BLOCKED_EXTERNAL` until credentials are supplied | Disabled; startup validates a deliberately enabled but incomplete configuration |
 | OTP delivery | `NOT_IMPLEMENTED` | `BLOCKED_EXTERNAL` on a production SMS/email provider | Development codes only; codes are never logged in production |
+| Kavenegar SMS | `IMPLEMENTED` | `BLOCKED_EXTERNAL` on a valid sender line (owner buying one); API key configured on the server | Plain-text OTP/notifications from the owner's line on the standard plan, Verify Lookup when an approved template is set; see `docs/integration/kavenegar-sms.fa.md` |
 | Faraz SMS | `IMPLEMENTED` | `READY_FOR_CONFIGURATION` pending server credentials and approved pattern UIDs | Official Pattern API; accepted sends remain `SENT`, never fake `DELIVERED` |
 | Standard payment gateway | `NOT_CONFIGURED` | `BLOCKED_EXTERNAL` on merchant credentials and live network implementation | `SANDBOX` outside production; explicit failure in production |
 | SnappPay | `NOT_IMPLEMENTED` | `BLOCKED_EXTERNAL` on merchant/API access | `SANDBOX` outside production; explicit decline in production |

@@ -27,6 +27,19 @@ describe("validateEnv — security invariants", () => {
     expect(() => validateEnv({ ...base, MESSAGING_SANDBOX_MODE: "production", MESSAGING_PROVIDER: "faraz", FARAZ_SMS_API_KEY: "key", FARAZ_SMS_SENDER: "90008361", FARAZ_SMS_NOTIFICATION_PATTERN_CODE: "notice-uid" } as NodeJS.ProcessEnv)).not.toThrow();
   });
 
+  it("requires Kavenegar to be enabled with an API key and a Verify template or a sender line when it handles OTP", () => {
+    expect(() => validateEnv({ ...base, OTP_PROVIDER: "kavenegar" } as NodeJS.ProcessEnv)).toThrow(/OTP_PROVIDER=kavenegar requires/);
+    expect(() => validateEnv({ ...base, OTP_PROVIDER: "kavenegar", KAVENEGAR_ENABLED: "true", KAVENEGAR_API_KEY: "key" } as NodeJS.ProcessEnv)).toThrow(/KAVENEGAR_OTP_TEMPLATE .* or KAVENEGAR_SENDER/);
+    expect(() => validateEnv({ ...base, OTP_PROVIDER: "kavenegar", KAVENEGAR_API_KEY: "key", KAVENEGAR_SENDER: "2000660110" } as NodeJS.ProcessEnv)).toThrow(/KAVENEGAR_ENABLED/);
+    expect(() => validateEnv({ ...base, OTP_PROVIDER: "kavenegar", KAVENEGAR_ENABLED: "true", KAVENEGAR_API_KEY: "key", KAVENEGAR_SENDER: "2000660110" } as NodeJS.ProcessEnv)).not.toThrow();
+    expect(() => validateEnv({ ...base, OTP_PROVIDER: "kavenegar", KAVENEGAR_ENABLED: "true", KAVENEGAR_API_KEY: "key", KAVENEGAR_OTP_TEMPLATE: "opetlifeotp" } as NodeJS.ProcessEnv)).not.toThrow();
+  });
+
+  it("requires a Kavenegar sender line for production notifications (the account has no default line)", () => {
+    expect(() => validateEnv({ ...base, MESSAGING_SANDBOX_MODE: "production", MESSAGING_PROVIDER: "kavenegar", KAVENEGAR_ENABLED: "true", KAVENEGAR_API_KEY: "key" } as NodeJS.ProcessEnv)).toThrow(/KAVENEGAR_API_KEY\/KAVENEGAR_SENDER/);
+    expect(() => validateEnv({ ...base, MESSAGING_SANDBOX_MODE: "production", MESSAGING_PROVIDER: "kavenegar", KAVENEGAR_ENABLED: "true", KAVENEGAR_API_KEY: "key", KAVENEGAR_SENDER: "2000660110" } as NodeJS.ProcessEnv)).not.toThrow();
+  });
+
   it("binds to loopback and trusts only the local proxy by default (finding G)", () => {
     const env = validateEnv({ ...base, NODE_ENV: "development" } as NodeJS.ProcessEnv);
     expect(env.HOST).toBe("127.0.0.1");

@@ -3,11 +3,13 @@ import { apiFetch } from "@/lib/api/client";
 export interface MessagingStatus {
   checkedAt: string;
   sms: {
-    provider: "dev" | "faraz";
+    provider: "dev" | "faraz" | "kavenegar";
     mode: "sandbox" | "production";
-    otpProvider: "dev" | "faraz";
+    otpProvider: "dev" | "faraz" | "kavenegar";
     live: boolean;
     otpLive: boolean;
+    /** Which real provider the setup checklist describes (Kavenegar once it handles notifications or sign-in codes). */
+    setupProvider?: "faraz" | "kavenegar";
     senderMasked: string | null;
     apiKeyConfigured: boolean;
     otpPatternConfigured: boolean;
