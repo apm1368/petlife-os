@@ -90,6 +90,8 @@ export class PaymentsService {
   async charge(intentId: string, mode: PaymentChargeMode | undefined, client: QueryClient = this.prisma): Promise<ChargeOutcome> {
     const intent = await client.paymentIntent.findUniqueOrThrow({ where: { id: intentId } });
     if (intent.status === PaymentIntentStatus.CAPTURED) throw new PaymentAlreadyCompletedException({ paymentIntentId: intentId });
+    // Before anything is claimed or recorded: a simulated gateway never takes a payment on a server people use.
+    this.gateways.assertChargeable(intent.provider);
     // Claim the intent before touching the gateway: only one caller can move it out of a chargeable
     // state, so two requests racing on the same intent (a double tap, a retry) never charge twice.
     // An interrupted charge leaves it PENDING, which reconciliation resolves against the gateway.
