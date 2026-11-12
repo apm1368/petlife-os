@@ -1175,6 +1175,10 @@ enum ShippingProvider {
   DEV
   ALOPEYK
   SNAPPBOX
+  /// opetlife's own couriers: priced from staff-set zone/distance rules, dispatched and updated by staff.
+  OPETLIFE_COURIER
+  /// Iran Post express (Pishtaz): a fixed price set by staff, no API; staff enter the Post tracking number.
+  POST_PISHTAZ
 }
 
 /// A single, fixed value this phase (spec section 4's "fulfillmentType"
@@ -2464,7 +2468,11 @@ model CustomerAddress {
   countryCode  String
   latitude     Float?
   longitude    Float?
+  /// Neighbourhood / district (محله), which Iranian couriers and the opetlife courier zones use.
+  area         String?
   instructions String?
+  /// Removed from the address book by the member; kept because bookings and orders still point at it.
+  archivedAt   DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -2813,9 +2821,46 @@ model SellerOrganization {
   settlements                     SellerSettlement[]
   adjustments                     SellerAdjustment[]
   marketplaceSettlementStatements MarketplaceSettlementStatement[]
+  shippingProfile                 SellerShippingProfile?
 
   @@index([verificationStatus, status])
   @@map("seller_organizations")
+}
+
+/// How a seller ships: which of the platform's enabled methods it offers (empty = all of them) and where couriers
+/// pick parcels up. The pickup address feeds every quote and shipment instead of the organization's city alone.
+model SellerShippingProfile {
+  sellerOrganizationId String             @id @db.Uuid
+  sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Cascade)
+  offeredProviders     ShippingProvider[] @default([])
+  pickupContactName    String?
+  pickupPhone          String?
+  pickupAddressLine    String?
+  pickupCity           String?
+  pickupRegion         String?
+  pickupArea           String?
+  pickupPostalCode     String?
+  pickupLatitude       Float?
+  pickupLongitude      Float?
+  pickupInstructions   String?
+  updatedAt            DateTime           @updatedAt
+  createdAt            DateTime           @default(now())
+
+  @@map("seller_shipping_profiles")
+}
+
+/// Staff-managed shipping method settings: on/off and the pricing rules for methods priced by opetlife itself
+/// (OPETLIFE_COURIER zone/distance rules, POST_PISHTAZ fixed price). API couriers keep their env credentials;
+/// a row here can only switch them off, never on without credentials.
+model ShippingMethodSetting {
+  provider         ShippingProvider @id
+  enabled          Boolean          @default(false)
+  config           Json             @default("{}")
+  updatedByAdminId String?          @db.Uuid
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@map("shipping_method_settings")
 }
 
 /// The Seller OS equivalent of ProviderUser (spec section 4) — replaces
@@ -3268,6 +3313,9 @@ model Checkout {
   promotionCode       String?
   /// Batch 4: the priced lines (CartLineDto[]) frozen when the checkout was created. Orders are built from this, never from the mutable cart, so the order always equals what was charged.
   pricedLinesSnapshot Json?
+  /// The delivery address frozen when payment starts: the order ships to what the quote priced, even if the
+  /// member edits the saved address afterwards.
+  deliveryAddressSnapshot Json?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -4299,6 +4347,10 @@ model ShippingQuote {
   estimatedDeliveryMinutes Int?
 
   providerQuoteId String?
+  /// How the price was reached, shown to the member: API, SANDBOX_ESTIMATE, DISTANCE_ESTIMATE, CITY_FLAT or FIXED_PRICE.
+  pricingBasis    String?
+  /// The checkout address this quote was priced for (see delivery-address-fingerprint.ts); a different one = stale.
+  deliveryAddressFingerprint String?
 
   status    ShippingQuoteStatus @default(AVAILABLE)
   expiresAt DateTime

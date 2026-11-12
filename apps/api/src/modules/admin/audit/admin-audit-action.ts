@@ -240,6 +240,8 @@ export type AdminAuditAction =
   | "place_report.dismissed"
   | "pet_memorial.approved"
   | "pet_memorial.rejected"
+  | "shipping_method.updated"
+  | "shipment.staff_updated"
   | "wallet.credited"
   | "wallet.debited"
   | "wallet_top_up.approved"

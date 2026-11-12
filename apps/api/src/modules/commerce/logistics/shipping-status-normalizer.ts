@@ -36,6 +36,9 @@ const MAP_BY_PROVIDER: Record<ShippingProvider, Record<string, ShipmentStatus>> 
   [ShippingProvider.DEV]: DEV_STATUS_MAP,
   [ShippingProvider.ALOPEYK]: ALOPEYK_STATUS_MAP,
   [ShippingProvider.SNAPPBOX]: SNAPPBOX_STATUS_MAP,
+  // Staff-run methods: the back office records the canonical status itself (lowercased), same vocabulary as DEV.
+  [ShippingProvider.OPETLIFE_COURIER]: DEV_STATUS_MAP,
+  [ShippingProvider.POST_PISHTAZ]: DEV_STATUS_MAP,
 };
 
 /**

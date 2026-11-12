@@ -1,0 +1,10 @@
+/* Admin shipping — glass ERP pattern (gx-*), light and dark via shared tokens. */
+.as-methods { grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); }
+.as-form { display: grid; gap: 10px; margin-top: 10px; }
+.as-row { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); }
+.as-switch { display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; font-weight: 700; font-size: 0.85rem; }
+.as-switch input { accent-color: var(--brand-natural, #2f7d4c); width: 18px; height: 18px; }
+.as-error { color: var(--state-urgent, #b3261e); font-size: 0.8rem; }
+.gx-tag.as-on { background: rgba(79, 154, 104, 0.16); color: #2f7d4c; }
+:root[data-theme="dark"] .gx-tag.as-on { color: #8fd3a5; }
+.gx-field textarea { min-height: 72px; padding: 8px 12px; border-radius: 14px; border: 1px solid var(--glass-edge); background: var(--glass-input); color: var(--text-primary); font: inherit; font-size: 0.85rem; }

@@ -3879,7 +3879,8 @@
         "channels": "Canales y envíos",
         "smsPatterns": "Plantillas SMS",
         "walletDirectory": "Miembros",
-        "walletTopUps": "Comprobantes de recarga"
+        "walletTopUps": "Comprobantes de recarga",
+        "shipping": "Envíos"
       },
       "palette": {
         "actions": "Acciones rápidas",
@@ -4971,7 +4972,9 @@
         "cancel": "Cancelar",
         "submit": "Enviar para revisión",
         "failed": "No se pudo enviar la reseña."
-      }
+      },
+      "deliveryMethod": "Envío: {method}",
+      "postTracking": "Seguir el envío en la web de Correos"
     },
     "checkout": {
       "summary": { "title": "Resumen del pedido", "deliveryNext": "Se elige en el paso de entrega" },
@@ -5012,12 +5015,28 @@
       },
       "shipping": {
         "title": "Elige la entrega para cada vendedor",
-        "serviceLevel": { "STANDARD": "Entrega estándar", "EXPRESS": "Entrega exprés" },
+        "serviceLevel": { "STANDARD": "Entrega estándar", "EXPRESS": "Entrega exprés", "COURIER": "Mensajero", "POST_PISHTAZ": "Correo exprés" },
         "eta": "Llega en aproximadamente {hours, plural, one {# hora} other {# horas}}",
         "selected": "Seleccionada",
         "unavailable": "Ahora no hay opciones de entrega disponibles",
         "refresh": "Actualizar opciones de entrega",
-        "chooseFirst": "Elige una opción de entrega para continuar."
+        "chooseFirst": "Elige una opción de entrega para continuar.",
+        "provider": {
+          "DEV": "Mensajero de prueba",
+          "ALOPEYK": "Alopeyk",
+          "SNAPPBOX": "Snappbox",
+          "OPETLIFE_COURIER": "Mensajero de opetlife",
+          "POST_PISHTAZ": "Correo exprés de Irán (Pishtaz)"
+        },
+        "basis": {
+          "API": "Precio actual del mensajero",
+          "SANDBOX_ESTIMATE": "Estimación de prueba: aún no se consultó al mensajero",
+          "DISTANCE_ESTIMATE": "Estimado según la distancia",
+          "CITY_FLAT": "Tarifa fija de la ciudad",
+          "FIXED_PRICE": "Tarifa fija"
+        },
+        "etaDays": "Llega en aproximadamente {days, plural, one {# día hábil} other {# días hábiles}}",
+        "sandboxNote": "Por ahora el envío está en modo de prueba: los precios de Alopeyk y Snappbox son estimaciones y no se envía ningún mensajero."
       },
       "payment": {
         "title": "Pago",
@@ -6916,6 +6935,47 @@
         "intervals": "Intervalos de entrega",
         "everyDays": "Cada {days} días",
         "pickOne": "Elige al menos un intervalo."
+      }
+    },
+    "shipping": {
+      "title": "Envíos",
+      "subtitle": "Los métodos que ofreces y la dirección donde los mensajeros recogen los paquetes.",
+      "loading": "Cargando…",
+      "failed": "No se pudieron cargar los ajustes de envío.",
+      "methods": "Métodos de envío",
+      "methodsHint": "Si no eliges ninguno, se ofrecen todos los métodos activos de opetlife.",
+      "noneActive": "Todavía no hay métodos de envío activos en opetlife.",
+      "provider": {
+        "DEV": "Mensajero de prueba",
+        "ALOPEYK": "Alopeyk",
+        "SNAPPBOX": "Snappbox",
+        "OPETLIFE_COURIER": "Mensajero de opetlife",
+        "POST_PISHTAZ": "Correo exprés de Irán (Pishtaz)"
+      },
+      "pickup": "Dirección de recogida",
+      "pickupHint": "Un punto en el mapa permite al mensajero de opetlife calcular por distancia.",
+      "fields": {
+        "contactName": "Persona de contacto",
+        "phone": "Teléfono",
+        "city": "Ciudad",
+        "region": "Provincia",
+        "area": "Barrio",
+        "addressLine": "Dirección completa",
+        "postalCode": "Código postal de 10 dígitos",
+        "instructions": "Nota para el mensajero"
+      },
+      "useLocation": "Usar la ubicación actual",
+      "clearLocation": "Quitar punto del mapa",
+      "locationDenied": "No se dio acceso a la ubicación.",
+      "save": "Guardar ajustes de envío",
+      "saving": "Guardando…",
+      "saved": "Guardado.",
+      "saveFailed": "No se guardó. Revisa los campos (código postal: 10 dígitos).",
+      "readOnly": "Solo un administrador de la tienda puede cambiarlo."
+    },
+    "shell": {
+      "nav": {
+        "shipping": "Envíos"
       }
     }
   },
@@ -9684,6 +9744,147 @@
       "body": "Lleva un minuto, y todo lo demás se construye sobre él.",
       "primary": "Crear una cuenta",
       "secondary": "Explorar servicios"
+    }
+  },
+  "addressBook": {
+    "eyebrow": "Cuenta",
+    "title": "Direcciones",
+    "description": "Las direcciones de entrega de tu hogar, para mensajeros y correo.",
+    "navHint": "Direcciones de entrega y predeterminada",
+    "loading": "Cargando direcciones…",
+    "failed": "No se pudieron cargar las direcciones.",
+    "noHousehold": "Crea primero un hogar para guardar direcciones.",
+    "empty": "Aún no hay direcciones guardadas.",
+    "add": "Añadir dirección",
+    "edit": "Editar",
+    "remove": "Eliminar",
+    "removeConfirm": "¿Eliminar esta dirección? Los pedidos anteriores conservan su propia copia.",
+    "removed": "Dirección eliminada.",
+    "makeDefault": "Hacer predeterminada",
+    "default": "Predeterminada",
+    "save": "Guardar dirección",
+    "saving": "Guardando…",
+    "saved": "Dirección guardada.",
+    "cancel": "Cancelar",
+    "failedSave": "No se guardó la dirección. Revisa los campos.",
+    "fields": {
+      "label": "Etiqueta (p. ej., casa, trabajo)",
+      "recipient": "Destinatario",
+      "phone": "Teléfono",
+      "city": "Ciudad",
+      "region": "Provincia",
+      "area": "Barrio",
+      "addressLine": "Dirección completa (calle, callejón, número, unidad)",
+      "postalCode": "Código postal de 10 dígitos",
+      "instructions": "Nota para el mensajero (opcional)",
+      "isDefault": "Usar como dirección predeterminada"
+    },
+    "location": {
+      "use": "Usar mi ubicación actual",
+      "locating": "Buscando tu ubicación…",
+      "set": "Punto del mapa guardado; el mensajero de opetlife puede calcular mejor.",
+      "clear": "Quitar punto del mapa",
+      "denied": "No se dio acceso a la ubicación. Puedes continuar sin ella.",
+      "hasPoint": "Con punto en el mapa"
+    }
+  },
+  "adminShipping": {
+    "kicker": "Tienda",
+    "title": "Métodos de envío",
+    "subtitle": "Qué métodos ofrece el pago, a qué precio y en qué estado está cada envío.",
+    "loading": "Cargando…",
+    "failed": "No se pudieron cargar los datos.",
+    "retry": "Reintentar",
+    "forbidden": "Necesitas el permiso «Ver tienda» para ver los envíos.",
+    "mode": {
+      "sandbox": "Modo de prueba: Alopeyk y Snappbox solo dan estimaciones y no se envía mensajero.",
+      "production": "Modo real: los precios vienen de los mensajeros."
+    },
+    "provider": {
+      "DEV": "Mensajero de prueba",
+      "ALOPEYK": "Alopeyk",
+      "SNAPPBOX": "Snappbox",
+      "OPETLIFE_COURIER": "Mensajero de opetlife",
+      "POST_PISHTAZ": "Correo exprés de Irán (Pishtaz)"
+    },
+    "kind": {
+      "API": "Precio por la API del mensajero",
+      "MANUAL": "Precio de opetlife"
+    },
+    "active": "Se ofrece al pagar",
+    "inactive": "No se ofrece al pagar",
+    "notes": {
+      "NEEDS_PRICE": "Primero define un precio.",
+      "SWITCHED_OFF": "Apagado por el equipo.",
+      "DISABLED_IN_ENV": "Apagado en la configuración del servidor.",
+      "SANDBOX": "Estimaciones de prueba hasta que se configuren las claves de API."
+    },
+    "webhook": {
+      "yes": "Secreto de webhook configurado",
+      "no": "Sin secreto de webhook (necesario para el modo real)"
+    },
+    "enabled": "Activado",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "saved": "Guardado.",
+    "saveFailed": "No se guardó. Si está activado, necesita un precio válido.",
+    "reason": "Motivo (queda en el registro de auditoría)",
+    "readOnly": "Solo «Gestionar tienda» puede cambiarlo.",
+    "courier": {
+      "cities": "Ciudades atendidas (separadas por comas; vacío = todas)",
+      "baseFare": "Tarifa base (tomanes)",
+      "perKm": "Por km (tomanes)",
+      "minFare": "Tarifa mínima (tomanes)",
+      "maxKm": "Distancia máxima (km)",
+      "roadFactor": "Factor de ruta (línea recta ×)",
+      "defaultFlat": "Tarifa fija sin punto en el mapa (tomanes, 0 = ninguna)",
+      "cityFares": "Tarifa fija por ciudad (una por línea: ciudad=tomanes)",
+      "pickupMinutes": "Minutos hasta la recogida",
+      "minutesPerKm": "Minutos por km"
+    },
+    "post": {
+      "fixedPrice": "Precio fijo (tomanes)",
+      "includedKg": "Peso incluido (kg)",
+      "perExtraKg": "Cada kilo extra (tomanes)",
+      "etaMin": "Entrega más rápida (días)",
+      "etaMax": "Entrega más lenta (días)"
+    },
+    "shipments": {
+      "title": "Envíos",
+      "hint": "El equipo mueve los envíos del mensajero de opetlife y de Correos; Alopeyk y Snappbox informan su propio estado.",
+      "allMethods": "Todos los métodos",
+      "allStatuses": "Todos los estados",
+      "empty": "No hay envíos.",
+      "columns": {
+        "method": "Método",
+        "seller": "Vendedor",
+        "city": "Destino",
+        "status": "Estado",
+        "tracking": "Seguimiento",
+        "updated": "Último cambio"
+      },
+      "status": {
+        "CREATED": "Creado",
+        "REQUESTED": "Mensajero solicitado",
+        "ASSIGNED": "Mensajero asignado",
+        "PICKED_UP": "Recogido",
+        "IN_TRANSIT": "En tránsito",
+        "OUT_FOR_DELIVERY": "En reparto",
+        "DELIVERED": "Entregado",
+        "FAILED": "Fallido",
+        "CANCELED": "Cancelado",
+        "UNKNOWN": "Desconocido"
+      },
+      "update": "Actualizar",
+      "updateTitle": "Actualizar envío",
+      "newStatus": "Nuevo estado",
+      "trackingCode": "Número de seguimiento de Correos o referencia del mensajero",
+      "note": "Nota (opcional, en el registro de auditoría)",
+      "apply": "Aplicar",
+      "cancel": "Cancelar",
+      "applied": "Envío actualizado; el miembro lo ve en el seguimiento.",
+      "notApplied": "Ese estado es anterior al actual; no cambió nada.",
+      "failed": "La actualización falló."
     }
   }
 }

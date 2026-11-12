@@ -3884,7 +3884,8 @@
         "channels": "Kanäle und Zustellung",
         "smsPatterns": "SMS-Vorlagen",
         "walletDirectory": "Mitglieder",
-        "walletTopUps": "Aufladebelege"
+        "walletTopUps": "Aufladebelege",
+        "shipping": "Versand"
       },
       "palette": {
         "actions": "Schnellaktionen",
@@ -4981,7 +4982,9 @@
         "cancel": "Abbrechen",
         "submit": "Zur Prüfung senden",
         "failed": "Deine Bewertung konnte nicht gesendet werden."
-      }
+      },
+      "deliveryMethod": "Versand: {method}",
+      "postTracking": "Sendung auf der Website der Post verfolgen"
     },
     "checkout": {
       "summary": { "title": "Bestellübersicht", "deliveryNext": "Wird im Lieferschritt ausgewählt" },
@@ -5022,12 +5025,28 @@
       },
       "shipping": {
         "title": "Lieferung für jeden Verkäufer auswählen",
-        "serviceLevel": { "STANDARD": "Standardlieferung", "EXPRESS": "Expresslieferung" },
+        "serviceLevel": { "STANDARD": "Standardlieferung", "EXPRESS": "Expresslieferung", "COURIER": "Kurier", "POST_PISHTAZ": "Expresspost" },
         "eta": "Lieferung in etwa {hours, plural, one {# Stunde} other {# Stunden}}",
         "selected": "Ausgewählt",
         "unavailable": "Zurzeit sind keine Lieferoptionen verfügbar",
         "refresh": "Lieferoptionen aktualisieren",
-        "chooseFirst": "Wähle zuerst eine Lieferoption aus, um fortzufahren."
+        "chooseFirst": "Wähle zuerst eine Lieferoption aus, um fortzufahren.",
+        "provider": {
+          "DEV": "Testkurier",
+          "ALOPEYK": "Alopeyk",
+          "SNAPPBOX": "Snappbox",
+          "OPETLIFE_COURIER": "opetlife-Kurier",
+          "POST_PISHTAZ": "Iranische Post Express (Pishtaz)"
+        },
+        "basis": {
+          "API": "Aktueller Kurierpreis",
+          "SANDBOX_ESTIMATE": "Testschätzung: der Kurier wurde noch nicht angefragt",
+          "DISTANCE_ESTIMATE": "Nach Entfernung geschätzt",
+          "CITY_FLAT": "Pauschalpreis für die Stadt",
+          "FIXED_PRICE": "Fester Tarif"
+        },
+        "etaDays": "Lieferung in etwa {days, plural, one {# Werktag} other {# Werktagen}}",
+        "sandboxNote": "Der Versand läuft vorerst im Testmodus: Preise von Alopeyk und Snappbox sind Schätzungen, es kommt kein Kurier."
       },
       "payment": {
         "title": "Zahlung",
@@ -6926,6 +6945,47 @@
         "intervals": "Lieferintervalle",
         "everyDays": "Alle {days} Tage",
         "pickOne": "Wähle mindestens ein Intervall aus."
+      }
+    },
+    "shipping": {
+      "title": "Versand",
+      "subtitle": "Die Versandarten, die Sie anbieten, und die Adresse, an der Kuriere Pakete abholen.",
+      "loading": "Wird geladen…",
+      "failed": "Versandeinstellungen konnten nicht geladen werden.",
+      "methods": "Versandarten",
+      "methodsHint": "Wenn Sie keine wählen, werden alle von opetlife aktivierten Versandarten angeboten.",
+      "noneActive": "Bei opetlife ist noch keine Versandart aktiviert.",
+      "provider": {
+        "DEV": "Testkurier",
+        "ALOPEYK": "Alopeyk",
+        "SNAPPBOX": "Snappbox",
+        "OPETLIFE_COURIER": "opetlife-Kurier",
+        "POST_PISHTAZ": "Iranische Post Express (Pishtaz)"
+      },
+      "pickup": "Abholadresse",
+      "pickupHint": "Ein Kartenpunkt lässt den opetlife-Kurier nach Entfernung rechnen.",
+      "fields": {
+        "contactName": "Ansprechpartner",
+        "phone": "Telefon",
+        "city": "Stadt",
+        "region": "Provinz",
+        "area": "Stadtviertel",
+        "addressLine": "Vollständige Adresse",
+        "postalCode": "10-stellige Postleitzahl",
+        "instructions": "Hinweis für den Kurier"
+      },
+      "useLocation": "Aktuellen Standort verwenden",
+      "clearLocation": "Kartenpunkt entfernen",
+      "locationDenied": "Kein Standortzugriff.",
+      "save": "Versandeinstellungen speichern",
+      "saving": "Wird gespeichert…",
+      "saved": "Gespeichert.",
+      "saveFailed": "Nicht gespeichert. Prüfen Sie die Felder (Postleitzahl: 10 Ziffern).",
+      "readOnly": "Nur ein Shop-Admin kann das ändern."
+    },
+    "shell": {
+      "nav": {
+        "shipping": "Versand"
       }
     }
   },
@@ -9686,6 +9746,147 @@
       "body": "Es dauert eine Minute, und alles andere baut darauf auf.",
       "primary": "Konto erstellen",
       "secondary": "Services entdecken"
+    }
+  },
+  "addressBook": {
+    "eyebrow": "Konto",
+    "title": "Adressen",
+    "description": "Die Lieferadressen Ihres Haushalts, für Kuriere und Post.",
+    "navHint": "Lieferadressen und Standard",
+    "loading": "Adressen werden geladen…",
+    "failed": "Die Adressen konnten nicht geladen werden.",
+    "noHousehold": "Legen Sie zuerst einen Haushalt an, um Adressen zu speichern.",
+    "empty": "Noch keine Adressen gespeichert.",
+    "add": "Adresse hinzufügen",
+    "edit": "Bearbeiten",
+    "remove": "Entfernen",
+    "removeConfirm": "Diese Adresse entfernen? Frühere Bestellungen behalten ihre eigene Kopie.",
+    "removed": "Adresse entfernt.",
+    "makeDefault": "Als Standard",
+    "default": "Standard",
+    "save": "Adresse speichern",
+    "saving": "Wird gespeichert…",
+    "saved": "Adresse gespeichert.",
+    "cancel": "Abbrechen",
+    "failedSave": "Die Adresse wurde nicht gespeichert. Prüfen Sie die Felder.",
+    "fields": {
+      "label": "Bezeichnung (z. B. Zuhause, Arbeit)",
+      "recipient": "Empfänger",
+      "phone": "Telefon",
+      "city": "Stadt",
+      "region": "Provinz",
+      "area": "Stadtviertel",
+      "addressLine": "Vollständige Adresse (Straße, Gasse, Nummer, Einheit)",
+      "postalCode": "10-stellige Postleitzahl",
+      "instructions": "Hinweis für den Kurier (optional)",
+      "isDefault": "Als Standardadresse verwenden"
+    },
+    "location": {
+      "use": "Meinen aktuellen Standort verwenden",
+      "locating": "Standort wird ermittelt…",
+      "set": "Kartenpunkt gespeichert; der opetlife-Kurier kann genauer rechnen.",
+      "clear": "Kartenpunkt entfernen",
+      "denied": "Kein Standortzugriff. Sie können ohne ihn fortfahren.",
+      "hasPoint": "Mit Kartenpunkt"
+    }
+  },
+  "adminShipping": {
+    "kicker": "Shop",
+    "title": "Versandarten",
+    "subtitle": "Welche Versandarten der Checkout anbietet, zu welchem Preis, und wo jede Sendung steht.",
+    "loading": "Wird geladen…",
+    "failed": "Die Daten konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "forbidden": "Dafür brauchen Sie die Berechtigung „Shop ansehen“.",
+    "mode": {
+      "sandbox": "Testmodus: Alopeyk und Snappbox liefern nur Schätzungen, es kommt kein Kurier.",
+      "production": "Live-Modus: Preise kommen von den Kurieren."
+    },
+    "provider": {
+      "DEV": "Testkurier",
+      "ALOPEYK": "Alopeyk",
+      "SNAPPBOX": "Snappbox",
+      "OPETLIFE_COURIER": "opetlife-Kurier",
+      "POST_PISHTAZ": "Iranische Post Express (Pishtaz)"
+    },
+    "kind": {
+      "API": "Preis über die Kurier-API",
+      "MANUAL": "Preis von opetlife"
+    },
+    "active": "Im Checkout angeboten",
+    "inactive": "Nicht im Checkout",
+    "notes": {
+      "NEEDS_PRICE": "Legen Sie zuerst einen Preis fest.",
+      "SWITCHED_OFF": "Von Mitarbeitern ausgeschaltet.",
+      "DISABLED_IN_ENV": "In den Servereinstellungen aus.",
+      "SANDBOX": "Testschätzungen, bis API-Schlüssel gesetzt sind."
+    },
+    "webhook": {
+      "yes": "Webhook-Secret gesetzt",
+      "no": "Kein Webhook-Secret (für den Live-Modus nötig)"
+    },
+    "enabled": "An",
+    "save": "Speichern",
+    "saving": "Wird gespeichert…",
+    "saved": "Gespeichert.",
+    "saveFailed": "Nicht gespeichert. Eingeschaltet braucht es einen gültigen Preis.",
+    "reason": "Grund (bleibt im Prüfprotokoll)",
+    "readOnly": "Nur „Shop verwalten“ kann das ändern.",
+    "courier": {
+      "cities": "Belieferte Städte (durch Kommas getrennt; leer = alle)",
+      "baseFare": "Grundpreis (Toman)",
+      "perKm": "Pro km (Toman)",
+      "minFare": "Mindestpreis (Toman)",
+      "maxKm": "Maximale Entfernung (km)",
+      "roadFactor": "Straßenfaktor (Luftlinie ×)",
+      "defaultFlat": "Pauschale ohne Kartenpunkt (Toman, 0 = keine)",
+      "cityFares": "Pauschale je Stadt (je Zeile: Stadt=Toman)",
+      "pickupMinutes": "Minuten bis zur Abholung",
+      "minutesPerKm": "Minuten pro km"
+    },
+    "post": {
+      "fixedPrice": "Festpreis (Toman)",
+      "includedKg": "Inklusivgewicht (kg)",
+      "perExtraKg": "Jedes weitere Kilo (Toman)",
+      "etaMin": "Schnellste Zustellung (Tage)",
+      "etaMax": "Langsamste Zustellung (Tage)"
+    },
+    "shipments": {
+      "title": "Sendungen",
+      "hint": "Mitarbeiter bewegen Sendungen von opetlife-Kurier und Post; Alopeyk und Snappbox melden ihren Status selbst.",
+      "allMethods": "Alle Versandarten",
+      "allStatuses": "Alle Status",
+      "empty": "Keine Sendungen.",
+      "columns": {
+        "method": "Versandart",
+        "seller": "Verkäufer",
+        "city": "Zielort",
+        "status": "Status",
+        "tracking": "Sendungsnummer",
+        "updated": "Letzte Änderung"
+      },
+      "status": {
+        "CREATED": "Erstellt",
+        "REQUESTED": "Kurier angefragt",
+        "ASSIGNED": "Kurier zugewiesen",
+        "PICKED_UP": "Abgeholt",
+        "IN_TRANSIT": "Unterwegs",
+        "OUT_FOR_DELIVERY": "In Zustellung",
+        "DELIVERED": "Zugestellt",
+        "FAILED": "Fehlgeschlagen",
+        "CANCELED": "Storniert",
+        "UNKNOWN": "Unbekannt"
+      },
+      "update": "Aktualisieren",
+      "updateTitle": "Sendung aktualisieren",
+      "newStatus": "Neuer Status",
+      "trackingCode": "Post-Sendungsnummer oder Kurierreferenz",
+      "note": "Notiz (optional, im Prüfprotokoll)",
+      "apply": "Übernehmen",
+      "cancel": "Abbrechen",
+      "applied": "Sendung aktualisiert; das Mitglied sieht es in der Verfolgung.",
+      "notApplied": "Dieser Status liegt hinter dem aktuellen; nichts geändert.",
+      "failed": "Die Aktualisierung ist fehlgeschlagen."
     }
   }
 }

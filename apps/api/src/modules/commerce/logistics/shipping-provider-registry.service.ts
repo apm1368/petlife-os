@@ -6,6 +6,7 @@ import { ShippingProviderDisabledException, ShippingProviderUnavailableException
 import { DevShippingAdapter } from "./dev-shipping.adapter";
 import { AloPeykAdapter } from "./alopeyk.adapter";
 import { SnappBoxAdapter } from "./snappbox.adapter";
+import { OpetlifeCourierAdapter, PostPishtazAdapter } from "./manual-shipping.adapters";
 import type { ShippingGateway } from "./shipping-gateway.interface";
 
 /**
@@ -23,12 +24,16 @@ export class ShippingProviderRegistry {
     dev: DevShippingAdapter,
     alopeyk: AloPeykAdapter,
     snappbox: SnappBoxAdapter,
+    courier: OpetlifeCourierAdapter,
+    post: PostPishtazAdapter,
     private readonly config: ConfigService<AppEnv, true>,
   ) {
     this.gateways = new Map<ShippingProvider, ShippingGateway>([
       [ShippingProvider.DEV, dev],
       [ShippingProvider.ALOPEYK, alopeyk],
       [ShippingProvider.SNAPPBOX, snappbox],
+      [ShippingProvider.OPETLIFE_COURIER, courier],
+      [ShippingProvider.POST_PISHTAZ, post],
     ]);
   }
 
@@ -36,6 +41,9 @@ export class ShippingProviderRegistry {
     if (provider === ShippingProvider.DEV) return this.config.get("DEV_SHIPPING_ENABLED", { infer: true });
     if (provider === ShippingProvider.ALOPEYK) return this.config.get("ALOPEYK_ENABLED", { infer: true });
     if (provider === ShippingProvider.SNAPPBOX) return this.config.get("SNAPPBOX_ENABLED", { infer: true });
+    // Staff-run methods stay resolvable so their existing shipments can be moved; whether they are offered in
+    // checkout is the staff switch, checked by the adapter's quote.
+    if (provider === ShippingProvider.OPETLIFE_COURIER || provider === ShippingProvider.POST_PISHTAZ) return true;
     return false;
   }
 

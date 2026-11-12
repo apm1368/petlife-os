@@ -104,6 +104,8 @@ export const DOMAIN_EVENT_TYPES = [
   // Delivery & Logistics Core (Handoff 08)
   "ShippingQuoteCreated",
   "ShippingQuoteSelected",
+  /** A seller changed where couriers pick up (who, when, before/after): the audit trail behind courier prices. */
+  "SellerShippingProfileChanged",
   "FulfillmentCreated",
   "FulfillmentReadyForPickup",
   "FulfillmentFailed",

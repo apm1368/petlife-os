@@ -754,6 +754,8 @@ export interface CustomerAddressDto {
   /** Batch 4 — Iranian 10-digit postal code, when known. */
   postalCode?: string | null;
   isDefault?: boolean;
+  /** Neighbourhood / district (محله). */
+  area?: string | null;
 }
 
 /** A single (provider, service) discovery result row — one provider can appear multiple times, once per matching service. */
@@ -1811,6 +1813,10 @@ export enum ShippingProvider {
   DEV = "DEV",
   ALOPEYK = "ALOPEYK",
   SNAPPBOX = "SNAPPBOX",
+  /** opetlife's own couriers (staff-set zone/distance pricing, staff-updated status). */
+  OPETLIFE_COURIER = "OPETLIFE_COURIER",
+  /** Iran Post express (Pishtaz): staff-set fixed price, staff-entered tracking number. */
+  POST_PISHTAZ = "POST_PISHTAZ",
 }
 
 export enum FulfillmentStatus {
@@ -1864,6 +1870,11 @@ export interface AddressSnapshotDto {
   region: string | null;
   countryCode: string | null;
   instructions: string | null;
+  /** Neighbourhood, postal code and map point when known (older snapshots have none). */
+  area?: string | null;
+  postalCode?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface ShippingQuoteDto {
@@ -1878,6 +1889,98 @@ export interface ShippingQuoteDto {
   status: ShippingQuoteStatus;
   expiresAt: string;
   createdAt: string;
+  /** How the price was reached, so the member is told when it is only an estimate. */
+  pricingBasis?: ShippingPricingBasis | null;
+}
+
+/**
+ * API: the courier's live quote. SANDBOX_ESTIMATE: shipping runs in sandbox, no courier was asked.
+ * DISTANCE_ESTIMATE: opetlife courier, straight-line distance x road factor. CITY_FLAT: opetlife courier city fare.
+ * FIXED_PRICE: Post Pishtaz price set by staff.
+ */
+export type ShippingPricingBasis = "API" | "SANDBOX_ESTIMATE" | "DISTANCE_ESTIMATE" | "CITY_FLAT" | "FIXED_PRICE";
+
+/** opetlife courier pricing rules (integer rials). */
+export interface OpetlifeCourierConfig {
+  /** Cities served (exact names as members type them, e.g. "تهران"); empty = every city. */
+  cities: string[];
+  baseFareIrr: number;
+  perKmIrr: number;
+  minFareIrr: number;
+  /** Beyond this straight-line x road-factor distance the courier is not offered. */
+  maxKm: number;
+  /** Straight-line to road distance multiplier, e.g. 1.3. */
+  roadFactor: number;
+  /** Fare when either side has no map point: per city, then the default. 0 = not offered without a map point. */
+  cityFlatFareIrr: Record<string, number>;
+  defaultFlatFareIrr: number;
+  /** Minutes to pick up, and minutes of travel per km. */
+  pickupMinutes: number;
+  minutesPerKm: number;
+}
+
+/** Post Pishtaz fixed pricing (integer rials). */
+export interface PostPishtazConfig {
+  fixedPriceIrr: number;
+  /** Weight included in the fixed price; each started kilo above it adds perExtraKgIrr. */
+  includedKg: number;
+  perExtraKgIrr: number;
+  etaDaysMin: number;
+  etaDaysMax: number;
+}
+
+export interface AdminShippingMethodDto {
+  provider: ShippingProvider;
+  /** Staff switch (for API couriers it can only turn an env-enabled courier off). */
+  enabled: boolean;
+  /** What actually applies now: env flag, credentials, mode and the staff switch together. */
+  active: boolean;
+  /** API couriers: why the method is not active (e.g. "SANDBOX", "DISABLED_IN_ENV"). */
+  note: string | null;
+  kind: "API" | "MANUAL";
+  config: OpetlifeCourierConfig | PostPishtazConfig | Record<string, never>;
+  webhookSecretConfigured: boolean | null;
+  updatedAt: string | null;
+}
+
+export interface AdminShippingOverviewDto {
+  mode: "sandbox" | "production";
+  methods: AdminShippingMethodDto[];
+}
+
+export interface AdminShipmentListItemDto {
+  id: string;
+  provider: ShippingProvider;
+  status: ShipmentStatus;
+  trackingCode: string | null;
+  orderId: string;
+  sellerName: string;
+  deliveryCity: string | null;
+  createdAt: string;
+  updatedAt: string;
+  /** Only opetlife courier and Post shipments are moved by staff; API couriers report their own status. */
+  staffManaged: boolean;
+}
+
+export interface SellerShippingProfileDto {
+  sellerOrganizationId: string;
+  /** Methods this seller offers; empty means every method the platform has switched on. */
+  offeredProviders: ShippingProvider[];
+  /** Methods the platform has switched on right now (the seller chooses among these). */
+  availableProviders: ShippingProvider[];
+  pickup: {
+    contactName: string | null;
+    phone: string | null;
+    addressLine: string | null;
+    city: string | null;
+    region: string | null;
+    area: string | null;
+    postalCode: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    instructions: string | null;
+  };
+  updatedAt: string | null;
 }
 
 /** One seller's shipping-option set for a Checkout (spec section 28: "shipping options per seller"). At most one quote in `quotes` has `status: SELECTED`. */

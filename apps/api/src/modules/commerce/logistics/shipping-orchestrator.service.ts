@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { FulfillmentStatus, Prisma, SellerMembershipStatus, ShipmentStatus, ShippingProvider, ShippingQuoteStatus, type Fulfillment, type Shipment, type ShippingQuote } from "@prisma/client";
 import type { AddressSnapshotDto, CartLineDto, SellerShippingOptionsDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
+import { deliveryAddressFingerprint } from "./delivery-address-fingerprint";
 import { DomainEventsService, type DomainEventType } from "../../../common/events/domain-events.service";
 import {
   CheckoutNotFoundException,
@@ -17,6 +18,26 @@ import { FulfillmentTransitionService } from "./fulfillment-transition.service";
 import { ShippingProviderRegistry } from "./shipping-provider-registry.service";
 import { toAddressSnapshotDto, toShippingQuoteDto } from "./logistics-dto.mapper";
 import { buildShippingPackage } from "./shipping-package.util";
+import { ShippingMethodSettingsService } from "./shipping-method-settings.service";
+import type { SellerShippingProfile } from "@prisma/client";
+
+/** A seller's pickup point: its shipping profile when filled in, otherwise just its name and city. */
+export function pickupFromProfile(seller: { name: string; city: string | null; countryCode: string }, profile: SellerShippingProfile | null): AddressSnapshotDto {
+  if (!profile?.pickupAddressLine && !profile?.pickupCity) return { recipient: seller.name, phone: null, addressLine: null, city: seller.city, region: null, countryCode: seller.countryCode, instructions: null };
+  return {
+    recipient: profile.pickupContactName ?? seller.name,
+    phone: profile.pickupPhone,
+    addressLine: profile.pickupAddressLine,
+    city: profile.pickupCity ?? seller.city,
+    region: profile.pickupRegion,
+    countryCode: seller.countryCode,
+    instructions: profile.pickupInstructions,
+    area: profile.pickupArea,
+    postalCode: profile.pickupPostalCode,
+    latitude: profile.pickupLatitude,
+    longitude: profile.pickupLongitude,
+  };
+}
 
 function isUniqueConstraintViolation(error: unknown): boolean {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
@@ -44,6 +65,7 @@ export class ShippingOrchestrator {
     private readonly shippingProviders: ShippingProviderRegistry,
     private readonly transitions: FulfillmentTransitionService,
     private readonly events: DomainEventsService,
+    private readonly methods: ShippingMethodSettingsService,
   ) {}
 
   // ---------------------------------------------------------------------
@@ -121,23 +143,45 @@ export class ShippingOrchestrator {
         }
       }
     }
-    return [...bySeller.values()];
+    const contexts = [...bySeller.values()];
+    if (contexts.length) {
+      const profiles = await this.prisma.sellerShippingProfile.findMany({ where: { sellerOrganizationId: { in: contexts.map((c) => c.sellerOrgId) } } });
+      const byId = new Map(profiles.map((p) => [p.sellerOrganizationId, p]));
+      for (const context of contexts) context.pickupAddress = pickupFromProfile(context.sellerOrganization as never, byId.get(context.sellerOrgId) ?? null);
+    }
+    return contexts;
   }
 
-  private async loadDeliveryAddress(checkout: { addressId: string | null }): Promise<AddressSnapshotDto> {
-    if (!checkout.addressId) return { recipient: null, phone: null, addressLine: null, city: null, region: null, countryCode: null, instructions: null };
+  private async loadDeliveryAddress(checkout: { addressId: string | null }): Promise<AddressSnapshotDto & { fingerprint: string }> {
+    const empty = { recipient: null, phone: null, addressLine: null, city: null, region: null, countryCode: null, instructions: null, fingerprint: deliveryAddressFingerprint(null) };
+    if (!checkout.addressId) return empty;
     const address = await this.prisma.customerAddress.findUnique({ where: { id: checkout.addressId } });
-    if (!address) return { recipient: null, phone: null, addressLine: null, city: null, region: null, countryCode: null, instructions: null };
-    return { recipient: address.recipient, phone: address.phone, addressLine: address.addressLine, city: address.city, region: address.region, countryCode: address.countryCode, instructions: address.instructions };
+    if (!address) return empty;
+    return { recipient: address.recipient, phone: address.phone, addressLine: address.addressLine, city: address.city, region: address.region, countryCode: address.countryCode, instructions: address.instructions, area: address.area, postalCode: address.postalCode, latitude: address.latitude, longitude: address.longitude, fingerprint: deliveryAddressFingerprint(address) };
   }
 
-  private async requestFreshQuotes(checkoutId: string, seller: SellerContext, deliveryAddress: AddressSnapshotDto): Promise<ShippingQuote[]> {
+  /**
+   * Offered quotes priced for another address (or an earlier version of this one) expire. A stale SELECTED quote is
+   * left selected so the totals stay coherent, but payment refuses it (CheckoutService) until the member picks a
+   * quote for the current address.
+   */
+  private async expireQuotesForOtherAddresses(checkoutId: string, fingerprint: string): Promise<void> {
+    await this.prisma.shippingQuote.updateMany({
+      where: { checkoutId, status: ShippingQuoteStatus.AVAILABLE, OR: [{ deliveryAddressFingerprint: null }, { deliveryAddressFingerprint: { not: fingerprint } }] },
+      data: { status: ShippingQuoteStatus.EXPIRED },
+    });
+  }
+
+  private async requestFreshQuotes(checkoutId: string, seller: SellerContext, delivery: AddressSnapshotDto & { fingerprint: string }): Promise<ShippingQuote[]> {
+    const { fingerprint, ...deliveryAddress } = delivery;
     const shippingPackage = buildShippingPackage(
       seller.shippingPackageLines.map((l) => ({ quantity: l.quantity, unitPriceAmount: l.unitPriceAmount, variantWeightValue: l.variantWeightValue, variantWeightUnit: l.variantWeightUnit as never })),
     );
     const created: ShippingQuote[] = [];
+    const allowed = await this.methods.providersFor(seller.sellerOrgId);
+    const sandbox = this.methods.mode() === "sandbox";
     for (const gateway of this.shippingProviders.listEnabled()) {
-      if (!gateway.capabilities.supportsQuote) continue;
+      if (!gateway.capabilities.supportsQuote || !allowed.has(gateway.provider)) continue;
       const result = await gateway.getQuote({ pickupAddress: seller.pickupAddress, deliveryAddress, shippingPackage });
       if (result.status !== "AVAILABLE") continue;
       for (const option of result.quotes) {
@@ -151,6 +195,8 @@ export class ShippingOrchestrator {
             estimatedPickupMinutes: option.estimatedPickupMinutes,
             estimatedDeliveryMinutes: option.estimatedDeliveryMinutes,
             providerQuoteId: option.providerQuoteId,
+            pricingBasis: option.pricingBasis ?? (sandbox || gateway.provider === ShippingProvider.DEV ? "SANDBOX_ESTIMATE" : "API"),
+            deliveryAddressFingerprint: fingerprint,
             status: ShippingQuoteStatus.AVAILABLE,
             expiresAt: new Date(Date.now() + option.expiresInMinutes * 60_000),
           },
@@ -173,12 +219,14 @@ export class ShippingOrchestrator {
     const checkout = await this.loadOwnedCheckout(userId, checkoutId);
     const sellers = await this.loadSellerContexts(checkout);
     const deliveryAddress = await this.loadDeliveryAddress(checkout);
+    await this.expireQuotesForOtherAddresses(checkoutId, deliveryAddress.fingerprint);
     const now = new Date();
 
     const result: SellerShippingOptionsDto[] = [];
     for (const seller of sellers) {
+      // Only quotes priced for the current address are shown; a stale selection disappears until the member picks again.
       let quotes = await this.prisma.shippingQuote.findMany({
-        where: { checkoutId, sellerOrgId: seller.sellerOrgId, OR: [{ status: ShippingQuoteStatus.SELECTED }, { status: ShippingQuoteStatus.AVAILABLE, expiresAt: { gt: now } }] },
+        where: { checkoutId, sellerOrgId: seller.sellerOrgId, deliveryAddressFingerprint: deliveryAddress.fingerprint, OR: [{ status: ShippingQuoteStatus.SELECTED }, { status: ShippingQuoteStatus.AVAILABLE, expiresAt: { gt: now } }] },
         orderBy: { createdAt: "desc" },
       });
       if (quotes.length === 0) quotes = await this.requestFreshQuotes(checkoutId, seller, deliveryAddress);
@@ -191,6 +239,7 @@ export class ShippingOrchestrator {
     const checkout = await this.loadOwnedCheckout(userId, checkoutId);
     const sellers = await this.loadSellerContexts(checkout);
     const deliveryAddress = await this.loadDeliveryAddress(checkout);
+    await this.expireQuotesForOtherAddresses(checkoutId, deliveryAddress.fingerprint);
 
     await this.prisma.shippingQuote.updateMany({
       where: { checkoutId, status: ShippingQuoteStatus.AVAILABLE },
@@ -199,7 +248,7 @@ export class ShippingOrchestrator {
 
     const result: SellerShippingOptionsDto[] = [];
     for (const seller of sellers) {
-      const selected = await this.prisma.shippingQuote.findMany({ where: { checkoutId, sellerOrgId: seller.sellerOrgId, status: ShippingQuoteStatus.SELECTED } });
+      const selected = await this.prisma.shippingQuote.findMany({ where: { checkoutId, sellerOrgId: seller.sellerOrgId, status: ShippingQuoteStatus.SELECTED, deliveryAddressFingerprint: deliveryAddress.fingerprint } });
       const fresh = await this.requestFreshQuotes(checkoutId, seller, deliveryAddress);
       result.push(this.toOptionsDto(seller, [...selected, ...fresh]));
     }
@@ -207,14 +256,16 @@ export class ShippingOrchestrator {
   }
 
   async selectShippingQuote(userId: string, checkoutId: string, quoteId: string): Promise<SellerShippingOptionsDto[]> {
-    await this.loadOwnedCheckout(userId, checkoutId);
+    const checkout = await this.loadOwnedCheckout(userId, checkoutId);
+    const { fingerprint } = await this.loadDeliveryAddress(checkout);
+    await this.expireQuotesForOtherAddresses(checkoutId, fingerprint);
     const quote = await this.prisma.shippingQuote.findUnique({ where: { id: quoteId } });
     if (!quote || quote.checkoutId !== checkoutId) throw new ShippingQuoteNotFoundException({ quoteId });
 
     if (quote.status === ShippingQuoteStatus.SELECTED) {
       // Duplicate selection of the same quote is a safe no-op (spec section 21).
     } else {
-      if (quote.status === ShippingQuoteStatus.EXPIRED || quote.expiresAt.getTime() <= Date.now()) throw new ShippingQuoteExpiredException({ quoteId });
+      if (quote.status === ShippingQuoteStatus.EXPIRED || quote.expiresAt.getTime() <= Date.now() || quote.deliveryAddressFingerprint !== fingerprint) throw new ShippingQuoteExpiredException({ quoteId });
       if (quote.status !== ShippingQuoteStatus.AVAILABLE) throw new ShippingQuoteNotEligibleException({ quoteId, status: quote.status });
 
       await this.prisma.$transaction(async (tx) => {
@@ -249,8 +300,8 @@ export class ShippingOrchestrator {
   async createFulfillmentsForOrders(tx: Prisma.TransactionClient, checkoutId: string, orders: { id: string; sellerOrganizationId: string }[]): Promise<void> {
     for (const order of orders) {
       const fullOrder = await tx.order.findUniqueOrThrow({ where: { id: order.id } });
-      const seller = await tx.sellerOrganization.findUniqueOrThrow({ where: { id: order.sellerOrganizationId } });
-      const pickupAddress: AddressSnapshotDto = { recipient: seller.name, phone: null, addressLine: null, city: seller.city, region: null, countryCode: seller.countryCode, instructions: null };
+      const seller = await tx.sellerOrganization.findUniqueOrThrow({ where: { id: order.sellerOrganizationId }, include: { shippingProfile: true } });
+      const pickupAddress: AddressSnapshotDto = pickupFromProfile(seller, seller.shippingProfile);
       const deliveryAddress = toAddressSnapshotDto(fullOrder.shippingAddressSnapshot);
 
       let fulfillment: Fulfillment;
