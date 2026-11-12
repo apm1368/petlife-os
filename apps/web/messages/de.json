@@ -6414,7 +6414,15 @@
       "insuranceProviders": "Versicherungsanbieter verwalten",
       "externalSources": "Externe Reisequellen verwalten",
       "accessControl": "Admin-Zugriffsverwaltung",
-      "verificationQueue": "Warteschlange zur Partnerprüfung"
+      "verificationQueue": "Warteschlange zur Partnerprüfung",
+      "launch": {
+        "title": "Ziel im Startmonat",
+        "hint": "Der Erfolgsmaßstab zum Start: registrierte Tiere und Buchungen pro Woche. Bis die Demodaten bereinigt sind (F4), werden sie mitgezählt.",
+        "registeredPets": "Registrierte Tiere",
+        "thisWeek": "diese Woche",
+        "bookingsThisWeek": "Buchungen diese Woche",
+        "vsLastWeek": "gegenüber {count} letzte Woche"
+      }
     },
     "adminSearch": {
       "title": "Kunden, Bestellungen oder Supportfälle suchen",

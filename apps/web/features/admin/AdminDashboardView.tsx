@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import {
   ArrowLeftRight,
   BadgeCheck,
+  CalendarDays,
   ChartColumn,
   CircleCheck,
   ClipboardList,
@@ -22,6 +23,7 @@ import {
   MapPinned,
   MessagesSquare,
   PackageCheck,
+  PawPrint,
   Plus,
   Receipt,
   Search,
@@ -34,7 +36,8 @@ import {
   StatusLabel,
   Wallet,
 } from "@petlife/ui";
-import type { AdminTaskDto } from "@petlife/types";
+import type { AdminLaunchKpisDto, AdminTaskDto } from "@petlife/types";
+import { asLocale, fmtNumber } from "./reports/report-format";
 import { ApiError } from "@/lib/api/client";
 import Link from "@/features/navigation/localized-link";
 import { adminService, type SystemHealth, type TrustQueueItem } from "@/services/admin.service";
@@ -203,6 +206,8 @@ export function AdminDashboardView() {
           ) : null}
         </div>
       </header>
+
+      {summary.launchKpis ? <LaunchKpis kpis={summary.launchKpis} /> : null}
 
       {board.length ? (
         <section className="gx-card" aria-labelledby="dash-attention">
@@ -375,5 +380,32 @@ export function AdminDashboardView() {
         </div>
       ) : null}
     </div>
+  );
+}
+
+/** #290 Q97: the launch month's success measure, registered pets and weekly bookings, at the top of the dashboard. */
+function LaunchKpis({ kpis }: { kpis: AdminLaunchKpisDto }) {
+  const t = useTranslations("rollout.admin.launch");
+  const locale = asLocale(useLocale());
+  const delta = kpis.bookingsThisWeek - kpis.bookingsLastWeek;
+  return (
+    <section className="gx-page" aria-labelledby="dash-launch">
+      <div className="gx-section-title">
+        <h2 id="dash-launch">{t("title")}</h2>
+        <p>{t("hint")}</p>
+      </div>
+      <div className="gx-grid gx-grid--kpi">
+        <Link href="/admin/reports" className="gx-kpi gx-kpi--accent">
+          <span className="gx-kpi__label"><PawPrint size={16} aria-hidden="true" />{t("registeredPets")}</span>
+          <span className="gx-kpi__value">{fmtNumber(kpis.registeredPets, locale)}</span>
+          <span className="gx-kpi__foot"><span className="gx-delta gx-delta--up">+{fmtNumber(kpis.newPetsThisWeek, locale)}</span><span>{t("thisWeek")}</span></span>
+        </Link>
+        <Link href="/admin/services" className="gx-kpi">
+          <span className="gx-kpi__label"><CalendarDays size={16} aria-hidden="true" />{t("bookingsThisWeek")}</span>
+          <span className="gx-kpi__value">{fmtNumber(kpis.bookingsThisWeek, locale)}</span>
+          <span className="gx-kpi__foot"><span className={`gx-delta ${delta >= 0 ? "gx-delta--up" : "gx-delta--down"}`}>{delta >= 0 ? "+" : "−"}{fmtNumber(Math.abs(delta), locale)}</span><span>{t("vsLastWeek", { count: fmtNumber(kpis.bookingsLastWeek, locale) })}</span></span>
+        </Link>
+      </div>
+    </section>
   );
 }
