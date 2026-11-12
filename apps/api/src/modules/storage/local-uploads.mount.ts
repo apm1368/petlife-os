@@ -13,7 +13,9 @@ import { isPrivateUploadPath } from "./object-url.util";
  */
 export function mountLocalUploads(app: NestExpressApplication, storageLocalDir: string): void {
   app.use("/uploads", (req: Request, res: Response, next: NextFunction) => {
-    if (isPrivateUploadPath(req.path)) {
+    // Only reads reach the static server. Any other method (the browser's PUT /uploads/:token) falls through to
+    // UploadsController: refusing it here 404'd every upload on the live site, since token paths are not public keys.
+    if ((req.method === "GET" || req.method === "HEAD") && isPrivateUploadPath(req.path)) {
       res.status(404).end();
       return;
     }
