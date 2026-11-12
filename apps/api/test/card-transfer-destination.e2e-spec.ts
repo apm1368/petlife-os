@@ -121,7 +121,10 @@ describe("Card-to-card destination (e2e)", () => {
       expect(res.status).toBeLessThan(500);
       expect(JSON.stringify(res.body)).not.toMatch(digits);
     }
-    expect([403, 404]).toContain((await bystander.get(`/wallet/top-ups/${after.body.topUp.id}`)).status);
+    // Someone else's top-up is refused (whichever refusal the route uses) and never carries the account.
+    const peek = await bystander.get(`/wallet/top-ups/${after.body.topUp.id}`);
+    expect([400, 403, 404]).toContain(peek.status);
+    expect(JSON.stringify(peek.body)).not.toMatch(digits);
     expect(JSON.stringify((await m.get("/wallet").expect(200)).body)).not.toMatch(digits);
 
     // Switching it off closes card-to-card (no silent fall back to the env account) and is announced too.
