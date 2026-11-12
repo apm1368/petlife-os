@@ -1,5 +1,9 @@
-/** A temporary, code-generated instrumental loop for the reel (reel.md asks for a licensed track later). */
-export function createReelMusic() {
+import { REEL_TRACK } from "./reel-track";
+
+export type ReelMusic = { start(): void; stop(): void; setMuted(v: boolean): void; dispose(): void };
+
+/** The code-generated instrumental loop: the fallback when the licensed track can't be played in this browser. */
+export function createSynthMusic(): ReelMusic {
   let ac: AudioContext | null = null, master: GainNode | null = null, timer = 0, nextT = 0, step = 0, noise: AudioBuffer | null = null, on = false, muted = false;
   const BPM = 92, S16 = 60 / BPM / 4, PROG = [[53, 57, 60], [48, 52, 55], [50, 53, 57], [46, 50, 53]] as const, PAT = [3, 2, 4, 2, 3, 1, 2, 1];
   const mf = (m: number) => 440 * Math.pow(2, (m - 69) / 12);
@@ -61,5 +65,60 @@ export function createReelMusic() {
     },
     setMuted(v: boolean) { muted = v; if (ac && on) { master!.gain.cancelScheduledValues(ac.currentTime); master!.gain.setTargetAtTime(v ? 0 : 0.6, ac.currentTime, 0.05); } },
     dispose() { this.stop(); void ac?.close(); ac = null; },
+  };
+}
+
+const VOLUME = 0.55;
+const FADE_MS = 400;
+
+/**
+ * Reel music: the licensed instrumental track (features/reel/reel-track.ts, credited on /credits), looped and faded in
+ * and out; the synth takes over when the browser can't decode WebM/Opus or playback fails. Nothing plays until the
+ * visitor presses play, and mute is honoured on both paths.
+ */
+export function createReelMusic(opts: { src?: string; synth?: () => ReelMusic } = {}): ReelMusic {
+  const src = opts.src ?? REEL_TRACK.src;
+  let synth: ReelMusic | null = null, audio: HTMLAudioElement | null = null, fallback = false, on = false, muted = false, fade = 0;
+  const getSynth = () => (synth ??= (opts.synth ?? createSynthMusic)());
+  const canPlayFile = () => typeof Audio !== "undefined" && new Audio().canPlayType(REEL_TRACK.mime) !== "";
+  const ramp = (to: number, then?: () => void) => {
+    window.clearInterval(fade);
+    const a = audio!, from = a.volume, t0 = Date.now();
+    fade = window.setInterval(() => {
+      const k = Math.min(1, (Date.now() - t0) / FADE_MS);
+      a.volume = Math.max(0, Math.min(1, from + (to - from) * k));
+      if (k >= 1) { window.clearInterval(fade); then?.(); }
+    }, 30);
+  };
+  const toSynth = () => {
+    fallback = true;
+    if (audio) { audio.pause(); audio.removeAttribute("src"); audio.load(); audio = null; }
+    if (on) { const s = getSynth(); s.setMuted(muted); s.start(); }
+  };
+  return {
+    start() {
+      on = true;
+      if (fallback || !canPlayFile()) { fallback = true; const s = getSynth(); s.setMuted(muted); s.start(); return; }
+      if (!audio) {
+        audio = new Audio(src);
+        audio.loop = true; audio.preload = "auto"; audio.volume = 0;
+        audio.addEventListener("error", toSynth, { once: true });
+      }
+      audio.muted = muted;
+      const played = audio.play();
+      if (played && typeof played.catch === "function") played.catch(() => { if (on) toSynth(); });
+      ramp(VOLUME);
+    },
+    stop() {
+      on = false;
+      if (fallback) { synth?.stop(); return; }
+      if (audio) ramp(0, () => { if (!on) audio?.pause(); });
+    },
+    setMuted(v: boolean) { muted = v; if (audio) audio.muted = v; synth?.setMuted(v); },
+    dispose() {
+      on = false; window.clearInterval(fade);
+      if (audio) { audio.pause(); audio.removeAttribute("src"); audio.load(); audio = null; }
+      synth?.dispose(); synth = null;
+    },
   };
 }

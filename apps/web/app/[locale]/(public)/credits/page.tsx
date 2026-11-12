@@ -1,19 +1,21 @@
-import { isAppLocale } from "@/lib/i18n/config";
+import { isRouteLocale } from "@/lib/i18n/config";
 import { notFound } from "next/navigation";
 import { ParkCredits } from "@/features/landing/ParkCredits";
 import { parkCopy } from "@/features/landing/park-copy";
 import credits from "@/features/landing/photo-credits.json";
 import { publicPageMetadata } from "@/lib/seo/public-metadata";
+import { REEL_TRACK, musicCreditCopy } from "@/features/reel/reel-track";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   return publicPageMetadata((await params).locale, "credits");
 }
 
-/** Photo credits — every third-party photograph we publish, its author and licence (CC BY / CC BY-SA require it). */
+/** Credits — every third-party photograph and the reel soundtrack we publish, with author and licence, in every site language. */
 export default async function CreditsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  if (!isAppLocale(locale)) notFound();
+  if (!isRouteLocale(locale)) notFound();
   const c = parkCopy[locale];
+  const m = musicCreditCopy[locale];
   return (
     <div className="flex flex-col gap-6">
       <header className="section-head">
@@ -43,6 +45,23 @@ export default async function CreditsPage({ params }: { params: Promise<{ locale
           </li>
         ))}
       </ul>
+      <section className="flex flex-col gap-3" aria-labelledby="music-credits-title">
+        <h2 id="music-credits-title" className="text-section-title">{m.heading}</h2>
+        <ul className="row-list">
+          <li>
+            <a className="row-list__item" href={REEL_TRACK.page} target="_blank" rel="noopener noreferrer">
+              <span className="flex min-w-0 flex-col">
+                <span className="font-semibold" dir="ltr">{REEL_TRACK.title} · {REEL_TRACK.album}</span>
+                <span className="text-metadata text-text-secondary" dir="ltr">{REEL_TRACK.author} · {REEL_TRACK.license}</span>
+              </span>
+            </a>
+            <p className="px-4 pb-4 text-metadata text-text-secondary">
+              {m.usage}{" · "}
+              <a href={REEL_TRACK.licenseUrl} target="_blank" rel="noopener noreferrer" className="underline">{m.licence}</a>
+            </p>
+          </li>
+        </ul>
+      </section>
     </div>
   );
 }
