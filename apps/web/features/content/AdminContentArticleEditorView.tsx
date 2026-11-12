@@ -193,6 +193,11 @@ export function AdminContentArticleEditorView({ articleId }: { articleId: string
     if (localeLoadError || localeLoading || !canAct(articleId ? "content.edit" : "content.create") || (status === ArticleLifecycleStatus.VISIBLE && !canAct("content.publish"))) return;
     setSaveError(null);
     setTransitionNotice(null);
+    // The API accepts only lowercase Latin words joined by hyphens (SLUG_PATTERN); say so before a round-trip.
+    if (!SLUG_PATTERN.test(slug)) {
+      setSaveError(t("slugInvalid"));
+      return;
+    }
     const input = { title, slug, excerpt: excerpt || undefined, body, seoTitle: seoTitle || undefined, seoDescription: seoDescription || undefined, changeNote: changeNote || undefined };
     try {
       if (!articleId) {

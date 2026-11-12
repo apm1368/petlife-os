@@ -1,7 +1,7 @@
 import type { RouteLocale } from "@/lib/i18n/config";
 export const parkAuthCopy: Record<RouteLocale, { close: string; title: string; register: string; tagline: string; description: string; privacy: string }> = {
   fa: {
-    close: "بستن و بازگشت به پارک", title: "ورود به دنیای opetlife", register: "ساخت حساب opetlife",
+    close: "بستن و بازگشت به پارک", title: "ورود به دنیای اپت لایف", register: "ساخت حساب اپت لایف",
     tagline: "یک دنیا برای تو و همراهت", description: "سلامت، مراقبت و لحظه‌های مشترک؛ از همین‌جا شروع می‌شود.", privacy: "پروندهٔ همراهت، با اختیار خودت",
   },
   en: {

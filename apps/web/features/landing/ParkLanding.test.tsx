@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/react";
+import { renderWithIntl } from "@/test/render-with-intl";
 import { ParkHeader } from "./ParkHeader";
 import { ParkHero } from "./ParkHero";
 import { ParkCredits } from "./ParkCredits";
 import { parkCopy, parkDestinations } from "./park-copy";
 import { storyCopy } from "./story-copy";
 import { landingCopy } from "./copy";
+import { oplCopy } from "./opl/opl-copy";
 import { routeExists } from "@/test/route-exists";
 
 const state = vi.hoisted(() => ({ authenticated: false }));
@@ -38,7 +40,7 @@ describe("Approved park landing", () => {
   });
 
   it.each(["fa", "en"] as const)("opens and dismisses the %s mobile menu with Escape", locale => {
-    render(<ParkHeader locale={locale} />);
+    renderWithIntl(<ParkHeader locale={locale} />, locale);
     const button = screen.getByRole("button", { name: landingCopy[locale].nav.menu });
     expect(button.getAttribute("aria-expanded")).toBe("false");
     fireEvent.click(button);
@@ -60,14 +62,14 @@ describe("Approved park landing", () => {
   it.each([
     ["fa", "زبان"], ["en", "Language"], ["de", "Sprache"], ["es", "Idioma"],
   ] as const)("offers all four language routes from the %s landing", (locale, label) => {
-    render(<ParkHeader locale={locale} />);
+    renderWithIntl(<ParkHeader locale={locale} />, locale);
     const selector = screen.getByRole("combobox", { name: label }) as HTMLSelectElement;
     expect(selector.value).toBe(locale);
     expect(within(selector).getAllByRole("option").map(option => (option as HTMLOptionElement).value)).toEqual(["fa", "en", "de", "es"]);
   });
 
   it.each(["de", "es"] as const)("uses %s copy for all landing header actions", locale => {
-    render(<ParkHeader locale={locale} />);
+    renderWithIntl(<ParkHeader locale={locale} />, locale);
     expect(screen.getByRole("link", { name: parkCopy[locale].signIn }).getAttribute("href")).toBe(`/${locale}/auth`);
     expect(screen.getByRole("navigation", { name: parkCopy[locale].navLabel })).toBeTruthy();
     expect(screen.getByRole("button", { name: parkCopy[locale].menuLabel })).toBeTruthy();
@@ -77,7 +79,7 @@ describe("Approved park landing", () => {
 
   it("takes authenticated visitors to their dashboard and preserves the partner destination", () => {
     state.authenticated = true;
-    render(<ParkHeader locale="fa" />);
+    renderWithIntl(<ParkHeader locale="fa" />, "fa");
     expect(screen.getByRole("link", { name: landingCopy.fa.actions.dashboard }).getAttribute("href")).toBe("/fa/home");
     expect(screen.getByRole("link", { name: parkCopy.fa.partnerSignIn }).getAttribute("href")).toBe("/fa/auth?returnTo=%2Ffa%2Fprovider");
   });
@@ -97,5 +99,6 @@ describe("Approved park landing", () => {
     expect(keys(parkCopy.en)).toEqual(keys(parkCopy.es));
     expect(keys(storyCopy.en)).toEqual(keys(storyCopy.de));
     expect(keys(storyCopy.en)).toEqual(keys(storyCopy.es));
+    for (const locale of ["en", "de", "es"] as const) expect(keys(oplCopy[locale])).toEqual(keys(oplCopy.fa));
   });
 });

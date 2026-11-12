@@ -8,7 +8,7 @@ import type { NotificationCategory, NotificationPreferencesDto } from "@petlife/
 import { notificationsService } from "@/services/notifications.service";
 
 type Category = NotificationCategory;
-type Channel = "IN_APP" | "SMS";
+type Channel = "IN_APP" | "SMS" | "EMAIL";
 
 const SECTIONS: { key: string; categories: Category[] }[] = [
   { key: "essential", categories: ["SECURITY" as Category, "SYSTEM" as Category] },
@@ -23,7 +23,8 @@ const SECTIONS: { key: string; categories: Category[] }[] = [
   { key: "marketing", categories: ["MARKETING" as Category] },
 ];
 
-const CHANNELS: Channel[] = ["IN_APP", "SMS"];
+/** EMAIL is offered only once an email provider is configured (the API reports its delivery state). */
+const CHANNELS: Channel[] = ["IN_APP", "SMS", "EMAIL"];
 
 /**
  * Notification preferences — a category × channel grid whose every control
@@ -133,7 +134,7 @@ export function NotificationPreferencesView() {
               <fieldset key={category} className="notification-pref-row">
                 <legend className="text-metadata text-text-primary">{t(`categories.${category}`)}</legend>
                 <div className="notification-pref-row__channels">
-                  {CHANNELS.map((channel) => (
+                  {CHANNELS.filter((channel) => channel !== "EMAIL" || (Boolean(data?.channels?.some((c) => (c.channel as string) === "EMAIL")) && channelState("EMAIL") !== "NOT_CONFIGURED")).map((channel) => (
                     <label key={channel} className="flex items-center gap-1.5 text-metadata text-text-secondary">
                       <input type="checkbox" checked={isEnabled(category, channel)} disabled={(category as string) === "MARKETING" && marketingLocked} onChange={() => toggle(category, channel)} />
                       {t(`channels.${channel}`)}

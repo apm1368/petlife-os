@@ -4,8 +4,8 @@ import type { RouteLocale } from "@/lib/i18n/config";
 export const SITE_ORIGIN = "https://opetlife.ir";
 
 /** Square brand mark used as the publisher logo in structured data and as the fallback share image. */
-export const SITE_LOGO_PATH = "/brand/opetlife/04_app_icon_light.png";
-export const SITE_SHARE_IMAGE_PATH = "/brand/opetlife/01_primary_logo_light.png";
+export const SITE_LOGO_PATH = "/brand/opl/app-icon-512.png";
+export const SITE_SHARE_IMAGE_PATH = "/brand/opl/social-card-1200x630.png";
 
 export const SITE_NAME: Record<RouteLocale, string> = { fa: "اپت‌لایف", en: "opetlife", de: "opetlife", es: "opetlife" };
 
@@ -43,7 +43,7 @@ export function organizationJsonLd(locale: RouteLocale) {
       name: "opetlife",
       alternateName: ["اپت‌لایف", "اپت لایف", "Opetlife", "oPetLife"],
       url: `${SITE_ORIGIN}/`,
-      logo: { "@type": "ImageObject", url: absoluteUrl(SITE_LOGO_PATH), width: 1024, height: 1024 },
+      logo: { "@type": "ImageObject", url: absoluteUrl(SITE_LOGO_PATH), width: 512, height: 512 },
       description: SITE_TAGLINE[locale],
       areaServed: "IR",
       knowsAbout: ["Dog care", "Cat care", "Pet training", "Pet health", "Pet nutrition", "Pet-friendly travel", "Lost and found pets"],

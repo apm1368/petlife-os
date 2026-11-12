@@ -7,7 +7,7 @@ import { ApiError } from "@/lib/api/client";
 import { adminUsersService } from "@/services/admin-users.service";
 import { AdminUsersView } from "./AdminUsersView";
 
-vi.mock("@/services/admin-users.service", () => ({ adminUsersService: { list: vi.fn(), detail: vi.fn() } }));
+vi.mock("@/services/admin-users.service", () => ({ adminUsersService: { list: vi.fn(), detail: vi.fn(), behavior: vi.fn().mockRejectedValue(new Error("not under test")) } }));
 const user: AdminUserDirectoryRowDto = { id: "user-1", displayName: "کاربر نمونه", emailMasked: "te***@example.com", phoneMasked: "+98912***1234", accountStatus: "ACTIVE", createdAt: "2026-10-01T10:00:00Z", lastActiveAt: null, roles: [{ kind: "CUSTOMER", role: "OWNER", business: null }, { kind: "CLINIC", role: "VET", business: { id: "clinic-1", name: "کلینیک همراه", verificationStatus: "VERIFIED" } }] };
 const list: AdminUserDirectoryListDto = { items: [user], total: 21, page: 1, pageSize: 20 };
 const profile: AdminUserProfileDto = {
@@ -22,6 +22,8 @@ const apiError = (status: number) => new ApiError({ code: "ERROR", message: "fai
 describe("admin users directory", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    // The directory mirrors its filters into the URL; start every test from a clean address.
+    window.history.replaceState(null, "", "/");
     useAdminStore.setState({ context: { isAdmin: true, adminUserId: "admin", role: "ADMIN", permissions: ["customer.view"] } as never, status: "ready" });
     vi.mocked(adminUsersService.list).mockResolvedValue(list);
     vi.mocked(adminUsersService.detail).mockResolvedValue(profile);

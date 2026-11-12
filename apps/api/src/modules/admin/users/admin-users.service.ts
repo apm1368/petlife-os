@@ -8,16 +8,22 @@ import type {
   AdminUserReviewSummaryDto,
   AdminUserRoleDto,
   AdminUserRoleKind,
+  AdminUserBehaviorSummaryDto,
+  AdminUserBehaviorDto,
+  AdminUserTimelineEntryDto,
 } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { AdminCustomerNotFoundException } from "../../../common/errors/api-exception";
-import { resolvePagination, toPaginatedDto, type PaginationQueryDto } from "../../../common/pagination/pagination.dto";
+import { resolvePagination, toPaginatedDto } from "../../../common/pagination/pagination.dto";
 import { maskPhone } from "../../../common/phone/phone-normalizer";
 import { maskEmail } from "../../../common/pii/pii-mask.util";
 import { AdminCustomerService } from "../customer/admin-customer.service";
 import { NotificationOrchestratorService } from "../../notifications/notification-orchestrator.service";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
+import { CUSTOMER_METRIC_CTES, CUSTOMER_METRIC_JOINS, customerMetricColumns, type CustomerMetricRow } from "../reports/customer-metrics.sql";
+import { TEHRAN_OFFSET_MS } from "../reports/report-range";
+import type { ListUsersQueryDto, UserSort } from "./dto/list-users-query.dto";
 
 /** Which directory kind a provider organization reads as, from its ProviderType. */
 function providerKind(type: ProviderType): AdminUserRoleKind {
@@ -35,7 +41,7 @@ function providerKind(type: ProviderType): AdminUserRoleKind {
   }
 }
 
-export type UserDirectoryFilter = PaginationQueryDto & { q?: string; kind?: AdminUserRoleKind };
+export type UserDirectoryFilter = Partial<ListUsersQueryDto>;
 type DirectoryUser = { id: string; displayName: string; email: string | null; phone: string | null; accountStatus: string; createdAt: Date; lastActiveAt: Date | null };
 
 /**
@@ -51,6 +57,16 @@ type DirectoryUser = { id: string; displayName: string; email: string | null; ph
  * same actor-reference convention they were written with, so they are queried by id list rather than
  * `include`d from User.
  */
+/** Whitelisted ORDER BY clauses; ids break ties so pages never overlap. */
+const USER_ORDER: Record<UserSort, Prisma.Sql> = {
+  newest: Prisma.sql`x."createdAt" DESC, x.id DESC`,
+  oldest: Prisma.sql`x."createdAt" ASC, x.id ASC`,
+  lastActive: Prisma.sql`x."engagedAt" DESC NULLS LAST, x.id DESC`,
+  spend: Prisma.sql`x."totalSpend" DESC, x.id DESC`,
+  orders: Prisma.sql`x."orderCount" DESC, x.id DESC`,
+  bookings: Prisma.sql`(x."serviceBookingCount" + x."travelBookingCount") DESC, x.id DESC`,
+};
+
 @Injectable()
 export class AdminUsersService {
   constructor(
@@ -60,8 +76,24 @@ export class AdminUsersService {
     private readonly audit: AdminAuditLogService,
   ) {}
 
-  private row(user: DirectoryUser, roles: AdminUserRoleDto[]): AdminUserDirectoryRowDto {
+  private behavior(row: CustomerMetricRow): AdminUserBehaviorSummaryDto {
     return {
+      orderCount: Number(row.orderCount),
+      totalSpend: Number(row.totalSpend),
+      lastOrderAt: row.lastOrderAt?.toISOString() ?? null,
+      serviceBookingCount: Number(row.serviceBookingCount),
+      travelBookingCount: Number(row.travelBookingCount),
+      lastBookingAt: row.lastBookingAt?.toISOString() ?? null,
+      cancelledCount: Number(row.cancelledCount),
+      noShowCount: Number(row.noShowCount),
+      supportCaseCount: Number(row.supportCaseCount),
+      segment: row.segment,
+    };
+  }
+
+  private row(user: DirectoryUser, roles: AdminUserRoleDto[], metrics?: CustomerMetricRow): AdminUserDirectoryRowDto {
+    return {
+      ...(metrics ? { behavior: this.behavior(metrics) } : {}),
       id: user.id,
       displayName: user.displayName,
       emailMasked: user.email ? maskEmail(user.email) : null,
@@ -101,26 +133,6 @@ export class AdminUsersService {
     }
   }
 
-  private async filteredPage(kind: AdminUserRoleKind, q: string | undefined, skip: number, take: number): Promise<{ users: DirectoryUser[]; total: number }> {
-    const search = q
-      ? Prisma.sql`(u."displayName" ILIKE ${`%${q}%`} OR u.email ILIKE ${`%${q}%`} OR u.phone ILIKE ${`%${q}%`})`
-      : Prisma.sql`TRUE`;
-    const membership = this.kindPredicate(kind);
-    const [users, counts] = await Promise.all([
-      this.prisma.$queryRaw<DirectoryUser[]>(Prisma.sql`
-        SELECT u.id, u."displayName", u.email, u.phone, u."accountStatus", u."createdAt", u."lastActiveAt"
-        FROM users u
-        WHERE ${search} AND ${membership}
-        ORDER BY u."createdAt" DESC, u.id DESC
-        LIMIT ${take} OFFSET ${skip}
-      `),
-      this.prisma.$queryRaw<Array<{ total: bigint }>>(Prisma.sql`
-        SELECT COUNT(*)::bigint AS total FROM users u WHERE ${search} AND ${membership}
-      `),
-    ]);
-    return { users, total: Number(counts[0]?.total ?? 0) };
-  }
-
   /** Every hat the given user ids wear, grouped by user id. One query per source, each scoped to the page. */
   private async rolesByUser(userIds: string[]): Promise<Map<string, AdminUserRoleDto[]>> {
     const map = new Map<string, AdminUserRoleDto[]>();
@@ -156,31 +168,54 @@ export class AdminUsersService {
     return map;
   }
 
-  async list(filter: UserDirectoryFilter): Promise<AdminUserDirectoryListDto> {
+  /**
+   * The directory with behaviour: one PostgreSQL statement filters on identity, relationship kind, account
+   * status, signup window and the customer roll-up (orders, spend, bookings, stays, cancellations, support,
+   * last engagement, segment), then sorts and paginates — nothing is filtered in memory.
+   */
+  async list(filter: UserDirectoryFilter, now = new Date()): Promise<AdminUserDirectoryListDto> {
     const { page, pageSize, skip, take } = resolvePagination(filter);
-    const where: Prisma.UserWhereInput = {};
+    const inner: Prisma.Sql[] = [];
     const q = filter.q?.trim();
-    if (q) {
-      where.OR = [
-        { displayName: { contains: q, mode: "insensitive" } },
-        { email: { contains: q, mode: "insensitive" } },
-        { phone: { contains: q } },
-      ];
-    }
-    const result = filter.kind
-      ? await this.filteredPage(filter.kind, q, skip, take)
-      : await (async () => {
-          const [users, total] = await Promise.all([
-            this.prisma.user.findMany({ where, orderBy: [{ createdAt: "desc" }, { id: "desc" }], skip, take, select: { id: true, displayName: true, email: true, phone: true, accountStatus: true, createdAt: true, lastActiveAt: true } }),
-            this.prisma.user.count({ where }),
-          ]);
-          return { users, total };
-        })();
-    const { users, total } = result;
+    if (q) inner.push(Prisma.sql`(u."displayName" ILIKE ${`%${q}%`} OR u.email ILIKE ${`%${q}%`} OR u.phone ILIKE ${`%${q}%`})`);
+    if (filter.kind) inner.push(this.kindPredicate(filter.kind));
+    if (filter.status) inner.push(Prisma.sql`u."accountStatus"::text = ${filter.status}`);
+    const localMidnight = (date: string) => new Date(Date.parse(`${date}T00:00:00Z`) - TEHRAN_OFFSET_MS);
+    if (filter.joinedFrom) inner.push(Prisma.sql`u."createdAt" >= ${localMidnight(filter.joinedFrom)}`);
+    if (filter.joinedTo) inner.push(Prisma.sql`u."createdAt" < ${new Date(localMidnight(filter.joinedTo).getTime() + 86_400_000)}`);
 
-    const roles = await this.rolesByUser(users.map((u) => u.id));
-    const items = users.map((u) => this.row(u, roles.get(u.id) ?? []));
-    return toPaginatedDto(items, total, page, pageSize);
+    const outer: Prisma.Sql[] = [];
+    const daysAgo = (days: number) => new Date(now.getTime() - days * 86_400_000);
+    if (filter.segment) outer.push(Prisma.sql`x.segment = ${filter.segment}`);
+    if (filter.activeWithinDays) outer.push(Prisma.sql`x."engagedAt" >= ${daysAgo(filter.activeWithinDays)}`);
+    if (filter.inactiveForDays) outer.push(Prisma.sql`x."engagedAt" < ${daysAgo(filter.inactiveForDays)}`);
+    if (filter.minOrders !== undefined) outer.push(Prisma.sql`x."orderCount" >= ${filter.minOrders}`);
+    if (filter.minSpend !== undefined) outer.push(Prisma.sql`x."totalSpend" >= ${filter.minSpend}`);
+    const has = (flag: boolean | undefined, column: string) => {
+      if (flag === undefined) return;
+      outer.push(flag ? Prisma.sql`x.${Prisma.raw(`"${column}"`)} > 0` : Prisma.sql`x.${Prisma.raw(`"${column}"`)} = 0`);
+    };
+    has(filter.hasServiceBooking, "serviceBookingCount");
+    has(filter.hasTravelBooking, "travelBookingCount");
+    has(filter.hasSupportCases, "supportCaseCount");
+    if (filter.hasCancellations !== undefined)
+      outer.push(filter.hasCancellations ? Prisma.sql`(x."cancelledCount" + x."noShowCount") > 0` : Prisma.sql`(x."cancelledCount" + x."noShowCount") = 0`);
+
+    const and = (parts: Prisma.Sql[]) => (parts.length ? Prisma.join(parts, " AND ") : Prisma.sql`TRUE`);
+    const base = Prisma.sql`
+      WITH ${CUSTOMER_METRIC_CTES}
+      SELECT x.* FROM (
+        SELECT u.id, u."displayName", u.email, u.phone, u."accountStatus", u."createdAt", u."lastActiveAt", ${customerMetricColumns(now)}
+        FROM users u ${CUSTOMER_METRIC_JOINS}
+        WHERE ${and(inner)}
+      ) x WHERE ${and(outer)}`;
+    const [rows, counts] = await Promise.all([
+      this.prisma.$queryRaw<Array<DirectoryUser & CustomerMetricRow>>(Prisma.sql`${base} ORDER BY ${USER_ORDER[filter.sort ?? "newest"]} LIMIT ${take} OFFSET ${skip}`),
+      this.prisma.$queryRaw<Array<{ total: bigint }>>(Prisma.sql`SELECT COUNT(*)::bigint AS total FROM (${base}) c`),
+    ]);
+    const roles = await this.rolesByUser(rows.map((u) => u.id));
+    const items = rows.map((u) => this.row(u, roles.get(u.id) ?? [], u));
+    return toPaginatedDto(items, Number(counts[0]?.total ?? 0), page, pageSize);
   }
 
   async getProfile(userId: string): Promise<AdminUserProfileDto> {
@@ -235,6 +270,77 @@ export class AdminUsersService {
       })),
       householdCount: customer.households.length,
       petCount: customer.households.reduce((total, household) => total + household.pets.length, 0),
+    };
+  }
+
+  /**
+   * Everything one person has done, newest first, plus the same roll-up the directory filters on. Sign-ins
+   * carry only a coarse device class — never the IP address or the raw user agent.
+   */
+  async getBehavior(userId: string, now = new Date()): Promise<AdminUserBehaviorDto> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { id: true, createdAt: true } });
+    if (!user) throw new AdminCustomerNotFoundException({ userId });
+    const firstMonthWall = (() => {
+      const wall = new Date(now.getTime() + TEHRAN_OFFSET_MS);
+      return Date.UTC(wall.getUTCFullYear(), wall.getUTCMonth() - 11, 1);
+    })();
+    const sinceUtc = new Date(firstMonthWall - TEHRAN_OFFSET_MS);
+    const month = (column: Prisma.Sql) => Prisma.sql`to_char(date_trunc('month', ${column} + interval '3 hours 30 minutes'), 'YYYY-MM-DD')`;
+    const [metrics, monthlyRows, categories, orders, bookings, stays, cases, sessions, providerReviews, productReviews, travelReviews] = await Promise.all([
+      this.prisma.$queryRaw<CustomerMetricRow[]>(Prisma.sql`
+        WITH ${CUSTOMER_METRIC_CTES}
+        SELECT ${customerMetricColumns(now)} FROM users u ${CUSTOMER_METRIC_JOINS} WHERE u.id = ${userId}::uuid`),
+      this.prisma.$queryRaw<{ month: string; orders: bigint; bookings: bigint; spend: bigint | null }[]>(Prisma.sql`
+        SELECT month, SUM(orders)::bigint AS orders, SUM(bookings)::bigint AS bookings, SUM(spend)::bigint AS spend FROM (
+          SELECT ${month(Prisma.sql`o."createdAt"`)} AS month, COUNT(*) AS orders, 0 AS bookings, SUM(o."totalAmount") AS spend
+            FROM orders o WHERE o."userId" = ${userId}::uuid AND o."checkoutId" IS NOT NULL AND o.status::text NOT IN ('CANCELLED', 'REFUNDED') AND o."createdAt" >= ${sinceUtc} GROUP BY 1
+          UNION ALL
+          SELECT ${month(Prisma.sql`b."createdAt"`)}, 0, COUNT(*), SUM(COALESCE(b."priceAmount", 0) - b."discountAmount")::bigint
+            FROM bookings b WHERE b."userId" = ${userId}::uuid AND b."bookingStatus"::text IN ('CONFIRMED', 'CHECKED_IN', 'IN_PROGRESS', 'COMPLETED', 'NO_SHOW') AND b."createdAt" >= ${sinceUtc} GROUP BY 1
+          UNION ALL
+          SELECT ${month(Prisma.sql`t."createdAt"`)}, 0, COUNT(*), SUM(t."totalAmountIrr")
+            FROM travel_bookings t WHERE t."bookedByUserId" = ${userId}::uuid AND t.status::text IN ('CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'NO_SHOW') AND t."createdAt" >= ${sinceUtc} GROUP BY 1
+        ) m GROUP BY month`),
+      this.prisma.$queryRaw<{ key: string; c: bigint; amount: Prisma.Decimal | null }[]>(Prisma.sql`
+        SELECT b.category::text AS key, COUNT(*) AS c, SUM(COALESCE(b."priceAmount", 0) - b."discountAmount") AS amount
+        FROM bookings b WHERE b."userId" = ${userId}::uuid AND b."bookingStatus"::text IN ('CONFIRMED', 'CHECKED_IN', 'IN_PROGRESS', 'COMPLETED', 'NO_SHOW')
+        GROUP BY 1 ORDER BY 2 DESC LIMIT 8`),
+      this.prisma.order.findMany({ where: { userId, checkoutId: { not: null } }, orderBy: { createdAt: "desc" }, take: 40, select: { id: true, createdAt: true, status: true, totalAmount: true, currency: true } }),
+      this.prisma.booking.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 40, select: { id: true, createdAt: true, bookingStatus: true, category: true, priceAmount: true, discountAmount: true, currency: true } }),
+      this.prisma.travelBooking.findMany({ where: { bookedByUserId: userId, status: { not: "DRAFT" } }, orderBy: { createdAt: "desc" }, take: 40, select: { id: true, createdAt: true, status: true, reference: true, totalAmountIrr: true } }),
+      this.prisma.supportCase.findMany({ where: { requesterUserId: userId }, orderBy: { createdAt: "desc" }, take: 20, select: { id: true, createdAt: true, status: true, caseNumber: true } }),
+      this.prisma.session.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 20, select: { id: true, createdAt: true, userAgent: true, revokedAt: true } }),
+      this.prisma.providerReview.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 10, select: { id: true, createdAt: true, rating: true, status: true } }),
+      this.prisma.productReview.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 10, select: { id: true, createdAt: true, rating: true, status: true } }),
+      this.prisma.travelReview.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 10, select: { id: true, createdAt: true, overall: true, status: true } }),
+    ]);
+    const device = (agent: string | null) => (!agent ? null : /Mobi|Android|iPhone|iPad/i.test(agent) ? "mobile" : "desktop");
+    const timeline: AdminUserTimelineEntryDto[] = [
+      { id: `signup-${user.id}`, kind: "SIGN_UP" as const, at: user.createdAt.toISOString(), status: null, amount: null, label: null, href: null },
+      ...orders.map((o) => ({ id: o.id, kind: "ORDER" as const, at: o.createdAt.toISOString(), status: o.status, amount: o.currency === "IRR" ? o.totalAmount : null, label: null, href: `/commerce/orders/${o.id}` })),
+      ...bookings.map((b) => ({ id: b.id, kind: "SERVICE_BOOKING" as const, at: b.createdAt.toISOString(), status: b.bookingStatus, amount: b.priceAmount && (b.currency ?? "IRR") === "IRR" ? Math.round(Number(b.priceAmount) - Number(b.discountAmount)) : null, label: b.category, href: `/services/bookings/${b.id}` })),
+      ...stays.map((t) => ({ id: t.id, kind: "TRAVEL_BOOKING" as const, at: t.createdAt.toISOString(), status: t.status, amount: t.totalAmountIrr, label: t.reference, href: `/travel/bookings/${t.id}` })),
+      ...cases.map((c) => ({ id: c.id, kind: "SUPPORT_CASE" as const, at: c.createdAt.toISOString(), status: c.status, amount: null, label: c.caseNumber, href: `/support/${c.id}` })),
+      ...sessions.map((x) => ({ id: x.id, kind: "SIGN_IN" as const, at: x.createdAt.toISOString(), status: x.revokedAt ? "REVOKED" : null, amount: null, label: device(x.userAgent), href: null })),
+      ...providerReviews.map((r) => ({ id: r.id, kind: "REVIEW" as const, at: r.createdAt.toISOString(), status: r.status, amount: r.rating, label: "PROVIDER", href: "/services/reviews" })),
+      ...productReviews.map((r) => ({ id: r.id, kind: "REVIEW" as const, at: r.createdAt.toISOString(), status: r.status, amount: r.rating, label: "PRODUCT", href: "/commerce/reviews" })),
+      ...travelReviews.map((r) => ({ id: r.id, kind: "REVIEW" as const, at: r.createdAt.toISOString(), status: r.status, amount: r.overall, label: "TRAVEL", href: "/travel/reviews" })),
+    ].sort((a, b) => b.at.localeCompare(a.at)).slice(0, 120);
+
+    const byMonth = new Map(monthlyRows.map((r) => [r.month, r]));
+    const monthlyActivity = Array.from({ length: 12 }, (_, i) => {
+      const key = new Date(Date.UTC(new Date(firstMonthWall).getUTCFullYear(), new Date(firstMonthWall).getUTCMonth() + i, 1)).toISOString().slice(0, 10);
+      const r = byMonth.get(key);
+      return { month: key, orders: Number(r?.orders ?? 0), bookings: Number(r?.bookings ?? 0), spend: Number(r?.spend ?? 0) };
+    });
+    const summary = metrics[0]
+      ? this.behavior(metrics[0])
+      : { orderCount: 0, totalSpend: 0, lastOrderAt: null, serviceBookingCount: 0, travelBookingCount: 0, lastBookingAt: null, cancelledCount: 0, noShowCount: 0, supportCaseCount: 0, segment: "NEVER_PURCHASED" as const };
+    return {
+      summary,
+      monthlyActivity,
+      favoriteCategories: categories.map((c) => ({ key: c.key, count: Number(c.c), amount: Math.round(Number(c.amount ?? 0)) })),
+      timeline,
     };
   }
 

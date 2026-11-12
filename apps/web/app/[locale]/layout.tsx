@@ -14,6 +14,7 @@ import { AuthModalOrigin } from "@/features/auth/AuthModalOrigin";
 import { DesignRoot } from "@/features/design-system/DesignRoot";
 import { PageMotion } from "@/features/motion/PageMotion";
 import { SITE_NAME, SITE_ORIGIN, SITE_TAGLINE } from "@/lib/seo/site";
+import { MaintenanceGate } from "@/features/site-settings/MaintenanceGate";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -29,10 +30,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     applicationName: "opetlife",
     icons: {
       icon: [
-        { url: "/brand/opetlife/04_app_icon_light.png", media: "(prefers-color-scheme: light)" },
-        { url: "/brand/opetlife/03_app_icon_dark.png", media: "(prefers-color-scheme: dark)" },
+        { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },
+        { url: "/brand/opl/favicon.svg", type: "image/svg+xml" },
       ],
-      apple: "/brand/opetlife/04_app_icon_light.png",
+      apple: "/brand/opl/app-icon-180.png",
     },
     description: SITE_TAGLINE[routeLocale],
     alternates: { types: { "application/rss+xml": `/${routeLocale}/feed.xml` } },
@@ -63,7 +64,7 @@ export default async function LocaleLayout({
       </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeSync /><DisplayModeSync /><ToastProvider><PageMotion><AuthModalOrigin><LocalReviewTools><DesignRoot>{children}{modal}</DesignRoot></LocalReviewTools></AuthModalOrigin></PageMotion></ToastProvider>
+          <ThemeSync /><DisplayModeSync /><ToastProvider><PageMotion><AuthModalOrigin><LocalReviewTools><DesignRoot><MaintenanceGate>{children}{modal}</MaintenanceGate></DesignRoot></LocalReviewTools></AuthModalOrigin></PageMotion></ToastProvider>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -78,6 +78,11 @@ import { AdminOrgService } from "./orgs/admin-org.service";
 import { AdminOrgController } from "./orgs/admin-org.controller";
 import { AdminAuditController } from "./audit/admin-audit.controller";
 import { AdminDashboardService } from "./dashboard/admin-dashboard.service";
+import { AdminReportsService } from "./reports/admin-reports.service";
+import { AdminReportsController } from "./reports/admin-reports.controller";
+import { AdminMessagingService } from "./messaging/admin-messaging.service";
+import { AdminMessagingController } from "./messaging/admin-messaging.controller";
+import { EmailModule } from "../../common/email/email.module";
 import { AdminDashboardController } from "./dashboard/admin-dashboard.controller";
 import { AdminSellerSettlementService } from "./finance/admin-seller-settlement.service";
 import { AdminSellerAdjustmentService } from "./finance/admin-seller-adjustment.service";
@@ -135,6 +140,7 @@ import { MemoriesModule } from "../memories/memories.module";
 @Module({
   imports: [
     NotificationsModule,
+    EmailModule,
     RefundsModule,
     PromotionsModule,
     TravelMarketplaceModule,
@@ -149,6 +155,8 @@ import { MemoriesModule } from "../memories/memories.module";
     MemoriesModule,
   ],
   controllers: [
+    AdminReportsController,
+    AdminMessagingController,
     AdminMeController,
     AdminSupportOpsController,
     UserSupportAttachmentsController,
@@ -192,6 +200,8 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminPetMemorialController,
   ],
   providers: [
+    AdminReportsService,
+    AdminMessagingService,
     SupportOpsService,
     DisputeOutcomeService,
     FinanceReconciliationService,

@@ -4684,6 +4684,10 @@ enum NotificationFailureKind {
 enum MessagingProvider {
   DEV
   FARAZ
+  /// Email through smtp.gmail.com with an App Password.
+  GMAIL
+  /// Email through any other SMTP relay.
+  SMTP
 }
 
 /// The addressable, in-app-visible unit — always has exactly one recipient

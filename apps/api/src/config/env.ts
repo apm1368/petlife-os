@@ -189,6 +189,22 @@ const envSchema = z.object({
   FARAZ_SMS_NOTIFICATION_PATTERN_CODE: z.string().min(1).optional(),
   FARAZ_SMS_NOTIFICATION_BODY_ATTRIBUTE: z.string().min(1).default("message"),
   FARAZ_SMS_TIMEOUT_MS: z.coerce.number().int().min(1000).max(30_000).default(5000),
+
+  /// Email channel. "gmail" sends through smtp.gmail.com with a Google App Password (2-step verification must be
+  /// on for that account); "smtp" is any SMTP relay; "dev" only logs; "disabled" (the default) sends nothing.
+  EMAIL_PROVIDER: z.enum(["disabled", "dev", "gmail", "smtp"]).default("disabled"),
+  /// Display name and address on outgoing mail. With Gmail the address must be the account itself or a verified alias.
+  EMAIL_FROM_NAME: z.string().min(1).default("opetlife"),
+  EMAIL_FROM_ADDRESS: z.string().email().optional(),
+  EMAIL_REPLY_TO: z.string().email().optional(),
+  GMAIL_USER: z.string().email().optional(),
+  GMAIL_APP_PASSWORD: z.string().min(1).optional(),
+  SMTP_HOST: z.string().min(1).optional(),
+  SMTP_PORT: z.coerce.number().int().positive().default(465),
+  SMTP_SECURE: flag(true),
+  SMTP_USER: z.string().min(1).optional(),
+  SMTP_PASSWORD: z.string().min(1).optional(),
+  EMAIL_TIMEOUT_MS: z.coerce.number().int().min(1000).max(60_000).default(15_000),
   /// How many times a TRANSIENT delivery failure is retried before the
   /// delivery is marked FAILED for good (spec: "do not infinitely retry").
   NOTIFICATION_MAX_DELIVERY_ATTEMPTS: z.coerce.number().int().positive().default(3),
@@ -303,7 +319,16 @@ function validateMarketplaceConfig(env: AppEnv): void {
 /// it does to payments/shipping/marketplace: Faraz enabled without its
 /// credentials configured fails startup rather than silently running
 /// DevMessagingAdapter-equivalent simulation against real recipients.
+/** Same "no fake success" rule for email: a chosen provider without its credentials fails startup. */
+function validateEmailConfig(env: AppEnv): void {
+  const missing: string[] = [];
+  if (env.EMAIL_PROVIDER === "gmail" && !(env.GMAIL_USER && env.GMAIL_APP_PASSWORD)) missing.push("GMAIL_USER/GMAIL_APP_PASSWORD");
+  if (env.EMAIL_PROVIDER === "smtp" && !(env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASSWORD && env.EMAIL_FROM_ADDRESS)) missing.push("SMTP_HOST/SMTP_USER/SMTP_PASSWORD/EMAIL_FROM_ADDRESS");
+  if (missing.length > 0) throw new Error(`EMAIL_PROVIDER=${env.EMAIL_PROVIDER} requires: ${missing.join(", ")}`);
+}
+
 function validateMessagingConfig(env: AppEnv): void {
+  validateEmailConfig(env);
   if (env.MESSAGING_SANDBOX_MODE !== "production") return;
   const missing: string[] = [];
   if (env.MESSAGING_PROVIDER !== "faraz") missing.push("MESSAGING_PROVIDER=faraz");

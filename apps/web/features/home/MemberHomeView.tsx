@@ -63,7 +63,7 @@ export const dashboardCopy = {
     care: "مراقبت‌ها",
     memories: "خاطرات",
     shop: "فروشگاه",
-    welcomeTitle: "به opetlife خوش آمدید",
+    welcomeTitle: "به اپت لایف خوش آمدید",
     welcomeBody: "با افزودن اولین حیوان، سلامت، مراقبت و خاطراتش را یک‌جا دنبال کنید.",
     welcomeCta: "افزودن اولین حیوان",
     unknownAge: "سن نامشخص",
