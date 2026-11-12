@@ -45,7 +45,7 @@ describe("ClinicClientsService", () => {
   it("records a text as SIMULATED while SMS is in sandbox, with the clinic's name first", async () => {
     const { service, sendSms } = setup({}, client);
     const result = await service.sendMessage(ctx, "c1", "Milo's vaccine is due next week");
-    expect(sendSms).toHaveBeenCalledWith(expect.objectContaining({ destination: "+989121234567", body: "Paw Clinic: Milo's vaccine is due next week" }));
+    expect(sendSms).toHaveBeenCalledWith(expect.objectContaining({ destination: "+989121234567", body: expect.stringMatching(/^Paw Clinic: Milo's vaccine is due next week\n/) }));
     expect(result).toMatchObject({ smsMode: "SANDBOX", message: { status: "SIMULATED" } });
   });
 
