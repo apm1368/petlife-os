@@ -2316,6 +2316,20 @@
     }
   },
   "commerce": {
+    "categoryNames": {
+      "food": "غذا",
+      "treats": "تشویقی",
+      "grooming": "آرایش و نظافت",
+      "accessories": "لوازم جانبی",
+      "species-dog": "سگ",
+      "species-cat": "گربه",
+      "species-bird": "پرنده",
+      "species-rabbit": "خرگوش",
+      "species-rodent": "جوندگان",
+      "species-fish": "ماهی",
+      "species-reptile": "خزنده",
+      "species-other": "سایر حیوانات"
+    },
     "shopHome": {
       "title": "فروشگاه",
       "subtitle": "برای {name}",
