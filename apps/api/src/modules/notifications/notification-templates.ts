@@ -199,6 +199,14 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "بیمه‌گر اطلاعات بیشتری خواسته است", body: "برای ادامه بررسی درخواست بیمه، اطلاعات خواسته‌شده را تکمیل کنید." },
     en: { title: "The insurer needs more information", body: "Add the requested information so the insurer can continue reviewing your application." },
   },
+  "product.price_dropped": {
+    fa: { title: "قیمت «{{product}}» کمتر شد", body: "کالایی که نشان کرده‌اید حالا ارزان‌تر است. پیش از تمام شدن، سری بزنید." },
+    en: { title: "{{product}} is cheaper now", body: "An item you saved has dropped in price. Take a look before it changes again." },
+  },
+  "product.back_in_stock": {
+    fa: { title: "«{{product}}» دوباره موجود شد", body: "کالایی که نشان کرده‌اید دوباره در فروشگاه موجود است." },
+    en: { title: "{{product}} is back in stock", body: "An item you saved is available in the shop again." },
+  },
   "shipment.delivered": {
     fa: { title: "سفارش شما تحویل داده شد", body: "سفارش شما با موفقیت تحویل داده شد.", smsBody: "سفارش شما در پت‌لایف تحویل داده شد." },
     en: { title: "Your order was delivered", body: "Your order was delivered successfully.", smsBody: "Your PET LIFE OS order was delivered." },

@@ -305,6 +305,55 @@ export class NotificationEventsListener {
     });
   }
 
+  /**
+   * Watchlist alerts: members who favourited a product hear when an offer of it gets cheaper or comes back in stock.
+   * At most one alert of each kind per product per member per day, so a seller nudging prices cannot spam anyone.
+   */
+  private async alertFavoriters(productId: string, type: "product.price_dropped" | "product.back_in_stock", domainEventId: string): Promise<void> {
+    const product = await this.prisma.product.findUnique({ where: { id: productId }, select: { title: true, status: true } });
+    if (!product || product.status !== "ACTIVE") return;
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const favorites = await this.prisma.productFavorite.findMany({ where: { productId }, select: { userId: true }, take: 1000 });
+    if (!favorites.length) return;
+    const recent = await this.prisma.notification.findMany({ where: { type, entityType: "Product", entityId: productId, createdAt: { gt: since }, userId: { in: favorites.map((f) => f.userId) } }, select: { userId: true } });
+    const skip = new Set(recent.map((r) => r.userId));
+    for (const { userId } of favorites) {
+      if (skip.has(userId)) continue;
+      await this.orchestrator.notify({
+        userId,
+        type,
+        category: NotificationCategory.COMMERCE,
+        templateParams: { product: product.title.slice(0, 80) },
+        deepLink: NotificationDeepLinks.product(productId),
+        entityType: "Product",
+        entityId: productId,
+        domainEventId,
+      });
+    }
+  }
+
+  @OnEvent("SellerOfferPriceChanged")
+  onSellerOfferPriceChanged(payload: { sellerOfferId: string; fromPriceAmount: number; toPriceAmount: number }, domainEventId: string): Promise<void> {
+    return this.safely("SellerOfferPriceChanged", async () => {
+      if (!(payload.toPriceAmount < payload.fromPriceAmount)) return;
+      const offer = await this.prisma.sellerOffer.findUnique({ where: { id: payload.sellerOfferId }, select: { status: true, moderationStatus: true, productVariant: { select: { productId: true } } } });
+      if (!offer || offer.status !== "ACTIVE" || offer.moderationStatus !== "APPROVED") return;
+      await this.alertFavoriters(offer.productVariant.productId, "product.price_dropped", domainEventId);
+    });
+  }
+
+  @OnEvent("InventoryAdjusted")
+  onInventoryAdjusted(payload: { inventoryItemId: string; delta: number; quantityAfter: number }, domainEventId: string): Promise<void> {
+    return this.safely("InventoryAdjusted", async () => {
+      // Back in stock = this adjustment took the item from nothing to something.
+      if (!(payload.quantityAfter > 0 && payload.quantityAfter - payload.delta <= 0)) return;
+      const item = await this.prisma.inventoryItem.findUnique({ where: { id: payload.inventoryItemId }, select: { sellerOffer: { select: { status: true, moderationStatus: true, productVariant: { select: { productId: true } } } } } });
+      const offer = item?.sellerOffer;
+      if (!offer || offer.status !== "ACTIVE" || offer.moderationStatus !== "APPROVED") return;
+      await this.alertFavoriters(offer.productVariant.productId, "product.back_in_stock", domainEventId);
+    });
+  }
+
   @OnEvent("ShipmentDelivered")
   onShipmentDelivered(payload: { shipmentId: string; fulfillmentId: string }, domainEventId: string): Promise<void> {
     return this.safely("ShipmentDelivered", async () => {

@@ -18,6 +18,7 @@ import type {
   ProductSummaryDto,
   RatingSummaryDto,
   SellerOfferDto,
+  PublicSellerStorefrontDto,
 } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { NotFoundApiException } from "../../../common/errors/api-exception";
@@ -27,6 +28,7 @@ import { toBrandDto, toCategoryDto, toSellerOfferDto, toVariantDto } from "../co
 import { PricingService, type EffectivePrice } from "../promotions/pricing.service";
 import { ProductCompatibilityService } from "./product-compatibility.service";
 import { excludeDemoRecordsFromPublicReads } from "../../../common/public-record-origin";
+import { RETURN_WINDOW_HOURS } from "../orders/order-policy";
 
 const OFFER_INCLUDE = {
   sellerOrganization: true,
@@ -132,6 +134,34 @@ export class CatalogService {
       }
     }
     return [...out];
+  }
+
+  /** Published review averages per seller, from verified purchases of that seller's orders. */
+  async sellerRatings(sellerIds: string[]): Promise<Record<string, { average: number; count: number }>> {
+    if (!sellerIds.length) return {};
+    const rows = await this.prisma.$queryRaw<{ id: string; average: number; count: number }[]>`
+      SELECT o."sellerOrganizationId" AS id, AVG(r.rating)::float AS average, COUNT(*)::int AS count
+      FROM product_reviews r
+      JOIN order_items oi ON oi.id = r."orderItemId"
+      JOIN orders o ON o.id = oi."orderId"
+      WHERE r.status::text IN ('PUBLISHED', 'APPROVED') AND o."sellerOrganizationId" = ANY(${sellerIds}::uuid[])
+      GROUP BY o."sellerOrganizationId"`;
+    return Object.fromEntries(rows.map((r) => [r.id, { average: Math.round(r.average * 10) / 10, count: r.count }]));
+  }
+
+  /** A verified, active seller's public page: profile facts (no contact numbers) and their products. */
+  async storefront(userId: string | undefined, slugOrId: string, page = 1): Promise<PublicSellerStorefrontDto | null> {
+    const isId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugOrId);
+    const seller = await this.prisma.sellerOrganization.findFirst({
+      where: { ...(isId ? { id: slugOrId } : { slug: slugOrId }), verificationStatus: SellerVerificationStatus.VERIFIED, status: SellerStatus.ACTIVE },
+    });
+    if (!seller) return null;
+    const [result, ratings] = await Promise.all([this.search(userId, { seller: seller.id, page, pageSize: 48 }), this.sellerRatings([seller.id])]);
+    return {
+      seller: { id: seller.id, slug: seller.slug ?? null, name: seller.name, logoUrl: seller.logoUrl ?? null, description: seller.description ?? null, city: seller.city ?? null, verified: true, memberSince: seller.createdAt.toISOString(), rating: ratings[seller.id] ?? null },
+      products: result.items,
+      total: result.total,
+    };
   }
 
   async ratings(productIds: string[]): Promise<Map<string, RatingSummaryDto>> {
@@ -467,6 +497,10 @@ export class CatalogService {
       })),
       related,
       favorited: Boolean(favorite),
+      trust: {
+        returnWindowHours: RETURN_WINDOW_HOURS,
+        sellerRatings: await this.sellerRatings([...new Set(product.variants.flatMap((v) => v.offers.map((o) => o.sellerOrganizationId)))]),
+      },
       supportsDog: product.supportsDog,
       supportsCat: product.supportsCat,
       supportedSpecies: supportedSpecies(product),
