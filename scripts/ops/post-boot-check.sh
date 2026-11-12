@@ -15,7 +15,7 @@ check "pm2 petlife-api online"   bash -c "pm2 jlist | grep -q '\"name\":\"petlif
 check "api bound on :4000"       bash -c "ss -ltn | grep -q '127.0.0.1:4000 '"
 check "health/live 200"          curl -sf http://127.0.0.1:4000/health/live
 check "health/ready 200"         curl -sf http://127.0.0.1:4000/health/ready
-check "web :3000 /fa 200"        curl -sf -o /dev/null http://127.0.0.1:3000/fa
+check "web :3000 / 200"           curl -sf -o /dev/null http://127.0.0.1:3000/
 check "public site via nginx"    curl -sf -o /dev/null http://127.0.0.1/fa
 check "public API via nginx"     curl -sf http://127.0.0.1/api/health/ready
 for c in petlife-os-postgres-1 petlife-os-redis-1 petlife-os-minio-1; do
