@@ -5906,7 +5906,9 @@
       "privateNotice": "Diese Datei ist privat und hat keine öffentliche Objektadresse. Für jeden Download wird ein kurzlebiger, signierter Zugriffslink erstellt.",
       "previewDownload": "Sicher anzeigen und herunterladen",
       "openFile": "Datei öffnen",
-      "previewUnavailable": "Für diesen Dateityp ist keine Vorschau verfügbar."
+      "previewUnavailable": "Für diesen Dateityp ist keine Vorschau verfügbar.",
+      "manage": "Details und zurückziehen",
+      "details": "Details"
     },
     "nav": {
       "overview": "Übersicht",

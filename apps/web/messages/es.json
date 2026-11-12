@@ -5896,7 +5896,9 @@
       "privateNotice": "Este archivo es privado y no tiene una URL pública. Cada descarga genera un enlace de acceso firmado y de corta duración.",
       "previewDownload": "Vista previa y descarga segura",
       "openFile": "Abrir archivo",
-      "previewUnavailable": "La vista previa no está disponible para este tipo de archivo."
+      "previewUnavailable": "La vista previa no está disponible para este tipo de archivo.",
+      "manage": "Detalles y retirar",
+      "details": "Detalles"
     },
     "nav": {
       "overview": "Resumen",
