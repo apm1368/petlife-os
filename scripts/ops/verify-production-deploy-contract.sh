@@ -14,6 +14,8 @@ grep -Fq "bash scripts/smoke-production.sh" "$workflow"
 grep -Fq "Verify public HTML and build assets" "$workflow"
 grep -Fq "python3 docs/qa/tools/public-assets-smoke.py --expected-sha" "$workflow"
 grep -Fq "public-assets-" "$workflow"
+# A timed-out job can leave deploy.sh building on the server; the next job must wait for its lock before git reset.
+grep -Fq "flock -n /var/lock/petlife-deploy.lock -c true" "$workflow"
 
 if grep -Fq "DEPLOYMENT_ENVIRONMENT='staging'" "$workflow"; then
   echo "deploy contract: production workflow must not label its release as staging" >&2
