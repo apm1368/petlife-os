@@ -15,8 +15,9 @@ function setup(target: { role: SellerMembershipRole } | null) {
       update: jest.fn().mockImplementation(({ data }) => ({ ...membership, ...data, user: { id: "target", displayName: "T" }, createdAt: new Date(), updatedAt: new Date() })),
       upsert: jest.fn().mockImplementation(({ create }) => ({ id: "m-new", ...create, user: { id: "target", displayName: "T" }, createdAt: new Date(), updatedAt: new Date() })),
     },
-    $transaction: jest.fn((fn: (tx: unknown) => unknown) => fn(prisma)),
+    $transaction: jest.fn(),
   };
+  prisma.$transaction.mockImplementation((fn: (tx: unknown) => unknown) => fn(prisma));
   const events = { publish: jest.fn() };
   const access = { countActiveOwners: jest.fn().mockResolvedValue(1) };
   return { service: new SellerTeamService(prisma as never, events as never, access as never), prisma };
