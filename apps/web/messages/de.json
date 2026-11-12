@@ -1,5 +1,6 @@
 {
   "adminOrders": {
+    "trackingLink": "Sendung verfolgen",
     "kicker": "Bestellungen",
     "titleAll": "Alle Bestellungen",
     "title": "Bestellungen: {section}",
@@ -168,6 +169,8 @@
       }
     },
     "codes": {
+      "SNAPPBOX_APP": "Snappbox (vom Team gebucht)",
+      "ALOPEYK_APP": "Alopeyk (vom Team gebucht)",
       "PENDING": "Ausstehend",
       "CONFIRMED": "Bestätigt",
       "PREPARING": "In Vorbereitung",

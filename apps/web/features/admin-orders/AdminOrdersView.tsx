@@ -10,7 +10,7 @@ import { ApiError } from "@/lib/api/client";
 import { adminOrdersService, type AdminOrdersParams } from "@/services/admin-orders.service";
 import { OrderDetailDrawer } from "./OrderDetailDrawer";
 import { PAYMENT_STATES, SECTION_STATUSES, STAGES } from "./order-sections";
-import { useOrderLabels } from "./order-labels";
+import { trackingHref, useOrderLabels } from "./order-labels";
 
 const FILTER_KEYS = ["q", "status", "stage", "payment", "partnerId", "partnerName", "customerId", "customerName", "city", "from", "to"] as const;
 type FilterKey = (typeof FILTER_KEYS)[number];
@@ -290,7 +290,7 @@ export function AdminOrdersView({ section }: { section: AdminOrderSection | "ALL
                       <td>
                         <span className={`gx-tag gx-tag--${STAGE_TONE[r.stage] ?? ""}`}>{l.code(r.status, r.section)}</span>
                         {r.fulfilment.status && r.fulfilment.status !== r.status ? <small className="gx-muted">{l.code(r.fulfilment.status)}</small> : null}
-                        {r.fulfilment.trackingCode ? <small className="gx-muted" dir="ltr">{r.fulfilment.trackingCode}</small> : null}
+                        {r.fulfilment.trackingCode ? (trackingHref(r.fulfilment.trackingCode) ? <small><a className="gx-link" href={trackingHref(r.fulfilment.trackingCode)!} target="_blank" rel="noopener noreferrer">{t("trackingLink")}</a></small> : <small className="gx-muted" dir="ltr">{r.fulfilment.trackingCode}</small>) : null}
                         {r.fulfilment.scheduledAt && r.section !== "SHOP" ? <small className="gx-muted">{l.dateTime(r.fulfilment.scheduledAt)}</small> : null}
                       </td>
                       <td>{r.city ?? <span className="gx-muted">—</span>}</td>

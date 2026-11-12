@@ -1,5 +1,6 @@
 {
   "adminOrders": {
+    "trackingLink": "پیگیری مرسوله",
     "kicker": "سفارش‌ها",
     "titleAll": "همهٔ سفارش‌ها",
     "title": "سفارش‌های {section}",
@@ -168,6 +169,8 @@
       }
     },
     "codes": {
+      "SNAPPBOX_APP": "اسنپ‌باکس (رزرو توسط پشتیبانی)",
+      "ALOPEYK_APP": "الوپیک (رزرو توسط پشتیبانی)",
       "PENDING": "در انتظار",
       "CONFIRMED": "تأییدشده",
       "PREPARING": "در حال آماده‌سازی",

@@ -1,5 +1,6 @@
 {
   "adminOrders": {
+    "trackingLink": "Seguir el envío",
     "kicker": "Pedidos",
     "titleAll": "Todos los pedidos",
     "title": "Pedidos de {section}",
@@ -168,6 +169,8 @@
       }
     },
     "codes": {
+      "SNAPPBOX_APP": "Snappbox (reservado por el equipo)",
+      "ALOPEYK_APP": "Alopeyk (reservado por el equipo)",
       "PENDING": "Pendiente",
       "CONFIRMED": "Confirmado",
       "PREPARING": "En preparación",

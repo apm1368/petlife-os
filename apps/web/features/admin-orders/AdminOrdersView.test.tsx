@@ -94,4 +94,14 @@ describe("Admin Orders", () => {
     expect(screen.getByText("اپت لایف")).toBeTruthy();
     expect(screen.queryByRole("button", { name: /خروجی CSV/ })).toBeNull();
   });
+
+  it("shows a staff courier's tracking link as a link, never a raw http one", async () => {
+    vi.mocked(adminOrdersService.list).mockResolvedValue({ ...PAGE, items: [{ ...SHOP, fulfilment: { ...SHOP.fulfilment, method: "SNAPPBOX_APP", trackingCode: "https://snappbox.example/track/991" } }, { ...SHOP, id: "o2", number: "PL-2", fulfilment: { ...SHOP.fulfilment, trackingCode: "http://insecure.example/t" } }] });
+    renderWithIntl(<AdminOrdersView section="ALL" />);
+    const link = await screen.findByRole("link", { name: "Track shipment" });
+    expect(link.getAttribute("href")).toBe("https://snappbox.example/track/991");
+    expect(link.getAttribute("rel")).toContain("noopener");
+    expect(screen.getByText("http://insecure.example/t")).toBeTruthy();
+  });
 });
+

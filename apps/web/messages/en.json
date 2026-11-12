@@ -1,5 +1,6 @@
 {
   "adminOrders": {
+    "trackingLink": "Track shipment",
     "kicker": "Orders",
     "titleAll": "All orders",
     "title": "{section} orders",
@@ -168,6 +169,8 @@
       }
     },
     "codes": {
+      "SNAPPBOX_APP": "Snappbox (booked by staff)",
+      "ALOPEYK_APP": "Alopeyk (booked by staff)",
       "PENDING": "Pending",
       "CONFIRMED": "Confirmed",
       "PREPARING": "Preparing",

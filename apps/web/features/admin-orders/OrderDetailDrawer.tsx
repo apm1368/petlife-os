@@ -6,7 +6,7 @@ import { Sheet, X } from "@petlife/ui";
 import type { AdminOrderDetailDto, AdminOrderRowDto } from "@petlife/types";
 import Link from "@/features/navigation/localized-link";
 import { adminOrdersService } from "@/services/admin-orders.service";
-import { useOrderLabels } from "./order-labels";
+import { trackingHref, useOrderLabels } from "./order-labels";
 
 const DATE_FACTS = new Set(["startsAt", "checkIn", "checkOut"]);
 const MONEY_FACTS = new Set(["sellerNet", "deposit", "payNow", "refunded"]);
@@ -134,7 +134,7 @@ export function OrderDetailDrawer({ row, canRevealPii, onClose }: { row: AdminOr
                 {d.shipment ? (
                   <p>
                     {l.code(d.shipment.provider)} · {l.code(d.shipment.status)}
-                    {d.shipment.trackingCode ? <> · <span dir="ltr">{d.shipment.trackingCode}</span></> : null}
+                    {d.shipment.trackingCode ? <> · {trackingHref(d.shipment.trackingCode) ? <a className="gx-link" href={trackingHref(d.shipment.trackingCode)!} target="_blank" rel="noopener noreferrer">{t("trackingLink")}</a> : <span dir="ltr">{d.shipment.trackingCode}</span>}</> : null}
                     {d.shipment.estimatedDeliveryAt ? <small className="gx-muted">{t("drawer.eta", { date: l.dateTime(d.shipment.estimatedDeliveryAt) })}</small> : null}
                   </p>
                 ) : null}

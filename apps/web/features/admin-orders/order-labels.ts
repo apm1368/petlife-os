@@ -35,3 +35,15 @@ export function useOrderLabels() {
     };
   }, [t, locale]);
 }
+
+/** Staff-run couriers (opetlife courier, Snappbox/Alopeyk booked in their apps) may store a tracking link, not a code. */
+export function trackingHref(code: string | null | undefined): string | null {
+  if (!code) return null;
+  try {
+    const url = new URL(code);
+    return url.protocol === "https:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
