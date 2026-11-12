@@ -12,7 +12,7 @@
 | IMAP / SMTP برای گوشی و برنامه‌های ایمیل | ✅ IMAPS 993، SMTPS 465، Submission 587 (STARTTLS) |
 | ایمیل تراکنشی سایت (بازیابی رمز و اعلان‌ها) از `noreply@opetlife.ir` | ✅ روی سایت زنده آزمایش شد |
 | SPF، DKIM (۲۰۴۸ بیتی)، DMARC، MTA-STS، TLS-RPT، SRV | ✅ در DNS پارس‌پک ثبت و با `dig` بررسی شد |
-| PTR آی‌پی 185.231.112.154 → `mail.opetlife.ir` | ⏳ تیکت ارسال شده؛ منتظر پارس‌پک |
+| PTR آی‌پی 185.231.112.154 → `mail.opetlife.ir` | ✅ از ۲۰۲۶-۱۱-۱۲ ساعت ۱۹:۳۱ UTC تنظیم شد (FCrDNS درست است) |
 | تحویل به Outlook/Hotmail/Microsoft 365 | ❌ مایکروسافت رنج آی‌پی پارس‌پک را بلاک کرده (S3140) |
 
 ## ۲. اجزا و پورت‌ها
@@ -46,7 +46,7 @@ POP3 خاموش است. ufw فقط 25/465/587/993 را به 22/80/443 قبلی �
 
 - **پورت 25 خروجی باز است.** جیمیل، iCloud و Yandex اتصال و `MAIL FROM` را پذیرفتند.
 - **مایکروسافت** (outlook.com و EOP): `550 5.7.1 ... part of their network is on our block list (S3140)`، یعنی کل رنج پارس‌پک بلاک است، نه فقط این آی‌پی.
-- **یاهو:** `550 5.7.25 Forward-confirmed reverse DNS failed`، یعنی PTR لازم است.
+- **یاهو:** `550 5.7.25 Forward-confirmed reverse DNS failed`، یعنی PTR لازم بود. پس از تنظیم PTR پذیرفت.
 - **mail.com/GMX:** `554 ... Service not available` (اعتبار آی‌پی).
 - **DNSBL:** آی‌پی در Spamcop، SORBS، UCEPROTECT، Barracuda، PSBL و Mailspike لیست نشده است.
 - **ورودی از اینترنت:** check-host.net پورت 25 را از ۵ نقطه از ۸ نقطه باز دید و 465/587/993 را تقریباً از همه‌جا. بعضی مسیرهای بین‌المللی ایران گاهی timeout می‌شوند؛ فرستنده‌ها دوباره تلاش می‌کنند.
@@ -193,12 +193,13 @@ opetlife-mail list
 | کاربر info@ که بخواهد به نام admin@ بفرستد | ✅ `553 ... not owned by user` |
 | ورود به وب‌میل از طریق HTTPS (درست و غلط) | ✅ ورود موفق / 401 |
 | ایمیل بازیابی رمز سایت (`POST /api/auth/password/forgot`) | ✅ از `noreply@` با DKIM معتبر و لینک `/fa/account/reset` رسید. حساب آزمایشی موقت پاک شد. |
-| `check-auth@verifier.port25.com` (رفت‌وبرگشت) | ✅ SPF pass و DKIM pass (هم‌خوان با From). iprev هنوز fail است تا PTR تنظیم شود. |
+| `check-auth@verifier.port25.com` (رفت‌وبرگشت) | ✅ پس از PTR: SPF pass، iprev pass و DKIM pass (هم‌خوان با From) |
+| پذیرش در MAIL FROM پس از PTR | ✅ جیمیل، یاهو (قبل از PTR رد می‌کرد)، iCloud و Yandex. ❌ Outlook: هنوز S3140. |
 | رکوردهای DNS روی 8.8.8.8، 1.1.1.1 و 9.9.9.9 | ✅ همه دیده می‌شوند و DKIM دقیقاً با کلید یکی است |
 
 ## ۱۴. کارهای باقی‌مانده و ریسک‌ها
 
-1. **PTR:** منطقهٔ reverse این رنج روی `ns1/ns2.bitcommand.com` است. پس از تنظیم PTR باید `check-auth@verifier.port25.com` و یک ارسال واقعی به جیمیل (بررسی «Show original») دوباره انجام شود. بدون PTR، جیمیل و یاهو ایمیل را رد می‌کنند یا به اسپم می‌فرستند.
+1. **PTR:** ✅ انجام شد (منطقهٔ reverse روی `ns1/ns2.bitcommand.com` است). آزمون port25 هر سه بررسی را pass کرد. یک ارسال واقعی به جیمیل و نگاه به «Show original» برای دیدن inbox یا اسپم هنوز مفید است.
 2. **مایکروسافت (S3140):** راه‌ها یکی از این دو است:
    - پارس‌پک از مایکروسافت بخواهد رنج را از بلاک خارج کند؛
    - یا یک smarthost (Brevo یا SMTP2GO، پلن رایگان) وصل شود. برای این کار `relayhost` و `smtp_sasl_password_maps` تنظیم می‌شود و `include:` آن سرویس به SPF اضافه می‌شود.
