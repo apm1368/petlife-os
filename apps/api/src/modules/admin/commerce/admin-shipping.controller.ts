@@ -138,7 +138,14 @@ export class AdminShippingController {
       canonicalStatus: dto.status,
       occurredAt,
     });
-    const { applied } = await this.orchestrator.applyShipmentStatus(id, dto.status);
+    // Staff often skip steps (a Post parcel goes from "requested" straight to "in transit" at the post office). The
+    // order's fulfillment only moves one step at a time, so walk every step in between, in order.
+    const order: ShipmentStatus[] = [ShipmentStatus.CREATED, ShipmentStatus.REQUESTED, ShipmentStatus.ASSIGNED, ShipmentStatus.PICKED_UP, ShipmentStatus.IN_TRANSIT, ShipmentStatus.OUT_FOR_DELIVERY, ShipmentStatus.DELIVERED];
+    const from = order.indexOf(shipment.status);
+    const to = order.indexOf(dto.status);
+    const steps = dto.status === ShipmentStatus.FAILED || from < 0 || to <= from ? [dto.status] : order.slice(from + 1, to + 1);
+    let applied = false;
+    for (const step of steps) applied = (await this.orchestrator.applyShipmentStatus(id, step)).applied || applied;
     await this.audit.record({
       adminUserId: admin.adminUserId,
       action: "shipment.staff_updated",
