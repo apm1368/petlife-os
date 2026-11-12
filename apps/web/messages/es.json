@@ -1,4 +1,119 @@
 {
+  "clinicClients": {
+    "optOut": {
+      "title": "Dejar de recibir SMS de la clínica",
+      "loading": "Comprobando…",
+      "missing": "Este enlace no es válido.",
+      "failed": "No funcionó. Inténtalo de nuevo.",
+      "explain": "{clinic} te envía SMS a través de opetlife.",
+      "button": "Dejar de recibir SMS de {clinic}",
+      "done": "Ya no recibirás SMS de {clinic}."
+    },
+    "title": "Clientes",
+    "intro": "Los clientes propios de tu clínica: registra a los dueños y sus mascotas, envíales SMS, programa recordatorios e invítalos a opetlife.",
+    "add": "Añadir cliente",
+    "cancel": "Cancelar",
+    "search": "Buscar por nombre, teléfono o mascota",
+    "loading": "Cargando…",
+    "loadFailed": "No se pudieron cargar los clientes.",
+    "forbidden": "Los clientes no están incluidos en el plan de tu clínica.",
+    "retry": "Reintentar",
+    "empty": "Aún no hay clientes. Añade el primero con sus mascotas.",
+    "noMatch": "Ningún cliente coincide con la búsqueda.",
+    "noPets": "Sin mascotas registradas",
+    "noPhone": "Sin teléfono",
+    "status": {
+      "CLINIC_ONLY": "Solo en la clínica",
+      "INVITED": "Invitado",
+      "JOINED": "En opetlife"
+    },
+    "newClient": "Nuevo cliente",
+    "name": "Nombre del dueño",
+    "phone": "Número de móvil",
+    "email": "Correo (opcional)",
+    "notes": "Notas (opcional)",
+    "pets": "Mascotas",
+    "petName": "Nombre de la mascota",
+    "species": "Especie",
+    "birthDate": "Fecha de nacimiento",
+    "addPet": "Añadir mascota",
+    "removePet": "Quitar",
+    "save": "Guardar cliente",
+    "statusLabel": "opetlife",
+    "petRemoved": "Mascota eliminada.",
+    "petAdded": "Mascota añadida.",
+    "saved": "Guardado.",
+    "reminders": "Recordatorios",
+    "anyPet": "Cualquiera de sus mascotas",
+    "reminderSaved": "Recordatorio guardado.",
+    "history": "Mensajes enviados",
+    "noMessages": "Aún no hay mensajes.",
+    "messageStatus": {
+      "SENT": "Enviado",
+      "SIMULATED": "Registrado (modo de prueba)",
+      "FAILED": "Falló",
+      "SKIPPED": "No enviado"
+    },
+    "messageKind": {
+      "MESSAGE": "Mensaje",
+      "REMINDER": "Recordatorio",
+      "INVITE": "Invitación"
+    },
+    "sms": {
+      "live": "El SMS está activo: los mensajes llegan a los teléfonos de tus clientes.",
+      "sandboxTitle": "El SMS está en modo de prueba.",
+      "sandbox": "Los mensajes se registran aquí, pero no llegan a los teléfonos hasta que se conecte la línea SMS de la plataforma.",
+      "offTitle": "El SMS está desactivado.",
+      "off": "Ahora no se pueden enviar mensajes.",
+      "title": "SMS",
+      "label": "Mensaje",
+      "placeholder": "El nombre de tu clínica va al principio.",
+      "count": "{count}/420",
+      "send": "Enviar SMS",
+      "sent": "SMS enviado.",
+      "recorded": "Registrado en modo de prueba; no llegó al teléfono.",
+      "optOut": "Dejar de enviar SMS a este cliente",
+      "optIn": "Volver a permitir SMS"
+    },
+    "invite": {
+      "send": "Invitar a opetlife",
+      "again": "Volver a enviar la invitación",
+      "sent": "Invitación enviada.",
+      "recorded": "Invitación registrada en modo de prueba; no llegó al teléfono.",
+      "help": "La invitación es un enlace. El cliente se conecta con tu clínica solo si lo abre con su sesión iniciada y acepta."
+    },
+    "errors": {
+      "TOO_MANY_OPEN_REMINDERS": "Este cliente ya tiene 20 recordatorios programados.",
+      "CLIENT_EXISTS": "Ya existe un cliente con este número de móvil.",
+      "INVALID_PHONE": "Introduce un móvil iraní válido.",
+      "INVALID_EMAIL": "Introduce un correo válido.",
+      "NO_PHONE": "Añade un número de móvil para enviarle SMS.",
+      "OPTED_OUT": "Este cliente pidió no recibir SMS.",
+      "CLIENT_DAILY_LIMIT": "Se alcanzó el límite diario para este cliente. Inténtalo mañana.",
+      "CLINIC_DAILY_LIMIT": "Se alcanzó el límite diario de SMS de tu clínica.",
+      "ALREADY_JOINED": "Este cliente ya está en opetlife.",
+      "LENGTH": "Revisa la longitud del nombre o del mensaje.",
+      "PLAN": "No está incluido en el plan de tu clínica.",
+      "GENERIC": "No funcionó. Revisa los datos e inténtalo de nuevo."
+    },
+    "join": {
+      "sentTo": "Enviado a {phone}",
+      "title": "Invitación de la clínica",
+      "loading": "Comprobando la invitación…",
+      "missing": "Este enlace de invitación no es válido o ha caducado.",
+      "failed": "No se pudo abrir la invitación. Inténtalo de nuevo.",
+      "used": "Otra cuenta ya usó esta invitación.",
+      "invitedBy": "{clinic} te invita a opetlife.",
+      "pets": "Mascotas en su ficha: {pets}",
+      "explain": "Al conectarte, la clínica puede enviarte aquí recordatorios y mensajes. Solo ve lo que ella misma registró.",
+      "connected": "Ya estás conectado con {clinic}.",
+      "addPets": "Añadir tus mascotas",
+      "accept": "Conectar con esta clínica"
+    }
+  },
+  "clinicWorkspace": {
+    "clients": "Clientes"
+  },
   "adminCustomRoles": {
     "loading": "Cargando roles…",
     "forbidden": "No tienes acceso a los roles.",
@@ -3684,7 +3799,8 @@
         "featureFlags": "Indicadores de funciones",
         "smsPatterns": "Plantillas SMS",
         "verification": "Identidad y documentos",
-        "wallets": "Monederos"
+        "wallets": "Monederos",
+        "pets": "Mascotas"
       },
       "navigation": "Navegación de administración",
       "openMenu": "Abrir menú",
@@ -7255,7 +7371,8 @@
       "noBookingsToday": "Hoy no hay reservas.",
       "verificationLink": "Verificación y documentos de la organización"
     },
-    "bookingRow": { "respondBy": "Responder antes del " },
+    "bookingRow": {
+      "attendanceConfirmed": "El dueño confirmó", "respondBy": "Responder antes del " },
     "availability": {
       "title": "Disponibilidad",
       "retry": "Intentar de nuevo",
@@ -7810,6 +7927,8 @@
       "genericAction": "No se pudo completar. Comprueba tu conexión e inténtalo de nuevo."
     },
     "ui": {
+      "confirmAttendance": "Asistiré",
+      "attendanceConfirmed": "Confirmaste que asistirás. El proveedor lo verá.",
       "loading": "Cargando reserva…",
       "forbidden": "No tienes acceso a esta reserva",
       "notFound": "No se encontró la reserva",
@@ -9023,6 +9142,221 @@
         "REFUND_OUTSIDE_SYSTEM": "Reembolso fuera de un pedido",
         "DUPLICATE_CREDIT_REVERSAL": "Abono duplicado revertido",
         "OTHER": "Otra corrección"
+      }
+    }
+  },
+  "adminPets": {
+    "kicker": "Clientes",
+    "title": "Mascotas",
+    "subtitle": "Cada mascota con su dueño y su hogar. La salud aparece solo como recuentos y fechas, nunca como texto clínico.",
+    "search": "Nombre de la mascota, del dueño o de un familiar, ID o microchip",
+    "searchButton": "Buscar",
+    "speciesFilter": "Especie",
+    "allSpecies": "Todas",
+    "species": {
+      "DOG": "Perro",
+      "CAT": "Gato",
+      "BIRD": "Ave",
+      "RABBIT": "Conejo",
+      "RODENT": "Roedor",
+      "FISH": "Pez",
+      "REPTILE": "Reptil",
+      "OTHER": "Otro"
+    },
+    "lifecycle": {
+      "ACTIVE": "Activa",
+      "LOST": "Perdida",
+      "TEMPORARILY_TRANSFERRED": "Temporalmente con otra persona",
+      "DECEASED": "Fallecida",
+      "MEMORIAL": "Memorial",
+      "deleted": "Eliminada"
+    },
+    "loading": "Cargando…",
+    "failed": "No se pudieron cargar los datos.",
+    "retry": "Reintentar",
+    "forbidden": "Necesitas el permiso «Ver clientes» para ver las mascotas.",
+    "empty": "Aún no hay mascotas registradas.",
+    "emptySearch": "Ninguna mascota coincide con esta búsqueda.",
+    "columns": {
+      "pet": "Mascota",
+      "species": "Especie y raza",
+      "owner": "Dueño",
+      "household": "Hogar",
+      "family": "Otros miembros",
+      "status": "Estado",
+      "created": "Registro"
+    },
+    "noOwner": "Sin dueño",
+    "open": "Abrir",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "pageOf": "Página {page} de {pages}",
+    "detail": {
+      "back": "Todas las mascotas",
+      "identity": "Identidad",
+      "fields": {
+        "species": "Especie",
+        "breed": "Raza",
+        "sex": "Sexo",
+        "birthDate": "Fecha de nacimiento",
+        "age": "Edad aproximada",
+        "neutered": "Esterilizada",
+        "microchip": "Microchip",
+        "status": "Estado",
+        "created": "Registrada",
+        "photo": "Foto"
+      },
+      "months": "{months} meses",
+      "sex": {
+        "MALE": "Macho",
+        "FEMALE": "Hembra",
+        "UNKNOWN": "Desconocido"
+      },
+      "neutered": {
+        "NEUTERED": "Sí",
+        "INTACT": "No",
+        "UNKNOWN": "Desconocido"
+      },
+      "yes": "Sí",
+      "no": "No",
+      "owner": "Dueño",
+      "ownerMissing": "Este hogar no tiene dueño activo.",
+      "openCustomer": "Ficha del cliente",
+      "household": "Hogar: {name}",
+      "unnamedHousehold": "Sin nombre",
+      "family": "Miembros del hogar",
+      "familyEmpty": "No hay más miembros en este hogar.",
+      "roles": {
+        "OWNER": "Dueño",
+        "FAMILY": "Familiar"
+      },
+      "accountStatus": {
+        "ACTIVE": "Cuenta activa",
+        "SUSPENDED": "Cuenta suspendida"
+      },
+      "invitations": "Invitaciones pendientes",
+      "invitationExpires": "Caduca el {date}",
+      "grants": "Acceso a esta mascota",
+      "grantsEmpty": "No hay accesos registrados.",
+      "grantColumns": {
+        "person": "Persona",
+        "source": "Origen",
+        "scope": "Permisos",
+        "period": "Periodo",
+        "state": "Estado"
+      },
+      "sources": {
+        "HOUSEHOLD": "Membresía del hogar",
+        "MANUAL": "Compartido a mano",
+        "TEMPORARY": "Temporal"
+      },
+      "scopeCount": "{count} permisos",
+      "states": {
+        "active": "Activo",
+        "revoked": "Revocado",
+        "inactive": "No activo"
+      },
+      "notMember": "Fuera del hogar",
+      "revoke": "Revocar acceso",
+      "revokeTitle": "Revocar el acceso de {name}",
+      "revokeReason": "Motivo (queda en el registro de auditoría)",
+      "revokeConfirm": "Revocar",
+      "revokeCancel": "Cancelar",
+      "revoked": "Acceso revocado.",
+      "revokeFailed": "No se pudo revocar el acceso.",
+      "reasonTooShort": "El motivo necesita al menos 5 caracteres.",
+      "ownerGrantNote": "El acceso del dueño nunca se revoca aquí.",
+      "health": "Salud (solo recuentos y fechas)",
+      "healthFields": {
+        "documents": "Documentos médicos",
+        "visits": "Visitas",
+        "labs": "Análisis",
+        "conditions": "Afecciones",
+        "allergies": "Alergias",
+        "medications": "Medicamentos"
+      },
+      "bookings": "Reservas",
+      "lost": "Avisos de pérdida",
+      "sightings": "{count} avistamientos",
+      "care": "Recordatorios de cuidado",
+      "travel": "Viajes",
+      "insurance": "Seguro",
+      "claimPreps": "{count} borradores de reclamación",
+      "sharing": "Compartido",
+      "shareCards": "{count} tarjetas activas",
+      "healthShares": "{count} enlaces de salud activos",
+      "none": "Ninguno.",
+      "diagnostics": "Notas de calidad de datos",
+      "diagnosticCodes": {
+        "NO_ACTIVE_OWNER": "El hogar no tiene dueño activo.",
+        "STALE_HOUSEHOLD_GRANT": "Alguien que dejó el hogar aún tiene acceso.",
+        "EXPIRED_GRANT_NOT_REVOKED": "Un acceso temporal caducó pero nunca se revocó.",
+        "MEMBER_WITHOUT_GRANT": "Un miembro del hogar no tiene acceso activo.",
+        "LONG_OPEN_LOST_INCIDENT": "Un aviso de pérdida lleva abierto más de 90 días.",
+        "DELETED_BUT_ACTIVE": "La mascota está eliminada pero sigue marcada como activa."
+      },
+      "activity": "Actividad reciente",
+      "changed": "Cambiado: {fields}"
+    },
+    "labels": {
+      "bookingStatus": {
+        "HOLD": "En espera",
+        "PENDING_CONFIRMATION": "Pendiente de confirmación",
+        "REQUESTED": "Solicitada",
+        "AWAITING_PAYMENT": "Pendiente de pago",
+        "REJECTED": "Rechazada",
+        "EXPIRED": "Caducada",
+        "RESCHEDULED": "Reprogramada",
+        "CONFIRMED": "Confirmada",
+        "CHECKED_IN": "Registrada",
+        "IN_PROGRESS": "En curso",
+        "COMPLETED": "Completada",
+        "CANCELLED_BY_USER": "Cancelada por el miembro",
+        "CANCELLED_BY_PROVIDER": "Cancelada por el proveedor",
+        "NO_SHOW": "No se presentó"
+      },
+      "serviceCategory": {
+        "VET": "Veterinario",
+        "GROOMING": "Peluquería",
+        "TRAINING": "Adiestramiento",
+        "WALKING": "Paseo",
+        "SITTING": "Cuidado en casa",
+        "BOARDING": "Residencia",
+        "PET_TAXI": "Taxi para mascotas",
+        "OTHER": "Otro"
+      },
+      "lostStatus": {
+        "OPEN": "Abierto",
+        "SEARCHING": "Buscando",
+        "SIGHTING_REPORTED": "Avistamiento reportado",
+        "FOUND": "Encontrada",
+        "REUNITED": "De vuelta en casa",
+        "CLOSED": "Cerrado"
+      },
+      "tripStatus": {
+        "DRAFT": "Borrador",
+        "PLANNING": "Planificando",
+        "READY": "Listo",
+        "IN_PROGRESS": "De viaje",
+        "COMPLETED": "Completado",
+        "CANCELLED": "Cancelado"
+      },
+      "insuranceStatus": {
+        "NEEDS_INFORMATION": "Falta información",
+        "DRAFT": "Borrador",
+        "SUBMITTED": "Enviada",
+        "UNDER_REVIEW": "En revisión",
+        "APPROVED": "Aprobada",
+        "DECLINED": "Rechazada",
+        "CANCELLED": "Cancelada"
+      },
+      "reminderState": {
+        "UPCOMING": "Próximos",
+        "DUE": "Pendientes",
+        "OVERDUE": "Atrasados",
+        "COMPLETED": "Hechos",
+        "SNOOZED": "Pospuestos",
+        "CANCELLED": "Cancelados"
       }
     }
   },

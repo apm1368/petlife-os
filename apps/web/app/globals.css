@@ -1263,3 +1263,32 @@ a.erp-list__row:hover { background:var(--erp-bg); }
 .site-maintenance__card h1 { margin:0; font-size:1.5rem; font-weight:800; }
 .site-maintenance__card p { margin:0; color:var(--text-secondary); line-height:1.9; white-space:pre-wrap; }
 .site-maintenance__link { min-height:44px; display:inline-flex; align-items:center; padding:0 20px; border-radius:999px; background:var(--brand-solid); color:#fff; font-weight:700; text-decoration:none; }
+
+/* Clinic clients (provider/clinic → Clients): list, editor and per-client SMS, invitations and reminders. */
+.clinic-clients { display:grid; gap:16px; min-width:0; }
+.clinic-clients__head { display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:12px; }
+.clinic-clients__list { display:grid; gap:12px; margin:0; padding:0; list-style:none; }
+.clinic-client { display:grid; gap:12px; }
+.clinic-client__row { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 16px; width:100%; min-height:48px; border:0; background:transparent; color:inherit; text-align:start; cursor:pointer; }
+.clinic-client__who { display:grid; gap:2px; min-width:0; }
+.clinic-client__who small, .clinic-client__pets small, .clinic-client__history small { color:var(--text-secondary); }
+.clinic-client__meta { display:inline-flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.clinic-client__detail { display:grid; gap:18px; padding-top:12px; border-top:1px solid var(--border-subtle); }
+.clinic-client__detail h4 { margin:0 0 8px; font-weight:750; }
+.clinic-client__facts { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr)); gap:12px; margin:0; }
+.clinic-client__facts dt { color:var(--text-secondary); font-size:.82rem; }
+.clinic-client__facts dd { margin:0; overflow-wrap:anywhere; }
+.clinic-client__pets, .clinic-client__history { display:grid; gap:8px; margin:0 0 10px; padding:0; list-style:none; }
+.clinic-client__pets li { display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; }
+.clinic-client__history li { padding:10px 12px; border-radius:12px; background:var(--surface-subtle); overflow-wrap:anywhere; }
+.clinic-client__history p { margin:6px 0 0; }
+.clinic-client__compose { display:grid; gap:6px; margin-bottom:10px; }
+.clinic-client__compose textarea { min-height:96px; padding:10px 12px; border-radius:14px; border:1px solid var(--border-subtle); background:var(--surface-elevated); color:var(--text-primary); font:inherit; }
+.clinic-client__compose small { color:var(--text-secondary); justify-self:end; }
+.clinic-client-form { display:grid; gap:14px; }
+.clinic-client-form__grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr)); gap:12px; align-items:end; }
+.clinic-client-form__pets { display:grid; gap:10px; margin:0; padding:12px 14px; border:1px solid var(--border-subtle); border-radius:16px; min-width:0; }
+.clinic-client-form__pet { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,180px),1fr)); gap:10px; align-items:end; }
+.clinic-sms-mode { margin:0; padding:10px 14px; border-radius:14px; font-size:.86rem; }
+.clinic-sms-mode--live { background:color-mix(in srgb,var(--state-success,#2f7d4c) 12%,transparent); color:var(--text-primary); }
+.clinic-sms-mode--sandbox { background:color-mix(in srgb,var(--state-attention,#c98a1b) 16%,transparent); color:var(--text-primary); }

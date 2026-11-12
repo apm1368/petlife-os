@@ -8,6 +8,8 @@ import { BookingHoldService } from "./booking-hold.service";
 import { BookingPetAccessService } from "./booking-pet-access.service";
 import { BookingLifecycleService } from "./booking-lifecycle.service";
 import { BookingExpiryWorker } from "./booking-expiry.worker";
+import { BookingReminderWorker } from "./booking-reminder.worker";
+import { NotificationsModule } from "../notifications/notifications.module";
 import { WaitlistService } from "./waitlist.service";
 import { ProviderReviewsService } from "./provider-reviews.service";
 import { BookingEngagementController, PublicProviderReviewsController } from "./engagement.controller";
@@ -18,9 +20,9 @@ import { TransportController } from "./transport/transport.controller";
 import { TransportRouteService } from "./transport/transport-route.service";
 
 @Module({
-  imports: [PetAccessModule, ProvidersModule, CareCalendarModule, ServicesModule, PaymentsModule, LedgerModule],
+  imports: [PetAccessModule, ProvidersModule, CareCalendarModule, ServicesModule, PaymentsModule, LedgerModule, NotificationsModule],
   controllers: [BookingsController, BookingEngagementController, PublicProviderReviewsController, TransportController],
-  providers: [TransportRouteService, BookingsService, BookingHoldService, BookingPetAccessService, BookingLifecycleService, BookingExpiryWorker, WaitlistService, ProviderReviewsService],
+  providers: [TransportRouteService, BookingsService, BookingHoldService, BookingPetAccessService, BookingLifecycleService, BookingExpiryWorker, BookingReminderWorker, WaitlistService, ProviderReviewsService],
   exports: [BookingPetAccessService, BookingLifecycleService, BookingHoldService, WaitlistService, ProviderReviewsService],
 })
 export class BookingModule {}

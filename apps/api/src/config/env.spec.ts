@@ -53,4 +53,11 @@ describe("validateEnv — dev simulation and boolean flags", () => {
     expect(env.DEV_SHIPPING_ENABLED).toBe(false);
     expect(validateEnv({ ...base, NODE_ENV: "development" } as NodeJS.ProcessEnv).DEV_MESSAGING_ENABLED).toBe(true);
   });
+
+  it("refuses production shipping without courier webhook secrets or with the simulated courier", () => {
+    const shipping = { ...base, SHIPPING_MODE: "production", ALOPEYK_API_BASE_URL: "https://a.example", ALOPEYK_API_KEY: "k", SNAPPBOX_ENABLED: "false", DEV_SHIPPING_ENABLED: "false" };
+    expect(() => validateEnv(shipping as NodeJS.ProcessEnv)).toThrow(/ALOPEYK_WEBHOOK_SECRET/);
+    expect(() => validateEnv({ ...shipping, ALOPEYK_WEBHOOK_SECRET: "w".repeat(32), DEV_SHIPPING_ENABLED: "true" } as NodeJS.ProcessEnv)).toThrow(/DEV_SHIPPING_ENABLED/);
+    expect(() => validateEnv({ ...shipping, ALOPEYK_WEBHOOK_SECRET: "w".repeat(32) } as NodeJS.ProcessEnv)).not.toThrow();
+  });
 });
