@@ -65,6 +65,9 @@
 .park-service:hover .park-service__icon { transform:translateY(-4px); }
 .park-service strong { font-size:14px; font-weight:750; }
 .park-service small { font-size:11px; color:var(--campaign-text); line-height:1.8; }
+/* Dark mode: the strip under the hero sits on the night paper, so its plum ink and lines switch to the pattern's light ink. */
+:root[data-theme="dark"] .park-intro { --campaign-ink:#F1EDE4; --campaign-text:#C2C6BC; --campaign-line:#3E453C; color:var(--campaign-ink); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .park-intro { --campaign-ink:#F1EDE4; --campaign-text:#C2C6BC; --campaign-line:#3E453C; color:var(--campaign-ink); } }
 .park-landing .hl-section { background:var(--campaign-cream); }
 .park-landing .hl-h2 { color:var(--campaign-ink); }
 .park-landing .hl-h2--light { color:var(--campaign-inverse); }
