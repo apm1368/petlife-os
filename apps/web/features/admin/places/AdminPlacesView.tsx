@@ -117,14 +117,15 @@ export function AdminPlacesView() {
               <tbody>{places.length === 0 ? <EmptyRow colSpan={5} label={tr("مکانی نیست", "No places")} /> : places.map((p) => (
                 <tr key={p.id}>
                   <Td>{editingPlaceId === p.id ? <Input label={tr("نام مکان", "Place name")} value={nameDraft} onChange={(e) => setNameDraft(e.target.value)} /> : p.name}</Td><Td>{p.city}</Td>
-                  <Td><Tag tone={p.status === "VERIFIED" ? "success" : p.status === "SUSPENDED" ? "urgent" : "neutral"}>{p.status}</Tag></Td>
+                  <Td><Tag tone={p.status === "VERIFIED" ? "success" : p.status === "SUSPENDED" ? "urgent" : "neutral"}>{p.status}</Tag>{p.source === "OSM" ? <> <Tag tone="brand">OSM</Tag></> : null}</Td>
                   <Td>{p.isPubliclyListed ? "✓" : "—"}</Td>
                   <Td>{canManage ? <div className="flex flex-wrap gap-1">
                     {editingPlaceId === p.id ? <>
                       <Button size="sm" disabled={savingPlaceId === p.id} onClick={() => void saveName(p.id)}>{tr("ذخیرهٔ نام", "Save name")}</Button>
                       <Button size="sm" variant="ghost" disabled={savingPlaceId === p.id} onClick={() => { setEditingPlaceId(null); setNameDraft(""); setMsg(null); }}>{tr("انصراف", "Cancel")}</Button>
                     </> : <Button size="sm" variant="ghost" onClick={() => beginRename(p)}>{tr("ویرایش نام", "Edit name")}</Button>}
-                    {p.status !== "VERIFIED" ? <Button size="sm" variant="ghost" onClick={() => void act(() => adminPlacesService.setVerification(p.id, "VERIFIED"))}>{tr("تأیید", "Verify")}</Button> : null}
+                    {/* An OpenStreetMap import is verified only through a business claim (claims tab). */}
+                    {p.status !== "VERIFIED" && !(p.source === "OSM" && !p.claimed) ? <Button size="sm" variant="ghost" onClick={() => void act(() => adminPlacesService.setVerification(p.id, "VERIFIED"))}>{tr("تأیید", "Verify")}</Button> : null}
                     {p.status !== "SUSPENDED" ? <Button size="sm" variant="ghost" onClick={() => void act(() => adminPlacesService.setVerification(p.id, "SUSPENDED"))}>{tr("تعلیق", "Suspend")}</Button> : null}
                     <Button size="sm" variant="ghost" onClick={() => void act(() => adminPlacesService.setListed(p.id, !p.isPubliclyListed))}>{p.isPubliclyListed ? (tr("خروج از فهرست", "Unlist")) : tr("نمایش عمومی", "List")}</Button>
                   </div> : <span className="text-sm text-text-secondary">—</span>}</Td>

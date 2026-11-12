@@ -42,6 +42,9 @@ import { AdminSystemController } from "./system/admin-system.controller";
 import { BookingModule } from "../booking/booking.module";
 import { PaymentsModule } from "../commerce/payments/payments.module";
 import { AdminCardTransferController } from "./finance/admin-card-transfer.controller";
+import { AdminPlacesOsmController } from "./places/admin-places-osm.controller";
+import { OsmDirectoryService } from "../places/osm/osm-directory.service";
+import { PlaceClaimsService } from "../places/osm/place-claims.service";
 import { AdminWalletsController } from "./finance/admin-wallets.controller";
 import { AdminWalletsService } from "./finance/admin-wallets.service";
 import { AdminServicesService } from "./services/admin-services.service";
@@ -166,6 +169,7 @@ import { MemoriesModule } from "../memories/memories.module";
     UserSupportAttachmentsController,
     AdminFinanceOpsController,
     AdminCardTransferController,
+    AdminPlacesOsmController,
     AdminWalletsController,
     AdminPartner360Controller,
     AdminPet360Controller,
@@ -252,6 +256,8 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminRefundService,
     AdminOrgService,
     AdminDashboardService,
+    OsmDirectoryService,
+    PlaceClaimsService,
     AdminWalletsService,
     AdminSellerSettlementService,
     AdminSellerAdjustmentService,

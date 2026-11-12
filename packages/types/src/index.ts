@@ -5516,6 +5516,12 @@ export enum PetFriendlyPlaceCategory {
   VENUE = "VENUE",
   SERVICE = "SERVICE",
   OTHER = "OTHER",
+  VETERINARY = "VETERINARY",
+  PET_SHOP = "PET_SHOP",
+  GROOMING = "GROOMING",
+  BOARDING = "BOARDING",
+  SHELTER = "SHELTER",
+  DOG_PARK = "DOG_PARK",
 }
 
 export enum PetFriendlyPlaceStatus {
@@ -5563,6 +5569,21 @@ export interface PetFriendlyPlaceDto {
   petFriendlyLevel?: "FULL" | "PARTIAL" | "OUTDOOR_ONLY" | null;
   openingHours?: { day: number; open: string; close: string }[] | null;
   province?: string | null;
+  /** OSM = imported from OpenStreetMap: show its "not verified" label and "© OpenStreetMap contributors". */
+  source?: "MANUAL" | "OSM";
+  /** Business contact as published in OpenStreetMap. */
+  phone?: string | null;
+  website?: string | null;
+  /** A KYC-verified business has claimed this listing. */
+  claimed?: boolean;
+  osmUrl?: string | null;
+}
+
+export interface PlaceClaimResultDto {
+  claimId: string;
+  status: "PENDING" | "APPROVED" | "REJECTED" | "WITHDRAWN";
+  /** What the member does next: sign up as a partner, finish KYC, or wait for review. */
+  nextStep: "CREATE_PARTNER_ACCOUNT" | "COMPLETE_VERIFICATION" | "AWAITING_REVIEW" | null;
 }
 
 // ---------------------------------------------------------------------------

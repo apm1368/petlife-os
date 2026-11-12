@@ -3708,7 +3708,10 @@
         "channels": "Canales y envíos",
         "smsPatterns": "Plantillas SMS",
         "walletDirectory": "Miembros",
-        "walletTopUps": "Comprobantes de recarga"
+        "walletTopUps": "Comprobantes de recarga",
+        "placeReports": "Reportes de lugares",
+        "osmImport": "OpenStreetMap",
+        "placeClaims": "Reclamaciones"
       },
       "palette": {
         "actions": "Acciones rápidas",
@@ -8420,7 +8423,13 @@
       "BEACH": "Playa",
       "VENUE": "Local",
       "SERVICE": "Servicio",
-      "OTHER": "Otro"
+      "OTHER": "Otro",
+      "VETERINARY": "Veterinario",
+      "PET_SHOP": "Tienda de mascotas",
+      "GROOMING": "Peluquería",
+      "BOARDING": "Residencia",
+      "SHELTER": "Refugio",
+      "DOG_PARK": "Parque para perros"
     },
     "list": {
       "search": "Buscar",
@@ -8447,6 +8456,36 @@
       "title": "Lugares guardados",
       "empty": "Aún no has guardado ningún lugar.",
       "signInPrompt": "Inicia sesión para guardar tus lugares favoritos."
+    },
+    "osm": {
+      "label": "De OpenStreetMap · aún sin verificar",
+      "explain": "Esta ficha viene del mapa abierto OpenStreetMap y opetlife aún no la ha revisado. Contacta con el lugar antes de ir.",
+      "attribution": "© colaboradores de OpenStreetMap",
+      "viewOnOsm": "Ver en OpenStreetMap",
+      "phone": "Teléfono",
+      "website": "Sitio web",
+      "managed": "Esta página la gestiona el propio negocio, con identidad verificada."
+    },
+    "claim": {
+      "title": "¿Es tu negocio?",
+      "body": "Reclama esta página para mantener tú mismo sus datos y obtener la insignia de verificado.",
+      "button": "Reclamar",
+      "sending": "Enviando…",
+      "signIn": "Inicia sesión para reclamarla",
+      "failed": "No funcionó. Inténtalo de nuevo.",
+      "next": {
+        "CREATE_PARTNER_ACCOUNT": "Solicitud guardada. Siguiente paso: crea una cuenta de socio y envía tus documentos para verificarlos.",
+        "COMPLETE_VERIFICATION": "Solicitud guardada. Siguiente paso: completa la verificación de tu negocio en el panel de socios.",
+        "AWAITING_REVIEW": "Solicitud guardada. El equipo de opetlife la revisará y te avisará."
+      },
+      "goPartner": "Crear cuenta de socio",
+      "goVerification": "Ir a la verificación",
+      "status": {
+        "PENDING": "Tu solicitud está en revisión.",
+        "APPROVED": "Tu solicitud fue aprobada.",
+        "REJECTED": "Tu solicitud no fue aceptada.",
+        "WITHDRAWN": "Solicitud retirada."
+      }
     }
   },
   "healthDepth": {
@@ -9079,6 +9118,63 @@
         "DUPLICATE_CREDIT_REVERSAL": "Abono duplicado revertido",
         "OTHER": "Otra corrección"
       }
+    }
+  },
+  "adminPlacesOsm": {
+    "osmTitle": "Importación de OpenStreetMap",
+    "osmHint": "Cada ciudad se actualiza semanalmente con una consulta suave a Overpass. Los lugares importados aparecen sin verificar hasta que el negocio los reclame.",
+    "columns": {
+      "city": "Ciudad",
+      "active": "Activa",
+      "listed": "Lugares listados",
+      "lastRun": "Última ejecución",
+      "result": "Resultado"
+    },
+    "result": "{created} nuevos, {updated} actualizados, {hidden} ocultos",
+    "status": {
+      "RUNNING": "En curso",
+      "SUCCEEDED": "Hecho",
+      "FAILED": "Fallido",
+      "RATE_LIMITED": "Overpass ocupado; se reintentará"
+    },
+    "never": "Aún sin ejecutar",
+    "runNow": "Ejecutar ahora",
+    "started": "Iniciado; vuelve en unos minutos.",
+    "runFailed": "Ahora no: hay otra ejecución en curso o esta zona acaba de ejecutarse.",
+    "claimsTitle": "Solicitudes de reclamación",
+    "claimsEmpty": "No hay solicitudes pendientes.",
+    "claimColumns": {
+      "place": "Lugar",
+      "claimant": "Solicitante",
+      "organization": "Negocio",
+      "message": "Mensaje"
+    },
+    "noOrganization": "Aún sin cuenta de socio",
+    "kyc": {
+      "VERIFIED": "Verificado",
+      "other": "Verificación pendiente"
+    },
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "reason": "Motivo (auditoría)",
+    "decided": "Guardado.",
+    "decideFailed": "No se guardó: la aprobación requiere un negocio verificado.",
+    "form": {
+      "title": "Añadir o editar ciudad",
+      "hint": "El recuadro de la ciudad (máx. 1,5° por lado). El nombre es el que muestra el filtro de ciudad.",
+      "province": "Provincia",
+      "south": "Sur (lat)",
+      "west": "Oeste (long)",
+      "north": "Norte (lat)",
+      "east": "Este (long)",
+      "save": "Guardar",
+      "saved": "Guardado.",
+      "saveFailed": "No se guardó: revisa el recuadro (sur menor que norte, oeste menor que este, máx. 1,5°).",
+      "edit": "Editar",
+      "activate": "Activar",
+      "deactivate": "Pausar",
+      "yes": "Sí",
+      "no": "No"
     }
   }
 }

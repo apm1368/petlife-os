@@ -3713,7 +3713,10 @@
         "channels": "Kanäle und Zustellung",
         "smsPatterns": "SMS-Vorlagen",
         "walletDirectory": "Mitglieder",
-        "walletTopUps": "Aufladebelege"
+        "walletTopUps": "Aufladebelege",
+        "placeReports": "Ortsmeldungen",
+        "osmImport": "OpenStreetMap",
+        "placeClaims": "Übernahmen"
       },
       "palette": {
         "actions": "Schnellaktionen",
@@ -8422,7 +8425,13 @@
       "BEACH": "Strand",
       "VENUE": "Veranstaltungsort",
       "SERVICE": "Dienstleistung",
-      "OTHER": "Sonstiges"
+      "OTHER": "Sonstiges",
+      "VETERINARY": "Tierarzt",
+      "PET_SHOP": "Tierhandlung",
+      "GROOMING": "Tierpflege",
+      "BOARDING": "Tierpension",
+      "SHELTER": "Tierheim",
+      "DOG_PARK": "Hundepark"
     },
     "list": {
       "search": "Suchen",
@@ -8449,6 +8458,36 @@
       "title": "Gespeicherte Orte",
       "empty": "Du hast noch keine Orte gespeichert.",
       "signInPrompt": "Melde dich an, um deine Lieblingsorte zu speichern."
+    },
+    "osm": {
+      "label": "Aus OpenStreetMap · noch nicht geprüft",
+      "explain": "Dieser Eintrag stammt aus der freien Karte OpenStreetMap und wurde von opetlife noch nicht geprüft. Kontaktieren Sie den Ort, bevor Sie hingehen.",
+      "attribution": "© OpenStreetMap-Mitwirkende",
+      "viewOnOsm": "Auf OpenStreetMap ansehen",
+      "phone": "Telefon",
+      "website": "Website",
+      "managed": "Diese Seite wird vom Unternehmen selbst verwaltet, dessen Identität geprüft ist."
+    },
+    "claim": {
+      "title": "Ist das Ihr Unternehmen?",
+      "body": "Übernehmen Sie diese Seite, um die Angaben selbst aktuell zu halten und das Prüfsiegel zu erhalten.",
+      "button": "Übernehmen",
+      "sending": "Wird gesendet…",
+      "signIn": "Zum Übernehmen anmelden",
+      "failed": "Das hat nicht geklappt. Bitte erneut versuchen.",
+      "next": {
+        "CREATE_PARTNER_ACCOUNT": "Anfrage gespeichert. Nächster Schritt: Partnerkonto anlegen und Unterlagen zur Prüfung senden.",
+        "COMPLETE_VERIFICATION": "Anfrage gespeichert. Nächster Schritt: Unternehmensprüfung im Partnerbereich abschließen.",
+        "AWAITING_REVIEW": "Anfrage gespeichert. Das opetlife-Team prüft sie und meldet sich."
+      },
+      "goPartner": "Partnerkonto anlegen",
+      "goVerification": "Zur Prüfung",
+      "status": {
+        "PENDING": "Ihre Anfrage wird geprüft.",
+        "APPROVED": "Ihre Anfrage wurde bestätigt.",
+        "REJECTED": "Ihre Anfrage wurde nicht angenommen.",
+        "WITHDRAWN": "Anfrage zurückgezogen."
+      }
     }
   },
   "healthDepth": {
@@ -9081,6 +9120,63 @@
         "DUPLICATE_CREDIT_REVERSAL": "Doppelte Gutschrift storniert",
         "OTHER": "Andere Korrektur"
       }
+    }
+  },
+  "adminPlacesOsm": {
+    "osmTitle": "OpenStreetMap-Import",
+    "osmHint": "Jede Stadt wird wöchentlich mit einer schonenden Overpass-Abfrage aktualisiert. Importierte Orte gelten als ungeprüft, bis das Unternehmen sie übernimmt.",
+    "columns": {
+      "city": "Stadt",
+      "active": "Aktiv",
+      "listed": "Gelistete Orte",
+      "lastRun": "Letzter Lauf",
+      "result": "Ergebnis"
+    },
+    "result": "{created} neu, {updated} aktualisiert, {hidden} ausgeblendet",
+    "status": {
+      "RUNNING": "Läuft",
+      "SUCCEEDED": "Fertig",
+      "FAILED": "Fehlgeschlagen",
+      "RATE_LIMITED": "Overpass ausgelastet; später erneut"
+    },
+    "never": "Noch nicht gelaufen",
+    "runNow": "Jetzt ausführen",
+    "started": "Gestartet; schauen Sie in ein paar Minuten wieder vorbei.",
+    "runFailed": "Gerade nicht: ein anderer Lauf ist aktiv oder dieser Bereich lief eben erst.",
+    "claimsTitle": "Übernahme-Anfragen",
+    "claimsEmpty": "Keine offenen Anfragen.",
+    "claimColumns": {
+      "place": "Ort",
+      "claimant": "Antragsteller",
+      "organization": "Unternehmen",
+      "message": "Nachricht"
+    },
+    "noOrganization": "Noch kein Partnerkonto",
+    "kyc": {
+      "VERIFIED": "Geprüft",
+      "other": "Prüfung offen"
+    },
+    "approve": "Bestätigen",
+    "reject": "Ablehnen",
+    "reason": "Grund (Prüfprotokoll)",
+    "decided": "Gespeichert.",
+    "decideFailed": "Nicht gespeichert: Bestätigung braucht ein geprüftes Unternehmen.",
+    "form": {
+      "title": "Stadt hinzufügen oder bearbeiten",
+      "hint": "Begrenzungsrahmen der Stadt (höchstens 1,5° je Richtung). Der Stadtname ist der, den der Stadtfilter zeigt.",
+      "province": "Provinz",
+      "south": "Süd (Breite)",
+      "west": "West (Länge)",
+      "north": "Nord (Breite)",
+      "east": "Ost (Länge)",
+      "save": "Speichern",
+      "saved": "Gespeichert.",
+      "saveFailed": "Nicht gespeichert: Rahmen prüfen (Süd unter Nord, West unter Ost, höchstens 1,5°).",
+      "edit": "Bearbeiten",
+      "activate": "Aktivieren",
+      "deactivate": "Pausieren",
+      "yes": "Ja",
+      "no": "Nein"
     }
   }
 }

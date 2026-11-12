@@ -4,6 +4,8 @@ import { PetFriendlyPlaceFavoriteService } from "./pet-friendly-place-favorite.s
 import { PlaceReportsController } from "./place-reports.controller";
 import { PlacesController } from "./places.controller";
 import { PublicPlacesController } from "./public-places.controller";
+import { PlaceClaimsController } from "./osm/place-claims.controller";
+import { PlaceClaimsService } from "./osm/place-claims.service";
 
 /**
  * The public/consumer half of the Handoff 19 Pet-Friendly Places domain —
@@ -21,8 +23,8 @@ import { PublicPlacesController } from "./public-places.controller";
   // registered first would swallow "/places/favorites" requests (placeId
   // would just be "favorites"). Same "literal before wildcard" rule already
   // used within a single controller (see TravelController's own ordering).
-  controllers: [PlacesController, PublicPlacesController, PlaceReportsController],
-  providers: [PublicPlacesReadService, PetFriendlyPlaceFavoriteService],
+  controllers: [PlacesController, PlaceClaimsController, PublicPlacesController, PlaceReportsController],
+  providers: [PublicPlacesReadService, PetFriendlyPlaceFavoriteService, PlaceClaimsService],
   exports: [PublicPlacesReadService, PetFriendlyPlaceFavoriteService],
 })
 export class PlacesModule {}

@@ -241,4 +241,8 @@ export type AdminAuditAction =
   | "wallet.debited"
   | "wallet_top_up.approved"
   | "wallet_top_up.rejected"
-  | "wallet_top_up.receipt_viewed";
+  | "wallet_top_up.receipt_viewed"
+  | "osm_area.updated"
+  | "osm_area.run_requested"
+  | "place_claim.approved"
+  | "place_claim.rejected";
