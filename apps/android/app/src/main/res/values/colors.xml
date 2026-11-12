@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand forest green behind the maskable icon. -->
+    <color name="iconBackground">#1F5A3D</color>
+</resources>
