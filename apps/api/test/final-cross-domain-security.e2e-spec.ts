@@ -63,6 +63,14 @@ const PUBLIC_GET = new Set([
 // The caller acting on their own relationship with a public item (their favourite, their reaction).
 const OWN_ACTION = new Set([
   "DELETE /community/posts/:postId/reactions",
+  // #290 Q52: any member may message a published post's author (identity stays hidden until they reply); doing so makes
+  // the caller a participant, so the per-member controls below act on the caller's own conversation.
+  "POST /chat/conversations/for-post/:postId",
+  "POST /chat/conversations/:id/read",
+  "POST /chat/conversations/:id/archive",
+  "POST /chat/conversations/:id/unarchive",
+  "DELETE /chat/conversations/:id/mute",
+  "POST /chat/conversations/:id/delete-for-self",
   "POST /community/posts/:postId/reactions",
   "POST /community/posts/:postId/save",
   "DELETE /community/posts/:postId/save",
