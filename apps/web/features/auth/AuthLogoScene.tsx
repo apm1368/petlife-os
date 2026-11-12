@@ -1,5 +1,5 @@
 import type { RouteLocale } from "@/lib/i18n/config";
-import { oplCopy } from "@/features/landing/opl/opl-copy";
+import { useOplCopy } from "@/features/landing/opl/opl-copy";
 import { makeKit } from "@/features/reel/scene-kit";
 
 /**
@@ -9,7 +9,7 @@ import { makeKit } from "@/features/reel/scene-kit";
  */
 export function AuthLogoScene({ locale, className = "" }: { locale: RouteLocale; className?: string }) {
   const { rtl, T, G, PAW, logo } = makeKit(locale);
-  const brand = oplCopy[locale].brand;
+  const brand = useOplCopy().brand;
   const word = (fill: string) => T(180, 350, brand, { s: rtl ? 46 : 44, w: rtl ? 900 : 700, f: fill, c: "a-rise", d: 1.35 });
   const light = `<circle cx="70" cy="110" r="70" fill="#FBE7C6"/><circle cx="310" cy="500" r="90" fill="#FBE7C6"/>`
     + G(300, 150, "a-float", 0, PAW("#EBD9B6"), 1.6) + G(64, 420, "a-float", 0.6, PAW("#EBD9B6"), 1.3) + G(250, 560, "a-float", 1.1, PAW("#EBD9B6"), 1.1)

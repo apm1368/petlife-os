@@ -3,12 +3,12 @@ import Image from "next/image";
 import { ArrowLeft, ArrowRight, ShoppingBag, Stethoscope, Scissors, House, Plane, CarFront, HandHeart, ShieldCheck } from "@petlife/ui";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { ParkPavilions } from "./ParkPavilions";
-import { parkCopy, parkDestinations } from "./park-copy";
+import { parkDestinations, useParkCopy } from "./park-copy";
 
 const icons = { shop: ShoppingBag, vet: Stethoscope, grooming: Scissors, boarding: House, travel: Plane, taxi: CarFront, support: HandHeart, insurance: ShieldCheck };
 
 export function ParkHero({ locale }: { locale: RouteLocale }) {
-  const c = parkCopy[locale];
+  const c = useParkCopy(locale);
   const Arrow = locale === "fa" ? ArrowLeft : ArrowRight;
   return <>
     <section className="park-hero" aria-labelledby="park-title">

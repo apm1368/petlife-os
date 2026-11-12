@@ -4,14 +4,14 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, PawPrint } from "@petlife/ui";
 import { useLanding } from "./LandingShell";
-import { oplCopy, withName } from "./opl-copy";
+import { useOplCopy, withName } from "./opl-copy";
 import { storyCopy } from "../story-copy";
 import { observeResize, observeVisible, prefersReducedMotion } from "./cursor-bus";
 
 /** The closing call: a field of paw prints that all point at signup and turn, wave-like, toward the pointer. */
 export function FinalStart() {
   const { locale, name } = useLanding();
-  const s = storyCopy[locale], c = oplCopy[locale].final;
+  const s = storyCopy[locale], c = useOplCopy().final;
   const Arrow = locale === "fa" ? ArrowLeft : ArrowRight;
   const canvas = useRef<HTMLCanvasElement>(null);
   const cta = useRef<HTMLAnchorElement>(null);
@@ -73,7 +73,7 @@ export function FinalStart() {
       <h2 className="opl-h2" id="opl-final-title">{withName(c.title, name)}</h2>
       <p className="opl-lede">{withName(c.body, name)}</p>
       <div className="opl-actions">
-        <Link ref={cta} className="opl-btn primary lg" href={`/${locale}/register`} onPointerEnter={() => setHot(true)} onPointerLeave={() => setHot(false)} data-ck={oplCopy[locale].cookie.go}>{s.join}<Arrow size={20} aria-hidden="true" /></Link>
+        <Link ref={cta} className="opl-btn primary lg" href={`/${locale}/register`} onPointerEnter={() => setHot(true)} onPointerLeave={() => setHot(false)} data-ck={useOplCopy().cookie.go}>{s.join}<Arrow size={20} aria-hidden="true" /></Link>
         <Link className="opl-btn line lg" href={`/${locale}/auth`}>{s.login}</Link>
       </div>
     </div>

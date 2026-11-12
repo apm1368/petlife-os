@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { EmptyState, ErrorRecovery, Heart, Plus, Skeleton } from "@petlife/ui";
 import { memoriesService, type PublicPetMemorialDto } from "@/services/memories.service";
 import { isRouteLocale } from "@/lib/i18n/config";
-import { fillVars, oplCopy } from "./opl/opl-copy";
+import { fillVars, useOplCopy } from "./opl/opl-copy";
 import { observeResize, observeVisible, prefersReducedMotion } from "./opl/cursor-bus";
 
 const CANDLES_KEY = "opl-candles";
@@ -21,7 +21,7 @@ export function PublicPetMemorialSection() {
   const tc = useTranslations("common");
   const raw = useLocale();
   const locale = isRouteLocale(raw) ? raw : "en";
-  const c = oplCopy[locale].memorial;
+  const c = useOplCopy().memorial;
   const [items, setItems] = useState<PublicPetMemorialDto[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [lit, setLit] = useState<Set<string>>(new Set());

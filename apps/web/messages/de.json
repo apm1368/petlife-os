@@ -1,4 +1,585 @@
 {
+  "pattern2026": {
+    "opl": {
+      "brand": "opetlife",
+      "header": {
+        "services": "Angebote",
+        "allServices": "Alle Angebote",
+        "allServicesHint": "Die vollständige Anbieterliste",
+        "partners": "Partner",
+        "theme": "Hellen und dunklen Modus wechseln",
+        "language": "Sprache"
+      },
+      "world": {
+        "eyebrow": "Eine Identität für ihre ganze Welt",
+        "title": {
+          "d": "Die Welt deines Tieres beginnt hier",
+          "n": "Die Welt von {name} beginnt hier"
+        },
+        "lede": "Wähle deine Frage und sieh, wo opetlife dir hilft. Alles, was du einträgst, bleibt in seinem Profil.",
+        "defaultName": "dein Tier",
+        "nameLabel": "Wie heißt dein Tier?",
+        "namePlaceholder": "Zum Beispiel Cookie",
+        "speciesLabel": "Tierart",
+        "species": {
+          "dog": "Hund",
+          "cat": "Katze",
+          "bird": "Vogel",
+          "rabbit": "Kaninchen",
+          "other": "Andere"
+        },
+        "coreSub": "Ein Profil für alles",
+        "worldsLabel": "Die fünf Welten von opetlife",
+        "worlds": {
+          "health": {
+            "q": "Geht es ihm gut?",
+            "name": "Gesundheit und Pflege",
+            "ck": "Gesundheit zuerst",
+            "desc": "Gesundheitsakte, Pflegeerinnerungen und Tierarzttermine liegen nebeneinander. Alles, was du einträgst, bleibt an einem Ort und lässt sich bei Bedarf mit der Tierarztpraxis teilen.",
+            "cta": {
+              "d": "Profil für dein Tier erstellen",
+              "n": "Profil für {name} erstellen"
+            },
+            "feats": [
+              {
+                "n": "Gesundheitsakte",
+                "d": "Impfungen, Medikamente, Allergien und Besuche"
+              },
+              {
+                "n": "Pflegekalender",
+                "d": "Erinnerungen für tägliche und monatliche Routinen"
+              },
+              {
+                "n": "Tierarzt finden",
+                "d": "Anbieter ansehen und Termin buchen"
+              },
+              {
+                "n": "Akte teilen",
+                "d": "Ein befristeter, widerrufbarer Link für die Praxis"
+              }
+            ]
+          },
+          "daily": {
+            "q": "Was braucht es heute?",
+            "name": "Einkauf und Dienste",
+            "ck": "Einkaufen?",
+            "desc": "Futter und Zubehör aus dem Shop sowie Dienste wie Pflege, Betreuung und Tiertaxi von Anbietern, gebucht und verfolgt in derselben App.",
+            "cta": {
+              "d": "Zum Shop",
+              "n": "Zum Shop"
+            },
+            "feats": [
+              {
+                "n": "Tiershop",
+                "d": "Futter, Zubehör und Pflegeprodukte"
+              },
+              {
+                "n": "Wiederkehrende Lieferung",
+                "d": "Bestellungen im gewünschten Abstand"
+              },
+              {
+                "n": "Fellpflege",
+                "d": "Termine bei Anbietern buchen"
+              },
+              {
+                "n": "Betreuung und Taxi",
+                "d": "Wenn du weg bist oder ihr unterwegs seid"
+              }
+            ]
+          },
+          "travel": {
+            "q": "Wohin reisen wir zusammen?",
+            "name": "Reisen und Unterkünfte",
+            "ck": "Auf Reisen?",
+            "desc": "Tierfreundliche Unterkünfte suchen und vergleichen und Reisepläne sowie Dokumente deines Tieres zusammen aufbewahren.",
+            "cta": {
+              "d": "Reise planen",
+              "n": "Reise planen"
+            },
+            "feats": [
+              {
+                "n": "Unterkunft suchen",
+                "d": "Orte, an denen Tiere willkommen sind"
+              },
+              {
+                "n": "Unterkünfte vergleichen",
+                "d": "Regeln und Ausstattung nebeneinander"
+              },
+              {
+                "n": "Reisepläne",
+                "d": "Reisen und Buchungen an einem Ort"
+              },
+              {
+                "n": "Reisepass",
+                "d": "Reisedokumente im Profil deines Tieres"
+              }
+            ]
+          },
+          "safe": {
+            "q": "Was, wenn etwas passiert?",
+            "name": "Sicherheit",
+            "ck": "Ganz entspannt",
+            "desc": "Versicherungen vergleichen und, falls dein Tier vermisst wird, aus seinem Profil eine Meldung erstellen, damit Aushang und Nachverfolgung an einem Ort laufen.",
+            "cta": {
+              "d": "Versicherungen vergleichen",
+              "n": "Versicherungen vergleichen"
+            },
+            "feats": [
+              {
+                "n": "Tierversicherung",
+                "d": "Tarife ansehen und vergleichen"
+              },
+              {
+                "n": "Vermisstenmeldung",
+                "d": "Öffentlicher Aushang und Nachverfolgung"
+              },
+              {
+                "n": "Ausweiskarte",
+                "d": "Eine teilbare Karte für den Heimweg"
+              },
+              {
+                "n": "Hilfe",
+                "d": "Anfrage stellen und Antwort verfolgen"
+              }
+            ]
+          },
+          "together": {
+            "q": "Und die anderen?",
+            "name": "Gemeinschaft und Hilfe",
+            "ck": "Neue Freunde",
+            "desc": "Erfahrungen mit anderen Haltern teilen, Tieren in Not helfen und gemeinsame Erinnerungen bewahren.",
+            "cta": {
+              "d": "Der Gemeinschaft beitreten",
+              "n": "Der Gemeinschaft beitreten"
+            },
+            "feats": [
+              {
+                "n": "Gemeinschaft",
+                "d": "Fragen, Erfahrungen und Gespräche"
+              },
+              {
+                "n": "Tierhilfe",
+                "d": "Gemeldeter Bedarf von Hilfszentren"
+              },
+              {
+                "n": "Erinnerungen",
+                "d": "Ein Album eurer gemeinsamen Momente"
+              },
+              {
+                "n": "Jahresrückblick",
+                "d": "Ein Jahr Zusammenleben im Überblick"
+              }
+            ]
+          }
+        }
+      },
+      "reel": {
+        "eyebrow": "Ohne Worte, mit Musik und Untertiteln",
+        "title": "opetlife in 30 Sekunden",
+        "lede": "Alle Angebote in einem kurzen Reel. Ton an und bei jedem Kapitel einsteigen.",
+        "label": "Angebots-Reel",
+        "play": "Mit Musik abspielen",
+        "replay": "Noch einmal ansehen",
+        "pause": "Pause",
+        "resume": "Abspielen",
+        "mute": "Stumm schalten",
+        "unmute": "Ton an",
+        "music": "Instrumentalmusik",
+        "chapters": "Kapitel",
+        "end": "Ende"
+      },
+      "path": {
+        "sample": "Beispiel",
+        "name": "Name",
+        "type": "Art",
+        "photo": "Foto",
+        "added": "Hinzugefügt",
+        "chips": [
+          "Tierarzt",
+          "Fellpflege",
+          "Betreuung",
+          "Taxi"
+        ],
+        "timeline": [
+          "Anfrage gesendet",
+          "Anbieter bestätigt",
+          "Termintag"
+        ]
+      },
+      "share": {
+        "title": {
+          "d": "Gesundheitsakte deines Tieres teilen",
+          "n": "Gesundheitsakte von {name} teilen"
+        },
+        "sectionsLabel": "Welche Bereiche sind sichtbar?",
+        "durationLabel": "Wie lange bleibt der Link offen?",
+        "previewLabel": "Das sieht die Tierarztpraxis",
+        "sections": {
+          "vaccination": "Impfungen",
+          "allergies": "Allergien",
+          "medications": "Medikamente",
+          "conditions": "Erkrankungen"
+        },
+        "durations": [
+          "24 Stunden",
+          "3 Tage",
+          "7 Tage"
+        ],
+        "recorded3": "3 Einträge",
+        "recorded1": "1 Eintrag",
+        "unknown": "Unbekannt; noch nicht eingetragen",
+        "fromClinic": "Von der Praxis",
+        "fromYou": "Von dir",
+        "notRecorded": "Nicht eingetragen",
+        "hidden": "Verborgen",
+        "foot": "Der Link bleibt {d} offen · jederzeit widerrufbar · du siehst, wie oft er geöffnet wurde"
+      },
+      "lost": {
+        "title": "Wenn es einmal verschwindet, zählt jede Minute",
+        "body": {
+          "d": "Erstelle aus dem Profil deines Tieres eine Vermisstenmeldung, damit Aushang und Nachverfolgung an einem Ort laufen.",
+          "n": "Erstelle aus dem Profil von {name} eine Vermisstenmeldung, damit Aushang und Nachverfolgung an einem Ort laufen."
+        },
+        "cta": "Vermisstenmeldungen ansehen"
+      },
+      "memorial": {
+        "lightCandle": "Kerze anzünden",
+        "candleLit": "Kerze brennt",
+        "lightFor": "Kerze für {name} anzünden",
+        "putOut": "Kerze für {name} löschen",
+        "newArch": "Ein Platz für dein Tier",
+        "newArchCaption": "Deine Erinnerung",
+        "ctaBody": "Für ein Tier, das nicht mehr bei dir ist: ein Ort zum Bleiben. Fotos und Erinnerungen bleiben in seinem Profil.",
+        "cta": "Erinnerung anlegen"
+      },
+      "kindness": {
+        "hint": "Bewege den Zeiger über das Bild",
+        "alt": "Illustration: eine Hand bringt einem herrenlosen Hund und einer Katze neben einer Holzhütte eine Futterschale"
+      },
+      "partners": {
+        "roles": [
+          {
+            "title": "Praxen und Tierärzte",
+            "body": "Termine, Patienten und die Akten, die Halter mit euch teilen."
+          },
+          {
+            "title": "Dienstleister",
+            "body": "Angebote, Kalender, Buchungen und Bewertungen, von Pflege bis Betreuung und Reisen."
+          },
+          {
+            "title": "Händler",
+            "body": "Produkte, Bestand, Bestellungen und Abrechnungen in einem Bereich."
+          },
+          {
+            "title": "Hilfszentren",
+            "body": "Bedarf melden, Spenden verfolgen und das Team verwalten."
+          }
+        ]
+      },
+      "final": {
+        "title": {
+          "d": "Die Welt deines Tieres beginnt an deiner Seite",
+          "n": "Die Welt von {name} beginnt an deiner Seite"
+        },
+        "body": {
+          "d": "Der erste Schritt: ein Profil für dein Tier.",
+          "n": "Der erste Schritt: ein Profil für {name}."
+        }
+      },
+      "hook": {
+        "text": {
+          "d": "Profil für dein Tier erstellen",
+          "n": "Profil für {name} erstellen"
+        },
+        "start": "Los",
+        "close": "Schließen"
+      },
+      "cookie": {
+        "show": "Cookie zeigen",
+        "hide": "Cookie ausblenden",
+        "hello": "Hallo {name}",
+        "play": "Spielen?",
+        "input": "Wie heißt es?",
+        "go": "Los geht's"
+      },
+      "scenes": {
+        "s": [
+          "Eine Welt für Hunde, Katzen, Vögel und alle Tiere.",
+          "Die Gesundheitsakte deines Tieres, immer zur Hand.",
+          "Pflegeerinnerungen, genau zur richtigen Zeit.",
+          "Tierarzt in der Nähe finden und Termin buchen.",
+          "Futter und Zubehör, mit wiederkehrender Lieferung.",
+          "Pflege, Baden und Betreuung, online gebucht.",
+          "Tierfreundliche Unterkünfte für die nächste Reise.",
+          "Versicherung und Vermisstenmeldung für schwere Tage.",
+          "Eine freundliche Gemeinschaft und Hilfe für Tiere in Not.",
+          "Ihre Welt beginnt an deiner Seite."
+        ],
+        "k": [
+          "opetlife",
+          "Gesundheitsakte",
+          "Pflegekalender",
+          "Tierärzte",
+          "Tiershop",
+          "Pflege und Betreuung",
+          "Reisen",
+          "Sicherheit",
+          "Gemeinschaft",
+          ""
+        ],
+        "tagline": "Eine Welt für Haustiere",
+        "healthTitle": "Gesundheitsakte",
+        "healthSub": "Ein Profil für alles",
+        "calendarTitle": "Pflegekalender",
+        "reminderMed": "Morgenmedikament, 8:00",
+        "reminderVaccine": "Jährliche Impferinnerung",
+        "nearestClinic": "Nächste Praxis",
+        "booked": "Termin gebucht",
+        "repeat": "Wiederkehrende Lieferung",
+        "shop": "Tiershop",
+        "grooming": "Pflege und Baden",
+        "boarding": "Betreuung",
+        "petFriendly": "Tierfreundlich",
+        "insurance": "Tierversicherung",
+        "lost": "Vermisstenmeldung",
+        "support": "Tieren in Not helfen",
+        "start": "Heute starten"
+      }
+    },
+    "reels": {
+      "care": {
+        "eyebrow": "Die Akte deines Tieres auf einen Blick",
+        "title": "Die ganze Pflege an einem Ort",
+        "lede": "Gesundheit, Erinnerungen und tägliche Aufgaben zusammen, geteilt mit deiner Familie.",
+        "cta": "Akte öffnen",
+        "a": {
+          "k": "Heute",
+          "s": "Futter, Spaziergang und Medikament; jede erledigte Aufgabe wird abgehakt."
+        },
+        "b": {
+          "k": "Mit der Familie",
+          "s": "Alle zu Hause sehen dieselbe Akte und teilen sich die Aufgaben."
+        },
+        "labels": {
+          "today": "Heute",
+          "feed": "Futter",
+          "walk": "Spaziergang",
+          "meds": "Medikament",
+          "family": "Familie",
+          "shared": "Geteilte Akte",
+          "done": "Erledigt"
+        }
+      },
+      "services": {
+        "eyebrow": "Angebote und Tierärzte auf einen Blick",
+        "title": "Von der Suche zum Termin in 20 Sekunden",
+        "lede": "So funktioniert die Suche nach Anbietern und die Terminbuchung bei opetlife.",
+        "cta": "Termin buchen",
+        "a": {
+          "k": "Suche",
+          "s": "Angebot und Gegend wählen, Anbieter ansehen."
+        },
+        "b": {
+          "k": "Buchung",
+          "s": "Tag und Uhrzeit wählen, schon ist der Termin da."
+        },
+        "labels": {
+          "search": "Pflege, Tierarzt, Betreuung…",
+          "vet": "Tierarzt",
+          "grooming": "Pflege",
+          "boarding": "Betreuung",
+          "verified": "Geprüft",
+          "provider": "Anbieter",
+          "month": "Terminkalender",
+          "confirm": "Buchen"
+        }
+      },
+      "shop": {
+        "eyebrow": "Der Tiershop auf einen Blick",
+        "title": "Alltagseinkauf ganz einfach",
+        "lede": "Vom Produkt bis zur Lieferung und wiederkehrenden Bestellung.",
+        "cta": "Produkte ansehen",
+        "a": {
+          "k": "Produkte",
+          "s": "Futter, Zubehör und Spielzeug nebeneinander."
+        },
+        "b": {
+          "k": "Lieferung",
+          "s": "Verfolge deine Bestellung bis zur Tür."
+        },
+        "labels": {
+          "food": "Futter",
+          "bowl": "Napf",
+          "toy": "Spielzeug",
+          "care": "Pflege",
+          "cart": "Warenkorb",
+          "onTheWay": "Unterwegs",
+          "delivered": "Zugestellt"
+        }
+      },
+      "travel": {
+        "eyebrow": "Reisen auf einen Blick",
+        "title": "Dein liebster Reisebegleiter",
+        "lede": "Tierfreundliche Unterkünfte finden und vergleichen, Reisedokumente immer dabei.",
+        "cta": "Unterkunft suchen",
+        "a": {
+          "k": "Vergleich",
+          "s": "Unterkünfte nebeneinander vergleichen."
+        },
+        "b": {
+          "k": "Reisepass",
+          "s": "Reisedokumente im Profil deines Tieres."
+        },
+        "labels": {
+          "stayA": "Berghütte",
+          "stayB": "Am Meer",
+          "dogs": "Hunde willkommen",
+          "cats": "Katzen willkommen",
+          "yard": "Garten",
+          "passport": "Reisepass",
+          "vaccine": "Impfung",
+          "microchip": "Mikrochip"
+        }
+      },
+      "safe": {
+        "eyebrow": "Sicherheit auf einen Blick",
+        "title": "Bereit für schwere Tage",
+        "lede": "Versicherungen vergleichen und eine Vermisstenmeldung schnell veröffentlichen.",
+        "cta": "Versicherungen vergleichen",
+        "a": {
+          "k": "Tarife",
+          "s": "Versicherungstarife nebeneinander sehen."
+        },
+        "b": {
+          "k": "Vermisst",
+          "s": "Meldung erstellen und mit allen teilen."
+        },
+        "labels": {
+          "basic": "Basis",
+          "plus": "Komplett",
+          "accident": "Unfall",
+          "lost": "Vermisst",
+          "share": "Teilen",
+          "seen": "Gesehen?"
+        }
+      },
+      "together": {
+        "eyebrow": "Gemeinschaft und Hilfe auf einen Blick",
+        "title": "Freundlichkeit reicht über das eigene Zuhause hinaus",
+        "lede": "Mit anderen Haltern sprechen, Hilfszentren unterstützen und Erinnerungen bewahren.",
+        "cta": "Der Gemeinschaft beitreten",
+        "a": {
+          "k": "Bedarf",
+          "s": "Gemeldeten Bedarf der Zentren sehen und helfen."
+        },
+        "b": {
+          "k": "Erinnerungen",
+          "s": "Gemeinsame Momente in einem Album."
+        },
+        "labels": {
+          "food": "Futter",
+          "medicine": "Medizin",
+          "shelter": "Unterkunft",
+          "album": "Erinnerungen"
+        }
+      },
+      "learn": {
+        "eyebrow": "Ratgeber und Hilfe auf einen Blick",
+        "title": "Jede Frage, eine klare Antwort",
+        "lede": "Geprüfte Artikel, häufige Fragen und Hilfe an einem Ort.",
+        "cta": "Ratgeber ansehen",
+        "a": {
+          "k": "Artikel",
+          "s": "Pflegeratgeber lesen und speichern."
+        },
+        "b": {
+          "k": "Hilfe",
+          "s": "Frage senden und Antwort verfolgen."
+        },
+        "labels": {
+          "guide": "Ratgeber",
+          "journal": "Magazin",
+          "faq": "Häufige Fragen",
+          "ticket": "Hilfeanfrage",
+          "answered": "Beantwortet"
+        }
+      }
+    },
+    "park": {
+      "title": "Eine ganze Welt für dich und dein Tier",
+      "description": "Alles, was dein Tier braucht – in einer App",
+      "subline": "Ein gesünderes, glücklicheres Leben mit deinem kleinen Begleiter",
+      "explore": "Angebote entdecken",
+      "imageAlt": "KI-generierte Konzeptillustration eines Parks in Teheran mit Dienstleistungspavillons, Azadi- und Milad-Turm.",
+      "destinationsLabel": "Angebote im Park entdecken",
+      "introTitle": "An deiner Seite, in jedem Moment",
+      "introBody": "Von Gesundheit und Pflege bis zu Reisen und Unterkunft – für ein besseres Leben mit deinem Tier.",
+      "brandTagline": "Eine Welt für Haustiere",
+      "partnerSignIn": "Partner-Login",
+      "partnerJoin": "Partner werden",
+      "memberJoin": "Registrieren",
+      "signIn": "Anmelden",
+      "dashboard": "Mein Dashboard",
+      "skip": "Zum Hauptinhalt",
+      "navLabel": "Hauptnavigation",
+      "menuLabel": "Menü öffnen",
+      "closeMenuLabel": "Menü schließen",
+      "home": "Startseite",
+      "about": "Über uns",
+      "partners": "Für Partner",
+      "photoCredits": "Bildnachweise",
+      "services": {
+        "shop": {
+          "title": "Tierbedarf",
+          "hint": "Für den Alltag"
+        },
+        "vet": {
+          "title": "Tiermedizin",
+          "hint": "Gesundheit zuerst"
+        },
+        "grooming": {
+          "title": "Fellpflege",
+          "hint": "Pflege und Wohlbefinden"
+        },
+        "boarding": {
+          "title": "Betreuung",
+          "hint": "Gut aufgehoben, wenn du weg bist"
+        },
+        "travel": {
+          "title": "Reisen",
+          "hint": "Gemeinsam unterwegs"
+        },
+        "taxi": {
+          "title": "Tier-Taxi",
+          "hint": "Sichere Fahrten"
+        },
+        "support": {
+          "title": "Tierschutz",
+          "hint": "Tieren in Not helfen"
+        },
+        "insurance": {
+          "title": "Versicherung",
+          "hint": "Mehr Sicherheit"
+        }
+      },
+      "creditsTitle": "Der Park von Tara und Cookie",
+      "shopCredit": "Shop-Motiv: KI-generierte Konzeptillustration von OpenAI, zugeschnitten und neu codiert. Kein echtes Geschäft und kein Produktfoto.",
+      "backdropCredit": "Auch der warme, unscharfe Hintergrund des Mitgliederbereichs ist KI-generiert und für das Web neu codiert; er zeigt keinen realen Ort.",
+      "creditsBody": "Dieser Park ist eine KI-generierte Konzeptillustration nach dem freigegebenen Entwurf und den Referenzbildern von Tara, Pedram und Cookie. Sie zeigt weder einen realen Ort noch den Nachweis, dass diese Pavillons existieren. Die Referenzbilder wurden vom Projekteigentümer für diesen Entwurf bereitgestellt.",
+      "processing": "Zugeschnitten und neu codiert",
+      "licence": "Lizenz- und Nutzungsbedingungen"
+    },
+    "member": {
+      "nav": "Meine Bereiche",
+      "home": "Übersicht",
+      "profile": "Tierprofil",
+      "health": "Gesundheit",
+      "care": "Pflege",
+      "memories": "Erinnerungen",
+      "shop": "Shop",
+      "skip": "Zum Inhalt springen"
+    }
+  },
   "blog": {
     "index": {
       "title": "Magazin",

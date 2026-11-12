@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, MapPin } from "@petlife/ui";
 import { useLanding } from "./LandingShell";
-import { oplCopy, withName } from "./opl-copy";
+import { useOplCopy, withName } from "./opl-copy";
 import { Bird } from "./Bird";
 
 export function LostStrip() {
   const { locale, name } = useLanding();
-  const c = oplCopy[locale].lost;
+  const c = useOplCopy().lost;
   const Arrow = locale === "fa" ? ArrowLeft : ArrowRight;
   return <section className="opl-lost" aria-labelledby="opl-lost-title">
     <div className="opl-wrap opl-lost__in">
