@@ -128,6 +128,11 @@ export class BookingsController {
     return this.bookingsService.cancel(user.id, id, dto);
   }
 
+  @Post("bookings/:id/confirm-attendance")
+  confirmAttendance(@CurrentUser() user: SessionUser, @Param("id") id: string) {
+    return this.bookingsService.confirmAttendance(user.id, id);
+  }
+
   @Post("bookings/:id/pay")
   @UseInterceptors(IdempotencyInterceptor)
   pay(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string, @Body() dto: PayBookingDto) {
