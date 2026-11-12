@@ -4465,7 +4465,8 @@
         "featureFlags": "کنترل انتشار",
         "smsPatterns": "الگوهای پیامک",
         "verification": "بررسی هویت و مدارک",
-        "wallets": "کیف پول‌ها"
+        "wallets": "کیف پول‌ها",
+        "pets": "حیوانات"
       },
       "navigation": "ناوبری مدیریت",
       "openMenu": "باز کردن منو",
@@ -9900,6 +9901,221 @@
         "REFUND_OUTSIDE_SYSTEM": "بازپرداخت خارج از سفارش",
         "DUPLICATE_CREDIT_REVERSAL": "برگشت واریز تکراری",
         "OTHER": "اصلاح دیگر"
+      }
+    }
+  },
+  "adminPets": {
+    "kicker": "کاربران",
+    "title": "حیوانات",
+    "subtitle": "هر حیوان همراه صاحبش و اعضای خانواده‌اش. سلامت فقط با شمارش و تاریخ نشان داده می‌شود، هرگز متن بالینی.",
+    "search": "نام حیوان، نام صاحب یا عضو خانواده، شناسه یا میکروچیپ",
+    "searchButton": "جستجو",
+    "speciesFilter": "گونه",
+    "allSpecies": "همه",
+    "species": {
+      "DOG": "سگ",
+      "CAT": "گربه",
+      "BIRD": "پرنده",
+      "RABBIT": "خرگوش",
+      "RODENT": "جونده",
+      "FISH": "ماهی",
+      "REPTILE": "خزنده",
+      "OTHER": "دیگر"
+    },
+    "lifecycle": {
+      "ACTIVE": "فعال",
+      "LOST": "گم‌شده",
+      "TEMPORARILY_TRANSFERRED": "موقتاً نزد دیگری",
+      "DECEASED": "درگذشته",
+      "MEMORIAL": "یادبود",
+      "deleted": "حذف‌شده"
+    },
+    "loading": "در حال بارگذاری…",
+    "failed": "اطلاعات بارگذاری نشد.",
+    "retry": "تلاش دوباره",
+    "forbidden": "برای دیدن حیوانات به دسترسی «دیدن مشتریان» نیاز دارید.",
+    "empty": "هنوز حیوانی ثبت نشده است.",
+    "emptySearch": "حیوانی با این جستجو پیدا نشد.",
+    "columns": {
+      "pet": "حیوان",
+      "species": "گونه و نژاد",
+      "owner": "صاحب",
+      "household": "خانواده",
+      "family": "اعضای دیگر",
+      "status": "وضعیت",
+      "created": "ثبت"
+    },
+    "noOwner": "بدون صاحب",
+    "open": "باز کردن",
+    "previous": "قبلی",
+    "next": "بعدی",
+    "pageOf": "صفحهٔ {page} از {pages}",
+    "detail": {
+      "back": "همهٔ حیوانات",
+      "identity": "شناسنامه",
+      "fields": {
+        "species": "گونه",
+        "breed": "نژاد",
+        "sex": "جنسیت",
+        "birthDate": "تاریخ تولد",
+        "age": "سن تقریبی",
+        "neutered": "عقیم‌سازی",
+        "microchip": "میکروچیپ",
+        "status": "وضعیت",
+        "created": "ثبت در اپت لایف",
+        "photo": "عکس"
+      },
+      "months": "{months} ماه",
+      "sex": {
+        "MALE": "نر",
+        "FEMALE": "ماده",
+        "UNKNOWN": "نامشخص"
+      },
+      "neutered": {
+        "NEUTERED": "بله",
+        "INTACT": "خیر",
+        "UNKNOWN": "نامشخص"
+      },
+      "yes": "دارد",
+      "no": "ندارد",
+      "owner": "صاحب حیوان",
+      "ownerMissing": "این خانواده صاحب فعال ندارد.",
+      "openCustomer": "پروندهٔ کاربر",
+      "household": "خانواده: {name}",
+      "unnamedHousehold": "بی‌نام",
+      "family": "اعضای خانواده",
+      "familyEmpty": "عضو دیگری در این خانواده نیست.",
+      "roles": {
+        "OWNER": "صاحب",
+        "FAMILY": "عضو خانواده"
+      },
+      "accountStatus": {
+        "ACTIVE": "حساب فعال",
+        "SUSPENDED": "حساب معلق"
+      },
+      "invitations": "دعوت‌های در انتظار",
+      "invitationExpires": "انقضا: {date}",
+      "grants": "دسترسی به این حیوان",
+      "grantsEmpty": "دسترسی‌ای ثبت نشده است.",
+      "grantColumns": {
+        "person": "شخص",
+        "source": "منشأ",
+        "scope": "اجازه‌ها",
+        "period": "بازه",
+        "state": "وضعیت"
+      },
+      "sources": {
+        "HOUSEHOLD": "عضویت خانواده",
+        "MANUAL": "اشتراک دستی",
+        "TEMPORARY": "موقت"
+      },
+      "scopeCount": "{count} اجازه",
+      "states": {
+        "active": "فعال",
+        "revoked": "لغوشده",
+        "inactive": "غیرفعال"
+      },
+      "notMember": "خارج از خانواده",
+      "revoke": "لغو دسترسی",
+      "revokeTitle": "لغو دسترسی {name}",
+      "revokeReason": "دلیل (در گزارش ممیزی می‌ماند)",
+      "revokeConfirm": "لغو شود",
+      "revokeCancel": "انصراف",
+      "revoked": "دسترسی لغو شد.",
+      "revokeFailed": "لغو دسترسی انجام نشد.",
+      "reasonTooShort": "دلیل باید دست‌کم ۵ نویسه باشد.",
+      "ownerGrantNote": "دسترسی صاحب حیوان از اینجا لغو نمی‌شود.",
+      "health": "سلامت (فقط شمارش و تاریخ)",
+      "healthFields": {
+        "documents": "مدارک پزشکی",
+        "visits": "ویزیت‌ها",
+        "labs": "آزمایش‌ها",
+        "conditions": "بیماری‌ها",
+        "allergies": "حساسیت‌ها",
+        "medications": "داروها"
+      },
+      "bookings": "نوبت‌ها",
+      "lost": "گزارش‌های گم‌شدن",
+      "sightings": "{count} مشاهده",
+      "care": "یادآورهای مراقبت",
+      "travel": "سفرها",
+      "insurance": "بیمه",
+      "claimPreps": "{count} پروندهٔ آماده‌سازی خسارت",
+      "sharing": "اشتراک‌گذاری",
+      "shareCards": "{count} کارت معرفی فعال",
+      "healthShares": "{count} پیوند سلامت فعال",
+      "none": "موردی نیست.",
+      "diagnostics": "نکته‌های کیفیت داده",
+      "diagnosticCodes": {
+        "NO_ACTIVE_OWNER": "خانواده صاحب فعال ندارد.",
+        "STALE_HOUSEHOLD_GRANT": "کسی که دیگر عضو خانواده نیست هنوز دسترسی دارد.",
+        "EXPIRED_GRANT_NOT_REVOKED": "یک دسترسی موقت منقضی شده ولی لغو نشده است.",
+        "MEMBER_WITHOUT_GRANT": "یک عضو خانواده دسترسی فعال ندارد.",
+        "LONG_OPEN_LOST_INCIDENT": "گزارش گم‌شدن بیش از ۹۰ روز باز مانده است.",
+        "DELETED_BUT_ACTIVE": "حیوان حذف شده ولی هنوز فعال علامت خورده است."
+      },
+      "activity": "فعالیت اخیر",
+      "changed": "تغییر: {fields}"
+    },
+    "labels": {
+      "bookingStatus": {
+        "HOLD": "رزرو موقت",
+        "PENDING_CONFIRMATION": "در انتظار تأیید",
+        "REQUESTED": "درخواست‌شده",
+        "AWAITING_PAYMENT": "در انتظار پرداخت",
+        "REJECTED": "ردشده",
+        "EXPIRED": "منقضی",
+        "RESCHEDULED": "جابه‌جاشده",
+        "CONFIRMED": "تأییدشده",
+        "CHECKED_IN": "حاضر شد",
+        "IN_PROGRESS": "در حال انجام",
+        "COMPLETED": "انجام‌شده",
+        "CANCELLED_BY_USER": "لغو توسط کاربر",
+        "CANCELLED_BY_PROVIDER": "لغو توسط ارائه‌دهنده",
+        "NO_SHOW": "حاضر نشد"
+      },
+      "serviceCategory": {
+        "VET": "دامپزشکی",
+        "GROOMING": "آرایش",
+        "TRAINING": "آموزش",
+        "WALKING": "پیاده‌روی",
+        "SITTING": "نگهداری در خانه",
+        "BOARDING": "پانسیون",
+        "PET_TAXI": "تاکسی حیوانات",
+        "OTHER": "دیگر"
+      },
+      "lostStatus": {
+        "OPEN": "باز",
+        "SEARCHING": "در حال جستجو",
+        "SIGHTING_REPORTED": "مشاهده گزارش شد",
+        "FOUND": "پیدا شد",
+        "REUNITED": "به خانه برگشت",
+        "CLOSED": "بسته"
+      },
+      "tripStatus": {
+        "DRAFT": "پیش‌نویس",
+        "PLANNING": "در حال برنامه‌ریزی",
+        "READY": "آماده",
+        "IN_PROGRESS": "در سفر",
+        "COMPLETED": "پایان‌یافته",
+        "CANCELLED": "لغوشده"
+      },
+      "insuranceStatus": {
+        "NEEDS_INFORMATION": "نیاز به اطلاعات",
+        "DRAFT": "پیش‌نویس",
+        "SUBMITTED": "ارسال‌شده",
+        "UNDER_REVIEW": "در حال بررسی",
+        "APPROVED": "پذیرفته",
+        "DECLINED": "ردشده",
+        "CANCELLED": "لغوشده"
+      },
+      "reminderState": {
+        "UPCOMING": "پیش رو",
+        "DUE": "موعد رسیده",
+        "OVERDUE": "عقب‌افتاده",
+        "COMPLETED": "انجام‌شده",
+        "SNOOZED": "به تعویق افتاده",
+        "CANCELLED": "لغوشده"
       }
     }
   },
