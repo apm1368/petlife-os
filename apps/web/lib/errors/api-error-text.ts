@@ -119,6 +119,7 @@ const FA: Record<string, string> = {
   WEAK_PASSWORD: "رمز عبور باید دست‌کم ۸ نویسه باشد.",
   PAYLOAD_TOO_LARGE: "حجم فایل یا اطلاعات بیش از حد مجاز است.",
   RATE_LIMITED: "درخواست‌ها بیش از حد بود. کمی بعد دوباره امتحان کنید.",
+  SERVICE_BUSY: "سرور همین حالا شلوغ است و چیزی ذخیره نشد. چند لحظه بعد دوباره امتحان کنید.",
   FORBIDDEN: "اجازهٔ این کار را ندارید.",
   NOT_FOUND: "این مورد پیدا نشد.",
 };
@@ -145,6 +146,17 @@ function familyRule(code: string): string | null {
   return null;
 }
 
+/** Nothing was saved and a retry will likely work: worth saying in every language, not just the generic line. */
+const BUSY = {
+  de: "Der Server ist gerade ausgelastet, es wurde nichts gespeichert. Bitte versuchen Sie es gleich noch einmal.",
+  es: "El servidor está ocupado ahora mismo y no se ha guardado nada. Vuelve a intentarlo en un momento.",
+  ar: "الخادم مشغول الآن ولم يُحفظ أي شيء. حاول مرة أخرى بعد لحظات.",
+  nl: "De server is nu even druk en er is niets opgeslagen. Probeer het zo meteen opnieuw.",
+};
+
+/** Languages that must never show the API's English sentence: a localized fallback or generic line instead. */
+const NO_API_ENGLISH = (l: string): l is "de" | "es" | "ar" | "nl" => l === "de" || l === "es" || l === "ar" || l === "nl";
+
 const GENERIC = {
   fa: "انجام نشد. دوباره تلاش کنید.",
   en: "That didn't work. Please try again.",
@@ -156,7 +168,7 @@ const GENERIC = {
 
 /**
  * The sentence to show for a failed call. Persian receives a translated error code; English keeps
- * the API's human-readable sentence. German and Spanish must never leak an English API message, so
+ * the API's human-readable sentence. German, Spanish, Arabic and Dutch must never leak an English API message, so
  * they use the caller's localized fallback or a localized generic message. Without a locale, read
  * the page language (only called from client-side error handlers).
  */
@@ -164,9 +176,10 @@ export function apiErrorText(err: unknown, locale?: string, fallback?: string): 
   const currentLocale = locale ?? (typeof document === "undefined" ? "" : document.documentElement.lang);
   const fa = currentLocale === "fa";
   if (err instanceof ApiError) {
-    if (currentLocale === "de" || currentLocale === "es") return fallback || GENERIC[currentLocale];
+    if (err.code === "SERVICE_BUSY" && NO_API_ENGLISH(currentLocale)) return BUSY[currentLocale];
+    if (NO_API_ENGLISH(currentLocale)) return fallback || GENERIC[currentLocale];
     if (!fa) return err.message || fallback || GENERIC.en;
     return validationReasonRule(err) ?? FA[err.code] ?? familyRule(err.code) ?? fallback ?? GENERIC.fa;
   }
-  return fallback ?? (fa ? GENERIC.fa : GENERIC.en);
+  return fallback ?? (fa ? GENERIC.fa : NO_API_ENGLISH(currentLocale) ? GENERIC[currentLocale] : GENERIC.en);
 }
