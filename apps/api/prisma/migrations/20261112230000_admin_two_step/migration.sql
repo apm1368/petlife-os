@@ -9,10 +9,11 @@ CREATE TABLE "admin_two_step_factors" (
     "lastUsedStep" INTEGER NOT NULL DEFAULT 0,
     "failedAttempts" INTEGER NOT NULL DEFAULT 0,
     "lockedUntil" TIMESTAMP(3),
+    "lockouts" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "admin_two_step_factors_pkey" PRIMARY KEY ("userId"),
-    CONSTRAINT "admin_two_step_factors_counters_check" CHECK ("lastUsedStep" >= 0 AND "failedAttempts" >= 0)
+    CONSTRAINT "admin_two_step_factors_counters_check" CHECK ("lastUsedStep" >= 0 AND "failedAttempts" >= 0 AND "lockouts" >= 0)
 );
 ALTER TABLE "admin_two_step_factors" ADD CONSTRAINT "admin_two_step_factors_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 

@@ -45,7 +45,7 @@ function Challenge({ onPassed }: { onPassed: () => void }) {
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const code = recovery ? value.trim() : asciiDigits(value);
+    const code = asciiDigits(value);
     if (!recovery && !/^\d{6}$/.test(code)) return setError(t("errors.format"));
     if (recovery && code.replace(/[^A-Za-z2-7]/g, "").length !== 16) return setError(t("errors.recoveryFormat"));
     setBusy(true);

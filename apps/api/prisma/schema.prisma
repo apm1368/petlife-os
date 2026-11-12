@@ -12099,6 +12099,8 @@ model AdminTwoStepFactor {
   lastUsedStep     Int                        @default(0)
   failedAttempts   Int                        @default(0)
   lockedUntil      DateTime?
+  /// Lock-outs since the last successful code; each one locks longer (15 min, 1 h, then 24 h).
+  lockouts         Int                        @default(0)
   createdAt        DateTime                   @default(now())
   updatedAt        DateTime                   @updatedAt
   recoveryCodes    AdminTwoStepRecoveryCode[]

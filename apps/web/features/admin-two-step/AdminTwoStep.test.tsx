@@ -33,10 +33,10 @@ describe("Admin two-step gate", () => {
     expect(adminTwoStepService.verify).toHaveBeenLastCalledWith({ code: "123456" });
 
     fireEvent.click(screen.getByRole("button", { name: "Use a recovery code instead" }));
-    fireEvent.change(screen.getByLabelText("Recovery code"), { target: { value: "abcd-efgh-2345-6723" } });
+    fireEvent.change(screen.getByLabelText("Recovery code"), { target: { value: "abcd-efgh-۲۳۴۵-۶۷۲۳" } });
     fireEvent.click(screen.getByRole("button", { name: "Verify" }));
     await waitFor(() => expect(passed).toHaveBeenCalled());
-    expect(adminTwoStepService.verify).toHaveBeenLastCalledWith({ recoveryCode: "ABCD-EFGH-2345-6723" });
+    expect(adminTwoStepService.verify).toHaveBeenLastCalledWith({ recoveryCode: "ABCDEFGH23456723" });
   });
 
   it("enrolment shows the setup key, turns on only after a valid code and holds the recovery codes until saved", async () => {

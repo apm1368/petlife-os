@@ -46,6 +46,17 @@ export function base32Decode(text: string): Buffer {
   return Buffer.from(out);
 }
 
+/**
+ * What people actually type: Persian (۰–۹) and Arabic-Indic (٠–٩) digits from a Persian keyboard, spaces, dashes and
+ * the invisible direction marks RTL text fields insert. All of it reads as the same ASCII code.
+ */
+export function normalizeCodeInput(input: string): string {
+  return input
+    .replace(/[\u06F0-\u06F9]/g, (d) => String(d.charCodeAt(0) - 0x06f0))
+    .replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+    .replace(/[\s\-\u200B-\u200F\u061C\u202A-\u202E\u2066-\u2069\uFEFF]/g, "");
+}
+
 /** A fresh 160-bit secret (the RFC 4226 recommended length). */
 export function newTotpSecret(): Buffer {
   return randomBytes(20);
@@ -69,7 +80,7 @@ export function totpStep(at: Date = new Date()): number {
  * (or any earlier one) can never be replayed, even inside its 30-second window.
  */
 export function matchTotp(secret: Buffer, code: string, lastUsedStep: number, at: Date = new Date()): number | null {
-  const digits = code.replace(/\s/g, "");
+  const digits = normalizeCodeInput(code);
   if (!/^\d{6}$/.test(digits)) return null;
   const now = totpStep(at);
   for (let step = now - TOTP_WINDOW; step <= now + TOTP_WINDOW; step++) {
@@ -95,7 +106,7 @@ export function newRecoveryCode(): string {
 }
 
 export function normalizeRecoveryCode(input: string): string {
-  return input.toUpperCase().replace(/[^A-Z2-7]/g, "");
+  return normalizeCodeInput(input).toUpperCase().replace(/[^A-Z2-7]/g, "");
 }
 
 /** 80-bit random codes don't need a slow hash; a plain SHA-256 of the normalized code is stored, never the code. */

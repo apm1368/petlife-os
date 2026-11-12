@@ -1,4 +1,4 @@
-import { base32Decode, base32Encode, hashRecoveryCode, hotp, matchTotp, newRecoveryCode, normalizeRecoveryCode, otpauthUri, totpStep } from "./totp";
+import { base32Decode, base32Encode, hashRecoveryCode, hotp, matchTotp, newRecoveryCode, normalizeCodeInput, normalizeRecoveryCode, otpauthUri, totpStep } from "./totp";
 import { openSecret, sealSecret } from "./two-step-secret";
 
 // RFC 6238 Appendix B (SHA-1 seed "12345678901234567890"); the 8-digit vectors' last 6 digits are the 6-digit codes.
@@ -35,6 +35,21 @@ describe("TOTP (RFC 6238)", () => {
     expect(matchTotp(RFC_SECRET, hotp(RFC_SECRET, step), step, at)).toBeNull(); // replay
     expect(matchTotp(RFC_SECRET, "12345", 0, at)).toBeNull();
     expect(matchTotp(RFC_SECRET, "abcdef", 0, at)).toBeNull();
+  });
+
+  it("accepts codes typed on a Persian or Arabic keyboard, with spaces, dashes and direction marks", () => {
+    const at = new Date(1234567890 * 1000);
+    const step = totpStep(at);
+    const ascii = hotp(RFC_SECRET, step); // "005924"
+    const persian = ascii.replace(/\d/g, (d) => String.fromCharCode(0x06f0 + Number(d)));
+    const arabic = ascii.replace(/\d/g, (d) => String.fromCharCode(0x0660 + Number(d)));
+    expect(persian).toBe("۰۰۵۹۲۴");
+    expect(normalizeCodeInput("\u200F۱۲۳ ۴۵۶\u200E")).toBe("123456");
+    expect(normalizeCodeInput("١٢٣-٤٥٦")).toBe("123456");
+    expect(matchTotp(RFC_SECRET, persian, 0, at)).toBe(step);
+    expect(matchTotp(RFC_SECRET, `${arabic.slice(0, 3)} ${arabic.slice(3)}`, 0, at)).toBe(step);
+    // Recovery codes carry digits 2–7, which may be typed in Persian too.
+    expect(normalizeRecoveryCode("abcd-efgh-۲۳۴۵-۶۷۲۳")).toBe("ABCDEFGH23456723");
   });
 
   it("builds an otpauth URI the authenticator apps read", () => {

@@ -88,10 +88,17 @@ describe("Admin two-step sign-in", () => {
     expect(locked.code).toBe("TWO_STEP_LOCKED");
     await send("post", tablet, "/admin/two-step/verify").send({ recoveryCode: confirmed.recoveryCodes[1] }).expect(429);
     await get(tablet, "/admin/support/cases").expect(403);
+    // A second lock-out before any success lasts an hour, not 15 minutes.
+    await db.adminTwoStepFactor.update({ where: { userId: support.userId }, data: { lockedUntil: null } });
+    for (let i = 0; i < 4; i++) await send("post", tablet, "/admin/two-step/verify").send({ code: "000000" }).expect(400);
+    const relocked = (await send("post", tablet, "/admin/two-step/verify").send({ code: "000000" }).expect(429)).body.error;
+    expect(new Date(relocked.details.retryAt).getTime() - Date.now()).toBeGreaterThan(55 * 60 * 1000);
 
     // Regenerating recovery codes needs a fresh authenticator code and retires the old set.
     await db.adminTwoStepFactor.update({ where: { userId: support.userId }, data: { lockedUntil: null, lastUsedStep: 0 } });
-    const fresh = (await send("post", laptop, "/admin/two-step/recovery-codes").send({ code: code(started.secret, -1) }).expect(201)).body.recoveryCodes;
+    // Typed on a Persian keyboard, with a direction mark: the same code.
+    const persian = `\u200F${code(started.secret, -1).replace(/\d/g, (d) => String.fromCharCode(0x06f0 + Number(d)))}`;
+    const fresh = (await send("post", laptop, "/admin/two-step/recovery-codes").send({ code: persian }).expect(201)).body.recoveryCodes;
     expect(fresh).toHaveLength(10);
     await send("post", tablet, "/admin/two-step/verify").send({ recoveryCode: confirmed.recoveryCodes[1] }).expect(400);
     await send("post", tablet, "/admin/two-step/verify").send({ recoveryCode: fresh[0] }).expect(201);

@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
+import { Transform } from "class-transformer";
 import { IsBoolean, IsInt, IsOptional, IsString, Length, Matches, Max, Min, ValidateIf } from "class-validator";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
 import { CurrentUser } from "../../../common/auth/current-user.decorator";
@@ -10,13 +11,17 @@ import { RequireAdminPermission } from "../auth/require-admin-permission.decorat
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 import { AllowBeforeTwoStep } from "./two-step-gate";
 import { AdminTwoStepService } from "./admin-two-step.service";
+import { normalizeCodeInput } from "./totp";
+
+/** Persian/Arabic-Indic digits, spaces, dashes and RTL marks become a plain 6-digit code before validation. */
+const asCode = () => Transform(({ value }: { value: unknown }) => (typeof value === "string" ? normalizeCodeInput(value) : value));
 
 class CodeDto {
-  @IsString() @Matches(/^\s*\d{3}\s?\d{3}\s*$/) code!: string;
+  @asCode() @IsString() @Matches(/^\d{6}$/) code!: string;
 }
 class VerifyDto {
-  @ValidateIf((o: VerifyDto) => !o.recoveryCode) @IsString() @Matches(/^\s*\d{3}\s?\d{3}\s*$/) code?: string;
-  @IsOptional() @IsString() @Length(16, 40) recoveryCode?: string;
+  @ValidateIf((o: VerifyDto) => !o.recoveryCode) @asCode() @IsString() @Matches(/^\d{6}$/) code?: string;
+  @IsOptional() @IsString() @Length(16, 60) recoveryCode?: string;
 }
 class ReasonDto {
   @IsString() @Length(5, 500) reason!: string;

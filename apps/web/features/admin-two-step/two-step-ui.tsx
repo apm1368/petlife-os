@@ -53,9 +53,12 @@ export function TwoStepCodeInput({ id, label, value, onChange, recovery = false,
   );
 }
 
-/** Persian/Arabic-Indic digits typed on a phone keyboard count as the same digits. */
+/** Persian/Arabic-Indic digits, spaces, dashes and RTL direction marks: the same code (the server does the same). */
 export function asciiDigits(v: string): string {
-  return v.replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06f0)).replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660)).replace(/\s/g, "");
+  return v
+    .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06f0))
+    .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+    .replace(/[\s\-\u200B-\u200F\u061C\u202A-\u202E\u2066-\u2069\uFEFF]/g, "");
 }
 
 /** Shown once: copy or download, and the person confirms they kept them before moving on. */

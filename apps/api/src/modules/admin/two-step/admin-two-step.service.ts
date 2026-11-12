@@ -11,9 +11,9 @@ import { evaluateTwoStep, type TwoStepGate } from "./two-step-gate";
 import { base32Encode, hashRecoveryCode, matchTotp, newRecoveryCode, newTotpSecret, otpauthUri, RECOVERY_CODE_COUNT } from "./totp";
 import { openSecret, sealSecret } from "./two-step-secret";
 
-/** After this many wrong codes in a row the account waits LOCK_MINUTES before it may try again. */
+/** After this many wrong codes in a row the check locks; each further lock-out before a success lasts longer. */
 export const TWO_STEP_MAX_FAILURES = 5;
-export const TWO_STEP_LOCK_MINUTES = 15;
+export const TWO_STEP_LOCK_MINUTES = [15, 60, 24 * 60] as const;
 // What authenticator apps show above the code; a domain reads the same in every language.
 const ISSUER = "opetlife.ir";
 
@@ -244,14 +244,16 @@ export class AdminTwoStepService {
       }
     }
     if (accepted) {
-      if (factor.failedAttempts > 0 || factor.lockedUntil) await this.prisma.adminTwoStepFactor.update({ where: { userId: admin.userId }, data: { failedAttempts: 0, lockedUntil: null } });
+      if (factor.failedAttempts > 0 || factor.lockedUntil || factor.lockouts > 0) await this.prisma.adminTwoStepFactor.update({ where: { userId: admin.userId }, data: { failedAttempts: 0, lockedUntil: null, lockouts: 0 } });
       return;
     }
-    const after = await this.prisma.adminTwoStepFactor.update({ where: { userId: admin.userId }, data: { failedAttempts: { increment: 1 } }, select: { failedAttempts: true } });
+    const after = await this.prisma.adminTwoStepFactor.update({ where: { userId: admin.userId }, data: { failedAttempts: { increment: 1 } }, select: { failedAttempts: true, lockouts: true } });
     if (after.failedAttempts >= TWO_STEP_MAX_FAILURES) {
-      const retryAt = new Date(now.getTime() + TWO_STEP_LOCK_MINUTES * 60 * 1000);
-      await this.prisma.adminTwoStepFactor.update({ where: { userId: admin.userId }, data: { failedAttempts: 0, lockedUntil: retryAt } });
-      await this.audit.record({ adminUserId: admin.adminUserId, action: "admin_two_step.locked", entityType: "AdminUser", entityId: admin.adminUserId, afterSummary: { lockedMinutes: TWO_STEP_LOCK_MINUTES } });
+      // 15 minutes, then 1 hour, then 24 hours: an honest typo costs little, a guessing run gets a few hundred tries a month.
+      const minutes = TWO_STEP_LOCK_MINUTES[Math.min(after.lockouts, TWO_STEP_LOCK_MINUTES.length - 1)]!;
+      const retryAt = new Date(now.getTime() + minutes * 60 * 1000);
+      await this.prisma.adminTwoStepFactor.update({ where: { userId: admin.userId }, data: { failedAttempts: 0, lockedUntil: retryAt, lockouts: { increment: 1 } } });
+      await this.audit.record({ adminUserId: admin.adminUserId, action: "admin_two_step.locked", entityType: "AdminUser", entityId: admin.adminUserId, afterSummary: { lockedMinutes: minutes, lockout: after.lockouts + 1 } });
       throw new TwoStepLockedException(retryAt);
     }
     throw new TwoStepCodeInvalidException(TWO_STEP_MAX_FAILURES - after.failedAttempts);
