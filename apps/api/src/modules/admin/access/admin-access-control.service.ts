@@ -8,6 +8,9 @@ import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 import { ROLE_PERMISSIONS, type AdminPermission } from "../auth/admin-permissions";
 import { SERVICE_VERTICALS } from "../auth/admin-verticals";
+import { effectiveAccess } from "../auth/admin-access.service";
+
+const CUSTOM_ROLE_SELECT = { id: true, name: true, permissions: true, verticals: true, archivedAt: true } as const;
 
 /** Roles whose holders may not be created, changed or suspended by anyone but a SUPER_ADMIN (all of access control is admin.manage = SUPER_ADMIN today; the rule is explicit so delegating admin.manage later can't escalate). */
 const PROTECTED_ROLES: AdminRole[] = [AdminRole.SUPER_ADMIN];
@@ -61,16 +64,17 @@ export class AdminAccessControlService {
       ...(q.q ? { user: { OR: [{ displayName: { contains: q.q, mode: "insensitive" } }, { email: { contains: q.q, mode: "insensitive" } }] } } : {}),
     };
     const [rows, total] = await Promise.all([
-      this.prisma.adminUser.findMany({ where, include: { user: { select: { displayName: true, email: true } } }, orderBy: [{ status: "asc" }, { createdAt: "asc" }], skip, take }),
+      this.prisma.adminUser.findMany({ where, include: { user: { select: { displayName: true, email: true } }, customRole: { select: CUSTOM_ROLE_SELECT } }, orderBy: [{ status: "asc" }, { createdAt: "asc" }], skip, take }),
       this.prisma.adminUser.count({ where }),
     ]);
     return toPaginatedDto(rows.map((r) => this.toDto(r)), total, page, pageSize);
   }
 
   async get(adminUserId: string) {
-    const row = await this.prisma.adminUser.findUnique({ where: { id: adminUserId }, include: { user: { select: { displayName: true, email: true } } } });
+    const row = await this.prisma.adminUser.findUnique({ where: { id: adminUserId }, include: { user: { select: { displayName: true, email: true } }, customRole: { select: CUSTOM_ROLE_SELECT } } });
     if (!row) throw new NotFoundApiException("AdminUser");
-    return { ...this.toDto(row), permissions: ROLE_PERMISSIONS[row.role] };
+    // Effective permissions: the custom role's set when one is assigned (what the guard enforces), else the role's.
+    return { ...this.toDto(row), permissions: effectiveAccess(row).permissions };
   }
 
   /** Grant admin access to an existing member account (by email). Never creates a login. */
@@ -165,7 +169,7 @@ export class AdminAccessControlService {
     return this.get(result.id);
   }
 
-  private toDto(r: { id: string; userId: string; role: AdminRole; status: AdminMembershipStatus; serviceScopes: AdminVertical[]; createdAt: Date; updatedAt: Date; lastActiveAt: Date | null; user: { displayName: string | null; email: string | null } }) {
-    return { id: r.id, userId: r.userId, displayName: r.user.displayName, emailMasked: maskEmail(r.user.email), role: r.role, serviceScopes: r.serviceScopes, status: r.status, createdAt: r.createdAt.toISOString(), updatedAt: r.updatedAt.toISOString(), lastActiveAt: r.lastActiveAt?.toISOString() ?? null };
+  private toDto(r: { id: string; userId: string; role: AdminRole; status: AdminMembershipStatus; serviceScopes: AdminVertical[]; createdAt: Date; updatedAt: Date; lastActiveAt: Date | null; user: { displayName: string | null; email: string | null }; customRole?: { id: string; name: string; archivedAt: Date | null } | null }) {
+    return { id: r.id, userId: r.userId, displayName: r.user.displayName, emailMasked: maskEmail(r.user.email), role: r.role, serviceScopes: r.serviceScopes, customRole: r.customRole ? { id: r.customRole.id, name: r.customRole.name } : null, status: r.status, createdAt: r.createdAt.toISOString(), updatedAt: r.updatedAt.toISOString(), lastActiveAt: r.lastActiveAt?.toISOString() ?? null };
   }
 }

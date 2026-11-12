@@ -81,7 +81,7 @@ export type AdminPermission =
   | "travel.listing.manage"
   | "travel.override.manage";
 
-const ALL_PERMISSIONS: AdminPermission[] = [
+export const ALL_PERMISSIONS: AdminPermission[] = [
   "customer.view",
   "customer.pii.reveal",
   "support.view",
@@ -349,4 +349,29 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
 
 export function roleHasPermission(role: AdminRole, permission: AdminPermission): boolean {
   return ROLE_PERMISSIONS[role].includes(permission);
+}
+
+/** Never grantable through a custom role: managing admins and roles stays with SUPER_ADMIN (no delegation chains). */
+export const CUSTOM_ROLE_FORBIDDEN: readonly AdminPermission[] = ["admin.manage"];
+
+export function isAdminPermission(value: string): value is AdminPermission {
+  return (ALL_PERMISSIONS as string[]).includes(value);
+}
+
+/** Permissions a custom role may carry, in catalogue order. */
+export function customRoleGrantable(): AdminPermission[] {
+  return ALL_PERMISSIONS.filter((p) => !CUSTOM_ROLE_FORBIDDEN.includes(p));
+}
+
+/**
+ * What this admin may do right now: the custom role's permission set when one is assigned, otherwise the
+ * built-in role's. Contexts built without a resolved permission list (older call sites, tests) fall back to the role.
+ */
+export function effectivePermissions(admin: { role: AdminRole; permissions?: readonly AdminPermission[] }): readonly AdminPermission[] {
+  return admin.permissions ?? ROLE_PERMISSIONS[admin.role];
+}
+
+/** The one permission check for a resolved admin — use this instead of roleHasPermission(admin.role, …). */
+export function adminCan(admin: { role: AdminRole; permissions?: readonly AdminPermission[] }, permission: AdminPermission): boolean {
+  return effectivePermissions(admin).includes(permission);
 }

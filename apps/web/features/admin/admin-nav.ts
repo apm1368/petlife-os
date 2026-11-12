@@ -261,6 +261,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
         href: "/access",
         tabs: [
           { href: "/access", labelKey: "tabs.adminsRoles", permission: "access.view" },
+          { href: "/access/roles", labelKey: "tabs.customRoles", permission: "access.view" },
           { href: "/access/matrix", labelKey: "tabs.permissionMatrix", permission: "access.view" },
         ],
       },

@@ -6,7 +6,7 @@ import { NotFoundApiException, ValidationApiException } from "../../../common/er
 import { resolvePagination, toPaginatedDto } from "../../../common/pagination/pagination.dto";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
-import { roleHasPermission } from "../auth/admin-permissions";
+import { adminCan } from "../auth/admin-permissions";
 
 const iso = (d: Date | null | undefined) => d?.toISOString() ?? null;
 const DAY = 86400e3;
@@ -102,7 +102,7 @@ export class AdminPartner360Service {
       bookings: { allTime: by(bookingsAll), last30Days: by(bookings30), completionRate: settled ? Math.round((completed / settled) * 100) / 100 : null },
       reviews: { published: reviews._count._all, averageRating: reviews._avg.rating, hidden: hiddenReviews },
       complaints: { disputes: Object.fromEntries(disputes.map((d) => [d.status, d._count._all])), trustCases: Object.fromEntries(trust.map((t) => [t.status, t._count._all])) },
-      finance: roleHasPermission(admin.role, "finance.view") ? { settlement: "PRODUCT_DECISION_REQUIRED", note: "Provider/clinic settlement economics are not decided; no provider payouts exist." } : { restricted: true },
+      finance: adminCan(admin, "finance.view") ? { settlement: "PRODUCT_DECISION_REQUIRED", note: "Provider/clinic settlement economics are not decided; no provider payouts exist." } : { restricted: true },
       subscription: clinicSub ? { context: "CLINIC", planCode: clinicSub.plan.code, status: clinicSub.status, currentPeriodEndsAt: iso(clinicSub.currentPeriodEndsAt) } : null,
       riskFlags: flags,
       recentAdminActions: audit,
@@ -174,7 +174,7 @@ export class AdminPartner360Service {
       reminders: Object.fromEntries(reminders.map((r) => [r.status, r._count._all])),
       imports: importBatches.filter((b) => b.importBatchId).map((b) => ({ batchId: b.importBatchId, contacts: b._count._all, importedAt: iso(b._min.createdAt) })),
       operationalErrors: { failedReminders: failedReminders.map((r) => ({ id: r.id, kind: r.kind, at: r.updatedAt.toISOString() })) },
-      finance: roleHasPermission(admin.role, "finance.view") ? { settlement: "PRODUCT_DECISION_REQUIRED" } : { restricted: true },
+      finance: adminCan(admin, "finance.view") ? { settlement: "PRODUCT_DECISION_REQUIRED" } : { restricted: true },
       recentAdminActions: await this.recentAudit(["PROVIDER_ORGANIZATION", "ProviderOrganization", "ClinicSubscription"], orgId),
     };
   }
@@ -227,7 +227,7 @@ export class AdminPartner360Service {
       this.verificationSummary(PartnerSubjectType.SELLER, id),
       this.recentAudit(["SELLER_ORGANIZATION", "SellerOrganization"], id),
     ]);
-    const financeAllowed = roleHasPermission(admin.role, "sellerFinance.view");
+    const financeAllowed = adminCan(admin, "sellerFinance.view");
     const flags: Flag[] = [];
     if (seller.status === SellerStatus.SUSPENDED || seller.status === SellerStatus.RESTRICTED) flags.push({ code: `SELLER_${seller.status}`, severity: "HIGH" });
     if (seller.verificationStatus !== "VERIFIED") flags.push({ code: "NOT_VERIFIED", severity: "MEDIUM", detail: { status: seller.verificationStatus } });
