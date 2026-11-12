@@ -11,7 +11,7 @@ import { LoadFailure } from "@/features/system/LoadFailure";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 import { placeLocation, formatDistanceKm } from "@/features/places/place-format";
 import { DiscoveryPage } from "@/features/discovery/DiscoveryPage";
-import type { RouteLocale } from "@/lib/i18n/config";
+import { localeDirection, type RouteLocale } from "@/lib/i18n/config";
 
 const CATEGORIES: PetFriendlyPlaceCategory[] = [
   PetFriendlyPlaceCategory.PARK,
@@ -47,7 +47,7 @@ function placeRules(place: PetFriendlyPlaceDto, fa: boolean): string[] {
 
 /** Public directory — no guard by design; works fully for anonymous visitors (spec: "public browsing" for pet-friendly places must work without auth). */
 export function PlacesListView() {
-  const locale = useLocale() as RouteLocale;
+  const locale = useLocale() as "fa" | "en";
   const t = useTranslations("places");
   const tCommon = useTranslations("common");
 
@@ -133,7 +133,7 @@ export function PlacesListView() {
           {places.map((place) => {
             const Icon = CATEGORY_ICON[place.category] ?? MapPin;
             const rules = placeRules(place, locale === "fa");
-            const Go = (locale === "fa" || locale === "ar") ? ChevronLeft : ChevronRight;
+            const Go = localeDirection[locale as RouteLocale] === "rtl" ? ChevronLeft : ChevronRight;
             return (
               <li key={place.id}>
                 <Link href={`/${locale}/places/${place.id}`} className="place-row">
