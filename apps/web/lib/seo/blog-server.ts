@@ -1,6 +1,6 @@
 import { cache } from "react";
 import type { PaginatedDto, PublicArticleDetailDto, PublicArticleFeedItemDto, PublicArticleSlugRedirectDto, PublicArticleSummaryDto, PublicCategoryDto, PublicTagDto } from "@petlife/types";
-import type { RouteLocale } from "@/lib/i18n/config";
+import { locales, type RouteLocale } from "@/lib/i18n/config";
 
 /**
  * Server-side reads of the public blog API, so article pages, indexes, the sitemap and llms.txt are
@@ -47,7 +47,17 @@ export const lookupArticle = cache(async (locale: RouteLocale, slug: string): Pr
   const article = await getJson<PublicArticleDetailDto>(`/blog/articles/${slug}${query({ locale })}`, { fresh: true });
   if (article) return { kind: "found", article };
   const moved = await getJson<PublicArticleSlugRedirectDto>(`/blog/slug-redirects/${slug}${query({ locale })}`, { fresh: true });
-  return moved ? { kind: "moved", canonicalPath: moved.canonicalPath } : { kind: "missing" };
+  if (moved) return { kind: "moved", canonicalPath: moved.canonicalPath };
+  // A slug from another language (e.g. /de/blog/cat-scratching-furniture, shared or mistyped links): send the reader to
+  // this article's own translation in the requested language. Without one, it stays a real 404.
+  for (const other of locales) {
+    if (other === locale) continue;
+    const sibling = await getJson<PublicArticleDetailDto>(`/blog/articles/${slug}${query({ locale: other })}`, { fresh: true });
+    if (!sibling) continue;
+    const translation = sibling.translations?.find((t) => t.locale === locale);
+    return translation ? { kind: "moved", canonicalPath: translation.canonicalPath } : { kind: "missing" };
+  }
+  return { kind: "missing" };
 });
 
 export const fetchRelatedArticles = cache(async (locale: RouteLocale, slug: string): Promise<PublicArticleSummaryDto[]> => {
