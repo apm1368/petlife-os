@@ -735,7 +735,10 @@
       "settings_approve": "Approve sensitive changes",
       "system_view": "View system status",
       "analytics_view": "Reports & analytics",
-      "pet_access_manage": "Manage pet record access"
+      "pet_access_manage": "Manage pet record access",
+      "wallet_view": "View wallets",
+      "wallet_adjust": "Correct balances",
+      "wallet_topup_review": "Review top-up receipts"
     },
     "domains": {
       "customer": "Customers",
@@ -762,7 +765,8 @@
       "access": "Access",
       "admin": "Administrators",
       "settings": "Settings",
-      "system": "System"
+      "system": "System",
+      "wallet": "Wallets"
     }
   },
   "adminSiteSettings": {
@@ -4307,7 +4311,9 @@
         "platformSettings": "Settings",
         "featureFlags": "Feature flags",
         "channels": "Channels & delivery",
-        "smsPatterns": "SMS patterns"
+        "smsPatterns": "SMS patterns",
+        "walletDirectory": "Member wallets",
+        "walletTopUps": "Top-up receipts"
       },
       "palette": {
         "actions": "Quick actions",
@@ -4397,6 +4403,7 @@
         "featureFlags": "Feature flags",
         "smsPatterns": "SMS patterns",
         "verification": "Identity and documents",
+        "wallets": "Wallets",
         "pets": "Pets"
       },
       "navigation": "Admin navigation",
@@ -6688,7 +6695,8 @@
           "pendingSupportNeeds": "Help requests to review",
           "pendingMemorials": "Memorials to review",
           "openPlaceReports": "Place reports",
-          "openTasks": "Open tasks"
+          "openTasks": "Open tasks",
+          "pendingWalletTopUps": "Top-up receipts"
         }
       },
       "performance": {
@@ -8402,6 +8410,27 @@
     }
   },
   "partnerVerification": {
+    "superseded": "Replaced by a newer upload",
+    "reviewedBy": "by {name}",
+    "caseSummary": "Where this case stands",
+    "lastDecision": "Last decision",
+    "decidedBy": "{name} · {date}",
+    "decisionReason": "Reason: {reason}",
+    "noDecisionYet": "No decision has been recorded yet.",
+    "actorAdmin": "Admin",
+    "actorPartner": "Partner",
+    "documentGeneric": "Document",
+    "history": {
+      "title": "Case history",
+      "hint": "Every decision with its reason, and every opening of a private document, is listed here with who did it.",
+      "empty": "Nothing recorded yet.",
+      "statusChanged": "Status: {from} → {to}",
+      "documentAccepted": "{document} accepted",
+      "documentRejected": "{document} rejected",
+      "documentOpened": "{document} opened",
+      "documentUploaded": "{document} uploaded",
+      "submitted": "Sent for review"
+    },
     "businessEvidenceRequirement": "Business license or Enamad (ID or evidence)",
     "profileRequired": "Required before submission",
     "profileRecorded": "Recorded for staff review",
@@ -9546,6 +9575,269 @@
         "BOARDING": "Boarding",
         "PET_TAXI": "Pet taxi",
         "OTHER": "Other"
+      }
+    }
+  },
+  "wallet": {
+    "eyebrow": "Account",
+    "title": "Wallet",
+    "description": "Your balance, top-ups and wallet history",
+    "navHint": "Balance, top-ups and history",
+    "loading": "Loading your wallet…",
+    "failed": "The wallet could not be loaded.",
+    "retry": "Try again",
+    "balance": {
+      "total": "Total balance",
+      "purchaseOnly": "For purchases",
+      "purchaseOnlyHint": "Top-ups and gifts, for purchases only",
+      "withdrawable": "Withdrawable",
+      "withdrawableHint": "Order refunds: spend them or withdraw them",
+      "expiring": "{amount} of gift credit expires on {date}."
+    },
+    "topUp": {
+      "title": "Add money",
+      "amountLabel": "Amount (Toman)",
+      "amountHint": "From {min} to {max}",
+      "railLabel": "How you pay",
+      "rails": {
+        "ZIBAL": "Online payment (bank gateway)",
+        "CARD_TO_CARD": "Card-to-card transfer"
+      },
+      "submit": "Add money",
+      "submitting": "Starting…",
+      "redirecting": "Taking you to the bank gateway…",
+      "unavailableTitle": "Top-ups open soon",
+      "unavailableBody": "No payment method is open for top-ups yet. Order refunds and gift credit still arrive in this wallet.",
+      "errors": {
+        "OUT_OF_RANGE": "The amount must be between {min} and {max}.",
+        "TOO_MANY_OPEN_TOP_UPS": "You already have three open requests. Finish or cancel one first.",
+        "TOP_UP_RAIL_UNAVAILABLE": "This payment method is not available right now.",
+        "ZIBAL_REQUEST_UNAVAILABLE": "The bank gateway did not answer. Please try again shortly.",
+        "generic": "The request did not go through. Please try again."
+      }
+    },
+    "card": {
+      "title": "Send the amount to this card",
+      "number": "Card number",
+      "holder": "Card holder",
+      "amount": "Amount to send",
+      "copy": "Copy",
+      "copied": "Copied",
+      "deadline": "Upload the receipt by {date}.",
+      "stepOne": "Transfer the amount to this card with your bank app or an ATM.",
+      "stepTwo": "Take a photo or screenshot of the receipt.",
+      "stepThree": "Send the receipt here. Our finance team checks it and adds the money."
+    },
+    "receipt": {
+      "choose": "Choose the receipt image",
+      "hint": "JPG, PNG or WebP, up to 10 MB",
+      "send": "Send receipt",
+      "sending": "Sending the receipt…",
+      "sent": "Receipt sent. Once finance has checked it, the money is added.",
+      "failed": "The receipt could not be sent. Please try again.",
+      "expired": "The time to send this receipt is over. Please start a new request."
+    },
+    "requests": {
+      "title": "Top-up requests",
+      "status": {
+        "AWAITING_PAYMENT": "Waiting for payment",
+        "AWAITING_RECEIPT": "Waiting for the receipt",
+        "REVIEW_PENDING": "Being checked",
+        "CREDITED": "Added",
+        "FAILED": "Failed",
+        "REJECTED": "Declined",
+        "EXPIRED": "Expired",
+        "CANCELLED": "Cancelled"
+      },
+      "rails": {
+        "ZIBAL": "Online payment (bank gateway)",
+        "CARD_TO_CARD": "Card-to-card transfer"
+      },
+      "received": "Added: {amount}",
+      "reason": "Reason: {reason}",
+      "showCard": "See the card and send the receipt",
+      "cancel": "Cancel request",
+      "cancelled": "The request was cancelled."
+    },
+    "return": {
+      "verifying": "Checking your payment…",
+      "credited": "Payment confirmed: {amount} was added to your wallet.",
+      "failed": "The payment was not confirmed. If money left your account, the bank returns it within 72 hours.",
+      "unknown": "The payment result is not known yet. Please open this page again in a few minutes."
+    },
+    "history": {
+      "title": "History",
+      "empty": "No wallet movements yet.",
+      "more": "Show more",
+      "purpose": {
+        "TOP_UP": "Top-up",
+        "PURCHASE": "Purchase",
+        "REFUND": "Refund",
+        "ADJUSTMENT": "Correction by our team",
+        "EXPIRY": "Gift credit expired",
+        "OTHER": "Movement"
+      },
+      "bucket": {
+        "PURCHASE_ONLY": "For purchases",
+        "WITHDRAWABLE": "Withdrawable"
+      },
+      "reasons": {
+        "GOODWILL": "Goodwill credit",
+        "SERVICE_RECOVERY": "Making up for a service problem",
+        "PAYMENT_CORRECTION": "Payment correction",
+        "REFUND_OUTSIDE_SYSTEM": "Refund outside an order",
+        "DUPLICATE_CREDIT_REVERSAL": "Duplicate credit reversed",
+        "OTHER": "Other correction"
+      },
+      "expires": "Expires {date}"
+    }
+  },
+  "adminWallets": {
+    "kicker": "Finance",
+    "title": "Member wallets",
+    "subtitle": "Each member's wallet balance and history. Every change of money carries a reason and is written to the audit log.",
+    "search": "Search name, email or phone",
+    "loading": "Loading…",
+    "failed": "The data could not be loaded.",
+    "retry": "Retry",
+    "forbidden": "You need the “View wallets” permission to see this.",
+    "empty": "No wallet has any movement yet.",
+    "emptySearch": "No member matches this search.",
+    "columns": {
+      "member": "Member",
+      "contact": "Contact",
+      "purchaseOnly": "For purchases",
+      "withdrawable": "Withdrawable",
+      "total": "Total",
+      "lastActivity": "Last movement"
+    },
+    "open": "Open",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page} of {pages}",
+    "never": "No movements",
+    "detail": {
+      "back": "All wallets",
+      "memberSince": "Member since {date}",
+      "entries": "History",
+      "entriesEmpty": "This wallet has no movements yet.",
+      "topUps": "Top-up requests",
+      "topUpsEmpty": "No requests yet.",
+      "adjustments": "Balance corrections",
+      "adjustmentsEmpty": "No corrections yet.",
+      "audit": "Audit log",
+      "auditEmpty": "Nothing recorded yet.",
+      "by": "by {name}",
+      "openCustomer": "Customer record"
+    },
+    "adjust": {
+      "title": "Correct the balance",
+      "hint": "Only to fix a mistake or make up for one. Each correction is logged with your name, the reason and the balance before and after.",
+      "direction": "Direction",
+      "directions": {
+        "CREDIT": "Add money",
+        "DEBIT": "Take money out"
+      },
+      "bucket": "Wallet part",
+      "buckets": {
+        "PURCHASE_ONLY": "For purchases",
+        "WITHDRAWABLE": "Withdrawable"
+      },
+      "amount": "Amount (Toman)",
+      "reasonCode": "Reason type",
+      "reasonCodes": {
+        "GOODWILL": "Goodwill credit",
+        "SERVICE_RECOVERY": "Making up for a service problem",
+        "PAYMENT_CORRECTION": "Payment correction",
+        "REFUND_OUTSIDE_SYSTEM": "Refund outside an order",
+        "DUPLICATE_CREDIT_REVERSAL": "Duplicate credit reversed",
+        "OTHER": "Other correction"
+      },
+      "reason": "Explanation (kept in the audit log)",
+      "evidence": "Ticket or reference (optional)",
+      "submit": "Save correction",
+      "confirm": "Record “{direction}” of {amount} in “{bucket}”? It applies to the balance immediately.",
+      "confirmYes": "Yes, record it",
+      "cancel": "Cancel",
+      "saving": "Saving…",
+      "done": "Correction saved.",
+      "noPermission": "Correcting a balance needs the “Correct balances” permission.",
+      "errors": {
+        "INSUFFICIENT_WALLET_BALANCE": "This part of the wallet does not hold that much.",
+        "reasonTooShort": "The explanation needs at least 5 characters.",
+        "amount": "Enter a valid amount.",
+        "generic": "The correction was not saved."
+      }
+    },
+    "topUps": {
+      "title": "Top-up receipts",
+      "subtitle": "Members' card-to-card receipts. Confirm the amount that actually reached the company account: that is the amount added.",
+      "filter": "Status",
+      "all": "All",
+      "status": {
+        "AWAITING_PAYMENT": "Waiting for payment",
+        "AWAITING_RECEIPT": "Waiting for the receipt",
+        "REVIEW_PENDING": "Being checked",
+        "CREDITED": "Added",
+        "FAILED": "Failed",
+        "REJECTED": "Declined",
+        "EXPIRED": "Expired",
+        "CANCELLED": "Cancelled"
+      },
+      "rails": {
+        "ZIBAL": "Online payment (bank gateway)",
+        "CARD_TO_CARD": "Card-to-card transfer"
+      },
+      "columns": {
+        "member": "Member",
+        "amount": "Requested",
+        "rail": "Method",
+        "status": "Status",
+        "submitted": "Receipt sent",
+        "actions": "Action"
+      },
+      "empty": "No receipts in this status.",
+      "review": "Review",
+      "reviewTitle": "Review receipt",
+      "viewReceipt": "View receipt",
+      "receiptOpening": "Preparing the receipt…",
+      "receivedAmount": "Amount received (Toman)",
+      "rejectReason": "Reason for declining (shown to the member)",
+      "approve": "Approve and add",
+      "reject": "Decline",
+      "approved": "The money was added to the member's wallet.",
+      "rejected": "The receipt was declined.",
+      "noPermission": "Reviewing receipts needs the “Review top-up receipts” permission.",
+      "failed": "The review was not saved.",
+      "close": "Close"
+    },
+    "audit": {
+      "wallet_credited": "Balance increased",
+      "wallet_debited": "Balance reduced",
+      "wallet_top_up_approved": "Receipt approved",
+      "wallet_top_up_rejected": "Receipt declined",
+      "wallet_top_up_receipt_viewed": "Receipt viewed"
+    },
+    "entry": {
+      "purpose": {
+        "TOP_UP": "Top-up",
+        "PURCHASE": "Purchase",
+        "REFUND": "Refund",
+        "ADJUSTMENT": "Correction by our team",
+        "EXPIRY": "Gift credit expired",
+        "OTHER": "Movement"
+      },
+      "bucket": {
+        "PURCHASE_ONLY": "For purchases",
+        "WITHDRAWABLE": "Withdrawable"
+      },
+      "reasons": {
+        "GOODWILL": "Goodwill credit",
+        "SERVICE_RECOVERY": "Making up for a service problem",
+        "PAYMENT_CORRECTION": "Payment correction",
+        "REFUND_OUTSIDE_SYSTEM": "Refund outside an order",
+        "DUPLICATE_CREDIT_REVERSAL": "Duplicate credit reversed",
+        "OTHER": "Other correction"
       }
     }
   },

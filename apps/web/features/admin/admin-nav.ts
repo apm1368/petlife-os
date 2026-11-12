@@ -26,6 +26,7 @@ import {
   SlidersHorizontal,
   Stethoscope,
   Users,
+  Wallet,
 } from "@petlife/ui";
 
 /**
@@ -229,6 +230,16 @@ export const ADMIN_SECTIONS: AdminSection[] = [
           { href: "/marketplace-statements", labelKey: "tabs.statements", permission: "sellerFinance.view" },
         ],
         owns: [{ prefix: "/settlements", tab: "/seller-finance" }],
+      },
+      {
+        key: "wallets",
+        labelKey: "nav.wallets",
+        icon: Wallet,
+        href: "/wallets",
+        tabs: [
+          { href: "/wallets", labelKey: "tabs.walletDirectory", permission: "wallet.view" },
+          { href: "/wallets/top-ups", labelKey: "tabs.walletTopUps", permission: "wallet.view", queue: "pendingWalletTopUps" },
+        ],
       },
     ],
   },
