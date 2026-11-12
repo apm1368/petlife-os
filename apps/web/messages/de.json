@@ -1864,10 +1864,7 @@
       "FULL_PREPAYMENT": "Vollständige Online-Vorauszahlung",
       "DEPOSIT": "Online-Anzahlung"
     },
-    "bookingMode": {
-      "INSTANT": "Sofortbuchung",
-      "REQUEST": "Anfrage mit Bestätigung durch Anbieter"
-    },
+    "bookingMode": { "INSTANT": "Sofortbuchung", "REQUEST": "Anfrage mit Bestätigung durch Anbieter" },
     "paymentStatus": {
       "NOT_REQUIRED": "Nicht erforderlich",
       "PENDING": "Ausstehend",
@@ -2152,9 +2149,7 @@
     "actionFailed": "Das hat nicht funktioniert. Bitte versuche es erneut.",
     "loading": "Pflegeerinnerungen werden geladen",
     "filtersAria": "Pflegefilter",
-    "filters": {
-      "all": "Alle"
-    },
+    "filters": { "all": "Alle" },
     "states": {
       "DUE": "Bald fällig",
       "OVERDUE": "Überfällig",
@@ -2174,30 +2169,14 @@
     "create": "Erinnerung erstellen",
     "empty": {
       "body": "Erinnerungen können aus Impfungen, Medikamenten und Terminen entstehen. Du kannst auch eine persönliche Erinnerung hinzufügen.",
-      "all": {
-        "title": "Noch keine Pflegeeinträge"
-      },
-      "due": {
-        "title": "Nichts ist bald fällig"
-      },
-      "overdue": {
-        "title": "Nichts ist überfällig"
-      },
-      "upcoming": {
-        "title": "Keine anstehenden Erinnerungen"
-      },
-      "completed": {
-        "title": "Noch keine erledigte Pflege"
-      },
-      "snoozed": {
-        "title": "Keine verschobenen Erinnerungen"
-      },
-      "cancelled": {
-        "title": "Keine abgesagten Erinnerungen"
-      },
-      "custom": {
-        "title": "Keine persönlichen Erinnerungen"
-      }
+      "all": { "title": "Noch keine Pflegeeinträge" },
+      "due": { "title": "Nichts ist bald fällig" },
+      "overdue": { "title": "Nichts ist überfällig" },
+      "upcoming": { "title": "Keine anstehenden Erinnerungen" },
+      "completed": { "title": "Noch keine erledigte Pflege" },
+      "snoozed": { "title": "Keine verschobenen Erinnerungen" },
+      "cancelled": { "title": "Keine abgesagten Erinnerungen" },
+      "custom": { "title": "Keine persönlichen Erinnerungen" }
     },
     "recentlyCompleted": "Kürzlich erledigt",
     "dailyInstructions": "Tägliche Pflegehinweise",
@@ -2277,11 +2256,7 @@
     "notes": "Notizen (optional)",
     "providerConfirm": "Ich bestätige, dass ich diesen Pflegevorschlag an die berechtigte Bezugsperson sende.",
     "providerSubmit": "Vorschlag speichern und senden",
-    "statuses": {
-      "PENDING": "Entscheidung ausstehend",
-      "ACCEPTED": "Angenommen",
-      "DISMISSED": "Abgelehnt"
-    },
+    "statuses": { "PENDING": "Entscheidung ausstehend", "ACCEPTED": "Angenommen", "DISMISSED": "Abgelehnt" },
     "types": {
       "VACCINATION": "Impfung",
       "VET_VISIT": "Tierarztbesuch",
@@ -2632,12 +2607,7 @@
       "CANCELLED": "Abgebrochen",
       "SUPERSEDED": "Durch eine neuere Änderung ersetzt"
     },
-    "units": {
-      "toman": "Toman",
-      "seconds": "Sekunden",
-      "hours": "Stunden",
-      "perDay": "pro Tag"
-    }
+    "units": { "toman": "Toman", "seconds": "Sekunden", "hours": "Stunden", "perDay": "pro Tag" }
   },
   "adminAccess": {
     "title": "Adminzugänge verwalten",
@@ -2725,15 +2695,8 @@
       "ACCOMMODATION": "Unterkünfte und Tierbetreuung",
       "INSURANCE": "Versicherung"
     },
-    "statuses": {
-      "ACTIVE": "Aktiv",
-      "SUSPENDED": "Ausgesetzt"
-    },
-    "tabs": {
-      "admins": "Admins",
-      "roles": "Rollen",
-      "permissions": "Berechtigungen"
-    }
+    "statuses": { "ACTIVE": "Aktiv", "SUSPENDED": "Ausgesetzt" },
+    "tabs": { "admins": "Admins", "roles": "Rollen", "permissions": "Berechtigungen" }
   },
   "admin": {
     "memorials": {
@@ -3178,22 +3141,14 @@
       "title": "Vertrauen und Sicherheit",
       "newCase": "Vertrauensfall eröffnen",
       "createTitle": "Vertrauensfall eröffnen",
-      "filter": {
-        "status": "Nach Status filtern",
-        "allStatuses": "Alle Status"
-      },
+      "filter": { "status": "Nach Status filtern", "allStatuses": "Alle Status" },
       "status": {
         "OPEN": "Offen",
         "UNDER_REVIEW": "Wird geprüft",
         "RESOLVED": "Gelöst",
         "CLOSED": "Geschlossen"
       },
-      "severity": {
-        "LOW": "Niedrig",
-        "MEDIUM": "Mittel",
-        "HIGH": "Hoch",
-        "CRITICAL": "Kritisch"
-      },
+      "severity": { "LOW": "Niedrig", "MEDIUM": "Mittel", "HIGH": "Hoch", "CRITICAL": "Kritisch" },
       "subjectType": {
         "USER": "Nutzer",
         "HOUSEHOLD": "Haushalt",
@@ -3344,10 +3299,7 @@
       "title": "Streitfälle",
       "newDispute": "Neuer Streitfall",
       "createTitle": "Streitfall eröffnen",
-      "filter": {
-        "status": "Nach Status filtern",
-        "allStatuses": "Alle Status"
-      },
+      "filter": { "status": "Nach Status filtern", "allStatuses": "Alle Status" },
       "status": {
         "OPEN": "Offen",
         "UNDER_REVIEW": "Wird geprüft",
@@ -3383,10 +3335,7 @@
         "evidencePlaceholder": "Beschreibung des Belegs",
         "changeStatus": "Status ändern",
         "financialNote": "Finanzielle Vorgänge (einschließlich Erstattungen) werden separat verfolgt. Eine Streitfallentscheidung löst keine automatische Erstattung aus.",
-        "actorType": {
-          "USER": "Nutzer",
-          "ADMIN": "Admin"
-        }
+        "actorType": { "USER": "Nutzer", "ADMIN": "Admin" }
       },
       "states": {
         "loading": "Streitfälle werden geladen …",
@@ -3439,12 +3388,7 @@
         "TRUST_SAFETY": "Vertrauen und Sicherheit",
         "OTHER": "Sonstiges"
       },
-      "priority": {
-        "LOW": "Niedrig",
-        "NORMAL": "Normal",
-        "HIGH": "Hoch",
-        "URGENT": "Dringend"
-      },
+      "priority": { "LOW": "Niedrig", "NORMAL": "Normal", "HIGH": "Hoch", "URGENT": "Dringend" },
       "form": {
         "requesterUserId": "Nutzer-ID der anfragenden Person",
         "subject": "Betreff",
@@ -3456,11 +3400,7 @@
       "detail": {
         "caseNumber": "Fall {number}",
         "requester": "Anfragende Person: {name}",
-        "authorType": {
-          "USER": "Kunde",
-          "ADMIN": "Admin",
-          "SYSTEM": "System"
-        },
+        "authorType": { "USER": "Kunde", "ADMIN": "Admin", "SYSTEM": "System" },
         "assignTo": "Admin zuweisen",
         "changeStatus": "Status ändern",
         "messages": "Nachrichten",
@@ -3711,10 +3651,7 @@
         "FAILED": "Fehlgeschlagen",
         "CANCELLED": "Abgebrochen"
       },
-      "ledgerDirection": {
-        "DEBIT": "Soll",
-        "CREDIT": "Haben"
-      },
+      "ledgerDirection": { "DEBIT": "Soll", "CREDIT": "Haben" },
       "ledgerAccount": {
         "CASH_GATEWAY_RECEIVABLE": "Forderung an Zahlungsanbieter",
         "CUSTOMER_PAYMENT_CLEARING": "Verrechnungskonto für Kundenzahlungen",
@@ -4436,10 +4373,7 @@
       }
     },
     "checkout": {
-      "summary": {
-        "title": "Bestellübersicht",
-        "deliveryNext": "Wird im Lieferschritt ausgewählt"
-      },
+      "summary": { "title": "Bestellübersicht", "deliveryNext": "Wird im Lieferschritt ausgewählt" },
       "address": {
         "title": "Lieferadresse",
         "addNew": "Neue Adresse hinzufügen",
@@ -4459,10 +4393,7 @@
       },
       "delivery": {
         "title": "Lieferart",
-        "method": {
-          "STANDARD": "Standard",
-          "EXPRESS": "Express"
-        },
+        "method": { "STANDARD": "Standard", "EXPRESS": "Express" },
         "quotesNext": "Die verfügbaren Kurieroptionen wählst du im nächsten Schritt."
       },
       "safetyAck": {
@@ -4480,10 +4411,7 @@
       },
       "shipping": {
         "title": "Lieferung für jeden Verkäufer auswählen",
-        "serviceLevel": {
-          "STANDARD": "Standardlieferung",
-          "EXPRESS": "Expresslieferung"
-        },
+        "serviceLevel": { "STANDARD": "Standardlieferung", "EXPRESS": "Expresslieferung" },
         "eta": "Lieferung in etwa {hours, plural, one {# Stunde} other {# Stunden}}",
         "selected": "Ausgewählt",
         "unavailable": "Zurzeit sind keine Lieferoptionen verfügbar",
@@ -4563,12 +4491,7 @@
         "retry": "Erneut versuchen"
       },
       "progress": {
-        "steps": {
-          "address": "Adresse",
-          "review": "Prüfen",
-          "shipping": "Lieferung",
-          "payment": "Zahlung"
-        },
+        "steps": { "address": "Adresse", "review": "Prüfen", "shipping": "Lieferung", "payment": "Zahlung" },
         "label": "Schritte beim Bezahlen"
       }
     },
@@ -4695,6 +4618,129 @@
         "cancel": "Abbrechen",
         "submit": "Zur Prüfung senden",
         "failed": "Deine Bewertung konnte nicht gesendet werden."
+      }
+    },
+    "checkout": {
+      "summary": { "title": "Bestellübersicht", "deliveryNext": "Wird im Lieferschritt ausgewählt" },
+      "address": {
+        "title": "Lieferadresse",
+        "addNew": "Neue Adresse hinzufügen",
+        "addressLine": "Adresse",
+        "city": "Stadt",
+        "countryCode": "Ländercode",
+        "save": "Adresse speichern",
+        "noHousehold": "Erstelle zuerst einen Haushalt, um eine Lieferadresse zu speichern.",
+        "default": "Standard",
+        "postalCodeValue": "Postleitzahl {code}",
+        "recipient": "Name des Empfängers",
+        "phone": "Mobilnummer",
+        "postalCode": "Postleitzahl",
+        "postalCodeHint": "10 Ziffern, optional",
+        "postalCodeInvalid": "Die Postleitzahl muss 10 Ziffern haben",
+        "saveFailed": "Die Adresse konnte nicht gespeichert werden."
+      },
+      "delivery": {
+        "title": "Lieferart",
+        "method": { "STANDARD": "Standard", "EXPRESS": "Express" },
+        "quotesNext": "Die verfügbaren Kurieroptionen wählst du im nächsten Schritt."
+      },
+      "safetyAck": {
+        "title": "Bitte bestätige, bevor du fortfährst",
+        "warning": "Möglicher Sicherheitskonflikt",
+        "description": "Mindestens ein Artikel im Warenkorb könnte mit einer bekannten Allergie eines Haustiers in Konflikt stehen. Bestätige, dass du mit der Bestellung fortfahren möchtest.",
+        "acknowledge": "Verstanden, fortfahren"
+      },
+      "review": {
+        "title": "Bestellung prüfen",
+        "subtotal": "Zwischensumme",
+        "delivery": "Lieferung",
+        "total": "Gesamt",
+        "discount": "Aktionen"
+      },
+      "shipping": {
+        "title": "Lieferung für jeden Verkäufer auswählen",
+        "serviceLevel": { "STANDARD": "Standardlieferung", "EXPRESS": "Expresslieferung" },
+        "eta": "Lieferung in etwa {hours, plural, one {# Stunde} other {# Stunden}}",
+        "selected": "Ausgewählt",
+        "unavailable": "Zurzeit sind keine Lieferoptionen verfügbar",
+        "refresh": "Lieferoptionen aktualisieren",
+        "chooseFirst": "Wähle zuerst eine Lieferoption aus, um fortzufahren."
+      },
+      "payment": {
+        "title": "Zahlung",
+        "amountDue": "Fälliger Betrag",
+        "devLabel": "Entwicklungszahlung",
+        "simulateSuccess": "Erfolgreiche Zahlung simulieren",
+        "simulateFailure": "Fehlgeschlagene Zahlung simulieren",
+        "simulatePending": "Ausstehende Zahlung simulieren",
+        "onlinePayment": "Online bezahlen"
+      },
+      "pending": {
+        "title": "Zahlung ausstehend",
+        "status": "Warte auf Bestätigung",
+        "description": "Wir warten auf die Bestätigung des Zahlungsanbieters. Das kann einen Moment dauern — prüfe den Status in Kürze erneut.",
+        "refresh": "Status prüfen"
+      },
+      "paymentFailed": {
+        "title": "Zahlung fehlgeschlagen",
+        "generic": "Die Zahlung konnte nicht abgeschlossen werden.",
+        "preserved": "Es wurde nichts abgebucht und dein Warenkorb bleibt erhalten.",
+        "returnToCart": "Zum Warenkorb",
+        "tryAgain": "Erneut versuchen",
+        "chooseInstallments": "Stattdessen Ratenzahlung wählen"
+      },
+      "createFailed": "Der Bezahlvorgang konnte nicht gestartet werden. Bitte versuche es erneut.",
+      "method": {
+        "title": "Wie möchtest du bezahlen?",
+        "onlinePayment": "Online bezahlen",
+        "installments": "Ratenzahlung",
+        "chooseProvider": "Tarif auswählen",
+        "chooseAnother": "Andere Zahlungsmethode wählen",
+        "noneAvailable": "Zurzeit sind keine Zahlungsmethoden verfügbar.",
+        "provider": {
+          "DEV_SIMULATED": "Entwicklungs-Gateway",
+          "STANDARD_GATEWAY": "Onlinezahlung",
+          "SNAPP_PAY": "SnappPay",
+          "DIGI_PAY": "DigiPay"
+        }
+      },
+      "financingEligibility": {
+        "title": "Berechtigung wird geprüft",
+        "status": {
+          "CHECKING": "Deine Berechtigung wird geprüft …",
+          "ELIGIBLE": "Du kannst in Raten zahlen",
+          "NOT_ELIGIBLE": "Zurzeit ist keine Ratenzahlung möglich",
+          "NEEDS_VERIFICATION": "Zusätzliche Prüfung erforderlich",
+          "ERROR": "Die Berechtigung konnte nicht geprüft werden"
+        },
+        "notEligibleHint": "Du kannst weiterhin online bezahlen."
+      },
+      "financingPlans": {
+        "title": "Tarif auswählen",
+        "installmentCount": "{count, plural, one {1 Rate} other {# Raten}}",
+        "downPayment": "Anzahlung",
+        "installmentAmount": "Betrag je Rate",
+        "fee": "Gebühr",
+        "totalPayable": "Zu zahlender Gesamtbetrag",
+        "none": "Zurzeit sind keine Tarife verfügbar."
+      },
+      "financingAuthorize": {
+        "title": "Ratenplan bestätigen",
+        "redirectNotice": "Du wirst sicher zu {provider} weitergeleitet.",
+        "simulateApprove": "Genehmigung simulieren",
+        "simulateDecline": "Ablehnung simulieren",
+        "simulatePending": "Ausstehend simulieren",
+        "authorize": "Mit Anbieter fortfahren"
+      },
+      "financingDeclined": {
+        "title": "Ratenanfrage wurde nicht genehmigt",
+        "generic": "Dieser Ratenplan wurde nicht genehmigt.",
+        "tryAnother": "Anderen Anbieter wählen",
+        "retry": "Erneut versuchen"
+      },
+      "progress": {
+        "steps": { "address": "Adresse", "review": "Prüfen", "shipping": "Lieferung", "payment": "Zahlung" },
+        "label": "Schritte beim Bezahlen"
       }
     },
     "myOrders": {
@@ -4890,53 +4936,6 @@
       "previous": "Zurück",
       "next": "Weiter",
       "imageAlt": "Gedenkfoto von {name}"
-    },
-    "hero": {
-      "title": "Alles, was dein Tier braucht, an einem Ort",
-      "subtitle": "Tierarzt finden, Termin buchen, einkaufen, ein vermisstes Tier melden — ganz ohne vorherige Registrierung.",
-      "primaryCta": "Tierarzt finden",
-      "secondaryCta": "Zum Shop"
-    },
-    "explore": {
-      "title": "Womit möchtest du anfangen?",
-      "vet": {
-        "title": "Tierärzte und Praxen",
-        "description": "Suche nach Stadt und Fachgebiet und buche einen Termin."
-      },
-      "services": {
-        "title": "Dienstleistungen für Tiere",
-        "description": "Fellpflege, Tierpension, Training und Services bei dir zu Hause."
-      },
-      "shop": {
-        "title": "Shop",
-        "description": "Futter, Medikamente und Zubehör passend zu deinem Tier."
-      },
-      "lostPets": {
-        "title": "Vermisste Tiere",
-        "description": "Vermisstenmeldungen ansehen oder eine Sichtung melden."
-      },
-      "places": {
-        "title": "Tierfreundliche Orte",
-        "description": "Cafés, Parks und Unterkünfte, in denen Tiere willkommen sind."
-      },
-      "insurance": {
-        "title": "Tierversicherung",
-        "description": "Vergleiche den Versicherungsschutz und sieh, was jede Police voraussetzt."
-      },
-      "animalSupport": {
-        "title": "Tierhilfe",
-        "description": "Echte Anfragen von Tierheimen — und wie du helfen kannst."
-      },
-      "community": {
-        "title": "Community",
-        "description": "Fragen, Erfahrungen und Tipps von anderen Tierhaltern."
-      }
-    },
-    "account": {
-      "title": "Brauchst du ein Konto?",
-      "description": "Ein Konto brauchst du zum Buchen, Bestellen und für die Gesundheitsakte deines Tieres. Stöbern ist für alle offen.",
-      "createAccount": "Konto erstellen",
-      "logIn": "Anmelden"
     }
   },
   "bookingFlow": {
@@ -5203,106 +5202,6 @@
         "BOARDING": "Übernachtung mit täglichen Updates",
         "PET_TAXI": "Sichere Fahrten innerhalb der Stadt"
       }
-    },
-    "results": {
-      "title": "Anbieter",
-      "loading": "Wird geladen",
-      "retry": "Erneut versuchen",
-      "subtitle": "Für {name}",
-      "empty": "Noch keine Anbieter gefunden.",
-      "verified": "Verifiziert",
-      "nextAvailable": "Nächster freier Termin: {when}",
-      "noAvailability": "Keine freien Termine gefunden"
-    },
-    "compatibility": {
-      "status": {
-        "COMPATIBLE": "Passend",
-        "NEEDS_REVIEW": "Prüfung nötig",
-        "NOT_SUPPORTED": "Nicht unterstützt",
-        "UNKNOWN": "Mehr Infos nötig"
-      }
-    },
-    "booking": {
-      "noDraft": "Wähle zuerst einen Anbieter aus den Suchergebnissen.",
-      "backToResults": "Zurück zu den Ergebnissen",
-      "slotPicker": {
-        "title": "Wähle eine Uhrzeit",
-        "incompatible": "Dieser Anbieter bietet diese Leistung nicht für die Tierart deines Tieres an.",
-        "noSlots": "Keine freien Termine in der nächsten Woche."
-      },
-      "dateRange": {
-        "title": "Wähle An- und Abreise",
-        "checkIn": "Anreise",
-        "checkOut": "Abreise"
-      },
-      "address": {
-        "title": "Wo soll das stattfinden?",
-        "addNew": "Neue Adresse hinzufügen",
-        "addressLine": "Adresse",
-        "city": "Stadt",
-        "countryCode": "Ländercode",
-        "save": "Adresse speichern"
-      },
-      "review": {
-        "title": "Buchung überprüfen",
-        "pet": "Tier",
-        "provider": "Anbieter",
-        "service": "Leistung",
-        "location": "Ort",
-        "atCustomerLocation": "Deine Adresse",
-        "dateTime": "Datum & Uhrzeit",
-        "price": "Preis",
-        "paymentStatus": "Zahlung",
-        "paymentPlaceholder": "Noch nicht erforderlich",
-        "notesLabel": "Notizen (optional)"
-      },
-      "careSharing": {
-        "title": "Pflegeinfos mit dem Anbieter teilen",
-        "who": "Wer",
-        "why": "Warum",
-        "whyValue": "Für diese Buchung: {service}",
-        "until": "Bis",
-        "what": "Was geteilt wird",
-        "confirm": "Buchung bestätigen",
-        "preset": {
-          "GROOMING_BASIC": {
-            "title": "Grundlagen Fellpflege",
-            "description": "Temperament, Empfindlichkeit beim Anfassen und Hinweise zu Fell und Haut aus dem Pflegeprofil."
-          },
-          "TRAINING_BASIC": {
-            "title": "Grundlagen Training",
-            "description": "Temperament und Hinweise zum Verhalten aus dem Pflegeprofil."
-          },
-          "WALKING_BASIC": {
-            "title": "Grundlagen Gassi gehen",
-            "description": "Verhalten an der Leine, Temperament und besondere Hinweise aus dem Pflegeprofil."
-          },
-          "SITTING_BASIC": {
-            "title": "Grundlagen Betreuung zu Hause",
-            "description": "Fütterungsroutine, Toilettengewohnheiten und Verhalten beim Alleinsein aus dem Pflegeprofil."
-          },
-          "BOARDING_BASIC": {
-            "title": "Grundlagen Tierpension",
-            "description": "Pflegeprofil plus Impfstatus, falls zutreffend."
-          },
-          "TAXI_BASIC": {
-            "title": "Grundlagen Haustiertaxi",
-            "description": "Temperament und Hinweise zum Handling und zur Transportbox aus dem Pflegeprofil."
-          }
-        }
-      },
-      "errors": {
-        "SLOT_UNAVAILABLE": "Diese Uhrzeit ist nicht mehr verfügbar. Bitte wähle eine andere.",
-        "HOLD_EXPIRED": "Die Reservierung ist abgelaufen. Bitte wähle erneut.",
-        "BOOKING_CONFLICT": "Dieser Termin wurde gerade von jemand anderem gebucht. Bitte wähle einen anderen.",
-        "PROVIDER_NOT_VERIFIED": "Dieser Anbieter ist noch nicht verifiziert.",
-        "SERVICE_NOT_AVAILABLE": "Diese Leistung ist derzeit nicht verfügbar.",
-        "PET_NOT_SUPPORTED": "Dieser Anbieter bietet diese Leistung nicht für die Tierart deines Tieres an.",
-        "PET_ACCESS_DENIED": "Du hast keine Berechtigung, für dieses Tier zu buchen.",
-        "PET_CONTEXT_INCOMPLETE": "Das Profil dieses Tieres braucht mehr Angaben, bevor diese Leistung gebucht werden kann.",
-        "ADDRESS_REQUIRED": "Für diese Leistung brauchst du eine Adresse, bevor du buchen kannst.",
-        "BOOKING_NOT_CANCELLABLE": "Diese Buchung kann nicht mehr storniert werden."
-      }
     }
   },
   "errors": {
@@ -5460,21 +5359,6 @@
       "unavailable": "Der Eintrag ist nicht verfügbar.",
       "retry": "Erneut versuchen",
       "loading": "Eintrag wird geladen"
-    },
-    "nutrition": {
-      "title": "Ernährungsgrundlagen",
-      "dietType": "Ernährungsart",
-      "currentFood": "Aktuelles Futter",
-      "feedingFrequency": "Fütterungshäufigkeit",
-      "restrictions": "Einschränkungen",
-      "shopPlaceholder": "Futter kaufen (demnächst)",
-      "dietType_DRY": "Trocken",
-      "dietType_WET": "Nass",
-      "dietType_RAW": "Roh",
-      "dietType_MIXED": "Gemischt",
-      "dietType_PRESCRIPTION": "Tierärztliches Diätfutter",
-      "dietType_OTHER": "Sonstiges",
-      "dietType_UNKNOWN": "Unbekannt"
     }
   },
   "communityChat": {
@@ -5591,14 +5475,8 @@
       "restore": "Erinnerung wiederherstellen",
       "archivedNotice": "Diese Erinnerung ist archiviert. Sie bleibt hier sicher gespeichert und kann jederzeit wiederhergestellt werden."
     },
-    "timeline": {
-      "title": "Lebensverlauf",
-      "empty": "Noch nichts zu zeigen."
-    },
-    "editMemory": {
-      "title": "Erinnerung bearbeiten",
-      "submit": "Änderungen speichern"
-    }
+    "timeline": { "title": "Lebensverlauf", "empty": "Noch nichts zu zeigen." },
+    "editMemory": { "title": "Erinnerung bearbeiten", "submit": "Änderungen speichern" }
   },
   "healthAdvanced": {
     "documents": {
@@ -5631,120 +5509,6 @@
       "previewDownload": "Sicher anzeigen und herunterladen",
       "openFile": "Datei öffnen",
       "previewUnavailable": "Für diesen Dateityp ist keine Vorschau verfügbar."
-    },
-    "nav": {
-      "overview": "Übersicht",
-      "timeline": "Zeitverlauf",
-      "documents": "Dokumente",
-      "labs": "Laborwerte",
-      "imaging": "Bildgebung",
-      "referrals": "Überweisungen",
-      "dental": "Zahnmedizin",
-      "nutrition": "Ernährung",
-      "rehab": "Reha",
-      "observations": "Beobachtungen",
-      "vitals": "Untersuchungen & Vitalwerte",
-      "estimates": "Kostenvoranschläge",
-      "discharge": "Entlassungshinweise"
-    },
-    "overview": {
-      "title": "Erweiterte Gesundheit",
-      "upcomingCare": "Anstehende Versorgung",
-      "overdueCare": "Überfällige Versorgung",
-      "activeMedications": "Aktive Medikamente",
-      "unresolvedCarePlanItems": "Offene Punkte im Versorgungsplan",
-      "recentDocuments": "Neueste Dokumente",
-      "recentVisits": "Letzte Besuche",
-      "missingInformation": "Fehlende Angaben",
-      "noMissingInformation": "Keine bekannten Lücken in den erfassten Gesundheitsdaten dieses Tieres."
-    },
-    "timeline": {
-      "title": "Gesundheitsverlauf",
-      "empty": "Noch keine Gesundheitsereignisse erfasst."
-    },
-    "labs": {
-      "title": "Laborwerte",
-      "empty": "Keine Laborergebnisse erfasst."
-    },
-    "imaging": {
-      "title": "Bildgebung",
-      "empty": "Keine bildgebenden Untersuchungen erfasst."
-    },
-    "referrals": {
-      "title": "Überweisungen",
-      "empty": "Keine Überweisungen erfasst."
-    },
-    "dental": {
-      "title": "Zahnmedizin",
-      "empty": "Keine Zahnbefunde erfasst."
-    },
-    "nutrition": {
-      "title": "Ernährungspläne",
-      "empty": "Keine tierärztlichen Ernährungspläne erfasst."
-    },
-    "rehab": {
-      "title": "Reha-Pläne",
-      "empty": "Keine Reha-Pläne erfasst.",
-      "sessionsLogged": "{count, number} Sitzungen erfasst"
-    },
-    "observations": {
-      "title": "Beobachtungen",
-      "empty": "Noch keine Beobachtungen erfasst.",
-      "add": "Beobachtung hinzufügen",
-      "category": "Kategorie",
-      "description": "Beschreibung",
-      "observedAt": "Beobachtet am",
-      "disclaimer": "Beobachtung der Halterin oder des Halters — keine Diagnose.",
-      "save": "Speichern"
-    },
-    "correction": {
-      "add": "Korrektur hinzufügen",
-      "text": "Was möchtest du korrigieren?",
-      "submit": "Korrektur senden",
-      "history": "Korrekturverlauf"
-    },
-    "vitals": {
-      "title": "Untersuchungen & Vitalwerte",
-      "disclaimer": "Das sind Messwerte, die deine Praxis erfasst hat. opetlife interpretiert sie nicht — frag deine Tierärztin oder deinen Tierarzt, was ein Wert bedeutet.",
-      "weightTrend": "Gewicht im Zeitverlauf",
-      "trendCaption": "{count, number} erfasste Messungen. Jeder Punkt ist ein tatsächlicher Messwert.",
-      "empty": "Keine Messwerte erfasst.",
-      "emptyDescription": "Messwerte erscheinen hier, sobald eine Praxis eine Untersuchung deines Tieres erfasst.",
-      "noneRecorded": "Nichts erfasst",
-      "weight": "Gewicht",
-      "temperature": "Temperatur",
-      "heartRate": "Herzfrequenz",
-      "respiratoryRate": "Atemfrequenz",
-      "bodyCondition": "Körperkondition"
-    },
-    "estimates": {
-      "title": "Kostenvoranschläge für Behandlungen",
-      "empty": "Keine Kostenvoranschläge.",
-      "emptyDescription": "Hier erscheint der Kostenvoranschlag einer Praxis, sobald sie dir einen zur Freigabe schickt.",
-      "range": "{low} – {high} IRR",
-      "rangeToman": "{low} – {high} Toman",
-      "rangeExplainer": "Eine Spanne, kein Festpreis — die endgültigen Kosten hängen davon ab, welche Behandlung sich als nötig erweist.",
-      "lineRange": "{low} – {high} IRR",
-      "validUntil": "Gültig bis {date}",
-      "declinedBecause": "Abgelehnt: {reason}",
-      "approve": "Annehmen",
-      "decline": "Ablehnen",
-      "declinePrompt": "Warum lehnst du ab? (optional, wird mit der Praxis geteilt)",
-      "status": {
-        "DRAFT": "Entwurf",
-        "PRESENTED": "Wartet auf deine Entscheidung",
-        "APPROVED": "Angenommen",
-        "DECLINED": "Abgelehnt",
-        "EXPIRED": "Abgelaufen"
-      }
-    },
-    "discharge": {
-      "title": "Entlassungshinweise",
-      "empty": "Keine Entlassungshinweise erfasst.",
-      "homeCare": "Pflege zu Hause",
-      "medications": "Medikamente für zu Hause",
-      "warningSigns": "Ruf sofort die Praxis an, wenn …",
-      "followUp": "Nachsorge"
     }
   },
   "rollout": {
@@ -6036,39 +5800,6 @@
       "mode": "Verkehrsmittel",
       "save": "Speichern",
       "failed": "Die Änderungen konnten nicht gespeichert werden. Deine Eingaben sind weiterhin vorhanden."
-    },
-    "contact": {
-      "eyebrow": "opetlife, an deiner Seite",
-      "title": "Lass uns über deinen Liebling sprechen.",
-      "subtitle": "Fragen, Vorschläge oder Hilfe beim nächsten Schritt mit deinem Tier — wir hören zu.",
-      "subject": "Betreff",
-      "message": "Deine Nachricht",
-      "send": "Nachricht senden",
-      "signIn": "Anmelden und senden",
-      "signInHint": "Melde dich an, um deine Nachricht sicher zu senden und die Antwort in deinem Support-Postfach zu verfolgen.",
-      "savedDraft": "Dein Entwurf bleibt auf diesem Gerät gespeichert, während du dich anmeldest.",
-      "sent": "Deine Nachricht ist angekommen.",
-      "openTicket": "Unterhaltung verfolgen",
-      "failed": "Deine Nachricht konnte nicht gesendet werden. Dein Entwurf ist noch da.",
-      "draftHint": "Du kannst auf diesem Gerät zu deinem Entwurf zurückkehren.",
-      "support": "Meine Support-Unterhaltungen",
-      "link": "Kontakt"
-    },
-    "share": {
-      "group": "Teilen",
-      "copy": "Link kopieren",
-      "copied": "Link kopiert",
-      "copyFailed": "Der Link konnte nicht kopiert werden. Bitte versuch es erneut.",
-      "shareFailed": "Teilen fehlgeschlagen.",
-      "whatsapp": "WhatsApp",
-      "telegram": "Telegram",
-      "bale": "Bale"
-    },
-    "household": {
-      "title": "Name des Haushalts",
-      "name": "Haushaltsname",
-      "save": "Speichern",
-      "failed": "Der Haushalt konnte nicht umbenannt werden."
     }
   },
   "clinicCustomerExtras": {
@@ -6085,11 +5816,7 @@
     "emptyShared": "Es wurden noch keine Kliniknachrichten geteilt."
   },
   "lostPet": {
-    "species": {
-      "dog": "Hund",
-      "cat": "Katze",
-      "other": "Andere"
-    },
+    "species": { "dog": "Hund", "cat": "Katze", "other": "Andere" },
     "report": {
       "title": "Vermisstes Haustier melden",
       "subtitle": "Teile Einzelheiten, damit die Gemeinschaft bei der Suche helfen kann.",
@@ -6133,12 +5860,7 @@
       "publicContactPlaceholder": "Zum Beispiel: 0912***4567 — nur SMS",
       "publicContactWarning": "Alle können diesen Text sehen. Vermeide nach Möglichkeit eine vollständige Telefonnummer.",
       "reviewTitle": "Was in der öffentlichen Meldung zu sehen ist",
-      "review": {
-        "area": "Gegend",
-        "when": "Zeitpunkt",
-        "photo": "Foto",
-        "contact": "Kontakt"
-      },
+      "review": { "area": "Gegend", "when": "Zeitpunkt", "photo": "Foto", "contact": "Kontakt" },
       "notGiven": "Nicht angegeben",
       "noPhoto": "Kein Foto",
       "contactThroughApp": "Über opetlife",
@@ -6269,42 +5991,6 @@
       "myMessages": "Meine Nachrichten",
       "lostPetsNearby": "Vermisste Tiere in der Nähe",
       "supportNeeds": "Hilfsanfragen"
-    },
-    "reaction": {
-      "LIKE": "Gefällt mir",
-      "LOVE": "Liebe ich",
-      "HELPFUL": "Hilfreich"
-    },
-    "reportReason": {
-      "SPAM": "Spam",
-      "ABUSE": "Missbrauch",
-      "MISINFORMATION": "Falschinformation",
-      "INAPPROPRIATE": "Unangemessen",
-      "OTHER": "Sonstiges",
-      "SCAM": "Betrug",
-      "HARASSMENT": "Belästigung",
-      "PERSONAL_INFORMATION": "Teilt persönliche Daten",
-      "ANIMAL_WELFARE": "Bedenken zum Tierwohl",
-      "DANGEROUS_CONTENT": "Gefährliche Inhalte"
-    },
-    "newPost": {
-      "title": "Neuer Beitrag",
-      "typeLabel": "Art",
-      "titleLabel": "Titel",
-      "bodyLabel": "Was möchtest du teilen?",
-      "mediaLabel": "Foto",
-      "submit": "Veröffentlichen"
-    },
-    "post": {
-      "report": "Melden",
-      "reportReasonLabel": "Grund",
-      "reportDetailsLabel": "Details",
-      "reportSubmit": "Meldung senden",
-      "reportSuccess": "Danke — dieser Beitrag wurde zur Prüfung gemeldet.",
-      "commentsTitle": "Kommentare",
-      "commentLabel": "Kommentar hinzufügen",
-      "commentSubmit": "Kommentieren",
-      "commentsEmpty": "Noch keine Kommentare."
     }
   },
   "publicNavigation": {
@@ -6824,24 +6510,6 @@
       "HOSPITALIZATION": "Krankenhausaufenthalt",
       "EMERGENCY": "Notfall",
       "OTHER": "Sonstiges"
-    },
-    "applicationStatus": {
-      "DRAFT": "Entwurf",
-      "SUBMITTED": "Eingereicht",
-      "UNDER_REVIEW": "In Prüfung",
-      "APPROVED": "Genehmigt",
-      "DECLINED": "Abgelehnt",
-      "CANCELLED": "Storniert",
-      "NEEDS_INFORMATION": "Angaben fehlen"
-    },
-    "application": {
-      "title": "Versicherungsanträge für {petName}",
-      "sectionTitle": "Versicherungsanträge",
-      "empty": "Noch keine Anträge.",
-      "notesLabel": "Notizen zu diesem Antrag",
-      "submit": "Antrag einreichen",
-      "cancel": "Antrag zurückziehen",
-      "disclaimer": "Mit dem Einreichen geht dieser Antrag an den Anbieter — eine Deckung ist damit nicht garantiert."
     }
   },
   "adminInsuranceProviders": {
@@ -7001,11 +6669,7 @@
         "body": "Du gehörst mehreren Anbieterorganisationen an. Wähle aus, in welcher du arbeitest."
       },
       "headerRole": "{role}",
-      "role": {
-        "OWNER": "Inhaber/in",
-        "VET": "Tierarzt/Tierärztin",
-        "STAFF": "Mitarbeiter/in"
-      },
+      "role": { "OWNER": "Inhaber/in", "VET": "Tierarzt/Tierärztin", "STAFF": "Mitarbeiter/in" },
       "switchOrg": "Organisation wechseln",
       "notVerifiedBanner": "Diese Organisation ist noch nicht bestätigt. Einige Aktionen sind eingeschränkt."
     },
@@ -7025,24 +6689,14 @@
       "noBookingsToday": "Heute gibt es keine Buchungen.",
       "verificationLink": "Organisationsnachweise und Verifizierung"
     },
-    "bookingRow": {
-      "respondBy": "Antwort bis "
-    },
+    "bookingRow": { "respondBy": "Antwort bis " },
     "availability": {
       "title": "Verfügbarkeit",
       "retry": "Erneut versuchen",
       "loading": "Wird geladen",
       "loadFailed": "Die Verfügbarkeit konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.",
       "accessDenied": "Du darfst die Verfügbarkeit nicht verwalten.",
-      "day": {
-        "sun": "So",
-        "mon": "Mo",
-        "tue": "Di",
-        "wed": "Mi",
-        "thu": "Do",
-        "fri": "Fr",
-        "sat": "Sa"
-      },
+      "day": { "sun": "So", "mon": "Mo", "tue": "Di", "wed": "Mi", "thu": "Do", "fri": "Fr", "sat": "Sa" },
       "rules": {
         "title": "Wöchentlicher Zeitplan",
         "empty": "Es sind noch keine wiederkehrenden Zeiten eingerichtet.",
@@ -7066,10 +6720,7 @@
         "startAt": "Beginn",
         "endAt": "Ende",
         "typeLabel": "Art",
-        "type": {
-          "BLOCKED": "Gesperrt",
-          "AVAILABLE_OVERRIDE": "Zusätzliche Verfügbarkeit"
-        },
+        "type": { "BLOCKED": "Gesperrt", "AVAILABLE_OVERRIDE": "Zusätzliche Verfügbarkeit" },
         "reason": "Grund (optional)",
         "add": "Hinzufügen",
         "fieldsRequired": "Standort, Beginn und Ende sind erforderlich.",
@@ -7080,11 +6731,7 @@
         "conflictCancel": "Abbrechen",
         "conflictProceed": "Trotzdem sperren"
       },
-      "actions": {
-        "edit": "Bearbeiten",
-        "cancel": "Abbrechen",
-        "save": "Änderungen speichern"
-      }
+      "actions": { "edit": "Bearbeiten", "cancel": "Abbrechen", "save": "Änderungen speichern" }
     },
     "bookings": {
       "title": "Buchungen",
@@ -7237,11 +6884,7 @@
       "loading": "Wird geladen",
       "loadFailed": "Das Team konnte nicht geladen werden.",
       "empty": "Es gibt noch keine Teammitglieder.",
-      "role": {
-        "OWNER": "Inhaber/in",
-        "VET": "Tierarzt/Tierärztin",
-        "STAFF": "Mitarbeiter/in"
-      },
+      "role": { "OWNER": "Inhaber/in", "VET": "Tierarzt/Tierärztin", "STAFF": "Mitarbeiter/in" },
       "settings": {
         "title": "Leistungen und öffentliches Profil je Teammitglied",
         "description": "Wenn einer Leistung keine Personen zugeordnet sind, wird sie von allen buchbaren Teammitgliedern angeboten. Hier werden keine Personaldaten gespeichert.",
@@ -7605,12 +7248,7 @@
       "everydayCareProfile": "Alltägliches Pflegeprofil",
       "until": "bis",
       "timeline": "Verlauf",
-      "actor": {
-        "USER": "Du",
-        "PROVIDER": "Dienstleister",
-        "SYSTEM": "System",
-        "ADMIN": "Support"
-      },
+      "actor": { "USER": "Du", "PROVIDER": "Dienstleister", "SYSTEM": "System", "ADMIN": "Support" },
       "reschedule": "Termin ändern",
       "cancelFollowing": "Diese und folgende Buchungen stornieren",
       "weeklyCreated": "Wöchentliche Buchungen erstellt; ausgebuchte Wochen wurden übersprungen.",
@@ -7817,717 +7455,5 @@
         "OTHER": "Sonstiges"
       }
     }
-  },
-  "onboarding": {
-    "chapters": {
-      "account": "Dein Konto",
-      "household": "Haushalt",
-      "petIdentity": "Stell dein Tier vor",
-      "healthBasics": "Gesundheits-Grundlagen",
-      "personalization": "Mach es zu deinem",
-      "ready": "Fertig"
-    },
-    "household": {
-      "title": "Richte deinen Haushalt ein",
-      "subtitle": "Du kannst das später jederzeit ändern.",
-      "nameLabel": "Name des Haushalts",
-      "cityLabel": "Stadt"
-    },
-    "species": {
-      "title": "Was für ein Tier?",
-      "dog": "Hund",
-      "cat": "Katze"
-    },
-    "petName": {
-      "title": "Wie heißt dein Tier?"
-    },
-    "petPhoto": {
-      "title": "Foto hinzufügen",
-      "subtitle": "Optional — du kannst später eins hinzufügen.",
-      "upload": "Foto hochladen",
-      "uploading": "Wird hochgeladen...",
-      "retry": "Erneut hochladen"
-    },
-    "breed": {
-      "title": "Rasse",
-      "subtitle": "Optional"
-    },
-    "sex": {
-      "title": "Geschlecht",
-      "male": "Männlich",
-      "female": "Weiblich",
-      "unknown": "Nicht sicher",
-      "subtitle": "Optional"
-    },
-    "age": {
-      "title": "Geburtstag oder ungefähres Alter",
-      "birthDateLabel": "Geburtstag",
-      "approxAgeLabel": "Ungefähres Alter (Monate)",
-      "useApprox": "Ich kenne den genauen Geburtstag nicht",
-      "useExact": "Genaues Geburtsdatum eingeben",
-      "optional": "Wenn Geburtsdatum oder Alter unbekannt sind, überspring diesen Schritt und ergänze es später.",
-      "skip": "Weiß ich noch nicht; weiter",
-      "saveFailed": "Speichern fehlgeschlagen. Deine Eingaben bleiben erhalten; bitte versuch es erneut."
-    },
-    "personalization": {
-      "title": "Wofür interessierst du dich?",
-      "subtitle": "So können wir deine Startseite passend priorisieren.",
-      "health": "Gesundheit",
-      "vet": "Tierärztliche Versorgung",
-      "dailyCare": "Tägliche Pflege",
-      "shopping": "Einkaufen",
-      "training": "Erziehung & Training",
-      "travel": "Reisen",
-      "insurance": "Versicherung",
-      "animalSupport": "Tierhilfe"
-    },
-    "ready": {
-      "title": "{name} ist startklar!",
-      "subtitle": "Auf zu deiner Startseite.",
-      "cta": "Zur Startseite"
-    },
-    "healthBasics": {
-      "yes": "Ja",
-      "dontKnow": "Weiß ich nicht",
-      "addLater": "Später hinzufügen",
-      "allergies": {
-        "title": "Bekannte Allergien?",
-        "noneKnown": "Keine bekannten Allergien",
-        "namePlaceholder": "Name der Allergie"
-      },
-      "conditions": {
-        "title": "Bekannte Erkrankungen?",
-        "noneKnown": "Keine bekannten Erkrankungen",
-        "namePlaceholder": "Name der Erkrankung"
-      },
-      "medications": {
-        "title": "Nimmt dein Tier aktuell Medikamente?",
-        "noneKnown": "Keine aktuellen Medikamente",
-        "namePlaceholder": "Name des Medikaments"
-      },
-      "vaccination": {
-        "title": "Impfstatus",
-        "upToDate": "Auf dem neuesten Stand",
-        "dueSoon": "Bald fällig",
-        "overdue": "Überfällig"
-      },
-      "diet": {
-        "title": "Was frisst dein Tier?",
-        "dry": "Trockenfutter",
-        "wet": "Nassfutter",
-        "mixed": "Gemischt"
-      }
-    },
-    "resumeIdentity": "Ergänze die noch nicht gespeicherten Angaben zur Identität, um dein Tier weiter hinzuzufügen. Das Geburtsdatum bleibt optional."
-  },
-  "home": {
-    "title": "Heute für {name}",
-    "action": {
-      "completeHealth": "Gesundheitsdaten vervollständigen",
-      "viewVaccination": "Impfstatus ansehen",
-      "viewMedication": "Medikamente ansehen",
-      "completeCareProfile": "Pflegeprofil vervollständigen",
-      "viewProfile": "Profil von {name} ansehen",
-      "findVet": "Tierärztliche Versorgung finden",
-      "askAi": "KI zu {name} fragen",
-      "addPet": "Füge dein erstes Tier hinzu",
-      "viewBooking": {
-        "vet": "Anstehenden Tierarztbesuch ansehen",
-        "grooming": "Anstehende Fellpflege ansehen",
-        "training": "Anstehende Trainingseinheit ansehen",
-        "walking": "Anstehenden Spaziergang ansehen",
-        "sitting": "Anstehende Betreuung zu Hause ansehen",
-        "boarding": "Anstehenden Aufenthalt in der Tierpension ansehen",
-        "petTaxi": "Anstehende Haustiertaxi-Fahrt ansehen",
-        "other": "Servicebuchung ansehen"
-      },
-      "viewMemories": "Erinnerungen ansehen"
-    },
-    "sections": {
-      "ai": "KI fragen",
-      "upcoming": "Anstehend",
-      "exploreServices": "Dienstleistungen entdecken",
-      "shop": "Shop",
-      "subscription": "Mitgliedschaft"
-    },
-    "aiPlaceholder": "KI-Unterstützung kommt bald.",
-    "upcomingPlaceholder": "Noch nichts geplant.",
-    "exploreServicesHint": "Fellpflege, Training, Gassi-Service, Betreuung zu Hause, Tierpension und Haustiertaxi.",
-    "exploreServicesAction": "Entdecken",
-    "shopHint": "Futter, Leckerlis, Pflegeprodukte und mehr.",
-    "shopAction": "Stöbern",
-    "subscriptionHint": "Sieh dir deinen Tarif, die Nutzung und Upgrade-Optionen an.",
-    "subscriptionAction": "Verwalten"
-  },
-  "pets": {
-    "myPets": "Meine Tiere",
-    "addPet": "Tier hinzufügen",
-    "active": "Aktiv",
-    "setActive": "Als aktiv festlegen",
-    "openProfile": "Profil öffnen",
-    "profile": {
-      "editIdentity": "Identität bearbeiten",
-      "digitalId": "Digitaler Ausweis",
-      "digitalIdComingSoon": "Demnächst verfügbar",
-      "weight": "Gewicht",
-      "unknown": "Nicht angegeben",
-      "healthTeaser": "Gesundheit",
-      "careTeaser": "Pflege",
-      "openHealth": "Gesundheit öffnen",
-      "openCareProfile": "Pflegeprofil öffnen",
-      "upcomingServiceTeaser": {
-        "VET": "Anstehender Tierarztbesuch",
-        "GROOMING": "Anstehende Fellpflege",
-        "TRAINING": "Anstehende Trainingseinheit",
-        "WALKING": "Anstehender Spaziergang",
-        "SITTING": "Anstehende Betreuung zu Hause",
-        "BOARDING": "Anstehender Aufenthalt in der Tierpension",
-        "PET_TAXI": "Anstehende Haustiertaxi-Fahrt"
-      },
-      "viewBooking": "Buchung ansehen",
-      "memoriesTeaser": "Erinnerungen",
-      "memoriesTeaserMemorial": "Ein Ort für die Momente, die ihr geteilt habt",
-      "openMemories": "Erinnerungen öffnen",
-      "lostPetTeaser": "Entlaufen oder gefunden?",
-      "openLostPet": "Als vermisst melden",
-      "travelTeaser": "Reisen & tierfreundliche Orte",
-      "openTravel": "Reise planen",
-      "insuranceTeaser": "Tierversicherung",
-      "openInsurance": "Tarife ansehen"
-    },
-    "listDescription": "Öffne die Akte jedes Tieres oder wähle das aktive Tier deines Haushalts.",
-    "emptyTitle": "In diesem Haushalt wurden noch keine Tiere hinzugefügt.",
-    "emptyDescription": "Füge dein erstes Tier hinzu, um hier seine Identität und Akte zu sehen.",
-    "switchFailed": "Das aktive Tier konnte nicht gespeichert werden. Deine vorherige Auswahl bleibt bestehen; bitte versuch es erneut."
-  },
-  "vet": {
-    "find": {
-      "title": "Tierarzt finden",
-      "subtitle": "Tierärztliche Versorgung für {name}",
-      "empty": "Noch keine Tierärzte gefunden.",
-      "verified": "Verifiziert",
-      "nextAvailable": "Nächster freier Termin: {when}",
-      "noAvailability": "Keine freien Termine gefunden"
-    },
-    "profile": {
-      "verified": "Verifiziert",
-      "locations": "Standorte",
-      "services": "Leistungen",
-      "duration": "{minutes} Min.",
-      "book": "Buchen"
-    },
-    "booking": {
-      "noDraft": "Wähle zuerst eine Leistung im Profil der Tierarztpraxis.",
-      "backToProfile": "Zurück zum Profil",
-      "slotPicker": {
-        "title": "Wähle eine Uhrzeit",
-        "incompatible": "Dieser Anbieter bietet diese Leistung nicht für die Tierart deines Tieres an.",
-        "noSlots": "Keine freien Termine in der nächsten Woche."
-      },
-      "review": {
-        "title": "Buchung überprüfen",
-        "pet": "Tier",
-        "provider": "Tierarzt / Praxis",
-        "service": "Leistung",
-        "location": "Ort",
-        "dateTime": "Datum & Uhrzeit",
-        "price": "Preis",
-        "paymentStatus": "Zahlung",
-        "paymentPlaceholder": "Noch nicht erforderlich",
-        "reasonLabel": "Grund des Besuchs (optional)"
-      },
-      "healthSharing": {
-        "title": "Gesundheitsinfos mit der Praxis teilen",
-        "who": "Wer",
-        "why": "Warum",
-        "whyValue": "Für diesen Termin",
-        "until": "Bis",
-        "what": "Was geteilt wird",
-        "confirm": "Buchung bestätigen",
-        "preset": {
-          "MINIMAL_VET_CONTEXT": {
-            "title": "Minimaler Kontext",
-            "description": "Nur die grundlegende Identität deines Tieres — keine Gesundheitsdaten."
-          },
-          "HEALTH_BASICS": {
-            "title": "Gesundheits-Grundlagen (empfohlen)",
-            "description": "Allergien, aktuelle Medikamente und Pflegeprofil."
-          },
-          "SELECTED_HEALTH_DATA": {
-            "title": "Ausgewählte Gesundheitsdaten",
-            "description": "Vorerst wie Gesundheits-Grundlagen — die Auswahl einzelner Einträge folgt später."
-          }
-        }
-      },
-      "errors": {
-        "SLOT_UNAVAILABLE": "Diese Uhrzeit ist nicht mehr verfügbar. Bitte wähle einen anderen Termin.",
-        "HOLD_EXPIRED": "Die Reservierung ist abgelaufen. Bitte wähle erneut einen Termin.",
-        "BOOKING_CONFLICT": "Dieser Termin wurde gerade von jemand anderem gebucht. Bitte wähle einen anderen Termin.",
-        "PROVIDER_NOT_VERIFIED": "Dieser Anbieter ist noch nicht verifiziert.",
-        "SERVICE_NOT_AVAILABLE": "Diese Leistung ist derzeit nicht verfügbar.",
-        "PET_NOT_SUPPORTED": "Dieser Anbieter bietet diese Leistung nicht für die Tierart deines Tieres an.",
-        "PET_ACCESS_DENIED": "Du hast keine Berechtigung, für dieses Tier zu buchen.",
-        "BOOKING_NOT_CANCELLABLE": "Diese Buchung kann nicht mehr storniert werden."
-      }
-    }
-  },
-  "bookings": {
-    "myBookings": {
-      "title": "Meine Buchungen",
-      "tab": {
-        "upcoming": "Anstehend",
-        "past": "Vergangen",
-        "cancelled": "Storniert"
-      },
-      "empty": {
-        "upcoming": "Keine anstehenden Buchungen.",
-        "past": "Keine vergangenen Buchungen.",
-        "cancelled": "Keine stornierten Buchungen."
-      },
-      "category": {
-        "VET": "Tierarztbesuch",
-        "GROOMING": "Fellpflege",
-        "TRAINING": "Training",
-        "WALKING": "Gassi-Service",
-        "SITTING": "Betreuung zu Hause",
-        "BOARDING": "Tierpension",
-        "PET_TAXI": "Haustiertaxi"
-      },
-      "status": {
-        "HOLD": "Vorgemerkt",
-        "PENDING_CONFIRMATION": "Bestätigung ausstehend",
-        "CONFIRMED": "Bestätigt",
-        "CHECKED_IN": "Eingecheckt",
-        "IN_PROGRESS": "Läuft",
-        "COMPLETED": "Abgeschlossen",
-        "CANCELLED_BY_USER": "Von dir storniert",
-        "CANCELLED_BY_PROVIDER": "Vom Anbieter storniert",
-        "NO_SHOW": "Nicht erschienen",
-        "REQUESTED": "Angefragt",
-        "AWAITING_PAYMENT": "Zahlung ausstehend",
-        "REJECTED": "Abgelehnt",
-        "EXPIRED": "Abgelaufen",
-        "RESCHEDULED": "Verschoben"
-      }
-    }
-  },
-  "careCalendar": {
-    "title": "Pflegekalender",
-    "empty": "Noch nichts geplant.",
-    "event": {
-      "VET_APPOINTMENT": "Tierarzttermin",
-      "GROOMING_APPOINTMENT": "Fellpflegetermin",
-      "TRAINING_SESSION": "Trainingseinheit",
-      "WALK": "Spaziergang",
-      "SITTING": "Betreuung zu Hause",
-      "BOARDING": "Tierpension",
-      "PET_TAXI": "Haustiertaxi-Fahrt",
-      "otherService": "Servicetermin"
-    },
-    "status": {
-      "SCHEDULED": "Geplant",
-      "CANCELLED": "Abgesagt",
-      "COMPLETED": "Erledigt"
-    }
-  },
-  "animalSupport": {
-    "orgList": {
-      "title": "Tierschutzorganisationen",
-      "subtitle": "Entdecke verifizierte Tierschutzorganisationen, die du unterstützen kannst.",
-      "empty": "Noch keine Organisationen gelistet.",
-      "verified": "Verifiziert"
-    },
-    "orgDetail": {
-      "verified": "Verifizierte Organisation",
-      "campaignsTitle": "Aktive Kampagnen",
-      "campaignsEmpty": "Derzeit keine aktiven Kampagnen.",
-      "rescueCasesTitle": "Rettungsfälle",
-      "rescueCasesEmpty": "Keine Rettungsfälle gelistet."
-    },
-    "campaignList": {
-      "title": "Hilfskampagnen",
-      "subtitle": "Jede Kampagne zeigt einen transparenten, aus dem Spendenbuch berechneten Gesamtstand — niemals eine Schätzung.",
-      "empty": "Derzeit sind keine Kampagnen offen."
-    },
-    "campaignCard": {
-      "raised": "{raised} gesammelt",
-      "raisedOfTarget": "{raised} von {target} gesammelt"
-    },
-    "fundType": {
-      "GENERAL": "Allgemeiner Fonds",
-      "RESTRICTED": "Zweckgebunden für diese Kampagne"
-    },
-    "campaignDetail": {
-      "fundType": "Fondsart: {fundType}",
-      "donateTitle": "Spenden",
-      "loginToDonate": "Melde dich an, um zu spenden.",
-      "amountLabel": "Betrag (IRR)",
-      "showDonorPublicly": "Meinen Namen bei dieser Spende öffentlich anzeigen",
-      "donateSubmit": "Spenden",
-      "donateSuccess": "Danke für deine Spende!",
-      "updatesTitle": "Neuigkeiten",
-      "updatesEmpty": "Noch keine Neuigkeiten.",
-      "donorsTitle": "Neueste Spender",
-      "donorsEmpty": "Noch keine öffentlichen Spender."
-    },
-    "myDonations": {
-      "title": "Meine Spenden",
-      "empty": "Du hast noch nicht gespendet."
-    },
-    "donationStatus": {
-      "PENDING": "Ausstehend",
-      "SUCCEEDED": "Abgeschlossen",
-      "FAILED": "Fehlgeschlagen",
-      "REFUNDED": "Erstattet"
-    }
-  },
-  "places": {
-    "category": {
-      "PARK": "Park",
-      "CAFE": "Café",
-      "RESTAURANT": "Restaurant",
-      "HOTEL": "Hotel",
-      "STORE": "Geschäft",
-      "BEACH": "Strand",
-      "VENUE": "Veranstaltungsort",
-      "SERVICE": "Dienstleistung",
-      "OTHER": "Sonstiges"
-    },
-    "list": {
-      "search": "Suchen",
-      "title": "Tierfreundliche Orte",
-      "subtitle": "Verifizierte Orte, an denen Tiere willkommen sind.",
-      "empty": "Keine Orte gefunden.",
-      "nearMe": "In meiner Nähe suchen",
-      "allCategories": "Alle Kategorien",
-      "filtersCity": "Stadt",
-      "filtersCategory": "Kategorie"
-    },
-    "detail": {
-      "indoorAllowed": "Drinnen erlaubt",
-      "outdoorAllowed": "Draußen erlaubt",
-      "sizeRestrictions": "Größenbeschränkungen: {restrictions}",
-      "petPolicy": "Regeln für Tiere",
-      "verifiedAt": "Verifiziert am {date}",
-      "unverified": "Noch nicht verifiziert — Angaben sind eventuell unvollständig",
-      "addFavorite": "Zu Favoriten hinzufügen",
-      "removeFavorite": "Aus Favoriten entfernen",
-      "distance": "{distance} km entfernt"
-    },
-    "favorites": {
-      "title": "Gespeicherte Orte",
-      "empty": "Du hast noch keine Orte gespeichert.",
-      "signInPrompt": "Melde dich an, um deine Lieblingsorte zu speichern."
-    }
-  },
-  "supportNeeds": {
-    "category": {
-      "FOOD": "Futter",
-      "MEDICINE": "Medikamente",
-      "VETERINARY_CARE": "Tierärztliche Versorgung",
-      "TEMPORARY_HOME": "Vorübergehendes Zuhause",
-      "FOSTER": "Pflegestelle",
-      "TRANSPORT": "Fahrdienst",
-      "VOLUNTEER": "Ehrenamt",
-      "EQUIPMENT": "Ausstattung",
-      "FINANCIAL": "Finanzielle Hilfe",
-      "SHELTER_SUPPLIES": "Tierheimbedarf",
-      "OTHER": "Sonstiges"
-    },
-    "urgency": {
-      "NORMAL": "Normal",
-      "IMPORTANT": "Wichtig",
-      "URGENT": "Dringend",
-      "CRITICAL": "Kritisch"
-    },
-    "status": {
-      "DRAFT": "Entwurf",
-      "PENDING_REVIEW": "In Prüfung",
-      "PUBLISHED": "Veröffentlicht",
-      "FULFILLED": "Erfüllt",
-      "CLOSED": "Geschlossen",
-      "EXPIRED": "Abgelaufen",
-      "REJECTED": "Änderungen nötig",
-      "REMOVED": "Entfernt",
-      "PARTIALLY_FULFILLED": "Teilweise erfüllt",
-      "PAUSED": "Pausiert"
-    },
-    "offerStatus": {
-      "PENDING": "Ausstehend",
-      "ACCEPTED": "Angenommen",
-      "DECLINED": "Abgelehnt",
-      "COMPLETED": "Abgeschlossen",
-      "CANCELLED": "Abgesagt",
-      "IN_PROGRESS": "In Bearbeitung"
-    },
-    "list": {
-      "title": "Hilfsanfragen für Tiere",
-      "subtitle": "Echte, konkrete Anfragen von Tierrettern, Tierheimen und Nachbarn.",
-      "publish": "Anfrage erstellen",
-      "searchLabel": "Anfragen durchsuchen",
-      "searchPlaceholder": "Nach Titel oder Beschreibung suchen",
-      "categoryLabel": "Kategorie",
-      "allCategories": "Alle Kategorien",
-      "urgencyLabel": "Dringlichkeit",
-      "allUrgencies": "Jede Dringlichkeit",
-      "cityLabel": "Stadt",
-      "allCities": "Überall",
-      "empty": "Noch keine Anfragen passen zu diesen Filtern.",
-      "emptyBrowseByCategory": "Stöbere stattdessen nach Kategorie:",
-      "verifiedOrganization": "Verifizierte Organisation",
-      "progress": "{fulfilled} von {needed} {unit} gedeckt",
-      "myListings": "Meine Anfragen"
-    },
-    "detail": {
-      "animalType": "Tier: {type}",
-      "offerCounts": "{pending, number} ausstehend · {accepted, number} angenommen · {completed, number} abgeschlossen",
-      "offerTitle": "Hilfe anbieten",
-      "contactExplainer": "Deine Nachricht geht innerhalb von opetlife an die anfragende Person. Telefonnummern und E-Mail-Adressen werden nie öffentlich angezeigt.",
-      "helpTypeLabel": "Was kannst du anbieten?",
-      "messageLabel": "Nachricht",
-      "messagePlaceholder": "Erzähl, wie du helfen kannst",
-      "quantityLabel": "Wie viele?",
-      "offerAction": "Angebot senden",
-      "offerSent": "Dein Angebot wurde an die anfragende Person gesendet.",
-      "signInToHelp": "Melde dich an, um Hilfe anzubieten",
-      "donateTitle": "Finanziell helfen",
-      "donateExplainer": "Spenden laufen über die verknüpfte Kampagne dieser Anfrage, sodass jeder Rial im Spendenbuch nachverfolgt wird.",
-      "donateAction": "Zur Kampagne",
-      "shareTitle": "Anfrage teilen",
-      "backToBoard": "Zurück zu allen Anfragen"
-    },
-    "create": {
-      "title": "Anfrage erstellen",
-      "categoryLabel": "Kategorie",
-      "urgencyLabel": "Dringlichkeit",
-      "titleLabel": "Titel",
-      "titlePlaceholder": "z. B. Hundefutter für acht gerettete Hunde benötigt",
-      "descriptionLabel": "Beschreibung",
-      "descriptionPlaceholder": "Erkläre genau, was gebraucht wird und warum",
-      "provinceLabel": "Provinz",
-      "cityLabel": "Stadt",
-      "neighborhoodLabel": "Stadtteil",
-      "locationPrivacyHint": "Optional. Bleib allgemein — gib nie deine genaue Wohnadresse an.",
-      "quantityLabel": "Wie viele werden benötigt?",
-      "unitLabel": "Einheit (Säcke, Dosen, Stunden)",
-      "animalTypeLabel": "Tierart",
-      "photosLabel": "Fotos",
-      "continue": "Vorschau",
-      "previewTitle": "Vorschau deiner Anfrage",
-      "previewQuantity": "Benötigt: {quantity} {unit}",
-      "moderationNotice": "Unser Team prüft deine Anfrage, bevor sie öffentlich erscheint.",
-      "publish": "Zur Prüfung einreichen",
-      "back": "Bearbeiten",
-      "signInToPublish": "Melde dich an, um diese Anfrage zu veröffentlichen"
-    },
-    "mine": {
-      "title": "Meine Hilfsanfragen",
-      "tabAll": "Alle",
-      "empty": "Du hast noch keine Anfragen erstellt.",
-      "signInPrompt": "Melde dich an, um deine Anfragen zu sehen.",
-      "reviewNote": "Hinweis der Moderation: {note}",
-      "viewOffers": "Angebote ansehen",
-      "hideOffers": "Angebote ausblenden",
-      "noOffers": "Noch keine Angebote.",
-      "markFulfilled": "Als erfüllt markieren",
-      "close": "Anfrage schließen",
-      "acceptOffer": "Annehmen",
-      "declineOffer": "Ablehnen",
-      "completeOffer": "Als abgeschlossen markieren"
-    },
-    "share": {
-      "whatsapp": "WhatsApp",
-      "telegram": "Telegram",
-      "bale": "Bale",
-      "native": "Teilen",
-      "copyLink": "Link kopieren",
-      "copied": "Link kopiert"
-    }
-  },
-  "memberProfile": {
-    "title": "Profil",
-    "loadError": "Wir konnten dein Profil nicht laden.",
-    "eyebrow": "Mitgliedsprofil",
-    "contactMissing": "Kontaktmöglichkeit hinzufügen",
-    "settings": "Einstellungen",
-    "household": "Haushalt",
-    "defaultHousehold": "Mein Haushalt",
-    "active": "Aktiv",
-    "petsCount": "Tiere",
-    "location": "Standort",
-    "notSet": "Nicht angegeben",
-    "managePets": "Tiere verwalten",
-    "membership": "Mitgliedschaft",
-    "careMembership": "opetlife Care",
-    "membershipDescription": "Pflege-Tools, Gesundheitsakten und Mitgliedervorteile an einem Ort.",
-    "viewMembership": "Mitgliedschaft ansehen",
-    "manage": "Konto verwalten",
-    "destinations": {
-      "pets": {
-        "title": "Meine Tiere",
-        "description": "Profile, Pflege und Gesundheitsakten"
-      },
-      "membership": {
-        "title": "Mitgliedschaft",
-        "description": "Tarif, Testphase und Vorteile"
-      },
-      "bookings": {
-        "title": "Buchungen",
-        "description": "Anstehende und vergangene Services"
-      },
-      "orders": {
-        "title": "Bestellungen",
-        "description": "Einkäufe und Lieferstatus"
-      },
-      "notifications": {
-        "title": "Benachrichtigungen",
-        "description": "Kanäle, Kategorien und Ruhezeiten"
-      },
-      "support": {
-        "title": "Hilfe",
-        "description": "Anfragen und Unterstützung"
-      }
-    }
-  },
-  "report": {
-    "action": "Melden",
-    "hint": "Meldungen sind vertraulich. Das Team prüft sie, und die gemeldete Person erfährt nicht, wer sie gemeldet hat.",
-    "reasonLabel": "Was stimmt nicht?",
-    "detailsLabel": "Details",
-    "submit": "Meldung senden",
-    "success": "Danke — das Team sieht sich das an.",
-    "duplicate": "Du hast das bereits gemeldet. Das Team prüft es gerade.",
-    "limitReached": "Du hast heute viele Meldungen gesendet. Bitte versuch es morgen erneut."
-  },
-  "healthDepth": {
-    "title": "Gesamte Gesundheitshistorie",
-    "intro": "Erfasster Gesundheitszustand und Ereignisse, jeweils mit Quelle des Eintrags. Fehlende Daten bedeuten nicht, dass keine Erkrankung oder Allergie vorliegt.",
-    "sharesLink": "Temporäre Links zur Gesundheitsakte",
-    "accessFailed": "Deine Berechtigung konnte nicht geprüft werden.",
-    "retry": "Erneut versuchen",
-    "loading": "Wird geladen …",
-    "forbidden": "Du hast keinen Zugriff auf die Gesundheitsdaten dieses Tieres.",
-    "snapshotFailed": "Der aktuelle Stand konnte nicht geladen werden.",
-    "conditions": "Erfasste aktive Erkrankungen",
-    "medications": "Erfasste aktive Medikamente",
-    "allergies": "Erfasste Allergien",
-    "weight": "Zuletzt erfasstes Gewicht",
-    "noneRecorded": "Kein aktiver Eintrag vorhanden; das bestätigt keine gute Gesundheit.",
-    "documents": "Aktive Dokumente: {count}",
-    "type": "Ereignistyp",
-    "source": "Quelle des Eintrags",
-    "all": "Alle",
-    "from": "Von (Gerätezeit)",
-    "to": "Bis (Gerätezeit)",
-    "apply": "Filter anwenden",
-    "invalid": "Wähle einen gültigen Zeitraum (Beginn vor Ende).",
-    "feedFailed": "Dieser Teil des Verlaufs konnte nicht geladen werden. Bereits geladene Einträge bleiben erhalten.",
-    "openRecord": "Eintrag öffnen",
-    "empty": "Keine erfassten Ereignisse passen zu diesen Filtern.",
-    "more": "Ältere anzeigen",
-    "types": {
-      "VISIT": "Besuch",
-      "CONDITION": "Erkrankung",
-      "ALLERGY": "Allergie",
-      "VACCINATION": "Impfung",
-      "MEDICATION": "Medikament",
-      "LAB": "Labor",
-      "IMAGING": "Bildgebung",
-      "WEIGHT": "Gewicht",
-      "DOCUMENT": "Dokument",
-      "OTHER": "Sonstiges"
-    },
-    "sources": {
-      "OWNER": "Familie",
-      "CLINIC": "Praxis",
-      "VET": "Tierärztin/Tierarzt",
-      "IMPORT": "Importiertes Dokument",
-      "SYSTEM": "System"
-    }
-  },
-  "healthShares": {
-    "title": "Temporäre Links zur Gesundheitsakte",
-    "intro": "Teile ausgewählte Informationen über einen widerrufbaren Link. Damit wird kein dauerhafter Zugriff auf das Konto gewährt.",
-    "accessFailed": "Deine Berechtigung konnte nicht geprüft werden.",
-    "retry": "Erneut versuchen",
-    "loading": "Wird geladen …",
-    "forbidden": "Du hast keinen Zugriff auf die Gesundheitsdaten dieses Tieres.",
-    "create": "Temporären Link erstellen",
-    "privacy": "Wer den Link hat, kann die ausgewählten Informationen bis zum Ablauf oder Widerruf lesen. Wenn du einen Besuch auswählst, sind Befund und Behandlungsplan der Tierärztin bzw. des Tierarztes enthalten. Dokumentdateien sind nicht enthalten.",
-    "label": "Bezeichnung des Links (optional)",
-    "hours": "Gültigkeit (Stunden, 1–168)",
-    "sectionsTitle": "Ausgewählte Bereiche",
-    "recentRecords": "Aktuelle Einträge zum Teilen",
-    "recentHelp": "Zur Auswahl stehen bis zu 5 aktuelle Laborbefunde, 3 Besuche und 3 bildgebende Befunde; das ist nicht die vollständige Akte.",
-    "snapshotFailed": "Aktuelle Einträge konnten nicht geladen werden.",
-    "labRecord": "Labor: {name}",
-    "visitRecord": "Besuch: {name}",
-    "imagingRecord": "Bildgebung: {name}",
-    "noRecent": "Keine aktuellen Einträge zur Auswahl verfügbar.",
-    "confirm": "Ich bestätige, dass die ausgewählten Informationen bis zum Ablauf mit allen geteilt werden, die den Link haben.",
-    "saveFailed": "Der Vorgang wurde nicht bestätigt. Bitte versuch es erneut. Deine Eingaben bleiben erhalten.",
-    "created": "Link erstellt. Die vollständige Adresse wird nur jetzt angezeigt; kopiere sie für die vorgesehene Person.",
-    "newLink": "Neue Link-Adresse",
-    "copy": "Link kopieren",
-    "open": "Link öffnen",
-    "copied": "Link kopiert.",
-    "copyFailed": "Automatisches Kopieren nicht möglich. Kopiere die Adresse aus dem Feld oben.",
-    "existing": "Erfasste Links",
-    "listLimit": "Es werden bis zu 50 aktuelle Links angezeigt. Eine vollständige Adresse lässt sich aus dem Token-Hinweis nicht wiederherstellen.",
-    "loadFailed": "Diese Informationen konnten nicht geladen werden.",
-    "empty": "Für dieses Tier sind keine Links erfasst.",
-    "unnamed": "Link ohne Bezeichnung",
-    "expires": "Läuft ab: {date}",
-    "accessCount": "Erfasste Zugriffe: {count}",
-    "lastAccess": "Letzter Zugriff: {date}",
-    "log": "Zugriffsverlauf",
-    "revoke": "Link widerrufen",
-    "confirmRevoke": "Diesen Link widerrufen?",
-    "cancel": "Abbrechen",
-    "logLimit": "Bis zu 200 aktuelle Zugriffe. Der Server protokolliert erfolgreiche Abrufe; das ist keine verifizierte Identität der Besucher.",
-    "noAccess": "Keine Zugriffe erfasst.",
-    "unknownDevice": "Keine Geräteangaben erfasst",
-    "close": "Schließen",
-    "publicTitle": "Geteilte Gesundheitsakte",
-    "publicIntro": "Diese Seite zeigt nur Informationen, die eine berechtigte Person ausgewählt hat. Lass medizinische Angaben von einer Tierärztin oder einem Tierarzt einordnen.",
-    "unavailable": "Dieser Link ist nicht verfügbar. Er ist möglicherweise abgelaufen oder wurde widerrufen.",
-    "noneShared": "In diesem Bereich wurde kein aktiver Eintrag bereitgestellt. Das bestätigt nicht, dass keine Erkrankung oder Allergie vorliegt.",
-    "lastVaccination": "Zuletzt erfasstes Datum: {date}",
-    "nextVaccination": "Nächstes erfasstes Fälligkeitsdatum: {date}",
-    "labs": "Ausgewählte Laborbefunde",
-    "referenceRange": "Erfasster Referenzbereich:",
-    "notProvided": "Nicht angegeben",
-    "visits": "Ausgewählte Besuche",
-    "imaging": "Ausgewählte Bildgebung",
-    "states": {
-      "ACTIVE": "Aktiv",
-      "EXPIRED": "Abgelaufen",
-      "REVOKED": "Widerrufen"
-    },
-    "sections": {
-      "ALLERGIES": "Allergien",
-      "MEDICATIONS": "Medikamente",
-      "CONDITIONS": "Erkrankungen",
-      "VACCINATION": "Impfungen"
-    },
-    "severity": {
-      "MILD": "Leichter Schweregrad",
-      "MODERATE": "Mittlerer Schweregrad",
-      "SEVERE": "Schwer",
-      "UNKNOWN": "Schweregrad unbekannt"
-    },
-    "labFlag": {
-      "NORMAL": "Laut erfasster Markierung normal",
-      "ABNORMAL": "Laut erfasster Markierung auffällig",
-      "UNKNOWN": "Labormarkierung nicht angegeben"
-    },
-    "unnamedImaging": "Körperregion nicht erfasst"
-  },
-  "localDateTime": {
-    "date": "Datum",
-    "hour": "Stunde",
-    "minute": "Minuten",
-    "chooseDate": "Wähle zuerst ein Datum. Uhrzeiten werden minutengenau gespeichert.",
-    "clear": "Uhrzeit löschen"
   }
 }

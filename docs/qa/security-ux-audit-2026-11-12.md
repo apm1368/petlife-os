@@ -40,10 +40,9 @@ Scope: the whole site except the admin back office UI (admin API authorization w
 
 ### Language and UX fixed
 
-- **795 member/public message keys** were missing from `de.json`/`es.json` (German and Spanish visitors saw
-  English): support needs, health, onboarding, health shares, services, vet booking, pets, places, community,
-  bookings, landing, insurance, care calendar… All added (ICU-validated, informal du/tú, existing terminology).
-  Partner panels (seller/vet/provider/clinic) and admin namespaces (≈870 keys) were left for a later pass.
+- **Missing de/es message keys** for member and public pages (German and Spanish visitors saw English) are
+  added by PR #277, which covers all 795 keys this audit found missing. Partner panels (seller/vet/provider/
+  clinic) and admin namespaces were left for a later pass.
 - **German/Spanish visitors were shown Persian** in: the animal-support section nav, the *Add a pet* form, the
   public pet card (QR / emergency page — its "reported lost" link also pointed to `/fa`), clinic invitations, and
   pet identity labels. Fixed with de/es copy (or English where the copy is still fa/en only).
