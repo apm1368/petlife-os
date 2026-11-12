@@ -872,7 +872,10 @@
       "settings_approve": "Aprobar cambios sensibles",
       "system_view": "Ver estado del sistema",
       "analytics_view": "Informes y análisis",
-      "pet_access_manage": "Gestionar acceso a fichas"
+      "pet_access_manage": "Gestionar acceso a fichas",
+      "wallet_view": "Ver monederos",
+      "wallet_adjust": "Corregir saldos",
+      "wallet_topup_review": "Revisar comprobantes de recarga"
     },
     "domains": {
       "customer": "Clientes",
@@ -899,7 +902,8 @@
       "access": "Acceso",
       "admin": "Administradores",
       "settings": "Ajustes",
-      "system": "Sistema"
+      "system": "Sistema",
+      "wallet": "Monederos"
     }
   },
   "adminSiteSettings": {
@@ -3702,7 +3706,9 @@
         "platformSettings": "Ajustes",
         "featureFlags": "Funciones experimentales",
         "channels": "Canales y envíos",
-        "smsPatterns": "Plantillas SMS"
+        "smsPatterns": "Plantillas SMS",
+        "walletDirectory": "Miembros",
+        "walletTopUps": "Comprobantes de recarga"
       },
       "palette": {
         "actions": "Acciones rápidas",
@@ -3791,7 +3797,8 @@
         "settings": "Configuración de la plataforma",
         "featureFlags": "Indicadores de funciones",
         "smsPatterns": "Plantillas SMS",
-        "verification": "Identidad y documentos"
+        "verification": "Identidad y documentos",
+        "wallets": "Monederos"
       },
       "navigation": "Navegación de administración",
       "openMenu": "Abrir menú",
@@ -6155,7 +6162,8 @@
           "pendingSupportNeeds": "Solicitudes de ayuda por revisar",
           "pendingMemorials": "Memoriales por revisar",
           "openPlaceReports": "Denuncias de lugares",
-          "openTasks": "Tareas abiertas"
+          "openTasks": "Tareas abiertas",
+          "pendingWalletTopUps": "Comprobantes de recarga"
         }
       },
       "performance": {
@@ -8809,5 +8817,268 @@
       "UNKNOWN": "Indicador de laboratorio no especificado"
     },
     "unnamedImaging": "Región no registrada"
+  },
+  "wallet": {
+    "eyebrow": "Cuenta",
+    "title": "Monedero",
+    "description": "Tu saldo, tus recargas y el historial del monedero",
+    "navHint": "Saldo, recargas e historial",
+    "loading": "Cargando el monedero…",
+    "failed": "No se pudo cargar el monedero.",
+    "retry": "Reintentar",
+    "balance": {
+      "total": "Saldo total",
+      "purchaseOnly": "Para compras",
+      "purchaseOnlyHint": "Recargas y regalos, solo para compras",
+      "withdrawable": "Retirable",
+      "withdrawableHint": "Reembolsos de pedidos: gástalos o retíralos",
+      "expiring": "{amount} de saldo de regalo caduca el {date}."
+    },
+    "topUp": {
+      "title": "Recargar saldo",
+      "amountLabel": "Importe (tomanes)",
+      "amountHint": "De {min} a {max}",
+      "railLabel": "Forma de pago",
+      "rails": {
+        "ZIBAL": "Pago en línea (pasarela bancaria)",
+        "CARD_TO_CARD": "Transferencia de tarjeta a tarjeta"
+      },
+      "submit": "Recargar",
+      "submitting": "Iniciando…",
+      "redirecting": "Te llevamos a la pasarela bancaria…",
+      "unavailableTitle": "Las recargas llegan pronto",
+      "unavailableBody": "Todavía no hay ninguna forma de pago habilitada para recargar. Los reembolsos y el saldo de regalo siguen llegando a este monedero.",
+      "errors": {
+        "OUT_OF_RANGE": "El importe debe estar entre {min} y {max}.",
+        "TOO_MANY_OPEN_TOP_UPS": "Ya tienes tres solicitudes abiertas. Termina o cancela una primero.",
+        "TOP_UP_RAIL_UNAVAILABLE": "Esta forma de pago no está disponible ahora.",
+        "ZIBAL_REQUEST_UNAVAILABLE": "La pasarela bancaria no respondió. Inténtalo de nuevo en un momento.",
+        "generic": "La solicitud no se completó. Inténtalo de nuevo."
+      }
+    },
+    "card": {
+      "title": "Envía el importe a esta tarjeta",
+      "number": "Número de tarjeta",
+      "holder": "Titular",
+      "amount": "Importe a enviar",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "deadline": "Sube el comprobante antes del {date}.",
+      "stepOne": "Transfiere el importe a esta tarjeta desde tu app bancaria o un cajero.",
+      "stepTwo": "Haz una foto o una captura del comprobante.",
+      "stepThree": "Envía aquí el comprobante. Nuestro equipo de finanzas lo revisa y añade el saldo."
+    },
+    "receipt": {
+      "choose": "Elegir la imagen del comprobante",
+      "hint": "JPG, PNG o WebP, hasta 10 MB",
+      "send": "Enviar comprobante",
+      "sending": "Enviando el comprobante…",
+      "sent": "Comprobante enviado. Cuando finanzas lo revise, se añadirá el saldo.",
+      "failed": "No se pudo enviar el comprobante. Inténtalo de nuevo.",
+      "expired": "El plazo para enviar este comprobante terminó. Inicia una nueva solicitud."
+    },
+    "requests": {
+      "title": "Solicitudes de recarga",
+      "status": {
+        "AWAITING_PAYMENT": "Pendiente de pago",
+        "AWAITING_RECEIPT": "Pendiente de comprobante",
+        "REVIEW_PENDING": "En revisión",
+        "CREDITED": "Abonado",
+        "FAILED": "Fallido",
+        "REJECTED": "Rechazado",
+        "EXPIRED": "Caducado",
+        "CANCELLED": "Cancelado"
+      },
+      "rails": {
+        "ZIBAL": "Pago en línea (pasarela bancaria)",
+        "CARD_TO_CARD": "Transferencia de tarjeta a tarjeta"
+      },
+      "received": "Abonado: {amount}",
+      "reason": "Motivo: {reason}",
+      "showCard": "Ver la tarjeta y enviar el comprobante",
+      "cancel": "Cancelar solicitud",
+      "cancelled": "Se canceló la solicitud."
+    },
+    "return": {
+      "verifying": "Comprobando tu pago…",
+      "credited": "Pago confirmado: se añadieron {amount} a tu monedero.",
+      "failed": "El pago no se confirmó. Si se descontó dinero de tu cuenta, el banco lo devuelve en 72 horas.",
+      "unknown": "Aún no se conoce el resultado del pago. Vuelve a abrir esta página en unos minutos."
+    },
+    "history": {
+      "title": "Historial",
+      "empty": "Aún no hay movimientos.",
+      "more": "Mostrar más",
+      "purpose": {
+        "TOP_UP": "Recarga",
+        "PURCHASE": "Compra",
+        "REFUND": "Reembolso",
+        "ADJUSTMENT": "Corrección de nuestro equipo",
+        "EXPIRY": "Saldo de regalo caducado",
+        "OTHER": "Movimiento"
+      },
+      "bucket": {
+        "PURCHASE_ONLY": "Para compras",
+        "WITHDRAWABLE": "Retirable"
+      },
+      "reasons": {
+        "GOODWILL": "Crédito de cortesía",
+        "SERVICE_RECOVERY": "Compensación por un problema de servicio",
+        "PAYMENT_CORRECTION": "Corrección de pago",
+        "REFUND_OUTSIDE_SYSTEM": "Reembolso fuera de un pedido",
+        "DUPLICATE_CREDIT_REVERSAL": "Abono duplicado revertido",
+        "OTHER": "Otra corrección"
+      },
+      "expires": "Caduca el {date}"
+    }
+  },
+  "adminWallets": {
+    "kicker": "Finanzas",
+    "title": "Monederos de los miembros",
+    "subtitle": "Saldo e historial del monedero de cada miembro. Cada movimiento de dinero lleva un motivo y queda en el registro de auditoría.",
+    "search": "Buscar nombre, correo o teléfono",
+    "loading": "Cargando…",
+    "failed": "No se pudieron cargar los datos.",
+    "retry": "Reintentar",
+    "forbidden": "Necesitas el permiso «Ver monederos» para ver esto.",
+    "empty": "Ningún monedero tiene movimientos todavía.",
+    "emptySearch": "Ningún miembro coincide con esta búsqueda.",
+    "columns": {
+      "member": "Miembro",
+      "contact": "Contacto",
+      "purchaseOnly": "Para compras",
+      "withdrawable": "Retirable",
+      "total": "Total",
+      "lastActivity": "Último movimiento"
+    },
+    "open": "Abrir",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "pageOf": "Página {page} de {pages}",
+    "never": "Sin movimientos",
+    "detail": {
+      "back": "Todos los monederos",
+      "memberSince": "Miembro desde {date}",
+      "entries": "Historial",
+      "entriesEmpty": "Este monedero aún no tiene movimientos.",
+      "topUps": "Solicitudes de recarga",
+      "topUpsEmpty": "Aún no hay solicitudes.",
+      "adjustments": "Correcciones de saldo",
+      "adjustmentsEmpty": "Aún no hay correcciones.",
+      "audit": "Registro de auditoría",
+      "auditEmpty": "Aún no hay registros.",
+      "by": "por {name}",
+      "openCustomer": "Ficha del cliente"
+    },
+    "adjust": {
+      "title": "Corregir el saldo",
+      "hint": "Solo para corregir un error o compensarlo. Cada corrección queda registrada con tu nombre, el motivo y el saldo antes y después.",
+      "direction": "Dirección",
+      "directions": {
+        "CREDIT": "Añadir saldo",
+        "DEBIT": "Retirar saldo"
+      },
+      "bucket": "Parte del monedero",
+      "buckets": {
+        "PURCHASE_ONLY": "Para compras",
+        "WITHDRAWABLE": "Retirable"
+      },
+      "amount": "Importe (tomanes)",
+      "reasonCode": "Tipo de motivo",
+      "reasonCodes": {
+        "GOODWILL": "Crédito de cortesía",
+        "SERVICE_RECOVERY": "Compensación por un problema de servicio",
+        "PAYMENT_CORRECTION": "Corrección de pago",
+        "REFUND_OUTSIDE_SYSTEM": "Reembolso fuera de un pedido",
+        "DUPLICATE_CREDIT_REVERSAL": "Abono duplicado revertido",
+        "OTHER": "Otra corrección"
+      },
+      "reason": "Explicación (queda en el registro de auditoría)",
+      "evidence": "Ticket o referencia (opcional)",
+      "submit": "Guardar corrección",
+      "confirm": "¿Registrar «{direction}» de {amount} en «{bucket}»? Se aplica al saldo de inmediato.",
+      "confirmYes": "Sí, registrar",
+      "cancel": "Cancelar",
+      "saving": "Guardando…",
+      "done": "Corrección guardada.",
+      "noPermission": "Corregir un saldo requiere el permiso «Corregir saldos».",
+      "errors": {
+        "INSUFFICIENT_WALLET_BALANCE": "Esta parte del monedero no tiene tanto saldo.",
+        "reasonTooShort": "La explicación necesita al menos 5 caracteres.",
+        "amount": "Introduce un importe válido.",
+        "generic": "No se guardó la corrección."
+      }
+    },
+    "topUps": {
+      "title": "Comprobantes de recarga",
+      "subtitle": "Comprobantes de tarjeta a tarjeta de los miembros. Confirma el importe que realmente llegó a la cuenta de la empresa: ese es el que se abona.",
+      "filter": "Estado",
+      "all": "Todos",
+      "status": {
+        "AWAITING_PAYMENT": "Pendiente de pago",
+        "AWAITING_RECEIPT": "Pendiente de comprobante",
+        "REVIEW_PENDING": "En revisión",
+        "CREDITED": "Abonado",
+        "FAILED": "Fallido",
+        "REJECTED": "Rechazado",
+        "EXPIRED": "Caducado",
+        "CANCELLED": "Cancelado"
+      },
+      "rails": {
+        "ZIBAL": "Pago en línea (pasarela bancaria)",
+        "CARD_TO_CARD": "Transferencia de tarjeta a tarjeta"
+      },
+      "columns": {
+        "member": "Miembro",
+        "amount": "Solicitado",
+        "rail": "Método",
+        "status": "Estado",
+        "submitted": "Comprobante enviado",
+        "actions": "Acción"
+      },
+      "empty": "No hay comprobantes en este estado.",
+      "review": "Revisar",
+      "reviewTitle": "Revisar comprobante",
+      "viewReceipt": "Ver comprobante",
+      "receiptOpening": "Preparando el comprobante…",
+      "receivedAmount": "Importe recibido (tomanes)",
+      "rejectReason": "Motivo del rechazo (lo verá el miembro)",
+      "approve": "Aprobar y abonar",
+      "reject": "Rechazar",
+      "approved": "Se abonó el importe al monedero del miembro.",
+      "rejected": "Se rechazó el comprobante.",
+      "noPermission": "Revisar comprobantes requiere el permiso «Revisar comprobantes de recarga».",
+      "failed": "No se guardó la revisión.",
+      "close": "Cerrar"
+    },
+    "audit": {
+      "wallet_credited": "Saldo aumentado",
+      "wallet_debited": "Saldo reducido",
+      "wallet_top_up_approved": "Comprobante aprobado",
+      "wallet_top_up_rejected": "Comprobante rechazado",
+      "wallet_top_up_receipt_viewed": "Comprobante visto"
+    },
+    "entry": {
+      "purpose": {
+        "TOP_UP": "Recarga",
+        "PURCHASE": "Compra",
+        "REFUND": "Reembolso",
+        "ADJUSTMENT": "Corrección de nuestro equipo",
+        "EXPIRY": "Saldo de regalo caducado",
+        "OTHER": "Movimiento"
+      },
+      "bucket": {
+        "PURCHASE_ONLY": "Para compras",
+        "WITHDRAWABLE": "Retirable"
+      },
+      "reasons": {
+        "GOODWILL": "Crédito de cortesía",
+        "SERVICE_RECOVERY": "Compensación por un problema de servicio",
+        "PAYMENT_CORRECTION": "Corrección de pago",
+        "REFUND_OUTSIDE_SYSTEM": "Reembolso fuera de un pedido",
+        "DUPLICATE_CREDIT_REVERSAL": "Abono duplicado revertido",
+        "OTHER": "Otra corrección"
+      }
+    }
   }
 }

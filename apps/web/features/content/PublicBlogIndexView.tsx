@@ -6,10 +6,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { Button, EmptyState, ErrorRecovery, Search, Skeleton } from "@petlife/ui";
 import type { Locale as ContentLocale, PaginatedDto, PublicArticleSummaryDto, PublicCategoryDto } from "@petlife/types";
 import { blogService } from "@/services/blog.service";
-import { GUIDE_CATEGORY_SLUG } from "./content-sections";
+import { ARTICLE_INDEX_PAGE_SIZE, GUIDE_CATEGORY_SLUG } from "./content-sections";
 import { PublicBlogArticleCard } from "./PublicBlogArticleCard";
 
-export const ARTICLE_INDEX_PAGE_SIZE = 12;
 
 interface IndexProps {
   categorySlug?: string;

@@ -24,7 +24,7 @@ describe("dev simulation gate", () => {
   it("a sandbox server without the flag refuses shipping webhooks and the dev shipment simulator", async () => {
     const orchestrator = { findShipmentByProviderReference: jest.fn() };
     const controller = new ShippingWebhooksController(undefined as never, orchestrator as never, undefined as never, undefined as never, config(sandboxServer));
-    await expect(controller.handleWebhook("dev", { providerShipmentId: "s1" } as never)).rejects.toBeInstanceOf(ShippingWebhookInvalidException);
+    await expect(controller.handleWebhook("dev", { providerShipmentId: "s1" } as never, {} as never)).rejects.toBeInstanceOf(ShippingWebhookInvalidException);
     await expect(controller.simulateDevEvent(undefined as never, "s1", {})).rejects.toBeTruthy();
     expect(orchestrator.findShipmentByProviderReference).not.toHaveBeenCalled();
   });

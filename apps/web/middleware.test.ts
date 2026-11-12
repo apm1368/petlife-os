@@ -31,4 +31,10 @@ describe("URL normalisation middleware", () => {
     expect(res.status).toBe(200);
     expect(res.headers.get("location")).toBeNull();
   });
+
+  it("states the served language, including on the bare-domain Persian landing", () => {
+    expect(run("/de/blog/katze-kratzt-moebel").headers.get("content-language")).toBe("de");
+    expect(run("/").headers.get("content-language")).toBe("fa");
+    expect(run("/fa").headers.get("content-language")).toBeNull();
+  });
 });
