@@ -89,6 +89,11 @@ describe("ERP-C partners", () => {
     expect(detail.policy.missingProfileFields).toEqual([]);
     await post(ops, `/admin/verification/PROVIDER/${p.orgId}/transition`).send({ to: "VERIFIED", reason: "Legacy evidence reviewed" }).expect(201);
     expect((await db.providerOrganization.findUniqueOrThrow({ where: { id: p.orgId } })).verificationPolicyVersion).toBeNull();
+    // The admin case view now explains itself: who decided, from what to what, and why — newest first.
+    const after = (await get(ops, `/admin/verification/PROVIDER/${p.orgId}`).expect(200)).body;
+    expect(after.lastDecision).toMatchObject({ from: "UNDER_REVIEW", to: "VERIFIED", reason: "Legacy evidence reviewed", by: "legacy-reviewer" });
+    expect(after.history[0]).toMatchObject({ kind: "STATUS_CHANGED", actor: "ADMIN", actorName: "legacy-reviewer", from: "UNDER_REVIEW", to: "VERIFIED" });
+    expect(after.history.some((h: { kind: string; actor: string }) => h.kind === "DOCUMENT_UPLOADED" && h.actor === "PARTNER")).toBe(true);
   });
 
   it("records private identity details only with a server-verified mobile; review locks edits", async () => {

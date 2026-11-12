@@ -67,4 +67,22 @@ describe("AdminVerificationView",()=>{
   await screen.findByText("Information recorded on the server.");expect(partnerVerificationService.review).toHaveBeenCalledTimes(2);
  });
 
+ it("shows the case history, the last decision with its reason, reviewers and replaced uploads",async()=>{
+  vi.mocked(partnerVerificationService.detail).mockResolvedValue({...verificationDetail,
+   documents:[{...verificationDocument,id:"doc2",createdAt:"2026-11-10T10:00:00Z",submittedAt:"2026-11-10T10:00:00Z"},{...verificationDocument,id:"doc1",status:"REJECTED",reviewNote:"Unreadable licence",rejectionReason:"Unreadable licence",reviewedAt:"2026-11-09T10:00:00Z",reviewedByAdminId:"a1",reviewedByName:"Sara Reviewer",createdAt:"2026-11-08T10:00:00Z",submittedAt:"2026-11-08T10:00:00Z"}],
+   lastDecision:{at:"2026-11-09T11:00:00Z",by:"Sara Reviewer",from:"SUBMITTED",to:"NEEDS_INFORMATION",reason:"Send a readable licence"},
+   history:[
+    {id:"h3",at:"2026-11-10T10:00:00Z",kind:"DOCUMENT_UPLOADED",actor:"PARTNER",actorName:null,reason:null,from:null,to:null,documentId:"doc2",documentKind:verificationDocument.kind,decision:null},
+    {id:"h2",at:"2026-11-09T11:00:00Z",kind:"STATUS_CHANGED",actor:"ADMIN",actorName:"Sara Reviewer",reason:"Send a readable licence",from:"SUBMITTED",to:"NEEDS_INFORMATION",documentId:null,documentKind:null,decision:null},
+    {id:"h1",at:"2026-11-09T10:30:00Z",kind:"DOCUMENT_OPENED",actor:"ADMIN",actorName:"Omid Ops",reason:"Checking the licence number",from:null,to:null,documentId:"doc1",documentKind:verificationDocument.kind,decision:null}]});
+  renderWithIntl(<AdminVerificationView subject="PROVIDER" id="org1"/>);
+  const history=within(await screen.findByRole("complementary",{name:"Case history"}));
+  expect(history.getAllByText(/Sara Reviewer/).length).toBeGreaterThan(0);
+  expect(history.getByText("Omid Ops",{exact:false})).toBeTruthy();
+  expect(history.getByText("Checking the licence number")).toBeTruthy();
+  expect(history.getAllByText("Partner",{exact:false}).length).toBe(1);
+  expect(screen.getByText("Reason: Send a readable licence")).toBeTruthy();
+  expect(screen.getByText("by Sara Reviewer")).toBeTruthy();
+  expect(screen.getByText("Replaced by a newer upload")).toBeTruthy();
+ });
 });

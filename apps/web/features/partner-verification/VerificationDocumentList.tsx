@@ -14,13 +14,15 @@ export function VerificationDocumentList({ documents, actions }: { documents: Ve
     {documents.length === 0 ? <p>{t("emptyDocuments")}</p> : null}
     {documents.map(doc => {
       const note = doc.reviewNote || doc.rejectionReason;
-      return <ContextSurface key={doc.id} className={styles.card}>
-        <div className={styles.cardHeader}><h3 className="text-section-title">{t(`documentKinds.${doc.kind}`)}</h3><StatusLabel tone={doc.status === "ACCEPTED" ? "success" : doc.status === "PENDING" ? "attention" : "urgent"}>{t(`documentStatuses.${doc.status}`)}</StatusLabel></div>
+      // Documents arrive newest first; an older upload of the same kind has been replaced by a newer one.
+      const superseded = documents.some(other => other.kind === doc.kind && other.id !== doc.id && other.createdAt > doc.createdAt);
+      return <ContextSurface key={doc.id} className={superseded ? `${styles.card} ${styles.superseded}` : styles.card}>
+        <div className={styles.cardHeader}><h3 className="text-section-title">{t(`documentKinds.${doc.kind}`)}</h3>{superseded ? <span className={styles.versionTag}>{t("superseded")}</span> : null}<StatusLabel tone={doc.status === "ACCEPTED" ? "success" : doc.status === "PENDING" ? "attention" : "urgent"}>{t(`documentStatuses.${doc.status}`)}</StatusLabel></div>
         <dl className={styles.metadata}>
           <div><dt>{t("uploadedLabel")}</dt><dd><time dateTime={doc.submittedAt}>{format.dateTime(doc.submittedAt)}</time></dd></div>
           <div><dt>{t("fileLabel")}</dt><dd>{t(`fileTypes.${FILE_TYPES[doc.mimeType] || "other"}`)} · {t("fileSize", { size:new Intl.NumberFormat(locale, { maximumFractionDigits:1 }).format(doc.fileSizeBytes / 1024) })}</dd></div>
           <div><dt>{t("expiryLabel")}</dt><dd>{t(`expiry.${doc.expiryState}`)}{doc.expiresAt ? <><br/><time dateTime={doc.expiresAt}>{format.dateTime(doc.expiresAt)}</time></> : null}</dd></div>
-          <div><dt>{t("reviewedLabel")}</dt><dd>{doc.reviewedAt ? <time dateTime={doc.reviewedAt}>{format.dateTime(doc.reviewedAt)}</time> : t("notReviewed")}</dd></div>
+          <div><dt>{t("reviewedLabel")}</dt><dd>{doc.reviewedAt ? <time dateTime={doc.reviewedAt}>{format.dateTime(doc.reviewedAt)}</time> : t("notReviewed")}{doc.reviewedByName ? <><br/><span>{t("reviewedBy", { name: doc.reviewedByName })}</span></> : null}</dd></div>
         </dl>
         {note ? <div className={styles.note}><h4>{t(doc.status === "REJECTED" ? "rejectionLabel" : "reviewNoteLabel")}</h4><p>{note}</p></div> : null}
         {actions ? <div className={styles.actions}>{actions(doc)}</div> : null}
