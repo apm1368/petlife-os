@@ -3676,7 +3676,8 @@
         "settings": "Configuración de la plataforma",
         "featureFlags": "Indicadores de funciones",
         "smsPatterns": "Plantillas SMS",
-        "verification": "Identidad y documentos"
+        "verification": "Identidad y documentos",
+        "pets": "Mascotas"
       },
       "navigation": "Navegación de administración",
       "openMenu": "Abrir menú",
@@ -8673,5 +8674,220 @@
       "UNKNOWN": "Indicador de laboratorio no especificado"
     },
     "unnamedImaging": "Región no registrada"
+  },
+  "adminPets": {
+    "kicker": "Clientes",
+    "title": "Mascotas",
+    "subtitle": "Cada mascota con su dueño y su hogar. La salud aparece solo como recuentos y fechas, nunca como texto clínico.",
+    "search": "Nombre de la mascota, del dueño o de un familiar, ID o microchip",
+    "searchButton": "Buscar",
+    "speciesFilter": "Especie",
+    "allSpecies": "Todas",
+    "species": {
+      "DOG": "Perro",
+      "CAT": "Gato",
+      "BIRD": "Ave",
+      "RABBIT": "Conejo",
+      "RODENT": "Roedor",
+      "FISH": "Pez",
+      "REPTILE": "Reptil",
+      "OTHER": "Otro"
+    },
+    "lifecycle": {
+      "ACTIVE": "Activa",
+      "LOST": "Perdida",
+      "TEMPORARILY_TRANSFERRED": "Temporalmente con otra persona",
+      "DECEASED": "Fallecida",
+      "MEMORIAL": "Memorial",
+      "deleted": "Eliminada"
+    },
+    "loading": "Cargando…",
+    "failed": "No se pudieron cargar los datos.",
+    "retry": "Reintentar",
+    "forbidden": "Necesitas el permiso «Ver clientes» para ver las mascotas.",
+    "empty": "Aún no hay mascotas registradas.",
+    "emptySearch": "Ninguna mascota coincide con esta búsqueda.",
+    "columns": {
+      "pet": "Mascota",
+      "species": "Especie y raza",
+      "owner": "Dueño",
+      "household": "Hogar",
+      "family": "Otros miembros",
+      "status": "Estado",
+      "created": "Registro"
+    },
+    "noOwner": "Sin dueño",
+    "open": "Abrir",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "pageOf": "Página {page} de {pages}",
+    "detail": {
+      "back": "Todas las mascotas",
+      "identity": "Identidad",
+      "fields": {
+        "species": "Especie",
+        "breed": "Raza",
+        "sex": "Sexo",
+        "birthDate": "Fecha de nacimiento",
+        "age": "Edad aproximada",
+        "neutered": "Esterilizada",
+        "microchip": "Microchip",
+        "status": "Estado",
+        "created": "Registrada",
+        "photo": "Foto"
+      },
+      "months": "{months} meses",
+      "sex": {
+        "MALE": "Macho",
+        "FEMALE": "Hembra",
+        "UNKNOWN": "Desconocido"
+      },
+      "neutered": {
+        "NEUTERED": "Sí",
+        "INTACT": "No",
+        "UNKNOWN": "Desconocido"
+      },
+      "yes": "Sí",
+      "no": "No",
+      "owner": "Dueño",
+      "ownerMissing": "Este hogar no tiene dueño activo.",
+      "openCustomer": "Ficha del cliente",
+      "household": "Hogar: {name}",
+      "unnamedHousehold": "Sin nombre",
+      "family": "Miembros del hogar",
+      "familyEmpty": "No hay más miembros en este hogar.",
+      "roles": {
+        "OWNER": "Dueño",
+        "FAMILY": "Familiar"
+      },
+      "accountStatus": {
+        "ACTIVE": "Cuenta activa",
+        "SUSPENDED": "Cuenta suspendida"
+      },
+      "invitations": "Invitaciones pendientes",
+      "invitationExpires": "Caduca el {date}",
+      "grants": "Acceso a esta mascota",
+      "grantsEmpty": "No hay accesos registrados.",
+      "grantColumns": {
+        "person": "Persona",
+        "source": "Origen",
+        "scope": "Permisos",
+        "period": "Periodo",
+        "state": "Estado"
+      },
+      "sources": {
+        "HOUSEHOLD": "Membresía del hogar",
+        "MANUAL": "Compartido a mano",
+        "TEMPORARY": "Temporal"
+      },
+      "scopeCount": "{count} permisos",
+      "states": {
+        "active": "Activo",
+        "revoked": "Revocado",
+        "inactive": "No activo"
+      },
+      "notMember": "Fuera del hogar",
+      "revoke": "Revocar acceso",
+      "revokeTitle": "Revocar el acceso de {name}",
+      "revokeReason": "Motivo (queda en el registro de auditoría)",
+      "revokeConfirm": "Revocar",
+      "revokeCancel": "Cancelar",
+      "revoked": "Acceso revocado.",
+      "revokeFailed": "No se pudo revocar el acceso.",
+      "reasonTooShort": "El motivo necesita al menos 5 caracteres.",
+      "ownerGrantNote": "El acceso del dueño nunca se revoca aquí.",
+      "health": "Salud (solo recuentos y fechas)",
+      "healthFields": {
+        "documents": "Documentos médicos",
+        "visits": "Visitas",
+        "labs": "Análisis",
+        "conditions": "Afecciones",
+        "allergies": "Alergias",
+        "medications": "Medicamentos"
+      },
+      "bookings": "Reservas",
+      "lost": "Avisos de pérdida",
+      "sightings": "{count} avistamientos",
+      "care": "Recordatorios de cuidado",
+      "travel": "Viajes",
+      "insurance": "Seguro",
+      "claimPreps": "{count} borradores de reclamación",
+      "sharing": "Compartido",
+      "shareCards": "{count} tarjetas activas",
+      "healthShares": "{count} enlaces de salud activos",
+      "none": "Ninguno.",
+      "diagnostics": "Notas de calidad de datos",
+      "diagnosticCodes": {
+        "NO_ACTIVE_OWNER": "El hogar no tiene dueño activo.",
+        "STALE_HOUSEHOLD_GRANT": "Alguien que dejó el hogar aún tiene acceso.",
+        "EXPIRED_GRANT_NOT_REVOKED": "Un acceso temporal caducó pero nunca se revocó.",
+        "MEMBER_WITHOUT_GRANT": "Un miembro del hogar no tiene acceso activo.",
+        "LONG_OPEN_LOST_INCIDENT": "Un aviso de pérdida lleva abierto más de 90 días.",
+        "DELETED_BUT_ACTIVE": "La mascota está eliminada pero sigue marcada como activa."
+      },
+      "activity": "Actividad reciente",
+      "changed": "Cambiado: {fields}"
+    },
+    "labels": {
+      "bookingStatus": {
+        "HOLD": "En espera",
+        "PENDING_CONFIRMATION": "Pendiente de confirmación",
+        "REQUESTED": "Solicitada",
+        "AWAITING_PAYMENT": "Pendiente de pago",
+        "REJECTED": "Rechazada",
+        "EXPIRED": "Caducada",
+        "RESCHEDULED": "Reprogramada",
+        "CONFIRMED": "Confirmada",
+        "CHECKED_IN": "Registrada",
+        "IN_PROGRESS": "En curso",
+        "COMPLETED": "Completada",
+        "CANCELLED_BY_USER": "Cancelada por el miembro",
+        "CANCELLED_BY_PROVIDER": "Cancelada por el proveedor",
+        "NO_SHOW": "No se presentó"
+      },
+      "serviceCategory": {
+        "VET": "Veterinario",
+        "GROOMING": "Peluquería",
+        "TRAINING": "Adiestramiento",
+        "WALKING": "Paseo",
+        "SITTING": "Cuidado en casa",
+        "BOARDING": "Residencia",
+        "PET_TAXI": "Taxi para mascotas",
+        "OTHER": "Otro"
+      },
+      "lostStatus": {
+        "OPEN": "Abierto",
+        "SEARCHING": "Buscando",
+        "SIGHTING_REPORTED": "Avistamiento reportado",
+        "FOUND": "Encontrada",
+        "REUNITED": "De vuelta en casa",
+        "CLOSED": "Cerrado"
+      },
+      "tripStatus": {
+        "DRAFT": "Borrador",
+        "PLANNING": "Planificando",
+        "READY": "Listo",
+        "IN_PROGRESS": "De viaje",
+        "COMPLETED": "Completado",
+        "CANCELLED": "Cancelado"
+      },
+      "insuranceStatus": {
+        "NEEDS_INFORMATION": "Falta información",
+        "DRAFT": "Borrador",
+        "SUBMITTED": "Enviada",
+        "UNDER_REVIEW": "En revisión",
+        "APPROVED": "Aprobada",
+        "DECLINED": "Rechazada",
+        "CANCELLED": "Cancelada"
+      },
+      "reminderState": {
+        "UPCOMING": "Próximos",
+        "DUE": "Pendientes",
+        "OVERDUE": "Atrasados",
+        "COMPLETED": "Hechos",
+        "SNOOZED": "Pospuestos",
+        "CANCELLED": "Cancelados"
+      }
+    }
   }
 }

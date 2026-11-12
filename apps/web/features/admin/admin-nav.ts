@@ -17,6 +17,7 @@ import {
   LifeBuoy,
   MapPinned,
   MessagesSquare,
+  PawPrint,
   ScrollText,
   Settings,
   ShieldAlert,
@@ -91,6 +92,8 @@ export const ADMIN_SECTIONS: AdminSection[] = [
           { href: "/customers", labelKey: "tabs.customer360", permission: "customer.view" },
         ],
       },
+      // Each pet with its owner and household members (Pet 360); health appears as counts only.
+      { key: "pets", labelKey: "nav.pets", icon: PawPrint, href: "/pets", permission: "customer.view" },
       { key: "support", labelKey: "nav.support", icon: Headset, href: "/support", permission: "support.view", queue: "openSupportCases" },
       { key: "disputes", labelKey: "nav.disputes", icon: Gavel, href: "/disputes", permission: "dispute.view", queue: "openDisputes" },
       {

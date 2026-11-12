@@ -6833,3 +6833,81 @@ export type {
   PetOwnershipTransferStatusName,
 } from "./ownership";
 export { OWNERSHIP_TRANSFER_EXPIRY_DAYS, PET_MEMORY_DISPOSITIONS, PET_OWNERSHIP_TRANSFER_STATUSES } from "./ownership";
+
+// ---------------------------------------------------------------------------
+// Admin "Pets" section (GET /admin/pets, GET /admin/pets/:id) — operational metadata, never clinical text
+// ---------------------------------------------------------------------------
+
+export interface AdminPetDirectoryItemDto {
+  id: string;
+  name: string;
+  species: PetSpecies;
+  breed: string | null;
+  lifecycleStatus: PetLifecycleStatus;
+  deleted: boolean;
+  hasPhoto: boolean;
+  household: { id: string; name: string | null };
+  owner: { userId: string; displayName: string } | null;
+  /** Household members other than the owner. */
+  familyMemberCount: number;
+  createdAt: string;
+}
+
+export type AdminPetDiagnosticCode = "NO_ACTIVE_OWNER" | "STALE_HOUSEHOLD_GRANT" | "EXPIRED_GRANT_NOT_REVOKED" | "MEMBER_WITHOUT_GRANT" | "LONG_OPEN_LOST_INCIDENT" | "DELETED_BUT_ACTIVE";
+
+export interface AdminPet360Dto {
+  identity: {
+    id: string;
+    name: string;
+    species: PetSpecies;
+    breed: string | null;
+    sex: string | null;
+    birthDate: string | null;
+    approximateAgeMonths: number | null;
+    neuteredStatus: string | null;
+    microchipMasked: string | null;
+    lifecycleStatus: PetLifecycleStatus;
+    deletedAt: string | null;
+    createdAt: string | null;
+    hasPhoto: boolean;
+  };
+  household: {
+    id: string;
+    name: string | null;
+    city: string | null;
+    members: { userId: string; displayName: string; role: string; accountStatus: string }[];
+    pendingInvitations: { id: string; contactMasked: string; createdAt: string; expiresAt: string }[];
+  };
+  accessGrants: {
+    id: string;
+    user: { id: string; displayName: string };
+    source: string;
+    reason: string | null;
+    flags: Record<string, boolean>;
+    healthScopes: string[];
+    startsAt: string | null;
+    expiresAt: string | null;
+    revokedAt: string | null;
+    active: boolean;
+    grantedByUserId: string | null;
+    isHouseholdMember: boolean;
+    createdAt: string;
+  }[];
+  health: {
+    documents: number;
+    documentsByType: { documentType: string; sourceType: string; count: number; latestAt: string | null }[];
+    clinicalVisits: number;
+    labResults: number;
+    medications: Record<string, number>;
+    conditions: number;
+    allergies: number;
+  };
+  bookings: { id: string; category: string; bookingStatus: string; startAt: string; providerOrganizationId: string | null }[];
+  lostIncidents: { id: string; status: string; publicArea: string | null; lastSeenAt: string | null; createdAt: string; reunitedAt: string | null; closedAt: string | null; sightings: number }[];
+  care: { reminders: Record<string, number> };
+  travel: { id: string; status: string; destinationCountry: string | null; destinationCity: string | null; departAt: string }[];
+  insurance: { applications: Record<string, number>; claimPreps: number };
+  sharing: { activeShareCards: number; activeHealthShares: number };
+  activity: { id: string; type: string; at: string; changedFields?: string[]; photoChanged?: boolean }[];
+  diagnostics: { code: AdminPetDiagnosticCode; severity: "WARNING" | "INFO"; entityId?: string; detail?: Record<string, unknown> }[];
+}
