@@ -3498,6 +3498,8 @@ model CardTransferPayment {
   currency                String                    @default("IRR")
   companyCardNumberMasked String
   accountHolderName       String
+  /// The admin-managed company account this payment was started with (null: the server env account).
+  cardTransferDestinationId String? @db.Uuid
   receiptObjectKey        String?
   receiptUploadedAt       DateTime?
   receiptUploadDeadlineAt DateTime
@@ -3567,6 +3569,8 @@ model WalletTopUp {
   /// Card to card: masked snapshot of the receiving card, for audit (the full number is configuration).
   cardNumberMasked  String?
   cardHolderName    String?
+  /// The admin-managed company account this request was started with (null: the server env account).
+  cardTransferDestinationId String? @db.Uuid
   receiptObjectKey  String?
   receiptUploadedAt DateTime?
   /// Card to card: the receipt must arrive before this, or the request expires.
@@ -12171,4 +12175,28 @@ model SupportEscalation {
   @@index([caseId])
   @@index([requesterUserId])
   @@map("support_escalations")
+}
+
+/// The company account members pay into by card-to-card (wallet top-ups, card-transfer checkout and bookings).
+/// Managed by the owner in admin (SUPER_ADMIN + settings.manage). Append-only: a change adds a row and closes the
+/// previous one, so every past account stays on record for receipts and audits. The server env account is used
+/// only while no row has ever been created.
+model CardTransferDestination {
+  id               String    @id @default(uuid()) @db.Uuid
+  /// 16 digits, Luhn-checked.
+  cardNumber       String?
+  /// IR + 24 digits, IBAN-checked.
+  sheba            String?
+  holderName       String
+  bankName         String?
+  active           Boolean   @default(true)
+  reason           String
+  createdByAdminId String    @db.Uuid
+  createdAt        DateTime  @default(now())
+  closedAt         DateTime?
+  closedByAdminId  String?   @db.Uuid
+  closeReason      String?
+
+  @@index([active, createdAt])
+  @@map("card_transfer_destinations")
 }

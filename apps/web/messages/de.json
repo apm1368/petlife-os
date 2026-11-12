@@ -3713,7 +3713,9 @@
         "channels": "Kanäle und Zustellung",
         "smsPatterns": "SMS-Vorlagen",
         "walletDirectory": "Mitglieder",
-        "walletTopUps": "Aufladebelege"
+        "walletTopUps": "Aufladebelege",
+        "walletCardAccount": "Kartenkonto",
+        "walletCardReceipts": "Kartenbelege"
       },
       "palette": {
         "actions": "Schnellaktionen",
@@ -8872,7 +8874,9 @@
       "deadline": "Laden Sie den Beleg bis {date} hoch.",
       "stepOne": "Überweisen Sie den Betrag mit Ihrer Banking-App oder am Geldautomaten auf diese Karte.",
       "stepTwo": "Machen Sie ein Foto oder einen Screenshot des Belegs.",
-      "stepThree": "Senden Sie den Beleg hier. Unser Finanzteam prüft ihn und schreibt das Guthaben gut."
+      "stepThree": "Senden Sie den Beleg hier. Unser Finanzteam prüft ihn und schreibt das Guthaben gut.",
+      "bank": "Bank",
+      "sheba": "Sheba"
     },
     "receipt": {
       "choose": "Belegbild auswählen",
@@ -9300,6 +9304,120 @@
         "SNOOZED": "Verschoben",
         "CANCELLED": "Abgesagt"
       }
+    }
+  },
+  "adminCardAccount": {
+    "kicker": "Finanzen",
+    "title": "Konto für Kartenüberweisungen",
+    "subtitle": "Die Karte, auf die Mitglieder für Guthabenaufladungen und Kartenüberweisungen einzahlen.",
+    "current": "Aktuelles Konto",
+    "source": {
+      "ADMIN": "Auf dieser Seite festgelegt.",
+      "ENV": "Aus den Servereinstellungen (hier noch nicht festgelegt).",
+      "NONE": "Kein Konto festgelegt; Kartenüberweisung ist für Mitglieder aus."
+    },
+    "readOnly": "Nur ein Super-Admin mit settings.manage kann dieses Konto ändern.",
+    "change": "Konto ändern",
+    "changeHint": "Jede Änderung wird mit Grund protokolliert und alle Super-Admins werden benachrichtigt. Bereits begonnene Zahlungen behalten ihr ursprüngliches Konto.",
+    "fields": {
+      "cardNumber": "Kartennummer (16 Ziffern)",
+      "sheba": "Sheba / IBAN (optional)",
+      "holderName": "Kontoinhaber",
+      "bankName": "Bank (optional)",
+      "reason": "Grund der Änderung"
+    },
+    "confirm": "Ich bestätige, dass dieses Konto opetlife gehört.",
+    "save": "Neues Konto speichern",
+    "saving": "Wird gespeichert…",
+    "saved": "Das neue Konto ist gespeichert, Super-Admins wurden benachrichtigt.",
+    "offReason": "Grund für das Abschalten der Kartenüberweisung",
+    "switchOff": "Kartenüberweisung abschalten",
+    "switchedOff": "Kartenüberweisung ist abgeschaltet.",
+    "history": "Kontoverlauf",
+    "noHistory": "Hier wurde noch kein Konto festgelegt.",
+    "columns": {
+      "setBy": "Festgelegt von",
+      "reason": "Grund",
+      "closed": "Beendet"
+    },
+    "activeNow": "Aktiv",
+    "loading": "Wird geladen…",
+    "failed": "Konnte nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "forbidden": "Berechtigung wallet.view erforderlich.",
+    "errors": {
+      "REASON_TOO_SHORT": "Grund mit mindestens 10 Zeichen angeben.",
+      "CONFIRM": "Bestätigen Sie, dass das Konto opetlife gehört.",
+      "CARD_NUMBER_INVALID": "Die Kartennummer muss 16 Ziffern haben.",
+      "CARD_NUMBER_CHECKSUM": "Diese Kartennummer ist ungültig; prüfen Sie die Ziffern.",
+      "SHEBA_INVALID": "Sheba muss IR und 24 Ziffern sein.",
+      "SHEBA_CHECKSUM": "Diese Sheba-Nummer ist ungültig.",
+      "CARD_OR_SHEBA_REQUIRED": "Kartennummer oder Sheba eingeben.",
+      "HOLDER_REQUIRED": "Kontoinhaber eingeben.",
+      "SUPER_ADMIN_WITH_SETTINGS_MANAGE_REQUIRED": "Nur ein Super-Admin kann dieses Konto ändern.",
+      "generic": "Nicht gespeichert; bitte erneut versuchen."
+    }
+  },
+  "adminCardReceipts": {
+    "kicker": "Finanzen",
+    "title": "Belege für Kartenüberweisungen",
+    "subtitle": "Belege für Bestell- und Terminzahlungen; offene zuerst, älteste zuerst.",
+    "filter": "Statusfilter",
+    "status": {
+      "REVIEW_PENDING": "Prüfung offen",
+      "UNDERPAID_AWAITING_DIFFERENCE": "Restbetrag offen",
+      "AWAITING_RECEIPT": "Beleg offen",
+      "APPROVED": "Bestätigt",
+      "REJECTED": "Abgelehnt",
+      "EXPIRED": "Abgelaufen",
+      "CANCELLED": "Storniert",
+      "ALL": "Alle"
+    },
+    "columns": {
+      "member": "Mitglied",
+      "reference": "Für",
+      "amount": "Betrag",
+      "uploaded": "Beleg gesendet",
+      "status": "Status"
+    },
+    "reference": {
+      "booking": "Termin",
+      "order": "Bestellung ({count})"
+    },
+    "open": "Prüfen",
+    "empty": "Keine Belege mit diesem Status.",
+    "loading": "Wird geladen…",
+    "failed": "Konnte nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "forbidden": "Berechtigung finance.view erforderlich.",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "reviewTitle": "Beleg prüfen",
+    "receivedSoFar": "erhalten: {amount}",
+    "account": "Eingezahlt auf",
+    "rejectionReason": "Ablehnungsgrund",
+    "viewReceipt": "Beleg ansehen",
+    "receiptOpening": "Wird geöffnet…",
+    "receiptFailed": "Der Beleg konnte nicht geöffnet werden.",
+    "noReceipt": "Noch kein Beleg gesendet.",
+    "availableAt": "Prüfung möglich ab {date}.",
+    "receivedAmount": "Erhaltener Betrag (Toman)",
+    "reason": "Grund (für Ablehnung erforderlich)",
+    "approve": "Bestätigen",
+    "reject": "Ablehnen",
+    "saving": "Wird gespeichert…",
+    "readOnly": "Nur finance.refund.execute kann Belege bestätigen oder ablehnen.",
+    "done": {
+      "APPROVED": "Bestätigt; das Mitglied wurde benachrichtigt.",
+      "REJECTED": "Abgelehnt; das Mitglied wurde benachrichtigt.",
+      "UNDERPAID": "Zu wenig gezahlt; das Mitglied wurde um den Restbetrag gebeten."
+    },
+    "errors": {
+      "amount": "Erhaltenen Betrag in Toman eingeben.",
+      "reason": "Zum Ablehnen einen Grund mit mindestens 5 Zeichen angeben.",
+      "notYet": "Die Prüfung dieses Belegs ist noch nicht offen.",
+      "notReviewable": "Dieser Beleg kann nicht mehr geprüft werden.",
+      "generic": "Nicht gespeichert; bitte erneut versuchen."
     }
   }
 }

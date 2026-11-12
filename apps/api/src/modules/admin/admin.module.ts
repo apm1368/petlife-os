@@ -43,6 +43,10 @@ import { BookingModule } from "../booking/booking.module";
 import { PaymentsModule } from "../commerce/payments/payments.module";
 import { AdminCardTransferController } from "./finance/admin-card-transfer.controller";
 import { AdminWalletsController } from "./finance/admin-wallets.controller";
+import { AdminCardTransferDestinationController } from "./finance/admin-card-transfer-destination.controller";
+import { AdminCardTransferDestinationService } from "./finance/admin-card-transfer-destination.service";
+import { AdminCardTransferReceiptsService } from "./finance/admin-card-transfer-receipts.service";
+import { ReceiptReviewNotifier } from "./finance/receipt-review.notifier";
 import { AdminWalletsService } from "./finance/admin-wallets.service";
 import { AdminServicesService } from "./services/admin-services.service";
 import { AdminServicesController } from "./services/admin-services.controller";
@@ -167,6 +171,7 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminFinanceOpsController,
     AdminCardTransferController,
     AdminWalletsController,
+    AdminCardTransferDestinationController,
     AdminPartner360Controller,
     AdminPet360Controller,
     AdminAccessControlController,
@@ -253,6 +258,9 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminOrgService,
     AdminDashboardService,
     AdminWalletsService,
+    AdminCardTransferDestinationService,
+    AdminCardTransferReceiptsService,
+    ReceiptReviewNotifier,
     AdminSellerSettlementService,
     AdminSellerAdjustmentService,
     AdminMarketplaceSettlementService,
