@@ -9,8 +9,23 @@ import { blogService } from "@/services/blog.service";
 import { GUIDE_CATEGORY_SLUG } from "./content-sections";
 import { PublicBlogArticleCard } from "./PublicBlogArticleCard";
 
+export const ARTICLE_INDEX_PAGE_SIZE = 12;
+
+interface IndexProps {
+  categorySlug?: string;
+  tagSlug?: string;
+  titleOverride?: string;
+  descriptionOverride?: string;
+  section?: "blog" | "guides";
+  /** Server-rendered first page — when present the page arrives complete (crawlable), with real page links. */
+  initialPage?: PaginatedDto<PublicArticleSummaryDto>;
+  initialCategories?: PublicCategoryDto[];
+  pageNumber?: number;
+  basePath?: string;
+}
+
 /** Blog index (spec: "featured/recent articles, category navigation, pagination, localized empty state"). */
-export function PublicBlogIndexView({ categorySlug, tagSlug, titleOverride, section = "blog" }: { categorySlug?: string; tagSlug?: string; titleOverride?: string; section?: "blog" | "guides" } = {}) {
+export function PublicBlogIndexView({ categorySlug, tagSlug, titleOverride, descriptionOverride, section = "blog", initialPage, initialCategories, pageNumber: initialPageNumber = 1, basePath }: IndexProps = {}) {
   const t = useTranslations("blog.index");
   const design = useTranslations("rollout.editorial");
   const [search, setSearch] = useState("");
@@ -18,11 +33,12 @@ export function PublicBlogIndexView({ categorySlug, tagSlug, titleOverride, sect
   const [busy, setBusy] = useState(false);
   const locale = useLocale() as ContentLocale;
 
-  const [page, setPage] = useState<PaginatedDto<PublicArticleSummaryDto> | null>(null);
-  const [categories, setCategories] = useState<PublicCategoryDto[]>([]);
+  const [page, setPage] = useState<PaginatedDto<PublicArticleSummaryDto> | null>(initialPage ?? null);
+  const [categories, setCategories] = useState<PublicCategoryDto[]>((initialCategories ?? []).filter((c) => c.slug !== GUIDE_CATEGORY_SLUG));
   const [error, setError] = useState(false);
-  const [pageNumber, setPageNumber] = useState(1);
+  const [pageNumber, setPageNumber] = useState(initialPageNumber);
   const generation = useRef(0);
+  const serverDelivered = useRef(Boolean(initialPage));
   const [appendError, setAppendError] = useState(false);
 
   async function load(nextPage: number, append = false) {
@@ -31,7 +47,7 @@ export function PublicBlogIndexView({ categorySlug, tagSlug, titleOverride, sect
     if (!append) setPage(null);
     setBusy(true);
     try {
-      const [articles, cats] = await Promise.all([blogService.listArticles(locale, section === "guides" ? { categorySlug: GUIDE_CATEGORY_SLUG, search: query || undefined, page: nextPage, pageSize: 12 } : { categorySlug, tagSlug, excludeCategorySlug: categorySlug || tagSlug ? undefined : GUIDE_CATEGORY_SLUG, search: query || undefined, page: nextPage, pageSize: 12 }), blogService.listCategories(locale)]);
+      const [articles, cats] = await Promise.all([blogService.listArticles(locale, section === "guides" ? { categorySlug: GUIDE_CATEGORY_SLUG, search: query || undefined, page: nextPage, pageSize: ARTICLE_INDEX_PAGE_SIZE } : { categorySlug, tagSlug, excludeCategorySlug: categorySlug || tagSlug ? undefined : GUIDE_CATEGORY_SLUG, search: query || undefined, page: nextPage, pageSize: ARTICLE_INDEX_PAGE_SIZE }), blogService.listCategories(locale)]);
       if (request !== generation.current) return;
       setPage((prev) => (append && prev ? { ...articles, items: [...prev.items, ...articles.items] } : articles));
       // Guides are their own section; the blog's category strip never lists them.
@@ -45,6 +61,9 @@ export function PublicBlogIndexView({ categorySlug, tagSlug, titleOverride, sect
   }
 
   useEffect(() => {
+    // The server already rendered this exact page; only a search (or a client-only use) loads here.
+    if (serverDelivered.current && query === "") { serverDelivered.current = false; return; }
+    serverDelivered.current = false;
     void load(1);
     return () => { generation.current += 1; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -52,9 +71,13 @@ export function PublicBlogIndexView({ categorySlug, tagSlug, titleOverride, sect
 
   if (error) return <ErrorRecovery title={t("title")} message="" retryLabel={t("retry")} onRetry={() => load(1)} />;
 
+  const totalPages = page ? Math.max(1, Math.ceil(page.total / ARTICLE_INDEX_PAGE_SIZE)) : 1;
+  const linkedPagination = Boolean(basePath) && query === "" && initialPage !== undefined;
+  const pageHref = (n: number) => (n <= 1 ? basePath! : `${basePath}?page=${n}`);
+
   return (
     <div className="editorial-index">
-      <header className="editorial-heading"><p>{design("eyebrow")}</p><h1>{titleOverride ?? t("title")}</h1><p>{design("description")}</p></header>
+      <header className="editorial-heading"><p>{design("eyebrow")}</p><h1>{titleOverride ?? t("title")}</h1><p>{descriptionOverride ?? design("description")}</p></header>
       <form className="editorial-search" role="search" onSubmit={(e) => { e.preventDefault(); setQuery(search.trim()); }}><Search size={20} aria-hidden="true" /><label className="sr-only" htmlFor="article-query">{design("search")}</label><input id="article-query" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={design("search")} /><Button type="submit" disabled={busy}>{design("searchButton")}</Button></form>
 
       {section === "blog" && categories.length > 0 ? (
@@ -83,7 +106,13 @@ export function PublicBlogIndexView({ categorySlug, tagSlug, titleOverride, sect
       )}
 
       {appendError ? <p role="alert">{design("loadFailed")}</p> : null}
-      {page && page.items.length < page.total ? (
+      {linkedPagination && totalPages > 1 ? (
+        <nav className="editorial-pagination" aria-label={design("pageLabel", { page: pageNumber })}>
+          {pageNumber > 1 ? <Link href={pageHref(pageNumber - 1)} rel="prev">{design("newer")}</Link> : <span />}
+          <span>{design("pageLabel", { page: pageNumber })}</span>
+          {pageNumber < totalPages ? <Link href={pageHref(pageNumber + 1)} rel="next">{design("older")}</Link> : <span />}
+        </nav>
+      ) : page && page.items.length < page.total && !linkedPagination ? (
         <Button variant="secondary" isLoading={busy} onClick={() => load(pageNumber + 1, true)}>
           {t("loadMore")}
         </Button>

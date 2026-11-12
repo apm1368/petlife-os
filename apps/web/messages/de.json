@@ -1,4 +1,26 @@
 {
+  "blog": {
+    "index": {
+      "title": "Magazin",
+      "allCategories": "Alle",
+      "loading": "Artikel werden geladen",
+      "empty": "Noch keine Artikel. Schau bald wieder vorbei.",
+      "loadMore": "Mehr laden",
+      "retry": "Erneut versuchen",
+      "categoryNotFoundTitle": "Kategorie nicht gefunden",
+      "categoryNotFoundMessage": "Diese Kategorie gibt es nicht oder sie ist nicht verfügbar.",
+      "tagNotFoundTitle": "Thema nicht gefunden",
+      "tagNotFoundMessage": "Dieses Thema gibt es nicht oder es ist nicht verfügbar."
+    },
+    "article": {
+      "loading": "Artikel wird geladen",
+      "published": "Veröffentlicht am {date}",
+      "updated": "Aktualisiert am {date}",
+      "retry": "Erneut versuchen",
+      "notFoundTitle": "Artikel nicht gefunden",
+      "notFoundMessage": "Diesen Artikel gibt es nicht oder er ist gerade nicht verfügbar."
+    }
+  },
   "adminAccessMatrix": {
     "kicker": "Zugriffsebenen",
     "title": "Rollen-Zugriffsmatrix",
@@ -4796,6 +4818,15 @@
   },
   "rollout": {
     "editorial": {
+      "guidesLabel": "Ratgeber",
+      "blogLabel": "Magazin",
+      "home": "Startseite",
+      "breadcrumb": "Brotkrümelnavigation",
+      "contents": "In diesem Artikel",
+      "otherLanguages": "In anderen Sprachen lesen",
+      "pageLabel": "Seite {page}",
+      "newer": "Vorherige Seite",
+      "older": "Nächste Seite",
       "eyebrow": "Das opetlife-Journal",
       "title": "Ein bisschen Wissen. Ein besseres Leben zusammen.",
       "description": "Pflege, alltägliche Entdeckungen und hilfreiche Tipps für das Leben mit Ihrem Begleiter.",

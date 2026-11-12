@@ -2,6 +2,7 @@ import type {
   AdminArticleDto,
   AdminArticleListItemDto,
   AdminArticleLocaleDto,
+  AdminArticleSlugCheckDto,
   AdminContentPlacementDto,
   ArticleLifecycleStatus,
   CategoryDto,
@@ -73,6 +74,8 @@ export const adminContentService = {
     apiFetch<AdminArticleDto>("/admin/content/articles", { method: "POST", body: input }),
   updateArticle: (id: string, input: { authorId?: string | null; categoryId?: string | null; coverMediaAssetId?: string | null; tagIds?: string[] }) =>
     apiFetch<AdminArticleDto>(`/admin/content/articles/${id}`, { method: "PATCH", body: input }),
+  checkArticleSlug: (input: { locale: Locale; slug: string; articleId?: string; categoryId?: string }) =>
+    apiFetch<AdminArticleSlugCheckDto>(`/admin/content/articles/slug-check${toQueryString({ ...input })}`),
   getArticleLocale: (id: string, locale: Locale) => apiFetch<AdminArticleLocaleDto>(`/admin/content/articles/${id}/locales/${locale}`),
   saveArticleLocale: (id: string, locale: Locale, input: SaveArticleLocaleInput) => apiFetch<AdminArticleLocaleDto>(`/admin/content/articles/${id}/locales/${locale}`, { method: "PUT", body: input }),
   publishArticleLocale: (id: string, locale: Locale) => apiFetch<AdminArticleLocaleDto>(`/admin/content/articles/${id}/locales/${locale}/publish`, { method: "POST" }),

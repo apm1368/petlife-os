@@ -3680,7 +3680,19 @@ export type RichTextBlock =
   | { type: "quote"; content: RichTextInline[] }
   | { type: "callout"; tone: "info" | "warning"; content: RichTextInline[] }
   /** `url` is never stored or accepted on write — the server resolves it from `mediaAssetId` on every read response so the renderer never has to look anything up itself. */
-  | { type: "image"; mediaAssetId: string; alt: string; caption?: string; url?: string };
+  | { type: "image"; mediaAssetId: string; alt: string; caption?: string; url?: string }
+  /**
+   * A CMS-hosted video (mp4/webm). `title`/`description` feed the page's VideoObject structured data;
+   * `url`, `posterUrl` and `mimeType` are read-only, resolved from the media ids on every read like `image.url`.
+   */
+  | { type: "video"; mediaAssetId: string; title: string; description?: string; posterMediaAssetId?: string; durationSeconds?: number; caption?: string; url?: string; posterUrl?: string; mimeType?: string }
+  /** Question/answer pairs, rendered as an FAQ section and published as FAQPage structured data. */
+  | { type: "faq"; items: RichTextFaqItem[] };
+
+export interface RichTextFaqItem {
+  question: string;
+  answer: RichTextInline[];
+}
 
 export type RichTextDocument = RichTextBlock[];
 
@@ -3798,6 +3810,8 @@ export interface AdminArticleLocaleDto {
   status: ArticleLifecycleStatus;
   title: string;
   slug: string;
+  /** Where this locale is (or will be, once published) on the public site, e.g. `/fa/blog/puppy-potty-training`. */
+  publicPath?: string;
   excerpt: string | null;
   body: RichTextDocument;
   seoTitle: string | null;
@@ -3853,6 +3867,43 @@ export interface PublicArticleDetailDto extends PublicArticleSummaryDto {
   body: RichTextDocument;
   seoTitle: string | null;
   seoDescription: string | null;
+  /** The same article's other visible locales, for hreflang alternates and the language switcher. */
+  translations?: { locale: Locale; canonicalPath: string }[];
+}
+
+/** Where an old (renamed) article address now lives — the public site answers the old URL with a permanent redirect. */
+export interface PublicArticleSlugRedirectDto {
+  canonicalPath: string;
+}
+
+/** One visible article locale for sitemaps, feeds and llms.txt — no body unless explicitly requested. */
+export interface PublicArticleFeedItemDto {
+  articleId: string;
+  locale: Locale;
+  slug: string;
+  canonicalPath: string;
+  title: string;
+  excerpt: string | null;
+  seoDescription: string | null;
+  categorySlug: string | null;
+  categoryName: string | null;
+  tags: string[];
+  coverUrl: string | null;
+  coverAlt: string | null;
+  videos: { url: string; posterUrl: string | null; title: string; description: string | null; durationSeconds: number | null }[];
+  publishedAt: string;
+  updatedAt: string;
+  body?: RichTextDocument;
+}
+
+/** Admin "URL builder" check: is this slug well-formed and free in this locale, and where will it live once published. */
+export interface AdminArticleSlugCheckDto {
+  slug: string;
+  valid: boolean;
+  available: boolean;
+  /** Another article (or a renamed article's old address) already holds this slug in this locale. */
+  conflict: { articleId: string; title: string | null; kind: "ARTICLE" | "REDIRECT" } | null;
+  publicPath: string;
 }
 
 /** A minimal, non-leaking reference to an article for use inside a placement block — never the full body. */
