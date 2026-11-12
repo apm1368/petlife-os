@@ -7314,7 +7314,8 @@
       "noBookingsToday": "Hoy no hay reservas.",
       "verificationLink": "Verificación y documentos de la organización"
     },
-    "bookingRow": { "respondBy": "Responder antes del " },
+    "bookingRow": {
+      "attendanceConfirmed": "El dueño confirmó", "respondBy": "Responder antes del " },
     "availability": {
       "title": "Disponibilidad",
       "retry": "Intentar de nuevo",
@@ -7869,6 +7870,8 @@
       "genericAction": "No se pudo completar. Comprueba tu conexión e inténtalo de nuevo."
     },
     "ui": {
+      "confirmAttendance": "Asistiré",
+      "attendanceConfirmed": "Confirmaste que asistirás. El proveedor lo verá.",
       "loading": "Cargando reserva…",
       "forbidden": "No tienes acceso a esta reserva",
       "notFound": "No se encontró la reserva",

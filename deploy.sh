@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Deploys the commit checked out in $APP_DIR (deploy.yml checks out main at the pushed SHA, then runs this).
-# Order: lock → data services → install → DB backup → migrate status/deploy → snapshot running build → build
-# (one task at a time, under the shared build lock) → pm2 startOrReload → health. If the build or the health
+# Order: lock → data services → install → DB backup → migrate status/deploy → snapshot running build → the
+# CI-built release when PREBUILT_ARCHIVE is set (checksum + sha verified, swapped in by rename), otherwise a local
+# build (one task at a time, under the shared build lock) → pm2 startOrReload → health. If the build or the health
 # check fails, the previous build is restored and reloaded, so a failed deploy never leaves the site down.
 set -Eeuo pipefail
 
@@ -270,8 +271,38 @@ else
 fi
 unset faraz_api_key faraz_sender faraz_otp_pattern faraz_notification_pattern
 
-log "building (one task at a time)"
-flock "$BUILD_LOCK" pnpm turbo run build --filter=@petlife/api --filter=@petlife/web --concurrency=1
+# The CI-built release (deploy.yml's release job, uploaded over SSH): verify it is the archive CI produced for this
+# commit, unpack it beside the app, then swap each output in with a rename on the same filesystem, so the running
+# server never sees a half-written .next. Any failure here trips the ERR trap and restores the previous build.
+install_prebuilt() {
+  local archive="$1" stage="$RELEASE_DIR/incoming-${SHA}" dir
+  [ -f "$archive" ] && [ -f "$archive.sha256" ] || { echo "deploy: prebuilt release or its checksum is missing: $archive" >&2; return 1; }
+  (cd "$(dirname "$archive")" && sha256sum --check --status "$(basename "$archive").sha256") || { echo "deploy: prebuilt release checksum mismatch" >&2; return 1; }
+  # Safe by construction even though CI made it: no absolute or parent-relative members, and no foreign owners.
+  if tar -tzf "$archive" | grep -Eq '(^/|(^|/)\.\.(/|$))'; then echo "deploy: prebuilt release has unsafe paths" >&2; return 1; fi
+  rm -rf "$stage" && mkdir -p "$stage"
+  tar -xzf "$archive" -C "$stage" --no-same-owner
+  [ "$(cat "$stage/RELEASE_SHA" 2>/dev/null)" = "$SHA" ] || { echo "deploy: prebuilt release is not for ${SHA:0:7}" >&2; return 1; }
+  [ -f "$stage/apps/api/dist/main.js" ] && [ -f "$stage/apps/web/.next/BUILD_ID" ] || { echo "deploy: prebuilt release is incomplete" >&2; return 1; }
+  # Keep the build cache, so a later local-build fallback stays fast.
+  if [ -d apps/web/.next/cache ]; then mv apps/web/.next/cache "$stage/apps/web/.next/cache"; fi
+  for dir in apps/api/dist apps/web/.next packages/types/dist packages/config/dist; do
+    [ -d "$stage/$dir" ] || continue
+    rm -rf "$dir.old"
+    if [ -e "$dir" ]; then mv "$dir" "$dir.old"; fi
+    mv "$stage/$dir" "$dir"
+    rm -rf "$dir.old"
+  done
+  rm -rf "$stage" "$archive" "$archive.sha256"
+}
+
+if [ -n "${PREBUILT_ARCHIVE:-}" ]; then
+  log "installing the CI-built release (no build on this host)"
+  install_prebuilt "$PREBUILT_ARCHIVE"
+else
+  log "building (one task at a time)"
+  flock "$BUILD_LOCK" pnpm turbo run build --filter=@petlife/api --filter=@petlife/web --concurrency=1
+fi
 if [ ! -f apps/api/dist/main.js ] || [ ! -f apps/web/.next/BUILD_ID ]; then
   echo "deploy: build finished without apps/api/dist/main.js or apps/web/.next/BUILD_ID" >&2
   rollback
