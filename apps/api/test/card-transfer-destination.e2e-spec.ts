@@ -83,7 +83,10 @@ describe("Card-to-card destination (e2e)", () => {
     // Finance cannot change it, nor can an ADMIN holding settings.manage: only SUPER_ADMIN.
     expect((await finance.c.put("/admin/finance/card-transfer-destination").send(NEW_CARD)).status).toBe(403);
     const plainAdmin = await admin(AdminRole.ADMIN);
+    // The ADMIN role really holds settings.manage; the owner-level role is still required.
+    expect((await plainAdmin.c.get("/admin/me").expect(200)).body.permissions).toContain("settings.manage");
     expect((await plainAdmin.c.put("/admin/finance/card-transfer-destination").send(NEW_CARD)).status).toBe(403);
+    expect((await plainAdmin.c.post("/admin/finance/card-transfer-destination/deactivate").send({ reason: "Trying to switch it off" })).status).toBe(403);
 
     const owner = await admin(AdminRole.SUPER_ADMIN);
     const otherOwner = await admin(AdminRole.SUPER_ADMIN);
@@ -108,8 +111,18 @@ describe("Card-to-card destination (e2e)", () => {
     const after = await m.post("/wallet/top-ups").set("Idempotency-Key", unique()).send({ amount: 1_000_000, rail: "CARD_TO_CARD", locale: "fa" }).expect(201);
     expect(after.body.cardTransfer).toEqual({ cardNumber: "6219-8600-0000-1231", cardHolderName: "شرکت پت لایف", bankName: "سامان", sheba: "IR050170000000123456789012" });
     expect((await m.get(`/wallet/top-ups/${before.body.topUp.id}`).expect(200)).body.cardTransfer).toMatchObject({ cardNumber: "6037-9912-3456-7890" });
-    // Public settings never carry it.
-    expect(JSON.stringify((await request(server).get("/settings/public").expect(200)).body)).not.toContain("6219");
+    // Outside an active card-to-card payment nothing carries it: public settings, the member's own wallet and
+    // profile, and another member's view of that payment.
+    const digits = /6219[-\s]?8600[-\s]?0000[-\s]?1231|IR050170000000123456789012/;
+    for (const res of [await request(server).get("/settings/public"), await request(server).get("/settings/public?locale=en")]) expect(JSON.stringify(res.body)).not.toMatch(digits);
+    const bystander = await member();
+    for (const path of ["/wallet", "/wallet/entries", "/me", "/auth/session"]) {
+      const res = await bystander.get(path);
+      expect(res.status).toBeLessThan(500);
+      expect(JSON.stringify(res.body)).not.toMatch(digits);
+    }
+    expect([403, 404]).toContain((await bystander.get(`/wallet/top-ups/${after.body.topUp.id}`)).status);
+    expect(JSON.stringify((await m.get("/wallet").expect(200)).body)).not.toMatch(digits);
 
     // Switching it off closes card-to-card (no silent fall back to the env account) and is announced too.
     await owner.c.post("/admin/finance/card-transfer-destination/deactivate").send({ reason: "Bank account is being replaced" }).expect(201);
