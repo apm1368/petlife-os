@@ -31,6 +31,7 @@ import {
   ShoppingBag,
   Skeleton,
   UserRound,
+  ShieldCheck,
   X,
 } from "@petlife/ui";
 import { authService } from "@/services/auth.service";
@@ -40,6 +41,9 @@ import { useAdminStore } from "@/stores/admin-store";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { LocaleSwitcher } from "@/features/locale/LocaleSwitcher";
 import { useSignOut } from "@/features/account/use-sign-out";
+import { AdminTwoStepGate } from "@/features/admin-two-step/AdminTwoStepGate";
+import { TwoStepBanner } from "@/features/admin-two-step/TwoStepBanner";
+import { ADMIN_TWO_STEP_EVENT } from "@/lib/api/client";
 import {
   ADMIN_SECTIONS,
   matchRoute,
@@ -93,9 +97,23 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const locale = useLocale();
-  const ready = sessionState === "authenticated" && status === "ready" && !!context?.isAdmin;
+  // A session that still owes a two-step code is not "ready": admin data stays unloaded until it passes.
+  const twoStepRequired = context?.twoStep?.required ?? "NONE";
+  const ready = sessionState === "authenticated" && status === "ready" && !!context?.isAdmin && twoStepRequired === "NONE";
+  const retryRef = useRef(retryBootstrap);
+  retryRef.current = retryBootstrap;
+  const gateRef = useRef(twoStepRequired);
+  gateRef.current = twoStepRequired;
 
   useEffect(() => setCollapsed(readCollapsed()), []);
+  // An admin call refused for two-step (e.g. the 12-hour check ran out) re-reads /admin/me, which shows the code screen.
+  useEffect(() => {
+    const onRequired = () => {
+      if (gateRef.current === "NONE") retryRef.current();
+    };
+    window.addEventListener(ADMIN_TWO_STEP_EVENT, onRequired);
+    return () => window.removeEventListener(ADMIN_TWO_STEP_EVENT, onRequired);
+  }, []);
   useEffect(() => {
     setPaletteOpen(false);
     setMenuOpen(false);
@@ -188,6 +206,10 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
     );
   }
 
+  if (context.twoStep && context.twoStep.required !== "NONE") {
+    return <AdminTwoStepGate requirement={context.twoStep.required} onPassed={retryBootstrap} />;
+  }
+
   const roleLabel = context.customRoleName || (t.has(`role.${context.role}`) ? t(`role.${context.role}`) : String(context.role ?? "").replace(/_/g, " "));
   const displayName = context.displayName || roleLabel;
   const formatCount = (value: number) => new Intl.NumberFormat(NUMBER_LOCALE[locale] ?? "en-GB").format(value);
@@ -274,6 +296,7 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
           {match && match.module.visibleTabs.length > 1 ? (
             <ModuleTabs mod={match.module} activeHref={match.tab?.href} summary={summary} href={href} formatCount={formatCount} />
           ) : null}
+          {context.twoStep && !context.twoStep.enrolled && adminPath !== "/two-step" ? <TwoStepBanner gate={context.twoStep} /> : null}
           {children}
         </main>
       </div>
@@ -486,6 +509,10 @@ function UserMenu({ name, role, compact, placement }: { name: string; role: stri
           <Link role="menuitem" href={`/${locale}/account`} className={styles.menuItem} onClick={() => setOpen(false)}>
             <UserRound size={16} aria-hidden="true" />
             {t("account.profile")}
+          </Link>
+          <Link role="menuitem" href={`/${locale}/admin/two-step`} className={styles.menuItem} onClick={() => setOpen(false)}>
+            <ShieldCheck size={16} aria-hidden="true" />
+            {t("account.twoStep")}
           </Link>
           <Link role="menuitem" href={`/${locale}`} className={styles.menuItem} onClick={() => setOpen(false)}>
             <ExternalLink size={16} aria-hidden="true" />

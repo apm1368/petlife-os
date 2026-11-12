@@ -3426,6 +3426,39 @@ export interface AdminSessionContextDto {
   permissions: AdminPermissionName[];
   /** Set when an owner-defined custom role decides this admin's access (admin/access/roles). */
   customRoleName?: string | null;
+  /** Two-step sign-in state for this session (admin/two-step). `required` other than NONE: show that screen first. */
+  twoStep?: AdminTwoStepGateDto;
+}
+
+export interface AdminTwoStepGateDto {
+  enrolled: boolean;
+  verified: boolean;
+  enforced: boolean;
+  graceEndsAt: string | null;
+  required: "NONE" | "CHALLENGE" | "ENROL";
+}
+
+export interface AdminTwoStepStatusDto extends AdminTwoStepGateDto {
+  verifiedUntil: string | null;
+  enrolledAt: string | null;
+  recoveryCodesLeft: number | null;
+  pendingEnrolment: boolean;
+}
+
+export interface AdminTwoStepEnrolmentDto {
+  /** Base32 key in groups of four, for typing into an authenticator by hand. */
+  secret: string;
+  otpauthUri: string;
+  issuer: string;
+  account: string;
+}
+
+export interface AdminTwoStepPolicyDto {
+  enforced: boolean;
+  enforcedAt: string | null;
+  graceDays: number;
+  enrolledCount: number;
+  members: Array<{ adminUserId: string; displayName: string; role: AdminRole; enrolled: boolean; enrolledAt: string | null; graceEndsAt: string | null }>;
 }
 
 /** Current server permissions, refreshed on every request; never grants access itself. */

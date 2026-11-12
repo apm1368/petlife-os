@@ -1,14 +1,16 @@
-import { Controller, Get, Header, UseGuards } from "@nestjs/common";
+import { Controller, Get, Header, Req, UseGuards } from "@nestjs/common";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
 import { CurrentUser } from "../../../common/auth/current-user.decorator";
-import type { SessionUser } from "../../../common/session/session.service";
+import { SessionService, type SessionUser } from "../../../common/session/session.service";
+import { PrismaService } from "../../../common/prisma/prisma.service";
+import { evaluateTwoStep } from "../two-step/two-step-gate";
 import { AdminAccessService } from "./admin-access.service";
 import { AdminAuthGuard } from "./admin-auth.guard";
 import { CurrentAdmin } from "./current-admin.decorator";
 import type { ResolvedAdminContext } from "./admin-context.types";
 import { effectivePermissions } from "./admin-permissions";
 import { allowedVerticals } from "./admin-verticals";
-import type { AdminCapabilitiesDto } from "@petlife/types";
+import type { AdminCapabilitiesDto, AdminSessionContextDto } from "@petlife/types";
 
 /**
  * Deliberately behind SessionAuthGuard only, never AdminAuthGuard — a
@@ -20,11 +22,19 @@ import type { AdminCapabilitiesDto } from "@petlife/types";
 @Controller("admin/me")
 @UseGuards(SessionAuthGuard)
 export class AdminMeController {
-  constructor(private readonly adminAccess: AdminAccessService) {}
+  constructor(private readonly adminAccess: AdminAccessService, private readonly prisma: PrismaService, private readonly sessions: SessionService) {}
 
+  /** Also tells the shell whether this session still has to pass two-step sign-in (and which step), so it can show that screen. */
   @Get()
-  getMe(@CurrentUser() user: SessionUser) {
-    return this.adminAccess.getSessionContext(user.id);
+  @Header("Cache-Control", "no-store")
+  async getMe(@CurrentUser() user: SessionUser, @Req() req: { cookies?: Record<string, string> }): Promise<AdminSessionContextDto> {
+    const context = await this.adminAccess.getSessionContext(user.id);
+    if (!context.isAdmin) return context;
+    const gate = await evaluateTwoStep(this.prisma, user.id, this.sessions.getSessionId(this.sessions.readCookie(req)));
+    return {
+      ...context,
+      twoStep: { enrolled: gate.enrolled, verified: gate.verified, enforced: gate.enforced, graceEndsAt: gate.graceEndsAt?.toISOString() ?? null, required: gate.required },
+    };
   }
 
   @Get("capabilities")

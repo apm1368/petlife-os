@@ -56,6 +56,11 @@ describe("admin route guard contract", () => {
     expect(adminMe).toContain('@UseGuards(SessionAuthGuard)');
     expect(adminMe).toContain("@UseGuards(AdminAuthGuard)");
 
+    // Only the self-service two-step handlers (status, start enrolment, confirm it, verify a code) may answer before
+    // the session has passed two-step sign-in; every other admin route sits behind it (AdminAuthGuard).
+    const beforeTwoStep = adminControllers.flatMap(({ file, source }) => (source.match(/@AllowBeforeTwoStep\(\)/g) ?? []).map(() => file));
+    expect(beforeTwoStep).toEqual(Array(4).fill(join("two-step", "admin-two-step.controller.ts")));
+
     const dashboard = routed.find(({ file }) => file === join("dashboard", "admin-dashboard.controller.ts"))?.source ?? "";
     expect(dashboard).toContain("@UseGuards(SessionAuthGuard, AdminAuthGuard)");
     const dashboardService = await readFile(join(adminModuleRoot, "dashboard", "admin-dashboard.service.ts"), "utf8");

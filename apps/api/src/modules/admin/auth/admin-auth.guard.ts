@@ -8,6 +8,9 @@ import { ADMIN_VERTICAL_KEY } from "./require-admin-vertical.decorator";
 import { allowedVerticals } from "./admin-verticals";
 import type { AdminVertical } from "@prisma/client";
 import type { AdminAuthedRequest } from "./admin-context.types";
+import { PrismaService } from "../../../common/prisma/prisma.service";
+import { SessionService } from "../../../common/session/session.service";
+import { ADMIN_TWO_STEP_EXEMPT_KEY, AdminTwoStepRequiredException, evaluateTwoStep } from "../two-step/two-step-gate";
 
 /**
  * Every /admin route goes through this guard. It requires the same
@@ -18,12 +21,18 @@ import type { AdminAuthedRequest } from "./admin-context.types";
  * caller would be for a seller/provider route. When a handler declares
  * @RequireAdminPermission, the resolved role must satisfy at least one of
  * the listed permissions.
+ *
+ * Between the two: two-step sign-in (admin/two-step). An admin with an authenticator must have passed it in this
+ * session; while a SUPER_ADMIN enforces it, an admin without one must enrol once their grace window ends. Only the
+ * handlers marked @AllowBeforeTwoStep (status, enrol, verify) answer before that.
  */
 @Injectable()
 export class AdminAuthGuard implements CanActivate {
   constructor(
     private readonly adminAccess: AdminAccessService,
     private readonly reflector: Reflector,
+    private readonly prisma: PrismaService,
+    private readonly sessions: SessionService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -32,6 +41,12 @@ export class AdminAuthGuard implements CanActivate {
     if (!user) throw new UnauthenticatedException();
 
     const resolved = await this.adminAccess.resolveAdminContext(user.id);
+
+    const exempt = this.reflector.getAllAndOverride<boolean | undefined>(ADMIN_TWO_STEP_EXEMPT_KEY, [context.getHandler(), context.getClass()]);
+    if (!exempt) {
+      const gate = await evaluateTwoStep(this.prisma, user.id, this.sessions.getSessionId(this.sessions.readCookie(request)));
+      if (gate.required !== "NONE") throw new AdminTwoStepRequiredException({ reason: gate.required, graceEndsAt: gate.graceEndsAt?.toISOString() ?? null });
+    }
 
     const requiredPermissions = this.reflector.getAllAndOverride<AdminPermission[] | undefined>(ADMIN_PERMISSION_KEY, [context.getHandler(), context.getClass()]);
     if (requiredPermissions && requiredPermissions.length > 0) {

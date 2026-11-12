@@ -44,6 +44,23 @@ describe("AdminShell", () => {
     useAdminStore.setState({ context: null, status: "idle" });
   });
 
+  it("shows the two-step code screen instead of any admin page while the session owes a code, and loads no admin data", async () => {
+    signIn(["customer.view"], { twoStep: { enrolled: true, verified: false, enforced: false, graceEndsAt: null, required: "CHALLENGE" } });
+    renderWithIntl(<AdminShell><div>private content</div></AdminShell>);
+    expect(await screen.findByRole("heading", { name: "Enter your two-step code" })).toBeTruthy();
+    expect(screen.queryByText("private content")).toBeNull();
+    expect(screen.queryByRole("complementary")).toBeNull();
+    expect(adminService.getDashboard).not.toHaveBeenCalled();
+  });
+
+  it("reminds an admin without two-step to turn it on, above the page", async () => {
+    signIn(["customer.view"], { twoStep: { enrolled: false, verified: false, enforced: true, graceEndsAt: "2026-11-20T08:00:00.000Z", required: "NONE" } });
+    renderWithIntl(<AdminShell><div>private content</div></AdminShell>);
+    expect(await screen.findByText("private content")).toBeTruthy();
+    expect(screen.getByRole("note").textContent).toContain("Two-step sign-in is required. Turn it on before");
+    expect(screen.getByRole("link", { name: "Turn it on" }).getAttribute("href")).toBe("/en/admin/two-step");
+  });
+
   it("clears old admin identity on bootstrap failure and retries without mounting protected content", async () => {
     useAdminStore.setState({ context: { isAdmin: true, adminUserId: "old", role: "SUPER_ADMIN", permissions: ["customer.view"] } as never, status: "ready" });
     vi.mocked(authService.getSession).mockResolvedValue({ user: SESSION_USER });

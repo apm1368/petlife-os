@@ -49,6 +49,8 @@ const envSchema = z.object({
   WEB_APP_ORIGIN: z.string().min(1),
 
   SESSION_SECRET: z.string().min(16),
+  /** Seals admin TOTP secrets at rest (two-step-secret.ts). Optional: derived from SESSION_SECRET when unset. */
+  ADMIN_TWO_STEP_KEY: z.string().min(32).optional(),
   SESSION_COOKIE_NAME: z.string().default("petlife_session"),
   SESSION_TTL_DAYS: z.coerce.number().int().positive().default(30),
 
