@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Android 13+: the web app's own notification opt-in asks for this through the Trusted Web Activity. -->
+    <!-- The only two permissions. INTERNET: the in-app WebView fallback (the Trusted Web Activity itself uses Chrome's).
+         POST_NOTIFICATIONS (Android 13+): asked only when the member turns notifications on in the app, never at launch. -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
@@ -9,6 +11,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/appName"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="false"
         android:manageSpaceActivity="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity"
         android:theme="@android:style/Theme.Translucent.NoTitleBar">
 

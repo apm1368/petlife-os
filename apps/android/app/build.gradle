@@ -24,7 +24,10 @@ def twa = [
     navigationDividerColor: "#F0E7D9",
     navigationDividerColorDark: "#2A2F29",
     backgroundColor   : "#FFFBF5",
-    fallbackType      : "customtabs",
+    // Phones with no browser that can host a Trusted Web Activity (no Chrome, e.g. some devices sold without Google
+    // services) still open the site inside the app, in a WebView, never in a browser tab: store reviewers expect an
+    // app, not a link. Web push needs Chrome, so it is unavailable only on those phones.
+    fallbackType      : "webview",
     orientation       : "portrait",
 ]
 
