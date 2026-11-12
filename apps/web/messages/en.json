@@ -5515,7 +5515,11 @@
       "back": "Back",
       "continue": "Continue",
       "photoLabel": "Photo",
-      "submit": "Report lost pet"
+      "submit": "Report lost pet",
+      "useMyLocation": "Use my current location",
+      "useMyLocationHelp": "If you are where they were last seen, save the location so neighbours who turned on alerts hear about it. The exact point stays private.",
+      "locationSaved": "Location saved",
+      "locationDenied": "Location access wasn't allowed; you can continue without it."
     },
     "list": {
       "title": "Lost pet reports",
@@ -5605,6 +5609,27 @@
         "reunited": "{name} is back home. Thank you to everyone who helped.",
         "photoAlt": "Photo of {name}"
       }
+    },
+    "areaAlert": {
+      "title": "Lost-pet alerts for my area",
+      "body": "When a pet goes missing near you, we'll let you know so you can help if you see them.",
+      "on": "On: you'll hear about reports within {km} km of you.",
+      "enable": "Turn on alerts",
+      "update": "Update area",
+      "disable": "Turn off",
+      "radius": "Area",
+      "km": "{km} km",
+      "signIn": "Sign in to turn on alerts",
+      "privacy": "Your location is only used to find nearby reports and is never shown to anyone.",
+      "denied": "The browser didn't allow location access.",
+      "failed": "Couldn't save. Please try again."
+    },
+    "found": {
+      "title": "Pets found by neighbours",
+      "subtitle": "Found a pet? Post it here so its family can recognise it.",
+      "cta": "I found a pet",
+      "empty": "No found-pet posts right now.",
+      "untitled": "Found pet"
     }
   },
   "animalSupport": {
@@ -5666,7 +5691,8 @@
       "LOST_PET_SHARE": "Lost pet",
       "RESCUE": "Rescue",
       "ADOPTION": "Adoption",
-      "MEMORY": "Memory"
+      "MEMORY": "Memory",
+      "FOUND_PET": "Found pet"
     },
     "reaction": {
       "LIKE": "Like",

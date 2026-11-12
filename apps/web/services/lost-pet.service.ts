@@ -1,6 +1,11 @@
 import type { LostPetIncidentDto, LostPetIncidentPublicDto, LostPetSightingDto, PaginatedDto } from "@petlife/types";
 import { apiFetch } from "@/lib/api/client";
 
+export interface LostPetAreaAlert {
+  active: boolean;
+  radiusKm: number | null;
+}
+
 export interface UploadTargetDto {
   uploadUrl: string;
   method: "PUT";
@@ -38,6 +43,10 @@ export interface SubmitSightingInput {
 
 export const lostPetService = {
   // -- Household (authenticated) --------------------------------------------
+  /** #290 Q53: the signed-in member's own opt-in neighbourhood alert (the point is never returned). */
+  getAreaAlert: () => apiFetch<LostPetAreaAlert>("/me/lost-pet-alert"),
+  setAreaAlert: (input: { latitude: number; longitude: number; radiusKm: number }) => apiFetch<LostPetAreaAlert>("/me/lost-pet-alert", { method: "PUT", body: input }),
+  removeAreaAlert: () => apiFetch<LostPetAreaAlert>("/me/lost-pet-alert", { method: "DELETE" }),
   list: (petId: string) => apiFetch<LostPetIncidentDto[]>(`/pets/${petId}/lost-incidents`),
   get: (petId: string, incidentId: string) => apiFetch<LostPetIncidentDto>(`/pets/${petId}/lost-incidents/${incidentId}`),
   open: (petId: string, input: CreateLostPetIncidentInput) => apiFetch<LostPetIncidentDto>(`/pets/${petId}/lost-incidents`, { method: "POST", body: input }),

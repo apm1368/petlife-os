@@ -6320,7 +6320,11 @@
       "back": "Atrás",
       "continue": "Continuar",
       "photoLabel": "Foto",
-      "submit": "Informar de la mascota perdida"
+      "submit": "Informar de la mascota perdida",
+      "useMyLocation": "Usar mi ubicación actual",
+      "useMyLocationHelp": "Si estás donde se vio por última vez, guarda la ubicación para que los vecinos con alertas activadas se enteren. El punto exacto es privado.",
+      "locationSaved": "Ubicación guardada",
+      "locationDenied": "No se permitió el acceso a la ubicación; puedes continuar sin ella."
     },
     "list": {
       "title": "Informes de mascotas perdidas",
@@ -6410,6 +6414,27 @@
         "reunited": "{name} ya está en casa. Gracias a todas las personas que ayudaron.",
         "photoAlt": "Foto de {name}"
       }
+    },
+    "areaAlert": {
+      "title": "Alertas de mascotas perdidas en mi zona",
+      "body": "Cuando una mascota se pierda cerca de ti, te avisaremos para que puedas ayudar si la ves.",
+      "on": "Activadas: recibirás reportes a menos de {km} km.",
+      "enable": "Activar alertas",
+      "update": "Actualizar zona",
+      "disable": "Desactivar",
+      "radius": "Zona",
+      "km": "{km} km",
+      "signIn": "Inicia sesión para activar alertas",
+      "privacy": "Tu ubicación solo se usa para encontrar reportes cercanos y nunca se muestra a nadie.",
+      "denied": "El navegador no permitió el acceso a la ubicación.",
+      "failed": "No se pudo guardar. Inténtalo de nuevo."
+    },
+    "found": {
+      "title": "Mascotas encontradas por vecinos",
+      "subtitle": "¿Encontraste una mascota? Publícala aquí para que su familia la reconozca.",
+      "cta": "Encontré una mascota",
+      "empty": "Por ahora no hay mascotas encontradas.",
+      "untitled": "Mascota encontrada"
     }
   },
   "community": {
@@ -6420,7 +6445,8 @@
       "LOST_PET_SHARE": "Mascota desaparecida",
       "RESCUE": "Rescate",
       "ADOPTION": "Adopción",
-      "MEMORY": "Recuerdo"
+      "MEMORY": "Recuerdo",
+      "FOUND_PET": "Mascota encontrada"
     },
     "feed": {
       "title": "Comunidad",

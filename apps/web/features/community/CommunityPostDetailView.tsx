@@ -118,7 +118,7 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
           ))}
         </div>
 
-        {post.type === "ADOPTION" ? <SafetyTip kind="adoption" /> : post.type === "LOST_PET_SHARE" ? <SafetyTip kind="lostPet" /> : post.type === "RESCUE" ? <SafetyTip kind="donation" /> : null}
+        {post.type === "ADOPTION" ? <SafetyTip kind="adoption" /> : post.type === "LOST_PET_SHARE" || post.type === "FOUND_PET" ? <SafetyTip kind="lostPet" /> : post.type === "RESCUE" ? <SafetyTip kind="donation" /> : null}
 
         <ReportContentPanel successMessage={t("post.reportSuccess")} submit={(reason, details) => communityService.reportPost(postId, reason, details)} />
 

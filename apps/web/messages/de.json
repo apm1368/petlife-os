@@ -6330,7 +6330,11 @@
       "back": "Zurück",
       "continue": "Weiter",
       "photoLabel": "Foto",
-      "submit": "Vermisstes Tier melden"
+      "submit": "Vermisstes Tier melden",
+      "useMyLocation": "Meinen aktuellen Standort verwenden",
+      "useMyLocationHelp": "Wenn Sie dort sind, wo das Tier zuletzt gesehen wurde, speichern Sie den Standort, damit Nachbarn mit eingeschalteten Hinweisen davon erfahren. Der genaue Punkt bleibt privat.",
+      "locationSaved": "Standort gespeichert",
+      "locationDenied": "Standortzugriff wurde nicht erlaubt; Sie können ohne ihn fortfahren."
     },
     "list": {
       "title": "Meldungen zu vermissten Tieren",
@@ -6420,6 +6424,27 @@
         "reunited": "{name} ist wieder zu Hause. Danke an alle, die geholfen haben.",
         "photoAlt": "Foto von {name}"
       }
+    },
+    "areaAlert": {
+      "title": "Hinweise zu vermissten Tieren in meiner Nähe",
+      "body": "Wenn in Ihrer Nähe ein Tier vermisst wird, sagen wir Ihnen Bescheid, damit Sie helfen können.",
+      "on": "An: Sie erfahren von Meldungen im Umkreis von {km} km.",
+      "enable": "Hinweise einschalten",
+      "update": "Umkreis aktualisieren",
+      "disable": "Ausschalten",
+      "radius": "Umkreis",
+      "km": "{km} km",
+      "signIn": "Anmelden, um Hinweise einzuschalten",
+      "privacy": "Ihr Standort wird nur verwendet, um Meldungen in der Nähe zu finden, und niemandem angezeigt.",
+      "denied": "Der Browser hat den Standortzugriff nicht erlaubt.",
+      "failed": "Konnte nicht gespeichert werden. Bitte erneut versuchen."
+    },
+    "found": {
+      "title": "Von Nachbarn gefundene Tiere",
+      "subtitle": "Ein Tier gefunden? Posten Sie es hier, damit seine Familie es erkennt.",
+      "cta": "Ich habe ein Tier gefunden",
+      "empty": "Zurzeit keine Fundmeldungen.",
+      "untitled": "Gefundenes Tier"
     }
   },
   "community": {
@@ -6430,7 +6455,8 @@
       "LOST_PET_SHARE": "Vermisstes Tier",
       "RESCUE": "Rettung",
       "ADOPTION": "Adoption",
-      "MEMORY": "Erinnerung"
+      "MEMORY": "Erinnerung",
+      "FOUND_PET": "Tier gefunden"
     },
     "feed": {
       "title": "Community",

@@ -270,6 +270,36 @@ describe("Batch 6 — Animal support ecosystem", () => {
       expect(notification?.deepLink).toBe(`/pets/${o.petId}/lost/${incident.body.id}`);
     });
 
+    it("#290 Q53: neighbours who opted in hear about a new report inside their radius; far-away, opted-out and household members don't", async () => {
+      // Use a remote point so other tests' alerts never fall inside this radius.
+      const LAT = 29.61 + Math.random() * 0.01, LNG = 52.53 + Math.random() * 0.01;
+      const near = await user("b6-near");
+      const far = await user("b6-far");
+      const off = await user("b6-off");
+      await near.c.put("/me/lost-pet-alert").send({ latitude: LAT + 0.009, longitude: LNG, radiusKm: 3 }).expect(200); // ~1 km away
+      await far.c.put("/me/lost-pet-alert").send({ latitude: LAT + 0.2, longitude: LNG, radiusKm: 5 }).expect(200); // ~22 km away
+      await off.c.put("/me/lost-pet-alert").send({ latitude: LAT, longitude: LNG, radiusKm: 3 }).expect(200);
+      expect((await off.c.delete("/me/lost-pet-alert").expect(200)).body).toEqual({ active: false, radiusKm: null });
+      expect((await near.c.get("/me/lost-pet-alert").expect(200)).body).toEqual({ active: true, radiusKm: 3 }); // the point is never echoed
+      await near.c.put("/me/lost-pet-alert").send({ latitude: LAT, longitude: LNG, radiusKm: 7 }).expect(400); // radius from a short list only
+      const o = await owner("Pashmak");
+      await o.c.put("/me/lost-pet-alert").send({ latitude: LAT, longitude: LNG, radiusKm: 3 }).expect(200);
+      const incident = await o.c.post(`/pets/${o.petId}/lost-incidents`).send({ description: "Lost", publicArea: "Eram garden", lastKnownLatitude: LAT, lastKnownLongitude: LNG }).expect(201);
+      const deadline = Date.now() + 5000;
+      let alert = null;
+      while (!alert && Date.now() < deadline) {
+        alert = await prisma.notification.findFirst({ where: { userId: near.userId, type: "lost_pet.nearby_opened" } });
+        if (!alert) await new Promise((r) => setTimeout(r, 100));
+      }
+      expect(alert).toMatchObject({ deepLink: `/lost-pets/${incident.body.id}`, entityId: incident.body.id });
+      expect(alert?.body).toContain("Pashmak");
+      expect(alert?.body).toContain("Eram garden");
+      expect(JSON.stringify(alert)).not.toContain(String(LAT));
+      await new Promise((r) => setTimeout(r, 300));
+      expect(await prisma.notification.count({ where: { userId: { in: [far.userId, off.userId, o.userId] }, type: "lost_pet.nearby_opened" } })).toBe(0);
+      await request(server).get("/me/lost-pet-alert").expect(401);
+    });
+
     it("admin operations mask the exact location, reveal it only with PII permission and audit every reveal and moderator close", async () => {
       const o = await owner();
       const incident = await o.c.post(`/pets/${o.petId}/lost-incidents`).send({ description: "Lost", publicArea: "Gisha", lastKnownLocation: "Gisha st, No. 3", lastKnownLatitude: EXACT_LAT, lastKnownLongitude: EXACT_LNG, privateNotes: "chip 123" }).expect(201);
