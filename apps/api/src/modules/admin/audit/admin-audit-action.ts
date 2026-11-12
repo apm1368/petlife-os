@@ -238,6 +238,8 @@ export type AdminAuditAction =
   | "pet_memorial.approved"
   | "pet_memorial.rejected"
   | "pet_taxi_fare.updated"
+  | "pet_taxi_driver.verified"
+  | "pet_taxi_driver.suspended"
   | "wallet.credited"
   | "wallet.debited"
   | "wallet_top_up.approved"

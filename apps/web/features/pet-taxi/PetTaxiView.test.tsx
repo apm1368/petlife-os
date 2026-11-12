@@ -10,7 +10,7 @@ import { PetTaxiView } from "./PetTaxiView";
 import { DriverConsoleView } from "./DriverConsoleView";
 
 vi.mock("@/lib/api/client", async (orig) => ({ ...(await orig<typeof import("@/lib/api/client")>()), apiFetch: vi.fn() }));
-vi.mock("@/services/pet-taxi.service", () => ({ petTaxiService: { rides: vi.fn(), quote: vi.fn(), request: vi.fn(), ride: vi.fn(), cancel: vi.fn(), rate: vi.fn(), search: vi.fn(), driverState: vi.fn(), presence: vi.fn(), accept: vi.fn(), decline: vi.fn(), advance: vi.fn(), release: vi.fn() } }));
+vi.mock("@/services/pet-taxi.service", () => ({ petTaxiService: { rides: vi.fn(), quote: vi.fn(), request: vi.fn(), ride: vi.fn(), cancel: vi.fn(), rate: vi.fn(), search: vi.fn(), driverState: vi.fn(), presence: vi.fn(), accept: vi.fn(), decline: vi.fn(), advance: vi.fn(), release: vi.fn(), drivers: vi.fn(), registerDriver: vi.fn() } }));
 vi.mock("@/services/households.service", () => ({ householdsService: { listMine: vi.fn(), listPets: vi.fn() } }));
 vi.mock("@/services/addresses.service", () => ({ addressesService: { list: vi.fn() } }));
 
@@ -58,22 +58,33 @@ describe("PetTaxiView", () => {
 });
 
 describe("DriverConsoleView", () => {
-  const base: PetTaxiDriverStateDto = { eligible: true, reason: null, online: true, organizationName: "Paw Cabs", activeRide: null, requests: [] };
+  const verified = { id: "d1", providerUserId: "pu1", name: "Reza", licenceNumber: "123456", vehiclePlate: "12 ب 345", vehicleDescription: "Peugeot 206, white", status: "VERIFIED" as const, statusReason: null, verifiedAt: "2026-11-12T10:00:00.000Z", createdAt: "2026-11-12T09:00:00.000Z" };
+  const base: PetTaxiDriverStateDto = { eligible: true, reason: null, canDrive: true, isOwner: false, driver: verified, online: true, organizationName: "Paw Cabs", activeRide: null, requests: [] };
   beforeEach(() => {
     vi.mocked(apiFetch).mockReset().mockResolvedValue({ provider: "none", tileUrl: "https://tile.example/{z}/{x}/{y}.png", tileAttribution: "© OSM", googleBrowserKey: null, search: false, estimatesOnly: true });
     Object.defineProperty(navigator, "geolocation", { configurable: true, value: { watchPosition: vi.fn(() => 1), clearWatch: vi.fn(), getCurrentPosition: vi.fn() } });
   });
 
   it("lists nearby requests and accepts one", async () => {
-    vi.mocked(petTaxiService.driverState).mockResolvedValue({ ...base, requests: [{ id: "r1", pickup: ride.pickup, dropoff: ride.dropoff, carrierSize: "SMALL", petCount: 1, fareIrr: 1_500_000, distanceMeters: 10_000, durationSeconds: 1_800, kmFromYou: 2.4, searchExpiresAt: ride.searchExpiresAt }] });
+    // Before accepting: an area, not the address.
+    vi.mocked(petTaxiService.driverState).mockResolvedValue({ ...base, requests: [{ id: "r1", approximate: true, pickup: { label: "", latitude: 35.8, longitude: 51.43, city: "Tehran", note: null }, dropoff: { label: "", latitude: 35.7, longitude: 51.34, city: null, note: null }, carrierSize: "SMALL", petCount: 1, fareIrr: 1_500_000, distanceMeters: 10_000, durationSeconds: 1_800, kmFromYou: 2.5, searchExpiresAt: ride.searchExpiresAt }] });
     vi.mocked(petTaxiService.accept).mockResolvedValue({ ...base, activeRide: { ...ride, driver: null, member: { name: "Sara", phone: "09120000000" } } });
     renderWithIntl(<DriverConsoleView />, "en");
-    expect(await screen.findByText("2.4 km to pickup")).toBeTruthy();
+    expect(await screen.findByText("2.5 km to pickup")).toBeTruthy();
+    expect(screen.getByText("Around Tehran")).toBeTruthy();
+    expect(screen.queryByText("Tajrish")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Accept" }));
     await waitFor(() => expect(petTaxiService.accept).toHaveBeenCalledWith("r1"));
     expect(await screen.findByText("Sara")).toBeTruthy();
     expect(screen.getByRole("button", { name: "I've arrived" })).toBeTruthy();
     expect(screen.getByText("Navigate: Neshan").getAttribute("href")).toContain("nshn.ir");
+  });
+
+  it("keeps an unchecked driver offline and says why", async () => {
+    vi.mocked(petTaxiService.driverState).mockResolvedValue({ ...base, canDrive: false, online: false, driver: { ...verified, status: "PENDING", verifiedAt: null } });
+    renderWithIntl(<DriverConsoleView />, "en");
+    expect(await screen.findByText(/checking your details/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Go online" })).toBeNull();
   });
 
   it("tells a clinic it is not a pet-taxi provider", async () => {

@@ -7068,6 +7068,8 @@ export interface PetTaxiRideDto {
 
 export interface PetTaxiRequestDto {
   id: string;
+  /** Before accepting, pickup and drop-off are a ~500 m grid point plus the city: no address label, no note. */
+  approximate: boolean;
   pickup: PetTaxiPointDto;
   dropoff: PetTaxiPointDto;
   carrierSize: PetTaxiCarrierSizeValue;
@@ -7075,15 +7077,48 @@ export interface PetTaxiRequestDto {
   fareIrr: number;
   distanceMeters: number;
   durationSeconds: number;
-  /** Straight-line km from the driver's last position to the pickup, when known. */
+  /** Straight-line km from the driver's fresh position to the approximate pickup, rounded to half a km. */
   kmFromYou: number | null;
   searchExpiresAt: string;
+}
+
+export type PetTaxiDriverStatusValue = "PENDING" | "VERIFIED" | "SUSPENDED";
+
+/** One person a pet-taxi organization lets drive, with the staff check of their licence and vehicle. */
+export interface PetTaxiDriverDto {
+  id: string;
+  providerUserId: string;
+  name: string;
+  licenceNumber: string;
+  vehiclePlate: string;
+  vehicleDescription: string;
+  status: PetTaxiDriverStatusValue;
+  statusReason: string | null;
+  verifiedAt: string | null;
+  createdAt: string;
+}
+
+/** The owner's view: registered drivers and the members (owner/staff) who could be registered. */
+export interface PetTaxiDriversDto {
+  drivers: PetTaxiDriverDto[];
+  members: { providerUserId: string; name: string; role: "OWNER" | "STAFF" }[];
+}
+
+export interface AdminPetTaxiDriverDto extends PetTaxiDriverDto {
+  organizationName: string;
+  organizationVerified: boolean;
 }
 
 export interface PetTaxiDriverStateDto {
   /** False when this organization is not a verified pet-taxi provider. */
   eligible: boolean;
   reason: "NOT_PET_TAXI" | "NOT_VERIFIED" | null;
+  /** This person may go online: a driving role and a staff-verified driver record. */
+  canDrive: boolean;
+  /** The organization owner, who registers drivers. */
+  isOwner: boolean;
+  /** This person's own driver record in this organization, if registered. */
+  driver: PetTaxiDriverDto | null;
   online: boolean;
   organizationName: string;
   activeRide: PetTaxiRideDto | null;
@@ -7100,6 +7135,11 @@ export interface AdminPetTaxiFareRuleDto {
   mediumSurchargePercent: number;
   largeSurchargePercent: number;
   extraPetIrr: number;
+  /** The city's bounding box (null for "*"). */
+  south: number | null;
+  west: number | null;
+  north: number | null;
+  east: number | null;
   active: boolean;
   updatedAt: string;
 }

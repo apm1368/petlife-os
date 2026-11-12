@@ -12124,6 +12124,12 @@ model PetTaxiFareRule {
   largeSurchargePercent  Int      @default(35)
   /// Each pet after the first.
   extraPetIrr            Int      @default(0)
+  /// The city's bounding box: the server picks the rule whose box holds the pickup point (the member's typed city is
+  /// only a label). Required for every rule except "*", which prices everything outside the boxes.
+  south                  Float?
+  west                   Float?
+  north                  Float?
+  east                   Float?
   active                 Boolean  @default(true)
   updatedByAdminId       String?  @db.Uuid
   createdAt              DateTime @default(now())
@@ -12133,6 +12139,34 @@ model PetTaxiFareRule {
 }
 
 /// Whether a pet-taxi driver is taking rides, and where their phone last said they are.
+enum PetTaxiDriverStatus {
+  PENDING
+  VERIFIED
+  SUSPENDED
+}
+
+/// A person a PET_TAXI organization lets drive: licence and vehicle, checked by staff before they can go online.
+model PetTaxiDriver {
+  id                     String              @id @default(uuid()) @db.Uuid
+  providerUserId         String              @unique @db.Uuid
+  providerOrganizationId String              @db.Uuid
+  userId                 String              @db.Uuid
+  licenceNumber          String
+  vehiclePlate           String
+  vehicleDescription     String
+  status                 PetTaxiDriverStatus @default(PENDING)
+  statusReason           String?
+  registeredByUserId     String              @db.Uuid
+  verifiedByAdminId      String?             @db.Uuid
+  verifiedAt             DateTime?
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+
+  @@index([providerOrganizationId])
+  @@index([status])
+  @@map("pet_taxi_drivers")
+}
+
 model PetTaxiDriverPresence {
   providerUserId         String    @id @db.Uuid
   userId                 String    @db.Uuid
@@ -12192,6 +12226,8 @@ model PetTaxiRide {
   rating                 Int?
   ratingComment          String?
   ratedAt                DateTime?
+  /// Set by the retention worker once a finished ride's exact places were coarsened (30 days after it ended).
+  coordinatesRedactedAt  DateTime?
 
   createdAt              DateTime           @default(now())
   updatedAt              DateTime           @updatedAt

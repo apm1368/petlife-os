@@ -1,4 +1,5 @@
 import { Controller, Get, Query, UseGuards } from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
 import { Type } from "class-transformer";
 import { IsLatitude, IsLongitude, IsOptional, IsString, Length } from "class-validator";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
@@ -22,6 +23,7 @@ export class MapsController {
 
   @Get("search")
   @UseGuards(SessionAuthGuard)
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
   search(@Query() query: SearchQueryDto): Promise<PlaceResult[]> {
     return this.maps.search(query.q, query.lat != null && query.lng != null ? { latitude: query.lat, longitude: query.lng } : undefined);
   }

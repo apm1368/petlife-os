@@ -8,6 +8,7 @@ import { formatCurrency } from "@/lib/currency/format-currency";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { petTaxiService } from "@/services/pet-taxi.service";
 import { MapView, navigationLinks, type MapMarker } from "@/features/maps/MapView";
+import { DriverRosterPanel } from "./DriverRosterPanel";
 import "./pet-taxi.css";
 
 const POLL_MS = 6_000;
@@ -95,6 +96,21 @@ export function DriverConsoleView() {
           <h1>{t("title")}</h1>
           <p>{state.reason ? t(`notEligible.${state.reason}`) : null}</p>
         </header>
+      </div>
+    );
+
+  // A verified organization, but this person is not (yet) a staff-checked driver: say why, and let the owner register drivers.
+  if (!state.canDrive && !state.activeRide)
+    return (
+      <div className="pet-taxi">
+        <header className="pet-taxi__head">
+          <h1>{t("title")}</h1>
+          <p role="status">
+            {!state.driver ? (state.isOwner ? t("driverStatus.NONE_OWNER") : t("driverStatus.NONE")) : t(`driverStatus.${state.driver.status}`)}
+            {state.driver?.status === "SUSPENDED" && state.driver.statusReason ? ` (${state.driver.statusReason})` : null}
+          </p>
+        </header>
+        {state.isOwner ? <DriverRosterPanel /> : null}
       </div>
     );
 
@@ -221,13 +237,14 @@ export function DriverConsoleView() {
               <ol className="pet-taxi__legs">
                 <li>
                   <span className="pet-taxi__dot pet-taxi__dot--pickup" aria-hidden />
-                  {r.pickup.label}
+                  {r.pickup.label || (r.pickup.city ? t("around", { city: r.pickup.city }) : t("approxArea"))}
                 </li>
                 <li>
                   <span className="pet-taxi__dot pet-taxi__dot--dropoff" aria-hidden />
-                  {r.dropoff.label}
+                  {r.dropoff.label || t("approxArea")}
                 </li>
               </ol>
+              {r.approximate ? <small className="pet-taxi__muted">{t("approxHint")}</small> : null}
               <small>
                 {tm("distanceTime", { km: (r.distanceMeters / 1000).toFixed(1), minutes: Math.round(r.durationSeconds / 60) })} · {tm(`carrierSize.${r.carrierSize}`)} · {t("pets", { count: r.petCount })}
               </small>
@@ -243,6 +260,7 @@ export function DriverConsoleView() {
           ))}
         </section>
       ) : null}
+      {state.isOwner ? <DriverRosterPanel /> : null}
     </div>
   );
 }

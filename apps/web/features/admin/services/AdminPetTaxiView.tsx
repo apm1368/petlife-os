@@ -10,14 +10,20 @@ import type { RouteLocale } from "@/lib/i18n/config";
 import { petTaxiService } from "@/services/pet-taxi.service";
 import { useAdminStore } from "@/stores/admin-store";
 
-type Draft = { city: string; base: string; perKm: string; perMinute: string; minimum: string; medium: string; large: string; extraPet: string; active: boolean };
+type Draft = { city: string; base: string; perKm: string; perMinute: string; minimum: string; medium: string; large: string; extraPet: string; south: string; west: string; north: string; east: string; active: boolean };
 const toToman = (irr: number) => String(Math.round(irr / 10));
 const num = (v: string) => {
   const n = Number(v.replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06f0)).replace(/[,\s٬]/g, ""));
   return Number.isFinite(n) && n >= 0 ? Math.round(n) : 0;
 };
-const draftOf = (r: AdminPetTaxiFareRuleDto): Draft => ({ city: r.city, base: toToman(r.baseFareIrr), perKm: toToman(r.perKmIrr), perMinute: toToman(r.perMinuteIrr), minimum: toToman(r.minimumFareIrr), medium: String(r.mediumSurchargePercent), large: String(r.largeSurchargePercent), extraPet: toToman(r.extraPetIrr), active: r.active });
-const EMPTY: Draft = { city: "", base: "", perKm: "", perMinute: "0", minimum: "0", medium: "15", large: "35", extraPet: "0", active: true };
+const coord = (v: number | null) => (v == null ? "" : String(v));
+/** Latitude/longitude as typed (Persian digits and decimal separators accepted); null when empty or not a number. */
+const toCoord = (v: string) => {
+  const n = Number(v.replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06f0)).replace(/[٫,]/g, ".").trim());
+  return v.trim() && Number.isFinite(n) ? n : null;
+};
+const draftOf = (r: AdminPetTaxiFareRuleDto): Draft => ({ city: r.city, base: toToman(r.baseFareIrr), perKm: toToman(r.perKmIrr), perMinute: toToman(r.perMinuteIrr), minimum: toToman(r.minimumFareIrr), medium: String(r.mediumSurchargePercent), large: String(r.largeSurchargePercent), extraPet: toToman(r.extraPetIrr), south: coord(r.south), west: coord(r.west), north: coord(r.north), east: coord(r.east), active: r.active });
+const EMPTY: Draft = { city: "", base: "", perKm: "", perMinute: "0", minimum: "0", medium: "15", large: "35", extraPet: "0", south: "", west: "", north: "", east: "", active: true };
 
 /** /admin/services/pet-taxi — fares per city (Toman in, rials stored) and the last day's rides. */
 export function AdminPetTaxiView() {
@@ -70,6 +76,10 @@ export function AdminPetTaxiView() {
   async function save(i: number) {
     const d = drafts[i]!;
     if (!d.city.trim()) return setMessage({ ok: false, text: t("saveFailed") });
+    const isDefault = d.city.trim() === "*";
+    const box = { south: toCoord(d.south), west: toCoord(d.west), north: toCoord(d.north), east: toCoord(d.east) };
+    // A city rule prices pickups inside its box; only "*" has none.
+    if (!isDefault && Object.values(box).some((v) => v == null)) return setMessage({ ok: false, text: t("boxRequired") });
     setSaving(i);
     setMessage(null);
     try {
@@ -81,6 +91,7 @@ export function AdminPetTaxiView() {
         mediumSurchargePercent: Math.min(300, num(d.medium)),
         largeSurchargePercent: Math.min(300, num(d.large)),
         extraPetIrr: num(d.extraPet) * 10,
+        ...(isDefault ? {} : box),
         active: d.active,
         ...(reason.trim().length >= 3 ? { reason: reason.trim() } : {}),
       });
@@ -136,7 +147,16 @@ export function AdminPetTaxiView() {
                 {field(i, "medium", t("fields.medium"))}
                 {field(i, "large", t("fields.large"))}
                 {field(i, "extraPet", t("fields.extraPet"))}
+                {d.city.trim() !== "*" ? (
+                  <>
+                    {field(i, "south", t("fields.south"), "text")}
+                    {field(i, "west", t("fields.west"), "text")}
+                    {field(i, "north", t("fields.north"), "text")}
+                    {field(i, "east", t("fields.east"), "text")}
+                  </>
+                ) : null}
               </div>
+              {d.city.trim() !== "*" ? <p className="gx-muted">{t("boxHint")}</p> : null}
               <div className="gx-toolbar" style={{ marginTop: 10 }}>
                 <label className="gx-field" style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                   <input type="checkbox" checked={d.active} disabled={!canManage} onChange={(e) => setDrafts((list) => list.map((x, j) => (j === i ? { ...x, active: e.target.checked } : x)))} />

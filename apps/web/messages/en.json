@@ -4315,7 +4315,8 @@
         "smsPatterns": "SMS patterns",
         "walletDirectory": "Member wallets",
         "walletTopUps": "Top-up receipts",
-        "petTaxi": "Pet taxi"
+        "petTaxi": "Pet taxi",
+        "petTaxiDrivers": "Pet-taxi drivers"
       },
       "palette": {
         "actions": "Quick actions",
@@ -9942,7 +9943,7 @@
       "offline": "You are offline",
       "goOnline": "Go online",
       "goOffline": "Go offline",
-      "locationOff": "Your phone's location is unavailable; requests show without distance.",
+      "locationOff": "Your phone's location is unavailable; requests appear only with a current location.",
       "requests": "Nearby requests",
       "noRequests": "No requests right now. This page updates by itself.",
       "kmFromYou": "{km} km to pickup",
@@ -9962,7 +9963,35 @@
       "releaseReason": "Reason (the ride goes back to other drivers)",
       "fare": "Fare: {amount}",
       "collect": "Collect the fare on delivery.",
-      "failed": "That did not work. Please try again."
+      "failed": "That did not work. Please try again.",
+      "driverStatus": {
+        "NONE": "You are not registered as a driver yet. Ask your organization's owner to add you with your licence and vehicle.",
+        "NONE_OWNER": "To go online, register yourself or your drivers with licence and vehicle below; the opetlife team checks them.",
+        "PENDING": "The opetlife team is checking your details; you can go online once they are verified.",
+        "VERIFIED": "You are verified.",
+        "SUSPENDED": "Your driving is suspended for now."
+      },
+      "around": "Around {city}",
+      "approxArea": "Approximate area",
+      "approxHint": "You see the exact address and note after you accept.",
+      "roster": {
+        "title": "Your drivers",
+        "hint": "Each driver is registered with licence and plate and cannot go online until the opetlife team verifies them. Changed details are checked again.",
+        "member": "Team member",
+        "licenceNumber": "Licence number",
+        "vehiclePlate": "Plate",
+        "vehicleDescription": "Vehicle (model and colour)",
+        "save": "Send for checking",
+        "saved": "Saved; it will be checked.",
+        "failed": "That did not work. Please try again.",
+        "incomplete": "Fill in every field.",
+        "empty": "No drivers registered yet.",
+        "status": {
+          "PENDING": "Waiting for check",
+          "VERIFIED": "Verified",
+          "SUSPENDED": "Suspended"
+        }
+      }
     }
   },
   "adminPetTaxi": {
@@ -9986,7 +10015,11 @@
       "large": "Large surcharge %",
       "extraPet": "Each extra pet (Toman)",
       "active": "Active",
-      "reason": "Reason (audit log)"
+      "reason": "Reason (audit log)",
+      "south": "Box south (lat)",
+      "west": "Box west (lng)",
+      "north": "Box north (lat)",
+      "east": "Box east (lng)"
     },
     "add": "New city fare",
     "save": "Save",
@@ -10013,6 +10046,37 @@
       "CANCELLED_BY_DRIVER": "Cancelled by the driver",
       "NO_DRIVER": "No driver found"
     },
-    "disputesHint": "Complaints about a ride are handled in Disputes."
+    "disputesHint": "Complaints about a ride are handled in Disputes.",
+    "boxHint": "This city's fare applies to rides whose pickup is inside this box (at most 3°). The city a member types does not affect the price.",
+    "boxRequired": "A city fare needs all four box coordinates.",
+    "drivers": {
+      "kicker": "Pet taxi",
+      "title": "Drivers",
+      "subtitle": "Check each driver's licence and vehicle; only verified drivers can go online.",
+      "loading": "Loading…",
+      "failed": "That did not work. Please try again.",
+      "retry": "Retry",
+      "forbidden": "services.view permission required.",
+      "empty": "No drivers registered yet.",
+      "columns": {
+        "name": "Driver",
+        "organization": "Organization",
+        "licence": "Licence",
+        "vehicle": "Vehicle",
+        "status": "Status",
+        "decision": "Decision"
+      },
+      "status": {
+        "PENDING": "Waiting for check",
+        "VERIFIED": "Verified",
+        "SUSPENDED": "Suspended"
+      },
+      "reason": "Reason (audit log)",
+      "reasonRequired": "Write a reason for the decision.",
+      "verify": "Verify",
+      "suspend": "Suspend",
+      "decided": "Saved.",
+      "orgNotVerified": "organization not verified yet"
+    }
   }
 }

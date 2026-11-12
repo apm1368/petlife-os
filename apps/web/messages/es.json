@@ -3594,7 +3594,8 @@
         "smsPatterns": "Plantillas SMS",
         "walletDirectory": "Miembros",
         "walletTopUps": "Comprobantes de recarga",
-        "petTaxi": "Taxi para mascotas"
+        "petTaxi": "Taxi para mascotas",
+        "petTaxiDrivers": "Conductores de taxi"
       },
       "palette": {
         "actions": "Acciones rápidas",
@@ -9068,7 +9069,7 @@
       "offline": "Estás desconectado",
       "goOnline": "Conectarme",
       "goOffline": "Desconectarme",
-      "locationOff": "Ubicación no disponible; las solicitudes se muestran sin distancia.",
+      "locationOff": "La ubicación de tu teléfono no está disponible; las solicitudes solo aparecen con una ubicación actual.",
       "requests": "Solicitudes cercanas",
       "noRequests": "No hay solicitudes ahora. Esta página se actualiza sola.",
       "kmFromYou": "{km} km hasta la recogida",
@@ -9088,7 +9089,35 @@
       "releaseReason": "Motivo (el viaje vuelve a otros conductores)",
       "fare": "Tarifa: {amount}",
       "collect": "Cobra la tarifa al entregar.",
-      "failed": "No funcionó. Inténtalo de nuevo."
+      "failed": "No funcionó. Inténtalo de nuevo.",
+      "driverStatus": {
+        "NONE": "Aún no estás registrado como conductor. Pide al titular de tu organización que te añada con tu permiso y vehículo.",
+        "NONE_OWNER": "Para conectarte, registra abajo a ti o a tus conductores con permiso y vehículo; el equipo de opetlife lo revisa.",
+        "PENDING": "El equipo de opetlife está revisando tus datos; podrás conectarte cuando estén verificados.",
+        "VERIFIED": "Estás verificado.",
+        "SUSPENDED": "Tu actividad como conductor está suspendida por ahora."
+      },
+      "around": "Alrededor de {city}",
+      "approxArea": "Zona aproximada",
+      "approxHint": "Verás la dirección exacta y la nota después de aceptar.",
+      "roster": {
+        "title": "Tus conductores",
+        "hint": "Cada conductor se registra con permiso y matrícula y no puede conectarse hasta que opetlife lo verifique. Los datos cambiados se revisan de nuevo.",
+        "member": "Miembro del equipo",
+        "licenceNumber": "Número de permiso",
+        "vehiclePlate": "Matrícula",
+        "vehicleDescription": "Vehículo (modelo y color)",
+        "save": "Enviar a revisión",
+        "saved": "Guardado; se revisará.",
+        "failed": "No funcionó. Inténtalo de nuevo.",
+        "incomplete": "Completa todos los campos.",
+        "empty": "Aún no hay conductores registrados.",
+        "status": {
+          "PENDING": "Pendiente de revisión",
+          "VERIFIED": "Verificado",
+          "SUSPENDED": "Suspendido"
+        }
+      }
     }
   },
   "adminPetTaxi": {
@@ -9112,7 +9141,11 @@
       "large": "Recargo grande %",
       "extraPet": "Cada mascota extra (tomanes)",
       "active": "Activa",
-      "reason": "Motivo (auditoría)"
+      "reason": "Motivo (auditoría)",
+      "south": "Recuadro sur (lat)",
+      "west": "Recuadro oeste (long)",
+      "north": "Recuadro norte (lat)",
+      "east": "Recuadro este (long)"
     },
     "add": "Nueva tarifa de ciudad",
     "save": "Guardar",
@@ -9139,6 +9172,37 @@
       "CANCELLED_BY_DRIVER": "Cancelado por el conductor",
       "NO_DRIVER": "No se encontró conductor"
     },
-    "disputesHint": "Las quejas sobre un viaje se gestionan en Disputas."
+    "disputesHint": "Las quejas sobre un viaje se gestionan en Disputas.",
+    "boxHint": "La tarifa de esta ciudad se aplica a viajes cuya recogida está dentro de este recuadro (máx. 3°). La ciudad que escribe el usuario no afecta al precio.",
+    "boxRequired": "Una tarifa de ciudad necesita las cuatro coordenadas del recuadro.",
+    "drivers": {
+      "kicker": "Taxi para mascotas",
+      "title": "Conductores",
+      "subtitle": "Revisa el permiso y vehículo de cada conductor; solo los verificados pueden conectarse.",
+      "loading": "Cargando…",
+      "failed": "No funcionó. Inténtalo de nuevo.",
+      "retry": "Reintentar",
+      "forbidden": "Se requiere el permiso services.view.",
+      "empty": "Aún no hay conductores registrados.",
+      "columns": {
+        "name": "Conductor",
+        "organization": "Organización",
+        "licence": "Permiso",
+        "vehicle": "Vehículo",
+        "status": "Estado",
+        "decision": "Decisión"
+      },
+      "status": {
+        "PENDING": "Pendiente de revisión",
+        "VERIFIED": "Verificado",
+        "SUSPENDED": "Suspendido"
+      },
+      "reason": "Motivo (auditoría)",
+      "reasonRequired": "Escribe un motivo.",
+      "verify": "Verificar",
+      "suspend": "Suspender",
+      "decided": "Guardado.",
+      "orgNotVerified": "organización aún no verificada"
+    }
   }
 }

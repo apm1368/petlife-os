@@ -192,15 +192,32 @@ interface GMapsNamespace {
   Polyline: new (opts: Record<string, unknown>) => { setMap(m: unknown): void };
 }
 let googleLoad: Promise<GMapsNamespace> | null = null;
+/** Google calls this when the key is refused (wrong referrer, billing, region); every Google map then falls back. */
+const authFailureListeners = new Set<() => void>();
+let googleAuthFailed = false;
+/** A script that neither loads nor errors (filtered networks) counts as unreachable after this long. */
+const GOOGLE_LOAD_TIMEOUT_MS = 8_000;
 function loadGoogle(key: string): Promise<GMapsNamespace> {
   googleLoad ??= new Promise((resolve, reject) => {
-    const w = window as unknown as { google?: { maps?: GMapsNamespace } };
+    const w = window as unknown as { google?: { maps?: GMapsNamespace }; gm_authFailure?: () => void };
     if (w.google?.maps) return resolve(w.google.maps);
+    w.gm_authFailure = () => {
+      googleAuthFailed = true;
+      authFailureListeners.forEach((fn) => fn());
+    };
+    const timer = window.setTimeout(() => reject(new Error("google maps timed out")), GOOGLE_LOAD_TIMEOUT_MS);
     const script = document.createElement("script");
     script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&language=${encodeURIComponent(document.documentElement.lang || "fa")}`;
     script.async = true;
-    script.onload = () => (w.google?.maps ? resolve(w.google.maps) : reject(new Error("google maps missing")));
-    script.onerror = () => reject(new Error("google maps unreachable"));
+    script.onload = () => {
+      window.clearTimeout(timer);
+      if (w.google?.maps) resolve(w.google.maps);
+      else reject(new Error("google maps missing"));
+    };
+    script.onerror = () => {
+      window.clearTimeout(timer);
+      reject(new Error("google maps unreachable"));
+    };
     document.head.appendChild(script);
   });
   return googleLoad;
@@ -216,7 +233,16 @@ function GoogleMap(props: MapViewProps & { apiKey: string; fallback: MapsClientC
   const drawn = useRef<{ setMap(m: unknown): void }[]>([]);
   const pick = useRef(onPick);
   pick.current = onPick;
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState(googleAuthFailed);
+
+  // A refused key draws Google's error box over the map; show our own map instead.
+  useEffect(() => {
+    const onAuthFailure = () => setFailed(true);
+    authFailureListeners.add(onAuthFailure);
+    return () => {
+      authFailureListeners.delete(onAuthFailure);
+    };
+  }, []);
 
   useEffect(() => {
     let alive = true;

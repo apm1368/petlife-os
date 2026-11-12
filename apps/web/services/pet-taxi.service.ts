@@ -1,4 +1,4 @@
-import type { AdminPetTaxiOverviewDto, MapPlaceDto, PetTaxiCarrierSizeValue, PetTaxiDriverStateDto, PetTaxiPointDto, PetTaxiQuoteDto, PetTaxiRideDto } from "@petlife/types";
+import type { AdminPetTaxiDriverDto, AdminPetTaxiOverviewDto, MapPlaceDto, PetTaxiCarrierSizeValue, PetTaxiDriversDto, PetTaxiDriverStateDto, PetTaxiPointDto, PetTaxiQuoteDto, PetTaxiRideDto } from "@petlife/types";
 import { apiFetch } from "@/lib/api/client";
 
 export const petTaxiService = {
@@ -20,8 +20,12 @@ export const petTaxiService = {
   decline: (id: string) => apiFetch<PetTaxiDriverStateDto>(`/provider/pet-taxi/rides/${id}/decline`, { method: "POST" }),
   advance: (id: string, status: "ARRIVING" | "PICKED_UP" | "COMPLETED") => apiFetch<PetTaxiDriverStateDto>(`/provider/pet-taxi/rides/${id}/status`, { method: "POST", body: { status } }),
   release: (id: string, reason: string) => apiFetch<PetTaxiDriverStateDto>(`/provider/pet-taxi/rides/${id}/release`, { method: "POST", body: { reason } }),
+  drivers: () => apiFetch<PetTaxiDriversDto>("/provider/pet-taxi/drivers"),
+  registerDriver: (input: { providerUserId: string; licenceNumber: string; vehiclePlate: string; vehicleDescription: string }) => apiFetch<PetTaxiDriversDto>("/provider/pet-taxi/drivers", { method: "POST", body: input }),
 
   // Admin
   adminOverview: () => apiFetch<AdminPetTaxiOverviewDto>("/admin/pet-taxi"),
+  adminDrivers: () => apiFetch<AdminPetTaxiDriverDto[]>("/admin/pet-taxi/drivers"),
+  adminDecideDriver: (id: string, status: "VERIFIED" | "SUSPENDED", reason: string) => apiFetch<AdminPetTaxiDriverDto[]>(`/admin/pet-taxi/drivers/${id}/decision`, { method: "POST", body: { status, reason } }),
   adminSaveRule: (city: string, rule: Record<string, unknown>) => apiFetch<AdminPetTaxiOverviewDto>(`/admin/pet-taxi/fare-rules/${encodeURIComponent(city)}`, { method: "PUT", body: rule }),
 };

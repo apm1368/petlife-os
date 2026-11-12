@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Headers, Param, ParseUUIDPipe, Post, UseGuards } from "@nestjs/common";
-import { PetTaxiCarrierSize, PetTaxiRideStatus } from "@prisma/client";
+import { PetTaxiCarrierSize, PetTaxiRideStatus, ProviderUserRole } from "@prisma/client";
+import { Throttle } from "@nestjs/throttler";
 import { Type } from "class-transformer";
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsIn, IsInt, IsLatitude, IsLongitude, IsOptional, IsString, IsUUID, Length, Max, Min, ValidateNested } from "class-validator";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
@@ -8,6 +9,7 @@ import type { SessionUser } from "../../common/session/session.service";
 import { ProviderAuthGuard } from "../provider-os/auth/provider-auth.guard";
 import { CurrentProviderContext } from "../provider-os/auth/current-provider-context.decorator";
 import type { ResolvedProviderContext } from "../provider-os/auth/provider-context.types";
+import { RequireProviderRole } from "../provider-os/auth/require-provider-role.decorator";
 import { PetTaxiService } from "./pet-taxi.service";
 
 class PointDto {
@@ -54,6 +56,12 @@ class AdvanceDto {
 class ReleaseDto {
   @IsString() @Length(3, 200) reason!: string;
 }
+class RegisterDriverDto {
+  @IsUUID() providerUserId!: string;
+  @IsString() @Length(3, 40) licenceNumber!: string;
+  @IsString() @Length(3, 20) vehiclePlate!: string;
+  @IsString() @Length(3, 120) vehicleDescription!: string;
+}
 
 /** The member side: fare, request, follow, cancel, rate. */
 @Controller("pet-taxi")
@@ -61,7 +69,9 @@ class ReleaseDto {
 export class PetTaxiController {
   constructor(private readonly taxi: PetTaxiService) {}
 
+  // Each quote may spend a paid routing call.
   @Post("quote")
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   quote(@Body() dto: QuoteDto) {
     return this.taxi.quote(dto);
   }
@@ -92,7 +102,7 @@ export class PetTaxiController {
   }
 }
 
-/** The driver side, for members of a verified PET_TAXI provider organization. */
+/** The driver side: staff-verified drivers (owner or staff) of a verified PET_TAXI provider organization. */
 @Controller("provider/pet-taxi")
 @UseGuards(SessionAuthGuard, ProviderAuthGuard)
 export class ProviderPetTaxiController {
@@ -104,27 +114,46 @@ export class ProviderPetTaxiController {
   }
 
   @Post("presence")
+  @RequireProviderRole(ProviderUserRole.OWNER, ProviderUserRole.STAFF)
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   presence(@CurrentProviderContext() ctx: ResolvedProviderContext, @Body() dto: PresenceDto) {
     return this.taxi.presence(ctx, dto);
   }
 
   @Post("rides/:id/accept")
+  @RequireProviderRole(ProviderUserRole.OWNER, ProviderUserRole.STAFF)
   accept(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("id", ParseUUIDPipe) id: string) {
     return this.taxi.accept(ctx, id);
   }
 
   @Post("rides/:id/decline")
+  @RequireProviderRole(ProviderUserRole.OWNER, ProviderUserRole.STAFF)
   decline(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("id", ParseUUIDPipe) id: string) {
     return this.taxi.decline(ctx, id);
   }
 
   @Post("rides/:id/status")
+  @RequireProviderRole(ProviderUserRole.OWNER, ProviderUserRole.STAFF)
   advance(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("id", ParseUUIDPipe) id: string, @Body() dto: AdvanceDto) {
     return this.taxi.advance(ctx, id, dto.status);
   }
 
   @Post("rides/:id/release")
+  @RequireProviderRole(ProviderUserRole.OWNER, ProviderUserRole.STAFF)
   release(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("id", ParseUUIDPipe) id: string, @Body() dto: ReleaseDto) {
     return this.taxi.release(ctx, id, dto.reason);
+  }
+
+  /** The owner's list of drivers (licence, vehicle, staff check) and the members who could drive. */
+  @Get("drivers")
+  @RequireProviderRole(ProviderUserRole.OWNER)
+  drivers(@CurrentProviderContext() ctx: ResolvedProviderContext) {
+    return this.taxi.drivers(ctx);
+  }
+
+  @Post("drivers")
+  @RequireProviderRole(ProviderUserRole.OWNER)
+  registerDriver(@CurrentProviderContext() ctx: ResolvedProviderContext, @Body() dto: RegisterDriverDto) {
+    return this.taxi.registerDriver(ctx, dto);
   }
 }

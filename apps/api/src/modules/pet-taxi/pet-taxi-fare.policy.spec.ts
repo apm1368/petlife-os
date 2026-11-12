@@ -1,4 +1,4 @@
-import { computeFare, normalizeCity, pickRule } from "./pet-taxi-fare.policy";
+import { approximate, computeFare, normalizeCity, pickRuleForPoint, validCityBox } from "./pet-taxi-fare.policy";
 import { straightLineRoute } from "../maps/maps.service";
 
 const rule = { city: "*", baseFareIrr: 500_000, perKmIrr: 80_000, perMinuteIrr: 10_000, minimumFareIrr: 1_000_000, mediumSurchargePercent: 20, largeSurchargePercent: 40, extraPetIrr: 200_000 };
@@ -17,12 +17,27 @@ describe("pet taxi fare", () => {
     expect(computeFare({ ...rule, minimumFareIrr: 0, baseFareIrr: 1 }, { distanceMeters: 0, durationSeconds: 0 }, "SMALL", 1).fareIrr).toBe(10_000);
   });
 
-  it("uses the pickup city's rule, else the default, ignoring inactive rules and Arabic letter forms", () => {
-    const rules = [{ ...rule, active: true }, { ...rule, city: "تهران", baseFareIrr: 1, active: true }, { ...rule, city: "اصفهان", active: false }];
-    expect(pickRule(rules, " تهران ")?.city).toBe("تهران");
-    expect(pickRule(rules, "اصفهان")?.city).toBe("*");
-    expect(pickRule(rules.slice(1, 2), "شیراز")).toBeNull();
+  it("chooses the rule from where the pickup is, never from a typed city", () => {
+    const noBox = { south: null, west: null, north: null, east: null };
+    const tehran = { ...rule, city: "تهران", baseFareIrr: 1, active: true, south: 35.56, west: 51.09, north: 35.84, east: 51.62 };
+    const rules = [{ ...rule, active: true, ...noBox }, tehran, { ...rule, city: "اصفهان", active: false, south: 32.5, west: 51.5, north: 32.8, east: 51.8 }, { ...rule, city: "بی‌مرز", active: true, ...noBox }];
+    expect(pickRuleForPoint(rules, { latitude: 35.7, longitude: 51.4 })?.city).toBe("تهران");
+    // Isfahan's rule is off, and a city rule without a box never matches: both fall back to "*".
+    expect(pickRuleForPoint(rules, { latitude: 32.65, longitude: 51.67 })?.city).toBe("*");
+    expect(pickRuleForPoint([tehran], { latitude: 29.6, longitude: 52.5 })).toBeNull();
+    // Overlapping boxes: the smaller (more specific) one wins.
+    const shemiran = { ...tehran, city: "شمیران", south: 35.78, west: 51.4, north: 35.84, east: 51.5 };
+    expect(pickRuleForPoint([...rules, shemiran], { latitude: 35.8, longitude: 51.43 })?.city).toBe("شمیران");
+    expect(validCityBox(tehran)).toBe(true);
+    expect(validCityBox({ south: 35.8, west: 51, north: 35.5, east: 51.6 })).toBe(false);
+    expect(validCityBox({ south: 30, west: 50, north: 36, east: 52 })).toBe(false);
     expect(normalizeCity("كرمان  شهر")).toBe("کرمان شهر");
+  });
+
+  it("shows drivers a ~500 m grid point, not the exact place", () => {
+    expect(approximate(35.80483)).toBe(35.805);
+    expect(approximate(51.43441)).toBe(51.435);
+    expect(Math.abs(approximate(35.7012) - 35.7012)).toBeLessThanOrEqual(0.0025);
   });
 
   it("estimates road distance and city time from the straight line", () => {

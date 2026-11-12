@@ -1,10 +1,11 @@
 import type { INestApplication } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
 import request from "supertest";
-import { AdminMembershipStatus, AdminRole, ProviderUserRole } from "@prisma/client";
+import { AdminMembershipStatus, AdminRole, PetTaxiDriverStatus, ProviderUserRole } from "@prisma/client";
 import { createTestApp, extractCookie } from "./test-app";
 import { signSessionCookie } from "../src/common/session/session-cookie.util";
 import { PrismaService } from "../src/common/prisma/prisma.service";
+import { PetTaxiService } from "../src/modules/pet-taxi/pet-taxi.service";
 
 type Actor = { id: string; csrf: string; cookie: string };
 
@@ -44,11 +45,18 @@ describe("Pet taxi on demand (e2e)", () => {
     const pet = await db.pet.create({ data: { householdId: hh.id, name: "Cookie", species: "DOG", approximateAgeMonths: 30 } });
     return { owner, petId: pet.id };
   }
+  /** An owner-driver of a verified pet-taxi organization whose licence and vehicle staff have verified. */
   async function driver(type: "PET_TAXI" | "VET_CLINIC" = "PET_TAXI", verificationStatus: "VERIFIED" | "NOT_STARTED" = "VERIFIED") {
     const org = await db.providerOrganization.create({ data: { name: `Taxi ${randomUUID().slice(0, 6)}`, type: type as never, verificationStatus, phone: "02188888888" } });
     const d = await actor("Reza");
-    await db.providerUser.create({ data: { userId: d.id, providerOrganizationId: org.id, role: ProviderUserRole.OWNER } });
+    const pu = await db.providerUser.create({ data: { userId: d.id, providerOrganizationId: org.id, role: ProviderUserRole.OWNER } });
+    await db.petTaxiDriver.create({ data: { providerUserId: pu.id, providerOrganizationId: org.id, userId: d.id, licenceNumber: "1234567", vehiclePlate: "12ب345", vehicleDescription: "Peugeot 206", status: PetTaxiDriverStatus.VERIFIED, registeredByUserId: d.id, verifiedAt: new Date() } });
     return d;
+  }
+  async function staffAdmin() {
+    const staff = await actor("staff");
+    await db.adminUser.create({ data: { userId: staff.id, role: AdminRole.SUPER_ADMIN, status: AdminMembershipStatus.ACTIVE } });
+    return staff;
   }
 
   it("prices from staff rules, lets the first online driver take the ride, and moves it forward only", async () => {
@@ -84,6 +92,10 @@ describe("Pet taxi on demand (e2e)", () => {
     const seen = (await post(first, "/provider/pet-taxi/presence").send({ online: true, latitude: 35.79, longitude: 51.43 }).expect(201)).body;
     expect(seen.requests.map((r: { id: string }) => r.id)).toContain(ride.id);
     expect(JSON.stringify(seen.requests)).not.toContain("Sara");
+    // Before accepting: a ~500 m grid point and the city, never the address label or note.
+    const offered = seen.requests.find((r: { id: string }) => r.id === ride.id);
+    expect(offered).toMatchObject({ approximate: true, pickup: { label: "", note: null, latitude: 35.805, longitude: 51.435 }, dropoff: { label: "" } });
+    expect(JSON.stringify(seen.requests)).not.toContain("Tajrish");
     await post(second, "/provider/pet-taxi/presence").send({ online: true, latitude: 35.7, longitude: 51.34 }).expect(201);
 
     const [a, b] = await Promise.all([post(first, `/provider/pet-taxi/rides/${ride.id}/accept`), post(second, `/provider/pet-taxi/rides/${ride.id}/accept`)]);
@@ -105,7 +117,12 @@ describe("Pet taxi on demand (e2e)", () => {
     await post(winner, `/provider/pet-taxi/rides/${ride.id}/status`).send({ status: "PICKED_UP" }).expect(201);
     await post(owner, `/pet-taxi/rides/${ride.id}/cancel`).send({}).expect(400);
     await post(loser, `/provider/pet-taxi/rides/${ride.id}/status`).send({ status: "COMPLETED" }).expect(400);
+    // Still at the pickup, seconds after it: not delivered yet.
+    await post(winner, `/provider/pet-taxi/rides/${ride.id}/status`).send({ status: "COMPLETED" }).expect(400);
+    await post(winner, "/provider/pet-taxi/presence").send({ online: true, latitude: 35.6995, longitude: 51.3385 }).expect(201);
     await post(winner, `/provider/pet-taxi/rides/${ride.id}/status`).send({ status: "COMPLETED" }).expect(201);
+    const finished = await db.petTaxiRide.findUniqueOrThrow({ where: { id: ride.id } });
+    expect(finished).toMatchObject({ driverLatitude: null, driverLongitude: null });
 
     await post(owner, `/pet-taxi/rides/${ride.id}/rate`).send({ rating: 6 }).expect(400);
     const rated = (await post(owner, `/pet-taxi/rides/${ride.id}/rate`).send({ rating: 5, comment: "Gentle with Cookie" }).expect(201)).body;
@@ -121,12 +138,90 @@ describe("Pet taxi on demand (e2e)", () => {
     const { owner, petId } = await member();
     const ride = (await post(owner, "/pet-taxi/rides").set("Idempotency-Key", randomUUID()).send({ pickup: tajrish, dropoff: azadi, carrierSize: "SMALL", petIds: [petId] }).expect(201)).body;
     const d = await driver();
+    // Online without a position: no requests and nothing to accept.
     await post(d, "/provider/pet-taxi/presence").send({ online: true }).expect(201);
+    expect((await get(d, "/provider/pet-taxi").expect(200)).body.requests).toEqual([]);
+    await post(d, `/provider/pet-taxi/rides/${ride.id}/accept`).expect(400);
+    await post(d, "/provider/pet-taxi/presence").send({ online: true, latitude: 35.79, longitude: 51.43 }).expect(201);
     await post(d, `/provider/pet-taxi/rides/${ride.id}/accept`).expect(201);
     await post(d, `/provider/pet-taxi/rides/${ride.id}/release`).send({ reason: "Flat tyre" }).expect(201);
     expect((await get(owner, `/pet-taxi/rides/${ride.id}`).expect(200)).body).toMatchObject({ status: "SEARCHING", driver: null });
-    // The driver who handed it back is not offered it again.
+    // The driver who handed it back is not offered it again, and cannot take it back.
     expect((await get(d, "/provider/pet-taxi").expect(200)).body.requests.map((r: { id: string }) => r.id)).not.toContain(ride.id);
+    await post(d, `/provider/pet-taxi/rides/${ride.id}/accept`).expect(400);
     expect((await post(owner, `/pet-taxi/rides/${ride.id}/cancel`).send({ reason: "Changed plans" }).expect(201)).body.status).toBe("CANCELLED_BY_MEMBER");
+  });
+
+  it("prices from where the pickup is, never from the typed city", async () => {
+    const staff = await staffAdmin();
+    const fare = { baseFareIrr: 500_000, perKmIrr: 50_000, perMinuteIrr: 0, minimumFareIrr: 0, mediumSurchargePercent: 0, largeSurchargePercent: 0, extraPetIrr: 0, active: true };
+    await put(staff, "/admin/pet-taxi/fare-rules/*").send(fare).expect(200);
+    const city = encodeURIComponent("تهران");
+    // A city rule needs its box; a stray "%" in the city is a 400, not a 500.
+    await put(staff, `/admin/pet-taxi/fare-rules/${city}`).send({ ...fare, baseFareIrr: 2_000_000 }).expect(400);
+    await put(staff, "/admin/pet-taxi/fare-rules/%25").send(fare).expect(400);
+    await put(staff, `/admin/pet-taxi/fare-rules/${city}`).send({ ...fare, baseFareIrr: 2_000_000, south: 35.56, west: 51.09, north: 35.84, east: 51.62 }).expect(200);
+    const { owner } = await member();
+    const inTehran = (await post(owner, "/pet-taxi/quote").send({ pickup: { ...tajrish, city: "شیراز" }, dropoff: azadi, carrierSize: "SMALL", petCount: 1 }).expect(201)).body;
+    expect(inTehran.fareRuleCity).toBe("تهران");
+    const karaj = { label: "Karaj", latitude: 35.83, longitude: 50.97, city: "تهران" };
+    const outside = (await post(owner, "/pet-taxi/quote").send({ pickup: karaj, dropoff: { label: "Fardis", latitude: 35.72, longitude: 50.98 }, carrierSize: "SMALL", petCount: 1 }).expect(201)).body;
+    expect(outside.fareRuleCity).toBe("*");
+  });
+
+  it("lets only staff-verified drivers go online, registered by their owner", async () => {
+    const org = await db.providerOrganization.create({ data: { name: `Taxi ${randomUUID().slice(0, 6)}`, type: "PET_TAXI" as never, verificationStatus: "VERIFIED", phone: "02188888888" } });
+    const owner = await actor("Owner");
+    const staffDriver = await actor("Driver");
+    const vet = await actor("Vet");
+    await db.providerUser.create({ data: { userId: owner.id, providerOrganizationId: org.id, role: ProviderUserRole.OWNER } });
+    const staffPu = await db.providerUser.create({ data: { userId: staffDriver.id, providerOrganizationId: org.id, role: ProviderUserRole.STAFF } });
+    await db.providerUser.create({ data: { userId: vet.id, providerOrganizationId: org.id, role: ProviderUserRole.VET } });
+    const here = { online: true, latitude: 35.79, longitude: 51.43 };
+
+    expect((await get(owner, "/provider/pet-taxi").expect(200)).body).toMatchObject({ eligible: true, canDrive: false, isOwner: true, driver: null });
+    await post(owner, "/provider/pet-taxi/presence").send(here).expect(400);
+    await post(vet, "/provider/pet-taxi/presence").send(here).expect(403);
+    await post(staffDriver, "/provider/pet-taxi/drivers").send({ providerUserId: staffPu.id, licenceNumber: "7654321", vehiclePlate: "22ج333", vehicleDescription: "Pride, silver" }).expect(403);
+    const roster = (await post(owner, "/provider/pet-taxi/drivers").send({ providerUserId: staffPu.id, licenceNumber: "7654321", vehiclePlate: "22ج333", vehicleDescription: "Pride, silver" }).expect(201)).body;
+    expect(roster.drivers).toEqual([expect.objectContaining({ name: "Driver", status: "PENDING" })]);
+    await post(staffDriver, "/provider/pet-taxi/presence").send(here).expect(400);
+
+    const admin = await staffAdmin();
+    const pending = (await get(admin, "/admin/pet-taxi/drivers").expect(200)).body.find((d: { providerUserId: string }) => d.providerUserId === staffPu.id);
+    await post(admin, `/admin/pet-taxi/drivers/${pending.id}/decision`).send({ status: "VERIFIED" }).expect(400);
+    await post(admin, `/admin/pet-taxi/drivers/${pending.id}/decision`).send({ status: "VERIFIED", reason: "Licence and plate checked" }).expect(201);
+    expect(await db.adminAuditLog.count({ where: { action: "pet_taxi_driver.verified", entityId: pending.id } })).toBe(1);
+    expect((await post(staffDriver, "/provider/pet-taxi/presence").send(here).expect(201)).body).toMatchObject({ canDrive: true, online: true });
+
+    // New vehicle details go back to staff, and the driver is taken offline meanwhile.
+    await post(owner, "/provider/pet-taxi/drivers").send({ providerUserId: staffPu.id, licenceNumber: "7654321", vehiclePlate: "33د444", vehicleDescription: "Pride, silver" }).expect(201);
+    expect((await get(staffDriver, "/provider/pet-taxi").expect(200)).body).toMatchObject({ canDrive: false, online: false, driver: { status: "PENDING" } });
+    const presence = await db.petTaxiDriverPresence.findUniqueOrThrow({ where: { providerUserId: staffPu.id } });
+    expect(presence).toMatchObject({ online: false, latitude: null, longitude: null });
+  });
+
+  it("gives one driver one ride even when two accepts race", async () => {
+    await db.petTaxiFareRule.upsert({ where: { city: "*" }, create: { city: "*", baseFareIrr: 500_000, perKmIrr: 50_000 }, update: { active: true } });
+    const a = await member();
+    const b = await member();
+    const rideA = (await post(a.owner, "/pet-taxi/rides").set("Idempotency-Key", randomUUID()).send({ pickup: tajrish, dropoff: azadi, carrierSize: "SMALL", petIds: [a.petId] }).expect(201)).body;
+    const rideB = (await post(b.owner, "/pet-taxi/rides").set("Idempotency-Key", randomUUID()).send({ pickup: tajrish, dropoff: azadi, carrierSize: "SMALL", petIds: [b.petId] }).expect(201)).body;
+    const d = await driver();
+    await post(d, "/provider/pet-taxi/presence").send({ online: true, latitude: 35.79, longitude: 51.43 }).expect(201);
+    const [x, y] = await Promise.all([post(d, `/provider/pet-taxi/rides/${rideA.id}/accept`), post(d, `/provider/pet-taxi/rides/${rideB.id}/accept`)]);
+    expect([x.status, y.status].sort()).toEqual([201, 400]);
+    expect(await db.petTaxiRide.count({ where: { driverUserId: d.id, status: "DRIVER_ASSIGNED" } })).toBe(1);
+  });
+
+  it("coarsens the places of rides that ended more than 30 days ago", async () => {
+    const { owner, petId } = await member();
+    const base = { userId: owner.id, petIds: [petId], carrierSize: "SMALL" as const, pickupLabel: "Home, Valiasr St 12", pickupLatitude: 35.80483, pickupLongitude: 51.43441, pickupNote: "Ring twice", dropoffLabel: "Clinic", dropoffLatitude: 35.69971, dropoffLongitude: 51.33802, distanceMeters: 15_000, durationSeconds: 2_400, routeSource: "STRAIGHT_LINE_ESTIMATE", fareIrr: 1_000_000, fareBreakdown: {}, fareRuleCity: "*", searchExpiresAt: new Date(), status: "COMPLETED" as const };
+    const old = await db.petTaxiRide.create({ data: { ...base, idempotencyKey: randomUUID(), completedAt: new Date(Date.now() - 40 * 86_400_000), driverLatitude: 35.7, driverLongitude: 51.34 } });
+    const recent = await db.petTaxiRide.create({ data: { ...base, idempotencyKey: randomUUID(), completedAt: new Date(Date.now() - 2 * 86_400_000) } });
+    await app.get(PetTaxiService).applyRetention();
+    expect(await db.petTaxiRide.findUniqueOrThrow({ where: { id: old.id } })).toMatchObject({ pickupLabel: "", pickupNote: null, dropoffLabel: "", pickupLatitude: 35.8, pickupLongitude: 51.43, driverLatitude: null, driverLongitude: null });
+    expect((await db.petTaxiRide.findUniqueOrThrow({ where: { id: old.id } })).coordinatesRedactedAt).not.toBeNull();
+    expect(await db.petTaxiRide.findUniqueOrThrow({ where: { id: recent.id } })).toMatchObject({ pickupLabel: "Home, Valiasr St 12", pickupLatitude: 35.80483 });
   });
 });
