@@ -9,6 +9,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import type { AdminPermissionName } from "@petlife/types";
+import type { RouteLocale } from "@/lib/i18n/config";
 import {
   Button,
   ClipboardList,
@@ -305,7 +306,7 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
     <div className={`erp-shell ${styles.shell}`}>
       <aside className={styles.sidebar}>
         <Link href={`/${locale}/admin`} className={styles.brand}>
-          <Brand />
+          <Brand locale={locale as RouteLocale} />
           <span>{t("title")}</span>
         </Link>
         {searchButton(styles.search)}
@@ -360,7 +361,7 @@ function LiveAdminShell({ children }: { children: React.ReactNode }) {
               />
             </span>
             <Link href={`/${locale}/admin`} className={styles.headerBrand} aria-label={t("title")}>
-              <Brand compact />
+              <Brand compact locale={locale as RouteLocale} />
             </Link>
             <span className={styles.title}>{t("title")}</span>
             {activeItem && activeItem.href !== "" ? <span className={styles.crumb}>{t(activeItem.labelKey)}</span> : null}

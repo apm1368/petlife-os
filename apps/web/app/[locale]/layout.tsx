@@ -25,10 +25,10 @@ export const metadata: Metadata = {
   applicationName: "opetlife",
   icons: {
     icon: [
-      { url: "/brand/opetlife/04_app_icon_light.png", media: "(prefers-color-scheme: light)" },
-      { url: "/brand/opetlife/03_app_icon_dark.png", media: "(prefers-color-scheme: dark)" },
+      { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },
+      { url: "/brand/opl/favicon.svg", type: "image/svg+xml" },
     ],
-    apple: "/brand/opetlife/04_app_icon_light.png",
+    apple: "/brand/opl/app-icon-180.png",
   },
   description: "Your pet's life, in one place.",
 };

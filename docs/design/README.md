@@ -1,5 +1,19 @@
 # PET LIFE OS visual source of truth
 
+## Latest approved pattern (2026-11-11)
+
+The approved design pattern for the public pages lives in [`pattern-2026-11/`](pattern-2026-11/README.md) (Persian). It holds:
+
+- `README.md`: principles, the 5-question information architecture, page anatomy, colour, type, buttons, illustration, languages, accessibility and the release process.
+- `pages.md`: page rollout order and the definition of done for each page.
+- `reel.md` and `motion.md`: the illustrated reel format, the Cookie cursor, birds and motion rules.
+- `tokens.json` and `components/`: tokens and live component previews (Button, Header, CookieCursor, Reel, Logo, Cover).
+- `brand-kit/`: the approved opl logo in every export (outlined SVG, PNG sizes, favicon.ico, app and maskable icons, social card, manifest and head snippet).
+- `prototype/landing.html`: the approved interactive landing prototype (open it from this folder; images come from `apps/web/public/images`).
+
+Where it conflicts with the earlier directions below, this pattern wins. The landing HERO stays unchanged.
+
+
 Saved 2026-09-02 at the user's request. These references override the previous Codex landing styling. They are design references, not permission to introduce new features or fake product behavior. Preserve existing PET LIFE OS domain rules when a board is ambiguous.
 
 ## Durable reference index

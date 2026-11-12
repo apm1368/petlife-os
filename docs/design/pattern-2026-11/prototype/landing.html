@@ -1,0 +1,1572 @@
+<title>لندینگ زندهٔ opetlife</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500..700&family=Vazirmatn:wght@300..900&display=swap">
+<style>
+/* Layout: one warm sunlit column; a 5-question orbit around the pet's record, a phone-frame reel, one dusk memorial, paw-field finale. Soft capsule buttons everywhere. */
+:root{
+  color-scheme:light;
+  --paper:#FFFBF5;--paper-2:#FFFDFA;--cream:#FDF4E6;--mint:#EEF7EC;--apricot-bg:#FFF0E4;
+  --raised:#FFFFFF;--ink:#1E241F;--ink-2:#4F574F;--ink-3:#6B726A;--line:#F0E7D9;--line-2:#DED2BF;
+  --forest:#1F5A3D;--forest-2:#2E7650;--on-forest:#FFFDF8;--leaf:#7DB46C;
+  --sun:#F2B544;--on-sun:#3A2A05;--apricot:#E98A5B;--plum:#6A4D78;--plum-bg:#F5EEF7;
+  --dusk:#34315A;--dusk-2:#4D4880;--dusk-ink:#FFF9F0;--dusk-ink-2:#DCD6EA;--glow:#FFC978;
+  --band:#F6EEDF;--band-ink:#1E241F;--band-ink-2:#5A6159;--band-line:#E4D8C4;
+  --reel-bg:#121412;--sh:46 40 28;
+  --font:"Vazirmatn",Tahoma,"Segoe UI",system-ui,sans-serif;
+  --ease:cubic-bezier(.2,.8,.2,1);--ease-emph:cubic-bezier(.16,1,.3,1);
+  --gutter:clamp(16px,4vw,48px);--max:1220px;
+}
+/* Light theme only, by choice: the landing is one warm daylight world; the memorial keeps its own soft twilight. */
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.site{position:relative;overflow-x:clip}
+.wrap{max-width:var(--max);margin-inline:auto;padding-left:max(var(--gutter),env(safe-area-inset-left,0px));padding-right:max(var(--gutter),env(safe-area-inset-right,0px))}
+section{position:relative;scroll-margin-top:84px}
+.sec{padding-block:clamp(72px,10vw,128px)}
+h1,h2,h3{margin:0;text-wrap:balance}
+p{margin:0}
+a{color:inherit}
+img{max-width:100%;display:block}
+.ic{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.9rem;font-weight:700;color:var(--forest-2)}
+.eyebrow .ic{width:18px;height:18px}
+.h2{font-size:clamp(1.85rem,1.1rem + 2.4vw,2.9rem);line-height:1.32;font-weight:850}
+.lede{font-size:clamp(1rem,.95rem + .3vw,1.13rem);color:var(--ink-2);max-width:58ch}
+.sec-head{display:grid;gap:12px;margin-block-end:clamp(32px,5vw,56px)}
+.sec-head.center{justify-items:center;text-align:center}
+.tag{display:inline-flex;align-items:center;font-size:.72rem;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--plum-bg);color:var(--plum)}
+
+/* soft buttons: the shared theme for the next pages */
+.btn{--bg:var(--raised);--fg:var(--ink);position:relative;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 26px;border:0;border-radius:999px;background:var(--bg);color:var(--fg);font:inherit;font-weight:750;font-size:1rem;line-height:1.2;text-decoration:none;cursor:pointer;white-space:nowrap;
+  box-shadow:inset 0 1px 0 rgb(255 255 255 / .28),0 1px 2px rgb(var(--sh) / .10),0 12px 26px -14px rgb(var(--sh) / .45);transition:transform .22s var(--ease),box-shadow .22s var(--ease),background-color .22s var(--ease)}
+.btn:hover{transform:translateY(-2px);box-shadow:inset 0 1px 0 rgb(255 255 255 / .28),0 2px 4px rgb(var(--sh) / .10),0 18px 32px -14px rgb(var(--sh) / .5)}
+.btn:active{transform:translateY(0) scale(.97);transition-duration:.08s}
+.btn:focus-visible,.chip:focus-visible,.node:focus-visible,.tg:focus-visible,.seg button:focus-visible,.candle:focus-visible,.species button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+.btn.primary{--bg:var(--forest);--fg:var(--on-forest)}
+.btn.sun{--bg:var(--sun);--fg:var(--on-sun)}
+.btn.soft{--bg:var(--mint);--fg:var(--forest)}
+.btn.line{--bg:transparent;box-shadow:inset 0 0 0 1.5px var(--line-2)}
+.btn.line:hover{box-shadow:inset 0 0 0 1.5px var(--forest)}
+.btn.sm{min-height:40px;padding:0 18px;font-size:.92rem}
+.btn.lg{min-height:60px;padding:0 34px;font-size:1.08rem}
+.actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+
+/* studio bar + design notes */
+.studio{background:var(--band);color:var(--band-ink);font-size:.88rem}
+.studio__in{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding-block:10px}
+.studio__in strong{font-weight:800}
+.studio__muted{color:var(--band-ink-2)}
+.studio__tg{display:flex;gap:6px;margin-inline-start:auto;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--band-line);background:transparent;color:var(--band-ink);font:inherit;font-size:.82rem;font-weight:700;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--sun);border-color:var(--sun);color:var(--on-sun)}
+.note{display:grid;gap:4px;border:1.5px dashed var(--plum);background:var(--plum-bg);color:var(--ink);border-radius:16px;padding:12px 16px;font-size:.88rem;line-height:1.85;margin-block-end:28px;max-width:78ch}
+.note b{color:var(--plum);font-weight:800}
+.note--dusk{background:rgb(255 255 255 / .06);color:var(--dusk-ink);border-color:var(--dusk-ink-2)}
+.note--dusk b{color:var(--glow)}
+:root[data-notes="off"] .note,:root[data-notes="off"] .idea{display:none}
+.idea{background:var(--paper-2);border-bottom:1px solid var(--line)}
+.idea__in{padding-block:28px 32px;display:grid;gap:18px}
+.idea__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px}
+.idea__card{background:var(--raised);border-radius:20px;padding:16px 18px;box-shadow:0 1px 0 var(--line)}
+.idea__card h3{font-size:1rem;font-weight:800;margin-block-end:4px}
+.idea__card p{font-size:.9rem;color:var(--ink-2)}
+.idea__btns{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.idea__btns span{font-size:.85rem;color:var(--ink-3);margin-inline-end:4px}
+
+/* logo: o = cat, p = dog, l = a sprout for life */
+.logo-mark{display:inline-block;line-height:0;color:var(--forest);--lm-nose:#1E241F}
+.logo-mark svg{width:100%;height:auto;display:block;overflow:visible}
+.logo-mark *{transform-box:view-box}
+.lm-ear{transform-origin:108px 40px;transition:transform .5s var(--ease-emph)}
+.lm-leaf{transform-origin:176.5px 26px;transition:transform .6s var(--ease-emph)}
+.lm-eyes{transform-origin:48px 65px}
+.logo-anim .lm-eyes,.brand:hover .lm-eyes{animation:dblink 3.6s infinite}
+.logo-anim .lm-leaf{animation:sway 3.4s ease-in-out infinite}
+@keyframes sway{50%{transform:rotate(9deg)}}
+.logo-anim:hover .lm-ear,.brand:hover .lm-ear{transform:rotate(-18deg)}
+.brand:hover .lm-leaf{transform:rotate(12deg)}
+.brandboard{background:var(--paper-2);border-bottom:1px solid var(--line);padding-block:clamp(48px,7vw,88px)}
+.bgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:900px){.bgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.bgrid{grid-template-columns:minmax(0,1fr)}}
+.btile{margin:0;position:relative;display:grid;place-items:center;min-height:220px;padding:28px 20px 48px;border-radius:30px;background:var(--raised);box-shadow:0 1px 0 var(--line)}
+.btile--hero{grid-row:span 2;background:var(--cream)}
+.btile--wide{grid-column:1 / -1;min-height:190px}
+.btile--hero .logo-mark{width:min(340px,72%)}
+@media (max-width:900px){.btile--hero{grid-column:1 / -1;grid-row:auto;min-height:300px}}
+.btile--dark{background:var(--forest)}
+.btile--dark .logo-mark,.appicon .logo-mark,.slide--outro .logo-mark{color:#FFFDF8;--lm-nose:#F2B544}
+.btile--dark .wm-fa,.btile--dark small{color:#FFFDF8}
+.btile figcaption{position:absolute;inset-block-end:16px;inset-inline-start:20px;font-size:.8rem;font-weight:700;color:var(--ink-3)}
+.btile--dark figcaption{color:#CFE3D4}
+.lockup{display:flex;align-items:center;gap:14px}
+.lockup .logo-mark{width:92px}
+.wm-fa{display:block;font-size:2rem;font-weight:900;color:var(--forest);line-height:1.25}
+.lockup small{display:block;font-size:.8rem;color:var(--ink-3)}
+.wm-en{font-family:"Fredoka",var(--font);font-size:2.5rem;font-weight:600;color:var(--forest);line-height:1}
+.icons{display:flex;align-items:flex-end;gap:16px}
+.appicon{display:grid;place-items:center;background:var(--forest);border-radius:24%;box-shadow:0 14px 28px -16px rgb(var(--sh) / .6)}
+.appicon .logo-mark{width:76%}
+.appicon.a1{width:100px;height:100px}.appicon.a2{width:58px;height:58px}.appicon.a3{width:32px;height:32px;border-radius:9px}
+.parts{display:flex;gap:22px;align-items:flex-end}
+.parts > div{display:grid;justify-items:center;gap:10px;font-size:.92rem;font-weight:800;color:var(--ink-2)}
+.parts .logo-mark svg{height:70px;width:auto;overflow:hidden}
+
+/* header: light glass bar with soft buttons, shared by the next pages */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:70;background:rgb(255 251 245 / .94)}
+.hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:65;background:rgb(255 251 245 / .86);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid transparent;transition:border-color .3s,box-shadow .3s}
+.hdr.scrolled{border-bottom-color:var(--line);box-shadow:0 12px 30px -24px rgb(var(--sh) / .5)}
+.hdr__in{display:flex;align-items:center;gap:16px;min-height:74px}
+.brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);flex:none}
+.brand .logo-mark{width:58px}
+.brand b{display:block;font-size:1.3rem;font-weight:900;line-height:1.2;color:var(--forest)}
+.brand small{display:block;font-size:.7rem;color:var(--ink-3);line-height:1.4}
+.hnav{display:flex;align-items:center;gap:2px;margin-inline:auto}
+.hnav > a,.hnav__dd > button{display:inline-flex;align-items:center;gap:6px;min-height:42px;padding:0 14px;border-radius:999px;border:0;background:transparent;color:var(--ink-2);font:inherit;font-size:.94rem;font-weight:700;text-decoration:none;cursor:pointer;transition:background-color .2s,color .2s}
+.hnav > a:hover,.hnav__dd > button:hover,.hnav__dd > button[aria-expanded="true"],.hnav > a.on{background:var(--mint);color:var(--forest)}
+.hnav__dd{position:relative}
+.hnav__dd .ic{width:16px;height:16px;transition:transform .25s var(--ease)}
+.hnav__dd > button[aria-expanded="true"] .ic{transform:rotate(180deg)}
+.dd{position:absolute;top:calc(100% + 12px);right:50%;transform:translateX(50%) translateY(-8px);width:min(580px,92vw);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding:12px;background:var(--raised);border-radius:26px;box-shadow:0 1px 0 var(--line),0 34px 64px -32px rgb(var(--sh) / .55);opacity:0;visibility:hidden;transition:opacity .2s,transform .3s var(--ease-emph),visibility .2s}
+.dd.open{opacity:1;visibility:visible;transform:translateX(50%) translateY(0)}
+.dd a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:18px;text-decoration:none;color:var(--ink);transition:background-color .2s}
+.dd a:hover{background:var(--paper)}
+.dd__ic{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--mint);color:var(--forest);flex:none}
+.dd b{display:block;font-size:.94rem;font-weight:800;line-height:1.5}
+.dd small{display:block;font-size:.8rem;color:var(--ink-3);line-height:1.5}
+.hact{display:flex;align-items:center;gap:8px;flex:none}
+.iconbtn{width:42px;height:42px;border-radius:50%;border:0;display:grid;place-items:center;background:var(--raised);color:var(--ink-2);font:inherit;font-weight:800;font-size:.86rem;cursor:pointer;box-shadow:inset 0 0 0 1.5px var(--line);transition:background-color .2s,color .2s}
+.iconbtn:hover,.iconbtn[aria-expanded="true"]{background:var(--mint);color:var(--forest)}
+.iconbtn:focus-visible,.hnav a:focus-visible,.hnav__dd > button:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.lang{position:relative}
+.lang__menu{position:absolute;top:calc(100% + 10px);left:0;min-width:170px;display:grid;padding:6px;background:var(--raised);border-radius:20px;box-shadow:0 1px 0 var(--line),0 26px 48px -26px rgb(var(--sh) / .55);opacity:0;visibility:hidden;transform:translateY(-6px);transition:opacity .2s,transform .25s var(--ease-emph),visibility .2s}
+.lang__menu.open{opacity:1;visibility:visible;transform:none}
+.lang__menu button{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 14px;border:0;border-radius:14px;background:transparent;font:inherit;font-size:.92rem;font-weight:700;color:var(--ink);cursor:pointer;text-align:start}
+.lang__menu button:hover,.lang__menu button[aria-checked="true"]{background:var(--mint);color:var(--forest)}
+.lang__menu span{color:var(--ink-3);font-weight:600;font-size:.8rem;direction:ltr}
+.hmenu,.msheet{display:none}
+@media (max-width:1060px){
+  .hnav,.hact .hide-sm{display:none}
+  .hmenu{display:grid}
+  .hact{margin-inline-start:auto}
+  .msheet{display:grid;gap:4px;max-height:0;overflow:hidden;transition:max-height .45s var(--ease-emph),padding .3s}
+  .msheet.open{max-height:90vh;padding-block:6px 18px}
+  .msheet a{display:flex;align-items:center;gap:12px;min-height:50px;padding:0 12px;border-radius:18px;text-decoration:none;color:var(--ink);font-weight:750}
+  .msheet a:hover{background:var(--mint)}
+  .msheet .dd__ic{width:36px;height:36px}
+  .msheet .actions{padding:10px 4px 0}
+}
+@media (max-width:520px){.brand small{display:none}.brand b{font-size:1.15rem}}
+
+/* hero: copied as-is from the live site (unchanged) */
+.hero{position:relative;display:flex;flex-direction:column;background:#FBF4EA}
+.hero__img{width:100%;height:clamp(520px,56.25vw,880px);object-fit:cover;object-position:50% 45%}
+.hero__in{position:absolute;inset-inline:0;top:clamp(28px,4vw,56px);display:grid;justify-items:center;gap:8px;text-align:center;padding-inline:16px}
+.hero h1{font-size:clamp(2.2rem,1rem + 4vw,4.6rem);font-weight:900;line-height:1.25;color:#3B1630}
+.hero__d{font-size:clamp(1rem,.8rem + .7vw,1.35rem);font-weight:800;color:#2A1424}
+.hero__s{font-size:clamp(.9rem,.8rem + .3vw,1.05rem);color:#3A2A33}
+.hero__cta{margin-top:14px;display:inline-flex;align-items:center;gap:22px;min-height:54px;padding:0 44px;border-radius:6px;background:#481D39;color:#FFF8EF;font-weight:800;text-decoration:none}
+.hero__tag{position:absolute;inset-block-end:16px;inset-inline-start:16px;background:rgb(23 36 29 / .82);color:#F3EFE6;font-size:.82rem;font-weight:700;padding:8px 14px;border-radius:999px}
+:root[data-notes="off"] .hero__tag{display:none}
+@media (max-width:700px){.hero__in{position:static;order:-1;padding:28px 16px 30px}.hero__img{height:380px;object-position:62% 50%}}
+
+/* decorative paws */
+.decor{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.decor svg{position:absolute;width:22px;height:22px;color:var(--line-2);opacity:.7}
+
+/* ===== world orbit ===== */
+.world{background:var(--paper)}
+.namehook{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;background:var(--raised);border-radius:999px;padding:8px 8px 8px 8px;box-shadow:0 1px 0 var(--line),0 16px 34px -24px rgb(var(--sh) / .5);max-width:max-content}
+.namehook label{font-weight:800;padding-inline-start:14px;font-size:.95rem}
+.namehook input{font:inherit;font-size:1rem;font-weight:700;border:0;background:var(--paper);color:var(--ink);border-radius:999px;padding:10px 18px;width:min(190px,48vw);outline:none;box-shadow:inset 0 0 0 1.5px var(--line)}
+.namehook input:focus{box-shadow:inset 0 0 0 2px var(--forest)}
+.species{display:flex;flex-wrap:wrap;gap:4px}
+.species button{min-height:40px;padding:0 14px;border-radius:999px;border:0;background:transparent;color:var(--ink-2);font:inherit;font-size:.88rem;font-weight:700;cursor:pointer;transition:background-color .2s,color .2s}
+.species button[aria-checked="true"]{background:var(--mint);color:var(--forest)}
+@media (max-width:640px){.namehook{border-radius:24px;padding:12px}.namehook label{padding-inline-start:4px;width:100%}}
+.world__grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:clamp(24px,4vw,56px);align-items:center;margin-block-start:clamp(28px,4vw,44px)}
+@media (max-width:980px){.world__grid{grid-template-columns:minmax(0,1fr)}}
+.stage{position:relative;width:100%;max-width:600px;aspect-ratio:1;margin-inline:auto;perspective:1100px;--R:36%}
+.stage__bg{position:absolute;inset:5%;border-radius:50%;background:radial-gradient(circle at var(--px,50%) var(--py,50%),color-mix(in srgb,var(--sun) 30%,transparent),transparent 55%),var(--paper-2);box-shadow:inset 0 0 0 1px var(--line)}
+.ring{position:absolute;border-radius:50%;border:1.5px dashed var(--line-2);inset:14%;animation:spin 70s linear infinite}
+.ring.r2{inset:27%;border-style:dotted;animation-duration:100s;animation-direction:reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tilt{position:absolute;inset:0;transform-style:preserve-3d;will-change:transform}
+.links{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.link{fill:none;stroke:var(--line-2);stroke-width:1.6;stroke-dasharray:2 7;stroke-linecap:round;transition:stroke .3s}
+.link.on{stroke:var(--forest);stroke-width:2.4;stroke-dasharray:7 9;animation:flow 1.1s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-32}}
+.core{position:absolute;left:50%;top:50%;width:31%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:var(--raised);display:grid;place-content:center;justify-items:center;gap:2px;text-align:center;padding:10px;box-shadow:0 0 0 10px color-mix(in srgb,var(--forest) 9%,transparent),0 24px 44px -22px rgb(var(--sh) / .5)}
+.core::after{content:"";position:absolute;inset:-10px;border-radius:50%;border:2px solid var(--sun);opacity:0}
+.core.pulse::after{animation:corePulse .9s var(--ease) 1}
+@keyframes corePulse{0%{opacity:.9;transform:scale(.92)}100%{opacity:0;transform:scale(1.25)}}
+.core__ic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--mint);color:var(--forest)}
+.core__ic svg{width:26px;height:26px}
+.core__name{font-size:clamp(1rem,.8rem + 1vw,1.35rem);font-weight:850;line-height:1.3;max-width:9ch;overflow-wrap:anywhere}
+.core__sub{font-size:.75rem;color:var(--ink-3);line-height:1.4}
+.node{--s:1;position:absolute;left:calc(50% + cos(var(--a)) * var(--R));top:calc(50% + sin(var(--a)) * var(--R));transform:translate(-50%,-50%) scale(var(--s));display:flex;align-items:center;gap:10px;width:max-content;max-width:190px;padding:8px 16px 8px 8px;border:0;border-radius:999px;background:var(--raised);color:var(--ink);font:inherit;text-align:start;cursor:pointer;box-shadow:0 1px 0 var(--line),0 14px 28px -18px rgb(var(--sh) / .55);transition:transform .45s var(--ease-emph),opacity .3s,background-color .3s,color .3s}
+.node__ic{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--mint);color:var(--forest);transition:background-color .3s,color .3s}
+.node__t{display:grid}
+.node__q{font-size:.76rem;color:var(--ink-3);line-height:1.45}
+.node__n{font-size:.95rem;font-weight:800;line-height:1.45}
+.stage.has-active .node{--s:.94;opacity:.6}
+.stage.has-active .node.is-active{--s:1.08;opacity:1;background:var(--forest);color:var(--on-forest)}
+.node.is-active .node__ic{background:var(--sun);color:var(--on-sun)}
+.node.is-active .node__q{color:inherit}
+@media (max-width:620px){.stage{--R:37%}.node{flex-direction:column;gap:4px;padding:8px 6px;border-radius:20px;max-width:88px;text-align:center}.node__q{display:none}.node__n{font-size:.74rem}.node__ic{width:36px;height:36px}.core{width:30%}.core__ic{width:34px;height:34px}.core__sub{display:none}}
+.panel{position:relative;background:var(--raised);border-radius:30px;padding:clamp(18px,2.6vw,28px);box-shadow:0 1px 0 var(--line),0 34px 64px -40px rgb(var(--sh) / .55)}
+.panel__media{position:relative;aspect-ratio:16/9;border-radius:22px;overflow:hidden;margin-block-end:18px;background:var(--cream)}
+.panel__media img{position:absolute;inset:-5%;width:110%;height:110%;max-width:none;object-fit:cover;transform:translate(var(--mx,0px),var(--my,0px));transition:opacity .35s var(--ease),transform .5s var(--ease)}
+.panel__media img.fade{opacity:0}
+.panel__q{font-size:.9rem;font-weight:700;color:var(--forest-2)}
+.panel__t{font-size:clamp(1.35rem,1.1rem + 1vw,1.75rem);font-weight:850;line-height:1.35}
+.panel__d{color:var(--ink-2);margin-block-start:6px;font-size:.98rem}
+.feats{list-style:none;margin:14px 0 20px;padding:0;display:grid}
+.feats a{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 12px;padding:11px 6px;border-top:1px solid var(--line);text-decoration:none;border-radius:14px;transition:background-color .2s,padding .25s var(--ease)}
+.feats li:first-child a{border-top-color:transparent}
+.feats a:hover{background:var(--paper-2);padding-inline:14px}
+.f-n{font-weight:800}
+.f-d{grid-column:1;font-size:.86rem;color:var(--ink-2);line-height:1.6}
+.feats .ic{grid-row:1 / span 2;grid-column:2;align-self:center;color:var(--forest);transition:transform .25s var(--ease)}
+.feats a:hover .ic{transform:translateX(-5px)}
+.panel.swap .panel__body > *{animation:swapIn .55s var(--ease-emph) both;animation-delay:calc(var(--i,0) * 50ms)}
+@keyframes swapIn{from{opacity:0;transform:translateY(10px)}}
+
+/* birds */
+.bird{position:absolute;width:48px;height:48px;z-index:4;pointer-events:none;transition:transform 1.15s var(--ease-emph),opacity .9s var(--ease)}
+.bird .b-in{width:100%;height:100%}
+.bird.flip .b-in{transform:scaleX(-1)}
+.bird svg{width:100%;height:100%;overflow:visible;display:block}
+.bird.hop svg{animation:hop .5s var(--ease)}
+@keyframes hop{40%{transform:translateY(-8px)}}
+.bird .b-head,.rbird .b-head{transform-box:view-box;transform-origin:24px 34px}
+.bird.peck .b-head{animation:peck .7s var(--ease)}
+@keyframes peck{35%,60%{transform:rotate(-24deg) translate(-1px,3px)}}
+.bird .b-wing,.rbird .b-wing{transform-box:view-box;transform-origin:42px 33px}
+.bird.flap .b-wing{animation:flap .11s ease-in-out infinite alternate}
+@keyframes flap{to{transform:rotate(-42deg) scaleY(1.25)}}
+.bird .b-tail{transform-box:view-box;transform-origin:40px 42px}
+.bird.flick .b-tail{animation:flick .45s var(--ease)}
+@keyframes flick{40%{transform:rotate(12deg)}}
+.bird.away{transform:translate(var(--fx,120px),-200px) rotate(-14deg) scale(.8);opacity:0;transition:transform 1s cubic-bezier(.5,0,.75,0),opacity .6s .45s}
+
+/* ===== reel ===== */
+.reel-sec{background:var(--cream)}
+.reel-grid{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:clamp(28px,5vw,80px);align-items:center}
+@media (max-width:900px){.reel-grid{grid-template-columns:minmax(0,1fr)}.reel-wrap{order:-1}}
+.reel-copy{display:grid;gap:14px}
+.chapters{list-style:none;margin:8px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.chapters button{width:100%;display:flex;align-items:center;gap:10px;min-height:46px;padding:0 14px;border-radius:999px;border:0;background:var(--raised);color:var(--ink-2);font:inherit;font-size:.9rem;font-weight:700;cursor:pointer;text-align:start;box-shadow:0 1px 0 var(--line);transition:background-color .25s,color .25s,transform .25s var(--ease)}
+.chapters button:hover{transform:translateY(-2px)}
+.chapters b{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--paper);font-size:.78rem;font-feature-settings:"tnum"}
+.chapters button.on{background:var(--forest);color:var(--on-forest)}
+.chapters button.on b{background:var(--sun);color:var(--on-sun)}
+.reel-wrap{position:relative;justify-self:center}
+.reel{position:relative;width:min(340px,80vw);aspect-ratio:9/16;border-radius:36px;overflow:hidden;background:var(--reel-bg);color:#fff;isolation:isolate;box-shadow:0 0 0 10px var(--raised),0 0 0 11px var(--line),0 44px 80px -34px rgb(var(--sh) / .7);cursor:pointer}
+.reel__slides{position:absolute;inset:0}
+.slide{position:absolute;inset:0;opacity:0;transition:opacity .7s var(--ease)}
+.slide.on{opacity:1}
+.slide img{width:100%;height:100%;object-fit:cover;transform:scale(1.05)}
+.slide.on img{animation:kb var(--dur,3300ms) linear both}
+@keyframes kb{from{transform:scale(1.05) translate(0,0)}to{transform:scale(1.2) translate(var(--kx,0%),var(--ky,0%))}}
+.reel:not(.playing) .slide img{animation-play-state:paused}
+.reel__bars{position:absolute;inset:12px 14px auto;display:flex;gap:4px;z-index:3}
+.reel__bars span{flex:1;height:3px;border-radius:3px;background:rgb(0 0 0 / .16);overflow:hidden}
+.reel__bars i{display:block;height:100%;width:0;background:#F2B544;border-radius:3px}
+.reel__kick{position:absolute;inset-block-start:28px;inset-inline-start:14px;z-index:3;background:var(--sun);color:#3A2A05;font-size:.78rem;font-weight:800;padding:4px 12px;border-radius:999px}
+.reel__sub{position:absolute;left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100% - 32px);bottom:66px;z-index:3;color:#fff;font-size:1.02rem;font-weight:800;line-height:1.7;text-align:center;background:rgb(20 30 24 / .8);padding:8px 16px;border-radius:18px;backdrop-filter:blur(6px)}
+.reel.playing .reel__sub span{display:inline-block;animation:wordIn .55s var(--ease-emph) both;animation-delay:calc(var(--i) * 110ms + 250ms)}
+@keyframes wordIn{from{opacity:0;transform:translateY(10px)}}
+.reel__ctl{position:absolute;inset:auto 14px 16px;z-index:3;display:flex;align-items:center;gap:8px}
+.reel__music{display:inline-flex;align-items:center;gap:6px;font-size:.76rem;font-weight:700;color:#fff;margin-inline-end:auto;background:rgb(20 30 24 / .55);padding:5px 12px;border-radius:999px}
+.reel__music .ic{width:16px;height:16px}
+.rbtn{width:38px;height:38px;border-radius:50%;border:0;display:grid;place-items:center;background:rgb(20 30 24 / .55);color:#fff;cursor:pointer;backdrop-filter:blur(6px)}
+.rbtn .ic{width:18px;height:18px}
+.reel__play{position:absolute;inset:0;z-index:4;display:grid;place-content:center;justify-items:center;gap:12px;border:0;background:rgb(0 0 0 / .28);color:#fff;font:inherit;font-weight:800;font-size:1rem;cursor:pointer}
+.reel__playbtn{width:86px;height:86px;border-radius:50%;display:grid;place-items:center;background:var(--sun);color:#3A2A05;box-shadow:0 0 0 10px rgb(242 181 68 / .28);animation:breatheBtn 2.4s ease-in-out infinite}
+.reel__playbtn svg{width:34px;height:34px;margin-inline-start:4px}
+@keyframes breatheBtn{50%{box-shadow:0 0 0 18px rgb(242 181 68 / .12)}}
+.slide--birds{background:linear-gradient(170deg,#FFE3A3,#F7B98B 60%,#E98A5B)}
+.slide--birds .branch{position:absolute;left:-10%;right:-10%;top:58%;height:14px;border-radius:999px;background:#7A5536;transform:rotate(-6deg)}
+.rbird{position:absolute;width:42%;aspect-ratio:1}
+.rbird svg{width:100%;height:100%;overflow:visible}
+.rbird.b1{left:12%;top:31%}
+.rbird.b2{right:8%;top:28%;transform:scaleX(-1)}
+.slide--birds.on .b-head{animation:bob 1.4s ease-in-out infinite}
+.slide--birds.on .b2 .b-head{animation-delay:.5s}
+@keyframes bob{50%{transform:rotate(-10deg)}}
+.slide--outro{background:#1F5A3D;display:grid;place-content:center;justify-items:center;gap:10px;color:#FFFDF8}
+.slide--outro .logo-mark{width:120px}
+.slide--outro b{font-size:2rem;font-weight:900}
+.slide--outro small{font-size:.9rem;color:#CFE3D4;direction:ltr}
+
+/* reel scenes: vector illustration + motion */
+.slide svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.slide svg *{transform-box:fill-box;transform-origin:center}
+.slide svg .a-snip{transform-box:view-box;transform-origin:0 0}
+.slide svg .a-sprout{transform-origin:left bottom}
+.slide svg .a-ring{transform-origin:top center}
+.reel.started .slide.on .a-pop,.reel.started .slide.on .a-sprout{animation:aPop .7s var(--d,0s) cubic-bezier(.34,1.56,.64,1) both}
+.reel.started .slide.on .a-rise{animation:aRise .7s var(--d,0s) cubic-bezier(.16,1,.3,1) both}
+.reel.started .slide.on .a-draw{stroke-dasharray:1;animation:aDraw 1s var(--d,0s) cubic-bezier(.65,0,.35,1) both}
+.reel.started .slide.on .a-drop{animation:aDrop .85s var(--d,0s) cubic-bezier(.34,1.35,.64,1) both}
+.reel.started .slide.on .a-fade{animation:aFade .6s var(--d,0s) ease both}
+.slide.on .a-float{animation:aFloat 2.4s var(--d,0s) ease-in-out infinite alternate}
+.slide.on .a-spin{animation:aSpin 7s linear infinite}
+.slide.on .a-ring{animation:aRing 1.3s ease-in-out infinite}
+.slide.on .a-pulse{animation:aPulse 1.8s var(--d,0s) ease-out infinite}
+.reel.started .slide.on .a-up{animation:aUp 2.8s var(--d,0s) ease-in infinite}
+.slide.on .a-twinkle{animation:aTw 1.2s var(--d,0s) ease-in-out infinite alternate}
+.slide.on .a-snip{animation:aSnip .45s ease-in-out infinite alternate}
+.slide.on .a-beat{animation:aBeat 1s ease-in-out infinite}
+@keyframes aPop{from{transform:scale(0);opacity:0}}
+@keyframes aRise{from{transform:translateY(40px);opacity:0}}
+@keyframes aDraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes aDrop{from{transform:translateY(-320px)}}
+@keyframes aFade{from{opacity:0}}
+@keyframes aFloat{to{transform:translateY(-9px)}}
+@keyframes aSpin{to{transform:rotate(360deg)}}
+@keyframes aRing{0%,60%,100%{transform:rotate(0)}15%{transform:rotate(16deg)}30%{transform:rotate(-14deg)}45%{transform:rotate(8deg)}}
+@keyframes aPulse{0%{transform:scale(.35);opacity:.9}100%{transform:scale(1.7);opacity:0}}
+@keyframes aUp{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(-230px);opacity:0}}
+@keyframes aTw{to{opacity:.3;transform:scale(.7)}}
+@keyframes aSnip{to{transform:rotate(-16deg)}}
+@keyframes aBeat{50%{transform:scale(1.15)}}
+.reel:not(.playing) .slide *{animation-play-state:paused!important}
+
+/* ===== path ===== */
+.path{background:var(--paper)}
+.trail{position:relative;height:96px;margin-block-end:8px}
+.tp{position:absolute;width:22px;height:22px;margin:-11px 0 0 -11px;color:var(--forest-2);opacity:0;transform:rotate(var(--r)) scale(.4);transition:opacity .35s,transform .45s var(--ease-emph)}
+.tp.on{opacity:.85;transform:rotate(var(--r)) scale(1)}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,2vw,24px)}
+@media (max-width:860px){.steps{grid-template-columns:minmax(0,1fr)}}
+.step{background:var(--raised);border-radius:28px;padding:22px;display:grid;gap:8px;align-content:start;box-shadow:0 1px 0 var(--line);opacity:.55;transform:translateY(8px);transition:opacity .5s var(--ease),transform .6s var(--ease-emph),box-shadow .5s}
+.step.lit{opacity:1;transform:none;box-shadow:0 1px 0 var(--line),0 26px 50px -34px rgb(var(--sh) / .55)}
+:root[data-motion="off"] .step{opacity:1;transform:none}
+.step__n{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--mint);color:var(--forest);font-weight:850}
+.step.lit .step__n{background:var(--sun);color:var(--on-sun)}
+.step h3{font-size:1.15rem;font-weight:850}
+.step p{color:var(--ink-2);font-size:.95rem}
+.frag{margin-block-start:8px;background:var(--paper-2);border-radius:18px;padding:12px 14px;display:grid;gap:8px;font-size:.86rem}
+.frag__row{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--line);padding-bottom:6px}
+.frag__row:last-of-type{border-bottom:0;padding-bottom:0}
+.frag__row span{color:var(--ink-3)}
+.frag__ok{color:var(--forest-2)}
+.frag small{justify-self:start}
+.fchips{display:flex;flex-wrap:wrap;gap:6px}
+.fchips span{padding:4px 12px;border-radius:999px;background:var(--raised);box-shadow:inset 0 0 0 1px var(--line);font-weight:700}
+.fchips span.on{background:var(--forest);color:var(--on-forest);box-shadow:none}
+.fline{display:grid;gap:8px}
+.fline div{display:flex;align-items:center;gap:8px}
+.fline i{width:12px;height:12px;border-radius:50%;background:var(--line-2);flex:none}
+.fline .done i{background:var(--forest-2)}
+.fline .now i{background:var(--sun);box-shadow:0 0 0 0 rgb(242 181 68 / .6);animation:ping 1.6s infinite}
+@keyframes ping{70%{box-shadow:0 0 0 9px rgb(242 181 68 / 0)}}
+
+/* ===== trust ===== */
+.trust{background:var(--mint)}
+.trust__grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(28px,5vw,72px);align-items:center}
+@media (max-width:920px){.trust__grid{grid-template-columns:minmax(0,1fr)}}
+.principles{list-style:none;margin:24px 0 0;padding:0;display:grid;gap:10px}
+.principles li{display:grid;gap:2px;padding:14px 18px;border-radius:22px;background:color-mix(in srgb,var(--raised) 70%,transparent);cursor:default;transition:background-color .25s,transform .3s var(--ease)}
+.principles li:hover,.principles li:focus-within,.principles li.on{background:var(--raised);transform:translateX(-6px)}
+.principles h3{font-size:1.02rem;font-weight:850}
+.principles p{font-size:.92rem;color:var(--ink-2)}
+.share{position:relative;background:var(--raised);border-radius:30px;padding:clamp(18px,2.6vw,28px);box-shadow:0 1px 0 var(--line),0 34px 64px -40px rgb(var(--sh) / .5);display:grid;gap:16px}
+.share__head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.share__title{font-weight:850;font-size:1.05rem}
+.lbl{font-size:.82rem;font-weight:800;color:var(--ink-3);margin-block-end:6px}
+.toggles{display:flex;flex-wrap:wrap;gap:6px}
+.tg{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:999px;border:0;background:var(--paper);color:var(--ink-2);font:inherit;font-size:.9rem;font-weight:750;cursor:pointer;box-shadow:inset 0 0 0 1.5px var(--line);transition:background-color .2s,color .2s,box-shadow .2s}
+.tg .ic{width:16px;height:16px;opacity:0;margin-inline-start:-22px;transition:opacity .2s,margin .25s var(--ease)}
+.tg[aria-pressed="true"]{background:var(--forest);color:var(--on-forest);box-shadow:none}
+.tg[aria-pressed="true"] .ic{opacity:1;margin-inline-start:0}
+.seg{display:inline-flex;background:var(--paper);border-radius:999px;padding:4px;box-shadow:inset 0 0 0 1.5px var(--line)}
+.seg button{min-height:36px;padding:0 16px;border-radius:999px;border:0;background:transparent;color:var(--ink-2);font:inherit;font-size:.88rem;font-weight:750;cursor:pointer;transition:background-color .2s,color .2s}
+.seg button[aria-checked="true"]{background:var(--sun);color:var(--on-sun)}
+.prev{display:grid;border-radius:20px;background:var(--paper-2);padding:6px 14px}
+.prow{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:2px 10px;padding:10px 0;border-top:1px solid var(--line)}
+.prow:first-child{border-top:0}
+.prow__n{font-weight:800;font-size:.93rem}
+.prow__v{grid-column:1;font-size:.86rem;color:var(--ink-2)}
+.src{grid-row:1 / span 2;grid-column:2;font-size:.74rem;font-weight:800;padding:3px 10px;border-radius:999px;background:var(--mint);color:var(--forest);transition:box-shadow .3s}
+.src.me{background:var(--apricot-bg);color:var(--ink)}
+.src.none{background:transparent;color:var(--ink-3);border:1.5px dashed var(--line-2)}
+.prow__v.unknown{display:inline-flex;align-items:center;gap:6px;width:max-content;padding:2px 10px;border-radius:8px;border:1.5px dashed var(--line-2);color:var(--ink-2);transition:box-shadow .3s}
+.prow .prow__n,.prow .prow__v,.prow .src{transition:filter .4s var(--ease),opacity .4s}
+.prow.off .prow__n,.prow.off .prow__v,.prow.off .src{filter:blur(5px);opacity:.45}
+.prow__lock{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.8);display:inline-flex;align-items:center;gap:6px;font-size:.8rem;font-weight:800;color:var(--ink);background:var(--raised);padding:4px 12px;border-radius:999px;box-shadow:0 6px 16px -10px rgb(var(--sh) / .6);opacity:0;transition:opacity .3s,transform .35s var(--ease-emph);pointer-events:none}
+.prow__lock .ic{width:15px;height:15px}
+.prow.off .prow__lock{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.share__foot{font-size:.85rem;color:var(--ink-2)}
+.share__foot b{color:var(--ink)}
+.share[data-hl="controls"] .hl-controls,.share[data-hl="source"] .src,.share[data-hl="unknown"] .unknown{box-shadow:0 0 0 3px var(--sun)}
+.hl-controls{display:grid;gap:12px;border-radius:20px;padding:4px;transition:box-shadow .3s}
+
+/* ===== lost strip ===== */
+.lost{background:var(--apricot-bg);padding-block:clamp(40px,6vw,64px)}
+.lost__in{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:18px 24px}
+.lost__ic{position:relative;width:60px;height:60px;border-radius:50%;display:grid;place-items:center;background:var(--raised);color:var(--apricot);flex:none}
+.lost__ic .ic{width:28px;height:28px}
+.lost__t{flex:1 1 320px;min-width:0}
+.lost__t h2{font-size:clamp(1.25rem,1rem + 1vw,1.6rem);font-weight:850;line-height:1.4}
+.lost__t p{color:var(--ink-2)}
+
+/* ===== memorial ===== */
+.memory{background:radial-gradient(ellipse 70% 55% at 50% 0%,#9089CF 0%,transparent 72%),linear-gradient(180deg,var(--dusk-2),var(--dusk) 82%);color:var(--dusk-ink);overflow:hidden}
+.memory .eyebrow{color:var(--glow)}
+.memory .lede{color:var(--dusk-ink-2)}
+.sky{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.moon{position:absolute;top:56px;inset-inline-end:12%;width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 40% 40%,#FFF4DC,#F4DDB0);box-shadow:0 0 60px 10px rgb(255 214 150 / .25);pointer-events:none}
+.memory .wrap{position:relative}
+.arches{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(12px,2.4vw,28px);align-items:end;padding-block-start:24px}
+.arch{margin:0;display:grid;justify-items:center}
+.arch:nth-child(2),.arch:nth-child(4){transform:translateY(-26px)}
+.arch:nth-child(3){transform:translateY(-40px)}
+@media (max-width:820px){.arches{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:16px;padding-block-start:44px}.arch{flex:0 0 46%;scroll-snap-align:center}.arch:nth-child(n){transform:none}}
+.arch__frame{position:relative;width:100%;aspect-ratio:3/4.3;border-radius:999px 999px 16px 16px;overflow:hidden;background:var(--dusk-2);box-shadow:0 0 0 1px rgb(255 201 120 / .28),0 30px 50px -30px rgb(0 0 0 / .8);transition:box-shadow .8s var(--ease)}
+.arch__frame::after{content:"";position:absolute;inset:8px;border-radius:999px 999px 10px 10px;border:1px solid rgb(255 230 190 / .38);pointer-events:none}
+.arch__frame img{width:100%;height:100%;object-fit:cover;filter:sepia(.3) saturate(.75) brightness(.72);transition:filter .9s var(--ease),transform 1.4s var(--ease)}
+.arch:hover img,.arch.lit img{filter:sepia(.05) saturate(1) brightness(.98);transform:scale(1.05)}
+.arch.lit .arch__frame{box-shadow:0 0 0 1px rgb(255 201 120 / .7),0 0 70px -8px rgb(255 201 120 / .55),0 30px 50px -30px rgb(0 0 0 / .8)}
+.arch figcaption{margin-top:14px;font-weight:800;font-size:1.08rem;color:var(--dusk-ink)}
+.candle{display:grid;justify-items:center;gap:8px;margin-top:10px;background:none;border:0;color:var(--dusk-ink-2);font:inherit;font-size:.8rem;font-weight:700;cursor:pointer;padding:6px 10px;border-radius:14px}
+.candle:hover{color:var(--glow)}
+.candle__body{position:relative;width:14px;height:26px;border-radius:4px 4px 3px 3px;background:linear-gradient(#F7EEDD,#DCCBAE)}
+.candle__body::before{content:"";position:absolute;left:50%;top:-5px;width:2px;height:6px;margin-left:-1px;background:#3a3020;border-radius:1px}
+.candle__flame{position:absolute;left:50%;bottom:calc(100% + 3px);width:11px;height:18px;margin-left:-5.5px;border-radius:50% 50% 50% 50% / 62% 62% 38% 38%;background:radial-gradient(circle at 50% 72%,#FFFBEA 0 18%,#FFD27A 42%,#F2913C 72%,transparent 74%);transform-origin:50% 100%;opacity:0;transform:scale(.3);transition:opacity .5s,transform .5s var(--ease-emph)}
+.arch.lit .candle__flame{opacity:1;transform:scale(1);animation:flicker 1.7s ease-in-out infinite}
+@keyframes flicker{25%{transform:scale(.94,1.06) rotate(-2deg)}50%{transform:scale(1.03,.96) rotate(1.5deg)}75%{transform:scale(.97,1.04) rotate(-1deg)}}
+.arch--new .arch__frame{display:grid;place-content:center;justify-items:center;gap:10px;background:rgb(255 255 255 / .04);box-shadow:inset 0 0 0 1.5px rgb(255 230 190 / .35);text-decoration:none;color:var(--dusk-ink);text-align:center;padding:16px}
+.arch--new .arch__frame::after{border-style:dashed}
+.arch--new .plus{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:rgb(255 201 120 / .16);color:var(--glow)}
+.arch--new span{font-size:.9rem;font-weight:700;line-height:1.6}
+.memory__cta{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:14px 20px;margin-block-start:48px;text-align:center}
+.memory__cta p{color:var(--dusk-ink-2);max-width:44ch}
+.btn.glow{--bg:var(--glow);--fg:#2B1F03}
+
+/* ===== kindness ===== */
+.kind{background:var(--paper)}
+.kind__grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:clamp(28px,5vw,72px);align-items:center}
+@media (max-width:920px){.kind__grid{grid-template-columns:minmax(0,1fr)}}
+.lightbox{position:relative;border-radius:32px;overflow:hidden;aspect-ratio:4/3;background:var(--cream);--mx:56%;--my:60%}
+.lightbox img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.lightbox .base{filter:grayscale(1) contrast(.92) brightness(1.06)}
+.lightbox .color{-webkit-mask-image:radial-gradient(circle 200px at var(--mx) var(--my),#000 38%,transparent 100%);mask-image:radial-gradient(circle 200px at var(--mx) var(--my),#000 38%,transparent 100%)}
+.lightbox::after{content:"";position:absolute;inset:0;background:radial-gradient(circle 230px at var(--mx) var(--my),rgb(255 201 120 / .3),transparent 70%);pointer-events:none}
+.lightbox__hint{position:absolute;inset-block-end:14px;inset-inline-start:14px;z-index:2;background:rgb(23 36 29 / .78);color:#F3EFE6;font-size:.8rem;font-weight:700;padding:6px 12px;border-radius:999px}
+.kind__copy{display:grid;gap:14px}
+
+/* ===== partners ===== */
+.partners{background:var(--cream)}
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px}
+.role{position:relative;background:var(--raised);border-radius:28px;padding:22px;display:grid;gap:8px;align-content:start;box-shadow:0 1px 0 var(--line);transition:transform .35s var(--ease-emph),box-shadow .35s}
+.role:hover{transform:translateY(-6px);box-shadow:0 1px 0 var(--line),0 30px 54px -34px rgb(var(--sh) / .55)}
+.role__ic{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;background:var(--mint);color:var(--forest)}
+.role__ic .ic{width:26px;height:26px}
+.role h3{font-size:1.1rem;font-weight:850}
+.role p{font-size:.92rem;color:var(--ink-2)}
+.partners__cta{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px;margin-block-start:28px;padding:20px 22px;border-radius:999px;background:var(--raised);box-shadow:0 1px 0 var(--line)}
+.partners__cta p{flex:1 1 300px;min-width:0;font-size:.88rem;color:var(--ink-2)}
+@media (max-width:700px){.partners__cta{border-radius:28px}}
+
+/* ===== final ===== */
+.final{background:var(--paper-2);overflow:hidden}
+.final canvas{position:absolute;inset:0;width:100%;height:100%}
+.final__in{position:relative;display:grid;justify-items:center;text-align:center;gap:16px;padding-block:clamp(96px,13vw,160px);pointer-events:none}
+.final__in > *{pointer-events:auto}
+.final__badge{width:70px;height:70px;border-radius:50%;display:grid;place-items:center;background:var(--sun);color:var(--on-sun);box-shadow:0 0 0 12px color-mix(in srgb,var(--sun) 22%,transparent)}
+.final__badge svg{width:34px;height:34px}
+.final .lede{margin-inline:auto}
+
+/* footer */
+.foot{background:var(--band);color:var(--band-ink);padding-block:56px 40px}
+.foot__grid{display:grid;grid-template-columns:minmax(0,1.4fr) repeat(3,minmax(0,1fr));gap:28px}
+@media (max-width:820px){.foot__grid{grid-template-columns:repeat(2,minmax(0,1fr))}.foot__brand{grid-column:1 / -1}}
+.foot__brand .logo-mark{width:64px}.foot__brand .wm-fa{font-size:1.6rem}
+.foot__brand p{color:var(--band-ink-2);font-size:.92rem;max-width:36ch;margin-top:8px}
+.foot h3{font-size:.95rem;font-weight:800;margin-bottom:10px}
+.foot ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.foot a{color:var(--band-ink-2);text-decoration:none;font-size:.92rem}
+.foot a:hover{color:var(--band-ink)}
+.foot__notice{margin-top:36px;padding-top:18px;border-top:1px solid var(--band-line);font-size:.82rem;color:var(--band-ink-2)}
+
+/* sticky hook */
+.hookbar{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;align-items:center;gap:12px;padding:8px 8px 8px 12px;border-radius:999px;background:var(--raised);box-shadow:0 1px 0 var(--line),0 24px 50px -20px rgb(var(--sh) / .6);transform:translate(-50%,140%);opacity:0;transition:transform .5s var(--ease-emph),opacity .4s;max-width:calc(100vw - 32px)}
+.hookbar.show{transform:translate(-50%,0);opacity:1}
+.hookbar__paw{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--mint);color:var(--forest);flex:none}
+.hookbar__paw svg{width:20px;height:20px}
+.hookbar__t{font-weight:750;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.hookbar__x{width:34px;height:34px;border-radius:50%;border:0;background:transparent;color:var(--ink-3);display:grid;place-items:center;cursor:pointer;flex:none}
+.hookbar__x .ic{width:16px;height:16px}
+
+/* Cookie cursor */
+.ck{position:fixed;left:0;top:0;z-index:90;pointer-events:none;will-change:transform;display:none}
+:root[data-cookie="on"] .ck{display:block}
+.ck__body{transform-origin:50% 90%}
+.dog{display:block;width:96px;height:77px;overflow:visible}
+.dog *{transform-box:view-box}
+.d-flip{transform-origin:60px 50px;transition:transform .22s var(--ease)}
+.dog.left .d-flip{transform:scaleX(-1)}
+.pose-stand{transform-origin:40px 86px;transition:opacity .16s linear,transform .3s var(--ease-emph)}
+.pose-sit{opacity:0;transform:scale(.92);transition:opacity .16s linear,transform .3s var(--ease-emph)}
+.dog.sit .pose-sit{opacity:1;transform:none}
+.dog.sit .pose-stand{opacity:0}
+.dog.walk .pose-stand,.dog.run .pose-stand{animation:dbob .17s ease-in-out infinite alternate}
+.dog.run .pose-stand{animation-duration:.11s}
+@keyframes dbob{to{transform:translateY(-1.8px)}}
+.dog.bow .pose-stand{transform:rotate(15deg)}
+.dog.walk .d-a{animation:dleg .34s ease-in-out infinite alternate}
+.dog.walk .d-b{animation:dleg .34s ease-in-out infinite alternate-reverse}
+.dog.run .d-a{animation:dleg .2s ease-in-out infinite alternate}
+.dog.run .d-b{animation:dleg .2s ease-in-out infinite alternate-reverse}
+@keyframes dleg{from{transform:rotate(28deg)}to{transform:rotate(-28deg)}}
+.d-tail,.d-tail2{animation:dwag .34s ease-in-out infinite alternate}
+.dog.run .d-tail,.dog.play .d-tail,.dog.bow .d-tail,.dog.look .d-tail2{animation-duration:.17s}
+@keyframes dwag{from{transform:rotate(-12deg)}to{transform:rotate(14deg)}}
+.dog.run .d-ear{animation:dflop .2s ease-in-out infinite alternate}
+@keyframes dflop{to{transform:rotate(-14deg)}}
+.d-eyes,.d-eyes2{animation:dblink 4.4s infinite}
+@keyframes dblink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.12)}}
+.d-tongue{opacity:0;transition:opacity .2s}
+.dog.run .d-tongue,.dog.bow .d-tongue,.dog.play .d-tongue,.dog.look .d-tongue{opacity:1}
+.dog.look .d-head2{animation:dtilt 2.2s var(--ease) both}
+@keyframes dtilt{0%{transform:rotate(0)}30%,64%{transform:rotate(-13deg)}100%{transform:rotate(0)}}
+.dog.point .d-head{animation:dtilt2 2.6s ease-in-out infinite}
+@keyframes dtilt2{50%{transform:rotate(-9deg)}}
+.ck__bubble{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%) scale(.6);transform-origin:50% 100%;opacity:0;white-space:nowrap;background:var(--raised);color:var(--ink);font-size:.82rem;font-weight:800;padding:6px 14px;border-radius:999px;box-shadow:0 10px 24px -10px rgb(var(--sh) / .6),0 0 0 1px var(--line);transition:opacity .25s,transform .35s var(--ease-emph)}
+.ck.talk .ck__bubble{opacity:1;transform:translateX(-50%) scale(1)}
+.ck-dot{position:fixed;left:0;top:0;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:var(--forest);box-shadow:0 0 0 2px var(--raised);z-index:91;pointer-events:none;display:none;transition:opacity .15s}
+:root[data-cookie="on"][data-fine="1"] .ck-dot{display:block}
+.ck-dot.hide{opacity:0}
+:root[data-cookie="on"][data-fine="1"] body{cursor:none}
+:root[data-cookie="on"][data-fine="1"] :is(a,button,label,[role="radio"]){cursor:pointer}
+:root[data-cookie="on"][data-fine="1"] input{cursor:text}
+.ck-ball{position:fixed;left:0;top:0;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#F4F77A,#C9D93A 60%,#9DB22A);box-shadow:inset 0 0 0 1.5px rgb(255 255 255 / .6),0 6px 10px -4px rgb(0 0 0 / .3);z-index:89;pointer-events:none;opacity:0;transition:opacity .3s}
+.ck-ball.on{opacity:1}
+.pawlayer{position:absolute;left:0;top:0;width:0;height:0;z-index:5;pointer-events:none}
+.pp{position:absolute;width:15px;height:15px;margin:-7.5px 0 0 -7.5px;color:var(--ink-3);transform:rotate(var(--r));animation:ppfade 1.8s ease-out forwards}
+.pp svg{width:100%;height:100%;display:block}
+@keyframes ppfade{0%{opacity:.5}100%{opacity:0}}
+
+/* reveal */
+.rise{transition:opacity .9s var(--ease-emph),transform .9s var(--ease-emph)}
+.rise.pre{opacity:0;transform:translateY(26px)}
+:root[data-motion="off"] *,:root[data-motion="off"] *::before,:root[data-motion="off"] *::after{animation:none!important;transition:none!important}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m11 18-6-6 6-6"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/></symbol>
+  <symbol id="i-bag" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></symbol>
+  <symbol id="i-plane" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-love" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 7.5 2.8C19.5 15.4 12 20 12 20z"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4.5 4.5L19 7"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-vol" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-paw" viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><ellipse cx="12" cy="15.6" rx="5" ry="4.2"/><ellipse cx="6.2" cy="10.2" rx="1.9" ry="2.4"/><ellipse cx="9.6" cy="6.9" rx="1.9" ry="2.5"/><ellipse cx="14.4" cy="6.9" rx="1.9" ry="2.5"/><ellipse cx="17.8" cy="10.2" rx="1.9" ry="2.4"/></g></symbol>
+</svg>
+
+<div class="site" id="site">
+  <div class="pawlayer" id="pawLayer" aria-hidden="true"></div>
+
+  <div class="studio" role="region" aria-label="کنترل‌های پیش‌نمایش">
+    <div class="wrap studio__in">
+      <strong>پیش‌نمایش طرح لندینگ اپت لایف</strong>
+      <span class="studio__muted">نسخهٔ ۲ · فقط فارسی در این پیش‌نمایش · هیرو بدون تغییر</span>
+      <div class="studio__tg">
+        <button class="chip" id="tgCookie" type="button" aria-pressed="true">کوکی</button>
+        <button class="chip" id="tgNotes" type="button" aria-pressed="true">یادداشت‌های طراحی</button>
+        <button class="chip" id="tgMotion" type="button" aria-pressed="true">حرکت</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="idea">
+    <div class="wrap idea__in">
+      <div class="idea__grid">
+        <div class="idea__card"><h3>کاربر گم نمی‌شود</h3><p>زیر هیرو الان ۹ بخش پشت سر هم است با حدود ۲۰ دکمه و لینک هم‌وزن. اینجا همهٔ قابلیت‌ها در ۵ پرسش ساده دور پروندهٔ پت جمع شده‌اند.</p></div>
+        <div class="idea__card"><h3>کوکی راهنماست</h3><p>نشانگر موس یک سگ انیمیشنی شبیه کوکی است: موی بلند طلایی، گوش‌های پشمالو و یقهٔ توری صورتی. دنبالت راه می‌افتد و می‌دود، کنار گزینه‌ای که انتخاب می‌کنی می‌ایستد و سرش را کج می‌کند، اگر موس ثابت بماند می‌نشیند و به تو نگاه می‌کند و اگر بیشتر بمانی توپ‌بازی می‌کند.</p></div>
+        <div class="idea__card"><h3>هدر نرم و روشن</h3><p>هدر روشن و شیشه‌ای با دکمه‌های نرم؛ منوی «خدمات» همان ۵ پرسش را نشان می‌دهد و انتخاب زبان برای هر چهار زبان سایت است. هیرو، متن‌ها و دکمهٔ «کشف خدمات» دقیقاً همان نسخهٔ سایت است.</p></div>
+        <div class="idea__card"><h3>قلاب‌های واقعی بازاریابی</h3><p>اسم پتت را بنویس تا صفحه برای او شخصی شود. ریلز ۳۰ ثانیه‌ای همهٔ خدمات را نشان می‌دهد و یادبود جایی برای ماندن یاد همراهان است. هیچ عدد یا ادعای ساختگی در صفحه نیست.</p></div>
+        <div class="idea__card"><h3>پرنده‌ها و ردپاها</h3><p>پرنده‌های خانگی روی لبهٔ بخش‌ها نشسته‌اند و وقتی کوکی نزدیک می‌شود پر می‌کشند و برمی‌گردند. ردپای کوکی هر جا برود روی صفحه می‌ماند و آرام محو می‌شود.</p></div>
+      </div>
+      <div class="idea__btns"><span>سیستم دکمه‌های نرم برای صفحه‌های بعدی:</span>
+        <a class="btn primary sm" href="#start">اصلی</a><a class="btn sun sm" href="#lost">گرم</a><a class="btn soft sm" href="#world">نرم</a><a class="btn line sm" href="#partners">خطی</a>
+      </div>
+    </div>
+  </div>
+
+  <section class="brandboard" id="brand" aria-labelledby="brand-title">
+    <div class="wrap">
+      <header class="sec-head">
+        <p class="eyebrow"><svg class="ic"><use href="#i-spark"/></svg>پیشنهاد لوگوی تازه</p>
+        <h2 class="h2" id="brand-title">اپت لایف، در سه حرف</h2>
+        <p class="lede">در opl، حرف o یک گربه است، p یک سگ و l جوانه‌ای برای زندگی. بدون پنجهٔ تکراری و قلب کلیشه‌ای؛ خود حروف همراه‌ها هستند. در نسخهٔ فارسی کنار نشانه «اپت لایف» نوشته می‌شود.</p>
+      </header>
+      <div class="bgrid">
+        <figure class="btile btile--hero logo-anim"><span class="logo-mark" data-logo></span><figcaption>نشانه</figcaption></figure>
+        <figure class="btile"><div class="lockup"><span class="logo-mark" data-logo></span><span><b class="wm-fa">اپت لایف</b><small>یک جهان برای حیوانات خانگی</small></span></div><figcaption>نسخهٔ فارسی</figcaption></figure>
+        <figure class="btile"><div class="lockup" dir="ltr"><span class="logo-mark" data-logo></span><b class="wm-en">opetlife</b></div><figcaption>انگلیسی، آلمانی و اسپانیایی</figcaption></figure>
+        <figure class="btile btile--dark"><div class="lockup"><span class="logo-mark" data-logo></span><span><b class="wm-fa">اپت لایف</b><small>یک جهان برای حیوانات خانگی</small></span></div><figcaption>روی رنگ برند</figcaption></figure>
+        <figure class="btile"><div class="icons"><span class="appicon a1"><span class="logo-mark" data-logo></span></span><span class="appicon a2"><span class="logo-mark" data-logo></span></span><span class="appicon a3"><span class="logo-mark" data-logo></span></span></div><figcaption>آیکون اپ و فاوآیکن</figcaption></figure>
+        <figure class="btile btile--wide logo-anim"><div class="parts"><div><span class="logo-mark" data-logo data-vb="10 20 76 86"></span>o · گربه</div><div><span class="logo-mark" data-logo data-vb="88 28 76 96"></span>p · سگ</div><div><span class="logo-mark" data-logo data-vb="164 0 38 104"></span>l · زندگی</div></div><figcaption>ساختار</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <header class="hdr" id="hdr">
+    <div class="wrap hdr__in">
+      <a class="brand" href="#site" aria-label="اپت لایف، خانه" data-ck="خونه">
+        <span class="logo-mark" data-logo></span>
+        <span><b>اپت لایف</b><small>یک جهان برای حیوانات خانگی</small></span>
+      </a>
+      <nav class="hnav" aria-label="ناوبری اصلی">
+        <a class="on" href="#site">خانه</a>
+        <div class="hnav__dd">
+          <button type="button" id="ddBtn" aria-expanded="false" aria-controls="dd">خدمات<svg class="ic"><use href="#i-chev"/></svg></button>
+          <div class="dd" id="dd">
+            <a href="#world" data-go="health"><span class="dd__ic"><svg class="ic"><use href="#i-heart"/></svg></span><span><b>سلامت و مراقبت</b><small>حالش خوبه؟</small></span></a>
+            <a href="#world" data-go="daily"><span class="dd__ic"><svg class="ic"><use href="#i-bag"/></svg></span><span><b>خرید و خدمات</b><small>امروز چی لازم داره؟</small></span></a>
+            <a href="#world" data-go="travel"><span class="dd__ic"><svg class="ic"><use href="#i-plane"/></svg></span><span><b>سفر و اقامت</b><small>کجا با هم بریم؟</small></span></a>
+            <a href="#world" data-go="safe"><span class="dd__ic"><svg class="ic"><use href="#i-shield"/></svg></span><span><b>آرامش خاطر</b><small>اگه اتفاقی بیفته؟</small></span></a>
+            <a href="#world" data-go="together"><span class="dd__ic"><svg class="ic"><use href="#i-users"/></svg></span><span><b>جامعه و مهربانی</b><small>با بقیه چطور؟</small></span></a>
+            <a href="https://opetlife.ir/fa/services" target="_blank" rel="noopener"><span class="dd__ic"><svg class="ic"><use href="#i-spark"/></svg></span><span><b>همهٔ خدمات</b><small>فهرست کامل ارائه‌دهنده‌ها</small></span></a>
+          </div>
+        </div>
+        <a href="https://opetlife.ir/fa/vet/find" target="_blank" rel="noopener">دامپزشکی</a>
+        <a href="#world">دربارهٔ ما</a>
+        <a href="#partners">برای همکاران</a>
+      </nav>
+      <div class="hact">
+        <div class="lang">
+          <button class="iconbtn" id="langBtn" type="button" aria-expanded="false" aria-controls="langMenu" aria-label="زبان: فارسی">فا</button>
+          <div class="lang__menu" id="langMenu" role="menu">
+            <button type="button" role="menuitemradio" aria-checked="true" data-l="fa">فارسی<span>FA</span></button>
+            <button type="button" role="menuitemradio" aria-checked="false" data-l="en">English<span>EN</span></button>
+            <button type="button" role="menuitemradio" aria-checked="false" data-l="de">Deutsch<span>DE</span></button>
+            <button type="button" role="menuitemradio" aria-checked="false" data-l="es">Español<span>ES</span></button>
+          </div>
+        </div>
+        <button class="iconbtn hide-sm" id="aaBtn" type="button" aria-label="حالت نمایش ساده">Aa</button>
+        <a class="btn line sm hide-sm" href="https://opetlife.ir/fa/auth?returnTo=%2Ffa%2Fprovider" target="_blank" rel="noopener" data-ck="همکار عزیز">همکاران</a>
+        <a class="btn soft sm hide-sm" href="https://opetlife.ir/fa/auth" target="_blank" rel="noopener" data-ck="خوش برگشتی">ورود</a>
+        <a class="btn primary sm" href="https://opetlife.ir/fa/register" target="_blank" rel="noopener" data-ck="بزن بریم">عضویت</a>
+        <button class="iconbtn hmenu" id="menuBtn" type="button" aria-expanded="false" aria-controls="msheet" aria-label="باز کردن منو"><svg class="ic"><use href="#i-menu"/></svg></button>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="msheet" id="msheet">
+        <a href="#world" data-go="health"><span class="dd__ic"><svg class="ic"><use href="#i-heart"/></svg></span>سلامت و مراقبت</a>
+        <a href="#world" data-go="daily"><span class="dd__ic"><svg class="ic"><use href="#i-bag"/></svg></span>خرید و خدمات</a>
+        <a href="#world" data-go="travel"><span class="dd__ic"><svg class="ic"><use href="#i-plane"/></svg></span>سفر و اقامت</a>
+        <a href="#world" data-go="safe"><span class="dd__ic"><svg class="ic"><use href="#i-shield"/></svg></span>آرامش خاطر</a>
+        <a href="#world" data-go="together"><span class="dd__ic"><svg class="ic"><use href="#i-users"/></svg></span>جامعه و مهربانی</a>
+        <a href="https://opetlife.ir/fa/vet/find" target="_blank" rel="noopener"><span class="dd__ic"><svg class="ic"><use href="#i-heart"/></svg></span>دامپزشکی</a>
+        <a href="#partners"><span class="dd__ic"><svg class="ic"><use href="#i-spark"/></svg></span>برای همکاران</a>
+        <div class="actions"><a class="btn soft sm" href="https://opetlife.ir/fa/auth" target="_blank" rel="noopener">ورود</a><a class="btn line sm" href="https://opetlife.ir/fa/auth?returnTo=%2Ffa%2Fprovider" target="_blank" rel="noopener">ورود همکار</a></div>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero" id="hero" aria-labelledby="hero-title">
+    <img class="hero__img" src="../../../../apps/web/public/images/landing/tehran-park.webp" alt="تارا با موهای فر مسی و کوکی وارد پارکی در تهران می‌شوند؛ پدرام کنار تریر سفید و مشکی است. غرفه‌های خدمات، برج آزادی و برج میلاد در دورنما دیده می‌شوند.">
+    <div class="hero__in">
+      <h1 id="hero-title">یک دنیا برای تو و همراهت</h1>
+      <p class="hero__d">همهٔ خدمات مورد نیاز حیوانات خانگی، در یک اپلیکیشن</p>
+      <p class="hero__s">زندگی سالم‌تر، شادتر و همراه‌تر برای دوست کوچک شما</p>
+      <a class="hero__cta" href="#world" data-ck="بریم ببینیم">کشف خدمات<svg class="ic"><use href="#i-arrow"/></svg></a>
+    </div>
+    <span class="hero__tag">هیرو بدون تغییر · همان نسخهٔ سایت</span>
+  </section>
+
+  <!-- 1. world orbit -->
+  <section class="sec world" id="world" aria-labelledby="world-title">
+    <div class="decor" aria-hidden="true">
+      <svg style="top:8%;right:3%;transform:rotate(-30deg)"><use href="#i-paw"/></svg>
+      <svg style="top:13%;right:6%;transform:rotate(-20deg)"><use href="#i-paw"/></svg>
+      <svg style="top:18%;right:4%;transform:rotate(-35deg)"><use href="#i-paw"/></svg>
+      <svg style="bottom:10%;left:4%;transform:rotate(150deg)"><use href="#i-paw"/></svg>
+      <svg style="bottom:15%;left:7%;transform:rotate(160deg)"><use href="#i-paw"/></svg>
+    </div>
+    <div class="wrap">
+      <aside class="note"><span><b>UX:</b> به‌جای ۲۰ مقصد هم‌وزن، کاربر اول پرسش خودش را انتخاب می‌کند و بعد فقط ۴ قابلیت مرتبط را می‌بیند.</span><span><b>حرکت:</b> موس را دور دایره بچرخان؛ دنیای نزدیک‌تر باز می‌شود، خطِ پرونده به آن جریان پیدا می‌کند و کوکی به سمتش می‌دود.</span><span><b>قلاب:</b> اسم پت را بنویس؛ تیترها و دکمه‌ها در کل صفحه با اسم او عوض می‌شوند و همین اسم به فرم ثبت‌نام می‌رود.</span></aside>
+      <header class="sec-head rise">
+        <p class="eyebrow"><svg class="ic"><use href="#i-paw"/></svg>یک هویت، برای تمام دنیای او</p>
+        <h2 class="h2" id="world-title">دنیای <span data-name>همراهت</span>، از همین‌جا</h2>
+        <p class="lede">پرسشت را انتخاب کن تا ببینی اپت لایف کجا کنار شماست. هر چیزی که ثبت می‌کنی در پروندهٔ او می‌ماند.</p>
+      </header>
+      <div class="namehook rise">
+        <label for="petName">اسم همراهت چیه؟</label>
+        <input id="petName" type="text" maxlength="20" placeholder="مثلاً کوکی" autocomplete="off" data-ck="اسمش چیه؟">
+        <div class="species" role="radiogroup" aria-label="نوع همراه">
+          <button type="button" role="radio" aria-checked="true" data-sp="dog">سگ</button>
+          <button type="button" role="radio" aria-checked="false" data-sp="cat">گربه</button>
+          <button type="button" role="radio" aria-checked="false" data-sp="bird">پرنده</button>
+          <button type="button" role="radio" aria-checked="false" data-sp="rabbit">خرگوش</button>
+          <button type="button" role="radio" aria-checked="false" data-sp="other">دیگر</button>
+        </div>
+      </div>
+      <div class="world__grid">
+        <div class="stage has-active" id="stage">
+          <div class="stage__bg"></div>
+          <div class="ring"></div><div class="ring r2"></div>
+          <div class="tilt" id="tilt">
+            <svg class="links" id="links" aria-hidden="true"></svg>
+            <div class="core" id="core"><span class="core__ic" id="coreIc"><svg class="ic"><use href="#i-paw"/></svg></span><b class="core__name" data-name>همراهت</b><span class="core__sub">یک پرونده برای همه‌چیز</span></div>
+            <button class="node is-active" type="button" data-world="health" style="--a:-90deg" aria-pressed="true" data-ck="سلامتش مهمه"><span class="node__ic"><svg class="ic"><use href="#i-heart"/></svg></span><span class="node__t"><span class="node__q">حالش خوبه؟</span><span class="node__n">سلامت و مراقبت</span></span></button>
+            <button class="node" type="button" data-world="daily" style="--a:-18deg" aria-pressed="false" data-ck="بریم خرید؟"><span class="node__ic"><svg class="ic"><use href="#i-bag"/></svg></span><span class="node__t"><span class="node__q">امروز چی لازم داره؟</span><span class="node__n">خرید و خدمات</span></span></button>
+            <button class="node" type="button" data-world="travel" style="--a:54deg" aria-pressed="false" data-ck="بریم سفر؟"><span class="node__ic"><svg class="ic"><use href="#i-plane"/></svg></span><span class="node__t"><span class="node__q">کجا با هم بریم؟</span><span class="node__n">سفر و اقامت</span></span></button>
+            <button class="node" type="button" data-world="safe" style="--a:126deg" aria-pressed="false" data-ck="با خیال راحت"><span class="node__ic"><svg class="ic"><use href="#i-shield"/></svg></span><span class="node__t"><span class="node__q">اگه اتفاقی بیفته؟</span><span class="node__n">آرامش خاطر</span></span></button>
+            <button class="node" type="button" data-world="together" style="--a:198deg" aria-pressed="false" data-ck="دوست‌های جدید"><span class="node__ic"><svg class="ic"><use href="#i-users"/></svg></span><span class="node__t"><span class="node__q">با بقیه چطور؟</span><span class="node__n">جامعه و مهربانی</span></span></button>
+          </div>
+        </div>
+        <div class="panel" id="panel" aria-live="polite">
+          <span class="bird" data-bird="budgie" style="top:-40px;left:40px"></span>
+          <div class="panel__media" id="pMedia"><img id="pImg" src="../../../../apps/web/public/images/landing/home/vet.webp" data-src="vet" alt="دامپزشک در حال معاینهٔ یک توله‌سگ"></div>
+          <div class="panel__body">
+            <p class="panel__q" id="pQ" style="--i:0">حالش خوبه؟</p>
+            <h3 class="panel__t" id="pT" style="--i:1">سلامت و مراقبت</h3>
+            <p class="panel__d" id="pD" style="--i:2">پروندهٔ سلامت، یادآور مراقبت و نوبت دامپزشک کنار هم هستند؛ هر چیزی که ثبت می‌کنی یک‌جا می‌ماند و هر وقت لازم شد آن را با دامپزشک به اشتراک می‌گذاری.</p>
+            <ul class="feats" id="pF" style="--i:3"></ul>
+            <a class="btn primary" id="pC" href="https://opetlife.ir/fa/register" target="_blank" rel="noopener" style="--i:4" data-ck="بزن بریم"><span id="pCt">ساخت پروندهٔ همراهت</span><svg class="ic"><use href="#i-arrow"/></svg></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. reel -->
+  <section class="sec reel-sec" id="reel-sec" aria-labelledby="reel-title">
+    <div class="wrap">
+      <aside class="note"><span><b>ریلز با کد ساخته شده، نه فایل ویدیو:</b> زیرنویس برای فارسی، انگلیسی، آلمانی و اسپانیایی جدا ساخته می‌شود و صفحه سبک می‌ماند. همین ریلز را می‌شود برای اینستاگرام هم خروجی گرفت.</span><span><b>تصویرسازی:</b> ده صحنهٔ برداری متحرک برای خدمات؛ ریلز با ساخته‌شدن لوگوی تازه شروع می‌شود و با همان لوگو تمام می‌شود.</span><span><b>موسیقی:</b> موسیقی این پیش‌نمایش موقت است و با کد ساخته شده. برای نسخهٔ نهایی یک قطعهٔ بی‌کلام با مجوز قرار می‌گیرد.</span></aside>
+      <div class="reel-grid">
+        <div class="reel-copy rise">
+          <p class="eyebrow"><svg class="ic"><use href="#i-music"/></svg>بی‌کلام، با موسیقی و زیرنویس</p>
+          <h2 class="h2" id="reel-title">اپت لایف در ۳۰ ثانیه</h2>
+          <p class="lede">همهٔ خدمات در یک ریلز کوتاه. صدا را روشن کن و از هر فصل که خواستی شروع کن.</p>
+          <ol class="chapters" id="chapters"></ol>
+        </div>
+        <div class="reel-wrap">
+          <span class="bird flip" data-bird="canary" style="top:-36px;right:34px"></span>
+          <div class="reel" id="reel" role="region" aria-label="ریلز معرفی خدمات">
+            <div class="reel__slides" id="reelSlides">
+              
+            </div>
+            <div class="reel__bars" id="reelBars"></div>
+            <span class="reel__kick" id="reelKick">اپت لایف</span>
+            <p class="reel__sub" id="reelSub">یک جهان برای سگ، گربه، پرنده و همهٔ همراه‌ها.</p>
+            <div class="reel__ctl">
+              <span class="reel__music"><svg class="ic"><use href="#i-music"/></svg>موسیقی بی‌کلام</span>
+              <button class="rbtn" id="reelPP" type="button" aria-label="مکث"><svg class="ic"><use href="#i-pause"/></svg></button>
+              <button class="rbtn" id="reelMute" type="button" aria-label="بی‌صدا کردن"><svg class="ic"><use href="#i-vol"/></svg></button>
+            </div>
+            <button class="reel__play" id="reelPlay" type="button" data-ck="با هم ببینیم"><span class="reel__playbtn"><svg><use href="#i-play"/></svg></span><span id="reelPlayTxt">پخش با موسیقی</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. path -->
+  <section class="sec path" id="path" aria-labelledby="path-title">
+    <div class="wrap">
+      <aside class="note"><span><b>حرکت:</b> با اسکرول، ردپاها قدم‌به‌قدم جلو می‌روند و هر مرحله وقتی ردپا به آن می‌رسد روشن می‌شود. سه قدم همان مسیر واقعی ثبت‌نام است.</span></aside>
+      <header class="sec-head rise">
+        <p class="eyebrow"><svg class="ic"><use href="#i-paw"/></svg>از آشنایی تا رسیدگی</p>
+        <h2 class="h2" id="path-title">یک مسیر روشن، برای خیال راحت‌تر</h2>
+      </header>
+      <div class="trail" id="pawTrail" aria-hidden="true"></div>
+      <ol class="steps">
+        <li class="step" data-at="0.18"><span class="step__n">۱</span><h3>همراهت را معرفی کن</h3><p>نام و مشخصاتش را ثبت کن؛ پرونده از اطلاعات خودت شکل می‌گیرد.</p>
+          <div class="frag"><div class="frag__row"><span>نام</span><b data-name>همراهت</b></div><div class="frag__row"><span>نوع</span><b data-species>سگ</b></div><div class="frag__row"><span>عکس</span><b class="frag__ok">اضافه شد</b></div><small class="tag">نمونه</small></div></li>
+        <li class="step" data-at="0.5"><span class="step__n">۲</span><h3>خدمت مورد نیاز را پیدا کن</h3><p>خدمات و ارائه‌دهندگان را ببین و گزینهٔ مناسب را انتخاب کن.</p>
+          <div class="frag"><div class="fchips"><span class="on">دامپزشکی</span><span>آرایش</span><span>اقامت</span><span>تاکسی</span></div><small class="tag">نمونه</small></div></li>
+        <li class="step" data-at="0.82"><span class="step__n">۳</span><h3>رزرو و پیگیری کن</h3><p>جزئیات و وضعیت نوبت‌ها را در برنامه دنبال کن.</p>
+          <div class="frag"><div class="fline"><div class="done"><i></i>ثبت درخواست</div><div class="now"><i></i>تأیید ارائه‌دهنده</div><div><i></i>روز نوبت</div></div><small class="tag">نمونه</small></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 4. trust -->
+  <section class="sec trust" id="trust" aria-labelledby="trust-title">
+    <div class="wrap">
+      <aside class="note"><span><b>UX:</b> به‌جای سه جملهٔ کلی، کاربر خودش امتحان می‌کند. گزینه‌ها همان‌هایی است که اشتراک پروندهٔ سلامت واقعاً دارد: چهار بخش، حداکثر ۷ روز، قابل لغو. روی هر اصل بروی، همان قسمت کارت روشن می‌شود.</span></aside>
+      <div class="trust__grid">
+        <div class="rise">
+          <p class="eyebrow"><svg class="ic"><use href="#i-shield"/></svg>اعتماد، با شفافیت شروع می‌شود</p>
+          <h2 class="h2" id="trust-title" style="margin-top:10px">اطلاعات او، با اختیار تو</h2>
+          <ul class="principles" id="principles">
+            <li data-hl="controls" tabindex="0"><h3>اشتراک با اجازهٔ تو</h3><p>دسترسی به پرونده را خودت تعیین می‌کنی؛ کدام بخش و تا چه زمانی.</p></li>
+            <li data-hl="source" tabindex="0"><h3>منبع اطلاعات روشن است</h3><p>معلوم است هر اطلاعات از صاحب حیوان، مرکز درمانی یا منبع دیگری آمده است.</p></li>
+            <li data-hl="unknown" tabindex="0"><h3>نامشخص، یعنی نامشخص</h3><p>اطلاعات ثبت‌نشده را سالم یا تأییدشده نشان نمی‌دهیم.</p></li>
+          </ul>
+        </div>
+        <div class="share" id="share" data-hl="">
+          <span class="bird" data-bird="cockatiel" style="top:-40px;right:52px"></span>
+          <div class="share__head"><span class="share__title">اشتراک پروندهٔ سلامت <span data-name>همراهت</span></span><span class="tag">نمونه</span></div>
+          <div class="hl-controls">
+            <div><p class="lbl">کدام بخش‌ها دیده شوند؟</p>
+              <div class="toggles" id="toggles">
+                <button class="tg" type="button" aria-pressed="true" data-sec="VAC"><svg class="ic"><use href="#i-check"/></svg>واکسیناسیون</button>
+                <button class="tg" type="button" aria-pressed="true" data-sec="ALG"><svg class="ic"><use href="#i-check"/></svg>آلرژی‌ها</button>
+                <button class="tg" type="button" aria-pressed="false" data-sec="MED"><svg class="ic"><use href="#i-check"/></svg>داروها</button>
+                <button class="tg" type="button" aria-pressed="false" data-sec="CON"><svg class="ic"><use href="#i-check"/></svg>بیماری‌ها</button>
+              </div></div>
+            <div><p class="lbl">تا کی باز باشد؟</p>
+              <div class="seg" role="radiogroup" aria-label="مدت اعتبار لینک" id="seg">
+                <button type="button" role="radio" aria-checked="true" data-h="۲۴ ساعت">۲۴ ساعت</button>
+                <button type="button" role="radio" aria-checked="false" data-h="۳ روز">۳ روز</button>
+                <button type="button" role="radio" aria-checked="false" data-h="۷ روز">۷ روز</button>
+              </div></div>
+          </div>
+          <div><p class="lbl">آنچه دامپزشک می‌بیند</p>
+            <div class="prev">
+              <div class="prow" data-sec="VAC"><span class="prow__n">واکسیناسیون</span><span class="prow__v">۳ مورد ثبت‌شده</span><span class="src">از کلینیک</span><span class="prow__lock"><svg class="ic"><use href="#i-lock"/></svg>پنهان</span></div>
+              <div class="prow" data-sec="ALG"><span class="prow__n">آلرژی‌ها</span><span class="prow__v unknown">نامشخص؛ هنوز ثبت نشده</span><span class="src none">ثبت نشده</span><span class="prow__lock"><svg class="ic"><use href="#i-lock"/></svg>پنهان</span></div>
+              <div class="prow off" data-sec="MED"><span class="prow__n">داروها</span><span class="prow__v">۱ مورد ثبت‌شده</span><span class="src me">از شما</span><span class="prow__lock"><svg class="ic"><use href="#i-lock"/></svg>پنهان</span></div>
+              <div class="prow off" data-sec="CON"><span class="prow__n">بیماری‌ها</span><span class="prow__v">۱ مورد ثبت‌شده</span><span class="src">از کلینیک</span><span class="prow__lock"><svg class="ic"><use href="#i-lock"/></svg>پنهان</span></div>
+            </div></div>
+          <p class="share__foot">لینک تا <b id="expTxt">۲۴ ساعت</b> دیگر باز است · هر زمان قابل لغو · تعداد بازدیدها را می‌بینی</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. lost hook -->
+  <section class="lost" id="lost" aria-labelledby="lost-title">
+    <div class="wrap lost__in rise">
+      <span class="lost__ic"><span class="bird" data-bird="lovebird" style="top:-40px;left:6px"></span><svg class="ic"><use href="#i-pin"/></svg></span>
+      <div class="lost__t"><h2 id="lost-title">اگر روزی گم شد، هر دقیقه مهم است</h2><p>از پروندهٔ <span data-name>همراهت</span> گزارش گم‌شدن بساز تا آگهی عمومی و پیگیری از یک‌جا انجام شود.</p></div>
+      <a class="btn sun" href="https://opetlife.ir/fa/lost-pets" target="_blank" rel="noopener" data-ck="کمکش کنیم">دیدن آگهی‌های گمشده<svg class="ic"><use href="#i-arrow"/></svg></a>
+    </div>
+  </section>
+
+  <!-- 6. memorial -->
+  <section class="sec memory" id="memory" aria-labelledby="memory-title">
+    <canvas class="sky" id="sky" aria-hidden="true"></canvas>
+    <div class="moon" aria-hidden="true"></div>
+    <div class="wrap">
+      <aside class="note note--dusk"><span><b>لحن عوض می‌شود:</b> تنها بخش تاریک صفحه. کوکی اینجا بازی نمی‌کند و آرام راه می‌رود. قاب‌ها طاق‌نمای ایرانی‌اند.</span><span><b>داده:</b> نام‌ها و عکس‌ها نمونه‌اند؛ در سایت فقط یادبودهای تأییدشده با رضایت صاحبشان نشان داده می‌شود. شمع فقط روی دستگاه خود بازدیدکننده روشن می‌ماند و شمارنده‌ای ساخته نمی‌شود.</span></aside>
+      <header class="sec-head center rise">
+        <p class="eyebrow"><svg class="ic"><use href="#i-love"/></svg>به یاد همراهانمان</p>
+        <h2 class="h2" id="memory-title">یاد همراهان عزیزمان</h2>
+        <p class="lede">بعضی همراه‌ها همیشه در دل ما می‌مانند. نام و عکس هر یادبود فقط با رضایت صریح صاحبش و پس از بررسی نمایش داده می‌شود.</p>
+      </header>
+      <div class="arches" id="arches">
+        <figure class="arch" data-id="m1"><div class="arch__frame"><img src="../../../../apps/web/public/images/landing/home/care.webp" alt="عکس یادبود پشمک" loading="lazy"></div><figcaption>پشمک</figcaption><button class="candle" type="button" aria-pressed="false" aria-label="روشن کردن شمع برای پشمک" data-ck="آروم"><span class="candle__body"><span class="candle__flame"></span></span><span class="candle__t">روشن کردن شمع</span></button></figure>
+        <figure class="arch" data-id="m2"><div class="arch__frame"><img src="../../../../apps/web/public/images/landing/home/nose.webp" alt="عکس یادبود ببو" loading="lazy" style="object-position:50% 40%"></div><figcaption>ببو</figcaption><button class="candle" type="button" aria-pressed="false" aria-label="روشن کردن شمع برای ببو" data-ck="آروم"><span class="candle__body"><span class="candle__flame"></span></span><span class="candle__t">روشن کردن شمع</span></button></figure>
+        <figure class="arch" data-id="m3"><div class="arch__frame"><img src="../../../../apps/web/public/images/landing/home/activity.webp" alt="عکس یادبود لوسی" loading="lazy" style="object-position:36% 50%"></div><figcaption>لوسی</figcaption><button class="candle" type="button" aria-pressed="false" aria-label="روشن کردن شمع برای لوسی" data-ck="آروم"><span class="candle__body"><span class="candle__flame"></span></span><span class="candle__t">روشن کردن شمع</span></button></figure>
+        <figure class="arch" data-id="m4"><div class="arch__frame"><img src="../../../../apps/web/public/images/landing/home/travel.webp" alt="عکس یادبود مخمل" loading="lazy" style="object-position:40% 50%"></div><figcaption>مخمل</figcaption><button class="candle" type="button" aria-pressed="false" aria-label="روشن کردن شمع برای مخمل" data-ck="آروم"><span class="candle__body"><span class="candle__flame"></span></span><span class="candle__t">روشن کردن شمع</span></button></figure>
+        <figure class="arch arch--new"><a class="arch__frame" href="https://opetlife.ir/fa/pets" target="_blank" rel="noopener" data-ck="جای او اینجاست"><span class="plus"><svg class="ic"><use href="#i-plus"/></svg></span><span>جای یاد همراه تو</span></a><figcaption>یادبود تو</figcaption></figure>
+      </div>
+      <div class="memory__cta rise">
+        <p>برای همراهی که دیگر کنارت نیست، جایی برای ماندن بساز؛ عکس‌ها و خاطره‌هایش در پرونده‌اش می‌مانند.</p>
+        <a class="btn glow" href="https://opetlife.ir/fa/pets" target="_blank" rel="noopener" data-ck="یادش بمونه">ساخت یادبود<svg class="ic"><use href="#i-arrow"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. kindness -->
+  <section class="sec kind" id="kind" aria-labelledby="kind-title">
+    <div class="wrap">
+      <aside class="note"><span><b>حرکت:</b> نشانگر مثل نور گرم است؛ هر جا برود، عکس سیاه‌وسفید رنگ می‌گیرد. اگر موس ثابت باشد، نور آرام خودش حرکت می‌کند.</span><span><b>تصویر:</b> به‌جای عکس، تصویرسازی برداری در همان زبان بصری ریلز: دستی که برای یک سگ و گربهٔ بی‌سرپناه ظرف غذا می‌آورد. دم گربه تکان می‌خورد، چشم‌ها پلک می‌زنند و قلب‌ها بالا می‌روند.</span></aside>
+      <div class="kind__grid">
+        <div class="lightbox" id="lightbox">
+          <img class="base" src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20400%20300%22%3E%20%3Cstyle%3E%20.tail%7Btransform-box%3Afill-box%3Btransform-origin%3A0%25%20100%25%3Banimation%3Asw%201.6s%20ease-in-out%20infinite%20alternate%7D%20.hand%7Banimation%3Aof%202.4s%20ease-in-out%20infinite%20alternate%7D%20.h1%2C.h2%2C.h3%7Btransform-box%3Afill-box%3Btransform-origin%3Acenter%3Banimation%3Aup%203.6s%20ease-in%20infinite%7D%20.h2%7Banimation-delay%3A1.2s%7D.h3%7Banimation-delay%3A2.4s%7D%20.blink%7Btransform-box%3Afill-box%3Btransform-origin%3Acenter%3Banimation%3Abl%204s%20infinite%7D%20%40keyframes%20sw%7Bto%7Btransform%3Arotate%2818deg%29%7D%7D%20%40keyframes%20of%7Bto%7Btransform%3AtranslateX%28-8px%29%7D%7D%20%40keyframes%20up%7B0%25%7Btransform%3AtranslateY%280%29%3Bopacity%3A0%7D20%25%7Bopacity%3A1%7D100%25%7Btransform%3AtranslateY%28-70px%29%3Bopacity%3A0%7D%7D%20%40keyframes%20bl%7B0%25%2C94%25%2C100%25%7Btransform%3AscaleY%281%29%7D97%25%7Btransform%3AscaleY%28.1%29%7D%7D%20%40media%20%28prefers-reduced-motion%3Areduce%29%7B%2A%7Banimation%3Anone%21important%7D%7D%20%3C%2Fstyle%3E%20%3Crect%20width%3D%22400%22%20height%3D%22300%22%20fill%3D%22%23F6E6D2%22%2F%3E%20%3Ccircle%20cx%3D%2270%22%20cy%3D%2260%22%20r%3D%2270%22%20fill%3D%22%23FBEFDF%22%2F%3E%20%3Crect%20x%3D%22250%22%20y%3D%2240%22%20width%3D%2292%22%20height%3D%2282%22%20rx%3D%2212%22%20fill%3D%22%23FFE3A8%22%2F%3E%3Cpath%20d%3D%22M296%2040%20V122%20M250%2081%20H342%22%20stroke%3D%22%23E9C98B%22%20stroke-width%3D%224%22%2F%3E%20%3Crect%20y%3D%22222%22%20width%3D%22400%22%20height%3D%2278%22%20fill%3D%22%23E7D2B6%22%2F%3E%3Cpath%20d%3D%22M0%20222%20H400%22%20stroke%3D%22%23D8BE9C%22%20stroke-width%3D%223%22%2F%3E%20%3Cpath%20d%3D%22M28%20222%20L34%20186%20H70%20L76%20222%20Z%22%20fill%3D%22%23C9744A%22%2F%3E%3Cpath%20d%3D%22M52%20186%20C40%20160%2030%20150%2022%20146%20C30%20160%2038%20170%2046%20186Z%22%20fill%3D%22%237DB46C%22%2F%3E%3Cpath%20d%3D%22M52%20186%20C58%20156%2070%20140%2084%20136%20C76%20156%2066%20170%2058%20186Z%22%20fill%3D%22%235E9A4E%22%2F%3E%3Cpath%20d%3D%22M52%20186%20C50%20166%2052%20150%2058%20138%20C60%20154%2058%20170%2056%20186Z%22%20fill%3D%22%237DB46C%22%2F%3E%20%3Cpath%20d%3D%22M96%20120%20L156%2078%20L216%20120%20Z%22%20fill%3D%22%231F5A3D%22%20stroke%3D%22%231F5A3D%22%20stroke-width%3D%226%22%20stroke-linejoin%3D%22round%22%2F%3E%3Crect%20x%3D%22104%22%20y%3D%22116%22%20width%3D%22104%22%20height%3D%22106%22%20rx%3D%226%22%20fill%3D%22%23D9A066%22%2F%3E%3Cpath%20d%3D%22M104%20142%20H208%20M104%20168%20H208%20M104%20194%20H208%22%20stroke%3D%22%23C38B54%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20d%3D%22M128%20222%20V176%20A28%2028%200%200%201%20184%20176%20V222%20Z%22%20fill%3D%22%235A3A22%22%2F%3E%20%3Cpath%20d%3D%22M136%20222%20C136%20198%20146%20184%20156%20184%20C166%20184%20176%20198%20176%20222Z%22%20fill%3D%22%239C8166%22%2F%3E%3Cellipse%20cx%3D%22156%22%20cy%3D%22196%22%20rx%3D%2220%22%20ry%3D%2218%22%20fill%3D%22%23A88B6E%22%2F%3E%3Cpath%20d%3D%22M137%20190%20C128%20194%20128%20212%20136%20216%20C140%20208%20142%20198%20140%20190Z%22%20fill%3D%22%237E6450%22%2F%3E%3Cpath%20d%3D%22M175%20190%20C184%20194%20184%20212%20176%20216%20C172%20208%20170%20198%20172%20190Z%22%20fill%3D%22%237E6450%22%2F%3E%3Cellipse%20cx%3D%22156%22%20cy%3D%22205%22%20rx%3D%229%22%20ry%3D%227%22%20fill%3D%22%23CDB49A%22%2F%3E%3Cellipse%20cx%3D%22156%22%20cy%3D%22201%22%20rx%3D%224%22%20ry%3D%223%22%20fill%3D%22%232B1D16%22%2F%3E%3Cg%20class%3D%22blink%22%3E%3Ccircle%20cx%3D%22148%22%20cy%3D%22192%22%20r%3D%222.6%22%20fill%3D%22%232B1D16%22%2F%3E%3Ccircle%20cx%3D%22164%22%20cy%3D%22192%22%20r%3D%222.6%22%20fill%3D%22%232B1D16%22%2F%3E%3C%2Fg%3E%20%3Crect%20x%3D%22222%22%20y%3D%22186%22%20width%3D%2258%22%20height%3D%2236%22%20rx%3D%224%22%20fill%3D%22%23B98552%22%2F%3E%3Cpath%20d%3D%22M222%20198%20H280%20M222%20210%20H280%22%20stroke%3D%22%23A3733F%22%20stroke-width%3D%222%22%2F%3E%20%3Cpath%20class%3D%22tail%22%20d%3D%22M268%20182%20C284%20180%20290%20168%20286%20156%20C284%20150%20278%20152%20279%20158%20C281%20166%20276%20172%20266%20174Z%22%20fill%3D%22%23E39A52%22%2F%3E%20%3Cpath%20d%3D%22M236%20186%20C232%20166%20238%20150%20251%20148%20C264%20150%20270%20166%20266%20186Z%22%20fill%3D%22%23E8A35E%22%2F%3E%20%3Ccircle%20cx%3D%22251%22%20cy%3D%22140%22%20r%3D%2215%22%20fill%3D%22%23E8A35E%22%2F%3E%3Cpath%20d%3D%22M238%20134%20L236%20120%20L247%20128Z%20M264%20134%20L266%20120%20L255%20128Z%22%20fill%3D%22%23E8A35E%22%2F%3E%20%3Cpath%20d%3D%22M240%20147%20h4%20M240%20151%20h4%20M258%20147%20h4%20M258%20151%20h4%22%20stroke%3D%22%23C97A35%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%20%3Cpath%20d%3D%22M243%20162%20C246%20170%20256%20170%20259%20162%22%20stroke%3D%22%23C97A35%22%20stroke-width%3D%222.4%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%20%3Cg%20class%3D%22blink%22%3E%3Cellipse%20cx%3D%22245%22%20cy%3D%22139%22%20rx%3D%222.3%22%20ry%3D%223%22%20fill%3D%22%232B1D16%22%2F%3E%3Cellipse%20cx%3D%22257%22%20cy%3D%22139%22%20rx%3D%222.3%22%20ry%3D%223%22%20fill%3D%22%232B1D16%22%2F%3E%3C%2Fg%3E%20%3Cpath%20d%3D%22M249%20145%20h4%20l-2%202.4z%22%20fill%3D%22%23D9707A%22%2F%3E%20%3Cg%20class%3D%22hand%22%3E%3Cpath%20d%3D%22M400%20214%20L330%20222%20C322%20223%20318%20230%20320%20236%20L330%20242%20L400%20242Z%22%20fill%3D%22%236A4D78%22%2F%3E%3Cpath%20d%3D%22M332%20228%20C318%20226%20300%20230%20296%20238%20C294%20244%20300%20246%20308%20245%20L330%20244Z%22%20fill%3D%22%23E7B48F%22%2F%3E%3Cpath%20d%3D%22M262%20244%20H318%20C316%20258%20304%20266%20290%20266%20C276%20266%20264%20258%20262%20244Z%22%20fill%3D%22%23F2B544%22%2F%3E%3Crect%20x%3D%22258%22%20y%3D%22239%22%20width%3D%2264%22%20height%3D%228%22%20rx%3D%224%22%20fill%3D%22%23DD9A25%22%2F%3E%3Ccircle%20cx%3D%22278%22%20cy%3D%22237%22%20r%3D%224%22%20fill%3D%22%239C6A3A%22%2F%3E%3Ccircle%20cx%3D%22288%22%20cy%3D%22235%22%20r%3D%224%22%20fill%3D%22%239C6A3A%22%2F%3E%3Ccircle%20cx%3D%22298%22%20cy%3D%22237%22%20r%3D%224%22%20fill%3D%22%239C6A3A%22%2F%3E%3C%2Fg%3E%20%3Cg%20fill%3D%22%23E46A5B%22%3E%3Cpath%20class%3D%22h1%22%20d%3D%22M200%20110%20C190%20103%20192%2095%20197%2095%20C199%2095%20200%2097%20200%2098%20C200%2097%20201%2095%20203%2095%20C208%2095%20210%20103%20200%20110Z%22%2F%3E%3Cpath%20class%3D%22h2%22%20d%3D%22M232%2096%20C222%2089%20224%2081%20229%2081%20C231%2081%20232%2083%20232%2084%20C232%2083%20233%2081%20235%2081%20C240%2081%20242%2089%20232%2096Z%22%2F%3E%3Cpath%20class%3D%22h3%22%20d%3D%22M172%20100%20C162%2093%20164%2085%20169%2085%20C171%2085%20172%2087%20172%2088%20C172%2087%20173%2085%20175%2085%20C180%2085%20182%2093%20172%20100Z%22%2F%3E%3C%2Fg%3E%20%3C%2Fsvg%3E" alt="تصویرسازی: دستی که برای یک سگ و یک گربهٔ بی‌سرپناه کنار یک لانهٔ چوبی ظرف غذا می‌آورد">
+          <img class="color" src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20400%20300%22%3E%20%3Cstyle%3E%20.tail%7Btransform-box%3Afill-box%3Btransform-origin%3A0%25%20100%25%3Banimation%3Asw%201.6s%20ease-in-out%20infinite%20alternate%7D%20.hand%7Banimation%3Aof%202.4s%20ease-in-out%20infinite%20alternate%7D%20.h1%2C.h2%2C.h3%7Btransform-box%3Afill-box%3Btransform-origin%3Acenter%3Banimation%3Aup%203.6s%20ease-in%20infinite%7D%20.h2%7Banimation-delay%3A1.2s%7D.h3%7Banimation-delay%3A2.4s%7D%20.blink%7Btransform-box%3Afill-box%3Btransform-origin%3Acenter%3Banimation%3Abl%204s%20infinite%7D%20%40keyframes%20sw%7Bto%7Btransform%3Arotate%2818deg%29%7D%7D%20%40keyframes%20of%7Bto%7Btransform%3AtranslateX%28-8px%29%7D%7D%20%40keyframes%20up%7B0%25%7Btransform%3AtranslateY%280%29%3Bopacity%3A0%7D20%25%7Bopacity%3A1%7D100%25%7Btransform%3AtranslateY%28-70px%29%3Bopacity%3A0%7D%7D%20%40keyframes%20bl%7B0%25%2C94%25%2C100%25%7Btransform%3AscaleY%281%29%7D97%25%7Btransform%3AscaleY%28.1%29%7D%7D%20%40media%20%28prefers-reduced-motion%3Areduce%29%7B%2A%7Banimation%3Anone%21important%7D%7D%20%3C%2Fstyle%3E%20%3Crect%20width%3D%22400%22%20height%3D%22300%22%20fill%3D%22%23F6E6D2%22%2F%3E%20%3Ccircle%20cx%3D%2270%22%20cy%3D%2260%22%20r%3D%2270%22%20fill%3D%22%23FBEFDF%22%2F%3E%20%3Crect%20x%3D%22250%22%20y%3D%2240%22%20width%3D%2292%22%20height%3D%2282%22%20rx%3D%2212%22%20fill%3D%22%23FFE3A8%22%2F%3E%3Cpath%20d%3D%22M296%2040%20V122%20M250%2081%20H342%22%20stroke%3D%22%23E9C98B%22%20stroke-width%3D%224%22%2F%3E%20%3Crect%20y%3D%22222%22%20width%3D%22400%22%20height%3D%2278%22%20fill%3D%22%23E7D2B6%22%2F%3E%3Cpath%20d%3D%22M0%20222%20H400%22%20stroke%3D%22%23D8BE9C%22%20stroke-width%3D%223%22%2F%3E%20%3Cpath%20d%3D%22M28%20222%20L34%20186%20H70%20L76%20222%20Z%22%20fill%3D%22%23C9744A%22%2F%3E%3Cpath%20d%3D%22M52%20186%20C40%20160%2030%20150%2022%20146%20C30%20160%2038%20170%2046%20186Z%22%20fill%3D%22%237DB46C%22%2F%3E%3Cpath%20d%3D%22M52%20186%20C58%20156%2070%20140%2084%20136%20C76%20156%2066%20170%2058%20186Z%22%20fill%3D%22%235E9A4E%22%2F%3E%3Cpath%20d%3D%22M52%20186%20C50%20166%2052%20150%2058%20138%20C60%20154%2058%20170%2056%20186Z%22%20fill%3D%22%237DB46C%22%2F%3E%20%3Cpath%20d%3D%22M96%20120%20L156%2078%20L216%20120%20Z%22%20fill%3D%22%231F5A3D%22%20stroke%3D%22%231F5A3D%22%20stroke-width%3D%226%22%20stroke-linejoin%3D%22round%22%2F%3E%3Crect%20x%3D%22104%22%20y%3D%22116%22%20width%3D%22104%22%20height%3D%22106%22%20rx%3D%226%22%20fill%3D%22%23D9A066%22%2F%3E%3Cpath%20d%3D%22M104%20142%20H208%20M104%20168%20H208%20M104%20194%20H208%22%20stroke%3D%22%23C38B54%22%20stroke-width%3D%222%22%2F%3E%3Cpath%20d%3D%22M128%20222%20V176%20A28%2028%200%200%201%20184%20176%20V222%20Z%22%20fill%3D%22%235A3A22%22%2F%3E%20%3Cpath%20d%3D%22M136%20222%20C136%20198%20146%20184%20156%20184%20C166%20184%20176%20198%20176%20222Z%22%20fill%3D%22%239C8166%22%2F%3E%3Cellipse%20cx%3D%22156%22%20cy%3D%22196%22%20rx%3D%2220%22%20ry%3D%2218%22%20fill%3D%22%23A88B6E%22%2F%3E%3Cpath%20d%3D%22M137%20190%20C128%20194%20128%20212%20136%20216%20C140%20208%20142%20198%20140%20190Z%22%20fill%3D%22%237E6450%22%2F%3E%3Cpath%20d%3D%22M175%20190%20C184%20194%20184%20212%20176%20216%20C172%20208%20170%20198%20172%20190Z%22%20fill%3D%22%237E6450%22%2F%3E%3Cellipse%20cx%3D%22156%22%20cy%3D%22205%22%20rx%3D%229%22%20ry%3D%227%22%20fill%3D%22%23CDB49A%22%2F%3E%3Cellipse%20cx%3D%22156%22%20cy%3D%22201%22%20rx%3D%224%22%20ry%3D%223%22%20fill%3D%22%232B1D16%22%2F%3E%3Cg%20class%3D%22blink%22%3E%3Ccircle%20cx%3D%22148%22%20cy%3D%22192%22%20r%3D%222.6%22%20fill%3D%22%232B1D16%22%2F%3E%3Ccircle%20cx%3D%22164%22%20cy%3D%22192%22%20r%3D%222.6%22%20fill%3D%22%232B1D16%22%2F%3E%3C%2Fg%3E%20%3Crect%20x%3D%22222%22%20y%3D%22186%22%20width%3D%2258%22%20height%3D%2236%22%20rx%3D%224%22%20fill%3D%22%23B98552%22%2F%3E%3Cpath%20d%3D%22M222%20198%20H280%20M222%20210%20H280%22%20stroke%3D%22%23A3733F%22%20stroke-width%3D%222%22%2F%3E%20%3Cpath%20class%3D%22tail%22%20d%3D%22M268%20182%20C284%20180%20290%20168%20286%20156%20C284%20150%20278%20152%20279%20158%20C281%20166%20276%20172%20266%20174Z%22%20fill%3D%22%23E39A52%22%2F%3E%20%3Cpath%20d%3D%22M236%20186%20C232%20166%20238%20150%20251%20148%20C264%20150%20270%20166%20266%20186Z%22%20fill%3D%22%23E8A35E%22%2F%3E%20%3Ccircle%20cx%3D%22251%22%20cy%3D%22140%22%20r%3D%2215%22%20fill%3D%22%23E8A35E%22%2F%3E%3Cpath%20d%3D%22M238%20134%20L236%20120%20L247%20128Z%20M264%20134%20L266%20120%20L255%20128Z%22%20fill%3D%22%23E8A35E%22%2F%3E%20%3Cpath%20d%3D%22M240%20147%20h4%20M240%20151%20h4%20M258%20147%20h4%20M258%20151%20h4%22%20stroke%3D%22%23C97A35%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%2F%3E%20%3Cpath%20d%3D%22M243%20162%20C246%20170%20256%20170%20259%20162%22%20stroke%3D%22%23C97A35%22%20stroke-width%3D%222.4%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%20%3Cg%20class%3D%22blink%22%3E%3Cellipse%20cx%3D%22245%22%20cy%3D%22139%22%20rx%3D%222.3%22%20ry%3D%223%22%20fill%3D%22%232B1D16%22%2F%3E%3Cellipse%20cx%3D%22257%22%20cy%3D%22139%22%20rx%3D%222.3%22%20ry%3D%223%22%20fill%3D%22%232B1D16%22%2F%3E%3C%2Fg%3E%20%3Cpath%20d%3D%22M249%20145%20h4%20l-2%202.4z%22%20fill%3D%22%23D9707A%22%2F%3E%20%3Cg%20class%3D%22hand%22%3E%3Cpath%20d%3D%22M400%20214%20L330%20222%20C322%20223%20318%20230%20320%20236%20L330%20242%20L400%20242Z%22%20fill%3D%22%236A4D78%22%2F%3E%3Cpath%20d%3D%22M332%20228%20C318%20226%20300%20230%20296%20238%20C294%20244%20300%20246%20308%20245%20L330%20244Z%22%20fill%3D%22%23E7B48F%22%2F%3E%3Cpath%20d%3D%22M262%20244%20H318%20C316%20258%20304%20266%20290%20266%20C276%20266%20264%20258%20262%20244Z%22%20fill%3D%22%23F2B544%22%2F%3E%3Crect%20x%3D%22258%22%20y%3D%22239%22%20width%3D%2264%22%20height%3D%228%22%20rx%3D%224%22%20fill%3D%22%23DD9A25%22%2F%3E%3Ccircle%20cx%3D%22278%22%20cy%3D%22237%22%20r%3D%224%22%20fill%3D%22%239C6A3A%22%2F%3E%3Ccircle%20cx%3D%22288%22%20cy%3D%22235%22%20r%3D%224%22%20fill%3D%22%239C6A3A%22%2F%3E%3Ccircle%20cx%3D%22298%22%20cy%3D%22237%22%20r%3D%224%22%20fill%3D%22%239C6A3A%22%2F%3E%3C%2Fg%3E%20%3Cg%20fill%3D%22%23E46A5B%22%3E%3Cpath%20class%3D%22h1%22%20d%3D%22M200%20110%20C190%20103%20192%2095%20197%2095%20C199%2095%20200%2097%20200%2098%20C200%2097%20201%2095%20203%2095%20C208%2095%20210%20103%20200%20110Z%22%2F%3E%3Cpath%20class%3D%22h2%22%20d%3D%22M232%2096%20C222%2089%20224%2081%20229%2081%20C231%2081%20232%2083%20232%2084%20C232%2083%20233%2081%20235%2081%20C240%2081%20242%2089%20232%2096Z%22%2F%3E%3Cpath%20class%3D%22h3%22%20d%3D%22M172%20100%20C162%2093%20164%2085%20169%2085%20C171%2085%20172%2087%20172%2088%20C172%2087%20173%2085%20175%2085%20C180%2085%20182%2093%20172%20100Z%22%2F%3E%3C%2Fg%3E%20%3C%2Fsvg%3E" alt="" aria-hidden="true">
+          <span class="lightbox__hint">نشانگر را روی تصویر ببر</span>
+        </div>
+        <div class="kind__copy rise">
+          <p class="eyebrow"><svg class="ic"><use href="#i-love"/></svg>مهربانی، بیرون از خانه هم ادامه دارد</p>
+          <h2 class="h2" id="kind-title">برای آن‌هایی که منتظر یک دست مهربان‌اند</h2>
+          <p class="lede">نیازهای ثبت‌شدهٔ مراکز حمایتی را ببین و مسیر کمک را دنبال کن؛ سهم کوچکی از دنیای ما برای همراهانی که هنوز خانه‌ای ندارند.</p>
+          <div class="actions">
+            <a class="btn primary" href="https://opetlife.ir/fa/animal-support/needs" target="_blank" rel="noopener" data-ck="کمک کنیم">دیدن نیازهای حمایتی<svg class="ic"><use href="#i-arrow"/></svg></a>
+            <a class="btn line" href="https://opetlife.ir/fa/community" target="_blank" rel="noopener" data-ck="دوست‌های جدید">پیوستن به جامعه</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. partners -->
+  <section class="sec partners" id="partners" aria-labelledby="partners-title">
+    <div class="decor" aria-hidden="true">
+      <svg style="top:10%;left:5%;transform:rotate(200deg)"><use href="#i-paw"/></svg>
+      <svg style="top:15%;left:8%;transform:rotate(210deg)"><use href="#i-paw"/></svg>
+      <svg style="top:20%;left:6%;transform:rotate(195deg)"><use href="#i-paw"/></svg>
+    </div>
+    <div class="wrap">
+      <aside class="note"><span><b>دعوت به همکاری:</b> چهار نقشی که همین الان پنل واقعی دارند، هر کدام با کارهایی که در پنلشان انجام می‌دهند.</span></aside>
+      <header class="sec-head rise">
+        <p class="eyebrow"><svg class="ic"><use href="#i-spark"/></svg>برای کسانی که مراقبت را حرفه‌ای دنبال می‌کنند</p>
+        <h2 class="h2" id="partners-title">تو هم بخشی از این دنیا باش</h2>
+        <p class="lede">دامپزشک، ارائه‌دهندهٔ خدمات، فروشنده یا مرکز حمایتی هستی؟ فضای کاری تو در اپت لایف آماده است.</p>
+      </header>
+      <div class="roles rise">
+        <article class="role"><span class="role__ic"><svg class="ic"><use href="#i-heart"/></svg></span><h3>کلینیک و دامپزشک</h3><p>نوبت‌ها، بیماران و پرونده‌هایی که صاحبان حیوانات با شما به اشتراک می‌گذارند.</p></article>
+        <article class="role"><span class="role__ic"><svg class="ic"><use href="#i-spark"/></svg></span><h3>ارائه‌دهندهٔ خدمات</h3><p>خدمات، تقویم کاری، رزروها و نظرهای مشتریان؛ از آرایش تا اقامت و سفر.</p></article>
+        <article class="role"><span class="role__ic"><svg class="ic"><use href="#i-bag"/></svg></span><h3>فروشنده</h3><p>محصولات، موجودی، سفارش‌ها و تسویه‌حساب در یک پنل.</p></article>
+        <article class="role"><span class="role__ic"><svg class="ic"><use href="#i-love"/></svg></span><h3>مرکز حمایتی</h3><p>ثبت نیازهای مرکز، پیگیری کمک‌ها و مدیریت تیم.</p></article>
+      </div>
+      <div class="partners__cta rise">
+        <span class="bird flip" data-bird="budgie" style="top:-40px;left:30%"></span>
+        <p>داشتن حساب کاربری به‌تنهایی عضویت کسب‌وکار ایجاد نمی‌کند؛ دسترسی به فضای کاری به عضویت تأییدشدهٔ همان کسب‌وکار نیاز دارد.</p>
+        <div class="actions">
+          <a class="btn primary" href="https://opetlife.ir/fa/register?returnTo=%2Ffa%2Fprovider" target="_blank" rel="noopener" data-ck="خوش اومدی">ساخت حساب همکار</a>
+          <a class="btn line" href="https://opetlife.ir/fa/auth?returnTo=%2Ffa%2Fprovider" target="_blank" rel="noopener">ورود همکار</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. final -->
+  <section class="final" id="start" aria-labelledby="final-title">
+    <canvas id="pawField" aria-hidden="true"></canvas>
+    <div class="wrap final__in">
+      <aside class="note" style="text-align:start"><span><b>لحظهٔ پایانی:</b> همهٔ ردپاها به سمت دکمهٔ ثبت‌نام‌اند. موس که حرکت کند، موج‌وار به سمت تو برمی‌گردند.</span></aside>
+      <span class="final__badge"><svg><use href="#i-paw"/></svg></span>
+      <h2 class="h2" id="final-title">دنیای <span data-name>همراهت</span>، از کنار تو شروع می‌شود</h2>
+      <p class="lede">اولین قدم، ساختن یک پرونده برای <span data-name>همراهت</span> است.</p>
+      <div class="actions" style="justify-content:center">
+        <a class="btn primary lg" id="finalCta" href="https://opetlife.ir/fa/register" target="_blank" rel="noopener" data-ck="بزن بریم">ساخت حساب<svg class="ic"><use href="#i-arrow"/></svg></a>
+        <a class="btn line lg" href="https://opetlife.ir/fa/auth" target="_blank" rel="noopener">ورود به حساب</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="wrap">
+      <div class="foot__grid">
+        <div class="foot__brand"><div class="lockup"><span class="logo-mark" data-logo></span><b class="wm-fa">اپت لایف</b></div><p>سلامت، مراقبت، خدمات و لحظه‌های مشترک؛ یک دنیا برای تو و همراه کوچکت.</p></div>
+        <div><h3>خدمات</h3><ul><li><a href="https://opetlife.ir/fa/vet/find" target="_blank" rel="noopener">دامپزشکی</a></li><li><a href="https://opetlife.ir/fa/shop" target="_blank" rel="noopener">پت‌شاپ</a></li><li><a href="https://opetlife.ir/fa/services/GROOMING" target="_blank" rel="noopener">آرایش و شست‌وشو</a></li><li><a href="https://opetlife.ir/fa/services/BOARDING" target="_blank" rel="noopener">اقامت و مراقبت</a></li></ul></div>
+        <div><h3>زندگی کنار هم</h3><ul><li><a href="https://opetlife.ir/fa/travel" target="_blank" rel="noopener">سفر</a></li><li><a href="https://opetlife.ir/fa/services/PET_TAXI" target="_blank" rel="noopener">تاکسی</a></li><li><a href="https://opetlife.ir/fa/insurance" target="_blank" rel="noopener">بیمه</a></li><li><a href="https://opetlife.ir/fa/animal-support/needs" target="_blank" rel="noopener">حمایت از حیوانات</a></li></ul></div>
+        <div><h3>همراه شما</h3><ul><li><a href="https://opetlife.ir/fa/guides" target="_blank" rel="noopener">راهنما</a></li><li><a href="https://opetlife.ir/fa/blog" target="_blank" rel="noopener">مجله</a></li><li><a href="https://opetlife.ir/fa/community" target="_blank" rel="noopener">جامعه</a></li><li><a href="https://opetlife.ir/fa/support" target="_blank" rel="noopener">پشتیبانی</a></li></ul></div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<div class="hookbar" id="hookbar" aria-hidden="true">
+  <span class="hookbar__paw"><svg><use href="#i-paw"/></svg></span>
+  <span class="hookbar__t">پروندهٔ <b data-name>همراهت</b> را بساز</span>
+  <a class="btn primary sm" href="https://opetlife.ir/fa/register" target="_blank" rel="noopener" tabindex="-1" data-ck="بزن بریم">شروع</a>
+  <button class="hookbar__x" id="hookX" type="button" aria-label="بستن" tabindex="-1"><svg class="ic"><use href="#i-x"/></svg></button>
+</div>
+
+<div class="ck" id="ck" aria-hidden="true">
+  <div class="ck__body" id="ckBody">
+    <svg class="dog stand" id="dogSvg" viewBox="0 0 120 96" aria-hidden="true">
+      <ellipse cx="62" cy="90" rx="30" ry="3.6" fill="rgb(60 40 20 / .16)"/>
+      <g class="d-flip">
+        <g class="pose-stand">
+          <g class="d-tail" style="transform-origin:37px 50px"><path d="M38 51 C27 50 17 41 18 28 C19 22 26 22 27 28 C28 36 33 42 41 46 Z" fill="#E9B676"/><path d="M23 30 C21 37 24 44 31 48" stroke="#F7DDB0" stroke-width="3" fill="none" stroke-linecap="round"/></g>
+          <g class="d-leg d-b" style="transform-origin:43px 60px"><rect x="39" y="58" width="8" height="27" rx="4" fill="#CF9452"/></g>
+          <g class="d-leg d-a" style="transform-origin:77px 60px"><rect x="73" y="58" width="8" height="27" rx="4" fill="#CF9452"/></g>
+          <path d="M34 53 C34 41 49 38 62 39 C76 40 88 42 88 54 C88 64 78 67 62 67 C46 67 34 64 34 53 Z" fill="#E9B676"/>
+          <path d="M37 59 L37 63 q3.5 6 7 1.5 q3.5 6 7 1.5 q3.5 6 7 1.5 q3.5 6 7 1.5 q3.5 6 7 1.5 q3.5 5 7 0 L79 59 Z" fill="#E9B676"/>
+          <path d="M79 44 C91 45 94 59 85 66 C80 60 77 52 79 44 Z" fill="#F7DDB0"/>
+          <g class="d-leg d-a" style="transform-origin:49px 60px"><rect x="45" y="58" width="8" height="27" rx="4" fill="#E9B676"/><ellipse cx="49" cy="84" rx="5.2" ry="3" fill="#F7DDB0"/></g>
+          <g class="d-leg d-b" style="transform-origin:83px 60px"><rect x="79" y="58" width="8" height="27" rx="4" fill="#E9B676"/><ellipse cx="83" cy="84" rx="5.2" ry="3" fill="#F7DDB0"/></g>
+          <path d="M79 39 C86 43 89 51 85 59 C80 56 76 47 79 39 Z" fill="#F59AB8"/>
+          <g fill="#fff"><circle cx="81" cy="40.5" r="1.6"/><circle cx="84.5" cy="44.5" r="1.6"/><circle cx="86.5" cy="49.5" r="1.6"/><circle cx="86" cy="54.5" r="1.6"/></g>
+          <g class="d-head" style="transform-origin:86px 42px">
+            <path d="M87 21 C91 15 97 17 97 24 Z" fill="#CF9452"/>
+            <circle cx="92" cy="32" r="14" fill="#E9B676"/>
+            <circle cx="86" cy="40" r="8" fill="#E9B676"/>
+            <ellipse cx="104" cy="37" rx="9" ry="6.5" fill="#F7DDB0"/>
+            <path class="d-tongue" d="M101 41 q2.5 8 6.5 1.5 z" fill="#F07D93"/>
+            <path d="M110 39.5 Q105 43.5 99 40.5" stroke="#2B1D16" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+            <ellipse cx="111.5" cy="34.5" rx="3" ry="2.6" fill="#2B1D16"/>
+            <g class="d-eyes" style="transform-origin:97px 29px"><circle cx="97" cy="29" r="2.7" fill="#2B1D16"/><circle cx="98" cy="28" r=".95" fill="#fff"/></g>
+            <path d="M89 20 q4.5 -4.5 9 0" stroke="#F7DDB0" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path class="d-ear" style="transform-origin:84px 24px" d="M82 21 C75 18 71 29 75 39 C80 41 86 34 86 26 Z" fill="#D99D5C"/>
+          </g>
+        </g>
+        <g class="pose-sit" style="transform-origin:60px 90px">
+          <g class="d-tail2" style="transform-origin:72px 84px"><path d="M71 85 C84 83 95 72 93 57 C91 52 86 54 86 59 C86 68 80 75 69 79 Z" fill="#E9B676"/></g>
+          <ellipse cx="45" cy="81" rx="10" ry="9" fill="#DCA466"/><ellipse cx="75" cy="81" rx="10" ry="9" fill="#DCA466"/>
+          <path d="M44 89 C40 68 47 52 60 50 C73 52 80 68 76 89 Z" fill="#E9B676"/>
+          <ellipse cx="60" cy="67" rx="11" ry="13" fill="#F7DDB0"/>
+          <rect x="50" y="68" width="8" height="22" rx="4" fill="#E9B676"/><rect x="62" y="68" width="8" height="22" rx="4" fill="#E9B676"/>
+          <ellipse cx="54" cy="89" rx="5.5" ry="3.2" fill="#F7DDB0"/><ellipse cx="66" cy="89" rx="5.5" ry="3.2" fill="#F7DDB0"/>
+          <path d="M43 50 Q60 61 77 50 Q75 59 60 62 Q45 59 43 50 Z" fill="#F59AB8"/>
+          <g fill="#fff"><circle cx="46.5" cy="54" r="1.7"/><circle cx="53" cy="58" r="1.7"/><circle cx="60" cy="59.5" r="1.7"/><circle cx="67" cy="58" r="1.7"/><circle cx="73.5" cy="54" r="1.7"/></g>
+          <g class="d-head2" style="transform-origin:60px 46px">
+            <path d="M46 29 C37 17 38 6 47 10 C52 13 54 22 52 30 Z" fill="#D99D5C"/>
+            <path d="M74 29 C83 17 82 6 73 10 C68 13 66 22 68 30 Z" fill="#D99D5C"/>
+            <circle cx="60" cy="33" r="16" fill="#E9B676"/>
+            <ellipse cx="47.5" cy="40" rx="8" ry="7" fill="#E9B676"/><ellipse cx="72.5" cy="40" rx="8" ry="7" fill="#E9B676"/>
+            <ellipse cx="60" cy="41" rx="9" ry="7" fill="#F7DDB0"/>
+            <path class="d-tongue" d="M57.5 43.5 q2.5 7 5 0 z" fill="#F07D93"/>
+            <path d="M60 40.5 q-3 3.5 -6 1.5 M60 40.5 q3 3.5 6 1.5" stroke="#2B1D16" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+            <ellipse cx="60" cy="38" rx="3.6" ry="2.8" fill="#2B1D16"/>
+            <g class="d-eyes2" style="transform-origin:60px 31px"><circle cx="53" cy="31" r="3.2" fill="#2B1D16"/><circle cx="67" cy="31" r="3.2" fill="#2B1D16"/><circle cx="54.1" cy="29.9" r="1.1" fill="#fff"/><circle cx="68.1" cy="29.9" r="1.1" fill="#fff"/></g>
+            <path d="M55 19 q5 -5 10 0" stroke="#F7DDB0" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          </g>
+        </g>
+      </g>
+    </svg>
+  </div>
+  <div class="ck__bubble" id="ckBubble"></div>
+</div>
+<div class="ck-dot" id="ckDot" aria-hidden="true"></div>
+<div class="ck-ball" id="ckBall" aria-hidden="true"></div>
+
+<script>
+(()=>{
+'use strict';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const root=document.documentElement; root.lang='fa'; root.dir='rtl';
+const SITE='https://opetlife.ir/fa';
+const fine=matchMedia('(hover:hover) and (pointer:fine)').matches;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fa=n=>Number(n).toLocaleString('fa-IR');
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+root.dataset.fine=fine?'1':'0';
+let motion=!reduce, cookieOn=!reduce, notesOn=true;
+
+/* ---------- toggles ---------- */
+function applyFlags(){
+  root.dataset.motion=motion?'on':'off'; root.dataset.cookie=cookieOn?'on':'off'; root.dataset.notes=notesOn?'on':'off';
+  $('#tgMotion').setAttribute('aria-pressed',String(motion)); $('#tgCookie').setAttribute('aria-pressed',String(cookieOn)); $('#tgNotes').setAttribute('aria-pressed',String(notesOn));
+  if(!motion) $$('.rise.pre').forEach(el=>el.classList.remove('pre'));
+  if(!cookieOn) hideBall();
+}
+$('#tgMotion').addEventListener('click',()=>{motion=!motion;applyFlags();requestStatic();});
+$('#tgCookie').addEventListener('click',()=>{cookieOn=!cookieOn;applyFlags();});
+$('#tgNotes').addEventListener('click',()=>{notesOn=!notesOn;applyFlags();setTimeout(onResize,50);});
+
+/* ---------- birds ---------- */
+const BIRD_C={budgie:{b:'#7CC35A',h:'#F4D35E',w:'#4E8A3A',k:'#E9A23B',c:'#3D6FB6'},canary:{b:'#F6C944',h:'#F8D864',w:'#D9A12A',k:'#E8913A'},cockatiel:{b:'#BDB8AD',h:'#F2D06B',w:'#8F8A80',k:'#A4978A',c:'#F08A4B',crest:1},lovebird:{b:'#6DBE5B',h:'#F5926B',w:'#4C9A40',k:'#E8604C'}};
+function birdSVG(t){const c=BIRD_C[t]||BIRD_C.budgie;return '<svg viewBox="0 0 64 64" aria-hidden="true"><g class="b-tail"><path d="M41 40 L59 50 L56 55 L38 45 Z" fill="'+c.w+'"/></g><g stroke="#9b7653" stroke-width="1.8" stroke-linecap="round"><path d="M28 47 v6"/><path d="M34 47 v6"/><path d="M25.5 53 h5"/><path d="M31.5 53 h5"/></g><ellipse cx="33" cy="38" rx="14" ry="10.5" fill="'+c.b+'"/><g class="b-head"><circle cx="21" cy="27" r="9" fill="'+c.h+'"/>'+(c.crest?'<path d="M23 19 Q25 9 31 7 Q27 13 27 19 Z" fill="'+c.h+'"/>':'')+(c.c?'<circle cx="19" cy="31" r="2.6" fill="'+c.c+'"/>':'')+'<circle cx="18" cy="25" r="1.8" fill="#1d1d1b"/><circle cx="17.4" cy="24.4" r=".6" fill="#fff"/><path d="M12.5 26.5 Q9 28.5 12 31 Q14.5 30 14 27.5 Z" fill="'+c.k+'"/></g><g class="b-wing"><ellipse cx="36" cy="36.5" rx="10" ry="6.5" fill="'+c.w+'" transform="rotate(-14 36 36.5)"/></g></svg>';}
+const birds=$$('.bird').map(el=>{el.innerHTML='<div class="b-in">'+birdSVG(el.dataset.bird)+'</div>';return {el,state:'perched',next:performance.now()+1500+Math.random()*3000,back:0};});
+$$('.rbird').forEach(el=>{el.innerHTML=birdSVG(el.dataset.bird);});
+function birdIdle(b,now){
+  if(now<b.next||!motion) return;
+  const acts=['peck','hop','flick','peck'];const a=acts[Math.floor(Math.random()*acts.length)];
+  b.el.classList.add(a); setTimeout(()=>b.el.classList.remove(a),750);
+  b.next=now+1800+Math.random()*3800;
+}
+function scare(b,now){
+  b.state='away'; b.el.style.setProperty('--fx',((Math.random()<.5?-1:1)*(80+Math.random()*90))+'px');
+  b.el.classList.add('flap','away'); b.back=now+4200+Math.random()*3000;
+}
+function birdsFrame(now,sx,sy){
+  for(const b of birds){
+    if(b.state==='perched'){
+      birdIdle(b,now);
+      if(sx!=null&&motion){const r=b.el.getBoundingClientRect(); if(r.bottom<-50||r.top>innerHeight+50) continue; const d=Math.hypot(r.left+r.width/2-sx,r.top+r.height/2-sy); if(d<95) scare(b,now);}
+    }else if(now>b.back){
+      b.state='landing'; b.el.classList.remove('away'); setTimeout(()=>{b.el.classList.remove('flap');b.state='perched';b.next=performance.now()+2000;},1150);
+    }
+  }
+}
+
+/* ---------- personalization ---------- */
+const SPECIES={dog:'سگ',cat:'گربه',bird:'پرنده',rabbit:'خرگوش',other:'همراه'};
+let petName='', species='dog';
+const nm=()=>petName||'همراهت';
+function applyName(){
+  $$('[data-name]').forEach(el=>{el.textContent=nm();});
+  $$('[data-species]').forEach(el=>{el.textContent=SPECIES[species];});
+  $('#pCt').textContent=WORLDS[active].cta.t(nm());
+}
+const nameIn=$('#petName');
+nameIn.addEventListener('input',()=>{
+  petName=nameIn.value.replace(/\s+/g,' ').trim().slice(0,20); applyName();
+  if(petName) say('سلام '+petName,1600);
+});
+$$('.species button').forEach(btn=>btn.addEventListener('click',()=>{
+  species=btn.dataset.sp; $$('.species button').forEach(b=>b.setAttribute('aria-checked',String(b===btn)));
+  const ic=$('#coreIc'); ic.innerHTML=species==='bird'?'<svg viewBox="0 0 64 64" style="width:34px;height:34px">'+birdSVG('budgie').replace(/^<svg[^>]*>|<\/svg>$/g,'')+'</svg>':'<svg class="ic"><use href="#i-paw"/></svg>';
+  pulseCore(); applyName(); say(species==='bird'?'جیک جیک':SPECIES[species]+'؟ عالیه',1400);
+}));
+
+/* ---------- world orbit ---------- */
+const WORLDS={
+ health:{q:'حالش خوبه؟',name:'سلامت و مراقبت',img:'vet',pos:'50% 35%',alt:'دامپزشک در حال معاینهٔ یک توله‌سگ',desc:'پروندهٔ سلامت، یادآور مراقبت و نوبت دامپزشک کنار هم هستند؛ هر چیزی که ثبت می‌کنی یک‌جا می‌ماند و هر وقت لازم شد آن را با دامپزشک به اشتراک می‌گذاری.',feats:[{n:'پروندهٔ سلامت',d:'واکسن، دارو، آلرژی و ویزیت‌ها',h:'/pets'},{n:'تقویم مراقبت',d:'یادآور کارهای منظم هر روز و هر ماه',h:'/care-calendar'},{n:'پیدا کردن دامپزشک',d:'دیدن ارائه‌دهنده‌ها و رزرو نوبت',h:'/vet/find'},{n:'اشتراک پرونده',d:'لینک موقت و قابل لغو برای دامپزشک',h:'/pets'}],cta:{t:n=>'ساخت پروندهٔ '+n,h:'/register'}},
+ daily:{q:'امروز چی لازم داره؟',name:'خرید و خدمات',img:'shop-companions',pos:'40% 55%',alt:'یک سگ طلایی و یک گربه کنار ظرف‌های غذا در خانه‌ای آفتابی',desc:'غذا و لوازم روزانه از پت‌شاپ، و خدماتی مثل آرایش، اقامت و تاکسی از ارائه‌دهنده‌ها؛ با رزرو و پیگیری در همین برنامه.',feats:[{n:'پت‌شاپ',d:'غذا، لوازم و محصولات مراقبتی',h:'/shop'},{n:'ارسال دوره‌ای',d:'سفارش تکراری در فاصلهٔ دلخواه تو',h:'/repeat-delivery'},{n:'آرایش و شست‌وشو',d:'رزرو نوبت از ارائه‌دهنده‌ها',h:'/services/GROOMING'},{n:'اقامت و تاکسی',d:'وقتی خودت نیستی یا باید جابه‌جا شوید',h:'/services/BOARDING'}],cta:{t:()=>'رفتن به پت‌شاپ',h:'/shop'}},
+ travel:{q:'کجا با هم بریم؟',name:'سفر و اقامت',img:'travel',pos:'45% 45%',alt:'سگی که سرش را از پنجرهٔ ماشین بیرون آورده',desc:'اقامتگاه‌های پذیرای حیوانات را جست‌وجو و مقایسه کن و برنامهٔ سفر و مدارک همراهت را کنار هم نگه دار.',feats:[{n:'جست‌وجوی اقامتگاه',d:'جاهایی که حیوان خانگی را می‌پذیرند',h:'/travel/search'},{n:'مقایسهٔ اقامتگاه‌ها',d:'شرایط و امکانات کنار هم',h:'/travel/compare'},{n:'برنامهٔ سفر',d:'سفرها و رزروهایشان در یک‌جا',h:'/travel/trips'},{n:'گذرنامهٔ سفر',d:'مدارک سفر در پروندهٔ همراهت',h:'/pets'}],cta:{t:()=>'برنامه‌ریزی سفر',h:'/travel'}},
+ safe:{q:'اگه اتفاقی بیفته؟',name:'آرامش خاطر',img:'care',pos:'50% 50%',alt:'گربه‌ای که آرام و جمع‌شده خوابیده',desc:'طرح‌های بیمه را مقایسه کن و اگر همراهت گم شد، از پرونده‌اش گزارش بساز تا آگهی و پیگیری از یک‌جا انجام شود.',feats:[{n:'بیمهٔ حیوان خانگی',d:'دیدن و مقایسهٔ طرح‌ها',h:'/insurance'},{n:'گزارش گم‌شدن',d:'آگهی عمومی و پیگیری از پروندهٔ او',h:'/lost-pets'},{n:'کارت شناسایی',d:'کارت قابل‌اشتراک برای پیدا شدن سریع‌تر',h:'/pets'},{n:'پشتیبانی',d:'ثبت درخواست و پیگیری پاسخ',h:'/support'}],cta:{t:()=>'مقایسهٔ بیمه‌ها',h:'/insurance'}},
+ together:{q:'با بقیه چطور؟',name:'جامعه و مهربانی',img:'@kind',pos:'50% 62%',alt:'تصویرسازی: دستی که برای یک سگ و یک گربهٔ بی‌سرپناه کنار یک لانهٔ چوبی ظرف غذا می‌آورد',desc:'تجربه‌ها را با صاحبان دیگر در میان بگذار، به حیوانات نیازمند کمک کن و خاطره‌های مشترک را نگه دار.',feats:[{n:'جامعه',d:'پرسش، تجربه و گفت‌وگو',h:'/community'},{n:'حمایت از حیوانات',d:'نیازهای ثبت‌شدهٔ مراکز حمایتی',h:'/animal-support/needs'},{n:'خاطره‌ها',d:'آلبوم لحظه‌هایی که با هم داشتید',h:'/pets'},{n:'مرور سال',d:'خلاصهٔ یک سال زندگی کنار هم',h:'/pets'}],cta:{t:()=>'پیوستن به جامعه',h:'/community'}}
+};
+const stage=$('#stage'), tilt=$('#tilt'), linksSvg=$('#links'), nodes=$$('.node',stage), panel=$('#panel');
+let active='health', pinned=false, intentT=0, stageHover=false;
+const tiltT={x:0,y:0}, tiltC={x:0,y:0};
+function drawLinks(){
+  const w=tilt.clientWidth,h=tilt.clientHeight; if(!w) return;
+  linksSvg.setAttribute('viewBox','0 0 '+w+' '+h);
+  let html='';
+  nodes.forEach((n,i)=>{const x=n.offsetLeft,y=n.offsetTop,cx=w/2,cy=h/2,dx=x-cx,dy=y-cy,L=Math.hypot(dx,dy)||1,off=(i%2?1:-1)*L*.14,qx=(cx+x)/2-dy/L*off,qy=(cy+y)/2+dx/L*off;
+    html+='<path class="link'+(n.dataset.world===active?' on':'')+'" data-w="'+n.dataset.world+'" d="M'+cx.toFixed(1)+' '+cy.toFixed(1)+' Q'+qx.toFixed(1)+' '+qy.toFixed(1)+' '+x.toFixed(1)+' '+y.toFixed(1)+'"/>';});
+  linksSvg.innerHTML=html;
+}
+function pulseCore(){const c=$('#core');c.classList.remove('pulse');void c.offsetWidth;c.classList.add('pulse');}
+function renderPanel(anim){
+  const w=WORLDS[active];
+  $('#pQ').textContent=w.q; $('#pT').textContent=w.name; $('#pD').textContent=w.desc;
+  $('#pF').innerHTML=w.feats.map(f=>'<li><a href="'+SITE+f.h+'" target="_blank" rel="noopener" data-ck="'+f.n+'"><span class="f-n">'+f.n+'</span><span class="f-d">'+f.d+'</span><svg class="ic"><use href="#i-arrow"/></svg></a></li>').join('');
+  const cta=$('#pC'); cta.href=SITE+w.cta.h; $('#pCt').textContent=w.cta.t(nm());
+  const img=$('#pImg');
+  if(img.dataset.src!==w.img){
+    const swap=()=>{img.src=w.img==='@kind'?$('#lightbox .base').src:'../../../../apps/web/public/images/landing/home/'+(w.img.indexOf('.')>-1?w.img:w.img+'.webp'); img.alt=w.alt; img.dataset.src=w.img; img.style.objectPosition=w.pos; const done=()=>img.classList.remove('fade'); if(img.complete) done(); else img.onload=done;};
+    if(anim&&motion){img.classList.add('fade'); setTimeout(swap,200);} else swap();
+  }
+  if(anim&&motion){panel.classList.remove('swap'); void panel.offsetWidth; panel.classList.add('swap');}
+}
+function select(key){
+  if(!WORLDS[key]||key===active) return;
+  active=key;
+  nodes.forEach(n=>{const on=n.dataset.world===key; n.classList.toggle('is-active',on); n.setAttribute('aria-pressed',String(on));});
+  $$('.link',linksSvg).forEach(p=>p.classList.toggle('on',p.dataset.w===key));
+  renderPanel(true); pulseCore();
+}
+stage.addEventListener('pointerenter',()=>{stageHover=true;});
+stage.addEventListener('pointermove',e=>{
+  const r=stage.getBoundingClientRect(), x=e.clientX-r.left, y=e.clientY-r.top;
+  stage.style.setProperty('--px',(x/r.width*100).toFixed(1)+'%'); stage.style.setProperty('--py',(y/r.height*100).toFixed(1)+'%');
+  tiltT.x=x/r.width-.5; tiltT.y=y/r.height-.5;
+  if(pinned) return;
+  const dx=x-r.width/2, dy=y-r.height/2, d=Math.hypot(dx,dy);
+  if(d<r.width*.12||d>r.width*.54) return;
+  const a=Math.atan2(dy,dx); let best=null, bd=1e9;
+  nodes.forEach(n=>{const na=parseFloat(n.style.getPropertyValue('--a'))*Math.PI/180; const df=Math.abs(Math.atan2(Math.sin(a-na),Math.cos(a-na))); if(df<bd){bd=df;best=n;}});
+  clearTimeout(intentT);
+  if(best&&best.dataset.world!==active){const k=best.dataset.world; intentT=setTimeout(()=>select(k),motion?120:0);}
+});
+stage.addEventListener('pointerleave',()=>{clearTimeout(intentT);pinned=false;stageHover=false;tiltT.x=0;tiltT.y=0;});
+nodes.forEach(n=>{n.addEventListener('click',()=>{select(n.dataset.world);pinned=true;}); n.addEventListener('focus',()=>select(n.dataset.world));});
+const pMedia=$('#pMedia');
+panel.addEventListener('pointermove',e=>{if(!motion) return; const r=pMedia.getBoundingClientRect(); const x=(e.clientX-r.left)/r.width-.5, y=(e.clientY-r.top)/r.height-.5; pMedia.style.setProperty('--mx',(-x*16).toFixed(1)+'px'); pMedia.style.setProperty('--my',(-y*12).toFixed(1)+'px');});
+panel.addEventListener('pointerleave',()=>{pMedia.style.setProperty('--mx','0px');pMedia.style.setProperty('--my','0px');});
+
+/* ---------- reel + music ---------- */
+/* ---------- reel: illustrated service scenes ---------- */
+const D=d=>` style="--d:${d}s"`;
+const T=(x,y,str,o={})=>`<text x="${x}" y="${y}" direction="${o.ltr?'ltr':'rtl'}" text-anchor="${o.a||'middle'}" font-family="Vazirmatn,Tahoma,sans-serif" font-size="${o.s||16}" font-weight="${o.w||700}" fill="${o.f||'#1E241F'}"${o.c?` class="${o.c}"`:''}${o.d!=null?D(o.d):''}>${str}</text>`;
+const G=(x,y,cls,d,inner,sc)=>`<g transform="translate(${x} ${y})${sc?` scale(${sc})`:''}"><g class="${cls}"${d!=null?D(d):''}>${inner}</g></g>`;
+const PAW=f=>`<g fill="${f}"><ellipse cx="0" cy="3.6" rx="5" ry="4.2"/><ellipse cx="-5.8" cy="-1.8" rx="1.9" ry="2.4"/><ellipse cx="-2.4" cy="-5.1" rx="1.9" ry="2.5"/><ellipse cx="2.4" cy="-5.1" rx="1.9" ry="2.5"/><ellipse cx="5.8" cy="-1.8" rx="1.9" ry="2.4"/></g>`;
+const HEART=f=>`<path d="M0 9 C-13 0 -11 -11 -4.5 -11 C-1.5 -11 0 -8 0 -7 C0 -8 1.5 -11 4.5 -11 C11 -11 13 0 0 9Z" fill="${f}"/>`;
+const PIN=(f,inner)=>`<path d="M0 0 C-10 -12 -15 -19 -15 -26 A15 15 0 1 1 15 -26 C15 -19 10 -12 0 0Z" fill="${f}"/>${inner||''}`;
+const LABEL=(w,fill,txt,tf)=>`<rect x="${-w/2}" y="-17" width="${w}" height="34" rx="17" fill="${fill}"/>${T(0,6,txt,{s:13,w:850,f:tf})}`;
+function logoAnim(fill,nose){return ''
+ +`<g class="a-pop"${D(.45)}><path d="M19.9 51.8 L16 27 L39.6 36.6 Z" fill="${fill}" stroke="${fill}" stroke-width="5" stroke-linejoin="round"/></g>`
+ +`<g class="a-pop"${D(.55)}><path d="M76.1 51.8 L80 27 L56.4 36.6 Z" fill="${fill}" stroke="${fill}" stroke-width="5" stroke-linejoin="round"/></g>`
+ +`<circle class="a-draw" pathLength="1"${D(.1)} cx="48" cy="68" r="26" fill="none" stroke="${fill}" stroke-width="13"/>`
+ +`<g class="a-pop"${D(.8)}><ellipse cx="40.5" cy="65" rx="3" ry="3.6" fill="${fill}"/><ellipse cx="55.5" cy="65" rx="3" ry="3.6" fill="${fill}"/></g>`
+ +`<g class="a-pop"${D(.9)}><path d="M45 72 h6 l-3 3.6 z" fill="#F2B544"/></g>`
+ +`<g class="a-rise"${D(.5)}><rect x="92" y="36" width="13" height="84" rx="6.5" fill="${fill}"/></g>`
+ +`<circle class="a-draw" pathLength="1"${D(.6)} cx="122" cy="68" r="26" fill="none" stroke="${fill}" stroke-width="13"/>`
+ +`<g class="a-pop"${D(1)}><circle cx="130" cy="62" r="3.4" fill="${fill}"/></g>`
+ +`<g class="a-pop"${D(1.05)}><ellipse cx="157" cy="66" rx="6" ry="5" fill="${nose}"/></g>`
+ +`<g class="a-pop"${D(1.15)}><path d="M109 38 C100 34 91 43 95 60 C98 72 106 77 110 70 C113 63 112 51 117 42 Z" fill="#F2B544"/></g>`
+ +`<g class="a-rise"${D(.9)}><rect x="170" y="22" width="13" height="78.5" rx="6.5" fill="${fill}"/></g>`
+ +`<g class="a-sprout"${D(1.3)}><path d="M176.5 26 C176 12 186 3 198 3 C198 16 190 25 176.5 26 Z" fill="#7DB46C"/></g>`;}
+
+const S1=`<circle cx="70" cy="110" r="70" fill="#FBE7C6"/><circle cx="310" cy="500" r="90" fill="#FBE7C6"/>`
+ +G(300,150,'a-float',0,PAW('#EBD9B6'),1.6)+G(64,420,'a-float',.6,PAW('#EBD9B6'),1.3)
+ +`<g transform="translate(60 132) scale(1.2)">${logoAnim('#1F5A3D','#1E241F')}</g>`
+ +T(180,350,'اپت لایف',{s:46,w:900,f:'#1F5A3D',c:'a-rise',d:1.35})
+ +T(180,388,'یک جهان برای حیوانات خانگی',{s:16,w:600,f:'#4F574F',c:'a-rise',d:1.55});
+
+const rowsH=[['واکسیناسیون','ok'],['داروها','time'],['آلرژی‌ها','unk']].map(([l,k],i)=>{const y=250+i*56;
+ const m=k==='ok'?`<circle cx="106" cy="${y+22}" r="12" fill="#2E7650"/><path d="M100 ${y+22} l4 4 l8 -8" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`
+  :k==='time'?`<circle cx="106" cy="${y+22}" r="12" fill="#F2B544"/><path d="M106 ${y+15} v7 l5 3" stroke="#3A2A05" stroke-width="2.4" fill="none" stroke-linecap="round"/>`
+  :`<rect x="88" y="${y+11}" width="62" height="22" rx="11" fill="none" stroke="#B9AE9B" stroke-width="1.5" stroke-dasharray="4 3"/>${T(119,y+26,'نامشخص',{s:11,w:700,f:'#6B726A'})}`;
+ return `<g class="a-rise"${D(.8+i*.18)}><rect x="84" y="${y}" width="192" height="44" rx="14" fill="#F4F9F3"/>${T(262,y+28,l,{a:'start',s:15,w:750})}${m}</g>`;}).join('');
+const S2=`<circle cx="310" cy="110" r="70" fill="#D2EACD"/><circle cx="40" cy="500" r="90" fill="#D2EACD"/>`
+ +`<ellipse cx="180" cy="446" rx="104" ry="10" fill="rgb(31 90 61 / .12)"/>`
+ +`<g class="a-rise"${D(.05)}><rect x="62" y="118" width="236" height="318" rx="28" fill="#fff"/></g>`
+ +G(262,156,'a-pop',.3,`<circle r="16" fill="#E3F1E0"/><circle r="8" fill="none" stroke="#1F5A3D" stroke-width="4"/><path d="M-8 -3 L-9 -12 L-2 -8 Z M8 -3 L9 -12 L2 -8 Z" fill="#1F5A3D"/>`)
+ +T(238,152,'پروندهٔ سلامت',{a:'start',s:17,w:850,c:'a-fade',d:.35})
+ +T(238,172,'یک پرونده برای همه‌چیز',{a:'start',s:12,w:500,f:'#6B726A',c:'a-fade',d:.45})
+ +`<path class="a-draw" pathLength="1"${D(.5)} d="M84 214 H140 L150 194 L162 236 L174 202 L182 214 H276" fill="none" stroke="#E46A5B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`
+ +rowsH
+ +`<g transform="translate(300 122)"><g class="a-float"><g class="a-pop"${D(1.4)}><circle r="24" fill="#F2B544"/>${HEART('#fff')}</g></g></g>`;
+
+let grid='';const marks={'0,2':['#1F5A3D',.6],'1,5':['#F2B544',.8],'3,1':['#7DB46C',1]};
+for(let r=0;r<4;r++)for(let c=0;c<7;c++){const cx=84+c*32,cy=236+r*38,m=marks[r+','+c];grid+=m?G(cx,cy,'a-pop',m[1],`<circle r="13" fill="${m[0]}"/>`):`<circle cx="${cx}" cy="${cy}" r="11" fill="#F4EFE3"/>`;}
+const S3=`<circle cx="300" cy="530" r="100" fill="#FFE6A6"/><circle cx="40" cy="90" r="60" fill="#FFE6A6"/>`
+ +`<ellipse cx="180" cy="410" rx="110" ry="10" fill="rgb(140 100 20 / .12)"/>`
+ +`<g class="a-rise"${D(.05)}><rect x="58" y="150" width="244" height="250" rx="26" fill="#fff"/><rect x="58" y="150" width="244" height="56" rx="26" fill="#1F5A3D"/><rect x="58" y="182" width="244" height="24" fill="#1F5A3D"/><circle cx="112" cy="150" r="7" fill="#F2B544"/><circle cx="248" cy="150" r="7" fill="#F2B544"/>${T(180,186,'تقویم مراقبت',{s:17,w:850,f:'#fff'})}</g>`
+ +grid
+ +G(180,104,'a-pop',1.1,`<rect x="-104" y="-22" width="208" height="44" rx="22" fill="#fff"/><circle cx="80" cy="0" r="9" fill="#F2B544"/>${T(64,6,'داروی صبح، ساعت ۸',{a:'start',s:14,w:800})}`)
+ +G(180,446,'a-pop',1.5,`<rect x="-104" y="-22" width="208" height="44" rx="22" fill="#1F5A3D"/><circle cx="80" cy="0" r="9" fill="#7DB46C"/>${T(64,6,'یادآور واکسن سالانه',{a:'start',s:14,w:800,f:'#fff'})}`)
+ +`<g transform="translate(318 196)"><g class="a-ring"><path d="M0 -16 C-10 -16 -14 -8 -14 2 L-14 10 L14 10 L14 2 C14 -8 10 -16 0 -16 Z" fill="#F2B544"/><circle cy="15" r="4" fill="#F2B544"/><circle cy="-18" r="3" fill="#F2B544"/></g></g>`;
+
+const S4=`<circle cx="320" cy="90" r="80" fill="#2A6B49"/><circle cx="30" cy="560" r="100" fill="#2A6B49"/>`
+ +`<g class="a-rise"${D(.05)}><rect x="36" y="140" width="288" height="200" rx="26" fill="#2E7650"/><g fill="none" stroke="#3E8C60" stroke-width="12" stroke-linecap="round"><path d="M36 220 C120 200 200 280 324 250"/><path d="M150 140 C162 200 138 280 172 340"/><path d="M36 306 C120 290 240 316 324 296"/></g><ellipse cx="272" cy="186" rx="34" ry="22" fill="#3A8A5B"/><ellipse cx="80" cy="268" rx="26" ry="18" fill="#3A8A5B"/></g>`
+ +G(96,236,'a-drop',.3,PIN('#FFFDF8',`<circle cy="-26" r="6" fill="#2E7650"/>`))
+ +G(262,292,'a-drop',.45,PIN('#FFFDF8',`<circle cy="-26" r="6" fill="#2E7650"/>`))
+ +`<g transform="translate(206 222)"><circle class="a-pulse"${D(.9)} r="22" fill="none" stroke="#F2B544" stroke-width="3"/></g>`
+ +G(206,222,'a-drop',.6,PIN('#F2B544',`<path d="M-3 -36 h6 v7 h7 v6 h-7 v7 h-6 v-7 h-7 v-6 h7z" fill="#3A2A05"/>`),1.25)
+ +G(206,120,'a-pop',.95,LABEL(150,'#fff','نزدیک‌ترین کلینیک','#1F5A3D'))
+ +[['۱۰:۰۰',100],['۱۱:۳۰',180],['۱۷:۰۰',260]].map(([t,x],i)=>G(x,372,i===1?'a-pop':'a-rise',i===1?1.25:1.05+i*.05,`<rect x="-36" y="-18" width="72" height="36" rx="18" fill="${i===1?'#F2B544':'#FFFDF8'}"/>${T(0,6,t,{s:14,w:800,f:i===1?'#3A2A05':'#1F5A3D'})}`)).join('')
+ +G(180,436,'a-pop',1.65,`<rect x="-100" y="-25" width="200" height="50" rx="25" fill="#FFFDF8"/><circle cx="72" r="14" fill="#2E7650"/><path d="M65 0 l5 5 l9 -9" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>${T(48,6,'نوبت ثبت شد',{a:'start',s:16,w:850,f:'#1F5A3D'})}`);
+
+const S5=`<circle cx="310" cy="120" r="80" fill="#F6C6A4"/><circle cx="50" cy="530" r="100" fill="#F6C6A4"/>`
+ +`<g transform="translate(84 146)"><g class="a-spin"><path d="M0 -30 A30 30 0 1 1 -30 0" fill="none" stroke="#1F5A3D" stroke-width="6" stroke-linecap="round"/><path d="M-38 -8 L-30 0 L-22 -8" fill="none" stroke="#1F5A3D" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></g></g>`
+ +G(84,200,'a-pop',1.4,LABEL(120,'#fff','ارسال دوره‌ای','#1F5A3D'))
+ +G(146,250,'a-drop',.3,`<path d="M-28 -4 H28 C26 14 14 22 0 22 C-14 22 -26 14 -28 -4Z" fill="#F2B544"/><rect x="-31" y="-9" width="62" height="8" rx="4" fill="#DD9A25"/><circle cx="-8" cy="-12" r="4" fill="#9C6A3A"/><circle cx="2" cy="-14" r="4" fill="#9C6A3A"/><circle cx="11" cy="-11" r="4" fill="#9C6A3A"/>`)
+ +`<g transform="translate(206 228) rotate(-24)"><g class="a-drop"${D(.5)}><g fill="#FFFDF8"><circle cx="-18" cy="-5" r="6"/><circle cx="-18" cy="5" r="6"/><circle cx="18" cy="-5" r="6"/><circle cx="18" cy="5" r="6"/><rect x="-18" y="-5" width="36" height="10"/></g></g></g>`
+ +G(236,248,'a-drop',.7,`<rect x="-14" y="-24" width="28" height="46" rx="6" fill="#E46A5B"/><rect x="-14" y="-6" width="28" height="14" fill="#FFFDF8"/><ellipse cy="-24" rx="14" ry="4" fill="#F08A7C"/>`)
+ +G(122,234,'a-drop',.9,`<circle r="13" fill="#7DB46C"/><path d="M-12 -4 C-4 0 4 0 12 -4 M-12 5 C-4 1 4 1 12 5" stroke="#fff" stroke-width="2" fill="none"/>`)
+ +`<g class="a-rise"${D(0)}><path d="M146 272 C146 232 214 232 214 272" fill="none" stroke="#1F5A3D" stroke-width="9" stroke-linecap="round"/><rect x="102" y="268" width="156" height="150" rx="24" fill="#1F5A3D"/><rect x="102" y="268" width="156" height="22" rx="11" fill="#2E7650"/>${T(180,374,'پت‌شاپ',{s:22,w:900,f:'#FFFDF8'})}<path d="M172 340 C171 326 180 318 192 318 C192 330 184 339 172 340Z" fill="#7DB46C"/></g>`;
+
+const bub=[[60,330,14,0],[96,360,9,.5],[132,340,18,1],[250,350,12,.3],[296,330,8,.8],[222,372,16,1.4],[170,360,10,1.8]].map(([x,y,r,d])=>G(x,y,'a-up',d,`<circle r="${r}" fill="rgb(255 255 255 / .55)" stroke="#fff" stroke-width="2"/><circle cx="${(-r*.35).toFixed(1)}" cy="${(-r*.35).toFixed(1)}" r="${(r*.22).toFixed(1)}" fill="#fff"/>`)).join('');
+const S6=`<circle cx="300" cy="560" r="110" fill="#D9D2F0"/><circle cx="60" cy="90" r="60" fill="#D9D2F0"/>`+bub
+ +`<g transform="translate(112 200)"><g class="a-pop"${D(.15)}><g class="a-snip"><path d="M0 0 L58 -10 L60 -4 Z" fill="#FFFDF8" stroke="#6A4D78" stroke-width="2" stroke-linejoin="round"/><circle cx="-16" cy="-10" r="10" fill="none" stroke="#6A4D78" stroke-width="5"/></g><path d="M0 0 L58 10 L60 4 Z" fill="#FFFDF8" stroke="#6A4D78" stroke-width="2" stroke-linejoin="round"/><circle cx="-16" cy="10" r="10" fill="none" stroke="#6A4D78" stroke-width="5"/><circle r="3.5" fill="#6A4D78"/></g></g>`
+ +G(222,170,'a-pop',.5,LABEL(150,'#fff','آرایش و شست‌وشو','#6A4D78'))
+ +`<g class="a-rise"${D(.35)}><path d="M110 330 L190 266 L270 330 Z" fill="#1F5A3D" stroke="#1F5A3D" stroke-width="10" stroke-linejoin="round"/><rect x="126" y="320" width="128" height="104" rx="12" fill="#FFF8EE"/><rect x="176" y="362" width="28" height="62" rx="14" fill="#F2B544"/><rect x="214" y="338" width="26" height="24" rx="6" fill="#FFE08A"/><rect x="140" y="338" width="26" height="24" rx="6" fill="#FFE08A"/></g>`
+ +G(296,268,'a-pop',.9,`<circle r="20" fill="#FFE08A"/><circle cx="9" cy="-6" r="17" fill="#E7E2F6"/>`)
+ +[[258,236,0],[318,322,.4],[62,272,.8]].map(([x,y,d])=>G(x,y,'a-twinkle',d,`<path d="M0 -8 L2 -2 L8 0 L2 2 L0 8 L-2 2 L-8 0 L-2 -2Z" fill="#F2B544"/>`)).join('')
+ +G(190,456,'a-pop',1.3,LABEL(140,'#1F5A3D','اقامت و نگهداری','#fff'));
+
+const rays=Array.from({length:8},(_,i)=>{const a=i*Math.PI/4;return `<path d="M${(Math.cos(a)*30).toFixed(1)} ${(Math.sin(a)*30).toFixed(1)} L${(Math.cos(a)*40).toFixed(1)} ${(Math.sin(a)*40).toFixed(1)}" stroke="#F2B544" stroke-width="5" stroke-linecap="round"/>`;}).join('');
+const CLOUD=`<g fill="#fff"><circle cx="-14" cy="0" r="12"/><circle cx="2" cy="-8" r="16"/><circle cx="18" cy="0" r="12"/><rect x="-26" y="0" width="56" height="12" rx="6"/></g>`;
+const ROAD='M30 470 C150 450 260 470 262 396 C264 326 112 340 106 268 C100 206 190 176 252 156';
+const S7=`<g transform="translate(292 108)"><g class="a-spin">${rays}</g><circle r="22" fill="#F2B544"/></g>`
+ +G(84,118,'a-float',0,CLOUD)+G(214,206,'a-float',.8,CLOUD,.8)
+ +`<path id="reelRoad" class="a-draw" pathLength="1"${D(.05)} d="${ROAD}" fill="none" stroke="#9CC6D8" stroke-width="30" stroke-linecap="round"/>`
+ +`<path class="a-fade"${D(.7)} d="${ROAD}" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="10 12" stroke-linecap="round"/>`
+ +G(252,152,'a-drop',1,PIN('#1F5A3D',`<g transform="translate(0 -26) scale(.9)">${PAW('#fff')}</g>`))
+ +G(252,92,'a-pop',1.5,LABEL(124,'#fff','پذیرای حیوان','#1F5A3D'))
+ +`<g class="car" data-road="reelRoad" transform="translate(180 360)"><rect x="-32" y="-14" width="64" height="24" rx="10" fill="#E46A5B"/><rect x="-18" y="-30" width="34" height="20" rx="9" fill="#E46A5B"/><rect x="-14" y="-27" width="26" height="13" rx="5" fill="#fff"/><circle cx="-1" cy="-20" r="4.2" fill="none" stroke="#1F5A3D" stroke-width="2.2"/><path d="M-5 -22 L-6 -27 L-2.5 -24Z M3 -22 L4 -27 L0.5 -24Z" fill="#1F5A3D"/><circle cx="-17" cy="11" r="7" fill="#1E241F"/><circle cx="17" cy="11" r="7" fill="#1E241F"/><circle cx="-17" cy="11" r="2.6" fill="#fff"/><circle cx="17" cy="11" r="2.6" fill="#fff"/></g>`;
+
+const S8=`<circle cx="320" cy="560" r="110" fill="#D9ECD5"/><circle cx="40" cy="90" r="70" fill="#D9ECD5"/>`
+ +G(118,214,'a-pop',.1,`<path d="M0 -78 C26 -60 50 -56 66 -56 V-6 C66 44 34 70 0 84 C-34 70 -66 44 -66 -6 V-56 C-50 -56 -26 -60 0 -78Z" fill="#1F5A3D"/><path d="M0 -62 C20 -48 38 -44 50 -44 V-6 C50 34 26 54 0 66Z" fill="#2E7650"/>`,.85)
+ +`<g transform="translate(118 214) scale(.85)"><path class="a-draw" pathLength="1"${D(.6)} d="M-26 2 L-6 22 L30 -18" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></g>`
+ +G(118,306,'a-rise',.9,LABEL(116,'#fff','بیمهٔ حیوان','#1F5A3D'))
+ +`<g transform="translate(246 352)">${[0,.6,1.2].map(d=>`<circle class="a-pulse"${D(d)} r="40" fill="none" stroke="#2E7650" stroke-width="3"/>`).join('')}<circle r="58" fill="none" stroke="#C9E2C4" stroke-width="1.5" stroke-dasharray="3 6"/></g>`
+ +G(246,368,'a-drop',1,PIN('#F2B544',`<g transform="translate(0 -26) scale(.9)">${PAW('#3A2A05')}</g>`))
+ +G(246,438,'a-rise',1.3,LABEL(132,'#1F5A3D','گزارش گم‌شدن','#fff'));
+
+const hearts=[[70,470,0,'#E46A5B'],[130,500,.7,'#F2B544'],[230,480,.3,'#F2B544'],[290,500,1.1,'#E46A5B'],[180,520,1.5,'#E46A5B']].map(([x,y,d,f])=>G(x,y,'a-up',d,HEART(f),.9)).join('');
+const S9=`<circle cx="60" cy="120" r="70" fill="#F8DCCB"/><circle cx="320" cy="530" r="100" fill="#F8DCCB"/>`+hearts
+ +`<g class="a-rise"${D(.1)}><path d="M110 280 L180 220 L250 280" fill="none" stroke="#1F5A3D" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/><path d="M124 270 V360 H236 V270" fill="none" stroke="#1F5A3D" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></g>`
+ +G(180,316,'a-beat',0,HEART('#E46A5B'),2.2)
+ +`<g class="a-pop"${D(.9)}><svg x="150" y="160" width="60" height="60" viewBox="0 0 64 64" overflow="visible">${birdSVG('budgie').replace(/^<svg[^>]*>|<\/svg>$/g,'')}</svg></g>`
+ +G(88,150,'a-pop',.5,`<rect x="-58" y="-24" width="116" height="48" rx="20" fill="#fff"/><path d="M30 20 L40 34 L20 22Z" fill="#fff"/><circle class="a-twinkle" cx="-20" r="5" fill="#B9AE9B"/><circle class="a-twinkle" style="--d:.3s" cx="0" r="5" fill="#B9AE9B"/><circle class="a-twinkle" style="--d:.6s" cx="20" r="5" fill="#B9AE9B"/>`)
+ +G(274,176,'a-pop',.9,`<rect x="-46" y="-22" width="92" height="44" rx="20" fill="#1F5A3D"/><path d="M-30 18 L-40 32 L-18 20Z" fill="#1F5A3D"/><g transform="scale(.9)">${HEART('#FFFDF8')}</g>`)
+ +[0,1,2,3].map(i=>G(60+i*28,420-i*22,'a-fade',.4+i*.2,`<g transform="rotate(${30+i*4})">${PAW('#C9A27E')}</g>`)).join('')
+ +G(180,446,'a-pop',1.3,LABEL(184,'#fff','حمایت از حیوانات نیازمند','#1F5A3D'));
+
+const S10=`<circle cx="320" cy="90" r="80" fill="#2A6B49"/><circle cx="40" cy="560" r="110" fill="#2A6B49"/>`
+ +G(60,96,'a-float',0,PAW('#2E7650'),1.8)+G(300,420,'a-float',.5,PAW('#2E7650'),1.5)
+ +`<g transform="translate(60 128) scale(1.2)">${logoAnim('#FFFDF8','#F2B544')}</g>`
+ +T(180,346,'اپت لایف',{s:46,w:900,f:'#FFFDF8',c:'a-rise',d:1.3})
+ +T(180,378,'opetlife.ir',{s:16,w:600,f:'#CFE3D4',c:'a-rise',d:1.45,ltr:1})
+ +G(180,436,'a-pop',1.7,`<rect x="-112" y="-26" width="224" height="52" rx="26" fill="#F2B544"/>${T(0,7,'از همین امروز شروع کن',{s:16,w:850,f:'#3A2A05'})}`);
+
+const REEL=[
+ {bg:'#FDF4E6',k:'اپت لایف',s:'یک جهان برای سگ، گربه، پرنده و همهٔ همراه‌ها.',svg:S1},
+ {bg:'#E3F1E0',k:'پروندهٔ سلامت',s:'پروندهٔ سلامت همراهت، همیشه در دسترس.',svg:S2},
+ {bg:'#FFF1CC',k:'تقویم مراقبت',s:'یادآور مراقبت، درست سر وقت.',svg:S3},
+ {bg:'#1F5A3D',k:'دامپزشکی',s:'دامپزشک نزدیک را پیدا کن و نوبت بگیر.',svg:S4},
+ {bg:'#F9D9C2',k:'پت‌شاپ',s:'غذا و لوازم روزانه، با ارسال دوره‌ای.',svg:S5},
+ {bg:'#E7E2F6',k:'آرایش و اقامت',s:'آرایش، شست‌وشو و اقامت؛ با رزرو آنلاین.',svg:S6},
+ {bg:'#D7ECF5',k:'سفر',s:'اقامتگاه‌های پذیرای حیوان، برای سفر بعدی.',svg:S7},
+ {bg:'#EAF4E8',k:'آرامش خاطر',s:'بیمه و گزارش گم‌شدن، برای روزهای سخت.',svg:S8},
+ {bg:'#FCEFE6',k:'جامعه و حمایت',s:'جامعه‌ای مهربان، و کمک به حیوانات نیازمند.',svg:S9},
+ {bg:'#1F5A3D',k:'',s:'دنیای او، از کنار تو شروع می‌شود.',svg:S10}
+];
+const DUR=3000;
+const reel=$('#reel'), slidesBox=$('#reelSlides'), barsBox=$('#reelBars'), sub=$('#reelSub'), kick=$('#reelKick'), chapters=$('#chapters');
+slidesBox.innerHTML=REEL.map((r,i)=>`<div class="slide${i===0?' on':''}" style="background:${r.bg}"><svg viewBox="0 0 360 640" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${r.svg}</svg></div>`).join('');
+function carUpdate(slideEl,p){
+  const car=slideEl&&slideEl.querySelector('.car'); if(!car) return;
+  const road=slideEl.querySelector('#'+car.dataset.road); if(!road) return;
+  const L=road.getTotalLength(), e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2, t=.04+e*.9;
+  const a=road.getPointAtLength(L*t), b=road.getPointAtLength(Math.min(L,L*t+2));
+  const dx=b.x-a.x, dy=b.y-a.y, flip=dx<0?-1:1, ang=clamp(Math.atan2(dy,Math.abs(dx)||.001)*180/Math.PI,-28,28);
+  car.setAttribute('transform','translate('+a.x.toFixed(1)+' '+(a.y-6).toFixed(1)+') scale('+flip+' 1) rotate('+ang.toFixed(1)+')');
+}
+barsBox.innerHTML=REEL.map(()=>'<span><i></i></span>').join('');
+chapters.innerHTML=REEL.map((s,i)=>'<li><button type="button" data-i="'+i+'"'+(i===0?' class="on"':'')+' data-ck="'+(s.k||'پایان')+'"><b>'+fa(i+1)+'</b>'+(s.k||'پایان')+'</button></li>').join('');
+const slideEls=$$('.slide',slidesBox), barEls=$$('i',barsBox), chapBtns=$$('button',chapters);
+let rIdx=0, rPlaying=false, rStart=0, rElapsed=0, rEnded=false;
+function setSub(text){sub.innerHTML=text.split(' ').map((w,i)=>'<span style="--i:'+i+'">'+w+'</span>').join(' ');}
+function showSlide(i){
+  rIdx=i;
+  slideEls.forEach((s,j)=>{if(j===i){s.classList.remove('on');void s.offsetWidth;s.classList.add('on');}else s.classList.remove('on');});
+  kick.textContent=REEL[i].k; kick.hidden=!REEL[i].k; setSub(REEL[i].s); carUpdate(slideEls[i],reel.classList.contains('started')?0:.6);
+  barEls.forEach((b,j)=>{b.style.width=j<i?'100%':'0%';});
+  chapBtns.forEach((b,j)=>b.classList.toggle('on',j===i));
+}
+const Music=(()=>{let ac,master,timer,nextT=0,step=0,noise,on=false,muted=false;
+  const BPM=92,S16=60/BPM/4,PROG=[[53,57,60],[48,52,55],[50,53,57],[46,50,53]],PAT=[3,2,4,2,3,1,2,1];
+  const mf=m=>440*Math.pow(2,(m-69)/12);
+  function init(){const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return false; ac=new AC(); const comp=ac.createDynamicsCompressor(); comp.threshold.value=-18; comp.ratio.value=3; master=ac.createGain(); master.gain.value=0; master.connect(comp); comp.connect(ac.destination); noise=ac.createBuffer(1,Math.floor(ac.sampleRate*.2),ac.sampleRate); const d=noise.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1; return true;}
+  function pluck(m,t,v){const o=ac.createOscillator(),o2=ac.createOscillator(),g=ac.createGain(),f=ac.createBiquadFilter();o.type='triangle';o2.type='sine';o.frequency.value=mf(m+12);o2.frequency.value=mf(m+24);f.type='lowpass';f.frequency.value=2600;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+.7);o.connect(f);o2.connect(f);f.connect(g);g.connect(master);o.start(t);o2.start(t);o.stop(t+.75);o2.stop(t+.75);}
+  function pad(ch,t,dur){ch.forEach(m=>{[-7,7].forEach(det=>{const o=ac.createOscillator(),g=ac.createGain(),f=ac.createBiquadFilter();o.type='sawtooth';o.frequency.value=mf(m);o.detune.value=det;f.type='lowpass';f.frequency.value=700;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.016,t+.6);g.gain.setValueAtTime(.016,t+dur-.3);g.gain.linearRampToValueAtTime(.0001,t+dur+.4);o.connect(f);f.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.5);});});
+    const b=ac.createOscillator(),bg=ac.createGain();b.type='sine';b.frequency.value=mf(ch[0]-12);bg.gain.setValueAtTime(.0001,t);bg.gain.linearRampToValueAtTime(.12,t+.05);bg.gain.exponentialRampToValueAtTime(.0001,t+dur);b.connect(bg);bg.connect(master);b.start(t);b.stop(t+dur+.05);}
+  function kickD(t){const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.setValueAtTime(120,t);o.frequency.exponentialRampToValueAtTime(45,t+.12);g.gain.setValueAtTime(.3,t);g.gain.exponentialRampToValueAtTime(.0001,t+.28);o.connect(g);g.connect(master);o.start(t);o.stop(t+.3);}
+  function shaker(t,v){const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();s.buffer=noise;f.type='highpass';f.frequency.value=6500;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+.07);s.connect(f);f.connect(g);g.connect(master);s.start(t);s.stop(t+.08);}
+  function sched(){while(nextT<ac.currentTime+.15){const bar=Math.floor(step/16)%4,s=step%16,ch=PROG[bar],tones=[ch[0],ch[1],ch[2],ch[0]+12,ch[1]+12];if(s===0)pad(ch,nextT,S16*16);if(s%2===0)pluck(tones[PAT[(s/2)%8]],nextT,s%4===0?.13:.08);if(s===0||s===8)kickD(nextT);if(s%4===2)shaker(nextT,.05);if(s%4===3)shaker(nextT,.022);nextT+=S16;step++;}}
+  return{start(){if(!ac&&!init())return;ac.resume();if(on)return;on=true;step=0;nextT=ac.currentTime+.06;master.gain.cancelScheduledValues(ac.currentTime);master.gain.setValueAtTime(master.gain.value,ac.currentTime);master.gain.linearRampToValueAtTime(muted?0:.6,ac.currentTime+.4);timer=setInterval(sched,25);sched();},
+    stop(){if(!ac||!on)return;on=false;clearInterval(timer);master.gain.cancelScheduledValues(ac.currentTime);master.gain.setValueAtTime(master.gain.value,ac.currentTime);master.gain.linearRampToValueAtTime(0,ac.currentTime+.35);},
+    mute(v){muted=v;if(ac&&on){master.gain.cancelScheduledValues(ac.currentTime);master.gain.setTargetAtTime(v?0:.6,ac.currentTime,.05);}},
+    isMuted(){return muted}};
+})();
+const ppBtn=$('#reelPP'), muteBtn=$('#reelMute'), playOv=$('#reelPlay');
+function setPP(){ppBtn.innerHTML='<svg class="ic"><use href="#i-'+(rPlaying?'pause':'play')+'"/></svg>';ppBtn.setAttribute('aria-label',rPlaying?'مکث':'پخش');}
+function rPlay(){
+  if(rEnded){rEnded=false;rElapsed=0;showSlide(0);}
+  rPlaying=true; rStart=performance.now()-rElapsed; reel.classList.add('playing','started'); playOv.hidden=true; Music.start(); setPP();
+  if(rElapsed===0) showSlide(rIdx);
+}
+function rPause(){rPlaying=false; rElapsed=performance.now()-rStart; reel.classList.remove('playing'); Music.stop(); setPP();}
+function rEnd(){rPlaying=false; rEnded=true; reel.classList.remove('playing'); Music.stop(); setPP(); $('#reelPlayTxt').textContent='دوباره ببین'; playOv.hidden=false;}
+function reelFrame(now){
+  rElapsed=now-rStart; const p=clamp(rElapsed/DUR,0,1); barEls[rIdx].style.width=(p*100).toFixed(1)+'%'; carUpdate(slideEls[rIdx],p);
+  if(rElapsed>=DUR){ if(rIdx<REEL.length-1){ showSlide(rIdx+1); rElapsed=0; rStart=now; } else { barEls[rIdx].style.width='100%'; rEnd(); } }
+}
+playOv.addEventListener('click',e=>{e.stopPropagation();rPlay();});
+ppBtn.addEventListener('click',e=>{e.stopPropagation(); rPlaying?rPause():rPlay();});
+muteBtn.addEventListener('click',e=>{e.stopPropagation(); const m=!Music.isMuted(); Music.mute(m); muteBtn.innerHTML='<svg class="ic"><use href="#i-'+(m?'mute':'vol')+'"/></svg>'; muteBtn.setAttribute('aria-label',m?'صدا دار کردن':'بی‌صدا کردن');});
+reel.addEventListener('click',()=>{ if(!playOv.hidden) return; rPlaying?rPause():rPlay(); });
+chapBtns.forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.i; rEnded=false; showSlide(i); rElapsed=0; rStart=performance.now(); if(!rPlaying) rPlay();}));
+setPP(); setSub(REEL[0].s);
+
+/* ---------- path trail ---------- */
+const trailEl=$('#pawTrail'), steps=$$('.step'); let tpaws=[];
+function buildTrail(){
+  const w=trailEl.clientWidth, h=trailEl.clientHeight; if(!w) return;
+  const N=Math.max(9,Math.round(w/50)), A=h*.28, k=Math.PI*2.2; trailEl.innerHTML=''; tpaws=[];
+  for(let i=0;i<N;i++){
+    const t=i/(N-1), x=w*(.97-.94*t), y=h/2+Math.sin(t*k)*A, dxdt=-.94*w, dydt=A*k*Math.cos(t*k), hd=Math.atan2(dydt,dxdt), side=i%2?1:-1;
+    const px=x-Math.sin(hd)*8*side, py=y+Math.cos(hd)*8*side;
+    const el=document.createElement('span'); el.className='tp'; el.style.left=px.toFixed(1)+'px'; el.style.top=py.toFixed(1)+'px'; el.style.setProperty('--r',(hd*180/Math.PI+90).toFixed(1)+'deg');
+    el.innerHTML='<svg width="22" height="22"><use href="#i-paw"/></svg>'; trailEl.appendChild(el); tpaws.push({el,t});
+  }
+  updatePath();
+}
+function updatePath(){
+  const r=$('#path').getBoundingClientRect(); const p=motion?clamp((innerHeight*.85-r.top)/(r.height*.75),0,1):1;
+  tpaws.forEach(o=>o.el.classList.toggle('on',p>=o.t*.92));
+  steps.forEach(s=>s.classList.toggle('lit',p>=parseFloat(s.dataset.at)));
+}
+
+/* ---------- trust ---------- */
+const share=$('#share');
+$$('.tg').forEach(b=>b.addEventListener('click',()=>{const on=b.getAttribute('aria-pressed')!=='true'; b.setAttribute('aria-pressed',String(on)); const row=$('.prow[data-sec="'+b.dataset.sec+'"]'); if(row) row.classList.toggle('off',!on);}));
+$$('#seg button').forEach(b=>b.addEventListener('click',()=>{$$('#seg button').forEach(x=>x.setAttribute('aria-checked',String(x===b))); $('#expTxt').textContent=b.dataset.h;}));
+$$('#principles li').forEach(li=>{const on=()=>{share.dataset.hl=li.dataset.hl;li.classList.add('on');}, off=()=>{share.dataset.hl='';li.classList.remove('on');};
+  li.addEventListener('pointerenter',on); li.addEventListener('pointerleave',off); li.addEventListener('focus',on); li.addEventListener('blur',off);});
+
+/* ---------- memorial ---------- */
+let lit=new Set(); try{lit=new Set(JSON.parse(store.get('ol-candles')||'[]'));}catch(e){}
+$$('.arch[data-id]').forEach(a=>{const btn=$('.candle',a), t=$('.candle__t',a), name=$('figcaption',a).textContent;
+  const set=on=>{a.classList.toggle('lit',on); btn.setAttribute('aria-pressed',String(on)); t.textContent=on?'شمع روشن است':'روشن کردن شمع'; btn.setAttribute('aria-label',(on?'خاموش کردن شمع ':'روشن کردن شمع برای ')+name);};
+  set(lit.has(a.dataset.id));
+  btn.addEventListener('click',()=>{const on=!a.classList.contains('lit'); set(on); on?lit.add(a.dataset.id):lit.delete(a.dataset.id); store.set('ol-candles',JSON.stringify([...lit]));});
+});
+const sky=$('#sky'), sctx=sky.getContext('2d'); let motes=[], skyW=0, skyH=0, skyPtr=null;
+function sizeSky(){const r=sky.getBoundingClientRect(), dpr=Math.min(2,devicePixelRatio||1); skyW=r.width; skyH=r.height; sky.width=Math.round(skyW*dpr); sky.height=Math.round(skyH*dpr); sctx.setTransform(dpr,0,0,dpr,0,0);
+  motes=Array.from({length:Math.round(clamp(skyW/18,24,90))},(_,i)=>({x:Math.random()*skyW,y:Math.random()*skyH,r:Math.random()*1.7+.6,v:Math.random()*.22+.06,ph:Math.random()*6.28,ox:0,oy:0,star:i%3===0}));}
+function drawSky(t){
+  sctx.clearRect(0,0,skyW,skyH);
+  for(const m of motes){
+    if(motion&&!m.star){m.y-=m.v; m.x+=Math.sin(t*.0006+m.ph)*.15; if(m.y<-10){m.y=skyH+10;m.x=Math.random()*skyW;}}
+    if(skyPtr&&motion){const dx=m.x+m.ox-skyPtr.x, dy=m.y+m.oy-skyPtr.y, d=Math.hypot(dx,dy); if(d<130&&d>0){m.ox+=dx/d*.9;m.oy+=dy/d*.9;}}
+    m.ox*=.96; m.oy*=.96;
+    const a=m.star?(.25+.25*Math.sin(t*.0012+m.ph)):(.35+.4*Math.sin(t*.002+m.ph));
+    sctx.beginPath(); sctx.fillStyle=m.star?'rgba(244,238,228,'+a.toFixed(3)+')':'rgba(255,201,120,'+a.toFixed(3)+')';
+    sctx.shadowColor=m.star?'transparent':'rgba(255,190,100,.9)'; sctx.shadowBlur=m.star?0:8;
+    sctx.arc(m.x+m.ox,m.y+m.oy,m.star?m.r*.7:m.r,0,Math.PI*2); sctx.fill();
+  }
+  sctx.shadowBlur=0;
+}
+$('#memory').addEventListener('pointermove',e=>{const r=sky.getBoundingClientRect(); skyPtr={x:e.clientX-r.left,y:e.clientY-r.top};});
+$('#memory').addEventListener('pointerleave',()=>{skyPtr=null;});
+
+/* ---------- kindness light ---------- */
+const lb=$('#lightbox'); let lbHover=false, lbPos={x:.56,y:.6};
+lb.addEventListener('pointermove',e=>{const r=lb.getBoundingClientRect(); lbHover=true; lbPos.x=(e.clientX-r.left)/r.width; lbPos.y=(e.clientY-r.top)/r.height;});
+lb.addEventListener('pointerleave',()=>{lbHover=false;});
+const lbCur={x:.56,y:.6};
+function kindFrame(t){ let tx=lbPos.x, ty=lbPos.y; if(!lbHover&&motion){tx=.54+Math.sin(t*.00035)*.26; ty=.56+Math.sin(t*.00051+1)*.18;} const k=motion?.1:1; lbCur.x+=(tx-lbCur.x)*k; lbCur.y+=(ty-lbCur.y)*k; lb.style.setProperty('--mx',(lbCur.x*100).toFixed(2)+'%'); lb.style.setProperty('--my',(lbCur.y*100).toFixed(2)+'%'); }
+
+/* ---------- paw field ---------- */
+const pf=$('#pawField'), pctx=pf.getContext('2d'); let pfPaws=[], pfW=0, pfH=0, pfPtr=null, ctaHover=false, colors={};
+function readColors(){const cs=getComputedStyle(root); colors={near:cs.getPropertyValue('--forest').trim()||'#1F5A3D', far:cs.getPropertyValue('--line-2').trim()||'#D2C6B2'};}
+function sizePF(){const r=pf.getBoundingClientRect(), dpr=Math.min(2,devicePixelRatio||1); pfW=r.width; pfH=r.height; pf.width=Math.round(pfW*dpr); pf.height=Math.round(pfH*dpr); pctx.setTransform(dpr,0,0,dpr,0,0); pfPaws=[]; const gap=pfW<600?40:48;
+  for(let y=gap/2;y<pfH;y+=gap) for(let x=gap/2;x<pfW;x+=gap){const j=Math.abs(Math.sin(x*12.9898+y*78.233)*43758.5453)%1, j2=Math.abs(Math.sin(x*39.3+y*11.1)*9631.7)%1; pfPaws.push({x:x+(j-.5)*16,y:y+(j2-.5)*16,a:j*6.28});}
+  readColors(); drawPF(performance.now(),true);}
+function pawShape(c){c.beginPath(); c.ellipse(0,3.4,5,4.2,0,0,Math.PI*2); [[-5.8,-1.9,1.9,2.4],[-2.4,-5.2,1.9,2.5],[2.4,-5.2,1.9,2.5],[5.8,-1.9,1.9,2.4]].forEach(([x,y,rx,ry])=>{c.moveTo(x+rx,y); c.ellipse(x,y,rx,ry,0,0,Math.PI*2);}); c.fill();}
+function ctaCenter(){const a=$('#finalCta').getBoundingClientRect(), b=pf.getBoundingClientRect(); return {x:a.left+a.width/2-b.left,y:a.top+a.height/2-b.top};}
+function drawPF(t,instant){
+  pctx.clearRect(0,0,pfW,pfH); const T=pfPtr||ctaCenter();
+  for(const p of pfPaws){
+    const dx=T.x-p.x, dy=T.y-p.y, d=Math.hypot(dx,dy), ta=Math.atan2(dy,dx)+Math.PI/2;
+    const diff=Math.atan2(Math.sin(ta-p.a),Math.cos(ta-p.a)); const k=(instant||!motion)?1:(.035+.22*Math.exp(-d/420)); p.a+=diff*k;
+    const near=Math.exp(-(d*d)/(2*170*170)); const pulse=ctaHover&&motion?.18*Math.max(0,Math.sin(t*.008-d*.025)):0;
+    pctx.save(); pctx.translate(p.x,p.y); pctx.rotate(p.a); const s=.7+.6*near+pulse; pctx.scale(s,s);
+    pctx.globalAlpha=.22+.6*near; pctx.fillStyle=near>.3?colors.near:colors.far; pawShape(pctx); pctx.restore();
+  }
+  pctx.globalAlpha=1;
+}
+$('#start').addEventListener('pointermove',e=>{const r=pf.getBoundingClientRect(); pfPtr={x:e.clientX-r.left,y:e.clientY-r.top};});
+$('#start').addEventListener('pointerleave',()=>{pfPtr=null;});
+$('#finalCta').addEventListener('pointerenter',()=>{ctaHover=true;}); $('#finalCta').addEventListener('pointerleave',()=>{ctaHover=false;});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{readColors();});
+new MutationObserver(readColors).observe(root,{attributes:true,attributeFilter:['data-theme']});
+
+/* ---------- visibility ---------- */
+const vis={sky:false,pf:false,kind:false,path:false};
+const io=new IntersectionObserver(es=>es.forEach(e=>{const k=e.target.dataset.v; if(k) vis[k]=e.isIntersecting;}),{rootMargin:'100px'});
+[['#memory','sky'],['#start','pf'],['#kind','kind'],['#path','path']].forEach(([s,k])=>{const el=$(s); el.dataset.v=k; io.observe(el);});
+const riseIO=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.remove('pre'); riseIO.unobserve(e.target);}}),{rootMargin:'0px 0px -8% 0px'});
+function initRise(){ if(!motion) return; $$('.rise').forEach(el=>{ if(el.getBoundingClientRect().top>innerHeight){ el.classList.add('pre'); riseIO.observe(el);} }); }
+
+/* ---------- hook bar ---------- */
+const hook=$('#hookbar'); let hookClosed=false;
+$('#hookX').addEventListener('click',()=>{hookClosed=true; updateHook();});
+function updateHook(){ const w=$('#world').getBoundingClientRect(), f=$('#start').getBoundingClientRect(); const show=!hookClosed&&w.bottom<0&&f.top>innerHeight*.7; hook.classList.toggle('show',show); hook.setAttribute('aria-hidden',String(!show)); $$('a,button',hook).forEach(el=>el.tabIndex=show?0:-1); }
+
+/* ---------- Cookie ---------- */
+const ck=$('#ck'), ckBody=$('#ckBody'), bubble=$('#ckBubble'), dot=$('#ckDot'), ball=$('#ckBall'), pawLayer=$('#pawLayer'), site=$('#site');
+const P={x:innerWidth*.5,y:innerHeight*.55,last:performance.now(),zone:'',seen:false,vx:0,dir:1};
+const C={x:innerWidth-80,y:innerHeight-90,rot:0,scale:1,phase:0,lx:0,ly:0,side:1,mode:''};
+let hoverEl=null, sayUntil=0, sayText='', bowUntil=0, dogCls='', face=1; const dogEl=$('#dogSvg');
+function say(text,ms){sayText=text; sayUntil=performance.now()+ms;}
+document.addEventListener('pointermove',e=>{
+  if(e.pointerType==='touch') return;
+  if(P.seen){ P.vx=P.vx*.7+(e.clientX-P.x)*.3; if(P.vx>1.2) P.dir=1; else if(P.vx<-1.2) P.dir=-1; }
+  P.x=e.clientX; P.y=e.clientY; P.last=performance.now(); P.seen=true;
+  hoverEl=e.target.closest('a,button,input,[role="radio"]');
+  const sec=e.target.closest('section,footer'); P.zone=sec?sec.id:'';
+},{passive:true});
+document.addEventListener('pointerdown',e=>{ if(e.pointerType!=='touch') return; P.dir=e.clientX>C.x?1:-1; P.x=e.clientX; P.y=e.clientY; P.last=performance.now(); P.seen=true; const sec=e.target.closest('section,footer'); P.zone=sec?sec.id:''; },{passive:true});
+document.addEventListener('mouseout',e=>{ if(!e.relatedTarget){ hoverEl=null; } });
+const B={x:0,y:0,fx:0,fy:0,tx:0,ty:0,t0:0,dur:900,on:false};
+function kickBall(now){if(B.on&&motion)bowUntil=now+520;B.fx=B.x;B.fy=B.y;const ang=Math.random()*Math.PI*2, dist=90+Math.random()*140; B.tx=clamp(P.x+Math.cos(ang)*dist,40,innerWidth-40); B.ty=clamp(P.y+Math.sin(ang)*dist*.6,60,innerHeight-40); B.t0=now; B.dur=700+dist*2.2;}
+function updateBall(now){
+  if(!B.on){B.on=true;B.x=C.x-30;B.y=C.y+20;kickBall(now);ball.classList.add('on');}
+  const t=clamp((now-B.t0)/B.dur,0,1), e=1-Math.pow(1-t,2), hop=Math.abs(Math.sin(t*Math.PI*2))*(1-t)*46;
+  B.x=B.fx+(B.tx-B.fx)*e; B.y=B.fy+(B.ty-B.fy)*e-hop;
+  ball.style.transform='translate3d('+B.x.toFixed(1)+'px,'+B.y.toFixed(1)+'px,0) rotate('+(t*720).toFixed(0)+'deg)';
+  if(t>=1&&Math.hypot(C.x-B.x,C.y-B.y)<52) kickBall(now);
+}
+function hideBall(){ if(B.on){B.on=false; ball.classList.remove('on');} }
+function printPaw(ang){
+  C.side*=-1; const nx=-Math.sin(ang), ny=Math.cos(ang);
+  const fx=clamp(C.x+nx*8*C.side,10,innerWidth-24), fy=C.y+30+ny*8*C.side;
+  const top=site.getBoundingClientRect().top;
+  const el=document.createElement('span'); el.className='pp'; el.style.left=fx.toFixed(1)+'px'; el.style.top=(fy-top).toFixed(1)+'px'; el.style.setProperty('--r',(ang*180/Math.PI+90).toFixed(1)+'deg');
+  el.innerHTML='<svg width="15" height="15"><use href="#i-paw"/></svg>'; pawLayer.appendChild(el); setTimeout(()=>el.remove(),1800);
+  while(pawLayer.childElementCount>44) pawLayer.firstElementChild.remove();
+  C.lx=C.x; C.ly=C.y;
+}
+function cookieFrame(now){
+  if(!cookieOn){hideBall(); return null;}
+  const idle=now-P.last, calm=P.zone==='memory';
+  let tx=P.x-50*P.dir, ty=P.y+14, mode='follow', lock=null, lockCx=0;
+  if(fine){
+    if(hoverEl&&site.contains(hoverEl)) lock=hoverEl;
+    else if(stageHover){ lock=$('.node.is-active',stage); }
+  }
+  if(lock){
+    const r=lock.getBoundingClientRect();
+    if(r.width<360&&r.height<180){ const fromRight=P.x>r.left+r.width/2; tx=fromRight?Math.min(r.right+54,innerWidth-50):Math.max(r.left-54,50); ty=r.top+r.height/2; mode='point'; lockCx=r.left+r.width/2; }
+  }
+  if(mode!=='point'&&P.seen&&idle>1400) mode=(idle>6500&&!calm&&motion)?'play':'look';
+  if(!P.seen&&!fine) mode='look';
+  if(mode==='look'){ tx=P.x+(fine?46:0); ty=P.y+(fine?34:0); }
+  if(mode==='play'){ updateBall(now); const bd=(B.tx-B.fx)>=0?1:-1; tx=B.x-42*bd; ty=B.y+6; } else hideBall();
+  const k=!motion?1:(mode==='play'?.085:(calm?.06:.14));
+  const ax=(tx-C.x)*k, ay=(ty-C.y)*k; C.x+=ax; C.y+=ay;
+  const speed=Math.hypot(ax,ay);
+  if(mode==='point') face=lockCx>C.x?1:-1; else if(Math.abs(ax)>.9) face=ax>0?1:-1;
+  C.scale+=((calm?.9:1)-C.scale)*.12;
+  ck.style.transform='translate3d('+C.x.toFixed(1)+'px,'+C.y.toFixed(1)+'px,0) translate(-50%,-50%)';
+  ckBody.style.transform='scale('+C.scale.toFixed(3)+')';
+  let cls;
+  if(mode==='play') cls=now<bowUntil?'bow play':(speed>.6?'run play':'play');
+  else if(speed>3.2&&!calm) cls='run';
+  else if(speed>.45) cls='walk';
+  else cls=mode==='point'?'point':(mode==='look'?'sit look':'stand');
+  if(!motion) cls=cls.replace('run','stand').replace('walk','stand');
+  if(face<0) cls+=' left';
+  if(cls!==dogCls){ dogCls=cls; dogEl.setAttribute('class','dog '+cls); }
+  if(C.mode!==mode){C.mode=mode; ck.dataset.mode=mode;}
+  if(motion&&speed>.8&&Math.hypot(C.x-C.lx,C.y-C.ly)>30) printPaw(Math.atan2(ay,ax));
+  let txt='';
+  if(now<sayUntil) txt=sayText; else if(mode==='point'&&lock&&lock.dataset.ck) txt=lock.dataset.ck; else if(mode==='play') txt='بازی؟';
+  if(bubble.textContent!==txt&&txt) bubble.textContent=txt;
+  ck.classList.toggle('talk',!!txt);
+  dot.style.transform='translate3d('+P.x.toFixed(1)+'px,'+P.y.toFixed(1)+'px,0)';
+  dot.classList.toggle('hide',!!hoverEl||!P.seen);
+  return {x:C.x,y:C.y};
+}
+
+/* ---------- logo ---------- */
+function logoSVG(vb){return '<svg viewBox="'+(vb||'0 0 200 124')+'" aria-hidden="true">'
+ +'<g class="lm-cat"><path d="M19.9 51.8 L16 27 L39.6 36.6 Z" fill="currentColor" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/><path d="M76.1 51.8 L80 27 L56.4 36.6 Z" fill="currentColor" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/><circle cx="48" cy="68" r="26" fill="none" stroke="currentColor" stroke-width="13"/><g class="lm-eyes"><ellipse cx="40.5" cy="65" rx="3" ry="3.6" fill="currentColor"/><ellipse cx="55.5" cy="65" rx="3" ry="3.6" fill="currentColor"/></g><path d="M45 72 h6 l-3 3.6 z" fill="#F2B544"/></g>'
+ +'<g class="lm-dog"><rect x="92" y="36" width="13" height="84" rx="6.5" fill="currentColor"/><circle cx="122" cy="68" r="26" fill="none" stroke="currentColor" stroke-width="13"/><ellipse cx="157" cy="66" rx="6" ry="5" fill="var(--lm-nose)"/><circle cx="130" cy="62" r="3.4" fill="currentColor"/><path class="lm-ear" d="M109 38 C100 34 91 43 95 60 C98 72 106 77 110 70 C113 63 112 51 117 42 Z" fill="#F2B544"/></g>'
+ +'<g class="lm-l"><rect x="170" y="22" width="13" height="78.5" rx="6.5" fill="currentColor"/><path class="lm-leaf" d="M176.5 26 C176 12 186 3 198 3 C198 16 190 25 176.5 26 Z" fill="#7DB46C"/></g>'
+ +'</svg>';}
+function injectLogos(){ $$('[data-logo]').forEach(el=>{ if(!el.firstElementChild) el.innerHTML=logoSVG(el.dataset.vb); }); }
+injectLogos();
+
+/* ---------- header ---------- */
+const hdr=$('#hdr'), ddBtn=$('#ddBtn'), dd=$('#dd'), langBtn=$('#langBtn'), langMenu=$('#langMenu'), menuBtn=$('#menuBtn'), sheet=$('#msheet');
+function closeMenus(keep){
+  if(keep!=='dd'){dd.classList.remove('open'); ddBtn.setAttribute('aria-expanded','false');}
+  if(keep!=='lang'){langMenu.classList.remove('open'); langBtn.setAttribute('aria-expanded','false');}
+}
+ddBtn.addEventListener('click',e=>{e.stopPropagation(); const o=!dd.classList.contains('open'); closeMenus('dd'); dd.classList.toggle('open',o); ddBtn.setAttribute('aria-expanded',String(o));});
+langBtn.addEventListener('click',e=>{e.stopPropagation(); const o=!langMenu.classList.contains('open'); closeMenus('lang'); langMenu.classList.toggle('open',o); langBtn.setAttribute('aria-expanded',String(o));});
+document.addEventListener('click',e=>{ if(!e.target.closest('.hnav__dd,.lang')) closeMenus(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeMenus(); });
+$$('#langMenu button').forEach(b=>b.addEventListener('click',()=>{ closeMenus(); if(b.dataset.l!=='fa') say('این پیش‌نمایش فقط فارسی است',2200); }));
+menuBtn.addEventListener('click',()=>{ const o=!sheet.classList.contains('open'); sheet.classList.toggle('open',o); menuBtn.setAttribute('aria-expanded',String(o)); });
+$$('[data-go]').forEach(a=>a.addEventListener('click',()=>{ select(a.dataset.go); closeMenus(); sheet.classList.remove('open'); menuBtn.setAttribute('aria-expanded','false'); }));
+$('#aaBtn').addEventListener('click',()=>say('حالت نمایش ساده',1600));
+
+/* ---------- main loop ---------- */
+function frame(now){
+  if(motion){ tiltC.x+=(tiltT.x-tiltC.x)*.08; tiltC.y+=(tiltT.y-tiltC.y)*.08; tilt.style.transform='rotateX('+(-tiltC.y*10).toFixed(2)+'deg) rotateY('+(tiltC.x*12).toFixed(2)+'deg)'; }
+  else tilt.style.transform='none';
+  const cpos=cookieFrame(now);
+  birdsFrame(now, cpos?cpos.x:(P.seen?P.x:null), cpos?cpos.y:(P.seen?P.y:null));
+  if(rPlaying) reelFrame(now);
+  if(vis.sky&&(motion||skyPtr)) drawSky(now);
+  if(vis.pf&&motion) drawPF(now,false);
+  if(vis.kind) kindFrame(now);
+  requestAnimationFrame(frame);
+}
+function requestStatic(){ drawSky(performance.now()); drawPF(performance.now(),true); updatePath(); }
+
+/* ---------- init ---------- */
+function onResize(){ drawLinks(); buildTrail(); sizeSky(); sizePF(); drawSky(performance.now()); }
+let rzT=0; addEventListener('resize',()=>{clearTimeout(rzT); rzT=setTimeout(onResize,120);});
+addEventListener('scroll',()=>{ if(vis.path) updatePath(); updateHook(); hdr.classList.toggle('scrolled',hdr.getBoundingClientRect().top<=1&&scrollY>40); },{passive:true});
+applyFlags(); renderPanel(false); applyName(); showSlide(0);
+C.x=innerWidth-90; C.y=innerHeight-100; if(fine){C.x=innerWidth*.5;C.y=innerHeight*.5;} else {P.x=innerWidth-110; P.y=innerHeight-130;}
+onResize(); initRise(); updateHook();
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{drawLinks(); buildTrail();});
+requestAnimationFrame(frame);
+})();
+</script>

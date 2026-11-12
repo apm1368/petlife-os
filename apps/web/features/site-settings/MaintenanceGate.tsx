@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Brand } from "@/features/brand/Brand";
+import type { RouteLocale } from "@/lib/i18n/config";
 import { localizedSetting, useSiteSettings } from "./site-settings";
 
 /** Paths that stay usable during maintenance so staff can sign in and work, and visitors can check status. */
@@ -23,7 +24,7 @@ export function MaintenanceGate({ children }: { children: React.ReactNode }) {
   return (
     <main className="site-maintenance" role="main" aria-labelledby="site-maintenance-title">
       <div className="site-maintenance__card">
-        <Brand />
+        <Brand locale={locale as RouteLocale} />
         <h1 id="site-maintenance-title">{t("title")}</h1>
         <p dir="auto">{message}</p>
         <a className="site-maintenance__link" href={`/${locale}/status`}>{t("status")}</a>
