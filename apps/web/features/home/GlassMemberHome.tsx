@@ -28,7 +28,7 @@ export function GlassMemberHome({ locale, userName, pet, overview, pets, activeP
   ].filter(section => section.href === `${base}/health` || section.href === `${base}/health/documents` ? permission.access?.canViewHealth : section.href === `${base}/care` ? permission.access?.canViewCareProfile : true);
   return <section className="glass-home" aria-label={c.identity}>
     <header className="glass-home__greeting">
-      <div><p className="glass-home__eyebrow">opetlife</p><h2>{c.greeting}{userName ? c.nameSeparator + userName : ""}</h2><p>{c.subtitle}</p></div>
+      <div><p className="glass-home__eyebrow">{locale === "fa" ? "اپت لایف" : "opetlife"}</p><h2>{c.greeting}{userName ? c.nameSeparator + userName : ""}</h2><p>{c.subtitle}</p></div>
       <div className="glass-home__summary"><Bell size={22} aria-hidden="true" /><strong>{count(overview.upcoming.length)}</strong><span>{c.reminders}</span></div>
       <div className="glass-home__switch">
         {overview.householdName && permission.access?.canViewIdentity ? <div className="glass-home__household" role="group" aria-label={`${c.household}: ${overview.householdName}`}><span>{c.household}</span><strong>{overview.householdName}</strong></div> : null}

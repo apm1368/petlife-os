@@ -43,8 +43,8 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
   const preview = useLocalPreview();
   const warmSurface = /^\/(fa|en|de|es)\//.test(usePathname() ?? "");
 
-  // A signed-in member keeps the member frame on public discovery pages, with the family reel at the end.
-  if (!preview && status === "authenticated" && user) return <MemberFrame>{children}<FamilyReel /></MemberFrame>;
+  // A signed-in member keeps the member frame on public discovery pages; the frame adds the family reel at the end.
+  if (!preview && status === "authenticated" && user) return <MemberFrame>{children}</MemberFrame>;
 
   return (
     <LandingShell locale={routeLocale} variant="page">

@@ -7,6 +7,7 @@ import { familyCopy, type Family } from "./family-copy";
 
 /** Which landing scenes each family reuses around its two own scenes (A, B). Numbers index the landing reel. */
 const SEQUENCE: Record<Family, (number | "A" | "B")[]> = {
+  care: [0, 1, "A", 2, "B"],
   services: [0, "A", 3, 5, "B"],
   shop: [0, "A", 4, "B", 2],
   travel: [0, 6, "A", "B"],
@@ -30,6 +31,31 @@ export function buildFamilyReel(family: Family, locale: RouteLocale): { scenes: 
   const blob = (a: string) => `<circle cx="310" cy="110" r="70" fill="${a}"/><circle cx="40" cy="520" r="90" fill="${a}"/>`;
 
   const scenes: Record<Family, () => { A: ReelScene; B: ReelScene }> = {
+    care: () => ({
+      A: { bg: "#FDF4E6", svg: blob("#FBE7C6")
+        + G(180, 104, "a-pop", 0.1, pill(116, "#F2B544", L.today!, "#3A2A05"))
+        + ([[L.feed!, "feed"], [L.walk!, "walk"], [L.meds!, "meds"]] as const).map(([label, kind], i) => {
+          const cy = 186 + i * 82;
+          const icon = kind === "feed" ? `<path d="M-13 -2 H13 C12 7 6 11 0 11 C-6 11 -12 7 -13 -2Z" fill="#F2B544"/><rect x="-14" y="-6" width="28" height="5" rx="2.5" fill="#DD9A25"/>`
+            : kind === "walk" ? PAW("#2E7650")
+            : `<g transform="rotate(-35)"><rect x="-13" y="-6" width="26" height="12" rx="6" fill="#F7B3A9"/><path d="M0 -6 H-7 A6 6 0 0 0 -7 6 H0 Z" fill="#E46A5B"/></g>`;
+          return `<g class="a-rise"${D(0.25 + i * 0.15)}><rect x="40" y="${cy - 35}" width="280" height="70" rx="20" fill="#fff"/><g transform="translate(${X(286)} ${cy})"><circle r="20" fill="${["#FFF1CC", "#E3F1E0", "#FCE3DE"][i]}"/>${icon}</g>${T(X(256), cy - 2, label, { a: "start", s: 15, w: 800 })}${bar(166, cy + 10, 90, "#EFE8DA")}${check(X(74), cy, false)}</g>`
+            + G(X(74), cy, "a-pop", 1 + i * 0.45, check(0, 0));
+        }).join("")
+        + `<rect x="60" y="430" width="240" height="14" rx="7" fill="#F2EBDF"/><path class="a-draw" pathLength="1"${D(2.3)} d="M${X(67)} 437 H${X(293)}" stroke="#2E7650" stroke-width="14" stroke-linecap="round" fill="none"/>`
+        + G(180, 490, "a-pop", 2.7, `<rect x="-70" y="-22" width="140" height="44" rx="22" fill="#1F5A3D"/>${check(m(44), 0, true)}${T(m(26), 6, L.done!, { a: "start", s: 14, w: 850, f: "#fff" })}`) },
+      B: { bg: "#EEF7EC", svg: blob("#D9ECD5")
+        + G(180, 104, "a-pop", 0.1, pill(150, "#1F5A3D", L.shared!, "#fff"))
+        + ([[72, 196, "#F2B544"], [288, 196, "#E98A5B"], [72, 420, "#6A4D78"], [288, 420, "#7DB46C"]] as const).map(([x, y, col], i) => {
+          const tx = x < 180 ? 112 : 248, ty = y < 300 ? 236 : 372;
+          return `<path class="a-draw" pathLength="1"${D(0.8 + i * 0.18)} d="M${x} ${y} L${tx} ${ty}" stroke="#9CC9A5" stroke-width="4" stroke-linecap="round" fill="none"/>`
+            + G(x, y, "a-pop", 0.5 + i * 0.18, `<circle r="30" fill="#fff"/><circle r="24" fill="${col}"/><circle cy="-6" r="8" fill="#FFF8EE"/><path d="M-13 15 C-11 4 11 4 13 15 Z" fill="#FFF8EE"/>`);
+        }).join("")
+        + G(180, 304, "a-rise", 0.2, `<rect x="-74" y="-86" width="148" height="172" rx="26" fill="#fff"/><g transform="translate(0 -34)"><circle r="30" fill="#E3F1E0"/><g transform="scale(2)">${PAW("#2E7650")}</g></g><rect x="-48" y="12" width="96" height="10" rx="5" fill="#1E241F"/><rect x="-36" y="32" width="72" height="8" rx="4" fill="#D6CFC2"/><g transform="translate(0 62)">${HEART("#E46A5B")}</g>`)
+        + G(X(72), 196, "a-pop", 1.8, `<g transform="translate(${m(-22)} 22)">${check(0, 0)}</g>`)
+        + G(X(288), 420, "a-pop", 2.1, `<g transform="translate(${m(22)} 22)">${check(0, 0)}</g>`)
+        + G(180, 520, "a-pop", 2.4, pill(130, "#fff", L.family!, "#1F5A3D")) },
+    }),
     services: () => ({
       A: { bg: "#EEF7EC", svg: blob("#D9ECD5")
         + `<g class="a-rise"${D(0.05)}><rect x="40" y="118" width="280" height="50" rx="25" fill="#fff"/><circle cx="${X(292)}" cy="141" r="9" fill="none" stroke="#1F5A3D" stroke-width="3"/><path d="M${X(292) + m(-6)} 148 l${m(-6)} 6" stroke="#1F5A3D" stroke-width="3" stroke-linecap="round"/>${T(X(270), 149, L.search!, { a: "start", s: 13, w: 600, f: "#6B726A" })}</g>`
