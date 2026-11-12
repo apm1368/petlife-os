@@ -1,0 +1,4 @@
+# Strip the submitting client's own (home/phone) IP from mail sent on 587/465.
+/^Received:.*with ESMTPSA/              IGNORE
+/^X-Originating-IP:/                    IGNORE
+/^X-Mailer:/                            IGNORE

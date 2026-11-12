@@ -1,0 +1,27 @@
+# /etc/fail2ban/jail.d/opetlife-mail.local — brute-force protection for mail logins only.
+[DEFAULT]
+ignoreip = 127.0.0.1/8 ::1 185.231.112.154
+bantime = 1h
+bantime.increment = true
+bantime.maxtime = 1w
+findtime = 10m
+maxretry = 6
+
+
+[postfix-sasl]
+enabled = true
+port = smtp,submission,submissions,465,587
+logpath = /var/log/mail.log
+backend = auto
+
+[dovecot]
+enabled = true
+port = imap,imaps,submission,submissions,465,587,sieve
+logpath = /var/log/mail.log
+backend = auto
+
+[roundcube-auth]
+enabled = true
+port = http,https
+logpath = /var/log/roundcube/errors.log
+backend = auto

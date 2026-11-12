@@ -1,0 +1,8 @@
+[Unit]
+Description=Back up opetlife.ir mailboxes and mail config
+
+[Service]
+Type=oneshot
+Nice=10
+IOSchedulingClass=idle
+ExecStart=/usr/local/sbin/opetlife-mail-backup
