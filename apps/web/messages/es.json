@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "adminHolidays": {
     "kicker": "Calendario laboral",
     "title": "Festivos y cierres",
@@ -93,7 +92,6 @@
       "oil": "Día de la Nacionalización del Petróleo"
     }
   },
-=======
   "clinicClients": {
     "optOut": {
       "title": "Dejar de recibir SMS de la clínica",
@@ -209,7 +207,6 @@
   "clinicWorkspace": {
     "clients": "Clientes"
   },
->>>>>>> origin/main
   "adminCustomRoles": {
     "loading": "Cargando roles…",
     "forbidden": "No tienes acceso a los roles.",

@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "adminHolidays": {
     "kicker": "Business calendar",
     "title": "Holidays and closures",
@@ -91,7 +90,8 @@
       "eidAlFitr": "Eid al-Fitr",
       "eidAlFitr2": "Eid al-Fitr holiday",
       "oil": "Oil Nationalization Day"
-=======
+    }
+  },
   "clinicClients": {
     "optOut": {
       "title": "Stop clinic texts",
@@ -202,7 +202,6 @@
       "connected": "You are now connected with {clinic}.",
       "addPets": "Add your pets",
       "accept": "Connect with this clinic"
->>>>>>> origin/main
     }
   },
   "adminCustomRoles": {

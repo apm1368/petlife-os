@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "adminHolidays": {
     "kicker": "Geschäftskalender",
     "title": "Feiertage und Schließtage",
@@ -93,7 +92,6 @@
       "oil": "Tag der Ölverstaatlichung"
     }
   },
-=======
   "clinicClients": {
     "optOut": {
       "title": "SMS der Klinik abbestellen",
@@ -209,7 +207,6 @@
   "clinicWorkspace": {
     "clients": "Kundschaft"
   },
->>>>>>> origin/main
   "adminCustomRoles": {
     "loading": "Rollen werden geladen …",
     "forbidden": "Du hast keinen Zugriff auf Rollen.",
