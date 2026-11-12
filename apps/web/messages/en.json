@@ -1,4 +1,116 @@
 {
+  "clinicClients": {
+    "optOut": {
+      "title": "Stop clinic texts",
+      "loading": "Checking…",
+      "missing": "This link is not valid.",
+      "failed": "That did not work. Try again.",
+      "explain": "{clinic} sends you texts through opetlife.",
+      "button": "Stop texts from {clinic}",
+      "done": "You will no longer receive texts from {clinic}."
+    },
+    "title": "Clients",
+    "intro": "Your clinic's own clients: add owners and their pets, text them, set reminders and invite them to opetlife.",
+    "add": "Add client",
+    "cancel": "Cancel",
+    "search": "Search by name, phone or pet",
+    "loading": "Loading…",
+    "loadFailed": "Clients could not be loaded.",
+    "forbidden": "Clients are not included in your clinic plan.",
+    "retry": "Retry",
+    "empty": "No clients yet. Add your first client and their pets.",
+    "noMatch": "No client matches this search.",
+    "noPets": "No pets recorded",
+    "noPhone": "No phone",
+    "status": {
+      "CLINIC_ONLY": "Clinic only",
+      "INVITED": "Invited",
+      "JOINED": "On opetlife"
+    },
+    "newClient": "New client",
+    "name": "Owner's name",
+    "phone": "Mobile number",
+    "email": "Email (optional)",
+    "notes": "Notes (optional)",
+    "pets": "Pets",
+    "petName": "Pet's name",
+    "species": "Species",
+    "birthDate": "Birth date",
+    "addPet": "Add pet",
+    "removePet": "Remove",
+    "save": "Save client",
+    "statusLabel": "opetlife",
+    "petRemoved": "Pet removed.",
+    "petAdded": "Pet added.",
+    "saved": "Saved.",
+    "reminders": "Reminders",
+    "anyPet": "Any of their pets",
+    "reminderSaved": "Reminder saved.",
+    "history": "Messages sent",
+    "noMessages": "No messages yet.",
+    "messageStatus": {
+      "SENT": "Sent",
+      "SIMULATED": "Recorded (sandbox)",
+      "FAILED": "Failed",
+      "SKIPPED": "Not sent"
+    },
+    "messageKind": {
+      "MESSAGE": "Message",
+      "REMINDER": "Reminder",
+      "INVITE": "Invitation"
+    },
+    "sms": {
+      "live": "SMS is live: messages reach your clients' phones.",
+      "sandboxTitle": "SMS is in test mode.",
+      "sandbox": "Messages are recorded here but do not reach phones until the platform's SMS line is connected.",
+      "offTitle": "SMS is off.",
+      "off": "Messages cannot be sent right now.",
+      "title": "Text message",
+      "label": "Message",
+      "placeholder": "Your clinic's name is added at the start.",
+      "count": "{count}/420",
+      "send": "Send text",
+      "sent": "Text sent.",
+      "recorded": "Recorded in test mode — not delivered to the phone.",
+      "optOut": "Stop texts to this client",
+      "optIn": "Allow texts again"
+    },
+    "invite": {
+      "send": "Invite to opetlife",
+      "again": "Send the invitation again",
+      "sent": "Invitation sent.",
+      "recorded": "Invitation recorded in test mode — not delivered to the phone.",
+      "help": "The invitation is a link. The client connects to your clinic only if they open it and accept while signed in."
+    },
+    "errors": {
+      "TOO_MANY_OPEN_REMINDERS": "This client already has 20 scheduled reminders.",
+      "CLIENT_EXISTS": "A client with this mobile number already exists.",
+      "INVALID_PHONE": "Enter a valid Iranian mobile number.",
+      "INVALID_EMAIL": "Enter a valid email address.",
+      "NO_PHONE": "Add a mobile number to text this client.",
+      "OPTED_OUT": "This client asked not to receive texts.",
+      "CLIENT_DAILY_LIMIT": "Daily limit for this client reached. Try again tomorrow.",
+      "CLINIC_DAILY_LIMIT": "Your clinic's daily text limit is reached.",
+      "ALREADY_JOINED": "This client is already on opetlife.",
+      "LENGTH": "Check the length of the name or message.",
+      "PLAN": "This is not included in your clinic plan.",
+      "GENERIC": "That did not work. Check the details and try again."
+    },
+    "join": {
+      "sentTo": "Sent to {phone}",
+      "title": "Clinic invitation",
+      "loading": "Checking the invitation…",
+      "missing": "This invitation link is not valid or has expired.",
+      "failed": "The invitation could not be opened. Try again.",
+      "used": "This invitation was already used by another account.",
+      "invitedBy": "{clinic} invited you to opetlife.",
+      "pets": "Pets on their file: {pets}",
+      "explain": "Connecting lets the clinic send you reminders and messages here. They see only what they already recorded.",
+      "connected": "You are now connected with {clinic}.",
+      "addPets": "Add your pets",
+      "accept": "Connect with this clinic"
+    }
+  },
   "adminCustomRoles": {
     "loading": "Loading roles…",
     "forbidden": "You don't have access to roles.",
@@ -735,7 +847,10 @@
       "settings_approve": "Approve sensitive changes",
       "system_view": "View system status",
       "analytics_view": "Reports & analytics",
-      "pet_access_manage": "Manage pet record access"
+      "pet_access_manage": "Manage pet record access",
+      "wallet_view": "View wallets",
+      "wallet_adjust": "Correct balances",
+      "wallet_topup_review": "Review top-up receipts"
     },
     "domains": {
       "customer": "Customers",
@@ -762,7 +877,8 @@
       "access": "Access",
       "admin": "Administrators",
       "settings": "Settings",
-      "system": "System"
+      "system": "System",
+      "wallet": "Wallets"
     }
   },
   "adminSiteSettings": {
@@ -4307,7 +4423,9 @@
         "platformSettings": "Settings",
         "featureFlags": "Feature flags",
         "channels": "Channels & delivery",
-        "smsPatterns": "SMS patterns"
+        "smsPatterns": "SMS patterns",
+        "walletDirectory": "Member wallets",
+        "walletTopUps": "Top-up receipts"
       },
       "palette": {
         "actions": "Quick actions",
@@ -4396,7 +4514,9 @@
         "settings": "Platform settings",
         "featureFlags": "Feature flags",
         "smsPatterns": "SMS patterns",
-        "verification": "Identity and documents"
+        "verification": "Identity and documents",
+        "wallets": "Wallets",
+        "pets": "Pets"
       },
       "navigation": "Admin navigation",
       "openMenu": "Open menu",
@@ -6687,7 +6807,8 @@
           "pendingSupportNeeds": "Help requests to review",
           "pendingMemorials": "Memorials to review",
           "openPlaceReports": "Place reports",
-          "openTasks": "Open tasks"
+          "openTasks": "Open tasks",
+          "pendingWalletTopUps": "Top-up receipts"
         }
       },
       "performance": {
@@ -6999,6 +7120,7 @@
     }
   },
   "clinicWorkspace": {
+    "clients": "Clients",
     "title": "Clinic workspace",
     "intro": "Appointments, follow-up tasks and clinic customers in one shared workspace.",
     "queue": "Visit queue",
@@ -9566,6 +9688,484 @@
         "BOARDING": "Boarding",
         "PET_TAXI": "Pet taxi",
         "OTHER": "Other"
+      }
+    }
+  },
+  "wallet": {
+    "eyebrow": "Account",
+    "title": "Wallet",
+    "description": "Your balance, top-ups and wallet history",
+    "navHint": "Balance, top-ups and history",
+    "loading": "Loading your wallet…",
+    "failed": "The wallet could not be loaded.",
+    "retry": "Try again",
+    "balance": {
+      "total": "Total balance",
+      "purchaseOnly": "For purchases",
+      "purchaseOnlyHint": "Top-ups and gifts, for purchases only",
+      "withdrawable": "Withdrawable",
+      "withdrawableHint": "Order refunds: spend them or withdraw them",
+      "expiring": "{amount} of gift credit expires on {date}."
+    },
+    "topUp": {
+      "title": "Add money",
+      "amountLabel": "Amount (Toman)",
+      "amountHint": "From {min} to {max}",
+      "railLabel": "How you pay",
+      "rails": {
+        "ZIBAL": "Online payment (bank gateway)",
+        "CARD_TO_CARD": "Card-to-card transfer"
+      },
+      "submit": "Add money",
+      "submitting": "Starting…",
+      "redirecting": "Taking you to the bank gateway…",
+      "unavailableTitle": "Top-ups open soon",
+      "unavailableBody": "No payment method is open for top-ups yet. Order refunds and gift credit still arrive in this wallet.",
+      "errors": {
+        "OUT_OF_RANGE": "The amount must be between {min} and {max}.",
+        "TOO_MANY_OPEN_TOP_UPS": "You already have three open requests. Finish or cancel one first.",
+        "TOP_UP_RAIL_UNAVAILABLE": "This payment method is not available right now.",
+        "ZIBAL_REQUEST_UNAVAILABLE": "The bank gateway did not answer. Please try again shortly.",
+        "generic": "The request did not go through. Please try again."
+      }
+    },
+    "card": {
+      "title": "Send the amount to this card",
+      "number": "Card number",
+      "holder": "Card holder",
+      "amount": "Amount to send",
+      "copy": "Copy",
+      "copied": "Copied",
+      "deadline": "Upload the receipt by {date}.",
+      "stepOne": "Transfer the amount to this card with your bank app or an ATM.",
+      "stepTwo": "Take a photo or screenshot of the receipt.",
+      "stepThree": "Send the receipt here. Our finance team checks it and adds the money."
+    },
+    "receipt": {
+      "choose": "Choose the receipt image",
+      "hint": "JPG, PNG or WebP, up to 10 MB",
+      "send": "Send receipt",
+      "sending": "Sending the receipt…",
+      "sent": "Receipt sent. Once finance has checked it, the money is added.",
+      "failed": "The receipt could not be sent. Please try again.",
+      "expired": "The time to send this receipt is over. Please start a new request."
+    },
+    "requests": {
+      "title": "Top-up requests",
+      "status": {
+        "AWAITING_PAYMENT": "Waiting for payment",
+        "AWAITING_RECEIPT": "Waiting for the receipt",
+        "REVIEW_PENDING": "Being checked",
+        "CREDITED": "Added",
+        "FAILED": "Failed",
+        "REJECTED": "Declined",
+        "EXPIRED": "Expired",
+        "CANCELLED": "Cancelled"
+      },
+      "rails": {
+        "ZIBAL": "Online payment (bank gateway)",
+        "CARD_TO_CARD": "Card-to-card transfer"
+      },
+      "received": "Added: {amount}",
+      "reason": "Reason: {reason}",
+      "showCard": "See the card and send the receipt",
+      "cancel": "Cancel request",
+      "cancelled": "The request was cancelled."
+    },
+    "return": {
+      "verifying": "Checking your payment…",
+      "credited": "Payment confirmed: {amount} was added to your wallet.",
+      "failed": "The payment was not confirmed. If money left your account, the bank returns it within 72 hours.",
+      "unknown": "The payment result is not known yet. Please open this page again in a few minutes."
+    },
+    "history": {
+      "title": "History",
+      "empty": "No wallet movements yet.",
+      "more": "Show more",
+      "purpose": {
+        "TOP_UP": "Top-up",
+        "PURCHASE": "Purchase",
+        "REFUND": "Refund",
+        "ADJUSTMENT": "Correction by our team",
+        "EXPIRY": "Gift credit expired",
+        "OTHER": "Movement"
+      },
+      "bucket": {
+        "PURCHASE_ONLY": "For purchases",
+        "WITHDRAWABLE": "Withdrawable"
+      },
+      "reasons": {
+        "GOODWILL": "Goodwill credit",
+        "SERVICE_RECOVERY": "Making up for a service problem",
+        "PAYMENT_CORRECTION": "Payment correction",
+        "REFUND_OUTSIDE_SYSTEM": "Refund outside an order",
+        "DUPLICATE_CREDIT_REVERSAL": "Duplicate credit reversed",
+        "OTHER": "Other correction"
+      },
+      "expires": "Expires {date}"
+    }
+  },
+  "adminWallets": {
+    "kicker": "Finance",
+    "title": "Member wallets",
+    "subtitle": "Each member's wallet balance and history. Every change of money carries a reason and is written to the audit log.",
+    "search": "Search name, email or phone",
+    "loading": "Loading…",
+    "failed": "The data could not be loaded.",
+    "retry": "Retry",
+    "forbidden": "You need the “View wallets” permission to see this.",
+    "empty": "No wallet has any movement yet.",
+    "emptySearch": "No member matches this search.",
+    "columns": {
+      "member": "Member",
+      "contact": "Contact",
+      "purchaseOnly": "For purchases",
+      "withdrawable": "Withdrawable",
+      "total": "Total",
+      "lastActivity": "Last movement"
+    },
+    "open": "Open",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page} of {pages}",
+    "never": "No movements",
+    "detail": {
+      "back": "All wallets",
+      "memberSince": "Member since {date}",
+      "entries": "History",
+      "entriesEmpty": "This wallet has no movements yet.",
+      "topUps": "Top-up requests",
+      "topUpsEmpty": "No requests yet.",
+      "adjustments": "Balance corrections",
+      "adjustmentsEmpty": "No corrections yet.",
+      "audit": "Audit log",
+      "auditEmpty": "Nothing recorded yet.",
+      "by": "by {name}",
+      "openCustomer": "Customer record"
+    },
+    "adjust": {
+      "title": "Correct the balance",
+      "hint": "Only to fix a mistake or make up for one. Each correction is logged with your name, the reason and the balance before and after.",
+      "direction": "Direction",
+      "directions": {
+        "CREDIT": "Add money",
+        "DEBIT": "Take money out"
+      },
+      "bucket": "Wallet part",
+      "buckets": {
+        "PURCHASE_ONLY": "For purchases",
+        "WITHDRAWABLE": "Withdrawable"
+      },
+      "amount": "Amount (Toman)",
+      "reasonCode": "Reason type",
+      "reasonCodes": {
+        "GOODWILL": "Goodwill credit",
+        "SERVICE_RECOVERY": "Making up for a service problem",
+        "PAYMENT_CORRECTION": "Payment correction",
+        "REFUND_OUTSIDE_SYSTEM": "Refund outside an order",
+        "DUPLICATE_CREDIT_REVERSAL": "Duplicate credit reversed",
+        "OTHER": "Other correction"
+      },
+      "reason": "Explanation (kept in the audit log)",
+      "evidence": "Ticket or reference (optional)",
+      "submit": "Save correction",
+      "confirm": "Record “{direction}” of {amount} in “{bucket}”? It applies to the balance immediately.",
+      "confirmYes": "Yes, record it",
+      "cancel": "Cancel",
+      "saving": "Saving…",
+      "done": "Correction saved.",
+      "noPermission": "Correcting a balance needs the “Correct balances” permission.",
+      "errors": {
+        "INSUFFICIENT_WALLET_BALANCE": "This part of the wallet does not hold that much.",
+        "reasonTooShort": "The explanation needs at least 5 characters.",
+        "amount": "Enter a valid amount.",
+        "generic": "The correction was not saved."
+      }
+    },
+    "topUps": {
+      "title": "Top-up receipts",
+      "subtitle": "Members' card-to-card receipts. Confirm the amount that actually reached the company account: that is the amount added.",
+      "filter": "Status",
+      "all": "All",
+      "status": {
+        "AWAITING_PAYMENT": "Waiting for payment",
+        "AWAITING_RECEIPT": "Waiting for the receipt",
+        "REVIEW_PENDING": "Being checked",
+        "CREDITED": "Added",
+        "FAILED": "Failed",
+        "REJECTED": "Declined",
+        "EXPIRED": "Expired",
+        "CANCELLED": "Cancelled"
+      },
+      "rails": {
+        "ZIBAL": "Online payment (bank gateway)",
+        "CARD_TO_CARD": "Card-to-card transfer"
+      },
+      "columns": {
+        "member": "Member",
+        "amount": "Requested",
+        "rail": "Method",
+        "status": "Status",
+        "submitted": "Receipt sent",
+        "actions": "Action"
+      },
+      "empty": "No receipts in this status.",
+      "review": "Review",
+      "reviewTitle": "Review receipt",
+      "viewReceipt": "View receipt",
+      "receiptOpening": "Preparing the receipt…",
+      "receivedAmount": "Amount received (Toman)",
+      "rejectReason": "Reason for declining (shown to the member)",
+      "approve": "Approve and add",
+      "reject": "Decline",
+      "approved": "The money was added to the member's wallet.",
+      "rejected": "The receipt was declined.",
+      "noPermission": "Reviewing receipts needs the “Review top-up receipts” permission.",
+      "failed": "The review was not saved.",
+      "close": "Close"
+    },
+    "audit": {
+      "wallet_credited": "Balance increased",
+      "wallet_debited": "Balance reduced",
+      "wallet_top_up_approved": "Receipt approved",
+      "wallet_top_up_rejected": "Receipt declined",
+      "wallet_top_up_receipt_viewed": "Receipt viewed"
+    },
+    "entry": {
+      "purpose": {
+        "TOP_UP": "Top-up",
+        "PURCHASE": "Purchase",
+        "REFUND": "Refund",
+        "ADJUSTMENT": "Correction by our team",
+        "EXPIRY": "Gift credit expired",
+        "OTHER": "Movement"
+      },
+      "bucket": {
+        "PURCHASE_ONLY": "For purchases",
+        "WITHDRAWABLE": "Withdrawable"
+      },
+      "reasons": {
+        "GOODWILL": "Goodwill credit",
+        "SERVICE_RECOVERY": "Making up for a service problem",
+        "PAYMENT_CORRECTION": "Payment correction",
+        "REFUND_OUTSIDE_SYSTEM": "Refund outside an order",
+        "DUPLICATE_CREDIT_REVERSAL": "Duplicate credit reversed",
+        "OTHER": "Other correction"
+      }
+    }
+  },
+  "adminPets": {
+    "kicker": "Customers",
+    "title": "Pets",
+    "subtitle": "Every pet with its owner and household. Health shows only as counts and dates, never clinical text.",
+    "search": "Pet name, owner or family member name, ID or microchip",
+    "searchButton": "Search",
+    "speciesFilter": "Species",
+    "allSpecies": "All",
+    "species": {
+      "DOG": "Dog",
+      "CAT": "Cat",
+      "BIRD": "Bird",
+      "RABBIT": "Rabbit",
+      "RODENT": "Rodent",
+      "FISH": "Fish",
+      "REPTILE": "Reptile",
+      "OTHER": "Other"
+    },
+    "lifecycle": {
+      "ACTIVE": "Active",
+      "LOST": "Lost",
+      "TEMPORARILY_TRANSFERRED": "Temporarily with someone else",
+      "DECEASED": "Passed away",
+      "MEMORIAL": "Memorial",
+      "deleted": "Deleted"
+    },
+    "loading": "Loading…",
+    "failed": "The data could not be loaded.",
+    "retry": "Retry",
+    "forbidden": "You need the “View customers” permission to see pets.",
+    "empty": "No pets registered yet.",
+    "emptySearch": "No pet matches this search.",
+    "columns": {
+      "pet": "Pet",
+      "species": "Species and breed",
+      "owner": "Owner",
+      "household": "Household",
+      "family": "Other members",
+      "status": "Status",
+      "created": "Registered"
+    },
+    "noOwner": "No owner",
+    "open": "Open",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page} of {pages}",
+    "detail": {
+      "back": "All pets",
+      "identity": "Identity",
+      "fields": {
+        "species": "Species",
+        "breed": "Breed",
+        "sex": "Sex",
+        "birthDate": "Date of birth",
+        "age": "Approximate age",
+        "neutered": "Neutered",
+        "microchip": "Microchip",
+        "status": "Status",
+        "created": "Registered",
+        "photo": "Photo"
+      },
+      "months": "{months} months",
+      "sex": {
+        "MALE": "Male",
+        "FEMALE": "Female",
+        "UNKNOWN": "Unknown"
+      },
+      "neutered": {
+        "NEUTERED": "Yes",
+        "INTACT": "No",
+        "UNKNOWN": "Unknown"
+      },
+      "yes": "Yes",
+      "no": "No",
+      "owner": "Owner",
+      "ownerMissing": "This household has no active owner.",
+      "openCustomer": "Customer record",
+      "household": "Household: {name}",
+      "unnamedHousehold": "Unnamed",
+      "family": "Household members",
+      "familyEmpty": "No other members in this household.",
+      "roles": {
+        "OWNER": "Owner",
+        "FAMILY": "Family member"
+      },
+      "accountStatus": {
+        "ACTIVE": "Active account",
+        "SUSPENDED": "Suspended account"
+      },
+      "invitations": "Pending invitations",
+      "invitationExpires": "Expires {date}",
+      "grants": "Access to this pet",
+      "grantsEmpty": "No access recorded.",
+      "grantColumns": {
+        "person": "Person",
+        "source": "Source",
+        "scope": "Permissions",
+        "period": "Period",
+        "state": "State"
+      },
+      "sources": {
+        "HOUSEHOLD": "Household membership",
+        "MANUAL": "Shared by hand",
+        "TEMPORARY": "Temporary"
+      },
+      "scopeCount": "{count} permissions",
+      "states": {
+        "active": "Active",
+        "revoked": "Revoked",
+        "inactive": "Not active"
+      },
+      "notMember": "Not in the household",
+      "revoke": "Revoke access",
+      "revokeTitle": "Revoke {name}'s access",
+      "revokeReason": "Reason (kept in the audit log)",
+      "revokeConfirm": "Revoke",
+      "revokeCancel": "Cancel",
+      "revoked": "Access revoked.",
+      "revokeFailed": "The access could not be revoked.",
+      "reasonTooShort": "The reason needs at least 5 characters.",
+      "ownerGrantNote": "An owner's access is never revoked here.",
+      "health": "Health (counts and dates only)",
+      "healthFields": {
+        "documents": "Medical documents",
+        "visits": "Visits",
+        "labs": "Lab results",
+        "conditions": "Conditions",
+        "allergies": "Allergies",
+        "medications": "Medications"
+      },
+      "bookings": "Bookings",
+      "lost": "Lost reports",
+      "sightings": "{count} sightings",
+      "care": "Care reminders",
+      "travel": "Trips",
+      "insurance": "Insurance",
+      "claimPreps": "{count} claim drafts",
+      "sharing": "Sharing",
+      "shareCards": "{count} active share cards",
+      "healthShares": "{count} active health links",
+      "none": "None.",
+      "diagnostics": "Data-quality notes",
+      "diagnosticCodes": {
+        "NO_ACTIVE_OWNER": "The household has no active owner.",
+        "STALE_HOUSEHOLD_GRANT": "Someone who left the household still has access.",
+        "EXPIRED_GRANT_NOT_REVOKED": "A temporary access expired but was never revoked.",
+        "MEMBER_WITHOUT_GRANT": "A household member has no active access.",
+        "LONG_OPEN_LOST_INCIDENT": "A lost report has been open for over 90 days.",
+        "DELETED_BUT_ACTIVE": "The pet is deleted but still marked active."
+      },
+      "activity": "Recent activity",
+      "changed": "Changed: {fields}"
+    },
+    "labels": {
+      "bookingStatus": {
+        "HOLD": "On hold",
+        "PENDING_CONFIRMATION": "Awaiting confirmation",
+        "REQUESTED": "Requested",
+        "AWAITING_PAYMENT": "Awaiting payment",
+        "REJECTED": "Declined",
+        "EXPIRED": "Expired",
+        "RESCHEDULED": "Rescheduled",
+        "CONFIRMED": "Confirmed",
+        "CHECKED_IN": "Checked in",
+        "IN_PROGRESS": "In progress",
+        "COMPLETED": "Completed",
+        "CANCELLED_BY_USER": "Cancelled by the member",
+        "CANCELLED_BY_PROVIDER": "Cancelled by the provider",
+        "NO_SHOW": "No-show"
+      },
+      "serviceCategory": {
+        "VET": "Vet",
+        "GROOMING": "Grooming",
+        "TRAINING": "Training",
+        "WALKING": "Walking",
+        "SITTING": "Pet sitting",
+        "BOARDING": "Boarding",
+        "PET_TAXI": "Pet taxi",
+        "OTHER": "Other"
+      },
+      "lostStatus": {
+        "OPEN": "Open",
+        "SEARCHING": "Searching",
+        "SIGHTING_REPORTED": "Sighting reported",
+        "FOUND": "Found",
+        "REUNITED": "Back home",
+        "CLOSED": "Closed"
+      },
+      "tripStatus": {
+        "DRAFT": "Draft",
+        "PLANNING": "Planning",
+        "READY": "Ready",
+        "IN_PROGRESS": "Travelling",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled"
+      },
+      "insuranceStatus": {
+        "NEEDS_INFORMATION": "Needs information",
+        "DRAFT": "Draft",
+        "SUBMITTED": "Submitted",
+        "UNDER_REVIEW": "Under review",
+        "APPROVED": "Approved",
+        "DECLINED": "Declined",
+        "CANCELLED": "Cancelled"
+      },
+      "reminderState": {
+        "UPCOMING": "Upcoming",
+        "DUE": "Due",
+        "OVERDUE": "Overdue",
+        "COMPLETED": "Done",
+        "SNOOZED": "Snoozed",
+        "CANCELLED": "Cancelled"
       }
     }
   }

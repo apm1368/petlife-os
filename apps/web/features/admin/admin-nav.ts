@@ -17,6 +17,7 @@ import {
   LifeBuoy,
   MapPinned,
   MessagesSquare,
+  PawPrint,
   ScrollText,
   Settings,
   ShieldAlert,
@@ -25,6 +26,7 @@ import {
   SlidersHorizontal,
   Stethoscope,
   Users,
+  Wallet,
 } from "@petlife/ui";
 
 /**
@@ -91,6 +93,8 @@ export const ADMIN_SECTIONS: AdminSection[] = [
           { href: "/customers", labelKey: "tabs.customer360", permission: "customer.view" },
         ],
       },
+      // Each pet with its owner and household members (Pet 360); health appears as counts only.
+      { key: "pets", labelKey: "nav.pets", icon: PawPrint, href: "/pets", permission: "customer.view" },
       { key: "support", labelKey: "nav.support", icon: Headset, href: "/support", permission: "support.view", queue: "openSupportCases" },
       { key: "disputes", labelKey: "nav.disputes", icon: Gavel, href: "/disputes", permission: "dispute.view", queue: "openDisputes" },
       {
@@ -226,6 +230,16 @@ export const ADMIN_SECTIONS: AdminSection[] = [
           { href: "/marketplace-statements", labelKey: "tabs.statements", permission: "sellerFinance.view" },
         ],
         owns: [{ prefix: "/settlements", tab: "/seller-finance" }],
+      },
+      {
+        key: "wallets",
+        labelKey: "nav.wallets",
+        icon: Wallet,
+        href: "/wallets",
+        tabs: [
+          { href: "/wallets", labelKey: "tabs.walletDirectory", permission: "wallet.view" },
+          { href: "/wallets/top-ups", labelKey: "tabs.walletTopUps", permission: "wallet.view", queue: "pendingWalletTopUps" },
+        ],
       },
     ],
   },

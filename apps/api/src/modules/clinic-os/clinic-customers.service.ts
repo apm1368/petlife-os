@@ -102,6 +102,6 @@ export class ClinicCustomersService {
   }
 }
 
-export function toReminderDto(r: { id: string; petId: string; kind: string; title: string; note: string | null; dueAt: Date; status: string; sentAt: Date | null; recipientCount: number; cancelledAt: Date | null; createdAt: Date }) {
-  return { id: r.id, petId: r.petId, kind: r.kind, title: r.title, note: r.note, dueAt: r.dueAt.toISOString(), status: r.status, sentAt: r.sentAt?.toISOString() ?? null, recipientCount: r.recipientCount, cancelledAt: r.cancelledAt?.toISOString() ?? null, createdAt: r.createdAt.toISOString() };
+export function toReminderDto(r: { id: string; petId: string | null; contactId?: string | null; clientPetId?: string | null; kind: string; title: string; note: string | null; dueAt: Date; status: string; sentAt: Date | null; recipientCount: number; cancelledAt: Date | null; createdAt: Date }) {
+  return { id: r.id, petId: r.petId, contactId: r.contactId ?? null, clientPetId: r.clientPetId ?? null, kind: r.kind, title: r.title, note: r.note, dueAt: r.dueAt.toISOString(), status: r.status, sentAt: r.sentAt?.toISOString() ?? null, recipientCount: r.recipientCount, cancelledAt: r.cancelledAt?.toISOString() ?? null, createdAt: r.createdAt.toISOString() };
 }

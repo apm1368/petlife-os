@@ -1,4 +1,119 @@
 {
+  "clinicClients": {
+    "optOut": {
+      "title": "Dejar de recibir SMS de la clínica",
+      "loading": "Comprobando…",
+      "missing": "Este enlace no es válido.",
+      "failed": "No funcionó. Inténtalo de nuevo.",
+      "explain": "{clinic} te envía SMS a través de opetlife.",
+      "button": "Dejar de recibir SMS de {clinic}",
+      "done": "Ya no recibirás SMS de {clinic}."
+    },
+    "title": "Clientes",
+    "intro": "Los clientes propios de tu clínica: registra a los dueños y sus mascotas, envíales SMS, programa recordatorios e invítalos a opetlife.",
+    "add": "Añadir cliente",
+    "cancel": "Cancelar",
+    "search": "Buscar por nombre, teléfono o mascota",
+    "loading": "Cargando…",
+    "loadFailed": "No se pudieron cargar los clientes.",
+    "forbidden": "Los clientes no están incluidos en el plan de tu clínica.",
+    "retry": "Reintentar",
+    "empty": "Aún no hay clientes. Añade el primero con sus mascotas.",
+    "noMatch": "Ningún cliente coincide con la búsqueda.",
+    "noPets": "Sin mascotas registradas",
+    "noPhone": "Sin teléfono",
+    "status": {
+      "CLINIC_ONLY": "Solo en la clínica",
+      "INVITED": "Invitado",
+      "JOINED": "En opetlife"
+    },
+    "newClient": "Nuevo cliente",
+    "name": "Nombre del dueño",
+    "phone": "Número de móvil",
+    "email": "Correo (opcional)",
+    "notes": "Notas (opcional)",
+    "pets": "Mascotas",
+    "petName": "Nombre de la mascota",
+    "species": "Especie",
+    "birthDate": "Fecha de nacimiento",
+    "addPet": "Añadir mascota",
+    "removePet": "Quitar",
+    "save": "Guardar cliente",
+    "statusLabel": "opetlife",
+    "petRemoved": "Mascota eliminada.",
+    "petAdded": "Mascota añadida.",
+    "saved": "Guardado.",
+    "reminders": "Recordatorios",
+    "anyPet": "Cualquiera de sus mascotas",
+    "reminderSaved": "Recordatorio guardado.",
+    "history": "Mensajes enviados",
+    "noMessages": "Aún no hay mensajes.",
+    "messageStatus": {
+      "SENT": "Enviado",
+      "SIMULATED": "Registrado (modo de prueba)",
+      "FAILED": "Falló",
+      "SKIPPED": "No enviado"
+    },
+    "messageKind": {
+      "MESSAGE": "Mensaje",
+      "REMINDER": "Recordatorio",
+      "INVITE": "Invitación"
+    },
+    "sms": {
+      "live": "El SMS está activo: los mensajes llegan a los teléfonos de tus clientes.",
+      "sandboxTitle": "El SMS está en modo de prueba.",
+      "sandbox": "Los mensajes se registran aquí, pero no llegan a los teléfonos hasta que se conecte la línea SMS de la plataforma.",
+      "offTitle": "El SMS está desactivado.",
+      "off": "Ahora no se pueden enviar mensajes.",
+      "title": "SMS",
+      "label": "Mensaje",
+      "placeholder": "El nombre de tu clínica va al principio.",
+      "count": "{count}/420",
+      "send": "Enviar SMS",
+      "sent": "SMS enviado.",
+      "recorded": "Registrado en modo de prueba; no llegó al teléfono.",
+      "optOut": "Dejar de enviar SMS a este cliente",
+      "optIn": "Volver a permitir SMS"
+    },
+    "invite": {
+      "send": "Invitar a opetlife",
+      "again": "Volver a enviar la invitación",
+      "sent": "Invitación enviada.",
+      "recorded": "Invitación registrada en modo de prueba; no llegó al teléfono.",
+      "help": "La invitación es un enlace. El cliente se conecta con tu clínica solo si lo abre con su sesión iniciada y acepta."
+    },
+    "errors": {
+      "TOO_MANY_OPEN_REMINDERS": "Este cliente ya tiene 20 recordatorios programados.",
+      "CLIENT_EXISTS": "Ya existe un cliente con este número de móvil.",
+      "INVALID_PHONE": "Introduce un móvil iraní válido.",
+      "INVALID_EMAIL": "Introduce un correo válido.",
+      "NO_PHONE": "Añade un número de móvil para enviarle SMS.",
+      "OPTED_OUT": "Este cliente pidió no recibir SMS.",
+      "CLIENT_DAILY_LIMIT": "Se alcanzó el límite diario para este cliente. Inténtalo mañana.",
+      "CLINIC_DAILY_LIMIT": "Se alcanzó el límite diario de SMS de tu clínica.",
+      "ALREADY_JOINED": "Este cliente ya está en opetlife.",
+      "LENGTH": "Revisa la longitud del nombre o del mensaje.",
+      "PLAN": "No está incluido en el plan de tu clínica.",
+      "GENERIC": "No funcionó. Revisa los datos e inténtalo de nuevo."
+    },
+    "join": {
+      "sentTo": "Enviado a {phone}",
+      "title": "Invitación de la clínica",
+      "loading": "Comprobando la invitación…",
+      "missing": "Este enlace de invitación no es válido o ha caducado.",
+      "failed": "No se pudo abrir la invitación. Inténtalo de nuevo.",
+      "used": "Otra cuenta ya usó esta invitación.",
+      "invitedBy": "{clinic} te invita a opetlife.",
+      "pets": "Mascotas en su ficha: {pets}",
+      "explain": "Al conectarte, la clínica puede enviarte aquí recordatorios y mensajes. Solo ve lo que ella misma registró.",
+      "connected": "Ya estás conectado con {clinic}.",
+      "addPets": "Añadir tus mascotas",
+      "accept": "Conectar con esta clínica"
+    }
+  },
+  "clinicWorkspace": {
+    "clients": "Clientes"
+  },
   "adminCustomRoles": {
     "loading": "Cargando roles…",
     "forbidden": "No tienes acceso a los roles.",
@@ -757,7 +872,10 @@
       "settings_approve": "Aprobar cambios sensibles",
       "system_view": "Ver estado del sistema",
       "analytics_view": "Informes y análisis",
-      "pet_access_manage": "Gestionar acceso a fichas"
+      "pet_access_manage": "Gestionar acceso a fichas",
+      "wallet_view": "Ver monederos",
+      "wallet_adjust": "Corregir saldos",
+      "wallet_topup_review": "Revisar comprobantes de recarga"
     },
     "domains": {
       "customer": "Clientes",
@@ -784,7 +902,8 @@
       "access": "Acceso",
       "admin": "Administradores",
       "settings": "Ajustes",
-      "system": "Sistema"
+      "system": "Sistema",
+      "wallet": "Monederos"
     }
   },
   "adminSiteSettings": {
@@ -3587,7 +3706,9 @@
         "platformSettings": "Ajustes",
         "featureFlags": "Funciones experimentales",
         "channels": "Canales y envíos",
-        "smsPatterns": "Plantillas SMS"
+        "smsPatterns": "Plantillas SMS",
+        "walletDirectory": "Miembros",
+        "walletTopUps": "Comprobantes de recarga"
       },
       "palette": {
         "actions": "Acciones rápidas",
@@ -3676,7 +3797,9 @@
         "settings": "Configuración de la plataforma",
         "featureFlags": "Indicadores de funciones",
         "smsPatterns": "Plantillas SMS",
-        "verification": "Identidad y documentos"
+        "verification": "Identidad y documentos",
+        "wallets": "Monederos",
+        "pets": "Mascotas"
       },
       "navigation": "Navegación de administración",
       "openMenu": "Abrir menú",
@@ -6040,7 +6163,8 @@
           "pendingSupportNeeds": "Solicitudes de ayuda por revisar",
           "pendingMemorials": "Memoriales por revisar",
           "openPlaceReports": "Denuncias de lugares",
-          "openTasks": "Tareas abiertas"
+          "openTasks": "Tareas abiertas",
+          "pendingWalletTopUps": "Comprobantes de recarga"
         }
       },
       "performance": {
@@ -8694,5 +8818,483 @@
       "UNKNOWN": "Indicador de laboratorio no especificado"
     },
     "unnamedImaging": "Región no registrada"
+  },
+  "wallet": {
+    "eyebrow": "Cuenta",
+    "title": "Monedero",
+    "description": "Tu saldo, tus recargas y el historial del monedero",
+    "navHint": "Saldo, recargas e historial",
+    "loading": "Cargando el monedero…",
+    "failed": "No se pudo cargar el monedero.",
+    "retry": "Reintentar",
+    "balance": {
+      "total": "Saldo total",
+      "purchaseOnly": "Para compras",
+      "purchaseOnlyHint": "Recargas y regalos, solo para compras",
+      "withdrawable": "Retirable",
+      "withdrawableHint": "Reembolsos de pedidos: gástalos o retíralos",
+      "expiring": "{amount} de saldo de regalo caduca el {date}."
+    },
+    "topUp": {
+      "title": "Recargar saldo",
+      "amountLabel": "Importe (tomanes)",
+      "amountHint": "De {min} a {max}",
+      "railLabel": "Forma de pago",
+      "rails": {
+        "ZIBAL": "Pago en línea (pasarela bancaria)",
+        "CARD_TO_CARD": "Transferencia de tarjeta a tarjeta"
+      },
+      "submit": "Recargar",
+      "submitting": "Iniciando…",
+      "redirecting": "Te llevamos a la pasarela bancaria…",
+      "unavailableTitle": "Las recargas llegan pronto",
+      "unavailableBody": "Todavía no hay ninguna forma de pago habilitada para recargar. Los reembolsos y el saldo de regalo siguen llegando a este monedero.",
+      "errors": {
+        "OUT_OF_RANGE": "El importe debe estar entre {min} y {max}.",
+        "TOO_MANY_OPEN_TOP_UPS": "Ya tienes tres solicitudes abiertas. Termina o cancela una primero.",
+        "TOP_UP_RAIL_UNAVAILABLE": "Esta forma de pago no está disponible ahora.",
+        "ZIBAL_REQUEST_UNAVAILABLE": "La pasarela bancaria no respondió. Inténtalo de nuevo en un momento.",
+        "generic": "La solicitud no se completó. Inténtalo de nuevo."
+      }
+    },
+    "card": {
+      "title": "Envía el importe a esta tarjeta",
+      "number": "Número de tarjeta",
+      "holder": "Titular",
+      "amount": "Importe a enviar",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "deadline": "Sube el comprobante antes del {date}.",
+      "stepOne": "Transfiere el importe a esta tarjeta desde tu app bancaria o un cajero.",
+      "stepTwo": "Haz una foto o una captura del comprobante.",
+      "stepThree": "Envía aquí el comprobante. Nuestro equipo de finanzas lo revisa y añade el saldo."
+    },
+    "receipt": {
+      "choose": "Elegir la imagen del comprobante",
+      "hint": "JPG, PNG o WebP, hasta 10 MB",
+      "send": "Enviar comprobante",
+      "sending": "Enviando el comprobante…",
+      "sent": "Comprobante enviado. Cuando finanzas lo revise, se añadirá el saldo.",
+      "failed": "No se pudo enviar el comprobante. Inténtalo de nuevo.",
+      "expired": "El plazo para enviar este comprobante terminó. Inicia una nueva solicitud."
+    },
+    "requests": {
+      "title": "Solicitudes de recarga",
+      "status": {
+        "AWAITING_PAYMENT": "Pendiente de pago",
+        "AWAITING_RECEIPT": "Pendiente de comprobante",
+        "REVIEW_PENDING": "En revisión",
+        "CREDITED": "Abonado",
+        "FAILED": "Fallido",
+        "REJECTED": "Rechazado",
+        "EXPIRED": "Caducado",
+        "CANCELLED": "Cancelado"
+      },
+      "rails": {
+        "ZIBAL": "Pago en línea (pasarela bancaria)",
+        "CARD_TO_CARD": "Transferencia de tarjeta a tarjeta"
+      },
+      "received": "Abonado: {amount}",
+      "reason": "Motivo: {reason}",
+      "showCard": "Ver la tarjeta y enviar el comprobante",
+      "cancel": "Cancelar solicitud",
+      "cancelled": "Se canceló la solicitud."
+    },
+    "return": {
+      "verifying": "Comprobando tu pago…",
+      "credited": "Pago confirmado: se añadieron {amount} a tu monedero.",
+      "failed": "El pago no se confirmó. Si se descontó dinero de tu cuenta, el banco lo devuelve en 72 horas.",
+      "unknown": "Aún no se conoce el resultado del pago. Vuelve a abrir esta página en unos minutos."
+    },
+    "history": {
+      "title": "Historial",
+      "empty": "Aún no hay movimientos.",
+      "more": "Mostrar más",
+      "purpose": {
+        "TOP_UP": "Recarga",
+        "PURCHASE": "Compra",
+        "REFUND": "Reembolso",
+        "ADJUSTMENT": "Corrección de nuestro equipo",
+        "EXPIRY": "Saldo de regalo caducado",
+        "OTHER": "Movimiento"
+      },
+      "bucket": {
+        "PURCHASE_ONLY": "Para compras",
+        "WITHDRAWABLE": "Retirable"
+      },
+      "reasons": {
+        "GOODWILL": "Crédito de cortesía",
+        "SERVICE_RECOVERY": "Compensación por un problema de servicio",
+        "PAYMENT_CORRECTION": "Corrección de pago",
+        "REFUND_OUTSIDE_SYSTEM": "Reembolso fuera de un pedido",
+        "DUPLICATE_CREDIT_REVERSAL": "Abono duplicado revertido",
+        "OTHER": "Otra corrección"
+      },
+      "expires": "Caduca el {date}"
+    }
+  },
+  "adminWallets": {
+    "kicker": "Finanzas",
+    "title": "Monederos de los miembros",
+    "subtitle": "Saldo e historial del monedero de cada miembro. Cada movimiento de dinero lleva un motivo y queda en el registro de auditoría.",
+    "search": "Buscar nombre, correo o teléfono",
+    "loading": "Cargando…",
+    "failed": "No se pudieron cargar los datos.",
+    "retry": "Reintentar",
+    "forbidden": "Necesitas el permiso «Ver monederos» para ver esto.",
+    "empty": "Ningún monedero tiene movimientos todavía.",
+    "emptySearch": "Ningún miembro coincide con esta búsqueda.",
+    "columns": {
+      "member": "Miembro",
+      "contact": "Contacto",
+      "purchaseOnly": "Para compras",
+      "withdrawable": "Retirable",
+      "total": "Total",
+      "lastActivity": "Último movimiento"
+    },
+    "open": "Abrir",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "pageOf": "Página {page} de {pages}",
+    "never": "Sin movimientos",
+    "detail": {
+      "back": "Todos los monederos",
+      "memberSince": "Miembro desde {date}",
+      "entries": "Historial",
+      "entriesEmpty": "Este monedero aún no tiene movimientos.",
+      "topUps": "Solicitudes de recarga",
+      "topUpsEmpty": "Aún no hay solicitudes.",
+      "adjustments": "Correcciones de saldo",
+      "adjustmentsEmpty": "Aún no hay correcciones.",
+      "audit": "Registro de auditoría",
+      "auditEmpty": "Aún no hay registros.",
+      "by": "por {name}",
+      "openCustomer": "Ficha del cliente"
+    },
+    "adjust": {
+      "title": "Corregir el saldo",
+      "hint": "Solo para corregir un error o compensarlo. Cada corrección queda registrada con tu nombre, el motivo y el saldo antes y después.",
+      "direction": "Dirección",
+      "directions": {
+        "CREDIT": "Añadir saldo",
+        "DEBIT": "Retirar saldo"
+      },
+      "bucket": "Parte del monedero",
+      "buckets": {
+        "PURCHASE_ONLY": "Para compras",
+        "WITHDRAWABLE": "Retirable"
+      },
+      "amount": "Importe (tomanes)",
+      "reasonCode": "Tipo de motivo",
+      "reasonCodes": {
+        "GOODWILL": "Crédito de cortesía",
+        "SERVICE_RECOVERY": "Compensación por un problema de servicio",
+        "PAYMENT_CORRECTION": "Corrección de pago",
+        "REFUND_OUTSIDE_SYSTEM": "Reembolso fuera de un pedido",
+        "DUPLICATE_CREDIT_REVERSAL": "Abono duplicado revertido",
+        "OTHER": "Otra corrección"
+      },
+      "reason": "Explicación (queda en el registro de auditoría)",
+      "evidence": "Ticket o referencia (opcional)",
+      "submit": "Guardar corrección",
+      "confirm": "¿Registrar «{direction}» de {amount} en «{bucket}»? Se aplica al saldo de inmediato.",
+      "confirmYes": "Sí, registrar",
+      "cancel": "Cancelar",
+      "saving": "Guardando…",
+      "done": "Corrección guardada.",
+      "noPermission": "Corregir un saldo requiere el permiso «Corregir saldos».",
+      "errors": {
+        "INSUFFICIENT_WALLET_BALANCE": "Esta parte del monedero no tiene tanto saldo.",
+        "reasonTooShort": "La explicación necesita al menos 5 caracteres.",
+        "amount": "Introduce un importe válido.",
+        "generic": "No se guardó la corrección."
+      }
+    },
+    "topUps": {
+      "title": "Comprobantes de recarga",
+      "subtitle": "Comprobantes de tarjeta a tarjeta de los miembros. Confirma el importe que realmente llegó a la cuenta de la empresa: ese es el que se abona.",
+      "filter": "Estado",
+      "all": "Todos",
+      "status": {
+        "AWAITING_PAYMENT": "Pendiente de pago",
+        "AWAITING_RECEIPT": "Pendiente de comprobante",
+        "REVIEW_PENDING": "En revisión",
+        "CREDITED": "Abonado",
+        "FAILED": "Fallido",
+        "REJECTED": "Rechazado",
+        "EXPIRED": "Caducado",
+        "CANCELLED": "Cancelado"
+      },
+      "rails": {
+        "ZIBAL": "Pago en línea (pasarela bancaria)",
+        "CARD_TO_CARD": "Transferencia de tarjeta a tarjeta"
+      },
+      "columns": {
+        "member": "Miembro",
+        "amount": "Solicitado",
+        "rail": "Método",
+        "status": "Estado",
+        "submitted": "Comprobante enviado",
+        "actions": "Acción"
+      },
+      "empty": "No hay comprobantes en este estado.",
+      "review": "Revisar",
+      "reviewTitle": "Revisar comprobante",
+      "viewReceipt": "Ver comprobante",
+      "receiptOpening": "Preparando el comprobante…",
+      "receivedAmount": "Importe recibido (tomanes)",
+      "rejectReason": "Motivo del rechazo (lo verá el miembro)",
+      "approve": "Aprobar y abonar",
+      "reject": "Rechazar",
+      "approved": "Se abonó el importe al monedero del miembro.",
+      "rejected": "Se rechazó el comprobante.",
+      "noPermission": "Revisar comprobantes requiere el permiso «Revisar comprobantes de recarga».",
+      "failed": "No se guardó la revisión.",
+      "close": "Cerrar"
+    },
+    "audit": {
+      "wallet_credited": "Saldo aumentado",
+      "wallet_debited": "Saldo reducido",
+      "wallet_top_up_approved": "Comprobante aprobado",
+      "wallet_top_up_rejected": "Comprobante rechazado",
+      "wallet_top_up_receipt_viewed": "Comprobante visto"
+    },
+    "entry": {
+      "purpose": {
+        "TOP_UP": "Recarga",
+        "PURCHASE": "Compra",
+        "REFUND": "Reembolso",
+        "ADJUSTMENT": "Corrección de nuestro equipo",
+        "EXPIRY": "Saldo de regalo caducado",
+        "OTHER": "Movimiento"
+      },
+      "bucket": {
+        "PURCHASE_ONLY": "Para compras",
+        "WITHDRAWABLE": "Retirable"
+      },
+      "reasons": {
+        "GOODWILL": "Crédito de cortesía",
+        "SERVICE_RECOVERY": "Compensación por un problema de servicio",
+        "PAYMENT_CORRECTION": "Corrección de pago",
+        "REFUND_OUTSIDE_SYSTEM": "Reembolso fuera de un pedido",
+        "DUPLICATE_CREDIT_REVERSAL": "Abono duplicado revertido",
+        "OTHER": "Otra corrección"
+      }
+    }
+  },
+  "adminPets": {
+    "kicker": "Clientes",
+    "title": "Mascotas",
+    "subtitle": "Cada mascota con su dueño y su hogar. La salud aparece solo como recuentos y fechas, nunca como texto clínico.",
+    "search": "Nombre de la mascota, del dueño o de un familiar, ID o microchip",
+    "searchButton": "Buscar",
+    "speciesFilter": "Especie",
+    "allSpecies": "Todas",
+    "species": {
+      "DOG": "Perro",
+      "CAT": "Gato",
+      "BIRD": "Ave",
+      "RABBIT": "Conejo",
+      "RODENT": "Roedor",
+      "FISH": "Pez",
+      "REPTILE": "Reptil",
+      "OTHER": "Otro"
+    },
+    "lifecycle": {
+      "ACTIVE": "Activa",
+      "LOST": "Perdida",
+      "TEMPORARILY_TRANSFERRED": "Temporalmente con otra persona",
+      "DECEASED": "Fallecida",
+      "MEMORIAL": "Memorial",
+      "deleted": "Eliminada"
+    },
+    "loading": "Cargando…",
+    "failed": "No se pudieron cargar los datos.",
+    "retry": "Reintentar",
+    "forbidden": "Necesitas el permiso «Ver clientes» para ver las mascotas.",
+    "empty": "Aún no hay mascotas registradas.",
+    "emptySearch": "Ninguna mascota coincide con esta búsqueda.",
+    "columns": {
+      "pet": "Mascota",
+      "species": "Especie y raza",
+      "owner": "Dueño",
+      "household": "Hogar",
+      "family": "Otros miembros",
+      "status": "Estado",
+      "created": "Registro"
+    },
+    "noOwner": "Sin dueño",
+    "open": "Abrir",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "pageOf": "Página {page} de {pages}",
+    "detail": {
+      "back": "Todas las mascotas",
+      "identity": "Identidad",
+      "fields": {
+        "species": "Especie",
+        "breed": "Raza",
+        "sex": "Sexo",
+        "birthDate": "Fecha de nacimiento",
+        "age": "Edad aproximada",
+        "neutered": "Esterilizada",
+        "microchip": "Microchip",
+        "status": "Estado",
+        "created": "Registrada",
+        "photo": "Foto"
+      },
+      "months": "{months} meses",
+      "sex": {
+        "MALE": "Macho",
+        "FEMALE": "Hembra",
+        "UNKNOWN": "Desconocido"
+      },
+      "neutered": {
+        "NEUTERED": "Sí",
+        "INTACT": "No",
+        "UNKNOWN": "Desconocido"
+      },
+      "yes": "Sí",
+      "no": "No",
+      "owner": "Dueño",
+      "ownerMissing": "Este hogar no tiene dueño activo.",
+      "openCustomer": "Ficha del cliente",
+      "household": "Hogar: {name}",
+      "unnamedHousehold": "Sin nombre",
+      "family": "Miembros del hogar",
+      "familyEmpty": "No hay más miembros en este hogar.",
+      "roles": {
+        "OWNER": "Dueño",
+        "FAMILY": "Familiar"
+      },
+      "accountStatus": {
+        "ACTIVE": "Cuenta activa",
+        "SUSPENDED": "Cuenta suspendida"
+      },
+      "invitations": "Invitaciones pendientes",
+      "invitationExpires": "Caduca el {date}",
+      "grants": "Acceso a esta mascota",
+      "grantsEmpty": "No hay accesos registrados.",
+      "grantColumns": {
+        "person": "Persona",
+        "source": "Origen",
+        "scope": "Permisos",
+        "period": "Periodo",
+        "state": "Estado"
+      },
+      "sources": {
+        "HOUSEHOLD": "Membresía del hogar",
+        "MANUAL": "Compartido a mano",
+        "TEMPORARY": "Temporal"
+      },
+      "scopeCount": "{count} permisos",
+      "states": {
+        "active": "Activo",
+        "revoked": "Revocado",
+        "inactive": "No activo"
+      },
+      "notMember": "Fuera del hogar",
+      "revoke": "Revocar acceso",
+      "revokeTitle": "Revocar el acceso de {name}",
+      "revokeReason": "Motivo (queda en el registro de auditoría)",
+      "revokeConfirm": "Revocar",
+      "revokeCancel": "Cancelar",
+      "revoked": "Acceso revocado.",
+      "revokeFailed": "No se pudo revocar el acceso.",
+      "reasonTooShort": "El motivo necesita al menos 5 caracteres.",
+      "ownerGrantNote": "El acceso del dueño nunca se revoca aquí.",
+      "health": "Salud (solo recuentos y fechas)",
+      "healthFields": {
+        "documents": "Documentos médicos",
+        "visits": "Visitas",
+        "labs": "Análisis",
+        "conditions": "Afecciones",
+        "allergies": "Alergias",
+        "medications": "Medicamentos"
+      },
+      "bookings": "Reservas",
+      "lost": "Avisos de pérdida",
+      "sightings": "{count} avistamientos",
+      "care": "Recordatorios de cuidado",
+      "travel": "Viajes",
+      "insurance": "Seguro",
+      "claimPreps": "{count} borradores de reclamación",
+      "sharing": "Compartido",
+      "shareCards": "{count} tarjetas activas",
+      "healthShares": "{count} enlaces de salud activos",
+      "none": "Ninguno.",
+      "diagnostics": "Notas de calidad de datos",
+      "diagnosticCodes": {
+        "NO_ACTIVE_OWNER": "El hogar no tiene dueño activo.",
+        "STALE_HOUSEHOLD_GRANT": "Alguien que dejó el hogar aún tiene acceso.",
+        "EXPIRED_GRANT_NOT_REVOKED": "Un acceso temporal caducó pero nunca se revocó.",
+        "MEMBER_WITHOUT_GRANT": "Un miembro del hogar no tiene acceso activo.",
+        "LONG_OPEN_LOST_INCIDENT": "Un aviso de pérdida lleva abierto más de 90 días.",
+        "DELETED_BUT_ACTIVE": "La mascota está eliminada pero sigue marcada como activa."
+      },
+      "activity": "Actividad reciente",
+      "changed": "Cambiado: {fields}"
+    },
+    "labels": {
+      "bookingStatus": {
+        "HOLD": "En espera",
+        "PENDING_CONFIRMATION": "Pendiente de confirmación",
+        "REQUESTED": "Solicitada",
+        "AWAITING_PAYMENT": "Pendiente de pago",
+        "REJECTED": "Rechazada",
+        "EXPIRED": "Caducada",
+        "RESCHEDULED": "Reprogramada",
+        "CONFIRMED": "Confirmada",
+        "CHECKED_IN": "Registrada",
+        "IN_PROGRESS": "En curso",
+        "COMPLETED": "Completada",
+        "CANCELLED_BY_USER": "Cancelada por el miembro",
+        "CANCELLED_BY_PROVIDER": "Cancelada por el proveedor",
+        "NO_SHOW": "No se presentó"
+      },
+      "serviceCategory": {
+        "VET": "Veterinario",
+        "GROOMING": "Peluquería",
+        "TRAINING": "Adiestramiento",
+        "WALKING": "Paseo",
+        "SITTING": "Cuidado en casa",
+        "BOARDING": "Residencia",
+        "PET_TAXI": "Taxi para mascotas",
+        "OTHER": "Otro"
+      },
+      "lostStatus": {
+        "OPEN": "Abierto",
+        "SEARCHING": "Buscando",
+        "SIGHTING_REPORTED": "Avistamiento reportado",
+        "FOUND": "Encontrada",
+        "REUNITED": "De vuelta en casa",
+        "CLOSED": "Cerrado"
+      },
+      "tripStatus": {
+        "DRAFT": "Borrador",
+        "PLANNING": "Planificando",
+        "READY": "Listo",
+        "IN_PROGRESS": "De viaje",
+        "COMPLETED": "Completado",
+        "CANCELLED": "Cancelado"
+      },
+      "insuranceStatus": {
+        "NEEDS_INFORMATION": "Falta información",
+        "DRAFT": "Borrador",
+        "SUBMITTED": "Enviada",
+        "UNDER_REVIEW": "En revisión",
+        "APPROVED": "Aprobada",
+        "DECLINED": "Rechazada",
+        "CANCELLED": "Cancelada"
+      },
+      "reminderState": {
+        "UPCOMING": "Próximos",
+        "DUE": "Pendientes",
+        "OVERDUE": "Atrasados",
+        "COMPLETED": "Hechos",
+        "SNOOZED": "Pospuestos",
+        "CANCELLED": "Cancelados"
+      }
+    }
   }
 }

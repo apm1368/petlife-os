@@ -406,6 +406,25 @@ export class StorageService {
     return { ...target, key };
   }
 
+  /**
+   * A wallet top-up's bank receipt — private (it shows the payer's card and bank), images only so the upload is
+   * checked as a real JPEG/PNG/WebP and stripped of metadata; finance reads it through a signed download.
+   */
+  async createWalletTopUpReceiptUploadTarget(
+    topUpId: string,
+    contentType: string,
+    fileSizeBytes: number,
+  ): Promise<UploadTarget & { key: string }> {
+    const extension = LOST_PET_PHOTO_MIME_EXTENSIONS[contentType];
+    if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
+    if (fileSizeBytes <= 0 || fileSizeBytes > LOST_PET_PHOTO_MAX_BYTES) {
+      throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: LOST_PET_PHOTO_MAX_BYTES });
+    }
+    const key = `wallet-top-up-receipts/${topUpId}/${randomUUID()}.${extension}`;
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
+    return { ...target, key };
+  }
+
   /** ERP-F: a support-case attachment — private, same allow-list and limits as medical documents; read only via signed downloads after a case-access check. */
   async createSupportAttachmentUploadTarget(
     caseId: string,
