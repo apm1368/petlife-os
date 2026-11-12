@@ -137,6 +137,7 @@ export type AdminAuditAction =
   | "admin_user.custom_role_cleared"
   // Admin → Orders
   | "orders.exported"
+  | "orders.phone_searched"
   | "messaging.test_sms_sent"
   | "messaging.test_email_sent"
   | "customer.suspended"

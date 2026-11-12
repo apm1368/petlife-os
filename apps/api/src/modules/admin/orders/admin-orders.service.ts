@@ -58,15 +58,22 @@ export class AdminOrdersService {
     return [one];
   }
 
-  /** `q` is either a phone number (matched to accounts) or an order reference. */
-  private async filterOf(query: OrdersQuery): Promise<OrderFilter> {
-    const { section: _s, q, before: _b, limit: _l, ...rest } = query;
+  /**
+   * `q` is either a phone number (matched to accounts) or an order reference. A phone search is itself a personal-data
+   * lookup ("does this number have orders?"), so its first page is audited — that a search happened and in which
+   * section, never the number.
+   */
+  private async filterOf(admin: ResolvedAdminContext, query: OrdersQuery, purpose: "list" | "export"): Promise<OrderFilter> {
+    const { section: _s, q, before, limit: _l, ...rest } = query;
     const filter: OrderFilter = { ...rest };
     if (!q?.trim()) return filter;
     const phone = normalizeIranianPhone(q);
     if (phone) {
       const users = await this.prisma.user.findMany({ where: { phone: phone.e164 }, select: { id: true }, take: 20 });
       filter.customerIds = users.map((u) => u.id);
+      if (!before) {
+        await this.audit.record({ adminUserId: admin.adminUserId, action: "orders.phone_searched", entityType: "Orders", afterSummary: { section: query.section, purpose, matchedAccounts: users.length } });
+      }
     } else {
       filter.number = q.trim().toUpperCase().replace(/\s/g, "");
     }
@@ -82,7 +89,7 @@ export class AdminOrdersService {
 
   async list(admin: ResolvedAdminContext, query: OrdersQuery): Promise<AdminOrdersPageDto> {
     const limit = Math.min(Math.max(query.limit ?? 25, 1), 50);
-    const filter = await this.filterOf(query);
+    const filter = await this.filterOf(admin, query, "list");
     const visible = this.visible(admin);
     const chosen = this.chosen(admin, query.section);
     const before = AdminOrdersService.cursorOf(query.before);
@@ -115,8 +122,10 @@ export class AdminOrdersService {
   /** CSV of the current filters (masked contacts, formula-safe cells), at most EXPORT_MAX_ROWS rows, audited. */
   async export(admin: ResolvedAdminContext, query: OrdersQuery): Promise<{ filename: string; csv: string; rows: number }> {
     if (!adminCan(admin, "orders.export")) throw new AdminAccessDeniedException({ reason: "INSUFFICIENT_PERMISSION", requiredPermissions: ["orders.export"] });
-    const filter = await this.filterOf(query);
+    // The route's own permission replaces the controller's view list, so the export also needs a section to see.
     const chosen = this.chosen(admin, query.section);
+    if (!chosen.length) throw new AdminAccessDeniedException({ reason: "NO_ORDER_SECTION", requiredPermissions: ["commerce.view", "services.view", "travel.view", "animalSupport.view", "subscription.view"] });
+    const filter = await this.filterOf(admin, query, "export");
     const rows: AdminOrderRowDto[] = [];
     let before: Cursor | null = null;
     // Page through newest first so a large section never loads in one query.

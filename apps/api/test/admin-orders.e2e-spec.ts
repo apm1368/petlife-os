@@ -130,5 +130,18 @@ describe("Admin Orders", () => {
     const audit = await db.adminAuditLog.findFirstOrThrow({ where: { adminUserId: ops.adminUserId, action: "orders.exported" } });
     expect(audit.afterSummary).toMatchObject({ section: "ALL", rows: 2, truncated: false, filters: { customerId: buyer.id, search: "yes" } });
     expect(JSON.stringify(audit.afterSummary)).not.toContain(national);
+
+    // A phone search is audited (that it happened, where, how many accounts matched), never the number itself.
+    const searches = await db.adminAuditLog.findMany({ where: { adminUserId: root.adminUserId, action: "orders.phone_searched" } });
+    expect(searches).toHaveLength(1);
+    expect(searches[0]!.afterSummary).toEqual({ section: "ALL", purpose: "list", matchedAccounts: 1 });
+    expect(JSON.stringify(searches)).not.toContain(national);
+
+    // orders.export alone (no section to see) is refused rather than answered with an empty file.
+    const exporterOnly = await admin(AdminRole.SUPPORT);
+    const role = await db.adminCustomRole.create({ data: { name: `Exporter ${randomUUID().slice(0, 6)}`, permissions: ["orders.export"], verticals: [], createdByAdminId: root.adminUserId, updatedByAdminId: root.adminUserId } });
+    await db.adminUser.update({ where: { id: exporterOnly.adminUserId }, data: { customRoleId: role.id } });
+    await get(exporterOnly, "/admin/orders/export").expect(403);
+    await get(exporterOnly, "/admin/orders").expect(403);
   });
 });
