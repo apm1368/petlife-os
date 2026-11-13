@@ -22,6 +22,8 @@ describe("admin inline copy", () => {
     expect(pickCopy("en", "سفارش‌ها", "Orders")).toBe("Orders");
     expect(pickCopy("de", "سفارش‌ها", "Orders")).toBe("Bestellungen");
     expect(pickCopy("es", "سفارش‌ها", "Orders")).toBe("Pedidos");
+    expect(pickCopy("ar", "تلاش دوباره", "Retry")).toBe("أعد المحاولة");
+    expect(pickCopy("nl", "تلاش دوباره", "Retry")).toBe("Opnieuw proberen");
     expect(pickCopy("de", "متن تازه", "A sentence nobody translated")).toBe("A sentence nobody translated");
     expect(copyFor("es").trf("صفحه {page}", "Page {page}", { page: 3 })).toBe("Página 3");
     expect(copyFor("de")).toBe(copyFor("de"));
@@ -41,11 +43,12 @@ describe("admin inline copy", () => {
     expect(missing).toEqual([]);
   });
 
-  it("never leaves an empty or Persian German/Spanish entry", () => {
-    for (const [english, [de, es]] of Object.entries(LEGACY_COPY)) {
-      expect(de.trim(), english).not.toBe("");
-      expect(es.trim(), english).not.toBe("");
-      expect(`${de}${es}`, english).not.toMatch(/[؀-ۿ]/);
+  it("never leaves an empty or wrong-script German/Spanish/Arabic/Dutch entry", () => {
+    for (const [english, [de, es, ar, nl]] of Object.entries(LEGACY_COPY)) {
+      for (const value of [de, es, ar, nl]) expect(value.trim(), english).not.toBe("");
+      expect(`${de}${es}${nl}`, english).not.toMatch(/[؀-ۿ]/);
+      // Arabic only: none of the Persian-only letters.
+      expect(ar, english).not.toMatch(/[پچژگکی]/);
     }
   });
 });

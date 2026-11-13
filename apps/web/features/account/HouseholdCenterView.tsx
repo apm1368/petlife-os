@@ -24,6 +24,7 @@ import { ConfirmActionDialog } from "./ConfirmActionDialog";
 import { formatAccountDate, useAccountCopy } from "./account-copy";
 import { normalizeIranPhone } from "@petlife/validation";
 import { ShareBar } from "@/features/shared/ShareBar";
+import { isRouteLocale } from "@/lib/i18n/config";
 
 type Preset = "NONE" | "VIEW_ONLY" | "CARE_HELPER" | "FULL";
 type Member = HouseholdCollaborationDto["members"][number];
@@ -1117,7 +1118,7 @@ function InviteDialog({
                   value: key,
                   label:
                     PRESET_COPY[key][
-                      locale === "fa" ? "fa" : locale === "de" ? "de" : locale === "es" ? "es" : "en"
+                      isRouteLocale(locale) ? locale : "en"
                     ],
                 }))}
               />

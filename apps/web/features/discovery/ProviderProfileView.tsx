@@ -31,7 +31,7 @@ export function ProviderProfileView({ providerId }: { providerId: string }) {
   const fa = locale === "fa";
   const t = useTranslations("providerProfile");
   const discoveryT = useTranslations("providerDiscovery");
-  const dateLocale = locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-GB";
+  const dateLocale = locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : locale === "ar" ? "ar" : locale === "nl" ? "nl-NL" : "en-GB";
   const [profile, setProfile] = useState<ProviderProfile | null>(null);
   const [state, setState] = useState<"loading" | "ready" | "notFound" | "error">("loading");
   const [weekService, setWeekService] = useState<string | null>(null);
@@ -213,7 +213,7 @@ export function ProviderProfileView({ providerId }: { providerId: string }) {
             <h2 id="pd-about">{t("about")}</h2>
             {profile.description ? <p className="pd-prose">{profile.description}</p> : <p className="pd-muted">{t("noDescription")}</p>}
             <dl className="pd-facts">
-              <div><dt>{t("petsServed")}</dt><dd>{profile.petTypes.length ? profile.petTypes.map((petType) => petType === "DOG" ? discoveryT("species.dogs") : petType === "CAT" ? discoveryT("species.cats") : petType).join(fa ? " و " : locale === "de" ? " und " : locale === "es" ? " y " : " & ") : t("notStated")}</dd></div>
+              <div><dt>{t("petsServed")}</dt><dd>{profile.petTypes.length ? profile.petTypes.map((petType) => petType === "DOG" ? discoveryT("species.dogs") : petType === "CAT" ? discoveryT("species.cats") : petType).join(fa ? " و " : locale === "de" ? " und " : locale === "es" ? " y " : locale === "ar" ? " و " : locale === "nl" ? " en " : " & ") : t("notStated")}</dd></div>
               <div><dt>{t("homeVisits")}</dt><dd>{profile.homeVisit ? t("available") : t("notOffered")}</dd></div>
               {!isVet && profile.specialties.length ? <div><dt>{t("specialties").replace(/:$/, "")}</dt><dd>{profile.specialties.join(sep)}</dd></div> : null}
               {allRequest ? <div><dt>{t("booking")}</dt><dd>{t("bookingNeedsApproval")}</dd></div> : null}

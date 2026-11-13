@@ -15,6 +15,7 @@ import { entitlementLabelKey } from "./entitlement-labels";
 import { SubscriptionChanges } from "./SubscriptionChanges";
 import { ConfirmActionDialog } from "@/features/account/ConfirmActionDialog";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { isRouteLocale } from "@/lib/i18n/config";
 
 const STATUS_TONE: Record<SubscriptionStatus, StatusTone> = {
   [SubscriptionStatus.TRIALING]: "neutral",
@@ -27,16 +28,16 @@ const STATUS_TONE: Record<SubscriptionStatus, StatusTone> = {
 };
 
 function formatDate(iso: string, locale: string): string {
-  const intlLocale = locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-GB";
+  const intlLocale = locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : locale === "ar" ? "ar" : locale === "nl" ? "nl-NL" : "en-GB";
   return new Intl.DateTimeFormat(intlLocale, { dateStyle: "medium" }).format(new Date(iso));
 }
 
 function numberLocale(locale: string): string {
-  return locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-GB";
+  return locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : locale === "ar" ? "ar" : locale === "nl" ? "nl-NL" : "en-GB";
 }
 
 function contentLocale(locale: string): "fa" | "en" | "de" | "es" | "ar" | "nl" {
-  return locale === "fa" || locale === "de" || locale === "es" ? locale : "en";
+  return isRouteLocale(locale) ? locale : "en";
 }
 
 /**
@@ -133,7 +134,7 @@ export function SubscriptionOverviewView() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-section-title text-text-primary">{locale === "fa" ? sub.plan.nameFa : sub.plan.nameEn}</p>
-                {locale === "de" || locale === "es" ? <p className="text-metadata text-text-secondary">{t("planContentEnglish")}</p> : null}
+                {locale !== "fa" && locale !== "en" ? <p className="text-metadata text-text-secondary">{t("planContentEnglish")}</p> : null}
                 {sub.price ? <p className="text-metadata text-text-secondary">{formatCurrency(sub.price.amount, contentLocale(locale))}</p> : null}
               </div>
               <StatusLabel tone={STATUS_TONE[sub.status]}>{t(`status.${sub.status}`)}</StatusLabel>

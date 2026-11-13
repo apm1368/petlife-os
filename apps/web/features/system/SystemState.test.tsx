@@ -30,6 +30,13 @@ describe("SystemState", () => {
     expect(screen.getByRole("link", { name: "ورود" }).getAttribute("href")).toBe("/fa/welcome?returnTo=%2Ffa%2Fpets%2Fp1");
   });
 
+  it.each([["ar", "إعادة المحاولة"], ["nl", "Opnieuw proberen"]] as const)("uses its own copy and button labels in %s, not English", (locale, retry) => {
+    renderWithIntl(<SystemState kind="GENERIC_RETRYABLE_ERROR" onRetry={() => undefined} />, locale);
+    expect(screen.getByRole("button", { name: retry })).toBeTruthy();
+    expect(screen.queryByText("Something went wrong")).toBeNull();
+    expect(screen.queryByRole("link", { name: "Go to home" })).toBeNull();
+  });
+
   it("forbidden says nothing about the thing being protected", () => {
     renderWithIntl(<SystemState kind="FORBIDDEN" />, "en");
     expect(screen.getByRole("heading").textContent).toBe("You don't have access to this");

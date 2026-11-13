@@ -51,7 +51,7 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
   const params = useSearchParams();
   const session = useSessionStore((s) => s.status);
   const activePetId = usePetStore((s) => s.activePetId);
-  const dateLocale = locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-GB";
+  const dateLocale = locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : locale === "ar" ? "ar" : locale === "nl" ? "nl-NL" : "en-GB";
   const formatPrice = (amountRial: number) => `${Math.round(amountRial / 10).toLocaleString(dateLocale)} ${t("currencyUnit")}`;
   const formatDuration = (minutes: number) => t("duration", { count: minutes });
   const paymentLabel = (mode: string) => t(`paymentMode.${mode}` as never);

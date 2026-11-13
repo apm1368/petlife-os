@@ -114,7 +114,7 @@ export function MyOrdersView() {
                     ) : null}
                   </span>
                   <span className="text-body font-semibold text-text-primary">{formatCurrency(order.totalAmount, locale)}</span>
-                  <span className="text-metadata text-text-secondary">{new Intl.DateTimeFormat(locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-GB").format(new Date(order.createdAt))}</span>
+                  <span className="text-metadata text-text-secondary">{new Intl.DateTimeFormat(locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : locale === "ar" ? "ar" : locale === "nl" ? "nl-NL" : "en-GB").format(new Date(order.createdAt))}</span>
                 </span>
               </button>
             </li>

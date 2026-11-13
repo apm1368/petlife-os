@@ -5007,8 +5007,8 @@
         "plans": "الخطط",
         "households": "الأُسر",
         "verification": "قائمة التحقق",
-        "providers": "مقدّمو الخدمة",
-        "sellers": "البائعون",
+        "providers": "الخدمات",
+        "sellers": "المتاجر",
         "overview": "نظرة عامة",
         "orders": "الطلبات",
         "refundRequests": "طلبات الاسترداد",
@@ -6958,7 +6958,7 @@
     "list": {
       "search": "ابحث",
       "title": "أماكن ترحّب بالحيوانات الأليفة",
-      "subtitle": "أماكن موثَّقة ترحّب بالحيوانات الأليفة.",
+      "subtitle": "أماكن ترحّب بالحيوانات الأليفة. تُميَّز الأماكن الموثَّقة والقوائم المأخوذة من OpenStreetMap.",
       "empty": "لم يُعثر على أماكن.",
       "nearMe": "ابحث بالقرب مني",
       "allCategories": "كل الفئات",
@@ -7638,7 +7638,7 @@
       },
       "shortcuts": "اختصارات",
       "healthLink": "صفحة الحالة",
-      "workersSummary": "{running} من {total} مهام خلفية قيد التشغيل",
+      "workersSummary": "{running} من {total} من المهام الخلفية تعمل بسلامة",
       "priority": {
         "URGENT": "عاجلة",
         "HIGH": "عالية"
