@@ -5,7 +5,7 @@ import type { SetPetSize, SetPetZone } from "@petlife/types";
 import { FileText, Plus, RotateCcw } from "@petlife/ui";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { formatLocaleNumber } from "@/lib/i18n/format";
-import { HUMAN_FRAME, PET_FRAME, boxStyle, humanCollarPath, humanShirtPath, humanZoneBox, petShirtShape, type Box } from "./garment-geometry";
+import { HUMAN_FRAME, HUMAN_RULER, PET_FRAME, PET_RULER, boxStyle, humanCollarPath, humanShirtPath, humanZoneBox, petShirtShape, rulerTicks, type Box } from "./garment-geometry";
 import { HUMAN_ZONES, ZONE_CM, colourHex, isDarkColour, sizeLabel, zoneSide } from "./set-pet-catalog";
 
 export type PreviewDesign = { id: string; name: string; previewUrl: string | null };
@@ -14,6 +14,8 @@ type Props = {
   humanSize: SetPetSize;
   petSize: SetPetSize;
   colour: string;
+  /** The pet shirt's colour; the human colour unless the member picked another (owner, #368 P13). */
+  petColour?: string;
   side: "front" | "back";
   onSideChange: (side: "front" | "back") => void;
   zones: ReadonlySet<SetPetZone>;
@@ -28,12 +30,31 @@ type Props = {
  * its zone at true scale (owner, 2026-11-13). Only raster previews are ever shown, and only as <img>; print files show
  * a "file received" tile. Turning the shirt = switching between the front and back views.
  */
-export function GarmentMockups({ humanSize, petSize, colour, side, onSideChange, zones, placements, designs, onToggleZone }: Props) {
+/** The cm ruler under each garment, so sizes and print areas read in real centimetres. */
+function Ruler({ y, fromX, lengthCm, unit, format }: { y: number; fromX: number; lengthCm: number; unit: string; format: (n: number) => string }) {
+  return (
+    <g className="setpet-ruler">
+      <line x1={fromX} x2={fromX + lengthCm} y1={y} y2={y} />
+      {rulerTicks(fromX, lengthCm).map((tick) => (
+        <g key={tick.x}>
+          <line x1={tick.x} x2={tick.x} y1={y} y2={y + tick.size} />
+          {tick.label != null ? <text x={tick.x} y={y + 5.4}>{format(tick.label)}</text> : null}
+        </g>
+      ))}
+      <text className="setpet-ruler__unit" x={fromX} y={y - 1.4}>{unit}</text>
+    </g>
+  );
+}
+
+export function GarmentMockups({ humanSize, petSize, colour, petColour, side, onSideChange, zones, placements, designs, onToggleZone }: Props) {
   const t = useTranslations("setPet.preview");
   const tz = useTranslations("setPet.zones");
   const locale = useLocale() as RouteLocale;
   const fill = colourHex(colour);
+  const petFill = colourHex(petColour ?? colour);
   const dark = isDarkColour(colour);
+  const petDark = isDarkColour(petColour ?? colour);
+  const format = (n: number) => formatLocaleNumber(n, locale);
   const pet = petShirtShape(petSize);
   const humanZones = HUMAN_ZONES.filter((zone) => zoneSide(zone) === side);
 
@@ -67,8 +88,8 @@ export function GarmentMockups({ humanSize, petSize, colour, side, onSideChange,
   };
 
   return (
-    <div className={`setpet-preview${dark ? " is-dark" : ""}`}>
-      <figure className="setpet-garment">
+    <div className="setpet-preview">
+      <figure className={`setpet-garment${dark ? " is-dark" : ""}`}>
         <div className="setpet-garment__bar">
           <span className="setpet-garment__size">{t("human", { size: sizeLabel(humanSize) })}</span>
           <button type="button" className="setpet-turn" aria-pressed={side === "back"} onClick={() => onSideChange(side === "front" ? "back" : "front")}>
@@ -80,6 +101,7 @@ export function GarmentMockups({ humanSize, petSize, colour, side, onSideChange,
           <svg viewBox={`${HUMAN_FRAME.minX} ${HUMAN_FRAME.minY} ${HUMAN_FRAME.width} ${HUMAN_FRAME.height}`} aria-hidden="true" focusable="false">
             <path className="setpet-garment__body" d={humanShirtPath(humanSize, side)} fill={fill} />
             <path className="setpet-garment__collar" d={humanCollarPath(side)} fill="none" />
+            <Ruler {...HUMAN_RULER} unit={t("cm")} format={format} />
           </svg>
           {humanZones.map((zone) => {
             const box = humanZoneBox(zone, humanSize);
@@ -89,14 +111,15 @@ export function GarmentMockups({ humanSize, petSize, colour, side, onSideChange,
         <figcaption>{side === "front" ? t("frontCaption") : t("backCaption")}</figcaption>
       </figure>
 
-      <figure className="setpet-garment">
+      <figure className={`setpet-garment${petDark ? " is-dark" : ""}`}>
         <div className="setpet-garment__bar">
           <span className="setpet-garment__size">{t("pet", { size: sizeLabel(petSize) })}</span>
         </div>
         <div className="setpet-garment__frame" style={{ aspectRatio: `${PET_FRAME.width} / ${PET_FRAME.height}` }} dir="ltr">
           <svg viewBox={`${PET_FRAME.minX} ${PET_FRAME.minY} ${PET_FRAME.width} ${PET_FRAME.height}`} aria-hidden="true" focusable="false">
-            <path className="setpet-garment__body" d={pet.path} fill={fill} />
+            <path className="setpet-garment__body" d={pet.path} fill={petFill} />
             <path className="setpet-garment__collar" d={pet.collar} fill="none" />
+            <Ruler {...PET_RULER} unit={t("cm")} format={format} />
           </svg>
           {zoneTile("PET_BACK", pet.zone, PET_FRAME)}
         </div>

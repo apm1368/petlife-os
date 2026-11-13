@@ -11631,10 +11631,12 @@
       "line1": "Elige las tallas, un color y dónde va cada diseño.",
       "line2": "Mira las dos camisetas una al lado de la otra antes de enviar la solicitud.",
       "line3": "Nuestro equipo revisa tallas y diseños y confirma el precio. Ahora no pagas nada.",
-      "cta": "Diseña tu Set Pet",
+      "cta": "Crea tu conjunto con tu mascota",
       "navLabel": "Set Pet",
       "videoLabel": "Vídeo de Set Pet: cómo pedir camisetas a juego para ti y tu mascota",
-      "play": "Reproducir el vídeo de Set Pet"
+      "play": "Reproducir el vídeo de Set Pet",
+      "soundOn": "Activar sonido",
+      "soundOff": "Silenciar"
     },
     "page": {
       "eyebrow": "Set Pet",
@@ -11671,7 +11673,7 @@
       },
       "buildTitle": "Diseña tu conjunto",
       "signIn": {
-        "body": "Inicia sesión para diseñar tu conjunto, subir tus diseños y seguir tus solicitudes. Tus diseños son privados: solo tú y nuestro equipo de impresión podéis verlos.",
+        "body": "Puedes empezar ya; solo inicias sesión para enviar la solicitud. Tus diseños son privados: solo los veis tú y nuestro equipo de impresión.",
         "cta": "Iniciar sesión",
         "join": "Crear una cuenta"
       },
@@ -11717,7 +11719,13 @@
         "guideTitle": "Cómo se mide la camiseta: A ancho de pecho, B largo",
         "chartCaption": "Tabla de tallas de camiseta (cm, en plano)",
         "chest": "A · Ancho de pecho",
-        "length": "B · Largo"
+        "length": "B · Largo",
+        "suggest": "¿No estás seguro? Sugerir una talla",
+        "height": "Altura",
+        "weight": "Peso",
+        "suggested": "Talla sugerida: {size}",
+        "use": "Usar {size}",
+        "mismatch": "Te sugeriríamos {size}; tu elección está bien si prefieres otro ajuste."
       },
       "pet": {
         "title": "La camiseta de tu mascota",
@@ -11743,11 +11751,15 @@
           "fix": "Revisa las medidas de tu mascota.",
           "required": "Obligatorio",
           "range": "Entre {min} y {max}"
-        }
+        },
+        "mismatch": "La medida del pecho sugiere {size}. Tu elección está bien si lo quieres más holgado o más ajustado."
       },
       "colour": {
         "title": "Color",
-        "lede": "Un color para todo el conjunto; la camiseta de tu mascota va a juego."
+        "lede": "Un color para todo el conjunto; la camiseta de tu mascota va a juego.",
+        "human": "Color de la camiseta",
+        "petDifferent": "Otro color para la camiseta de la mascota",
+        "petColour": "Color de la camiseta de mascota"
       },
       "zones": {
         "title": "Zonas de impresión",
@@ -11769,7 +11781,8 @@
         "status": {
           "uploading": "Subiendo…",
           "checking": "Comprobando el archivo…",
-          "ready": "Listo"
+          "ready": "Listo",
+          "local": "Listo; se envía con tu solicitud"
         },
         "receivedNoPreview": "Archivo recibido; nuestro equipo lo revisará (sin vista previa)",
         "remove": "Quitar {name}",
@@ -11789,8 +11802,10 @@
           "generic": "La subida falló. Vuelve a intentarlo.",
           "max": "Puedes usar hasta {max} diseños.",
           "wait": "Espera a que terminen de subirse tus archivos.",
-          "zoneMissing": "Elige un diseño para «{zone}»."
-        }
+          "zoneMissing": "Elige un diseño para «{zone}».",
+          "someFailed": "Algunos diseños no se pudieron subir. Revísalos y vuelve a enviar."
+        },
+        "lowRes": "Esta imagen podría imprimirse borrosa en «{zone}» (unos {dpi} ppp; con 150 o más queda nítida)."
       },
       "review": {
         "title": "Revisar y enviar",
@@ -11814,7 +11829,10 @@
           "validation": "Hay datos que revisar. Repasa los pasos.",
           "unavailable": "Los pedidos de Set Pet aún no están abiertos. Inténtalo de nuevo pronto.",
           "generic": "No se pudo enviar la solicitud. Vuelve a intentarlo."
-        }
+        },
+        "signInToSend": "Iniciar sesión y enviar",
+        "signInNote": "Para enviarla, inicias sesión o creas una cuenta. Mientras tanto, tu conjunto se guarda en este dispositivo.",
+        "uploading": "Enviando tus diseños…"
       }
     },
     "zones": {
@@ -11858,7 +11876,8 @@
       "petCaption": "Vista desde arriba, sobre el lomo de tu mascota",
       "zoneLabel": "{zone} ({cm} × {cm} cm)",
       "designOn": "{name} en {zone}",
-      "fileReceived": "Archivo recibido"
+      "fileReceived": "Archivo recibido",
+      "cm": "cm"
     },
     "requests": {
       "loading": "Cargando tus solicitudes…",

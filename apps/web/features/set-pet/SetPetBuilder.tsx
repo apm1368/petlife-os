@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { WeightUnit, type SetPetCreateRequestInput, type SetPetDesignFileDto, type SetPetOptionsDto, type SetPetRequestDto, type SetPetSize, type SetPetZone } from "@petlife/types";
 import { Check, ChevronLeft, ChevronRight, CircleAlert, FileText, Info, Minus, Plus, Trash2, Upload } from "@petlife/ui";
@@ -12,59 +13,81 @@ import { usePetStore } from "@/stores/pet-store";
 import { GarmentMockups, type PreviewDesign } from "./GarmentMockups";
 import { PetMeasureGuide, ShirtMeasureGuide } from "./MeasureGuides";
 import {
-  ALL_ZONES, COLOURS, HUMAN_CHART, MEASUREMENT_KEYS, MEASUREMENT_RANGES, PET_CHART, SIZES, ZONE_CM,
-  checkMeasurement, isRasterPreviewable, parseMeasurement, roundMeasurement, sizeLabel, suggestPetSize, zoneSide,
+  ALL_ZONES, COLOURS, DEFAULT_LIMITS, HUMAN_CHART, MEASUREMENT_KEYS, MEASUREMENT_RANGES, MIN_SHARP_DPI, PET_CHART, SIZES, ZONE_CM,
+  checkMeasurement, isRasterPreviewable, parseMeasurement, printDpi, roundMeasurement, sizeLabel, suggestHumanSize, suggestPetSize, zoneSide,
   type MeasurementKey,
 } from "./set-pet-catalog";
+import { clearDraft, readDraft, readDraftFiles, saveDraft, type SetPetDraft } from "./draft-store";
 
 const STEPS = ["shirts", "pet", "colour", "zones", "designs", "review"] as const;
 type Step = (typeof STEPS)[number];
 
 type DesignItem = {
-  /** The server's file id, or a temporary "local-n" id until the upload target is issued. */
+  /** The server's file id, or a temporary "local-n" id until the file is uploaded. */
   id: string;
   name: string;
   previewUrl: string | null;
-  status: "uploading" | "checking" | "ready" | "error";
+  /** "local": picked before signing in, kept on the device and uploaded when the request is sent. */
+  status: "local" | "uploading" | "checking" | "ready" | "error";
   error?: string;
+  file?: File;
+  /** Raster size in pixels, for the print-quality warning. */
+  px?: { w: number; h: number };
 };
 
-const DEFAULT_MAX = { designs: 3, garments: 10 };
+const usable = (d: DesignItem) => d.status === "ready" || d.status === "local";
+
+/** Pixel size of a raster preview (resolves null when it can't be read). */
+function measureImage(url: string): Promise<{ w: number; h: number } | null> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
 
 /**
  * «ست پت» builder (owner, 2026-11-13): the member's T-shirts (one size per shirt) → the pet's shirt (measurements,
  * suggested size) → one colour → fixed print zones → designs, one per zone → review and send. From the colour step on,
  * the human and pet shirts are previewed side by side with every design on its zone. Nothing is paid here: staff
- * confirm the price and dates with a quote.
+ * confirm the price and dates with a quote. Anyone can build (owner, #368 P4); signing in is asked only to send, and
+ * the set waits on the device meanwhile (draft-store).
  */
-export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRequestDto) => void }) {
+export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; onSubmitted: (request: SetPetRequestDto) => void }) {
   const t = useTranslations("setPet.builder");
   const tz = useTranslations("setPet.zones");
   const tc = useTranslations("setPet.colours");
   const locale = useLocale() as RouteLocale;
   const pets = usePetStore((s) => s.pets);
   const activePetId = usePetStore((s) => s.activePetId);
+  const router = useRouter();
   const num = (value: number) => formatLocaleNumber(value, locale);
+  const [draft] = useState<SetPetDraft | null>(() => (typeof window === "undefined" ? null : readDraft()));
 
   const [options, setOptions] = useState<SetPetOptionsDto | null>(null);
   const [optionsState, setOptionsState] = useState<"loading" | "ready" | "unavailable" | "error">("loading");
-  const [step, setStep] = useState<Step>("shirts");
-  const [reached, setReached] = useState(0);
-  const [humanSizes, setHumanSizes] = useState<SetPetSize[]>(["M"]);
-  const [petSize, setPetSize] = useState<SetPetSize>("M");
-  const [petSizeChosen, setPetSizeChosen] = useState(false);
-  const [raw, setRaw] = useState<Record<MeasurementKey, string>>({ neckCm: "", chestCm: "", backLengthCm: "", weightKg: "" });
-  const [petId, setPetId] = useState<string>("");
-  const [colour, setColour] = useState<string>("white");
-  const [zones, setZones] = useState<Set<SetPetZone>>(() => new Set<SetPetZone>(["FRONT_CENTER"]));
-  const [placements, setPlacements] = useState<Partial<Record<SetPetZone, string>>>({});
+  const restoredStep = draft && (STEPS as readonly string[]).includes(draft.step) ? (draft.step as Step) : "shirts";
+  const [step, setStep] = useState<Step>(restoredStep);
+  const [reached, setReached] = useState(STEPS.indexOf(restoredStep));
+  const [humanSizes, setHumanSizes] = useState<SetPetSize[]>(draft?.humanSizes?.length ? draft.humanSizes : ["M"]);
+  const [hints, setHints] = useState<Array<{ height: string; weight: string }>>([]);
+  const [petSize, setPetSize] = useState<SetPetSize>(draft?.petSize ?? "M");
+  const [petSizeChosen, setPetSizeChosen] = useState(draft?.petSizeChosen ?? false);
+  const [raw, setRaw] = useState<Record<MeasurementKey, string>>({ neckCm: "", chestCm: "", backLengthCm: "", weightKg: "", ...(draft?.raw ?? {}) });
+  const [petId, setPetId] = useState<string>(draft?.petId ?? "");
+  const [colour, setColour] = useState<string>(draft?.colour ?? "white");
+  /** null = the pet's shirt matches the human colour (owner, #368 P13: same by default, changeable). */
+  const [petColour, setPetColour] = useState<string | null>(draft?.petColour ?? null);
+  const [zones, setZones] = useState<Set<SetPetZone>>(() => new Set<SetPetZone>(draft?.zones?.length ? draft.zones : ["FRONT_CENTER"]));
+  const [placements, setPlacements] = useState<Partial<Record<SetPetZone, string>>>(draft?.placements ?? {});
   const [designs, setDesigns] = useState<DesignItem[]>([]);
   const [earlier, setEarlier] = useState<SetPetDesignFileDto[]>([]);
   const [side, setSide] = useState<"front" | "back">("front");
   const [previewShirt, setPreviewShirt] = useState(0);
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState(draft?.notes ?? "");
   const [stepError, setStepError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [submitting, setSubmitting] = useState<false | "uploading" | "sending">(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const blobUrls = useRef(new Set<string>());
   const seq = useRef(0);
@@ -76,12 +99,23 @@ export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRe
     zonesRef.current = zones;
   }, [zones]);
 
-  const maxDesigns = options?.maxDesigns ?? DEFAULT_MAX.designs;
-  const maxGarments = Math.min(options?.maxHumanGarments ?? DEFAULT_MAX.garments, DEFAULT_MAX.garments);
-  const accept = (options?.acceptedExtensions ?? []).map((ext) => (ext.startsWith(".") ? ext : `.${ext}`)).join(",");
+  const limits = {
+    acceptedExtensions: options?.acceptedExtensions ?? DEFAULT_LIMITS.acceptedExtensions,
+    maxFileBytes: options?.maxFileBytes ?? DEFAULT_LIMITS.maxFileBytes,
+    maxDesigns: options?.maxDesigns ?? DEFAULT_LIMITS.maxDesigns,
+  };
+  const maxDesigns = limits.maxDesigns;
+  const maxGarments = Math.min(options?.maxHumanGarments ?? DEFAULT_LIMITS.maxHumanGarments, DEFAULT_LIMITS.maxHumanGarments);
+  const accept = limits.acceptedExtensions.map((ext) => (ext.startsWith(".") ? ext : `.${ext}`)).join(",");
+  const maxMb = num(Math.round(limits.maxFileBytes / 1_048_576));
 
   const loadOptions = useCallback(() => {
     const controller = new AbortController();
+    // Options and earlier uploads need a session; visitors build on the published limits until they sign in.
+    if (!signedIn) {
+      setOptionsState("ready");
+      return controller;
+    }
     setOptionsState("loading");
     setPetService
       .options(controller.signal)
@@ -98,7 +132,7 @@ export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRe
       .then((files) => setEarlier(files.filter((file) => file.status === "READY")))
       .catch(() => undefined);
     return controller;
-  }, []);
+  }, [signedIn]);
 
   useEffect(() => {
     const controller = loadOptions();
@@ -109,6 +143,27 @@ export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRe
       urls.clear();
     };
   }, [loadOptions]);
+
+  // Designs picked before signing in come back from this device's IndexedDB.
+  useEffect(() => {
+    if (!draft?.files.length) return;
+    let cancelled = false;
+    void readDraftFiles(draft.files.map((f) => f.id)).then((found) => {
+      if (cancelled || !found.size) return;
+      const items: DesignItem[] = [];
+      found.forEach((file, id) => {
+        const name = draft.files.find((f) => f.id === id)?.name ?? file.name;
+        const url = isRasterPreviewable({ name, type: file.type }) ? URL.createObjectURL(file) : null;
+        if (url) blobUrls.current.add(url);
+        items.push({ id, name, previewUrl: url, status: "local", file });
+        seq.current = Math.max(seq.current, Number(id.replace("local-", "")) || 0);
+      });
+      setDesigns((list) => [...list, ...items]);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [draft]);
 
   // The pet this set is for: the active pet by default (optional; staff see the name).
   useEffect(() => {
@@ -128,10 +183,22 @@ export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRe
     if (!petSizeChosen && suggested) setPetSize(suggested);
   }, [petSizeChosen, suggested]);
 
-  const previewDesigns = useMemo(() => new Map<string, PreviewDesign>(designs.filter((d) => d.status === "ready").map((d) => [d.id, { id: d.id, name: d.name, previewUrl: d.previewUrl }])), [designs]);
-  const readyDesigns = designs.filter((d) => d.status === "ready");
+  const previewDesigns = useMemo(() => new Map<string, PreviewDesign>(designs.filter(usable).map((d) => [d.id, { id: d.id, name: d.name, previewUrl: d.previewUrl }])), [designs]);
+  const readyDesigns = designs.filter(usable);
   const activeDesigns = designs.filter((d) => d.status !== "error");
   const usedDesigns = new Set(Object.entries(placements).filter(([zone]) => zones.has(zone as SetPetZone)).map(([, id]) => id));
+
+  // Owner, #368 P26: warn (never block) when a photo has too few pixels for its print area.
+  const lowRes = ALL_ZONES.filter((zone) => zones.has(zone) && ZONE_CM[zone]).flatMap((zone) => {
+    const design = designs.find((d) => d.id === placements[zone]);
+    if (!design?.px) return [];
+    const dpi = printDpi(Math.min(design.px.w, design.px.h), ZONE_CM[zone]!);
+    return dpi < MIN_SHARP_DPI ? [t("upload.lowRes", { zone: tz(`${zone}.name`), dpi: num(dpi) })] : [];
+  });
+
+  function noteSize(id: string, url: string | null) {
+    if (url) void measureImage(url).then((px) => px && setDesigns((list) => list.map((d) => (d.id === id ? { ...d, px } : d))));
+  }
 
   function updateDesign(id: string, patch: Partial<DesignItem>) {
     setDesigns((list) => list.map((d) => (d.id === id ? { ...d, ...patch } : d)));
@@ -171,7 +238,7 @@ export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRe
       if (error.code === "SET_PET_FILE_NOT_UPLOADED") return t("upload.errors.notUploaded");
       if (error.code === "SET_PET_FILE_REJECTED") {
         const reason = (error.details as { reason?: string } | undefined)?.reason;
-        if (reason === "TOO_LARGE") return t("upload.errors.tooLarge", { mb: num(Math.round((options?.maxFileBytes ?? 0) / 1_048_576)) });
+        if (reason === "TOO_LARGE") return t("upload.errors.tooLarge", { mb: maxMb });
         if (reason === "CONTENT_DOES_NOT_MATCH_TYPE") return t("upload.errors.mismatch");
         return t("upload.errors.rejected");
       }
@@ -179,18 +246,30 @@ export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRe
     return t("upload.errors.generic");
   }
 
-  async function upload(file: File) {
+  function pick(file: File) {
     const extension = file.name.toLowerCase().split(".").pop() ?? "";
-    const allowed = (options?.acceptedExtensions ?? []).map((ext) => ext.replace(/^\./, "").toLowerCase());
+    const allowed = limits.acceptedExtensions.map((ext) => ext.replace(/^\./, "").toLowerCase());
     const tempId = `local-${++seq.current}`;
     const fail = (error: string) => setDesigns((list) => [...list, { id: tempId, name: file.name, previewUrl: null, status: "error", error }]);
-    if (allowed.length && !allowed.includes(extension)) return fail(t("upload.errors.type"));
-    if (options?.maxFileBytes && file.size > options.maxFileBytes) return fail(t("upload.errors.tooLarge", { mb: num(Math.round(options.maxFileBytes / 1_048_576)) }));
+    if (!allowed.includes(extension)) return fail(t("upload.errors.type"));
+    if (file.size > limits.maxFileBytes) return fail(t("upload.errors.tooLarge", { mb: maxMb }));
 
     // Only the member's own JPEG/PNG/WebP is previewed, from a local blob URL, in <img>. Never an SVG or print file.
     const localUrl = isRasterPreviewable(file) ? URL.createObjectURL(file) : null;
     if (localUrl) blobUrls.current.add(localUrl);
-    setDesigns((list) => [...list, { id: tempId, name: file.name, previewUrl: localUrl, status: "uploading" }]);
+    const item: DesignItem = { id: tempId, name: file.name, previewUrl: localUrl, status: "local", file };
+    setDesigns((list) => [...list, item]);
+    noteSize(tempId, localUrl);
+    if (signedIn) void upload(item);
+    else assignToEmptyZones(tempId);
+  }
+
+  /** Upload target → PUT → complete. Returns the server id, or null when the file was refused. */
+  async function upload(item: DesignItem): Promise<string | null> {
+    const file = item.file!;
+    const tempId = item.id;
+    const localUrl = item.previewUrl;
+    updateDesign(tempId, { status: "uploading", error: undefined });
     let id = tempId;
     try {
       const target = await setPetService.uploadTarget({ filename: file.name, contentType: file.type, fileSizeBytes: file.size });
@@ -201,10 +280,14 @@ export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRe
       updateDesign(id, { status: "checking" });
       const done = await setPetService.completeDesign(id);
       if (done.status !== "READY") throw new ApiError({ code: "SET_PET_FILE_REJECTED", message: "rejected", requestId: "client", details: { reason: done.rejectReason ?? undefined } }, 422);
-      updateDesign(id, { status: "ready", previewUrl: done.previewable ? localUrl : null });
+      updateDesign(id, { status: "ready", previewUrl: done.previewable ? localUrl : null, file: undefined });
+      // The design keeps its zones under its new server id.
+      setPlacements((current) => Object.fromEntries(Object.entries(current).map(([zone, d]) => [zone, d === tempId ? id : d])));
       assignToEmptyZones(id);
+      return id;
     } catch (error) {
       updateDesign(id, { status: "error", error: uploadErrorText(error) });
+      return null;
     }
   }
 
@@ -213,7 +296,7 @@ export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRe
     event.target.value = "";
     setStepError(null);
     const room = Math.max(0, maxDesigns - activeDesigns.length);
-    files.slice(0, room).forEach((file) => void upload(file));
+    files.slice(0, room).forEach((file) => pick(file));
     if (files.length > room) setStepError(t("upload.errors.max", { max: num(maxDesigns) }));
   }
 
@@ -224,7 +307,7 @@ export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRe
       URL.revokeObjectURL(item.previewUrl);
       blobUrls.current.delete(item.previewUrl);
     }
-    if (!item.id.startsWith("local-") && item.status !== "uploading") await setPetService.removeDesign(item.id).catch(() => undefined);
+    if (signedIn && !item.id.startsWith("local-") && item.status !== "uploading") await setPetService.removeDesign(item.id).catch(() => undefined);
   }
 
   async function pickEarlier(file: SetPetDesignFileDto) {
@@ -241,6 +324,14 @@ export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRe
   async function deleteEarlier(file: SetPetDesignFileDto) {
     setEarlier((list) => list.filter((f) => f.id !== file.id));
     await setPetService.removeDesign(file.id).catch(() => undefined);
+  }
+
+  function snapshot(at: Step, files: Map<string, File>): SetPetDraft {
+    return {
+      step: at, humanSizes, petSize, petSizeChosen, raw, petId, colour, petColour, zones: [...zones], notes,
+      placements: Object.fromEntries(Object.entries(placements).filter(([, id]) => id && (files.has(id) || !id.startsWith("local-")))),
+      files: [...files.keys()].map((id) => ({ id, name: designs.find((d) => d.id === id)?.name ?? "" })),
+    };
   }
 
   function validate(target: Step): string | null {
@@ -287,20 +378,45 @@ export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRe
         return;
       }
     }
+    if (!signedIn) {
+      // Keep the set on this device, then sign in (the in-page sign-in sheet) and come back to send it.
+      const files = new Map<string, File>();
+      designs.forEach((d) => d.status === "local" && d.file && files.set(d.id, d.file));
+      await saveDraft(snapshot("review", files), files);
+      router.push(`/${locale}/welcome?returnTo=${encodeURIComponent(`/${locale}/set-pet?resume=1#setpet-builder`)}`);
+      return;
+    }
+    setSubmitError(null);
+    const ids = new Map<string, string>();
+    const local = designs.filter((d) => d.status === "local" && usedDesigns.has(d.id));
+    if (local.length) {
+      setSubmitting("uploading");
+      for (const item of local) {
+        const id = await upload(item);
+        if (!id) {
+          setSubmitting(false);
+          setStep("designs");
+          setStepError(t("upload.errors.someFailed"));
+          return;
+        }
+        ids.set(item.id, id);
+      }
+    }
     const input: SetPetCreateRequestInput = {
       humanColour: colour,
       humanSizes,
       petSize,
-      petColour: colour,
+      petColour: petColour ?? colour,
       petMeasurements: Object.fromEntries(MEASUREMENT_KEYS.map((key) => [key, roundMeasurement(key, measured[key] as number)])) as SetPetCreateRequestInput["petMeasurements"],
-      placements: ALL_ZONES.filter((zone) => zones.has(zone)).map((zone) => ({ zone, designFileId: placements[zone]! })),
+      placements: ALL_ZONES.filter((zone) => zones.has(zone)).map((zone) => ({ zone, designFileId: ids.get(placements[zone]!) ?? placements[zone]! })),
       ...(petId ? { petId } : {}),
       ...(notes.trim() ? { notes: notes.trim() } : {}),
     };
-    setSubmitting(true);
-    setSubmitError(null);
+    setSubmitting("sending");
     try {
-      onSubmitted(await setPetService.create(input));
+      const request = await setPetService.create(input);
+      void clearDraft();
+      onSubmitted(request);
     } catch (error) {
       const code = error instanceof ApiError ? error.code : "";
       setSubmitError(
@@ -364,19 +480,45 @@ export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRe
                   <button type="button" className="opl-iconbtn" aria-label={t("shirts.more")} disabled={humanSizes.length >= maxGarments} onClick={() => setHumanSizes((s) => [...s, s[s.length - 1] ?? "M"])}><Plus size={18} aria-hidden="true" /></button>
                 </div>
               </div>
-              {humanSizes.map((size, i) => (
-                <fieldset key={i} className="setpet-sizes">
-                  <legend>{t("shirts.sizeFor", { n: num(i + 1) })}</legend>
-                  <div className="setpet-seg">
-                    {SIZES.map((s) => (
-                      <label key={s} className={s === size ? "is-on" : undefined}>
-                        <input type="radio" name={`setpet-human-${i}`} value={s} checked={s === size} onChange={() => setHumanSizes((list) => list.map((v, j) => (j === i ? s : v)))} />
-                        <span dir="ltr">{sizeLabel(s)}</span>
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-              ))}
+              {humanSizes.map((size, i) => {
+                const hint = hints[i] ?? { height: "", weight: "" };
+                const tip = suggestHumanSize(parseMeasurement(hint.height), parseMeasurement(hint.weight));
+                const setHint = (patch: Partial<typeof hint>) => setHints((list) => { const next = [...list]; next[i] = { ...hint, ...patch }; return next; });
+                const choose = (s: SetPetSize) => setHumanSizes((list) => list.map((v, j) => (j === i ? s : v)));
+                return (
+                  <fieldset key={i} className="setpet-sizes">
+                    <legend>{t("shirts.sizeFor", { n: num(i + 1) })}</legend>
+                    <div className="setpet-seg">
+                      {SIZES.map((s) => (
+                        <label key={s} className={s === size ? "is-on" : undefined}>
+                          <input type="radio" name={`setpet-human-${i}`} value={s} checked={s === size} onChange={() => choose(s)} />
+                          <span dir="ltr">{sizeLabel(s)}</span>
+                        </label>
+                      ))}
+                    </div>
+                    <details className="setpet-hint">
+                      <summary>{t("shirts.suggest")}</summary>
+                      <div className="setpet-hint__fields">
+                        <label className="setpet-field">
+                          <span>{t("shirts.height")}<span className="sr-only"> ({t("cm")})</span></span>
+                          <input inputMode="numeric" autoComplete="off" value={hint.height} onChange={(e) => setHint({ height: e.target.value })} />
+                        </label>
+                        <label className="setpet-field">
+                          <span>{t("shirts.weight")}<span className="sr-only"> ({t("kg")})</span></span>
+                          <input inputMode="decimal" autoComplete="off" value={hint.weight} onChange={(e) => setHint({ weight: e.target.value })} />
+                        </label>
+                      </div>
+                      {tip ? (
+                        <p className="setpet-suggest" role="status">
+                          {t("shirts.suggested", { size: sizeLabel(tip) })}
+                          {tip !== size ? <button type="button" className="opl-btn soft sm" onClick={() => choose(tip)}>{t("shirts.use", { size: sizeLabel(tip) })}</button> : null}
+                        </p>
+                      ) : null}
+                    </details>
+                    {tip && tip !== size ? <p className="setpet-note">{t("shirts.mismatch", { size: sizeLabel(tip) })}</p> : null}
+                  </fieldset>
+                );
+              })}
               <div className="setpet-chart">
                 <ShirtMeasureGuide title={t("shirts.guideTitle")} />
                 <table>
@@ -448,6 +590,7 @@ export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRe
                     </label>
                   ))}
                 </div>
+                {suggested && suggested !== petSize ? <p className="setpet-note">{t("pet.mismatch", { size: sizeLabel(suggested) })}</p> : null}
               </fieldset>
               <table className="setpet-table">
                 <caption>{t("pet.chartCaption")}</caption>
@@ -466,16 +609,34 @@ export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRe
           ) : null}
 
           {step === "colour" ? (
-            <fieldset className="setpet-colours">
-              <legend className="sr-only">{t("colour.title")}</legend>
-              {COLOURS.map((c) => (
-                <label key={c.id} className={c.id === colour ? "is-on" : undefined}>
-                  <input type="radio" name="setpet-colour" value={c.id} checked={c.id === colour} onChange={() => setColour(c.id)} />
-                  <span className="setpet-swatch" style={{ background: c.hex }} aria-hidden="true" />
-                  <span>{tc(c.id)}</span>
-                </label>
-              ))}
-            </fieldset>
+            <>
+              <fieldset className="setpet-colours">
+                <legend className={petColour ? undefined : "sr-only"}>{petColour ? t("colour.human") : t("colour.title")}</legend>
+                {COLOURS.map((c) => (
+                  <label key={c.id} className={c.id === colour ? "is-on" : undefined}>
+                    <input type="radio" name="setpet-colour" value={c.id} checked={c.id === colour} onChange={() => setColour(c.id)} />
+                    <span className="setpet-swatch" style={{ background: c.hex }} aria-hidden="true" />
+                    <span>{tc(c.id)}</span>
+                  </label>
+                ))}
+              </fieldset>
+              <label className="setpet-check">
+                <input type="checkbox" checked={petColour !== null} onChange={(e) => setPetColour(e.target.checked ? colour : null)} />
+                <span>{t("colour.petDifferent")}</span>
+              </label>
+              {petColour ? (
+                <fieldset className="setpet-colours">
+                  <legend>{t("colour.petColour")}</legend>
+                  {COLOURS.map((c) => (
+                    <label key={c.id} className={c.id === petColour ? "is-on" : undefined}>
+                      <input type="radio" name="setpet-pet-colour" value={c.id} checked={c.id === petColour} onChange={() => setPetColour(c.id)} />
+                      <span className="setpet-swatch" style={{ background: c.hex }} aria-hidden="true" />
+                      <span>{tc(c.id)}</span>
+                    </label>
+                  ))}
+                </fieldset>
+              ) : null}
+            </>
           ) : null}
 
           {step === "zones" ? (
@@ -499,7 +660,7 @@ export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRe
                 <input type="file" accept={accept || undefined} multiple disabled={activeDesigns.length >= maxDesigns} onChange={onFiles} />
                 <Upload size={22} aria-hidden="true" />
                 <strong>{t("upload.choose")}</strong>
-                <small>{t("upload.limits", { max: num(maxDesigns), mb: num(Math.round((options?.maxFileBytes ?? 0) / 1_048_576)) })}</small>
+                <small>{t("upload.limits", { max: num(maxDesigns), mb: maxMb })}</small>
                 <small>{t("upload.formats")}</small>
               </label>
               {designs.length ? (
@@ -514,7 +675,7 @@ export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRe
                       </span>
                       <span className="setpet-files__name">
                         <strong dir="auto">{d.name}</strong>
-                        <small>{d.status === "error" ? d.error : d.status === "ready" && !d.previewUrl ? t("upload.receivedNoPreview") : t(`upload.status.${d.status}`)}</small>
+                        <small>{d.status === "error" ? d.error : usable(d) && !d.previewUrl ? t("upload.receivedNoPreview") : t(`upload.status.${d.status}`)}</small>
                       </span>
                       <button type="button" className="opl-iconbtn" aria-label={t("upload.remove", { name: d.name })} disabled={d.status === "uploading" || d.status === "checking"} onClick={() => void removeDesign(d)}>
                         <Trash2 size={18} aria-hidden="true" />
@@ -523,6 +684,7 @@ export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRe
                   ))}
                 </ul>
               ) : null}
+              {lowRes.map((warning) => <p key={warning} className="setpet-note setpet-note--warn"><CircleAlert size={16} aria-hidden="true" />{warning}</p>)}
               {earlier.length ? (
                 <details className="setpet-earlier">
                   <summary>{t("upload.earlier", { n: num(earlier.length) })}</summary>
@@ -560,14 +722,16 @@ export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRe
                 <div><dt>{t("review.shirts")}</dt><dd>{t("review.shirtsValue", { n: num(humanSizes.length), sizes: humanSizes.map(sizeLabel).join(locale === "fa" || locale === "ar" ? "، " : ", ") })}</dd></div>
                 <div><dt>{t("review.pet")}</dt><dd>{t("review.petValue", { size: sizeLabel(petSize), name: pets.find((p) => p.id === petId)?.name ?? t("pet.noPet") })}</dd></div>
                 <div><dt>{t("review.measurements")}</dt><dd>{t("review.measurementsValue", { neck: num(measured.neckCm ?? 0), chest: num(measured.chestCm ?? 0), back: num(measured.backLengthCm ?? 0), weight: num(measured.weightKg ?? 0) })}</dd></div>
-                <div><dt>{t("review.colour")}</dt><dd>{tc(colour)}</dd></div>
+                <div><dt>{t("review.colour")}</dt><dd>{petColour && petColour !== colour ? `${tc(colour)} · ${t("colour.petColour")}: ${tc(petColour)}` : tc(colour)}</dd></div>
                 <div><dt>{t("review.zones")}</dt><dd><ul>{ALL_ZONES.filter((zone) => zones.has(zone)).map((zone) => <li key={zone}>{tz(`${zone}.name`)}: <span dir="auto">{previewDesigns.get(placements[zone] ?? "")?.name}</span></li>)}</ul></dd></div>
               </dl>
               <label className="setpet-field">
                 <span>{t("review.notes")}</span>
                 <textarea rows={3} maxLength={1000} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t("review.notesPlaceholder")} />
               </label>
+              {lowRes.map((warning) => <p key={warning} className="setpet-note setpet-note--warn"><CircleAlert size={16} aria-hidden="true" />{warning}</p>)}
               <p className="setpet-note"><Info size={16} aria-hidden="true" />{t("review.priceNote")}</p>
+              {!signedIn ? <p className="setpet-note"><Info size={16} aria-hidden="true" />{t("review.signInNote")}</p> : null}
               {submitError ? <p className="setpet-error" role="alert"><CircleAlert size={16} aria-hidden="true" />{submitError}</p> : null}
             </>
           ) : null}
@@ -583,7 +747,7 @@ export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRe
             ) : <span />}
             {step === "review" ? (
               <button type="button" className="opl-btn primary" disabled={submitting} aria-busy={submitting || undefined} onClick={() => void submit()}>
-                {submitting ? t("review.sending") : t("review.send")}
+                {submitting === "uploading" ? t("review.uploading") : submitting ? t("review.sending") : signedIn ? t("review.send") : t("review.signInToSend")}
               </button>
             ) : (
               <button type="button" className="opl-btn primary" onClick={() => go(STEPS[index + 1])}>
@@ -605,7 +769,7 @@ export function SetPetBuilder({ onSubmitted }: { onSubmitted: (request: SetPetRe
                 ))}
               </div>
             ) : null}
-            <GarmentMockups humanSize={shirtForPreview} petSize={petSize} colour={colour} side={side} onSideChange={setSide} zones={zones} placements={placements} designs={previewDesigns}
+            <GarmentMockups humanSize={shirtForPreview} petSize={petSize} colour={colour} petColour={petColour ?? colour} side={side} onSideChange={setSide} zones={zones} placements={placements} designs={previewDesigns}
               onToggleZone={step === "zones" || step === "designs" ? toggleZone : undefined} />
             <p className="setpet-note"><Info size={16} aria-hidden="true" />{t("previewNote")}</p>
           </aside>

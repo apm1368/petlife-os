@@ -12349,10 +12349,12 @@
       "line1": "Pick your sizes, one colour, and where each design goes.",
       "line2": "See both shirts side by side before you send the request.",
       "line3": "Our team checks your sizes and designs and confirms the price. Nothing is paid now.",
-      "cta": "Design your Set Pet",
+      "cta": "Build your set with your pet",
       "navLabel": "Set Pet",
       "videoLabel": "Set Pet video: how to order matching shirts for you and your pet",
-      "play": "Play the Set Pet video"
+      "play": "Play the Set Pet video",
+      "soundOn": "Sound on",
+      "soundOff": "Mute"
     },
     "page": {
       "eyebrow": "Set Pet",
@@ -12389,7 +12391,7 @@
       },
       "buildTitle": "Design your set",
       "signIn": {
-        "body": "Sign in to design your set, upload your designs and follow your requests. Your designs stay private: only you and our print team can see them.",
+        "body": "You can start right away; you only sign in to send your request. Your designs stay private: only you and our print team see them.",
         "cta": "Sign in",
         "join": "Create an account"
       },
@@ -12435,7 +12437,13 @@
         "guideTitle": "How the T-shirt is measured: A chest width, B length",
         "chartCaption": "T-shirt size chart (cm, laid flat)",
         "chest": "A · Chest width",
-        "length": "B · Length"
+        "length": "B · Length",
+        "suggest": "Not sure? Suggest a size",
+        "height": "Height",
+        "weight": "Weight",
+        "suggested": "Suggested size: {size}",
+        "use": "Use {size}",
+        "mismatch": "We'd suggest {size}; your choice is fine if you prefer a different fit."
       },
       "pet": {
         "title": "Your pet's shirt",
@@ -12461,11 +12469,15 @@
           "fix": "Please check your pet's measurements.",
           "required": "Required",
           "range": "Between {min} and {max}"
-        }
+        },
+        "mismatch": "The chest measurement suggests {size}. Your choice is fine if you want a looser or snugger fit."
       },
       "colour": {
         "title": "Colour",
-        "lede": "One colour for the whole set; your pet's shirt matches it."
+        "lede": "One colour for the whole set; your pet's shirt matches it.",
+        "human": "T-shirt colour",
+        "petDifferent": "A different colour for the pet's shirt",
+        "petColour": "Pet shirt colour"
       },
       "zones": {
         "title": "Print areas",
@@ -12487,7 +12499,8 @@
         "status": {
           "uploading": "Uploading…",
           "checking": "Checking the file…",
-          "ready": "Ready"
+          "ready": "Ready",
+          "local": "Ready; it's sent with your request"
         },
         "receivedNoPreview": "File received; our team will check it (no preview)",
         "remove": "Remove {name}",
@@ -12507,8 +12520,10 @@
           "generic": "The upload failed. Please try again.",
           "max": "You can use up to {max} designs.",
           "wait": "Please wait until your files have finished uploading.",
-          "zoneMissing": "Choose a design for “{zone}”."
-        }
+          "zoneMissing": "Choose a design for “{zone}”.",
+          "someFailed": "Some designs couldn't be uploaded. Check them and send again."
+        },
+        "lowRes": "This image may print blurry on “{zone}” (about {dpi} dpi; 150 or more prints sharp)."
       },
       "review": {
         "title": "Review and send",
@@ -12532,7 +12547,10 @@
           "validation": "Some details need checking. Please go back through the steps.",
           "unavailable": "Set Pet orders aren't open yet. Please try again soon.",
           "generic": "The request couldn't be sent. Please try again."
-        }
+        },
+        "signInToSend": "Sign in and send",
+        "signInNote": "To send, you'll sign in or create an account. Your set is kept on this device meanwhile.",
+        "uploading": "Sending your designs…"
       }
     },
     "zones": {
@@ -12576,7 +12594,8 @@
       "petCaption": "Seen from above, over your pet's back",
       "zoneLabel": "{zone} ({cm} × {cm} cm)",
       "designOn": "{name} on {zone}",
-      "fileReceived": "File received"
+      "fileReceived": "File received",
+      "cm": "cm"
     },
     "requests": {
       "loading": "Loading your requests…",

@@ -11633,10 +11633,12 @@
       "line1": "Wähle Größen, eine Farbe und wohin jedes Motiv kommt.",
       "line2": "Sieh dir beide Shirts nebeneinander an, bevor du die Anfrage sendest.",
       "line3": "Unser Team prüft Größen und Motive und bestätigt den Preis. Jetzt zahlst du nichts.",
-      "cta": "Dein Set Pet gestalten",
+      "cta": "Stell dein Set mit deinem Tier zusammen",
       "navLabel": "Set Pet",
       "videoLabel": "Set-Pet-Video: so bestellst du Partnershirts für dich und dein Tier",
-      "play": "Set-Pet-Video abspielen"
+      "play": "Set-Pet-Video abspielen",
+      "soundOn": "Ton an",
+      "soundOff": "Stumm"
     },
     "page": {
       "eyebrow": "Set Pet",
@@ -11673,7 +11675,7 @@
       },
       "buildTitle": "Gestalte dein Set",
       "signIn": {
-        "body": "Melde dich an, um dein Set zu gestalten, Motive hochzuladen und deine Anfragen zu verfolgen. Deine Motive bleiben privat: nur du und unser Druckteam sehen sie.",
+        "body": "Du kannst sofort loslegen; anmelden musst du dich erst zum Senden. Deine Motive bleiben privat: nur du und unser Druckteam sehen sie.",
         "cta": "Anmelden",
         "join": "Konto erstellen"
       },
@@ -11719,7 +11721,13 @@
         "guideTitle": "So wird das T-Shirt gemessen: A Brustbreite, B Länge",
         "chartCaption": "T-Shirt-Größentabelle (cm, flach gelegt)",
         "chest": "A · Brustbreite",
-        "length": "B · Länge"
+        "length": "B · Länge",
+        "suggest": "Unsicher? Größe vorschlagen",
+        "height": "Körpergröße",
+        "weight": "Gewicht",
+        "suggested": "Vorgeschlagene Größe: {size}",
+        "use": "{size} wählen",
+        "mismatch": "Wir würden {size} vorschlagen; deine Wahl passt, wenn du eine andere Passform magst."
       },
       "pet": {
         "title": "Das Shirt deines Tieres",
@@ -11745,11 +11753,15 @@
           "fix": "Bitte prüfe die Maße deines Tieres.",
           "required": "Erforderlich",
           "range": "Zwischen {min} und {max}"
-        }
+        },
+        "mismatch": "Der Brustumfang spricht für {size}. Deine Wahl passt, wenn du es lockerer oder enger magst."
       },
       "colour": {
         "title": "Farbe",
-        "lede": "Eine Farbe für das ganze Set; das Tiershirt passt dazu."
+        "lede": "Eine Farbe für das ganze Set; das Tiershirt passt dazu.",
+        "human": "T-Shirt-Farbe",
+        "petDifferent": "Eine andere Farbe für das Tiershirt",
+        "petColour": "Farbe des Tiershirts"
       },
       "zones": {
         "title": "Druckflächen",
@@ -11771,7 +11783,8 @@
         "status": {
           "uploading": "Wird hochgeladen …",
           "checking": "Datei wird geprüft …",
-          "ready": "Bereit"
+          "ready": "Bereit",
+          "local": "Bereit; wird mit deiner Anfrage gesendet"
         },
         "receivedNoPreview": "Datei erhalten; unser Team prüft sie (keine Vorschau)",
         "remove": "{name} entfernen",
@@ -11791,8 +11804,10 @@
           "generic": "Der Upload ist fehlgeschlagen. Bitte versuche es erneut.",
           "max": "Du kannst bis zu {max} Motive verwenden.",
           "wait": "Bitte warte, bis deine Dateien hochgeladen sind.",
-          "zoneMissing": "Wähle ein Motiv für „{zone}“."
-        }
+          "zoneMissing": "Wähle ein Motiv für „{zone}“.",
+          "someFailed": "Einige Motive konnten nicht hochgeladen werden. Prüfe sie und sende erneut."
+        },
+        "lowRes": "Dieses Bild könnte auf „{zone}“ unscharf gedruckt werden (etwa {dpi} dpi; ab 150 wird es scharf)."
       },
       "review": {
         "title": "Prüfen und senden",
@@ -11816,7 +11831,10 @@
           "validation": "Einige Angaben müssen geprüft werden. Bitte geh die Schritte noch einmal durch.",
           "unavailable": "Set-Pet-Bestellungen sind noch nicht geöffnet. Bitte versuche es bald erneut.",
           "generic": "Die Anfrage konnte nicht gesendet werden. Bitte versuche es erneut."
-        }
+        },
+        "signInToSend": "Anmelden und senden",
+        "signInNote": "Zum Senden meldest du dich an oder erstellst ein Konto. Dein Set bleibt so lange auf diesem Gerät.",
+        "uploading": "Motive werden gesendet …"
       }
     },
     "zones": {
@@ -11860,7 +11878,8 @@
       "petCaption": "Von oben, über dem Rücken deines Tieres",
       "zoneLabel": "{zone} ({cm} × {cm} cm)",
       "designOn": "{name} auf {zone}",
-      "fileReceived": "Datei erhalten"
+      "fileReceived": "Datei erhalten",
+      "cm": "cm"
     },
     "requests": {
       "loading": "Deine Anfragen werden geladen …",

@@ -23,7 +23,7 @@ const FACTS = [
 /**
  * /set-pet — «ست پت» (owner, 2026-11-13): matching custom-printed shirts for a member and their pet. First a plain
  * explanation (what it is, the steps, what gets printed, sizing, timing, and that it is an order request priced by
- * staff); then the builder for signed-in members, and their requests with quotes.
+ * staff); then the builder, open to everyone (sign-in only to send), and a member's requests with quotes.
  */
 export function SetPetView({ locale }: { locale: RouteLocale }) {
   const t = useTranslations("setPet.page");
@@ -75,18 +75,22 @@ export function SetPetView({ locale }: { locale: RouteLocale }) {
             <p>{t("done.body")}</p>
             <button type="button" className="opl-btn soft" onClick={() => setSent(null)}>{t("done.another")}</button>
           </div>
-        ) : signedIn ? (
-          <SetPetBuilder onSubmitted={(request) => { setSent(request); setRefreshKey((k) => k + 1); }} />
         ) : status === "idle" || status === "loading" ? (
           <p className="setpet-state" role="status">{tb("loading")}</p>
         ) : (
-          <div className="setpet-signin">
-            <p>{t("signIn.body")}</p>
-            <div className="setpet-signin__actions">
-              <Link className="opl-btn primary" href={`/${locale}/welcome?returnTo=${returnTo}`}>{t("signIn.cta")}</Link>
-              <Link className="opl-btn line" href={`/${locale}/register?returnTo=${returnTo}`}>{t("signIn.join")}</Link>
-            </div>
-          </div>
+          <>
+            {/* Owner, #368 P4: anyone can build; signing in is needed only to send. */}
+            {signedIn ? null : (
+              <div className="setpet-signin">
+                <p>{t("signIn.body")}</p>
+                <div className="setpet-signin__actions">
+                  <Link className="opl-btn soft sm" href={`/${locale}/welcome?returnTo=${returnTo}`}>{t("signIn.cta")}</Link>
+                  <Link className="opl-btn line sm" href={`/${locale}/register?returnTo=${returnTo}`}>{t("signIn.join")}</Link>
+                </div>
+              </div>
+            )}
+            <SetPetBuilder signedIn={signedIn} onSubmitted={(request) => { setSent(request); setRefreshKey((k) => k + 1); }} />
+          </>
         )}
       </section>
 

@@ -65,4 +65,6 @@ export {
   Clock,
   Minus,
   Play,
+  Volume2,
+  VolumeX,
 } from "lucide-react";

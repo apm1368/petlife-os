@@ -8,10 +8,17 @@ import { HUMAN_CHART, PET_CHART, ZONE_CM } from "./set-pet-catalog";
  */
 export type Box = { cx: number; cy: number; w: number; h: number; rotate: number };
 
-/** One frame for every human size (the largest size fits), so sizes compare honestly. */
-export const HUMAN_FRAME = { minX: -48, minY: -3, width: 96, height: 86 };
-/** One frame for every pet size. */
-export const PET_FRAME = { minX: -26, minY: -3, width: 52, height: 70 };
+/** One frame for every human size (the largest size fits), so sizes compare honestly; the cm ruler sits under it. */
+export const HUMAN_FRAME = { minX: -48, minY: -3, width: 96, height: 96 };
+/** One frame for every pet size, ruler included. */
+export const PET_FRAME = { minX: -26, minY: -3, width: 52, height: 80 };
+
+/** A cm ruler (owner, #368 P34): ticks every cm, longer every 5, numbered every 10. */
+export function rulerTicks(fromX: number, lengthCm: number) {
+  return Array.from({ length: lengthCm + 1 }, (_, cm) => ({ x: fromX + cm, size: cm % 10 === 0 ? 2.6 : cm % 5 === 0 ? 1.8 : 1, label: cm % 10 === 0 ? cm : null }));
+}
+export const HUMAN_RULER = { y: 85, fromX: -25, lengthCm: 50 };
+export const PET_RULER = { y: 67, fromX: -20, lengthCm: 40 };
 
 const SLEEVE_ANGLE = 31; // degrees: the sleeve's slope on the flat-laid shirt
 

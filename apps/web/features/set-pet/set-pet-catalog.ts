@@ -41,7 +41,7 @@ export function suggestPetSize(chestCm: number | null): SetPetSize | null {
   return null;
 }
 
-/** A short colour list (owner: "e.g. white"); staff confirm the exact shade with the quote. */
+/** Six base colours (owner, #368 P12); staff confirm the exact shade with the quote. */
 export const COLOURS = [
   { id: "white", hex: "#FFFFFF" },
   { id: "black", hex: "#1E1F1D" },
@@ -49,7 +49,6 @@ export const COLOURS = [
   { id: "navy", hex: "#22304A" },
   { id: "cream", hex: "#F3E9D2" },
   { id: "sage", hex: "#A9B9A0" },
-  { id: "pink", hex: "#F2C6CF" },
 ] as const;
 export type ColourId = (typeof COLOURS)[number]["id"];
 export const colourHex = (id: string) => COLOURS.find((c) => c.id === id)?.hex ?? "#FFFFFF";
@@ -92,3 +91,27 @@ export function checkMeasurement(key: MeasurementKey, value: number | null): "ok
 
 /** The API stores one decimal for cm and two for kg. */
 export const roundMeasurement = (key: MeasurementKey, value: number) => (key === "weightKg" ? Math.round(value * 100) / 100 : Math.round(value * 10) / 10);
+
+/**
+ * A unisex T-shirt size from height and weight (owner, #368 P16): by weight, one size up for tall people and one down
+ * for short ones. Only a suggestion; the member picks, and a different pick is never blocked (P20).
+ */
+export function suggestHumanSize(heightCm: number | null, weightKg: number | null): SetPetSize | null {
+  if (weightKg == null || weightKg < 25 || weightKg > 250) return null;
+  const byWeight = weightKg < 60 ? 0 : weightKg < 72 ? 1 : weightKg < 84 ? 2 : weightKg < 96 ? 3 : weightKg < 110 ? 4 : 5;
+  const shift = heightCm == null || heightCm < 100 || heightCm > 230 ? 0 : heightCm >= 186 ? 1 : heightCm < 160 ? -1 : 0;
+  return SIZES[Math.min(SIZES.length - 1, Math.max(0, byWeight + shift))];
+}
+
+/** Print quality: pixels across the print width, as dots per inch (150 dpi or more prints sharp). */
+export const printDpi = (pixels: number, cm: number) => Math.round(pixels / (cm / 2.54));
+export const MIN_SHARP_DPI = 150;
+
+/** Until a visitor signs in (options need a session), the builder runs on the API's published limits. */
+export const DEFAULT_LIMITS = {
+  acceptedExtensions: ["jpg", "jpeg", "png", "webp", "heic", "pdf", "svg", "ai", "psd"],
+  maxFileBytes: 50 * 1024 * 1024,
+  maxDesigns: 3,
+  /** Owner, #368 P9: up to five human garments in one set. */
+  maxHumanGarments: 5,
+};

@@ -12418,10 +12418,12 @@
       "line1": "Kies je maten, één kleur en waar elk ontwerp komt.",
       "line2": "Bekijk beide shirts naast elkaar voordat je de aanvraag verstuurt.",
       "line3": "Ons team controleert maten en ontwerpen en bevestigt de prijs. Je betaalt nu niets.",
-      "cta": "Ontwerp je Set Pet",
+      "cta": "Stel je set samen met je huisdier",
       "navLabel": "Set Pet",
       "videoLabel": "Set Pet-video: zo bestel je bijpassende shirts voor jou en je huisdier",
-      "play": "Set Pet-video afspelen"
+      "play": "Set Pet-video afspelen",
+      "soundOn": "Geluid aan",
+      "soundOff": "Dempen"
     },
     "page": {
       "eyebrow": "Set Pet",
@@ -12458,7 +12460,7 @@
       },
       "buildTitle": "Ontwerp je set",
       "signIn": {
-        "body": "Log in om je set te ontwerpen, je ontwerpen te uploaden en je aanvragen te volgen. Je ontwerpen blijven privé: alleen jij en ons printteam zien ze.",
+        "body": "Je kunt meteen beginnen; je logt pas in om je aanvraag te versturen. Je ontwerpen blijven privé: alleen jij en ons printteam zien ze.",
         "cta": "Inloggen",
         "join": "Account aanmaken"
       },
@@ -12504,7 +12506,13 @@
         "guideTitle": "Zo wordt het T-shirt gemeten: A borstbreedte, B lengte",
         "chartCaption": "Maattabel T-shirt (cm, plat gelegd)",
         "chest": "A · Borstbreedte",
-        "length": "B · Lengte"
+        "length": "B · Lengte",
+        "suggest": "Twijfel je? Stel een maat voor",
+        "height": "Lengte",
+        "weight": "Gewicht",
+        "suggested": "Voorgestelde maat: {size}",
+        "use": "{size} kiezen",
+        "mismatch": "Wij zouden {size} voorstellen; je keuze is prima als je een andere pasvorm wilt."
       },
       "pet": {
         "title": "Het shirt van je huisdier",
@@ -12530,11 +12538,15 @@
           "fix": "Controleer de maten van je huisdier.",
           "required": "Verplicht",
           "range": "Tussen {min} en {max}"
-        }
+        },
+        "mismatch": "De borstomtrek wijst op {size}. Je keuze is prima als je het ruimer of strakker wilt."
       },
       "colour": {
         "title": "Kleur",
-        "lede": "Eén kleur voor de hele set; het huisdiershirt past erbij."
+        "lede": "Eén kleur voor de hele set; het huisdiershirt past erbij.",
+        "human": "Kleur T-shirt",
+        "petDifferent": "Een andere kleur voor het huisdiershirt",
+        "petColour": "Kleur huisdiershirt"
       },
       "zones": {
         "title": "Printvlakken",
@@ -12556,7 +12568,8 @@
         "status": {
           "uploading": "Uploaden…",
           "checking": "Bestand wordt gecontroleerd…",
-          "ready": "Klaar"
+          "ready": "Klaar",
+          "local": "Klaar; wordt met je aanvraag verstuurd"
         },
         "receivedNoPreview": "Bestand ontvangen; ons team controleert het (geen voorbeeld)",
         "remove": "{name} verwijderen",
@@ -12576,8 +12589,10 @@
           "generic": "De upload is mislukt. Probeer het opnieuw.",
           "max": "Je kunt maximaal {max} ontwerpen gebruiken.",
           "wait": "Wacht tot je bestanden klaar zijn met uploaden.",
-          "zoneMissing": "Kies een ontwerp voor ‘{zone}’."
-        }
+          "zoneMissing": "Kies een ontwerp voor ‘{zone}’.",
+          "someFailed": "Sommige ontwerpen konden niet worden geüpload. Controleer ze en verstuur opnieuw."
+        },
+        "lowRes": "Deze afbeelding kan wazig worden geprint op ‘{zone}’ (ongeveer {dpi} dpi; vanaf 150 wordt het scherp)."
       },
       "review": {
         "title": "Controleren en versturen",
@@ -12601,7 +12616,10 @@
           "validation": "Sommige gegevens moeten worden gecontroleerd. Loop de stappen nog eens door.",
           "unavailable": "Set Pet-bestellingen zijn nog niet open. Probeer het binnenkort opnieuw.",
           "generic": "De aanvraag kon niet worden verstuurd. Probeer het opnieuw."
-        }
+        },
+        "signInToSend": "Inloggen en versturen",
+        "signInNote": "Om te versturen log je in of maak je een account aan. Je set blijft zolang op dit apparaat bewaard.",
+        "uploading": "Je ontwerpen worden verstuurd…"
       }
     },
     "zones": {
@@ -12645,7 +12663,8 @@
       "petCaption": "Van bovenaf, over de rug van je huisdier",
       "zoneLabel": "{zone} ({cm} × {cm} cm)",
       "designOn": "{name} op {zone}",
-      "fileReceived": "Bestand ontvangen"
+      "fileReceived": "Bestand ontvangen",
+      "cm": "cm"
     },
     "requests": {
       "loading": "Je aanvragen worden geladen…",
