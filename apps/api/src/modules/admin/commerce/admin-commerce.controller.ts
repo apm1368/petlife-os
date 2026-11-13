@@ -121,7 +121,7 @@ class CatalogImportCreateDto {
 class DigikalaFactsImportDto {
   @IsUUID() categoryId!: string;
   @IsOptional() @IsUUID() brandId?: string;
-  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(3000) maxProducts?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(50_000) maxProducts?: number;
   @IsUUID() idempotencyKey!: string;
 }
 

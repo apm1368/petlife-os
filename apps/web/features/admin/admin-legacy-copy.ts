@@ -8,6 +8,7 @@ export const LEGACY_COPY: Readonly<Record<string, readonly [de: string, es: stri
   "Could not load": ["Konnte nicht geladen werden", "No se pudo cargar", "تعذّر التحميل", "Laden mislukt"],
   "Retry": ["Erneut versuchen", "Reintentar", "أعد المحاولة", "Opnieuw proberen"],
   "items": ["Einträge", "elementos", "عناصر", "items"],
+  "Latest {shown} of {total} items": ["Neueste {shown} von {total} Einträgen", "Últimos {shown} de {total} elementos", "أحدث {shown} من {total} عنصرًا", "Laatste {shown} van {total} items"],
   "Previous": ["Zurück", "Anterior", "السابق", "Vorige"],
   "Next": ["Weiter", "Siguiente", "التالي", "Volgende"],
   "Commerce": ["Shop", "Tienda", "المتجر", "Winkel"],

@@ -12134,21 +12134,30 @@
   },
   "adminDigikalaFacts": {
     "title": "Eenmalige import van huisdierproducten van Digikala (alleen feitelijke gegevens)",
-    "hint": "De bestverkochte producten uit de huisdiercategorie van Digikala komen eenmalig als concepten in de catalogus.",
+    "hint": "De bestverkochte producten uit alle huisdier-subcategorieën van Digikala (naar verhouding van hun grootte) komen eenmalig als concepten in de catalogus.",
     "rules": {
-      "facts": "Naam, merk, categorie, specificaties en gewicht worden geïmporteerd.",
+      "facts": "Naam, merk, categorie, specificaties, gewicht en varianten (kleur, maat, smaak) worden geïmporteerd.",
       "noContent": "Foto's en beschrijvingen van Digikala worden niet gekopieerd; voeg vóór publicatie onze eigen tekst en afbeeldingen toe.",
       "reference": "De prijs en voorraad van Digikala blijven alleen ter referentie in het importrecord; dat is niet onze verkoopprijs.",
-      "pace": "Het loopt langzaam (één verzoek per 3 seconden) en stopt als Digikala het blokkeert."
+      "pace": "Het loopt langzaam (één verzoek per 3 seconden) en stopt als Digikala het blokkeert.",
+      "resume": "Na een herstart van de server gaat het verder waar het was; producten die al gelezen zijn worden overgeslagen en tellen mee voor het totaal."
     },
     "category": "Doelcategorie in de catalogus",
-    "maxProducts": "Maximaal aantal producten (tot 3000)",
+    "maxProducts": "Totaal aantal producten (tot 16.000)",
     "start": "Eenmalige import starten",
     "started": "In de wachtrij; de voortgang staat in de takenlijst.",
-    "alreadyRun": "Deze import is al uitgevoerd of loopt nog.",
-    "invalid": "Kies een categorie en een aantal van 1 tot 3000.",
+    "alreadyRun": "Deze import loopt of heeft zijn volledige totaal al gelezen.",
+    "invalid": "Kies een categorie en een aantal van 1 tot 16.000.",
     "forbidden": "Recht commerce.manage vereist.",
-    "failed": "Starten mislukt; probeer het opnieuw."
+    "failed": "Starten mislukt; probeer het opnieuw.",
+    "progress": {
+      "title": "Voortgang van de import",
+      "planning": "Subcategorieën worden gemeten: {done} van {total}",
+      "subcategory": "Subcategorie {index} van {count}: {title}",
+      "fill": "Totaal wordt aangevuld uit subcategorieën met meer producten",
+      "counts": "{seen} van {target} gelezen · {imported} concepten · {failed} mislukt",
+      "eta": "Nog ongeveer {hours} uur"
+    }
   },
   "petCard": {
     "title": "Huisdierkaart en QR-code",
