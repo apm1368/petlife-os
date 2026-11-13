@@ -36,6 +36,7 @@ export function toTopUpDto(row: WalletTopUp, now = new Date()): WalletTopUpDto {
     rejectionReason: row.rejectionReason,
     createdAt: row.createdAt.toISOString(),
     creditedAt: row.creditedAt?.toISOString() ?? null,
+    walletAccountId: row.walletAccountId,
   };
 }
 
@@ -81,8 +82,16 @@ export class WalletTopUpService {
     return { rails: availableTopUpRails(this.railConfig(), !!(await this.card())), minAmount: WALLET_TOP_UP_MIN_IRR, maxAmount: WALLET_TOP_UP_MAX_IRR, presets: WALLET_TOP_UP_PRESETS_IRR };
   }
 
+  /** The member's own-wallet top-ups (business top-ups they started are listed on that organisation's wallet). */
   async list(userId: string): Promise<WalletTopUpDto[]> {
-    const rows = await this.prisma.walletTopUp.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 20 });
+    const rows = await this.prisma.walletTopUp.findMany({ where: { userId, walletAccountId: null }, orderBy: { createdAt: "desc" }, take: 20 });
+    const now = new Date();
+    return rows.map((r) => toTopUpDto(r, now));
+  }
+
+  /** Every top-up of one business wallet, whoever of its managers started it (the caller checked access). */
+  async listForAccount(walletAccountId: string): Promise<WalletTopUpDto[]> {
+    const rows = await this.prisma.walletTopUp.findMany({ where: { walletAccountId }, orderBy: { createdAt: "desc" }, take: 20 });
     const now = new Date();
     return rows.map((r) => toTopUpDto(r, now));
   }
@@ -97,13 +106,17 @@ export class WalletTopUpService {
     return { topUp: toTopUpDto(row), redirectUrl: null, cardTransfer: account?.cardNumber ? this.instructions(account) : null };
   }
 
-  async start(userId: string, input: { amount: number; rail: WalletTopUpRail; locale: string }, idempotencyKey: string | undefined): Promise<WalletTopUpStartedDto> {
+  /**
+   * Starts a top-up of the member's own wallet, or — with `business` — of a business wallet the caller manages (the
+   * caller checked that). The member who starts it is the only one who can send its receipt or cancel it.
+   */
+  async start(userId: string, input: { amount: number; rail: WalletTopUpRail; locale: string }, idempotencyKey: string | undefined, business?: { walletAccountId: string; returnPath: string }): Promise<WalletTopUpStartedDto> {
     const key = idempotencyKey?.trim();
     if (!key || key.length > 120) throw new ValidationApiException({ field: "idempotencyKey", reason: "REQUIRED" });
     const replay = await this.prisma.walletTopUp.findUnique({ where: { idempotencyKey: key } });
     if (replay) {
       // A key is client-chosen: someone else's row under it is a conflict, never a replay.
-      if (replay.userId !== userId) throw new ValidationApiException({ field: "idempotencyKey", reason: "CONFLICT" });
+      if (replay.userId !== userId || replay.walletAccountId !== (business?.walletAccountId ?? null)) throw new ValidationApiException({ field: "idempotencyKey", reason: "CONFLICT" });
       return this.get(userId, replay.id);
     }
     if (!validTopUpAmount(input.amount)) throw new ValidationApiException({ field: "amount", reason: "OUT_OF_RANGE", min: WALLET_TOP_UP_MIN_IRR, max: WALLET_TOP_UP_MAX_IRR });
@@ -117,7 +130,7 @@ export class WalletTopUpService {
     if (input.rail === WalletTopUpRail.CARD_TO_CARD && card) {
       const row = await this.prisma.walletTopUp.create({
         data: {
-          userId, rail: input.rail, status: WalletTopUpStatus.AWAITING_RECEIPT, amount: input.amount, idempotencyKey: key,
+          userId, walletAccountId: business?.walletAccountId ?? null, rail: input.rail, status: WalletTopUpStatus.AWAITING_RECEIPT, amount: input.amount, idempotencyKey: key,
           cardNumberMasked: card.cardNumberMasked, cardHolderName: card.holderName, cardTransferDestinationId: card.destinationId,
           receiptDeadlineAt: new Date(Date.now() + WALLET_CARD_RECEIPT_WINDOW_MS),
         },
@@ -125,9 +138,9 @@ export class WalletTopUpService {
       return { topUp: toTopUpDto(row), redirectUrl: null, cardTransfer: this.instructions(card) };
     }
 
-    const row = await this.prisma.walletTopUp.create({ data: { userId, rail: input.rail, status: WalletTopUpStatus.AWAITING_PAYMENT, amount: input.amount, idempotencyKey: key } });
+    const row = await this.prisma.walletTopUp.create({ data: { userId, walletAccountId: business?.walletAccountId ?? null, rail: input.rail, status: WalletTopUpStatus.AWAITING_PAYMENT, amount: input.amount, idempotencyKey: key } });
     try {
-      const callbackUrl = walletReturnUrl(this.config.get("WEB_APP_ORIGIN", { infer: true }), input.locale);
+      const callbackUrl = walletReturnUrl(this.config.get("WEB_APP_ORIGIN", { infer: true }), input.locale, business?.returnPath);
       const remote = await this.gateway.request(row.amount, callbackUrl, row.id);
       const updated = await this.prisma.walletTopUp.update({ where: { id: row.id }, data: { zibalTrackId: remote.trackId } });
       return { topUp: toTopUpDto(updated), redirectUrl: remote.redirectUrl, cardTransfer: null };
@@ -233,8 +246,9 @@ export class WalletTopUpService {
   }
 
   private async creditOnce(tx: Prisma.TransactionClient, row: WalletTopUp, amount: number, debitAccount: LedgerAccountCode, from: WalletTopUpStatus, extra: Prisma.WalletTopUpUncheckedUpdateManyInput = {}) {
+    // A business top-up credits the organisation's wallet, never the member who paid it.
     const credit = await this.wallet.creditEntry({
-      userId: row.userId, balanceType: WalletBalanceType.PURCHASE_ONLY, amount, source: WalletCreditSource.TOP_UP,
+      userId: row.userId, walletAccountId: row.walletAccountId ?? undefined, balanceType: WalletBalanceType.PURCHASE_ONLY, amount, source: WalletCreditSource.TOP_UP,
       referenceType: WALLET_TOP_UP_REFERENCE, referenceId: row.id, debitAccount,
     }, tx);
     // Conditional on the status we read: a concurrent approval/verify blocks here, then matches nothing and rolls back its credit.

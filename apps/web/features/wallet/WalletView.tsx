@@ -2,13 +2,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { WalletEntryDto, WalletSummaryDto, WalletTopUpDto, WalletTopUpRailValue, WalletTopUpStartedDto } from "@petlife/types";
+import Link from "next/link";
+import type { BusinessWalletDto, WalletEntryDto, WalletSummaryDto, WalletTopUpDto, WalletTopUpRailValue, WalletTopUpStartedDto } from "@petlife/types";
 import { Button, Check, EmptyState, Input, Skeleton } from "@petlife/ui";
 import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import type { RouteLocale } from "@/lib/i18n/config";
-import { walletService } from "@/services/wallet.service";
+import { businessWalletService, businessWalletsService, walletService } from "@/services/wallet.service";
 import { SystemState } from "@/features/system/SystemState";
+import { SponsoredCampaignsPanel } from "@/features/sponsored/SponsoredCampaignsPanel";
 import { AccountPageHeader } from "@/features/account/AccountNav";
 import { formatAccountDate } from "@/features/account/account-copy";
 import "./wallet.css";
@@ -35,8 +37,11 @@ function newKey(): string {
  * The member's wallet: what they hold (two buckets), how to add money, open top-up requests and every movement.
  * Money only appears after it is confirmed (gateway verify or a finance-approved receipt); the page says so plainly.
  */
-export function WalletView() {
+export function WalletView({ accountId }: { accountId?: string } = {}) {
   const t = useTranslations("wallet");
+  // A business wallet (accountId) uses the same page; only where its balance, history and new top-ups come from differ.
+  const api = useMemo(() => (accountId ? businessWalletService(accountId) : walletService), [accountId]);
+  const [business, setBusiness] = useState<BusinessWalletDto[]>([]);
   const locale = useLocale() as RouteLocale;
   const money = useCallback((rial: number) => formatCurrency(rial, locale), [locale]);
   const [summary, setSummary] = useState<WalletSummaryDto | null>(null);
@@ -50,7 +55,7 @@ export function WalletView() {
   const load = useCallback(async () => {
     setFailed(false);
     try {
-      const [s, list, page] = await Promise.all([walletService.summary(), walletService.topUps(), walletService.entries()]);
+      const [s, list, page] = await Promise.all([api.summary(), api.topUps(), api.entries()]);
       setSummary(s);
       setTopUps(list);
       setEntries(page.items);
@@ -58,7 +63,9 @@ export function WalletView() {
     } catch {
       setFailed(true);
     }
-  }, []);
+    // The member's own wallet also lists the business wallets they manage (never fatal if it fails).
+    if (!accountId) businessWalletsService.list().then(setBusiness).catch(() => setBusiness([]));
+  }, [api, accountId]);
 
   useEffect(() => {
     void load();
@@ -91,7 +98,7 @@ export function WalletView() {
   async function loadMore() {
     if (!cursor) return;
     try {
-      const page = await walletService.entries(cursor);
+      const page = await api.entries(cursor);
       setEntries((current) => [...(current ?? []), ...page.items]);
       setCursor(page.nextCursor);
     } catch {
@@ -106,7 +113,16 @@ export function WalletView() {
 
   return (
     <div className="wallet-page">
-      <AccountPageHeader eyebrow={t("eyebrow")} title={t("title")} description={t("description")} />
+      {summary?.owner ? (
+        <AccountPageHeader eyebrow={t("business.eyebrow")} title={t("business.title", { name: summary.owner.name })} description={t("business.description")} />
+      ) : (
+        <AccountPageHeader eyebrow={t("eyebrow")} title={t("title")} description={t("description")} />
+      )}
+      {accountId ? (
+        <p className="wallet-back">
+          <Link href={`/${locale}/profile/wallet`}>{t("business.back")}</Link>
+        </p>
+      ) : null}
       {notice ? (
         <p role={notice.tone === "error" ? "alert" : "status"} className={`wallet-notice wallet-notice--${notice.tone}`}>
           {notice.text}
@@ -157,6 +173,7 @@ export function WalletView() {
         ) : (
           <TopUpForm
             summary={summary}
+            startTopUp={api.startTopUp}
             onStarted={(started) => {
               setTopUps((list) => [started.topUp, ...list.filter((r) => r.id !== started.topUp.id)]);
               if (started.redirectUrl) {
@@ -169,6 +186,9 @@ export function WalletView() {
           />
         )
       ) : null}
+
+      {/* A business wallet also runs the organisation's sponsored listings (paid per click from this wallet). */}
+      {accountId && summary?.owner ? <SponsoredCampaignsPanel accountId={accountId} /> : null}
 
       {open.length || closed.length ? (
         <section aria-labelledby="wallet-requests" className="wallet-section">
@@ -197,6 +217,28 @@ export function WalletView() {
                   }
                 }}
               />
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {!accountId && business.length ? (
+        <section aria-labelledby="wallet-business" className="wallet-section">
+          <div className="account-section-title">
+            <h2 id="wallet-business">{t("business.listTitle")}</h2>
+          </div>
+          <p className="wallet-business__hint">{t("business.listHint")}</p>
+          <ul className="wallet-business">
+            {business.map((w) => (
+              <li key={w.owner.walletAccountId}>
+                <Link href={`/${locale}/profile/wallet/business/${w.owner.walletAccountId}`}>
+                  <strong>{w.owner.name}</strong>
+                  <small>{t(`business.kind.${w.owner.type}`)}</small>
+                </Link>
+                <span className="wallet-amount" dir="ltr">
+                  {money(w.balances.total)}
+                </span>
+              </li>
             ))}
           </ul>
         </section>
@@ -243,7 +285,15 @@ export function WalletView() {
   );
 }
 
-function TopUpForm({ summary, onStarted }: { summary: WalletSummaryDto; onStarted: (started: WalletTopUpStartedDto) => void }) {
+function TopUpForm({
+  summary,
+  startTopUp,
+  onStarted,
+}: {
+  summary: WalletSummaryDto;
+  startTopUp: (input: { amount: number; rail: WalletTopUpRailValue; locale: string }, idempotencyKey: string) => Promise<WalletTopUpStartedDto>;
+  onStarted: (started: WalletTopUpStartedDto) => void;
+}) {
   const t = useTranslations("wallet");
   const locale = useLocale() as RouteLocale;
   const { rails, minAmount, maxAmount, presets } = summary.topUp;
@@ -276,7 +326,7 @@ function TopUpForm({ summary, onStarted }: { summary: WalletSummaryDto; onStarte
     setBusy(true);
     setError(null);
     try {
-      onStarted(await walletService.startTopUp({ amount: rial, rail, locale }, key.current));
+      onStarted(await startTopUp({ amount: rial, rail, locale }, key.current));
       key.current = newKey();
     } catch (err) {
       const reason = err instanceof ApiError ? String((err.details as { reason?: string } | undefined)?.reason ?? "") : "";

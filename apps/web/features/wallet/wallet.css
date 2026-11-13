@@ -141,3 +141,13 @@
   .wallet-topup,
   .wallet-card { padding: var(--space-4); }
 }
+
+/* Business wallets the member manages (one per partner organisation), listed on their own wallet page. */
+.wallet-back { margin: 0; font-size: var(--text-metadata, 0.85rem); }
+.wallet-back a { color: var(--text-secondary); text-decoration: underline; text-underline-offset: 3px; }
+.wallet-business__hint { margin: 0 0 var(--space-2); color: var(--text-secondary); font-size: var(--text-metadata, 0.85rem); }
+.wallet-business { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+.wallet-business li { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3); border: 1px solid var(--border-subtle); border-radius: 14px; background: var(--surface-elevated); }
+.wallet-business a { display: grid; gap: 2px; min-width: 0; min-height: 44px; align-content: center; color: var(--text-primary); text-decoration: none; }
+.wallet-business a strong { overflow-wrap: anywhere; }
+.wallet-business a small { color: var(--text-secondary); }

@@ -41,7 +41,8 @@
       "paragraphs": [
         "opetlife is an intermediary. Partners provide their own services and sell their own products, set their own prices within our rules, and are responsible for their quality, legality and description. A seller's invoice is issued in the seller's name.",
         "We check partners before they can take bookings or sell, but a verified badge only means we reviewed the documents they gave us. It is not a guarantee of every service.",
-        "Business listings imported from open map data are labelled as unverified until the business claims and verifies them. Links to other sites, such as accommodation on Jajiga, take you to services that have their own terms. The insurance section only compares published plans: the insurer decides on applications and issues the policy, under its own terms."
+        "Business listings imported from open map data are labelled as unverified until the business claims and verifies them. Links to other sites, such as accommodation on Jajiga, take you to services that have their own terms. The insurance section only compares published plans: the insurer decides on applications and issues the policy, under its own terms.",
+        "Sponsored listings: partners can pay to show a listing in a separate block marked “Sponsored” at the top of some lists, such as shop searches and categories, vets and service providers. A sponsored listing is not a recommendation, a rating or a verification by opetlife. Which sponsored listings you see depends only on the list you are viewing (its own filters, such as category, species, city or type of service), never on your profile, pets or history. The rest of the list keeps its usual order."
       ]
     },
     {
@@ -53,7 +54,8 @@
         "Listings, prices, availability, cancellation terms and product details must be true and up to date. Health data a partner receives through a booking may be used only for that booking.",
         "Partners must follow the law, animal-welfare standards and our community rules, and must treat members' personal data as the Privacy Policy describes.",
         "Commissions, payouts and settlements are set out in the partner agreement and the partner dashboard.",
-        "Only a verified organisation can claim an unverified business listing. A claim made in bad faith leads to removal."
+        "Only a verified organisation can claim an unverified business listing. A claim made in bad faith leads to removal.",
+        "Only verified organisations can run sponsored listings. They are prepaid from the organisation's business wallet at one flat price per click that opetlife sets for everyone and shows in the partner dashboard, with the date any new price applies from. Partners set a daily budget and a maximum price per click: an ad stops showing when the budget or the wallet runs out, and simply isn't shown while the price is above that maximum. At most one click per listing per day is charged for each signed-in account and for each network address; repeat clicks, clicks by the partner's own team or our staff, automated clicks and browser prefetches are free. Our staff can refund invalid clicks to the wallet and can hold or stop a campaign, and partners are told when their wallet runs out."
       ]
     },
     {
@@ -97,6 +99,7 @@
         "Checkout shows the ways to pay that are available for that purchase. These may include an online payment gateway, your wallet, a card-to-card transfer, or paying the partner directly.",
         "Card-to-card: transfer the exact amount to the account shown at checkout, then upload the receipt within 30 minutes. Our finance team checks receipts during working hours: Saturday to Wednesday 9:00–18:00 and Thursday 9:00–13:00, Tehran time. A booking paid this way must start at least 24 hours later. If you paid too much, the difference is credited to your wallet. If you paid too little, you have 30 minutes to pay the rest.",
         "The wallet has two kinds of credit. Refund credit comes back to you from cancelled or refunded purchases. Purchase credit comes from top-ups and gifts, and can only be spent on opetlife. Gift credit expires six months after it is given. The wallet does not earn interest. Both kinds can be spent on opetlife. Paying refund credit out to a bank account is not yet available in the app; if you need it, contact Support and our finance team will review your request.",
+        "Each member account and each partner organisation has its own wallet; a business wallet is seen and managed only by the organisation's wallet managers. Our staff move credit between wallets only for a recorded reason: your own request, merging your accounts, a refund, a payment sent to the wrong account, handing an account over, a legal order, or correcting a payment. Between wallets with no common owner, only refunds, wrong-account payments, account handovers and legal orders are allowed, and an organisation that is not yet verified can only receive refunds. One staff member requests each transfer with a reason and evidence, a different authorised staff member must approve it, a single transfer is at most 50,000,000 toman, the people of both wallets are notified in the app, and it is recorded in our accounts and audit log. A transfer is never edited or deleted; it can only be reversed by a new transfer approved the same way.",
         "A top-up must be at least 10,000 toman and at most 50,000,000 toman. You can have at most three top-up requests waiting for review.",
         "Promotions apply automatically when you are eligible and cannot be combined. Apart from the subscription gift code described below, when we offer one, there are no discount codes.",
         "Subscriptions and free trial: some extra features are part of optional paid plans, shown with their price on the subscription page. If you have never paid for a plan, you can try one for free once: it can start when you add your first pet, or you can start it from the subscription page. Starting the trial needs no card and no payment, and it lasts the number of days shown when it starts, normally 7. Each account, household and mobile number can have only one trial; to check the number, we keep only a scrambled (hashed) form of it. We remind you in the app, and by SMS where available, two days before it ends. When it ends, you simply go back to the free plan: we never charge you without your explicit consent. You can end the trial early, but it still counts as used.",
@@ -139,7 +142,8 @@
         "Get around security or limits, probe for weaknesses without permission, or interfere with the service.",
         "Collect data from the site with automated tools without our written permission.",
         "Open several accounts to misuse promotions, reviews or limits.",
-        "Take payments for a booking or order outside opetlife in order to avoid our rules or fees."
+        "Take payments for a booking or order outside opetlife in order to avoid our rules or fees.",
+        "Click sponsored listings repeatedly or with automated tools, for example to use up a competitor's budget."
       ]
     },
     {

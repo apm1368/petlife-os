@@ -184,6 +184,20 @@ describe("Location pins (e2e)", () => {
     expect((await pinless.c.get(`/places/nearby?near=home`).expect(400)).body.error.details.reason).toBe("HOME_PIN_MISSING");
   });
 
+  it("keeps the visitor's point out of travel search URLs too (POST body or near=home)", async () => {
+    expect((await request(server).get("/travel/listings?lat=32.87&lng=59.22&sort=DISTANCE").expect(400)).body.error.details.reason).toBe("POINT_IN_QUERY");
+    const byPoint = await request(server).post("/travel/listings/near").send({ lat: 32.87, lng: 59.22, sort: "DISTANCE" }).expect(200);
+    expect(Array.isArray(byPoint.body.items)).toBe(true);
+    expect(byPoint.body.items.every((i: { distanceKm: number | null }) => i.distanceKm === null || Number.isInteger(i.distanceKm))).toBe(true);
+    expect(leaks(byPoint.body)).toEqual([]);
+    expect((await request(server).post("/travel/listings/near").send({ sort: "DISTANCE" }).expect(400)).body.error.details.reason).toBe("POINT_REQUIRED");
+    expect((await request(server).get("/travel/listings?near=home&sort=DISTANCE").expect(400)).body.error.details.reason).toBe("HOME_PIN_MISSING");
+    const member = await memberWithHome();
+    const fromHome = await member.c.get("/travel/listings?near=home&sort=DISTANCE").expect(200);
+    expect(Array.isArray(fromHome.body.items)).toBe(true);
+    expect(leaks(fromHome.body)).toEqual([]);
+  });
+
   it("never shows a member's pin to a provider, another member or the public", async () => {
     const member = await memberWithHome();
     const other = await signedIn("pin-other");

@@ -21,7 +21,7 @@ const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
  */
 const CSRF_EXEMPT_PREFIXES = ["/payments/webhooks/", "/shipping/webhooks/", "/uploads/"];
 /** Read-only searches that use POST only to keep the visitor's point out of URLs and logs: nothing to forge. */
-const CSRF_EXEMPT_READ_ONLY = new Set(["/discovery/providers/near", "/places/nearby"]);
+const CSRF_EXEMPT_READ_ONLY = new Set(["/discovery/providers/near", "/places/nearby", "/travel/listings/near"]);
 
 @Injectable()
 export class CsrfGuard implements CanActivate {

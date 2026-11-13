@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import type { WalletSummaryDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
-import { walletService } from "@/services/wallet.service";
+import { businessWalletService, businessWalletsService, walletService } from "@/services/wallet.service";
 import { WalletView, parseToman } from "./WalletView";
 
 vi.mock("next/navigation", () => ({
@@ -10,8 +10,11 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn() }),
   usePathname: () => "/en/profile/wallet",
 }));
+vi.mock("@/services/sponsored.service", () => ({ sponsoredService: { overview: vi.fn(() => Promise.reject(new Error("not in this test"))), targets: vi.fn(), create: vi.fn(), setStatus: vi.fn() } }));
 vi.mock("@/services/wallet.service", () => ({
   walletService: { summary: vi.fn(), topUps: vi.fn(), entries: vi.fn(), startTopUp: vi.fn(), topUp: vi.fn(), cancel: vi.fn(), receiptUploadTarget: vi.fn(), submitReceipt: vi.fn(), verifyZibal: vi.fn() },
+  businessWalletsService: { list: vi.fn(() => Promise.resolve([])) },
+  businessWalletService: vi.fn(),
 }));
 
 function summary(rails: WalletSummaryDto["topUp"]["rails"]): WalletSummaryDto {
@@ -49,7 +52,7 @@ describe("WalletView", () => {
   it("starts a card-to-card top-up in rials and shows the card to transfer to", async () => {
     vi.mocked(walletService.summary).mockResolvedValue(summary(["CARD_TO_CARD"]));
     vi.mocked(walletService.startTopUp).mockResolvedValue({
-      topUp: { id: "t1", rail: "CARD_TO_CARD", status: "AWAITING_RECEIPT", amount: 2_000_000, receivedAmount: null, currency: "IRR", receiptUploaded: false, receiptDeadlineAt: "2026-11-13T08:00:00.000Z", rejectionReason: null, createdAt: "2026-11-12T08:00:00.000Z", creditedAt: null },
+      topUp: { id: "t1", rail: "CARD_TO_CARD", status: "AWAITING_RECEIPT", amount: 2_000_000, receivedAmount: null, currency: "IRR", receiptUploaded: false, receiptDeadlineAt: "2026-11-13T08:00:00.000Z", rejectionReason: null, createdAt: "2026-11-12T08:00:00.000Z", creditedAt: null, walletAccountId: null },
       redirectUrl: null,
       cardTransfer: { cardNumber: "6037-9912-3456-7890", cardHolderName: "PET LIFE OS", bankName: null, sheba: null },
     });
@@ -61,6 +64,28 @@ describe("WalletView", () => {
     expect(await screen.findByText("6037-9912-3456-7890")).toBeTruthy();
     expect(screen.getByText("PET LIFE OS")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Send receipt" })).toBeTruthy();
+  });
+
+  it("lists the business wallets the member manages, each linking to its own page", async () => {
+    vi.mocked(walletService.summary).mockResolvedValue(summary([]));
+    vi.mocked(businessWalletsService.list).mockResolvedValueOnce([
+      { owner: { walletAccountId: "w-shop", type: "SELLER", ownerId: "s1", name: "Paws Shop" }, role: "OWNER", balances: { purchaseOnly: 3_000_000, withdrawable: 0, total: 3_000_000, currency: "IRR" } },
+    ]);
+    renderWithIntl(<WalletView />, "en");
+    const link = await screen.findByRole("link", { name: /Paws Shop/ });
+    expect(link.getAttribute("href")).toBe("/en/profile/wallet/business/w-shop");
+    expect(screen.getByText("300,000 Toman")).toBeTruthy();
+  });
+
+  it("shows a business wallet from its own endpoints, titled with the organisation", async () => {
+    const api = { summary: vi.fn(), topUps: vi.fn().mockResolvedValue([]), entries: vi.fn().mockResolvedValue({ items: [], nextCursor: null }), startTopUp: vi.fn() };
+    api.summary.mockResolvedValue({ ...summary([]), owner: { walletAccountId: "w-shop", type: "SELLER", ownerId: "s1", name: "Paws Shop" } });
+    vi.mocked(businessWalletService).mockReturnValue(api);
+    renderWithIntl(<WalletView accountId="w-shop" />, "en");
+    expect(await screen.findByRole("heading", { name: /Paws Shop/ })).toBeTruthy();
+    expect(businessWalletService).toHaveBeenCalledWith("w-shop");
+    expect(walletService.summary).not.toHaveBeenCalled();
+    expect(screen.getByRole("link", { name: "Back to my wallet" }).getAttribute("href")).toBe("/en/profile/wallet");
   });
 
   it("renders the Persian page with Persian labels", async () => {
