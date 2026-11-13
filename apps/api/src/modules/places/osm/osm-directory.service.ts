@@ -10,6 +10,9 @@ const USER_AGENT = "opetlife-directory/1.0 (+https://opetlife.ir)";
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 /** One area per tick, ticks an hour apart: at most one Overpass request an hour (fair use). */
 const TICK_MS = 60 * 60 * 1000;
+/** Categories whose visit is plainly indoors / outdoors; anything else stays "not stated". */
+const INDOOR_KINDS: ReadonlySet<string> = new Set(["VETERINARY", "PET_SHOP", "GROOMING", "BOARDING", "SHELTER"]);
+const OUTDOOR_KINDS: ReadonlySet<string> = new Set(["PARK", "DOG_PARK"]);
 const FETCH_TIMEOUT_MS = 120_000;
 /** Largest Overpass answer we read (a city box is a few MB); the query asks Overpass for the same cap. */
 export const MAX_OVERPASS_BYTES = 32 * 1024 * 1024;
@@ -194,8 +197,10 @@ export class OsmDirectoryService implements OnModuleInit, OnModuleDestroy {
           verificationSource: "OPENSTREETMAP",
           isPubliclyListed: true,
           speciesAllowed: c.dogsOnly ? [PetSpecies.DOG] : [],
-          indoorAllowed: c.category !== "PARK" && c.category !== "DOG_PARK",
-          outdoorAllowed: true,
+          // Only what the kind of place makes plain: a shop/clinic is visited indoors, a park outdoors. Nothing else is
+          // inferred (a café's terrace, a shop's yard) until the business or staff say so.
+          indoorAllowed: INDOOR_KINDS.has(c.category),
+          outdoorAllowed: OUTDOOR_KINDS.has(c.category),
         },
       });
       await this.setLocation(tx, created.id, c.latitude, c.longitude);

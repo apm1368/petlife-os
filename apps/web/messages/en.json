@@ -6881,7 +6881,7 @@
     "list": {
       "search": "Search",
       "title": "Pet-friendly places",
-      "subtitle": "Verified places that welcome pets.",
+      "subtitle": "Places that welcome pets. Verified places and listings from OpenStreetMap are labelled.",
       "empty": "No places found.",
       "nearMe": "Search near me",
       "allCategories": "All categories",

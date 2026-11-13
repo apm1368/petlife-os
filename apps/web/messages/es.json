@@ -9063,7 +9063,7 @@
     "list": {
       "search": "Buscar",
       "title": "Lugares que admiten mascotas",
-      "subtitle": "Lugares verificados donde las mascotas son bienvenidas.",
+      "subtitle": "Lugares donde las mascotas son bienvenidas. Los verificados y los de OpenStreetMap están etiquetados.",
       "empty": "No se encontraron lugares.",
       "nearMe": "Buscar cerca de mí",
       "allCategories": "Todas las categorías",
