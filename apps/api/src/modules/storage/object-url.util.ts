@@ -50,6 +50,8 @@ export const PRIVATE_OBJECT_KEY_PREFIXES = [
   "wallet-top-up-receipts/",
   "set-pet-designs/",
   "set-pet-proofs/",
+  // Member photos attached to a place suggestion: unmoderated, staff-only until a reviewer approves the place.
+  "place-suggestions/",
 ] as const;
 
 /** Repository-owned static assets (demo/QA media shipped with the web app) and absolute URLs are not object keys. */
