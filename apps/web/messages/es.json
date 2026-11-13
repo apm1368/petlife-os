@@ -1196,7 +1196,8 @@
       "pet_access_manage": "Gestionar acceso a fichas",
       "wallet_view": "Ver monederos",
       "wallet_adjust": "Corregir saldos",
-      "wallet_topup_review": "Revisar comprobantes de recarga"
+      "wallet_topup_review": "Revisar comprobantes de recarga",
+      "finance_manage": "Exportar datos financieros (CSV)"
     },
     "domains": {
       "customer": "Clientes",
@@ -4387,7 +4388,8 @@
         "orderLookup": "Buscar pedido",
         "refundApprovals": "Aprobaciones de reembolso",
         "twoStep": "Inicio de sesión en dos pasos",
-        "walletAdjustments": "Solicitudes de corrección"
+        "walletAdjustments": "Solicitudes de corrección",
+        "transactionExplorer": "Explorador"
       },
       "palette": {
         "actions": "Acciones rápidas",
@@ -12589,5 +12591,83 @@
     "notPending": "Este pedido ya no está pendiente de aprobación; vuelve a cargar la página.",
     "failed": "No funcionó; inténtalo de nuevo.",
     "noPermission": "Para aprobar o rechazar necesitas el permiso de gestión de la tienda."
+  },
+  "adminTransactionsExplorer": {
+    "kicker": "Finanzas",
+    "title": "Explorador de transacciones",
+    "subtitle": "Todos los pagos, reembolsos, recargas y correcciones de monedero en una sola lista, de la más reciente a la más antigua.",
+    "forbidden": "Necesitas el permiso de ver finanzas para consultar las transacciones.",
+    "privacyNote": "De las tarjetas solo se muestran los cuatro últimos dígitos y los contactos aparecen ocultos. Cada búsqueda de una persona y cada exportación quedan registradas en el registro de auditoría.",
+    "filters": {
+      "title": "Filtrar transacciones",
+      "person": "Persona",
+      "personHint": "Nombre, móvil, correo o ID de usuario",
+      "product": "Producto",
+      "productHint": "Nombre o ID del producto",
+      "kind": "Tipo",
+      "gateway": "Pasarela",
+      "from": "Desde",
+      "to": "Hasta",
+      "min": "Mínimo (tomanes)",
+      "max": "Máximo (tomanes)",
+      "status": "Estado",
+      "any": "Todos",
+      "apply": "Buscar",
+      "clear": "Limpiar"
+    },
+    "kind": {
+      "PAYMENT": "Pago",
+      "REFUND": "Reembolso",
+      "WALLET_TOP_UP": "Recarga de monedero",
+      "WALLET_ADJUSTMENT": "Corrección de monedero"
+    },
+    "purpose": {
+      "ORDER": "Pedido de tienda",
+      "BOOKING": "Reserva de servicio",
+      "STAY": "Alojamiento",
+      "SUBSCRIPTION": "Suscripción",
+      "DONATION": "Donación",
+      "WALLET": "Monedero",
+      "OTHER": "Otro"
+    },
+    "gateway": {
+      "ZIBAL": "Zibal",
+      "CARD_TO_CARD": "Tarjeta a tarjeta",
+      "WALLET": "Monedero",
+      "STAFF": "Equipo",
+      "DEV_SIMULATED": "Prueba (simulada)",
+      "STANDARD_GATEWAY": "Pasarela estándar",
+      "SNAPP_PAY": "SnappPay",
+      "DIGI_PAY": "DigiPay"
+    },
+    "direction": {
+      "IN": "Entrada",
+      "OUT": "Salida"
+    },
+    "columns": {
+      "when": "Fecha",
+      "kind": "Tipo",
+      "person": "Persona",
+      "amount": "Importe",
+      "gateway": "Pasarela",
+      "status": "Estado",
+      "details": "Detalles"
+    },
+    "card": "Tarjeta",
+    "export": {
+      "button": "Exportar CSV",
+      "working": "Preparando el archivo…",
+      "done": "Se exportaron {rows} filas.",
+      "truncated": "Se exportaron las {rows} filas más recientes; acota los filtros para exportar el resto.",
+      "forbidden": "Para exportar necesitas el permiso de gestionar finanzas.",
+      "failed": "No se pudo exportar. Inténtalo de nuevo."
+    },
+    "invalid": "Revisa los filtros: los importes deben ser números enteros y el mínimo no puede superar el máximo.",
+    "failed": "No se pudieron cargar las transacciones.",
+    "retry": "Reintentar",
+    "loading": "Cargando…",
+    "empty": "Ninguna transacción coincide con estos filtros.",
+    "more": "Cargar anteriores",
+    "end": "Eso es todo: {count} filas."
   }
 }

@@ -1098,7 +1098,8 @@
       "pet_access_manage": "Toegang tot huisdierdossiers beheren",
       "wallet_view": "Portemonnees bekijken",
       "wallet_adjust": "Saldi corrigeren",
-      "wallet_topup_review": "Opwaardeerbewijzen beoordelen"
+      "wallet_topup_review": "Opwaardeerbewijzen beoordelen",
+      "finance_manage": "Financiële gegevens exporteren (CSV)"
     },
     "domains": {
       "customer": "Klanten",
@@ -5109,7 +5110,8 @@
         "orderLookup": "Bestelling opzoeken",
         "refundApprovals": "Goedkeuring van terugbetalingen",
         "twoStep": "Inloggen in twee stappen",
-        "walletAdjustments": "Correctieaanvragen"
+        "walletAdjustments": "Correctieaanvragen",
+        "transactionExplorer": "Verkenner"
       },
       "palette": {
         "actions": "Snelle acties",
@@ -12682,5 +12684,83 @@
     "notPending": "Deze bestelling wacht niet meer op goedkeuring; laad de pagina opnieuw.",
     "failed": "Dat is niet gelukt; probeer het opnieuw.",
     "noPermission": "Voor goedkeuren of afwijzen heb je het recht voor winkelbeheer nodig."
+  },
+  "adminTransactionsExplorer": {
+    "kicker": "Financiën",
+    "title": "Transactieverkenner",
+    "subtitle": "Alle betalingen, terugbetalingen, wallet-opwaarderingen en wallet-correcties in één lijst, nieuwste eerst.",
+    "forbidden": "Je hebt de rechten om financiën te bekijken nodig om transacties te zien.",
+    "privacyNote": "Van kaartnummers zie je alleen de laatste vier cijfers en contactgegevens zijn gemaskeerd. Zoeken naar een persoon en elke export komen in het auditlog.",
+    "filters": {
+      "title": "Transacties filteren",
+      "person": "Persoon",
+      "personHint": "Naam, mobiel nummer, e-mail of gebruikers-id",
+      "product": "Product",
+      "productHint": "Productnaam of -id",
+      "kind": "Soort",
+      "gateway": "Betaalroute",
+      "from": "Van",
+      "to": "Tot",
+      "min": "Minimum (toman)",
+      "max": "Maximum (toman)",
+      "status": "Status",
+      "any": "Alle",
+      "apply": "Zoeken",
+      "clear": "Wissen"
+    },
+    "kind": {
+      "PAYMENT": "Betaling",
+      "REFUND": "Terugbetaling",
+      "WALLET_TOP_UP": "Wallet-opwaardering",
+      "WALLET_ADJUSTMENT": "Wallet-correctie"
+    },
+    "purpose": {
+      "ORDER": "Winkelbestelling",
+      "BOOKING": "Dienstboeking",
+      "STAY": "Verblijf",
+      "SUBSCRIPTION": "Abonnement",
+      "DONATION": "Donatie",
+      "WALLET": "Wallet",
+      "OTHER": "Overig"
+    },
+    "gateway": {
+      "ZIBAL": "Zibal",
+      "CARD_TO_CARD": "Kaart naar kaart",
+      "WALLET": "Wallet",
+      "STAFF": "Team",
+      "DEV_SIMULATED": "Test (gesimuleerd)",
+      "STANDARD_GATEWAY": "Standaard betaalroute",
+      "SNAPP_PAY": "SnappPay",
+      "DIGI_PAY": "DigiPay"
+    },
+    "direction": {
+      "IN": "In",
+      "OUT": "Uit"
+    },
+    "columns": {
+      "when": "Datum",
+      "kind": "Soort",
+      "person": "Persoon",
+      "amount": "Bedrag",
+      "gateway": "Betaalroute",
+      "status": "Status",
+      "details": "Details"
+    },
+    "card": "Kaart",
+    "export": {
+      "button": "CSV exporteren",
+      "working": "Bestand wordt gemaakt…",
+      "done": "{rows} rijen geëxporteerd.",
+      "truncated": "De nieuwste {rows} rijen zijn geëxporteerd; verfijn de filters om de rest te exporteren.",
+      "forbidden": "Voor exporteren heb je de rechten om financiën te beheren nodig.",
+      "failed": "Exporteren is mislukt. Probeer het opnieuw."
+    },
+    "invalid": "Controleer de filters: bedragen moeten hele getallen zijn en het minimum mag niet boven het maximum liggen.",
+    "failed": "Transacties konden niet worden geladen.",
+    "retry": "Opnieuw proberen",
+    "loading": "Bezig met laden…",
+    "empty": "Geen transacties die bij deze filters passen.",
+    "more": "Oudere laden",
+    "end": "Dat was alles: {count} rijen."
   }
 }

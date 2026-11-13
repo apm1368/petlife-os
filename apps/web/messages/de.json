@@ -1196,7 +1196,8 @@
       "pet_access_manage": "Zugriff auf Tierakten verwalten",
       "wallet_view": "Guthaben ansehen",
       "wallet_adjust": "Guthaben korrigieren",
-      "wallet_topup_review": "Aufladebelege prüfen"
+      "wallet_topup_review": "Aufladebelege prüfen",
+      "finance_manage": "Finanzdaten exportieren (CSV)"
     },
     "domains": {
       "customer": "Kundschaft",
@@ -4392,7 +4393,8 @@
         "orderLookup": "Bestellsuche",
         "refundApprovals": "Erstattungsfreigaben",
         "twoStep": "Zwei-Schritt-Anmeldung",
-        "walletAdjustments": "Korrekturanträge"
+        "walletAdjustments": "Korrekturanträge",
+        "transactionExplorer": "Explorer"
       },
       "palette": {
         "actions": "Schnellaktionen",
@@ -12591,5 +12593,83 @@
     "notPending": "Diese Bestellung wartet nicht mehr auf Freigabe; lade die Seite neu.",
     "failed": "Das hat nicht geklappt; bitte erneut versuchen.",
     "noPermission": "Zum Freigeben oder Ablehnen ist die Berechtigung zur Shop-Verwaltung nötig."
+  },
+  "adminTransactionsExplorer": {
+    "kicker": "Finanzen",
+    "title": "Transaktions-Explorer",
+    "subtitle": "Alle Zahlungen, Erstattungen, Wallet-Aufladungen und Wallet-Korrekturen in einer Liste, neueste zuerst.",
+    "forbidden": "Zum Ansehen von Transaktionen brauchen Sie die Berechtigung Finanzen ansehen.",
+    "privacyNote": "Von Kartennummern werden nur die letzten vier Ziffern gezeigt, Kontaktdaten sind maskiert. Die Suche nach einer Person und jeder Export werden im Audit-Log festgehalten.",
+    "filters": {
+      "title": "Transaktionen filtern",
+      "person": "Person",
+      "personHint": "Name, Handynummer, E-Mail oder Nutzer-ID",
+      "product": "Produkt",
+      "productHint": "Produktname oder -ID",
+      "kind": "Art",
+      "gateway": "Zahlungsweg",
+      "from": "Von",
+      "to": "Bis",
+      "min": "Mindestens (Toman)",
+      "max": "Höchstens (Toman)",
+      "status": "Status",
+      "any": "Alle",
+      "apply": "Suchen",
+      "clear": "Zurücksetzen"
+    },
+    "kind": {
+      "PAYMENT": "Zahlung",
+      "REFUND": "Erstattung",
+      "WALLET_TOP_UP": "Wallet-Aufladung",
+      "WALLET_ADJUSTMENT": "Wallet-Korrektur"
+    },
+    "purpose": {
+      "ORDER": "Shop-Bestellung",
+      "BOOKING": "Service-Buchung",
+      "STAY": "Unterkunft",
+      "SUBSCRIPTION": "Abo",
+      "DONATION": "Spende",
+      "WALLET": "Wallet",
+      "OTHER": "Sonstiges"
+    },
+    "gateway": {
+      "ZIBAL": "Zibal",
+      "CARD_TO_CARD": "Karte zu Karte",
+      "WALLET": "Wallet",
+      "STAFF": "Team",
+      "DEV_SIMULATED": "Test (simuliert)",
+      "STANDARD_GATEWAY": "Standard-Gateway",
+      "SNAPP_PAY": "SnappPay",
+      "DIGI_PAY": "DigiPay"
+    },
+    "direction": {
+      "IN": "Ein",
+      "OUT": "Aus"
+    },
+    "columns": {
+      "when": "Datum",
+      "kind": "Art",
+      "person": "Person",
+      "amount": "Betrag",
+      "gateway": "Zahlungsweg",
+      "status": "Status",
+      "details": "Details"
+    },
+    "card": "Karte",
+    "export": {
+      "button": "CSV exportieren",
+      "working": "Datei wird erstellt…",
+      "done": "{rows} Zeilen exportiert.",
+      "truncated": "Die neuesten {rows} Zeilen wurden exportiert; grenzen Sie die Filter ein, um den Rest zu exportieren.",
+      "forbidden": "Für den Export brauchen Sie die Berechtigung Finanzen verwalten.",
+      "failed": "Der Export ist fehlgeschlagen. Bitte erneut versuchen."
+    },
+    "invalid": "Bitte Filter prüfen: Beträge müssen ganze Zahlen sein, und das Minimum darf nicht über dem Maximum liegen.",
+    "failed": "Transaktionen konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "loading": "Wird geladen…",
+    "empty": "Keine Transaktionen passen zu diesen Filtern.",
+    "more": "Ältere laden",
+    "end": "Das war alles: {count} Zeilen."
   }
 }
