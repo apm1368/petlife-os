@@ -52,7 +52,9 @@ describe("Help Center, legal pages and status", () => {
 
     it("counts concurrent anonymous feedback from the same client only once per article and day", async () => {
       const s = slug("feedback");
-      const saved = (await send("post", editor, "/admin/help/articles").send({ categoryId, locale: "fa", slug: s, title: "راهنما", body: "متن راهنما" }).expect(201)).body;
+      // Its own category: publishing here must not make the shared category visible to the other tests in this block.
+      const feedbackCategoryId = (await send("post", publisher, "/admin/help/categories").send({ slug: slug("cat-feedback"), titleFa: "بازخورد", titleEn: "Feedback" }).expect(201)).body.id;
+      const saved = (await send("post", editor, "/admin/help/articles").send({ categoryId: feedbackCategoryId, locale: "fa", slug: s, title: "راهنما", body: "متن راهنما" }).expect(201)).body;
       const csrf = extractCookie((await request(server()).get("/health/live")).headers["set-cookie"], "petlife_csrf")!;
       const vote = (agent: string, helpful: boolean) => request(server()).post(`/help/articles/${s}/vote?locale=fa`).set("Cookie", `petlife_csrf=${csrf}`).set("x-csrf-token", csrf).set("User-Agent", agent).send({ helpful });
       await vote("same-test-client", true).expect(404);
