@@ -1,4 +1,65 @@
 {
+  "adminPlaceSuggestions": {
+    "title": "Plaatsvoorstellen",
+    "hint": "Nieuwe plekken, correcties en sluitingsmeldingen van leden. Een goedgekeurde nieuwe plek wordt ongecontroleerd en niet vermeld aangemaakt: controleer en vermeld hem op de pagina Plekken. Een afwijzing heeft een reden nodig; het lid krijgt die te zien.",
+    "tabs": {
+      "PENDING": "Wachtend",
+      "APPROVED": "Goedgekeurd",
+      "REJECTED": "Afgewezen"
+    },
+    "kindFilter": "Soort",
+    "allKinds": "Alle soorten",
+    "kinds": {
+      "NEW_PLACE": "Nieuwe plek",
+      "CORRECTION": "Correctie",
+      "CLOSURE_REPORT": "Gesloten"
+    },
+    "empty": {
+      "PENDING": "Geen wachtende voorstellen.",
+      "APPROVED": "Nog geen goedgekeurde voorstellen.",
+      "REJECTED": "Geen afgewezen voorstellen."
+    },
+    "by": "van {name}",
+    "address": "Adres",
+    "pin": "Kaartpunt",
+    "noPin": "Geen kaartpunt – voeg er een toe om goed te keuren.",
+    "notes": "Notitie van het lid",
+    "photos": "Foto's van het lid",
+    "photoAlt": "Foto van het lid {n}",
+    "photoMissing": "Foto niet geüpload",
+    "field": "Veld",
+    "now": "Nu",
+    "proposed": "Voorgesteld",
+    "closureHint": "Het lid meldt dat deze plek gesloten is. Bij goedkeuring verdwijnt hij uit de openbare lijst (hij blijft in de database).",
+    "aboutPlace": "Over: {name} ({city})",
+    "listed": "Vermeld",
+    "unlisted": "Niet vermeld",
+    "duplicates": "Mogelijke dubbele vermeldingen",
+    "sameName": "Zelfde naam",
+    "meters": "{n} m verderop",
+    "noDuplicates": "Geen plek binnen {m} m of met dezelfde naam in deze stad.",
+    "similarPending": "{count, plural, one {# ander wachtend voorstel lijkt op dit voorstel.} other {# andere wachtende voorstellen lijken op dit voorstel.}}",
+    "decidedBy": "Besloten door {name}",
+    "reason": "Reden",
+    "createdPlace": "Aangemaakte plek (ongecontroleerd, niet vermeld)",
+    "latitude": "Breedtegraad",
+    "longitude": "Lengtegraad",
+    "noteLabel": "Notitie of reden (het lid leest de reden van een afwijzing)",
+    "approve": "Goedkeuren",
+    "reject": "Afwijzen",
+    "reasonRequired": "Schrijf een reden (minstens 5 tekens) om af te wijzen.",
+    "pinRequired": "Vul de breedte- en lengtegraad in om deze plek aan te maken.",
+    "approvedNew": "Goedgekeurd. De plek is ongecontroleerd en niet vermeld aangemaakt.",
+    "approvedChange": "Goedgekeurd en doorgevoerd.",
+    "rejected": "Afgewezen. Het lid heeft de reden te horen gekregen.",
+    "failed": "Dat is niet gelukt. Vernieuw de pagina en probeer het opnieuw.",
+    "errors": {
+      "NOT_PENDING": "Iemand heeft al over dit voorstel beslist.",
+      "COORDINATES_REQUIRED_TO_CREATE_PLACE": "Er is een kaartpunt nodig om de plek aan te maken.",
+      "BOTH_OR_NEITHER": "Vul zowel de breedte- als de lengtegraad in.",
+      "REQUIRED_FOR_REJECTION": "Een afwijzing heeft een reden nodig."
+    }
+  },
   "partnerSupport": {
     "title": "Support",
     "intro": "Stel het opetlife-team je vragen over verificatie, uitbetalingen, boekingen, bestellingen of je bedrijfspagina. Antwoorden verschijnen hier en als melding.",
@@ -5039,6 +5100,7 @@
         "twoStep": "Inloggen in twee stappen"
       },
       "tabs": {
+        "placeSuggestions": "Plaatsvoorstellen",
         "productReadiness": "Onvolledige producten",
         "holidays": "Feestdagen en sluitingen",
         "ownershipTransfers": "Eigendomsoverdrachten",
@@ -7653,6 +7715,7 @@
         "allClear": "Alles op orde — er wacht niets op je team.",
         "clearList": "Leeg: {list}",
         "queue": {
+          "pendingPlaceSuggestions": "Plaatsvoorstellen",
           "pendingReviews": "Te modereren beoordelingen",
           "openProviderNoShows": "Meldingen van niet-verschenen aanbieders",
           "openOwnershipDisputes": "Eigendomsgeschillen",
