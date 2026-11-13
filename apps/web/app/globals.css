@@ -1256,9 +1256,15 @@ a.erp-list__row:hover { background:var(--erp-bg); }
 .site-contact a { text-decoration:underline; text-underline-offset:4px; }
 .site-contact__hint { color:var(--text-secondary); }
 .site-contact--page { padding:20px; border:1px solid var(--border-subtle); border-radius:20px; background:var(--surface-elevated); }
+/* Social profile icons (owner, 2026-11-13): 44px round buttons with in-house monochrome marks. The footer's touch rules
+   (opl-touch.css: footer list links inline-flex, list gap 0) are outranked here so the icons stay centred and spaced. */
 .site-social { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 0; padding:0; list-style:none; }
-.site-social a { display:inline-flex; align-items:center; min-height:36px; padding:0 14px; border-radius:999px; border:1px solid var(--border-subtle); font-size:.8rem; font-weight:700; text-decoration:none; }
-.site-social a:hover { border-color:var(--brand-natural); color:var(--brand-natural); }
+:root .opl-foot ul.site-social { gap:8px; }
+.site-social a, :root .opl-foot .site-social a { display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; min-width:44px; border-radius:50%; border:1px solid var(--opl-line-2, var(--border-subtle)); background:var(--opl-raised, transparent); color:var(--opl-forest, var(--brand-natural)); text-decoration:none; transition:border-color .15s, background .15s; }
+.site-social a:hover, .site-social a:focus-visible { border-color:var(--opl-forest, var(--brand-natural)); background:var(--opl-mint, var(--surface-subtle)); }
+.site-social-block h2 { margin-bottom:8px; font-size:1rem; font-weight:800; }
+.site-enamad { display:inline-block; margin-top:14px; border-radius:12px; background:#fff; padding:4px; }
+.site-enamad img { display:block; width:auto; height:auto; max-height:96px; }
 .site-footer-note { display:grid; gap:4px; margin-top:12px; font-size:.8rem; color:var(--text-secondary); line-height:1.8; }
 .site-footer-note__tagline { font-weight:700; color:var(--text-primary); }
 .site-maintenance { min-height:100dvh; display:grid; place-items:center; padding:24px 16px; background:radial-gradient(50rem 30rem at 100% 0, rgba(242,181,68,.22), transparent 60%), radial-gradient(40rem 30rem at 0 100%, rgba(125,180,108,.25), transparent 60%), var(--surface-base); }

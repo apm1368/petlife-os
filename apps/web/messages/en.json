@@ -1130,6 +1130,8 @@
     }
   },
   "adminSiteSettings": {
+    "enamadCheck": "Check this seal on eNamad",
+    "enamadIncomplete": "Enter a valid id and code to check the seal.",
     "kicker": "Site configuration",
     "title": "Site settings",
     "subtitle": "Manage identity, contact details, social links, the announcement, active sections, sign-up and maintenance mode here. Every change is recorded in the audit trail.",
@@ -1162,6 +1164,10 @@
       "everyone": "Every visitor"
     },
     "sections": {
+      "trust": {
+        "title": "eNamad trust seal",
+        "hint": "Enter only the id and code from the eNamad badge code, never the HTML. The seal appears in the footer once it is switched on and both are filled in."
+      },
       "identity": {
         "title": "Identity and footer",
         "hint": "The short line under the logo and the note at the bottom of every page (legal name, registration number)."
@@ -1172,7 +1178,7 @@
       },
       "social": {
         "title": "Social media",
-        "hint": "Full https page addresses; only filled-in links are shown."
+        "hint": "Full https links to each network's own site; a link shows only while its switch is on."
       },
       "announcement": {
         "title": "Site-wide announcement",
@@ -1192,6 +1198,18 @@
       }
     },
     "names": {
+      "social_bale": "Bale",
+      "social_instagramEnabled": "Show Instagram",
+      "social_telegramEnabled": "Show Telegram",
+      "social_whatsappEnabled": "Show WhatsApp",
+      "social_baleEnabled": "Show Bale",
+      "social_xEnabled": "Show X",
+      "social_linkedinEnabled": "Show LinkedIn",
+      "social_youtubeEnabled": "Show YouTube",
+      "social_aparatEnabled": "Show Aparat",
+      "trust_enamadEnabled": "Show the eNamad seal",
+      "trust_enamadId": "eNamad id (digits after id=)",
+      "trust_enamadCode": "eNamad code (after Code=)",
       "site_tagline": "Tagline",
       "site_footerNote": "Footer note",
       "site_contactPhone": "Support phone",
@@ -1237,6 +1255,7 @@
       "error": "“{name}” was not saved: {code}"
     },
     "errors": {
+      "URL_HOST_NOT_ALLOWED": "this link must point to the network's own site (https)",
       "URL_INVALID": "the address must start with https:// or /",
       "EMAIL_INVALID": "not a valid email",
       "FORMAT_INVALID": "invalid format",
@@ -1256,13 +1275,16 @@
       "x": "X",
       "linkedin": "LinkedIn",
       "youtube": "YouTube",
-      "aparat": "Aparat"
+      "aparat": "Aparat",
+      "bale": "Bale"
     },
     "maintenance": {
       "title": "We are updating opetlife",
       "defaultMessage": "opetlife is briefly unavailable while we make it better. Please check back soon.",
       "status": "System status"
-    }
+    },
+    "enamad": "eNamad trust seal",
+    "followUs": "opetlife on social media"
   },
   "adminMessaging": {
     "kicker": "SMS and email",
@@ -6987,6 +7009,60 @@
       },
       "refresh": "I've done that — update my claim",
       "limit": "You can have at most 5 open claims; please wait for review."
+    },
+    "suggest": {
+      "cta": "Suggest a place",
+      "eyebrow": "Pet-friendly places",
+      "title": "Suggest a pet-friendly place",
+      "lede": "Know a park, café or shop that welcomes pets? Tell us about it. Our team checks every suggestion before it appears in the directory.",
+      "fields": {
+        "name": "Place name",
+        "category": "Category",
+        "categoryPick": "Choose a category",
+        "city": "City",
+        "address": "Address (optional)",
+        "pin": "Location on the map",
+        "notes": "Notes (optional)"
+      },
+      "pinHint": "Tap the map where the place is, or use your current location.",
+      "map": "Map: tap to place the pin",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "pinned": "Suggested place",
+      "pinSet": "Pin placed",
+      "myLocation": "Use my location",
+      "locating": "Finding you…",
+      "notesPublic": "What makes it pet-friendly? If the place is approved, these notes may be shown publicly as its description.",
+      "review": "Our team reviews your suggestion before it is listed. Your name is never shown publicly.",
+      "send": "Send suggestion",
+      "sending": "Sending…",
+      "done": {
+        "title": "Thanks! Your suggestion is under review",
+        "body": "We'll check the details and add the place to the directory if it fits. You can follow it below.",
+        "another": "Suggest another place"
+      },
+      "mine": {
+        "title": "Your suggestions",
+        "loading": "Loading your suggestions…",
+        "error": "We couldn't load your suggestions.",
+        "retry": "Try again",
+        "empty": "You haven't suggested a place yet.",
+        "view": "View the place"
+      },
+      "status": {
+        "PENDING": "Under review",
+        "APPROVED": "Added",
+        "REJECTED": "Not added"
+      },
+      "errors": {
+        "required": "Required",
+        "pin": "Place the pin on the map: our team needs the location to list the place.",
+        "noLocation": "We couldn't get your location. Tap the map instead.",
+        "tooManyPending": "You already have 10 suggestions waiting for review. Please wait until some are reviewed.",
+        "tooFast": "Too many tries in a short time. Please wait a minute and try again.",
+        "check": "Some details need checking.",
+        "generic": "The suggestion couldn't be sent. Please try again."
+      }
     }
   },
   "supportNeeds": {
