@@ -90,7 +90,7 @@ Operational owners are roles, not people: **Support**, **Finance**, **Trust & Sa
 | # | Shown text | Where | Decision | System behaviour | Owner | Status |
 |---|---|---|---|---|---|---|
 | S1 | First answer within 24 working hours | Terms §16 | AD-06 | `setting-definitions.ts` SLA default 24 h | Support | ✅ ("we aim to") |
-| S2 | 14 days' notice before important changes | Terms §17, Privacy §13 | NT-08 | No code; announce on the site + notification by hand | Owner | 🧑‍💼 |
+| S2 | **Changes take effect on publication; important changes get a site notice plus an email (when the account has an email address); no advance-notice period** | Terms §17, Privacy §13 | NT-08; owner 2026-11-13: remove the 14-day notice («حذف شود»), inform on publication by banner + email | No code; site announcement setting for the notice, email sent by hand from our mail server | Owner / Support | ✏️ the 14-day promise was removed at the owner's request |
 | S3 | Governing law: Iran (Electronic Commerce Law, Consumer Rights Protection Law); statutory rights not limited | Terms §8, §18 | — | — | Owner | ⚖️ |
 | S4 | Company name / registration / address via footer and Contact page | Terms §1, Privacy §1 | — | `site.footerNote`, `site.contact*` settings — **empty by default; the owner must fill them** | Owner | 🧑‍💼 |
 | S5 | No precedence clause between language versions | — | GC-05 (English is the reference for legal text) | — | Owner | ⚖️ |
