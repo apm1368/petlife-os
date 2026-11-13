@@ -41,7 +41,8 @@
       "paragraphs": [
         "opetlife is an intermediary. Partners provide their own services and sell their own products, set their own prices within our rules, and are responsible for their quality, legality and description. A seller's invoice is issued in the seller's name.",
         "We check partners before they can take bookings or sell, but a verified badge only means we reviewed the documents they gave us. It is not a guarantee of every service.",
-        "Business listings imported from open map data are labelled as unverified until the business claims and verifies them. Links to other sites, such as accommodation on Jajiga, take you to services that have their own terms. The insurance section only compares published plans: the insurer decides on applications and issues the policy, under its own terms."
+        "Business listings imported from open map data are labelled as unverified until the business claims and verifies them. Links to other sites, such as accommodation on Jajiga, take you to services that have their own terms. The insurance section only compares published plans: the insurer decides on applications and issues the policy, under its own terms.",
+        "Sponsored listings: partners can pay to show a listing in a separate block marked “Sponsored” at the top of some lists, such as shop searches and categories, vets and service providers. A sponsored listing is not a recommendation, a rating or a verification by opetlife. Which sponsored listings you see depends only on the list you are viewing (its own filters, such as category, species, city or type of service), never on your profile, pets or history. The rest of the list keeps its usual order."
       ]
     },
     {
@@ -53,7 +54,8 @@
         "Listings, prices, availability, cancellation terms and product details must be true and up to date. Health data a partner receives through a booking may be used only for that booking.",
         "Partners must follow the law, animal-welfare standards and our community rules, and must treat members' personal data as the Privacy Policy describes.",
         "Commissions, payouts and settlements are set out in the partner agreement and the partner dashboard.",
-        "Only a verified organisation can claim an unverified business listing. A claim made in bad faith leads to removal."
+        "Only a verified organisation can claim an unverified business listing. A claim made in bad faith leads to removal.",
+        "Only verified organisations can run sponsored listings. They are prepaid from the organisation's business wallet at one flat price per click that opetlife sets for everyone and shows in the partner dashboard, with the date any new price applies from. Partners set a daily budget and a maximum price per click: an ad stops showing when the budget or the wallet runs out, and simply isn't shown while the price is above that maximum. At most one click per listing per day is charged for each signed-in account and for each network address; repeat clicks, clicks by the partner's own team or our staff, automated clicks and browser prefetches are free. Our staff can refund invalid clicks to the wallet and can hold or stop a campaign, and partners are told when their wallet runs out."
       ]
     },
     {
@@ -140,7 +142,8 @@
         "Get around security or limits, probe for weaknesses without permission, or interfere with the service.",
         "Collect data from the site with automated tools without our written permission.",
         "Open several accounts to misuse promotions, reviews or limits.",
-        "Take payments for a booking or order outside opetlife in order to avoid our rules or fees."
+        "Take payments for a booking or order outside opetlife in order to avoid our rules or fees.",
+        "Click sponsored listings repeatedly or with automated tools, for example to use up a competitor's budget."
       ]
     },
     {

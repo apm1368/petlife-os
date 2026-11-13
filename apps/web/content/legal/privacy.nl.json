@@ -22,7 +22,8 @@
         "Wat je publiceert: berichten, reacties, chats, beoordelingen, meldingen van vermiste en gevonden huisdieren, gedenkpagina's, en de foto's en bestanden die je uploadt. Locatiegegevens in foto's (EXIF en GPS) worden bij het uploaden verwijderd.",
         "Plaatsvoorstellen: de naam, categorie, stad, het adres, het kaartpunt en de opmerkingen van een plek die je voorstelt. Alleen ons team kan zien dat het voorstel van jou komt. Als ons team de plek controleert en in de gids opneemt, kunnen de gegevens en je opmerkingen worden gepubliceerd, je naam nooit. In de app laten we je weten of je voorstel is aangenomen.",
         "Support en berichten: je supportverzoeken en onze antwoorden, en de meldingen die we je sturen.",
-        "Technisch: per ingelogde sessie de browsergegevens en het IP-adres van het apparaat. Voor pushmeldingen het pushadres van je browser. Wanneer iemand een deellink voor gezondheidsgegevens opent, registreren we het tijdstip, de browsergegevens en een onherkenbaar gemaakte vorm van het IP-adres."
+        "Technisch: per ingelogde sessie de browsergegevens en het IP-adres van het apparaat. Voor pushmeldingen het pushadres van je browser. Wanneer iemand een deellink voor gezondheidsgegevens opent, registreren we het tijdstip, de browsergegevens en een onherkenbaar gemaakte vorm van het IP-adres.",
+        "Klikken op gesponsorde vermeldingen: als je een gesponsorde vermelding opent, leggen we het tijdstip, de campagne, je account als je bent ingelogd en een versleutelde (met een sleutel gehashte) vorm van je IP-adres vast, zodat herhaalde of geautomatiseerde klikken niet in rekening worden gebracht. Het account en het versleutelde IP-adres wissen we na 90 dagen; de rest van het klikrecord bewaren we voor de facturering."
       ]
     },
     {
@@ -32,7 +33,7 @@
         "Om je account, je huishouden en de dossiers van je huisdieren te beheren, en om de boekingen, bestellingen, reizen en betalingen uit te voeren waar je om vraagt.",
         "Om jou en het platform veilig te houden: inlogcodes, beveiligingsmeldingen, fraudepreventie, moderatie en de afhandeling van geschillen.",
         "Om je de meldingen te sturen die je nodig hebt, en marketingberichten alleen als je daarmee instemt.",
-        "Om support te bieden en de dienst te verbeteren, op basis van onze eigen gegevens. We maken geen advertentieprofielen.",
+        "Om support te bieden en de dienst te verbeteren, op basis van onze eigen gegevens. We maken geen advertentieprofielen. Gesponsorde vermeldingen worden alleen gekozen op basis van de lijst die je bekijkt, nooit op basis van een profiel van jou.",
         "Om te voldoen aan onze wettelijke, fiscale en boekhoudkundige verplichtingen."
       ]
     },

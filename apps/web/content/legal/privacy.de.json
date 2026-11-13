@@ -22,7 +22,8 @@
         "Was du veröffentlichst: Beiträge, Kommentare, Chats, Bewertungen, Vermissten- und Fundmeldungen, Gedenkseiten sowie die Fotos und Dateien, die du hochlädst. Standortdaten in Fotos (EXIF und GPS) werden beim Hochladen entfernt.",
         "Ortsvorschläge: Name, Kategorie, Stadt, Adresse, Kartenpunkt und Hinweise zu einem Ort, den du vorschlägst. Nur unser Team sieht, dass der Vorschlag von dir kommt. Wenn unser Team den Ort prüft und ins Verzeichnis aufnimmt, können seine Angaben und deine Hinweise veröffentlicht werden, dein Name nie. Ob dein Vorschlag angenommen wurde, erfährst du in der App.",
         "Support und Nachrichten: deine Support-Anfragen und unsere Antworten sowie die Benachrichtigungen, die wir dir senden.",
-        "Technisches: für jede angemeldete Sitzung die Browserangaben und die IP-Adresse des Geräts. Für Push-Benachrichtigungen die Push-Adresse deines Browsers. Wenn jemand einen Freigabelink für Gesundheitsdaten öffnet, protokollieren wir den Zeitpunkt, die Browserangaben und eine unkenntlich gemachte Form der IP-Adresse."
+        "Technisches: für jede angemeldete Sitzung die Browserangaben und die IP-Adresse des Geräts. Für Push-Benachrichtigungen die Push-Adresse deines Browsers. Wenn jemand einen Freigabelink für Gesundheitsdaten öffnet, protokollieren wir den Zeitpunkt, die Browserangaben und eine unkenntlich gemachte Form der IP-Adresse.",
+        "Klicks auf Anzeigen: Wenn du eine Anzeige öffnest, speichern wir die Uhrzeit, die Kampagne, dein Konto, falls du angemeldet bist, und eine verschlüsselte (mit Schlüssel gehashte) Form deiner IP-Adresse, damit wiederholte oder automatisierte Klicks nicht berechnet werden. Konto und verschlüsselte IP löschen wir nach 90 Tagen; der Rest des Klickeintrags bleibt für die Abrechnung erhalten."
       ]
     },
     {
@@ -32,7 +33,7 @@
         "Um dein Konto, deinen Haushalt und die Akten deiner Tiere zu führen und die Buchungen, Bestellungen, Fahrten und Zahlungen auszuführen, die du anforderst.",
         "Um dich und die Plattform zu schützen: Anmeldecodes, Sicherheitsmeldungen, Betrugsprävention, Moderation und die Bearbeitung von Streitfällen.",
         "Um dir die Benachrichtigungen zu senden, die du brauchst, und Marketingnachrichten nur, wenn du ihnen zustimmst.",
-        "Um Support zu leisten und den Dienst zu verbessern, und zwar anhand unserer eigenen Aufzeichnungen. Wir erstellen keine Werbeprofile.",
+        "Um Support zu leisten und den Dienst zu verbessern, und zwar anhand unserer eigenen Aufzeichnungen. Wir erstellen keine Werbeprofile. Anzeigen werden nur anhand der Liste ausgewählt, die du ansiehst, nie anhand eines Profils von dir.",
         "Um unsere gesetzlichen, steuerlichen und buchhalterischen Pflichten zu erfüllen."
       ]
     },

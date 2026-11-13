@@ -100,6 +100,10 @@
         {
           "q": "Waar gaan terugbetalingen naartoe?",
           "a": "Goedgekeurde terugbetalingen gaan terug naar je oorspronkelijke betaalmethode of naar je opetlife-portemonnee. In de melding over de terugbetaling staat welke van de twee. Ons financeteam beoordeelt en verwerkt elke terugbetaling."
+        },
+        {
+          "q": "Waarom zijn sommige vermeldingen gemarkeerd als ‘Gesponsord’?",
+          "a": "Een partner heeft betaald om ze in een apart blok bovenaan de lijst te tonen. Het is geen aanbeveling, beoordeling of verificatie en hangt nooit af van je profiel of geschiedenis."
         }
       ]
     },
@@ -158,6 +162,10 @@
         {
           "q": "Hoe worden commissies en uitbetalingen geregeld?",
           "a": "Die staan in je partnerovereenkomst en in je partnerdashboard, met een overzicht van elke afrekening."
+        },
+        {
+          "q": "Hoe werken gesponsorde vermeldingen voor partners?",
+          "a": "Alleen geverifieerde organisaties kunnen adverteren. Je betaalt per betaalde klik één vaste prijs, vastgesteld door opetlife, uit je zakelijke portemonnee, binnen het dagbudget en de maximumprijs per klik die je kiest. Per vermelding wordt hoogstens één klik per bezoeker per dag in rekening gebracht; herhaalde klikken, klikken van je eigen team, van ons team en geautomatiseerde klikken zijn gratis, en de advertentie stopt als je budget of tegoed op is."
         }
       ]
     },
