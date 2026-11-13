@@ -1,5 +1,6 @@
 import { OrderLifecycleService } from "../../commerce/orders/order-lifecycle.service";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
+import { PRODUCT_READINESS_ISSUES, ProductReadinessService, type ProductReadinessIssue } from "./product-readiness.service";
 import {
   Body,
   Controller,
@@ -134,6 +135,11 @@ class ReasonDto {
 
 class CatalogImportSnapshotDecisionDto extends ReasonDto {}
 class CatalogRequestMatchDto extends ReasonDto { @IsUUID() productId!: string; }
+class ProductReadinessQueryDto extends PageDto {
+  @IsOptional() @IsIn(PRODUCT_READINESS_ISSUES) issue?: ProductReadinessIssue;
+  @IsOptional() @IsIn([ProductStatus.DRAFT, ProductStatus.ACTIVE, ProductStatus.INACTIVE]) status?: ProductStatus;
+  @IsOptional() @IsString() @MaxLength(100) q?: string;
+}
 class CatalogRequestListQueryDto { @IsOptional() @IsIn(["PENDING", "DECIDED"]) status?: "PENDING" | "DECIDED"; }
 class CatalogRequestApproveDto extends ReasonDto { @IsUUID() categoryId!: string; @IsArray() @ArrayMaxSize(50) @IsUUID("all", { each: true }) reviewedDuplicateProductIds!: string[]; }
 
@@ -226,6 +232,7 @@ export class AdminCommerceController {
     private readonly catalogImports: CatalogImportService,
     private readonly promotions: PromotionManagementService,
     private readonly sellerCatalogRequests: SellerCatalogReviewService,
+    private readonly readiness: ProductReadinessService,
     private readonly orderLifecycle: OrderLifecycleService,
     private readonly audit: AdminAuditLogService,
   ) {}
@@ -289,6 +296,13 @@ export class AdminCommerceController {
   @RequireAdminPermission("commerce.view")
   listProducts(@Query() query: ProductQueryDto) {
     return this.commerce.listProducts(query);
+  }
+
+  /** Products not ready to sell and why (P4). Read-only; publishing keeps its own strict rule. */
+  @Get("product-readiness")
+  @RequireAdminPermission("commerce.view")
+  productReadiness(@Query() query: ProductReadinessQueryDto) {
+    return this.readiness.list(query);
   }
 
   @Get("products/:id")

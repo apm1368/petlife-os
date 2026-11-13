@@ -1,5 +1,6 @@
 import type {
   AdminCommerceAnalyticsDto,
+  AdminProductReadinessDto,
   AdminProductDetailDto,
   AdminCommerceOrderDetailDto,
   AdminCommerceOrderRowDto,
@@ -53,6 +54,8 @@ export const adminCommerceService = {
     apiFetch<{ id: string; status: string }>(`/admin/transactions/refund-approvals/${approvalId}/execute`, {
       method: "PATCH",
     }),
+  productReadiness: (input: { issue?: string; status?: string; q?: string; page?: number } = {}) =>
+    apiFetch<AdminProductReadinessDto>(`/admin/commerce/product-readiness${qs(input)}`),
   listProducts: (input: { status?: string; q?: string; page?: number }) =>
     apiFetch<PaginatedDto<AdminProductRowDto>>(`/admin/commerce/products${qs(input)}`),
   listProductCategories: () => apiFetch<Array<{ id: string; name: string; slug: string }>>("/admin/commerce/product-categories"),

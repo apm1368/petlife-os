@@ -4755,6 +4755,45 @@
     }
   },
   "admin": {
+    "productReadiness": {
+      "title": "Onvolledige producten",
+      "intro": "Producten die nog niet klaar zijn voor verkoop, met alle redenen. Los ze op bij het product en de aanbiedingen; hier wordt niets gepubliceerd of verborgen.",
+      "issuesLabel": "Problemen",
+      "issue": {
+        "ANY": "Alle problemen",
+        "MEDIA_INCOMPLETE": "Afbeeldingen onvolledig",
+        "MISSING_BRAND": "Geen merk",
+        "MISSING_SPECS": "Geen specificaties",
+        "UNREVIEWED_SOURCE": "Brongegevens niet gecontroleerd",
+        "NO_LIVE_OFFER": "Geen actieve aanbieding"
+      },
+      "search": "Productnaam",
+      "statusFilter": "Productstatus",
+      "allStatuses": "Alle statussen",
+      "status": {
+        "ACTIVE": "Actief",
+        "DRAFT": "Concept",
+        "INACTIVE": "Inactief"
+      },
+      "searchButton": "Zoeken",
+      "listTitle": "Te herstellen producten",
+      "rule": "Publiceren vereist precies 3 afbeeldingen, elk met alternatieve tekst. Een actieve aanbieding is actief en goedgekeurd, van een geverifieerde, actieve winkel en met voorraad.",
+      "forbidden": "Recht commerce.view vereist",
+      "loadFailed": "De gereedheidslijst kon niet worden geladen",
+      "loadFailedHint": "De fout komt van de server en wordt ongewijzigd getoond; er is niets verborgen.",
+      "retry": "Opnieuw proberen",
+      "loading": "Laden…",
+      "empty": "Alle producten zijn klaar voor verkoop.",
+      "emptyIssue": "Geen product heeft dit probleem.",
+      "media": "{count} van 3 afbeeldingen · {withoutAlt} zonder alternatieve tekst",
+      "publishOk": "publiceren toegestaan",
+      "publishBlocked": "publiceren geblokkeerd",
+      "offers": "{live} actieve aanbiedingen van {total}",
+      "pages": "Pagina's",
+      "previous": "Vorige",
+      "next": "Volgende",
+      "page": "Pagina {page} van {pages}"
+    },
     "partners": {
       "servicesTitle": "Diensten",
       "shopsTitle": "Winkels",
@@ -4997,6 +5036,7 @@
         "signingOut": "Bezig met uitloggen…"
       },
       "tabs": {
+        "productReadiness": "Onvolledige producten",
         "holidays": "Feestdagen en sluitingen",
         "ownershipTransfers": "Eigendomsoverdrachten",
         "deletionRequests": "Verwijderverzoeken",

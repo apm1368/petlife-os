@@ -3158,6 +3158,45 @@
     "tabs": { "admins": "Administradores", "roles": "Roles", "permissions": "Permisos" }
   },
   "admin": {
+    "productReadiness": {
+      "title": "Productos incompletos",
+      "intro": "Productos que aún no están listos para la venta, con todos los motivos. Corrígelos en el producto y sus ofertas; aquí no se publica ni se oculta nada.",
+      "issuesLabel": "Problemas",
+      "issue": {
+        "ANY": "Todos los problemas",
+        "MEDIA_INCOMPLETE": "Imágenes incompletas",
+        "MISSING_BRAND": "Sin marca",
+        "MISSING_SPECS": "Sin especificaciones",
+        "UNREVIEWED_SOURCE": "Datos de origen sin revisar",
+        "NO_LIVE_OFFER": "Sin oferta activa"
+      },
+      "search": "Nombre del producto",
+      "statusFilter": "Estado del producto",
+      "allStatuses": "Todos los estados",
+      "status": {
+        "ACTIVE": "Activo",
+        "DRAFT": "Borrador",
+        "INACTIVE": "Inactivo"
+      },
+      "searchButton": "Buscar",
+      "listTitle": "Productos por corregir",
+      "rule": "Para publicar se necesitan exactamente 3 imágenes con texto alternativo. Una oferta activa está activa y aprobada, es de una tienda verificada y activa, y tiene stock.",
+      "forbidden": "Se requiere el permiso commerce.view",
+      "loadFailed": "No se pudo cargar la cola de preparación",
+      "loadFailedHint": "El error viene del servidor y se muestra tal cual; no se ocultó nada.",
+      "retry": "Reintentar",
+      "loading": "Cargando…",
+      "empty": "Todos los productos están listos para la venta.",
+      "emptyIssue": "Ningún producto tiene este problema.",
+      "media": "{count} de 3 imágenes · {withoutAlt} sin texto alternativo",
+      "publishOk": "publicación permitida",
+      "publishBlocked": "publicación bloqueada",
+      "offers": "{live} ofertas activas de {total}",
+      "pages": "Páginas",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "page": "Página {page} de {pages}"
+    },
     "partners": {
       "servicesTitle": "Servicios",
       "shopsTitle": "Tiendas",
@@ -4150,6 +4189,7 @@
         "signingOut": "Cerrando sesión…"
       },
       "tabs": {
+        "productReadiness": "Productos incompletos",
         "holidays": "Festivos y cierres",
         "ownershipTransfers": "Transferencias de propiedad",
         "deletionRequests": "Solicitudes de eliminación",

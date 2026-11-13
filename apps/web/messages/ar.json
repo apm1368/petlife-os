@@ -4755,6 +4755,45 @@
     }
   },
   "admin": {
+    "productReadiness": {
+      "title": "منتجات غير مكتملة",
+      "intro": "منتجات غير جاهزة للبيع، مع كل الأسباب. أصلحها في المنتج وعروضه؛ هذه الصفحة لا تنشر أي منتج ولا تخفيه.",
+      "issuesLabel": "المشكلات",
+      "issue": {
+        "ANY": "كل المشكلات",
+        "MEDIA_INCOMPLETE": "صور غير مكتملة",
+        "MISSING_BRAND": "بلا علامة تجارية",
+        "MISSING_SPECS": "بلا مواصفات",
+        "UNREVIEWED_SOURCE": "بيانات المصدر غير مراجَعة",
+        "NO_LIVE_OFFER": "لا يوجد عرض نشط"
+      },
+      "search": "اسم المنتج",
+      "statusFilter": "حالة المنتج",
+      "allStatuses": "كل الحالات",
+      "status": {
+        "ACTIVE": "نشط",
+        "DRAFT": "مسودة",
+        "INACTIVE": "غير نشط"
+      },
+      "searchButton": "بحث",
+      "listTitle": "منتجات تحتاج إلى إصلاح",
+      "rule": "يتطلب النشر 3 صور بالضبط، لكل منها نص بديل. العرض النشط هو عرض نشط ومعتمد من متجر موثّق ونشط ولديه مخزون.",
+      "forbidden": "يلزم إذن commerce.view",
+      "loadFailed": "تعذّر تحميل قائمة الجاهزية",
+      "loadFailedHint": "الخطأ من الخادم ويُعرض كما هو؛ لم يُخفَ شيء.",
+      "retry": "إعادة المحاولة",
+      "loading": "جارٍ التحميل…",
+      "empty": "كل المنتجات جاهزة للبيع.",
+      "emptyIssue": "لا يوجد منتج بهذه المشكلة.",
+      "media": "{count} من 3 صور · {withoutAlt} بلا نص بديل",
+      "publishOk": "النشر مسموح",
+      "publishBlocked": "النشر محظور",
+      "offers": "{live} عروض نشطة من {total}",
+      "pages": "الصفحات",
+      "previous": "السابق",
+      "next": "التالي",
+      "page": "الصفحة {page} من {pages}"
+    },
     "partners": {
       "servicesTitle": "الخدمات",
       "shopsTitle": "المتاجر",
@@ -4997,6 +5036,7 @@
         "signingOut": "جارٍ تسجيل الخروج…"
       },
       "tabs": {
+        "productReadiness": "منتجات غير مكتملة",
         "holidays": "العطلات والإغلاقات",
         "ownershipTransfers": "نقل الملكية",
         "deletionRequests": "طلبات الحذف",

@@ -137,6 +137,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
           { href: "/commerce/repeat-deliveries", labelKey: "tabs.repeatDeliveries", permission: "commerce.view" },
           { href: "/commerce/refund-requests", labelKey: "tabs.refundRequests", permission: "commerce.view", queue: "pendingRefundRequests" },
           { href: "/commerce/products", labelKey: "tabs.products", permission: "commerce.view" },
+          { href: "/commerce/product-readiness", labelKey: "tabs.productReadiness", permission: "commerce.view" },
           { href: "/commerce/product-moderation", labelKey: "tabs.offerModeration", permission: "commerce.view", queue: "pendingOfferModeration" },
           { href: "/commerce/catalog-product-requests", labelKey: "tabs.catalogRequests", permission: "commerce.view", queue: "pendingCatalogRequests" },
           { href: "/commerce/catalog-imports", labelKey: "tabs.catalogImports", permission: "commerce.view" },

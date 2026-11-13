@@ -6810,6 +6810,33 @@ export interface AdminProductDetailDto extends AdminProductRowDto {
   lowestBuyablePrice: number | null;
 }
 
+/** Shop readiness queue: one product that is not ready to sell, and every reason why. */
+export interface AdminProductReadinessRowDto {
+  id: string;
+  title: string;
+  status: string;
+  isDemoRecord: boolean;
+  categoryName: string;
+  brandName: string | null;
+  mediaCount: number;
+  mediaWithoutAlt: number;
+  /** The publish rule (C-03): exactly three images, each with alternative text. */
+  meetsPublishRule: boolean;
+  offers: number;
+  /** Offers a customer can buy now (active, approved, verified and active shop, stock on hand). */
+  liveOffers: number;
+  issues: Array<"MEDIA_INCOMPLETE" | "MISSING_BRAND" | "MISSING_SPECS" | "UNREVIEWED_SOURCE" | "NO_LIVE_OFFER">;
+  updatedAt: string;
+}
+
+export interface AdminProductReadinessDto {
+  items: AdminProductReadinessRowDto[];
+  total: number;
+  page: number;
+  pageSize: number;
+  counts: Record<"ANY" | "MEDIA_INCOMPLETE" | "MISSING_BRAND" | "MISSING_SPECS" | "UNREVIEWED_SOURCE" | "NO_LIVE_OFFER", number>;
+}
+
 export interface AdminProductReviewRowDto {
   id: string;
   productId: string;
