@@ -4414,7 +4414,9 @@
         "orderLookup": "Bestellsuche",
         "refundApprovals": "Erstattungsfreigaben",
         "twoStep": "Zwei-Schritt-Anmeldung",
-        "walletAdjustments": "Korrekturanträge"
+        "walletAdjustments": "Korrekturanträge",
+        "walletBusiness": "Geschäftsguthaben",
+        "walletTransfers": "Übertragungen"
       },
       "palette": {
         "actions": "Schnellaktionen",
@@ -10484,7 +10486,8 @@
         "REFUND": "Erstattung",
         "ADJUSTMENT": "Korrektur durch unser Team",
         "EXPIRY": "Geschenkguthaben abgelaufen",
-        "OTHER": "Bewegung"
+        "OTHER": "Bewegung",
+        "TRANSFER": "Übertragung durch unser Team (von zwei Personen genehmigt)"
       },
       "bucket": {
         "PURCHASE_ONLY": "Für Einkäufe",
@@ -10496,9 +10499,29 @@
         "PAYMENT_CORRECTION": "Zahlungskorrektur",
         "REFUND_OUTSIDE_SYSTEM": "Erstattung außerhalb einer Bestellung",
         "DUPLICATE_CREDIT_REVERSAL": "Doppelte Gutschrift storniert",
-        "OTHER": "Andere Korrektur"
+        "OTHER": "Andere Korrektur",
+        "OWNER_REQUEST": "Auf Wunsch der Inhaberin oder des Inhabers",
+        "ACCOUNT_CONSOLIDATION": "Zusammenlegung von Konten",
+        "REFUND": "Erstattung",
+        "MISDIRECTED_PAYMENT": "Zahlung an das falsche Konto",
+        "ACCOUNT_SUCCESSION": "Konto übergeben",
+        "LEGAL_ORDER": "Behördliche oder gerichtliche Anordnung",
+        "REVERSAL": "Frühere Übertragung rückgängig gemacht"
       },
       "expires": "Verfällt am {date}"
+    },
+    "business": {
+      "eyebrow": "Geschäftsguthaben",
+      "title": "{name} – Geschäftsguthaben",
+      "description": "Das eigene Guthaben dieser Organisation, getrennt von deinem persönlichen Guthaben. Aufladungen werden erst gutgeschrieben, wenn das Geld bestätigt ist, und nur die Guthaben-Verwalter der Organisation sehen es.",
+      "back": "Zurück zu meinem Guthaben",
+      "listTitle": "Geschäftsguthaben",
+      "listHint": "Guthaben der Organisationen, die du verwaltest. Jedes ist von deinem persönlichen Guthaben getrennt.",
+      "kind": {
+        "MEMBER": "Persönliches Guthaben",
+        "SELLER": "Shop",
+        "PROVIDER": "Dienstleister"
+      }
     }
   },
   "adminWallets": {
@@ -10695,6 +10718,109 @@
         "INSUFFICIENT_WALLET_BALANCE": "In diesem Guthabenteil ist nicht mehr so viel vorhanden; die Abbuchung kann nicht gebucht werden.",
         "reasonTooShort": "Der Grund braucht mindestens 5 Zeichen.",
         "generic": "Das hat nicht geklappt. Bitte versuchen Sie es erneut."
+      }
+    },
+    "business": {
+      "title": "Guthaben nach Inhaber",
+      "subtitle": "Jede Partnerorganisation hat ein eigenes Geschäftsguthaben, getrennt von den persönlichen Guthaben ihrer Mitglieder.",
+      "typeLabel": "Inhaber",
+      "search": "Nach Name (oder ID) suchen",
+      "searchButton": "Suchen",
+      "empty": "Keine passenden Guthaben.",
+      "kind": {
+        "MEMBER": "Mitglied",
+        "SELLER": "Shop",
+        "PROVIDER": "Dienstleister"
+      },
+      "kindPlural": {
+        "MEMBER": "Mitglieder",
+        "SELLER": "Shops",
+        "PROVIDER": "Dienstleister"
+      },
+      "columns": {
+        "owner": "Inhaber"
+      },
+      "memberPage": "Guthaben-Seite des Mitglieds",
+      "transferFrom": "Von diesem Guthaben übertragen",
+      "transferTo": "Auf dieses Guthaben übertragen",
+      "history": "Verlauf",
+      "noHistory": "Noch keine Bewegungen.",
+      "topUps": "Aufladungen",
+      "purpose": {
+        "TOP_UP": "Aufladung",
+        "PURCHASE": "Kauf",
+        "REFUND": "Erstattung",
+        "ADJUSTMENT": "Korrektur durch das Team",
+        "TRANSFER": "Übertragung durch das Team",
+        "EXPIRY": "Geschenk abgelaufen",
+        "OTHER": "Sonstiges"
+      }
+    },
+    "transfers": {
+      "title": "Guthaben-Übertragungen",
+      "subtitle": "Guthaben zwischen Konten zu verschieben ist nur für sensible Fälle gedacht: Eine Admin-Person beantragt es mit Grund und Nachweis, eine andere genehmigt es, und erst dann wird Geld bewegt.",
+      "new": "Neue Übertragung",
+      "newHint": "Bis zu {max} pro Übertragung. Es wird nichts bewegt, bevor eine zweite Admin-Person genehmigt.",
+      "from": "Von Guthaben",
+      "to": "Auf Guthaben",
+      "bucket": "Guthabenart",
+      "amount": "Betrag (Toman)",
+      "reasonCode": "Grund",
+      "note": "Notiz",
+      "evidence": "Nachweis",
+      "evidenceHint": "Ticketnummer, Schreiben oder Aktenzeichen der Anordnung",
+      "rules": "Zwischen Guthaben ohne gemeinsamen Inhaber ist nur eine Erstattung, eine Zahlung an das falsche Konto, eine Kontoübergabe oder eine behördliche Anordnung möglich. Ein nicht verifizierter Shop oder Dienstleister kann nur eine Erstattung erhalten.",
+      "submit": "Übertragung beantragen",
+      "created": "Übertragung beantragt. Sie wartet auf eine zweite Admin-Person.",
+      "available": "Guthaben {amount}",
+      "change": "Ändern",
+      "filter": "Nach Status filtern",
+      "all": "Alle",
+      "empty": "Hier gibt es keine Übertragungen.",
+      "status": {
+        "PENDING": "Wartet auf Genehmigung",
+        "APPROVED": "Gebucht",
+        "REJECTED": "Abgelehnt",
+        "EXPIRED": "Abgelaufen"
+      },
+      "reason": {
+        "OWNER_REQUEST": "Auf Wunsch der Inhaberin oder des Inhabers",
+        "ACCOUNT_CONSOLIDATION": "Zusammenlegung von Konten",
+        "PAYMENT_CORRECTION": "Zahlungskorrektur",
+        "REFUND": "Erstattung",
+        "MISDIRECTED_PAYMENT": "Zahlung an das falsche Konto",
+        "ACCOUNT_SUCCESSION": "Konto übergeben",
+        "LEGAL_ORDER": "Behördliche oder gerichtliche Anordnung",
+        "REVERSAL": "Frühere Übertragung rückgängig gemacht"
+      },
+      "reversal": "Rückbuchung",
+      "unrelated": "Kein gemeinsamer Inhaber",
+      "requestedBy": "Beantragt von {name} am {date}",
+      "decidedBy": "entschieden von {name} am {date}",
+      "expires": "läuft ab am {date}",
+      "waitingForSecond": "Du hast das beantragt; eine andere Admin-Person muss genehmigen.",
+      "approve": "Genehmigen und buchen",
+      "reject": "Ablehnen",
+      "withdraw": "Zurückziehen",
+      "rejectReason": "Grund",
+      "reverse": "Diese Übertragung rückgängig machen",
+      "reverseHint": "Eine Rückbuchung ist ein neuer Antrag über denselben Betrag in Gegenrichtung und braucht ebenfalls eine zweite Admin-Person.",
+      "errors": {
+        "generic": "Das hat nicht geklappt. Versuche es erneut.",
+        "forbidden": "Du brauchst die Berechtigung „Guthaben korrigieren“.",
+        "WALLET_TRANSFER_SELF_APPROVAL": "Eine Übertragung, die du beantragt hast, muss eine andere Admin-Person genehmigen.",
+        "WALLET_TRANSFER_NOT_PENDING": "Über diese Übertragung wurde bereits entschieden.",
+        "WALLET_TRANSFER_EXPIRED": "Diese Übertragung ist abgelaufen. Beantrage eine neue.",
+        "UNRELATED_WALLETS": "Diese Guthaben haben keinen gemeinsamen Inhaber: Wähle Erstattung, Zahlung an das falsche Konto, Kontoübergabe oder behördliche Anordnung.",
+        "DESTINATION_NOT_VERIFIED": "Die empfangende Organisation ist nicht verifiziert: Sie kann nur eine Erstattung erhalten.",
+        "INSUFFICIENT_WALLET_BALANCE": "Das Quellguthaben reicht in dieser Guthabenart nicht aus.",
+        "SAME_WALLET": "Wähle zwei verschiedene Guthaben.",
+        "TOO_MANY_PENDING": "Für dieses Guthaben warten schon zu viele Übertragungen.",
+        "OUT_OF_RANGE": "Der Betrag liegt außerhalb des erlaubten Bereichs.",
+        "ALREADY_REVERSED": "Diese Übertragung wurde bereits rückgängig gemacht.",
+        "CANNOT_REVERSE_A_REVERSAL": "Eine Rückbuchung kann nicht rückgängig gemacht werden; beantrage stattdessen eine neue Übertragung.",
+        "NOT_APPROVED": "Nur eine gebuchte Übertragung kann rückgängig gemacht werden.",
+        "OWNER_NOT_FOUND": "Dieser Inhaber existiert nicht."
       }
     }
   },
