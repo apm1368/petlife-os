@@ -58,4 +58,11 @@ export {
   Hourglass,
   Zap,
   RefreshCw,
+  Upload,
+  Trash2,
+  Shirt,
+  Ruler,
+  Clock,
+  Minus,
+  Play,
 } from "lucide-react";

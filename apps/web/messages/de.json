@@ -11624,5 +11624,273 @@
       "TWO_STEP_POLICY_SUPER_ADMIN_ONLY": "Nur ein Super-Admin kann das ändern.",
       "TWO_STEP_KEY_CHANGED": "Nach einem Schlüsselwechsel auf dem Server kann Ihr Authenticator nicht geprüft werden. Nutzen Sie einen Wiederherstellungscode oder lassen Sie ihn von einem Super-Admin zurücksetzen."
     }
+  },
+  "setPet": {
+    "landing": {
+      "eyebrow": "Set Pet · neu",
+      "title": "Partnerlook für dich und dein Tier",
+      "lede": "Ein T-Shirt für dich und ein Shirt für dein Tier in derselben Farbe, bedruckt mit deinem eigenen Motiv: einem Foto, einer Zeichnung oder dem Namen deines Tieres.",
+      "line1": "Wähle Größen, eine Farbe und wohin jedes Motiv kommt.",
+      "line2": "Sieh dir beide Shirts nebeneinander an, bevor du die Anfrage sendest.",
+      "line3": "Unser Team prüft Größen und Motive und bestätigt den Preis. Jetzt zahlst du nichts.",
+      "cta": "Dein Set Pet gestalten",
+      "navLabel": "Set Pet",
+      "videoLabel": "Set-Pet-Video: so bestellst du Partnershirts für dich und dein Tier",
+      "play": "Set-Pet-Video abspielen"
+    },
+    "page": {
+      "eyebrow": "Set Pet",
+      "title": "Set Pet: Partnerlook für dich und dein Tier",
+      "lede": "Bestelle ein T-Shirt für dich und ein passendes Shirt für dein Tier, in derselben Farbe und mit deinen eigenen Motiven. Du wählst Größen, Farbe und Druckflächen und siehst beide Shirts nebeneinander; danach prüft unser Team alles und schickt dir einen Preis.",
+      "start": "Jetzt gestalten",
+      "howTitle": "So funktioniert es",
+      "how": {
+        "shirts": "Wähle die Anzahl der T-Shirts und je eine Größe, mit Größentabelle in cm.",
+        "pet": "Miss dein Tier (Hals, Brust, Rückenlänge und Gewicht); wir schlagen eine Größe vor.",
+        "colour": "Wähle eine Farbe für das ganze Set.",
+        "zones": "Wähle die Druckflächen: Ärmel, Vorderseite, Rücken oder den Rücken des Tiershirts.",
+        "designs": "Lade bis zu drei Motive hoch und sieh sie auf beiden Shirts.",
+        "review": "Prüfe alles und sende die Anfrage. Unser Team antwortet mit Preis und Termin."
+      },
+      "factsLabel": "Gut zu wissen",
+      "facts": {
+        "print": {
+          "title": "Was gedruckt wird",
+          "body": "Auf deinem T-Shirt: oben am rechten oder linken Ärmel (10 × 10 cm), Brustmitte oder Rücken (20 × 20 cm). Auf dem Tiershirt: der Rücken. Ein Motiv pro Fläche, insgesamt bis zu drei Motive."
+        },
+        "sizing": {
+          "title": "Größen",
+          "body": "Größen S bis 3XL für dich und dein Tier. Die Tabellen sind Richtwerte; unser Team prüft vor dem Druck deine Größen und die Maße deines Tieres."
+        },
+        "timing": {
+          "title": "Zeitplan",
+          "body": "Nach deiner Anfrage nennt dir unser Team einen Preis und einen voraussichtlichen Fertigstellungstermin. Die Produktion beginnt erst, wenn du zustimmst."
+        },
+        "price": {
+          "title": "Preis und Zahlung",
+          "body": "Das ist eine Bestellanfrage, kein Kauf. Der Preis hängt von den Shirts und Druckflächen ab und wird von unserem Team bestätigt. Jetzt wird nichts berechnet."
+        }
+      },
+      "buildTitle": "Gestalte dein Set",
+      "signIn": {
+        "body": "Melde dich an, um dein Set zu gestalten, Motive hochzuladen und deine Anfragen zu verfolgen. Deine Motive bleiben privat: nur du und unser Druckteam sehen sie.",
+        "cta": "Anmelden",
+        "join": "Konto erstellen"
+      },
+      "mineTitle": "Deine Set-Pet-Anfragen",
+      "done": {
+        "title": "Anfrage {reference} gesendet",
+        "body": "Unser Team prüft deine Größen und Motive und schickt dir Preis und Fertigstellungstermin. Du findest beides unter „Deine Set-Pet-Anfragen“; berechnet wird erst, wenn du zustimmst.",
+        "another": "Noch ein Set gestalten"
+      }
+    },
+    "builder": {
+      "stepsLabel": "Set-Pet-Schritte",
+      "steps": {
+        "shirts": "T-Shirts",
+        "pet": "Tiershirt",
+        "colour": "Farbe",
+        "zones": "Druckflächen",
+        "designs": "Motive",
+        "review": "Prüfen und senden"
+      },
+      "loading": "Wird geladen …",
+      "comingSoon": "Set-Pet-Bestellungen starten in Kürze. Schau bald wieder vorbei.",
+      "loadError": "Set Pet konnte gerade nicht geladen werden.",
+      "retry": "Erneut versuchen",
+      "back": "Zurück",
+      "next": "Weiter",
+      "size": "Größe",
+      "cm": "cm",
+      "kg": "kg",
+      "range": "{min}–{max}",
+      "approximate": "Richtwerte: unser Team bestätigt jede Größe vor dem Druck.",
+      "previewLabel": "Vorschau beider Shirts",
+      "previewShirt": "T-Shirt für die Vorschau",
+      "shirtN": "T-Shirt {n}",
+      "previewNote": "Jedes Motiv wird in seiner echten Druckgröße gezeigt. Tippe auf „Rücken zeigen“, um das T-Shirt zu drehen.",
+      "shirts": {
+        "title": "Deine T-Shirts",
+        "lede": "Wie viele T-Shirts für die Menschen im Set, und welche Größe jeweils?",
+        "count": "Anzahl T-Shirts",
+        "fewer": "Ein T-Shirt weniger",
+        "more": "Ein T-Shirt mehr",
+        "sizeFor": "Größe von T-Shirt {n}",
+        "guideTitle": "So wird das T-Shirt gemessen: A Brustbreite, B Länge",
+        "chartCaption": "T-Shirt-Größentabelle (cm, flach gelegt)",
+        "chest": "A · Brustbreite",
+        "length": "B · Länge"
+      },
+      "pet": {
+        "title": "Das Shirt deines Tieres",
+        "lede": "Miss dein Tier mit einem weichen Maßband, anliegend, aber nicht stramm. Die Größe schlagen wir anhand des Brustumfangs vor.",
+        "which": "Für welches Tier? (optional)",
+        "noPet": "Keinem Tier zugeordnet",
+        "guideTitle": "Wo du dein Tier misst: 1 Hals, 2 Brust, 3 Rückenlänge",
+        "guide": {
+          "neck": "Hals: unten am Hals, dort wo das Halsband sitzt.",
+          "chest": "Brust: an der breitesten Stelle, direkt hinter den Vorderbeinen.",
+          "back": "Rückenlänge: vom Halsansatz bis zum Schwanzansatz."
+        },
+        "fields": {
+          "neckCm": "Halsumfang",
+          "chestCm": "Brustumfang",
+          "backLengthCm": "Rückenlänge",
+          "weightKg": "Gewicht"
+        },
+        "size": "Größe des Tiershirts",
+        "suggested": "Vorschlag nach Brustumfang: {size}",
+        "chartCaption": "Größentabelle Tiershirt (cm)",
+        "errors": {
+          "fix": "Bitte prüfe die Maße deines Tieres.",
+          "required": "Erforderlich",
+          "range": "Zwischen {min} und {max}"
+        }
+      },
+      "colour": {
+        "title": "Farbe",
+        "lede": "Eine Farbe für das ganze Set; das Tiershirt passt dazu."
+      },
+      "zones": {
+        "title": "Druckflächen",
+        "lede": "Hake an, wo gedruckt werden soll. Du kannst es jederzeit ändern: die Vorschau folgt dir.",
+        "area": "{cm} × {cm} cm",
+        "petArea": "Passend zum Tiershirt",
+        "errors": {
+          "none": "Wähle mindestens eine Druckfläche."
+        }
+      },
+      "designs": {
+        "title": "Motive",
+        "lede": "Lade bis zu drei Motive hoch und wähle, welches auf welche Fläche kommt."
+      },
+      "upload": {
+        "choose": "Motivdateien auswählen",
+        "limits": "Bis zu {max} Dateien, je bis zu {mb} MB",
+        "formats": "Fotos (JPG, PNG, WebP) erscheinen in der Vorschau; Druckdateien (PDF, SVG, AI, PSD, HEIC) gehen ohne Vorschau an unser Team.",
+        "status": {
+          "uploading": "Wird hochgeladen …",
+          "checking": "Datei wird geprüft …",
+          "ready": "Bereit"
+        },
+        "receivedNoPreview": "Datei erhalten; unser Team prüft sie (keine Vorschau)",
+        "remove": "{name} entfernen",
+        "earlier": "Frühere Uploads ({n})",
+        "use": "Verwenden",
+        "delete": "Löschen",
+        "untitled": "Motiv ohne Namen",
+        "assignTitle": "Welches Motiv wohin",
+        "pick": "Motiv wählen",
+        "errors": {
+          "type": "Dieser Dateityp wird nicht angenommen.",
+          "tooManyFiles": "Du hast zu viele ungenutzte Uploads. Lösche einige unter „Frühere Uploads“ und versuche es erneut.",
+          "notUploaded": "Der Upload wurde nicht abgeschlossen. Bitte versuche es erneut.",
+          "tooLarge": "Die Datei ist zu groß (bis zu {mb} MB).",
+          "mismatch": "Der Inhalt der Datei passt nicht zu ihrem Typ.",
+          "rejected": "Diese Datei kann nicht verwendet werden. Bitte versuche eine andere.",
+          "generic": "Der Upload ist fehlgeschlagen. Bitte versuche es erneut.",
+          "max": "Du kannst bis zu {max} Motive verwenden.",
+          "wait": "Bitte warte, bis deine Dateien hochgeladen sind.",
+          "zoneMissing": "Wähle ein Motiv für „{zone}“."
+        }
+      },
+      "review": {
+        "title": "Prüfen und senden",
+        "lede": "Prüfe dein Set. Unser Team bestätigt alles mit dem Preis, bevor etwas gedruckt wird.",
+        "shirts": "T-Shirts",
+        "shirtsValue": "{n} · Größen {sizes}",
+        "pet": "Tiershirt",
+        "petValue": "Größe {size} · {name}",
+        "measurements": "Maße des Tieres",
+        "measurementsValue": "Hals {neck} · Brust {chest} · Rücken {back} cm · {weight} kg",
+        "colour": "Farbe",
+        "zones": "Drucke",
+        "notes": "Hinweise für unser Team (optional)",
+        "notesPlaceholder": "Zum Beispiel ein Text zum Drucken oder ein Farbdetail",
+        "priceNote": "Das ist eine Bestellanfrage: unser Team bestätigt Preis und Fertigstellungstermin. Jetzt zahlst du nichts.",
+        "send": "Anfrage senden",
+        "sending": "Wird gesendet …",
+        "errors": {
+          "tooManyOpen": "Du hast bereits drei offene Anfragen. Warte, bis eine abgeschlossen ist, oder storniere eine.",
+          "designUnavailable": "Eines der Motive ist nicht mehr verfügbar. Bitte lade es erneut hoch.",
+          "validation": "Einige Angaben müssen geprüft werden. Bitte geh die Schritte noch einmal durch.",
+          "unavailable": "Set-Pet-Bestellungen sind noch nicht geöffnet. Bitte versuche es bald erneut.",
+          "generic": "Die Anfrage konnte nicht gesendet werden. Bitte versuche es erneut."
+        }
+      }
+    },
+    "zones": {
+      "RIGHT_UPPER_ARM": {
+        "name": "Rechter Oberarm",
+        "hint": "am rechten Arm der tragenden Person"
+      },
+      "LEFT_UPPER_ARM": {
+        "name": "Linker Oberarm",
+        "hint": "am linken Arm der tragenden Person"
+      },
+      "FRONT_CENTER": {
+        "name": "Brustmitte",
+        "hint": "auf der Brust"
+      },
+      "BACK": {
+        "name": "Rücken",
+        "hint": "zwischen den Schulterblättern"
+      },
+      "PET_BACK": {
+        "name": "Rücken des Tiershirts",
+        "hint": "außen, über dem Rücken deines Tieres"
+      }
+    },
+    "colours": {
+      "white": "Weiß",
+      "black": "Schwarz",
+      "heather-grey": "Graumeliert",
+      "navy": "Marineblau",
+      "cream": "Creme",
+      "sage": "Salbeigrün",
+      "pink": "Zartrosa"
+    },
+    "preview": {
+      "human": "T-Shirt · {size}",
+      "pet": "Tiershirt · {size}",
+      "showBack": "Rücken zeigen",
+      "showFront": "Vorderseite zeigen",
+      "frontCaption": "Vorderseite (der rechte Ärmel der tragenden Person ist links)",
+      "backCaption": "Rücken",
+      "petCaption": "Von oben, über dem Rücken deines Tieres",
+      "zoneLabel": "{zone} ({cm} × {cm} cm)",
+      "designOn": "{name} auf {zone}",
+      "fileReceived": "Datei erhalten"
+    },
+    "requests": {
+      "loading": "Deine Anfragen werden geladen …",
+      "loadError": "Deine Anfragen konnten nicht geladen werden.",
+      "retry": "Erneut versuchen",
+      "empty": "Du hast noch keine Set-Pet-Anfrage gesendet.",
+      "summary": "{n, plural, one {# T-Shirt} other {# T-Shirts}} ({sizes}) und ein Tiershirt ({pet}), {colour}",
+      "sent": "Gesendet am {date}",
+      "quote": "Preis: {amount}",
+      "ready": "Fertig etwa am {date}",
+      "waiting": "Wartet auf den Preis unseres Teams.",
+      "accept": "Preis annehmen und starten",
+      "cancel": "Anfrage stornieren",
+      "cancelConfirm": "Diese Anfrage stornieren?",
+      "cancelYes": "Ja, stornieren",
+      "cancelNo": "Behalten",
+      "status": {
+        "SUBMITTED": "Gesendet",
+        "QUOTED": "Preis liegt vor",
+        "CONFIRMED": "Angenommen",
+        "IN_PRODUCTION": "In Produktion",
+        "SHIPPED": "Versendet",
+        "CANCELLED": "Storniert"
+      },
+      "errors": {
+        "notCancellable": "Diese Anfrage kann nicht mehr storniert werden.",
+        "noQuote": "Es gibt noch keinen Preis zum Annehmen.",
+        "quoteChanged": "Unser Team hat den Preis aktualisiert. Bitte prüfe den neuen Preis, bevor du annimmst.",
+        "generic": "Das hat nicht geklappt. Bitte versuche es erneut."
+      }
+    }
   }
 }

@@ -12340,5 +12340,273 @@
       "TWO_STEP_POLICY_SUPER_ADMIN_ONLY": "Only a super admin can change this.",
       "TWO_STEP_KEY_CHANGED": "Your authenticator can't be checked after a server key change. Use a recovery code, or ask a super admin to reset it."
     }
+  },
+  "setPet": {
+    "landing": {
+      "eyebrow": "Set Pet · new",
+      "title": "Matching shirts for you and your pet",
+      "lede": "A T-shirt for you and a shirt for your pet in the same colour, printed with your own design: a photo, a drawing or your pet's name.",
+      "line1": "Pick your sizes, one colour, and where each design goes.",
+      "line2": "See both shirts side by side before you send the request.",
+      "line3": "Our team checks your sizes and designs and confirms the price. Nothing is paid now.",
+      "cta": "Design your Set Pet",
+      "navLabel": "Set Pet",
+      "videoLabel": "Set Pet video: how to order matching shirts for you and your pet",
+      "play": "Play the Set Pet video"
+    },
+    "page": {
+      "eyebrow": "Set Pet",
+      "title": "Set Pet: matching shirts for you and your pet",
+      "lede": "Order a T-shirt for yourself and a matching shirt for your pet, in the same colour and printed with your own designs. You choose the sizes, colour and print areas and see both shirts side by side; our team then checks everything and sends you a price.",
+      "start": "Start designing",
+      "howTitle": "How it works",
+      "how": {
+        "shirts": "Choose how many T-shirts and a size for each, with the size chart in cm.",
+        "pet": "Measure your pet (neck, chest, back length and weight); we suggest a size.",
+        "colour": "Pick one colour for the whole set.",
+        "zones": "Choose where to print: sleeves, front, back, or the back of your pet's shirt.",
+        "designs": "Upload up to three designs and see them on both shirts.",
+        "review": "Check everything and send the request. Our team replies with a price and a date."
+      },
+      "factsLabel": "Good to know",
+      "facts": {
+        "print": {
+          "title": "What gets printed",
+          "body": "On your T-shirt: upper right or left sleeve (10 × 10 cm), front centre or back (20 × 20 cm). On your pet's shirt: the back. One design per area, up to three designs in all."
+        },
+        "sizing": {
+          "title": "Sizes",
+          "body": "Sizes S to 3XL for you and for your pet. The charts are approximate; our team checks your sizes and your pet's measurements before printing."
+        },
+        "timing": {
+          "title": "Timing",
+          "body": "After you send the request, our team replies with a price and an estimated ready date. Production starts only when you accept."
+        },
+        "price": {
+          "title": "Price and payment",
+          "body": "This is an order request, not a purchase. The price depends on the shirts and print areas and is confirmed by our team. Nothing is charged now."
+        }
+      },
+      "buildTitle": "Design your set",
+      "signIn": {
+        "body": "Sign in to design your set, upload your designs and follow your requests. Your designs stay private: only you and our print team can see them.",
+        "cta": "Sign in",
+        "join": "Create an account"
+      },
+      "mineTitle": "Your Set Pet requests",
+      "done": {
+        "title": "Request {reference} sent",
+        "body": "Our team will check your sizes and designs and send you a price and a ready date. You'll find it under “Your Set Pet requests”; nothing is charged until you accept.",
+        "another": "Design another set"
+      }
+    },
+    "builder": {
+      "stepsLabel": "Set Pet steps",
+      "steps": {
+        "shirts": "T-shirts",
+        "pet": "Pet shirt",
+        "colour": "Colour",
+        "zones": "Print areas",
+        "designs": "Designs",
+        "review": "Review and send"
+      },
+      "loading": "Loading…",
+      "comingSoon": "Set Pet orders open very soon. Please check back shortly.",
+      "loadError": "We couldn't load Set Pet right now.",
+      "retry": "Try again",
+      "back": "Back",
+      "next": "Next",
+      "size": "Size",
+      "cm": "cm",
+      "kg": "kg",
+      "range": "{min}–{max}",
+      "approximate": "Approximate sizes: our team confirms every size before printing.",
+      "previewLabel": "Preview of both shirts",
+      "previewShirt": "T-shirt to preview",
+      "shirtN": "T-shirt {n}",
+      "previewNote": "Each design is shown at its real print size. Tap “Show back” to turn the T-shirt.",
+      "shirts": {
+        "title": "Your T-shirts",
+        "lede": "How many T-shirts for the people in the set, and a size for each.",
+        "count": "Number of T-shirts",
+        "fewer": "One T-shirt fewer",
+        "more": "One more T-shirt",
+        "sizeFor": "Size of T-shirt {n}",
+        "guideTitle": "How the T-shirt is measured: A chest width, B length",
+        "chartCaption": "T-shirt size chart (cm, laid flat)",
+        "chest": "A · Chest width",
+        "length": "B · Length"
+      },
+      "pet": {
+        "title": "Your pet's shirt",
+        "lede": "Measure your pet with a soft tape, snug but not tight. We suggest a size from the chest.",
+        "which": "Which pet is it for? (optional)",
+        "noPet": "Not linked to a pet",
+        "guideTitle": "Where to measure your pet: 1 neck, 2 chest, 3 back length",
+        "guide": {
+          "neck": "Neck: around the base of the neck, where a collar sits.",
+          "chest": "Chest: around the widest part, just behind the front legs.",
+          "back": "Back length: from the base of the neck to the base of the tail."
+        },
+        "fields": {
+          "neckCm": "Neck",
+          "chestCm": "Chest",
+          "backLengthCm": "Back length",
+          "weightKg": "Weight"
+        },
+        "size": "Pet shirt size",
+        "suggested": "Suggested from the chest: {size}",
+        "chartCaption": "Pet shirt size chart (cm)",
+        "errors": {
+          "fix": "Please check your pet's measurements.",
+          "required": "Required",
+          "range": "Between {min} and {max}"
+        }
+      },
+      "colour": {
+        "title": "Colour",
+        "lede": "One colour for the whole set; your pet's shirt matches it."
+      },
+      "zones": {
+        "title": "Print areas",
+        "lede": "Tick where you want a print. Change it any time: the preview moves with you.",
+        "area": "{cm} × {cm} cm",
+        "petArea": "Sized to your pet's shirt",
+        "errors": {
+          "none": "Choose at least one print area."
+        }
+      },
+      "designs": {
+        "title": "Designs",
+        "lede": "Upload up to three designs and choose which one goes on each area."
+      },
+      "upload": {
+        "choose": "Choose design files",
+        "limits": "Up to {max} files, up to {mb} MB each",
+        "formats": "Photos (JPG, PNG, WebP) show in the preview; print files (PDF, SVG, AI, PSD, HEIC) go to our team without a preview.",
+        "status": {
+          "uploading": "Uploading…",
+          "checking": "Checking the file…",
+          "ready": "Ready"
+        },
+        "receivedNoPreview": "File received; our team will check it (no preview)",
+        "remove": "Remove {name}",
+        "earlier": "Earlier uploads ({n})",
+        "use": "Use",
+        "delete": "Delete",
+        "untitled": "Untitled design",
+        "assignTitle": "Which design goes where",
+        "pick": "Choose a design",
+        "errors": {
+          "type": "This file type isn't accepted.",
+          "tooManyFiles": "You have too many unused uploads. Delete some under “Earlier uploads” and try again.",
+          "notUploaded": "The upload didn't finish. Please try again.",
+          "tooLarge": "The file is too large (up to {mb} MB).",
+          "mismatch": "The file's content doesn't match its type.",
+          "rejected": "This file couldn't be used. Please try another one.",
+          "generic": "The upload failed. Please try again.",
+          "max": "You can use up to {max} designs.",
+          "wait": "Please wait until your files have finished uploading.",
+          "zoneMissing": "Choose a design for “{zone}”."
+        }
+      },
+      "review": {
+        "title": "Review and send",
+        "lede": "Check your set. Our team confirms everything with the price before anything is printed.",
+        "shirts": "T-shirts",
+        "shirtsValue": "{n} · sizes {sizes}",
+        "pet": "Pet shirt",
+        "petValue": "Size {size} · {name}",
+        "measurements": "Pet measurements",
+        "measurementsValue": "Neck {neck} · chest {chest} · back {back} cm · {weight} kg",
+        "colour": "Colour",
+        "zones": "Prints",
+        "notes": "Notes for our team (optional)",
+        "notesPlaceholder": "For example, text to print or a colour detail",
+        "priceNote": "This is an order request: our team confirms the price and the ready date. Nothing is paid now.",
+        "send": "Send request",
+        "sending": "Sending…",
+        "errors": {
+          "tooManyOpen": "You already have three open requests. Wait for one to finish, or cancel one.",
+          "designUnavailable": "One of the designs is no longer available. Please upload it again.",
+          "validation": "Some details need checking. Please go back through the steps.",
+          "unavailable": "Set Pet orders aren't open yet. Please try again soon.",
+          "generic": "The request couldn't be sent. Please try again."
+        }
+      }
+    },
+    "zones": {
+      "RIGHT_UPPER_ARM": {
+        "name": "Upper right sleeve",
+        "hint": "on the wearer's right arm"
+      },
+      "LEFT_UPPER_ARM": {
+        "name": "Upper left sleeve",
+        "hint": "on the wearer's left arm"
+      },
+      "FRONT_CENTER": {
+        "name": "Front centre",
+        "hint": "on the chest"
+      },
+      "BACK": {
+        "name": "Back",
+        "hint": "between the shoulder blades"
+      },
+      "PET_BACK": {
+        "name": "Back of the pet shirt",
+        "hint": "on the outside, over your pet's back"
+      }
+    },
+    "colours": {
+      "white": "White",
+      "black": "Black",
+      "heather-grey": "Heather grey",
+      "navy": "Navy",
+      "cream": "Cream",
+      "sage": "Sage green",
+      "pink": "Soft pink"
+    },
+    "preview": {
+      "human": "T-shirt · {size}",
+      "pet": "Pet shirt · {size}",
+      "showBack": "Show back",
+      "showFront": "Show front",
+      "frontCaption": "Front (the wearer's right sleeve is on the left)",
+      "backCaption": "Back",
+      "petCaption": "Seen from above, over your pet's back",
+      "zoneLabel": "{zone} ({cm} × {cm} cm)",
+      "designOn": "{name} on {zone}",
+      "fileReceived": "File received"
+    },
+    "requests": {
+      "loading": "Loading your requests…",
+      "loadError": "We couldn't load your requests.",
+      "retry": "Try again",
+      "empty": "You haven't sent a Set Pet request yet.",
+      "summary": "{n, plural, one {# T-shirt} other {# T-shirts}} ({sizes}) and a pet shirt ({pet}), {colour}",
+      "sent": "Sent {date}",
+      "quote": "Price: {amount}",
+      "ready": "Ready by about {date}",
+      "waiting": "Waiting for our team's price.",
+      "accept": "Accept the price and start",
+      "cancel": "Cancel request",
+      "cancelConfirm": "Cancel this request?",
+      "cancelYes": "Yes, cancel",
+      "cancelNo": "Keep it",
+      "status": {
+        "SUBMITTED": "Sent",
+        "QUOTED": "Price ready",
+        "CONFIRMED": "Accepted",
+        "IN_PRODUCTION": "In production",
+        "SHIPPED": "Shipped",
+        "CANCELLED": "Cancelled"
+      },
+      "errors": {
+        "notCancellable": "This request can't be cancelled any more.",
+        "noQuote": "There's no price to accept yet.",
+        "quoteChanged": "Our team has updated the price. Please check the new price before accepting.",
+        "generic": "That didn't work. Please try again."
+      }
+    }
   }
 }

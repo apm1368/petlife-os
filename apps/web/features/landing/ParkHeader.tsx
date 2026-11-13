@@ -9,6 +9,7 @@ import { useSessionBootstrap } from "@/hooks/use-session-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
 import { DisplayModeToggle } from "@/features/display-mode/DisplayModeToggle";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
+import { useTranslations } from "next-intl";
 import { useParkCopy } from "./park-copy";
 import { useOplCopy, worldOrder } from "./opl/opl-copy";
 import { localeHomePath } from "@/lib/seo/site";
@@ -26,6 +27,7 @@ export function ParkHeader({ locale }: { locale: RouteLocale }) {
   const ddWrap = useRef<HTMLDivElement>(null);
   const c = useParkCopy(locale);
   const o = useOplCopy();
+  const setPet = useTranslations("setPet.landing");
   const root = `/${locale}`;
   // Home and its sections live at the canonical home address (the bare domain for Persian).
   const home = localeHomePath(locale);
@@ -38,7 +40,9 @@ export function ParkHeader({ locale }: { locale: RouteLocale }) {
     document.addEventListener("click", onClick);
     return () => { removeEventListener("scroll", onScroll); document.removeEventListener("click", onClick); };
   }, []);
+  // «ست پت» (owner, 2026-11-13): first in the bar and the mobile menu.
   const links = [
+    { href: `${root}/set-pet`, label: setPet("navLabel") },
     { href: `${root}/vet/find`, label: c.services.vet.title },
     { href: `${root}/about`, label: c.about },
     { href: `${home}#park-partners`, label: c.partners },
