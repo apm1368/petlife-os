@@ -15,8 +15,8 @@ export class StartPartnerOnboardingDto {
 export class PartnerBusinessDto {
   @IsString() @Length(2, 120) name!: string;
   @IsOptional() @IsString() @MaxLength(2000) description?: string;
-  /** The public URL returned by POST /partner-onboarding/logo-upload (checked server-side). */
-  @IsOptional() @IsString() @MaxLength(500) logoUrl?: string;
+  /** The object key returned by POST /partner-onboarding/logo-upload; the server builds the public URL from it. */
+  @IsOptional() @IsString() @MaxLength(200) logoObjectKey?: string;
 }
 
 export class PartnerUploadDto {

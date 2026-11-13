@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { resolveObjectUrl } from "../storage/object-url.util";
 import {
   LocationMode,
   PartnerSubjectType,
@@ -57,6 +58,10 @@ const minutesOf = (hhmm: string) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.
  * organizations start NOT_STARTED, services inactive, offers PAUSED and pending moderation. The partner can never
  * reach these rows through ids they pass in — each call resolves the caller's own onboarding organizations.
  */
+const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
+/** Exactly the shape StorageService.createPartnerLogoUploadTarget issues for this user. */
+const logoKeyPattern = (userId: string) => new RegExp(`^partner-logos/${userId.replace(/[^0-9a-f-]/gi, "")}/${UUID}\\.(jpg|png|webp)$`);
+
 @Injectable()
 export class PartnerOnboardingService {
   constructor(
@@ -146,11 +151,15 @@ export class PartnerOnboardingService {
     return this.storage.createPartnerLogoUploadTarget(userId, contentType, fileSizeBytes);
   }
 
-  /** Step 2: name, description and logo (a logo URL must be one issued to this user). */
+  /**
+   * Step 2: name, description and logo. The logo is identified by the object key this user's upload target issued
+   * (never a URL from the client); the public URL is built here, so nothing external can end up on a partner page.
+   */
   async business(userId: string, dto: PartnerBusinessDto) {
     const o = await this.requireAny(userId);
-    const logoUrl = dto.logoUrl?.trim() || null;
-    if (logoUrl && !logoUrl.includes(`/partner-logos/${userId}/`)) throw new ValidationApiException({ field: "logoUrl", reason: "NOT_ISSUED_FOR_THIS_ACCOUNT" });
+    const key = dto.logoObjectKey?.trim() || null;
+    if (key && !logoKeyPattern(userId).test(key)) throw new ValidationApiException({ field: "logoObjectKey", reason: "NOT_ISSUED_FOR_THIS_ACCOUNT" });
+    const logoUrl = key ? resolveObjectUrl(key) : null;
     const data = { name: dto.name.trim(), description: dto.description?.trim() || null, ...(logoUrl ? { logoUrl } : {}) };
     await this.prisma.$transaction(async (tx) => {
       if (o.provider) await tx.providerOrganization.update({ where: { id: o.provider.id }, data });

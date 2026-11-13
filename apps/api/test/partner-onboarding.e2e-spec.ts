@@ -74,7 +74,21 @@ describe("Partner onboarding (e2e)", () => {
     expect((await partner.get("/onboarding").expect(200)).body).toMatchObject({ signupIntent: "PARTNER", partnerStage: "IN_PROGRESS" });
 
     await partner.put("/partner-onboarding/business").send({ name: "کلینیک و پت‌شاپ آریا", description: "دامپزشکی و پت‌شاپ" }).expect(200);
-    await partner.put("/partner-onboarding/business").send({ name: "Aria", logoUrl: "https://cdn.example/partner-logos/someone-else/logo.png" }).expect(400);
+    // A logo is only ever an object key issued to this account; a URL (even one containing the right path), another
+    // account's key or a path trick is refused, and a URL field is not accepted at all.
+    await partner.put("/partner-onboarding/business").send({ name: "Aria", logoUrl: "https://cdn.example/partner-logos/x/logo.png" }).expect(400);
+    for (const logoObjectKey of [
+      `https://evil.example/partner-logos/${partner.id}/${randomUUID()}.png`,
+      `partner-logos/${randomUUID()}/${randomUUID()}.png`,
+      `partner-logos/${partner.id}/../${randomUUID()}.png`,
+      `partner-logos/${partner.id}/${randomUUID()}.svg`,
+    ]) await partner.put("/partner-onboarding/business").send({ name: "Aria", logoObjectKey }).expect(400);
+    const issued = (await partner.post("/partner-onboarding/logo-upload").send({ contentType: "image/png", fileSizeBytes: 2048 }).expect(201)).body as { key: string };
+    expect(issued.key).toMatch(new RegExp(`^partner-logos/${partner.id}/`));
+    await partner.put("/partner-onboarding/business").send({ name: "Aria", logoObjectKey: issued.key }).expect(200);
+    const withLogo = await db.providerOrganization.findFirstOrThrow({ where: { providerUsers: { some: { userId: partner.id } } } });
+    expect(withLogo.logoUrl).toContain(issued.key);
+    expect(withLogo.logoUrl).not.toContain("evil.example");
     await partner.put("/partner-onboarding/owner").send({ firstName: "آرش", lastName: "رضایی", phone: "021-88001122" }).expect(200);
     await partner.put("/partner-onboarding/calendar").send({ days: [{ dayOfWeek: 6, start: "09:00", end: "18:00" }] }).expect(400);
     await partner.put("/partner-onboarding/address").send({ province: "تهران", city: "تهران", addressLine: "خیابان ولیعصر، پلاک ۱۲", postalCode: "1234567890", latitude: 35.75, longitude: 51.41 }).expect(200);

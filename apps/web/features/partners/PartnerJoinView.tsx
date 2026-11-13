@@ -228,13 +228,13 @@ function BusinessStep({ state, onSaved }: { state: PartnerOnboardingStateDto; on
         e.preventDefault();
         if (logo && (!LOGO_MIME.includes(logo.type) || logo.size > 10 * 1024 * 1024)) return setError(t("errors.LOGO_FILE"));
         void run(async () => {
-          let logoUrl: string | undefined;
+          let logoObjectKey: string | undefined;
           if (logo) {
             const target = await partnerOnboardingService.logoUpload(logo.type, logo.size);
             await putToTarget(target, logo);
-            logoUrl = target.publicUrl;
+            logoObjectKey = target.key;
           }
-          return partnerOnboardingService.business({ name: name.trim(), description: description.trim() || undefined, logoUrl });
+          return partnerOnboardingService.business({ name: name.trim(), description: description.trim() || undefined, logoObjectKey });
         }, onSaved);
       }}
     >
