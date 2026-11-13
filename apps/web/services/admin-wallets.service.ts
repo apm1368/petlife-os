@@ -1,4 +1,9 @@
 import type {
+  AdminWalletAccountDetailDto,
+  AdminWalletAccountDto,
+  AdminWalletTransferDto,
+  AdminWalletTransferInput,
+  WalletOwnerTypeValue,
   AdminCardTransferDestinationOverviewDto,
   AdminCardTransferPaymentDto,
   CardTransferPaymentStatusValue,
@@ -28,6 +33,18 @@ function qs(params: Record<string, string | number | undefined>): string {
  */
 export const adminWalletsService = {
   list: (q: string | undefined, page = 1, pageSize = 20) => apiFetch<PaginatedDto<AdminWalletListItemDto>>(`/admin/wallets${qs({ q, page, pageSize })}`),
+  // Every kind of wallet (member, seller organisation, provider organisation) and two-person transfers between them.
+  accounts: (type: WalletOwnerTypeValue, q: string | undefined, page = 1, pageSize = 20) =>
+    apiFetch<PaginatedDto<AdminWalletAccountDto>>(`/admin/wallet-accounts${qs({ type, q, page, pageSize })}`),
+  account: (id: string) => apiFetch<AdminWalletAccountDetailDto>(`/admin/wallet-accounts/${encodeURIComponent(id)}`),
+  transfers: (query: { status?: WalletAdjustmentRequestStatusValue; walletAccountId?: string; page?: number; pageSize?: number } = {}) =>
+    apiFetch<PaginatedDto<AdminWalletTransferDto>>(`/admin/wallet-transfers${qs({ status: query.status, walletAccountId: query.walletAccountId, page: query.page ?? 1, pageSize: query.pageSize ?? 20 })}`),
+  requestTransfer: (input: AdminWalletTransferInput, idempotencyKey: string) =>
+    apiFetch<AdminWalletTransferDto>("/admin/wallet-transfers", { method: "POST", body: input, idempotencyKey }),
+  approveTransfer: (id: string) => apiFetch<AdminWalletTransferDto>(`/admin/wallet-transfers/${encodeURIComponent(id)}/approve`, { method: "POST", body: {} }),
+  rejectTransfer: (id: string, reason: string) => apiFetch<AdminWalletTransferDto>(`/admin/wallet-transfers/${encodeURIComponent(id)}/reject`, { method: "POST", body: { reason } }),
+  reverseTransfer: (id: string, input: { note: string; evidenceReference: string }) =>
+    apiFetch<AdminWalletTransferDto>(`/admin/wallet-transfers/${encodeURIComponent(id)}/reverse`, { method: "POST", body: input }),
   detail: (userId: string) => apiFetch<AdminWalletDetailDto>(`/admin/wallets/${userId}`),
   requestAdjustment: (
     userId: string,

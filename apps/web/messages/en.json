@@ -5087,7 +5087,9 @@
         "orderLookup": "Order lookup",
         "refundApprovals": "Refund approvals",
         "twoStep": "Two-step sign-in",
-        "walletAdjustments": "Correction requests"
+        "walletAdjustments": "Correction requests",
+        "walletBusiness": "Business wallets",
+        "walletTransfers": "Transfers"
       },
       "palette": {
         "actions": "Quick actions",
@@ -10773,7 +10775,8 @@
         "REFUND": "Refund",
         "ADJUSTMENT": "Correction by our team",
         "EXPIRY": "Gift credit expired",
-        "OTHER": "Movement"
+        "OTHER": "Movement",
+        "TRANSFER": "Transfer by our team (two-person approved)"
       },
       "bucket": {
         "PURCHASE_ONLY": "For purchases",
@@ -10785,9 +10788,29 @@
         "PAYMENT_CORRECTION": "Payment correction",
         "REFUND_OUTSIDE_SYSTEM": "Refund outside an order",
         "DUPLICATE_CREDIT_REVERSAL": "Duplicate credit reversed",
-        "OTHER": "Other correction"
+        "OTHER": "Other correction",
+        "OWNER_REQUEST": "Requested by the owner",
+        "ACCOUNT_CONSOLIDATION": "Merging accounts",
+        "REFUND": "Refund",
+        "MISDIRECTED_PAYMENT": "Payment sent to the wrong account",
+        "ACCOUNT_SUCCESSION": "Account handed over",
+        "LEGAL_ORDER": "Legal order",
+        "REVERSAL": "Earlier transfer reversed"
       },
       "expires": "Expires {date}"
+    },
+    "business": {
+      "eyebrow": "Business wallet",
+      "title": "{name} — business wallet",
+      "description": "This organisation's own wallet, separate from your personal wallet. Top-ups here are credited only after the money is confirmed, and only the organisation's wallet managers can see it.",
+      "back": "Back to my wallet",
+      "listTitle": "Business wallets",
+      "listHint": "Wallets of the organisations you manage. Each one is separate from your personal wallet.",
+      "kind": {
+        "MEMBER": "Personal wallet",
+        "SELLER": "Shop",
+        "PROVIDER": "Service provider"
+      }
     }
   },
   "adminWallets": {
@@ -10984,6 +11007,109 @@
         "INSUFFICIENT_WALLET_BALANCE": "The wallet no longer holds that much in this part, so the debit can't be posted.",
         "reasonTooShort": "The reason needs at least 5 characters.",
         "generic": "That didn't work. Please try again."
+      }
+    },
+    "business": {
+      "title": "Wallets by owner",
+      "subtitle": "Every partner organisation has its own business wallet, separate from its members' personal wallets.",
+      "typeLabel": "Wallet owner",
+      "search": "Search by name (or id)",
+      "searchButton": "Search",
+      "empty": "No wallets match.",
+      "kind": {
+        "MEMBER": "Member",
+        "SELLER": "Shop",
+        "PROVIDER": "Service provider"
+      },
+      "kindPlural": {
+        "MEMBER": "Members",
+        "SELLER": "Shops",
+        "PROVIDER": "Service providers"
+      },
+      "columns": {
+        "owner": "Owner"
+      },
+      "memberPage": "Member wallet page",
+      "transferFrom": "Transfer from this wallet",
+      "transferTo": "Transfer to this wallet",
+      "history": "History",
+      "noHistory": "No movements yet.",
+      "topUps": "Top-ups",
+      "purpose": {
+        "TOP_UP": "Top-up",
+        "PURCHASE": "Purchase",
+        "REFUND": "Refund",
+        "ADJUSTMENT": "Staff correction",
+        "TRANSFER": "Staff transfer",
+        "EXPIRY": "Gift expired",
+        "OTHER": "Other"
+      }
+    },
+    "transfers": {
+      "title": "Wallet transfers",
+      "subtitle": "Moving credit between wallets is for sensitive cases only: one admin requests it with a reason and evidence, a different admin approves it, and only then does the money move.",
+      "new": "New transfer",
+      "newHint": "Up to {max} per transfer. Nothing moves until a second admin approves.",
+      "from": "From wallet",
+      "to": "To wallet",
+      "bucket": "Balance",
+      "amount": "Amount (toman)",
+      "reasonCode": "Reason",
+      "note": "Note",
+      "evidence": "Evidence",
+      "evidenceHint": "Ticket number, letter or order reference",
+      "rules": "Wallets with no common owner can only be used for a refund, a payment sent to the wrong account, an account handover or a legal order. A shop or provider that is not verified can only receive a refund.",
+      "submit": "Request transfer",
+      "created": "Transfer requested. It waits for a second admin.",
+      "available": "Balance {amount}",
+      "change": "Change",
+      "filter": "Filter by status",
+      "all": "All",
+      "empty": "No transfers here.",
+      "status": {
+        "PENDING": "Waiting for approval",
+        "APPROVED": "Posted",
+        "REJECTED": "Rejected",
+        "EXPIRED": "Expired"
+      },
+      "reason": {
+        "OWNER_REQUEST": "Requested by the owner",
+        "ACCOUNT_CONSOLIDATION": "Merging accounts",
+        "PAYMENT_CORRECTION": "Payment correction",
+        "REFUND": "Refund",
+        "MISDIRECTED_PAYMENT": "Payment sent to the wrong account",
+        "ACCOUNT_SUCCESSION": "Account handed over",
+        "LEGAL_ORDER": "Legal order",
+        "REVERSAL": "Earlier transfer reversed"
+      },
+      "reversal": "Reversal",
+      "unrelated": "No common owner",
+      "requestedBy": "Requested by {name} on {date}",
+      "decidedBy": "decided by {name} on {date}",
+      "expires": "expires {date}",
+      "waitingForSecond": "You asked for this; another admin must approve it.",
+      "approve": "Approve and post",
+      "reject": "Reject",
+      "withdraw": "Withdraw",
+      "rejectReason": "Reason",
+      "reverse": "Reverse this transfer",
+      "reverseHint": "A reversal is a new request for the same amount the other way, and it also needs a second admin.",
+      "errors": {
+        "generic": "That didn't work. Try again.",
+        "forbidden": "You need the “Correct wallets” permission.",
+        "WALLET_TRANSFER_SELF_APPROVAL": "Another admin has to approve a transfer you asked for.",
+        "WALLET_TRANSFER_NOT_PENDING": "This transfer was already decided.",
+        "WALLET_TRANSFER_EXPIRED": "This transfer expired. Ask for a new one.",
+        "UNRELATED_WALLETS": "These wallets have no common owner: choose a refund, wrong-account payment, account handover or legal order.",
+        "DESTINATION_NOT_VERIFIED": "The receiving organisation is not verified: only a refund can go to it.",
+        "INSUFFICIENT_WALLET_BALANCE": "The source wallet doesn't have enough in that balance.",
+        "SAME_WALLET": "Choose two different wallets.",
+        "TOO_MANY_PENDING": "This wallet already has too many transfers waiting.",
+        "OUT_OF_RANGE": "The amount is outside the allowed range.",
+        "ALREADY_REVERSED": "This transfer already has a reversal.",
+        "CANNOT_REVERSE_A_REVERSAL": "A reversal can't be reversed; request a new transfer instead.",
+        "NOT_APPROVED": "Only a posted transfer can be reversed.",
+        "OWNER_NOT_FOUND": "That wallet owner doesn't exist."
       }
     }
   },
