@@ -26,6 +26,8 @@ import { AutomaticTaskListener } from "./task/automatic-task.listener";
 import { AdminPartner360Service } from "./partners/admin-partner360.service";
 import { AdminPartner360Controller } from "./partners/admin-partner360.controller";
 import { AdminPartnerDirectoryController } from "./partners/admin-partner-directory.controller";
+import { AdminPartnerApprovalController } from "./partners/admin-partner-approval.controller";
+import { AdminPartnerApprovalService } from "./partners/admin-partner-approval.service";
 import { AdminPartnerDirectoryService } from "./partners/admin-partner-directory.service";
 import { AutomaticTaskService } from "./task/automatic-task.service";
 import { AdminPet360Service } from "./pets/admin-pet360.service";
@@ -197,6 +199,7 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminCardTransferDestinationController,
     AdminPartner360Controller,
     AdminPartnerDirectoryController,
+    AdminPartnerApprovalController,
     AdminPet360Controller,
     AdminAccessControlController,
     AdminCustomRolesController,
@@ -246,6 +249,7 @@ import { MemoriesModule } from "../memories/memories.module";
     AutomaticTaskListener,
     AdminPartner360Service,
     AdminPartnerDirectoryService,
+    AdminPartnerApprovalService,
     AutomaticTaskService,
     AdminPet360Service,
     AdminCustomerOverviewService,

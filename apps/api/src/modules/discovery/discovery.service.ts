@@ -8,6 +8,8 @@ import { toProviderLocationDto, toProviderServiceDto } from "../providers/provid
 import { ProviderReviewsService, type ProviderRatingSummary } from "../booking/provider-reviews.service";
 import type { DiscoverProvidersDto, DiscoverySort } from "./discovery.dto";
 import { excludeDemoRecordsFromPublicReads } from "../../common/public-record-origin";
+import type { ProviderServiceDto } from "@petlife/types";
+import { ApprovalPolicyService } from "../approvals/approval-policy.service";
 
 const MAX_CANDIDATES = 60;
 const AVAILABILITY_HORIZON_DAYS = 7;
@@ -87,6 +89,7 @@ export class DiscoveryService {
     private readonly prisma: PrismaService,
     private readonly slots: SlotGeneratorService,
     private readonly reviews: ProviderReviewsService,
+    private readonly approvals: ApprovalPolicyService,
   ) {}
 
   async search(query: DiscoverProvidersDto): Promise<{ total: number; items: ProviderDiscoveryResultDto[] }> {
@@ -113,9 +116,11 @@ export class DiscoveryService {
       take: MAX_CANDIDATES,
     });
 
-    const [ratings, completed] = await Promise.all([
+    const [ratings, completed, modeOf] = await Promise.all([
       this.reviews.summaries(orgs.map((o) => o.id)),
       this.prisma.booking.groupBy({ by: ["providerOrganizationId"], where: { providerOrganizationId: { in: orgs.map((o) => o.id) }, bookingStatus: BookingStatus.COMPLETED }, _count: { _all: true } }),
+      // Approval modes: show the mode booking will actually use (admin vertical setting / per-partner override).
+      this.approvals.serviceModeResolver(orgs.map((o) => o.id)),
     ]);
 
     const now = new Date();
@@ -157,7 +162,7 @@ export class DiscoveryService {
         specialties: org.specialties,
         location: location ? { id: location.id, city: location.city, region: location.region, addressLine: location.addressLine } : null,
         distanceKm,
-        services: services.map((s) => ({ id: s.id, name: s.name, category: s.category, type: s.type, startingPrice: startingPrice(s), currency: s.currency, durationMinutes: s.durationMinutes, homeVisit: isHomeVisit(s), bookingMode: s.bookingMode })),
+        services: services.map((s) => ({ id: s.id, name: s.name, category: s.category, type: s.type, startingPrice: startingPrice(s), currency: s.currency, durationMinutes: s.durationMinutes, homeVisit: isHomeVisit(s), bookingMode: modeOf(s) })),
         startingPrice: minPrice,
         currency: services.find((s) => s.currency)?.currency ?? null,
         nextAvailableAt,
@@ -228,10 +233,11 @@ export class DiscoveryService {
       },
     });
     if (!org) throw new NotFoundApiException("Provider");
-    const [rating, reviews, completedBookings] = await Promise.all([
+    const [rating, reviews, completedBookings, modeOf] = await Promise.all([
       this.reviews.summary(org.id),
       this.reviews.listPublic(org.id, 10),
       this.prisma.booking.count({ where: { providerOrganizationId: org.id, bookingStatus: BookingStatus.COMPLETED } }),
+      this.approvals.serviceModeResolver([org.id]),
     ]);
     const faqs = Array.isArray(org.faqs) ? (org.faqs as { question?: unknown; answer?: unknown }[]).filter((f) => typeof f.question === "string" && typeof f.answer === "string") : [];
     return {
@@ -249,7 +255,8 @@ export class DiscoveryService {
       phone: org.phone,
       websiteUrl: org.websiteUrl,
       locations: org.locations.map(toProviderLocationDto),
-      services: org.services.map((s) => ({ ...toProviderServiceDto(s), startingPrice: startingPrice(s), homeVisit: isHomeVisit(s), staffIds: s.qualifiedStaff.map((q) => q.providerUserId) })),
+      // bookingMode = what booking will do (approval policy applied), so the flow's "instant / request" copy is right.
+      services: org.services.map((s) => ({ ...toProviderServiceDto(s), bookingMode: modeOf(s) as unknown as ProviderServiceDto["bookingMode"], startingPrice: startingPrice(s), homeVisit: isHomeVisit(s), staffIds: s.qualifiedStaff.map((q) => q.providerUserId) })),
       team: org.providerUsers.map((m) => ({ providerUserId: m.id, displayName: m.user.displayName, avatarUrl: m.user.avatarUrl, displayTitle: m.displayTitle, publicBio: m.publicBio, role: m.role === "VET" ? "VET" : "STAFF", serviceIds: m.qualifiedServices.map((q) => q.serviceId) })),
       rating,
       reviews,

@@ -46,6 +46,8 @@ import type { PayBookingDto } from "./dto/pay-booking.dto";
 import type { CreateBookingHoldDto } from "./dto/create-booking-hold.dto";
 import type { CreateBookingDto } from "./dto/create-booking.dto";
 import { TransportRouteService } from "./transport/transport-route.service";
+import { ApprovalPolicyService } from "../approvals/approval-policy.service";
+import { ApprovalTaskService } from "../approvals/approval-task.service";
 import type { CancelBookingDto } from "./dto/cancel-booking.dto";
 
 const CANCELLABLE_STATUSES: BookingStatus[] = [BookingStatus.HOLD, BookingStatus.PENDING_CONFIRMATION, BookingStatus.REQUESTED, BookingStatus.AWAITING_PAYMENT, BookingStatus.CONFIRMED];
@@ -134,6 +136,8 @@ export class BookingsService {
     private readonly payments: PaymentsService,
     private readonly ledger: LedgerService,
     private readonly transportRoutes: TransportRouteService,
+    private readonly approvals: ApprovalPolicyService,
+    private readonly approvalTasks: ApprovalTaskService,
   ) {}
 
   /**
@@ -338,8 +342,10 @@ export class BookingsService {
       throw new ServiceNotAvailableException({ serviceId: service.id, reason: "PAYMENT_POLICY_INCOMPLETE" });
     }
     const now = new Date();
+    // Approval modes: an admin override or vertical setting can turn this service's own choice into instant or request.
+    const bookingMode = await this.approvals.serviceBookingMode(service);
     const initialStatus =
-      service.bookingMode === BookingMode.REQUEST ? BookingStatus.REQUESTED : onlinePayment ? BookingStatus.AWAITING_PAYMENT : BookingStatus.CONFIRMED;
+      bookingMode === BookingMode.REQUEST ? BookingStatus.REQUESTED : onlinePayment ? BookingStatus.AWAITING_PAYMENT : BookingStatus.CONFIRMED;
     const requestExpiresAt =
       initialStatus === BookingStatus.REQUESTED
         ? new Date(Math.min(now.getTime() + service.requestTtlHours * 3600_000, new Date(hold.slotStart).getTime()))
@@ -374,7 +380,8 @@ export class BookingsService {
             bookingNumber: await this.lifecycle.nextBookingNumber(tx),
             variantId: variant?.id ?? null,
             resourceId: hold.resourceId ?? null,
-            bookingMode: service.bookingMode,
+            // The mode this booking actually ran under (after the approval policy), not the service's raw setting.
+            bookingMode,
             paymentMode: service.paymentMode,
             priceAmount,
             discountAmount: 0,
@@ -397,6 +404,7 @@ export class BookingsService {
           await tx.bookingTransportRoute.create({ data: { bookingId: created.id, ...transportRoute, requirements, pickupContactName: dto.pickupContact?.name.trim() ?? null, pickupContactPhone: dto.pickupContact?.phone.trim() ?? null } });
         }
         await this.lifecycle.recordCreated(tx, created, BookingActorType.USER, userId);
+        if (initialStatus === BookingStatus.REQUESTED) await this.approvalTasks.raiseForServiceBooking(created, tx);
 
         const eventType =
           initialStatus === BookingStatus.REQUESTED ? "ServiceBookingRequested" : initialStatus === BookingStatus.AWAITING_PAYMENT ? "ServiceBookingAwaitingPayment" : "ServiceBookingConfirmed";
@@ -746,9 +754,10 @@ export class BookingsService {
     if (origin.variantId && !(await this.prisma.providerServiceVariant.findFirst({ where: { id: origin.variantId, isActive: true } }))) {
       throw new ServiceNotAvailableException({ serviceId: originService.id, variantId: origin.variantId });
     }
-    // Each occurrence goes through the service's current booking mode: a REQUEST service needs the provider to
-    // accept every appointment, so occurrences start REQUESTED rather than silently CONFIRMED.
-    const occurrenceStatus = originService.bookingMode === BookingMode.REQUEST ? BookingStatus.REQUESTED : BookingStatus.CONFIRMED;
+    // Each occurrence goes through the service's current booking mode (after the approval policy): a request needs
+    // the provider to accept every appointment, so occurrences start REQUESTED rather than silently CONFIRMED.
+    const occurrenceMode = await this.approvals.serviceBookingMode(originService);
+    const occurrenceStatus = occurrenceMode === BookingMode.REQUEST ? BookingStatus.REQUESTED : BookingStatus.CONFIRMED;
     const isRehab = originService.type === "REHAB_SESSION";
     if (!RECURRING_CATEGORIES.includes(category) && !isRehab) {
       throw new ValidationApiException({ field: "category", reason: `Recurring bookings are only supported for ${RECURRING_CATEGORIES.join(", ")}` });
@@ -831,7 +840,7 @@ export class BookingsService {
               bookingNumber: await this.lifecycle.nextBookingNumber(tx),
               variantId: origin.variantId,
               resourceId: slot.resourceId ?? null,
-              bookingMode: originService.bookingMode,
+              bookingMode: occurrenceMode,
               bookingStatus: occurrenceStatus,
               // Same request window as a single REQUEST booking, so the expiry worker closes an unanswered one.
               requestExpiresAt: occurrenceStatus === BookingStatus.REQUESTED ? new Date(Math.min(Date.now() + originService.requestTtlHours * 3600_000, startAt.getTime())) : null,
@@ -851,6 +860,7 @@ export class BookingsService {
             },
           });
           await this.lifecycle.recordCreated(tx, created, BookingActorType.USER, userId);
+          if (occurrenceStatus === BookingStatus.REQUESTED) await this.approvalTasks.raiseForServiceBooking(created, tx);
           await this.events.publish(
             occurrenceStatus === BookingStatus.REQUESTED ? "ServiceBookingRequested" : "ServiceBookingConfirmed",
             { ...bookingEventFields(created), bookingSeriesId: series.id },

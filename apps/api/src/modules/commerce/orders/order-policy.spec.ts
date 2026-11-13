@@ -76,4 +76,9 @@ describe("order policy — customer cancellation", () => {
     const cancelled = { ...order, cancelledAt: new Date() };
     expect(canCustomerCancel(cancelled, null)).toBe(false);
   });
+
+  it("allows cancelling a paid order still waiting for staff approval, but not a refunded one", () => {
+    expect(canCustomerCancel({ ...order, status: OrderStatus.PENDING }, null)).toBe(true);
+    expect(canCustomerCancel({ ...order, status: OrderStatus.REFUNDED }, null)).toBe(false);
+  });
 });

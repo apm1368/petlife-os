@@ -43,4 +43,25 @@ export class AutomaticTaskService {
       return { created: false };
     }
   }
+
+  /**
+   * Closes the rule-generated task for `dedupeKey` (DONE) once its subject resolved itself — a request was answered,
+   * expired or cancelled. A no-op when no such task exists or staff already closed it, so callers can fire it on
+   * every outcome. `note` (Persian, like the titles) is appended to the description so the queue shows why it closed.
+   */
+  async resolve(dedupeKey: string, note?: string, tx?: Prisma.TransactionClient): Promise<{ closed: boolean }> {
+    const client = tx ?? this.prisma;
+    try {
+      const task = await client.adminTask.findUnique({ where: { dedupeKey }, select: { id: true, status: true, description: true, completedAt: true } });
+      if (!task || task.status === AdminTaskStatus.DONE || task.status === AdminTaskStatus.CANCELLED) return { closed: false };
+      const description = note ? [task.description, note].filter(Boolean).join("\n") : task.description;
+      const { count } = await client.adminTask.updateMany({ where: { id: task.id, status: task.status }, data: { status: AdminTaskStatus.DONE, completedAt: task.completedAt ?? new Date(), description } });
+      if (count === 1) await this.events.publish("AdminTaskCompleted", { taskId: task.id, dedupeKey, automatic: true }, { tx, aggregateType: "AdminTask", aggregateId: task.id });
+      return { closed: count === 1 };
+    } catch (error) {
+      if (tx) throw error;
+      this.logger.error(`Closing automatic task ${dedupeKey} failed`, error instanceof Error ? error.stack : undefined);
+      return { closed: false };
+    }
+  }
 }

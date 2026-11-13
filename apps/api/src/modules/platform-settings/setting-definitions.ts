@@ -1,6 +1,6 @@
 import type { AppEnv } from "../../config/env";
 
-export type SettingCategory = "platform" | "booking" | "commerce" | "support" | "content" | "notifications" | "privacy" | "country" | "auth" | "site" | "social" | "features" | "maintenance";
+export type SettingCategory = "platform" | "booking" | "commerce" | "approvals" | "support" | "content" | "notifications" | "privacy" | "country" | "auth" | "site" | "social" | "features" | "maintenance";
 export type SettingType = "integer" | "boolean" | "localizedText" | "text" | "url" | "email" | "enum";
 /** Locales a localizedText value may carry. Older values hold fa/en only and stay valid. */
 export const SETTING_LOCALES = ["fa", "en", "de", "es", "ar", "nl"] as const;
@@ -167,6 +167,38 @@ export const SETTING_DEFINITIONS: SettingDefinition[] = [
     max: 2_000_000_000,
     fallback: (env) => env("SETTLEMENT_APPROVAL_THRESHOLD_IRR"),
     description: "Seller settlements at or above this net amount need approval before payout.",
+  },
+  // Approval modes (owner request 2026-11-13). Read by ApprovalPolicyService; a per-partner override
+  // (PartnerApprovalOverride, admin partner profile) wins over these. The defaults are today's behaviour.
+  {
+    key: "approvals.mode.serviceBookings",
+    category: "approvals",
+    type: "enum",
+    scope: "INTERNAL",
+    highImpact: false,
+    options: ["PARTNER_CHOICE", "INSTANT", "NEEDS_APPROVAL"],
+    fallback: () => "PARTNER_CHOICE",
+    description: "Care-service bookings: each provider's own per-service choice, always instant, or always a request the provider must accept (with a follow-up task for staff). Pet-taxi dispatch is not affected.",
+  },
+  {
+    key: "approvals.mode.stayBookings",
+    category: "approvals",
+    type: "enum",
+    scope: "INTERNAL",
+    highImpact: false,
+    options: ["PARTNER_CHOICE", "INSTANT", "NEEDS_APPROVAL"],
+    fallback: () => "PARTNER_CHOICE",
+    description: "Stay bookings: each listing's own choice, always instant, or always a request the host must accept (with a follow-up task for staff).",
+  },
+  {
+    key: "approvals.mode.shopOrders",
+    category: "approvals",
+    type: "enum",
+    scope: "INTERNAL",
+    highImpact: false,
+    options: ["INSTANT", "NEEDS_APPROVAL"],
+    fallback: () => "INSTANT",
+    description: "Shop orders: go to the seller as soon as they are paid, or wait for staff approval first (approve sends them to the seller; reject refunds in full).",
   },
   {
     key: "support.firstResponseSlaHours",

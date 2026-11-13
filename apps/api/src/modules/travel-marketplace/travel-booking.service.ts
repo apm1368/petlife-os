@@ -38,6 +38,8 @@ import { resolveStayRange, toDateKey, toUtcMidnight } from "./travel-date.util";
 import { decideTravelRefund, toKg, type PetFacts, type RatePlanTerms } from "./travel-pricing.util";
 import { PetAccessService } from "../pet-access/pet-access.service";
 import { publicProviderWhere } from "../../common/public-partner";
+import { ApprovalPolicyService } from "../approvals/approval-policy.service";
+import { ApprovalTaskService } from "../approvals/approval-task.service";
 
 export class TravelActionNotAllowedException extends ApiException {
   constructor(code: string, message: string, details?: Record<string, unknown>) {
@@ -106,6 +108,8 @@ export class TravelBookingService {
     private readonly refunds: RefundsService,
     private readonly storage: StorageService,
     private readonly petAccess: PetAccessService,
+    private readonly approvals: ApprovalPolicyService,
+    private readonly approvalTasks: ApprovalTaskService,
   ) {}
 
   // --- Access -----------------------------------------------------------------
@@ -189,6 +193,8 @@ export class TravelBookingService {
 
     const perTrip = listing.pricingMode === "PER_TRIP";
     const { checkIn, checkOut, nights } = resolveStayRange(input.checkIn, input.checkOut, perTrip);
+    // Approval modes: the mode shown while the traveller finishes the flow is the one submit applies.
+    const bookingMode = await this.approvals.stayBookingMode(listing.organizationId, listing.bookingMode);
 
     const created = await this.prisma.$transaction(async (tx) => {
       // Re-priced and re-validated inside the transaction that holds the nights.
@@ -222,6 +228,7 @@ export class TravelBookingService {
           priceBreakdownSnapshot: quote.breakdown as unknown as Prisma.InputJsonValue,
           holdExpiresAt: new Date(Date.now() + HOLD_MINUTES * 60_000),
           paymentStatus: "NOT_REQUIRED",
+          bookingMode,
           pets: { create: pets.map((p) => ({ petId: p.id })) },
           statusEvents: { create: { fromStatus: null, toStatus: TravelBookingStatus.HELD, actorType: "TRAVELER", actorId: userId, reason: quote.petPolicyMatch?.outcome ?? null } },
         },
@@ -269,12 +276,18 @@ export class TravelBookingService {
       if (!trip) throw new TripNotFoundException({ tripId: input.tripId });
     }
     const listing = await this.prisma.travelListing.findUniqueOrThrow({ where: { id: row.listingId }, select: { bookingMode: true, organizationId: true } });
+    // The mode snapshotted at hold (approval policy applied); holds from before approval modes resolve it now.
+    const bookingMode = row.bookingMode ?? (await this.approvals.stayBookingMode(listing.organizationId, listing.bookingMode));
     const now = new Date();
     let to: TravelBookingStatus;
-    const data: Prisma.TravelBookingUncheckedUpdateManyInput = { holdExpiresAt: null, travelerNote: input.travelerNote ?? null, ...(input.tripId ? { tripId: input.tripId } : {}) };
-    if (listing.bookingMode === TravelBookingMode.REQUEST_TO_BOOK) {
+    let afterMove: ((tx: Prisma.TransactionClient) => Promise<unknown>) | undefined;
+    const data: Prisma.TravelBookingUncheckedUpdateManyInput = { holdExpiresAt: null, travelerNote: input.travelerNote ?? null, bookingMode, ...(input.tripId ? { tripId: input.tripId } : {}) };
+    if (bookingMode === TravelBookingMode.REQUEST_TO_BOOK) {
       to = TravelBookingStatus.AWAITING_PROVIDER;
-      data.requestExpiresAt = new Date(Math.min(now.getTime() + REQUEST_TTL_HOURS * 3600_000, row.checkIn.getTime()));
+      const requestExpiresAt = new Date(Math.min(now.getTime() + REQUEST_TTL_HOURS * 3600_000, row.checkIn.getTime()));
+      data.requestExpiresAt = requestExpiresAt;
+      // Staff follow-up while the host decides; it closes itself on accept, reject, cancel or expiry.
+      afterMove = (tx) => this.approvalTasks.raiseForStay({ id: row.id, reference: row.reference, listingTitle: row.listing.title, requestExpiresAt, checkIn: row.checkIn }, tx);
     } else if (row.payNowAmountIrr > 0) {
       to = TravelBookingStatus.AWAITING_PAYMENT;
       data.paymentStatus = "AWAITING";
@@ -284,7 +297,7 @@ export class TravelBookingService {
       data.confirmedAt = now;
       data.paymentStatus = row.totalAmountIrr > 0 ? "PAY_AT_PROPERTY" : "NOT_REQUIRED";
     }
-    await this.move(row, to, { type: "TRAVELER", id: userId }, null, data);
+    await this.move(row, to, { type: "TRAVELER", id: userId }, null, data, afterMove);
     return this.toDto(await this.loadForTraveler(userId, bookingId));
   }
 
@@ -480,6 +493,7 @@ export class TravelBookingService {
           paymentIntentId: row.paymentIntentId,
           paymentStatus: row.paymentStatus,
           travelerNote: row.travelerNote,
+          bookingMode: row.bookingMode,
           confirmedAt: new Date(),
           modifiedFromBookingId: bookingId,
           pets: { create: petIds.map((petId) => ({ petId })) },
@@ -555,11 +569,12 @@ export class TravelBookingService {
   // --- Shared transition ----------------------------------------------------------
 
   /** Optimistic status move + timeline row + inventory release + domain event, all in one transaction. */
-  private async move(row: BookingWithRelations, to: TravelBookingStatus, actor: TravelActor, reason: string | null, data: Prisma.TravelBookingUncheckedUpdateManyInput): Promise<void> {
+  private async move(row: BookingWithRelations, to: TravelBookingStatus, actor: TravelActor, reason: string | null, data: Prisma.TravelBookingUncheckedUpdateManyInput, afterMove?: (tx: Prisma.TransactionClient) => Promise<unknown>): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
       const res = await tx.travelBooking.updateMany({ where: { id: row.id, status: row.status }, data: { ...data, status: to } });
       if (res.count === 0) throw new InvalidTravelBookingTransitionException({ bookingId: row.id, reason: "CHANGED_CONCURRENTLY" });
       await tx.travelBookingEvent.create({ data: { bookingId: row.id, fromStatus: row.status, toStatus: to, actorType: actor.type, actorId: actor.id, reason } });
+      if (afterMove) await afterMove(tx);
       if (RELEASING_STATUSES.includes(to)) await tx.travelBookedNight.deleteMany({ where: { bookingId: row.id } });
       const eventName: Record<string, string> = {
         [TravelBookingStatus.AWAITING_PROVIDER]: "TravelBookingRequested",
