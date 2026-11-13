@@ -16,7 +16,7 @@ export function GlassMemberHome({ locale, userName, pet, overview, pets, activeP
 }) {
   const c = glassHomeCopy[locale];
   const base = `/${locale}/pets/${pet.id}`;
-  const Forward = locale === "fa" ? ChevronLeft : ChevronRight;
+  const Forward = (locale === "fa" || locale === "ar") ? ChevronLeft : ChevronRight;
   const count = (n: number) => new Intl.NumberFormat(locale).format(n);
   const sections = [
     { href: `${base}/health`, label: c.health, Icon: HeartPulse },

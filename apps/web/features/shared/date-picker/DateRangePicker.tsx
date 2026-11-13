@@ -53,7 +53,7 @@ export interface DateRangePickerProps {
 
 type Lang = RouteLocale;
 
-const DATE_LOCALES: Record<Lang, string> = { fa: "fa-IR-u-ca-persian", en: "en-GB", de: "de-DE", es: "es-ES" };
+const DATE_LOCALES: Record<Lang, string> = { fa: "fa-IR-u-ca-persian", en: "en-GB", de: "de-DE", es: "es-ES", ar: "ar", nl: "nl-NL" };
 function localizedDate(iso: string, locale: Lang, options: { system?: CalendarSystem; weekday?: boolean; year?: boolean } = {}): string {
   if (locale === "fa") return formatDay(iso, "fa", options);
   const g = calendarFromIso(options.system ?? "gregorian", iso);

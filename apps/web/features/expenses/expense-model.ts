@@ -31,7 +31,7 @@ export function monthlyTotals(entries: PetExpenseEntryDto[], system: CalendarSys
  */
 export function parseTomanToIrr(input: string): number | null {
   const normalized = input
-    .replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)))
+    .replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))
     .replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))
     .replace(/[,،٬\s]/g, "");
   if (!/^\d+$/.test(normalized)) return null;
@@ -42,20 +42,20 @@ export function parseTomanToIrr(input: string): number | null {
 }
 
 export const CATEGORY_LABELS: Record<PetExpenseCategory, Record<Locale, string>> = {
-  FOOD: { fa: "غذا", en: "Food", de: "Futter", es: "Alimentación" },
-  VET: { fa: "دامپزشکی", en: "Vet", de: "Tierarzt", es: "Veterinario" },
-  MEDICATION: { fa: "دارو", en: "Medication", de: "Medikamente", es: "Medicamentos" },
-  GROOMING: { fa: "آرایش و نظافت", en: "Grooming", de: "Pflege", es: "Peluquería y aseo" },
-  TRAINING: { fa: "آموزش", en: "Training", de: "Training", es: "Adiestramiento" },
-  BOARDING: { fa: "نگهداری و پانسیون", en: "Sitting & boarding", de: "Betreuung und Pension", es: "Cuidado y residencia" },
-  SUPPLIES: { fa: "لوازم و خرید", en: "Supplies", de: "Zubehör", es: "Suministros" },
-  INSURANCE: { fa: "بیمه", en: "Insurance", de: "Versicherung", es: "Seguro" },
-  TRANSPORT: { fa: "حمل‌ونقل", en: "Transport", de: "Transport", es: "Transporte" },
-  OTHER: { fa: "سایر", en: "Other", de: "Sonstiges", es: "Otros" },
+  FOOD: { fa: "غذا", en: "Food", de: "Futter", es: "Alimentación", ar: "الطعام", nl: "Voeding" },
+  VET: { fa: "دامپزشکی", en: "Vet", de: "Tierarzt", es: "Veterinario", ar: "الطبيب البيطري", nl: "Dierenarts" },
+  MEDICATION: { fa: "دارو", en: "Medication", de: "Medikamente", es: "Medicamentos", ar: "الأدوية", nl: "Medicatie" },
+  GROOMING: { fa: "آرایش و نظافت", en: "Grooming", de: "Pflege", es: "Peluquería y aseo", ar: "التجميل", nl: "Vachtverzorging" },
+  TRAINING: { fa: "آموزش", en: "Training", de: "Training", es: "Adiestramiento", ar: "التدريب", nl: "Training" },
+  BOARDING: { fa: "نگهداری و پانسیون", en: "Sitting & boarding", de: "Betreuung und Pension", es: "Cuidado y residencia", ar: "المجالسة والإيواء", nl: "Oppas en pension" },
+  SUPPLIES: { fa: "لوازم و خرید", en: "Supplies", de: "Zubehör", es: "Suministros", ar: "المستلزمات", nl: "Benodigdheden" },
+  INSURANCE: { fa: "بیمه", en: "Insurance", de: "Versicherung", es: "Seguro", ar: "التأمين", nl: "Verzekering" },
+  TRANSPORT: { fa: "حمل‌ونقل", en: "Transport", de: "Transport", es: "Transporte", ar: "النقل", nl: "Vervoer" },
+  OTHER: { fa: "سایر", en: "Other", de: "Sonstiges", es: "Otros", ar: "أخرى", nl: "Overig" },
 };
 
 export const SOURCE_LABELS: Record<PetExpenseSource, Record<Locale, string>> = {
-  MANUAL: { fa: "ثبت دستی", en: "Added by you", de: "Von Ihnen hinzugefügt", es: "Añadido por ti" },
-  BOOKING: { fa: "رزرو در پت‌لایف", en: "PET LIFE booking", de: "PET-LIFE-Buchung", es: "Reserva de PET LIFE" },
-  SHOP: { fa: "خرید از فروشگاه", en: "PET LIFE shop", de: "PET-LIFE-Shop", es: "Tienda de PET LIFE" },
+  MANUAL: { fa: "ثبت دستی", en: "Added by you", de: "Von Ihnen hinzugefügt", es: "Añadido por ti", ar: "أضفته أنت", nl: "Door jou toegevoegd" },
+  BOOKING: { fa: "رزرو در پت‌لایف", en: "PET LIFE booking", de: "PET-LIFE-Buchung", es: "Reserva de PET LIFE", ar: "حجز PET LIFE", nl: "PET LIFE-boeking" },
+  SHOP: { fa: "خرید از فروشگاه", en: "PET LIFE shop", de: "PET-LIFE-Shop", es: "Tienda de PET LIFE", ar: "متجر PET LIFE", nl: "PET LIFE-winkel" },
 };

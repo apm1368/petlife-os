@@ -34,7 +34,8 @@ describe("public sitemap", () => {
   it("does not expose authenticated, tokenized, or empty/unpublished page families", async () => {
     const urls = (await sitemap()).map(({ url }) => url);
     expect(urls.some((url) => /\/(admin|profile|pets|provider|seller|checkout|orders|health-share|pet-card)(\/|$)/.test(url))).toBe(false);
-    expect(urls.some((url) => /\/(shop|help|legal|insurance)(\/|$)/.test(url))).toBe(false);
+    // Only the built-in Terms, Privacy and FAQ (always published) are listed from the help and legal families.
+    expect(urls.filter((url) => /\/(shop|help|legal|insurance)(\/|$)/.test(url)).every((url) => /\/(legal\/terms|legal\/privacy|help\/faq)$/.test(url))).toBe(true);
   });
 
   it("lists the blog index once it has articles, and guides only when guides exist", async () => {

@@ -56,7 +56,7 @@ export function ReadyStep({ returnTo }: { returnTo?: string | null }) {
           }}
           isActive
           size="lg"
-          labels={petIdentityLabels({ species: draft.species, lifecycleStatus: PetLifecycleStatus.ACTIVE }, locale as "fa" | "en" | "de" | "es")}
+          labels={petIdentityLabels({ species: draft.species, lifecycleStatus: PetLifecycleStatus.ACTIVE }, locale as "fa" | "en" | "de" | "es" | "ar" | "nl")}
         />
       ) : null}
       <Button variant="primary" isLoading={isCompleting || isLeaving} onClick={() => void goToHome()}>

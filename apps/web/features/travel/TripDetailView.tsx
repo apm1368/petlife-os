@@ -52,7 +52,7 @@ const REQUIREMENT_STATUSES: TravelRequirementStatus[] = [
 export function TripDetailView({ petId, tripId }: { petId: string; tripId: string }) {
   const t = useTranslations("travel");
   const externalT = useTranslations("externalTravel");
-  const locale = useLocale() as "fa" | "en" | "de" | "es";
+  const locale = useLocale() as "fa" | "en" | "de" | "es" | "ar" | "nl";
   const fmt = useInstantFormat();
   const tCommon = useTranslations("common");
 
@@ -135,7 +135,7 @@ export function TripDetailView({ petId, tripId }: { petId: string; tripId: strin
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-page-title text-text-primary">
-          {trip.originCity || countryName(trip.originCountry, locale)} {locale === "fa" ? "←" : "→"} {trip.destinationCity || countryName(trip.destinationCountry, locale)}
+          {trip.originCity || countryName(trip.originCountry, locale)} {(locale === "fa" || locale === "ar") ? "←" : "→"} {trip.destinationCity || countryName(trip.destinationCountry, locale)}
         </h1>
         <StatusLabel tone={tripStatusTone(trip.status)}>{t(`status.${trip.status}`)}</StatusLabel>
       </div>
@@ -246,7 +246,7 @@ function RequirementCard({
   const fmt = useInstantFormat();
   const t = useTranslations("travel");
   const tCommon = useTranslations("common");
-  const locale = useLocale() as "fa" | "en" | "de" | "es";
+  const locale = useLocale() as "fa" | "en" | "de" | "es" | "ar" | "nl";
 
   return (
     <article className="req-row flex flex-col gap-2">

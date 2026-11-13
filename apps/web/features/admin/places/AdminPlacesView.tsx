@@ -16,7 +16,7 @@ const REASON: Record<string, [string, string]> = { CLOSED_PERMANENTLY: ["بست�
 
 /** MAP/PLACES admin: user reports queue first, then the directory with verification and listing toggles (both audited). */
 export function AdminPlacesView() {
-  const lang = useLocale() as "fa" | "en" | "de" | "es";
+  const lang = useLocale() as "fa" | "en" | "de" | "es" | "ar" | "nl";
   const { tr } = copyFor(lang);
   const context = useAdminStore((state) => state.context);
   const adminStatus = useAdminStore((state) => state.status);

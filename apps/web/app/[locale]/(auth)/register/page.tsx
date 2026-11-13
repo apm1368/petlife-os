@@ -22,7 +22,21 @@ function RegisterFlow() {
     en: { intro: "Start with your mobile number, then create your account details. The number is not SMS-verified at this stage.", phone: "Mobile number", firstName: "First name", lastName: "Last name", invalidPhone: "Enter a valid mobile number." },
     de: { intro: "Geben Sie zuerst Ihre Mobilnummer ein und erstellen Sie dann Ihre Kontodaten. Die Nummer wird in dieser Phase nicht per SMS bestätigt.", phone: "Mobilnummer", firstName: "Vorname", lastName: "Nachname", invalidPhone: "Geben Sie eine gültige Mobilnummer ein." },
     es: { intro: "Primero introduce tu número de móvil y luego crea los datos de tu cuenta. En esta fase el número no se verifica por SMS.", phone: "Número de móvil", firstName: "Nombre", lastName: "Apellidos", invalidPhone: "Introduce un número de móvil válido." },
-  } as const)[locale as "fa" | "en" | "de" | "es"];
+    ar: {
+      intro: "ابدأ برقم هاتفك المحمول، ثم أنشئ بيانات حسابك. لا يتم التحقق من الرقم عبر SMS في هذه المرحلة.",
+      phone: "رقم الهاتف المحمول",
+      firstName: "الاسم الأول",
+      lastName: "اسم العائلة",
+      invalidPhone: "أدخل رقم هاتف محمول صالحًا."
+    },
+    nl: {
+      intro: "Begin met je mobiele nummer en maak daarna je accountgegevens aan. Het nummer wordt in deze stap niet via SMS geverifieerd.",
+      phone: "Mobiel nummer",
+      firstName: "Voornaam",
+      lastName: "Achternaam",
+      invalidPhone: "Voer een geldig mobiel nummer in."
+    },
+  } as const)[locale as "fa" | "en" | "de" | "es" | "ar" | "nl"];
   const returnTo = searchParams.get("returnTo"); const setUser = useSessionStore((s) => s.setUser);
   const [phone, setPhone] = useState(""); const [firstName, setFirstName] = useState(""); const [lastName, setLastName] = useState("");
   const [username, setUsername] = useState(""); const [password, setPassword] = useState(""); const [passwordConfirm, setPasswordConfirm] = useState(""); const [accepted, setAccepted] = useState(false);
@@ -55,7 +69,7 @@ function RegisterFlow() {
     <PasswordInput label={t("register.passwordLabel")} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />
     <PasswordInput label={t("register.confirmPassword")} autoComplete="new-password" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} errorMessage={passwordConfirm && passwordConfirm !== password ? t("register.passwordMismatch") : undefined} />
     {error ? <p role="alert" className="text-metadata text-state-urgent">{error}</p> : null}
-    <label className="flex items-start gap-2 text-metadata text-text-secondary"><input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} /><span>{t("register.terms")}</span></label>
+    <label className="flex items-start gap-2 text-metadata text-text-secondary"><input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} /><span>{t.rich("register.terms", { terms: (c) => <Link href={`/${locale}/legal/terms`} target="_blank" rel="noopener" className="underline">{c}</Link>, privacy: (c) => <Link href={`/${locale}/legal/privacy`} target="_blank" rel="noopener" className="underline">{c}</Link> })}</span></label>
     <Button variant="primary" isLoading={isSubmitting} disabled={!normalizeIranPhone(phone) || !firstName.trim() || !lastName.trim() || username.trim().length < 3 || password.length < 8 || password !== passwordConfirm || !accepted} onClick={submit}>{t("register.submit")}</Button>
     <Link href={loginUrl} className="text-center text-metadata text-text-secondary underline">{t("register.haveAccount")}</Link>
   </div>;

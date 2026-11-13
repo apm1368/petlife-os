@@ -179,7 +179,7 @@ function emptyTitle(filter: string, t: CareCenterTranslator): string {
   return t(`empty.${key}.title`);
 }
 function stateLabel(state: string, t: CareCenterTranslator): string { return stateKeys.includes(state as typeof stateKeys[number]) ? t(`states.${state as typeof stateKeys[number]}`) : t("unknownState"); }
-function kindLabel(type: string, locale: RouteLocale, t: CareCenterTranslator): string { return kinds[type]?.[({ fa:0, en:1, de:2, es:3 } as const)[locale]] ?? t("unknownType"); }
+function kindLabel(type: string, locale: RouteLocale, t: CareCenterTranslator): string { return kinds[type]?.[({ fa: 0, en: 1, de: 2, es: 3, ar: 4, nl: 5 } as const)[locale]] ?? t("unknownType"); }
 function recurrenceLabel(recurrence: string, t: CareCenterTranslator): string {
   const known = ["ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY", "CUSTOM"] as const;
   return known.includes(recurrence as typeof known[number]) ? t(`recurrenceOptions.${recurrence as typeof known[number]}`) : t("unknownRecurrence");

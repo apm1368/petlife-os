@@ -10,7 +10,7 @@ import { useAdminStore } from "@/stores/admin-store";
 import { adminCalendarService, type CalendarDayDto, type CalendarYearDto } from "@/services/admin-calendar.service";
 import { holidayNameKeys } from "./holiday-names";
 
-const DATE_LOCALE: Record<RouteLocale, string> = { fa: "fa-IR-u-ca-persian-nu-arabext", en: "en-GB", de: "de-DE", es: "es-ES" };
+const DATE_LOCALE: Record<RouteLocale, string> = { fa: "fa-IR-u-ca-persian-nu-arabext", en: "en-GB", de: "de-DE", es: "es-ES", ar: "ar", nl: "nl-NL" };
 
 function currentPersianYear(): number {
   const part = new Intl.DateTimeFormat("en-u-ca-persian-nu-latn", { year: "numeric", timeZone: "Asia/Tehran" }).formatToParts(new Date()).find((p) => p.type === "year");

@@ -9,7 +9,7 @@ const icons = { shop: ShoppingBag, vet: Stethoscope, grooming: Scissors, boardin
 
 export function ParkHero({ locale }: { locale: RouteLocale }) {
   const c = useParkCopy(locale);
-  const Arrow = locale === "fa" ? ArrowLeft : ArrowRight;
+  const Arrow = (locale === "fa" || locale === "ar") ? ArrowLeft : ArrowRight;
   return <>
     <section className="park-hero" aria-labelledby="park-title">
       <div className="park-scene">

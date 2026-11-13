@@ -50,7 +50,7 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
   const t = useTranslations("vetPanel.record");
   const tCommon = useTranslations("common");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en" | "de" | "es";
+  const locale = useLocale() as "fa" | "en" | "de" | "es" | "ar" | "nl";
   const tVaccination = useTranslations("health.vaccinationStatus");
   const [downloadError, setDownloadError] = useState<string | null>(null);
 

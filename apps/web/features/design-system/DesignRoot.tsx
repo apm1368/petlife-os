@@ -3,10 +3,11 @@
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import "./approved-patterns.css";
+import { LOCALE_PREFIX } from "@/lib/i18n/config";
 
 /** Shared visual rules reach every existing route without changing its role guards or API. */
 export function routePattern(pathname: string) {
-  const path = pathname.replace(/^\/(fa|en|de|es)(?=\/|$)/, "") || "/";
+  const path = pathname.replace(LOCALE_PREFIX, "") || "/";
   if (path === "/") return "landing";
   if (/^\/admin\/(crm|customer-affairs)(\/|$)/.test(path)) return "protected";
   if (/^\/admin(\/|$)/.test(path)) return "admin";

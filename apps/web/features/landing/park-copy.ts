@@ -19,6 +19,8 @@ export const parkImageSrc: Record<RouteLocale, string> = {
   en: "/images/landing/tehran-park-en.webp",
   de: "/images/landing/tehran-park-en.webp",
   es: "/images/landing/tehran-park-en.webp",
+  ar: "/images/landing/tehran-park-en.webp",
+  nl: "/images/landing/tehran-park-en.webp",
 };
 
 /** Park and hero copy lives in messages/{fa,en,de,es}.json under `pattern2026.park`, read through next-intl. */

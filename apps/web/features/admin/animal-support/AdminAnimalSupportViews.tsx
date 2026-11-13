@@ -83,12 +83,12 @@ function StatusTag({ map, value }: { map: Record<string, [string, string, Tone]>
   return <Tag tone={entry?.[2] ?? "neutral"}>{entry ? (fa ? entry[0] : entry[1]) : value}</Tag>;
 }
 
-type FourLocaleCopy = (fa: string, en: string, de: string, es: string) => string;
-const localizedLostPetCopy = (locale: RouteLocale): FourLocaleCopy => (fa, en, de, es) => ({ fa, en, de, es })[locale];
+type FourLocaleCopy = (fa: string, en: string, de: string, es: string, ar: string, nl: string) => string;
+const localizedLostPetCopy = (locale: RouteLocale): FourLocaleCopy => (fa, en, de, es, ar, nl) => ({ fa, en, de, es, ar, nl })[locale];
 
 function AdminLostPetStatusTag({ value, locale }: { value: string; locale: RouteLocale }) {
   const entry = lostPetIncidentStatus[value];
-  return <Tag tone={entry?.[4] ?? "neutral"}>{entry ? entry[({ fa: 0, en: 1, de: 2, es: 3 })[locale]] : localizedLostPetCopy(locale)("وضعیت نامشخص", "Unknown status", "Unbekannter Status", "Estado desconocido")}</Tag>;
+  return <Tag tone={entry?.[4] ?? "neutral"}>{entry ? entry[({ fa: 0, en: 1, de: 2, es: 3, ar: 4, nl: 5 })[locale]] : localizedLostPetCopy(locale)("وضعیت نامشخص", "Unknown status", "Unbekannter Status", "Estado desconocido", "حالة غير معروفة", "Onbekende status")}</Tag>;
 }
 const lostPetIncidentStatus: Record<string, [string, string, string, string, Tone]> = {
   OPEN: ["باز", "Missing", "Vermisst", "Desaparecida", "urgent"],
@@ -100,22 +100,22 @@ const lostPetIncidentStatus: Record<string, [string, string, string, string, Ton
 };
 const lostPetIncidentStatusLabel = (value: string, locale: RouteLocale) => {
   const entry = lostPetIncidentStatus[value];
-  return entry ? entry[({ fa: 0, en: 1, de: 2, es: 3 })[locale]] ?? localizedLostPetCopy(locale)("وضعیت نامشخص", "Unknown status", "Unbekannter Status", "Estado desconocido") : localizedLostPetCopy(locale)("وضعیت نامشخص", "Unknown status", "Unbekannter Status", "Estado desconocido");
+  return entry ? entry[({ fa: 0, en: 1, de: 2, es: 3, ar: 4, nl: 5 })[locale]] ?? localizedLostPetCopy(locale)("وضعیت نامشخص", "Unknown status", "Unbekannter Status", "Estado desconocido", "حالة غير معروفة", "Onbekende status") : localizedLostPetCopy(locale)("وضعیت نامشخص", "Unknown status", "Unbekannter Status", "Estado desconocido", "حالة غير معروفة", "Onbekende status");
 };
 const lostPetContactPreference: Record<string, Record<RouteLocale, string>> = {
-  IN_APP_MESSAGE: { fa: "پیام درون‌برنامه‌ای", en: "In-app message", de: "Nachricht in der App", es: "Mensaje en la aplicación" },
-  MASKED_CONTACT: { fa: "راه تماس پوشیده", en: "Masked contact", de: "Verdeckte Kontaktdaten", es: "Contacto oculto" },
-  PUBLIC_CONTACT: { fa: "تماس عمومی", en: "Public contact", de: "Öffentliche Kontaktdaten", es: "Contacto público" },
+  IN_APP_MESSAGE: { fa: "پیام درون‌برنامه‌ای", en: "In-app message", de: "Nachricht in der App", es: "Mensaje en la aplicación", ar: "رسالة داخل التطبيق", nl: "Bericht in de app" },
+  MASKED_CONTACT: { fa: "راه تماس پوشیده", en: "Masked contact", de: "Verdeckte Kontaktdaten", es: "Contacto oculto", ar: "جهة اتصال مخفية", nl: "Afgeschermd contact" },
+  PUBLIC_CONTACT: { fa: "تماس عمومی", en: "Public contact", de: "Öffentliche Kontaktdaten", es: "Contacto público", ar: "جهة اتصال عامة", nl: "Openbaar contact" },
 };
 
 function lostPetActionError(error: unknown, locale: RouteLocale) {
   const code = error instanceof ApiError ? error.status : 0;
   const copy = code === 403
-    ? ["این کار با نقش شما مجاز نیست.", "Your role is not allowed to do this.", "Deine Rolle erlaubt diese Aktion nicht.", "Tu rol no permite esta acción."]
+    ? ["این کار با نقش شما مجاز نیست.", "Your role is not allowed to do this.", "Deine Rolle erlaubt diese Aktion nicht.", "Tu rol no permite esta acción.", "لا يُسمح لدورك بفعل هذا.", "Je rol mag dit niet doen."]
     : code === 409
-      ? ["این تغییر از وضعیت فعلی مجاز نیست.", "This change is not allowed in the current state.", "Diese Änderung ist im aktuellen Status nicht möglich.", "Este cambio no está permitido en el estado actual."]
-      : ["انجام نشد؛ دوباره تلاش کنید.", "The action could not be completed. Try again.", "Die Aktion konnte nicht abgeschlossen werden. Bitte versuche es erneut.", "No se pudo completar la acción. Inténtalo de nuevo."];
-  return copy[({ fa: 0, en: 1, de: 2, es: 3 })[locale]] ?? copy[1]!;
+      ? ["این تغییر از وضعیت فعلی مجاز نیست.", "This change is not allowed in the current state.", "Diese Änderung ist im aktuellen Status nicht möglich.", "Este cambio no está permitido en el estado actual.", "هذا التغيير غير مسموح به في الحالة الحالية.", "Deze wijziging is in de huidige status niet toegestaan."]
+      : ["انجام نشد؛ دوباره تلاش کنید.", "The action could not be completed. Try again.", "Die Aktion konnte nicht abgeschlossen werden. Bitte versuche es erneut.", "No se pudo completar la acción. Inténtalo de nuevo.", "تعذّر إكمال الإجراء. حاول مرة أخرى.", "De actie kon niet worden voltooid. Probeer het opnieuw."];
+  return copy[({ fa: 0, en: 1, de: 2, es: 3, ar: 4, nl: 5 })[locale]] ?? copy[1]!;
 }
 
 function reportTarget(report: CommunityReportDto): { label: [string, string]; href?: string } {
@@ -133,9 +133,9 @@ function reportTarget(report: CommunityReportDto): { label: [string, string]; hr
 function LoadState({ error, perm, onRetry, locale }: { error: LoadError; perm: string; onRetry: () => void; locale?: RouteLocale }) {
   const { t: legacyT } = useLang();
   const t: FourLocaleCopy = locale ? localizedLostPetCopy(locale) : (fa, en) => legacyT(fa, en);
-  if (error === "forbidden") return <EmptyState title={t(`دسترسی «${perm}» لازم است`, `The “${perm}” permission is required`, `Die Berechtigung „${perm}“ ist erforderlich`, `Se requiere el permiso “${perm}”`)} />;
-  if (error === "notFound") return <EmptyState title={t("پیدا نشد", "Not found", "Nicht gefunden", "No encontrado")} />;
-  return <ErrorRecovery title={t("بارگذاری نشد", "Didn't load", "Laden fehlgeschlagen", "No se pudo cargar")} message="" retryLabel={t("تلاش دوباره", "Retry", "Erneut versuchen", "Reintentar")} onRetry={onRetry} />;
+  if (error === "forbidden") return <EmptyState title={t(`دسترسی «${perm}» لازم است`, `The “${perm}” permission is required`, `Die Berechtigung „${perm}“ ist erforderlich`, `Se requiere el permiso “${perm}”`, `يلزم إذن «${perm}»`, `De machtiging “${perm}” is vereist`)} />;
+  if (error === "notFound") return <EmptyState title={t("پیدا نشد", "Not found", "Nicht gefunden", "No encontrado", "غير موجود", "Niet gevonden")} />;
+  return <ErrorRecovery title={t("بارگذاری نشد", "Didn't load", "Laden fehlgeschlagen", "No se pudo cargar", "لم يتم التحميل", "Niet geladen")} message="" retryLabel={t("تلاش دوباره", "Retry", "Erneut versuchen", "Reintentar", "إعادة المحاولة", "Opnieuw proberen")} onRetry={onRetry} />;
 }
 
 /** An action that needs an audited reason (min 5 characters) before it can run. */
@@ -149,10 +149,10 @@ function ReasonAction({ label, confirmLabel, onRun, danger = false, minLength = 
   if (!open) return <Button size="sm" variant={danger ? "danger" : "secondary"} onClick={() => setOpen(true)}>{label}</Button>;
   return (
     <div className="flex w-full flex-col gap-2 rounded-md border border-border-subtle p-3">
-      <Input label={t("دلیل (در گزارش ممیزی ثبت می‌شود)", "Reason (recorded in the audit log)", "Begründung (wird im Prüfprotokoll erfasst)", "Motivo (se registra en el registro de auditoría)")} hint={hint} value={reason} onChange={(e) => setReason(e.target.value)} />
+      <Input label={t("دلیل (در گزارش ممیزی ثبت می‌شود)", "Reason (recorded in the audit log)", "Begründung (wird im Prüfprotokoll erfasst)", "Motivo (se registra en el registro de auditoría)", "السبب (يُسجَّل في سجل التدقيق)", "Reden (wordt vastgelegd in het auditlog)")} hint={hint} value={reason} onChange={(e) => setReason(e.target.value)} />
       {error ? <p role="alert" className="text-metadata text-state-urgent">{error}</p> : null}
       <div className="flex flex-wrap gap-2">
-        <Button size="sm" variant="ghost" disabled={busy} onClick={() => { setOpen(false); setReason(""); setError(null); }}>{t("انصراف", "Cancel", "Abbrechen", "Cancelar")}</Button>
+        <Button size="sm" variant="ghost" disabled={busy} onClick={() => { setOpen(false); setReason(""); setError(null); }}>{t("انصراف", "Cancel", "Abbrechen", "Cancelar", "إلغاء", "Annuleren")}</Button>
         <Button
           size="sm"
           variant={danger ? "danger" : "primary"}
@@ -184,15 +184,15 @@ function Pager({ page, total, pageSize, onPage, locale }: { page: number; total:
   const pages = Math.max(1, Math.ceil(total / pageSize));
   const displayNumber = (value: number) => locale ? formatLocaleNumber(value, locale) : n(value, lang);
   const pageLabel = locale
-    ? localizedLostPetCopy(locale)(`صفحهٔ ${displayNumber(page)} از ${displayNumber(pages)}`, `Page ${displayNumber(page)} of ${displayNumber(pages)}`, `Seite ${displayNumber(page)} von ${displayNumber(pages)}`, `Página ${displayNumber(page)} de ${displayNumber(pages)}`)
+    ? localizedLostPetCopy(locale)(`صفحهٔ ${displayNumber(page)} از ${displayNumber(pages)}`, `Page ${displayNumber(page)} of ${displayNumber(pages)}`, `Seite ${displayNumber(page)} von ${displayNumber(pages)}`, `Página ${displayNumber(page)} de ${displayNumber(pages)}`, `الصفحة ${displayNumber(page)} من ${displayNumber(pages)}`, `Pagina ${displayNumber(page)} van ${displayNumber(pages)}`)
     : t(`صفحهٔ ${displayNumber(page)} از ${displayNumber(pages)}`, `Page ${displayNumber(page)} of ${displayNumber(pages)}`);
   if (pages <= 1) return null;
   return (
     <div className="mt-3 flex items-center justify-between gap-2 text-metadata text-text-secondary">
       <span>{pageLabel}</span>
       <div className="flex gap-2">
-        <Button size="sm" variant="secondary" disabled={page <= 1} onClick={() => onPage(page - 1)}>{locale ? localizedLostPetCopy(locale)("قبلی", "Previous", "Zurück", "Anterior") : t("قبلی", "Previous")}</Button>
-        <Button size="sm" variant="secondary" disabled={page >= pages} onClick={() => onPage(page + 1)}>{locale ? localizedLostPetCopy(locale)("بعدی", "Next", "Weiter", "Siguiente") : t("بعدی", "Next")}</Button>
+        <Button size="sm" variant="secondary" disabled={page <= 1} onClick={() => onPage(page - 1)}>{locale ? localizedLostPetCopy(locale)("قبلی", "Previous", "Zurück", "Anterior", "السابق", "Vorige") : t("قبلی", "Previous")}</Button>
+        <Button size="sm" variant="secondary" disabled={page >= pages} onClick={() => onPage(page + 1)}>{locale ? localizedLostPetCopy(locale)("بعدی", "Next", "Weiter", "Siguiente", "التالي", "Volgende") : t("بعدی", "Next")}</Button>
       </div>
     </div>
   );
@@ -612,20 +612,20 @@ export function AdminLostPetsView() {
   }, [load]);
   return (
     <div>
-      <h1 className="mb-2 text-page-title text-text-primary">{t("حیوانات گم‌شده", "Lost pets", "Vermisste Tiere", "Mascotas desaparecidas")}</h1>
-      <p className="mb-4 text-metadata text-text-secondary">{t("موقعیت دقیق پنهان است؛ نمایش آن نیاز به مجوز دادهٔ شخصی دارد و ثبت می‌شود.", "Exact locations are masked; revealing one needs the personal-data permission and is audited.", "Genaue Standorte sind verborgen. Ihre Anzeige erfordert die Berechtigung für personenbezogene Daten und wird protokolliert.", "Las ubicaciones exactas están ocultas. Mostrarlas requiere el permiso para datos personales y queda registrado.")}</p>
+      <h1 className="mb-2 text-page-title text-text-primary">{t("حیوانات گم‌شده", "Lost pets", "Vermisste Tiere", "Mascotas desaparecidas", "الحيوانات الأليفة المفقودة", "Vermiste huisdieren")}</h1>
+      <p className="mb-4 text-metadata text-text-secondary">{t("موقعیت دقیق پنهان است؛ نمایش آن نیاز به مجوز دادهٔ شخصی دارد و ثبت می‌شود.", "Exact locations are masked; revealing one needs the personal-data permission and is audited.", "Genaue Standorte sind verborgen. Ihre Anzeige erfordert die Berechtigung für personenbezogene Daten und wird protokolliert.", "Las ubicaciones exactas están ocultas. Mostrarlas requiere el permiso para datos personales y queda registrado.", "المواقع الدقيقة مخفية؛ يتطلب كشف أي منها إذن البيانات الشخصية ويخضع للتدقيق.", "Exacte locaties zijn afgeschermd; er een tonen vereist het recht voor persoonsgegevens en wordt geaudit.")}</p>
       <FilterBar>
-        <FilterField label={t("جست‌وجو", "Search", "Suche", "Buscar")}><TextFilter value={q} onChange={(v) => { setQ(v); setPage(1); }} placeholder={t("نام حیوان یا محدوده", "Pet name or area", "Name des Tieres oder Gebiet", "Nombre de la mascota o zona")} /></FilterField>
-        <FilterField label={t("وضعیت", "Status", "Status", "Estado")}>
-          <SelectFilter value={status} onChange={(v) => { setStatus(v); setPage(1); }} options={[{ value: "all", label: t("همه", "All", "Alle", "Todos") }, ...Object.keys(INCIDENT_STATUS).map((s) => ({ value: s, label: lostPetIncidentStatusLabel(s, locale) }))]} />
+        <FilterField label={t("جست‌وجو", "Search", "Suche", "Buscar", "بحث", "Zoeken")}><TextFilter value={q} onChange={(v) => { setQ(v); setPage(1); }} placeholder={t("نام حیوان یا محدوده", "Pet name or area", "Name des Tieres oder Gebiet", "Nombre de la mascota o zona", "اسم الحيوان الأليف أو المنطقة", "Naam huisdier of gebied")} /></FilterField>
+        <FilterField label={t("وضعیت", "Status", "Status", "Estado", "الحالة", "Status")}>
+          <SelectFilter value={status} onChange={(v) => { setStatus(v); setPage(1); }} options={[{ value: "all", label: t("همه", "All", "Alle", "Todos", "الكل", "Alle") }, ...Object.keys(INCIDENT_STATUS).map((s) => ({ value: s, label: lostPetIncidentStatusLabel(s, locale) }))]} />
         </FilterField>
       </FilterBar>
-      {error ? <LoadState error={error} perm="trust.view" onRetry={load} locale={locale} /> : !data ? <Skeleton className="h-40 w-full" aria-label={t("در حال بارگذاری", "Loading", "Wird geladen", "Cargando")} /> : (
+      {error ? <LoadState error={error} perm="trust.view" onRetry={load} locale={locale} /> : !data ? <Skeleton className="h-40 w-full" aria-label={t("در حال بارگذاری", "Loading", "Wird geladen", "Cargando", "جارٍ التحميل", "Laden")} /> : (
         <Panel>
           <TableWrap><table className="w-full border-collapse">
-            <thead><tr><Th>{t("حیوان", "Pet", "Tier", "Mascota")}</Th><Th>{t("محدودهٔ عمومی", "Public area", "Öffentliches Gebiet", "Zona pública")}</Th><Th>{t("مشاهده‌ها", "Sightings", "Sichtungen", "Avistamientos")}</Th><Th>{t("وضعیت", "Status", "Status", "Estado")}</Th><Th>{t("ثبت", "Reported", "Gemeldet", "Fecha del informe")}</Th></tr></thead>
+            <thead><tr><Th>{t("حیوان", "Pet", "Tier", "Mascota", "الحيوان الأليف", "Huisdier")}</Th><Th>{t("محدودهٔ عمومی", "Public area", "Öffentliches Gebiet", "Zona pública", "المنطقة العامة", "Openbaar gebied")}</Th><Th>{t("مشاهده‌ها", "Sightings", "Sichtungen", "Avistamientos", "المشاهدات", "Waarnemingen")}</Th><Th>{t("وضعیت", "Status", "Status", "Estado", "الحالة", "Status")}</Th><Th>{t("ثبت", "Reported", "Gemeldet", "Fecha del informe", "تاريخ البلاغ", "Gemeld")}</Th></tr></thead>
             <tbody>
-              {data.items.length === 0 ? <EmptyRow colSpan={5} label={t("موردی نیست", "Nothing here", "Keine Einträge", "No hay elementos")} /> : data.items.map((row) => (
+              {data.items.length === 0 ? <EmptyRow colSpan={5} label={t("موردی نیست", "Nothing here", "Keine Einträge", "No hay elementos", "لا شيء هنا", "Niets te zien")} /> : data.items.map((row) => (
                 <tr key={row.id}>
                   <Td><Link className="text-brand-natural underline" href={`/${lang}/admin/lost-pets/${row.id}`}>{row.petName}</Link></Td>
                   <Td>{row.publicArea ?? "—"}</Td>
@@ -662,7 +662,7 @@ export function AdminLostPetDetailView({ incidentId }: { incidentId: string }) {
     void load();
   }, [load]);
   if (error) return <div><LoadState error={error} perm="trust.view" onRetry={load} locale={locale} /></div>;
-  if (!row) return <div><Skeleton className="h-40 w-full" aria-label={t("در حال بارگذاری", "Loading", "Wird geladen", "Cargando")} /></div>;
+  if (!row) return <div><Skeleton className="h-40 w-full" aria-label={t("در حال بارگذاری", "Loading", "Wird geladen", "Cargando", "جارٍ التحميل", "Laden")} /></div>;
   const closable = ["OPEN", "SEARCHING", "SIGHTING_REPORTED", "FOUND"].includes(row.status);
   return (
     <div>
@@ -672,16 +672,16 @@ export function AdminLostPetDetailView({ incidentId }: { incidentId: string }) {
       </div>
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] [&>*]:min-w-0">
         <Panel>
-          <PanelTitle title={t("گزارش", "Report", "Meldung", "Informe")} />
+          <PanelTitle title={t("گزارش", "Report", "Meldung", "Informe", "البلاغ", "Melding")} />
           {row.description ? <p className="mb-3 whitespace-pre-line text-body text-text-primary" dir="auto">{row.description}</p> : null}
-          <DetailRow label={t("محدودهٔ عمومی", "Public area", "Öffentliches Gebiet", "Zona pública")}>{row.publicArea ?? "—"}</DetailRow>
-          <DetailRow label={t("آخرین مشاهده", "Last seen", "Zuletzt gesehen", "Última vez visto")}>{row.lastSeenAt ? formatDateLabel(row.lastSeenAt, locale, "Asia/Tehran") : "—"}</DetailRow>
-          <DetailRow label={t("روش تماس", "Contact preference", "Kontaktoption", "Preferencia de contacto")}>{lostPetContactPreference[row.contactPreference]?.[locale] ?? t("نامشخص", "Unknown", "Unbekannt", "Desconocida")}</DetailRow>
-          <DetailRow label={t("ثبت", "Reported", "Gemeldet", "Informado")}>{formatDateLabel(row.createdAt, locale, "Asia/Tehran")}</DetailRow>
-          <DetailRow label={t("موقعیت دقیق", "Exact location", "Genauer Standort", "Ubicación exacta")}>{row.exactLocationRecorded ? t("ثبت شده (پنهان)", "Recorded (masked)", "Erfasst (verborgen)", "Registrada (oculta)") : t("ثبت نشده", "Not recorded", "Nicht erfasst", "No registrada")}</DetailRow>
+          <DetailRow label={t("محدودهٔ عمومی", "Public area", "Öffentliches Gebiet", "Zona pública", "المنطقة العامة", "Openbaar gebied")}>{row.publicArea ?? "—"}</DetailRow>
+          <DetailRow label={t("آخرین مشاهده", "Last seen", "Zuletzt gesehen", "Última vez visto", "آخر مشاهدة", "Laatst gezien")}>{row.lastSeenAt ? formatDateLabel(row.lastSeenAt, locale, "Asia/Tehran") : "—"}</DetailRow>
+          <DetailRow label={t("روش تماس", "Contact preference", "Kontaktoption", "Preferencia de contacto", "تفضيل التواصل", "Contactvoorkeur")}>{lostPetContactPreference[row.contactPreference]?.[locale] ?? t("نامشخص", "Unknown", "Unbekannt", "Desconocida", "غير معروف", "Onbekend")}</DetailRow>
+          <DetailRow label={t("ثبت", "Reported", "Gemeldet", "Informado", "تاريخ البلاغ", "Gemeld")}>{formatDateLabel(row.createdAt, locale, "Asia/Tehran")}</DetailRow>
+          <DetailRow label={t("موقعیت دقیق", "Exact location", "Genauer Standort", "Ubicación exacta", "الموقع الدقيق", "Exacte locatie")}>{row.exactLocationRecorded ? t("ثبت شده (پنهان)", "Recorded (masked)", "Erfasst (verborgen)", "Registrada (oculta)", "مسجَّل (مخفي)", "Vastgelegd (afgeschermd)") : t("ثبت نشده", "Not recorded", "Nicht erfasst", "No registrada", "غير مسجَّل", "Niet vastgelegd")}</DetailRow>
           {revealed ? (
             <div className="mt-3 rounded-md border border-state-attention p-3 text-metadata">
-              <p className="mb-1 font-bold">{t("موقعیت دقیق (این مشاهده ثبت شد)", "Exact location (this view was audited)", "Genauer Standort (diese Anzeige wurde protokolliert)", "Ubicación exacta (esta consulta quedó registrada)")}</p>
+              <p className="mb-1 font-bold">{t("موقعیت دقیق (این مشاهده ثبت شد)", "Exact location (this view was audited)", "Genauer Standort (diese Anzeige wurde protokolliert)", "Ubicación exacta (esta consulta quedó registrada)", "الموقع الدقيق (تم تدقيق هذا العرض)", "Exacte locatie (deze weergave is geaudit)")}</p>
               <p dir="auto">{revealed.lastKnownLocation ?? "—"}</p>
               {revealed.lastKnownLatitude !== null ? <p dir="ltr">{formatLocaleNumber(revealed.lastKnownLatitude, locale)}, {revealed.lastKnownLongitude !== null ? formatLocaleNumber(revealed.lastKnownLongitude, locale) : "—"}</p> : null}
               {revealed.privateNotes ? <p dir="auto" className="mt-1 text-text-secondary">{revealed.privateNotes}</p> : null}
@@ -689,10 +689,10 @@ export function AdminLostPetDetailView({ incidentId }: { incidentId: string }) {
           ) : null}
         </Panel>
         <Panel>
-          <PanelTitle title={t("اقدام‌ها", "Actions", "Aktionen", "Acciones")} />
+          <PanelTitle title={t("اقدام‌ها", "Actions", "Aktionen", "Acciones", "الإجراءات", "Acties")} />
           <div className="flex flex-col gap-2">
-            {permissions.reveal && row.exactLocationRecorded && !revealed ? <ReasonAction locale={locale} label={t("نمایش موقعیت دقیق", "Reveal exact location", "Genauen Standort anzeigen", "Mostrar ubicación exacta")} confirmLabel={t("نمایش", "Reveal", "Anzeigen", "Mostrar")} hint={t("نیاز به مجوز دادهٔ شخصی", "Needs the personal-data permission", "Erfordert die Berechtigung für personenbezogene Daten", "Requiere el permiso para datos personales")} onRun={async (reason) => setRevealed(await adminAnimalSupportService.revealLostPetLocation(row.id, reason))} /> : null}
-            {closable && permissions.trustManage ? <ReasonAction locale={locale} danger label={t("بستن گزارش (گزارش نادرست یا سوءاستفاده)", "Close report (false or abusive)", "Meldung schließen (falsch oder missbräuchlich)", "Cerrar informe (falso o abusivo)")} confirmLabel={t("بستن", "Close", "Schließen", "Cerrar")} hint={t("وضعیت خود حیوان تغییر نمی‌کند.", "The pet's own status is not changed.", "Der Status des Tieres selbst wird nicht geändert.", "El estado de la mascota no cambia.")} onRun={async (reason) => { await adminAnimalSupportService.closeLostPet(row.id, reason); await load(); }} /> : !closable ? <p className="text-metadata text-text-secondary">{t("این گزارش بسته است.", "This report is closed.", "Diese Meldung ist geschlossen.", "Este informe está cerrado.")}</p> : null}
+            {permissions.reveal && row.exactLocationRecorded && !revealed ? <ReasonAction locale={locale} label={t("نمایش موقعیت دقیق", "Reveal exact location", "Genauen Standort anzeigen", "Mostrar ubicación exacta", "كشف الموقع الدقيق", "Exacte locatie tonen")} confirmLabel={t("نمایش", "Reveal", "Anzeigen", "Mostrar", "كشف", "Tonen")} hint={t("نیاز به مجوز دادهٔ شخصی", "Needs the personal-data permission", "Erfordert die Berechtigung für personenbezogene Daten", "Requiere el permiso para datos personales", "يتطلب إذن البيانات الشخصية", "Vereist het recht voor persoonsgegevens")} onRun={async (reason) => setRevealed(await adminAnimalSupportService.revealLostPetLocation(row.id, reason))} /> : null}
+            {closable && permissions.trustManage ? <ReasonAction locale={locale} danger label={t("بستن گزارش (گزارش نادرست یا سوءاستفاده)", "Close report (false or abusive)", "Meldung schließen (falsch oder missbräuchlich)", "Cerrar informe (falso o abusivo)", "إغلاق البلاغ (كاذب أو مسيء)", "Melding sluiten (onjuist of misbruik)")} confirmLabel={t("بستن", "Close", "Schließen", "Cerrar", "إغلاق", "Sluiten")} hint={t("وضعیت خود حیوان تغییر نمی‌کند.", "The pet's own status is not changed.", "Der Status des Tieres selbst wird nicht geändert.", "El estado de la mascota no cambia.", "لا تتغير حالة الحيوان الأليف نفسه.", "De status van het huisdier zelf verandert niet.")} onRun={async (reason) => { await adminAnimalSupportService.closeLostPet(row.id, reason); await load(); }} /> : !closable ? <p className="text-metadata text-text-secondary">{t("این گزارش بسته است.", "This report is closed.", "Diese Meldung ist geschlossen.", "Este informe está cerrado.", "هذا البلاغ مغلق.", "Deze melding is gesloten.")}</p> : null}
           </div>
         </Panel>
       </div>

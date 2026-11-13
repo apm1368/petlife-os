@@ -8,13 +8,15 @@ export const PWA_BACKGROUND_COLOR = "#FFFBF5";
 /** Dark-theme paper (opl-landing.css), for the browser bar when the page is dark. */
 export const PWA_DARK_BACKGROUND_COLOR = "#121512";
 
-const APP_NAME: Record<RouteLocale, string> = { fa: "اپت لایف", en: "opetlife", de: "opetlife", es: "opetlife" };
+const APP_NAME: Record<RouteLocale, string> = { fa: "اپت لایف", en: "opetlife", de: "opetlife", es: "opetlife", ar: "opetlife", nl: "opetlife" };
 
 const SHORTCUTS: Record<RouteLocale, { pets: string; calendar: string; shop: string; notifications: string }> = {
   fa: { pets: "حیوان‌های من", calendar: "تقویم مراقبت", shop: "فروشگاه", notifications: "اعلان‌ها" },
   en: { pets: "My pets", calendar: "Care calendar", shop: "Shop", notifications: "Notifications" },
   de: { pets: "Meine Tiere", calendar: "Pflegekalender", shop: "Shop", notifications: "Benachrichtigungen" },
   es: { pets: "Mis mascotas", calendar: "Calendario de cuidados", shop: "Tienda", notifications: "Notificaciones" },
+  ar: { pets: "حيواناتي", calendar: "تقويم الرعاية", shop: "المتجر", notifications: "الإشعارات" },
+  nl: { pets: "Mijn dieren", calendar: "Verzorgingskalender", shop: "Winkel", notifications: "Meldingen" },
 };
 
 export function manifestPath(locale: RouteLocale): string {

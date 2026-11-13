@@ -32,7 +32,7 @@ const isMoney = (key: string) => key.endsWith("Irr");
 const nameKey = (key: string) => key.replaceAll(".", "_");
 const ascii = (value: string) =>
   value
-    .replace(/[۰-۹]/g, (char) => String(char.charCodeAt(0) - 1776))
+    .replace(/[۰-۹]/g, (char) => String(char.charCodeAt(0) - 1776)).replace(/[٠-٩]/g, (char) => String(char.charCodeAt(0) - 1632))
     .replace(/[٠-٩]/g, (char) => String(char.charCodeAt(0) - 1632))
     .replace(/٫/g, ".")
     .trim();
@@ -51,7 +51,7 @@ function keepOtherLocales(value: SettingValue) {
 }
 function useCopy() {
   const t = useTranslations("adminSettings"),
-    locale = useLocale() as "fa" | "en" | "de" | "es";
+    locale = useLocale() as "fa" | "en" | "de" | "es" | "ar" | "nl";
   const number = (value: number) =>
     new Intl.NumberFormat(locale === "fa" ? "fa-IR" : locale, { maximumFractionDigits: 1 }).format(value);
   return {

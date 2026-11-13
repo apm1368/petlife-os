@@ -264,7 +264,7 @@
       "title": "SMS",
       "label": "Nachricht",
       "placeholder": "Der Name deiner Klinik steht am Anfang.",
-      "count": "{count}/420",
+      "count": "{count, number}/420",
       "send": "SMS senden",
       "sent": "SMS gesendet.",
       "recorded": "Im Testmodus erfasst – nicht ans Telefon zugestellt.",
@@ -1118,12 +1118,14 @@
     "on": "An",
     "off": "Aus",
     "twoAdmins": "Zweite Freigabe nötig",
-    "pendingCount": "{count} warten auf Freigabe",
+    "pendingCount": "{count, number} warten auf Freigabe",
     "languages": {
       "fa": "Persisch",
       "en": "Englisch",
       "de": "Deutsch",
-      "es": "Spanisch"
+      "es": "Spanisch",
+      "ar": "Arabisch",
+      "nl": "Niederländisch"
     },
     "options": {
       "info": "Information",
@@ -1200,11 +1202,11 @@
     "save": {
       "label": "Änderungen speichern",
       "reason": "Notiz für das Protokoll",
-      "button": "{count} Änderungen speichern",
+      "button": "{count, number} Änderungen speichern",
       "saving": "Wird gespeichert…",
       "discard": "Änderungen verwerfen",
-      "applied": "{count} Änderungen übernommen.",
-      "pending": "{count} Änderungen warten auf eine zweite Freigabe.",
+      "applied": "{count, number} Änderungen übernommen.",
+      "pending": "{count, number} Änderungen warten auf eine zweite Freigabe.",
       "review": "In den Betriebseinstellungen prüfen",
       "error": "„{name}“ wurde nicht gespeichert: {code}"
     },
@@ -2512,7 +2514,7 @@
       "haveAccount": "Du hast schon ein Konto? Anmelden",
       "confirmPassword": "Passwort bestätigen",
       "passwordMismatch": "Die Passwörter stimmen nicht überein.",
-      "terms": "Ich akzeptiere die Nutzungsbedingungen und die Datenschutzerklärung von opetlife.",
+      "terms": "Ich akzeptiere die <terms>AGB und Regeln</terms> und die <privacy>Datenschutzerklärung</privacy> von opetlife.",
       "genericError": "Dein Konto konnte nicht erstellt werden. Prüfe deine Angaben und versuche es erneut."
     },
     "forgot": {
@@ -3177,7 +3179,7 @@
         "placeholder": "Interne Notiz hinzufügen (wird der Kundschaft nie angezeigt)",
         "submit": "Notiz hinzufügen"
       },
-      "pets": "{count} Haustier(e)"
+      "pets": "{count, number} Haustier(e)"
     },
     "orgs": {
       "providersTitle": "Anbieter",
@@ -3381,7 +3383,9 @@
         "loading": "Wird geladen …",
         "localeSectionTitle": {
           "fa": "Persischer Inhalt",
-          "en": "Englischer Inhalt"
+          "en": "Englischer Inhalt",
+          "ar": "Arabischer Inhalt",
+          "nl": "Niederländischer Inhalt"
         },
         "titleField": "Titel",
         "slug": "Slug",
@@ -3439,7 +3443,7 @@
         "retry": "Erneut versuchen",
         "loading": "Versionen werden geladen …",
         "empty": "Noch keine Versionen.",
-        "version": "Version {number}",
+        "version": "Version {number, number}",
         "restore": "Wiederherstellen",
         "actionError": "Der Vorgang ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
         "closePreview": "Vorschau schließen",
@@ -3493,7 +3497,7 @@
           "HOME_EDUCATION": "Ratgeber auf der Startseite",
           "HOME_ANNOUNCEMENT": "Ankündigung auf der Startseite"
         },
-        "block": "Block {number}",
+        "block": "Block {number, number}",
         "remove": "Entfernen",
         "linkedArticleId": "ID des verknüpften Artikels (optional)",
         "mediaAssetId": "Medien-Asset-ID (optional)",
@@ -3597,7 +3601,7 @@
         "missingSubject": "Der Gegenstand ist nicht mehr vorhanden oder es gibt keine Zusammenfassung.",
         "by": "Gemeldet von: {name}",
         "openPublicPage": "Öffentliche Seite öffnen",
-        "reportCount": "Meldungen: {total} · verschiedene meldende Personen: {reporters}",
+        "reportCount": "Meldungen: {total, number} · verschiedene meldende Personen: {reporters, number}",
         "unknownKind": "Anderer Gegenstand",
         "unknownStatus": "Status nicht verfügbar",
         "unknownReason": "Sonstiger oder unbekannter Grund",
@@ -3829,9 +3833,9 @@
           "household": "Haushalt: {name}",
           "pet": "Haustier: {name}",
           "relatedEntity": "Bezug: {summary}",
-          "firstResponseTime": "Erste Antwort nach {minutes} Min.",
+          "firstResponseTime": "Erste Antwort nach {minutes, number} Min.",
           "noFirstResponseYet": "Noch keine Antwort gesendet",
-          "resolutionTime": "Gelöst nach {minutes} Min.",
+          "resolutionTime": "Gelöst nach {minutes, number} Min.",
           "previousCases": "Frühere Fälle dieser Person:",
           "noPreviousCases": "Diese Person hat keine früheren Fälle."
         }
@@ -4818,129 +4822,6 @@
         "PROMOTION_EXPIRED": "Angebot abgelaufen"
       }
     },
-    "checkout": {
-      "summary": { "title": "Bestellübersicht", "deliveryNext": "Wird im Lieferschritt ausgewählt" },
-      "address": {
-        "title": "Lieferadresse",
-        "addNew": "Neue Adresse hinzufügen",
-        "addressLine": "Adresse",
-        "city": "Stadt",
-        "countryCode": "Ländercode",
-        "save": "Adresse speichern",
-        "noHousehold": "Erstelle zuerst einen Haushalt, um eine Lieferadresse zu speichern.",
-        "default": "Standard",
-        "postalCodeValue": "Postleitzahl {code}",
-        "recipient": "Name des Empfängers",
-        "phone": "Mobilnummer",
-        "postalCode": "Postleitzahl",
-        "postalCodeHint": "10 Ziffern, optional",
-        "postalCodeInvalid": "Die Postleitzahl muss 10 Ziffern haben",
-        "saveFailed": "Die Adresse konnte nicht gespeichert werden."
-      },
-      "delivery": {
-        "title": "Lieferart",
-        "method": { "STANDARD": "Standard", "EXPRESS": "Express" },
-        "quotesNext": "Die verfügbaren Kurieroptionen wählst du im nächsten Schritt."
-      },
-      "safetyAck": {
-        "title": "Bitte bestätige, bevor du fortfährst",
-        "warning": "Möglicher Sicherheitskonflikt",
-        "description": "Mindestens ein Artikel im Warenkorb könnte mit einer bekannten Allergie eines Haustiers in Konflikt stehen. Bestätige, dass du mit der Bestellung fortfahren möchtest.",
-        "acknowledge": "Verstanden, fortfahren"
-      },
-      "review": {
-        "title": "Bestellung prüfen",
-        "subtotal": "Zwischensumme",
-        "delivery": "Lieferung",
-        "total": "Gesamt",
-        "discount": "Aktionen"
-      },
-      "shipping": {
-        "title": "Lieferung für jeden Verkäufer auswählen",
-        "serviceLevel": { "STANDARD": "Standardlieferung", "EXPRESS": "Expresslieferung" },
-        "eta": "Lieferung in etwa {hours, plural, one {# Stunde} other {# Stunden}}",
-        "selected": "Ausgewählt",
-        "unavailable": "Zurzeit sind keine Lieferoptionen verfügbar",
-        "refresh": "Lieferoptionen aktualisieren",
-        "chooseFirst": "Wähle zuerst eine Lieferoption aus, um fortzufahren."
-      },
-      "payment": {
-        "title": "Zahlung",
-        "amountDue": "Fälliger Betrag",
-        "devLabel": "Entwicklungszahlung",
-        "simulateSuccess": "Erfolgreiche Zahlung simulieren",
-        "simulateFailure": "Fehlgeschlagene Zahlung simulieren",
-        "simulatePending": "Ausstehende Zahlung simulieren",
-        "onlinePayment": "Online bezahlen"
-      },
-      "pending": {
-        "title": "Zahlung ausstehend",
-        "status": "Warte auf Bestätigung",
-        "description": "Wir warten auf die Bestätigung des Zahlungsanbieters. Das kann einen Moment dauern — prüfe den Status in Kürze erneut.",
-        "refresh": "Status prüfen"
-      },
-      "paymentFailed": {
-        "title": "Zahlung fehlgeschlagen",
-        "generic": "Die Zahlung konnte nicht abgeschlossen werden.",
-        "preserved": "Es wurde nichts abgebucht und dein Warenkorb bleibt erhalten.",
-        "returnToCart": "Zum Warenkorb",
-        "tryAgain": "Erneut versuchen",
-        "chooseInstallments": "Stattdessen Ratenzahlung wählen"
-      },
-      "createFailed": "Der Bezahlvorgang konnte nicht gestartet werden. Bitte versuche es erneut.",
-      "method": {
-        "title": "Wie möchtest du bezahlen?",
-        "onlinePayment": "Online bezahlen",
-        "installments": "Ratenzahlung",
-        "chooseProvider": "Tarif auswählen",
-        "chooseAnother": "Andere Zahlungsmethode wählen",
-        "noneAvailable": "Zurzeit sind keine Zahlungsmethoden verfügbar.",
-        "provider": {
-          "DEV_SIMULATED": "Entwicklungs-Gateway",
-          "STANDARD_GATEWAY": "Onlinezahlung",
-          "SNAPP_PAY": "SnappPay",
-          "DIGI_PAY": "DigiPay"
-        }
-      },
-      "financingEligibility": {
-        "title": "Berechtigung wird geprüft",
-        "status": {
-          "CHECKING": "Deine Berechtigung wird geprüft …",
-          "ELIGIBLE": "Du kannst in Raten zahlen",
-          "NOT_ELIGIBLE": "Zurzeit ist keine Ratenzahlung möglich",
-          "NEEDS_VERIFICATION": "Zusätzliche Prüfung erforderlich",
-          "ERROR": "Die Berechtigung konnte nicht geprüft werden"
-        },
-        "notEligibleHint": "Du kannst weiterhin online bezahlen."
-      },
-      "financingPlans": {
-        "title": "Tarif auswählen",
-        "installmentCount": "{count, plural, one {1 Rate} other {# Raten}}",
-        "downPayment": "Anzahlung",
-        "installmentAmount": "Betrag je Rate",
-        "fee": "Gebühr",
-        "totalPayable": "Zu zahlender Gesamtbetrag",
-        "none": "Zurzeit sind keine Tarife verfügbar."
-      },
-      "financingAuthorize": {
-        "title": "Ratenplan bestätigen",
-        "redirectNotice": "Du wirst sicher zu {provider} weitergeleitet.",
-        "simulateApprove": "Genehmigung simulieren",
-        "simulateDecline": "Ablehnung simulieren",
-        "simulatePending": "Ausstehend simulieren",
-        "authorize": "Mit Anbieter fortfahren"
-      },
-      "financingDeclined": {
-        "title": "Ratenanfrage wurde nicht genehmigt",
-        "generic": "Dieser Ratenplan wurde nicht genehmigt.",
-        "tryAnother": "Anderen Anbieter wählen",
-        "retry": "Erneut versuchen"
-      },
-      "progress": {
-        "steps": { "address": "Adresse", "review": "Prüfen", "shipping": "Lieferung", "payment": "Zahlung" },
-        "label": "Schritte beim Bezahlen"
-      }
-    },
     "confirmation": {
       "title": "Bestellung bestätigt",
       "subtitle": "{count, plural, one {1 Bestellung wurde} other {# Bestellungen wurden}} aufgegeben",
@@ -5512,7 +5393,7 @@
     "addPet": "Tier hinzufügen",
     "chooseUpToPets": "Wähle bis zu {count, number} Tiere aus",
     "whichPet": "Für welches Tier?",
-    "petSelectionInfo": "Alle buchbaren Tiere in deinem Haushalt werden angezeigt. Auswahlgrenze für diese Leistung: {count}.",
+    "petSelectionInfo": "Alle buchbaren Tiere in deinem Haushalt werden angezeigt. Auswahlgrenze für diese Leistung: {count, number}.",
     "speciesNotSupported": "Diese Leistung wird für diese Tierart nicht angeboten",
     "petLimitReached": "Die Höchstzahl für diese Leistung ist erreicht.",
     "sameHouseholdRequired": "Tiere einer Mehrtierbuchung müssen demselben Haushalt angehören.",
@@ -6297,7 +6178,7 @@
       "breadcrumb": "Brotkrümelnavigation",
       "contents": "In diesem Artikel",
       "otherLanguages": "In anderen Sprachen lesen",
-      "pageLabel": "Seite {page}",
+      "pageLabel": "Seite {page, number}",
       "newer": "Vorherige Seite",
       "older": "Nächste Seite",
       "eyebrow": "Das opetlife-Journal",
@@ -6845,12 +6726,12 @@
     "areaAlert": {
       "title": "Hinweise zu vermissten Tieren in meiner Nähe",
       "body": "Wenn in Ihrer Nähe ein Tier vermisst wird, sagen wir Ihnen Bescheid, damit Sie helfen können.",
-      "on": "An: Sie erfahren von Meldungen im Umkreis von {km} km.",
+      "on": "An: Sie erfahren von Meldungen im Umkreis von {km, number} km.",
       "enable": "Hinweise einschalten",
       "update": "Umkreis aktualisieren",
       "disable": "Ausschalten",
       "radius": "Umkreis",
-      "km": "{km} km",
+      "km": "{km, number} km",
       "signIn": "Anmelden, um Hinweise einzuschalten",
       "privacy": "Ihr Standort wird nur verwendet, um Meldungen in der Nähe zu finden, und niemandem angezeigt.",
       "denied": "Der Browser hat den Standortzugriff nicht erlaubt.",
@@ -7512,6 +7393,7 @@
       "annualLimit": "Jahreshöchstleistung: {amount}",
       "premiumRange": "Versicherungsbeitrag: {min}–{max}",
       "exclusionsEmpty": "Für dieses Produkt sind keine Ausschlüsse angegeben.",
+      "insurerLanguageNote": "Diesen Text hat der Versicherer auf Persisch verfasst; wir zeigen ihn unverändert.",
       "termsSource": "Quelle: {source}",
       "visitInsurer": "Zur Website des Versicherers",
       "insurerWebsiteUnavailable": "Der Versicherer hat keinen Website-Link veröffentlicht.",
@@ -9461,7 +9343,7 @@
     "open": "Öffnen",
     "previous": "Zurück",
     "next": "Weiter",
-    "pageOf": "Seite {page} von {pages}",
+    "pageOf": "Seite {page, number} von {pages, number}",
     "never": "Keine Bewegungen",
     "detail": {
       "back": "Alle Guthaben",
@@ -9633,7 +9515,7 @@
     "open": "Öffnen",
     "previous": "Zurück",
     "next": "Weiter",
-    "pageOf": "Seite {page} von {pages}",
+    "pageOf": "Seite {page, number} von {pages, number}",
     "detail": {
       "back": "Alle Tiere",
       "identity": "Identität",
@@ -9649,7 +9531,7 @@
         "created": "Registriert",
         "photo": "Foto"
       },
-      "months": "{months} Monate",
+      "months": "{months, number} Monate",
       "sex": {
         "MALE": "Männlich",
         "FEMALE": "Weiblich",
@@ -9693,7 +9575,7 @@
         "MANUAL": "Manuell geteilt",
         "TEMPORARY": "Befristet"
       },
-      "scopeCount": "{count} Rechte",
+      "scopeCount": "{count, number} Rechte",
       "states": {
         "active": "Aktiv",
         "revoked": "Widerrufen",
@@ -9720,14 +9602,14 @@
       },
       "bookings": "Buchungen",
       "lost": "Vermisstenmeldungen",
-      "sightings": "{count} Sichtungen",
+      "sightings": "{count, number} Sichtungen",
       "care": "Pflegeerinnerungen",
       "travel": "Reisen",
       "insurance": "Versicherung",
-      "claimPreps": "{count} Schadensentwürfe",
+      "claimPreps": "{count, number} Schadensentwürfe",
       "sharing": "Freigaben",
-      "shareCards": "{count} aktive Steckbriefe",
-      "healthShares": "{count} aktive Gesundheitslinks",
+      "shareCards": "{count, number} aktive Steckbriefe",
+      "healthShares": "{count, number} aktive Gesundheitslinks",
       "none": "Keine.",
       "diagnostics": "Hinweise zur Datenqualität",
       "diagnosticCodes": {
@@ -10139,7 +10021,7 @@
       "estimate": "Entfernung und Zeit sind Schätzungen (Luftlinie × Straßenfaktor).",
       "routed": "Nach der Straßenroute",
       "notPriced": "Das Tiertaxi ist in dieser Stadt noch nicht verfügbar.",
-      "distanceTime": "{km} km · etwa {minutes} Min.",
+      "distanceTime": "{km, number} km · etwa {minutes, number} Min.",
       "payNote": "Online-Zahlung ist noch nicht aktiv; zahlen Sie beim Fahrer bei Ankunft.",
       "request": "Fahrt anfragen",
       "requesting": "Anfrage wird gesendet…",
@@ -10161,7 +10043,7 @@
         "NO_DRIVER": "Kein Fahrer gefunden"
       },
       "searchingHint": "Ihre Anfrage ging an Fahrer in der Nähe. Nimmt bis {time} niemand an, sagen wir es Ihnen.",
-      "eta": "Etwa {minutes} Min. entfernt",
+      "eta": "Etwa {minutes, number} Min. entfernt",
       "driver": "Fahrer",
       "call": "Anrufen",
       "positionAt": "Position um {time}",
@@ -10172,7 +10054,7 @@
       "rateComment": "Ihr Kommentar (optional)",
       "rateSend": "Bewertung senden",
       "rated": "Danke für Ihre Bewertung.",
-      "stars": "{n} von 5",
+      "stars": "{n, number} von 5",
       "receipt": "Fahrtbeleg",
       "receiptLines": {
         "base": "Grundpreis",
@@ -10202,7 +10084,7 @@
       "locationOff": "Der Standort Ihres Telefons ist nicht verfügbar; Anfragen erscheinen nur mit aktuellem Standort.",
       "requests": "Anfragen in der Nähe",
       "noRequests": "Gerade keine Anfragen. Die Seite aktualisiert sich selbst.",
-      "kmFromYou": "{km} km bis zur Abholung",
+      "kmFromYou": "{km, number} km bis zur Abholung",
       "pets": "{count, plural, one {# Tier} other {# Tiere}}",
       "accept": "Annehmen",
       "decline": "Ablehnen",
@@ -10496,7 +10378,7 @@
     },
     "reference": {
       "booking": "Termin",
-      "order": "Bestellung ({count})"
+      "order": "Bestellung ({count, number})"
     },
     "open": "Prüfen",
     "empty": "Keine Belege mit diesem Status.",
@@ -10565,7 +10447,7 @@
       "status": "Status",
       "lastOrder": "Letzte Bestellung"
     },
-    "days": "{count} Tage",
+    "days": "{count, number} Tage",
     "empty": "Keine.",
     "prev": "Zurück",
     "next": "Weiter",
@@ -10747,5 +10629,27 @@
     "loadError": "Die Kartendaten konnten nicht geladen werden.",
     "retry": "Erneut versuchen",
     "loading": "Wird geladen…"
+  },
+  "legalPages": {
+    "eyebrow": {
+      "terms": "AGB",
+      "privacy": "Datenschutz",
+      "faq": "Hilfe"
+    },
+    "updated": "Zuletzt aktualisiert: {date}",
+    "onThisPage": "Auf dieser Seite",
+    "allLegal": "Alle rechtlichen Dokumente",
+    "faqMore": "Weitere Antworten im Hilfe-Center",
+    "stillNeedHelp": "Noch eine Frage?",
+    "contactSupport": "Support kontaktieren",
+    "terms": "AGB und Regeln",
+    "privacy": "Datenschutzerklärung",
+    "faq": "Häufige Fragen",
+    "consent": "Wenn du fortfährst, akzeptierst du die <terms>AGB und Regeln</terms> und die <privacy>Datenschutzerklärung</privacy> von opetlife.",
+    "checkoutConsent": "Mit dieser Bestellung akzeptierst du die <terms>AGB und Regeln</terms>, einschließlich <returns>Stornierung und Rückgabe innerhalb von 48 Stunden</returns>, sowie die <privacy>Datenschutzerklärung</privacy>.",
+    "adminDraft": {
+      "title": "Integrierte AGB, Datenschutzerklärung und FAQ sind live – Entwurf, rechtliche Prüfung durch den Inhaber nötig",
+      "body": "Diese Texte beschreiben, wie die Plattform tatsächlich funktioniert, und werden in allen sechs Sprachen angezeigt, bis du eine geprüfte Fassung veröffentlichst. Wenn du hier AGB oder Datenschutz auf Persisch oder Englisch veröffentlichst, ersetzt das den integrierten Text in dieser Sprache. Mit einem Anwalt zu prüfen: die 48-Stunden-Rückgabefrist neben dem gesetzlichen Widerrufsrecht bei Fernkäufen, wohin Erstattungen gehen (ursprüngliche Zahlungsart oder Wallet), die Kontolöschung (die Ausführung ist noch abgeschaltet) und dass Community-Beiträge vor der Prüfung erscheinen."
+    }
   }
 }

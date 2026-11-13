@@ -10,7 +10,7 @@ export type AppLocale = RouteLocale;
  * this is purely a display concern.
  */
 function calendarLocale(locale: AppLocale): string {
-  return ({ fa: "fa-IR-u-ca-persian", en: "en-US-u-ca-gregory", de: "de-DE-u-ca-gregory", es: "es-ES-u-ca-gregory" })[locale];
+  return ({ fa: "fa-IR-u-ca-persian", en: "en-US-u-ca-gregory", de: "de-DE-u-ca-gregory", es: "es-ES-u-ca-gregory", ar: "ar-u-ca-gregory", nl: "nl-NL-u-ca-gregory" })[locale];
 }
 
 /** The provider location's timezone is authoritative for an appointment's time — always format in it, never the viewer's own. */
@@ -25,7 +25,7 @@ export function formatDayLabel(iso: string, locale: AppLocale, timeZone: string)
 }
 
 export function formatTimeLabel(iso: string, locale: AppLocale, timeZone: string): string {
-  const languageLocale = ({ fa: "fa-IR", en: "en-US", de: "de-DE", es: "es-ES" })[locale];
+  const languageLocale = ({ fa: "fa-IR", en: "en-US", de: "de-DE", es: "es-ES", ar: "ar", nl: "nl-NL" })[locale];
   return new Intl.DateTimeFormat(languageLocale, { hour: "numeric", minute: "2-digit", timeZone }).format(
     new Date(iso),
   );

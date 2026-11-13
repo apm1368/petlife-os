@@ -12,7 +12,7 @@ import { adminPrivacyService, type AccountDeletionState, type AdminDeletionReque
 const GROUPS: AccountDeletionState[] = ["REQUESTED", "PENDING_RETENTION", "READY_FOR_EXECUTION", "CANCELLED", "COMPLETED"];
 const NEXT: Partial<Record<AccountDeletionState, AccountDeletionState>> = { REQUESTED: "PENDING_RETENTION", PENDING_RETENTION: "READY_FOR_EXECUTION" };
 const TONE: Record<AccountDeletionState, string> = { REQUESTED: "AT_RISK", PENDING_RETENTION: "NEW", READY_FOR_EXECUTION: "VIP", CANCELLED: "DORMANT", COMPLETED: "ACTIVE" };
-const DATE_LOCALE: Record<RouteLocale, string> = { fa: "fa-IR-u-ca-persian-nu-arabext", en: "en-GB", de: "de-DE", es: "es-ES" };
+const DATE_LOCALE: Record<RouteLocale, string> = { fa: "fa-IR-u-ca-persian-nu-arabext", en: "en-GB", de: "de-DE", es: "es-ES", ar: "ar", nl: "nl-NL" };
 
 /**
  * Admin → Users → Deletion requests: the members who asked to delete their account, oldest waiting first, and the

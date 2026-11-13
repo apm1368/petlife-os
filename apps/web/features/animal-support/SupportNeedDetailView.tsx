@@ -17,6 +17,8 @@ import { ShareBar } from "@/features/shared/ShareBar";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 import { SafetyTip } from "@/features/shared/SafetyTip";
+import { placeName } from "@/lib/i18n/iran-places";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 const HELP_TYPES: SupportNeedCategory[] = [
   SupportNeedCategory.FOOD,
@@ -118,7 +120,7 @@ export function SupportNeedDetailView({ listingId }: { listingId: string }) {
           {listing.status === "PAUSED" ? <StatusLabel tone="neutral">{t("status.PAUSED")}</StatusLabel> : null}
         </div>
         <p className="text-metadata text-text-secondary">
-          {[listing.city, listing.province, listing.neighborhood].filter(Boolean).join(" · ")} · {fmt.date(listing.createdAt)}
+          {[placeName(listing.city, locale as RouteLocale), placeName(listing.province, locale as RouteLocale), listing.neighborhood].filter(Boolean).join(" · ")} · {fmt.date(listing.createdAt)}
         </p>
         {listing.organizationName ? <p className="text-metadata text-text-secondary">{listing.organizationName}</p> : null}
       </div>

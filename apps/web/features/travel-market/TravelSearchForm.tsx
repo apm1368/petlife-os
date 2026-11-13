@@ -9,6 +9,8 @@ import { DateRangeField, type DateRangeValue } from "@/features/shared/date-pick
 import { addDays, isIsoDay, todayIso } from "@/lib/date/jalali";
 import { travelMarketService } from "@/services/travel-marketplace.service";
 import { petWeightKg, readChosenPetIds, useMyPets, writeChosenPetIds } from "./use-my-pets";
+import { placeName, placeQuery } from "@/lib/i18n/iran-places";
+import type { RouteLocale } from "@/lib/i18n/config";
 
 export interface TravelSearchState {
   city: string;
@@ -35,7 +37,7 @@ export function searchStateFromParams(p: URLSearchParams): TravelSearchState {
 
 export function searchUrl(locale: string, s: TravelSearchState, extra: Record<string, string> = {}): string {
   const q = new URLSearchParams();
-  if (s.city.trim()) q.set("city", s.city.trim());
+  if (s.city.trim()) q.set("city", placeQuery(s.city));
   if (s.checkIn && s.checkOut) {
     q.set("checkIn", s.checkIn);
     q.set("checkOut", s.checkOut);
@@ -77,7 +79,7 @@ export function TravelSearchForm({ initial, compact = false, onSubmitted }: { in
 
   const suggestions = useMemo(() => {
     const q = state.city.trim().toLowerCase();
-    return destinations.filter((d) => !q || d.city.toLowerCase().includes(q) || (d.province ?? "").toLowerCase().includes(q)).slice(0, 8);
+    return destinations.filter((d) => !q || [d.city, d.province ?? "", placeName(d.city, lang as RouteLocale), placeName(d.province, lang as RouteLocale)].some((name) => name.toLowerCase().includes(q))).slice(0, 8);
   }, [destinations, state.city]);
 
   const submit = (e: React.FormEvent) => {
@@ -114,7 +116,7 @@ export function TravelSearchForm({ initial, compact = false, onSubmitted }: { in
         />
         <datalist id={listId}>
           {suggestions.map((d) => (
-            <option key={`${d.country}-${d.city}`} value={d.city}>{`${d.province ? `${d.province} · ` : ""}${t("stayCount", { count: d.listingCount })}`}</option>
+            <option key={`${d.country}-${d.city}`} value={d.city}>{`${d.province ? `${placeName(d.province, lang as RouteLocale)} · ` : ""}${t("stayCount", { count: d.listingCount })}`}</option>
           ))}
         </datalist>
       </label>

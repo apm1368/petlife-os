@@ -7,7 +7,7 @@ import type { RouteLocale } from "@/lib/i18n/config";
 import { Button, ContextSurface } from "@petlife/ui";
 import { lostPetService } from "@/services/lost-pet.service";
 import { DateRangeField } from "@/features/shared/date-picker/DateRangePicker";
-import { addDays, formatDay, todayIso } from "@/lib/date/jalali";
+import { addDays, formatDay, localizeDigits, todayIso } from "@/lib/date/jalali";
 import { TimeSelect } from "@/features/shared/date-picker/TimeSelect";
 import { FilePicker } from "@/features/shared/FilePicker";
 
@@ -185,7 +185,7 @@ export function ReportLostPetView({ petId }: { petId: string }) {
             <h2 className="font-bold">{t("report.reviewTitle")}</h2>
             <dl className="grid gap-1">
               <div><dt className="inline text-text-secondary">{t("report.review.area")}: </dt><dd className="inline">{publicArea.trim() || t("report.notGiven")}</dd></div>
-              <div><dt className="inline text-text-secondary">{t("report.review.when")}: </dt><dd className="inline">{seenDay ? `${formatDay(seenDay, lang)}${seenTime ? ` ${seenTime}` : ""}` : "—"}</dd></div>
+              <div><dt className="inline text-text-secondary">{t("report.review.when")}: </dt><dd className="inline">{seenDay ? `${formatDay(seenDay, lang)}${seenTime ? ` ${localizeDigits(seenTime, lang)}` : ""}` : "—"}</dd></div>
               <div><dt className="inline text-text-secondary">{t("report.review.photo")}: </dt><dd className="inline">{photo?.name ?? t("report.noPhoto")}</dd></div>
               <div><dt className="inline text-text-secondary">{t("report.descriptionLabel")}: </dt><dd className="inline">{description}</dd></div>
               {publicNotes.trim() ? <div><dt className="inline text-text-secondary">{t("report.publicNote")}: </dt><dd className="inline">{publicNotes}</dd></div> : null}

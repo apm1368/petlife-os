@@ -17,8 +17,8 @@ import { headingAnchor, inlineToText } from "@/lib/seo/rich-text-text";
 import "./editorial-design.css";
 import { localizedAuthorName } from "@/lib/content/author-name";
 
-const LANGUAGE_NAMES: Record<string, string> = { fa: "فارسی", en: "English", de: "Deutsch", es: "Español" };
-const DATE_LOCALE: Record<string, string> = { fa: "fa-IR", en: "en-US", de: "de-DE", es: "es-ES" };
+const LANGUAGE_NAMES: Record<string, string> = { fa: "فارسی", en: "English", de: "Deutsch", es: "Español", ar: "العربية", nl: "Nederlands" };
+const DATE_LOCALE: Record<string, string> = { fa: "fa-IR", en: "en-US", de: "de-DE", es: "es-ES", ar: "ar", nl: "nl-NL" };
 
 /**
  * The public article page. The server route passes `initialArticle` (and related reading), so the full

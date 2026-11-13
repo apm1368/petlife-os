@@ -15,5 +15,19 @@ export const parkAuthCopy: Record<RouteLocale, { close: string; title: string; r
   es: {
     close: "Cerrar y volver al parque", title: "Inicia sesión en opetlife", register: "Crear una cuenta de opetlife",
     tagline: "Un mundo para ti y tu mascota", description: "Salud, cuidados y momentos compartidos. Todo empieza aquí.", privacy: "Su historial, tu decisión",
+  }, ar: {
+    close: "أغلق وعُد إلى الحديقة",
+    title: "سجّل الدخول إلى opetlife",
+    register: "أنشئ حسابًا في opetlife",
+    tagline: "عالم لك ولرفيقك",
+    description: "الصحة والرعاية واللحظات المشتركة. تبدأ من هنا.",
+    privacy: "سجلّه، وقرارك"
+  }, nl: {
+    close: "Sluiten en terug naar het park",
+    title: "Inloggen bij opetlife",
+    register: "Maak een opetlife-account aan",
+    tagline: "Een wereld voor jou en je maatje",
+    description: "Gezondheid, zorg en gedeelde momenten. Het begint hier.",
+    privacy: "Hun dossier, jouw keuze"
   },
 };

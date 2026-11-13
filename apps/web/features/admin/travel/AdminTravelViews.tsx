@@ -15,7 +15,7 @@ import { copyFor } from "@/features/admin/admin-copy";
 import { StaffBookingMoneyPanel } from "../finance/StaffBookingMoneyPanel";
 import { externalHref } from "@/lib/url/external-href";
 
-type Lang = "fa" | "en" | "de" | "es";
+type Lang = "fa" | "en" | "de" | "es" | "ar" | "nl";
 const useLang = () => {
   const lang = useLocale() as Lang;
   return { lang, fa: lang === "fa", ...copyFor(lang) };

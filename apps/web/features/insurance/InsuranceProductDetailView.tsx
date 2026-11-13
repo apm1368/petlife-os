@@ -10,6 +10,7 @@ import { verificationStatusTone } from "./insurance-status";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
 import type { RouteLocale } from "@/lib/i18n/config";
+import { persianSourceProps } from "@/lib/i18n/iran-places";
 
 function safeInsurerWebsite(value: string | null): string | null {
   if (!value) return null;
@@ -68,7 +69,8 @@ export function InsuranceProductDetailView({ productId }: { productId: string })
         <div className="split-main">
           <section className="flex flex-col gap-3">
             <h2 className="text-section-title text-text-primary">{t("detail.coverageTitle")}</h2>
-            <p className="text-body text-text-primary">{product.coverageSummary}</p>
+            <p className="text-body text-text-primary" {...persianSourceProps(product.coverageSummary, locale)}>{product.coverageSummary}</p>
+            {persianSourceProps([product.coverageSummary, ...product.exclusions].join(" "), locale).lang ? <p className="text-metadata text-text-secondary">{t("detail.insurerLanguageNote")}</p> : null}
             <div className="flex flex-wrap gap-2">
               {product.coverageTypes.map((type) => (
                 <span key={type} className="tag">
@@ -85,7 +87,7 @@ export function InsuranceProductDetailView({ productId }: { productId: string })
             ) : (
               <ul className="flex list-inside list-disc flex-col gap-1">
                 {product.exclusions.map((exclusion) => (
-                  <li key={exclusion} className="text-body text-text-primary">
+                  <li key={exclusion} className="text-body text-text-primary" {...persianSourceProps(exclusion, locale)}>
                     {exclusion}
                   </li>
                 ))}

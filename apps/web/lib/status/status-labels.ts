@@ -114,7 +114,7 @@ function entry(code: string, domain: StatusDomain): Entry | undefined {
 }
 
 /** Readable label for a server status code. Never returns the raw constant for a known code. */
-export function statusLabel(code: string | null | undefined, locale: "fa" | "en" | "de" | "es", domain: StatusDomain = "generic"): string {
+export function statusLabel(code: string | null | undefined, locale: "fa" | "en" | "de" | "es" | "ar" | "nl", domain: StatusDomain = "generic"): string {
   if (!code) return "";
   const e = entry(code, domain);
   if (e) {

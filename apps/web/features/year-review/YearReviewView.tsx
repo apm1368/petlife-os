@@ -15,14 +15,14 @@ import { currentYear, systemFor, yearRange, type Locale } from "@/features/expen
 import { humanYears, nextBirthday } from "./birthday";
 
 const SERVICE_LABELS: Record<string, Record<Locale, string>> = {
-  VET: { fa: "ویزیت دامپزشک", en: "Vet visits", de: "Tierarztbesuche", es: "Visitas veterinarias" },
-  GROOMING: { fa: "آرایش و نظافت", en: "Grooming", de: "Fellpflege", es: "Peluquería y aseo" },
-  TRAINING: { fa: "آموزش", en: "Training", de: "Training", es: "Adiestramiento" },
-  WALKING: { fa: "پیاده‌روی", en: "Walks", de: "Spaziergänge", es: "Paseos" },
-  SITTING: { fa: "نگهداری در خانه", en: "Pet sitting", de: "Betreuung zu Hause", es: "Cuidado a domicilio" },
-  BOARDING: { fa: "پانسیون", en: "Boarding", de: "Tierpension", es: "Residencia" },
-  PET_TAXI: { fa: "تاکسی حیوان", en: "Pet taxi", de: "Tiertransport", es: "Taxi para mascotas" },
-  OTHER: { fa: "سایر خدمات", en: "Other services", de: "Weitere Dienstleistungen", es: "Otros servicios" },
+  VET: { fa: "ویزیت دامپزشک", en: "Vet visits", de: "Tierarztbesuche", es: "Visitas veterinarias", ar: "زيارات الطبيب البيطري", nl: "Dierenartsbezoeken" },
+  GROOMING: { fa: "آرایش و نظافت", en: "Grooming", de: "Fellpflege", es: "Peluquería y aseo", ar: "التجميل", nl: "Vachtverzorging" },
+  TRAINING: { fa: "آموزش", en: "Training", de: "Training", es: "Adiestramiento", ar: "التدريب", nl: "Training" },
+  WALKING: { fa: "پیاده‌روی", en: "Walks", de: "Spaziergänge", es: "Paseos", ar: "النزهات", nl: "Wandelingen" },
+  SITTING: { fa: "نگهداری در خانه", en: "Pet sitting", de: "Betreuung zu Hause", es: "Cuidado a domicilio", ar: "مجالسة الحيوانات الأليفة", nl: "Huisdieroppas" },
+  BOARDING: { fa: "پانسیون", en: "Boarding", de: "Tierpension", es: "Residencia", ar: "الإيواء", nl: "Dierenpension" },
+  PET_TAXI: { fa: "تاکسی حیوان", en: "Pet taxi", de: "Tiertransport", es: "Taxi para mascotas", ar: "تاكسي الحيوانات الأليفة", nl: "Dierentaxi" },
+  OTHER: { fa: "سایر خدمات", en: "Other services", de: "Weitere Dienstleistungen", es: "Otros servicios", ar: "خدمات أخرى", nl: "Andere diensten" },
 };
 
 const copy = {
@@ -102,6 +102,28 @@ const copy = {
     noBirthDate: "No hay fecha de nacimiento registrada. Añádela para mostrar aquí la cuenta atrás.", addBirthDate: "Añadir fecha de nacimiento",
     empty: "Aún no hay datos de este año. Los recuerdos, cuidados y viajes irán formando este resumen.", addMemory: "Añadir un recuerdo", loading: "Preparando el resumen anual",
   },
+  ar: {
+    title: (name: string, year: string) => `${year} مع ${name}`,
+    memorialTitle: (name: string, year: string) => `نتذكّر ${name} في ${year}`,
+    intro: "ملخص لما سُجّل لهذا الحيوان الأليف هذا العام — مبني فقط على السجل الفعلي.",
+    prevYear: "السنة السابقة", nextYear: "السنة التالية", memories: "ذكريات", photos: "صور", care: "مهام رعاية منجزة", services: "خدمات مستلمة", trips: "رحلات", visits: "زيارات بيطرية",
+    highlights: "أبرز اللحظات", mostCare: "الرعاية الأكثر تكرارًا", servicesBreakdown: "الخدمات", destinations: "الوجهات", birthday: "عيد الميلاد",
+    birthdayToday: (name: string, n: string) => `اليوم عيد ميلاد ${name} الـ${n}!`, birthdayIn: (days: string, n: string) => `الأيام المتبقية حتى بلوغ ${n}: ${days}`,
+    humanAge: (n: string) => `نحو ${n} بالسنوات البشرية`, humanNote: "تقدير شائع؛ تُحتسب الكلاب وفق متوسط الكلاب متوسطة الحجم.",
+    noBirthDate: "لم يُسجَّل تاريخ الميلاد؛ أضفه لترى هنا العد التنازلي لعيد الميلاد.", addBirthDate: "إضافة تاريخ الميلاد",
+    empty: "لم يُسجَّل شيء لهذا العام بعد. ستُكوِّن الذكريات والرعاية والرحلات هذا الملخص.", addMemory: "أضف ذكرى", loading: "جارٍ إعداد ملخص العام",
+  },
+  nl: {
+    title: (name: string, year: string) => `${year} met ${name}`,
+    memorialTitle: (name: string, year: string) => `Herinneringen aan ${name} in ${year}`,
+    intro: "Een terugblik op wat dit jaar voor dit huisdier is vastgelegd — alleen op basis van het echte dossier.",
+    prevYear: "Vorig jaar", nextYear: "Volgend jaar", memories: "momenten", photos: "foto's", care: "verzorgingstaken gedaan", services: "diensten ontvangen", trips: "reizen", visits: "dierenartsbezoeken",
+    highlights: "Hoogtepunten", mostCare: "Meest voorkomende verzorging", servicesBreakdown: "Diensten", destinations: "Bestemmingen", birthday: "Verjaardag",
+    birthdayToday: (name: string, n: string) => `${name} wordt vandaag ${n}!`, birthdayIn: (days: string, n: string) => `Nog ${days} dagen tot ${n} jaar`,
+    humanAge: (n: string) => `Ongeveer ${n} mensenjaren`, humanNote: "Een gangbare schatting; voor honden geldt het gemiddelde van een middelgrote hond.",
+    noBirthDate: "Geen geboortedatum vastgelegd; voeg er een toe om hier af te tellen naar de verjaardag.", addBirthDate: "Geboortedatum toevoegen",
+    empty: "Nog niets vastgelegd voor dit jaar. Momenten, verzorging en reizen vormen samen deze terugblik.", addMemory: "Moment toevoegen", loading: "Jaaroverzicht wordt voorbereid",
+  },
 } as const;
 
 export function YearReviewView({ petId }: { petId: string }) {
@@ -162,9 +184,9 @@ export function YearReviewView({ petId }: { petId: string }) {
           <p className="mt-1 text-sm leading-7 text-text-secondary">{c.intro}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => setYear((y) => y - 1)} aria-label={c.prevYear}>{locale === "fa" ? "›" : "‹"}</Button>
+          <Button variant="ghost" size="sm" onClick={() => setYear((y) => y - 1)} aria-label={c.prevYear}>{(locale === "fa" || locale === "ar") ? "›" : "‹"}</Button>
           <span className="min-w-16 text-center font-semibold text-text-primary" aria-live="polite">{yearLabel}</span>
-          <Button variant="ghost" size="sm" onClick={() => setYear((y) => y + 1)} aria-label={c.nextYear} disabled={year >= thisYear}>{locale === "fa" ? "‹" : "›"}</Button>
+          <Button variant="ghost" size="sm" onClick={() => setYear((y) => y + 1)} aria-label={c.nextYear} disabled={year >= thisYear}>{(locale === "fa" || locale === "ar") ? "‹" : "›"}</Button>
         </div>
       </header>
 
@@ -217,7 +239,7 @@ export function YearReviewView({ petId }: { petId: string }) {
             {review.care && review.care.topTypes.length ? (
               <section aria-labelledby="yr-care" className="split-panel">
                 <h2 id="yr-care" className="mb-3 font-semibold text-text-primary">{c.mostCare}</h2>
-                <Breakdown rows={review.care.topTypes.map((t) => [CARE_KINDS[t.type]?.[{ fa: 0, en: 1, de: 2, es: 3 }[locale]] ?? t.type, t.count])} n={n} />
+                <Breakdown rows={review.care.topTypes.map((t) => [CARE_KINDS[t.type]?.[{ fa: 0, en: 1, de: 2, es: 3, ar: 4, nl: 5 }[locale]] ?? t.type, t.count])} n={n} />
               </section>
             ) : null}
             {review.services && review.services.byCategory.length ? (

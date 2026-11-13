@@ -20,7 +20,7 @@ export function WorldOrbit() {
   const copy = useOplCopy();
   const c = copy.world;
   const href = (path: string) => `/${locale}${path}`;
-  const Arrow = locale === "fa" ? ArrowLeft : ArrowRight;
+  const Arrow = (locale === "fa" || locale === "ar") ? ArrowLeft : ArrowRight;
   const scenes = useMemo(() => buildReelScenes(copy, locale), [copy, locale]);
   const [active, setActive] = useState<WorldKey>("health");
   const [pulse, setPulse] = useState(0);

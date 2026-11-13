@@ -10,7 +10,7 @@ import { formatCurrency } from "@/lib/currency/format-currency";
 import { adminCommerceService, type AdminRepeatDeliveryRow } from "@/services/admin-commerce.service";
 import { EmptyRow, Panel, TableWrap, Tag, Td, Th } from "../console-ui";
 
-type Lang = "fa" | "en" | "de" | "es";
+type Lang = "fa" | "en" | "de" | "es" | "ar" | "nl";
 type Status = "" | "ACTIVE" | "PAUSED" | "CANCELLED";
 const TONE = { ACTIVE: "success", PAUSED: "attention", CANCELLED: "neutral" } as const;
 

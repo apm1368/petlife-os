@@ -23,7 +23,7 @@ const STATUS_TONE: Record<string, "success" | "attention" | "urgent" | "neutral"
 };
 
 /** Compact booking-queue row (spec section 11) — Pet/Owner/Service/Time/Location/Booking Status/Payment Status, kept separate on purpose. */
-export function ProviderBookingRow({ booking, locale, onClick }: { booking: ProviderBookingSummaryDto; locale: "fa" | "en" | "de" | "es"; onClick: () => void }) {
+export function ProviderBookingRow({ booking, locale, onClick }: { booking: ProviderBookingSummaryDto; locale: "fa" | "en" | "de" | "es" | "ar" | "nl"; onClick: () => void }) {
   const t = useTranslations("provider.bookings.status");
   const tPayment = useTranslations("provider.bookings.paymentStatus");
   const tProvider = useTranslations("provider.bookingRow");

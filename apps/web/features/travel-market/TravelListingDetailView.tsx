@@ -14,6 +14,7 @@ import { travelMarketService } from "@/services/travel-marketplace.service";
 import { useSessionStore } from "@/stores/session-store";
 import { amenityLabel, cancellationSummary, listingTypeLabel, MATCH_LABEL, matchReason, matchTone, money, paymentTimingSummary, policyFacts, ratingText } from "./labels";
 import { readChosenPetIds, useMyPets, writeChosenPetIds } from "./use-my-pets";
+import { placeName } from "@/lib/i18n/iran-places";
 
 /**
  * TRAVEL LISTING DETAIL PATTERN. Everything the traveller must know before paying is on this page
@@ -211,7 +212,7 @@ export function TravelListingDetailView({ listingId }: { listingId: string }) {
   return (
     <div className="flex w-full flex-col gap-6 pb-28 lg:pb-0">
       <nav aria-label={fa ? "مسیر" : "Breadcrumb"} className="text-metadata text-text-secondary">
-        <Link href={`/${lang}/travel`} className="hover:underline">{fa ? "سفر" : "Travel"}</Link> / <Link href={`/${lang}/travel/search?city=${encodeURIComponent(listing.city)}`} className="hover:underline">{listing.city}</Link>
+        <Link href={`/${lang}/travel`} className="hover:underline">{fa ? "سفر" : "Travel"}</Link> / <Link href={`/${lang}/travel/search?city=${encodeURIComponent(listing.city)}`} className="hover:underline">{placeName(listing.city, lang)}</Link>
       </nav>
 
       {images.length ? (
@@ -232,7 +233,7 @@ export function TravelListingDetailView({ listingId }: { listingId: string }) {
           <header className="flex flex-col gap-2">
             <div className="flex flex-wrap items-center gap-2 text-metadata text-text-secondary">
               <span>{listingTypeLabel(listing.type, lang)}</span>
-              <span>· {listing.city}{listing.province ? `${fa ? "، " : ", "}${listing.province}` : ""}</span>
+              <span>· {placeName(listing.city, lang)}{listing.province ? `${fa ? "، " : ", "}${placeName(listing.province, lang)}` : ""}</span>
               {listing.isVerified ? <span className="inline-flex items-center gap-1 text-state-success"><BadgeCheck aria-hidden className="h-4 w-4" />{fa ? "تأییدشده توسط اپت لایف" : "Verified by opetlife"}</span> : null}
             </div>
             <div className="flex items-start justify-between gap-3">

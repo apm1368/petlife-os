@@ -8,12 +8,12 @@ import { formatDay, todayIso } from "./jalali";
  */
 export const TEHRAN_TIME_ZONE = "Asia/Tehran";
 
-type Lang = "fa" | "en" | "de" | "es";
+type Lang = "fa" | "en" | "de" | "es" | "ar" | "nl";
 
-const ZONE_LABEL: Record<Lang, string> = { fa: "به وقت تهران", en: "Tehran time", de: "Teheraner Zeit", es: "hora de Teherán" };
-const TIME_LOCALE: Record<Lang, string> = { fa: "fa-IR-u-nu-arabext", en: "en-GB", de: "de-DE", es: "es-ES" };
+const ZONE_LABEL: Record<Lang, string> = { fa: "به وقت تهران", en: "Tehran time", de: "Teheraner Zeit", es: "hora de Teherán", ar: "بتوقيت طهران", nl: "Teheraanse tijd" };
+const TIME_LOCALE: Record<Lang, string> = { fa: "fa-IR-u-nu-arabext", en: "en-GB", de: "de-DE", es: "es-ES", ar: "ar", nl: "nl-NL" };
 
-const lang = (locale: string): Lang => (locale === "fa" || locale === "de" || locale === "es" ? locale : "en");
+const lang = (locale: string): Lang => (locale === "fa" || locale === "de" || locale === "es" || locale === "ar" || locale === "nl" ? locale : "en");
 
 /** The calendar day (ISO "YYYY-MM-DD") an instant falls on in Tehran. */
 export function tehranDay(instant: string | Date): string {
@@ -35,7 +35,7 @@ export function formatTehranDateTime(instant: string, locale: string, options: {
   const l = lang(locale);
   const day = formatDay(tehranDay(instant), l, { weekday: options.weekday });
   const time = formatTehranTime(instant, l);
-  const joined = l === "fa" ? `${day}، ساعت ${time}` : `${day}, ${time}`;
+  const joined = l === "fa" ? `${day}، ساعت ${time}` : l === "ar" ? `${day}، ${time}` : `${day}, ${time}`;
   return options.zone ? `${joined} (${ZONE_LABEL[l]})` : joined;
 }
 

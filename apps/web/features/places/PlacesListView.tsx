@@ -12,6 +12,8 @@ import { apiErrorText } from "@/lib/errors/api-error-text";
 import { placeLocation, formatDistanceKm } from "@/features/places/place-format";
 import { DiscoveryPage } from "@/features/discovery/DiscoveryPage";
 import { isOsmUnclaimed, OsmAttribution } from "@/features/places/PlaceOsm";
+import { localeDirection, type RouteLocale } from "@/lib/i18n/config";
+import { placeQuery } from "@/lib/i18n/iran-places";
 
 const CATEGORIES: PetFriendlyPlaceCategory[] = [
   PetFriendlyPlaceCategory.VETERINARY,
@@ -69,7 +71,7 @@ export function PlacesListView() {
     setError(null);
     setLoadError(null);
     try {
-      const result = await placesService.list({ city: city.trim() || undefined, category: category || undefined, pageSize: 50 });
+      const result = await placesService.list({ city: placeQuery(city) || undefined, category: category || undefined, pageSize: 50 });
       setPlaces(result.items);
     } catch (err) {
       setLoadError(err);
@@ -140,7 +142,7 @@ export function PlacesListView() {
           {places.map((place) => {
             const Icon = CATEGORY_ICON[place.category] ?? MapPin;
             const rules = placeRules(place, locale === "fa");
-            const Go = locale === "fa" ? ChevronLeft : ChevronRight;
+            const Go = localeDirection[locale as RouteLocale] === "rtl" ? ChevronLeft : ChevronRight;
             return (
               <li key={place.id}>
                 <Link href={`/${locale}/places/${place.id}`} className="place-row">

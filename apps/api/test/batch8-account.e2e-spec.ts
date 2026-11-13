@@ -147,7 +147,8 @@ describe("Batch 8 — Account & security", () => {
         expect((await u.c.get("/me").expect(200)).body.locale).toBe(locale);
         expect((await prisma.user.findUniqueOrThrow({ where: { id: u.userId } })).locale).toBe(locale);
       }
-      await u.c.patch("/me").send({ locale: "ar" }).expect(400);
+      await u.c.patch("/me").send({ locale: "tr" }).expect(400);
+      expect((await u.c.patch("/me").send({ locale: "ar" }).expect(200)).body.locale).toBe("ar");
     });
 
     it("registers the requested account identity while keeping the phone explicitly unverified", async () => {

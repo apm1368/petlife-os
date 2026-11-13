@@ -51,7 +51,7 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
   const tSeverity = useTranslations("healthShares.severity");
   const tCommon = useTranslations("common");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en" | "de" | "es";
+  const locale = useLocale() as "fa" | "en" | "de" | "es" | "ar" | "nl";
   const fmt = useInstantFormat();
   const [downloadError, setDownloadError] = useState<string | null>(null);
 

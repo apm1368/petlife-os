@@ -18,7 +18,7 @@ const FIELD = "rounded-md border border-border-subtle bg-surface-base px-3 py-2 
 /** The finance queue of refund approvals across shop orders, service bookings and stays (two-person control). */
 export function AdminRefundApprovalsView() {
   const t = useTranslations("adminRefundApprovals");
-  const locale = useLocale() as "fa" | "en" | "de" | "es";
+  const locale = useLocale() as "fa" | "en" | "de" | "es" | "ar" | "nl";
   const permissions: readonly string[] = useAdminStore((s) => s.context?.permissions) ?? NO_PERMISSIONS;
   const can = (p: string) => permissions.includes(p);
   const [status, setStatus] = useState<(typeof STATUSES)[number]>("REQUESTED");

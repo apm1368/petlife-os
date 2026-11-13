@@ -9,6 +9,8 @@ const VISIBILITY_COPY: Record<RouteLocale, { show: string; hide: string }> = {
  en: { show: "Show", hide: "Hide" },
  de: { show: "Anzeigen", hide: "Ausblenden" },
  es: { show: "Mostrar", hide: "Ocultar" },
+ ar: { show: "إظهار", hide: "إخفاء" },
+ nl: { show: "Tonen", hide: "Verbergen" },
 };
 
 export function PasswordInput(props: InputProps) {

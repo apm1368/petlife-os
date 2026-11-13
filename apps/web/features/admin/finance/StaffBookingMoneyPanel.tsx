@@ -46,7 +46,7 @@ export function StaffBookingMoneyPanel({ kind, bookingId, onChanged }: { kind: "
   }, [kind, bookingId]);
   useEffect(() => void load(), [load]);
 
-  const irr = (n: number) => formatCurrency(n, locale as "fa" | "en" | "de" | "es");
+  const irr = (n: number) => formatCurrency(n, locale as "fa" | "en" | "de" | "es" | "ar" | "nl");
 
   function reset() {
     setMode(null);

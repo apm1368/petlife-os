@@ -30,6 +30,7 @@ import { localizeDigits } from "@/lib/date/jalali";
 import { isolate } from "@/lib/text/bidi";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { SafetyTip } from "@/features/shared/SafetyTip";
+import { LegalConsentLine } from "@/features/legal/LegalConsentLine";
 
 type Step =
   | "address"
@@ -668,6 +669,8 @@ export function CheckoutView() {
         {onlineOptions.length === 0 && installmentOptions.length === 0 ? (
           <StatusLabel tone="attention">{t("method.noneAvailable")}</StatusLabel>
         ) : null}
+
+        <LegalConsentLine kind="checkoutConsent" locale={locale} />
 
         <Button variant="ghost" onClick={() => setStep("review")}>
           {tCommon("back")}

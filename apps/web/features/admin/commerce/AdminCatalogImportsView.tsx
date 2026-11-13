@@ -9,7 +9,7 @@ import { Panel, PanelTitle, Tag } from "../console-ui";
 import { copyFor } from "@/features/admin/admin-copy";
 import { DigikalaFactsImportPanel } from "./DigikalaFactsImportPanel";
 
-type Lang = "fa" | "en" | "de" | "es";
+type Lang = "fa" | "en" | "de" | "es" | "ar" | "nl";
 type Category = { id: string; name: string; slug: string };
 type Brand = { id: string; name: string; slug: string };
 type ImportRow = Awaited<ReturnType<typeof adminCommerceService.listCatalogImports>>[number];

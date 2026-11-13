@@ -16,6 +16,8 @@ function formatDate(iso: string, locale: string) {
     en: "en-GB",
     de: "de-DE",
     es: "es-ES",
+    ar: "ar",
+    nl: "nl-NL",
   };
   return new Intl.DateTimeFormat(intlLocale[locale] ?? "en-GB", {
     dateStyle: "short",

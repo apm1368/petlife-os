@@ -232,6 +232,58 @@ export const dashboardCopy = {
     loadingTrips: "Cargando próximas estancias",
     planNameInEnglish: "Nombre del plan en inglés",
   },
+  ar: {
+    dashboard: "لوحة التحكم", startHere: "ابدأ من هنا", firstStep: "أولًا، لنتعرّف على حيوانك الأليف.",
+    healthIntro: "السجلات الصحية والتاريخ والمستندات في مكان واحد.", careIntro: "المواعيد والرعاية القادمة في الوقت المناسب.",
+    memoriesIntro: "مكان للذكريات التي تريد الاحتفاظ بها.", account: "حسابك", accountIntro: "أدِر بياناتك الشخصية وأسرتك من هنا.",
+    personal: "البيانات الشخصية", household: "الأسرة والصلاحيات", recentActivity: "أحدث ما في سجله",
+    noActivity: "ستبني الرعاية والزيارات والذكريات تاريخ حيوانك الأليف هنا.", hello: (name: string) => `مرحبًا، ${name}`,
+    todayIs: "اليوم", addPet: "أضف حيوانًا أليفًا", profile: "الملف الكامل", attention: "يحتاج إلى انتباه",
+    noAttention: "بناءً على ما هو مسجّل، لا يوجد شيء عاجل بانتظارك.", noAttentionHint: "هذا لا يعني أن السجل مكتمل — كلما أضفت أكثر، تحسّنت التذكيرات.",
+    next: "الموعد التالي", noNext: "ليس لديك موعد قادم.", findVet: "ابحث عن طبيب بيطري", findService: "الخدمات", details: "تفاصيل الموعد",
+    upcoming: "قريبًا", noUpcoming: "لا يوجد تذكير أو حدث مسجّل بتاريخ.", calendar: "تقويم الرعاية", shortcuts: "اختصارات",
+    health: "السجل الصحي", care: "الرعاية", memories: "الذكريات", shop: "المتجر", welcomeTitle: "مرحبًا بك في opetlife",
+    welcomeBody: "أضف أول حيوان أليف لديك لتجمع صحته ورعايته وذكرياته في مكان واحد.", welcomeCta: "أضف أول حيوان أليف",
+    unknownAge: "العمر غير معروف", switchPet: "اختر حيوانًا أليفًا", sections: "أقسام الملف الشخصي", lastHealth: "آخر سجل صحي",
+    documents: "المستندات", travel: "السفر", weight: "الوزن", microchip: "الشريحة الإلكترونية", registered: "مسجّل", notRecorded: "غير مسجّل",
+    recentHealth: "السجلات الصحية الأخيرة", noRecentHealth: "لم يُسجَّل شيء بعد.", allHealth: "السجل الكامل", membership: "العضوية",
+    noMembership: "لا توجد عضوية نشطة. اطّلع على الخطط وما تتضمنه.", seePlans: "عرض الخطط", manage: "إدارة",
+    trialUntil: "الفترة التجريبية حتى", renewsOn: "يتجدد في", orders: "الطلبات", noOrders: "لم تطلب أي شيء بعد.", allOrders: "كل الطلبات",
+    trips: "الإقامات القادمة", noTrips: "لا توجد إقامة قادمة محجوزة.", findStay: "ابحث عن إقامة", explore: "لحيوانك الأليف",
+    services: "الخدمات", vets: "الأطباء البيطريون", shopLink: "المتجر", stays: "السفر والإقامة", community: "المجتمع",
+    unavailable: "تعذّر تحميل هذا القسم الآن.", retry: "إعادة المحاولة",
+    loadingDashboard: "جارٍ تحميل لوحة التحكم",
+    loadingMembership: "جارٍ تحميل العضوية",
+    loadingOrders: "جارٍ تحميل الطلبات",
+    loadingTrips: "جارٍ تحميل الإقامات القادمة",
+    planNameInEnglish: "اسم الخطة بالإنجليزية",
+  },
+  nl: {
+    dashboard: "Dashboard", startHere: "Begin hier", firstStep: "Laten we eerst kennismaken met je huisdier.",
+    healthIntro: "Gezondheidsdossier, geschiedenis en documenten bij elkaar.", careIntro: "Afspraken en komende verzorging, op het juiste moment.",
+    memoriesIntro: "Een plek voor de momenten die je wilt bewaren.", account: "Je account", accountIntro: "Beheer hier je persoonlijke gegevens en je huishouden.",
+    personal: "Persoonlijke gegevens", household: "Huishouden en toegang", recentActivity: "Nieuw in het dossier",
+    noActivity: "Verzorging, bezoeken en momenten vormen hier de geschiedenis van je huisdier.", hello: (name: string) => `Hallo, ${name}`,
+    todayIs: "Vandaag", addPet: "Huisdier toevoegen", profile: "Volledig profiel", attention: "Vraagt aandacht",
+    noAttention: "Op basis van wat is vastgelegd, wacht er niets dringends.", noAttentionHint: "Dat betekent niet dat het dossier compleet is — hoe meer je toevoegt, hoe beter de herinneringen.",
+    next: "Volgende afspraak", noNext: "Je hebt geen komende afspraak.", findVet: "Zoek een dierenarts", findService: "Diensten", details: "Afspraakdetails",
+    upcoming: "Binnenkort", noUpcoming: "Er is geen herinnering of gebeurtenis met een datum vastgelegd.", calendar: "Verzorgingskalender", shortcuts: "Snelkoppelingen",
+    health: "Gezondheidsdossier", care: "Verzorging", memories: "Momenten", shop: "Winkel", welcomeTitle: "Welkom bij opetlife",
+    welcomeBody: "Voeg je eerste huisdier toe om gezondheid, verzorging en momenten op één plek te bewaren.", welcomeCta: "Voeg je eerste huisdier toe",
+    unknownAge: "Leeftijd onbekend", switchPet: "Kies een huisdier", sections: "Profielonderdelen", lastHealth: "Laatste gezondheidsnotitie",
+    documents: "Documenten", travel: "Reizen", weight: "Gewicht", microchip: "Microchip", registered: "Geregistreerd", notRecorded: "Niet vastgelegd",
+    recentHealth: "Recente gezondheid", noRecentHealth: "Nog niets vastgelegd.", allHealth: "Volledig dossier", membership: "Lidmaatschap",
+    noMembership: "Geen actief lidmaatschap. Bekijk de abonnementen en wat ze bevatten.", seePlans: "Bekijk abonnementen", manage: "Beheren",
+    trialUntil: "Proefperiode tot", renewsOn: "Wordt verlengd op", orders: "Bestellingen", noOrders: "Je hebt nog niets besteld.", allOrders: "Alle bestellingen",
+    trips: "Komende verblijven", noTrips: "Geen komend verblijf geboekt.", findStay: "Zoek een verblijf", explore: "Voor je huisdier",
+    services: "Diensten", vets: "Dierenartsen", shopLink: "Winkel", stays: "Reizen en verblijven", community: "Community",
+    unavailable: "Dit onderdeel kon nu niet worden geladen.", retry: "Opnieuw proberen",
+    loadingDashboard: "Dashboard laden",
+    loadingMembership: "Lidmaatschap laden",
+    loadingOrders: "Bestellingen laden",
+    loadingTrips: "Komende verblijven laden",
+    planNameInEnglish: "Plannaam in het Engels",
+  },
 } as const;
 
 /**
@@ -242,7 +294,7 @@ export const dashboardCopy = {
 export function MemberHomeView() {
   const locale = useLocale() as RouteLocale;
   const c = dashboardCopy[locale];
-  const Forward = locale === "fa" ? ChevronLeft : ChevronRight;
+  const Forward = (locale === "fa" || locale === "ar") ? ChevronLeft : ChevronRight;
   const user = useSessionStore((s) => s.user);
   const { pets, activePetId, switchActivePet, isSwitching } = useActivePet();
   const [overview, setOverview] = useState<PetOverviewDto | null>(null);
