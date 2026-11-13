@@ -339,7 +339,9 @@
   -webkit-mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><ellipse cx='12' cy='15.6' rx='5' ry='4.2'/><ellipse cx='6.2' cy='10.2' rx='1.9' ry='2.4'/><ellipse cx='9.6' cy='6.9' rx='1.9' ry='2.5'/><ellipse cx='14.4' cy='6.9' rx='1.9' ry='2.5'/><ellipse cx='17.8' cy='10.2' rx='1.9' ry='2.4'/></svg>") center / contain no-repeat;
   mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><ellipse cx='12' cy='15.6' rx='5' ry='4.2'/><ellipse cx='6.2' cy='10.2' rx='1.9' ry='2.4'/><ellipse cx='9.6' cy='6.9' rx='1.9' ry='2.5'/><ellipse cx='14.4' cy='6.9' rx='1.9' ry='2.5'/><ellipse cx='17.8' cy='10.2' rx='1.9' ry='2.4'/></svg>") center / contain no-repeat; }
 @keyframes oplPpFade { 0% { opacity:.5; } 100% { opacity:0; } }
-.opl-ck { position:fixed; left:0; top:0; z-index:90; pointer-events:none; will-change:transform; }
+.opl-ck { position:fixed; left:0; top:0; z-index:90; pointer-events:none; will-change:transform; transition:opacity .25s; }
+/* Over a form Cookie steps back and fades, so fields and buttons stay readable (it never takes clicks anyway). */
+.opl-ck.shy { opacity:.25; }
 .opl-ck__body { transform-origin:50% 90%; }
 .opl-ck__bubble { position:absolute; bottom:calc(100% + 4px); left:50%; transform:translateX(-50%) scale(.6); transform-origin:50% 100%; opacity:0; white-space:nowrap; background:var(--opl-raised); color:var(--opl-ink); font-size:.82rem; font-weight:800; padding:6px 14px; border-radius:999px; box-shadow:0 10px 24px -10px rgb(var(--opl-sh) / .6),0 0 0 1px var(--opl-line); transition:opacity .25s,transform .35s var(--opl-ease-emph); }
 .opl-ck.talk .opl-ck__bubble { opacity:1; transform:translateX(-50%) scale(1); }

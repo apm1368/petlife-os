@@ -92,6 +92,59 @@
       "oil": "Tag der Ölverstaatlichung"
     }
   },
+  "adminOwnership": {
+    "kicker": "Tiere",
+    "title": "Eigentumsübertragungen",
+    "intro": "Alle Anfragen, ein Tier an einen neuen Eigentümer zu übertragen, strittige zuerst. Ein Streit bewegt das Tier nie: Der eingetragene Eigentümer bleibt bis zu einer amtlichen Entscheidung oder schriftlichen Vereinbarung. Prüfen Sie die Unterlagen der Beteiligten (über den Support) und schließen Sie den Streit mit Begründung. Beide werden über das Ergebnis informiert.",
+    "filterLabel": "Status der Übertragung",
+    "search": "Suche",
+    "searchPlaceholder": "Name des Tiers oder der Person",
+    "apply": "Suchen",
+    "retry": "Erneut versuchen",
+    "cancel": "Abbrechen",
+    "status": {
+      "DISPUTED": "Strittig",
+      "PENDING_REVIEW": "Wartet auf Empfänger",
+      "ACCEPTED": "Übertragen",
+      "DECLINED": "Abgelehnt",
+      "CANCELLED": "Storniert",
+      "EXPIRED": "Abgelaufen",
+      "ALL": "Alle"
+    },
+    "empty": "Keine passenden Übertragungen.",
+    "emptyDisputed": "Keine offenen Streitfälle.",
+    "registeredOwner": "Jetzt eingetragener Eigentümer",
+    "requested": "Angefragt",
+    "applied": "Übertragen am",
+    "notApplied": "Nicht übertragen",
+    "memories": "Erinnerungen",
+    "memory": {
+      "TRANSFER": "Gehen an den neuen Eigentümer",
+      "RETAIN": "Bleiben beim bisherigen Eigentümer",
+      "COPY_READ_ONLY": "Schreibgeschützte Kopie für den neuen Eigentümer"
+    },
+    "explain": {
+      "applied": "Diese Übertragung war bereits erfolgt. Das Schließen des Streits lässt sie bestehen.",
+      "pending": "Der Empfänger hatte noch nicht angenommen. Das Schließen des Streits schließt die Anfrage; der eingetragene Eigentümer bleibt."
+    },
+    "close": "Streit schließen",
+    "reason": "Ergebnis und Begründung",
+    "reasonPlaceholder": "Zum Beispiel: Kaufvertrag mit beiden Parteien telefonisch geprüft",
+    "done": {
+      "stands": "Streit um {pet} geschlossen: Die Übertragung bleibt bestehen. Beide Parteien wurden benachrichtigt.",
+      "ownerStays": "Streit um {pet} geschlossen: Die Anfrage ist geschlossen, der eingetragene Eigentümer bleibt. Beide Parteien wurden benachrichtigt."
+    },
+    "errors": {
+      "reason": "Geben Sie Ergebnis und Begründung an (mindestens 5 Zeichen).",
+      "forbidden": "Ihre Rolle umfasst keine Kundendaten.",
+      "load": "Die Übertragungen konnten nicht geladen werden.",
+      "generic": "Das hat nicht funktioniert. Bitte versuchen Sie es erneut."
+    },
+    "rules": {
+      "OWNERSHIP_NOT_DISPUTED": "Diese Übertragung ist nicht mehr strittig. Aktualisieren Sie die Liste.",
+      "OWNERSHIP_CHANGED_CONCURRENTLY": "Jemand anderes hat diese Übertragung gerade geändert. Aktualisieren Sie die Liste."
+    }
+  },
   "adminDeletionRequests": {
     "kicker": "Datenschutz",
     "title": "Anträge auf Kontolöschung",
@@ -2052,6 +2105,9 @@
       "analytics": "Auswertung und Warteliste"
     },
     "bookings": {
+      "noShowLabel": "Nicht erschienen",
+      "noShowProvider": "Anbieter nicht erschienen (Meldung des Mitglieds)",
+      "noShowOwner": "Halter nicht erschienen",
       "title": "Dienstleistungen und Buchungen",
       "searchLabel": "Nach Nummer, Tier oder Anbieter suchen",
       "statusLabel": "Buchungsstatus",
@@ -3179,6 +3235,8 @@
         "URGENT": "Dringend"
       },
       "sources": {
+        "PROVIDER_NO_SHOW": "Anbieter nicht erschienen",
+        "OWNERSHIP_DISPUTE": "Eigentumsstreit",
         "MANUAL": "Manuelle Erfassung",
         "TRAVEL_SOURCE": "Reisequellen",
         "PARTNER_VERIFICATION": "Prüfung von Partnerdokumenten",
@@ -3834,6 +3892,7 @@
       },
       "tabs": {
         "holidays": "Feiertage und Schließtage",
+        "ownershipTransfers": "Eigentumsübertragungen",
         "deletionRequests": "Löschanträge",
         "customRoles": "Eigene Rollen",
         "directory": "Verzeichnis",
@@ -4066,6 +4125,10 @@
           "EXECUTED": "Ausgeführt"
         }
       }
+    },
+    "demoRecord": {
+      "label": "Demo – auf der Live-Seite ausgeblendet",
+      "hint": "Beispieldaten für Demos und Tests. Die Live-Seite zeigt sie Mitgliedern nie, auch wenn sie hier als geprüft oder öffentlich markiert sind."
     }
   },
   "adminUsers": {
@@ -5558,7 +5621,8 @@
       "checkInSelected": "Anreise ausgewählt; wähle jetzt die Abreise.",
       "checkInSuffix": ", Anreise",
       "checkOutSuffix": ", Abreise"
-    }
+    },
+    "year": "Jahr"
   },
   "filePicker": {
     "choose": "Datei auswählen",
@@ -6099,7 +6163,9 @@
       "privateNotice": "Diese Datei ist privat und hat keine öffentliche Objektadresse. Für jeden Download wird ein kurzlebiger, signierter Zugriffslink erstellt.",
       "previewDownload": "Sicher anzeigen und herunterladen",
       "openFile": "Datei öffnen",
-      "previewUnavailable": "Für diesen Dateityp ist keine Vorschau verfügbar."
+      "previewUnavailable": "Für diesen Dateityp ist keine Vorschau verfügbar.",
+      "manage": "Details und zurückziehen",
+      "details": "Details"
     },
     "nav": {
       "overview": "Übersicht",
@@ -6376,6 +6442,9 @@
         "allClear": "Alles erledigt – auf dein Team wartet nichts.",
         "clearList": "Erledigt: {list}",
         "queue": {
+          "pendingReviews": "Bewertungen in Prüfung",
+          "openProviderNoShows": "Meldungen: Anbieter nicht erschienen",
+          "openOwnershipDisputes": "Eigentumsstreitigkeiten",
           "pendingDeletionRequests": "Anträge auf Kontolöschung",
           "openTrustCases": "Fälle zu Vertrauen und Sicherheit",
           "openDisputes": "Offene Streitfälle",
@@ -6400,7 +6469,7 @@
       },
       "shortcuts": "Schnellzugriffe",
       "healthLink": "Statusseite",
-      "workersSummary": "{running} von {total} Hintergrundjobs laufen",
+      "workersSummary": "{running} von {total} Hintergrundjobs fehlerfrei",
       "priority": {
         "URGENT": "Dringend",
         "HIGH": "Hoch"
@@ -6880,6 +6949,18 @@
         "send": "Anfrage senden",
         "cancel": "Abbrechen"
       }
+  },
+    "own": {
+      "edit": "Bearbeiten",
+      "delete": "Löschen",
+      "save": "Änderungen speichern",
+      "cancel": "Abbrechen",
+      "titleLabel": "Titel",
+      "bodyLabel": "Text",
+      "confirmPost": "Diesen Beitrag für alle löschen? Auch seine Kommentare verschwinden.",
+      "confirmComment": "Diesen Kommentar löschen?",
+      "deleteYes": "Ja, löschen",
+      "edited": "bearbeitet"
     }
   },
   "publicNavigation": {
@@ -10546,5 +10627,68 @@
     "invalid": "Wählen Sie eine Kategorie und eine Zahl von 1 bis 3000.",
     "forbidden": "Berechtigung commerce.manage erforderlich.",
     "failed": "Konnte nicht starten; bitte erneut versuchen."
+  },
+  "petCard": {
+    "title": "Tierkarte und QR-Code",
+    "intro": "Eine öffentliche Karte für die Marke oder das Halsband von {name}. Wer den Code scannt, sieht nur, was du hier auswählst, und kann dir über opetlife schreiben. Deine Telefonnummer wird nie angezeigt.",
+    "back": "Zurück zum Profil von {name}",
+    "fieldsTitle": "Was die Karte zeigt",
+    "healthGroup": "Gesundheit (für den Fall, dass Finder es wissen müssen)",
+    "fields": {
+      "PHOTO": "Foto",
+      "SPECIES": "Tierart",
+      "BREED": "Rasse",
+      "SEX": "Geschlecht",
+      "AGE": "Alter",
+      "MICROCHIP_STATUS": "Ob ein Mikrochip vorhanden ist (nicht die Nummer)",
+      "ALLERGIES": "Allergien",
+      "CONDITIONS": "Aktuelle Erkrankungen",
+      "MEDICATIONS": "Aktuelle Medikamente",
+      "BLOOD_TYPE": "Blutgruppe",
+      "CRITICAL_NOTES": "Wichtige Hinweise"
+    },
+    "previewTitle": "Wer den Code scannt, sieht",
+    "previewName": "Name: {name}",
+    "previewMessage": "Eine Schaltfläche „Besitzer kontaktieren“ über opetlife",
+    "neverTitle": "Nie angezeigt",
+    "never": "Deine Adresse, Haushaltsmitglieder, Telefonnummer, die Mikrochipnummer, Dokumente und Termine.",
+    "create": "Karte und QR-Code erstellen",
+    "replace": "Neue Karte erstellen",
+    "replaceNote": "Mit einer neuen Karte wird die aktuelle sofort ungültig; ihr alter Code öffnet sich nicht mehr.",
+    "creating": "Wird erstellt…",
+    "createError": "Die Karte wurde nicht erstellt. Versuch es noch einmal.",
+    "readyTitle": "Deine Karte ist fertig",
+    "onceNote": "Dieser Link und Code werden nur jetzt angezeigt. Lade sie herunter oder drucke sie; wenn sie verloren gehen, erstelle eine neue Karte.",
+    "qrLabel": "QR-Code für die Karte von {name}",
+    "download": "QR herunterladen",
+    "print": "Drucken",
+    "copy": "Link kopieren",
+    "copied": "Kopiert",
+    "open": "Karte ansehen",
+    "listTitle": "Karten von {name}",
+    "listEmpty": "Noch keine Karte.",
+    "kind": {
+      "ID_TAG": "Markenkarte",
+      "EMERGENCY": "Notfallkarte"
+    },
+    "state": {
+      "ACTIVE": "Aktiv",
+      "REVOKED": "Widerrufen",
+      "ROTATED": "Ersetzt",
+      "EXPIRED": "Abgelaufen"
+    },
+    "created": "Erstellt am {date}",
+    "ending": "Code endet auf …{hint}",
+    "views": "Aufrufe: {count}",
+    "lastViewed": "Zuletzt angesehen {date}",
+    "revoke": "Karte widerrufen",
+    "revokeConfirm": "Ja, diese Karte widerrufen",
+    "revokeCancel": "Abbrechen",
+    "revoked": "Die Karte ist widerrufen; ihr Code öffnet sich nicht mehr.",
+    "revokeError": "Nicht widerrufen. Versuch es noch einmal.",
+    "noAccess": "Nur wer die Zugriffe auf dieses Tier verwaltet, kann eine Karte erstellen.",
+    "loadError": "Die Kartendaten konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "loading": "Wird geladen…"
   }
 }

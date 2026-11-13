@@ -9,6 +9,7 @@ import { ChatController } from "./chat/chat.controller";
 import { ChatService } from "./chat/chat.service";
 import { ChatNotificationListener } from "./chat/chat-notification.listener";
 import { NotificationsModule } from "../notifications/notifications.module";
+import { CommunityModerationNotificationListener } from "./community-moderation-notification.listener";
 
 /**
  * The consumer-facing half of the Handoff 18 Community domain — browsing,
@@ -22,7 +23,7 @@ import { NotificationsModule } from "../notifications/notifications.module";
 @Module({
   imports: [PetAccessModule, StorageModule, NotificationsModule],
   controllers: [CommunityController, ContentReportController, ChatController],
-  providers: [CommunityPostService, CommunityReportService, ChatService, ChatNotificationListener],
+  providers: [CommunityPostService, CommunityReportService, ChatService, ChatNotificationListener, CommunityModerationNotificationListener],
   exports: [CommunityPostService],
 })
 export class CommunityModule {}

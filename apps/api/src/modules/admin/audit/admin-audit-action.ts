@@ -141,6 +141,7 @@ export type AdminAuditAction =
   // Business calendar (Settings → Holidays and closures)
   | "calendar_day.changed"
   | "calendar_day.cleared"
+  | "pet_ownership.dispute_closed"
   | "messaging.test_sms_sent"
   | "messaging.test_email_sent"
   | "customer.suspended"

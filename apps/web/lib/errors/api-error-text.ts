@@ -17,6 +17,7 @@ const FA: Record<string, string> = {
   CHECKOUT_EXPIRED: "مهلت این پرداخت تمام شده است. دوباره شروع کنید.",
   CLINICAL_RECORDING_NOT_AUTHORIZED: "اجازهٔ ثبت اطلاعات بالینی برای این حیوان را ندارید.",
   COMMUNITY_CONTENT_NOT_VISIBLE: "این مطلب دیگر نمایش داده نمی‌شود.",
+  COMMUNITY_CONTENT_UNDER_REVIEW: "این مطلب گزارش شده و در حال بررسی است؛ تا پایان بررسی نمی‌توان آن را ویرایش کرد.",
   COMPATIBILITY_REVIEW_REQUIRED: "پیش از خرید برای این حیوان، این کالا را بررسی و تأیید کنید.",
   CONSENT_REQUIRED: "پذیرش این توافق برای استفاده از اپت لایف لازم است. برای توقف، حذف حساب را درخواست کنید.",
   CONTACT_UNAVAILABLE: "از این ایمیل یا شماره نمی‌توان برای حساب شما استفاده کرد.",

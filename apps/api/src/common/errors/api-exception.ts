@@ -1370,6 +1370,13 @@ export class CommunityContentNotVisibleException extends ApiException {
   }
 }
 
+/** M6: an author can't edit a post or comment while a report on it is open or escalated, so the reported words stay as reported. */
+export class CommunityContentUnderReviewException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("COMMUNITY_CONTENT_UNDER_REVIEW", "This was reported and is being reviewed; it can't be edited until the review ends.", HttpStatus.CONFLICT, details);
+  }
+}
+
 export class CommunityReportNotFoundException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("COMMUNITY_REPORT_NOT_FOUND", "Report not found.", HttpStatus.NOT_FOUND, details);

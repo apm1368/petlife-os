@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { BookingStatus, Prisma, ProviderReviewStatus, ProviderType, WaitlistStatus } from "@prisma/client";
+import { NoShowParty, BookingStatus, Prisma, ProviderReviewStatus, ProviderType, WaitlistStatus } from "@prisma/client";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { NotFoundApiException, AdminAccessDeniedException } from "../../../common/errors/api-exception";
 import { maskEmail } from "../../../common/pii/pii-mask.util";
@@ -11,6 +11,7 @@ import { ProviderReviewsService } from "../../booking/provider-reviews.service";
 
 export interface AdminBookingListQuery {
   status?: BookingStatus;
+  noShowParty?: NoShowParty;
   providerId?: string;
   q?: string;
   from?: string;
@@ -55,6 +56,7 @@ export class AdminServicesService {
     const where: Prisma.BookingWhereInput = {
       ...this.providerScope(admin),
       ...(query.status ? { bookingStatus: query.status } : {}),
+      ...(query.noShowParty ? { noShowParty: query.noShowParty } : {}),
       ...(query.providerId ? { providerOrganizationId: query.providerId } : {}),
       ...(query.from || query.to ? { startAt: { ...(query.from ? { gte: new Date(query.from) } : {}), ...(query.to ? { lt: new Date(query.to) } : {}) } } : {}),
       ...(query.q ? { OR: [{ bookingNumber: { contains: query.q, mode: "insensitive" } }, { pet: { name: { contains: query.q, mode: "insensitive" } } }, { providerOrganization: { name: { contains: query.q, mode: "insensitive" } } }] } : {}),
@@ -84,6 +86,7 @@ export class AdminServicesService {
         serviceName: b.serviceNameSnapshot ?? b.providerService.name,
         priceAmount: b.priceAmount === null ? null : Number(b.priceAmount),
         currency: b.currency,
+        noShowParty: b.noShowParty,
       })),
     };
   }

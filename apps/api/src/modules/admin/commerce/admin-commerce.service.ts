@@ -518,6 +518,7 @@ export class AdminCommerceService {
         return {
           id: p.id,
           title: p.title,
+          isDemoRecord: p.isDemoRecord,
           status: p.status as unknown as AdminProductRowDto["status"],
           categoryName: p.category.name,
           brandName: p.brand?.name ?? null,

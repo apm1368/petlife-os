@@ -92,6 +92,59 @@
       "oil": "Oil Nationalization Day"
     }
   },
+  "adminOwnership": {
+    "kicker": "Pets",
+    "title": "Ownership transfers",
+    "intro": "Every request to move a pet to a new owner, disputed ones first. A dispute never moves the pet: the registered owner stays until an official ruling or a written agreement. Check the parties' documents (via support), then close the dispute with a reason. Both people are told the outcome.",
+    "filterLabel": "Transfer status",
+    "search": "Search",
+    "searchPlaceholder": "Pet or person name",
+    "apply": "Search",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "status": {
+      "DISPUTED": "Disputed",
+      "PENDING_REVIEW": "Waiting for recipient",
+      "ACCEPTED": "Transferred",
+      "DECLINED": "Declined",
+      "CANCELLED": "Cancelled",
+      "EXPIRED": "Expired",
+      "ALL": "All"
+    },
+    "empty": "No transfers match.",
+    "emptyDisputed": "No open disputes.",
+    "registeredOwner": "Registered owner now",
+    "requested": "Requested",
+    "applied": "Transferred on",
+    "notApplied": "Not transferred",
+    "memories": "Memories",
+    "memory": {
+      "TRANSFER": "Go to the new owner",
+      "RETAIN": "Stay with the previous owner",
+      "COPY_READ_ONLY": "Read-only copy for the new owner"
+    },
+    "explain": {
+      "applied": "This transfer had already happened. Closing the dispute keeps it as it is.",
+      "pending": "The recipient hadn't accepted yet. Closing the dispute closes the request; the registered owner stays."
+    },
+    "close": "Close dispute",
+    "reason": "Outcome and reason",
+    "reasonPlaceholder": "For example: purchase contract checked with both parties by phone",
+    "done": {
+      "stands": "Dispute about {pet} closed: the transfer stands. Both parties have been notified.",
+      "ownerStays": "Dispute about {pet} closed: the request is closed and the registered owner stays. Both parties have been notified."
+    },
+    "errors": {
+      "reason": "Write the outcome and reason (at least 5 characters).",
+      "forbidden": "Your role doesn't include customer records.",
+      "load": "Transfers couldn't be loaded.",
+      "generic": "That didn't work. Please try again."
+    },
+    "rules": {
+      "OWNERSHIP_NOT_DISPUTED": "This transfer isn't disputed any more. Refresh the list.",
+      "OWNERSHIP_CHANGED_CONCURRENTLY": "Someone else changed this transfer just now. Refresh the list."
+    }
+  },
   "adminDeletionRequests": {
     "kicker": "Privacy",
     "title": "Account deletion requests",
@@ -1391,6 +1444,9 @@
       "analytics": "Analytics & waitlist"
     },
     "bookings": {
+      "noShowLabel": "No-show",
+      "noShowProvider": "Provider didn't show (reported by member)",
+      "noShowOwner": "Owner didn't show",
       "title": "Services & bookings",
       "searchLabel": "Search by number, pet or provider",
       "statusLabel": "Booking status",
@@ -4617,6 +4673,7 @@
       },
       "tabs": {
         "holidays": "Holidays and closures",
+        "ownershipTransfers": "Ownership transfers",
         "deletionRequests": "Deletion requests",
         "customRoles": "Custom roles",
         "directory": "Directory",
@@ -5277,6 +5334,8 @@
         "URGENT": "Urgent"
       },
       "sources": {
+        "PROVIDER_NO_SHOW": "Provider no-show",
+        "OWNERSHIP_DISPUTE": "Ownership dispute",
         "MANUAL": "Manual entry",
         "TRAVEL_SOURCE": "Travel sources",
         "PARTNER_VERIFICATION": "Partner document review",
@@ -5628,6 +5687,10 @@
         "limitValue": "Limit value",
         "grantOverride": "Grant override"
       }
+    },
+    "demoRecord": {
+      "label": "Demo — hidden on the live site",
+      "hint": "Sample data for demos and tests. The live site never shows it to members, even if it is marked verified or public here."
     }
   },
   "blog": {
@@ -5712,7 +5775,9 @@
       "privateNotice": "This file is private and has no public object URL. Every download mints a short-lived signed access link.",
       "previewDownload": "Preview and secure download",
       "openFile": "Open file",
-      "previewUnavailable": "Preview is unavailable for this file type."
+      "previewUnavailable": "Preview is unavailable for this file type.",
+      "manage": "Details and retract",
+      "details": "Details"
     },
     "labs": {
       "title": "Labs",
@@ -6148,6 +6213,18 @@
         "send": "Send request",
         "cancel": "Cancel"
       }
+  },
+    "own": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save changes",
+      "cancel": "Cancel",
+      "titleLabel": "Title",
+      "bodyLabel": "Text",
+      "confirmPost": "Delete this post for everyone? Its comments disappear too.",
+      "confirmComment": "Delete this comment?",
+      "deleteYes": "Yes, delete",
+      "edited": "edited"
     }
   },
   "communityChat": {
@@ -7142,6 +7219,9 @@
         "allClear": "All clear — nothing is waiting on your team.",
         "clearList": "Clear: {list}",
         "queue": {
+          "pendingReviews": "Reviews waiting for moderation",
+          "openProviderNoShows": "Provider no-show reports",
+          "openOwnershipDisputes": "Ownership disputes",
           "pendingDeletionRequests": "Account deletion requests",
           "openTrustCases": "Trust & safety cases",
           "openDisputes": "Open disputes",
@@ -7166,7 +7246,7 @@
       },
       "shortcuts": "Shortcuts",
       "healthLink": "Status page",
-      "workersSummary": "{running} of {total} background jobs running",
+      "workersSummary": "{running} of {total} background jobs healthy",
       "priority": {
         "URGENT": "Urgent",
         "HIGH": "High"
@@ -9657,7 +9737,8 @@
       "checkInSelected": "Check-in selected; now choose check-out.",
       "checkInSuffix": ", check-in",
       "checkOutSuffix": ", check-out"
-    }
+    },
+    "year": "Year"
   },
   "providerDiscovery": {
     "allServices": "All services",
@@ -11414,5 +11495,68 @@
     "invalid": "Choose a category and a number from 1 to 3000.",
     "forbidden": "commerce.manage permission required.",
     "failed": "Could not start; please try again."
+  },
+  "petCard": {
+    "title": "Pet card and QR code",
+    "intro": "A public card for {name}'s tag or collar. Anyone who scans the code sees only what you choose here and can message you through opetlife. Your phone number is never shown.",
+    "back": "Back to {name}'s profile",
+    "fieldsTitle": "What the card shows",
+    "healthGroup": "Health (for when a finder needs to know)",
+    "fields": {
+      "PHOTO": "Photo",
+      "SPECIES": "Species",
+      "BREED": "Breed",
+      "SEX": "Sex",
+      "AGE": "Age",
+      "MICROCHIP_STATUS": "Whether it's microchipped (not the number)",
+      "ALLERGIES": "Allergies",
+      "CONDITIONS": "Active conditions",
+      "MEDICATIONS": "Current medications",
+      "BLOOD_TYPE": "Blood type",
+      "CRITICAL_NOTES": "Critical notes"
+    },
+    "previewTitle": "Anyone who scans the code sees",
+    "previewName": "Name: {name}",
+    "previewMessage": "A “Message the owner” button through opetlife",
+    "neverTitle": "Never shown",
+    "never": "Your address, household members, phone number, the microchip number, documents and bookings.",
+    "create": "Create card and QR code",
+    "replace": "Create a new card",
+    "replaceNote": "Creating a new card stops the current one at once; its old code no longer opens.",
+    "creating": "Creating…",
+    "createError": "The card wasn't created. Try again.",
+    "readyTitle": "Your card is ready",
+    "onceNote": "This link and code are shown only now. Download or print them; if you lose them, create a new card.",
+    "qrLabel": "QR code for {name}'s card",
+    "download": "Download QR",
+    "print": "Print",
+    "copy": "Copy link",
+    "copied": "Copied",
+    "open": "View card",
+    "listTitle": "{name}'s cards",
+    "listEmpty": "No card yet.",
+    "kind": {
+      "ID_TAG": "Tag card",
+      "EMERGENCY": "Emergency card"
+    },
+    "state": {
+      "ACTIVE": "Active",
+      "REVOKED": "Revoked",
+      "ROTATED": "Replaced",
+      "EXPIRED": "Expired"
+    },
+    "created": "Created {date}",
+    "ending": "Code ending …{hint}",
+    "views": "Views: {count}",
+    "lastViewed": "Last viewed {date}",
+    "revoke": "Revoke card",
+    "revokeConfirm": "Yes, revoke this card",
+    "revokeCancel": "Cancel",
+    "revoked": "The card is revoked and its code no longer opens.",
+    "revokeError": "It wasn't revoked. Try again.",
+    "noAccess": "Only someone who manages this pet's access can create its card.",
+    "loadError": "The card details didn't load.",
+    "retry": "Try again",
+    "loading": "Loading…"
   }
 }
