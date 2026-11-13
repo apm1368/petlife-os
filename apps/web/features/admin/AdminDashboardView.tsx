@@ -90,6 +90,7 @@ const QUEUES: { key: QueueKey; href: string; permission: string | string[]; rout
   { key: "pendingSupportNeeds", href: "/admin/animal-support/needs", permission: "trust.view", icon: HeartHandshake, tone: "neutral" },
   { key: "pendingMemorials", href: "/admin/pet-memorials", permission: "trust.view", icon: Heart, tone: "neutral" },
   { key: "openPlaceReports", href: "/admin/places", permission: "places.view", icon: MapPinned, tone: "neutral" },
+  { key: "pendingPlaceSuggestions", href: "/admin/places/suggestions", permission: "places.view", icon: MapPinned, tone: "neutral" },
   { key: "openTasks", href: "/admin/tasks", permission: "task.manage", icon: ClipboardList, tone: "neutral" },
 ];
 

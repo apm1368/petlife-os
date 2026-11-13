@@ -44,14 +44,15 @@ describe("JajigaStaysSection", () => {
     vi.mocked(travelExternalService.search).mockReset().mockResolvedValue(page([stay(1)], 1));
   });
 
-  it("lists Jajiga stays 20 at a time under a small source chip, facts only, leaving through the logged redirect", async () => {
+  it("lists the stays 20 at a time as readable cards without the source's name, leaving through the logged redirect", async () => {
     renderWithIntl(<JajigaStaysSection city="رشت" context={{ checkIn: "2026-12-01", checkOut: "2026-12-03", pets: 1 }} />, "fa");
     expect(await screen.findByText("ویلای جنگلی 1")).toBeTruthy();
     expect(travelExternalService.search).toHaveBeenCalledWith(expect.objectContaining({ source: "JAJIGA", city: "رشت", checkIn: "2026-12-01", checkOut: "2026-12-03", pets: 1, page: 1, pageSize: 20 }), expect.any(AbortSignal));
     expect(screen.getByRole("heading", { name: "اقامتگاه‌های پت‌پذیر بیشتر" })).toBeTruthy();
-    expect(screen.getByText("اقامتگاه‌های جاجیگا")).toBeTruthy();
+    // Owner (2026-11-13): no source branding; one small honest line says where the data and the booking come from.
+    expect(screen.getByText("اطلاعات از منبع بیرونی؛ رزرو در سایت منبع انجام می‌شود.")).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/جاجیگا|Jajiga/);
     const tile = screen.getByRole("article");
-    expect(within(tile).getByText("از جاجیگا")).toBeTruthy();
     // No picture from the source: a designed placeholder for the kind of stay.
     expect(within(tile).queryByRole("img")).toBeNull();
     expect(within(tile).getByText("ویلا")).toBeTruthy();
@@ -62,15 +63,20 @@ describe("JajigaStaysSection", () => {
     // conditions that read "unknown" because Jajiga states none of them, and a button that names the source.
     expect(within(tile).getByText(/شروع قیمت از ۲٬۵۰۰٬۰۰۰ تومان/)).toBeTruthy();
     expect(within(tile).getByText(/^به‌روزرسانی /)).toBeTruthy();
-    expect(within(tile).getByText(/^طبق اطلاعات جاجیگا، این اقامتگاه پت‌پذیر است/)).toBeTruthy();
+    expect(within(tile).getByText("طبق اطلاعات سایت اقامتگاه، حیوان خانگی پذیرفته می‌شود.")).toBeTruthy();
+    expect(within(tile).getByText("/ شب")).toBeTruthy();
     expect(within(tile).queryByText("پذیرش پت طبق شرایط تأییدشده منبع")).toBeNull();
     expect(within(tile).queryByText("پذیرش پت را اپت لایف بررسی و تأیید کرده است")).toBeNull();
-    const conditions = within(tile).getByRole("list", { name: "شرایط پت" });
+    // The five conditions fold away behind one summary.
+    const conditions = within(tile).getByText("شرایط پت").closest("details")!;
+    expect(conditions.hasAttribute("open")).toBe(false);
     expect(within(conditions).getAllByText("نامشخص")).toHaveLength(5);
-    const out = within(tile).getByRole("link", { name: "مشاهده همین اقامتگاه در جاجیگا" });
+    const out = within(tile).getByRole("link", { name: /^مشاهدهٔ اقامتگاه/ });
     expect(out.getAttribute("href")).toContain("/travel/external/stays/jj1/out");
     expect(out.getAttribute("href")).toContain("checkIn=2026-12-01");
     expect(out.getAttribute("target")).toBe("_blank");
+    expect(out.getAttribute("rel")).toBe("noopener nofollow");
+    expect(out.querySelector("svg")).toBeTruthy();
     // Click-out only: nothing here books.
     expect(screen.queryByRole("button", { name: /رزرو|book/i })).toBeNull();
   });
@@ -125,24 +131,24 @@ describe("JajigaStaysSection", () => {
     expect(travelExternalService.search).toHaveBeenCalledWith(expect.objectContaining({ province: undefined }), expect.any(AbortSignal));
   });
 
-  it("shows a picture and description only when the source sends them (a licensed feed)", async () => {
-    vi.mocked(travelExternalService.search).mockResolvedValue(page([stay(1, { images: ["https://cdn.example/licensed.jpg"], descriptionSummary: "خلاصهٔ مجاز" })], 1));
+  it("shows a picture only when the source's image policy sends one (a licensed feed), and never the source's description", async () => {
+    vi.mocked(travelExternalService.search).mockResolvedValue(page([stay(1, { images: ["https://cdn.example/licensed.jpg"], descriptionSummary: "خلاصهٔ منبع" })], 1));
     renderWithIntl(<JajigaStaysSection />, "fa");
-    expect(await screen.findByText("خلاصهٔ مجاز")).toBeTruthy();
-    expect(screen.getByRole("img").getAttribute("src")).toBe("https://cdn.example/licensed.jpg");
+    expect((await screen.findByRole("img")).getAttribute("src")).toBe("https://cdn.example/licensed.jpg");
+    expect(screen.queryByText("خلاصهٔ منبع")).toBeNull();
   });
 
-  it("labels the source in every language", async () => {
-    for (const [locale, chip, out] of [
-      ["en", "Jajiga stays", "View this stay on Jajiga"],
-      ["de", "Unterkünfte von Jajiga", "Diese Unterkunft bei Jajiga ansehen"],
-      ["es", "Alojamientos de Jajiga", "Ver este alojamiento en Jajiga"],
-      ["ar", "أماكن إقامة Jajiga", "عرض هذا المكان على Jajiga"],
-      ["nl", "Verblijven van Jajiga", "Bekijk deze accommodatie op Jajiga"],
+  it("names the button and keeps the honest source line in every language, never the source's name", async () => {
+    for (const [locale, out] of [
+      ["en", /^View stay/],
+      ["de", /^Unterkunft ansehen/],
+      ["es", /^Ver alojamiento/],
+      ["ar", /^عرض الإقامة/],
+      ["nl", /^Verblijf bekijken/],
     ] as const) {
-      const { unmount } = renderWithIntl(<JajigaStaysSection />, locale);
-      expect(await screen.findByText(chip)).toBeTruthy();
+      const { unmount, container } = renderWithIntl(<JajigaStaysSection />, locale);
       expect(await screen.findByRole("link", { name: out })).toBeTruthy();
+      expect(container.textContent).not.toMatch(/Jajiga|جاجیگا/);
       unmount();
     }
   });

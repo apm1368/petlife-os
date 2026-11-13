@@ -61,7 +61,8 @@ describe("Travel, places and insurance — functional depth", () => {
     // Approval never publishes: the place is unverified and unlisted until an admin completes it.
     expect(created).toMatchObject({ status: "UNVERIFIED", isPubliclyListed: false, name: "Dog beach" });
     await get(null, `/places/${created.id}`).expect(404);
-    await send("post", adminUser, `/admin/place-suggestions/${s.id}/reject`).send({}).expect(404);
+    await send("post", adminUser, `/admin/place-suggestions/${s.id}/reject`).send({}).expect(400);
+    await send("post", adminUser, `/admin/place-suggestions/${s.id}/reject`).send({ note: "Already decided" }).expect(404);
     expect(await db.adminAuditLog.count({ where: { action: "place_suggestion.approved", entityId: s.id } })).toBe(1);
   });
 
