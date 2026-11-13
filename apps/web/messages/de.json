@@ -5602,6 +5602,12 @@
       "possibleConflict": "Passt möglicherweise nicht zu den Haustierregeln",
       "moreInfo": "Weitere Angaben erforderlich",
       "distanceKm": "{distance} km"
+    },
+    "source": {
+      "label": "Quelle",
+      "all": "Alle",
+      "opetlife": "opetlife",
+      "jajiga": "Jajiga"
     }
   },
   "services": {
@@ -7360,6 +7366,14 @@
       "SOURCE_REPORTED_AVAILABLE": "Quelle meldet Verfügbarkeit. Bestand bei der Buchung bestätigen.",
       "SOURCE_REPORTED_UNAVAILABLE": "Quelle meldet keine Verfügbarkeit.",
       "UNKNOWN": "Verfügbarkeit unbekannt."
+    },
+    "fromSource": "Von {source}",
+    "blend": {
+      "title": "Haustierfreundliche Unterkünfte von Jajiga",
+      "titleCity": "Haustierfreundliche Unterkünfte in {city} von Jajiga",
+      "hint": "Angebote von Jajiga: Buchung und Zahlung erfolgen direkt bei Jajiga, opetlife berechnet nichts. Klären Sie die Haustierregeln vor der Buchung mit dem Gastgeber.",
+      "seeAll": "Alle Jajiga-Unterkünfte",
+      "pages": "Jajiga-Seiten"
     }
   },
   "insurance": {

@@ -8433,6 +8433,12 @@
       "possibleConflict": "May not fit the pet rules",
       "moreInfo": "More information needed",
       "distanceKm": "{distance} km"
+    },
+    "source": {
+      "label": "Source",
+      "all": "All",
+      "opetlife": "opetlife",
+      "jajiga": "Jajiga"
     }
   },
   "externalTravel": {
@@ -8515,6 +8521,14 @@
       "SOURCE_REPORTED_AVAILABLE": "Source reports availability. Confirm inventory when booking.",
       "SOURCE_REPORTED_UNAVAILABLE": "Source reports no availability.",
       "UNKNOWN": "Availability is unknown."
+    },
+    "fromSource": "From {source}",
+    "blend": {
+      "title": "Pet-friendly stays from Jajiga",
+      "titleCity": "Pet-friendly stays in {city} from Jajiga",
+      "hint": "Listings from Jajiga: you book and pay on Jajiga's own site, and opetlife charges nothing. Confirm the pet rules with the host before booking.",
+      "seeAll": "All Jajiga stays",
+      "pages": "Jajiga pages"
     }
   },
   "localDateTime": {
