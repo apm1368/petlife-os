@@ -97,11 +97,11 @@ export function MyBookingsView() {
     <div className="flex flex-col gap-5">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <h1 className="text-page-title text-text-primary">{c.title}</h1>
-        <Link href={`/${locale}/services`} className="text-sm font-bold text-brand-natural">{c.bookService}</Link>
+        <Link href={`/${locale}/services`} className="inline-flex min-h-11 items-center text-sm font-bold text-brand-natural">{c.bookService}</Link>
       </header>
       <nav aria-label={c.tabsLabel} className="-mx-1 flex gap-2 overflow-x-auto border-b border-border-subtle pb-2">
         {TAB_KEYS.map((key) => (
-          <button key={key} type="button" aria-pressed={tab === key} onClick={() => setParam({ tab: key })} className={`whitespace-nowrap rounded-md px-3 py-2 text-sm ${tab === key ? "bg-brand-solid text-on-brand" : "text-text-secondary"}`}>
+          <button key={key} type="button" aria-pressed={tab === key} onClick={() => setParam({ tab: key })} className={`inline-flex min-h-11 items-center whitespace-nowrap rounded-md px-3 py-2 text-sm ${tab === key ? "bg-brand-solid text-on-brand" : "text-text-secondary"}`}>
             {c.tabs[key]}
           </button>
         ))}
@@ -109,7 +109,7 @@ export function MyBookingsView() {
       {tab !== "waitlist" && pets.length > 1 ? (
         <label className="flex max-w-xs flex-col gap-1 text-sm">
           <span className="text-text-secondary">{c.pet}</span>
-          <select className="rounded border border-border-subtle bg-surface-base p-2" value={petId} onChange={(e) => setParam({ petId: e.target.value || undefined })}>
+          <select className="min-h-11 rounded border border-border-subtle bg-surface-base p-2" value={petId} onChange={(e) => setParam({ petId: e.target.value || undefined })}>
             <option value="">{c.allPets}</option>
             {pets.map((p) => (
               <option key={p.id} value={p.id}>{p.name}</option>
@@ -136,7 +136,7 @@ export function MyBookingsView() {
                 </div>
                 <div className="flex gap-2">
                   {w.status === "NOTIFIED" ? (
-                    <Link className="rounded-md bg-brand-solid px-3 py-2 text-sm text-on-brand" href={`/${locale}/providers/${w.providerOrganizationId}/book?serviceId=${w.serviceId}${w.variantId ? `&variantId=${w.variantId}` : ""}&date=${w.windowStart.slice(0, 10)}`}>
+                    <Link className="inline-flex min-h-11 items-center rounded-md bg-brand-solid px-3 py-2 text-sm text-on-brand" href={`/${locale}/providers/${w.providerOrganizationId}/book?serviceId=${w.serviceId}${w.variantId ? `&variantId=${w.variantId}` : ""}&date=${w.windowStart.slice(0, 10)}`}>
                       {c.book}
                     </Link>
                   ) : null}
