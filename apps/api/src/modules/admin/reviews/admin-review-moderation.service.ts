@@ -26,6 +26,7 @@ import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 import { adminCan, type AdminPermission } from "../auth/admin-permissions";
 import { allowedProviderTypes, canReachVertical } from "../auth/admin-verticals";
+import { DomainEventsService } from "../../../common/events/domain-events.service";
 
 type Query = PaginationQueryDto & { vertical: AdminReviewVertical; status?: string; q?: string };
 
@@ -34,6 +35,7 @@ export class AdminReviewModerationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AdminAuditLogService,
+    private readonly events: DomainEventsService,
   ) {}
 
   private permission(admin: ResolvedAdminContext, vertical: AdminReviewVertical, manage: boolean): void {
@@ -243,7 +245,7 @@ export class AdminReviewModerationService {
     const now = new Date(),
       cleanLabels = this.labels(labels),
       note = reason?.trim() || null;
-    return this.prisma.$transaction(async (tx) => {
+    const decided = await this.prisma.$transaction(async (tx) => {
       if (vertical === "SERVICE") {
         const existing = await tx.providerReview.findUnique({
           where: { id },
@@ -370,5 +372,8 @@ export class AdminReviewModerationService {
         user?.displayName ?? "—",
       );
     });
+    // After commit: the author hears the decision (a review used to disappear or go live without a word).
+    await this.events.publish("ReviewModerated", { vertical, reviewId: id, decision }, { aggregateType: "Review", aggregateId: id });
+    return decided;
   }
 }

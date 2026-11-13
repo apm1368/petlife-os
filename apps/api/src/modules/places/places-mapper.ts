@@ -1,6 +1,7 @@
 import type { PetFriendlyPlace } from "@prisma/client";
 import type { PetFriendlyPlaceDto } from "@petlife/types";
 import { resolveObjectUrls } from "../storage/object-url.util";
+import { osmUrl } from "./osm/osm-mapping";
 
 export function toPetFriendlyPlaceDto(row: PetFriendlyPlace, options: { distanceMeters?: number | null; isFavorited?: boolean } = {}): PetFriendlyPlaceDto {
   return {
@@ -39,5 +40,11 @@ export function toPetFriendlyPlaceDto(row: PetFriendlyPlace, options: { distance
     openingHours: (row.openingHours as unknown as { day: number; open: string; close: string }[] | null) ?? null,
     province: row.province,
     createdAt: row.createdAt.toISOString(),
+    source: row.source === "OSM" ? "OSM" : "MANUAL",
+    phone: row.phone,
+    website: row.website,
+    claimed: Boolean(row.claimedByProviderOrganizationId),
+    osmUrl: row.osmType && row.osmId != null ? osmUrl(row.osmType, row.osmId) : null,
+    isDemoRecord: row.isDemoRecord,
   };
 }

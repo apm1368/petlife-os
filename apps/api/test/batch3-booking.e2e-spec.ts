@@ -655,6 +655,99 @@ describe("Batch 3 — services, booking lifecycle, provider and admin operations
       ).toBe(1_000_000);
       expect(provBooking.bookingStatus).toBe("CANCELLED_BY_PROVIDER");
     });
+
+    it("staff cancel and refund through finance: a second admin approves, the money goes back once, a member's waiting request is superseded", async () => {
+      const c = await clinic({ service: { paymentMode: "FULL_PREPAYMENT", freeCancellationHours: 24, lateCancellationRefundPercent: 50 } });
+      const owner = await actor("owner");
+      const { pets } = await household(owner);
+      const pay = async (b: { id: string }) => post(owner, `/bookings/${b.id}/pay`).set("Idempotency-Key", randomUUID()).send({ mode: "SUCCESS" }).expect(201);
+      const finance = async (name: string) => {
+        const a = await actor(name);
+        await db.adminUser.create({ data: { userId: a.id, role: AdminRole.SUPER_ADMIN, status: AdminMembershipStatus.ACTIVE } });
+        return a;
+      };
+      const first = await finance("finance-1");
+      const second = await finance("finance-2");
+      const support = await actor("support-only");
+      await db.adminUser.create({ data: { userId: support.id, role: AdminRole.SUPPORT, status: AdminMembershipStatus.ACTIVE } });
+
+      // A paid booking cancelled by staff with everything back.
+      const b = await book(owner, pets[0]!.id, c, { hoursAhead: 72 });
+      await pay(b);
+      await post(support, `/admin/service-bookings/${b.id}/cancel`).send({ reason: "Clinic closed", refund: "FULL" }).expect(403);
+      const cancelled = await post(first, `/admin/service-bookings/${b.id}/cancel`).send({ reason: "Clinic closed by inspection", refund: "FULL" }).expect(201);
+      expect(cancelled.body).toMatchObject({ status: "CANCELLED_BY_PROVIDER", paidIrr: 1_000_000, refundableIrr: 1_000_000 });
+      const approval = cancelled.body.approvals[0];
+      expect(approval).toMatchObject({ subjectType: "BOOKING", bookingId: b.id, orderId: null, amount: 1_000_000, status: "REQUESTED" });
+      const timeline = await db.bookingStatusEvent.findFirstOrThrow({ where: { bookingId: b.id, toStatus: "CANCELLED_BY_PROVIDER" } });
+      expect(timeline).toMatchObject({ actorType: "ADMIN", actorId: first.id });
+      // Two-person control: the requester can't approve their own refund.
+      await patch(first, `/admin/transactions/refund-approvals/${approval.id}/approve`).send({}).expect(409);
+      await patch(second, `/admin/transactions/refund-approvals/${approval.id}/approve`).send({}).expect(200);
+      await patch(second, `/admin/transactions/refund-approvals/${approval.id}/execute`).send({}).expect(200);
+      const after = await db.booking.findUniqueOrThrow({ where: { id: b.id } });
+      expect(after.paymentStatus).toBe("REFUNDED");
+      expect((await db.refund.findMany({ where: { paymentIntentId: after.paymentIntentId!, status: "SUCCEEDED" } })).map((r) => r.amount)).toEqual([1_000_000]);
+      const queue = (await get(second, "/admin/transactions/refund-approvals").expect(200)).body.items as { id: string; subjectType: string }[];
+      expect(queue.find((r) => r.id === approval.id)).toMatchObject({ subjectType: "BOOKING" });
+
+      // The member cancelled late (half back is waiting); staff give a goodwill 600k through finance instead.
+      const m = await book(owner, pets[0]!.id, c, { hoursAhead: 3 });
+      await pay(m);
+      await post(owner, `/bookings/${m.id}/cancel`).send({}).expect(201);
+      const opened = await post(first, `/admin/service-bookings/${m.id}/refund`).send({ amount: 600_000, reason: "Goodwill above the late-cancellation half" }).expect(201);
+      const goodwill = opened.body.approvals[0];
+      await patch(second, `/admin/transactions/refund-approvals/${goodwill.id}/approve`).send({}).expect(200);
+      await patch(first, `/admin/transactions/refund-approvals/${goodwill.id}/execute`).send({}).expect(200);
+      const intentId = (await db.booking.findUniqueOrThrow({ where: { id: m.id } })).paymentIntentId!;
+      const rows = await db.refund.findMany({ where: { paymentIntentId: intentId }, orderBy: { createdAt: "asc" } });
+      expect(rows.map((r) => [r.status, r.amount])).toEqual([["CANCELLED", 500_000], ["SUCCEEDED", 600_000]]);
+      // Never more than what is left.
+      await post(first, `/admin/service-bookings/${m.id}/refund`).send({ amount: 500_000, reason: "More than is left" }).expect(400);
+      const money = (await get(first, `/admin/service-bookings/${m.id}/money`).expect(200)).body;
+      expect(money).toMatchObject({ paidIrr: 1_000_000, refundedIrr: 600_000, refundableIrr: 400_000, cancellable: false });
+    });
+
+    it("refund routes need finance permissions, and executions running together never refund more than was paid", async () => {
+      const c = await clinic({ service: { paymentMode: "FULL_PREPAYMENT", freeCancellationHours: 24, lateCancellationRefundPercent: 50 } });
+      const owner = await actor("owner-parallel");
+      const { pets } = await household(owner);
+      const staff = async (name: string, role: AdminRole) => {
+        const a = await actor(name);
+        await db.adminUser.create({ data: { userId: a.id, role, status: AdminMembershipStatus.ACTIVE } });
+        return a;
+      };
+      const first = await staff("finance-p1", AdminRole.SUPER_ADMIN);
+      const second = await staff("finance-p2", AdminRole.SUPER_ADMIN);
+      // SUPPORT holds services.view and travel.view but no finance permission.
+      const support = await staff("support-p", AdminRole.SUPPORT);
+      const b = await book(owner, pets[0]!.id, c, { hoursAhead: 72 });
+      await post(owner, `/bookings/${b.id}/pay`).set("Idempotency-Key", randomUUID()).send({ mode: "SUCCESS" }).expect(201);
+
+      await post(support, `/admin/service-bookings/${b.id}/refund`).send({ amount: 100_000, reason: "Not a finance user" }).expect(403);
+      const open = async (reason: string) => ((await post(first, `/admin/service-bookings/${b.id}/refund`).send({ amount: 600_000, reason }).expect(201)).body.approvals as { id: string; status: string; reason: string }[]).find((a) => a.reason === reason)!;
+      const a1 = await open("Goodwill, first approval");
+      const a2 = await open("Goodwill, second approval");
+      await patch(support, `/admin/transactions/refund-approvals/${a1.id}/approve`).send({}).expect(403);
+      await patch(support, `/admin/transactions/refund-approvals/${a1.id}/execute`).send({}).expect(403);
+      await patch(second, `/admin/transactions/refund-approvals/${a1.id}/approve`).send({}).expect(200);
+      await patch(second, `/admin/transactions/refund-approvals/${a2.id}/approve`).send({}).expect(200);
+
+      // Two approvals (1.2M together) on a 1M payment, executed at the same moment, and the first one twice.
+      const results = await Promise.all([
+        patch(second, `/admin/transactions/refund-approvals/${a1.id}/execute`).send({}),
+        patch(second, `/admin/transactions/refund-approvals/${a2.id}/execute`).send({}),
+        patch(second, `/admin/transactions/refund-approvals/${a1.id}/execute`).send({}),
+      ]);
+      expect(results.every((r) => r.status < 500)).toBe(true);
+      const intentId = (await db.booking.findUniqueOrThrow({ where: { id: b.id } })).paymentIntentId!;
+      const succeeded = await db.refund.findMany({ where: { paymentIntentId: intentId, status: "SUCCEEDED" } });
+      expect(succeeded.reduce((sum, r) => sum + r.amount, 0)).toBeLessThanOrEqual(1_000_000);
+      expect(succeeded).toHaveLength(1);
+      // Each approval executed at most once.
+      const executed = await db.adminRefundApproval.findMany({ where: { id: { in: [a1.id, a2.id] }, refundId: { not: null } } });
+      expect(executed).toHaveLength(1);
+    });
   });
 
   describe("reschedule, series and rebook", () => {

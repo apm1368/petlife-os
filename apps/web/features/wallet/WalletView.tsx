@@ -402,6 +402,18 @@ function CardTransferPanel({
           <dt>{t("card.holder")}</dt>
           <dd>{card.cardHolderName}</dd>
         </div>
+        {card.bankName ? (
+          <div>
+            <dt>{t("card.bank")}</dt>
+            <dd>{card.bankName}</dd>
+          </div>
+        ) : null}
+        {card.sheba ? (
+          <div>
+            <dt>{t("card.sheba")}</dt>
+            <dd dir="ltr">{card.sheba}</dd>
+          </div>
+        ) : null}
         <div>
           <dt>{t("card.amount")}</dt>
           <dd>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { Button, Coffee, EmptyState, Hotel, House, Input, MapPin, Select, Skeleton, ShoppingBag, Stethoscope, Trees, UtensilsCrossed, Waves, ChevronLeft, ChevronRight } from "@petlife/ui";
+import { Button, Coffee, Dog, EmptyState, HandHeart, Hotel, House, Input, MapPin, PawPrint, Scissors, Select, Skeleton, ShoppingBag, Stethoscope, Store, Trees, UtensilsCrossed, Waves, ChevronLeft, ChevronRight } from "@petlife/ui";
 import { PetFriendlyPlaceCategory } from "@petlife/types";
 import type { PetFriendlyPlaceDto } from "@petlife/types";
 import { placesService } from "@/services/places.service";
@@ -11,8 +11,15 @@ import { LoadFailure } from "@/features/system/LoadFailure";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 import { placeLocation, formatDistanceKm } from "@/features/places/place-format";
 import { DiscoveryPage } from "@/features/discovery/DiscoveryPage";
+import { isOsmUnclaimed, OsmAttribution } from "@/features/places/PlaceOsm";
 
 const CATEGORIES: PetFriendlyPlaceCategory[] = [
+  PetFriendlyPlaceCategory.VETERINARY,
+  PetFriendlyPlaceCategory.PET_SHOP,
+  PetFriendlyPlaceCategory.GROOMING,
+  PetFriendlyPlaceCategory.BOARDING,
+  PetFriendlyPlaceCategory.SHELTER,
+  PetFriendlyPlaceCategory.DOG_PARK,
   PetFriendlyPlaceCategory.PARK,
   PetFriendlyPlaceCategory.CAFE,
   PetFriendlyPlaceCategory.RESTAURANT,
@@ -26,6 +33,7 @@ const CATEGORIES: PetFriendlyPlaceCategory[] = [
 
 const CATEGORY_ICON: Partial<Record<PetFriendlyPlaceCategory, typeof MapPin>> = {
   PARK: Trees, CAFE: Coffee, RESTAURANT: UtensilsCrossed, HOTEL: Hotel, STORE: ShoppingBag, BEACH: Waves, SERVICE: Stethoscope, VENUE: House,
+  VETERINARY: Stethoscope, PET_SHOP: Store, GROOMING: Scissors, BOARDING: PawPrint, SHELTER: HandHeart, DOG_PARK: Dog,
 };
 const SPECIES: Record<string, [string, string]> = { DOG: ["سگ", "Dogs"], CAT: ["گربه", "Cats"], BIRD: ["پرنده", "Birds"], RABBIT: ["خرگوش", "Rabbits"], RODENT: ["جونده", "Rodents"], FISH: ["ماهی", "Fish"], REPTILE: ["خزنده", "Reptiles"], OTHER: ["سایر", "Other"] };
 
@@ -144,7 +152,7 @@ export function PlacesListView() {
                       {place.distanceMeters !== null ? ` · ${t("detail.distance", { distance: formatDistanceKm(place.distanceMeters, locale) })}` : ""}
                     </span>
                     {rules.length ? <span className="place-row__rules">{rules.map((r) => <span key={r} className="tag">{r}</span>)}</span> : null}
-                    {place.status !== "VERIFIED" ? <span className="text-metadata text-state-attention">{t("detail.unverified")}</span> : null}
+                    {isOsmUnclaimed(place) ? <span className="text-metadata text-state-attention">{t("osm.label")}</span> : place.status !== "VERIFIED" ? <span className="text-metadata text-state-attention">{t("detail.unverified")}</span> : null}
                   </span>
                   <Go size={18} aria-hidden="true" className="place-row__go" />
                 </Link>
@@ -153,6 +161,7 @@ export function PlacesListView() {
           })}
         </ul>
       )}
+      {places?.some((p) => p.source === "OSM") ? <OsmAttribution /> : null}
     </DiscoveryPage>
   );
 }
