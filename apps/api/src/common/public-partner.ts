@@ -15,7 +15,7 @@ import { excludeDemoRecordsFromPublicReads } from "./public-record-origin";
  * same rule with `isPublicProvider`, so a partner who just signed up stays
  * invisible and unbookable until staff approve them.
  */
-export function publicProviderWhere(): { verificationStatus: typeof ProviderVerificationStatus.VERIFIED } & ({ isDemoRecord: false } | Record<string, never>) {
+export function publicProviderWhere(): { verificationStatus: typeof ProviderVerificationStatus.VERIFIED; isDemoRecord?: false } {
   return { verificationStatus: ProviderVerificationStatus.VERIFIED, ...excludeDemoRecordsFromPublicReads() };
 }
 
