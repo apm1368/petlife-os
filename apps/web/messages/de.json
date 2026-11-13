@@ -3236,6 +3236,45 @@
     "tabs": { "admins": "Admins", "roles": "Rollen", "permissions": "Berechtigungen" }
   },
   "admin": {
+    "productReadiness": {
+      "title": "Unvollständige Produkte",
+      "intro": "Produkte, die noch nicht verkaufsbereit sind, mit allen Gründen. Behebe sie am Produkt und an seinen Angeboten; hier wird nichts veröffentlicht oder ausgeblendet.",
+      "issuesLabel": "Probleme",
+      "issue": {
+        "ANY": "Alle Probleme",
+        "MEDIA_INCOMPLETE": "Bilder unvollständig",
+        "MISSING_BRAND": "Keine Marke",
+        "MISSING_SPECS": "Keine technischen Daten",
+        "UNREVIEWED_SOURCE": "Quelldaten nicht geprüft",
+        "NO_LIVE_OFFER": "Kein aktives Angebot"
+      },
+      "search": "Produktname",
+      "statusFilter": "Produktstatus",
+      "allStatuses": "Alle Status",
+      "status": {
+        "ACTIVE": "Aktiv",
+        "DRAFT": "Entwurf",
+        "INACTIVE": "Inaktiv"
+      },
+      "searchButton": "Suchen",
+      "listTitle": "Zu korrigierende Produkte",
+      "rule": "Zum Veröffentlichen braucht es genau 3 Bilder mit Alternativtext. Ein aktives Angebot ist aktiv und freigegeben, von einem verifizierten, aktiven Shop und mit Bestand.",
+      "forbidden": "Berechtigung commerce.view erforderlich",
+      "loadFailed": "Die Bereitschaftsliste konnte nicht geladen werden",
+      "loadFailedHint": "Der Fehler kommt vom Server und wird unverändert angezeigt; nichts wurde ausgeblendet.",
+      "retry": "Erneut versuchen",
+      "loading": "Wird geladen…",
+      "empty": "Alle Produkte sind verkaufsbereit.",
+      "emptyIssue": "Kein Produkt hat dieses Problem.",
+      "media": "{count} von 3 Bildern · {withoutAlt} ohne Alternativtext",
+      "publishOk": "Veröffentlichung möglich",
+      "publishBlocked": "Veröffentlichung gesperrt",
+      "offers": "{live} aktive Angebote von {total}",
+      "pages": "Seiten",
+      "previous": "Zurück",
+      "next": "Weiter",
+      "page": "Seite {page} von {pages}"
+    },
     "partners": {
       "servicesTitle": "Dienstleister",
       "shopsTitle": "Shops",
@@ -4271,6 +4310,7 @@
         "twoStep": "Zwei-Schritt-Anmeldung"
       },
       "tabs": {
+        "productReadiness": "Unvollständige Produkte",
         "holidays": "Feiertage und Schließtage",
         "ownershipTransfers": "Eigentumsübertragungen",
         "deletionRequests": "Löschanträge",
