@@ -48,6 +48,8 @@ describe("a partner is public only after verification", () => {
     const owner = await actor("Pet Owner");
     const household = await db.household.create({ data: { name: "Guard home", members: { create: { userId: owner.id, role: "OWNER" } } } });
     const pet = await db.pet.create({ data: { householdId: household.id, name: "Pishi", species: "CAT" } });
+    // Pet permissions come from grants, not from household membership alone (same fixture as the booking e2e).
+    await db.petAccessGrant.create({ data: { petId: pet.id, userId: owner.id, canViewIdentity: true, canViewHealth: true, canEditHealth: true, canBookCare: true, canViewCareProfile: true, canEditCareProfile: true, canManageAccess: true } });
     const from = new Date(Date.now() + 86400000).toISOString();
     const to = new Date(Date.now() + 3 * 86400000).toISOString();
     const availability = `/providers/vets/${org.id}/availability?locationId=${location.id}&serviceId=${service.id}&from=${from}&to=${to}`;
