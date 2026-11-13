@@ -13,7 +13,7 @@ import { intlLocale } from "@/features/admin/admin-copy";
 import { DemoRecordTag } from "../DemoRecordTag";
 import { adminStatusTone } from "../status-tone";
 
-type Locale = "fa" | "en" | "de" | "es";
+type Locale = "fa" | "en" | "de" | "es" | "ar" | "nl";
 type LoadError = "forbidden" | "notFound" | "load" | null;
 
 /** Weekdays in the order an Iranian week reads (Saturday first); `dayOfWeek` is 0 = Sunday … 6 = Saturday. */

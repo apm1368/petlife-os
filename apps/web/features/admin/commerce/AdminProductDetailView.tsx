@@ -12,7 +12,7 @@ import { intlLocale } from "@/features/admin/admin-copy";
 import { DemoRecordTag } from "../DemoRecordTag";
 import { Panel, PanelTitle, TableWrap, Tag, Td, Th, type Tone } from "../console-ui";
 
-type Locale = "fa" | "en" | "de" | "es";
+type Locale = "fa" | "en" | "de" | "es" | "ar" | "nl";
 
 const OFFER_TONE: Record<string, Tone> = { ACTIVE: "success", PAUSED: "attention", OUT_OF_STOCK: "attention", SUSPENDED: "concern" };
 const MODERATION_TONE: Record<string, Tone> = { APPROVED: "success", PENDING_REVIEW: "attention", REJECTED: "concern" };

@@ -12,7 +12,7 @@ import { sellerOsService } from "@/services/seller-os.service";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { formatDay, localizeDigits } from "@/lib/date/jalali";
 
-type Lang = "fa" | "en" | "de" | "es";
+type Lang = "fa" | "en" | "de" | "es" | "ar" | "nl";
 
 const time = (iso: string, lang: Lang) =>
   localizeDigits(new Date(iso).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tehran" }), lang);
