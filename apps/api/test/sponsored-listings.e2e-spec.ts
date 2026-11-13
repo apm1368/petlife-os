@@ -49,7 +49,7 @@ describe("Sponsored listings (CPC)", () => {
     const finance = await actor("Finance", AdminRole.FINANCE);
     const superAdmin = await actor("Super", AdminRole.SUPER_ADMIN);
     const category = await db.productCategory.create({ data: { name: `Treats ${tag}`, slug: `treats-${tag}` } });
-    const product = await db.product.create({ data: { categoryId: category.id, title: `Sponsored Treat ${tag}`, slug: `treat-${tag}`, allergenTags: [], status: "ACTIVE", supportsDog: true } });
+    const product = await db.product.create({ data: { categoryId: category.id, title: `Sponsored Treat ${tag}`, slug: `treat-${tag}`, allergenTags: [], status: "ACTIVE", supportsDog: true, supportsCat: false } });
     const variant = await db.productVariant.create({ data: { productId: product.id, sku: `trt-${tag}`, title: "200 g" } });
     const shop = await db.sellerOrganization.create({ data: { name: `Ad Shop ${tag}`, countryCode: "IR", verificationStatus: "VERIFIED", status: "ACTIVE", memberships: { create: { userId: owner.id, role: "OWNER", status: "ACTIVE" } } } });
     await db.sellerOffer.create({ data: { sellerOrganizationId: shop.id, productVariantId: variant.id, priceAmount: 450_000, status: "ACTIVE", moderationStatus: "APPROVED" } });
