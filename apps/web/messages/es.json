@@ -5607,7 +5607,8 @@
       "checkInSelected": "Entrada seleccionada; ahora elige la salida.",
       "checkInSuffix": ", entrada",
       "checkOutSuffix": ", salida"
-    }
+    },
+    "year": "Año"
   },
   "filePicker": {
     "choose": "Elegir archivo",
@@ -10606,5 +10607,68 @@
     "invalid": "Elige una categoría y un número de 1 a 3000.",
     "forbidden": "Se requiere el permiso commerce.manage.",
     "failed": "No se pudo iniciar; inténtalo de nuevo."
+  },
+  "petCard": {
+    "title": "Tarjeta de la mascota y código QR",
+    "intro": "Una tarjeta pública para la placa o el collar de {name}. Quien escanee el código solo verá lo que elijas aquí y podrá escribirte a través de opetlife. Tu número de teléfono nunca se muestra.",
+    "back": "Volver al perfil de {name}",
+    "fieldsTitle": "Qué muestra la tarjeta",
+    "healthGroup": "Salud (por si quien la encuentra necesita saberlo)",
+    "fields": {
+      "PHOTO": "Foto",
+      "SPECIES": "Especie",
+      "BREED": "Raza",
+      "SEX": "Sexo",
+      "AGE": "Edad",
+      "MICROCHIP_STATUS": "Si tiene microchip (no el número)",
+      "ALLERGIES": "Alergias",
+      "CONDITIONS": "Enfermedades activas",
+      "MEDICATIONS": "Medicamentos actuales",
+      "BLOOD_TYPE": "Grupo sanguíneo",
+      "CRITICAL_NOTES": "Notas importantes"
+    },
+    "previewTitle": "Quien escanee el código verá",
+    "previewName": "Nombre: {name}",
+    "previewMessage": "Un botón «Escribir al dueño» a través de opetlife",
+    "neverTitle": "Nunca se muestra",
+    "never": "Tu dirección, los miembros de tu hogar, tu teléfono, el número de microchip, los documentos y las citas.",
+    "create": "Crear tarjeta y código QR",
+    "replace": "Crear una tarjeta nueva",
+    "replaceNote": "Al crear una tarjeta nueva, la actual deja de funcionar al instante y su código antiguo ya no abre.",
+    "creating": "Creando…",
+    "createError": "No se creó la tarjeta. Inténtalo de nuevo.",
+    "readyTitle": "Tu tarjeta está lista",
+    "onceNote": "Este enlace y este código solo se muestran ahora. Descárgalos o imprímelos; si los pierdes, crea una tarjeta nueva.",
+    "qrLabel": "Código QR de la tarjeta de {name}",
+    "download": "Descargar QR",
+    "print": "Imprimir",
+    "copy": "Copiar enlace",
+    "copied": "Copiado",
+    "open": "Ver tarjeta",
+    "listTitle": "Tarjetas de {name}",
+    "listEmpty": "Todavía no hay ninguna tarjeta.",
+    "kind": {
+      "ID_TAG": "Tarjeta de placa",
+      "EMERGENCY": "Tarjeta de emergencia"
+    },
+    "state": {
+      "ACTIVE": "Activa",
+      "REVOKED": "Revocada",
+      "ROTATED": "Sustituida",
+      "EXPIRED": "Caducada"
+    },
+    "created": "Creada el {date}",
+    "ending": "Código que termina en …{hint}",
+    "views": "Visitas: {count}",
+    "lastViewed": "Última visita: {date}",
+    "revoke": "Revocar tarjeta",
+    "revokeConfirm": "Sí, revocar esta tarjeta",
+    "revokeCancel": "Cancelar",
+    "revoked": "La tarjeta está revocada y su código ya no abre.",
+    "revokeError": "No se revocó. Inténtalo de nuevo.",
+    "noAccess": "Solo quien gestiona el acceso a esta mascota puede crear su tarjeta.",
+    "loadError": "No se cargaron los datos de la tarjeta.",
+    "retry": "Reintentar",
+    "loading": "Cargando…"
   }
 }
