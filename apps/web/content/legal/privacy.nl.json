@@ -17,7 +17,7 @@
       "items": [
         "Account: je mobiele nummer en e-mailadres (en of je die hebt geverifieerd), gebruikersnaam, naam, weergavenaam en foto, taal en thema, en een veilig gehasht wachtwoord als je er een instelt. We vragen niet naar je nationale identificatienummer.",
         "Huishouden en huisdieren: de leden van je huishouden en hun rollen, en het profiel van elk huisdier (naam, soort, ras, geslacht, geboortedatum, foto, gewicht, aftekeningen, castratie of sterilisatie en microchip). Daaronder valt ook de gezondheidsinformatie die je toevoegt: allergieën, aandoeningen, medicatie, vaccinaties, bezoeken, labuitslagen en documenten.",
-        "Adressen en locatie: de bezorg- of bezoekadressen die je opslaat en hun kaartpunten, die je plaatst en bevestigt wanneer je een adres opslaat. Als je daar toestemming voor geeft, wordt de locatie van je browser gebruikt voor diensten en plekken in de buurt (afgerond op ongeveer 1 km en alleen voor die zoekopdracht; hij wordt niet in je account opgeslagen, maar onze serverlogs bewaren de afgeronde waarde ongeveer 7 dagen), meldingen over vermiste huisdieren en de dierentaxi.",
+        "Adressen en locatie: de bezorg- of bezoekadressen die je opslaat en hun kaartpunten, die je plaatst en bevestigt wanneer je een adres opslaat. Als je daar toestemming voor geeft, wordt de locatie van je browser gebruikt voor diensten en plekken in de buurt (afgerond op ongeveer 1 km en alleen voor die zoekopdracht; hij wordt niet in je account opgeslagen, maar onze serverlogs bewaren de afgeronde waarde tot 14 dagen), meldingen over vermiste huisdieren en de dierentaxi.",
         "Boekingen, bestellingen en betalingen: wat je hebt geboekt of gekocht, bezorggegevens, en terugbetalingen en geschillen. Bij kaart-naar-kaartbetalingen bewaren we de afbeelding van het betaalbewijs dat je uploadt. We verzamelen het nummer van je bankkaart en je IBAN niet.",
         "Wat je publiceert: berichten, reacties, chats, beoordelingen, meldingen van vermiste en gevonden huisdieren, gedenkpagina's, en de foto's en bestanden die je uploadt. Locatiegegevens in foto's (EXIF en GPS) worden bij het uploaden verwijderd.",
         "Plaatsvoorstellen: de naam, categorie, stad, het adres, het kaartpunt en de opmerkingen van een plek die je voorstelt. Alleen ons team kan zien dat het voorstel van jou komt. Als ons team de plek controleert en in de gids opneemt, kunnen de gegevens en je opmerkingen worden gepubliceerd, je naam nooit. In de app laten we je weten of je voorstel is aangenomen.",
@@ -104,7 +104,7 @@
         "Inlogsessies: 30 dagen, tenzij je eerder uitlogt.",
         "Exportbestanden met je gegevens: 7 dagen.",
         "Ritten met de dierentaxi: exacte locaties 30 dagen, daarna alleen bij benadering.",
-        "Serverlogs: ongeveer 7 dagen.",
+        "Serverlogs: tot 14 dagen.",
         "Financiële gegevens, zoals bestellingen, betalingen, terugbetalingen en facturen: zo lang als de wet vereist.",
         "Als je vraagt om je account te verwijderen, wordt je verzoek vastgelegd en beoordeeld, en uitgevoerd zodra ons bewaarbeleid voor gegevens is gepubliceerd. Dan verwijderen of anonimiseren we je persoonsgegevens, behalve wat we volgens de wet moeten bewaren, en laten we je weten wanneer het is gebeurd."
       ]
