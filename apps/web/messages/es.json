@@ -4409,7 +4409,9 @@
         "orderLookup": "Buscar pedido",
         "refundApprovals": "Aprobaciones de reembolso",
         "twoStep": "Inicio de sesión en dos pasos",
-        "walletAdjustments": "Solicitudes de corrección"
+        "walletAdjustments": "Solicitudes de corrección",
+        "walletBusiness": "Monederos de empresa",
+        "walletTransfers": "Transferencias"
       },
       "palette": {
         "actions": "Acciones rápidas",
@@ -10482,7 +10484,8 @@
         "REFUND": "Reembolso",
         "ADJUSTMENT": "Corrección de nuestro equipo",
         "EXPIRY": "Saldo de regalo caducado",
-        "OTHER": "Movimiento"
+        "OTHER": "Movimiento",
+        "TRANSFER": "Transferencia de nuestro equipo (aprobada por dos personas)"
       },
       "bucket": {
         "PURCHASE_ONLY": "Para compras",
@@ -10494,9 +10497,29 @@
         "PAYMENT_CORRECTION": "Corrección de pago",
         "REFUND_OUTSIDE_SYSTEM": "Reembolso fuera de un pedido",
         "DUPLICATE_CREDIT_REVERSAL": "Abono duplicado revertido",
-        "OTHER": "Otra corrección"
+        "OTHER": "Otra corrección",
+        "OWNER_REQUEST": "A petición del titular",
+        "ACCOUNT_CONSOLIDATION": "Unificación de cuentas",
+        "REFUND": "Reembolso",
+        "MISDIRECTED_PAYMENT": "Pago enviado a la cuenta equivocada",
+        "ACCOUNT_SUCCESSION": "Cuenta traspasada",
+        "LEGAL_ORDER": "Orden legal",
+        "REVERSAL": "Transferencia anterior revertida"
       },
       "expires": "Caduca el {date}"
+    },
+    "business": {
+      "eyebrow": "Monedero de empresa",
+      "title": "{name}: monedero de empresa",
+      "description": "El monedero propio de esta organización, separado de tu monedero personal. Las recargas se abonan solo cuando se confirma el dinero, y solo los gestores del monedero de la organización pueden verlo.",
+      "back": "Volver a mi monedero",
+      "listTitle": "Monederos de empresa",
+      "listHint": "Monederos de las organizaciones que gestionas. Cada uno está separado de tu monedero personal.",
+      "kind": {
+        "MEMBER": "Monedero personal",
+        "SELLER": "Tienda",
+        "PROVIDER": "Proveedor de servicios"
+      }
     }
   },
   "adminWallets": {
@@ -10693,6 +10716,109 @@
         "INSUFFICIENT_WALLET_BALANCE": "Esta parte del monedero ya no tiene tanto saldo, así que no se puede registrar el cargo.",
         "reasonTooShort": "El motivo necesita al menos 5 caracteres.",
         "generic": "No funcionó. Inténtalo de nuevo."
+      }
+    },
+    "business": {
+      "title": "Monederos por titular",
+      "subtitle": "Cada organización socia tiene su propio monedero de empresa, separado de los monederos personales de sus miembros.",
+      "typeLabel": "Titular",
+      "search": "Buscar por nombre (o id)",
+      "searchButton": "Buscar",
+      "empty": "No hay monederos que coincidan.",
+      "kind": {
+        "MEMBER": "Miembro",
+        "SELLER": "Tienda",
+        "PROVIDER": "Proveedor de servicios"
+      },
+      "kindPlural": {
+        "MEMBER": "Miembros",
+        "SELLER": "Tiendas",
+        "PROVIDER": "Proveedores de servicios"
+      },
+      "columns": {
+        "owner": "Titular"
+      },
+      "memberPage": "Página del monedero del miembro",
+      "transferFrom": "Transferir desde este monedero",
+      "transferTo": "Transferir a este monedero",
+      "history": "Historial",
+      "noHistory": "Aún no hay movimientos.",
+      "topUps": "Recargas",
+      "purpose": {
+        "TOP_UP": "Recarga",
+        "PURCHASE": "Compra",
+        "REFUND": "Reembolso",
+        "ADJUSTMENT": "Corrección del equipo",
+        "TRANSFER": "Transferencia del equipo",
+        "EXPIRY": "Regalo caducado",
+        "OTHER": "Otro"
+      }
+    },
+    "transfers": {
+      "title": "Transferencias entre monederos",
+      "subtitle": "Mover saldo entre monederos es solo para casos delicados: un administrador lo solicita con un motivo y pruebas, otro distinto lo aprueba y solo entonces se mueve el dinero.",
+      "new": "Nueva transferencia",
+      "newHint": "Hasta {max} por transferencia. No se mueve nada hasta que lo apruebe un segundo administrador.",
+      "from": "Desde el monedero",
+      "to": "Al monedero",
+      "bucket": "Tipo de saldo",
+      "amount": "Importe (tomanes)",
+      "reasonCode": "Motivo",
+      "note": "Nota",
+      "evidence": "Prueba",
+      "evidenceHint": "Número de ticket, carta o referencia de la orden",
+      "rules": "Entre monederos sin titular común solo se permite un reembolso, un pago enviado a la cuenta equivocada, el traspaso de una cuenta o una orden legal. Una tienda o un proveedor sin verificar solo puede recibir un reembolso.",
+      "submit": "Solicitar transferencia",
+      "created": "Transferencia solicitada. Espera a un segundo administrador.",
+      "available": "Saldo {amount}",
+      "change": "Cambiar",
+      "filter": "Filtrar por estado",
+      "all": "Todas",
+      "empty": "No hay transferencias aquí.",
+      "status": {
+        "PENDING": "Pendiente de aprobación",
+        "APPROVED": "Contabilizada",
+        "REJECTED": "Rechazada",
+        "EXPIRED": "Caducada"
+      },
+      "reason": {
+        "OWNER_REQUEST": "A petición del titular",
+        "ACCOUNT_CONSOLIDATION": "Unificación de cuentas",
+        "PAYMENT_CORRECTION": "Corrección de pago",
+        "REFUND": "Reembolso",
+        "MISDIRECTED_PAYMENT": "Pago enviado a la cuenta equivocada",
+        "ACCOUNT_SUCCESSION": "Cuenta traspasada",
+        "LEGAL_ORDER": "Orden legal",
+        "REVERSAL": "Transferencia anterior revertida"
+      },
+      "reversal": "Reversión",
+      "unrelated": "Sin titular común",
+      "requestedBy": "Solicitada por {name} el {date}",
+      "decidedBy": "decidida por {name} el {date}",
+      "expires": "caduca el {date}",
+      "waitingForSecond": "Lo has solicitado tú; otro administrador debe aprobarlo.",
+      "approve": "Aprobar y contabilizar",
+      "reject": "Rechazar",
+      "withdraw": "Retirar",
+      "rejectReason": "Motivo",
+      "reverse": "Revertir esta transferencia",
+      "reverseHint": "Una reversión es una nueva solicitud por el mismo importe en sentido contrario y también necesita un segundo administrador.",
+      "errors": {
+        "generic": "No ha funcionado. Vuelve a intentarlo.",
+        "forbidden": "Necesitas el permiso «Corregir saldos».",
+        "WALLET_TRANSFER_SELF_APPROVAL": "Una transferencia que has solicitado tú debe aprobarla otro administrador.",
+        "WALLET_TRANSFER_NOT_PENDING": "Esta transferencia ya se ha decidido.",
+        "WALLET_TRANSFER_EXPIRED": "Esta transferencia ha caducado. Solicita una nueva.",
+        "UNRELATED_WALLETS": "Estos monederos no tienen titular común: elige reembolso, pago a la cuenta equivocada, traspaso de cuenta u orden legal.",
+        "DESTINATION_NOT_VERIFIED": "La organización que recibe no está verificada: solo puede recibir un reembolso.",
+        "INSUFFICIENT_WALLET_BALANCE": "El monedero de origen no tiene suficiente saldo de ese tipo.",
+        "SAME_WALLET": "Elige dos monederos distintos.",
+        "TOO_MANY_PENDING": "Este monedero ya tiene demasiadas transferencias pendientes.",
+        "OUT_OF_RANGE": "El importe está fuera del rango permitido.",
+        "ALREADY_REVERSED": "Esta transferencia ya tiene una reversión.",
+        "CANNOT_REVERSE_A_REVERSAL": "Una reversión no se puede revertir; solicita una transferencia nueva.",
+        "NOT_APPROVED": "Solo se puede revertir una transferencia contabilizada.",
+        "OWNER_NOT_FOUND": "Ese titular no existe."
       }
     }
   },

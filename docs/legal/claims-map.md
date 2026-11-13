@@ -50,6 +50,7 @@ Operational owners are roles, not people: **Support**, **Finance**, **Trust & Sa
 | P6 | Promotions automatic, not combinable, no codes | Terms §9 | — | `schema.prisma` promotion comment "Automatic, non-stacking… No codes" | Engineering | ✅ |
 | P7 | Instalments by a third party when offered | Terms §9 | — | SnappPay / DigiPay adapters are stubs | Owner | ✅ ("when offered") |
 | P8 | Gateways process online payments | Privacy §6 | — | `PAYMENT_SANDBOX_MODE` — gateways are **sandbox** today | Engineering / Owner | ✅ (no claim that online payment is live) |
+| P11 | One wallet per member account and per partner organisation (business wallet seen/managed only by its wallet managers); staff transfers only for a recorded reason (owner request, account merge, refund, misdirected payment, account handover, legal order, payment correction); unrelated wallets only refund / misdirected / handover / legal order; unverified org receives refunds only; requester + different approving admin, reason + evidence, ≤ 50,000,000 toman per transfer, both wallets' people notified in the app, ledger + audit; never edited/deleted, reversed only by a new two-person transfer | Terms §9, FAQ | FE-16, owner request 2026-11-13 (#3) | #385: business wallets; `adminWallets.transfers` two-person flow (`WALLET_TRANSFER_SELF_APPROVAL`, `UNRELATED_WALLETS`, `DESTINATION_NOT_VERIFIED`), `wallet.transfer_in/out` notices, REVERSAL as a new request | Finance | ✅ (#385) |
 
 ## Community and content
 

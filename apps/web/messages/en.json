@@ -11096,7 +11096,7 @@
       "reverseHint": "A reversal is a new request for the same amount the other way, and it also needs a second admin.",
       "errors": {
         "generic": "That didn't work. Try again.",
-        "forbidden": "You need the “Correct wallets” permission.",
+        "forbidden": "You need the “Correct balances” permission.",
         "WALLET_TRANSFER_SELF_APPROVAL": "Another admin has to approve a transfer you asked for.",
         "WALLET_TRANSFER_NOT_PENDING": "This transfer was already decided.",
         "WALLET_TRANSFER_EXPIRED": "This transfer expired. Ask for a new one.",
