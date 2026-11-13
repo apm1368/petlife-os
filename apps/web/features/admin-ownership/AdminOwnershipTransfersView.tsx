@@ -13,7 +13,7 @@ import { adminOwnershipService, type AdminOwnershipTransfer, type OwnershipTrans
 
 const FILTERS: Array<OwnershipTransferStatus | "ALL"> = ["DISPUTED", "PENDING_REVIEW", "ACCEPTED", "DECLINED", "CANCELLED", "EXPIRED", "ALL"];
 const TONE: Record<OwnershipTransferStatus, string> = { DISPUTED: "NEVER_PURCHASED", PENDING_REVIEW: "AT_RISK", ACCEPTED: "ACTIVE", DECLINED: "DORMANT", CANCELLED: "DORMANT", EXPIRED: "DORMANT" };
-const DATE_LOCALE: Record<RouteLocale, string> = { fa: "fa-IR-u-ca-persian-nu-arabext", en: "en-GB", de: "de-DE", es: "es-ES" };
+const DATE_LOCALE: Record<RouteLocale, string> = { fa: "fa-IR-u-ca-persian-nu-arabext", en: "en-GB", de: "de-DE", es: "es-ES", ar: "ar", nl: "nl-NL" };
 
 /**
  * Admin → Users → Ownership transfers: every two-party transfer request and, first, the disputed ones (ID-03). Staff
