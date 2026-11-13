@@ -1,6 +1,6 @@
 import { Logger } from "@nestjs/common";
 import type { INestApplication } from "@nestjs/common";
-import { ProviderType, ProviderUserRole, SellerMembershipRole, SellerMembershipStatus, SellerStatus, SellerVerificationStatus } from "@prisma/client";
+import { AdminMembershipStatus, AdminRole, ProviderType, ProviderUserRole, SellerMembershipRole, SellerMembershipStatus, SellerStatus, SellerVerificationStatus } from "@prisma/client";
 import request from "supertest";
 import { createTestApp, extractCookie } from "./test-app";
 import { PrismaService } from "../src/common/prisma/prisma.service";
@@ -156,9 +156,13 @@ describe("Location pins (e2e)", () => {
     expect(anon.body.items.every((p: { distanceKm: number | null }) => p.distanceKm === null)).toBe(true);
     const pinless = await signedIn("pin-pinless");
     expect((await pinless.c.get(`/discovery/providers?q=${token}&near=home`).expect(200)).body.origin).toBeNull();
-    const point = await request(server).get(`/discovery/providers?q=${token}&lat=32.87&lng=59.22&sort=NEAREST`).expect(200);
+    // A browser point travels only in a POST body; a point in a URL (access logs) is refused.
+    const point = await request(server).post("/discovery/providers/near").send({ q: token, lat: 32.87, lng: 59.22, sort: "NEAREST" }).expect(200);
     expect(point.body.origin).toBe("POINT");
     expect(point.body.items[0].id).toBe(near.org.id);
+    expect(point.body.items.every((p: { distanceKm: number | null }) => p.distanceKm === null || Number.isInteger(p.distanceKm))).toBe(true);
+    expect((await request(server).get(`/discovery/providers?q=${token}&lat=32.87&lng=59.22&sort=NEAREST`).expect(400)).body.error.details.reason).toBe("POINT_IN_QUERY");
+    expect((await request(server).post("/discovery/providers/near").send({ q: token }).expect(400)).body.error.details.reason).toBe("POINT_REQUIRED");
 
     // Places: PostGIS distance, whole kilometres only.
     const placeIds: string[] = [];
@@ -173,6 +177,10 @@ describe("Location pins (e2e)", () => {
     expect(ours.map((p: { distanceMeters: number }) => p.distanceMeters)).toEqual([0, 3000, 11000]);
     expect(leaks(places.body)).toEqual([]);
     expect((await request(server).get(`/places/nearby?near=home`).expect(400)).body.error.details.reason).toBe("HOME_PIN_MISSING");
+    const byPoint = await request(server).post("/places/nearby").send({ latitude: 32.87, longitude: 59.22, radiusMeters: 20000, pageSize: 50 }).expect(200);
+    expect(byPoint.body.items.filter((p: { id: string }) => placeIds.includes(p.id)).map((p: { id: string }) => p.id)).toEqual([placeIds[1], placeIds[2], placeIds[0]]);
+    expect(byPoint.body.items.every((p: { distanceMeters: number }) => p.distanceMeters % 1000 === 0)).toBe(true);
+    expect((await request(server).get(`/places/nearby?latitude=32.87&longitude=59.22`).expect(400)).body.error.details.reason).toBe("POINT_IN_QUERY");
     expect((await pinless.c.get(`/places/nearby?near=home`).expect(400)).body.error.details.reason).toBe("HOME_PIN_MISSING");
   });
 
@@ -220,13 +228,59 @@ describe("Location pins (e2e)", () => {
       await other.c.get(`/bookings/${booking.id}`),
       await other.c.get(`/discovery/providers?near=home&sort=NEAREST`),
       await request(server).get(`/discovery/providers/${org.id}`),
-      await request(server).get(`/discovery/providers?category=SITTING&lat=32.9&lng=59.2&sort=NEAREST`),
+      await request(server).post("/discovery/providers/near").send({ category: "SITTING", lat: 32.9, lng: 59.2, sort: "NEAREST" }),
       await request(server).get(`/provider-services/${service.id}`),
     ]) {
       expect(res.status).toBeLessThan(500);
       expect(leaks(res.body)).toEqual([]);
     }
     expect((await other.c.get(`/addresses/${member.addressId}`)).status).toBe(404);
+  });
+
+  it("audits every staff read of a member's exact pin (dispatch) without storing the coordinates", async () => {
+    const member = await memberWithHome();
+    const staff = await signedIn("pin-staff");
+    await prisma.adminUser.create({ data: { userId: staff.user.id, role: AdminRole.SUPER_ADMIN, status: AdminMembershipStatus.ACTIVE } });
+    const seller = await prisma.sellerOrganization.create({ data: { name: `Pin audit shop ${unique()}`, city: "بیرجند", verificationStatus: SellerVerificationStatus.VERIFIED, status: SellerStatus.ACTIVE, countryCode: "IR" } });
+    const snapshot = { recipient: "Sara", phone: "09120000000", addressLine: "خیابان مدرس", city: "بیرجند", region: null, countryCode: "IR", instructions: null, ...HOME };
+    const order = await prisma.order.create({ data: { sellerOrganizationId: seller.id, userId: member.user.id, householdId: member.householdId, status: "CONFIRMED", subtotalAmount: 1_000_000, deliveryAmount: 0, discountAmount: 0, totalAmount: 1_000_000, currency: "IRR", shippingAddressId: member.addressId, shippingAddressSnapshot: snapshot } });
+    await prisma.fulfillment.create({ data: { orderId: order.id, sellerOrgId: seller.id, pickupAddressSnapshot: { city: "بیرجند" }, deliveryAddressSnapshot: snapshot } });
+
+    const detail = await staff.c.get(`/admin/commerce/orders/${order.id}`).expect(200);
+    expect(detail.body.fulfillment.deliveryAddress).toMatchObject(HOME);
+    const rows = await prisma.adminAuditLog.findMany({ where: { action: "member_pin.viewed", entityId: order.id } });
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ entityType: "Order", reason: "dispatch" });
+    expect(leaks(rows)).toEqual([]);
+
+    // An order without a pin is not a pin read.
+    const plain = await prisma.order.create({ data: { sellerOrganizationId: seller.id, userId: member.user.id, householdId: member.householdId, status: "CONFIRMED", subtotalAmount: 1, deliveryAmount: 0, discountAmount: 0, totalAmount: 1, currency: "IRR", shippingAddressSnapshot: { city: "بیرجند" } } });
+    await prisma.fulfillment.create({ data: { orderId: plain.id, sellerOrgId: seller.id, pickupAddressSnapshot: {}, deliveryAddressSnapshot: { city: "بیرجند" } } });
+    await staff.c.get(`/admin/commerce/orders/${plain.id}`).expect(200);
+    expect(await prisma.adminAuditLog.count({ where: { action: "member_pin.viewed", entityId: plain.id } })).toBe(0);
+
+    // The staff pet-taxi overview shows recent rides' exact pickup / drop-off points: that read is audited too.
+    const pet = await prisma.pet.create({ data: { householdId: member.householdId, name: "Pishi", species: "CAT" } });
+    await prisma.petTaxiRide.create({ data: { userId: member.user.id, petIds: [pet.id], carrierSize: "SMALL", pickupLabel: "Home", pickupLatitude: HOME.latitude, pickupLongitude: HOME.longitude, pickupNote: "Ring twice", dropoffLabel: "Clinic", dropoffLatitude: 32.86, dropoffLongitude: 59.2, distanceMeters: 2_000, durationSeconds: 600, routeSource: "STRAIGHT_LINE_ESTIMATE", fareIrr: 500_000, fareBreakdown: {}, fareRuleCity: "*", searchExpiresAt: new Date(), status: "CANCELLED_BY_MEMBER", cancelledAt: new Date(), idempotencyKey: `pin-${unique()}` } });
+    const before = await prisma.adminAuditLog.count({ where: { action: "member_pin.viewed", entityType: "PetTaxiOverview", adminUserId: (await prisma.adminUser.findFirstOrThrow({ where: { userId: staff.user.id } })).id } });
+    await staff.c.get("/admin/pet-taxi").expect(200);
+    const overviewRows = await prisma.adminAuditLog.findMany({ where: { action: "member_pin.viewed", entityType: "PetTaxiOverview" }, orderBy: { createdAt: "desc" }, take: 1 });
+    expect(overviewRows[0]).toMatchObject({ reason: "dispatch" });
+    expect(await prisma.adminAuditLog.count({ where: { action: "member_pin.viewed", entityType: "PetTaxiOverview", adminUserId: overviewRows[0]!.adminUserId } })).toBe(before + 1);
+    expect(leaks(overviewRows)).toEqual([]);
+  });
+
+  it("clears the pin and its consent when the member removes an address; past order snapshots stay", async () => {
+    const member = await memberWithHome();
+    const seller = await prisma.sellerOrganization.create({ data: { name: `Pin archive shop ${unique()}`, city: "بیرجند", verificationStatus: SellerVerificationStatus.VERIFIED, status: SellerStatus.ACTIVE, countryCode: "IR" } });
+    const order = await prisma.order.create({ data: { sellerOrganizationId: seller.id, userId: member.user.id, householdId: member.householdId, status: "FULFILLED", subtotalAmount: 1, deliveryAmount: 0, discountAmount: 0, totalAmount: 1, currency: "IRR", shippingAddressId: member.addressId, shippingAddressSnapshot: { addressLine: "خیابان مدرس", city: "بیرجند", ...HOME } } });
+    expect(await prisma.customerAddress.findUniqueOrThrow({ where: { id: member.addressId } })).toMatchObject({ ...HOME, locationConsentAt: expect.any(Date) });
+
+    await member.c.delete(`/addresses/${member.addressId}`).expect(200);
+    expect(await prisma.customerAddress.findUniqueOrThrow({ where: { id: member.addressId } })).toMatchObject({ latitude: null, longitude: null, locationConsentAt: null, archivedAt: expect.any(Date) });
+    expect((await prisma.order.findUniqueOrThrow({ where: { id: order.id } })).shippingAddressSnapshot).toMatchObject(HOME);
+    // No pinned address left: near=home has nothing to measure from.
+    expect((await member.c.get(`/places/nearby?near=home`).expect(400)).body.error.details.reason).toBe("HOME_PIN_MISSING");
   });
 
   it("shows home-based providers at a ~1 km point until they opt in; clinics at their exact pin", async () => {

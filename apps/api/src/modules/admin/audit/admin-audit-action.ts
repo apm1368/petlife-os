@@ -290,4 +290,6 @@ export type AdminAuditAction =
   | "set_pet.prices_saved"
   | "set_pet.status_changed"
   | "set_pet.note_saved"
-  | "set_pet.design_opened";
+  | "set_pet.design_opened"
+  // A staff response carried a member's exact map pin (order dispatch). The row never holds the coordinates.
+  | "member_pin.viewed";

@@ -13576,5 +13576,12 @@
   "locationNudge": {
     "text": "Zet uw standaardadres op de kaart voor nauwkeurigere bezorging en plekken bij u in de buurt.",
     "action": "Nu vastzetten"
+  },
+  "nearMe": {
+    "nearHome": "Bij mijn adres",
+    "homePinMissing": "Zet uw standaardadres op de kaart om te sorteren op afstand vanaf thuis.",
+    "pinAddress": "Mijn adres vastzetten",
+    "distanceUnderOne": "<1 km",
+    "distanceAbout": "~{km} km"
   }
 }

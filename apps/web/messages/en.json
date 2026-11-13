@@ -13507,5 +13507,12 @@
   "locationNudge": {
     "text": "Pin your default address on the map for more precise delivery and places near you.",
     "action": "Pin it now"
+  },
+  "nearMe": {
+    "nearHome": "Near my address",
+    "homePinMissing": "Pin your default address on the map to sort by distance from home.",
+    "pinAddress": "Pin my address",
+    "distanceUnderOne": "<1 km",
+    "distanceAbout": "~{km} km"
   }
 }

@@ -11,8 +11,6 @@ import {
   IsDateString,
   IsEnum,
   IsInt,
-  IsLatitude,
-  IsLongitude,
   IsNumber,
   IsOptional,
   IsString,
@@ -24,6 +22,7 @@ import {
 import { PaymentProvider, PetSpecies, TravelBookingMode, TravelListingStatus, TravelListingType, TravelPricingMode } from "@prisma/client";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
 import { IsObjectKeyFor } from "../../../common/storage-keys/object-key.validator";
+import { IsIranLatitude, IsIranLongitude } from "../../../common/geo/geo";
 
 // --- Provider: listings -----------------------------------------------------
 
@@ -54,13 +53,18 @@ export class CreateTravelListingDto {
   @MaxLength(400)
   address?: string;
 
+  /** The stay's map pin (inside Iran); sent together with locationConsent: true. Null on an edit removes it. */
   @IsOptional()
-  @IsLatitude()
-  latitude?: number;
+  @IsIranLatitude()
+  latitude?: number | null;
 
   @IsOptional()
-  @IsLongitude()
-  longitude?: number;
+  @IsIranLongitude()
+  longitude?: number | null;
+
+  @IsOptional()
+  @IsBoolean()
+  locationConsent?: boolean;
 
   /** Homes (villa, apartment, residence, boarding): show the exact pin publicly instead of a ~1 km point. */
   @IsOptional()
@@ -118,13 +122,18 @@ export class UpdateTravelListingDto {
   @MaxLength(400)
   address?: string;
 
+  /** The stay's map pin (inside Iran); sent together with locationConsent: true. Null on an edit removes it. */
   @IsOptional()
-  @IsLatitude()
-  latitude?: number;
+  @IsIranLatitude()
+  latitude?: number | null;
 
   @IsOptional()
-  @IsLongitude()
-  longitude?: number;
+  @IsIranLongitude()
+  longitude?: number | null;
+
+  @IsOptional()
+  @IsBoolean()
+  locationConsent?: boolean;
 
   /** Homes (villa, apartment, residence, boarding): show the exact pin publicly instead of a ~1 km point. */
   @IsOptional()

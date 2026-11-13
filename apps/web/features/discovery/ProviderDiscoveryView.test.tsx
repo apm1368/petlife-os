@@ -44,6 +44,17 @@ describe("ProviderDiscoveryView", () => {
     expect(replace).toHaveBeenCalledWith(expect.stringContaining("homeVisit=true"), { scroll: false });
   });
 
+  it("keeps the visitor's point out of the URL: near me puts only near=me in the query", async () => {
+    vi.mocked(discoveryService.search).mockResolvedValue({ total: 0, items: [] });
+    const getCurrentPosition = vi.fn((ok: PositionCallback) => ok({ coords: { latitude: 35.712345, longitude: 51.398765 } } as GeolocationPosition));
+    Object.defineProperty(navigator, "geolocation", { value: { getCurrentPosition }, configurable: true });
+    renderWithIntl(<ProviderDiscoveryView category="VET" />, "fa");
+    fireEvent.click(await screen.findAllByRole("button", { name: /نزدیک من/ }).then((b) => b[0]!));
+    expect(replace).toHaveBeenCalledWith(expect.stringContaining("near=me"), { scroll: false });
+    const url = replace.mock.calls.at(-1)![0] as string;
+    expect(url).not.toMatch(/lat=|lng=|35\.7|51\.4/);
+  });
+
   it("offers clearing filters from the empty state", async () => {
     vi.mocked(discoveryService.search).mockResolvedValue({ total: 0, items: [] });
     renderWithIntl(<ProviderDiscoveryView category="GROOMING" />, "en");

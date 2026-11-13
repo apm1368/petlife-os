@@ -13483,5 +13483,12 @@
   "locationNudge": {
     "text": "Setzen Sie Ihre Standardadresse auf der Karte, für genauere Lieferungen und Orte in Ihrer Nähe.",
     "action": "Jetzt setzen"
+  },
+  "nearMe": {
+    "nearHome": "In der Nähe meiner Adresse",
+    "homePinMissing": "Setzen Sie Ihre Standardadresse auf der Karte, um nach Entfernung von zu Hause zu sortieren.",
+    "pinAddress": "Adresse auf der Karte setzen",
+    "distanceUnderOne": "<1 km",
+    "distanceAbout": "~{km} km"
   }
 }

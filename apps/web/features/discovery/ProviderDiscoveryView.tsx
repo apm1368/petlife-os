@@ -24,7 +24,10 @@ const CATEGORY_NAV = ["VET", "GROOMING", "TRAINING", "WALKING", "SITTING", "BOAR
 const VET_SPECIALTIES = ["LAB_TEST", "IMAGING_STUDY", "DENTAL_CARE", "REHAB_SESSION", "NUTRITION_CONSULT", "VACCINATION"] as const;
 
 /** Query keys the filter rail owns — "clear all" removes these and keeps nothing else but the search text. */
-const FILTER_KEYS = ["city", "date", "species", "homeVisit", "minRating", "maxPrice", "serviceType", "lat", "lng"] as const;
+const FILTER_KEYS = ["city", "date", "species", "homeVisit", "minRating", "maxPrice", "serviceType", "near"] as const;
+
+/** "Near": `me` = the browser's point, kept in memory only and sent in a POST body; `home` = the member's pinned address (server-side). */
+type Near = "me" | "home" | undefined;
 
 function readQuery(params: URLSearchParams, category?: string): DiscoveryQuery {
   const num = (key: string) => (params.get(key) ? Number(params.get(key)) : undefined);
@@ -38,11 +41,10 @@ function readQuery(params: URLSearchParams, category?: string): DiscoveryQuery {
     minRating: num("minRating"),
     maxPrice: num("maxPrice"),
     date: params.get("date") ?? undefined,
-    lat: num("lat"),
-    lng: num("lng"),
     sort: (params.get("sort") as DiscoverySort | null) ?? "RECOMMENDED",
   };
 }
+const readNear = (params: URLSearchParams): Near => (params.get("near") === "home" ? "home" : params.get("near") === "me" ? "me" : undefined);
 
 /**
  * DISCOVERY PATTERN (services + vets): a compact header with search, the category strip, then a
@@ -60,6 +62,11 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
   const params = useSearchParams();
   const sessionStatus = useSessionStore((s) => s.status);
   const query = useMemo(() => readQuery(new URLSearchParams(params.toString()), category), [params, category]);
+  const near = readNear(new URLSearchParams(params.toString()));
+  // The browser's point never goes into the URL (URLs reach access logs): it lives here, rounded to ~1 km.
+  const [point, setPoint] = useState<{ lat: number; lng: number } | null>(null);
+  const [homeMissing, setHomeMissing] = useState(false);
+  const tNear = useTranslations("nearMe");
   const [results, setResults] = useState<ProviderDiscoveryResult[] | null>(null);
   const [total, setTotal] = useState(0);
   const [cities, setCities] = useState<string[]>([]);
@@ -87,13 +94,19 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
     setError(false);
     setResults(null);
     try {
-      const page = await discoveryService.search(query);
+      const page =
+        near === "me" && point
+          ? await discoveryService.searchNear({ ...query, lat: point.lat, lng: point.lng })
+          : near === "home"
+            ? await discoveryService.search({ ...query, near: "home" })
+            : await discoveryService.search(query);
+      setHomeMissing(near === "home" && page.origin !== "HOME");
       setResults(page.items);
       setTotal(page.total ?? page.items.length);
     } catch {
       setError(true);
     }
-  }, [query]);
+  }, [query, near, point]);
 
   useEffect(() => void load(), [load]);
   useEffect(() => {
@@ -138,8 +151,9 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setLocating("idle");
-        // Rounded to ~1 km before it enters the URL (and server logs); it is never stored.
-        setParam({ lat: pos.coords.latitude.toFixed(2), lng: pos.coords.longitude.toFixed(2), sort: "NEAREST" });
+        // Rounded to ~1 km and kept in memory; it is sent in a POST body, never in a URL, and never stored.
+        setPoint({ lat: Math.round(pos.coords.latitude * 100) / 100, lng: Math.round(pos.coords.longitude * 100) / 100 });
+        setParam({ near: "me", sort: "NEAREST" });
       },
       () => setLocating("denied"),
       { maximumAge: 300_000, timeout: 10_000 },
@@ -168,7 +182,8 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
     ...(query.minRating ? [{ key: "minRating", label: t("filters.ratedFourPlus"), clear: { minRating: undefined } }] : []),
     ...(query.maxPrice ? [{ key: "maxPrice", label: t("filters.upTo", { amount: formatPrice(query.maxPrice) }), clear: { maxPrice: undefined } }] : []),
     ...(query.serviceType ? [{ key: "serviceType", label: t.has(`specialties.${query.serviceType}`) ? t(`specialties.${query.serviceType}`) : query.serviceType, clear: { serviceType: undefined } }] : []),
-    ...(query.lat !== undefined ? [{ key: "near", label: t("filters.nearMe"), clear: { lat: undefined, lng: undefined } }] : []),
+    ...(near === "me" && point ? [{ key: "near", label: t("filters.nearMe"), clear: { near: undefined } }] : []),
+    ...(near === "home" ? [{ key: "near", label: tNear("nearHome"), clear: { near: undefined } }] : []),
   ];
   const filterCount = active.filter((a) => a.key !== "q").length;
   const clearAll = () => {
@@ -207,11 +222,22 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
         <button type="button" className="disc-toggle" aria-pressed={query.minRating === 4} onClick={() => setParam({ minRating: query.minRating === 4 ? undefined : "4" })}>
           <Star size={16} aria-hidden="true" /> {t("filters.fourStarsAndUp")}
         </button>
-        <button type="button" className="disc-toggle" aria-pressed={query.lat !== undefined} onClick={() => (query.lat !== undefined ? setParam({ lat: undefined, lng: undefined }) : locateMe())} aria-busy={locating === "busy"}>
+        <button type="button" className="disc-toggle" aria-pressed={near === "me" && !!point} onClick={() => (near === "me" && point ? setParam({ near: undefined }) : locateMe())} aria-busy={locating === "busy"}>
           <LocateFixed size={16} aria-hidden="true" /> {t("filters.nearMe")}
         </button>
+        {sessionStatus === "authenticated" ? (
+          <button type="button" className="disc-toggle" aria-pressed={near === "home"} onClick={() => setParam(near === "home" ? { near: undefined } : { near: "home", sort: "NEAREST" })}>
+            <House size={16} aria-hidden="true" /> {tNear("nearHome")}
+          </button>
+        ) : null}
       </div>
       {locating === "denied" ? <p role="status" className="disc-note">{t("filters.locationUnavailable")}</p> : null}
+      {near === "home" && homeMissing ? (
+        <p role="status" className="disc-note">
+          {tNear("homePinMissing")}{" "}
+          <Link href={`/${locale}/profile/addresses`} className="font-semibold underline">{tNear("pinAddress")}</Link>
+        </p>
+      ) : null}
       {category === "PET_TAXI" ? (
         <p className="disc-note">
           <Link href={`/${locale}/pet-taxi`} className="font-semibold underline">
@@ -282,7 +308,7 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
             </p>
             <label className="disc-sort">
               <span>{t("sort.label")}</span>
-              <select aria-label={t("sort.label")} value={query.sort} onChange={(e) => (e.target.value === "NEAREST" && query.lat === undefined ? locateMe() : setParam({ sort: e.target.value }))}>
+              <select aria-label={t("sort.label")} value={query.sort} onChange={(e) => (e.target.value === "NEAREST" && !(near === "home" || (near === "me" && point)) ? locateMe() : setParam({ sort: e.target.value }))}>
                 {SORTS.map((s) => (
                   <option key={s} value={s}>{t(`sort.${s}`)}</option>
                 ))}
@@ -351,7 +377,7 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
                           {isVet && p.specialties.length ? p.specialties.slice(0, 4).join(fa ? "، " : ", ") : p.services.slice(0, 3).map((s) => s.name).join(fa ? "، " : ", ")}
                         </p>
                         <p className="disc-row__meta">
-                          {p.location ? <span><MapPin size={14} aria-hidden="true" />{[placeName(p.location.region, locale), placeName(p.location.city, locale)].filter(Boolean).join(fa ? "، " : ", ")}{p.distanceKm !== null ? ` · ${formatCount(p.distanceKm, locale)} ${t("distanceUnit")}` : ""}</span> : null}
+                          {p.location ? <span><MapPin size={14} aria-hidden="true" />{[placeName(p.location.region, locale), placeName(p.location.city, locale)].filter(Boolean).join(fa ? "، " : ", ")}{p.distanceKm !== null ? ` · ${p.distanceKm < 1 ? tNear("distanceUnderOne") : tNear("distanceAbout", { km: formatCount(p.distanceKm, locale) })}` : ""}</span> : null}
                           <span className={p.nextAvailableAt ? "disc-row__open" : undefined}><Clock3 size={14} aria-hidden="true" />{p.nextAvailableAt ? `${t("nextOpening")}: ${fmtTime(p.nextAvailableAt)}` : t("noOpening")}</span>
                           {p.homeVisit ? <span><House size={14} aria-hidden="true" />{t("filters.homeVisitPlural")}</span> : null}
                           {p.petTypes.length ? <span>{p.petTypes.map((petType) => t(petType === "DOG" ? "species.dogs" : "species.cats")).join(fa ? " و " : locale === "de" ? " und " : locale === "es" ? " y " : locale === "ar" ? " و " : locale === "nl" ? " en " : " & ")}</span> : null}

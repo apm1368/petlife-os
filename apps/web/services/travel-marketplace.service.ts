@@ -114,8 +114,12 @@ export interface ListingInput {
   province?: string;
   city?: string;
   address?: string;
-  latitude?: number;
-  longitude?: number;
+  /** The stay's pin (inside Iran), sent with locationConsent: true; null removes it. */
+  latitude?: number | null;
+  longitude?: number | null;
+  locationConsent?: boolean;
+  /** Homes: show the exact pin publicly instead of a ~1 km point. */
+  exactPinPublic?: boolean | null;
   amenities?: string[];
   bookingMode?: "INSTANT_BOOKING" | "REQUEST_TO_BOOK";
   cancellationPolicy?: string;
