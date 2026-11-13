@@ -9,7 +9,7 @@ export type Family = "care" | "services" | "shop" | "travel" | "safe" | "togethe
  * Flows that must stay quiet get none: checkout, onboarding, invitations, and the NGO and insurer workspaces.
  */
 export function familyForPath(pathname: string): Family | null {
-  const path = pathname.replace(/^\/(fa|en|de|es)(?=\/|$)/, "");
+  const path = pathname.replace(/^\/(fa|en|de|es|ar|nl)(?=\/|$)/, "");
   if (/^\/(home|pets|care-calendar|notifications|profile|subscription|ai)(\/|$)/.test(path)) return "care";
   if (/^\/(services|vet|providers|places|bookings|explore)(\/|$)/.test(path)) return "services";
   if (/^\/(shop|cart|orders|repeat-delivery|favorites)(\/|$)/.test(path)) return "shop";

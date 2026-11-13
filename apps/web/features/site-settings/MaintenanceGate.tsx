@@ -18,7 +18,7 @@ export function MaintenanceGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? "";
   const locale = useLocale();
   const t = useTranslations("siteSettings.maintenance");
-  const path = pathname.replace(/^\/(fa|en|de|es)(?=\/|$)/, "") || "/";
+  const path = pathname.replace(/^\/(fa|en|de|es|ar|nl)(?=\/|$)/, "") || "/";
   if (!settings?.["maintenance.enabled"] || ALLOWED.some((p) => path === p || path.startsWith(`${p}/`))) return <>{children}</>;
   const message = localizedSetting(settings["maintenance.message"], locale) ?? t("defaultMessage");
   return (
