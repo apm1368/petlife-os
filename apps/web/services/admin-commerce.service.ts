@@ -38,6 +38,10 @@ export const adminCommerceService = {
   getOrder: (id: string) => apiFetch<AdminCommerceOrderDetailDto>(`/admin/commerce/orders/${id}`),
   /** Staff cancel before dispatch: full refund in the same step (commerce.manage, audited). */
   cancelOrder: (id: string, reason: string) => apiFetch<AdminCommerceOrderDetailDto>(`/admin/commerce/orders/${id}/cancel`, { method: "POST", body: { reason } }),
+  /** Approval modes: a paid order held for approval goes to the seller (commerce.manage, audited). */
+  approveOrder: (id: string, note?: string) => apiFetch<AdminCommerceOrderDetailDto>(`/admin/commerce/orders/${id}/approve`, { method: "POST", body: note ? { note } : {} }),
+  /** Approval modes: a held order is refused — full refund on the staff-cancel path (commerce.manage, audited). */
+  rejectOrder: (id: string, reason: string) => apiFetch<AdminCommerceOrderDetailDto>(`/admin/commerce/orders/${id}/reject`, { method: "POST", body: { reason } }),
   listRefundRequests: (input: { status?: string; page?: number }) =>
     apiFetch<PaginatedDto<AdminRefundRequestDto>>(`/admin/commerce/refund-requests${qs(input)}`),
   approveRefundRequest: (id: string, note?: string) =>

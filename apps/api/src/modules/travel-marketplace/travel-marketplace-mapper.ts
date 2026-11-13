@@ -151,7 +151,8 @@ export function toTravelBookingDto(row: BookingWithRelations, extras: BookingDto
     listingId: row.listingId,
     listingTitle: row.listing.title,
     listingType: row.listing.type as unknown as TravelBookingDto["listingType"],
-    bookingMode: row.listing.bookingMode as unknown as TravelBookingDto["bookingMode"],
+    // The mode this stay runs under (approval policy applied at hold); older rows fall back to the listing.
+    bookingMode: (row.bookingMode ?? row.listing.bookingMode) as unknown as TravelBookingDto["bookingMode"],
     listingCity: row.listing.city,
     unitId: row.unitId,
     unitName: row.unit.name,

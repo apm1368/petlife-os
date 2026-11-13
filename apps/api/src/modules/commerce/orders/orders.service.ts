@@ -8,6 +8,8 @@ import { toSellerSummaryDto } from "../commerce-dto.mapper";
 import { toBuyerFulfillmentDto } from "../logistics/logistics-dto.mapper";
 import { canCustomerCancel, canCustomerRequestRefund } from "./order-policy";
 import { REPEAT_REMINDER_LEAD_DAYS } from "../repeat-delivery/repeat-delivery.service";
+import { ApprovalPolicyService } from "../../approvals/approval-policy.service";
+import { ApprovalTaskService } from "../../approvals/approval-task.service";
 
 const ORDER_INCLUDE = {
   sellerOrganization: true,
@@ -64,11 +66,17 @@ export class OrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly events: DomainEventsService,
+    private readonly approvals: ApprovalPolicyService,
+    private readonly approvalTasks: ApprovalTaskService,
   ) {}
 
   /**
    * Groups the checkout's priced lines by seller and creates one CONFIRMED
    * Order + its OrderItems per seller, inside the caller's transaction.
+   * Approval modes: when this seller's effective shop-order mode is
+   * NEEDS_APPROVAL the Order is created PENDING instead (paid, held for staff)
+   * with a follow-up task; the caller creates no fulfillment for it and the
+   * seller does not see it until OrderApprovalService approves it.
    * Every commercial fact (title/sku/price/compatibility) is copied at
    * this moment — an Order must never be re-rendered from mutable
    * Product/Offer rows later (spec section 31).
@@ -104,6 +112,7 @@ export class OrdersService {
       const deliveryAmount = deliveryAmountBySeller ? (deliveryAmountBySeller.get(sellerOrganizationId) ?? 0) : checkout.deliveryAmount;
       const totalAmount = subtotalAmount - discountAmount + deliveryAmount;
       let createdItems: { id: string; promotionId: string | null; unitDiscount: number; quantity: number }[] | null = null;
+      const needsApproval = await this.approvals.shopOrderNeedsApproval(sellerOrganizationId, tx);
 
       let order;
       try {
@@ -113,7 +122,7 @@ export class OrdersService {
             sellerOrganizationId,
             userId: checkout.userId,
             householdId: checkout.householdId,
-            status: OrderStatus.CONFIRMED,
+            status: needsApproval ? OrderStatus.PENDING : OrderStatus.CONFIRMED,
             subtotalAmount,
             deliveryAmount,
             discountAmount,
@@ -121,7 +130,7 @@ export class OrdersService {
             currency: checkout.currency,
             shippingAddressId,
             shippingAddressSnapshot: (shippingAddressSnapshot ?? {}) as Prisma.InputJsonValue,
-            confirmedAt: new Date(),
+            confirmedAt: needsApproval ? null : new Date(),
             items: {
               create: sellerLines.map((line) => ({
                 productId: line.productId,
@@ -156,13 +165,23 @@ export class OrdersService {
       }
 
       orderIds.push(order.id);
+      const held = order.status === OrderStatus.PENDING;
       if (createdItems) {
-        await tx.orderStatusEvent.create({ data: { orderId: order.id, fromStatus: null, toStatus: OrderStatus.CONFIRMED, actorType: "SYSTEM", reason: "PAYMENT_CONFIRMED" } });
+        await tx.orderStatusEvent.create({ data: { orderId: order.id, fromStatus: null, toStatus: order.status, actorType: "SYSTEM", reason: held ? "PAYMENT_CONFIRMED_AWAITING_APPROVAL" : "PAYMENT_CONFIRMED" } });
         await this.recordPromotionRedemptions(tx, order.id, checkout.userId, createdItems);
         await this.advanceRepeatDeliveries(tx, order.id, checkout.userId, sellerLines);
+        if (held) {
+          const seller = await tx.sellerOrganization.findUniqueOrThrow({ where: { id: sellerOrganizationId }, select: { name: true } });
+          await this.approvalTasks.raiseForOrder({ id: order.id, orderNumber: orderNumberOf(order.id), sellerName: seller.name, totalAmount: order.totalAmount }, tx);
+        }
       }
-      await this.events.publish("OrderCreated", { orderId: order.id, checkoutId: checkout.id, sellerOrganizationId, userId: checkout.userId }, { tx, aggregateType: "Order", aggregateId: order.id });
-      await this.events.publish("OrderConfirmed", { orderId: order.id, checkoutId: checkout.id }, { tx, aggregateType: "Order", aggregateId: order.id });
+      if (held) {
+        // No OrderCreated: the seller hears about it ("order received") only once staff approve it (OrderApproved).
+        await this.events.publish("OrderAwaitingApproval", { orderId: order.id, checkoutId: checkout.id, sellerOrganizationId, userId: checkout.userId }, { tx, aggregateType: "Order", aggregateId: order.id });
+      } else {
+        await this.events.publish("OrderCreated", { orderId: order.id, checkoutId: checkout.id, sellerOrganizationId, userId: checkout.userId }, { tx, aggregateType: "Order", aggregateId: order.id });
+        await this.events.publish("OrderConfirmed", { orderId: order.id, checkoutId: checkout.id }, { tx, aggregateType: "Order", aggregateId: order.id });
+      }
     }
 
     return orderIds;

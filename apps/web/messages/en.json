@@ -3789,7 +3789,7 @@
       "title": "Order confirmed",
       "subtitle": "{count, plural, one {1 order was} other {# orders were}} placed",
       "orderStatus": {
-        "PENDING": "Pending",
+        "PENDING": "Awaiting confirmation",
         "CONFIRMED": "Confirmed",
         "CANCELLED": "Cancelled",
         "PARTIALLY_REFUNDED": "Partially refunded",
@@ -3798,7 +3798,8 @@
       "delivery": "Delivery",
       "total": "Total",
       "viewOrders": "View my orders",
-      "continueShopping": "Continue shopping"
+      "continueShopping": "Continue shopping",
+      "awaitingConfirmation": "Paid. opetlife confirms this order before the seller prepares it; if it can't be confirmed, the full amount is refunded."
     },
     "myOrders": {
       "title": "My Orders",
@@ -3808,7 +3809,7 @@
       "browseShop": "Browse the shop",
       "itemCount": "{count, plural, one {1 item} other {# items}}",
       "status": {
-        "PENDING": "Pending",
+        "PENDING": "Awaiting confirmation",
         "CONFIRMED": "Confirmed",
         "CANCELLED": "Cancelled",
         "PARTIALLY_REFUNDED": "Partially refunded",
@@ -3847,7 +3848,7 @@
       "trackingUnavailable": "Tracking update temporarily unavailable",
       "placedAt": "Placed {when}",
       "status": {
-        "PENDING": "Pending",
+        "PENDING": "Awaiting confirmation",
         "CONFIRMED": "Confirmed",
         "CANCELLED": "Cancelled",
         "PARTIALLY_REFUNDED": "Partially refunded",
@@ -3918,7 +3919,7 @@
       },
       "timeline": {
         "title": "Order history",
-        "PENDING": "Order created",
+        "PENDING": "Payment received — awaiting confirmation",
         "CONFIRMED": "Payment confirmed — order placed",
         "PREPARING": "Seller is preparing",
         "READY_FOR_FULFILLMENT": "Ready to ship",
@@ -3939,7 +3940,8 @@
       },
       "deliveryMethod": "Delivery: {method}",
       "postTracking": "Track the parcel on the Post website",
-      "courierTracking": "Track the courier"
+      "courierTracking": "Track the courier",
+      "awaitingConfirmation": "Your payment is received. opetlife confirms this order before the seller prepares it; if it can't be confirmed, you get the full amount back."
     },
     "statusLabels": {
       "payment": {
@@ -5691,7 +5693,9 @@
         "FAILED_IMPORT": "Failed import",
         "SUPPORT": "Support",
         "CLINIC_FOLLOW_UP": "Clinic follow-up",
-        "DATA_QUALITY": "Data quality"
+        "DATA_QUALITY": "Data quality",
+        "BOOKING_APPROVAL": "Booking request follow-up",
+        "ORDER_APPROVAL": "Order awaiting approval"
       },
       "checkList": "Check task list"
     },
@@ -9855,7 +9859,10 @@
       "support_firstResponseSlaHours": "First support response target (hours)",
       "trust_highSeveritySlaHours": "High-severity response target (hours)",
       "trust_standardSlaHours": "Standard response target (hours)",
-      "privacy_exportsPerDay": "Daily data-export request limit"
+      "privacy_exportsPerDay": "Daily data-export request limit",
+      "approvals_mode_serviceBookings": "Care-service bookings: approval mode",
+      "approvals_mode_stayBookings": "Stay bookings: approval mode",
+      "approvals_mode_shopOrders": "Shop orders: approval mode"
     },
     "statuses": {
       "PENDING": "Pending approval; not applied",
@@ -9869,7 +9876,14 @@
       "seconds": "seconds",
       "hours": "hours",
       "perDay": "per day"
-    }
+    },
+    "options": {
+      "PARTNER_CHOICE": "Each partner's own choice",
+      "INSTANT": "Instant",
+      "NEEDS_APPROVAL": "Needs approval"
+    },
+    "choiceValue": "New value",
+    "approvalsNote": "Requests and held orders go to the task list for follow-up. A business's own setting on its profile page wins over this."
   },
   "adminFeatureFlags": {
     "title": "Feature flags",
@@ -12650,6 +12664,57 @@
       "TWO_STEP_POLICY_SUPER_ADMIN_ONLY": "Only a super admin can change this.",
       "TWO_STEP_KEY_CHANGED": "Your authenticator can't be checked after a server key change. Use a recovery code, or ask a super admin to reset it."
     }
+  },
+  "adminApprovalModes": {
+    "title": "Approval mode",
+    "hint": "Instant or needs approval, per flow. A choice here applies to this business only and wins over the platform setting.",
+    "scopes": {
+      "SERVICE_BOOKINGS": "Care-service bookings",
+      "STAY_BOOKINGS": "Stay bookings",
+      "SHOP_ORDERS": "Shop orders"
+    },
+    "modes": {
+      "PARTNER_CHOICE": "The business's own choice (per service or listing)",
+      "INSTANT": "Instant",
+      "NEEDS_APPROVAL": "Needs approval"
+    },
+    "platform": "Platform setting",
+    "source": "Applies from",
+    "overridden": "Set for this business",
+    "inherited": "Inherited from the platform setting",
+    "overrideReason": "Reason: {reason}",
+    "overrideBy": "{name}, {when}",
+    "unknownAdmin": "A staff member",
+    "choice": "For this business",
+    "choices": {
+      "INHERIT": "Inherit the platform setting",
+      "INSTANT": "Instant",
+      "NEEDS_APPROVAL": "Needs approval"
+    },
+    "reason": "Reason (audit log)",
+    "reasonHint": "At least 5 characters.",
+    "reasonRequired": "Write a reason of at least 5 characters.",
+    "save": "Save",
+    "saved": "Saved.",
+    "saveFailed": "Not saved; please try again.",
+    "loadFailed": "Could not load the approval mode.",
+    "retry": "Try again",
+    "loading": "Loading…",
+    "readOnly": "Changing this needs the settings permission."
+  },
+  "adminOrderApproval": {
+    "title": "Waiting for approval",
+    "hint": "Paid and held before the seller sees it. Approve to send it to the seller for preparation; reject to refund the customer in full.",
+    "note": "Note (optional, audit log)",
+    "approve": "Approve and send to the seller",
+    "reject": "Reject and refund",
+    "reason": "Reason for rejecting (audit log)",
+    "reasonRequired": "Write a short reason.",
+    "confirmReject": "Yes, reject and refund in full",
+    "back": "Back",
+    "notPending": "This order is no longer waiting for approval; reload the page.",
+    "failed": "That did not work; please try again.",
+    "noPermission": "Approving or rejecting needs the shop management permission."
   },
   "setPet": {
     "landing": {

@@ -6820,6 +6820,28 @@ export interface AdminPartnerShopDetailDto {
   linkedService: (AdminPartnerLinkDto & { type: string; serviceKinds: string[] }) | null;
 }
 
+/** Approval modes (owner request 2026-11-13): whether a booking / stay / shop order goes through at once or waits for a human. */
+export type ApprovalModeValue = "INSTANT" | "NEEDS_APPROVAL";
+export type ApprovalScopeValue = "SERVICE_BOOKINGS" | "STAY_BOOKINGS" | "SHOP_ORDERS";
+/** A vertical setting (`approvals.mode.*`); PARTNER_CHOICE = each provider's own per-service / per-listing choice. */
+export type VerticalApprovalSettingValue = "PARTNER_CHOICE" | ApprovalModeValue;
+
+/** One flow's approval mode for one partner, as staff see it on the partner profile. */
+export interface PartnerApprovalModeDto {
+  scope: ApprovalScopeValue;
+  /** The vertical setting this partner inherits when it has no override. */
+  vertical: VerticalApprovalSettingValue;
+  override: { mode: ApprovalModeValue; reason: string; updatedAt: string; updatedByName: string | null } | null;
+  /** What applies now: the override, else the vertical setting (PARTNER_CHOICE = the partner's own per-item choice). */
+  effective: VerticalApprovalSettingValue;
+}
+
+export interface PartnerApprovalModesDto {
+  partnerType: "PROVIDER" | "SELLER";
+  organizationId: string;
+  items: PartnerApprovalModeDto[];
+}
+
 /** One seller's offer on a product variant, as staff see it: who sells it, at what price, how much is in stock, and whether it is live. */
 export interface AdminProductOfferDto {
   id: string;

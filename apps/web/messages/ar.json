@@ -3833,7 +3833,7 @@
       "title": "تم تأكيد الطلب",
       "subtitle": "{count, plural, one {تم تقديم طلب واحد} other {تم تقديم # طلبات}}",
       "orderStatus": {
-        "PENDING": "قيد الانتظار",
+        "PENDING": "بانتظار التأكيد",
         "CONFIRMED": "مؤكَّد",
         "CANCELLED": "ملغى",
         "PARTIALLY_REFUNDED": "مُستردّ جزئيًا",
@@ -3842,7 +3842,8 @@
       "delivery": "التوصيل",
       "total": "الإجمالي",
       "viewOrders": "اعرض طلباتي",
-      "continueShopping": "تابع التسوق"
+      "continueShopping": "تابع التسوق",
+      "awaitingConfirmation": "تم الدفع. تؤكد opetlife هذا الطلب قبل أن يجهّزه البائع؛ وإذا تعذّر تأكيده، يُسترد المبلغ كاملًا."
     },
     "myOrders": {
       "title": "طلباتي",
@@ -3852,7 +3853,7 @@
       "browseShop": "تصفّح المتجر",
       "itemCount": "{count, plural, one {منتج واحد} other {# منتجات}}",
       "status": {
-        "PENDING": "قيد الانتظار",
+        "PENDING": "بانتظار التأكيد",
         "CONFIRMED": "مؤكَّد",
         "CANCELLED": "ملغى",
         "PARTIALLY_REFUNDED": "مُستردّ جزئيًا",
@@ -3891,7 +3892,7 @@
       "trackingUnavailable": "تحديث التتبّع غير متاح مؤقتًا",
       "placedAt": "تاريخ الطلب {when}",
       "status": {
-        "PENDING": "قيد الانتظار",
+        "PENDING": "بانتظار التأكيد",
         "CONFIRMED": "مؤكَّد",
         "CANCELLED": "ملغى",
         "PARTIALLY_REFUNDED": "مُستردّ جزئيًا",
@@ -3962,7 +3963,7 @@
       },
       "timeline": {
         "title": "سجل الطلب",
-        "PENDING": "تم إنشاء الطلب",
+        "PENDING": "تم استلام الدفع — بانتظار التأكيد",
         "CONFIRMED": "تم تأكيد الدفع — تم تقديم الطلب",
         "PREPARING": "البائع يجهّز الطلب",
         "READY_FOR_FULFILLMENT": "جاهز للشحن",
@@ -3983,7 +3984,8 @@
       },
       "deliveryMethod": "التوصيل: {method}",
       "postTracking": "تتبّع الطرد على موقع البريد",
-      "courierTracking": "تتبّع المندوب"
+      "courierTracking": "تتبّع المندوب",
+      "awaitingConfirmation": "تم استلام دفعتك. تؤكد opetlife هذا الطلب قبل أن يجهّزه البائع؛ وإذا تعذّر تأكيده، يُعاد إليك المبلغ كاملًا."
     },
     "statusLabels": {
       "payment": {
@@ -5751,7 +5753,9 @@
         "FAILED_IMPORT": "استيراد فاشل",
         "SUPPORT": "الدعم",
         "CLINIC_FOLLOW_UP": "متابعة العيادة",
-        "DATA_QUALITY": "جودة البيانات"
+        "DATA_QUALITY": "جودة البيانات",
+        "BOOKING_APPROVAL": "متابعة طلب حجز",
+        "ORDER_APPROVAL": "طلب بانتظار الموافقة"
       },
       "checkList": "راجع قائمة المهام"
     },
@@ -9924,7 +9928,10 @@
       "support_firstResponseSlaHours": "المدة المستهدفة لأول ردّ من الدعم (بالساعات)",
       "trust_highSeveritySlaHours": "المدة المستهدفة للردّ على الحالات عالية الخطورة (بالساعات)",
       "trust_standardSlaHours": "المدة المستهدفة للردّ على الحالات العادية (بالساعات)",
-      "privacy_exportsPerDay": "الحدّ اليومي لطلبات تصدير البيانات"
+      "privacy_exportsPerDay": "الحدّ اليومي لطلبات تصدير البيانات",
+      "approvals_mode_serviceBookings": "حجوزات خدمات الرعاية: وضع الموافقة",
+      "approvals_mode_stayBookings": "حجوزات الإقامة: وضع الموافقة",
+      "approvals_mode_shopOrders": "طلبات المتجر: وضع الموافقة"
     },
     "statuses": {
       "PENDING": "بانتظار الموافقة؛ لم يُطبَّق",
@@ -9938,7 +9945,14 @@
       "seconds": "ثوانٍ",
       "hours": "ساعات",
       "perDay": "يوميًا"
-    }
+    },
+    "options": {
+      "PARTNER_CHOICE": "اختيار كل شريك",
+      "INSTANT": "فوري",
+      "NEEDS_APPROVAL": "يحتاج إلى موافقة"
+    },
+    "choiceValue": "القيمة الجديدة",
+    "approvalsNote": "تذهب الطلبات والطلبيات المحتجزة إلى قائمة المهام للمتابعة. الإعداد الخاص بالنشاط التجاري في صفحة ملفه يتقدّم على هذا."
   },
   "adminFeatureFlags": {
     "title": "علامات الميزات",
@@ -12719,6 +12733,57 @@
       "TWO_STEP_POLICY_SUPER_ADMIN_ONLY": "لا يمكن تغيير هذا إلا من قِبل مشرف أعلى.",
       "TWO_STEP_KEY_CHANGED": "تعذّر التحقق من تطبيق المصادقة بعد تغيير مفتاح الخادم. استخدم رمز استرداد، أو اطلب من مشرف أعلى إعادة تعيينه."
     }
+  },
+  "adminApprovalModes": {
+    "title": "وضع الموافقة",
+    "hint": "فوري أو يحتاج إلى موافقة، لكل مسار على حدة. ما تختاره هنا ينطبق على هذا النشاط التجاري فقط ويتقدّم على إعداد المنصة.",
+    "scopes": {
+      "SERVICE_BOOKINGS": "حجوزات خدمات الرعاية",
+      "STAY_BOOKINGS": "حجوزات الإقامة",
+      "SHOP_ORDERS": "طلبات المتجر"
+    },
+    "modes": {
+      "PARTNER_CHOICE": "اختيار النشاط التجاري نفسه (لكل خدمة أو مكان إقامة)",
+      "INSTANT": "فوري",
+      "NEEDS_APPROVAL": "يحتاج إلى موافقة"
+    },
+    "platform": "إعداد المنصة",
+    "source": "المصدر",
+    "overridden": "محدد لهذا النشاط التجاري",
+    "inherited": "موروث من إعداد المنصة",
+    "overrideReason": "السبب: {reason}",
+    "overrideBy": "{name}، {when}",
+    "unknownAdmin": "أحد أعضاء الفريق",
+    "choice": "لهذا النشاط التجاري",
+    "choices": {
+      "INHERIT": "اتباع إعداد المنصة",
+      "INSTANT": "فوري",
+      "NEEDS_APPROVAL": "يحتاج إلى موافقة"
+    },
+    "reason": "السبب (سجل التدقيق)",
+    "reasonHint": "5 أحرف على الأقل.",
+    "reasonRequired": "اكتب سببًا من 5 أحرف على الأقل.",
+    "save": "حفظ",
+    "saved": "تم الحفظ.",
+    "saveFailed": "لم يتم الحفظ؛ يرجى المحاولة مرة أخرى.",
+    "loadFailed": "تعذّر تحميل وضع الموافقة.",
+    "retry": "إعادة المحاولة",
+    "loading": "جارٍ التحميل…",
+    "readOnly": "يتطلب تغيير هذا صلاحية الإعدادات."
+  },
+  "adminOrderApproval": {
+    "title": "بانتظار الموافقة",
+    "hint": "مدفوع ومُحتجز قبل أن يراه البائع. وافق لإرساله إلى البائع لتجهيزه، أو ارفضه لاسترداد المبلغ كاملًا للعميل.",
+    "note": "ملاحظة (اختيارية، سجل التدقيق)",
+    "approve": "الموافقة والإرسال إلى البائع",
+    "reject": "الرفض والاسترداد",
+    "reason": "سبب الرفض (سجل التدقيق)",
+    "reasonRequired": "اكتب سببًا قصيرًا.",
+    "confirmReject": "نعم، ارفض واسترد المبلغ كاملًا",
+    "back": "رجوع",
+    "notPending": "لم يعد هذا الطلب بانتظار الموافقة؛ أعد تحميل الصفحة.",
+    "failed": "لم ينجح ذلك؛ يرجى المحاولة مرة أخرى.",
+    "noPermission": "تتطلب الموافقة أو الرفض صلاحية إدارة المتجر."
   },
   "setPet": {
     "landing": {

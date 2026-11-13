@@ -366,6 +366,9 @@ export const DOMAIN_EVENT_TYPES = [
   "OrderRefundRequestApproved",
   "OrderRefundRequestRejected",
   "OrderRefundRequestWithdrawn",
+  // Approval modes: a paid order held for staff approval, and its approval (then OrderCreated/OrderConfirmed follow).
+  "OrderAwaitingApproval",
+  "OrderApproved",
   "ProductReviewCreated",
   "ProductReviewHidden",
   "PromotionChanged",

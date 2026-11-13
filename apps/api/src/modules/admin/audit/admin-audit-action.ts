@@ -10,6 +10,11 @@
 export type AdminAuditAction =
   | "user.message_sent"
   | "order.cancelled_by_staff"
+  // Approval modes: staff decision on a held order, and per-partner approval overrides.
+  | "order.approved_by_staff"
+  | "order.rejected_by_staff"
+  | "partner_approval_override.set"
+  | "partner_approval_override.removed"
   | "product.created"
   | "product.updated"
   | "product.media_added"

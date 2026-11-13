@@ -218,6 +218,32 @@ describe("settings governance UI", () => {
       }),
     );
   });
+  it("edits an approval-mode setting as a choice of labelled options and applies it at once", async () => {
+    const approvals: PlatformSetting = {
+      ...setting,
+      key: "approvals.mode.shopOrders",
+      category: "approvals",
+      type: "enum",
+      highImpact: false,
+      constraints: { min: null, max: null, maxLength: null, options: ["INSTANT", "NEEDS_APPROVAL"] },
+      value: "INSTANT",
+      defaultValue: "INSTANT",
+      source: "DEFAULT",
+      version: 0,
+    };
+    svc.list.mockResolvedValue([approvals]);
+    svc.propose.mockResolvedValue({ ...change, key: approvals.key, status: "APPLIED" });
+    renderWithIntl(<AdminSettingsView />);
+    const panel = (await screen.findByRole("heading", { name: "Shop orders: approval mode", level: 2 })).closest("section")!;
+    expect(within(panel).getByText("Instant")).toBeTruthy();
+    expect(within(panel).getByText(/goes to the task list|go to the task list/)).toBeTruthy();
+    fireEvent.click(within(panel).getByRole("button", { name: "Edit value" }));
+    fireEvent.change(within(panel).getByLabelText("New value"), { target: { value: "NEEDS_APPROVAL" } });
+    fireEvent.change(within(panel).getByLabelText("Reason for change (at least 5 characters)"), { target: { value: "Owner wants to review orders" } });
+    fireEvent.click(within(panel).getByLabelText(confirmLabel));
+    fireEvent.click(within(panel).getByRole("button", { name: "Apply change" }));
+    await waitFor(() => expect(svc.propose).toHaveBeenCalledWith("approvals.mode.shopOrders", { value: "NEEDS_APPROVAL", baseVersion: 0, reason: "Owner wants to review orders" }));
+  });
   it("keeps an approver from reviewing their own pending proposal", async () => {
     permissions("settings.view", "settings.manage", "settings.approve");
     svc.changes.mockResolvedValue({
