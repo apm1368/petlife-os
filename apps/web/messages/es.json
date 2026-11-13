@@ -92,6 +92,59 @@
       "oil": "Día de la Nacionalización del Petróleo"
     }
   },
+  "adminOwnership": {
+    "kicker": "Mascotas",
+    "title": "Transferencias de propiedad",
+    "intro": "Todas las solicitudes para pasar una mascota a un nuevo propietario, primero las disputadas. Una disputa nunca mueve a la mascota: el propietario registrado sigue hasta una resolución oficial o un acuerdo por escrito. Revisa los documentos de las partes (a través de soporte) y cierra la disputa con un motivo. Se avisa a ambas personas del resultado.",
+    "filterLabel": "Estado de la transferencia",
+    "search": "Buscar",
+    "searchPlaceholder": "Nombre de la mascota o de la persona",
+    "apply": "Buscar",
+    "retry": "Reintentar",
+    "cancel": "Cancelar",
+    "status": {
+      "DISPUTED": "En disputa",
+      "PENDING_REVIEW": "Pendiente del destinatario",
+      "ACCEPTED": "Transferida",
+      "DECLINED": "Rechazada",
+      "CANCELLED": "Cancelada",
+      "EXPIRED": "Caducada",
+      "ALL": "Todas"
+    },
+    "empty": "No hay transferencias que coincidan.",
+    "emptyDisputed": "No hay disputas abiertas.",
+    "registeredOwner": "Propietario registrado ahora",
+    "requested": "Solicitada",
+    "applied": "Transferida el",
+    "notApplied": "Sin transferir",
+    "memories": "Recuerdos",
+    "memory": {
+      "TRANSFER": "Pasan al nuevo propietario",
+      "RETAIN": "Se quedan con el propietario anterior",
+      "COPY_READ_ONLY": "Copia de solo lectura para el nuevo propietario"
+    },
+    "explain": {
+      "applied": "Esta transferencia ya se había hecho. Cerrar la disputa la mantiene tal cual.",
+      "pending": "El destinatario aún no había aceptado. Cerrar la disputa cierra la solicitud; el propietario registrado sigue."
+    },
+    "close": "Cerrar disputa",
+    "reason": "Resultado y motivo",
+    "reasonPlaceholder": "Por ejemplo: contrato de compra revisado por teléfono con ambas partes",
+    "done": {
+      "stands": "Disputa sobre {pet} cerrada: la transferencia se mantiene. Se ha avisado a ambas partes.",
+      "ownerStays": "Disputa sobre {pet} cerrada: la solicitud se cierra y el propietario registrado sigue. Se ha avisado a ambas partes."
+    },
+    "errors": {
+      "reason": "Escribe el resultado y el motivo (al menos 5 caracteres).",
+      "forbidden": "Tu rol no incluye los datos de clientes.",
+      "load": "No se han podido cargar las transferencias.",
+      "generic": "No ha funcionado. Inténtalo de nuevo."
+    },
+    "rules": {
+      "OWNERSHIP_NOT_DISPUTED": "Esta transferencia ya no está en disputa. Actualiza la lista.",
+      "OWNERSHIP_CHANGED_CONCURRENTLY": "Otra persona acaba de cambiar esta transferencia. Actualiza la lista."
+    }
+  },
   "adminDeletionRequests": {
     "kicker": "Privacidad",
     "title": "Solicitudes de eliminación de cuenta",
@@ -3172,6 +3225,7 @@
         "URGENT": "Urgente"
       },
       "sources": {
+        "OWNERSHIP_DISPUTE": "Disputa de propiedad",
         "MANUAL": "Entrada manual",
         "TRAVEL_SOURCE": "Fuentes de viaje",
         "PARTNER_VERIFICATION": "Revisión de documentos de socios",
@@ -3825,6 +3879,7 @@
       },
       "tabs": {
         "holidays": "Festivos y cierres",
+        "ownershipTransfers": "Transferencias de propiedad",
         "deletionRequests": "Solicitudes de eliminación",
         "customRoles": "Roles personalizados",
         "directory": "Directorio",
@@ -6366,6 +6421,7 @@
         "allClear": "Todo al día: no hay nada pendiente para tu equipo.",
         "clearList": "Al día: {list}",
         "queue": {
+          "openOwnershipDisputes": "Disputas de propiedad",
           "pendingDeletionRequests": "Solicitudes de eliminación de cuenta",
           "openTrustCases": "Casos de confianza y seguridad",
           "openDisputes": "Disputas abiertas",

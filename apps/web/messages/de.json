@@ -92,6 +92,59 @@
       "oil": "Tag der Ölverstaatlichung"
     }
   },
+  "adminOwnership": {
+    "kicker": "Tiere",
+    "title": "Eigentumsübertragungen",
+    "intro": "Alle Anfragen, ein Tier an einen neuen Eigentümer zu übertragen, strittige zuerst. Ein Streit bewegt das Tier nie: Der eingetragene Eigentümer bleibt bis zu einer amtlichen Entscheidung oder schriftlichen Vereinbarung. Prüfen Sie die Unterlagen der Beteiligten (über den Support) und schließen Sie den Streit mit Begründung. Beide werden über das Ergebnis informiert.",
+    "filterLabel": "Status der Übertragung",
+    "search": "Suche",
+    "searchPlaceholder": "Name des Tiers oder der Person",
+    "apply": "Suchen",
+    "retry": "Erneut versuchen",
+    "cancel": "Abbrechen",
+    "status": {
+      "DISPUTED": "Strittig",
+      "PENDING_REVIEW": "Wartet auf Empfänger",
+      "ACCEPTED": "Übertragen",
+      "DECLINED": "Abgelehnt",
+      "CANCELLED": "Storniert",
+      "EXPIRED": "Abgelaufen",
+      "ALL": "Alle"
+    },
+    "empty": "Keine passenden Übertragungen.",
+    "emptyDisputed": "Keine offenen Streitfälle.",
+    "registeredOwner": "Jetzt eingetragener Eigentümer",
+    "requested": "Angefragt",
+    "applied": "Übertragen am",
+    "notApplied": "Nicht übertragen",
+    "memories": "Erinnerungen",
+    "memory": {
+      "TRANSFER": "Gehen an den neuen Eigentümer",
+      "RETAIN": "Bleiben beim bisherigen Eigentümer",
+      "COPY_READ_ONLY": "Schreibgeschützte Kopie für den neuen Eigentümer"
+    },
+    "explain": {
+      "applied": "Diese Übertragung war bereits erfolgt. Das Schließen des Streits lässt sie bestehen.",
+      "pending": "Der Empfänger hatte noch nicht angenommen. Das Schließen des Streits schließt die Anfrage; der eingetragene Eigentümer bleibt."
+    },
+    "close": "Streit schließen",
+    "reason": "Ergebnis und Begründung",
+    "reasonPlaceholder": "Zum Beispiel: Kaufvertrag mit beiden Parteien telefonisch geprüft",
+    "done": {
+      "stands": "Streit um {pet} geschlossen: Die Übertragung bleibt bestehen. Beide Parteien wurden benachrichtigt.",
+      "ownerStays": "Streit um {pet} geschlossen: Die Anfrage ist geschlossen, der eingetragene Eigentümer bleibt. Beide Parteien wurden benachrichtigt."
+    },
+    "errors": {
+      "reason": "Geben Sie Ergebnis und Begründung an (mindestens 5 Zeichen).",
+      "forbidden": "Ihre Rolle umfasst keine Kundendaten.",
+      "load": "Die Übertragungen konnten nicht geladen werden.",
+      "generic": "Das hat nicht funktioniert. Bitte versuchen Sie es erneut."
+    },
+    "rules": {
+      "OWNERSHIP_NOT_DISPUTED": "Diese Übertragung ist nicht mehr strittig. Aktualisieren Sie die Liste.",
+      "OWNERSHIP_CHANGED_CONCURRENTLY": "Jemand anderes hat diese Übertragung gerade geändert. Aktualisieren Sie die Liste."
+    }
+  },
   "adminDeletionRequests": {
     "kicker": "Datenschutz",
     "title": "Anträge auf Kontolöschung",
@@ -3177,6 +3230,7 @@
         "URGENT": "Dringend"
       },
       "sources": {
+        "OWNERSHIP_DISPUTE": "Eigentumsstreit",
         "MANUAL": "Manuelle Erfassung",
         "TRAVEL_SOURCE": "Reisequellen",
         "PARTNER_VERIFICATION": "Prüfung von Partnerdokumenten",
@@ -3830,6 +3884,7 @@
       },
       "tabs": {
         "holidays": "Feiertage und Schließtage",
+        "ownershipTransfers": "Eigentumsübertragungen",
         "deletionRequests": "Löschanträge",
         "customRoles": "Eigene Rollen",
         "directory": "Verzeichnis",
@@ -6376,6 +6431,7 @@
         "allClear": "Alles erledigt – auf dein Team wartet nichts.",
         "clearList": "Erledigt: {list}",
         "queue": {
+          "openOwnershipDisputes": "Eigentumsstreitigkeiten",
           "pendingDeletionRequests": "Anträge auf Kontolöschung",
           "openTrustCases": "Fälle zu Vertrauen und Sicherheit",
           "openDisputes": "Offene Streitfälle",

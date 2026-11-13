@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import {
   AccountDeletionState,
+  PetOwnershipTransferStatus,
   AdminRefundApprovalStatus,
   AdminTaskStatus,
   AdminVertical,
@@ -58,6 +59,7 @@ export class AdminDashboardService {
       pendingWalletTopUps,
       pendingDeletionRequests,
       launchKpis,
+      openOwnershipDisputes,
     ] = await Promise.all([
       when(may("support.view"), () => this.prisma.supportCase.count({ where: { status: { notIn: [SupportCaseStatus.RESOLVED, SupportCaseStatus.CLOSED] } } })),
       when(may("dispute.view"), () => this.prisma.dispute.count({ where: { status: { notIn: [DisputeStatus.CLOSED] } } })),
@@ -85,6 +87,8 @@ export class AdminDashboardService {
       when(may("admin.manage"), () => this.prisma.accountDeletionRequest.count({ where: { state: { in: [AccountDeletionState.REQUESTED, AccountDeletionState.PENDING_RETENTION] } } })),
       // Platform-wide figures: only for unscoped roles, so a vertical-limited role never sees other verticals' bookings.
       may("analytics.view") && allowedVerticals(admin) === null ? this.launchKpis() : Promise.resolve(null),
+      // Pet ownership disputes waiting for staff to record an outcome (ID-03).
+      when(may("customer.view"), () => this.prisma.petOwnershipTransfer.count({ where: { status: PetOwnershipTransferStatus.DISPUTED } })),
     ]);
     return {
       openSupportCases,
@@ -104,6 +108,7 @@ export class AdminDashboardService {
       pendingWalletTopUps,
       pendingDeletionRequests,
       launchKpis,
+      openOwnershipDisputes,
     };
   }
 
