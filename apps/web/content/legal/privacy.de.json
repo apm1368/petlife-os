@@ -102,7 +102,7 @@
         "Tiertaxi-Fahrten: genaue Orte 30 Tage lang, danach nur noch ungefähr.",
         "Serverprotokolle: etwa 7 Tage.",
         "Finanzunterlagen wie Bestellungen, Zahlungen, Erstattungen und Rechnungen: so lange, wie das Gesetz es verlangt.",
-        "Nach der Löschung deines Kontos löschen oder anonymisieren wir deine personenbezogenen Daten, außer denen, die wir gesetzlich aufbewahren müssen."
+        "Wenn du die Löschung deines Kontos beantragst, wird dein Antrag erfasst und geprüft und ausgeführt, sobald unsere Richtlinie zur Datenspeicherung veröffentlicht ist. Dann löschen oder anonymisieren wir deine personenbezogenen Daten, außer dem, was wir gesetzlich aufbewahren müssen, und geben dir Bescheid, wenn es erledigt ist."
       ]
     },
     {
@@ -112,7 +112,7 @@
         "Deine Daten auf deinen Profil-, Haushalts- und Tierseiten einsehen und korrigieren.",
         "Unter Profil → Datenschutz eine Kopie deiner Daten herunterladen. Du erhältst eine Datei mit deinen Tieren, Gesundheitsakten, Buchungen, Bestellungen, Fahrten, Support-Anfragen, Einwilligungen, Beiträgen, Chats und Spenden. Der Download bleibt 7 Tage lang verfügbar.",
         "Jederzeit Benachrichtigungskanäle und Marketing-Einwilligung ändern sowie Freigabelinks und Tierarztzugriffe widerrufen.",
-        "Unter Profil → Datenschutz die Löschung deines Kontos beantragen. Wir prüfen jeden Antrag. Daten, die wir gesetzlich aufbewahren müssen, legen wir gesondert ab, alles andere wird gelöscht oder anonymisiert. Solange der Antrag geprüft wird, kannst du ihn zurückziehen. Solange du offene Buchungen, Bestellungen, Erstattungen, Streitfälle, eine laufende Fahrt oder eine Partnerrolle hast, muss die Löschung warten, bis diese abgeschlossen sind.",
+        "Beantrage die Löschung deines Kontos unter Profil → Datenschutz. Dein Antrag wird erfasst und geprüft und ausgeführt, sobald unsere Richtlinie zur Datenspeicherung veröffentlicht ist; wir geben dir Bescheid, wenn es erledigt ist. Solange der Antrag offen ist, kannst du ihn zurückziehen. Solange du offene Buchungen, Bestellungen, Erstattungen, Streitfälle, eine aktive Reise oder eine Partnerrolle hast, muss die Löschung warten, bis diese abgeschlossen sind.",
         "Ein Datenschutzanliegen über den Support oder die Kontaktseite vorbringen."
       ]
     },
@@ -120,7 +120,8 @@
       "id": "security",
       "heading": "11. Wie wir sie schützen",
       "paragraphs": [
-        "Verbindungen zu opetlife sind verschlüsselt. Passwörter werden nur als Argon2id-Hashes gespeichert. Anmelde-Cookies können nicht von Skripten auf der Seite gelesen werden. Der Zugriff von Mitarbeitenden hängt von ihrer Rolle ab und wird protokolliert. Hochgeladene Dokumente werden privat gespeichert und lassen sich nur über kurzlebige Links öffnen. Kein System ist vollkommen sicher, also nutze bitte ein starkes Passwort und behalte deine Anmeldecodes für dich."
+        "Verbindungen zu opetlife sind verschlüsselt. Passwörter werden nur als Argon2id-Hashes gespeichert. Anmelde-Cookies können nicht von Skripten auf der Seite gelesen werden. Der Zugriff von Mitarbeitenden hängt von ihrer Rolle ab und wird protokolliert. Hochgeladene Dokumente werden privat gespeichert und lassen sich nur über kurzlebige Links öffnen. Kein System ist vollkommen sicher, also nutze bitte ein starkes Passwort und behalte deine Anmeldecodes für dich.",
+        "Fotos, die du veröffentlichst, etwa in Beiträgen, Vermisstenmeldungen oder auf Gedenkseiten, sind öffentliche Dateien: Wenn du sie entfernst oder ausblendest, verschwinden sie sofort von den Seiten von opetlife, aber wer die Adresse eines Fotos bereits hat, kann es möglicherweise noch öffnen, bis die Datei selbst gelöscht ist. Bitte den Support darum, und unser Team löscht die Datei innerhalb von 30 Tagen."
       ]
     },
     {
