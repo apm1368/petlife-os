@@ -848,6 +848,9 @@ export class WalletAdjustmentSelfApprovalException extends ApiException {
 export class WalletAdjustmentRequestExpiredException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("WALLET_ADJUSTMENT_REQUEST_EXPIRED", "This wallet adjustment request has expired. Ask for a new one.", HttpStatus.CONFLICT, details);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Company card-to-card account: two-person change (BO-14), mirroring refund approvals
 // ---------------------------------------------------------------------------
