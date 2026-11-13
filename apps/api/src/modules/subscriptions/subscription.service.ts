@@ -192,10 +192,6 @@ export class SubscriptionService {
           if (!phone && this.settings.get<boolean>("membership.freeWeek.requireVerifiedPhone") === true) {
             throw new SubscriptionTrialNotEligibleException({ planId, reason: "PHONE_VERIFICATION_REQUIRED" });
           }
-          if (phone) {
-            const claim = await tx.subscriptionTrialPhoneClaim.createMany({ data: [{ phoneHash: this.phoneHash(phone), userId: trialUserId, householdId }], skipDuplicates: true });
-            if (claim.count !== 1) throw new SubscriptionTrialNotEligibleException({ planId, reason: "PHONE_TRIAL_ALREADY_USED" });
-          }
           // The single-use guarantee itself: conditional row updates. A concurrent attempt for the same household
           // or user blocks on the row lock, then sees the column already set and updates nothing.
           const consumedAt = new Date();
@@ -203,6 +199,10 @@ export class SubscriptionService {
           if (household.count !== 1) throw new SubscriptionTrialNotEligibleException({ planId, reason: "TRIAL_ALREADY_USED" });
           const user = await tx.user.updateMany({ where: { id: trialUserId, welcomeTrialConsumedAt: null }, data: { welcomeTrialConsumedAt: consumedAt } });
           if (user.count !== 1) throw new SubscriptionTrialNotEligibleException({ planId, reason: "USER_TRIAL_ALREADY_USED" });
+          if (phone) {
+            const claim = await tx.subscriptionTrialPhoneClaim.createMany({ data: [{ phoneHash: this.phoneHash(phone), userId: trialUserId, householdId }], skipDuplicates: true });
+            if (claim.count !== 1) throw new SubscriptionTrialNotEligibleException({ planId, reason: "PHONE_TRIAL_ALREADY_USED" });
+          }
 
           if (sub.currentPeriodId) await tx.subscriptionPeriod.update({ where: { id: sub.currentPeriodId }, data: { status: SubscriptionPeriodStatus.ENDED } });
           const period = await tx.subscriptionPeriod.create({ data: { subscriptionId: sub.id, planId, priceId: null, startAt, endAt, isTrial: true, status: SubscriptionPeriodStatus.ACTIVE } });

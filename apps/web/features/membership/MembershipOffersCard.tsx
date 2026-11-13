@@ -52,10 +52,11 @@ export function MembershipOffersCard({ scope = "household", onApplyGift, onOffer
     let cancelled = false;
     setOffers(null);
     if (scope === "household" && !householdId) return;
-    const request = scope === "account" ? membershipOffersService.forAccount() : membershipOffersService.forHousehold(householdId!);
-    request
+    // Wrapped so that any failure, even a synchronous one, just leaves the card out instead of breaking the page.
+    Promise.resolve()
+      .then(() => (scope === "account" ? membershipOffersService.forAccount() : membershipOffersService.forHousehold(householdId!)))
       .then((result) => {
-        if (cancelled) return;
+        if (cancelled || !result?.freeWeek) return;
         setOffers(result);
         loaded.current?.(result);
       })
