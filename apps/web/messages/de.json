@@ -1,4 +1,65 @@
 {
+  "adminPlaceSuggestions": {
+    "title": "Ortsvorschläge",
+    "hint": "Neue Orte, Korrekturen und Schließungsmeldungen von Mitgliedern. Ein angenommener neuer Ort wird ungeprüft und nicht gelistet angelegt: Prüfe und liste ihn auf der Seite „Orte“. Eine Ablehnung braucht einen Grund; das Mitglied erfährt ihn.",
+    "tabs": {
+      "PENDING": "Wartend",
+      "APPROVED": "Angenommen",
+      "REJECTED": "Abgelehnt"
+    },
+    "kindFilter": "Art",
+    "allKinds": "Alle Arten",
+    "kinds": {
+      "NEW_PLACE": "Neuer Ort",
+      "CORRECTION": "Korrektur",
+      "CLOSURE_REPORT": "Geschlossen"
+    },
+    "empty": {
+      "PENDING": "Keine wartenden Vorschläge.",
+      "APPROVED": "Noch keine angenommenen Vorschläge.",
+      "REJECTED": "Keine abgelehnten Vorschläge."
+    },
+    "by": "von {name}",
+    "address": "Adresse",
+    "pin": "Kartenpunkt",
+    "noPin": "Kein Kartenpunkt – füge einen hinzu, um anzunehmen.",
+    "notes": "Notiz des Mitglieds",
+    "photos": "Fotos des Mitglieds",
+    "photoAlt": "Foto des Mitglieds {n}",
+    "photoMissing": "Foto nicht hochgeladen",
+    "field": "Feld",
+    "now": "Aktuell",
+    "proposed": "Vorgeschlagen",
+    "closureHint": "Das Mitglied meldet, dass dieser Ort geschlossen hat. Wenn du annimmst, verschwindet er aus der öffentlichen Liste (er bleibt in der Datenbank).",
+    "aboutPlace": "Betrifft: {name} ({city})",
+    "listed": "Gelistet",
+    "unlisted": "Nicht gelistet",
+    "duplicates": "Mögliche Duplikate",
+    "sameName": "Gleicher Name",
+    "meters": "{n} m entfernt",
+    "noDuplicates": "Kein Ort im Umkreis von {m} m und keiner mit gleichem Namen in dieser Stadt.",
+    "similarPending": "{count, plural, one {# weiterer wartender Vorschlag ähnelt diesem.} other {# weitere wartende Vorschläge ähneln diesem.}}",
+    "decidedBy": "Entschieden von {name}",
+    "reason": "Grund",
+    "createdPlace": "Angelegter Ort (ungeprüft, nicht gelistet)",
+    "latitude": "Breitengrad",
+    "longitude": "Längengrad",
+    "noteLabel": "Notiz oder Grund (das Mitglied liest einen Ablehnungsgrund)",
+    "approve": "Annehmen",
+    "reject": "Ablehnen",
+    "reasonRequired": "Schreib einen Grund (mindestens 5 Zeichen), um abzulehnen.",
+    "pinRequired": "Gib Breiten- und Längengrad ein, um diesen Ort anzulegen.",
+    "approvedNew": "Angenommen. Der Ort wurde ungeprüft und nicht gelistet angelegt.",
+    "approvedChange": "Angenommen und übernommen.",
+    "rejected": "Abgelehnt. Das Mitglied hat den Grund erfahren.",
+    "failed": "Das hat nicht geklappt. Lade die Seite neu und versuche es erneut.",
+    "errors": {
+      "NOT_PENDING": "Über diesen Vorschlag hat schon jemand entschieden.",
+      "COORDINATES_REQUIRED_TO_CREATE_PLACE": "Zum Anlegen des Ortes ist ein Kartenpunkt nötig.",
+      "BOTH_OR_NEITHER": "Gib Breiten- und Längengrad ein.",
+      "REQUIRED_FOR_REJECTION": "Eine Ablehnung braucht einen Grund."
+    }
+  },
   "partnerSupport": {
     "title": "Support",
     "intro": "Fragen Sie das opetlife-Team zu Verifizierung, Auszahlungen, Buchungen, Bestellungen oder Ihrem Eintrag. Antworten erscheinen hier und als Benachrichtigung.",
@@ -4396,6 +4457,7 @@
         "twoStep": "Zwei-Schritt-Anmeldung"
       },
       "tabs": {
+        "placeSuggestions": "Ortsvorschläge",
         "productReadiness": "Unvollständige Produkte",
         "holidays": "Feiertage und Schließtage",
         "ownershipTransfers": "Eigentumsübertragungen",
@@ -7050,6 +7112,7 @@
         "allClear": "Alles erledigt – auf dein Team wartet nichts.",
         "clearList": "Erledigt: {list}",
         "queue": {
+          "pendingPlaceSuggestions": "Ortsvorschläge",
           "pendingReviews": "Bewertungen in Prüfung",
           "openProviderNoShows": "Meldungen: Anbieter nicht erschienen",
           "openOwnershipDisputes": "Eigentumsstreitigkeiten",

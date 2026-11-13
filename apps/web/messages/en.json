@@ -1,4 +1,65 @@
 {
+  "adminPlaceSuggestions": {
+    "title": "Place suggestions",
+    "hint": "Members' new places, corrections and closure reports. An approved new place is created unverified and unlisted: verify and list it on the places page. A rejection needs a reason; the member is told.",
+    "tabs": {
+      "PENDING": "Waiting",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected"
+    },
+    "kindFilter": "Type",
+    "allKinds": "All types",
+    "kinds": {
+      "NEW_PLACE": "New place",
+      "CORRECTION": "Correction",
+      "CLOSURE_REPORT": "Closed"
+    },
+    "empty": {
+      "PENDING": "No suggestions waiting.",
+      "APPROVED": "No approved suggestions yet.",
+      "REJECTED": "No rejected suggestions."
+    },
+    "by": "by {name}",
+    "address": "Address",
+    "pin": "Map pin",
+    "noPin": "No map pin — add one to approve.",
+    "notes": "Member's note",
+    "photos": "Member photos",
+    "photoAlt": "Member photo {n}",
+    "photoMissing": "Photo not uploaded",
+    "field": "Field",
+    "now": "Now",
+    "proposed": "Proposed",
+    "closureHint": "The member reports this place has closed. Approving takes it off the public list (it stays in the database).",
+    "aboutPlace": "About: {name} ({city})",
+    "listed": "Listed",
+    "unlisted": "Not listed",
+    "duplicates": "Possible duplicates",
+    "sameName": "Same name",
+    "meters": "{n} m away",
+    "noDuplicates": "No place within {m} m or with the same name in this city.",
+    "similarPending": "{count, plural, one {# other waiting suggestion looks like this one.} other {# other waiting suggestions look like this one.}}",
+    "decidedBy": "Decided by {name}",
+    "reason": "Reason",
+    "createdPlace": "Created place (unverified, not listed)",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "noteLabel": "Note or reason (the member reads a rejection reason)",
+    "approve": "Approve",
+    "reject": "Reject",
+    "reasonRequired": "Write a reason (at least 5 characters) to reject.",
+    "pinRequired": "Enter the latitude and longitude to create this place.",
+    "approvedNew": "Approved. The place was created unverified and unlisted.",
+    "approvedChange": "Approved and applied.",
+    "rejected": "Rejected. The member has been told why.",
+    "failed": "That didn't work. Refresh and try again.",
+    "errors": {
+      "NOT_PENDING": "Someone already decided this suggestion.",
+      "COORDINATES_REQUIRED_TO_CREATE_PLACE": "A map pin is needed to create the place.",
+      "BOTH_OR_NEITHER": "Enter both latitude and longitude.",
+      "REQUIRED_FOR_REJECTION": "A rejection needs a reason."
+    }
+  },
   "partnerSupport": {
     "title": "Support",
     "intro": "Ask the opetlife team about verification, payouts, bookings, orders or your listing. Replies arrive here and as a notification.",
@@ -5112,6 +5173,7 @@
         "twoStep": "Two-step sign-in"
       },
       "tabs": {
+        "placeSuggestions": "Place suggestions",
         "productReadiness": "Incomplete products",
         "holidays": "Holidays and closures",
         "ownershipTransfers": "Ownership transfers",
@@ -7901,6 +7963,7 @@
         "allClear": "All clear — nothing is waiting on your team.",
         "clearList": "Clear: {list}",
         "queue": {
+          "pendingPlaceSuggestions": "Place suggestions",
           "pendingReviews": "Reviews waiting for moderation",
           "openProviderNoShows": "Provider no-show reports",
           "openOwnershipDisputes": "Ownership disputes",

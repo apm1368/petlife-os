@@ -440,6 +440,32 @@ export class StorageService {
     return { ...target, key };
   }
 
+  /**
+   * Owner #6: a member's photo for a place suggestion. Private (unmoderated) under the member's own prefix; the
+   * target carries no public URL. Approval copies it into the new place's public gallery.
+   */
+  async createPlaceSuggestionPhotoUploadTarget(userId: string, contentType: string, fileSizeBytes: number) {
+    const extension = TRAVEL_COMMERCE_MEDIA_MIME_EXTENSIONS[contentType];
+    if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
+    if (fileSizeBytes <= 0 || fileSizeBytes > TRAVEL_COMMERCE_MEDIA_MAX_BYTES) {
+      throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: TRAVEL_COMMERCE_MEDIA_MAX_BYTES });
+    }
+    const key = `place-suggestions/${userId}/${randomUUID()}.${extension}`;
+    const { uploadUrl, method, headers, expiresInSeconds } = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
+    return { uploadUrl, method, headers, expiresInSeconds, key, maxBytes: TRAVEL_COMMERCE_MEDIA_MAX_BYTES };
+  }
+
+  /** Copies an approved suggestion photo into the place's public gallery prefix; returns the new public key. */
+  async copyPlaceSuggestionPhotoToPlace(sourceKey: string, placeId: string): Promise<string> {
+    if (!sourceKey.startsWith("place-suggestions/")) throw new Error("Not a place suggestion photo");
+    const extension = sourceKey.split(".").pop() ?? "";
+    const contentType = Object.entries(TRAVEL_COMMERCE_MEDIA_MIME_EXTENSIONS).find(([, ext]) => ext === extension)?.[0];
+    if (!contentType) throw new UnsupportedDocumentTypeException({ contentType: extension });
+    const destination = `pet-friendly-places/${placeId}/${randomUUID()}.${extension}`;
+    await this.driver.copyObject(sourceKey, destination, contentType);
+    return destination;
+  }
+
   /** Evidence for a rescue case (or, later, a campaign update) — public, same allow-list, own key prefix per aggregate id. */
   async createAnimalSupportEvidenceUploadTarget(
     aggregateId: string,
