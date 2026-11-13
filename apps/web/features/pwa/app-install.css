@@ -1,0 +1,27 @@
+/* /app — install opetlife on Android, iPhone/iPad and desktop. Pattern 2026-11 tokens, light and dark. */
+.opl-app { display:flex; flex-direction:column; gap:24px; }
+.opl-app__head { display:grid; gap:8px; max-width:62ch; }
+.opl-app__eyebrow { margin:0; color:var(--opl-forest-2, var(--brand-natural)); font-weight:700; font-size:.9rem; }
+.opl-app__head h1 { margin:0; font-size:clamp(1.6rem, 4vw, 2.2rem); line-height:1.35; color:var(--opl-ink, var(--text-primary)); }
+.opl-app__head p { margin:0; color:var(--opl-ink-2, var(--text-secondary)); line-height:1.9; }
+.opl-app__installed { padding:10px 14px; border-radius:14px; background:var(--opl-mint, var(--surface-subtle)); color:var(--opl-forest, var(--brand-natural)) !important; font-weight:700; }
+.opl-app__grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap:16px; align-items:start; }
+.opl-app__card { display:flex; flex-direction:column; gap:12px; padding:20px; border:1px solid var(--opl-line, var(--border-subtle)); border-radius:24px; background:var(--opl-raised, var(--surface-elevated)); color:var(--opl-ink, var(--text-primary)); scroll-margin-top:96px; }
+.opl-app__card[data-current="true"] { border-color:var(--opl-forest, var(--brand-natural)); box-shadow:0 0 0 2px color-mix(in srgb, var(--opl-forest, var(--brand-natural)) 35%, transparent), 0 18px 40px -30px rgb(0 0 0 / .45); }
+.opl-app__card p { margin:0; color:var(--opl-ink-2, var(--text-secondary)); line-height:1.85; }
+.opl-app__card-head { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.opl-app__card-head h2 { margin:0; font-size:1.15rem; }
+.opl-app__icon { display:grid; place-items:center; width:40px; height:40px; border-radius:14px; background:var(--opl-mint, var(--surface-subtle)); color:var(--opl-forest, var(--brand-natural)); }
+.opl-app__badge { margin-inline-start:auto; padding:2px 10px; border-radius:999px; background:var(--opl-forest, var(--brand-natural)); color:var(--opl-on-forest, #fff); font-size:.78rem; font-weight:700; }
+.opl-app__card .opl-btn { min-height:48px; align-self:flex-start; }
+.opl-app__card .opl-btn.sm { min-height:44px; }
+.opl-app__meta { font-size:.85rem; }
+.opl-app__meta code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.74rem; word-break:break-all; color:var(--opl-ink-3, var(--text-secondary)); }
+.opl-app__hint { font-size:.85rem; }
+.opl-app__stores { display:flex; flex-wrap:wrap; gap:8px; }
+.opl-app__notice { display:grid; gap:8px; padding:14px; border-radius:16px; background:var(--opl-cream, var(--surface-subtle)); }
+.opl-app__notice strong { color:var(--opl-ink, var(--text-primary)); }
+.opl-app__steps { margin:0; padding:0; list-style:none; display:grid; gap:10px; counter-reset:step; }
+.opl-app__steps li { display:flex; align-items:center; gap:12px; min-height:44px; line-height:1.7; }
+.opl-app__step-icon { flex:none; display:grid; place-items:center; width:40px; height:40px; border-radius:12px; border:1px solid var(--opl-line-2, var(--border-strong)); color:#0a84ff; background:var(--opl-paper-2, var(--surface-base)); }
+.opl-app__step-icon--text { font-weight:700; font-size:.85rem; }

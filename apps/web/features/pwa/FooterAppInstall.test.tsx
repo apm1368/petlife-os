@@ -4,58 +4,48 @@ import { renderWithIntl } from "@/test/render-with-intl";
 import { FooterAppInstall } from "./FooterAppInstall";
 import { androidDownloadLinks } from "./app-links";
 
-const setUserAgent = (ua: string) => Object.defineProperty(window.navigator, "userAgent", { value: ua, configurable: true });
 const standalone = (on: boolean) =>
   Object.defineProperty(window, "matchMedia", { configurable: true, value: (query: string) => ({ matches: on && query.includes("standalone"), media: query, addEventListener: () => undefined, removeEventListener: () => undefined }) });
 
-afterEach(() => {
-  setUserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36");
-  standalone(false);
-});
+afterEach(() => standalone(false));
 
-describe("footer: install the app (owner, 2026-11-13)", () => {
-  it("shows the iPhone steps in Safari, where there is no install prompt", () => {
-    standalone(false);
-    setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1");
-    renderWithIntl(<FooterAppInstall />, "fa");
-    fireEvent.click(screen.getByRole("button", { name: "نصب اپ روی گوشی" }));
-    expect(screen.getByRole("status").textContent).toContain("Add to Home Screen");
-  });
-
-  it("explains the browser menu where no prompt was offered", () => {
-    standalone(false);
-    renderWithIntl(<FooterAppInstall />, "de");
-    fireEvent.click(screen.getByRole("button", { name: "App installieren" }));
-    expect(screen.getByRole("status").textContent).toContain("Browsermenü");
-  });
-
-  it("offers the Android download with its version, size and SHA-256", () => {
+describe("footer: the app on Android and iPhone/iPad (owner, 2026-11-13)", () => {
+  it("shows Android (APK download) and iPhone/iPad (web app steps) side by side, plus all ways to install", () => {
     standalone(false);
     renderWithIntl(<FooterAppInstall />, "fa");
-    const link = screen.getByRole("link", { name: "دانلود مستقیم اندروید" });
-    expect(link.getAttribute("href")).toBe("https://opetlife.ir/app/opetlife.apk");
-    expect(link.hasAttribute("download")).toBe(true);
-    expect(screen.getByText("نسخهٔ ۱.۰.۱۴ · ۱۷۸ کیلوبایت")).toBeTruthy();
-    expect(screen.getByText("32806b76452526c2d4f74383b09b6c922eb3f2ffdc4bcce20cf1ec6e4d5ee700")).toBeTruthy();
+    const android = screen.getByRole("link", { name: /اندروید: دانلود اپ \(APK\)/ });
+    expect(android.getAttribute("href")).toBe("https://opetlife.ir/app/opetlife.apk");
+    expect(android.hasAttribute("download")).toBe(true);
+    expect(android.textContent).toContain("نسخهٔ ۱.۰.۱۴ · ۱۷۸ کیلوبایت");
+    expect(screen.getByRole("link", { name: /آیفون و آیپد: نصب وب‌اپ/ }).getAttribute("href")).toBe("/fa/app#ios");
+    expect(screen.getByRole("link", { name: "همهٔ راه‌های نصب" }).getAttribute("href")).toBe("/fa/app");
+    // No browser prompt offered: no install button.
+    expect(screen.queryByRole("button")).toBeNull();
   });
 
-  it("opens the browser's own install prompt when Chrome offered one", async () => {
+  it.each([["en", "Android: download the app (APK)", "iPhone & iPad: install the web app"], ["ar", "أندرويد: تنزيل التطبيق (APK)", "آيفون وآيباد: تثبيت تطبيق الويب"], ["nl", "Android: app downloaden (APK)", "iPhone & iPad: web-app installeren"]] as const)("is translated in %s", (locale, android, ios) => {
+    standalone(false);
+    renderWithIntl(<FooterAppInstall />, locale);
+    expect(screen.getByRole("link", { name: new RegExp(android.replace(/[()]/g, "\\$&")) })).toBeTruthy();
+    expect(screen.getByRole("link", { name: new RegExp(ios) }).getAttribute("href")).toBe(`/${locale}/app#ios`);
+  });
+
+  it("adds the browser's own install button when Chrome offers it", async () => {
     standalone(false);
     const prompt = vi.fn(async () => undefined);
     renderWithIntl(<FooterAppInstall />, "en");
-    const event = Object.assign(new Event("beforeinstallprompt", { cancelable: true }), { prompt, userChoice: Promise.resolve({ outcome: "accepted", platform: "web" }) });
     act(() => {
-      window.dispatchEvent(event);
+      window.dispatchEvent(Object.assign(new Event("beforeinstallprompt", { cancelable: true }), { prompt, userChoice: Promise.resolve({ outcome: "accepted", platform: "web" }) }));
     });
     fireEvent.click(screen.getByRole("button", { name: "Install the app" }));
     await waitFor(() => expect(prompt).toHaveBeenCalled());
-    await waitFor(() => expect(screen.queryByRole("button", { name: "Install the app" })).toBeNull());
+    await waitFor(() => expect(screen.queryByRole("link", { name: /Android: download the app/ })).toBeNull());
   });
 
   it("is hidden inside the installed app", () => {
     standalone(true);
     renderWithIntl(<FooterAppInstall />, "es");
-    expect(screen.queryByRole("button", { name: "Instalar la app" })).toBeNull();
+    expect(screen.queryByRole("link", { name: /Android/ })).toBeNull();
   });
 
   it("lists only real https store links", () => {
@@ -64,6 +54,4 @@ describe("footer: install the app (owner, 2026-11-13)", () => {
       { store: "bazaar", url: "https://cafebazaar.ir/app/ir.opetlife.app" },
     ]);
   });
-
 });
-

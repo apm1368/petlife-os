@@ -10002,7 +10002,44 @@
         "apk": "Für Android herunterladen"
       },
       "apkMeta": "Version {version} · {size} KB",
-      "apkHint": "Öffne die Datei nach dem Download und erlaube, falls gefragt, die Installation aus dieser Quelle."
+      "apkHint": "Öffne die Datei nach dem Download und erlaube, falls gefragt, die Installation aus dieser Quelle.",
+      "androidEntry": "Android: App herunterladen (APK)",
+      "iosEntry": "iPhone & iPad: Web-App installieren",
+      "iosEntryNote": "In Safari „Zum Home-Bildschirm“",
+      "allWays": "Alle Installationswege"
+    },
+    "appPage": {
+      "eyebrow": "Die opetlife-App",
+      "title": "opetlife auf deinem Handy und Tablet",
+      "lede": "Unter Android lädst du die App direkt herunter. Auf iPhone und iPad fügst du sie über Safari zum Home-Bildschirm hinzu. Beides ist das vollständige opetlife, mit Benachrichtigungen.",
+      "yourDevice": "Dein Gerät",
+      "installed": "opetlife ist auf diesem Gerät bereits installiert.",
+      "android": {
+        "title": "Android",
+        "lead": "Lade die opetlife-App für Android direkt von unserer Website herunter und installiere sie.",
+        "download": "Android-App herunterladen (APK)",
+        "meta": "Version {version} · {size} KB · ab Android 5",
+        "sha": "Datei-Fingerabdruck (SHA-256)",
+        "webInstall": "Oder die Web-Version über Chrome installieren (ohne Download)"
+      },
+      "ios": {
+        "title": "iPhone und iPad",
+        "lead": "Füge opetlife über Safari zum Home-Bildschirm hinzu, ganz ohne Store.",
+        "step1": "Tippe in Safari auf „Teilen“.",
+        "step2": "Wähle „Zum Home-Bildschirm“.",
+        "step3": "Tippe auf „Hinzufügen“. Das opetlife-Symbol erscheint auf dem Home-Bildschirm.",
+        "notifications": "Benachrichtigungen funktionieren in der installierten App ab iOS 16.4.",
+        "openInSafari": "Öffne diese Seite in Safari",
+        "openInSafariBody": "Das Hinzufügen zum Home-Bildschirm geht nur in Safari. Kopiere den Link und öffne ihn in Safari.",
+        "copy": "Link kopieren",
+        "copied": "Kopiert"
+      },
+      "desktop": {
+        "title": "Computer",
+        "lead": "Installiere opetlife in Chrome oder Edge wie eine App.",
+        "install": "Auf diesem Computer installieren",
+        "hint": "Kein Button? Nutze das Installationssymbol in der Adressleiste oder das Browsermenü."
+      }
     }
   },
   "safety": {

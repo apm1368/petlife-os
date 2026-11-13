@@ -10989,7 +10989,44 @@
         "apk": "Download for Android"
       },
       "apkMeta": "Version {version} · {size} KB",
-      "apkHint": "After downloading, open the file and, if your phone asks, allow installs from this source."
+      "apkHint": "After downloading, open the file and, if your phone asks, allow installs from this source.",
+      "androidEntry": "Android: download the app (APK)",
+      "iosEntry": "iPhone & iPad: install the web app",
+      "iosEntryNote": "From Safari, “Add to Home Screen”",
+      "allWays": "All ways to install"
+    },
+    "appPage": {
+      "eyebrow": "The opetlife app",
+      "title": "opetlife on your phone and tablet",
+      "lede": "On Android, download the app directly. On iPhone and iPad, add it to your home screen from Safari. Both are the full opetlife, notifications included.",
+      "yourDevice": "Your device",
+      "installed": "opetlife is already installed on this device.",
+      "android": {
+        "title": "Android",
+        "lead": "Download and install the opetlife Android app straight from our site.",
+        "download": "Download the Android app (APK)",
+        "meta": "Version {version} · {size} KB · Android 5 or later",
+        "sha": "File fingerprint (SHA-256)",
+        "webInstall": "Or install the web version from Chrome (no download)"
+      },
+      "ios": {
+        "title": "iPhone and iPad",
+        "lead": "Add opetlife to your home screen from Safari, no store needed.",
+        "step1": "In Safari, tap the Share button.",
+        "step2": "Choose “Add to Home Screen”.",
+        "step3": "Tap “Add”. The opetlife icon appears on your home screen.",
+        "notifications": "Notifications work in the installed app on iOS 16.4 or later.",
+        "openInSafari": "Open this page in Safari",
+        "openInSafariBody": "Adding to the home screen only works from Safari. Copy the link and open it in Safari.",
+        "copy": "Copy link",
+        "copied": "Copied"
+      },
+      "desktop": {
+        "title": "Computer",
+        "lead": "Install opetlife like an app in Chrome or Edge.",
+        "install": "Install on this computer",
+        "hint": "No button? Use the install icon in the address bar or the browser menu."
+      }
     }
   },
   "safety": {

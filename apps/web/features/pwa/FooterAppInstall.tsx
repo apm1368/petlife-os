@@ -1,28 +1,30 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { Download } from "@petlife/ui";
-import { getPwaState, getServerPwaState, isIosSafari, isStandalone, promptInstall, subscribePwa } from "./pwa-runtime";
-import { ANDROID_APK, androidDownloadLinks } from "./app-links";
+import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
+import { Download, Smartphone } from "@petlife/ui";
 import { formatLocaleNumber } from "@/lib/i18n/format";
 import type { RouteLocale } from "@/lib/i18n/config";
+import { getPwaState, getServerPwaState, isStandalone, promptInstall, subscribePwa } from "./pwa-runtime";
+import { ANDROID_APK, androidDownloadLinks } from "./app-links";
 
 /** "1.0.14" in the locale's digits ("۱.۰.۱۴" in Persian). */
 const localDigits = (text: string, locale: RouteLocale) => text.replace(/\d/g, (d) => formatLocaleNumber(Number(d), locale));
 
 /**
- * "Install the app" in the site footer (owner, 2026-11-13). Chrome, Edge and Samsung Internet get the browser's own
- * install prompt; iPhone Safari gets the Add to Home Screen steps; other browsers get the menu steps. Hidden inside
- * the installed app. Android store / APK links appear next to it once they exist (app-links.ts).
+ * The app in the site footer (owner, 2026-11-13): Android (the signed APK from our own domain) and iPhone/iPad (the
+ * web app from Safari, steps on /app) side by side, store links once they exist, the browser's own install button
+ * when Chrome/Edge offers one, and "All ways to install" (/app). Hidden inside the installed app.
  */
 export function FooterAppInstall() {
   const t = useTranslations("pwa.footer");
   const locale = useLocale() as RouteLocale;
   const pwa = useSyncExternalStore(subscribePwa, getPwaState, getServerPwaState);
   const [installed, setInstalled] = useState(false);
-  const [help, setHelp] = useState<"ios" | "other" | null>(null);
   const downloads = androidDownloadLinks();
+  const apk = downloads.find((d) => d.store === "apk");
+  const stores = downloads.filter((d) => d.store !== "apk");
 
   useEffect(() => {
     setInstalled(isStandalone());
@@ -31,44 +33,47 @@ export function FooterAppInstall() {
   if (installed || pwa.installed) return null;
 
   async function install() {
-    if (pwa.installPrompt) {
-      const outcome = await promptInstall();
-      if (outcome === "accepted") setInstalled(true);
-      return;
-    }
-    setHelp(isIosSafari() ? "ios" : "other");
+    const outcome = await promptInstall();
+    if (outcome === "accepted") setInstalled(true);
   }
 
   return (
     <div className="opl-foot__app">
       <h2>{t("title")}</h2>
-      <div className="opl-foot__app-actions">
-        <button type="button" className="opl-btn soft sm" onClick={() => void install()} aria-expanded={help !== null}>
-          <Download size={17} aria-hidden="true" />
-          {t("install")}
-        </button>
-        {downloads.map(({ store, url }) =>
-          store === "apk" ? (
-            <a key={store} className="opl-btn line sm" href={url} download>
-              {t(`android.${store}`)}
-            </a>
-          ) : (
+      <div className="opl-foot__app-entries">
+        {apk ? (
+          <a className="opl-foot__app-entry" href={apk.url} download>
+            <Download size={20} aria-hidden="true" />
+            <span>
+              <strong>{t("androidEntry")}</strong>
+              <small>{t("apkMeta", { version: localDigits(ANDROID_APK.version, locale), size: formatLocaleNumber(Math.round(ANDROID_APK.sizeBytes / 1024), locale) })}</small>
+            </span>
+          </a>
+        ) : null}
+        <Link className="opl-foot__app-entry" href={`/${locale}/app#ios`}>
+          <Smartphone size={20} aria-hidden="true" />
+          <span>
+            <strong>{t("iosEntry")}</strong>
+            <small>{t("iosEntryNote")}</small>
+          </span>
+        </Link>
+      </div>
+      {stores.length || pwa.installPrompt ? (
+        <div className="opl-foot__app-actions">
+          {pwa.installPrompt ? (
+            <button type="button" className="opl-btn soft sm" onClick={() => void install()}>
+              <Download size={17} aria-hidden="true" />
+              {t("install")}
+            </button>
+          ) : null}
+          {stores.map(({ store, url }) => (
             <a key={store} className="opl-btn line sm" href={url} rel="noopener" target="_blank">
               {t(`android.${store}`)}
             </a>
-          ),
-        )}
-      </div>
-      {downloads.some((d) => d.store === "apk") ? (
-        <div className="opl-foot__apk">
-          <p>{t("apkMeta", { version: localDigits(ANDROID_APK.version, locale), size: formatLocaleNumber(Math.round(ANDROID_APK.sizeBytes / 1024), locale) })}</p>
-          <p>
-            SHA-256: <code dir="ltr">{ANDROID_APK.sha256}</code>
-          </p>
-          <p>{t("apkHint")}</p>
+          ))}
         </div>
       ) : null}
-      {help ? <p className="opl-foot__app-help" role="status">{t(help === "ios" ? "iosSteps" : "otherSteps")}</p> : null}
+      <Link className="opl-foot__app-all" href={`/${locale}/app`}>{t("allWays")}</Link>
     </div>
   );
 }
