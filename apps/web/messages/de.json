@@ -4532,7 +4532,8 @@
         "transactionExplorer": "Explorer",
         "setPet": "Set-Pet-Anfragen",
         "walletBusiness": "Geschäftsguthaben",
-        "walletTransfers": "Übertragungen"
+        "walletTransfers": "Übertragungen",
+        "sponsored": "Anzeigen"
       },
       "palette": {
         "actions": "Schnellaktionen",
@@ -10822,7 +10823,8 @@
         "ADJUSTMENT": "Korrektur durch unser Team",
         "EXPIRY": "Geschenkguthaben abgelaufen",
         "OTHER": "Bewegung",
-        "TRANSFER": "Übertragung durch unser Team (von zwei Personen genehmigt)"
+        "TRANSFER": "Übertragung durch unser Team (von zwei Personen genehmigt)",
+        "SPONSORED_CLICK": "Klick auf eine Anzeige"
       },
       "bucket": {
         "PURCHASE_ONLY": "Für Einkäufe",
@@ -11088,7 +11090,8 @@
         "ADJUSTMENT": "Korrektur durch das Team",
         "TRANSFER": "Übertragung durch das Team",
         "EXPIRY": "Geschenk abgelaufen",
-        "OTHER": "Sonstiges"
+        "OTHER": "Sonstiges",
+        "SPONSORED_CLICK": "Klick auf eine Anzeige"
       }
     },
     "transfers": {
@@ -13616,5 +13619,148 @@
     "pinAddress": "Adresse auf der Karte setzen",
     "distanceUnderOne": "<1 km",
     "distanceAbout": "~{km} km"
+  },
+  "sponsored": {
+    "label": "Anzeige",
+    "explain": "Anzeige: Dieser Partner bezahlt dafür, in dieser Liste weiter oben zu erscheinen. Das ist keine Empfehlung, Bewertung oder Prüfung durch opetlife.",
+    "why": "Warum sehe ich das?",
+    "blockLabel": "Anzeigen",
+    "partner": {
+      "title": "Anzeigen",
+      "price": "Jeder berechnete Klick kostet {price}, für alle gleich.",
+      "nextPrice": "Ab {date} sind es {price}.",
+      "rules": "Du zahlst nur für echte Klicks: höchstens einen pro Besucher und Tag für jeden Eintrag. Klicks deines eigenen Teams, des opetlife-Teams und automatisierter Werkzeuge sind kostenlos, und unser Finanzteam erstattet Klicks, die es für ungültig hält. Dein Eintrag erscheint in einem eigenen, gekennzeichneten Bereich über der Liste; normale Ergebnisse werden nie umsortiert.",
+      "switchedOff": "Anzeigen sind im Moment ausgeschaltet.",
+      "notVerified": "Nur verifizierte Shops und Dienstleister können Anzeigen schalten.",
+      "empty": "Noch keine Anzeigen.",
+      "new": "Neue Anzeige",
+      "serving": "Wird angezeigt",
+      "notServing": {
+        "PAUSED": "Pausiert",
+        "STOPPED": "Beendet",
+        "STAFF_HOLD": "Von opetlife angehalten",
+        "SWITCHED_OFF": "Anzeigen sind ausgeschaltet",
+        "ABOVE_CEILING": "Preis pro Klick liegt über deinem Limit",
+        "BUDGET_SPENT_TODAY": "Tagesbudget aufgebraucht",
+        "NO_FUNDS": "Nicht genug Guthaben",
+        "LISTING_UNAVAILABLE": "Der Eintrag ist nicht verfügbar",
+        "NOT_VERIFIED": "Organisation nicht verifiziert"
+      },
+      "placement": {
+        "SHOP": "Shop-Listen",
+        "VETS": "Tierarztverzeichnis",
+        "SERVICES": "Dienstleister"
+      },
+      "limits": "Tagesbudget {budget} · max. pro Klick {ceiling}",
+      "today": "Heute: {spent} · {clicks} berechnete, {free} kostenlose Klicks",
+      "total": "Insgesamt: {spent} · {clicks} berechnet · erstattet {refunded}",
+      "heldBecause": "Von opetlife angehalten: {reason}",
+      "pause": "Pausieren",
+      "resume": "Fortsetzen",
+      "stop": "Beenden",
+      "confirmStop": "Diese Anzeige endgültig beenden?",
+      "form": {
+        "target": "Was beworben werden soll",
+        "alreadyLive": "läuft bereits",
+        "budget": "Tagesbudget (Toman)",
+        "ceiling": "Max. pro Klick (Toman)",
+        "ceilingHint": "Falls der Preis pro Klick je darüber steigt, wird dein Eintrag einfach nicht mehr angezeigt; mehr wird dir nie berechnet.",
+        "submit": "Starten",
+        "cancel": "Abbrechen",
+        "noTargets": "Es gibt noch nichts zu bewerben: Du brauchst einen aktiven, freigegebenen Eintrag."
+      },
+      "errors": {
+        "generic": "Das hat nicht geklappt. Versuche es erneut.",
+        "OUT_OF_RANGE": "Prüfe die Beträge: Budget und Höchstpreis pro Klick müssen mindestens dem Preis pro Klick entsprechen.",
+        "ALREADY_RUNNING": "Für diesen Eintrag läuft bereits eine Anzeige.",
+        "NOT_PROMOTABLE": "Dieser Eintrag kann nicht beworben werden.",
+        "NOT_VERIFIED": "Nur verifizierte Organisationen können Anzeigen schalten.",
+        "SWITCHED_OFF": "Anzeigen sind im Moment ausgeschaltet.",
+        "STOPPED": "Diese Anzeige wurde beendet."
+      }
+    }
+  },
+  "adminSponsored": {
+    "kicker": "Handel",
+    "title": "Anzeigen",
+    "subtitle": "Alle Partnerkampagnen, die pro Klick aus einem Geschäftsguthaben bezahlt werden: Ausgaben, Sperren, Erstattungen ungültiger Klicks und der Preis pro Klick.",
+    "forbidden": "Du brauchst die Berechtigung „Aktionen verwalten“.",
+    "filter": "Nach Status filtern",
+    "status": {
+      "ACTIVE": "Läuft",
+      "PAUSED": "Pausiert",
+      "STOPPED": "Beendet",
+      "ALL": "Alle"
+    },
+    "search": "Eintrag oder Organisation suchen",
+    "searchButton": "Suchen",
+    "empty": "Hier gibt es keine Kampagnen.",
+    "retry": "Erneut versuchen",
+    "serving": "Wird angezeigt",
+    "notServing": {
+      "PAUSED": "Pausiert",
+      "STOPPED": "Beendet",
+      "STAFF_HOLD": "Von opetlife angehalten",
+      "SWITCHED_OFF": "Anzeigen sind ausgeschaltet",
+      "ABOVE_CEILING": "Preis pro Klick liegt über deinem Limit",
+      "BUDGET_SPENT_TODAY": "Tagesbudget aufgebraucht",
+      "NO_FUNDS": "Nicht genug Guthaben",
+      "LISTING_UNAVAILABLE": "Der Eintrag ist nicht verfügbar",
+      "NOT_VERIFIED": "Organisation nicht verifiziert"
+    },
+    "placement": {
+      "SHOP": "Shop-Listen",
+      "VETS": "Tierarztverzeichnis",
+      "SERVICES": "Dienstleister"
+    },
+    "limits": "Tagesbudget {budget} · max. pro Klick {ceiling}",
+    "spend": "Heute {today} ({todayClicks} berechnet) · gesamt {total} ({totalClicks} berechnet, {free} kostenlos) · erstattet {refunded}",
+    "heldBecause": "Angehalten: {reason}",
+    "showClicks": "Klicks",
+    "hideClicks": "Klicks ausblenden",
+    "hold": "Anhalten",
+    "release": "Freigeben",
+    "stop": "Beenden",
+    "cancel": "Abbrechen",
+    "reason": "Grund",
+    "pageOf": "Seite {page, number} von {pages, number}",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "clicks": {
+      "empty": "Noch keine Klicks.",
+      "outcome": {
+        "BILLED": "Berechnet",
+        "DUPLICATE": "Wiederholung (kostenlos)",
+        "SELF": "Eigenes Team (kostenlos)",
+        "STAFF": "Team (kostenlos)",
+        "BOT": "Automatisiert (kostenlos)",
+        "INACTIVE": "Lief nicht (kostenlos)",
+        "ABOVE_CEILING": "Über dem Limit (kostenlos)",
+        "OVER_BUDGET": "Über dem Budget (kostenlos)",
+        "NO_FUNDS": "Kein Guthaben (kostenlos)"
+      },
+      "viewer": {
+        "SIGNED_IN": "angemeldeter Besucher",
+        "ANONYMOUS": "Besucher",
+        "ERASED": "Besucher (nach 90 Tagen gelöscht)"
+      },
+      "refund": "{count, number} Klicks erstatten",
+      "refunded": "{count, number} Klicks erstattet ({amount}).",
+      "refundedLine": "erstattet: {reason}"
+    },
+    "rate": {
+      "title": "Preis pro Klick",
+      "current": "Aktuell: {price} pro berechnetem Klick",
+      "next": "ab {date}: {price}",
+      "hint": "Ein Preis für alle. Ein neuer Preis gilt ab dem Zeitpunkt, den du wählst; frühere Preise bleiben im Verlauf.",
+      "newPrice": "Neuer Preis (Toman)",
+      "from": "Ab (leer = sofort)",
+      "save": "Preis festlegen",
+      "historyLine": "ab {date} · {by} · {reason}"
+    },
+    "errors": {
+      "generic": "Das hat nicht geklappt. Versuche es erneut.",
+      "forbidden": "Dafür hast du keine Berechtigung."
+    }
   }
 }

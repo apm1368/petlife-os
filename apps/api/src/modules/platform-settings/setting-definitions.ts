@@ -92,6 +92,7 @@ const SITE_SETTINGS: SettingDefinition[] = [
   feature("features.animalSupport", "Show animal support and donations in navigation."),
   feature("features.blog", "Show the magazine and guides in navigation."),
   feature("features.memorials", "Show pet memorials in navigation."),
+  { key: "sponsored.enabled", category: "commerce", type: "boolean", scope: "INTERNAL", highImpact: true, fallback: () => true, description: "Sponsored listings (CPC): show sponsored slots above shop, vet and provider lists, and let partners run campaigns. Off stops all serving and billing at once (P-03 switch)." },
   { key: "auth.passwordSignupEnabled", category: "auth", type: "boolean", scope: "PUBLIC", highImpact: true, fallback: () => true, description: "Whether new accounts can be created with a username and password. Existing members can still sign in." },
 ];
 

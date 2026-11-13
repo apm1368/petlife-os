@@ -22,7 +22,8 @@
         "Lo que publicas: publicaciones, comentarios, chats, reseñas, avisos de mascotas perdidas y encontradas, memoriales, y las fotos y archivos que subes. Los datos de ubicación incluidos en las fotos (EXIF y GPS) se eliminan al subirlas.",
         "Sugerencias de lugares: el nombre, la categoría, la ciudad, la dirección, el punto del mapa, las notas y hasta tres fotos de un lugar que sugieres. Solo nuestro equipo puede ver que la sugerencia es tuya, y las fotos son privadas hasta que se aprueba el lugar. Si nuestro equipo revisa el lugar y lo publica en el directorio, sus datos, tus notas y tus fotos pueden mostrarse, pero nunca tu nombre. Te avisamos en la app de si se aceptó tu sugerencia.",
         "Soporte y mensajes: tus solicitudes de soporte y nuestras respuestas, y las notificaciones que te enviamos.",
-        "Datos técnicos: en cada sesión iniciada, los datos del navegador del dispositivo y la dirección IP. Para las notificaciones push, la dirección push de tu navegador. Cuando alguien abre un enlace para compartir datos de salud, registramos la hora, los datos del navegador y una versión ofuscada de la dirección IP."
+        "Datos técnicos: en cada sesión iniciada, los datos del navegador del dispositivo y la dirección IP. Para las notificaciones push, la dirección push de tu navegador. Cuando alguien abre un enlace para compartir datos de salud, registramos la hora, los datos del navegador y una versión ofuscada de la dirección IP.",
+        "Clics en anuncios patrocinados: cuando abres un anuncio patrocinado, registramos la hora, la campaña, tu cuenta si has iniciado sesión y una forma cifrada (hash con clave) de tu dirección IP, para que no se cobren los clics repetidos o automatizados. Borramos la cuenta y la IP cifrada a los 90 días; el resto del registro del clic se conserva para la facturación."
       ]
     },
     {
@@ -32,7 +33,7 @@
         "Para gestionar tu cuenta, tu hogar y los registros de tus mascotas, y para llevar a cabo las reservas, los pedidos, los viajes y los pagos que solicitas.",
         "Para mantenerte a ti y a la plataforma a salvo: códigos de inicio de sesión, alertas de seguridad, prevención del fraude, moderación y gestión de disputas.",
         "Para enviarte las notificaciones que necesitas, y mensajes de marketing solo si das tu consentimiento.",
-        "Para ofrecer soporte y mejorar el servicio, usando nuestros propios registros. No creamos perfiles publicitarios.",
+        "Para ofrecer soporte y mejorar el servicio, usando nuestros propios registros. No creamos perfiles publicitarios. Los anuncios patrocinados se eligen solo según la lista que estás viendo, nunca según un perfil tuyo.",
         "Para cumplir nuestras obligaciones legales, fiscales y contables."
       ]
     },

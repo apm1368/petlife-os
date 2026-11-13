@@ -16,6 +16,7 @@ import { ProductCard } from "./ProductCard";
 import { formatNumber } from "./commerce-ui";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { useCategoryName } from "./category-name";
+import { SponsoredSlots } from "@/features/sponsored/SponsoredSlots";
 
 const SORTS: ProductSort[] = ["RECOMMENDED", "NEWEST", "PRICE_ASC", "PRICE_DESC", "TOP_RATED"];
 const PAGE_SIZE = 24;
@@ -254,6 +255,11 @@ export function ProductResultsView() {
               onAction={() => router.replace(pathname)}
             />
           ) : null}
+          {/* Sponsored listings: their own labelled block above the results; the organic order below is never changed. */}
+          <SponsoredSlots
+            placement="SHOP"
+            context={{ category: filters.category, species: filters.species && /^(dog|cat)$/i.test(filters.species) ? filters.species.toUpperCase() : undefined }}
+          />
           {data && data.items.length ? (
             <div className="product-grid">
               {data.items.map((product) => (

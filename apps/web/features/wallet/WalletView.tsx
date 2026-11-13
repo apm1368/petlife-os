@@ -10,6 +10,7 @@ import { formatCurrency } from "@/lib/currency/format-currency";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { businessWalletService, businessWalletsService, walletService } from "@/services/wallet.service";
 import { SystemState } from "@/features/system/SystemState";
+import { SponsoredCampaignsPanel } from "@/features/sponsored/SponsoredCampaignsPanel";
 import { AccountPageHeader } from "@/features/account/AccountNav";
 import { formatAccountDate } from "@/features/account/account-copy";
 import "./wallet.css";
@@ -185,6 +186,9 @@ export function WalletView({ accountId }: { accountId?: string } = {}) {
           />
         )
       ) : null}
+
+      {/* A business wallet also runs the organisation's sponsored listings (paid per click from this wallet). */}
+      {accountId && summary?.owner ? <SponsoredCampaignsPanel accountId={accountId} /> : null}
 
       {open.length || closed.length ? (
         <section aria-labelledby="wallet-requests" className="wallet-section">

@@ -36,3 +36,5 @@
 .aw-picked { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 12px; border-radius: 14px; background: var(--glass-input); border: 1px solid var(--glass-edge); }
 .aw-pick { display: grid; gap: 2px; width: 100%; min-height: 44px; padding: 6px 4px; border: 0; background: none; color: var(--text-primary); text-align: start; font: inherit; cursor: pointer; }
 .aw-pick small { color: var(--text-secondary); font-size: 0.74rem; }
+.aw-click { display: flex; align-items: flex-start; gap: 8px; min-height: 32px; }
+.aw-click input { margin-top: 3px; }

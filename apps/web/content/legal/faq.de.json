@@ -100,6 +100,10 @@
         {
           "q": "Wohin gehen Erstattungen?",
           "a": "Genehmigte Erstattungen gehen an deine ursprüngliche Zahlungsmethode zurück oder auf dein opetlife-Guthaben. In der Mitteilung zur Erstattung steht, was davon zutrifft. Jede Erstattung wird von unserem Finanzteam geprüft und abgewickelt."
+        },
+        {
+          "q": "Warum sind manche Einträge als „Anzeige“ gekennzeichnet?",
+          "a": "Ein Partner hat dafür bezahlt, sie in einem eigenen Bereich oben in der Liste zu zeigen. Das ist keine Empfehlung, Bewertung oder Prüfung und hängt nie von deinem Profil oder Verlauf ab."
         }
       ]
     },
@@ -158,6 +162,10 @@
         {
           "q": "Wie werden Provisionen und Auszahlungen abgewickelt?",
           "a": "Sie sind in deiner Partnervereinbarung festgelegt und in deinem Partner-Dashboard zu sehen, wo jede Abrechnung aufgeführt ist."
+        },
+        {
+          "q": "Wie funktionieren Anzeigen für Partner?",
+          "a": "Nur verifizierte Organisationen können Anzeigen schalten. Du zahlst pro berechnetem Klick einen festen Preis, den opetlife festlegt, aus deinem Geschäftsguthaben – innerhalb des Tagesbudgets und Höchstpreises pro Klick, die du wählst. Pro Eintrag wird höchstens ein Klick je Besucher und Tag berechnet; wiederholte Klicks, Klicks deines Teams, unseres Teams und automatisierte Klicks sind kostenlos, und die Anzeige stoppt, wenn Budget oder Guthaben aufgebraucht sind."
         }
       ]
     },

@@ -147,6 +147,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
           { href: "/commerce/reviews", labelKey: "tabs.reviews", permission: "commerce.view" },
           { href: "/commerce/sellers", labelKey: "tabs.sellerStores", permission: "commerce.view" },
           { href: "/commerce/promotions", labelKey: "tabs.promotions", permission: "commerce.view" },
+          { href: "/commerce/sponsored", labelKey: "tabs.sponsored", permission: "promotions.manage" },
         ],
       },
       {

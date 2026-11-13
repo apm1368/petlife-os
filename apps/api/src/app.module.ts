@@ -48,6 +48,7 @@ import { RepeatDeliveryModule } from "./modules/commerce/repeat-delivery/repeat-
 import { CartModule } from "./modules/commerce/cart/cart.module";
 import { CheckoutModule } from "./modules/commerce/checkout/checkout.module";
 import { PaymentsModule } from "./modules/commerce/payments/payments.module";
+import { SponsoredModule } from "./modules/sponsored/sponsored.module";
 import { FinancingModule } from "./modules/commerce/financing/financing.module";
 import { LedgerModule } from "./modules/commerce/ledger/ledger.module";
 import { RefundsModule } from "./modules/commerce/refunds/refunds.module";
@@ -140,6 +141,7 @@ import { SetPetModule } from "./modules/set-pet/set-pet.module";
     CartModule,
     CheckoutModule,
     PaymentsModule,
+    SponsoredModule,
     FinancingModule,
     LedgerModule,
     RefundsModule,

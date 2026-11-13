@@ -100,6 +100,10 @@
         {
           "q": "Where do refunds go?",
           "a": "Approved refunds go back to your original payment method or into your opetlife wallet. The refund notice tells you which. Our finance team reviews and processes every refund."
+        },
+        {
+          "q": "Why are some listings marked “Sponsored”?",
+          "a": "A partner paid to show them in a separate block at the top of the list. It is not a recommendation, a rating or a verification, and it never depends on your profile or history."
         }
       ]
     },
@@ -158,6 +162,10 @@
         {
           "q": "How are commissions and payouts handled?",
           "a": "They are set out in your partner agreement and shown in your partner dashboard, with every settlement listed."
+        },
+        {
+          "q": "How do sponsored listings work for partners?",
+          "a": "Only verified organisations can advertise. You pay one flat price per charged click, set by opetlife, from your business wallet, within the daily budget and maximum per click you choose. At most one click per visitor per day is charged for each listing; repeat, own-team, staff and automated clicks are free, and the ad stops when your budget or wallet runs out."
         }
       ]
     },

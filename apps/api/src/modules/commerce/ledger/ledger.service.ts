@@ -27,6 +27,7 @@ const SEEDED_ACCOUNTS: { code: LedgerAccountCode; name: string }[] = [
   { code: LedgerAccountCode.CPC_RECEIVABLE, name: "CPC Receivable" },
   { code: LedgerAccountCode.PAWMA_REWARD_LIABILITY, name: "Pawma Reward Liability" },
   { code: LedgerAccountCode.WALLET_TRANSFER_CLEARING, name: "Wallet Transfer Clearing (two-person staff transfers)" },
+  { code: LedgerAccountCode.CPC_REVENUE, name: "Sponsored listings (CPC) revenue" },
 ];
 
 /**

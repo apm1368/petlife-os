@@ -7540,6 +7540,25 @@ export type {
 export { WALLET_TRANSFER_MAX_IRR, WALLET_TRANSFER_REASON_CODES, WALLET_TRANSFER_REFUND_REASON_CODES, WALLET_TRANSFER_UNRELATED_REASON_CODES } from "./business-wallets";
 
 export type {
+  SponsoredPlacementValue,
+  SponsoredCampaignStatusValue,
+  SponsoredClickOutcomeValue,
+  SponsoredNotServingReason,
+  SponsoredSlotDto,
+  SponsoredStatsDto,
+  SponsoredCampaignDto,
+  SponsoredRateDto,
+  SponsoredOverviewDto,
+  SponsoredTargetDto,
+  SponsoredCampaignInput,
+  AdminSponsoredCampaignDto,
+  AdminSponsoredClickDto,
+  AdminSponsoredCampaignDetailDto,
+  AdminSponsoredRateDto,
+} from "./sponsored";
+export { SPONSORED_DEFAULT_CPC_IRR, SPONSORED_SLOTS_PER_LIST } from "./sponsored";
+
+export type {
   AdminTransactionKind,
   AdminTransactionPurpose,
   AdminTransactionGateway,
@@ -7643,8 +7662,8 @@ export interface WalletEntryDto {
   source: WalletCreditSourceValue | null;
   /** Positive for money in, negative for money out. */
   signedAmount: number;
-  /** What the movement was for: TOP_UP, PURCHASE, REFUND, ADJUSTMENT, TRANSFER (a two-person staff transfer), EXPIRY or OTHER. */
-  purpose: "TOP_UP" | "PURCHASE" | "REFUND" | "ADJUSTMENT" | "TRANSFER" | "EXPIRY" | "OTHER";
+  /** What the movement was for: TOP_UP, PURCHASE, REFUND, ADJUSTMENT, TRANSFER (a two-person staff transfer), SPONSORED_CLICK (a billed click on a sponsored listing), EXPIRY or OTHER. */
+  purpose: "TOP_UP" | "PURCHASE" | "REFUND" | "ADJUSTMENT" | "TRANSFER" | "SPONSORED_CLICK" | "EXPIRY" | "OTHER";
   /** A staff adjustment's reason, shown to the member so a correction is never silent. */
   note: string | null;
   expiresAt: string | null;

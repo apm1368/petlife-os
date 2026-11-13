@@ -10,6 +10,7 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn() }),
   usePathname: () => "/en/profile/wallet",
 }));
+vi.mock("@/services/sponsored.service", () => ({ sponsoredService: { overview: vi.fn(() => Promise.reject(new Error("not in this test"))), targets: vi.fn(), create: vi.fn(), setStatus: vi.fn() } }));
 vi.mock("@/services/wallet.service", () => ({
   walletService: { summary: vi.fn(), topUps: vi.fn(), entries: vi.fn(), startTopUp: vi.fn(), topUp: vi.fn(), cancel: vi.fn(), receiptUploadTarget: vi.fn(), submitReceipt: vi.fn(), verifyZibal: vi.fn() },
   businessWalletsService: { list: vi.fn(() => Promise.resolve([])) },

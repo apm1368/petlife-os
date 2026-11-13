@@ -22,7 +22,8 @@
         "What you publish: posts, comments, chats, reviews, lost and found reports, memorials, and the photos and files you upload. Location data inside photos (EXIF and GPS) is removed when you upload them.",
         "Place suggestions: the name, category, city, address, map point, notes and up to three photos of a place you suggest. Only our staff can see that it came from you, and the photos stay private until the place is approved. If our team checks and lists the place, its details, your notes and your photos may be published, never your name. We tell you in the app whether your suggestion was accepted.",
         "Support and messages: your support requests and our replies, and the notifications we send you.",
-        "Technical: for each signed-in session, the device's browser details and IP address. For push notifications, your browser's push address. When someone opens a health share link, we log the time, browser details and a scrambled form of the IP address."
+        "Technical: for each signed-in session, the device's browser details and IP address. For push notifications, your browser's push address. When someone opens a health share link, we log the time, browser details and a scrambled form of the IP address.",
+        "Sponsored-listing clicks: when you open a sponsored listing, we record the time, the campaign, your account if you are signed in, and a scrambled (keyed hash) form of your IP address, so that repeated or automated clicks are not charged. We erase the account and the scrambled IP after 90 days; the rest of the click record is kept for billing."
       ]
     },
     {
@@ -32,7 +33,7 @@
         "To run your account, household and pet records, and to carry out the bookings, orders, trips and payments you ask for.",
         "To keep you and the platform safe: sign-in codes, security alerts, fraud prevention, moderation and dispute handling.",
         "To send the notifications you need, and marketing messages only if you agree to them.",
-        "To give support and improve the service, using our own records. We don't build advertising profiles.",
+        "To give support and improve the service, using our own records. We don't build advertising profiles. Sponsored listings are chosen only from the list you are viewing, never from a profile of you.",
         "To meet our legal, tax and accounting obligations."
       ]
     },

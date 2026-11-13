@@ -15,6 +15,7 @@ import { DiscoveryPage } from "./DiscoveryPage";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { serviceCategorySlug } from "@/lib/services/category-slug";
 import { placeName } from "@/lib/i18n/iran-places";
+import { SponsoredSlots } from "@/features/sponsored/SponsoredSlots";
 
 const SORTS: DiscoverySort[] = ["RECOMMENDED", "EARLIEST", "NEAREST", "TOP_RATED", "LOWEST_PRICE"];
 
@@ -353,6 +354,8 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
           ) : (
             <>
               {query.sort === "RECOMMENDED" ? <p className="disc-note">{t("recommendedOrderNote")}</p> : null}
+              {/* Sponsored listings: their own labelled block, whatever the sort; the organic list below is untouched. */}
+              <SponsoredSlots placement={category === "VET" ? "VETS" : "SERVICES"} context={{ city: query.city, serviceCategory: category && category !== "VET" ? category : undefined }} />
               <ul className="disc-list">
                 {results.map((p) => {
                   const href = `/${locale}/providers/${p.id}`;

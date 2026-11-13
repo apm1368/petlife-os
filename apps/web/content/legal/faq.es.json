@@ -100,6 +100,10 @@
         {
           "q": "¿Adónde van los reembolsos?",
           "a": "Los reembolsos aprobados vuelven a tu método de pago original o a tu monedero de opetlife. El aviso de reembolso te indica cuál de las dos opciones se aplica. Nuestro equipo de finanzas revisa y tramita cada reembolso."
+        },
+        {
+          "q": "¿Por qué algunos anuncios están marcados como «Patrocinado»?",
+          "a": "Un socio ha pagado para mostrarlos en un bloque aparte en la parte superior de la lista. No es una recomendación, una valoración ni una verificación, y nunca depende de tu perfil ni de tu historial."
         }
       ]
     },
@@ -158,6 +162,10 @@
         {
           "q": "¿Cómo se gestionan las comisiones y los abonos?",
           "a": "Se establecen en tu acuerdo de socio y se muestran en tu panel de socio, con cada liquidación detallada."
+        },
+        {
+          "q": "¿Cómo funcionan los anuncios patrocinados para los socios?",
+          "a": "Solo las organizaciones verificadas pueden anunciarse. Pagas un precio fijo por cada clic cobrado, fijado por opetlife, desde tu monedero de empresa, dentro del presupuesto diario y el máximo por clic que elijas. Por cada anuncio se cobra como máximo un clic por visitante y día; los clics repetidos, los de tu equipo, los de nuestro equipo y los automatizados son gratis, y el anuncio se detiene cuando se agotan tu presupuesto o tu saldo."
         }
       ]
     },
