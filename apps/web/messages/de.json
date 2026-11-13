@@ -12597,13 +12597,13 @@
   "adminTransactionsExplorer": {
     "kicker": "Finanzen",
     "title": "Transaktions-Explorer",
-    "subtitle": "Alle Zahlungen, Erstattungen, Wallet-Aufladungen und Wallet-Korrekturen in einer Liste, neueste zuerst.",
-    "forbidden": "Zum Ansehen von Transaktionen brauchen Sie die Berechtigung Finanzen ansehen.",
-    "privacyNote": "Von Kartennummern werden nur die letzten vier Ziffern gezeigt, Kontaktdaten sind maskiert. Die Suche nach einer Person und jeder Export werden im Audit-Log festgehalten.",
+    "subtitle": "Alle Zahlungen, Erstattungen, Guthaben-Aufladungen und Guthaben-Korrekturen in einer Liste, die neuesten zuerst.",
+    "forbidden": "Du brauchst die Berechtigung zum Ansehen der Finanzen, um Transaktionen zu sehen.",
+    "privacyNote": "Von Kartennummern werden nur die letzten vier Ziffern angezeigt, Kontaktdaten sind maskiert. Die Suche nach einer Person und jeder Export werden im Prüfprotokoll festgehalten.",
     "filters": {
       "title": "Transaktionen filtern",
       "person": "Person",
-      "personHint": "Name, Handynummer, E-Mail oder Nutzer-ID",
+      "personHint": "Name, Mobilnummer, E-Mail oder Nutzer-ID",
       "product": "Produkt",
       "productHint": "Produktname oder -ID",
       "kind": "Art",
@@ -12620,31 +12620,31 @@
     "kind": {
       "PAYMENT": "Zahlung",
       "REFUND": "Erstattung",
-      "WALLET_TOP_UP": "Wallet-Aufladung",
-      "WALLET_ADJUSTMENT": "Wallet-Korrektur"
+      "WALLET_TOP_UP": "Guthaben-Aufladung",
+      "WALLET_ADJUSTMENT": "Guthaben-Korrektur"
     },
     "purpose": {
       "ORDER": "Shop-Bestellung",
-      "BOOKING": "Service-Buchung",
+      "BOOKING": "Buchung einer Leistung",
       "STAY": "Unterkunft",
       "SUBSCRIPTION": "Abo",
       "DONATION": "Spende",
-      "WALLET": "Wallet",
+      "WALLET": "Guthaben",
       "OTHER": "Sonstiges"
     },
     "gateway": {
       "ZIBAL": "Zibal",
       "CARD_TO_CARD": "Karte zu Karte",
-      "WALLET": "Wallet",
+      "WALLET": "Guthaben",
       "STAFF": "Team",
       "DEV_SIMULATED": "Test (simuliert)",
-      "STANDARD_GATEWAY": "Standard-Gateway",
+      "STANDARD_GATEWAY": "Standard-Zahlungsgateway",
       "SNAPP_PAY": "SnappPay",
       "DIGI_PAY": "DigiPay"
     },
     "direction": {
-      "IN": "Ein",
-      "OUT": "Aus"
+      "IN": "Eingang",
+      "OUT": "Ausgang"
     },
     "columns": {
       "when": "Datum",
@@ -12658,16 +12658,16 @@
     "card": "Karte",
     "export": {
       "button": "CSV exportieren",
-      "working": "Datei wird erstellt…",
+      "working": "Datei wird vorbereitet …",
       "done": "{rows} Zeilen exportiert.",
-      "truncated": "Die neuesten {rows} Zeilen wurden exportiert; grenzen Sie die Filter ein, um den Rest zu exportieren.",
-      "forbidden": "Für den Export brauchen Sie die Berechtigung Finanzen verwalten.",
-      "failed": "Der Export ist fehlgeschlagen. Bitte erneut versuchen."
+      "truncated": "Die neuesten {rows} Zeilen wurden exportiert; grenze die Filter ein, um den Rest zu exportieren.",
+      "forbidden": "Für den Export brauchst du die Berechtigung zur Finanzverwaltung.",
+      "failed": "Der Export ist fehlgeschlagen. Versuche es erneut."
     },
-    "invalid": "Bitte Filter prüfen: Beträge müssen ganze Zahlen sein, und das Minimum darf nicht über dem Maximum liegen.",
+    "invalid": "Prüfe die Filter: Beträge müssen ganze Zahlen sein, und das Minimum darf nicht über dem Maximum liegen.",
     "failed": "Transaktionen konnten nicht geladen werden.",
     "retry": "Erneut versuchen",
-    "loading": "Wird geladen…",
+    "loading": "Wird geladen …",
     "empty": "Keine Transaktionen passen zu diesen Filtern.",
     "more": "Ältere laden",
     "end": "Das war alles: {count} Zeilen."

@@ -12595,15 +12595,15 @@
   "adminTransactionsExplorer": {
     "kicker": "Finanzas",
     "title": "Explorador de transacciones",
-    "subtitle": "Todos los pagos, reembolsos, recargas y correcciones de monedero en una sola lista, de la más reciente a la más antigua.",
-    "forbidden": "Necesitas el permiso de ver finanzas para consultar las transacciones.",
-    "privacyNote": "De las tarjetas solo se muestran los cuatro últimos dígitos y los contactos aparecen ocultos. Cada búsqueda de una persona y cada exportación quedan registradas en el registro de auditoría.",
+    "subtitle": "Todos los pagos, reembolsos, recargas y correcciones del monedero en una sola lista, los más recientes primero.",
+    "forbidden": "Necesitas el permiso para ver finanzas para consultar las transacciones.",
+    "privacyNote": "De los números de tarjeta solo se muestran los cuatro últimos dígitos y los datos de contacto están enmascarados. La búsqueda de una persona y cada exportación quedan en el registro de auditoría.",
     "filters": {
       "title": "Filtrar transacciones",
       "person": "Persona",
-      "personHint": "Nombre, móvil, correo o ID de usuario",
+      "personHint": "Nombre, móvil, correo o id de usuario",
       "product": "Producto",
-      "productHint": "Nombre o ID del producto",
+      "productHint": "Nombre o id del producto",
       "kind": "Tipo",
       "gateway": "Pasarela",
       "from": "Desde",
@@ -12613,16 +12613,16 @@
       "status": "Estado",
       "any": "Todos",
       "apply": "Buscar",
-      "clear": "Limpiar"
+      "clear": "Borrar"
     },
     "kind": {
       "PAYMENT": "Pago",
       "REFUND": "Reembolso",
-      "WALLET_TOP_UP": "Recarga de monedero",
-      "WALLET_ADJUSTMENT": "Corrección de monedero"
+      "WALLET_TOP_UP": "Recarga del monedero",
+      "WALLET_ADJUSTMENT": "Corrección del monedero"
     },
     "purpose": {
-      "ORDER": "Pedido de tienda",
+      "ORDER": "Pedido de la tienda",
       "BOOKING": "Reserva de servicio",
       "STAY": "Alojamiento",
       "SUBSCRIPTION": "Suscripción",
@@ -12632,7 +12632,7 @@
     },
     "gateway": {
       "ZIBAL": "Zibal",
-      "CARD_TO_CARD": "Tarjeta a tarjeta",
+      "CARD_TO_CARD": "De tarjeta a tarjeta",
       "WALLET": "Monedero",
       "STAFF": "Equipo",
       "DEV_SIMULATED": "Prueba (simulada)",
@@ -12659,8 +12659,8 @@
       "working": "Preparando el archivo…",
       "done": "Se exportaron {rows} filas.",
       "truncated": "Se exportaron las {rows} filas más recientes; acota los filtros para exportar el resto.",
-      "forbidden": "Para exportar necesitas el permiso de gestionar finanzas.",
-      "failed": "No se pudo exportar. Inténtalo de nuevo."
+      "forbidden": "Para exportar necesitas el permiso de gestión de finanzas.",
+      "failed": "La exportación ha fallado. Vuelve a intentarlo."
     },
     "invalid": "Revisa los filtros: los importes deben ser números enteros y el mínimo no puede superar el máximo.",
     "failed": "No se pudieron cargar las transacciones.",

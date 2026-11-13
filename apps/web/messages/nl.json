@@ -12688,9 +12688,9 @@
   "adminTransactionsExplorer": {
     "kicker": "Financiën",
     "title": "Transactieverkenner",
-    "subtitle": "Alle betalingen, terugbetalingen, wallet-opwaarderingen en wallet-correcties in één lijst, nieuwste eerst.",
-    "forbidden": "Je hebt de rechten om financiën te bekijken nodig om transacties te zien.",
-    "privacyNote": "Van kaartnummers zie je alleen de laatste vier cijfers en contactgegevens zijn gemaskeerd. Zoeken naar een persoon en elke export komen in het auditlog.",
+    "subtitle": "Alle betalingen, terugbetalingen, opwaarderingen en correcties van de portemonnee in één lijst, nieuwste eerst.",
+    "forbidden": "Je hebt de rechten voor het bekijken van financiën nodig om transacties te zien.",
+    "privacyNote": "Van kaartnummers zijn alleen de laatste vier cijfers zichtbaar en contactgegevens zijn gemaskeerd. Het zoeken naar een persoon en elke export worden vastgelegd in het auditlogboek.",
     "filters": {
       "title": "Transacties filteren",
       "person": "Persoon",
@@ -12698,11 +12698,11 @@
       "product": "Product",
       "productHint": "Productnaam of -id",
       "kind": "Soort",
-      "gateway": "Betaalroute",
+      "gateway": "Betaalmethode",
       "from": "Van",
       "to": "Tot",
-      "min": "Minimum (toman)",
-      "max": "Maximum (toman)",
+      "min": "Minimaal (toman)",
+      "max": "Maximaal (toman)",
       "status": "Status",
       "any": "Alle",
       "apply": "Zoeken",
@@ -12711,54 +12711,54 @@
     "kind": {
       "PAYMENT": "Betaling",
       "REFUND": "Terugbetaling",
-      "WALLET_TOP_UP": "Wallet-opwaardering",
-      "WALLET_ADJUSTMENT": "Wallet-correctie"
+      "WALLET_TOP_UP": "Opwaardering portemonnee",
+      "WALLET_ADJUSTMENT": "Correctie portemonnee"
     },
     "purpose": {
       "ORDER": "Winkelbestelling",
-      "BOOKING": "Dienstboeking",
+      "BOOKING": "Boeking van een dienst",
       "STAY": "Verblijf",
       "SUBSCRIPTION": "Abonnement",
       "DONATION": "Donatie",
-      "WALLET": "Wallet",
+      "WALLET": "Portemonnee",
       "OTHER": "Overig"
     },
     "gateway": {
       "ZIBAL": "Zibal",
       "CARD_TO_CARD": "Kaart naar kaart",
-      "WALLET": "Wallet",
+      "WALLET": "Portemonnee",
       "STAFF": "Team",
       "DEV_SIMULATED": "Test (gesimuleerd)",
-      "STANDARD_GATEWAY": "Standaard betaalroute",
+      "STANDARD_GATEWAY": "Standaard betaalgateway",
       "SNAPP_PAY": "SnappPay",
       "DIGI_PAY": "DigiPay"
     },
     "direction": {
-      "IN": "In",
-      "OUT": "Uit"
+      "IN": "Inkomend",
+      "OUT": "Uitgaand"
     },
     "columns": {
       "when": "Datum",
       "kind": "Soort",
       "person": "Persoon",
       "amount": "Bedrag",
-      "gateway": "Betaalroute",
+      "gateway": "Betaalmethode",
       "status": "Status",
       "details": "Details"
     },
     "card": "Kaart",
     "export": {
       "button": "CSV exporteren",
-      "working": "Bestand wordt gemaakt…",
+      "working": "Bestand wordt voorbereid…",
       "done": "{rows} rijen geëxporteerd.",
       "truncated": "De nieuwste {rows} rijen zijn geëxporteerd; verfijn de filters om de rest te exporteren.",
-      "forbidden": "Voor exporteren heb je de rechten om financiën te beheren nodig.",
-      "failed": "Exporteren is mislukt. Probeer het opnieuw."
+      "forbidden": "Voor exporteren heb je de rechten voor financieel beheer nodig.",
+      "failed": "De export is mislukt. Probeer het opnieuw."
     },
     "invalid": "Controleer de filters: bedragen moeten hele getallen zijn en het minimum mag niet boven het maximum liggen.",
     "failed": "Transacties konden niet worden geladen.",
     "retry": "Opnieuw proberen",
-    "loading": "Bezig met laden…",
+    "loading": "Laden…",
     "empty": "Geen transacties die bij deze filters passen.",
     "more": "Oudere laden",
     "end": "Dat was alles: {count} rijen."
