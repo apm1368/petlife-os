@@ -4746,6 +4746,90 @@
           "STAFF": "کارمند"
         },
         "supportCases": "درخواست‌های پشتیبانی این کسب‌وکار"
+    }
+  },
+    "productDetail": {
+      "title": "کالا",
+      "back": "همه کالاها",
+      "loading": "در حال بارگذاری…",
+      "loadFailed": "اطلاعات کالا بارگذاری نشد.",
+      "retry": "تلاش دوباره",
+      "forbidden": "دسترسی commerce.view لازم است",
+      "notFound": "کالا پیدا نشد",
+      "media": "{count} تصویر",
+      "publicPage": "صفحهٔ عمومی",
+      "productStatus": {
+        "DRAFT": "پیش‌نویس",
+        "ACTIVE": "فعال",
+        "INACTIVE": "غیرفعال",
+        "ARCHIVED": "بایگانی‌شده"
+      },
+      "facts": {
+        "sellers": "فروشندگان",
+        "buyable": "پیشنهادهای قابل خرید",
+        "lowestPrice": "کمترین قیمت فعال",
+        "noneBuyable": "فعلاً هیچ فروشنده‌ای نمی‌فروشد",
+        "rating": "امتیاز"
+      },
+      "offers": {
+        "title": "پیشنهاد هر فروشنده",
+        "hint": "قیمت و موجودی را هر فروشنده خودش تعیین می‌کند. مشتری فقط وقتی می‌تواند بخرد که پیشنهاد فعال و تأییدشده باشد، فروشگاه احراز و فعال باشد و موجودی داشته باشد.",
+        "empty": "هنوز هیچ فروشنده‌ای این کالا را عرضه نکرده است.",
+        "seller": "فروشنده",
+        "variant": "مدل",
+        "price": "قیمت",
+        "stock": "موجودی",
+        "status": "وضعیت",
+        "updated": "به‌روزرسانی",
+        "sellerNotLive": "فروشگاه {status} · {verification}",
+        "sellerSku": "کد فروشنده {sku}",
+        "available": "{count} موجود",
+        "onHandReserved": "{onHand} در انبار · {reserved} رزروشده",
+        "noInventory": "موجودی ثبت نشده",
+        "buyable": "قابل خرید"
+      },
+      "offerStatus": {
+        "ACTIVE": "فعال",
+        "PAUSED": "متوقف",
+        "OUT_OF_STOCK": "ناموجود",
+        "SUSPENDED": "تعلیق‌شده"
+      },
+      "moderation": {
+        "PENDING_REVIEW": "در انتظار بررسی",
+        "APPROVED": "تأییدشده",
+        "REJECTED": "ردشده"
+      },
+      "sellerStatus": {
+        "PENDING": "در انتظار",
+        "ACTIVE": "فعال",
+        "INACTIVE": "غیرفعال",
+        "SUSPENDED": "تعلیق‌شده",
+        "RESTRICTED": "محدودشده",
+        "CLOSED": "بسته"
+      },
+      "sellerVerification": {
+        "NOT_STARTED": "احراز نشده",
+        "SUBMITTED": "مدارک ارسال شده",
+        "NEEDS_INFORMATION": "نیاز به اطلاعات",
+        "UNDER_REVIEW": "در حال بررسی",
+        "VERIFIED": "احرازشده",
+        "REJECTED": "احراز ردشده",
+        "SUSPENDED": "احراز تعلیق‌شده"
+      },
+      "variants": {
+        "title": "مدل‌ها",
+        "inactive": "غیرفعال"
+      },
+      "requests": {
+        "title": "درخواست‌های فروشندگان",
+        "hint": "درخواست‌هایی از فروشگاه‌ها که این کالا را ساختند یا به آن وصل شدند.",
+        "empty": "این کالا از درخواست فروشنده ساخته نشده است.",
+        "status": {
+          "PENDING_REVIEW": "در انتظار بررسی",
+          "APPROVED": "به‌عنوان کالای جدید تأیید شد",
+          "MATCHED_EXISTING": "به این کالا وصل شد",
+          "REJECTED": "ردشده"
+        }
       }
     },
     "memorials": {

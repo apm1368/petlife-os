@@ -4822,6 +4822,90 @@
           "STAFF": "Staff"
         },
         "supportCases": "Support cases from this business"
+    }
+  },
+    "productDetail": {
+      "title": "Product",
+      "back": "All products",
+      "loading": "Loading…",
+      "loadFailed": "The product could not be loaded.",
+      "retry": "Try again",
+      "forbidden": "commerce.view permission required",
+      "notFound": "Product not found",
+      "media": "{count, plural, one {# image} other {# images}}",
+      "publicPage": "Public page",
+      "productStatus": {
+        "DRAFT": "Draft",
+        "ACTIVE": "Active",
+        "INACTIVE": "Inactive",
+        "ARCHIVED": "Archived"
+      },
+      "facts": {
+        "sellers": "Sellers",
+        "buyable": "Buyable offers",
+        "lowestPrice": "Lowest live price",
+        "noneBuyable": "Nobody can sell it now",
+        "rating": "Rating"
+      },
+      "offers": {
+        "title": "Offers by seller",
+        "hint": "Each seller sets their own price and stock. A customer can buy an offer only when it is active and approved, the shop is verified and active, and stock is available.",
+        "empty": "No seller offers this product yet.",
+        "seller": "Seller",
+        "variant": "Variant",
+        "price": "Price",
+        "stock": "Stock",
+        "status": "Status",
+        "updated": "Updated",
+        "sellerNotLive": "Shop {status} · {verification}",
+        "sellerSku": "Seller SKU {sku}",
+        "available": "{count} available",
+        "onHandReserved": "{onHand} on hand · {reserved} reserved",
+        "noInventory": "No stock record",
+        "buyable": "Buyable now"
+      },
+      "offerStatus": {
+        "ACTIVE": "Active",
+        "PAUSED": "Paused",
+        "OUT_OF_STOCK": "Out of stock",
+        "SUSPENDED": "Suspended"
+      },
+      "moderation": {
+        "PENDING_REVIEW": "Awaiting review",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected"
+      },
+      "sellerStatus": {
+        "PENDING": "pending",
+        "ACTIVE": "active",
+        "INACTIVE": "inactive",
+        "SUSPENDED": "suspended",
+        "RESTRICTED": "restricted",
+        "CLOSED": "closed"
+      },
+      "sellerVerification": {
+        "NOT_STARTED": "not verified",
+        "SUBMITTED": "verification submitted",
+        "NEEDS_INFORMATION": "needs information",
+        "UNDER_REVIEW": "under review",
+        "VERIFIED": "verified",
+        "REJECTED": "verification rejected",
+        "SUSPENDED": "verification suspended"
+      },
+      "variants": {
+        "title": "Variants",
+        "inactive": "Inactive"
+      },
+      "requests": {
+        "title": "Seller requests",
+        "hint": "Requests from shops that created this product or were matched to it.",
+        "empty": "This product did not come from a seller request.",
+        "status": {
+          "PENDING_REVIEW": "Pending review",
+          "APPROVED": "Approved as new",
+          "MATCHED_EXISTING": "Matched to this product",
+          "REJECTED": "Rejected"
+        }
       }
     },
     "memorials": {
