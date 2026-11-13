@@ -5066,7 +5066,8 @@
         "repeatDeliveries": "Herhaalleveringen",
         "orderLookup": "Bestelling opzoeken",
         "refundApprovals": "Goedkeuring van terugbetalingen",
-        "twoStep": "Inloggen in twee stappen"
+        "twoStep": "Inloggen in twee stappen",
+        "walletAdjustments": "Correctieaanvragen"
       },
       "palette": {
         "actions": "Snelle acties",
@@ -7626,7 +7627,9 @@
           "pendingMemorials": "Te beoordelen herdenkingen",
           "openPlaceReports": "Meldingen over plekken",
           "openTasks": "Openstaande taken",
-          "pendingWalletTopUps": "Opwaardeerbewijzen"
+          "pendingWalletTopUps": "Opwaardeerbewijzen",
+          "pendingWalletAdjustments": "Correcties om goed te keuren",
+          "pendingCardDestinationChanges": "Rekeningwijzigingen ter goedkeuring"
         }
       },
       "performance": {
@@ -8893,6 +8896,41 @@
       "hint": "Advertenties van Jajiga: je boekt en betaalt op de eigen site van Jajiga, en opetlife rekent niets. Check de huisdierregels bij de verhuurder voordat je boekt.",
       "seeAll": "Alle verblijven op Jajiga",
       "pages": "Jajiga-pagina’s"
+    },
+    "tile": {
+      "kind": {
+        "villa": "Villa",
+        "apartment": "Appartement of suite",
+        "cottage": "Huisje",
+        "ecolodge": "Ecolodge",
+        "house": "Huis of verblijf"
+      },
+      "sourceChip": "Van {source}",
+      "capacity": "Max. gasten: {count}",
+      "bedrooms": "Slaapkamers: {count}"
+    },
+    "browser": {
+      "title": "Meer huisdiervriendelijke verblijven",
+      "sourceChip": "Verblijven van Jajiga",
+      "count": "Gevonden: {count}",
+      "hint": "Advertenties van Jajiga: je boekt en betaalt op de eigen site van Jajiga, en opetlife rekent niets. Check de huisdierregels bij de verhuurder voordat je boekt.",
+      "filters": "Verblijven filteren",
+      "province": "Provincie",
+      "allProvinces": "Alle provincies",
+      "city": "Stad",
+      "allCities": "Alle steden",
+      "guests": "Gasten",
+      "anyGuests": "Elk aantal",
+      "guestsAtLeast": "Minstens {count}",
+      "price": "Prijs per nacht",
+      "anyPrice": "Elke prijs",
+      "priceUpTo": "Tot {max}",
+      "priceBetween": "{min} tot {max}",
+      "priceOver": "Meer dan {min}",
+      "clear": "Filters wissen",
+      "noMatch": "Geen verblijven die bij deze filters passen. Probeer er een te verwijderen.",
+      "loadMore": "Meer tonen ({shown} van {total})",
+      "mediaNote": "Foto's en de volledige beschrijving van elk verblijf staan op de bronsite; hier zie je de belangrijkste gegevens."
     }
   },
   "localDateTime": {
@@ -10727,11 +10765,12 @@
       "audit": "Auditlog",
       "auditEmpty": "Nog niets vastgelegd.",
       "by": "door {name}",
-      "openCustomer": "Klantdossier"
+      "openCustomer": "Klantdossier",
+      "approvedBy": "goedgekeurd door {name}"
     },
     "adjust": {
-      "title": "Saldo corrigeren",
-      "hint": "Alleen om een fout te herstellen of goed te maken. Elke correctie wordt vastgelegd met je naam, de reden en het saldo ervoor en erna.",
+      "title": "Correctie aanvragen (tweede beheerder nodig)",
+      "hint": "Alleen om een fout te herstellen of goed te maken. Het saldo verandert pas als een andere beheerder met hetzelfde recht de aanvraag goedkeurt. Beide namen, de reden en het saldo ervoor en erna worden vastgelegd.",
       "direction": "Richting",
       "directions": {
         "CREDIT": "Geld toevoegen",
@@ -10754,19 +10793,21 @@
       },
       "reason": "Toelichting (blijft in het auditlog)",
       "evidence": "Ticket of referentie (optioneel)",
-      "submit": "Correctie opslaan",
-      "confirm": "“{direction}” van {amount} in “{bucket}” vastleggen? Dit wordt direct op het saldo toegepast.",
-      "confirmYes": "Ja, vastleggen",
+      "submit": "Ter goedkeuring versturen",
+      "confirm": "“{direction}” van {amount} in “{bucket}” aanvragen? Het saldo verandert pas nadat een tweede beheerder het goedkeurt.",
+      "confirmYes": "Ja, aanvraag versturen",
       "cancel": "Annuleren",
-      "saving": "Opslaan…",
-      "done": "Correctie opgeslagen.",
-      "noPermission": "Voor het corrigeren van een saldo heb je het recht “Saldi corrigeren” nodig.",
+      "saving": "Versturen…",
+      "done": "Aanvraag verstuurd. Een tweede beheerder moet hem goedkeuren voordat het saldo verandert.",
+      "noPermission": "Voor het aanvragen of goedkeuren van een correctie heb je het recht “Saldi corrigeren” nodig.",
       "errors": {
         "INSUFFICIENT_WALLET_BALANCE": "Er staat niet zoveel in dit deel van de portemonnee.",
         "reasonTooShort": "De toelichting moet minstens 5 tekens bevatten.",
         "amount": "Voer een geldig bedrag in.",
-        "generic": "De correctie is niet opgeslagen."
-      }
+        "generic": "De aanvraag is niet verstuurd.",
+        "TOO_MANY_PENDING": "Voor dit lid staan al zoveel aanvragen open als is toegestaan. Beslis eerst over een paar daarvan."
+      },
+      "confirmTitle": "Deze aanvraag versturen?"
     },
     "topUps": {
       "title": "Opwaardeerbewijzen",
@@ -10815,7 +10856,10 @@
       "wallet_debited": "Saldo verlaagd",
       "wallet_top_up_approved": "Betaalbewijs goedgekeurd",
       "wallet_top_up_rejected": "Betaalbewijs afgewezen",
-      "wallet_top_up_receipt_viewed": "Betaalbewijs bekeken"
+      "wallet_top_up_receipt_viewed": "Betaalbewijs bekeken",
+      "wallet_adjustment_requested": "Correctie aangevraagd",
+      "wallet_adjustment_approved": "Correctie goedgekeurd en geboekt",
+      "wallet_adjustment_rejected": "Correctieaanvraag afgewezen"
     },
     "entry": {
       "purpose": {
@@ -10837,6 +10881,48 @@
         "REFUND_OUTSIDE_SYSTEM": "Terugbetaling buiten een bestelling",
         "DUPLICATE_CREDIT_REVERSAL": "Dubbele bijschrijving teruggedraaid",
         "OTHER": "Andere correctie"
+      }
+    },
+    "requests": {
+      "title": "Correctieaanvragen",
+      "subtitle": "Elke saldocorrectie heeft een tweede beheerder nodig. Na goedkeuring wordt ze direct in de portemonnee geboekt; een aanvraag waarover niemand beslist, vervalt na 72 uur.",
+      "detailTitle": "Correctieaanvragen voor dit lid",
+      "empty": "Geen aanvragen.",
+      "filter": "Status",
+      "all": "Alle",
+      "status": {
+        "PENDING": "Wacht op goedkeuring",
+        "APPROVED": "Goedgekeurd en geboekt",
+        "REJECTED": "Afgewezen",
+        "EXPIRED": "Verlopen"
+      },
+      "itemLabel": "Aanvraag van {amount} door {name}",
+      "requestedBy": "Aangevraagd door {name}",
+      "decidedBy": "beslist door {name}",
+      "expires": "vervalt {date}",
+      "yours": "Je eigen aanvraag: een andere beheerder moet hem goedkeuren.",
+      "approve": "Goedkeuren",
+      "reject": "Afwijzen",
+      "approveTitle": "Deze correctie goedkeuren?",
+      "rejectTitle": "Deze aanvraag afwijzen?",
+      "summary": "“{direction}” van {amount} in “{bucket}” voor {member}.",
+      "approveWarning": "Na goedkeuring wordt de correctie direct in de portemonnee geboekt en wordt je naam als tweede beheerder vastgelegd.",
+      "rejectWarning": "Er wordt niets geboekt. De reden blijft in het auditlog.",
+      "rejectReason": "Reden van afwijzing (verplicht)",
+      "confirmApprove": "Goedkeuren en boeken",
+      "confirmReject": "Aanvraag afwijzen",
+      "cancel": "Annuleren",
+      "approved": "Goedgekeurd; de correctie is in de portemonnee geboekt.",
+      "rejected": "Afgewezen; er is niets geboekt.",
+      "noPermission": "Voor een beslissing over een aanvraag heb je het recht “Saldi corrigeren” nodig.",
+      "errors": {
+        "WALLET_ADJUSTMENT_SELF_APPROVAL": "Je hebt deze correctie zelf aangevraagd, dus een andere beheerder moet hem goedkeuren.",
+        "WALLET_ADJUSTMENT_REQUEST_EXPIRED": "Deze aanvraag is verlopen. Vraag een nieuwe aan als het nog nodig is.",
+        "INVALID_WALLET_ADJUSTMENT_REQUEST_TRANSITION": "Over deze aanvraag is al beslist. Laad de pagina opnieuw om de status te zien.",
+        "WALLET_ADJUSTMENT_REQUEST_NOT_FOUND": "Deze aanvraag bestaat niet meer.",
+        "INSUFFICIENT_WALLET_BALANCE": "Er staat niet meer zoveel in dit deel van de portemonnee, dus de afschrijving kan niet worden geboekt.",
+        "reasonTooShort": "De reden moet minstens 5 tekens bevatten.",
+        "generic": "Dat is niet gelukt. Probeer het opnieuw."
       }
     }
   },
@@ -11086,8 +11172,48 @@
         "googlePlay": "Ontdek het op Google Play",
         "apk": "Downloaden voor Android"
       },
-      "apkMeta": "Versie {version} · {size} KB",
-      "apkHint": "Open het bestand na het downloaden en sta, als je telefoon erom vraagt, installatie vanuit deze bron toe."
+      "apkHint": "Open het bestand na het downloaden en sta, als je telefoon erom vraagt, installatie vanuit deze bron toe.",
+      "androidEntry": "Downloaden voor Android",
+      "iosEntry": "Installeren op iPhone",
+      "allWays": "Alle manieren om te installeren"
+    },
+    "appPage": {
+      "eyebrow": "De opetlife-app",
+      "title": "opetlife op je telefoon en tablet",
+      "lede": "Op Android download je de app rechtstreeks. Op iPhone en iPad zet je hem via Safari op je beginscherm. Beide zijn het volledige opetlife, met meldingen.",
+      "yourDevice": "Jouw apparaat",
+      "installed": "opetlife is al geïnstalleerd op dit apparaat.",
+      "android": {
+        "title": "Android",
+        "lead": "Download en installeer de opetlife-app voor Android rechtstreeks van onze website.",
+        "download": "Android-app downloaden (APK)",
+        "meta": "Versie {version} · {size} KB · Android 5 of nieuwer",
+        "sha": "Vingerafdruk van het bestand (SHA-256)",
+        "webInstall": "Of installeer de webversie via Chrome (zonder download)",
+        "details": "Bestandsdetails"
+      },
+      "ios": {
+        "title": "iPhone en iPad",
+        "lead": "Zet opetlife via Safari op je beginscherm, zonder app store.",
+        "step1": "Tik in Safari op de deelknop.",
+        "step2": "Kies ‘Zet op beginscherm’.",
+        "step3": "Tik op ‘Voeg toe’. Het opetlife-icoon staat nu op je beginscherm.",
+        "notifications": "Meldingen werken in de geïnstalleerde app vanaf iOS 16.4.",
+        "openInSafari": "Open deze pagina in Safari",
+        "openInSafariBody": "Zetten op het beginscherm werkt alleen vanuit Safari. Kopieer de link en open hem in Safari.",
+        "copy": "Link kopiëren",
+        "copied": "Gekopieerd"
+      },
+      "desktop": {
+        "title": "Computer",
+        "lead": "Installeer opetlife als app in Chrome of Edge.",
+        "install": "Op deze computer installeren",
+        "hint": "Geen knop? Gebruik het installatie-icoon in de adresbalk of het browsermenu."
+      }
+    },
+    "credits": {
+      "title": "Pictogrammen",
+      "androidRobot": "De Android-robot is gereproduceerd of aangepast op basis van werk dat door Google is gemaakt en gedeeld, en wordt gebruikt volgens de voorwaarden van de Creative Commons Naamsvermelding 3.0-licentie."
     }
   },
   "safety": {
@@ -11698,7 +11824,7 @@
     },
     "readOnly": "Alleen een superbeheerder met settings.manage kan deze rekening wijzigen.",
     "change": "Rekening wijzigen",
-    "changeHint": "Elke wijziging wordt met de reden vastgelegd en elke superbeheerder krijgt een melding. Betalingen die al zijn gestart, houden de rekening waarmee ze begonnen.",
+    "changeHint": "Een nieuwe rekening gaat pas in als een andere superbeheerder die binnen {hours} uur goedkeurt; tot dan blijven leden naar de huidige rekening betalen. Elke stap wordt met de reden vastgelegd en elke superbeheerder krijgt een melding. Betalingen die al zijn gestart, houden de rekening waarmee ze begonnen.",
     "fields": {
       "cardNumber": "Kaartnummer (16 cijfers)",
       "sheba": "Sheba / IBAN (optioneel)",
@@ -11707,9 +11833,9 @@
       "reason": "Reden van de wijziging"
     },
     "confirm": "Ik bevestig dat deze rekening van opetlife is.",
-    "save": "Nieuwe rekening opslaan",
+    "save": "Ter goedkeuring versturen",
     "saving": "Opslaan…",
-    "saved": "De nieuwe rekening is opgeslagen en de superbeheerders hebben een melding gekregen.",
+    "saved": "Ter goedkeuring verstuurd. De huidige rekening blijft in gebruik tot een andere superbeheerder de wijziging goedkeurt.",
     "offReason": "Reden om kaart-naar-kaart uit te zetten",
     "switchOff": "Kaart-naar-kaart uitzetten",
     "switchedOff": "Kaart-naar-kaart staat uit.",
@@ -11718,7 +11844,9 @@
     "columns": {
       "setBy": "Ingesteld door",
       "reason": "Reden",
-      "closed": "Beëindigd"
+      "closed": "Beëindigd",
+      "status": "Status",
+      "approvedBy": "Goedgekeurd door"
     },
     "activeNow": "Actief",
     "loading": "Laden…",
@@ -11735,7 +11863,38 @@
       "CARD_OR_SHEBA_REQUIRED": "Vul een kaartnummer of Sheba in.",
       "HOLDER_REQUIRED": "Vul de rekeninghouder in.",
       "SUPER_ADMIN_WITH_SETTINGS_MANAGE_REQUIRED": "Alleen een superbeheerder kan deze rekening wijzigen.",
-      "generic": "Niet opgeslagen; probeer het opnieuw."
+      "generic": "Niet opgeslagen; probeer het opnieuw.",
+      "SELF_APPROVAL": "Je hebt deze wijziging zelf aangevraagd; een andere superbeheerder moet die goedkeuren.",
+      "ALREADY_PENDING": "Er wacht al een andere wijziging op goedkeuring.",
+      "NOT_PENDING": "Over deze wijziging is al beslist; de pagina is vernieuwd.",
+      "EXPIRED": "Deze wijziging is verlopen voordat ze werd goedgekeurd; stel haar opnieuw voor als dat nog nodig is.",
+      "NOT_FOUND": "Deze wijziging bestaat niet meer.",
+      "CONFIRM_APPROVE": "Bevestig dat je de rekening hebt gecontroleerd voordat je goedkeurt."
+    },
+    "pendingBlocksChange": "Er wacht al een wijziging op goedkeuring. Keur die goed, wijs die af of trek die in voordat je een nieuwe voorstelt.",
+    "pending": {
+      "title": "Wijziging wacht op goedkeuring",
+      "hint": "Nog niet in gebruik: leden blijven naar de huidige rekening betalen tot een andere superbeheerder deze wijziging goedkeurt.",
+      "requestedBy": "Aangevraagd door",
+      "expiresAt": "Verloopt",
+      "yours": "Je hebt deze wijziging zelf aangevraagd, dus een andere superbeheerder moet die goedkeuren. Je kunt haar intrekken.",
+      "confirm": "Ik heb met de aanvrager gecontroleerd dat deze rekening van opetlife is.",
+      "approve": "Goedkeuren en activeren",
+      "approving": "Bezig met goedkeuren…",
+      "approved": "Goedgekeurd: de nieuwe rekening is nu actief en de superbeheerders hebben een melding gekregen.",
+      "rejectReason": "Reden voor afwijzing",
+      "withdrawReason": "Reden voor intrekken",
+      "reject": "Afwijzen",
+      "withdraw": "Mijn aanvraag intrekken",
+      "rejected": "De wijziging is afgewezen; de huidige rekening blijft ongewijzigd.",
+      "withdrawn": "Je aanvraag is ingetrokken; de huidige rekening blijft ongewijzigd."
+    },
+    "status": {
+      "PENDING": "Wacht op goedkeuring",
+      "ACTIVE": "Actief",
+      "CLOSED": "Beëindigd",
+      "REJECTED": "Afgewezen",
+      "EXPIRED": "Verlopen"
     }
   },
   "adminCardReceipts": {

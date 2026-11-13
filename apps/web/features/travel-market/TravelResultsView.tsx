@@ -47,7 +47,6 @@ export function TravelResultsView() {
   const sort = (params.get("sort") as TravelSort | null) ?? "RECOMMENDED";
   const page = Math.max(1, Number(params.get("page") ?? 1) || 1);
   const source: ResultSource = (SOURCES as readonly string[]).includes(params.get("source") ?? "") ? (params.get("source") as ResultSource) : "all";
-  const jajigaPage = Math.max(1, Number(params.get("jpage") ?? 1) || 1);
   const externalContext = { checkIn: search.checkIn ?? undefined, checkOut: search.checkOut ?? undefined, pets: search.species ? search.petCount : 1 };
 
   const query = useMemo<TravelSearchParams>(() => {
@@ -229,14 +228,7 @@ export function TravelResultsView() {
             </>
           )}
           {source !== "opetlife" ? (
-            <JajigaStaysSection
-              city={search.city || undefined}
-              context={externalContext}
-              pageSize={source === "jajiga" ? 12 : 4}
-              page={source === "jajiga" ? jajigaPage : 1}
-              onPage={source === "jajiga" ? (next) => setParams({ jpage: String(next) }, false) : undefined}
-              seeAllHref={source === "all" ? `${pathname}?${withParams(params, { source: "jajiga", page: null, jpage: null })}` : undefined}
-            />
+            <JajigaStaysSection city={search.city || undefined} context={externalContext} />
           ) : null}
         </section>
       </div>
@@ -328,13 +320,4 @@ function formatResultsDateRange(start: string, end: string, locale: LocalizedTra
   if (locale === "fa" || locale === "en") return formatStayRange({ start, end }, locale);
   const formatter = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", timeZone: "Asia/Tehran" });
   return `${formatter.format(new Date(`${start}T12:00:00+03:30`))} – ${formatter.format(new Date(`${end}T12:00:00+03:30`))}`;
-}
-
-function withParams(params: URLSearchParams | ReturnType<typeof useSearchParams>, patch: Record<string, string | null>): string {
-  const next = new URLSearchParams(params.toString());
-  for (const [k, v] of Object.entries(patch)) {
-    if (v) next.set(k, v);
-    else next.delete(k);
-  }
-  return next.toString();
 }

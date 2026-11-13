@@ -115,6 +115,18 @@ const pages = {
       nl: { title: "Contact met Opetlife", description: "Contactgegevens en ondersteuningsopties van Opetlife." },
     },
   },
+  appInstall: {
+    path: "app",
+    indexable: true,
+    copy: {
+      fa: { title: "اپ اپت لایف برای اندروید، آیفون و آیپد | اپت لایف", description: "اپ اندروید اپت لایف را مستقیم دانلود کنید یا در آیفون و آیپد آن را از Safari به صفحهٔ اصلی اضافه کنید." },
+      en: { title: "Get the opetlife app for Android, iPhone and iPad | opetlife", description: "Download the signed opetlife Android app, or add opetlife to your iPhone or iPad home screen from Safari." },
+      de: { title: "Die opetlife-App für Android, iPhone und iPad | opetlife", description: "Lade die signierte opetlife-App für Android herunter oder füge opetlife auf iPhone und iPad über Safari zum Home-Bildschirm hinzu." },
+      es: { title: "La app de opetlife para Android, iPhone y iPad | opetlife", description: "Descarga la app firmada de opetlife para Android o añade opetlife a la pantalla de inicio de tu iPhone o iPad desde Safari." },
+      ar: { title: "تطبيق opetlife لأندرويد وآيفون وآيباد | opetlife", description: "نزّل تطبيق opetlife الموقّع لأندرويد، أو أضف opetlife إلى الشاشة الرئيسية في آيفون وآيباد من Safari." },
+      nl: { title: "De opetlife-app voor Android, iPhone en iPad | opetlife", description: "Download de ondertekende opetlife-app voor Android of zet opetlife via Safari op het beginscherm van je iPhone of iPad." },
+    },
+  },
   credits: {
     path: "credits",
     indexable: true,
@@ -378,7 +390,7 @@ const pages = {
 export type PublicSeoPage = keyof typeof pages;
 
 export const sitemapPages: readonly PublicSeoPage[] = [
-  "home", "blog", "guides", "services", "vetFind", "community", "lostPets", "animalSupport", "animalSupportCampaigns", "animalSupportNeeds", "travel", "travelExternal", "about", "legalTerms", "legalPrivacy", "faq", "contact", "credits", "status", "memorials",
+  "home", "blog", "guides", "services", "vetFind", "community", "lostPets", "animalSupport", "animalSupportCampaigns", "animalSupportNeeds", "travel", "travelExternal", "about", "legalTerms", "legalPrivacy", "faq", "contact", "credits", "status", "memorials", "appInstall",
 ];
 
 export function publicPagePath(locale: RouteLocale, page: PublicSeoPage): string {

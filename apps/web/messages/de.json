@@ -4229,7 +4229,8 @@
         "repeatDeliveries": "Liefer-Abos",
         "orderLookup": "Bestellsuche",
         "refundApprovals": "Erstattungsfreigaben",
-        "twoStep": "Zwei-Schritt-Anmeldung"
+        "twoStep": "Zwei-Schritt-Anmeldung",
+        "walletAdjustments": "Korrekturanträge"
       },
       "palette": {
         "actions": "Schnellaktionen",
@@ -6630,7 +6631,9 @@
           "pendingMemorials": "Zu prüfende Gedenkseiten",
           "openPlaceReports": "Ortsmeldungen",
           "openTasks": "Offene Aufgaben",
-          "pendingWalletTopUps": "Aufladebelege"
+          "pendingWalletTopUps": "Aufladebelege",
+          "pendingWalletAdjustments": "Korrekturen zur Freigabe",
+          "pendingCardDestinationChanges": "Kontoänderungen zur Freigabe"
         }
       },
       "performance": {
@@ -7939,6 +7942,41 @@
       "hint": "Angebote von Jajiga: Buchung und Zahlung erfolgen direkt bei Jajiga, opetlife berechnet nichts. Klären Sie die Haustierregeln vor der Buchung mit dem Gastgeber.",
       "seeAll": "Alle Jajiga-Unterkünfte",
       "pages": "Jajiga-Seiten"
+    },
+    "tile": {
+      "kind": {
+        "villa": "Villa",
+        "apartment": "Wohnung oder Suite",
+        "cottage": "Hütte",
+        "ecolodge": "Öko-Lodge",
+        "house": "Haus oder Unterkunft"
+      },
+      "sourceChip": "Von {source}",
+      "capacity": "Max. Gäste: {count}",
+      "bedrooms": "Schlafzimmer: {count}"
+    },
+    "browser": {
+      "title": "Weitere haustierfreundliche Unterkünfte",
+      "sourceChip": "Unterkünfte von Jajiga",
+      "count": "Gefunden: {count}",
+      "hint": "Angebote von Jajiga: Buchung und Zahlung erfolgen direkt bei Jajiga, opetlife berechnet nichts. Klären Sie die Haustierregeln vor der Buchung mit dem Gastgeber.",
+      "filters": "Unterkünfte filtern",
+      "province": "Provinz",
+      "allProvinces": "Alle Provinzen",
+      "city": "Stadt",
+      "allCities": "Alle Städte",
+      "guests": "Gäste",
+      "anyGuests": "Beliebig viele",
+      "guestsAtLeast": "Mindestens {count}",
+      "price": "Preis pro Nacht",
+      "anyPrice": "Beliebiger Preis",
+      "priceUpTo": "Bis {max}",
+      "priceBetween": "{min} bis {max}",
+      "priceOver": "Über {min}",
+      "clear": "Filter zurücksetzen",
+      "noMatch": "Keine Unterkunft passt zu diesen Filtern. Entferne einen Filter.",
+      "loadMore": "Mehr anzeigen ({shown} von {total})",
+      "mediaNote": "Fotos und die vollständige Beschreibung jeder Unterkunft findest du auf der Quellseite; hier siehst du die wichtigsten Fakten."
     }
   },
   "insurance": {
@@ -9942,11 +9980,12 @@
       "audit": "Prüfprotokoll",
       "auditEmpty": "Noch nichts protokolliert.",
       "by": "von {name}",
-      "openCustomer": "Kundenakte"
+      "openCustomer": "Kundenakte",
+      "approvedBy": "freigegeben von {name}"
     },
     "adjust": {
-      "title": "Guthaben korrigieren",
-      "hint": "Nur um einen Fehler zu beheben oder auszugleichen. Jede Korrektur wird mit Ihrem Namen, dem Grund und dem Guthaben davor und danach protokolliert.",
+      "title": "Korrektur beantragen (zweite Freigabe nötig)",
+      "hint": "Nur um einen Fehler zu beheben oder auszugleichen. Das Guthaben ändert sich erst, wenn ein anderer Admin mit derselben Berechtigung den Antrag freigibt. Beide Namen, der Grund und das Guthaben davor und danach werden protokolliert.",
       "direction": "Richtung",
       "directions": {
         "CREDIT": "Guthaben erhöhen",
@@ -9969,19 +10008,21 @@
       },
       "reason": "Erläuterung (bleibt im Prüfprotokoll)",
       "evidence": "Ticket oder Referenz (optional)",
-      "submit": "Korrektur speichern",
-      "confirm": "„{direction}“ über {amount} in „{bucket}“ buchen? Das wirkt sofort auf das Guthaben.",
-      "confirmYes": "Ja, buchen",
+      "submit": "Zur Freigabe senden",
+      "confirm": "„{direction}“ über {amount} in „{bucket}“ beantragen? Das Guthaben ändert sich erst nach der Freigabe durch einen zweiten Admin.",
+      "confirmYes": "Ja, Antrag senden",
       "cancel": "Abbrechen",
-      "saving": "Wird gespeichert…",
-      "done": "Korrektur gespeichert.",
-      "noPermission": "Für Korrekturen brauchen Sie die Berechtigung „Guthaben korrigieren“.",
+      "saving": "Wird gesendet…",
+      "done": "Antrag gesendet. Ein zweiter Admin muss ihn freigeben, bevor sich das Guthaben ändert.",
+      "noPermission": "Für das Beantragen oder Freigeben von Korrekturen brauchen Sie die Berechtigung „Guthaben korrigieren“.",
       "errors": {
         "INSUFFICIENT_WALLET_BALANCE": "Dieser Guthabenteil reicht dafür nicht aus.",
         "reasonTooShort": "Die Erläuterung braucht mindestens 5 Zeichen.",
         "amount": "Geben Sie einen gültigen Betrag ein.",
-        "generic": "Die Korrektur wurde nicht gespeichert."
-      }
+        "generic": "Der Antrag wurde nicht gesendet.",
+        "TOO_MANY_PENDING": "Für dieses Mitglied warten bereits so viele Anträge wie erlaubt. Entscheiden Sie zuerst über einige davon."
+      },
+      "confirmTitle": "Antrag senden?"
     },
     "topUps": {
       "title": "Aufladebelege",
@@ -10030,7 +10071,10 @@
       "wallet_debited": "Guthaben verringert",
       "wallet_top_up_approved": "Beleg bestätigt",
       "wallet_top_up_rejected": "Beleg abgelehnt",
-      "wallet_top_up_receipt_viewed": "Beleg angesehen"
+      "wallet_top_up_receipt_viewed": "Beleg angesehen",
+      "wallet_adjustment_requested": "Korrektur beantragt",
+      "wallet_adjustment_approved": "Korrektur freigegeben und gebucht",
+      "wallet_adjustment_rejected": "Korrekturantrag abgelehnt"
     },
     "entry": {
       "purpose": {
@@ -10052,6 +10096,48 @@
         "REFUND_OUTSIDE_SYSTEM": "Erstattung außerhalb einer Bestellung",
         "DUPLICATE_CREDIT_REVERSAL": "Doppelte Gutschrift storniert",
         "OTHER": "Andere Korrektur"
+      }
+    },
+    "requests": {
+      "title": "Korrekturanträge",
+      "subtitle": "Jede Guthabenkorrektur braucht einen zweiten Admin. Mit der Freigabe wird sie sofort gebucht; ein Antrag, über den niemand entscheidet, verfällt nach 72 Stunden.",
+      "detailTitle": "Korrekturanträge für dieses Mitglied",
+      "empty": "Keine Anträge.",
+      "filter": "Status",
+      "all": "Alle",
+      "status": {
+        "PENDING": "Wartet auf Freigabe",
+        "APPROVED": "Freigegeben und gebucht",
+        "REJECTED": "Abgelehnt",
+        "EXPIRED": "Verfallen"
+      },
+      "itemLabel": "Antrag über {amount} von {name}",
+      "requestedBy": "Beantragt von {name}",
+      "decidedBy": "entschieden von {name}",
+      "expires": "verfällt {date}",
+      "yours": "Ihr eigener Antrag: Ein anderer Admin muss ihn freigeben.",
+      "approve": "Freigeben",
+      "reject": "Ablehnen",
+      "approveTitle": "Diese Korrektur freigeben?",
+      "rejectTitle": "Diesen Antrag ablehnen?",
+      "summary": "„{direction}“ über {amount} in „{bucket}“ für {member}.",
+      "approveWarning": "Mit der Freigabe wird die Korrektur sofort gebucht und Ihr Name als zweiter Admin protokolliert.",
+      "rejectWarning": "Es wird nichts gebucht. Der Grund bleibt im Prüfprotokoll.",
+      "rejectReason": "Grund der Ablehnung (Pflichtfeld)",
+      "confirmApprove": "Freigeben und buchen",
+      "confirmReject": "Antrag ablehnen",
+      "cancel": "Abbrechen",
+      "approved": "Freigegeben; die Korrektur wurde gebucht.",
+      "rejected": "Abgelehnt; es wurde nichts gebucht.",
+      "noPermission": "Für Entscheidungen über Anträge brauchen Sie die Berechtigung „Guthaben korrigieren“.",
+      "errors": {
+        "WALLET_ADJUSTMENT_SELF_APPROVAL": "Sie haben diese Korrektur beantragt, daher muss ein anderer Admin sie freigeben.",
+        "WALLET_ADJUSTMENT_REQUEST_EXPIRED": "Dieser Antrag ist verfallen. Stellen Sie bei Bedarf einen neuen.",
+        "INVALID_WALLET_ADJUSTMENT_REQUEST_TRANSITION": "Über diesen Antrag wurde bereits entschieden. Laden Sie die Seite neu, um den Status zu sehen.",
+        "WALLET_ADJUSTMENT_REQUEST_NOT_FOUND": "Diesen Antrag gibt es nicht mehr.",
+        "INSUFFICIENT_WALLET_BALANCE": "In diesem Guthabenteil ist nicht mehr so viel vorhanden; die Abbuchung kann nicht gebucht werden.",
+        "reasonTooShort": "Der Grund braucht mindestens 5 Zeichen.",
+        "generic": "Das hat nicht geklappt. Bitte versuchen Sie es erneut."
       }
     }
   },
@@ -10301,8 +10387,48 @@
         "googlePlay": "Bei Google Play laden",
         "apk": "Für Android herunterladen"
       },
-      "apkMeta": "Version {version} · {size} KB",
-      "apkHint": "Öffne die Datei nach dem Download und erlaube, falls gefragt, die Installation aus dieser Quelle."
+      "apkHint": "Öffne die Datei nach dem Download und erlaube, falls gefragt, die Installation aus dieser Quelle.",
+      "androidEntry": "Für Android herunterladen",
+      "iosEntry": "Auf dem iPhone installieren",
+      "allWays": "Alle Installationswege"
+    },
+    "appPage": {
+      "eyebrow": "Die opetlife-App",
+      "title": "opetlife auf deinem Handy und Tablet",
+      "lede": "Unter Android lädst du die App direkt herunter. Auf iPhone und iPad fügst du sie über Safari zum Home-Bildschirm hinzu. Beides ist das vollständige opetlife, mit Benachrichtigungen.",
+      "yourDevice": "Dein Gerät",
+      "installed": "opetlife ist auf diesem Gerät bereits installiert.",
+      "android": {
+        "title": "Android",
+        "lead": "Lade die opetlife-App für Android direkt von unserer Website herunter und installiere sie.",
+        "download": "Android-App herunterladen (APK)",
+        "meta": "Version {version} · {size} KB · ab Android 5",
+        "sha": "Datei-Fingerabdruck (SHA-256)",
+        "webInstall": "Oder die Web-Version über Chrome installieren (ohne Download)",
+        "details": "Dateidetails"
+      },
+      "ios": {
+        "title": "iPhone und iPad",
+        "lead": "Füge opetlife über Safari zum Home-Bildschirm hinzu, ganz ohne Store.",
+        "step1": "Tippe in Safari auf „Teilen“.",
+        "step2": "Wähle „Zum Home-Bildschirm“.",
+        "step3": "Tippe auf „Hinzufügen“. Das opetlife-Symbol erscheint auf dem Home-Bildschirm.",
+        "notifications": "Benachrichtigungen funktionieren in der installierten App ab iOS 16.4.",
+        "openInSafari": "Öffne diese Seite in Safari",
+        "openInSafariBody": "Das Hinzufügen zum Home-Bildschirm geht nur in Safari. Kopiere den Link und öffne ihn in Safari.",
+        "copy": "Link kopieren",
+        "copied": "Kopiert"
+      },
+      "desktop": {
+        "title": "Computer",
+        "lead": "Installiere opetlife in Chrome oder Edge wie eine App.",
+        "install": "Auf diesem Computer installieren",
+        "hint": "Kein Button? Nutze das Installationssymbol in der Adressleiste oder das Browsermenü."
+      }
+    },
+    "credits": {
+      "title": "Symbole",
+      "androidRobot": "Der Android-Roboter wurde auf Grundlage eines von Google erstellten und geteilten Werks reproduziert oder verändert und wird gemäß der Lizenz Creative Commons Namensnennung 3.0 verwendet."
     }
   },
   "safety": {
@@ -10913,7 +11039,7 @@
     },
     "readOnly": "Nur ein Super-Admin mit settings.manage kann dieses Konto ändern.",
     "change": "Konto ändern",
-    "changeHint": "Jede Änderung wird mit Grund protokolliert und alle Super-Admins werden benachrichtigt. Bereits begonnene Zahlungen behalten ihr ursprüngliches Konto.",
+    "changeHint": "Ein neues Konto gilt erst, wenn ein anderer Super-Admin es innerhalb von {hours} Stunden freigibt; bis dahin zahlen Mitglieder weiter auf das aktuelle Konto. Jeder Schritt wird mit Grund protokolliert und alle Super-Admins werden benachrichtigt. Bereits begonnene Zahlungen behalten ihr ursprüngliches Konto.",
     "fields": {
       "cardNumber": "Kartennummer (16 Ziffern)",
       "sheba": "Sheba / IBAN (optional)",
@@ -10922,9 +11048,9 @@
       "reason": "Grund der Änderung"
     },
     "confirm": "Ich bestätige, dass dieses Konto opetlife gehört.",
-    "save": "Neues Konto speichern",
+    "save": "Zur Freigabe senden",
     "saving": "Wird gespeichert…",
-    "saved": "Das neue Konto ist gespeichert, Super-Admins wurden benachrichtigt.",
+    "saved": "Zur Freigabe gesendet. Das aktuelle Konto bleibt in Gebrauch, bis ein anderer Super-Admin die Änderung freigibt.",
     "offReason": "Grund für das Abschalten der Kartenüberweisung",
     "switchOff": "Kartenüberweisung abschalten",
     "switchedOff": "Kartenüberweisung ist abgeschaltet.",
@@ -10933,7 +11059,9 @@
     "columns": {
       "setBy": "Festgelegt von",
       "reason": "Grund",
-      "closed": "Beendet"
+      "closed": "Beendet",
+      "status": "Status",
+      "approvedBy": "Freigegeben von"
     },
     "activeNow": "Aktiv",
     "loading": "Wird geladen…",
@@ -10950,7 +11078,38 @@
       "CARD_OR_SHEBA_REQUIRED": "Kartennummer oder Sheba eingeben.",
       "HOLDER_REQUIRED": "Kontoinhaber eingeben.",
       "SUPER_ADMIN_WITH_SETTINGS_MANAGE_REQUIRED": "Nur ein Super-Admin kann dieses Konto ändern.",
-      "generic": "Nicht gespeichert; bitte erneut versuchen."
+      "generic": "Nicht gespeichert; bitte erneut versuchen.",
+      "SELF_APPROVAL": "Sie haben diese Änderung beantragt; ein anderer Super-Admin muss sie freigeben.",
+      "ALREADY_PENDING": "Eine andere Änderung wartet bereits auf Freigabe.",
+      "NOT_PENDING": "Über diese Änderung wurde bereits entschieden; die Seite wurde aktualisiert.",
+      "EXPIRED": "Diese Änderung ist vor der Freigabe abgelaufen; beantragen Sie sie bei Bedarf erneut.",
+      "NOT_FOUND": "Diese Änderung gibt es nicht mehr.",
+      "CONFIRM_APPROVE": "Bestätigen Sie vor der Freigabe, dass Sie das Konto geprüft haben."
+    },
+    "pendingBlocksChange": "Eine Änderung wartet bereits auf Freigabe. Geben Sie sie frei, lehnen Sie sie ab oder ziehen Sie sie zurück, bevor Sie eine weitere beantragen.",
+    "pending": {
+      "title": "Änderung wartet auf Freigabe",
+      "hint": "Noch nicht in Gebrauch: Mitglieder zahlen weiter auf das aktuelle Konto, bis ein anderer Super-Admin diese Änderung freigibt.",
+      "requestedBy": "Beantragt von",
+      "expiresAt": "Läuft ab",
+      "yours": "Sie haben diese Änderung beantragt, daher muss ein anderer Super-Admin sie freigeben. Sie können sie zurückziehen.",
+      "confirm": "Ich habe mit der antragstellenden Person geprüft, dass dieses Konto opetlife gehört.",
+      "approve": "Freigeben und aktivieren",
+      "approving": "Wird freigegeben…",
+      "approved": "Freigegeben: Das neue Konto ist jetzt aktiv, Super-Admins wurden benachrichtigt.",
+      "rejectReason": "Grund für die Ablehnung",
+      "withdrawReason": "Grund für das Zurückziehen",
+      "reject": "Ablehnen",
+      "withdraw": "Meinen Antrag zurückziehen",
+      "rejected": "Die Änderung wurde abgelehnt; das aktuelle Konto bleibt unverändert.",
+      "withdrawn": "Ihr Antrag wurde zurückgezogen; das aktuelle Konto bleibt unverändert."
+    },
+    "status": {
+      "PENDING": "Wartet auf Freigabe",
+      "ACTIVE": "Aktiv",
+      "CLOSED": "Beendet",
+      "REJECTED": "Abgelehnt",
+      "EXPIRED": "Abgelaufen"
     }
   },
   "adminCardReceipts": {
