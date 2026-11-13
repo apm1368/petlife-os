@@ -103,9 +103,13 @@ export class DonationService {
       }
     }
 
-    const campaign = await this.prisma.supportCampaign.findUnique({ where: { id: campaignId } });
+    const campaign = await this.prisma.supportCampaign.findUnique({ where: { id: campaignId }, include: { organization: { select: { verificationStatus: true, isPubliclyListed: true } } } });
     if (!campaign) throw new SupportCampaignNotFoundException({ campaignId });
     if (campaign.status !== SupportCampaignStatus.ACTIVE) throw new SupportCampaignNotAcceptingDonationsException({ campaignId, status: campaign.status });
+    // #290 Q55 + QA review: an ACTIVE campaign stops taking money the moment its organization leaves VERIFIED or is unlisted.
+    if (campaign.organization.verificationStatus !== "VERIFIED" || !campaign.organization.isPubliclyListed) {
+      throw new SupportCampaignNotAcceptingDonationsException({ campaignId, reason: "ORGANIZATION_NOT_VERIFIED" });
+    }
     if (dto.amountIrr <= 0) throw new DonationAmountInvalidException({ amountIrr: dto.amountIrr });
     if (dto.supportNeedListingId) {
       // A donation "for" a need must go to that need's own campaign, while the need is live.

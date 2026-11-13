@@ -12,7 +12,7 @@ export type VerificationHistoryKind="STATUS_CHANGED"|"DOCUMENT_REVIEWED"|"DOCUME
 export interface VerificationHistoryEntry {id:string;at:string;kind:VerificationHistoryKind;actor:"ADMIN"|"PARTNER";actorName:string|null;reason:string|null;from:string|null;to:string|null;documentId:string|null;documentKind:string|null;decision:string|null}
 export interface VerificationDecision {at:string;by:string|null;from:string|null;to:string|null;reason:string|null}
 export interface VerificationDetail extends VerificationState {subjectType:PartnerSubject;id:string;name:string;kind:string;allowedTransitions:VerificationStatus[];profile?:PartnerVerificationProfileDto|null;history?:VerificationHistoryEntry[];lastDecision?:VerificationDecision|null}
-export interface VerificationQueueItem {subjectType:PartnerSubject;id:string;name:string;kind:string;status:VerificationStatus;submittedAt:string|null;waitingHours:number|null;documents:{pending:number;accepted:number;rejected:number;expired:number}}
+export interface VerificationQueueItem {subjectType:PartnerSubject;id:string;name:string;kind:string;status:VerificationStatus;submittedAt:string|null;waitingHours:number|null;slaHours?:number;workingHoursWaiting?:number|null;overdue?:boolean;documents:{pending:number;accepted:number;rejected:number;expired:number}}
 export interface VerificationUpload {uploadUrl:string;headers?:Record<string,string>;key:string}
 const admin="/admin/verification";
 function portal(sellerId?:string){return sellerId?`/seller-organizations/${encodeURIComponent(sellerId)}/verification`:"/provider/verification"}

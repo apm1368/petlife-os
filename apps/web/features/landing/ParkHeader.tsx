@@ -40,7 +40,7 @@ export function ParkHeader({ locale }: { locale: RouteLocale }) {
   }, []);
   const links = [
     { href: `${root}/vet/find`, label: c.services.vet.title },
-    { href: `${home}#park-about`, label: c.about },
+    { href: `${root}/about`, label: c.about },
     { href: `${home}#park-partners`, label: c.partners },
   ];
   return <header className={`opl-hdr${scrolled ? " scrolled" : ""}`} onKeyDown={(event) => { if (event.key === "Escape") { setDd(false); if (open) { setOpen(false); menuButton.current?.focus(); } } }}>

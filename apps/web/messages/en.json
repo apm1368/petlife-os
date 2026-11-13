@@ -1,4 +1,147 @@
 {
+  "adminHolidays": {
+    "kicker": "Business calendar",
+    "title": "Holidays and closures",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "yearLabel": "Persian year",
+    "intro": "Iran's official public holidays, plus any day your team closes or opens. Working-hour targets such as the 24-hour verification review skip closed days, and bookings and delivery estimates can read the same calendar. Fridays are always closed.",
+    "coverage": {
+      "official": "{count, plural, one {# closed day} other {# closed days}} this year, from the official calendar and your team's changes.",
+      "provisional": "Lunar holidays for this year are provisional until the official calendar is published. Correct any day here if it moves.",
+      "none": "There's no official list for this year yet. A developer adds it once the official calendar is published; until then, add closures by hand."
+    },
+    "add": {
+      "title": "Add a closure",
+      "help": "For a day the office is closed that isn't an official holiday, such as a sudden closure or a company day off.",
+      "date": "Date",
+      "name": "Name",
+      "namePlaceholder": "For example: Office closed",
+      "submit": "Close this day"
+    },
+    "reason": "Reason",
+    "reasonPlaceholder": "Why this change (kept in the audit log)",
+    "list": {
+      "title": "Closed and changed days",
+      "empty": "No holidays or changes for this year.",
+      "date": "Date",
+      "name": "Day",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "closed": "Closed",
+      "open": "Open"
+    },
+    "source": {
+      "official": "Official holiday",
+      "staffClosure": "Team closure",
+      "staffOpened": "Opened by the team"
+    },
+    "actions": {
+      "open": "Open as a working day",
+      "undo": "Undo team change"
+    },
+    "confirm": {
+      "openTitle": "Open {date} as a working day?",
+      "openBody": "Working-hour targets will count this day, and bookings may treat it as open.",
+      "undoTitle": "Undo the change on {date}?",
+      "undoBody": "The day goes back to the official calendar."
+    },
+    "done": {
+      "closed": "Closure added.",
+      "opened": "The day is now a working day.",
+      "undone": "Change undone; the day follows the official calendar again."
+    },
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "closureFields": "Pick a date, give it a name, and write a short reason (at least 5 characters).",
+      "reason": "Write a short reason (at least 5 characters)."
+    },
+    "rules": {
+      "CALENDAR_FRIDAY": "Fridays are always closed, so there's nothing to change.",
+      "CALENDAR_ALREADY_OPEN": "That day is already a working day.",
+      "CALENDAR_ALREADY_CLOSED": "That's already an official holiday. To close it again after opening it, undo the team change.",
+      "CALENDAR_OUT_OF_RANGE": "Pick a date from a month ago up to two years ahead.",
+      "CALENDAR_NO_STAFF_CHANGE": "There's no team change on that day."
+    },
+    "names": {
+      "nowruz": "Nowruz (Persian New Year)",
+      "republicDay": "Islamic Republic Day",
+      "natureDay": "Nature Day (Sizdah Bedar)",
+      "sadiqMartyrdom": "Martyrdom of Imam Ja'far al-Sadiq",
+      "eidAlAdha": "Eid al-Adha",
+      "khomeini": "Death of Imam Khomeini",
+      "ghadir": "Eid al-Ghadir",
+      "khordad15": "15 Khordad uprising",
+      "tasua": "Tasua",
+      "ashura": "Ashura",
+      "arbaeen": "Arbaeen",
+      "prophetDeath": "Death of the Prophet and martyrdom of Imam Hasan",
+      "reza": "Martyrdom of Imam Reza",
+      "askari": "Martyrdom of Imam Hasan al-Askari",
+      "mawlid": "Birth of the Prophet and Imam Ja'far al-Sadiq",
+      "fatima": "Martyrdom of Fatima al-Zahra",
+      "aliBirth": "Birth of Imam Ali (Father's Day)",
+      "mabath": "Mab'ath (the Prophet's mission)",
+      "midShaban": "Mid-Sha'ban (birth of Imam Mahdi)",
+      "revolution": "Victory of the Islamic Revolution",
+      "aliMartyrdom": "Martyrdom of Imam Ali",
+      "eidAlFitr": "Eid al-Fitr",
+      "eidAlFitr2": "Eid al-Fitr holiday",
+      "oil": "Oil Nationalization Day"
+    }
+  },
+  "adminDeletionRequests": {
+    "kicker": "Privacy",
+    "title": "Account deletion requests",
+    "intro": "Members who asked to delete their account. Review each one: move it to retention review, then mark it ready once the retention policy is approved. Members can cancel until deletion is carried out, and they get a notice at each step.",
+    "executionDisabled": "Deletion itself is switched off until a retention policy is approved, so nothing here deletes data.",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "filterLabel": "Request state",
+    "state": {
+      "REQUESTED": "New",
+      "PENDING_RETENTION": "Retention review",
+      "READY_FOR_EXECUTION": "Ready",
+      "CANCELLED": "Cancelled by member",
+      "COMPLETED": "Completed"
+    },
+    "empty": {
+      "REQUESTED": "No new requests.",
+      "PENDING_RETENTION": "Nothing in retention review.",
+      "READY_FOR_EXECUTION": "Nothing ready for deletion.",
+      "CANCELLED": "No cancelled requests.",
+      "COMPLETED": "No completed deletions."
+    },
+    "requested": "Requested {date} · {days, plural, =0 {today} one {# day ago} other {# days ago}}",
+    "impact": "{households, plural, one {# household} other {# households}} · {pets, plural, one {# pet} other {# pets}} · {shared, plural, =0 {not shared with anyone} one {# shared with others} other {# shared with others}}",
+    "noImpact": "No households or pets recorded.",
+    "soleOwner": "Sole owner of a household that has other members: ownership has to move to someone else first.",
+    "lastChange": "Last step {date}",
+    "note": "Note (optional)",
+    "notePlaceholder": "For example: invoices kept for tax law until 1408",
+    "explain": {
+      "PENDING_RETENTION": "Starts the retention review: you check which records the law requires keeping. The member is told their request is being reviewed.",
+      "READY_FOR_EXECUTION": "Marks the review done. Only possible once a retention policy is approved. The member is told deletion will happen soon and can still cancel."
+    },
+    "action": {
+      "PENDING_RETENTION": "Start retention review",
+      "READY_FOR_EXECUTION": "Mark ready for deletion"
+    },
+    "done": {
+      "PENDING_RETENTION": "{name}'s request is in retention review; they've been notified.",
+      "READY_FOR_EXECUTION": "{name}'s request is ready; they've been notified."
+    },
+    "errors": {
+      "forbidden": "Only a super admin can handle deletion requests.",
+      "load": "Deletion requests couldn't be loaded.",
+      "generic": "That didn't work. Please try again.",
+      "RETENTION_POLICY_NOT_APPROVED": "Not yet: a retention policy has to be approved before any request can be marked ready.",
+      "INVALID_TRANSITION": "This request has moved on already. Refresh the list.",
+      "CHANGED_CONCURRENTLY": "Someone else changed this request just now. Refresh the list."
+    }
+  },
   "clinicClients": {
     "optOut": {
       "title": "Stop clinic texts",
@@ -746,7 +889,8 @@
       "processing": "Cropped/re-encoded",
       "licence": "Licence and usage terms",
       "musicTitle": "Music",
-      "musicUsage": "The wordless soundtrack of the site's reels; a 48-second excerpt, faded in and out and re-encoded."
+      "musicUsage": "The wordless soundtrack of the site's reels; a 48-second excerpt, faded in and out and re-encoded.",
+      "musicUsageVideo": "The instrumental soundtrack of the one-minute video “10 searches of dog and cat owners” on the blog and social media; a 60-second excerpt, faded out and re-encoded."
     },
     "member": {
       "nav": "My sections",
@@ -4398,6 +4542,8 @@
         "signingOut": "Signing out…"
       },
       "tabs": {
+        "holidays": "Holidays and closures",
+        "deletionRequests": "Deletion requests",
         "customRoles": "Custom roles",
         "directory": "Directory",
         "customer360": "Customer 360",
@@ -5011,6 +5157,7 @@
       }
     },
     "tasks": {
+      "openRelated": "Open the request",
       "title": "Tasks",
       "newTask": "New task",
       "createTitle": "Create task",
@@ -5654,7 +5801,11 @@
       "back": "Back",
       "continue": "Continue",
       "photoLabel": "Photo",
-      "submit": "Report lost pet"
+      "submit": "Report lost pet",
+      "useMyLocation": "Use my current location",
+      "useMyLocationHelp": "If you are where they were last seen, save the location so neighbours who turned on alerts hear about it. The exact point stays private.",
+      "locationSaved": "Location saved",
+      "locationDenied": "Location access wasn't allowed; you can continue without it."
     },
     "list": {
       "title": "Lost pet reports",
@@ -5744,6 +5895,27 @@
         "reunited": "{name} is back home. Thank you to everyone who helped.",
         "photoAlt": "Photo of {name}"
       }
+    },
+    "areaAlert": {
+      "title": "Lost-pet alerts for my area",
+      "body": "When a pet goes missing near you, we'll let you know so you can help if you see them.",
+      "on": "On: you'll hear about reports within {km} km of you.",
+      "enable": "Turn on alerts",
+      "update": "Update area",
+      "disable": "Turn off",
+      "radius": "Area",
+      "km": "{km} km",
+      "signIn": "Sign in to turn on alerts",
+      "privacy": "Your location is only used to find nearby reports and is never shown to anyone.",
+      "denied": "The browser didn't allow location access.",
+      "failed": "Couldn't save. Please try again."
+    },
+    "found": {
+      "title": "Pets found by neighbours",
+      "subtitle": "Found a pet? Post it here so its family can recognise it.",
+      "cta": "I found a pet",
+      "empty": "No found-pet posts right now.",
+      "untitled": "Found pet"
     }
   },
   "animalSupport": {
@@ -5805,7 +5977,8 @@
       "LOST_PET_SHARE": "Lost pet",
       "RESCUE": "Rescue",
       "ADOPTION": "Adoption",
-      "MEMORY": "Memory"
+      "MEMORY": "Memory",
+      "FOUND_PET": "Found pet"
     },
     "reaction": {
       "LIKE": "Like",
@@ -5864,6 +6037,30 @@
       "commentLabel": "Add a comment",
       "commentSubmit": "Post",
       "commentsEmpty": "No comments yet."
+    },
+    "contact": {
+      "message": "Message the poster",
+      "adopt": "Ask to adopt",
+      "signIn": "Sign in to send a message",
+      "private": "The conversation stays inside opetlife; phone numbers are never shown.",
+      "screening": {
+        "title": "A few quick questions for adoption",
+        "hint": "Your answers are sent as your first message, so the poster can choose carefully.",
+        "intro": "Hello, I'd like to adopt this pet.",
+        "home": "Where you live",
+        "homes": {
+          "apartment": "Apartment",
+          "houseWithYard": "House with a yard",
+          "other": "Other"
+        },
+        "experience": "Experience with pets",
+        "otherPets": "Other pets at home",
+        "why": "Why you want to adopt",
+        "visit": "I can meet in person",
+        "visitYes": "I can come and meet them in person.",
+        "send": "Send request",
+        "cancel": "Cancel"
+      }
     }
   },
   "communityChat": {
@@ -6820,6 +7017,7 @@
         "allClear": "All clear — nothing is waiting on your team.",
         "clearList": "Clear: {list}",
         "queue": {
+          "pendingDeletionRequests": "Account deletion requests",
           "openTrustCases": "Trust & safety cases",
           "openDisputes": "Open disputes",
           "openSupportCases": "Open support cases",
@@ -6903,7 +7101,15 @@
       "insuranceProviders": "Insurance provider management",
       "externalSources": "External travel source operations",
       "accessControl": "Admin access management",
-      "verificationQueue": "Partner verification queue"
+      "verificationQueue": "Partner verification queue",
+      "launch": {
+        "title": "Launch month goal",
+        "hint": "The launch success measure: registered pets and weekly bookings. Until the demo data is cleaned up (Q4), it is counted too.",
+        "registeredPets": "Registered pets",
+        "thisWeek": "this week",
+        "bookingsThisWeek": "Bookings this week",
+        "vsLastWeek": "vs {count} last week"
+      }
     },
     "records": {
       "clinical": "Clinical records",
@@ -8521,6 +8727,7 @@
       "SUPPORT_AGENT": "Support agent"
     },
     "rules": {
+      "UNVERIFIED_CONTACT": "Admin access can only go to an account whose email address has been verified.",
       "ALREADY_ADMIN": "This account is already an admin; open its existing membership.",
       "SELF_CHANGE_FORBIDDEN": "You cannot change your own membership.",
       "LAST_SUPER_ADMIN": "The last active super admin cannot be changed.",
@@ -8549,6 +8756,10 @@
     }
   },
   "partnerVerification": {
+    "sla": {
+      "overdue": "Past the 24-working-hour target",
+      "progress": "{hours} of {target} working hours used"
+    },
     "superseded": "Replaced by a newer upload",
     "reviewedBy": "by {name}",
     "caseSummary": "Where this case stands",
@@ -10214,6 +10425,137 @@
       "pull": "Pull to refresh",
       "release": "Release to refresh",
       "loading": "Refreshing…"
+    }
+  },
+  "safety": {
+    "title": "Stay safe from scams",
+    "contact": "Pay only inside opetlife. Never send a card-to-card transfer outside the site, and never share a verification code or password.",
+    "payment": "Pay only on this page. opetlife never asks you to transfer money to a personal account or to share a verification code.",
+    "lostPet": "Anyone who asks for money or a reward before returning a pet is probably a scammer. Meet in a public place and never pay in advance.",
+    "donation": "Donate only through this page. opetlife never asks you to transfer a donation to a personal account.",
+    "adoption": "Never pay a fee before meeting. See the pet in person and meet somewhere safe."
+  },
+  "aboutPage": {
+    "eyebrow": "About opetlife",
+    "title": "We built opetlife so caring for an animal never has to start from zero",
+    "lede": "A vaccination booklet in a drawer, a vet’s number lost in a chat, a shop that doesn’t know about an allergy, a trip planned around “no pets allowed”. opetlife brings all of it together around one profile of your pet — and keeps it honest.",
+    "chapters": {
+      "label": "On this page",
+      "why": "Why we exist",
+      "connect": "How it fits together",
+      "promises": "What we promise",
+      "values": "How we decide",
+      "contact": "Talk to us"
+    },
+    "why": {
+      "title": "Care shouldn’t depend on remembering everything",
+      "p1": "Living with a dog, a cat or a bird means hundreds of small decisions: when the next vaccine is due, which food suits a sensitive stomach, who can look after them when you travel. Most of that knowledge lives in scattered places — and when it is needed most, it is hard to find.",
+      "p2": "opetlife started from a simple idea: the animal is at the centre, not the app. Everything we build — records, bookings, the shop, travel, rescue — reads from and adds to your pet’s own profile, so each step knows what came before.",
+      "p3": "We write in Persian first, because that is where most of our families live, and in English, German and Spanish for everyone who lives with an animal far from home."
+    },
+    "connect": {
+      "title": "One profile, many helping hands",
+      "lede": "Each part of opetlife does one job well and shares only what you allow.",
+      "steps": {
+        "record": {
+          "title": "Your pet’s record",
+          "body": "Vaccinations, medications, allergies, weight and documents in one health file — with reminders before something is due.",
+          "cta": "Add your pet"
+        },
+        "care": {
+          "title": "Vets and services",
+          "body": "Find clinics, groomers, sitters and pet taxis, see real available times and book; share the health record with a vet for a limited time.",
+          "cta": "Find care"
+        },
+        "shop": {
+          "title": "Shop",
+          "body": "Food, treats and accessories, chosen with your pet’s species and needs in mind.",
+          "cta": "Visit the shop"
+        },
+        "travel": {
+          "title": "Travel",
+          "body": "Pet-friendly stays and trips; every external listing shows its source and when we last checked it.",
+          "cta": "Plan a trip"
+        },
+        "safety": {
+          "title": "Safety",
+          "body": "Lost-pet alerts, a pet ID card and plain comparisons of insurance plans, for the days you hope never come.",
+          "cta": "Lost and found"
+        },
+        "together": {
+          "title": "Community and rescue",
+          "body": "Talk with other owners, support verified rescue groups and see exactly where donations go.",
+          "cta": "Join the community"
+        },
+        "learn": {
+          "title": "Learn",
+          "body": "Practical articles and guides on training, nutrition and health, written to be used at home.",
+          "cta": "Read the magazine"
+        }
+      }
+    },
+    "promises": {
+      "title": "What we promise — and how you can check it",
+      "lede": "Trust shouldn’t be a slogan. These are things the product does, and you can see them for yourself.",
+      "items": {
+        "verified": {
+          "title": "Verified means checked",
+          "body": "Clinics, vets and service providers get a verified badge only after our team has reviewed their documents."
+        },
+        "consent": {
+          "title": "Your pet’s record, your decision",
+          "body": "A health record is shared only when you choose to share it, for a limited time, and you can revoke access at any moment."
+        },
+        "privacy": {
+          "title": "Your data stays yours",
+          "body": "From your privacy centre you can download a copy of your data or ask us to delete it."
+        },
+        "sources": {
+          "title": "Honest about where things come from",
+          "body": "Listings from other websites show their source and when we last checked them; we never present them as our own."
+        },
+        "ledger": {
+          "title": "Donations you can follow",
+          "body": "Every rescue campaign shows a running total built from real transactions — never an estimate."
+        },
+        "credits": {
+          "title": "Credit where it’s due",
+          "body": "Photos and music made by others are credited with their licence on our credits page."
+        }
+      }
+    },
+    "values": {
+      "title": "How we decide what to build",
+      "items": {
+        "animals": {
+          "title": "The animal comes first",
+          "body": "If a feature is good for business but not for the animal, we don’t build it."
+        },
+        "honest": {
+          "title": "Say what we know — and what we don’t",
+          "body": "No made-up availability, no invented reviews, no medical promises. When something is uncertain, we say so."
+        },
+        "simple": {
+          "title": "Simple for every family",
+          "body": "Clear words, large buttons, light and dark themes, and pages that work on any phone."
+        },
+        "kindness": {
+          "title": "Kindness counts",
+          "body": "Rescue, adoption and remembering the animals we have lost are part of opetlife, not an afterthought."
+        }
+      }
+    },
+    "contact": {
+      "title": "Talk to us",
+      "body": "Questions, ideas, a partnership or something that didn’t work as it should: your message reaches our support team, and you’ll see the reply in your support inbox.",
+      "contactCta": "Send a message",
+      "helpCta": "Help centre"
+    },
+    "cta": {
+      "title": "Start with your pet’s profile",
+      "body": "It takes a minute, and everything else builds on it.",
+      "primary": "Create an account",
+      "secondary": "Explore services"
     }
   }
 }

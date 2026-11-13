@@ -7,11 +7,11 @@ const FAMILIES: Family[] = ["care", "services", "shop", "travel", "safe", "toget
 
 describe("page family reels", () => {
   it.each([
-    ["/fa/services/GROOMING", "services"], ["/en/vet/find", "services"], ["/de/providers/abc", "services"], ["/es/places", "services"],
+    ["/fa/services/grooming", "services"], ["/en/vet/find", "services"], ["/de/providers/abc", "services"], ["/es/places", "services"],
     ["/fa/shop/products/1", "shop"], ["/en/travel/search", "travel"], ["/fa/insurance/compare", "safe"], ["/en/lost-pets", "safe"],
     ["/fa/community/posts/1", "together"], ["/de/animal-support/needs", "together"], ["/en/blog/a", "learn"], ["/es/help/faq", "learn"],
     ["/fa/home", "care"], ["/en/pets/p1/health/labs", "care"], ["/de/care-calendar", "care"], ["/es/profile/household", "care"],
-    ["/fa/bookings/b1", "services"], ["/en/orders/o1", "shop"], ["/de/cart", "shop"], ["/es/donations", "together"], ["/fa/support", "learn"],
+    ["/fa/bookings/b1", "services"], ["/en/orders/o1", "shop"], ["/de/cart", "shop"], ["/es/donations", "together"], ["/en/memorials", "together"], ["/fa/support", "learn"],
     ["/fa/checkout", null], ["/en/onboarding", null], ["/de/ngo/needs", null], ["/es/insurer", null], ["/fa/invitations/t", null],
     ["/fa/health-share/token", null], ["/en/pet-card/token", null], ["/fa", null],
   ] as const)("maps %s to its family", (path, family) => {

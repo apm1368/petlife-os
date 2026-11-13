@@ -119,6 +119,7 @@ const FA: Record<string, string> = {
   WEAK_PASSWORD: "رمز عبور باید دست‌کم ۸ نویسه باشد.",
   PAYLOAD_TOO_LARGE: "حجم فایل یا اطلاعات بیش از حد مجاز است.",
   RATE_LIMITED: "درخواست‌ها بیش از حد بود. کمی بعد دوباره امتحان کنید.",
+  SERVICE_BUSY: "سرور همین حالا شلوغ است و چیزی ذخیره نشد. چند لحظه بعد دوباره امتحان کنید.",
   FORBIDDEN: "اجازهٔ این کار را ندارید.",
   NOT_FOUND: "این مورد پیدا نشد.",
 };
@@ -145,6 +146,12 @@ function familyRule(code: string): string | null {
   return null;
 }
 
+/** Nothing was saved and a retry will likely work: worth saying in every language, not just the generic line. */
+const BUSY = {
+  de: "Der Server ist gerade ausgelastet, es wurde nichts gespeichert. Bitte versuchen Sie es gleich noch einmal.",
+  es: "El servidor está ocupado ahora mismo y no se ha guardado nada. Vuelve a intentarlo en un momento.",
+};
+
 const GENERIC = {
   fa: "انجام نشد. دوباره تلاش کنید.",
   en: "That didn't work. Please try again.",
@@ -162,6 +169,7 @@ export function apiErrorText(err: unknown, locale?: string, fallback?: string): 
   const currentLocale = locale ?? (typeof document === "undefined" ? "" : document.documentElement.lang);
   const fa = currentLocale === "fa";
   if (err instanceof ApiError) {
+    if (err.code === "SERVICE_BUSY" && (currentLocale === "de" || currentLocale === "es")) return BUSY[currentLocale];
     if (currentLocale === "de" || currentLocale === "es") return fallback || GENERIC[currentLocale];
     if (!fa) return err.message || fallback || GENERIC.en;
     return validationReasonRule(err) ?? FA[err.code] ?? familyRule(err.code) ?? fallback ?? GENERIC.fa;

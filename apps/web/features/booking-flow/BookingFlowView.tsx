@@ -22,6 +22,7 @@ import { Stepper } from "@/features/shared/Stepper";
 import { BookingFrame } from "@/features/bookings/BookingFrame";
 import { formatDay } from "@/lib/date/jalali";
 import type { RouteLocale } from "@/lib/i18n/config";
+import { SafetyTip } from "@/features/shared/SafetyTip";
 
 type Step = "service" | "pets" | "time" | "details" | "review";
 const STEPS: Step[] = ["service", "pets", "time", "details", "review"];
@@ -434,6 +435,7 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
       {step === "review" && service ? (
         <ContextSurface className="flex flex-col gap-3">
           <h2 className="text-section-title">{t("reviewTitle")}</h2>
+          <SafetyTip kind="payment" />
           <dl className="grid gap-3 text-sm sm:grid-cols-2">
             <Row label={t("provider")} value={profile.name} />
             <Row label={t("service")} value={`${service.name}${variant ? ` — ${variant.name}` : ""}`} />

@@ -61,6 +61,23 @@ export function organizationJsonLd(locale: RouteLocale) {
   ];
 }
 
+/** The About page as an AboutPage about the site's Organization (same @id as the home page's Organization node). */
+export function aboutPageJsonLd(locale: RouteLocale, name: string, description: string) {
+  const url = absoluteUrl(`/${locale}/about`);
+  return {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "@id": `${url}#webpage`,
+    url,
+    name,
+    description,
+    inLanguage: LANGUAGE_TAG[locale],
+    isPartOf: { "@id": `${SITE_ORIGIN}/#website` },
+    about: { "@id": `${SITE_ORIGIN}/#organization` },
+    mainEntity: { "@id": `${SITE_ORIGIN}/#organization` },
+  };
+}
+
 /** Serialises structured data for a `<script type="application/ld+json">`, escaping `<` so content can never close the tag. */
 export function jsonLdScript(data: unknown): string {
   return JSON.stringify(data).replace(/</g, "\\u003c");
