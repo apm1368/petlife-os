@@ -55,7 +55,8 @@ describe("admin Set Pet requests", () => {
 
     await get(member, "/admin/set-pet/requests").expect(403);
     const listed = (await get(viewer, `/admin/set-pet/requests?status=SUBMITTED&q=${number}`).expect(200)).body;
-    expect(listed.items).toEqual([expect.objectContaining({ id: req.id, number, memberName: "Sara Member", humanSizes: ["M", "XXL"], petSize: "S", placements: 2, designs: 4 })]);
+    // The three files attached to the request (two ready, one still uploading); the member's loose upload isn't one.
+    expect(listed.items).toEqual([expect.objectContaining({ id: req.id, number, memberName: "Sara Member", humanSizes: ["M", "XXL"], petSize: "S", placements: 2, designs: 3 })]);
     expect(listed.counts.SUBMITTED).toBe(1);
     expect((await get(viewer, `/admin/set-pet/requests?q=${encodeURIComponent("Ali Member")}`).expect(200)).body.items.map((r: { id: string }) => r.id)).toEqual([second.id]);
     await get(viewer, "/admin/set-pet/requests?status=LOST").expect(400);
