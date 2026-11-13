@@ -22,6 +22,8 @@ export interface ConfirmBookingInput {
   reasonForVisit?: string;
   ownerNotes?: string;
   accessSelection?: PetAccessScopePreset;
+  /** VET + health basics only: the pet's own documents the owner ticked for this booking's vet. */
+  sharedDocumentIds?: string[];
   customerAddressId?: string;
   dropoffAddressId?: string;
 }

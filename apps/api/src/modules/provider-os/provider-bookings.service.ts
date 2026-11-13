@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { BookingActorType, BookingPaymentMode, BookingStatus, PaymentStatus, Prisma, SourceType, type PetAccessGrant } from "@prisma/client";
-import { SetupStatus as SharedSetupStatus, type CareProfileDto, type ProviderBookingDetailDto, type ProviderPetAccessContextDto } from "@petlife/types";
+import { AllergyStatus, BookingActorType, BookingPaymentMode, BookingStatus, ConditionStatus, MedicationStatus, PaymentStatus, Prisma, SourceType, VaccinationStatus } from "@prisma/client";
+import { SetupStatus as SharedSetupStatus, type CareProfileDto, type ProviderBookingDetailDto, type ProviderBookingHealthDetailsDto, type ProviderBookingIntakeDto, type ProviderPetAccessContextDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import {
@@ -17,6 +17,9 @@ import { BookingLifecycleService, bookingEventFields } from "../booking/booking-
 import { CareCalendarService } from "../care-calendar/care-calendar.service";
 import { CareProfileService } from "../care-profile/care-profile.service";
 import { HealthSummaryService } from "../health/health-summary.service";
+import { MEDICAL_DOCUMENT_INCLUDE, toMedicalDocumentDto } from "../clinical-health/clinical-health-mapper";
+import { bookingSharedDocumentIds } from "../pet-access/booking-document-shares";
+import type { IntakeQuestion } from "../service-intake/service-intake.util";
 import type { ResolvedProviderContext } from "./auth/provider-context.types";
 import { toProviderBookingSummaryDto, type ProviderBookingRow } from "./provider-os-dto.mapper";
 import type { ListProviderBookingsDto } from "./dto/list-provider-bookings.dto";
@@ -119,11 +122,13 @@ export class ProviderBookingsService {
       canViewHealth: false,
     };
     if (!link) return noAccess;
-
-    const grant: PetAccessGrant = link.petAccessGrant;
+    // No grant yet: an "any staff" booking waits for the clinic to assign someone (see followAssignee).
+    const grant = link.petAccessGrant;
+    if (!grant) return noAccess;
     // The grant is only "this provider user's own" access — a receptionist viewing a
     // booking assigned to the vet has no access via that vet's grant (spec section 4:
     // provider role is never a pet-data permission source; PetAccessGrant is per-person).
+    // After a reassignment the link points at the new assignee's grant, so the previous one sees NO_GRANT.
     if (grant.userId !== ctx.userId) return noAccess;
 
     const base = {
@@ -144,10 +149,13 @@ export class ProviderBookingsService {
     const booking = await this.loadForOrg(ctx, id);
     const access = await this.resolvePetAccessContext(booking, ctx);
 
-    const [careProfile, healthSummaryDto] = await Promise.all([
+    const [careProfile, healthSummaryDto, healthDetails, intake] = await Promise.all([
       access.canViewCareProfile ? this.careProfile.get(booking.petId) : Promise.resolve(null),
       access.canViewHealth ? this.healthSummary.getSummary(booking.petId) : Promise.resolve(null),
+      access.canViewHealth ? this.healthDetails(booking, ctx) : Promise.resolve(null),
+      this.intake(booking),
     ]);
+    const pet = booking.pet;
 
     const providerNoteRows = await this.prisma.bookingProviderNote.findMany({ where: { bookingId: id }, orderBy: { createdAt: "desc" } });
 
@@ -165,10 +173,29 @@ export class ProviderBookingsService {
         createdAt: booking.createdAt.toISOString(),
         updatedAt: booking.updatedAt.toISOString(),
       },
-      pet: { id: booking.pet.id, name: booking.pet.name, species: booking.pet.species as unknown as ProviderBookingDetailDto["pet"]["species"], breed: booking.pet.breed, photoUrl: booking.pet.photoUrl },
+      pet: {
+        id: pet.id,
+        name: pet.name,
+        species: pet.species as unknown as ProviderBookingDetailDto["pet"]["species"],
+        breed: pet.breed,
+        photoUrl: pet.photoUrl,
+        // General identity is part of every booking scope, so it follows the viewer's own active grant.
+        identity: access.state === "GRANTED"
+          ? {
+              sex: pet.sex as unknown as NonNullable<ProviderBookingDetailDto["pet"]["identity"]>["sex"],
+              birthDate: pet.birthDate?.toISOString() ?? null,
+              approximateAgeMonths: pet.approximateAgeMonths,
+              latestWeightValue: pet.latestWeightValue === null ? null : Number(pet.latestWeightValue),
+              latestWeightUnit: pet.latestWeightUnit as unknown as NonNullable<ProviderBookingDetailDto["pet"]["identity"]>["latestWeightUnit"],
+              hasMicrochip: Boolean(pet.microchipNumber?.trim()),
+            }
+          : null,
+      },
       access,
       careProfile: careProfile ? toCareProfileDto(careProfile) : null,
       healthSummary: healthSummaryDto,
+      healthDetails,
+      intake,
       providerNotes: providerNoteRows.map((n) => ({
         id: n.id,
         bookingId: n.bookingId,
@@ -178,6 +205,43 @@ export class ProviderBookingsService {
         updatedAt: n.updatedAt.toISOString(),
       })),
     };
+  }
+
+  /**
+   * The health basics the owner chose to share for this booking — only called once the viewer's own grant
+   * for it is active and reads health. Documents are exactly the ones ticked for this booking.
+   */
+  private async healthDetails(booking: ProviderBookingRow, ctx: ResolvedProviderContext): Promise<ProviderBookingHealthDetailsDto> {
+    const petId = booking.petId;
+    const sharedIds = await bookingSharedDocumentIds(this.prisma, petId, ctx.userId, { bookingId: booking.id });
+    const [allergies, conditions, medications, vaccination, documents] = await Promise.all([
+      this.prisma.allergy.findMany({ where: { petId, status: AllergyStatus.ACTIVE }, orderBy: { recordedAt: "desc" } }),
+      this.prisma.condition.findMany({ where: { petId, status: ConditionStatus.ACTIVE }, orderBy: { createdAt: "desc" } }),
+      this.prisma.medication.findMany({ where: { petId, status: MedicationStatus.ACTIVE }, orderBy: { createdAt: "desc" } }),
+      this.prisma.vaccinationSummary.findUnique({ where: { petId } }),
+      this.prisma.medicalDocument.findMany({ where: { petId, voidedAt: null, id: { in: sharedIds } }, include: MEDICAL_DOCUMENT_INCLUDE, orderBy: { uploadedAt: "desc" } }),
+    ]);
+    return {
+      allergies: allergies.map((a) => ({ id: a.id, name: a.name, severity: a.severity, reaction: a.reaction })),
+      conditions: conditions.map((c) => ({ id: c.id, name: c.name, notes: c.notes })),
+      medications: medications.map((m) => ({ id: m.id, name: m.name, dosage: m.dosage === null ? null : Number(m.dosage), unit: m.unit, frequencyText: m.frequencyText })),
+      vaccination: {
+        status: (vaccination?.status ?? VaccinationStatus.INCOMPLETE) as unknown as ProviderBookingHealthDetailsDto["vaccination"]["status"],
+        lastKnownDate: vaccination?.lastKnownDate?.toISOString() ?? null,
+        nextDueDate: vaccination?.nextDueDate?.toISOString() ?? null,
+        notes: vaccination?.notes ?? null,
+      },
+      sharedDocuments: documents.map(toMedicalDocumentDto),
+    };
+  }
+
+  /** The intake form as answered for this booking — the clinic's own form, already readable by its staff. */
+  private async intake(booking: ProviderBookingRow): Promise<ProviderBookingIntakeDto | null> {
+    if (!booking.intakeFormId) return null;
+    const form = await this.prisma.serviceIntakeForm.findUnique({ where: { id: booking.intakeFormId } });
+    if (!form) return null;
+    const given = (booking.intakeAnswers ?? {}) as Record<string, unknown>;
+    return { formVersion: form.version, answers: (form.questions as unknown as IntakeQuestion[]).map((q) => ({ key: q.key, label: q.label, type: q.type, value: given[q.key] ?? null })) };
   }
 
   /**

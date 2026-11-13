@@ -3130,6 +3130,31 @@
       "reason": "Reason",
       "cancelledReason": "Cancellation reason",
       "completionNote": "Completion note",
+      "ownerNotes": "Owner notes",
+      "petInfo": {
+        "sex": "Sex",
+        "age": "Age",
+        "weight": "Weight",
+        "microchip": "Microchip",
+        "microchipPresent": "Microchipped",
+        "notRecorded": "Not recorded",
+        "sexValue": {
+          "MALE": "Male",
+          "FEMALE": "Female",
+          "UNKNOWN": "Unknown"
+        },
+        "moreAfterAssignment": "Sex, age, weight and microchip are shown to the team member this booking is assigned to."
+      },
+      "intake": {
+        "title": "Owner's intake answers",
+        "yes": "Yes",
+        "no": "No"
+      },
+      "documents": {
+        "title": "Documents the owner shared for this visit",
+        "download": "Secure download",
+        "downloadFailed": "The document could not be opened. Please try again."
+      },
       "access": {
         "title": "Pet data access",
         "state": {
@@ -3163,7 +3188,13 @@
       "health": {
         "title": "Health context",
         "allergyState": "Allergies",
-        "vaccinationStatus": "Vaccination"
+        "vaccinationStatus": "Vaccination",
+        "allergies": "Active allergies",
+        "conditions": "Conditions",
+        "medications": "Current medications",
+        "vaccinationLast": "Last vaccination",
+        "vaccinationNext": "Next vaccination due",
+        "identityOnly": "The owner shared basic identity only for this booking, so no health information or clinical record is available."
       },
       "actions": {
         "confirm": "Confirm",
@@ -6888,6 +6919,19 @@
       "resolveAlert": "Resolve",
       "owner": "Owner: {name} · {phone}",
       "chip": "Chip {chip}",
+      "age": "Age {age}",
+      "ownerWeight": "{weight} (owner-recorded)",
+      "medications": "Current medications",
+      "conditions": "Conditions",
+      "vaccination": "Vaccination",
+      "vaccinationLast": "Last vaccination",
+      "vaccinationNext": "Next due",
+      "noLabs": "No lab results recorded.",
+      "labRange": "Reference {low}–{high}",
+      "noDocuments": "No documents available to you for this patient.",
+      "sharedByOwner": "Shared by the owner",
+      "download": "Secure download",
+      "downloadFailed": "The document could not be opened. Please try again.",
       "noneRecorded": "Nothing recorded",
       "allergies": "Allergies",
       "activeProblems": "Active problems",
@@ -6920,6 +6964,8 @@
         "vitals": "Exams",
         "prescriptions": "Prescriptions",
         "visits": "Visits",
+        "labs": "Labs",
+        "documents": "Documents",
         "financial": "Estimates"
       },
       "alertType": {
@@ -9666,6 +9712,17 @@
     "shareHealthBasics": "Health summary (conditions, allergies, active medications, vaccination status) until 24h after the visit",
     "chooseHealthSharing": "Choose one of the two options to continue.",
     "shareSelectedDocuments": "Share selected documents precisely via Share with Vet",
+    "shareDocuments": {
+      "title": "Documents for this vet (optional)",
+      "description": "Tick the documents this visit's vet may open. Only the vet assigned to this booking can open them, and only until 24h after the visit. Nothing is shared unless you tick it.",
+      "loading": "Loading your documents",
+      "empty": "No health documents uploaded for this pet yet.",
+      "loadFailed": "Your documents could not be loaded. You can continue without sharing any.",
+      "limit": "You can share up to {max, number} documents with one booking.",
+      "reviewLabel": "Documents shared",
+      "reviewNone": "None",
+      "reviewCount": "{count, plural, one {# document} other {# documents}}"
+    },
     "reviewTitle": "Review everything once",
     "provider": "Provider",
     "service": "Service",

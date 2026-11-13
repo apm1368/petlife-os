@@ -3,6 +3,7 @@ import type { HealthTimelineEntryDto } from "@petlife/types";
 import { HealthTimelineEntryType, SourceType as SourceTypeDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { toClinicalActorRefDto } from "./clinical-health-mapper";
+import { documentReadScope } from "../pet-access/booking-document-shares";
 
 const EMPTY_ACTOR = { providerOrganizationId: null, providerOrganizationName: null, providerUserId: null, providerUserDisplayTitle: null, userId: null };
 
@@ -18,7 +19,9 @@ const EMPTY_ACTOR = { providerOrganizationId: null, providerOrganizationName: nu
 export class HealthTimelineService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async list(petId: string, limit = 100): Promise<HealthTimelineEntryDto[]> {
+  /** `readerUserId` (the household route) limits documents to the reader's scope — see documentReadScope. */
+  async list(petId: string, limit = 100, readerUserId?: string): Promise<HealthTimelineEntryDto[]> {
+    const documentScope = readerUserId ? await documentReadScope(this.prisma, petId, readerUserId) : {};
     const [vaccination, medications, conditions, allergies, visits, labs, imaging, referrals, dental, nutrition, rehabSessions, observations, documents] = await Promise.all([
       this.prisma.vaccinationSummary.findUnique({ where: { petId } }),
       this.prisma.medication.findMany({ where: { petId } }),
@@ -32,7 +35,7 @@ export class HealthTimelineService {
       this.prisma.clinicalNutritionPlan.findMany({ where: { petId }, include: { providerOrganization: { select: { id: true, name: true } } } }),
       this.prisma.rehabSession.findMany({ where: { rehabPlan: { petId } }, include: { rehabPlan: { include: { providerOrganization: { select: { id: true, name: true } } } } } }),
       this.prisma.petObservation.findMany({ where: { petId } }),
-      this.prisma.medicalDocument.findMany({ where: { petId, voidedAt: null }, include: { sourceProviderOrganization: { select: { id: true, name: true } }, sourceProviderUser: { select: { id: true, displayTitle: true } } } }),
+      this.prisma.medicalDocument.findMany({ where: { petId, voidedAt: null, ...documentScope }, include: { sourceProviderOrganization: { select: { id: true, name: true } }, sourceProviderUser: { select: { id: true, displayTitle: true } } } }),
     ]);
 
     const entries: HealthTimelineEntryDto[] = [];

@@ -23,6 +23,7 @@ import { BookingFrame } from "@/features/bookings/BookingFrame";
 import { formatDay } from "@/lib/date/jalali";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { SafetyTip } from "@/features/shared/SafetyTip";
+import { BookingDocumentPicker } from "./BookingDocumentPicker";
 
 type Step = "service" | "pets" | "time" | "details" | "review";
 const STEPS: Step[] = ["service", "pets", "time", "details", "review"];
@@ -87,6 +88,7 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
   const [now, setNow] = useState(() => Date.now());
   const [intake, setIntake] = useState("");
   const [healthShare, setHealthShare] = useState<"MINIMAL_VET_CONTEXT" | "HEALTH_BASICS" | null>(null);
+  const [sharedDocumentIds, setSharedDocumentIds] = useState<string[]>([]);
   const [addresses, setAddresses] = useState<CustomerAddressDto[] | null>(null);
   const [addressId, setAddressId] = useState<string | null>(null);
   const [dropoffId, setDropoffId] = useState<string | null>(null);
@@ -184,6 +186,9 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, [hold]);
+  // Ticked documents belong to one pet: a different pet starts with none.
+  const mainPetId = petIds[0] ?? null;
+  useEffect(() => setSharedDocumentIds([]), [mainPetId]);
   const holdSecondsLeft = hold ? Math.max(0, Math.floor((new Date(hold.expiresAt).getTime() - now) / 1000)) : 0;
   const holdExpired = Boolean(hold) && holdSecondsLeft === 0;
 
@@ -235,7 +240,16 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
     setError(null);
     try {
       const booking = await bookingsService.confirm(
-        { holdId: hold.holdId, petId: petIds[0]!, reasonForVisit: intake.trim() || undefined, accessSelection: service?.category === "VET" && healthShare ? healthShare : undefined, customerAddressId: addressId ?? undefined, dropoffAddressId: dropoffId ?? undefined } as never,
+        {
+          holdId: hold.holdId,
+          petId: petIds[0]!,
+          reasonForVisit: intake.trim() || undefined,
+          accessSelection: service?.category === "VET" && healthShare ? healthShare : undefined,
+          // Documents travel only with the health choice, and only the ones the owner ticked.
+          sharedDocumentIds: service?.category === "VET" && healthShare === "HEALTH_BASICS" && sharedDocumentIds.length ? sharedDocumentIds : undefined,
+          customerAddressId: addressId ?? undefined,
+          dropoffAddressId: dropoffId ?? undefined,
+        } as never,
         idempotencyKey,
       );
       router.push(`/${locale}/bookings/${booking.id}?created=1`);
@@ -423,9 +437,10 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
             <fieldset className="flex flex-col gap-2">
               <legend className="mb-2 inline-flex items-center gap-2 font-bold"><ShieldCheck size={16} aria-hidden="true" />{t("shareHealthTitle")}</legend>
               <p className="text-sm text-text-secondary">{t("shareHealthDescription")}</p>
-              <label className="flex items-start gap-3"><input type="radio" name="health" checked={healthShare === "MINIMAL_VET_CONTEXT"} onChange={() => setHealthShare("MINIMAL_VET_CONTEXT")} /><span>{t("shareBasicIdentity")}</span></label>
+              <label className="flex items-start gap-3"><input type="radio" name="health" checked={healthShare === "MINIMAL_VET_CONTEXT"} onChange={() => { setHealthShare("MINIMAL_VET_CONTEXT"); setSharedDocumentIds([]); }} /><span>{t("shareBasicIdentity")}</span></label>
               <label className="flex items-start gap-3"><input type="radio" name="health" checked={healthShare === "HEALTH_BASICS"} onChange={() => setHealthShare("HEALTH_BASICS")} /><span>{t("shareHealthBasics")}</span></label>
               {healthShare === null ? <p role="status" className="text-sm text-state-attention">{t("chooseHealthSharing")}</p> : null}
+              {healthShare === "HEALTH_BASICS" && petIds[0] ? <BookingDocumentPicker petId={petIds[0]} selected={sharedDocumentIds} onChange={setSharedDocumentIds} /> : null}
               {petIds[0] ? <Link className="text-sm text-brand-natural" href={`/${locale}/pets/${petIds[0]}/health/share`}>{t("shareSelectedDocuments")}</Link> : null}
             </fieldset>
           ) : null}
@@ -450,6 +465,7 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
             <Row label={t("cancellationLabel")} value={service.cancellationPolicy ?? t("cancellationFallback", { hours: service.freeCancellationHours.toLocaleString(locale), percent: service.lateCancellationRefundPercent.toLocaleString(locale) })} />
             {service.preparationNotes ? <Row label={t("preparation")} value={service.preparationNotes} /> : null}
             {service.category === "VET" ? <Row label={t("healthDataShared")} value={healthShare === "HEALTH_BASICS" ? t("sharedHealthBasics") : t("sharedBasicIdentity")} /> : null}
+            {service.category === "VET" && healthShare === "HEALTH_BASICS" ? <Row label={t("shareDocuments.reviewLabel")} value={sharedDocumentIds.length ? t("shareDocuments.reviewCount", { count: sharedDocumentIds.length }) : t("shareDocuments.reviewNone")} /> : null}
           </dl>
           <p className="text-xs text-text-secondary">{t("termsSnapshotNotice")}</p>
         </ContextSurface>
