@@ -7619,7 +7619,8 @@
           "pendingMemorials": "Te beoordelen herdenkingen",
           "openPlaceReports": "Meldingen over plekken",
           "openTasks": "Openstaande taken",
-          "pendingWalletTopUps": "Opwaardeerbewijzen"
+          "pendingWalletTopUps": "Opwaardeerbewijzen",
+          "pendingCardDestinationChanges": "Rekeningwijzigingen ter goedkeuring"
         }
       },
       "performance": {
@@ -11667,7 +11668,7 @@
     },
     "readOnly": "Alleen een superbeheerder met settings.manage kan deze rekening wijzigen.",
     "change": "Rekening wijzigen",
-    "changeHint": "Elke wijziging wordt met de reden vastgelegd en elke superbeheerder krijgt een melding. Betalingen die al zijn gestart, houden de rekening waarmee ze begonnen.",
+    "changeHint": "Een nieuwe rekening gaat pas in als een andere superbeheerder die binnen {hours} uur goedkeurt; tot dan blijven leden naar de huidige rekening betalen. Elke stap wordt met de reden vastgelegd en elke superbeheerder krijgt een melding. Betalingen die al zijn gestart, houden de rekening waarmee ze begonnen.",
     "fields": {
       "cardNumber": "Kaartnummer (16 cijfers)",
       "sheba": "Sheba / IBAN (optioneel)",
@@ -11676,9 +11677,9 @@
       "reason": "Reden van de wijziging"
     },
     "confirm": "Ik bevestig dat deze rekening van opetlife is.",
-    "save": "Nieuwe rekening opslaan",
+    "save": "Ter goedkeuring versturen",
     "saving": "Opslaan…",
-    "saved": "De nieuwe rekening is opgeslagen en de superbeheerders hebben een melding gekregen.",
+    "saved": "Ter goedkeuring verstuurd. De huidige rekening blijft in gebruik tot een andere superbeheerder de wijziging goedkeurt.",
     "offReason": "Reden om kaart-naar-kaart uit te zetten",
     "switchOff": "Kaart-naar-kaart uitzetten",
     "switchedOff": "Kaart-naar-kaart staat uit.",
@@ -11687,7 +11688,9 @@
     "columns": {
       "setBy": "Ingesteld door",
       "reason": "Reden",
-      "closed": "Beëindigd"
+      "closed": "Beëindigd",
+      "status": "Status",
+      "approvedBy": "Goedgekeurd door"
     },
     "activeNow": "Actief",
     "loading": "Laden…",
@@ -11704,7 +11707,38 @@
       "CARD_OR_SHEBA_REQUIRED": "Vul een kaartnummer of Sheba in.",
       "HOLDER_REQUIRED": "Vul de rekeninghouder in.",
       "SUPER_ADMIN_WITH_SETTINGS_MANAGE_REQUIRED": "Alleen een superbeheerder kan deze rekening wijzigen.",
-      "generic": "Niet opgeslagen; probeer het opnieuw."
+      "generic": "Niet opgeslagen; probeer het opnieuw.",
+      "SELF_APPROVAL": "Je hebt deze wijziging zelf aangevraagd; een andere superbeheerder moet die goedkeuren.",
+      "ALREADY_PENDING": "Er wacht al een andere wijziging op goedkeuring.",
+      "NOT_PENDING": "Over deze wijziging is al beslist; de pagina is vernieuwd.",
+      "EXPIRED": "Deze wijziging is verlopen voordat ze werd goedgekeurd; stel haar opnieuw voor als dat nog nodig is.",
+      "NOT_FOUND": "Deze wijziging bestaat niet meer.",
+      "CONFIRM_APPROVE": "Bevestig dat je de rekening hebt gecontroleerd voordat je goedkeurt."
+    },
+    "pendingBlocksChange": "Er wacht al een wijziging op goedkeuring. Keur die goed, wijs die af of trek die in voordat je een nieuwe voorstelt.",
+    "pending": {
+      "title": "Wijziging wacht op goedkeuring",
+      "hint": "Nog niet in gebruik: leden blijven naar de huidige rekening betalen tot een andere superbeheerder deze wijziging goedkeurt.",
+      "requestedBy": "Aangevraagd door",
+      "expiresAt": "Verloopt",
+      "yours": "Je hebt deze wijziging zelf aangevraagd, dus een andere superbeheerder moet die goedkeuren. Je kunt haar intrekken.",
+      "confirm": "Ik heb met de aanvrager gecontroleerd dat deze rekening van opetlife is.",
+      "approve": "Goedkeuren en activeren",
+      "approving": "Bezig met goedkeuren…",
+      "approved": "Goedgekeurd: de nieuwe rekening is nu actief en de superbeheerders hebben een melding gekregen.",
+      "rejectReason": "Reden voor afwijzing",
+      "withdrawReason": "Reden voor intrekken",
+      "reject": "Afwijzen",
+      "withdraw": "Mijn aanvraag intrekken",
+      "rejected": "De wijziging is afgewezen; de huidige rekening blijft ongewijzigd.",
+      "withdrawn": "Je aanvraag is ingetrokken; de huidige rekening blijft ongewijzigd."
+    },
+    "status": {
+      "PENDING": "Wacht op goedkeuring",
+      "ACTIVE": "Actief",
+      "CLOSED": "Beëindigd",
+      "REJECTED": "Afgewezen",
+      "EXPIRED": "Verlopen"
     }
   },
   "adminCardReceipts": {

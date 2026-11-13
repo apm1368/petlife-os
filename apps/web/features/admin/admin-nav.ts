@@ -266,7 +266,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
           { href: "/wallets", labelKey: "tabs.walletDirectory", permission: "wallet.view" },
           { href: "/wallets/top-ups", labelKey: "tabs.walletTopUps", permission: "wallet.view", queue: "pendingWalletTopUps" },
           { href: "/wallets/card-receipts", labelKey: "tabs.walletCardReceipts", permission: "finance.view" },
-          { href: "/wallets/card-account", labelKey: "tabs.walletCardAccount", permission: "wallet.view" },
+          { href: "/wallets/card-account", labelKey: "tabs.walletCardAccount", permission: "wallet.view", queue: "pendingCardDestinationChanges" },
         ],
       },
     ],

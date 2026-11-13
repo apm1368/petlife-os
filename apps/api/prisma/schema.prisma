@@ -12640,26 +12640,49 @@ model OsmImportRun {
   @@map("osm_import_runs")
 }
 
+/// Where a company card-to-card account is in its two-person life (BO-14): a SUPER_ADMIN proposes it (PENDING), a
+/// different SUPER_ADMIN approves it (ACTIVE) until a later approved change or a switch-off ends it (CLOSED). A
+/// proposal that is turned down or withdrawn is REJECTED; one nobody approved in time is EXPIRED. Only ACTIVE ever
+/// reaches members.
+enum CardTransferDestinationStatus {
+  PENDING
+  ACTIVE
+  CLOSED
+  REJECTED
+  EXPIRED
+}
+
 /// The company account members pay into by card-to-card (wallet top-ups, card-transfer checkout and bookings).
-/// Managed by the owner in admin (SUPER_ADMIN + settings.manage). Append-only: a change adds a row and closes the
-/// previous one, so every past account stays on record for receipts and audits. The server env account is used
-/// only while no row has ever been created.
+/// Managed by the owner in admin (SUPER_ADMIN + settings.manage). Append-only: a change is proposed as a PENDING row
+/// and, once a second SUPER_ADMIN approves it, becomes the ACTIVE one and closes the previous one, so every past
+/// account stays on record for receipts and audits. `active` mirrors status = ACTIVE and is what payments read. The
+/// server env account is used only while no row has ever been active.
 model CardTransferDestination {
-  id               String    @id @default(uuid()) @db.Uuid
+  id                String                        @id @default(uuid()) @db.Uuid
   /// 16 digits, Luhn-checked.
-  cardNumber       String?
+  cardNumber        String?
   /// IR + 24 digits, IBAN-checked.
-  sheba            String?
-  holderName       String
-  bankName         String?
-  active           Boolean   @default(true)
-  reason           String
-  createdByAdminId String    @db.Uuid
-  createdAt        DateTime  @default(now())
-  closedAt         DateTime?
-  closedByAdminId  String?   @db.Uuid
-  closeReason      String?
+  sheba             String?
+  holderName        String
+  bankName          String?
+  active            Boolean                       @default(false)
+  status            CardTransferDestinationStatus @default(PENDING)
+  reason            String
+  /// The SUPER_ADMIN who proposed it.
+  createdByAdminId  String                        @db.Uuid
+  createdAt         DateTime                      @default(now())
+  /// A PENDING proposal can no longer be approved after this.
+  expiresAt         DateTime?
+  /// The second SUPER_ADMIN who approved it (never the proposer; a CHECK constraint holds that). Null on rows made
+  /// before two-person approval.
+  approvedByAdminId String?                       @db.Uuid
+  approvedAt        DateTime?
+  /// When it stopped being active, or when its proposal was rejected or withdrawn (an expired one keeps expiresAt).
+  closedAt          DateTime?
+  closedByAdminId   String?                       @db.Uuid
+  closeReason       String?
 
   @@index([active, createdAt])
+  @@index([status, createdAt])
   @@map("card_transfer_destinations")
 }

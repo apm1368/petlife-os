@@ -7550,7 +7550,8 @@
           "pendingMemorials": "Memorials to review",
           "openPlaceReports": "Place reports",
           "openTasks": "Open tasks",
-          "pendingWalletTopUps": "Top-up receipts"
+          "pendingWalletTopUps": "Top-up receipts",
+          "pendingCardDestinationChanges": "Card account changes to approve"
         }
       },
       "performance": {
@@ -11598,7 +11599,7 @@
     },
     "readOnly": "Only a super admin with settings.manage can change this account.",
     "change": "Change the account",
-    "changeHint": "Every change is recorded with its reason and every super admin is notified. Payments already started keep the account they began with.",
+    "changeHint": "A new account takes effect only when another super admin approves it within {hours} hours; until then members keep paying into the current account. Every step is recorded with its reason and every super admin is notified. Payments already started keep the account they began with.",
     "fields": {
       "cardNumber": "Card number (16 digits)",
       "sheba": "Sheba / IBAN (optional)",
@@ -11607,9 +11608,9 @@
       "reason": "Reason for the change"
     },
     "confirm": "I confirm this account belongs to opetlife.",
-    "save": "Save the new account",
+    "save": "Send for approval",
     "saving": "Saving…",
-    "saved": "The new account is saved and super admins were notified.",
+    "saved": "Sent for approval. The current account stays in use until another super admin approves it.",
     "offReason": "Reason for switching card-to-card off",
     "switchOff": "Switch card-to-card off",
     "switchedOff": "Card-to-card is switched off.",
@@ -11618,7 +11619,9 @@
     "columns": {
       "setBy": "Set by",
       "reason": "Reason",
-      "closed": "Ended"
+      "closed": "Ended",
+      "status": "Status",
+      "approvedBy": "Approved by"
     },
     "activeNow": "Active",
     "loading": "Loading…",
@@ -11635,7 +11638,38 @@
       "CARD_OR_SHEBA_REQUIRED": "Enter a card number or a Sheba.",
       "HOLDER_REQUIRED": "Enter the account holder.",
       "SUPER_ADMIN_WITH_SETTINGS_MANAGE_REQUIRED": "Only a super admin can change this account.",
-      "generic": "Not saved; please try again."
+      "generic": "Not saved; please try again.",
+      "SELF_APPROVAL": "You requested this change; another super admin must approve it.",
+      "ALREADY_PENDING": "Another change is already waiting for approval.",
+      "NOT_PENDING": "This change was already decided; the page has been refreshed.",
+      "EXPIRED": "This change expired before it was approved; propose it again if it is still needed.",
+      "NOT_FOUND": "This change no longer exists.",
+      "CONFIRM_APPROVE": "Confirm that you checked the account before approving it."
+    },
+    "pendingBlocksChange": "A change is already waiting for approval. Approve, reject or withdraw it before proposing another.",
+    "pending": {
+      "title": "Change waiting for approval",
+      "hint": "Not in use yet: members keep paying into the current account until another super admin approves this change.",
+      "requestedBy": "Requested by",
+      "expiresAt": "Expires",
+      "yours": "You requested this change, so another super admin must approve it. You can withdraw it.",
+      "confirm": "I checked with the requester that this account belongs to opetlife.",
+      "approve": "Approve and activate",
+      "approving": "Approving…",
+      "approved": "Approved: the new account is now active and super admins were notified.",
+      "rejectReason": "Reason for rejecting",
+      "withdrawReason": "Reason for withdrawing",
+      "reject": "Reject",
+      "withdraw": "Withdraw my request",
+      "rejected": "The change was rejected; the current account is unchanged.",
+      "withdrawn": "Your request was withdrawn; the current account is unchanged."
+    },
+    "status": {
+      "PENDING": "Waiting for approval",
+      "ACTIVE": "Active",
+      "CLOSED": "Ended",
+      "REJECTED": "Rejected",
+      "EXPIRED": "Expired"
     }
   },
   "adminCardReceipts": {

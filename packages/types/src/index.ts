@@ -3434,6 +3434,8 @@ export interface AdminDashboardSummaryDto {
   openPlaceReports: number | null;
   /** Card-to-card wallet top-up receipts waiting for finance. */
   pendingWalletTopUps: number | null;
+  /** BO-14: a proposed company card-to-card account waiting for a second super admin; SUPER_ADMIN with settings.manage only. */
+  pendingCardDestinationChanges: number | null;
   /** Account deletion requests waiting on staff (REQUESTED or PENDING_RETENTION); admin.manage only. */
   pendingDeletionRequests: number | null;
   /** Pet ownership transfers in DISPUTED, waiting for staff to record the outcome; customer.view. */
@@ -7354,6 +7356,12 @@ export interface WalletCardTransferInstructionsDto {
   sheba: string | null;
 }
 
+/**
+ * BO-14: PENDING = proposed, waiting for a second super admin; ACTIVE = what members pay into; CLOSED = was active,
+ * since replaced or switched off; REJECTED = turned down or withdrawn; EXPIRED = nobody approved it in time.
+ */
+export type CardTransferDestinationStatusValue = "PENDING" | "ACTIVE" | "CLOSED" | "REJECTED" | "EXPIRED";
+
 /** One company card-to-card account, masked (admin never sees the full number back). */
 export interface AdminCardTransferDestinationDto {
   id: string;
@@ -7362,12 +7370,39 @@ export interface AdminCardTransferDestinationDto {
   holderName: string;
   bankName: string | null;
   active: boolean;
+  status: CardTransferDestinationStatusValue;
   reason: string;
   createdAt: string;
+  /** Who proposed it. */
   createdBy: string | null;
+  /** Until when a PENDING proposal can be approved. */
+  expiresAt: string | null;
+  /** The second super admin who approved it (null for accounts set before two-person approval). */
+  approvedAt: string | null;
+  approvedBy: string | null;
+  /** When it stopped being active, or when its proposal was rejected or withdrawn (an expired one shows expiresAt). */
   closedAt: string | null;
   closedBy: string | null;
   closeReason: string | null;
+}
+
+/** A proposed new account waiting for a second super admin (BO-14), masked. Members never see it. */
+export interface AdminCardTransferDestinationPendingDto {
+  id: string;
+  cardNumberMasked: string | null;
+  shebaMasked: string | null;
+  holderName: string;
+  bankName: string | null;
+  reason: string;
+  requestedBy: string | null;
+  requestedAt: string;
+  expiresAt: string;
+  /** The viewer proposed it: they may withdraw it, never approve it. */
+  requestedByMe: boolean;
+  /** A super admin with settings.manage other than the proposer. */
+  canApprove: boolean;
+  /** Any super admin with settings.manage (the proposer withdraws). */
+  canReject: boolean;
 }
 
 export type CardTransferPaymentStatusValue = "AWAITING_RECEIPT" | "REVIEW_PENDING" | "APPROVED" | "REJECTED" | "UNDERPAID_AWAITING_DIFFERENCE" | "EXPIRED" | "CANCELLED";
@@ -7397,8 +7432,12 @@ export interface AdminCardTransferDestinationOverviewDto {
   /** ADMIN = set by the owner here; ENV = the server fallback (none set here yet); NONE = card-to-card is off. */
   source: "ADMIN" | "ENV" | "NONE";
   current: { cardNumberMasked: string | null; shebaMasked: string | null; holderName: string; bankName: string | null } | null;
-  /** Only SUPER_ADMIN with settings.manage may change it. */
+  /** Only SUPER_ADMIN with settings.manage may propose a change or switch it off. */
   canEdit: boolean;
+  /** A proposed change waiting for a second super admin; the current account stays in use until it is approved. */
+  pending: AdminCardTransferDestinationPendingDto | null;
+  /** How long a proposal can wait for approval before it expires. */
+  approvalWindowHours: number;
   history: AdminCardTransferDestinationDto[];
 }
 

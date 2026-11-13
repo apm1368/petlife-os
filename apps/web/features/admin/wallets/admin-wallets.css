@@ -10,14 +10,14 @@
 .aw-form__row { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); align-items: end; }
 .aw-error { margin: 0; color: var(--state-urgent, #b3261e); font-size: 0.82rem; }
 .aw-dialog-actions { margin-top: 12px; }
-.aw-status--REVIEW_PENDING, .aw-status--AWAITING_RECEIPT, .aw-status--AWAITING_PAYMENT { background: rgba(224, 154, 31, 0.18); color: #9a5b00; }
-.aw-status--CREDITED { background: rgba(79, 154, 104, 0.16); color: #2f7d4c; }
+.aw-status--REVIEW_PENDING, .aw-status--AWAITING_RECEIPT, .aw-status--AWAITING_PAYMENT, .aw-status--PENDING { background: rgba(224, 154, 31, 0.18); color: #9a5b00; }
+.aw-status--CREDITED, .aw-status--ACTIVE { background: rgba(79, 154, 104, 0.16); color: #2f7d4c; }
 .aw-status--REJECTED, .aw-status--FAILED { background: rgba(212, 100, 74, 0.13); color: #b4472f; }
-:root[data-theme="dark"] .aw-status--REVIEW_PENDING, :root[data-theme="dark"] .aw-status--AWAITING_RECEIPT, :root[data-theme="dark"] .aw-status--AWAITING_PAYMENT { color: #f2c46b; }
-:root[data-theme="dark"] .aw-status--CREDITED { color: #8fd3a5; }
+:root[data-theme="dark"] .aw-status--REVIEW_PENDING, :root[data-theme="dark"] .aw-status--AWAITING_RECEIPT, :root[data-theme="dark"] .aw-status--AWAITING_PAYMENT, :root[data-theme="dark"] .aw-status--PENDING { color: #f2c46b; }
+:root[data-theme="dark"] .aw-status--CREDITED, :root[data-theme="dark"] .aw-status--ACTIVE { color: #8fd3a5; }
 :root[data-theme="dark"] .aw-status--REJECTED, :root[data-theme="dark"] .aw-status--FAILED { color: #f0a08c; }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .aw-status--REVIEW_PENDING, :root:not([data-theme="light"]) .aw-status--AWAITING_RECEIPT, :root:not([data-theme="light"]) .aw-status--AWAITING_PAYMENT { color: #f2c46b; }
-  :root:not([data-theme="light"]) .aw-status--CREDITED { color: #8fd3a5; }
+  :root:not([data-theme="light"]) .aw-status--REVIEW_PENDING, :root:not([data-theme="light"]) .aw-status--AWAITING_RECEIPT, :root:not([data-theme="light"]) .aw-status--AWAITING_PAYMENT, :root:not([data-theme="light"]) .aw-status--PENDING { color: #f2c46b; }
+  :root:not([data-theme="light"]) .aw-status--CREDITED, :root:not([data-theme="light"]) .aw-status--ACTIVE { color: #8fd3a5; }
   :root:not([data-theme="light"]) .aw-status--REJECTED, :root:not([data-theme="light"]) .aw-status--FAILED { color: #f0a08c; }
 }

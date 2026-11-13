@@ -6613,7 +6613,8 @@
           "pendingMemorials": "Memoriales por revisar",
           "openPlaceReports": "Denuncias de lugares",
           "openTasks": "Tareas abiertas",
-          "pendingWalletTopUps": "Comprobantes de recarga"
+          "pendingWalletTopUps": "Comprobantes de recarga",
+          "pendingCardDestinationChanges": "Cambios de cuenta por aprobar"
         }
       },
       "performance": {
@@ -10609,7 +10610,7 @@
     },
     "readOnly": "Solo un superadministrador con settings.manage puede cambiar esta cuenta.",
     "change": "Cambiar la cuenta",
-    "changeHint": "Cada cambio se registra con su motivo y se avisa a todos los superadministradores. Los pagos ya iniciados conservan la cuenta con la que empezaron.",
+    "changeHint": "Una cuenta nueva solo entra en vigor cuando otro superadministrador la aprueba en un plazo de {hours} horas; hasta entonces los miembros siguen pagando a la cuenta actual. Cada paso se registra con su motivo y se avisa a todos los superadministradores. Los pagos ya iniciados conservan la cuenta con la que empezaron.",
     "fields": {
       "cardNumber": "Número de tarjeta (16 dígitos)",
       "sheba": "Sheba / IBAN (opcional)",
@@ -10618,9 +10619,9 @@
       "reason": "Motivo del cambio"
     },
     "confirm": "Confirmo que esta cuenta pertenece a opetlife.",
-    "save": "Guardar la nueva cuenta",
+    "save": "Enviar para aprobación",
     "saving": "Guardando…",
-    "saved": "La nueva cuenta se guardó y se avisó a los superadministradores.",
+    "saved": "Enviado para aprobación. La cuenta actual sigue en uso hasta que otro superadministrador apruebe el cambio.",
     "offReason": "Motivo para desactivar el pago con tarjeta",
     "switchOff": "Desactivar el pago con tarjeta",
     "switchedOff": "El pago con tarjeta está desactivado.",
@@ -10629,7 +10630,9 @@
     "columns": {
       "setBy": "Configurada por",
       "reason": "Motivo",
-      "closed": "Finalizada"
+      "closed": "Finalizada",
+      "status": "Estado",
+      "approvedBy": "Aprobada por"
     },
     "activeNow": "Activa",
     "loading": "Cargando…",
@@ -10646,7 +10649,38 @@
       "CARD_OR_SHEBA_REQUIRED": "Introduce un número de tarjeta o un Sheba.",
       "HOLDER_REQUIRED": "Introduce el titular de la cuenta.",
       "SUPER_ADMIN_WITH_SETTINGS_MANAGE_REQUIRED": "Solo un superadministrador puede cambiar esta cuenta.",
-      "generic": "No se guardó; inténtalo de nuevo."
+      "generic": "No se guardó; inténtalo de nuevo.",
+      "SELF_APPROVAL": "Tú solicitaste este cambio; debe aprobarlo otro superadministrador.",
+      "ALREADY_PENDING": "Ya hay otro cambio pendiente de aprobación.",
+      "NOT_PENDING": "Este cambio ya se decidió; la página se ha actualizado.",
+      "EXPIRED": "Este cambio caducó antes de aprobarse; vuelve a proponerlo si aún hace falta.",
+      "NOT_FOUND": "Este cambio ya no existe.",
+      "CONFIRM_APPROVE": "Confirma que comprobaste la cuenta antes de aprobarla."
+    },
+    "pendingBlocksChange": "Ya hay un cambio pendiente de aprobación. Apruébalo, recházalo o retíralo antes de proponer otro.",
+    "pending": {
+      "title": "Cambio pendiente de aprobación",
+      "hint": "Aún no está en uso: los miembros siguen pagando a la cuenta actual hasta que otro superadministrador apruebe este cambio.",
+      "requestedBy": "Solicitado por",
+      "expiresAt": "Caduca",
+      "yours": "Tú solicitaste este cambio, así que debe aprobarlo otro superadministrador. Puedes retirarlo.",
+      "confirm": "He comprobado con quien lo solicitó que esta cuenta pertenece a opetlife.",
+      "approve": "Aprobar y activar",
+      "approving": "Aprobando…",
+      "approved": "Aprobado: la nueva cuenta ya está activa y se avisó a los superadministradores.",
+      "rejectReason": "Motivo del rechazo",
+      "withdrawReason": "Motivo para retirarlo",
+      "reject": "Rechazar",
+      "withdraw": "Retirar mi solicitud",
+      "rejected": "Se rechazó el cambio; la cuenta actual no cambia.",
+      "withdrawn": "Retiraste tu solicitud; la cuenta actual no cambia."
+    },
+    "status": {
+      "PENDING": "Pendiente de aprobación",
+      "ACTIVE": "Activa",
+      "CLOSED": "Finalizada",
+      "REJECTED": "Rechazada",
+      "EXPIRED": "Caducada"
     }
   },
   "adminCardReceipts": {
