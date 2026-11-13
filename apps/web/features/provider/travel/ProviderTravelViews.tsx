@@ -9,6 +9,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
 import type { TravelBookingDto, TravelListingDto, TravelProviderCalendarDto, TravelProviderFinanceDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
+import { LocationPicker } from "@/features/maps/LocationPicker";
+import type { MapPoint } from "@/features/maps/MapView";
+
+/** Stay types that are usually someone's home: public at a ~1 km point unless the host opts in to the exact spot. */
+const HOME_STAY_TYPES = new Set(["VILLA", "APARTMENT", "RESIDENCE", "BOARDING"]);
 import { addDays, formatDay, localizeDigits, todayIso } from "@/lib/date/jalali";
 import { DateRangeField, type DateRangeValue } from "@/features/shared/date-picker/DateRangePicker";
 import { travelProviderService, type ProviderTravelReviewRow, type RatePlanInput } from "@/services/travel-marketplace.service";
@@ -204,7 +209,13 @@ export function ProviderTravelListingEditor({ listingId }: { listingId: string }
 
 function DetailsTab({ listing, busy, onSave }: { listing: TravelListingDto; busy: boolean; onSave: (v: Parameters<typeof travelProviderService.update>[1]) => void }) {
   const { lang, fa } = useLang();
-  const [v, setV] = useState({ title: listing.title, description: listing.description, city: listing.city, province: listing.province ?? "", address: listing.address ?? "", checkInFrom: listing.checkInFrom ?? "", checkOutUntil: listing.checkOutUntil ?? "", houseRules: listing.houseRules ?? "", cancellationPolicy: listing.cancellationPolicy ?? "", bookingMode: listing.bookingMode as string, amenities: listing.amenities, latitude: listing.latitude?.toString() ?? "", longitude: listing.longitude?.toString() ?? "" });
+  const [v, setV] = useState({ title: listing.title, description: listing.description, city: listing.city, province: listing.province ?? "", address: listing.address ?? "", checkInFrom: listing.checkInFrom ?? "", checkOutUntil: listing.checkOutUntil ?? "", houseRules: listing.houseRules ?? "", cancellationPolicy: listing.cancellationPolicy ?? "", bookingMode: listing.bookingMode as string, amenities: listing.amenities });
+  const savedPin = listing.latitude !== null && listing.longitude !== null ? { latitude: listing.latitude, longitude: listing.longitude } : null;
+  const [pin, setPin] = useState<MapPoint | null>(savedPin);
+  const [pinConsent, setPinConsent] = useState(savedPin !== null);
+  const [exactPublic, setExactPublic] = useState(!!listing.pinPublicExact);
+  const pinMoved = (pin?.latitude ?? null) !== (savedPin?.latitude ?? null) || (pin?.longitude ?? null) !== (savedPin?.longitude ?? null);
+  const homeStay = HOME_STAY_TYPES.has(String(listing.type));
   const time = /^([01]\d|2[0-3]):[0-5]\d$/;
   return (
     <ContextSurface className="flex flex-col gap-3">
@@ -213,11 +224,10 @@ function DetailsTab({ listing, busy, onSave }: { listing: TravelListingDto; busy
       <div className="grid gap-3 sm:grid-cols-2">
         <Input dir="auto" label={fa ? "استان" : "Province"} value={v.province} onChange={(e) => setV({ ...v, province: e.target.value })} />
         <Input dir="auto" label={fa ? "نشانی" : "Address"} value={v.address} onChange={(e) => setV({ ...v, address: e.target.value })} />
-        <Input label={fa ? "عرض جغرافیایی" : "Latitude"} inputMode="decimal" value={v.latitude} onChange={(e) => setV({ ...v, latitude: e.target.value })} hint={fa ? "برای فاصله تا مکان‌ها و دامپزشکان" : "Used for distances to places and vets"} />
-        <Input label={fa ? "طول جغرافیایی" : "Longitude"} inputMode="decimal" value={v.longitude} onChange={(e) => setV({ ...v, longitude: e.target.value })} />
         <Input label={fa ? "ساعت ورود از (HH:MM)" : "Check-in from (HH:MM)"} dir="ltr" value={v.checkInFrom} onChange={(e) => setV({ ...v, checkInFrom: e.target.value })} errorMessage={v.checkInFrom && !time.test(v.checkInFrom) ? (fa ? "مثلاً 14:00" : "e.g. 14:00") : undefined} />
         <Input label={fa ? "ساعت خروج تا (HH:MM)" : "Check-out until (HH:MM)"} dir="ltr" value={v.checkOutUntil} onChange={(e) => setV({ ...v, checkOutUntil: e.target.value })} errorMessage={v.checkOutUntil && !time.test(v.checkOutUntil) ? (fa ? "مثلاً 12:00" : "e.g. 12:00") : undefined} />
       </div>
+      <LocationPicker audience="business" value={pin} onChange={setPin} consent={pinConsent} onConsentChange={setPinConsent} {...(homeStay ? { exactPublic, onExactPublicChange: setExactPublic } : {})} />
       <label className="flex flex-col gap-1 text-sm">{fa ? "نوع رزرو" : "Booking mode"}
         <select value={v.bookingMode} onChange={(e) => setV({ ...v, bookingMode: e.target.value })} className="min-h-11 rounded-md border border-border-subtle bg-surface-base px-2">
           <option value="INSTANT_BOOKING">{fa ? "رزرو فوری" : "Instant booking"}</option>
@@ -229,11 +239,13 @@ function DetailsTab({ listing, busy, onSave }: { listing: TravelListingDto; busy
       <fieldset className="flex flex-wrap gap-2"><legend className="mb-1 text-sm font-medium">{fa ? "امکانات" : "Amenities"}</legend>
         {Object.keys(AMENITY).map((a) => { const on = v.amenities.includes(a); return <button type="button" key={a} aria-pressed={on} onClick={() => setV({ ...v, amenities: on ? v.amenities.filter((x) => x !== a) : [...v.amenities, a] })} className={`min-h-10 rounded-full border px-3 text-sm ${on ? "border-brand-natural bg-brand-solid/10" : "border-border-subtle text-text-secondary"}`}>{amenityLabel(a, lang)}</button>; })}
       </fieldset>
-      <Button isLoading={busy} disabled={(!!v.checkInFrom && !time.test(v.checkInFrom)) || (!!v.checkOutUntil && !time.test(v.checkOutUntil))} onClick={() => onSave({
+      <Button isLoading={busy} disabled={(!!v.checkInFrom && !time.test(v.checkInFrom)) || (!!v.checkOutUntil && !time.test(v.checkOutUntil)) || (!!pin && pinMoved && !pinConsent)} onClick={() => onSave({
         title: v.title.trim(), description: v.description.trim(), province: v.province.trim() || undefined, address: v.address.trim() || undefined,
         checkInFrom: v.checkInFrom || undefined, checkOutUntil: v.checkOutUntil || undefined, houseRules: v.houseRules.trim() || undefined, cancellationPolicy: v.cancellationPolicy.trim() || undefined,
         bookingMode: v.bookingMode as "INSTANT_BOOKING" | "REQUEST_TO_BOOK", amenities: v.amenities,
-        latitude: v.latitude ? Number(v.latitude) : undefined, longitude: v.longitude ? Number(v.longitude) : undefined,
+        // A new or moved pin goes with the host's consent; a removed pin is sent as null.
+        ...(pin && pinMoved ? { latitude: pin.latitude, longitude: pin.longitude, locationConsent: true } : !pin && savedPin ? { latitude: null, longitude: null } : {}),
+        ...(homeStay ? { exactPinPublic: exactPublic } : {}),
       })}>{fa ? "ذخیرهٔ مشخصات" : "Save details"}</Button>
     </ContextSurface>
   );

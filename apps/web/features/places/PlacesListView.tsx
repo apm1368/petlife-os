@@ -9,11 +9,14 @@ import type { PetFriendlyPlaceDto } from "@petlife/types";
 import { placesService } from "@/services/places.service";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { apiErrorText } from "@/lib/errors/api-error-text";
-import { placeLocation, formatDistanceKm } from "@/features/places/place-format";
+import { placeLocation } from "@/features/places/place-format";
 import { DiscoveryPage } from "@/features/discovery/DiscoveryPage";
 import { isOsmUnclaimed, OsmAttribution } from "@/features/places/PlaceOsm";
 import { localeDirection, type RouteLocale } from "@/lib/i18n/config";
 import { placeQuery } from "@/lib/i18n/iran-places";
+import { ApiError } from "@/lib/api/client";
+import { formatCount } from "@/lib/number/format-number";
+import { useSessionStore } from "@/stores/session-store";
 
 const CATEGORIES: PetFriendlyPlaceCategory[] = [
   PetFriendlyPlaceCategory.VETERINARY,
@@ -66,6 +69,11 @@ export function PlacesListView() {
   const [error, setError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<unknown>(null);
   const [isSearchingNearby, setIsSearchingNearby] = useState(false);
+  const tNear = useTranslations("nearMe");
+  const signedIn = useSessionStore((s) => s.status === "authenticated");
+  const [homeMissing, setHomeMissing] = useState(false);
+  /** Whole kilometres from the server; shown as "<1 km" / "~3 km", never exact metres. */
+  const approxDistance = (meters: number) => (meters < 1000 ? tNear("distanceUnderOne") : tNear("distanceAbout", { km: formatCount(Math.round(meters / 1000), locale) }));
 
   async function load() {
     setError(null);
@@ -90,7 +98,8 @@ export function PlacesListView() {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         try {
-          const result = await placesService.nearby({ latitude: position.coords.latitude, longitude: position.coords.longitude, category: category || undefined, pageSize: 50 });
+          // Rounded to ~1 km and sent in the POST body: never in a URL or access log, never stored.
+          const result = await placesService.nearby({ latitude: Math.round(position.coords.latitude * 100) / 100, longitude: Math.round(position.coords.longitude * 100) / 100, category: category || undefined, pageSize: 50 });
           setPlaces(result.items);
         } catch (err) {
           setError(apiErrorText(err, undefined, tCommon("genericError")));
@@ -103,6 +112,20 @@ export function PlacesListView() {
         setError(locale === "fa" ? "اجازه‌ی دسترسی به موقعیت داده نشد؛ شهر را وارد کنید یا دسترسی را در مرورگر فعال کنید." : "Location permission was not given; enter a city or allow location in your browser.");
       },
     );
+  }
+
+  async function searchNearHome(): Promise<void> {
+    setIsSearchingNearby(true);
+    setError(null);
+    setHomeMissing(false);
+    try {
+      setPlaces((await placesService.nearHome({ category: category || undefined, pageSize: 50 })).items);
+    } catch (err) {
+      if (err instanceof ApiError && (err.details as { reason?: string } | undefined)?.reason === "HOME_PIN_MISSING") setHomeMissing(true);
+      else setError(apiErrorText(err, undefined, tCommon("genericError")));
+    } finally {
+      setIsSearchingNearby(false);
+    }
   }
 
   if (loadError) return <LoadFailure error={loadError} onRetry={load} />;
@@ -133,7 +156,17 @@ export function PlacesListView() {
         <Button variant="primary" isLoading={isSearchingNearby} onClick={searchNearMe}>
           {t("list.nearMe")}
         </Button>
+        {signedIn ? (
+          <Button variant="secondary" disabled={isSearchingNearby} onClick={() => void searchNearHome()}>
+            <House size={16} aria-hidden="true" /> {tNear("nearHome")}
+          </Button>
+        ) : null}
       </div>
+      {homeMissing ? (
+        <p role="status" className="text-metadata text-text-secondary">
+          {tNear("homePinMissing")} <Link href={`/${locale}/profile/addresses`} className="underline">{tNear("pinAddress")}</Link>
+        </p>
+      ) : null}
 
       {!places ? (
         <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />
@@ -153,7 +186,7 @@ export function PlacesListView() {
                     <span className="place-row__name">{place.name}</span>
                     <span className="place-row__meta">
                       {t(`category.${place.category}`)} · {placeLocation(place, locale)}
-                      {place.distanceMeters !== null ? ` · ${t("detail.distance", { distance: formatDistanceKm(place.distanceMeters, locale) })}` : ""}
+                      {place.distanceMeters !== null ? ` · ${approxDistance(place.distanceMeters)}` : ""}
                     </span>
                     {rules.length ? <span className="place-row__rules">{rules.map((r) => <span key={r} className="tag">{r}</span>)}</span> : null}
                     {isOsmUnclaimed(place) ? <span className="text-metadata text-state-attention">{t("osm.label")}</span> : place.status !== "VERIFIED" ? <span className="text-metadata text-state-attention">{t("detail.unverified")}</span> : null}

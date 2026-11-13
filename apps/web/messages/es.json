@@ -13398,5 +13398,12 @@
   "locationNudge": {
     "text": "Marca tu dirección predeterminada en el mapa para entregas más precisas y lugares cerca de ti.",
     "action": "Marcar ahora"
+  },
+  "nearMe": {
+    "nearHome": "Cerca de mi dirección",
+    "homePinMissing": "Marca tu dirección predeterminada en el mapa para ordenar por distancia desde casa.",
+    "pinAddress": "Marcar mi dirección",
+    "distanceUnderOne": "<1 km",
+    "distanceAbout": "~{km} km"
   }
 }

@@ -1,6 +1,7 @@
 import { OrderLifecycleService } from "../../commerce/orders/order-lifecycle.service";
 import { OrderApprovalService } from "../../commerce/orders/order-approval.service";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
+import { auditMemberPinRead, carriesPin } from "../audit/member-pin-audit";
 import { PRODUCT_READINESS_ISSUES, ProductReadinessService, type ProductReadinessIssue } from "./product-readiness.service";
 import {
   Body,
@@ -255,10 +256,13 @@ export class AdminCommerceController {
     return this.commerce.listRepeatDeliveries(query);
   }
 
+  /** Order detail. When it carries the member's exact delivery pin (dispatch), the read is audited (never the coordinates). */
   @Get("orders/:id")
   @RequireAdminPermission("commerce.view")
-  getOrder(@Param("id", ParseUUIDPipe) id: string) {
-    return this.commerce.getOrder(id);
+  async getOrder(@Param("id", ParseUUIDPipe) id: string, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
+    const order = await this.commerce.getOrder(id);
+    if (carriesPin(order.fulfillment?.deliveryAddress)) await auditMemberPinRead(this.audit, { adminUserId: admin.adminUserId, entityType: "Order", entityId: id, field: "fulfillment.deliveryAddress", requestId: req.requestId });
+    return order;
   }
 
   /** Staff cancel before dispatch: full refund, fulfillment cancelled, stock returned; audited with the reason. */

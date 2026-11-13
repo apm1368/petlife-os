@@ -14,10 +14,13 @@ export interface DiscoveryQuery {
   minRating?: number;
   maxPrice?: number;
   date?: string;
+  /** Only for searchNear (sent in the body, never in a URL). */
   lat?: number;
   lng?: number;
   radiusKm?: number;
   sort?: DiscoverySort;
+  /** "home": distances from the member's own pinned default address, looked up by the server. */
+  near?: "home";
 }
 
 export interface RatingSummary {
@@ -105,7 +108,10 @@ function qs(params: object): string {
 }
 
 export const discoveryService = {
-  search: (query: DiscoveryQuery) => apiFetch<{ total: number; items: ProviderDiscoveryResult[] }>(`/discovery/providers${qs(query)}`),
+  search: ({ lat: _lat, lng: _lng, ...query }: DiscoveryQuery) => apiFetch<{ total: number; items: ProviderDiscoveryResult[]; origin?: "HOME" | "POINT" | null }>(`/discovery/providers${qs(query)}`),
+  /** "Near me": the browser's point (already rounded to ~1 km) goes in the POST body, so it never lands in a URL or access log. */
+  searchNear: ({ near: _near, ...query }: DiscoveryQuery & { lat: number; lng: number }) =>
+    apiFetch<{ total: number; items: ProviderDiscoveryResult[]; origin?: "HOME" | "POINT" | null }>("/discovery/providers/near", { method: "POST", body: { ...query, ...(query.homeVisit ? { homeVisit: "true" } : { homeVisit: undefined }) } }),
   profile: (providerId: string) => apiFetch<ProviderProfile>(`/discovery/providers/${providerId}`),
   cities: () => apiFetch<string[]>("/discovery/cities"),
   favorites: () => apiFetch<{ id: string; name: string; type: string; logoUrl: string | null; savedAt: string }[]>("/me/favorite-providers"),

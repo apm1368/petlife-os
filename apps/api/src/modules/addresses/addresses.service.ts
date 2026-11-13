@@ -103,11 +103,13 @@ export class AddressesService {
     return addresses.map(toDto);
   }
 
-  /** Removes an address from the book. If it was the default, the most recently added remaining address takes over. */
+  /** Removes an address from the book (and clears its pin). If it was the default, the most recently added remaining address takes over. */
   async archive(userId: string, addressId: string): Promise<{ archived: true; newDefaultId: string | null }> {
     const current = await this.ownAddress(userId, addressId);
     return this.prisma.$transaction(async (tx) => {
-      await tx.customerAddress.update({ where: { id: addressId }, data: { archivedAt: new Date(), isDefault: false } });
+      // The archived row stays for the orders and bookings that point at it, but its exact pin (and the consent for it)
+      // goes with the member's deletion. Past orders keep their own delivery snapshot.
+      await tx.customerAddress.update({ where: { id: addressId }, data: { archivedAt: new Date(), isDefault: false, latitude: null, longitude: null, locationConsentAt: null } });
       if (!current.isDefault) return { archived: true as const, newDefaultId: null };
       const next = await tx.customerAddress.findFirst({ where: { householdId: current.householdId, archivedAt: null }, orderBy: { createdAt: "desc" } });
       if (next) await tx.customerAddress.update({ where: { id: next.id }, data: { isDefault: true } });
