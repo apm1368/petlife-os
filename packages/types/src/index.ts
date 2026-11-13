@@ -3448,7 +3448,7 @@ export interface AdminDashboardSummaryDto {
   openProviderNoShows: number | null;
   /** Service, product and stay reviews waiting for a moderator, in the verticals this admin may moderate. */
   pendingReviews: number | null;
-  /** «ست پت» Set Pet requests submitted and waiting for a quote; commerce.view (shop vertical). */
+  /** «ست پت» Set Pet orders sent and waiting for a print proof; commerce.view (shop vertical). */
   newSetPetRequests: number | null;
   /**
    * Market-readiness #290 Q97, the launch month's success measure: registered pets and weekly bookings
@@ -6878,10 +6878,10 @@ export interface AdminProductReadinessDto {
   page: number;
   pageSize: number;
   counts: Record<"ANY" | "MEDIA_INCOMPLETE" | "MISSING_BRAND" | "MISSING_SPECS" | "UNREVIEWED_SOURCE" | "NO_LIVE_OFFER", number>;
-/** «ست پت» Set Pet, admin side; statuses, sizes and zones are the shared ones from ./set-pet (X2's member API). */
+}
+
+/** «ست پت» Set Pet, admin side (v2, owner's #368 answers); statuses, garments and zones are the shared ones from ./set-pet. */
 type SetPetStatus = import("./set-pet").SetPetRequestStatus;
-type SetPetSizeCode = import("./set-pet").SetPetSize;
-type SetPetZoneCode = import("./set-pet").SetPetZone;
 
 export interface AdminSetPetRowDto {
   id: string;
@@ -6889,13 +6889,11 @@ export interface AdminSetPetRowDto {
   number: string;
   status: SetPetStatus;
   memberName: string;
-  petName: string | null;
-  petSpecies: string | null;
-  humanSizes: SetPetSizeCode[];
-  petSize: SetPetSizeCode;
+  humanGarments: number;
+  petGarments: number;
   placements: number;
-  designs: number;
-  quoteAmountIrr: number | null;
+  itemsTotalIrr: number;
+  totalPaidIrr: number | null;
   estimatedReadyAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -6917,9 +6915,22 @@ export interface AdminSetPetDesignFileDto {
   originalFilename: string | null;
   /** JPEG/PNG/WebP only; anything else downloads as a plain file. */
   previewable: boolean;
+  widthPx: number | null;
+  heightPx: number | null;
   status: "PENDING_UPLOAD" | "READY" | "REJECTED";
-  rejectReason: string | null;
   uploadedAt: string | null;
+}
+
+export interface AdminSetPetProofDto {
+  id: string;
+  status: "UPLOADING" | "SENT" | "APPROVED" | "SUPERSEDED";
+  mimeType: string;
+  note: string | null;
+  petPrintWidthCm: number | null;
+  petPrintHeightCm: number | null;
+  uploadedBy: string | null;
+  sentAt: string | null;
+  decidedAt: string | null;
 }
 
 export interface AdminSetPetDetailDto {
@@ -6927,22 +6938,43 @@ export interface AdminSetPetDetailDto {
   number: string;
   status: SetPetStatus;
   member: { id: string; displayName: string };
-  pet: { id: string; name: string; species: string } | null;
-  human: { colour: string; sizes: SetPetSizeCode[] };
-  petGarment: { size: SetPetSizeCode; colour: string; neckCm: number | null; chestCm: number | null; backLengthCm: number | null; weightKg: number | null };
+  forPet: { id: string; name: string; species: string; lifecycleStatus: string } | null;
+  items: Array<import("./set-pet").SetPetItemDto & { pet: { id: string; name: string; species: string } | null }>;
+  placements: Array<import("./set-pet").SetPetPlacementDto & { designFile: AdminSetPetDesignFileDto | null }>;
   notes: string | null;
-  placements: Array<{ zone: SetPetZoneCode; designFile: AdminSetPetDesignFileDto }>;
-  designs: AdminSetPetDesignFileDto[];
-  quote: { amountIrr: number | null; note: string | null; estimatedReadyAt: string | null; quotedAt: string | null; quotedBy: string | null };
+  price: { lines: import("./set-pet").SetPetPriceLine[]; subtotalIrr: number; discountPercent: number; discountIrr: number; totalIrr: number };
+  payment: { shippingProvider: string | null; shippingIrr: number | null; shippingAddress: unknown; totalPaidIrr: number | null; paidAt: string | null; refundedIrr: number | null; refundedAt: string | null };
+  proofs: AdminSetPetProofDto[];
+  designRejectReason: string | null;
+  estimatedReadyAt: string | null;
   shippingNote: string | null;
   cancelled: { at: string; by: "MEMBER" | "STAFF" | null; reason: string | null } | null;
   /** Staff-only; never shown to the member. */
   adminNote: string | null;
-  allowedTransitions: SetPetStatus[];
-  canQuote: boolean;
+  /** What staff may do now. */
+  actions: { sendProof: boolean; rejectDesign: boolean; startProduction: boolean; ship: boolean; cancel: boolean; refundsOnCancel: boolean; printDefectOnly: boolean };
   timeline: Array<{ id: string; at: string; from: SetPetStatus | null; to: SetPetStatus; actor: "MEMBER" | "STAFF"; staffName: string | null; note: string | null }>;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface AdminSetPetSettingsDto {
+  garmentPricesIrr: import("./set-pet").SetPetPriceTable["garmentPricesIrr"];
+  zonePricesIrr: import("./set-pet").SetPetPriceTable["zonePricesIrr"];
+  setDiscountPercent: number;
+  productionWorkingDays: number;
+  workshopCity: string | null;
+  workshopLatitude: number | null;
+  workshopLongitude: number | null;
+  updatedAt: string | null;
+}
+
+export interface AdminSetPetProofUploadTargetDto {
+  proofId: string;
+  uploadUrl: string;
+  method: "PUT";
+  headers?: Record<string, string>;
+  expiresInSeconds: number;
 }
 
 export interface AdminProductReviewRowDto {
@@ -7413,18 +7445,49 @@ export { OWNERSHIP_TRANSFER_EXPIRY_DAYS, PET_MEMORY_DISPOSITIONS, PET_OWNERSHIP_
 export type {
   SetPetRequestStatus,
   SetPetSize,
+  SetPetGarment,
+  SetPetWearer,
   SetPetZone,
-  SetPetMeasurements,
+  SetPetFont,
+  SetPetColour,
+  SetPetPriceTable,
+  SetPetPriceLine,
+  SetPetPrice,
   SetPetDesignFileStatus,
   SetPetDesignFileDto,
   SetPetUploadTargetDto,
+  SetPetItemInput,
+  SetPetPlacementInput,
+  SetPetOrderInput,
+  SetPetItemDto,
   SetPetPlacementDto,
+  SetPetProofDto,
   SetPetTimelineEntryDto,
   SetPetRequestDto,
-  SetPetCreateRequestInput,
+  SetPetShippingOptionDto,
+  SetPetPayInput,
   SetPetOptionsDto,
+  SetPetDraftDto,
 } from "./set-pet";
-export { SET_PET_STATUSES, SET_PET_SIZES, SET_PET_ZONES, SET_PET_MEASUREMENT_RANGES } from "./set-pet";
+export {
+  SET_PET_STATUSES,
+  SET_PET_EDITABLE_STATUSES,
+  SET_PET_MEMBER_CANCELLABLE,
+  SET_PET_SIZES,
+  SET_PET_HUMAN_GARMENTS,
+  SET_PET_PET_GARMENTS,
+  SET_PET_GARMENTS,
+  SET_PET_ZONES,
+  SET_PET_ZONE_KEYS,
+  SET_PET_FONTS,
+  SET_PET_COLOURS,
+  SET_PET_COLOUR_KEYS,
+  SET_PET_LIMITS,
+  SET_PET_ACCEPTED_EXTENSIONS,
+  setPetWearerOf,
+  priceSetPet,
+  priceRangeSetPet,
+} from "./set-pet";
 
 // ---------------------------------------------------------------------------
 // Member wallet (balances are always derived from append-only entries)

@@ -47,6 +47,7 @@ import { AdminSystemService } from "./system/admin-system.service";
 import { AdminSystemController } from "./system/admin-system.controller";
 import { BookingModule } from "../booking/booking.module";
 import { PaymentsModule } from "../commerce/payments/payments.module";
+import { SetPetModule } from "../set-pet/set-pet.module";
 import { AdminCardTransferController } from "./finance/admin-card-transfer.controller";
 import { AdminShippingController } from "./commerce/admin-shipping.controller";
 import { LogisticsModule } from "../commerce/logistics/logistics.module";
@@ -179,6 +180,7 @@ import { MemoriesModule } from "../memories/memories.module";
     CommunityModule,
     BookingModule,
     PaymentsModule,
+    SetPetModule,
     LogisticsModule,
     MemoriesModule,
   ],

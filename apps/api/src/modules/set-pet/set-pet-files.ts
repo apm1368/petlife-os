@@ -11,10 +11,10 @@ export type SetPetFileKind = "jpeg" | "png" | "webp" | "heic" | "pdf" | "svg" | 
 
 /** Owner: up to about 50 MB per file (the upload ceiling). */
 export const SET_PET_FILE_MAX_BYTES = 50 * 1024 * 1024;
-/** Designs per request (owner: two or three; one is fine for a single shared design). */
-export const SET_PET_MAX_DESIGNS = 3;
-/** Uploaded but not yet placed on a request — enough to try a few, not a free file host. */
-export const SET_PET_MAX_LOOSE_FILES = 12;
+/** Designs per order (owner P21: unlimited — this is the technical cap). */
+export const SET_PET_MAX_DESIGNS = 20;
+/** Uploaded but not yet placed on an order — enough to try many, not a free file host. */
+export const SET_PET_MAX_LOOSE_FILES = 40;
 
 /** Extension the member's file has → its family and the extension the object key gets. */
 const EXTENSIONS: Record<string, SetPetFileKind> = {
@@ -107,6 +107,48 @@ export function stripMetadata(bytes: Buffer, kind: SetPetFileKind): Buffer | nul
   if (kind === "jpeg" || kind === "png" || kind === "webp") return stripImageMetadata(bytes, kind);
   if (kind === "heic") return blankHeicMetadata(bytes);
   return bytes;
+}
+
+/**
+ * Pixel size of a checked JPEG/PNG/WebP, read from its header (for the low-quality warning, owner P26); null when the
+ * header does not say. Never decodes the image.
+ */
+export function rasterSize(bytes: Buffer, kind: SetPetFileKind): { width: number; height: number } | null {
+  try {
+    if (kind === "png") {
+      if (bytes.length < 24 || bytes.toString("latin1", 12, 16) !== "IHDR") return null;
+      return sane(bytes.readUInt32BE(16), bytes.readUInt32BE(20));
+    }
+    if (kind === "webp") {
+      const chunk = bytes.toString("latin1", 12, 16);
+      if (chunk === "VP8X" && bytes.length >= 30) return sane(1 + bytes.readUIntLE(24, 3), 1 + bytes.readUIntLE(27, 3));
+      if (chunk === "VP8 " && bytes.length >= 30) return sane(bytes.readUInt16LE(26) & 0x3fff, bytes.readUInt16LE(28) & 0x3fff);
+      if (chunk === "VP8L" && bytes.length >= 25) {
+        const b = bytes.readUInt32LE(21);
+        return sane((b & 0x3fff) + 1, ((b >> 14) & 0x3fff) + 1);
+      }
+      return null;
+    }
+    if (kind === "jpeg") {
+      let at = 2;
+      while (at + 9 < bytes.length) {
+        if (bytes[at] !== 0xff) return null;
+        const marker = bytes[at + 1]!;
+        if (marker === 0xd8 || (marker >= 0xd0 && marker <= 0xd7) || marker === 0x01 || marker === 0xff) { at += marker === 0xff ? 1 : 2; continue; }
+        const length = bytes.readUInt16BE(at + 2);
+        // SOF0–SOF15, except DHT (C4), JPG (C8) and DAC (CC), carry the frame size.
+        if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) return sane(bytes.readUInt16BE(at + 7), bytes.readUInt16BE(at + 5));
+        at += 2 + length;
+      }
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+function sane(width: number, height: number) {
+  return width > 0 && height > 0 && width <= 100_000 && height <= 100_000 ? { width, height } : null;
 }
 
 // --------------------------------------------------------------------------------------------- HEIC (ISO BMFF)

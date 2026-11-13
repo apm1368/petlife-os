@@ -114,7 +114,7 @@ export class AdminDashboardService {
       when(admin.role === AdminRole.SUPER_ADMIN && may("settings.manage"), () =>
         this.prisma.cardTransferDestination.count({ where: { status: CardTransferDestinationStatus.PENDING, expiresAt: { gt: new Date() } } }),
       ),
-      // «ست پت» requests members submitted that still need a quote.
+      // «ست پت» orders members sent (or edited) that still need a print proof.
       when(may("commerce.view", AdminVertical.SHOP), () => this.prisma.setPetRequest.count({ where: { status: SetPetRequestStatus.SUBMITTED } })),
     ]);
     return {

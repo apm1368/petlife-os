@@ -25,7 +25,7 @@ function entryPurpose(entry: Pick<WalletEntry, "kind" | "referenceType" | "sourc
   if (entry.kind === WalletEntryKind.EXPIRY) return "EXPIRY";
   if (entry.referenceType === WALLET_TOP_UP_REFERENCE) return "TOP_UP";
   if (entry.referenceType === WALLET_ADJUSTMENT_REFERENCE) return "ADJUSTMENT";
-  if (entry.referenceType === "PAYMENT_INTENT") return "PURCHASE";
+  if (entry.referenceType === "PAYMENT_INTENT" || entry.referenceType === "SET_PET_ORDER") return "PURCHASE";
   if (/REFUND|OVERPAYMENT/.test(entry.referenceType) || entry.source === WalletCreditSource.REFUND || entry.source === WalletCreditSource.OVERPAYMENT) return "REFUND";
   return "OTHER";
 }

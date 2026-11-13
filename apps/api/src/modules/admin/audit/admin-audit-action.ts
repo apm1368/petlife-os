@@ -278,7 +278,9 @@ export type AdminAuditAction =
   | "place_claim.rejected"
   | "place_claim.released"
   // «ست پت» Set Pet requests
-  | "set_pet.quoted"
+  | "set_pet.proof_sent"
+  | "set_pet.design_rejected"
+  | "set_pet.prices_saved"
   | "set_pet.status_changed"
   | "set_pet.note_saved"
   | "set_pet.design_opened";
