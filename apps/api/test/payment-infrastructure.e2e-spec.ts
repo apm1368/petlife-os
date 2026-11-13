@@ -212,7 +212,7 @@ describe("P1-a payment infrastructure (e2e)", () => {
     await prisma.walletEntry.update({ where: { id: gift.id }, data: { expiresAt: new Date(0) } });
     expect(await wallet.expireGiftCredits(new Date())).toBe(1);
     expect(await wallet.getBalances(b.user.id)).toEqual({ WITHDRAWABLE: 70_000, PURCHASE_ONLY: 0 });
-    expect(readFileSync("prisma/schema.prisma", "utf8")).toMatch(/model WalletAccount \{[\s\S]*?entries WalletEntry\[\]/);
+    expect(readFileSync("prisma/schema.prisma", "utf8")).toMatch(/model WalletAccount \{[\s\S]*?entries\s+WalletEntry\[\]/);
     expect(readFileSync("prisma/schema.prisma", "utf8")).not.toMatch(/model WalletAccount \{[\s\S]*?\n\s*(?:balance|withdrawableBalance|purchaseOnlyBalance)\s+/);
     expect(await prisma.walletEntry.count({ where: { walletAccount: { userId: b.user.id }, kind: WalletEntryKind.EXPIRY } })).toBe(1);
     await assertAllLedgerTransactionsBalanced();
