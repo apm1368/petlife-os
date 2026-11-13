@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useLocale } from "next-intl";
 import Link from "@/features/navigation/localized-link";
+import { LOCALE_PREFIX } from "@/lib/i18n/config";
 
 const ITEMS = [
   { href: "/animal-support/needs", fa: "نیازهای باز", en: "Open needs", de: "Offene Bedarfe", es: "Necesidades abiertas", ar: "احتياجات مفتوحة", nl: "Open behoeften" },
@@ -16,7 +17,7 @@ const NAV_LABEL = { fa: "بخش‌های حمایت از حیوان", en: "Anima
 export function AnimalSupportNav() {
   const raw = useLocale();
   const locale = (raw in NAV_LABEL ? raw : "en") as keyof typeof NAV_LABEL;
-  const path = (usePathname() ?? "").replace(/^\/(fa|en|de|es|ar|nl)(?=\/|$)/, "");
+  const path = (usePathname() ?? "").replace(LOCALE_PREFIX, "");
   return (
     <nav aria-label={NAV_LABEL[locale]} className="section-tabs">
       {ITEMS.map((item) => {

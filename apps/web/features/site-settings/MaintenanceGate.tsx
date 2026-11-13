@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Brand } from "@/features/brand/Brand";
-import type { RouteLocale } from "@/lib/i18n/config";
+import { LOCALE_PREFIX, type RouteLocale } from "@/lib/i18n/config";
 import { localizedSetting, useSiteSettings } from "./site-settings";
 
 /** Paths that stay usable during maintenance so staff can sign in and work, and visitors can check status. */
@@ -18,7 +18,7 @@ export function MaintenanceGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? "";
   const locale = useLocale();
   const t = useTranslations("siteSettings.maintenance");
-  const path = pathname.replace(/^\/(fa|en|de|es|ar|nl)(?=\/|$)/, "") || "/";
+  const path = pathname.replace(LOCALE_PREFIX, "") || "/";
   if (!settings?.["maintenance.enabled"] || ALLOWED.some((p) => path === p || path.startsWith(`${p}/`))) return <>{children}</>;
   const message = localizedSetting(settings["maintenance.message"], locale) ?? t("defaultMessage");
   return (
