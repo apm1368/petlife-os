@@ -91,7 +91,7 @@
         },
         {
           "q": "¿Adónde van los reembolsos?",
-          "a": "Los reembolsos aprobados vuelven a tu método de pago original o a tu monedero de opetlife. El aviso de reembolso te indica cuál de las dos opciones se aplica."
+          "a": "Los reembolsos aprobados vuelven a tu método de pago original o a tu monedero de opetlife. El aviso de reembolso te indica cuál de las dos opciones se aplica. Nuestro equipo de finanzas revisa y tramita cada reembolso."
         }
       ]
     },
@@ -101,7 +101,7 @@
       "items": [
         {
           "q": "¿Qué es el monedero?",
-          "a": "Tu saldo en opetlife. Contiene saldo de reembolso, procedente de compras canceladas o reembolsadas, y saldo de compra, procedente de recargas y regalos. El saldo de compra solo puede gastarse en opetlife, y el saldo de regalo caduca a los seis meses."
+          "a": "Tu saldo en opetlife. Contiene saldo de reembolso, procedente de compras canceladas o reembolsadas, y saldo de compra, procedente de recargas y regalos. El saldo de compra solo puede gastarse en opetlife, y el saldo de regalo caduca a los seis meses. Ambos tipos se pueden gastar en opetlife. Retirar el saldo de reembolsos a una cuenta bancaria todavía no está disponible en la app; si lo necesitas, contacta con soporte y nuestro equipo de finanzas revisará tu solicitud."
         },
         {
           "q": "¿Cómo hago una recarga?",
@@ -163,7 +163,7 @@
         },
         {
           "q": "¿Cómo elimino mi cuenta?",
-          "a": "Solicítalo desde Perfil → Privacidad. Revisamos la solicitud, apartamos lo que la ley nos obliga a conservar y eliminamos o anonimizamos el resto. Puedes cancelarla mientras esté en revisión. Antes deben finalizar las reservas, los pedidos, los reembolsos o las disputas abiertos."
+          "a": "Pídelo desde Perfil → Privacidad. Tu solicitud se registra y se revisa, y se ejecuta una vez que publiquemos nuestra política de conservación de datos; te avisaremos cuando esté hecho. Puedes cancelarla mientras esté pendiente. Antes deben terminar las reservas, pedidos, reembolsos o disputas abiertos."
         },
         {
           "q": "¿Qué notificaciones recibiré?",

@@ -91,7 +91,7 @@
         },
         {
           "q": "Wohin gehen Erstattungen?",
-          "a": "Genehmigte Erstattungen gehen an deine ursprüngliche Zahlungsmethode zurück oder auf dein opetlife-Guthaben. In der Mitteilung zur Erstattung steht, was davon zutrifft."
+          "a": "Genehmigte Erstattungen gehen an deine ursprüngliche Zahlungsmethode zurück oder auf dein opetlife-Guthaben. In der Mitteilung zur Erstattung steht, was davon zutrifft. Jede Erstattung wird von unserem Finanzteam geprüft und abgewickelt."
         }
       ]
     },
@@ -101,7 +101,7 @@
       "items": [
         {
           "q": "Was ist das Guthaben?",
-          "a": "Dein Guthabenkonto bei opetlife. Es enthält Erstattungsguthaben aus stornierten oder erstatteten Käufen und Einkaufsguthaben aus Aufladungen und Geschenken. Einkaufsguthaben kann nur bei opetlife ausgegeben werden, und Geschenkguthaben verfällt nach sechs Monaten."
+          "a": "Dein Guthabenkonto bei opetlife. Es enthält Erstattungsguthaben aus stornierten oder erstatteten Käufen und Einkaufsguthaben aus Aufladungen und Geschenken. Einkaufsguthaben kann nur bei opetlife ausgegeben werden, und Geschenkguthaben verfällt nach sechs Monaten. Beide Arten kannst du auf opetlife ausgeben. Eine Auszahlung von Erstattungsguthaben auf ein Bankkonto ist in der App noch nicht möglich; wenn du sie brauchst, wende dich an den Support, und unser Finanzteam prüft deine Anfrage."
         },
         {
           "q": "Wie lade ich Guthaben auf?",
@@ -163,7 +163,7 @@
         },
         {
           "q": "Wie lösche ich mein Konto?",
-          "a": "Beantrage die Löschung unter Profil → Datenschutz. Wir prüfen den Antrag, legen gesondert ab, was wir gesetzlich aufbewahren müssen, und löschen oder anonymisieren den Rest. Solange der Antrag geprüft wird, kannst du ihn zurückziehen. Offene Buchungen, Bestellungen, Erstattungen oder Streitfälle müssen vorher abgeschlossen sein."
+          "a": "Beantrage sie unter Profil → Datenschutz. Dein Antrag wird erfasst und geprüft und ausgeführt, sobald unsere Richtlinie zur Datenspeicherung veröffentlicht ist; wir geben dir Bescheid, wenn es erledigt ist. Solange er offen ist, kannst du ihn zurückziehen. Offene Buchungen, Bestellungen, Erstattungen oder Streitfälle müssen vorher abgeschlossen sein."
         },
         {
           "q": "Welche Benachrichtigungen bekomme ich?",

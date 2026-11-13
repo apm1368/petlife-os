@@ -4950,7 +4950,8 @@
         "profile": "My account",
         "viewSite": "View site",
         "signOut": "Sign out",
-        "signingOut": "Signing out…"
+        "signingOut": "Signing out…",
+        "twoStep": "Two-step sign-in"
       },
       "tabs": {
         "holidays": "Holidays and closures",
@@ -5020,7 +5021,8 @@
         "walletCardReceipts": "Card-to-card receipts",
         "repeatDeliveries": "Repeat deliveries",
         "orderLookup": "Order lookup",
-        "refundApprovals": "Refund approvals"
+        "refundApprovals": "Refund approvals",
+        "twoStep": "Two-step sign-in"
       },
       "palette": {
         "actions": "Quick actions",
@@ -5294,6 +5296,11 @@
         "actionFailed": "The change could not be saved. Try again.",
         "noMessages": "No messages yet.",
         "noNotes": "No internal notes yet."
+      },
+      "humanEscalation": {
+        "label": "Human follow-up requested",
+        "reference": "Reference: {reference}",
+        "submitted": "Requested: {date}"
       }
     },
     "disputes": {
@@ -8708,6 +8715,28 @@
     }
   },
   "externalTravel": {
+    "petPerSource": "According to {source}, this stay accepts pets. Check the conditions for your pet and availability for your dates with {source} or the host.",
+    "petVerifiedByOpetlife": "Pet acceptance checked and verified by opetlife",
+    "petFacts": {
+      "title": "Pet conditions",
+      "species": "Species",
+      "size": "Size",
+      "indoor": "Indoor access",
+      "fee": "Pet fee",
+      "approval": "Host approval",
+      "unknown": "Unknown",
+      "yes": "Yes",
+      "no": "No",
+      "dogs": "Dogs",
+      "cats": "Cats",
+      "upTo": "Up to {limit}",
+      "noFee": "No fee",
+      "approvalNeeded": "Required",
+      "approvalNotNeeded": "Not required"
+    },
+    "startingPrice": "Starting from {amount}",
+    "updatedAgo": "Updated {ago}",
+    "viewOnSource": "View this stay on {source}",
     "title": "Stays from external sources",
     "detailTitle": "External stay details",
     "disclaimer": "Information is collected from public sources and may change. Confirm pet acceptance and stay conditions with the property before booking.",
@@ -8773,7 +8802,7 @@
     "alreadyAttached": "Already in trip plan",
     "attach": "Add to trip plan",
     "policy": {
-      "CONFIRMED_ALLOWED": "Pet acceptance confirmed under source conditions",
+      "CONFIRMED_ALLOWED": "Pet-friendly according to the source",
       "CONFIRMED_NOT_ALLOWED": "Pets reported as not allowed",
       "UNKNOWN": "Pet acceptance unknown",
       "AMBIGUOUS": "Pet acceptance information is ambiguous"
@@ -12176,6 +12205,140 @@
       "LOGO_FILE": "The logo must be JPG, PNG or WebP under 10 MB.",
       "DOC_FILE": "The document must be JPG, PNG or PDF under 20 MB.",
       "TOO_MANY_PENDING": "Too many documents are waiting for review."
+    }
+  },
+  "adminTwoStep": {
+    "kicker": "Account security",
+    "title": "Two-step sign-in",
+    "retry": "Try again",
+    "intro": "A code from an authenticator app on your phone, on top of your password. Admin pages ask for it once per sign-in and again every 12 hours.",
+    "status": {
+      "on": "On",
+      "off": "Off",
+      "onSince": "On since {date}",
+      "recoveryLeft": "{count, plural, one {# recovery code left} other {# recovery codes left}}",
+      "recoveryLow": "{count, plural, =0 {No recovery codes left.} one {Only # recovery code left.} other {Only # recovery codes left.}} Make a new set.",
+      "enforced": "Required for every admin on this team.",
+      "optional": "Optional for now. A super admin can make it required for the whole team."
+    },
+    "actions": {
+      "turnOn": "Turn on two-step sign-in",
+      "newCodes": "Make new recovery codes",
+      "turnOff": "Turn off",
+      "turnOffBlocked": "It can't be turned off while it's required for the team."
+    },
+    "enrol": {
+      "step1": "1. Add opetlife.ir to your authenticator app",
+      "step1Help": "In Google Authenticator, Microsoft Authenticator, 1Password, Bitwarden or Aegis, choose “Add account”, then “Enter a setup key”, and type the key below. Setting it up on this phone? Use “Open in authenticator app”.",
+      "copyKey": "Copy key",
+      "copied": "Copied",
+      "openApp": "Open in authenticator app",
+      "step2": "2. Enter the 6-digit code the app shows",
+      "confirm": "Turn on",
+      "cancel": "Cancel",
+      "starting": "Preparing…",
+      "accountLabel": "Account name",
+      "keyLabel": "Setup key",
+      "typeLabel": "Type",
+      "type": "Time-based, 6 digits"
+    },
+    "codes": {
+      "title": "Save your recovery codes",
+      "body": "If you lose your phone, each code gets you in once. They won't be shown again, so keep them somewhere safe and away from this computer.",
+      "copy": "Copy codes",
+      "download": "Download as a text file",
+      "saved": "I've saved these codes",
+      "continue": "Continue",
+      "fileHeading": "opetlife.ir admin recovery codes — each works once"
+    },
+    "challenge": {
+      "title": "Enter your two-step code",
+      "body": "Open your authenticator app and enter the 6-digit code shown for opetlife.ir.",
+      "codeLabel": "6-digit code",
+      "recoveryLabel": "Recovery code",
+      "useRecovery": "Use a recovery code instead",
+      "useApp": "Use the authenticator app instead",
+      "submit": "Verify",
+      "lostPhone": "Lost your phone and your recovery codes? Ask a super admin to reset your two-step sign-in.",
+      "signOut": "Sign out"
+    },
+    "forced": {
+      "title": "Turn on two-step sign-in to continue",
+      "body": "Two-step sign-in is now required for every admin. It takes about a minute."
+    },
+    "banner": {
+      "optional": "Protect your admin account with two-step sign-in.",
+      "enforced": "Two-step sign-in is required. Turn it on before {date}.",
+      "action": "Turn it on",
+      "dismiss": "Not now"
+    },
+    "errors": {
+      "invalidPlain": "That code didn't work. Make sure your phone sets its time automatically, then enter the newest code.",
+      "invalid": "That code didn't work. {count, plural, =0 {Next wrong code locks it for a while.} one {# more try before a short lock.} other {# more tries before a short lock.}}",
+      "locked": "Too many wrong codes. Try again after {time}.",
+      "generic": "Something went wrong. Please try again.",
+      "format": "Enter the 6 digits from the app.",
+      "recoveryFormat": "A recovery code has 16 letters and digits, like ABCD-EFGH-2345-6723."
+    },
+    "confirmCode": {
+      "label": "Current 6-digit code",
+      "help": "Enter a fresh code from your app. The old recovery codes stop working.",
+      "turnOffHelp": "Enter a fresh code from your app to turn two-step sign-in off."
+    },
+    "done": {
+      "on": "Two-step sign-in is on.",
+      "off": "Two-step sign-in is off.",
+      "newCodes": "New recovery codes are ready. The old ones no longer work."
+    },
+    "policy": {
+      "title": "Two-step sign-in for the team",
+      "intro": "When it's required, every admin enters an authenticator code at sign-in. Admins who haven't turned it on keep working through the grace period, then must turn it on before any admin page opens.",
+      "required": "Require two-step sign-in for every admin",
+      "on": "Required",
+      "off": "Optional",
+      "coverage": "{enrolled} of {total} admins have it on",
+      "since": "required since {date}",
+      "graceDays": "Grace period (days)",
+      "graceHelp": "Counted from when it becomes required, or from when an admin joins, whichever is later. 0 means right away.",
+      "reason": "Reason",
+      "reasonPlaceholder": "Why this change",
+      "reasonRequired": "Write a short reason (at least 5 characters).",
+      "save": "Save",
+      "saved": "Saved.",
+      "onlySuper": "Only a super admin can change this.",
+      "selfFirst": "Turn on two-step sign-in for your own account first.",
+      "selfFirstAction": "Set up mine",
+      "mine": "My two-step sign-in",
+      "members": "Admins",
+      "col": {
+        "name": "Admin",
+        "role": "Role",
+        "status": "Two-step sign-in"
+      },
+      "member": {
+        "on": "On since {date}",
+        "grace": "Not yet · until {date}",
+        "overdue": "Must turn it on now",
+        "off": "Off"
+      },
+      "reset": "Reset",
+      "resetTitle": "Reset two-step sign-in for {name}?",
+      "resetBody": "Use this when they've lost their phone and their recovery codes. Their authenticator and recovery codes stop working, and they set it up again at their next sign-in.",
+      "resetReasonPlaceholder": "For example: lost phone, confirmed by phone call",
+      "resetConfirm": "Reset",
+      "resetDone": "Reset done. {name} will set it up again.",
+      "you": "you",
+      "enforcementLater": "For now two-step sign-in is optional for each admin. Requiring it for everyone becomes available once SMS and email are live."
+    },
+    "rules": {
+      "TWO_STEP_ALREADY_ON": "Two-step sign-in is already on for this account.",
+      "TWO_STEP_NO_PENDING_ENROLMENT": "This setup has expired. Start again.",
+      "TWO_STEP_NOT_ON": "Two-step sign-in isn't on for this account.",
+      "TWO_STEP_ENFORCED": "It can't be turned off while it's required for the team.",
+      "TWO_STEP_SELF_RESET": "You can't reset your own. Turn it off yourself, or ask another super admin.",
+      "TWO_STEP_SELF_ENROLMENT_REQUIRED": "Turn on two-step sign-in for your own account first.",
+      "TWO_STEP_POLICY_SUPER_ADMIN_ONLY": "Only a super admin can change this.",
+      "TWO_STEP_KEY_CHANGED": "Your authenticator can't be checked after a server key change. Use a recovery code, or ask a super admin to reset it."
     }
   }
 }

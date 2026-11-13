@@ -23,7 +23,7 @@ describe("JajigaStaysSection", () => {
     expect(travelExternalService.search).toHaveBeenCalledWith(expect.objectContaining({ source: "JAJIGA", city: "تهران", checkIn: "2026-12-01", checkOut: "2026-12-03", pets: 1, page: 1, pageSize: 6 }), expect.any(AbortSignal));
     expect(screen.getByText("از جاجیگا")).toBeTruthy();
     expect(screen.getByRole("heading", { name: "اقامتگاه‌های پت‌پذیر تهران از جاجیگا" })).toBeTruthy();
-    const out = screen.getByRole("link", { name: "مشاهده و بررسی در سایت منبع" });
+    const out = screen.getByRole("link", { name: "مشاهده همین اقامتگاه در جاجیگا" });
     expect(out.getAttribute("href")).toContain("/travel/external/stays/jj1/out");
     expect(out.getAttribute("target")).toBe("_blank");
     expect(screen.getByRole("link", { name: "همهٔ اقامتگاه‌های جاجیگا" }).getAttribute("href")).toBe("/fa/travel/search?source=jajiga");

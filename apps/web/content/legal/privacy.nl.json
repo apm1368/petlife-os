@@ -102,7 +102,7 @@
         "Ritten met de dierentaxi: exacte locaties 30 dagen, daarna alleen bij benadering.",
         "Serverlogs: ongeveer 7 dagen.",
         "Financiële gegevens, zoals bestellingen, betalingen, terugbetalingen en facturen: zo lang als de wet vereist.",
-        "Nadat je je account hebt verwijderd, verwijderen of anonimiseren we je persoonsgegevens, behalve wat we volgens de wet moeten bewaren."
+        "Als je vraagt om je account te verwijderen, wordt je verzoek vastgelegd en beoordeeld, en uitgevoerd zodra ons bewaarbeleid voor gegevens is gepubliceerd. Dan verwijderen of anonimiseren we je persoonsgegevens, behalve wat we volgens de wet moeten bewaren, en laten we je weten wanneer het is gebeurd."
       ]
     },
     {
@@ -112,7 +112,7 @@
         "Je gegevens bekijken en corrigeren via je profiel en de pagina's van je huishouden en huisdieren.",
         "Een kopie van je gegevens downloaden via Profiel → Privacy. Je krijgt een bestand met je huisdieren, gezondheidsdossiers, boekingen, bestellingen, reizen, supportverzoeken, toestemmingen, berichten, chats en donaties. De download blijft 7 dagen beschikbaar.",
         "Op elk moment je meldingskanalen en je toestemming voor marketing wijzigen, en deellinks en toegang voor dierenartsen intrekken.",
-        "Via Profiel → Privacy vragen om je account te verwijderen. We beoordelen elk verzoek. Gegevens die we volgens de wet moeten bewaren, worden apart gezet, en al het andere wordt verwijderd of geanonimiseerd. Zolang het verzoek in behandeling is, kun je het annuleren. Heb je nog openstaande boekingen, bestellingen, terugbetalingen, geschillen, een actieve reis of een partnerrol, dan moet de verwijdering wachten tot die zijn afgerond.",
+        "Vraag via Profiel → Privacy om je account te verwijderen. Je verzoek wordt vastgelegd en beoordeeld, en uitgevoerd zodra ons bewaarbeleid voor gegevens is gepubliceerd; we laten je weten wanneer het is gebeurd. Zolang het verzoek openstaat, kun je het annuleren. Zolang je openstaande boekingen, bestellingen, terugbetalingen of geschillen, een actieve reis of een partnerrol hebt, moet de verwijdering wachten tot die zijn afgerond.",
         "Een zorg over privacy melden via Support of de contactpagina."
       ]
     },
@@ -120,7 +120,8 @@
       "id": "security",
       "heading": "11. Hoe we ze beschermen",
       "paragraphs": [
-        "Verbindingen met opetlife zijn versleuteld. Wachtwoorden worden alleen als Argon2id-hashes opgeslagen. Inlogcookies kunnen niet worden gelezen door scripts op de pagina. De toegang van medewerkers hangt af van hun rol en wordt vastgelegd. Geüploade documenten worden privé bewaard en kunnen alleen worden geopend via links die kort geldig zijn. Geen enkel systeem is volledig veilig, dus gebruik een sterk wachtwoord en houd je inlogcodes voor jezelf."
+        "Verbindingen met opetlife zijn versleuteld. Wachtwoorden worden alleen als Argon2id-hashes opgeslagen. Inlogcookies kunnen niet worden gelezen door scripts op de pagina. De toegang van medewerkers hangt af van hun rol en wordt vastgelegd. Geüploade documenten worden privé bewaard en kunnen alleen worden geopend via links die kort geldig zijn. Geen enkel systeem is volledig veilig, dus gebruik een sterk wachtwoord en houd je inlogcodes voor jezelf.",
+        "Foto’s die je publiceert, bijvoorbeeld in berichten, meldingen van vermiste dieren of herdenkingspagina’s, zijn openbare bestanden: als je ze verwijdert of verbergt, verdwijnen ze meteen van de pagina’s van opetlife, maar wie het adres van een foto al heeft, kan hem misschien nog openen tot het bestand zelf is verwijderd. Vraag het aan Support en ons team verwijdert het bestand binnen 30 dagen."
       ]
     },
     {
