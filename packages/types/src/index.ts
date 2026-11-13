@@ -3448,6 +3448,8 @@ export interface AdminDashboardSummaryDto {
   openProviderNoShows: number | null;
   /** Service, product and stay reviews waiting for a moderator, in the verticals this admin may moderate. */
   pendingReviews: number | null;
+  /** «ست پت» Set Pet orders sent and waiting for a print proof; commerce.view (shop vertical). */
+  newSetPetRequests: number | null;
   /**
    * Market-readiness #290 Q97, the launch month's success measure: registered pets and weekly bookings
    * (analytics.view; null otherwise). Live bookings only, rolling 7-day windows.
@@ -6945,6 +6947,103 @@ export interface AdminProductReadinessDto {
   counts: Record<"ANY" | "MEDIA_INCOMPLETE" | "MISSING_BRAND" | "MISSING_SPECS" | "UNREVIEWED_SOURCE" | "NO_LIVE_OFFER", number>;
 }
 
+/** «ست پت» Set Pet, admin side (v2, owner's #368 answers); statuses, garments and zones are the shared ones from ./set-pet. */
+type SetPetStatus = import("./set-pet").SetPetRequestStatus;
+
+export interface AdminSetPetRowDto {
+  id: string;
+  /** SP-000123 */
+  number: string;
+  status: SetPetStatus;
+  memberName: string;
+  humanGarments: number;
+  petGarments: number;
+  placements: number;
+  itemsTotalIrr: number;
+  totalPaidIrr: number | null;
+  estimatedReadyAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminSetPetListDto {
+  items: AdminSetPetRowDto[];
+  total: number;
+  page: number;
+  pageSize: number;
+  /** Per status, for the same search (ignores the status filter). */
+  counts: Record<SetPetStatus, number>;
+}
+
+export interface AdminSetPetDesignFileDto {
+  id: string;
+  mimeType: string;
+  fileSizeBytes: number;
+  originalFilename: string | null;
+  /** JPEG/PNG/WebP only; anything else downloads as a plain file. */
+  previewable: boolean;
+  widthPx: number | null;
+  heightPx: number | null;
+  status: "PENDING_UPLOAD" | "READY" | "REJECTED";
+  uploadedAt: string | null;
+}
+
+export interface AdminSetPetProofDto {
+  id: string;
+  status: "UPLOADING" | "SENT" | "APPROVED" | "SUPERSEDED";
+  mimeType: string;
+  note: string | null;
+  petPrintWidthCm: number | null;
+  petPrintHeightCm: number | null;
+  uploadedBy: string | null;
+  sentAt: string | null;
+  decidedAt: string | null;
+}
+
+export interface AdminSetPetDetailDto {
+  id: string;
+  number: string;
+  status: SetPetStatus;
+  member: { id: string; displayName: string };
+  forPet: { id: string; name: string; species: string; lifecycleStatus: string } | null;
+  items: Array<import("./set-pet").SetPetItemDto & { pet: { id: string; name: string; species: string } | null }>;
+  placements: Array<import("./set-pet").SetPetPlacementDto & { designFile: AdminSetPetDesignFileDto | null }>;
+  notes: string | null;
+  price: { lines: import("./set-pet").SetPetPriceLine[]; subtotalIrr: number; discountPercent: number; discountIrr: number; totalIrr: number };
+  payment: { shippingProvider: string | null; shippingIrr: number | null; shippingAddress: unknown; totalPaidIrr: number | null; paidAt: string | null; refundedIrr: number | null; refundedAt: string | null };
+  proofs: AdminSetPetProofDto[];
+  designRejectReason: string | null;
+  estimatedReadyAt: string | null;
+  shippingNote: string | null;
+  cancelled: { at: string; by: "MEMBER" | "STAFF" | null; reason: string | null } | null;
+  /** Staff-only; never shown to the member. */
+  adminNote: string | null;
+  /** What staff may do now. */
+  actions: { sendProof: boolean; rejectDesign: boolean; startProduction: boolean; ship: boolean; cancel: boolean; refundsOnCancel: boolean; printDefectOnly: boolean };
+  timeline: Array<{ id: string; at: string; from: SetPetStatus | null; to: SetPetStatus; actor: "MEMBER" | "STAFF"; staffName: string | null; note: string | null }>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminSetPetSettingsDto {
+  garmentPricesIrr: import("./set-pet").SetPetPriceTable["garmentPricesIrr"];
+  zonePricesIrr: import("./set-pet").SetPetPriceTable["zonePricesIrr"];
+  setDiscountPercent: number;
+  productionWorkingDays: number;
+  workshopCity: string | null;
+  workshopLatitude: number | null;
+  workshopLongitude: number | null;
+  updatedAt: string | null;
+}
+
+export interface AdminSetPetProofUploadTargetDto {
+  proofId: string;
+  uploadUrl: string;
+  method: "PUT";
+  headers?: Record<string, string>;
+  expiresInSeconds: number;
+}
+
 export interface AdminProductReviewRowDto {
   id: string;
   productId: string;
@@ -7419,6 +7518,53 @@ export type {
   AdminTransactionFilters,
 } from "./admin-transactions";
 export { ADMIN_TRANSACTION_KINDS, ADMIN_TRANSACTION_GATEWAYS } from "./admin-transactions";
+
+export type {
+  SetPetRequestStatus,
+  SetPetSize,
+  SetPetGarment,
+  SetPetWearer,
+  SetPetZone,
+  SetPetFont,
+  SetPetColour,
+  SetPetPriceTable,
+  SetPetPriceLine,
+  SetPetPrice,
+  SetPetDesignFileStatus,
+  SetPetDesignFileDto,
+  SetPetUploadTargetDto,
+  SetPetItemInput,
+  SetPetPlacementInput,
+  SetPetOrderInput,
+  SetPetItemDto,
+  SetPetPlacementDto,
+  SetPetProofDto,
+  SetPetTimelineEntryDto,
+  SetPetRequestDto,
+  SetPetShippingOptionDto,
+  SetPetPayInput,
+  SetPetOptionsDto,
+  SetPetDraftDto,
+} from "./set-pet";
+export {
+  SET_PET_STATUSES,
+  SET_PET_EDITABLE_STATUSES,
+  SET_PET_MEMBER_CANCELLABLE,
+  SET_PET_SIZES,
+  SET_PET_HUMAN_GARMENTS,
+  SET_PET_PET_GARMENTS,
+  SET_PET_GARMENTS,
+  SET_PET_ZONES,
+  SET_PET_ZONE_KEYS,
+  SET_PET_FONTS,
+  SET_PET_COLOURS,
+  SET_PET_COLOUR_KEYS,
+  SET_PET_LIMITS,
+  SET_PET_ACCEPTED_EXTENSIONS,
+  setPetWearerOf,
+  priceSetPet,
+  priceRangeSetPet,
+} from "./set-pet";
 
 // ---------------------------------------------------------------------------
 // Member wallet (balances are always derived from append-only entries)

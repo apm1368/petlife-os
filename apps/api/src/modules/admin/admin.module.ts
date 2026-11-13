@@ -6,6 +6,8 @@ import { TravelMarketplaceModule } from "../travel-marketplace/travel-marketplac
 import { AdminCommerceController } from "./commerce/admin-commerce.controller";
 import { AdminCommerceService } from "./commerce/admin-commerce.service";
 import { ProductReadinessService } from "./commerce/product-readiness.service";
+import { AdminSetPetService } from "./set-pet/admin-set-pet.service";
+import { AdminSetPetController } from "./set-pet/admin-set-pet.controller";
 import { SellerCatalogReviewService } from "./commerce/seller-catalog-review.service";
 import { CatalogImportService } from "./commerce/catalog-import.service";
 import { CatalogImportWorker } from "./commerce/catalog-import.worker";
@@ -49,6 +51,7 @@ import { AdminSystemService } from "./system/admin-system.service";
 import { AdminSystemController } from "./system/admin-system.controller";
 import { BookingModule } from "../booking/booking.module";
 import { PaymentsModule } from "../commerce/payments/payments.module";
+import { SetPetModule } from "../set-pet/set-pet.module";
 import { AdminCardTransferController } from "./finance/admin-card-transfer.controller";
 import { AdminShippingController } from "./commerce/admin-shipping.controller";
 import { LogisticsModule } from "../commerce/logistics/logistics.module";
@@ -181,6 +184,7 @@ import { MemoriesModule } from "../memories/memories.module";
     CommunityModule,
     BookingModule,
     PaymentsModule,
+    SetPetModule,
     LogisticsModule,
     MemoriesModule,
   ],
@@ -201,6 +205,7 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminWalletsController,
     AdminCardTransferDestinationController,
     AdminPartner360Controller,
+    AdminSetPetController,
     AdminPartnerDirectoryController,
     AdminPartnerApprovalController,
     AdminPet360Controller,
@@ -271,6 +276,7 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminTravelService,
     AdminCommerceService,
     ProductReadinessService,
+    AdminSetPetService,
     SellerCatalogReviewService,
     CatalogImportService,
     CatalogImportWorker,

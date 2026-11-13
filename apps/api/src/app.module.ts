@@ -88,6 +88,7 @@ import { TravelModule } from "./modules/travel/travel.module";
 import { TravelMarketplaceModule } from "./modules/travel-marketplace/travel-marketplace.module";
 import { InsuranceModule } from "./modules/insurance/insurance.module";
 import { PlacesModule } from "./modules/places/places.module";
+import { SetPetModule } from "./modules/set-pet/set-pet.module";
 
 @Module({
   imports: [
@@ -179,6 +180,7 @@ import { PlacesModule } from "./modules/places/places.module";
     TravelMarketplaceModule,
     InsuranceModule,
     PlacesModule,
+    SetPetModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: ApiExceptionFilter },

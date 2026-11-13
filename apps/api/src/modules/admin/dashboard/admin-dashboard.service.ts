@@ -21,6 +21,7 @@ import {
   ProviderVerificationStatus,
   SellerOfferModerationStatus,
   SellerVerificationStatus,
+  SetPetRequestStatus,
   SupportCaseStatus,
   SupportNeedStatus,
   TravelListingStatus,
@@ -71,6 +72,7 @@ export class AdminDashboardService {
       openProviderNoShows,
       pendingReviews,
       pendingCardDestinationChanges,
+      newSetPetRequests,
     ] = await Promise.all([
       when(may("support.view"), () => this.prisma.supportCase.count({ where: { status: { notIn: [SupportCaseStatus.RESOLVED, SupportCaseStatus.CLOSED] } } })),
       when(may("dispute.view"), () => this.prisma.dispute.count({ where: { status: { notIn: [DisputeStatus.CLOSED] } } })),
@@ -112,6 +114,8 @@ export class AdminDashboardService {
       when(admin.role === AdminRole.SUPER_ADMIN && may("settings.manage"), () =>
         this.prisma.cardTransferDestination.count({ where: { status: CardTransferDestinationStatus.PENDING, expiresAt: { gt: new Date() } } }),
       ),
+      // «ست پت» orders members sent (or edited) that still need a print proof.
+      when(may("commerce.view", AdminVertical.SHOP), () => this.prisma.setPetRequest.count({ where: { status: SetPetRequestStatus.SUBMITTED } })),
     ]);
     return {
       openSupportCases,
@@ -136,6 +140,7 @@ export class AdminDashboardService {
       openOwnershipDisputes,
       openProviderNoShows,
       pendingReviews,
+      newSetPetRequests,
     };
   }
 

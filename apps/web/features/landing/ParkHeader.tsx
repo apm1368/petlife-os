@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ChevronDown, HeartPulse, Menu, Plane, ShieldCheck, ShoppingBag, Sparkles, Users, X } from "@petlife/ui";
+import { ChevronDown, HeartPulse, Menu, PawPrint, Plane, ShieldCheck, ShoppingBag, Sparkles, Users, X } from "@petlife/ui";
 import { LOCALE_PREFIX, type RouteLocale } from "@/lib/i18n/config";
 import { Brand } from "@/features/brand/Brand";
 import { useSessionBootstrap } from "@/hooks/use-session-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
 import { DisplayModeToggle } from "@/features/display-mode/DisplayModeToggle";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
+import { useTranslations } from "next-intl";
 import { useParkCopy } from "./park-copy";
 import { useOplCopy, worldOrder } from "./opl/opl-copy";
 import { localeHomePath } from "@/lib/seo/site";
@@ -26,6 +27,7 @@ export function ParkHeader({ locale }: { locale: RouteLocale }) {
   const ddWrap = useRef<HTMLDivElement>(null);
   const c = useParkCopy(locale);
   const o = useOplCopy();
+  const setPet = useTranslations("setPet.landing");
   const root = `/${locale}`;
   // Home and its sections live at the canonical home address (the bare domain for Persian).
   const home = localeHomePath(locale);
@@ -73,6 +75,8 @@ export function ParkHeader({ locale }: { locale: RouteLocale }) {
         </select>
         <span className="opl-hact__theme hide-sm"><ThemeToggle /></span>
         <span className="hide-sm"><DisplayModeToggle locale={locale} compact /></span>
+        {/* «ست پت» (owner, #368 P1): a prominent button beside the menu, on every screen size. */}
+        <Link className="opl-btn soft sm opl-setpet-btn" href={`${root}/set-pet`}><PawPrint size={16} aria-hidden="true" />{setPet("navLabel")}</Link>
         <Link className="opl-btn line sm hide-sm" href={`${root}/auth?returnTo=${partnerReturn}`}>{c.partnerSignIn}</Link>
         {signedIn ? <Link className="opl-btn primary sm" href={`${root}/home`}>{c.dashboard}</Link> : <>
           <Link className="opl-btn soft sm hide-sm" href={`${root}/auth`}>{c.signIn}</Link>
@@ -85,7 +89,7 @@ export function ParkHeader({ locale }: { locale: RouteLocale }) {
     </div>
     <nav id="park-mobile-nav" className="opl-msheet" aria-label={c.navLabel} hidden={!open}>
       <div className="opl-wrap opl-msheet__in">
-        {[{ href: home, label: c.home }, ...links].map((link) => <Link key={link.href} href={link.href} onClick={() => setOpen(false)}>{link.label}</Link>)}
+        {[{ href: home, label: c.home }, { href: `${root}/set-pet`, label: setPet("navLabel") }, ...links].map((link) => <Link key={link.href} href={link.href} onClick={() => setOpen(false)}>{link.label}</Link>)}
         {worldOrder.map((key) => <Link key={key} href={`${home}#world-${key}`} onClick={() => setOpen(false)}>{o.world.worlds[key].name}</Link>)}
         <Link href={`${root}/auth`} onClick={() => setOpen(false)}>{c.signIn}</Link>
         <Link href={`${root}/register`} onClick={() => setOpen(false)}>{c.memberJoin}</Link>

@@ -3973,7 +3973,8 @@
         "active": "Niets lopend.",
         "delivered": "Nog geen bezorgde bestellingen.",
         "closed": "Geen geannuleerde of terugbetaalde bestellingen."
-      }
+      },
+      "setPetLink": "Mijn Set Pet-bestellingen"
     },
     "orderDetail": {
       "title": "Bestelling",
@@ -5212,7 +5213,8 @@
         "refundApprovals": "Goedkeuring van terugbetalingen",
         "twoStep": "Inloggen in twee stappen",
         "walletAdjustments": "Correctieaanvragen",
-        "transactionExplorer": "Verkenner"
+        "transactionExplorer": "Verkenner",
+        "setPet": "Set Pet-aanvragen"
       },
       "palette": {
         "actions": "Snelle acties",
@@ -6203,6 +6205,150 @@
     "demoRecord": {
       "label": "Demo — verborgen op de live site",
       "hint": "Voorbeeldgegevens voor demo’s en tests. De live site toont ze nooit aan leden, ook niet als ze hier als geverifieerd of openbaar zijn gemarkeerd."
+    },
+    "setPet": {
+      "title": "Set Pet",
+      "intro": "Bijpassende outfits die leden ontwerpen. Stuur voor elke bestelling een drukproef; leden betalen na goedkeuring; daarna drukken en verzenden.",
+      "statusTabs": "Bestelstatus",
+      "search": "Zoeken",
+      "searchPlaceholder": "SP-000123 of naam",
+      "searchButton": "Zoeken",
+      "forbidden": "Je hebt commerce.view nodig voor Set Pet-bestellingen.",
+      "loadFailed": "Laden mislukt.",
+      "retry": "Opnieuw",
+      "loading": "Laden…",
+      "empty": "Geen bestellingen.",
+      "notFound": "Bestelling niet gevonden.",
+      "rowGarments": "{people} voor mensen, {pets} voor huisdieren, {zones} printvlakken",
+      "submittedOn": "Verstuurd {date}",
+      "readyBy": "Klaar op {date}",
+      "pages": "Pagina's",
+      "previous": "Vorige",
+      "next": "Volgende",
+      "back": "Alle Set Pet-bestellingen",
+      "inMemoryOf": "ter nagedachtenis aan {name}",
+      "actionsTitle": "Acties",
+      "garments": "Kleding",
+      "species": {
+        "DOG": "hond",
+        "CAT": "kat"
+      },
+      "memberNotes": "Opmerkingen van het lid: {notes}",
+      "placement": "Prints",
+      "placementHint": "Elke print komt op elk stuk van zijn soort: mensvlakken op elk mensenstuk, het huisdiervlak op elk huisdierstuk.",
+      "cm": "{size} cm",
+      "textPrint": "Tekst «{text}», {font}, {colour}",
+      "transform": "zoom {zoom}, verschuiving {x} / {y}",
+      "openDesign": "Ontwerp openen",
+      "downloadsAudited": "Ontwerpen openen alleen als download; elke opening wordt met reden vastgelegd.",
+      "priceTitle": "Prijs en betaling",
+      "discountLine": "Setkorting {percent}%: −{amount}",
+      "itemsTotal": "Kleding en druk: {amount}",
+      "paidLine": "Betaald {amount} (bezorging {shipping}, {method}) op {date}",
+      "refundedLine": "Teruggestort op het tegoed: {amount}",
+      "shipTo": "Bezorgen op: {address}",
+      "shippingLine": "Verzending: {note}",
+      "cancelledLine": "Geannuleerd door {by}: {reason}",
+      "actor": {
+        "MEMBER": "lid",
+        "STAFF": "team"
+      },
+      "timeline": "Geschiedenis",
+      "edited": "Lid heeft de bestelling gewijzigd",
+      "adminNote": "Teamnotitie",
+      "adminNoteHint": "Alleen het team ziet dit.",
+      "saveNote": "Notitie opslaan",
+      "reasonRequired": "Schrijf de reden die het lid leest.",
+      "trackingRequired": "Vul vervoerder en trackingnummer in.",
+      "defectRequired": "Na de start van het drukken alleen annuleren bij een drukfout: vink aan om te bevestigen.",
+      "memberIsNotified": "Het lid krijgt een melding op de site en per e-mail.",
+      "confirm": "Bevestigen",
+      "shippingNote": "Vervoerder en tracking",
+      "cancelReason": "Reden (het lid leest die)",
+      "statusNote": "Notitie (optioneel, het lid leest die)",
+      "defectConfirm": "Dit is een drukfout (volledige terugbetaling op het tegoed van het lid)",
+      "refundNote": "{amount} gaat terug naar het tegoed van het lid.",
+      "downloadReason": "Waarom open je het?",
+      "downloadConfirm": "Openen",
+      "downloadFailed": "Ontwerp kon niet worden geopend.",
+      "actionFailed": "Dat lukte niet.",
+      "proof": {
+        "title": "Drukproef",
+        "send": "Drukproef versturen",
+        "replace": "Nieuwere proef versturen",
+        "none": "Nog geen proef verstuurd.",
+        "alt": "Drukproef ({status})",
+        "status": {
+          "UPLOADING": "Uploaden",
+          "SENT": "Wacht op lid",
+          "APPROVED": "Goedgekeurd",
+          "SUPERSEDED": "Vervangen"
+        },
+        "petSize": "Huisdierprint: {w}×{h} cm",
+        "file": "Proefafbeelding (JPG, PNG of WebP)",
+        "petWidth": "Breedte huisdierprint (cm)",
+        "petHeight": "Hoogte huisdierprint (cm)",
+        "note": "Bericht aan het lid",
+        "type": "De proef moet een JPG-, PNG- of WebP-afbeelding zijn."
+      },
+      "reject": {
+        "action": "Ontwerp weigeren",
+        "reason": "Waarom het niet gedrukt kan worden (ongeschikt of auteursrechtelijk beschermd); het lid leest dit",
+        "current": "Ontwerp geweigerd: {reason}"
+      },
+      "action": {
+        "IN_PRODUCTION": "Drukken starten",
+        "SHIPPED": "Markeren als verzonden",
+        "CANCELLED": "Bestelling annuleren",
+        "defect": "Annuleren wegens drukfout"
+      },
+      "hint": {
+        "SUBMITTED": "Maak de drukproef en verstuur hem. Weiger een ontwerp als het niet gedrukt kan worden.",
+        "NEEDS_NEW_DESIGN": "Wacht op een nieuw ontwerp van het lid.",
+        "PROOF_SENT": "Wacht tot het lid goedkeurt of wijzigt. Je kunt een nieuwere proef sturen.",
+        "AWAITING_PAYMENT": "Het lid heeft de proef goedgekeurd en betaalt.",
+        "PAID": "Betaald: start met drukken zodra de pers vrij is.",
+        "IN_PRODUCTION": "Markeer na het inpakken als verzonden met tracking.",
+        "SHIPPED": "Klaar. Een drukfout kan nog worden terugbetaald.",
+        "CANCELLED": "Geannuleerd."
+      },
+      "zone": {
+        "RIGHT_UPPER_ARM": "Rechtermouw",
+        "LEFT_UPPER_ARM": "Linkermouw",
+        "FRONT_CENTER": "Voorkant",
+        "BACK": "Achterkant",
+        "PET_BACK": "Rug van het huisdier"
+      },
+      "status": {
+        "SUBMITTED": "Proef nodig",
+        "NEEDS_NEW_DESIGN": "Nieuw ontwerp nodig",
+        "PROOF_SENT": "Proef verstuurd",
+        "AWAITING_PAYMENT": "Wacht op betaling",
+        "PAID": "Betaald, te drukken",
+        "IN_PRODUCTION": "Wordt gedrukt",
+        "SHIPPED": "Verzonden",
+        "CANCELLED": "Geannuleerd"
+      },
+      "prices": {
+        "link": "Prijstabel",
+        "title": "Set Pet-prijzen",
+        "intro": "Vaste prijzen in toman. Prijs van een stuk = stuk zonder print + elk printvlak erop. Leden kunnen pas bestellen als elk stuk en elk vlak een prijs heeft.",
+        "updated": "Laatst opgeslagen {date}",
+        "garments": "Kleding (per stuk)",
+        "zones": "Printvlakken (per stuk)",
+        "zonesHint": "Eén keer per stuk dat de print draagt.",
+        "other": "Korting en doorlooptijd",
+        "toman": "{name} (toman)",
+        "discount": "Setkorting in % (mens en huisdier samen)",
+        "days": "Productietijd (werkdagen)",
+        "city": "Stad van de werkplaats (voor koeriersbezorging)",
+        "cityHint": "Koeriers bezorgen alleen in deze stad; de post overal.",
+        "invalid": "Prijzen moeten hele bedragen in toman zijn.",
+        "saved": "Prijzen opgeslagen. Ze gelden voor bestellingen die vanaf nu worden verstuurd of gewijzigd.",
+        "save": "Prijzen opslaan",
+        "forPeople": "Voor mensen",
+        "forPets": "Voor huisdieren"
+      }
     }
   },
   "blog": {
@@ -7830,7 +7976,8 @@
           "openTasks": "Openstaande taken",
           "pendingWalletTopUps": "Opwaardeerbewijzen",
           "pendingWalletAdjustments": "Correcties om goed te keuren",
-          "pendingCardDestinationChanges": "Rekeningwijzigingen ter goedkeuring"
+          "pendingCardDestinationChanges": "Rekeningwijzigingen ter goedkeuring",
+          "newSetPetRequests": "Nieuwe Set Pet-aanvragen"
         }
       },
       "performance": {
@@ -12929,5 +13076,371 @@
     "empty": "Geen transacties die bij deze filters passen.",
     "more": "Oudere laden",
     "end": "Dat was alles: {count} rijen."
+  },
+  "setPet": {
+    "landing": {
+      "eyebrow": "Nieuw bij opetlife",
+      "title": "Set Pet: matchende outfits voor jou en je huisdier",
+      "lede": "Jouw outfit en die van je huisdier in één ontwerp, en dat ontwerp maak je zelf.",
+      "line1": "Kies een T-shirt, hoodie of sweater, en daarna de kleur en maat.",
+      "line2": "Upload foto's of ontwerpen van jou en je huisdier en plaats ze op de borst, rug of mouwen van je kledingstuk en op de rug van de outfit van je huisdier.",
+      "line3": "Kies de maat van je huisdier met de maattabel; de outfit krijgt hetzelfde ontwerp.",
+      "cta": "Maak een set voor jou en je huisdier",
+      "navLabel": "Set Pet",
+      "videoLabel": "Introductievideo van Set Pet",
+      "play": "Set Pet-video afspelen",
+      "soundOn": "Geluid aan",
+      "soundOff": "Dempen",
+      "line4": "Je ziet al een prijsindicatie tijdens het ontwerpen. Voor het drukken krijg je een drukproef en je betaalt pas na je goedkeuring."
+    },
+    "page": {
+      "eyebrow": "Nieuw bij opetlife",
+      "title": "Set Pet: bijpassende kleding voor jou en je huisdier",
+      "lede": "Ontwerp één look voor jou en je huisdier: een T-shirt, hoodie of sweater voor jou, een shirt, hoodie of bandana voor elke hond of kat, met je eigen foto's of tekst – en bekijk het in 3D. Vóór het drukken sturen we je een drukproef.",
+      "start": "Maak je set",
+      "howTitle": "Zo werkt het",
+      "how": {
+        "build": {
+          "title": "Maak je set",
+          "body": "Kleding, maten, kleuren en prints, met direct een prijsindicatie."
+        },
+        "proof": {
+          "title": "Ontvang de drukproef",
+          "body": "Ons team stuurt een proef van precies hoe het gedrukt wordt. Tot je die goedkeurt, kun je alles nog wijzigen."
+        },
+        "pay": {
+          "title": "Goedkeuren en betalen",
+          "body": "Betaal het volledige bedrag uit je tegoed; vul het zo nodig aan via kaart-naar-kaart."
+        },
+        "make": {
+          "title": "Wij drukken het",
+          "body": "In de eigen werkplaats van opetlife, in ongeveer 5 werkdagen."
+        },
+        "ship": {
+          "title": "Bezorging",
+          "body": "Met dezelfde verzendmethoden als de shop."
+        }
+      },
+      "factsLabel": "Goed om te weten",
+      "facts": {
+        "print": {
+          "title": "Wat wordt gedrukt",
+          "body": "Je mouwen 10×10 cm, voor- of achterkant 20×20 cm en de rug van de kleding van je huisdier. Eén ontwerp kan op meerdere plekken; tekst in drie lettertypen."
+        },
+        "sizing": {
+          "title": "Maten S tot 3XL",
+          "body": "Unisex katoen met een maattabel in cm en een advies op basis van lengte en gewicht. Voor huisdieren kies je de maatletter met de gids."
+        },
+        "timing": {
+          "title": "Ongeveer 5 werkdagen",
+          "body": "Vanaf de betaling. Je krijgt updates op de site en per e-mail."
+        },
+        "price": {
+          "title": "Vaste prijzen",
+          "body": "Elk kledingstuk plus elk printvlak, met korting als de set zowel jouw kleding als die van je huisdier bevat. Gratis annuleren tot het drukken begint."
+        }
+      },
+      "buildTitle": "Maak je set",
+      "editTitle": "Bestelling {reference} wijzigen",
+      "done": {
+        "title": "Bestelling {reference} is ontvangen",
+        "editedTitle": "Bestelling {reference} is bijgewerkt",
+        "body": "We sturen je de drukproef op de site en per e-mail. Je betaalt pas na je goedkeuring.",
+        "view": "Mijn bestelling bekijken",
+        "another": "Nog een set maken"
+      },
+      "signIn": {
+        "body": "Ontwerp vrij; je hoeft pas in te loggen bij het versturen. Je set blijft op dit apparaat.",
+        "cta": "Inloggen",
+        "join": "Account aanmaken"
+      },
+      "mineTitle": "Mijn Set Pet-bestellingen"
+    },
+    "builder": {
+      "stepsLabel": "Stappen",
+      "steps": {
+        "garments": "Kleding",
+        "prints": "Prints",
+        "review": "Controleren en versturen"
+      },
+      "loading": "Laden…",
+      "loadError": "De ontwerper kon niet laden.",
+      "retry": "Opnieuw proberen",
+      "back": "Terug",
+      "next": "Volgende",
+      "previewLabel": "Voorbeeld",
+      "range": "Prijsindicatie: {min} tot {max}",
+      "autosave": {
+        "saving": "Concept wordt opgeslagen…",
+        "saved": "Concept opgeslagen in je account"
+      },
+      "garments": {
+        "title": "Wie draagt wat",
+        "lede": "Tot vijf stuks voor mensen en één voor elke hond of kat.",
+        "people": "Voor mensen",
+        "personN": "Stuk {n}",
+        "addPerson": "Stuk voor een persoon toevoegen",
+        "maxPeople": "Maximaal {max} stuks voor mensen.",
+        "pets": "Voor huisdieren",
+        "petN": "Huisdierkleding {n}",
+        "addPet": "Stuk voor een huisdier toevoegen",
+        "remove": "Verwijderen",
+        "type": "Kledingstuk",
+        "size": "Maat",
+        "colour": "Kleur",
+        "suggest": "Twijfel over de maat? Tabel en advies",
+        "height": "Lengte (cm)",
+        "weight": "Gewicht (kg)",
+        "suggested": "Aanbevolen maat: {size}",
+        "useSize": "Kies {size}",
+        "humanChart": "Plat gelegd, cm",
+        "chestWidth": "Borstbreedte",
+        "length": "Lengte",
+        "whichPet": "Welk huisdier",
+        "otherPet": "Ander huisdier (typ de naam)",
+        "petName": "Naam van het huisdier",
+        "species": "Hond of kat",
+        "dog": "Hond",
+        "cat": "Kat",
+        "sizeMismatch": "Deze maat lijkt niet te passen bij het geregistreerde gewicht van je huisdier. Je kunt hem toch kiezen.",
+        "petGuide": "Maatgids voor huisdieren",
+        "petChart": "Gids huisdierkleding, cm",
+        "neck": "Nek",
+        "chest": "Borst",
+        "back": "Ruglengte",
+        "sameColour": "Zelfde kleur als mijn stuk",
+        "p8": "Bij een set hoort de kleding van je huisdier. Alleen voor jezelf bestellen kan ter nagedachtenis aan een huisdier dat vermist of overleden is.",
+        "inMemoryOf": "Ter nagedachtenis aan",
+        "choose": "Kies",
+        "noMemorial": "Om zonder huisdierkleding te bestellen moet het huisdier in zijn profiel als vermist of overleden staan.",
+        "errors": {
+          "human": "Voeg minstens één stuk voor een persoon toe.",
+          "tooMany": "Maximaal {max} stuks voor mensen.",
+          "petName": "Typ de naam van je huisdier of kies het uit je profiel.",
+          "petRequired": "Voeg een stuk voor je huisdier toe, of kies het huisdier dat deze set herdenkt."
+        }
+      },
+      "prints": {
+        "title": "Prints",
+        "lede": "Kies een vlak en voeg een ontwerp of tekst toe. Eén ontwerp kan op meerdere vlakken.",
+        "size": "{cm}×{cm} cm",
+        "petSize": "Maat bepaald in de drukproef",
+        "empty": "Nog leeg",
+        "design": "Ontwerp",
+        "text": "Tekst",
+        "textLabel": "Tekst (tot 40 tekens)",
+        "font": "Lettertype",
+        "zoom": "Zoom",
+        "moveX": "Opzij schuiven",
+        "moveY": "Omhoog of omlaag schuiven",
+        "noBackground": "De afbeelding wordt gedrukt zoals ze is; achtergronden worden niet verwijderd.",
+        "clear": "Deze print verwijderen",
+        "pick": "Kies hierboven of in het voorbeeld een printvlak.",
+        "errors": {
+          "none": "Voeg minstens één print toe.",
+          "design": "Het ontwerp op {zone} is niet klaar; kies een ander of probeer opnieuw."
+        }
+      },
+      "upload": {
+        "cta": "Ontwerp uploaden",
+        "hint": "Foto's (JPG, PNG, WebP, HEIC) of drukbestanden (PDF, SVG, AI, PSD), tot {mb} MB",
+        "yours": "Jouw ontwerpen",
+        "untitled": "Ontwerp",
+        "uploading": "Uploaden…",
+        "checking": "Controleren…",
+        "lowRes": "{zone}: deze afbeelding kan wazig gedrukt worden (ongeveer {dpi} dpi). Een grotere afbeelding drukt scherper.",
+        "errors": {
+          "type": "Dit bestandstype kan niet.",
+          "tooManyFiles": "Verwijder een ongebruikt ontwerp voordat je een nieuw uploadt.",
+          "notUploaded": "Het bestand is niet aangekomen; probeer opnieuw.",
+          "tooLarge": "Het bestand is groter dan {mb} MB.",
+          "mismatch": "De inhoud past niet bij het bestandstype.",
+          "rejected": "Dit bestand kan niet.",
+          "generic": "Uploaden mislukt; probeer opnieuw.",
+          "wait": "Wacht tot je ontwerpen klaar zijn met uploaden.",
+          "someFailed": "Sommige ontwerpen zijn niet geüpload; controleer ze en probeer opnieuw."
+        }
+      },
+      "review": {
+        "title": "Controleren en versturen",
+        "lede": "Controleer je set en de exacte prijs. Je betaalt nu niets.",
+        "item": "{garment}, {size}, {colour}",
+        "line": "{garment} {size} met {zones} prints",
+        "discount": "Setkorting ({percent}%)",
+        "total": "Totaal (bezorging kies je bij het betalen)",
+        "next": {
+          "proof": "We sturen je een drukproef.",
+          "approve": "Je keurt hem goed of wijzigt je bestelling.",
+          "pay": "Je betaalt uit je tegoed.",
+          "make": "We drukken het in ongeveer {days} werkdagen.",
+          "ship": "Bezorgd met de verzendmethoden van de shop."
+        },
+        "notes": "Opmerkingen voor ons team (optioneel)",
+        "uploading": "Ontwerpen uploaden…",
+        "sending": "Versturen…",
+        "saveChanges": "Wijzigingen opslaan",
+        "send": "Bestelling versturen",
+        "signInAndSend": "Inloggen en versturen",
+        "editNote": "Wijzigingen gaan terug naar ons team voor een nieuwe drukproef.",
+        "noPaymentYet": "Je betaalt pas na goedkeuring van de drukproef.",
+        "errors": {
+          "tooManyOpen": "Je hebt meerdere lopende bestellingen; wacht tot er één klaar is of annuleer er één.",
+          "prices": "Je bestelling kon nu niet worden verstuurd; probeer het straks opnieuw.",
+          "designUnavailable": "Een ontwerp ontbreekt of is nog niet gecontroleerd.",
+          "notEditable": "Deze bestelling kan niet meer gewijzigd worden.",
+          "validation": "Er moet iets in de set worden aangepast; controleer elke stap.",
+          "generic": "De bestelling kon niet worden verstuurd; probeer opnieuw."
+        }
+      }
+    },
+    "zones": {
+      "RIGHT_UPPER_ARM": {
+        "name": "Rechtermouw"
+      },
+      "LEFT_UPPER_ARM": {
+        "name": "Linkermouw"
+      },
+      "FRONT_CENTER": {
+        "name": "Voorkant"
+      },
+      "BACK": {
+        "name": "Achterkant"
+      },
+      "PET_BACK": {
+        "name": "Rug van het huisdier"
+      }
+    },
+    "colours": {
+      "white": "Wit",
+      "black": "Zwart",
+      "heather-grey": "Grijs gemêleerd",
+      "navy": "Marineblauw",
+      "cream": "Crème",
+      "sage": "Saliegroen"
+    },
+    "garments": {
+      "HUMAN_TEE": "T-shirt",
+      "HUMAN_HOODIE": "Hoodie",
+      "HUMAN_SWEATSHIRT": "Sweater",
+      "PET_TEE": "Shirt/vestje",
+      "PET_HOODIE": "Hoodie",
+      "PET_BANDANA": "Bandana"
+    },
+    "fonts": {
+      "VAZIRMATN": "Eenvoudig",
+      "LALEZAR": "Vet",
+      "AMIRI": "Klassiek"
+    },
+    "preview": {
+      "zoneLabel": "{zone}, {cm}×{cm} cm",
+      "designOn": "{name} op {zone}",
+      "cm": "cm",
+      "human": "{garment}, {size}",
+      "pet": "Huisdier-{garment}, {size}",
+      "showBack": "Achterkant tonen",
+      "showFront": "Voorkant tonen",
+      "frontCaption": "Voorkant, met mouwen",
+      "backCaption": "Achterkant",
+      "petCaption": "Van boven: de rug van je huisdier",
+      "loading3d": "3D-weergave laden…",
+      "turn": "Omdraaien",
+      "rulerLabel": "Schaal: {cm} cm",
+      "modeLabel": "Weergave",
+      "mode3d": "3D",
+      "modeFlat": "Plat met liniaal",
+      "label3dHuman": "3D-weergave van je {garment}; sleep om te draaien",
+      "label3dPet": "3D-weergave van de {garment} van je huisdier; sleep om te draaien",
+      "approxNote": "Het voorbeeld komt dicht bij het echte formaat; de drukproef laat precies zien hoe het gedrukt wordt."
+    },
+    "status": {
+      "SUBMITTED": "Wacht op drukproef",
+      "NEEDS_NEW_DESIGN": "Nieuw ontwerp nodig",
+      "PROOF_SENT": "Drukproef klaar om goed te keuren",
+      "AWAITING_PAYMENT": "Wacht op betaling",
+      "PAID": "Betaald, in de drukwachtrij",
+      "IN_PRODUCTION": "Wordt gedrukt",
+      "SHIPPED": "Verzonden",
+      "CANCELLED": "Geannuleerd"
+    },
+    "shipping": {
+      "OPETLIFE_COURIER": "opetlife-koerier",
+      "SNAPPBOX_APP": "Snappbox",
+      "ALOPEYK_APP": "Alopeyk",
+      "POST_PISHTAZ": "Iraanse expresspost",
+      "SNAPPBOX": "Snappbox",
+      "ALOPEYK": "Alopeyk",
+      "DEV": "Testbezorging",
+      "STAFF_ARRANGED": "Ons team regelt de bezorging en neemt contact met je op (geen bezorgkosten online)"
+    },
+    "orders": {
+      "pageTitle": "Mijn Set Pet-bestellingen",
+      "new": "Nieuwe set maken",
+      "allOrders": "Al mijn bestellingen",
+      "loading": "Bestellingen laden…",
+      "loadError": "Je bestellingen konden niet laden.",
+      "retry": "Opnieuw proberen",
+      "empty": "Je hebt nog geen Set Pet-bestellingen.",
+      "start": "Maak je set",
+      "item": "{garment} {size} ({colour})",
+      "price": "Prijs: {amount}",
+      "discount": "inclusief {percent}% setkorting",
+      "next": {
+        "SUBMITTED": "Ons team maakt je drukproef. Je kunt je bestelling nog wijzigen.",
+        "NEEDS_NEW_DESIGN": "Een ontwerp kan niet gedrukt worden: {reason} Pas het aan en verstuur de bestelling opnieuw.",
+        "PROOF_SENT": "Zo wordt je set gedrukt. Keur hem goed om te betalen, of wijzig je bestelling.",
+        "PAID": "Betaald. Klaar rond {date}. Gratis annuleren tot het drukken begint.",
+        "IN_PRODUCTION": "Wordt gedrukt. Klaar rond {date}.",
+        "SHIPPED": "Verzonden. {note}"
+      },
+      "proofLoading": "Drukproef laden…",
+      "proofAlt": "Drukproef voor {reference}",
+      "petPrintSize": "Print op de rug van je huisdier: {w}×{h} cm",
+      "approve": "Drukproef goedkeuren",
+      "requestChange": "Mijn bestelling wijzigen",
+      "edit": "Mijn bestelling wijzigen",
+      "reorder": "Opnieuw bestellen",
+      "cancel": "Bestelling annuleren",
+      "confirmCancel": "Deze bestelling annuleren?",
+      "confirmCancelPaid": "Annuleren? Het volledige bedrag gaat terug naar je tegoed.",
+      "yesCancel": "Ja, annuleren",
+      "keep": "Behouden",
+      "cancelled": "Geannuleerd.",
+      "cancelledReason": "Geannuleerd: {reason}",
+      "refunded": "{amount} is teruggestort op je tegoed.",
+      "defectHelp": "Is er een drukfout?",
+      "support": "Contact met support",
+      "timeline": "Geschiedenis",
+      "edited": "Bestelling gewijzigd",
+      "errors": {
+        "proofChanged": "Er is een nieuwere drukproef verstuurd; bekijk die opnieuw.",
+        "notCancellable": "Het drukken is begonnen; neem bij een drukfout contact op met support.",
+        "generic": "Dat lukte niet; probeer opnieuw."
+      },
+      "pay": {
+        "title": "Betaling en bezorging",
+        "loading": "Laden…",
+        "address": "Bezorgen op",
+        "noAddress": "Voeg eerst een bezorgadres toe.",
+        "addAddress": "Adres toevoegen",
+        "shippingLoading": "Bezorgopties zoeken…",
+        "shipping": "Bezorging",
+        "eta": "binnen {days} dagen",
+        "noShipping": "Er is nog geen bezorgmethode voor dit adres; neem contact op met support.",
+        "items": "Je set",
+        "delivery": "Bezorging",
+        "total": "Totaal",
+        "balance": "Tegoed: {amount}",
+        "topUpNeeded": "Vul je tegoed aan met {amount} (kaart-naar-kaart of online) om te betalen.",
+        "topUp": "Tegoed aanvullen",
+        "paying": "Betalen…",
+        "cta": "{amount} betalen uit mijn tegoed",
+        "ctaPlain": "Betalen uit mijn tegoed",
+        "errors": {
+          "balance": "Je tegoed is nog niet genoeg.",
+          "changed": "Het totaal is veranderd; controleer het opnieuw.",
+          "generic": "De betaling is niet gelukt; probeer opnieuw."
+        }
+      }
+    }
   }
 }

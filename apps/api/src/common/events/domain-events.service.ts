@@ -106,6 +106,12 @@ export const DOMAIN_EVENT_TYPES = [
   "ShippingQuoteSelected",
   /** A seller changed where couriers pick up (who, when, before/after): the audit trail behind courier prices. */
   "SellerShippingProfileChanged",
+  // «ست پت» Set Pet orders (member side; staff proof and status changes are on the order timeline and audit log)
+  "SetPetRequestSubmitted",
+  "SetPetRequestEdited",
+  "SetPetRequestCancelled",
+  "SetPetProofApproved",
+  "SetPetRequestPaid",
   "FulfillmentCreated",
   "FulfillmentReadyForPickup",
   "FulfillmentFailed",
