@@ -7258,7 +7258,278 @@
     "shell": {
       "nav": {
         "support": "Support",
-        "shipping": "Versand"
+        "shipping": "Versand",
+        "overview": "Übersicht",
+        "orders": "Bestellungen",
+        "offers": "Angebote",
+        "inventory": "Lagerbestand",
+        "channels": "Vertriebskanäle",
+        "team": "Team",
+        "settings": "Einstellungen",
+        "finance": "Finanzen",
+        "promotions": "Aktionen"
+      },
+      "notASeller": {
+        "title": "Kein Verkäuferzugang",
+        "body": "Dein Konto gehört keiner Verkäuferorganisation an.",
+        "backToApp": "Zurück zu opetlife"
+      },
+      "chooseOrg": {
+        "title": "Verkäufer auswählen",
+        "body": "Du gehörst zu mehreren Verkäuferorganisationen. Wähle aus, in welcher du arbeiten möchtest."
+      },
+      "headerRole": "{role}",
+      "role": {
+        "OWNER": "Inhaber",
+        "ADMIN": "Administration",
+        "OPERATIONS": "Betrieb",
+        "CATALOG_MANAGER": "Katalogverwaltung",
+        "ORDER_MANAGER": "Bestellverwaltung",
+        "FINANCE": "Finanzen",
+        "SUPPORT": "Support",
+        "VIEWER": "Leseberechtigt"
+      },
+      "switchOrg": "Verkäufer wechseln",
+      "suspendedBanner": "Diese Verkäuferorganisation ist gesperrt. Neue operative Aktionen sind blockiert."
+    },
+    "orders": {
+      "title": "Bestellungen",
+      "loading": "Bestellungen werden geladen …",
+      "retry": "Erneut versuchen",
+      "empty": "Noch keine Bestellungen.",
+      "sourceMarketplace": "{provider}",
+      "sourcePetlife": "opetlife",
+      "externalOrderId": "Externe Bestellnummer: {id}",
+      "paymentSource": {
+        "PETLIFE_PAYMENT": "Über opetlife bezahlt",
+        "MARKETPLACE_COLLECTED": "Vom Marktplatz eingezogen",
+        "CASH_ON_DELIVERY": "Nachnahme",
+        "UNKNOWN": "Zahlungsquelle unbekannt"
+      }
+    },
+    "orderDetail": {
+      "title": "Bestelldetails",
+      "loading": "Bestellung wird geladen …",
+      "retry": "Erneut versuchen",
+      "sourceMarketplace": "{provider}",
+      "sourcePetlife": "opetlife",
+      "externalOrderId": "Externe Bestellnummer: {id}",
+      "paymentSource": {
+        "PETLIFE_PAYMENT": "Über opetlife bezahlt",
+        "MARKETPLACE_COLLECTED": "Vom Marktplatz eingezogen",
+        "CASH_ON_DELIVERY": "Nachnahme",
+        "UNKNOWN": "Zahlungsquelle unbekannt"
+      },
+      "items": "Artikel",
+      "quantity": "Menge: {count}",
+      "subtotal": "Zwischensumme",
+      "delivery": "Lieferung",
+      "total": "Gesamt",
+      "cancelledDoNotShip": "Diese Bestellung wurde storniert und erstattet. Bitte nicht versenden.",
+      "actionFailed": "Die Aktion ist fehlgeschlagen. Bitte versuche es erneut.",
+      "nextStep": "Nächster Schritt",
+      "markReady": "Verpackt und abholbereit markieren",
+      "requestCourier": "Kurier anfordern",
+      "cancelOrder": "Bestellung kann nicht erfüllt werden – stornieren",
+      "cancelExplain": "Der Kunde erhält sofort eine vollständige Erstattung ({amount}); die Artikel werden wieder deinem Bestand hinzugefügt.",
+      "cancelReason": "Grund (wird dem Kunden angezeigt)",
+      "cancelConfirm": "Stornieren und erstatten",
+      "promotionApplied": "Aktion: {name}",
+      "discount": "Rabatte",
+      "refundRequests": "Erstattungsanfragen",
+      "refundRequestsNote": "opetlife prüft Erstattungsanfragen; genehmigte Erstattungen werden mit deiner Abrechnung verrechnet.",
+      "orderStatus": {
+        "PENDING": "Ausstehend",
+        "CONFIRMED": "Bestätigt",
+        "PREPARING": "Wird vorbereitet",
+        "READY_FOR_FULFILLMENT": "Versandbereit",
+        "FULFILLED": "Abgeschlossen",
+        "CANCELLED": "Storniert",
+        "PARTIALLY_REFUNDED": "Teilweise erstattet",
+        "REFUNDED": "Erstattet"
+      },
+      "refundReason": {
+        "DAMAGED": "Beschädigt angekommen",
+        "WRONG_ITEM": "Falscher Artikel",
+        "NOT_AS_DESCRIBED": "Entspricht nicht der Beschreibung",
+        "MISSING_ITEMS": "Artikel fehlen",
+        "NOT_DELIVERED": "Nicht geliefert",
+        "PET_REACTION": "Mein Tier hat schlecht darauf reagiert",
+        "OTHER": "Sonstiges"
+      },
+      "refundStatus": {
+        "PENDING_REVIEW": "Wird geprüft",
+        "APPROVED": "Genehmigt",
+        "REJECTED": "Abgelehnt",
+        "WITHDRAWN": "Zurückgezogen"
+      }
+    },
+    "inventory": {
+      "title": "Lagerbestand",
+      "loading": "Lagerbestand wird geladen …",
+      "retry": "Erneut versuchen",
+      "empty": "Noch kein Lagerbestand vorhanden.",
+      "lowStock": "Niedriger Bestand",
+      "reserved": "Reserviert",
+      "available": "Verfügbar",
+      "onHand": "Gesamtbestand",
+      "save": "Speichern",
+      "adjustFailed": "Diese Anpassung würde den Bestand ins Negative setzen."
+    },
+    "channels": {
+      "title": "Vertriebskanäle",
+      "loading": "Vertriebskanäle werden geladen …",
+      "retry": "Erneut versuchen",
+      "connections": "Verbindungen",
+      "lastSync": "Zuletzt synchronisiert: {when}",
+      "neverSynced": "Noch nie synchronisiert",
+      "connect": "Verbinden",
+      "listings": "Angebote auf Marktplätzen",
+      "noListings": "Noch keine Marktplatzangebote",
+      "noListingsBody": "Ordne auf der Seite Angebote ein Angebot einem Kanal zu, um es zu veröffentlichen.",
+      "resync": "Erneut synchronisieren",
+      "publish": "Veröffentlichen",
+      "reconcile": "Abgleichen",
+      "inventoryMismatch": "Der veröffentlichte Bestand ({published}) weicht vom opetlife-Bestand ({canonical}) ab.",
+      "noDiscrepancy": "Keine Abweichung gefunden.",
+      "discrepancy": {
+        "INVENTORY_MISMATCH": "Bestandsabweichung erkannt.",
+        "PRICE_MISMATCH": "Preisabweichung erkannt.",
+        "LISTING_STATUS_MISMATCH": "Abweichender Angebotsstatus erkannt.",
+        "ORDER_STATUS_MISMATCH": "Abweichender Bestellstatus erkannt.",
+        "UNKNOWN_PROVIDER_REFERENCE": "Zuordnung des Angebots erforderlich."
+      }
+    },
+    "team": {
+      "title": "Team",
+      "loading": "Team wird geladen …",
+      "retry": "Erneut versuchen",
+      "invite": "Teammitglied hinzufügen",
+      "inviteIdentifier": "E-Mail oder Telefonnummer",
+      "inviteHint": "Die Person benötigt bereits ein opetlife-Konto.",
+      "role": "Rolle",
+      "inviteAction": "Einladen",
+      "inviteFailed": "Die Einladung konnte nicht gesendet werden. Bitte versuche es erneut.",
+      "statusLabel": {
+        "PENDING": "Ausstehend",
+        "ACTIVE": "Aktiv",
+        "DEACTIVATED": "Deaktiviert"
+      },
+      "remove": "Entfernen",
+      "roles": {
+        "OWNER": "Inhaber",
+        "ADMIN": "Administration",
+        "OPERATIONS": "Betrieb",
+        "CATALOG_MANAGER": "Katalogverwaltung",
+        "ORDER_MANAGER": "Bestellverwaltung",
+        "FINANCE": "Finanzen",
+        "SUPPORT": "Support",
+        "VIEWER": "Leseberechtigt"
+      }
+    },
+    "settings": {
+      "title": "Einstellungen",
+      "loading": "Einstellungen werden geladen …",
+      "retry": "Erneut versuchen",
+      "verificationNote": "Rechts- und Prüfungsangaben werden durch die Prüfung von opetlife verwaltet und können hier nicht geändert werden.",
+      "supportEmail": "Support-E-Mail",
+      "supportPhone": "Support-Telefon",
+      "city": "Stadt",
+      "timezone": "Zeitzone",
+      "description": "Beschreibung",
+      "save": "Speichern",
+      "saved": "Gespeichert"
+    },
+    "finance": {
+      "title": "Finanzen",
+      "loading": "Finanzen werden geladen …",
+      "retry": "Erneut versuchen",
+      "viewTransactions": "Transaktionen ansehen",
+      "viewAllSettlements": "Alle Abrechnungen ansehen",
+      "balance": {
+        "pending": "Ausstehend",
+        "reserved": "Zur Abrechnung vorgemerkt",
+        "available": "Auszahlbar",
+        "paid": "Bisher ausgezahlt"
+      },
+      "nextSettlementEligible": "Betrag für die nächste Abrechnung",
+      "accountCurrency": "{currency}-Konto · Abrechnungsrhythmus: {schedule}",
+      "schedule": {
+        "WEEKLY": "Wöchentlich",
+        "BIWEEKLY": "Alle zwei Wochen",
+        "MONTHLY": "Monatlich",
+        "MANUAL": "Manuell"
+      },
+      "lastSettlement": "Letzte Abrechnung",
+      "noSettlementsYet": "Noch keine Abrechnungen.",
+      "status": {
+        "CALCULATED": "Berechnet",
+        "APPROVED": "Genehmigt",
+        "PAID": "Ausgezahlt",
+        "FAILED": "Fehlgeschlagen",
+        "RECONCILIATION_REQUIRED": "Abgleich erforderlich",
+        "CANCELLED": "Storniert"
+      },
+      "transactions": {
+        "title": "Transaktionen",
+        "loading": "Transaktionen werden geladen …",
+        "retry": "Erneut versuchen",
+        "empty": "Noch keine Transaktionen.",
+        "loadMore": "Mehr laden",
+        "gross": "Brutto: {amount}",
+        "commission": "Provision: {amount}",
+        "settlementStatus": {
+          "CALCULATED": "Berechnet",
+          "APPROVED": "Genehmigt",
+          "PAID": "Ausgezahlt",
+          "FAILED": "Fehlgeschlagen",
+          "RECONCILIATION_REQUIRED": "Abgleich erforderlich",
+          "CANCELLED": "Storniert",
+          "UNSETTLED": "Nicht abgerechnet"
+        }
+      },
+      "settlements": {
+        "title": "Abrechnungen",
+        "loading": "Abrechnungen werden geladen …",
+        "retry": "Erneut versuchen",
+        "empty": "Noch keine Abrechnungen.",
+        "status": {
+          "CALCULATED": "Berechnet",
+          "APPROVED": "Genehmigt",
+          "PAID": "Ausgezahlt",
+          "FAILED": "Fehlgeschlagen",
+          "RECONCILIATION_REQUIRED": "Abgleich erforderlich",
+          "CANCELLED": "Storniert"
+        }
+      },
+      "settlementDetail": {
+        "title": "Abrechnung",
+        "loading": "Abrechnung wird geladen …",
+        "retry": "Erneut versuchen",
+        "status": {
+          "CALCULATED": "Berechnet",
+          "APPROVED": "Genehmigt",
+          "PAID": "Ausgezahlt",
+          "FAILED": "Fehlgeschlagen",
+          "RECONCILIATION_REQUIRED": "Abgleich erforderlich",
+          "CANCELLED": "Storniert"
+        },
+        "period": "{start} – {end}",
+        "breakdown": {
+          "gross": "Bruttowarenwert",
+          "commission": "Plattformprovision",
+          "refunds": "Erstattungen",
+          "adjustments": "Anpassungen",
+          "net": "Nettoauszahlung"
+        },
+        "payoutMethod": "Auszahlungsmethode",
+        "paidAt": "Ausgezahlt am {date}",
+        "items": "{count, plural, one {# Position} other {# Positionen}}",
+        "sourceType": {
+          "ORDER": "Bestellung",
+          "REFUND": "Erstattung",
+          "ADJUSTMENT": "Anpassung"
+        }
       }
     }
   },
