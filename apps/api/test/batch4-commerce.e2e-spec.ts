@@ -642,6 +642,30 @@ describe("Batch 4 — Commerce", () => {
       return c.post(`/seller-organizations/${sellerId}/catalog-product-requests`).send({ requestedTitle: title, brandName: "Request Brand", description: "Seller supplied product description", sourceName: "manual" });
     }
 
+    it("the directory lists active products nobody sells yet, hides drafts and other shops' state, and marks the shop's own offer", async () => {
+      const shop = await seller();
+      const other = await seller();
+      const title = `Directory food ${unique()}`;
+      const { product: listed, variant } = await product({ title });
+      const draft = await product({ title: `${title} draft` });
+      await prisma.product.update({ where: { id: draft.product.id }, data: { status: "DRAFT" } });
+      const search = (c: Client, sellerId: string) => c.get(`/seller-organizations/${sellerId}/catalog/search?q=${encodeURIComponent(title)}`);
+
+      // Not in the public shop search (no offer yet), but in the directory.
+      const publicItems = (await request(server).get(`/shop/products?search=${encodeURIComponent(title)}`).expect(200)).body.items as { id: string }[];
+      expect(publicItems.find((p) => p.id === listed.id)).toBeUndefined();
+      const before = (await search(shop.c, shop.id).expect(200)).body.items as { productId: string; variants: { id: string; myOffer: unknown }[] }[];
+      expect(before.map((i) => i.productId)).toEqual([listed.id]);
+      expect(before[0]!.variants).toEqual([expect.objectContaining({ id: variant.id, myOffer: null })]);
+
+      await shop.c.post(`/seller-organizations/${shop.id}/offers`).send({ productVariantId: variant.id, priceAmount: 450_000, initialOnHand: 5 }).expect(201);
+      const after = (await search(shop.c, shop.id).expect(200)).body.items[0];
+      expect(after.variants[0].myOffer).toMatchObject({ id: expect.any(String) });
+      // Another shop sees the product but not this shop's offer, and can't read this shop's directory view.
+      expect((await search(other.c, other.id).expect(200)).body.items[0].variants[0].myOffer).toBeNull();
+      expect([403, 404]).toContain((await search(other.c, shop.id)).status);
+    });
+
     it("requires catalog-manager access and deduplicates the same pending request", async () => {
       const owner = await seller();
       const title = `Request ${unique()}`;

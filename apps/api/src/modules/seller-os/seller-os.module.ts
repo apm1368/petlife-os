@@ -18,6 +18,7 @@ import { SellerOrderService } from "./seller-order.service";
 import { SellerDashboardService } from "./seller-dashboard.service";
 import { SellerPromotionController } from "./seller-promotion.controller";
 import { SellerCatalogRequestController } from "./seller-catalog-request.controller";
+import { SellerCatalogDirectoryController } from "./seller-catalog-directory.controller";
 import { SellerCatalogRequestService } from "./seller-catalog-request.service";
 import { PromotionsModule } from "../commerce/promotions/promotions.module";
 import { OrdersModule } from "../commerce/orders/orders.module";
@@ -31,6 +32,7 @@ import { OrdersModule } from "../commerce/orders/orders.module";
     SellerTeamController,
     SellerOfferController,
     SellerCatalogRequestController,
+    SellerCatalogDirectoryController,
     SellerInventoryController,
     SellerOrderController,
     SellerDashboardController,

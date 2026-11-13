@@ -7075,3 +7075,13 @@ export interface AdminPet360Dto {
   activity: { id: string; type: string; at: string; changedFields?: string[]; photoChanged?: boolean }[];
   diagnostics: { code: AdminPetDiagnosticCode; severity: "WARNING" | "INFO"; entityId?: string; detail?: Record<string, unknown> }[];
 }
+
+/** A catalog product as a shop sees it when listing (any active product, offered or not). */
+export interface SellerCatalogDirectoryItemDto {
+  productId: string;
+  title: string;
+  brandName: string | null;
+  categoryName: string;
+  imageUrl: string | null;
+  variants: { id: string; title: string | null; sku: string; weight: string | null; myOffer: { id: string; status: string } | null }[];
+}
