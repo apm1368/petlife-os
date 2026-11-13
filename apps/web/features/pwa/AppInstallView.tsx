@@ -2,11 +2,12 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
-import { Copy, Download, Laptop, Share, Smartphone, SquarePlus } from "@petlife/ui";
+import { Copy, Download, Laptop, Share, SquarePlus } from "@petlife/ui";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { formatLocaleNumber } from "@/lib/i18n/format";
 import { ANDROID_APK, androidDownloadLinks } from "./app-links";
 import { detectPlatform, type PlatformInfo } from "./platform";
+import { AndroidIcon, AppleIcon } from "./PlatformIcons";
 import { getPwaState, getServerPwaState, isStandalone, promptInstall, subscribePwa } from "./pwa-runtime";
 import "./app-install.css";
 
@@ -15,7 +16,7 @@ const localDigits = (text: string, locale: RouteLocale) => text.replace(/\d/g, (
 /**
  * /app — every way to get opetlife on a device (owner, 2026-11-13): the signed Android APK, the iPhone/iPad web app
  * (Safari → Add to Home Screen) and the desktop install. All three are always shown; the one for this device is
- * highlighted and listed first. Inside the installed app the install steps give way to "already installed".
+ * highlighted and listed first. The APK version, size and SHA-256 sit in a collapsed "file details". Inside the installed app the install steps give way to "already installed".
  */
 export function AppInstallView({ locale }: { locale: RouteLocale }) {
   const t = useTranslations("pwa.appPage");
@@ -61,7 +62,7 @@ export function AppInstallView({ locale }: { locale: RouteLocale }) {
       <div className="opl-app__grid">
         <section id="android" className="opl-app__card" data-current={current === "android"} style={{ order: order("android") }} aria-labelledby="opl-app-android">
           <div className="opl-app__card-head">
-            <span className="opl-app__icon" aria-hidden="true"><Smartphone size={22} /></span>
+            <span className="opl-app__icon" aria-hidden="true"><AndroidIcon /></span>
             <h2 id="opl-app-android">{t("android.title")}</h2>
             {badge("android")}
           </div>
@@ -72,11 +73,14 @@ export function AppInstallView({ locale }: { locale: RouteLocale }) {
                 <Download size={18} aria-hidden="true" />
                 {t("android.download")}
               </a>
-              <p className="opl-app__meta">{t("android.meta", { version: localDigits(ANDROID_APK.version, locale), size: formatLocaleNumber(Math.round(ANDROID_APK.sizeBytes / 1024), locale) })}</p>
-              <p className="opl-app__meta">
-                {t("android.sha")}: <code dir="ltr">{ANDROID_APK.sha256}</code>
-              </p>
               <p className="opl-app__hint">{tf("apkHint")}</p>
+              <details className="opl-app__details">
+                <summary>{t("android.details")}</summary>
+                <p className="opl-app__meta">{t("android.meta", { version: localDigits(ANDROID_APK.version, locale), size: formatLocaleNumber(Math.round(ANDROID_APK.sizeBytes / 1024), locale) })}</p>
+                <p className="opl-app__meta">
+                  {t("android.sha")}: <code dir="ltr">{ANDROID_APK.sha256}</code>
+                </p>
+              </details>
             </>
           ) : null}
           {current === "android" && pwa.installPrompt && !done ? (
@@ -95,7 +99,7 @@ export function AppInstallView({ locale }: { locale: RouteLocale }) {
 
         <section id="ios" className="opl-app__card" data-current={current === "ios"} style={{ order: order("ios") }} aria-labelledby="opl-app-ios">
           <div className="opl-app__card-head">
-            <span className="opl-app__icon" aria-hidden="true"><Smartphone size={22} /></span>
+            <span className="opl-app__icon" aria-hidden="true"><AppleIcon /></span>
             <h2 id="opl-app-ios">{t("ios.title")}</h2>
             {badge("ios")}
           </div>

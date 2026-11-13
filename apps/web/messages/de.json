@@ -10001,11 +10001,9 @@
         "googlePlay": "Bei Google Play laden",
         "apk": "Für Android herunterladen"
       },
-      "apkMeta": "Version {version} · {size} KB",
       "apkHint": "Öffne die Datei nach dem Download und erlaube, falls gefragt, die Installation aus dieser Quelle.",
-      "androidEntry": "Android: App herunterladen (APK)",
-      "iosEntry": "iPhone & iPad: Web-App installieren",
-      "iosEntryNote": "In Safari „Zum Home-Bildschirm“",
+      "androidEntry": "Für Android herunterladen",
+      "iosEntry": "Auf dem iPhone installieren",
       "allWays": "Alle Installationswege"
     },
     "appPage": {
@@ -10020,7 +10018,8 @@
         "download": "Android-App herunterladen (APK)",
         "meta": "Version {version} · {size} KB · ab Android 5",
         "sha": "Datei-Fingerabdruck (SHA-256)",
-        "webInstall": "Oder die Web-Version über Chrome installieren (ohne Download)"
+        "webInstall": "Oder die Web-Version über Chrome installieren (ohne Download)",
+        "details": "Dateidetails"
       },
       "ios": {
         "title": "iPhone und iPad",
@@ -10040,6 +10039,10 @@
         "install": "Auf diesem Computer installieren",
         "hint": "Kein Button? Nutze das Installationssymbol in der Adressleiste oder das Browsermenü."
       }
+    },
+    "credits": {
+      "title": "Symbole",
+      "androidRobot": "Der Android-Roboter wurde auf Grundlage eines von Google erstellten und geteilten Werks reproduziert oder verändert und wird gemäß der Lizenz Creative Commons Namensnennung 3.0 verwendet."
     }
   },
   "safety": {

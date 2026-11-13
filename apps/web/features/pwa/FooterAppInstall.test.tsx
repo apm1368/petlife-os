@@ -9,37 +9,49 @@ const standalone = (on: boolean) =>
 
 afterEach(() => standalone(false));
 
-describe("footer: the app on Android and iPhone/iPad (owner, 2026-11-13)", () => {
-  it("shows Android (APK download) and iPhone/iPad (web app steps) side by side, plus all ways to install", () => {
+describe("footer: two clean app buttons, Android and iPhone (owner, 2026-11-13)", () => {
+  it("shows only the Android download and the iPhone install, with icons and no version, size or SHA", () => {
     standalone(false);
-    renderWithIntl(<FooterAppInstall />, "fa");
-    const android = screen.getByRole("link", { name: /اندروید: دانلود اپ \(APK\)/ });
+    const { container } = renderWithIntl(<FooterAppInstall />, "fa");
+    const android = screen.getByRole("link", { name: "دانلود برای اندروید" });
     expect(android.getAttribute("href")).toBe("https://opetlife.ir/app/opetlife.apk");
     expect(android.hasAttribute("download")).toBe(true);
-    expect(android.textContent).toContain("نسخهٔ ۱.۰.۱۴ · ۱۷۸ کیلوبایت");
-    expect(screen.getByRole("link", { name: /آیفون و آیپد: نصب وب‌اپ/ }).getAttribute("href")).toBe("/fa/app#ios");
+    expect(android.querySelector("svg")).toBeTruthy();
+    const iphone = screen.getByRole("link", { name: "نصب روی آیفون" });
+    expect(iphone.getAttribute("href")).toBe("/fa/app#ios");
+    expect(iphone.querySelector("svg")).toBeTruthy();
     expect(screen.getByRole("link", { name: "همهٔ راه‌های نصب" }).getAttribute("href")).toBe("/fa/app");
-    // No browser prompt offered: no install button.
+    expect(screen.getAllByRole("link")).toHaveLength(3);
     expect(screen.queryByRole("button")).toBeNull();
+    const text = container.textContent ?? "";
+    for (const detail of ["SHA", "32806b76", "نسخه", "کیلوبایت", "۱.۰.۱۴"]) expect(text).not.toContain(detail);
   });
 
-  it.each([["en", "Android: download the app (APK)", "iPhone & iPad: install the web app"], ["ar", "أندرويد: تنزيل التطبيق (APK)", "آيفون وآيباد: تثبيت تطبيق الويب"], ["nl", "Android: app downloaden (APK)", "iPhone & iPad: web-app installeren"]] as const)("is translated in %s", (locale, android, ios) => {
+  it.each([
+    ["en", "Download for Android", "Install on iPhone"],
+    ["de", "Für Android herunterladen", "Auf dem iPhone installieren"],
+    ["es", "Descargar para Android", "Instalar en iPhone"],
+    ["ar", "تنزيل لأندرويد", "التثبيت على آيفون"],
+    ["nl", "Downloaden voor Android", "Installeren op iPhone"],
+  ] as const)("is translated in %s", (locale, android, ios) => {
     standalone(false);
     renderWithIntl(<FooterAppInstall />, locale);
-    expect(screen.getByRole("link", { name: new RegExp(android.replace(/[()]/g, "\\$&")) })).toBeTruthy();
-    expect(screen.getByRole("link", { name: new RegExp(ios) }).getAttribute("href")).toBe(`/${locale}/app#ios`);
+    expect(screen.getByRole("link", { name: android }).getAttribute("href")).toBe("https://opetlife.ir/app/opetlife.apk");
+    expect(screen.getByRole("link", { name: ios }).getAttribute("href")).toBe(`/${locale}/app#ios`);
   });
 
-  it("adds the browser's own install button when Chrome offers it", async () => {
+  it("opens the browser's own install prompt from the iPhone button where one exists (Chrome/Edge)", async () => {
     standalone(false);
     const prompt = vi.fn(async () => undefined);
     renderWithIntl(<FooterAppInstall />, "en");
     act(() => {
       window.dispatchEvent(Object.assign(new Event("beforeinstallprompt", { cancelable: true }), { prompt, userChoice: Promise.resolve({ outcome: "accepted", platform: "web" }) }));
     });
-    fireEvent.click(screen.getByRole("button", { name: "Install the app" }));
+    const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+    fireEvent(screen.getByRole("link", { name: "Install on iPhone" }), click);
+    expect(click.defaultPrevented).toBe(true);
     await waitFor(() => expect(prompt).toHaveBeenCalled());
-    await waitFor(() => expect(screen.queryByRole("link", { name: /Android: download the app/ })).toBeNull());
+    await waitFor(() => expect(screen.queryByRole("link", { name: "Download for Android" })).toBeNull());
   });
 
   it("is hidden inside the installed app", () => {

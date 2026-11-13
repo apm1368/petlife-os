@@ -18,6 +18,10 @@
 .opl-app__meta { font-size:.85rem; }
 .opl-app__meta code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.74rem; word-break:break-all; color:var(--opl-ink-3, var(--text-secondary)); }
 .opl-app__hint { font-size:.85rem; }
+.opl-app__details { font-size:.85rem; }
+.opl-app__details summary { display:inline-flex; align-items:center; min-height:44px; cursor:pointer; color:var(--opl-ink-2, var(--text-secondary)); font-weight:700; }
+.opl-app__details[open] summary { margin-bottom:4px; }
+.opl-app__details .opl-app__meta + .opl-app__meta { margin-top:6px; }
 .opl-app__stores { display:flex; flex-wrap:wrap; gap:8px; }
 .opl-app__notice { display:grid; gap:8px; padding:14px; border-radius:16px; background:var(--opl-cream, var(--surface-subtle)); }
 .opl-app__notice strong { color:var(--opl-ink, var(--text-primary)); }

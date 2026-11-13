@@ -9999,11 +9999,9 @@
         "googlePlay": "Descargar en Google Play",
         "apk": "Descargar para Android"
       },
-      "apkMeta": "Versión {version} · {size} KB",
       "apkHint": "Tras descargarla, abre el archivo y, si el teléfono lo pide, permite instalar desde este origen.",
-      "androidEntry": "Android: descargar la app (APK)",
-      "iosEntry": "iPhone y iPad: instalar la web app",
-      "iosEntryNote": "Desde Safari, “Añadir a pantalla de inicio”",
+      "androidEntry": "Descargar para Android",
+      "iosEntry": "Instalar en iPhone",
       "allWays": "Todas las formas de instalar"
     },
     "appPage": {
@@ -10018,7 +10016,8 @@
         "download": "Descargar la app para Android (APK)",
         "meta": "Versión {version} · {size} KB · Android 5 o posterior",
         "sha": "Huella del archivo (SHA-256)",
-        "webInstall": "O instala la versión web desde Chrome (sin descargar)"
+        "webInstall": "O instala la versión web desde Chrome (sin descargar)",
+        "details": "Detalles del archivo"
       },
       "ios": {
         "title": "iPhone y iPad",
@@ -10038,6 +10037,10 @@
         "install": "Instalar en este ordenador",
         "hint": "¿No ves el botón? Usa el icono de instalación de la barra de direcciones o el menú del navegador."
       }
+    },
+    "credits": {
+      "title": "Iconos",
+      "androidRobot": "El robot de Android se reproduce o modifica a partir de una obra creada y compartida por Google y se usa según los términos de la licencia Creative Commons Atribución 3.0."
     }
   },
   "safety": {

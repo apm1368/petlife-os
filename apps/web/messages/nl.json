@@ -11057,11 +11057,9 @@
         "googlePlay": "Ontdek het op Google Play",
         "apk": "Downloaden voor Android"
       },
-      "apkMeta": "Versie {version} · {size} KB",
       "apkHint": "Open het bestand na het downloaden en sta, als je telefoon erom vraagt, installatie vanuit deze bron toe.",
-      "androidEntry": "Android: app downloaden (APK)",
-      "iosEntry": "iPhone & iPad: web-app installeren",
-      "iosEntryNote": "Via Safari, ‘Zet op beginscherm’",
+      "androidEntry": "Downloaden voor Android",
+      "iosEntry": "Installeren op iPhone",
       "allWays": "Alle manieren om te installeren"
     },
     "appPage": {
@@ -11076,7 +11074,8 @@
         "download": "Android-app downloaden (APK)",
         "meta": "Versie {version} · {size} KB · Android 5 of nieuwer",
         "sha": "Vingerafdruk van het bestand (SHA-256)",
-        "webInstall": "Of installeer de webversie via Chrome (zonder download)"
+        "webInstall": "Of installeer de webversie via Chrome (zonder download)",
+        "details": "Bestandsdetails"
       },
       "ios": {
         "title": "iPhone en iPad",
@@ -11096,6 +11095,10 @@
         "install": "Op deze computer installeren",
         "hint": "Geen knop? Gebruik het installatie-icoon in de adresbalk of het browsermenu."
       }
+    },
+    "credits": {
+      "title": "Pictogrammen",
+      "androidRobot": "De Android-robot is gereproduceerd of aangepast op basis van werk dat door Google is gemaakt en gedeeld, en wordt gebruikt volgens de voorwaarden van de Creative Commons Naamsvermelding 3.0-licentie."
     }
   },
   "safety": {

@@ -33,7 +33,10 @@ describe("/app: every way to install opetlife (owner, 2026-11-13)", () => {
     const download = within(card("اندروید")).getByRole("link", { name: "دانلود اپ اندروید (APK)" });
     expect(download.getAttribute("href")).toBe("https://opetlife.ir/app/opetlife.apk");
     expect(download.hasAttribute("download")).toBe(true);
-    expect(within(card("اندروید")).getByText("32806b76452526c2d4f74383b09b6c922eb3f2ffdc4bcce20cf1ec6e4d5ee700")).toBeTruthy();
+    // Version, size and SHA-256 sit in a collapsed "file details", not in the open card.
+    const details = within(card("اندروید")).getByText("جزئیات فایل").closest("details");
+    expect(details?.hasAttribute("open")).toBe(false);
+    expect(within(details as HTMLElement).getByText("32806b76452526c2d4f74383b09b6c922eb3f2ffdc4bcce20cf1ec6e4d5ee700")).toBeTruthy();
   });
 
   it("gives iPhone Safari the Add to Home Screen steps", () => {

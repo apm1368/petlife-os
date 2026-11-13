@@ -10988,11 +10988,9 @@
         "googlePlay": "Get it on Google Play",
         "apk": "Download for Android"
       },
-      "apkMeta": "Version {version} · {size} KB",
       "apkHint": "After downloading, open the file and, if your phone asks, allow installs from this source.",
-      "androidEntry": "Android: download the app (APK)",
-      "iosEntry": "iPhone & iPad: install the web app",
-      "iosEntryNote": "From Safari, “Add to Home Screen”",
+      "androidEntry": "Download for Android",
+      "iosEntry": "Install on iPhone",
       "allWays": "All ways to install"
     },
     "appPage": {
@@ -11007,7 +11005,8 @@
         "download": "Download the Android app (APK)",
         "meta": "Version {version} · {size} KB · Android 5 or later",
         "sha": "File fingerprint (SHA-256)",
-        "webInstall": "Or install the web version from Chrome (no download)"
+        "webInstall": "Or install the web version from Chrome (no download)",
+        "details": "File details"
       },
       "ios": {
         "title": "iPhone and iPad",
@@ -11027,6 +11026,10 @@
         "install": "Install on this computer",
         "hint": "No button? Use the install icon in the address bar or the browser menu."
       }
+    },
+    "credits": {
+      "title": "Icons",
+      "androidRobot": "The Android robot is reproduced or modified from work created and shared by Google and used according to terms described in the Creative Commons 3.0 Attribution License."
     }
   },
   "safety": {
