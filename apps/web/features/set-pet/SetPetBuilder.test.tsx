@@ -103,7 +103,7 @@ describe("Set Pet builder (owner's #368 answers)", () => {
     expect(svc.deleteDraft).toHaveBeenCalled();
   });
 
-  it("explains P8 when the pet garment is removed, and waits for prices before sending", async () => {
+  it("explains P8 when the pet garment is removed, and never shows a coming-soon state without prices", async () => {
     svc.options.mockResolvedValue({ ...OPTIONS, pricesReady: false });
     renderWithIntl(<SetPetBuilder signedIn={false} onSubmitted={vi.fn()} />);
     await screen.findByRole("heading", { name: "Who wears what" });
@@ -111,6 +111,7 @@ describe("Set Pet builder (owner's #368 answers)", () => {
     expect(screen.getByText(/in memory of a pet that is lost or has passed away/)).toBeTruthy();
     next();
     expect(screen.getByRole("alert").textContent).toContain("Add a garment for your pet");
-    expect(screen.getAllByText("Prices will be published soon; you can build your set now.").length).toBeGreaterThan(0);
+    expect(screen.queryByText(/^Price range:/)).toBeNull();
+    expect(screen.queryByText(/soon/i)).toBeNull();
   });
 });

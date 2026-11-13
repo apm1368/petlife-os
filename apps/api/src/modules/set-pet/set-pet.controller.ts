@@ -8,7 +8,7 @@ import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { CurrentUser } from "../../common/auth/current-user.decorator";
 import type { SessionUser } from "../../common/session/session.service";
 import { SET_PET_FILE_MAX_BYTES } from "./set-pet-files";
-import { SetPetService } from "./set-pet.service";
+import { SET_PET_STAFF_ARRANGED, SetPetService } from "./set-pet.service";
 
 class UploadTargetDto {
   @IsString() @Length(3, 200) filename!: string;
@@ -63,7 +63,8 @@ class ShippingQueryDto {
 
 class PayDto {
   @IsUUID() addressId!: string;
-  @IsIn(Object.values(ShippingProvider)) shippingProvider!: ShippingProvider;
+  /** One of the shop's methods, or STAFF_ARRANGED when none serves the address. */
+  @IsIn([...Object.values(ShippingProvider), SET_PET_STAFF_ARRANGED]) shippingProvider!: string;
   /** The total (IRR) the member saw; paying fails rather than charge anything else. */
   @Type(() => Number) @IsInt() @Min(1) expectedTotalIrr!: number;
 }

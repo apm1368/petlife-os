@@ -346,7 +346,7 @@ export function AdminSetPetDetailView({ id }: { id: string }) {
           <li className="font-medium">{t("itemsTotal", { amount: money(data.price.totalIrr) })}</li>
           {data.payment.totalPaidIrr != null ? (
             <li className="font-medium">
-              {t("paidLine", { amount: money(data.payment.totalPaidIrr), shipping: data.payment.shippingIrr != null ? money(data.payment.shippingIrr) : "—", method: data.payment.shippingProvider ? tp(data.payment.shippingProvider) : "—", date: data.payment.paidAt ? dateTime(data.payment.paidAt) : "—" })}
+              {t("paidLine", { amount: money(data.payment.totalPaidIrr), shipping: data.payment.shippingIrr != null ? money(data.payment.shippingIrr) : "—", method: tp(data.payment.shippingProvider ?? "STAFF_ARRANGED"), date: data.payment.paidAt ? dateTime(data.payment.paidAt) : "—" })}
             </li>
           ) : null}
           {data.payment.refundedIrr ? <li>{t("refundedLine", { amount: money(data.payment.refundedIrr) })}</li> : null}

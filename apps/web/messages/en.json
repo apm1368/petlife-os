@@ -12952,7 +12952,6 @@
         "line": "{garment} {size} with {zones} prints",
         "discount": "Set discount ({percent}%)",
         "total": "Total (delivery chosen at payment)",
-        "pricesSoon": "Prices will be published soon; you can build your set now.",
         "next": {
           "proof": "We send you a print proof.",
           "approve": "You approve it, or change your order.",
@@ -12970,7 +12969,7 @@
         "noPaymentYet": "You pay only after you approve the print proof.",
         "errors": {
           "tooManyOpen": "You have several orders in progress; wait for one to finish or cancel one.",
-          "prices": "Prices aren't published yet; try again soon.",
+          "prices": "Your order couldn't be sent right now; please try again a little later.",
           "designUnavailable": "A design is missing or not checked yet.",
           "notEditable": "This order can no longer be changed.",
           "validation": "Something in the set needs fixing; check each step.",
@@ -13054,7 +13053,8 @@
       "POST_PISHTAZ": "Iran Post express",
       "SNAPPBOX": "Snappbox",
       "ALOPEYK": "Alopeyk",
-      "DEV": "Test delivery"
+      "DEV": "Test delivery",
+      "STAFF_ARRANGED": "Our team arranges delivery and contacts you (no delivery fee online)"
     },
     "orders": {
       "pageTitle": "My Set Pet orders",

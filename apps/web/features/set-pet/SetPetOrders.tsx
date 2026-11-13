@@ -121,7 +121,7 @@ function PayPanel({ order, onPaid }: { order: SetPetRequestDto; onPaid: (o: SetP
               <label key={o.provider} className={o.provider === provider ? "is-on" : undefined}>
                 <input type="radio" name={`ship-${order.id}`} checked={o.provider === provider} onChange={() => setProvider(o.provider)} />
                 <span>{tp(o.provider)}</span>
-                <strong>{money(o.priceIrr)}</strong>
+                {o.provider === "STAFF_ARRANGED" ? <span /> : <strong>{money(o.priceIrr)}</strong>}
                 {o.etaDays ? <small>{t("eta", { days: formatLocaleNumber(o.etaDays, locale) })}</small> : null}
               </label>
             ))}

@@ -233,6 +233,29 @@ describe("Set Pet orders (member side)", () => {
     expect((await get(owner, "/set-pet/draft").expect(200)).body).toEqual({ draft: null });
   });
 
+  it("falls back to staff-arranged delivery (no online fee) when no shop method serves the address", async () => {
+    await db.setPetSettings.upsert({ where: { id: "default" }, create: { id: "default", ...prices }, update: prices });
+    await db.shippingMethodSetting.updateMany({ where: { provider: { in: ["POST_PISHTAZ", "OPETLIFE_COURIER", "SNAPPBOX_APP", "ALOPEYK_APP"] } }, data: { enabled: false } });
+    const order = (await post(owner, "/set-pet/requests").send({ items: [{ garment: "HUMAN_TEE", size: "L", colour: "white" }, { garment: "PET_TEE", size: "S", colour: "white", petId }], placements: [{ zone: "BACK", text: "Ma", font: "AMIRI" }] }).expect(201)).body;
+    const proof = await db.setPetProof.create({ data: { requestId: order.id, objectKey: `set-pet-proofs/${order.id}/${randomUUID()}.png`, mimeType: "image/png", fileSizeBytes: 10, status: "SENT", sentAt: new Date(), uploadedByAdminUserId: randomUUID() } });
+    await db.setPetRequest.update({ where: { id: order.id }, data: { status: "PROOF_SENT" } });
+    await post(owner, `/set-pet/requests/${order.id}/approve-proof`).send({ proofId: proof.id }).expect(201);
+    const options = (await get(owner, `/set-pet/requests/${order.id}/shipping-options?addressId=${addressId}`).expect(200)).body;
+    expect(options).toEqual([{ provider: "STAFF_ARRANGED", priceIrr: 0, etaDays: null }]);
+    await post(owner, `/set-pet/requests/${order.id}/pay`).send({ addressId, shippingProvider: "POST_PISHTAZ", expectedTotalIrr: order.price.totalIrr }).expect(400);
+    await wallet.credit({ userId: owner.id, balanceType: WalletBalanceType.PURCHASE_ONLY, amount: order.price.totalIrr, source: WalletCreditSource.TOP_UP, referenceType: "TEST_TOP_UP", referenceId: randomUUID() });
+    const paid = (await post(owner, `/set-pet/requests/${order.id}/pay`).send({ addressId, shippingProvider: "STAFF_ARRANGED", expectedTotalIrr: order.price.totalIrr }).expect(201)).body;
+    expect(paid).toMatchObject({ status: "PAID", payment: { shippingProvider: null, shippingIrr: 0, totalPaidIrr: order.price.totalIrr } });
+  });
+
+  it("refuses an order the price table can't price, and asks staff to fill the table", async () => {
+    await db.setPetSettings.update({ where: { id: "default" }, data: { zonePricesIrr: {} } });
+    expect((await post(owner, "/set-pet/requests").send({ items: [{ garment: "HUMAN_TEE", size: "L", colour: "white" }, { garment: "PET_TEE", size: "S", colour: "white", petId }], placements: [{ zone: "BACK", text: "Ma", font: "AMIRI" }] }).expect(409)).body.error.code).toBe("SET_PET_PRICES_NOT_SET");
+    await post(owner, "/set-pet/requests").send({ items: [{ garment: "HUMAN_TEE", size: "L", colour: "white" }, { garment: "PET_TEE", size: "S", colour: "white", petId }], placements: [{ zone: "BACK", text: "Ma", font: "AMIRI" }] }).expect(409);
+    expect(await db.adminTask.count({ where: { dedupeKey: { startsWith: "set-pet-price-table:" }, status: "OPEN" } })).toBe(1);
+    await db.setPetSettings.update({ where: { id: "default" }, data: { zonePricesIrr: prices.zonePricesIrr } });
+  });
+
   it("keeps one size-capped draft per member (P5)", async () => {
     await put(owner, "/set-pet/draft").send({ data: { step: "garments", items: [{ garment: "HUMAN_TEE" }] } }).expect(200);
     expect((await get(owner, "/set-pet/draft").expect(200)).body.draft.data).toEqual({ step: "garments", items: [{ garment: "HUMAN_TEE" }] });

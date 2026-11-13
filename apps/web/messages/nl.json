@@ -13021,7 +13021,6 @@
         "line": "{garment} {size} met {zones} prints",
         "discount": "Setkorting ({percent}%)",
         "total": "Totaal (bezorging kies je bij het betalen)",
-        "pricesSoon": "De prijzen worden binnenkort bekendgemaakt; je kunt je set nu al maken.",
         "next": {
           "proof": "We sturen je een drukproef.",
           "approve": "Je keurt hem goed of wijzigt je bestelling.",
@@ -13039,7 +13038,7 @@
         "noPaymentYet": "Je betaalt pas na goedkeuring van de drukproef.",
         "errors": {
           "tooManyOpen": "Je hebt meerdere lopende bestellingen; wacht tot er één klaar is of annuleer er één.",
-          "prices": "De prijzen zijn nog niet bekend; probeer het binnenkort opnieuw.",
+          "prices": "Je bestelling kon nu niet worden verstuurd; probeer het straks opnieuw.",
           "designUnavailable": "Een ontwerp ontbreekt of is nog niet gecontroleerd.",
           "notEditable": "Deze bestelling kan niet meer gewijzigd worden.",
           "validation": "Er moet iets in de set worden aangepast; controleer elke stap.",
@@ -13123,7 +13122,8 @@
       "POST_PISHTAZ": "Iraanse expresspost",
       "SNAPPBOX": "Snappbox",
       "ALOPEYK": "Alopeyk",
-      "DEV": "Testbezorging"
+      "DEV": "Testbezorging",
+      "STAFF_ARRANGED": "Ons team regelt de bezorging en neemt contact met je op (geen bezorgkosten online)"
     },
     "orders": {
       "pageTitle": "Mijn Set Pet-bestellingen",

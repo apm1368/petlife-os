@@ -12928,7 +12928,6 @@
         "line": "{garment} {size} con {zones} diseños",
         "discount": "Descuento de set ({percent} %)",
         "total": "Total (envío al pagar)",
-        "pricesSoon": "Los precios se publicarán pronto; ya puedes crear tu set.",
         "next": {
           "proof": "Te enviamos una prueba de impresión.",
           "approve": "La apruebas o cambias tu pedido.",
@@ -12946,7 +12945,7 @@
         "noPaymentYet": "Solo pagas después de aprobar la prueba de impresión.",
         "errors": {
           "tooManyOpen": "Tienes varios pedidos en curso; espera a que termine uno o cancela uno.",
-          "prices": "Los precios aún no se han publicado; vuelve a intentarlo pronto.",
+          "prices": "Tu pedido no se pudo enviar ahora; inténtalo de nuevo un poco más tarde.",
           "designUnavailable": "Falta un diseño o aún no está comprobado.",
           "notEditable": "Este pedido ya no se puede cambiar.",
           "validation": "Hay algo que corregir en el set; revisa cada paso.",
@@ -13030,7 +13029,8 @@
       "POST_PISHTAZ": "Correo urgente de Irán",
       "SNAPPBOX": "Snappbox",
       "ALOPEYK": "Alopeyk",
-      "DEV": "Envío de prueba"
+      "DEV": "Envío de prueba",
+      "STAFF_ARRANGED": "Nuestro equipo organiza el envío y te contacta (sin coste de envío en línea)"
     },
     "orders": {
       "pageTitle": "Mis pedidos de Set Pet",

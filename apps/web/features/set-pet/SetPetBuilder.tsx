@@ -804,9 +804,7 @@ export function SetPetBuilder({ signedIn, editOrder, initial, onSubmitted }: Pro
                     <tr className="is-total"><th scope="row">{t("review.total")}</th><td>{money(exact.totalIrr)}</td></tr>
                   </tbody>
                 </table>
-              ) : (
-                <p className="setpet-note" role="status">{t("review.pricesSoon")}</p>
-              )}
+              ) : null}
               <ol className="setpet-next">
                 <li>{t("review.next.proof")}</li>
                 <li>{t("review.next.approve")}</li>
@@ -819,7 +817,7 @@ export function SetPetBuilder({ signedIn, editOrder, initial, onSubmitted }: Pro
                 <textarea rows={3} maxLength={1000} value={s.notes} onChange={(e) => update({ notes: e.target.value })} />
               </label>
               {submitError ? <p className="setpet-error" role="alert"><CircleAlert size={16} aria-hidden="true" />{submitError}</p> : null}
-              <button type="button" className="opl-btn primary" disabled={!!submitting || !pricesReady} onClick={() => void submit()}>
+              <button type="button" className="opl-btn primary" disabled={!!submitting} onClick={() => void submit()}>
                 {submitting === "uploading" ? t("review.uploading") : submitting === "sending" ? t("review.sending") : editOrder ? t("review.saveChanges") : signedIn ? t("review.send") : t("review.signInAndSend")}
               </button>
               <p className="setpet-note">{editOrder ? t("review.editNote") : t("review.noPaymentYet")}</p>
@@ -828,10 +826,8 @@ export function SetPetBuilder({ signedIn, editOrder, initial, onSubmitted }: Pro
 
           {stepError ? <p ref={errorRef} tabIndex={-1} className="setpet-error" role="alert"><CircleAlert size={16} aria-hidden="true" />{stepError}</p> : null}
 
-          {range && step !== "review" ? (
-            <p className="setpet-range" aria-live="polite">
-              {pricesReady ? t("range", { min: money(range.minIrr), max: money(range.maxIrr) }) : t("review.pricesSoon")}
-            </p>
+          {range && pricesReady && step !== "review" ? (
+            <p className="setpet-range" aria-live="polite">{t("range", { min: money(range.minIrr), max: money(range.maxIrr) })}</p>
           ) : null}
 
           <div className="setpet-nav">

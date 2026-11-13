@@ -1344,7 +1344,7 @@ model User {
   paidSubscriptions          Subscription[]             @relation("SubscriptionPayer")
 
   adminUser                 AdminUser?
-  adminTwoStepFactor        AdminTwoStepFactor?
+  adminTwoStepFactor     AdminTwoStepFactor?
   supportCasesRequested     SupportCase[]
   supportMessages           SupportMessage[]
   disputesRaised            Dispute[]
@@ -1357,11 +1357,11 @@ model User {
   ProductFavorite           ProductFavorite[]
   OrderRefundRequest        OrderRefundRequest[]
   RepeatDeliverySchedule    RepeatDeliverySchedule[]
-  chatParticipations        ChatParticipant[]         @relation("ChatParticipations")
-  chatMessagesSent          ChatMessage[]             @relation("ChatMessagesSent")
-  blocksMade                UserBlock[]               @relation("BlocksMade")
-  blocksReceived            UserBlock[]               @relation("BlocksReceived")
-  clinicInvitationsReceived ClinicInvitation[]        @relation("ClinicInvitationsReceived")
+  chatParticipations        ChatParticipant[]        @relation("ChatParticipations")
+  chatMessagesSent          ChatMessage[]            @relation("ChatMessagesSent")
+  blocksMade                UserBlock[]              @relation("BlocksMade")
+  blocksReceived            UserBlock[]              @relation("BlocksReceived")
+  clinicInvitationsReceived ClinicInvitation[]       @relation("ClinicInvitationsReceived")
   walletAccount             WalletAccount?
   cardTransferPayments      CardTransferPayment[]
   petTaxiRides              PetTaxiRide[]
@@ -1369,10 +1369,10 @@ model User {
   walletAdjustmentRequests  WalletAdjustmentRequest[]
   lostPetAreaAlert          LostPetAreaAlert?
 
-  clinicClientLinks ClinicImportedContact[] @relation("ClinicClientLinkedUser")
-  setPetRequests    SetPetRequest[]
-  setPetDesignFiles SetPetDesignFile[]
-  setPetDraft       SetPetDraft?
+  clinicClientLinks        ClinicImportedContact[]  @relation("ClinicClientLinkedUser")
+  setPetRequests           SetPetRequest[]
+  setPetDesignFiles        SetPetDesignFile[]
+  setPetDraft              SetPetDraft?
 
   @@map("users")
 }
@@ -1424,19 +1424,19 @@ model PasswordResetToken {
 
 /// Server-side session record backing the HTTP-only session cookie. The cookie carries only the id.
 model Session {
-  id                String    @id @default(uuid()) @db.Uuid
-  userId            String    @db.Uuid
-  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userAgent         String?
-  ipAddress         String?
-  expiresAt         DateTime
-  rotatedAt         DateTime  @default(now())
-  lastSeenAt        DateTime  @default(now())
-  revokedAt         DateTime?
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @db.Uuid
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAgent  String?
+  ipAddress  String?
+  expiresAt  DateTime
+  rotatedAt  DateTime  @default(now())
+  lastSeenAt DateTime  @default(now())
+  revokedAt  DateTime?
   /// When this session last passed the admin two-step check (TOTP or a recovery code). Admin routes need it to be
   /// recent while the account has two-step sign-in on; consumer routes never read it.
   twoStepVerifiedAt DateTime?
-  createdAt         DateTime  @default(now())
+  createdAt  DateTime  @default(now())
 
   @@index([userId])
   @@map("sessions")
@@ -2183,16 +2183,16 @@ model ProviderOrganization {
   /// Null retains the evidence policy of cases submitted before the Wave 2 rollout.
   verificationPolicyVersion String?
 
-  phone                      String?
-  email                      String?
-  description                String?
+  phone       String?
+  email       String?
+  description String?
   /// Every service kind the partner offers (multi-select at signup); `type` stays the first/primary one.
-  serviceKinds               ProviderType[]      @default([])
+  serviceKinds               ProviderType[]             @default([])
   /// The partner's shop when one signup created both a service business and a shop (same owner).
-  linkedSellerOrganizationId String?             @unique @db.Uuid
-  linkedSellerOrganization   SellerOrganization? @relation("ProviderSellerLink", fields: [linkedSellerOrganizationId], references: [id], onDelete: SetNull)
-  logoUrl                    String?
-  websiteUrl                 String?
+  linkedSellerOrganizationId String?                    @unique @db.Uuid
+  linkedSellerOrganization   SellerOrganization?        @relation("ProviderSellerLink", fields: [linkedSellerOrganizationId], references: [id], onDelete: SetNull)
+  logoUrl     String?
+  websiteUrl  String?
 
   /// Batch 3 public profile. Media are repository/storage-owned paths, never hotlinks.
   coverImageUrl String?
@@ -2606,16 +2606,16 @@ model Booking {
   bookingSeriesId String?        @db.Uuid
   bookingSeries   BookingSeries? @relation(fields: [bookingSeriesId], references: [id], onDelete: SetNull)
 
-  startAt               DateTime
+  startAt  DateTime
   /// Automatic appointment reminders (booking-reminder.worker.ts): set when each one was handled, sent or skipped.
   reminder24hSentAt     DateTime?
   reminder2hSentAt      DateTime?
   /// The owner tapped "I'll be there" — shown to the provider.
   attendanceConfirmedAt DateTime?
-  endAt                 DateTime
+  endAt    DateTime
   /// The provider location's timezone at booking time — authoritative for
   /// this appointment's local time, independent of the viewer's own locale.
-  timezone              String
+  timezone String
 
   bookingStatus BookingStatus @default(CONFIRMED)
   /// For NO_SHOW: who did not show up (OWNER = the member, marked by the provider; PROVIDER = reported by the member).
@@ -2832,26 +2832,26 @@ model CareCalendarEvent {
 /// SellerOffers (see ShopService); a seller under review or suspended stays
 /// fully readable for admin/history purposes, just never discoverable.
 model SellerOrganization {
-  id                         String                   @id @default(uuid()) @db.Uuid
-  name                       String
-  verificationStatus         SellerVerificationStatus @default(NOT_STARTED)
-  verificationSubmittedAt    DateTime?
-  verificationNote           String?
-  verificationPolicyVersion  String?
-  status                     SellerStatus             @default(ACTIVE)
-  countryCode                String
-  city                       String?
+  id                        String                   @id @default(uuid()) @db.Uuid
+  name                      String
+  verificationStatus        SellerVerificationStatus @default(NOT_STARTED)
+  verificationSubmittedAt   DateTime?
+  verificationNote          String?
+  verificationPolicyVersion String?
+  status                    SellerStatus             @default(ACTIVE)
+  countryCode               String
+  city                      String?
   /// Postal address from partner signup (city is the existing `city`); province = استان.
-  province                   String?
-  addressLine                String?
-  postalCode                 String?
-  latitude                   Float?
-  longitude                  Float?
+  province                  String?
+  addressLine               String?
+  postalCode                String?
+  latitude                  Float?
+  longitude                 Float?
   /// Shop opening hours for display only (no booking): [{ dayOfWeek, open, close }].
-  openingHours               Json?
-  linkedProviderOrganization ProviderOrganization?    @relation("ProviderSellerLink")
-  logoUrl                    String?
-  description                String?
+  openingHours              Json?
+  linkedProviderOrganization ProviderOrganization?   @relation("ProviderSellerLink")
+  logoUrl                   String?
+  description               String?
 
   /// Handoff 09 (spec section 3) — all additive/optional so every existing
   /// SellerOrganization row remains valid without a data backfill.
@@ -3371,15 +3371,15 @@ model Checkout {
 
   status CheckoutStatus @default(DRAFT)
 
-  subtotalAmount          Int     @default(0)
-  deliveryAmount          Int     @default(0)
-  discountAmount          Int     @default(0)
-  totalAmount             Int     @default(0)
-  currency                String  @default("IRR")
+  subtotalAmount      Int     @default(0)
+  deliveryAmount      Int     @default(0)
+  discountAmount      Int     @default(0)
+  totalAmount         Int     @default(0)
+  currency            String  @default("IRR")
   /// Placeholder only (spec section 46) — no promotion/campaign engine exists to validate this against.
-  promotionCode           String?
+  promotionCode       String?
   /// Batch 4: the priced lines (CartLineDto[]) frozen when the checkout was created. Orders are built from this, never from the mutable cart, so the order always equals what was charged.
-  pricedLinesSnapshot     Json?
+  pricedLinesSnapshot Json?
   /// The delivery address frozen when payment starts: the order ships to what the quote priced, even if the
   /// member edits the saved address afterwards.
   deliveryAddressSnapshot Json?
@@ -3601,32 +3601,32 @@ model ZibalPayment {
 /// A receipt-backed company-card payment. The receipt is an object-storage
 /// key rather than bytes or a public URL; the media layer authorises access.
 model CardTransferPayment {
-  id                        String                    @id @default(uuid()) @db.Uuid
-  userId                    String                    @db.Uuid
-  user                      User                      @relation(fields: [userId], references: [id], onDelete: Restrict)
-  checkoutId                String?                   @unique @db.Uuid
-  checkout                  Checkout?                 @relation(fields: [checkoutId], references: [id], onDelete: Restrict)
-  bookingId                 String?                   @db.Uuid
-  booking                   Booking?                  @relation(fields: [bookingId], references: [id], onDelete: Restrict)
-  status                    CardTransferPaymentStatus @default(AWAITING_RECEIPT)
-  idempotencyKey            String                    @unique
-  expectedAmount            Int
-  receivedAmount            Int?
-  currency                  String                    @default("IRR")
-  companyCardNumberMasked   String
-  accountHolderName         String
+  id                      String                    @id @default(uuid()) @db.Uuid
+  userId                  String                    @db.Uuid
+  user                    User                      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  checkoutId              String?                   @unique @db.Uuid
+  checkout                Checkout?                 @relation(fields: [checkoutId], references: [id], onDelete: Restrict)
+  bookingId               String?                   @db.Uuid
+  booking                 Booking?                  @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  status                  CardTransferPaymentStatus @default(AWAITING_RECEIPT)
+  idempotencyKey          String                    @unique
+  expectedAmount          Int
+  receivedAmount          Int?
+  currency                String                    @default("IRR")
+  companyCardNumberMasked String
+  accountHolderName       String
   /// The admin-managed company account this payment was started with (null: the server env account).
-  cardTransferDestinationId String?                   @db.Uuid
-  receiptObjectKey          String?
-  receiptUploadedAt         DateTime?
-  receiptUploadDeadlineAt   DateTime
-  reviewAvailableAt         DateTime
-  differenceDueAt           DateTime?
-  reviewedAt                DateTime?
-  reviewedByAdminId         String?                   @db.Uuid
-  rejectionReason           String?
-  createdAt                 DateTime                  @default(now())
-  updatedAt                 DateTime                  @updatedAt
+  cardTransferDestinationId String? @db.Uuid
+  receiptObjectKey        String?
+  receiptUploadedAt       DateTime?
+  receiptUploadDeadlineAt DateTime
+  reviewAvailableAt       DateTime
+  differenceDueAt         DateTime?
+  reviewedAt              DateTime?
+  reviewedByAdminId       String?                   @db.Uuid
+  rejectionReason         String?
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
 
   @@index([userId, status])
   @@index([bookingId, status])
@@ -3644,7 +3644,7 @@ model WalletAccount {
   currency  String   @default("IRR")
   createdAt DateTime @default(now())
 
-  entries     WalletEntry[]
+  entries WalletEntry[]
   adjustments WalletAdjustment[]
 
   @@map("wallet_accounts")
@@ -3673,36 +3673,36 @@ model WalletEntry {
 /// A member's request to add money. Money only enters the wallet when the request is CREDITED, and then exactly
 /// once: walletEntryId points at the single WalletEntry that the credit wrote.
 model WalletTopUp {
-  id                        String            @id @default(uuid()) @db.Uuid
-  userId                    String            @db.Uuid
-  user                      User              @relation(fields: [userId], references: [id], onDelete: Restrict)
-  rail                      WalletTopUpRail
-  status                    WalletTopUpStatus
+  id                String            @id @default(uuid()) @db.Uuid
+  userId            String            @db.Uuid
+  user              User              @relation(fields: [userId], references: [id], onDelete: Restrict)
+  rail              WalletTopUpRail
+  status            WalletTopUpStatus
   /// What the member asked to add, in integer rials.
-  amount                    Int
-  currency                  String            @default("IRR")
-  idempotencyKey            String            @unique
-  zibalTrackId              String?           @unique
+  amount            Int
+  currency          String            @default("IRR")
+  idempotencyKey    String            @unique
+  zibalTrackId      String?           @unique
   /// Card to card: masked snapshot of the receiving card, for audit (the full number is configuration).
-  cardNumberMasked          String?
-  cardHolderName            String?
+  cardNumberMasked  String?
+  cardHolderName    String?
   /// The admin-managed company account this request was started with (null: the server env account).
-  cardTransferDestinationId String?           @db.Uuid
-  receiptObjectKey          String?
-  receiptUploadedAt         DateTime?
+  cardTransferDestinationId String? @db.Uuid
+  receiptObjectKey  String?
+  receiptUploadedAt DateTime?
   /// Card to card: the receipt must arrive before this, or the request expires.
-  receiptDeadlineAt         DateTime?
+  receiptDeadlineAt DateTime?
   /// What finance confirmed actually arrived; the credit is this amount, not the requested one.
-  receivedAmount            Int?
-  reviewedAt                DateTime?
-  reviewedByAdminId         String?           @db.Uuid
-  reviewedByAdmin           AdminUser?        @relation("ReviewedWalletTopUps", fields: [reviewedByAdminId], references: [id], onDelete: Restrict)
-  rejectionReason           String?
-  failureCode               String?
-  walletEntryId             String?           @unique @db.Uuid
-  creditedAt                DateTime?
-  createdAt                 DateTime          @default(now())
-  updatedAt                 DateTime          @updatedAt
+  receivedAmount    Int?
+  reviewedAt        DateTime?
+  reviewedByAdminId String?           @db.Uuid
+  reviewedByAdmin   AdminUser?        @relation("ReviewedWalletTopUps", fields: [reviewedByAdminId], references: [id], onDelete: Restrict)
+  rejectionReason   String?
+  failureCode       String?
+  walletEntryId     String?           @unique @db.Uuid
+  creditedAt        DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
   @@index([userId, createdAt])
   @@index([status, createdAt])
@@ -4457,9 +4457,9 @@ model ShippingQuote {
   estimatedPickupMinutes   Int?
   estimatedDeliveryMinutes Int?
 
-  providerQuoteId            String?
+  providerQuoteId String?
   /// How the price was reached, shown to the member: API, SANDBOX_ESTIMATE, DISTANCE_ESTIMATE, CITY_FLAT or FIXED_PRICE.
-  pricingBasis               String?
+  pricingBasis    String?
   /// The checkout address this quote was priced for (see delivery-address-fingerprint.ts); a different one = stale.
   deliveryAddressFingerprint String?
 
@@ -5724,7 +5724,7 @@ model Appeal {
 /// called it. `idempotencyKey` prevents a double-click from creating two
 /// approval rows for the same logical request.
 model AdminRefundApproval {
-  id              String                 @id @default(uuid()) @db.Uuid
+  id      String @id @default(uuid()) @db.Uuid
   /// What is refunded: a shop order, a service booking or a travel stay; exactly one matching id is set (DB CHECK).
   subjectType     AdminRefundSubjectType @default(ORDER)
   orderId         String?                @db.Uuid
@@ -8146,19 +8146,19 @@ enum CommunitySourceType {
 }
 
 model CommunityPost {
-  id                String                 @id @default(uuid()) @db.Uuid
-  authorUserId      String                 @db.Uuid
-  type              CommunityPostType      @default(GENERAL)
-  title             String?
-  body              String
-  locale            Locale?
-  countryCode       String?
+  id              String                 @id @default(uuid()) @db.Uuid
+  authorUserId    String                 @db.Uuid
+  type            CommunityPostType      @default(GENERAL)
+  title           String?
+  body            String
+  locale          Locale?
+  countryCode     String?
   /// A public-safe reference only (name/species/photo via the mapper) —
   /// never a channel back into the pet's private health/household data.
-  petId             String?                @db.Uuid
-  pet               Pet?                   @relation(fields: [petId], references: [id], onDelete: SetNull)
-  mediaObjectKeys   String[]               @default([])
-  status            CommunityContentStatus @default(PUBLISHED)
+  petId           String?                @db.Uuid
+  pet             Pet?                   @relation(fields: [petId], references: [id], onDelete: SetNull)
+  mediaObjectKeys String[]               @default([])
+  status          CommunityContentStatus @default(PUBLISHED)
   /// Set when the author changes the text; shown as "edited" so a reply never looks like it answered other words.
   editedAt          DateTime?
   /// Set when the author deletes it (status REMOVED). Distinguishes a self-deletion from a moderator removal.
@@ -8189,13 +8189,13 @@ model CommunityPost {
 }
 
 model CommunityComment {
-  id                String                 @id @default(uuid()) @db.Uuid
-  postId            String                 @db.Uuid
-  post              CommunityPost          @relation(fields: [postId], references: [id], onDelete: Restrict)
-  authorUserId      String                 @db.Uuid
-  body              String
-  status            CommunityContentStatus @default(PUBLISHED)
-  createdAt         DateTime               @default(now())
+  id           String                 @id @default(uuid()) @db.Uuid
+  postId       String                 @db.Uuid
+  post         CommunityPost          @relation(fields: [postId], references: [id], onDelete: Restrict)
+  authorUserId String                 @db.Uuid
+  body         String
+  status       CommunityContentStatus @default(PUBLISHED)
+  createdAt    DateTime               @default(now())
   /// Same meaning as on CommunityPost.
   editedAt          DateTime?
   removedByAuthorAt DateTime?
@@ -8807,19 +8807,19 @@ model PetFriendlyPlace {
 
   /// MANUAL (staff/members) or OSM: imported from OpenStreetMap (ODbL, "© OpenStreetMap contributors"), shown as an
   /// unclaimed, unverified listing until a KYC-verified business claims it.
-  source                          String    @default("MANUAL")
+  source          String    @default("MANUAL")
   /// node | way | relation, and the OSM id: the key for weekly re-sync and de-duplication.
-  osmType                         String?
-  osmId                           BigInt?
-  osmTags                         Json?
-  osmSyncedAt                     DateTime?
+  osmType         String?
+  osmId           BigInt?
+  osmTags         Json?
+  osmSyncedAt     DateTime?
   /// Set when a re-sync no longer finds the object in OpenStreetMap (the listing is hidden, not deleted).
-  osmMissingSince                 DateTime?
+  osmMissingSince DateTime?
   /// Fields staff changed by hand on an OSM listing; the weekly re-sync leaves them alone.
-  osmEditedFields                 String[]  @default([])
+  osmEditedFields String[]  @default([])
   /// Business contact exactly as published in the OSM tags (no other source).
-  phone                           String?
-  website                         String?
+  phone           String?
+  website         String?
   /// A verified partner that claimed this listing; re-sync never overwrites a claimed listing.
   claimedByProviderOrganizationId String?   @db.Uuid
   claimedAt                       DateTime?
@@ -10630,9 +10630,9 @@ enum ClinicReminderStatus {
 /// A clinic-to-owner reminder or message for one of the clinic's own patients. Delivery is always the
 /// NotificationOrchestrator (in-app + whatever channel MessagingGateway really has) — never a direct SMS.
 model ClinicReminder {
-  id                      String                 @id @default(uuid()) @db.Uuid
-  providerOrganizationId  String                 @db.Uuid
-  providerOrganization    ProviderOrganization   @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
+  id                      String               @id @default(uuid()) @db.Uuid
+  providerOrganizationId  String               @db.Uuid
+  providerOrganization    ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
   /// Exactly one target: a platform pet (petId) or a clinic client (contactId, optionally one of their clinic pets).
   petId                   String?                @db.Uuid
   pet                     Pet?                   @relation(fields: [petId], references: [id], onDelete: Cascade)
@@ -10640,14 +10640,14 @@ model ClinicReminder {
   contact                 ClinicImportedContact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
   clientPetId             String?                @db.Uuid
   clientPet               ClinicClientPet?       @relation(fields: [clientPetId], references: [id], onDelete: Cascade)
-  createdByProviderUserId String                 @db.Uuid
+  createdByProviderUserId String               @db.Uuid
   kind                    ClinicReminderKind
   title                   String
   note                    String?
   dueAt                   DateTime
-  status                  ClinicReminderStatus   @default(SCHEDULED)
+  status                  ClinicReminderStatus @default(SCHEDULED)
   sentAt                  DateTime?
-  recipientCount          Int                    @default(0)
+  recipientCount          Int                  @default(0)
   cancelledAt             DateTime?
 
   createdAt DateTime @default(now())
@@ -12357,7 +12357,7 @@ model HelpArticle {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  versions  HelpArticleVersion[]
+  versions HelpArticleVersion[]
   voteDedup HelpArticleVoteDedup[]
 
   @@unique([locale, slug])
@@ -12562,7 +12562,6 @@ model CalendarDayOverride {
 
   @@map("calendar_day_overrides")
 }
-
 // ---------------------------------------------------------------------------
 // On-demand pet taxi (Uber/Snapp-style), next to the scheduled pet-taxi booking. A member asks for a ride now,
 // online drivers of verified PET_TAXI organizations see it, the first to accept takes it, and both sides follow it
@@ -12660,57 +12659,57 @@ model PetTaxiDriverPresence {
 }
 
 model PetTaxiRide {
-  id             String             @id @default(uuid()) @db.Uuid
-  userId         String             @db.Uuid
-  user           User               @relation(fields: [userId], references: [id], onDelete: Restrict)
-  householdId    String?            @db.Uuid
-  petIds         String[]           @db.Uuid
-  carrierSize    PetTaxiCarrierSize
-  idempotencyKey String             @unique
+  id                     String             @id @default(uuid()) @db.Uuid
+  userId                 String             @db.Uuid
+  user                   User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  householdId            String?            @db.Uuid
+  petIds                 String[]           @db.Uuid
+  carrierSize            PetTaxiCarrierSize
+  idempotencyKey         String             @unique
 
-  pickupLabel      String
-  pickupLatitude   Float
-  pickupLongitude  Float
-  pickupCity       String?
-  pickupNote       String?
-  dropoffLabel     String
-  dropoffLatitude  Float
-  dropoffLongitude Float
+  pickupLabel            String
+  pickupLatitude         Float
+  pickupLongitude        Float
+  pickupCity             String?
+  pickupNote             String?
+  dropoffLabel           String
+  dropoffLatitude        Float
+  dropoffLongitude       Float
 
-  distanceMeters  Int
-  durationSeconds Int
+  distanceMeters         Int
+  durationSeconds        Int
   /// GOOGLE, NESHAN or STRAIGHT_LINE_ESTIMATE (shown to both sides as an estimate).
-  routeSource     String
-  fareIrr         Int
-  fareBreakdown   Json
-  fareRuleCity    String
+  routeSource            String
+  fareIrr                Int
+  fareBreakdown          Json
+  fareRuleCity           String
 
-  status                 PetTaxiRideStatus @default(SEARCHING)
+  status                 PetTaxiRideStatus  @default(SEARCHING)
   searchExpiresAt        DateTime
-  providerOrganizationId String?           @db.Uuid
-  driverProviderUserId   String?           @db.Uuid
-  driverUserId           String?           @db.Uuid
+  providerOrganizationId String?            @db.Uuid
+  driverProviderUserId   String?            @db.Uuid
+  driverUserId           String?            @db.Uuid
   driverLatitude         Float?
   driverLongitude        Float?
   driverLocatedAt        DateTime?
 
-  assignedAt   DateTime?
-  arrivingAt   DateTime?
-  pickedUpAt   DateTime?
-  completedAt  DateTime?
-  cancelledAt  DateTime?
-  cancelReason String?
+  assignedAt             DateTime?
+  arrivingAt             DateTime?
+  pickedUpAt             DateTime?
+  completedAt            DateTime?
+  cancelledAt            DateTime?
+  cancelReason           String?
 
-  rating                Int?
-  ratingComment         String?
-  ratedAt               DateTime?
+  rating                 Int?
+  ratingComment          String?
+  ratedAt                DateTime?
   /// Set by the retention worker once a finished ride's exact places were coarsened (30 days after it ended).
-  coordinatesRedactedAt DateTime?
+  coordinatesRedactedAt  DateTime?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
 
-  declines PetTaxiRideDecline[]
+  declines               PetTaxiRideDecline[]
 
   @@index([status, searchExpiresAt])
   @@index([userId, createdAt])

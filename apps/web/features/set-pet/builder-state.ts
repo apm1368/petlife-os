@@ -127,7 +127,7 @@ export function toOrderInput(s: BuilderSnapshot, ids: ReadonlyMap<string, string
         ? { garment: i.garment, size: i.size, colour: i.colour, ...(i.petId ? { petId: i.petId } : { petName: (i.petName ?? "").trim(), petSpecies: i.petSpecies ?? "DOG" }) }
         : { garment: i.garment, size: i.size, colour: i.colour },
     ),
-    placements: SET_PET_ZONE_KEYS.flatMap((zone) => {
+    placements: SET_PET_ZONE_KEYS.flatMap((zone): SetPetOrderInput["placements"] => {
       const p = s.prints[zone];
       if (!p) return [];
       if (zone === "PET_BACK" && !hasPet) return [];

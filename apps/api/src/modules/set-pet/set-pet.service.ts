@@ -1,5 +1,8 @@
 import { HttpStatus, Injectable, Logger } from "@nestjs/common";
 import {
+  AdminPriority,
+  AdminTaskSource,
+  AdminTaskStatus,
   LedgerAccountCode,
   LedgerEntryDirection,
   PetLifecycleStatus,
@@ -70,6 +73,8 @@ export const SET_PET_DRAFT_MAX_BYTES = 64 * 1024;
 /** Wallet entries and ledger rows of a Set Pet payment or refund point at the order with these reference types. */
 export const SET_PET_PAYMENT_REFERENCE = "SET_PET_ORDER";
 export const SET_PET_REFUND_REFERENCE = "SET_PET_ORDER_REFUND";
+/** No shop shipping method serves the address: staff arrange delivery, nothing is charged for it online. */
+export const SET_PET_STAFF_ARRANGED = "STAFF_ARRANGED";
 /** Unplaced uploads older than this are removed when the member next uploads. */
 const LOOSE_FILE_TTL_MS = 14 * 24 * 3600e3;
 const HEAD_BYTES = 4096;
@@ -425,8 +430,29 @@ export class SetPetService {
 
     const notes = cleanText(input.notes ?? "", SET_PET_LIMITS.maxNotesLength, true) || null;
     const price = priceSetPet(await this.priceTable(), items, zones);
-    if (price.unpriced.length) throw new ApiException("SET_PET_PRICES_NOT_SET", "Prices for Set Pet are not published yet.", HttpStatus.CONFLICT, { unpriced: price.unpriced });
+    if (price.unpriced.length) {
+      // Never price anything at 0 (owner): refuse quietly and ask staff to fill the price table, once a day.
+      await this.raisePriceTableTask(price.unpriced);
+      throw new ApiException("SET_PET_PRICES_NOT_SET", "This order can't be sent right now.", HttpStatus.CONFLICT);
+    }
     return { items: checkedItems, placements: checkedPlacements, forPetId, notes, price, zones };
+  }
+
+  private async raisePriceTableTask(unpriced: string[]) {
+    const day = new Date().toISOString().slice(0, 10);
+    try {
+      await this.prisma.adminTask.createMany({
+        data: [{
+          title: "Set Pet: fill the price table (ست پت: جدول قیمت را کامل کنید)",
+          description: `A member could not send a Set Pet order because these have no price: ${unpriced.join(", ")}. Admin → Set Pet → Price table.`,
+          source: AdminTaskSource.DATA_QUALITY, team: "commerce", priority: AdminPriority.HIGH, status: AdminTaskStatus.OPEN,
+          relatedEntityType: "SET_PET_SETTINGS", relatedEntityId: "default", dedupeKey: `set-pet-price-table:${day}`,
+        }],
+        skipDuplicates: true,
+      });
+    } catch (e) {
+      this.logger.error(`Could not raise the Set Pet price-table task: ${e instanceof Error ? e.message : e}`);
+    }
   }
 
   private priceData(price: SetPetPrice) {
@@ -528,7 +554,16 @@ export class SetPetService {
     return this.quoteShipping(address, order._count.items);
   }
 
+  /**
+   * The shop's methods that staff have switched on and priced for this address; when there are none, staff arrange the
+   * delivery themselves and nothing is charged for it online (STAFF_ARRANGED).
+   */
   private async quoteShipping(delivery: AddressSnapshotDto, garments: number): Promise<SetPetShippingOptionDto[]> {
+    const offered = await this.shopShipping(delivery, garments);
+    return offered.length ? offered : [{ provider: SET_PET_STAFF_ARRANGED, priceIrr: 0, etaDays: null }];
+  }
+
+  private async shopShipping(delivery: AddressSnapshotDto, garments: number): Promise<SetPetShippingOptionDto[]> {
     const [rows, settings] = await Promise.all([this.prisma.shippingMethodSetting.findMany({ where: { provider: { in: SET_PET_SHIPPING }, enabled: true } }), this.settings()]);
     const pickup: AddressSnapshotDto = {
       recipient: null, phone: null, addressLine: null, region: null, countryCode: "IR", instructions: null,
@@ -574,7 +609,8 @@ export class SetPetService {
       const moved = await tx.setPetRequest.updateMany({
         where: { id, userId, status: SetPetRequestStatus.AWAITING_PAYMENT, itemsTotalIrr: current.itemsTotalIrr },
         data: {
-          status: SetPetRequestStatus.PAID, paidAt: now, totalPaidIrr: total, shippingIrr: option.priceIrr, shippingProvider: option.provider as ShippingProvider,
+          status: SetPetRequestStatus.PAID, paidAt: now, totalPaidIrr: total, shippingIrr: option.priceIrr,
+          shippingProvider: option.provider === SET_PET_STAFF_ARRANGED ? null : (option.provider as ShippingProvider),
           shippingAddress: address as unknown as Prisma.InputJsonObject, estimatedReadyAt: addWorkingDays(now, settings?.productionWorkingDays ?? 5),
         },
       });

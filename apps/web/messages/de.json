@@ -12930,7 +12930,6 @@
         "line": "{garment} {size} mit {zones} Motiven",
         "discount": "Set-Rabatt ({percent} %)",
         "total": "Summe (Versand bei der Zahlung)",
-        "pricesSoon": "Die Preise werden bald veröffentlicht; dein Set kannst du schon jetzt gestalten.",
         "next": {
           "proof": "Wir schicken dir einen Druckabzug.",
           "approve": "Du gibst ihn frei oder änderst deine Bestellung.",
@@ -12948,7 +12947,7 @@
         "noPaymentYet": "Du bezahlst erst nach Freigabe des Druckabzugs.",
         "errors": {
           "tooManyOpen": "Du hast mehrere laufende Bestellungen; warte, bis eine fertig ist, oder storniere eine.",
-          "prices": "Die Preise sind noch nicht veröffentlicht; versuche es bald erneut.",
+          "prices": "Deine Bestellung konnte gerade nicht gesendet werden; bitte versuche es etwas später erneut.",
           "designUnavailable": "Ein Motiv fehlt oder ist noch nicht geprüft.",
           "notEditable": "Diese Bestellung kann nicht mehr geändert werden.",
           "validation": "Im Set muss etwas korrigiert werden; prüfe die Schritte.",
@@ -13032,7 +13031,8 @@
       "POST_PISHTAZ": "Iran Post Express",
       "SNAPPBOX": "Snappbox",
       "ALOPEYK": "Alopeyk",
-      "DEV": "Testversand"
+      "DEV": "Testversand",
+      "STAFF_ARRANGED": "Unser Team organisiert den Versand und meldet sich bei dir (keine Versandkosten online)"
     },
     "orders": {
       "pageTitle": "Meine Set-Pet-Bestellungen",
