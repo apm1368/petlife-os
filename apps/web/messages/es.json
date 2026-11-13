@@ -4225,8 +4225,7 @@
         "orderLookup": "Buscar pedido",
         "refundApprovals": "Aprobaciones de reembolso",
         "twoStep": "Inicio de sesión en dos pasos",
-        "walletAdjustments": "Solicitudes de corrección",
-        "twoStep": "Inicio de sesión en dos pasos"
+        "walletAdjustments": "Solicitudes de corrección"
       },
       "palette": {
         "actions": "Acciones rápidas",

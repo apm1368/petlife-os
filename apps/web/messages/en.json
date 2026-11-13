@@ -5023,8 +5023,7 @@
         "orderLookup": "Order lookup",
         "refundApprovals": "Refund approvals",
         "twoStep": "Two-step sign-in",
-        "walletAdjustments": "Correction requests",
-        "twoStep": "Two-step sign-in"
+        "walletAdjustments": "Correction requests"
       },
       "palette": {
         "actions": "Quick actions",

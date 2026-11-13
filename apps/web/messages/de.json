@@ -4230,8 +4230,7 @@
         "orderLookup": "Bestellsuche",
         "refundApprovals": "Erstattungsfreigaben",
         "twoStep": "Zwei-Schritt-Anmeldung",
-        "walletAdjustments": "Korrekturanträge",
-        "twoStep": "Zwei-Schritt-Anmeldung"
+        "walletAdjustments": "Korrekturanträge"
       },
       "palette": {
         "actions": "Schnellaktionen",
