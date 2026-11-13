@@ -1080,7 +1080,35 @@
       "care": "Pflege",
       "memories": "Erinnerungen",
       "shop": "Shop",
-      "skip": "Zum Inhalt springen"
+      "skip": "Zum Inhalt springen",
+      "hub": {
+        "contextLabel": "Dein Haushalt und deine Tiere",
+        "petsLabel": "Tier wählen",
+        "show": "{name} anzeigen",
+        "addPet": "Tier hinzufügen",
+        "links": {
+          "findVet": "Tierarztverzeichnis",
+          "careCalendar": "Pflegekalender",
+          "services": "Services",
+          "shop": "Shop",
+          "stays": "Tierfreundliche Unterkünfte",
+          "petTaxi": "Tiertaxi",
+          "petTravel": "Reisedokumente",
+          "petCard": "Vermisstenkarte & QR",
+          "lostPets": "Vermisst & gefunden",
+          "insurance": "Tierversicherung",
+          "memories": "Erinnerungen",
+          "memorial": "Gedenkgarten",
+          "community": "Community",
+          "animalSupport": "Tieren in Not helfen"
+        },
+        "lastMemory": "Neueste Erinnerung",
+        "memorialEyebrow": "In liebevoller Erinnerung",
+        "memorialTitle": "{name} bleibt immer Teil deines Zuhauses",
+        "memorialBody": "Erinnerungen, Lebensgeschichte und Unterlagen bleiben hier sicher und privat, so lange du willst.",
+        "openMemories": "Erinnerungen an {name} öffnen",
+        "visitMemorial": "Zum Gedenkgarten"
+      }
     }
   },
   "blog": {

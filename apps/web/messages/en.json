@@ -1004,7 +1004,35 @@
       "care": "Care",
       "memories": "Memories",
       "shop": "Shop",
-      "skip": "Skip to content"
+      "skip": "Skip to content",
+      "hub": {
+        "contextLabel": "Your household and pets",
+        "petsLabel": "Choose a pet",
+        "show": "Show {name}",
+        "addPet": "Add a pet",
+        "links": {
+          "findVet": "Vet directory",
+          "careCalendar": "Care calendar",
+          "services": "Services",
+          "shop": "Shop",
+          "stays": "Pet-friendly stays",
+          "petTaxi": "Pet taxi",
+          "petTravel": "Travel papers",
+          "petCard": "Lost-pet card & QR",
+          "lostPets": "Lost & found",
+          "insurance": "Pet insurance",
+          "memories": "Memories",
+          "memorial": "Memorial garden",
+          "community": "Community",
+          "animalSupport": "Help animals in need"
+        },
+        "lastMemory": "Latest memory",
+        "memorialEyebrow": "In loving memory",
+        "memorialTitle": "{name} is always part of your home",
+        "memorialBody": "Their memories, life story and records stay here, safe and private, for as long as you want.",
+        "openMemories": "Open {name}'s memories",
+        "visitMemorial": "Visit the memorial garden"
+      }
     }
   },
   "adminAccessMatrix": {

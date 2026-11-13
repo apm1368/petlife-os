@@ -1080,7 +1080,35 @@
       "care": "Cuidados",
       "memories": "Recuerdos",
       "shop": "Tienda",
-      "skip": "Saltar al contenido"
+      "skip": "Saltar al contenido",
+      "hub": {
+        "contextLabel": "Tu hogar y tus mascotas",
+        "petsLabel": "Elige una mascota",
+        "show": "Ver a {name}",
+        "addPet": "Añadir mascota",
+        "links": {
+          "findVet": "Directorio de veterinarios",
+          "careCalendar": "Calendario de cuidados",
+          "services": "Servicios",
+          "shop": "Tienda",
+          "stays": "Alojamientos que admiten mascotas",
+          "petTaxi": "Taxi para mascotas",
+          "petTravel": "Documentos de viaje",
+          "petCard": "Tarjeta y QR de extravío",
+          "lostPets": "Perdidos y encontrados",
+          "insurance": "Seguro para mascotas",
+          "memories": "Recuerdos",
+          "memorial": "Jardín de recuerdo",
+          "community": "Comunidad",
+          "animalSupport": "Ayudar a animales necesitados"
+        },
+        "lastMemory": "Último recuerdo",
+        "memorialEyebrow": "Con cariño, en su memoria",
+        "memorialTitle": "{name} siempre forma parte de tu hogar",
+        "memorialBody": "Sus recuerdos, su historia y sus registros se quedan aquí, seguros y privados, todo el tiempo que quieras.",
+        "openMemories": "Abrir los recuerdos de {name}",
+        "visitMemorial": "Visitar el jardín de recuerdo"
+      }
     }
   },
   "blog": {

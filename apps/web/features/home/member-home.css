@@ -202,3 +202,38 @@
 @media (max-width: 720px) { .ih-lens { width:190px; } }
 .ih-pet { border-radius:34px; }
 .member-home .site-social-block { margin-top:var(--space-6); }
+
+/* ---------------------------------------------------------------------------------------------------------------
+   Member home IA (owner #5, 2026-11-13, 2026-11 pattern): sticky household/pet context, the pet card, then the five
+   questions around the pet's record. Light and dark through the opl tokens; logical properties only (RTL-safe).
+   --------------------------------------------------------------------------------------------------------------- */
+.member-context { position:sticky; top:86px; z-index:15; display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; margin-block-end:var(--space-5, 20px); padding:8px 10px; border:1px solid var(--opl-line, var(--border-subtle)); border-radius:999px; background:color-mix(in srgb, var(--opl-raised, var(--surface-raised)) 92%, transparent); backdrop-filter:saturate(1.2) blur(10px); box-shadow:0 6px 18px rgb(0 0 0 / .05); }
+.member-context__household { display:flex; align-items:center; gap:6px; padding-inline:10px; font-size:.85rem; }
+.member-context__household span { color:var(--opl-ink-3, var(--text-secondary)); }
+.member-context__pets { display:flex; flex:1; align-items:center; gap:6px; min-width:0; overflow-x:auto; scrollbar-width:none; }
+.member-context__pet, .member-context__add { display:inline-flex; flex:none; align-items:center; gap:8px; min-height:44px; padding-block:4px; padding-inline:4px 14px; border:1px solid transparent; border-radius:999px; background:none; color:var(--opl-ink, var(--text-primary)); font:inherit; font-size:.9rem; font-weight:650; cursor:pointer; text-decoration:none; }
+.member-context__pet[aria-pressed="true"] { border-color:transparent; background:var(--opl-forest, var(--brand-solid)); color:var(--opl-on-forest, #fff); }
+.member-context__pet:disabled { opacity:.6; cursor:progress; }
+.member-context__add { padding-inline:12px 14px; border-color:var(--opl-line-2, var(--border-default)); color:var(--opl-forest, var(--brand-natural)); }
+@media (max-width:640px) { .member-context { border-radius:22px; } .member-context__household { flex-basis:100%; } }
+
+.glass-home--memorial .glass-home__greeting h2 { font-weight:700; }
+.glass-home__memorial { display:grid; gap:14px; margin-block-end:var(--space-5, 20px); padding:18px; border-radius:22px; background:linear-gradient(135deg, var(--opl-plum-bg, var(--surface-subtle)), var(--opl-paper-2, var(--surface-base))); line-height:1.9; }
+.glass-home__memorial-actions { display:flex; flex-wrap:wrap; gap:10px; }
+
+.member-home__slot { margin-block:var(--space-4, 16px); }
+
+.member-worlds { display:grid; gap:14px; grid-template-columns:repeat(auto-fit, minmax(min(100%, 320px), 1fr)); margin-block:var(--space-6, 24px); }
+.member-world { display:flex; flex-direction:column; gap:12px; padding:18px; border:1px solid var(--opl-line, var(--border-subtle)); border-radius:24px; background:var(--opl-raised, var(--surface-raised)); }
+.member-world__head { display:flex; align-items:center; gap:12px; }
+.member-world__icon { display:grid; flex:none; place-items:center; width:44px; height:44px; border-radius:14px; background:var(--opl-mint, var(--surface-subtle)); color:var(--opl-forest, var(--brand-natural)); }
+.member-world__q { color:var(--opl-forest-2, var(--brand-natural)); font-size:.82rem; font-weight:700; }
+.member-world h2 { font-size:1.12rem; font-weight:800; line-height:1.5; }
+.member-world__body { display:grid; gap:10px; }
+.member-world__body .member-home__card { margin:0; padding:12px; border:1px solid var(--opl-line, var(--border-subtle)); border-radius:16px; background:var(--opl-paper-2, var(--surface-base)); box-shadow:none; }
+.member-world__body .member-home__card h3 { font-size:.95rem; font-weight:750; }
+.member-world__links { display:flex; flex-wrap:wrap; gap:8px; margin-block-start:auto; }
+.member-world__links a { display:inline-flex; align-items:center; min-height:44px; padding-inline:14px; border:1px solid var(--opl-line-2, var(--border-default)); border-radius:999px; color:var(--opl-ink, var(--text-primary)); font-size:.88rem; font-weight:650; text-decoration:none; }
+.member-world__links a:hover, .member-world__links a:focus-visible { border-color:var(--opl-forest, var(--brand-natural)); color:var(--opl-forest, var(--brand-natural)); }
+.member-world__memory { display:flex; align-items:center; gap:10px; min-height:52px; padding:10px 12px; border-radius:16px; background:var(--opl-paper-2, var(--surface-base)); color:inherit; text-decoration:none; }
+.member-world--together { background:linear-gradient(180deg, var(--opl-raised, var(--surface-raised)), var(--opl-plum-bg, var(--surface-subtle))); }

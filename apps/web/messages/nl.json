@@ -1004,7 +1004,35 @@
       "care": "Zorg",
       "memories": "Momenten",
       "shop": "Shop",
-      "skip": "Naar de inhoud"
+      "skip": "Naar de inhoud",
+      "hub": {
+        "contextLabel": "Je huishouden en huisdieren",
+        "petsLabel": "Kies een huisdier",
+        "show": "{name} tonen",
+        "addPet": "Huisdier toevoegen",
+        "links": {
+          "findVet": "Dierenartsengids",
+          "careCalendar": "Zorgkalender",
+          "services": "Diensten",
+          "shop": "Winkel",
+          "stays": "Huisdiervriendelijke verblijven",
+          "petTaxi": "Dierentaxi",
+          "petTravel": "Reisdocumenten",
+          "petCard": "Vermiskaart & QR",
+          "lostPets": "Vermist & gevonden",
+          "insurance": "Dierenverzekering",
+          "memories": "Herinneringen",
+          "memorial": "Herdenkingstuin",
+          "community": "Community",
+          "animalSupport": "Dieren in nood helpen"
+        },
+        "lastMemory": "Nieuwste herinnering",
+        "memorialEyebrow": "In liefdevolle herinnering",
+        "memorialTitle": "{name} blijft altijd deel van je thuis",
+        "memorialBody": "Herinneringen, levensverhaal en gegevens blijven hier, veilig en privé, zo lang je wilt.",
+        "openMemories": "Herinneringen aan {name} openen",
+        "visitMemorial": "Naar de herdenkingstuin"
+      }
     }
   },
   "adminAccessMatrix": {

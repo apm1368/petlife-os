@@ -978,7 +978,35 @@
       "care": "مراقبت‌ها",
       "memories": "خاطرات",
       "shop": "فروشگاه",
-      "skip": "رفتن به محتوای صفحه"
+      "skip": "رفتن به محتوای صفحه",
+      "hub": {
+        "contextLabel": "خانوار و همراهانت",
+        "petsLabel": "انتخاب همراه",
+        "show": "نمایش {name}",
+        "addPet": "افزودن همراه",
+        "links": {
+          "findVet": "فهرست دامپزشک‌ها",
+          "careCalendar": "تقویم مراقبت",
+          "services": "خدمات",
+          "shop": "فروشگاه",
+          "stays": "اقامت با حیوان خانگی",
+          "petTaxi": "تاکسی پت",
+          "petTravel": "مدارک سفر",
+          "petCard": "کارت و QR گم‌شدن",
+          "lostPets": "گمشده و پیداشده",
+          "insurance": "بیمهٔ حیوان خانگی",
+          "memories": "خاطره‌ها",
+          "memorial": "باغ یادبود",
+          "community": "جامعه",
+          "animalSupport": "کمک به حیوانات نیازمند"
+        },
+        "lastMemory": "تازه‌ترین خاطره",
+        "memorialEyebrow": "به یادش",
+        "memorialTitle": "{name} همیشه بخشی از خانهٔ توست",
+        "memorialBody": "خاطره‌ها، داستان زندگی و پرونده‌هایش همین‌جا، امن و خصوصی، تا هر وقت بخواهی می‌مانند.",
+        "openMemories": "باز کردن خاطره‌های {name}",
+        "visitMemorial": "رفتن به باغ یادبود"
+      }
     }
   },
   "adminAccessMatrix": {

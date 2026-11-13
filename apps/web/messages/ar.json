@@ -1004,7 +1004,35 @@
       "care": "الرعاية",
       "memories": "الذكريات",
       "shop": "المتجر",
-      "skip": "الانتقال إلى المحتوى"
+      "skip": "الانتقال إلى المحتوى",
+      "hub": {
+        "contextLabel": "أسرتك وحيواناتك",
+        "petsLabel": "اختر حيوانًا",
+        "show": "عرض {name}",
+        "addPet": "إضافة حيوان",
+        "links": {
+          "findVet": "دليل الأطباء البيطريين",
+          "careCalendar": "تقويم الرعاية",
+          "services": "الخدمات",
+          "shop": "المتجر",
+          "stays": "إقامات ترحب بالحيوانات",
+          "petTaxi": "تاكسي الحيوانات",
+          "petTravel": "وثائق السفر",
+          "petCard": "بطاقة الفقدان ورمز QR",
+          "lostPets": "المفقود والموجود",
+          "insurance": "تأمين الحيوانات الأليفة",
+          "memories": "الذكريات",
+          "memorial": "حديقة الذكرى",
+          "community": "المجتمع",
+          "animalSupport": "ساعد الحيوانات المحتاجة"
+        },
+        "lastMemory": "أحدث ذكرى",
+        "memorialEyebrow": "في ذكراه بمحبة",
+        "memorialTitle": "{name} جزء من بيتك دائمًا",
+        "memorialBody": "تبقى ذكرياته وقصة حياته وسجلاته هنا، آمنة وخاصة، ما دمت تريد.",
+        "openMemories": "افتح ذكريات {name}",
+        "visitMemorial": "زيارة حديقة الذكرى"
+      }
     }
   },
   "adminAccessMatrix": {
