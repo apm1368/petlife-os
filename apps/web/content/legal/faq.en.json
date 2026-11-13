@@ -167,7 +167,7 @@
         },
         {
           "q": "Who can see my address on the map?",
-          "a": "Only you and your household. Sellers, providers and other members don't see the map point. You can move the point or delete the address at any time."
+          "a": "You and your household. Besides you, only the courier of a shipment to that address, our staff handling your order, and your pet-taxi driver once the ride is accepted see the exact point. Sellers, providers and other members never see it. You can move or remove the point at any time."
         },
         {
           "q": "Which notifications will I get?",

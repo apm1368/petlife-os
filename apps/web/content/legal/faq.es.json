@@ -167,7 +167,7 @@
         },
         {
           "q": "¿Quién puede ver mi dirección en el mapa?",
-          "a": "Solo tú y tu hogar. Los vendedores, los proveedores y los demás miembros no ven el punto del mapa. Puedes mover el punto o eliminar la dirección cuando quieras."
+          "a": "Tú y tu hogar. Además, solo ven el punto exacto el repartidor de un envío a esa dirección, nuestro equipo que gestiona tu pedido y el conductor del taxi para mascotas una vez aceptado el viaje. Los vendedores, los proveedores y los demás miembros nunca lo ven. Puedes mover o quitar el punto cuando quieras."
         },
         {
           "q": "¿Qué notificaciones recibiré?",
