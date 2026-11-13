@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { SellerShippingProfileDto, ShippingProvider } from "@petlife/types";
-import { Button, ContextSurface, ErrorRecovery, Input, LocateFixed, Skeleton } from "@petlife/ui";
+import { Button, ContextSurface, ErrorRecovery, Input, Skeleton } from "@petlife/ui";
+import { LocationPicker } from "@/features/maps/LocationPicker";
 import { apiFetch } from "@/lib/api/client";
 import { useSellerStore } from "@/stores/seller-store";
 
@@ -26,6 +27,9 @@ export function SellerShippingView() {
   const [failed, setFailed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  // The pickup pin is saved only with the seller's consent (pins saved before consent existed must be confirmed once).
+  const [pinConsent, setPinConsent] = useState(false);
+  const tp = useTranslations("locationPicker");
 
   const load = useCallback(async () => {
     if (!sellerId) return;
@@ -35,6 +39,7 @@ export function SellerShippingView() {
       setProfile(p);
       setOffered(p.offeredProviders);
       setPickup(p.pickup);
+      setPinConsent(!!p.pickup.pinConsentAt);
     } catch {
       setFailed(true);
     }
@@ -52,6 +57,11 @@ export function SellerShippingView() {
   async function save() {
     if (!sellerId || !pickup) return;
     if (pickup.postalCode && !/^\d{10}$/.test(pickup.postalCode)) return setMessage({ ok: false, text: t("saveFailed") });
+    const hasPin = pickup.latitude != null && pickup.longitude != null;
+    if (hasPin && !pinConsent) {
+      setMessage({ ok: false, text: tp("consentNeeded") });
+      return;
+    }
     setBusy(true);
     setMessage(null);
     const str = (v: string | null) => (v && v.trim() ? v.trim() : undefined);
@@ -68,7 +78,7 @@ export function SellerShippingView() {
           area: str(pickup.area),
           postalCode: str(pickup.postalCode),
           instructions: str(pickup.instructions),
-          ...(pickup.latitude != null && pickup.longitude != null ? { latitude: pickup.latitude, longitude: pickup.longitude } : {}),
+          ...(pickup.latitude != null && pickup.longitude != null ? { latitude: pickup.latitude, longitude: pickup.longitude, locationConsent: true } : {}),
         },
       });
       setProfile(saved);
@@ -78,14 +88,6 @@ export function SellerShippingView() {
     } finally {
       setBusy(false);
     }
-  }
-
-  function locate() {
-    navigator.geolocation?.getCurrentPosition(
-      (pos) => setPickup((p) => (p ? { ...p, latitude: Math.round(pos.coords.latitude * 1e6) / 1e6, longitude: Math.round(pos.coords.longitude * 1e6) / 1e6 } : p)),
-      () => setMessage({ ok: false, text: t("locationDenied") }),
-      { enableHighAccuracy: true, timeout: 15_000 },
-    );
   }
 
   return (
@@ -129,21 +131,14 @@ export function SellerShippingView() {
         <Input label={t("fields.addressLine")} value={pickup.addressLine ?? ""} onChange={set("addressLine")} disabled={!canEdit} maxLength={300} />
         <Input label={t("fields.instructions")} value={pickup.instructions ?? ""} onChange={set("instructions")} disabled={!canEdit} maxLength={500} />
         {canEdit ? (
-          <div className="flex flex-wrap items-center gap-2">
-            <Button type="button" variant="secondary" size="sm" onClick={locate}>
-              <LocateFixed size={16} aria-hidden /> {t("useLocation")}
-            </Button>
-            {pickup.latitude != null && pickup.longitude != null ? (
-              <>
-                <span dir="ltr" className="text-metadata text-text-secondary">
-                  {pickup.latitude.toFixed(5)}, {pickup.longitude.toFixed(5)}
-                </span>
-                <Button type="button" variant="ghost" size="sm" onClick={() => setPickup((p) => (p ? { ...p, latitude: null, longitude: null } : p))}>
-                  {t("clearLocation")}
-                </Button>
-              </>
-            ) : null}
-          </div>
+          <LocationPicker
+            audience="pickup"
+            required={!!pickup.addressLine?.trim()}
+            value={pickup.latitude != null && pickup.longitude != null ? { latitude: pickup.latitude, longitude: pickup.longitude } : null}
+            onChange={(pt) => setPickup((p) => (p ? { ...p, latitude: pt?.latitude ?? null, longitude: pt?.longitude ?? null } : p))}
+            consent={pinConsent}
+            onConsentChange={setPinConsent}
+          />
         ) : null}
       </ContextSurface>
 

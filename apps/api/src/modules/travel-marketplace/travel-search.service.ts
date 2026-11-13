@@ -13,6 +13,7 @@ import { TravelListingNotFoundException, ValidationApiException } from "../../co
 import { EMPTY_TRAVEL_RATING, LISTING_INCLUDE, toTravelListingDto, type ListingWithRelations } from "./travel-marketplace-mapper";
 import { TravelAvailabilityService, type UnitNightState } from "./travel-availability.service";
 import { resolveStayRange, toUtcMidnight } from "./travel-date.util";
+import { coarseKm, listingPinIsExact, providerPinIsExact, publicPin } from "../../common/geo/geo";
 import { haversineKm, matchPetPolicy, priceStay, ratePlanApplies, type PetFacts, type RatePlanTerms } from "./travel-pricing.util";
 import type { TravelSearchQueryDto } from "./dto/travel-marketplace.dto";
 import { TravelBookingService } from "./travel-booking.service";
@@ -161,7 +162,7 @@ export class TravelSearchService {
     }
     const favorites = userId ? new Set((await this.prisma.travelListingFavorite.findMany({ where: { userId, listingId: { in: candidates.map((c) => c.id) } }, select: { listingId: true } })).map((f) => f.listingId)) : new Set<string>();
 
-    const items: (TravelSearchResultItemDto & { _score: number; _price: number | null; _bayes: number; _match: number })[] = [];
+    const items: (TravelSearchResultItemDto & { _score: number; _price: number | null; _bayes: number; _match: number; _km: number | null })[] = [];
     for (const listing of candidates) {
       const rating = ratings.get(listing.id) ?? EMPTY_TRAVEL_RATING;
       if (q.minRating && (rating.average === null || rating.average < q.minRating)) continue;
@@ -175,14 +176,17 @@ export class TravelSearchService {
       const price = stay ? stay.totalIrr : fromNightlyIrr;
       if (q.minPrice !== undefined && (price === null || price < q.minPrice)) continue;
       if (q.maxPrice !== undefined && (price === null || price > q.maxPrice)) continue;
-      const distanceKm = q.lat !== undefined && q.lng !== undefined && listing.latitude !== null && listing.longitude !== null ? Math.round(haversineKm(q.lat, q.lng, listing.latitude, listing.longitude) * 10) / 10 : null;
-      if (q.radiusKm && q.lat !== undefined && (distanceKm === null || distanceKm > q.radiusKm)) continue;
+      // From the listing's public point (a home's ~1 km approximation), shown in whole kilometres only.
+      const pub = listingPublicPin(listing);
+      const exactKm = q.lat !== undefined && q.lng !== undefined && pub.latitude !== null && pub.longitude !== null ? haversineKm(q.lat, q.lng, pub.latitude, pub.longitude) : null;
+      if (q.radiusKm && q.lat !== undefined && (exactKm === null || exactKm > q.radiusKm)) continue;
+      const distanceKm = exactKm === null ? null : coarseKm(exactKm);
       const petMatch: PetPolicyMatchOutcome | null = pets.length ? matchPetPolicy(listing.petPolicy, pets).outcome : null;
       // A listing whose stated policy clearly excludes these pets is never shown as bookable for them.
       if (petMatch === "POTENTIAL_CONFLICT") continue;
       const bayes = this.bayes(rating);
       const matchScore = petMatch === "MATCH" ? 1 : petMatch === "MORE_INFO_NEEDED" ? 0.3 : 0;
-      const proximity = distanceKm === null ? 0 : Math.max(0, 1 - distanceKm / 50);
+      const proximity = exactKm === null ? 0 : Math.max(0, 1 - exactKm / 50);
       items.push({
         ...toSearchItem(listing, rating, stay, fromNightlyIrr, favorites.has(listing.id)),
         bookingMode: bookingMode as unknown as TravelSearchResultItemDto["bookingMode"],
@@ -193,6 +197,7 @@ export class TravelSearchService {
         _price: price,
         _bayes: bayes,
         _match: matchScore,
+        _km: exactKm,
       });
     }
 
@@ -202,7 +207,7 @@ export class TravelSearchService {
       if (sort === "PRICE_ASC") return (a._price ?? Infinity) - (b._price ?? Infinity) || byTitle(a, b);
       if (sort === "PRICE_DESC") return (b._price ?? -Infinity) - (a._price ?? -Infinity) || byTitle(a, b);
       if (sort === "RATING") return b._bayes - a._bayes || b.rating.count - a.rating.count || byTitle(a, b);
-      if (sort === "DISTANCE") return (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity) || byTitle(a, b);
+      if (sort === "DISTANCE") return (a._km ?? Infinity) - (b._km ?? Infinity) || byTitle(a, b);
       if (sort === "BEST_PET_MATCH") return b._match - a._match || (b.petPolicySummary.stated ? 1 : 0) - (a.petPolicySummary.stated ? 1 : 0) || b._bayes - a._bayes || byTitle(a, b);
       return b._score - a._score || byTitle(a, b);
     });
@@ -217,11 +222,12 @@ export class TravelSearchService {
     }
     const page = q.page ?? 1;
     const pageSize = q.pageSize ?? 12;
-    const slice = items.slice((page - 1) * pageSize, page * pageSize).map(({ _score, _price, _bayes, _match, ...rest }) => {
+    const slice = items.slice((page - 1) * pageSize, page * pageSize).map(({ _score, _price, _bayes, _match, _km, ...rest }) => {
       void _score;
       void _price;
       void _bayes;
       void _match;
+      void _km;
       return rest;
     });
     return {
@@ -251,17 +257,23 @@ export class TravelSearchService {
   async detail(userId: string | undefined, listingId: string): Promise<TravelListingDetailDto> {
     const row = await this.prisma.travelListing.findFirst({ where: { id: listingId, status: TravelListingStatus.PUBLISHED, isPubliclyListed: true, organization: publicProviderWhere() }, include: LISTING_INCLUDE });
     if (!row) throw new TravelListingNotFoundException({ listingId });
+    // A home stay is shown (and measured from) its ~1 km approximate point unless the host opted in to the exact pin.
+    const pub = listingPublicPin(row);
     const [ratings, reviews, favorite, nearbyPlaces, nearbyVets] = await Promise.all([
       this.ratings([row.id]),
       this.bookings.listPublishedReviews(row.id, 1, 6),
       userId ? this.prisma.travelListingFavorite.findUnique({ where: { userId_listingId: { userId, listingId } } }) : Promise.resolve(null),
-      this.nearbyPlaces(row.latitude, row.longitude),
-      this.nearbyVets(row.city, row.latitude, row.longitude),
+      this.nearbyPlaces(pub.latitude, pub.longitude),
+      this.nearbyVets(row.city, pub.latitude, pub.longitude),
     ]);
     // Approval modes: show the mode booking will actually use (admin vertical setting / per-partner override).
     const modeOf = await this.approvals.stayModeResolver([row.organizationId]);
     return {
       ...toTravelListingDto(row, ratings.get(row.id) ?? EMPTY_TRAVEL_RATING),
+      latitude: pub.latitude,
+      longitude: pub.longitude,
+      pinPrecision: pub.pinPrecision,
+      pinPublicExact: undefined,
       bookingMode: modeOf(row) as unknown as TravelListingDetailDto["bookingMode"],
       // Only active units and rate plans are offered to the public.
       units: toTravelListingDto(row).units.filter((u) => u.isActive).map((u) => ({ ...u, ratePlans: u.ratePlans.filter((p) => p.isActive) })),
@@ -291,13 +303,14 @@ export class TravelSearchService {
   async nearbyVets(city: string, lat: number | null, lng: number | null, limit = 4): Promise<{ id: string; name: string; city: string; distanceKm: number | null }[]> {
     const orgs = await this.prisma.providerOrganization.findMany({
       where: { type: { in: VET_TYPES }, ...publicProviderWhere(), locations: { some: { city: { equals: city, mode: "insensitive" } } } },
-      select: { id: true, name: true, locations: { where: { city: { equals: city, mode: "insensitive" } }, select: { city: true, latitude: true, longitude: true } } },
+      select: { id: true, name: true, type: true, locations: { where: { city: { equals: city, mode: "insensitive" } }, select: { city: true, latitude: true, longitude: true, pinPublicExact: true } } },
       take: 20,
     });
     return orgs
       .map((o) => {
         const loc = o.locations[0]!;
-        const distanceKm = lat !== null && lng !== null && loc.latitude !== null && loc.longitude !== null ? Math.round(haversineKm(lat, lng, loc.latitude, loc.longitude) * 10) / 10 : null;
+        const vet = publicPin(loc, providerPinIsExact(o.type, loc.pinPublicExact));
+        const distanceKm = lat !== null && lng !== null && vet.latitude !== null && vet.longitude !== null ? Math.round(haversineKm(lat, lng, vet.latitude, vet.longitude) * 10) / 10 : null;
         return { id: o.id, name: o.name, city: loc.city, distanceKm };
       })
       .sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity) || a.name.localeCompare(b.name))
@@ -334,6 +347,9 @@ function hasFreeCancellationRate(listing: ListingWithRelations): boolean {
   return listing.units.some((u) => u.isActive && u.ratePlans.some((p) => p.isActive && p.cancellationType === "FREE_UNTIL"));
 }
 
+/** The point the public sees for a listing: exact for hotels and other storefronts, ~1 km for homes unless the host opted in. */
+const listingPublicPin = (listing: { type: string; latitude: number | null; longitude: number | null; pinPublicExact: boolean | null }) => publicPin(listing, listingPinIsExact(listing.type, listing.pinPublicExact));
+
 function toSearchItem(listing: ListingWithRelations, rating: TravelRatingSummaryDto, stay: TravelSearchResultItemDto["stay"], fromNightlyIrr: number | null, favorited: boolean): Omit<TravelSearchResultItemDto, "freeCancellationAvailable" | "distanceKm" | "petMatch"> {
   return {
     id: listing.id,
@@ -343,8 +359,7 @@ function toSearchItem(listing: ListingWithRelations, rating: TravelRatingSummary
     province: listing.province,
     country: listing.country,
     coverUrl: listing.media.find((m) => !m.unitId)?.url ?? listing.media[0]?.url ?? null,
-    latitude: listing.latitude,
-    longitude: listing.longitude,
+    ...(({ latitude, longitude }) => ({ latitude, longitude }))(listingPublicPin(listing)),
     isVerified: listing.isVerified,
     bookingMode: listing.bookingMode as unknown as TravelSearchResultItemDto["bookingMode"],
     rating,

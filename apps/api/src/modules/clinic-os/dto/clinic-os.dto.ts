@@ -1,6 +1,7 @@
 import { Type } from "class-transformer";
-import { Equals, IsBoolean, IsDateString, IsEmail, IsEnum, IsIn, IsInt, IsLatitude, IsLongitude, IsOptional, IsString, IsUUID, Length, Matches, Max, MaxLength, Min, ValidateIf, IsArray, ArrayMaxSize, ValidateNested } from "class-validator";
+import { Equals, IsBoolean, IsDateString, IsEmail, IsEnum, IsIn, IsInt, IsOptional, IsString, IsUUID, Length, Matches, Max, MaxLength, Min, ValidateIf, IsArray, ArrayMaxSize, ValidateNested } from "class-validator";
 import { ClinicReminderKind, ClinicReminderStatus } from "@prisma/client";
+import { IsIranLatitude, IsIranLongitude } from "../../../common/geo/geo";
 
 class PageQuery {
   @IsOptional()
@@ -133,17 +134,42 @@ export class AddClinicBranchDto {
   region?: string;
 
   @IsOptional()
-  @IsLatitude()
+  @IsIranLatitude()
   latitude?: number;
 
   @IsOptional()
-  @IsLongitude()
+  @IsIranLongitude()
   longitude?: number;
+
+  /** Required (true) with a pin: the owner confirmed the map location. */
+  @IsOptional()
+  @IsBoolean()
+  locationConsent?: boolean;
 
   @IsOptional()
   @IsString()
   @Matches(/^[0-9+\-\s()]{5,20}$/)
   phone?: string;
+}
+
+/** Sets or removes a branch's map pin (and whether the public sees it exactly). */
+export class SetBranchPinDto {
+  @IsOptional()
+  @IsIranLatitude()
+  latitude?: number | null;
+
+  @IsOptional()
+  @IsIranLongitude()
+  longitude?: number | null;
+
+  @IsOptional()
+  @IsBoolean()
+  locationConsent?: boolean;
+
+  /** null = the default for the organization type (clinics exact, home-based providers approximate). */
+  @IsOptional()
+  @IsBoolean()
+  exactPinPublic?: boolean | null;
 }
 
 export class AddCustomerNoteDto {

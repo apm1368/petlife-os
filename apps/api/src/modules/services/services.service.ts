@@ -84,12 +84,12 @@ export class ServicesService {
             verificationStatus: service.providerOrganization.verificationStatus as unknown as ServiceSearchResultDto["provider"]["verificationStatus"],
             description: service.providerOrganization.description,
             logoUrl: service.providerOrganization.logoUrl,
-            locations: service.location ? [toProviderLocationDto(service.location)] : [],
+            locations: service.location ? [toProviderLocationDto(service.location, { publicFor: service.providerOrganization.type })] : [],
             services: [],
             nextAvailableSlotStart,
           },
           service: toProviderServiceDto(service),
-          location: service.location ? toProviderLocationDto(service.location) : null,
+          location: service.location ? toProviderLocationDto(service.location, { publicFor: service.providerOrganization.type }) : null,
           compatibility: await this.compatibility.evaluateForViewer(query.petId, service, viewerId),
           nextAvailableSlotStart,
         };
@@ -130,11 +130,11 @@ export class ServicesService {
         description: org.description,
         logoUrl: org.logoUrl,
         websiteUrl: org.websiteUrl,
-        locations: org.locations.map(toProviderLocationDto),
+        locations: org.locations.map((l) => toProviderLocationDto(l, { publicFor: org.type })),
         services: org.services.filter((s) => s.isActive).map((service) => toProviderServiceDto(service)),
       },
       service: toProviderServiceDto(service),
-      locationOptions: service.locationId ? org.locations.filter((l) => l.id === service.locationId).map(toProviderLocationDto) : org.locations.map(toProviderLocationDto),
+      locationOptions: (service.locationId ? org.locations.filter((l) => l.id === service.locationId) : org.locations).map((l) => toProviderLocationDto(l, { publicFor: org.type })),
       compatibility,
     };
   }

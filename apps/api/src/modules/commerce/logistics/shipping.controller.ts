@@ -6,7 +6,7 @@ import type { SessionUser } from "../../../common/session/session.service";
 import { FulfillmentStatus, ShipmentStatus, type FulfillmentDto, type ShipmentDto, type ShipmentTrackingDto, type ShipmentTrackingEventDto } from "@petlife/types";
 import { ShippingOrchestrator } from "./shipping-orchestrator.service";
 import { ShippingReconciliationService } from "./shipping-reconciliation.service";
-import { toBuyerFulfillmentDto, toFulfillmentDto, toShipmentDto } from "./logistics-dto.mapper";
+import { toBuyerFulfillmentDto, toSellerFulfillmentDto, toShipmentDto } from "./logistics-dto.mapper";
 import { SelectShippingQuoteDto } from "./dto/shipping.dto";
 
 /** Checkout-time shipping-quote routes (spec section 26, adapted to this project's ShippingQuote-per-checkout model — see ShippingQuote's own doc comment for why). Declared here (LogisticsModule) rather than inside CheckoutModule, mirroring PaymentWebhooksController's precedent of adding routes to another module's prefix without a cross-module import. */
@@ -96,7 +96,7 @@ export class OrderLogisticsController {
   async markReadyForPickup(@CurrentUser() user: SessionUser, @Param("orderId") orderId: string) {
     const fulfillment = await this.shipping.getFulfillmentForOrderAsSeller(user.id, orderId);
     if (!fulfillment) return null;
-    return toFulfillmentDto(await this.shipping.markReadyForPickup(user.id, fulfillment.id));
+    return toSellerFulfillmentDto(await this.shipping.markReadyForPickup(user.id, fulfillment.id));
   }
 
   @Post(":orderId/fulfillment/request-courier")
@@ -105,7 +105,7 @@ export class OrderLogisticsController {
     const fulfillment = await this.shipping.getFulfillmentForOrderAsSeller(user.id, orderId);
     if (!fulfillment) return null;
     const { fulfillment: updated, shipment } = await this.shipping.requestCourier(user.id, fulfillment.id);
-    return { fulfillment: toFulfillmentDto(updated), shipment: toShipmentDto(shipment) };
+    return { fulfillment: toSellerFulfillmentDto(updated), shipment: toShipmentDto(shipment) };
   }
 
   // Batch 4: seller cancellation moved to POST seller-organizations/:sellerId/orders/:orderId/cancel,

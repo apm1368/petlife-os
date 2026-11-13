@@ -83,7 +83,9 @@ export type AdminPermission =
   // Member wallets — view balances/history, correct a balance with a reason, review card-to-card top-up receipts
   | "wallet.view"
   | "wallet.adjust"
-  | "wallet.topup.review";
+  | "wallet.topup.review"
+  // Finance data leaving the back office: the transactions explorer's CSV export (audited). Viewing stays finance.view.
+  | "finance.manage";
 
 export const ALL_PERMISSIONS: AdminPermission[] = [
   "customer.view",
@@ -151,6 +153,7 @@ export const ALL_PERMISSIONS: AdminPermission[] = [
   "wallet.view",
   "wallet.adjust",
   "wallet.topup.review",
+  "finance.manage",
 ];
 
 const READ_ONLY_PERMISSIONS: AdminPermission[] = [
@@ -278,6 +281,7 @@ export const ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     "wallet.view",
     "wallet.adjust",
     "wallet.topup.review",
+    "finance.manage",
     // spec: "FINANCE: appropriate billing visibility" — read-only; plan/price
     // management and subscription mutations stay ADMIN/SUPER_ADMIN-only.
     "subscription.view",

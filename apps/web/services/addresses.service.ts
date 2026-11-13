@@ -12,8 +12,10 @@ export interface CreateAddressInput {
   /** Neighbourhood / district (محله). */
   area?: string;
   countryCode: string;
+  /** The exact pin (inside Iran): private to the household. Send locationConsent: true with a new or moved pin. */
   latitude?: number | null;
   longitude?: number | null;
+  locationConsent?: boolean;
   instructions?: string;
   /** Iranian 10-digit postal code. */
   postalCode?: string;

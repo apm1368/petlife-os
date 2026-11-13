@@ -759,7 +759,8 @@ describe("Batch 4 — Commerce", () => {
       expect(again.body.filter((a: { isDefault: boolean }) => a.isDefault)).toHaveLength(1);
 
       const stranger = await customer();
-      await stranger.c.patch(`/addresses/${cu.addressId}`).send({ label: "mine now" }).expect(403);
+      // Another account gets the same 404 as a missing address (no existence leak).
+      await stranger.c.patch(`/addresses/${cu.addressId}`).send({ label: "mine now" }).expect(404);
     });
   });
 });

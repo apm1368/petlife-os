@@ -6,6 +6,8 @@ import { Button, ContextSurface, Dialog, Input, Select } from "@petlife/ui";
 import { ApiError } from "@/lib/api/client";
 import { clinicTeamService, type ClinicBranches, type ClinicStaffRoster } from "@/services/clinic-team.service";
 import { useProviderStore } from "@/stores/provider-store";
+import { LocationPicker } from "@/features/maps/LocationPicker";
+import type { MapPoint } from "@/features/maps/MapView";
 
 type Removal = { kind: "member" | "invitation" | "branch"; id: string; name: string };
 
@@ -25,7 +27,10 @@ function ClinicTeamContent({ section }: { section: "staff" | "branches" }) {
   const [email, setEmail] = useState(""), [role, setRole] = useState<"VET" | "STAFF">("VET"), [title, setTitle] = useState("");
   const [name, setName] = useState(""), [city, setCity] = useState(""), [address, setAddress] = useState("");
   const [region, setRegion] = useState(""), [phone, setPhone] = useState("");
-  const [latitude, setLatitude] = useState(""), [longitude, setLongitude] = useState("");
+  const [pin, setPin] = useState<MapPoint | null>(null), [pinConsent, setPinConsent] = useState(false);
+  // One branch's pin editor at a time: its draft pin, consent and public exact-spot choice.
+  const [pinEdit, setPinEdit] = useState<{ id: string; pin: MapPoint | null; consent: boolean; exact: boolean } | null>(null);
+  const tp = useTranslations("locationPicker");
   const [removal, setRemoval] = useState<Removal | null>(null);
   const alive = useRef(true);
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
@@ -65,9 +70,14 @@ function ClinicTeamContent({ section }: { section: "staff" | "branches" }) {
   async function addBranch() {
     const result = await clinicTeamService.addBranch({ name: name.trim(), city: city.trim(), addressLine: address.trim(),
       ...(region.trim() ? { region: region.trim() } : {}), ...(phone.trim() ? { phone: phone.trim() } : {}),
-      ...(latitude !== "" ? { latitude: Number(latitude) } : {}), ...(longitude !== "" ? { longitude: Number(longitude) } : {}),
+      ...(pin ? { latitude: pin.latitude, longitude: pin.longitude, locationConsent: true } : {}),
     });
-    if (alive.current) { setBranches(result); setName(""); setCity(""); setAddress(""); setRegion(""); setPhone(""); setLatitude(""); setLongitude(""); }
+    if (alive.current) { setBranches(result); setName(""); setCity(""); setAddress(""); setRegion(""); setPhone(""); setPin(null); setPinConsent(false); }
+  }
+  async function saveBranchPin() {
+    if (!pinEdit) return;
+    const result = await clinicTeamService.setBranchPin(pinEdit.id, pinEdit.pin ? { latitude: pinEdit.pin.latitude, longitude: pinEdit.pin.longitude, locationConsent: true, exactPinPublic: pinEdit.exact } : { latitude: null, longitude: null });
+    if (alive.current) { setBranches(result); setPinEdit(null); }
   }
   async function remove() {
     if (!removal) return;
@@ -110,7 +120,15 @@ function ClinicTeamContent({ section }: { section: "staff" | "branches" }) {
     </>}
     {section === "branches" && branches && <>
       <ContextSurface><p>{t("branchUsage", { used: number(branches.usage.used), limit: branches.usage.limit === null ? t("unlimited") : number(branches.usage.limit) })}</p></ContextSurface>
-      <div className="grid gap-3 md:grid-cols-2">{branches.items.map(branch => <ContextSurface key={branch.id} className="space-y-2"><h3 className="font-medium">{branch.name}</h3><p>{branch.city}{branch.region ? ` · ${branch.region}` : ""}</p><p>{branch.addressLine}</p>{branch.phone && <bdi dir="ltr">{branch.phone}</bdi>}{owner && branches.items.length > 1 && <Button variant="secondary" disabled={busy} onClick={() => { setError(null); setRemoval({ kind: "branch", id: branch.id, name: branch.name }); }}>{t("removeBranch")}</Button>}</ContextSurface>)}</div>
+      <div className="grid gap-3 md:grid-cols-2">{branches.items.map(branch => <ContextSurface key={branch.id} className="space-y-2"><h3 className="font-medium">{branch.name}</h3><p>{branch.city}{branch.region ? ` · ${branch.region}` : ""}</p><p>{branch.addressLine}</p>{branch.phone && <bdi dir="ltr">{branch.phone}</bdi>}
+        {branch.latitude === null ? <p className="text-text-secondary">{t("location.noPin")}</p> : null}
+        {owner && pinEdit?.id !== branch.id && <Button variant="secondary" disabled={busy} onClick={() => setPinEdit({ id: branch.id, pin: branch.latitude !== null && branch.longitude !== null ? { latitude: branch.latitude, longitude: branch.longitude } : null, consent: branch.latitude !== null, exact: branch.pinPublicExact ?? false })}>{t("location.edit")}</Button>}
+        {owner && pinEdit?.id === branch.id && <form className="space-y-2" onSubmit={e => { e.preventDefault(); if (pinEdit.pin && !pinEdit.consent) { setError(tp("consentNeeded")); return; } void mutate(saveBranchPin); }}>
+          <LocationPicker audience="business" value={pinEdit.pin} onChange={p => setPinEdit(x => x && { ...x, pin: p })} consent={pinEdit.consent} onConsentChange={c => setPinEdit(x => x && { ...x, consent: c })} exactPublic={pinEdit.exact} onExactPublicChange={v => setPinEdit(x => x && { ...x, exact: v })} />
+          {error && !removal && <p role="alert">{error}</p>}
+          <div className="flex flex-wrap gap-2"><Button type="submit" disabled={busy}>{t("location.save")}</Button><Button type="button" variant="ghost" disabled={busy} onClick={() => setPinEdit(null)}>{t("location.cancel")}</Button></div>
+        </form>}
+        {owner && branches.items.length > 1 && <Button variant="secondary" disabled={busy} onClick={() => { setError(null); setRemoval({ kind: "branch", id: branch.id, name: branch.name }); }}>{t("removeBranch")}</Button>}</ContextSurface>)}</div>
       {!branches.items.length && <p>{t("emptyBranches")}</p>}
       {owner && !branchesFull && <ContextSurface><form className="grid gap-3 md:grid-cols-2" onSubmit={e => { e.preventDefault(); void mutate(addBranch); }}>
         <Input label={t("branchName")} required maxLength={120} value={name} onChange={e => setName(e.target.value)} />
@@ -118,10 +136,9 @@ function ClinicTeamContent({ section }: { section: "staff" | "branches" }) {
         <Input label={t("address")} required minLength={3} maxLength={300} value={address} onChange={e => setAddress(e.target.value)} />
         <Input label={t("region")} maxLength={80} value={region} onChange={e => setRegion(e.target.value)} />
         <Input label={t("phone")} type="tel" dir="ltr" minLength={5} maxLength={20} value={phone} onChange={e => setPhone(e.target.value)} />
-        <Input label={t("latitude")} type="number" dir="ltr" min={-90} max={90} step="any" value={latitude} onChange={e => setLatitude(e.target.value)} />
-        <Input label={t("longitude")} type="number" dir="ltr" min={-180} max={180} step="any" value={longitude} onChange={e => setLongitude(e.target.value)} />
+        <div className="md:col-span-2"><LocationPicker audience="business" required value={pin} onChange={setPin} consent={pinConsent} onConsentChange={setPinConsent} /></div>
         {error && !removal && <p role="alert" className="md:col-span-2">{error}</p>}
-        <Button type="submit" disabled={busy || !name.trim() || !city.trim() || address.trim().length < 3}>{t("addBranch")}</Button>
+        <Button type="submit" disabled={busy || !name.trim() || !city.trim() || address.trim().length < 3 || !pin || !pinConsent}>{t("addBranch")}</Button>
       </form></ContextSurface>}
       {owner && branchesFull && <p>{t("limitReached")}</p>}
     </>}

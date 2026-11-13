@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Headers, Param, Post, Query, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Get, Headers, HttpCode, HttpStatus, Param, Post, Query, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
 import { ValidationApiException } from "../../common/errors/api-exception";
 import { SubscriptionInsightService } from "./subscription-insight.service";
 import { SubscriptionBillingReason } from "@prisma/client";
@@ -13,7 +14,9 @@ import { SubscriptionBillingService } from "./subscription-billing.service";
 import { EntitlementService } from "./entitlement.service";
 import { SubscriptionPlanReadService } from "./subscription-plan-read.service";
 import { resolveHouseholdCountry } from "./household-country.util";
-import { ScheduleDowngradeDto, StartTrialDto, SubscribeDto } from "./dto/subscription.dto";
+import { GiftCodeCheckDto, ScheduleDowngradeDto, StartTrialDto, SubscribeDto } from "./dto/subscription.dto";
+import { SubscriptionOffersService } from "./subscription-offers.service";
+import { SubscriptionGiftService } from "./subscription-gift.service";
 import { PrismaService } from "../../common/prisma/prisma.service";
 
 /**
@@ -38,6 +41,8 @@ export class SubscriptionController {
     private readonly plans: SubscriptionPlanReadService,
     private readonly prisma: PrismaService,
     private readonly insight: SubscriptionInsightService,
+    private readonly offers: SubscriptionOffersService,
+    private readonly gifts: SubscriptionGiftService,
   ) {}
 
   @Get()
@@ -93,18 +98,49 @@ export class SubscriptionController {
     return this.subscriptions.startTrial(householdId, dto.planId, user.id);
   }
 
+  /** The free week and the first-purchase gift as they apply to this member and household right now. */
+  @Get("offers")
+  getOffers(@Param("householdId") householdId: string, @CurrentUser() user: SessionUser) {
+    return this.offers.forHousehold(householdId, user.id);
+  }
+
+  /** One click, no card. Idempotent: while the trial runs, a repeat call returns it (`started: false`). */
+  @Post("free-week")
+  @UseGuards(HouseholdOwnerGuard)
+  @UseInterceptors(IdempotencyInterceptor)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  startFreeWeek(@Param("householdId") householdId: string, @CurrentUser() user: SessionUser) {
+    return this.subscriptions.startFreeWeek(householdId, user.id);
+  }
+
+  /** Ends a running trial now; it still counts as the household's and owner's one trial. Nothing is charged. */
+  @Post("trial/end")
+  @UseGuards(HouseholdOwnerGuard)
+  endTrial(@Param("householdId") householdId: string, @CurrentUser() user: SessionUser) {
+    return this.subscriptions.endTrialNow(householdId, user.id);
+  }
+
+  /** "Apply" for the gift code at checkout. Rate-limited per IP and per account; every refusal is the same 400. */
+  @Post("gift/check")
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(HouseholdOwnerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  checkGift(@Param("householdId") householdId: string, @CurrentUser() user: SessionUser, @Body() dto: GiftCodeCheckDto) {
+    return this.gifts.check(householdId, user.id, dto.code);
+  }
+
   @Post("subscribe")
   @UseGuards(HouseholdOwnerGuard)
   @UseInterceptors(IdempotencyInterceptor)
   subscribe(@Param("householdId") householdId: string, @CurrentUser() user: SessionUser, @Body() dto: SubscribeDto, @Headers("idempotency-key") idempotencyKey?: string) {
-    return this.billing.purchase(householdId, user.id, dto.planId, dto.billingInterval, SubscriptionBillingReason.INITIAL, idempotencyKey, dto.mode);
+    return this.billing.purchase(householdId, user.id, dto.planId, dto.billingInterval, SubscriptionBillingReason.INITIAL, idempotencyKey, dto.mode, dto.giftCode);
   }
 
   @Post("upgrade")
   @UseGuards(HouseholdOwnerGuard)
   @UseInterceptors(IdempotencyInterceptor)
   upgrade(@Param("householdId") householdId: string, @CurrentUser() user: SessionUser, @Body() dto: SubscribeDto, @Headers("idempotency-key") idempotencyKey?: string) {
-    return this.billing.purchase(householdId, user.id, dto.planId, dto.billingInterval, SubscriptionBillingReason.UPGRADE, idempotencyKey, dto.mode);
+    return this.billing.purchase(householdId, user.id, dto.planId, dto.billingInterval, SubscriptionBillingReason.UPGRADE, idempotencyKey, dto.mode, dto.giftCode);
   }
 
   @Post("downgrade")

@@ -14,6 +14,8 @@ export interface SubscribeInput {
   billingInterval: SubscriptionBillingInterval;
   /** Sandbox-only outcome selector (Handoff 07's own PayCheckoutDto precedent) — never present against a real gateway. */
   mode?: "SUCCESS" | "FAILURE";
+  /** First-purchase gift code; the server decides whether it applies. */
+  giftCode?: string;
 }
 
 export interface SubscribeOutcome {
@@ -42,4 +44,7 @@ export const subscriptionService = {
   cancel: (householdId: string) => apiFetch<SubscriptionDto>(`/households/${householdId}/subscription/cancel`, { method: "POST" }),
 
   resume: (householdId: string) => apiFetch<SubscriptionDto>(`/households/${householdId}/subscription/resume`, { method: "POST" }),
+
+  /** Ends a running trial now (it still counts as used); nothing is charged. */
+  endTrial: (householdId: string) => apiFetch<SubscriptionDto>(`/households/${householdId}/subscription/trial/end`, { method: "POST" }),
 };

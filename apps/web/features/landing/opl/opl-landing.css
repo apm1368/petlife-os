@@ -445,3 +445,5 @@
 .opl-page main :is(button,a).bg-brand-solid { box-shadow:0 8px 18px -10px rgb(var(--opl-sh) / .55); transition:transform .25s var(--opl-ease),box-shadow .25s var(--opl-ease),background-color .2s; }
 @media (hover:hover) { .opl-page main :is(button,a).bg-brand-solid:hover { transform:translateY(-1px); box-shadow:0 12px 22px -10px rgb(var(--opl-sh) / .6); } }
 .opl-family-reel { position:relative; }
+/* «ست پت» header button (owner, #368 P1). */
+.opl-hact .opl-setpet-btn { gap: 6px; padding-inline: 14px; }

@@ -22,6 +22,8 @@ export class DiscoverProvidersDto {
   @IsOptional() @Type(() => Number) @IsNumber() @Min(-90) @Max(90) lat?: number;
   @IsOptional() @Type(() => Number) @IsNumber() @Min(-180) @Max(180) lng?: number;
   @IsOptional() @Type(() => Number) @IsNumber() @Min(1) @Max(200) radiusKm?: number;
+  /** "home": distances from the signed-in member's own pinned default address, looked up server-side (never sent or echoed). */
+  @IsOptional() @IsIn(["home"]) near?: "home";
   @IsOptional() @IsIn(DISCOVERY_SORTS) sort?: DiscoverySort;
 }
 

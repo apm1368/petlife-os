@@ -194,10 +194,11 @@ describe("Shipping methods, seller profiles and the address book (e2e)", () => {
     const member = await signedIn("ship-book");
     const household = await member.c.post("/households").send({}).expect(201);
     const first = await member.c.post("/addresses").send({ householdId: household.body.id, addressLine: "اول", city: "تهران", countryCode: "IR" }).expect(201);
-    const second = await member.c.post("/addresses").send({ householdId: household.body.id, addressLine: "دوم", city: "تهران", countryCode: "IR", latitude: 35.75, longitude: 51.41 }).expect(201);
+    const second = await member.c.post("/addresses").send({ householdId: household.body.id, addressLine: "دوم", city: "تهران", countryCode: "IR", latitude: 35.75, longitude: 51.41, locationConsent: true }).expect(201);
     expect(first.body.isDefault).toBe(true);
     const stranger = await signedIn("ship-stranger");
-    await stranger.c.delete(`/addresses/${first.body.id}`).expect(403);
+    // Another account gets the same 404 as a missing address (no existence leak).
+    await stranger.c.delete(`/addresses/${first.body.id}`).expect(404);
     const archived = await member.c.delete(`/addresses/${first.body.id}`).expect(200);
     expect(archived.body).toEqual({ archived: true, newDefaultId: second.body.id });
     const list = (await member.c.get(`/addresses?householdId=${household.body.id}`).expect(200)).body as { id: string; isDefault: boolean }[];

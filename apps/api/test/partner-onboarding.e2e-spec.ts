@@ -91,7 +91,7 @@ describe("Partner onboarding (e2e)", () => {
     expect(withLogo.logoUrl).not.toContain("evil.example");
     await partner.put("/partner-onboarding/owner").send({ firstName: "آرش", lastName: "رضایی", phone: "021-88001122" }).expect(200);
     await partner.put("/partner-onboarding/calendar").send({ days: [{ dayOfWeek: 6, start: "09:00", end: "18:00" }] }).expect(400);
-    await partner.put("/partner-onboarding/address").send({ province: "تهران", city: "تهران", addressLine: "خیابان ولیعصر، پلاک ۱۲", postalCode: "1234567890", latitude: 35.75, longitude: 51.41 }).expect(200);
+    await partner.put("/partner-onboarding/address").send({ province: "تهران", city: "تهران", addressLine: "خیابان ولیعصر، پلاک ۱۲", postalCode: "1234567890", latitude: 35.75, longitude: 51.41, locationConsent: true }).expect(200);
     await partner.put("/partner-onboarding/calendar").send({ days: [{ dayOfWeek: 6, start: "18:00", end: "09:00" }] }).expect(400);
     await partner.put("/partner-onboarding/calendar").send({ days: [{ dayOfWeek: 6, start: "09:00", end: "18:00" }, { dayOfWeek: 0, start: "09:00", end: "18:00" }] }).expect(200);
     await partner.put("/partner-onboarding/services").send({ services: [{ kind: "PET_TAXI", name: "تاکسی", priceIrr: 1_000_000, durationMinutes: 30, maxPets: 1 }] }).expect(400);

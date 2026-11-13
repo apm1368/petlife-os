@@ -12,6 +12,8 @@ import { useSessionStore } from "@/stores/session-store";
 import { dashboardCopy, MemberHomeView } from "./MemberHomeView";
 import { glassHomeCopy } from "./glass-home-copy";
 import { routeExists } from "@/test/route-exists";
+import { householdsService } from "@/services/households.service";
+import { MemberHomeSlot } from "./member-home-slots";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => "/fa/home" }));
 vi.mock("@/services/pets.service", () => ({ petsService: { getOverview: vi.fn(), getMyAccess: vi.fn().mockResolvedValue({ canViewIdentity: true, canViewHealth: true, canViewCareProfile: true }) } }));
@@ -19,6 +21,8 @@ vi.mock("@/services/care-reminders.service", () => ({ careRemindersService: { li
 vi.mock("@/services/bookings.service", () => ({ bookingsService: { list: vi.fn() } }));
 vi.mock("@/services/commerce.service", () => ({ commerceService: { listOrders: vi.fn().mockResolvedValue([]) } }));
 vi.mock("@/services/travel-marketplace.service", () => ({ travelMarketService: { listBookings: vi.fn().mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 20 }) } }));
+// The location nudge (#391) loads the member's households and addresses itself; these views are tested without it.
+vi.mock("@/services/households.service", () => ({ householdsService: { setActivePet: vi.fn().mockResolvedValue({ petId: "pet-2" }), listMine: vi.fn(() => new Promise(() => undefined)) } }));
 vi.mock("@/services/subscription.service", () => ({ subscriptionService: { getCurrent: vi.fn().mockRejectedValue(Object.assign(new Error("none"), { status: 404 })) } }));
 
 const PET = { id: "pet-1", name: "پشمک", species: "DOG", breed: null, birthDate: null, approximateAgeMonths: 18, photoUrl: null, lifecycleStatus: "ACTIVE" };
@@ -27,6 +31,8 @@ function overview(extra: Record<string, unknown> = {}) {
   return { pet: PET, householdName: null, attention: [], upcoming: [], recentHealth: [], recentActivity: [], recentMemory: null, ...extra } as never;
 }
 
+// The membership offers card loads its own data; these views are tested without it.
+vi.mock("@/services/membership-offers.service", () => ({ membershipOffersService: { forHousehold: vi.fn(() => new Promise(() => undefined)), forAccount: vi.fn(() => new Promise(() => undefined)), startFreeWeek: vi.fn(), checkGift: vi.fn() } }));
 describe("MemberHomeView", () => {
   beforeEach(() => {
     vi.mocked(petsService.getOverview).mockReset();
@@ -309,4 +315,57 @@ describe("MemberHomeView", () => {
     expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
   });
 
+
+  it("groups the dashboard into the five questions around the pet's record (owner #5, 2026-11 pattern)", async () => {
+    vi.mocked(petsService.getOverview).mockResolvedValue(overview());
+    renderWithIntl(<MemberHomeView />, "en");
+    await screen.findByRole("heading", { name: "پشمک" });
+    const worlds = screen.getAllByRole("region").filter((r) => r.classList.contains("member-world"));
+    expect(worlds.map((w) => w.querySelector("h2")!.textContent)).toEqual(["Health and care", "Shopping and services", "Travel and stays", "Peace of mind", "Community and kindness"]);
+    // The live panels sit inside their question: orders and the next appointment under shopping, stays under travel.
+    expect(screen.getByRole("heading", { name: "Orders" }).closest(".member-world")!.classList.contains("member-world--daily")).toBe(true);
+    expect(screen.getByRole("heading", { name: "Upcoming stays" }).closest(".member-world")!.classList.contains("member-world--travel")).toBe(true);
+    expect(screen.getByRole("heading", { name: "Membership" }).closest(".member-world")!.classList.contains("member-world--safe")).toBe(true);
+    const hrefs = screen.getAllByRole("link").map((a) => a.getAttribute("href")!);
+    for (const href of ["/en/pets/pet-1/card", "/en/lost-pets", "/en/memorials", "/en/pet-taxi", "/en/care-calendar"]) expect(hrefs).toContain(href);
+    expect(hrefs.filter((h) => !routeExists(h))).toEqual([]);
+  });
+
+  it("keeps the household and every pet in a context bar, and switches the whole page from a pet chip", async () => {
+    const sibling = { ...PET, id: "pet-2", name: "Milo" };
+    usePetStore.setState({ householdId: "h1", pets: [PET as never, sibling as never], activePetId: "pet-1" });
+    vi.mocked(petsService.getOverview).mockResolvedValue(overview({ householdName: "Garcia family" }));
+    renderWithIntl(<MemberHomeView />, "en");
+    const bar = await screen.findByRole("region", { name: "Your household and pets" });
+    expect(within(bar).getByRole("group", { name: "Active household: Garcia family" })).toBeTruthy();
+    expect(within(bar).getByRole("button", { name: "Show پشمک" }).getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(within(bar).getByRole("button", { name: "Show Milo" }));
+    await waitFor(() => expect(householdsService.setActivePet).toHaveBeenCalledWith("h1", "pet-2"));
+    await waitFor(() => expect(petsService.getOverview).toHaveBeenCalledWith("pet-2"));
+  });
+
+  it("turns Home into a calm remembrance for a pet who has passed away: memories first, no shopping, booking or travel", async () => {
+    const remembered = { ...PET, lifecycleStatus: "DECEASED" };
+    usePetStore.setState({ householdId: "h1", pets: [remembered as never], activePetId: "pet-1" });
+    vi.mocked(petsService.getOverview).mockResolvedValue(overview({ pet: remembered, recentMemory: { id: "m1", title: "Our first beach day", occurredAt: "2025-06-01T10:00:00Z", type: "PHOTO" } }));
+    renderWithIntl(<MemberHomeView />, "en");
+    expect(await screen.findByText("پشمک is always part of your home")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Open پشمک's memories" }).getAttribute("href")).toBe("/en/pets/pet-1/memories");
+    expect(screen.getByRole("link", { name: "Visit the memorial garden" }).getAttribute("href")).toBe("/en/memorials");
+    const worlds = screen.getAllByRole("region").filter((r) => r.classList.contains("member-world"));
+    expect(worlds.map((w) => w.querySelector("h2")!.textContent)).toEqual(["Community and kindness", "Health and care"]);
+    expect(screen.getByRole("link", { name: /Our first beach day/ }).getAttribute("href")).toBe("/en/pets/pet-1/memories/m1");
+    expect(screen.queryByRole("heading", { name: "Orders" })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "Upcoming stays" })).toBeNull();
+    const hrefs = screen.getAllByRole("link").map((a) => a.getAttribute("href"));
+    for (const nudge of ["/en/shop", "/en/services", "/en/travel", "/en/vet/find", "/en/pet-taxi", "/en/pets/pet-1/travel"]) expect(hrefs).not.toContain(nudge);
+  });
+
+  it("renders a registered component in its named slot and nothing in an empty one", () => {
+    const { container, unmount } = renderWithIntl(<MemberHomeSlot name="offers" slots={{}} />, "en");
+    expect(container.innerHTML).toBe("");
+    unmount();
+    renderWithIntl(<MemberHomeSlot name="offers" slots={{ offers: () => <p>Your gift code</p> }} />, "en");
+    expect(screen.getByText("Your gift code").closest("[data-slot]")!.getAttribute("data-slot")).toBe("offers");
+  });
 });

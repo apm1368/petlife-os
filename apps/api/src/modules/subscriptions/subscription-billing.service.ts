@@ -20,12 +20,13 @@ import type { SubscriptionBillingAttemptDto, SubscriptionDto } from "@petlife/ty
 import type { AppEnv } from "../../config/env";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
-import { SubscriptionBillingAttemptNotFoundException, SubscriptionBillingAttemptNotRefundableException } from "../../common/errors/api-exception";
+import { SubscriptionBillingAttemptNotFoundException, SubscriptionBillingAttemptNotRefundableException, SubscriptionGiftCodeNotApplicableException } from "../../common/errors/api-exception";
 import { PaymentsService } from "../commerce/payments/payments.service";
 import type { PaymentChargeMode } from "../commerce/payments/payment-gateway.interface";
 import { LedgerService } from "../commerce/ledger/ledger.service";
 import { SubscriptionService } from "./subscription.service";
 import { SubscriptionPlanReadService } from "./subscription-plan-read.service";
+import { SubscriptionGiftService, type ActiveGift } from "./subscription-gift.service";
 import { addBillingInterval, addDays } from "./subscription-date.util";
 import { resolveHouseholdCountry } from "./household-country.util";
 import { SUBSCRIPTION_INCLUDE, toBillingAttemptDto, toSubscriptionDto, type SubscriptionWithRelations } from "./subscription-mapper";
@@ -92,6 +93,7 @@ export class SubscriptionBillingService {
     private readonly plans: SubscriptionPlanReadService,
     private readonly events: DomainEventsService,
     private readonly config: ConfigService<AppEnv, true>,
+    private readonly gifts: SubscriptionGiftService,
   ) {}
 
   private async createShellCheckout(tx: Prisma.TransactionClient, userId: string, householdId: string, amount: number, currency: string) {
@@ -152,6 +154,11 @@ export class SubscriptionBillingService {
    * refunded. This is deliberately the simpler of the two policies the spec
    * offers, chosen because it needs no floating-point/rounding logic and is
    * trivially auditable (see README "Upgrade/downgrade").
+   *
+   * `giftCode` (optional): the first-purchase gift. Rate-limited per account; any refusal is the same 400. Applied
+   * to the list price only (it never stacks with anything), it lowers what is charged and is recorded on the
+   * attempt (`discountAmount`) and in SubscriptionGiftRedemption, whose unique keys make it single-use per account
+   * and household. A failed charge releases it again. Renewals are always charged the full price.
    */
   async purchase(
     householdId: string,
@@ -161,7 +168,14 @@ export class SubscriptionBillingService {
     reason: typeof SubscriptionBillingReason.INITIAL | typeof SubscriptionBillingReason.UPGRADE,
     idempotencyKey?: string,
     mode: PaymentChargeMode = "SUCCESS",
+    giftCode?: string,
   ): Promise<BillingOutcome> {
+    let gift: ActiveGift | null = null;
+    if (giftCode !== undefined) {
+      await this.gifts.countAttempt(userId);
+      gift = this.gifts.matching(giftCode);
+      if (!gift) throw new SubscriptionGiftCodeNotApplicableException();
+    }
     const countryCode = await resolveHouseholdCountry(this.prisma, householdId);
     const plan = await this.plans.getRawById(planId);
     this.plans.assertSubscribable(plan, countryCode);
@@ -178,16 +192,32 @@ export class SubscriptionBillingService {
         }
       }
 
-      const checkout = await this.createShellCheckout(tx, userId, householdId, price.amount, price.currency);
-      const intent = await this.payments.createIntent(checkout.id, price.amount, price.currency, PaymentProvider.DEV_SIMULATED, undefined, tx);
+      // Re-checked under the subscription lock: first paid purchase only, never used by this account or household.
+      if (gift && !(await this.gifts.isEligible(tx, householdId, userId))) throw new SubscriptionGiftCodeNotApplicableException();
+      const discountAmount = gift ? this.gifts.discountFor(price.amount, gift.percentOff) : 0;
+      const amount = price.amount - discountAmount;
+
+      const checkout = await this.createShellCheckout(tx, userId, householdId, amount, price.currency);
+      const intent = await this.payments.createIntent(checkout.id, amount, price.currency, PaymentProvider.DEV_SIMULATED, undefined, tx);
       const attemptNumber = (await tx.subscriptionBillingAttempt.count({ where: { subscriptionId: sub.id } })) + 1;
       const attempt = await tx.subscriptionBillingAttempt.create({
-        data: { subscriptionId: sub.id, reason, attemptNumber, paymentIntentId: intent.id, priceId: price.id, idempotencyKey, amount: price.amount, currency: price.currency, status: SubscriptionBillingAttemptStatus.PENDING },
+        data: { subscriptionId: sub.id, reason, attemptNumber, paymentIntentId: intent.id, priceId: price.id, idempotencyKey, amount, discountAmount, currency: price.currency, status: SubscriptionBillingAttemptStatus.PENDING },
       });
+      if (gift) {
+        // The unique household/user keys are the single-use guarantee: a concurrent redemption elsewhere by the same
+        // account (or in the same household) inserts nothing here, and the whole purchase is refused.
+        const redeemed = await tx.subscriptionGiftRedemption.createMany({
+          data: [{ householdId, userId, subscriptionId: sub.id, billingAttemptId: attempt.id, code: gift.code, percentOff: gift.percentOff, listAmount: price.amount, discountAmount, chargedAmount: amount, currency: price.currency }],
+          skipDuplicates: true,
+        });
+        if (redeemed.count !== 1) throw new SubscriptionGiftCodeNotApplicableException();
+      }
 
       const outcome = await this.payments.charge(intent.id, mode, tx);
 
       if (outcome.status !== "SUCCEEDED") {
+        // Nothing was bought, so the gift stays available for the next try.
+        if (gift) await tx.subscriptionGiftRedemption.deleteMany({ where: { billingAttemptId: attempt.id } });
         const failedAttempt = await tx.subscriptionBillingAttempt.update({
           where: { id: attempt.id },
           data: { status: SubscriptionBillingAttemptStatus.FAILED, failureCode: outcome.failureCode, failureReason: outcome.failureMessage, completedAt: new Date() },
@@ -196,15 +226,31 @@ export class SubscriptionBillingService {
       }
 
       await tx.checkout.update({ where: { id: checkout.id }, data: { status: CheckoutStatus.CONFIRMED } });
-      await this.ledger.recordPaymentSucceeded(attempt.id, price.amount, price.currency, tx);
-      await this.ledger.recordSubscriptionRevenue(attempt.id, price.amount, price.currency, tx);
+      // The ledger carries the cash actually taken; the gift is a lower price, never a payout or wallet credit.
+      await this.ledger.recordPaymentSucceeded(attempt.id, amount, price.currency, tx);
+      await this.ledger.recordSubscriptionRevenue(attempt.id, amount, price.currency, tx);
 
       const startAt = new Date();
       const period = await this.subscriptions.activatePeriod(tx, sub, planId, price.id, startAt, addBillingInterval(startAt, billingInterval));
       const succeededAttempt = await tx.subscriptionBillingAttempt.update({ where: { id: attempt.id }, data: { status: SubscriptionBillingAttemptStatus.SUCCEEDED, periodId: period.id, completedAt: new Date() } });
       await tx.subscriptionChange.create({
-        data: { subscriptionId: sub.id, type: reason === SubscriptionBillingReason.INITIAL ? SubscriptionChangeType.INITIAL_PURCHASE : SubscriptionChangeType.UPGRADE, fromPlanId: sub.planId, toPlanId: planId, effectiveAt: startAt, initiatedByUserId: userId },
+        data: {
+          subscriptionId: sub.id,
+          type: reason === SubscriptionBillingReason.INITIAL ? SubscriptionChangeType.INITIAL_PURCHASE : SubscriptionChangeType.UPGRADE,
+          fromPlanId: sub.planId,
+          toPlanId: planId,
+          effectiveAt: startAt,
+          initiatedByUserId: userId,
+          note: gift ? `First-purchase gift ${gift.code}: ${gift.percentOff}% off` : undefined,
+        },
       });
+      if (gift) {
+        await this.events.publish(
+          "SubscriptionGiftRedeemed",
+          { subscriptionId: sub.id, householdId, billingAttemptId: attempt.id, percentOff: gift.percentOff, listAmount: price.amount, discountAmount, chargedAmount: amount, currency: price.currency },
+          { tx, aggregateType: "Subscription", aggregateId: sub.id },
+        );
+      }
       await this.events.publish(
         reason === SubscriptionBillingReason.INITIAL ? "SubscriptionStarted" : "SubscriptionUpgraded",
         { subscriptionId: sub.id, householdId, planId, isTrial: false },

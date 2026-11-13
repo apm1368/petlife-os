@@ -8,6 +8,8 @@ import type { SellerCatalogDirectoryItemDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
 import { buildLoginUrl } from "@/lib/auth/return-to";
 import { IRAN_PROVINCES } from "@/lib/geo/iran-provinces";
+import { LocationPicker } from "@/features/maps/LocationPicker";
+import type { MapPoint } from "@/features/maps/MapView";
 import { useSessionStore } from "@/stores/session-store";
 import { sellerOsService } from "@/services/seller-os.service";
 import {
@@ -354,17 +356,21 @@ function AddressStep({ state, onSaved }: { state: PartnerOnboardingStateDto; onS
   const [otherCity, setOtherCity] = useState(!!state.address?.city && !cities.includes(state.address.city));
   const [addressLine, setAddressLine] = useState(state.address?.addressLine ?? "");
   const [postalCode, setPostalCode] = useState(state.address?.postalCode ?? "");
-  const [lat, setLat] = useState(state.address?.latitude != null ? String(state.address.latitude) : "");
-  const [lng, setLng] = useState(state.address?.longitude != null ? String(state.address.longitude) : "");
+  const savedPin = state.address?.latitude != null && state.address.longitude != null ? { latitude: state.address.latitude, longitude: state.address.longitude } : null;
+  const [pin, setPin] = useState<MapPoint | null>(savedPin);
+  const [consent, setConsent] = useState(savedPin !== null);
+  const [exactPublic, setExactPublic] = useState(!!state.address?.exactPinPublic);
+  const tp = useTranslations("locationPicker");
   const { busy, run, alert } = useSave();
+  // Service businesses choose whether the public sees their exact spot (home-based ones default to ~1 km).
+  const offersServices = state.serviceKinds.length > 0;
   return (
     <form
       className="flex flex-col gap-4"
       onSubmit={(e) => {
         e.preventDefault();
-        const latitude = lat.trim() ? num(lat) : undefined;
-        const longitude = lng.trim() ? num(lng) : undefined;
-        void run(() => partnerOnboardingService.address({ province, city: city.trim(), addressLine: addressLine.trim(), postalCode: postalCode.trim() || undefined, latitude, longitude }), onSaved);
+        const pinFields = pin && consent ? { latitude: pin.latitude, longitude: pin.longitude, locationConsent: true } : {};
+        void run(() => partnerOnboardingService.address({ province, city: city.trim(), addressLine: addressLine.trim(), postalCode: postalCode.trim() || undefined, ...pinFields, ...(offersServices ? { exactPinPublic: exactPublic } : {}) }), onSaved);
       }}
     >
       <div className="grid gap-3 sm:grid-cols-2">
@@ -377,13 +383,19 @@ function AddressStep({ state, onSaved }: { state: PartnerOnboardingStateDto; onS
       </div>
       <Input label={t("address.line")} value={addressLine} onChange={(e) => setAddressLine(e.target.value)} />
       <Input label={t("address.postalCode")} dir="ltr" inputMode="numeric" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} />
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Input label={t("address.latitude")} dir="ltr" inputMode="decimal" value={lat} onChange={(e) => setLat(e.target.value)} />
-        <Input label={t("address.longitude")} dir="ltr" inputMode="decimal" value={lng} onChange={(e) => setLng(e.target.value)} />
-      </div>
+      <LocationPicker
+        audience="business"
+        required={!savedPin}
+        value={pin}
+        onChange={setPin}
+        consent={consent}
+        onConsentChange={setConsent}
+        {...(offersServices ? { exactPublic, onExactPublicChange: setExactPublic } : {})}
+      />
       <p className="text-metadata text-text-secondary">{t("address.pinHint")}</p>
+      {pin && !consent ? <p className="text-metadata text-text-secondary">{tp("consentNeeded")}</p> : null}
       {alert}
-      <Button type="submit" isLoading={busy} className="w-fit" disabled={!province || !city.trim()}>{t("saveAndContinue")}</Button>
+      <Button type="submit" isLoading={busy} className="w-fit" disabled={!province || !city.trim() || (!savedPin && !pin) || (!!pin && !consent)}>{t("saveAndContinue")}</Button>
     </form>
   );
 }

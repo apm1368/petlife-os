@@ -1,11 +1,14 @@
 import { AdminInsuranceApplicationsController } from "./insurance/admin-insurance-applications.controller";
 import { OrdersModule } from "../commerce/orders/orders.module";
+import { MapsModule } from "../maps/maps.module";
 import { AdminTravelController } from "./travel/admin-travel.controller";
 import { AdminTravelService } from "./travel/admin-travel.service";
 import { TravelMarketplaceModule } from "../travel-marketplace/travel-marketplace.module";
 import { AdminCommerceController } from "./commerce/admin-commerce.controller";
 import { AdminCommerceService } from "./commerce/admin-commerce.service";
 import { ProductReadinessService } from "./commerce/product-readiness.service";
+import { AdminSetPetService } from "./set-pet/admin-set-pet.service";
+import { AdminSetPetController } from "./set-pet/admin-set-pet.controller";
 import { SellerCatalogReviewService } from "./commerce/seller-catalog-review.service";
 import { CatalogImportService } from "./commerce/catalog-import.service";
 import { CatalogImportWorker } from "./commerce/catalog-import.worker";
@@ -24,6 +27,8 @@ import { SettlementOpsService } from "./finance/settlement-ops.service";
 import { AdminFinanceOpsController } from "./finance/finance-ops.controller";
 import { AdminWalletTransfersController } from "./finance/admin-wallet-transfers.controller";
 import { AdminWalletTransfersService } from "./finance/admin-wallet-transfers.service";
+import { AdminTransactionsExplorerController } from "./finance/transactions-explorer.controller";
+import { TransactionsExplorerService } from "./finance/transactions-explorer.service";
 import { AutomaticTaskListener } from "./task/automatic-task.listener";
 import { AdminPartner360Service } from "./partners/admin-partner360.service";
 import { AdminPartner360Controller } from "./partners/admin-partner360.controller";
@@ -49,6 +54,7 @@ import { AdminSystemService } from "./system/admin-system.service";
 import { AdminSystemController } from "./system/admin-system.controller";
 import { BookingModule } from "../booking/booking.module";
 import { PaymentsModule } from "../commerce/payments/payments.module";
+import { SetPetModule } from "../set-pet/set-pet.module";
 import { AdminCardTransferController } from "./finance/admin-card-transfer.controller";
 import { AdminShippingController } from "./commerce/admin-shipping.controller";
 import { LogisticsModule } from "../commerce/logistics/logistics.module";
@@ -167,6 +173,7 @@ import { MemoriesModule } from "../memories/memories.module";
  */
 @Module({
   imports: [
+    MapsModule,
     NotificationsModule,
     EmailModule,
     RefundsModule,
@@ -181,6 +188,7 @@ import { MemoriesModule } from "../memories/memories.module";
     CommunityModule,
     BookingModule,
     PaymentsModule,
+    SetPetModule,
     LogisticsModule,
     MemoriesModule,
   ],
@@ -195,12 +203,14 @@ import { MemoriesModule } from "../memories/memories.module";
     UserSupportAttachmentsController,
     AdminFinanceOpsController,
     AdminWalletTransfersController,
+    AdminTransactionsExplorerController,
     AdminCardTransferController,
     AdminShippingController,
     AdminPlacesOsmController,
     AdminWalletsController,
     AdminCardTransferDestinationController,
     AdminPartner360Controller,
+    AdminSetPetController,
     AdminPartnerDirectoryController,
     AdminPartnerApprovalController,
     AdminPet360Controller,
@@ -249,6 +259,7 @@ import { MemoriesModule } from "../memories/memories.module";
     FinanceReconciliationWorker,
     PaymentTraceService,
     AdminWalletTransfersService,
+    TransactionsExplorerService,
     SettlementOpsService,
     AutomaticTaskListener,
     AdminPartner360Service,
@@ -271,6 +282,7 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminTravelService,
     AdminCommerceService,
     ProductReadinessService,
+    AdminSetPetService,
     SellerCatalogReviewService,
     CatalogImportService,
     CatalogImportWorker,

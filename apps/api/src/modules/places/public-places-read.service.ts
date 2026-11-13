@@ -6,6 +6,7 @@ import { resolvePagination, toPaginatedDto } from "../../common/pagination/pagin
 import { toPetFriendlyPlaceDto } from "./places-mapper";
 import type { ListPetFriendlyPlacesQueryDto, NearbyPetFriendlyPlacesQueryDto } from "./dto/places.dto";
 import { excludeDemoRecordsFromPublicReads } from "../../common/public-record-origin";
+import { coarseKm } from "../../common/geo/geo";
 
 /**
  * Public = listed and either VERIFIED, or an unverified OpenStreetMap import (shown with its "not verified" label and
@@ -99,7 +100,8 @@ export class PublicPlacesReadService {
     const total = await this.countNearby(query, radiusMeters);
     if (nearbyRows.length === 0) return toPaginatedDto([], total, page, pageSize);
 
-    const distanceById = new Map(nearbyRows.map((row) => [row.id, row.distance_meters]));
+    // Whole kilometres only (0 = under 1 km): members never see exact metres to or from their own location.
+    const distanceById = new Map(nearbyRows.map((row) => [row.id, coarseKm(Number(row.distance_meters) / 1000) * 1000]));
     const rows = await this.prisma.petFriendlyPlace.findMany({ where: { id: { in: nearbyRows.map((row) => row.id) }, ...excludeDemoRecordsFromPublicReads() } });
     const byId = new Map(rows.map((row) => [row.id, row]));
     const ordered = nearbyRows.map((nearbyRow) => byId.get(nearbyRow.id)).filter((row): row is NonNullable<typeof row> => row !== undefined);

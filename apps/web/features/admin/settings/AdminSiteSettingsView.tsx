@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Globe, Save, Settings, ToggleLeft, Mail, Phone, Bell, Palette, LockKeyhole, ShieldCheck, ExternalLink } from "@petlife/ui";
+import { Globe, Save, Settings, ToggleLeft, Mail, Phone, Bell, Palette, LockKeyhole, ShieldCheck, ExternalLink, MapPin } from "@petlife/ui";
+import type { AdminMapsCoverageDto } from "@petlife/types";
 import Link from "@/features/navigation/localized-link";
 import { ApiError } from "@/lib/api/client";
 import { adminSettingsService, type PlatformSetting, type SettingValue } from "@/services/admin-settings.service";
@@ -25,6 +26,7 @@ const SECTIONS: { key: string; icon: typeof Globe; keys: string[] }[] = [
   { key: "features", icon: ToggleLeft, keys: ["features.shop", "features.services", "features.travel", "features.insurance", "features.places", "features.community", "features.lostPets", "features.animalSupport", "features.blog", "features.memorials"] },
   { key: "access", icon: LockKeyhole, keys: ["auth.passwordSignupEnabled", "auth.otpEnabled", "auth.googleEnabled"] },
   { key: "maintenance", icon: Settings, keys: ["maintenance.enabled", "maintenance.message"] },
+  { key: "maps", icon: MapPin, keys: ["maps.provider", "maps.googleBrowserKey"] },
 ];
 
 const nameKey = (key: string) => key.replace(".", "_");
@@ -131,6 +133,7 @@ export function AdminSiteSettingsView() {
                   {sectionRows.map((row) => <Field key={row.key} row={row} value={drafts[row.key] ?? null} disabled={!canManage} onChange={(v) => set(row.key, v)} />)}
                 </div>
                 {section.key === "trust" ? <EnamadCheck id={drafts["trust.enamadId"]} code={drafts["trust.enamadCode"]} /> : null}
+                {section.key === "maps" ? <MapsCoverage /> : null}
               </section>
             );
           })}
@@ -151,6 +154,26 @@ export function AdminSiteSettingsView() {
           ) : <p className="gx-muted">{t("readOnly")}</p>}
         </>
       )}
+    </div>
+  );
+}
+
+/** How many saved locations still lack a pin — counts only, never addresses or coordinates. */
+function MapsCoverage() {
+  const t = useTranslations("adminSiteSettings");
+  const [data, setData] = useState<AdminMapsCoverageDto | null>(null);
+  useEffect(() => {
+    const controller = new AbortController();
+    adminSettingsService.mapsCoverage(controller.signal).then((d) => { if (!controller.signal.aborted) setData(d); }).catch(() => undefined);
+    return () => controller.abort();
+  }, []);
+  if (!data) return null;
+  return (
+    <div className="gx-muted" style={{ marginTop: 12 }} role="status">
+      <p style={{ fontWeight: 600 }}>{t("coverage.title")}</p>
+      <p>{t("coverage.addresses", { missing: data.memberAddresses.withoutPin, total: data.memberAddresses.total })}</p>
+      <p>{t("coverage.providers", { missing: data.providerLocations.withoutPin, total: data.providerLocations.total })}</p>
+      <p>{t("coverage.pickups", { missing: data.sellerPickups.withoutPin, total: data.sellerPickups.total })}</p>
     </div>
   );
 }

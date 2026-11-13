@@ -22,6 +22,14 @@
         {
           "q": "Kostet opetlife etwas?",
           "a": "Ein Konto zu erstellen und die Akten deiner Tiere zu führen, ist kostenlos. Du bezahlst nur für die Leistungen, Produkte und Fahrten, die du buchst oder kaufst. Einige Zusatzfunktionen gehören zu optionalen kostenpflichtigen Tarifen, die auf der Abo-Seite angezeigt werden."
+        },
+        {
+          "q": "Wie funktioniert der kostenlose Test?",
+          "a": "Er ist für Mitglieder, die noch nie für einen Tarif bezahlt haben. Er kann beginnen, wenn du dein erstes Tier hinzufügst, oder du startest ihn auf der Abo-Seite. Du brauchst keine Karte und zahlst nichts. Er dauert so viele Tage, wie beim Start angezeigt, normalerweise 7, und jedes Konto, jeder Haushalt und jede Mobilnummer kann ihn einmal nutzen. Zwei Tage vor dem Ende erinnern wir dich. Danach bist du einfach wieder im kostenlosen Tarif; es wird nie automatisch etwas berechnet."
+        },
+        {
+          "q": "Gibt es einen Geschenkcode?",
+          "a": "Wenn wir einen anbieten, steht er auf der Abo-Seite. Er gilt einmal, für dein erstes kostenpflichtiges Abo, und lässt sich weder mit anderen Aktionen kombinieren noch in Bargeld oder Guthaben umwandeln."
         }
       ]
     },
@@ -168,6 +176,10 @@
         {
           "q": "Wie lösche ich mein Konto?",
           "a": "Beantrage sie unter Profil → Datenschutz. Dein Antrag wird erfasst und geprüft und ausgeführt, sobald unsere Richtlinie zur Datenspeicherung veröffentlicht ist; wir geben dir Bescheid, wenn es erledigt ist. Solange er offen ist, kannst du ihn zurückziehen. Offene Buchungen, Bestellungen, Erstattungen oder Streitfälle müssen vorher abgeschlossen sein."
+        },
+        {
+          "q": "Wer sieht meine Adresse auf der Karte?",
+          "a": "Du und dein Haushalt. Außerdem sehen den genauen Punkt nur der Kurier einer Sendung an diese Adresse, unser Team, das deine Bestellung bearbeitet, und die Tiertaxi-Fahrerin oder der -Fahrer, sobald die Fahrt angenommen ist. Verkaufsstellen, Anbieter und andere Mitglieder sehen ihn nie. Du kannst den Punkt jederzeit verschieben oder entfernen."
         },
         {
           "q": "Welche Benachrichtigungen bekomme ich?",

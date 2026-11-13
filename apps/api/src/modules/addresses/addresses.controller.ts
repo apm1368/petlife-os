@@ -26,6 +26,12 @@ export class AddressesController {
     return this.addressesService.listForHousehold(user.id, query.householdId);
   }
 
+  /** One address of the caller's own household (the edit form). Anyone else gets 404. */
+  @Get(":id")
+  get(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string) {
+    return this.addressesService.get(user.id, id);
+  }
+
   @Patch(":id")
   update(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string, @Body() dto: UpdateAddressDto) {
     return this.addressesService.update(user.id, id, dto);
