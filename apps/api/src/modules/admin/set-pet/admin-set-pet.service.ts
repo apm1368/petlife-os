@@ -6,6 +6,7 @@ import { NotFoundApiException, ValidationApiException } from "../../../common/er
 import { StorageService } from "../../storage/storage.service";
 import { NotificationOrchestratorService } from "../../notifications/notification-orchestrator.service";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
+import { setPetDesignDownloadOptions, setPetReference } from "../../set-pet/set-pet.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 
 const S = SetPetRequestStatus;
@@ -24,17 +25,8 @@ export const SET_PET_STAFF_TRANSITIONS: Record<SetPetRequestStatus, SetPetReques
   [S.CANCELLED]: [],
 };
 
-/** SP-000123: the reference members and staff read aloud. */
-export const setPetNumber = (n: number) => `SP-${String(n).padStart(6, "0")}`;
-
-/**
- * Design files leave only as downloads: previewable images keep their type, anything else (SVG, PDF, AI, PSD, HEIC)
- * goes out as application/octet-stream, so a file that can carry script is never rendered inline.
- */
-export function setPetDesignDownload(file: { objectKey: string; originalFilename: string | null; mimeType: string; previewable: boolean }) {
-  const ext = (/\.([a-z0-9]{1,8})$/i.exec(file.objectKey)?.[1] ?? "bin").toLowerCase();
-  return { filename: file.originalFilename?.trim() || `design.${ext}`, contentType: file.previewable ? file.mimeType : "application/octet-stream" };
-}
+/** SP-000123 and the attachment-only download rule are shared with the member side (X2's set-pet module). */
+const setPetNumber = setPetReference;
 
 const num = (d: Prisma.Decimal | null) => (d === null ? null : Number(d));
 
@@ -234,7 +226,7 @@ export class AdminSetPetService {
     const file = await this.prisma.setPetDesignFile.findUnique({ where: { id: fileId } });
     if (!file || !file.requestId) throw new NotFoundApiException("Set Pet design", { fileId });
     if (file.status !== SetPetDesignFileStatus.READY) throw new ValidationApiException({ field: "fileId", reason: "NOT_READY", status: file.status });
-    const options = setPetDesignDownload(file);
+    const options = setPetDesignDownloadOptions(file);
     const target = await this.storage.createPrivateDownloadTarget(file.objectKey, options);
     await this.audit.record({ adminUserId: admin.adminUserId, action: "set_pet.design_opened", entityType: "SET_PET_REQUEST", entityId: file.requestId, reason, afterSummary: { fileId, mimeType: file.mimeType, previewable: file.previewable }, requestId });
     return { fileId, filename: options.filename, ...target };

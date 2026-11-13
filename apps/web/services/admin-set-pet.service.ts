@@ -1,4 +1,4 @@
-import type { AdminSetPetDetailDto, AdminSetPetListDto, SetPetStatus } from "@petlife/types";
+import type { AdminSetPetDetailDto, AdminSetPetListDto, SetPetRequestStatus as SetPetStatus } from "@petlife/types";
 import { apiFetch } from "@/lib/api/client";
 
 function query(input: Record<string, string | number | undefined>): string {

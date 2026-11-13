@@ -6849,10 +6849,10 @@ export interface AdminProductDetailDto extends AdminProductRowDto {
   lowestBuyablePrice: number | null;
 }
 
-/** «ست پت» Set Pet, admin side. Sizes are S…XXXL (shown as 2XL/3XL); zones are the fixed print areas. */
-export type SetPetStatus = "SUBMITTED" | "QUOTED" | "CONFIRMED" | "IN_PRODUCTION" | "SHIPPED" | "CANCELLED";
-export type SetPetSizeCode = "S" | "M" | "L" | "XL" | "XXL" | "XXXL";
-export type SetPetZoneCode = "RIGHT_UPPER_ARM" | "LEFT_UPPER_ARM" | "FRONT_CENTER" | "BACK" | "PET_BACK";
+/** «ست پت» Set Pet, admin side; statuses, sizes and zones are the shared ones from ./set-pet (X2's member API). */
+type SetPetStatus = import("./set-pet").SetPetRequestStatus;
+type SetPetSizeCode = import("./set-pet").SetPetSize;
+type SetPetZoneCode = import("./set-pet").SetPetZone;
 
 export interface AdminSetPetRowDto {
   id: string;

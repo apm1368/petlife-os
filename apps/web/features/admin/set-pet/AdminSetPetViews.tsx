@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, Dialog, EmptyState, ErrorRecovery, Input, Skeleton, StatusLabel, type StatusTone } from "@petlife/ui";
-import type { AdminSetPetDetailDto, AdminSetPetDesignFileDto, AdminSetPetListDto, SetPetSizeCode, SetPetStatus, SetPetZoneCode } from "@petlife/types";
+import type { AdminSetPetDetailDto, AdminSetPetDesignFileDto, AdminSetPetListDto, SetPetRequestStatus as SetPetStatus, SetPetSize as SetPetSizeCode, SetPetZone as SetPetZoneCode } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 import { formatCurrency } from "@/lib/currency/format-currency";
