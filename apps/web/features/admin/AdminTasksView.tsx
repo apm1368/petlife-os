@@ -15,6 +15,7 @@ const RELATED_LINKS: Record<string, (id: string) => string> = {
   CommunityReport: () => "/admin/community",
   SupportCase: (id) => `/admin/support/${encodeURIComponent(id)}`,
   PetOwnershipTransfer: (id) => `/admin/ownership-transfers?focus=${encodeURIComponent(id)}`,
+  Booking: (id) => `/admin/services/bookings/${encodeURIComponent(id)}`,
 };
 import styles from "./AdminTasksView.module.css";
 

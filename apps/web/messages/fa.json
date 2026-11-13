@@ -1416,6 +1416,9 @@
       "analytics": "آمار و فهرست انتظار"
     },
     "bookings": {
+      "noShowLabel": "عدم حضور",
+      "noShowProvider": "ارائه‌دهنده نیامد (گزارش عضو)",
+      "noShowOwner": "صاحب حیوان نیامد",
       "title": "خدمات و رزروها",
       "searchLabel": "جست‌وجو با شماره، پت یا ارائه‌دهنده",
       "statusLabel": "وضعیت رزرو",
@@ -5253,6 +5256,7 @@
         "URGENT": "فوری"
       },
       "sources": {
+        "PROVIDER_NO_SHOW": "عدم حضور ارائه‌دهنده",
         "OWNERSHIP_DISPUTE": "اختلاف مالکیت",
         "MANUAL": "ثبت دستی",
         "TRAVEL_SOURCE": "منابع سفر",
@@ -7121,6 +7125,7 @@
         "allClear": "همه‌چیز مرتب است؛ هیچ کاری منتظر تیم شما نیست.",
         "clearList": "بدون مورد: {list}",
         "queue": {
+          "openProviderNoShows": "گزارش‌های عدم حضور ارائه‌دهنده",
           "openOwnershipDisputes": "اختلاف‌های مالکیت",
           "pendingDeletionRequests": "درخواست‌های حذف حساب",
           "openTrustCases": "پرونده‌های اعتماد و امنیت",

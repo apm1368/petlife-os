@@ -1442,6 +1442,9 @@
       "analytics": "Analytics & waitlist"
     },
     "bookings": {
+      "noShowLabel": "No-show",
+      "noShowProvider": "Provider didn't show (reported by member)",
+      "noShowOwner": "Owner didn't show",
       "title": "Services & bookings",
       "searchLabel": "Search by number, pet or provider",
       "statusLabel": "Booking status",
@@ -5329,6 +5332,7 @@
         "URGENT": "Urgent"
       },
       "sources": {
+        "PROVIDER_NO_SHOW": "Provider no-show",
         "OWNERSHIP_DISPUTE": "Ownership dispute",
         "MANUAL": "Manual entry",
         "TRAVEL_SOURCE": "Travel sources",
@@ -7197,6 +7201,7 @@
         "allClear": "All clear — nothing is waiting on your team.",
         "clearList": "Clear: {list}",
         "queue": {
+          "openProviderNoShows": "Provider no-show reports",
           "openOwnershipDisputes": "Ownership disputes",
           "pendingDeletionRequests": "Account deletion requests",
           "openTrustCases": "Trust & safety cases",

@@ -2103,6 +2103,9 @@
       "analytics": "Auswertung und Warteliste"
     },
     "bookings": {
+      "noShowLabel": "Nicht erschienen",
+      "noShowProvider": "Anbieter nicht erschienen (Meldung des Mitglieds)",
+      "noShowOwner": "Halter nicht erschienen",
       "title": "Dienstleistungen und Buchungen",
       "searchLabel": "Nach Nummer, Tier oder Anbieter suchen",
       "statusLabel": "Buchungsstatus",
@@ -3230,6 +3233,7 @@
         "URGENT": "Dringend"
       },
       "sources": {
+        "PROVIDER_NO_SHOW": "Anbieter nicht erschienen",
         "OWNERSHIP_DISPUTE": "Eigentumsstreit",
         "MANUAL": "Manuelle Erfassung",
         "TRAVEL_SOURCE": "Reisequellen",
@@ -6431,6 +6435,7 @@
         "allClear": "Alles erledigt – auf dein Team wartet nichts.",
         "clearList": "Erledigt: {list}",
         "queue": {
+          "openProviderNoShows": "Meldungen: Anbieter nicht erschienen",
           "openOwnershipDisputes": "Eigentumsstreitigkeiten",
           "pendingDeletionRequests": "Anträge auf Kontolöschung",
           "openTrustCases": "Fälle zu Vertrauen und Sicherheit",

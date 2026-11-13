@@ -26,6 +26,12 @@ export class AutomaticTaskListener {
     await this.tasks.raise({ dedupeKey: `ownership-dispute:${payload.transferId}`, title: "اختلاف در انتقال مالکیت حیوان", description: "یکی از طرفین با انتقال مالکیت مخالفت کرده است. مالک ثبت‌شده تغییر نمی‌کند؛ مدارک را بررسی و نتیجه را ثبت کنید.", source: AdminTaskSource.OWNERSHIP_DISPUTE, team: "SUPPORT", priority: AdminPriority.HIGH, relatedEntityType: "PetOwnershipTransfer", relatedEntityId: payload.transferId, dueAt: new Date(Date.now() + 3 * 86400e3) });
   }
 
+  /** A member says the provider never showed: staff contact both sides and check whether a refund is due. */
+  @OnEvent("ServiceBookingProviderNoShowReported")
+  async onProviderNoShow(payload: { bookingId: string; providerOrganizationId: string }) {
+    await this.tasks.raise({ dedupeKey: `provider-no-show:${payload.bookingId}`, title: "گزارش عدم حضور ارائه‌دهنده", description: "عضو گزارش داده است که ارائه‌دهنده سر نوبت حاضر نشد. با هر دو طرف تماس بگیرید؛ اگر پرداخت آنلاین بوده، بازپرداخت را بررسی کنید.", source: AdminTaskSource.PROVIDER_NO_SHOW, team: "SUPPORT", priority: AdminPriority.HIGH, relatedEntityType: "Booking", relatedEntityId: payload.bookingId, dueAt: new Date(Date.now() + 2 * 86400e3) });
+  }
+
   @OnEvent("CommunityReportSubmitted")
   @OnEvent("ContentReportSubmitted")
   async onReport(payload: { reportId: string; reason?: string; targetType?: string }) {

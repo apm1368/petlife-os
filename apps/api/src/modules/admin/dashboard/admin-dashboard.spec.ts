@@ -68,6 +68,7 @@ describe("dashboard permission boundary", () => {
       pendingDeletionRequests: 17,
       launchKpis: { registeredPets: 40, newPetsThisWeek: 40, bookingsThisWeek: 7, bookingsLastWeek: 7 },
       openOwnershipDisputes: 18,
+      openProviderNoShows: 5,
     });
   });
   it("hides vertical queues from an admin scoped to another vertical", async () => {

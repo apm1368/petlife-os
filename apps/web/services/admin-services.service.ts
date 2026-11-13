@@ -12,6 +12,8 @@ export interface AdminBookingRow {
   serviceName: string;
   priceAmount: number | null;
   currency: string | null;
+  /** PROVIDER: the member reported the provider didn't show up; OWNER: the provider marked the owner absent. */
+  noShowParty?: "OWNER" | "PROVIDER" | null;
 }
 
 export interface AdminBookingDetail {
@@ -103,7 +105,7 @@ function qs(params: Record<string, string | number | undefined>): string {
 }
 
 export const adminServicesService = {
-  listBookings: (q: { status?: string; providerId?: string; q?: string; page?: number }) => apiFetch<{ total: number; page: number; items: AdminBookingRow[] }>(`/admin/service-bookings${qs(q)}`),
+  listBookings: (q: { status?: string; noShowParty?: string; providerId?: string; q?: string; page?: number }) => apiFetch<{ total: number; page: number; items: AdminBookingRow[] }>(`/admin/service-bookings${qs(q)}`),
   getBooking: (id: string) => apiFetch<AdminBookingDetail>(`/admin/service-bookings/${id}`),
   listServices: (providerId?: string) => apiFetch<AdminServiceRow[]>(`/admin/provider-services${qs({ providerId })}`),
   setServiceActive: (id: string, active: boolean, reason: string) => apiFetch<{ id: string; isActive: boolean }>(`/admin/provider-services/${id}/${active ? "reactivate" : "deactivate"}`, { method: "POST", body: { reason } }),

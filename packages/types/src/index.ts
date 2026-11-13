@@ -3368,6 +3368,8 @@ export interface AdminDashboardSummaryDto {
   pendingDeletionRequests: number | null;
   /** Pet ownership transfers in DISPUTED, waiting for staff to record the outcome; customer.view. */
   openOwnershipDisputes: number | null;
+  /** Members' reports that a provider didn't show up, still open as admin tasks; services.view. */
+  openProviderNoShows: number | null;
   /**
    * Market-readiness #290 Q97, the launch month's success measure: registered pets and weekly bookings
    * (analytics.view; null otherwise). Live bookings only, rolling 7-day windows.
