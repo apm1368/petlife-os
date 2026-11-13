@@ -78,6 +78,11 @@ const PRODUCT_MEDIA_MIME_EXTENSIONS: Record<string, string> = {
 };
 const PRODUCT_MEDIA_MAX_BYTES = 10 * 1024 * 1024; // 10MB
 
+const SET_PET_DESIGN_KEY = /^set-pet-designs\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpg|png|webp|heic|pdf|svg|ai|psd)$/;
+function assertSetPetDesignKey(key: string) {
+  if (!SET_PET_DESIGN_KEY.test(key)) throw new Error("Invalid Set Pet design key");
+}
+
 @Injectable()
 export class StorageService {
   constructor(@Inject(STORAGE_DRIVER) private readonly driver: StorageDriver) {}
@@ -254,6 +259,27 @@ export class StorageService {
 
   async deletePrivateObject(key: string): Promise<void> {
     await this.driver.deleteObject(key);
+  }
+
+  /**
+   * «ست پت»: a member's design file, PRIVATE (set-pet-designs/<userId>/<uuid>.<ext>). The caller has checked the type
+   * claim and the size; the bytes are checked again (magic bytes, EXIF/XMP stripped) before the file can be used.
+   */
+  async createSetPetDesignUploadTarget(key: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget> {
+    assertSetPetDesignKey(key);
+    return this.driver.createUploadTarget(key, contentType, fileSizeBytes);
+  }
+
+  /** Reads a «ست پت» design file through the API (for the type check); never any other key. */
+  async openSetPetDesign(key: string) {
+    assertSetPetDesignKey(key);
+    return this.driver.openObject(key);
+  }
+
+  /** Rewrites a «ست پت» design file in place with its cleaned bytes (metadata removed). */
+  async putSetPetDesign(key: string, body: Buffer, contentType: string): Promise<void> {
+    assertSetPetDesignKey(key);
+    await this.driver.putObject(key, body, contentType);
   }
 
   /** A completely separate key namespace (`cms/media/...`) from `pets/...` — spec: "strongly separate CMS media authorization from private pet documents." CMS media is meant to be public (blog images), so this uses the same plain-public-URL delivery `createPetPhotoUploadTarget` already established, never a signed-read scheme this codebase has no other precedent for. Returns `key` alongside the target (unlike the pet-photo variant) since the CMS confirm step needs it verbatim, not reconstructed from the URL. */

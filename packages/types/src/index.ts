@@ -7381,6 +7381,22 @@ export type {
 } from "./ownership";
 export { OWNERSHIP_TRANSFER_EXPIRY_DAYS, PET_MEMORY_DISPOSITIONS, PET_OWNERSHIP_TRANSFER_STATUSES } from "./ownership";
 
+export type {
+  SetPetRequestStatus,
+  SetPetSize,
+  SetPetZone,
+  SetPetMeasurements,
+  SetPetDesignFileStatus,
+  SetPetDesignFileDto,
+  SetPetUploadTargetDto,
+  SetPetPlacementDto,
+  SetPetTimelineEntryDto,
+  SetPetRequestDto,
+  SetPetCreateRequestInput,
+  SetPetOptionsDto,
+} from "./set-pet";
+export { SET_PET_STATUSES, SET_PET_SIZES, SET_PET_ZONES, SET_PET_MEASUREMENT_RANGES } from "./set-pet";
+
 // ---------------------------------------------------------------------------
 // Member wallet (balances are always derived from append-only entries)
 // ---------------------------------------------------------------------------
