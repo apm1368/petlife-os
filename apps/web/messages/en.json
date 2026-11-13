@@ -8834,7 +8834,7 @@
       "label": "Source",
       "all": "All",
       "opetlife": "opetlife",
-      "jajiga": "Jajiga"
+      "jajiga": "Other sites"
     }
   },
   "externalTravel": {
@@ -8942,11 +8942,11 @@
     },
     "fromSource": "From {source}",
     "blend": {
-      "title": "Pet-friendly stays from Jajiga",
-      "titleCity": "Pet-friendly stays in {city} from Jajiga",
-      "hint": "Listings from Jajiga: you book and pay on Jajiga's own site, and opetlife charges nothing. Confirm the pet rules with the host before booking.",
-      "seeAll": "All Jajiga stays",
-      "pages": "Jajiga pages"
+      "title": "Pet-friendly stays",
+      "titleCity": "Pet-friendly stays in {city}",
+      "hint": "Information from an external source; booking happens on the source site.",
+      "seeAll": "All pet-friendly stays",
+      "pages": "Pages"
     },
     "tile": {
       "kind": {
@@ -8962,9 +8962,9 @@
     },
     "browser": {
       "title": "More pet-friendly stays",
-      "sourceChip": "Jajiga stays",
+      "sourceChip": "Pet-friendly stays",
       "count": "Found: {count}",
-      "hint": "Listings from Jajiga: you book and pay on Jajiga's own site, and opetlife charges nothing. Confirm the pet rules with the host before booking.",
+      "hint": "Information from an external source; booking happens on the source site.",
       "filters": "Filter stays",
       "province": "Province",
       "allProvinces": "All provinces",
@@ -8982,7 +8982,13 @@
       "noMatch": "No stays match these filters. Try removing one.",
       "loadMore": "Show more ({shown} of {total})",
       "mediaNote": "Photos and the full description of each stay are on the source site; here you see the key facts."
-    }
+    },
+    "perNight": "night",
+    "petPerListing": "Pets accepted, according to the listing site.",
+    "viewStay": "View stay",
+    "opensNewTab": "(opens in a new tab)",
+    "priceOnListing": "Price on the listing site",
+    "evidenceListingFilter": "Listed in the listing site’s public “pets allowed” filter. Species, size and house-rule limits are not published there; confirm them with the host before booking."
   },
   "localDateTime": {
     "date": "Date",
