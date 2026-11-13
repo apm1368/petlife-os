@@ -8,6 +8,17 @@ import { resolvePagination, toPaginatedDto, type PaginationQueryDto } from "../.
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 import type { CreateAdminTaskDto, UpdateAdminTaskDto } from "./dto/admin-task.dto";
+import { reconDetailFa } from "./task-titles";
+
+/** Finance-mismatch tasks raised before descriptions were written in Persian still hold the raw finding JSON. */
+function readableDescription(row: { source: AdminTaskSource; description: string | null }): string | null {
+  if (row.source !== AdminTaskSource.FINANCE_MISMATCH || !row.description?.startsWith("{")) return row.description;
+  try {
+    return reconDetailFa(JSON.parse(row.description) as Record<string, unknown>);
+  } catch {
+    return row.description;
+  }
+}
 
 const TASK_INCLUDE = { assigneeAdmin: { include: { user: true } }, createdByAdmin: { include: { user: true } } } as const;
 type TaskWithRelations = Prisma.AdminTaskGetPayload<{ include: typeof TASK_INCLUDE }>;
@@ -16,7 +27,7 @@ function toTaskDto(row: TaskWithRelations): AdminTaskDto {
   return {
     id: row.id,
     title: row.title,
-    description: row.description,
+    description: readableDescription(row),
     assigneeAdmin: row.assigneeAdmin ? { id: row.assigneeAdmin.id, displayName: row.assigneeAdmin.user.displayName, role: row.assigneeAdmin.role as never } : null,
     dueAt: row.dueAt ? row.dueAt.toISOString() : null,
     status: row.status as never,

@@ -37,6 +37,12 @@ export class CreateAddressDto {
   @Length(2, 2)
   countryCode!: string;
 
+  /** Neighbourhood / district (محله). */
+  @IsOptional()
+  @IsString()
+  @Length(1, 120)
+  area?: string;
+
   @IsOptional()
   @IsLatitude()
   latitude?: number;

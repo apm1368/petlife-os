@@ -46,6 +46,37 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "حذف حساب شما آمادهٔ اجراست", body: "بررسی درخواست حذف حساب شما تمام شد و حذف به‌زودی انجام می‌شود. اگر نظرتان عوض شده، همین حالا از بخش حریم خصوصی لغو کنید." },
     en: { title: "Your account is ready to be deleted", body: "We've finished reviewing your deletion request and it will be carried out soon. If you've changed your mind, cancel it now from Privacy." },
   },
+  // The company card-to-card account changed: every SUPER_ADMIN hears about it (SECURITY, so in-app + email), because
+  // swapping it would divert member payments.
+  "admin.card_destination_changed": {
+    fa: { title: "حساب کارت‌به‌کارت تغییر کرد", body: "{{actor}} حساب مقصد کارت‌به‌کارت را به {{account}} ({{holder}}) تغییر داد. دلیل: {{reason}}. اگر این تغییر را نمی‌شناسید، فوراً بررسی کنید." },
+    en: { title: "Card-to-card account changed", body: "{{actor}} changed the card-to-card account to {{account}} ({{holder}}). Reason: {{reason}}. If you don't recognise this change, check it now." },
+  },
+  "admin.card_destination_disabled": {
+    fa: { title: "کارت‌به‌کارت خاموش شد", body: "{{actor}} حساب کارت‌به‌کارت را غیرفعال کرد؛ اعضا تا تعیین حساب تازه نمی‌توانند کارت‌به‌کارت پرداخت کنند. دلیل: {{reason}}." },
+    en: { title: "Card-to-card switched off", body: "{{actor}} switched the card-to-card account off; members cannot pay by card-to-card until a new account is set. Reason: {{reason}}." },
+  },
+  // Card-to-card receipts: the member hears finance's decision (wallet top-ups and order/booking payments).
+  "wallet.top_up_credited": {
+    fa: { title: "کیف پول شارژ شد", body: "رسید کارت‌به‌کارت شما تأیید شد و {{amount}} تومان به کیف پولتان اضافه شد." },
+    en: { title: "Wallet topped up", body: "Your card-to-card receipt was approved and {{amount}} toman was added to your wallet." },
+  },
+  "wallet.top_up_rejected": {
+    fa: { title: "رسید شارژ کیف پول پذیرفته نشد", body: "رسید کارت‌به‌کارت شما برای {{amount}} تومان پذیرفته نشد. دلیل: {{reason}}. اگر مبلغ را واریز کرده‌اید، با پشتیبانی تماس بگیرید." },
+    en: { title: "Wallet top-up receipt not accepted", body: "Your card-to-card receipt for {{amount}} toman was not accepted. Reason: {{reason}}. If you did send the money, contact support." },
+  },
+  "payment.card_transfer_approved": {
+    fa: { title: "پرداخت کارت‌به‌کارت تأیید شد", body: "رسید شما برای {{amount}} تومان تأیید شد و پرداخت ثبت شد." },
+    en: { title: "Card-to-card payment approved", body: "Your receipt for {{amount}} toman was approved and the payment is recorded." },
+  },
+  "payment.card_transfer_rejected": {
+    fa: { title: "رسید پرداخت پذیرفته نشد", body: "رسید کارت‌به‌کارت شما برای {{amount}} تومان پذیرفته نشد. دلیل: {{reason}}. می‌توانید دوباره پرداخت کنید یا با پشتیبانی تماس بگیرید." },
+    en: { title: "Payment receipt not accepted", body: "Your card-to-card receipt for {{amount}} toman was not accepted. Reason: {{reason}}. You can pay again or contact support." },
+  },
+  "payment.card_transfer_underpaid": {
+    fa: { title: "مبلغ واریزی کامل نیست", body: "{{received}} تومان دریافت شد؛ برای تکمیل پرداخت {{difference}} تومان دیگر واریز کنید و رسید آن را بفرستید." },
+    en: { title: "Payment is short", body: "We received {{received}} toman; send the remaining {{difference}} toman and upload its receipt to complete the payment." },
+  },
   "booking.confirmed": {
     fa: { title: "نوبت شما تأیید شد", body: "نوبت شما تأیید شد. جزئیات را در اپلیکیشن ببینید.", smsBody: "نوبت شما در پت‌لایف تأیید شد." },
     en: { title: "Your booking is confirmed", body: "Your booking is confirmed. See the app for details.", smsBody: "Your PET LIFE OS booking is confirmed." },
@@ -175,6 +206,14 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "میزبان رزرو را لغو کرد", body: "رزرو شما توسط میزبان لغو شد و مبلغ پرداختی کامل بازگردانده می‌شود." },
     en: { title: "Host cancelled your stay", body: "The host cancelled your stay; anything you paid is refunded in full." },
   },
+  "travel.booking_cancelled_by_staff": {
+    fa: { title: "رزرو شما لغو شد", body: "پشتیبانی اپت لایف این رزرو را لغو کرد. اگر مبلغی پرداخت کرده باشید، بازگشت آن پس از تأیید مالی انجام می‌شود." },
+    en: { title: "Your stay was cancelled", body: "opetlife support cancelled this stay. Anything you paid is refunded once finance approves it." },
+  },
+  "travel.booking_cancelled_by_staff_host": {
+    fa: { title: "یک رزرو لغو شد", body: "پشتیبانی اپت لایف یک رزرو را لغو کرد و تاریخ‌ها آزاد شد." },
+    en: { title: "A booking was cancelled", body: "opetlife support cancelled a stay; the dates were released." },
+  },
   "travel.booking_cancelled_by_traveler": {
     fa: { title: "مهمان رزرو را لغو کرد", body: "یک رزرو توسط مهمان لغو شد و تاریخ‌ها آزاد شد." },
     en: { title: "Guest cancelled", body: "A guest cancelled a stay; the dates were released." },
@@ -198,6 +237,14 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
   "insurance.application_needs_information": {
     fa: { title: "بیمه‌گر اطلاعات بیشتری خواسته است", body: "برای ادامه بررسی درخواست بیمه، اطلاعات خواسته‌شده را تکمیل کنید." },
     en: { title: "The insurer needs more information", body: "Add the requested information so the insurer can continue reviewing your application." },
+  },
+  "product.price_dropped": {
+    fa: { title: "قیمت «{{product}}» کمتر شد", body: "کالایی که نشان کرده‌اید حالا ارزان‌تر است. پیش از تمام شدن، سری بزنید." },
+    en: { title: "{{product}} is cheaper now", body: "An item you saved has dropped in price. Take a look before it changes again." },
+  },
+  "product.back_in_stock": {
+    fa: { title: "«{{product}}» دوباره موجود شد", body: "کالایی که نشان کرده‌اید دوباره در فروشگاه موجود است." },
+    en: { title: "{{product}} is back in stock", body: "An item you saved is available in the shop again." },
   },
   "shipment.delivered": {
     fa: { title: "سفارش شما تحویل داده شد", body: "سفارش شما با موفقیت تحویل داده شد.", smsBody: "سفارش شما در پت‌لایف تحویل داده شد." },
@@ -249,6 +296,28 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
   "pet.ownership_transfer_declined": {
     fa: { title: "انتقال مالکیت پت انجام نشد", body: "پیشنهاد انتقال مالکیت پت پذیرفته نشد؛ مالک ثبت‌شده همان فرد قبلی باقی ماند." },
     en: { title: "The pet ownership transfer did not happen", body: "The pet ownership transfer was declined; the registered owner remains unchanged." },
+  },
+  // Review moderation outcome for its author (Admin → Reviews). Rejections say why, in the moderator's words.
+  "review.approved": {
+    fa: { title: "نظر شما منتشر شد", body: "نظر شما دربارهٔ «{{subject}}» بررسی و منتشر شد. ممنون که تجربه‌تان را به اشتراک گذاشتید." },
+    en: { title: "Your review is published", body: "Your review of “{{subject}}” was checked and published. Thanks for sharing your experience." },
+  },
+  "review.rejected": {
+    fa: { title: "نظر شما منتشر نشد", body: "نظر شما دربارهٔ «{{subject}}» با قوانین انتشار هم‌خوان نبود و منتشر نشد. دلیل: {{reason}}" },
+    en: { title: "Your review wasn't published", body: "Your review of “{{subject}}” didn't meet the publishing rules and wasn't published. Reason: {{reason}}" },
+  },
+  // Ownership disputes (ID-03): the pet never moves on a dispute; staff check the documents and record the outcome.
+  "pet.ownership_disputed": {
+    fa: { title: "اختلاف دربارهٔ مالکیت «{{petName}}»", body: "{{actorName}} با انتقال مالکیت «{{petName}}» مخالفت کرد. تا بررسی پشتیبانی، مالک ثبت‌شده تغییر نمی‌کند. اگر مدرکی دارید، از بخش پشتیبانی بفرستید." },
+    en: { title: "Ownership of “{{petName}}” is disputed", body: "{{actorName}} disagreed with the ownership transfer of “{{petName}}”. The registered owner stays the same while support reviews it. If you have documents, send them through Support." },
+  },
+  "pet.ownership_dispute_closed_stands": {
+    fa: { title: "بررسی اختلاف مالکیت «{{petName}}» تمام شد", body: "پشتیبانی اختلاف را بررسی کرد و انتقال مالکیت «{{petName}}» به همان شکل باقی ماند." },
+    en: { title: "The ownership dispute about “{{petName}}” is closed", body: "Support reviewed the dispute and the ownership transfer of “{{petName}}” stands." },
+  },
+  "pet.ownership_dispute_closed_owner_stays": {
+    fa: { title: "بررسی اختلاف مالکیت «{{petName}}» تمام شد", body: "پشتیبانی اختلاف را بررسی کرد. درخواست انتقال بسته شد و مالک ثبت‌شدهٔ «{{petName}}» تغییری نکرد." },
+    en: { title: "The ownership dispute about “{{petName}}” is closed", body: "Support reviewed the dispute. The transfer request was closed and the registered owner of “{{petName}}” did not change." },
   },
   "pet.ownership_transfer_cancelled": {
     fa: { title: "درخواست انتقال مالکیت لغو شد", body: "درخواست انتقال مالکیت پت لغو شد و تغییری در مالکیت انجام نشد." },

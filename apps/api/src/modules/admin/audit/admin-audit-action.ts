@@ -9,6 +9,7 @@
  */
 export type AdminAuditAction =
   | "user.message_sent"
+  | "order.cancelled_by_staff"
   | "product.created"
   | "product.updated"
   | "product.media_added"
@@ -48,6 +49,8 @@ export type AdminAuditAction =
   | "trust_action.taken"
   | "appeal.submitted"
   | "appeal.resolved"
+  | "service_booking.staff_cancelled"
+  | "travel_booking.staff_cancelled"
   | "admin_refund_approval.requested"
   | "admin_refund_approval.approved"
   | "admin_refund_approval.rejected"
@@ -138,6 +141,7 @@ export type AdminAuditAction =
   // Business calendar (Settings → Holidays and closures)
   | "calendar_day.changed"
   | "calendar_day.cleared"
+  | "pet_ownership.dispute_closed"
   | "messaging.test_sms_sent"
   | "messaging.test_email_sent"
   | "customer.suspended"
@@ -240,8 +244,21 @@ export type AdminAuditAction =
   | "place_report.dismissed"
   | "pet_memorial.approved"
   | "pet_memorial.rejected"
+  | "shipping_method.updated"
+  | "shipment.staff_updated"
+  | "pet_taxi_fare.updated"
+  | "pet_taxi_driver.verified"
+  | "pet_taxi_driver.suspended"
   | "wallet.credited"
+  | "card_transfer_destination.changed"
+  | "card_transfer.receipt_viewed"
+  | "card_transfer_destination.deactivated"
   | "wallet.debited"
   | "wallet_top_up.approved"
   | "wallet_top_up.rejected"
-  | "wallet_top_up.receipt_viewed";
+  | "wallet_top_up.receipt_viewed"
+  | "osm_area.updated"
+  | "osm_area.run_requested"
+  | "place_claim.approved"
+  | "place_claim.rejected"
+  | "place_claim.released";

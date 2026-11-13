@@ -64,6 +64,7 @@ function toArticleDto(row: ArticleWithRelations): AdminArticleDto {
 function toListItemDto(row: ArticleWithRelations): AdminArticleListItemDto {
   return {
     id: row.id,
+    isDemoRecord: row.isDemoRecord,
     author: row.author ? toContentAuthorDto(row.author) : null,
     category: row.category ? toPublicCategoryDto(row.category.locales.find((l) => l.locale === "fa") ?? row.category.locales[0]!) : null,
     createdByAdmin: toAdminActorDto(row.createdByAdmin),

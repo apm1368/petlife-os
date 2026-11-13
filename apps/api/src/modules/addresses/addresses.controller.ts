@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { IsUUID } from "class-validator";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { CurrentUser } from "../../common/auth/current-user.decorator";
@@ -29,5 +29,11 @@ export class AddressesController {
   @Patch(":id")
   update(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string, @Body() dto: UpdateAddressDto) {
     return this.addressesService.update(user.id, id, dto);
+  }
+
+  /** Removes the address from the book (archived: past bookings and orders keep pointing at it). */
+  @Delete(":id")
+  archive(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string) {
+    return this.addressesService.archive(user.id, id);
   }
 }

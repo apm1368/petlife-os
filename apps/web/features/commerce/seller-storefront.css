@@ -1,0 +1,15 @@
+/* Public seller storefront — pattern tokens, light and dark. */
+.storefront { display: grid; gap: var(--space-6); }
+.storefront__head { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: flex-start; padding: var(--space-5); border-radius: var(--radius-card); border: 1px solid var(--border-default); background: var(--surface-raised); box-shadow: var(--shadow-1); }
+.storefront__logo { inline-size: 88px; block-size: 88px; border-radius: 22px; object-fit: cover; flex: none; background: var(--surface-page); }
+.storefront__logo--initial { display: grid; place-items: center; font-size: 2.2rem; font-weight: 800; color: var(--brand-primary); background: var(--brand-tint); }
+.storefront__intro { display: grid; gap: var(--space-2); flex: 1 1 18rem; min-inline-size: 0; }
+.storefront__intro h1 { margin: 0; font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2rem); color: var(--text-primary); }
+.storefront__facts { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); margin: 0; color: var(--text-secondary); font-size: var(--font-size-14, 0.875rem); }
+.storefront__facts span { display: inline-flex; align-items: center; gap: 4px; }
+.storefront__badge { color: var(--state-success, #2f7d4c); font-weight: 650; }
+.storefront__description { margin: 0; color: var(--text-primary); line-height: 1.8; max-inline-size: 70ch; white-space: pre-line; }
+.storefront__protection { display: inline-flex; align-items: center; gap: var(--space-2); margin: 0; color: var(--text-secondary); font-size: var(--font-size-14, 0.875rem); }
+.storefront__products h2 { margin: 0 0 var(--space-3); font-size: 1.15rem; color: var(--text-primary); }
+.storefront__empty { color: var(--text-secondary); }
+.storefront__empty a { color: var(--brand-primary); text-decoration: underline; }

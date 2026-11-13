@@ -11,7 +11,7 @@ import {
   AdminServicesAnalyticsView,
 } from "./AdminServicesViews";
 
-vi.mock("next/navigation", () => ({ usePathname: () => "/fa/admin/services" }));
+vi.mock("next/navigation", () => ({ usePathname: () => "/fa/admin/services", useSearchParams: () => new URLSearchParams() }));
 vi.mock("@/services/admin-services.service", () => ({
   adminServicesService: {
     listBookings: vi.fn(), getBooking: vi.fn(), listServices: vi.fn(), setServiceActive: vi.fn(),

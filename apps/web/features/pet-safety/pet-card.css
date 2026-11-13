@@ -1,0 +1,20 @@
+/* Member pet card / QR page (pattern 2026-11 tokens, light and dark). */
+.pet-card-manager .pet-card-option { display:flex; align-items:center; gap:10px; min-height:44px; color:var(--opl-ink, var(--text-primary)); }
+.pet-card-manager .pet-card-option input { width:20px; height:20px; accent-color:var(--opl-forest, var(--brand-natural)); }
+.pet-card-manager .pet-card-preview { padding:14px 16px; border-radius:16px; background:var(--opl-mint, var(--surface-subtle)); }
+.pet-card-manager .pet-card-preview ul { margin:8px 0; padding-inline-start:20px; list-style:disc; color:var(--opl-ink, var(--text-primary)); }
+.pet-card-manager .pet-card-preview li { line-height:1.9; }
+.pet-card-manager .pet-card-qr { border-radius:12px; box-shadow:0 10px 28px -20px rgb(0 0 0 / .5); max-width:100%; height:auto; }
+.pet-card-manager .pet-card-actions .opl-btn { min-height:44px; }
+.pet-card-manager .pet-card-list { margin:0; padding:0; list-style:none; border-top:1px solid var(--opl-line, var(--border-subtle)); }
+.pet-card-manager .pet-card-list li { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--opl-line, var(--border-subtle)); }
+.pet-card-manager [data-state="ACTIVE"] { color:var(--opl-forest, var(--brand-natural)); }
+
+/* Printing the ready card: only the QR, the pet's name and the link, on white. */
+@media print {
+  body * { visibility:hidden; }
+  .pet-card-print, .pet-card-print * { visibility:visible; }
+  .pet-card-print { position:absolute; inset:0 auto auto 0; width:100%; background:#fff !important; color:#000 !important; border:0 !important; box-shadow:none !important; }
+  .pet-card-print .pet-card-actions, .pet-card-print .pet-card-once { display:none !important; }
+  .pet-card-print .pet-card-qr { width:60mm; height:60mm; box-shadow:none; }
+}

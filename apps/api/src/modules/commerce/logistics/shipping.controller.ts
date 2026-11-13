@@ -6,7 +6,7 @@ import type { SessionUser } from "../../../common/session/session.service";
 import { FulfillmentStatus, ShipmentStatus, type FulfillmentDto, type ShipmentDto, type ShipmentTrackingDto, type ShipmentTrackingEventDto } from "@petlife/types";
 import { ShippingOrchestrator } from "./shipping-orchestrator.service";
 import { ShippingReconciliationService } from "./shipping-reconciliation.service";
-import { toFulfillmentDto, toShipmentDto } from "./logistics-dto.mapper";
+import { toBuyerFulfillmentDto, toFulfillmentDto, toShipmentDto } from "./logistics-dto.mapper";
 import { SelectShippingQuoteDto } from "./dto/shipping.dto";
 
 /** Checkout-time shipping-quote routes (spec section 26, adapted to this project's ShippingQuote-per-checkout model — see ShippingQuote's own doc comment for why). Declared here (LogisticsModule) rather than inside CheckoutModule, mirroring PaymentWebhooksController's precedent of adding routes to another module's prefix without a cross-module import. */
@@ -73,7 +73,7 @@ export class OrderLogisticsController {
   @Get(":orderId/fulfillment")
   async getFulfillment(@CurrentUser() user: SessionUser, @Param("orderId") orderId: string) {
     const fulfillment = await this.shipping.getFulfillmentForOrder(user.id, orderId);
-    return fulfillment ? toFulfillmentDto(fulfillment) : null;
+    return fulfillment ? toBuyerFulfillmentDto(fulfillment) : null;
   }
 
   @Get(":orderId/shipment")
@@ -86,7 +86,7 @@ export class OrderLogisticsController {
   async getTracking(@CurrentUser() user: SessionUser, @Param("orderId") orderId: string): Promise<ShipmentTrackingDto> {
     const fulfillmentRow = await this.shipping.getFulfillmentForOrder(user.id, orderId);
     const shipmentRow = await this.shipping.getShipmentForOrder(user.id, orderId);
-    const fulfillment = fulfillmentRow ? toFulfillmentDto(fulfillmentRow) : null;
+    const fulfillment = fulfillmentRow ? toBuyerFulfillmentDto(fulfillmentRow) : null;
     const shipment = shipmentRow ? toShipmentDto(shipmentRow) : null;
     const lastUpdatedAt = [fulfillment?.updatedAt, shipment?.updatedAt].filter((v): v is string => !!v).sort().at(-1) ?? null;
     return { fulfillment, shipment, timeline: buildTimeline(fulfillment, shipment), lastUpdatedAt };

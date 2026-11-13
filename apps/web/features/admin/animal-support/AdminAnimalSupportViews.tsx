@@ -17,6 +17,7 @@ import { DetailRow, EmptyRow, FilterBar, FilterField, Kpi, Panel, PanelTitle, Se
 import { AdminOrganizationFunds, AdminSupportOrganizationEditor, AdminSupportOrganizationInfo } from "./AdminSupportOperations";
 import { useSupportPermissions } from "./use-support-permissions";
 import { intlLocale } from "@/features/admin/admin-copy";
+import { refreshQueues } from "../admin-queues";
 
 type Lang = "fa" | "en";
 const useLang = () => {
@@ -745,14 +746,15 @@ export function AdminReportsView() {
                   <tr key={r.id}>
                     <Td>{itemTarget.href ? <Link className="text-brand-natural underline" href={`/${lang}${itemTarget.href}`}>{t(itemTarget.label[0], itemTarget.label[1])}</Link> : t(itemTarget.label[0], itemTarget.label[1])}</Td>
                     <Td>{REPORT_REASON[r.reason] ? t(REPORT_REASON[r.reason]![0], REPORT_REASON[r.reason]![1]) : r.reason}</Td>
-                    <Td><span dir="auto">{r.details ?? "—"}</span></Td>
+                    {/* The reporter's note wraps (cells are nowrap by default), so a long note can't run under the status pill. */}
+                    <Td className="min-w-[12rem] max-w-[28rem] !whitespace-normal break-words"><span dir="auto">{r.details ?? "—"}</span></Td>
                     <Td><StatusTag map={REPORT_STATUS} value={r.status} />{r.trustCaseId ? <> <Link className="text-metadata text-brand-natural underline" href={`/${lang}/admin/trust/${r.trustCaseId}`}>{t("پرونده", "Case")}</Link></> : null}</Td>
                     <Td>{day(r.createdAt, lang)}</Td>
                     <Td>
                       {permissions.trustManage && r.status === "OPEN" ? (
                         <div className="flex min-w-[200px] flex-col gap-2">
-                          <ReasonAction label={t("ارجاع به پرونده", "Escalate")} confirmLabel={t("ارجاع", "Escalate")} onRun={async (reason) => { const res = await adminAnimalSupportService.escalateReport(r.id, reason); setNotice(<Link className="underline" href={`/${lang}/admin/trust/${res.trustCaseId}`}>{t("گزارش ارجاع شد — مشاهدهٔ پرونده", "Escalated — open the case")}</Link>); await load(); }} />
-                          <ReasonAction label={t("رد گزارش", "Dismiss")} confirmLabel={t("رد", "Dismiss")} minLength={0} onRun={async (reason) => { await adminAnimalSupportService.dismissReport(r.id, reason || undefined); await load(); }} />
+                          <ReasonAction label={t("ارجاع به پرونده", "Escalate")} confirmLabel={t("ارجاع", "Escalate")} onRun={async (reason) => { const res = await adminAnimalSupportService.escalateReport(r.id, reason); setNotice(<Link className="underline" href={`/${lang}/admin/trust/${res.trustCaseId}`}>{t("گزارش ارجاع شد — مشاهدهٔ پرونده", "Escalated — open the case")}</Link>); await load(); void refreshQueues(true); }} />
+                          <ReasonAction label={t("رد گزارش", "Dismiss")} confirmLabel={t("رد", "Dismiss")} minLength={0} onRun={async (reason) => { await adminAnimalSupportService.dismissReport(r.id, reason || undefined); await load(); void refreshQueues(true); }} />
                         </div>
                       ) : null}
                     </Td>

@@ -12,8 +12,17 @@ interface OnboardingProgressLike {
  * returnTo along so ReadyStep can finish the job), and only a completed
  * account is sent straight to its original intended destination.
  */
-export function resolvePostAuthDestination(locale: string, returnTo: string | null | undefined, progress: OnboardingProgressLike): string {
+/** Staff and partner consoles: onboarding is the pet-owner flow, so it never stands between someone and these. */
+const CONSOLE = /^\/[a-z]{2}\/(admin|provider|seller|insurer|ngo)(\/|\?|$)/;
+
+export function resolvePostAuthDestination(locale: string, returnTo: string | null | undefined, progress: OnboardingProgressLike, opts: { isAdmin?: boolean } = {}): string {
   const isOnboardingComplete = progress.status === "COMPLETED" && progress.chapter === "READY";
+
+  // Someone sent back to a console after signing in goes straight there (the console checks access itself), and an
+  // admin signing in with nowhere particular to go lands in admin, not in pet-owner onboarding.
+  const target = returnTo ? sanitizeReturnTo(returnTo, "") : "";
+  if (target && CONSOLE.test(target)) return target;
+  if (opts.isAdmin && !target) return `/${locale}/admin`;
 
   if (!isOnboardingComplete) {
     const onboardingPath = `/${locale}/onboarding`;

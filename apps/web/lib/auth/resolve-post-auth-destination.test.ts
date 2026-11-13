@@ -31,4 +31,20 @@ describe("resolvePostAuthDestination", () => {
     const dest = resolvePostAuthDestination("en", "https://evil.example", { status: "COMPLETED", chapter: "READY" });
     expect(dest).toBe("/en/home");
   });
+
+  it("never puts pet-owner onboarding between someone and the console they were sent back to", () => {
+    const incomplete = { status: "IN_PROGRESS", chapter: "WELCOME" };
+    expect(resolvePostAuthDestination("fa", "/fa/admin/tasks", incomplete)).toBe("/fa/admin/tasks");
+    expect(resolvePostAuthDestination("en", "/en/provider/bookings", incomplete)).toBe("/en/provider/bookings");
+    expect(resolvePostAuthDestination("en", "/en/administrator-fake", incomplete)).toBe("/en/onboarding?returnTo=%2Fen%2Fadministrator-fake");
+  });
+
+  it("lands an admin with nowhere particular to go in admin, onboarding finished or not", () => {
+    expect(resolvePostAuthDestination("fa", null, { status: "IN_PROGRESS", chapter: "WELCOME" }, { isAdmin: true })).toBe("/fa/admin");
+    expect(resolvePostAuthDestination("fa", null, { status: "COMPLETED", chapter: "READY" }, { isAdmin: true })).toBe("/fa/admin");
+    expect(resolvePostAuthDestination("fa", "https://evil.example", { status: "COMPLETED", chapter: "READY" }, { isAdmin: true })).toBe("/fa/admin");
+    // An admin who was on their way to a member page still gets there (through onboarding if unfinished).
+    expect(resolvePostAuthDestination("fa", "/fa/pets", { status: "COMPLETED", chapter: "READY" }, { isAdmin: true })).toBe("/fa/pets");
+  });
 });
+

@@ -12,6 +12,7 @@ import { adminInsuranceOpsService, adminTravelService, type AdminInsuranceApplic
 import { bookingStatusLabel, cancellationSummary, listingTypeLabel, money, paymentStatusLabel, policyFacts, stayDates } from "@/features/travel-market/labels";
 import { DetailRow, EmptyRow, FilterBar, FilterField, Kpi, Panel, PanelTitle, SelectFilter, TableWrap, Tag, Td, TextFilter, Th } from "../console-ui";
 import { copyFor } from "@/features/admin/admin-copy";
+import { StaffBookingMoneyPanel } from "../finance/StaffBookingMoneyPanel";
 import { externalHref } from "@/lib/url/external-href";
 
 type Lang = "fa" | "en" | "de" | "es";
@@ -310,6 +311,7 @@ export function AdminTravelBookingDetailView({ bookingId }: { bookingId: string 
           <PanelTitle title={tr("تاریخچه", "Timeline")} />
           {b.timeline.map((e, i) => <DetailRow key={i} label={new Intl.DateTimeFormat(tr("fa-IR-u-ca-persian", "en-GB"), { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Tehran" }).format(new Date(e.createdAt))}>{`${e.actorType} → ${bookingStatusLabel(e.toStatus, pairLang(lang))}${e.reason ? ` (${e.reason})` : ""}`}</DetailRow>)}
         </Panel>
+        <StaffBookingMoneyPanel kind="TRAVEL_BOOKING" bookingId={bookingId} />
       </div>
     </div>
   );
@@ -514,6 +516,14 @@ export function AdminTravelAnalyticsView() {
 }
 
 const APP_STATUSES = ["SUBMITTED", "UNDER_REVIEW", "NEEDS_INFORMATION", "APPROVED", "DECLINED", "CANCELLED", "DRAFT"];
+const APP_STATUS_LABEL: Record<string, [fa: string, en: string]> = {
+  SUBMITTED: ["ارسال‌شده", "Submitted"], UNDER_REVIEW: ["در حال بررسی", "Under review"], NEEDS_INFORMATION: ["نیازمند اطلاعات", "Needs information"],
+  APPROVED: ["تأییدشده", "Approved"], DECLINED: ["ردشده", "Declined"], CANCELLED: ["لغوشده", "Cancelled"], DRAFT: ["پیش‌نویس", "Draft"],
+};
+const SPECIES_LABEL: Record<string, [fa: string, en: string]> = {
+  DOG: ["سگ", "Dog"], CAT: ["گربه", "Cat"], BIRD: ["پرنده", "Bird"], RABBIT: ["خرگوش", "Rabbit"], RODENT: ["جونده", "Rodent"],
+  FISH: ["ماهی", "Fish"], REPTILE: ["خزنده", "Reptile"], OTHER: ["سایر", "Other"],
+};
 
 /** Admin insurance: oversight only — PET LIFE never decides an application. */
 export function AdminInsuranceApplicationsView() {
@@ -538,7 +548,7 @@ export function AdminInsuranceApplicationsView() {
       <p className="mb-3 text-sm text-text-secondary">{tr("تصمیم‌گیری دربارهٔ درخواست‌ها فقط با بیمه‌گر است. اعضای بیمه‌گر را از صفحهٔ هر بیمه‌گر مدیریت کنید.", "Only the insurer decides applications. Manage insurer members from each insurer's page.")}</p>
       {error === "forbidden" ? <Forbidden perm="insurance.applications.view" /> : (
         <Panel>
-          <FilterBar><FilterField label={tr("وضعیت", "Status")}><SelectFilter value={status} onChange={(v) => { setStatus(v); setPage(1); }} options={[{ value: "all", label: tr("همه", "All") }, ...APP_STATUSES.map((s) => ({ value: s, label: s }))]} /></FilterField></FilterBar>
+          <FilterBar><FilterField label={tr("وضعیت", "Status")}><SelectFilter value={status} onChange={(v) => { setStatus(v); setPage(1); }} options={[{ value: "all", label: tr("همه", "All") }, ...APP_STATUSES.map((s) => ({ value: s, label: APP_STATUS_LABEL[s] ? tr(...APP_STATUS_LABEL[s]!) : s }))]} /></FilterField></FilterBar>
           {error === "error" ? <ErrorRecovery title={tr("بارگیری نشد", "Could not load")} message="" retryLabel={tr("تلاش دوباره", "Retry")} onRetry={load} /> : null}
           {!data && !error ? <Skeleton className="h-64" /> : null}
           {data ? (
@@ -547,7 +557,7 @@ export function AdminInsuranceApplicationsView() {
                 <table className="w-full">
                   <thead><tr><Th>{tr("محصول", "Product")}</Th><Th>{tr("گونه", "Species")}</Th><Th>{tr("وضعیت", "Status")}</Th><Th>{tr("رضایت", "Consent")}</Th><Th>{tr("ارسال", "Submitted")}</Th></tr></thead>
                   <tbody>{data.items.length === 0 ? <EmptyRow colSpan={5} label={tr("درخواستی نیست", "No applications")} /> : data.items.map((a) => (
-                    <tr key={a.id}><Td>{a.productName}<span className="block text-metadata text-text-secondary">{a.providerName}</span></Td><Td>{a.petSpecies}</Td><Td><Tag tone={a.status === "APPROVED" ? "success" : a.status === "NEEDS_INFORMATION" || a.status === "SUBMITTED" ? "attention" : "neutral"}>{a.status}</Tag></Td><Td>{a.consentAt ? formatDay(a.consentAt.slice(0, 10), lang) : "—"}</Td><Td>{a.submittedAt ? formatDay(a.submittedAt.slice(0, 10), lang) : "—"}</Td></tr>
+                    <tr key={a.id}><Td>{a.productName}<span className="block text-metadata text-text-secondary">{a.providerName}</span></Td><Td>{SPECIES_LABEL[a.petSpecies] ? tr(...SPECIES_LABEL[a.petSpecies]!) : a.petSpecies}</Td><Td><Tag tone={a.status === "APPROVED" ? "success" : a.status === "NEEDS_INFORMATION" || a.status === "SUBMITTED" ? "attention" : "neutral"}>{APP_STATUS_LABEL[a.status] ? tr(...APP_STATUS_LABEL[a.status]!) : a.status}</Tag></Td><Td>{a.consentAt ? formatDay(a.consentAt.slice(0, 10), lang) : "—"}</Td><Td>{a.submittedAt ? formatDay(a.submittedAt.slice(0, 10), lang) : "—"}</Td></tr>
                   ))}</tbody>
                 </table>
               </TableWrap>

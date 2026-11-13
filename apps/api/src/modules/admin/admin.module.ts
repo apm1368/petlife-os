@@ -1,4 +1,5 @@
 import { AdminInsuranceApplicationsController } from "./insurance/admin-insurance-applications.controller";
+import { OrdersModule } from "../commerce/orders/orders.module";
 import { AdminTravelController } from "./travel/admin-travel.controller";
 import { AdminTravelService } from "./travel/admin-travel.service";
 import { TravelMarketplaceModule } from "../travel-marketplace/travel-marketplace.module";
@@ -42,7 +43,16 @@ import { AdminSystemController } from "./system/admin-system.controller";
 import { BookingModule } from "../booking/booking.module";
 import { PaymentsModule } from "../commerce/payments/payments.module";
 import { AdminCardTransferController } from "./finance/admin-card-transfer.controller";
+import { AdminShippingController } from "./commerce/admin-shipping.controller";
+import { LogisticsModule } from "../commerce/logistics/logistics.module";
+import { AdminPlacesOsmController } from "./places/admin-places-osm.controller";
+import { OsmDirectoryService } from "../places/osm/osm-directory.service";
+import { PlaceClaimsService } from "../places/osm/place-claims.service";
 import { AdminWalletsController } from "./finance/admin-wallets.controller";
+import { AdminCardTransferDestinationController } from "./finance/admin-card-transfer-destination.controller";
+import { AdminCardTransferDestinationService } from "./finance/admin-card-transfer-destination.service";
+import { AdminCardTransferReceiptsService } from "./finance/admin-card-transfer-receipts.service";
+import { ReceiptReviewNotifier } from "./finance/receipt-review.notifier";
 import { AdminWalletsService } from "./finance/admin-wallets.service";
 import { AdminServicesService } from "./services/admin-services.service";
 import { AdminServicesController } from "./services/admin-services.controller";
@@ -56,6 +66,8 @@ import { AdminAuthGuard } from "./auth/admin-auth.guard";
 import { AdminMeController } from "./auth/admin-me.controller";
 import { AdminCalendarController } from "./calendar/admin-calendar.controller";
 import { AdminCalendarService } from "./calendar/admin-calendar.service";
+import { AdminOwnershipController } from "./ownership/admin-ownership.controller";
+import { AdminOwnershipService } from "./ownership/admin-ownership.service";
 import { AdminAuditLogService } from "./audit/admin-audit-log.service";
 import { AdminCustomerService } from "./customer/admin-customer.service";
 import { AdminCustomerController } from "./customer/admin-customer.controller";
@@ -79,6 +91,7 @@ import { AdminTaskService } from "./task/admin-task.service";
 import { AdminTaskController } from "./task/admin-task.controller";
 import { AdminFinanceService } from "./finance/admin-finance.service";
 import { AdminRefundService } from "./finance/admin-refund.service";
+import { AdminBookingMoneyService } from "./finance/admin-booking-money.service";
 import { AdminFinanceController } from "./finance/admin-finance.controller";
 import { AdminOrgService } from "./orgs/admin-org.service";
 import { AdminOrgController } from "./orgs/admin-org.controller";
@@ -148,6 +161,7 @@ import { MemoriesModule } from "../memories/memories.module";
     NotificationsModule,
     EmailModule,
     RefundsModule,
+    OrdersModule,
     PromotionsModule,
     TravelMarketplaceModule,
     PetAccessModule,
@@ -158,6 +172,7 @@ import { MemoriesModule } from "../memories/memories.module";
     CommunityModule,
     BookingModule,
     PaymentsModule,
+    LogisticsModule,
     MemoriesModule,
   ],
   controllers: [
@@ -165,11 +180,15 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminMessagingController,
     AdminMeController,
     AdminCalendarController,
+    AdminOwnershipController,
     AdminSupportOpsController,
     UserSupportAttachmentsController,
     AdminFinanceOpsController,
     AdminCardTransferController,
+    AdminShippingController,
+    AdminPlacesOsmController,
     AdminWalletsController,
+    AdminCardTransferDestinationController,
     AdminPartner360Controller,
     AdminPet360Controller,
     AdminAccessControlController,
@@ -224,6 +243,7 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminCustomerOverviewService,
     AdminAccessControlService,
     AdminCalendarService,
+    AdminOwnershipService,
     AdminCustomRolesService,
     AdminSettingsService,
     AdminFeatureFlagsService,
@@ -254,9 +274,15 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminTaskService,
     AdminFinanceService,
     AdminRefundService,
+    AdminBookingMoneyService,
     AdminOrgService,
     AdminDashboardService,
+    OsmDirectoryService,
+    PlaceClaimsService,
     AdminWalletsService,
+    AdminCardTransferDestinationService,
+    AdminCardTransferReceiptsService,
+    ReceiptReviewNotifier,
     AdminSellerSettlementService,
     AdminSellerAdjustmentService,
     AdminMarketplaceSettlementService,
