@@ -10,7 +10,7 @@ import type { RouteLocale } from "@/lib/i18n/config";
 import { petTaxiService } from "@/services/pet-taxi.service";
 import { useAdminStore } from "@/stores/admin-store";
 
-type Draft = { city: string; base: string; perKm: string; perMinute: string; minimum: string; medium: string; large: string; extraPet: string; south: string; west: string; north: string; east: string; active: boolean };
+type Draft = { city: string; base: string; perKm: string; perMinute: string; minimum: string; medium: string; large: string; south: string; west: string; north: string; east: string; active: boolean };
 const toToman = (irr: number) => String(Math.round(irr / 10));
 const num = (v: string) => {
   const n = Number(v.replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06f0)).replace(/[,\s٬]/g, ""));
@@ -22,8 +22,8 @@ const toCoord = (v: string) => {
   const n = Number(v.replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06f0)).replace(/[٫,]/g, ".").trim());
   return v.trim() && Number.isFinite(n) ? n : null;
 };
-const draftOf = (r: AdminPetTaxiFareRuleDto): Draft => ({ city: r.city, base: toToman(r.baseFareIrr), perKm: toToman(r.perKmIrr), perMinute: toToman(r.perMinuteIrr), minimum: toToman(r.minimumFareIrr), medium: String(r.mediumSurchargePercent), large: String(r.largeSurchargePercent), extraPet: toToman(r.extraPetIrr), south: coord(r.south), west: coord(r.west), north: coord(r.north), east: coord(r.east), active: r.active });
-const EMPTY: Draft = { city: "", base: "", perKm: "", perMinute: "0", minimum: "0", medium: "15", large: "35", extraPet: "0", south: "", west: "", north: "", east: "", active: true };
+const draftOf = (r: AdminPetTaxiFareRuleDto): Draft => ({ city: r.city, base: toToman(r.baseFareIrr), perKm: toToman(r.perKmIrr), perMinute: toToman(r.perMinuteIrr), minimum: toToman(r.minimumFareIrr), medium: String(r.mediumSurchargePercent), large: String(r.largeSurchargePercent), south: coord(r.south), west: coord(r.west), north: coord(r.north), east: coord(r.east), active: r.active });
+const EMPTY: Draft = { city: "", base: "", perKm: "", perMinute: "0", minimum: "0", medium: "15", large: "35", south: "", west: "", north: "", east: "", active: true };
 
 /** /admin/services/pet-taxi — fares per city (Toman in, rials stored) and the last day's rides. */
 export function AdminPetTaxiView() {
@@ -90,7 +90,6 @@ export function AdminPetTaxiView() {
         minimumFareIrr: num(d.minimum) * 10,
         mediumSurchargePercent: Math.min(300, num(d.medium)),
         largeSurchargePercent: Math.min(300, num(d.large)),
-        extraPetIrr: num(d.extraPet) * 10,
         ...(isDefault ? {} : box),
         active: d.active,
         ...(reason.trim().length >= 3 ? { reason: reason.trim() } : {}),
@@ -146,7 +145,6 @@ export function AdminPetTaxiView() {
                 {field(i, "minimum", t("fields.minimum"))}
                 {field(i, "medium", t("fields.medium"))}
                 {field(i, "large", t("fields.large"))}
-                {field(i, "extraPet", t("fields.extraPet"))}
                 {d.city.trim() !== "*" ? (
                   <>
                     {field(i, "south", t("fields.south"), "text")}

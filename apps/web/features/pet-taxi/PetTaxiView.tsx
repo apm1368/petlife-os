@@ -278,7 +278,7 @@ function RideRequest({ onRequested }: { onRequested: (r: PetTaxiRideDto) => void
             {pets === null ? <Skeleton className="h-10 w-full" /> : pets.length === 0 ? <p>{t("noPets")}</p> : null}
             {(pets ?? []).map((p) => (
               <label key={p.id} className={petIds.includes(p.id) ? "is-selected" : undefined}>
-                <input type="checkbox" checked={petIds.includes(p.id)} onChange={(e) => setPetIds((ids) => (e.target.checked ? [...ids, p.id].slice(0, 4) : ids.filter((x) => x !== p.id)))} />
+                <input type="checkbox" checked={petIds.includes(p.id)} onChange={(e) => setPetIds((ids) => (e.target.checked ? [...ids, p.id].slice(0, 3) : ids.filter((x) => x !== p.id)))} />
                 {p.name}
               </label>
             ))}
