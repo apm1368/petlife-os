@@ -34,7 +34,9 @@ const PRODUCT: AdminProductDetailDto = {
 };
 
 describe("AdminProductDetailView", () => {
-  beforeEach(() => vi.mocked(adminCommerceService.getProduct).mockReset());
+  beforeEach(() => {
+    vi.mocked(adminCommerceService.getProduct).mockReset();
+  });
 
   it("shows each seller's price, stock and whether it can be bought", async () => {
     vi.mocked(adminCommerceService.getProduct).mockResolvedValue(PRODUCT);
@@ -52,8 +54,8 @@ describe("AdminProductDetailView", () => {
   });
 
   it("says when the product does not exist", async () => {
-    vi.mocked(adminCommerceService.getProduct).mockRejectedValue(new ApiError({ code: "NOT_FOUND", message: "nope", requestId: "r" }, 404));
+    vi.mocked(adminCommerceService.getProduct).mockRejectedValue(new ApiError({ code: "NOT_FOUND", message: "missing", requestId: "test" }, 404));
     renderWithIntl(<AdminProductDetailView productId="missing" />);
-    await waitFor(() => expect(screen.getByText("Product not found")).toBeTruthy());
+    await screen.findByText("Product not found");
   });
 });
