@@ -111,3 +111,9 @@
 @media (prefers-reduced-motion: reduce) {
   .operator-shell__nav a { transition: none; }
 }
+
+/* P7 (owner, 2026-11-13): partner and seller consoles on touch screens: nav pills and selects at least 44px. */
+@media (pointer: coarse) {
+  .operator-shell__nav a { min-block-size: 44px; }
+  .operator-shell select { min-block-size: 44px; }
+}

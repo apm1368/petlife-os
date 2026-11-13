@@ -167,7 +167,7 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
         {notVerified ? (
           <div className="operator-shell__notice">
             <StatusLabel tone="attention">{t("notVerifiedBanner")}</StatusLabel>
-            <Link className="ms-3 underline" href={`/${locale}/provider/verification`}>{t("nav.verification")}</Link>
+            <Link className="ms-3 inline-flex min-h-11 items-center underline" href={`/${locale}/provider/verification`}>{t("nav.verification")}</Link>
           </div>
         ) : null}
       </header>
