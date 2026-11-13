@@ -7056,6 +7056,60 @@
       },
       "refresh": "Gedaan — werk mijn claim bij",
       "limit": "Je kunt maximaal 5 openstaande claims hebben; wacht op de beoordeling."
+    },
+    "suggest": {
+      "cta": "Plek voorstellen",
+      "eyebrow": "Huisdiervriendelijke plekken",
+      "title": "Stel een huisdiervriendelijke plek voor",
+      "lede": "Ken je een park, café of winkel waar huisdieren welkom zijn? Vertel het ons. Ons team controleert elke suggestie voordat die in de gids verschijnt.",
+      "fields": {
+        "name": "Naam van de plek",
+        "category": "Categorie",
+        "categoryPick": "Kies een categorie",
+        "city": "Plaats",
+        "address": "Adres (optioneel)",
+        "pin": "Locatie op de kaart",
+        "notes": "Opmerkingen (optioneel)"
+      },
+      "pinHint": "Tik op de kaart waar de plek is, of gebruik je huidige locatie.",
+      "map": "Kaart: tik om de markering te plaatsen",
+      "zoomIn": "Inzoomen",
+      "zoomOut": "Uitzoomen",
+      "pinned": "Voorgestelde plek",
+      "pinSet": "Markering geplaatst",
+      "myLocation": "Mijn locatie",
+      "locating": "Locatie zoeken…",
+      "notesPublic": "Wat maakt de plek huisdiervriendelijk? Als de plek wordt goedgekeurd, kunnen deze opmerkingen openbaar als beschrijving worden getoond.",
+      "review": "Ons team controleert je suggestie voordat die verschijnt. Je naam wordt nooit openbaar getoond.",
+      "send": "Suggestie versturen",
+      "sending": "Versturen…",
+      "done": {
+        "title": "Bedankt! Je suggestie wordt beoordeeld",
+        "body": "We controleren de gegevens en zetten de plek in de gids als die past. Je volgt de status hieronder.",
+        "another": "Nog een plek voorstellen"
+      },
+      "mine": {
+        "title": "Jouw suggesties",
+        "loading": "Je suggesties worden geladen…",
+        "error": "We konden je suggesties niet laden.",
+        "retry": "Opnieuw proberen",
+        "empty": "Je hebt nog geen plek voorgesteld.",
+        "view": "Plek bekijken"
+      },
+      "status": {
+        "PENDING": "In beoordeling",
+        "APPROVED": "Toegevoegd",
+        "REJECTED": "Niet toegevoegd"
+      },
+      "errors": {
+        "required": "Verplicht",
+        "pin": "Plaats de markering op de kaart: ons team heeft de locatie nodig om de plek toe te voegen.",
+        "noLocation": "We konden je locatie niet bepalen. Tik op de kaart.",
+        "tooManyPending": "Je hebt al 10 suggesties in beoordeling. Wacht tot er een paar zijn beoordeeld.",
+        "tooFast": "Te veel pogingen in korte tijd. Wacht een minuut.",
+        "check": "Sommige gegevens moeten worden gecontroleerd.",
+        "generic": "De suggestie kon niet worden verstuurd. Probeer het opnieuw."
+      }
     }
   },
   "supportNeeds": {
