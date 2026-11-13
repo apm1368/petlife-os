@@ -4157,7 +4157,8 @@
         "profile": "Mein Konto",
         "viewSite": "Website ansehen",
         "signOut": "Abmelden",
-        "signingOut": "Abmeldung läuft …"
+        "signingOut": "Abmeldung läuft …",
+        "twoStep": "Zwei-Schritt-Anmeldung"
       },
       "tabs": {
         "holidays": "Feiertage und Schließtage",
@@ -4227,7 +4228,8 @@
         "walletCardReceipts": "Kartenbelege",
         "repeatDeliveries": "Liefer-Abos",
         "orderLookup": "Bestellsuche",
-        "refundApprovals": "Erstattungsfreigaben"
+        "refundApprovals": "Erstattungsfreigaben",
+        "twoStep": "Zwei-Schritt-Anmeldung"
       },
       "palette": {
         "actions": "Schnellaktionen",
@@ -11465,6 +11467,140 @@
       "LOGO_FILE": "Das Logo muss JPG, PNG oder WebP unter 10 MB sein.",
       "DOC_FILE": "Das Dokument muss JPG, PNG oder PDF unter 20 MB sein.",
       "TOO_MANY_PENDING": "Zu viele Unterlagen warten auf Prüfung."
+    }
+  },
+  "adminTwoStep": {
+    "kicker": "Kontosicherheit",
+    "title": "Zwei-Schritt-Anmeldung",
+    "retry": "Erneut versuchen",
+    "intro": "Zusätzlich zum Passwort ein Code aus einer Authenticator-App auf Ihrem Handy. Admin-Seiten fragen einmal pro Anmeldung danach und dann alle 12 Stunden.",
+    "status": {
+      "on": "Aktiv",
+      "off": "Aus",
+      "onSince": "Aktiv seit {date}",
+      "recoveryLeft": "{count, plural, one {# Wiederherstellungscode übrig} other {# Wiederherstellungscodes übrig}}",
+      "recoveryLow": "{count, plural, =0 {Keine Wiederherstellungscodes mehr.} one {Nur noch # Wiederherstellungscode.} other {Nur noch # Wiederherstellungscodes.}} Erstellen Sie neue.",
+      "enforced": "Für alle Admins dieses Teams Pflicht.",
+      "optional": "Derzeit freiwillig. Ein Super-Admin kann sie für das ganze Team verpflichtend machen."
+    },
+    "actions": {
+      "turnOn": "Zwei-Schritt-Anmeldung aktivieren",
+      "newCodes": "Neue Wiederherstellungscodes erstellen",
+      "turnOff": "Deaktivieren",
+      "turnOffBlocked": "Sie kann nicht deaktiviert werden, solange sie für das Team Pflicht ist."
+    },
+    "enrol": {
+      "step1": "1. opetlife.ir zur Authenticator-App hinzufügen",
+      "step1Help": "Wählen Sie in Google Authenticator, Microsoft Authenticator, 1Password, Bitwarden oder Aegis „Konto hinzufügen“ und dann „Einrichtungsschlüssel eingeben“ und tippen Sie den Schlüssel unten ein. Richten Sie es auf diesem Handy ein? Nutzen Sie „In der Authenticator-App öffnen“.",
+      "copyKey": "Schlüssel kopieren",
+      "copied": "Kopiert",
+      "openApp": "In der Authenticator-App öffnen",
+      "step2": "2. Den 6-stelligen Code aus der App eingeben",
+      "confirm": "Aktivieren",
+      "cancel": "Abbrechen",
+      "starting": "Wird vorbereitet…",
+      "accountLabel": "Kontoname",
+      "keyLabel": "Einrichtungsschlüssel",
+      "typeLabel": "Typ",
+      "type": "Zeitbasiert, 6 Ziffern"
+    },
+    "codes": {
+      "title": "Wiederherstellungscodes sichern",
+      "body": "Falls Sie Ihr Handy verlieren, bringt Sie jeder Code einmal hinein. Sie werden nicht noch einmal angezeigt – bewahren Sie sie sicher und getrennt von diesem Computer auf.",
+      "copy": "Codes kopieren",
+      "download": "Als Textdatei herunterladen",
+      "saved": "Ich habe die Codes gesichert",
+      "continue": "Weiter",
+      "fileHeading": "opetlife.ir Admin-Wiederherstellungscodes – jeder gilt einmal"
+    },
+    "challenge": {
+      "title": "Zwei-Schritt-Code eingeben",
+      "body": "Öffnen Sie Ihre Authenticator-App und geben Sie den 6-stelligen Code für opetlife.ir ein.",
+      "codeLabel": "6-stelliger Code",
+      "recoveryLabel": "Wiederherstellungscode",
+      "useRecovery": "Stattdessen einen Wiederherstellungscode verwenden",
+      "useApp": "Stattdessen die Authenticator-App verwenden",
+      "submit": "Bestätigen",
+      "lostPhone": "Handy und Wiederherstellungscodes verloren? Bitten Sie einen Super-Admin, Ihre Zwei-Schritt-Anmeldung zurückzusetzen.",
+      "signOut": "Abmelden"
+    },
+    "forced": {
+      "title": "Aktivieren Sie die Zwei-Schritt-Anmeldung, um fortzufahren",
+      "body": "Die Zwei-Schritt-Anmeldung ist jetzt für alle Admins Pflicht. Das dauert etwa eine Minute."
+    },
+    "banner": {
+      "optional": "Schützen Sie Ihr Admin-Konto mit der Zwei-Schritt-Anmeldung.",
+      "enforced": "Die Zwei-Schritt-Anmeldung ist Pflicht. Aktivieren Sie sie bis {date}.",
+      "action": "Jetzt aktivieren",
+      "dismiss": "Später"
+    },
+    "errors": {
+      "invalidPlain": "Dieser Code hat nicht funktioniert. Achten Sie darauf, dass Ihr Handy die Uhrzeit automatisch stellt, und geben Sie dann den neuesten Code ein.",
+      "invalid": "Dieser Code hat nicht funktioniert. {count, plural, =0 {Der nächste falsche Code sperrt für eine Weile.} one {Noch # Versuch bis zu einer kurzen Sperre.} other {Noch # Versuche bis zu einer kurzen Sperre.}}",
+      "locked": "Zu viele falsche Codes. Versuchen Sie es nach {time} erneut.",
+      "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+      "format": "Geben Sie die 6 Ziffern aus der App ein.",
+      "recoveryFormat": "Ein Wiederherstellungscode hat 16 Buchstaben und Ziffern, z. B. ABCD-EFGH-2345-6723."
+    },
+    "confirmCode": {
+      "label": "Aktueller 6-stelliger Code",
+      "help": "Geben Sie einen frischen Code aus der App ein. Die alten Wiederherstellungscodes werden ungültig.",
+      "turnOffHelp": "Geben Sie einen frischen Code aus der App ein, um die Zwei-Schritt-Anmeldung zu deaktivieren."
+    },
+    "done": {
+      "on": "Die Zwei-Schritt-Anmeldung ist aktiv.",
+      "off": "Die Zwei-Schritt-Anmeldung ist deaktiviert.",
+      "newCodes": "Neue Wiederherstellungscodes sind bereit. Die alten gelten nicht mehr."
+    },
+    "policy": {
+      "title": "Zwei-Schritt-Anmeldung für das Team",
+      "intro": "Wenn sie Pflicht ist, gibt jeder Admin bei der Anmeldung einen Code aus der Authenticator-App ein. Admins ohne aktivierte Zwei-Schritt-Anmeldung arbeiten während der Schonfrist weiter und müssen sie danach aktivieren, bevor sich eine Admin-Seite öffnet.",
+      "required": "Zwei-Schritt-Anmeldung für alle Admins verlangen",
+      "on": "Pflicht",
+      "off": "Freiwillig",
+      "coverage": "{enrolled} von {total} Admins haben sie aktiviert",
+      "since": "Pflicht seit {date}",
+      "graceDays": "Schonfrist (Tage)",
+      "graceHelp": "Gezählt ab dem Zeitpunkt der Pflicht oder ab dem Beitritt eines Admins – je nachdem, was später ist. 0 bedeutet sofort.",
+      "reason": "Grund",
+      "reasonPlaceholder": "Warum diese Änderung",
+      "reasonRequired": "Geben Sie einen kurzen Grund an (mindestens 5 Zeichen).",
+      "save": "Speichern",
+      "saved": "Gespeichert.",
+      "onlySuper": "Nur ein Super-Admin kann das ändern.",
+      "selfFirst": "Aktivieren Sie zuerst die Zwei-Schritt-Anmeldung für Ihr eigenes Konto.",
+      "selfFirstAction": "Meine einrichten",
+      "mine": "Meine Zwei-Schritt-Anmeldung",
+      "members": "Admins",
+      "col": {
+        "name": "Admin",
+        "role": "Rolle",
+        "status": "Zwei-Schritt-Anmeldung"
+      },
+      "member": {
+        "on": "Aktiv seit {date}",
+        "grace": "Noch nicht · bis {date}",
+        "overdue": "Muss sie jetzt aktivieren",
+        "off": "Aus"
+      },
+      "reset": "Zurücksetzen",
+      "resetTitle": "Zwei-Schritt-Anmeldung von {name} zurücksetzen?",
+      "resetBody": "Für den Fall, dass Handy und Wiederherstellungscodes verloren sind. Authenticator und Wiederherstellungscodes werden ungültig; bei der nächsten Anmeldung wird sie neu eingerichtet.",
+      "resetReasonPlaceholder": "Zum Beispiel: Handy verloren, telefonisch bestätigt",
+      "resetConfirm": "Zurücksetzen",
+      "resetDone": "Zurückgesetzt. {name} richtet sie neu ein.",
+      "you": "Sie",
+      "enforcementLater": "Die Zwei-Schritt-Anmeldung ist vorerst für jede Admin-Person freiwillig. Sie für alle vorzuschreiben, wird möglich, sobald SMS und E-Mail laufen."
+    },
+    "rules": {
+      "TWO_STEP_ALREADY_ON": "Die Zwei-Schritt-Anmeldung ist für dieses Konto bereits aktiv.",
+      "TWO_STEP_NO_PENDING_ENROLMENT": "Diese Einrichtung ist abgelaufen. Beginnen Sie neu.",
+      "TWO_STEP_NOT_ON": "Die Zwei-Schritt-Anmeldung ist für dieses Konto nicht aktiv.",
+      "TWO_STEP_ENFORCED": "Sie kann nicht deaktiviert werden, solange sie für das Team Pflicht ist.",
+      "TWO_STEP_SELF_RESET": "Die eigene kann man nicht zurücksetzen. Deaktivieren Sie sie selbst oder fragen Sie einen anderen Super-Admin.",
+      "TWO_STEP_SELF_ENROLMENT_REQUIRED": "Aktivieren Sie zuerst die Zwei-Schritt-Anmeldung für Ihr eigenes Konto.",
+      "TWO_STEP_POLICY_SUPER_ADMIN_ONLY": "Nur ein Super-Admin kann das ändern.",
+      "TWO_STEP_KEY_CHANGED": "Nach einem Schlüsselwechsel auf dem Server kann Ihr Authenticator nicht geprüft werden. Nutzen Sie einen Wiederherstellungscode oder lassen Sie ihn von einem Super-Admin zurücksetzen."
     }
   }
 }

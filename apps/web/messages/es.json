@@ -4152,7 +4152,8 @@
         "profile": "Mi cuenta",
         "viewSite": "Ver el sitio",
         "signOut": "Cerrar sesión",
-        "signingOut": "Cerrando sesión…"
+        "signingOut": "Cerrando sesión…",
+        "twoStep": "Inicio de sesión en dos pasos"
       },
       "tabs": {
         "holidays": "Festivos y cierres",
@@ -4222,7 +4223,8 @@
         "walletCardReceipts": "Comprobantes de tarjeta",
         "repeatDeliveries": "Entregas periódicas",
         "orderLookup": "Buscar pedido",
-        "refundApprovals": "Aprobaciones de reembolso"
+        "refundApprovals": "Aprobaciones de reembolso",
+        "twoStep": "Inicio de sesión en dos pasos"
       },
       "palette": {
         "actions": "Acciones rápidas",
@@ -11463,6 +11465,140 @@
       "LOGO_FILE": "El logo debe ser JPG, PNG o WebP de menos de 10 MB.",
       "DOC_FILE": "El documento debe ser JPG, PNG o PDF de menos de 20 MB.",
       "TOO_MANY_PENDING": "Demasiados documentos pendientes de revisión."
+    }
+  },
+  "adminTwoStep": {
+    "kicker": "Seguridad de la cuenta",
+    "title": "Inicio de sesión en dos pasos",
+    "retry": "Reintentar",
+    "intro": "Además de la contraseña, un código de una app de autenticación en tu móvil. Las páginas de administración lo piden una vez por inicio de sesión y luego cada 12 horas.",
+    "status": {
+      "on": "Activado",
+      "off": "Desactivado",
+      "onSince": "Activado desde {date}",
+      "recoveryLeft": "{count, plural, one {Queda # código de recuperación} other {Quedan # códigos de recuperación}}",
+      "recoveryLow": "{count, plural, =0 {No quedan códigos de recuperación.} one {Solo queda # código de recuperación.} other {Solo quedan # códigos de recuperación.}} Genera unos nuevos.",
+      "enforced": "Obligatorio para todo el equipo de administración.",
+      "optional": "Por ahora es opcional. Un superadministrador puede hacerlo obligatorio para todo el equipo."
+    },
+    "actions": {
+      "turnOn": "Activar el inicio de sesión en dos pasos",
+      "newCodes": "Generar códigos de recuperación nuevos",
+      "turnOff": "Desactivar",
+      "turnOffBlocked": "No se puede desactivar mientras sea obligatorio para el equipo."
+    },
+    "enrol": {
+      "step1": "1. Añade opetlife.ir a tu app de autenticación",
+      "step1Help": "En Google Authenticator, Microsoft Authenticator, 1Password, Bitwarden o Aegis, elige «Añadir cuenta» y luego «Introducir una clave de configuración», y escribe la clave de abajo. ¿Lo configuras en este móvil? Usa «Abrir en la app de autenticación».",
+      "copyKey": "Copiar clave",
+      "copied": "Copiado",
+      "openApp": "Abrir en la app de autenticación",
+      "step2": "2. Escribe el código de 6 dígitos que muestra la app",
+      "confirm": "Activar",
+      "cancel": "Cancelar",
+      "starting": "Preparando…",
+      "accountLabel": "Nombre de la cuenta",
+      "keyLabel": "Clave de configuración",
+      "typeLabel": "Tipo",
+      "type": "Basado en tiempo, 6 dígitos"
+    },
+    "codes": {
+      "title": "Guarda tus códigos de recuperación",
+      "body": "Si pierdes el móvil, cada código te deja entrar una vez. No se volverán a mostrar: guárdalos en un lugar seguro, lejos de este ordenador.",
+      "copy": "Copiar códigos",
+      "download": "Descargar como archivo de texto",
+      "saved": "He guardado estos códigos",
+      "continue": "Continuar",
+      "fileHeading": "Códigos de recuperación de administración de opetlife.ir — cada uno sirve una vez"
+    },
+    "challenge": {
+      "title": "Introduce tu código de dos pasos",
+      "body": "Abre tu app de autenticación e introduce el código de 6 dígitos de opetlife.ir.",
+      "codeLabel": "Código de 6 dígitos",
+      "recoveryLabel": "Código de recuperación",
+      "useRecovery": "Usar un código de recuperación",
+      "useApp": "Usar la app de autenticación",
+      "submit": "Verificar",
+      "lostPhone": "¿Has perdido el móvil y los códigos de recuperación? Pide a un superadministrador que restablezca tu inicio de sesión en dos pasos.",
+      "signOut": "Cerrar sesión"
+    },
+    "forced": {
+      "title": "Activa el inicio de sesión en dos pasos para continuar",
+      "body": "El inicio de sesión en dos pasos ya es obligatorio para todo el equipo de administración. Tarda alrededor de un minuto."
+    },
+    "banner": {
+      "optional": "Protege tu cuenta de administración con el inicio de sesión en dos pasos.",
+      "enforced": "El inicio de sesión en dos pasos es obligatorio. Actívalo antes del {date}.",
+      "action": "Activarlo",
+      "dismiss": "Ahora no"
+    },
+    "errors": {
+      "invalidPlain": "Ese código no ha funcionado. Comprueba que tu móvil ajusta la hora automáticamente y escribe el código más reciente.",
+      "invalid": "Ese código no ha funcionado. {count, plural, =0 {El próximo código erróneo lo bloqueará un rato.} one {Te queda # intento antes de un bloqueo breve.} other {Te quedan # intentos antes de un bloqueo breve.}}",
+      "locked": "Demasiados códigos erróneos. Vuelve a intentarlo después de las {time}.",
+      "generic": "Algo ha fallado. Inténtalo de nuevo.",
+      "format": "Escribe los 6 dígitos de la app.",
+      "recoveryFormat": "Un código de recuperación tiene 16 letras y dígitos, como ABCD-EFGH-2345-6723."
+    },
+    "confirmCode": {
+      "label": "Código actual de 6 dígitos",
+      "help": "Introduce un código nuevo de la app. Los códigos de recuperación anteriores dejarán de funcionar.",
+      "turnOffHelp": "Introduce un código nuevo de la app para desactivar el inicio de sesión en dos pasos."
+    },
+    "done": {
+      "on": "El inicio de sesión en dos pasos está activado.",
+      "off": "El inicio de sesión en dos pasos está desactivado.",
+      "newCodes": "Los códigos de recuperación nuevos están listos. Los anteriores ya no sirven."
+    },
+    "policy": {
+      "title": "Inicio de sesión en dos pasos para el equipo",
+      "intro": "Cuando es obligatorio, cada administrador introduce un código de su app de autenticación al iniciar sesión. Quien aún no lo tenga activado sigue trabajando durante el periodo de gracia y después debe activarlo antes de abrir cualquier página de administración.",
+      "required": "Exigir el inicio de sesión en dos pasos a todo el equipo",
+      "on": "Obligatorio",
+      "off": "Opcional",
+      "coverage": "{enrolled} de {total} administradores lo tienen activado",
+      "since": "obligatorio desde el {date}",
+      "graceDays": "Periodo de gracia (días)",
+      "graceHelp": "Se cuenta desde que pasa a ser obligatorio o desde que se incorpora el administrador, lo que sea posterior. 0 significa de inmediato.",
+      "reason": "Motivo",
+      "reasonPlaceholder": "Por qué haces este cambio",
+      "reasonRequired": "Escribe un motivo breve (al menos 5 caracteres).",
+      "save": "Guardar",
+      "saved": "Guardado.",
+      "onlySuper": "Solo un superadministrador puede cambiar esto.",
+      "selfFirst": "Primero activa el inicio de sesión en dos pasos en tu propia cuenta.",
+      "selfFirstAction": "Configurar el mío",
+      "mine": "Mi inicio de sesión en dos pasos",
+      "members": "Administradores",
+      "col": {
+        "name": "Administrador",
+        "role": "Rol",
+        "status": "Dos pasos"
+      },
+      "member": {
+        "on": "Activado desde {date}",
+        "grace": "Todavía no · hasta el {date}",
+        "overdue": "Debe activarlo ya",
+        "off": "Desactivado"
+      },
+      "reset": "Restablecer",
+      "resetTitle": "¿Restablecer el inicio de sesión en dos pasos de {name}?",
+      "resetBody": "Úsalo cuando haya perdido el móvil y los códigos de recuperación. Su app de autenticación y sus códigos dejan de funcionar, y lo configurará de nuevo en su próximo inicio de sesión.",
+      "resetReasonPlaceholder": "Por ejemplo: móvil perdido, confirmado por teléfono",
+      "resetConfirm": "Restablecer",
+      "resetDone": "Restablecido. {name} lo configurará de nuevo.",
+      "you": "tú",
+      "enforcementLater": "Por ahora el inicio de sesión en dos pasos es opcional para cada admin. Exigirlo a todos estará disponible cuando el SMS y el correo funcionen."
+    },
+    "rules": {
+      "TWO_STEP_ALREADY_ON": "El inicio de sesión en dos pasos ya está activado en esta cuenta.",
+      "TWO_STEP_NO_PENDING_ENROLMENT": "Esta configuración ha caducado. Empieza de nuevo.",
+      "TWO_STEP_NOT_ON": "El inicio de sesión en dos pasos no está activado en esta cuenta.",
+      "TWO_STEP_ENFORCED": "No se puede desactivar mientras sea obligatorio para el equipo.",
+      "TWO_STEP_SELF_RESET": "No puedes restablecer el tuyo. Desactívalo tú o pídeselo a otro superadministrador.",
+      "TWO_STEP_SELF_ENROLMENT_REQUIRED": "Primero activa el inicio de sesión en dos pasos en tu propia cuenta.",
+      "TWO_STEP_POLICY_SUPER_ADMIN_ONLY": "Solo un superadministrador puede cambiar esto.",
+      "TWO_STEP_KEY_CHANGED": "Tras un cambio de clave en el servidor no se puede comprobar tu app de autenticación. Usa un código de recuperación o pide a un superadministrador que la restablezca."
     }
   }
 }

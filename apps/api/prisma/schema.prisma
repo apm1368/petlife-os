@@ -1332,6 +1332,7 @@ model User {
   paidSubscriptions          Subscription[]             @relation("SubscriptionPayer")
 
   adminUser                 AdminUser?
+  adminTwoStepFactor     AdminTwoStepFactor?
   supportCasesRequested     SupportCase[]
   supportMessages           SupportMessage[]
   disputesRaised            Dispute[]
@@ -1416,6 +1417,9 @@ model Session {
   rotatedAt  DateTime  @default(now())
   lastSeenAt DateTime  @default(now())
   revokedAt  DateTime?
+  /// When this session last passed the admin two-step check (TOTP or a recovery code). Admin routes need it to be
+  /// recent while the account has two-step sign-in on; consumer routes never read it.
+  twoStepVerifiedAt DateTime?
   createdAt  DateTime  @default(now())
 
   @@index([userId])
@@ -12397,6 +12401,51 @@ model SupportEscalation {
   @@index([caseId])
   @@index([requesterUserId])
   @@map("support_escalations")
+}
+
+/// Admin two-step sign-in (TOTP, RFC 6238 — market-readiness Q75). One factor per account; `confirmedAt` stays null
+/// until the admin proves the authenticator works. The secret is AES-256-GCM sealed (two-step-secret.ts).
+model AdminTwoStepFactor {
+  userId           String                     @id @db.Uuid
+  user             User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  secretCiphertext String
+  confirmedAt      DateTime?
+  /// Highest 30-second step already accepted; only later steps count, so no code is ever accepted twice.
+  lastUsedStep     Int                        @default(0)
+  failedAttempts   Int                        @default(0)
+  lockedUntil      DateTime?
+  /// Lock-outs since the last successful code; each one locks longer (15 min, 1 h, then 24 h).
+  lockouts         Int                        @default(0)
+  createdAt        DateTime                   @default(now())
+  updatedAt        DateTime                   @updatedAt
+  recoveryCodes    AdminTwoStepRecoveryCode[]
+
+  @@map("admin_two_step_factors")
+}
+
+/// Single-use recovery codes, stored only as hashes (shown once, at enrolment or regeneration).
+model AdminTwoStepRecoveryCode {
+  id        String             @id @default(uuid()) @db.Uuid
+  userId    String             @db.Uuid
+  factor    AdminTwoStepFactor @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  codeHash  String             @unique
+  usedAt    DateTime?
+  createdAt DateTime           @default(now())
+
+  @@index([userId])
+  @@map("admin_two_step_recovery_codes")
+}
+
+/// Singleton (id = 1). While `enforcedAt` is set, every admin must have two-step sign-in on; an admin who hasn't
+/// enrolled may keep working for `graceDays` after enforcement (or after joining, whichever is later).
+model AdminTwoStepPolicy {
+  id              Int       @id @default(1)
+  enforcedAt      DateTime?
+  graceDays       Int       @default(7)
+  updatedByUserId String?   @db.Uuid
+  updatedAt       DateTime  @updatedAt
+
+  @@map("admin_two_step_policy")
 }
 
 /// A staff change to the business calendar (Settings → Holidays and closures): close a day that is normally open
