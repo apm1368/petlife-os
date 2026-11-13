@@ -189,6 +189,33 @@ const envSchema = z.object({
   FARAZ_SMS_NOTIFICATION_PATTERN_CODE: z.string().min(1).optional(),
   FARAZ_SMS_NOTIFICATION_BODY_ATTRIBUTE: z.string().min(1).default("message"),
   FARAZ_SMS_TIMEOUT_MS: z.coerce.number().int().min(1000).max(30_000).default(5000),
+
+  /// Email channel. "gmail" sends through smtp.gmail.com with a Google App Password (2-step verification must be
+  /// on for that account); "smtp" is any SMTP relay; "dev" only logs; "disabled" (the default) sends nothing.
+  EMAIL_PROVIDER: z.enum(["disabled", "dev", "gmail", "smtp"]).default("disabled"),
+  /// Display name and address on outgoing mail. With Gmail the address must be the account itself or a verified alias.
+  EMAIL_FROM_NAME: z.string().min(1).default("opetlife"),
+  EMAIL_FROM_ADDRESS: z.string().email().optional(),
+  EMAIL_REPLY_TO: z.string().email().optional(),
+  GMAIL_USER: z.string().email().optional(),
+  GMAIL_APP_PASSWORD: z.string().min(1).optional(),
+  SMTP_HOST: z.string().min(1).optional(),
+  SMTP_PORT: z.coerce.number().int().positive().default(465),
+  SMTP_SECURE: flag(true),
+  SMTP_USER: z.string().min(1).optional(),
+  SMTP_PASSWORD: z.string().min(1).optional(),
+  EMAIL_TIMEOUT_MS: z.coerce.number().int().min(1000).max(60_000).default(15_000),
+  /// Web Push (VAPID) for browsers, installed PWAs and the Android app (TWA). Generate a pair once with
+  /// `node apps/api/scripts/generate-vapid-keys.mjs` and keep both only in apps/api/.env (the private key must never reach git).
+  /// Without both keys the PUSH channel reports NOT_CONFIGURED and nothing is sent. Rotating the pair silently
+  /// invalidates every existing browser subscription, so do it only on a key leak.
+  WEB_PUSH_VAPID_PUBLIC_KEY: z.string().regex(/^[A-Za-z0-9_-]{80,100}$/, "must be a base64url P-256 public key").optional(),
+  WEB_PUSH_VAPID_PRIVATE_KEY: z.string().regex(/^[A-Za-z0-9_-]{40,50}$/, "must be a base64url P-256 private key").optional(),
+  /// Contact the push services may use about this sender (mailto: or https:); Apple rejects localhost.
+  WEB_PUSH_SUBJECT: z.string().regex(/^(mailto:|https:\/\/)/, "must start with mailto: or https://").default("https://opetlife.ir"),
+  /// How long a push service keeps an undelivered message for an offline device.
+  WEB_PUSH_TTL_SECONDS: z.coerce.number().int().min(60).max(2_419_200).default(86_400),
+  WEB_PUSH_TIMEOUT_MS: z.coerce.number().int().min(1000).max(30_000).default(10_000),
   /// How many times a TRANSIENT delivery failure is retried before the
   /// delivery is marked FAILED for good (spec: "do not infinitely retry").
   NOTIFICATION_MAX_DELIVERY_ATTEMPTS: z.coerce.number().int().positive().default(3),
@@ -226,6 +253,10 @@ const envSchema = z.object({
   /// generous for a blog cover/body image without a native image-processing
   /// dependency (see README "Media") to pre-compress on the server.
   CMS_MEDIA_MAX_SIZE_BYTES: z.coerce.number().int().positive().default(5_242_880),
+  /// Article videos (mp4/webm motion graphics) are larger than images; capped below the 50 MB upload ceiling.
+  CMS_VIDEO_MAX_SIZE_BYTES: z.coerce.number().int().positive().max(50 * 1024 * 1024).default(40 * 1024 * 1024),
+  /// IndexNow ownership key — public by design (served by the web app at /{key}.txt).
+  INDEXNOW_KEY: z.string().regex(/^[A-Za-z0-9-]{8,128}$/).default("4a0befe853050c1497b259da2760af9f"),
 
   /// Subscription + Membership + Metering (Handoff 16) — how often the
   /// background renewal worker polls for periods whose `endAt` has passed.
@@ -247,6 +278,18 @@ const envSchema = z.object({
    * great-circle estimate for test servers — never a route distance.
    */
   TRANSPORT_DISTANCE_MODE: z.enum(["unavailable", "straight_line_demo"]).default("unavailable"),
+
+  /**
+   * Maps for the on-demand pet taxi and address pins. "none" draws OpenStreetMap-style tiles and prices from a
+   * straight-line estimate (always labelled as an estimate). "neshan" (Iranian, reachable in Iran) and "google"
+   * use the provider's distance matrix and place search with a server key; their browser keys are public by design.
+   */
+  MAPS_PROVIDER: z.enum(["none", "neshan", "google"]).default("none"),
+  NESHAN_SERVICE_KEY: z.string().optional(),
+  GOOGLE_MAPS_SERVER_KEY: z.string().optional(),
+  GOOGLE_MAPS_BROWSER_KEY: z.string().optional(),
+  MAP_TILE_URL: z.string().default("https://tile.openstreetmap.org/{z}/{x}/{y}.png"),
+  MAP_TILE_ATTRIBUTION: z.string().default("© OpenStreetMap contributors"),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;
@@ -276,9 +319,14 @@ function validateShippingConfig(env: AppEnv): void {
   const missing: string[] = [];
   if (env.ALOPEYK_ENABLED && !(env.ALOPEYK_API_BASE_URL && env.ALOPEYK_API_KEY)) missing.push("ALOPEYK_API_BASE_URL/ALOPEYK_API_KEY");
   if (env.SNAPPBOX_ENABLED && !(env.SNAPPBOX_API_BASE_URL && env.SNAPPBOX_API_KEY)) missing.push("SNAPPBOX_API_BASE_URL/SNAPPBOX_API_KEY");
+  // Courier callbacks move shipments (up to DELIVERED); each enabled courier needs a webhook secret to verify them.
+  const strongSecret = (value: string | undefined) => (value?.trim().length ?? 0) >= 32;
+  if (env.ALOPEYK_ENABLED && !strongSecret(env.ALOPEYK_WEBHOOK_SECRET)) missing.push("ALOPEYK_WEBHOOK_SECRET (32+ characters)");
+  if (env.SNAPPBOX_ENABLED && !strongSecret(env.SNAPPBOX_WEBHOOK_SECRET)) missing.push("SNAPPBOX_WEBHOOK_SECRET (32+ characters)");
   if (missing.length > 0) {
     throw new Error(`SHIPPING_MODE=production requires credentials for every enabled provider. Missing: ${missing.join(", ")}`);
   }
+  if (env.DEV_SHIPPING_ENABLED) throw new Error("SHIPPING_MODE=production cannot run with DEV_SHIPPING_ENABLED=true (the simulated courier).");
 }
 
 /// Handoff 09 (spec section 58) — "no fake production success" applies here
@@ -299,7 +347,24 @@ function validateMarketplaceConfig(env: AppEnv): void {
 /// it does to payments/shipping/marketplace: Faraz enabled without its
 /// credentials configured fails startup rather than silently running
 /// DevMessagingAdapter-equivalent simulation against real recipients.
+/** Same "no fake success" rule for email: a chosen provider without its credentials fails startup. */
+function validateEmailConfig(env: AppEnv): void {
+  const missing: string[] = [];
+  if (env.EMAIL_PROVIDER === "gmail" && !(env.GMAIL_USER && env.GMAIL_APP_PASSWORD)) missing.push("GMAIL_USER/GMAIL_APP_PASSWORD");
+  if (env.EMAIL_PROVIDER === "smtp" && !(env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASSWORD && env.EMAIL_FROM_ADDRESS)) missing.push("SMTP_HOST/SMTP_USER/SMTP_PASSWORD/EMAIL_FROM_ADDRESS");
+  if (missing.length > 0) throw new Error(`EMAIL_PROVIDER=${env.EMAIL_PROVIDER} requires: ${missing.join(", ")}`);
+}
+
+/** Web Push needs both halves of the VAPID pair; one without the other is a typo, not a choice. */
+function validateWebPushConfig(env: AppEnv): void {
+  if (Boolean(env.WEB_PUSH_VAPID_PUBLIC_KEY) !== Boolean(env.WEB_PUSH_VAPID_PRIVATE_KEY)) {
+    throw new Error("WEB_PUSH_VAPID_PUBLIC_KEY and WEB_PUSH_VAPID_PRIVATE_KEY must be set together");
+  }
+}
+
 function validateMessagingConfig(env: AppEnv): void {
+  validateEmailConfig(env);
+  validateWebPushConfig(env);
   if (env.MESSAGING_SANDBOX_MODE !== "production") return;
   const missing: string[] = [];
   if (env.MESSAGING_PROVIDER !== "faraz") missing.push("MESSAGING_PROVIDER=faraz");

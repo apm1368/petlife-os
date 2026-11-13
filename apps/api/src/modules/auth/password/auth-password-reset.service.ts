@@ -9,6 +9,18 @@ import { PasswordResetTokenInvalidException } from "../../../common/errors/api-e
 import { hashPassword } from "../../../common/password/password-hash.util";
 import { classifyLoginIdentifier } from "../identifier.util";
 import { IDENTIFIER_LIMITS, IdentifierRateLimiter } from "../../../common/rate-limit/identifier-rate-limiter.service";
+import { EmailGatewayService } from "../../../common/email/email-gateway.service";
+import { publicOrigin, renderEmail, type EmailLocale } from "../../../common/email/email-layout";
+import { isLiveDeployment } from "../../../common/http/deployment.util";
+
+const RESET_COPY: Record<EmailLocale, { subject: string; body: (minutes: number) => string; action: string }> = {
+  fa: { subject: "بازیابی رمز عبور اپت‌لایف", body: (m) => `درخواستی برای تغییر رمز عبور حساب شما ثبت شد. برای انتخاب رمز تازه روی دکمهٔ زیر بزنید. این پیوند تا ${m} دقیقه معتبر است.\n\nاگر شما این درخواست را نداده‌اید، این پیام را نادیده بگیرید؛ رمز فعلی شما تغییری نمی‌کند.`, action: "انتخاب رمز تازه" },
+  en: { subject: "Reset your opetlife password", body: (m) => `We received a request to change your account password. Use the button below to choose a new one. The link works for ${m} minutes.\n\nIf you did not ask for this, ignore this email — your current password stays as it is.`, action: "Choose a new password" },
+  de: { subject: "opetlife-Passwort zurücksetzen", body: (m) => `Wir haben eine Anfrage erhalten, das Passwort Ihres Kontos zu ändern. Über die Schaltfläche unten wählen Sie ein neues. Der Link ist ${m} Minuten gültig.\n\nWenn Sie das nicht angefordert haben, ignorieren Sie diese E-Mail – Ihr Passwort bleibt unverändert.`, action: "Neues Passwort wählen" },
+  es: { subject: "Restablece tu contraseña de opetlife", body: (m) => `Recibimos una solicitud para cambiar la contraseña de tu cuenta. Usa el botón de abajo para elegir una nueva. El enlace es válido durante ${m} minutos.\n\nSi no lo solicitaste, ignora este correo: tu contraseña actual no cambia.`, action: "Elegir nueva contraseña" },
+  ar: { subject: "إعادة تعيين كلمة مرور opetlife", body: (m) => `تلقّينا طلبًا لتغيير كلمة مرور حسابك. استخدم الزر أدناه لاختيار كلمة مرور جديدة. يعمل الرابط لمدة ${m} دقيقة.\n\nإذا لم تطلب ذلك، فتجاهل هذه الرسالة — ستبقى كلمة مرورك الحالية كما هي.`, action: "اختر كلمة مرور جديدة" },
+  nl: { subject: "Je opetlife-wachtwoord opnieuw instellen", body: (m) => `We hebben een verzoek ontvangen om het wachtwoord van je account te wijzigen. Kies via de knop hieronder een nieuw wachtwoord. De link werkt ${m} minuten.\n\nHeb je dit niet gevraagd? Negeer dan deze e-mail — je huidige wachtwoord blijft ongewijzigd.`, action: "Kies een nieuw wachtwoord" },
+};
 
 function hashToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
@@ -33,6 +45,7 @@ export class AuthPasswordResetService {
     private readonly events: DomainEventsService,
     private readonly config: ConfigService<AppEnv, true>,
     private readonly limiter: IdentifierRateLimiter,
+    private readonly email: EmailGatewayService,
   ) {}
 
   /** Always resolves the same way regardless of whether identifier matched anything — never reveals account existence. */
@@ -61,12 +74,24 @@ export class AuthPasswordResetService {
 
     await this.events.publish("PasswordResetRequested", { userId: user.id });
 
+    // With an email provider configured the link goes to the address on the account (the person asking proved
+    // nothing, so the link only ever reaches the mailbox already on file). The token itself is never logged.
+    if (user.email && this.email.status().live) {
+      const locale: EmailLocale = user.locale === "fa" || user.locale === "de" || user.locale === "es" ? user.locale : "en";
+      const copy = RESET_COPY[locale];
+      const url = `${publicOrigin(this.config.get("WEB_APP_ORIGIN", { infer: true }))}/${locale}/account/reset?token=${encodeURIComponent(rawToken)}`;
+      const { html, text } = renderEmail({ locale, title: copy.subject, body: copy.body(ttlMinutes), action: { label: copy.action, url } });
+      const result = await this.email.send({ to: user.email, subject: copy.subject, html, text, tag: "auth.password_reset" });
+      if (result.status !== "SENT") this.logger.warn(`Password reset email for userId=${user.id} failed (${result.failureCode})`);
+      return;
+    }
+
     // The raw token must never reach a production log stream — the DB only ever
     // stores its hash, and there is no real mail provider wired in yet (see class
     // doc comment). Gate the actual token behind a runtime check rather than
     // trusting call sites to never invoke this path in production.
-    if (this.config.get("NODE_ENV", { infer: true }) === "production") {
-      this.logger.warn(`[DEV PASSWORD RESET] insecure development reset-token delivery was invoked in production for userId=${user.id} — no token was logged, and no email was sent. Configure a real mail provider before accepting production traffic.`);
+    if (isLiveDeployment(this.config)) {
+      this.logger.warn(`[DEV PASSWORD RESET] insecure development reset-token delivery was invoked on a live deployment for userId=${user.id} — no token was logged, and no email was sent. Configure a real mail provider before accepting production traffic.`);
       return;
     }
     this.logger.log(`[DEV PASSWORD RESET] userId=${user.id} token=${rawToken} (expires in ${ttlMinutes}m)`);

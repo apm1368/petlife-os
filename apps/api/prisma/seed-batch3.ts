@@ -46,6 +46,8 @@ interface ProviderSeed {
   specialties: string[];
   cover?: string;
   region: string;
+  /** The location's city; defaults to تهران for the Tehran providers. */
+  city?: string;
   address: string;
   lat: number;
   lng: number;
@@ -166,7 +168,6 @@ const PROVIDERS: ProviderSeed[] = [
     type: "WALKER",
     description: "پیاده‌روی روزانه و نگهداری در منزل با گزارش کوتاه بعد از هر نوبت.",
     specialties: ["پیاده‌روی گروهی کوچک", "نگهداری شبانه"],
-    cover: "/images/landing/cookie-world-day-clean.png",
     region: "پاسداران",
     address: "تهران، پاسداران (خدمت در محل مشتری)",
     lat: 35.7722,
@@ -186,7 +187,6 @@ const PROVIDERS: ProviderSeed[] = [
     type: "TRAINER",
     description: "آموزش اطاعت پایه و اصلاح رفتار با روش تقویت مثبت.",
     specialties: ["اطاعت پایه", "اصلاح رفتار"],
-    cover: "/images/landing/cookie-taxi.png",
     region: "شهرک غرب",
     address: "تهران، شهرک غرب، بلوار دادمان، پارک آموزشی",
     lat: 35.7596,
@@ -214,6 +214,8 @@ const PROVIDERS: ProviderSeed[] = [
     description: `درمانگاه حیوانات کوچک با ویزیت عمومی، واکسیناسیون و پیگیری منظم. تخصص‌ها: ${(specialties as string[]).join("، ")}.`,
     specialties: specialties as string[],
     region: region as string,
+    // The address starts with its city ("کرج، گوهردشت، …"): the showcase clinics outside Tehran keep their own city.
+    city: (address as string).split("،")[0]!.trim(),
     address: address as string,
     lat: lat as number,
     lng: lng as number,
@@ -340,8 +342,8 @@ async function main() {
     const locationId = id(`loc:${p.key}`);
     await db.providerLocation.upsert({
       where: { id: locationId },
-      create: { id: locationId, providerOrganizationId: orgId, name: p.region, addressLine: p.address, city: "تهران", region: p.region, countryCode: "IR", latitude: p.lat, longitude: p.lng, timezone: "Asia/Tehran" },
-      update: {},
+      create: { id: locationId, providerOrganizationId: orgId, name: p.region, addressLine: p.address, city: p.city ?? "تهران", region: p.region, countryCode: "IR", latitude: p.lat, longitude: p.lng, timezone: "Asia/Tehran" },
+      update: { city: p.city ?? "تهران" },
     });
     const staffIds: Record<string, string> = {};
     for (const s of p.staff) {

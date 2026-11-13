@@ -4,6 +4,7 @@ import type { Notification, NotificationDelivery, Prisma } from "@prisma/client"
 import type { NotificationDto, PaginatedDto, UnreadCountDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotificationNotFoundException } from "../../common/errors/api-exception";
+import { notificationCopyFor } from "./notification-templates";
 import { resolvePagination, toPaginatedDto, type PaginationQueryDto } from "../../common/pagination/pagination.dto";
 
 export type NotificationWithDeliveries = Notification & { deliveries: NotificationDelivery[] };
@@ -51,7 +52,7 @@ export function toNotificationDto(row: NotificationWithDeliveries): Notification
 export class NotificationsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async list(userId: string, query: PaginationQueryDto & { group?: NotificationGroup }): Promise<PaginatedDto<NotificationDto>> {
+  async list(userId: string, query: PaginationQueryDto & { group?: NotificationGroup; locale?: string }): Promise<PaginatedDto<NotificationDto>> {
     const { skip, take, page, pageSize } = resolvePagination(query);
     const where: Prisma.NotificationWhereInput = { userId, dismissedAt: null, ...(query.group ? notificationGroupWhere(query.group) : {}) };
     const [rows, total] = await Promise.all([
@@ -59,7 +60,7 @@ export class NotificationsService {
       this.prisma.notification.findMany({ where, include: { deliveries: true }, orderBy: { createdAt: "desc" }, skip, take }),
       this.prisma.notification.count({ where }),
     ]);
-    return toPaginatedDto(rows.map(toNotificationDto), total, page, pageSize);
+    return toPaginatedDto(rows.map((r) => ({ ...toNotificationDto(r), ...notificationCopyFor(r, query.locale) })), total, page, pageSize);
   }
 
   async unreadCount(userId: string): Promise<UnreadCountDto> {
@@ -103,7 +104,7 @@ export class NotificationsService {
    * Server-side grouping of the recent inbox: repeated notifications of the same type about the same entity
    * (e.g. three messages in one conversation) collapse into one row. Unrelated entities are never merged.
    */
-  async grouped(userId: string, limit = 200) {
+  async grouped(userId: string, limit = 200, viewerLocale?: string) {
     const rows = await this.prisma.notification.findMany({ where: { userId, dismissedAt: null }, orderBy: { createdAt: "desc" }, take: Math.min(Math.max(limit, 1), 500) });
     const groups = new Map<string, { groupKey: string; group: NotificationGroup; type: string; entityType: string | null; entityId: string | null; groupCount: number; unreadCount: number; latestAt: string; title: string; body: string; deepLink: string | null; notificationIds: string[] }>();
     for (const r of rows) {
@@ -114,7 +115,7 @@ export class NotificationsService {
         if (!r.readAt) g.unreadCount++;
         g.notificationIds.push(r.id);
       } else {
-        groups.set(groupKey, { groupKey, group: notificationGroup(r.category, r.type), type: r.type, entityType: r.entityType, entityId: r.entityId, groupCount: 1, unreadCount: r.readAt ? 0 : 1, latestAt: r.createdAt.toISOString(), title: r.title, body: r.body, deepLink: r.deepLink, notificationIds: [r.id] });
+        groups.set(groupKey, { groupKey, group: notificationGroup(r.category, r.type), type: r.type, entityType: r.entityType, entityId: r.entityId, groupCount: 1, unreadCount: r.readAt ? 0 : 1, latestAt: r.createdAt.toISOString(), ...notificationCopyFor(r, viewerLocale), deepLink: r.deepLink, notificationIds: [r.id] });
       }
     }
     return [...groups.values()];

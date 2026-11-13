@@ -19,6 +19,8 @@ vi.mock("@/services/admin-content.service", () => ({
     publishArticleLocale: vi.fn(),
     hideArticleLocale: vi.fn(),
     archiveArticleLocale: vi.fn(),
+    checkArticleSlug: vi.fn(),
+    listMedia: vi.fn(),
   },
 }));
 

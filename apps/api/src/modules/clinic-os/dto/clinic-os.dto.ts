@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { Equals, IsBoolean, IsDateString, IsEmail, IsEnum, IsIn, IsInt, IsLatitude, IsLongitude, IsOptional, IsString, IsUUID, Length, Matches, Max, MaxLength, Min, ValidateIf } from "class-validator";
+import { Equals, IsBoolean, IsDateString, IsEmail, IsEnum, IsIn, IsInt, IsLatitude, IsLongitude, IsOptional, IsString, IsUUID, Length, Matches, Max, MaxLength, Min, ValidateIf, IsArray, ArrayMaxSize, ValidateNested } from "class-validator";
 import { ClinicReminderKind, ClinicReminderStatus } from "@prisma/client";
 
 class PageQuery {
@@ -31,8 +31,19 @@ export class ListClinicCustomersQueryDto extends PageQuery {
 }
 
 export class CreateClinicReminderDto {
+  /** A platform patient (one of the clinic's caseload pets)… */
+  @ValidateIf((o: CreateClinicReminderDto) => !o.contactId)
   @IsUUID()
-  petId!: string;
+  petId?: string;
+
+  /** …or one of the clinic's own clients, optionally for one of their pets (exactly one of petId / contactId). */
+  @ValidateIf((o: CreateClinicReminderDto) => !o.petId)
+  @IsUUID()
+  contactId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  clientPetId?: string;
 
   @IsEnum(ClinicReminderKind)
   kind!: ClinicReminderKind;
@@ -194,3 +205,82 @@ export class ImportContactsDto {
 export class ListContactsQueryDto {
   @IsOptional() @IsString() @Length(1, 100) q?: string;
 }
+
+// ---- Clinic clients (the clinic's own owners and pets) ----
+
+export class ClinicClientPetDto {
+  @IsString()
+  @Length(1, 60)
+  name!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  species?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(60)
+  breed?: string;
+
+  @IsOptional()
+  @IsDateString()
+  birthDate?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  notes?: string;
+}
+
+export class ClinicClientDto {
+  @IsString()
+  @Length(2, 120)
+  name!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  notes?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  smsOptOut?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(30)
+  @ValidateNested({ each: true })
+  @Type(() => ClinicClientPetDto)
+  pets?: ClinicClientPetDto[];
+}
+
+export class ListClinicClientsQueryDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  q?: string;
+}
+
+export class ClinicClientMessageDto {
+  @IsString()
+  @Length(2, 480)
+  body!: string;
+}
+
+export class InviteClinicClientDto {
+  @IsOptional()
+  @IsIn(["fa", "en"])
+  locale?: "fa" | "en";
+}
+

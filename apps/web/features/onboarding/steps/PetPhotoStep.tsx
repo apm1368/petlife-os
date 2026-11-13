@@ -7,6 +7,7 @@ import { OnboardingChapter, OnboardingStatus } from "@petlife/types";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { onboardingService } from "@/services/onboarding.service";
 import { petsService } from "@/services/pets.service";
+import { uploadPetPhoto } from "@/features/pets/pet-photo-upload";
 
 type UploadState = "idle" | "uploading" | "error";
 
@@ -28,11 +29,10 @@ export function PetPhotoStep({ onNext, onSkip }: { onNext: () => void; onSkip: (
     setPendingFile(file);
     setPreview(URL.createObjectURL(file));
     try {
-      const contentType = file.type === "image/png" ? "image/png" : "image/jpeg";
-      const target = await petsService.createPhotoUploadUrl(petId, contentType);
-      await fetch(target.uploadUrl, { method: "PUT", body: file, headers: target.headers });
-      await petsService.update(petId, { photoUrl: target.publicUrl });
-      update({ photoUrl: target.publicUrl });
+      // uploadPetPhoto throws when the file never arrived, so onboarding never saves a photo link that is dead.
+      const photoUrl = await uploadPetPhoto(petId, file);
+      await petsService.update(petId, { photoUrl });
+      update({ photoUrl });
       setState("idle");
     } catch {
       setState("error");
@@ -76,7 +76,7 @@ export function PetPhotoStep({ onNext, onSkip }: { onNext: () => void; onSkip: (
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png"
+        accept="image/jpeg,image/png,image/webp"
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];

@@ -6,7 +6,17 @@ import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skele
 import { AdminTaskStatus, type AdminTaskDto } from "@petlife/types";
 import { adminService } from "@/services/admin.service";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
+import Link from "@/features/navigation/localized-link";
 import { adminStatusTone } from "./status-tone";
+
+/** Where an automatic task's subject lives, so the task opens it instead of leaving staff to search. */
+const RELATED_LINKS: Record<string, (id: string) => string> = {
+  AccountDeletionRequest: (id) => `/admin/privacy/deletion-requests?focus=${encodeURIComponent(id)}`,
+  CommunityReport: () => "/admin/community",
+  SupportCase: (id) => `/admin/support/${encodeURIComponent(id)}`,
+  PetOwnershipTransfer: (id) => `/admin/ownership-transfers?focus=${encodeURIComponent(id)}`,
+  Booking: (id) => `/admin/services/bookings/${encodeURIComponent(id)}`,
+};
 import styles from "./AdminTasksView.module.css";
 
 const STATUSES = Object.values(AdminTaskStatus);
@@ -87,7 +97,7 @@ export function AdminTasksView() {
         <li key={task.id}>
           <ContextSurface className={styles.card}>
             <div className={styles.summary}>
-              <div className={styles.identity}><h2 className="text-section-title text-text-primary">{task.title}</h2>{task.description ? <p className="text-text-secondary">{task.description}</p> : null}</div>
+              <div className={styles.identity}><h2 className="text-section-title text-text-primary">{task.title}</h2>{task.description ? <p className="text-text-secondary">{task.description}</p> : null}{task.relatedEntityType && task.relatedEntityId && RELATED_LINKS[task.relatedEntityType] ? <Link className="underline" href={RELATED_LINKS[task.relatedEntityType]!(task.relatedEntityId)}>{t("openRelated")}</Link> : null}</div>
               <StatusLabel tone={adminStatusTone(task.status)}>{t(`status.${task.status}`)}</StatusLabel>
             </div>
             <dl className={styles.details}>

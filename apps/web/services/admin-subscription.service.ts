@@ -61,7 +61,8 @@ export const adminSubscriptionService = {
   listPlans: () => apiFetch<SubscriptionPlanDto[]>("/admin/subscriptions/plans"),
   getPlan: (planId: string) => apiFetch<SubscriptionPlanDto>(`/admin/subscriptions/plans/${planId}`),
   createPlan: (input: CreatePlanInput) => apiFetch<SubscriptionPlanDto>("/admin/subscriptions/plans", { method: "POST", body: input }),
-  updatePlan: (planId: string, input: Partial<CreatePlanInput> & { status?: string }) => apiFetch<SubscriptionPlanDto>(`/admin/subscriptions/plans/${planId}`, { method: "PATCH", body: input }),
+  /** The update DTO has no `code` or `isFree` (forbidNonWhitelisted would reject them), so the type excludes both. */
+  updatePlan: (planId: string, input: Partial<Omit<CreatePlanInput, "code" | "isFree">> & { status?: string }) => apiFetch<SubscriptionPlanDto>(`/admin/subscriptions/plans/${planId}`, { method: "PATCH", body: input }),
   upsertEntitlement: (planId: string, input: UpsertEntitlementInput) => apiFetch<SubscriptionPlanDto>(`/admin/subscriptions/plans/${planId}/entitlements`, { method: "POST", body: input }),
   createPrice: (planId: string, input: CreatePriceInput) => apiFetch<SubscriptionPlanPriceDto>(`/admin/subscriptions/plans/${planId}/prices`, { method: "POST", body: input }),
   updatePriceStatus: (priceId: string, status: "ACTIVE" | "INACTIVE") => apiFetch<SubscriptionPlanPriceDto>(`/admin/subscriptions/prices/${priceId}`, { method: "PATCH", body: { status } }),

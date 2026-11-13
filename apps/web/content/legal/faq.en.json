@@ -1,0 +1,94 @@
+{
+  "title": "Frequently asked questions",
+  "lede": "Short answers to the questions we hear most. For anything else, our support team is happy to help.",
+  "updated": "2026-11-13",
+  "groups": [
+    {
+      "id": "members",
+      "heading": "Getting started",
+      "items": [
+        { "q": "What is opetlife?", "a": "One place for life with your pets: their records and health history, vet and care bookings, a shop of independent sellers, pet-friendly travel, a pet taxi, lost-and-found help and a community of pet families." },
+        { "q": "How do I sign up?", "a": "Enter your mobile number and the one-time code we text you. Where it is available, you can also sign up with a password or a Google account. You must be at least 18 to have your own account." },
+        { "q": "Can my family share our pets' records?", "a": "Yes. The household owner can invite family members, approves every invitation and decides who can see and manage each pet." },
+        { "q": "Does opetlife cost anything?", "a": "Creating an account and keeping your pets' records is free. You pay only for the services, products and trips you book or buy. Some extra features are part of optional paid plans, which are shown on the subscription page." }
+      ]
+    },
+    {
+      "id": "health",
+      "heading": "Pets and health records",
+      "items": [
+        { "q": "Who can see my pet's health records?", "a": "Only you, the household members you allow, and anyone you choose to share them with. Partners see health information only when their service needs it, such as a clinic or boarding, and only until 24 hours after the booking." },
+        { "q": "How do I share records with a vet?", "a": "Create a share link from the pet's health page. It lasts from 1 hour up to 7 days, shows only the sections you pick and can be revoked at any time. You can also give a vet at a verified clinic access for up to 90 days." },
+        { "q": "Is the information on opetlife medical advice?", "a": "No. Health tools and articles help you keep track and stay informed, but they do not replace a vet. In an emergency, contact a vet or an emergency clinic right away." }
+      ]
+    },
+    {
+      "id": "bookings",
+      "heading": "Bookings and services",
+      "items": [
+        { "q": "Are the clinics and providers checked?", "a": "Partners must pass identity and business checks before they can take bookings, and clinical services need a valid professional licence. Business listings imported from open map data are clearly marked as unverified until the business claims and verifies them." },
+        { "q": "How do I cancel a booking, and will I get a refund?", "a": "Cancel from the booking page. Each service shows its cancellation terms before you book. Inside the free-cancellation window you get a full refund. After that, you get the percentage shown when you booked. If the provider cancels, you always get a full refund." },
+        { "q": "What if the provider doesn't show up?", "a": "Report it from the booking page. Our support team will review it with the provider and decide what to put right." },
+        { "q": "How does the pet taxi work?", "a": "Set your pickup and drop-off on the map, see the fare, and follow your driver live. Until online payment is switched on for rides, you pay the driver on arrival. You can cancel at any time before pickup." }
+      ]
+    },
+    {
+      "id": "shop",
+      "heading": "Shop, payment, shipping and returns",
+      "items": [
+        { "q": "Who sells the products?", "a": "Independent sellers. opetlife is the marketplace, and each seller is responsible for its products and issues its own invoice." },
+        { "q": "How can I pay?", "a": "Checkout shows the options available for that purchase, such as online payment, your wallet or a card-to-card transfer. Prices are in toman and include everything shown at checkout." },
+        { "q": "How does card-to-card payment work?", "a": "Transfer the exact amount to the account shown at checkout and upload the receipt within 30 minutes. Our finance team checks receipts on Saturday to Wednesday, 9:00–18:00, and Thursday, 9:00–13:00. If you paid too much, the difference goes to your wallet. If you paid too little, you have 30 minutes to pay the rest." },
+        { "q": "How long does delivery take?", "a": "It depends on the seller, the delivery method and your city. Your order page shows the expected time and, once it has been sent, the tracking." },
+        { "q": "Can I cancel or return an order?", "a": "You can cancel for a full refund at any time before the seller ships. If an item arrives damaged, doesn't match its description or has expired, report it from the order page within 48 hours of delivery, with photos, and keep the item and its packaging. Your statutory consumer rights still apply." },
+        { "q": "Where do refunds go?", "a": "Approved refunds go back to your original payment method or into your opetlife wallet. The refund notice tells you which." }
+      ]
+    },
+    {
+      "id": "wallet",
+      "heading": "Wallet",
+      "items": [
+        { "q": "What is the wallet?", "a": "Your opetlife balance. It holds refund credit from cancelled or refunded purchases, and purchase credit from top-ups and gifts. Purchase credit can only be spent on opetlife, and gift credit expires after six months." },
+        { "q": "How do I top up?", "a": "From the wallet page, by card-to-card with a receipt. A top-up must be between 10,000 and 50,000,000 toman, and you can have up to three top-ups waiting for review at a time." }
+      ]
+    },
+    {
+      "id": "lost-pets",
+      "heading": "Lost and found pets",
+      "items": [
+        { "q": "My pet is lost. What should I do?", "a": "Post a lost-pet report with a clear photo and the area where your pet was last seen (not your home address). Members nearby who switched on area alerts will be told, and anyone who has seen your pet can reply." },
+        { "q": "I found a pet. How can I help?", "a": "Post a found-pet report in the community with a photo and the area. You can post up to three found-pet reports a day. If the pet is hurt, take it to a vet first." },
+        { "q": "Do area alerts reveal where I live?", "a": "No. Your point is rounded to about one kilometre and never shown to anyone. You can choose a radius of up to 10 km and switch alerts off at any time." }
+      ]
+    },
+    {
+      "id": "partners",
+      "heading": "For partners",
+      "items": [
+        { "q": "How do I join as a clinic, provider, seller or host?", "a": "Start from the partner pages, create your organisation and upload the requested documents. We aim to review them within 24 working hours. You can take bookings or sell once you are verified." },
+        { "q": "Which documents do I need?", "a": "An identity document, and for clinical services a valid professional licence. Depending on your business we may also ask for a national ID card, a business licence or an eNamad certificate, a landline and a verified mobile number." },
+        { "q": "My business is already listed. How do I take it over?", "a": "Open the listing and choose “Is this your business?”. Only a verified organisation can claim a listing." },
+        { "q": "How are commissions and payouts handled?", "a": "They are set out in your partner agreement and shown in your partner dashboard, with every settlement listed." }
+      ]
+    },
+    {
+      "id": "privacy",
+      "heading": "Privacy and your account",
+      "items": [
+        { "q": "Does opetlife sell my data or show ads based on it?", "a": "No. We don't sell personal data and don't use advertising or analytics trackers. The Privacy Policy explains exactly what we collect and why." },
+        { "q": "Can I download my data?", "a": "Yes. From Profile → Privacy you can download a file with your pets, health records, bookings, orders and more. The file stays available for 7 days." },
+        { "q": "How do I delete my account?", "a": "Ask from Profile → Privacy. We review the request, set aside what the law requires us to keep, and delete or anonymise the rest. You can cancel while it is under review. Open bookings, orders, refunds or disputes must be finished first." },
+        { "q": "Which notifications will I get?", "a": "The ones you choose, in the app and by push, SMS or email. Marketing messages are off unless you turn them on. Security alerts are always sent. You can also set quiet hours." }
+      ]
+    },
+    {
+      "id": "app",
+      "heading": "The app",
+      "items": [
+        { "q": "Is there an app?", "a": "Yes. You can install opetlife on your phone's home screen straight from the browser, and there is an Android app. Both use the same account." },
+        { "q": "How do I turn on push notifications?", "a": "Allow notifications when the site or app asks, or switch them on in your notification settings. You can turn them off at any time in the same place or in your browser." },
+        { "q": "Which languages does opetlife support?", "a": "Persian, English, German, Spanish, Arabic and Dutch. Switch language from the language menu at the top or bottom of any page." }
+      ]
+    }
+  ]
+}

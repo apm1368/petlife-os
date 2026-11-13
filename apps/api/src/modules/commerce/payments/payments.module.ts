@@ -13,12 +13,16 @@ import { ZibalPaymentService } from "./zibal-payment.service";
 import { PaymentInfrastructureController } from "./payment-infrastructure.controller";
 import { ProviderSettlementService } from "./provider-settlement.service";
 import { WalletPaymentService } from "./wallet-payment.service";
+import { WalletTopUpService } from "./wallet-top-up.service";
+import { WalletController } from "./wallet.controller";
+import { StorageModule } from "../../storage/storage.module";
+import { CardTransferDestinationService } from "./card-transfer-destination.service";
 
 /** Webhook/callback routes live in CheckoutModule's PaymentWebhooksController (both PaymentsService and FinancingService are needed there). The only route here is the read-only payment environment (Batch 6). */
 @Module({
-  imports: [LedgerModule],
-  controllers: [PaymentEnvironmentController, PaymentInfrastructureController],
-  providers: [PaymentsService, DevPaymentGateway, StandardGatewayAdapter, ZibalGateway, PaymentGatewayRegistry, ProviderEventsService, WalletService, CardTransferPaymentService, ZibalPaymentService, ProviderSettlementService, WalletPaymentService],
-  exports: [PaymentsService, PaymentGatewayRegistry, ProviderEventsService, WalletService, CardTransferPaymentService, ZibalPaymentService, ProviderSettlementService, WalletPaymentService],
+  imports: [LedgerModule, StorageModule],
+  controllers: [PaymentEnvironmentController, PaymentInfrastructureController, WalletController],
+  providers: [PaymentsService, DevPaymentGateway, StandardGatewayAdapter, ZibalGateway, PaymentGatewayRegistry, ProviderEventsService, WalletService, CardTransferPaymentService, ZibalPaymentService, ProviderSettlementService, WalletPaymentService, WalletTopUpService, CardTransferDestinationService],
+  exports: [PaymentsService, PaymentGatewayRegistry, ProviderEventsService, WalletService, CardTransferPaymentService, ZibalPaymentService, ProviderSettlementService, WalletPaymentService, WalletTopUpService, CardTransferDestinationService],
 })
 export class PaymentsModule {}

@@ -11,15 +11,16 @@ import { ConfirmActionDialog } from "./ConfirmActionDialog";
 import { formatAccountDate, useAccountCopy } from "./account-copy";
 import { useSignOut } from "./use-sign-out";
 
-const SECURITY_EVENT_LABELS: Record<string, [string, string, string, string]> = {
-  UserAuthenticated: ["ورود به حساب", "Signed in", "Angemeldet", "Sesión iniciada"],
-  PasswordChanged: ["رمز عبور تغییر کرد", "Password changed", "Passwort geändert", "Contraseña cambiada"],
-  PasswordResetCompleted: ["رمز عبور بازیابی شد", "Password reset", "Passwort zurückgesetzt", "Contraseña restablecida"],
-  SessionRevoked: ["یک دستگاه خارج شد", "A device was signed out", "Ein Gerät wurde abgemeldet", "Se cerró la sesión de un dispositivo"],
-  OtherSessionsRevoked: ["سایر دستگاه‌ها خارج شدند", "Other devices signed out", "Andere Geräte abgemeldet", "Sesión cerrada en otros dispositivos"],
-  AllSessionsRevoked: ["خروج از همهٔ دستگاه‌ها", "Signed out everywhere", "Überall abgemeldet", "Sesión cerrada en todos los dispositivos"],
-  ContactChanged: ["راه تماس تغییر کرد", "Contact method changed", "Kontaktmethode geändert", "Medio de contacto actualizado"],
-  UnverifiedCredentialsCleared: ["رمز تأییدنشده حذف شد", "Unverified password removed", "Unbestätigtes Passwort entfernt", "Se eliminó la contraseña no verificada"],
+const SECURITY_EVENT_LABELS: Record<string, [string, string, string, string, string, string]> = {
+  UserAuthenticated: ["ورود به حساب", "Signed in", "Angemeldet", "Sesión iniciada", "تسجيل الدخول", "Ingelogd"],
+  PasswordChanged: ["رمز عبور تغییر کرد", "Password changed", "Passwort geändert", "Contraseña cambiada", "تم تغيير كلمة المرور", "Wachtwoord gewijzigd"],
+  PasswordResetCompleted: ["رمز عبور بازیابی شد", "Password reset", "Passwort zurückgesetzt", "Contraseña restablecida", "تمت إعادة تعيين كلمة المرور", "Wachtwoord hersteld"],
+  SessionRevoked: ["یک دستگاه خارج شد", "A device was signed out", "Ein Gerät wurde abgemeldet", "Se cerró la sesión de un dispositivo", "تم تسجيل خروج جهاز", "Een apparaat is uitgelogd"],
+  OtherSessionsRevoked: ["سایر دستگاه‌ها خارج شدند", "Other devices signed out", "Andere Geräte abgemeldet", "Sesión cerrada en otros dispositivos", "تم تسجيل خروج الأجهزة الأخرى", "Andere apparaten uitgelogd"],
+  AllSessionsRevoked: ["خروج از همهٔ دستگاه‌ها", "Signed out everywhere", "Überall abgemeldet", "Sesión cerrada en todos los dispositivos", "تم تسجيل الخروج من كل الأجهزة", "Overal uitgelogd"],
+  ContactChanged: ["راه تماس تغییر کرد", "Contact method changed", "Kontaktmethode geändert", "Medio de contacto actualizado", "تم تغيير وسيلة التواصل", "Contactmethode gewijzigd"],
+  UnverifiedCredentialsCleared: ["رمز تأییدنشده حذف شد", "Unverified password removed", "Unbestätigtes Passwort entfernt", "Se eliminó la contraseña no verificada", "أُزيلت كلمة مرور غير مُتحقق منها", "Niet-geverifieerd wachtwoord verwijderd"],
+  UnprovenContactReleased: ["راه تماس تأییدنشده از حساب برداشته شد", "Unverified contact removed from this account", "Unbestätigter Kontakt aus dem Konto entfernt", "Se quitó un contacto no verificado de la cuenta", "أُزيلت وسيلة تواصل غير مُتحقق منها من هذا الحساب", "Niet-geverifieerd contact verwijderd uit dit account"],
 };
 
 const SECURITY_DE: Record<string, string> = {
@@ -51,7 +52,7 @@ const SECURITY_ES: Record<string, string> = {
 function useSecurityCopy() {
   const { locale, num } = useAccountCopy();
   const base = useAccountCopy().t;
-  const t = (fa: string, en: string, de?: string, es?: string) => locale === "de" ? de ?? SECURITY_DE[en] ?? `[Missing de: ${en}]` : locale === "es" ? es ?? SECURITY_ES[en] ?? `[Missing es: ${en}]` : base(fa, en);
+  const t = (fa: string, en: string, de?: string, es?: string, ar?: string, nl?: string) => locale === "de" ? de ?? SECURITY_DE[en] ?? `[Missing de: ${en}]` : locale === "es" ? es ?? SECURITY_ES[en] ?? `[Missing es: ${en}]` : base(fa, en, de, es, ar, nl);
   return { locale, num, t };
 }
 
@@ -122,7 +123,7 @@ export function SecurityCenterView() {
           <MethodRow
             icon="G"
             title="Google"
-            detail={google ? google.email ?? t("متصل", "Connected") : methods?.google ? t("با ورود از طریق Google به همین ایمیل متصل می‌شود.", "Links when you sign in with Google using this email.") : t("ورود با Google هنوز در opetlife فعال نیست.", "Google sign-in isn't available in opetlife yet.")}
+            detail={google ? google.email ?? t("متصل", "Connected") : methods?.google ? t("با ورود از طریق Google به همین ایمیل متصل می‌شود.", "Links when you sign in with Google using this email.") : t("ورود با Google هنوز در اپت لایف فعال نیست.", "Google sign-in isn't available in opetlife yet.")}
             ltr={Boolean(google?.email)}
             tone={google ? "success" : "neutral"}
             status={google ? t("متصل", "Connected") : methods?.google ? t("متصل نیست", "Not linked") : t("در دسترس نیست", "Unavailable")}

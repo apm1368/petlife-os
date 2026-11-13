@@ -6,7 +6,7 @@ import { AdminGovernanceRuleException, NotFoundApiException, SettingChangeConfli
 import { resolvePagination, toPaginatedDto } from "../../../common/pagination/pagination.dto";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
-import { roleHasPermission } from "../auth/admin-permissions";
+import { adminCan } from "../auth/admin-permissions";
 import { PlatformSettingsService } from "../../platform-settings/platform-settings.service";
 import { settingDefinition, validateSettingValue } from "../../platform-settings/setting-definitions";
 
@@ -58,7 +58,7 @@ export class AdminSettingsService {
   }
 
   async review(actor: ResolvedAdminContext, changeId: string, decision: "APPROVE" | "REJECT", note?: string) {
-    if (!roleHasPermission(actor.role, "settings.approve")) throw new AdminGovernanceRuleException({ rule: "APPROVER_REQUIRED" });
+    if (!adminCan(actor, "settings.approve")) throw new AdminGovernanceRuleException({ rule: "APPROVER_REQUIRED" });
     await this.prisma.$transaction(async (tx) => {
       const change = await tx.platformSettingChange.findUnique({ where: { id: changeId } });
       if (!change) throw new NotFoundApiException("SettingChange");

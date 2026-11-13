@@ -381,6 +381,72 @@ describe("CMS + Blog + Content Management (Handoff 15)", () => {
 
   // --- Flow T: placement update audited --------------------------------------
 
+  it("Flow U: renaming a published article's address keeps the old URL as a permanent redirect, and reusing it removes the redirect", async () => {
+    const admin = await setupAdmin(AdminRole.ADMIN);
+    const s = unique();
+    const article = await createArticleDraft(admin.client, { slug: `old-address-${s}` });
+    await admin.client.post(`/admin/content/articles/${article.id}/locales/fa/publish`).expect(201);
+
+    const renamed = await admin.client.put(`/admin/content/articles/${article.id}/locales/fa`).send({ title: "عنوان", slug: `new-address-${s}`, body: simpleBody("متن") }).expect(200);
+    expect(renamed.body.publicPath).toBe(`/fa/blog/new-address-${s}`);
+    const moved = await request(app.getHttpServer()).get(`/blog/slug-redirects/old-address-${s}?locale=fa`).expect(200);
+    expect(moved.body).toEqual({ canonicalPath: `/fa/blog/new-address-${s}` });
+    await request(app.getHttpServer()).get(`/blog/slug-redirects/new-address-${s}?locale=fa`).expect(404);
+
+    // The builder warns that the old address is still in use as a redirect …
+    const check = await admin.client.get(`/admin/content/articles/slug-check?locale=fa&slug=old-address-${s}`).expect(200);
+    expect(check.body).toMatchObject({ valid: true, available: true, conflict: { articleId: article.id, kind: "REDIRECT" } });
+    // … and another article that takes it over removes the redirect.
+    await createArticleDraft(admin.client, { slug: `old-address-${s}` });
+    await request(app.getHttpServer()).get(`/blog/slug-redirects/old-address-${s}?locale=fa`).expect(404);
+  });
+
+  it("Flow V: the URL builder check reports validity, collisions and the /blog vs /guides public path", async () => {
+    const admin = await setupAdmin(AdminRole.ADMIN);
+    const s = unique();
+    const taken = await createArticleDraft(admin.client, { slug: `taken-${s}` });
+    const invalid = await admin.client.get(`/admin/content/articles/slug-check?locale=fa&slug=${encodeURIComponent("Bad Slug")}`).expect(200);
+    expect(invalid.body).toMatchObject({ valid: false, available: false });
+    const collision = await admin.client.get(`/admin/content/articles/slug-check?locale=fa&slug=taken-${s}`).expect(200);
+    expect(collision.body).toMatchObject({ valid: true, available: false, conflict: { articleId: taken.id, kind: "ARTICLE" } });
+    const own = await admin.client.get(`/admin/content/articles/slug-check?locale=fa&slug=taken-${s}&articleId=${taken.id}`).expect(200);
+    expect(own.body).toMatchObject({ available: true, conflict: null, publicPath: `/fa/blog/taken-${s}` });
+    const otherLocale = await admin.client.get(`/admin/content/articles/slug-check?locale=de&slug=taken-${s}`).expect(200);
+    expect(otherLocale.body).toMatchObject({ available: true, publicPath: `/de/blog/taken-${s}` });
+    const guides = await prisma.categoryLocale.findFirst({ where: { locale: "fa", slug: "guides" } });
+    if (guides) {
+      const guidePath = await admin.client.get(`/admin/content/articles/slug-check?locale=fa&slug=free-${s}&categoryId=${guides.categoryId}`).expect(200);
+      expect(guidePath.body.publicPath).toBe(`/fa/guides/free-${s}`);
+    }
+  });
+
+  it("Flow W: video and FAQ blocks are stored, resolved on read and listed in the public feed with translations", async () => {
+    const admin = await setupAdmin(AdminRole.ADMIN);
+    const s = unique();
+    const media = await prisma.mediaAsset.create({ data: { key: `cms/media/e2e-${s}.mp4`, url: `https://example.test/${s}.mp4`, mimeType: "video/mp4", fileSizeBytes: 1000, createdByAdminId: admin.adminUserId } });
+    const body = [
+      { type: "callout", tone: "info", content: [{ text: "Short answer." }] },
+      { type: "video", mediaAssetId: media.id, title: "Video title", durationSeconds: 25 },
+      { type: "faq", items: [{ question: "Why?", answer: [{ text: "Because." }] }] },
+    ];
+    const created = await admin.client.post("/admin/content/articles").send({ locale: "fa", title: "ویدیو", slug: `video-${s}`, body }).expect(201);
+    await admin.client.put(`/admin/content/articles/${created.body.id}/locales/de`).send({ title: "Video", slug: `video-de-${s}`, body }).expect(200);
+    await admin.client.post(`/admin/content/articles/${created.body.id}/locales/fa/publish`).expect(201);
+    await admin.client.post(`/admin/content/articles/${created.body.id}/locales/de/publish`).expect(201);
+
+    const detail = await request(app.getHttpServer()).get(`/blog/articles/video-${s}?locale=fa`).expect(200);
+    expect(detail.body.body[1]).toMatchObject({ type: "video", url: media.url, mimeType: "video/mp4", title: "Video title" });
+    expect(detail.body.body[2]).toEqual({ type: "faq", items: [{ question: "Why?", answer: [{ text: "Because." }] }] });
+    expect(detail.body.translations).toEqual([{ locale: "de", canonicalPath: `/de/blog/video-de-${s}` }]);
+
+    const feed = await request(app.getHttpServer()).get("/blog/feed?locale=de").expect(200);
+    const item = feed.body.find((f: { slug: string }) => f.slug === `video-de-${s}`);
+    expect(item).toMatchObject({ articleId: created.body.id, canonicalPath: `/de/blog/video-de-${s}`, videos: [{ url: media.url, title: "Video title", durationSeconds: 25 }] });
+    expect(item.body).toBeUndefined();
+    const withBody = await request(app.getHttpServer()).get("/blog/feed?locale=de&withBody=true").expect(200);
+    expect(withBody.body.find((f: { slug: string }) => f.slug === `video-de-${s}`).body).toHaveLength(3);
+  });
+
   it("Flow T: replacing a placement's blocks is audited and never touches Codex's own Landing rendering (no layout fields exist)", async () => {
     const admin = await setupAdmin(AdminRole.ADMIN);
     const updated = await admin.client

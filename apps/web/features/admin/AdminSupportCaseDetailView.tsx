@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, ContextSurface, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
-import { SupportCaseStatus, SupportMessageVisibility, type SupportCaseContextDto, type SupportCaseDetailDto } from "@petlife/types";
+import { SupportCaseStatus, SupportMessageVisibility, type SupportCaseContextDto, type SupportCaseDetailDto, SUPPORT_CASE_NEXT } from "@petlife/types";
 import { adminService } from "@/services/admin.service";
 import { adminStatusTone } from "./status-tone";
 import { ApiError } from "@/lib/api/client";
@@ -124,6 +125,12 @@ export function AdminSupportCaseDetailView({ caseId }: { caseId: string }) {
         <span className="text-body text-text-primary">{data.humanEscalation.reason}</span>
         <span className="text-metadata text-text-secondary">{t("humanEscalation.submitted", { date: formatDate(data.humanEscalation.confirmedAt, locale) })}</span>
       </ContextSurface> : null}
+      {data.requesterOrganization ? (
+        <span className="text-metadata text-text-secondary">
+          {t(`requesterOrg.${data.requesterOrganization.type}`)}: {data.requesterOrganization.name ?? t("requesterOrg.unnamed")} ·{" "}
+          <Link className="underline" href={`/${locale}/admin/support?requester=${data.requesterOrganization.type}&org=${data.requesterOrganization.id}`}>{t("requesterOrg.allCases")}</Link>
+        </span>
+      ) : null}
       {actionError ? <p role="alert" className="text-error">{t("states.actionFailed")}</p> : null}
 
       {context ? (
@@ -158,7 +165,7 @@ export function AdminSupportCaseDetailView({ caseId }: { caseId: string }) {
 
       <ContextSurface className="flex flex-wrap gap-2">
         {STATUSES.map((s) => (
-          <Button key={s} size="sm" aria-pressed={s === data.status} variant={s === data.status ? "primary" : "secondary"} onClick={() => transition(s)} disabled={s === data.status}>
+          <Button key={s} size="sm" aria-pressed={s === data.status} variant={s === data.status ? "primary" : "secondary"} onClick={() => transition(s)} disabled={s === data.status || !(SUPPORT_CASE_NEXT[data.status as SupportCaseStatus] ?? []).includes(s)}>
             {t(`status.${s}`)}
           </Button>
         ))}

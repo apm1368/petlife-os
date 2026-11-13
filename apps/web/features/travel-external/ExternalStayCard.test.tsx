@@ -13,4 +13,12 @@ describe("ExternalStayCard",()=>{
   ["de","Haustieraufnahme unbekannt","100.000 Toman","Bei der Quellwebsite ansehen und prüfen"],
   ["es","Se desconoce si admite mascotas","100.000 Toman","Ver y consultar en el sitio de origen"],
  ] as const)("renders source evidence and price copy in %s",(locale,policy,price,sourceAction)=>{renderWithIntl(<ExternalStayCard stay={externalStay} context={context}/>,locale);expect(screen.getByText(policy)).toBeTruthy();expect(screen.getByText(price)).toBeTruthy();expect(screen.getByRole("link",{name:sourceAction})).toBeTruthy()});
+ const jajiga={...externalStay,source:{...externalStay.source,sourceType:"UNOFFICIAL_PUBLIC_WEB_ENDPOINT",code:"JAJIGA",nameFa:"جاجیگا",nameEn:"Jajiga"},pet:{...externalStay.pet,policyStatus:"CONFIRMED_ALLOWED" as const,accepted:true,evidenceType:"SOURCE_FILTER",evidenceText:"Listed in Jajiga's public pet-permitted search (rules=pet) with its is_pet_friendly marker.",evidenceObservedAt:"2026-11-11T21:00:00Z"}};
+ it.each([
+  ["fa",/فیلتر عمومی «مجاز برای ورود حیوان خانگی» جاجیگا/,/آخرین همگام‌سازی موفق با منبع/],
+  ["en",/“pets allowed” filter on Jajiga/,/Last successful source sync/],
+  ["de",/„Haustiere erlaubt“ von Jajiga/,/Letzte erfolgreiche Synchronisierung/],
+  ["es",/«se admiten mascotas» de Jajiga/,/Última sincronización correcta/],
+ ] as const)("localizes automated source-filter pet evidence and the sync time in %s",(locale,evidence,synced)=>{renderWithIntl(<ExternalStayCard stay={jajiga} context={{}} detail/>,locale);expect(screen.getByText(evidence)).toBeTruthy();expect(screen.getByText(synced)).toBeTruthy();expect(screen.queryByText(/is_pet_friendly/)).toBeNull()});
+ it("keeps staff-entered evidence text for manual records",()=>{renderWithIntl(<ExternalStayCard stay={{...jajiga,source:{...jajiga.source,sourceType:"MANUAL_ENTRY"},pet:{...jajiga.pet,evidenceText:"Host confirmed small dogs by phone"}}} context={{}} detail/>);expect(screen.getByText("Host confirmed small dogs by phone")).toBeTruthy()});
 });

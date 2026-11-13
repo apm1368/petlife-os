@@ -1,6 +1,11 @@
-import { PublicBlogArticleView } from "@/features/content/PublicBlogArticleView";
+import { ArticleRoute, articleRouteMetadata } from "@/features/content/article-route";
 
-export default async function BlogArticlePage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  return <PublicBlogArticleView slug={slug} />;
+type Params = { params: Promise<{ locale: string; slug: string }> };
+
+export function generateMetadata({ params }: Params) {
+  return articleRouteMetadata(params, "blog");
+}
+
+export default function BlogArticlePage({ params }: Params) {
+  return <ArticleRoute params={params} section="blog" />;
 }

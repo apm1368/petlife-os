@@ -7,6 +7,7 @@ import { Button, EmptyState, ErrorRecovery, IconButton, Skeleton, StatusLabel } 
 import type { NotificationDto } from "@petlife/types";
 import { notificationsService } from "@/services/notifications.service";
 import { useNotificationStore } from "@/stores/notification-store";
+import { hasLocalePrefix } from "@/lib/i18n/config";
 
 const PAGE_SIZE = 20;
 
@@ -52,14 +53,14 @@ export function NotificationCenterView() {
   const load = useCallback(async () => {
     setError(false);
     try {
-      const result = await notificationsService.list(1, PAGE_SIZE);
+      const result = await notificationsService.list(1, PAGE_SIZE, locale);
       setItems(result.items);
       setTotal(result.total);
       setPage(1);
     } catch {
       setError(true);
     }
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     void load();
@@ -68,7 +69,7 @@ export function NotificationCenterView() {
   async function loadMore() {
     setLoadingMore(true);
     try {
-      const result = await notificationsService.list(page + 1, PAGE_SIZE);
+      const result = await notificationsService.list(page + 1, PAGE_SIZE, locale);
       setItems((prev) => [...(prev ?? []), ...result.items]);
       setTotal(result.total);
       setPage((p) => p + 1);
@@ -162,5 +163,5 @@ export function NotificationCenterView() {
 
 /** Deep links are locale-free; links stored before that fix may already carry one, which must not be doubled. */
 export function localizeDeepLink(deepLink: string, locale: string): string {
-  return /^\/(fa|en|de|es)(\/|$)/.test(deepLink) ? deepLink : `/${locale}${deepLink}`;
+  return hasLocalePrefix(deepLink) ? deepLink : `/${locale}${deepLink}`;
 }

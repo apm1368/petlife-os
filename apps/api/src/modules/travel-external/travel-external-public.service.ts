@@ -98,25 +98,37 @@ export class TravelExternalPublicService {
   async search(q: { city?: string; checkIn?: string; checkOut?: string; guests?: number; pets?: number; stayType?: string; source?: string; minPrice?: number; maxPrice?: number; instantBooking?: boolean; dogs?: boolean; cats?: boolean; petPolicy?: PetPolicyFilter; page?: number; pageSize?: number }) {
     const ctx = this.context(q);
     const { page, pageSize, skip, take } = resolvePagination(q);
+    const city = q.city?.trim();
+    // Each condition is its own AND term: several of them are OR groups, and spreading them into one object would let
+    // a later OR (e.g. guests) silently replace the pet-policy filter.
+    const and: Prisma.ExternalStayWhereInput[] = [
+      this.petWhere(q.petPolicy),
+      ...(city ? [{ OR: [{ city: { equals: city, mode: "insensitive" as const } }, { province: { equals: city, mode: "insensitive" as const } }] }] : []),
+      ...(q.guests ? [{ OR: [{ capacity: null }, { capacity: { gte: q.guests } }] }] : []),
+      // Pet filters match only explicit source values; UNKNOWN never counts as "yes".
+      ...(q.dogs ? [{ petPolicy: { path: ["dogs"], equals: true } }] : []),
+      ...(q.cats ? [{ petPolicy: { path: ["cats"], equals: true } }] : []),
+    ];
     const where: Prisma.ExternalStayWhereInput = {
       publishState: ExternalPublishState.PUBLISHED, status: { in: VISIBLE },
-      ...this.petWhere(q.petPolicy),
-      ...(q.city ? { city: { equals: q.city.trim(), mode: "insensitive" } } : {}),
       ...(q.stayType ? { stayType: q.stayType } : {}),
       ...(q.source ? { source: { code: q.source } } : {}),
       ...(q.instantBooking !== undefined ? { instantBooking: q.instantBooking } : {}),
-      ...(q.guests ? { OR: [{ capacity: null }, { capacity: { gte: q.guests } }] } : {}),
-      // Pet filters match only explicit source values; UNKNOWN never counts as "yes".
-      ...(q.dogs ? { petPolicy: { path: ["dogs"], equals: true } } : {}),
-      ...(q.cats ? { AND: [{ petPolicy: { path: ["cats"], equals: true } }] } : {}),
+      AND: and,
     };
-    const rows = await this.prisma.externalStay.findMany({ where, include: { source: true, images: true }, orderBy: [{ lastCheckedAt: "desc" }], take: 500 });
-    const items = await Promise.all(rows.map((s) => this.withPrice(s, ctx)));
+    // Stable order across pages and across the day's sync: best rated first, then a unique tie-breaker.
+    const orderBy: Prisma.ExternalStayOrderByWithRelationInput[] = [{ rating: { sort: "desc", nulls: "last" } }, { reviewCount: { sort: "desc", nulls: "last" } }, { id: "asc" }];
+    const meta = { context: ctx, petPolicyFilter: q.petPolicy ?? "DEFAULT_EXCLUDES_CONFIRMED_NOT_ALLOWED", notice: "SOURCE_ATTRIBUTED_EXTERNAL_LISTINGS", externalDataDisclaimerRequired: true, disclaimerFa: EXTERNAL_DATA_DISCLAIMER_FA, bookingMode: "OUTBOUND_TO_SOURCE" };
+    if (q.minPrice === undefined && q.maxPrice === undefined) {
+      // Paginate in the database and price only the page being returned.
+      const [total, rows] = await Promise.all([this.prisma.externalStay.count({ where }), this.prisma.externalStay.findMany({ where, include: { source: true, images: true }, orderBy, skip, take })]);
+      return { ...toPaginatedDto(await Promise.all(rows.map((s) => this.withPrice(s, ctx))), total, page, pageSize), ...meta };
+    }
     // Price filters only ever use fresh prices for these exact dates; anything without one is excluded when filtering by price.
-    const priced = q.minPrice !== undefined || q.maxPrice !== undefined
-      ? items.filter((i) => i.price.state === "FRESH" && "priceIrr" in i.price && i.price.priceIrr != null && (q.minPrice === undefined || i.price.priceIrr >= q.minPrice) && (q.maxPrice === undefined || i.price.priceIrr <= q.maxPrice))
-      : items;
-    return { ...toPaginatedDto(priced.slice(skip, skip + take), priced.length, page, pageSize), context: ctx, petPolicyFilter: q.petPolicy ?? "DEFAULT_EXCLUDES_CONFIRMED_NOT_ALLOWED", notice: "SOURCE_ATTRIBUTED_EXTERNAL_LISTINGS", externalDataDisclaimerRequired: true, disclaimerFa: EXTERNAL_DATA_DISCLAIMER_FA, bookingMode: "OUTBOUND_TO_SOURCE" };
+    const rows = await this.prisma.externalStay.findMany({ where, include: { source: true, images: true }, orderBy, take: 500 });
+    const items = await Promise.all(rows.map((s) => this.withPrice(s, ctx)));
+    const priced = items.filter((i) => i.price.state === "FRESH" && "priceIrr" in i.price && i.price.priceIrr != null && (q.minPrice === undefined || i.price.priceIrr >= q.minPrice) && (q.maxPrice === undefined || i.price.priceIrr <= q.maxPrice));
+    return { ...toPaginatedDto(priced.slice(skip, skip + take), priced.length, page, pageSize), ...meta };
   }
 
   /** Effective policy = staff review if present, else the source observation. */

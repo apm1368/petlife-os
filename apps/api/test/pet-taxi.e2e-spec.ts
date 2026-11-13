@@ -92,6 +92,29 @@ describe("Pet taxi — route snapshot and distance pricing", () => {
     expect(reread.transportRoute.pickupAddressText).toContain("دربند");
   });
 
+  it("several pets share one ride at the same price, up to the vehicle's capacity (owner 2026-11-13)", async () => {
+    const owner = await actor("family");
+    const r = await rider(owner);
+    const t = await taxi();
+    expect(t.service.maxPetsPerBooking).toBe(4);
+    await db.providerService.update({ where: { id: t.service.id }, data: { maxPetsPerBooking: 3 } });
+    const extra = await Promise.all(["دوم", "سوم", "چهارم"].map(async (name) => {
+      const pet = await db.pet.create({ data: { householdId: r.householdId, name, species: "DOG", approximateAgeMonths: 20 } });
+      await db.petAccessGrant.create({ data: { petId: pet.id, userId: owner.id, canViewIdentity: true, canBookCare: true, canViewCareProfile: true, canManageAccess: true } });
+      return pet.id;
+    }));
+    const from = new Date(Date.now() + 48 * 3600_000);
+    const s = (await slots.generate({ providerOrganizationId: t.org.id, locationId: t.location.id, serviceId: t.service.id, from, to: new Date(from.getTime() + 2 * 86400_000), petCount: 3 })).find((x) => x.state === "AVAILABLE")!;
+    // A ride is one slot long whatever the number of pets.
+    expect(s.endAt.getTime() - s.startAt.getTime()).toBe(60 * 60_000);
+    const base = { petId: r.petId, providerId: t.org.id, locationId: t.location.id, serviceId: t.service.id, slotStart: s.startAt.toISOString() };
+    await post(owner, "/booking-holds").send({ ...base, additionalPetIds: extra }).expect(400);
+    const hold = await post(owner, "/booking-holds").send({ ...base, additionalPetIds: extra.slice(0, 2) }).expect(201);
+    const booking = (await post(owner, "/bookings").set("Idempotency-Key", randomUUID()).send({ holdId: hold.body.holdId, petId: r.petId, customerAddressId: r.pickup.id, dropoffAddressId: r.dropoff.id }).expect(201)).body;
+    expect(Number(booking.priceAmount)).toBe(2_000_000);
+    expect(booking.additionalPetIds).toHaveLength(2);
+  });
+
   it("inactive pricing — or no coordinates — keeps the fixed price and says the distance is unavailable", async () => {
     const owner = await actor("owner2");
     const r = await rider(owner);

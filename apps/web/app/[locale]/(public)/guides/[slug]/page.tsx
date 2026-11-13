@@ -1,6 +1,12 @@
-import { PublicBlogArticleView } from "@/features/content/PublicBlogArticleView";
+import { ArticleRoute, articleRouteMetadata } from "@/features/content/article-route";
 
-export default async function GuidePage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  return <PublicBlogArticleView slug={slug} section="guides" />;
+type Params = { params: Promise<{ locale: string; slug: string }> };
+
+export function generateMetadata({ params }: Params) {
+  return articleRouteMetadata(params, "guides");
+}
+
+/** Guides: practical care articles in the "guides" category, a section of their own — not the blog. */
+export default function GuidePage({ params }: Params) {
+  return <ArticleRoute params={params} section="guides" />;
 }

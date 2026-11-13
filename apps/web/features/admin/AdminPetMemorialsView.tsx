@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import { adminService, type AdminPetMemorialItem } from "@/services/admin.service";
-import { AdminAnimalSupportNav } from "./animal-support/AdminAnimalSupportNav";
 
 const STATUSES = ["PENDING_REVIEW", "PUBLISHED", "REJECTED", "WITHDRAWN"] as const;
 
@@ -36,7 +35,6 @@ export function AdminPetMemorialsView() {
   const date = (value: string) => new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 
   return <div className="flex flex-col gap-4">
-    <AdminAnimalSupportNav />
     <header><h1 className="text-page-title text-text-primary">{t("title")}</h1><p className="text-body text-text-secondary">{t("description")}</p></header>
     <Select label={t("filter")} value={status} onChange={(event) => setStatus(event.target.value as (typeof STATUSES)[number])} options={STATUSES.map((value) => ({ value, label: t(`status.${value}`) }))} />
     {failed ? <ErrorRecovery title={t("title")} message={t("error")} retryLabel={tc("retry")} onRetry={() => void load()} /> : null}

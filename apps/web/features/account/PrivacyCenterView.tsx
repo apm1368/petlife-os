@@ -12,53 +12,53 @@ import { ConfirmActionDialog } from "./ConfirmActionDialog";
 import { formatAccountDate, useAccountCopy } from "./account-copy";
 import { formatDay } from "@/lib/date/jalali";
 
-const EXPORT_STATUS: Record<PrivacyRequestStatusValue, { fa: string; en: string; de: string; es: string; tone: StatusTone }> = {
-  PENDING: { fa: "در صف", en: "Queued", de: "In der Warteschlange", es: "En espera", tone: "neutral" },
-  PROCESSING: { fa: "در حال آماده‌سازی", en: "Preparing", de: "Wird vorbereitet", es: "Preparando", tone: "neutral" },
-  READY: { fa: "آمادهٔ دریافت", en: "Ready", de: "Bereit", es: "Listo", tone: "success" },
-  COMPLETED: { fa: "انجام شد", en: "Done", de: "Abgeschlossen", es: "Completado", tone: "success" },
-  CANCELLED: { fa: "لغو شد", en: "Cancelled", de: "Abgebrochen", es: "Cancelado", tone: "neutral" },
-  FAILED: { fa: "ناموفق", en: "Failed", de: "Fehlgeschlagen", es: "Error", tone: "urgent" },
-  EXPIRED: { fa: "منقضی شد", en: "Expired", de: "Abgelaufen", es: "Caducado", tone: "neutral" },
+const EXPORT_STATUS: Record<PrivacyRequestStatusValue, { fa: string; en: string; de: string; es: string; ar: string; nl: string; tone: StatusTone }> = {
+  PENDING: { fa: "در صف", en: "Queued", de: "In der Warteschlange", es: "En espera", ar: "في قائمة الانتظار", nl: "In de wachtrij", tone: "neutral" },
+  PROCESSING: { fa: "در حال آماده‌سازی", en: "Preparing", de: "Wird vorbereitet", es: "Preparando", ar: "قيد التحضير", nl: "Wordt voorbereid", tone: "neutral" },
+  READY: { fa: "آمادهٔ دریافت", en: "Ready", de: "Bereit", es: "Listo", ar: "جاهز", nl: "Klaar", tone: "success" },
+  COMPLETED: { fa: "انجام شد", en: "Done", de: "Abgeschlossen", es: "Completado", ar: "تم", nl: "Afgerond", tone: "success" },
+  CANCELLED: { fa: "لغو شد", en: "Cancelled", de: "Abgebrochen", es: "Cancelado", ar: "ملغى", nl: "Geannuleerd", tone: "neutral" },
+  FAILED: { fa: "ناموفق", en: "Failed", de: "Fehlgeschlagen", es: "Error", ar: "فشل", nl: "Mislukt", tone: "urgent" },
+  EXPIRED: { fa: "منقضی شد", en: "Expired", de: "Abgelaufen", es: "Caducado", ar: "منتهي الصلاحية", nl: "Verlopen", tone: "neutral" },
 };
 
-const SCOPE_LABELS: Record<string, [string, string, string, string]> = {
-  ACCOUNT: ["حساب", "Account", "Konto", "Cuenta"],
-  HOUSEHOLDS: ["خانواده‌ها", "Households", "Haushalte", "Hogares"],
-  PETS: ["حیوانات", "Pets", "Tiere", "Mascotas"],
-  HEALTH_WHERE_PERMITTED: ["سلامت (در حد دسترسی شما)", "Health (as far as you may see it)", "Gesundheit (im Rahmen Ihrer Berechtigung)", "Salud (según tus permisos)"],
-  MEMORIES_YOU_WROTE: ["خاطراتی که خودتان نوشته‌اید", "Memories you wrote", "Von Ihnen verfasste Erinnerungen", "Recuerdos que escribiste"],
-  BOOKINGS: ["رزروها", "Bookings", "Buchungen", "Reservas"],
-  ORDERS: ["سفارش‌ها", "Orders", "Bestellungen", "Pedidos"],
-  TRAVEL: ["سفرها", "Travel", "Reisen", "Viajes"],
-  SUPPORT: ["گفت‌وگوهای پشتیبانی", "Support conversations", "Support-Unterhaltungen", "Conversaciones de soporte"],
-  PRIVACY_SETTINGS: ["رضایت‌ها و تنظیمات اعلان", "Consents & notification settings", "Einwilligungen und Benachrichtigungseinstellungen", "Consentimientos y preferencias de notificación"],
-  ACTIVITY: ["فعالیت حساب", "Account activity", "Kontoaktivität", "Actividad de la cuenta"],
+const SCOPE_LABELS: Record<string, [string, string, string, string, string, string]> = {
+  ACCOUNT: ["حساب", "Account", "Konto", "Cuenta", "الحساب", "Account"],
+  HOUSEHOLDS: ["خانواده‌ها", "Households", "Haushalte", "Hogares", "الأسر", "Huishoudens"],
+  PETS: ["حیوانات", "Pets", "Tiere", "Mascotas", "الحيوانات الأليفة", "Huisdieren"],
+  HEALTH_WHERE_PERMITTED: ["سلامت (در حد دسترسی شما)", "Health (as far as you may see it)", "Gesundheit (im Rahmen Ihrer Berechtigung)", "Salud (según tus permisos)", "الصحة (بقدر ما يُسمح لك برؤيته)", "Gezondheid (voor zover jij die mag zien)"],
+  MEMORIES_YOU_WROTE: ["خاطراتی که خودتان نوشته‌اید", "Memories you wrote", "Von Ihnen verfasste Erinnerungen", "Recuerdos que escribiste", "الذكريات التي كتبتها", "Herinneringen die jij schreef"],
+  BOOKINGS: ["رزروها", "Bookings", "Buchungen", "Reservas", "الحجوزات", "Boekingen"],
+  ORDERS: ["سفارش‌ها", "Orders", "Bestellungen", "Pedidos", "الطلبات", "Bestellingen"],
+  TRAVEL: ["سفرها", "Travel", "Reisen", "Viajes", "السفر", "Reizen"],
+  SUPPORT: ["گفت‌وگوهای پشتیبانی", "Support conversations", "Support-Unterhaltungen", "Conversaciones de soporte", "محادثات الدعم", "Supportgesprekken"],
+  PRIVACY_SETTINGS: ["رضایت‌ها و تنظیمات اعلان", "Consents & notification settings", "Einwilligungen und Benachrichtigungseinstellungen", "Consentimientos y preferencias de notificación", "الموافقات وإعدادات الإشعارات", "Toestemmingen en meldingsinstellingen"],
+  ACTIVITY: ["فعالیت حساب", "Account activity", "Kontoaktivität", "Actividad de la cuenta", "نشاط الحساب", "Accountactiviteit"],
 };
 
-const MEMBERSHIP_STATUS: Record<string, [string, string, string, string]> = {
-  TRIALING: ["آزمایشی", "trial", "Testphase", "prueba"], ACTIVE: ["فعال", "active", "aktiv", "activa"],
-  PAST_DUE: ["پرداخت معوق", "payment overdue", "Zahlung überfällig", "pago pendiente"],
-  GRACE_PERIOD: ["مهلت پرداخت", "grace period", "Kulanzzeitraum", "periodo de gracia"],
-  CANCEL_AT_PERIOD_END: ["لغو در پایان دوره", "ending at period end", "Endet zum Laufzeitende", "finaliza al terminar el periodo"],
-  CANCELLED: ["لغوشده", "cancelled", "gekündigt", "cancelada"], EXPIRED: ["پایان‌یافته", "ended", "abgelaufen", "finalizada"],
+const MEMBERSHIP_STATUS: Record<string, [string, string, string, string, string, string]> = {
+  TRIALING: ["آزمایشی", "trial", "Testphase", "prueba", "تجريبي", "proefperiode"], ACTIVE: ["فعال", "active", "aktiv", "activa", "نشط", "actief"],
+  PAST_DUE: ["پرداخت معوق", "payment overdue", "Zahlung überfällig", "pago pendiente", "الدفع متأخر", "betaling achterstallig"],
+  GRACE_PERIOD: ["مهلت پرداخت", "grace period", "Kulanzzeitraum", "periodo de gracia", "فترة سماح", "respijtperiode"],
+  CANCEL_AT_PERIOD_END: ["لغو در پایان دوره", "ending at period end", "Endet zum Laufzeitende", "finaliza al terminar el periodo", "ينتهي في نهاية الفترة", "stopt aan het einde van de periode"],
+  CANCELLED: ["لغوشده", "cancelled", "gekündigt", "cancelada", "ملغى", "geannuleerd"], EXPIRED: ["پایان‌یافته", "ended", "abgelaufen", "finalizada", "منتهٍ", "beëindigd"],
 };
 
-const SHARE_KIND: Record<string, [string, string, string, string]> = {
-  HOUSEHOLD: ["عضو خانواده", "Household member", "Haushaltsmitglied", "Miembro del hogar"],
-  TEMPORARY: ["دسترسی موقت", "Temporary access", "Vorübergehender Zugriff", "Acceso temporal"],
-  PROVIDER_BOOKING: ["ارائه‌دهندهٔ رزرو", "Booking provider", "Anbieter einer Buchung", "Proveedor de la reserva"],
-  VET_SHARE: ["اشتراک با دامپزشک", "Shared with a vet", "Mit einer Tierarztpraxis geteilt", "Compartido con un veterinario"],
+const SHARE_KIND: Record<string, [string, string, string, string, string, string]> = {
+  HOUSEHOLD: ["عضو خانواده", "Household member", "Haushaltsmitglied", "Miembro del hogar", "عضو الأسرة", "Lid van het huishouden"],
+  TEMPORARY: ["دسترسی موقت", "Temporary access", "Vorübergehender Zugriff", "Acceso temporal", "وصول مؤقت", "Tijdelijke toegang"],
+  PROVIDER_BOOKING: ["ارائه‌دهندهٔ رزرو", "Booking provider", "Anbieter einer Buchung", "Proveedor de la reserva", "مقدم خدمة الحجز", "Boekingsaanbieder"],
+  VET_SHARE: ["اشتراک با دامپزشک", "Shared with a vet", "Mit einer Tierarztpraxis geteilt", "Compartido con un veterinario", "مُشارك مع طبيب بيطري", "Gedeeld met een dierenarts"],
 };
 
-const BLOCKER_COPY: Record<string, { fa: string; en: string; de: string; es: string; href?: string }> = {
-  UPCOMING_BOOKINGS: { fa: "رزروهای پیش‌رو دارید؛ آن‌ها را انجام یا لغو کنید.", en: "You have upcoming bookings; complete or cancel them.", de: "Sie haben anstehende Buchungen. Schließen Sie diese ab oder stornieren Sie sie.", es: "Tienes reservas próximas; complétalas o cancélalas.", href: "/bookings" },
-  OPEN_ORDERS: { fa: "سفارش‌های باز دارید که هنوز تحویل یا لغو نشده‌اند.", en: "You have open orders that aren't delivered or cancelled yet.", de: "Es gibt offene Bestellungen, die noch nicht geliefert oder storniert wurden.", es: "Tienes pedidos abiertos que aún no se han entregado ni cancelado.", href: "/orders" },
-  OPEN_REFUND_REQUESTS: { fa: "درخواست بازپرداخت در حال بررسی دارید.", en: "A refund request is still being reviewed.", de: "Ein Erstattungsantrag wird noch geprüft.", es: "Aún se está revisando una solicitud de reembolso." , href: "/orders" },
-  OPEN_DISPUTES: { fa: "یک اختلاف باز دارید.", en: "You have an open dispute.", de: "Sie haben einen offenen Streitfall.", es: "Tienes una disputa abierta.", href: "/support" },
-  ACTIVE_TRAVEL_BOOKINGS: { fa: "رزرو سفر فعال دارید.", en: "You have an active travel booking.", de: "Sie haben eine aktive Reisebuchung.", es: "Tienes una reserva de viaje activa.", href: "/travel/trips" },
-  PARTNER_ROLES: { fa: "در یک کسب‌وکار (ارائه‌دهنده یا فروشنده) نقش دارید؛ ابتدا مسئولیت را منتقل کنید.", en: "You hold a role in a partner business (provider or seller); hand it over first.", de: "Sie haben eine Rolle in einem Partnerunternehmen (Anbieter oder Verkäufer). Übertragen Sie diese zuerst.", es: "Tienes un cargo en un negocio asociado (proveedor o vendedor); transfiérelo primero." },
-  ONLY_OWNER_OF_SHARED_HOUSEHOLD: { fa: "تنها مدیر خانواده‌ای با اعضای دیگر هستید؛ ابتدا عضو دیگری را مدیر کنید.", en: "You're the only owner of a household others share; make someone else an owner first.", de: "Sie sind alleinige Leitung eines Haushalts mit weiteren Mitgliedern. Ernennen Sie zuerst eine andere Person zur Leitung.", es: "Eres la única persona administradora de un hogar con más miembros; nombra primero a otra persona administradora.", href: "/profile/household" },
+const BLOCKER_COPY: Record<string, { fa: string; en: string; de: string; es: string; ar: string; nl: string; href?: string }> = {
+  UPCOMING_BOOKINGS: { fa: "رزروهای پیش‌رو دارید؛ آن‌ها را انجام یا لغو کنید.", en: "You have upcoming bookings; complete or cancel them.", de: "Sie haben anstehende Buchungen. Schließen Sie diese ab oder stornieren Sie sie.", es: "Tienes reservas próximas; complétalas o cancélalas.", ar: "لديك حجوزات قادمة؛ أكملها أو ألغها.", nl: "Je hebt komende boekingen; rond ze af of annuleer ze.", href: "/bookings" },
+  OPEN_ORDERS: { fa: "سفارش‌های باز دارید که هنوز تحویل یا لغو نشده‌اند.", en: "You have open orders that aren't delivered or cancelled yet.", de: "Es gibt offene Bestellungen, die noch nicht geliefert oder storniert wurden.", es: "Tienes pedidos abiertos que aún no se han entregado ni cancelado.", ar: "لديك طلبات مفتوحة لم تُسلَّم أو تُلغَ بعد.", nl: "Je hebt openstaande bestellingen die nog niet zijn geleverd of geannuleerd.", href: "/orders" },
+  OPEN_REFUND_REQUESTS: { fa: "درخواست بازپرداخت در حال بررسی دارید.", en: "A refund request is still being reviewed.", de: "Ein Erstattungsantrag wird noch geprüft.", es: "Aún se está revisando una solicitud de reembolso.", ar: "لا يزال طلب استرداد قيد المراجعة.", nl: "Een terugbetalingsverzoek wordt nog beoordeeld." , href: "/orders" },
+  OPEN_DISPUTES: { fa: "یک اختلاف باز دارید.", en: "You have an open dispute.", de: "Sie haben einen offenen Streitfall.", es: "Tienes una disputa abierta.", ar: "لديك نزاع مفتوح.", nl: "Je hebt een openstaand geschil.", href: "/support" },
+  ACTIVE_TRAVEL_BOOKINGS: { fa: "رزرو سفر فعال دارید.", en: "You have an active travel booking.", de: "Sie haben eine aktive Reisebuchung.", es: "Tienes una reserva de viaje activa.", ar: "لديك حجز سفر نشط.", nl: "Je hebt een actieve reisboeking.", href: "/travel/trips" },
+  PARTNER_ROLES: { fa: "در یک کسب‌وکار (ارائه‌دهنده یا فروشنده) نقش دارید؛ ابتدا مسئولیت را منتقل کنید.", en: "You hold a role in a partner business (provider or seller); hand it over first.", de: "Sie haben eine Rolle in einem Partnerunternehmen (Anbieter oder Verkäufer). Übertragen Sie diese zuerst.", es: "Tienes un cargo en un negocio asociado (proveedor o vendedor); transfiérelo primero.", ar: "لديك دور في نشاط تجاري شريك (مقدم خدمة أو بائع)؛ سلّمه أولًا.", nl: "Je hebt een rol bij een partnerbedrijf (aanbieder of verkoper); draag die eerst over." },
+  ONLY_OWNER_OF_SHARED_HOUSEHOLD: { fa: "تنها مدیر خانواده‌ای با اعضای دیگر هستید؛ ابتدا عضو دیگری را مدیر کنید.", en: "You're the only owner of a household others share; make someone else an owner first.", de: "Sie sind alleinige Leitung eines Haushalts mit weiteren Mitgliedern. Ernennen Sie zuerst eine andere Person zur Leitung.", es: "Eres la única persona administradora de un hogar con más miembros; nombra primero a otra persona administradora.", ar: "أنت المالك الوحيد لأسرة يشاركها آخرون؛ اجعل شخصًا آخر مالكًا أولًا.", nl: "Je bent de enige eigenaar van een huishouden dat je met anderen deelt; maak eerst iemand anders eigenaar.", href: "/profile/household" },
 };
 
 const PRIVACY_DE: Record<string, string> = {
@@ -89,8 +89,8 @@ const PRIVACY_ES: Record<string, string> = {
 function usePrivacyCopy() {
   const { locale, num } = useAccountCopy();
   const base = useAccountCopy().t;
-  const t = (faText: string, enText: string, deText?: string, esText?: string) =>
-    locale === "de" ? deText ?? PRIVACY_DE[enText] ?? `[Missing de: ${enText}]` : locale === "es" ? esText ?? PRIVACY_ES[enText] ?? `[Missing es: ${enText}]` : base(faText, enText);
+  const t = (faText: string, enText: string, deText?: string, esText?: string, arText?: string, nlText?: string) =>
+    locale === "de" ? deText ?? PRIVACY_DE[enText] ?? `[Missing de: ${enText}]` : locale === "es" ? esText ?? PRIVACY_ES[enText] ?? `[Missing es: ${enText}]` : base(faText, enText, deText, esText, arText, nlText);
   return { locale, num, t };
 }
 
@@ -200,7 +200,7 @@ export function PrivacyCenterView() {
                 <div>
                   <b>{kind === "TERMS" ? t("شرایط استفاده", "Terms of use") : t("سیاست حریم خصوصی", "Privacy policy")}</b>
                   <p>{c?.granted && c.grantedAt ? t(`پذیرفته‌شده در ${formatAccountDate(c.grantedAt, locale)}`, `Accepted on ${formatAccountDate(c.grantedAt, locale)}`, `Angenommen am ${formatAccountDate(c.grantedAt, locale)}`, `Aceptado el ${formatAccountDate(c.grantedAt, locale)}`) : c?.lastRecordedVersion ? t("نسخهٔ جدیدی منتشر شده که هنوز نپذیرفته‌اید.", "A newer version hasn't been accepted yet.") : t("پذیرش شما برای این نسخه ثبت نشده است.", "Your acceptance of this version isn't on record.")}</p>
-                  <p className="text-metadata text-text-secondary">{t("لازم برای استفاده از opetlife؛ برای توقف، درخواست حذف حساب بدهید.", "Required to use opetlife; to stop, request account deletion.")}</p>
+                  <p className="text-metadata text-text-secondary">{t("لازم برای استفاده از اپت لایف؛ برای توقف، درخواست حذف حساب بدهید.", "Required to use opetlife; to stop, request account deletion.")}</p>
                 </div>
                 {c?.granted ? <StatusLabel tone="success">{t("پذیرفته", "Accepted")}</StatusLabel> : <Button variant="secondary" size="sm" isLoading={busy === kind} onClick={() => run(kind, () => accountService.setConsent(kind, true))}>{t("پذیرش نسخهٔ فعلی", "Accept current version")}</Button>}
               </div>
@@ -275,7 +275,7 @@ export function PrivacyCenterView() {
           <p>{t(`یک فایل JSON آماده می‌شود و ${num(data.exportAvailableDays)} روز برای دریافت در دسترس است. پیوند دریافت فقط چند دقیقه اعتبار دارد و هر دریافت ثبت می‌شود.`, `We prepare a JSON file that stays available for ${num(data.exportAvailableDays)} days. Each download link works for a few minutes and every download is recorded.`, `Wir erstellen eine JSON-Datei, die ${num(data.exportAvailableDays)} Tage verfügbar bleibt. Jeder Download-Link ist nur wenige Minuten gültig und jeder Download wird protokolliert.`, `Preparamos un archivo JSON que estará disponible durante ${num(data.exportAvailableDays)} días. Cada enlace de descarga funciona durante unos minutos y cada descarga queda registrada.`)}</p>
           <div className="experience-pills">
             {data.exportIncludes.map((item) => (
-              <span className="experience-pill" key={item}>{SCOPE_LABELS[item] ? t(...SCOPE_LABELS[item]!) : t("بخش داده", "Data category", "Datenkategorie", "Categoría de datos")}</span>
+              <span className="experience-pill" key={item}>{SCOPE_LABELS[item] ? t(...SCOPE_LABELS[item]!) : t("بخش داده", "Data category", "Datenkategorie", "Categoría de datos", "فئة البيانات", "Gegevenscategorie")}</span>
             ))}
           </div>
         </div>
@@ -409,7 +409,7 @@ function DeleteAccountDialog({ onClose, onDone }: { onClose: () => void; onDone:
               <ul>
                 {preview.households.map((h) => (
                   <li key={h.id}>
-                    {h.name || t("خانهٔ بدون نام", "Unnamed household")}: {h.role === "OWNER" ? t("مدیر", "owner", "verantwortliche Person", "administrador/a") : t("عضو", "member")}, {t(`${num(h.pets)} حیوان`, `${num(h.pets)} pet(s)`, `${num(h.pets)} ${h.pets === 1 ? "Tier" : "Tiere"}`, `${num(h.pets)} ${h.pets === 1 ? "mascota" : "mascotas"}`)}
+                    {h.name || t("خانهٔ بدون نام", "Unnamed household")}: {h.role === "OWNER" ? t("مدیر", "owner", "verantwortliche Person", "administrador/a", "المالك", "eigenaar") : t("عضو", "member")}, {t(`${num(h.pets)} حیوان`, `${num(h.pets)} pet(s)`, `${num(h.pets)} ${h.pets === 1 ? "Tier" : "Tiere"}`, `${num(h.pets)} ${h.pets === 1 ? "mascota" : "mascotas"}`)}
                     {h.otherMembers ? t(`، ${num(h.otherMembers)} عضو دیگر دسترسی خود را حفظ می‌کنند`, `; ${num(h.otherMembers)} other member(s) keep their access`, `; ${num(h.otherMembers)} weitere Mitglieder behalten ihren Zugriff`, `; ${num(h.otherMembers)} miembros más conservarán el acceso`) : ""}
                     {h.membershipStatus && MEMBERSHIP_STATUS[h.membershipStatus] ? t(`، عضویت: ${MEMBERSHIP_STATUS[h.membershipStatus]![0]}`, `; membership: ${MEMBERSHIP_STATUS[h.membershipStatus]![1]}`, `; Mitgliedschaft: ${MEMBERSHIP_STATUS[h.membershipStatus]![2]}`, `; estado de membresía: ${MEMBERSHIP_STATUS[h.membershipStatus]![3]}`) : ""}
                   </li>

@@ -1,7 +1,7 @@
 import type { RouteLocale } from "@/lib/i18n/config";
 export const parkAuthCopy: Record<RouteLocale, { close: string; title: string; register: string; tagline: string; description: string; privacy: string }> = {
   fa: {
-    close: "بستن و بازگشت به پارک", title: "ورود به دنیای opetlife", register: "ساخت حساب opetlife",
+    close: "بستن و بازگشت به پارک", title: "ورود به دنیای اپت لایف", register: "ساخت حساب اپت لایف",
     tagline: "یک دنیا برای تو و همراهت", description: "سلامت، مراقبت و لحظه‌های مشترک؛ از همین‌جا شروع می‌شود.", privacy: "پروندهٔ همراهت، با اختیار خودت",
   },
   en: {
@@ -15,5 +15,19 @@ export const parkAuthCopy: Record<RouteLocale, { close: string; title: string; r
   es: {
     close: "Cerrar y volver al parque", title: "Inicia sesión en opetlife", register: "Crear una cuenta de opetlife",
     tagline: "Un mundo para ti y tu mascota", description: "Salud, cuidados y momentos compartidos. Todo empieza aquí.", privacy: "Su historial, tu decisión",
+  }, ar: {
+    close: "أغلق وعُد إلى الحديقة",
+    title: "سجّل الدخول إلى opetlife",
+    register: "أنشئ حسابًا في opetlife",
+    tagline: "عالم لك ولرفيقك",
+    description: "الصحة والرعاية واللحظات المشتركة. تبدأ من هنا.",
+    privacy: "سجلّه، وقرارك"
+  }, nl: {
+    close: "Sluiten en terug naar het park",
+    title: "Inloggen bij opetlife",
+    register: "Maak een opetlife-account aan",
+    tagline: "Een wereld voor jou en je maatje",
+    description: "Gezondheid, zorg en gedeelde momenten. Het begint hier.",
+    privacy: "Hun dossier, jouw keuze"
   },
 };

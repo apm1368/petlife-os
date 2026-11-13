@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button, ContextSurface, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
-import { AppealStatus, TrustActionType, TrustCaseStatus, type TrustActionDto, type TrustCaseDto } from "@petlife/types";
+import { AppealStatus, TrustActionType, TrustCaseStatus, type TrustActionDto, type TrustCaseDto, TRUST_CASE_NEXT } from "@petlife/types";
 import { adminService } from "@/services/admin.service";
 import { adminAnimalSupportService, type TrustCaseContext } from "@/services/admin-animal-support.service";
 import { ApiError } from "@/lib/api/client";
@@ -211,7 +211,7 @@ export function AdminTrustCaseDetailView({ trustCaseId }: { trustCaseId: string 
 
       <ContextSurface className="flex flex-wrap gap-2">
         {STATUSES.map((s) => (
-          <Button key={s} size="sm" aria-pressed={s === data.status} variant={s === data.status ? "primary" : "secondary"} onClick={() => transition(s)} disabled={s === data.status}>
+          <Button key={s} size="sm" aria-pressed={s === data.status} variant={s === data.status ? "primary" : "secondary"} onClick={() => transition(s)} disabled={s === data.status || !(TRUST_CASE_NEXT[data.status as TrustCaseStatus] ?? []).includes(s)}>
             {t(`status.${s}`)}
           </Button>
         ))}

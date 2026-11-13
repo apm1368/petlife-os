@@ -22,11 +22,27 @@ export class OnboardingService {
   ) {}
 
   async getProgress(userId: string) {
-    const progress = await this.prisma.onboardingProgress.findUnique({ where: { userId } });
-    if (progress) return progress;
+    const [progress, user] = await Promise.all([
+      this.prisma.onboardingProgress.findUnique({ where: { userId } }),
+      this.prisma.user.findUnique({ where: { id: userId }, select: { signupIntent: true } }),
+    ]);
+    // Partners (signup intent PARTNER) are routed to the partner wizard, never into this pet-owner onboarding.
+    const signupIntent = user?.signupIntent ?? "PET_OWNER";
+    const partnerStage = signupIntent === "PARTNER" ? await this.partnerStage(userId) : "NONE";
+    if (progress) return { ...progress, signupIntent, partnerStage };
     // Resumable-by-default: an unstarted user still gets a well-formed
     // "at the beginning" state instead of a 404.
-    return { userId, ...INITIAL_STATE, householdId: null, petId: null, lastCompletedAt: null };
+    return { userId, ...INITIAL_STATE, householdId: null, petId: null, lastCompletedAt: null, signupIntent, partnerStage };
+  }
+
+  /** SUBMITTED once any of the partner's own businesses has gone to KYC (or past it); IN_PROGRESS while the wizard is unfinished. */
+  private async partnerStage(userId: string): Promise<"IN_PROGRESS" | "SUBMITTED"> {
+    const draft = ["NOT_STARTED", "NEEDS_INFORMATION", "REJECTED"];
+    const [provider, seller] = await Promise.all([
+      this.prisma.providerUser.findFirst({ where: { userId, role: "OWNER", removedAt: null, providerOrganization: { verificationStatus: { notIn: draft as never } } }, select: { id: true } }),
+      this.prisma.sellerMembership.findFirst({ where: { userId, role: "OWNER", status: "ACTIVE", sellerOrganization: { verificationStatus: { notIn: draft as never } } }, select: { id: true } }),
+    ]);
+    return provider || seller ? "SUBMITTED" : "IN_PROGRESS";
   }
 
   async updateProgress(userId: string, dto: UpdateProgressDto) {

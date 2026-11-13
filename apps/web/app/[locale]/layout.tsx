@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -13,24 +13,50 @@ import { DisplayModeSync } from "@/features/display-mode/DisplayModeSync";
 import { AuthModalOrigin } from "@/features/auth/AuthModalOrigin";
 import { DesignRoot } from "@/features/design-system/DesignRoot";
 import { PageMotion } from "@/features/motion/PageMotion";
+import { SITE_NAME, SITE_ORIGIN, SITE_TAGLINE } from "@/lib/seo/site";
+import { MaintenanceGate } from "@/features/site-settings/MaintenanceGate";
+import { PwaRuntime } from "@/features/pwa/PwaRuntime";
+import { manifestPath, PWA_BACKGROUND_COLOR, PWA_DARK_BACKGROUND_COLOR } from "@/lib/pwa/manifest";
+
+/** Phones: content may use the whole screen (the app shell pads for notches and the home indicator); the browser bar takes the page colour. */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: PWA_BACKGROUND_COLOR },
+    { media: "(prefers-color-scheme: dark)", color: PWA_DARK_BACKGROUND_COLOR },
+  ],
+};
+
+/** A static brand image (not a page), so it carries no locale prefix. */
+const APPLE_TOUCH_ICON = "/brand/opl/app-icon-180.png";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://opetlife.ir"),
-  title: "opetlife",
-  applicationName: "opetlife",
-  icons: {
-    icon: [
-      { url: "/brand/opetlife/04_app_icon_light.png", media: "(prefers-color-scheme: light)" },
-      { url: "/brand/opetlife/03_app_icon_dark.png", media: "(prefers-color-scheme: dark)" },
-    ],
-    apple: "/brand/opetlife/04_app_icon_light.png",
-  },
-  description: "Your pet's life, in one place.",
-};
+/** Site-wide defaults in the page's own language; every public page that should rank sets its own title, description and canonical. */
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const routeLocale = isRouteLocale(locale) ? locale : "fa";
+  return {
+    metadataBase: new URL(SITE_ORIGIN),
+    title: SITE_NAME[routeLocale],
+    applicationName: "opetlife",
+    // The web app manifest and the Apple touch icon are written straight into <head> below: on pages with async
+    // metadata Next streams these tags into <body>, where browsers ignore them for installing the app.
+    appleWebApp: { capable: true, title: "opetlife", statusBarStyle: "default" },
+    icons: {
+      icon: [
+        { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },
+        { url: "/brand/opl/favicon.svg", type: "image/svg+xml" },
+      ],
+    },
+    description: SITE_TAGLINE[routeLocale],
+    alternates: { types: { "application/rss+xml": `/${routeLocale}/feed.xml` } },
+  };
+}
 
 export default async function LocaleLayout({
   children,
@@ -53,10 +79,12 @@ export default async function LocaleLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         {/* Which commit this bundle was built from — lets a reviewer confirm the preview is current. */}
         <meta name="petlife-build" content={process.env.NEXT_PUBLIC_BUILD_SHA ?? "dev"} />
+        <link rel="manifest" href={manifestPath(locale)} />
+        <link rel="apple-touch-icon" href={APPLE_TOUCH_ICON} />
       </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeSync /><DisplayModeSync /><ToastProvider><PageMotion><AuthModalOrigin><LocalReviewTools><DesignRoot>{children}{modal}</DesignRoot></LocalReviewTools></AuthModalOrigin></PageMotion></ToastProvider>
+          <ThemeSync /><DisplayModeSync /><PwaRuntime /><ToastProvider><PageMotion><AuthModalOrigin><LocalReviewTools><DesignRoot><MaintenanceGate>{children}{modal}</MaintenanceGate></DesignRoot></LocalReviewTools></AuthModalOrigin></PageMotion></ToastProvider>
         </NextIntlClientProvider>
       </body>
     </html>

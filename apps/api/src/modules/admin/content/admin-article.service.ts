@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ArticleLifecycleStatus, Locale, Prisma } from "@prisma/client";
-import type { AdminArticleDto, AdminArticleListItemDto, AdminArticleLocaleDto, PaginatedDto, RichTextDocument } from "@petlife/types";
+import type { AdminArticleDto, AdminArticleListItemDto, AdminArticleLocaleDto, AdminArticleSlugCheckDto, PaginatedDto, RichTextDocument } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import {
   AdminAccessDeniedException,
@@ -12,9 +12,12 @@ import {
 import { resolvePagination, toPaginatedDto, type PaginationQueryDto } from "../../../common/pagination/pagination.dto";
 import { CATEGORY_INCLUDE, CONTENT_AUTHOR_INCLUDE, MEDIA_ASSET_INCLUDE, TAG_INCLUDE, resolveRichTextMedia, toAdminActorDto, toCategoryDto, toContentAuthorDto, toMediaAssetDto, toPublicCategoryDto, toTagDto } from "../../content/content-mapper";
 import { validateRichTextDocument } from "../../content/rich-text.util";
+import { articleCanonicalPath } from "../../content/article-paths";
+import { SLUG_PATTERN } from "../../content/slug.util";
+import { IndexNowService } from "../../content/indexnow.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
-import { roleHasPermission } from "../auth/admin-permissions";
+import { adminCan } from "../auth/admin-permissions";
 import { AdminMediaService } from "./admin-media.service";
 
 /** Exactly the five transitions the spec enumerates — ARCHIVED is a deliberate terminal state this phase (see ArticleLifecycleStatus's own schema.prisma doc comment). */
@@ -61,6 +64,7 @@ function toArticleDto(row: ArticleWithRelations): AdminArticleDto {
 function toListItemDto(row: ArticleWithRelations): AdminArticleListItemDto {
   return {
     id: row.id,
+    isDemoRecord: row.isDemoRecord,
     author: row.author ? toContentAuthorDto(row.author) : null,
     category: row.category ? toPublicCategoryDto(row.category.locales.find((l) => l.locale === "fa") ?? row.category.locales[0]!) : null,
     createdByAdmin: toAdminActorDto(row.createdByAdmin),
@@ -126,6 +130,7 @@ export class AdminArticleService {
     private readonly prisma: PrismaService,
     private readonly auditLog: AdminAuditLogService,
     private readonly media: AdminMediaService,
+    private readonly indexNow: IndexNowService,
   ) {}
 
   async list(query: ListArticlesQuery): Promise<PaginatedDto<AdminArticleListItemDto>> {
@@ -157,6 +162,27 @@ export class AdminArticleService {
     const row = await this.prisma.articleLocale.findUnique({ where: { articleId_locale: { articleId, locale } }, include: ARTICLE_LOCALE_INCLUDE });
     if (!row) throw new ArticleLocaleNotFoundException({ articleId, locale });
     return this.withResolvedMedia(toLocaleDto(row));
+  }
+
+  /**
+   * The admin "URL builder" check: whether `slug` is well-formed and free in `locale`, and the public path it
+   * will have once published (guides live under /guides, everything else under /blog). A slug held by a
+   * renamed article's old address is still usable, but reported so the editor knows the old links will
+   * start landing on this article instead.
+   */
+  async checkSlug(locale: Locale, slug: string, articleId?: string, categoryId?: string | null): Promise<AdminArticleSlugCheckDto> {
+    const valid = SLUG_PATTERN.test(slug) && slug.length <= 120;
+    const resolvedCategoryId = categoryId !== undefined ? categoryId : articleId ? (await this.prisma.article.findUnique({ where: { id: articleId }, select: { categoryId: true } }))?.categoryId ?? null : null;
+    const categorySlug = resolvedCategoryId ? (await this.prisma.categoryLocale.findUnique({ where: { categoryId_locale: { categoryId: resolvedCategoryId, locale } }, select: { slug: true } }))?.slug ?? null : null;
+    const publicPath = articleCanonicalPath(locale, valid ? slug : slug.toLowerCase(), categorySlug);
+    if (!valid) return { slug, valid, available: false, conflict: null, publicPath };
+    const [holder, redirect] = await Promise.all([
+      this.prisma.articleLocale.findUnique({ where: { locale_slug: { locale, slug } }, select: { articleId: true, title: true } }),
+      this.prisma.articleSlugRedirect.findUnique({ where: { locale_slug: { locale, slug } }, select: { articleId: true } }),
+    ]);
+    if (holder && holder.articleId !== articleId) return { slug, valid, available: false, conflict: { articleId: holder.articleId, title: holder.title, kind: "ARTICLE" }, publicPath };
+    if (redirect && redirect.articleId !== articleId) return { slug, valid, available: true, conflict: { articleId: redirect.articleId, title: null, kind: "REDIRECT" }, publicPath };
+    return { slug, valid, available: true, conflict: null, publicPath };
   }
 
   /** Creates the language-neutral Article shell and its first locale in one step — the common "start drafting" action needs exactly one call (spec: "create content quickly"). */
@@ -193,6 +219,7 @@ export class AdminArticleService {
         include: ARTICLE_INCLUDE,
       });
       const locale = article.locales[0]!;
+      await tx.articleSlugRedirect.deleteMany({ where: { locale: input.locale, slug: input.slug } });
       await tx.contentVersion.create({
         data: { articleId: article.id, locale: input.locale, versionNumber: 1, editorAdminId: admin.adminUserId, changeNote: input.changeNote, snapshot: this.toSnapshot(locale) as unknown as Prisma.InputJsonValue },
       });
@@ -243,11 +270,17 @@ export class AdminArticleService {
     if (!article) throw new ArticleNotFoundException({ articleId });
 
     const row = await this.prisma.$transaction(async (tx) => {
-      const [locked] = await tx.$queryRaw<{ id: string; status: ArticleLifecycleStatus }[]>`SELECT "id", "status" FROM "content_article_locales" WHERE "articleId" = ${articleId}::uuid AND "locale" = ${locale}::"Locale" FOR UPDATE`;
-      if (locked?.status === ArticleLifecycleStatus.VISIBLE && !roleHasPermission(admin.role, "content.publish")) {
+      const [locked] = await tx.$queryRaw<{ id: string; status: ArticleLifecycleStatus; slug: string; publishedAt: Date | null }[]>`SELECT "id", "status", "slug", "publishedAt" FROM "content_article_locales" WHERE "articleId" = ${articleId}::uuid AND "locale" = ${locale}::"Locale" FOR UPDATE`;
+      if (locked?.status === ArticleLifecycleStatus.VISIBLE && !adminCan(admin, "content.publish")) {
         throw new AdminAccessDeniedException({ reason: "LIVE_EDIT_REQUIRES_CONTENT_PUBLISH", requiredPermission: "content.publish", articleId, locale });
       }
       await this.assertSlugAvailable(locale, input.slug, locked?.id);
+      // A slug lives either on an article locale or as an old address, never both.
+      await tx.articleSlugRedirect.deleteMany({ where: { locale, slug: input.slug } });
+      // Renaming a slug that has ever been public keeps the old address alive as a permanent redirect.
+      if (locked && locked.slug !== input.slug && locked.publishedAt) {
+        await tx.articleSlugRedirect.upsert({ where: { locale_slug: { locale, slug: locked.slug } }, create: { articleId, locale, slug: locked.slug }, update: { articleId } });
+      }
 
       let saved: ArticleLocaleWithRelations;
       let versionNumber: number;
@@ -289,9 +322,10 @@ export class AdminArticleService {
         data: { articleId, locale, versionNumber, editorAdminId: admin.adminUserId, changeNote: input.changeNote, snapshot: this.toSnapshot(saved) as unknown as Prisma.InputJsonValue },
       });
       await tx.article.update({ where: { id: articleId }, data: { updatedAt: new Date() } });
-      await this.auditLog.record({ adminUserId: admin.adminUserId, action: "article.updated", entityType: "ARTICLE", entityId: articleId, reason: input.changeNote, afterSummary: { locale, versionNumber }, requestId, tx });
+      await this.auditLog.record({ adminUserId: admin.adminUserId, action: "article.updated", entityType: "ARTICLE", entityId: articleId, reason: input.changeNote, afterSummary: { locale, versionNumber, ...(locked && locked.slug !== input.slug ? { previousSlug: locked.slug, slug: input.slug } : {}) }, requestId, tx });
       return saved;
     });
+    if (row.status === ArticleLifecycleStatus.VISIBLE) this.indexNow.notify([await this.publicPathFor(articleId, locale, row.slug)]);
     return this.withResolvedMedia(toLocaleDto(row));
   }
 
@@ -323,6 +357,8 @@ export class AdminArticleService {
       await this.auditLog.record({ adminUserId: admin.adminUserId, action, entityType: "ARTICLE", entityId: articleId, beforeSummary: { status: existing.status }, afterSummary: { status: to, locale }, requestId, tx });
       return updated;
     });
+    // Publishing (and hiding — so the URL drops out quickly) tells IndexNow search engines right away.
+    if (to !== ArticleLifecycleStatus.ARCHIVED) this.indexNow.notify([await this.publicPathFor(articleId, locale, row.slug)]);
     return this.withResolvedMedia(toLocaleDto(row));
   }
 
@@ -331,7 +367,14 @@ export class AdminArticleService {
   }
 
   private async withResolvedMedia(dto: AdminArticleLocaleDto): Promise<AdminArticleLocaleDto> {
-    return { ...dto, body: await resolveRichTextMedia(this.prisma, dto.body) };
+    const [body, publicPath] = await Promise.all([resolveRichTextMedia(this.prisma, dto.body), this.publicPathFor(dto.articleId, dto.locale as unknown as Locale, dto.slug)]);
+    return { ...dto, body, publicPath };
+  }
+
+  /** The locale's public path, from the article's category in that locale (guides vs blog). */
+  private async publicPathFor(articleId: string, locale: Locale, slug: string): Promise<string> {
+    const article = await this.prisma.article.findUnique({ where: { id: articleId }, select: { category: { select: { locales: { where: { locale }, select: { slug: true } } } } } });
+    return articleCanonicalPath(locale, slug, article?.category?.locales[0]?.slug ?? null);
   }
 
   private async assertSlugAvailable(locale: Locale, slug: string, excludeArticleLocaleId?: string): Promise<void> {

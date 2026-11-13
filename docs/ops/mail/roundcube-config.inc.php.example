@@ -1,0 +1,56 @@
+<?php
+// /var/www/roundcube/config/config.inc.php — opetlife.ir webmail. des_key is per-install (root-only file).
+$config = [];
+$config['db_dsnw'] = 'sqlite:////var/lib/roundcube/db/roundcube.sqlite?mode=0640';
+
+$config['imap_host'] = 'ssl://mail.opetlife.ir:993';
+$config['smtp_host'] = 'ssl://mail.opetlife.ir:465';
+$config['smtp_user'] = '%u';
+$config['smtp_pass'] = '%p';
+$config['username_domain'] = 'opetlife.ir';
+$config['username_domain_forced'] = true;
+$config['mail_domain'] = 'opetlife.ir';
+$config['login_lc'] = 2;
+$config['identities_level'] = 3;   // one identity, address fixed to the login (Postfix enforces it too)
+
+$config['product_name'] = 'opetlife Webmail';
+$config['support_url'] = 'https://opetlife.ir';
+$config['skin'] = 'elastic';
+$config['language'] = null;        // follow the browser; Persian (fa_IR) is included
+$config['des_key'] = '__DES_KEY__';
+$config['cipher_method'] = 'AES-256-CBC';
+
+$config['use_https'] = true;
+$config['force_https'] = false;    // nginx already redirects
+$config['ip_check'] = true;
+$config['session_lifetime'] = 30;
+$config['session_samesite'] = 'Lax';
+$config['login_rate_limit'] = 5;
+$config['x_frame_options'] = 'sameorigin';
+$config['enable_installer'] = false;
+$config['request_path'] = '/';
+$config['proxy_whitelist'] = [];
+
+$config['log_driver'] = 'file';
+$config['log_dir'] = '/var/log/roundcube/';
+$config['temp_dir'] = '/var/lib/roundcube/temp/';
+$config['log_logins'] = true;
+$config['log_session'] = false;
+$config['smtp_log'] = false;
+
+$config['max_message_size'] = '25M';
+$config['draft_autosave'] = 120;
+$config['mime_param_folding'] = 0;
+$config['create_default_folders'] = true;
+$config['default_charset'] = 'UTF-8';
+$config['useragent'] = '';          // don't advertise the Roundcube version in mail headers
+$config['http_received_header'] = false;
+$config['spellcheck_engine'] = 'pspell';
+$config['enable_spellcheck'] = false;
+
+$config['plugins'] = ['archive', 'zipdownload', 'managesieve', 'markasjunk', 'newmail_notifier'];
+$config['managesieve_host'] = '127.0.0.1';
+$config['managesieve_port'] = 4190;
+$config['managesieve_usetls'] = false;
+$config['managesieve_vacation'] = 1;
+$config['archive_mbox'] = 'Archive';

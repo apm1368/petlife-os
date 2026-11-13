@@ -6,9 +6,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { Button, ContextSurface, ErrorRecovery, Skeleton } from "@petlife/ui";
 import type { NotificationCategory, NotificationPreferencesDto } from "@petlife/types";
 import { notificationsService } from "@/services/notifications.service";
+import { PushOptInCard } from "@/features/pwa/PushOptInCard";
 
 type Category = NotificationCategory;
-type Channel = "IN_APP" | "SMS";
+type Channel = "IN_APP" | "SMS" | "EMAIL" | "PUSH";
 
 const SECTIONS: { key: string; categories: Category[] }[] = [
   { key: "essential", categories: ["SECURITY" as Category, "SYSTEM" as Category] },
@@ -23,13 +24,15 @@ const SECTIONS: { key: string; categories: Category[] }[] = [
   { key: "marketing", categories: ["MARKETING" as Category] },
 ];
 
-const CHANNELS: Channel[] = ["IN_APP", "SMS"];
+/** EMAIL and PUSH are offered only once their provider is configured (the API reports each channel's delivery state). */
+const CHANNELS: Channel[] = ["IN_APP", "PUSH", "SMS", "EMAIL"];
+const OPTIONAL_CHANNELS = new Set<Channel>(["EMAIL", "PUSH"]);
 
 /**
  * Notification preferences — a category × channel grid whose every control
  * the backend actually honours (in-app suppression, SMS suppression,
- * quiet hours for SMS). EMAIL/PUSH are never rendered: they aren't
- * implemented. Required categories (security) show as always-on text;
+ * quiet hours for SMS). EMAIL and PUSH columns appear once their provider
+ * is configured; this device's push opt-in is the card at the top. Required categories (security) show as always-on text;
  * marketing stays off until the Privacy Center consent allows it; a channel
  * that doesn't really deliver yet (SMS in sandbox) says so.
  */
@@ -113,6 +116,8 @@ export function NotificationPreferencesView() {
         <p className="mt-1 text-body text-text-secondary">{t("intro")}</p>
       </div>
 
+      <PushOptInCard />
+
       {SECTIONS.map((section) => (
         <ContextSurface key={section.key} className="flex flex-col gap-3">
           <h2 className="text-body font-medium text-text-primary">{t(`sections.${section.key}`)}</h2>
@@ -133,7 +138,7 @@ export function NotificationPreferencesView() {
               <fieldset key={category} className="notification-pref-row">
                 <legend className="text-metadata text-text-primary">{t(`categories.${category}`)}</legend>
                 <div className="notification-pref-row__channels">
-                  {CHANNELS.map((channel) => (
+                  {CHANNELS.filter((channel) => !OPTIONAL_CHANNELS.has(channel) || (Boolean(data?.channels?.some((c) => (c.channel as string) === channel)) && channelState(channel) !== "NOT_CONFIGURED")).map((channel) => (
                     <label key={channel} className="flex items-center gap-1.5 text-metadata text-text-secondary">
                       <input type="checkbox" checked={isEnabled(category, channel)} disabled={(category as string) === "MARKETING" && marketingLocked} onChange={() => toggle(category, channel)} />
                       {t(`channels.${channel}`)}

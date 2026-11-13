@@ -1,7 +1,8 @@
 import { estimateReadingMinutes } from "./reading-time.util";
+import { articleCanonicalPath } from "./article-paths";
 import { Injectable } from "@nestjs/common";
 import { ArticleLifecycleStatus, Locale, Prisma } from "@prisma/client";
-import type { PaginatedDto, PublicArticleDetailDto, PublicArticleReferenceDto, PublicArticleSummaryDto, PublicCategoryDto, PublicTagDto, RichTextDocument } from "@petlife/types";
+import type { PaginatedDto, PublicArticleDetailDto, PublicArticleFeedItemDto, PublicArticleReferenceDto, PublicArticleSlugRedirectDto, PublicArticleSummaryDto, PublicCategoryDto, PublicTagDto, RichTextDocument } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { excludeDemoRecordsFromPublicReads } from "../../common/public-record-origin";
 import { ArticleLocaleNotFoundException, CategoryNotFoundException, TagNotFoundException } from "../../common/errors/api-exception";
@@ -19,12 +20,8 @@ function articleInclude(locale: Locale) {
 
 type PublicArticleLocaleRow = Prisma.ArticleLocaleGetPayload<{ include: { article: { include: ReturnType<typeof articleInclude> } } }>;
 
-/** Guides are articles in this category; they have their own section (/guides), distinct from the blog. */
-export const GUIDE_CATEGORY_SLUG = "guides";
-
-function canonicalPath(locale: Locale, slug: string, categorySlug?: string | null): string {
-  return categorySlug === GUIDE_CATEGORY_SLUG ? `/${locale}/guides/${slug}` : `/${locale}/blog/${slug}`;
-}
+export { GUIDE_CATEGORY_SLUG } from "./article-paths";
+const canonicalPath = articleCanonicalPath;
 
 function toSummary(row: PublicArticleLocaleRow): PublicArticleSummaryDto {
   const { article } = row;
@@ -98,8 +95,75 @@ export class PublicContentReadService {
   async getArticleBySlug(locale: Locale, slug: string): Promise<PublicArticleDetailDto> {
     const row = await this.prisma.articleLocale.findFirst({ where: { locale, slug, article: excludeDemoRecordsFromPublicReads() }, include: { article: { include: articleInclude(locale) } } });
     if (!row || row.status !== ArticleLifecycleStatus.VISIBLE) throw new ArticleLocaleNotFoundException({ locale, slug });
-    const body = await resolveRichTextMedia(this.prisma, row.body as unknown as RichTextDocument);
-    return { ...toSummary(row), body, seoTitle: row.seoTitle, seoDescription: row.seoDescription };
+    const [body, siblings] = await Promise.all([
+      resolveRichTextMedia(this.prisma, row.body as unknown as RichTextDocument),
+      this.prisma.articleLocale.findMany({
+        where: { articleId: row.articleId, status: ArticleLifecycleStatus.VISIBLE, locale: { not: locale } },
+        select: { locale: true, slug: true, article: { select: { category: { select: { locales: { select: { locale: true, slug: true } } } } } } },
+      }),
+    ]);
+    const translations = siblings.map((sibling) => ({
+      locale: sibling.locale as unknown as PublicArticleSummaryDto["locale"],
+      canonicalPath: canonicalPath(sibling.locale, sibling.slug, sibling.article.category?.locales.find((l) => l.locale === sibling.locale)?.slug),
+    }));
+    return { ...toSummary(row), body, seoTitle: row.seoTitle, seoDescription: row.seoDescription, translations };
+  }
+
+  /** An old address of a renamed article, answered with where the article lives now (only while it is visible in that locale). */
+  async slugRedirect(locale: Locale, slug: string): Promise<PublicArticleSlugRedirectDto> {
+    const redirect = await this.prisma.articleSlugRedirect.findUnique({ where: { locale_slug: { locale, slug } }, select: { articleId: true } });
+    if (!redirect) throw new ArticleLocaleNotFoundException({ locale, slug });
+    const target = await this.prisma.articleLocale.findFirst({
+      where: { articleId: redirect.articleId, locale, status: ArticleLifecycleStatus.VISIBLE, article: excludeDemoRecordsFromPublicReads() },
+      include: { article: { include: articleInclude(locale) } },
+    });
+    if (!target) throw new ArticleLocaleNotFoundException({ locale, slug });
+    return { canonicalPath: toSummary(target).canonicalPath };
+  }
+
+  /**
+   * Every visible article locale (optionally one locale), newest first, for the sitemap, RSS and llms.txt.
+   * Capped so a runaway catalogue can never turn one request into an unbounded read.
+   */
+  async feed(locale: Locale | undefined, withBody: boolean): Promise<PublicArticleFeedItemDto[]> {
+    const rows = await this.prisma.articleLocale.findMany({
+      where: { status: ArticleLifecycleStatus.VISIBLE, ...(locale ? { locale } : {}), article: excludeDemoRecordsFromPublicReads() },
+      include: {
+        article: {
+          include: {
+            category: { include: { locales: true } },
+            coverMediaAsset: { select: PUBLIC_MEDIA_ASSET_SELECT },
+            tags: { include: { tag: { include: { locales: true } } } },
+          },
+        },
+      },
+      orderBy: { publishedAt: "desc" },
+      take: 2000,
+    });
+    return Promise.all(rows.map(async (row) => {
+      const category = row.article.category?.locales.find((l) => l.locale === row.locale) ?? null;
+      const body = await resolveRichTextMedia(this.prisma, row.body as unknown as RichTextDocument);
+      const videos = body.flatMap((block) => (block.type === "video" && block.url ? [{ url: block.url, posterUrl: block.posterUrl ?? null, title: block.title, description: block.description ?? null, durationSeconds: block.durationSeconds ?? null }] : []));
+      const cover = row.article.coverMediaAsset;
+      return {
+        articleId: row.articleId,
+        locale: row.locale as unknown as PublicArticleFeedItemDto["locale"],
+        slug: row.slug,
+        canonicalPath: canonicalPath(row.locale, row.slug, category?.slug),
+        title: row.title,
+        excerpt: row.excerpt,
+        seoDescription: row.seoDescription,
+        categorySlug: category?.slug ?? null,
+        categoryName: category?.name ?? null,
+        tags: row.article.tags.map((t) => t.tag.locales.find((l) => l.locale === row.locale)?.name).filter((name): name is string => Boolean(name)),
+        coverUrl: cover?.url ?? null,
+        coverAlt: cover?.altText ?? null,
+        videos,
+        publishedAt: row.publishedAt!.toISOString(),
+        updatedAt: row.updatedAt.toISOString(),
+        ...(withBody ? { body } : {}),
+      };
+    }));
   }
 
   /**

@@ -364,6 +364,28 @@ describe("Batch 4 — Commerce", () => {
       expect(again.body.error.code).toBe("ORDER_NOT_CANCELLABLE");
     });
 
+    it("staff cancel before dispatch: full refund, restock, audited; refused after dispatch and for view-only admins", async () => {
+      const cu = await customer();
+      const s = await seller();
+      const { variant } = await product();
+      const o = await offer(s.id, variant.id, 300_000, 10);
+      const { orderId } = await paidOrder(cu.c, cu.addressId, o.id, 2);
+      const viewer = await admin(AdminRole.SUPPORT);
+      const ops = await admin(AdminRole.SUPER_ADMIN);
+      await viewer.c.post(`/admin/commerce/orders/${orderId}/cancel`).send({ reason: "Customer asked by phone" }).expect(403);
+      await ops.c.post(`/admin/commerce/orders/${orderId}/cancel`).send({ reason: "x" }).expect(400);
+      const detail = await ops.c.post(`/admin/commerce/orders/${orderId}/cancel`).send({ reason: "Customer asked by phone" }).expect(201);
+      expect(detail.body.cancelledAt).toBeTruthy();
+      expect((await prisma.inventoryItem.findUniqueOrThrow({ where: { sellerOfferId: o.id } })).onHand).toBe(10);
+      expect(await prisma.adminAuditLog.count({ where: { action: "order.cancelled_by_staff", entityId: orderId } })).toBe(1);
+      expect((await cu.c.get(`/orders/${orderId}`).expect(200)).body.status).toBe("REFUNDED");
+      await ops.c.post(`/admin/commerce/orders/${orderId}/cancel`).send({ reason: "Again" }).expect(409);
+
+      const shipped = await paidOrder(cu.c, cu.addressId, o.id, 1);
+      await setFulfillment(shipped.orderId, FulfillmentStatus.PICKED_UP);
+      expect((await ops.c.post(`/admin/commerce/orders/${shipped.orderId}/cancel`).send({ reason: "Too late" }).expect(409)).body.error.code).toBe("ORDER_NOT_CANCELLABLE");
+    });
+
     it("after dispatch: no cancel and no instant refund; after delivery a refund request goes to admin review and finance executes it", async () => {
       const cu = await customer();
       const s = await seller();
@@ -536,6 +558,21 @@ describe("Batch 4 — Commerce", () => {
       expect(new Date(after.body.nextCycleAt).getTime()).toBeGreaterThan(Date.now() + 25 * 86_400_000);
     });
 
+    it("staff see members' schedules read-only, filtered by status", async () => {
+      const cu = await customer();
+      const { variant } = await product({ title: `Repeat food ${unique()}` });
+      const o = await offer((await seller()).id, variant.id, 500_000, 30, [30]);
+      const created = await cu.c.post("/repeat-deliveries").send({ sellerOfferId: o.id, quantity: 1, intervalDays: 30, addressId: cu.addressId }).expect(201);
+      const staff = await admin(AdminRole.SUPPORT);
+      const active = (await staff.c.get("/admin/commerce/repeat-deliveries?status=ACTIVE").expect(200)).body;
+      const row = active.items.find((r: { id: string }) => r.id === created.body.id);
+      expect(row).toMatchObject({ status: "ACTIVE", quantity: 1, intervalDays: 30, unitPrice: 500_000 });
+      await cu.c.post(`/repeat-deliveries/${created.body.id}/pause`).expect(201);
+      const paused = (await staff.c.get("/admin/commerce/repeat-deliveries?status=PAUSED").expect(200)).body.items as { id: string }[];
+      expect(paused.some((r) => r.id === created.body.id)).toBe(true);
+      await staff.c.get("/admin/commerce/repeat-deliveries?status=NOPE").expect(400);
+    });
+
     it("another user cannot read or change someone else's schedule", async () => {
       const owner = await customer();
       const other = await customer();
@@ -641,6 +678,30 @@ describe("Batch 4 — Commerce", () => {
     function requestProduct(c: Client, sellerId: string, title: string) {
       return c.post(`/seller-organizations/${sellerId}/catalog-product-requests`).send({ requestedTitle: title, brandName: "Request Brand", description: "Seller supplied product description", sourceName: "manual" });
     }
+
+    it("the directory lists active products nobody sells yet, hides drafts and other shops' state, and marks the shop's own offer", async () => {
+      const shop = await seller();
+      const other = await seller();
+      const title = `Directory food ${unique()}`;
+      const { product: listed, variant } = await product({ title });
+      const draft = await product({ title: `${title} draft` });
+      await prisma.product.update({ where: { id: draft.product.id }, data: { status: "DRAFT" } });
+      const search = (c: Client, sellerId: string) => c.get(`/seller-organizations/${sellerId}/catalog/search?q=${encodeURIComponent(title)}`);
+
+      // Not in the public shop search (no offer yet), but in the directory.
+      const publicItems = (await request(server).get(`/shop/products?search=${encodeURIComponent(title)}`).expect(200)).body.items as { id: string }[];
+      expect(publicItems.find((p) => p.id === listed.id)).toBeUndefined();
+      const before = (await search(shop.c, shop.id).expect(200)).body.items as { productId: string; variants: { id: string; myOffer: unknown }[] }[];
+      expect(before.map((i) => i.productId)).toEqual([listed.id]);
+      expect(before[0]!.variants).toEqual([expect.objectContaining({ id: variant.id, myOffer: null })]);
+
+      await shop.c.post(`/seller-organizations/${shop.id}/offers`).send({ productVariantId: variant.id, priceAmount: 450_000, initialOnHand: 5 }).expect(201);
+      const after = (await search(shop.c, shop.id).expect(200)).body.items[0];
+      expect(after.variants[0].myOffer).toMatchObject({ id: expect.any(String) });
+      // Another shop sees the product but not this shop's offer, and can't read this shop's directory view.
+      expect((await search(other.c, other.id).expect(200)).body.items[0].variants[0].myOffer).toBeNull();
+      expect([403, 404]).toContain((await search(other.c, shop.id)).status);
+    });
 
     it("requires catalog-manager access and deduplicates the same pending request", async () => {
       const owner = await seller();

@@ -5,6 +5,7 @@ import { useAdminStore } from "@/stores/admin-store";
 import { adminService } from "@/services/admin.service";
 import { ApiError } from "@/lib/api/client";
 import { AdminDashboardView } from "./AdminDashboardView";
+import { resetQueues } from "./admin-queues";
 import de from "@/messages/de.json";
 import es from "@/messages/es.json";
 import en from "@/messages/en.json";
@@ -15,10 +16,10 @@ describe("AdminDashboardView",()=>{
    if (!value || typeof value !== "object") return [prefix];
    return Object.entries(value).flatMap(([key, child]) => leafKeys(child, prefix ? `${prefix}.${key}` : key));
  };
- beforeEach(()=>{vi.clearAllMocks();useAdminStore.setState({context:{isAdmin:true,displayName:"Owner",permissions:[]} as never,status:"ready"});vi.mocked(adminService.getDashboard).mockResolvedValue({openSupportCases:12,openDisputes:2,openTrustCases:3,pendingRefundApprovals:4,openTasks:5});});
+ beforeEach(()=>{vi.clearAllMocks();resetQueues();useAdminStore.setState({context:{isAdmin:true,displayName:"Owner",permissions:[]} as never,status:"ready"});vi.mocked(adminService.getDashboard).mockResolvedValue({openSupportCases:12,openDisputes:2,openTrustCases:3,pendingRefundApprovals:4,openTasks:5} as never);});
  afterEach(()=>vi.unstubAllGlobals());
  it("never renders counts, requests or links forbidden queues",async()=>{renderWithIntl(<AdminDashboardView/>);await screen.findByText("Owner");expect(screen.queryByText("12")).toBeNull();expect(adminService.getTrustQueue).not.toHaveBeenCalled();expect(adminService.listTasks).not.toHaveBeenCalled();expect(adminService.getSystemHealth).not.toHaveBeenCalled();expect(screen.queryAllByRole("link")).toHaveLength(0);});
- it("renders an allowed count and hides withheld counts rather than treating them as zero",async()=>{useAdminStore.setState({context:{isAdmin:true,permissions:["support.view","finance.view"]} as never});vi.mocked(adminService.getDashboard).mockResolvedValue({openSupportCases:12,openDisputes:null,openTrustCases:null,pendingRefundApprovals:null,openTasks:null});renderWithIntl(<AdminDashboardView/>);await waitFor(()=>expect(screen.getByText("12")).toBeTruthy());expect(screen.queryByText("0")).toBeNull();expect(screen.queryByRole("link",{name:/refund/i})).toBeNull();});
+ it("renders an allowed count and hides withheld counts rather than treating them as zero",async()=>{useAdminStore.setState({context:{isAdmin:true,permissions:["support.view","finance.view"]} as never});vi.mocked(adminService.getDashboard).mockResolvedValue({openSupportCases:12,openDisputes:null,openTrustCases:null,pendingRefundApprovals:null,openTasks:null} as never);renderWithIntl(<AdminDashboardView/>);await waitFor(()=>expect(screen.getByText("12")).toBeTruthy());expect(screen.queryByText("0")).toBeNull();expect(screen.queryByRole("link",{name:/refund/i})).toBeNull();});
  it("distinguishes a queue request failure from an empty queue",async()=>{useAdminStore.setState({context:{isAdmin:true,permissions:["trust.view"]} as never});vi.mocked(adminService.getTrustQueue).mockRejectedValue(new Error("offline"));renderWithIntl(<AdminDashboardView/>);expect(await screen.findByRole("alert")).toBeTruthy();expect(screen.queryByText("Nothing needs attention here.")).toBeNull();});
 
  it.each([
@@ -90,7 +91,7 @@ describe("AdminDashboardView",()=>{
    expect(JSON.stringify([dashboard, search])).not.toMatch(/Your operations|Nothing waiting|Search customers|نبض کارها|تلاش دوباره/);
  });
 
- it.each([["de", "Ihr Arbeitsüberblick", "Fälle zu Vertrauen und Sicherheit", "Betriebsbereit", "Datenbank", /Fällig am 13\./], ["es", "Resumen de operaciones", "Casos de confianza y seguridad", "Operativo", "Base de datos", /Vence el 13 nov/]] as const)("renders dashboard cards, queue and system data in %s", async (locale, title, trustLabel, healthy, database, dueDate) => {
+ it.each([["de", "Dashboard", "Fälle zu Vertrauen und Sicherheit", "Betriebsbereit", "Datenbank", /Fällig am 13\./], ["es", "Panel de control", "Casos de confianza y seguridad", "Operativo", "Base de datos", /Vence el 13 nov/]] as const)("renders dashboard cards, queue and system data in %s", async (locale, title, trustLabel, healthy, database, dueDate) => {
    useAdminStore.setState({context:{isAdmin:true,displayName:"Admin",permissions:["support.view","trust.view","task.manage","system.view"]} as never});
    vi.mocked(adminService.getTrustQueue).mockResolvedValue({items:[{key:"trust-1",kind:"TRUST_CASE",severity:"HIGH",reasons:[],trustCaseId:"case-1"}]} as never);
    vi.mocked(adminService.listTasks).mockResolvedValue({items:[{id:"task-1",title:"Review submitted case",dueAt:"2026-11-13T08:00:00.000Z"}]} as never);
@@ -102,5 +103,28 @@ describe("AdminDashboardView",()=>{
    expect(screen.getByText(database)).toBeTruthy();
    expect(screen.getByText(dueDate)).toBeTruthy();
    expect(document.body.textContent).not.toMatch(/نبض کارها|صف اعتماد و امنیت|تلاش دوباره/);
+ });
+ it("orders the attention board by consequence, hides withheld queues and lists cleared ones", async () => {
+   useAdminStore.setState({context:{isAdmin:true,displayName:"Owner",permissions:["support.view","trust.view","commerce.view","dispute.view"]} as never});
+   vi.mocked(adminService.getTrustQueue).mockResolvedValue({items:[],total:0,page:1,pageSize:6} as never);
+   vi.mocked(adminService.getDashboard).mockResolvedValue({openSupportCases:4,openDisputes:0,openTrustCases:2,pendingRefundApprovals:null,openTasks:null,pendingVerifications:null,pendingRefundRequests:1,pendingOfferModeration:0,pendingCatalogRequests:0,pendingTravelListings:null,pendingSupportNeeds:0,openCommunityReports:3,pendingMemorials:0,openPlaceReports:null} as never);
+   renderWithIntl(<AdminDashboardView/>);
+   const board = await screen.findByRole("heading", { name: "Needs your attention" });
+   const card = board.closest("section")!;
+   expect(card.textContent).toContain("10 items waiting across 4 queues");
+   const links = Array.from(card.querySelectorAll("a")).map((a) => a.getAttribute("href"));
+   expect(links).toEqual(["/admin/trust", "/admin/support", "/admin/commerce/refund-requests", "/admin/community"]);
+   expect(card.textContent).toContain("Clear: Open disputes, Offers to moderate, Catalog requests, Help requests to review, Memorials to review");
+   expect(card.textContent).not.toContain("Refund approvals");
+ });
+ it("shows the launch-month goal (registered pets, weekly bookings) when the API includes it (#290 Q97)", async () => {
+   useAdminStore.setState({context:{isAdmin:true,displayName:"Owner",permissions:["support.view"]} as never});
+   vi.mocked(adminService.getDashboard).mockResolvedValue({openSupportCases:0,openDisputes:null,openTrustCases:null,pendingRefundApprovals:null,openTasks:null,pendingVerifications:null,pendingRefundRequests:null,pendingOfferModeration:null,pendingCatalogRequests:null,pendingTravelListings:null,pendingSupportNeeds:null,openCommunityReports:null,pendingMemorials:null,openPlaceReports:null,pendingWalletTopUps:null,launchKpis:{registeredPets:1240,newPetsThisWeek:85,bookingsThisWeek:31,bookingsLastWeek:24}} as never);
+   renderWithIntl(<AdminDashboardView/>, "fa");
+   const goal = (await screen.findByRole("heading", { name: "هدف ماه اول" })).closest("section")!;
+   expect(goal.textContent).toContain("حیوان‌های ثبت‌شده");
+   expect(goal.textContent).toContain("۱٬۲۴۰");
+   expect(goal.textContent).toContain("+۸۵");
+   expect(goal.textContent).toContain("+۷");
  });
 });

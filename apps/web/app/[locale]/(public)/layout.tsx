@@ -1,5 +1,8 @@
 import { PublicShell } from "@/features/app-shell/PublicShell";
 import type { Metadata } from "next";
+import "@/features/landing/opl/opl-landing.css";
+import "@/features/landing/opl/opl-body.css";
+import "@/features/reel/reel.css";
 
 // Public client views must receive HTML referencing the current build's chunks.
 // Do not retain full-route HTML across deployments (observed /de/legal assets 404).

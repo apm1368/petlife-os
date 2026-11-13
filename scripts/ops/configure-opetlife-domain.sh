@@ -91,7 +91,7 @@ systemctl reload nginx
 curl --fail --silent --show-error --retry 6 --retry-delay 3 --retry-all-errors \
   --resolve "$DOMAIN:443:127.0.0.1" "https://$DOMAIN/api/health/ready" >/dev/null
 html="$(curl --fail --silent --show-error --retry 6 --retry-delay 3 --retry-all-errors \
-  --resolve "$DOMAIN:443:127.0.0.1" "https://$DOMAIN/fa")"
+  --resolve "$DOMAIN:443:127.0.0.1" "https://$DOMAIN/")"
 asset="$(printf '%s' "$html" | grep -oE '/_next/static/chunks/[^"? ]+\.js' | head -n 1)"
 [ -n "$asset" ] || { echo "domain: rendered page did not reference a JavaScript chunk" >&2; false; }
 asset_meta="$(curl --fail --silent --show-error \

@@ -1,3 +1,5 @@
+import { OrderLifecycleService } from "../../commerce/orders/order-lifecycle.service";
+import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import {
   Body,
   Controller,
@@ -64,6 +66,10 @@ class PageDto {
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(1000) page?: number;
 }
 
+class RepeatDeliveryQueryDto extends PageDto {
+  @IsOptional() @IsIn(["ACTIVE", "PAUSED", "CANCELLED"]) status?: "ACTIVE" | "PAUSED" | "CANCELLED";
+}
+
 class AdminOrderQueryDto extends PageDto {
   @IsOptional() @IsEnum(OrderStatus) status?: OrderStatus;
   @IsOptional() @IsUUID() sellerId?: string;
@@ -110,6 +116,14 @@ class CatalogImportCreateDto {
   @IsUUID() idempotencyKey!: string;
 }
 
+/** The owner's one-time Digikala pet-category import, facts only. */
+class DigikalaFactsImportDto {
+  @IsUUID() categoryId!: string;
+  @IsOptional() @IsUUID() brandId?: string;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(3000) maxProducts?: number;
+  @IsUUID() idempotencyKey!: string;
+}
+
 class DecisionNoteDto {
   @IsOptional() @IsString() @MaxLength(500) note?: string;
 }
@@ -120,6 +134,7 @@ class ReasonDto {
 
 class CatalogImportSnapshotDecisionDto extends ReasonDto {}
 class CatalogRequestMatchDto extends ReasonDto { @IsUUID() productId!: string; }
+class CatalogRequestListQueryDto { @IsOptional() @IsIn(["PENDING", "DECIDED"]) status?: "PENDING" | "DECIDED"; }
 class CatalogRequestApproveDto extends ReasonDto { @IsUUID() categoryId!: string; @IsArray() @ArrayMaxSize(50) @IsUUID("all", { each: true }) reviewedDuplicateProductIds!: string[]; }
 
 class SellerOfferModerationDecisionDto extends ReasonDto {
@@ -211,6 +226,8 @@ export class AdminCommerceController {
     private readonly catalogImports: CatalogImportService,
     private readonly promotions: PromotionManagementService,
     private readonly sellerCatalogRequests: SellerCatalogReviewService,
+    private readonly orderLifecycle: OrderLifecycleService,
+    private readonly audit: AdminAuditLogService,
   ) {}
 
   @Get("orders")
@@ -219,9 +236,24 @@ export class AdminCommerceController {
     return this.commerce.listOrders(query);
   }
 
+  @Get("repeat-deliveries")
+  @RequireAdminPermission("commerce.view")
+  listRepeatDeliveries(@Query() query: RepeatDeliveryQueryDto) {
+    return this.commerce.listRepeatDeliveries(query);
+  }
+
   @Get("orders/:id")
   @RequireAdminPermission("commerce.view")
   getOrder(@Param("id", ParseUUIDPipe) id: string) {
+    return this.commerce.getOrder(id);
+  }
+
+  /** Staff cancel before dispatch: full refund, fulfillment cancelled, stock returned; audited with the reason. */
+  @Post("orders/:id/cancel")
+  @RequireAdminPermission("commerce.manage")
+  async cancelOrder(@Param("id", ParseUUIDPipe) id: string, @Body() dto: ReasonDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
+    const refund = await this.orderLifecycle.adminCancel(admin.userId, id, dto.reason);
+    await this.audit.record({ adminUserId: admin.adminUserId, action: "order.cancelled_by_staff", entityType: "Order", entityId: id, reason: dto.reason, afterSummary: { refundId: refund.id, amount: refund.amount, status: refund.status }, requestId: req.requestId });
     return this.commerce.getOrder(id);
   }
 
@@ -259,6 +291,12 @@ export class AdminCommerceController {
     return this.commerce.listProducts(query);
   }
 
+  @Get("products/:id")
+  @RequireAdminPermission("commerce.view")
+  productDetail(@Param("id", ParseUUIDPipe) id: string) {
+    return this.commerce.productDetail(id);
+  }
+
   @Get("product-categories")
   @RequireAdminPermission("commerce.view")
   listProductCategories() {
@@ -279,8 +317,8 @@ export class AdminCommerceController {
 
   @Get("catalog-product-requests")
   @RequireAdminPermission("commerce.view")
-  listCatalogProductRequests() {
-    return this.sellerCatalogRequests.listPending();
+  listCatalogProductRequests(@Query() query: CatalogRequestListQueryDto) {
+    return query.status === "DECIDED" ? this.sellerCatalogRequests.listDecided() : this.sellerCatalogRequests.listPending();
   }
 
   @Post("catalog-product-requests/:id/match")
@@ -315,6 +353,12 @@ export class AdminCommerceController {
     @Req() req: AdminAuthedRequest,
   ) {
     return this.catalogImports.createJob(admin, dto, req.requestId);
+  }
+
+  @Post("catalog-imports/digikala-facts")
+  @RequireAdminPermission("commerce.manage")
+  createDigikalaFactsImport(@Body() dto: DigikalaFactsImportDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
+    return this.catalogImports.createFactsJob(admin, dto, req.requestId);
   }
 
   @Post("catalog-imports/:id/cancel")

@@ -28,9 +28,24 @@ export class IdentifierRateLimiter {
 
   /** Records one event (a send, a failure) in the identifier's window. */
   async hit(bucket: string, identifier: string, windowSeconds: number): Promise<void> {
+    await this.increment(bucket, identifier, windowSeconds);
+  }
+
+  /**
+   * Check-and-record in one step: counts this event, then answers like `retryAfter` for it. Concurrent callers
+   * each get their own count, so a burst cannot all pass a check made before any of them was recorded.
+   */
+  async consume(bucket: string, identifier: string, limit: number, windowSeconds: number): Promise<number> {
+    const count = await this.increment(bucket, identifier, windowSeconds);
+    if (count <= limit) return 0;
+    return Math.max(await this.redis.ttl(this.key(bucket, identifier)), 1);
+  }
+
+  /** Window start and increment are one transaction, so a crash between them can never leave a key without a TTL. */
+  private async increment(bucket: string, identifier: string, windowSeconds: number): Promise<number> {
     const key = this.key(bucket, identifier);
-    const count = await this.redis.incr(key);
-    if (count === 1) await this.redis.expire(key, windowSeconds);
+    const replies = await this.redis.multi().set(key, "0", "EX", windowSeconds, "NX").incr(key).exec();
+    return Number(replies?.[1]?.[1] ?? 1);
   }
 
   /** A successful sign-in clears the failure budget for that identifier. */

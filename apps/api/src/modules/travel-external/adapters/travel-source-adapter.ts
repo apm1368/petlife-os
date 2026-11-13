@@ -71,10 +71,20 @@ export interface ScrapeContext {
   now: Date;
 }
 
+export interface DiscoveryOptions {
+  /** Single-listing refresh: an adapter may stop walking its result pages once this id is observed. */
+  stopAtExternalId?: string;
+}
+
 export interface DiscoveryResult {
   items: RawListing[];
   /** True only when the adapter walked its whole configured scope; partial discovery never drives removals. */
   complete: boolean;
+  /**
+   * Why a full walk ended before its scope did (a page that kept timing out, the request budget, the page cap). The
+   * engine reports such a run as PARTIAL instead of letting an unfinished crawl pass as a clean success.
+   */
+  stoppedEarly?: { category: AdapterErrorCategory; message: string };
   strategy: string;
 }
 
@@ -97,9 +107,11 @@ export interface TravelSourceAdapter {
   readonly strategy: string;
   /** False while the source's real payload hasn't been observed — the engine then refuses to sync (PARSER_PENDING). */
   readonly parserReady: boolean;
+  /** False when discovery records already carry every published field, so the engine never requests detail pages. */
+  readonly fetchesDetailPages?: boolean;
   /** Low-frequency, few-request check: is the public surface reachable and does it still look like we expect? */
   healthCheck(ctx: ScrapeContext): Promise<HealthCheckResult>;
-  discover(ctx: ScrapeContext): Promise<DiscoveryResult>;
+  discover(ctx: ScrapeContext, opts?: DiscoveryOptions): Promise<DiscoveryResult>;
   fetchDetails(ctx: ScrapeContext, externalId: string, searchRaw?: RawListing): Promise<RawListing>;
   normalize(raw: RawListing): NormalizedListing;
   extractPetPolicy(raw: RawListing, searchRaw?: RawListing): PetPolicyObservation;

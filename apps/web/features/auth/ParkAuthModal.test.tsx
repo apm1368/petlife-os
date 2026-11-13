@@ -27,11 +27,11 @@ describe("Park auth overlay", () => {
     expect(document.body.style.overflow).toBe("clip");
   });
   it("closes a multi-step flow to the originating page and preserves its filters", () => {
-    window.history.replaceState({}, "", "/fa/services/GROOMING?city=Tehran#results");
+    window.history.replaceState({}, "", "/fa/services/grooming?city=Tehran#results");
     renderWithIntl(<AuthModalOrigin><Link href="/fa/auth" onClick={event => event.preventDefault()}>Sign in</Link><ParkAuthModal registration><p>Existing form</p></ParkAuthModal></AuthModalOrigin>);
     fireEvent.click(screen.getByRole("link", { name: "Sign in" }));
     fireEvent.click(screen.getByRole("button", { name: parkAuthCopy.en.close }));
-    expect(replace).toHaveBeenCalledWith("/fa/services/GROOMING?city=Tehran#results", { scroll: false });
+    expect(replace).toHaveBeenCalledWith("/fa/services/grooming?city=Tehran#results", { scroll: false });
   });
   it("does not dismiss when clicking inside the form", () => {
     renderWithIntl(<ParkAuthModal><button type="button">Existing submit</button></ParkAuthModal>);

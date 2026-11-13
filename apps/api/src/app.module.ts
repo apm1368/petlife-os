@@ -41,6 +41,7 @@ import { ServicesModule } from "./modules/services/services.module";
 import { AddressesModule } from "./modules/addresses/addresses.module";
 import { ProviderOsModule } from "./modules/provider-os/provider-os.module";
 import { SellerOsModule } from "./modules/seller-os/seller-os.module";
+import { BusinessHubModule } from "./modules/business-hub/business-hub.module";
 import { CatalogModule } from "./modules/commerce/catalog/catalog.module";
 import { ProductEngagementModule } from "./modules/commerce/engagement/product-engagement.module";
 import { RepeatDeliveryModule } from "./modules/commerce/repeat-delivery/repeat-delivery.module";
@@ -53,6 +54,8 @@ import { RefundsModule } from "./modules/commerce/refunds/refunds.module";
 import { ReconciliationModule } from "./modules/commerce/reconciliation/reconciliation.module";
 import { OrdersModule } from "./modules/commerce/orders/orders.module";
 import { LogisticsModule } from "./modules/commerce/logistics/logistics.module";
+import { MapsModule } from "./modules/maps/maps.module";
+import { PetTaxiModule } from "./modules/pet-taxi/pet-taxi.module";
 import { MarketplaceModule } from "./modules/commerce/marketplace/marketplace.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { AdminModule } from "./modules/admin/admin.module";
@@ -71,7 +74,9 @@ import { MemberTrustModule } from "./modules/member-trust/member-trust.module";
 import { HealthDepthModule } from "./modules/health-depth/health-depth.module";
 import { PrivacyGovernanceModule } from "./modules/privacy-governance/privacy-governance.module";
 import { PlatformSettingsModule } from "./modules/platform-settings/platform-settings.module";
+import { CalendarModule } from "./modules/calendar/calendar.module";
 import { PartnerVerificationModule } from "./modules/partner-verification/partner-verification.module";
+import { PartnerOnboardingModule } from "./modules/partner-onboarding/partner-onboarding.module";
 import { TravelExternalModule } from "./modules/travel-external/travel-external.module";
 import { ConsumerHubModule } from "./modules/consumer-hub/consumer-hub.module";
 import { LostPetModule } from "./modules/lost-pet/lost-pet.module";
@@ -126,6 +131,7 @@ import { PlacesModule } from "./modules/places/places.module";
     AddressesModule,
     ProviderOsModule,
     SellerOsModule,
+    BusinessHubModule,
     CatalogModule,
     ProductEngagementModule,
     RepeatDeliveryModule,
@@ -138,6 +144,8 @@ import { PlacesModule } from "./modules/places/places.module";
     ReconciliationModule,
     OrdersModule,
     LogisticsModule,
+    MapsModule,
+    PetTaxiModule,
     MarketplaceModule,
     NotificationsModule,
     AdminModule,
@@ -149,7 +157,9 @@ import { PlacesModule } from "./modules/places/places.module";
     HealthDepthModule,
     PrivacyGovernanceModule,
     PlatformSettingsModule,
+    CalendarModule,
     PartnerVerificationModule,
+    PartnerOnboardingModule,
     TravelExternalModule,
     VetPanelModule,
     ClinicOsModule,

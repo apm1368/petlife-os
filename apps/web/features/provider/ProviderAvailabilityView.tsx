@@ -26,7 +26,7 @@ export function ProviderAvailabilityView() {
   const [editingException, setEditingException] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const tDay = useTranslations("provider.availability.day");
-  const locale = useLocale() as "fa" | "en" | "de" | "es";
+  const locale = useLocale() as "fa" | "en" | "de" | "es" | "ar" | "nl";
   const dayLabel = (day: number) => {
     const key = weekdayKey(day);
     return key ? tDay(key) : t("rules.invalidDay");

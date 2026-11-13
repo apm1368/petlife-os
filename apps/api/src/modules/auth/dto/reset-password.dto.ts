@@ -1,4 +1,4 @@
-import { IsString, Length, MinLength } from "class-validator";
+import { IsString, Length } from "class-validator";
 
 export class ResetPasswordDto {
   @IsString()
@@ -6,6 +6,7 @@ export class ResetPasswordDto {
   token!: string;
 
   @IsString()
-  @MinLength(8)
+  // Same ceiling as sign-in (LoginPasswordDto): bounds Argon2id work (64 MiB per hash) on oversized input.
+  @Length(8, 200)
   newPassword!: string;
 }

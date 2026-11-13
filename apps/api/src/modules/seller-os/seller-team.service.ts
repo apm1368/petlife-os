@@ -3,7 +3,7 @@ import { SellerMembershipRole, SellerMembershipStatus } from "@prisma/client";
 import type { SellerTeamMemberDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
-import { NotFoundApiException, SellerLastOwnerException, SellerMembershipNotFoundException } from "../../common/errors/api-exception";
+import { NotFoundApiException, SellerAccessDeniedException, SellerLastOwnerException, SellerMembershipNotFoundException } from "../../common/errors/api-exception";
 import { SellerAccessService } from "./seller-access.service";
 import type { ResolvedSellerContext } from "./auth/seller-context.types";
 
@@ -52,6 +52,8 @@ export class SellerTeamService {
       where: { OR: [input.email ? { email: input.email } : undefined, input.phone ? { phone: input.phone } : undefined].filter((c): c is NonNullable<typeof c> => !!c) },
     });
     if (!user) throw new NotFoundApiException("User", { email: input.email, phone: input.phone });
+    const current = await this.prisma.sellerMembership.findUnique({ where: { sellerOrganizationId_userId: { sellerOrganizationId: ctx.sellerOrganizationId, userId: user.id } }, select: { role: true } });
+    assertOwnershipChangeAllowed(ctx, current?.role, input.role);
 
     const now = new Date();
     const membership = await this.prisma.$transaction(async (tx) => {
@@ -87,6 +89,7 @@ export class SellerTeamService {
 
   async updateRole(ctx: ResolvedSellerContext, membershipId: string, role: SellerMembershipRole): Promise<SellerTeamMemberDto> {
     const existing = await this.loadMembership(ctx, membershipId);
+    assertOwnershipChangeAllowed(ctx, existing.role, role);
     await this.assertNotLastOwner(ctx.sellerOrganizationId, membershipId, existing.role, role === SellerMembershipRole.OWNER);
 
     const updated = await this.prisma.$transaction(async (tx) => {
@@ -104,6 +107,7 @@ export class SellerTeamService {
 
   async remove(ctx: ResolvedSellerContext, membershipId: string): Promise<SellerTeamMemberDto> {
     const existing = await this.loadMembership(ctx, membershipId);
+    assertOwnershipChangeAllowed(ctx, existing.role, undefined);
     await this.assertNotLastOwner(ctx.sellerOrganizationId, membershipId, existing.role, false);
 
     const updated = await this.prisma.$transaction(async (tx) => {
@@ -118,4 +122,15 @@ export class SellerTeamService {
 
     return toDto(updated);
   }
+}
+
+/**
+ * Ownership stays with owners: only an OWNER may make someone an OWNER, or change or remove an existing OWNER.
+ * Without this an ADMIN could promote themselves (or a friend) to OWNER and then demote or remove the real owner,
+ * or re-"invite" the owner's account at a lower role.
+ */
+function assertOwnershipChangeAllowed(ctx: ResolvedSellerContext, currentRole: SellerMembershipRole | undefined, nextRole: SellerMembershipRole | undefined): void {
+  if (ctx.role === SellerMembershipRole.OWNER) return;
+  const touchesOwner = nextRole === SellerMembershipRole.OWNER || currentRole === SellerMembershipRole.OWNER;
+  if (touchesOwner) throw new SellerAccessDeniedException({ reason: "OWNER_ONLY" });
 }

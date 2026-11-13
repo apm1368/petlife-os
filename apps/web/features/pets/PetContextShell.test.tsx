@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { renderWithIntl } from "@/test/render-with-intl";
 import enMessages from "@/messages/en.json";
@@ -167,5 +167,21 @@ describe("PetContextShell — no active pet saved yet", () => {
       "fa",
     );
     await waitFor(() => expect(householdsService.setActivePet).toHaveBeenCalledWith("h1", "cookie"));
+  });
+
+  it("updates the hero as soon as an edit below saves (QA L11: weight stayed 'not recorded' until reload)", async () => {
+    usePetStore.setState({ householdId: "h1", pets: [], activePetId: "cookie" });
+    vi.mocked(petsService.getById).mockResolvedValue({ ...(pet("cookie", "Cookie") as object), updatedAt: "2026-11-12T10:00:00.000Z" } as never);
+    renderWithIntl(
+      <PetContextShell petId="cookie">
+        <p>overview</p>
+      </PetContextShell>,
+      "en",
+    );
+    await screen.findByText("Weight");
+    const weight = () => screen.getByText("Weight").nextElementSibling?.textContent;
+    expect(weight()).toBe("Not recorded");
+    act(() => usePetStore.getState().upsertPet({ ...(pet("cookie", "Cookie") as object), latestWeightValue: "12.5", latestWeightUnit: "KG", updatedAt: "2026-11-12T10:05:00.000Z" } as never));
+    await waitFor(() => expect(weight()).toBe("12.5 kg"));
   });
 });

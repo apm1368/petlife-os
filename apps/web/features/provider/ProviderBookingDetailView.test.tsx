@@ -3,9 +3,11 @@ import { screen, waitFor, fireEvent } from "@testing-library/react";
 import type { ProviderBookingDetailDto } from "@petlife/types";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { providerOsService } from "@/services/provider-os.service";
+import { healthAdvancedService } from "@/services/health-advanced.service";
 import { ProviderBookingDetailView } from "./ProviderBookingDetailView";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+vi.mock("@/services/health-advanced.service", () => ({ healthAdvancedService: { downloadDocument: vi.fn() } }));
 vi.mock("@/services/provider-os.service", () => ({
   providerOsService: {
     getBooking: vi.fn(),
@@ -46,10 +48,12 @@ function baseDetail(overrides: Partial<ProviderBookingDetailDto> = {}): Provider
       createdAt: "2026-08-25T00:00:00.000Z",
       updatedAt: "2026-08-25T00:00:00.000Z",
     },
-    pet: { id: "pet-1", name: "Rex", species: "DOG" as never, breed: null, photoUrl: null },
+    pet: { id: "pet-1", name: "Rex", species: "DOG" as never, breed: null, photoUrl: null, identity: null },
     access: { state: "NO_GRANT", scopePreset: null, reason: null, startsAt: null, expiresAt: null, canViewCareProfile: false, canViewHealth: false },
     careProfile: null,
     healthSummary: null,
+    healthDetails: null,
+    intake: null,
     providerNotes: [],
     ...overrides,
   };
@@ -164,5 +168,88 @@ describe("ProviderBookingDetailView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Cancelar reserva" }));
     fireEvent.click(screen.getByRole("button", { name: "Sí, cancelar la reserva" }));
     await waitFor(() => expect(screen.getByText("No se pudo completar la acción. Inténtalo de nuevo.")).toBeTruthy());
+  });
+
+  describe("the pet's records the owner allowed", () => {
+    const identity = { sex: "FEMALE" as never, birthDate: null, approximateAgeMonths: 30, latestWeightValue: 12.5, latestWeightUnit: "KG" as never, hasMicrochip: true };
+    const vetBooking = (over: Partial<ProviderBookingDetailDto["booking"]> = {}) => ({ ...baseDetail().booking, category: "VET" as never, serviceName: "Checkup", ...over });
+
+    it("before the booking is assigned to the viewer it shows the pet's name and kind, and says the rest follows assignment", async () => {
+      vi.mocked(providerOsService.getBooking).mockResolvedValue(baseDetail({ booking: vetBooking(), pet: { ...baseDetail().pet, breed: "Beagle" } }));
+      renderWithIntl(<ProviderBookingDetailView bookingId="booking-1" />);
+      await waitFor(() => expect(screen.getByRole("heading", { name: "Rex" })).toBeTruthy());
+      expect(screen.getByText("Dog · Beagle")).toBeTruthy();
+      expect(screen.getByText("Sex, age, weight and microchip are shown to the team member this booking is assigned to.")).toBeTruthy();
+      expect(screen.queryByText("Microchipped")).toBeNull();
+      expect(screen.queryByRole("button", { name: "Open Clinical Record" })).toBeNull();
+    });
+
+    it("with basic identity only: general info, the owner's notes and intake answers, but no health and no clinical record", async () => {
+      vi.mocked(providerOsService.getBooking).mockResolvedValue(
+        baseDetail({
+          booking: vetBooking({ reasonForVisit: "Itchy paws", ownerNotes: "Nervous in the car" }),
+          pet: { ...baseDetail().pet, identity },
+          access: { state: "GRANTED", scopePreset: "MINIMAL_VET_CONTEXT" as never, reason: "VET_BOOKING", startsAt: "2026-08-25T00:00:00.000Z", expiresAt: "2026-09-02T10:00:00.000Z", canViewCareProfile: false, canViewHealth: false },
+          intake: { formVersion: 1, answers: [{ key: "fasted", label: "Fasted since last night?", type: "BOOLEAN", value: true }, { key: "symptoms", label: "Symptoms", type: "MULTI_SELECT", value: ["Scratching", "Licking"] }] },
+        }),
+      );
+      renderWithIntl(<ProviderBookingDetailView bookingId="booking-1" />);
+      await waitFor(() => expect(screen.getByText("Access granted")).toBeTruthy());
+      expect(screen.getByText("Female")).toBeTruthy();
+      expect(screen.getByText("2y 6m")).toBeTruthy();
+      expect(screen.getByText("12.5 kg")).toBeTruthy();
+      expect(screen.getByText("Microchipped")).toBeTruthy();
+      expect(screen.getByText("Nervous in the car")).toBeTruthy();
+      expect(screen.getByText("Owner's intake answers")).toBeTruthy();
+      expect(screen.getByText("Yes")).toBeTruthy();
+      expect(screen.getByText("Scratching, Licking")).toBeTruthy();
+      expect(screen.getByText("The owner shared basic identity only for this booking, so no health information or clinical record is available.")).toBeTruthy();
+      expect(screen.queryByText("Health context")).toBeNull();
+      expect(screen.queryByRole("button", { name: "Open Clinical Record" })).toBeNull();
+      expect(screen.queryByRole("button", { name: "Start clinical visit" })).toBeNull();
+    });
+
+    it("with health shared: allergies, conditions, medications, vaccination dates and the owner's documents, with a secure download", async () => {
+      const open = vi.spyOn(window, "open").mockReturnValue(null);
+      vi.mocked(healthAdvancedService.downloadDocument).mockResolvedValue({ downloadUrl: "https://files.example/signed", expiresInSeconds: 300 });
+      vi.mocked(providerOsService.getBooking).mockResolvedValue(
+        baseDetail({
+          booking: vetBooking(),
+          pet: { ...baseDetail().pet, identity },
+          access: { state: "GRANTED", scopePreset: "HEALTH_BASICS" as never, reason: "VET_BOOKING_HEALTH_CONSENT", startsAt: "2026-08-25T00:00:00.000Z", expiresAt: "2026-09-02T10:00:00.000Z", canViewCareProfile: true, canViewHealth: true },
+          healthSummary: { status: "PARTIAL" as never, allergyState: "KNOWN_PRESENT" as never, conditionsState: "KNOWN_NEGATIVE" as never, activeMedicationCount: 1, medicationsState: "KNOWN_PRESENT" as never, vaccinationStatus: "UP_TO_DATE" as never, nextVaccinationDueAt: "2027-05-01T00:00:00.000Z", primaryAttention: null },
+          healthDetails: {
+            allergies: [{ id: "a1", name: "Chicken", severity: "SEVERE", reaction: "Hives" }],
+            conditions: [],
+            medications: [{ id: "m1", name: "Apoquel", dosage: 16, unit: "mg", frequencyText: "daily" }],
+            vaccination: { status: "UP_TO_DATE" as never, lastKnownDate: "2026-05-01T00:00:00.000Z", nextDueDate: "2027-05-01T00:00:00.000Z", notes: null },
+            sharedDocuments: [{ id: "doc-1", petId: "pet-1", householdId: "hh-1", documentType: "LAB_REPORT" as never, title: "Blood panel", description: null, sourceType: "OWNER" as never, source: { providerOrganizationId: null, providerOrganizationName: null, providerUserId: null, providerUserDisplayTitle: null, userId: "u1" }, recordedAt: "2026-04-01T00:00:00.000Z", uploadedAt: "2026-04-02T00:00:00.000Z", mimeType: "application/pdf", fileSizeBytes: 100, visibility: "HOUSEHOLD_ONLY" as never, verificationStatus: "UNVERIFIED" as never, relatedVisitId: null, relatedLabResultId: null, relatedImagingStudyId: null, relatedReferralId: null, voidedAt: null, voidedReason: null, createdAt: "2026-04-02T00:00:00.000Z", updatedAt: "2026-04-02T00:00:00.000Z" }],
+          },
+        }),
+      );
+      renderWithIntl(<ProviderBookingDetailView bookingId="booking-1" />);
+      await waitFor(() => expect(screen.getByText("Health context")).toBeTruthy());
+      expect(screen.getByText("Chicken · Severe · Hives")).toBeTruthy();
+      expect(screen.getByText("None known")).toBeTruthy();
+      expect(screen.getByText("Apoquel · 16 mg · daily")).toBeTruthy();
+      expect(screen.getByText("Up to date")).toBeTruthy();
+      expect(screen.getByText("Next vaccination due")).toBeTruthy();
+      expect(screen.getByRole("button", { name: "Open Clinical Record" })).toBeTruthy();
+      expect(screen.getByText("Documents the owner shared for this visit")).toBeTruthy();
+      fireEvent.click(screen.getByRole("button", { name: "Secure download" }));
+      await waitFor(() => expect(healthAdvancedService.downloadDocument).toHaveBeenCalledWith("pet-1", "doc-1"));
+      await waitFor(() => expect(open).toHaveBeenCalledWith("https://files.example/signed", "_blank", "noopener,noreferrer"));
+      open.mockRestore();
+    });
+
+    it("renders the new pet and health labels in Persian", async () => {
+      vi.mocked(providerOsService.getBooking).mockResolvedValue(
+        baseDetail({ booking: vetBooking(), pet: { ...baseDetail().pet, identity }, access: { state: "GRANTED", scopePreset: "MINIMAL_VET_CONTEXT" as never, reason: "VET_BOOKING", startsAt: null, expiresAt: null, canViewCareProfile: false, canViewHealth: false } }),
+      );
+      renderWithIntl(<ProviderBookingDetailView bookingId="booking-1" />, "fa");
+      await waitFor(() => expect(screen.getByText("ماده")).toBeTruthy());
+      expect(screen.getByText("میکروچیپ")).toBeTruthy();
+      expect(screen.getByText("صاحب حیوان برای این نوبت فقط مشخصات پایه را به اشتراک گذاشته است؛ اطلاعات سلامت و پروندهٔ بالینی در دسترس نیست.")).toBeTruthy();
+    });
   });
 });

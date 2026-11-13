@@ -15,8 +15,14 @@ import { NotificationsService } from "./notifications.service";
 class GroupQueryDto {
   @IsOptional() @IsIn(NOTIFICATION_GROUPS) group?: NotificationGroup;
 }
+const VIEWER_LOCALES = ["fa", "en", "de", "es", "ar", "nl"] as const;
 class ListNotificationsQueryDto extends PaginationQueryDto {
   @IsOptional() @IsIn(NOTIFICATION_GROUPS) group?: NotificationGroup;
+  /** The UI language the inbox is read in; copy is re-rendered into it where the template allows. */
+  @IsOptional() @IsIn(VIEWER_LOCALES) locale?: string;
+}
+class ViewerLocaleQueryDto {
+  @IsOptional() @IsIn(VIEWER_LOCALES) locale?: string;
 }
 class ReadGroupKeyDto {
   @IsString() @Length(3, 200) groupKey!: string;
@@ -38,8 +44,8 @@ export class NotificationsController {
 
   /** Server-computed groups of the recent inbox (same type + same entity collapse; unrelated never merge). */
   @Get("grouped")
-  grouped(@CurrentUser() user: SessionUser) {
-    return this.notifications.grouped(user.id);
+  grouped(@CurrentUser() user: SessionUser, @Query() query: ViewerLocaleQueryDto) {
+    return this.notifications.grouped(user.id, 200, query.locale);
   }
 
   /** Selected ids (≤100): only the caller's own are touched. */

@@ -14,6 +14,7 @@ import { travelMarketService } from "@/services/travel-marketplace.service";
 import { useSessionStore } from "@/stores/session-store";
 import { amenityLabel, cancellationSummary, listingTypeLabel, MATCH_LABEL, matchReason, matchTone, money, paymentTimingSummary, policyFacts, ratingText } from "./labels";
 import { readChosenPetIds, useMyPets, writeChosenPetIds } from "./use-my-pets";
+import { placeName } from "@/lib/i18n/iran-places";
 
 /**
  * TRAVEL LISTING DETAIL PATTERN. Everything the traveller must know before paying is on this page
@@ -211,7 +212,7 @@ export function TravelListingDetailView({ listingId }: { listingId: string }) {
   return (
     <div className="flex w-full flex-col gap-6 pb-28 lg:pb-0">
       <nav aria-label={fa ? "مسیر" : "Breadcrumb"} className="text-metadata text-text-secondary">
-        <Link href={`/${lang}/travel`} className="hover:underline">{fa ? "سفر" : "Travel"}</Link> / <Link href={`/${lang}/travel/search?city=${encodeURIComponent(listing.city)}`} className="hover:underline">{listing.city}</Link>
+        <Link href={`/${lang}/travel`} className="hover:underline">{fa ? "سفر" : "Travel"}</Link> / <Link href={`/${lang}/travel/search?city=${encodeURIComponent(listing.city)}`} className="hover:underline">{placeName(listing.city, lang)}</Link>
       </nav>
 
       {images.length ? (
@@ -232,8 +233,8 @@ export function TravelListingDetailView({ listingId }: { listingId: string }) {
           <header className="flex flex-col gap-2">
             <div className="flex flex-wrap items-center gap-2 text-metadata text-text-secondary">
               <span>{listingTypeLabel(listing.type, lang)}</span>
-              <span>· {listing.city}{listing.province ? `${fa ? "، " : ", "}${listing.province}` : ""}</span>
-              {listing.isVerified ? <span className="inline-flex items-center gap-1 text-state-success"><BadgeCheck aria-hidden className="h-4 w-4" />{fa ? "تأییدشده توسط opetlife" : "Verified by opetlife"}</span> : null}
+              <span>· {placeName(listing.city, lang)}{listing.province ? `${fa ? "، " : ", "}${placeName(listing.province, lang)}` : ""}</span>
+              {listing.isVerified ? <span className="inline-flex items-center gap-1 text-state-success"><BadgeCheck aria-hidden className="h-4 w-4" />{fa ? "تأییدشده توسط اپت لایف" : "Verified by opetlife"}</span> : null}
             </div>
             <div className="flex items-start justify-between gap-3">
               <h1 className="text-page-title text-text-primary">{listing.title}</h1>
@@ -256,7 +257,7 @@ export function TravelListingDetailView({ listingId }: { listingId: string }) {
               ))}
             </dl>
             {listing.petPolicy?.notes ? <p className="text-sm text-text-primary">{listing.petPolicy.notes}</p> : null}
-            <p className="text-metadata text-text-secondary">{fa ? "opetlife این قوانین را تغییر نمی‌دهد و تضمین نمی‌کند؛ در صورت تردید پیش از سفر با اقامتگاه هماهنگ کنید." : "opetlife does not alter or guarantee these rules; if in doubt, confirm with the property before travelling."}</p>
+            <p className="text-metadata text-text-secondary">{fa ? "اپت لایف این قوانین را تغییر نمی‌دهد و تضمین نمی‌کند؛ در صورت تردید پیش از سفر با اقامتگاه هماهنگ کنید." : "opetlife does not alter or guarantee these rules; if in doubt, confirm with the property before travelling."}</p>
           </section>
 
           <section aria-labelledby="about" className="flex flex-col gap-3">
@@ -308,7 +309,7 @@ export function TravelListingDetailView({ listingId }: { listingId: string }) {
 
           <section aria-labelledby="reviews" className="flex flex-col gap-3">
             <h2 id="reviews" className="text-section-title text-text-primary">{fa ? "نظرات مهمانان" : "Guest reviews"}</h2>
-            <p className="text-metadata text-text-secondary">{fa ? "فقط مهمانانی که اقامتشان در opetlife به پایان رسیده می‌توانند نظر بدهند." : "Only guests whose opetlife stay was completed can review."}</p>
+            <p className="text-metadata text-text-secondary">{fa ? "فقط مهمانانی که اقامتشان در اپت لایف به پایان رسیده می‌توانند نظر بدهند." : "Only guests whose opetlife stay was completed can review."}</p>
             {listing.rating.count ? (
               <dl className="flex flex-wrap gap-4 text-sm">
                 {[["petFriendliness", fa ? "رفتار با حیوانات" : "Pet friendliness"], ["cleanliness", fa ? "تمیزی" : "Cleanliness"], ["location", fa ? "موقعیت" : "Location"]].map(([k, label]) => {

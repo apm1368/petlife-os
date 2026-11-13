@@ -16,7 +16,7 @@ import { formatNumber, StarRow } from "./commerce-ui";
 import type { RouteLocale } from "@/lib/i18n/config";
 
 function dateTime(value: string, locale: RouteLocale, withTime = true) {
-  const intlLocale: Record<RouteLocale, string> = { fa: "fa-IR-u-ca-persian", en: "en-GB", de: "de-DE", es: "es-ES" };
+  const intlLocale: Record<RouteLocale, string> = { fa: "fa-IR-u-ca-persian", en: "en-GB", de: "de-DE", es: "es-ES", ar: "ar", nl: "nl-NL" };
   return new Intl.DateTimeFormat(intlLocale[locale], withTime ? { dateStyle: "medium", timeStyle: "short" } : { dateStyle: "medium" }).format(new Date(value));
 }
 
@@ -30,6 +30,7 @@ function dateTime(value: string, locale: RouteLocale, withTime = true) {
 export function OrderDetailView({ orderId }: { orderId: string }) {
   const t = useTranslations("commerce.orderDetail");
   const tStatus = useTranslations("commerce.statusLabels");
+  const tShip = useTranslations("commerce.checkout.shipping");
   const locale = useLocale() as RouteLocale;
   const router = useRouter();
   const pets = usePetStore((s) => s.pets);
@@ -132,9 +133,29 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
             <div>
               <StatusLabel tone={fulfillmentTone(order.fulfillment.status)}>{tStatus(`fulfillment.${order.fulfillment.status}`)}</StatusLabel>
             </div>
+            {tracking?.shipment && tShip.has(`provider.${tracking.shipment.provider}`) ? (
+              <p className="text-metadata text-text-secondary">{t("deliveryMethod", { method: tShip(`provider.${tracking.shipment.provider}` as "provider.DEV") })}</p>
+            ) : null}
             {tracking?.shipment?.trackingCode ? (
               <p className="text-metadata text-text-secondary">
-                {t("trackingCode")}: <span dir="ltr">{tracking.shipment.trackingCode}</span>
+                {/^https:\/\//i.test(tracking.shipment.trackingCode) ? (
+                  // Snappbox/Alopeyk booked in their app share a live tracking link.
+                  <a href={tracking.shipment.trackingCode} target="_blank" rel="noopener noreferrer nofollow" className="underline">
+                    {t("courierTracking")}
+                  </a>
+                ) : (
+                  <>
+                    {t("trackingCode")}: <span dir="ltr">{tracking.shipment.trackingCode}</span>
+                  </>
+                )}
+                {tracking.shipment.provider === "POST_PISHTAZ" ? (
+                  <>
+                    {" · "}
+                    <a href="https://tracking.post.ir/" target="_blank" rel="noopener noreferrer" className="underline">
+                      {t("postTracking")}
+                    </a>
+                  </>
+                ) : null}
               </p>
             ) : null}
             {tracking?.shipment?.estimatedDeliveryAt && !tracking.shipment.actualDeliveryAt ? <p className="text-metadata text-text-secondary">{t("estimatedDelivery", { when: dateTime(tracking.shipment.estimatedDeliveryAt, locale, false) })}</p> : null}

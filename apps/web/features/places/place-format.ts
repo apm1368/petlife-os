@@ -1,8 +1,9 @@
 import { countryName } from "@/lib/number/format-number";
+import { placeName } from "@/lib/i18n/iran-places";
 
 /** "Shiraz, Iran" / «شیراز، ایران» — city and the country's name (never its ISO code) in the UI language. */
 export function placeLocation(place: { city: string | null; country: string | null }, locale: "fa" | "en"): string {
-  return [place.city, countryName(place.country, locale)].filter(Boolean).join(locale === "fa" ? "، " : ", ");
+  return [placeName(place.city, locale), countryName(place.country, locale)].filter(Boolean).join(locale === "fa" ? "، " : ", ");
 }
 
 /** Metres → kilometres with one decimal, in the UI language's digits. */

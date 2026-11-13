@@ -11,7 +11,8 @@ import { resolvePagination, toPaginatedDto, type PaginationQueryDto } from "../.
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 
-const ALLOWED_MIME_TYPES: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+const ALLOWED_MIME_TYPES: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "video/mp4": "mp4", "video/webm": "webm" };
+const isVideo = (mimeType: string) => mimeType.startsWith("video/");
 
 export interface ConfirmMediaUploadInput {
   key: string;
@@ -45,12 +46,13 @@ export class AdminMediaService {
   async requestUpload(contentType: string): Promise<UploadTarget> {
     const extension = ALLOWED_MIME_TYPES[contentType];
     if (!extension) throw new UnsupportedMediaTypeException({ contentType, allowed: Object.keys(ALLOWED_MIME_TYPES) });
-    return this.storage.createCmsMediaUploadTarget(contentType, extension);
+    const maxBytes = isVideo(contentType) ? this.config.get("CMS_VIDEO_MAX_SIZE_BYTES", { infer: true }) : this.config.get("CMS_MEDIA_MAX_SIZE_BYTES", { infer: true });
+    return this.storage.createCmsMediaUploadTarget(contentType, extension, maxBytes);
   }
 
   async confirm(admin: ResolvedAdminContext, input: ConfirmMediaUploadInput, requestId?: string): Promise<MediaAssetDto> {
     if (!ALLOWED_MIME_TYPES[input.mimeType]) throw new UnsupportedMediaTypeException({ mimeType: input.mimeType, allowed: Object.keys(ALLOWED_MIME_TYPES) });
-    const maxSize = this.config.get("CMS_MEDIA_MAX_SIZE_BYTES", { infer: true });
+    const maxSize = isVideo(input.mimeType) ? this.config.get("CMS_VIDEO_MAX_SIZE_BYTES", { infer: true }) : this.config.get("CMS_MEDIA_MAX_SIZE_BYTES", { infer: true });
     if (input.fileSizeBytes > maxSize) throw new MediaTooLargeException({ fileSizeBytes: input.fileSizeBytes, maxSize });
 
     const row = await this.prisma.$transaction(async (tx) => {

@@ -87,10 +87,12 @@ export const adminService = {
 
   // Support cases
   listSupportCases: (
-    input: { status?: SupportCaseStatus; assignedAdminId?: string; category?: SupportCaseCategory; search?: string; createdFrom?: string; createdTo?: string } & AdminPaginationInput = {},
+    input: { status?: SupportCaseStatus; assignedAdminId?: string; category?: SupportCaseCategory; search?: string; createdFrom?: string; createdTo?: string; requesterKind?: "PARTNER" | "PROVIDER" | "SELLER" | "PERSONAL"; requesterOrgId?: string } & AdminPaginationInput = {},
   ) =>
     apiFetch<PaginatedDto<SupportCaseSummaryDto>>(
       `/admin/support${toQueryString({
+        requesterKind: input.requesterKind,
+        requesterOrgId: input.requesterOrgId,
         status: input.status,
         assignedAdminId: input.assignedAdminId,
         category: input.category,

@@ -3,26 +3,26 @@ import { localizeDigits } from "@/lib/date/jalali";
 import { statusLabel } from "@/lib/status/status-labels";
 
 /** Shared pet identity text — the pet header, the home hero and the pet list say the same thing. */
-type Locale = "fa" | "en" | "de" | "es";
-const localeIndex: Record<Locale, number> = { fa: 0, en: 1, de: 2, es: 3 };
-const intlLocale = (locale: Locale) => ({ fa: "fa-IR", en: "en-US", de: "de-DE", es: "es-ES" })[locale];
-export const SPECIES_LABELS: Record<string, [string, string, string, string]> = {
-  DOG: ["سگ", "Dog", "Hund", "Perro"],
-  CAT: ["گربه", "Cat", "Katze", "Gato"],
-  BIRD: ["پرنده", "Bird", "Vogel", "Ave"],
-  RABBIT: ["خرگوش", "Rabbit", "Kaninchen", "Conejo"],
-  RODENT: ["جونده (همستر، خوکچهٔ هندی…)", "Small rodent (hamster, guinea pig…)", "Kleinnager (Hamster, Meerschweinchen …)", "Roedor pequeño (hámster, cobaya…)"],
-  FISH: ["ماهی", "Fish", "Fisch", "Pez"],
-  REPTILE: ["خزنده", "Reptile", "Reptil", "Reptil"],
-  OTHER: ["سایر", "Other", "Andere", "Otro"],
+type Locale = "fa" | "en" | "de" | "es" | "ar" | "nl";
+const localeIndex: Record<Locale, number> = { fa: 0, en: 1, de: 2, es: 3, ar: 4, nl: 5 };
+const intlLocale = (locale: Locale) => ({ fa: "fa-IR", en: "en-US", de: "de-DE", es: "es-ES", ar: "ar", nl: "nl-NL" })[locale];
+export const SPECIES_LABELS: Record<string, [string, string, string, string, string, string]> = {
+  DOG: ["سگ", "Dog", "Hund", "Perro", "كلب", "Hond"],
+  CAT: ["گربه", "Cat", "Katze", "Gato", "قطة", "Kat"],
+  BIRD: ["پرنده", "Bird", "Vogel", "Ave", "طائر", "Vogel"],
+  RABBIT: ["خرگوش", "Rabbit", "Kaninchen", "Conejo", "أرنب", "Konijn"],
+  RODENT: ["جونده (همستر، خوکچهٔ هندی…)", "Small rodent (hamster, guinea pig…)", "Kleinnager (Hamster, Meerschweinchen …)", "Roedor pequeño (hámster, cobaya…)", "قارض صغير (هامستر، خنزير غينيا…)", "Klein knaagdier (hamster, cavia…)"],
+  FISH: ["ماهی", "Fish", "Fisch", "Pez", "سمكة", "Vis"],
+  REPTILE: ["خزنده", "Reptile", "Reptil", "Reptil", "زاحف", "Reptiel"],
+  OTHER: ["سایر", "Other", "Andere", "Otro", "أخرى", "Anders"],
 };
 
 /** Short species name for identity lines ("Rodent" rather than the long picker hint). */
-const SPECIES_SHORT: Record<string, [string, string, string, string]> = { RODENT: ["جونده", "Rodent", "Nager", "Roedor"] };
+const SPECIES_SHORT: Record<string, [string, string, string, string, string, string]> = { RODENT: ["جونده", "Rodent", "Nager", "Roedor", "قارض", "Knaagdier"] };
 
 export function speciesLabel(pet: Pick<PetDto, "species">, locale: Locale): string {
   const entry = SPECIES_SHORT[pet.species] ?? SPECIES_LABELS[pet.species];
-  return entry ? entry[localeIndex[locale]]! : ({ fa: "حیوان", en: "Pet", de: "Tier", es: "Mascota" }[locale]);
+  return entry ? entry[localeIndex[locale]]! : ({ fa: "حیوان", en: "Pet", de: "Tier", es: "Mascota", ar: "حيوان أليف", nl: "Huisdier" }[locale]);
 }
 
 export function petAgeMonths(pet: Pick<PetDto, "birthDate" | "approximateAgeMonths">): number | null {
@@ -47,7 +47,7 @@ export function formatAge(pet: Pick<PetDto, "birthDate" | "approximateAgeMonths"
 /** "۱۸ کیلوگرم" / "18 kg"; `unknown` when no weight is recorded. Presentation only — the stored value is untouched. */
 export function formatWeight(pet: Pick<PetDto, "latestWeightValue" | "latestWeightUnit">, locale: Locale, unknown: string): string {
   if (pet.latestWeightValue === null || pet.latestWeightValue === undefined) return unknown;
-  const units = { fa: { lb: "پوند", kg: "کیلوگرم" }, en: { lb: "lb", kg: "kg" }, de: { lb: "lb", kg: "kg" }, es: { lb: "lb", kg: "kg" } }[locale];
+  const units = { fa: { lb: "پوند", kg: "کیلوگرم" }, en: { lb: "lb", kg: "kg" }, de: { lb: "lb", kg: "kg" }, es: { lb: "lb", kg: "kg" }, ar: { lb: "رطل", kg: "كغ" }, nl: { lb: "lb", kg: "kg" } }[locale];
   const unit = pet.latestWeightUnit === "LB" ? units.lb : units.kg;
   // The API serialises the decimal weight as a string; format the number, not the string.
   const value = Number(pet.latestWeightValue).toLocaleString(intlLocale(locale), { maximumFractionDigits: 2 });
@@ -56,5 +56,5 @@ export function formatWeight(pet: Pick<PetDto, "latestWeightValue" | "latestWeig
 
 /** The labels PetIdentity (UI package, no i18n) needs, in the UI language. */
 export function petIdentityLabels(pet: Pick<PetDto, "species" | "lifecycleStatus">, locale: Locale) {
-  return { active: ({ fa: "فعال", en: "Active", de: "Aktiv", es: "Activo" }[locale]), species: speciesLabel(pet, locale), lifecycle: statusLabel(pet.lifecycleStatus, locale, "lifecycle") };
+  return { active: ({ fa: "فعال", en: "Active", de: "Aktiv", es: "Activo", ar: "نشط", nl: "Actief" }[locale]), species: speciesLabel(pet, locale), lifecycle: statusLabel(pet.lifecycleStatus, locale, "lifecycle") };
 }

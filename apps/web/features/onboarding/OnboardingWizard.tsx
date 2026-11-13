@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { ErrorRecovery, Skeleton } from "@petlife/ui";
 import { onboardingService } from "@/services/onboarding.service";
 import { petsService } from "@/services/pets.service";
+import { reloadHouseholdPets } from "@/hooks/use-app-bootstrap";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { sanitizeReturnTo } from "@/lib/auth/return-to";
 import { HouseholdStep } from "./steps/HouseholdStep";
@@ -59,6 +60,8 @@ function OnboardingWizardInner() {
       if (cancelled) return;
 
       if (progress.status === "COMPLETED" && progress.chapter === "READY") {
+        await reloadHouseholdPets().catch(() => undefined);
+        if (cancelled) return;
         router.replace(sanitizeReturnTo(returnTo, `/${locale}/home`));
         return;
       }
@@ -174,7 +177,7 @@ function OnboardingWizardInner() {
   const current = STEP_ORDER.indexOf(step);
   const groups = locale === "fa" ? ["خانواده", "آشنایی با حیوان", "سلامت و مراقبت", "آماده‌اید"] : ["Household", "Meet your pet", "Health & care", "Ready"];
   const activeGroup = current === 0 ? 0 : current < 7 ? 1 : current < 13 ? 2 : 3;
-  return <div className="onboarding-layout"><aside><p className="text-metadata text-text-secondary">{locale === "fa" ? "به خانواده opetlife خوش آمدید" : "Welcome to the opetlife family"}</p><ol className="mt-6 space-y-4">{groups.map((label, index) => <li key={label} aria-current={index === activeGroup ? "step" : undefined} className="flex items-center gap-3 text-body"><span className="onboarding-step-number">{new Intl.NumberFormat(locale).format(index + 1)}</span>{label}</li>)}</ol><p className="mt-8 text-metadata text-text-secondary" role="status">{locale === "fa" ? "مرحله" : "Step"} {new Intl.NumberFormat(locale).format(current + 1)} / {new Intl.NumberFormat(locale).format(STEP_ORDER.length)}</p><progress className="mt-3 w-full accent-brand-natural" value={current + 1} max={STEP_ORDER.length} aria-label={locale === "fa" ? "پیشرفت راه‌اندازی" : "Onboarding progress"} /></aside><section className="min-w-0">{recoveredIdentity && <p className="calm-note mb-5" role="status">{t("resumeIdentity")}</p>}{renderStep()}</section></div>;
+  return <div className="onboarding-layout"><aside><p className="text-metadata text-text-secondary">{locale === "fa" ? "به خانواده اپت لایف خوش آمدید" : "Welcome to the opetlife family"}</p><ol className="mt-6 space-y-4">{groups.map((label, index) => <li key={label} aria-current={index === activeGroup ? "step" : undefined} className="flex items-center gap-3 text-body"><span className="onboarding-step-number">{new Intl.NumberFormat(locale).format(index + 1)}</span>{label}</li>)}</ol><p className="mt-8 text-metadata text-text-secondary" role="status">{locale === "fa" ? "مرحله" : "Step"} {new Intl.NumberFormat(locale).format(current + 1)} / {new Intl.NumberFormat(locale).format(STEP_ORDER.length)}</p><progress className="mt-3 w-full accent-brand-natural" value={current + 1} max={STEP_ORDER.length} aria-label={locale === "fa" ? "پیشرفت راه‌اندازی" : "Onboarding progress"} /></aside><section className="min-w-0">{recoveredIdentity && <p className="calm-note mb-5" role="status">{t("resumeIdentity")}</p>}{renderStep()}</section></div>;
 }
 
 export function OnboardingWizard() {

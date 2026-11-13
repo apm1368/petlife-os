@@ -4564,7 +4564,7 @@ describe("PET LIFE OS critical paths (e2e)", () => {
 
     it("returns the enabled auth methods without requiring a session", async () => {
       const res = await request(app.getHttpServer()).get("/auth/methods").expect(200);
-      expect(res.body).toEqual({ google: false, phone: true, password: true });
+      expect(res.body).toEqual({ google: false, phone: true, password: true, passwordSignup: true });
     });
   });
 

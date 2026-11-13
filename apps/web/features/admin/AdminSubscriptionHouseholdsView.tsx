@@ -8,6 +8,7 @@ import { Button, ContextSurface, EmptyState, ErrorRecovery, Select, Skeleton, St
 import type { AdminSubscriptionSummaryDto, PaginatedDto } from "@petlife/types";
 import { SubscriptionStatus } from "@petlife/types";
 import { adminSubscriptionService } from "@/services/admin-subscription.service";
+import { intlLocale } from "@/features/admin/admin-copy";
 
 const STATUS_TONE: Record<SubscriptionStatus, "neutral" | "success" | "attention" | "higherConcern" | "urgent"> = {
   [SubscriptionStatus.TRIALING]: "neutral",
@@ -33,7 +34,7 @@ export function AdminSubscriptionHouseholdsView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const paging = useTranslations("admin.orgs");
-  const number = (value: number) => value.toLocaleString(locale === "fa" ? "fa-IR" : "en-US");
+  const number = (value: number) => value.toLocaleString(intlLocale(locale));
 
   useEffect(() => {
     let current = true;

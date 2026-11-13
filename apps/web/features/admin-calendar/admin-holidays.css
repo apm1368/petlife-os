@@ -1,0 +1,9 @@
+/* Settings → Holidays and closures */
+.gx-holidays-add, .gx-holidays-confirm { display: grid; gap: 12px; }
+.gx-holidays-add h2, .gx-holidays-confirm h2 { display: flex; align-items: center; gap: 8px; margin: 0; }
+.gx-holidays-add p, .gx-holidays-confirm p { margin: 0; }
+.gx-holidays-fields { display: grid; gap: 12px; grid-template-columns: minmax(150px, 0.8fr) minmax(0, 1.2fr) minmax(0, 1.6fr); }
+@media (max-width: 760px) { .gx-holidays-fields { grid-template-columns: 1fr; } }
+.gx-holidays-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.gx-holidays-reason { display: block; margin-top: 2px; font-size: 0.74rem; }
+.gx-holidays-past td { opacity: 0.6; }

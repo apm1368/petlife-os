@@ -1,4 +1,4 @@
-import { roleHasPermission } from "../auth/admin-permissions";
+import { adminCan } from "../auth/admin-permissions";
 import { Injectable } from "@nestjs/common";
 import type { Prisma } from "@prisma/client";
 import type {
@@ -76,9 +76,9 @@ export class AdminCustomerService {
    */
   async globalSearch(q: string, admin: ResolvedAdminContext): Promise<AdminSearchResultDto> {
     const searched = {
-      customers: roleHasPermission(admin.role, "customer.view"),
-      orders: roleHasPermission(admin.role, "commerce.view"),
-      supportCases: roleHasPermission(admin.role, "support.view"),
+      customers: adminCan(admin, "customer.view"),
+      orders: adminCan(admin, "commerce.view"),
+      supportCases: adminCan(admin, "support.view"),
     };
     if (!q) return { customers: [], orders: [], supportCases: [], searched };
     // Order.id is a Postgres UUID column — no partial/prefix match is
@@ -103,7 +103,7 @@ export class AdminCustomerService {
     return {
       customers: users.map(toListItem),
       orders: orders.map(toOrderSummary),
-      supportCases: cases.map(toSupportCaseSummaryDto),
+      supportCases: cases.map((row) => toSupportCaseSummaryDto(row)),
       searched,
     };
   }
@@ -152,7 +152,7 @@ export class AdminCustomerService {
 
     const orderDtos = orders.map(toOrderSummary);
     const bookingDtos = bookings.map((b) => ({ id: b.id, category: b.category, bookingStatus: b.bookingStatus, startAt: b.startAt.toISOString(), petId: b.petId }));
-    const supportCaseDtos = supportCases.map(toSupportCaseSummaryDto);
+    const supportCaseDtos = supportCases.map((row) => toSupportCaseSummaryDto(row));
     const disputeDtos = disputes.map(toDisputeDto);
     const noteDtos = internalNotes.map((n) => ({
       id: n.id,

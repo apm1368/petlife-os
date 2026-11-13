@@ -28,7 +28,7 @@ const SECTION_HINT: Record<Section, string> = {
   desk: "کارها و پرونده‌های خودت",
   leads: "جذب کلینیک، پت‌شاپ، آرایشگاه و پانسیون",
   upgrades: "خانوارهایی که از پلن فعلی‌شان فراتر رفته‌اند",
-  households: "مشتری opetlife یک خانوار است، نه یک نفر",
+  households: "مشتری اپت لایف یک خانوار است، نه یک نفر",
   tickets: "بار پشتیبانی روی هر رابطه",
   calls: "گزارش تماس‌ها و ارزیابی کیفیت",
   reports: "روند شش ماه گذشته و اثربخشی کانال‌ها",
@@ -81,7 +81,7 @@ export function CrmWorkspace() {
     <div dir="rtl" lang="fa" className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-page-title text-text-primary">CRM opetlife</h1>
+          <h1 className="text-page-title text-text-primary">CRM اپت لایف</h1>
           <p className="mt-0.5 text-metadata text-text-secondary">{SECTION_HINT[section]}</p>
         </div>
         <label className="flex items-center gap-2">

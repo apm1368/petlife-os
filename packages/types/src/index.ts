@@ -2,7 +2,7 @@
 // Keep in sync with apps/api/prisma/schema.prisma enums — this package has no
 // runtime dependency on Prisma so it stays usable from the frontend.
 
-export type Locale = "fa" | "en" | "de" | "es";
+export type Locale = "fa" | "en" | "de" | "es" | "ar" | "nl";
 export type ThemePreference = "SYSTEM" | "LIGHT" | "DARK";
 
 /** VALIDATION_ERROR.details for a pet chip already on file. */
@@ -754,6 +754,8 @@ export interface CustomerAddressDto {
   /** Batch 4 — Iranian 10-digit postal code, when known. */
   postalCode?: string | null;
   isDefault?: boolean;
+  /** Neighbourhood / district (محله). */
+  area?: string | null;
 }
 
 /** A single (provider, service) discovery result row — one provider can appear multiple times, once per matching service. */
@@ -866,6 +868,8 @@ export interface BookingDto {
   paymentStatus: PaymentStatus;
   reasonForVisit: string | null;
   ownerNotes: string | null;
+  /** When the owner confirmed they will attend (after an automatic reminder or from the booking page). */
+  attendanceConfirmedAt?: string | null;
   cancelledAt: string | null;
   cancelledReason: string | null;
   /** Handoff 05: set only by the Provider OS's POST .../complete transition. */
@@ -1008,6 +1012,8 @@ export interface ProviderAvailabilityExceptionDto {
 export interface ProviderBookingSummaryDto {
   id: string;
   petId: string;
+  /** The owner confirmed they will attend (from the automatic reminder or the booking page). */
+  attendanceConfirmedAt?: string | null;
   petName: string;
   petSpecies: PetSpecies;
   ownerDisplayName: string;
@@ -1045,6 +1051,43 @@ export interface ProviderPetAccessContextDto {
   canViewHealth: boolean;
 }
 
+/**
+ * The pet's general, non-medical identity — every booking scope includes it, so it is returned only while
+ * the viewer holds this booking's active grant. Microchip presence only, never the number.
+ */
+export interface ProviderBookingPetIdentityDto {
+  sex: PetSex | null;
+  birthDate: string | null;
+  approximateAgeMonths: number | null;
+  latestWeightValue: number | null;
+  latestWeightUnit: WeightUnit | null;
+  hasMicrochip: boolean;
+}
+
+/** One summary row per pet (see VaccinationSummary) — dates are calendar dates, never implied. */
+export interface ProviderVaccinationSummaryDto {
+  status: VaccinationStatus;
+  lastKnownDate: string | null;
+  nextDueDate: string | null;
+  notes: string | null;
+}
+
+/** Only when the owner chose to share health for this booking and the viewer holds its active grant. */
+export interface ProviderBookingHealthDetailsDto {
+  allergies: { id: string; name: string; severity: string | null; reaction: string | null }[];
+  conditions: { id: string; name: string; notes: string | null }[];
+  medications: { id: string; name: string; dosage: number | null; unit: string | null; frequencyText: string | null }[];
+  vaccination: ProviderVaccinationSummaryDto;
+  /** The owner's documents ticked for this booking — download through the pet's signed document download. */
+  sharedDocuments: MedicalDocumentDto[];
+}
+
+/** The service's intake form as the owner answered it for this booking (same shape as GET /provider/bookings/:id/intake). */
+export interface ProviderBookingIntakeDto {
+  formVersion: number;
+  answers: { key: string; label: string; type: string; value: unknown }[];
+}
+
 export interface ProviderBookingDetailDto {
   booking: ProviderBookingSummaryDto & {
     reasonForVisit: string | null;
@@ -1058,10 +1101,12 @@ export interface ProviderBookingDetailDto {
     createdAt: string;
     updatedAt: string;
   };
-  pet: { id: string; name: string; species: PetSpecies; breed: string | null; photoUrl: string | null };
+  pet: { id: string; name: string; species: PetSpecies; breed: string | null; photoUrl: string | null; identity: ProviderBookingPetIdentityDto | null };
   access: ProviderPetAccessContextDto;
   careProfile: CareProfileDto | null;
   healthSummary: HealthSummaryDto | null;
+  healthDetails: ProviderBookingHealthDetailsDto | null;
+  intake: ProviderBookingIntakeDto | null;
   providerNotes: BookingProviderNoteDto[];
 }
 
@@ -1438,6 +1483,9 @@ export interface SellerOrganizationSummaryDto {
   verificationStatus: SellerVerificationStatus;
   status: SellerStatus;
   city: string | null;
+  /** Public storefront address (/shop/sellers/{slug}) and logo, when the seller has them. */
+  slug?: string | null;
+  logoUrl?: string | null;
 }
 
 export interface SellerOfferDto {
@@ -1524,6 +1572,30 @@ export interface ProductSummaryDto {
   supportedSpecies?: Array<`${PetSpecies}`>;
 }
 
+/** Facts that help a shopper trust an offer: only what the platform actually enforces or has measured. */
+export interface ProductTrustDto {
+  /** The platform's refund window after delivery (damaged, wrong or expired items), in hours. */
+  returnWindowHours: number;
+  /** Published review averages per seller (from verified purchases); a seller without reviews is absent. */
+  sellerRatings: Record<string, { average: number; count: number }>;
+}
+
+export interface PublicSellerStorefrontDto {
+  seller: {
+    id: string;
+    slug: string | null;
+    name: string;
+    logoUrl: string | null;
+    description: string | null;
+    city: string | null;
+    verified: boolean;
+    memberSince: string;
+    rating: { average: number; count: number } | null;
+  };
+  products: ProductSummaryDto[];
+  total: number;
+}
+
 export interface ProductDetailDto {
   id: string;
   title: string;
@@ -1545,6 +1617,7 @@ export interface ProductDetailDto {
   reviews: ProductReviewDto[];
   related: ProductSummaryDto[];
   favorited: boolean;
+  trust?: ProductTrustDto;
   supportsDog: boolean;
   supportsCat: boolean;
   supportedSpecies?: Array<`${PetSpecies}`>;
@@ -1807,6 +1880,12 @@ export enum ShippingProvider {
   DEV = "DEV",
   ALOPEYK = "ALOPEYK",
   SNAPPBOX = "SNAPPBOX",
+  /** opetlife's own couriers (staff-set zone/distance pricing, staff-updated status). */
+  OPETLIFE_COURIER = "OPETLIFE_COURIER",
+  /** Iran Post express (Pishtaz): staff-set fixed price, staff-entered tracking number. */
+  POST_PISHTAZ = "POST_PISHTAZ",
+  SNAPPBOX_APP = "SNAPPBOX_APP",
+  ALOPEYK_APP = "ALOPEYK_APP",
 }
 
 export enum FulfillmentStatus {
@@ -1860,6 +1939,11 @@ export interface AddressSnapshotDto {
   region: string | null;
   countryCode: string | null;
   instructions: string | null;
+  /** Neighbourhood, postal code and map point when known (older snapshots have none). */
+  area?: string | null;
+  postalCode?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface ShippingQuoteDto {
@@ -1874,6 +1958,98 @@ export interface ShippingQuoteDto {
   status: ShippingQuoteStatus;
   expiresAt: string;
   createdAt: string;
+  /** How the price was reached, so the member is told when it is only an estimate. */
+  pricingBasis?: ShippingPricingBasis | null;
+}
+
+/**
+ * API: the courier's live quote. SANDBOX_ESTIMATE: shipping runs in sandbox, no courier was asked.
+ * DISTANCE_ESTIMATE: opetlife courier, straight-line distance x road factor. CITY_FLAT: opetlife courier city fare.
+ * FIXED_PRICE: Post Pishtaz price set by staff.
+ */
+export type ShippingPricingBasis = "API" | "SANDBOX_ESTIMATE" | "DISTANCE_ESTIMATE" | "CITY_FLAT" | "FIXED_PRICE";
+
+/** opetlife courier pricing rules (integer rials). */
+export interface OpetlifeCourierConfig {
+  /** Cities served (exact names as members type them, e.g. "تهران"); empty = every city. */
+  cities: string[];
+  baseFareIrr: number;
+  perKmIrr: number;
+  minFareIrr: number;
+  /** Beyond this straight-line x road-factor distance the courier is not offered. */
+  maxKm: number;
+  /** Straight-line to road distance multiplier, e.g. 1.3. */
+  roadFactor: number;
+  /** Fare when either side has no map point: per city, then the default. 0 = not offered without a map point. */
+  cityFlatFareIrr: Record<string, number>;
+  defaultFlatFareIrr: number;
+  /** Minutes to pick up, and minutes of travel per km. */
+  pickupMinutes: number;
+  minutesPerKm: number;
+}
+
+/** Post Pishtaz fixed pricing (integer rials). */
+export interface PostPishtazConfig {
+  fixedPriceIrr: number;
+  /** Weight included in the fixed price; each started kilo above it adds perExtraKgIrr. */
+  includedKg: number;
+  perExtraKgIrr: number;
+  etaDaysMin: number;
+  etaDaysMax: number;
+}
+
+export interface AdminShippingMethodDto {
+  provider: ShippingProvider;
+  /** Staff switch (for API couriers it can only turn an env-enabled courier off). */
+  enabled: boolean;
+  /** What actually applies now: env flag, credentials, mode and the staff switch together. */
+  active: boolean;
+  /** API couriers: why the method is not active (e.g. "SANDBOX", "DISABLED_IN_ENV"). */
+  note: string | null;
+  kind: "API" | "MANUAL";
+  config: OpetlifeCourierConfig | PostPishtazConfig | Record<string, never>;
+  webhookSecretConfigured: boolean | null;
+  updatedAt: string | null;
+}
+
+export interface AdminShippingOverviewDto {
+  mode: "sandbox" | "production";
+  methods: AdminShippingMethodDto[];
+}
+
+export interface AdminShipmentListItemDto {
+  id: string;
+  provider: ShippingProvider;
+  status: ShipmentStatus;
+  trackingCode: string | null;
+  orderId: string;
+  sellerName: string;
+  deliveryCity: string | null;
+  createdAt: string;
+  updatedAt: string;
+  /** Only opetlife courier and Post shipments are moved by staff; API couriers report their own status. */
+  staffManaged: boolean;
+}
+
+export interface SellerShippingProfileDto {
+  sellerOrganizationId: string;
+  /** Methods this seller offers; empty means every method the platform has switched on. */
+  offeredProviders: ShippingProvider[];
+  /** Methods the platform has switched on right now (the seller chooses among these). */
+  availableProviders: ShippingProvider[];
+  pickup: {
+    contactName: string | null;
+    phone: string | null;
+    addressLine: string | null;
+    city: string | null;
+    region: string | null;
+    area: string | null;
+    postalCode: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    instructions: string | null;
+  };
+  updatedAt: string | null;
 }
 
 /** One seller's shipping-option set for a Checkout (spec section 28: "shipping options per seller"). At most one quote in `quotes` has `status: SELECTED`. */
@@ -2592,6 +2768,46 @@ export enum TrustCaseStatus {
   CLOSED = "CLOSED",
 }
 
+/**
+ * Allowed case status moves, mirrored from the API's authoritative tables (trust-case-transitions.ts,
+ * dispute-transitions.ts, support-case-transitions.ts; a spec there keeps them equal). The admin UI uses
+ * them only to offer valid next steps — the API still validates every transition.
+ */
+export const TRUST_CASE_NEXT: Record<TrustCaseStatus, TrustCaseStatus[]> = {
+  [TrustCaseStatus.OPEN]: [TrustCaseStatus.UNDER_REVIEW, TrustCaseStatus.CLOSED],
+  [TrustCaseStatus.UNDER_REVIEW]: [TrustCaseStatus.RESOLVED, TrustCaseStatus.CLOSED],
+  [TrustCaseStatus.RESOLVED]: [TrustCaseStatus.CLOSED],
+  [TrustCaseStatus.CLOSED]: [],
+};
+
+const DISPUTE_DECISIONS = [
+  DisputeStatus.RESOLVED_CUSTOMER,
+  DisputeStatus.RESOLVED_PROVIDER,
+  DisputeStatus.RESOLVED_SELLER,
+  DisputeStatus.PARTIAL_RESOLUTION,
+  DisputeStatus.REJECTED,
+];
+export const DISPUTE_NEXT: Record<DisputeStatus, DisputeStatus[]> = {
+  [DisputeStatus.OPEN]: [DisputeStatus.UNDER_REVIEW, DisputeStatus.AWAITING_EVIDENCE, DisputeStatus.REJECTED, DisputeStatus.CLOSED],
+  [DisputeStatus.UNDER_REVIEW]: [DisputeStatus.AWAITING_EVIDENCE, ...DISPUTE_DECISIONS, DisputeStatus.CLOSED],
+  [DisputeStatus.AWAITING_EVIDENCE]: [DisputeStatus.UNDER_REVIEW, ...DISPUTE_DECISIONS, DisputeStatus.CLOSED],
+  [DisputeStatus.RESOLVED_CUSTOMER]: [DisputeStatus.CLOSED],
+  [DisputeStatus.RESOLVED_PROVIDER]: [DisputeStatus.CLOSED],
+  [DisputeStatus.RESOLVED_SELLER]: [DisputeStatus.CLOSED],
+  [DisputeStatus.PARTIAL_RESOLUTION]: [DisputeStatus.CLOSED],
+  [DisputeStatus.REJECTED]: [DisputeStatus.CLOSED],
+  [DisputeStatus.CLOSED]: [],
+};
+
+export const SUPPORT_CASE_NEXT: Record<SupportCaseStatus, SupportCaseStatus[]> = {
+  [SupportCaseStatus.OPEN]: [SupportCaseStatus.IN_PROGRESS, SupportCaseStatus.WAITING_ON_USER, SupportCaseStatus.WAITING_ON_INTERNAL, SupportCaseStatus.RESOLVED, SupportCaseStatus.CLOSED],
+  [SupportCaseStatus.IN_PROGRESS]: [SupportCaseStatus.WAITING_ON_USER, SupportCaseStatus.WAITING_ON_INTERNAL, SupportCaseStatus.RESOLVED, SupportCaseStatus.CLOSED],
+  [SupportCaseStatus.WAITING_ON_USER]: [SupportCaseStatus.IN_PROGRESS, SupportCaseStatus.RESOLVED, SupportCaseStatus.CLOSED],
+  [SupportCaseStatus.WAITING_ON_INTERNAL]: [SupportCaseStatus.IN_PROGRESS, SupportCaseStatus.RESOLVED, SupportCaseStatus.CLOSED],
+  [SupportCaseStatus.RESOLVED]: [SupportCaseStatus.CLOSED, SupportCaseStatus.IN_PROGRESS],
+  [SupportCaseStatus.CLOSED]: [SupportCaseStatus.IN_PROGRESS],
+};
+
 export enum TrustActionType {
   WARNING = "WARNING",
   RESTRICT = "RESTRICT",
@@ -2681,6 +2897,8 @@ export interface SupportCaseSummaryDto {
   reopenCount?: number;
   /** Admin-only human follow-up request, if one has been recorded. */
   humanEscalation?: { referenceNumber: string; reason: string; confirmedAt: string } | null;
+  /** Set when a partner opened the case from their business panel; admin support lists these under Partners. */
+  requesterOrganization?: SupportCaseRequesterOrgDto | null;
 }
 
 export interface SupportCaseDetailDto extends SupportCaseSummaryDto {
@@ -2752,6 +2970,35 @@ export interface SupportCaseUserSummaryDto {
 }
 
 export interface SupportCaseUserDetailDto extends SupportCaseUserSummaryDto {
+  description: string;
+  messages: SupportMessageDto[];
+}
+
+/** The business (provider or shop) a partner case was opened for. */
+export interface SupportCaseRequesterOrgDto {
+  type: "PROVIDER" | "SELLER";
+  id: string;
+  name: string | null;
+}
+
+/**
+ * Categories a partner can pick in their business panel. PROVIDER / SELLER
+ * is the general "about my business" topic; the rest are the money and
+ * order questions partners actually raise.
+ */
+export const PARTNER_SUPPORT_CATEGORIES = ["PROVIDER", "SELLER", "ACCOUNT", "PAYMENT", "BOOKING", "ORDER", "DELIVERY", "SERVICE", "MARKETPLACE", "OTHER"] as const;
+export type PartnerSupportCategory = (typeof PARTNER_SUPPORT_CATEGORIES)[number];
+
+/**
+ * A case seen from a partner panel. Same user-facing status as the personal
+ * support centre (no priority, no assignee), plus who on the team opened it.
+ */
+export interface SupportCasePartnerSummaryDto extends SupportCaseUserSummaryDto {
+  openedBy: { id: string; displayName: string; isMe: boolean };
+  organization: SupportCaseRequesterOrgDto;
+}
+
+export interface SupportCasePartnerDetailDto extends SupportCasePartnerSummaryDto {
   description: string;
   messages: SupportMessageDto[];
 }
@@ -2848,9 +3095,15 @@ export interface TrustCaseDto {
 }
 
 /** Wraps (never replaces) RefundsService.request() — see the AdminRefundApproval model's own doc comment. `refundId` is set only once EXECUTED actually calls the refund flow. */
+export type AdminRefundSubjectType = "ORDER" | "BOOKING" | "TRAVEL_BOOKING";
+
 export interface AdminRefundApprovalDto {
   id: string;
-  orderId: string;
+  /** What is refunded; exactly the matching id below is set. */
+  subjectType: AdminRefundSubjectType;
+  orderId: string | null;
+  bookingId: string | null;
+  travelBookingId: string | null;
   amount: number;
   reason: string;
   status: AdminRefundApprovalStatus;
@@ -2860,6 +3113,23 @@ export interface AdminRefundApprovalDto {
   createdAt: string;
   updatedAt: string;
   executedAt: string | null;
+}
+
+/** Money on a service booking or stay as staff see it before cancelling or refunding (all rials). */
+export interface AdminBookingMoneyDto {
+  kind: "BOOKING" | "TRAVEL_BOOKING";
+  bookingId: string;
+  reference: string | null;
+  status: string;
+  paymentStatus: string;
+  /** Captured online; card-to-card or pay-at-provider money is not refundable from here. */
+  paidIrr: number;
+  refundedIrr: number;
+  refundableIrr: number;
+  /** What the booking's own cancellation terms would give back now. */
+  policyRefundIrr: number;
+  cancellable: boolean;
+  approvals: AdminRefundApprovalDto[];
 }
 
 export interface AdminAuditLogDto {
@@ -2982,6 +3252,8 @@ export interface AdminUserDirectoryRowDto {
   /** Coarse last-seen stamp (W2-5), null for a user who has not resolved a session since it shipped. */
   lastActiveAt: string | null;
   roles: AdminUserRoleDto[];
+  /** Behaviour roll-up for the row; present on directory list rows. */
+  behavior?: AdminUserBehaviorSummaryDto;
 }
 
 export type AdminUserDirectoryListDto = PaginatedDto<AdminUserDirectoryRowDto>;
@@ -3120,6 +3392,8 @@ export interface AdminOrderFinancialsDto {
 
 /** Minimal admin-facing org summaries, used to locate a Provider/Seller for verification overrides or as a TrustCase subject — never the seller/provider's own operational DTOs, which carry fields (context, membership) an internal admin view has no use for. */
 export interface AdminProviderOrgSummaryDto {
+  /** Demo/showcase content: hidden from the public site in production; staff see it labelled. */
+  isDemoRecord?: boolean;
   id: string;
   name: string;
   type: string;
@@ -3142,6 +3416,178 @@ export interface AdminDashboardSummaryDto {
   openTrustCases: number | null;
   pendingRefundApprovals: number | null;
   openTasks: number | null;
+  /** Provider and seller organisations whose verification waits on staff (SUBMITTED or UNDER_REVIEW). */
+  pendingVerifications: number | null;
+  /** Shop refund requests awaiting a decision. */
+  pendingRefundRequests: number | null;
+  /** Seller offers awaiting moderation. */
+  pendingOfferModeration: number | null;
+  /** Seller requests to add a product to the central catalogue. */
+  pendingCatalogRequests: number | null;
+  /** Stay listings submitted for review. */
+  pendingTravelListings: number | null;
+  /** Animal-support requests awaiting moderation. */
+  pendingSupportNeeds: number | null;
+  /** Community reports still OPEN or ESCALATED. */
+  openCommunityReports: number | null;
+  /** Memorial submissions awaiting review. */
+  pendingMemorials: number | null;
+  /** User reports about wrong place data. */
+  openPlaceReports: number | null;
+  /** Card-to-card wallet top-up receipts waiting for finance. */
+  pendingWalletTopUps: number | null;
+  /** Account deletion requests waiting on staff (REQUESTED or PENDING_RETENTION); admin.manage only. */
+  pendingDeletionRequests: number | null;
+  /** Pet ownership transfers in DISPUTED, waiting for staff to record the outcome; customer.view. */
+  openOwnershipDisputes: number | null;
+  /** Members' reports that a provider didn't show up, still open as admin tasks; services.view. */
+  openProviderNoShows: number | null;
+  /** Service, product and stay reviews waiting for a moderator, in the verticals this admin may moderate. */
+  pendingReviews: number | null;
+  /**
+   * Market-readiness #290 Q97, the launch month's success measure: registered pets and weekly bookings
+   * (analytics.view; null otherwise). Live bookings only, rolling 7-day windows.
+   */
+  launchKpis: AdminLaunchKpisDto | null;
+}
+
+export interface AdminLaunchKpisDto {
+  registeredPets: number;
+  newPetsThisWeek: number;
+  bookingsThisWeek: number;
+  bookingsLastWeek: number;
+}
+
+// ---------------------------------------------------------------------------
+// ERP reports (analytics.view) and customer behaviour
+// ---------------------------------------------------------------------------
+
+export type AdminReportGranularity = "day" | "week" | "month";
+
+/** One headline number for the window, with the same-length window just before it. */
+export interface AdminReportKpiDto {
+  value: number;
+  previous: number;
+  /** (value − previous) / previous; null when the previous window was zero and this one is not. */
+  change: number | null;
+}
+
+export interface AdminReportSeriesPointDto {
+  /** Bucket start, Tehran calendar date (YYYY-MM-DD). */
+  bucket: string;
+  newUsers: number;
+  activeUsers: number;
+  orders: number;
+  gmv: number;
+  serviceBookings: number;
+  travelBookings: number;
+  bookingValue: number;
+}
+
+export interface AdminReportBreakdownRowDto {
+  key: string;
+  count: number;
+  /** IRR, when the row carries money. */
+  amount?: number;
+}
+
+export interface AdminReportTopRowDto {
+  id: string;
+  name: string;
+  count: number;
+  amount: number;
+}
+
+export interface AdminReportCohortDto {
+  /** Signup month, Tehran calendar (YYYY-MM-01). */
+  cohort: string;
+  size: number;
+  /** Share of the cohort that ordered or booked in month 0, 1, 2… after signup (0..1). */
+  retention: number[];
+}
+
+export interface AdminReportOverviewDto {
+  range: {
+    from: string;
+    to: string;
+    previousFrom: string;
+    previousTo: string;
+    granularity: AdminReportGranularity;
+    days: number;
+    timezone: "Asia/Tehran";
+    generatedAt: string;
+  };
+  kpis: {
+    newUsers: AdminReportKpiDto;
+    activeUsers: AdminReportKpiDto;
+    buyers: AdminReportKpiDto;
+    orders: AdminReportKpiDto;
+    gmv: AdminReportKpiDto;
+    averageOrderValue: AdminReportKpiDto;
+    serviceBookings: AdminReportKpiDto;
+    travelBookings: AdminReportKpiDto;
+    bookingValue: AdminReportKpiDto;
+    cancellationRate: AdminReportKpiDto;
+    repeatBuyerRate: AdminReportKpiDto;
+    supportCases: AdminReportKpiDto;
+  };
+  series: AdminReportSeriesPointDto[];
+  breakdowns: {
+    orderStatus: AdminReportBreakdownRowDto[];
+    serviceCategory: AdminReportBreakdownRowDto[];
+    serviceStatus: AdminReportBreakdownRowDto[];
+    travelStatus: AdminReportBreakdownRowDto[];
+    customerSegments: AdminReportBreakdownRowDto[];
+  };
+  funnel: { carts: number; checkouts: number; orders: number; fulfilled: number };
+  top: {
+    sellers: AdminReportTopRowDto[];
+    providers: AdminReportTopRowDto[];
+    products: AdminReportTopRowDto[];
+    /** Null when the caller may not see customer identities (needs customer.view). */
+    customers: AdminReportTopRowDto[] | null;
+  };
+  cohorts: AdminReportCohortDto[];
+}
+
+/** Behaviour segments the users directory and reports share. Computed on read, never stored. */
+export type AdminCustomerSegment = "NEW" | "VIP" | "ACTIVE" | "AT_RISK" | "DORMANT" | "NEVER_PURCHASED";
+
+export interface AdminUserBehaviorSummaryDto {
+  orderCount: number;
+  /** IRR across shop orders, service bookings and stays that were not cancelled, rejected or refunded. */
+  totalSpend: number;
+  lastOrderAt: string | null;
+  serviceBookingCount: number;
+  travelBookingCount: number;
+  lastBookingAt: string | null;
+  cancelledCount: number;
+  noShowCount: number;
+  supportCaseCount: number;
+  segment: AdminCustomerSegment;
+}
+
+export type AdminUserTimelineKind = "ORDER" | "SERVICE_BOOKING" | "TRAVEL_BOOKING" | "SUPPORT_CASE" | "REVIEW" | "SIGN_IN" | "SIGN_UP";
+
+export interface AdminUserTimelineEntryDto {
+  id: string;
+  kind: AdminUserTimelineKind;
+  at: string;
+  status: string | null;
+  /** IRR, when the event carries money. */
+  amount: number | null;
+  /** Short machine label (category, reference, case number…). */
+  label: string | null;
+  /** Admin route the entry opens, relative to /{locale}/admin; null when there is no admin page for it. */
+  href: string | null;
+}
+
+export interface AdminUserBehaviorDto {
+  summary: AdminUserBehaviorSummaryDto;
+  /** Last 12 Tehran calendar months, oldest first. */
+  monthlyActivity: { month: string; orders: number; bookings: number; spend: number }[];
+  favoriteCategories: AdminReportBreakdownRowDto[];
+  timeline: AdminUserTimelineEntryDto[];
 }
 
 /** The admin-domain mirror of AdminPermission (apps/api's own admin-permissions.ts) — kept as a plain string union here since the frontend only ever compares/display-filters against it, never re-derives access decisions (the backend is always the source of truth; hiding a nav item is a convenience, never a security boundary). */
@@ -3203,6 +3649,9 @@ export type AdminPermissionName =
   | "customer.sessions.revoke"
   | "pet.access.manage"
   | "finance.reconcile"
+  | "wallet.view"
+  | "wallet.adjust"
+  | "wallet.topup.review"
   | "travel.source.view"
   | "travel.source.manage"
   | "travel.sync.run"
@@ -3210,12 +3659,27 @@ export type AdminPermissionName =
   | "travel.override.manage";
 
 /** Never throws (mirrors SellerContextDto's own "resolve once, always succeeds" shape) — `isAdmin: false` is a normal, expected resolution for the overwhelming majority of authenticated sessions, not an error state. */
+/** An owner-defined admin role: a named permission set, optionally limited to verticals (empty = every vertical). */
+export interface AdminCustomRoleDto {
+  id: string;
+  name: string;
+  description: string | null;
+  permissions: string[];
+  verticals: string[];
+  members: number;
+  archivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AdminSessionContextDto {
   isAdmin: boolean;
   adminUserId: string | null;
   displayName: string | null;
   role: AdminRole | null;
   permissions: AdminPermissionName[];
+  /** Set when an owner-defined custom role decides this admin's access (admin/access/roles). */
+  customRoleName?: string | null;
 }
 
 /** Current server permissions, refreshed on every request; never grants access itself. */
@@ -3508,7 +3972,19 @@ export type RichTextBlock =
   | { type: "quote"; content: RichTextInline[] }
   | { type: "callout"; tone: "info" | "warning"; content: RichTextInline[] }
   /** `url` is never stored or accepted on write — the server resolves it from `mediaAssetId` on every read response so the renderer never has to look anything up itself. */
-  | { type: "image"; mediaAssetId: string; alt: string; caption?: string; url?: string };
+  | { type: "image"; mediaAssetId: string; alt: string; caption?: string; url?: string }
+  /**
+   * A CMS-hosted video (mp4/webm). `title`/`description` feed the page's VideoObject structured data;
+   * `url`, `posterUrl` and `mimeType` are read-only, resolved from the media ids on every read like `image.url`.
+   */
+  | { type: "video"; mediaAssetId: string; title: string; description?: string; posterMediaAssetId?: string; durationSeconds?: number; caption?: string; url?: string; posterUrl?: string; mimeType?: string }
+  /** Question/answer pairs, rendered as an FAQ section and published as FAQPage structured data. */
+  | { type: "faq"; items: RichTextFaqItem[] };
+
+export interface RichTextFaqItem {
+  question: string;
+  answer: RichTextInline[];
+}
 
 export type RichTextDocument = RichTextBlock[];
 
@@ -3597,6 +4073,8 @@ export interface AdminArticleLocaleAvailabilityDto {
 }
 
 export interface AdminArticleListItemDto {
+  /** Demo/showcase content: hidden from the public site in production; staff see it labelled. */
+  isDemoRecord?: boolean;
   id: string;
   author: ContentAuthorDto | null;
   category: PublicCategoryDto | null;
@@ -3626,6 +4104,8 @@ export interface AdminArticleLocaleDto {
   status: ArticleLifecycleStatus;
   title: string;
   slug: string;
+  /** Where this locale is (or will be, once published) on the public site, e.g. `/fa/blog/puppy-potty-training`. */
+  publicPath?: string;
   excerpt: string | null;
   body: RichTextDocument;
   seoTitle: string | null;
@@ -3681,6 +4161,43 @@ export interface PublicArticleDetailDto extends PublicArticleSummaryDto {
   body: RichTextDocument;
   seoTitle: string | null;
   seoDescription: string | null;
+  /** The same article's other visible locales, for hreflang alternates and the language switcher. */
+  translations?: { locale: Locale; canonicalPath: string }[];
+}
+
+/** Where an old (renamed) article address now lives — the public site answers the old URL with a permanent redirect. */
+export interface PublicArticleSlugRedirectDto {
+  canonicalPath: string;
+}
+
+/** One visible article locale for sitemaps, feeds and llms.txt — no body unless explicitly requested. */
+export interface PublicArticleFeedItemDto {
+  articleId: string;
+  locale: Locale;
+  slug: string;
+  canonicalPath: string;
+  title: string;
+  excerpt: string | null;
+  seoDescription: string | null;
+  categorySlug: string | null;
+  categoryName: string | null;
+  tags: string[];
+  coverUrl: string | null;
+  coverAlt: string | null;
+  videos: { url: string; posterUrl: string | null; title: string; description: string | null; durationSeconds: number | null }[];
+  publishedAt: string;
+  updatedAt: string;
+  body?: RichTextDocument;
+}
+
+/** Admin "URL builder" check: is this slug well-formed and free in this locale, and where will it live once published. */
+export interface AdminArticleSlugCheckDto {
+  slug: string;
+  valid: boolean;
+  available: boolean;
+  /** Another article (or a renamed article's old address) already holds this slug in this locale. */
+  conflict: { articleId: string; title: string | null; kind: "ARTICLE" | "REDIRECT" } | null;
+  publicPath: string;
 }
 
 /** A minimal, non-leaking reference to an article for use inside a placement block — never the full body. */
@@ -4834,6 +5351,7 @@ export enum CommunityPostType {
   RESCUE = "RESCUE",
   ADOPTION = "ADOPTION",
   MEMORY = "MEMORY",
+  FOUND_PET = "FOUND_PET",
 }
 
 export enum CommunityContentStatus {
@@ -4904,6 +5422,8 @@ export interface CommunityPostDto {
   /** Only present when the request is authenticated — the caller's own reaction, if any. */
   viewerReaction: CommunityReactionType | null;
   createdAt: string;
+  /** When the author last changed the text, if ever. */
+  editedAt?: string | null;
   /** Topic tags (fixed vocabulary). */
   topics?: string[];
   /** The first topic (canonical taxonomy), or null. */
@@ -4927,6 +5447,7 @@ export interface CommunityCommentDto {
   /** Published replies, on top-level comments from the comments list. */
   replies?: CommunityCommentDto[];
   createdAt: string;
+  editedAt?: string | null;
 }
 
 export interface CommunityReportDto {
@@ -5255,6 +5776,12 @@ export enum PetFriendlyPlaceCategory {
   VENUE = "VENUE",
   SERVICE = "SERVICE",
   OTHER = "OTHER",
+  VETERINARY = "VETERINARY",
+  PET_SHOP = "PET_SHOP",
+  GROOMING = "GROOMING",
+  BOARDING = "BOARDING",
+  SHELTER = "SHELTER",
+  DOG_PARK = "DOG_PARK",
 }
 
 export enum PetFriendlyPlaceStatus {
@@ -5264,6 +5791,8 @@ export enum PetFriendlyPlaceStatus {
 }
 
 export interface PetFriendlyPlaceDto {
+  /** Demo/showcase content: hidden from the public site in production; staff see it labelled. */
+  isDemoRecord?: boolean;
   id: string;
   name: string;
   category: PetFriendlyPlaceCategory;
@@ -5302,6 +5831,21 @@ export interface PetFriendlyPlaceDto {
   petFriendlyLevel?: "FULL" | "PARTIAL" | "OUTDOOR_ONLY" | null;
   openingHours?: { day: number; open: string; close: string }[] | null;
   province?: string | null;
+  /** OSM = imported from OpenStreetMap: show its "not verified" label and "© OpenStreetMap contributors". */
+  source?: "MANUAL" | "OSM";
+  /** Business contact as published in OpenStreetMap. */
+  phone?: string | null;
+  website?: string | null;
+  /** A KYC-verified business has claimed this listing. */
+  claimed?: boolean;
+  osmUrl?: string | null;
+}
+
+export interface PlaceClaimResultDto {
+  claimId: string;
+  status: "PENDING" | "APPROVED" | "REJECTED" | "WITHDRAWN";
+  /** What the member does next: sign up as a partner, finish KYC, or wait for review. */
+  nextStep: "CREATE_PARTNER_ACCOUNT" | "COMPLETE_VERIFICATION" | "AWAITING_REVIEW" | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -5989,12 +6533,14 @@ export interface ProviderPatientRecordDto {
     frequencyText: string | null;
   }[];
   conditions: { id: string; name: string; notes: string | null }[];
+  vaccination: ProviderVaccinationSummaryDto;
   problems: ClinicalProblemDto[];
   prescriptions: PrescriptionDto[];
   latestVitals: PatientVitalsDto | null;
   vitalsHistory: PatientVitalsDto[];
   recentVisits: ClinicalVisitDto[];
   recentLabs: LabResultDto[];
+  /** Provider-shared or provider-authored documents, plus the owner's documents ticked for one of the reader's active bookings. */
   documents: MedicalDocumentDto[];
   carePlans: CarePlanDto[];
   estimates: ClinicalEstimateDto[];
@@ -6097,6 +6643,8 @@ export interface AdminRefundRequestDto {
 }
 
 export interface AdminProductRowDto {
+  /** Demo/showcase content: hidden from the public site in production; staff see it labelled. */
+  isDemoRecord?: boolean;
   id: string;
   title: string;
   status: ProductStatus;
@@ -6111,6 +6659,157 @@ export interface AdminProductRowDto {
   mediaCount: number;
   hasMedia: boolean;
   createdAt: string;
+}
+
+/** A business on the other side of a partner link (one owner, a service business and a shop). */
+export interface AdminPartnerLinkDto {
+  id: string;
+  name: string;
+  verificationStatus: string;
+  /** Shop operating status; null for a service business. */
+  status: string | null;
+}
+
+/** KYC as staff see it in a partner profile: the case status and every document (never the file itself; opening one goes through the audited verification screen). */
+export interface AdminPartnerKycDto {
+  status: string;
+  submittedAt: string | null;
+  note: string | null;
+  contact: { firstName: string; lastName: string; mobile: string; landline: string; websiteUrl: string | null; enamadId: string | null } | null;
+  documents: Array<{ id: string; kind: string; status: string; reviewNote: string | null; expiresAt: string | null; uploadedAt: string; reviewedAt: string | null }>;
+}
+
+export interface AdminPartnerServiceRowDto {
+  id: string;
+  name: string;
+  logoUrl: string | null;
+  type: string;
+  /** Every kind offered (vet, groomer, boarding, sitter, trainer, taxi…); the first is `type`. */
+  serviceKinds: string[];
+  phone: string | null;
+  city: string | null;
+  province: string | null;
+  verificationStatus: string;
+  submittedAt: string | null;
+  isDemoRecord: boolean;
+  activeServices: number;
+  inactiveServices: number;
+  pendingDocuments: number;
+  linkedShop: AdminPartnerLinkDto | null;
+  createdAt: string;
+}
+
+export interface AdminPartnerShopRowDto {
+  id: string;
+  name: string;
+  logoUrl: string | null;
+  phone: string | null;
+  city: string | null;
+  province: string | null;
+  status: string;
+  verificationStatus: string;
+  submittedAt: string | null;
+  activeOffers: number;
+  pendingOffers: number;
+  pendingDocuments: number;
+  linkedService: (AdminPartnerLinkDto & { type: string }) | null;
+  createdAt: string;
+}
+
+export interface AdminPartnerServiceDetailDto {
+  id: string;
+  name: string;
+  logoUrl: string | null;
+  type: string;
+  serviceKinds: string[];
+  phone: string | null;
+  email: string | null;
+  websiteUrl: string | null;
+  description: string | null;
+  isDemoRecord: boolean;
+  createdAt: string;
+  kyc: AdminPartnerKycDto;
+  locations: Array<{ id: string; name: string | null; addressLine: string; city: string; province: string | null; latitude: number | null; longitude: number | null; phone: string | null; timezone: string }>;
+  services: Array<{
+    id: string;
+    name: string;
+    category: string;
+    type: string;
+    locationMode: string;
+    isActive: boolean;
+    durationMinutes: number;
+    priceAmount: number | null;
+    currency: string | null;
+    maxPetsPerBooking: number;
+    supportsDog: boolean;
+    supportsCat: boolean;
+    variants: Array<{ id: string; name: string; priceAmount: number | null; durationMinutes: number; isActive: boolean }>;
+    transportPricing: { baseFareIrr: number; perKmRateIrr: number; isActive: boolean } | null;
+  }>;
+  /** Weekly opening rules (0 = Sunday … 6 = Saturday) and the closures/extra openings of the next 60 days. */
+  calendar: {
+    rules: Array<{ id: string; dayOfWeek: number; start: string; end: string; timezone: string; locationName: string | null; staffName: string | null; serviceName: string | null }>;
+    exceptions: Array<{ id: string; startAt: string; endAt: string; type: string; reason: string | null; staffName: string | null }>;
+  };
+  team: Array<{ id: string; role: string; displayName: string; displayTitle: string | null }>;
+  linkedShop: AdminPartnerLinkDto | null;
+}
+
+export interface AdminPartnerShopDetailDto {
+  id: string;
+  name: string;
+  slug: string | null;
+  logoUrl: string | null;
+  description: string | null;
+  phone: string | null;
+  email: string | null;
+  status: string;
+  createdAt: string;
+  address: { province: string | null; city: string | null; addressLine: string | null; postalCode: string | null; latitude: number | null; longitude: number | null };
+  /** Display-only opening hours from signup (0 = Sunday … 6 = Saturday); empty when the shop has not set them. */
+  openingHours: Array<{ dayOfWeek: number; open: string; close: string }>;
+  kyc: AdminPartnerKycDto;
+  offers: {
+    counts: Record<string, number>;
+    pendingReview: number;
+    items: Array<{ id: string; productId: string; productTitle: string; productStatus: string; variantSku: string; variantTitle: string | null; priceAmount: number; currency: string; status: string; moderationStatus: string; available: number | null; updatedAt: string }>;
+  };
+  pendingCatalogRequests: number;
+  team: Array<{ id: string; role: string; displayName: string }>;
+  linkedService: (AdminPartnerLinkDto & { type: string; serviceKinds: string[] }) | null;
+}
+
+/** One seller's offer on a product variant, as staff see it: who sells it, at what price, how much is in stock, and whether it is live. */
+export interface AdminProductOfferDto {
+  id: string;
+  variantId: string;
+  variantSku: string;
+  variantTitle: string | null;
+  seller: { id: string; name: string; status: string; verificationStatus: string };
+  status: string;
+  moderationStatus: string;
+  moderationReason: string | null;
+  priceAmount: number;
+  compareAtAmount: number | null;
+  currency: string;
+  sellerSku: string | null;
+  /** null when the offer has no inventory row yet. available = onHand - reserved, never below zero. */
+  stock: { onHand: number; reserved: number; available: number } | null;
+  /** True when a customer can buy it right now: offer active and approved, seller verified and active, stock available. */
+  buyable: boolean;
+  updatedAt: string;
+}
+
+export interface AdminProductDetailDto extends AdminProductRowDto {
+  slug: string;
+  category: { id: string; name: string };
+  brand: { id: string; name: string } | null;
+  variants: Array<{ id: string; sku: string; title: string | null; isActive: boolean }>;
+  offers: AdminProductOfferDto[];
+  /** The seller request this product came from (approved as new or matched to it), newest first. */
+  catalogRequests: Array<{ id: string; status: string; sellerName: string; requestedTitle: string; reviewedAt: string | null; decisionReason: string | null }>;
+  /** Lowest live price across buyable offers, or null when nobody can sell it now. */
+  lowestBuyablePrice: number | null;
 }
 
 export interface AdminProductReviewRowDto {
@@ -6577,3 +7276,509 @@ export type {
   PetOwnershipTransferStatusName,
 } from "./ownership";
 export { OWNERSHIP_TRANSFER_EXPIRY_DAYS, PET_MEMORY_DISPOSITIONS, PET_OWNERSHIP_TRANSFER_STATUSES } from "./ownership";
+
+// ---------------------------------------------------------------------------
+// Member wallet (balances are always derived from append-only entries)
+// ---------------------------------------------------------------------------
+
+export type WalletBalanceTypeValue = "WITHDRAWABLE" | "PURCHASE_ONLY";
+export type WalletEntryKindValue = "CREDIT" | "DEBIT" | "EXPIRY";
+export type WalletCreditSourceValue = "REFUND" | "TOP_UP" | "GIFT" | "OVERPAYMENT" | "DUPLICATE_PAYMENT" | "MANUAL_CORRECTION";
+export type WalletTopUpRailValue = "ZIBAL" | "CARD_TO_CARD";
+export type WalletTopUpStatusValue = "AWAITING_PAYMENT" | "AWAITING_RECEIPT" | "REVIEW_PENDING" | "CREDITED" | "FAILED" | "REJECTED" | "EXPIRED" | "CANCELLED";
+export type WalletAdjustmentDirectionValue = "CREDIT" | "DEBIT";
+export type WalletAdjustmentReasonCode = "GOODWILL" | "SERVICE_RECOVERY" | "PAYMENT_CORRECTION" | "REFUND_OUTSIDE_SYSTEM" | "DUPLICATE_CREDIT_REVERSAL" | "OTHER";
+
+export interface WalletBalancesDto {
+  /** Top-ups and gifts: spendable on purchases only. */
+  purchaseOnly: number;
+  /** Refund money: spendable, and the only part that may later be paid out. */
+  withdrawable: number;
+  total: number;
+  currency: string;
+}
+
+export interface WalletTopUpOptionsDto {
+  /** Rails that can take money right now; empty means top-up is not open yet. */
+  rails: WalletTopUpRailValue[];
+  minAmount: number;
+  maxAmount: number;
+  presets: number[];
+}
+
+export interface WalletSummaryDto {
+  balances: WalletBalancesDto;
+  /** Gift credit that expires within 30 days, soonest first. */
+  expiringSoon: { amount: number; expiresAt: string }[];
+  topUp: WalletTopUpOptionsDto;
+}
+
+export interface WalletEntryDto {
+  id: string;
+  kind: WalletEntryKindValue;
+  balanceType: WalletBalanceTypeValue;
+  source: WalletCreditSourceValue | null;
+  /** Positive for money in, negative for money out. */
+  signedAmount: number;
+  /** What the movement was for: TOP_UP, PURCHASE, REFUND, ADJUSTMENT, EXPIRY or OTHER. */
+  purpose: "TOP_UP" | "PURCHASE" | "REFUND" | "ADJUSTMENT" | "EXPIRY" | "OTHER";
+  /** A staff adjustment's reason, shown to the member so a correction is never silent. */
+  note: string | null;
+  expiresAt: string | null;
+  createdAt: string;
+}
+
+export interface WalletEntryPageDto {
+  items: WalletEntryDto[];
+  nextCursor: string | null;
+}
+
+export interface WalletTopUpDto {
+  id: string;
+  rail: WalletTopUpRailValue;
+  status: WalletTopUpStatusValue;
+  amount: number;
+  receivedAmount: number | null;
+  currency: string;
+  receiptUploaded: boolean;
+  receiptDeadlineAt: string | null;
+  rejectionReason: string | null;
+  createdAt: string;
+  creditedAt: string | null;
+}
+
+/** Returned when a card-to-card top-up starts: where to send the money. */
+export interface WalletCardTransferInstructionsDto {
+  cardNumber: string;
+  cardHolderName: string;
+  bankName: string | null;
+  /** IR + 24 digits, when the owner set one. */
+  sheba: string | null;
+}
+
+/** One company card-to-card account, masked (admin never sees the full number back). */
+export interface AdminCardTransferDestinationDto {
+  id: string;
+  cardNumberMasked: string | null;
+  shebaMasked: string | null;
+  holderName: string;
+  bankName: string | null;
+  active: boolean;
+  reason: string;
+  createdAt: string;
+  createdBy: string | null;
+  closedAt: string | null;
+  closedBy: string | null;
+  closeReason: string | null;
+}
+
+export type CardTransferPaymentStatusValue = "AWAITING_RECEIPT" | "REVIEW_PENDING" | "APPROVED" | "REJECTED" | "UNDERPAID_AWAITING_DIFFERENCE" | "EXPIRED" | "CANCELLED";
+
+/** A card-to-card payment for an order or a booking, as finance sees it in the receipts queue. */
+export interface AdminCardTransferPaymentDto {
+  id: string;
+  status: CardTransferPaymentStatusValue;
+  member: { userId: string; displayName: string | null };
+  reference: { kind: "ORDER" | "BOOKING"; bookingId: string | null; orderIds: string[] };
+  /** Rials. */
+  expectedAmount: number;
+  receivedAmount: number | null;
+  currency: string;
+  companyCardNumberMasked: string;
+  accountHolderName: string;
+  receiptUploaded: boolean;
+  receiptUploadedAt: string | null;
+  /** Review opens at the next working-hours slot after the upload. */
+  reviewAvailableAt: string;
+  reviewedAt: string | null;
+  rejectionReason: string | null;
+  createdAt: string;
+}
+
+export interface AdminCardTransferDestinationOverviewDto {
+  /** ADMIN = set by the owner here; ENV = the server fallback (none set here yet); NONE = card-to-card is off. */
+  source: "ADMIN" | "ENV" | "NONE";
+  current: { cardNumberMasked: string | null; shebaMasked: string | null; holderName: string; bankName: string | null } | null;
+  /** Only SUPER_ADMIN with settings.manage may change it. */
+  canEdit: boolean;
+  history: AdminCardTransferDestinationDto[];
+}
+
+export interface WalletTopUpStartedDto {
+  topUp: WalletTopUpDto;
+  /** Zibal: send the browser here. */
+  redirectUrl: string | null;
+  /** Card to card: the card to transfer to. */
+  cardTransfer: WalletCardTransferInstructionsDto | null;
+}
+
+export interface WalletReceiptUploadTargetDto {
+  uploadUrl: string;
+  method: "PUT";
+  headers?: Record<string, string>;
+  key: string;
+  expiresInSeconds: number;
+}
+
+export interface AdminWalletListItemDto {
+  userId: string;
+  displayName: string | null;
+  email: string | null;
+  phone: string | null;
+  balances: WalletBalancesDto;
+  lastActivityAt: string | null;
+}
+
+export interface AdminWalletAdjustmentDto {
+  id: string;
+  direction: WalletAdjustmentDirectionValue;
+  balanceType: WalletBalanceTypeValue;
+  amount: number;
+  reasonCode: string;
+  reason: string;
+  evidenceReference: string | null;
+  createdBy: { adminUserId: string; displayName: string | null };
+  createdAt: string;
+}
+
+export interface AdminWalletTopUpDto extends WalletTopUpDto {
+  userId: string;
+  userDisplayName: string | null;
+  cardNumberMasked: string | null;
+  receiptUploadedAt: string | null;
+  reviewedAt: string | null;
+  reviewedBy: string | null;
+  failureCode: string | null;
+}
+
+export interface AdminWalletAuditDto {
+  id: string;
+  action: string;
+  reason: string | null;
+  adminDisplayName: string | null;
+  createdAt: string;
+}
+
+export interface AdminWalletDetailDto {
+  user: { id: string; displayName: string | null; email: string | null; phone: string | null; createdAt: string };
+  balances: WalletBalancesDto;
+  entries: WalletEntryDto[];
+  topUps: AdminWalletTopUpDto[];
+  adjustments: AdminWalletAdjustmentDto[];
+  audit: AdminWalletAuditDto[];
+}
+
+// ---------------------------------------------------------------------------
+// On-demand pet taxi (Uber/Snapp-style) and maps
+// ---------------------------------------------------------------------------
+
+export interface MapsClientConfigDto {
+  provider: "none" | "neshan" | "google";
+  tileUrl: string;
+  tileAttribution: string;
+  googleBrowserKey: string | null;
+  search: boolean;
+  /** Routes are straight-line estimates (no routing provider configured or reachable). */
+  estimatesOnly: boolean;
+}
+
+export interface MapPlaceDto {
+  label: string;
+  address: string | null;
+  city: string | null;
+  latitude: number;
+  longitude: number;
+}
+
+export type PetTaxiCarrierSizeValue = "SMALL" | "MEDIUM" | "LARGE";
+export type PetTaxiRideStatusValue = "SEARCHING" | "DRIVER_ASSIGNED" | "ARRIVING" | "PICKED_UP" | "COMPLETED" | "CANCELLED_BY_MEMBER" | "CANCELLED_BY_DRIVER" | "NO_DRIVER";
+export type PetTaxiRouteSource = "GOOGLE" | "NESHAN" | "STRAIGHT_LINE_ESTIMATE";
+
+export interface PetTaxiPointDto {
+  label: string;
+  latitude: number;
+  longitude: number;
+  city?: string | null;
+  note?: string | null;
+}
+
+export interface PetTaxiFareBreakdownDto {
+  baseIrr: number;
+  distanceIrr: number;
+  timeIrr: number;
+  carrierIrr: number;
+  extraPetsIrr: number;
+  minimumApplied: boolean;
+  km: number;
+  minutes: number;
+}
+
+export interface PetTaxiQuoteDto {
+  available: boolean;
+  /** NOT_PRICED: no fare rule for this city yet. */
+  reason: "NOT_PRICED" | null;
+  fareIrr: number | null;
+  breakdown: PetTaxiFareBreakdownDto | null;
+  distanceMeters: number;
+  durationSeconds: number;
+  routeSource: PetTaxiRouteSource;
+  fareRuleCity: string | null;
+}
+
+export interface PetTaxiRideDto {
+  id: string;
+  status: PetTaxiRideStatusValue;
+  carrierSize: PetTaxiCarrierSizeValue;
+  petIds: string[];
+  pickup: PetTaxiPointDto;
+  dropoff: PetTaxiPointDto;
+  fareIrr: number;
+  breakdown: PetTaxiFareBreakdownDto;
+  distanceMeters: number;
+  durationSeconds: number;
+  routeSource: PetTaxiRouteSource;
+  searchExpiresAt: string;
+  /** Shown to the member once a driver accepts. */
+  driver: { name: string; organizationName: string; phone: string | null; latitude: number | null; longitude: number | null; locatedAt: string | null } | null;
+  /** Shown to the driver once they accept. */
+  member: { name: string; phone: string | null } | null;
+  /** Straight-line estimate to the pickup (before pickup) or to the drop-off (after). */
+  etaSeconds: number | null;
+  assignedAt: string | null;
+  arrivingAt: string | null;
+  pickedUpAt: string | null;
+  completedAt: string | null;
+  cancelledAt: string | null;
+  cancelReason: string | null;
+  rating: number | null;
+  ratingComment: string | null;
+  createdAt: string;
+}
+
+export interface PetTaxiRequestDto {
+  id: string;
+  /** Before accepting, pickup and drop-off are a ~500 m grid point plus the city: no address label, no note. */
+  approximate: boolean;
+  pickup: PetTaxiPointDto;
+  dropoff: PetTaxiPointDto;
+  carrierSize: PetTaxiCarrierSizeValue;
+  petCount: number;
+  fareIrr: number;
+  distanceMeters: number;
+  durationSeconds: number;
+  /** Straight-line km from the driver's fresh position to the approximate pickup, rounded to half a km. */
+  kmFromYou: number | null;
+  searchExpiresAt: string;
+}
+
+export type PetTaxiDriverStatusValue = "PENDING" | "VERIFIED" | "SUSPENDED";
+
+/** One person a pet-taxi organization lets drive, with the staff check of their licence and vehicle. */
+export interface PetTaxiDriverDto {
+  id: string;
+  providerUserId: string;
+  name: string;
+  licenceNumber: string;
+  vehiclePlate: string;
+  vehicleDescription: string;
+  status: PetTaxiDriverStatusValue;
+  statusReason: string | null;
+  verifiedAt: string | null;
+  createdAt: string;
+}
+
+/** The owner's view: registered drivers and the members (owner/staff) who could be registered. */
+export interface PetTaxiDriversDto {
+  drivers: PetTaxiDriverDto[];
+  members: { providerUserId: string; name: string; role: "OWNER" | "STAFF" }[];
+}
+
+export interface AdminPetTaxiDriverDto extends PetTaxiDriverDto {
+  organizationName: string;
+  organizationVerified: boolean;
+}
+
+export interface PetTaxiDriverStateDto {
+  /** False when this organization is not a verified pet-taxi provider. */
+  eligible: boolean;
+  reason: "NOT_PET_TAXI" | "NOT_VERIFIED" | null;
+  /** This person may go online: a driving role and a staff-verified driver record. */
+  canDrive: boolean;
+  /** The organization owner, who registers drivers. */
+  isOwner: boolean;
+  /** This person's own driver record in this organization, if registered. */
+  driver: PetTaxiDriverDto | null;
+  online: boolean;
+  organizationName: string;
+  activeRide: PetTaxiRideDto | null;
+  requests: PetTaxiRequestDto[];
+}
+
+export interface AdminPetTaxiFareRuleDto {
+  id: string;
+  city: string;
+  baseFareIrr: number;
+  perKmIrr: number;
+  perMinuteIrr: number;
+  minimumFareIrr: number;
+  mediumSurchargePercent: number;
+  largeSurchargePercent: number;
+  extraPetIrr: number;
+  /** The city's bounding box (null for "*"). */
+  south: number | null;
+  west: number | null;
+  north: number | null;
+  east: number | null;
+  active: boolean;
+  updatedAt: string;
+}
+
+export interface AdminPetTaxiOverviewDto {
+  rules: AdminPetTaxiFareRuleDto[];
+  onlineDrivers: number;
+  rides: (PetTaxiRideDto & { memberName: string; driverName: string | null })[];
+}
+
+// ---------------------------------------------------------------------------
+// Admin "Pets" section (GET /admin/pets, GET /admin/pets/:id) — operational metadata, never clinical text
+// ---------------------------------------------------------------------------
+
+export interface AdminPetDirectoryItemDto {
+  id: string;
+  name: string;
+  species: PetSpecies;
+  breed: string | null;
+  lifecycleStatus: PetLifecycleStatus;
+  deleted: boolean;
+  hasPhoto: boolean;
+  household: { id: string; name: string | null };
+  owner: { userId: string; displayName: string } | null;
+  /** Household members other than the owner. */
+  familyMemberCount: number;
+  createdAt: string;
+}
+
+export type AdminPetDiagnosticCode = "NO_ACTIVE_OWNER" | "STALE_HOUSEHOLD_GRANT" | "EXPIRED_GRANT_NOT_REVOKED" | "MEMBER_WITHOUT_GRANT" | "LONG_OPEN_LOST_INCIDENT" | "DELETED_BUT_ACTIVE";
+
+export interface AdminPet360Dto {
+  identity: {
+    id: string;
+    name: string;
+    species: PetSpecies;
+    breed: string | null;
+    sex: string | null;
+    birthDate: string | null;
+    approximateAgeMonths: number | null;
+    neuteredStatus: string | null;
+    microchipMasked: string | null;
+    lifecycleStatus: PetLifecycleStatus;
+    deletedAt: string | null;
+    createdAt: string | null;
+    hasPhoto: boolean;
+  };
+  household: {
+    id: string;
+    name: string | null;
+    city: string | null;
+    members: { userId: string; displayName: string; role: string; accountStatus: string }[];
+    pendingInvitations: { id: string; contactMasked: string; createdAt: string; expiresAt: string }[];
+  };
+  accessGrants: {
+    id: string;
+    user: { id: string; displayName: string };
+    source: string;
+    reason: string | null;
+    flags: Record<string, boolean>;
+    healthScopes: string[];
+    startsAt: string | null;
+    expiresAt: string | null;
+    revokedAt: string | null;
+    active: boolean;
+    grantedByUserId: string | null;
+    isHouseholdMember: boolean;
+    createdAt: string;
+  }[];
+  health: {
+    documents: number;
+    documentsByType: { documentType: string; sourceType: string; count: number; latestAt: string | null }[];
+    clinicalVisits: number;
+    labResults: number;
+    medications: Record<string, number>;
+    conditions: number;
+    allergies: number;
+  };
+  bookings: { id: string; category: string; bookingStatus: string; startAt: string; providerOrganizationId: string | null }[];
+  lostIncidents: { id: string; status: string; publicArea: string | null; lastSeenAt: string | null; createdAt: string; reunitedAt: string | null; closedAt: string | null; sightings: number }[];
+  care: { reminders: Record<string, number> };
+  travel: { id: string; status: string; destinationCountry: string | null; destinationCity: string | null; departAt: string }[];
+  insurance: { applications: Record<string, number>; claimPreps: number };
+  sharing: { activeShareCards: number; activeHealthShares: number };
+  activity: { id: string; type: string; at: string; changedFields?: string[]; photoChanged?: boolean }[];
+  diagnostics: { code: AdminPetDiagnosticCode; severity: "WARNING" | "INFO"; entityId?: string; detail?: Record<string, unknown> }[];
+}
+
+/** A catalog product as a shop sees it when listing (any active product, offered or not). */
+export interface SellerCatalogDirectoryItemDto {
+  productId: string;
+  title: string;
+  brandName: string | null;
+  categoryName: string;
+  imageUrl: string | null;
+  variants: { id: string; title: string | null; sku: string; weight: string | null; myOffer: { id: string; status: string } | null }[];
+}
+
+// ---------------------------------------------------------------------------
+// Partner business home (GET /business/memberships, /business/overview)
+// ---------------------------------------------------------------------------
+
+export interface BusinessServiceMembershipDto {
+  providerOrganizationId: string;
+  name: string;
+  type: ProviderType;
+  role: ProviderUserRole;
+  verificationStatus: ProviderVerificationStatus;
+}
+
+export interface BusinessShopMembershipDto {
+  sellerOrganizationId: string;
+  name: string;
+  role: SellerMembershipRole;
+  verificationStatus: SellerVerificationStatus;
+  sellerStatus: SellerStatus;
+}
+
+/** Every business the signed-in user belongs to; `hasHousehold` says whether they also use opetlife as a pet owner. */
+export interface BusinessMembershipsDto {
+  services: BusinessServiceMembershipDto[];
+  shops: BusinessShopMembershipDto[];
+  hasHousehold: boolean;
+}
+
+export interface BusinessReviewSnippetDto {
+  id: string;
+  rating: number;
+  body: string | null;
+  /** The product a shop review is about; null for a service review. */
+  productTitle: string | null;
+  createdAt: string;
+}
+
+export interface BusinessServiceCardDto extends BusinessServiceMembershipDto {
+  counts: { today: number; upcoming: number; pendingConfirmation: number };
+  nextBookings: { id: string; startAt: string; status: string; serviceName: string; petName: string | null }[];
+  services: { total: number; active: number; items: { id: string; name: string; durationMinutes: number; priceAmount: number | null; currency: string | null; isActive: boolean }[] };
+  reviews: { average: number | null; count: number; latest: BusinessReviewSnippetDto[] };
+}
+
+export interface BusinessShopCardDto extends BusinessShopMembershipDto {
+  counts: { ordersToPrepare: number; lowStockOffers: number; offersPendingModeration: number; activeOffers: number };
+  reviews: { average: number | null; count: number; latest: BusinessReviewSnippetDto[] };
+  /** Settlement balance in rials, only for roles that see money in the seller panel (owner, admin, finance). */
+  balance: { pendingIrr: number; availableIrr: number; paidIrr: number } | null;
+}
+
+export interface BusinessOverviewDto {
+  services: BusinessServiceCardDto[];
+  shops: BusinessShopCardDto[];
+  hasHousehold: boolean;
+}

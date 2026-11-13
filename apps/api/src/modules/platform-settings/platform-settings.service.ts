@@ -61,7 +61,7 @@ export class PlatformSettingsService implements OnModuleInit, OnModuleDestroy {
         type: def.type,
         scope: def.scope,
         highImpact: def.highImpact,
-        constraints: { min: def.min ?? null, max: def.max ?? null, maxLength: def.maxLength ?? null },
+        constraints: { min: def.min ?? null, max: def.max ?? null, maxLength: def.maxLength ?? null, options: def.options ?? null },
         description: def.description,
         value: override ? override.value : this.fallback(def.key),
         defaultValue: this.fallback(def.key),

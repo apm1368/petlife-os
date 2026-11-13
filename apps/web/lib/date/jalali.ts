@@ -12,7 +12,7 @@
  */
 
 export type CalendarSystem = "jalali" | "gregorian";
-type Locale = "fa" | "en" | "de" | "es";
+type Locale = "fa" | "en" | "de" | "es" | "ar" | "nl";
 
 export interface CalendarDate {
   year: number;
@@ -168,33 +168,41 @@ export const JALALI_MONTHS_EN = ["Farvardin", "Ordibehesht", "Khordad", "Tir", "
 export const GREGORIAN_MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 export const GREGORIAN_MONTHS_FA = ["ژانویه", "فوریه", "مارس", "آوریل", "مه", "ژوئن", "ژوئیه", "اوت", "سپتامبر", "اکتبر", "نوامبر", "دسامبر"];
 export const GREGORIAN_MONTHS_DE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+export const GREGORIAN_MONTHS_AR = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+export const GREGORIAN_MONTHS_NL = ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december"];
 export const GREGORIAN_MONTHS_ES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 /** Indexed by Date#getUTCDay (0 = Sunday). */
 export const WEEKDAYS_FA = ["یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه", "شنبه"];
 export const WEEKDAYS_FA_SHORT = ["ی", "د", "س", "چ", "پ", "ج", "ش"];
 export const WEEKDAYS_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 export const WEEKDAYS_DE = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+export const WEEKDAYS_AR = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+export const WEEKDAYS_NL = ["zondag", "maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag"];
 export const WEEKDAYS_ES = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
 export const WEEKDAYS_EN_SHORT = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
 const PERSIAN_DIGITS = "۰۱۲۳۴۵۶۷۸۹";
+const ARABIC_DIGITS = "٠١٢٣٤٥٦٧٨٩";
+/** Persian digits in fa, Arabic-Indic digits in ar (matching Intl "ar"), Latin digits elsewhere. */
 export function localizeDigits(value: string | number, locale: Locale): string {
   const s = String(value);
-  return locale === "fa" ? s.replace(/\d/g, (d) => PERSIAN_DIGITS[Number(d)]!) : s;
+  if (locale === "fa") return s.replace(/\d/g, (d) => PERSIAN_DIGITS[Number(d)]!);
+  if (locale === "ar") return s.replace(/\d/g, (d) => ARABIC_DIGITS[Number(d)]!);
+  return s;
 }
 
 export function monthName(system: CalendarSystem, month: number, locale: Locale): string {
   if (system === "jalali") return (locale === "fa" ? JALALI_MONTHS_FA : JALALI_MONTHS_EN)[month - 1]!;
-  return ({ fa: GREGORIAN_MONTHS_FA, en: GREGORIAN_MONTHS_EN, de: GREGORIAN_MONTHS_DE, es: GREGORIAN_MONTHS_ES }[locale])[month - 1]!;
+  return ({ fa: GREGORIAN_MONTHS_FA, en: GREGORIAN_MONTHS_EN, de: GREGORIAN_MONTHS_DE, es: GREGORIAN_MONTHS_ES, ar: GREGORIAN_MONTHS_AR, nl: GREGORIAN_MONTHS_NL }[locale])[month - 1]!;
 }
 
 /** "۱۲ مهر ۱۴۰۵" / "4 October 2026" — the calendar system follows the locale unless given. */
 export function formatDay(iso: string, locale: Locale, options: { system?: CalendarSystem; weekday?: boolean; year?: boolean } = {}): string {
   const system = options.system ?? (locale === "fa" ? "jalali" : "gregorian");
   const c = calendarFromIso(system, iso);
-  const wd = options.weekday ? ({ fa: WEEKDAYS_FA, en: WEEKDAYS_EN, de: WEEKDAYS_DE, es: WEEKDAYS_ES }[locale])[weekday(iso)]! : null;
+  const wd = options.weekday ? ({ fa: WEEKDAYS_FA, en: WEEKDAYS_EN, de: WEEKDAYS_DE, es: WEEKDAYS_ES, ar: WEEKDAYS_AR, nl: WEEKDAYS_NL }[locale])[weekday(iso)]! : null;
   const core = locale === "fa" ? `${localizeDigits(c.day, locale)} ${monthName(system, c.month, locale)}${options.year === false ? "" : ` ${localizeDigits(c.year, locale)}`}` : `${c.day} ${monthName(system, c.month, locale)}${options.year === false ? "" : ` ${c.year}`}`;
-  return wd ? `${wd}${locale === "fa" ? "،" : ","} ${core}` : core;
+  return wd ? `${wd}${locale === "fa" || locale === "ar" ? "،" : ","} ${core}` : core;
 }
 
 /** Today's ISO day key in Tehran — travel dates are property-local calendar days. */

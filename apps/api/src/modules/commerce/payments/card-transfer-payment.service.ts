@@ -10,6 +10,7 @@ import { LedgerService } from "../ledger/ledger.service";
 import { CheckoutService } from "../checkout/checkout.service";
 import { InventoryReservationService } from "../checkout/inventory-reservation.service";
 import { WalletService } from "./wallet.service";
+import { CardTransferDestinationService } from "./card-transfer-destination.service";
 import { CARD_TRANSFER_RECEIPT_WINDOW_MS, CARD_TRANSFER_UNDERPAYMENT_WINDOW_MS, cardTransferAllowedForBooking, nextWorkingReviewAt } from "./payment-infrastructure.policy";
 
 /** Receipt-backed company-card rail. Its state/evidence never shares the generic online-payment model. */
@@ -21,6 +22,7 @@ export class CardTransferPaymentService {
     private readonly ledger: LedgerService,
     private readonly wallet: WalletService,
     private readonly moduleRef: ModuleRef,
+    private readonly destinations: CardTransferDestinationService,
   ) {}
 
   private get checkout(): CheckoutService {
@@ -31,18 +33,27 @@ export class CardTransferPaymentService {
     return this.moduleRef.get(InventoryReservationService, { strict: false });
   }
 
-  private accountDetails() {
-    const raw = this.config.get("CARD_TRANSFER_ACCOUNT_NUMBER", { infer: true });
-    const holder = this.config.get("CARD_TRANSFER_ACCOUNT_HOLDER", { infer: true });
-    if (!raw || !holder) throw new ValidationApiException({ field: "cardTransfer", reason: "CARD_TRANSFER_NOT_CONFIGURED" });
-    const digits = raw.replace(/\D/g, "");
-    if (digits.length < 8) throw new ValidationApiException({ field: "cardTransfer", reason: "CARD_TRANSFER_CONFIGURATION_INVALID" });
-    return { companyCardNumberMasked: `${"•".repeat(Math.max(0, digits.length - 4))}${digits.slice(-4)}`, accountHolderName: holder };
+  /** The owner's admin-managed account (or the env one before any is set); a card number is required for card-to-card. */
+  private async accountDetails() {
+    const account = await this.destinations.current();
+    if (!account) throw new ValidationApiException({ field: "cardTransfer", reason: "CARD_TRANSFER_NOT_CONFIGURED" });
+    if (!account.cardNumber) throw new ValidationApiException({ field: "cardTransfer", reason: "CARD_TRANSFER_CONFIGURATION_INVALID" });
+    return { companyCardNumberMasked: `${"•".repeat(12)}${account.cardNumber.slice(-4)}`, accountHolderName: account.holderName, cardTransferDestinationId: account.destinationId };
+  }
+
+  /**
+   * An idempotent replay returns the caller's own earlier row — never another member's: a key is client-chosen,
+   * so a row found under it that belongs to someone else is a conflict, not a replay.
+   */
+  private async ownReplay(userId: string, idempotencyKey: string) {
+    const existing = await this.prisma.cardTransferPayment.findUnique({ where: { idempotencyKey: idempotencyKey.trim() } });
+    if (existing && existing.userId !== userId) throw new ValidationApiException({ field: "idempotencyKey", reason: "CONFLICT" });
+    return existing;
   }
 
   async startForCheckout(userId: string, checkoutId: string, idempotencyKey: string) {
     if (!idempotencyKey?.trim()) throw new ValidationApiException({ field: "idempotencyKey", reason: "REQUIRED" });
-    const existing = await this.prisma.cardTransferPayment.findUnique({ where: { idempotencyKey } });
+    const existing = await this.ownReplay(userId, idempotencyKey);
     if (existing) return existing;
     const checkout = await this.prisma.checkout.findFirst({ where: { id: checkoutId, userId } });
     if (!checkout) throw new ValidationApiException({ field: "checkoutId", reason: "NOT_FOUND" });
@@ -50,7 +61,7 @@ export class CardTransferPaymentService {
       throw new ValidationApiException({ field: "checkout", reason: "NOT_READY_FOR_PAYMENT" });
     }
     const now = new Date();
-    const details = this.accountDetails();
+    const details = await this.accountDetails();
     return this.prisma.$transaction(async (tx) => {
       const active = await tx.inventoryReservation.findFirst({ where: { checkoutId, status: "ACTIVE", expiresAt: { gt: now } } });
       // OF-13's base hold starts at payment, not cart.  PY-02 is the explicit
@@ -77,7 +88,7 @@ export class CardTransferPaymentService {
 
   async startForBooking(userId: string, bookingId: string, idempotencyKey: string) {
     if (!idempotencyKey?.trim()) throw new ValidationApiException({ field: "idempotencyKey", reason: "REQUIRED" });
-    const existing = await this.prisma.cardTransferPayment.findUnique({ where: { idempotencyKey } });
+    const existing = await this.ownReplay(userId, idempotencyKey);
     if (existing) return existing;
     const booking = await this.prisma.booking.findFirst({ where: { id: bookingId, userId } });
     if (!booking) throw new ValidationApiException({ field: "bookingId", reason: "NOT_FOUND" });
@@ -85,7 +96,7 @@ export class CardTransferPaymentService {
     const amount = Number(booking.depositAmount ?? booking.priceAmount);
     if (!Number.isInteger(amount) || amount <= 0) throw new ValidationApiException({ field: "booking", reason: "PAYABLE_AMOUNT_REQUIRED" });
     const now = new Date();
-    const details = this.accountDetails();
+    const details = await this.accountDetails();
     const row = await this.prisma.cardTransferPayment.create({
       data: { userId, bookingId, idempotencyKey: idempotencyKey.trim(), expectedAmount: amount, currency: booking.currency ?? "IRR", ...details, receiptUploadDeadlineAt: new Date(now.getTime() + CARD_TRANSFER_RECEIPT_WINDOW_MS), reviewAvailableAt: nextWorkingReviewAt(now) },
     });

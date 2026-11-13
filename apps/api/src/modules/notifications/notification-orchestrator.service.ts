@@ -1,4 +1,7 @@
+import { EmailGatewayService } from "../../common/email/email-gateway.service";
+import { maskEmail } from "../../common/pii/pii-mask.util";
 import { Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import {
   NotificationCategory,
   NotificationChannel,
@@ -13,8 +16,13 @@ import { getCountryConfig } from "../../common/country/country-config";
 import { maskPhone } from "../../common/phone/phone-normalizer";
 import { NotificationPreferenceService } from "./notification-preference.service";
 import { NotificationDeliveryService } from "./notification-delivery.service";
-import { renderNotificationTemplate } from "./notification-templates";
+import { renderNotificationTemplate, TEMPLATE_PARAMS_METADATA_KEY } from "./notification-templates";
 import { isWithinQuietHours, nextQuietHoursEndUtc } from "./notification-quiet-hours.util";
+import type { AppEnv } from "../../config/env";
+import { WebPushService } from "./push/web-push.service";
+import { pushDirection, pushTargetUrl, pushTitle } from "./push/push-payload.util";
+
+const EMAIL_ACTION_LABEL = { fa: "مشاهده در اپت‌لایف", en: "Open in opetlife", de: "In opetlife öffnen", es: "Abrir en opetlife", ar: "افتح في opetlife", nl: "Openen in opetlife" } as const;
 
 export interface NotifyInput {
   userId: string;
@@ -36,6 +44,10 @@ export interface NotifyInput {
   metadata?: Record<string, unknown>;
   /** Attempt SMS in addition to IN_APP when the resolved template has an smsBody and preferences/quiet-hours allow it. Default true. */
   attemptSms?: boolean;
+  /** Also email the user (when an email channel is configured and they have an address). Default true for eligible templates. */
+  attemptEmail?: boolean;
+  /** Also push to the member's subscribed devices (browsers, installed PWA, Android app). Default true. */
+  attemptPush?: boolean;
   /** Dev/test-only outcome selector for the SMS channel's very first send attempt (see DevMessagingAdapter) — never present in a real domain-event listener call. A retry never reuses this; it always attempts for real (simulated-success in DEV). */
   smsSimMode?: "SUCCESS" | "FAILURE_TRANSIENT" | "FAILURE_PERMANENT" | "PENDING";
 }
@@ -57,6 +69,13 @@ export interface NotifyInput {
  * an already-existing notification — this method enforces that by simply
  * returning early.
  */
+/** The caller's metadata plus the template parameters, so the inbox can re-render the copy in the reader's language. */
+function storedMetadata(metadata: Record<string, unknown> | undefined, templateParams: Record<string, string | number> | undefined): Prisma.InputJsonValue | undefined {
+  const params = templateParams && Object.keys(templateParams).length > 0 ? { [TEMPLATE_PARAMS_METADATA_KEY]: templateParams } : {};
+  if (!metadata && !Object.keys(params).length) return undefined;
+  return { ...(metadata ?? {}), ...params } as Prisma.InputJsonValue;
+}
+
 @Injectable()
 export class NotificationOrchestratorService {
   constructor(
@@ -64,6 +83,9 @@ export class NotificationOrchestratorService {
     private readonly events: DomainEventsService,
     private readonly preferences: NotificationPreferenceService,
     private readonly delivery: NotificationDeliveryService,
+    private readonly email: EmailGatewayService,
+    private readonly webPush: WebPushService,
+    private readonly config: ConfigService<AppEnv, true>,
   ) {}
 
   async notify(input: NotifyInput): Promise<{ notification: Notification; created: boolean }> {
@@ -104,7 +126,7 @@ export class NotificationOrchestratorService {
           entityId: input.entityId ?? null,
           actorType: input.actorType ?? null,
           actorId: input.actorId ?? null,
-          metadata: input.metadata ? (input.metadata as Prisma.InputJsonValue) : undefined,
+          metadata: storedMetadata(input.metadata, input.templateParams),
         },
       });
     } catch (error) {
@@ -164,7 +186,101 @@ export class NotificationOrchestratorService {
       );
     }
 
+    // Email mirrors SMS eligibility (transactional templates that carry an smsBody), plus security notices and
+    // staff messages; it is skipped entirely unless an email provider is configured.
+    const emailEligible = Boolean(rendered.smsBody) || input.category === NotificationCategory.SECURITY || input.type === "admin.message";
+    if (emailEligible && input.attemptEmail !== false && this.email.isEnabled()) {
+      await this.fanOutEmail(notification.id, input.userId, user.email, user.emailVerifiedAt, input.category, rendered.title, rendered.body, input.type, user.locale, input.deepLink ?? null);
+    }
+
+    if (input.attemptPush !== false) {
+      await this.fanOutPush(notification, user.locale, input.priority ?? NotificationPriority.NORMAL, inAppEnabled);
+    }
+
     return { notification, created };
+  }
+
+  /**
+   * Push is the inbox on the member's own devices, so it follows the inbox: it is sent only when the in-app
+   * notification itself was kept (a category switched off in-app never buzzes a phone) and PUSH is on for that
+   * category. During quiet hours it still arrives, but silently, exactly like the inbox; only URGENT keeps its
+   * sound. A member with no subscribed device gets no PUSH row at all (nothing was attempted).
+   */
+  private async fanOutPush(notification: Notification, userLocale: string, priority: NotificationPriority, inAppEnabled: boolean): Promise<void> {
+    if (!this.webPush.isConfigured()) return;
+    const userId = notification.userId;
+    const devices = await this.prisma.pushSubscription.count({ where: { userId } });
+    if (devices === 0) return;
+    const skip = (reason: string) =>
+      this.prisma.notificationDelivery.create({ data: { notificationId: notification.id, channel: NotificationChannel.PUSH, status: NotificationDeliveryStatus.SKIPPED, metadata: { reason } } });
+    if (!inAppEnabled) { await skip("in_app_disabled"); return; }
+    if (!(await this.preferences.resolve(userId, notification.category, NotificationChannel.PUSH))) { await skip("category_disabled"); return; }
+
+    const quietHours = await this.prisma.notificationQuietHours.findUnique({ where: { userId } });
+    const silent = Boolean(
+      quietHours?.enabled && priority !== NotificationPriority.URGENT && isWithinQuietHours(new Date(), quietHours.startTime, quietHours.endTime, quietHours.timezone),
+    );
+    const urgent =
+      priority === NotificationPriority.URGENT ||
+      priority === NotificationPriority.HIGH ||
+      notification.category === NotificationCategory.SECURITY ||
+      notification.category === NotificationCategory.LOST_PET;
+    const locale = userLocale;
+    const delivery = await this.prisma.notificationDelivery.create({
+      data: {
+        notificationId: notification.id,
+        channel: NotificationChannel.PUSH,
+        status: NotificationDeliveryStatus.PENDING,
+        destinationMasked: `${devices} device${devices === 1 ? "" : "s"}`,
+        metadata: {
+          userId,
+          // Title and link only: the notification's own title/body can name a pet, clinic or medicine (see PushPayload).
+          title: pushTitle(notification.category, locale),
+          url: pushTargetUrl(this.config.get("WEB_APP_ORIGIN", { infer: true }), locale, notification.deepLink),
+          locale,
+          dir: pushDirection(locale),
+          silent,
+          urgency: urgent ? "high" : "normal",
+          sentTo: [],
+        },
+      },
+    });
+    await this.delivery.attempt(delivery.id);
+  }
+
+  /**
+   * Email goes only to a verified address (OTP- or Google-proven): an address typed at sign-up and never
+   * confirmed may belong to someone else, and sending them account details would be a privacy leak.
+   */
+  private async fanOutEmail(
+    notificationId: string,
+    userId: string,
+    email: string | null,
+    emailVerifiedAt: Date | null,
+    category: NotificationCategory,
+    title: string,
+    body: string,
+    templateKey: string,
+    userLocale: string,
+    deepLink: string | null,
+  ): Promise<void> {
+    const skip = (reason: string, destinationMasked?: string) =>
+      this.prisma.notificationDelivery.create({ data: { notificationId, channel: NotificationChannel.EMAIL, status: NotificationDeliveryStatus.SKIPPED, destinationMasked, metadata: { reason } } });
+    if (!email) { await skip("no_email"); return; }
+    const masked = maskEmail(email);
+    if (!emailVerifiedAt) { await skip("email_unverified", masked); return; }
+    if (!(await this.preferences.resolve(userId, category, NotificationChannel.EMAIL))) { await skip("category_disabled", masked); return; }
+    const locale = userLocale === "fa" || userLocale === "de" || userLocale === "es" ? userLocale : "en";
+    const delivery = await this.prisma.notificationDelivery.create({
+      data: {
+        notificationId,
+        channel: NotificationChannel.EMAIL,
+        status: NotificationDeliveryStatus.PENDING,
+        destinationMasked: masked,
+        metadata: { destination: email, title, body, templateKey, locale, deepLink, actionLabel: EMAIL_ACTION_LABEL[locale] },
+      },
+    });
+    await this.delivery.attempt(delivery.id);
   }
 
   private async fanOutSms(

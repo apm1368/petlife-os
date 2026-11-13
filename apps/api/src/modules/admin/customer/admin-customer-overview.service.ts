@@ -5,7 +5,7 @@ import { DomainEventsService } from "../../../common/events/domain-events.servic
 import { AdminGovernanceRuleException, NotFoundApiException, ValidationApiException } from "../../../common/errors/api-exception";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
-import { roleHasPermission } from "../auth/admin-permissions";
+import { adminCan } from "../auth/admin-permissions";
 
 const mask = (v: string | null) => {
   if (!v) return null;
@@ -60,7 +60,7 @@ export class AdminCustomerOverviewService {
       this.prisma.recentlyViewed.count({ where: { userId } }),
       this.prisma.adminAuditLog.findMany({ where: { entityType: { in: ["USER", "User"] }, entityId: userId }, orderBy: { createdAt: "desc" }, take: 10, include: { adminUser: { select: { role: true, user: { select: { displayName: true } } } } } }),
     ]);
-    const finance = roleHasPermission(admin.role, "finance.view") ? await this.finance(userId) : { restricted: true as const };
+    const finance = adminCan(admin, "finance.view") ? await this.finance(userId) : { restricted: true as const };
     const count = <T extends { _count: { _all: number } }>(rows: T[], pick: (r: T) => boolean) => rows.filter(pick).reduce((n, r) => n + r._count._all, 0);
     return {
       identity: {

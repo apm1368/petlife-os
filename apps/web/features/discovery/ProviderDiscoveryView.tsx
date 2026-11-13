@@ -13,6 +13,8 @@ import { formatCount } from "@/lib/number/format-number";
 import { DateField } from "@/features/shared/date-picker/DateField";
 import { DiscoveryPage } from "./DiscoveryPage";
 import type { RouteLocale } from "@/lib/i18n/config";
+import { serviceCategorySlug } from "@/lib/services/category-slug";
+import { placeName } from "@/lib/i18n/iran-places";
 
 const SORTS: DiscoverySort[] = ["RECOMMENDED", "EARLIEST", "NEAREST", "TOP_RATED", "LOWEST_PRICE"];
 
@@ -49,6 +51,7 @@ function readQuery(params: URLSearchParams, category?: string): DiscoveryQuery {
  * is listed above the results with its own remove control.
  */
 export function ProviderDiscoveryView({ category }: { category?: string }) {
+  const tTaxi = useTranslations("petTaxi.member");
   const locale = useLocale() as RouteLocale;
   const fa = locale === "fa";
   const t = useTranslations("providerDiscovery");
@@ -65,6 +68,8 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
   const [locating, setLocating] = useState<"idle" | "busy" | "denied">("idle");
   const [text, setText] = useState(query.q ?? "");
   const [sheet, setSheet] = useState(false);
+  /** Covers that failed to load (a moved file, an expired upload) fall back to the monogram, never a broken image. */
+  const [brokenCovers, setBrokenCovers] = useState<Set<string>>(() => new Set());
 
   const setParam = useCallback(
     (patch: Record<string, string | undefined>) => {
@@ -206,6 +211,14 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
         </button>
       </div>
       {locating === "denied" ? <p role="status" className="disc-note">{t("filters.locationUnavailable")}</p> : null}
+      {category === "PET_TAXI" ? (
+        <p className="disc-note">
+          <Link href={`/${locale}/pet-taxi`} className="font-semibold underline">
+            {tTaxi("requestNow")}
+          </Link>{" "}
+          · {tTaxi("requestNowHint")}
+        </p>
+      ) : null}
       {category === "VET" ? (
         <fieldset className="disc-field">
           <legend>{t("filters.veterinaryService")}</legend>
@@ -248,7 +261,7 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
       <nav className="disc-cats" aria-label={t("serviceCategories")}>
         <Link href={`/${locale}/services/search${navQuery}`} aria-current={!category ? "page" : undefined}>{t("all")}</Link>
         {CATEGORY_NAV.map((c) => (
-          <Link key={c} href={`/${locale}/services/${c}${navQuery}`} aria-current={category === c ? "page" : undefined}>{categoryName(c)}</Link>
+          <Link key={c} href={`/${locale}/services/${serviceCategorySlug(c)}${navQuery}`} aria-current={category === c ? "page" : undefined}>{categoryName(c)}</Link>
         ))}
       </nav>
 
@@ -268,7 +281,7 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
             </p>
             <label className="disc-sort">
               <span>{t("sort.label")}</span>
-              <select value={query.sort} onChange={(e) => (e.target.value === "NEAREST" && query.lat === undefined ? locateMe() : setParam({ sort: e.target.value }))}>
+              <select aria-label={t("sort.label")} value={query.sort} onChange={(e) => (e.target.value === "NEAREST" && query.lat === undefined ? locateMe() : setParam({ sort: e.target.value }))}>
                 {SORTS.map((s) => (
                   <option key={s} value={s}>{t(`sort.${s}`)}</option>
                 ))}
@@ -320,8 +333,8 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
                   return (
                     <li key={p.id} className="disc-row">
                       <div className="disc-row__media">
-                        {p.coverImageUrl ? (
-                          <Image unoptimized src={p.coverImageUrl} alt="" fill sizes="128px" />
+                        {p.coverImageUrl && !brokenCovers.has(p.id) ? (
+                          <Image unoptimized src={p.coverImageUrl} alt="" fill sizes="128px" onError={() => setBrokenCovers((prev) => new Set(prev).add(p.id))} />
                         ) : (
                           // No photo of their own: a monogram, never a stock photo that implies a different place.
                           <span className="provider-monogram" aria-hidden="true">{p.name.trim().charAt(0)}</span>
@@ -337,7 +350,7 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
                           {isVet && p.specialties.length ? p.specialties.slice(0, 4).join(fa ? "، " : ", ") : p.services.slice(0, 3).map((s) => s.name).join(fa ? "، " : ", ")}
                         </p>
                         <p className="disc-row__meta">
-                          {p.location ? <span><MapPin size={14} aria-hidden="true" />{[p.location.region, p.location.city].filter(Boolean).join(fa ? "، " : ", ")}{p.distanceKm !== null ? ` · ${formatCount(p.distanceKm, locale)} ${t("distanceUnit")}` : ""}</span> : null}
+                          {p.location ? <span><MapPin size={14} aria-hidden="true" />{[placeName(p.location.region, locale), placeName(p.location.city, locale)].filter(Boolean).join(fa ? "، " : ", ")}{p.distanceKm !== null ? ` · ${formatCount(p.distanceKm, locale)} ${t("distanceUnit")}` : ""}</span> : null}
                           <span className={p.nextAvailableAt ? "disc-row__open" : undefined}><Clock3 size={14} aria-hidden="true" />{p.nextAvailableAt ? `${t("nextOpening")}: ${fmtTime(p.nextAvailableAt)}` : t("noOpening")}</span>
                           {p.homeVisit ? <span><House size={14} aria-hidden="true" />{t("filters.homeVisitPlural")}</span> : null}
                           {p.petTypes.length ? <span>{p.petTypes.map((petType) => t(petType === "DOG" ? "species.dogs" : "species.cats")).join(fa ? " و " : locale === "de" ? " und " : locale === "es" ? " y " : " & ")}</span> : null}

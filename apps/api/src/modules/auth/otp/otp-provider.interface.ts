@@ -1,13 +1,13 @@
+import type { OtpPurpose } from "./otp-code-store";
+
 export const OTP_PROVIDER = Symbol("OTP_PROVIDER");
 
 /**
- * Boundary between auth and OTP delivery. Dev logs only outside production;
- * Faraz sends the code through the official Pattern API.
+ * Delivery boundary for one-time codes. Providers only deliver the code they are handed; generation, storage,
+ * cooldowns, attempt caps and budgets live in OtpService/OtpCodeStore. Dev logs the code outside production;
+ * Faraz sends it through the official Pattern API.
  */
 export interface OtpProvider {
-  /** Issues (or resends) a code for `identifier`. Throws OtpRateLimitedException on cooldown/rate-limit. */
-  sendOtp(identifier: string): Promise<void>;
-
-  /** Verifies `code` for `identifier`. Throws OtpInvalidException on mismatch/expiry/attempt exhaustion. */
-  verifyOtp(identifier: string, code: string): Promise<void>;
+  /** Delivers `code` to `identifier`. Throws when nothing was delivered (no code is stored then). */
+  deliver(identifier: string, code: string, purpose: OtpPurpose): Promise<void>;
 }
