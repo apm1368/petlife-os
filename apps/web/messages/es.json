@@ -10074,6 +10074,20 @@
         "tooFast": "Demasiados intentos en poco tiempo. Espera un minuto y vuelve a intentarlo.",
         "check": "Hay datos que revisar.",
         "generic": "No se pudo enviar la sugerencia. Vuelve a intentarlo."
+      },
+      "photos": {
+        "label": "Fotos (opcional)",
+        "hint": "Hasta 3 fotos (JPG, PNG o WebP, de hasta 10 MB cada una). Son privadas y se eliminan sus datos de ubicación y cámara; si se aprueba el lugar, pueden aparecer en su galería.",
+        "add": "Añadir fotos",
+        "remove": "Quitar {name}",
+        "count": "{count, plural, one {# foto} other {# fotos}}",
+        "errors": {
+          "type": "Solo se aceptan fotos JPG, PNG o WebP.",
+          "tooLarge": "Cada foto puede pesar hasta 10 MB.",
+          "max": "Puedes añadir hasta 3 fotos.",
+          "notImage": "Uno de los archivos no es una foto. Elige otro.",
+          "upload": "No se pudo subir una foto. Vuelve a intentarlo."
+        }
       }
     }
   },

@@ -63,4 +63,6 @@ export {
   Smartphone,
   Copy,
   Laptop,
+  ImagePlus,
+  Trash2,
 } from "lucide-react";

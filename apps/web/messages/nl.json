@@ -7193,6 +7193,20 @@
         "tooFast": "Te veel pogingen in korte tijd. Wacht een minuut en probeer het opnieuw.",
         "check": "Sommige gegevens moeten worden gecontroleerd.",
         "generic": "De suggestie kon niet worden verstuurd. Probeer het opnieuw."
+      },
+      "photos": {
+        "label": "Foto's (optioneel)",
+        "hint": "Tot 3 foto's (JPG, PNG of WebP, elk tot 10 MB). Ze blijven privé en locatie- en cameragegevens worden verwijderd; als de plek wordt goedgekeurd, kunnen ze in de galerij verschijnen.",
+        "add": "Foto's toevoegen",
+        "remove": "{name} verwijderen",
+        "count": "{count, plural, one {# foto} other {# foto's}}",
+        "errors": {
+          "type": "Alleen JPG-, PNG- of WebP-foto's worden geaccepteerd.",
+          "tooLarge": "Elke foto mag maximaal 10 MB zijn.",
+          "max": "Je kunt maximaal 3 foto's toevoegen.",
+          "notImage": "Een van de bestanden is geen foto. Kies een andere.",
+          "upload": "Een foto kon niet worden geüpload. Probeer het opnieuw."
+        }
       }
     }
   },
