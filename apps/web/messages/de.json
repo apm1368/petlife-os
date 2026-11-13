@@ -10850,21 +10850,30 @@
   },
   "adminDigikalaFacts": {
     "title": "Einmaliger Digikala-Tierbedarf-Import (nur Fakten)",
-    "hint": "Die meistverkauften Produkte der Digikala-Kategorie Tierbedarf kommen einmalig als Entwürfe in den Katalog.",
+    "hint": "Die meistverkauften Produkte aller Digikala-Unterkategorien für Tierbedarf (anteilig nach Größe) kommen einmalig als Entwürfe in den Katalog.",
     "rules": {
-      "facts": "Name, Marke, Kategorie, technische Daten und Gewicht werden übernommen.",
+      "facts": "Name, Marke, Kategorie, technische Daten, Gewicht und Varianten (Farbe, Größe, Geschmack) werden übernommen.",
       "noContent": "Fotos und Beschreibungen von Digikala werden nicht kopiert; vor dem Veröffentlichen eigene Texte und Bilder ergänzen.",
       "reference": "Preis und Bestand von Digikala bleiben nur als Referenz im Importprotokoll; sie sind nicht unser Verkaufspreis.",
-      "pace": "Er läuft langsam (eine Anfrage alle 3 Sekunden) und stoppt, wenn Digikala blockiert."
+      "pace": "Er läuft langsam (eine Anfrage alle 3 Sekunden) und stoppt, wenn Digikala blockiert.",
+      "resume": "Nach einem Serverneustart macht er dort weiter, wo er war; bereits gelesene Produkte werden übersprungen und zählen zur Gesamtzahl."
     },
     "category": "Zielkategorie im Katalog",
-    "maxProducts": "Höchstzahl Produkte (bis 3000)",
+    "maxProducts": "Produkte insgesamt (bis 16.000)",
     "start": "Einmaligen Import starten",
     "started": "In der Warteschlange; der Fortschritt erscheint in der Auftragsliste.",
-    "alreadyRun": "Dieser Import ist bereits gelaufen oder läuft gerade.",
-    "invalid": "Wählen Sie eine Kategorie und eine Zahl von 1 bis 3000.",
+    "alreadyRun": "Dieser Import läuft gerade oder hat seine Gesamtzahl bereits gelesen.",
+    "invalid": "Wählen Sie eine Kategorie und eine Zahl von 1 bis 16.000.",
     "forbidden": "Berechtigung commerce.manage erforderlich.",
-    "failed": "Konnte nicht starten; bitte erneut versuchen."
+    "failed": "Konnte nicht starten; bitte erneut versuchen.",
+    "progress": {
+      "title": "Importfortschritt",
+      "planning": "Unterkategorien werden gemessen: {done} von {total}",
+      "subcategory": "Unterkategorie {index} von {count}: {title}",
+      "fill": "Gesamtzahl wird aus Unterkategorien mit mehr Produkten aufgefüllt",
+      "counts": "{seen} von {target} gelesen · {imported} Entwürfe · {failed} Fehler",
+      "eta": "Noch etwa {hours} Std."
+    }
   },
   "petCard": {
     "title": "Tierkarte und QR-Code",

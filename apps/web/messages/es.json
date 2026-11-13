@@ -10848,21 +10848,30 @@
   },
   "adminDigikalaFacts": {
     "title": "Importación única de mascotas de Digikala (solo datos)",
-    "hint": "Los productos más vendidos de la categoría de mascotas de Digikala entran una vez al catálogo como borradores.",
+    "hint": "Los productos más vendidos de todas las subcategorías de mascotas de Digikala (en proporción a su tamaño) entran una vez al catálogo como borradores.",
     "rules": {
-      "facts": "Se importan nombre, marca, categoría, especificaciones y peso.",
+      "facts": "Se importan nombre, marca, categoría, especificaciones, peso y variantes (color, talla, sabor).",
       "noContent": "No se copian fotos ni descripciones de Digikala; añade textos e imágenes propios antes de publicar.",
       "reference": "El precio y el stock de Digikala quedan solo como referencia en el registro; no son nuestro precio de venta.",
-      "pace": "Se ejecuta despacio (una solicitud cada 3 segundos) y se detiene si Digikala bloquea."
+      "pace": "Se ejecuta despacio (una solicitud cada 3 segundos) y se detiene si Digikala bloquea.",
+      "resume": "Tras un reinicio del servidor continúa donde estaba; los productos ya leídos se omiten y cuentan para el total."
     },
     "category": "Categoría de destino",
-    "maxProducts": "Máximo de productos (hasta 3000)",
+    "maxProducts": "Total de productos (hasta 16.000)",
     "start": "Iniciar la importación única",
     "started": "En cola; el progreso aparece en la lista de trabajos.",
-    "alreadyRun": "Esta importación ya se ejecutó o está en curso.",
-    "invalid": "Elige una categoría y un número de 1 a 3000.",
+    "alreadyRun": "Esta importación está en curso o ya leyó su total.",
+    "invalid": "Elige una categoría y un número de 1 a 16.000.",
     "forbidden": "Se requiere el permiso commerce.manage.",
-    "failed": "No se pudo iniciar; inténtalo de nuevo."
+    "failed": "No se pudo iniciar; inténtalo de nuevo.",
+    "progress": {
+      "title": "Progreso de la importación",
+      "planning": "Midiendo subcategorías: {done} de {total}",
+      "subcategory": "Subcategoría {index} de {count}: {title}",
+      "fill": "Completando el total con subcategorías que tienen más productos",
+      "counts": "{seen} de {target} leídos · {imported} borradores · {failed} con error",
+      "eta": "Quedan unas {hours} h"
+    }
   },
   "petCard": {
     "title": "Tarjeta de la mascota y código QR",

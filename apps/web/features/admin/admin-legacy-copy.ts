@@ -272,6 +272,7 @@ export const LEGACY_COPY: Readonly<Record<string, readonly [de: string, es: stri
   "No import jobs yet": ["Noch keine Importaufträge", "Aún no hay trabajos de importación"],
   "After you submit a source link, its real result will appear here.": ["Nachdem du einen Quelllink eingereicht hast, erscheint hier sein tatsächliches Ergebnis.", "Cuando envíes un enlace de origen, aquí aparecerá su resultado real."],
   "Pages / seen / drafts / failed": ["Seiten / gesehen / Entwürfe / fehlgeschlagen", "Páginas / vistas / borradores / fallidas"],
+  "Latest {shown} of {total} items": ["Neueste {shown} von {total} Einträgen", "Últimos {shown} de {total} elementos"],
   "Source brand": ["Marke der Quelle", "Marca de origen"],
   "Apply source version": ["Version der Quelle übernehmen", "Aplicar la versión de origen"],
   "Reject change": ["Änderung ablehnen", "Rechazar el cambio"],

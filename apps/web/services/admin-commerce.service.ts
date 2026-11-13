@@ -60,7 +60,11 @@ export const adminCommerceService = {
   catalogImportAvailability: () => apiFetch<{ key: string; enabled: boolean; reason: string }>("/admin/commerce/catalog-imports/availability"),
   listCatalogImports: () => apiFetch<Array<{
     id: string; status: string; mode?: string; submittedUrls: string[]; pagesVisited: number; productsSeen: number;
-    productsImported: number; productsFailed: number; lastError: string | null; createdAt: string;
+    productsImported: number; productsFailed: number; lastError: string | null; createdAt: string; maxProducts: number;
+    /** DIGIKALA_FACTS runs: the sub-category plan and cursor. */
+    progress?: { planned: boolean; subcategories: Array<{ code: string; title: string; total: number | null }>; plan: Array<{ code: string; title: string; quota: number; taken: number; exhausted: boolean }>; current: number; pass: "QUOTA" | "FILL" } | null;
+    /** All items of the job; `items` holds only the latest 100. */
+    _count?: { items: number };
     targetCategory: { id: string; name: string };
     items: Array<{ id: string; sourceItemId: string; sourceUrl: string; sourceSnapshot: { title?: string; brandName?: string | null }; pendingSnapshot?: { title?: string; brandName?: string | null } | null; status: string; errorCode: string | null; errorDetail: string | null; product: { id: string; title: string; status: string } | null }>;
   }>>("/admin/commerce/catalog-imports"),

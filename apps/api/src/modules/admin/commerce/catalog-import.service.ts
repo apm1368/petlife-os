@@ -11,12 +11,29 @@ import { StorageService } from "../../storage/storage.service";
 import { safeFetch, SourceFetchError } from "../../travel-external/safe-fetch";
 import { canonicalDigikalaInput, parseDigikalaCatalogPage, type DigikalaProductSnapshot } from "./digikala-catalog.parser";
 import { robotsDisallowsPath } from "./digikala-robots";
-import { DIGIKALA_FACTS_HOSTS, DIGIKALA_FACTS_MODE, factsDetailUrl, factsListUrl, parseFactsDetail, parseFactsList, type DigikalaFactsSnapshot } from "./digikala-facts";
+import { DIGIKALA_FACTS_CATEGORY, DIGIKALA_FACTS_HOSTS, DIGIKALA_FACTS_MODE, FACTS_SOURCE_MAX_PAGES, factsDetailUrl, factsListUrl, parseFactsDetail, parseFactsList, parseFactsSubcategories, planQuotas, type DigikalaFactsSnapshot, type FactsPlanEntry, type FactsSubcategory } from "./digikala-facts";
 
-/** The one-time facts run (owner, 2026-11-12): at most this many products, one request every few seconds. */
-const FACTS_MAX_PRODUCTS = 3000;
-const FACTS_DEFAULT_PRODUCTS = 1000;
-const FACTS_MAX_PAGES = 500;
+/**
+ * The one-time facts run (owner, 2026-11-12/13): about 16,000 products in total, once, one request every few seconds.
+ * DIGIKALA_FACTS_MAX_PRODUCTS can lower (or raise, up to 50,000) the total; every later run only completes it.
+ */
+export function factsMaxProducts(env: NodeJS.ProcessEnv = process.env): number {
+  const value = Number(env.DIGIKALA_FACTS_MAX_PRODUCTS);
+  return Number.isInteger(value) && value >= 1 && value <= 50_000 ? value : 16_000;
+}
+const FACTS_DEFAULT_PRODUCTS = 16_000;
+
+/** Where a facts run is: the sub-category plan and each one's cursor, saved after every product so a restart resumes. */
+export interface FactsProgress {
+  version: 1;
+  /** False while sub-category sizes are still being read. */
+  planned: boolean;
+  subcategories: Array<FactsSubcategory & { total: number | null }>;
+  plan: FactsPlanEntry[];
+  current: number;
+  /** QUOTA: each sub-category up to its share; FILL: any sub-category with products left, up to the run's total. */
+  pass: "QUOTA" | "FILL";
+}
 
 const HOSTS = ["digikala.com"];
 const MAX_URLS = 20;
@@ -31,6 +48,21 @@ type ItemSnapshot = DigikalaProductSnapshot;
 type JobInput = { urls: string[]; categoryId: string; brandId?: string; maxPages?: number; maxProducts?: number; idempotencyKey: string };
 
 function hash(value: unknown): string { return createHash("sha256").update(JSON.stringify(value)).digest("hex"); }
+
+/** The draft's variants: one row per colour/size/flavour/weight Digikala lists; SKU DK-<id> when there is only one. */
+export function factsVariantRows(snapshot: Pick<DigikalaFactsSnapshot, "sourceItemId" | "weightKg"> & { variants?: DigikalaFactsSnapshot["variants"] }) {
+  const variants = snapshot.variants?.length ? snapshot.variants : [{ attributes: {} as Record<string, string>, weightKg: snapshot.weightKg }];
+  const rows = variants.map((variant, index) => {
+    const values = Object.values(variant.attributes);
+    return {
+      sku: variants.length === 1 ? `DK-${snapshot.sourceItemId}` : `DK-${snapshot.sourceItemId}-${index + 1}`,
+      ...(variants.length > 1 && values.length ? { title: values.join(" · ").slice(0, 120) } : {}),
+      ...(values.length ? { attributes: variant.attributes as Prisma.InputJsonValue } : {}),
+      ...(variant.weightKg ? { weightValue: variant.weightKg, weightUnit: WeightUnit.KG } : {}),
+    };
+  });
+  return rows.length === 1 ? rows[0]! : rows;
+}
 function mimeOf(bytes: Buffer): string | null {
   if (bytes.length >= 8 && bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) return "image/png";
   if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "image/jpeg";
@@ -102,8 +134,9 @@ export class CatalogImportService {
     return row;
   }
 
+  /** Jobs with their latest 100 items each (a facts run has thousands; the count says how many). */
   listJobs() {
-    return this.prisma.catalogImportJob.findMany({ orderBy: { createdAt: "desc" }, take: 50, include: { items: { orderBy: { createdAt: "asc" }, include: { product: { select: { id: true, title: true, status: true } } } }, targetCategory: { select: { id: true, name: true } } } });
+    return this.prisma.catalogImportJob.findMany({ orderBy: { createdAt: "desc" }, take: 50, include: { items: { orderBy: { createdAt: "desc" }, take: 100, include: { product: { select: { id: true, title: true, status: true } } } }, _count: { select: { items: true } }, targetCategory: { select: { id: true, name: true } } } });
   }
 
   listActiveBrands() {
@@ -306,8 +339,9 @@ export class CatalogImportService {
   factsDelayMs = process.env.NODE_ENV === "test" ? 0 : 3_000;
 
   /**
-   * Queues the one-time Digikala pet import, facts only (owner decision 2026-11-12). Refused once a facts run has
-   * finished or is under way, so it really happens once; a failed or cancelled run may be queued again.
+   * Queues the one-time Digikala pet import, facts only (owner decisions 2026-11-12/13). One run at a time; a later run
+   * only completes the one-time total (products already recorded are skipped and counted), so across all runs no more
+   * than factsMaxProducts() products are ever read. Refused once that total is reached.
    */
   async createFactsJob(admin: ResolvedAdminContext, input: { categoryId: string; brandId?: string; maxProducts?: number; idempotencyKey: string }, requestId?: string) {
     const prior = await this.prisma.catalogImportJob.findUnique({ where: { idempotencyKey: input.idempotencyKey } });
@@ -318,14 +352,18 @@ export class CatalogImportService {
       const brand = await this.prisma.brand.findFirst({ where: { id: input.brandId, status: "ACTIVE" }, select: { id: true } });
       if (!brand) throw new NotFoundApiException("Active brand", { brandId: input.brandId });
     }
-    const existing = await this.prisma.catalogImportJob.findFirst({ where: { mode: DIGIKALA_FACTS_MODE, status: { in: [CatalogImportJobStatus.QUEUED, CatalogImportJobStatus.RUNNING, CatalogImportJobStatus.COMPLETED, CatalogImportJobStatus.PARTIAL] } }, select: { id: true } });
-    if (existing) throw new ApiException("DIGIKALA_FACTS_ALREADY_RUN", "The one-time Digikala facts import has already run or is running.", HttpStatus.CONFLICT, { jobId: existing.id });
-    const maxProducts = Math.min(FACTS_MAX_PRODUCTS, Math.max(1, input.maxProducts ?? FACTS_DEFAULT_PRODUCTS));
+    const running = await this.prisma.catalogImportJob.findFirst({ where: { mode: DIGIKALA_FACTS_MODE, status: { in: [CatalogImportJobStatus.QUEUED, CatalogImportJobStatus.RUNNING] } }, select: { id: true } });
+    if (running) throw new ApiException("DIGIKALA_FACTS_ALREADY_RUN", "The one-time Digikala facts import is already running.", HttpStatus.CONFLICT, { jobId: running.id });
+    const total = factsMaxProducts();
+    const alreadyRead = await this.prisma.catalogImportItem.count({ where: { source: "DIGIKALA", job: { mode: DIGIKALA_FACTS_MODE } } });
+    const remaining = total - alreadyRead;
+    if (remaining <= 0) throw new ApiException("DIGIKALA_FACTS_ALREADY_RUN", "The one-time Digikala facts import has already read its total.", HttpStatus.CONFLICT, { total, alreadyRead });
+    const maxProducts = Math.min(remaining, Math.max(1, input.maxProducts ?? FACTS_DEFAULT_PRODUCTS));
     const row = await this.prisma.catalogImportJob.create({ data: {
       mode: DIGIKALA_FACTS_MODE, submittedUrls: [factsListUrl(1)], targetCategoryId: category.id, targetBrandId: input.brandId ?? null,
-      maxPages: FACTS_MAX_PAGES, maxProducts, requestedById: admin.adminUserId, idempotencyKey: input.idempotencyKey,
+      maxPages: FACTS_SOURCE_MAX_PAGES, maxProducts, requestedById: admin.adminUserId, idempotencyKey: input.idempotencyKey,
     } });
-    await this.audit.record({ adminUserId: admin.adminUserId, action: "catalog_import.queued", entityType: "CATALOG_IMPORT_JOB", entityId: row.id, afterSummary: { mode: DIGIKALA_FACTS_MODE, categoryId: row.targetCategoryId, maxProducts }, requestId });
+    await this.audit.record({ adminUserId: admin.adminUserId, action: "catalog_import.queued", entityType: "CATALOG_IMPORT_JOB", entityId: row.id, afterSummary: { mode: DIGIKALA_FACTS_MODE, categoryId: row.targetCategoryId, maxProducts, total, alreadyRead }, requestId });
     return row;
   }
 
@@ -358,7 +396,7 @@ export class CatalogImportService {
           specifications: specifications as unknown as Prisma.InputJsonValue,
           categoryId: job.targetCategoryId, brandId, status: ProductStatus.DRAFT,
           supportsDog: snapshot.supportsDog, supportsCat: snapshot.supportsCat,
-          variants: { create: { sku: `DK-${snapshot.sourceItemId}`, ...(snapshot.weightKg ? { weightValue: snapshot.weightKg, weightUnit: WeightUnit.KG } : {}) } },
+          variants: { create: factsVariantRows(snapshot) },
         }, select: { id: true } });
         await tx.catalogImportItem.create({ data: { jobId: job.id, source: "DIGIKALA", sourceItemId: snapshot.sourceItemId, sourceUrl: snapshot.sourceUrl, sourceSnapshot: snapshot as unknown as Prisma.InputJsonValue, sourceHash: hash(snapshot), productId: product.id, status: CatalogImportItemStatus.IMPORTED } });
       });
@@ -370,53 +408,107 @@ export class CatalogImportService {
     }
   }
 
+  private saveFactsProgress(jobId: string, progress: FactsProgress, counters?: { pages: number; seen: number; imported: number; failed: number }) {
+    return this.prisma.catalogImportJob.update({ where: { id: jobId }, data: {
+      progress: progress as unknown as Prisma.InputJsonValue,
+      ...(counters ? { pagesVisited: counters.pages, productsSeen: counters.seen, productsImported: counters.imported, productsFailed: counters.failed } : {}),
+      // Progress is proof of life: keep the lock, and count only failures in a row towards giving up.
+      lockedUntil: new Date(Date.now() + 10 * 60_000), attempt: 0,
+    } });
+  }
+
   /**
-   * Walks Digikala's pet category best-sellers page by page and reads each product's facts. Resumes after a retry
-   * (products already recorded are skipped). A 403/429/captcha/non-JSON answer stops the run; nothing is retried
-   * around a block.
+   * Reads the pet category's sub-categories and their sizes (one listing request each), then splits the run's total
+   * across them. Saved as it goes, so a restart continues the measuring instead of repeating it.
+   */
+  private async planFacts(job: { id: string; maxProducts: number }, saved: FactsProgress | null): Promise<FactsProgress> {
+    if (saved?.version === 1 && saved.planned) return saved;
+    let subcategories = saved?.version === 1 ? saved.subcategories : [];
+    if (!subcategories.length) {
+      const root = await this.fetchFactsJson(factsListUrl(1));
+      const found = parseFactsSubcategories(root);
+      // No sub-category list: the whole pet category, read as one (at most 10,000 products).
+      subcategories = found.length ? found.map((sub) => ({ ...sub, total: null })) : [{ code: DIGIKALA_FACTS_CATEGORY, title: "پت شاپ", total: parseFactsList(root).totalItems }];
+    }
+    const progress: FactsProgress = { version: 1, planned: false, subcategories, plan: [], current: 0, pass: "QUOTA" };
+    for (const sub of subcategories) {
+      if (sub.total !== null) continue;
+      sub.total = parseFactsList(await this.fetchFactsJson(factsListUrl(1, sub.code))).totalItems;
+      await this.saveFactsProgress(job.id, progress);
+    }
+    progress.plan = planQuotas(subcategories.map((sub) => ({ code: sub.code, title: sub.title, total: sub.total ?? 0 })), job.maxProducts);
+    progress.planned = true;
+    await this.saveFactsProgress(job.id, progress);
+    return progress;
+  }
+
+  /**
+   * Walks each Digikala pet sub-category's best-sellers up to its share of the total, then (FILL) tops the total up from
+   * sub-categories with products left. Resumes from the saved cursor after a restart or a retry; products already
+   * recorded (by this or an earlier facts run) are skipped. A 403/429/captcha/non-JSON answer stops the run; nothing is
+   * retried around a block.
    */
   private async runFactsJob(jobId: string) {
     const job = await this.prisma.catalogImportJob.findUniqueOrThrow({ where: { id: jobId } });
-    let page = Math.max(1, job.pagesVisited);
+    const progress = await this.planFacts(job, (job.progress as unknown as FactsProgress | null) ?? null);
     let pages = job.pagesVisited;
     let seen = job.productsSeen;
     let failed = job.productsFailed;
-    let lastPage = job.maxPages;
-    while (seen < job.maxProducts && page <= lastPage) {
-      const list = parseFactsList(await this.fetchFactsJson(factsListUrl(page)));
-      if (list.totalPages) lastPage = Math.min(lastPage, list.totalPages);
-      pages = Math.max(pages, page);
-      if (!list.items.length) break;
-      for (const ref of list.items) {
-        if (seen >= job.maxProducts) break;
-        const known = await this.prisma.catalogImportItem.findFirst({ where: { source: "DIGIKALA", sourceItemId: ref.id }, select: { id: true } });
-        if (known) continue;
-        seen++;
-        try {
-          const snapshot = parseFactsDetail(await this.fetchFactsJson(factsDetailUrl(ref.id)), ref);
-          if (!snapshot) {
-            failed++;
-            await this.prisma.catalogImportItem.create({ data: { jobId, source: "DIGIKALA", sourceItemId: ref.id, sourceUrl: `https://www.digikala.com/product/dkp-${ref.id}/`, sourceSnapshot: ref as unknown as Prisma.InputJsonValue, sourceHash: hash(ref), status: CatalogImportItemStatus.FAILED, errorCode: "UNREADABLE_PRODUCT" } }).catch(() => undefined);
-          } else {
-            await this.ingestFacts(job, snapshot);
+    let cancelled = false;
+    const counters = async () => ({ pages, seen, failed, imported: await this.prisma.catalogImportItem.count({ where: { jobId, status: CatalogImportItemStatus.IMPORTED } }) });
+    walk: for (const pass of ["QUOTA", "FILL"] as const) {
+      if (pass === "QUOTA" && progress.pass === "FILL") continue;
+      if (pass === "FILL" && progress.pass === "QUOTA") { progress.pass = "FILL"; progress.current = 0; }
+      for (let index = progress.current; index < progress.plan.length; index++) {
+        progress.current = index;
+        const entry = progress.plan[index]!;
+        const wanted = () => seen < job.maxProducts && (pass === "FILL" || entry.taken < entry.quota);
+        while (!entry.exhausted && wanted()) {
+          if (entry.page > FACTS_SOURCE_MAX_PAGES) { entry.exhausted = true; break; }
+          const list = parseFactsList(await this.fetchFactsJson(factsListUrl(entry.page, entry.code)));
+          pages++;
+          if (!list.items.length) { entry.exhausted = true; break; }
+          let wholePage = true;
+          for (const ref of list.items) {
+            if (!wanted()) { wholePage = false; break; }
+            const known = await this.prisma.catalogImportItem.findFirst({ where: { source: "DIGIKALA", sourceItemId: ref.id }, select: { id: true } });
+            if (known) continue;
+            seen++;
+            entry.taken++;
+            try {
+              const snapshot = parseFactsDetail(await this.fetchFactsJson(factsDetailUrl(ref.id)), ref, entry.code);
+              if (!snapshot) {
+                failed++;
+                await this.prisma.catalogImportItem.create({ data: { jobId, source: "DIGIKALA", sourceItemId: ref.id, sourceUrl: `https://www.digikala.com/product/dkp-${ref.id}/`, sourceSnapshot: ref as unknown as Prisma.InputJsonValue, sourceHash: hash(ref), status: CatalogImportItemStatus.FAILED, errorCode: "UNREADABLE_PRODUCT" } }).catch(() => undefined);
+              } else {
+                await this.ingestFacts(job, snapshot);
+              }
+            } catch (e) {
+              failed++;
+              const detail = e instanceof Error ? e.message.slice(0, 250) : "unknown";
+              await this.prisma.catalogImportItem.create({ data: { jobId, source: "DIGIKALA", sourceItemId: ref.id, sourceUrl: `https://www.digikala.com/product/dkp-${ref.id}/`, sourceSnapshot: ref as unknown as Prisma.InputJsonValue, sourceHash: hash(ref), status: CatalogImportItemStatus.FAILED, errorCode: "IMPORT_ITEM_FAILED", errorDetail: detail } }).catch(() => undefined);
+              if (e instanceof CatalogImportBlockedError || (e instanceof SourceFetchError && ["BLOCKED_BY_SOURCE", "RATE_LIMITED"].includes(e.category))) {
+                await this.saveFactsProgress(jobId, progress, await counters());
+                throw e;
+              }
+            }
+            await this.saveFactsProgress(jobId, progress, await counters());
+            if (await this.cancelRequested(jobId)) { cancelled = true; break walk; }
           }
-        } catch (e) {
-          failed++;
-          const detail = e instanceof Error ? e.message.slice(0, 250) : "unknown";
-          await this.prisma.catalogImportItem.create({ data: { jobId, source: "DIGIKALA", sourceItemId: ref.id, sourceUrl: `https://www.digikala.com/product/dkp-${ref.id}/`, sourceSnapshot: ref as unknown as Prisma.InputJsonValue, sourceHash: hash(ref), status: CatalogImportItemStatus.FAILED, errorCode: "IMPORT_ITEM_FAILED", errorDetail: detail } }).catch(() => undefined);
-          if (e instanceof CatalogImportBlockedError || (e instanceof SourceFetchError && ["BLOCKED_BY_SOURCE", "RATE_LIMITED"].includes(e.category))) throw e;
+          // A page left half-read (share reached) is read again later; products already recorded are skipped.
+          if (wholePage) {
+            entry.page++;
+            if (entry.page > Math.min(list.totalPages || FACTS_SOURCE_MAX_PAGES, FACTS_SOURCE_MAX_PAGES)) entry.exhausted = true;
+          }
+          await this.saveFactsProgress(jobId, progress, await counters());
+          if (await this.cancelRequested(jobId)) { cancelled = true; break walk; }
         }
-        const imported = await this.prisma.catalogImportItem.count({ where: { jobId, status: CatalogImportItemStatus.IMPORTED } });
-        await this.bumpProgress(jobId, pages, seen, imported, failed);
-        if (await this.cancelRequested(jobId)) break;
       }
-      if (await this.cancelRequested(jobId)) break;
-      page++;
+      progress.current = progress.plan.length;
     }
-    const cancelled = await this.cancelRequested(jobId);
-    const imported = await this.prisma.catalogImportItem.count({ where: { jobId, status: CatalogImportItemStatus.IMPORTED } });
+    const { imported } = await counters();
     const status = cancelled ? CatalogImportJobStatus.CANCELLED : imported === 0 ? CatalogImportJobStatus.FAILED : failed > 0 ? CatalogImportJobStatus.PARTIAL : CatalogImportJobStatus.COMPLETED;
-    await this.prisma.catalogImportJob.update({ where: { id: jobId }, data: { status, pagesVisited: pages, productsSeen: seen, productsImported: imported, productsFailed: failed, lockedUntil: null, finishedAt: new Date() } });
+    await this.prisma.catalogImportJob.update({ where: { id: jobId }, data: { status, progress: progress as unknown as Prisma.InputJsonValue, pagesVisited: pages, productsSeen: seen, productsImported: imported, productsFailed: failed, lockedUntil: null, finishedAt: new Date() } });
   }
 
   async applyIncomingSnapshot(admin: ResolvedAdminContext, itemId: string, reason: string, requestId?: string) {
