@@ -2,7 +2,7 @@ import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from "@ne
 import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import type { AppEnv } from "../../config/env";
-import { SETTING_DEFINITIONS, settingDefinition } from "./setting-definitions";
+import { SETTING_DEFINITIONS, hostAllowed, settingDefinition, type SettingDefinition } from "./setting-definitions";
 
 const REFRESH_MS = 30_000;
 
@@ -61,7 +61,7 @@ export class PlatformSettingsService implements OnModuleInit, OnModuleDestroy {
         type: def.type,
         scope: def.scope,
         highImpact: def.highImpact,
-        constraints: { min: def.min ?? null, max: def.max ?? null, maxLength: def.maxLength ?? null, options: def.options ?? null },
+        constraints: { min: def.min ?? null, max: def.max ?? null, maxLength: def.maxLength ?? null, options: def.options ?? null, allowedHosts: def.allowedHosts ?? null },
         description: def.description,
         value: override ? override.value : this.fallback(def.key),
         defaultValue: this.fallback(def.key),
@@ -74,6 +74,13 @@ export class PlatformSettingsService implements OnModuleInit, OnModuleDestroy {
   }
 
   publicSettings() {
-    return Object.fromEntries(SETTING_DEFINITIONS.filter((d) => d.scope === "PUBLIC").map((d) => [d.key, this.get(d.key)]));
+    return Object.fromEntries(SETTING_DEFINITIONS.filter((d) => d.scope === "PUBLIC").map((d) => [d.key, this.publicValue(d)]));
+  }
+
+  /** A link stored before its host allowlist existed (or edited outside the API) is never published off-allowlist. */
+  private publicValue(def: SettingDefinition) {
+    const value = this.get(def.key);
+    if (def.type === "url" && def.allowedHosts && typeof value === "string" && !hostAllowed(value, def.allowedHosts)) return null;
+    return value;
   }
 }

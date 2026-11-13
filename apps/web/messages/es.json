@@ -1228,6 +1228,8 @@
     }
   },
   "adminSiteSettings": {
+    "enamadCheck": "Comprobar este sello en eNamad",
+    "enamadIncomplete": "Introduce un id y un código válidos para comprobar el sello.",
     "kicker": "Configuración del sitio",
     "title": "Ajustes del sitio",
     "subtitle": "Gestiona aquí la identidad, los datos de contacto, las redes sociales, el anuncio, las secciones activas, el registro y el modo mantenimiento. Cada cambio queda registrado.",
@@ -1260,6 +1262,10 @@
       "everyone": "Todos los visitantes"
     },
     "sections": {
+      "trust": {
+        "title": "Sello de confianza eNamad",
+        "hint": "Introduce solo el id y el código que aparecen en el código del sello de eNamad, nunca el HTML. El sello aparece en el pie de página cuando está activado y ambos campos están rellenados."
+      },
       "identity": {
         "title": "Identidad y pie de página",
         "hint": "La frase bajo el logotipo y la nota al final de cada página (razón social, número de registro)."
@@ -1270,7 +1276,7 @@
       },
       "social": {
         "title": "Redes sociales",
-        "hint": "Direcciones https completas; solo se muestran los enlaces rellenados."
+        "hint": "Enlaces https completos al sitio de cada red; un enlace solo se muestra mientras su interruptor está activado."
       },
       "announcement": {
         "title": "Anuncio general",
@@ -1290,6 +1296,18 @@
       }
     },
     "names": {
+      "social_bale": "Bale",
+      "social_instagramEnabled": "Mostrar Instagram",
+      "social_telegramEnabled": "Mostrar Telegram",
+      "social_whatsappEnabled": "Mostrar WhatsApp",
+      "social_baleEnabled": "Mostrar Bale",
+      "social_xEnabled": "Mostrar X",
+      "social_linkedinEnabled": "Mostrar LinkedIn",
+      "social_youtubeEnabled": "Mostrar YouTube",
+      "social_aparatEnabled": "Mostrar Aparat",
+      "trust_enamadEnabled": "Mostrar el sello eNamad",
+      "trust_enamadId": "Id de eNamad (dígitos después de id=)",
+      "trust_enamadCode": "Código de eNamad (después de Code=)",
       "site_tagline": "Lema",
       "site_footerNote": "Nota del pie",
       "site_contactPhone": "Teléfono de soporte",
@@ -1335,6 +1353,7 @@
       "error": "«{name}» no se guardó: {code}"
     },
     "errors": {
+      "URL_HOST_NOT_ALLOWED": "este enlace debe apuntar al sitio de la propia red (https)",
       "URL_INVALID": "la dirección debe empezar por https:// o /",
       "EMAIL_INVALID": "correo no válido",
       "FORMAT_INVALID": "formato no válido",

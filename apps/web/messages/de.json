@@ -1228,6 +1228,8 @@
     }
   },
   "adminSiteSettings": {
+    "enamadCheck": "Dieses Siegel bei eNamad prüfen",
+    "enamadIncomplete": "Gib eine gültige ID und einen gültigen Code ein, um das Siegel zu prüfen.",
     "kicker": "Website-Konfiguration",
     "title": "Website-Einstellungen",
     "subtitle": "Verwalten Sie hier Identität, Kontaktdaten, soziale Netzwerke, Ankündigung, aktive Bereiche, Registrierung und Wartungsmodus. Jede Änderung wird protokolliert.",
@@ -1260,6 +1262,10 @@
       "everyone": "Alle Besuchenden"
     },
     "sections": {
+      "trust": {
+        "title": "eNamad-Vertrauenssiegel",
+        "hint": "Gib nur die ID und den Code aus dem eNamad-Siegelcode ein, nie das HTML. Das Siegel erscheint in der Fußzeile, sobald es eingeschaltet ist und beide Werte ausgefüllt sind."
+      },
       "identity": {
         "title": "Identität und Fußzeile",
         "hint": "Kurzer Text unter dem Logo und Hinweis am Seitenende (rechtlicher Name, Registernummer)."
@@ -1270,7 +1276,7 @@
       },
       "social": {
         "title": "Soziale Medien",
-        "hint": "Vollständige https-Adressen; nur ausgefüllte Links werden gezeigt."
+        "hint": "Vollständige https-Links zur Website des jeweiligen Netzwerks; ein Link wird nur angezeigt, solange sein Schalter an ist."
       },
       "announcement": {
         "title": "Seitenweite Ankündigung",
@@ -1290,6 +1296,18 @@
       }
     },
     "names": {
+      "social_bale": "Bale",
+      "social_instagramEnabled": "Instagram anzeigen",
+      "social_telegramEnabled": "Telegram anzeigen",
+      "social_whatsappEnabled": "WhatsApp anzeigen",
+      "social_baleEnabled": "Bale anzeigen",
+      "social_xEnabled": "X anzeigen",
+      "social_linkedinEnabled": "LinkedIn anzeigen",
+      "social_youtubeEnabled": "YouTube anzeigen",
+      "social_aparatEnabled": "Aparat anzeigen",
+      "trust_enamadEnabled": "eNamad-Siegel anzeigen",
+      "trust_enamadId": "eNamad-ID (Ziffern nach id=)",
+      "trust_enamadCode": "eNamad-Code (nach Code=)",
       "site_tagline": "Slogan",
       "site_footerNote": "Fußzeilenhinweis",
       "site_contactPhone": "Support-Telefon",
@@ -1335,6 +1353,7 @@
       "error": "„{name}“ wurde nicht gespeichert: {code}"
     },
     "errors": {
+      "URL_HOST_NOT_ALLOWED": "dieser Link muss auf die eigene Website des Netzwerks zeigen (https)",
       "URL_INVALID": "Adresse muss mit https:// oder / beginnen",
       "EMAIL_INVALID": "keine gültige E-Mail",
       "FORMAT_INVALID": "ungültiges Format",
