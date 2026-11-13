@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma, PetFriendlyPlaceStatus, ProviderType, ProviderVerificationStatus, TravelListingStatus, TravelReviewStatus } from "@prisma/client";
+import { Prisma, PetFriendlyPlaceStatus, ProviderType, TravelListingStatus, TravelReviewStatus } from "@prisma/client";
 import type {
   PetPolicyMatchOutcome,
   TravelDestinationDto,
@@ -16,6 +16,7 @@ import { resolveStayRange, toUtcMidnight } from "./travel-date.util";
 import { haversineKm, matchPetPolicy, priceStay, ratePlanApplies, type PetFacts, type RatePlanTerms } from "./travel-pricing.util";
 import type { TravelSearchQueryDto } from "./dto/travel-marketplace.dto";
 import { TravelBookingService } from "./travel-booking.service";
+import { publicProviderWhere } from "../../common/public-partner";
 
 const MAX_CANDIDATES = 300;
 const BAYES_PRIOR = 4;
@@ -121,7 +122,7 @@ export class TravelSearchService {
       status: TravelListingStatus.PUBLISHED,
       isPubliclyListed: true,
       // A suspended (or otherwise unverified) partner's listings leave search and can't be booked.
-      organization: { verificationStatus: ProviderVerificationStatus.VERIFIED },
+      organization: publicProviderWhere(),
       ...(q.city ? { city: { equals: q.city.trim(), mode: "insensitive" } } : {}),
       ...(q.province ? { province: { equals: q.province.trim(), mode: "insensitive" } } : {}),
       ...(q.country ? { country: { equals: q.country, mode: "insensitive" } } : {}),
@@ -233,7 +234,7 @@ export class TravelSearchService {
   async destinations(): Promise<TravelDestinationDto[]> {
     const rows = await this.prisma.travelListing.groupBy({
       by: ["country", "province", "city"],
-      where: { status: TravelListingStatus.PUBLISHED, isPubliclyListed: true, organization: { verificationStatus: ProviderVerificationStatus.VERIFIED } },
+      where: { status: TravelListingStatus.PUBLISHED, isPubliclyListed: true, organization: publicProviderWhere() },
       _count: { _all: true },
       orderBy: [{ country: "asc" }, { city: "asc" }],
     });
@@ -241,7 +242,7 @@ export class TravelSearchService {
   }
 
   async detail(userId: string | undefined, listingId: string): Promise<TravelListingDetailDto> {
-    const row = await this.prisma.travelListing.findFirst({ where: { id: listingId, status: TravelListingStatus.PUBLISHED, isPubliclyListed: true, organization: { verificationStatus: ProviderVerificationStatus.VERIFIED } }, include: LISTING_INCLUDE });
+    const row = await this.prisma.travelListing.findFirst({ where: { id: listingId, status: TravelListingStatus.PUBLISHED, isPubliclyListed: true, organization: publicProviderWhere() }, include: LISTING_INCLUDE });
     if (!row) throw new TravelListingNotFoundException({ listingId });
     const [ratings, reviews, favorite, nearbyPlaces, nearbyVets] = await Promise.all([
       this.ratings([row.id]),
@@ -279,7 +280,7 @@ export class TravelSearchService {
   /** Verified vet organisations in the same city, nearest first when coordinates exist. */
   async nearbyVets(city: string, lat: number | null, lng: number | null, limit = 4): Promise<{ id: string; name: string; city: string; distanceKm: number | null }[]> {
     const orgs = await this.prisma.providerOrganization.findMany({
-      where: { type: { in: VET_TYPES }, verificationStatus: ProviderVerificationStatus.VERIFIED, locations: { some: { city: { equals: city, mode: "insensitive" } } } },
+      where: { type: { in: VET_TYPES }, ...publicProviderWhere(), locations: { some: { city: { equals: city, mode: "insensitive" } } } },
       select: { id: true, name: true, locations: { where: { city: { equals: city, mode: "insensitive" } }, select: { city: true, latitude: true, longitude: true } } },
       take: 20,
     });
@@ -295,7 +296,7 @@ export class TravelSearchService {
 
   /** Same item shape and facts as search, for 2–3 chosen listings (optionally priced for dates). */
   async compare(userId: string | undefined, ids: string[], checkInInput?: string, checkOutInput?: string): Promise<TravelSearchResultItemDto[]> {
-    const rows = await this.prisma.travelListing.findMany({ where: { id: { in: ids }, status: TravelListingStatus.PUBLISHED, isPubliclyListed: true, organization: { verificationStatus: ProviderVerificationStatus.VERIFIED } }, include: LISTING_INCLUDE });
+    const rows = await this.prisma.travelListing.findMany({ where: { id: { in: ids }, status: TravelListingStatus.PUBLISHED, isPubliclyListed: true, organization: publicProviderWhere() }, include: LISTING_INCLUDE });
     const ratings = await this.ratings(rows.map((r) => r.id));
     let nights: Date[] = [];
     let checkIn: Date | null = null;
