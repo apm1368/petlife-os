@@ -1357,6 +1357,8 @@ model User {
   lostPetAreaAlert          LostPetAreaAlert?
 
   clinicClientLinks        ClinicImportedContact[]  @relation("ClinicClientLinkedUser")
+  setPetRequests           SetPetRequest[]
+  setPetDesignFiles        SetPetDesignFile[]
 
   @@map("users")
 }
@@ -1698,6 +1700,7 @@ model Pet {
   healthShareLinks      HealthShareLink[]
   careSuggestions       CareSuggestion[]
   expenses              PetExpense[]
+  setPetRequests        SetPetRequest[]
 
   @@index([householdId])
   @@map("pets")
@@ -12724,4 +12727,165 @@ model CardTransferDestination {
 
   @@index([active, createdAt])
   @@map("card_transfer_destinations")
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// «ست پت» — Set Pet (owner, 2026-11-13): matching custom-printed outfits for a member and their pet. An order request,
+// not a shop product: the member sends sizes, colours, the pet's measurements and up to three designs placed on fixed
+// print zones; staff quote it; the member accepts; then production and shipping. Payment is settled later (wallet /
+// card-to-card), outside these tables. Design files are PRIVATE objects (set-pet-designs/<userId>/…).
+// ---------------------------------------------------------------------------------------------------------------------
+
+enum SetPetRequestStatus {
+  SUBMITTED
+  QUOTED
+  CONFIRMED
+  IN_PRODUCTION
+  SHIPPED
+  CANCELLED
+}
+
+/// One size scale for the human garments and the pet garment (XXL and XXXL are shown as 2XL and 3XL).
+enum SetPetSize {
+  S
+  M
+  L
+  XL
+  XXL
+  XXXL
+}
+
+/// Fixed print zones (owner): RIGHT_UPPER_ARM and LEFT_UPPER_ARM 10×10 cm, FRONT_CENTER and BACK 20×20 cm on the human
+/// garments; PET_BACK on the pet garment. At most one design per zone.
+enum SetPetZone {
+  RIGHT_UPPER_ARM
+  LEFT_UPPER_ARM
+  FRONT_CENTER
+  BACK
+  PET_BACK
+}
+
+enum SetPetDesignFileStatus {
+  /// Upload target issued; the bytes have not been checked yet.
+  PENDING_UPLOAD
+  /// Checked by magic bytes and size (raster images stripped of EXIF/XMP); may be placed on a request.
+  READY
+  /// Not a file of an allowed type, or too large; never placed, the object is deleted.
+  REJECTED
+}
+
+enum SetPetActor {
+  MEMBER
+  STAFF
+}
+
+model SetPetRequest {
+  id                  String              @id @default(uuid()) @db.Uuid
+  /// The human reference, shown as SP-000123.
+  number              Int                 @unique @default(autoincrement())
+  userId              String              @db.Uuid
+  user                User                @relation(fields: [userId], references: [id], onDelete: Restrict)
+  /// The member's pet this set is for, when they picked one (they must have access to it).
+  petId               String?             @db.Uuid
+  pet                 Pet?                @relation(fields: [petId], references: [id], onDelete: SetNull)
+  status              SetPetRequestStatus @default(SUBMITTED)
+  /// The human garments' colour and one size per garment (the count is the number of sizes).
+  humanColour         String
+  humanSizes          SetPetSize[]
+  petSize             SetPetSize
+  /// The pet garment's colour; often the same as the human set's.
+  petColour           String
+  petNeckCm           Decimal             @db.Decimal(5, 1)
+  petChestCm          Decimal             @db.Decimal(5, 1)
+  petBackLengthCm     Decimal             @db.Decimal(5, 1)
+  petWeightKg         Decimal             @db.Decimal(5, 2)
+  notes               String?
+  /// Staff's quote (IRR) and promised date; the member accepts it (→ CONFIRMED) or cancels.
+  quoteAmountIrr      Int?
+  quoteNote           String?
+  estimatedReadyAt    DateTime?
+  quotedAt            DateTime?
+  quotedByAdminUserId String?             @db.Uuid
+  confirmedAt         DateTime?
+  productionStartedAt DateTime?
+  shippedAt           DateTime?
+  /// Courier and tracking details staff add when shipping.
+  shippingNote        String?
+  cancelledAt         DateTime?
+  cancelledBy         SetPetActor?
+  cancelReason        String?
+  /// Internal note for staff only; never sent to the member.
+  adminNote           String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  placements SetPetPlacement[]
+  designs    SetPetDesignFile[]
+  events     SetPetRequestEvent[]
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@map("set_pet_requests")
+}
+
+model SetPetDesignFile {
+  id               String                 @id @default(uuid()) @db.Uuid
+  /// The member who uploaded it; only they may place it on a request.
+  userId           String                 @db.Uuid
+  user             User                   @relation(fields: [userId], references: [id], onDelete: Restrict)
+  /// Set once the file is placed on a submitted request; a file belongs to at most one request.
+  requestId        String?                @db.Uuid
+  request          SetPetRequest?         @relation(fields: [requestId], references: [id], onDelete: SetNull)
+  /// PRIVATE object key: set-pet-designs/<userId>/<uuid>.<ext>. Never a public URL.
+  objectKey        String                 @unique
+  /// The detected type once checked (declared type before that).
+  mimeType         String
+  fileSizeBytes    Int
+  /// Sanitised name the member's file had, for staff downloads.
+  originalFilename String?
+  /// JPEG/PNG/WebP only: the owner may see it through a short-lived signed URL. Everything else (HEIC, SVG, PDF, AI,
+  /// PSD) is only ever downloaded by staff, as an attachment, through the audited admin download.
+  previewable      Boolean                @default(false)
+  status           SetPetDesignFileStatus @default(PENDING_UPLOAD)
+  rejectReason     String?
+  uploadedAt       DateTime?
+  createdAt        DateTime               @default(now())
+
+  placements SetPetPlacement[]
+
+  @@index([userId, createdAt])
+  @@index([requestId])
+  @@map("set_pet_design_files")
+}
+
+/// Which design goes on which zone of a request: one design per zone, a design may be used on several zones.
+model SetPetPlacement {
+  id           String           @id @default(uuid()) @db.Uuid
+  requestId    String           @db.Uuid
+  request      SetPetRequest    @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  zone         SetPetZone
+  designFileId String           @db.Uuid
+  designFile   SetPetDesignFile @relation(fields: [designFileId], references: [id], onDelete: Restrict)
+
+  @@unique([requestId, zone])
+  @@index([designFileId])
+  @@map("set_pet_placements")
+}
+
+/// The request's timeline: every status change, who made it and an optional note shown to the member.
+model SetPetRequestEvent {
+  id          String               @id @default(uuid()) @db.Uuid
+  requestId   String               @db.Uuid
+  request     SetPetRequest        @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  fromStatus  SetPetRequestStatus?
+  toStatus    SetPetRequestStatus
+  actor       SetPetActor
+  /// The member, or the staff member's user id.
+  actorUserId String?              @db.Uuid
+  adminUserId String?              @db.Uuid
+  note        String?
+  createdAt   DateTime             @default(now())
+
+  @@index([requestId, createdAt])
+  @@map("set_pet_request_events")
 }
