@@ -99,8 +99,12 @@ export class TravelExternalPublicService {
    */
   private facetCache = new Map<string, { at: number; value: { provinces: { name: string; count: number }[]; cities: { name: string; province: string | null; count: number }[] } }>();
 
-  /** Provinces and cities with listed stays (optionally for one source), most stays first; 10-minute cache. */
+  /**
+   * Provinces and cities with listed stays (optionally for one source), most stays first; 10-minute cache. The cache is
+   * keyed only by real source codes, so made-up `source` values can't grow it: an unknown code simply has no facets.
+   */
   async facets(source?: string) {
+    if (source && !(await this.prisma.externalTravelSource.count({ where: { code: source } }))) return { provinces: [], cities: [] };
     const key = source ?? "*";
     const hit = this.facetCache.get(key);
     if (hit && Date.now() - hit.at < 10 * 60_000) return hit.value;

@@ -324,6 +324,8 @@ describe("External pet-friendly stays", () => {
     const [sc, sd, sn] = await Promise.all([cheap, dear, none].map((id) => db.externalStay.findFirstOrThrow({ where: { sourceListingId: id } }).then((s) => s.id)));
 
     const facets = (await get(null, "/travel/external/facets?source=FIXTURE").expect(200)).body;
+    // An unknown source code has no facets and is never cached (random codes can't grow the cache).
+    expect((await get(null, `/travel/external/facets?source=NOPE${tag}`).expect(200)).body).toEqual({ provinces: [], cities: [] });
     expect(facets.provinces).toEqual(expect.arrayContaining([{ name: province, count: 3 }]));
     expect(facets.cities).toEqual(expect.arrayContaining([{ name: c1, province, count: 1 }, { name: c2, province, count: 2 }]));
 
@@ -341,7 +343,7 @@ describe("External pet-friendly stays", () => {
     expect((await get(null, `/travel/external/stays?source=FIXTURE${inProvince}&minPrice=1`).expect(200)).body.total).toBe(2);
     // Only the newest FROM price counts: an older, cheaper snapshot does not make a stay match.
     const old = new Date(Date.now() - 5 * DAY);
-    await db.externalStayPriceSnapshot.create({ data: { stayId: sd, checkIn: null, checkOut: null, guests: 1, priceIrr: 10_000_000, priceBasis: "PER_NIGHT", observedAt: old, lastConfirmedAt: old, expiresAt: old, observedBy: "ADAPTER", contentHash: `old-${tag}`, priceType: "FROM_PRICE" } });
+    await db.externalStayPriceSnapshot.create({ data: { stayId: sd!, checkIn: null, checkOut: null, guests: 1, priceIrr: 10_000_000, priceBasis: "PER_NIGHT", observedAt: old, lastConfirmedAt: old, expiresAt: old, observedBy: "ADAPTER", contentHash: `old-${tag}`, priceType: "FROM_PRICE" } });
     expect(await ids(`${inProvince}&maxPrice=20000000`)).toEqual([sc]);
     // A stale FROM price (past the source's aging window) is hidden on the card, so it matches nothing either.
     await db.externalStayPriceSnapshot.updateMany({ where: { stayId: sc, priceType: "FROM_PRICE" }, data: { lastConfirmedAt: new Date(Date.now() - 80 * 3600e3) } });
