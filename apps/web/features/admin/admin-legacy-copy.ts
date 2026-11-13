@@ -382,6 +382,7 @@ export const LEGACY_COPY: Readonly<Record<string, readonly [de: string, es: stri
   "Versions": ["Versionen", "Versiones"],
   "Publish": ["Veröffentlichen", "Publicar"],
   "Draft/empty": ["Entwurf/leer", "Borrador/vacío"],
+  "Built-in draft live — needs legal review": ["Integrierter Entwurf live – rechtliche Prüfung nötig", "Borrador integrado publicado: pendiente de revisión legal"],
   "Saved versions": ["Gespeicherte Versionen", "Versiones guardadas"],
   "No version has been saved for this document.": ["Für dieses Dokument wurde noch keine Version gespeichert.", "No se ha guardado ninguna versión de este documento."],
   "Official document title": ["Offizieller Dokumenttitel", "Título oficial del documento"],
