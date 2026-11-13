@@ -6377,7 +6377,7 @@
       "label": "Quelle",
       "all": "Alle",
       "opetlife": "opetlife",
-      "jajiga": "Jajiga"
+      "jajiga": "Andere Websites"
     }
   },
   "services": {
@@ -8723,11 +8723,11 @@
     },
     "fromSource": "Von {source}",
     "blend": {
-      "title": "Haustierfreundliche Unterkünfte von Jajiga",
-      "titleCity": "Haustierfreundliche Unterkünfte in {city} von Jajiga",
-      "hint": "Angebote von Jajiga: Buchung und Zahlung erfolgen direkt bei Jajiga, opetlife berechnet nichts. Klären Sie die Haustierregeln vor der Buchung mit dem Gastgeber.",
-      "seeAll": "Alle Jajiga-Unterkünfte",
-      "pages": "Jajiga-Seiten"
+      "title": "Tierfreundliche Unterkünfte",
+      "titleCity": "Tierfreundliche Unterkünfte in {city}",
+      "hint": "Angaben aus einer externen Quelle; gebucht wird auf der Website der Quelle.",
+      "seeAll": "Alle tierfreundlichen Unterkünfte",
+      "pages": "Seiten"
     },
     "tile": {
       "kind": {
@@ -8743,9 +8743,9 @@
     },
     "browser": {
       "title": "Weitere haustierfreundliche Unterkünfte",
-      "sourceChip": "Unterkünfte von Jajiga",
+      "sourceChip": "Tierfreundliche Unterkünfte",
       "count": "Gefunden: {count}",
-      "hint": "Angebote von Jajiga: Buchung und Zahlung erfolgen direkt bei Jajiga, opetlife berechnet nichts. Klären Sie die Haustierregeln vor der Buchung mit dem Gastgeber.",
+      "hint": "Angaben aus einer externen Quelle; gebucht wird auf der Website der Quelle.",
       "filters": "Unterkünfte filtern",
       "province": "Provinz",
       "allProvinces": "Alle Provinzen",
@@ -8763,7 +8763,13 @@
       "noMatch": "Keine Unterkunft passt zu diesen Filtern. Entferne einen Filter.",
       "loadMore": "Mehr anzeigen ({shown} von {total})",
       "mediaNote": "Fotos und die vollständige Beschreibung jeder Unterkunft findest du auf der Quellseite; hier siehst du die wichtigsten Fakten."
-    }
+    },
+    "perNight": "Nacht",
+    "petPerListing": "Laut Inseratsseite sind Haustiere willkommen.",
+    "viewStay": "Unterkunft ansehen",
+    "opensNewTab": "(öffnet in neuem Tab)",
+    "priceOnListing": "Preis auf der Inseratsseite",
+    "evidenceListingFilter": "Im öffentlichen Filter „Haustiere erlaubt“ der Inseratsseite gelistet. Einschränkungen zu Art, Größe und Hausregeln sind dort nicht angegeben; kläre sie vor der Buchung mit dem Gastgeber."
   },
   "insurance": {
     "verificationStatus": {

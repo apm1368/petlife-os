@@ -6367,7 +6367,7 @@
       "label": "Fuente",
       "all": "Todos",
       "opetlife": "opetlife",
-      "jajiga": "Jajiga"
+      "jajiga": "Otros sitios"
     }
   },
   "services": {
@@ -8713,11 +8713,11 @@
     },
     "fromSource": "De {source}",
     "blend": {
-      "title": "Alojamientos que aceptan mascotas, de Jajiga",
-      "titleCity": "Alojamientos que aceptan mascotas en {city}, de Jajiga",
-      "hint": "Anuncios de Jajiga: reservas y pagas en el propio sitio de Jajiga y opetlife no cobra nada. Confirma las normas sobre mascotas con el anfitrión antes de reservar.",
-      "seeAll": "Todos los alojamientos de Jajiga",
-      "pages": "Páginas de Jajiga"
+      "title": "Alojamientos que admiten mascotas",
+      "titleCity": "Alojamientos que admiten mascotas en {city}",
+      "hint": "Información de una fuente externa; la reserva se hace en el sitio de origen.",
+      "seeAll": "Todos los alojamientos que admiten mascotas",
+      "pages": "Páginas"
     },
     "tile": {
       "kind": {
@@ -8733,9 +8733,9 @@
     },
     "browser": {
       "title": "Más alojamientos que aceptan mascotas",
-      "sourceChip": "Alojamientos de Jajiga",
+      "sourceChip": "Alojamientos que admiten mascotas",
       "count": "Encontrados: {count}",
-      "hint": "Anuncios de Jajiga: reservas y pagas en el propio sitio de Jajiga y opetlife no cobra nada. Confirma las normas sobre mascotas con el anfitrión antes de reservar.",
+      "hint": "Información de una fuente externa; la reserva se hace en el sitio de origen.",
       "filters": "Filtrar alojamientos",
       "province": "Provincia",
       "allProvinces": "Todas las provincias",
@@ -8753,7 +8753,13 @@
       "noMatch": "Ningún alojamiento coincide con estos filtros. Prueba a quitar uno.",
       "loadMore": "Ver más ({shown} de {total})",
       "mediaNote": "Las fotos y la descripción completa de cada alojamiento están en el sitio de origen; aquí ves los datos principales."
-    }
+    },
+    "perNight": "noche",
+    "petPerListing": "Admite mascotas, según el sitio del anuncio.",
+    "viewStay": "Ver alojamiento",
+    "opensNewTab": "(se abre en una pestaña nueva)",
+    "priceOnListing": "Precio en el sitio del anuncio",
+    "evidenceListingFilter": "Aparece en el filtro público «se admiten mascotas» del sitio del anuncio. Allí no se publican límites de especie, tamaño ni normas de la casa; confírmalos con el anfitrión antes de reservar."
   },
   "insurance": {
     "verificationStatus": {

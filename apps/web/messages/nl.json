@@ -9215,7 +9215,7 @@
       "label": "Bron",
       "all": "Alle",
       "opetlife": "opetlife",
-      "jajiga": "Jajiga"
+      "jajiga": "Andere sites"
     }
   },
   "externalTravel": {
@@ -9323,11 +9323,11 @@
     },
     "fromSource": "Van {source}",
     "blend": {
-      "title": "Huisdiervriendelijke verblijven van Jajiga",
-      "titleCity": "Huisdiervriendelijke verblijven in {city} van Jajiga",
-      "hint": "Advertenties van Jajiga: je boekt en betaalt op de eigen site van Jajiga, en opetlife rekent niets. Check de huisdierregels bij de verhuurder voordat je boekt.",
-      "seeAll": "Alle verblijven op Jajiga",
-      "pages": "Jajiga-pagina’s"
+      "title": "Huisdiervriendelijke verblijven",
+      "titleCity": "Huisdiervriendelijke verblijven in {city}",
+      "hint": "Informatie van een externe bron; je boekt op de website van de bron.",
+      "seeAll": "Alle huisdiervriendelijke verblijven",
+      "pages": "Pagina's"
     },
     "tile": {
       "kind": {
@@ -9343,9 +9343,9 @@
     },
     "browser": {
       "title": "Meer huisdiervriendelijke verblijven",
-      "sourceChip": "Verblijven van Jajiga",
+      "sourceChip": "Huisdiervriendelijke verblijven",
       "count": "Gevonden: {count}",
-      "hint": "Advertenties van Jajiga: je boekt en betaalt op de eigen site van Jajiga, en opetlife rekent niets. Check de huisdierregels bij de verhuurder voordat je boekt.",
+      "hint": "Informatie van een externe bron; je boekt op de website van de bron.",
       "filters": "Verblijven filteren",
       "province": "Provincie",
       "allProvinces": "Alle provincies",
@@ -9363,7 +9363,13 @@
       "noMatch": "Geen verblijven die bij deze filters passen. Probeer er een te verwijderen.",
       "loadMore": "Meer tonen ({shown} van {total})",
       "mediaNote": "Foto's en de volledige beschrijving van elk verblijf staan op de bronsite; hier zie je de belangrijkste gegevens."
-    }
+    },
+    "perNight": "nacht",
+    "petPerListing": "Huisdieren welkom, volgens de advertentiesite.",
+    "viewStay": "Verblijf bekijken",
+    "opensNewTab": "(opent in een nieuw tabblad)",
+    "priceOnListing": "Prijs op de advertentiesite",
+    "evidenceListingFilter": "Vermeld in het openbare filter „huisdieren toegestaan” van de advertentiesite. Beperkingen voor soort, grootte en huisregels staan daar niet; bevestig ze met de host voordat je boekt."
   },
   "localDateTime": {
     "date": "Datum",

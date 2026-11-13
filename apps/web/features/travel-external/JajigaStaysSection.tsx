@@ -170,7 +170,6 @@ export function JajigaStaysSection({
         <Heading id="jajiga-stays-title" className={headingLevel === 1 ? "text-page-title text-text-primary" : "text-section-title text-text-primary"}>
           {t("browser.title")}
         </Heading>
-        <span className="xs-head__chip">{t("browser.sourceChip")}</span>
         {rows ? <span className="text-metadata text-text-secondary" aria-live="polite">{t("browser.count", { count: nf.format(total) })}</span> : null}
       </div>
       <p className="text-metadata text-text-secondary">{t("browser.hint")}</p>

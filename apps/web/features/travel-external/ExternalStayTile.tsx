@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { BedDouble, House, Hotel, Star, Trees, Users } from "@petlife/ui";
+import { BedDouble, ExternalLink, House, Hotel, Star, Trees, Users } from "@petlife/ui";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { placeName } from "@/lib/i18n/iran-places";
 import { travelExternalService, type ExternalStay, type ExternalStayContext } from "@/services/travel-external.service";
@@ -24,9 +24,11 @@ export function stayKind(stay: Pick<ExternalStay, "stayType" | "title">): Kind {
 const KIND_ICON = { villa: House, apartment: Hotel, cottage: Trees, ecolodge: Trees, house: House } as const;
 
 /**
- * A compact stay card for the list: facts only (city, province, capacity, bedrooms, rating, "from" price, last
- * update, the pet line). The picture and description slots fill only when the source's image policy allows images
- * and a description exists (a licensed feed); otherwise a designed placeholder for the kind of stay shows.
+ * A stay card for the list (owner, 2026-11-13: readable, no source branding). Big title, city·province, capacity and
+ * bedrooms, a clear "from … / night" price block, one short pet sentence with the five conditions folded away, and
+ * one primary button that opens the exact listing in a new tab through the logged click-out. The picture slot fills
+ * only when the source's image policy allows images (a licensed feed, `images` is [] otherwise); until then a
+ * designed placeholder for the kind of stay shows the city. No source descriptions are shown.
  */
 export function ExternalStayTile({ stay, context = {} }: { stay: ExternalStay; context?: ExternalStayContext }) {
   const t = useTranslations("externalTravel");
@@ -41,61 +43,73 @@ export function ExternalStayTile({ stay, context = {} }: { stay: ExternalStay; c
   for (const [key, value] of Object.entries(context)) if (value !== undefined) query.set(key, String(value));
   const suffix = query.toString() ? `?${query}` : "";
   const image = stay.images[0] ?? null;
-  const sourceName = locale === "fa" ? stay.source.nameFa : stay.source.nameEn;
   // Same honesty rules as ExternalStayCard: "verified" only after opetlife staff checked; otherwise the source's claim,
   // and the five pet conditions read "unknown" unless the source states them.
   const verifiedByUs = stay.pet.authority === "ADMIN_CONFIRMED";
   const facts = petFacts(stay.pet.policy, (key, values) => t(key as never, values as never), (irr) => formatCurrency(irr, locale));
   const updatedAt = stay.lastSuccessfulSyncAt ?? stay.fromPrice?.observedAt ?? stay.lastSeenAt;
 
+  const sep = locale === "fa" || locale === "ar" ? "، " : ", ";
+  const place = [stay.city, stay.province].filter(Boolean).map((n) => placeName(n!, locale)).join(sep);
+  const city = stay.city ? placeName(stay.city, locale) : null;
+  const petLine = stay.pet.policyStatus === "CONFIRMED_ALLOWED" ? (verifiedByUs ? t("petVerifiedByOpetlife") : t("petPerListing")) : t(`policy.${stay.pet.policyStatus}`);
+
   return (
     <article className="xs-tile">
       <div className={`xs-tile__media xs-kind--${kind}`}>
         {image ? (
-          // eslint-disable-next-line @next/next/no-img-element
+          // eslint-disable-next-line @next/next/no-img-element -- only when the source's image policy allows it
           <img src={image} alt={stay.title ?? ""} loading="lazy" />
         ) : (
           <span className="xs-tile__placeholder" aria-hidden="true">
-            <Icon size={36} />
+            <Icon size={34} />
+            {city ? <strong>{city}</strong> : null}
             <span>{t(`tile.kind.${kind}`)}</span>
           </span>
         )}
-        <span className="xs-tile__chip">{t("tile.sourceChip", { source: sourceName })}</span>
       </div>
       <div className="xs-tile__body">
         <h3 className="xs-tile__title">{stay.title ?? t("unnamed")}</h3>
-        <p className="xs-tile__place">{[stay.city, stay.province].filter(Boolean).map((n) => placeName(n, locale)).join(locale === "fa" || locale === "ar" ? "، " : ", ")}</p>
+        {place ? <p className="xs-tile__place">{place}</p> : null}
         <ul className="xs-tile__facts">
-          {stay.capacity !== null ? <li><Users size={14} aria-hidden="true" /> {t("tile.capacity", { count: nf.format(stay.capacity) })}</li> : null}
-          {stay.bedrooms !== null ? <li><BedDouble size={14} aria-hidden="true" /> {t("tile.bedrooms", { count: nf.format(stay.bedrooms) })}</li> : null}
-          {stay.rating !== null ? <li><Star size={14} aria-hidden="true" /> {nf.format(stay.rating)}{stay.reviewCount ? ` (${nf.format(stay.reviewCount)})` : ""}</li> : null}
+          {stay.capacity !== null ? <li><Users size={15} aria-hidden="true" /> {t("tile.capacity", { count: nf.format(stay.capacity) })}</li> : null}
+          {stay.bedrooms !== null ? <li><BedDouble size={15} aria-hidden="true" /> {t("tile.bedrooms", { count: nf.format(stay.bedrooms) })}</li> : null}
+          {stay.rating !== null ? <li><Star size={15} aria-hidden="true" /> {nf.format(stay.rating)}{stay.reviewCount ? ` (${nf.format(stay.reviewCount)})` : ""}</li> : null}
         </ul>
-        <p className="xs-tile__pet">
-          {stay.pet.policyStatus === "CONFIRMED_ALLOWED" ? (verifiedByUs ? t("petVerifiedByOpetlife") : t("petPerSource", { source: sourceName })) : t(`policy.${stay.pet.policyStatus}`)}
-        </p>
+        <div className="xs-tile__price">
+          {price ? (
+            <strong><bdi>{money(price.priceIrr!, price.currency ?? "IRR")}</bdi></strong>
+          ) : from ? (
+            <>
+              <strong><bdi>{t("startingPrice", { amount: money(from.priceIrr, from.currency) })}</bdi></strong>
+              {from.priceBasis === "PER_NIGHT" ? <span className="xs-tile__basis">/ {t("perNight")}</span> : null}
+            </>
+          ) : (
+            <span className="xs-tile__basis">{t("priceOnListing")}</span>
+          )}
+        </div>
+        <p className="xs-tile__pet">{petLine}</p>
         {stay.pet.policyStatus !== "CONFIRMED_NOT_ALLOWED" ? (
-          <ul className="xs-tile__conditions" aria-label={t("petFacts.title")}>
-            {(["species", "size", "indoor", "fee", "approval"] as const).map((key) => (
-              <li key={key}>
-                <span>{t(`petFacts.${key}`)}</span>
-                <span>{facts[key]}</span>
-              </li>
-            ))}
-          </ul>
+          <details className="xs-tile__conditions">
+            <summary>{t("petFacts.title")}</summary>
+            <ul>
+              {(["species", "size", "indoor", "fee", "approval"] as const).map((key) => (
+                <li key={key}>
+                  <span>{t(`petFacts.${key}`)}</span>
+                  <span>{facts[key]}</span>
+                </li>
+              ))}
+            </ul>
+          </details>
         ) : null}
-        {stay.descriptionSummary ? <p className="xs-tile__desc">{stay.descriptionSummary}</p> : null}
-        {price ? (
-          <p className="xs-tile__price"><bdi>{money(price.priceIrr!, price.currency ?? "IRR")}</bdi></p>
-        ) : from ? (
-          <p className="xs-tile__price">
-            <bdi>{t("startingPrice", { amount: money(from.priceIrr, from.currency) })}</bdi>
-            {from.priceBasis === "PER_NIGHT" ? <span className="xs-tile__basis"> · {t("basis.PER_NIGHT")}</span> : null}
-          </p>
-        ) : null}
-        <p className="xs-tile__meta">{t("updatedAgo", { ago: timeAgo(updatedAt, locale) })}</p>
-        <div className="xs-tile__actions">
-          <Link className="underline" href={`/${locale}/travel/external/${stay.id}${suffix}`}>{t("details")}</Link>
-          <a className="xs-tile__out" href={travelExternalService.outboundUrl(stay.id, context)} target="_blank" rel="noreferrer noopener">{t("viewOnSource", { source: sourceName })}</a>
+        <a className="xs-tile__cta" href={travelExternalService.outboundUrl(stay.id, context)} target="_blank" rel="noopener nofollow">
+          {t("viewStay")}
+          <ExternalLink size={16} aria-hidden="true" />
+          <span className="sr-only"> {t("opensNewTab")}</span>
+        </a>
+        <div className="xs-tile__foot">
+          <Link href={`/${locale}/travel/external/${stay.id}${suffix}`}>{t("details")}</Link>
+          <span>{t("updatedAgo", { ago: timeAgo(updatedAt, locale) })}</span>
         </div>
       </div>
     </article>
