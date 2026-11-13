@@ -17,5 +17,5 @@ export function formatCurrency(amountRial: number, locale: "fa" | "en" | "de" | 
     nl: "nl-NL",
   };
   const formatted = toman.toLocaleString(intlLocale[locale]);
-  return locale === "fa" ? `${formatted} تومان` : `${formatted} Toman`;
+  return locale === "fa" || locale === "ar" ? `${formatted} تومان` : `${formatted} Toman`;
 }

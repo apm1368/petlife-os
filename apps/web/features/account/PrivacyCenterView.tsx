@@ -11,6 +11,7 @@ import { AccountPageHeader } from "./AccountNav";
 import { ConfirmActionDialog } from "./ConfirmActionDialog";
 import { formatAccountDate, useAccountCopy } from "./account-copy";
 import { formatDay } from "@/lib/date/jalali";
+import { isRouteLocale } from "@/lib/i18n/config";
 
 const EXPORT_STATUS: Record<PrivacyRequestStatusValue, { fa: string; en: string; de: string; es: string; ar: string; nl: string; tone: StatusTone }> = {
   PENDING: { fa: "در صف", en: "Queued", de: "In der Warteschlange", es: "En espera", ar: "في قائمة الانتظار", nl: "In de wachtrij", tone: "neutral" },
@@ -299,7 +300,7 @@ export function PrivacyCenterView() {
                   </p>
                 </div>
                 <div className="member-row__actions">
-                  <StatusLabel tone={status.tone}>{locale === "fa" ? status.fa : locale === "de" ? status.de : locale === "es" ? status.es : status.en}</StatusLabel>
+                  <StatusLabel tone={status.tone}>{status[isRouteLocale(locale) ? locale : "en"]}</StatusLabel>
                   {request.status === "READY" ? <Button variant="secondary" size="sm" isLoading={busy === `download-${request.id}`} onClick={() => download(request.id)}>{t("دریافت", "Download")}</Button> : null}
                 </div>
               </div>
@@ -426,7 +427,7 @@ function DeleteAccountDialog({ onClose, onDone }: { onClose: () => void; onDone:
                     const copy = BLOCKER_COPY[b.code];
                     return (
                       <li key={b.code}>
-                        {copy ? (locale === "fa" ? copy.fa : locale === "de" ? copy.de : locale === "es" ? copy.es : copy.en) : t("مورد باز دیگری وجود دارد.", "Something else is still open.")} {b.count > 1 ? `(${num(b.count)})` : ""}
+                        {copy ? copy[isRouteLocale(locale) ? locale : "en"] : t("مورد باز دیگری وجود دارد.", "Something else is still open.")} {b.count > 1 ? `(${num(b.count)})` : ""}
                         {copy?.href ? <> · <Link href={`/${locale}${copy.href}`} className="text-brand-natural">{t("مشاهده", "View")}</Link></> : null}
                       </li>
                     );
