@@ -85,7 +85,7 @@ describe("Partner onboarding (e2e)", () => {
     ]) await partner.put("/partner-onboarding/business").send({ name: "Aria", logoObjectKey }).expect(400);
     const issued = (await partner.post("/partner-onboarding/logo-upload").send({ contentType: "image/png", fileSizeBytes: 2048 }).expect(201)).body as { key: string };
     expect(issued.key).toMatch(new RegExp(`^partner-logos/${partner.id}/`));
-    await partner.put("/partner-onboarding/business").send({ name: "Aria", logoObjectKey: issued.key }).expect(200);
+    await partner.put("/partner-onboarding/business").send({ name: "کلینیک و پت‌شاپ آریا", description: "دامپزشکی و پت‌شاپ", logoObjectKey: issued.key }).expect(200);
     const withLogo = await db.providerOrganization.findFirstOrThrow({ where: { providerUsers: { some: { userId: partner.id } } } });
     expect(withLogo.logoUrl).toContain(issued.key);
     expect(withLogo.logoUrl).not.toContain("evil.example");
