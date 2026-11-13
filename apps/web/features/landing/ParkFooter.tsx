@@ -11,6 +11,7 @@ import { localeHomePath } from "@/lib/seo/site";
 export function ParkFooter({ locale }: { locale: RouteLocale }) {
   const c = storyCopy[locale];
   const park = useTranslations("pattern2026.park");
+  const legal = useTranslations("legalPages");
   return <footer className="opl-foot" aria-label={c.footerLabel}>
     <div className="opl-wrap">
       <div className="opl-foot__grid">
@@ -33,6 +34,9 @@ export function ParkFooter({ locale }: { locale: RouteLocale }) {
         <CookieToggle />
         <nav aria-label={c.footerPrivacy}>
           <Link href={`/${locale}/about`}>{park("about")}</Link>
+          <Link href={`/${locale}/legal/terms`}>{legal("terms")}</Link>
+          <Link href={`/${locale}/legal/privacy`}>{legal("privacy")}</Link>
+          <Link href={`/${locale}/help/faq`}>{legal("faq")}</Link>
           <Link href={`/${locale}/profile/privacy`}>{c.footerPrivacy}</Link>
           <Link href={`/${locale}/credits`}>{c.footerCredits}</Link>
         </nav>

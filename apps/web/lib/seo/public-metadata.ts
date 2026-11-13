@@ -175,6 +175,42 @@ const pages = {
       nl: { title: "Juridische documenten van Opetlife", description: "Officiële juridische documenten worden getoond na goedkeuring en publicatie." },
     },
   },
+  legalTerms: {
+    path: "legal/terms",
+    indexable: true,
+    copy: {
+      fa: { title: "قوانین و مقررات اپت‌لایف", description: "قوانین استفاده از اپت‌لایف: حساب کاربری، رزرو و لغو، سفارش و مرجوعی ۴۸ ساعته، پرداخت و کیف پول، کارت‌به‌کارت، ارسال، قوانین جامعه و حل اختلاف." },
+      en: { title: "Terms and Rules | Opetlife", description: "How opetlife works: accounts, bookings and cancellations, orders and 48-hour returns, payments and wallet, card-to-card, delivery, community rules and disputes." },
+      de: { title: "AGB und Regeln | opetlife", description: "So funktioniert opetlife: Konto, Buchungen und Stornierung, Bestellungen und 48-Stunden-Rückgabe, Zahlung und Wallet, Karte-zu-Karte, Versand, Community-Regeln und Streitfälle." },
+      es: { title: "Términos y normas | opetlife", description: "Cómo funciona opetlife: cuentas, reservas y cancelaciones, pedidos y devoluciones en 48 horas, pagos y monedero, tarjeta a tarjeta, envíos, normas de la comunidad y disputas." },
+      ar: { title: "الشروط والأحكام | Opetlife", description: "كيف يعمل opetlife: الحساب، والحجوزات والإلغاء، والطلبات والإرجاع خلال 48 ساعة، والدفع والمحفظة، والتحويل من بطاقة إلى بطاقة، والشحن، وقواعد المجتمع والنزاعات." },
+      nl: { title: "Voorwaarden en regels | Opetlife", description: "Zo werkt opetlife: account, boekingen en annuleren, bestellingen en retour binnen 48 uur, betalen en wallet, kaart-naar-kaart, verzending, communityregels en geschillen." },
+    },
+  },
+  legalPrivacy: {
+    path: "legal/privacy",
+    indexable: true,
+    copy: {
+      fa: { title: "حریم خصوصی اپت‌لایف", description: "چه اطلاعاتی جمع می‌کنیم، چرا، چه کسی آن را می‌بیند، چه مدت نگه می‌داریم و چطور داده‌هایتان را دریافت یا حذف کنید. بدون ردیاب تبلیغاتی یا تحلیلی." },
+      en: { title: "Privacy Policy | Opetlife", description: "What we collect, why, who sees it, how long we keep it, and how to export or delete your data. No advertising or analytics trackers." },
+      de: { title: "Datenschutzerklärung | opetlife", description: "Welche Daten wir erheben, warum, wer sie sieht, wie lange wir sie speichern und wie du sie exportierst oder löschst. Keine Werbe- oder Analyse-Tracker." },
+      es: { title: "Política de privacidad | opetlife", description: "Qué datos recopilamos, por qué, quién los ve, cuánto tiempo los guardamos y cómo exportarlos o eliminarlos. Sin rastreadores publicitarios ni de analítica." },
+      ar: { title: "سياسة الخصوصية | Opetlife", description: "ما البيانات التي نجمعها، ولماذا، ومن يطّلع عليها، ومدة الاحتفاظ بها، وكيف تصدّرها أو تحذفها. بلا أدوات تتبع إعلانية أو تحليلية." },
+      nl: { title: "Privacybeleid | Opetlife", description: "Welke gegevens we verzamelen, waarom, wie ze ziet, hoe lang we ze bewaren en hoe je ze exporteert of verwijdert. Geen advertentie- of analysetrackers." },
+    },
+  },
+  faq: {
+    path: "help/faq",
+    indexable: true,
+    copy: {
+      fa: { title: "سوالات متداول اپت‌لایف", description: "پاسخ کوتاه به پرسش‌های رایج: ثبت‌نام، پرونده سلامت، رزرو و لغو، پرداخت کارت‌به‌کارت، ارسال و مرجوعی، کیف پول، حیوان گمشده، همکاران و اپلیکیشن." },
+      en: { title: "Frequently asked questions | Opetlife", description: "Quick answers about sign-up, health records, bookings and cancellations, card-to-card payment, delivery and returns, the wallet, lost pets, partners and the app." },
+      de: { title: "Häufige Fragen | opetlife", description: "Kurze Antworten zu Anmeldung, Gesundheitsakte, Buchung und Stornierung, Karte-zu-Karte-Zahlung, Versand und Rückgabe, Wallet, vermissten Tieren, Partnern und der App." },
+      es: { title: "Preguntas frecuentes | opetlife", description: "Respuestas rápidas sobre registro, historial de salud, reservas y cancelaciones, pago de tarjeta a tarjeta, envíos y devoluciones, monedero, mascotas perdidas, profesionales y la app." },
+      ar: { title: "الأسئلة الشائعة | Opetlife", description: "إجابات سريعة عن التسجيل، والسجل الصحي، والحجز والإلغاء، والدفع من بطاقة إلى بطاقة، والشحن والإرجاع، والمحفظة، والحيوانات المفقودة، والشركاء، والتطبيق." },
+      nl: { title: "Veelgestelde vragen | Opetlife", description: "Korte antwoorden over aanmelden, gezondheidsdossier, boeken en annuleren, kaart-naar-kaart betalen, verzending en retour, wallet, vermiste dieren, partners en de app." },
+    },
+  },
   blog: {
     path: "blog",
     indexable: true,
@@ -342,7 +378,7 @@ const pages = {
 export type PublicSeoPage = keyof typeof pages;
 
 export const sitemapPages: readonly PublicSeoPage[] = [
-  "home", "blog", "guides", "services", "vetFind", "community", "lostPets", "animalSupport", "animalSupportCampaigns", "animalSupportNeeds", "travel", "travelExternal", "about", "contact", "credits", "status", "memorials",
+  "home", "blog", "guides", "services", "vetFind", "community", "lostPets", "animalSupport", "animalSupportCampaigns", "animalSupportNeeds", "travel", "travelExternal", "about", "legalTerms", "legalPrivacy", "faq", "contact", "credits", "status", "memorials",
 ];
 
 export function publicPagePath(locale: RouteLocale, page: PublicSeoPage): string {

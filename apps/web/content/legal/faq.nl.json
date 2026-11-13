@@ -1,0 +1,193 @@
+{
+  "title": "Veelgestelde vragen",
+  "lede": "Korte antwoorden op de vragen die we het vaakst horen. Voor al het andere helpt ons supportteam je graag.",
+  "updated": "2026-11-13",
+  "groups": [
+    {
+      "id": "members",
+      "heading": "Aan de slag",
+      "items": [
+        {
+          "q": "Wat is opetlife?",
+          "a": "Eén plek voor het leven met je huisdieren: hun dossiers en gezondheidsgeschiedenis, boekingen bij dierenartsen en voor verzorging, een winkel met onafhankelijke verkopers, huisdiervriendelijk reizen, een dierentaxi, hulp bij vermiste en gevonden huisdieren en een community van gezinnen met huisdieren."
+        },
+        {
+          "q": "Hoe meld ik me aan?",
+          "a": "Vul je mobiele nummer in en de eenmalige code die we je per sms sturen. Waar dat beschikbaar is, kun je je ook aanmelden met een wachtwoord of een Google-account. Je moet minimaal 18 jaar zijn voor een eigen account."
+        },
+        {
+          "q": "Kan mijn gezin de dossiers van onze huisdieren delen?",
+          "a": "Ja. De eigenaar van het huishouden kan gezinsleden uitnodigen, keurt elke uitnodiging goed en bepaalt wie elk huisdier kan zien en beheren."
+        },
+        {
+          "q": "Kost opetlife iets?",
+          "a": "Een account aanmaken en de dossiers van je huisdieren bijhouden is gratis. Je betaalt alleen voor de diensten, producten en reizen die je boekt of koopt. Sommige extra functies horen bij optionele betaalde abonnementen, die op de abonnementspagina staan."
+        }
+      ]
+    },
+    {
+      "id": "health",
+      "heading": "Huisdieren en gezondheidsdossiers",
+      "items": [
+        {
+          "q": "Wie kan de gezondheidsdossiers van mijn huisdier zien?",
+          "a": "Alleen jij, de leden van je huishouden aan wie je dat toestaat en iedereen met wie je ze zelf deelt. Partners zien gezondheidsinformatie alleen als hun dienst die nodig heeft, zoals een kliniek of pension, en alleen tot 24 uur na de boeking."
+        },
+        {
+          "q": "Hoe deel ik dossiers met een dierenarts?",
+          "a": "Maak een deellink aan op de gezondheidspagina van je huisdier. Die is 1 uur tot 7 dagen geldig, toont alleen de onderdelen die je kiest en kan op elk moment worden ingetrokken. Je kunt een dierenarts van een geverifieerde kliniek ook tot 90 dagen toegang geven."
+        },
+        {
+          "q": "Is de informatie op opetlife medisch advies?",
+          "a": "Nee. Gezondheidstools en artikelen helpen je om alles bij te houden en op de hoogte te blijven, maar ze vervangen geen dierenarts. Neem bij een noodgeval meteen contact op met een dierenarts of een spoedkliniek voor dieren."
+        }
+      ]
+    },
+    {
+      "id": "bookings",
+      "heading": "Boekingen en diensten",
+      "items": [
+        {
+          "q": "Worden de klinieken en aanbieders gecontroleerd?",
+          "a": "Partners moeten identiteits- en bedrijfscontroles doorstaan voordat ze boekingen kunnen aannemen, en voor klinische diensten is een geldige beroepsvergunning nodig. Bedrijfsvermeldingen die uit open kaartgegevens zijn geïmporteerd, worden duidelijk aangeduid als niet geverifieerd, totdat het bedrijf ze claimt en verifieert."
+        },
+        {
+          "q": "Hoe annuleer ik een boeking, en krijg ik mijn geld terug?",
+          "a": "Annuleer via de boekingspagina. Elke dienst toont de annuleringsvoorwaarden voordat je boekt. Binnen de periode voor gratis annuleren krijg je je geld volledig terug. Daarna krijg je het percentage terug dat bij het boeken werd getoond. Annuleert de aanbieder, dan krijg je altijd je geld volledig terug."
+        },
+        {
+          "q": "Wat als de aanbieder niet komt opdagen?",
+          "a": "Meld het via de boekingspagina. Ons supportteam bekijkt het samen met de aanbieder en beslist hoe het wordt rechtgezet."
+        },
+        {
+          "q": "Hoe werkt de dierentaxi?",
+          "a": "Zet je ophaal- en afzetpunt op de kaart, bekijk het tarief en volg je chauffeur live. Totdat online betalen voor ritten is ingeschakeld, betaal je de chauffeur bij aankomst. Je kunt op elk moment vóór het ophalen annuleren."
+        }
+      ]
+    },
+    {
+      "id": "shop",
+      "heading": "Winkel, betaling, verzending en retouren",
+      "items": [
+        {
+          "q": "Wie verkoopt de producten?",
+          "a": "Onafhankelijke verkopers. opetlife is de marktplaats, en elke verkoper is verantwoordelijk voor zijn producten en geeft zijn eigen factuur uit."
+        },
+        {
+          "q": "Hoe kan ik betalen?",
+          "a": "Bij het afrekenen zie je welke opties voor die aankoop beschikbaar zijn, zoals online betalen, je portemonnee of een kaart-naar-kaartoverschrijving. Prijzen zijn in toman en zijn inclusief alles wat bij het afrekenen wordt getoond."
+        },
+        {
+          "q": "Hoe werkt betalen met kaart-naar-kaart?",
+          "a": "Maak het exacte bedrag over naar de rekening die bij het afrekenen wordt getoond en upload het betaalbewijs binnen 30 minuten. Ons financiële team controleert betaalbewijzen van zaterdag tot en met woensdag, 9.00–18.00 uur, en op donderdag, 9.00–13.00 uur. Heb je te veel betaald, dan gaat het verschil naar je portemonnee. Heb je te weinig betaald, dan heb je 30 minuten om de rest te betalen."
+        },
+        {
+          "q": "Hoe lang duurt de bezorging?",
+          "a": "Dat hangt af van de verkoper, de verzendmethode en je stad. Op je bestelpagina zie je de verwachte levertijd en, zodra je bestelling is verzonden, de track-and-trace."
+        },
+        {
+          "q": "Kan ik een bestelling annuleren of retourneren?",
+          "a": "Je kunt op elk moment voordat de verkoper verzendt annuleren en je geld volledig terugkrijgen. Komt een artikel beschadigd aan, komt het niet overeen met de omschrijving of is het verlopen, meld het dan binnen 48 uur na levering via de bestelpagina, met foto's, en bewaar het artikel en de verpakking. Je wettelijke consumentenrechten blijven gewoon gelden."
+        },
+        {
+          "q": "Waar gaan terugbetalingen naartoe?",
+          "a": "Goedgekeurde terugbetalingen gaan terug naar je oorspronkelijke betaalmethode of naar je opetlife-portemonnee. In de melding over de terugbetaling staat welke van de twee."
+        }
+      ]
+    },
+    {
+      "id": "wallet",
+      "heading": "Portemonnee",
+      "items": [
+        {
+          "q": "Wat is de portemonnee?",
+          "a": "Je saldo bij opetlife. Daarin staat terugbetalingstegoed van geannuleerde of terugbetaalde aankopen, en aankooptegoed uit opwaarderingen en cadeaus. Aankooptegoed kun je alleen bij opetlife uitgeven, en cadeautegoed vervalt na zes maanden."
+        },
+        {
+          "q": "Hoe waardeer ik mijn portemonnee op?",
+          "a": "Via de portemonneepagina, met een kaart-naar-kaartoverschrijving en een betaalbewijs. Een opwaardering moet tussen 10.000 en 50.000.000 toman liggen, en je kunt maximaal drie opwaarderingen tegelijk hebben die op beoordeling wachten."
+        }
+      ]
+    },
+    {
+      "id": "lost-pets",
+      "heading": "Vermiste en gevonden huisdieren",
+      "items": [
+        {
+          "q": "Mijn huisdier is vermist. Wat moet ik doen?",
+          "a": "Plaats een melding van een vermist huisdier met een duidelijke foto en het gebied waar je huisdier het laatst is gezien (niet je huisadres). Leden in de buurt die buurtmeldingen hebben ingeschakeld, worden op de hoogte gebracht, en iedereen die je huisdier heeft gezien, kan reageren."
+        },
+        {
+          "q": "Ik heb een huisdier gevonden. Hoe kan ik helpen?",
+          "a": "Plaats in de community een bericht over een gevonden huisdier, met een foto en het gebied. Je kunt maximaal drie berichten over gevonden huisdieren per dag plaatsen. Is het dier gewond, breng het dan eerst naar een dierenarts."
+        },
+        {
+          "q": "Verraden buurtmeldingen waar ik woon?",
+          "a": "Nee. Je punt wordt afgerond op ongeveer één kilometer en aan niemand getoond. Je kunt een straal tot 10 km kiezen en meldingen op elk moment uitzetten."
+        }
+      ]
+    },
+    {
+      "id": "partners",
+      "heading": "Voor partners",
+      "items": [
+        {
+          "q": "Hoe sluit ik me aan als kliniek, aanbieder, verkoper of verhuurder?",
+          "a": "Begin op de partnerpagina's, maak je organisatie aan en upload de gevraagde documenten. We streven ernaar die binnen 24 werkuren te beoordelen. Zodra je geverifieerd bent, kun je boekingen aannemen of verkopen."
+        },
+        {
+          "q": "Welke documenten heb ik nodig?",
+          "a": "Een identiteitsbewijs en, voor klinische diensten, een geldige beroepsvergunning. Afhankelijk van je bedrijf kunnen we ook vragen om een nationale identiteitskaart, een bedrijfsvergunning of een eNamad-certificaat, een vast telefoonnummer en een geverifieerd mobiel nummer."
+        },
+        {
+          "q": "Mijn bedrijf staat al op de site. Hoe neem ik het over?",
+          "a": "Open de vermelding en kies “Is dit jouw bedrijf?”. Alleen een geverifieerde organisatie kan een vermelding claimen."
+        },
+        {
+          "q": "Hoe worden commissies en uitbetalingen geregeld?",
+          "a": "Die staan in je partnerovereenkomst en in je partnerdashboard, met een overzicht van elke afrekening."
+        }
+      ]
+    },
+    {
+      "id": "privacy",
+      "heading": "Privacy en je account",
+      "items": [
+        {
+          "q": "Verkoopt opetlife mijn gegevens of toont het advertenties op basis daarvan?",
+          "a": "Nee. We verkopen geen persoonsgegevens en gebruiken geen trackers voor advertenties of analyse. In het Privacybeleid lees je precies wat we verzamelen en waarom."
+        },
+        {
+          "q": "Kan ik mijn gegevens downloaden?",
+          "a": "Ja. Via Profiel → Privacy kun je een bestand downloaden met je huisdieren, gezondheidsdossiers, boekingen, bestellingen en meer. Het bestand blijft 7 dagen beschikbaar."
+        },
+        {
+          "q": "Hoe verwijder ik mijn account?",
+          "a": "Vraag het aan via Profiel → Privacy. We beoordelen het verzoek, zetten apart wat we volgens de wet moeten bewaren en verwijderen of anonimiseren de rest. Zolang het verzoek in behandeling is, kun je het annuleren. Openstaande boekingen, bestellingen, terugbetalingen of geschillen moeten eerst zijn afgerond."
+        },
+        {
+          "q": "Welke meldingen krijg ik?",
+          "a": "De meldingen die je zelf kiest, in de app en via push, sms of e-mail. Marketingberichten staan uit, tenzij je ze aanzet. Beveiligingsmeldingen worden altijd verstuurd. Je kunt ook stille uren instellen."
+        }
+      ]
+    },
+    {
+      "id": "app",
+      "heading": "De app",
+      "items": [
+        {
+          "q": "Is er een app?",
+          "a": "Ja. Je kunt opetlife rechtstreeks vanuit de browser op het startscherm van je telefoon installeren, en er is een Android-app. Beide gebruiken hetzelfde account."
+        },
+        {
+          "q": "Hoe zet ik pushmeldingen aan?",
+          "a": "Sta meldingen toe wanneer de site of app daarom vraagt, of zet ze aan in je meldingsinstellingen. Je kunt ze op elk moment op dezelfde plek of in je browser weer uitzetten."
+        },
+        {
+          "q": "Welke talen ondersteunt opetlife?",
+          "a": "Perzisch, Engels, Duits, Spaans, Arabisch en Nederlands. Wissel van taal via het taalmenu boven- of onderaan elke pagina."
+        }
+      ]
+    }
+  ]
+}

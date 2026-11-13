@@ -1974,7 +1974,7 @@
       "haveAccount": "Already have an account? Log in",
       "confirmPassword": "Confirm password",
       "passwordMismatch": "Passwords do not match.",
-      "terms": "I accept opetlife's Terms and Privacy Policy.",
+      "terms": "I accept opetlife's <terms>Terms and Rules</terms> and <privacy>Privacy Policy</privacy>.",
       "genericError": "Could not create your account. Check the details and try again."
     },
     "forgot": {
@@ -11415,5 +11415,27 @@
     "invalid": "Choose a category and a number from 1 to 3000.",
     "forbidden": "commerce.manage permission required.",
     "failed": "Could not start; please try again."
+  },
+  "legalPages": {
+    "eyebrow": {
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "faq": "Help"
+    },
+    "updated": "Last updated: {date}",
+    "onThisPage": "On this page",
+    "allLegal": "All legal documents",
+    "faqMore": "More answers in the help center",
+    "stillNeedHelp": "Still have a question?",
+    "contactSupport": "Contact support",
+    "terms": "Terms and Rules",
+    "privacy": "Privacy Policy",
+    "faq": "FAQ",
+    "consent": "By continuing, you agree to opetlife's <terms>Terms and Rules</terms> and <privacy>Privacy Policy</privacy>.",
+    "checkoutConsent": "By placing this order, you agree to the <terms>Terms and Rules</terms>, including <returns>cancellation and 48-hour returns</returns>, and the <privacy>Privacy Policy</privacy>.",
+    "adminDraft": {
+      "title": "Built-in Terms, Privacy Policy and FAQ are live — draft, needs the owner's legal review",
+      "body": "These texts were written from how the platform actually works and are shown in all six languages until you publish a reviewed version. Publishing Terms or Privacy here for Persian or English replaces the built-in text for that language. Points to check with a lawyer: the 48-hour return window next to the statutory right of withdrawal for distance purchases, where refunds go (original method or wallet), account deletion (execution is still switched off), and community posts appearing before review."
+    }
   }
 }

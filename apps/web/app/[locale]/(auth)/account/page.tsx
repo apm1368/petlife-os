@@ -13,6 +13,7 @@ import { onboardingService } from "@/services/onboarding.service";
 import { useSessionStore } from "@/stores/session-store";
 import { signInErrorText } from "@/features/auth/sign-in-error";
 import { resolvePostAuthDestination } from "@/lib/auth/resolve-post-auth-destination";
+import { LegalConsentLine } from "@/features/legal/LegalConsentLine";
 
 const RESEND_COOLDOWN_SECONDS = 30;
 
@@ -125,6 +126,7 @@ function AccountFlow() {
         <Button variant="primary" isLoading={isSubmitting} disabled={!identifier} onClick={sendCode}>
           {t("identifier.sendCode")}
         </Button>
+        <LegalConsentLine kind="consent" locale={locale} className="text-center text-metadata text-text-secondary" />
       </div>
     );
   }

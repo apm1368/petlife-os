@@ -1986,7 +1986,7 @@
       "haveAccount": "Heb je al een account? Log in",
       "confirmPassword": "Wachtwoord bevestigen",
       "passwordMismatch": "Wachtwoorden komen niet overeen.",
-      "terms": "Ik ga akkoord met de Voorwaarden en het Privacybeleid van opetlife.",
+      "terms": "Ik ga akkoord met de <terms>Voorwaarden en regels</terms> en het <privacy>Privacybeleid</privacy> van opetlife.",
       "genericError": "Je account kon niet worden aangemaakt. Controleer de gegevens en probeer het opnieuw."
     },
     "forgot": {
@@ -11484,5 +11484,27 @@
     "invalid": "Kies een categorie en een aantal van 1 tot 3000.",
     "forbidden": "Recht commerce.manage vereist.",
     "failed": "Starten mislukt; probeer het opnieuw."
+  },
+  "legalPages": {
+    "eyebrow": {
+      "terms": "Voorwaarden",
+      "privacy": "Privacy",
+      "faq": "Hulp"
+    },
+    "updated": "Laatst bijgewerkt: {date}",
+    "onThisPage": "Op deze pagina",
+    "allLegal": "Alle juridische documenten",
+    "faqMore": "Meer antwoorden in het helpcentrum",
+    "stillNeedHelp": "Nog een vraag?",
+    "contactSupport": "Contact met support",
+    "terms": "Voorwaarden en regels",
+    "privacy": "Privacybeleid",
+    "faq": "Veelgestelde vragen",
+    "consent": "Door verder te gaan, ga je akkoord met de <terms>Voorwaarden en regels</terms> en het <privacy>Privacybeleid</privacy> van opetlife.",
+    "checkoutConsent": "Door deze bestelling te plaatsen, ga je akkoord met de <terms>Voorwaarden en regels</terms>, inclusief <returns>annuleren en retour binnen 48 uur</returns>, en het <privacy>Privacybeleid</privacy>.",
+    "adminDraft": {
+      "title": "Ingebouwde Voorwaarden, Privacybeleid en FAQ staan live — concept, juridische controle door de eigenaar nodig",
+      "body": "Deze teksten beschrijven hoe het platform echt werkt en worden in alle zes talen getoond tot je een gecontroleerde versie publiceert. Als je hier de Voorwaarden of Privacy in het Perzisch of Engels publiceert, vervangt dat de ingebouwde tekst voor die taal. Met een jurist te controleren: de retourtermijn van 48 uur naast het wettelijke herroepingsrecht bij aankopen op afstand, waar terugbetalingen naartoe gaan (oorspronkelijke betaalmethode of wallet), het verwijderen van accounts (de uitvoering staat nog uit) en dat communityberichten verschijnen vóór controle."
+    }
   }
 }

@@ -1,0 +1,165 @@
+{
+  "title": "Datenschutzerklärung",
+  "lede": "Diese Erklärung beschreibt, welche Informationen opetlife über dich und deine Tiere erhebt, warum wir sie brauchen, wer sie sehen kann, wie lange wir sie aufbewahren und wie du die Kontrolle behältst. Wir verkaufen deine Daten nicht und setzen keine Werbe- oder Analyse-Tracker ein.",
+  "updated": "2026-11-13",
+  "sections": [
+    {
+      "id": "scope",
+      "heading": "1. Wer wir sind und wofür diese Erklärung gilt",
+      "paragraphs": [
+        "Diese Erklärung gilt für die Website von opetlife, die installierbare App und die Android-App. Verantwortlich für deine Daten ist der Betreiber, dessen Angaben in der Fußzeile der Website und auf der Kontaktseite stehen. Partner, die deine Informationen erhalten, um eine Leistung zu erbringen (zum Beispiel eine Klinik, bei der du buchst), sind für ihre eigene Nutzung dieser Informationen verantwortlich und müssen diese Erklärung und das Gesetz einhalten.",
+        "Die Android-App zeigt dieselbe Website und fragt nur nach zwei Android-Berechtigungen: Internetzugang und – ab Android 13 – die Erlaubnis, Benachrichtigungen anzuzeigen. Diese wird erst angefragt, wenn du Benachrichtigungen einschaltest. Die App fragt nicht nach Standort, Kamera, Kontakten oder Speicher. Wenn eine Funktion wie das Tiertaxi, vermisste Tiere oder ein Foto-Upload deinen Standort oder die Kamera braucht, fragt dich der Browser jedes Mal. Der Offline-Speicher der App enthält nur statische Dateien wie Stile und Bilder, nie deine Seiten oder Daten, und die App enthält keine Analyse-Tools oder SDKs von Drittanbietern."
+      ]
+    },
+    {
+      "id": "collect",
+      "heading": "2. Was wir erheben",
+      "items": [
+        "Konto: deine Mobilnummer und E-Mail-Adresse (samt der Angabe, ob du sie bestätigt hast), Benutzername, Name, Anzeigename und Foto, Sprache und Design sowie ein sicher gehashtes Passwort, falls du eines festlegst. Nach deiner nationalen Identifikationsnummer fragen wir nicht.",
+        "Haushalt und Tiere: Haushaltsmitglieder und ihre Rollen sowie das Profil jedes Tieres (Name, Tierart, Rasse, Geschlecht, Geburtsdatum, Foto, Gewicht, Merkmale, Kastration und Mikrochip). Dazu gehören auch die Gesundheitsinformationen, die du hinzufügst: Allergien, Erkrankungen, Medikamente, Impfungen, Besuche, Laborergebnisse und Dokumente.",
+        "Adressen und Standort: die Liefer- oder Besuchsadressen, die du speicherst, optional mit einem Punkt auf der Karte. Wenn du es erlaubst, wird der Standort deines Browsers für Dienste und Orte in der Nähe, Hinweise zu vermissten Tieren und das Tiertaxi verwendet.",
+        "Buchungen, Bestellungen und Zahlungen: was du gebucht oder gekauft hast, Lieferangaben sowie Erstattungen und Streitfälle. Bei Karte-zu-Karte-Zahlungen speichern wir das Bild des Belegs, das du hochlädst. Deine Bankkartennummer oder IBAN erheben wir nicht.",
+        "Was du veröffentlichst: Beiträge, Kommentare, Chats, Bewertungen, Vermissten- und Fundmeldungen, Gedenkseiten sowie die Fotos und Dateien, die du hochlädst. Standortdaten in Fotos (EXIF und GPS) werden beim Hochladen entfernt.",
+        "Support und Nachrichten: deine Support-Anfragen und unsere Antworten sowie die Benachrichtigungen, die wir dir senden.",
+        "Technisches: für jede angemeldete Sitzung die Browserangaben und die IP-Adresse des Geräts. Für Push-Benachrichtigungen die Push-Adresse deines Browsers. Wenn jemand einen Freigabelink für Gesundheitsdaten öffnet, protokollieren wir den Zeitpunkt, die Browserangaben und eine unkenntlich gemachte Form der IP-Adresse."
+      ]
+    },
+    {
+      "id": "use",
+      "heading": "3. Wofür wir sie nutzen",
+      "items": [
+        "Um dein Konto, deinen Haushalt und die Akten deiner Tiere zu führen und die Buchungen, Bestellungen, Fahrten und Zahlungen auszuführen, die du anforderst.",
+        "Um dich und die Plattform zu schützen: Anmeldecodes, Sicherheitsmeldungen, Betrugsprävention, Moderation und die Bearbeitung von Streitfällen.",
+        "Um dir die Benachrichtigungen zu senden, die du brauchst, und Marketingnachrichten nur, wenn du ihnen zustimmst.",
+        "Um Support zu leisten und den Dienst zu verbessern, und zwar anhand unserer eigenen Aufzeichnungen. Wir erstellen keine Werbeprofile.",
+        "Um unsere gesetzlichen, steuerlichen und buchhalterischen Pflichten zu erfüllen."
+      ]
+    },
+    {
+      "id": "health",
+      "heading": "4. Gesundheitsinformationen",
+      "items": [
+        "Die Gesundheitsakten deiner Tiere sind nur für dich sichtbar, für die Haushaltsmitglieder, denen du es erlaubst, und für die Personen, mit denen du sie teilen möchtest.",
+        "Ein Freigabelink gilt zwischen 1 Stunde und 7 Tagen (standardmäßig 24 Stunden). Er zeigt nur die Bereiche, die du auswählst, protokolliert jedes Öffnen und kann jederzeit widerrufen werden.",
+        "Du kannst Akten bis zu 90 Tage lang mit einem Tierarzt einer verifizierten Klinik teilen und diese Freigabe jederzeit widerrufen.",
+        "Wenn du eine Leistung buchst, sieht der Partner nur, was diese Leistung erfordert. Bei tierärztlichen Leistungen und Unterbringung sind Gesundheitsinformationen sichtbar, bei Fellpflege und Gassigehen nicht. Dieser Zugriff endet 24 Stunden nach der Buchung."
+      ]
+    },
+    {
+      "id": "location",
+      "heading": "5. Standort",
+      "items": [
+        "Wir nutzen deinen Standort nur, wenn du es im Browser erlaubst, und nur für die Funktion, die du gerade verwendest.",
+        "Für Umkreis-Hinweise zu vermissten Tieren wird dein Standort auf etwa 1 km gerundet und anderen nie angezeigt. Vermisstenmeldungen zeigen nur die Gegend, die die Besitzerin oder der Besitzer angibt.",
+        "Während einer Tiertaxi-Fahrt wird die Live-Position des Fahrers mit dir geteilt. Nach 30 Tagen werden die Orte von Fahrten nur noch ungefähr gespeichert, auf etwa 1 km genau."
+      ]
+    },
+    {
+      "id": "sharing",
+      "heading": "6. Mit wem wir sie teilen",
+      "items": [
+        "Partner: Wenn du bei einer Klinik, einem Anbieter, Händler, Gastgeber oder Fahrer buchst oder kaufst, erhält dieser Partner, was nötig ist, um dich zu bedienen (deinen Namen, deine Kontaktdaten, deine Adresse und die für diese Leistung zulässigen Tierinformationen).",
+        "Kurierdienste: für die Lieferung dein Name, deine Telefonnummer und deine Lieferadresse.",
+        "Zahlungsdienstleister: Wenn du online bezahlst, wickelt das Zahlungsportal die Zahlung ab. Wir erhalten das Ergebnis, nicht deine Kartendaten.",
+        "Nachrichtenversand: Anmeldecodes und SMS-Benachrichtigungen laufen über unseren SMS-Anbieter Faraz. E-Mails werden von unserem eigenen Mailserver versendet. Push-Benachrichtigungen laufen über den Push-Dienst deines Browsers.",
+        "Karten: Karten auf der Website laden Kartenkacheln von OpenStreetMap. Manche Routen- und Ortssuchen können einen Kartenanbieter wie Neshan oder Google nutzen. Diese Dienste sehen den Bereich, den du ansiehst oder durchsuchst, nicht dein Konto.",
+        "Versicherer: nur wenn du einen Versicherungsantrag stellst, und nur nach deiner Zustimmung. Der Versicherer erhält dann deine Kontaktdaten sowie Tierart, Rasse, Alter und Gewicht deines Tieres.",
+        "Andere Websites: Wenn du ein externes Angebot öffnest, zum Beispiel auf Jajiga, erfassen wir den Klick, und ab dann gilt die Datenschutzerklärung dieser Website.",
+        "Behörden: wenn das Gesetz es verlangt, zum Beispiel aufgrund eines Gerichtsbeschlusses.",
+        "Wir verkaufen deine personenbezogenen Daten niemals. Unsere Mitarbeitenden sehen personenbezogene Daten nur in dem Umfang, den ihre Rolle erfordert. Die vollständigen Kontaktdaten einer Kundin oder eines Kunden lassen sich nur mit einer besonderen Berechtigung einblenden, und jedes Einblenden wird protokolliert."
+      ]
+    },
+    {
+      "id": "cookies",
+      "heading": "7. Cookies und lokaler Speicher",
+      "items": [
+        "petlife_session hält dich angemeldet. Das Cookie gilt 30 Tage, kann nicht von Skripten auf der Seite gelesen werden und wird nur an unsere Website gesendet.",
+        "petlife_csrf schützt deine Formulare und Aktionen vor websiteübergreifenden Anfragen.",
+        "petlife_oauth_state wird nur während der Anmeldung mit Google verwendet und gilt 10 Minuten.",
+        "NEXT_LOCALE merkt sich die Sprache, die du gewählt hast.",
+        "Der lokale Speicher deines Browsers bewahrt einige kleine Einstellungen auf deinem Gerät auf, zum Beispiel die Einstellung für den Hunde-Mauszeiger.",
+        "Wir verwenden keine Cookies für Werbung, Analyse oder Tracking durch soziale Medien."
+      ]
+    },
+    {
+      "id": "notifications",
+      "heading": "8. Benachrichtigungen",
+      "items": [
+        "Wir benachrichtigen dich in der App und je nach deinen Einstellungen per Push, SMS oder E-Mail.",
+        "Marketingnachrichten sind ausgeschaltet, bis du sie einschaltest. Sicherheitsmeldungen, etwa bei einer neuen Anmeldung oder einem geänderten Passwort, lassen sich nicht ausschalten.",
+        "Du kannst Ruhezeiten festlegen (22:00–08:00 Uhr, Teheraner Zeit). Nicht dringende SMS werden dann bis zum Morgen zurückgehalten, und Push-Benachrichtigungen kommen lautlos an.",
+        "Für Push-Benachrichtigungen speichern wir die Push-Adresse und die Schlüssel deines Geräts. Eine Push-Nachricht enthält nur einen kurzen Titel ihrer Kategorie und einen Link, nie die Details. Wenn du dich abmeldest, wird das Gerät entfernt."
+      ]
+    },
+    {
+      "id": "retention",
+      "heading": "9. Wie lange wir sie aufbewahren",
+      "items": [
+        "Konto-, Haushalts- und Tierdaten: solange dein Konto besteht.",
+        "Anmeldesitzungen: 30 Tage, sofern du dich nicht früher abmeldest.",
+        "Dateien mit Datenexporten: 7 Tage.",
+        "Tiertaxi-Fahrten: genaue Orte 30 Tage lang, danach nur noch ungefähr.",
+        "Serverprotokolle: etwa 7 Tage.",
+        "Finanzunterlagen wie Bestellungen, Zahlungen, Erstattungen und Rechnungen: so lange, wie das Gesetz es verlangt.",
+        "Nach der Löschung deines Kontos löschen oder anonymisieren wir deine personenbezogenen Daten, außer denen, die wir gesetzlich aufbewahren müssen."
+      ]
+    },
+    {
+      "id": "rights",
+      "heading": "10. Deine Rechte und Wahlmöglichkeiten",
+      "items": [
+        "Deine Daten auf deinen Profil-, Haushalts- und Tierseiten einsehen und korrigieren.",
+        "Unter Profil → Datenschutz eine Kopie deiner Daten herunterladen. Du erhältst eine Datei mit deinen Tieren, Gesundheitsakten, Buchungen, Bestellungen, Fahrten, Support-Anfragen, Einwilligungen, Beiträgen, Chats und Spenden. Der Download bleibt 7 Tage lang verfügbar.",
+        "Jederzeit Benachrichtigungskanäle und Marketing-Einwilligung ändern sowie Freigabelinks und Tierarztzugriffe widerrufen.",
+        "Unter Profil → Datenschutz die Löschung deines Kontos beantragen. Wir prüfen jeden Antrag. Daten, die wir gesetzlich aufbewahren müssen, legen wir gesondert ab, alles andere wird gelöscht oder anonymisiert. Solange der Antrag geprüft wird, kannst du ihn zurückziehen. Solange du offene Buchungen, Bestellungen, Erstattungen, Streitfälle, eine laufende Fahrt oder eine Partnerrolle hast, muss die Löschung warten, bis diese abgeschlossen sind.",
+        "Ein Datenschutzanliegen über den Support oder die Kontaktseite vorbringen."
+      ]
+    },
+    {
+      "id": "security",
+      "heading": "11. Wie wir sie schützen",
+      "paragraphs": [
+        "Verbindungen zu opetlife sind verschlüsselt. Passwörter werden nur als Argon2id-Hashes gespeichert. Anmelde-Cookies können nicht von Skripten auf der Seite gelesen werden. Der Zugriff von Mitarbeitenden hängt von ihrer Rolle ab und wird protokolliert. Hochgeladene Dokumente werden privat gespeichert und lassen sich nur über kurzlebige Links öffnen. Kein System ist vollkommen sicher, also nutze bitte ein starkes Passwort und behalte deine Anmeldecodes für dich."
+      ]
+    },
+    {
+      "id": "children",
+      "heading": "12. Kinder",
+      "paragraphs": [
+        "Konten sind für Personen ab 18 Jahren. Kinder können nur über einen Haushalt teilnehmen, der von einem Elternteil oder Vormund verwaltet wird. Diese Person ist dafür verantwortlich, was über die Kinder hinzugefügt wird."
+      ]
+    },
+    {
+      "id": "changes",
+      "heading": "13. Änderungen dieser Erklärung",
+      "paragraphs": [
+        "Über wichtige Änderungen informieren wir dich mindestens 14 Tage, bevor sie wirksam werden. Das Datum oben zeigt die aktuelle Fassung."
+      ]
+    },
+    {
+      "id": "contact",
+      "heading": "14. Kontakt",
+      "paragraphs": [
+        "Bei Fragen oder Anliegen zum Datenschutz nutze den Support oder die Kontaktseite."
+      ],
+      "links": [
+        {
+          "label": "Deine Datenschutzeinstellungen",
+          "href": "/profile/privacy"
+        },
+        {
+          "label": "Hilfe und Support",
+          "href": "/support"
+        },
+        {
+          "label": "Kontakt",
+          "href": "/contact"
+        },
+        {
+          "label": "Nutzungsbedingungen und Regeln",
+          "href": "/legal/terms"
+        }
+      ]
+    }
+  ]
+}

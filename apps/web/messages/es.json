@@ -2453,7 +2453,7 @@
       "haveAccount": "¿Ya tienes una cuenta? Inicia sesión",
       "confirmPassword": "Confirmar contraseña",
       "passwordMismatch": "Las contraseñas no coinciden.",
-      "terms": "Acepto las condiciones de uso y la política de privacidad de opetlife.",
+      "terms": "Acepto los <terms>Términos y normas</terms> y la <privacy>Política de privacidad</privacy> de opetlife.",
       "genericError": "No se pudo crear tu cuenta. Revisa los datos e inténtalo de nuevo."
     },
     "forgot": {
@@ -10545,5 +10545,27 @@
     "invalid": "Elige una categoría y un número de 1 a 3000.",
     "forbidden": "Se requiere el permiso commerce.manage.",
     "failed": "No se pudo iniciar; inténtalo de nuevo."
+  },
+  "legalPages": {
+    "eyebrow": {
+      "terms": "Términos",
+      "privacy": "Privacidad",
+      "faq": "Ayuda"
+    },
+    "updated": "Última actualización: {date}",
+    "onThisPage": "En esta página",
+    "allLegal": "Todos los documentos legales",
+    "faqMore": "Más respuestas en el centro de ayuda",
+    "stillNeedHelp": "¿Todavía tienes dudas?",
+    "contactSupport": "Contactar con soporte",
+    "terms": "Términos y normas",
+    "privacy": "Política de privacidad",
+    "faq": "Preguntas frecuentes",
+    "consent": "Al continuar, aceptas los <terms>Términos y normas</terms> y la <privacy>Política de privacidad</privacy> de opetlife.",
+    "checkoutConsent": "Al realizar este pedido, aceptas los <terms>Términos y normas</terms>, incluidas la <returns>cancelación y las devoluciones en 48 horas</returns>, y la <privacy>Política de privacidad</privacy>.",
+    "adminDraft": {
+      "title": "Los Términos, la Política de privacidad y las preguntas frecuentes integrados están publicados: borrador, pendiente de revisión legal del propietario",
+      "body": "Estos textos describen cómo funciona realmente la plataforma y se muestran en los seis idiomas hasta que publiques una versión revisada. Publicar aquí los Términos o la Privacidad en persa o inglés sustituye el texto integrado en ese idioma. Puntos que debe revisar un abogado: el plazo de devolución de 48 horas junto al derecho legal de desistimiento en compras a distancia, adónde van los reembolsos (método original o monedero), la eliminación de cuentas (la ejecución sigue desactivada) y que las publicaciones de la comunidad aparecen antes de revisarse."
+    }
   }
 }

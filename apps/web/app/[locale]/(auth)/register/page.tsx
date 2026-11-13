@@ -68,7 +68,7 @@ function RegisterFlow() {
     <PasswordInput label={t("register.passwordLabel")} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />
     <PasswordInput label={t("register.confirmPassword")} autoComplete="new-password" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} errorMessage={passwordConfirm && passwordConfirm !== password ? t("register.passwordMismatch") : undefined} />
     {error ? <p role="alert" className="text-metadata text-state-urgent">{error}</p> : null}
-    <label className="flex items-start gap-2 text-metadata text-text-secondary"><input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} /><span>{t("register.terms")}</span></label>
+    <label className="flex items-start gap-2 text-metadata text-text-secondary"><input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} /><span>{t.rich("register.terms", { terms: (c) => <Link href={`/${locale}/legal/terms`} target="_blank" rel="noopener" className="underline">{c}</Link>, privacy: (c) => <Link href={`/${locale}/legal/privacy`} target="_blank" rel="noopener" className="underline">{c}</Link> })}</span></label>
     <Button variant="primary" isLoading={isSubmitting} disabled={!normalizeIranPhone(phone) || !firstName.trim() || !lastName.trim() || username.trim().length < 3 || password.length < 8 || password !== passwordConfirm || !accepted} onClick={submit}>{t("register.submit")}</Button>
     <Link href={loginUrl} className="text-center text-metadata text-text-secondary underline">{t("register.haveAccount")}</Link>
   </div>;

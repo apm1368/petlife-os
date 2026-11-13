@@ -2458,7 +2458,7 @@
       "haveAccount": "Du hast schon ein Konto? Anmelden",
       "confirmPassword": "Passwort bestätigen",
       "passwordMismatch": "Die Passwörter stimmen nicht überein.",
-      "terms": "Ich akzeptiere die Nutzungsbedingungen und die Datenschutzerklärung von opetlife.",
+      "terms": "Ich akzeptiere die <terms>AGB und Regeln</terms> und die <privacy>Datenschutzerklärung</privacy> von opetlife.",
       "genericError": "Dein Konto konnte nicht erstellt werden. Prüfe deine Angaben und versuche es erneut."
     },
     "forgot": {
@@ -10547,5 +10547,27 @@
     "invalid": "Wählen Sie eine Kategorie und eine Zahl von 1 bis 3000.",
     "forbidden": "Berechtigung commerce.manage erforderlich.",
     "failed": "Konnte nicht starten; bitte erneut versuchen."
+  },
+  "legalPages": {
+    "eyebrow": {
+      "terms": "AGB",
+      "privacy": "Datenschutz",
+      "faq": "Hilfe"
+    },
+    "updated": "Zuletzt aktualisiert: {date}",
+    "onThisPage": "Auf dieser Seite",
+    "allLegal": "Alle rechtlichen Dokumente",
+    "faqMore": "Weitere Antworten im Hilfe-Center",
+    "stillNeedHelp": "Noch eine Frage?",
+    "contactSupport": "Support kontaktieren",
+    "terms": "AGB und Regeln",
+    "privacy": "Datenschutzerklärung",
+    "faq": "Häufige Fragen",
+    "consent": "Wenn du fortfährst, akzeptierst du die <terms>AGB und Regeln</terms> und die <privacy>Datenschutzerklärung</privacy> von opetlife.",
+    "checkoutConsent": "Mit dieser Bestellung akzeptierst du die <terms>AGB und Regeln</terms>, einschließlich <returns>Stornierung und Rückgabe innerhalb von 48 Stunden</returns>, sowie die <privacy>Datenschutzerklärung</privacy>.",
+    "adminDraft": {
+      "title": "Integrierte AGB, Datenschutzerklärung und FAQ sind live – Entwurf, rechtliche Prüfung durch den Inhaber nötig",
+      "body": "Diese Texte beschreiben, wie die Plattform tatsächlich funktioniert, und werden in allen sechs Sprachen angezeigt, bis du eine geprüfte Fassung veröffentlichst. Wenn du hier AGB oder Datenschutz auf Persisch oder Englisch veröffentlichst, ersetzt das den integrierten Text in dieser Sprache. Mit einem Anwalt zu prüfen: die 48-Stunden-Rückgabefrist neben dem gesetzlichen Widerrufsrecht bei Fernkäufen, wohin Erstattungen gehen (ursprüngliche Zahlungsart oder Wallet), die Kontolöschung (die Ausführung ist noch abgeschaltet) und dass Community-Beiträge vor der Prüfung erscheinen."
+    }
   }
 }
