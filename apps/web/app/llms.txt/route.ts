@@ -1,8 +1,10 @@
-import { fetchArticleFeed } from "@/lib/seo/blog-server";
+import { fetchArticleFeedResult, upstreamUnavailableResponse } from "@/lib/seo/blog-server";
 import { buildLlmsTxt } from "@/lib/seo/llms";
 
 export const revalidate = 300;
 
 export async function GET() {
-  return new Response(buildLlmsTxt(await fetchArticleFeed()), { headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=300" } });
+  const feed = await fetchArticleFeedResult();
+  if (feed.unavailable) return upstreamUnavailableResponse();
+  return new Response(buildLlmsTxt(feed.items), { headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=300" } });
 }
