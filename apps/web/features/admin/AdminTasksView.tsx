@@ -16,6 +16,9 @@ const RELATED_LINKS: Record<string, (id: string) => string> = {
   SupportCase: (id) => `/admin/support/${encodeURIComponent(id)}`,
   PetOwnershipTransfer: (id) => `/admin/ownership-transfers?focus=${encodeURIComponent(id)}`,
   Booking: (id) => `/admin/services/bookings/${encodeURIComponent(id)}`,
+  // Approval modes: a stay request waiting on its host, and a paid order waiting for staff approval.
+  TravelBooking: (id) => `/admin/travel/bookings/${encodeURIComponent(id)}`,
+  Order: (id) => `/admin/commerce/orders/${encodeURIComponent(id)}`,
 };
 import styles from "./AdminTasksView.module.css";
 

@@ -1,5 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { FulfillmentStatus, InventoryMovementType, OrderRefundRequestStatus, Prisma, type Order } from "@prisma/client";
+import { FulfillmentStatus, InventoryMovementType, OrderRefundRequestStatus, OrderStatus, Prisma, type Order } from "@prisma/client";
 import type { RefundDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
@@ -88,7 +88,8 @@ export class OrderLifecycleService {
    */
   async sellerCancel(sellerOrganizationId: string, actorUserId: string, orderId: string, reason: string): Promise<RefundDto> {
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
-    if (!order || order.sellerOrganizationId !== sellerOrganizationId) throw new OrderNotFoundException({ orderId });
+    // An order held for staff approval is not the seller's yet (approval modes): it doesn't exist for them.
+    if (!order || order.sellerOrganizationId !== sellerOrganizationId || order.status === OrderStatus.PENDING) throw new OrderNotFoundException({ orderId });
     const fulfillment = await this.primaryFulfillment(orderId);
     if (!order.userId || !canCustomerCancel(order, fulfillment)) {
       throw new OrderNotCancellableException({ orderId, status: order.status, fulfillmentStatus: fulfillment?.status ?? null });
@@ -113,6 +114,8 @@ export class OrderLifecycleService {
 
   private cancelWithRefund(userId: string, order: Order, reason?: string, by: { actor: "CUSTOMER" | "SELLER" | "ADMIN"; actorUserId: string } = { actor: "CUSTOMER", actorUserId: userId }): Promise<RefundDto> {
     const cancelReason = reason?.trim() || (by.actor === "SELLER" ? "Cancelled by the seller before dispatch" : by.actor === "ADMIN" ? "Cancelled by opetlife support before dispatch" : "Cancelled by customer before dispatch");
+    // Held for staff approval: the seller never saw this order, so nobody tells them it was cancelled.
+    const awaitingApproval = order.status === OrderStatus.PENDING;
     return this.refunds.request(userId, order.id, cancelReason, undefined, {
       actorType: by.actor,
       actorId: by.actorUserId,
@@ -146,7 +149,7 @@ export class OrderLifecycleService {
 
         await this.events.publish(
           "OrderCancelled",
-          { orderId: order.id, userId, sellerOrganizationId: order.sellerOrganizationId, cancelledBy: by.actor },
+          { orderId: order.id, userId, sellerOrganizationId: order.sellerOrganizationId, cancelledBy: by.actor, awaitingApproval },
           { tx, aggregateType: "Order", aggregateId: order.id },
         );
       },

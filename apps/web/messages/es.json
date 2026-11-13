@@ -3126,7 +3126,10 @@
       "support_firstResponseSlaHours": "Objetivo de tiempo para la primera respuesta de soporte (horas)",
       "trust_highSeveritySlaHours": "Objetivo de respuesta para reportes de alta gravedad (horas)",
       "trust_standardSlaHours": "Objetivo de respuesta para reportes estándar (horas)",
-      "privacy_exportsPerDay": "Límite diario de solicitudes de exportación de datos"
+      "privacy_exportsPerDay": "Límite diario de solicitudes de exportación de datos",
+      "approvals_mode_serviceBookings": "Reservas de servicios de cuidado: modo de aprobación",
+      "approvals_mode_stayBookings": "Reservas de alojamiento: modo de aprobación",
+      "approvals_mode_shopOrders": "Pedidos de la tienda: modo de aprobación"
     },
     "statuses": {
       "PENDING": "Pendiente de aprobación; aún no aplicado",
@@ -3135,7 +3138,14 @@
       "CANCELLED": "Cancelado",
       "SUPERSEDED": "Sustituido por un cambio más reciente"
     },
-    "units": { "toman": "tomanes", "seconds": "segundos", "hours": "horas", "perDay": "por día" }
+    "units": { "toman": "tomanes", "seconds": "segundos", "hours": "horas", "perDay": "por día" },
+    "options": {
+      "PARTNER_CHOICE": "Elección de cada socio",
+      "INSTANT": "Inmediato",
+      "NEEDS_APPROVAL": "Requiere aprobación"
+    },
+    "choiceValue": "Nuevo valor",
+    "approvalsNote": "Las solicitudes y los pedidos retenidos van a la lista de tareas para su seguimiento. El ajuste propio de un negocio en su página de perfil prevalece sobre este."
   },
   "adminAccess": {
     "title": "Gestión de accesos de administración",
@@ -3601,7 +3611,9 @@
         "FAILED_IMPORT": "Importación fallida",
         "SUPPORT": "Soporte",
         "CLINIC_FOLLOW_UP": "Seguimiento de clínica",
-        "DATA_QUALITY": "Calidad de datos"
+        "DATA_QUALITY": "Calidad de datos",
+        "BOOKING_APPROVAL": "Seguimiento de solicitud de reserva",
+        "ORDER_APPROVAL": "Pedido pendiente de aprobación"
       },
       "checkList": "Revisar la lista de tareas"
     },
@@ -5238,7 +5250,7 @@
       "title": "Pedido confirmado",
       "subtitle": "{count, plural, one {Se ha realizado 1 pedido} other {Se han realizado # pedidos}}",
       "orderStatus": {
-        "PENDING": "Pendiente",
+        "PENDING": "Pendiente de confirmación",
         "CONFIRMED": "Confirmado",
         "CANCELLED": "Cancelado",
         "PARTIALLY_REFUNDED": "Reembolsado parcialmente",
@@ -5247,7 +5259,8 @@
       "delivery": "Envío",
       "total": "Total",
       "viewOrders": "Ver mis pedidos",
-      "continueShopping": "Seguir comprando"
+      "continueShopping": "Seguir comprando",
+      "awaitingConfirmation": "Pagado. opetlife confirma este pedido antes de que el vendedor lo prepare; si no se puede confirmar, se reembolsa el importe completo."
     },
     "orderDetail": {
       "title": "Pedido",
@@ -5268,7 +5281,7 @@
       "trackingUnavailable": "La información del envío no está disponible temporalmente",
       "placedAt": "Realizado el {when}",
       "status": {
-        "PENDING": "Pendiente",
+        "PENDING": "Pendiente de confirmación",
         "CONFIRMED": "Confirmado",
         "CANCELLED": "Cancelado",
         "PARTIALLY_REFUNDED": "Reembolsado parcialmente",
@@ -5339,7 +5352,7 @@
       },
       "timeline": {
         "title": "Historial del pedido",
-        "PENDING": "Pedido creado",
+        "PENDING": "Pago recibido: pendiente de confirmación",
         "CONFIRMED": "Pago confirmado: pedido realizado",
         "PREPARING": "El vendedor está preparando el pedido",
         "READY_FOR_FULFILLMENT": "Listo para enviar",
@@ -5360,7 +5373,8 @@
       },
       "deliveryMethod": "Envío: {method}",
       "postTracking": "Seguir el envío en la web de Correos",
-      "courierTracking": "Seguir al mensajero"
+      "courierTracking": "Seguir al mensajero",
+      "awaitingConfirmation": "Hemos recibido tu pago. opetlife confirma este pedido antes de que el vendedor lo prepare; si no se puede confirmar, te devolvemos el importe completo."
     },
     "checkout": {
       "summary": { "title": "Resumen del pedido", "deliveryNext": "Se elige en el paso de entrega" },
@@ -5511,7 +5525,7 @@
       "browseShop": "Ir a la tienda",
       "itemCount": "{count, plural, one {1 artículo} other {# artículos}}",
       "status": {
-        "PENDING": "Pendiente",
+        "PENDING": "Pendiente de confirmación",
         "CONFIRMED": "Confirmado",
         "CANCELLED": "Cancelado",
         "PARTIALLY_REFUNDED": "Reembolsado parcialmente",
@@ -12524,5 +12538,56 @@
       "TWO_STEP_POLICY_SUPER_ADMIN_ONLY": "Solo un superadministrador puede cambiar esto.",
       "TWO_STEP_KEY_CHANGED": "Tras un cambio de clave en el servidor no se puede comprobar tu app de autenticación. Usa un código de recuperación o pide a un superadministrador que la restablezca."
     }
+  },
+  "adminApprovalModes": {
+    "title": "Modo de aprobación",
+    "hint": "Inmediato o con aprobación, por flujo. Lo que elijas aquí se aplica solo a este negocio y prevalece sobre el ajuste de la plataforma.",
+    "scopes": {
+      "SERVICE_BOOKINGS": "Reservas de servicios de cuidado",
+      "STAY_BOOKINGS": "Reservas de alojamiento",
+      "SHOP_ORDERS": "Pedidos de la tienda"
+    },
+    "modes": {
+      "PARTNER_CHOICE": "Elección del propio negocio (por servicio o alojamiento)",
+      "INSTANT": "Inmediato",
+      "NEEDS_APPROVAL": "Requiere aprobación"
+    },
+    "platform": "Ajuste de la plataforma",
+    "source": "Origen",
+    "overridden": "Fijado para este negocio",
+    "inherited": "Heredado del ajuste de la plataforma",
+    "overrideReason": "Motivo: {reason}",
+    "overrideBy": "{name}, {when}",
+    "unknownAdmin": "Un miembro del equipo",
+    "choice": "Para este negocio",
+    "choices": {
+      "INHERIT": "Heredar el ajuste de la plataforma",
+      "INSTANT": "Inmediato",
+      "NEEDS_APPROVAL": "Requiere aprobación"
+    },
+    "reason": "Motivo (registro de auditoría)",
+    "reasonHint": "Al menos 5 caracteres.",
+    "reasonRequired": "Escribe un motivo de al menos 5 caracteres.",
+    "save": "Guardar",
+    "saved": "Guardado.",
+    "saveFailed": "No se guardó; inténtalo de nuevo.",
+    "loadFailed": "No se pudo cargar el modo de aprobación.",
+    "retry": "Reintentar",
+    "loading": "Cargando…",
+    "readOnly": "Para cambiarlo necesitas el permiso de ajustes."
+  },
+  "adminOrderApproval": {
+    "title": "Pendiente de aprobación",
+    "hint": "Pagado y retenido antes de que el vendedor lo vea. Aprueba para enviarlo al vendedor para su preparación; recházalo para reembolsar al cliente el importe completo.",
+    "note": "Nota (opcional, registro de auditoría)",
+    "approve": "Aprobar y enviar al vendedor",
+    "reject": "Rechazar y reembolsar",
+    "reason": "Motivo del rechazo (registro de auditoría)",
+    "reasonRequired": "Escribe un motivo breve.",
+    "confirmReject": "Sí, rechazar y reembolsar todo",
+    "back": "Volver",
+    "notPending": "Este pedido ya no está pendiente de aprobación; vuelve a cargar la página.",
+    "failed": "No funcionó; inténtalo de nuevo.",
+    "noPermission": "Para aprobar o rechazar necesitas el permiso de gestión de la tienda."
   }
 }

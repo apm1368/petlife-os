@@ -3131,7 +3131,10 @@
       "support_firstResponseSlaHours": "Zielzeit für die erste Supportantwort (Stunden)",
       "trust_highSeveritySlaHours": "Reaktionsziel für Meldungen mit hoher Priorität (Stunden)",
       "trust_standardSlaHours": "Reaktionsziel für reguläre Meldungen (Stunden)",
-      "privacy_exportsPerDay": "Tägliches Limit für Datenexporte"
+      "privacy_exportsPerDay": "Tägliches Limit für Datenexporte",
+      "approvals_mode_serviceBookings": "Betreuungsbuchungen: Freigabemodus",
+      "approvals_mode_stayBookings": "Unterkunftsbuchungen: Freigabemodus",
+      "approvals_mode_shopOrders": "Shop-Bestellungen: Freigabemodus"
     },
     "statuses": {
       "PENDING": "Genehmigung ausstehend; noch nicht angewendet",
@@ -3140,7 +3143,14 @@
       "CANCELLED": "Abgebrochen",
       "SUPERSEDED": "Durch eine neuere Änderung ersetzt"
     },
-    "units": { "toman": "Toman", "seconds": "Sekunden", "hours": "Stunden", "perDay": "pro Tag" }
+    "units": { "toman": "Toman", "seconds": "Sekunden", "hours": "Stunden", "perDay": "pro Tag" },
+    "options": {
+      "PARTNER_CHOICE": "Eigene Wahl jedes Partners",
+      "INSTANT": "Sofort",
+      "NEEDS_APPROVAL": "Freigabe nötig"
+    },
+    "choiceValue": "Neuer Wert",
+    "approvalsNote": "Anfragen und zurückgehaltene Bestellungen landen zur Nachverfolgung in der Aufgabenliste. Die eigene Einstellung eines Unternehmens auf seiner Profilseite hat Vorrang."
   },
   "adminAccess": {
     "title": "Adminzugänge verwalten",
@@ -3606,7 +3616,9 @@
         "FAILED_IMPORT": "Fehlgeschlagener Import",
         "SUPPORT": "Support",
         "CLINIC_FOLLOW_UP": "Klinik-Nachverfolgung",
-        "DATA_QUALITY": "Datenqualität"
+        "DATA_QUALITY": "Datenqualität",
+        "BOOKING_APPROVAL": "Nachverfolgung einer Buchungsanfrage",
+        "ORDER_APPROVAL": "Bestellung wartet auf Freigabe"
       },
       "checkList": "Aufgabenliste prüfen"
     },
@@ -5248,7 +5260,7 @@
       "title": "Bestellung bestätigt",
       "subtitle": "{count, plural, one {1 Bestellung wurde} other {# Bestellungen wurden}} aufgegeben",
       "orderStatus": {
-        "PENDING": "Ausstehend",
+        "PENDING": "Wartet auf Bestätigung",
         "CONFIRMED": "Bestätigt",
         "CANCELLED": "Storniert",
         "PARTIALLY_REFUNDED": "Teilweise erstattet",
@@ -5257,7 +5269,8 @@
       "delivery": "Lieferung",
       "total": "Gesamt",
       "viewOrders": "Meine Bestellungen ansehen",
-      "continueShopping": "Weiter einkaufen"
+      "continueShopping": "Weiter einkaufen",
+      "awaitingConfirmation": "Bezahlt. opetlife bestätigt diese Bestellung, bevor der Verkäufer sie vorbereitet; kann sie nicht bestätigt werden, wird der volle Betrag erstattet."
     },
     "orderDetail": {
       "title": "Bestellung",
@@ -5278,7 +5291,7 @@
       "trackingUnavailable": "Versandinformationen sind vorübergehend nicht verfügbar",
       "placedAt": "Bestellt am {when}",
       "status": {
-        "PENDING": "Ausstehend",
+        "PENDING": "Wartet auf Bestätigung",
         "CONFIRMED": "Bestätigt",
         "CANCELLED": "Storniert",
         "PARTIALLY_REFUNDED": "Teilweise erstattet",
@@ -5349,7 +5362,7 @@
       },
       "timeline": {
         "title": "Bestellverlauf",
-        "PENDING": "Bestellung erstellt",
+        "PENDING": "Zahlung erhalten — wartet auf Bestätigung",
         "CONFIRMED": "Zahlung bestätigt — Bestellung aufgegeben",
         "PREPARING": "Verkäufer bereitet die Bestellung vor",
         "READY_FOR_FULFILLMENT": "Versandbereit",
@@ -5370,7 +5383,8 @@
       },
       "deliveryMethod": "Versand: {method}",
       "postTracking": "Sendung auf der Website der Post verfolgen",
-      "courierTracking": "Kurier verfolgen"
+      "courierTracking": "Kurier verfolgen",
+      "awaitingConfirmation": "Deine Zahlung ist eingegangen. opetlife bestätigt diese Bestellung, bevor der Verkäufer sie vorbereitet; kann sie nicht bestätigt werden, bekommst du den vollen Betrag zurück."
     },
     "checkout": {
       "summary": { "title": "Bestellübersicht", "deliveryNext": "Wird im Lieferschritt ausgewählt" },
@@ -5521,7 +5535,7 @@
       "browseShop": "Zum Shop",
       "itemCount": "{count, plural, one {1 Artikel} other {# Artikel}}",
       "status": {
-        "PENDING": "Ausstehend",
+        "PENDING": "Wartet auf Bestätigung",
         "CONFIRMED": "Bestätigt",
         "CANCELLED": "Storniert",
         "PARTIALLY_REFUNDED": "Teilweise erstattet",
@@ -12526,5 +12540,56 @@
       "TWO_STEP_POLICY_SUPER_ADMIN_ONLY": "Nur ein Super-Admin kann das ändern.",
       "TWO_STEP_KEY_CHANGED": "Nach einem Schlüsselwechsel auf dem Server kann Ihr Authenticator nicht geprüft werden. Nutzen Sie einen Wiederherstellungscode oder lassen Sie ihn von einem Super-Admin zurücksetzen."
     }
+  },
+  "adminApprovalModes": {
+    "title": "Freigabemodus",
+    "hint": "Sofort oder mit Freigabe, je Bereich. Eine Auswahl hier gilt nur für dieses Unternehmen und hat Vorrang vor der Plattform-Einstellung.",
+    "scopes": {
+      "SERVICE_BOOKINGS": "Buchungen von Betreuungsleistungen",
+      "STAY_BOOKINGS": "Unterkunftsbuchungen",
+      "SHOP_ORDERS": "Shop-Bestellungen"
+    },
+    "modes": {
+      "PARTNER_CHOICE": "Eigene Wahl des Unternehmens (je Leistung oder Unterkunft)",
+      "INSTANT": "Sofort",
+      "NEEDS_APPROVAL": "Freigabe nötig"
+    },
+    "platform": "Plattform-Einstellung",
+    "source": "Gilt aus",
+    "overridden": "Für dieses Unternehmen festgelegt",
+    "inherited": "Von der Plattform-Einstellung übernommen",
+    "overrideReason": "Grund: {reason}",
+    "overrideBy": "{name}, {when}",
+    "unknownAdmin": "Ein Teammitglied",
+    "choice": "Für dieses Unternehmen",
+    "choices": {
+      "INHERIT": "Plattform-Einstellung übernehmen",
+      "INSTANT": "Sofort",
+      "NEEDS_APPROVAL": "Freigabe nötig"
+    },
+    "reason": "Grund (Prüfprotokoll)",
+    "reasonHint": "Mindestens 5 Zeichen.",
+    "reasonRequired": "Gib einen Grund mit mindestens 5 Zeichen an.",
+    "save": "Speichern",
+    "saved": "Gespeichert.",
+    "saveFailed": "Nicht gespeichert; bitte erneut versuchen.",
+    "loadFailed": "Der Freigabemodus konnte nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "loading": "Wird geladen …",
+    "readOnly": "Zum Ändern ist die Berechtigung für Einstellungen nötig."
+  },
+  "adminOrderApproval": {
+    "title": "Wartet auf Freigabe",
+    "hint": "Bezahlt und zurückgehalten, bevor der Verkäufer sie sieht. Freigeben schickt sie zur Vorbereitung an den Verkäufer; Ablehnen erstattet dem Kunden den vollen Betrag.",
+    "note": "Notiz (optional, Prüfprotokoll)",
+    "approve": "Freigeben und an den Verkäufer senden",
+    "reject": "Ablehnen und erstatten",
+    "reason": "Grund für die Ablehnung (Prüfprotokoll)",
+    "reasonRequired": "Gib einen kurzen Grund an.",
+    "confirmReject": "Ja, ablehnen und voll erstatten",
+    "back": "Zurück",
+    "notPending": "Diese Bestellung wartet nicht mehr auf Freigabe; lade die Seite neu.",
+    "failed": "Das hat nicht geklappt; bitte erneut versuchen.",
+    "noPermission": "Zum Freigeben oder Ablehnen ist die Berechtigung zur Shop-Verwaltung nötig."
   }
 }

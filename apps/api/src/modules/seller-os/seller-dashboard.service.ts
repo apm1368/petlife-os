@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { FulfillmentStatus, MarketplaceListingSyncStatus, SellerOfferStatus } from "@prisma/client";
+import { FulfillmentStatus, MarketplaceListingSyncStatus, OrderStatus, SellerOfferStatus } from "@prisma/client";
 import type { SellerDashboardDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { LOW_STOCK_THRESHOLD } from "./seller-offer.service";
@@ -26,7 +26,7 @@ export class SellerDashboardService {
         where: { marketplaceChannelAccount: { sellerOrganizationId: ctx.sellerOrganizationId }, syncStatus: { in: [MarketplaceListingSyncStatus.FAILED, MarketplaceListingSyncStatus.DEGRADED] } },
       }),
       this.prisma.fulfillment.count({ where: { sellerOrgId: ctx.sellerOrganizationId, status: FulfillmentStatus.FAILED } }),
-      this.prisma.order.findMany({ where: { sellerOrganizationId: ctx.sellerOrganizationId, createdAt: { gte: startOfToday } }, include: { items: true } }),
+      this.prisma.order.findMany({ where: { sellerOrganizationId: ctx.sellerOrganizationId, createdAt: { gte: startOfToday }, status: { not: OrderStatus.PENDING } }, include: { items: true } }),
       this.orders.list(ctx, { page: 1, pageSize: 5 }),
     ]);
 

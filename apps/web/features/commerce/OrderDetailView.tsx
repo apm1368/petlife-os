@@ -104,8 +104,15 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
           <h1 className="text-page-title text-text-primary">{t("titleWithSeller", { seller: order.sellerOrganization.name })}</h1>
           <p className="text-metadata text-text-secondary">{t("placedAt", { when: dateTime(order.createdAt, locale) })}</p>
         </div>
-        <StatusLabel tone={order.cancelledAt ? "neutral" : order.status === "CONFIRMED" ? "success" : order.status === "CANCELLED" ? "urgent" : "neutral"}>{statusLabel}</StatusLabel>
+        <StatusLabel tone={order.cancelledAt ? "neutral" : order.status === "CONFIRMED" ? "success" : order.status === "CANCELLED" ? "urgent" : order.status === "PENDING" ? "pending" : "neutral"}>{statusLabel}</StatusLabel>
       </div>
+
+      {/* Approval modes: paid, and opetlife confirms it before the seller starts preparing it. */}
+      {order.status === "PENDING" && !order.cancelledAt ? (
+        <p role="status" className="rounded-md bg-surface-subtle p-3 text-body text-text-primary">
+          {t("awaitingConfirmation")}
+        </p>
+      ) : null}
 
       {notice ? (
         <p role="status" className="rounded-md bg-surface-subtle p-3 text-body text-text-primary">
