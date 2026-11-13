@@ -1,4 +1,4 @@
-import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsIn, IsInt, IsLatitude, IsLongitude, IsNumber, IsOptional, IsString, IsUUID, Length, Matches, Max, MaxLength, Min, ValidateNested, ValidateIf } from "class-validator";
+import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsIn, IsInt, IsLatitude, IsLongitude, IsNumber, IsOptional, IsString, IsUUID, Length, Matches, Max, MaxLength, Min, MinLength, ValidateNested, ValidateIf } from "class-validator";
 import { Type } from "class-transformer";
 import { PetFriendlyPlaceCategory, PetFriendlyPlaceStatus, PetSpecies } from "@petlife/types";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
@@ -280,6 +280,9 @@ export class NearbyPetFriendlyPlacesPointDto extends PaginationQueryDto {
   species?: PetSpecies;
 }
 
+/** Owner #6: at most this many photos per suggestion. */
+export const PLACE_SUGGESTION_MAX_PHOTOS = 3;
+
 export class SuggestPlaceDto {
   @IsString() @Length(1, 200) name!: string;
   @IsEnum(PetFriendlyPlaceCategory) category!: PetFriendlyPlaceCategory;
@@ -288,6 +291,14 @@ export class SuggestPlaceDto {
   @IsOptional() @IsLatitude() latitude?: number;
   @IsOptional() @IsLongitude() longitude?: number;
   @IsOptional() @IsString() @MaxLength(1000) notes?: string;
+  /** Keys from POST /place-suggestions/photo-upload-url, already uploaded (owner #6). */
+  @IsOptional() @IsArray() @ArrayMaxSize(PLACE_SUGGESTION_MAX_PHOTOS) @IsObjectKeyFor(["place-suggestions"]) photoObjectKeys?: string[];
+}
+
+export const PLACE_SUGGESTION_PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+export class RequestPlaceSuggestionPhotoUploadDto {
+  @IsIn(PLACE_SUGGESTION_PHOTO_TYPES) contentType!: (typeof PLACE_SUGGESTION_PHOTO_TYPES)[number];
+  @IsInt() @Min(1) @Max(10 * 1024 * 1024) fileSizeBytes!: number;
 }
 
 /** Allowed fields of a CORRECTION — structured place attributes only, never coordinates, status or verification. */
@@ -311,8 +322,17 @@ export class SuggestPlaceChangeDto {
   @IsUUID() placeId!: string;
   @IsOptional() @ValidateNested() @Type(() => PlaceCorrectionChangesDto) changes?: PlaceCorrectionChangesDto;
   @IsOptional() @IsString() @MaxLength(1000) notes?: string;
+  @IsOptional() @IsArray() @ArrayMaxSize(PLACE_SUGGESTION_MAX_PHOTOS) @IsObjectKeyFor(["place-suggestions"]) photoObjectKeys?: string[];
 }
 
 export class ReviewPlaceSuggestionDto {
   @IsOptional() @IsString() @MaxLength(500) note?: string;
+  /** Staff may set the pin when the member didn't give one (both or neither). */
+  @IsOptional() @IsLatitude() latitude?: number;
+  @IsOptional() @IsLongitude() longitude?: number;
+}
+
+/** Owner #6: a rejection always carries the reason the member will read. */
+export class RejectPlaceSuggestionDto {
+  @IsString() @MinLength(5) @MaxLength(500) note!: string;
 }

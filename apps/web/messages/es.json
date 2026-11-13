@@ -1,4 +1,65 @@
 {
+  "adminPlaceSuggestions": {
+    "title": "Sugerencias de lugares",
+    "hint": "Lugares nuevos, correcciones y avisos de cierre enviados por los miembros. Un lugar nuevo aprobado se crea sin verificar y sin publicar: verifícalo y publícalo en la página de lugares. Un rechazo necesita un motivo, que se comunica al miembro.",
+    "tabs": {
+      "PENDING": "Pendientes",
+      "APPROVED": "Aprobadas",
+      "REJECTED": "Rechazadas"
+    },
+    "kindFilter": "Tipo",
+    "allKinds": "Todos los tipos",
+    "kinds": {
+      "NEW_PLACE": "Lugar nuevo",
+      "CORRECTION": "Corrección",
+      "CLOSURE_REPORT": "Cerrado"
+    },
+    "empty": {
+      "PENDING": "No hay sugerencias pendientes.",
+      "APPROVED": "Aún no hay sugerencias aprobadas.",
+      "REJECTED": "No hay sugerencias rechazadas."
+    },
+    "by": "de {name}",
+    "address": "Dirección",
+    "pin": "Punto en el mapa",
+    "noPin": "Sin punto en el mapa: añade uno para aprobar.",
+    "notes": "Nota del miembro",
+    "photos": "Fotos del miembro",
+    "photoAlt": "Foto del miembro {n}",
+    "photoMissing": "Foto no subida",
+    "field": "Campo",
+    "now": "Ahora",
+    "proposed": "Propuesto",
+    "closureHint": "El miembro informa de que este lugar ha cerrado. Al aprobarlo, sale de la lista pública (se conserva en la base de datos).",
+    "aboutPlace": "Sobre: {name} ({city})",
+    "listed": "Publicado",
+    "unlisted": "No publicado",
+    "duplicates": "Posibles duplicados",
+    "sameName": "Mismo nombre",
+    "meters": "a {n} m",
+    "noDuplicates": "No hay ningún lugar a menos de {m} m ni con el mismo nombre en esta ciudad.",
+    "similarPending": "{count, plural, one {# otra sugerencia pendiente se parece a esta.} other {# otras sugerencias pendientes se parecen a esta.}}",
+    "decidedBy": "Decidido por {name}",
+    "reason": "Motivo",
+    "createdPlace": "Lugar creado (sin verificar, no publicado)",
+    "latitude": "Latitud",
+    "longitude": "Longitud",
+    "noteLabel": "Nota o motivo (el miembro lee el motivo del rechazo)",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "reasonRequired": "Escribe un motivo (al menos 5 caracteres) para rechazar.",
+    "pinRequired": "Introduce la latitud y la longitud para crear este lugar.",
+    "approvedNew": "Aprobada. El lugar se creó sin verificar y sin publicar.",
+    "approvedChange": "Aprobada y aplicada.",
+    "rejected": "Rechazada. Se ha comunicado el motivo al miembro.",
+    "failed": "No ha funcionado. Actualiza la página y vuelve a intentarlo.",
+    "errors": {
+      "NOT_PENDING": "Alguien ya ha decidido sobre esta sugerencia.",
+      "COORDINATES_REQUIRED_TO_CREATE_PLACE": "Hace falta un punto en el mapa para crear el lugar.",
+      "BOTH_OR_NEITHER": "Introduce la latitud y la longitud.",
+      "REQUIRED_FOR_REJECTION": "Un rechazo necesita un motivo."
+    }
+  },
   "partnerSupport": {
     "title": "Soporte",
     "intro": "Pregunta al equipo de opetlife sobre la verificación, los pagos, las reservas, los pedidos o tu ficha. Las respuestas llegan aquí y como notificación.",
@@ -4391,6 +4452,7 @@
         "twoStep": "Inicio de sesión en dos pasos"
       },
       "tabs": {
+        "placeSuggestions": "Sugerencias de lugares",
         "productReadiness": "Productos incompletos",
         "holidays": "Festivos y cierres",
         "ownershipTransfers": "Transferencias de propiedad",
@@ -6305,7 +6367,7 @@
       "label": "Fuente",
       "all": "Todos",
       "opetlife": "opetlife",
-      "jajiga": "Jajiga"
+      "jajiga": "Otros sitios"
     }
   },
   "services": {
@@ -7040,6 +7102,7 @@
         "allClear": "Todo al día: no hay nada pendiente para tu equipo.",
         "clearList": "Al día: {list}",
         "queue": {
+          "pendingPlaceSuggestions": "Sugerencias de lugares",
           "pendingReviews": "Reseñas pendientes de moderación",
           "openProviderNoShows": "Avisos de proveedor ausente",
           "openOwnershipDisputes": "Disputas de propiedad",
@@ -8650,11 +8713,11 @@
     },
     "fromSource": "De {source}",
     "blend": {
-      "title": "Alojamientos que aceptan mascotas, de Jajiga",
-      "titleCity": "Alojamientos que aceptan mascotas en {city}, de Jajiga",
-      "hint": "Anuncios de Jajiga: reservas y pagas en el propio sitio de Jajiga y opetlife no cobra nada. Confirma las normas sobre mascotas con el anfitrión antes de reservar.",
-      "seeAll": "Todos los alojamientos de Jajiga",
-      "pages": "Páginas de Jajiga"
+      "title": "Alojamientos que admiten mascotas",
+      "titleCity": "Alojamientos que admiten mascotas en {city}",
+      "hint": "Información de una fuente externa; la reserva se hace en el sitio de origen.",
+      "seeAll": "Todos los alojamientos que admiten mascotas",
+      "pages": "Páginas"
     },
     "tile": {
       "kind": {
@@ -8670,9 +8733,9 @@
     },
     "browser": {
       "title": "Más alojamientos que aceptan mascotas",
-      "sourceChip": "Alojamientos de Jajiga",
+      "sourceChip": "Alojamientos que admiten mascotas",
       "count": "Encontrados: {count}",
-      "hint": "Anuncios de Jajiga: reservas y pagas en el propio sitio de Jajiga y opetlife no cobra nada. Confirma las normas sobre mascotas con el anfitrión antes de reservar.",
+      "hint": "Información de una fuente externa; la reserva se hace en el sitio de origen.",
       "filters": "Filtrar alojamientos",
       "province": "Provincia",
       "allProvinces": "Todas las provincias",
@@ -8690,7 +8753,13 @@
       "noMatch": "Ningún alojamiento coincide con estos filtros. Prueba a quitar uno.",
       "loadMore": "Ver más ({shown} de {total})",
       "mediaNote": "Las fotos y la descripción completa de cada alojamiento están en el sitio de origen; aquí ves los datos principales."
-    }
+    },
+    "perNight": "noche",
+    "petPerListing": "Admite mascotas, según el sitio del anuncio.",
+    "viewStay": "Ver alojamiento",
+    "opensNewTab": "(se abre en una pestaña nueva)",
+    "priceOnListing": "Precio en el sitio del anuncio",
+    "evidenceListingFilter": "Aparece en el filtro público «se admiten mascotas» del sitio del anuncio. Allí no se publican límites de especie, tamaño ni normas de la casa; confírmalos con el anfitrión antes de reservar."
   },
   "insurance": {
     "verificationStatus": {
@@ -10263,6 +10332,20 @@
         "tooFast": "Demasiados intentos en poco tiempo. Espera un minuto y vuelve a intentarlo.",
         "check": "Hay datos que revisar.",
         "generic": "No se pudo enviar la sugerencia. Vuelve a intentarlo."
+      },
+      "photos": {
+        "label": "Fotos (opcional)",
+        "hint": "Hasta 3 fotos (JPG, PNG o WebP, de hasta 10 MB cada una). Son privadas y se eliminan sus datos de ubicación y cámara; si se aprueba el lugar, pueden aparecer en su galería.",
+        "add": "Añadir fotos",
+        "remove": "Quitar {name}",
+        "count": "{count, plural, one {# foto} other {# fotos}}",
+        "errors": {
+          "type": "Solo se aceptan fotos JPG, PNG o WebP.",
+          "tooLarge": "Cada foto puede pesar hasta 10 MB.",
+          "max": "Puedes añadir hasta 3 fotos.",
+          "notImage": "Uno de los archivos no es una foto. Elige otro.",
+          "upload": "No se pudo subir una foto. Vuelve a intentarlo."
+        }
       }
     }
   },

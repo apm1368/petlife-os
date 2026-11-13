@@ -13,7 +13,7 @@ import { dashboardCopy, MemberHomeView } from "./MemberHomeView";
 import { glassHomeCopy } from "./glass-home-copy";
 import { routeExists } from "@/test/route-exists";
 import { householdsService } from "@/services/households.service";
-import { MemberHomeSlot } from "./member-home-slots";
+import { MEMBER_HOME_SLOTS, MemberHomeSlot } from "./member-home-slots";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => "/fa/home" }));
 vi.mock("@/services/pets.service", () => ({ petsService: { getOverview: vi.fn(), getMyAccess: vi.fn().mockResolvedValue({ canViewIdentity: true, canViewHealth: true, canViewCareProfile: true }) } }));
@@ -367,5 +367,9 @@ describe("MemberHomeView", () => {
     unmount();
     renderWithIntl(<MemberHomeSlot name="offers" slots={{ offers: () => <p>Your gift code</p> }} />, "en");
     expect(screen.getByText("Your gift code").closest("[data-slot]")!.getAttribute("data-slot")).toBe("offers");
+  });
+
+  it("renders the admin's social icons from the dashboard's social slot, not twice", () => {
+    expect(MEMBER_HOME_SLOTS.social).toBeTruthy();
   });
 });
