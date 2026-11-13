@@ -18,6 +18,7 @@ import {
   OrderRefundRequestStatus,
   PetMemorialStatus,
   PlaceReportStatus,
+  PlaceSuggestionStatus,
   ProviderVerificationStatus,
   SellerOfferModerationStatus,
   SellerVerificationStatus,
@@ -64,6 +65,7 @@ export class AdminDashboardService {
       openCommunityReports,
       pendingMemorials,
       openPlaceReports,
+      pendingPlaceSuggestions,
       pendingWalletTopUps,
       pendingWalletAdjustments,
       pendingDeletionRequests,
@@ -94,6 +96,7 @@ export class AdminDashboardService {
       when(may("trust.view"), () => this.prisma.communityReport.count({ where: { status: { in: [CommunityReportStatus.OPEN, CommunityReportStatus.ESCALATED] } } })),
       when(may("trust.view"), () => this.prisma.petMemorialSubmission.count({ where: { status: PetMemorialStatus.PENDING_REVIEW, withdrawnAt: null } })),
       when(may("places.view"), () => this.prisma.placeReport.count({ where: { status: PlaceReportStatus.OPEN } })),
+      when(may("places.view"), () => this.prisma.placeSuggestion.count({ where: { status: PlaceSuggestionStatus.PENDING } })),
       // Same permission as the Wallets tab the badge sits on (a view-only admin sees the queue; reviewing needs more).
       when(may("wallet.view"), () => this.prisma.walletTopUp.count({ where: { status: WalletTopUpStatus.REVIEW_PENDING } })),
       // FE-16: wallet corrections waiting for a second admin (not yet lapsed); same tab permission as the top-ups.
@@ -132,6 +135,7 @@ export class AdminDashboardService {
       openCommunityReports,
       pendingMemorials,
       openPlaceReports,
+      pendingPlaceSuggestions,
       pendingWalletTopUps,
       pendingWalletAdjustments,
       pendingCardDestinationChanges,

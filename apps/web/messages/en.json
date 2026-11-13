@@ -1,4 +1,65 @@
 {
+  "adminPlaceSuggestions": {
+    "title": "Place suggestions",
+    "hint": "Members' new places, corrections and closure reports. An approved new place is created unverified and unlisted: verify and list it on the places page. A rejection needs a reason; the member is told.",
+    "tabs": {
+      "PENDING": "Waiting",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected"
+    },
+    "kindFilter": "Type",
+    "allKinds": "All types",
+    "kinds": {
+      "NEW_PLACE": "New place",
+      "CORRECTION": "Correction",
+      "CLOSURE_REPORT": "Closed"
+    },
+    "empty": {
+      "PENDING": "No suggestions waiting.",
+      "APPROVED": "No approved suggestions yet.",
+      "REJECTED": "No rejected suggestions."
+    },
+    "by": "by {name}",
+    "address": "Address",
+    "pin": "Map pin",
+    "noPin": "No map pin — add one to approve.",
+    "notes": "Member's note",
+    "photos": "Member photos",
+    "photoAlt": "Member photo {n}",
+    "photoMissing": "Photo not uploaded",
+    "field": "Field",
+    "now": "Now",
+    "proposed": "Proposed",
+    "closureHint": "The member reports this place has closed. Approving takes it off the public list (it stays in the database).",
+    "aboutPlace": "About: {name} ({city})",
+    "listed": "Listed",
+    "unlisted": "Not listed",
+    "duplicates": "Possible duplicates",
+    "sameName": "Same name",
+    "meters": "{n} m away",
+    "noDuplicates": "No place within {m} m or with the same name in this city.",
+    "similarPending": "{count, plural, one {# other waiting suggestion looks like this one.} other {# other waiting suggestions look like this one.}}",
+    "decidedBy": "Decided by {name}",
+    "reason": "Reason",
+    "createdPlace": "Created place (unverified, not listed)",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "noteLabel": "Note or reason (the member reads a rejection reason)",
+    "approve": "Approve",
+    "reject": "Reject",
+    "reasonRequired": "Write a reason (at least 5 characters) to reject.",
+    "pinRequired": "Enter the latitude and longitude to create this place.",
+    "approvedNew": "Approved. The place was created unverified and unlisted.",
+    "approvedChange": "Approved and applied.",
+    "rejected": "Rejected. The member has been told why.",
+    "failed": "That didn't work. Refresh and try again.",
+    "errors": {
+      "NOT_PENDING": "Someone already decided this suggestion.",
+      "COORDINATES_REQUIRED_TO_CREATE_PLACE": "A map pin is needed to create the place.",
+      "BOTH_OR_NEITHER": "Enter both latitude and longitude.",
+      "REQUIRED_FOR_REJECTION": "A rejection needs a reason."
+    }
+  },
   "partnerSupport": {
     "title": "Support",
     "intro": "Ask the opetlife team about verification, payouts, bookings, orders or your listing. Replies arrive here and as a notification.",
@@ -5112,6 +5173,7 @@
         "twoStep": "Two-step sign-in"
       },
       "tabs": {
+        "placeSuggestions": "Place suggestions",
         "productReadiness": "Incomplete products",
         "holidays": "Holidays and closures",
         "ownershipTransfers": "Ownership transfers",
@@ -7306,6 +7368,20 @@
         "tooFast": "Too many tries in a short time. Please wait a minute and try again.",
         "check": "Some details need checking.",
         "generic": "The suggestion couldn't be sent. Please try again."
+      },
+      "photos": {
+        "label": "Photos (optional)",
+        "hint": "Up to 3 photos (JPG, PNG or WebP, up to 10 MB each). They stay private and their location and camera data are removed; if the place is approved, they may appear in its gallery.",
+        "add": "Add photos",
+        "remove": "Remove {name}",
+        "count": "{count, plural, one {# photo} other {# photos}}",
+        "errors": {
+          "type": "Only JPG, PNG or WebP photos are accepted.",
+          "tooLarge": "Each photo can be up to 10 MB.",
+          "max": "You can add up to 3 photos.",
+          "notImage": "One of the files isn't a photo. Please choose another.",
+          "upload": "A photo couldn't be uploaded. Please try again."
+        }
       }
     }
   },
@@ -7904,6 +7980,7 @@
         "allClear": "All clear — nothing is waiting on your team.",
         "clearList": "Clear: {list}",
         "queue": {
+          "pendingPlaceSuggestions": "Place suggestions",
           "pendingReviews": "Reviews waiting for moderation",
           "openProviderNoShows": "Provider no-show reports",
           "openOwnershipDisputes": "Ownership disputes",
@@ -9086,7 +9163,7 @@
       "label": "Source",
       "all": "All",
       "opetlife": "opetlife",
-      "jajiga": "Jajiga"
+      "jajiga": "Other sites"
     }
   },
   "externalTravel": {
@@ -9194,11 +9271,11 @@
     },
     "fromSource": "From {source}",
     "blend": {
-      "title": "Pet-friendly stays from Jajiga",
-      "titleCity": "Pet-friendly stays in {city} from Jajiga",
-      "hint": "Listings from Jajiga: you book and pay on Jajiga's own site, and opetlife charges nothing. Confirm the pet rules with the host before booking.",
-      "seeAll": "All Jajiga stays",
-      "pages": "Jajiga pages"
+      "title": "Pet-friendly stays",
+      "titleCity": "Pet-friendly stays in {city}",
+      "hint": "Information from an external source; booking happens on the source site.",
+      "seeAll": "All pet-friendly stays",
+      "pages": "Pages"
     },
     "tile": {
       "kind": {
@@ -9214,9 +9291,9 @@
     },
     "browser": {
       "title": "More pet-friendly stays",
-      "sourceChip": "Jajiga stays",
+      "sourceChip": "Pet-friendly stays",
       "count": "Found: {count}",
-      "hint": "Listings from Jajiga: you book and pay on Jajiga's own site, and opetlife charges nothing. Confirm the pet rules with the host before booking.",
+      "hint": "Information from an external source; booking happens on the source site.",
       "filters": "Filter stays",
       "province": "Province",
       "allProvinces": "All provinces",
@@ -9234,7 +9311,13 @@
       "noMatch": "No stays match these filters. Try removing one.",
       "loadMore": "Show more ({shown} of {total})",
       "mediaNote": "Photos and the full description of each stay are on the source site; here you see the key facts."
-    }
+    },
+    "perNight": "night",
+    "petPerListing": "Pets accepted, according to the listing site.",
+    "viewStay": "View stay",
+    "opensNewTab": "(opens in a new tab)",
+    "priceOnListing": "Price on the listing site",
+    "evidenceListingFilter": "Listed in the listing site’s public “pets allowed” filter. Species, size and house-rule limits are not published there; confirm them with the host before booking."
   },
   "localDateTime": {
     "date": "Date",

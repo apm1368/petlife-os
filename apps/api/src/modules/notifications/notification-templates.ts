@@ -761,6 +761,17 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     en: { title: "Request removed", body: "“{{title}}” was removed from public view by the PET LIFE team." },
   },
 
+  // Owner #6 (2026-11-13): the member hears how their place suggestion (new place, correction or closure) was decided.
+  // An accepted new place still waits for staff verification before it is shown, so the text promises no listing.
+  "place_suggestion.approved": {
+    fa: { title: "پیشنهاد مکان پذیرفته شد", body: "پیشنهاد شما دربارهٔ «{{name}}» بررسی و پذیرفته شد. ممنون که به دیگران کمک می‌کنید." },
+    en: { title: "Place suggestion accepted", body: "Your suggestion about “{{name}}” was reviewed and accepted. Thank you for helping others." },
+  },
+  "place_suggestion.rejected": {
+    fa: { title: "پیشنهاد مکان پذیرفته نشد", body: "پیشنهاد شما دربارهٔ «{{name}}» پذیرفته نشد: {{reason}}" },
+    en: { title: "Place suggestion not accepted", body: "Your suggestion about “{{name}}” wasn't accepted: {{reason}}" },
+  },
+
   // Handoff 19: Insurance application status — deliberately just
   // submission/status-change, never a per-field or per-comparison-view
   // notification (spec: "do not over-notify"). Never claims an approval or

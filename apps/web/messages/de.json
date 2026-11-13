@@ -1,4 +1,65 @@
 {
+  "adminPlaceSuggestions": {
+    "title": "Ortsvorschläge",
+    "hint": "Neue Orte, Korrekturen und Schließungsmeldungen von Mitgliedern. Ein angenommener neuer Ort wird ungeprüft und nicht gelistet angelegt: Prüfe und liste ihn auf der Seite „Orte“. Eine Ablehnung braucht einen Grund; das Mitglied erfährt ihn.",
+    "tabs": {
+      "PENDING": "Wartend",
+      "APPROVED": "Angenommen",
+      "REJECTED": "Abgelehnt"
+    },
+    "kindFilter": "Art",
+    "allKinds": "Alle Arten",
+    "kinds": {
+      "NEW_PLACE": "Neuer Ort",
+      "CORRECTION": "Korrektur",
+      "CLOSURE_REPORT": "Geschlossen"
+    },
+    "empty": {
+      "PENDING": "Keine wartenden Vorschläge.",
+      "APPROVED": "Noch keine angenommenen Vorschläge.",
+      "REJECTED": "Keine abgelehnten Vorschläge."
+    },
+    "by": "von {name}",
+    "address": "Adresse",
+    "pin": "Kartenpunkt",
+    "noPin": "Kein Kartenpunkt – füge einen hinzu, um anzunehmen.",
+    "notes": "Notiz des Mitglieds",
+    "photos": "Fotos des Mitglieds",
+    "photoAlt": "Foto des Mitglieds {n}",
+    "photoMissing": "Foto nicht hochgeladen",
+    "field": "Feld",
+    "now": "Aktuell",
+    "proposed": "Vorgeschlagen",
+    "closureHint": "Das Mitglied meldet, dass dieser Ort geschlossen hat. Wenn du annimmst, verschwindet er aus der öffentlichen Liste (er bleibt in der Datenbank).",
+    "aboutPlace": "Betrifft: {name} ({city})",
+    "listed": "Gelistet",
+    "unlisted": "Nicht gelistet",
+    "duplicates": "Mögliche Duplikate",
+    "sameName": "Gleicher Name",
+    "meters": "{n} m entfernt",
+    "noDuplicates": "Kein Ort im Umkreis von {m} m und keiner mit gleichem Namen in dieser Stadt.",
+    "similarPending": "{count, plural, one {# weiterer wartender Vorschlag ähnelt diesem.} other {# weitere wartende Vorschläge ähneln diesem.}}",
+    "decidedBy": "Entschieden von {name}",
+    "reason": "Grund",
+    "createdPlace": "Angelegter Ort (ungeprüft, nicht gelistet)",
+    "latitude": "Breitengrad",
+    "longitude": "Längengrad",
+    "noteLabel": "Notiz oder Grund (das Mitglied liest einen Ablehnungsgrund)",
+    "approve": "Annehmen",
+    "reject": "Ablehnen",
+    "reasonRequired": "Schreib einen Grund (mindestens 5 Zeichen), um abzulehnen.",
+    "pinRequired": "Gib Breiten- und Längengrad ein, um diesen Ort anzulegen.",
+    "approvedNew": "Angenommen. Der Ort wurde ungeprüft und nicht gelistet angelegt.",
+    "approvedChange": "Angenommen und übernommen.",
+    "rejected": "Abgelehnt. Das Mitglied hat den Grund erfahren.",
+    "failed": "Das hat nicht geklappt. Lade die Seite neu und versuche es erneut.",
+    "errors": {
+      "NOT_PENDING": "Über diesen Vorschlag hat schon jemand entschieden.",
+      "COORDINATES_REQUIRED_TO_CREATE_PLACE": "Zum Anlegen des Ortes ist ein Kartenpunkt nötig.",
+      "BOTH_OR_NEITHER": "Gib Breiten- und Längengrad ein.",
+      "REQUIRED_FOR_REJECTION": "Eine Ablehnung braucht einen Grund."
+    }
+  },
   "partnerSupport": {
     "title": "Support",
     "intro": "Fragen Sie das opetlife-Team zu Verifizierung, Auszahlungen, Buchungen, Bestellungen oder Ihrem Eintrag. Antworten erscheinen hier und als Benachrichtigung.",
@@ -4396,6 +4457,7 @@
         "twoStep": "Zwei-Schritt-Anmeldung"
       },
       "tabs": {
+        "placeSuggestions": "Ortsvorschläge",
         "productReadiness": "Unvollständige Produkte",
         "holidays": "Feiertage und Schließtage",
         "ownershipTransfers": "Eigentumsübertragungen",
@@ -6318,7 +6380,7 @@
       "label": "Quelle",
       "all": "Alle",
       "opetlife": "opetlife",
-      "jajiga": "Jajiga"
+      "jajiga": "Andere Websites"
     }
   },
   "services": {
@@ -7053,6 +7115,7 @@
         "allClear": "Alles erledigt – auf dein Team wartet nichts.",
         "clearList": "Erledigt: {list}",
         "queue": {
+          "pendingPlaceSuggestions": "Ortsvorschläge",
           "pendingReviews": "Bewertungen in Prüfung",
           "openProviderNoShows": "Meldungen: Anbieter nicht erschienen",
           "openOwnershipDisputes": "Eigentumsstreitigkeiten",
@@ -8663,11 +8726,11 @@
     },
     "fromSource": "Von {source}",
     "blend": {
-      "title": "Haustierfreundliche Unterkünfte von Jajiga",
-      "titleCity": "Haustierfreundliche Unterkünfte in {city} von Jajiga",
-      "hint": "Angebote von Jajiga: Buchung und Zahlung erfolgen direkt bei Jajiga, opetlife berechnet nichts. Klären Sie die Haustierregeln vor der Buchung mit dem Gastgeber.",
-      "seeAll": "Alle Jajiga-Unterkünfte",
-      "pages": "Jajiga-Seiten"
+      "title": "Tierfreundliche Unterkünfte",
+      "titleCity": "Tierfreundliche Unterkünfte in {city}",
+      "hint": "Angaben aus einer externen Quelle; gebucht wird auf der Website der Quelle.",
+      "seeAll": "Alle tierfreundlichen Unterkünfte",
+      "pages": "Seiten"
     },
     "tile": {
       "kind": {
@@ -8683,9 +8746,9 @@
     },
     "browser": {
       "title": "Weitere haustierfreundliche Unterkünfte",
-      "sourceChip": "Unterkünfte von Jajiga",
+      "sourceChip": "Tierfreundliche Unterkünfte",
       "count": "Gefunden: {count}",
-      "hint": "Angebote von Jajiga: Buchung und Zahlung erfolgen direkt bei Jajiga, opetlife berechnet nichts. Klären Sie die Haustierregeln vor der Buchung mit dem Gastgeber.",
+      "hint": "Angaben aus einer externen Quelle; gebucht wird auf der Website der Quelle.",
       "filters": "Unterkünfte filtern",
       "province": "Provinz",
       "allProvinces": "Alle Provinzen",
@@ -8703,7 +8766,13 @@
       "noMatch": "Keine Unterkunft passt zu diesen Filtern. Entferne einen Filter.",
       "loadMore": "Mehr anzeigen ({shown} von {total})",
       "mediaNote": "Fotos und die vollständige Beschreibung jeder Unterkunft findest du auf der Quellseite; hier siehst du die wichtigsten Fakten."
-    }
+    },
+    "perNight": "Nacht",
+    "petPerListing": "Laut Inseratsseite sind Haustiere willkommen.",
+    "viewStay": "Unterkunft ansehen",
+    "opensNewTab": "(öffnet in neuem Tab)",
+    "priceOnListing": "Preis auf der Inseratsseite",
+    "evidenceListingFilter": "Im öffentlichen Filter „Haustiere erlaubt“ der Inseratsseite gelistet. Einschränkungen zu Art, Größe und Hausregeln sind dort nicht angegeben; kläre sie vor der Buchung mit dem Gastgeber."
   },
   "insurance": {
     "verificationStatus": {
@@ -10268,6 +10337,20 @@
         "tooFast": "Zu viele Versuche in kurzer Zeit. Bitte warte eine Minute und versuche es erneut.",
         "check": "Einige Angaben müssen geprüft werden.",
         "generic": "Der Vorschlag konnte nicht gesendet werden. Bitte versuche es erneut."
+      },
+      "photos": {
+        "label": "Fotos (optional)",
+        "hint": "Bis zu 3 Fotos (JPG, PNG oder WebP, je bis zu 10 MB). Sie bleiben privat, Standort- und Kameradaten werden entfernt; wird der Ort freigegeben, können sie in seiner Galerie erscheinen.",
+        "add": "Fotos hinzufügen",
+        "remove": "{name} entfernen",
+        "count": "{count, plural, one {# Foto} other {# Fotos}}",
+        "errors": {
+          "type": "Nur JPG-, PNG- oder WebP-Fotos sind erlaubt.",
+          "tooLarge": "Jedes Foto darf höchstens 10 MB groß sein.",
+          "max": "Du kannst bis zu 3 Fotos hinzufügen.",
+          "notImage": "Eine der Dateien ist kein Foto. Bitte wähle ein anderes.",
+          "upload": "Ein Foto konnte nicht hochgeladen werden. Bitte versuche es erneut."
+        }
       }
     }
   },
