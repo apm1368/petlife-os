@@ -12,6 +12,9 @@ import {
   type UploadTarget,
 } from "./storage-driver.interface";
 
+/** Owner, 2026-11-13: one pet photo may be up to 50 MB. */
+export const PET_PHOTO_MAX_BYTES = 50 * 1024 * 1024;
+
 /** Handoff 17: allow-listed MIME types for a medical document — a narrow, explicit set, never "anything the client sends". */
 const HEALTH_DOCUMENT_MIME_EXTENSIONS: Record<string, string> = {
   "application/pdf": "pdf",
@@ -91,7 +94,9 @@ export class StorageService {
     const extension = extensionByContentType[contentType];
     if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
     const key = `pets/${petId}/${randomUUID()}.${extension}`;
-    return this.driver.createUploadTarget(key, contentType);
+    // Owner, 2026-11-13: pet photos up to 50 MB (the upload ceiling). The web app scales big originals down before
+    // sending; the upload controller still strips EXIF/XMP from whatever arrives.
+    return this.driver.createUploadTarget(key, contentType, PET_PHOTO_MAX_BYTES);
   }
 
   /** Copies a validated, already-public source photo into an independently controlled private memorial asset. */

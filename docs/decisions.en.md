@@ -120,6 +120,7 @@ overpricing and the product is hidden.
 | C-10 | Discount codes are created by both OptLife and the seller; the cost falls to the creator (an OptLife code from commission, a seller code from their share) | Owner |
 | C-11 | Delivery time and shipping cost are recorded for every offer | Original document |
 | C-12 | Source imports create drafts only in the central catalogue; source prices, stock and seller offers are not imported, and source changes stay separate from local content until an administrator explicitly approves them | Owner |
+| C-13 | Product directory (2026-11-13): Digikala photos and descriptions are imported into the central catalogue (the owner chose this after being told of the legal and takedown risk, which is theirs). Guardrails: fair-use pacing, stop on 403/429, re-hosted with provenance, a one-click takedown, sanitised text | Owner |
 
 ## O — Order, dispatch, delivery, return
 
@@ -182,6 +183,7 @@ fully refunded.
 | B-07 | SMS for booking confirmation/rejection and a reminder the day before to the customer | Owner |
 | B-08 | New booking notification to the provider: SMS + panel notification | Owner |
 | B-09 | The service panel and veterinary panel spec must be written (empty in the original document) | Gap |
+| B-10 | Multi-pet bookings (2026-11-13): a member may bring several pets in one booking (default limit 4, set per service). Price is per pet for grooming, vet, training and walking, and per night per pet for boarding and sitting. Grooming, vet and training run the pets one after another, so the appointment lasts the duration × pets | Owner |
 
 ## U — User panel, household, memorial, subscription
 
@@ -237,6 +239,7 @@ operations queue in the admin panel.
 | X-05 | Migration and outbound travel: free initial consultation, a paid case file with an expert price | Owner (matches current document) |
 | X-06 | Emergency: a direct call button + a list of 24/7 clinics; no dispatch commitment | Owner |
 | X-07 | (Replaced by V-57 to V-63) An /ai page with a "coming soon" label | Owner |
+| X-08 | Pet taxi (2026-11-13): the price is fixed per ride whatever the number of pets; the number of pets is capped by the vehicle's capacity (default 3, set per service) | Owner |
 
 ## AD — Admin, support, notification, reporting, security, release
 

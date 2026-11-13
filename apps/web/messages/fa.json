@@ -9433,6 +9433,11 @@
       "addressRequired": "آدرس محل خدمت را انتخاب کنید.",
       "petAccessDenied": "اجازه رزرو برای این حیوان را ندارید.",
       "bookingChanged": "وضعیت این نوبت تغییر کرده است. صفحه را تازه کنید."
+    },
+    "priceBreakdown": {
+      "perPet": "{unit} برای هر حیوان × {pets, number} حیوان",
+      "perPetNight": "{unit} برای هر حیوان در هر شب × {pets, number} حیوان × {nights, number} شب",
+      "perRide": "{unit} برای هر سفر، با هر تعداد حیوان"
     }
   },
   "datePicker": {

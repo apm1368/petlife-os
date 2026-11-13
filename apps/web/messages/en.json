@@ -9509,6 +9509,11 @@
       "addressRequired": "Please choose the service address.",
       "petAccessDenied": "You are not allowed to book for this pet.",
       "bookingChanged": "This booking changed state. Please refresh."
+    },
+    "priceBreakdown": {
+      "perPet": "{unit} per pet × {pets, number} pets",
+      "perPetNight": "{unit} per pet per night × {pets, number} pets × {nights, number} nights",
+      "perRide": "{unit} per ride, however many pets"
     }
   },
   "datePicker": {

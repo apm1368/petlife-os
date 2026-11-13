@@ -22,6 +22,7 @@ import { Stepper } from "@/features/shared/Stepper";
 import { BookingFrame } from "@/features/bookings/BookingFrame";
 import { formatDay } from "@/lib/date/jalali";
 import type { RouteLocale } from "@/lib/i18n/config";
+import { bookingPrice, bookingSpanMinutes } from "./booking-price";
 import { SafetyTip } from "@/features/shared/SafetyTip";
 
 type Step = "service" | "pets" | "time" | "details" | "review";
@@ -174,7 +175,7 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
     const from = new Date(`${date}T00:00:00Z`);
     const to = new Date(from.getTime() + 86400_000);
     void servicesService
-      .getAvailability(service.id, { locationId, from: (from < new Date() ? new Date() : from).toISOString(), to: to.toISOString(), variantId: variantId ?? undefined, providerUserId: staffId ?? undefined, petId: petIds[0] })
+      .getAvailability(service.id, { locationId, from: (from < new Date() ? new Date() : from).toISOString(), to: to.toISOString(), variantId: variantId ?? undefined, providerUserId: staffId ?? undefined, petCount: Math.max(1, petIds.length), petId: petIds[0] })
       .then((res) => setSlots(res.slots))
       .catch(() => setSlots([]));
   }, [step, service, locationId, date, variantId, staffId, petIds, isRange]);
@@ -192,7 +193,26 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
   if (loadState === "error" || !profile) return <ErrorRecovery title={t("loadFailed")} message="" retryLabel={t("retry")} onRetry={load} />;
 
   const unitPrice = variant?.priceAmount ?? service?.priceAmount ?? null;
-  const total = unitPrice === null ? null : unitPrice * Math.max(1, petIds.length);
+  // Same rules as the API (booking-price.ts): taxi per ride, stays per night per pet, the rest per pet.
+  const priced = service
+    ? bookingPrice({
+        category: service.category,
+        locationMode: service.locationMode,
+        unitPrice,
+        petCount: Math.max(1, petIds.length),
+        start: hold ? new Date(hold.slotStart) : new Date(`${date}T12:00:00Z`),
+        end: hold ? new Date(hold.slotEnd) : isRange && rangeEnd ? new Date(`${rangeEnd}T12:00:00Z`) : new Date(`${date}T12:00:00Z`),
+      })
+    : null;
+  const total = priced?.total ?? null;
+  const priceDetail = priced && priced.unitPrice !== null && (priced.basis === "PER_RIDE" ? petIds.length > 1 : priced.quantity > 1)
+    ? priced.basis === "PER_RIDE"
+      ? t("priceBreakdown.perRide", { unit: formatPrice(priced.unitPrice) })
+      : priced.basis === "PER_PET_NIGHT"
+        ? t("priceBreakdown.perPetNight", { unit: formatPrice(priced.unitPrice), pets: Math.max(1, petIds.length), nights: priced.nights ?? 1 })
+        : t("priceBreakdown.perPet", { unit: formatPrice(priced.unitPrice), pets: Math.max(1, petIds.length) })
+    : null;
+  const spanMinutes = service ? bookingSpanMinutes(service.category, variant?.durationMinutes ?? service.durationMinutes, Math.max(1, petIds.length)) : 0;
   const fmtDateTime = (iso: string, tz?: string) => new Intl.DateTimeFormat(dateLocale, { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: tz ?? "Asia/Tehran" }).format(new Date(iso));
   const fmtDay = (day: string) => fa ? formatDay(day, "fa") : new Intl.DateTimeFormat(dateLocale, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${day}T12:00:00Z`));
   const isSupportedForService = (pet: PetDto) => !service || (service.supportedSpecies
@@ -442,9 +462,9 @@ export function BookingFlowView({ providerId }: { providerId: string }) {
             <Row label={t("pet")} value={pets?.filter((p) => petIds.includes(p.id)).map((p) => p.name).join(fa ? "، " : ", ") ?? ""} />
             <Row label={t("professional")} value={qualifiedStaff.find((m) => m.providerUserId === (hold?.providerUserId ?? staffId))?.displayName ?? t("automaticAssignment")} />
             <Row label={t("when")} value={hold ? fmtDateTime(hold.slotStart, hold.timezone) : ""} />
-            <Row label={t("durationLabel")} value={formatDuration(variant?.durationMinutes ?? service.durationMinutes)} />
+            <Row label={t("durationLabel")} value={formatDuration(spanMinutes)} />
             <Row label={t("location")} value={needsAddress ? (addresses?.find((a) => a.id === addressId)?.addressLine ?? "") : [profile.locations.find((l) => l.id === locationId)?.addressLine, profile.locations.find((l) => l.id === locationId)?.city].filter(Boolean).join(fa ? "، " : ", ")} />
-            <Row label={t("price")} value={total !== null ? formatPrice(total) : t("priceOnRequest")} />
+            <Row label={t("price")} value={total !== null ? `${formatPrice(total)}${priceDetail ? ` (${priceDetail})` : ""}` : t("priceOnRequest")} />
             <Row label={t("payment")} value={`${paymentLabel(service.paymentMode)}${service.paymentMode === "DEPOSIT" && service.depositAmount ? ` — ${formatPrice(service.depositAmount)}` : ""}`} />
             <Row label={t("bookingType")} value={service.bookingMode === "REQUEST" ? t("requestBooking") : t("instantBooking")} />
             <Row label={t("cancellationLabel")} value={service.cancellationPolicy ?? t("cancellationFallback", { hours: service.freeCancellationHours.toLocaleString(locale), percent: service.lateCancellationRefundPercent.toLocaleString(locale) })} />

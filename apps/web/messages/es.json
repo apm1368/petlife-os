@@ -5480,6 +5480,11 @@
       "addressRequired": "Elige la dirección del servicio.",
       "petAccessDenied": "No tienes permiso para reservar para esta mascota.",
       "bookingChanged": "El estado de esta reserva ha cambiado. Actualiza la página."
+    },
+    "priceBreakdown": {
+      "perPet": "{unit} por mascota × {pets, number} mascotas",
+      "perPetNight": "{unit} por mascota y noche × {pets, number} mascotas × {nights, number} noches",
+      "perRide": "{unit} por viaje, con cualquier número de mascotas"
     }
   },
   "datePicker": {

@@ -14,6 +14,7 @@ import { ApiError } from "@/lib/api/client";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 import { isPlanError, PlanRequiredNote } from "@/features/subscription/PlanRequiredNote";
 import { SPECIES_LABELS } from "./pet-identity";
+import { PET_PHOTO_MAX_BYTES, uploadPetPhoto } from "@/features/pets/pet-photo-upload";
 
 const SPECIES: { value: PetSpecies; icon: typeof Dog }[] = [
   { value: PetSpecies.DOG, icon: Dog },
@@ -53,8 +54,8 @@ const COPY = {
     choosePhoto: "انتخاب عکس",
     replacePhoto: "تغییر عکس",
     removePhoto: "حذف عکس",
-    photoHint: "JPG، PNG یا WebP، حداکثر ۱۰ مگابایت. عکس روی پروفایل و کارت حیوان دیده می‌شود.",
-    photoTooBig: "حجم عکس بیشتر از ۱۰ مگابایت است.",
+    photoHint: "JPG، PNG یا WebP، حداکثر ۵۰ مگابایت. عکس روی پروفایل و کارت حیوان دیده می‌شود.",
+    photoTooBig: "حجم عکس بیشتر از ۵۰ مگابایت است.",
     sex: "جنسیت",
     sexes: { MALE: "نر", FEMALE: "ماده", UNKNOWN: "نمی‌دانم" },
     birth: "تاریخ تولد",
@@ -98,8 +99,8 @@ const COPY = {
     choosePhoto: "Choose a photo",
     replacePhoto: "Replace photo",
     removePhoto: "Remove photo",
-    photoHint: "JPG, PNG or WebP, up to 10 MB. Shown on the pet's profile and card.",
-    photoTooBig: "The photo is larger than 10 MB.",
+    photoHint: "JPG, PNG or WebP, up to 50 MB. Shown on the pet's profile and card.",
+    photoTooBig: "The photo is larger than 50 MB.",
     sex: "Sex",
     sexes: { MALE: "Male", FEMALE: "Female", UNKNOWN: "Not sure" },
     birth: "Birth date",
@@ -143,8 +144,8 @@ const COPY = {
     choosePhoto: "Foto auswählen",
     replacePhoto: "Foto ersetzen",
     removePhoto: "Foto entfernen",
-    photoHint: "JPG, PNG oder WebP, bis 10 MB. Wird im Profil und auf der Karte des Tiers angezeigt.",
-    photoTooBig: "Das Foto ist größer als 10 MB.",
+    photoHint: "JPG, PNG oder WebP, bis 50 MB. Wird im Profil und auf der Karte des Tiers angezeigt.",
+    photoTooBig: "Das Foto ist größer als 50 MB.",
     sex: "Geschlecht",
     sexes: { MALE: "Männlich", FEMALE: "Weiblich", UNKNOWN: "Weiß nicht" },
     birth: "Geburtsdatum",
@@ -188,8 +189,8 @@ const COPY = {
     choosePhoto: "Elegir una foto",
     replacePhoto: "Cambiar foto",
     removePhoto: "Quitar foto",
-    photoHint: "JPG, PNG o WebP, hasta 10 MB. Se muestra en el perfil y en la tarjeta de la mascota.",
-    photoTooBig: "La foto pesa más de 10 MB.",
+    photoHint: "JPG, PNG o WebP, hasta 50 MB. Se muestra en el perfil y en la tarjeta de la mascota.",
+    photoTooBig: "La foto pesa más de 50 MB.",
     sex: "Sexo",
     sexes: { MALE: "Macho", FEMALE: "Hembra", UNKNOWN: "No lo sé" },
     birth: "Fecha de nacimiento",
@@ -224,7 +225,7 @@ const COPY = {
   },
 } as const;
 
-const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
+const MAX_PHOTO_BYTES = PET_PHOTO_MAX_BYTES;
 
 /**
  * Add a pet in three short steps: identity (species, name, photo, sex), details (age, breed, colour)
@@ -318,11 +319,7 @@ export function AddPetView() {
       let saved = pet;
       if (photo) {
         try {
-          const contentType = photo.type === "image/png" || photo.type === "image/webp" ? photo.type : "image/jpeg";
-          const target = await petsService.createPhotoUploadUrl(pet.id, contentType);
-          const put = await fetch(target.uploadUrl, { method: "PUT", body: photo, headers: target.headers });
-          if (!put.ok) throw new Error(String(put.status));
-          saved = await petsService.update(pet.id, { photoUrl: target.publicUrl });
+          saved = await petsService.update(pet.id, { photoUrl: await uploadPetPhoto(pet.id, photo) });
         } catch {
           setError(c.photoFailed);
         }

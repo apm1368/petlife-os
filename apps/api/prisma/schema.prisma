@@ -2358,7 +2358,9 @@ model ProviderService {
   freeCancellationHours         Int                   @default(24)
   lateCancellationRefundPercent Int                   @default(0)
   preparationNotes              String?
-  maxPetsPerBooking             Int                   @default(1)
+  /// How many pets one booking may bring (owner 2026-11-13: multi-pet bookings by default; for a pet taxi this is the
+  /// vehicle capacity, since the ride price stays the same).
+  maxPetsPerBooking             Int                   @default(4)
   requiredResourceType          ProviderResourceType?
   requestTtlHours               Int                   @default(24)
 
