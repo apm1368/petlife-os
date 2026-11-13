@@ -9958,6 +9958,60 @@
       },
       "refresh": "Hecho: actualizar mi solicitud",
       "limit": "Puedes tener como máximo 5 solicitudes abiertas; espera la revisión."
+    },
+    "suggest": {
+      "cta": "Sugerir un lugar",
+      "eyebrow": "Lugares que admiten mascotas",
+      "title": "Sugiere un lugar que admita mascotas",
+      "lede": "¿Conoces un parque, café o tienda que acepte mascotas? Cuéntanoslo. Nuestro equipo revisa cada sugerencia antes de que aparezca en el directorio.",
+      "fields": {
+        "name": "Nombre del lugar",
+        "category": "Categoría",
+        "categoryPick": "Elige una categoría",
+        "city": "Ciudad",
+        "address": "Dirección (opcional)",
+        "pin": "Ubicación en el mapa",
+        "notes": "Notas (opcional)"
+      },
+      "pinHint": "Toca el mapa donde está el lugar o usa tu ubicación actual.",
+      "map": "Mapa: toca para colocar el marcador",
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar",
+      "pinned": "Lugar sugerido",
+      "pinSet": "Marcador colocado",
+      "myLocation": "Usar mi ubicación",
+      "locating": "Buscando tu ubicación…",
+      "notesPublic": "¿Qué lo hace apto para mascotas? Si se aprueba el lugar, estas notas pueden mostrarse públicamente como su descripción.",
+      "review": "Nuestro equipo revisa tu sugerencia antes de publicarla. Tu nombre nunca se muestra públicamente.",
+      "send": "Enviar sugerencia",
+      "sending": "Enviando…",
+      "done": {
+        "title": "¡Gracias! Tu sugerencia está en revisión",
+        "body": "Revisaremos los datos y añadiremos el lugar al directorio si encaja. Puedes seguirla abajo.",
+        "another": "Sugerir otro lugar"
+      },
+      "mine": {
+        "title": "Tus sugerencias",
+        "loading": "Cargando tus sugerencias…",
+        "error": "No hemos podido cargar tus sugerencias.",
+        "retry": "Reintentar",
+        "empty": "Aún no has sugerido ningún lugar.",
+        "view": "Ver el lugar"
+      },
+      "status": {
+        "PENDING": "En revisión",
+        "APPROVED": "Añadido",
+        "REJECTED": "No añadido"
+      },
+      "errors": {
+        "required": "Obligatorio",
+        "pin": "Coloca el marcador en el mapa: nuestro equipo necesita la ubicación para añadir el lugar.",
+        "noLocation": "No pudimos obtener tu ubicación. Toca el mapa.",
+        "tooManyPending": "Ya tienes 10 sugerencias en revisión. Espera a que se revisen algunas.",
+        "tooFast": "Demasiados intentos en poco tiempo. Espera un minuto y vuelve a intentarlo.",
+        "check": "Hay datos que revisar.",
+        "generic": "No se pudo enviar la sugerencia. Vuelve a intentarlo."
+      }
     }
   },
   "healthDepth": {

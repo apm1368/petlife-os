@@ -9960,6 +9960,60 @@
       },
       "refresh": "Erledigt – Antrag aktualisieren",
       "limit": "Höchstens 5 offene Anträge; bitte die Prüfung abwarten."
+    },
+    "suggest": {
+      "cta": "Ort vorschlagen",
+      "eyebrow": "Tierfreundliche Orte",
+      "title": "Einen tierfreundlichen Ort vorschlagen",
+      "lede": "Kennst du einen Park, ein Café oder einen Laden, wo Tiere willkommen sind? Erzähl uns davon. Unser Team prüft jeden Vorschlag, bevor er im Verzeichnis erscheint.",
+      "fields": {
+        "name": "Name des Ortes",
+        "category": "Kategorie",
+        "categoryPick": "Kategorie wählen",
+        "city": "Stadt",
+        "address": "Adresse (optional)",
+        "pin": "Lage auf der Karte",
+        "notes": "Hinweise (optional)"
+      },
+      "pinHint": "Tippe auf die Karte, wo der Ort liegt, oder nutze deinen Standort.",
+      "map": "Karte: tippen, um die Markierung zu setzen",
+      "zoomIn": "Vergrößern",
+      "zoomOut": "Verkleinern",
+      "pinned": "Vorgeschlagener Ort",
+      "pinSet": "Markierung gesetzt",
+      "myLocation": "Meinen Standort verwenden",
+      "locating": "Standort wird gesucht …",
+      "notesPublic": "Was macht den Ort tierfreundlich? Wird der Ort freigegeben, können diese Hinweise öffentlich als Beschreibung erscheinen.",
+      "review": "Unser Team prüft deinen Vorschlag, bevor er erscheint. Dein Name wird nie öffentlich gezeigt.",
+      "send": "Vorschlag senden",
+      "sending": "Wird gesendet …",
+      "done": {
+        "title": "Danke! Dein Vorschlag wird geprüft",
+        "body": "Wir prüfen die Angaben und nehmen den Ort ins Verzeichnis auf, wenn er passt. Den Stand siehst du unten.",
+        "another": "Weiteren Ort vorschlagen"
+      },
+      "mine": {
+        "title": "Deine Vorschläge",
+        "loading": "Vorschläge werden geladen …",
+        "error": "Deine Vorschläge konnten nicht geladen werden.",
+        "retry": "Erneut versuchen",
+        "empty": "Du hast noch keinen Ort vorgeschlagen.",
+        "view": "Ort ansehen"
+      },
+      "status": {
+        "PENDING": "In Prüfung",
+        "APPROVED": "Aufgenommen",
+        "REJECTED": "Nicht aufgenommen"
+      },
+      "errors": {
+        "required": "Erforderlich",
+        "pin": "Setze die Markierung auf der Karte: Unser Team braucht die Lage, um den Ort aufzunehmen.",
+        "noLocation": "Dein Standort ist nicht verfügbar. Tippe stattdessen auf die Karte.",
+        "tooManyPending": "Du hast bereits 10 Vorschläge in Prüfung. Bitte warte, bis einige geprüft sind.",
+        "tooFast": "Zu viele Versuche in kurzer Zeit. Bitte warte eine Minute und versuche es erneut.",
+        "check": "Einige Angaben müssen geprüft werden.",
+        "generic": "Der Vorschlag konnte nicht gesendet werden. Bitte versuche es erneut."
+      }
     }
   },
   "healthDepth": {

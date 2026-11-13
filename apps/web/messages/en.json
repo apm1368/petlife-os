@@ -7009,6 +7009,60 @@
       },
       "refresh": "I've done that — update my claim",
       "limit": "You can have at most 5 open claims; please wait for review."
+    },
+    "suggest": {
+      "cta": "Suggest a place",
+      "eyebrow": "Pet-friendly places",
+      "title": "Suggest a pet-friendly place",
+      "lede": "Know a park, café or shop that welcomes pets? Tell us about it. Our team checks every suggestion before it appears in the directory.",
+      "fields": {
+        "name": "Place name",
+        "category": "Category",
+        "categoryPick": "Choose a category",
+        "city": "City",
+        "address": "Address (optional)",
+        "pin": "Location on the map",
+        "notes": "Notes (optional)"
+      },
+      "pinHint": "Tap the map where the place is, or use your current location.",
+      "map": "Map: tap to place the pin",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "pinned": "Suggested place",
+      "pinSet": "Pin placed",
+      "myLocation": "Use my location",
+      "locating": "Finding you…",
+      "notesPublic": "What makes it pet-friendly? If the place is approved, these notes may be shown publicly as its description.",
+      "review": "Our team reviews your suggestion before it is listed. Your name is never shown publicly.",
+      "send": "Send suggestion",
+      "sending": "Sending…",
+      "done": {
+        "title": "Thanks! Your suggestion is under review",
+        "body": "We'll check the details and add the place to the directory if it fits. You can follow it below.",
+        "another": "Suggest another place"
+      },
+      "mine": {
+        "title": "Your suggestions",
+        "loading": "Loading your suggestions…",
+        "error": "We couldn't load your suggestions.",
+        "retry": "Try again",
+        "empty": "You haven't suggested a place yet.",
+        "view": "View the place"
+      },
+      "status": {
+        "PENDING": "Under review",
+        "APPROVED": "Added",
+        "REJECTED": "Not added"
+      },
+      "errors": {
+        "required": "Required",
+        "pin": "Place the pin on the map: our team needs the location to list the place.",
+        "noLocation": "We couldn't get your location. Tap the map instead.",
+        "tooManyPending": "You already have 10 suggestions waiting for review. Please wait until some are reviewed.",
+        "tooFast": "Too many tries in a short time. Please wait a minute and try again.",
+        "check": "Some details need checking.",
+        "generic": "The suggestion couldn't be sent. Please try again."
+      }
     }
   },
   "supportNeeds": {

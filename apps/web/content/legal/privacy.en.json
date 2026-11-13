@@ -20,6 +20,7 @@
         "Addresses and location: the delivery or visit addresses you save, optionally with a map point. When you allow it, your browser's location is used for nearby services, places, lost-pet alerts and the pet taxi.",
         "Bookings, orders and payments: what you booked or bought, delivery details, and refunds and disputes. For card-to-card payments we keep the receipt image you upload. We do not collect your bank card number or IBAN.",
         "What you publish: posts, comments, chats, reviews, lost and found reports, memorials, and the photos and files you upload. Location data inside photos (EXIF and GPS) is removed when you upload them.",
+        "Place suggestions: the name, category, city, address, map point and notes of a place you suggest. Only our staff can see that it came from you. If our team checks and lists the place, its details and your notes may be published, never your name. We tell you in the app whether your suggestion was accepted.",
         "Support and messages: your support requests and our replies, and the notifications we send you.",
         "Technical: for each signed-in session, the device's browser details and IP address. For push notifications, your browser's push address. When someone opens a health share link, we log the time, browser details and a scrambled form of the IP address."
       ]
