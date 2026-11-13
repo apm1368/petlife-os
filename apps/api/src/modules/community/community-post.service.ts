@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { CommunityContentStatus, CommunityPostType, CommunitySourceType, Prisma } from "@prisma/client";
+import { CommunityContentStatus, CommunityPostType, CommunityReportStatus, CommunitySourceType, Prisma } from "@prisma/client";
 import type { CommunityReactionType as DtoReactionType } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
@@ -7,7 +7,7 @@ import { StorageService } from "../storage/storage.service";
 import { PetAccessService } from "../pet-access/pet-access.service";
 import { NotificationOrchestratorService } from "../notifications/notification-orchestrator.service";
 import { NotificationDeepLinks } from "../notifications/notification-deeplink.util";
-import { CommunityCommentNotFoundException, CommunityInteractionBlockedException, CommunityContentNotVisibleException, CommunityPostNotFoundException, PetAccessDeniedException, ValidationApiException } from "../../common/errors/api-exception";
+import { CommunityCommentNotFoundException, CommunityInteractionBlockedException, CommunityContentNotVisibleException, CommunityPostNotFoundException, PetAccessDeniedException, ValidationApiException, CommunityContentUnderReviewException } from "../../common/errors/api-exception";
 import { resolvePagination, toPaginatedDto, type PaginationQueryDto } from "../../common/pagination/pagination.dto";
 import { toCommunityCommentDto, toCommunityPostDto } from "./community-mapper";
 import type { CreateCommunityCommentDto, CreateCommunityPostDto, ListCommunityPostsQueryDto, SetCommunityReactionDto, UpdateCommunityCommentDto, UpdateCommunityPostDto } from "./dto/community.dto";
@@ -208,21 +208,30 @@ export class CommunityPostService {
     return row;
   }
 
+  /** A report still OPEN or ESCALATED freezes the text, so an author can't rewrite what moderators were asked to look at. */
+  private async assertNotUnderReview(where: { postId: string } | { commentId: string }) {
+    const open = await this.prisma.communityReport.count({ where: { ...where, status: { in: [CommunityReportStatus.OPEN, CommunityReportStatus.ESCALATED] } } });
+    if (open > 0) throw new CommunityContentUnderReviewException(where);
+  }
+
   async updatePost(postId: string, userId: string, dto: UpdateCommunityPostDto) {
     const own = await this.ownPublishedPost(postId, userId);
     // A lost-pet or campaign post only presents its source; its text follows the source, not a hand edit.
     if (own.sourceType !== CommunitySourceType.USER) throw new CommunityContentNotVisibleException({ postId, reason: "SOURCED_POST" });
     if (dto.body !== undefined && !dto.body.trim()) throw new ValidationApiException({ field: "body", reason: "REQUIRED" });
-    const data: Prisma.CommunityPostUpdateInput = { editedAt: new Date() };
+    await this.assertNotUnderReview({ postId });
+    const data: Prisma.CommunityPostUpdateManyMutationInput = { editedAt: new Date() };
     if (dto.title !== undefined) data.title = dto.title.trim() || null;
     if (dto.body !== undefined) data.body = dto.body;
     if (dto.topics !== undefined) data.topics = dto.topics;
     if (dto.city !== undefined) data.city = dto.city.trim() || null;
     if (dto.region !== undefined) data.region = dto.region.trim() || null;
     const row = await this.prisma.$transaction(async (tx) => {
-      const updated = await tx.communityPost.update({ where: { id: postId }, data, include: POST_INCLUDE });
+      // Conditional on still being the author's published post: one hidden or reported mid-edit is not changed.
+      const done = await tx.communityPost.updateMany({ where: { id: postId, authorUserId: userId, status: CommunityContentStatus.PUBLISHED, reports: { none: { status: { in: [CommunityReportStatus.OPEN, CommunityReportStatus.ESCALATED] } } } }, data });
+      if (done.count !== 1) throw new CommunityContentNotVisibleException({ postId });
       await this.events.publish("CommunityPostEdited", { postId, authorUserId: userId }, { tx, aggregateType: "CommunityPost", aggregateId: postId });
-      return updated;
+      return tx.communityPost.findUniqueOrThrow({ where: { id: postId }, include: POST_INCLUDE });
     });
     const names = await this.displayNameMap([userId]);
     return toCommunityPostDto(row, names.get(userId) ?? "", null, userId);
@@ -231,7 +240,8 @@ export class CommunityPostService {
   async deletePost(postId: string, userId: string) {
     await this.ownPublishedPost(postId, userId);
     await this.prisma.$transaction(async (tx) => {
-      await tx.communityPost.update({ where: { id: postId }, data: { status: CommunityContentStatus.REMOVED, removedByAuthorAt: new Date() } });
+      const done = await tx.communityPost.updateMany({ where: { id: postId, authorUserId: userId, status: CommunityContentStatus.PUBLISHED }, data: { status: CommunityContentStatus.REMOVED, removedByAuthorAt: new Date() } });
+      if (done.count !== 1) throw new CommunityContentNotVisibleException({ postId });
       await tx.communityPostBookmark.deleteMany({ where: { postId } });
       await this.events.publish("CommunityPostDeletedByAuthor", { postId, authorUserId: userId }, { tx, aggregateType: "CommunityPost", aggregateId: postId });
     });
@@ -249,14 +259,18 @@ export class CommunityPostService {
     const own = await this.ownPublishedComment(commentId, userId);
     await this.getVisiblePostOrThrow(own.postId);
     if (!dto.body.trim()) throw new ValidationApiException({ field: "body", reason: "REQUIRED" });
-    const row = await this.prisma.communityComment.update({ where: { id: commentId }, data: { body: dto.body, editedAt: new Date() } });
+    await this.assertNotUnderReview({ commentId });
+    const done = await this.prisma.communityComment.updateMany({ where: { id: commentId, authorUserId: userId, status: CommunityContentStatus.PUBLISHED, reports: { none: { status: { in: [CommunityReportStatus.OPEN, CommunityReportStatus.ESCALATED] } } } }, data: { body: dto.body, editedAt: new Date() } });
+    if (done.count !== 1) throw new CommunityContentNotVisibleException({ commentId });
+    const row = await this.prisma.communityComment.findUniqueOrThrow({ where: { id: commentId } });
     const names = await this.displayNameMap([userId]);
     return toCommunityCommentDto(row, names.get(userId) ?? "", userId);
   }
 
   async deleteComment(commentId: string, userId: string) {
     await this.ownPublishedComment(commentId, userId);
-    await this.prisma.communityComment.update({ where: { id: commentId }, data: { status: CommunityContentStatus.REMOVED, removedByAuthorAt: new Date() } });
+    const done = await this.prisma.communityComment.updateMany({ where: { id: commentId, authorUserId: userId, status: CommunityContentStatus.PUBLISHED }, data: { status: CommunityContentStatus.REMOVED, removedByAuthorAt: new Date() } });
+    if (done.count !== 1) throw new CommunityContentNotVisibleException({ commentId });
     return { deleted: true };
   }
 

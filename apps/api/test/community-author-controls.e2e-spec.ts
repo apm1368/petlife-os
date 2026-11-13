@@ -90,6 +90,27 @@ describe("Community — the author's own controls", () => {
     await send("patch", b, `/community/comments/${randomUUID()}`).send({ body: "Nope" }).expect(404);
   });
 
+  it("an open report freezes the text, so the reported words stay as reported; deleting stays possible", async () => {
+    const a = await actor("author");
+    const b = await actor("reporter");
+    const p = (await post(a)).body;
+    const c = (await send("post", a, `/community/posts/${p.id}/comments`).send({ body: "Original comment" }).expect(201)).body;
+    await send("post", b, `/community/posts/${p.id}/report`).send({ reason: "SCAM", details: "Asks for a deposit" }).expect(201);
+    await send("post", b, `/community/comments/${c.id}/report`).send({ reason: "ABUSE" }).expect(201);
+    const frozen = await send("patch", a, `/community/posts/${p.id}`).send({ body: "Nothing to see" }).expect(409);
+    expect(frozen.body.error.code).toBe("COMMUNITY_CONTENT_UNDER_REVIEW");
+    await send("patch", a, `/community/comments/${c.id}`).send({ body: "Rewritten" }).expect(409);
+    expect((await db.communityPost.findUniqueOrThrow({ where: { id: p.id } })).body).toBe("Hello");
+    expect((await db.communityComment.findUniqueOrThrow({ where: { id: c.id } })).body).toBe("Original comment");
+    // Once moderators close the reports, editing works again.
+    await db.communityReport.updateMany({ where: { OR: [{ postId: p.id }, { commentId: c.id }] }, data: { status: "DISMISSED" } });
+    await send("patch", a, `/community/posts/${p.id}`).send({ body: "Fixed typo" }).expect(200);
+    // Deleting a reported post keeps its row (and words) for the moderators.
+    await db.communityReport.updateMany({ where: { postId: p.id }, data: { status: "OPEN" } });
+    await send("delete", a, `/community/posts/${p.id}`).expect(200);
+    expect(await db.communityPost.findUniqueOrThrow({ where: { id: p.id } })).toMatchObject({ status: "REMOVED", body: "Fixed typo" });
+  });
+
   it("the author is told in-app when a moderator removes or restores their post", async () => {
     const a = await actor("author");
     const p = (await post(a)).body;
