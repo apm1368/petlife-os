@@ -5067,7 +5067,8 @@
         "orderLookup": "البحث عن طلب",
         "refundApprovals": "موافقات الاسترداد",
         "twoStep": "تسجيل الدخول بخطوتين",
-        "walletAdjustments": "طلبات التعديل"
+        "walletAdjustments": "طلبات التعديل",
+        "twoStep": "تسجيل الدخول بخطوتين"
       },
       "palette": {
         "actions": "إجراءات سريعة",
@@ -8896,6 +8897,41 @@
       "hint": "إعلانات من Jajiga: تحجز وتدفع على موقع Jajiga نفسه، ولا يتقاضى opetlife أي رسوم. تأكّد من قواعد استقبال الحيوانات الأليفة مع المضيف قبل الحجز.",
       "seeAll": "كل أماكن الإقامة على Jajiga",
       "pages": "صفحات Jajiga"
+    },
+    "tile": {
+      "kind": {
+        "villa": "فيلا",
+        "apartment": "شقة أو جناح",
+        "cottage": "كوخ",
+        "ecolodge": "نُزُل بيئي",
+        "house": "منزل أو مكان إقامة"
+      },
+      "sourceChip": "من {source}",
+      "capacity": "السعة: {count}",
+      "bedrooms": "غرف النوم: {count}"
+    },
+    "browser": {
+      "title": "أماكن إقامة أخرى ترحّب بالحيوانات الأليفة",
+      "sourceChip": "أماكن إقامة Jajiga",
+      "count": "عدد أماكن الإقامة: {count}",
+      "hint": "إعلانات من Jajiga: تحجز وتدفع على موقع Jajiga نفسه، ولا يتقاضى opetlife أي رسوم. تأكّد من قواعد استقبال الحيوانات الأليفة مع المضيف قبل الحجز.",
+      "filters": "تصفية أماكن الإقامة",
+      "province": "المحافظة",
+      "allProvinces": "كل المحافظات",
+      "city": "المدينة",
+      "allCities": "كل المدن",
+      "guests": "عدد الضيوف",
+      "anyGuests": "أي عدد",
+      "guestsAtLeast": "{count} على الأقل",
+      "price": "السعر لليلة",
+      "anyPrice": "أي سعر",
+      "priceUpTo": "حتى {max}",
+      "priceBetween": "من {min} إلى {max}",
+      "priceOver": "أكثر من {min}",
+      "clear": "مسح عوامل التصفية",
+      "noMatch": "لا توجد أماكن إقامة تطابق هذه التصفية. جرّب إزالة أحد الخيارات.",
+      "loadMore": "عرض المزيد ({shown} من {total})",
+      "mediaNote": "الصور والوصف الكامل لكل مكان إقامة موجودة في موقع المصدر؛ هنا ترى المعلومات الأساسية."
     }
   },
   "localDateTime": {

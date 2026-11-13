@@ -5067,7 +5067,8 @@
         "orderLookup": "Bestelling opzoeken",
         "refundApprovals": "Goedkeuring van terugbetalingen",
         "twoStep": "Inloggen in twee stappen",
-        "walletAdjustments": "Correctieaanvragen"
+        "walletAdjustments": "Correctieaanvragen",
+        "twoStep": "Inloggen in twee stappen"
       },
       "palette": {
         "actions": "Snelle acties",
@@ -8896,6 +8897,41 @@
       "hint": "Advertenties van Jajiga: je boekt en betaalt op de eigen site van Jajiga, en opetlife rekent niets. Check de huisdierregels bij de verhuurder voordat je boekt.",
       "seeAll": "Alle verblijven op Jajiga",
       "pages": "Jajiga-pagina’s"
+    },
+    "tile": {
+      "kind": {
+        "villa": "Villa",
+        "apartment": "Appartement of suite",
+        "cottage": "Huisje",
+        "ecolodge": "Ecolodge",
+        "house": "Huis of verblijf"
+      },
+      "sourceChip": "Van {source}",
+      "capacity": "Max. gasten: {count}",
+      "bedrooms": "Slaapkamers: {count}"
+    },
+    "browser": {
+      "title": "Meer huisdiervriendelijke verblijven",
+      "sourceChip": "Verblijven van Jajiga",
+      "count": "Gevonden: {count}",
+      "hint": "Advertenties van Jajiga: je boekt en betaalt op de eigen site van Jajiga, en opetlife rekent niets. Check de huisdierregels bij de verhuurder voordat je boekt.",
+      "filters": "Verblijven filteren",
+      "province": "Provincie",
+      "allProvinces": "Alle provincies",
+      "city": "Stad",
+      "allCities": "Alle steden",
+      "guests": "Gasten",
+      "anyGuests": "Elk aantal",
+      "guestsAtLeast": "Minstens {count}",
+      "price": "Prijs per nacht",
+      "anyPrice": "Elke prijs",
+      "priceUpTo": "Tot {max}",
+      "priceBetween": "{min} tot {max}",
+      "priceOver": "Meer dan {min}",
+      "clear": "Filters wissen",
+      "noMatch": "Geen verblijven die bij deze filters passen. Probeer er een te verwijderen.",
+      "loadMore": "Meer tonen ({shown} van {total})",
+      "mediaNote": "Foto's en de volledige beschrijving van elk verblijf staan op de bronsite; hier zie je de belangrijkste gegevens."
     }
   },
   "localDateTime": {
