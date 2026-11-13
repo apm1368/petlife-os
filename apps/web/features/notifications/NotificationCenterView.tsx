@@ -7,6 +7,7 @@ import { Button, EmptyState, ErrorRecovery, IconButton, Skeleton, StatusLabel } 
 import type { NotificationDto } from "@petlife/types";
 import { notificationsService } from "@/services/notifications.service";
 import { useNotificationStore } from "@/stores/notification-store";
+import { hasLocalePrefix } from "@/lib/i18n/config";
 
 const PAGE_SIZE = 20;
 
@@ -162,5 +163,5 @@ export function NotificationCenterView() {
 
 /** Deep links are locale-free; links stored before that fix may already carry one, which must not be doubled. */
 export function localizeDeepLink(deepLink: string, locale: string): string {
-  return /^\/(fa|en|de|es)(\/|$)/.test(deepLink) ? deepLink : `/${locale}${deepLink}`;
+  return hasLocalePrefix(deepLink) ? deepLink : `/${locale}${deepLink}`;
 }

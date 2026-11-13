@@ -28,3 +28,26 @@ describe("locale config", () => {
     expect(localeDirection.nl).toBe("ltr");
   });
 });
+
+describe("locale prefix", () => {
+  it("recognises every language, with or without a path, query or hash", async () => {
+    const { LOCALE_PREFIX, hasLocalePrefix, stripLocalePrefix, locales } = await import("./config");
+    for (const l of locales) {
+      expect(hasLocalePrefix(`/${l}`)).toBe(true);
+      expect(hasLocalePrefix(`/${l}/shop`)).toBe(true);
+      expect(hasLocalePrefix(`/${l}?q=1`)).toBe(true);
+      expect(stripLocalePrefix(`/${l}/pets/1`)).toBe("/pets/1");
+    }
+    expect(hasLocalePrefix("/arcade")).toBe(false);
+    expect(hasLocalePrefix("/shop")).toBe(false);
+    expect(LOCALE_PREFIX.test("/nl/profile")).toBe(true);
+  });
+
+  it("never double-prefixes an Arabic or Dutch link (/ar/ar/… was a 404)", async () => {
+    const { localizeHref } = await import("@/features/navigation/localized-link");
+    expect(localizeHref("/ar/pets/new", "ar")).toBe("/ar/pets/new");
+    expect(localizeHref("/nl/shop?x=1", "nl")).toBe("/nl/shop?x=1");
+    expect(localizeHref("/pets/new", "ar")).toBe("/ar/pets/new");
+    expect(localizeHref("/uploads/a.png", "nl")).toBe("/uploads/a.png");
+  });
+});

@@ -1,5 +1,6 @@
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { LOCALE_PREFIX } from "@/lib/i18n/config";
 
 const APP = join(__dirname, "..", "app", "[locale]");
 
@@ -9,7 +10,7 @@ const APP = join(__dirname, "..", "app", "[locale]");
  * Used by "no dead CTA" tests so a link can never point at a route that does not exist.
  */
 export function routeExists(href: string): boolean {
-  const path = href.split(/[?#]/)[0]!.replace(/^\/(fa|en|de|es)(?=\/|$)/, "");
+  const path = href.split(/[?#]/)[0]!.replace(LOCALE_PREFIX, "");
   const segments = path.split("/").filter(Boolean);
   return match(APP, segments);
 }

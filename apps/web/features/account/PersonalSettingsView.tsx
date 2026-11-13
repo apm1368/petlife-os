@@ -10,7 +10,7 @@ import { DisplayModeToggle } from "@/features/display-mode/DisplayModeToggle";
 import { useLocale } from "next-intl";
 import { AccountPageHeader } from "./AccountNav";
 import { useAccountCopy } from "./account-copy";
-import type { RouteLocale } from "@/lib/i18n/config";
+import { LOCALE_PREFIX, type RouteLocale } from "@/lib/i18n/config";
 
 type ContactKind = "email" | "phone";
 
@@ -72,7 +72,7 @@ export function PersonalSettingsView() {
       setSaved(true);
       // Only an explicit preference change moves the app. Preserve query and fragment state.
       if (language !== user.locale) {
-        const path = window.location.pathname.replace(/^\/(fa|en|de|es|ar|nl)(?=\/|$)/, `/${language}`);
+        const path = window.location.pathname.replace(LOCALE_PREFIX, `/${language}`);
         window.location.assign(`${path}${window.location.search}${window.location.hash}`);
       }
     } catch {
