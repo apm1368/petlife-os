@@ -76,6 +76,36 @@ export class NotificationEventsListener {
     });
   }
 
+  /** A moderator approved or rejected a review: its author hears the outcome, with a link to where it belongs. */
+  @OnEvent("ReviewModerated")
+  onReviewModerated(payload: { vertical: "SERVICE" | "PRODUCT" | "TRAVEL"; reviewId: string; decision: "APPROVED" | "REJECTED" }, domainEventId: string): Promise<void> {
+    return this.safely("ReviewModerated", async () => {
+      let review: { userId: string; subject: string; reason: string | null; deepLink: string; category: NotificationCategory } | null = null;
+      if (payload.vertical === "SERVICE") {
+        const r = await this.prisma.providerReview.findUnique({ where: { id: payload.reviewId }, select: { userId: true, hiddenReason: true, providerOrganizationId: true, providerOrganization: { select: { name: true } } } });
+        if (r) review = { userId: r.userId, subject: r.providerOrganization.name, reason: r.hiddenReason, deepLink: NotificationDeepLinks.provider(r.providerOrganizationId), category: NotificationCategory.SERVICE };
+      } else if (payload.vertical === "PRODUCT") {
+        const r = await this.prisma.productReview.findUnique({ where: { id: payload.reviewId }, select: { userId: true, hiddenReason: true, product: { select: { title: true } }, orderItem: { select: { orderId: true } } } });
+        if (r) review = { userId: r.userId, subject: r.product.title, reason: r.hiddenReason, deepLink: NotificationDeepLinks.order(r.orderItem.orderId), category: NotificationCategory.COMMERCE };
+      } else {
+        const r = await this.prisma.travelReview.findUnique({ where: { id: payload.reviewId }, select: { userId: true, hiddenReason: true, bookingId: true, listing: { select: { title: true } } } });
+        if (r) review = { userId: r.userId, subject: r.listing.title, reason: r.hiddenReason, deepLink: NotificationDeepLinks.travelBooking(r.bookingId), category: NotificationCategory.TRAVEL };
+      }
+      if (!review) return;
+      await this.orchestrator.notify({
+        userId: review.userId,
+        type: payload.decision === "APPROVED" ? "review.approved" : "review.rejected",
+        category: review.category,
+        templateParams: { subject: review.subject, reason: (review.reason ?? "").slice(0, 300) },
+        deepLink: review.deepLink,
+        entityType: `${payload.vertical}_REVIEW`,
+        entityId: payload.reviewId,
+        domainEventId,
+        attemptSms: false,
+      });
+    });
+  }
+
   /** ID-03: the other party hears that the transfer is disputed (the one who raised it already knows). */
   @OnEvent("PetOwnershipDisputed")
   onOwnershipDisputed(payload: { transferId: string; petId: string; raisedByUserId: string }, domainEventId: string): Promise<void> {

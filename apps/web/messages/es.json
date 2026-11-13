@@ -6425,6 +6425,7 @@
         "allClear": "Todo al día: no hay nada pendiente para tu equipo.",
         "clearList": "Al día: {list}",
         "queue": {
+          "pendingReviews": "Reseñas pendientes de moderación",
           "openProviderNoShows": "Avisos de proveedor ausente",
           "openOwnershipDisputes": "Disputas de propiedad",
           "pendingDeletionRequests": "Solicitudes de eliminación de cuenta",

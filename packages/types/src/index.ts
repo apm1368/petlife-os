@@ -3370,6 +3370,8 @@ export interface AdminDashboardSummaryDto {
   openOwnershipDisputes: number | null;
   /** Members' reports that a provider didn't show up, still open as admin tasks; services.view. */
   openProviderNoShows: number | null;
+  /** Service, product and stay reviews waiting for a moderator, in the verticals this admin may moderate. */
+  pendingReviews: number | null;
   /**
    * Market-readiness #290 Q97, the launch month's success measure: registered pets and weekly bookings
    * (analytics.view; null otherwise). Live bookings only, rolling 7-day windows.

@@ -6435,6 +6435,7 @@
         "allClear": "Alles erledigt – auf dein Team wartet nichts.",
         "clearList": "Erledigt: {list}",
         "queue": {
+          "pendingReviews": "Bewertungen in Prüfung",
           "openProviderNoShows": "Meldungen: Anbieter nicht erschienen",
           "openOwnershipDisputes": "Eigentumsstreitigkeiten",
           "pendingDeletionRequests": "Anträge auf Kontolöschung",

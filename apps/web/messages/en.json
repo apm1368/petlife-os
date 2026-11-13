@@ -7201,6 +7201,7 @@
         "allClear": "All clear — nothing is waiting on your team.",
         "clearList": "Clear: {list}",
         "queue": {
+          "pendingReviews": "Reviews waiting for moderation",
           "openProviderNoShows": "Provider no-show reports",
           "openOwnershipDisputes": "Ownership disputes",
           "pendingDeletionRequests": "Account deletion requests",
