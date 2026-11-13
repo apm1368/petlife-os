@@ -98,6 +98,11 @@ const SCOPE_PRESET_FLAGS: Record<
   },
 };
 
+/** Whether a preset can read health at all (only with the owner's explicit choice — see grantForBooking). */
+export function presetIncludesHealth(preset: PetAccessScopePreset): boolean {
+  return SCOPE_PRESET_FLAGS[preset].canViewHealth;
+}
+
 /** The default preset per category when a booking doesn't explicitly choose one (never "full record" by default). */
 export const DEFAULT_SCOPE_PRESET_BY_CATEGORY: Record<ServiceCategory, PetAccessScopePreset> = {
   [ServiceCategory.VET]: PetAccessScopePreset.HEALTH_BASICS,
@@ -121,12 +126,13 @@ export class BookingPetAccessService {
   ) {}
 
   /**
-   * Creates an independent TEMPORARY PetAccessGrant for this booking's pet —
-   * never touches or overwrites the household's own standing grant, per the
-   * grant-union model (see the schema-hardening checkpoint). startsAt is the
-   * moment of booking confirmation; expiresAt is the booking's end time plus
-   * a buffer (default 24h, same rule for a 30-minute vet visit and a
-   * multi-day Boarding stay — see README "Access expiry").
+   * Records the owner's access decision for this booking and, when a specific provider staff member is
+   * already assigned, issues their independent TEMPORARY PetAccessGrant — never touching or overwriting the
+   * household's own standing grant, per the grant-union model (see the schema-hardening checkpoint).
+   * startsAt is the moment of booking confirmation; expiresAt is the booking's end time plus a buffer
+   * (default 24h, same rule for a 30-minute vet visit and a multi-day Boarding stay — see README "Access
+   * expiry"). An "any staff" booking keeps the decision on its BookingPetAccess row with no grant yet:
+   * the person the clinic assigns receives exactly that decision (see followAssignee).
    */
   async grantForBooking(
     booking: Booking,
@@ -134,24 +140,90 @@ export class BookingPetAccessService {
     scopePreset: PetAccessScopePreset,
     tx: Prisma.TransactionClient,
     ownerChoseScope = false,
+    sharedDocumentIds: string[] = [],
   ): Promise<void> {
-    if (!providerUserId) return; // No specific provider staff assigned yet — nothing to grant access to.
-
-    const bufferHours = this.config.get("BOOKING_HEALTH_ACCESS_BUFFER_HOURS", { infer: true });
-    const expiresAt = new Date(booking.endAt.getTime() + bufferHours * 60 * 60 * 1000);
-    const flags = SCOPE_PRESET_FLAGS[scopePreset];
     // A booking alone never opens the medical record: health reading requires the owner to have
     // explicitly chosen a health scope in the booking flow (a category default is not consent).
-    const healthConsented = ownerChoseScope && flags.canViewHealth;
-    const canViewLocation = booking.locationMode !== LocationMode.AT_PROVIDER;
+    const healthConsented = ownerChoseScope && SCOPE_PRESET_FLAGS[scopePreset].canViewHealth;
+    const consent = { scopePreset, healthConsented };
+    const providerUser = providerUserId ? await tx.providerUser.findFirst({ where: { id: providerUserId, removedAt: null } }) : null;
+    const grant = providerUser ? await this.issueGrant(booking, providerUser.userId, consent, tx) : null;
 
-    const providerUser = await tx.providerUser.findFirst({ where: { id: providerUserId, removedAt: null } });
-    if (!providerUser) return;
+    await tx.bookingPetAccess.create({
+      // Documents are health data: they travel only with health consent.
+      data: { bookingId: booking.id, petAccessGrantId: grant?.id ?? null, scopePreset, healthConsented, sharedDocumentIds: healthConsented ? [...new Set(sharedDocumentIds)] : [] },
+    });
+    if (grant) await this.publishGranted(booking, grant.id, scopePreset, tx);
+  }
 
-    const grant = await tx.petAccessGrant.create({
+  /**
+   * The booking's access follows the person it is assigned to. Called after a clinic assigns, reassigns or
+   * unassigns a booking: the previous assignee's grant is revoked (they keep any other grant they hold) and
+   * the new assignee receives one with exactly the owner's recorded scope and the booking's expiry. Nothing
+   * is issued once the owner has withdrawn this booking's access themselves, or after the access window.
+   */
+  async followAssignee(booking: Booking, actorUserId: string, tx: Prisma.TransactionClient): Promise<void> {
+    const existing = await tx.bookingPetAccess.findUnique({ where: { bookingId: booking.id }, include: { petAccessGrant: true } });
+    // Bookings made before "any staff" bookings kept their decision: the category default, never health.
+    const link = existing ?? (await tx.bookingPetAccess.create({
+      data: { bookingId: booking.id, scopePreset: DEFAULT_SCOPE_PRESET_BY_CATEGORY[booking.category as unknown as ServiceCategory], healthConsented: false },
+      include: { petAccessGrant: true },
+    }));
+    const current = link.petAccessGrant;
+    const assignee = booking.providerUserId ? await tx.providerUser.findFirst({ where: { id: booking.providerUserId, removedAt: null } }) : null;
+    if (current && !current.revokedAt && current.userId === assignee?.userId) return;
+
+    if (current?.revokedAt && current.revokedByUserId) {
+      // The owner (or anyone in the pet's household) ended this booking's access: no one receives it again.
+      const withdrawnByHousehold = await tx.householdMember.count({ where: { householdId: booking.householdId, userId: current.revokedByUserId } });
+      if (withdrawnByHousehold) return;
+    }
+    if (current && !current.revokedAt) {
+      await tx.petAccessGrant.update({ where: { id: current.id }, data: { revokedAt: new Date(), revokedByUserId: actorUserId } });
+      await this.events.publish("ServiceAccessRevoked", { bookingId: booking.id, grantId: current.id, reason: "REASSIGNED" }, { tx, aggregateType: "PetAccessGrant", aggregateId: current.id });
+    }
+    if (!assignee || this.expiryFor(booking) <= new Date()) return;
+
+    const scopePreset = link.scopePreset as unknown as PetAccessScopePreset;
+    const grant = await this.issueGrant(booking, assignee.userId, { scopePreset, healthConsented: link.healthConsented }, tx);
+    await tx.bookingPetAccess.update({ where: { id: link.id }, data: { petAccessGrantId: grant.id } });
+    await this.publishGranted(booking, grant.id, scopePreset, tx);
+  }
+
+  /**
+   * Revokes the grant this booking created, if any (a booking with no assigned provider user has none yet).
+   * Soft-revoke only — the row (and BookingPetAccess audit link) is preserved, per the same revocation
+   * convention as every other PetAccessGrant. An already-revoked grant keeps its original revocation.
+   */
+  async revokeForBooking(bookingId: string, revokedByUserId: string, tx: Prisma.TransactionClient): Promise<void> {
+    const link = await tx.bookingPetAccess.findUnique({ where: { bookingId } });
+    if (!link?.petAccessGrantId) return;
+
+    const revoked = await tx.petAccessGrant.updateMany({
+      where: { id: link.petAccessGrantId, revokedAt: null },
+      data: { revokedAt: new Date(), revokedByUserId },
+    });
+    if (!revoked.count) return;
+
+    await this.events.publish(
+      "ServiceAccessRevoked",
+      { bookingId, grantId: link.petAccessGrantId },
+      { tx, aggregateType: "PetAccessGrant", aggregateId: link.petAccessGrantId },
+    );
+  }
+
+  private expiryFor(booking: Booking): Date {
+    const bufferHours = this.config.get("BOOKING_HEALTH_ACCESS_BUFFER_HOURS", { infer: true });
+    return new Date(booking.endAt.getTime() + bufferHours * 60 * 60 * 1000);
+  }
+
+  private issueGrant(booking: Booking, userId: string, consent: { scopePreset: PetAccessScopePreset; healthConsented: boolean }, tx: Prisma.TransactionClient) {
+    const flags = SCOPE_PRESET_FLAGS[consent.scopePreset];
+    const healthConsented = consent.healthConsented && flags.canViewHealth;
+    return tx.petAccessGrant.create({
       data: {
         petId: booking.petId,
-        userId: providerUser.userId,
+        userId,
         canViewIdentity: flags.canViewIdentity,
         canEditIdentity: false,
         canViewHealth: healthConsented,
@@ -159,7 +231,7 @@ export class BookingPetAccessService {
         canBookCare: false,
         canViewCareProfile: flags.canViewCareProfile,
         canEditCareProfile: flags.canEditCareProfile,
-        canViewLocation,
+        canViewLocation: booking.locationMode !== LocationMode.AT_PROVIDER,
         canManageAccess: false,
         // Handoff 17: only a VET-category visit produces clinical records —
         // a groomer/trainer/walker/sitter/boarding/taxi booking never grants
@@ -170,41 +242,17 @@ export class BookingPetAccessService {
         source: PetAccessSource.TEMPORARY,
         reason: healthConsented ? `${booking.category}_BOOKING_HEALTH_CONSENT` : `${booking.category}_BOOKING`,
         startsAt: new Date(),
-        expiresAt,
+        expiresAt: this.expiryFor(booking),
         grantedByUserId: booking.userId,
       },
     });
-
-    await tx.bookingPetAccess.create({
-      data: { bookingId: booking.id, petAccessGrantId: grant.id, scopePreset },
-    });
-
-    await this.events.publish(
-      "ServiceAccessGranted",
-      { bookingId: booking.id, petId: booking.petId, grantId: grant.id, scopePreset, category: booking.category },
-      { tx, aggregateType: "PetAccessGrant", aggregateId: grant.id },
-    );
   }
 
-  /**
-   * Revokes the grant this booking created, if any (a booking with no
-   * assigned provider user never created one). Soft-revoke only — the row
-   * (and BookingPetAccess audit link) is preserved, per the same revocation
-   * convention as every other PetAccessGrant.
-   */
-  async revokeForBooking(bookingId: string, revokedByUserId: string, tx: Prisma.TransactionClient): Promise<void> {
-    const link = await tx.bookingPetAccess.findUnique({ where: { bookingId } });
-    if (!link) return;
-
-    await tx.petAccessGrant.update({
-      where: { id: link.petAccessGrantId },
-      data: { revokedAt: new Date(), revokedByUserId },
-    });
-
-    await this.events.publish(
-      "ServiceAccessRevoked",
-      { bookingId, grantId: link.petAccessGrantId },
-      { tx, aggregateType: "PetAccessGrant", aggregateId: link.petAccessGrantId },
+  private publishGranted(booking: Booking, grantId: string, scopePreset: PetAccessScopePreset, tx: Prisma.TransactionClient) {
+    return this.events.publish(
+      "ServiceAccessGranted",
+      { bookingId: booking.id, petId: booking.petId, grantId, scopePreset, category: booking.category },
+      { tx, aggregateType: "PetAccessGrant", aggregateId: grantId },
     );
   }
 }
