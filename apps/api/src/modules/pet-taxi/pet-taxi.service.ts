@@ -6,7 +6,7 @@ import { ValidationApiException } from "../../common/errors/api-exception";
 import { registerWorker, trackWorker } from "../../common/workers/worker-heartbeat";
 import type { ResolvedProviderContext } from "../provider-os/auth/provider-context.types";
 import { MapsService, haversineMeters, straightLineRoute, validLatLng, type LatLng } from "../maps/maps.service";
-import { approximate, computeFare, normalizeCity, pickRuleForPoint, type FareBreakdown } from "./pet-taxi-fare.policy";
+import { MAX_PETS_PER_RIDE, approximate, computeFare, normalizeCity, pickRuleForPoint, type FareBreakdown } from "./pet-taxi-fare.policy";
 
 /** How long a request waits for a driver before it reports "no driver nearby". */
 export const SEARCH_WINDOW_MS = 10 * 60 * 1000;
@@ -109,7 +109,7 @@ export class PetTaxiService implements OnModuleInit, OnModuleDestroy {
     if (open && !(open.status === PetTaxiRideStatus.SEARCHING && open.searchExpiresAt <= new Date())) throw new ValidationApiException({ field: "ride", reason: "RIDE_ALREADY_OPEN", rideId: open.id });
     // Only the member's own household pets travel; access is through household membership.
     const petIds = [...new Set(input.petIds)];
-    if (!petIds.length || petIds.length > 4) throw new ValidationApiException({ field: "petIds", reason: "ONE_TO_FOUR_PETS" });
+    if (!petIds.length || petIds.length > MAX_PETS_PER_RIDE) throw new ValidationApiException({ field: "petIds", reason: "ONE_TO_THREE_PETS", max: MAX_PETS_PER_RIDE });
     const pets = await this.prisma.pet.findMany({ where: { id: { in: petIds }, deletedAt: null, household: { members: { some: { userId } } } }, select: { id: true, householdId: true } });
     if (pets.length !== petIds.length) throw new ValidationApiException({ field: "petIds", reason: "NOT_YOUR_PETS" });
     const quote = await this.quote({ pickup: input.pickup, dropoff: input.dropoff, carrierSize: input.carrierSize, petCount: petIds.length });

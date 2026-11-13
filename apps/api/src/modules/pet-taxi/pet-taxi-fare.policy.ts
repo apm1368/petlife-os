@@ -13,12 +13,16 @@ export interface FareBreakdown {
   minutes: number;
 }
 
+/** Owner decision (X-08, 2026-11-13): one price per ride whatever the number of pets, up to the vehicle's capacity. */
+export const MAX_PETS_PER_RIDE = 3;
+
 /** Round up to the next 1,000 toman, as taxi fares are quoted. */
 const roundUp = (irr: number) => Math.ceil(irr / 10_000) * 10_000;
 
 /**
  * base + per km + per minute; the carrier surcharge is a percentage of the distance-and-time part (a crate in the
- * boot costs more the longer the trip); each pet after the first adds a fixed amount; never below the minimum.
+ * boot costs more the longer the trip); never below the minimum. The number of pets (1–MAX_PETS_PER_RIDE) never
+ * changes the price; `extraPetsIrr` stays in the breakdown as 0 for older clients.
  */
 export function computeFare(rule: FareRule, route: { distanceMeters: number; durationSeconds: number }, carrierSize: PetTaxiCarrierSize, petCount: number): { fareIrr: number; breakdown: FareBreakdown } {
   const km = route.distanceMeters / 1000;
@@ -27,7 +31,8 @@ export function computeFare(rule: FareRule, route: { distanceMeters: number; dur
   const timeIrr = Math.round(rule.perMinuteIrr * minutes);
   const percent = carrierSize === "LARGE" ? rule.largeSurchargePercent : carrierSize === "MEDIUM" ? rule.mediumSurchargePercent : 0;
   const carrierIrr = Math.round(((distanceIrr + timeIrr) * percent) / 100);
-  const extraPetsIrr = Math.max(0, petCount - 1) * rule.extraPetIrr;
+  void petCount;
+  const extraPetsIrr = 0;
   const raw = rule.baseFareIrr + distanceIrr + timeIrr + carrierIrr + extraPetsIrr;
   const minimumApplied = raw < rule.minimumFareIrr;
   return {

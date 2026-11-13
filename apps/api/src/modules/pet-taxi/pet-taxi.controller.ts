@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Headers, Param, ParseUUIDPipe, Post, UseGuards } from "@nestjs/common";
+import { MAX_PETS_PER_RIDE } from "./pet-taxi-fare.policy";
 import { PetTaxiCarrierSize, PetTaxiRideStatus, ProviderUserRole } from "@prisma/client";
 import { Throttle } from "@nestjs/throttler";
 import { Type } from "class-transformer";
@@ -24,14 +25,14 @@ class QuoteDto {
   @ValidateNested() @Type(() => PointDto) pickup!: PointDto;
   @ValidateNested() @Type(() => PointDto) dropoff!: PointDto;
   @IsIn(Object.values(PetTaxiCarrierSize)) carrierSize!: PetTaxiCarrierSize;
-  @IsInt() @Min(1) @Max(4) petCount!: number;
+  @IsInt() @Min(1) @Max(MAX_PETS_PER_RIDE) petCount!: number;
 }
 
 class RequestRideDto {
   @ValidateNested() @Type(() => PointDto) pickup!: PointDto;
   @ValidateNested() @Type(() => PointDto) dropoff!: PointDto;
   @IsIn(Object.values(PetTaxiCarrierSize)) carrierSize!: PetTaxiCarrierSize;
-  @IsArray() @ArrayMinSize(1) @ArrayMaxSize(4) @IsUUID("4", { each: true }) petIds!: string[];
+  @IsArray() @ArrayMinSize(1) @ArrayMaxSize(MAX_PETS_PER_RIDE) @IsUUID("4", { each: true }) petIds!: string[];
 }
 
 class CancelDto {
