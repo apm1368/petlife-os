@@ -3,6 +3,7 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
 import { ClinicalAlertSeverity, ClinicalAlertType, PetSpecies, type ProviderPatientRecordDto } from "@petlife/types";
 import { vetPanelService } from "@/services/vet-panel.service";
+import { healthAdvancedService } from "@/services/health-advanced.service";
 import { usePetAccess } from "@/hooks/use-pet-access";
 import { VetPatientRecordView } from "./VetPatientRecordView";
 
@@ -13,6 +14,7 @@ vi.mock("@/services/vet-panel.service", () => ({
   vetPanelService: { getPatientRecord: vi.fn(), resolveAlert: vi.fn(), admitPatient: vi.fn(), presentEstimate: vi.fn(), cancelPrescription: vi.fn(), dispenseRefill: vi.fn() },
 }));
 vi.mock("@/services/provider-clinical.service", () => ({ providerClinicalService: { startVisit: vi.fn() } }));
+vi.mock("@/services/health-advanced.service", () => ({ healthAdvancedService: { downloadDocument: vi.fn() } }));
 
 function record(overrides: Partial<ProviderPatientRecordDto> = {}): ProviderPatientRecordDto {
   return {
@@ -36,6 +38,7 @@ function record(overrides: Partial<ProviderPatientRecordDto> = {}): ProviderPati
     allergies: [],
     medications: [],
     conditions: [],
+    vaccination: { status: "INCOMPLETE" as never, lastKnownDate: null, nextDueDate: null, notes: null },
     problems: [],
     prescriptions: [],
     latestVitals: null,
@@ -155,4 +158,52 @@ it("keeps a read-only clinical grant free of write controls", async () => {
  expect(screen.queryByRole("button",{name:/start.*visit/i})).toBeNull();
  expect(screen.queryByRole("button",{name:/admit/i})).toBeNull();
  expect(screen.queryByText("Add to clinical record")).toBeNull();
+});
+
+it("shows the owner-allowed record: medications, conditions, vaccination, labs and shared documents", async () => {
+  vi.mocked(usePetAccess).mockReturnValue({ access: { canRecordClinicalData: true } } as never);
+  vi.mocked(healthAdvancedService.downloadDocument).mockResolvedValue({ downloadUrl: "https://files.example/signed", expiresInSeconds: 300 });
+  const open = vi.spyOn(window, "open").mockReturnValue(null);
+  const source = { providerOrganizationId: "org-1", providerOrganizationName: "City Vet", providerUserId: null, providerUserDisplayTitle: null, userId: null };
+  vi.mocked(vetPanelService.getPatientRecord).mockResolvedValue(
+    record({
+      pet: { ...record().pet, species: PetSpecies.RABBIT, sex: "FEMALE" as never, latestWeightValue: 2.4, latestWeightUnit: "KG" as never },
+      medications: [{ id: "m1", name: "Meloxicam", dosage: 0.5, unit: "mg", frequencyText: "daily" }],
+      conditions: [{ id: "c1", name: "Dental disease", notes: "Molar spurs" }],
+      vaccination: { status: "UP_TO_DATE" as never, lastKnownDate: "2026-05-01T00:00:00.000Z", nextDueDate: "2027-05-01T00:00:00.000Z", notes: null },
+      recentLabs: [{ id: "l1", petId: "pet-1", source, clinicalVisitId: null, testName: "Hematocrit", testCode: null, sampleDate: "2026-09-01T00:00:00.000Z", resultDate: null, value: "38", unit: "%", referenceRangeLow: 30, referenceRangeHigh: 50, qualitativeResult: null, status: "FINAL" as never, flag: "NORMAL" as never, sourceType: "PROVIDER" as never, notes: null, supersedesId: null, createdAt: "2026-09-01T00:00:00.000Z", updatedAt: "2026-09-01T00:00:00.000Z" }],
+      documents: [{ id: "d1", petId: "pet-1", householdId: "hh-1", documentType: "LAB_REPORT" as never, title: "Last year's blood work", description: null, sourceType: "OWNER" as never, source: { ...source, providerOrganizationId: null, providerOrganizationName: null }, recordedAt: null, uploadedAt: "2026-04-02T00:00:00.000Z", mimeType: "application/pdf", fileSizeBytes: 100, visibility: "HOUSEHOLD_ONLY" as never, verificationStatus: "UNVERIFIED" as never, relatedVisitId: null, relatedLabResultId: null, relatedImagingStudyId: null, relatedReferralId: null, voidedAt: null, voidedReason: null, createdAt: "2026-04-02T00:00:00.000Z", updatedAt: "2026-04-02T00:00:00.000Z" }],
+    }),
+  );
+  renderWithIntl(<VetPatientRecordView petId="pet-1" />);
+  await screen.findByText("Luna");
+  expect(screen.getByText("Rabbit · Shiba Inu · Female · Age 3y · 2.4 kg (owner-recorded)")).toBeTruthy();
+  expect(screen.getByText("Meloxicam · 0.5 mg · daily")).toBeTruthy();
+  expect(screen.getByText("Dental disease")).toBeTruthy();
+  expect(screen.getByText("Molar spurs")).toBeTruthy();
+  expect(screen.getByText("Up to date")).toBeTruthy();
+
+  fireEvent.click(screen.getByText("Labs"));
+  await screen.findByText("Hematocrit");
+  expect(screen.getByText("38 %")).toBeTruthy();
+  expect(screen.getByText("Within range")).toBeTruthy();
+  expect(screen.getByText("Final result")).toBeTruthy();
+
+  fireEvent.click(screen.getByText("Documents"));
+  await screen.findByText("Last year's blood work");
+  expect(screen.getByText(/Shared by the owner/)).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "Secure download" }));
+  await waitFor(() => expect(healthAdvancedService.downloadDocument).toHaveBeenCalledWith("pet-1", "d1"));
+  await waitFor(() => expect(open).toHaveBeenCalledWith("https://files.example/signed", "_blank", "noopener,noreferrer"));
+  open.mockRestore();
+});
+
+it("says plainly when no documents or labs are available", async () => {
+  vi.mocked(vetPanelService.getPatientRecord).mockResolvedValue(record());
+  renderWithIntl(<VetPatientRecordView petId="pet-1" />);
+  await screen.findByText("Luna");
+  fireEvent.click(screen.getByText("Documents"));
+  expect(await screen.findByText("No documents available to you for this patient.")).toBeTruthy();
+  fireEvent.click(screen.getByText("Labs"));
+  expect(await screen.findByText("No lab results recorded.")).toBeTruthy();
 });

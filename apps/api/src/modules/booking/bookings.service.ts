@@ -33,7 +33,7 @@ import { SlotGeneratorService } from "../providers/slot-generator.service";
 import { toProviderLocationDto, toProviderServiceDto } from "../providers/provider-dto.mapper";
 import { CareCalendarService } from "../care-calendar/care-calendar.service";
 import { BookingHoldService } from "./booking-hold.service";
-import { BookingPetAccessService, DEFAULT_SCOPE_PRESET_BY_CATEGORY } from "./booking-pet-access.service";
+import { BookingPetAccessService, DEFAULT_SCOPE_PRESET_BY_CATEGORY, presetIncludesHealth } from "./booking-pet-access.service";
 import { BookingLifecycleService, OCCUPYING_STATUSES, TERMINAL_RELEASE_STATUSES, bookingEventFields } from "./booking-lifecycle.service";
 import { PetServiceCompatibilityService } from "../services/pet-service-compatibility.service";
 import { PaymentsService } from "../commerce/payments/payments.service";
@@ -282,8 +282,10 @@ export class BookingsService {
     const intake = peek && peek.userId === userId ? await this.resolveIntake(peek.providerServiceId, dto.intakeAnswers) : { intakeFormId: null, intakeAnswers: undefined };
     // Same for the address (missing, foreign or outside the service area): a correctable choice never costs the slot.
     if (peek && peek.userId === userId) {
-      const peekService = await this.prisma.providerService.findUnique({ where: { id: peek.providerServiceId }, select: { locationMode: true, serviceAreaCities: true } });
+      const peekService = await this.prisma.providerService.findUnique({ where: { id: peek.providerServiceId }, select: { locationMode: true, serviceAreaCities: true, category: true } });
       if (peekService) await this.resolveAddresses(peek.householdId, peekService.locationMode, dto, peekService.serviceAreaCities);
+      // Likewise the documents chosen for the vet.
+      if (peekService && dto.sharedDocumentIds?.length) await this.assertShareableDocuments(dto.petId, peekService.category as unknown as ServiceCategory, dto);
     }
     const hold = await this.bookingHold.consumeHold(dto.holdId);
     if (hold.petId !== dto.petId || hold.userId !== userId) {
@@ -388,7 +390,8 @@ export class BookingsService {
           initialStatus === BookingStatus.REQUESTED ? "ServiceBookingRequested" : initialStatus === BookingStatus.AWAITING_PAYMENT ? "ServiceBookingAwaitingPayment" : "ServiceBookingConfirmed";
         await this.events.publish(eventType, bookingEventFields(created), { tx, aggregateType: "Booking", aggregateId: created.id });
 
-        await this.petAccessGrants.grantForBooking(created, hold.providerUserId ?? undefined, scopePreset, tx, dto.accessSelection !== undefined);
+        const sharedDocumentIds = dto.sharedDocumentIds?.length && category === ServiceCategory.VET ? dto.sharedDocumentIds : [];
+        await this.petAccessGrants.grantForBooking(created, hold.providerUserId ?? undefined, scopePreset, tx, dto.accessSelection !== undefined, sharedDocumentIds);
         if (initialStatus !== BookingStatus.REQUESTED) await this.careCalendar.upsertForBooking(created, tx);
 
         return created.id;
@@ -692,8 +695,8 @@ export class BookingsService {
         // Access moves with the appointment: end the old grant, issue one for the new window with the same consent.
         await this.petAccessGrants.revokeForBooking(id, userId, tx);
         if (booking.petAccess) {
-          const consented = booking.petAccess.petAccessGrant.reason?.endsWith("_HEALTH_CONSENT") ?? false;
-          await this.petAccessGrants.grantForBooking(successor, successor.providerUserId ?? undefined, booking.petAccess.scopePreset as unknown as PetAccessScopePreset, tx, consented);
+          const { scopePreset, healthConsented, sharedDocumentIds } = booking.petAccess;
+          await this.petAccessGrants.grantForBooking(successor, successor.providerUserId ?? undefined, scopePreset as unknown as PetAccessScopePreset, tx, healthConsented, sharedDocumentIds);
         }
         await this.careCalendar.upsertForBooking(successor, tx);
         await this.events.publish("ServiceBookingRescheduled", { ...bookingEventFields(successor), fromBookingId: id }, { tx, aggregateType: "Booking", aggregateId: successor.id });
@@ -753,8 +756,7 @@ export class BookingsService {
 
     const scopePreset = (origin.petAccess?.scopePreset as unknown as PetAccessScopePreset | undefined) ?? DEFAULT_SCOPE_PRESET_BY_CATEGORY[category];
     // Occurrences inherit the owner's health-consent decision from the origin booking, never widen it.
-    const originGrant = origin.petAccess ? await this.prisma.petAccessGrant.findUnique({ where: { id: origin.petAccess.petAccessGrantId }, select: { reason: true } }) : null;
-    const originConsented = originGrant?.reason?.endsWith("_HEALTH_CONSENT") ?? false;
+    const originConsented = origin.petAccess?.healthConsented ?? false;
     const durationMs = origin.endAt.getTime() - origin.startAt.getTime();
 
     const series = await this.prisma.bookingSeries.create({
@@ -929,6 +931,20 @@ export class BookingsService {
   }
 
   /** Only a completely NOT_STARTED required profile blocks confirmation — see PetContextIncompleteException's doc comment. */
+  /**
+   * Documents shared with a booking's vet: only for a VET booking whose owner chose a health scope, and only
+   * this pet's own, non-retracted documents. Checked before the hold is consumed, so a wrong pick never
+   * costs the slot.
+   */
+  private async assertShareableDocuments(petId: string, category: ServiceCategory, dto: Pick<CreateBookingDto, "accessSelection" | "sharedDocumentIds">): Promise<void> {
+    const ids = dto.sharedDocumentIds ?? [];
+    if (!ids.length) return;
+    if (category !== ServiceCategory.VET) throw new ValidationApiException({ field: "sharedDocumentIds", reason: "ONLY_FOR_VET" });
+    if (!dto.accessSelection || !presetIncludesHealth(dto.accessSelection)) throw new ValidationApiException({ field: "sharedDocumentIds", reason: "REQUIRES_HEALTH_SHARING" });
+    const found = await this.prisma.medicalDocument.count({ where: { id: { in: ids }, petId, voidedAt: null } });
+    if (found !== new Set(ids).size) throw new ValidationApiException({ field: "sharedDocumentIds", reason: "DOCUMENT_NOT_FOUND" });
+  }
+
   private async assertPetContextComplete(petId: string, service: { requiresCareProfile: boolean; requiresHealthBasics: boolean }): Promise<void> {
     if (service.requiresCareProfile) {
       const careProfile = await this.prisma.careProfile.findUnique({ where: { petId } });
@@ -1024,7 +1040,7 @@ export class BookingsService {
   private toPetAccessSummary(petAccess: NonNullable<BookingWithRelations["petAccess"]>): BookingPetAccessSummaryDto {
     return {
       scopePreset: petAccess.scopePreset as unknown as BookingPetAccessSummaryDto["scopePreset"],
-      expiresAt: petAccess.petAccessGrant.expiresAt?.toISOString() ?? "",
+      expiresAt: petAccess.petAccessGrant?.expiresAt?.toISOString() ?? "",
     };
   }
 }

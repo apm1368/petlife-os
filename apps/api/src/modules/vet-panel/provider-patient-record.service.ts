@@ -1,10 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import { AllergyStatus, ClinicalVisitStatus, ConditionStatus, DocumentVisibility, HouseholdRole, MedicationStatus, SourceType } from "@prisma/client";
+import { AllergyStatus, ClinicalVisitStatus, ConditionStatus, DocumentVisibility, HouseholdRole, MedicationStatus, SourceType, VaccinationStatus } from "@prisma/client";
 import type { ProviderPatientRecordDto } from "@petlife/types";
 import { NotFoundApiException } from "../../common/errors/api-exception";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { CARE_PLAN_INCLUDE, CLINICAL_VISIT_INCLUDE, LAB_RESULT_INCLUDE, MEDICAL_DOCUMENT_INCLUDE, toCarePlanDto, toClinicalVisitDto, toLabResultDto, toMedicalDocumentDto } from "../clinical-health/clinical-health-mapper";
 import type { ResolvedProviderContext } from "../provider-os/auth/provider-context.types";
+import { bookingSharedDocumentIds } from "../pet-access/booking-document-shares";
 import { HOSPITALIZATION_INCLUDE, PROVIDER_ACTOR_INCLUDE, ESTIMATE_INCLUDE, toClinicalEstimateDto, toClinicalProblemDto, toHospitalizationDto, toPatientVitalsDto, toPrescriptionDto, toProviderClinicalAlertDto } from "./vet-panel.mapper";
 
 const VITALS_HISTORY_LIMIT = 10;
@@ -21,8 +22,9 @@ const VITALS_HISTORY_LIMIT = 10;
  * Authorization is entirely the controller's `PetAccessGuard(canViewHealth)`
  * stacked on `ProviderAuthGuard`, exactly as in Handoff 17: this service
  * shapes a DTO and never decides who may read it. Two things stay filtered by
- * construction regardless: an owner's HOUSEHOLD_ONLY documents never appear,
- * and alerts are scoped to the reading organisation's own rows.
+ * construction regardless: an owner's HOUSEHOLD_ONLY documents appear only
+ * when the owner ticked them for one of the reader's active bookings with this
+ * organisation, and alerts are scoped to the reading organisation's own rows.
  */
 @Injectable()
 export class ProviderPatientRecordService {
@@ -32,7 +34,8 @@ export class ProviderPatientRecordService {
     const pet = await this.prisma.pet.findUnique({ where: { id: petId } });
     if (!pet) throw new NotFoundApiException("Pet");
 
-    const [ownerMember, careProfile, alerts, allergies, medications, conditions, problems, prescriptions, vitals, visits, labs, documents, carePlans, estimates, hospitalizations] = await Promise.all([
+    const sharedIds = await bookingSharedDocumentIds(this.prisma, petId, ctx.userId, { organizationId: ctx.organizationId });
+    const [ownerMember, careProfile, alerts, allergies, medications, conditions, vaccination, problems, prescriptions, vitals, visits, labs, documents, sharedDocuments, carePlans, estimates, hospitalizations] = await Promise.all([
       this.prisma.householdMember.findFirst({
         where: { householdId: pet.householdId, role: HouseholdRole.OWNER },
         include: { user: { select: { displayName: true, phone: true } } },
@@ -42,6 +45,7 @@ export class ProviderPatientRecordService {
       this.prisma.allergy.findMany({ where: { petId, status: AllergyStatus.ACTIVE } }),
       this.prisma.medication.findMany({ where: { petId, status: MedicationStatus.ACTIVE } }),
       this.prisma.condition.findMany({ where: { petId, status: ConditionStatus.ACTIVE } }),
+      this.prisma.vaccinationSummary.findUnique({ where: { petId } }),
       this.prisma.clinicalProblem.findMany({ where: { petId }, include: PROVIDER_ACTOR_INCLUDE, orderBy: [{ status: "asc" }, { createdAt: "desc" }] }),
       this.prisma.prescription.findMany({ where: { petId }, include: PROVIDER_ACTOR_INCLUDE, orderBy: { prescribedAt: "desc" }, take: 20 }),
       this.prisma.patientVitalsRecord.findMany({ where: { petId }, include: PROVIDER_ACTOR_INCLUDE, orderBy: { recordedAt: "desc" }, take: VITALS_HISTORY_LIMIT }),
@@ -58,6 +62,8 @@ export class ProviderPatientRecordService {
         orderBy: { uploadedAt: "desc" },
         take: 10,
       }),
+      // The owner's own documents ticked for this reader's active booking(s) here — never by changing their visibility.
+      this.prisma.medicalDocument.findMany({ where: { petId, voidedAt: null, id: { in: sharedIds } }, include: MEDICAL_DOCUMENT_INCLUDE, orderBy: { uploadedAt: "desc" } }),
       this.prisma.carePlan.findMany({ where: { petId }, include: CARE_PLAN_INCLUDE, orderBy: { createdAt: "desc" } }),
       this.prisma.clinicalEstimate.findMany({ where: { petId }, include: ESTIMATE_INCLUDE, orderBy: { createdAt: "desc" }, take: 10 }),
       this.prisma.hospitalization.findMany({ where: { petId }, include: HOSPITALIZATION_INCLUDE, orderBy: { admittedAt: "desc" }, take: 10 }),
@@ -88,13 +94,21 @@ export class ProviderPatientRecordService {
       allergies: allergies.map((a) => ({ id: a.id, name: a.name, severity: a.severity })),
       medications: medications.map((m) => ({ id: m.id, name: m.name, dosage: m.dosage === null ? null : Number(m.dosage), unit: m.unit, frequencyText: m.frequencyText })),
       conditions: conditions.map((c) => ({ id: c.id, name: c.name, notes: c.notes })),
+      vaccination: {
+        status: (vaccination?.status ?? VaccinationStatus.INCOMPLETE) as unknown as ProviderPatientRecordDto["vaccination"]["status"],
+        lastKnownDate: vaccination?.lastKnownDate?.toISOString() ?? null,
+        nextDueDate: vaccination?.nextDueDate?.toISOString() ?? null,
+        notes: vaccination?.notes ?? null,
+      },
       problems: problems.map(toClinicalProblemDto),
       prescriptions: prescriptions.map((p) => toPrescriptionDto(p, "PROVIDER")),
       latestVitals: vitalsDtos[0] ?? null,
       vitalsHistory: vitalsDtos,
       recentVisits: visits.map(toClinicalVisitDto),
       recentLabs: labs.map(toLabResultDto),
-      documents: documents.map(toMedicalDocumentDto),
+      documents: [...new Map([...sharedDocuments, ...documents].map((d) => [d.id, d] as const)).values()]
+        .sort((a, b) => b.uploadedAt.getTime() - a.uploadedAt.getTime())
+        .map(toMedicalDocumentDto),
       carePlans: carePlans.map(toCarePlanDto),
       estimates: estimates.map(toClinicalEstimateDto),
       hospitalizations: hospitalizations.map(toHospitalizationDto),

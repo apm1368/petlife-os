@@ -14,8 +14,12 @@ import { VitalsSparkline } from "./VitalsSparkline";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
 import { useStatusText } from "@/lib/status/use-status-text";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { healthAdvancedService } from "@/services/health-advanced.service";
+import { formatAge, formatWeight, speciesLabel } from "@/features/pets/pet-identity";
+import { documentTypeLabel } from "@/features/health-advanced/document-labels";
 
-type Tab = "summary" | "problems" | "vitals" | "prescriptions" | "visits" | "financial";
+type Tab = "summary" | "problems" | "vitals" | "prescriptions" | "visits" | "labs" | "documents" | "financial";
+const TABS: Tab[] = ["summary", "problems", "vitals", "prescriptions", "visits", "labs", "documents", "financial"];
 
 const ALERT_TONE: Record<ClinicalAlertSeverity, "neutral" | "attention" | "emergency"> = {
   INFO: "neutral",
@@ -46,7 +50,9 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
   const t = useTranslations("vetPanel.record");
   const tCommon = useTranslations("common");
   const router = useRouter();
-  const locale = useLocale();
+  const locale = useLocale() as "fa" | "en" | "de" | "es";
+  const tVaccination = useTranslations("health.vaccinationStatus");
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const [record, setRecord] = useState<ProviderPatientRecordDto | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -107,6 +113,17 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
     }
   }
 
+  async function download(documentId: string): Promise<void> {
+    setDownloadError(null);
+    try {
+      // The pet's signed download: the API re-checks that this document is shared with this reader.
+      const target = await healthAdvancedService.downloadDocument(petId, documentId);
+      window.open(target.downloadUrl, "_blank", "noopener,noreferrer");
+    } catch {
+      setDownloadError(t("downloadFailed"));
+    }
+  }
+
   if (loadError && !record) return <LoadFailure error={loadError} onRetry={load} />;
   if (!record) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
@@ -156,7 +173,14 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
           </div> : null}
         </div>
         <p className="text-metadata text-text-secondary">
-          {[t(`species.${record.pet.species}`), record.pet.breed, record.pet.sex ? t(`sex.${record.pet.sex}`) : null, record.pet.microchipNumber ? t("chip", { chip: record.pet.microchipNumber }) : null]
+          {[
+            speciesLabel(record.pet, locale),
+            record.pet.breed,
+            record.pet.sex ? t(`sex.${record.pet.sex}`) : null,
+            record.pet.birthDate || record.pet.approximateAgeMonths !== null ? t("age", { age: formatAge(record.pet, locale, "") }) : null,
+            record.pet.latestWeightValue !== null ? t("ownerWeight", { weight: formatWeight(record.pet, locale, "") }) : null,
+            record.pet.microchipNumber ? t("chip", { chip: record.pet.microchipNumber }) : null,
+          ]
             .filter(Boolean)
             .join(" · ")}
         </p>
@@ -166,7 +190,7 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
       <ClinicalRecordActions key={petId} petId={petId} problems={record.problems} onSaved={load} />
 
       <nav className="flex gap-1 overflow-x-auto border-b border-border-subtle pb-2">
-        {(["summary", "problems", "vitals", "prescriptions", "visits", "financial"] as Tab[]).map((item) => (
+        {TABS.map((item) => (
           <button
             key={item}
             type="button"
@@ -207,6 +231,45 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
                 </div>
               ))
             )}
+          </ContextSurface>
+
+          <ContextSurface className="flex flex-col gap-2">
+            <h2 className="text-section-title text-text-primary">{t("medications")}</h2>
+            {record.medications.length === 0 ? (
+              <p className="text-body text-text-secondary">{t("noneRecorded")}</p>
+            ) : (
+              record.medications.map((m) => (
+                <p key={m.id} className="text-body text-text-primary" dir="auto">
+                  {[m.name, m.dosage !== null ? `${fmt.number(m.dosage)} ${m.unit ?? ""}`.trim() : null, m.frequencyText].filter(Boolean).join(" · ")}
+                </p>
+              ))
+            )}
+          </ContextSurface>
+
+          <ContextSurface className="flex flex-col gap-2">
+            <h2 className="text-section-title text-text-primary">{t("conditions")}</h2>
+            {record.conditions.length === 0 ? (
+              <p className="text-body text-text-secondary">{t("noneRecorded")}</p>
+            ) : (
+              record.conditions.map((c) => (
+                <div key={c.id} className="flex flex-col">
+                  <span className="text-body text-text-primary" dir="auto">{c.name}</span>
+                  {c.notes ? <span className="text-metadata text-text-secondary" dir="auto">{c.notes}</span> : null}
+                </div>
+              ))
+            )}
+          </ContextSurface>
+
+          <ContextSurface className="flex flex-col gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-section-title text-text-primary">{t("vaccination")}</h2>
+              <StatusLabel tone={statusText.tone(record.vaccination.status, "vaccination")}>{tVaccination(record.vaccination.status)}</StatusLabel>
+            </div>
+            <dl className="grid grid-cols-2 gap-2">
+              <Measure label={t("vaccinationLast")} value={record.vaccination.lastKnownDate ? fmt.date(record.vaccination.lastKnownDate) : null} />
+              <Measure label={t("vaccinationNext")} value={record.vaccination.nextDueDate ? fmt.date(record.vaccination.nextDueDate) : null} />
+            </dl>
+            {record.vaccination.notes ? <p className="text-body text-text-secondary" dir="auto">{record.vaccination.notes}</p> : null}
           </ContextSurface>
 
           <ContextSurface className="flex flex-col gap-2">
@@ -364,6 +427,57 @@ export function VetPatientRecordView({ petId, bookingId }: { petId: string; book
               </button>
             ))
           )}
+        </div>
+      ) : null}
+
+      {tab === "labs" ? (
+        <div className="flex flex-col gap-2">
+          {record.recentLabs.length === 0 ? (
+            <EmptyState title={t("noLabs")} />
+          ) : (
+            record.recentLabs.map((lab) => (
+              <ContextSurface key={lab.id} className="flex flex-col gap-1">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-body text-text-primary" dir="auto">{lab.testName}</span>
+                  <div className="flex flex-wrap gap-1">
+                    {lab.flag ? <StatusLabel tone={statusText.tone(lab.flag, "labFlag")}>{statusText.label(lab.flag, "labFlag")}</StatusLabel> : null}
+                    <StatusLabel tone={statusText.tone(lab.status, "lab")}>{statusText.label(lab.status, "lab")}</StatusLabel>
+                  </div>
+                </div>
+                <span className="text-body text-text-primary" dir="auto">{[lab.value !== null ? `${lab.value} ${lab.unit ?? ""}`.trim() : null, lab.qualitativeResult].filter(Boolean).join(" · ") || "—"}</span>
+                <span className="text-metadata text-text-secondary">
+                  {[
+                    lab.referenceRangeLow !== null && lab.referenceRangeHigh !== null ? t("labRange", { low: fmt.number(lab.referenceRangeLow), high: fmt.number(lab.referenceRangeHigh) }) : null,
+                    fmt.date(lab.resultDate ?? lab.sampleDate ?? lab.createdAt),
+                    lab.source.providerOrganizationName,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </span>
+              </ContextSurface>
+            ))
+          )}
+        </div>
+      ) : null}
+
+      {tab === "documents" ? (
+        <div className="flex flex-col gap-2">
+          {record.documents.length === 0 ? (
+            <EmptyState title={t("noDocuments")} />
+          ) : (
+            record.documents.map((d) => (
+              <ContextSurface key={d.id} className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex min-w-0 flex-col">
+                  <span className="text-body text-text-primary" dir="auto">{d.title}</span>
+                  <span className="text-metadata text-text-secondary">
+                    {[documentTypeLabel(d.documentType, locale), fmt.date(d.recordedAt ?? d.uploadedAt), d.sourceType === "PROVIDER" ? d.source.providerOrganizationName : t("sharedByOwner")].filter(Boolean).join(" · ")}
+                  </span>
+                </div>
+                <Button variant="secondary" onClick={() => void download(d.id)}>{t("download")}</Button>
+              </ContextSurface>
+            ))
+          )}
+          {downloadError ? <p role="alert" className="text-body text-state-urgent">{downloadError}</p> : null}
         </div>
       ) : null}
 

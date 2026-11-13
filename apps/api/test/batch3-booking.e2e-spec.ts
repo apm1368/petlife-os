@@ -791,8 +791,8 @@ describe("Batch 3 — services, booking lifecycle, provider and admin operations
         where: { bookingId: { in: [original.id, moved.body.id] } },
         include: { petAccessGrant: true },
       });
-      expect(grants.find((g) => g.bookingId === original.id)?.petAccessGrant.revokedAt).not.toBeNull();
-      expect(grants.find((g) => g.bookingId === moved.body.id)?.petAccessGrant.reason).toBe(
+      expect(grants.find((g) => g.bookingId === original.id)?.petAccessGrant?.revokedAt).toBeInstanceOf(Date);
+      expect(grants.find((g) => g.bookingId === moved.body.id)?.petAccessGrant?.reason).toBe(
         "VET_BOOKING_HEALTH_CONSENT",
       );
     });

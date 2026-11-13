@@ -1051,6 +1051,43 @@ export interface ProviderPetAccessContextDto {
   canViewHealth: boolean;
 }
 
+/**
+ * The pet's general, non-medical identity — every booking scope includes it, so it is returned only while
+ * the viewer holds this booking's active grant. Microchip presence only, never the number.
+ */
+export interface ProviderBookingPetIdentityDto {
+  sex: PetSex | null;
+  birthDate: string | null;
+  approximateAgeMonths: number | null;
+  latestWeightValue: number | null;
+  latestWeightUnit: WeightUnit | null;
+  hasMicrochip: boolean;
+}
+
+/** One summary row per pet (see VaccinationSummary) — dates are calendar dates, never implied. */
+export interface ProviderVaccinationSummaryDto {
+  status: VaccinationStatus;
+  lastKnownDate: string | null;
+  nextDueDate: string | null;
+  notes: string | null;
+}
+
+/** Only when the owner chose to share health for this booking and the viewer holds its active grant. */
+export interface ProviderBookingHealthDetailsDto {
+  allergies: { id: string; name: string; severity: string | null; reaction: string | null }[];
+  conditions: { id: string; name: string; notes: string | null }[];
+  medications: { id: string; name: string; dosage: number | null; unit: string | null; frequencyText: string | null }[];
+  vaccination: ProviderVaccinationSummaryDto;
+  /** The owner's documents ticked for this booking — download through the pet's signed document download. */
+  sharedDocuments: MedicalDocumentDto[];
+}
+
+/** The service's intake form as the owner answered it for this booking (same shape as GET /provider/bookings/:id/intake). */
+export interface ProviderBookingIntakeDto {
+  formVersion: number;
+  answers: { key: string; label: string; type: string; value: unknown }[];
+}
+
 export interface ProviderBookingDetailDto {
   booking: ProviderBookingSummaryDto & {
     reasonForVisit: string | null;
@@ -1064,10 +1101,12 @@ export interface ProviderBookingDetailDto {
     createdAt: string;
     updatedAt: string;
   };
-  pet: { id: string; name: string; species: PetSpecies; breed: string | null; photoUrl: string | null };
+  pet: { id: string; name: string; species: PetSpecies; breed: string | null; photoUrl: string | null; identity: ProviderBookingPetIdentityDto | null };
   access: ProviderPetAccessContextDto;
   careProfile: CareProfileDto | null;
   healthSummary: HealthSummaryDto | null;
+  healthDetails: ProviderBookingHealthDetailsDto | null;
+  intake: ProviderBookingIntakeDto | null;
   providerNotes: BookingProviderNoteDto[];
 }
 
@@ -6458,12 +6497,14 @@ export interface ProviderPatientRecordDto {
     frequencyText: string | null;
   }[];
   conditions: { id: string; name: string; notes: string | null }[];
+  vaccination: ProviderVaccinationSummaryDto;
   problems: ClinicalProblemDto[];
   prescriptions: PrescriptionDto[];
   latestVitals: PatientVitalsDto | null;
   vitalsHistory: PatientVitalsDto[];
   recentVisits: ClinicalVisitDto[];
   recentLabs: LabResultDto[];
+  /** Provider-shared or provider-authored documents, plus the owner's documents ticked for one of the reader's active bookings. */
   documents: MedicalDocumentDto[];
   carePlans: CarePlanDto[];
   estimates: ClinicalEstimateDto[];
