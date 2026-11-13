@@ -73,6 +73,7 @@ import { PrivacyGovernanceModule } from "./modules/privacy-governance/privacy-go
 import { PlatformSettingsModule } from "./modules/platform-settings/platform-settings.module";
 import { CalendarModule } from "./modules/calendar/calendar.module";
 import { PartnerVerificationModule } from "./modules/partner-verification/partner-verification.module";
+import { PartnerOnboardingModule } from "./modules/partner-onboarding/partner-onboarding.module";
 import { TravelExternalModule } from "./modules/travel-external/travel-external.module";
 import { ConsumerHubModule } from "./modules/consumer-hub/consumer-hub.module";
 import { LostPetModule } from "./modules/lost-pet/lost-pet.module";
@@ -152,6 +153,7 @@ import { PlacesModule } from "./modules/places/places.module";
     PlatformSettingsModule,
     CalendarModule,
     PartnerVerificationModule,
+    PartnerOnboardingModule,
     TravelExternalModule,
     VetPanelModule,
     ClinicOsModule,

@@ -22,11 +22,16 @@ export class OnboardingService {
   ) {}
 
   async getProgress(userId: string) {
-    const progress = await this.prisma.onboardingProgress.findUnique({ where: { userId } });
-    if (progress) return progress;
+    const [progress, user] = await Promise.all([
+      this.prisma.onboardingProgress.findUnique({ where: { userId } }),
+      this.prisma.user.findUnique({ where: { id: userId }, select: { signupIntent: true } }),
+    ]);
+    // Partners (signup intent PARTNER) are routed to the partner wizard, never into this pet-owner onboarding.
+    const signupIntent = user?.signupIntent ?? "PET_OWNER";
+    if (progress) return { ...progress, signupIntent };
     // Resumable-by-default: an unstarted user still gets a well-formed
     // "at the beginning" state instead of a 404.
-    return { userId, ...INITIAL_STATE, householdId: null, petId: null, lastCompletedAt: null };
+    return { userId, ...INITIAL_STATE, householdId: null, petId: null, lastCompletedAt: null, signupIntent };
   }
 
   async updateProgress(userId: string, dto: UpdateProgressDto) {

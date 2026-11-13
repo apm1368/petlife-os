@@ -3,7 +3,11 @@ import { sanitizeReturnTo } from "./return-to";
 interface OnboardingProgressLike {
   status: string;
   chapter: string;
+  signupIntent?: string;
 }
+
+/** Where a partner continues: the partner signup wizard (which shows the review status once submitted). */
+export const partnerHomePath = (locale: string) => `/${locale}/partners/onboarding`;
 
 /**
  * The single place every sign-in method (OTP, username/password, Google)
@@ -13,6 +17,14 @@ interface OnboardingProgressLike {
  * account is sent straight to its original intended destination.
  */
 export function resolvePostAuthDestination(locale: string, returnTo: string | null | undefined, progress: OnboardingProgressLike): string {
+  // Partner signup ("ثبت‌نام همکار"): a partner account, or anyone signing in on the way into the partner area, goes
+  // to the partner flow — never into the pet-owner onboarding.
+  const partnerHome = partnerHomePath(locale);
+  const partnerTarget = returnTo ? sanitizeReturnTo(returnTo, partnerHome) : null;
+  if (progress.signupIntent === "PARTNER" || partnerTarget?.startsWith(`/${locale}/partners/`)) {
+    return partnerTarget ?? partnerHome;
+  }
+
   const isOnboardingComplete = progress.status === "COMPLETED" && progress.chapter === "READY";
 
   if (!isOnboardingComplete) {

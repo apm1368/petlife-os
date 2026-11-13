@@ -1264,6 +1264,8 @@ model User {
   avatarUrl              String?
   locale                 Locale            @default(fa)
   themePreference        ThemePreference   @default(SYSTEM)
+  /// PET_OWNER (default) or PARTNER: a partner signup ("ثبت‌نام همکار") never goes through the pet-owner onboarding.
+  signupIntent           String            @default("PET_OWNER")
   /// ERP-B: platform-level account suspension by staff (trust/admin). A suspended account can't sign in and its
   /// sessions stop resolving; nothing is deleted. Reason is internal (never shown on member-facing APIs).
   accountStatus          UserAccountStatus @default(ACTIVE)
@@ -2151,6 +2153,11 @@ model ProviderOrganization {
   phone       String?
   email       String?
   description String?
+  /// Every service kind the partner offers (multi-select at signup); `type` stays the first/primary one.
+  serviceKinds               ProviderType[]             @default([])
+  /// The partner's shop when one signup created both a service business and a shop (same owner).
+  linkedSellerOrganizationId String?                    @unique @db.Uuid
+  linkedSellerOrganization   SellerOrganization?        @relation("ProviderSellerLink", fields: [linkedSellerOrganizationId], references: [id], onDelete: SetNull)
   logoUrl     String?
   websiteUrl  String?
 
@@ -2780,6 +2787,15 @@ model SellerOrganization {
   status                    SellerStatus             @default(ACTIVE)
   countryCode               String
   city                      String?
+  /// Postal address from partner signup (city is the existing `city`); province = استان.
+  province                  String?
+  addressLine               String?
+  postalCode                String?
+  latitude                  Float?
+  longitude                 Float?
+  /// Shop opening hours for display only (no booking): [{ dayOfWeek, open, close }].
+  openingHours              Json?
+  linkedProviderOrganization ProviderOrganization?   @relation("ProviderSellerLink")
   logoUrl                   String?
   description               String?
 

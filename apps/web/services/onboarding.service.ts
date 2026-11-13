@@ -10,6 +10,8 @@ export interface OnboardingProgressDto {
   status: OnboardingStatus;
   completedSteps: string[];
   lastCompletedAt: string | null;
+  /** PARTNER accounts (partner signup) are never sent into this pet-owner onboarding. */
+  signupIntent?: "PET_OWNER" | "PARTNER";
 }
 
 export interface UpdateProgressInput {
