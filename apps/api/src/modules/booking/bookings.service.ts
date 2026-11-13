@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { bookingPrice, bookingSpanMinutes } from "./booking-pricing.util";
 import { BookingActorType, BookingMode, BookingPaymentMode, BookingSeriesFrequency as PrismaBookingSeriesFrequency, BookingStatus, CartStatus, CheckoutStatus, LocationMode as PrismaLocationMode, PaymentMethodType, PaymentProvider, PaymentStatus, Prisma, SetupStatus } from "@prisma/client";
 import {
   ServiceCategory,
@@ -214,7 +215,8 @@ export class BookingsService {
     } else {
       if (!dto.slotStart) throw new ValidationApiException({ field: "slotStart", reason: `${service.category} bookings require a slotStart` });
       rangeStart = new Date(dto.slotStart);
-      rangeEnd = new Date(rangeStart.getTime() + durationMinutes * 60_000);
+      // Grooming, vet and training take the pets one after another (booking-pricing.util).
+      rangeEnd = new Date(rangeStart.getTime() + bookingSpanMinutes(service.category, durationMinutes, pets.length) * 60_000);
 
       const slots = await this.slotGenerator.generate({
         providerOrganizationId: dto.providerId,
@@ -224,6 +226,7 @@ export class BookingsService {
         variantId: variant?.id,
         from: new Date(rangeStart.getTime() - 60_000),
         to: new Date(rangeEnd.getTime() + 60_000),
+        petCount: pets.length,
       });
       // "Any professional": slots are ordered by time then staff id, so the first available qualified
       // staff member at that time is assigned — deterministic and documented in the booking pattern.
@@ -317,9 +320,18 @@ export class BookingsService {
       : null;
     const unitPrice = variant?.priceAmount ?? service.priceAmount;
     const petCount = 1 + (hold.additionalPetIds?.length ?? 0);
-    const priceAmount = transportRoute?.distancePricingApplied
-      ? new Prisma.Decimal(transportRoute.estimatedFareIrr!) // one ride, however many pets ride in it
-      : unitPrice === null ? null : new Prisma.Decimal(unitPrice).mul(petCount);
+    // Owner rules (booking-pricing.util): a taxi ride is one price however many pets ride; a stay is per night per
+    // pet; everything else is per pet.
+    const price = bookingPrice({
+      category: service.category,
+      locationMode,
+      unitPrice: unitPrice === null ? null : Number(unitPrice),
+      petCount,
+      start: new Date(hold.slotStart),
+      end: new Date(hold.slotEnd),
+      distanceFare: transportRoute?.distancePricingApplied ? transportRoute.estimatedFareIrr! : null,
+    });
+    const priceAmount = price.total === null ? null : new Prisma.Decimal(price.total);
     const onlinePayment = service.paymentMode === BookingPaymentMode.FULL_PREPAYMENT || service.paymentMode === BookingPaymentMode.DEPOSIT;
     if (onlinePayment && (priceAmount === null || (service.paymentMode === BookingPaymentMode.DEPOSIT && !service.depositAmount))) {
       // A misconfigured paid service must never produce an unpriced "paid" booking.
@@ -368,7 +380,7 @@ export class BookingsService {
             discountAmount: 0,
             depositAmount: service.paymentMode === BookingPaymentMode.DEPOSIT ? service.depositAmount : null,
             currency: service.currency,
-            durationMinutes: variant?.durationMinutes ?? service.durationMinutes,
+            durationMinutes: bookingSpanMinutes(service.category, variant?.durationMinutes ?? service.durationMinutes, petCount),
             serviceNameSnapshot: service.name,
             variantNameSnapshot: variant?.name ?? null,
             cancellationPolicySnapshot: service.cancellationPolicy,
@@ -660,6 +672,7 @@ export class BookingsService {
       from: new Date(newStart.getTime() - 60_000),
       to: new Date(newEnd.getTime() + 60_000),
       ignoreBookingId: id,
+      petCount: 1 + booking.additionalPets.length,
     });
     const match = slots.find((s) => s.startAt.getTime() === newStart.getTime() && s.state === "AVAILABLE");
     if (!match) throw new SlotUnavailableException({ slotStart: dto.slotStart });
@@ -720,7 +733,7 @@ export class BookingsService {
    * series-wide cancel endpoint this phase; see README Known limitations.
    */
   async createWeeklySeries(userId: string, originBookingId: string, occurrences: number, intervalWeeks = 1): Promise<{ series: BookingSeriesDto; createdBookingIds: string[]; skippedStarts: string[] }> {
-    const origin = await this.prisma.booking.findUnique({ where: { id: originBookingId }, include: { petAccess: true } });
+    const origin = await this.prisma.booking.findUnique({ where: { id: originBookingId }, include: { petAccess: true, additionalPets: true } });
     if (!origin) throw new NotFoundApiException("Booking");
 
     if (!(await this.petAccess.canActOnBooking(origin, userId))) throw new PetAccessDeniedException({ bookingId: originBookingId });
@@ -786,6 +799,7 @@ export class BookingsService {
         variantId: origin.variantId ?? undefined,
         from: new Date(startAt.getTime() - 60_000),
         to: new Date(endAt.getTime() + 60_000),
+        petCount: 1 + origin.additionalPets.length,
       });
       const slot = slots.find((s) => s.startAt.getTime() === startAt.getTime() && s.state === "AVAILABLE");
       if (!slot) {
@@ -832,6 +846,8 @@ export class BookingsService {
               freeCancellationHours: origin.freeCancellationHours,
               lateCancellationRefundPercent: origin.lateCancellationRefundPercent,
               preparationSnapshot: origin.preparationSnapshot,
+              // Every occurrence brings the same pets as the first visit (its span and price already count them).
+              additionalPets: { create: origin.additionalPets.map((p) => ({ petId: p.petId })) },
             },
           });
           await this.lifecycle.recordCreated(tx, created, BookingActorType.USER, userId);

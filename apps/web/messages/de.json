@@ -5486,6 +5486,11 @@
       "addressRequired": "Bitte wähle die Adresse des Termins.",
       "petAccessDenied": "Du darfst für dieses Tier keine Buchung vornehmen.",
       "bookingChanged": "Der Status dieser Buchung hat sich geändert. Bitte aktualisiere die Seite."
+    },
+    "priceBreakdown": {
+      "perPet": "{unit} pro Tier × {pets, number} Tiere",
+      "perPetNight": "{unit} pro Tier und Nacht × {pets, number} Tiere × {nights, number} Nächte",
+      "perRide": "{unit} pro Fahrt, egal wie viele Tiere"
     }
   },
   "datePicker": {
