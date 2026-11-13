@@ -33,6 +33,8 @@ export interface ShippingQuoteOption {
   estimatedDeliveryMinutes: number;
   providerQuoteId: string;
   expiresInMinutes: number;
+  /** How the price was reached; adapters that leave it out are treated as API (production) or SANDBOX_ESTIMATE. */
+  pricingBasis?: "API" | "SANDBOX_ESTIMATE" | "DISTANCE_ESTIMATE" | "CITY_FLAT" | "FIXED_PRICE";
 }
 
 export interface ShippingQuoteRequestResult {

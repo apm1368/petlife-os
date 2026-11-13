@@ -8,6 +8,7 @@ import { Button, EmptyState, Skeleton, StatusLabel } from "@petlife/ui";
 import type { LostPetIncidentPublicDto, PaginatedDto } from "@petlife/types";
 import { lostPetService } from "@/services/lost-pet.service";
 import { formatDay, localizeDigits } from "@/lib/date/jalali";
+import { tehranDay } from "@/lib/date/tehran";
 import { lostPetStatusTone } from "./lost-pet-status";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { FoundByNeighbours, LostPetAreaAlertCard } from "./LostPetNeighbourhood";
@@ -66,7 +67,7 @@ export function PublicLostPetListView() {
                     <StatusLabel tone={lostPetStatusTone(incident.status)}>{t(`status.${incident.status}`)}</StatusLabel>
                   </div>
                   <p className="text-metadata text-text-secondary">{incident.approximateArea ?? t("list.noLocation")}</p>
-                  {incident.lastSeenAt ? <p className="text-metadata text-text-secondary">{t("public.list.lastSeen", { date: formatDay(incident.lastSeenAt.slice(0, 10), lang) })}</p> : null}
+                  {incident.lastSeenAt ? <p className="text-metadata text-text-secondary">{t("public.list.lastSeen", { date: formatDay(tehranDay(incident.lastSeenAt), lang) })}</p> : null}
                 </Link>
               </li>
             ))}

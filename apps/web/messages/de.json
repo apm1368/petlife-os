@@ -92,6 +92,59 @@
       "oil": "Tag der Ölverstaatlichung"
     }
   },
+  "adminOwnership": {
+    "kicker": "Tiere",
+    "title": "Eigentumsübertragungen",
+    "intro": "Alle Anfragen, ein Tier an einen neuen Eigentümer zu übertragen, strittige zuerst. Ein Streit bewegt das Tier nie: Der eingetragene Eigentümer bleibt bis zu einer amtlichen Entscheidung oder schriftlichen Vereinbarung. Prüfen Sie die Unterlagen der Beteiligten (über den Support) und schließen Sie den Streit mit Begründung. Beide werden über das Ergebnis informiert.",
+    "filterLabel": "Status der Übertragung",
+    "search": "Suche",
+    "searchPlaceholder": "Name des Tiers oder der Person",
+    "apply": "Suchen",
+    "retry": "Erneut versuchen",
+    "cancel": "Abbrechen",
+    "status": {
+      "DISPUTED": "Strittig",
+      "PENDING_REVIEW": "Wartet auf Empfänger",
+      "ACCEPTED": "Übertragen",
+      "DECLINED": "Abgelehnt",
+      "CANCELLED": "Storniert",
+      "EXPIRED": "Abgelaufen",
+      "ALL": "Alle"
+    },
+    "empty": "Keine passenden Übertragungen.",
+    "emptyDisputed": "Keine offenen Streitfälle.",
+    "registeredOwner": "Jetzt eingetragener Eigentümer",
+    "requested": "Angefragt",
+    "applied": "Übertragen am",
+    "notApplied": "Nicht übertragen",
+    "memories": "Erinnerungen",
+    "memory": {
+      "TRANSFER": "Gehen an den neuen Eigentümer",
+      "RETAIN": "Bleiben beim bisherigen Eigentümer",
+      "COPY_READ_ONLY": "Schreibgeschützte Kopie für den neuen Eigentümer"
+    },
+    "explain": {
+      "applied": "Diese Übertragung war bereits erfolgt. Das Schließen des Streits lässt sie bestehen.",
+      "pending": "Der Empfänger hatte noch nicht angenommen. Das Schließen des Streits schließt die Anfrage; der eingetragene Eigentümer bleibt."
+    },
+    "close": "Streit schließen",
+    "reason": "Ergebnis und Begründung",
+    "reasonPlaceholder": "Zum Beispiel: Kaufvertrag mit beiden Parteien telefonisch geprüft",
+    "done": {
+      "stands": "Streit um {pet} geschlossen: Die Übertragung bleibt bestehen. Beide Parteien wurden benachrichtigt.",
+      "ownerStays": "Streit um {pet} geschlossen: Die Anfrage ist geschlossen, der eingetragene Eigentümer bleibt. Beide Parteien wurden benachrichtigt."
+    },
+    "errors": {
+      "reason": "Geben Sie Ergebnis und Begründung an (mindestens 5 Zeichen).",
+      "forbidden": "Ihre Rolle umfasst keine Kundendaten.",
+      "load": "Die Übertragungen konnten nicht geladen werden.",
+      "generic": "Das hat nicht funktioniert. Bitte versuchen Sie es erneut."
+    },
+    "rules": {
+      "OWNERSHIP_NOT_DISPUTED": "Diese Übertragung ist nicht mehr strittig. Aktualisieren Sie die Liste.",
+      "OWNERSHIP_CHANGED_CONCURRENTLY": "Jemand anderes hat diese Übertragung gerade geändert. Aktualisieren Sie die Liste."
+    }
+  },
   "adminDeletionRequests": {
     "kicker": "Datenschutz",
     "title": "Anträge auf Kontolöschung",
@@ -2050,6 +2103,9 @@
       "analytics": "Auswertung und Warteliste"
     },
     "bookings": {
+      "noShowLabel": "Nicht erschienen",
+      "noShowProvider": "Anbieter nicht erschienen (Meldung des Mitglieds)",
+      "noShowOwner": "Halter nicht erschienen",
       "title": "Dienstleistungen und Buchungen",
       "searchLabel": "Nach Nummer, Tier oder Anbieter suchen",
       "statusLabel": "Buchungsstatus",
@@ -3177,6 +3233,8 @@
         "URGENT": "Dringend"
       },
       "sources": {
+        "PROVIDER_NO_SHOW": "Anbieter nicht erschienen",
+        "OWNERSHIP_DISPUTE": "Eigentumsstreit",
         "MANUAL": "Manuelle Erfassung",
         "TRAVEL_SOURCE": "Reisequellen",
         "PARTNER_VERIFICATION": "Prüfung von Partnerdokumenten",
@@ -3830,6 +3888,7 @@
       },
       "tabs": {
         "holidays": "Feiertage und Schließtage",
+        "ownershipTransfers": "Eigentumsübertragungen",
         "deletionRequests": "Löschanträge",
         "customRoles": "Eigene Rollen",
         "directory": "Verzeichnis",
@@ -3884,7 +3943,18 @@
         "channels": "Kanäle und Zustellung",
         "smsPatterns": "SMS-Vorlagen",
         "walletDirectory": "Mitglieder",
-        "walletTopUps": "Aufladebelege"
+        "walletTopUps": "Aufladebelege",
+        "shipping": "Versand",
+        "petTaxi": "Tiertaxi",
+        "petTaxiDrivers": "Tiertaxi-Fahrer:innen",
+        "placeReports": "Ortsmeldungen",
+        "osmImport": "OpenStreetMap",
+        "placeClaims": "Übernahmen",
+        "walletCardAccount": "Kartenkonto",
+        "walletCardReceipts": "Kartenbelege",
+        "repeatDeliveries": "Liefer-Abos",
+        "orderLookup": "Bestellsuche",
+        "refundApprovals": "Erstattungsfreigaben"
       },
       "palette": {
         "actions": "Schnellaktionen",
@@ -4051,6 +4121,10 @@
           "EXECUTED": "Ausgeführt"
         }
       }
+    },
+    "demoRecord": {
+      "label": "Demo – auf der Live-Seite ausgeblendet",
+      "hint": "Beispieldaten für Demos und Tests. Die Live-Seite zeigt sie Mitgliedern nie, auch wenn sie hier als geprüft oder öffentlich markiert sind."
     }
   },
   "adminUsers": {
@@ -4695,7 +4769,16 @@
       "reviewsVerifiedOnly": "Nur Kunden, die das Produkt erhalten haben, können es bewerten.",
       "verifiedPurchase": "Verifizierter Kauf",
       "moreReviews": "Weitere Bewertungen anzeigen",
-      "related": "Weitere Produkte aus dieser Kategorie"
+      "related": "Weitere Produkte aus dieser Kategorie",
+      "trust": {
+        "title": "Sicher einkaufen bei opetlife",
+        "verified": "Alle Verkäufer hier haben Identität und Unterlagen bei opetlife bestätigt.",
+        "returns": "Kommt ein Artikel beschädigt, falsch oder abgelaufen an, beantragen Sie innerhalb von {hours} Stunden nach Zustellung eine Erstattung; unser Team prüft sie.",
+        "protection": "Sie zahlen über opetlife; kommt die Bestellung nie an, können Sie Ihr Geld zurückfordern.",
+        "shipsFrom": "Versand aus {city}",
+        "sellerRating": "Verkäuferbewertung {average} von 5 ({count, plural, one {# Bewertung} other {# Bewertungen}})",
+        "visitStore": "Shop von {seller} ansehen"
+      }
     },
     "cart": {
       "title": "Warenkorb",
@@ -4981,7 +5064,10 @@
         "cancel": "Abbrechen",
         "submit": "Zur Prüfung senden",
         "failed": "Deine Bewertung konnte nicht gesendet werden."
-      }
+      },
+      "deliveryMethod": "Versand: {method}",
+      "postTracking": "Sendung auf der Website der Post verfolgen",
+      "courierTracking": "Kurier verfolgen"
     },
     "checkout": {
       "summary": { "title": "Bestellübersicht", "deliveryNext": "Wird im Lieferschritt ausgewählt" },
@@ -5022,12 +5108,30 @@
       },
       "shipping": {
         "title": "Lieferung für jeden Verkäufer auswählen",
-        "serviceLevel": { "STANDARD": "Standardlieferung", "EXPRESS": "Expresslieferung" },
+        "serviceLevel": { "STANDARD": "Standardlieferung", "EXPRESS": "Expresslieferung", "COURIER": "Kurier", "POST_PISHTAZ": "Expresspost" },
         "eta": "Lieferung in etwa {hours, plural, one {# Stunde} other {# Stunden}}",
         "selected": "Ausgewählt",
         "unavailable": "Zurzeit sind keine Lieferoptionen verfügbar",
         "refresh": "Lieferoptionen aktualisieren",
-        "chooseFirst": "Wähle zuerst eine Lieferoption aus, um fortzufahren."
+        "chooseFirst": "Wähle zuerst eine Lieferoption aus, um fortzufahren.",
+        "provider": {
+          "DEV": "Testkurier",
+          "ALOPEYK": "Alopeyk",
+          "SNAPPBOX": "Snappbox",
+          "OPETLIFE_COURIER": "opetlife-Kurier",
+          "POST_PISHTAZ": "Iranische Post Express (Pishtaz)",
+          "SNAPPBOX_APP": "Snappbox",
+          "ALOPEYK_APP": "Alopeyk"
+        },
+        "basis": {
+          "API": "Aktueller Kurierpreis",
+          "SANDBOX_ESTIMATE": "Testschätzung: der Kurier wurde noch nicht angefragt",
+          "DISTANCE_ESTIMATE": "Nach Entfernung geschätzt",
+          "CITY_FLAT": "Pauschalpreis für die Stadt",
+          "FIXED_PRICE": "Fester Tarif"
+        },
+        "etaDays": "Lieferung in etwa {days, plural, one {# Werktag} other {# Werktagen}}",
+        "sandboxNote": "Der Versand läuft vorerst im Testmodus: Preise von Alopeyk und Snappbox sind Schätzungen, es kommt kein Kurier."
       },
       "payment": {
         "title": "Zahlung",
@@ -5513,7 +5617,8 @@
       "checkInSelected": "Anreise ausgewählt; wähle jetzt die Abreise.",
       "checkInSuffix": ", Anreise",
       "checkOutSuffix": ", Abreise"
-    }
+    },
+    "year": "Jahr"
   },
   "filePicker": {
     "choose": "Datei auswählen",
@@ -6337,6 +6442,9 @@
         "allClear": "Alles erledigt – auf dein Team wartet nichts.",
         "clearList": "Erledigt: {list}",
         "queue": {
+          "pendingReviews": "Bewertungen in Prüfung",
+          "openProviderNoShows": "Meldungen: Anbieter nicht erschienen",
+          "openOwnershipDisputes": "Eigentumsstreitigkeiten",
           "pendingDeletionRequests": "Anträge auf Kontolöschung",
           "openTrustCases": "Fälle zu Vertrauen und Sicherheit",
           "openDisputes": "Offene Streitfälle",
@@ -6361,7 +6469,7 @@
       },
       "shortcuts": "Schnellzugriffe",
       "healthLink": "Statusseite",
-      "workersSummary": "{running} von {total} Hintergrundjobs laufen",
+      "workersSummary": "{running} von {total} Hintergrundjobs fehlerfrei",
       "priority": {
         "URGENT": "Dringend",
         "HIGH": "Hoch"
@@ -6932,6 +7040,49 @@
         "intervals": "Lieferintervalle",
         "everyDays": "Alle {days} Tage",
         "pickOne": "Wähle mindestens ein Intervall aus."
+      }
+    },
+    "shipping": {
+      "title": "Versand",
+      "subtitle": "Die Versandarten, die Sie anbieten, und die Adresse, an der Kuriere Pakete abholen.",
+      "loading": "Wird geladen…",
+      "failed": "Versandeinstellungen konnten nicht geladen werden.",
+      "methods": "Versandarten",
+      "methodsHint": "Wenn Sie keine wählen, werden alle von opetlife aktivierten Versandarten angeboten.",
+      "noneActive": "Bei opetlife ist noch keine Versandart aktiviert.",
+      "provider": {
+        "DEV": "Testkurier",
+        "ALOPEYK": "Alopeyk",
+        "SNAPPBOX": "Snappbox",
+        "OPETLIFE_COURIER": "opetlife-Kurier",
+        "POST_PISHTAZ": "Iranische Post Express (Pishtaz)",
+        "SNAPPBOX_APP": "Snappbox (von opetlife gebucht)",
+        "ALOPEYK_APP": "Alopeyk (von opetlife gebucht)"
+      },
+      "pickup": "Abholadresse",
+      "pickupHint": "Ein Kartenpunkt lässt den opetlife-Kurier nach Entfernung rechnen.",
+      "fields": {
+        "contactName": "Ansprechpartner",
+        "phone": "Telefon",
+        "city": "Stadt",
+        "region": "Provinz",
+        "area": "Stadtviertel",
+        "addressLine": "Vollständige Adresse",
+        "postalCode": "10-stellige Postleitzahl",
+        "instructions": "Hinweis für den Kurier"
+      },
+      "useLocation": "Aktuellen Standort verwenden",
+      "clearLocation": "Kartenpunkt entfernen",
+      "locationDenied": "Kein Standortzugriff.",
+      "save": "Versandeinstellungen speichern",
+      "saving": "Wird gespeichert…",
+      "saved": "Gespeichert.",
+      "saveFailed": "Nicht gespeichert. Prüfen Sie die Felder (Postleitzahl: 10 Ziffern).",
+      "readOnly": "Nur ein Shop-Admin kann das ändern."
+    },
+    "shell": {
+      "nav": {
+        "shipping": "Versand"
       }
     }
   },
@@ -7533,7 +7684,8 @@
         "analytics": "Leistung",
         "travel": "Reisen und Aufenthalt",
         "clinicWorkspace": "Klinikverwaltung",
-        "verification": "Nachweisdokumente"
+        "verification": "Nachweisdokumente",
+        "petTaxi": "Tiertaxi"
       },
       "notAProvider": {
         "title": "Kein Zugriff auf den Anbieterbereich",
@@ -8674,7 +8826,13 @@
       "BEACH": "Strand",
       "VENUE": "Veranstaltungsort",
       "SERVICE": "Dienstleistung",
-      "OTHER": "Sonstiges"
+      "OTHER": "Sonstiges",
+      "VETERINARY": "Tierarzt",
+      "PET_SHOP": "Tierhandlung",
+      "GROOMING": "Tierpflege",
+      "BOARDING": "Tierpension",
+      "SHELTER": "Tierheim",
+      "DOG_PARK": "Hundepark"
     },
     "list": {
       "search": "Suchen",
@@ -8701,6 +8859,38 @@
       "title": "Gespeicherte Orte",
       "empty": "Du hast noch keine Orte gespeichert.",
       "signInPrompt": "Melde dich an, um deine Lieblingsorte zu speichern."
+    },
+    "osm": {
+      "label": "Aus OpenStreetMap · noch nicht geprüft",
+      "explain": "Dieser Eintrag stammt aus der freien Karte OpenStreetMap und wurde von opetlife noch nicht geprüft. Kontaktieren Sie den Ort, bevor Sie hingehen.",
+      "attribution": "© OpenStreetMap-Mitwirkende",
+      "viewOnOsm": "Auf OpenStreetMap ansehen",
+      "phone": "Telefon",
+      "website": "Website",
+      "managed": "Diese Seite wird vom Unternehmen selbst verwaltet, dessen Identität geprüft ist."
+    },
+    "claim": {
+      "title": "Ist das Ihr Unternehmen?",
+      "body": "Übernehmen Sie diese Seite, um die Angaben selbst aktuell zu halten und das Prüfsiegel zu erhalten.",
+      "button": "Übernehmen",
+      "sending": "Wird gesendet…",
+      "signIn": "Zum Übernehmen anmelden",
+      "failed": "Das hat nicht geklappt. Bitte erneut versuchen.",
+      "next": {
+        "CREATE_PARTNER_ACCOUNT": "Anfrage gespeichert. Nächster Schritt: Partnerkonto anlegen und Unterlagen zur Prüfung senden.",
+        "COMPLETE_VERIFICATION": "Anfrage gespeichert. Nächster Schritt: Unternehmensprüfung im Partnerbereich abschließen.",
+        "AWAITING_REVIEW": "Anfrage gespeichert. Das opetlife-Team prüft sie und meldet sich."
+      },
+      "goPartner": "Partnerkonto anlegen",
+      "goVerification": "Zur Prüfung",
+      "status": {
+        "PENDING": "Ihre Anfrage wird geprüft.",
+        "APPROVED": "Ihre Anfrage wurde bestätigt.",
+        "REJECTED": "Ihre Anfrage wurde nicht angenommen.",
+        "WITHDRAWN": "Anfrage zurückgezogen."
+      },
+      "refresh": "Erledigt – Antrag aktualisieren",
+      "limit": "Höchstens 5 offene Anträge; bitte die Prüfung abwarten."
     }
   },
   "healthDepth": {
@@ -9120,7 +9310,9 @@
       "deadline": "Laden Sie den Beleg bis {date} hoch.",
       "stepOne": "Überweisen Sie den Betrag mit Ihrer Banking-App oder am Geldautomaten auf diese Karte.",
       "stepTwo": "Machen Sie ein Foto oder einen Screenshot des Belegs.",
-      "stepThree": "Senden Sie den Beleg hier. Unser Finanzteam prüft ihn und schreibt das Guthaben gut."
+      "stepThree": "Senden Sie den Beleg hier. Unser Finanzteam prüft ihn und schreibt das Guthaben gut.",
+      "bank": "Bank",
+      "sheba": "Sheba"
     },
     "receipt": {
       "choose": "Belegbild auswählen",
@@ -9701,5 +9893,798 @@
       "primary": "Konto erstellen",
       "secondary": "Services entdecken"
     }
+  },
+  "addressBook": {
+    "eyebrow": "Konto",
+    "title": "Adressen",
+    "description": "Die Lieferadressen Ihres Haushalts, für Kuriere und Post.",
+    "navHint": "Lieferadressen und Standard",
+    "loading": "Adressen werden geladen…",
+    "failed": "Die Adressen konnten nicht geladen werden.",
+    "noHousehold": "Legen Sie zuerst einen Haushalt an, um Adressen zu speichern.",
+    "empty": "Noch keine Adressen gespeichert.",
+    "add": "Adresse hinzufügen",
+    "edit": "Bearbeiten",
+    "remove": "Entfernen",
+    "removeConfirm": "Diese Adresse entfernen? Frühere Bestellungen behalten ihre eigene Kopie.",
+    "removed": "Adresse entfernt.",
+    "makeDefault": "Als Standard",
+    "default": "Standard",
+    "save": "Adresse speichern",
+    "saving": "Wird gespeichert…",
+    "saved": "Adresse gespeichert.",
+    "cancel": "Abbrechen",
+    "failedSave": "Die Adresse wurde nicht gespeichert. Prüfen Sie die Felder.",
+    "fields": {
+      "label": "Bezeichnung (z. B. Zuhause, Arbeit)",
+      "recipient": "Empfänger",
+      "phone": "Telefon",
+      "city": "Stadt",
+      "region": "Provinz",
+      "area": "Stadtviertel",
+      "addressLine": "Vollständige Adresse (Straße, Gasse, Nummer, Einheit)",
+      "postalCode": "10-stellige Postleitzahl",
+      "instructions": "Hinweis für den Kurier (optional)",
+      "isDefault": "Als Standardadresse verwenden"
+    },
+    "location": {
+      "use": "Meinen aktuellen Standort verwenden",
+      "locating": "Standort wird ermittelt…",
+      "set": "Kartenpunkt gespeichert; der opetlife-Kurier kann genauer rechnen.",
+      "clear": "Kartenpunkt entfernen",
+      "denied": "Kein Standortzugriff. Sie können ohne ihn fortfahren.",
+      "hasPoint": "Mit Kartenpunkt"
+    }
+  },
+  "adminShipping": {
+    "kicker": "Shop",
+    "title": "Versandarten",
+    "subtitle": "Welche Versandarten der Checkout anbietet, zu welchem Preis, und wo jede Sendung steht.",
+    "loading": "Wird geladen…",
+    "failed": "Die Daten konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "forbidden": "Dafür brauchen Sie die Berechtigung „Shop ansehen“.",
+    "mode": {
+      "sandbox": "Testmodus: Alopeyk und Snappbox liefern nur Schätzungen, es kommt kein Kurier.",
+      "production": "Live-Modus: Preise kommen von den Kurieren."
+    },
+    "provider": {
+      "DEV": "Testkurier",
+      "ALOPEYK": "Alopeyk",
+      "SNAPPBOX": "Snappbox",
+      "OPETLIFE_COURIER": "opetlife-Kurier",
+      "POST_PISHTAZ": "Iranische Post Express (Pishtaz)",
+      "SNAPPBOX_APP": "Snappbox — in der App gebucht",
+      "ALOPEYK_APP": "Alopeyk — in der App gebucht"
+    },
+    "kind": {
+      "API": "Preis über die Kurier-API",
+      "MANUAL": "Preis von opetlife"
+    },
+    "active": "Im Checkout angeboten",
+    "inactive": "Nicht im Checkout",
+    "notes": {
+      "NEEDS_PRICE": "Legen Sie zuerst einen Preis fest.",
+      "SWITCHED_OFF": "Von Mitarbeitern ausgeschaltet.",
+      "DISABLED_IN_ENV": "In den Servereinstellungen aus.",
+      "SANDBOX": "Testschätzungen, bis API-Schlüssel gesetzt sind."
+    },
+    "webhook": {
+      "yes": "Webhook-Secret gesetzt",
+      "no": "Kein Webhook-Secret (für den Live-Modus nötig)"
+    },
+    "enabled": "An",
+    "save": "Speichern",
+    "saving": "Wird gespeichert…",
+    "saved": "Gespeichert.",
+    "saveFailed": "Nicht gespeichert. Eingeschaltet braucht es einen gültigen Preis.",
+    "reason": "Grund (bleibt im Prüfprotokoll)",
+    "readOnly": "Nur „Shop verwalten“ kann das ändern.",
+    "courier": {
+      "cities": "Belieferte Städte (durch Kommas getrennt; leer = alle)",
+      "baseFare": "Grundpreis (Toman)",
+      "perKm": "Pro km (Toman)",
+      "minFare": "Mindestpreis (Toman)",
+      "maxKm": "Maximale Entfernung (km)",
+      "roadFactor": "Straßenfaktor (Luftlinie ×)",
+      "defaultFlat": "Pauschale ohne Kartenpunkt (Toman, 0 = keine)",
+      "cityFares": "Pauschale je Stadt (je Zeile: Stadt=Toman)",
+      "pickupMinutes": "Minuten bis zur Abholung",
+      "minutesPerKm": "Minuten pro km"
+    },
+    "post": {
+      "fixedPrice": "Festpreis (Toman)",
+      "includedKg": "Inklusivgewicht (kg)",
+      "perExtraKg": "Jedes weitere Kilo (Toman)",
+      "etaMin": "Schnellste Zustellung (Tage)",
+      "etaMax": "Langsamste Zustellung (Tage)"
+    },
+    "shipments": {
+      "title": "Sendungen",
+      "hint": "Mitarbeiter bewegen Sendungen von opetlife-Kurier und Post; Alopeyk und Snappbox melden ihren Status selbst.",
+      "allMethods": "Alle Versandarten",
+      "allStatuses": "Alle Status",
+      "empty": "Keine Sendungen.",
+      "columns": {
+        "method": "Versandart",
+        "seller": "Verkäufer",
+        "city": "Zielort",
+        "status": "Status",
+        "tracking": "Sendungsnummer",
+        "updated": "Letzte Änderung"
+      },
+      "status": {
+        "CREATED": "Erstellt",
+        "REQUESTED": "Kurier angefragt",
+        "ASSIGNED": "Kurier zugewiesen",
+        "PICKED_UP": "Abgeholt",
+        "IN_TRANSIT": "Unterwegs",
+        "OUT_FOR_DELIVERY": "In Zustellung",
+        "DELIVERED": "Zugestellt",
+        "FAILED": "Fehlgeschlagen",
+        "CANCELED": "Storniert",
+        "UNKNOWN": "Unbekannt"
+      },
+      "update": "Aktualisieren",
+      "updateTitle": "Sendung aktualisieren",
+      "newStatus": "Neuer Status",
+      "trackingCode": "Post-Sendungsnummer, Kurierreferenz oder Tracking-Link der App",
+      "note": "Notiz (optional, im Prüfprotokoll)",
+      "apply": "Übernehmen",
+      "cancel": "Abbrechen",
+      "applied": "Sendung aktualisiert; das Mitglied sieht es in der Verfolgung.",
+      "notApplied": "Dieser Status liegt hinter dem aktuellen; nichts geändert.",
+      "failed": "Die Aktualisierung ist fehlgeschlagen."
+    },
+    "appCourierHint": "Mitglieder zahlen den Preis aus diesen Entfernungs-/Stadtregeln (nah an den App-Preisen einstellen). Nach einer Bestellung den Kurier in der normalen App mit Abhol- und Zielpin buchen, dann den Tracking-Link unter Sendungen eintragen und den Status weiterschalten."
+  },
+  "petTaxi": {
+    "member": {
+      "title": "Tiertaxi",
+      "subtitle": "Tippen Sie Start und Ziel auf der Karte an, sehen Sie den Preis und verfolgen Sie Ihren Fahrer live.",
+      "map": "Karte",
+      "zoomIn": "Vergrößern",
+      "zoomOut": "Verkleinern",
+      "loading": "Wird geladen…",
+      "failed": "Konnte nicht geladen werden.",
+      "retry": "Erneut versuchen",
+      "step": {
+        "pickup": "Tippen Sie den Abholort an",
+        "dropoff": "Tippen Sie das Ziel an",
+        "details": "Tiere und Fahrzeug"
+      },
+      "pickup": "Abholung",
+      "dropoff": "Ziel",
+      "pinned": "Auf der Karte gewählter Punkt",
+      "myLocation": "Mein aktueller Standort",
+      "locating": "Standort wird ermittelt…",
+      "locationDenied": "Kein Standortzugriff; tippen Sie stattdessen auf die Karte.",
+      "savedAddresses": "Gespeicherte Adressen",
+      "search": "Ort suchen",
+      "searchNone": "Kein Ort gefunden.",
+      "city": "Abholstadt",
+      "note": "Hinweis für den Fahrer (Etage, Klingel…)",
+      "change": "Ändern",
+      "pets": "Welche Tiere fahren mit?",
+      "noPets": "Legen Sie zuerst Ihr Tier an, um eine Fahrt zu buchen.",
+      "carrier": "Wie Ihr Tier reist",
+      "carrierSize": {
+        "SMALL": "Klein: Katze oder kleiner Hund in der Box",
+        "MEDIUM": "Mittel: mittelgroßer Hund in einer Kofferraumbox",
+        "LARGE": "Groß: großer Hund oder mehrere Tiere"
+      },
+      "quote": "Fahrpreis",
+      "quoting": "Fahrpreis wird berechnet…",
+      "estimate": "Entfernung und Zeit sind Schätzungen (Luftlinie × Straßenfaktor).",
+      "routed": "Nach der Straßenroute",
+      "notPriced": "Das Tiertaxi ist in dieser Stadt noch nicht verfügbar.",
+      "distanceTime": "{km} km · etwa {minutes} Min.",
+      "payNote": "Online-Zahlung ist noch nicht aktiv; zahlen Sie beim Fahrer bei Ankunft.",
+      "request": "Fahrt anfragen",
+      "requesting": "Anfrage wird gesendet…",
+      "errors": {
+        "RIDE_ALREADY_OPEN": "Sie haben bereits eine offene Fahrt.",
+        "TOO_CLOSE": "Start und Ziel liegen zu nah beieinander.",
+        "TOO_FAR": "Diese Strecke ist zu lang für das Tiertaxi.",
+        "NOT_PRICED": "Das Tiertaxi ist in dieser Stadt noch nicht verfügbar.",
+        "generic": "Das hat nicht geklappt. Bitte erneut versuchen."
+      },
+      "status": {
+        "SEARCHING": "Fahrer wird gesucht",
+        "DRIVER_ASSIGNED": "Fahrer ist unterwegs",
+        "ARRIVING": "Fahrer ist da",
+        "PICKED_UP": "Unterwegs zum Ziel",
+        "COMPLETED": "Angekommen",
+        "CANCELLED_BY_MEMBER": "Storniert",
+        "CANCELLED_BY_DRIVER": "Vom Fahrer storniert",
+        "NO_DRIVER": "Kein Fahrer gefunden"
+      },
+      "searchingHint": "Ihre Anfrage ging an Fahrer in der Nähe. Nimmt bis {time} niemand an, sagen wir es Ihnen.",
+      "eta": "Etwa {minutes} Min. entfernt",
+      "driver": "Fahrer",
+      "call": "Anrufen",
+      "positionAt": "Position um {time}",
+      "cancel": "Fahrt stornieren",
+      "cancelConfirm": "Diese Fahrt stornieren?",
+      "newRide": "Neue Fahrt",
+      "rate": "Fahrt bewerten",
+      "rateComment": "Ihr Kommentar (optional)",
+      "rateSend": "Bewertung senden",
+      "rated": "Danke für Ihre Bewertung.",
+      "stars": "{n} von 5",
+      "receipt": "Fahrtbeleg",
+      "receiptLines": {
+        "base": "Grundpreis",
+        "distance": "Strecke",
+        "time": "Zeit",
+        "carrier": "Transportart",
+        "extraPets": "Weitere Tiere",
+        "minimum": "Mindestpreis angewendet",
+        "total": "Gesamt"
+      },
+      "history": "Frühere Fahrten",
+      "historyEmpty": "Noch keine Fahrten.",
+      "requestNow": "Jetzt ein Tiertaxi rufen",
+      "requestNowHint": "auf der Karte, mit sofortigem Preis und Live-Verfolgung"
+    },
+    "driver": {
+      "title": "Tiertaxi: Fahrer",
+      "subtitle": "Gehen Sie online, um Anfragen in der Nähe zu sehen. Ihre Position wird nur online gesendet.",
+      "notEligible": {
+        "NOT_PET_TAXI": "Nur für Tiertaxi-Anbieter.",
+        "NOT_VERIFIED": "Sie können online gehen, sobald Ihre Unterlagen geprüft sind."
+      },
+      "online": "Sie sind online",
+      "offline": "Sie sind offline",
+      "goOnline": "Online gehen",
+      "goOffline": "Offline gehen",
+      "locationOff": "Der Standort Ihres Telefons ist nicht verfügbar; Anfragen erscheinen nur mit aktuellem Standort.",
+      "requests": "Anfragen in der Nähe",
+      "noRequests": "Gerade keine Anfragen. Die Seite aktualisiert sich selbst.",
+      "kmFromYou": "{km} km bis zur Abholung",
+      "pets": "{count, plural, one {# Tier} other {# Tiere}}",
+      "accept": "Annehmen",
+      "decline": "Ablehnen",
+      "taken": "Ein anderer Fahrer hat diese Anfrage übernommen.",
+      "activeRide": "Aktuelle Fahrt",
+      "passenger": "Fahrgast",
+      "navigate": "Navigation",
+      "next": {
+        "ARRIVING": "Ich bin da",
+        "PICKED_UP": "Tier abgeholt",
+        "COMPLETED": "Abgeliefert"
+      },
+      "release": "Ich schaffe es nicht",
+      "releaseReason": "Grund (die Fahrt geht an andere Fahrer zurück)",
+      "fare": "Fahrpreis: {amount}",
+      "collect": "Fahrpreis bei Ablieferung kassieren.",
+      "failed": "Das hat nicht geklappt. Bitte erneut versuchen.",
+      "driverStatus": {
+        "NONE": "Sie sind noch nicht als Fahrer:in registriert. Bitten Sie die Inhaberin/den Inhaber, Sie mit Führerschein und Fahrzeug einzutragen.",
+        "NONE_OWNER": "Um online zu gehen, tragen Sie sich oder Ihre Fahrer:innen unten mit Führerschein und Fahrzeug ein; das opetlife-Team prüft das.",
+        "PENDING": "Das opetlife-Team prüft Ihre Angaben; nach der Bestätigung können Sie online gehen.",
+        "VERIFIED": "Sie sind geprüft.",
+        "SUSPENDED": "Ihre Fahrberechtigung ist vorerst gesperrt."
+      },
+      "around": "Rund um {city}",
+      "approxArea": "Ungefähres Gebiet",
+      "approxHint": "Die genaue Adresse und Notiz sehen Sie nach dem Annehmen.",
+      "roster": {
+        "title": "Ihre Fahrer:innen",
+        "hint": "Jede Fahrerin/jeder Fahrer wird mit Führerschein und Kennzeichen eingetragen und kann erst nach der Prüfung durch opetlife online gehen. Geänderte Angaben werden erneut geprüft.",
+        "member": "Teammitglied",
+        "licenceNumber": "Führerscheinnummer",
+        "vehiclePlate": "Kennzeichen",
+        "vehicleDescription": "Fahrzeug (Modell und Farbe)",
+        "save": "Zur Prüfung senden",
+        "saved": "Gespeichert; wird geprüft.",
+        "failed": "Das hat nicht geklappt. Bitte erneut versuchen.",
+        "incomplete": "Bitte alle Felder ausfüllen.",
+        "empty": "Noch keine Fahrer:innen eingetragen.",
+        "status": {
+          "PENDING": "Prüfung ausstehend",
+          "VERIFIED": "Geprüft",
+          "SUSPENDED": "Gesperrt"
+        }
+      }
+    }
+  },
+  "adminPetTaxi": {
+    "kicker": "Dienste",
+    "title": "Tiertaxi",
+    "subtitle": "Fahrpreise je Stadt („*“ = alle anderen Städte) und laufende Fahrten.",
+    "loading": "Wird geladen…",
+    "failed": "Die Daten konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "forbidden": "Dafür brauchen Sie „Dienste ansehen“.",
+    "onlineDrivers": "Fahrer online",
+    "rules": "Fahrpreise",
+    "noRules": "Noch keine Fahrpreise; ohne sie nennt das Tiertaxi keinen Preis.",
+    "fields": {
+      "city": "Stadt („*“ für Standard)",
+      "base": "Grundpreis (Toman)",
+      "perKm": "Pro km (Toman)",
+      "perMinute": "Pro Minute (Toman)",
+      "minimum": "Minimum (Toman)",
+      "medium": "Zuschlag mittel %",
+      "large": "Zuschlag groß %",
+      "extraPet": "Jedes weitere Tier (Toman)",
+      "active": "Aktiv",
+      "reason": "Grund (Prüfprotokoll)",
+      "south": "Rahmen Süd (Breite)",
+      "west": "Rahmen West (Länge)",
+      "north": "Rahmen Nord (Breite)",
+      "east": "Rahmen Ost (Länge)"
+    },
+    "add": "Neuer Stadtpreis",
+    "save": "Speichern",
+    "saved": "Gespeichert.",
+    "saveFailed": "Nicht gespeichert. Zahlen prüfen.",
+    "readOnly": "Nur „Dienste verwalten“ kann Preise ändern.",
+    "rides": "Fahrten der letzten 24 Stunden",
+    "noRides": "Keine Fahrten.",
+    "columns": {
+      "member": "Mitglied",
+      "driver": "Fahrer",
+      "route": "Strecke",
+      "fare": "Preis",
+      "status": "Status",
+      "rating": "Bewertung"
+    },
+    "status": {
+      "SEARCHING": "Fahrer wird gesucht",
+      "DRIVER_ASSIGNED": "Fahrer ist unterwegs",
+      "ARRIVING": "Fahrer ist da",
+      "PICKED_UP": "Unterwegs zum Ziel",
+      "COMPLETED": "Angekommen",
+      "CANCELLED_BY_MEMBER": "Storniert",
+      "CANCELLED_BY_DRIVER": "Vom Fahrer storniert",
+      "NO_DRIVER": "Kein Fahrer gefunden"
+    },
+    "disputesHint": "Beschwerden zu einer Fahrt laufen über „Streitfälle“.",
+    "boxHint": "Der Tarif dieser Stadt gilt für Fahrten, deren Abholort in diesem Rahmen liegt (höchstens 3°). Die von Mitgliedern eingegebene Stadt beeinflusst den Preis nicht.",
+    "boxRequired": "Ein Stadttarif braucht alle vier Rahmenkoordinaten.",
+    "drivers": {
+      "kicker": "Tiertaxi",
+      "title": "Fahrer:innen",
+      "subtitle": "Prüfen Sie Führerschein und Fahrzeug jeder Person; nur geprüfte Fahrer:innen können online gehen.",
+      "loading": "Wird geladen…",
+      "failed": "Das hat nicht geklappt. Bitte erneut versuchen.",
+      "retry": "Erneut versuchen",
+      "forbidden": "Berechtigung services.view erforderlich.",
+      "empty": "Noch keine Fahrer:innen eingetragen.",
+      "columns": {
+        "name": "Fahrer:in",
+        "organization": "Organisation",
+        "licence": "Führerschein",
+        "vehicle": "Fahrzeug",
+        "status": "Status",
+        "decision": "Entscheidung"
+      },
+      "status": {
+        "PENDING": "Prüfung ausstehend",
+        "VERIFIED": "Geprüft",
+        "SUSPENDED": "Gesperrt"
+      },
+      "reason": "Grund (Prüfprotokoll)",
+      "reasonRequired": "Bitte einen Grund angeben.",
+      "verify": "Bestätigen",
+      "suspend": "Sperren",
+      "decided": "Gespeichert.",
+      "orgNotVerified": "Organisation noch nicht geprüft"
+    }
+  },
+  "sellerStorefront": {
+    "verified": "Geprüfter Verkäufer",
+    "since": "Bei opetlife seit {date}",
+    "rating": "{average} von 5 aus {count, plural, one {# Bewertung} other {# Bewertungen}}",
+    "noRating": "Noch keine Bewertungen",
+    "city": "Aus {city}",
+    "products": "{count, plural, one {# Produkt} other {# Produkte}}",
+    "empty": "Dieser Verkäufer bietet gerade keine Produkte an.",
+    "notFound": "Dieser Shop wurde nicht gefunden.",
+    "backToShop": "Zurück zum Shop",
+    "protection": "Käufe bei diesem Verkäufer folgen denselben Erstattungs- und Zahlungsregeln von opetlife."
+  },
+  "adminPlacesOsm": {
+    "osmTitle": "OpenStreetMap-Import",
+    "osmHint": "Jede Stadt wird wöchentlich mit einer schonenden Overpass-Abfrage aktualisiert. Importierte Orte gelten als ungeprüft, bis das Unternehmen sie übernimmt.",
+    "columns": {
+      "city": "Stadt",
+      "active": "Aktiv",
+      "listed": "Gelistete Orte",
+      "lastRun": "Letzter Lauf",
+      "result": "Ergebnis"
+    },
+    "result": "{created} neu, {updated} aktualisiert, {hidden} ausgeblendet",
+    "status": {
+      "RUNNING": "Läuft",
+      "SUCCEEDED": "Fertig",
+      "FAILED": "Fehlgeschlagen",
+      "RATE_LIMITED": "Overpass ausgelastet; später erneut"
+    },
+    "never": "Noch nicht gelaufen",
+    "runNow": "Jetzt ausführen",
+    "started": "Gestartet; schauen Sie in ein paar Minuten wieder vorbei.",
+    "runFailed": "Gerade nicht: ein anderer Lauf ist aktiv oder dieser Bereich lief eben erst.",
+    "claimsTitle": "Übernahme-Anfragen",
+    "claimsEmpty": "Keine offenen Anfragen.",
+    "claimColumns": {
+      "place": "Ort",
+      "claimant": "Antragsteller",
+      "organization": "Unternehmen",
+      "message": "Nachricht"
+    },
+    "noOrganization": "Noch kein Partnerkonto",
+    "kyc": {
+      "VERIFIED": "Geprüft",
+      "other": "Prüfung offen"
+    },
+    "approve": "Bestätigen",
+    "reject": "Ablehnen",
+    "reason": "Grund (Prüfprotokoll)",
+    "decided": "Gespeichert.",
+    "decideFailed": "Nicht gespeichert: Das Unternehmen des Antrags muss geprüft sein und der Eintrag darf nicht gesperrt sein.",
+    "form": {
+      "title": "Stadt hinzufügen oder bearbeiten",
+      "hint": "Begrenzungsrahmen der Stadt (höchstens 1,5° je Richtung). Der Stadtname ist der, den der Stadtfilter zeigt.",
+      "province": "Provinz",
+      "south": "Süd (Breite)",
+      "west": "West (Länge)",
+      "north": "Nord (Breite)",
+      "east": "Ost (Länge)",
+      "save": "Speichern",
+      "saved": "Gespeichert.",
+      "saveFailed": "Nicht gespeichert: Rahmen prüfen (Süd unter Nord, West unter Ost, höchstens 1,5°).",
+      "edit": "Bearbeiten",
+      "activate": "Aktivieren",
+      "deactivate": "Pausieren",
+      "yes": "Ja",
+      "no": "Nein"
+    },
+    "claimsHint": "Nur für das im Antrag genannte, geprüfte Unternehmen bestätigen. KYC-Angaben mit den OpenStreetMap-Tags des Eintrags vergleichen.",
+    "claimTabs": {
+      "PENDING": "Zu prüfen",
+      "APPROVED": "Bestätigt"
+    },
+    "approvedEmpty": "Noch kein Eintrag übergeben.",
+    "compare": {
+      "business": "Unternehmen (KYC)",
+      "listing": "Dieser Eintrag in OpenStreetMap",
+      "contact": "Ansprechperson",
+      "phone": "Telefon",
+      "address": "Adresse",
+      "website": "Website"
+    },
+    "release": "Von diesem Unternehmen zurücknehmen",
+    "releaseFailed": "Nicht zurückgenommen: der Eintrag gehört vielleicht nicht mehr diesem Unternehmen."
+  },
+  "adminCardAccount": {
+    "kicker": "Finanzen",
+    "title": "Konto für Kartenüberweisungen",
+    "subtitle": "Die Karte, auf die Mitglieder für Guthabenaufladungen und Kartenüberweisungen einzahlen.",
+    "current": "Aktuelles Konto",
+    "source": {
+      "ADMIN": "Auf dieser Seite festgelegt.",
+      "ENV": "Aus den Servereinstellungen (hier noch nicht festgelegt).",
+      "NONE": "Kein Konto festgelegt; Kartenüberweisung ist für Mitglieder aus."
+    },
+    "readOnly": "Nur ein Super-Admin mit settings.manage kann dieses Konto ändern.",
+    "change": "Konto ändern",
+    "changeHint": "Jede Änderung wird mit Grund protokolliert und alle Super-Admins werden benachrichtigt. Bereits begonnene Zahlungen behalten ihr ursprüngliches Konto.",
+    "fields": {
+      "cardNumber": "Kartennummer (16 Ziffern)",
+      "sheba": "Sheba / IBAN (optional)",
+      "holderName": "Kontoinhaber",
+      "bankName": "Bank (optional)",
+      "reason": "Grund der Änderung"
+    },
+    "confirm": "Ich bestätige, dass dieses Konto opetlife gehört.",
+    "save": "Neues Konto speichern",
+    "saving": "Wird gespeichert…",
+    "saved": "Das neue Konto ist gespeichert, Super-Admins wurden benachrichtigt.",
+    "offReason": "Grund für das Abschalten der Kartenüberweisung",
+    "switchOff": "Kartenüberweisung abschalten",
+    "switchedOff": "Kartenüberweisung ist abgeschaltet.",
+    "history": "Kontoverlauf",
+    "noHistory": "Hier wurde noch kein Konto festgelegt.",
+    "columns": {
+      "setBy": "Festgelegt von",
+      "reason": "Grund",
+      "closed": "Beendet"
+    },
+    "activeNow": "Aktiv",
+    "loading": "Wird geladen…",
+    "failed": "Konnte nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "forbidden": "Berechtigung wallet.view erforderlich.",
+    "errors": {
+      "REASON_TOO_SHORT": "Grund mit mindestens 10 Zeichen angeben.",
+      "CONFIRM": "Bestätigen Sie, dass das Konto opetlife gehört.",
+      "CARD_NUMBER_INVALID": "Die Kartennummer muss 16 Ziffern haben.",
+      "CARD_NUMBER_CHECKSUM": "Diese Kartennummer ist ungültig; prüfen Sie die Ziffern.",
+      "SHEBA_INVALID": "Sheba muss IR und 24 Ziffern sein.",
+      "SHEBA_CHECKSUM": "Diese Sheba-Nummer ist ungültig.",
+      "CARD_OR_SHEBA_REQUIRED": "Kartennummer oder Sheba eingeben.",
+      "HOLDER_REQUIRED": "Kontoinhaber eingeben.",
+      "SUPER_ADMIN_WITH_SETTINGS_MANAGE_REQUIRED": "Nur ein Super-Admin kann dieses Konto ändern.",
+      "generic": "Nicht gespeichert; bitte erneut versuchen."
+    }
+  },
+  "adminCardReceipts": {
+    "kicker": "Finanzen",
+    "title": "Belege für Kartenüberweisungen",
+    "subtitle": "Belege für Bestell- und Terminzahlungen; offene zuerst, älteste zuerst.",
+    "filter": "Statusfilter",
+    "status": {
+      "REVIEW_PENDING": "Prüfung offen",
+      "UNDERPAID_AWAITING_DIFFERENCE": "Restbetrag offen",
+      "AWAITING_RECEIPT": "Beleg offen",
+      "APPROVED": "Bestätigt",
+      "REJECTED": "Abgelehnt",
+      "EXPIRED": "Abgelaufen",
+      "CANCELLED": "Storniert",
+      "ALL": "Alle"
+    },
+    "columns": {
+      "member": "Mitglied",
+      "reference": "Für",
+      "amount": "Betrag",
+      "uploaded": "Beleg gesendet",
+      "status": "Status"
+    },
+    "reference": {
+      "booking": "Termin",
+      "order": "Bestellung ({count})"
+    },
+    "open": "Prüfen",
+    "empty": "Keine Belege mit diesem Status.",
+    "loading": "Wird geladen…",
+    "failed": "Konnte nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "forbidden": "Berechtigung finance.view erforderlich.",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "reviewTitle": "Beleg prüfen",
+    "receivedSoFar": "erhalten: {amount}",
+    "account": "Eingezahlt auf",
+    "rejectionReason": "Ablehnungsgrund",
+    "viewReceipt": "Beleg ansehen",
+    "receiptOpening": "Wird geöffnet…",
+    "receiptFailed": "Der Beleg konnte nicht geöffnet werden.",
+    "noReceipt": "Noch kein Beleg gesendet.",
+    "availableAt": "Prüfung möglich ab {date}.",
+    "receivedAmount": "Erhaltener Betrag (Toman)",
+    "reason": "Grund (für Ablehnung erforderlich)",
+    "approve": "Bestätigen",
+    "reject": "Ablehnen",
+    "saving": "Wird gespeichert…",
+    "readOnly": "Nur finance.refund.execute kann Belege bestätigen oder ablehnen.",
+    "done": {
+      "APPROVED": "Bestätigt; das Mitglied wurde benachrichtigt.",
+      "REJECTED": "Abgelehnt; das Mitglied wurde benachrichtigt.",
+      "UNDERPAID": "Zu wenig gezahlt; das Mitglied wurde um den Restbetrag gebeten."
+    },
+    "errors": {
+      "amount": "Erhaltenen Betrag in Toman eingeben.",
+      "reason": "Zum Ablehnen einen Grund mit mindestens 5 Zeichen angeben.",
+      "notYet": "Die Prüfung dieses Belegs ist noch nicht offen.",
+      "notReviewable": "Dieser Beleg kann nicht mehr geprüft werden.",
+      "generic": "Nicht gespeichert; bitte erneut versuchen."
+    }
+  },
+  "adminOrderCancel": {
+    "title": "Bestellung stornieren (Support)",
+    "hint": "Nur bevor ein Kurier das Paket hat. Der Kunde erhält sofort den vollen Betrag zurück; die Lieferung wird storniert und der Bestand zurückgebucht.",
+    "afterDispatch": "Das Paket ist beim Kurier; bitte stattdessen eine Erstattung beantragen.",
+    "reason": "Grund (Prüfprotokoll)",
+    "reasonRequired": "Bitte einen kurzen Grund angeben.",
+    "cancel": "Bestellung stornieren",
+    "confirm": "Ja, stornieren und voll erstatten",
+    "back": "Zurück",
+    "notCancellable": "Nicht mehr stornierbar; der Kurier hat das Paket.",
+    "failed": "Das hat nicht geklappt; bitte erneut versuchen."
+  },
+  "adminRepeatDeliveries": {
+    "title": "Wiederkehrende Lieferungen",
+    "hint": "Liefer-Abos der Mitglieder (nur Ansicht). Mitglieder ändern oder kündigen sie in ihrem Konto.",
+    "filter": "Status",
+    "all": "Alle",
+    "status": {
+      "ACTIVE": "Aktiv",
+      "PAUSED": "Pausiert",
+      "CANCELLED": "Gekündigt"
+    },
+    "col": {
+      "member": "Mitglied",
+      "product": "Produkt",
+      "seller": "Verkäufer",
+      "every": "Alle",
+      "next": "Nächste Lieferung",
+      "status": "Status",
+      "lastOrder": "Letzte Bestellung"
+    },
+    "days": "{count} Tage",
+    "empty": "Keine.",
+    "prev": "Zurück",
+    "next": "Weiter",
+    "forbidden": "Berechtigung commerce.view erforderlich.",
+    "failed": "Konnte nicht laden",
+    "retry": "Erneut versuchen"
+  },
+  "adminBookingMoney": {
+    "title": "Stornieren und erstatten",
+    "hint": "Die Stornierung folgt den Regeln der Buchung; Geld fließt nur nach Finanzfreigabe zurück (über dem Schwellenwert durch eine zweite Person).",
+    "paid": "Online bezahlt",
+    "refunded": "Erstattet",
+    "refundable": "Noch erstattbar",
+    "policy": "Laut Stornobedingungen",
+    "approvalStatus": {
+      "REQUESTED": "Wartet auf Freigabe",
+      "APPROVED": "Freigegeben",
+      "REJECTED": "Abgelehnt",
+      "EXECUTED": "Erstattet"
+    },
+    "openQueue": "Freigabeliste",
+    "cancel": "Als Team stornieren",
+    "refund": "Erstatten",
+    "refundChoice": "Was wird erstattet?",
+    "choice": {
+      "POLICY": "Laut Stornobedingungen ({policy})",
+      "FULL": "Alles ({full})",
+      "AMOUNT": "Fester Betrag",
+      "NONE": "Keine Erstattung"
+    },
+    "amount": "Betrag (IRR)",
+    "reason": "Grund (im Prüfprotokoll)",
+    "confirmCancel": "Ich bestätige die Stornierung; Kunde und Anbieter werden informiert.",
+    "confirmRefund": "Ich bestätige diese Erstattungsanfrage.",
+    "submitCancel": "Buchung stornieren",
+    "submitRefund": "Erstattung anfragen",
+    "back": "Zurück",
+    "needReason": "Grund angeben und Bestätigung anhaken.",
+    "needAmount": "Gültigen Betrag eingeben.",
+    "cancelled": "Buchung storniert.",
+    "refundRequested": "Die Erstattung wartet auf Finanzfreigabe.",
+    "forbidden": "Dafür fehlt die Berechtigung.",
+    "tooMuch": "Mehr als erstattbar, oder die Buchung ist nicht stornierbar.",
+    "failed": "Das hat nicht geklappt; bitte erneut versuchen."
+  },
+  "adminRefundApprovals": {
+    "title": "Erstattungsfreigaben",
+    "hint": "Bestellungen, Termine und Aufenthalte. Niemand gibt die eigene Anfrage frei.",
+    "filter": "Status",
+    "all": "Alle",
+    "status": {
+      "REQUESTED": "Wartet auf Freigabe",
+      "APPROVED": "Freigegeben",
+      "REJECTED": "Abgelehnt",
+      "EXECUTED": "Erstattet"
+    },
+    "subject": {
+      "ORDER": "Shop-Bestellung",
+      "BOOKING": "Termin",
+      "TRAVEL_BOOKING": "Aufenthalt"
+    },
+    "columns": {
+      "subject": "Betrifft",
+      "amount": "Betrag",
+      "reason": "Grund",
+      "requestedBy": "Angefragt von",
+      "status": "Status"
+    },
+    "empty": "Nichts vorhanden.",
+    "approve": "Freigeben",
+    "reject": "Ablehnen",
+    "execute": "Auszahlen",
+    "rejectReason": "Ablehnungsgrund:",
+    "done": {
+      "approve": "Freigegeben.",
+      "reject": "Abgelehnt.",
+      "execute": "Erstattet."
+    },
+    "selfApproval": "Die eigene Anfrage kann nicht freigegeben werden, oder dieser Schritt ist nicht mehr möglich.",
+    "forbidden": "Berechtigung finance.view erforderlich.",
+    "failed": "Das hat nicht geklappt; bitte erneut versuchen."
+  },
+  "adminDisputeRefund": {
+    "title": "Ergebnis mit Erstattung",
+    "hint": "Zugunsten des Kunden mit Erstattung: die Erstattung geht in die Finanzfreigabe, der Streitfall wird für den Kunden gelöst.",
+    "amount": "Betrag (IRR)",
+    "reason": "Grund",
+    "submit": "Mit Erstattung lösen",
+    "approval": "Erstattung von {amount}: {status}",
+    "status": {
+      "REQUESTED": "Wartet auf Freigabe",
+      "APPROVED": "Freigegeben",
+      "REJECTED": "Abgelehnt",
+      "EXECUTED": "Erstattet"
+    },
+    "notOpen": "Nur für einen laufenden Streitfall und mit Finanzberechtigung.",
+    "invalid": "Betrag und Grund (mind. 5 Zeichen) angeben.",
+    "requested": "Erstattung angefragt.",
+    "tooMuch": "Mehr als erlaubt, oder dieser Streitfall erlaubt keine Erstattung.",
+    "failed": "Das hat nicht geklappt; bitte erneut versuchen."
+  },
+  "adminDigikalaFacts": {
+    "title": "Einmaliger Digikala-Tierbedarf-Import (nur Fakten)",
+    "hint": "Die meistverkauften Produkte der Digikala-Kategorie Tierbedarf kommen einmalig als Entwürfe in den Katalog.",
+    "rules": {
+      "facts": "Name, Marke, Kategorie, technische Daten und Gewicht werden übernommen.",
+      "noContent": "Fotos und Beschreibungen von Digikala werden nicht kopiert; vor dem Veröffentlichen eigene Texte und Bilder ergänzen.",
+      "reference": "Preis und Bestand von Digikala bleiben nur als Referenz im Importprotokoll; sie sind nicht unser Verkaufspreis.",
+      "pace": "Er läuft langsam (eine Anfrage alle 3 Sekunden) und stoppt, wenn Digikala blockiert."
+    },
+    "category": "Zielkategorie im Katalog",
+    "maxProducts": "Höchstzahl Produkte (bis 3000)",
+    "start": "Einmaligen Import starten",
+    "started": "In der Warteschlange; der Fortschritt erscheint in der Auftragsliste.",
+    "alreadyRun": "Dieser Import ist bereits gelaufen oder läuft gerade.",
+    "invalid": "Wählen Sie eine Kategorie und eine Zahl von 1 bis 3000.",
+    "forbidden": "Berechtigung commerce.manage erforderlich.",
+    "failed": "Konnte nicht starten; bitte erneut versuchen."
+  },
+  "petCard": {
+    "title": "Tierkarte und QR-Code",
+    "intro": "Eine öffentliche Karte für die Marke oder das Halsband von {name}. Wer den Code scannt, sieht nur, was du hier auswählst, und kann dir über opetlife schreiben. Deine Telefonnummer wird nie angezeigt.",
+    "back": "Zurück zum Profil von {name}",
+    "fieldsTitle": "Was die Karte zeigt",
+    "healthGroup": "Gesundheit (für den Fall, dass Finder es wissen müssen)",
+    "fields": {
+      "PHOTO": "Foto",
+      "SPECIES": "Tierart",
+      "BREED": "Rasse",
+      "SEX": "Geschlecht",
+      "AGE": "Alter",
+      "MICROCHIP_STATUS": "Ob ein Mikrochip vorhanden ist (nicht die Nummer)",
+      "ALLERGIES": "Allergien",
+      "CONDITIONS": "Aktuelle Erkrankungen",
+      "MEDICATIONS": "Aktuelle Medikamente",
+      "BLOOD_TYPE": "Blutgruppe",
+      "CRITICAL_NOTES": "Wichtige Hinweise"
+    },
+    "previewTitle": "Wer den Code scannt, sieht",
+    "previewName": "Name: {name}",
+    "previewMessage": "Eine Schaltfläche „Besitzer kontaktieren“ über opetlife",
+    "neverTitle": "Nie angezeigt",
+    "never": "Deine Adresse, Haushaltsmitglieder, Telefonnummer, die Mikrochipnummer, Dokumente und Termine.",
+    "create": "Karte und QR-Code erstellen",
+    "replace": "Neue Karte erstellen",
+    "replaceNote": "Mit einer neuen Karte wird die aktuelle sofort ungültig; ihr alter Code öffnet sich nicht mehr.",
+    "creating": "Wird erstellt…",
+    "createError": "Die Karte wurde nicht erstellt. Versuch es noch einmal.",
+    "readyTitle": "Deine Karte ist fertig",
+    "onceNote": "Dieser Link und Code werden nur jetzt angezeigt. Lade sie herunter oder drucke sie; wenn sie verloren gehen, erstelle eine neue Karte.",
+    "qrLabel": "QR-Code für die Karte von {name}",
+    "download": "QR herunterladen",
+    "print": "Drucken",
+    "copy": "Link kopieren",
+    "copied": "Kopiert",
+    "open": "Karte ansehen",
+    "listTitle": "Karten von {name}",
+    "listEmpty": "Noch keine Karte.",
+    "kind": {
+      "ID_TAG": "Markenkarte",
+      "EMERGENCY": "Notfallkarte"
+    },
+    "state": {
+      "ACTIVE": "Aktiv",
+      "REVOKED": "Widerrufen",
+      "ROTATED": "Ersetzt",
+      "EXPIRED": "Abgelaufen"
+    },
+    "created": "Erstellt am {date}",
+    "ending": "Code endet auf …{hint}",
+    "views": "Aufrufe: {count}",
+    "lastViewed": "Zuletzt angesehen {date}",
+    "revoke": "Karte widerrufen",
+    "revokeConfirm": "Ja, diese Karte widerrufen",
+    "revokeCancel": "Abbrechen",
+    "revoked": "Die Karte ist widerrufen; ihr Code öffnet sich nicht mehr.",
+    "revokeError": "Nicht widerrufen. Versuch es noch einmal.",
+    "noAccess": "Nur wer die Zugriffe auf dieses Tier verwaltet, kann eine Karte erstellen.",
+    "loadError": "Die Kartendaten konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "loading": "Wird geladen…"
   }
 }

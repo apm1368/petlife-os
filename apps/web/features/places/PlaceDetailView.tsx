@@ -11,6 +11,8 @@ import { ApiError } from "@/lib/api/client";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 import { placeLocation } from "@/features/places/place-format";
+import { isClaimable, isOsmUnclaimed, OsmAttribution, PlaceClaimPanel, telHref } from "@/features/places/PlaceOsm";
+import { externalHref } from "@/lib/url/external-href";
 
 export function PlaceDetailView({ placeId }: { placeId: string }) {
   const t = useTranslations("places");
@@ -92,7 +94,16 @@ export function PlaceDetailView({ placeId }: { placeId: string }) {
         <span className="tag">{t(`category.${place.category}`)}</span>
       </header>
 
-      {place.status !== "VERIFIED" ? <p className="calm-note text-body">{t("detail.unverified")}</p> : null}
+      {isOsmUnclaimed(place) ? (
+        <div className="calm-note text-body">
+          <p className="font-bold">{t("osm.label")}</p>
+          <p className="text-text-secondary">{t("osm.explain")}</p>
+        </div>
+      ) : place.claimed ? (
+        <p className="calm-note text-body">{t("osm.managed")}</p>
+      ) : place.status !== "VERIFIED" ? (
+        <p className="calm-note text-body">{t("detail.unverified")}</p>
+      ) : null}
 
       <div className="split-layout">
         <div className="split-main">
@@ -128,6 +139,8 @@ export function PlaceDetailView({ placeId }: { placeId: string }) {
         <aside className="split-aside">
           <section className="split-panel flex flex-col gap-3">
             <p className="text-body text-text-primary">{place.address ?? placeLocation(place, lang)}</p>
+            {place.phone && telHref(place.phone) ? <p className="text-sm">{t("osm.phone")}: <a dir="ltr" className="underline" href={telHref(place.phone)!}>{place.phone}</a></p> : null}
+            {externalHref(place.website) ? <p className="text-sm">{t("osm.website")}: <a dir="ltr" className="underline break-all" href={externalHref(place.website)!} target="_blank" rel="nofollow noopener noreferrer ugc">{place.website!.replace(/^https?:\/\//, "").replace(/\/$/, "")}</a></p> : null}
             {error ? <p className="text-body text-state-urgent">{error}</p> : null}
             {requiresAuth ? <p className="text-body text-text-secondary">{t("favorites.signInPrompt")}</p> : null}
 
@@ -137,6 +150,7 @@ export function PlaceDetailView({ placeId }: { placeId: string }) {
 
             <Link className="text-sm underline" href={`/${lang}/travel/search?city=${encodeURIComponent(place.city)}`}>{fa ? `اقامتگاه‌های دوستدار حیوانات در ${place.city}` : `Pet-friendly stays in ${place.city}`}</Link>
           </section>
+          {isClaimable(place) ? <PlaceClaimPanel place={place} /> : null}
           <section className="flex flex-col gap-2" aria-label={fa ? "گزارش اطلاعات نادرست" : "Report incorrect information"}>
             {reportState === "sent" ? <p role="status" className="text-sm text-state-success">{fa ? "گزارش شما ثبت شد و تیم اپت لایف بررسی می‌کند." : "Thanks — the opetlife team will review your report."}</p> : null}
             {reportState === "duplicate" ? <p role="alert" className="text-sm text-text-secondary">{fa ? "گزارش شما برای این مکان قبلاً ثبت شده و در حال بررسی است." : "You have already reported this place; it is being reviewed."}</p> : null}
@@ -151,6 +165,7 @@ export function PlaceDetailView({ placeId }: { placeId: string }) {
                     <option value="NOT_PET_FRIENDLY">{fa ? "دیگر حیوان نمی‌پذیرد" : "No longer pet-friendly"}</option>
                     <option value="CLOSED_PERMANENTLY">{fa ? "برای همیشه بسته شده" : "Permanently closed"}</option>
                     <option value="WRONG_LOCATION">{fa ? "مکان نادرست" : "Wrong location"}</option>
+                    {place.claimed ? <option value="CLAIMED_BY_SOMEONE_ELSE">{fa ? "این کسب‌وکار من است و شخص دیگری آن را تحویل گرفته" : "This is my business and someone else claimed it"}</option> : null}
                     <option value="OTHER">{fa ? "سایر" : "Other"}</option>
                   </select>
                 </label>
@@ -159,6 +174,12 @@ export function PlaceDetailView({ placeId }: { placeId: string }) {
               </div>
             ) : null}
           </section>
+          {place.source === "OSM" ? (
+            <section className="flex flex-col gap-1">
+              {place.osmUrl ? <a className="text-sm underline" href={place.osmUrl} target="_blank" rel="noopener noreferrer">{t("osm.viewOnOsm")}</a> : null}
+              <OsmAttribution />
+            </section>
+          ) : null}
         </aside>
       </div>
     </div>

@@ -39,10 +39,10 @@ export function companyCard(config: Pick<RailConfig, "CARD_TRANSFER_ACCOUNT_NUMB
  * Which rails can really take money. Zibal only in production mode with a merchant: in sandbox the gateway's
  * verify always answers "paid", which would mint spendable credit from nothing. There is no simulated rail.
  */
-export function availableTopUpRails(config: RailConfig): WalletTopUpRail[] {
+export function availableTopUpRails(config: RailConfig, cardConfigured: boolean = !!companyCard(config)): WalletTopUpRail[] {
   const rails: WalletTopUpRail[] = [];
   if (config.PAYMENT_SANDBOX_MODE === "production" && config.ZIBAL_ENABLED && config.ZIBAL_MERCHANT?.trim()) rails.push(WalletTopUpRail.ZIBAL);
-  if (companyCard(config)) rails.push(WalletTopUpRail.CARD_TO_CARD);
+  if (cardConfigured) rails.push(WalletTopUpRail.CARD_TO_CARD);
   return rails;
 }
 

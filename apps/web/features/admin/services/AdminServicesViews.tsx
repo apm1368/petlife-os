@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Button, Dialog, EmptyState, ErrorRecovery, Input, Skeleton } from "@petlife/ui";
 import { ApiError } from "@/lib/api/client";
@@ -10,6 +11,7 @@ import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
 import { adminServicesService, type AdminBookingDetail, type AdminBookingRow, type AdminReviewRow, type AdminServiceRow, type AdminServicesAnalytics } from "@/services/admin-services.service";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { DetailRow, EmptyRow, FilterBar, FilterField, Kpi, Panel, PanelTitle, SelectFilter, TableWrap, Tag, Td, TextFilter, Th } from "../console-ui";
+import { StaffBookingMoneyPanel } from "../finance/StaffBookingMoneyPanel";
 
 const STATUS_OPTIONS = ["REQUESTED", "AWAITING_PAYMENT", "CONFIRMED", "CHECKED_IN", "IN_PROGRESS", "COMPLETED", "CANCELLED_BY_USER", "CANCELLED_BY_PROVIDER", "REJECTED", "EXPIRED", "RESCHEDULED", "NO_SHOW"];
 const isOffline = () => typeof navigator !== "undefined" && navigator.onLine === false;
@@ -20,6 +22,9 @@ export function AdminServiceBookingsView() {
   const tCommon = useTranslations("admin.common");
   const label = (key: string) => t.has(key) ? t(key) : t("unknownValue");
   const [status, setStatus] = useState<string | "all">("all");
+  // ?noShowParty=PROVIDER opens straight on members' "the provider didn't come" reports (dashboard tile, tasks).
+  const initialNoShow = useSearchParams()?.get("noShowParty");
+  const [noShow, setNoShow] = useState<string | "all">(initialNoShow === "PROVIDER" || initialNoShow === "OWNER" ? initialNoShow : "all");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [data, setData] = useState<{ total: number; items: AdminBookingRow[] } | null>(null);
@@ -29,11 +34,11 @@ export function AdminServiceBookingsView() {
     setError(null);
     setData(null);
     try {
-      setData(await adminServicesService.listBookings({ status: status === "all" ? undefined : status, q: q.trim() || undefined, page }));
+      setData(await adminServicesService.listBookings({ status: status === "all" ? undefined : status, noShowParty: noShow === "all" ? undefined : noShow, q: q.trim() || undefined, page }));
     } catch (e) {
       setError(e instanceof ApiError && e.status === 403 ? "forbidden" : isOffline() ? "offline" : "error");
     }
-  }, [status, q, page]);
+  }, [status, noShow, q, page]);
   useEffect(() => {
     const t = setTimeout(() => void load(), 250);
     return () => clearTimeout(t);
@@ -49,6 +54,9 @@ export function AdminServiceBookingsView() {
           <FilterField label={t("bookings.searchLabel")}><TextFilter value={q} onChange={(v) => { setQ(v); setPage(1); }} /></FilterField>
           <FilterField label={t("bookings.statusLabel")}>
             <SelectFilter value={status} onChange={(v) => { setStatus(v); setPage(1); }} options={[{ value: "all", label: t("common.all") }, ...STATUS_OPTIONS.map((s) => ({ value: s, label: label(`bookingStatus.${s}`) }))]} />
+          </FilterField>
+          <FilterField label={t("bookings.noShowLabel")}>
+            <SelectFilter value={noShow} onChange={(v) => { setNoShow(v); setPage(1); }} options={[{ value: "all", label: t("common.all") }, { value: "PROVIDER", label: t("bookings.noShowProvider") }, { value: "OWNER", label: t("bookings.noShowOwner") }]} />
           </FilterField>
         </FilterBar>
         {error === "error" ? <ErrorRecovery title={t("states.loadFailedTitle")} message={t("states.bookingsLoadFailed")} retryLabel={tCommon("retry")} onRetry={load} /> : null}
@@ -66,7 +74,7 @@ export function AdminServiceBookingsView() {
                       <Td>{b.petName}</Td>
                       <Td>{b.providerName}</Td>
                       <Td>{b.serviceName}</Td>
-                      <Td><Tag tone={b.status === "COMPLETED" || b.status === "CONFIRMED" ? "success" : b.status === "REQUESTED" || b.status === "AWAITING_PAYMENT" ? "attention" : "neutral"}>{label(`bookingStatus.${b.status}`)}</Tag></Td>
+                      <Td><Tag tone={b.status === "COMPLETED" || b.status === "CONFIRMED" ? "success" : b.status === "REQUESTED" || b.status === "AWAITING_PAYMENT" || b.noShowParty === "PROVIDER" ? "attention" : "neutral"}>{label(`bookingStatus.${b.status}`)}</Tag>{b.noShowParty ? <span className="block text-metadata text-text-secondary">{b.noShowParty === "PROVIDER" ? t("bookings.noShowProvider") : t("bookings.noShowOwner")}</span> : null}</Td>
                       <Td>{label(`paymentStatus.${b.paymentStatus}`)}</Td>
                       <Td>{b.priceAmount !== null ? formatCurrency(b.priceAmount, locale) : "—"}</Td>
                     </tr>
@@ -159,6 +167,7 @@ export function AdminServiceBookingDetailView({ bookingId }: { bookingId: string
           <DetailRow label={t("detail.review")}>{b.review ? `${b.review.rating}★ · ${label(`reviewStatus.${b.review.status}`)}` : "—"}</DetailRow>
           {b.supportCases.length ? b.supportCases.map((c) => <DetailRow key={c.id} label={t("detail.supportCase")}><Link href={`/${locale}/admin/support/${c.id}`}>{c.caseNumber}</Link> · {label(`supportStatus.${c.status}`)}</DetailRow>) : <DetailRow label={t("detail.support")}>—</DetailRow>}
         </Panel>
+        <StaffBookingMoneyPanel kind="BOOKING" bookingId={bookingId} />
       </div>
     </div>
   );

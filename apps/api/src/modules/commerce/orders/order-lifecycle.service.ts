@@ -96,8 +96,23 @@ export class OrderLifecycleService {
     return this.cancelWithRefund(order.userId, order, reason, { actor: "SELLER", actorUserId });
   }
 
-  private cancelWithRefund(userId: string, order: Order, reason?: string, by: { actor: "CUSTOMER" | "SELLER"; actorUserId: string } = { actor: "CUSTOMER", actorUserId: userId }): Promise<RefundDto> {
-    const cancelReason = reason?.trim() || (by.actor === "SELLER" ? "Cancelled by the seller before dispatch" : "Cancelled by customer before dispatch");
+  /**
+   * Staff cancel before dispatch (support/ops), on the same path as the customer and seller: the customer is refunded
+   * in full in the same step, the fulfillment is cancelled and stock goes back. After dispatch staff use a refund
+   * request/approval instead. The caller audits it.
+   */
+  async adminCancel(adminUserId: string, orderId: string, reason: string): Promise<RefundDto> {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) throw new OrderNotFoundException({ orderId });
+    const fulfillment = await this.primaryFulfillment(orderId);
+    if (!order.userId || !canCustomerCancel(order, fulfillment)) {
+      throw new OrderNotCancellableException({ orderId, status: order.status, fulfillmentStatus: fulfillment?.status ?? null });
+    }
+    return this.cancelWithRefund(order.userId, order, reason, { actor: "ADMIN", actorUserId: adminUserId });
+  }
+
+  private cancelWithRefund(userId: string, order: Order, reason?: string, by: { actor: "CUSTOMER" | "SELLER" | "ADMIN"; actorUserId: string } = { actor: "CUSTOMER", actorUserId: userId }): Promise<RefundDto> {
+    const cancelReason = reason?.trim() || (by.actor === "SELLER" ? "Cancelled by the seller before dispatch" : by.actor === "ADMIN" ? "Cancelled by opetlife support before dispatch" : "Cancelled by customer before dispatch");
     return this.refunds.request(userId, order.id, cancelReason, undefined, {
       actorType: by.actor,
       actorId: by.actorUserId,

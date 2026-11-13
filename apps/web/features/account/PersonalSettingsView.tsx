@@ -116,9 +116,9 @@ export function PersonalSettingsView() {
           />
         </div>
         <p className="text-metadata text-text-secondary">{datePreferenceCopy(locale)}</p>
-        <div className="security-row">
+        <div className="security-row security-row--plain">
           <div>
-            <b>{t("نمایش ساده", "Simple display")}</b>
+            <b>{t("نمایش ساده", "Simple display", "Einfache Ansicht", "Vista sencilla")}</b>
             <p>{t(
               "متن خواناتر و کنترل‌های بزرگ‌تر؛ این انتخاب فقط روی همین دستگاه ذخیره می‌شود و به زبان یا پوسته وابسته نیست.",
               "Clearer text and larger controls. This choice is saved on this device and is independent of language and theme.",

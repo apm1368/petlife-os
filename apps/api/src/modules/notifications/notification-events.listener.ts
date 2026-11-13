@@ -31,7 +31,8 @@ interface BookingEventPayload {
   householdId?: string;
   providerOrganizationId?: string;
   providerUserId?: string | null;
-  cancelledBy?: "PROVIDER";
+  /** Who cancelled when it was not the member: the provider, or opetlife staff (both then tell the other side). */
+  cancelledBy?: "PROVIDER" | "ADMIN";
 }
 
 @Injectable()
@@ -72,6 +73,71 @@ export class NotificationEventsListener {
         domainEventId,
         attemptSms: false,
       });
+    });
+  }
+
+  /** A moderator approved or rejected a review: its author hears the outcome, with a link to where it belongs. */
+  @OnEvent("ReviewModerated")
+  onReviewModerated(payload: { vertical: "SERVICE" | "PRODUCT" | "TRAVEL"; reviewId: string; decision: "APPROVED" | "REJECTED" }, domainEventId: string): Promise<void> {
+    return this.safely("ReviewModerated", async () => {
+      let review: { userId: string; subject: string; reason: string | null; deepLink: string; category: NotificationCategory } | null = null;
+      if (payload.vertical === "SERVICE") {
+        const r = await this.prisma.providerReview.findUnique({ where: { id: payload.reviewId }, select: { userId: true, hiddenReason: true, providerOrganizationId: true, providerOrganization: { select: { name: true } } } });
+        if (r) review = { userId: r.userId, subject: r.providerOrganization.name, reason: r.hiddenReason, deepLink: NotificationDeepLinks.provider(r.providerOrganizationId), category: NotificationCategory.SERVICE };
+      } else if (payload.vertical === "PRODUCT") {
+        const r = await this.prisma.productReview.findUnique({ where: { id: payload.reviewId }, select: { userId: true, hiddenReason: true, product: { select: { title: true } }, orderItem: { select: { orderId: true } } } });
+        if (r) review = { userId: r.userId, subject: r.product.title, reason: r.hiddenReason, deepLink: NotificationDeepLinks.order(r.orderItem.orderId), category: NotificationCategory.COMMERCE };
+      } else {
+        const r = await this.prisma.travelReview.findUnique({ where: { id: payload.reviewId }, select: { userId: true, hiddenReason: true, bookingId: true, listing: { select: { title: true } } } });
+        if (r) review = { userId: r.userId, subject: r.listing.title, reason: r.hiddenReason, deepLink: NotificationDeepLinks.travelBooking(r.bookingId), category: NotificationCategory.TRAVEL };
+      }
+      if (!review) return;
+      await this.orchestrator.notify({
+        userId: review.userId,
+        type: payload.decision === "APPROVED" ? "review.approved" : "review.rejected",
+        category: review.category,
+        templateParams: { subject: review.subject, reason: (review.reason ?? "").slice(0, 300) },
+        deepLink: review.deepLink,
+        entityType: `${payload.vertical}_REVIEW`,
+        entityId: payload.reviewId,
+        domainEventId,
+        attemptSms: false,
+      });
+    });
+  }
+
+  /** ID-03: the other party hears that the transfer is disputed (the one who raised it already knows). */
+  @OnEvent("PetOwnershipDisputed")
+  onOwnershipDisputed(payload: { transferId: string; petId: string; raisedByUserId: string }, domainEventId: string): Promise<void> {
+    return this.safely("PetOwnershipDisputed", async () => {
+      const transfer = await this.prisma.petOwnershipTransfer.findUnique({ where: { id: payload.transferId }, select: { fromUserId: true, toUserId: true, pet: { select: { name: true } } } });
+      if (!transfer) return;
+      const other = payload.raisedByUserId === transfer.fromUserId ? transfer.toUserId : transfer.fromUserId;
+      const actor = await this.prisma.user.findUnique({ where: { id: payload.raisedByUserId }, select: { displayName: true } });
+      await this.orchestrator.notify({
+        userId: other,
+        type: "pet.ownership_disputed",
+        category: NotificationCategory.HOUSEHOLD,
+        templateParams: { petName: transfer.pet.name, actorName: actor?.displayName ?? "" },
+        deepLink: NotificationDeepLinks.petOwnershipTransfer(payload.transferId),
+        entityType: "PetOwnershipTransfer",
+        entityId: payload.transferId,
+        petId: payload.petId,
+        domainEventId,
+        attemptSms: false,
+      });
+    });
+  }
+
+  /** Staff closed a dispute (Admin → Users → Ownership transfers): both parties hear the outcome. */
+  @OnEvent("PetOwnershipDisputeClosed")
+  onOwnershipDisputeClosed(payload: { transferId: string; petId: string; fromUserId: string; toUserId: string; outcome: "TRANSFER_STANDS" | "OWNER_STAYS" }, domainEventId: string): Promise<void> {
+    return this.safely("PetOwnershipDisputeClosed", async () => {
+      const pet = await this.prisma.pet.findUnique({ where: { id: payload.petId }, select: { name: true } });
+      const type = payload.outcome === "TRANSFER_STANDS" ? "pet.ownership_dispute_closed_stands" : "pet.ownership_dispute_closed_owner_stays";
+      for (const userId of [payload.fromUserId, payload.toUserId]) {
+        await this.orchestrator.notify({ userId, type, category: NotificationCategory.HOUSEHOLD, templateParams: { petName: pet?.name ?? "" }, deepLink: NotificationDeepLinks.petOwnershipTransfer(payload.transferId), entityType: "PetOwnershipTransfer", entityId: payload.transferId, petId: payload.petId, domainEventId, attemptSms: false });
+      }
     });
   }
 
@@ -302,6 +368,55 @@ export class NotificationEventsListener {
         entityId: payload.orderId,
         domainEventId,
       });
+    });
+  }
+
+  /**
+   * Watchlist alerts: members who favourited a product hear when an offer of it gets cheaper or comes back in stock.
+   * At most one alert of each kind per product per member per day, so a seller nudging prices cannot spam anyone.
+   */
+  private async alertFavoriters(productId: string, type: "product.price_dropped" | "product.back_in_stock", domainEventId: string): Promise<void> {
+    const product = await this.prisma.product.findUnique({ where: { id: productId }, select: { title: true, status: true } });
+    if (!product || product.status !== "ACTIVE") return;
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const favorites = await this.prisma.productFavorite.findMany({ where: { productId }, select: { userId: true }, take: 1000 });
+    if (!favorites.length) return;
+    const recent = await this.prisma.notification.findMany({ where: { type, entityType: "Product", entityId: productId, createdAt: { gt: since }, userId: { in: favorites.map((f) => f.userId) } }, select: { userId: true } });
+    const skip = new Set(recent.map((r) => r.userId));
+    for (const { userId } of favorites) {
+      if (skip.has(userId)) continue;
+      await this.orchestrator.notify({
+        userId,
+        type,
+        category: NotificationCategory.COMMERCE,
+        templateParams: { product: product.title.slice(0, 80) },
+        deepLink: NotificationDeepLinks.product(productId),
+        entityType: "Product",
+        entityId: productId,
+        domainEventId,
+      });
+    }
+  }
+
+  @OnEvent("SellerOfferPriceChanged")
+  onSellerOfferPriceChanged(payload: { sellerOfferId: string; fromPriceAmount: number; toPriceAmount: number }, domainEventId: string): Promise<void> {
+    return this.safely("SellerOfferPriceChanged", async () => {
+      if (!(payload.toPriceAmount < payload.fromPriceAmount)) return;
+      const offer = await this.prisma.sellerOffer.findUnique({ where: { id: payload.sellerOfferId }, select: { status: true, moderationStatus: true, productVariant: { select: { productId: true } } } });
+      if (!offer || offer.status !== "ACTIVE" || offer.moderationStatus !== "APPROVED") return;
+      await this.alertFavoriters(offer.productVariant.productId, "product.price_dropped", domainEventId);
+    });
+  }
+
+  @OnEvent("InventoryAdjusted")
+  onInventoryAdjusted(payload: { inventoryItemId: string; delta: number; quantityAfter: number }, domainEventId: string): Promise<void> {
+    return this.safely("InventoryAdjusted", async () => {
+      // Back in stock = this adjustment took the item from nothing to something.
+      if (!(payload.quantityAfter > 0 && payload.quantityAfter - payload.delta <= 0)) return;
+      const item = await this.prisma.inventoryItem.findUnique({ where: { id: payload.inventoryItemId }, select: { sellerOffer: { select: { status: true, moderationStatus: true, productVariant: { select: { productId: true } } } } } });
+      const offer = item?.sellerOffer;
+      if (!offer || offer.status !== "ACTIVE" || offer.moderationStatus !== "APPROVED") return;
+      await this.alertFavoriters(offer.productVariant.productId, "product.back_in_stock", domainEventId);
     });
   }
 
