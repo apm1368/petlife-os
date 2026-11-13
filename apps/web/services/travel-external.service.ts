@@ -1,6 +1,7 @@
 import {apiFetch,API_BASE_URL} from "@/lib/api/client";
 export interface ExternalStayContext {checkIn?:string;checkOut?:string;guests?:number;pets?:number}
-export interface ExternalStaySearch extends ExternalStayContext {city?:string;stayType?:string;source?:string;minPrice?:number;maxPrice?:number;instantBooking?:boolean;dogs?:boolean;cats?:boolean;petPolicy?:string;page?:number;pageSize?:number}
+export interface ExternalStayFacets {provinces:{name:string;count:number}[];cities:{name:string;province:string|null;count:number}[]}
+export interface ExternalStaySearch extends ExternalStayContext {city?:string;province?:string;stayType?:string;source?:string;minPrice?:number;maxPrice?:number;instantBooking?:boolean;dogs?:boolean;cats?:boolean;petPolicy?:string;page?:number;pageSize?:number}
 export interface ExternalStayPrice {state:"DATES_REQUIRED"|"NO_PRICE_FOR_DATES"|"FRESH"|"STALE";freshness:string;context?:ExternalStayContext;priceType?:string;currency?:string;priceIrr?:number|null;oldPriceIrr?:number|null;discountPercent?:number|null;priceBasis?:string;observedAt?:string;expiresAt?:string;availability?:{state:string;observedAt:string|null}}
 export interface ExternalStay {
  id:string;title:string|null;city:string|null;area:string|null;stayType:string|null;province:string|null;country:string;addressText:string|null;capacity:number|null;bedrooms:number|null;beds:number|null;amenities:string[];
@@ -14,6 +15,7 @@ export type ExternalStayFavorite = {savedAt:string;available:true;stay:ExternalS
 function query(input:object){const params=new URLSearchParams();for(const[key,value]of Object.entries(input)){if(value!==undefined&&value!=="")params.set(key,String(value))}const text=params.toString();return text?`?${text}`:""}
 function context(input:ExternalStayContext){return {checkIn:input.checkIn,checkOut:input.checkOut,guests:input.guests,pets:input.pets}}
 export const travelExternalService={
+ facets:(source?:string,signal?:AbortSignal)=>apiFetch<ExternalStayFacets>(`/travel/external/facets${query({source})}`,{signal}),
  search:(input:ExternalStaySearch,signal?:AbortSignal)=>apiFetch<{items:ExternalStay[];total:number;page:number;pageSize:number;context:ExternalStayContext|null}>(`/travel/external/stays${query(input)}`,{signal}),
  detail:(id:string,input:ExternalStayContext,signal?:AbortSignal)=>apiFetch<ExternalStay>(`/travel/external/stays/${id}${query(context(input))}`,{signal}),
  outboundUrl:(id:string,input:ExternalStayContext)=>`${API_BASE_URL}/travel/external/stays/${encodeURIComponent(id)}/out${query(context(input))}`,

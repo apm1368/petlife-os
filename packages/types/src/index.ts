@@ -2895,6 +2895,8 @@ export interface SupportCaseSummaryDto {
   firstAssignedAt?: string | null;
   firstResponseAt?: string | null;
   reopenCount?: number;
+  /** Admin-only human follow-up request, if one has been recorded. */
+  humanEscalation?: { referenceNumber: string; reason: string; confirmedAt: string } | null;
   /** Set when a partner opened the case from their business panel; admin support lists these under Partners. */
   requesterOrganization?: SupportCaseRequesterOrgDto | null;
 }
@@ -3434,6 +3436,10 @@ export interface AdminDashboardSummaryDto {
   openPlaceReports: number | null;
   /** Card-to-card wallet top-up receipts waiting for finance. */
   pendingWalletTopUps: number | null;
+  /** FE-16: wallet corrections waiting for a second admin's approval (PENDING, not yet expired); wallet.view. */
+  pendingWalletAdjustments: number | null;
+  /** BO-14: a proposed company card-to-card account waiting for a second super admin; SUPER_ADMIN with settings.manage only. */
+  pendingCardDestinationChanges: number | null;
   /** Account deletion requests waiting on staff (REQUESTED or PENDING_RETENTION); admin.manage only. */
   pendingDeletionRequests: number | null;
   /** Pet ownership transfers in DISPUTED, waiting for staff to record the outcome; customer.view. */
@@ -3678,6 +3684,41 @@ export interface AdminSessionContextDto {
   permissions: AdminPermissionName[];
   /** Set when an owner-defined custom role decides this admin's access (admin/access/roles). */
   customRoleName?: string | null;
+  /** Two-step sign-in state for this session (admin/two-step). `required` other than NONE: show that screen first. */
+  twoStep?: AdminTwoStepGateDto;
+}
+
+export interface AdminTwoStepGateDto {
+  enrolled: boolean;
+  verified: boolean;
+  enforced: boolean;
+  graceEndsAt: string | null;
+  required: "NONE" | "CHALLENGE" | "ENROL";
+}
+
+export interface AdminTwoStepStatusDto extends AdminTwoStepGateDto {
+  verifiedUntil: string | null;
+  enrolledAt: string | null;
+  recoveryCodesLeft: number | null;
+  pendingEnrolment: boolean;
+}
+
+export interface AdminTwoStepEnrolmentDto {
+  /** Base32 key in groups of four, for typing into an authenticator by hand. */
+  secret: string;
+  otpauthUri: string;
+  issuer: string;
+  account: string;
+}
+
+export interface AdminTwoStepPolicyDto {
+  enforced: boolean;
+  /** False until the server enables team enforcement (owner: opt-in until SMS and email are live). */
+  enforcementAvailable: boolean;
+  enforcedAt: string | null;
+  graceDays: number;
+  enrolledCount: number;
+  members: Array<{ adminUserId: string; displayName: string; role: AdminRole; enrolled: boolean; enrolledAt: string | null; graceEndsAt: string | null }>;
 }
 
 /** Current server permissions, refreshed on every request; never grants access itself. */
@@ -7286,6 +7327,8 @@ export type WalletTopUpRailValue = "ZIBAL" | "CARD_TO_CARD";
 export type WalletTopUpStatusValue = "AWAITING_PAYMENT" | "AWAITING_RECEIPT" | "REVIEW_PENDING" | "CREDITED" | "FAILED" | "REJECTED" | "EXPIRED" | "CANCELLED";
 export type WalletAdjustmentDirectionValue = "CREDIT" | "DEBIT";
 export type WalletAdjustmentReasonCode = "GOODWILL" | "SERVICE_RECOVERY" | "PAYMENT_CORRECTION" | "REFUND_OUTSIDE_SYSTEM" | "DUPLICATE_CREDIT_REVERSAL" | "OTHER";
+/** FE-16: a correction is requested by one admin and posted only when a different admin approves it. */
+export type WalletAdjustmentRequestStatusValue = "PENDING" | "APPROVED" | "REJECTED" | "EXPIRED";
 
 export interface WalletBalancesDto {
   /** Top-ups and gifts: spendable on purchases only. */
@@ -7354,6 +7397,12 @@ export interface WalletCardTransferInstructionsDto {
   sheba: string | null;
 }
 
+/**
+ * BO-14: PENDING = proposed, waiting for a second super admin; ACTIVE = what members pay into; CLOSED = was active,
+ * since replaced or switched off; REJECTED = turned down or withdrawn; EXPIRED = nobody approved it in time.
+ */
+export type CardTransferDestinationStatusValue = "PENDING" | "ACTIVE" | "CLOSED" | "REJECTED" | "EXPIRED";
+
 /** One company card-to-card account, masked (admin never sees the full number back). */
 export interface AdminCardTransferDestinationDto {
   id: string;
@@ -7362,12 +7411,39 @@ export interface AdminCardTransferDestinationDto {
   holderName: string;
   bankName: string | null;
   active: boolean;
+  status: CardTransferDestinationStatusValue;
   reason: string;
   createdAt: string;
+  /** Who proposed it. */
   createdBy: string | null;
+  /** Until when a PENDING proposal can be approved. */
+  expiresAt: string | null;
+  /** The second super admin who approved it (null for accounts set before two-person approval). */
+  approvedAt: string | null;
+  approvedBy: string | null;
+  /** When it stopped being active, or when its proposal was rejected or withdrawn (an expired one shows expiresAt). */
   closedAt: string | null;
   closedBy: string | null;
   closeReason: string | null;
+}
+
+/** A proposed new account waiting for a second super admin (BO-14), masked. Members never see it. */
+export interface AdminCardTransferDestinationPendingDto {
+  id: string;
+  cardNumberMasked: string | null;
+  shebaMasked: string | null;
+  holderName: string;
+  bankName: string | null;
+  reason: string;
+  requestedBy: string | null;
+  requestedAt: string;
+  expiresAt: string;
+  /** The viewer proposed it: they may withdraw it, never approve it. */
+  requestedByMe: boolean;
+  /** A super admin with settings.manage other than the proposer. */
+  canApprove: boolean;
+  /** Any super admin with settings.manage (the proposer withdraws). */
+  canReject: boolean;
 }
 
 export type CardTransferPaymentStatusValue = "AWAITING_RECEIPT" | "REVIEW_PENDING" | "APPROVED" | "REJECTED" | "UNDERPAID_AWAITING_DIFFERENCE" | "EXPIRED" | "CANCELLED";
@@ -7397,8 +7473,12 @@ export interface AdminCardTransferDestinationOverviewDto {
   /** ADMIN = set by the owner here; ENV = the server fallback (none set here yet); NONE = card-to-card is off. */
   source: "ADMIN" | "ENV" | "NONE";
   current: { cardNumberMasked: string | null; shebaMasked: string | null; holderName: string; bankName: string | null } | null;
-  /** Only SUPER_ADMIN with settings.manage may change it. */
+  /** Only SUPER_ADMIN with settings.manage may propose a change or switch it off. */
   canEdit: boolean;
+  /** A proposed change waiting for a second super admin; the current account stays in use until it is approved. */
+  pending: AdminCardTransferDestinationPendingDto | null;
+  /** How long a proposal can wait for approval before it expires. */
+  approvalWindowHours: number;
   history: AdminCardTransferDestinationDto[];
 }
 
@@ -7435,7 +7515,37 @@ export interface AdminWalletAdjustmentDto {
   reasonCode: string;
   reason: string;
   evidenceReference: string | null;
+  /** The admin who asked for the correction. */
   createdBy: { adminUserId: string; displayName: string | null };
+  /** The second admin who approved and posted it (FE-16); null for corrections made before two-person approval. */
+  approvedBy: { adminUserId: string; displayName: string | null } | null;
+  createdAt: string;
+}
+
+/**
+ * FE-16: a wallet correction waiting for (or decided by) a second admin. Nothing is posted while it is PENDING;
+ * APPROVED means the WalletAdjustment and its wallet entry were written (walletAdjustmentId / walletEntryId).
+ */
+export interface AdminWalletAdjustmentRequestDto {
+  id: string;
+  userId: string;
+  userDisplayName: string | null;
+  direction: WalletAdjustmentDirectionValue;
+  balanceType: WalletBalanceTypeValue;
+  /** Integer rials. */
+  amount: number;
+  reasonCode: WalletAdjustmentReasonCode;
+  /** The requester's explanation. */
+  reason: string;
+  evidenceReference: string | null;
+  status: WalletAdjustmentRequestStatusValue;
+  requestedBy: { adminUserId: string; displayName: string | null };
+  decidedBy: { adminUserId: string; displayName: string | null } | null;
+  decidedAt: string | null;
+  decisionReason: string | null;
+  walletAdjustmentId: string | null;
+  walletEntryId: string | null;
+  expiresAt: string;
   createdAt: string;
 }
 
@@ -7463,6 +7573,8 @@ export interface AdminWalletDetailDto {
   entries: WalletEntryDto[];
   topUps: AdminWalletTopUpDto[];
   adjustments: AdminWalletAdjustmentDto[];
+  /** FE-16: this member's correction requests, open ones first. */
+  adjustmentRequests: AdminWalletAdjustmentRequestDto[];
   audit: AdminWalletAuditDto[];
 }
 

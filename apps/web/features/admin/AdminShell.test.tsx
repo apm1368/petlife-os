@@ -23,7 +23,7 @@ const SESSION_USER: UserDto = { id: "u1", email: "admin@example.com", phone: nul
 const NO_QUEUES: AdminDashboardSummaryDto = {
   openSupportCases: null, openDisputes: null, openTrustCases: null, pendingRefundApprovals: null, openTasks: null,
   pendingVerifications: null, pendingRefundRequests: null, pendingOfferModeration: null, pendingCatalogRequests: null,
-  pendingTravelListings: null, pendingSupportNeeds: null, openCommunityReports: null, pendingMemorials: null, openPlaceReports: null, pendingWalletTopUps: null, pendingDeletionRequests: null, openOwnershipDisputes: null, openProviderNoShows: null, pendingReviews: null, launchKpis: null,
+  pendingTravelListings: null, pendingSupportNeeds: null, openCommunityReports: null, pendingMemorials: null, openPlaceReports: null, pendingWalletTopUps: null, pendingWalletAdjustments: null, pendingCardDestinationChanges: null, pendingDeletionRequests: null, openOwnershipDisputes: null, openProviderNoShows: null, pendingReviews: null, launchKpis: null,
 };
 
 function signIn(permissions: string[], extra: Partial<AdminSessionContextDto> = {}) {
@@ -42,6 +42,23 @@ describe("AdminShell", () => {
     vi.mocked(adminService.getDashboard).mockReset().mockResolvedValue(NO_QUEUES);
     vi.mocked(adminService.search).mockReset().mockResolvedValue({ customers: [], orders: [], supportCases: [], searched: { customers: true, orders: false, supportCases: false } });
     useAdminStore.setState({ context: null, status: "idle" });
+  });
+
+  it("shows the two-step code screen instead of any admin page while the session owes a code, and loads no admin data", async () => {
+    signIn(["customer.view"], { twoStep: { enrolled: true, verified: false, enforced: false, graceEndsAt: null, required: "CHALLENGE" } });
+    renderWithIntl(<AdminShell><div>private content</div></AdminShell>);
+    expect(await screen.findByRole("heading", { name: "Enter your two-step code" })).toBeTruthy();
+    expect(screen.queryByText("private content")).toBeNull();
+    expect(screen.queryByRole("complementary")).toBeNull();
+    expect(adminService.getDashboard).not.toHaveBeenCalled();
+  });
+
+  it("reminds an admin without two-step to turn it on, above the page", async () => {
+    signIn(["customer.view"], { twoStep: { enrolled: false, verified: false, enforced: true, graceEndsAt: "2026-11-20T08:00:00.000Z", required: "NONE" } });
+    renderWithIntl(<AdminShell><div>private content</div></AdminShell>);
+    expect(await screen.findByText("private content")).toBeTruthy();
+    expect((await screen.findByRole("note")).textContent).toContain("Two-step sign-in is required. Turn it on before");
+    expect(screen.getByRole("link", { name: "Turn it on" }).getAttribute("href")).toBe("/en/admin/two-step");
   });
 
   it("clears old admin identity on bootstrap failure and retries without mounting protected content", async () => {

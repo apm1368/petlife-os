@@ -644,7 +644,7 @@ The wallet has two separate balances and daily automatic reconciliation; double 
 | PY-16 | Transferring credit between users is forbidden; only via a gift card |
 | PY-17 | Receipt: a success page with a tracking code + SMS + the receipt in the order list |
 | PY-18 | Daily automatic reconciliation: Zibal against the ledger + the bank statement for card-to-card; mismatch alerts |
-| PY-19 | An idempotency key for every payment; a duplicate payment automatically returns to the wallet |
+| PY-19 | An idempotency key for every payment; a repeated callback or verify never charges, credits or refunds again. A "duplicate payment" is refunded only with evidence of a second, actually captured transaction (a distinct bank/gateway reference or a settlement statement), through manual review approved by a second admin (FE-16); there is no automatic path. (Updated 2026-11-13 by owner decision) |
 | PY-20 | Installments: SnappPay and DigiPay, whichever signs a contract first |
 
 ## Chapter 9 — Notification and communication

@@ -1,22 +1,28 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
-import { useTranslations } from "next-intl";
-import { Download } from "@petlife/ui";
-import { getPwaState, getServerPwaState, isIosSafari, isStandalone, promptInstall, subscribePwa } from "./pwa-runtime";
+import { useEffect, useState, useSyncExternalStore, type MouseEvent } from "react";
+import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
+import type { RouteLocale } from "@/lib/i18n/config";
+import { getPwaState, getServerPwaState, isStandalone, promptInstall, subscribePwa } from "./pwa-runtime";
 import { androidDownloadLinks } from "./app-links";
+import { AndroidIcon, AppleIcon } from "./PlatformIcons";
 
 /**
- * "Install the app" in the site footer (owner, 2026-11-13). Chrome, Edge and Samsung Internet get the browser's own
- * install prompt; iPhone Safari gets the Add to Home Screen steps; other browsers get the menu steps. Hidden inside
- * the installed app. Android store / APK links appear next to it once they exist (app-links.ts).
+ * The app in the site footer (owner, 2026-11-13): two clean buttons side by side and nothing else, with no version,
+ * size or fingerprint (those live in the "file details" on /app).
+ *   1. Android: downloads the signed APK straight from our own domain.
+ *   2. iPhone: the web app (PWA). Where the browser has its own install prompt (Chrome/Edge) the tap opens it;
+ *      everywhere else, iPhone Safari included, it goes to the Safari steps on /app#ios (which also says
+ *      "open in Safari" inside in-app browsers).
+ * "All ways to install" (/app) is a small text link below. Hidden inside the installed app.
  */
 export function FooterAppInstall() {
   const t = useTranslations("pwa.footer");
+  const locale = useLocale() as RouteLocale;
   const pwa = useSyncExternalStore(subscribePwa, getPwaState, getServerPwaState);
   const [installed, setInstalled] = useState(false);
-  const [help, setHelp] = useState<"ios" | "other" | null>(null);
-  const downloads = androidDownloadLinks();
+  const apk = androidDownloadLinks().find((d) => d.store === "apk");
 
   useEffect(() => {
     setInstalled(isStandalone());
@@ -24,30 +30,30 @@ export function FooterAppInstall() {
 
   if (installed || pwa.installed) return null;
 
-  async function install() {
-    if (pwa.installPrompt) {
-      const outcome = await promptInstall();
+  function installWebApp(event: MouseEvent<HTMLAnchorElement>) {
+    if (!pwa.installPrompt) return; // no native prompt: follow the link to the Safari steps
+    event.preventDefault();
+    void promptInstall().then((outcome) => {
       if (outcome === "accepted") setInstalled(true);
-      return;
-    }
-    setHelp(isIosSafari() ? "ios" : "other");
+    });
   }
 
   return (
     <div className="opl-foot__app">
       <h2>{t("title")}</h2>
-      <div className="opl-foot__app-actions">
-        <button type="button" className="opl-btn soft sm" onClick={() => void install()} aria-expanded={help !== null}>
-          <Download size={17} aria-hidden="true" />
-          {t("install")}
-        </button>
-        {downloads.map(({ store, url }) => (
-          <a key={store} className="opl-btn line sm" href={url} rel="noopener" target="_blank">
-            {t(`android.${store}`)}
+      <div className="opl-foot__app-buttons">
+        {apk ? (
+          <a className="opl-foot__app-btn" href={apk.url} download>
+            <AndroidIcon />
+            <span>{t("androidEntry")}</span>
           </a>
-        ))}
+        ) : null}
+        <Link className="opl-foot__app-btn" href={`/${locale}/app#ios`} onClick={installWebApp}>
+          <AppleIcon />
+          <span>{t("iosEntry")}</span>
+        </Link>
       </div>
-      {help ? <p className="opl-foot__app-help" role="status">{t(help === "ios" ? "iosSteps" : "otherSteps")}</p> : null}
+      <Link className="opl-foot__app-all" href={`/${locale}/app`}>{t("allWays")}</Link>
     </div>
   );
 }

@@ -169,7 +169,18 @@ export class SupportCaseService {
       this.prisma.supportCase.count({ where }),
     ]);
     const orgs = await this.requesterOrgs(rows);
-    return toPaginatedDto(rows.map((row) => toSupportCaseSummaryDto(row, orgs)), total, page, pageSize);
+    // Fetch requests in one query for this page; consumer-facing DTOs remain separate.
+    const escalations = rows.length ? await this.prisma.supportEscalation.findMany({
+      where: { caseId: { in: rows.map((row) => row.id) } },
+      orderBy: { createdAt: "desc" },
+      select: { caseId: true, referenceNumber: true, reason: true, confirmedAt: true },
+    }) : [];
+    const byCase = new Map<string, (typeof escalations)[number]>();
+    for (const escalation of escalations) if (!byCase.has(escalation.caseId)) byCase.set(escalation.caseId, escalation);
+    return toPaginatedDto(rows.map((row) => {
+      const escalation = byCase.get(row.id);
+      return { ...toSupportCaseSummaryDto(row, orgs), humanEscalation: escalation ? { referenceNumber: escalation.referenceNumber, reason: escalation.reason, confirmedAt: escalation.confirmedAt.toISOString() } : null };
+    }), total, page, pageSize);
   }
 
   /** Names of the businesses behind partner cases, looked up once per page (the id can point at either side, so there is no FK to include). */
@@ -190,12 +201,13 @@ export class SupportCaseService {
   async get(caseId: string): Promise<SupportCaseDetailDto> {
     const row = await this.prisma.supportCase.findUnique({ where: { id: caseId }, include: { ...CASE_INCLUDE, createdByAdmin: { include: { user: true } } } });
     if (!row) throw new SupportCaseNotFoundException({ caseId });
-    const [messages, internalNotes, orgs] = await Promise.all([
+    const [messages, internalNotes, orgs, escalation] = await Promise.all([
       this.prisma.supportMessage.findMany({ where: { caseId }, include: { authorUser: true, authorAdmin: { include: { user: true } } }, orderBy: { createdAt: "asc" } }),
       this.notes.listForEntity(InternalNoteEntityType.SUPPORT_CASE, caseId),
       this.requesterOrgs([row]),
+      this.prisma.supportEscalation.findFirst({ where: { caseId }, orderBy: { createdAt: "desc" }, select: { referenceNumber: true, reason: true, confirmedAt: true } }),
     ]);
-    return toSupportCaseDetailDto(row, messages.map(toSupportMessageDto), internalNotes, orgs);
+    return { ...toSupportCaseDetailDto(row, messages.map(toSupportMessageDto), internalNotes, orgs), humanEscalation: escalation ? { referenceNumber: escalation.referenceNumber, reason: escalation.reason, confirmedAt: escalation.confirmedAt.toISOString() } : null };
   }
 
   /**

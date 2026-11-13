@@ -2374,10 +2374,7 @@
       "FULL_PREPAYMENT": "Pago anticipado completo en línea",
       "DEPOSIT": "Anticipo en línea"
     },
-    "bookingMode": {
-      "INSTANT": "Reserva inmediata",
-      "REQUEST": "Solicitud con confirmación del proveedor"
-    },
+    "bookingMode": { "INSTANT": "Reserva inmediata", "REQUEST": "Solicitud con confirmación del proveedor" },
     "paymentStatus": {
       "NOT_REQUIRED": "No requerido",
       "PENDING": "Pendiente",
@@ -2409,12 +2406,7 @@
       "FAILED": "Fallido",
       "CANCELLED": "Cancelado"
     },
-    "timelineActor": {
-      "USER": "Cliente",
-      "PROVIDER": "Proveedor",
-      "SYSTEM": "Sistema",
-      "ADMIN": "Soporte"
-    },
+    "timelineActor": { "USER": "Cliente", "PROVIDER": "Proveedor", "SYSTEM": "Sistema", "ADMIN": "Soporte" },
     "healthScope": {
       "MINIMAL_VET_CONTEXT": "Contexto veterinario mínimo",
       "HEALTH_BASICS": "Información básica de salud",
@@ -2685,9 +2677,7 @@
     "actionFailed": "No se pudo completar. Inténtalo de nuevo.",
     "loading": "Cargando recordatorios de cuidados",
     "filtersAria": "Filtros de cuidados",
-    "filters": {
-      "all": "Todos"
-    },
+    "filters": { "all": "Todos" },
     "states": {
       "DUE": "Próximo",
       "OVERDUE": "Atrasado",
@@ -2707,30 +2697,14 @@
     "create": "Crear recordatorio",
     "empty": {
       "body": "Puede haber recordatorios de vacunas, medicamentos y citas. También puedes crear uno personal.",
-      "all": {
-        "title": "Aún no hay cuidados registrados"
-      },
-      "due": {
-        "title": "No hay nada próximo"
-      },
-      "overdue": {
-        "title": "Nada está atrasado"
-      },
-      "upcoming": {
-        "title": "No hay próximos recordatorios"
-      },
-      "completed": {
-        "title": "Aún no hay cuidados completados"
-      },
-      "snoozed": {
-        "title": "No hay recordatorios pospuestos"
-      },
-      "cancelled": {
-        "title": "No hay recordatorios cancelados"
-      },
-      "custom": {
-        "title": "No hay recordatorios personales"
-      }
+      "all": { "title": "Aún no hay cuidados registrados" },
+      "due": { "title": "No hay nada próximo" },
+      "overdue": { "title": "Nada está atrasado" },
+      "upcoming": { "title": "No hay próximos recordatorios" },
+      "completed": { "title": "Aún no hay cuidados completados" },
+      "snoozed": { "title": "No hay recordatorios pospuestos" },
+      "cancelled": { "title": "No hay recordatorios cancelados" },
+      "custom": { "title": "No hay recordatorios personales" }
     },
     "recentlyCompleted": "Completados recientemente",
     "dailyInstructions": "Instrucciones de cuidado diario",
@@ -2810,11 +2784,7 @@
     "notes": "Notas (opcional)",
     "providerConfirm": "Confirmo que envío esta sugerencia de cuidados a la persona autorizada responsable de la mascota.",
     "providerSubmit": "Registrar y enviar sugerencia",
-    "statuses": {
-      "PENDING": "Pendiente de respuesta",
-      "ACCEPTED": "Aceptada",
-      "DISMISSED": "Descartada"
-    },
+    "statuses": { "PENDING": "Pendiente de respuesta", "ACCEPTED": "Aceptada", "DISMISSED": "Descartada" },
     "types": {
       "VACCINATION": "Vacunación",
       "VET_VISIT": "Visita veterinaria",
@@ -3165,12 +3135,7 @@
       "CANCELLED": "Cancelado",
       "SUPERSEDED": "Sustituido por un cambio más reciente"
     },
-    "units": {
-      "toman": "tomanes",
-      "seconds": "segundos",
-      "hours": "horas",
-      "perDay": "por día"
-    }
+    "units": { "toman": "tomanes", "seconds": "segundos", "hours": "horas", "perDay": "por día" }
   },
   "adminAccess": {
     "title": "Gestión de accesos de administración",
@@ -3262,15 +3227,8 @@
       "ACCOMMODATION": "Alojamiento y cuidado de mascotas",
       "INSURANCE": "Seguros"
     },
-    "statuses": {
-      "ACTIVE": "Activo",
-      "SUSPENDED": "Suspendido"
-    },
-    "tabs": {
-      "admins": "Administradores",
-      "roles": "Roles",
-      "permissions": "Permisos"
-    }
+    "statuses": { "ACTIVE": "Activo", "SUSPENDED": "Suspendido" },
+    "tabs": { "admins": "Administradores", "roles": "Roles", "permissions": "Permisos" }
   },
   "admin": {
     "partners": {
@@ -3954,22 +3912,14 @@
       "title": "Confianza y seguridad",
       "newCase": "Abrir caso de confianza",
       "createTitle": "Abrir caso de confianza",
-      "filter": {
-        "status": "Filtrar por estado",
-        "allStatuses": "Todos los estados"
-      },
+      "filter": { "status": "Filtrar por estado", "allStatuses": "Todos los estados" },
       "status": {
         "OPEN": "Abierto",
         "UNDER_REVIEW": "En revisión",
         "RESOLVED": "Resuelto",
         "CLOSED": "Cerrado"
       },
-      "severity": {
-        "LOW": "Baja",
-        "MEDIUM": "Media",
-        "HIGH": "Alta",
-        "CRITICAL": "Crítica"
-      },
+      "severity": { "LOW": "Baja", "MEDIUM": "Media", "HIGH": "Alta", "CRITICAL": "Crítica" },
       "subjectType": {
         "USER": "Usuario",
         "HOUSEHOLD": "Hogar",
@@ -4120,10 +4070,7 @@
       "title": "Disputas",
       "newDispute": "Nueva disputa",
       "createTitle": "Abrir disputa",
-      "filter": {
-        "status": "Filtrar por estado",
-        "allStatuses": "Todos los estados"
-      },
+      "filter": { "status": "Filtrar por estado", "allStatuses": "Todos los estados" },
       "status": {
         "OPEN": "Abierta",
         "UNDER_REVIEW": "En revisión",
@@ -4159,10 +4106,7 @@
         "evidencePlaceholder": "Descripción de la prueba",
         "changeStatus": "Cambiar estado",
         "financialNote": "Los movimientos financieros, incluidos los reembolsos, se gestionan por separado. Resolver una disputa no genera un reembolso automático.",
-        "actorType": {
-          "USER": "Usuario",
-          "ADMIN": "Administración"
-        }
+        "actorType": { "USER": "Usuario", "ADMIN": "Administración" }
       },
       "states": {
         "loading": "Cargando disputas…",
@@ -4231,12 +4175,7 @@
         "TRUST_SAFETY": "Confianza y seguridad",
         "OTHER": "Otro"
       },
-      "priority": {
-        "LOW": "Baja",
-        "NORMAL": "Normal",
-        "HIGH": "Alta",
-        "URGENT": "Urgente"
-      },
+      "priority": { "LOW": "Baja", "NORMAL": "Normal", "HIGH": "Alta", "URGENT": "Urgente" },
       "form": {
         "requesterUserId": "ID de usuario solicitante",
         "subject": "Asunto",
@@ -4248,11 +4187,7 @@
       "detail": {
         "caseNumber": "Caso {number}",
         "requester": "Solicitante: {name}",
-        "authorType": {
-          "USER": "Cliente",
-          "ADMIN": "Administración",
-          "SYSTEM": "Sistema"
-        },
+        "authorType": { "USER": "Cliente", "ADMIN": "Administración", "SYSTEM": "Sistema" },
         "assignTo": "Asignar a administración",
         "changeStatus": "Cambiar estado",
         "messages": "Mensajes",
@@ -4289,6 +4224,11 @@
         "actionFailed": "No se pudo guardar el cambio. Inténtalo de nuevo.",
         "noMessages": "Todavía no hay mensajes.",
         "noNotes": "Todavía no hay notas internas."
+      },
+      "humanEscalation": {
+        "label": "Seguimiento por una persona solicitado",
+        "reference": "Referencia: {reference}",
+        "submitted": "Solicitado: {date}"
       }
     },
     "audit": {
@@ -4322,7 +4262,8 @@
         "profile": "Mi cuenta",
         "viewSite": "Ver el sitio",
         "signOut": "Cerrar sesión",
-        "signingOut": "Cerrando sesión…"
+        "signingOut": "Cerrando sesión…",
+        "twoStep": "Inicio de sesión en dos pasos"
       },
       "tabs": {
         "holidays": "Festivos y cierres",
@@ -4392,7 +4333,9 @@
         "walletCardReceipts": "Comprobantes de tarjeta",
         "repeatDeliveries": "Entregas periódicas",
         "orderLookup": "Buscar pedido",
-        "refundApprovals": "Aprobaciones de reembolso"
+        "refundApprovals": "Aprobaciones de reembolso",
+        "twoStep": "Inicio de sesión en dos pasos",
+        "walletAdjustments": "Solicitudes de corrección"
       },
       "palette": {
         "actions": "Acciones rápidas",
@@ -4522,10 +4465,7 @@
         "FAILED": "Fallido",
         "CANCELLED": "Cancelado"
       },
-      "ledgerDirection": {
-        "DEBIT": "Debe",
-        "CREDIT": "Haber"
-      },
+      "ledgerDirection": { "DEBIT": "Debe", "CREDIT": "Haber" },
       "ledgerAccount": {
         "CASH_GATEWAY_RECEIVABLE": "Cuenta por cobrar al proveedor de pago",
         "CUSTOMER_PAYMENT_CLEARING": "Cuenta de compensación de pagos de clientes",
@@ -4889,12 +4829,7 @@
     "unlimited": "Sin límite",
     "overridden": "personalizado",
     "durationLabel": "Duración de la membresía",
-    "interval": {
-      "monthly": "Mensual",
-      "quarterly": "3 meses",
-      "semiAnnual": "6 meses",
-      "annual": "Anual"
-    },
+    "interval": { "monthly": "Mensual", "quarterly": "3 meses", "semiAnnual": "6 meses", "annual": "Anual" },
     "currentPlanBadge": "Plan actual",
     "free": "Gratis",
     "notAvailableHere": "No disponible en tu país",
@@ -5388,10 +5323,7 @@
       "courierTracking": "Seguir al mensajero"
     },
     "checkout": {
-      "summary": {
-        "title": "Resumen del pedido",
-        "deliveryNext": "Se elige en el paso de entrega"
-      },
+      "summary": { "title": "Resumen del pedido", "deliveryNext": "Se elige en el paso de entrega" },
       "address": {
         "title": "Dirección de entrega",
         "addNew": "Añadir una dirección",
@@ -5411,10 +5343,7 @@
       },
       "delivery": {
         "title": "Método de entrega",
-        "method": {
-          "STANDARD": "Estándar",
-          "EXPRESS": "Exprés"
-        },
+        "method": { "STANDARD": "Estándar", "EXPRESS": "Exprés" },
         "quotesNext": "Podrás elegir entre las opciones reales de mensajería en el siguiente paso."
       },
       "safetyAck": {
@@ -5432,12 +5361,7 @@
       },
       "shipping": {
         "title": "Elige la entrega para cada vendedor",
-        "serviceLevel": {
-          "STANDARD": "Entrega estándar",
-          "EXPRESS": "Entrega exprés",
-          "COURIER": "Mensajero",
-          "POST_PISHTAZ": "Correo exprés"
-        },
+        "serviceLevel": { "STANDARD": "Entrega estándar", "EXPRESS": "Entrega exprés", "COURIER": "Mensajero", "POST_PISHTAZ": "Correo exprés" },
         "eta": "Llega en aproximadamente {hours, plural, one {# hora} other {# horas}}",
         "selected": "Seleccionada",
         "unavailable": "Ahora no hay opciones de entrega disponibles",
@@ -5535,12 +5459,7 @@
         "retry": "Intentar de nuevo"
       },
       "progress": {
-        "steps": {
-          "address": "Dirección",
-          "review": "Revisión",
-          "shipping": "Entrega",
-          "payment": "Pago"
-        },
+        "steps": { "address": "Dirección", "review": "Revisión", "shipping": "Entrega", "payment": "Pago" },
         "label": "Pasos del pago"
       }
     },
@@ -6482,14 +6401,8 @@
       "restore": "Restaurar recuerdo",
       "archivedNotice": "Este recuerdo está archivado. Se conserva aquí y puedes restaurarlo cuando quieras."
     },
-    "timeline": {
-      "title": "Historial de vida",
-      "empty": "Aún no hay nada que mostrar."
-    },
-    "editMemory": {
-      "title": "Editar recuerdo",
-      "submit": "Guardar cambios"
-    }
+    "timeline": { "title": "Historial de vida", "empty": "Aún no hay nada que mostrar." },
+    "editMemory": { "title": "Editar recuerdo", "submit": "Guardar cambios" }
   },
   "healthAdvanced": {
     "documents": {
@@ -6818,7 +6731,9 @@
           "pendingMemorials": "Memoriales por revisar",
           "openPlaceReports": "Denuncias de lugares",
           "openTasks": "Tareas abiertas",
-          "pendingWalletTopUps": "Comprobantes de recarga"
+          "pendingWalletTopUps": "Comprobantes de recarga",
+          "pendingWalletAdjustments": "Correcciones por aprobar",
+          "pendingCardDestinationChanges": "Cambios de cuenta por aprobar"
         }
       },
       "performance": {
@@ -7080,11 +6995,7 @@
     "assignFailed": "No se pudo guardar la asignación; se conserva tu selección. Comprueba el estado de la cita y tus permisos."
   },
   "lostPet": {
-    "species": {
-      "dog": "Perro",
-      "cat": "Gato",
-      "other": "Otro"
-    },
+    "species": { "dog": "Perro", "cat": "Gato", "other": "Otro" },
     "report": {
       "title": "Informar de una mascota perdida",
       "subtitle": "Comparte algunos detalles para que la comunidad pueda ayudarte a encontrarla.",
@@ -7128,12 +7039,7 @@
       "publicContactPlaceholder": "Por ejemplo: 0912***4567 — solo mensajes",
       "publicContactWarning": "Cualquiera podrá ver este texto. Evita compartir el número completo.",
       "reviewTitle": "Qué se mostrará en el informe público",
-      "review": {
-        "area": "Zona",
-        "when": "Cuándo",
-        "photo": "Foto",
-        "contact": "Contacto"
-      },
+      "review": { "area": "Zona", "when": "Cuándo", "photo": "Foto", "contact": "Contacto" },
       "notGiven": "No indicado",
       "noPhoto": "Sin foto",
       "contactThroughApp": "A través de opetlife",
@@ -7514,15 +7420,15 @@
       },
       "chooseOrg": {
         "title": "Elige un vendedor",
-        "body": "Perteneces a más de una organización de vendedores. Elige en cuál quieres trabajar."
+        "body": "Perteneces a varias organizaciones de vendedores. Elige en cuál quieres trabajar."
       },
       "headerRole": "{role}",
       "role": {
-        "OWNER": "Propietario/a",
-        "ADMIN": "Administración",
+        "OWNER": "Propietario",
+        "ADMIN": "Administrador",
         "OPERATIONS": "Operaciones",
-        "CATALOG_MANAGER": "Gestor/a de catálogo",
-        "ORDER_MANAGER": "Gestor/a de pedidos",
+        "CATALOG_MANAGER": "Gestión del catálogo",
+        "ORDER_MANAGER": "Gestión de pedidos",
         "FINANCE": "Finanzas",
         "SUPPORT": "Soporte",
         "VIEWER": "Solo lectura"
@@ -7534,14 +7440,14 @@
       "title": "Pedidos",
       "loading": "Cargando pedidos…",
       "retry": "Reintentar",
-      "empty": "Aún no hay pedidos.",
+      "empty": "Todavía no hay pedidos.",
       "sourceMarketplace": "{provider}",
       "sourcePetlife": "opetlife",
       "externalOrderId": "Pedido externo: {id}",
       "paymentSource": {
-        "PETLIFE_PAYMENT": "Pagado a través de opetlife",
-        "MARKETPLACE_COLLECTED": "Cobrado por el mercado",
-        "CASH_ON_DELIVERY": "Pago contra reembolso",
+        "PETLIFE_PAYMENT": "Pagado mediante opetlife",
+        "MARKETPLACE_COLLECTED": "Cobrado por el marketplace",
+        "CASH_ON_DELIVERY": "Pago contra entrega",
         "UNKNOWN": "Origen del pago desconocido"
       }
     },
@@ -7553,45 +7459,46 @@
       "sourcePetlife": "opetlife",
       "externalOrderId": "Pedido externo: {id}",
       "paymentSource": {
-        "PETLIFE_PAYMENT": "Pagado a través de opetlife",
-        "MARKETPLACE_COLLECTED": "Cobrado por el mercado",
-        "CASH_ON_DELIVERY": "Pago contra reembolso",
+        "PETLIFE_PAYMENT": "Pagado mediante opetlife",
+        "MARKETPLACE_COLLECTED": "Cobrado por el marketplace",
+        "CASH_ON_DELIVERY": "Pago contra entrega",
         "UNKNOWN": "Origen del pago desconocido"
       },
       "items": "Artículos",
-      "quantity": "Cant. {count}",
+      "quantity": "Cantidad: {count}",
       "subtotal": "Subtotal",
-      "delivery": "Envío",
-      "total": "Importe total",
+      "delivery": "Entrega",
+      "total": "Total",
       "cancelledDoNotShip": "Este pedido se canceló y se reembolsó. No lo envíes.",
-      "actionFailed": "No se pudo completar. Inténtalo de nuevo.",
+      "actionFailed": "No se pudo completar la acción. Inténtalo de nuevo.",
       "nextStep": "Siguiente paso",
-      "markReady": "Marcar como empaquetado y listo para recoger",
+      "markReady": "Marcar como preparado y listo para recoger",
       "requestCourier": "Solicitar mensajero",
-      "cancelOrder": "No es posible enviarlo — cancelar pedido",
-      "cancelExplain": "El cliente recibe de inmediato el reembolso completo ({amount}) y los artículos vuelven a tu inventario.",
+      "cancelOrder": "No se puede completar el pedido: cancelar",
+      "cancelExplain": "El cliente recibe un reembolso completo inmediato ({amount}) y los artículos vuelven a tu inventario.",
       "cancelReason": "Motivo (visible para el cliente)",
       "cancelConfirm": "Cancelar y reembolsar al cliente",
+      "promotionApplied": "Promoción: {name}",
+      "discount": "Descuentos",
+      "refundRequests": "Solicitudes de reembolso",
+      "refundRequestsNote": "opetlife revisa las solicitudes; los reembolsos aprobados se descuentan de tu liquidación.",
       "orderStatus": {
         "PENDING": "Pendiente",
         "CONFIRMED": "Confirmado",
         "PREPARING": "En preparación",
         "READY_FOR_FULFILLMENT": "Listo para enviar",
-        "FULFILLED": "Enviado",
+        "FULFILLED": "Completado",
         "CANCELLED": "Cancelado",
-        "PARTIALLY_REFUNDED": "Reembolsado parcialmente",
+        "PARTIALLY_REFUNDED": "Reembolso parcial",
         "REFUNDED": "Reembolsado"
       },
-      "promotionApplied": "Promoción: {name}",
-      "discount": "Descuentos",
-      "refundRequests": "Solicitudes de reembolso",
       "refundReason": {
         "DAMAGED": "Llegó dañado",
         "WRONG_ITEM": "Artículo equivocado",
         "NOT_AS_DESCRIBED": "No coincide con la descripción",
         "MISSING_ITEMS": "Faltan artículos",
         "NOT_DELIVERED": "No se entregó",
-        "PET_REACTION": "Mi mascota tuvo una mala reacción",
+        "PET_REACTION": "A mi mascota le sentó mal",
         "OTHER": "Otro"
       },
       "refundStatus": {
@@ -7599,20 +7506,19 @@
         "APPROVED": "Aprobado",
         "REJECTED": "Rechazado",
         "WITHDRAWN": "Retirado"
-      },
-      "refundRequestsNote": "opetlife revisa las solicitudes de reembolso; los reembolsos aprobados se descuentan de tu liquidación."
+      }
     },
     "inventory": {
       "title": "Inventario",
       "loading": "Cargando inventario…",
       "retry": "Reintentar",
-      "empty": "Aún no hay inventario.",
+      "empty": "Todavía no hay inventario.",
       "lowStock": "Pocas unidades",
       "reserved": "Reservado",
       "available": "Disponible",
-      "onHand": "En almacén",
+      "onHand": "Existencias",
       "save": "Guardar",
-      "adjustFailed": "Este ajuste dejaría el inventario en negativo."
+      "adjustFailed": "Este ajuste dejaría el inventario por debajo de cero."
     },
     "channels": {
       "title": "Canales",
@@ -7620,34 +7526,34 @@
       "retry": "Reintentar",
       "connections": "Conexiones",
       "lastSync": "Última sincronización: {when}",
-      "neverSynced": "Nunca sincronizado",
+      "neverSynced": "Nunca se ha sincronizado",
       "connect": "Conectar",
-      "listings": "Publicaciones",
-      "noListings": "Aún no hay publicaciones en el mercado",
-      "noListingsBody": "Asigna una oferta a un canal desde la página Ofertas para publicarla.",
-      "resync": "Volver a sincronizar",
+      "listings": "Publicaciones en marketplaces",
+      "noListings": "Todavía no hay publicaciones en marketplaces",
+      "noListingsBody": "Asocia una oferta a un canal desde la página Ofertas para publicarla.",
+      "resync": "Sincronizar de nuevo",
       "publish": "Publicar",
       "reconcile": "Conciliar",
-      "inventoryMismatch": "Las existencias publicadas ({published}) no coinciden con las de opetlife ({canonical}).",
-      "noDiscrepancy": "No se encontraron discrepancias.",
+      "inventoryMismatch": "El inventario publicado ({published}) no coincide con el inventario de opetlife ({canonical}).",
+      "noDiscrepancy": "No se encontraron diferencias.",
       "discrepancy": {
-        "INVENTORY_MISMATCH": "Se detectó una discrepancia de inventario.",
-        "PRICE_MISMATCH": "Se detectó una discrepancia de precio.",
-        "LISTING_STATUS_MISMATCH": "Se detectó una discrepancia en el estado de la publicación.",
-        "ORDER_STATUS_MISMATCH": "Se detectó una discrepancia en el estado del pedido.",
-        "UNKNOWN_PROVIDER_REFERENCE": "Hay que vincular la publicación."
+        "INVENTORY_MISMATCH": "Se detectó una diferencia de inventario.",
+        "PRICE_MISMATCH": "Se detectó una diferencia de precio.",
+        "LISTING_STATUS_MISMATCH": "Se detectó una diferencia en el estado de la publicación.",
+        "ORDER_STATUS_MISMATCH": "Se detectó una diferencia en el estado del pedido.",
+        "UNKNOWN_PROVIDER_REFERENCE": "Es necesario asociar la publicación."
       }
     },
     "team": {
       "title": "Equipo",
       "loading": "Cargando equipo…",
       "retry": "Reintentar",
-      "invite": "Invitar a un integrante del equipo",
+      "invite": "Invitar a una persona",
       "inviteIdentifier": "Correo electrónico o teléfono",
-      "inviteHint": "La persona debe tener ya una cuenta de opetlife.",
+      "inviteHint": "La persona ya debe tener una cuenta de opetlife.",
       "role": "Rol",
       "inviteAction": "Invitar",
-      "inviteFailed": "No se pudo invitar a esta persona.",
+      "inviteFailed": "No se pudo invitar a esta persona. Inténtalo de nuevo.",
       "statusLabel": {
         "PENDING": "Pendiente",
         "ACTIVE": "Activo",
@@ -7655,11 +7561,11 @@
       },
       "remove": "Quitar",
       "roles": {
-        "OWNER": "Propietario/a",
-        "ADMIN": "Administración",
+        "OWNER": "Propietario",
+        "ADMIN": "Administrador",
         "OPERATIONS": "Operaciones",
-        "CATALOG_MANAGER": "Gestor/a de catálogo",
-        "ORDER_MANAGER": "Gestor/a de pedidos",
+        "CATALOG_MANAGER": "Gestión del catálogo",
+        "ORDER_MANAGER": "Gestión de pedidos",
         "FINANCE": "Finanzas",
         "SUPPORT": "Soporte",
         "VIEWER": "Solo lectura"
@@ -7669,7 +7575,7 @@
       "title": "Ajustes",
       "loading": "Cargando ajustes…",
       "retry": "Reintentar",
-      "verificationNote": "Los datos legales y de verificación se gestionan mediante la revisión de opetlife y no se pueden editar aquí.",
+      "verificationNote": "La revisión de opetlife gestiona los datos legales y de verificación; no se pueden editar aquí.",
       "supportEmail": "Correo de soporte",
       "supportPhone": "Teléfono de soporte",
       "city": "Ciudad",
@@ -7680,18 +7586,18 @@
     },
     "finance": {
       "title": "Finanzas",
-      "loading": "Cargando datos financieros…",
+      "loading": "Cargando finanzas…",
       "retry": "Reintentar",
       "viewTransactions": "Ver transacciones",
       "viewAllSettlements": "Ver todas las liquidaciones",
       "balance": {
         "pending": "Pendiente",
         "reserved": "Reservado para liquidación",
-        "available": "Disponible para pago",
-        "paid": "Pagado hasta la fecha"
+        "available": "Disponible para retirar",
+        "paid": "Total pagado"
       },
       "nextSettlementEligible": "Importe apto para la próxima liquidación",
-      "accountCurrency": "Cuenta en {currency} · Periodicidad de liquidación: {schedule}",
+      "accountCurrency": "Cuenta en {currency} · frecuencia de liquidación: {schedule}",
       "schedule": {
         "WEEKLY": "Semanal",
         "BIWEEKLY": "Cada dos semanas",
@@ -7712,7 +7618,7 @@
         "title": "Transacciones",
         "loading": "Cargando transacciones…",
         "retry": "Reintentar",
-        "empty": "Aún no hay transacciones.",
+        "empty": "Todavía no hay transacciones.",
         "loadMore": "Cargar más",
         "gross": "Bruto: {amount}",
         "commission": "Comisión: {amount}",
@@ -7754,15 +7660,15 @@
         },
         "period": "{start} – {end}",
         "breakdown": {
-          "gross": "Mercancía bruta",
+          "gross": "Importe bruto de mercancía",
           "commission": "Comisión de la plataforma",
           "refunds": "Reembolsos",
           "adjustments": "Ajustes",
           "net": "Pago neto"
         },
         "payoutMethod": "Método de pago",
-        "paidAt": "Pagada el {date}",
-        "items": "{count, plural, one {# partida} other {# partidas}}",
+        "paidAt": "Pagado el {date}",
+        "items": "{count, plural, one {# concepto} other {# conceptos}}",
         "sourceType": {
           "ORDER": "Pedido",
           "REFUND": "Reembolso",
@@ -8312,6 +8218,28 @@
     "searchAction": "Buscar"
   },
   "externalTravel": {
+    "petPerSource": "Según {source}, este alojamiento admite mascotas. Consulta las condiciones para tu mascota y la disponibilidad para tus fechas con {source} o con el anfitrión.",
+    "petVerifiedByOpetlife": "Aceptación de mascotas revisada y verificada por opetlife",
+    "petFacts": {
+      "title": "Condiciones para mascotas",
+      "species": "Especie",
+      "size": "Tamaño",
+      "indoor": "Acceso al interior",
+      "fee": "Tarifa por mascota",
+      "approval": "Aprobación del anfitrión",
+      "unknown": "Desconocido",
+      "yes": "Sí",
+      "no": "No",
+      "dogs": "Perros",
+      "cats": "Gatos",
+      "upTo": "Hasta {limit}",
+      "noFee": "Sin cargo",
+      "approvalNeeded": "Necesaria",
+      "approvalNotNeeded": "No necesaria"
+    },
+    "startingPrice": "Desde {amount}",
+    "updatedAgo": "Actualizado {ago}",
+    "viewOnSource": "Ver este alojamiento en {source}",
     "title": "Alojamientos de fuentes externas",
     "detailTitle": "Detalles del alojamiento externo",
     "disclaimer": "La información procede de fuentes públicas y puede cambiar. Confirma con el alojamiento la aceptación de mascotas y las condiciones antes de reservar.",
@@ -8377,7 +8305,7 @@
     "alreadyAttached": "Ya está en el plan de viaje",
     "attach": "Añadir al plan de viaje",
     "policy": {
-      "CONFIRMED_ALLOWED": "Aceptación de mascotas confirmada según las condiciones de la fuente",
+      "CONFIRMED_ALLOWED": "Admite mascotas según la fuente",
       "CONFIRMED_NOT_ALLOWED": "La fuente indica que no se admiten mascotas",
       "UNKNOWN": "Se desconoce si admite mascotas",
       "AMBIGUOUS": "La información sobre mascotas es ambigua"
@@ -8399,6 +8327,41 @@
       "hint": "Anuncios de Jajiga: reservas y pagas en el propio sitio de Jajiga y opetlife no cobra nada. Confirma las normas sobre mascotas con el anfitrión antes de reservar.",
       "seeAll": "Todos los alojamientos de Jajiga",
       "pages": "Páginas de Jajiga"
+    },
+    "tile": {
+      "kind": {
+        "villa": "Villa",
+        "apartment": "Apartamento o suite",
+        "cottage": "Cabaña",
+        "ecolodge": "Ecolodge",
+        "house": "Casa o alojamiento"
+      },
+      "sourceChip": "De {source}",
+      "capacity": "Capacidad: {count}",
+      "bedrooms": "Dormitorios: {count}"
+    },
+    "browser": {
+      "title": "Más alojamientos que aceptan mascotas",
+      "sourceChip": "Alojamientos de Jajiga",
+      "count": "Encontrados: {count}",
+      "hint": "Anuncios de Jajiga: reservas y pagas en el propio sitio de Jajiga y opetlife no cobra nada. Confirma las normas sobre mascotas con el anfitrión antes de reservar.",
+      "filters": "Filtrar alojamientos",
+      "province": "Provincia",
+      "allProvinces": "Todas las provincias",
+      "city": "Ciudad",
+      "allCities": "Todas las ciudades",
+      "guests": "Huéspedes",
+      "anyGuests": "Cualquier número",
+      "guestsAtLeast": "Al menos {count}",
+      "price": "Precio por noche",
+      "anyPrice": "Cualquier precio",
+      "priceUpTo": "Hasta {max}",
+      "priceBetween": "De {min} a {max}",
+      "priceOver": "Más de {min}",
+      "clear": "Quitar filtros",
+      "noMatch": "Ningún alojamiento coincide con estos filtros. Prueba a quitar uno.",
+      "loadMore": "Ver más ({shown} de {total})",
+      "mediaNote": "Las fotos y la descripción completa de cada alojamiento están en el sitio de origen; aquí ves los datos principales."
     }
   },
   "insurance": {
@@ -8654,11 +8617,7 @@
         "body": "Perteneces a más de una organización proveedora. Elige en cuál trabajar."
       },
       "headerRole": "{role}",
-      "role": {
-        "OWNER": "Propietario/a",
-        "VET": "Veterinario/a",
-        "STAFF": "Personal"
-      },
+      "role": { "OWNER": "Propietario/a", "VET": "Veterinario/a", "STAFF": "Personal" },
       "switchOrg": "Cambiar de organización",
       "notVerifiedBanner": "Esta organización aún no está verificada. Algunas acciones están restringidas."
     },
@@ -8720,10 +8679,7 @@
         "startAt": "Inicio",
         "endAt": "Fin",
         "typeLabel": "Tipo",
-        "type": {
-          "BLOCKED": "Bloqueado",
-          "AVAILABLE_OVERRIDE": "Disponibilidad adicional"
-        },
+        "type": { "BLOCKED": "Bloqueado", "AVAILABLE_OVERRIDE": "Disponibilidad adicional" },
         "reason": "Motivo (opcional)",
         "add": "Añadir",
         "fieldsRequired": "Se requieren la ubicación, la hora de inicio y la hora de fin.",
@@ -8734,11 +8690,7 @@
         "conflictCancel": "Cancelar",
         "conflictProceed": "Bloquear de todos modos"
       },
-      "actions": {
-        "edit": "Editar",
-        "cancel": "Cancelar",
-        "save": "Guardar cambios"
-      }
+      "actions": { "edit": "Editar", "cancel": "Cancelar", "save": "Guardar cambios" }
     },
     "bookings": {
       "title": "Reservas",
@@ -8922,11 +8874,7 @@
       "loading": "Cargando",
       "loadFailed": "No se pudo cargar el equipo.",
       "empty": "Aún no hay integrantes del equipo.",
-      "role": {
-        "OWNER": "Propietario/a",
-        "VET": "Veterinario/a",
-        "STAFF": "Personal"
-      },
+      "role": { "OWNER": "Propietario/a", "VET": "Veterinario/a", "STAFF": "Personal" },
       "settings": {
         "title": "Servicios y perfil público de cada integrante",
         "description": "Si no se asigna ninguna persona a un servicio, lo ofrecen todos los integrantes que admiten reservas. Aquí no se almacenan datos de recursos humanos.",
@@ -9347,12 +9295,7 @@
       "everydayCareProfile": "Perfil de cuidados diarios",
       "until": "hasta",
       "timeline": "Historial",
-      "actor": {
-        "USER": "Tú",
-        "PROVIDER": "Proveedor",
-        "SYSTEM": "Sistema",
-        "ADMIN": "Soporte"
-      },
+      "actor": { "USER": "Tú", "PROVIDER": "Proveedor", "SYSTEM": "Sistema", "ADMIN": "Soporte" },
       "reschedule": "Cambiar horario",
       "cancelFollowing": "Cancelar esta reserva y las siguientes",
       "weeklyCreated": "Se crearon las reservas semanales; se omitieron las semanas sin disponibilidad.",
@@ -10462,11 +10405,12 @@
       "audit": "Registro de auditoría",
       "auditEmpty": "Aún no hay registros.",
       "by": "por {name}",
-      "openCustomer": "Ficha del cliente"
+      "openCustomer": "Ficha del cliente",
+      "approvedBy": "aprobada por {name}"
     },
     "adjust": {
-      "title": "Corregir el saldo",
-      "hint": "Solo para corregir un error o compensarlo. Cada corrección queda registrada con tu nombre, el motivo y el saldo antes y después.",
+      "title": "Solicitar corrección (requiere un segundo administrador)",
+      "hint": "Solo para corregir un error o compensarlo. El saldo no cambia hasta que otro administrador con el mismo permiso apruebe la solicitud. Se registran ambos nombres, el motivo y el saldo antes y después.",
       "direction": "Dirección",
       "directions": {
         "CREDIT": "Añadir saldo",
@@ -10489,19 +10433,21 @@
       },
       "reason": "Explicación (queda en el registro de auditoría)",
       "evidence": "Ticket o referencia (opcional)",
-      "submit": "Guardar corrección",
-      "confirm": "¿Registrar «{direction}» de {amount} en «{bucket}»? Se aplica al saldo de inmediato.",
-      "confirmYes": "Sí, registrar",
+      "submit": "Enviar para aprobación",
+      "confirm": "¿Solicitar «{direction}» de {amount} en «{bucket}»? El saldo solo cambia cuando lo apruebe un segundo administrador.",
+      "confirmYes": "Sí, enviar la solicitud",
       "cancel": "Cancelar",
-      "saving": "Guardando…",
-      "done": "Corrección guardada.",
-      "noPermission": "Corregir un saldo requiere el permiso «Corregir saldos».",
+      "saving": "Enviando…",
+      "done": "Solicitud enviada. Un segundo administrador debe aprobarla antes de que cambie el saldo.",
+      "noPermission": "Solicitar o aprobar una corrección requiere el permiso «Corregir saldos».",
       "errors": {
         "INSUFFICIENT_WALLET_BALANCE": "Esta parte del monedero no tiene tanto saldo.",
         "reasonTooShort": "La explicación necesita al menos 5 caracteres.",
         "amount": "Introduce un importe válido.",
-        "generic": "No se guardó la corrección."
-      }
+        "generic": "No se envió la solicitud.",
+        "TOO_MANY_PENDING": "Este miembro ya tiene tantas solicitudes pendientes como se permite. Decide primero algunas de ellas."
+      },
+      "confirmTitle": "¿Enviar esta solicitud?"
     },
     "topUps": {
       "title": "Comprobantes de recarga",
@@ -10550,7 +10496,10 @@
       "wallet_debited": "Saldo reducido",
       "wallet_top_up_approved": "Comprobante aprobado",
       "wallet_top_up_rejected": "Comprobante rechazado",
-      "wallet_top_up_receipt_viewed": "Comprobante visto"
+      "wallet_top_up_receipt_viewed": "Comprobante visto",
+      "wallet_adjustment_requested": "Corrección solicitada",
+      "wallet_adjustment_approved": "Corrección aprobada y registrada",
+      "wallet_adjustment_rejected": "Solicitud de corrección rechazada"
     },
     "entry": {
       "purpose": {
@@ -10572,6 +10521,48 @@
         "REFUND_OUTSIDE_SYSTEM": "Reembolso fuera de un pedido",
         "DUPLICATE_CREDIT_REVERSAL": "Abono duplicado revertido",
         "OTHER": "Otra corrección"
+      }
+    },
+    "requests": {
+      "title": "Solicitudes de corrección",
+      "subtitle": "Cada corrección de saldo necesita un segundo administrador. Al aprobarla se registra en el monedero al instante; una solicitud sin decisión caduca a las 72 horas.",
+      "detailTitle": "Solicitudes de corrección de este miembro",
+      "empty": "No hay solicitudes.",
+      "filter": "Estado",
+      "all": "Todas",
+      "status": {
+        "PENDING": "Pendiente de aprobación",
+        "APPROVED": "Aprobada y registrada",
+        "REJECTED": "Rechazada",
+        "EXPIRED": "Caducada"
+      },
+      "itemLabel": "Solicitud de {amount} de {name}",
+      "requestedBy": "Solicitada por {name}",
+      "decidedBy": "decidida por {name}",
+      "expires": "caduca {date}",
+      "yours": "Es tu solicitud: otro administrador debe aprobarla.",
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "approveTitle": "¿Aprobar esta corrección?",
+      "rejectTitle": "¿Rechazar esta solicitud?",
+      "summary": "«{direction}» de {amount} en «{bucket}» para {member}.",
+      "approveWarning": "Al aprobarla se registra en el monedero de inmediato y tu nombre queda como segundo administrador.",
+      "rejectWarning": "No se registra nada. El motivo queda en el registro de auditoría.",
+      "rejectReason": "Motivo del rechazo (obligatorio)",
+      "confirmApprove": "Aprobar y registrar",
+      "confirmReject": "Rechazar solicitud",
+      "cancel": "Cancelar",
+      "approved": "Aprobada; la corrección se registró en el monedero.",
+      "rejected": "Rechazada; no se registró nada.",
+      "noPermission": "Decidir sobre una solicitud requiere el permiso «Corregir saldos».",
+      "errors": {
+        "WALLET_ADJUSTMENT_SELF_APPROVAL": "Tú solicitaste esta corrección, así que debe aprobarla otro administrador.",
+        "WALLET_ADJUSTMENT_REQUEST_EXPIRED": "Esta solicitud caducó. Pide una nueva si todavía hace falta.",
+        "INVALID_WALLET_ADJUSTMENT_REQUEST_TRANSITION": "Ya se decidió esta solicitud. Recarga para ver su estado.",
+        "WALLET_ADJUSTMENT_REQUEST_NOT_FOUND": "Esta solicitud ya no existe.",
+        "INSUFFICIENT_WALLET_BALANCE": "Esta parte del monedero ya no tiene tanto saldo, así que no se puede registrar el cargo.",
+        "reasonTooShort": "El motivo necesita al menos 5 caracteres.",
+        "generic": "No funcionó. Inténtalo de nuevo."
       }
     }
   },
@@ -10820,7 +10811,49 @@
         "myket": "Descargar en Myket",
         "googlePlay": "Descargar en Google Play",
         "apk": "Descargar para Android"
+      },
+      "apkHint": "Tras descargarla, abre el archivo y, si el teléfono lo pide, permite instalar desde este origen.",
+      "androidEntry": "Descargar para Android",
+      "iosEntry": "Instalar en iPhone",
+      "allWays": "Todas las formas de instalar"
+    },
+    "appPage": {
+      "eyebrow": "La app de opetlife",
+      "title": "opetlife en tu móvil y tu tableta",
+      "lede": "En Android, descarga la app directamente. En iPhone y iPad, añádela a la pantalla de inicio desde Safari. Ambas son opetlife completo, con notificaciones.",
+      "yourDevice": "Tu dispositivo",
+      "installed": "opetlife ya está instalada en este dispositivo.",
+      "android": {
+        "title": "Android",
+        "lead": "Descarga e instala la app de opetlife para Android directamente desde nuestra web.",
+        "download": "Descargar la app para Android (APK)",
+        "meta": "Versión {version} · {size} KB · Android 5 o posterior",
+        "sha": "Huella del archivo (SHA-256)",
+        "webInstall": "O instala la versión web desde Chrome (sin descargar)",
+        "details": "Detalles del archivo"
+      },
+      "ios": {
+        "title": "iPhone y iPad",
+        "lead": "Añade opetlife a tu pantalla de inicio desde Safari, sin tienda de apps.",
+        "step1": "En Safari, toca el botón Compartir.",
+        "step2": "Elige “Añadir a pantalla de inicio”.",
+        "step3": "Toca “Añadir”. El icono de opetlife aparece en tu pantalla de inicio.",
+        "notifications": "Las notificaciones funcionan en la app instalada con iOS 16.4 o posterior.",
+        "openInSafari": "Abre esta página en Safari",
+        "openInSafariBody": "Añadir a la pantalla de inicio solo funciona desde Safari. Copia el enlace y ábrelo en Safari.",
+        "copy": "Copiar enlace",
+        "copied": "Copiado"
+      },
+      "desktop": {
+        "title": "Ordenador",
+        "lead": "Instala opetlife como una app en Chrome o Edge.",
+        "install": "Instalar en este ordenador",
+        "hint": "¿No ves el botón? Usa el icono de instalación de la barra de direcciones o el menú del navegador."
       }
+    },
+    "credits": {
+      "title": "Iconos",
+      "androidRobot": "El robot de Android se reproduce o modifica a partir de una obra creada y compartida por Google y se usa según los términos de la licencia Creative Commons Atribución 3.0."
     }
   },
   "safety": {
@@ -11431,7 +11464,7 @@
     },
     "readOnly": "Solo un superadministrador con settings.manage puede cambiar esta cuenta.",
     "change": "Cambiar la cuenta",
-    "changeHint": "Cada cambio se registra con su motivo y se avisa a todos los superadministradores. Los pagos ya iniciados conservan la cuenta con la que empezaron.",
+    "changeHint": "Una cuenta nueva solo entra en vigor cuando otro superadministrador la aprueba en un plazo de {hours} horas; hasta entonces los miembros siguen pagando a la cuenta actual. Cada paso se registra con su motivo y se avisa a todos los superadministradores. Los pagos ya iniciados conservan la cuenta con la que empezaron.",
     "fields": {
       "cardNumber": "Número de tarjeta (16 dígitos)",
       "sheba": "Sheba / IBAN (opcional)",
@@ -11440,9 +11473,9 @@
       "reason": "Motivo del cambio"
     },
     "confirm": "Confirmo que esta cuenta pertenece a opetlife.",
-    "save": "Guardar la nueva cuenta",
+    "save": "Enviar para aprobación",
     "saving": "Guardando…",
-    "saved": "La nueva cuenta se guardó y se avisó a los superadministradores.",
+    "saved": "Enviado para aprobación. La cuenta actual sigue en uso hasta que otro superadministrador apruebe el cambio.",
     "offReason": "Motivo para desactivar el pago con tarjeta",
     "switchOff": "Desactivar el pago con tarjeta",
     "switchedOff": "El pago con tarjeta está desactivado.",
@@ -11451,7 +11484,9 @@
     "columns": {
       "setBy": "Configurada por",
       "reason": "Motivo",
-      "closed": "Finalizada"
+      "closed": "Finalizada",
+      "status": "Estado",
+      "approvedBy": "Aprobada por"
     },
     "activeNow": "Activa",
     "loading": "Cargando…",
@@ -11468,7 +11503,38 @@
       "CARD_OR_SHEBA_REQUIRED": "Introduce un número de tarjeta o un Sheba.",
       "HOLDER_REQUIRED": "Introduce el titular de la cuenta.",
       "SUPER_ADMIN_WITH_SETTINGS_MANAGE_REQUIRED": "Solo un superadministrador puede cambiar esta cuenta.",
-      "generic": "No se guardó; inténtalo de nuevo."
+      "generic": "No se guardó; inténtalo de nuevo.",
+      "SELF_APPROVAL": "Tú solicitaste este cambio; debe aprobarlo otro superadministrador.",
+      "ALREADY_PENDING": "Ya hay otro cambio pendiente de aprobación.",
+      "NOT_PENDING": "Este cambio ya se decidió; la página se ha actualizado.",
+      "EXPIRED": "Este cambio caducó antes de aprobarse; vuelve a proponerlo si aún hace falta.",
+      "NOT_FOUND": "Este cambio ya no existe.",
+      "CONFIRM_APPROVE": "Confirma que comprobaste la cuenta antes de aprobarla."
+    },
+    "pendingBlocksChange": "Ya hay un cambio pendiente de aprobación. Apruébalo, recházalo o retíralo antes de proponer otro.",
+    "pending": {
+      "title": "Cambio pendiente de aprobación",
+      "hint": "Aún no está en uso: los miembros siguen pagando a la cuenta actual hasta que otro superadministrador apruebe este cambio.",
+      "requestedBy": "Solicitado por",
+      "expiresAt": "Caduca",
+      "yours": "Tú solicitaste este cambio, así que debe aprobarlo otro superadministrador. Puedes retirarlo.",
+      "confirm": "He comprobado con quien lo solicitó que esta cuenta pertenece a opetlife.",
+      "approve": "Aprobar y activar",
+      "approving": "Aprobando…",
+      "approved": "Aprobado: la nueva cuenta ya está activa y se avisó a los superadministradores.",
+      "rejectReason": "Motivo del rechazo",
+      "withdrawReason": "Motivo para retirarlo",
+      "reject": "Rechazar",
+      "withdraw": "Retirar mi solicitud",
+      "rejected": "Se rechazó el cambio; la cuenta actual no cambia.",
+      "withdrawn": "Retiraste tu solicitud; la cuenta actual no cambia."
+    },
+    "status": {
+      "PENDING": "Pendiente de aprobación",
+      "ACTIVE": "Activa",
+      "CLOSED": "Finalizada",
+      "REJECTED": "Rechazada",
+      "EXPIRED": "Caducada"
     }
   },
   "adminCardReceipts": {
@@ -12274,6 +12340,140 @@
       "clinic_exports": "Exportación de datos",
       "clinic_staff": "Integrantes del equipo",
       "clinic_branches": "Sedes"
+    }
+  },
+  "adminTwoStep": {
+    "kicker": "Seguridad de la cuenta",
+    "title": "Inicio de sesión en dos pasos",
+    "retry": "Reintentar",
+    "intro": "Además de la contraseña, un código de una app de autenticación en tu móvil. Las páginas de administración lo piden una vez por inicio de sesión y luego cada 12 horas.",
+    "status": {
+      "on": "Activado",
+      "off": "Desactivado",
+      "onSince": "Activado desde {date}",
+      "recoveryLeft": "{count, plural, one {Queda # código de recuperación} other {Quedan # códigos de recuperación}}",
+      "recoveryLow": "{count, plural, =0 {No quedan códigos de recuperación.} one {Solo queda # código de recuperación.} other {Solo quedan # códigos de recuperación.}} Genera unos nuevos.",
+      "enforced": "Obligatorio para todo el equipo de administración.",
+      "optional": "Por ahora es opcional. Un superadministrador puede hacerlo obligatorio para todo el equipo."
+    },
+    "actions": {
+      "turnOn": "Activar el inicio de sesión en dos pasos",
+      "newCodes": "Generar códigos de recuperación nuevos",
+      "turnOff": "Desactivar",
+      "turnOffBlocked": "No se puede desactivar mientras sea obligatorio para el equipo."
+    },
+    "enrol": {
+      "step1": "1. Añade opetlife.ir a tu app de autenticación",
+      "step1Help": "En Google Authenticator, Microsoft Authenticator, 1Password, Bitwarden o Aegis, elige «Añadir cuenta» y luego «Introducir una clave de configuración», y escribe la clave de abajo. ¿Lo configuras en este móvil? Usa «Abrir en la app de autenticación».",
+      "copyKey": "Copiar clave",
+      "copied": "Copiado",
+      "openApp": "Abrir en la app de autenticación",
+      "step2": "2. Escribe el código de 6 dígitos que muestra la app",
+      "confirm": "Activar",
+      "cancel": "Cancelar",
+      "starting": "Preparando…",
+      "accountLabel": "Nombre de la cuenta",
+      "keyLabel": "Clave de configuración",
+      "typeLabel": "Tipo",
+      "type": "Basado en tiempo, 6 dígitos"
+    },
+    "codes": {
+      "title": "Guarda tus códigos de recuperación",
+      "body": "Si pierdes el móvil, cada código te deja entrar una vez. No se volverán a mostrar: guárdalos en un lugar seguro, lejos de este ordenador.",
+      "copy": "Copiar códigos",
+      "download": "Descargar como archivo de texto",
+      "saved": "He guardado estos códigos",
+      "continue": "Continuar",
+      "fileHeading": "Códigos de recuperación de administración de opetlife.ir — cada uno sirve una vez"
+    },
+    "challenge": {
+      "title": "Introduce tu código de dos pasos",
+      "body": "Abre tu app de autenticación e introduce el código de 6 dígitos de opetlife.ir.",
+      "codeLabel": "Código de 6 dígitos",
+      "recoveryLabel": "Código de recuperación",
+      "useRecovery": "Usar un código de recuperación",
+      "useApp": "Usar la app de autenticación",
+      "submit": "Verificar",
+      "lostPhone": "¿Has perdido el móvil y los códigos de recuperación? Pide a un superadministrador que restablezca tu inicio de sesión en dos pasos.",
+      "signOut": "Cerrar sesión"
+    },
+    "forced": {
+      "title": "Activa el inicio de sesión en dos pasos para continuar",
+      "body": "El inicio de sesión en dos pasos ya es obligatorio para todo el equipo de administración. Tarda alrededor de un minuto."
+    },
+    "banner": {
+      "optional": "Protege tu cuenta de administración con el inicio de sesión en dos pasos.",
+      "enforced": "El inicio de sesión en dos pasos es obligatorio. Actívalo antes del {date}.",
+      "action": "Activarlo",
+      "dismiss": "Ahora no"
+    },
+    "errors": {
+      "invalidPlain": "Ese código no ha funcionado. Comprueba que tu móvil ajusta la hora automáticamente y escribe el código más reciente.",
+      "invalid": "Ese código no ha funcionado. {count, plural, =0 {El próximo código erróneo lo bloqueará un rato.} one {Te queda # intento antes de un bloqueo breve.} other {Te quedan # intentos antes de un bloqueo breve.}}",
+      "locked": "Demasiados códigos erróneos. Vuelve a intentarlo después de las {time}.",
+      "generic": "Algo ha fallado. Inténtalo de nuevo.",
+      "format": "Escribe los 6 dígitos de la app.",
+      "recoveryFormat": "Un código de recuperación tiene 16 letras y dígitos, como ABCD-EFGH-2345-6723."
+    },
+    "confirmCode": {
+      "label": "Código actual de 6 dígitos",
+      "help": "Introduce un código nuevo de la app. Los códigos de recuperación anteriores dejarán de funcionar.",
+      "turnOffHelp": "Introduce un código nuevo de la app para desactivar el inicio de sesión en dos pasos."
+    },
+    "done": {
+      "on": "El inicio de sesión en dos pasos está activado.",
+      "off": "El inicio de sesión en dos pasos está desactivado.",
+      "newCodes": "Los códigos de recuperación nuevos están listos. Los anteriores ya no sirven."
+    },
+    "policy": {
+      "title": "Inicio de sesión en dos pasos para el equipo",
+      "intro": "Cuando es obligatorio, cada administrador introduce un código de su app de autenticación al iniciar sesión. Quien aún no lo tenga activado sigue trabajando durante el periodo de gracia y después debe activarlo antes de abrir cualquier página de administración.",
+      "required": "Exigir el inicio de sesión en dos pasos a todo el equipo",
+      "on": "Obligatorio",
+      "off": "Opcional",
+      "coverage": "{enrolled} de {total} administradores lo tienen activado",
+      "since": "obligatorio desde el {date}",
+      "graceDays": "Periodo de gracia (días)",
+      "graceHelp": "Se cuenta desde que pasa a ser obligatorio o desde que se incorpora el administrador, lo que sea posterior. 0 significa de inmediato.",
+      "reason": "Motivo",
+      "reasonPlaceholder": "Por qué haces este cambio",
+      "reasonRequired": "Escribe un motivo breve (al menos 5 caracteres).",
+      "save": "Guardar",
+      "saved": "Guardado.",
+      "onlySuper": "Solo un superadministrador puede cambiar esto.",
+      "selfFirst": "Primero activa el inicio de sesión en dos pasos en tu propia cuenta.",
+      "selfFirstAction": "Configurar el mío",
+      "mine": "Mi inicio de sesión en dos pasos",
+      "members": "Administradores",
+      "col": {
+        "name": "Administrador",
+        "role": "Rol",
+        "status": "Dos pasos"
+      },
+      "member": {
+        "on": "Activado desde {date}",
+        "grace": "Todavía no · hasta el {date}",
+        "overdue": "Debe activarlo ya",
+        "off": "Desactivado"
+      },
+      "reset": "Restablecer",
+      "resetTitle": "¿Restablecer el inicio de sesión en dos pasos de {name}?",
+      "resetBody": "Úsalo cuando haya perdido el móvil y los códigos de recuperación. Su app de autenticación y sus códigos dejan de funcionar, y lo configurará de nuevo en su próximo inicio de sesión.",
+      "resetReasonPlaceholder": "Por ejemplo: móvil perdido, confirmado por teléfono",
+      "resetConfirm": "Restablecer",
+      "resetDone": "Restablecido. {name} lo configurará de nuevo.",
+      "you": "tú",
+      "enforcementLater": "Por ahora el inicio de sesión en dos pasos es opcional para cada admin. Exigirlo a todos estará disponible cuando el SMS y el correo funcionen."
+    },
+    "rules": {
+      "TWO_STEP_ALREADY_ON": "El inicio de sesión en dos pasos ya está activado en esta cuenta.",
+      "TWO_STEP_NO_PENDING_ENROLMENT": "Esta configuración ha caducado. Empieza de nuevo.",
+      "TWO_STEP_NOT_ON": "El inicio de sesión en dos pasos no está activado en esta cuenta.",
+      "TWO_STEP_ENFORCED": "No se puede desactivar mientras sea obligatorio para el equipo.",
+      "TWO_STEP_SELF_RESET": "No puedes restablecer el tuyo. Desactívalo tú o pídeselo a otro superadministrador.",
+      "TWO_STEP_SELF_ENROLMENT_REQUIRED": "Primero activa el inicio de sesión en dos pasos en tu propia cuenta.",
+      "TWO_STEP_POLICY_SUPER_ADMIN_ONLY": "Solo un superadministrador puede cambiar esto.",
+      "TWO_STEP_KEY_CHANGED": "Tras un cambio de clave en el servidor no se puede comprobar tu app de autenticación. Usa un código de recuperación o pide a un superadministrador que la restablezca."
     }
   }
 }

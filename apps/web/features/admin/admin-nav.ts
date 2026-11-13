@@ -265,8 +265,9 @@ export const ADMIN_SECTIONS: AdminSection[] = [
         tabs: [
           { href: "/wallets", labelKey: "tabs.walletDirectory", permission: "wallet.view" },
           { href: "/wallets/top-ups", labelKey: "tabs.walletTopUps", permission: "wallet.view", queue: "pendingWalletTopUps" },
+          { href: "/wallets/adjustments", labelKey: "tabs.walletAdjustments", permission: "wallet.view", queue: "pendingWalletAdjustments" },
           { href: "/wallets/card-receipts", labelKey: "tabs.walletCardReceipts", permission: "finance.view" },
-          { href: "/wallets/card-account", labelKey: "tabs.walletCardAccount", permission: "wallet.view" },
+          { href: "/wallets/card-account", labelKey: "tabs.walletCardAccount", permission: "wallet.view", queue: "pendingCardDestinationChanges" },
         ],
       },
     ],
@@ -305,6 +306,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
           { href: "/access", labelKey: "tabs.adminsRoles", permission: "access.view" },
           { href: "/access/roles", labelKey: "tabs.customRoles", permission: "access.view" },
           { href: "/access/matrix", labelKey: "tabs.permissionMatrix", permission: "access.view" },
+          { href: "/access/two-step", labelKey: "tabs.twoStep", permission: "access.view" },
         ],
       },
       {

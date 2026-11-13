@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Headers, Param, ParseUUIDPipe, Post, Query, Req, UseGuards } from "@nestjs/common";
-import { WalletAdjustmentDirection, WalletBalanceType, WalletTopUpStatus } from "@prisma/client";
+import { Body, Controller, Get, Headers, Param, ParseUUIDPipe, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
+import { WalletAdjustmentDirection, WalletAdjustmentRequestStatus, WalletBalanceType, WalletTopUpStatus } from "@prisma/client";
 import { Type } from "class-transformer";
-import { IsBoolean, IsIn, IsInt, IsOptional, IsString, Length, Max, Min } from "class-validator";
+import { IsBoolean, IsIn, IsInt, IsOptional, IsString, IsUUID, Length, Max, Min } from "class-validator";
 import type { WalletAdjustmentReasonCode } from "@petlife/types";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
 import { AdminAuthGuard } from "../auth/admin-auth.guard";
@@ -31,13 +31,27 @@ class WalletAdjustmentDto {
   @IsOptional() @IsString() @Length(1, 200) evidenceReference?: string;
 }
 
+class ListAdjustmentRequestsQueryDto {
+  @IsOptional() @IsIn(Object.values(WalletAdjustmentRequestStatus)) status?: WalletAdjustmentRequestStatus;
+  @IsOptional() @IsUUID() userId?: string;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) page?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100) pageSize?: number;
+}
+
+class RejectWalletAdjustmentDto {
+  @IsString() @Length(5, 500) reason!: string;
+}
+
 class ReviewTopUpDto {
   @IsBoolean() approve!: boolean;
   @IsOptional() @IsInt() @Min(0) receivedAmount?: number;
   @IsOptional() @IsString() @Length(5, 500) reason?: string;
 }
 
-/** Member wallets in the back office: read with wallet.view, correct with wallet.adjust, settle receipts with wallet.topup.review. */
+/**
+ * Member wallets in the back office: read with wallet.view, settle receipts with wallet.topup.review. A correction
+ * needs two admins with wallet.adjust (FE-16): one requests it, a different one approves it, and only then is it posted.
+ */
 @Controller("admin")
 @UseGuards(SessionAuthGuard, AdminAuthGuard)
 export class AdminWalletsController {
@@ -55,16 +69,35 @@ export class AdminWalletsController {
     return this.wallets.detail(userId);
   }
 
-  @Post("wallets/:userId/adjustments")
+  /** FE-16: asks for a correction; nothing is posted until a different admin approves it. */
+  @Post("wallets/:userId/adjustment-requests")
   @RequireAdminPermission("wallet.adjust")
-  adjust(
+  requestAdjustment(
     @CurrentAdmin() admin: ResolvedAdminContext,
     @Param("userId", ParseUUIDPipe) userId: string,
     @Body() dto: WalletAdjustmentDto,
     @Req() request: AdminAuthedRequest,
     @Headers("idempotency-key") idempotencyKey?: string,
   ) {
-    return this.wallets.adjust(admin, userId, dto, idempotencyKey, request.requestId);
+    return this.wallets.requestAdjustment(admin, userId, dto, idempotencyKey, request.requestId);
+  }
+
+  @Get("wallet-adjustment-requests")
+  @RequireAdminPermission("wallet.view")
+  listAdjustmentRequests(@Query() query: ListAdjustmentRequestsQueryDto) {
+    return this.wallets.listAdjustmentRequests({ status: query.status, userId: query.userId, page: query.page ?? 1, pageSize: query.pageSize ?? 20 });
+  }
+
+  @Patch("wallet-adjustment-requests/:id/approve")
+  @RequireAdminPermission("wallet.adjust")
+  approveAdjustment(@CurrentAdmin() admin: ResolvedAdminContext, @Param("id", ParseUUIDPipe) id: string, @Req() request: AdminAuthedRequest) {
+    return this.wallets.approveAdjustmentRequest(admin, id, request.requestId);
+  }
+
+  @Patch("wallet-adjustment-requests/:id/reject")
+  @RequireAdminPermission("wallet.adjust")
+  rejectAdjustment(@CurrentAdmin() admin: ResolvedAdminContext, @Param("id", ParseUUIDPipe) id: string, @Body() dto: RejectWalletAdjustmentDto, @Req() request: AdminAuthedRequest) {
+    return this.wallets.rejectAdjustmentRequest(admin, id, dto.reason, request.requestId);
   }
 
   @Get("wallet-top-ups")

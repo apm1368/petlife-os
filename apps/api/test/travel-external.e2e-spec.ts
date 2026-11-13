@@ -231,7 +231,10 @@ describe("External pet-friendly stays", () => {
     expect(fresh).toMatchObject({ cta: "VIEW_SOURCE", externalDataDisclaimerRequired: true, priceFreshness: "FRESH", availabilityStatus: "SOURCE_REPORTED_AVAILABLE", pet: { policyStatus: "CONFIRMED_ALLOWED", accepted: true } });
     expect(fresh.disclaimerFa).toContain("منبع عمومی");
     expect(fresh.lastSeenAt).toBeTruthy();
-    expect(fresh.trustLabels).toEqual(expect.arrayContaining(["PET_POLICY_CONFIRMED", "PRICE_FRESH", "EXTERNAL_SOURCE"]));
+    // The source's own claim, not opetlife's verification.
+    expect(fresh.pet.authority).toBe("SOURCE_OBSERVATION");
+    expect(fresh.trustLabels).toEqual(expect.arrayContaining(["PET_POLICY_SOURCE_REPORTED", "PRICE_FRESH", "EXTERNAL_SOURCE"]));
+    expect(fresh.trustLabels).not.toContain("PET_POLICY_CONFIRMED");
     expect(fresh.price).toMatchObject({ state: "FRESH", freshness: "FRESH", priceType: "EXACT", currency: "IRR", priceIrr: 45_000_000, availability: { state: "SOURCE_REPORTED_AVAILABLE" } });
     expect(fresh.fromPrice).toMatchObject({ priceType: "FROM_PRICE", priceIrr: 12_000_000 }); // never presented as the booking price
     expect(fresh.price.observedAt).toBeTruthy();
@@ -308,6 +311,43 @@ describe("External pet-friendly stays", () => {
     const unavailablePlan = (await get(member, `/pets/${pet.id}/trips/${trip.id}/external-stays`).expect(200)).body.find((row: { stay: { id: string } }) => row.stay.id === stay.id);
     expect(unavailablePlan).toMatchObject({ available: false, priceAtAttach: null });
     expect(unavailablePlan.stay).toEqual({ id: stay.id });
+  });
+
+  it("list filters: provinces and cities that have stays, a province whitelist, and a dateless price filter on the latest fresh FROM price", async () => {
+    const root = await actor("root", AdminRole.SUPER_ADMIN);
+    await resetSource();
+    const tag = randomUUID().slice(0, 6);
+    const province = `FixtureProvince-${tag}`, c1 = `${city}-f1-${tag}`, c2 = `${city}-f2-${tag}`;
+    const [cheap, dear, none] = [`fc-${tag}`, `fd-${tag}`, `fn-${tag}`];
+    fixture.script = { listings: [listing(cheap, { city: c1, province, fromPrice: 15_000_000 }), listing(dear, { city: c2, province, fromPrice: 90_000_000 }), listing(none, { city: c2, province })] };
+    await run(root);
+    const [sc, sd, sn] = await Promise.all([cheap, dear, none].map((id) => db.externalStay.findFirstOrThrow({ where: { sourceListingId: id } }).then((s) => s.id)));
+
+    const facets = (await get(null, "/travel/external/facets?source=FIXTURE").expect(200)).body;
+    // An unknown source code has no facets and is never cached (random codes can't grow the cache).
+    expect((await get(null, `/travel/external/facets?source=NOPE${tag}`).expect(200)).body).toEqual({ provinces: [], cities: [] });
+    expect(facets.provinces).toEqual(expect.arrayContaining([{ name: province, count: 3 }]));
+    expect(facets.cities).toEqual(expect.arrayContaining([{ name: c1, province, count: 1 }, { name: c2, province, count: 2 }]));
+
+    const inProvince = `&province=${encodeURIComponent(province)}`;
+    const ids = (q: string) => get(null, `/travel/external/stays?source=FIXTURE&pageSize=50${q}`).expect(200).then((r) => r.body.items.map((i: { id: string }) => i.id).sort());
+    expect(await ids(inProvince)).toEqual([sc, sd, sn].sort());
+    expect(await ids(`${inProvince}&city=${encodeURIComponent(c2)}`)).toEqual([sd, sn].sort());
+    // Not a province any listing has: rejected, never a free-text match.
+    const bad = await get(null, `/travel/external/stays?source=FIXTURE&province=${encodeURIComponent(`Nowhere-${tag}`)}`).expect(400);
+    expect(bad.body.error.details).toMatchObject({ field: "province", reason: "UNKNOWN_PROVINCE" });
+
+    // Without dates a price range filters on the nightly FROM price (the one the card shows); no FROM price, no match.
+    expect(await ids(`${inProvince}&maxPrice=20000000`)).toEqual([sc]);
+    expect(await ids(`${inProvince}&minPrice=50000000`)).toEqual([sd]);
+    expect((await get(null, `/travel/external/stays?source=FIXTURE${inProvince}&minPrice=1`).expect(200)).body.total).toBe(2);
+    // Only the newest FROM price counts: an older, cheaper snapshot does not make a stay match.
+    const old = new Date(Date.now() - 5 * DAY);
+    await db.externalStayPriceSnapshot.create({ data: { stayId: sd!, checkIn: null, checkOut: null, guests: 1, priceIrr: 10_000_000, priceBasis: "PER_NIGHT", observedAt: old, lastConfirmedAt: old, expiresAt: old, observedBy: "ADAPTER", contentHash: `old-${tag}`, priceType: "FROM_PRICE" } });
+    expect(await ids(`${inProvince}&maxPrice=20000000`)).toEqual([sc]);
+    // A stale FROM price (past the source's aging window) is hidden on the card, so it matches nothing either.
+    await db.externalStayPriceSnapshot.updateMany({ where: { stayId: sc, priceType: "FROM_PRICE" }, data: { lastConfirmedAt: new Date(Date.now() - 80 * 3600e3) } });
+    expect(await ids(`${inProvince}&maxPrice=20000000`)).toEqual([]);
   });
 
   it("admin ERP: daily diff, metrics, duplicate candidates → staff-approved canonical accommodation, source tasks, real sources honest", async () => {

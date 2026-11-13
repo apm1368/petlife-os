@@ -319,10 +319,11 @@
 /* "Install the app" (and the Android store links once they exist). */
 .opl-foot__app { margin-top:20px; padding-top:16px; border-top:1px dashed var(--opl-line-2); }
 .opl-foot__app h2 { margin-bottom:10px; }
-.opl-foot__app-actions { display:flex; flex-wrap:wrap; gap:8px; }
-.opl-foot__app-actions .opl-btn.sm { min-height:44px; }
-.opl-foot .opl-foot__app-actions a.opl-btn { color:var(--opl-ink); }
-.opl-foot__app-help { margin-top:10px !important; max-width:42ch; color:var(--opl-ink-2); font-size:.88rem; line-height:1.8; }
+.opl-foot__app-buttons { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:4px; }
+.opl-foot .opl-foot__app-btn { display:inline-flex; align-items:center; gap:10px; min-height:48px; padding-block:8px; padding-inline:14px 18px; border:1px solid var(--opl-line-2); border-radius:999px; background:var(--opl-raised); color:var(--opl-ink); font-size:.9rem; font-weight:700; line-height:1.3; text-decoration:none; }
+.opl-foot .opl-foot__app-btn:hover { border-color:var(--opl-forest); color:var(--opl-forest); }
+.opl-foot__app-btn svg { flex:none; color:var(--opl-forest); }
+.opl-foot .opl-foot__app-all { display:inline-flex; align-items:center; min-height:44px; margin-top:4px; color:var(--opl-forest); font-weight:700; }
 .opl-foot h2 { font-size:.95rem; font-weight:800; margin:0 0 10px; }
 .opl-foot ul { list-style:none; margin:0; padding:0; display:grid; gap:6px; }
 .opl-foot a { color:var(--opl-ink-2); text-decoration:none; font-size:.92rem; }

@@ -90,6 +90,9 @@ async function send<T>(path: string, options: ApiFetchOptions): Promise<{ respon
  * cookie to read yet (nothing has hit the API before), so a CSRF rejection
  * is treated as a one-time "prime and retry" rather than a hard failure.
  */
+/** Dispatched on window when an admin call answers ADMIN_TWO_STEP_REQUIRED, so the Admin Shell can ask for the code. */
+export const ADMIN_TWO_STEP_EVENT = "opl:admin-two-step-required";
+
 export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
   if (isLocalPreview() && options.method && options.method !== "GET") {
     throw new ApiError({ code: "LOCAL_PREVIEW_READ_ONLY", message: "Local preview is read-only", requestId: "local-preview" }, 403);
@@ -103,6 +106,7 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
 
   if (!response.ok) {
     const errorBody = payload as ApiErrorBody | undefined;
+    if (errorBody?.error?.code === "ADMIN_TWO_STEP_REQUIRED" && typeof window !== "undefined") window.dispatchEvent(new CustomEvent(ADMIN_TWO_STEP_EVENT));
     if (errorBody?.error) throw new ApiError(errorBody.error, response.status);
     throw new ApiError({ code: "UNKNOWN_ERROR", message: response.statusText, requestId: "unknown" }, response.status);
   }

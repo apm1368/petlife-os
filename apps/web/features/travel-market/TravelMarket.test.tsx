@@ -24,7 +24,7 @@ vi.mock("@/services/travel-marketplace.service", () => ({
 vi.mock("@/services/households.service", () => ({ householdsService: { listMine: vi.fn().mockResolvedValue([]), listPets: vi.fn() } }));
 vi.mock("@/services/travel-external.service", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/services/travel-external.service")>();
-  return { ...actual, travelExternalService: { ...actual.travelExternalService, search: vi.fn().mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 6, context: null }) } };
+  return { ...actual, travelExternalService: { ...actual.travelExternalService, search: vi.fn().mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 20, context: null }), facets: vi.fn().mockResolvedValue({ provinces: [], cities: [] }) } };
 });
 
 const RATING = { average: null, count: 0, petFriendliness: null, cleanliness: null, location: null };
@@ -109,11 +109,12 @@ describe("Jajiga stays in travel home and search", () => {
     vi.mocked(travelExternalService.search).mockReset().mockResolvedValue({ items: [jajigaStay], total: 1, page: 1, pageSize: 4, context: null });
   });
 
-  it("shows Jajiga stays on the travel home with a link to all of them in search", async () => {
+  it("shows Jajiga stays on the travel home as a full list under a small source chip", async () => {
     renderWithIntl(<TravelHomeView />, "fa");
     expect(await screen.findByText("ویلای جنگلی")).toBeTruthy();
     expect(screen.getByText("از جاجیگا")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "همهٔ اقامتگاه‌های جاجیگا" }).getAttribute("href")).toBe("/fa/travel/search?source=jajiga");
+    expect(screen.getByText("اقامتگاه‌های جاجیگا")).toBeTruthy();
+    expect(travelExternalService.search).toHaveBeenCalledWith(expect.objectContaining({ source: "JAJIGA", page: 1, pageSize: 20 }), expect.any(AbortSignal));
   });
 
   it("search shows opetlife and Jajiga together by default, in the same city and dates", async () => {
@@ -125,7 +126,7 @@ describe("Jajiga stays in travel home and search", () => {
     expect(await screen.findByText("ویلای جنگلی")).toBeTruthy();
     expect(travelExternalService.search).toHaveBeenCalledWith(expect.objectContaining({ source: "JAJIGA", city: "رامسر", checkIn: "2026-12-01", checkOut: "2026-12-03" }), expect.any(AbortSignal));
     expect(screen.getByRole("button", { name: "همه" }).getAttribute("aria-pressed")).toBe("true");
-    expect(screen.getByRole("link", { name: "مشاهده و بررسی در سایت منبع" }).getAttribute("href")).toContain("/travel/external/stays/jj1/out");
+    expect(screen.getByRole("link", { name: "مشاهده همین اقامتگاه در جاجیگا" }).getAttribute("href")).toContain("/travel/external/stays/jj1/out");
   });
 
   it("the source filter narrows to Jajiga (no opetlife search) or to opetlife (no Jajiga)", async () => {

@@ -8,8 +8,10 @@ import {
   PetOwnershipTransferStatus,
   AdminRefundApprovalStatus,
   AdminTaskStatus,
+  AdminRole,
   AdminVertical,
   BookingStatus,
+  CardTransferDestinationStatus,
   CatalogProductRequestStatus,
   CommunityReportStatus,
   DisputeStatus,
@@ -23,6 +25,7 @@ import {
   SupportNeedStatus,
   TravelListingStatus,
   TrustCaseStatus,
+  WalletAdjustmentRequestStatus,
   WalletTopUpStatus,
 } from "@prisma/client";
 import type { AdminDashboardSummaryDto, AdminLaunchKpisDto } from "@petlife/types";
@@ -61,11 +64,13 @@ export class AdminDashboardService {
       pendingMemorials,
       openPlaceReports,
       pendingWalletTopUps,
+      pendingWalletAdjustments,
       pendingDeletionRequests,
       launchKpis,
       openOwnershipDisputes,
       openProviderNoShows,
       pendingReviews,
+      pendingCardDestinationChanges,
     ] = await Promise.all([
       when(may("support.view"), () => this.prisma.supportCase.count({ where: { status: { notIn: [SupportCaseStatus.RESOLVED, SupportCaseStatus.CLOSED] } } })),
       when(may("dispute.view"), () => this.prisma.dispute.count({ where: { status: { notIn: [DisputeStatus.CLOSED] } } })),
@@ -89,6 +94,8 @@ export class AdminDashboardService {
       when(may("places.view"), () => this.prisma.placeReport.count({ where: { status: PlaceReportStatus.OPEN } })),
       // Same permission as the Wallets tab the badge sits on (a view-only admin sees the queue; reviewing needs more).
       when(may("wallet.view"), () => this.prisma.walletTopUp.count({ where: { status: WalletTopUpStatus.REVIEW_PENDING } })),
+      // FE-16: wallet corrections waiting for a second admin (not yet lapsed); same tab permission as the top-ups.
+      when(may("wallet.view"), () => this.prisma.walletAdjustmentRequest.count({ where: { status: WalletAdjustmentRequestStatus.PENDING, expiresAt: { gt: new Date() } } })),
       // Account deletion requests waiting on staff: new ones and those in retention review (execution stays disabled).
       when(may("admin.manage"), () => this.prisma.accountDeletionRequest.count({ where: { state: { in: [AccountDeletionState.REQUESTED, AccountDeletionState.PENDING_RETENTION] } } })),
       // Platform-wide figures: only for unscoped roles, so a vertical-limited role never sees other verticals' bookings.
@@ -100,6 +107,11 @@ export class AdminDashboardService {
       // Reviews every vertical holds back until a moderator decides (service, product, stay), counted only for the
       // verticals this admin may moderate; service reviews also respect the provider-type scope.
       this.pendingReviewCount(admin, may),
+      // BO-14: a proposed company card-to-card account waits on a second SUPER_ADMIN with settings.manage, the only
+      // people who may approve or reject it; a proposal past its approval window no longer counts.
+      when(admin.role === AdminRole.SUPER_ADMIN && may("settings.manage"), () =>
+        this.prisma.cardTransferDestination.count({ where: { status: CardTransferDestinationStatus.PENDING, expiresAt: { gt: new Date() } } }),
+      ),
     ]);
     return {
       openSupportCases,
@@ -117,6 +129,8 @@ export class AdminDashboardService {
       pendingMemorials,
       openPlaceReports,
       pendingWalletTopUps,
+      pendingWalletAdjustments,
+      pendingCardDestinationChanges,
       pendingDeletionRequests,
       launchKpis,
       openOwnershipDisputes,
