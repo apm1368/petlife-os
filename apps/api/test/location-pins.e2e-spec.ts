@@ -196,6 +196,22 @@ describe("Location pins (e2e)", () => {
     expect(leaks(providerList.body)).toEqual([]);
     expect(leaks((await staff.c.get(`/provider/bookings/${booking.id}`).expect(200)).body)).toEqual([]);
 
+    // The seller shipping the member's order sees the address text, never the pin (list and detail).
+    const sellerUser = await signedIn("pin-seller");
+    const seller = await prisma.sellerOrganization.create({ data: { name: `Pin shop ${unique()}`, city: "بیرجند", verificationStatus: SellerVerificationStatus.VERIFIED, status: SellerStatus.ACTIVE, countryCode: "IR" } });
+    await prisma.sellerMembership.create({ data: { sellerOrganizationId: seller.id, userId: sellerUser.user.id, role: SellerMembershipRole.OWNER, status: SellerMembershipStatus.ACTIVE, acceptedAt: new Date() } });
+    const snapshot = { recipient: "Sara", phone: "09120000000", addressLine: "خیابان مدرس", city: "بیرجند", region: null, countryCode: "IR", instructions: null, ...HOME };
+    const order = await prisma.order.create({ data: { sellerOrganizationId: seller.id, userId: member.user.id, householdId: member.householdId, status: "CONFIRMED", subtotalAmount: 1_000_000, deliveryAmount: 0, discountAmount: 0, totalAmount: 1_000_000, currency: "IRR", shippingAddressId: member.addressId, shippingAddressSnapshot: snapshot } });
+    await prisma.fulfillment.create({ data: { orderId: order.id, sellerOrgId: seller.id, pickupAddressSnapshot: { city: "بیرجند" }, deliveryAddressSnapshot: snapshot } });
+    const sellerList = await sellerUser.c.get(`/seller-organizations/${seller.id}/orders`).expect(200);
+    expect(JSON.stringify(sellerList.body)).toContain(order.id);
+    expect(leaks(sellerList.body)).toEqual([]);
+    const sellerDetail = await sellerUser.c.get(`/seller-organizations/${seller.id}/orders/${order.id}`).expect(200);
+    expect(sellerDetail.body.fulfillment.deliveryAddress).toMatchObject({ addressLine: "خیابان مدرس", city: "بیرجند" });
+    expect(leaks(sellerDetail.body)).toEqual([]);
+    // The member still sees their own pin on their order.
+    expect(leaks((await member.c.get(`/orders/${order.id}`).expect(200)).body).length).toBeGreaterThan(0);
+
     // Another member and the public: nothing anywhere they can reach.
     for (const res of [
       await other.c.get(`/addresses/${member.addressId}`),
