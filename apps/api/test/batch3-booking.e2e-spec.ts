@@ -1296,11 +1296,13 @@ describe("Batch 3 — services, booking lifecycle, provider and admin operations
       ]);
       expect((await anon("sort=LOWEST_PRICE")).body.items[0].id).toBe(cheapHome.id);
       expect((await anon("sort=TOP_RATED")).body.items[0].id).toBe(cheapHome.id);
-      const nearest = await anon("sort=NEAREST&lat=35.757&lng=51.41");
+      // A visitor's point travels in the POST body, never in the URL (access logs).
+      const nearPoint = (body: Record<string, unknown>) => request(server()).post("/discovery/providers/near").send({ city, ...body }).expect(200);
+      const nearest = await nearPoint({ sort: "NEAREST", lat: 35.757, lng: 51.41 });
       expect(nearest.body.items[0].id).toBe(near.id);
       expect(nearest.body.items[0].distanceKm).toBe(0);
       expect(
-        (await anon("lat=35.757&lng=51.41&radiusKm=2")).body.items.map((p: { id: string }) => p.id),
+        (await nearPoint({ lat: 35.757, lng: 51.41, radiusKm: 2 })).body.items.map((p: { id: string }) => p.id),
       ).toEqual([near.id]);
       expect((await anon("neighborhood=ونک")).body.total).toBe(2);
       const tomorrow = new Date(Date.now() + 86400_000).toISOString().slice(0, 10);

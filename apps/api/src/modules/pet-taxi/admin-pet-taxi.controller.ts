@@ -10,6 +10,7 @@ import { CurrentAdmin } from "../admin/auth/current-admin.decorator";
 import type { AdminAuthedRequest, ResolvedAdminContext } from "../admin/auth/admin-context.types";
 import { RequireAdminPermission } from "../admin/auth/require-admin-permission.decorator";
 import { AdminAuditLogService } from "../admin/audit/admin-audit-log.service";
+import { auditMemberPinRead } from "../admin/audit/member-pin-audit";
 import { PetTaxiService, PRESENCE_FRESH_MS } from "./pet-taxi.service";
 import { normalizeCity, validCityBox } from "./pet-taxi-fare.policy";
 
@@ -46,7 +47,7 @@ export class AdminPetTaxiController {
 
   @Get()
   @RequireAdminPermission("services.view")
-  async overview(): Promise<AdminPetTaxiOverviewDto> {
+  async overview(@CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest): Promise<AdminPetTaxiOverviewDto> {
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const [rules, onlineDrivers, rides] = await Promise.all([
       this.prisma.petTaxiFareRule.findMany({ orderBy: { city: "asc" } }),
@@ -58,6 +59,8 @@ export class AdminPetTaxiController {
         include: { user: { select: { displayName: true, phone: true } } },
       }),
     ]);
+    // The rides carry the members' exact pickup / drop-off points (often a home): the read is audited, never the points.
+    if (rides.length) await auditMemberPinRead(this.audit, { adminUserId: admin.adminUserId, entityType: "PetTaxiOverview", entityId: undefined, field: `rides[].pickup,dropoff (${rides.length})`, requestId: req.requestId });
     const driverIds = [...new Set(rides.map((r) => r.driverUserId).filter((id): id is string => !!id))];
     const drivers = driverIds.length ? await this.prisma.user.findMany({ where: { id: { in: driverIds } }, select: { id: true, displayName: true } }) : [];
     const driverName = new Map(drivers.map((d) => [d.id, d.displayName]));
@@ -94,7 +97,7 @@ export class AdminPetTaxiController {
         tx,
       });
     });
-    return this.overview();
+    return this.overview(admin, request);
   }
 
   /** Every registered driver, pending checks first. */

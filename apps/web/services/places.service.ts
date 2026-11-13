@@ -33,7 +33,10 @@ export type NearbyPlacesInput = {
 export const placesService = {
   // -- Public (OptionalSessionAuthGuard personalizes isFavorited, never gates) --
   list: (input: ListPlacesInput = {}) => apiFetch<PaginatedDto<PetFriendlyPlaceDto>>(`/places${toQueryString(input)}`),
-  nearby: (input: NearbyPlacesInput) => apiFetch<PaginatedDto<PetFriendlyPlaceDto>>(`/places/nearby${toQueryString(input)}`),
+  /** "Near me": the browser's point goes in the POST body (rounded to ~1 km by the caller), never in a URL or access log. */
+  nearby: (input: NearbyPlacesInput) => apiFetch<PaginatedDto<PetFriendlyPlaceDto>>("/places/nearby", { method: "POST", body: input }),
+  /** Near the member's own pinned default address (looked up by the server; 400 HOME_PIN_MISSING without one). */
+  nearHome: (input: Omit<NearbyPlacesInput, "latitude" | "longitude"> = {}) => apiFetch<PaginatedDto<PetFriendlyPlaceDto>>(`/places/nearby${toQueryString({ ...input, near: "home" })}`),
   get: (placeId: string) => apiFetch<PetFriendlyPlaceDto>(`/places/${placeId}`),
 
   // -- Authenticated favorites -------------------------------------------------

@@ -658,7 +658,7 @@ describe("Batch 5 — Travel, Insurance, Places", () => {
         await ops.c.post(`/admin/places/${id}/verification`).send({ status: "VERIFIED" }).expect(201);
         await ops.c.post(`/admin/places/${id}/listing`).send({ isPubliclyListed: true }).expect(201);
       }
-      const nearby = await request(server).get("/places/nearby?latitude=35.7001&longitude=51.4001&radiusMeters=5000").expect(200);
+      const nearby = await request(server).post("/places/nearby").send({ latitude: 35.7001, longitude: 51.4001, radiusMeters: 5000 }).expect(200);
       const ids = nearby.body.items.map((p: { id: string }) => p.id);
       expect(ids).toContain(near.body.id);
       expect(ids).not.toContain(far.body.id);

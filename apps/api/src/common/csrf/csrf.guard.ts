@@ -20,6 +20,8 @@ const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
  * there directly (no API client, no CSRF header), exactly as they would to a presigned S3 URL.
  */
 const CSRF_EXEMPT_PREFIXES = ["/payments/webhooks/", "/shipping/webhooks/", "/uploads/"];
+/** Read-only searches that use POST only to keep the visitor's point out of URLs and logs: nothing to forge. */
+const CSRF_EXEMPT_READ_ONLY = new Set(["/discovery/providers/near", "/places/nearby"]);
 
 @Injectable()
 export class CsrfGuard implements CanActivate {
@@ -27,6 +29,7 @@ export class CsrfGuard implements CanActivate {
     const req = context.switchToHttp().getRequest<Request>();
     if (SAFE_METHODS.has(req.method)) return true;
     if (CSRF_EXEMPT_PREFIXES.some((prefix) => req.path.startsWith(prefix))) return true;
+    if (req.method === "POST" && CSRF_EXEMPT_READ_ONLY.has(req.path)) return true;
 
     const cookies = (req as unknown as { cookies?: Record<string, string> }).cookies;
     const cookieToken = cookies?.[CSRF_COOKIE_NAME];

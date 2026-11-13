@@ -323,12 +323,12 @@ describe("Travel + Insurance + Pet-Friendly Places (Handoff 19)", () => {
     const admin = await setupAdmin();
     const { placeId } = await setupVerifiedListedPlace(admin, { latitude: 35.7, longitude: 51.4 });
 
-    const nearby = await request(app.getHttpServer()).get("/places/nearby?latitude=35.701&longitude=51.401&radiusMeters=5000").expect(200);
+    const nearby = await request(app.getHttpServer()).post("/places/nearby").send({ latitude: 35.701, longitude: 51.401, radiusMeters: 5000 }).expect(200);
     const found = nearby.body.items.find((p: { id: string }) => p.id === placeId);
     expect(found).toBeTruthy();
     expect(typeof found.distanceMeters).toBe("number");
 
-    const farAway = await request(app.getHttpServer()).get("/places/nearby?latitude=35.701&longitude=51.401&radiusMeters=10").expect(200);
+    const farAway = await request(app.getHttpServer()).post("/places/nearby").send({ latitude: 35.701, longitude: 51.401, radiusMeters: 10 }).expect(200);
     expect(farAway.body.items.some((p: { id: string }) => p.id === placeId)).toBe(false);
   });
 

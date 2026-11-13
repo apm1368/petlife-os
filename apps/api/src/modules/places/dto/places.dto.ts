@@ -255,6 +255,34 @@ export class NearbyPetFriendlyPlacesQueryDto extends PaginationQueryDto {
 /** Owner #6: at most this many photos per suggestion. */
 export const PLACE_SUGGESTION_MAX_PHOTOS = 3;
 
+/** POST /places/nearby: the browser's point travels in the body, never in the URL. */
+export class NearbyPetFriendlyPlacesPointDto extends PaginationQueryDto {
+  @Type(() => Number)
+  @IsNumber()
+  @IsLatitude()
+  latitude!: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @IsLongitude()
+  longitude!: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(100_000)
+  radiusMeters?: number;
+
+  @IsOptional()
+  @IsEnum(PetFriendlyPlaceCategory)
+  category?: PetFriendlyPlaceCategory;
+
+  @IsOptional()
+  @IsEnum(PetSpecies)
+  species?: PetSpecies;
+}
+
 export class SuggestPlaceDto {
   @IsString() @Length(1, 200) name!: string;
   @IsEnum(PetFriendlyPlaceCategory) category!: PetFriendlyPlaceCategory;

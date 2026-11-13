@@ -10,6 +10,8 @@ import { RequireAdminPermission } from "../auth/require-admin-permission.decorat
 import { CurrentAdmin } from "../auth/current-admin.decorator";
 import type { AdminAuthedRequest, ResolvedAdminContext } from "../auth/admin-context.types";
 import { AdminSetPetService } from "./admin-set-pet.service";
+import { AdminAuditLogService } from "../audit/admin-audit-log.service";
+import { auditMemberPinRead, carriesPin } from "../audit/member-pin-audit";
 
 class ListDto {
   @IsOptional() @IsIn(Object.values(SetPetRequestStatus)) status?: SetPetRequestStatus;
@@ -62,7 +64,10 @@ class SettingsDto {
 @RequireAdminVertical(AdminVertical.SHOP)
 @UseGuards(SessionAuthGuard, AdminAuthGuard)
 export class AdminSetPetController {
-  constructor(private readonly setPet: AdminSetPetService) {}
+  constructor(
+    private readonly setPet: AdminSetPetService,
+    private readonly audit: AdminAuditLogService,
+  ) {}
 
   @Get("requests")
   @RequireAdminPermission("commerce.view")
@@ -70,10 +75,19 @@ export class AdminSetPetController {
     return this.setPet.list(query);
   }
 
+  /** Request detail. Its shipping address can carry the member's exact pin (dispatch): that read is audited, without coordinates. */
   @Get("requests/:id")
   @RequireAdminPermission("commerce.view")
-  detail(@Param("id", ParseUUIDPipe) id: string) {
-    return this.setPet.detail(id);
+  detail(@Param("id", ParseUUIDPipe) id: string, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
+    return this.pinAudited(this.setPet.detail(id), admin, req, id);
+  }
+
+  /** Every response that returns the request detail (and so possibly the member's exact pin) records the read. */
+  private async pinAudited<T>(result: Promise<T>, admin: ResolvedAdminContext, req: AdminAuthedRequest, id: string): Promise<T> {
+    const value = await result;
+    const address = (value as { payment?: { shippingAddress?: unknown } | null } | null)?.payment?.shippingAddress as { latitude?: unknown; longitude?: unknown } | null | undefined;
+    if (carriesPin(address)) await auditMemberPinRead(this.audit, { adminUserId: admin.adminUserId, entityType: "SetPetRequest", entityId: id, field: "payment.shippingAddress", requestId: req.requestId });
+    return value;
   }
 
   @Post("requests/:id/proofs/upload-target")
@@ -85,7 +99,7 @@ export class AdminSetPetController {
   @Post("requests/:id/proofs/:proofId/send")
   @RequireAdminPermission("commerce.manage")
   sendProof(@Param("id", ParseUUIDPipe) id: string, @Param("proofId", ParseUUIDPipe) proofId: string, @Body() dto: SendProofDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
-    return this.setPet.sendProof(admin, id, proofId, dto, req.requestId);
+    return this.pinAudited(this.setPet.sendProof(admin, id, proofId, dto, req.requestId), admin, req, id);
   }
 
   @Get("requests/:id/proofs/:proofId")
@@ -97,19 +111,19 @@ export class AdminSetPetController {
   @Post("requests/:id/reject-design")
   @RequireAdminPermission("commerce.manage")
   rejectDesign(@Param("id", ParseUUIDPipe) id: string, @Body() dto: RejectDesignDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
-    return this.setPet.rejectDesign(admin, id, dto.reason, req.requestId);
+    return this.pinAudited(this.setPet.rejectDesign(admin, id, dto.reason, req.requestId), admin, req, id);
   }
 
   @Post("requests/:id/status")
   @RequireAdminPermission("commerce.manage")
   status(@Param("id", ParseUUIDPipe) id: string, @Body() dto: StatusDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
-    return this.setPet.changeStatus(admin, id, dto, req.requestId);
+    return this.pinAudited(this.setPet.changeStatus(admin, id, dto, req.requestId), admin, req, id);
   }
 
   @Put("requests/:id/admin-note")
   @RequireAdminPermission("commerce.manage")
   note(@Param("id", ParseUUIDPipe) id: string, @Body() dto: NoteDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
-    return this.setPet.saveAdminNote(admin, id, dto.note, req.requestId);
+    return this.pinAudited(this.setPet.saveAdminNote(admin, id, dto.note, req.requestId), admin, req, id);
   }
 
   /** Audited private download of one design printed on this order (always an attachment). */

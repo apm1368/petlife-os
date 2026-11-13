@@ -26,6 +26,7 @@ import type {
   RatePlanInputDto,
   TravelMediaInputDto,
 } from "./dto/travel-marketplace.dto";
+import { pinFromInput } from "../../common/geo/geo";
 
 /**
  * Provider-driven lifecycle. A provider can send a listing to review and pull
@@ -99,8 +100,8 @@ export class TravelListingService {
           country: input.country,
           city: input.city,
           address: input.address ?? null,
-          latitude: input.latitude ?? null,
-          longitude: input.longitude ?? null,
+          // Same pin rules as every location: inside Iran, both coordinates, and only with the host's consent.
+          ...((pin) => (pin ? { latitude: pin.latitude, longitude: pin.longitude } : { latitude: null, longitude: null }))(pinFromInput(input)),
           pinPublicExact: input.exactPinPublic ?? null,
           imageObjectKeys: input.imageObjectKeys ?? [],
           amenities: input.amenities ?? [],
@@ -131,8 +132,7 @@ export class TravelListingService {
         ...(input.title !== undefined ? { title: input.title } : {}),
         ...(input.description !== undefined ? { description: input.description } : {}),
         ...(input.address !== undefined ? { address: input.address } : {}),
-        ...(input.latitude !== undefined ? { latitude: input.latitude } : {}),
-        ...(input.longitude !== undefined ? { longitude: input.longitude } : {}),
+        ...((pin) => (pin === undefined ? {} : { latitude: pin?.latitude ?? null, longitude: pin?.longitude ?? null }))(pinFromInput(input)),
         ...(input.exactPinPublic !== undefined ? { pinPublicExact: input.exactPinPublic } : {}),
         ...(input.imageObjectKeys !== undefined ? { imageObjectKeys: input.imageObjectKeys } : {}),
         ...(input.amenities !== undefined ? { amenities: input.amenities } : {}),

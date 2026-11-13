@@ -31,6 +31,8 @@ import { isolate } from "@/lib/text/bidi";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { SafetyTip } from "@/features/shared/SafetyTip";
 import { LegalConsentLine } from "@/features/legal/LegalConsentLine";
+import { LocationPicker } from "@/features/maps/LocationPicker";
+import type { MapPoint } from "@/features/maps/MapView";
 
 type Step =
   | "address"
@@ -96,6 +98,12 @@ export function CheckoutView() {
   const [addressFormOpen, setAddressFormOpen] = useState(false);
   const [addressError, setAddressError] = useState<string | null>(null);
   const [isCreatingAddress, setIsCreatingAddress] = useState(false);
+  // Same pin rules as the address book: a new address needs a pin with the member's consent; an existing one keeps
+  // working without one and is only re-sent when the pin moves.
+  const [pin, setPin] = useState<MapPoint | null>(null);
+  const [savedPin, setSavedPin] = useState<MapPoint | null>(null);
+  const [pinConsent, setPinConsent] = useState(false);
+  const tPin = useTranslations("locationPicker");
 
   const [shippingOptions, setShippingOptions] = useState<SellerShippingOptionsDto[] | null>(null);
   const [shippingQuoteSelectingId, setShippingQuoteSelectingId] = useState<string | null>(null);
@@ -124,16 +132,24 @@ export function CheckoutView() {
     setEditingAddressId(address?.id ?? null);
     setDefaultAddress(address?.isDefault ?? false);
     setNewAddress({ recipient: address?.recipient ?? "", phone: address?.phone ?? "", addressLine: address?.addressLine ?? "", city: address?.city ?? "", postalCode: address?.postalCode ?? "", countryCode: address?.countryCode ?? "IR" });
+    const existing = address?.latitude != null && address.longitude != null ? { latitude: address.latitude, longitude: address.longitude } : null;
+    setPin(existing);
+    setSavedPin(existing);
+    setPinConsent(existing !== null);
     setAddressError(null);
     setAddressFormOpen(true);
   }
 
   async function createAddress() {
     if (!householdId) return;
+    const pinMoved = (pin?.latitude ?? null) !== (savedPin?.latitude ?? null) || (pin?.longitude ?? null) !== (savedPin?.longitude ?? null);
+    if (!editingAddressId && !pin) return setAddressError(tPin("pinNeeded"));
+    if (pin && pinMoved && !pinConsent) return setAddressError(tPin("consentNeeded"));
     setIsCreatingAddress(true);
     setAddressError(null);
     try {
       const fields = {
+        ...(pin && pinMoved ? { latitude: pin.latitude, longitude: pin.longitude, locationConsent: true } : !pin && savedPin ? { latitude: null, longitude: null } : {}),
         addressLine: newAddress.addressLine.trim(),
         city: newAddress.city.trim(),
         countryCode: newAddress.countryCode,
@@ -149,6 +165,9 @@ export function CheckoutView() {
       setEditingAddressId(null);
       setDefaultAddress(false);
       setNewAddress({ recipient: "", phone: "", addressLine: "", city: "", postalCode: "", countryCode: "IR" });
+      setPin(null);
+      setSavedPin(null);
+      setPinConsent(false);
     } catch (err) {
       // API messages are English implementation text for German and Spanish pages.
       // Keep errors in the selected UI language instead of leaking backend copy.
@@ -429,6 +448,7 @@ export function CheckoutView() {
             </div>
             <Input label={t("address.addressLine")} value={newAddress.addressLine} autoComplete="street-address" onChange={(e) => setNewAddress({ ...newAddress, addressLine: e.target.value })} />
             <label className="commerce-toggle"><span>{design("defaultAddress")}</span><input type="checkbox" checked={defaultAddress} onChange={(e) => setDefaultAddress(e.target.checked)} /></label>
+            <LocationPicker audience="member" required={!editingAddressId} value={pin} onChange={setPin} consent={pinConsent} onConsentChange={setPinConsent} />
             {addressError ? (
               <p role="alert" className="text-metadata text-state-urgent">
                 {addressError}
