@@ -13,6 +13,7 @@ import { onboardingService } from "@/services/onboarding.service";
 import { useSessionStore } from "@/stores/session-store";
 import { signInErrorText } from "@/features/auth/sign-in-error";
 import { resolvePostAuthDestination } from "@/lib/auth/resolve-post-auth-destination";
+import { adminService } from "@/services/admin.service";
 
 const RESEND_COOLDOWN_SECONDS = 30;
 
@@ -40,8 +41,8 @@ function AccountFlow() {
   }, [cooldown]);
 
   async function afterAuth() {
-    const progress = await onboardingService.getProgress();
-    router.replace(resolvePostAuthDestination(locale, returnTo, progress));
+    const [progress, staff] = await Promise.all([onboardingService.getProgress(), adminService.getMe().catch(() => null)]);
+    router.replace(resolvePostAuthDestination(locale, returnTo, progress, { isAdmin: !!staff?.isAdmin }));
   }
 
   async function sendCode() {

@@ -92,6 +92,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
         tabs: [
           { href: "/users", labelKey: "tabs.directory", permission: "customer.view" },
           { href: "/customers", labelKey: "tabs.customer360", permission: "customer.view" },
+          { href: "/ownership-transfers", labelKey: "tabs.ownershipTransfers", permission: "customer.view", queue: "openOwnershipDisputes" },
           { href: "/privacy/deletion-requests", labelKey: "tabs.deletionRequests", permission: "admin.manage", queue: "pendingDeletionRequests" },
         ],
       },
@@ -152,7 +153,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
         icon: Stethoscope,
         href: "/services",
         tabs: [
-          { href: "/services", labelKey: "tabs.bookings", permission: "services.view", exact: true },
+          { href: "/services", labelKey: "tabs.bookings", permission: "services.view", exact: true, queue: "openProviderNoShows" },
           { href: "/services/catalog", labelKey: "tabs.serviceCatalog", permission: "services.view" },
           { href: "/services/pet-taxi", labelKey: "tabs.petTaxi", permission: "services.view", exact: true },
           { href: "/services/pet-taxi/drivers", labelKey: "tabs.petTaxiDrivers", permission: "services.view" },

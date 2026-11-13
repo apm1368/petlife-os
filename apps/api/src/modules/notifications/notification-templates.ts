@@ -297,6 +297,28 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "انتقال مالکیت پت انجام نشد", body: "پیشنهاد انتقال مالکیت پت پذیرفته نشد؛ مالک ثبت‌شده همان فرد قبلی باقی ماند." },
     en: { title: "The pet ownership transfer did not happen", body: "The pet ownership transfer was declined; the registered owner remains unchanged." },
   },
+  // Review moderation outcome for its author (Admin → Reviews). Rejections say why, in the moderator's words.
+  "review.approved": {
+    fa: { title: "نظر شما منتشر شد", body: "نظر شما دربارهٔ «{{subject}}» بررسی و منتشر شد. ممنون که تجربه‌تان را به اشتراک گذاشتید." },
+    en: { title: "Your review is published", body: "Your review of “{{subject}}” was checked and published. Thanks for sharing your experience." },
+  },
+  "review.rejected": {
+    fa: { title: "نظر شما منتشر نشد", body: "نظر شما دربارهٔ «{{subject}}» با قوانین انتشار هم‌خوان نبود و منتشر نشد. دلیل: {{reason}}" },
+    en: { title: "Your review wasn't published", body: "Your review of “{{subject}}” didn't meet the publishing rules and wasn't published. Reason: {{reason}}" },
+  },
+  // Ownership disputes (ID-03): the pet never moves on a dispute; staff check the documents and record the outcome.
+  "pet.ownership_disputed": {
+    fa: { title: "اختلاف دربارهٔ مالکیت «{{petName}}»", body: "{{actorName}} با انتقال مالکیت «{{petName}}» مخالفت کرد. تا بررسی پشتیبانی، مالک ثبت‌شده تغییر نمی‌کند. اگر مدرکی دارید، از بخش پشتیبانی بفرستید." },
+    en: { title: "Ownership of “{{petName}}” is disputed", body: "{{actorName}} disagreed with the ownership transfer of “{{petName}}”. The registered owner stays the same while support reviews it. If you have documents, send them through Support." },
+  },
+  "pet.ownership_dispute_closed_stands": {
+    fa: { title: "بررسی اختلاف مالکیت «{{petName}}» تمام شد", body: "پشتیبانی اختلاف را بررسی کرد و انتقال مالکیت «{{petName}}» به همان شکل باقی ماند." },
+    en: { title: "The ownership dispute about “{{petName}}” is closed", body: "Support reviewed the dispute and the ownership transfer of “{{petName}}” stands." },
+  },
+  "pet.ownership_dispute_closed_owner_stays": {
+    fa: { title: "بررسی اختلاف مالکیت «{{petName}}» تمام شد", body: "پشتیبانی اختلاف را بررسی کرد. درخواست انتقال بسته شد و مالک ثبت‌شدهٔ «{{petName}}» تغییری نکرد." },
+    en: { title: "The ownership dispute about “{{petName}}” is closed", body: "Support reviewed the dispute. The transfer request was closed and the registered owner of “{{petName}}” did not change." },
+  },
   "pet.ownership_transfer_cancelled": {
     fa: { title: "درخواست انتقال مالکیت لغو شد", body: "درخواست انتقال مالکیت پت لغو شد و تغییری در مالکیت انجام نشد." },
     en: { title: "The ownership transfer request was withdrawn", body: "The pet ownership transfer request was withdrawn and no change was made." },
