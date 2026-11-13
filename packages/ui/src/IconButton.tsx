@@ -15,7 +15,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
         aria-label={label}
         title={label}
         className={cn(
-          "inline-flex h-10 w-10 items-center justify-center rounded-full text-text-primary",
+          "inline-flex h-10 w-10 items-center justify-center rounded-full text-text-primary [@media(pointer:coarse)]:h-11 [@media(pointer:coarse)]:w-11",
           "hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]",
           "disabled:cursor-not-allowed disabled:opacity-50",
           className,

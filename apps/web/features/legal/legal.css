@@ -17,7 +17,7 @@
 @media (min-width: 1000px) { .legal-toc { position: sticky; top: 96px; max-height: calc(100vh - 120px); overflow: auto; } }
 .legal-toc h2 { margin: 0 0 8px; font-size: 1rem; font-weight: 800; }
 .legal-toc ol { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
-.legal-toc a { display: flex; min-height: 40px; align-items: center; padding: 4px 8px; border-radius: 10px; color: var(--opl-ink-2); text-decoration: none; line-height: 1.5; }
+.legal-toc a { display: flex; min-height: 44px; align-items: center; padding: 4px 8px; border-radius: 10px; color: var(--opl-ink-2); text-decoration: none; line-height: 1.5; }
 .legal-toc a:hover, .legal-toc a:focus-visible { background: var(--opl-mint); color: var(--opl-ink); }
 
 .legal-sections { display: flex; flex-direction: column; gap: 8px; max-width: 76ch; }
