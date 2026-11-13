@@ -1,4 +1,4 @@
-import { ParseUUIDPipe, Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
+import { ParseUUIDPipe, Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Put, Query, UseGuards } from "@nestjs/common";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { OptionalSessionAuthGuard } from "../../common/auth/optional-session-auth.guard";
 import { CurrentUser, OptionalCurrentUser } from "../../common/auth/current-user.decorator";
@@ -12,6 +12,8 @@ import {
   RequestCommunityMediaUploadDto,
   SetCommunityReactionDto,
   SubmitCommunityReportDto,
+  UpdateCommunityCommentDto,
+  UpdateCommunityPostDto,
 } from "./dto/community.dto";
 import { PaginationQueryDto } from "../../common/pagination/pagination.dto";
 
@@ -46,6 +48,31 @@ export class CommunityController {
   @UseGuards(OptionalSessionAuthGuard)
   getPost(@Param("postId") postId: string, @OptionalCurrentUser() user: SessionUser | undefined) {
     return this.posts.get(postId, user?.id);
+  }
+
+  /** M6: the author edits or deletes their own published post; anyone else gets 404. */
+  @Patch("posts/:postId")
+  @UseGuards(SessionAuthGuard)
+  updatePost(@Param("postId", ParseUUIDPipe) postId: string, @CurrentUser() user: SessionUser, @Body() dto: UpdateCommunityPostDto) {
+    return this.posts.updatePost(postId, user.id, dto);
+  }
+
+  @Delete("posts/:postId")
+  @UseGuards(SessionAuthGuard)
+  deletePost(@Param("postId", ParseUUIDPipe) postId: string, @CurrentUser() user: SessionUser) {
+    return this.posts.deletePost(postId, user.id);
+  }
+
+  @Patch("comments/:commentId")
+  @UseGuards(SessionAuthGuard)
+  updateComment(@Param("commentId", ParseUUIDPipe) commentId: string, @CurrentUser() user: SessionUser, @Body() dto: UpdateCommunityCommentDto) {
+    return this.posts.updateComment(commentId, user.id, dto);
+  }
+
+  @Delete("comments/:commentId")
+  @UseGuards(SessionAuthGuard)
+  deleteComment(@Param("commentId", ParseUUIDPipe) commentId: string, @CurrentUser() user: SessionUser) {
+    return this.posts.deleteComment(commentId, user.id);
   }
 
   @Post("posts/upload-url")

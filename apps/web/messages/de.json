@@ -6943,6 +6943,18 @@
         "send": "Anfrage senden",
         "cancel": "Abbrechen"
       }
+  },
+    "own": {
+      "edit": "Bearbeiten",
+      "delete": "Löschen",
+      "save": "Änderungen speichern",
+      "cancel": "Abbrechen",
+      "titleLabel": "Titel",
+      "bodyLabel": "Text",
+      "confirmPost": "Diesen Beitrag für alle löschen? Auch seine Kommentare verschwinden.",
+      "confirmComment": "Diesen Kommentar löschen?",
+      "deleteYes": "Ja, löschen",
+      "edited": "bearbeitet"
     }
   },
   "publicNavigation": {
