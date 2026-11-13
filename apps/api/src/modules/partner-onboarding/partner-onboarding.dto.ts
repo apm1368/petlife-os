@@ -30,7 +30,7 @@ export class PartnerDocumentUploadDto extends PartnerUploadDto {
 
 export class PartnerRegisterDocumentDto extends PartnerDocumentUploadDto {
   @IsString() @Length(10, 300) objectKey!: string;
-  @IsIn(["NATIONAL_ID_CARD", "LICENSE", "BUSINESS_LICENSE", "BUSINESS_REGISTRATION", "OTHER"]) kind!: "NATIONAL_ID_CARD" | "LICENSE" | "BUSINESS_LICENSE" | "BUSINESS_REGISTRATION" | "OTHER";
+  @IsIn(["NATIONAL_ID_CARD", "LICENSE", "BUSINESS_LICENSE", "ENAMAD", "BUSINESS_REGISTRATION", "OTHER"]) kind!: "NATIONAL_ID_CARD" | "LICENSE" | "BUSINESS_LICENSE" | "ENAMAD" | "BUSINESS_REGISTRATION" | "OTHER";
   @IsOptional() @IsString() expiresAt?: string;
 }
 

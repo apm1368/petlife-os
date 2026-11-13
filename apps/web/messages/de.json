@@ -9735,6 +9735,197 @@
       "offers": "Produkte & Preise",
       "inventory": "Bestand",
       "payouts": "Auszahlungen"
+    },
+    "joinAsPartner": "Als Partner registrieren"
+  },
+  "partnerOnboarding": {
+    "loadFailed": "Konnte nicht laden",
+    "retry": "Erneut versuchen",
+    "saveAndContinue": "Speichern und weiter",
+    "continue": "Weiter",
+    "remove": "Entfernen",
+    "intro": {
+      "title": "Als Partner registrieren",
+      "body": "Sie bieten Tierdienstleistungen an oder führen einen Tierbedarf-Shop? Registrieren Sie sich bei opetlife, damit Tierhalter Sie finden, buchen oder bei Ihnen kaufen.",
+      "needs": {
+        "kinds": "Ihre Geschäftsart (mehrere möglich, z. B. Tierarzt und Shop)",
+        "documents": "Logo, Personalausweis und Lizenz oder Genehmigung",
+        "address": "Postanschrift mit Provinz und Stadt",
+        "services": "Für Dienstleistungen: Arbeitstage, Zeiten und der Preis jeder Leistung",
+        "shop": "Für einen Shop: Öffnungszeiten und Produkte mit Preis und Bestand",
+        "review": "Zur Prüfung und Identitätsprüfung senden"
+      },
+      "reviewNote": "Nichts erscheint auf der Website, bevor das opetlife-Team Ihre Unterlagen geprüft hat. Ausweisdokumente dienen nur der Prüfung und werden nie veröffentlicht.",
+      "create": "Partnerkonto erstellen",
+      "signIn": "Ich habe ein Konto – anmelden"
+    },
+    "wizard": {
+      "title": "Partner-Registrierung",
+      "reviewNote": "Jeder Schritt wird gespeichert, Sie können später weitermachen. Ihr Unternehmen erscheint nach der Freigabe durch das opetlife-Team.",
+      "steps": "Schritte"
+    },
+    "steps": {
+      "kinds": "Geschäftsart",
+      "business": "Name und Logo",
+      "owner": "Inhaberdaten",
+      "documents": "Unterlagen",
+      "address": "Adresse",
+      "calendar": "Arbeitskalender",
+      "services": "Leistungen und Preise",
+      "hours": "Öffnungszeiten",
+      "products": "Produkte",
+      "review": "Prüfen und senden"
+    },
+    "kinds": {
+      "hint": "Wählen Sie alle Leistungen, die Sie anbieten. Wenn Sie auch einen Shop haben, kreuzen Sie ihn an.",
+      "services": "Dienstleistungen",
+      "shopTitle": "Shop"
+    },
+    "kind": {
+      "VET_CLINIC": "Tierklinik",
+      "VETERINARIAN": "Tierarzt/Tierärztin",
+      "GROOMER": "Tierpflege",
+      "BOARDING": "Tierpension",
+      "SITTER": "Tiersitting",
+      "TRAINER": "Training",
+      "WALKER": "Gassi-Service",
+      "PET_TAXI": "Tiertaxi",
+      "SHOP": "Tierbedarf-Shop (online oder vor Ort)"
+    },
+    "business": {
+      "name": "Name des Unternehmens",
+      "description": "Kurzbeschreibung",
+      "logo": "Logo",
+      "logoHint": "JPG, PNG oder WebP bis 10 MB. Das Logo erscheint nach der Freigabe."
+    },
+    "owner": {
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "phone": "Telefon des Unternehmens",
+      "verifyMobile": "Zum Fortfahren muss die Mobilnummer Ihres Kontos per SMS-Code bestätigt sein.",
+      "verifyMobileLink": "Mobilnummer bestätigen"
+    },
+    "documents": {
+      "hint": "Personalausweis und Gewerbeschein (oder eNamad für Online-Shops) sind Pflicht; Tierärzte laden zusätzlich ihre Approbation hoch.",
+      "none": "Noch keine Unterlagen hochgeladen.",
+      "kind": "Dokumentart",
+      "file": "Datei (JPG, PNG oder PDF bis 20 MB)",
+      "private": "Unterlagen werden privat gespeichert; nur das Prüfteam sieht sie.",
+      "upload": "Hochladen"
+    },
+    "docKind": {
+      "NATIONAL_ID_CARD": "Personalausweis",
+      "LICENSE": "Lizenz / Genehmigung",
+      "BUSINESS_LICENSE": "Gewerbeschein",
+      "BUSINESS_REGISTRATION": "Handelsregister",
+      "OTHER": "Sonstiges",
+      "ENAMAD": "eNamad (E-Vertrauenssiegel)"
+    },
+    "docStatus": {
+      "PENDING": "Wartet auf Prüfung",
+      "ACCEPTED": "Akzeptiert",
+      "REJECTED": "Abgelehnt",
+      "EXPIRED": "Abgelaufen"
+    },
+    "address": {
+      "province": "Provinz",
+      "city": "Stadt",
+      "pick": "Bitte wählen",
+      "otherCity": "Andere Stadt…",
+      "line": "Straße und Hausnummer",
+      "postalCode": "Postleitzahl (10 Ziffern)",
+      "latitude": "Breitengrad (optional)",
+      "longitude": "Längengrad (optional)",
+      "pinHint": "Wenn Sie Ihre Kartenposition kennen, tragen Sie sie ein, damit Kunden Sie leichter finden."
+    },
+    "day": {
+      "6": "Samstag",
+      "0": "Sonntag",
+      "1": "Montag",
+      "2": "Dienstag",
+      "3": "Mittwoch",
+      "4": "Donnerstag",
+      "5": "Freitag"
+    },
+    "hours": {
+      "from": "Von ({day})",
+      "to": "Bis ({day})"
+    },
+    "services": {
+      "hint": "Preise gelten pro Tier; bei mehreren Tieren wird multipliziert. Termine richten sich nach der Dauer jeder Leistung.",
+      "kind": "Art",
+      "name": "Name der Leistung",
+      "price": "Preis pro Tier (Toman)",
+      "duration": "Dauer (Minuten)",
+      "maxPets": "Max. Tiere pro Termin",
+      "add": "Leistung hinzufügen"
+    },
+    "products": {
+      "hint": "Finden Sie Ihre Produkte im opetlife-Verzeichnis und legen Sie Preis und Bestand fest. Sie erscheinen nach Freigabe des Shops und Prüfung der Produkte.",
+      "search": "Produkte suchen",
+      "searchButton": "Suchen",
+      "noResults": "Keine Produkte gefunden.",
+      "add": "Hinzufügen",
+      "picked": "Ihre Produkte",
+      "nonePicked": "Noch keine Produkte (Sie können später welche hinzufügen).",
+      "price": "Preis (Toman)",
+      "stock": "Bestand",
+      "requestTitle": "Produkt nicht gefunden?",
+      "requestName": "Produktname",
+      "requestButton": "Produkt anfragen",
+      "requestSent": "Anfrage gesendet; nach Prüfung wird es aufgenommen.",
+      "requestLater": "Produktanfragen sind nach der Freigabe im Shop-Bereich möglich."
+    },
+    "review": {
+      "body": "Prüfen Sie alles und senden Sie es zur Prüfung. Danach ist bis zum Abschluss der Prüfung keine Bearbeitung möglich.",
+      "ready": "Alles ist bereit.",
+      "submit": "Zur Prüfung senden"
+    },
+    "missing": {
+      "ADDRESS": "Adresse",
+      "CALENDAR": "Arbeitskalender",
+      "SERVICES": "Mindestens eine Leistung mit Preis",
+      "OPENING_HOURS": "Öffnungszeiten",
+      "PROFILE": "Inhaberdaten (und bestätigte Mobilnummer)",
+      "DOCUMENTS": "Erforderliche Unterlagen (Ausweis und Lizenz)",
+      "document": "Erforderliches Dokument: {kind}"
+    },
+    "submitted": {
+      "title": "Ihre Anmeldung wird geprüft",
+      "body": "Das opetlife-Team prüft Ihre Unterlagen und meldet sich. Bis dahin erscheint nichts auf der Website.",
+      "verifiedTitle": "Ihr Unternehmen ist geprüft",
+      "verifiedBody": "Ihre Leistungen sind aktiv; Ihre Produkte erscheinen nach Prüfung im Shop.",
+      "toBusiness": "Zu meinem Unternehmen"
+    },
+    "subject": {
+      "PROVIDER": "Dienstleistungen",
+      "SELLER": "Shop"
+    },
+    "lifecycle": {
+      "NOT_SUBMITTED": "Nicht gesendet",
+      "PENDING": "Wartet auf Prüfung",
+      "UNDER_REVIEW": "In Prüfung",
+      "RESUBMISSION_REQUESTED": "Änderungen angefordert",
+      "APPROVED": "Freigegeben",
+      "REJECTED": "Abgelehnt",
+      "SUSPENDED": "Gesperrt"
+    },
+    "errors": {
+      "generic": "Nicht gespeichert; bitte erneut versuchen.",
+      "PICK_AT_LEAST_ONE": "Wählen Sie mindestens eine Leistung oder einen Shop.",
+      "NAME_REQUIRED": "Geben Sie den Namen des Unternehmens ein.",
+      "CANNOT_REMOVE_STARTED_BUSINESS": "Eine begonnene Geschäftsart kann nicht entfernt werden; Sie können nur neue hinzufügen.",
+      "UNDER_REVIEW_LOCKED": "Wird geprüft und kann gerade nicht geändert werden.",
+      "VERIFIED_MOBILE_REQUIRED": "Bestätigen Sie zuerst Ihre Mobilnummer per SMS-Code.",
+      "ADDRESS_FIRST": "Speichern Sie zuerst die Adresse.",
+      "START_BEFORE_END": "Die Startzeit muss vor der Endzeit liegen.",
+      "CATALOG_PRODUCT_NOT_AVAILABLE": "Ein Produkt ist nicht mehr im Verzeichnis.",
+      "STEPS_INCOMPLETE": "Einige Schritte sind noch nicht vollständig.",
+      "VERIFICATION_REQUIRED_DOCUMENTS_MISSING": "Erforderliche Unterlagen fehlen noch.",
+      "VERIFICATION_PROFILE_REQUIRED": "Inhaberdaten sind unvollständig.",
+      "LOGO_FILE": "Das Logo muss JPG, PNG oder WebP unter 10 MB sein.",
+      "DOC_FILE": "Das Dokument muss JPG, PNG oder PDF unter 20 MB sein.",
+      "TOO_MANY_PENDING": "Zu viele Unterlagen warten auf Prüfung."
     }
   }
 }

@@ -10605,6 +10605,197 @@
       "offers": "Products & prices",
       "inventory": "Stock",
       "payouts": "Payouts"
+    },
+    "joinAsPartner": "Join as a partner"
+  },
+  "partnerOnboarding": {
+    "loadFailed": "Could not load",
+    "retry": "Retry",
+    "saveAndContinue": "Save and continue",
+    "continue": "Continue",
+    "remove": "Remove",
+    "intro": {
+      "title": "Join as a partner",
+      "body": "Run a pet service or a pet shop? Join opetlife so pet owners can find you, book you or buy from you.",
+      "needs": {
+        "kinds": "Your business type (pick several, for example vet and pet shop)",
+        "documents": "Logo, national ID card and licence or permit",
+        "address": "Postal address with province and city",
+        "services": "For services: working days, hours and the price of each service",
+        "shop": "For a shop: opening hours and your products with price and stock",
+        "review": "Send for review and identity verification"
+      },
+      "reviewNote": "Nothing shows on the site until the opetlife team has verified your documents. Identity documents are only for review and are never published.",
+      "create": "Create a partner account",
+      "signIn": "I have an account — sign in"
+    },
+    "wizard": {
+      "title": "Partner signup",
+      "reviewNote": "Each step is saved, so you can continue later. Your business appears on the site once the opetlife team approves it.",
+      "steps": "Steps"
+    },
+    "steps": {
+      "kinds": "Business type",
+      "business": "Name and logo",
+      "owner": "Owner details",
+      "documents": "Documents",
+      "address": "Address",
+      "calendar": "Working calendar",
+      "services": "Services and prices",
+      "hours": "Shop hours",
+      "products": "Products",
+      "review": "Review and submit"
+    },
+    "kinds": {
+      "hint": "Pick every service you offer. If you also run a pet shop, tick it too.",
+      "services": "Services",
+      "shopTitle": "Shop"
+    },
+    "kind": {
+      "VET_CLINIC": "Vet clinic",
+      "VETERINARIAN": "Veterinarian",
+      "GROOMER": "Grooming",
+      "BOARDING": "Boarding",
+      "SITTER": "Pet sitting",
+      "TRAINER": "Training",
+      "WALKER": "Dog walking",
+      "PET_TAXI": "Pet taxi",
+      "SHOP": "Pet shop (online or in-store)"
+    },
+    "business": {
+      "name": "Business name",
+      "description": "Short description",
+      "logo": "Logo",
+      "logoHint": "JPG, PNG or WebP up to 10 MB. The logo shows on the site after approval."
+    },
+    "owner": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "phone": "Business phone",
+      "verifyMobile": "To continue, your account's mobile number must be confirmed with an SMS code.",
+      "verifyMobileLink": "Confirm my mobile"
+    },
+    "documents": {
+      "hint": "Your national ID card and business licence (or eNamad for an online shop) are required; vets also upload their veterinary licence.",
+      "none": "No documents uploaded yet.",
+      "kind": "Document type",
+      "file": "File (JPG, PNG or PDF up to 20 MB)",
+      "private": "Documents are stored privately; only the review team sees them.",
+      "upload": "Upload"
+    },
+    "docKind": {
+      "NATIONAL_ID_CARD": "National ID card",
+      "LICENSE": "Licence / permit",
+      "BUSINESS_LICENSE": "Business licence",
+      "BUSINESS_REGISTRATION": "Company registration",
+      "OTHER": "Other",
+      "ENAMAD": "eNamad (e-trust seal)"
+    },
+    "docStatus": {
+      "PENDING": "Waiting for review",
+      "ACCEPTED": "Accepted",
+      "REJECTED": "Rejected",
+      "EXPIRED": "Expired"
+    },
+    "address": {
+      "province": "Province",
+      "city": "City",
+      "pick": "Choose",
+      "otherCity": "Other city…",
+      "line": "Street address",
+      "postalCode": "Postal code (10 digits)",
+      "latitude": "Latitude (optional)",
+      "longitude": "Longitude (optional)",
+      "pinHint": "If you know your map position, add it so customers find you more easily."
+    },
+    "day": {
+      "6": "Saturday",
+      "0": "Sunday",
+      "1": "Monday",
+      "2": "Tuesday",
+      "3": "Wednesday",
+      "4": "Thursday",
+      "5": "Friday"
+    },
+    "hours": {
+      "from": "From ({day})",
+      "to": "To ({day})"
+    },
+    "services": {
+      "hint": "Prices are per pet; for several pets the price is multiplied. Booking slots follow each service's duration.",
+      "kind": "Type",
+      "name": "Service name",
+      "price": "Price per pet (toman)",
+      "duration": "Duration (minutes)",
+      "maxPets": "Max pets per booking",
+      "add": "Add a service"
+    },
+    "products": {
+      "hint": "Find your products in the opetlife product directory and set price and stock. They show in the shop after your shop is approved and the products are reviewed.",
+      "search": "Search products",
+      "searchButton": "Search",
+      "noResults": "No products found.",
+      "add": "Add",
+      "picked": "Your products",
+      "nonePicked": "No products yet (you can add them later too).",
+      "price": "Price (toman)",
+      "stock": "Stock",
+      "requestTitle": "Can't find your product?",
+      "requestName": "Product name",
+      "requestButton": "Request this product",
+      "requestSent": "Request sent; it's added to the directory after review.",
+      "requestLater": "Product requests become available in your shop panel after approval."
+    },
+    "review": {
+      "body": "Check everything and send it for verification. After sending, you can't edit until the review is done.",
+      "ready": "Everything is ready.",
+      "submit": "Send for review"
+    },
+    "missing": {
+      "ADDRESS": "Address",
+      "CALENDAR": "Working calendar",
+      "SERVICES": "At least one service with a price",
+      "OPENING_HOURS": "Shop opening hours",
+      "PROFILE": "Owner details (and a confirmed mobile)",
+      "DOCUMENTS": "Required documents (ID card and licence)",
+      "document": "Required document: {kind}"
+    },
+    "submitted": {
+      "title": "Your application is under review",
+      "body": "The opetlife team is reviewing your documents and will let you know. Until then nothing shows on the site.",
+      "verifiedTitle": "Your business is verified",
+      "verifiedBody": "Your services are live, and your products show in the shop after review.",
+      "toBusiness": "Go to my business"
+    },
+    "subject": {
+      "PROVIDER": "Services",
+      "SELLER": "Shop"
+    },
+    "lifecycle": {
+      "NOT_SUBMITTED": "Not sent",
+      "PENDING": "Waiting for review",
+      "UNDER_REVIEW": "Under review",
+      "RESUBMISSION_REQUESTED": "Changes requested",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "SUSPENDED": "Suspended"
+    },
+    "errors": {
+      "generic": "Not saved; please try again.",
+      "PICK_AT_LEAST_ONE": "Pick at least one service or a shop.",
+      "NAME_REQUIRED": "Enter the business name.",
+      "CANNOT_REMOVE_STARTED_BUSINESS": "A business type already started can't be removed; you can only add new ones.",
+      "UNDER_REVIEW_LOCKED": "It's under review and can't be changed right now.",
+      "VERIFIED_MOBILE_REQUIRED": "First confirm your account's mobile number with an SMS code.",
+      "ADDRESS_FIRST": "Save the address first.",
+      "START_BEFORE_END": "Start time must be before end time.",
+      "CATALOG_PRODUCT_NOT_AVAILABLE": "One of the products is no longer in the directory.",
+      "STEPS_INCOMPLETE": "Some steps aren't complete yet.",
+      "VERIFICATION_REQUIRED_DOCUMENTS_MISSING": "Required documents are still missing.",
+      "VERIFICATION_PROFILE_REQUIRED": "Owner details are not complete.",
+      "LOGO_FILE": "The logo must be JPG, PNG or WebP under 10 MB.",
+      "DOC_FILE": "The document must be JPG, PNG or PDF under 20 MB.",
+      "TOO_MANY_PENDING": "Too many documents are waiting for review."
     }
   }
 }

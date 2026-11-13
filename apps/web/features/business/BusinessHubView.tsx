@@ -21,6 +21,7 @@ const time = (iso: string, lang: Lang) =>
 export function BusinessHubView() {
   const t = useTranslations("businessHub");
   const lang = useLocale() as Lang;
+  const router = useRouter();
   const [data, setData] = useState<BusinessOverviewDto | null>(null);
   const [failed, setFailed] = useState(false);
 
@@ -52,7 +53,7 @@ export function BusinessHubView() {
         ) : null}
       </header>
       {none ? (
-        <EmptyState title={t("emptyTitle")} description={t("emptyBody")} />
+        <EmptyState title={t("emptyTitle")} description={t("emptyBody")} actionLabel={t("joinAsPartner")} onAction={() => router.push(`/${lang}/partners/join`)} />
       ) : (
         <div className="business-hub__grid">
           {data.services.map((s) => (
