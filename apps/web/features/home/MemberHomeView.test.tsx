@@ -21,7 +21,8 @@ vi.mock("@/services/care-reminders.service", () => ({ careRemindersService: { li
 vi.mock("@/services/bookings.service", () => ({ bookingsService: { list: vi.fn() } }));
 vi.mock("@/services/commerce.service", () => ({ commerceService: { listOrders: vi.fn().mockResolvedValue([]) } }));
 vi.mock("@/services/travel-marketplace.service", () => ({ travelMarketService: { listBookings: vi.fn().mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 20 }) } }));
-vi.mock("@/services/households.service", () => ({ householdsService: { setActivePet: vi.fn().mockResolvedValue({ petId: "pet-2" }) } }));
+// The location nudge (#391) loads the member's households and addresses itself; these views are tested without it.
+vi.mock("@/services/households.service", () => ({ householdsService: { setActivePet: vi.fn().mockResolvedValue({ petId: "pet-2" }), listMine: vi.fn(() => new Promise(() => undefined)) } }));
 vi.mock("@/services/subscription.service", () => ({ subscriptionService: { getCurrent: vi.fn().mockRejectedValue(Object.assign(new Error("none"), { status: 404 })) } }));
 
 const PET = { id: "pet-1", name: "پشمک", species: "DOG", breed: null, birthDate: null, approximateAgeMonths: 18, photoUrl: null, lifecycleStatus: "ACTIVE" };
