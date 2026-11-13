@@ -24,6 +24,7 @@ const NOT_A_PAGE: readonly RegExp[] = [
   /^\/pet-card$/,
   /^\/partners$/,
   /^\/profile\/household\/pets(\/[^/]+)?$/,
+  /^\/profile\/wallet\/business$/,
   /^\/providers$/,
   /^\/s$/,
   /^\/services\/[^/]+\/[^/]+$/,
