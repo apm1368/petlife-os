@@ -234,7 +234,7 @@ export function PrivacyCenterView() {
             <h2 id="sharing-title">{t("اشتراک‌گذاری", "Sharing")}</h2>
             <p>{t("افرادی که الان به حیوان‌هایی که مدیریت می‌کنید دسترسی دارند، و دسترسی شما به حیوان‌های دیگران.", "People who can currently reach pets you manage, and your access to other people's pets.")}</p>
           </div>
-          <Link className="text-metadata text-brand-natural" href={`/${locale}/profile/household`}>{t("مدیریت دسترسی‌ها", "Manage access")}</Link>
+          <Link className="inline-flex min-h-11 items-center text-metadata text-brand-natural" href={`/${locale}/profile/household`}>{t("مدیریت دسترسی‌ها", "Manage access")}</Link>
         </div>
         {!sharing ? (
           <p className="text-body text-text-secondary">{t("خلاصهٔ اشتراک‌گذاری بارگذاری نشد.", "The sharing summary didn't load.")}</p>

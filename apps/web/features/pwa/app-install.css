@@ -27,5 +27,8 @@
 .opl-app__notice strong { color:var(--opl-ink, var(--text-primary)); }
 .opl-app__steps { margin:0; padding:0; list-style:none; display:grid; gap:10px; counter-reset:step; }
 .opl-app__steps li { display:flex; align-items:center; gap:12px; min-height:44px; line-height:1.7; }
-.opl-app__step-icon { flex:none; display:grid; place-items:center; width:40px; height:40px; border-radius:12px; border:1px solid var(--opl-line-2, var(--border-strong)); color:#0a84ff; background:var(--opl-paper-2, var(--surface-base)); }
+.opl-app__step-icon { flex:none; display:grid; place-items:center; width:40px; height:40px; border-radius:12px; border:1px solid var(--opl-line-2, var(--border-strong)); color:#0062CC; background:var(--opl-paper-2, var(--surface-base)); }
 .opl-app__step-icon--text { font-weight:700; font-size:.85rem; }
+/* P7: the iOS-blue step icons need 4.5:1; darker blue on light paper (5.3:1), lighter on dark (6.9:1). */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .opl-app__step-icon { color: #5AB0FF; } }
+:root[data-theme="dark"] .opl-app__step-icon { color: #5AB0FF; }

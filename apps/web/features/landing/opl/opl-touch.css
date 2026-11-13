@@ -12,19 +12,25 @@
 
 /* Every control at least 44×44 CSS px on touch (WCAG 2.5.5, Apple and Android guidance). */
 @media (pointer: coarse) {
-  :root .opl-hdr .opl-brand,
+  :root .opl-brand,
   :root .member-header__brand { min-height: 44px; }
   :root .opl-iconbtn { width: 44px; height: 44px; }
   :root .opl-lang,
   :root .opl-btn.sm,
   :root .opl-cookie-toggle,
-  :root .opl-seg button { min-height: 44px; }
+  :root .opl-seg button,
+  :root .opl-species button,
+  :root .opl-tg,
+  :root .park-footer__back,
+  :root .lp-btn--sm { min-height: 44px; }
   :root .opl-rbtn { width: 44px; height: 44px; }
   :root .disc-row__save { width: 44px; height: 44px; }
   :root .section-tabs a { display: inline-flex; align-items: center; min-height: 44px; }
   :root .opl-foot__back,
   :root .opl-foot ul a,
-  :root .opl-foot__bottom nav a { display: inline-flex; align-items: center; min-height: 44px; }
+  :root .opl-foot__bottom nav a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
+  /* Travel stay tiles (Jajiga list): "details" and "view on the source site". */
+  :root .xs-tile__actions a { display: inline-flex; align-items: center; min-height: 44px; }
   :root .opl-foot ul { gap: 0; }
   :root .opl-foot__bottom nav { flex-wrap: wrap; column-gap: 16px; row-gap: 0; }
 }

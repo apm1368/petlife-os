@@ -1301,4 +1301,6 @@ a.erp-list__row:hover { background:var(--erp-bg); }
   .language-toggle, .account-link-button, .activity-filter, .mega__foot a, .pet-context__links a, .calendar-toolbar__pet select,
   .care-filters button, .disc-sort select, .disc-filter-btn, .add-pet-segment button, .add-pet-check, .mem-views button,
   .pd-service__book, .pd-week-select select, .commerce-nav__brand { min-height: 44px; }
+  /* The switch keeps its 48×28 look; a transparent border makes the tap area 64×44. */
+  .account-switch { box-sizing: content-box; border: 8px solid transparent; background-clip: padding-box; }
 }

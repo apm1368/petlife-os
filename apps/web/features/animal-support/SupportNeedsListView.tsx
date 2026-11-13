@@ -224,10 +224,10 @@ export function SupportNeedsListView() {
       ) : null}
 
       <div className="flex flex-wrap gap-4">
-        <Link href="/animal-support/needs/mine" className="text-body text-brand-mint-strong underline">
+        <Link href={`/${locale}/animal-support/needs/mine`} className="inline-flex min-h-11 items-center text-body text-brand-mint-strong underline">
           {t("list.myListings")}
         </Link>
-        <Link href={`/${locale}/animal-support/my-help`} className="text-body text-brand-mint-strong underline">
+        <Link href={`/${locale}/animal-support/my-help`} className="inline-flex min-h-11 items-center text-body text-brand-mint-strong underline">
           {fa ? "کمک‌های من" : "My help"}
         </Link>
       </div>
