@@ -157,7 +157,7 @@ export class AdminSponsoredService {
     const before = await this.rates.overview(now);
     await this.prisma.$transaction(async (tx) => {
       const row = await tx.sponsoredCpcRate.create({ data: { rateIrr: input.rateIrr, effectiveFrom: from, reason: why, setByAdminId: admin.adminUserId } });
-      await this.audit.record({ adminUserId: admin.adminUserId, action: "sponsored.rate_set", entityType: "SponsoredCpcRate", entityId: row.id, reason: why, beforeSummary: before, afterSummary: { rateIrr: input.rateIrr, effectiveFrom: from.toISOString() }, requestId, tx });
+      await this.audit.record({ adminUserId: admin.adminUserId, action: "sponsored.rate_set", entityType: "SponsoredCpcRate", entityId: row.id, reason: why, beforeSummary: { currentIrr: before.currentIrr, next: before.next }, afterSummary: { rateIrr: input.rateIrr, effectiveFrom: from.toISOString() }, requestId, tx });
     });
     this.rates.invalidate();
     this.sponsored.clearCache();

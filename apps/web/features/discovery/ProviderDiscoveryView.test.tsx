@@ -9,6 +9,7 @@ const replace = vi.fn();
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace, push }), usePathname: () => "/fa/services/vet", useSearchParams: () => params }));
 vi.mock("next/image", () => ({ default: (props: { alt: string }) => <span data-alt={props.alt} /> }));
+vi.mock("@/services/sponsored.service", () => ({ sponsoredService: { slots: vi.fn(() => Promise.resolve([])), clickUrl: vi.fn(() => "#") } }));
 vi.mock("@/services/discovery.service", () => ({ discoveryService: { search: vi.fn(), cities: vi.fn(), favorites: vi.fn(), favorite: vi.fn(), unfavorite: vi.fn() } }));
 vi.mock("@/features/experience/CinematicPageHero", () => ({ CinematicPageHero: ({ title, children }: { title: string; children?: React.ReactNode }) => <div><h1>{title}</h1>{children}</div> }));
 

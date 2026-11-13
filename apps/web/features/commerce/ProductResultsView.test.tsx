@@ -13,6 +13,7 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(search),
 }));
 vi.mock("@/hooks/use-active-pet", () => ({ useActivePet: () => ({ activePet: { id: "pet-1", name: "Luna" } }) }));
+vi.mock("@/services/sponsored.service", () => ({ sponsoredService: { slots: vi.fn(() => Promise.resolve([])), clickUrl: vi.fn(() => "#") } }));
 vi.mock("@/services/commerce.service", () => ({ commerceService: { searchProducts: vi.fn(), listCategories: vi.fn() } }));
 
 describe("ProductResultsView", () => {

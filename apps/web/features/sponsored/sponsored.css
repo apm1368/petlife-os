@@ -1,0 +1,33 @@
+/* Sponsored slots above a list: their own block, a visible text label, never styled like the verified badge or stars. */
+.spn { display: grid; gap: 8px; margin-block-end: 16px; padding: 12px; border: 1px dashed var(--border-subtle); border-radius: 16px; background: var(--surface-elevated); }
+.spn__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+.spn-card__link { display: flex; gap: 12px; align-items: center; min-height: 72px; padding: 8px; border-radius: 12px; color: var(--text-primary); text-decoration: none; }
+.spn-card__link:hover { background: color-mix(in srgb, var(--text-primary) 5%, transparent); }
+.spn-card__link:focus-visible { outline: 3px solid var(--focus-ring, var(--brand-natural)); outline-offset: 2px; }
+.spn-card__media { flex: none; display: grid; place-items: center; width: 64px; height: 64px; overflow: hidden; border-radius: 12px; background: color-mix(in srgb, var(--text-primary) 6%, var(--surface-elevated)); color: var(--text-secondary); }
+.spn-card__media img { width: 100%; height: 100%; object-fit: cover; }
+.spn-card__body { display: grid; gap: 2px; min-width: 0; }
+/* A plain neutral text label: not green, not a badge shape, not a star. */
+.spn-card__label { justify-self: start; padding: 0 6px; border: 1px solid var(--border-strong, var(--border-subtle)); border-radius: 4px; color: var(--text-secondary); font-size: 0.72rem; font-weight: 700; line-height: 1.6; }
+.spn-card__title { overflow-wrap: anywhere; font-size: 0.95rem; }
+.spn-card__sub { color: var(--text-secondary); font-size: 0.8rem; overflow-wrap: anywhere; }
+.spn-card__price { font-weight: 700; font-size: 0.86rem; }
+.spn__why { font-size: 0.78rem; color: var(--text-secondary); }
+.spn__why summary { display: inline-flex; align-items: center; min-height: 44px; cursor: pointer; }
+.spn__why p { margin: 0 0 4px; }
+
+/* The partner's campaigns on the business wallet page. */
+.spn-panel__price { margin: 0; font-weight: 700; }
+.spn-panel__rules, .spn-panel__empty { margin: 0; color: var(--text-secondary); font-size: 0.85rem; }
+.spn-panel__notice { margin: 0; padding: 8px 12px; border-radius: 12px; background: color-mix(in srgb, var(--state-attention, #e09a1f) 14%, transparent); }
+.spn-panel__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.spn-panel__list li { display: grid; gap: 4px; padding: 12px; border: 1px solid var(--border-subtle); border-radius: 14px; }
+.spn-panel__list small { color: var(--text-secondary); }
+.spn-panel__head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; }
+.spn-panel__state { font-size: 0.8rem; font-weight: 700; }
+.spn-panel__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.spn-panel__form { display: grid; gap: 10px; }
+.spn-panel__form label { display: grid; gap: 4px; font-size: 0.85rem; }
+.spn-panel__form select, .spn-panel__form input { min-height: 44px; padding: 0 10px; border: 1px solid var(--border-subtle); border-radius: 12px; background: var(--surface-elevated); color: var(--text-primary); font: inherit; }
+.spn-panel__form small { color: var(--text-secondary); }
+.spn-panel__error { margin: 0; color: var(--state-urgent, #b3261e); }
