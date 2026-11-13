@@ -30,6 +30,12 @@ export function foldPlaceName(text: string): string {
 }
 const foldSql = (column: Prisma.Sql) => Prisma.sql`regexp_replace(translate(lower(${column}), ${FOLD_FROM}, ${FOLD_TO}), ${FOLD_STRIP}, '', 'g')`;
 
+const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
+/** The exact key an upload slot issues for this member; nothing else may be attached to a suggestion. */
+export function isOwnSuggestionPhotoKey(userId: string, key: string): boolean {
+  return new RegExp(`^place-suggestions/${userId.replace(/[^0-9a-f-]/gi, "")}/${UUID}\\.(jpg|png|webp)$`).test(key);
+}
+
 export type PlaceDuplicateHint = { placeId: string; name: string; city: string; category: string; status: string; listed: boolean; distanceMeters: number | null; sameName: boolean };
 
 function metersBetween(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
@@ -60,10 +66,13 @@ export class PlaceSuggestionService {
     return this.storage.createPlaceSuggestionPhotoUploadTarget(userId, contentType, fileSizeBytes);
   }
 
-  /** Only the member's own uploads can be attached; anything else is refused, never silently dropped. */
+  /**
+   * Only the member's own uploads can be attached, in exactly the shape the upload slot issued
+   * (place-suggestions/<userId>/<uuid>.<jpg|png|webp>) — so no dot segments or other paths; anything else is refused.
+   */
   private ownPhotos(userId: string, keys: string[] | undefined): string[] {
     const unique = [...new Set(keys ?? [])];
-    if (unique.some((k) => !k.startsWith(`place-suggestions/${userId}/`))) throw new ValidationApiException({ field: "photoObjectKeys", reason: "NOT_YOUR_UPLOAD" });
+    if (unique.some((k) => !isOwnSuggestionPhotoKey(userId, k))) throw new ValidationApiException({ field: "photoObjectKeys", reason: "NOT_YOUR_UPLOAD" });
     return unique;
   }
 
