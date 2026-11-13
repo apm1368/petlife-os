@@ -5066,7 +5066,8 @@
         "repeatDeliveries": "Herhaalleveringen",
         "orderLookup": "Bestelling opzoeken",
         "refundApprovals": "Goedkeuring van terugbetalingen",
-        "twoStep": "Inloggen in twee stappen"
+        "twoStep": "Inloggen in twee stappen",
+        "walletAdjustments": "Correctieaanvragen"
       },
       "palette": {
         "actions": "Snelle acties",
@@ -7626,7 +7627,8 @@
           "pendingMemorials": "Te beoordelen herdenkingen",
           "openPlaceReports": "Meldingen over plekken",
           "openTasks": "Openstaande taken",
-          "pendingWalletTopUps": "Opwaardeerbewijzen"
+          "pendingWalletTopUps": "Opwaardeerbewijzen",
+          "pendingWalletAdjustments": "Correcties om goed te keuren"
         }
       },
       "performance": {
@@ -10727,11 +10729,12 @@
       "audit": "Auditlog",
       "auditEmpty": "Nog niets vastgelegd.",
       "by": "door {name}",
-      "openCustomer": "Klantdossier"
+      "openCustomer": "Klantdossier",
+      "approvedBy": "goedgekeurd door {name}"
     },
     "adjust": {
-      "title": "Saldo corrigeren",
-      "hint": "Alleen om een fout te herstellen of goed te maken. Elke correctie wordt vastgelegd met je naam, de reden en het saldo ervoor en erna.",
+      "title": "Correctie aanvragen (tweede beheerder nodig)",
+      "hint": "Alleen om een fout te herstellen of goed te maken. Het saldo verandert pas als een andere beheerder met hetzelfde recht de aanvraag goedkeurt. Beide namen, de reden en het saldo ervoor en erna worden vastgelegd.",
       "direction": "Richting",
       "directions": {
         "CREDIT": "Geld toevoegen",
@@ -10754,19 +10757,21 @@
       },
       "reason": "Toelichting (blijft in het auditlog)",
       "evidence": "Ticket of referentie (optioneel)",
-      "submit": "Correctie opslaan",
-      "confirm": "“{direction}” van {amount} in “{bucket}” vastleggen? Dit wordt direct op het saldo toegepast.",
-      "confirmYes": "Ja, vastleggen",
+      "submit": "Ter goedkeuring versturen",
+      "confirm": "“{direction}” van {amount} in “{bucket}” aanvragen? Het saldo verandert pas nadat een tweede beheerder het goedkeurt.",
+      "confirmYes": "Ja, aanvraag versturen",
       "cancel": "Annuleren",
-      "saving": "Opslaan…",
-      "done": "Correctie opgeslagen.",
-      "noPermission": "Voor het corrigeren van een saldo heb je het recht “Saldi corrigeren” nodig.",
+      "saving": "Versturen…",
+      "done": "Aanvraag verstuurd. Een tweede beheerder moet hem goedkeuren voordat het saldo verandert.",
+      "noPermission": "Voor het aanvragen of goedkeuren van een correctie heb je het recht “Saldi corrigeren” nodig.",
       "errors": {
         "INSUFFICIENT_WALLET_BALANCE": "Er staat niet zoveel in dit deel van de portemonnee.",
         "reasonTooShort": "De toelichting moet minstens 5 tekens bevatten.",
         "amount": "Voer een geldig bedrag in.",
-        "generic": "De correctie is niet opgeslagen."
-      }
+        "generic": "De aanvraag is niet verstuurd.",
+        "TOO_MANY_PENDING": "Voor dit lid staan al zoveel aanvragen open als is toegestaan. Beslis eerst over een paar daarvan."
+      },
+      "confirmTitle": "Deze aanvraag versturen?"
     },
     "topUps": {
       "title": "Opwaardeerbewijzen",
@@ -10815,7 +10820,10 @@
       "wallet_debited": "Saldo verlaagd",
       "wallet_top_up_approved": "Betaalbewijs goedgekeurd",
       "wallet_top_up_rejected": "Betaalbewijs afgewezen",
-      "wallet_top_up_receipt_viewed": "Betaalbewijs bekeken"
+      "wallet_top_up_receipt_viewed": "Betaalbewijs bekeken",
+      "wallet_adjustment_requested": "Correctie aangevraagd",
+      "wallet_adjustment_approved": "Correctie goedgekeurd en geboekt",
+      "wallet_adjustment_rejected": "Correctieaanvraag afgewezen"
     },
     "entry": {
       "purpose": {
@@ -10837,6 +10845,48 @@
         "REFUND_OUTSIDE_SYSTEM": "Terugbetaling buiten een bestelling",
         "DUPLICATE_CREDIT_REVERSAL": "Dubbele bijschrijving teruggedraaid",
         "OTHER": "Andere correctie"
+      }
+    },
+    "requests": {
+      "title": "Correctieaanvragen",
+      "subtitle": "Elke saldocorrectie heeft een tweede beheerder nodig. Na goedkeuring wordt ze direct in de portemonnee geboekt; een aanvraag waarover niemand beslist, vervalt na 72 uur.",
+      "detailTitle": "Correctieaanvragen voor dit lid",
+      "empty": "Geen aanvragen.",
+      "filter": "Status",
+      "all": "Alle",
+      "status": {
+        "PENDING": "Wacht op goedkeuring",
+        "APPROVED": "Goedgekeurd en geboekt",
+        "REJECTED": "Afgewezen",
+        "EXPIRED": "Verlopen"
+      },
+      "itemLabel": "Aanvraag van {amount} door {name}",
+      "requestedBy": "Aangevraagd door {name}",
+      "decidedBy": "beslist door {name}",
+      "expires": "vervalt {date}",
+      "yours": "Je eigen aanvraag: een andere beheerder moet hem goedkeuren.",
+      "approve": "Goedkeuren",
+      "reject": "Afwijzen",
+      "approveTitle": "Deze correctie goedkeuren?",
+      "rejectTitle": "Deze aanvraag afwijzen?",
+      "summary": "“{direction}” van {amount} in “{bucket}” voor {member}.",
+      "approveWarning": "Na goedkeuring wordt de correctie direct in de portemonnee geboekt en wordt je naam als tweede beheerder vastgelegd.",
+      "rejectWarning": "Er wordt niets geboekt. De reden blijft in het auditlog.",
+      "rejectReason": "Reden van afwijzing (verplicht)",
+      "confirmApprove": "Goedkeuren en boeken",
+      "confirmReject": "Aanvraag afwijzen",
+      "cancel": "Annuleren",
+      "approved": "Goedgekeurd; de correctie is in de portemonnee geboekt.",
+      "rejected": "Afgewezen; er is niets geboekt.",
+      "noPermission": "Voor een beslissing over een aanvraag heb je het recht “Saldi corrigeren” nodig.",
+      "errors": {
+        "WALLET_ADJUSTMENT_SELF_APPROVAL": "Je hebt deze correctie zelf aangevraagd, dus een andere beheerder moet hem goedkeuren.",
+        "WALLET_ADJUSTMENT_REQUEST_EXPIRED": "Deze aanvraag is verlopen. Vraag een nieuwe aan als het nog nodig is.",
+        "INVALID_WALLET_ADJUSTMENT_REQUEST_TRANSITION": "Over deze aanvraag is al beslist. Laad de pagina opnieuw om de status te zien.",
+        "WALLET_ADJUSTMENT_REQUEST_NOT_FOUND": "Deze aanvraag bestaat niet meer.",
+        "INSUFFICIENT_WALLET_BALANCE": "Er staat niet meer zoveel in dit deel van de portemonnee, dus de afschrijving kan niet worden geboekt.",
+        "reasonTooShort": "De reden moet minstens 5 tekens bevatten.",
+        "generic": "Dat is niet gelukt. Probeer het opnieuw."
       }
     }
   },

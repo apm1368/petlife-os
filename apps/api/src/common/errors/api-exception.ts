@@ -824,6 +824,33 @@ export class AdminRefundSelfApprovalException extends ApiException {
   }
 }
 
+export class WalletAdjustmentRequestNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("WALLET_ADJUSTMENT_REQUEST_NOT_FOUND", "Wallet adjustment request not found.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** FE-16: a wallet adjustment request that is no longer PENDING (already approved, rejected or expired) can't be decided again. */
+export class InvalidWalletAdjustmentRequestTransitionException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("INVALID_WALLET_ADJUSTMENT_REQUEST_TRANSITION", "This wallet adjustment request has already been decided.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** FE-16: two-person control for wallet corrections — mirrors AdminRefundSelfApprovalException; never bypassable, including by a SUPER_ADMIN. */
+export class WalletAdjustmentSelfApprovalException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("WALLET_ADJUSTMENT_SELF_APPROVAL", "A wallet adjustment must be approved by a different admin than the requester.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** FE-16: a pending wallet adjustment request lapses after its window and can no longer be approved. */
+export class WalletAdjustmentRequestExpiredException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("WALLET_ADJUSTMENT_REQUEST_EXPIRED", "This wallet adjustment request has expired. Ask for a new one.", HttpStatus.CONFLICT, details);
+  }
+}
+
 /** Thrown when a request tries to jump straight to EXECUTED for an amount at/above ADMIN_REFUND_APPROVAL_THRESHOLD_IRR without a prior APPROVED transition by a different admin. */
 export class AdminRefundApprovalRequiredException extends ApiException {
   constructor(details?: Record<string, unknown>) {

@@ -73,6 +73,7 @@ const QUEUES: { key: QueueKey; href: string; permission: string | string[]; rout
   { key: "pendingRefundApprovals", href: "/admin/transactions/refund-approvals", permission: "finance.view", icon: ArrowLeftRight, tone: "attention" },
   { key: "pendingRefundRequests", href: "/admin/commerce/refund-requests", permission: "commerce.view", icon: Receipt, tone: "attention" },
   { key: "pendingWalletTopUps", href: "/admin/wallets/top-ups", permission: "wallet.view", icon: Wallet, tone: "attention" },
+  { key: "pendingWalletAdjustments", href: "/admin/wallets/adjustments", permission: "wallet.view", icon: Wallet, tone: "attention" },
   { key: "pendingDeletionRequests", href: "/admin/privacy/deletion-requests", permission: "admin.manage", icon: KeyRound, tone: "attention" },
   { key: "openOwnershipDisputes", href: "/admin/ownership-transfers", permission: "customer.view", icon: Gavel, tone: "attention" },
   { key: "openProviderNoShows", href: "/admin/services?noShowParty=PROVIDER", permission: "services.view", icon: Stethoscope, tone: "attention" },

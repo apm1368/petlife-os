@@ -5066,7 +5066,8 @@
         "repeatDeliveries": "التوصيل المتكرر",
         "orderLookup": "البحث عن طلب",
         "refundApprovals": "موافقات الاسترداد",
-        "twoStep": "تسجيل الدخول بخطوتين"
+        "twoStep": "تسجيل الدخول بخطوتين",
+        "walletAdjustments": "طلبات التعديل"
       },
       "palette": {
         "actions": "إجراءات سريعة",
@@ -7626,7 +7627,8 @@
           "pendingMemorials": "صفحات تأبين للمراجعة",
           "openPlaceReports": "بلاغات الأماكن",
           "openTasks": "المهام المفتوحة",
-          "pendingWalletTopUps": "إيصالات شحن الرصيد"
+          "pendingWalletTopUps": "إيصالات شحن الرصيد",
+          "pendingWalletAdjustments": "تعديلات بانتظار الموافقة"
         }
       },
       "performance": {
@@ -10727,11 +10729,12 @@
       "audit": "سجل التدقيق",
       "auditEmpty": "لم يُسجَّل شيء بعد.",
       "by": "بواسطة {name}",
-      "openCustomer": "ملف العميل"
+      "openCustomer": "ملف العميل",
+      "approvedBy": "وافق عليه {name}"
     },
     "adjust": {
-      "title": "تعديل الرصيد",
-      "hint": "فقط لتصحيح خطأ أو التعويض عنه. يُسجَّل كل تعديل مع اسمك والسبب والرصيد قبله وبعده.",
+      "title": "طلب تعديل (يحتاج إلى مسؤول ثانٍ)",
+      "hint": "فقط لتصحيح خطأ أو التعويض عنه. لا يتغير الرصيد حتى يوافق مسؤول آخر لديه الصلاحية نفسها على الطلب. يُسجَّل الاسمان والسبب والرصيد قبله وبعده.",
       "direction": "نوع التعديل",
       "directions": {
         "CREDIT": "إضافة مبلغ",
@@ -10754,19 +10757,21 @@
       },
       "reason": "الشرح (يُحفظ في سجل التدقيق)",
       "evidence": "رقم التذكرة أو المرجع (اختياري)",
-      "submit": "حفظ التعديل",
-      "confirm": "هل تريد تسجيل «{direction}» بمبلغ {amount} في «{bucket}»؟ يُطبَّق ذلك على الرصيد فورًا.",
-      "confirmYes": "نعم، سجّله",
+      "submit": "إرسال للموافقة",
+      "confirm": "هل تريد طلب «{direction}» بمبلغ {amount} في «{bucket}»؟ لا يتغير الرصيد إلا بعد موافقة مسؤول ثانٍ.",
+      "confirmYes": "نعم، أرسل الطلب",
       "cancel": "إلغاء",
-      "saving": "جارٍ الحفظ…",
-      "done": "تم حفظ التعديل.",
-      "noPermission": "يتطلب تعديل الرصيد صلاحية «تعديل الأرصدة».",
+      "saving": "جارٍ الإرسال…",
+      "done": "أُرسل الطلب. يجب أن يوافق عليه مسؤول ثانٍ قبل أن يتغير الرصيد.",
+      "noPermission": "يتطلب طلب التعديل أو الموافقة عليه صلاحية «تعديل الأرصدة».",
       "errors": {
         "INSUFFICIENT_WALLET_BALANCE": "لا يحتوي هذا القسم من المحفظة على هذا المبلغ.",
         "reasonTooShort": "يجب أن يتكون الشرح من 5 أحرف على الأقل.",
         "amount": "أدخل مبلغًا صالحًا.",
-        "generic": "لم يتم حفظ التعديل."
-      }
+        "generic": "لم يُرسل الطلب.",
+        "TOO_MANY_PENDING": "لدى هذا العضو الحد الأقصى المسموح به من الطلبات المعلّقة. قرّر في بعضها أولًا."
+      },
+      "confirmTitle": "هل تريد إرسال هذا الطلب؟"
     },
     "topUps": {
       "title": "إيصالات شحن الرصيد",
@@ -10815,7 +10820,10 @@
       "wallet_debited": "خفض الرصيد",
       "wallet_top_up_approved": "تمت الموافقة على الإيصال",
       "wallet_top_up_rejected": "رُفض الإيصال",
-      "wallet_top_up_receipt_viewed": "عُرض الإيصال"
+      "wallet_top_up_receipt_viewed": "عُرض الإيصال",
+      "wallet_adjustment_requested": "طُلب تعديل",
+      "wallet_adjustment_approved": "تمت الموافقة على التعديل وتسجيله",
+      "wallet_adjustment_rejected": "رُفض طلب التعديل"
     },
     "entry": {
       "purpose": {
@@ -10837,6 +10845,48 @@
         "REFUND_OUTSIDE_SYSTEM": "استرداد خارج إطار طلب",
         "DUPLICATE_CREDIT_REVERSAL": "عكس إيداع مكرر",
         "OTHER": "تعديل آخر"
+      }
+    },
+    "requests": {
+      "title": "طلبات التعديل",
+      "subtitle": "يحتاج كل تعديل للرصيد إلى مسؤول ثانٍ. عند الموافقة يُسجَّل في المحفظة فورًا، والطلب الذي لا يُبتّ فيه ينتهي بعد 72 ساعة.",
+      "detailTitle": "طلبات التعديل لهذا العضو",
+      "empty": "لا توجد طلبات.",
+      "filter": "الحالة",
+      "all": "الكل",
+      "status": {
+        "PENDING": "بانتظار الموافقة",
+        "APPROVED": "تمت الموافقة والتسجيل",
+        "REJECTED": "مرفوض",
+        "EXPIRED": "منتهٍ"
+      },
+      "itemLabel": "طلب بمبلغ {amount} من {name}",
+      "requestedBy": "طلبه {name}",
+      "decidedBy": "بتّ فيه {name}",
+      "expires": "ينتهي {date}",
+      "yours": "هذا طلبك: يجب أن يوافق عليه مسؤول آخر.",
+      "approve": "موافقة",
+      "reject": "رفض",
+      "approveTitle": "هل توافق على هذا التعديل؟",
+      "rejectTitle": "هل ترفض هذا الطلب؟",
+      "summary": "«{direction}» بمبلغ {amount} في «{bucket}» للعضو {member}.",
+      "approveWarning": "عند الموافقة يُسجَّل التعديل في المحفظة فورًا ويُسجَّل اسمك بوصفك المسؤول الثاني.",
+      "rejectWarning": "لن يُسجَّل شيء. يبقى السبب في سجل التدقيق.",
+      "rejectReason": "سبب الرفض (إلزامي)",
+      "confirmApprove": "موافقة وتسجيل",
+      "confirmReject": "رفض الطلب",
+      "cancel": "إلغاء",
+      "approved": "تمت الموافقة، وسُجِّل التعديل في المحفظة.",
+      "rejected": "تم الرفض، ولم يُسجَّل شيء.",
+      "noPermission": "يتطلب البتّ في الطلب صلاحية «تعديل الأرصدة».",
+      "errors": {
+        "WALLET_ADJUSTMENT_SELF_APPROVAL": "أنت من طلب هذا التعديل، لذا يجب أن يوافق عليه مسؤول آخر.",
+        "WALLET_ADJUSTMENT_REQUEST_EXPIRED": "انتهت صلاحية هذا الطلب. قدّم طلبًا جديدًا إن كان لا يزال لازمًا.",
+        "INVALID_WALLET_ADJUSTMENT_REQUEST_TRANSITION": "سبق البتّ في هذا الطلب. أعد تحميل الصفحة لرؤية حالته.",
+        "WALLET_ADJUSTMENT_REQUEST_NOT_FOUND": "لم يعد هذا الطلب موجودًا.",
+        "INSUFFICIENT_WALLET_BALANCE": "لم يعد هذا القسم من المحفظة يحتوي على هذا المبلغ، لذا لا يمكن تسجيل الخصم.",
+        "reasonTooShort": "يجب أن يتكون السبب من 5 أحرف على الأقل.",
+        "generic": "لم تنجح العملية. حاول مرة أخرى."
       }
     }
   },
