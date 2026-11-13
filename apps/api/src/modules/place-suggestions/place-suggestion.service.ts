@@ -18,7 +18,8 @@ export const DUPLICATE_RADIUS_METERS = 250;
  */
 const FOLD_FROM = "يكةۀ۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩";
 const FOLD_TO = "یکهه01234567890123456789";
-const FOLD_STRIP = "[\\s\u200c\u200d._,،'\"()-]";
+// Alternation, not one character class: ZWNJ/ZWJ inside a class read as a joined sequence (no-misleading-character-class).
+const FOLD_STRIP = "(?:\\s|\u200c|\u200d|[._,،'\"()-])";
 export function foldPlaceName(text: string): string {
   const lower = text.toLowerCase();
   let out = "";
