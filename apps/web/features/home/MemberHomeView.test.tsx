@@ -30,6 +30,8 @@ function overview(extra: Record<string, unknown> = {}) {
   return { pet: PET, householdName: null, attention: [], upcoming: [], recentHealth: [], recentActivity: [], recentMemory: null, ...extra } as never;
 }
 
+// The membership offers card loads its own data; these views are tested without it.
+vi.mock("@/services/membership-offers.service", () => ({ membershipOffersService: { forHousehold: vi.fn(() => new Promise(() => undefined)), forAccount: vi.fn(() => new Promise(() => undefined)), startFreeWeek: vi.fn(), checkGift: vi.fn() } }));
 describe("MemberHomeView", () => {
   beforeEach(() => {
     vi.mocked(petsService.getOverview).mockReset();

@@ -395,9 +395,19 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "اشتراک شما فعال شد", body: "اشتراک {{planName}} برای خانواده شما فعال شد." },
     en: { title: "Your subscription is active", body: "Your household is now on the {{planName}} plan." },
   },
+  // The one subscription notice with an smsBody (owner request 2026-11-13): the trial reminder may also go by SMS, but
+  // TrialEndingNotifier only asks for SMS when the SMS channel is live; otherwise it is in-app (and push) only.
   "subscription.trial_ending": {
-    fa: { title: "دوره‌ی آزمایشی رو به پایان است", body: "دوره‌ی آزمایشی {{planName}} تا {{days}} روز دیگر تمام می‌شود." },
-    en: { title: "Your trial is ending", body: "Your {{planName}} trial ends in {{days}} day(s)." },
+    fa: {
+      title: "دوره‌ی آزمایشی رو به پایان است",
+      body: "دوره‌ی آزمایشی {{planName}} تا {{days}} روز دیگر تمام می‌شود. پس از آن به طرح رایگان برمی‌گردید و هیچ مبلغی خودکار برداشت نمی‌شود.",
+      smsBody: "اپت لایف: دوره‌ی آزمایشی رایگان شما تا {{days}} روز دیگر تمام می‌شود. هیچ مبلغی خودکار برداشت نمی‌شود.",
+    },
+    en: {
+      title: "Your trial is ending",
+      body: "Your {{planName}} trial ends in {{days}} day(s). After that you return to the free plan; nothing is charged automatically.",
+      smsBody: "opetlife: your free trial ends in {{days}} day(s). Nothing is charged automatically.",
+    },
   },
   "subscription.trial_started": {
     fa: { title: "دوره آزمایشی شما شروع شد", body: "دوره آزمایشی {{planName}} برای خانواده شما فعال شد." },

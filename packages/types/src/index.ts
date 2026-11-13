@@ -4348,6 +4348,7 @@ export enum SubscriptionChangeType {
   ADMIN_CANCELLED = "ADMIN_CANCELLED",
   ENTITLEMENT_OVERRIDE_GRANTED = "ENTITLEMENT_OVERRIDE_GRANTED",
   ENTITLEMENT_OVERRIDE_REVOKED = "ENTITLEMENT_OVERRIDE_REVOKED",
+  TRIAL_ENDED_EARLY = "TRIAL_ENDED_EARLY",
 }
 
 export enum SubscriptionBillingReason {
@@ -4424,13 +4425,56 @@ export interface SubscriptionBillingAttemptDto {
   reason: SubscriptionBillingReason;
   attemptNumber: number;
   status: SubscriptionBillingAttemptStatus;
+  /** What was charged: the list price minus `discountAmount`. */
   amount: number;
+  /** First-purchase gift taken off the list price; 0 when none. */
+  discountAmount: number;
   currency: string;
   failureCode: string | null;
   failureReason: string | null;
   paymentIntentId: string | null;
   createdAt: string;
   completedAt: string | null;
+}
+
+/**
+ * Membership offers (owner request 2026-11-13). The free week: one trial per account, household and verified phone,
+ * no card, nothing charged afterwards. AVAILABLE = can start now; ACTIVE = running (see trialEndsAt); USED = this
+ * account or household already had its trial; ALREADY_PAID = only for members who never paid; PHONE_REQUIRED = the
+ * admin requires a verified phone; UNAVAILABLE = switched off or not offered right now.
+ */
+export type MembershipFreeWeekStatus = "AVAILABLE" | "ACTIVE" | "USED" | "ALREADY_PAID" | "PHONE_REQUIRED" | "UNAVAILABLE";
+
+export interface MembershipFreeWeekOfferDto {
+  status: MembershipFreeWeekStatus;
+  /** Trial length in days (admin setting). */
+  days: number;
+  /** This viewer can start it now with one click (an owner of this household). */
+  canStart: boolean;
+  /** The account or household already had (or has) its one trial. */
+  trialUsed: boolean;
+  /** When the running trial ends (status ACTIVE); null otherwise. */
+  trialEndsAt: string | null;
+  plan: SubscriptionPlanRefDto | null;
+}
+
+/** The first-purchase gift, shown only to someone who can still use it. */
+export interface MembershipGiftOfferDto {
+  code: string;
+  percentOff: number;
+  /** Last valid day (YYYY-MM-DD, Tehran), or null for no expiry. */
+  expiresOn: string | null;
+}
+
+export interface MembershipOffersDto {
+  freeWeek: MembershipFreeWeekOfferDto;
+  firstPurchaseGift: MembershipGiftOfferDto | null;
+}
+
+export interface StartFreeWeekResultDto {
+  /** false when the household's trial was already running: the same trial is returned, never a second one. */
+  started: boolean;
+  subscription: SubscriptionDto;
 }
 
 export interface SubscriptionChangeDto {

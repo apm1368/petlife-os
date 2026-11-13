@@ -2383,7 +2383,58 @@
     "cancelKeeps2": "You can resume before {date} and nothing changes.",
     "cancelConfirm": "Cancel membership",
     "trialNote": "No payment is taken during the trial.",
-    "planContentEnglish": "Plan names and descriptions are currently available only in English; the original text is shown."
+    "planContentEnglish": "Plan names and descriptions are currently available only in English; the original text is shown.",
+    "offers": {
+      "region": "Membership offers",
+      "freeWeek": {
+        "eyebrow": "Free trial",
+        "title": "Try {plan} free for {days, number} days",
+        "titleNoPlan": "Try full membership free for {days, number} days",
+        "points": {
+          "noCard": "No card or payment needed to start.",
+          "noCharge": "Nothing is charged when it ends: you simply go back to the free plan.",
+          "once": "One free trial per account, household and phone number.",
+          "reminder": "We'll remind you 2 days before it ends. You can end it early at any time."
+        },
+        "start": "Start my free week",
+        "activeTitle": "Your free trial is on",
+        "activeUntil": "It ends on {date}.",
+        "phoneRequired": "Verify your phone number to start the free trial.",
+        "verifyPhone": "Verify phone number",
+        "withFirstPet": "It starts automatically when you add your first pet.",
+        "ownerOnly": "Only a household owner can start it.",
+        "notEligible": "This account or household has already used its free trial.",
+        "failed": "The free trial couldn't be started. Please try again."
+      },
+      "gift": {
+        "eyebrow": "First-purchase gift",
+        "title": "{percent, number}% off your first paid membership",
+        "codeLabel": "Your gift code",
+        "copy": "Copy code",
+        "copied": "Copied",
+        "apply": "Apply at checkout",
+        "expires": "Valid until {date}.",
+        "terms": "For your first paid purchase only, once per account and household. It also works after a free trial, doesn't combine with other discounts and can't be exchanged for cash or wallet credit."
+      },
+      "checkout": {
+        "label": "Gift code",
+        "apply": "Apply",
+        "remove": "Remove",
+        "applied": "Gift applied: {percent, number}% off this first payment.",
+        "withGift": "with your gift",
+        "notApplicable": "This code can't be used for this purchase.",
+        "rateLimited": "Too many tries. Please wait a minute and try again.",
+        "renewalNote": "The gift applies to this first payment only; later renewals are at the regular price."
+      }
+    },
+    "endTrial": {
+      "action": "End trial now",
+      "title": "End the free trial now",
+      "consequence1": "Trial features stop right away and you go back to the free plan.",
+      "consequence2": "The trial still counts as used and can't be started again.",
+      "keeps": "Nothing was charged and nothing will be. Everything you recorded stays yours.",
+      "confirm": "End trial now"
+    }
   },
   "pets": {
     "myPets": "My Pets",
@@ -8007,7 +8058,8 @@
         "EXPIRED": "Expired",
         "ADMIN_CANCELLED": "Cancelled by administrator",
         "ENTITLEMENT_OVERRIDE_GRANTED": "Entitlement override granted",
-        "ENTITLEMENT_OVERRIDE_REVOKED": "Entitlement override revoked"
+        "ENTITLEMENT_OVERRIDE_REVOKED": "Entitlement override revoked",
+        "TRIAL_ENDED_EARLY": "Trial ended early"
       }
     },
     "adminSearch": {
@@ -9866,7 +9918,14 @@
       "privacy_exportsPerDay": "Daily data-export request limit",
       "approvals_mode_serviceBookings": "Care-service bookings: approval mode",
       "approvals_mode_stayBookings": "Stay bookings: approval mode",
-      "approvals_mode_shopOrders": "Shop orders: approval mode"
+      "approvals_mode_shopOrders": "Shop orders: approval mode",
+      "membership_freeWeek_enabled": "Free trial on",
+      "membership_freeWeek_days": "Free trial length",
+      "membership_freeWeek_requireVerifiedPhone": "Free trial needs a verified phone",
+      "membership_firstPurchaseGift_enabled": "First-purchase gift on",
+      "membership_firstPurchaseGift_code": "First-purchase gift code",
+      "membership_firstPurchaseGift_percentOff": "First-purchase gift discount",
+      "membership_firstPurchaseGift_expiresOn": "First-purchase gift last day"
     },
     "statuses": {
       "PENDING": "Pending approval; not applied",
@@ -9879,7 +9938,9 @@
       "toman": "Toman",
       "seconds": "seconds",
       "hours": "hours",
-      "perDay": "per day"
+      "perDay": "per day",
+      "days": "days",
+      "percent": "%"
     },
     "options": {
       "PARTNER_CHOICE": "Each partner's own choice",
@@ -9887,7 +9948,9 @@
       "NEEDS_APPROVAL": "Needs approval"
     },
     "choiceValue": "New value",
-    "approvalsNote": "Requests and held orders go to the task list for follow-up. A business's own setting on its profile page wins over this."
+    "approvalsNote": "Requests and held orders go to the task list for follow-up. A business's own setting on its profile page wins over this.",
+    "textValue": "Value",
+    "membershipNote": "Membership offers: changes apply to new trials and purchases only. The gift code is 4 to 24 Latin letters, digits or dashes; the last day is YYYY-MM-DD (empty = no expiry)."
   },
   "adminFeatureFlags": {
     "title": "Feature flags",

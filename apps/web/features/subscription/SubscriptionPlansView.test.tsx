@@ -61,6 +61,8 @@ const FREE_SUB: SubscriptionDto = {
   updatedAt: "2026-01-01T00:00:00.000Z",
 };
 
+// The membership offers card loads its own data; these views are tested without it.
+vi.mock("@/services/membership-offers.service", () => ({ membershipOffersService: { forHousehold: vi.fn(() => new Promise(() => undefined)), forAccount: vi.fn(() => new Promise(() => undefined)), startFreeWeek: vi.fn(), checkGift: vi.fn() } }));
 describe("SubscriptionPlansView", () => {
   beforeEach(() => {
     testState.householdId = "household-1";

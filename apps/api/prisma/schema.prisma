@@ -6284,6 +6284,8 @@ enum SubscriptionChangeType {
   ADMIN_CANCELLED
   ENTITLEMENT_OVERRIDE_GRANTED
   ENTITLEMENT_OVERRIDE_REVOKED
+  /// The member ended their trial before its end date: access ends at once and the trial still counts as used.
+  TRIAL_ENDED_EARLY
 }
 
 /// Why a SubscriptionBillingAttempt was made — never inferred from context,
@@ -6576,14 +6578,50 @@ model SubscriptionBillingAttempt {
   failureCode   String?
   failureReason String?
 
-  amount   Int
-  currency String @default("IRR")
+  /// What was charged: the list price minus `discountAmount`.
+  amount         Int
+  currency       String @default("IRR")
+  /// First-purchase gift taken off the list price (0 = none); see SubscriptionGiftRedemption.
+  discountAmount Int    @default(0)
 
   createdAt   DateTime  @default(now())
   completedAt DateTime?
 
   @@index([subscriptionId, createdAt])
   @@map("subscription_billing_attempts")
+}
+
+/// First-purchase gift (owner request 2026-11-13): one row per redeemed gift, the audit trail of every discounted
+/// first membership purchase (code, percent and amounts frozen at purchase). Unique per household and per account,
+/// so the gift is single-use on both, enforced by the database. Plain ids without foreign keys on purpose: the
+/// record must outlive a deleted household or account, or deleting one would hand the gift out again.
+model SubscriptionGiftRedemption {
+  id               String   @id @default(uuid()) @db.Uuid
+  householdId      String   @unique @db.Uuid
+  userId           String   @unique @db.Uuid
+  subscriptionId   String   @db.Uuid
+  billingAttemptId String   @unique @db.Uuid
+  code             String
+  percentOff       Int
+  listAmount       Int
+  discountAmount   Int
+  chargedAmount    Int
+  currency         String   @default("IRR")
+  createdAt        DateTime @default(now())
+
+  @@map("subscription_gift_redemptions")
+}
+
+/// One trial per verified phone (owner request 2026-11-13): a trial started by an account with a verified phone
+/// claims that phone for good, so a new account on the same number gets no second trial. Stores only a keyed hash
+/// (HMAC-SHA256 with the server secret) of the E.164 number, never the number, and survives account deletion.
+model SubscriptionTrialPhoneClaim {
+  phoneHash   String   @id
+  userId      String?  @db.Uuid
+  householdId String?  @db.Uuid
+  createdAt   DateTime @default(now())
+
+  @@map("subscription_trial_phone_claims")
 }
 
 /// The append-only "what happened to this subscription" narrative — see the
