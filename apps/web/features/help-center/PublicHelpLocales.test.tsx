@@ -124,10 +124,11 @@ describe.each(["fa", "en", "de", "es"] as const)("public help/legal/status whole
     expect(await screen.findByText(copy.feedbackFailure)).toBeTruthy();
   });
 
-  it("localizes all ten unpublished legal labels without creating policy text", async () => {
+  it("localizes all ten legal labels; only Terms and Privacy (built-in) show as published", async () => {
     vi.mocked(helpCenterService.legalIndex).mockResolvedValue([]);
     const index = renderWithIntl(<LegalIndexView />, locale);
-    expect(await screen.findAllByText(copy.unpublished)).toHaveLength(10);
+    expect(await screen.findAllByText(copy.unpublished)).toHaveLength(8);
+    expect(screen.getAllByText(copy.published)).toHaveLength(2);
     for (const title of Object.values(copy.legalTitles)) expect(screen.getByText(title)).toBeTruthy();
     index.unmount();
     vi.mocked(helpCenterService.legalDocument).mockResolvedValue({ kind: "PRIVACY_POLICY", locale: "en", available: false, title: null, body: null, version: null, effectiveAt: null });
