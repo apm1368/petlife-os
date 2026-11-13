@@ -8,7 +8,7 @@ export interface PlatformSetting {
   type: "integer" | "boolean" | "localizedText" | "text" | "url" | "email" | "enum";
   scope: "PUBLIC" | "INTERNAL";
   highImpact: boolean;
-  constraints: { min: number | null; max: number | null; maxLength: number | null; options?: string[] | null };
+  constraints: { min: number | null; max: number | null; maxLength: number | null; options?: string[] | null; allowedHosts?: string[] | null };
   description: string;
   value: SettingValue;
   defaultValue: SettingValue;

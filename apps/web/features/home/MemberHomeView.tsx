@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { OrderSummaryDto, PetOverviewDto, SubscriptionDto, TravelBookingDto } from "@petlife/types";
 import { Avatar, CalendarDays, ChevronLeft, ChevronRight, HeartPulse, Images, MapPin, PackageCheck, Plane, Plus, Scissors, ShoppingBag, Skeleton, Sparkles, StatusLabel, Stethoscope, Users } from "@petlife/ui";
 import { petsService } from "@/services/pets.service";
@@ -25,6 +25,7 @@ import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
 import type { RouteLocale } from "@/lib/i18n/config";
 
 import { eventTitle, eventSourceLabel, formatOverviewDate, mergeCareIntoOverview } from "@/features/pets/overview-labels";
+import { SocialLinks } from "@/features/site-settings/SiteContact";
 import "./member-home.css";
 import { LocationNudge } from "@/features/maps/LocationNudge";
 
@@ -585,7 +586,10 @@ export function MemberHomeView() {
 
 function DashboardExplore({ locale }: { locale: RouteLocale }) {
   const c = dashboardCopy[locale];
-  return <nav className="member-home__explore" aria-label={c.explore}>
+  const site = useTranslations("siteSettings");
+  // Owner (2026-11-13): the admin's social profiles on the member dashboard too; nothing shows until one is set.
+  return <>
+    <nav className="member-home__explore" aria-label={c.explore}>
         <h2>{c.explore}</h2>
         <div>
           <Link href={`/${locale}/services`}><Scissors size={18} aria-hidden="true" />{c.services}</Link>
@@ -594,5 +598,7 @@ function DashboardExplore({ locale }: { locale: RouteLocale }) {
           <Link href={`/${locale}/travel`}><MapPin size={18} aria-hidden="true" />{c.stays}</Link>
           <Link href={`/${locale}/community`}><Users size={18} aria-hidden="true" />{c.community}</Link>
         </div>
-      </nav>;
+      </nav>
+    <SocialLinks title={site("followUs")} className="site-social--member" />
+  </>;
 }

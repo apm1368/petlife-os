@@ -21,6 +21,11 @@ export interface SettingDefinition {
   options?: readonly string[];
   /** For "text": an optional pattern the trimmed value must match. */
   pattern?: RegExp;
+  /**
+   * For "url": the only hosts the link may point at (each also accepted with a leading "www."). Set on social
+   * profiles so a settings change can never turn a footer icon into a link to somewhere else.
+   */
+  allowedHosts?: readonly string[];
   /** The value used while no override is stored — an env value where one already existed, so behaviour is unchanged. */
   fallback: (env: (k: keyof AppEnv) => unknown) => unknown;
   description: string;
@@ -30,9 +35,25 @@ export interface SettingDefinition {
 const publicText = (key: string, category: SettingCategory, maxLength: number, description: string): SettingDefinition => ({
   key, category, type: "localizedText", scope: "PUBLIC", highImpact: false, maxLength, fallback: () => null, description,
 });
-const publicUrl = (key: string, description: string): SettingDefinition => ({
-  key, category: "social", type: "url", scope: "PUBLIC", highImpact: false, maxLength: 300, fallback: () => null, description,
+const socialUrl = (key: string, allowedHosts: readonly string[], description: string): SettingDefinition => ({
+  key, category: "social", type: "url", scope: "PUBLIC", highImpact: false, maxLength: 300, allowedHosts, fallback: () => null, description,
 });
+/** Owner, 2026-11-13: each network has its link and its own on/off switch; on by default, so a filled link shows. */
+const socialSwitch = (network: string, label: string): SettingDefinition => ({
+  key: `social.${network}Enabled`, category: "social", type: "boolean", scope: "PUBLIC", highImpact: false, fallback: () => true, description: `Show the ${label} link (when one is set).`,
+});
+
+/** Social networks in footer order, with the hosts each link may use. */
+export const SOCIAL_NETWORKS = [
+  { network: "instagram", label: "Instagram", hosts: ["instagram.com"] },
+  { network: "telegram", label: "Telegram", hosts: ["t.me"] },
+  { network: "whatsapp", label: "WhatsApp", hosts: ["wa.me"] },
+  { network: "bale", label: "Bale", hosts: ["ble.ir"] },
+  { network: "x", label: "X (Twitter)", hosts: ["x.com", "twitter.com"] },
+  { network: "linkedin", label: "LinkedIn", hosts: ["linkedin.com"] },
+  { network: "youtube", label: "YouTube", hosts: ["youtube.com", "m.youtube.com", "youtu.be"] },
+  { network: "aparat", label: "Aparat", hosts: ["aparat.com"] },
+] as const;
 const feature = (key: string, description: string): SettingDefinition => ({
   key, category: "features", type: "boolean", scope: "PUBLIC", highImpact: false, fallback: () => true, description,
 });
@@ -49,13 +70,16 @@ const SITE_SETTINGS: SettingDefinition[] = [
   { key: "site.contactPhone", category: "site", type: "text", scope: "PUBLIC", highImpact: false, maxLength: 30, pattern: /^[+0-9۰-۹\s()-]{5,30}$/, fallback: () => null, description: "Public support phone number." },
   publicText("site.contactAddress", "site", 240, "Postal address shown on the contact page."),
   publicText("site.workingHours", "site", 160, "Support hours shown next to the phone number."),
-  publicUrl("social.instagram", "Instagram page URL."),
-  publicUrl("social.telegram", "Telegram channel URL."),
-  publicUrl("social.whatsapp", "WhatsApp contact URL."),
-  publicUrl("social.x", "X (Twitter) profile URL."),
-  publicUrl("social.linkedin", "LinkedIn page URL."),
-  publicUrl("social.youtube", "YouTube channel URL."),
-  publicUrl("social.aparat", "Aparat channel URL."),
+  ...SOCIAL_NETWORKS.flatMap(({ network, label, hosts }) => [
+    socialUrl(`social.${network}`, hosts, `${label} page URL (https, ${hosts.join(" / ")} only).`),
+    socialSwitch(network, label),
+  ]),
+  // eNamad trust seal (owner, 2026-11-13): only the badge id and code are stored — never pasted HTML or script. The
+  // web builds the standard trustseal.enamad.ir link and image from these two values, and shows nothing until all
+  // three are set.
+  { key: "trust.enamadEnabled", category: "site", type: "boolean", scope: "PUBLIC", highImpact: false, fallback: () => false, description: "Show the eNamad trust seal in the footer (needs the id and code)." },
+  { key: "trust.enamadId", category: "site", type: "text", scope: "PUBLIC", highImpact: false, maxLength: 12, pattern: /^\d{3,12}$/, fallback: () => null, description: "eNamad badge id (the digits after id= in the eNamad code)." },
+  { key: "trust.enamadCode", category: "site", type: "text", scope: "PUBLIC", highImpact: false, maxLength: 64, pattern: /^[A-Za-z0-9]{6,64}$/, fallback: () => null, description: "eNamad badge code (the letters and digits after Code= in the eNamad code)." },
   { key: "maintenance.enabled", category: "maintenance", type: "boolean", scope: "PUBLIC", highImpact: true, fallback: () => false, description: "Show the maintenance screen to visitors and members. Admin, sign-in and the status page stay reachable." },
   publicText("maintenance.message", "maintenance", 400, "Message on the maintenance screen."),
   feature("features.shop", "Show the shop (products, cart, orders) in navigation."),
@@ -287,6 +311,19 @@ export function settingDefinition(key: string): SettingDefinition | undefined {
 const SAFE_URL = /^(https:\/\/[^\s<>"']+|\/[A-Za-z0-9\-._~%!$&'()*+,;=:@/?#]*)$/;
 const EMAIL = /^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/;
 
+/** An absolute https link to exactly one of the hosts (or its www. form), with no credentials or port. */
+export function hostAllowed(text: string, hosts: readonly string[]): boolean {
+  let url: URL;
+  try {
+    url = new URL(text);
+  } catch {
+    return false;
+  }
+  if (url.protocol !== "https:" || url.username || url.password || url.port) return false;
+  const host = url.hostname.toLowerCase();
+  return hosts.some((h) => host === h || host === `www.${h}`);
+}
+
 export function validateSettingValue(def: SettingDefinition, value: unknown): { ok: true; value: unknown } | { ok: false; reason: string } {
   if (def.type === "text" || def.type === "url" || def.type === "email") {
     if (value === null || value === "") return { ok: true, value: null };
@@ -294,6 +331,7 @@ export function validateSettingValue(def: SettingDefinition, value: unknown): { 
     const text = value.trim();
     if (text.length > (def.maxLength ?? 280)) return { ok: false, reason: "TOO_LONG" };
     if (def.type === "url" && !SAFE_URL.test(text)) return { ok: false, reason: "URL_INVALID" };
+    if (def.type === "url" && def.allowedHosts && !hostAllowed(text, def.allowedHosts)) return { ok: false, reason: "URL_HOST_NOT_ALLOWED" };
     if (def.type === "email" && !EMAIL.test(text)) return { ok: false, reason: "EMAIL_INVALID" };
     if (def.type === "text" && def.pattern && !def.pattern.test(text)) return { ok: false, reason: "FORMAT_INVALID" };
     return { ok: true, value: text || null };
