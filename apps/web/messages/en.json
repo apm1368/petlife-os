@@ -5294,6 +5294,11 @@
         "actionFailed": "The change could not be saved. Try again.",
         "noMessages": "No messages yet.",
         "noNotes": "No internal notes yet."
+      },
+      "humanEscalation": {
+        "label": "Human follow-up requested",
+        "reference": "Reference: {reference}",
+        "submitted": "Requested: {date}"
       }
     },
     "disputes": {

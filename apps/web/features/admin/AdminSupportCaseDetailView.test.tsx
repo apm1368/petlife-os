@@ -64,6 +64,13 @@ describe("AdminSupportCaseDetailView", () => {
     expect(screen.getByText("Please help")).toBeTruthy();
   });
 
+  it("shows the follow-up request reference and reason to support staff", async () => {
+    vi.mocked(adminService.getSupportCase).mockResolvedValueOnce({ ...CASE, humanEscalation: { referenceNumber: "ESC-000001", reason: "Please contact me", confirmedAt: "2026-01-01T00:00:00.000Z" } });
+    renderWithIntl(<AdminSupportCaseDetailView caseId="case-1" />);
+    await waitFor(() => expect(screen.getByText("Reference: ESC-000001")).toBeTruthy());
+    expect(screen.getByText("Please contact me")).toBeTruthy();
+  });
+
   it("assigns the case to another admin", async () => {
     vi.mocked(adminService.assignSupportCase).mockResolvedValue({ ...CASE, assignedAdmin: { id: "admin-2", displayName: "Bob", role: "SUPPORT" as never } });
 

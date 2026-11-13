@@ -5218,6 +5218,11 @@
         "actionFailed": "ذخیره تغییر انجام نشد. دوباره تلاش کنید.",
         "noMessages": "هنوز پیامی وجود ندارد.",
         "noNotes": "هنوز یادداشت داخلی وجود ندارد."
+      },
+      "humanEscalation": {
+        "label": "درخواست پیگیری انسانی",
+        "reference": "کد پیگیری: {reference}",
+        "submitted": "ثبت‌شده در: {date}"
       }
     },
     "disputes": {

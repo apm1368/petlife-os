@@ -8,7 +8,7 @@
     "start": "node dist/main.js",
     "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "jest",
+    "test": "node --test scripts/e2e-fresh.test.js && jest",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:e2e:fresh": "node scripts/e2e-fresh.js",
     "db:generate": "prisma generate",

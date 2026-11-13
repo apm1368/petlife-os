@@ -2895,6 +2895,8 @@ export interface SupportCaseSummaryDto {
   firstAssignedAt?: string | null;
   firstResponseAt?: string | null;
   reopenCount?: number;
+  /** Admin-only human follow-up request, if one has been recorded. */
+  humanEscalation?: { referenceNumber: string; reason: string; confirmedAt: string } | null;
   /** Set when a partner opened the case from their business panel; admin support lists these under Partners. */
   requesterOrganization?: SupportCaseRequesterOrgDto | null;
 }

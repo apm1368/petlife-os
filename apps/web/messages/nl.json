@@ -5342,6 +5342,11 @@
         "actionFailed": "De wijziging kon niet worden opgeslagen. Probeer het opnieuw.",
         "noMessages": "Nog geen berichten.",
         "noNotes": "Nog geen interne notities."
+      },
+      "humanEscalation": {
+        "label": "Opvolging door een medewerker gevraagd",
+        "reference": "Referentie: {reference}",
+        "submitted": "Aangevraagd: {date}"
       }
     },
     "disputes": {

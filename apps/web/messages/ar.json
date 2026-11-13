@@ -5342,6 +5342,11 @@
         "actionFailed": "تعذّر حفظ التغيير. حاول مرة أخرى.",
         "noMessages": "لا توجد رسائل بعد.",
         "noNotes": "لا توجد ملاحظات داخلية بعد."
+      },
+      "humanEscalation": {
+        "label": "طُلبت متابعة من موظف",
+        "reference": "رقم المرجع: {reference}",
+        "submitted": "تاريخ الطلب: {date}"
       }
     },
     "disputes": {

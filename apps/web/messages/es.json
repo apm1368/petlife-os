@@ -4114,6 +4114,11 @@
         "actionFailed": "No se pudo guardar el cambio. Inténtalo de nuevo.",
         "noMessages": "Todavía no hay mensajes.",
         "noNotes": "Todavía no hay notas internas."
+      },
+      "humanEscalation": {
+        "label": "Seguimiento por una persona solicitado",
+        "reference": "Referencia: {reference}",
+        "submitted": "Solicitado: {date}"
       }
     },
     "audit": {

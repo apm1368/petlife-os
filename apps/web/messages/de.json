@@ -4119,6 +4119,11 @@
         "actionFailed": "Die Änderung konnte nicht gespeichert werden. Bitte erneut versuchen.",
         "noMessages": "Noch keine Nachrichten.",
         "noNotes": "Noch keine internen Notizen."
+      },
+      "humanEscalation": {
+        "label": "Persönliche Bearbeitung angefordert",
+        "reference": "Referenz: {reference}",
+        "submitted": "Angefordert: {date}"
       }
     },
     "audit": {

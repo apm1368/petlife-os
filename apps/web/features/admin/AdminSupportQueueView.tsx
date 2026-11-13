@@ -204,6 +204,7 @@ export function AdminSupportQueueView() {
               ) : null}
             </div>
             <div className="flex items-center gap-2">
+              {c.humanEscalation ? <StatusLabel tone="attention">{t("humanEscalation.label")}</StatusLabel> : null}
               {c.requesterOrganization ? <StatusLabel tone="info">{t("requesterTabs.PARTNER")}</StatusLabel> : null}
               <StatusLabel tone={adminStatusTone(c.priority)}>{t(`priority.${c.priority}`)}</StatusLabel>
               <StatusLabel tone={adminStatusTone(c.status)}>{t(`status.${c.status}`)}</StatusLabel>
