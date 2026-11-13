@@ -31,10 +31,13 @@ export const partnerJoinPath = (locale: string) => `/${locale}/partners/join`;
 export function resolvePostAuthDestination(locale: string, returnTo: string | null | undefined, progress: OnboardingProgressLike, business?: BusinessLanding | null): string {
   const isOnboardingComplete = progress.status === "COMPLETED" && progress.chapter === "READY";
 
-  const partnerTarget = returnTo ? sanitizeReturnTo(returnTo, partnerJoinPath(locale)) : null;
-  if (progress.signupIntent === "PARTNER" || partnerTarget?.startsWith(`/${locale}/partners/`)) {
-    if (progress.partnerStage === "SUBMITTED") return sanitizeReturnTo(returnTo, `/${locale}/business`);
-    return partnerTarget ?? partnerJoinPath(locale);
+  // Only a safe returnTo that really points into the partner area counts; an unsafe one never becomes a partner
+  // target through a fallback.
+  const safeReturn = returnTo ? sanitizeReturnTo(returnTo, "") : "";
+  const intoPartnerArea = safeReturn.startsWith(partnerJoinPath(locale));
+  if (progress.signupIntent === "PARTNER" || intoPartnerArea) {
+    if (progress.partnerStage === "SUBMITTED") return safeReturn || `/${locale}/business`;
+    return intoPartnerArea ? safeReturn : partnerJoinPath(locale);
   }
 
   // A partner who is not also a pet owner lands on their business home and never on the pet-owner onboarding.
