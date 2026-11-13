@@ -9685,5 +9685,54 @@
       "primary": "Crear una cuenta",
       "secondary": "Explorar servicios"
     }
+  },
+  "businessHub": {
+    "title": "Inicio del negocio",
+    "subtitle": "Panel de socios de opetlife",
+    "intro": "Cada negocio al que perteneces, con lo que necesita hoy.",
+    "emptyHint": "Aún no hay ningún negocio vinculado a tu cuenta.",
+    "emptyTitle": "Aún no hay negocios",
+    "emptyBody": "Tras el registro de socio y la verificación, tu negocio aparecerá aquí.",
+    "toPetOwnerHome": "Ir a mi inicio de dueño de mascota",
+    "failed": "No se pudo cargar",
+    "retry": "Reintentar",
+    "loading": "Cargando",
+    "finishVerification": "Completar la verificación",
+    "noReviews": "Aún no hay reseñas.",
+    "rating": "Valoración {average} de 5 · {count} reseñas",
+    "stars": "{rating} estrellas",
+    "support": "Contactar con soporte",
+    "homeLink": "Inicio del negocio",
+    "myBusiness": "Mi negocio",
+    "svc": {
+      "today": "Reservas de hoy",
+      "upcoming": "Próximas",
+      "pending": "Pendientes de confirmar",
+      "next": "Próximas reservas",
+      "noBookings": "No hay reservas próximas.",
+      "services": "Servicios y precios ({active} activos de {total})",
+      "noPrice": "Sin precio",
+      "minutes": "{minutes} min",
+      "noServices": "Aún no hay servicios.",
+      "open": "Abrir panel",
+      "bookings": "Reservas",
+      "calendar": "Calendario",
+      "servicesPrices": "Servicios y precios",
+      "reviews": "Reseñas"
+    },
+    "shop": {
+      "kind": "Tienda",
+      "toPrepare": "Pedidos por preparar",
+      "lowStock": "Poco stock",
+      "pendingModeration": "En revisión",
+      "activeOffers": "Ofertas activas",
+      "available": "Disponible para pago",
+      "pendingPayout": "Pendiente",
+      "open": "Abrir panel de tienda",
+      "orders": "Pedidos",
+      "offers": "Productos y precios",
+      "inventory": "Stock",
+      "payouts": "Pagos"
+    }
   }
 }

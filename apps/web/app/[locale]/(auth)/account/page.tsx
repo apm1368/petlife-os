@@ -12,7 +12,7 @@ import { authService } from "@/services/auth.service";
 import { onboardingService } from "@/services/onboarding.service";
 import { useSessionStore } from "@/stores/session-store";
 import { signInErrorText } from "@/features/auth/sign-in-error";
-import { resolvePostAuthDestination } from "@/lib/auth/resolve-post-auth-destination";
+import { loadBusinessLanding, resolvePostAuthDestination } from "@/lib/auth/resolve-post-auth-destination";
 
 const RESEND_COOLDOWN_SECONDS = 30;
 
@@ -40,8 +40,8 @@ function AccountFlow() {
   }, [cooldown]);
 
   async function afterAuth() {
-    const progress = await onboardingService.getProgress();
-    router.replace(resolvePostAuthDestination(locale, returnTo, progress));
+    const [progress, business] = await Promise.all([onboardingService.getProgress(), loadBusinessLanding()]);
+    router.replace(resolvePostAuthDestination(locale, returnTo, progress, business));
   }
 
   async function sendCode() {

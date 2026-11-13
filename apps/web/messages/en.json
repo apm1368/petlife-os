@@ -10557,5 +10557,54 @@
       "primary": "Create an account",
       "secondary": "Explore services"
     }
+  },
+  "businessHub": {
+    "title": "Business home",
+    "subtitle": "opetlife partner panel",
+    "intro": "Every business you belong to, with what needs you today.",
+    "emptyHint": "No business is linked to your account yet.",
+    "emptyTitle": "No business yet",
+    "emptyBody": "After partner sign-up and verification, your business appears here.",
+    "toPetOwnerHome": "Go to my pet-owner home",
+    "failed": "Could not load",
+    "retry": "Retry",
+    "loading": "Loading",
+    "finishVerification": "Finish verification",
+    "noReviews": "No reviews yet.",
+    "rating": "Rated {average} of 5 · {count} reviews",
+    "stars": "{rating} stars",
+    "support": "Contact support",
+    "homeLink": "Business home",
+    "myBusiness": "My business",
+    "svc": {
+      "today": "Today's bookings",
+      "upcoming": "Upcoming",
+      "pending": "Waiting for you",
+      "next": "Next bookings",
+      "noBookings": "No upcoming bookings.",
+      "services": "Services and prices ({active} active of {total})",
+      "noPrice": "No price",
+      "minutes": "{minutes} min",
+      "noServices": "No services yet.",
+      "open": "Open panel",
+      "bookings": "Bookings",
+      "calendar": "Calendar",
+      "servicesPrices": "Services & prices",
+      "reviews": "Reviews"
+    },
+    "shop": {
+      "kind": "Shop",
+      "toPrepare": "Orders to prepare",
+      "lowStock": "Low stock",
+      "pendingModeration": "Awaiting review",
+      "activeOffers": "Active offers",
+      "available": "Available to pay out",
+      "pendingPayout": "Pending",
+      "open": "Open shop panel",
+      "orders": "Orders",
+      "offers": "Products & prices",
+      "inventory": "Stock",
+      "payouts": "Payouts"
+    }
   }
 }
