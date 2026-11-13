@@ -13,6 +13,7 @@ import { formatCount } from "@/lib/number/format-number";
 import { DateField } from "@/features/shared/date-picker/DateField";
 import { DiscoveryPage } from "./DiscoveryPage";
 import type { RouteLocale } from "@/lib/i18n/config";
+import { serviceCategorySlug } from "@/lib/services/category-slug";
 
 const SORTS: DiscoverySort[] = ["RECOMMENDED", "EARLIEST", "NEAREST", "TOP_RATED", "LOWEST_PRICE"];
 
@@ -250,7 +251,7 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
       <nav className="disc-cats" aria-label={t("serviceCategories")}>
         <Link href={`/${locale}/services/search${navQuery}`} aria-current={!category ? "page" : undefined}>{t("all")}</Link>
         {CATEGORY_NAV.map((c) => (
-          <Link key={c} href={`/${locale}/services/${c}${navQuery}`} aria-current={category === c ? "page" : undefined}>{categoryName(c)}</Link>
+          <Link key={c} href={`/${locale}/services/${serviceCategorySlug(c)}${navQuery}`} aria-current={category === c ? "page" : undefined}>{categoryName(c)}</Link>
         ))}
       </nav>
 

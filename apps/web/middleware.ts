@@ -1,6 +1,7 @@
 import createMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
 import { defaultLocale, locales } from "./lib/i18n/config";
+import { serviceCategoryFromSlug, serviceCategorySlug } from "./lib/services/category-slug";
 
 const intl = createMiddleware({
   locales,
@@ -49,6 +50,16 @@ export default function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = lowered === defaultLocale && rest.filter(Boolean).length === 0 ? "/" : `/${[lowered, ...rest].join("/")}`;
     return NextResponse.redirect(url, 308);
+  }
+
+  // Service categories are lowercase slugs (/services/pet-taxi); enum spellings (/services/PET_TAXI) 308 there.
+  if (localeSet.has(first) && rest[0] === "services" && rest[1]) {
+    const code = serviceCategoryFromSlug(rest[1]);
+    if (code && rest[1] !== serviceCategorySlug(code)) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/${[first, "services", serviceCategorySlug(code), ...rest.slice(2)].join("/")}`;
+      return NextResponse.redirect(url, 308);
+    }
   }
 
   return withContentLanguage(intl(request), pathname);

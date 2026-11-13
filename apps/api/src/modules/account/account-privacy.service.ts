@@ -42,7 +42,9 @@ export class AccountPrivacyService {
   ) {}
 
   async overview(userId: string) {
-    const [consents, exports, deletionRequests] = await Promise.all([
+    // Not named `exports`: in the compiled CommonJS that local shadows the module's `exports`, so CONSENT_VERSION
+    // (read as `exports.CONSENT_VERSION`) became undefined and every consent showed as never accepted.
+    const [consents, exportRequests, deletionRequests] = await Promise.all([
       this.prisma.userConsent.findMany({ where: { userId }, orderBy: { updatedAt: "desc" } }),
       this.prisma.dataExportRequest.findMany({ where: { userId }, orderBy: { requestedAt: "desc" }, take: 5 }),
       this.prisma.accountDeletionRequest.findMany({ where: { userId }, orderBy: { requestedAt: "desc" }, take: 3 }),
@@ -63,7 +65,7 @@ export class AccountPrivacyService {
     return {
       consentVersion: CONSENT_VERSION,
       consents: consentState,
-      exports: exports.map((e) => ({ id: e.id, status: e.status, requestedAt: e.requestedAt, readyAt: e.readyAt, expiresAt: e.expiresAt, fileSizeBytes: e.fileSizeBytes, downloadCount: e.downloadCount, failureCode: e.failureCode })),
+      exports: exportRequests.map((e) => ({ id: e.id, status: e.status, requestedAt: e.requestedAt, readyAt: e.readyAt, expiresAt: e.expiresAt, fileSizeBytes: e.fileSizeBytes, downloadCount: e.downloadCount, failureCode: e.failureCode })),
       exportAvailableDays: EXPORT_AVAILABLE_DAYS,
       exportIncludes: EXPORT_SCOPE,
       deletionRequests: deletionRequests.map((d) => ({ id: d.id, status: d.status, state: d.state, stateChangedAt: d.stateChangedAt, cancellable: d.state === AccountDeletionState.REQUESTED || d.state === AccountDeletionState.PENDING_RETENTION, executionEnabled: false, requestedAt: d.requestedAt, cancelledAt: d.cancelledAt, completedAt: d.completedAt })),

@@ -35,6 +35,13 @@ export class ChatController {
     return this.chat.open(user.id, dto.participantUserId);
   }
 
+  /** #290 Q52: message a post's author from the post (no contact details exchanged). */
+  @Post("conversations/for-post/:postId")
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  openForPost(@CurrentUser() user: SessionUser, @Param("postId", new ParseUUIDPipe()) postId: string) {
+    return this.chat.openForPost(user.id, postId);
+  }
+
   @Get("conversations")
   list(@CurrentUser() user: SessionUser, @Query() query: ListConversationsQueryDto) {
     return this.chat.list(user.id, query.archived === "true");
