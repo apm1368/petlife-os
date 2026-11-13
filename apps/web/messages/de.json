@@ -3110,6 +3110,90 @@
     "tabs": { "admins": "Admins", "roles": "Rollen", "permissions": "Berechtigungen" }
   },
   "admin": {
+    "productDetail": {
+      "title": "Produkt",
+      "back": "Alle Produkte",
+      "loading": "Wird geladen…",
+      "loadFailed": "Das Produkt konnte nicht geladen werden.",
+      "retry": "Erneut versuchen",
+      "forbidden": "Berechtigung commerce.view erforderlich",
+      "notFound": "Produkt nicht gefunden",
+      "media": "{count, plural, one {# Bild} other {# Bilder}}",
+      "publicPage": "Öffentliche Seite",
+      "productStatus": {
+        "DRAFT": "Entwurf",
+        "ACTIVE": "Aktiv",
+        "INACTIVE": "Inaktiv",
+        "ARCHIVED": "Archiviert"
+      },
+      "facts": {
+        "sellers": "Verkäufer",
+        "buyable": "Kaufbare Angebote",
+        "lowestPrice": "Niedrigster aktiver Preis",
+        "noneBuyable": "Derzeit verkauft es niemand",
+        "rating": "Bewertung"
+      },
+      "offers": {
+        "title": "Angebote nach Verkäufer",
+        "hint": "Preis und Bestand legt jeder Verkäufer selbst fest. Ein Kunde kann nur kaufen, wenn das Angebot aktiv und freigegeben ist, der Shop verifiziert und aktiv ist und Bestand vorhanden ist.",
+        "empty": "Noch kein Verkäufer bietet dieses Produkt an.",
+        "seller": "Verkäufer",
+        "variant": "Variante",
+        "price": "Preis",
+        "stock": "Bestand",
+        "status": "Status",
+        "updated": "Aktualisiert",
+        "sellerNotLive": "Shop {status} · {verification}",
+        "sellerSku": "Verkäufer-SKU {sku}",
+        "available": "{count} verfügbar",
+        "onHandReserved": "{onHand} auf Lager · {reserved} reserviert",
+        "noInventory": "Kein Bestandseintrag",
+        "buyable": "Jetzt kaufbar"
+      },
+      "offerStatus": {
+        "ACTIVE": "Aktiv",
+        "PAUSED": "Pausiert",
+        "OUT_OF_STOCK": "Ausverkauft",
+        "SUSPENDED": "Gesperrt"
+      },
+      "moderation": {
+        "PENDING_REVIEW": "Prüfung ausstehend",
+        "APPROVED": "Freigegeben",
+        "REJECTED": "Abgelehnt"
+      },
+      "sellerStatus": {
+        "PENDING": "ausstehend",
+        "ACTIVE": "aktiv",
+        "INACTIVE": "inaktiv",
+        "SUSPENDED": "gesperrt",
+        "RESTRICTED": "eingeschränkt",
+        "CLOSED": "geschlossen"
+      },
+      "sellerVerification": {
+        "NOT_STARTED": "nicht verifiziert",
+        "SUBMITTED": "Verifizierung eingereicht",
+        "NEEDS_INFORMATION": "Angaben fehlen",
+        "UNDER_REVIEW": "in Prüfung",
+        "VERIFIED": "verifiziert",
+        "REJECTED": "Verifizierung abgelehnt",
+        "SUSPENDED": "Verifizierung ausgesetzt"
+      },
+      "variants": {
+        "title": "Varianten",
+        "inactive": "Inaktiv"
+      },
+      "requests": {
+        "title": "Verkäuferanfragen",
+        "hint": "Anfragen von Shops, die dieses Produkt angelegt haben oder ihm zugeordnet wurden.",
+        "empty": "Dieses Produkt stammt aus keiner Verkäuferanfrage.",
+        "status": {
+          "PENDING_REVIEW": "Prüfung ausstehend",
+          "APPROVED": "Als neu freigegeben",
+          "MATCHED_EXISTING": "Diesem Produkt zugeordnet",
+          "REJECTED": "Abgelehnt"
+        }
+      }
+    },
     "memorials": {
       "title": "Öffentliche Haustier-Gedenkseiten",
       "description": "Nur veröffentlichen, wenn eine ausdrückliche Einwilligung der Halterinnen und Halter vorliegt. Prüfen Sie jeden Namen und jedes ausgewählte Foto; Haushalts- und Gesundheitsdaten sind nicht Teil dieser Ansicht.",

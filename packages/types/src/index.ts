@@ -6584,6 +6584,39 @@ export interface AdminProductRowDto {
   createdAt: string;
 }
 
+/** One seller's offer on a product variant, as staff see it: who sells it, at what price, how much is in stock, and whether it is live. */
+export interface AdminProductOfferDto {
+  id: string;
+  variantId: string;
+  variantSku: string;
+  variantTitle: string | null;
+  seller: { id: string; name: string; status: string; verificationStatus: string };
+  status: string;
+  moderationStatus: string;
+  moderationReason: string | null;
+  priceAmount: number;
+  compareAtAmount: number | null;
+  currency: string;
+  sellerSku: string | null;
+  /** null when the offer has no inventory row yet. available = onHand - reserved, never below zero. */
+  stock: { onHand: number; reserved: number; available: number } | null;
+  /** True when a customer can buy it right now: offer active and approved, seller verified and active, stock available. */
+  buyable: boolean;
+  updatedAt: string;
+}
+
+export interface AdminProductDetailDto extends AdminProductRowDto {
+  slug: string;
+  category: { id: string; name: string };
+  brand: { id: string; name: string } | null;
+  variants: Array<{ id: string; sku: string; title: string | null; isActive: boolean }>;
+  offers: AdminProductOfferDto[];
+  /** The seller request this product came from (approved as new or matched to it), newest first. */
+  catalogRequests: Array<{ id: string; status: string; sellerName: string; requestedTitle: string; reviewedAt: string | null; decisionReason: string | null }>;
+  /** Lowest live price across buyable offers, or null when nobody can sell it now. */
+  lowestBuyablePrice: number | null;
+}
+
 export interface AdminProductReviewRowDto {
   id: string;
   productId: string;

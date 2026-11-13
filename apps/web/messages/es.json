@@ -3105,6 +3105,90 @@
     "tabs": { "admins": "Administradores", "roles": "Roles", "permissions": "Permisos" }
   },
   "admin": {
+    "productDetail": {
+      "title": "Producto",
+      "back": "Todos los productos",
+      "loading": "Cargando…",
+      "loadFailed": "No se pudo cargar el producto.",
+      "retry": "Reintentar",
+      "forbidden": "Se requiere el permiso commerce.view",
+      "notFound": "Producto no encontrado",
+      "media": "{count, plural, one {# imagen} other {# imágenes}}",
+      "publicPage": "Página pública",
+      "productStatus": {
+        "DRAFT": "Borrador",
+        "ACTIVE": "Activo",
+        "INACTIVE": "Inactivo",
+        "ARCHIVED": "Archivado"
+      },
+      "facts": {
+        "sellers": "Vendedores",
+        "buyable": "Ofertas comprables",
+        "lowestPrice": "Precio activo más bajo",
+        "noneBuyable": "Ahora nadie lo vende",
+        "rating": "Valoración"
+      },
+      "offers": {
+        "title": "Ofertas por vendedor",
+        "hint": "Cada vendedor fija su propio precio y su stock. Un cliente solo puede comprar si la oferta está activa y aprobada, la tienda está verificada y activa, y hay stock.",
+        "empty": "Ningún vendedor ofrece este producto todavía.",
+        "seller": "Vendedor",
+        "variant": "Variante",
+        "price": "Precio",
+        "stock": "Stock",
+        "status": "Estado",
+        "updated": "Actualizado",
+        "sellerNotLive": "Tienda {status} · {verification}",
+        "sellerSku": "SKU del vendedor {sku}",
+        "available": "{count} disponibles",
+        "onHandReserved": "{onHand} en almacén · {reserved} reservados",
+        "noInventory": "Sin registro de stock",
+        "buyable": "Comprable ahora"
+      },
+      "offerStatus": {
+        "ACTIVE": "Activa",
+        "PAUSED": "En pausa",
+        "OUT_OF_STOCK": "Agotada",
+        "SUSPENDED": "Suspendida"
+      },
+      "moderation": {
+        "PENDING_REVIEW": "Pendiente de revisión",
+        "APPROVED": "Aprobada",
+        "REJECTED": "Rechazada"
+      },
+      "sellerStatus": {
+        "PENDING": "pendiente",
+        "ACTIVE": "activa",
+        "INACTIVE": "inactiva",
+        "SUSPENDED": "suspendida",
+        "RESTRICTED": "restringida",
+        "CLOSED": "cerrada"
+      },
+      "sellerVerification": {
+        "NOT_STARTED": "sin verificar",
+        "SUBMITTED": "verificación enviada",
+        "NEEDS_INFORMATION": "faltan datos",
+        "UNDER_REVIEW": "en revisión",
+        "VERIFIED": "verificada",
+        "REJECTED": "verificación rechazada",
+        "SUSPENDED": "verificación suspendida"
+      },
+      "variants": {
+        "title": "Variantes",
+        "inactive": "Inactiva"
+      },
+      "requests": {
+        "title": "Solicitudes de vendedores",
+        "hint": "Solicitudes de tiendas que crearon este producto o se asociaron a él.",
+        "empty": "Este producto no proviene de una solicitud de vendedor.",
+        "status": {
+          "PENDING_REVIEW": "Pendiente de revisión",
+          "APPROVED": "Aprobada como nuevo",
+          "MATCHED_EXISTING": "Asociada a este producto",
+          "REJECTED": "Rechazada"
+        }
+      }
+    },
     "memorials": {
       "title": "Memoriales públicos de mascotas",
       "description": "Publica solo si existe el consentimiento explícito de la persona responsable. Revisa cada nombre y la foto seleccionada; los datos del hogar y de salud no forman parte de esta vista.",
