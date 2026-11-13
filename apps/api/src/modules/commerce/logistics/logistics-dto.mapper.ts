@@ -59,6 +59,16 @@ export function toBuyerFulfillmentDto(fulfillment: Fulfillment): FulfillmentDto 
   return { ...dto, pickupAddress: { recipient: null, phone: null, addressLine: null, city, region, countryCode, instructions: null } };
 }
 
+/**
+ * What a seller may see of a fulfillment: the buyer's delivery address as text, never the member's exact map pin
+ * (members' pins are private to their household; couriers get the pin through the courier integration / staff).
+ */
+export function toSellerFulfillmentDto(fulfillment: Fulfillment): FulfillmentDto {
+  const dto = toFulfillmentDto(fulfillment);
+  const { latitude: _lat, longitude: _lng, ...deliveryAddress } = dto.deliveryAddress;
+  return { ...dto, deliveryAddress };
+}
+
 export function toShipmentDto(shipment: Shipment): ShipmentDto {
   return {
     id: shipment.id,

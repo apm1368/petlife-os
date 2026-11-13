@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import { MembershipOffersCard } from "@/features/membership/MembershipOffersCard";
+import { LocationNudge } from "@/features/maps/LocationNudge";
 
 /**
  * Named places on the member home for other owner items (2026-11-13), so each can land without reworking the page:
@@ -13,6 +14,7 @@ export type MemberHomeSlotName = "offers" | "location-nudge" | "social";
 
 export const MEMBER_HOME_SLOTS: Partial<Record<MemberHomeSlotName, ComponentType>> = {
   offers: MembershipOffersCard,
+  "location-nudge": LocationNudge,
 };
 
 export function MemberHomeSlot({ name, slots = MEMBER_HOME_SLOTS }: { name: MemberHomeSlotName; slots?: Partial<Record<MemberHomeSlotName, ComponentType>> }) {

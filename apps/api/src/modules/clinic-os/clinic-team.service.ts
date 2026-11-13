@@ -14,7 +14,12 @@ import { NotificationOrchestratorService } from "../notifications/notification-o
 import { NotificationDeepLinks } from "../notifications/notification-deeplink.util";
 import type { ResolvedProviderContext } from "../provider-os/auth/provider-context.types";
 import { ClinicEntitlementService } from "./clinic-entitlement.service";
-import type { AddClinicBranchDto, AddClinicStaffDto } from "./dto/clinic-os.dto";
+import type { AddClinicBranchDto, AddClinicStaffDto, SetBranchPinDto } from "./dto/clinic-os.dto";
+import { pinFromInput, type LatLng } from "../../common/geo/geo";
+
+/** Pin columns for a write: a new pin with its consent time, null clears it, undefined leaves it alone. */
+const pinColumns = (pin: LatLng | null | undefined) =>
+  pin === undefined ? {} : pin ? { latitude: pin.latitude, longitude: pin.longitude, pinConsentAt: new Date() } : { latitude: null, longitude: null, pinConsentAt: null };
 
 const ROLE_LABEL = { fa: { VET: "دامپزشک", STAFF: "کارمند", OWNER: "مدیر" }, en: { VET: "vet", STAFF: "staff member", OWNER: "owner" } } as const;
 const INVITATION_TTL_MS = 7 * 86400e3;
@@ -187,7 +192,7 @@ export class ClinicTeamService {
       this.entitlements.resolve(ctx.organizationId),
     ]);
     return {
-      items: rows.map((l) => ({ id: l.id, name: l.name, addressLine: l.addressLine, city: l.city, region: l.region, latitude: l.latitude, longitude: l.longitude, phone: l.phone, timezone: l.timezone })),
+      items: rows.map((l) => ({ id: l.id, name: l.name, addressLine: l.addressLine, city: l.city, region: l.region, latitude: l.latitude, longitude: l.longitude, pinPublicExact: l.pinPublicExact, pinConsentAt: l.pinConsentAt?.toISOString() ?? null, phone: l.phone, timezone: l.timezone })),
       usage: { used: rows.length, limit: resolved.entitlements["clinic.branches.max"]?.limit ?? null },
     };
   }
@@ -198,9 +203,20 @@ export class ClinicTeamService {
       await this.lockOrganization(tx, ctx.organizationId);
       assertBelow("clinic.branches.max", branchLimit, await tx.providerLocation.count({ where: { providerOrganizationId: ctx.organizationId } }));
       const row = await tx.providerLocation.create({
-        data: { providerOrganizationId: ctx.organizationId, name: dto.name.trim(), addressLine: dto.addressLine.trim(), city: dto.city.trim(), region: dto.region?.trim() || null, latitude: dto.latitude ?? null, longitude: dto.longitude ?? null, phone: dto.phone?.trim() || null, countryCode: "IR", timezone: "Asia/Tehran" },
+        data: { providerOrganizationId: ctx.organizationId, name: dto.name.trim(), addressLine: dto.addressLine.trim(), city: dto.city.trim(), region: dto.region?.trim() || null, ...pinColumns(pinFromInput(dto)), phone: dto.phone?.trim() || null, countryCode: "IR", timezone: "Asia/Tehran" },
       });
       await this.events.publish("ClinicBranchAdded", { providerOrganizationId: ctx.organizationId, locationId: row.id }, { aggregateType: "ProviderOrganization", aggregateId: ctx.organizationId, tx });
+    });
+    return this.listBranches(ctx);
+  }
+
+  /** Sets, moves or removes a branch's map pin; the owner also chooses whether the public sees the exact spot. */
+  async setBranchPin(ctx: ResolvedProviderContext, locationId: string, dto: SetBranchPinDto) {
+    const branch = await this.prisma.providerLocation.findFirst({ where: { id: locationId, providerOrganizationId: ctx.organizationId }, select: { id: true } });
+    if (!branch) throw new NotFoundApiException("ProviderLocation", { locationId });
+    await this.prisma.providerLocation.update({
+      where: { id: branch.id },
+      data: { ...pinColumns(pinFromInput(dto)), ...(dto.exactPinPublic !== undefined ? { pinPublicExact: dto.exactPinPublic } : {}) },
     });
     return this.listBranches(ctx);
   }

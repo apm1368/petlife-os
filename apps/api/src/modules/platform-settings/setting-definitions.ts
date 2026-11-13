@@ -1,6 +1,6 @@
 import type { AppEnv } from "../../config/env";
 
-export type SettingCategory = "platform" | "booking" | "commerce" | "approvals" | "membership" | "support" | "content" | "notifications" | "privacy" | "country" | "auth" | "site" | "social" | "features" | "maintenance";
+export type SettingCategory = "platform" | "booking" | "commerce" | "approvals" | "membership" | "support" | "content" | "notifications" | "privacy" | "country" | "auth" | "site" | "social" | "features" | "maintenance" | "maps";
 export type SettingType = "integer" | "boolean" | "localizedText" | "text" | "url" | "email" | "enum";
 /** Locales a localizedText value may carry. Older values hold fa/en only and stay valid. */
 export const SETTING_LOCALES = ["fa", "en", "de", "es", "ar", "nl"] as const;
@@ -96,8 +96,39 @@ const SITE_SETTINGS: SettingDefinition[] = [
 ];
 
 /**
+ * Which map the web draws (GET /maps/config). The Google *browser* key is public by design: it ships to every
+ * visitor's browser and Google restricts it by HTTP referrer (opetlife.ir) in the Cloud console, so it may live here.
+ * The Google *server* key (Distance Matrix, place search) is a real secret and stays in the server env.
+ * Neither ever lives in git. Without a usable browser key the web keeps OpenStreetMap tiles.
+ */
+const MAPS_SETTINGS: SettingDefinition[] = [
+  {
+    key: "maps.provider",
+    category: "maps",
+    type: "enum",
+    scope: "INTERNAL",
+    highImpact: false,
+    options: ["osm", "google"],
+    fallback: (env) => (env("MAPS_PROVIDER") === "google" ? "google" : "osm"),
+    description: "Map drawn on the site: OpenStreetMap tiles, or Google Maps when a browser key is set (falls back to OpenStreetMap whenever Google is unreachable).",
+  },
+  {
+    key: "maps.googleBrowserKey",
+    category: "maps",
+    type: "text",
+    scope: "INTERNAL",
+    highImpact: false,
+    maxLength: 60,
+    pattern: /^AIza[0-9A-Za-z_-]{35}$/,
+    fallback: (env) => env("GOOGLE_MAPS_BROWSER_KEY") ?? null,
+    description: "Google Maps JavaScript API browser key (public by design; restrict it to the opetlife.ir HTTP referrers in Google Cloud). Never commit it to git.",
+  },
+];
+
+/**
  * The explicit registry. Only keys that something actually reads are listed — a setting nobody consumes would be a
- * fake control. Secrets, credentials and provider modes are deliberately NOT settings (they stay in the server env).
+ * fake control. Secrets, credentials and provider modes are deliberately NOT settings (they stay in the server env);
+ * the one exception is the map's public browser key and provider choice (see MAPS_SETTINGS).
  */
 export const SETTING_DEFINITIONS: SettingDefinition[] = [
   {
@@ -141,6 +172,7 @@ export const SETTING_DEFINITIONS: SettingDefinition[] = [
     description: "Who sees the announcement: signed-in members only, or every visitor.",
   },
   ...SITE_SETTINGS,
+  ...MAPS_SETTINGS,
   {
     key: "auth.googleEnabled",
     category: "auth",

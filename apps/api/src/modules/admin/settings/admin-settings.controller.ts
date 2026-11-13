@@ -33,6 +33,11 @@ export class AdminSettingsController {
   @RequireAdminPermission("settings.view")
   list() { return this.settings.list(); }
 
+  /** How many saved addresses and business locations still lack a map pin, and which map the site draws. */
+  @Get("maps-coverage")
+  @RequireAdminPermission("settings.view")
+  mapsCoverage() { return this.settings.mapsCoverage(); }
+
   @Get("changes")
   @RequireAdminPermission("settings.view")
   changes(@Query() q: ChangesQueryDto) { return this.settings.changes(q); }

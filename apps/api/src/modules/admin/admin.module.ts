@@ -1,5 +1,6 @@
 import { AdminInsuranceApplicationsController } from "./insurance/admin-insurance-applications.controller";
 import { OrdersModule } from "../commerce/orders/orders.module";
+import { MapsModule } from "../maps/maps.module";
 import { AdminTravelController } from "./travel/admin-travel.controller";
 import { AdminTravelService } from "./travel/admin-travel.service";
 import { TravelMarketplaceModule } from "../travel-marketplace/travel-marketplace.module";
@@ -170,6 +171,7 @@ import { MemoriesModule } from "../memories/memories.module";
  */
 @Module({
   imports: [
+    MapsModule,
     NotificationsModule,
     EmailModule,
     RefundsModule,

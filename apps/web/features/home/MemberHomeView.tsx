@@ -447,7 +447,7 @@ export function MemberHomeView() {
       {switchError ? <p role="alert">{c.unavailable}</p> : null}
       <GlassMemberHome locale={locale} userName={firstName ?? null} pet={pet} overview={overview} pets={pets} activePetId={petId} careFailed={careFailed} onRetryCare={load} permission={permission} isSwitching={isSwitching} onSwitch={(id) => { setSwitchError(false); void switchActivePet(id).catch(() => setSwitchError(true)); }} />
 
-      <MemberHomeSlot name="location-nudge" />
+      {memorial ? null : <MemberHomeSlot name="location-nudge" />}
       {memorial ? null : <MemberHomeSlot name="offers" />}
 
       {/* The five questions of the 2026-11 pattern around the pet's record; memorial mode keeps only the calm ones. */}

@@ -1288,7 +1288,9 @@
       "warning": "Aviso",
       "urgent": "Urgente",
       "members": "Solo miembros",
-      "everyone": "Todos los visitantes"
+      "everyone": "Todos los visitantes",
+      "osm": "OpenStreetMap",
+      "google": "Google Maps"
     },
     "sections": {
       "trust": {
@@ -1322,6 +1324,10 @@
       "maintenance": {
         "title": "Modo mantenimiento",
         "hint": "Los visitantes ven un mensaje de mantenimiento; el panel, el inicio de sesión y la página de estado siguen disponibles."
+      },
+      "maps": {
+        "title": "Mapas",
+        "hint": "Qué mapa muestra el sitio. Google necesita una clave de navegador restringida a opetlife.ir en Google Cloud (con facturación activa); sin ella, o si Google no responde, el sitio sigue con OpenStreetMap."
       }
     },
     "names": {
@@ -1368,7 +1374,9 @@
       "auth_otpEnabled": "Acceso con código SMS",
       "auth_googleEnabled": "Acceso con Google",
       "maintenance_enabled": "Modo mantenimiento activado",
-      "maintenance_message": "Mensaje de mantenimiento"
+      "maintenance_message": "Mensaje de mantenimiento",
+      "maps_provider": "Proveedor de mapas",
+      "maps_googleBrowserKey": "Clave de navegador de Google Maps"
     },
     "save": {
       "label": "Guardar cambios",
@@ -1390,6 +1398,12 @@
       "UNCHANGED": "no hay cambios",
       "SETTING_CHANGE_CONFLICT": "cambió mientras tanto: recarga la página",
       "OPTION_INVALID": "opción no válida"
+    },
+    "coverage": {
+      "title": "Ubicaciones guardadas sin pin",
+      "addresses": "Direcciones de miembros: {missing, number} de {total, number}",
+      "providers": "Ubicaciones de proveedores: {missing, number} de {total, number}",
+      "pickups": "Direcciones de recogida de vendedores: {missing, number} de {total, number}"
     }
   },
   "siteSettings": {
@@ -11394,7 +11408,8 @@
       "set": "Punto del mapa guardado; el mensajero de opetlife puede calcular mejor.",
       "clear": "Quitar punto del mapa",
       "denied": "No se dio acceso a la ubicación. Puedes continuar sin ella.",
-      "hasPoint": "Con punto en el mapa"
+      "hasPoint": "Con punto en el mapa",
+      "noPoint": "Aún sin pin: añade uno para entregas más precisas"
     }
   },
   "adminShipping": {
@@ -12539,6 +12554,12 @@
       "OWNER": "Propietario/a",
       "VET": "Veterinario/a",
       "STAFF": "Personal"
+    },
+    "location": {
+      "noPin": "Aún sin pin: añade uno para que los clientes encuentren esta sucursal.",
+      "edit": "Fijar ubicación en el mapa",
+      "save": "Guardar ubicación",
+      "cancel": "Cancelar"
     }
   },
   "clinicContacts": {
@@ -13347,5 +13368,35 @@
         }
       }
     }
+  },
+  "locationPicker": {
+    "title": "Ubicación en el mapa",
+    "required": "Obligatorio",
+    "hint": "Toca el mapa o arrastra el pin hasta la puerta exacta. Pellizca o usa + y − para hacer zoom.",
+    "searchPlaceholder": "Buscar una calle o un lugar",
+    "search": "Buscar",
+    "searchNone": "No se encontró nada. Coloca el pin en el mapa.",
+    "pinLabel": "Tu pin",
+    "mapLabel": "Mapa: toca para colocar el pin y arrástralo para moverlo",
+    "zoomIn": "Acercar",
+    "zoomOut": "Alejar",
+    "useMyLocation": "Usar mi ubicación actual",
+    "locating": "Buscando tu ubicación…",
+    "clear": "Quitar pin",
+    "denied": "Se denegó el acceso a la ubicación o no está disponible. Toca el mapa para colocar el pin.",
+    "outsideIran": "Ese punto está fuera de Irán. Coloca el pin en tu dirección en Irán.",
+    "pinNeeded": "Coloca un pin para que mensajeros y conductores encuentren la puerta.",
+    "privacyMember": "Tu pin exacto es privado. Solo se usa para entregas, tarifas y distancias «cerca de mí», y lo ve el mensajero o conductor que te atiende. Nadie más lo ve; los demás solo ven una distancia redondeada como ~2 km. Puedes moverlo o quitarlo cuando quieras.",
+    "privacyBusiness": "Los clientes ven este pin en tu página pública. Si trabajas desde casa, el público ve un punto aproximado (alrededor de 1 km), salvo que elijas mostrar el lugar exacto.",
+    "consentMember": "Guardar esta ubicación exacta para mis entregas y estimaciones de distancia",
+    "consentBusiness": "Esta es la ubicación de mi negocio y acepto que se muestre como se describe arriba",
+    "exactPublic": "Mostrar mi ubicación exacta públicamente (si no, un punto aproximado, alrededor de 1 km)",
+    "consentNeeded": "Marca la casilla bajo el mapa para guardar el pin, o quita el pin.",
+    "privacyPickup": "Solo los mensajeros que recogen tus paquetes y nuestro equipo de soporte usan este pin; nunca se muestra en tus páginas públicas.",
+    "consentPickup": "Guardar esta ubicación exacta de recogida para los mensajeros"
+  },
+  "locationNudge": {
+    "text": "Marca tu dirección predeterminada en el mapa para entregas más precisas y lugares cerca de ti.",
+    "action": "Marcar ahora"
   }
 }

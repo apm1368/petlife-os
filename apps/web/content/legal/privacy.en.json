@@ -17,7 +17,7 @@
       "items": [
         "Account: your mobile number and email (with whether you have verified them), username, name, display name and photo, language and theme, and a securely hashed password if you set one. We do not ask for your national ID number.",
         "Household and pets: household members and their roles, and each pet's profile (name, species, breed, sex, date of birth, photo, weight, markings, neutering and microchip). It also includes the health information you add: allergies, conditions, medications, vaccinations, visits, lab results and documents.",
-        "Addresses and location: the delivery or visit addresses you save, optionally with a map point. When you allow it, your browser's location is used for nearby services, places, lost-pet alerts and the pet taxi.",
+        "Addresses and location: the delivery or visit addresses you save and their map points, which you place and agree to when you save an address. When you allow it, your browser's location is used for nearby services and places (rounded, and only for that search, never stored), lost-pet alerts and the pet taxi.",
         "Bookings, orders and payments: what you booked or bought, delivery details, and refunds and disputes. For card-to-card payments we keep the receipt image you upload. We do not collect your bank card number or IBAN.",
         "What you publish: posts, comments, chats, reviews, lost and found reports, memorials, and the photos and files you upload. Location data inside photos (EXIF and GPS) is removed when you upload them.",
         "Place suggestions: the name, category, city, address, map point and notes of a place you suggest. Only our staff can see that it came from you. If our team checks and lists the place, its details and your notes may be published, never your name. We tell you in the app whether your suggestion was accepted.",
@@ -52,6 +52,8 @@
       "heading": "5. Location",
       "items": [
         "We use your location only when you allow it in the browser, and only for the feature you are using.",
+        "When you save an address, you place its point on the map and agree to us storing it; we record when you agreed. The point stays private to you and your household: we use it to work out delivery costs, fares and what is near you. Sellers, providers and other members don't see it. You can move the point or delete the address at any time.",
+        "Partners' business locations are shown publicly on the map at the pinned spot. Partners who work from home, such as sitters, walkers and home stays, are shown only at an approximate point about 1 km from the real one, unless they choose to show the exact spot.",
         "For lost-pet area alerts, your location is rounded to about 1 km and never shown to others. Lost-pet reports show only the area the owner writes.",
         "During a pet-taxi ride, the driver's live position is shared with you. After 30 days, trip locations are kept only roughly, to about 1 km."
       ]
@@ -64,7 +66,7 @@
         "Couriers: for delivery, your name, phone number and delivery address.",
         "Payment providers: when you pay online, the payment gateway processes the payment. We receive the result, not your card details.",
         "Messaging: sign-in codes and SMS notifications go through our SMS provider, Faraz. Emails are sent from our own mail server. Push notifications pass through your browser's push service.",
-        "Maps: maps on the site load tiles from OpenStreetMap. Some route and place searches may use a map provider such as Neshan or Google. These services see the area you are viewing or searching, not your account.",
+        "Maps: maps on the site load tiles from OpenStreetMap. If we switch on another map provider, such as Google Maps, maps and place searches may load from that provider instead. These services see the area you are viewing or searching, not your account.",
         "Insurers: only when you submit an insurance application, and only after you agree. The insurer then receives your contact details and your pet's species, breed, age and weight.",
         "Other sites: when you open an external listing, for example on Jajiga, we record the click, and that site's own privacy policy applies from then on.",
         "Trust badge: when the e-trust (eNamad) badge is shown at the bottom of our pages, your browser loads it from enamad.ir, which can see your IP address and that you are on opetlife.",

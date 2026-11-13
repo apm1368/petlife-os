@@ -664,8 +664,13 @@ export interface ProviderLocationDto {
   city: string;
   region: string | null;
   countryCode: string;
+  /** Public reads: the exact pin for storefronts, a ~1 km approximate point for home-based providers (see pinPrecision). */
   latitude: number | null;
   longitude: number | null;
+  /** EXACT, APPROXIMATE (rounded to ~1 km for privacy), or null when the location has no pin. */
+  pinPrecision?: "EXACT" | "APPROXIMATE" | null;
+  /** The provider's own choice to show the exact pin publicly (null = the default for its type). Owner views only. */
+  pinPublicExact?: boolean | null;
   phone: string | null;
   timezone: string;
 }
@@ -748,8 +753,11 @@ export interface CustomerAddressDto {
   city: string;
   region: string | null;
   countryCode: string;
+  /** The exact pin — private: only ever returned to the household's own members. */
   latitude: number | null;
   longitude: number | null;
+  /** When the member consented to storing the pin. */
+  locationConsentAt?: string | null;
   instructions: string | null;
   /** Batch 4 — Iranian 10-digit postal code, when known. */
   postalCode?: string | null;
@@ -2047,6 +2055,8 @@ export interface SellerShippingProfileDto {
     postalCode: string | null;
     latitude: number | null;
     longitude: number | null;
+    /** When the seller confirmed the pickup pin. */
+    pinConsentAt?: string | null;
     instructions: string | null;
   };
   updatedAt: string | null;
@@ -5888,7 +5898,7 @@ export interface PetFriendlyPlaceDto {
   address: string | null;
   latitude: number;
   longitude: number;
-  /** Only present on a nearby-search result — the caller's own straight-line distance to this place, in meters, computed server-side via PostGIS ST_Distance. */
+  /** Only present on a nearby-search result — the caller's straight-line distance to this place, computed server-side via PostGIS and rounded to whole kilometres (0 = under 1 km): members never see exact metres. */
   distanceMeters: number | null;
   speciesAllowed: PetSpecies[];
   sizeRestrictions: string | null;
@@ -6036,8 +6046,12 @@ export interface TravelListingDto {
   country: string;
   city: string;
   address: string | null;
+  /** Public reads of a home stay (villa, apartment, residence, boarding) show a ~1 km approximate point unless the host opted in. */
   latitude: number | null;
   longitude: number | null;
+  pinPrecision?: "EXACT" | "APPROXIMATE" | null;
+  /** The host's choice to show the exact pin publicly (null = the default for the listing type). Owner views only. */
+  pinPublicExact?: boolean | null;
   imageObjectKeys: string[];
   imageUrls: string[];
   amenities: string[];
@@ -6851,7 +6865,7 @@ export interface AdminPartnerShopDetailDto {
   email: string | null;
   status: string;
   createdAt: string;
-  address: { province: string | null; city: string | null; addressLine: string | null; postalCode: string | null; latitude: number | null; longitude: number | null };
+  address: { province: string | null; city: string | null; addressLine: string | null; postalCode: string | null; latitude: number | null; longitude: number | null; exactPinPublic?: boolean | null };
   /** Display-only opening hours from signup (0 = Sunday … 6 = Saturday); empty when the shop has not set them. */
   openingHours: Array<{ dayOfWeek: number; open: string; close: string }>;
   kyc: AdminPartnerKycDto;
@@ -7840,6 +7854,16 @@ export interface MapsClientConfigDto {
   search: boolean;
   /** Routes are straight-line estimates (no routing provider configured or reachable). */
   estimatesOnly: boolean;
+}
+
+/** Admin › Site settings › Maps: how many saved locations still have no map pin (cheap counts, no rows). */
+export interface AdminMapsCoverageDto {
+  memberAddresses: { total: number; withoutPin: number };
+  providerLocations: { total: number; withoutPin: number };
+  sellerPickups: { total: number; withoutPin: number };
+  /** Where the browser map comes from right now, and why. */
+  provider: "none" | "neshan" | "google";
+  googleBrowserKeySet: boolean;
 }
 
 export interface MapPlaceDto {

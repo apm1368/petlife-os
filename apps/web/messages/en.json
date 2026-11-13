@@ -1190,7 +1190,9 @@
       "warning": "Warning",
       "urgent": "Urgent",
       "members": "Members only",
-      "everyone": "Every visitor"
+      "everyone": "Every visitor",
+      "osm": "OpenStreetMap",
+      "google": "Google Maps"
     },
     "sections": {
       "trust": {
@@ -1224,6 +1226,10 @@
       "maintenance": {
         "title": "Maintenance mode",
         "hint": "Visitors see a maintenance message; the admin panel, sign-in and the status page stay available."
+      },
+      "maps": {
+        "title": "Maps",
+        "hint": "Which map the site draws. Google needs a browser key restricted to opetlife.ir in Google Cloud (with billing on); without one, or when Google is unreachable, the site keeps OpenStreetMap."
       }
     },
     "names": {
@@ -1270,7 +1276,9 @@
       "auth_otpEnabled": "SMS code sign-in",
       "auth_googleEnabled": "Google sign-in",
       "maintenance_enabled": "Maintenance mode on",
-      "maintenance_message": "Maintenance message"
+      "maintenance_message": "Maintenance message",
+      "maps_provider": "Map provider",
+      "maps_googleBrowserKey": "Google Maps browser key"
     },
     "save": {
       "label": "Save changes",
@@ -1292,6 +1300,12 @@
       "UNCHANGED": "nothing changed",
       "SETTING_CHANGE_CONFLICT": "changed meanwhile — refresh the page",
       "OPTION_INVALID": "invalid option"
+    },
+    "coverage": {
+      "title": "Saved locations without a map pin",
+      "addresses": "Member addresses: {missing, number} of {total, number}",
+      "providers": "Provider locations: {missing, number} of {total, number}",
+      "pickups": "Seller pickup addresses: {missing, number} of {total, number}"
     }
   },
   "siteSettings": {
@@ -8355,6 +8369,12 @@
       "OWNER": "Owner",
       "VET": "Veterinarian",
       "STAFF": "Staff"
+    },
+    "location": {
+      "noPin": "No map pin yet: add one so customers can find this branch.",
+      "edit": "Set location on map",
+      "save": "Save location",
+      "cancel": "Cancel"
     }
   },
   "clinicContacts": {
@@ -11687,7 +11707,8 @@
       "set": "Map point saved; the opetlife courier can price more precisely.",
       "clear": "Remove map point",
       "denied": "Location access was not given. You can continue without it.",
-      "hasPoint": "Has a map point"
+      "hasPoint": "Has a map point",
+      "noPoint": "No map pin yet: add one for more precise delivery"
     }
   },
   "adminShipping": {
@@ -13373,5 +13394,35 @@
         }
       }
     }
+  },
+  "locationPicker": {
+    "title": "Location on the map",
+    "required": "Required",
+    "hint": "Tap the map or drag the pin onto the exact door. Pinch or use + and − to zoom.",
+    "searchPlaceholder": "Search a street or place",
+    "search": "Search",
+    "searchNone": "Nothing found. Place the pin on the map instead.",
+    "pinLabel": "Your pin",
+    "mapLabel": "Map: tap to place the pin, drag the pin to move it",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "useMyLocation": "Use my current location",
+    "locating": "Finding your location…",
+    "clear": "Remove pin",
+    "denied": "Location access was denied or is unavailable. Tap the map to place the pin instead.",
+    "outsideIran": "That point is outside Iran. Place the pin on your address in Iran.",
+    "pinNeeded": "Place a pin so couriers and drivers can find the door.",
+    "privacyMember": "Your exact pin is private. It is used only for delivery, fares and “near me” distances, and by the courier or driver who serves you. Nobody else sees it; others only ever see a rounded distance such as ~2 km. You can move or remove it at any time.",
+    "privacyBusiness": "Customers see this pin on your public page. If you work from home, the public sees an approximate point (about 1 km) unless you choose to show the exact spot.",
+    "consentMember": "Save this exact location for my deliveries and distance estimates",
+    "consentBusiness": "This is my business location, and I agree to it being shown as described above",
+    "exactPublic": "Show my exact location publicly (otherwise an approximate point, about 1 km)",
+    "consentNeeded": "Tick the box under the map to save the pin, or remove the pin.",
+    "privacyPickup": "Only the couriers collecting your parcels and our support team use this pin; it is never shown on your public pages.",
+    "consentPickup": "Save this exact pickup location for couriers"
+  },
+  "locationNudge": {
+    "text": "Pin your default address on the map for more precise delivery and places near you.",
+    "action": "Pin it now"
   }
 }

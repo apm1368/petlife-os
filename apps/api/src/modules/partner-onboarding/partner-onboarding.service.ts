@@ -18,6 +18,7 @@ import {
 } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { ValidationApiException } from "../../common/errors/api-exception";
+import { pinFromInput } from "../../common/geo/geo";
 import { StorageService } from "../storage/storage.service";
 import { PartnerVerificationService } from "../partner-verification/partner-verification.service";
 import type {
@@ -204,18 +205,20 @@ export class PartnerOnboardingService {
   /** Step 5: postal address with province and city (+ map point): the service business's location and/or the shop's address. */
   async address(userId: string, dto: PartnerAddressDto) {
     const o = await this.requireAny(userId);
+    // A pin needs both coordinates inside Iran and the partner's consent; leaving it out keeps the saved pin.
+    const pin = pinFromInput(dto);
+    const pinFields = pin ? { latitude: pin.latitude, longitude: pin.longitude, pinConsentAt: new Date() } : {};
     const fields = {
       province: dto.province.trim(),
       city: dto.city.trim(),
       addressLine: dto.addressLine.trim(),
       postalCode: dto.postalCode ? toLatinDigits(dto.postalCode) : null,
-      latitude: dto.latitude ?? null,
-      longitude: dto.longitude ?? null,
+      ...pinFields,
     };
     await this.prisma.$transaction(async (tx) => {
       if (o.provider) {
         const location = o.provider.locations[0];
-        const data = { addressLine: fields.addressLine, city: fields.city, region: fields.province, latitude: fields.latitude, longitude: fields.longitude, phone: o.provider.phone };
+        const data = { addressLine: fields.addressLine, city: fields.city, region: fields.province, ...pinFields, ...(dto.exactPinPublic !== undefined ? { pinPublicExact: dto.exactPinPublic } : {}), phone: o.provider.phone };
         if (location) await tx.providerLocation.update({ where: { id: location.id }, data });
         else await tx.providerLocation.create({ data: { ...data, providerOrganizationId: o.provider.id, name: o.provider.name, countryCode: "IR", timezone: "Asia/Tehran" } });
       }
@@ -379,9 +382,9 @@ export class PartnerOnboardingService {
       business: o.provider || o.seller ? { name: (o.provider ?? o.seller)!.name, description: (o.provider ?? o.seller)!.description, logoUrl: (o.provider ?? o.seller)!.logoUrl } : null,
       owner: profile ? { firstName: profile.firstName, lastName: profile.lastName, phone: profile.landline } : null,
       address: location
-        ? { province: location.region, city: location.city, addressLine: location.addressLine, postalCode: o.seller?.postalCode ?? null, latitude: location.latitude, longitude: location.longitude }
+        ? { province: location.region, city: location.city, addressLine: location.addressLine, postalCode: o.seller?.postalCode ?? null, latitude: location.latitude, longitude: location.longitude, exactPinPublic: location.pinPublicExact }
         : o.seller?.addressLine
-          ? { province: o.seller.province, city: o.seller.city, addressLine: o.seller.addressLine, postalCode: o.seller.postalCode, latitude: o.seller.latitude, longitude: o.seller.longitude }
+          ? { province: o.seller.province, city: o.seller.city, addressLine: o.seller.addressLine, postalCode: o.seller.postalCode, latitude: o.seller.latitude, longitude: o.seller.longitude, exactPinPublic: null }
           : null,
       calendar: rules.map((r) => ({ dayOfWeek: r.dayOfWeek, start: r.startLocalTime, end: r.endLocalTime })),
       services: services.map((s) => ({ id: s.id, kind: kindOf(s.type), name: s.name, priceIrr: s.priceAmount ? Number(s.priceAmount) : 0, durationMinutes: s.durationMinutes, maxPets: s.maxPetsPerBooking, isActive: s.isActive })),

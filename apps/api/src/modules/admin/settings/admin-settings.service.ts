@@ -9,6 +9,8 @@ import type { ResolvedAdminContext } from "../auth/admin-context.types";
 import { adminCan } from "../auth/admin-permissions";
 import { PlatformSettingsService } from "../../platform-settings/platform-settings.service";
 import { settingDefinition, validateSettingValue } from "../../platform-settings/setting-definitions";
+import { MapsService } from "../../maps/maps.service";
+import type { AdminMapsCoverageDto } from "@petlife/types";
 
 type Tx = Prisma.TransactionClient;
 const json = (v: unknown) => (v === null ? Prisma.JsonNull : (v as Prisma.InputJsonValue));
@@ -25,7 +27,28 @@ export class AdminSettingsService {
     private readonly settings: PlatformSettingsService,
     private readonly audit: AdminAuditLogService,
     private readonly events: DomainEventsService,
+    private readonly maps: MapsService,
   ) {}
+
+  /** Admin › Site settings › Maps: counts of saved locations without a pin (no rows, no coordinates) and the live map. */
+  async mapsCoverage(): Promise<AdminMapsCoverageDto> {
+    const [addresses, addressesWithout, locations, locationsWithout, pickups, pickupsWithout] = await Promise.all([
+      this.prisma.customerAddress.count({ where: { archivedAt: null } }),
+      this.prisma.customerAddress.count({ where: { archivedAt: null, OR: [{ latitude: null }, { longitude: null }] } }),
+      this.prisma.providerLocation.count(),
+      this.prisma.providerLocation.count({ where: { OR: [{ latitude: null }, { longitude: null }] } }),
+      this.prisma.sellerShippingProfile.count({ where: { pickupAddressLine: { not: null } } }),
+      this.prisma.sellerShippingProfile.count({ where: { pickupAddressLine: { not: null }, OR: [{ pickupLatitude: null }, { pickupLongitude: null }] } }),
+    ]);
+    const config = this.maps.clientConfig();
+    return {
+      memberAddresses: { total: addresses, withoutPin: addressesWithout },
+      providerLocations: { total: locations, withoutPin: locationsWithout },
+      sellerPickups: { total: pickups, withoutPin: pickupsWithout },
+      provider: config.provider,
+      googleBrowserKeySet: !!this.settings.get<string | null>("maps.googleBrowserKey"),
+    };
+  }
 
   async list() {
     await this.settings.refresh();

@@ -6,7 +6,7 @@ import { apiFetch } from "@/lib/api/client";
 import "./map-view.css";
 
 export type MapPoint = { latitude: number; longitude: number };
-export type MapMarker = MapPoint & { id: string; kind: "pickup" | "dropoff" | "driver" | "me"; label: string };
+export type MapMarker = MapPoint & { id: string; kind: "pickup" | "dropoff" | "driver" | "me"; label: string; draggable?: boolean };
 
 export interface MapViewProps {
   center: MapPoint;
@@ -16,6 +16,8 @@ export interface MapViewProps {
   line?: [MapPoint, MapPoint] | null;
   /** Tapping the map places a point. */
   onPick?: (point: MapPoint) => void;
+  /** A draggable marker was dropped at a new point. */
+  onMarkerDrag?: (id: string, point: MapPoint) => void;
   /** Accessible name of the map region. */
   label: string;
   zoomInLabel: string;
@@ -68,12 +70,16 @@ const unproject = (x: number, y: number, z: number): MapPoint => {
   return { latitude: (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n))), longitude: lng };
 };
 
-function TileMap({ center, zoom: initialZoom = 13, markers, line, onPick, label, zoomInLabel, zoomOutLabel, className, tileUrl, attribution }: MapViewProps & { tileUrl: string; attribution: string }) {
+function TileMap({ center, zoom: initialZoom = 13, markers, line, onPick, onMarkerDrag, label, zoomInLabel, zoomOutLabel, className, tileUrl, attribution }: MapViewProps & { tileUrl: string; attribution: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 600, h: 360 });
   const [zoom, setZoom] = useState(initialZoom);
   const [view, setView] = useState<MapPoint>(center);
   const drag = useRef<{ x: number; y: number; cx: number; cy: number; moved: boolean } | null>(null);
+  // Touch: every active pointer, and the two-finger pinch in progress (distance and zoom when it started).
+  const pointers = useRef(new Map<number, { x: number; y: number }>());
+  const pinch = useRef<{ d0: number; z0: number } | null>(null);
+  const [markerDrag, setMarkerDrag] = useState<{ id: string; point: MapPoint } | null>(null);
 
   // Follow a new center from the parent (a picked place, the driver moving) without fighting a pan in progress.
   useEffect(() => {
@@ -82,7 +88,7 @@ function TileMap({ center, zoom: initialZoom = 13, markers, line, onPick, label,
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || typeof ResizeObserver === "undefined") return;
     const ro = new ResizeObserver(([entry]) => entry && setSize({ w: entry.contentRect.width, h: entry.contentRect.height }));
     ro.observe(el);
     return () => ro.disconnect();
@@ -105,11 +111,32 @@ function TileMap({ center, zoom: initialZoom = 13, markers, line, onPick, label,
     return { x: q.x - left, y: q.y - top };
   };
 
+  const spread = () => {
+    const [a, b] = [...pointers.current.values()];
+    return a && b ? Math.hypot(a.x - b.x, a.y - b.y) : 0;
+  };
+  const pointAt = (clientX: number, clientY: number): MapPoint | null => {
+    if (!ref.current) return null;
+    const rect = ref.current.getBoundingClientRect();
+    return unproject(left + (clientX - rect.left), top + (clientY - rect.top), zoom);
+  };
   const onPointerDown = (e: React.PointerEvent) => {
     (e.target as Element).setPointerCapture?.(e.pointerId);
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.current.size >= 2) {
+      // Second finger: pinch to zoom instead of panning or placing a pin.
+      pinch.current = { d0: Math.max(1, spread()), z0: zoom };
+      drag.current = null;
+      return;
+    }
     drag.current = { x: e.clientX, y: e.clientY, cx: c.x, cy: c.y, moved: false };
   };
   const onPointerMove = (e: React.PointerEvent) => {
+    if (pointers.current.has(e.pointerId)) pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pinch.current) {
+      if (pointers.current.size >= 2) setZoom(Math.max(4, Math.min(18, Math.round(pinch.current.z0 + Math.log2(spread() / pinch.current.d0)))));
+      return;
+    }
     const d = drag.current;
     if (!d) return;
     const dx = e.clientX - d.x;
@@ -118,12 +145,48 @@ function TileMap({ center, zoom: initialZoom = 13, markers, line, onPick, label,
     if (d.moved) setView(unproject(d.cx - dx, d.cy - dy, zoom));
   };
   const onPointerUp = (e: React.PointerEvent) => {
+    pointers.current.delete(e.pointerId);
+    if (pinch.current) {
+      if (pointers.current.size < 2) pinch.current = null;
+      drag.current = null;
+      return;
+    }
     const d = drag.current;
     drag.current = null;
-    if (!d || d.moved || !onPick || !ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    onPick(unproject(left + (e.clientX - rect.left), top + (e.clientY - rect.top), zoom));
+    if (!d || d.moved || !onPick) return;
+    const p = pointAt(e.clientX, e.clientY);
+    if (p) onPick(p);
   };
+  const onPointerCancel = (e: React.PointerEvent) => {
+    pointers.current.delete(e.pointerId);
+    if (pointers.current.size < 2) pinch.current = null;
+    drag.current = null;
+  };
+  // A draggable marker follows the finger and reports where it was dropped.
+  const markerHandlers = (m: MapMarker) =>
+    m.draggable && onMarkerDrag
+      ? {
+          onPointerDown: (e: React.PointerEvent) => {
+            e.stopPropagation();
+            (e.target as Element).setPointerCapture?.(e.pointerId);
+            setMarkerDrag({ id: m.id, point: m });
+          },
+          onPointerMove: (e: React.PointerEvent) => {
+            if (markerDrag?.id !== m.id) return;
+            e.stopPropagation();
+            const p = pointAt(e.clientX, e.clientY);
+            if (p) setMarkerDrag({ id: m.id, point: p });
+          },
+          onPointerUp: (e: React.PointerEvent) => {
+            if (markerDrag?.id !== m.id) return;
+            e.stopPropagation();
+            const p = pointAt(e.clientX, e.clientY) ?? markerDrag.point;
+            setMarkerDrag(null);
+            onMarkerDrag(m.id, p);
+          },
+          onPointerCancel: () => setMarkerDrag(null),
+        }
+      : {};
   const zoomBy = useCallback((delta: number) => setZoom((z) => Math.max(4, Math.min(18, z + delta))), []);
   const onKeyDown = (e: React.KeyboardEvent) => {
     const step = 80;
@@ -146,7 +209,7 @@ function TileMap({ center, zoom: initialZoom = 13, markers, line, onPick, label,
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        onPointerCancel={() => (drag.current = null)}
+        onPointerCancel={onPointerCancel}
         onWheel={(e) => zoomBy(e.deltaY < 0 ? 1 : -1)}
         onKeyDown={onKeyDown}
         dir="ltr"
@@ -162,9 +225,16 @@ function TileMap({ center, zoom: initialZoom = 13, markers, line, onPick, label,
           </svg>
         ) : null}
         {markers.map((m) => {
-          const p = screen(m);
+          const p = screen(markerDrag?.id === m.id ? markerDrag.point : m);
           return (
-            <span key={m.id} className={`map-view__marker map-view__marker--${m.kind}`} style={{ transform: `translate(${p.x}px, ${p.y}px)` }} title={m.label}>
+            <span
+              key={m.id}
+              data-testid={`map-marker-${m.id}`}
+              className={`map-view__marker map-view__marker--${m.kind}${m.draggable && onMarkerDrag ? " map-view__marker--draggable" : ""}`}
+              style={{ transform: `translate(${p.x}px, ${p.y}px)` }}
+              title={m.label}
+              {...markerHandlers(m)}
+            >
               <span className="sr-only">{m.label}</span>
             </span>
           );
@@ -188,7 +258,7 @@ function TileMap({ center, zoom: initialZoom = 13, markers, line, onPick, label,
 type GLatLng = { lat: number; lng: number };
 interface GMapsNamespace {
   Map: new (el: HTMLElement, opts: Record<string, unknown>) => { setCenter(c: GLatLng): void; addListener(ev: string, cb: (e: { latLng?: { lat(): number; lng(): number } }) => void): void };
-  Marker: new (opts: Record<string, unknown>) => { setMap(m: unknown): void; setPosition(p: GLatLng): void };
+  Marker: new (opts: Record<string, unknown>) => { setMap(m: unknown): void; setPosition(p: GLatLng): void; addListener(ev: string, cb: (e: { latLng?: { lat(): number; lng(): number } }) => void): void };
   Polyline: new (opts: Record<string, unknown>) => { setMap(m: unknown): void };
 }
 let googleLoad: Promise<GMapsNamespace> | null = null;
@@ -226,13 +296,15 @@ function loadGoogle(key: string): Promise<GMapsNamespace> {
 const MARKER_COLOR: Record<MapMarker["kind"], string> = { pickup: "#2f7d4c", dropoff: "#c2410c", driver: "#1d4ed8", me: "#6b7280" };
 
 function GoogleMap(props: MapViewProps & { apiKey: string; fallback: MapsClientConfigDto }) {
-  const { center, zoom = 13, markers, line, onPick, label, apiKey, fallback } = props;
+  const { center, zoom = 13, markers, line, onPick, onMarkerDrag, label, apiKey, fallback } = props;
   const ref = useRef<HTMLDivElement>(null);
   const map = useRef<InstanceType<GMapsNamespace["Map"]> | null>(null);
   const gm = useRef<GMapsNamespace | null>(null);
   const drawn = useRef<{ setMap(m: unknown): void }[]>([]);
   const pick = useRef(onPick);
   pick.current = onPick;
+  const dragged = useRef(onMarkerDrag);
+  dragged.current = onMarkerDrag;
   const [failed, setFailed] = useState(googleAuthFailed);
 
   // A refused key draws Google's error box over the map; show our own map instead.
@@ -267,7 +339,11 @@ function GoogleMap(props: MapViewProps & { apiKey: string; fallback: MapsClientC
     const g = gm.current;
     if (!g || !map.current) return;
     drawn.current.forEach((d) => d.setMap(null));
-    drawn.current = markers.map((m) => new g.Marker({ map: map.current, position: { lat: m.latitude, lng: m.longitude }, title: m.label, icon: { path: 0, scale: 9, fillColor: MARKER_COLOR[m.kind], fillOpacity: 1, strokeColor: "#fff", strokeWeight: 2 } }));
+    drawn.current = markers.map((m) => {
+      const marker = new g.Marker({ map: map.current, position: { lat: m.latitude, lng: m.longitude }, title: m.label, draggable: !!(m.draggable && dragged.current), icon: { path: 0, scale: 9, fillColor: MARKER_COLOR[m.kind], fillOpacity: 1, strokeColor: "#fff", strokeWeight: 2 } });
+      if (m.draggable) marker.addListener("dragend", (e) => e.latLng && dragged.current?.(m.id, { latitude: e.latLng.lat(), longitude: e.latLng.lng() }));
+      return marker;
+    });
     if (line) drawn.current.push(new g.Polyline({ map: map.current, path: line.map((p) => ({ lat: p.latitude, lng: p.longitude })), strokeColor: "#2f7d4c", strokeOpacity: 0.8, strokeWeight: 4 }));
   });
 
