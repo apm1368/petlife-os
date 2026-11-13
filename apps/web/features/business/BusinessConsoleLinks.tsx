@@ -9,10 +9,10 @@ export function BusinessConsoleLinks({ supportCategory }: { supportCategory: "PR
   const locale = useLocale();
   return (
     <span className="flex items-center gap-3 text-sm">
-      <Link className="underline" href={`/${locale}/business`}>
+      <Link className="inline-flex min-h-11 items-center underline" href={`/${locale}/business`}>
         {t("homeLink")}
       </Link>
-      <Link className="underline" href={`/${locale}/support/new?category=${supportCategory}`}>
+      <Link className="inline-flex min-h-11 items-center underline" href={`/${locale}/support/new?category=${supportCategory}`}>
         {t("support")}
       </Link>
     </span>

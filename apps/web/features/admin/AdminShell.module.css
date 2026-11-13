@@ -103,3 +103,10 @@
   .headerSearch span { display:none; }
 }
 @media (prefers-reduced-motion: reduce) { .sidebar { transition:none; } }
+
+/* P7 (owner, 2026-11-13): on touch screens every header and menu control is at least 44px. Desktop unchanged. */
+@media (pointer: coarse) {
+  .brand, .search, .link, .menuItem, .tools select, .tools button { min-height: 44px; }
+  .userButtonCompact { min-height: 44px; min-width: 44px; }
+  .collapse { width: 44px; height: 44px; }
+}
