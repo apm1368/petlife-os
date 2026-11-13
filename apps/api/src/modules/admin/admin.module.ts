@@ -24,6 +24,8 @@ import { AdminFinanceOpsController } from "./finance/finance-ops.controller";
 import { AutomaticTaskListener } from "./task/automatic-task.listener";
 import { AdminPartner360Service } from "./partners/admin-partner360.service";
 import { AdminPartner360Controller } from "./partners/admin-partner360.controller";
+import { AdminPartnerDirectoryController } from "./partners/admin-partner-directory.controller";
+import { AdminPartnerDirectoryService } from "./partners/admin-partner-directory.service";
 import { AutomaticTaskService } from "./task/automatic-task.service";
 import { AdminPet360Service } from "./pets/admin-pet360.service";
 import { AdminPet360Controller } from "./pets/admin-pet360.controller";
@@ -190,6 +192,7 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminWalletsController,
     AdminCardTransferDestinationController,
     AdminPartner360Controller,
+    AdminPartnerDirectoryController,
     AdminPet360Controller,
     AdminAccessControlController,
     AdminCustomRolesController,
@@ -238,6 +241,7 @@ import { MemoriesModule } from "../memories/memories.module";
     SettlementOpsService,
     AutomaticTaskListener,
     AdminPartner360Service,
+    AdminPartnerDirectoryService,
     AutomaticTaskService,
     AdminPet360Service,
     AdminCustomerOverviewService,

@@ -6628,6 +6628,124 @@ export interface AdminProductRowDto {
   createdAt: string;
 }
 
+/** A business on the other side of a partner link (one owner, a service business and a shop). */
+export interface AdminPartnerLinkDto {
+  id: string;
+  name: string;
+  verificationStatus: string;
+  /** Shop operating status; null for a service business. */
+  status: string | null;
+}
+
+/** KYC as staff see it in a partner profile: the case status and every document (never the file itself; opening one goes through the audited verification screen). */
+export interface AdminPartnerKycDto {
+  status: string;
+  submittedAt: string | null;
+  note: string | null;
+  contact: { firstName: string; lastName: string; mobile: string; landline: string; websiteUrl: string | null; enamadId: string | null } | null;
+  documents: Array<{ id: string; kind: string; status: string; reviewNote: string | null; expiresAt: string | null; uploadedAt: string; reviewedAt: string | null }>;
+}
+
+export interface AdminPartnerServiceRowDto {
+  id: string;
+  name: string;
+  logoUrl: string | null;
+  type: string;
+  /** Every kind offered (vet, groomer, boarding, sitter, trainer, taxi…); the first is `type`. */
+  serviceKinds: string[];
+  phone: string | null;
+  city: string | null;
+  province: string | null;
+  verificationStatus: string;
+  submittedAt: string | null;
+  isDemoRecord: boolean;
+  activeServices: number;
+  inactiveServices: number;
+  pendingDocuments: number;
+  linkedShop: AdminPartnerLinkDto | null;
+  createdAt: string;
+}
+
+export interface AdminPartnerShopRowDto {
+  id: string;
+  name: string;
+  logoUrl: string | null;
+  phone: string | null;
+  city: string | null;
+  province: string | null;
+  status: string;
+  verificationStatus: string;
+  submittedAt: string | null;
+  activeOffers: number;
+  pendingOffers: number;
+  pendingDocuments: number;
+  linkedService: (AdminPartnerLinkDto & { type: string }) | null;
+  createdAt: string;
+}
+
+export interface AdminPartnerServiceDetailDto {
+  id: string;
+  name: string;
+  logoUrl: string | null;
+  type: string;
+  serviceKinds: string[];
+  phone: string | null;
+  email: string | null;
+  websiteUrl: string | null;
+  description: string | null;
+  isDemoRecord: boolean;
+  createdAt: string;
+  kyc: AdminPartnerKycDto;
+  locations: Array<{ id: string; name: string | null; addressLine: string; city: string; province: string | null; latitude: number | null; longitude: number | null; phone: string | null; timezone: string }>;
+  services: Array<{
+    id: string;
+    name: string;
+    category: string;
+    type: string;
+    locationMode: string;
+    isActive: boolean;
+    durationMinutes: number;
+    priceAmount: number | null;
+    currency: string | null;
+    maxPetsPerBooking: number;
+    supportsDog: boolean;
+    supportsCat: boolean;
+    variants: Array<{ id: string; name: string; priceAmount: number | null; durationMinutes: number; isActive: boolean }>;
+    transportPricing: { baseFareIrr: number; perKmRateIrr: number; isActive: boolean } | null;
+  }>;
+  /** Weekly opening rules (0 = Sunday … 6 = Saturday) and the closures/extra openings of the next 60 days. */
+  calendar: {
+    rules: Array<{ id: string; dayOfWeek: number; start: string; end: string; timezone: string; locationName: string | null; staffName: string | null; serviceName: string | null }>;
+    exceptions: Array<{ id: string; startAt: string; endAt: string; type: string; reason: string | null; staffName: string | null }>;
+  };
+  team: Array<{ id: string; role: string; displayName: string; displayTitle: string | null }>;
+  linkedShop: AdminPartnerLinkDto | null;
+}
+
+export interface AdminPartnerShopDetailDto {
+  id: string;
+  name: string;
+  slug: string | null;
+  logoUrl: string | null;
+  description: string | null;
+  phone: string | null;
+  email: string | null;
+  status: string;
+  createdAt: string;
+  address: { province: string | null; city: string | null; addressLine: string | null; postalCode: string | null; latitude: number | null; longitude: number | null };
+  /** Display-only opening hours from signup (0 = Sunday … 6 = Saturday); empty when the shop has not set them. */
+  openingHours: Array<{ dayOfWeek: number; open: string; close: string }>;
+  kyc: AdminPartnerKycDto;
+  offers: {
+    counts: Record<string, number>;
+    pendingReview: number;
+    items: Array<{ id: string; productId: string; productTitle: string; productStatus: string; variantSku: string; variantTitle: string | null; priceAmount: number; currency: string; status: string; moderationStatus: string; available: number | null; updatedAt: string }>;
+  };
+  pendingCatalogRequests: number;
+  team: Array<{ id: string; role: string; displayName: string }>;
+  linkedService: (AdminPartnerLinkDto & { type: string; serviceKinds: string[] }) | null;
+}
+
 export interface AdminProductReviewRowDto {
   id: string;
   productId: string;
