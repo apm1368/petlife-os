@@ -53,6 +53,8 @@ import { RefundsModule } from "./modules/commerce/refunds/refunds.module";
 import { ReconciliationModule } from "./modules/commerce/reconciliation/reconciliation.module";
 import { OrdersModule } from "./modules/commerce/orders/orders.module";
 import { LogisticsModule } from "./modules/commerce/logistics/logistics.module";
+import { MapsModule } from "./modules/maps/maps.module";
+import { PetTaxiModule } from "./modules/pet-taxi/pet-taxi.module";
 import { MarketplaceModule } from "./modules/commerce/marketplace/marketplace.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { AdminModule } from "./modules/admin/admin.module";
@@ -139,6 +141,8 @@ import { PlacesModule } from "./modules/places/places.module";
     ReconciliationModule,
     OrdersModule,
     LogisticsModule,
+    MapsModule,
+    PetTaxiModule,
     MarketplaceModule,
     NotificationsModule,
     AdminModule,

@@ -1,0 +1,16 @@
+/* Users → Ownership transfers */
+.gx-ownership-filters { display: grid; gap: 12px; }
+.gx-ownership-search { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; }
+.gx-ownership-search .gx-field { flex: 1 1 240px; }
+.gx-ownership-list { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.gx-ownership { display: grid; gap: 8px; }
+.gx-ownership p { margin: 0; }
+.gx-ownership--focus { outline: 2px solid var(--brand-natural); outline-offset: 2px; }
+.gx-ownership__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.gx-ownership__head h2 { margin: 0; }
+.gx-ownership__facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 6px 16px; margin: 0; }
+.gx-ownership__facts dt { font-size: 0.74rem; color: var(--text-secondary); font-weight: 700; }
+.gx-ownership__facts dd { margin: 0; }
+.gx-ownership__note { overflow-wrap: anywhere; }
+.gx-ownership__close { display: grid; gap: 8px; max-width: 560px; }
+.gx-ownership__buttons { display: flex; flex-wrap: wrap; gap: 8px; }

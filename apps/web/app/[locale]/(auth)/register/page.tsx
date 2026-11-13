@@ -13,6 +13,7 @@ import { useSessionStore } from "@/stores/session-store";
 import { ApiError } from "@/lib/api/client";
 import { resolvePostAuthDestination } from "@/lib/auth/resolve-post-auth-destination";
 import { normalizeIranPhone } from "@petlife/validation";
+import { adminService } from "@/services/admin.service";
 
 function RegisterFlow() {
   const t = useTranslations("auth"); const router = useRouter(); const locale = useLocale(); const searchParams = useSearchParams();
@@ -36,8 +37,8 @@ function RegisterFlow() {
       const { user } = await authService.register({ phone: normalizedPhone, firstName: firstName.trim(), lastName: lastName.trim(), username: username.trim(), password });
       setUser(user);
       await Promise.all([accountService.setConsent("TERMS", true), accountService.setConsent("PRIVACY", true)]);
-      const progress = await onboardingService.getProgress();
-      router.replace(resolvePostAuthDestination(locale, returnTo, progress));
+      const [progress, staff] = await Promise.all([onboardingService.getProgress(), adminService.getMe().catch(() => null)]);
+      router.replace(resolvePostAuthDestination(locale, returnTo, progress, { isAdmin: !!staff?.isAdmin }));
     } catch (err) {
       if (err instanceof ApiError && err.code === "USERNAME_TAKEN") setError(t("register.usernameTaken"));
       else if (err instanceof ApiError && err.code === "PHONE_INVALID") setError(copy.invalidPhone);

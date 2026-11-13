@@ -28,23 +28,59 @@ export function cardTransferAllowedForBooking(startAt: Date, now = new Date()): 
 }
 
 /** Wallet balances are derived, never persisted. Expired credit is ignored even before the expiry worker appends its audit entry. */
-export function deriveWalletBalances(entries: Pick<WalletEntry, "id" | "balanceType" | "kind" | "amount" | "expiresAt" | "source" | "referenceType" | "referenceId">[], now = new Date()): Record<WalletBalanceType, number> {
-  const balances: Record<WalletBalanceType, number> = {
-    [WalletBalanceType.WITHDRAWABLE]: 0,
-    [WalletBalanceType.PURCHASE_ONLY]: 0,
+type BalanceEntry = Pick<WalletEntry, "id" | "balanceType" | "kind" | "amount" | "expiresAt" | "source" | "referenceType" | "referenceId"> & { createdAt?: Date };
+
+/** A credit with an expiry (gift credit): what is still unspent of it. */
+export interface ExpiringLot {
+  creditId: string;
+  balanceType: WalletBalanceType;
+  expiresAt: Date;
+  remaining: number;
+}
+
+/**
+ * Replays a wallet's entries in time order. Spending uses expiring credit first (soonest expiry first), then the rest
+ * of that bucket, so a gift that was spent is never expired again, and only the unspent remainder of a gift lapses.
+ * EXPIRY rows are audit records of that lapse and are not counted again.
+ */
+export function replayWallet(entries: BalanceEntry[], now = new Date()) {
+  const ordered = entries
+    .map((entry, index) => ({ entry, index }))
+    .sort((a, b) => (a.entry.createdAt && b.entry.createdAt ? a.entry.createdAt.getTime() - b.entry.createdAt.getTime() : 0) || a.index - b.index)
+    .map(({ entry }) => entry);
+  const plain: Record<WalletBalanceType, number> = { [WalletBalanceType.WITHDRAWABLE]: 0, [WalletBalanceType.PURCHASE_ONLY]: 0 };
+  const lots: ExpiringLot[] = [];
+  const expired: ExpiringLot[] = [];
+  const lapse = (at: Date) => {
+    for (let i = lots.length - 1; i >= 0; i--) {
+      if (lots[i]!.expiresAt <= at) expired.push(...lots.splice(i, 1));
+    }
   };
-  // Expired gift credit is excluded immediately, even before the worker has
-  // written its audit expiry row. Once that row exists it must also be
-  // excluded, otherwise the same gift would be subtracted twice.
-  const expiredGiftIds = new Set(entries
-    .filter((entry) => entry.kind === WalletEntryKind.CREDIT && entry.source === "GIFT" && entry.expiresAt && entry.expiresAt <= now)
-    .map((entry) => entry.id));
-  for (const entry of entries) {
-    if (entry.kind === WalletEntryKind.CREDIT && entry.expiresAt && entry.expiresAt <= now) continue;
-    if (entry.kind === WalletEntryKind.EXPIRY && entry.referenceType === "WALLET_GIFT_EXPIRY" && expiredGiftIds.has(entry.referenceId)) continue;
-    balances[entry.balanceType] += entry.kind === WalletEntryKind.CREDIT ? entry.amount : -entry.amount;
+  for (const entry of ordered) {
+    if (entry.createdAt) lapse(entry.createdAt);
+    if (entry.kind === WalletEntryKind.EXPIRY) continue;
+    if (entry.kind === WalletEntryKind.CREDIT) {
+      if (entry.expiresAt) lots.push({ creditId: entry.id, balanceType: entry.balanceType, expiresAt: entry.expiresAt, remaining: entry.amount });
+      else plain[entry.balanceType] += entry.amount;
+      continue;
+    }
+    let left = entry.amount;
+    for (const lot of lots.filter((l) => l.balanceType === entry.balanceType).sort((a, b) => a.expiresAt.getTime() - b.expiresAt.getTime())) {
+      const take = Math.min(lot.remaining, left);
+      lot.remaining -= take;
+      left -= take;
+      if (!left) break;
+    }
+    plain[entry.balanceType] -= left;
   }
-  return balances;
+  lapse(now);
+  const balances: Record<WalletBalanceType, number> = { ...plain };
+  for (const lot of lots) balances[lot.balanceType] += lot.remaining;
+  return { balances, open: lots.filter((l) => l.remaining > 0), expired: expired.filter((l) => l.remaining > 0) };
+}
+
+export function deriveWalletBalances(entries: BalanceEntry[], now = new Date()): Record<WalletBalanceType, number> {
+  return replayWallet(entries, now).balances;
 }
 
 export function sixMonthGiftExpiry(from = new Date()): Date {

@@ -361,6 +361,29 @@ export class TravelBookingService {
     return this.toDto(await this.loadForOrganization(organizationId, bookingId));
   }
 
+  /** Any stay by id, for staff (admin) actions; access is the admin permission on the calling route. */
+  async loadForStaff(bookingId: string): Promise<BookingWithRelations> {
+    const row = await this.prisma.travelBooking.findUnique({ where: { id: bookingId }, include: BOOKING_INCLUDE });
+    if (!row) throw new TravelBookingNotFoundException({ bookingId });
+    return row;
+  }
+
+  /** What the stay's own snapshotted terms would refund if the traveller cancelled now (staff preview). */
+  policyRefundIrr(row: BookingWithRelations, paidIrr: number): number {
+    return decideTravelRefund(row.ratePlanSnapshot as unknown as RatePlanTerms | null, row.checkIn, paidIrr, false).amountIrr;
+  }
+
+  /**
+   * Staff cancellation: releases the nights like any cancellation and tells both sides, but moves no money — a refund,
+   * if any, goes through a finance-approved AdminRefundApproval (see AdminBookingMoneyService).
+   */
+  async cancelAsStaff(adminUserId: string, bookingId: string, reason: string): Promise<void> {
+    const row = await this.loadForStaff(bookingId);
+    const allowed: TravelBookingStatus[] = [TravelBookingStatus.HELD, TravelBookingStatus.AWAITING_PROVIDER, TravelBookingStatus.AWAITING_PAYMENT, TravelBookingStatus.CONFIRMED, TravelBookingStatus.IN_PROGRESS];
+    if (!allowed.includes(row.status)) throw new InvalidTravelBookingTransitionException({ bookingId, from: row.status, to: TravelBookingStatus.CANCELLED });
+    await this.move(row, TravelBookingStatus.CANCELLED, { type: "ADMIN", id: adminUserId }, reason, { cancelledAt: new Date(), cancelReason: reason, cancelledBy: "ADMIN" });
+  }
+
   /** Cancels (releasing inventory in the same transaction) and then refunds what the snapshotted terms allow. */
   private async cancel(row: BookingWithRelations, actor: TravelActor, reason: string | null, byProvider: boolean): Promise<void> {
     const paid = row.paymentStatus === "PAID" ? row.payNowAmountIrr : 0;

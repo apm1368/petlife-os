@@ -54,6 +54,7 @@ const copy = {
     memory: "ثبت خاطره",
     yearReview: "مرور سال و تولد",
     careSheet: "برگه مراقبت برای پرستار",
+    petCard: "کارت حیوان و کد QR",
     household: "خانواده",
     editTitle: "ویرایش مشخصات",
     name: "نام",
@@ -95,6 +96,7 @@ const copy = {
     memory: "Add memory",
     yearReview: "Year in review & birthday",
     careSheet: "Care sheet for a sitter",
+    petCard: "Pet card and QR code",
     household: "Household",
     editTitle: "Edit identity",
     name: "Name",
@@ -138,6 +140,7 @@ const copy = {
     memory: "Erinnerung hinzufügen",
     yearReview: "Jahresrückblick und Geburtstag",
     careSheet: "Pflegeblatt für Betreuungspersonen",
+    petCard: "Tierkarte und QR-Code",
     household: "Haushalt",
     editTitle: "Angaben bearbeiten",
     name: "Name",
@@ -182,6 +185,7 @@ const copy = {
     memory: "Añadir recuerdo",
     yearReview: "Resumen del año y cumpleaños",
     careSheet: "Ficha de cuidados para cuidadores",
+    petCard: "Tarjeta y código QR",
     household: "Hogar",
     editTitle: "Editar datos",
     name: "Nombre",
@@ -362,6 +366,7 @@ export function PetProfileView({ petId }: { petId: string }) {
               {access.canViewCareProfile && !isMemorial ? (
                 <Shortcut href={base + "/care-sheet"} label={c.careSheet} />
               ) : null}
+              {access.canManageAccess && !isMemorial ? <Shortcut href={base + "/card"} label={c.petCard} /> : null}
             </div>
           </OverviewSection>
           <OverviewSection title={c.recentActivity}>

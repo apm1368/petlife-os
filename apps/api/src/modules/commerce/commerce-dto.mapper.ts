@@ -42,6 +42,8 @@ export function toSellerSummaryDto(seller: SellerOrganization): SellerOrganizati
     verificationStatus: seller.verificationStatus as unknown as SellerOrganizationSummaryDto["verificationStatus"],
     status: seller.status as unknown as SellerOrganizationSummaryDto["status"],
     city: seller.city,
+    slug: seller.slug ?? null,
+    logoUrl: seller.logoUrl ?? null,
   };
 }
 

@@ -9,6 +9,7 @@ import type { AppEnv } from "../../../config/env";
 import { StorageService } from "../../storage/storage.service";
 import { WalletService, WALLET_TOP_UP_REFERENCE } from "./wallet.service";
 import { ZibalGateway } from "./zibal.gateway";
+import { CardTransferDestinationService, type CompanyAccount } from "./card-transfer-destination.service";
 import {
   OPEN_TOP_UP_STATUSES,
   WALLET_CARD_RECEIPT_WINDOW_MS,
@@ -17,7 +18,6 @@ import {
   WALLET_TOP_UP_MIN_IRR,
   WALLET_TOP_UP_PRESETS_IRR,
   availableTopUpRails,
-  companyCard,
   isReceiptWindowOver,
   validTopUpAmount,
   walletReturnUrl,
@@ -54,6 +54,7 @@ export class WalletTopUpService {
     private readonly wallet: WalletService,
     private readonly gateway: ZibalGateway,
     private readonly storage: StorageService,
+    private readonly destinations: CardTransferDestinationService,
   ) {}
 
   private railConfig() {
@@ -66,8 +67,18 @@ export class WalletTopUpService {
     };
   }
 
-  options(): WalletTopUpOptionsDto {
-    return { rails: availableTopUpRails(this.railConfig()), minAmount: WALLET_TOP_UP_MIN_IRR, maxAmount: WALLET_TOP_UP_MAX_IRR, presets: WALLET_TOP_UP_PRESETS_IRR };
+  /** The company card a member transfers to, only while it can take a card-to-card payment (it has a card number). */
+  private async card(): Promise<CompanyAccount | null> {
+    const account = await this.destinations.current();
+    return account?.cardNumber ? account : null;
+  }
+
+  private instructions(account: CompanyAccount) {
+    return { cardNumber: account.cardNumberFormatted!, cardHolderName: account.holderName, bankName: account.bankName, sheba: account.sheba };
+  }
+
+  async options(): Promise<WalletTopUpOptionsDto> {
+    return { rails: availableTopUpRails(this.railConfig(), !!(await this.card())), minAmount: WALLET_TOP_UP_MIN_IRR, maxAmount: WALLET_TOP_UP_MAX_IRR, presets: WALLET_TOP_UP_PRESETS_IRR };
   }
 
   async list(userId: string): Promise<WalletTopUpDto[]> {
@@ -79,9 +90,11 @@ export class WalletTopUpService {
   /** The instructions a member needs again after a reload: the card for an open card-to-card request. */
   async get(userId: string, id: string): Promise<WalletTopUpStartedDto> {
     const row = await this.own(userId, id);
-    const card = companyCard(this.railConfig());
     const open = row.status === WalletTopUpStatus.AWAITING_RECEIPT && !isReceiptWindowOver(row);
-    return { topUp: toTopUpDto(row), redirectUrl: null, cardTransfer: open && card ? { cardNumber: card.cardNumber, cardHolderName: card.cardHolderName } : null };
+    // The account this request was started with, even if the owner has changed it since: the member may already
+    // have transferred to it, and finance checks the receipt against it.
+    const account = open && row.rail === WalletTopUpRail.CARD_TO_CARD ? await this.destinations.forPayment(row.cardTransferDestinationId) : null;
+    return { topUp: toTopUpDto(row), redirectUrl: null, cardTransfer: account?.cardNumber ? this.instructions(account) : null };
   }
 
   async start(userId: string, input: { amount: number; rail: WalletTopUpRail; locale: string }, idempotencyKey: string | undefined): Promise<WalletTopUpStartedDto> {
@@ -95,20 +108,21 @@ export class WalletTopUpService {
     }
     if (!validTopUpAmount(input.amount)) throw new ValidationApiException({ field: "amount", reason: "OUT_OF_RANGE", min: WALLET_TOP_UP_MIN_IRR, max: WALLET_TOP_UP_MAX_IRR });
     const config = this.railConfig();
-    if (!availableTopUpRails(config).includes(input.rail)) throw new ValidationApiException({ field: "rail", reason: "TOP_UP_RAIL_UNAVAILABLE" });
+    const card = input.rail === WalletTopUpRail.CARD_TO_CARD ? await this.card() : null;
+    if (!availableTopUpRails(config, !!card).includes(input.rail)) throw new ValidationApiException({ field: "rail", reason: "TOP_UP_RAIL_UNAVAILABLE" });
     await this.expireOverdue(userId);
     const open = await this.prisma.walletTopUp.count({ where: { userId, status: { in: OPEN_TOP_UP_STATUSES } } });
     if (open >= WALLET_MAX_OPEN_TOP_UPS) throw new ValidationApiException({ field: "topUp", reason: "TOO_MANY_OPEN_TOP_UPS", max: WALLET_MAX_OPEN_TOP_UPS });
 
-    if (input.rail === WalletTopUpRail.CARD_TO_CARD) {
-      const card = companyCard(config)!;
+    if (input.rail === WalletTopUpRail.CARD_TO_CARD && card) {
       const row = await this.prisma.walletTopUp.create({
         data: {
           userId, rail: input.rail, status: WalletTopUpStatus.AWAITING_RECEIPT, amount: input.amount, idempotencyKey: key,
-          cardNumberMasked: card.cardNumberMasked, cardHolderName: card.cardHolderName, receiptDeadlineAt: new Date(Date.now() + WALLET_CARD_RECEIPT_WINDOW_MS),
+          cardNumberMasked: card.cardNumberMasked, cardHolderName: card.holderName, cardTransferDestinationId: card.destinationId,
+          receiptDeadlineAt: new Date(Date.now() + WALLET_CARD_RECEIPT_WINDOW_MS),
         },
       });
-      return { topUp: toTopUpDto(row), redirectUrl: null, cardTransfer: { cardNumber: card.cardNumber, cardHolderName: card.cardHolderName } };
+      return { topUp: toTopUpDto(row), redirectUrl: null, cardTransfer: this.instructions(card) };
     }
 
     const row = await this.prisma.walletTopUp.create({ data: { userId, rail: input.rail, status: WalletTopUpStatus.AWAITING_PAYMENT, amount: input.amount, idempotencyKey: key } });

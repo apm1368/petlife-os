@@ -20,6 +20,9 @@ export function toAddressSnapshotDto(json: unknown): AddressSnapshotDto {
     region: snapshot.region ?? null,
     countryCode: snapshot.countryCode ?? null,
     instructions: snapshot.instructions ?? null,
+    ...(snapshot.area ? { area: snapshot.area } : {}),
+    ...(snapshot.postalCode ? { postalCode: snapshot.postalCode } : {}),
+    ...(typeof snapshot.latitude === "number" && typeof snapshot.longitude === "number" ? { latitude: snapshot.latitude, longitude: snapshot.longitude } : {}),
   };
 }
 
@@ -44,6 +47,16 @@ export function toFulfillmentDto(fulfillment: Fulfillment): FulfillmentDto {
     createdAt: fulfillment.createdAt.toISOString(),
     updatedAt: fulfillment.updatedAt.toISOString(),
   };
+}
+
+/**
+ * What a buyer may see of a fulfillment: the seller's pickup point is reduced to its city/region (it can be someone's
+ * home); contact, street, postal code, map point and instructions stay with the seller, staff and the courier.
+ */
+export function toBuyerFulfillmentDto(fulfillment: Fulfillment): FulfillmentDto {
+  const dto = toFulfillmentDto(fulfillment);
+  const { city, region, countryCode } = dto.pickupAddress;
+  return { ...dto, pickupAddress: { recipient: null, phone: null, addressLine: null, city, region, countryCode, instructions: null } };
 }
 
 export function toShipmentDto(shipment: Shipment): ShipmentDto {
@@ -76,5 +89,6 @@ export function toShippingQuoteDto(quote: ShippingQuote): ShippingQuoteDto {
     status: quote.status as unknown as ShippingQuoteDto["status"],
     expiresAt: quote.expiresAt.toISOString(),
     createdAt: quote.createdAt.toISOString(),
+    pricingBasis: (quote.pricingBasis as ShippingQuoteDto["pricingBasis"]) ?? null,
   };
 }
