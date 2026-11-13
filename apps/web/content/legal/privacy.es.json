@@ -102,7 +102,7 @@
         "Viajes en taxi para mascotas: ubicaciones exactas durante 30 días; después, solo aproximadas.",
         "Registros del servidor: unos 7 días.",
         "Registros financieros, como pedidos, pagos, reembolsos y facturas: durante el tiempo que exija la ley.",
-        "Cuando eliminas tu cuenta, eliminamos o anonimizamos tus datos personales, salvo los que la ley nos obliga a conservar."
+        "Si pides eliminar tu cuenta, tu solicitud se registra y se revisa, y se ejecuta una vez que publiquemos nuestra política de conservación de datos. Entonces eliminaremos o anonimizaremos tus datos personales, salvo lo que la ley nos obliga a conservar, y te avisaremos cuando esté hecho."
       ]
     },
     {
@@ -112,7 +112,7 @@
         "Consultar y corregir tus datos desde las páginas de tu perfil, tu hogar y tus mascotas.",
         "Descargar una copia de tus datos desde Perfil → Privacidad. Recibes un archivo con tus mascotas, historiales de salud, reservas, pedidos, viajes, solicitudes de soporte, consentimientos, publicaciones, chats y donaciones. La descarga sigue disponible durante 7 días.",
         "Cambiar los canales de notificación y el consentimiento de marketing, y revocar los enlaces para compartir y el acceso de veterinarios, en cualquier momento.",
-        "Solicitar la eliminación de tu cuenta desde Perfil → Privacidad. Revisamos cada solicitud. Los datos que la ley nos obliga a conservar se apartan, y todo lo demás se elimina o se anonimiza. Puedes cancelar la solicitud mientras esté en revisión. Mientras tengas reservas, pedidos, reembolsos o disputas abiertos, un viaje activo o un rol de socio, la eliminación tendrá que esperar a que finalicen.",
+        "Pide eliminar tu cuenta desde Perfil → Privacidad. Tu solicitud se registra y se revisa, y se ejecuta una vez que publiquemos nuestra política de conservación de datos; te avisaremos cuando esté hecho. Puedes cancelarla mientras esté pendiente. Mientras tengas reservas, pedidos, reembolsos o disputas abiertos, un viaje activo o un rol de socio, la eliminación debe esperar a que terminen.",
         "Plantear una inquietud sobre privacidad a través de Soporte o de la página de Contacto."
       ]
     },
@@ -120,7 +120,8 @@
       "id": "security",
       "heading": "11. Cómo la protegemos",
       "paragraphs": [
-        "Las conexiones con opetlife están cifradas. Las contraseñas solo se guardan como hashes Argon2id. Los scripts de la página no pueden leer las cookies de inicio de sesión. El acceso del personal depende de su función y queda registrado. Los documentos subidos se guardan de forma privada y solo se pueden abrir mediante enlaces de corta duración. Ningún sistema es totalmente seguro, así que usa una contraseña segura y no compartas tus códigos de inicio de sesión con nadie."
+        "Las conexiones con opetlife están cifradas. Las contraseñas solo se guardan como hashes Argon2id. Los scripts de la página no pueden leer las cookies de inicio de sesión. El acceso del personal depende de su función y queda registrado. Los documentos subidos se guardan de forma privada y solo se pueden abrir mediante enlaces de corta duración. Ningún sistema es totalmente seguro, así que usa una contraseña segura y no compartas tus códigos de inicio de sesión con nadie.",
+        "Las fotos que publicas, por ejemplo en publicaciones, avisos de mascotas perdidas o memoriales, son archivos públicos: al eliminarlas u ocultarlas desaparecen de inmediato de las páginas de opetlife, pero quien ya tenga la dirección de una foto podría seguir abriéndola hasta que se elimine el archivo. Pídelo a soporte y nuestro equipo eliminará el archivo en un plazo de 30 días."
       ]
     },
     {
