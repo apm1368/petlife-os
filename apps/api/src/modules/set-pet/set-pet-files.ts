@@ -56,7 +56,9 @@ export function claimedKind(filename: string, contentType: string): { kind: SetP
 /** A safe display/download name: no path, no control or quote characters, at most 120 characters. */
 export function safeFilename(name: string): string | null {
   const base = name.split(/[\\/]/).pop() ?? "";
-  const cleaned = base.replace(/[\u0000-\u001f\u007f"<>|*?:]/g, "").replace(/\s+/g, " ").trim().slice(-120);
+  // Control characters (code < 32, and DEL) and characters that break headers or file systems are dropped.
+  const printable = [...base].filter((c) => c.charCodeAt(0) >= 32 && c.charCodeAt(0) !== 127 && !'"<>|*?:'.includes(c)).join("");
+  const cleaned = printable.replace(/\s+/g, " ").trim().slice(-120);
   return cleaned || null;
 }
 
@@ -86,7 +88,8 @@ export function detectKind(head: Buffer, claimed: SetPetFileKind): SetPetFileKin
       return ascii(0, 4) === "8BPS" && head.length >= 6 && [1, 2].includes(head.readUInt16BE(4)) ? "psd" : null;
     case "svg": {
       if (head.includes(0)) return null;
-      const text = head.toString("utf8").replace(/^﻿/, "").trimStart();
+      const decoded = head.toString("utf8");
+      const text = (decoded.charCodeAt(0) === 0xfeff ? decoded.slice(1) : decoded).trimStart();
       const withoutProlog = text.replace(/^<\?xml[^>]*>\s*/i, "").replace(/^(<!--[\s\S]*?-->\s*|<!DOCTYPE[^>]*>\s*)*/i, "");
       return /^<svg[\s>]/i.test(withoutProlog) ? "svg" : null;
     }
