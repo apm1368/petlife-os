@@ -201,3 +201,4 @@
 @media (max-width: 1180px) { .ih-lens { width:240px; } }
 @media (max-width: 720px) { .ih-lens { width:190px; } }
 .ih-pet { border-radius:34px; }
+.member-home .site-social-block { margin-top:var(--space-6); }

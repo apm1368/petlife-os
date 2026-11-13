@@ -3,23 +3,44 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Mail, Phone, MapPin, Clock3 } from "@petlife/ui";
 import { localizedSetting, useSiteSettings } from "./site-settings";
+import { SOCIAL_NETWORKS, SocialIcon, type SocialNetwork } from "./SocialIcons";
+import type { SocialSettings } from "./social-settings";
 
-const SOCIAL = ["instagram", "telegram", "whatsapp", "x", "linkedin", "youtube", "aparat"] as const;
+/** The admin's social links (social.*): shown when the network's switch is not off and its https link is set. */
+export function socialLinks(settings: SocialSettings | null): { network: SocialNetwork; url: string }[] {
+  if (!settings) return [];
+  return SOCIAL_NETWORKS.flatMap((network) => {
+    const url = settings[`social.${network}`];
+    const on = settings[`social.${network}Enabled`] !== false;
+    return on && typeof url === "string" && /^https:\/\/[^\s"'<>]+$/i.test(url) ? [{ network, url }] : [];
+  });
+}
 
-/** Social profile links set by admins (social.*). Renders nothing until at least one is set. */
-export function SocialLinks({ className = "" }: { className?: string }) {
+/**
+ * Social profile icons (owner, 2026-11-13): plain links with in-house monochrome icons, no embeds, scripts or remote
+ * images (the privacy policy promises no social-media tracking). Renders nothing until at least one is set.
+ */
+export function SocialLinks({ className = "", title }: { className?: string; title?: string }) {
   const t = useTranslations("siteSettings");
-  const settings = useSiteSettings();
-  if (!settings) return null;
-  const links = SOCIAL.map((key) => ({ key, url: settings[`social.${key}`] })).filter((l): l is { key: (typeof SOCIAL)[number]; url: string } => typeof l.url === "string" && l.url.length > 0);
+  const links = socialLinks(useSiteSettings() as SocialSettings | null);
   if (!links.length) return null;
-  return (
-    <ul className={`site-social ${className}`} aria-label={t("social")}>
-      {links.map((l) => (
-        <li key={l.key}><a href={l.url} rel="noopener noreferrer me" target="_blank">{t(`networks.${l.key}`)}</a></li>
+  const list = (
+    <ul className={`site-social ${className}`} aria-label={title ?? t("social")}>
+      {links.map(({ network, url }) => (
+        <li key={network}>
+          <a href={url} rel="noopener noreferrer me" target="_blank" aria-label={t(`networks.${network}`)} title={t(`networks.${network}`)}>
+            <SocialIcon network={network} />
+          </a>
+        </li>
       ))}
     </ul>
   );
+  return title ? (
+    <section className="site-social-block" aria-label={title}>
+      <h2>{title}</h2>
+      {list}
+    </section>
+  ) : list;
 }
 
 /** Contact facts set by admins (site.contact*, site.workingHours). Renders nothing until one is set. */

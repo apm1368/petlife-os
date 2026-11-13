@@ -1256,13 +1256,16 @@
       "x": "X",
       "linkedin": "LinkedIn",
       "youtube": "YouTube",
-      "aparat": "Aparat"
+      "aparat": "Aparat",
+      "bale": "Bale"
     },
     "maintenance": {
       "title": "We werken opetlife bij",
       "defaultMessage": "opetlife is even niet beschikbaar terwijl we het verbeteren. Kom snel weer terug.",
       "status": "Systeemstatus"
-    }
+    },
+    "enamad": "eNamad-keurmerk",
+    "followUs": "opetlife op sociale media"
   },
   "adminMessaging": {
     "kicker": "Sms en e-mail",

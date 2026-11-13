@@ -1354,13 +1354,16 @@
       "x": "X",
       "linkedin": "LinkedIn",
       "youtube": "YouTube",
-      "aparat": "Aparat"
+      "aparat": "Aparat",
+      "bale": "Bale"
     },
     "maintenance": {
       "title": "Wir aktualisieren opetlife",
       "defaultMessage": "opetlife ist kurz nicht erreichbar, während wir es verbessern. Bitte schauen Sie bald wieder vorbei.",
       "status": "Systemstatus"
-    }
+    },
+    "enamad": "eNamad-Vertrauenssiegel",
+    "followUs": "opetlife in sozialen Netzwerken"
   },
   "adminMessaging": {
     "kicker": "SMS und E-Mail",
