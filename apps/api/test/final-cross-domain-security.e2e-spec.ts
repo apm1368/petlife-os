@@ -26,6 +26,7 @@ import { signSessionCookie } from "../src/common/session/session-cookie.util";
 const PUBLIC_GET = new Set([
   "/settings/public",
   "/travel/external/stays",
+  "/travel/external/facets",
   "/travel/external/stays/:id",
   "/travel/external/stays/:id/out",
   "/animal-support/campaigns/:campaignId",

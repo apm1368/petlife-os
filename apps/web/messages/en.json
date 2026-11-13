@@ -5123,7 +5123,8 @@
         "repeatDeliveries": "Repeat deliveries",
         "orderLookup": "Order lookup",
         "refundApprovals": "Refund approvals",
-        "twoStep": "Two-step sign-in"
+        "twoStep": "Two-step sign-in",
+        "walletAdjustments": "Correction requests"
       },
       "palette": {
         "actions": "Quick actions",
@@ -7659,7 +7660,9 @@
           "pendingMemorials": "Memorials to review",
           "openPlaceReports": "Place reports",
           "openTasks": "Open tasks",
-          "pendingWalletTopUps": "Top-up receipts"
+          "pendingWalletTopUps": "Top-up receipts",
+          "pendingWalletAdjustments": "Corrections to approve",
+          "pendingCardDestinationChanges": "Card account changes to approve"
         }
       },
       "performance": {
@@ -8926,6 +8929,41 @@
       "hint": "Listings from Jajiga: you book and pay on Jajiga's own site, and opetlife charges nothing. Confirm the pet rules with the host before booking.",
       "seeAll": "All Jajiga stays",
       "pages": "Jajiga pages"
+    },
+    "tile": {
+      "kind": {
+        "villa": "Villa",
+        "apartment": "Apartment or suite",
+        "cottage": "Cottage",
+        "ecolodge": "Eco-lodge",
+        "house": "House or stay"
+      },
+      "sourceChip": "From {source}",
+      "capacity": "Sleeps {count}",
+      "bedrooms": "Bedrooms: {count}"
+    },
+    "browser": {
+      "title": "More pet-friendly stays",
+      "sourceChip": "Jajiga stays",
+      "count": "Found: {count}",
+      "hint": "Listings from Jajiga: you book and pay on Jajiga's own site, and opetlife charges nothing. Confirm the pet rules with the host before booking.",
+      "filters": "Filter stays",
+      "province": "Province",
+      "allProvinces": "All provinces",
+      "city": "City",
+      "allCities": "All cities",
+      "guests": "Guests",
+      "anyGuests": "Any number",
+      "guestsAtLeast": "At least {count}",
+      "price": "Price per night",
+      "anyPrice": "Any price",
+      "priceUpTo": "Up to {max}",
+      "priceBetween": "{min} to {max}",
+      "priceOver": "Over {min}",
+      "clear": "Clear filters",
+      "noMatch": "No stays match these filters. Try removing one.",
+      "loadMore": "Show more ({shown} of {total})",
+      "mediaNote": "Photos and the full description of each stay are on the source site; here you see the key facts."
     }
   },
   "localDateTime": {
@@ -10760,11 +10798,12 @@
       "audit": "Audit log",
       "auditEmpty": "Nothing recorded yet.",
       "by": "by {name}",
-      "openCustomer": "Customer record"
+      "openCustomer": "Customer record",
+      "approvedBy": "approved by {name}"
     },
     "adjust": {
-      "title": "Correct the balance",
-      "hint": "Only to fix a mistake or make up for one. Each correction is logged with your name, the reason and the balance before and after.",
+      "title": "Request adjustment (needs a second admin)",
+      "hint": "Only to fix a mistake or make up for one. Nothing changes until a different admin with the same permission approves the request. Both names, the reason and the balance before and after are logged.",
       "direction": "Direction",
       "directions": {
         "CREDIT": "Add money",
@@ -10787,19 +10826,21 @@
       },
       "reason": "Explanation (kept in the audit log)",
       "evidence": "Ticket or reference (optional)",
-      "submit": "Save correction",
-      "confirm": "Record “{direction}” of {amount} in “{bucket}”? It applies to the balance immediately.",
-      "confirmYes": "Yes, record it",
+      "submit": "Send for approval",
+      "confirm": "Ask for “{direction}” of {amount} in “{bucket}”? The balance changes only after a second admin approves it.",
+      "confirmYes": "Yes, send the request",
       "cancel": "Cancel",
-      "saving": "Saving…",
-      "done": "Correction saved.",
-      "noPermission": "Correcting a balance needs the “Correct balances” permission.",
+      "saving": "Sending…",
+      "done": "Request sent. A second admin must approve it before the balance changes.",
+      "noPermission": "Requesting or approving a correction needs the “Correct balances” permission.",
       "errors": {
         "INSUFFICIENT_WALLET_BALANCE": "This part of the wallet does not hold that much.",
         "reasonTooShort": "The explanation needs at least 5 characters.",
         "amount": "Enter a valid amount.",
-        "generic": "The correction was not saved."
-      }
+        "generic": "The request was not sent.",
+        "TOO_MANY_PENDING": "This member already has as many requests waiting as allowed. Decide some of them first."
+      },
+      "confirmTitle": "Send this request?"
     },
     "topUps": {
       "title": "Top-up receipts",
@@ -10848,7 +10889,10 @@
       "wallet_debited": "Balance reduced",
       "wallet_top_up_approved": "Receipt approved",
       "wallet_top_up_rejected": "Receipt declined",
-      "wallet_top_up_receipt_viewed": "Receipt viewed"
+      "wallet_top_up_receipt_viewed": "Receipt viewed",
+      "wallet_adjustment_requested": "Correction requested",
+      "wallet_adjustment_approved": "Correction approved and posted",
+      "wallet_adjustment_rejected": "Correction request rejected"
     },
     "entry": {
       "purpose": {
@@ -10870,6 +10914,48 @@
         "REFUND_OUTSIDE_SYSTEM": "Refund outside an order",
         "DUPLICATE_CREDIT_REVERSAL": "Duplicate credit reversed",
         "OTHER": "Other correction"
+      }
+    },
+    "requests": {
+      "title": "Correction requests",
+      "subtitle": "Every balance correction needs a second admin. Approving posts it to the wallet at once; a request nobody decides lapses after 72 hours.",
+      "detailTitle": "Correction requests for this member",
+      "empty": "No requests here.",
+      "filter": "Status",
+      "all": "All",
+      "status": {
+        "PENDING": "Waiting for approval",
+        "APPROVED": "Approved and posted",
+        "REJECTED": "Rejected",
+        "EXPIRED": "Expired"
+      },
+      "itemLabel": "Request for {amount} by {name}",
+      "requestedBy": "Asked by {name}",
+      "decidedBy": "decided by {name}",
+      "expires": "lapses {date}",
+      "yours": "Your request: another admin must approve it.",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approveTitle": "Approve this correction?",
+      "rejectTitle": "Reject this request?",
+      "summary": "“{direction}” of {amount} in “{bucket}” for {member}.",
+      "approveWarning": "Approving posts it to the wallet immediately and records your name as the second admin.",
+      "rejectWarning": "Nothing is posted. The reason is kept in the audit log.",
+      "rejectReason": "Reason for rejecting (required)",
+      "confirmApprove": "Approve and post",
+      "confirmReject": "Reject request",
+      "cancel": "Cancel",
+      "approved": "Approved; the correction was posted to the wallet.",
+      "rejected": "Rejected; nothing was posted.",
+      "noPermission": "Deciding on a request needs the “Correct balances” permission.",
+      "errors": {
+        "WALLET_ADJUSTMENT_SELF_APPROVAL": "You asked for this correction, so a different admin must approve it.",
+        "WALLET_ADJUSTMENT_REQUEST_EXPIRED": "This request has expired. Ask for a new one if it is still needed.",
+        "INVALID_WALLET_ADJUSTMENT_REQUEST_TRANSITION": "This request was already decided. Reload to see its status.",
+        "WALLET_ADJUSTMENT_REQUEST_NOT_FOUND": "This request no longer exists.",
+        "INSUFFICIENT_WALLET_BALANCE": "The wallet no longer holds that much in this part, so the debit can't be posted.",
+        "reasonTooShort": "The reason needs at least 5 characters.",
+        "generic": "That didn't work. Please try again."
       }
     }
   },
@@ -11119,8 +11205,48 @@
         "googlePlay": "Get it on Google Play",
         "apk": "Download for Android"
       },
-      "apkMeta": "Version {version} · {size} KB",
-      "apkHint": "After downloading, open the file and, if your phone asks, allow installs from this source."
+      "apkHint": "After downloading, open the file and, if your phone asks, allow installs from this source.",
+      "androidEntry": "Download for Android",
+      "iosEntry": "Install on iPhone",
+      "allWays": "All ways to install"
+    },
+    "appPage": {
+      "eyebrow": "The opetlife app",
+      "title": "opetlife on your phone and tablet",
+      "lede": "On Android, download the app directly. On iPhone and iPad, add it to your home screen from Safari. Both are the full opetlife, notifications included.",
+      "yourDevice": "Your device",
+      "installed": "opetlife is already installed on this device.",
+      "android": {
+        "title": "Android",
+        "lead": "Download and install the opetlife Android app straight from our site.",
+        "download": "Download the Android app (APK)",
+        "meta": "Version {version} · {size} KB · Android 5 or later",
+        "sha": "File fingerprint (SHA-256)",
+        "webInstall": "Or install the web version from Chrome (no download)",
+        "details": "File details"
+      },
+      "ios": {
+        "title": "iPhone and iPad",
+        "lead": "Add opetlife to your home screen from Safari, no store needed.",
+        "step1": "In Safari, tap the Share button.",
+        "step2": "Choose “Add to Home Screen”.",
+        "step3": "Tap “Add”. The opetlife icon appears on your home screen.",
+        "notifications": "Notifications work in the installed app on iOS 16.4 or later.",
+        "openInSafari": "Open this page in Safari",
+        "openInSafariBody": "Adding to the home screen only works from Safari. Copy the link and open it in Safari.",
+        "copy": "Copy link",
+        "copied": "Copied"
+      },
+      "desktop": {
+        "title": "Computer",
+        "lead": "Install opetlife like an app in Chrome or Edge.",
+        "install": "Install on this computer",
+        "hint": "No button? Use the install icon in the address bar or the browser menu."
+      }
+    },
+    "credits": {
+      "title": "Icons",
+      "androidRobot": "The Android robot is reproduced or modified from work created and shared by Google and used according to terms described in the Creative Commons 3.0 Attribution License."
     }
   },
   "safety": {
@@ -11731,7 +11857,7 @@
     },
     "readOnly": "Only a super admin with settings.manage can change this account.",
     "change": "Change the account",
-    "changeHint": "Every change is recorded with its reason and every super admin is notified. Payments already started keep the account they began with.",
+    "changeHint": "A new account takes effect only when another super admin approves it within {hours} hours; until then members keep paying into the current account. Every step is recorded with its reason and every super admin is notified. Payments already started keep the account they began with.",
     "fields": {
       "cardNumber": "Card number (16 digits)",
       "sheba": "Sheba / IBAN (optional)",
@@ -11740,9 +11866,9 @@
       "reason": "Reason for the change"
     },
     "confirm": "I confirm this account belongs to opetlife.",
-    "save": "Save the new account",
+    "save": "Send for approval",
     "saving": "Saving…",
-    "saved": "The new account is saved and super admins were notified.",
+    "saved": "Sent for approval. The current account stays in use until another super admin approves it.",
     "offReason": "Reason for switching card-to-card off",
     "switchOff": "Switch card-to-card off",
     "switchedOff": "Card-to-card is switched off.",
@@ -11751,7 +11877,9 @@
     "columns": {
       "setBy": "Set by",
       "reason": "Reason",
-      "closed": "Ended"
+      "closed": "Ended",
+      "status": "Status",
+      "approvedBy": "Approved by"
     },
     "activeNow": "Active",
     "loading": "Loading…",
@@ -11768,7 +11896,38 @@
       "CARD_OR_SHEBA_REQUIRED": "Enter a card number or a Sheba.",
       "HOLDER_REQUIRED": "Enter the account holder.",
       "SUPER_ADMIN_WITH_SETTINGS_MANAGE_REQUIRED": "Only a super admin can change this account.",
-      "generic": "Not saved; please try again."
+      "generic": "Not saved; please try again.",
+      "SELF_APPROVAL": "You requested this change; another super admin must approve it.",
+      "ALREADY_PENDING": "Another change is already waiting for approval.",
+      "NOT_PENDING": "This change was already decided; the page has been refreshed.",
+      "EXPIRED": "This change expired before it was approved; propose it again if it is still needed.",
+      "NOT_FOUND": "This change no longer exists.",
+      "CONFIRM_APPROVE": "Confirm that you checked the account before approving it."
+    },
+    "pendingBlocksChange": "A change is already waiting for approval. Approve, reject or withdraw it before proposing another.",
+    "pending": {
+      "title": "Change waiting for approval",
+      "hint": "Not in use yet: members keep paying into the current account until another super admin approves this change.",
+      "requestedBy": "Requested by",
+      "expiresAt": "Expires",
+      "yours": "You requested this change, so another super admin must approve it. You can withdraw it.",
+      "confirm": "I checked with the requester that this account belongs to opetlife.",
+      "approve": "Approve and activate",
+      "approving": "Approving…",
+      "approved": "Approved: the new account is now active and super admins were notified.",
+      "rejectReason": "Reason for rejecting",
+      "withdrawReason": "Reason for withdrawing",
+      "reject": "Reject",
+      "withdraw": "Withdraw my request",
+      "rejected": "The change was rejected; the current account is unchanged.",
+      "withdrawn": "Your request was withdrawn; the current account is unchanged."
+    },
+    "status": {
+      "PENDING": "Waiting for approval",
+      "ACTIVE": "Active",
+      "CLOSED": "Ended",
+      "REJECTED": "Rejected",
+      "EXPIRED": "Expired"
     }
   },
   "adminCardReceipts": {

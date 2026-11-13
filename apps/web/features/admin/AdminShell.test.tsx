@@ -23,7 +23,7 @@ const SESSION_USER: UserDto = { id: "u1", email: "admin@example.com", phone: nul
 const NO_QUEUES: AdminDashboardSummaryDto = {
   openSupportCases: null, openDisputes: null, openTrustCases: null, pendingRefundApprovals: null, openTasks: null,
   pendingVerifications: null, pendingRefundRequests: null, pendingOfferModeration: null, pendingCatalogRequests: null,
-  pendingTravelListings: null, pendingSupportNeeds: null, openCommunityReports: null, pendingMemorials: null, openPlaceReports: null, pendingWalletTopUps: null, pendingDeletionRequests: null, openOwnershipDisputes: null, openProviderNoShows: null, pendingReviews: null, newSetPetRequests: null, launchKpis: null,
+  pendingTravelListings: null, pendingSupportNeeds: null, openCommunityReports: null, pendingMemorials: null, openPlaceReports: null, pendingWalletTopUps: null, pendingWalletAdjustments: null, pendingCardDestinationChanges: null, pendingDeletionRequests: null, openOwnershipDisputes: null, openProviderNoShows: null, pendingReviews: null, newSetPetRequests: null, launchKpis: null,
 };
 
 function signIn(permissions: string[], extra: Partial<AdminSessionContextDto> = {}) {

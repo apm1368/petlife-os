@@ -4325,7 +4325,8 @@
         "repeatDeliveries": "Entregas periódicas",
         "orderLookup": "Buscar pedido",
         "refundApprovals": "Aprobaciones de reembolso",
-        "twoStep": "Inicio de sesión en dos pasos"
+        "twoStep": "Inicio de sesión en dos pasos",
+        "walletAdjustments": "Solicitudes de corrección"
       },
       "palette": {
         "actions": "Acciones rápidas",
@@ -6722,7 +6723,9 @@
           "pendingMemorials": "Memoriales por revisar",
           "openPlaceReports": "Denuncias de lugares",
           "openTasks": "Tareas abiertas",
-          "pendingWalletTopUps": "Comprobantes de recarga"
+          "pendingWalletTopUps": "Comprobantes de recarga",
+          "pendingWalletAdjustments": "Correcciones por aprobar",
+          "pendingCardDestinationChanges": "Cambios de cuenta por aprobar"
         }
       },
       "performance": {
@@ -8031,6 +8034,41 @@
       "hint": "Anuncios de Jajiga: reservas y pagas en el propio sitio de Jajiga y opetlife no cobra nada. Confirma las normas sobre mascotas con el anfitrión antes de reservar.",
       "seeAll": "Todos los alojamientos de Jajiga",
       "pages": "Páginas de Jajiga"
+    },
+    "tile": {
+      "kind": {
+        "villa": "Villa",
+        "apartment": "Apartamento o suite",
+        "cottage": "Cabaña",
+        "ecolodge": "Ecolodge",
+        "house": "Casa o alojamiento"
+      },
+      "sourceChip": "De {source}",
+      "capacity": "Capacidad: {count}",
+      "bedrooms": "Dormitorios: {count}"
+    },
+    "browser": {
+      "title": "Más alojamientos que aceptan mascotas",
+      "sourceChip": "Alojamientos de Jajiga",
+      "count": "Encontrados: {count}",
+      "hint": "Anuncios de Jajiga: reservas y pagas en el propio sitio de Jajiga y opetlife no cobra nada. Confirma las normas sobre mascotas con el anfitrión antes de reservar.",
+      "filters": "Filtrar alojamientos",
+      "province": "Provincia",
+      "allProvinces": "Todas las provincias",
+      "city": "Ciudad",
+      "allCities": "Todas las ciudades",
+      "guests": "Huéspedes",
+      "anyGuests": "Cualquier número",
+      "guestsAtLeast": "Al menos {count}",
+      "price": "Precio por noche",
+      "anyPrice": "Cualquier precio",
+      "priceUpTo": "Hasta {max}",
+      "priceBetween": "De {min} a {max}",
+      "priceOver": "Más de {min}",
+      "clear": "Quitar filtros",
+      "noMatch": "Ningún alojamiento coincide con estos filtros. Prueba a quitar uno.",
+      "loadMore": "Ver más ({shown} de {total})",
+      "mediaNote": "Las fotos y la descripción completa de cada alojamiento están en el sitio de origen; aquí ves los datos principales."
     }
   },
   "insurance": {
@@ -10042,11 +10080,12 @@
       "audit": "Registro de auditoría",
       "auditEmpty": "Aún no hay registros.",
       "by": "por {name}",
-      "openCustomer": "Ficha del cliente"
+      "openCustomer": "Ficha del cliente",
+      "approvedBy": "aprobada por {name}"
     },
     "adjust": {
-      "title": "Corregir el saldo",
-      "hint": "Solo para corregir un error o compensarlo. Cada corrección queda registrada con tu nombre, el motivo y el saldo antes y después.",
+      "title": "Solicitar corrección (requiere un segundo administrador)",
+      "hint": "Solo para corregir un error o compensarlo. El saldo no cambia hasta que otro administrador con el mismo permiso apruebe la solicitud. Se registran ambos nombres, el motivo y el saldo antes y después.",
       "direction": "Dirección",
       "directions": {
         "CREDIT": "Añadir saldo",
@@ -10069,19 +10108,21 @@
       },
       "reason": "Explicación (queda en el registro de auditoría)",
       "evidence": "Ticket o referencia (opcional)",
-      "submit": "Guardar corrección",
-      "confirm": "¿Registrar «{direction}» de {amount} en «{bucket}»? Se aplica al saldo de inmediato.",
-      "confirmYes": "Sí, registrar",
+      "submit": "Enviar para aprobación",
+      "confirm": "¿Solicitar «{direction}» de {amount} en «{bucket}»? El saldo solo cambia cuando lo apruebe un segundo administrador.",
+      "confirmYes": "Sí, enviar la solicitud",
       "cancel": "Cancelar",
-      "saving": "Guardando…",
-      "done": "Corrección guardada.",
-      "noPermission": "Corregir un saldo requiere el permiso «Corregir saldos».",
+      "saving": "Enviando…",
+      "done": "Solicitud enviada. Un segundo administrador debe aprobarla antes de que cambie el saldo.",
+      "noPermission": "Solicitar o aprobar una corrección requiere el permiso «Corregir saldos».",
       "errors": {
         "INSUFFICIENT_WALLET_BALANCE": "Esta parte del monedero no tiene tanto saldo.",
         "reasonTooShort": "La explicación necesita al menos 5 caracteres.",
         "amount": "Introduce un importe válido.",
-        "generic": "No se guardó la corrección."
-      }
+        "generic": "No se envió la solicitud.",
+        "TOO_MANY_PENDING": "Este miembro ya tiene tantas solicitudes pendientes como se permite. Decide primero algunas de ellas."
+      },
+      "confirmTitle": "¿Enviar esta solicitud?"
     },
     "topUps": {
       "title": "Comprobantes de recarga",
@@ -10130,7 +10171,10 @@
       "wallet_debited": "Saldo reducido",
       "wallet_top_up_approved": "Comprobante aprobado",
       "wallet_top_up_rejected": "Comprobante rechazado",
-      "wallet_top_up_receipt_viewed": "Comprobante visto"
+      "wallet_top_up_receipt_viewed": "Comprobante visto",
+      "wallet_adjustment_requested": "Corrección solicitada",
+      "wallet_adjustment_approved": "Corrección aprobada y registrada",
+      "wallet_adjustment_rejected": "Solicitud de corrección rechazada"
     },
     "entry": {
       "purpose": {
@@ -10152,6 +10196,48 @@
         "REFUND_OUTSIDE_SYSTEM": "Reembolso fuera de un pedido",
         "DUPLICATE_CREDIT_REVERSAL": "Abono duplicado revertido",
         "OTHER": "Otra corrección"
+      }
+    },
+    "requests": {
+      "title": "Solicitudes de corrección",
+      "subtitle": "Cada corrección de saldo necesita un segundo administrador. Al aprobarla se registra en el monedero al instante; una solicitud sin decisión caduca a las 72 horas.",
+      "detailTitle": "Solicitudes de corrección de este miembro",
+      "empty": "No hay solicitudes.",
+      "filter": "Estado",
+      "all": "Todas",
+      "status": {
+        "PENDING": "Pendiente de aprobación",
+        "APPROVED": "Aprobada y registrada",
+        "REJECTED": "Rechazada",
+        "EXPIRED": "Caducada"
+      },
+      "itemLabel": "Solicitud de {amount} de {name}",
+      "requestedBy": "Solicitada por {name}",
+      "decidedBy": "decidida por {name}",
+      "expires": "caduca {date}",
+      "yours": "Es tu solicitud: otro administrador debe aprobarla.",
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "approveTitle": "¿Aprobar esta corrección?",
+      "rejectTitle": "¿Rechazar esta solicitud?",
+      "summary": "«{direction}» de {amount} en «{bucket}» para {member}.",
+      "approveWarning": "Al aprobarla se registra en el monedero de inmediato y tu nombre queda como segundo administrador.",
+      "rejectWarning": "No se registra nada. El motivo queda en el registro de auditoría.",
+      "rejectReason": "Motivo del rechazo (obligatorio)",
+      "confirmApprove": "Aprobar y registrar",
+      "confirmReject": "Rechazar solicitud",
+      "cancel": "Cancelar",
+      "approved": "Aprobada; la corrección se registró en el monedero.",
+      "rejected": "Rechazada; no se registró nada.",
+      "noPermission": "Decidir sobre una solicitud requiere el permiso «Corregir saldos».",
+      "errors": {
+        "WALLET_ADJUSTMENT_SELF_APPROVAL": "Tú solicitaste esta corrección, así que debe aprobarla otro administrador.",
+        "WALLET_ADJUSTMENT_REQUEST_EXPIRED": "Esta solicitud caducó. Pide una nueva si todavía hace falta.",
+        "INVALID_WALLET_ADJUSTMENT_REQUEST_TRANSITION": "Ya se decidió esta solicitud. Recarga para ver su estado.",
+        "WALLET_ADJUSTMENT_REQUEST_NOT_FOUND": "Esta solicitud ya no existe.",
+        "INSUFFICIENT_WALLET_BALANCE": "Esta parte del monedero ya no tiene tanto saldo, así que no se puede registrar el cargo.",
+        "reasonTooShort": "El motivo necesita al menos 5 caracteres.",
+        "generic": "No funcionó. Inténtalo de nuevo."
       }
     }
   },
@@ -10401,8 +10487,48 @@
         "googlePlay": "Descargar en Google Play",
         "apk": "Descargar para Android"
       },
-      "apkMeta": "Versión {version} · {size} KB",
-      "apkHint": "Tras descargarla, abre el archivo y, si el teléfono lo pide, permite instalar desde este origen."
+      "apkHint": "Tras descargarla, abre el archivo y, si el teléfono lo pide, permite instalar desde este origen.",
+      "androidEntry": "Descargar para Android",
+      "iosEntry": "Instalar en iPhone",
+      "allWays": "Todas las formas de instalar"
+    },
+    "appPage": {
+      "eyebrow": "La app de opetlife",
+      "title": "opetlife en tu móvil y tu tableta",
+      "lede": "En Android, descarga la app directamente. En iPhone y iPad, añádela a la pantalla de inicio desde Safari. Ambas son opetlife completo, con notificaciones.",
+      "yourDevice": "Tu dispositivo",
+      "installed": "opetlife ya está instalada en este dispositivo.",
+      "android": {
+        "title": "Android",
+        "lead": "Descarga e instala la app de opetlife para Android directamente desde nuestra web.",
+        "download": "Descargar la app para Android (APK)",
+        "meta": "Versión {version} · {size} KB · Android 5 o posterior",
+        "sha": "Huella del archivo (SHA-256)",
+        "webInstall": "O instala la versión web desde Chrome (sin descargar)",
+        "details": "Detalles del archivo"
+      },
+      "ios": {
+        "title": "iPhone y iPad",
+        "lead": "Añade opetlife a tu pantalla de inicio desde Safari, sin tienda de apps.",
+        "step1": "En Safari, toca el botón Compartir.",
+        "step2": "Elige “Añadir a pantalla de inicio”.",
+        "step3": "Toca “Añadir”. El icono de opetlife aparece en tu pantalla de inicio.",
+        "notifications": "Las notificaciones funcionan en la app instalada con iOS 16.4 o posterior.",
+        "openInSafari": "Abre esta página en Safari",
+        "openInSafariBody": "Añadir a la pantalla de inicio solo funciona desde Safari. Copia el enlace y ábrelo en Safari.",
+        "copy": "Copiar enlace",
+        "copied": "Copiado"
+      },
+      "desktop": {
+        "title": "Ordenador",
+        "lead": "Instala opetlife como una app en Chrome o Edge.",
+        "install": "Instalar en este ordenador",
+        "hint": "¿No ves el botón? Usa el icono de instalación de la barra de direcciones o el menú del navegador."
+      }
+    },
+    "credits": {
+      "title": "Iconos",
+      "androidRobot": "El robot de Android se reproduce o modifica a partir de una obra creada y compartida por Google y se usa según los términos de la licencia Creative Commons Atribución 3.0."
     }
   },
   "safety": {
@@ -11013,7 +11139,7 @@
     },
     "readOnly": "Solo un superadministrador con settings.manage puede cambiar esta cuenta.",
     "change": "Cambiar la cuenta",
-    "changeHint": "Cada cambio se registra con su motivo y se avisa a todos los superadministradores. Los pagos ya iniciados conservan la cuenta con la que empezaron.",
+    "changeHint": "Una cuenta nueva solo entra en vigor cuando otro superadministrador la aprueba en un plazo de {hours} horas; hasta entonces los miembros siguen pagando a la cuenta actual. Cada paso se registra con su motivo y se avisa a todos los superadministradores. Los pagos ya iniciados conservan la cuenta con la que empezaron.",
     "fields": {
       "cardNumber": "Número de tarjeta (16 dígitos)",
       "sheba": "Sheba / IBAN (opcional)",
@@ -11022,9 +11148,9 @@
       "reason": "Motivo del cambio"
     },
     "confirm": "Confirmo que esta cuenta pertenece a opetlife.",
-    "save": "Guardar la nueva cuenta",
+    "save": "Enviar para aprobación",
     "saving": "Guardando…",
-    "saved": "La nueva cuenta se guardó y se avisó a los superadministradores.",
+    "saved": "Enviado para aprobación. La cuenta actual sigue en uso hasta que otro superadministrador apruebe el cambio.",
     "offReason": "Motivo para desactivar el pago con tarjeta",
     "switchOff": "Desactivar el pago con tarjeta",
     "switchedOff": "El pago con tarjeta está desactivado.",
@@ -11033,7 +11159,9 @@
     "columns": {
       "setBy": "Configurada por",
       "reason": "Motivo",
-      "closed": "Finalizada"
+      "closed": "Finalizada",
+      "status": "Estado",
+      "approvedBy": "Aprobada por"
     },
     "activeNow": "Activa",
     "loading": "Cargando…",
@@ -11050,7 +11178,38 @@
       "CARD_OR_SHEBA_REQUIRED": "Introduce un número de tarjeta o un Sheba.",
       "HOLDER_REQUIRED": "Introduce el titular de la cuenta.",
       "SUPER_ADMIN_WITH_SETTINGS_MANAGE_REQUIRED": "Solo un superadministrador puede cambiar esta cuenta.",
-      "generic": "No se guardó; inténtalo de nuevo."
+      "generic": "No se guardó; inténtalo de nuevo.",
+      "SELF_APPROVAL": "Tú solicitaste este cambio; debe aprobarlo otro superadministrador.",
+      "ALREADY_PENDING": "Ya hay otro cambio pendiente de aprobación.",
+      "NOT_PENDING": "Este cambio ya se decidió; la página se ha actualizado.",
+      "EXPIRED": "Este cambio caducó antes de aprobarse; vuelve a proponerlo si aún hace falta.",
+      "NOT_FOUND": "Este cambio ya no existe.",
+      "CONFIRM_APPROVE": "Confirma que comprobaste la cuenta antes de aprobarla."
+    },
+    "pendingBlocksChange": "Ya hay un cambio pendiente de aprobación. Apruébalo, recházalo o retíralo antes de proponer otro.",
+    "pending": {
+      "title": "Cambio pendiente de aprobación",
+      "hint": "Aún no está en uso: los miembros siguen pagando a la cuenta actual hasta que otro superadministrador apruebe este cambio.",
+      "requestedBy": "Solicitado por",
+      "expiresAt": "Caduca",
+      "yours": "Tú solicitaste este cambio, así que debe aprobarlo otro superadministrador. Puedes retirarlo.",
+      "confirm": "He comprobado con quien lo solicitó que esta cuenta pertenece a opetlife.",
+      "approve": "Aprobar y activar",
+      "approving": "Aprobando…",
+      "approved": "Aprobado: la nueva cuenta ya está activa y se avisó a los superadministradores.",
+      "rejectReason": "Motivo del rechazo",
+      "withdrawReason": "Motivo para retirarlo",
+      "reject": "Rechazar",
+      "withdraw": "Retirar mi solicitud",
+      "rejected": "Se rechazó el cambio; la cuenta actual no cambia.",
+      "withdrawn": "Retiraste tu solicitud; la cuenta actual no cambia."
+    },
+    "status": {
+      "PENDING": "Pendiente de aprobación",
+      "ACTIVE": "Activa",
+      "CLOSED": "Finalizada",
+      "REJECTED": "Rechazada",
+      "EXPIRED": "Caducada"
     }
   },
   "adminCardReceipts": {

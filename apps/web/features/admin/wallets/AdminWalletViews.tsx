@@ -4,12 +4,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import type {
+  AdminWalletAdjustmentRequestDto,
   AdminWalletDetailDto,
   AdminWalletListItemDto,
   AdminWalletTopUpDto,
   PaginatedDto,
   WalletAdjustmentDirectionValue,
   WalletAdjustmentReasonCode,
+  WalletAdjustmentRequestStatusValue,
   WalletBalanceTypeValue,
   WalletTopUpStatusValue,
 } from "@petlife/types";
@@ -24,6 +26,7 @@ import "./admin-wallets.css";
 
 const REASON_CODES: WalletAdjustmentReasonCode[] = ["GOODWILL", "SERVICE_RECOVERY", "PAYMENT_CORRECTION", "REFUND_OUTSIDE_SYSTEM", "DUPLICATE_CREDIT_REVERSAL", "OTHER"];
 const TOP_UP_FILTERS: (WalletTopUpStatusValue | "ALL")[] = ["REVIEW_PENDING", "AWAITING_RECEIPT", "CREDITED", "REJECTED", "EXPIRED", "ALL"];
+const REQUEST_FILTERS: (WalletAdjustmentRequestStatusValue | "ALL")[] = ["PENDING", "APPROVED", "REJECTED", "EXPIRED", "ALL"];
 
 function useMoney() {
   const locale = useLocale() as RouteLocale;
@@ -48,6 +51,12 @@ function usePermissions() {
 
 function reasonOf(error: unknown): string {
   return error instanceof ApiError ? String((error.details as { reason?: string } | undefined)?.reason ?? "") : "";
+}
+
+/** The API's own code for a refused decision (self-approval, expired, already decided), else the validation reason. */
+function decisionErrorOf(error: unknown): string {
+  if (!(error instanceof ApiError)) return "";
+  return error.code === "VALIDATION_ERROR" ? reasonOf(error) : error.code;
 }
 
 /** Toman typed by staff (Persian or Latin digits) → integer rials, or null. */
@@ -210,7 +219,7 @@ export function AdminWalletDetailView({ userId }: { userId: string }) {
   const perms = usePermissions();
   const [data, setData] = useState<AdminWalletDetailDto | null>(null);
   const [failed, setFailed] = useState<"forbidden" | "error" | null>(null);
-  const [saved, setSaved] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setFailed(null);
@@ -274,22 +283,43 @@ export function AdminWalletDetailView({ userId }: { userId: string }) {
         </div>
       </div>
 
-      {saved ? (
+      {notice ? (
         <p className="gx-inline-note" role="status">
-          {t("adjust.done")}
+          {notice}
         </p>
       ) : null}
       {perms.has("wallet.adjust") ? (
         <AdjustForm
           userId={userId}
           onSaved={() => {
-            setSaved(true);
+            setNotice(t("adjust.done"));
             void load();
+            void refreshQueues(true);
           }}
         />
       ) : (
         <p className="gx-inline-note">{t("adjust.noPermission")}</p>
       )}
+
+      <section className="gx-card">
+        <header>
+          <h2>{t("requests.detailTitle")}</h2>
+          <p>{t("requests.subtitle")}</p>
+        </header>
+        {data.adjustmentRequests.length === 0 ? (
+          <p className="gx-empty">{t("requests.empty")}</p>
+        ) : (
+          <AdjustmentRequestList
+            rows={data.adjustmentRequests}
+            showMember={false}
+            onDecided={(message) => {
+              setNotice(message);
+              void load();
+              void refreshQueues(true);
+            }}
+          />
+        )}
+      </section>
 
       <section className="gx-card">
         <header>
@@ -359,7 +389,8 @@ export function AdminWalletDetailView({ userId }: { userId: string }) {
                   </span>
                   <span>{a.reason}</span>
                   <small>
-                    {t("detail.by", { name: a.createdBy.displayName ?? "—" })} · {date(a.createdAt)}
+                    {t("detail.by", { name: a.createdBy.displayName ?? "—" })}
+                    {a.approvedBy ? ` · ${t("detail.approvedBy", { name: a.approvedBy.displayName ?? "—" })}` : ""} · {date(a.createdAt)}
                     {a.evidenceReference ? ` · ${a.evidenceReference}` : ""}
                   </small>
                 </li>
@@ -427,7 +458,7 @@ function AdjustForm({ userId, onSaved }: { userId: string; onSaved: () => void }
     if (!amount) return;
     setBusy(true);
     try {
-      await adminWalletsService.adjust(userId, { direction, balanceType: bucket, amount, reasonCode, reason: reason.trim(), evidenceReference: evidence.trim() || undefined }, key.current);
+      await adminWalletsService.requestAdjustment(userId, { direction, balanceType: bucket, amount, reasonCode, reason: reason.trim(), evidenceReference: evidence.trim() || undefined }, key.current);
       key.current = crypto.randomUUID();
       setAmountText("");
       setReason("");
@@ -512,7 +543,7 @@ function AdjustForm({ userId, onSaved }: { userId: string; onSaved: () => void }
           </button>
         </div>
       </form>
-      <Dialog open={confirming} onClose={() => setConfirming(false)} title={t("adjust.title")}>
+      <Dialog open={confirming} onClose={() => setConfirming(false)} title={t("adjust.confirmTitle")}>
         <p>{t("adjust.confirm", { direction: t(`adjust.directions.${direction}`), amount: money(amount ?? 0), bucket: t(`adjust.buckets.${bucket}`) })}</p>
         <div className="gx-toolbar aw-dialog-actions">
           <button type="button" className="gx-btn gx-btn--primary" disabled={busy} onClick={() => void save()}>
@@ -524,6 +555,243 @@ function AdjustForm({ userId, onSaved }: { userId: string; onSaved: () => void }
         </div>
       </Dialog>
     </section>
+  );
+}
+
+/**
+ * Correction requests (FE-16), on the queue page and on a member's wallet. Anyone with wallet.adjust may reject a
+ * pending request with a reason; approving is offered only on requests someone else made (the API refuses the rest).
+ */
+function AdjustmentRequestList({ rows, showMember, onDecided }: { rows: AdminWalletAdjustmentRequestDto[]; showMember: boolean; onDecided: (message: string) => void }) {
+  const t = useTranslations("adminWallets");
+  const locale = useLocale();
+  const money = useMoney();
+  const date = useDate();
+  const perms = usePermissions();
+  const me = useAdminStore((s) => s.context?.adminUserId ?? null);
+  const canDecide = perms.has("wallet.adjust");
+  const [deciding, setDeciding] = useState<{ row: AdminWalletAdjustmentRequestDto; mode: "approve" | "reject" } | null>(null);
+
+  return (
+    <>
+      <ul className="aw-list">
+        {rows.map((row) => {
+          const mine = me !== null && row.requestedBy.adminUserId === me;
+          return (
+            <li key={row.id} aria-label={t("requests.itemLabel", { amount: money(row.amount), name: row.requestedBy.displayName ?? "—" })}>
+              <span>
+                <strong dir="ltr">
+                  {row.direction === "CREDIT" ? "+" : "−"}
+                  {money(row.amount)}
+                </strong>{" "}
+                · {t(`adjust.buckets.${row.balanceType}`)} · {t(`adjust.reasonCodes.${row.reasonCode}`)}
+                {showMember ? (
+                  <>
+                    {" · "}
+                    <Link href={`/${locale}/admin/wallets/${row.userId}`}>{row.userDisplayName ?? "—"}</Link>
+                  </>
+                ) : null}
+              </span>
+              <span>
+                {row.reason}
+                {row.evidenceReference ? ` · ${row.evidenceReference}` : ""}
+              </span>
+              <small>
+                {t("requests.requestedBy", { name: row.requestedBy.displayName ?? "—" })} · {date(row.createdAt)}
+                {row.status === "PENDING" ? ` · ${t("requests.expires", { date: date(row.expiresAt) })}` : ""}
+                {row.decidedBy ? ` · ${t("requests.decidedBy", { name: row.decidedBy.displayName ?? "—" })}` : ""}
+                {row.decisionReason ? ` · ${row.decisionReason}` : ""}
+              </small>
+              <div className="gx-toolbar aw-request-actions">
+                <span className={`gx-tag aw-status aw-status--${row.status}`}>{t(`requests.status.${row.status}`)}</span>
+                {row.status === "PENDING" && canDecide ? (
+                  <>
+                    {mine ? (
+                      <small>{t("requests.yours")}</small>
+                    ) : (
+                      <button type="button" className="gx-btn gx-btn--primary" onClick={() => setDeciding({ row, mode: "approve" })}>
+                        {t("requests.approve")}
+                      </button>
+                    )}
+                    <button type="button" className="gx-btn" onClick={() => setDeciding({ row, mode: "reject" })}>
+                      {t("requests.reject")}
+                    </button>
+                  </>
+                ) : null}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      {deciding ? (
+        <DecideDialog
+          row={deciding.row}
+          mode={deciding.mode}
+          onClose={() => setDeciding(null)}
+          onDone={(message) => {
+            setDeciding(null);
+            onDecided(message);
+          }}
+        />
+      ) : null}
+    </>
+  );
+}
+
+function DecideDialog({ row, mode, onClose, onDone }: { row: AdminWalletAdjustmentRequestDto; mode: "approve" | "reject"; onClose: () => void; onDone: (message: string) => void }) {
+  const t = useTranslations("adminWallets");
+  const money = useMoney();
+  const [reason, setReason] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function decide() {
+    if (mode === "reject" && reason.trim().length < 5) {
+      setError(t("requests.errors.reasonTooShort"));
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      if (mode === "approve") await adminWalletsService.approveAdjustment(row.id);
+      else await adminWalletsService.rejectAdjustment(row.id, reason.trim());
+      onDone(mode === "approve" ? t("requests.approved") : t("requests.rejected"));
+    } catch (err) {
+      const code = decisionErrorOf(err);
+      setError(t.has(`requests.errors.${code}`) ? t(`requests.errors.${code}`) : t("requests.errors.generic"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Dialog open onClose={onClose} title={mode === "approve" ? t("requests.approveTitle") : t("requests.rejectTitle")}>
+      <div className="aw-form">
+        <p>
+          {t("requests.summary", {
+            direction: t(`adjust.directions.${row.direction}`),
+            amount: money(row.amount),
+            bucket: t(`adjust.buckets.${row.balanceType}`),
+            member: row.userDisplayName ?? "—",
+          })}
+        </p>
+        <p className="gx-muted">
+          {row.reason}
+          {row.evidenceReference ? ` · ${row.evidenceReference}` : ""}
+        </p>
+        <p>{mode === "approve" ? t("requests.approveWarning") : t("requests.rejectWarning")}</p>
+        {mode === "reject" ? (
+          <label className="gx-field">
+            <span>{t("requests.rejectReason")}</span>
+            <input value={reason} maxLength={500} onChange={(e) => setReason(e.target.value)} />
+          </label>
+        ) : null}
+        {error ? (
+          <p className="aw-error" role="alert">
+            {error}
+          </p>
+        ) : null}
+        <div className="gx-toolbar aw-dialog-actions">
+          <button type="button" className="gx-btn gx-btn--primary" disabled={busy} onClick={() => void decide()}>
+            {mode === "approve" ? t("requests.confirmApprove") : t("requests.confirmReject")}
+          </button>
+          <button type="button" className="gx-btn" onClick={onClose}>
+            {t("requests.cancel")}
+          </button>
+        </div>
+      </div>
+    </Dialog>
+  );
+}
+
+/** /admin/wallets/adjustments — corrections waiting for a second admin (FE-16), oldest first; decided ones by filter. */
+export function AdminWalletAdjustmentRequestsView() {
+  const t = useTranslations("adminWallets");
+  const perms = usePermissions();
+  const [status, setStatus] = useState<WalletAdjustmentRequestStatusValue | "ALL">("PENDING");
+  const [page, setPage] = useState(1);
+  const [data, setData] = useState<PaginatedDto<AdminWalletAdjustmentRequestDto> | null>(null);
+  const [failed, setFailed] = useState<"forbidden" | "error" | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setFailed(null);
+    try {
+      setData(await adminWalletsService.adjustmentRequests({ status: status === "ALL" ? undefined : status, page }));
+    } catch (error) {
+      setFailed(error instanceof ApiError && error.status === 403 ? "forbidden" : "error");
+    }
+  }, [status, page]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  if ((perms.ready && !perms.has("wallet.view")) || failed === "forbidden") return <Forbidden />;
+  const pages = data ? Math.max(1, Math.ceil(data.total / data.pageSize)) : 1;
+
+  return (
+    <div className="gx-page">
+      <Head title={t("requests.title")} subtitle={t("requests.subtitle")} />
+      {notice ? (
+        <p className="gx-inline-note" role="status">
+          {notice}
+        </p>
+      ) : null}
+      <section className="gx-card">
+        <div className="gx-seg" role="radiogroup" aria-label={t("requests.filter")}>
+          {REQUEST_FILTERS.map((s) => (
+            <button
+              key={s}
+              type="button"
+              role="radio"
+              aria-checked={status === s}
+              onClick={() => {
+                setStatus(s);
+                setPage(1);
+                setData(null);
+              }}
+            >
+              {s === "ALL" ? t("requests.all") : t(`requests.status.${s}`)}
+            </button>
+          ))}
+        </div>
+        {failed === "error" ? (
+          <div className="gx-inline-alert" role="alert">
+            <p>{t("failed")}</p>
+            <button type="button" className="gx-btn" onClick={() => void load()}>
+              {t("retry")}
+            </button>
+          </div>
+        ) : !data ? (
+          <div className="gx-skel" style={{ height: 200 }} aria-label={t("loading")} />
+        ) : data.items.length === 0 ? (
+          <p className="gx-empty">{t("requests.empty")}</p>
+        ) : (
+          <AdjustmentRequestList
+            rows={data.items}
+            showMember
+            onDecided={(message) => {
+              setNotice(message);
+              void load();
+              void refreshQueues(true);
+            }}
+          />
+        )}
+        {data && pages > 1 ? (
+          <nav className="gx-toolbar aw-pager" aria-label={t("pageOf", { page, pages })}>
+            <button type="button" className="gx-btn" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+              {t("previous")}
+            </button>
+            <span className="gx-muted">{t("pageOf", { page, pages })}</span>
+            <button type="button" className="gx-btn" disabled={page >= pages} onClick={() => setPage((p) => p + 1)}>
+              {t("next")}
+            </button>
+          </nav>
+        ) : null}
+        {perms.ready && !perms.has("wallet.adjust") ? <p className="gx-muted">{t("requests.noPermission")}</p> : null}
+      </section>
+    </div>
   );
 }
 

@@ -11,11 +11,12 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return publicPageMetadata((await params).locale, "credits");
 }
 
-/** Credits — every third-party photograph and the reel soundtrack we publish, with author and licence, in every site language. */
+/** Credits — every third-party photograph, the reel soundtrack and the Android robot mark we publish, with author and licence, in every site language. */
 export default async function CreditsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isRouteLocale(locale)) notFound();
   const park = (await getTranslations({ locale, namespace: "pattern2026" })).raw("park") as ParkText;
+  const icons = await getTranslations({ locale, namespace: "pwa.credits" });
   return (
     <div className="flex flex-col gap-6">
       <header className="section-head">
@@ -65,6 +66,23 @@ export default async function CreditsPage({ params }: { params: Promise<{ locale
               </p>
             </li>
           ))}
+        </ul>
+      </section>
+      <section className="flex flex-col gap-3" aria-labelledby="icon-credits-title">
+        <h2 id="icon-credits-title" className="text-section-title">{icons("title")}</h2>
+        <ul className="row-list">
+          <li>
+            <a className="row-list__item" href="https://developer.android.com/distribute/marketing-tools/brand-guidelines" target="_blank" rel="noopener noreferrer">
+              <span className="flex min-w-0 flex-col">
+                <span className="font-semibold" dir="ltr">Android robot · Google</span>
+                <span className="text-metadata text-text-secondary" dir="ltr">CC BY 3.0</span>
+              </span>
+            </a>
+            <p className="px-4 pb-4 text-metadata text-text-secondary">
+              {icons("androidRobot")}{" · "}
+              <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer" className="underline">{park.licence}</a>
+            </p>
+          </li>
         </ul>
       </section>
     </div>

@@ -24,6 +24,7 @@ describe("dashboard permission boundary", () => {
       petMemorialSubmission: counter(14),
       placeReport: counter(15),
       walletTopUp: counter(16),
+      walletAdjustmentRequest: counter(19),
       accountDeletionRequest: counter(17),
       pet: counter(40),
       booking: counter(7),
@@ -31,7 +32,8 @@ describe("dashboard permission boundary", () => {
       providerReview: counter(1),
       productReview: counter(2),
       travelReview: counter(4),
-      setPetRequest: counter(19),
+      cardTransferDestination: counter(1),
+      setPetRequest: counter(21),
     };
     return { db, service: new AdminDashboardService(db as unknown as PrismaService) };
   };
@@ -69,12 +71,14 @@ describe("dashboard permission boundary", () => {
       pendingMemorials: 14,
       openPlaceReports: 15,
       pendingWalletTopUps: 16,
+      pendingWalletAdjustments: 19,
+      pendingCardDestinationChanges: 1,
       pendingDeletionRequests: 17,
       launchKpis: { registeredPets: 40, newPetsThisWeek: 40, bookingsThisWeek: 7, bookingsLastWeek: 7 },
       openOwnershipDisputes: 18,
       openProviderNoShows: 5,
       pendingReviews: 7,
-      newSetPetRequests: 19,
+      newSetPetRequests: 21,
     });
   });
   it("hides vertical queues from an admin scoped to another vertical", async () => {
@@ -94,6 +98,17 @@ describe("dashboard permission boundary", () => {
     expect((await service.getSummary(actor(AdminRole.SUPER_ADMIN))).pendingDeletionRequests).toBe(17);
   });
 
+  it("counts wallet corrections waiting for a second admin for anyone who may open Wallets, and only unexpired ones (FE-16)", async () => {
+    const { db, service } = setup();
+    expect((await service.getSummary(actor(AdminRole.FINANCE))).pendingWalletAdjustments).toBe(19);
+    const where = db.walletAdjustmentRequest.count.mock.calls[0][0].where;
+    expect(where.status).toBe("PENDING");
+    expect(where.expiresAt.gt).toBeInstanceOf(Date);
+    db.walletAdjustmentRequest.count.mockClear();
+    expect((await service.getSummary(actor(AdminRole.EDITOR))).pendingWalletAdjustments).toBeNull();
+    expect(db.walletAdjustmentRequest.count).not.toHaveBeenCalled();
+  });
+
   it("keeps the platform-wide launch figures from vertical-scoped roles (#290 Q97)", async () => {
     const { db, service } = setup();
     // A custom role with analytics.view but limited to the shop: figures belong to every vertical, so none.
@@ -102,6 +117,22 @@ describe("dashboard permission boundary", () => {
     expect(db.booking.count).not.toHaveBeenCalled();
     const allVerticals = { ...actor(AdminRole.ANALYTICS), permissions: ["analytics.view"], customRole: { id: "r2", name: "Analyst", verticals: [] } } as unknown as ResolvedAdminContext;
     expect((await service.getSummary(allVerticals)).launchKpis).toEqual({ registeredPets: 40, newPetsThisWeek: 40, bookingsThisWeek: 7, bookingsLastWeek: 7 });
+  });
+
+  it("counts a proposed card-to-card account only for the super admins who may approve it (BO-14)", async () => {
+    const { db, service } = setup();
+    // ADMIN holds settings.manage but may not touch the company account; finance only views it.
+    for (const role of [AdminRole.ADMIN, AdminRole.FINANCE, AdminRole.READ_ONLY]) {
+      expect((await service.getSummary(actor(role))).pendingCardDestinationChanges).toBeNull();
+    }
+    expect(db.cardTransferDestination.count).not.toHaveBeenCalled();
+    // A custom role on a SUPER_ADMIN membership that lacks settings.manage is not an approver either.
+    const narrowed = { ...actor(AdminRole.SUPER_ADMIN), permissions: ["wallet.view"] } as unknown as ResolvedAdminContext;
+    expect((await service.getSummary(narrowed)).pendingCardDestinationChanges).toBeNull();
+    expect(db.cardTransferDestination.count).not.toHaveBeenCalled();
+    expect((await service.getSummary(actor(AdminRole.SUPER_ADMIN))).pendingCardDestinationChanges).toBe(1);
+    // Only live proposals: PENDING and still inside the approval window.
+    expect(db.cardTransferDestination.count).toHaveBeenCalledWith({ where: { status: "PENDING", expiresAt: { gt: expect.any(Date) } } });
   });
 
   it("counts pending reviews only in the verticals an admin may moderate", async () => {

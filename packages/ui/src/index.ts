@@ -58,4 +58,9 @@ export {
   Hourglass,
   Zap,
   RefreshCw,
+  Share,
+  SquarePlus,
+  Smartphone,
+  Copy,
+  Laptop,
 } from "lucide-react";

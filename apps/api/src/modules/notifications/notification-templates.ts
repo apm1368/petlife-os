@@ -52,6 +52,19 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "حساب کارت‌به‌کارت تغییر کرد", body: "{{actor}} حساب مقصد کارت‌به‌کارت را به {{account}} ({{holder}}) تغییر داد. دلیل: {{reason}}. اگر این تغییر را نمی‌شناسید، فوراً بررسی کنید." },
     en: { title: "Card-to-card account changed", body: "{{actor}} changed the card-to-card account to {{account}} ({{holder}}). Reason: {{reason}}. If you don't recognise this change, check it now." },
   },
+  // BO-14: a change is only a proposal until a second super admin approves it; every super admin hears each step.
+  "admin.card_destination_change_requested": {
+    fa: { title: "تغییر حساب کارت‌به‌کارت در انتظار تأیید شما", body: "{{actor}} درخواست داده حساب مقصد کارت‌به‌کارت به {{account}} ({{holder}}) تغییر کند. دلیل: {{reason}}. تا مدیر ارشد دیگری آن را تأیید نکند حساب فعلی استفاده می‌شود؛ این درخواست پس از {{hours}} ساعت منقضی می‌شود. اگر آن را نمی‌شناسید، ردش کنید." },
+    en: { title: "Card-to-card account change pending your approval", body: "{{actor}} asked to change the card-to-card account to {{account}} ({{holder}}). Reason: {{reason}}. The current account stays in use until another super admin approves it; the request expires in {{hours}} hours. If you don't recognise it, reject it." },
+  },
+  "admin.card_destination_approved": {
+    fa: { title: "حساب کارت‌به‌کارت تازه تأیید و فعال شد", body: "{{actor}} درخواست {{requester}} را تأیید کرد؛ از این پس پرداخت‌های کارت‌به‌کارت به {{account}} ({{holder}}) واریز می‌شوند. دلیل: {{reason}}. اگر این تغییر را نمی‌شناسید، فوراً بررسی کنید." },
+    en: { title: "New card-to-card account approved and active", body: "{{actor}} approved {{requester}}'s request; new card-to-card payments now go to {{account}} ({{holder}}). Reason: {{reason}}. If you don't recognise this change, check it now." },
+  },
+  "admin.card_destination_change_rejected": {
+    fa: { title: "درخواست تغییر حساب کارت‌به‌کارت رد شد", body: "{{actor}} درخواست تغییر حساب کارت‌به‌کارت به {{account}} را بدون تأیید بست؛ حساب فعلی تغییری نکرد. دلیل: {{reason}}." },
+    en: { title: "Card-to-card account change rejected", body: "{{actor}} closed the request to change the card-to-card account to {{account}} without approving it; the current account is unchanged. Reason: {{reason}}." },
+  },
   "admin.card_destination_disabled": {
     fa: { title: "کارت‌به‌کارت خاموش شد", body: "{{actor}} حساب کارت‌به‌کارت را غیرفعال کرد؛ اعضا تا تعیین حساب تازه نمی‌توانند کارت‌به‌کارت پرداخت کنند. دلیل: {{reason}}." },
     en: { title: "Card-to-card switched off", body: "{{actor}} switched the card-to-card account off; members cannot pay by card-to-card until a new account is set. Reason: {{reason}}." },
