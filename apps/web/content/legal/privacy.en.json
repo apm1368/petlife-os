@@ -20,6 +20,7 @@
         "Addresses and location: the delivery or visit addresses you save, optionally with a map point. When you allow it, your browser's location is used for nearby services, places, lost-pet alerts and the pet taxi.",
         "Bookings, orders and payments: what you booked or bought, delivery details, and refunds and disputes. For card-to-card payments we keep the receipt image you upload. We do not collect your bank card number or IBAN.",
         "What you publish: posts, comments, chats, reviews, lost and found reports, memorials, and the photos and files you upload. Location data inside photos (EXIF and GPS) is removed when you upload them.",
+        "Place suggestions: the name, category, city, address, map point and notes of a place you suggest. Only our staff can see that it came from you. If our team checks and lists the place, its details and your notes may be published, never your name. We tell you in the app whether your suggestion was accepted.",
         "Support and messages: your support requests and our replies, and the notifications we send you.",
         "Technical: for each signed-in session, the device's browser details and IP address. For push notifications, your browser's push address. When someone opens a health share link, we log the time, browser details and a scrambled form of the IP address."
       ]
@@ -66,6 +67,7 @@
         "Maps: maps on the site load tiles from OpenStreetMap. Some route and place searches may use a map provider such as Neshan or Google. These services see the area you are viewing or searching, not your account.",
         "Insurers: only when you submit an insurance application, and only after you agree. The insurer then receives your contact details and your pet's species, breed, age and weight.",
         "Other sites: when you open an external listing, for example on Jajiga, we record the click, and that site's own privacy policy applies from then on.",
+        "Trust badge: when the e-trust (eNamad) badge is shown at the bottom of our pages, your browser loads it from enamad.ir, which can see your IP address and that you are on opetlife.",
         "Authorities: when the law requires it, for example under a court order.",
         "We never sell your personal data. Our staff can see personal data only as their role needs. Revealing a customer's full contact details requires a special permission, and every reveal is logged."
       ]
@@ -79,7 +81,7 @@
         "petlife_oauth_state is used only during Google sign-in and lasts 10 minutes.",
         "NEXT_LOCALE remembers the language you chose.",
         "Your browser's local storage keeps a few small preferences on your device, such as the dog-cursor setting.",
-        "We do not use advertising, analytics or social-media tracking cookies."
+        "We do not use advertising, analytics or social-media tracking cookies. Our links to Instagram, Telegram and other social networks are plain links: nothing from those services loads until you open one."
       ]
     },
     {

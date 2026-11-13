@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Globe, Save, Settings, ToggleLeft, Mail, Phone, Bell, Palette, LockKeyhole } from "@petlife/ui";
+import { Globe, Save, Settings, ToggleLeft, Mail, Phone, Bell, Palette, LockKeyhole, ShieldCheck, ExternalLink } from "@petlife/ui";
 import Link from "@/features/navigation/localized-link";
 import { ApiError } from "@/lib/api/client";
 import { adminSettingsService, type PlatformSetting, type SettingValue } from "@/services/admin-settings.service";
 import { useAdminStore } from "@/stores/admin-store";
+import { SOCIAL_NETWORKS, enamadSeal } from "@/features/site-settings/public-links";
 import "../admin-glass.css";
 
 const LOCALES = ["fa", "en", "de", "es", "ar", "nl"] as const;
@@ -17,7 +18,9 @@ type LocalizedValue = Partial<Record<Loc, string>>;
 const SECTIONS: { key: string; icon: typeof Globe; keys: string[] }[] = [
   { key: "identity", icon: Palette, keys: ["site.tagline", "site.footerNote"] },
   { key: "contact", icon: Phone, keys: ["site.contactPhone", "site.workingHours", "site.contactEmail", "site.contactAddress"] },
-  { key: "social", icon: Globe, keys: ["social.instagram", "social.telegram", "social.whatsapp", "social.x", "social.linkedin", "social.youtube", "social.aparat"] },
+  // Each network's link next to its own on/off switch (owner, 2026-11-13).
+  { key: "social", icon: Globe, keys: SOCIAL_NETWORKS.flatMap((n) => [`social.${n}`, `social.${n}Enabled`]) },
+  { key: "trust", icon: ShieldCheck, keys: ["trust.enamadEnabled", "trust.enamadId", "trust.enamadCode"] },
   { key: "announcement", icon: Bell, keys: ["platform.announcement", "platform.announcementTone", "platform.announcementAudience", "platform.announcementLink"] },
   { key: "features", icon: ToggleLeft, keys: ["features.shop", "features.services", "features.travel", "features.insurance", "features.places", "features.community", "features.lostPets", "features.animalSupport", "features.blog", "features.memorials"] },
   { key: "access", icon: LockKeyhole, keys: ["auth.passwordSignupEnabled", "auth.otpEnabled", "auth.googleEnabled"] },
@@ -127,6 +130,7 @@ export function AdminSiteSettingsView() {
                 <div className={section.key === "features" || section.key === "access" ? "gx-grid gx-grid--3" : "gx-grid gx-grid--2"}>
                   {sectionRows.map((row) => <Field key={row.key} row={row} value={drafts[row.key] ?? null} disabled={!canManage} onChange={(v) => set(row.key, v)} />)}
                 </div>
+                {section.key === "trust" ? <EnamadCheck id={drafts["trust.enamadId"]} code={drafts["trust.enamadCode"]} /> : null}
               </section>
             );
           })}
@@ -199,7 +203,18 @@ function Field({ row, value, disabled, onChange }: { row: PlatformSetting; value
   const type = row.type === "email" ? "email" : row.type === "url" ? "url" : row.key === "site.contactPhone" ? "tel" : "text";
   return (
     <label className="gx-field"><span>{head}</span>
-      <input type={type === "url" ? "text" : type} dir="ltr" inputMode={type === "tel" ? "tel" : type === "email" ? "email" : type === "url" ? "url" : undefined} maxLength={row.constraints.maxLength ?? 280} disabled={disabled} value={typeof value === "string" ? value : ""} placeholder={row.type === "url" ? "https://" : undefined} onChange={(e) => onChange(e.target.value)} />
+      <input type={type === "url" ? "text" : type} dir="ltr" inputMode={type === "tel" ? "tel" : type === "email" ? "email" : type === "url" ? "url" : undefined} maxLength={row.constraints.maxLength ?? 280} disabled={disabled} value={typeof value === "string" ? value : ""} placeholder={row.type === "url" ? (row.constraints.allowedHosts?.length ? `https://${row.constraints.allowedHosts[0]}/…` : "https://") : undefined} onChange={(e) => onChange(e.target.value)} />
     </label>
+  );
+}
+
+/** Lets staff open the seal page eNamad itself serves for the id and code being entered, before switching it on. */
+function EnamadCheck({ id, code }: { id: SettingValue | undefined; code: SettingValue | undefined }) {
+  const t = useTranslations("adminSiteSettings");
+  const seal = enamadSeal({ "trust.enamadEnabled": true, "trust.enamadId": typeof id === "string" ? id.trim() : null, "trust.enamadCode": typeof code === "string" ? code.trim() : null });
+  return (
+    <p className="gx-muted" style={{ marginTop: 10 }}>
+      {seal ? <a className="underline" href={seal.href} target="_blank" rel="noopener noreferrer" referrerPolicy="origin"><ExternalLink size={14} aria-hidden="true" style={{ display: "inline", marginInlineEnd: 4 }} />{t("enamadCheck")}</a> : t("enamadIncomplete")}
+    </p>
   );
 }

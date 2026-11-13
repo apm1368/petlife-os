@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { SiteContact, SiteFooterNote, SocialLinks } from "./SiteContact";
+import { EnamadSeal } from "./EnamadSeal";
 import { useHrefFilter } from "./site-settings";
 
 /** A footer link group with switched-off product areas removed (features.*). Hides itself when emptied. */
@@ -17,13 +18,14 @@ export function FooterLinkGroup({ title, links, locale }: { title: string; links
   );
 }
 
-/** Admin-managed footer extras: contact facts, social profiles and the footer note. */
+/** Admin-managed footer extras: contact facts, social profile icons, the footer note and the eNamad seal. */
 export function FooterSiteDetails() {
   return (
     <>
       <SiteContact />
       <SocialLinks />
       <SiteFooterNote />
+      <EnamadSeal />
     </>
   );
 }

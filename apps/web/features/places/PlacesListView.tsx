@@ -115,6 +115,8 @@ export function PlacesListView() {
           <h1>{t("list.title")}</h1>
           <p>{t("list.subtitle")}</p>
         </div>
+        {/* Owner (2026-11-13): members suggest places; staff review them before they are listed. */}
+        <Link className="opl-btn soft sm" href={`/${locale}/places/suggest`}>{t("suggest.cta")}</Link>
       </header>
 
       <div className="filter-band">

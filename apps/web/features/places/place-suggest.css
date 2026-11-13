@@ -1,0 +1,34 @@
+/* Suggest a place (owner, 2026-11-13). Logical properties only; 44px controls; light/dark through the shared tokens. */
+.place-suggest { display: flex; flex-direction: column; gap: 22px; max-width: 760px; margin-inline: auto; padding-block: 8px 24px; }
+.place-suggest__eyebrow { display: inline-flex; align-items: center; gap: 8px; color: var(--opl-forest-2, var(--brand-natural)); font-size: .9rem; font-weight: 700; }
+.place-suggest__head h1 { margin-block: 6px; font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.1rem); font-weight: 850; line-height: 1.4; }
+.place-suggest__head p { color: var(--opl-ink-2, var(--text-secondary)); line-height: 1.9; }
+.place-suggest__form { display: grid; gap: 16px; padding: 18px 16px; border: 1px solid var(--opl-line-2, var(--border-subtle)); border-radius: 22px; background: var(--opl-raised, var(--surface-raised)); }
+.place-suggest__field { display: flex; flex-direction: column; gap: 6px; font-weight: 650; }
+.place-suggest__field input, .place-suggest__field select, .place-suggest__field textarea { width: 100%; min-height: 44px; padding: 8px 12px; border: 1px solid var(--opl-line-2, var(--border-default)); border-radius: 12px; background: var(--opl-paper-2, var(--surface-base)); color: inherit; font: inherit; font-weight: 500; }
+.place-suggest__field [aria-invalid="true"] { border-color: #B3261E; }
+.place-suggest__error { color: #B3261E; font-weight: 600; outline: none; }
+.place-suggest__hint { color: var(--opl-ink-3, var(--text-secondary)); font-size: .86rem; font-weight: 500; line-height: 1.8; }
+.place-suggest__pin { display: grid; gap: 8px; margin: 0; padding: 0; border: 0; }
+.place-suggest__pin legend { margin-bottom: 4px; font-weight: 650; }
+.place-suggest__map { height: 280px; border-radius: 16px; overflow: hidden; }
+.place-suggest__pin-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.place-suggest__pin-state { color: var(--opl-forest, var(--brand-natural)); font-weight: 700; }
+.place-suggest__alert { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; border-radius: 12px; background: #FDECEA; color: #8C1D18; font-weight: 600; }
+.place-suggest__done { display: flex; align-items: flex-start; gap: 12px; padding: 18px; border-radius: 22px; background: var(--opl-mint, var(--surface-subtle)); }
+.place-suggest__done svg { flex: none; color: var(--opl-forest, var(--brand-natural)); }
+.place-suggest__done h2 { font-weight: 800; }
+.place-suggest__done p { margin-block: 4px 12px; line-height: 1.8; }
+.place-suggest__mine h2 { margin-bottom: 10px; font-size: 1.15rem; font-weight: 800; }
+.place-suggest__mine ul { display: grid; gap: 8px; padding: 0; list-style: none; }
+.place-suggest__mine li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 12px 14px; border: 1px solid var(--opl-line-2, var(--border-subtle)); border-radius: 16px; background: var(--opl-raised, var(--surface-raised)); }
+.place-suggest__mine-name { display: flex; flex: 1; flex-direction: column; min-width: 12rem; line-height: 1.6; }
+.place-suggest__mine-name small { color: var(--opl-ink-3, var(--text-secondary)); }
+.place-suggest__status { padding: 2px 10px; border-radius: 999px; background: var(--opl-apricot-bg, var(--surface-subtle)); font-size: .8rem; font-weight: 800; }
+.place-suggest__status--approved { background: var(--opl-mint, var(--surface-subtle)); color: var(--opl-forest, var(--brand-natural)); }
+.place-suggest__status--rejected { background: var(--opl-line, var(--surface-subtle)); color: var(--opl-ink-2, var(--text-secondary)); }
+.place-suggest__view { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; }
+.place-suggest__note { flex-basis: 100%; color: var(--opl-ink-2, var(--text-secondary)); font-size: .9rem; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .place-suggest__alert { background: #3B1E1C; color: #F9DEDC; } :root:not([data-theme="light"]) .place-suggest__error, :root:not([data-theme="light"]) .place-suggest__field [aria-invalid="true"] { color: #F2B8B5; border-color: #F2B8B5; } }
+:root[data-theme="dark"] .place-suggest__alert { background: #3B1E1C; color: #F9DEDC; }
+:root[data-theme="dark"] .place-suggest__error { color: #F2B8B5; }
