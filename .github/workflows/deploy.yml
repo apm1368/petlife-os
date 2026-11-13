@@ -117,8 +117,9 @@ jobs:
             # artifact downloads ran at ~20 KB/s, 2026-11-12). If the download fails, deploy.sh builds locally instead.
             rm -rf /var/www/petlife-os-releases/incoming && mkdir -p /var/www/petlife-os-releases/incoming
             # Parallel range requests (scripts/ops/fetch-release.sh): one connection ran at ~100 KB/s and a 160 MB
-            # archive hit the old 25-minute limit; several together reach ~0.4 MB/s (2026-11-12).
-            if timeout 2700 bash scripts/ops/fetch-release.sh '${{ github.sha }}' /var/www/petlife-os-releases/incoming; then export PREBUILT_ARCHIVE='/var/www/petlife-os-releases/incoming/release-${{ github.sha }}.tgz'; else echo "deploy: could not download the CI-built release; building on this host instead"; fi
+            # archive hit the old 25-minute limit; several together reach ~0.4 MB/s (2026-11-12). On afternoon networks a
+            # 347 MB build took 38 of the 45 minutes (2026-11-13), so the limit is 70 minutes; the job's own limit is 90.
+            if timeout 4200 bash scripts/ops/fetch-release.sh '${{ github.sha }}' /var/www/petlife-os-releases/incoming; then export PREBUILT_ARCHIVE='/var/www/petlife-os-releases/incoming/release-${{ github.sha }}.tgz'; else echo "deploy: could not download the CI-built release; building on this host instead"; fi
             /var/www/petlife-os/deploy.sh
             export EXPECTED_BUILD_SHA='${{ github.sha }}'
             export EXPECTED_DEPLOYMENT_ENVIRONMENT='production'
