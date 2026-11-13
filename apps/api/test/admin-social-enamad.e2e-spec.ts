@@ -21,7 +21,11 @@ describe("admin social links and eNamad seal reach /settings/public", () => {
     const session = await db.session.create({ data: { userId: user.id, expiresAt: new Date(Date.now() + 86_400_000) } });
     const cookie = `petlife_session=${signSessionCookie(session.id, process.env.SESSION_SECRET!)}; petlife_csrf=${csrf}`;
     const version = async (key: string) => ((await request(app.getHttpServer()).get("/admin/settings").set("Cookie", cookie).expect(200)).body as { key: string; version: number }[]).find((s) => s.key === key)!.version;
-    const put = async (key: string, value: unknown) => request(app.getHttpServer()).put(`/admin/settings/${key}`).set("Cookie", cookie).set("x-csrf-token", csrf).send({ value, baseVersion: await version(key), reason: "owner request #7/#8" });
+    /** Resolves to the response (the base version is read first), so callers assert on its status. */
+    const put = async (key: string, value: unknown) => {
+      const baseVersion = await version(key);
+      return request(app.getHttpServer()).put(`/admin/settings/${key}`).set("Cookie", cookie).set("x-csrf-token", csrf).send({ value, baseVersion, reason: "owner request #7/#8" });
+    };
     return { id: adminUser.id, put };
   }
 
@@ -42,16 +46,17 @@ describe("admin social links and eNamad seal reach /settings/public", () => {
     expect(await pub()).toMatchObject({ "social.bale": null, "social.baleEnabled": true, "trust.enamadEnabled": false, "trust.enamadId": null, "trust.enamadCode": null });
 
     // settings.view alone can't edit.
-    await (await viewer.put("social.bale", "https://ble.ir/opetlife")).expect(403);
+    expect((await viewer.put("social.bale", "https://ble.ir/opetlife")).status).toBe(403);
     // Another host, plain http, or a look-alike domain is refused with a reason the admin page shows.
     for (const bad of ["https://evil.example/ble.ir", "https://ble.ir.evil.example/x"]) {
-      const res = await (await editor.put("social.bale", bad)).expect(400);
+      const res = await editor.put("social.bale", bad);
+      expect(res.status).toBe(400);
       expect(JSON.stringify(res.body)).toContain("URL_HOST_NOT_ALLOWED");
     }
-    await (await editor.put("social.bale", "http://ble.ir/opetlife")).expect(400);
-    await (await editor.put("social.bale", "https://ble.ir/opetlife")).expect(200);
+    expect((await editor.put("social.bale", "http://ble.ir/opetlife")).status).toBe(400);
+    expect((await editor.put("social.bale", "https://ble.ir/opetlife")).status).toBe(200);
     expect((await pub())["social.bale"]).toBe("https://ble.ir/opetlife");
-    await (await editor.put("social.baleEnabled", false)).expect(200);
+    expect((await editor.put("social.baleEnabled", false)).status).toBe(200);
     expect(await pub()).toMatchObject({ "social.bale": "https://ble.ir/opetlife", "social.baleEnabled": false });
     expect(await db.adminAuditLog.count({ where: { adminUserId: editor.id, action: "setting.changed", entityId: { in: ["social.bale", "social.baleEnabled"] } } })).toBe(2);
 
@@ -61,10 +66,10 @@ describe("admin social links and eNamad seal reach /settings/public", () => {
     expect((await pub())["social.instagram"]).toBeNull();
 
     // eNamad: pasted HTML is refused; only the id and the code are stored.
-    await (await editor.put("trust.enamadCode", '<a href="https://trustseal.enamad.ir/?id=1"><img src=x></a>')).expect(400);
-    await (await editor.put("trust.enamadId", "123456")).expect(200);
-    await (await editor.put("trust.enamadCode", "AbC123xyz789")).expect(200);
-    await (await editor.put("trust.enamadEnabled", true)).expect(200);
+    expect((await editor.put("trust.enamadCode", '<a href="https://trustseal.enamad.ir/?id=1"><img src=x></a>')).status).toBe(400);
+    expect((await editor.put("trust.enamadId", "123456")).status).toBe(200);
+    expect((await editor.put("trust.enamadCode", "AbC123xyz789")).status).toBe(200);
+    expect((await editor.put("trust.enamadEnabled", true)).status).toBe(200);
     expect(await pub()).toMatchObject({ "trust.enamadEnabled": true, "trust.enamadId": "123456", "trust.enamadCode": "AbC123xyz789" });
   });
 });
