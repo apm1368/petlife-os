@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronDown, HeartPulse, Menu, Plane, ShieldCheck, ShoppingBag, Sparkles, Users, X } from "@petlife/ui";
-import type { RouteLocale } from "@/lib/i18n/config";
+import { LOCALE_PREFIX, type RouteLocale } from "@/lib/i18n/config";
 import { Brand } from "@/features/brand/Brand";
 import { useSessionBootstrap } from "@/hooks/use-session-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
@@ -66,7 +66,7 @@ export function ParkHeader({ locale }: { locale: RouteLocale }) {
         <label className="sr-only" htmlFor="park-language-select">{o.header.language}</label>
         <select id="park-language-select" className="opl-lang" aria-label={o.header.language} value={locale} onChange={(event) => {
           const url = new URL(window.location.href);
-          url.pathname = `/${event.target.value}${url.pathname.replace(/^\/(fa|en|de|es)/, "")}`;
+          url.pathname = `/${event.target.value}${url.pathname.replace(LOCALE_PREFIX, "")}`;
           window.location.assign(url.toString());
         }}>
           <option value="fa">فارسی</option><option value="en">English</option><option value="de">Deutsch</option><option value="es">Español</option>

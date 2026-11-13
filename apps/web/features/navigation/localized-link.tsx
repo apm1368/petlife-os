@@ -4,10 +4,11 @@ import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { forwardRef, useMemo, type ComponentProps } from "react";
+import { hasLocalePrefix } from "@/lib/i18n/config";
 
 /** Prefixes the active locale to an internal path that has none ("/pets/1" → "/en/pets/1"); everything else is untouched. */
 export function localizeHref(href: string, locale: string): string {
-  if (!href.startsWith("/") || href.startsWith("//") || /^\/(fa|en|de|es)(\/|$|\?|#)/.test(href) || /^\/(api|_next|uploads)\//.test(href)) return href;
+  if (!href.startsWith("/") || href.startsWith("//") || hasLocalePrefix(href) || /^\/(api|_next|uploads)\//.test(href)) return href;
   return `/${locale}${href}`;
 }
 
