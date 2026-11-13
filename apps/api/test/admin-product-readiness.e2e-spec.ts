@@ -57,7 +57,7 @@ describe("admin incomplete-products queue", () => {
     const soldOut = await product("Sold out", { status: "ACTIVE", brandId: brand.id, specifications: specs }, three, { onHand: 2, reserved: 2 });
     const pending = await product("Pending offer", { status: "ACTIVE", brandId: brand.id, specifications: specs }, three, { onHand: 9, moderation: "PENDING_REVIEW" });
     const archived = await product("Archived", { status: "ARCHIVED" }, [], undefined);
-    const job = await db.catalogImportJob.create({ data: { targetCategoryId: category.id, idempotencyKey: `readiness-${tag}`, requestedById: admin.id } as never });
+    const job = await db.catalogImportJob.create({ data: { targetCategoryId: category.id, idempotencyKey: `readiness-${tag}`, requestedById: admin.id, submittedUrls: [] } as never });
     const imported = await product("Imported", { status: "INACTIVE", brandId: brand.id, specifications: specs }, three, { onHand: 3 });
     await db.catalogImportItem.create({ data: { jobId: job.id, source: "DIGIKALA", sourceItemId: `dk-${tag}`, sourceUrl: `https://api.digikala.com/v2/product/${tag}/`, sourceSnapshot: {}, sourceHash: tag, productId: imported.id, status: "NEEDS_REVIEW" } });
 
