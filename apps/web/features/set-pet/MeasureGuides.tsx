@@ -6,7 +6,7 @@ import { humanShirtPath } from "./garment-geometry";
  */
 export function PetMeasureGuide({ title }: { title: string }) {
   return (
-    <svg className="setpet-guide" viewBox="0 0 200 124" role="img" aria-label={title} dir="ltr">
+    <svg className="setpet-guide" viewBox="0 0 200 124" role="img" aria-label={title} style={{ direction: "ltr" }}>
       <g className="setpet-guide__animal">
         <path d="M44 50 Q28 40 20 22" fill="none" strokeWidth="6" strokeLinecap="round" />
         <ellipse cx="95" cy="64" rx="56" ry="25" />
@@ -41,7 +41,7 @@ export function PetMeasureGuide({ title }: { title: string }) {
 /** The T-shirt chart: A = chest width laid flat (armpit to armpit), B = length (shoulder to hem). */
 export function ShirtMeasureGuide({ title }: { title: string }) {
   return (
-    <svg className="setpet-guide" viewBox="-44 -6 88 84" role="img" aria-label={title} dir="ltr">
+    <svg className="setpet-guide" viewBox="-44 -6 88 84" role="img" aria-label={title} style={{ direction: "ltr" }}>
       <path className="setpet-guide__shirt" d={humanShirtPath("M", "front")} />
       <g className="setpet-guide__lines" fill="none" strokeWidth="1.2">
         <path d="M-25.5 24 H25.5" markerStart="url(#setpet-tick-s)" markerEnd="url(#setpet-tick-s)" />

@@ -100,7 +100,7 @@ export function suggestHumanSize(heightCm: number | null, weightKg: number | nul
   if (weightKg == null || weightKg < 25 || weightKg > 250) return null;
   const byWeight = weightKg < 60 ? 0 : weightKg < 72 ? 1 : weightKg < 84 ? 2 : weightKg < 96 ? 3 : weightKg < 110 ? 4 : 5;
   const shift = heightCm == null || heightCm < 100 || heightCm > 230 ? 0 : heightCm >= 186 ? 1 : heightCm < 160 ? -1 : 0;
-  return SIZES[Math.min(SIZES.length - 1, Math.max(0, byWeight + shift))];
+  return SIZES[Math.min(SIZES.length - 1, Math.max(0, byWeight + shift))] ?? null;
 }
 
 /** Print quality: pixels across the print width, as dots per inch (150 dpi or more prints sharp). */

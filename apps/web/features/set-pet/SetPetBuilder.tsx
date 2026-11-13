@@ -227,7 +227,7 @@ export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; on
     if (!on) return;
     if (zone !== "PET_BACK") setSide(zoneSide(zone));
     // With a single design uploaded, a newly ticked zone gets it straight away (the preview moves live).
-    const only = readyDesigns.length === 1 ? readyDesigns[0].id : undefined;
+    const only = readyDesigns.length === 1 ? readyDesigns[0]?.id : undefined;
     if (only) setPlacements((p) => (p[zone] ? p : { ...p, [zone]: only }));
   }
 
@@ -407,7 +407,12 @@ export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; on
       humanSizes,
       petSize,
       petColour: petColour ?? colour,
-      petMeasurements: Object.fromEntries(MEASUREMENT_KEYS.map((key) => [key, roundMeasurement(key, measured[key] as number)])) as SetPetCreateRequestInput["petMeasurements"],
+      petMeasurements: {
+        neckCm: roundMeasurement("neckCm", measured.neckCm ?? 0),
+        chestCm: roundMeasurement("chestCm", measured.chestCm ?? 0),
+        backLengthCm: roundMeasurement("backLengthCm", measured.backLengthCm ?? 0),
+        weightKg: roundMeasurement("weightKg", measured.weightKg ?? 0),
+      },
       placements: ALL_ZONES.filter((zone) => zones.has(zone)).map((zone) => ({ zone, designFileId: ids.get(placements[zone]!) ?? placements[zone]! })),
       ...(petId ? { petId } : {}),
       ...(notes.trim() ? { notes: notes.trim() } : {}),
@@ -444,7 +449,7 @@ export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; on
 
   const index = STEPS.indexOf(step);
   const showPreview = index >= STEPS.indexOf("colour");
-  const shirtForPreview = humanSizes[Math.min(previewShirt, humanSizes.length - 1)];
+  const shirtForPreview = humanSizes[Math.min(previewShirt, humanSizes.length - 1)] ?? "M";
   const fieldError = (key: MeasurementKey) => {
     const state = checkMeasurement(key, measured[key]);
     if (state === "ok" || (state === "empty" && !stepError)) return null;
@@ -740,17 +745,17 @@ export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; on
 
           <div className="setpet-nav">
             {index > 0 ? (
-              <button type="button" className="opl-btn line" onClick={() => go(STEPS[index - 1])}>
+              <button type="button" className="opl-btn line" onClick={() => go(STEPS[index - 1] ?? "shirts")}>
                 <ChevronRight size={18} aria-hidden="true" className="setpet-nav__back" />
                 {t("back")}
               </button>
             ) : <span />}
             {step === "review" ? (
-              <button type="button" className="opl-btn primary" disabled={submitting} aria-busy={submitting || undefined} onClick={() => void submit()}>
+              <button type="button" className="opl-btn primary" disabled={submitting !== false} aria-busy={submitting ? true : undefined} onClick={() => void submit()}>
                 {submitting === "uploading" ? t("review.uploading") : submitting ? t("review.sending") : signedIn ? t("review.send") : t("review.signInToSend")}
               </button>
             ) : (
-              <button type="button" className="opl-btn primary" onClick={() => go(STEPS[index + 1])}>
+              <button type="button" className="opl-btn primary" onClick={() => go(STEPS[index + 1] ?? "review")}>
                 {t("next")}
                 <ChevronLeft size={18} aria-hidden="true" className="setpet-nav__next" />
               </button>

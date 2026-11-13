@@ -28,7 +28,7 @@ export function humanShirtPath(size: SetPetSize, side: "front" | "back"): string
   const shoulder = half * 0.92;
   const neck = 9;
   const drop = side === "front" ? 16 : 5; // quadratic control: the neckline dips half of this
-  const pts = (sign: 1 | -1) => [
+  const pts = (sign: 1 | -1): Array<[number, number]> => [
     [sign * shoulder, 2.5],
     [sign * (half + 14), 12],
     [sign * (half + 6), 26],
