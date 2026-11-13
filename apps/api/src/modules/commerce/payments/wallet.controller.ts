@@ -2,12 +2,13 @@ import { Body, Controller, Get, Headers, Param, ParseUUIDPipe, Post, Query, UseG
 import { WalletTopUpRail } from "@prisma/client";
 import { Type } from "class-transformer";
 import { IsIn, IsInt, IsOptional, IsString, IsUUID, Length, Max, Min } from "class-validator";
-import type { WalletEntryPageDto, WalletSummaryDto, WalletTopUpDto, WalletTopUpStartedDto } from "@petlife/types";
+import type { BusinessWalletDto, WalletEntryPageDto, WalletSummaryDto, WalletTopUpDto, WalletTopUpStartedDto } from "@petlife/types";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
 import { CurrentUser } from "../../../common/auth/current-user.decorator";
 import type { SessionUser } from "../../../common/session/session.service";
 import { WalletService } from "./wallet.service";
 import { WalletTopUpService } from "./wallet-top-up.service";
+import { BusinessWalletService } from "./business-wallet.service";
 
 class WalletHistoryQueryDto {
   @IsOptional() @IsUUID() cursor?: string;
@@ -33,11 +34,39 @@ class VerifyZibalDto {
   @IsString() @Length(1, 64) trackId!: string;
 }
 
-/** The signed-in member's own wallet: balance, history and top-ups. Nothing here can move another member's money. */
+/**
+ * The signed-in member's own wallet (balance, history, top-ups), and the business wallets of organisations they manage
+ * (/wallet/business, /wallet/accounts/:id — 404 unless they manage it). Nothing here can move another member's money.
+ */
 @Controller("wallet")
 @UseGuards(SessionAuthGuard)
 export class WalletController {
-  constructor(private readonly wallet: WalletService, private readonly topUps: WalletTopUpService) {}
+  constructor(private readonly wallet: WalletService, private readonly topUps: WalletTopUpService, private readonly business: BusinessWalletService) {}
+
+  @Get("business")
+  businessWallets(@CurrentUser() user: SessionUser): Promise<BusinessWalletDto[]> {
+    return this.business.listMine(user.id);
+  }
+
+  @Get("accounts/:accountId")
+  accountSummary(@CurrentUser() user: SessionUser, @Param("accountId", ParseUUIDPipe) accountId: string): Promise<WalletSummaryDto> {
+    return this.business.summary(user.id, accountId);
+  }
+
+  @Get("accounts/:accountId/entries")
+  accountEntries(@CurrentUser() user: SessionUser, @Param("accountId", ParseUUIDPipe) accountId: string, @Query() query: WalletHistoryQueryDto): Promise<WalletEntryPageDto> {
+    return this.business.entries(user.id, accountId, query);
+  }
+
+  @Get("accounts/:accountId/top-ups")
+  accountTopUps(@CurrentUser() user: SessionUser, @Param("accountId", ParseUUIDPipe) accountId: string): Promise<WalletTopUpDto[]> {
+    return this.business.listTopUps(user.id, accountId);
+  }
+
+  @Post("accounts/:accountId/top-ups")
+  startAccountTopUp(@CurrentUser() user: SessionUser, @Param("accountId", ParseUUIDPipe) accountId: string, @Body() dto: StartTopUpDto, @Headers("idempotency-key") idempotencyKey?: string): Promise<WalletTopUpStartedDto> {
+    return this.business.startTopUp(user.id, accountId, { amount: dto.amount, rail: dto.rail, locale: dto.locale ?? "fa" }, idempotencyKey);
+  }
 
   @Get()
   async summary(@CurrentUser() user: SessionUser): Promise<WalletSummaryDto> {

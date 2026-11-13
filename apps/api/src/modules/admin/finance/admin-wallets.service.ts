@@ -7,6 +7,7 @@ import {
   WalletAdjustmentRequestStatus,
   WalletBalanceType,
   WalletCreditSource,
+  WalletOwnerType,
   WalletTopUpStatus,
   type WalletTopUp,
 } from "@prisma/client";
@@ -36,6 +37,7 @@ import { WalletTopUpService, toTopUpDto } from "../../commerce/payments/wallet-t
 import { deriveWalletBalances } from "../../commerce/payments/payment-infrastructure.policy";
 import { WALLET_ADJUSTMENT_MAX_IRR } from "../../commerce/payments/wallet-top-up.policy";
 import { ReceiptReviewNotifier } from "./receipt-review.notifier";
+import { WALLET_OWNER_SELECT, toWalletOwnerDto, type WalletAccountWithOwner } from "../../commerce/payments/wallet-owner";
 
 export const WALLET_ADJUSTMENT_REASON_CODES: WalletAdjustmentReasonCode[] = [
   "GOODWILL",
@@ -52,11 +54,11 @@ export const WALLET_ADJUSTMENT_REQUEST_TTL_MS = 72 * 60 * 60 * 1000;
 export const WALLET_ADJUSTMENT_PENDING_CAP = 20;
 
 const ADMIN_NAME = { select: { id: true, user: { select: { displayName: true } } } } as const;
-const TOP_UP_INCLUDE = { user: { select: { displayName: true } }, reviewedByAdmin: { select: { user: { select: { displayName: true } } } } } as const;
+const TOP_UP_INCLUDE = { user: { select: { displayName: true } }, reviewedByAdmin: { select: { user: { select: { displayName: true } } } }, walletAccount: { select: WALLET_OWNER_SELECT } } as const;
 const ADJUSTMENT_INCLUDE = { createdByAdmin: ADMIN_NAME, request: { select: { decidedByAdmin: ADMIN_NAME } } } as const;
 const REQUEST_INCLUDE = { user: { select: { displayName: true } }, requestedByAdmin: ADMIN_NAME, decidedByAdmin: ADMIN_NAME } as const;
 
-type TopUpWithPeople = WalletTopUp & { user: { displayName: string }; reviewedByAdmin: { user: { displayName: string } } | null };
+type TopUpWithPeople = WalletTopUp & { user: { displayName: string }; reviewedByAdmin: { user: { displayName: string } } | null; walletAccount: WalletAccountWithOwner | null };
 type AdjustmentWithAdmin = Prisma.WalletAdjustmentGetPayload<{ include: typeof ADJUSTMENT_INCLUDE }>;
 type RequestWithPeople = Prisma.WalletAdjustmentRequestGetPayload<{ include: typeof REQUEST_INCLUDE }>;
 type AdjustmentRequestInput = { direction: WalletAdjustmentDirection; balanceType: WalletBalanceType; amount: number; reasonCode: WalletAdjustmentReasonCode; reason: string; evidenceReference?: string };
@@ -66,6 +68,7 @@ function toAdminTopUpDto(row: TopUpWithPeople): AdminWalletTopUpDto {
     ...toTopUpDto(row),
     userId: row.userId,
     userDisplayName: row.user.displayName,
+    businessWallet: row.walletAccount ? toWalletOwnerDto(row.walletAccount) : null,
     cardNumberMasked: row.cardNumberMasked,
     receiptUploadedAt: row.receiptUploadedAt?.toISOString() ?? null,
     reviewedAt: row.reviewedAt?.toISOString() ?? null,
@@ -146,9 +149,10 @@ export class AdminWalletsService {
       this.prisma.$queryRaw<{ userId: string }[]>`
         SELECT a."userId" FROM wallet_accounts a
         JOIN wallet_entries e ON e."walletAccountId" = a.id
+        WHERE a."userId" IS NOT NULL
         GROUP BY a."userId" ORDER BY max(e."createdAt") DESC
         OFFSET ${skip} LIMIT ${query.pageSize}`,
-      this.prisma.walletAccount.count({ where: { entries: { some: {} } } }),
+      this.prisma.walletAccount.count({ where: { ownerType: WalletOwnerType.MEMBER, entries: { some: {} } } }),
     ]);
     const users = await this.prisma.user.findMany({ where: { id: { in: accounts.map((a) => a.userId) } }, select: { id: true, displayName: true, email: true, phone: true } });
     const byId = new Map(users.map((u) => [u.id, u]));
@@ -182,7 +186,8 @@ export class AdminWalletsService {
     await this.expireOverdueAdjustmentRequests();
     const [entries, topUps, adjustments, requests] = await Promise.all([
       account ? this.prisma.walletEntry.findMany({ where: { walletAccountId: account.id }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 100 }) : [],
-      this.prisma.walletTopUp.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 50, include: TOP_UP_INCLUDE }),
+      // The member's own wallet only: business top-ups they started show on that organisation's wallet.
+      this.prisma.walletTopUp.findMany({ where: { userId, walletAccountId: null }, orderBy: { createdAt: "desc" }, take: 50, include: TOP_UP_INCLUDE }),
       account ? this.prisma.walletAdjustment.findMany({ where: { walletAccountId: account.id }, orderBy: { createdAt: "desc" }, take: 50, include: ADJUSTMENT_INCLUDE }) : [],
       // Open requests first (PENDING is the enum's first value), then the most recent decisions.
       this.prisma.walletAdjustmentRequest.findMany({ where: { userId }, orderBy: [{ status: "asc" }, { createdAt: "desc" }], take: 50, include: REQUEST_INCLUDE }),

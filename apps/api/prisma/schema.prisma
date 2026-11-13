@@ -901,6 +901,15 @@ enum WalletCreditSource {
   OVERPAYMENT
   DUPLICATE_PAYMENT
   MANUAL_CORRECTION
+  /// Moved here from another wallet by a two-person staff transfer (WalletTransferRequest).
+  TRANSFER
+}
+
+/// Whose money a wallet holds: a member's own wallet, or a partner organisation's business wallet.
+enum WalletOwnerType {
+  MEMBER
+  SELLER
+  PROVIDER
 }
 
 /// How a member adds money to their wallet. There is deliberately no sandbox rail: a simulated top-up would
@@ -1045,6 +1054,9 @@ enum LedgerAccountCode {
   PROVIDER_PAYABLE
   CPC_RECEIVABLE
   PAWMA_REWARD_LIABILITY
+  /// Passes money between two wallets in a staff transfer: debited and credited by the same amount in the same
+  /// database transaction, so it always nets to zero.
+  WALLET_TRANSFER_CLEARING
 }
 
 enum LedgerEntryDirection {
@@ -2252,6 +2264,8 @@ model ProviderOrganization {
   clinicTasks        ClinicTask[]
   clinicCampaigns    ClinicCampaign[]
   clinicContacts     ClinicImportedContact[]
+  /// The organisation's business wallet (CPC budget and other prepaid credit), kept apart from its members' wallets.
+  walletAccount      WalletAccount?
 
   @@index([verificationStatus])
   @@map("provider_organizations")
@@ -2895,6 +2909,8 @@ model SellerOrganization {
   adjustments                     SellerAdjustment[]
   marketplaceSettlementStatements MarketplaceSettlementStatement[]
   shippingProfile                 SellerShippingProfile?
+  /// The organisation's business wallet (CPC budget and other prepaid credit), kept apart from its members' wallets.
+  walletAccount                   WalletAccount?
 
   @@index([verificationStatus, status])
   @@map("seller_organizations")
@@ -3651,18 +3667,30 @@ model CardTransferPayment {
   @@map("card_transfer_payments")
 }
 
-/// Personal wallet identity. There are deliberately no amount/balance
+/// Wallet identity. There are deliberately no amount/balance
 /// columns here: WalletEntry is the append-only source and balances are
 /// derived by summing its signed entries for each balance type.
+///
+/// One wallet per account: a member's own wallet (userId), or one business wallet per partner organisation
+/// (sellerOrganizationId / providerOrganizationId). Exactly one owner column is set, matching ownerType — a database
+/// CHECK enforces it. A member's wallet and the wallets of organisations they manage never share a balance.
 model WalletAccount {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @unique @db.Uuid
-  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
-  currency  String   @default("IRR")
-  createdAt DateTime @default(now())
+  id                     String                @id @default(uuid()) @db.Uuid
+  ownerType              WalletOwnerType       @default(MEMBER)
+  userId                 String?               @unique @db.Uuid
+  user                   User?                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  sellerOrganizationId   String?               @unique @db.Uuid
+  sellerOrganization     SellerOrganization?   @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
+  providerOrganizationId String?               @unique @db.Uuid
+  providerOrganization   ProviderOrganization? @relation(fields: [providerOrganizationId], references: [id], onDelete: Restrict)
+  currency               String                @default("IRR")
+  createdAt              DateTime              @default(now())
 
-  entries WalletEntry[]
-  adjustments WalletAdjustment[]
+  entries      WalletEntry[]
+  adjustments  WalletAdjustment[]
+  topUps       WalletTopUp[]
+  transfersOut WalletTransferRequest[] @relation("WalletTransferFrom")
+  transfersIn  WalletTransferRequest[] @relation("WalletTransferTo")
 
   @@map("wallet_accounts")
 }
@@ -3691,8 +3719,12 @@ model WalletEntry {
 /// once: walletEntryId points at the single WalletEntry that the credit wrote.
 model WalletTopUp {
   id                String            @id @default(uuid()) @db.Uuid
+  /// Who started the request (and alone may send its receipt or cancel it).
   userId            String            @db.Uuid
   user              User              @relation(fields: [userId], references: [id], onDelete: Restrict)
+  /// The business wallet being topped up; null = the starter's own member wallet.
+  walletAccountId   String?           @db.Uuid
+  walletAccount     WalletAccount?    @relation(fields: [walletAccountId], references: [id], onDelete: Restrict)
   rail              WalletTopUpRail
   status            WalletTopUpStatus
   /// What the member asked to add, in integer rials.
@@ -3723,6 +3755,7 @@ model WalletTopUp {
 
   @@index([userId, createdAt])
   @@index([status, createdAt])
+  @@index([walletAccountId, createdAt])
   /// Admin transactions explorer: newest-first keyset pages over (createdAt, id).
   @@index([createdAt, id])
   @@map("wallet_top_ups")
@@ -3791,6 +3824,51 @@ model WalletAdjustmentRequest {
   @@index([status, expiresAt])
   @@index([userId, status])
   @@map("wallet_adjustment_requests")
+}
+
+/// FE-16 for moving credit between two wallets (a member's or a partner organisation's), for sensitive cases only:
+/// one admin requests it with a reason code, a note and evidence; a *different* admin with wallet.adjust approves it,
+/// and only then are the debit, the credit and their balanced ledger transactions written, in the transaction that
+/// claims this row. Transfers between wallets with no common owner are allowed only for a restricted set of reason
+/// codes. Nothing is ever edited: a mistake is corrected by a reversal, itself a new two-person request.
+model WalletTransferRequest {
+  id                  String                        @id @default(uuid()) @db.Uuid
+  fromWalletAccountId String                        @db.Uuid
+  fromWalletAccount   WalletAccount                 @relation("WalletTransferFrom", fields: [fromWalletAccountId], references: [id], onDelete: Restrict)
+  toWalletAccountId   String                        @db.Uuid
+  toWalletAccount     WalletAccount                 @relation("WalletTransferTo", fields: [toWalletAccountId], references: [id], onDelete: Restrict)
+  balanceType         WalletBalanceType
+  /// Integer rials.
+  amountIrr           Int
+  reasonCode          String
+  note                String
+  /// Ticket, letter, court order or other reference the approver can check. Always required.
+  evidenceReference   String
+  /// Whether the two wallets shared an owner (same member, or a member and an organisation they belong to) when this
+  /// was requested; checked again at approval.
+  related             Boolean
+  status              WalletAdjustmentRequestStatus @default(PENDING)
+  idempotencyKey      String?                       @unique
+  /// Set on a reversal: the approved transfer whose money this sends back.
+  reversesTransferId  String?                       @db.Uuid
+  reversesTransfer    WalletTransferRequest?        @relation("WalletTransferReversal", fields: [reversesTransferId], references: [id], onDelete: Restrict)
+  reversals           WalletTransferRequest[]       @relation("WalletTransferReversal")
+  requestedByAdminId  String                        @db.Uuid
+  requestedByAdmin    AdminUser                     @relation("RequestedWalletTransfers", fields: [requestedByAdminId], references: [id], onDelete: Restrict)
+  decidedByAdminId    String?                       @db.Uuid
+  decidedByAdmin      AdminUser?                    @relation("DecidedWalletTransfers", fields: [decidedByAdminId], references: [id], onDelete: Restrict)
+  decidedAt           DateTime?
+  decisionReason      String?
+  debitEntryId        String?                       @unique @db.Uuid
+  creditEntryId       String?                       @unique @db.Uuid
+  expiresAt           DateTime
+  createdAt           DateTime                      @default(now())
+  updatedAt           DateTime                      @updatedAt
+
+  @@index([status, expiresAt])
+  @@index([fromWalletAccountId, createdAt])
+  @@index([toWalletAccountId, createdAt])
+  @@map("wallet_transfer_requests")
 }
 
 model PaymentAttempt {
@@ -5453,6 +5531,8 @@ model AdminUser {
   createdWalletAdjustments       WalletAdjustment[]
   requestedWalletAdjustments     WalletAdjustmentRequest[]         @relation("RequestedWalletAdjustments")
   decidedWalletAdjustments       WalletAdjustmentRequest[]         @relation("DecidedWalletAdjustments")
+  requestedWalletTransfers       WalletTransferRequest[]           @relation("RequestedWalletTransfers")
+  decidedWalletTransfers         WalletTransferRequest[]           @relation("DecidedWalletTransfers")
   reviewedWalletTopUps           WalletTopUp[]                     @relation("ReviewedWalletTopUps")
   importedMarketplaceStatements  MarketplaceSettlementStatement[]
   resolvedReconciliations        MarketplaceReconciliationResult[]

@@ -29,11 +29,13 @@ export class ReceiptReviewNotifier {
     }
   }
 
-  async topUpReviewed(row: Pick<WalletTopUp, "id" | "userId" | "status" | "amount" | "receivedAmount" | "rejectionReason">) {
+  async topUpReviewed(row: Pick<WalletTopUp, "id" | "userId" | "status" | "amount" | "receivedAmount" | "rejectionReason"> & { walletAccountId?: string | null }) {
+    // A business top-up's notice opens that organisation's wallet page, not the member's own.
+    const page = row.walletAccountId ? `/profile/wallet/business/${row.walletAccountId}` : "/profile/wallet";
     if (row.status === WalletTopUpStatus.CREDITED) {
-      await this.send(row.userId, "wallet.top_up_credited", `wallet-top-up:${row.id}:CREDITED`, "WalletTopUp", row.id, "/profile/wallet", { amount: toman(row.receivedAmount ?? row.amount) });
+      await this.send(row.userId, "wallet.top_up_credited", `wallet-top-up:${row.id}:CREDITED`, "WalletTopUp", row.id, page, { amount: toman(row.receivedAmount ?? row.amount) });
     } else if (row.status === WalletTopUpStatus.REJECTED) {
-      await this.send(row.userId, "wallet.top_up_rejected", `wallet-top-up:${row.id}:REJECTED`, "WalletTopUp", row.id, "/profile/wallet", { amount: toman(row.amount), reason: row.rejectionReason ?? "—" });
+      await this.send(row.userId, "wallet.top_up_rejected", `wallet-top-up:${row.id}:REJECTED`, "WalletTopUp", row.id, page, { amount: toman(row.amount), reason: row.rejectionReason ?? "—" });
     }
   }
 

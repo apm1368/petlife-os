@@ -23,3 +23,16 @@
   :root:not([data-theme="light"]) .aw-status--CREDITED, :root:not([data-theme="light"]) .aw-status--APPROVED, .aw-status--ACTIVE { color: #8fd3a5; }
   :root:not([data-theme="light"]) .aw-status--REJECTED, :root:not([data-theme="light"]) .aw-status--FAILED { color: #f0a08c; }
 }
+
+/* Business wallets and two-person transfers between wallets. */
+.aw-owner { display: inline-grid; gap: 2px; min-width: 0; }
+.aw-owner a { font-weight: 700; color: var(--text-primary); overflow-wrap: anywhere; }
+.aw-owner small { color: var(--text-secondary); font-size: 0.72rem; }
+.aw-transfers li { gap: 6px; }
+.aw-transfer__head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.aw-transfer__route { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.aw-picker { min-width: 0; margin: 0; padding: 12px; border: 1px solid var(--glass-edge); border-radius: 16px; }
+.aw-picker legend { padding: 0 6px; font-weight: 700; font-size: 0.82rem; }
+.aw-picked { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 12px; border-radius: 14px; background: var(--glass-input); border: 1px solid var(--glass-edge); }
+.aw-pick { display: grid; gap: 2px; width: 100%; min-height: 44px; padding: 6px 4px; border: 0; background: none; color: var(--text-primary); text-align: start; font: inherit; cursor: pointer; }
+.aw-pick small { color: var(--text-secondary); font-size: 0.74rem; }

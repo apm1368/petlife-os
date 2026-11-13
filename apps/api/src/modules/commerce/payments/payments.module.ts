@@ -15,6 +15,7 @@ import { ProviderSettlementService } from "./provider-settlement.service";
 import { WalletPaymentService } from "./wallet-payment.service";
 import { WalletTopUpService } from "./wallet-top-up.service";
 import { WalletController } from "./wallet.controller";
+import { BusinessWalletService } from "./business-wallet.service";
 import { StorageModule } from "../../storage/storage.module";
 import { CardTransferDestinationService } from "./card-transfer-destination.service";
 
@@ -22,7 +23,7 @@ import { CardTransferDestinationService } from "./card-transfer-destination.serv
 @Module({
   imports: [LedgerModule, StorageModule],
   controllers: [PaymentEnvironmentController, PaymentInfrastructureController, WalletController],
-  providers: [PaymentsService, DevPaymentGateway, StandardGatewayAdapter, ZibalGateway, PaymentGatewayRegistry, ProviderEventsService, WalletService, CardTransferPaymentService, ZibalPaymentService, ProviderSettlementService, WalletPaymentService, WalletTopUpService, CardTransferDestinationService],
-  exports: [PaymentsService, PaymentGatewayRegistry, ProviderEventsService, WalletService, CardTransferPaymentService, ZibalPaymentService, ProviderSettlementService, WalletPaymentService, WalletTopUpService, CardTransferDestinationService],
+  providers: [PaymentsService, DevPaymentGateway, StandardGatewayAdapter, ZibalGateway, PaymentGatewayRegistry, ProviderEventsService, WalletService, CardTransferPaymentService, ZibalPaymentService, ProviderSettlementService, WalletPaymentService, WalletTopUpService, CardTransferDestinationService, BusinessWalletService],
+  exports: [PaymentsService, PaymentGatewayRegistry, ProviderEventsService, WalletService, CardTransferPaymentService, ZibalPaymentService, ProviderSettlementService, WalletPaymentService, WalletTopUpService, CardTransferDestinationService, BusinessWalletService],
 })
 export class PaymentsModule {}

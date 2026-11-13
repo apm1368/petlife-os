@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { LedgerAccountCode, LedgerEntryDirection, WalletBalanceType, WalletCreditSource, WalletEntryKind, Prisma, type WalletEntry } from "@prisma/client";
+import { LedgerAccountCode, LedgerEntryDirection, WalletBalanceType, WalletCreditSource, WalletEntryKind, WalletOwnerType, Prisma, type WalletAccount, type WalletEntry } from "@prisma/client";
 import type { WalletBalancesDto, WalletEntryDto, WalletEntryPageDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { ValidationApiException } from "../../../common/errors/api-exception";
@@ -8,12 +8,18 @@ import { deriveWalletBalances, replayWallet, sixMonthGiftExpiry } from "./paymen
 
 type QueryClient = PrismaService | Prisma.TransactionClient;
 
-type CreditInput = { userId: string; balanceType: WalletBalanceType; amount: number; source: WalletCreditSource; referenceType: string; referenceId: string; expiresAt?: Date; debitAccount?: LedgerAccountCode };
+/** A wallet's owner: a member (user id) or a partner organisation (seller or provider organisation id). */
+export type WalletOwnerRef = { type: WalletOwnerType; id: string };
+
+/** Which wallet: a member's own (userId) or any wallet by id (walletAccountId wins when both are given). */
+type CreditInput = { userId?: string; walletAccountId?: string; balanceType: WalletBalanceType; amount: number; source: WalletCreditSource; referenceType: string; referenceId: string; expiresAt?: Date; debitAccount?: LedgerAccountCode };
 
 /** referenceType of entries written by a staff adjustment (referenceId = WalletAdjustment.id). */
 export const WALLET_ADJUSTMENT_REFERENCE = "WALLET_ADJUSTMENT";
 /** referenceType of entries written by a member top-up (referenceId = WalletTopUp.id). */
 export const WALLET_TOP_UP_REFERENCE = "WALLET_TOP_UP";
+/** referenceType of both entries written by a two-person staff transfer (referenceId = WalletTransferRequest.id). */
+export const WALLET_TRANSFER_REFERENCE = "WALLET_TRANSFER";
 
 export function toBalancesDto(balances: Record<WalletBalanceType, number>, currency = "IRR"): WalletBalancesDto {
   const purchaseOnly = balances[WalletBalanceType.PURCHASE_ONLY];
@@ -25,6 +31,7 @@ function entryPurpose(entry: Pick<WalletEntry, "kind" | "referenceType" | "sourc
   if (entry.kind === WalletEntryKind.EXPIRY) return "EXPIRY";
   if (entry.referenceType === WALLET_TOP_UP_REFERENCE) return "TOP_UP";
   if (entry.referenceType === WALLET_ADJUSTMENT_REFERENCE) return "ADJUSTMENT";
+  if (entry.referenceType === WALLET_TRANSFER_REFERENCE) return "TRANSFER";
   if (entry.referenceType === "PAYMENT_INTENT" || entry.referenceType === "SET_PET_ORDER") return "PURCHASE";
   if (/REFUND|OVERPAYMENT/.test(entry.referenceType) || entry.source === WalletCreditSource.REFUND || entry.source === WalletCreditSource.OVERPAYMENT) return "REFUND";
   return "OTHER";
@@ -50,6 +57,58 @@ export class WalletService {
     return client.walletAccount.upsert({ where: { userId }, update: {}, create: { userId } });
   }
 
+  /** The owner's wallet, created empty on first use (a member's own, or an organisation's business wallet). */
+  async accountForOwner(owner: WalletOwnerRef, client: QueryClient = this.prisma): Promise<WalletAccount> {
+    switch (owner.type) {
+      case WalletOwnerType.MEMBER:
+        return this.accountForUser(owner.id, client);
+      case WalletOwnerType.SELLER:
+        return client.walletAccount.upsert({ where: { sellerOrganizationId: owner.id }, update: {}, create: { ownerType: WalletOwnerType.SELLER, sellerOrganizationId: owner.id } });
+      case WalletOwnerType.PROVIDER:
+        return client.walletAccount.upsert({ where: { providerOrganizationId: owner.id }, update: {}, create: { ownerType: WalletOwnerType.PROVIDER, providerOrganizationId: owner.id } });
+    }
+  }
+
+  /** Row-locks a wallet for the rest of the transaction (spends and transfers serialise on it). */
+  async lockAccountById(walletAccountId: string, client: Prisma.TransactionClient): Promise<void> {
+    await client.$queryRaw`SELECT id FROM wallet_accounts WHERE id = ${walletAccountId}::uuid FOR UPDATE`;
+  }
+
+  async balancesOf(walletAccountId: string, client: QueryClient = this.prisma, now = new Date()) {
+    return deriveWalletBalances(await client.walletEntry.findMany({ where: { walletAccountId } }), now);
+  }
+
+  /**
+   * Posts an approved staff transfer: a debit on the source and a credit on the destination, each with its own
+   * balanced ledger transaction through WALLET_TRANSFER_CLEARING (which therefore nets to zero). The caller holds both
+   * wallet locks and has re-checked the request; the source bucket never goes below zero.
+   */
+  async postTransfer(
+    input: { fromWalletAccountId: string; toWalletAccountId: string; balanceType: WalletBalanceType; amount: number; transferId: string },
+    client: Prisma.TransactionClient,
+  ): Promise<{ debitEntryId: string; creditEntryId: string }> {
+    if (!Number.isInteger(input.amount) || input.amount <= 0) throw new ValidationApiException({ field: "amount", reason: "INTEGER_RIAL_REQUIRED" });
+    if (input.fromWalletAccountId === input.toWalletAccountId) throw new ValidationApiException({ field: "to", reason: "SAME_WALLET" });
+    if ((await this.balancesOf(input.fromWalletAccountId, client))[input.balanceType] < input.amount) {
+      throw new ValidationApiException({ field: "amount", reason: "INSUFFICIENT_WALLET_BALANCE" });
+    }
+    const out = await this.ledger.recordBalanced("Wallet transfer out", WALLET_TRANSFER_REFERENCE, input.transferId, "IRR", [
+      { accountCode: accountFor(input.balanceType), direction: LedgerEntryDirection.DEBIT, amount: input.amount },
+      { accountCode: LedgerAccountCode.WALLET_TRANSFER_CLEARING, direction: LedgerEntryDirection.CREDIT, amount: input.amount },
+    ], client);
+    const debit = await client.walletEntry.create({
+      data: { walletAccountId: input.fromWalletAccountId, ledgerTransactionId: out, balanceType: input.balanceType, kind: WalletEntryKind.DEBIT, source: WalletCreditSource.TRANSFER, amount: input.amount, referenceType: WALLET_TRANSFER_REFERENCE, referenceId: input.transferId },
+    });
+    const into = await this.ledger.recordBalanced("Wallet transfer in", WALLET_TRANSFER_REFERENCE, input.transferId, "IRR", [
+      { accountCode: LedgerAccountCode.WALLET_TRANSFER_CLEARING, direction: LedgerEntryDirection.DEBIT, amount: input.amount },
+      { accountCode: accountFor(input.balanceType), direction: LedgerEntryDirection.CREDIT, amount: input.amount },
+    ], client);
+    const credit = await client.walletEntry.create({
+      data: { walletAccountId: input.toWalletAccountId, ledgerTransactionId: into, balanceType: input.balanceType, kind: WalletEntryKind.CREDIT, source: WalletCreditSource.TRANSFER, amount: input.amount, referenceType: WALLET_TRANSFER_REFERENCE, referenceId: input.transferId },
+    });
+    return { debitEntryId: debit.id, creditEntryId: credit.id };
+  }
+
   async credit(input: CreditInput, client: QueryClient = this.prisma): Promise<string> {
     return (await this.creditEntry(input, client)).ledgerTransactionId;
   }
@@ -57,7 +116,8 @@ export class WalletService {
   /** Same as credit(), also returning the WalletEntry it wrote (top-ups and adjustments point at it). */
   async creditEntry(input: CreditInput, client: QueryClient = this.prisma): Promise<{ ledgerTransactionId: string; entryId: string }> {
     if (!Number.isInteger(input.amount) || input.amount <= 0) throw new ValidationApiException({ field: "amount", reason: "INTEGER_RIAL_REQUIRED" });
-    const wallet = await this.accountForUser(input.userId, client);
+    if (!input.walletAccountId && !input.userId) throw new Error("WalletService.creditEntry needs a walletAccountId or a userId");
+    const wallet = input.walletAccountId ? { id: input.walletAccountId } : await this.accountForUser(input.userId!, client);
     const ledgerTransactionId = await this.ledger.recordBalanced(
       `Wallet credit: ${input.source}`,
       "WALLET_CREDIT",
@@ -105,7 +165,14 @@ export class WalletService {
   }
 
   async summary(userId: string, now = new Date()): Promise<{ balances: WalletBalancesDto; expiringSoon: { amount: number; expiresAt: string }[] }> {
-    const account = await this.prisma.walletAccount.findUnique({ where: { userId }, include: { entries: true } });
+    return this.summaryOf(await this.prisma.walletAccount.findUnique({ where: { userId }, include: { entries: true } }), now);
+  }
+
+  async summaryForAccount(walletAccountId: string, now = new Date()): Promise<{ balances: WalletBalancesDto; expiringSoon: { amount: number; expiresAt: string }[] }> {
+    return this.summaryOf(await this.prisma.walletAccount.findUnique({ where: { id: walletAccountId }, include: { entries: true } }), now);
+  }
+
+  private summaryOf(account: (WalletAccount & { entries: WalletEntry[] }) | null, now: Date): { balances: WalletBalancesDto; expiringSoon: { amount: number; expiresAt: string }[] } {
     const replay = replayWallet(account?.entries ?? [], now);
     const balances = toBalancesDto(replay.balances, account?.currency ?? "IRR");
     const horizon = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
@@ -119,9 +186,18 @@ export class WalletService {
 
   /** The member's own movements, newest first, with a cursor (the last entry id of the previous page). */
   async history(userId: string, query: { cursor?: string; limit?: number }): Promise<WalletEntryPageDto> {
-    const limit = Math.min(Math.max(query.limit ?? 25, 1), 100);
     const account = await this.prisma.walletAccount.findUnique({ where: { userId } });
     if (!account) return { items: [], nextCursor: null };
+    return this.historyForAccount(account.id, query);
+  }
+
+  /** One wallet's movements, newest first, with a cursor (the last entry id of the previous page). */
+  async historyForAccount(walletAccountId: string, query: { cursor?: string; limit?: number }): Promise<WalletEntryPageDto> {
+    const limit = Math.min(Math.max(query.limit ?? 25, 1), 100);
+    const account = { id: walletAccountId };
+    if (query.cursor && !(await this.prisma.walletEntry.findFirst({ where: { id: query.cursor, walletAccountId }, select: { id: true } }))) {
+      throw new ValidationApiException({ field: "cursor", reason: "INVALID_CURSOR" });
+    }
     const rows = await this.prisma.walletEntry.findMany({
       where: { walletAccountId: account.id },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
@@ -137,7 +213,11 @@ export class WalletService {
     const adjustments = adjustmentIds.length
       ? await this.prisma.walletAdjustment.findMany({ where: { id: { in: adjustmentIds } }, select: { id: true, reasonCode: true } })
       : [];
-    const reasonOf = new Map(adjustments.map((a) => [a.id, a.reasonCode]));
+    const transferIds = rows.filter((r) => r.referenceType === WALLET_TRANSFER_REFERENCE).map((r) => r.referenceId);
+    const transfers = transferIds.length
+      ? await this.prisma.walletTransferRequest.findMany({ where: { id: { in: transferIds } }, select: { id: true, reasonCode: true } })
+      : [];
+    const reasonOf = new Map([...adjustments.map((a) => [a.id, a.reasonCode] as const), ...transfers.map((t) => [t.id, t.reasonCode] as const)]);
     return rows.map((r) => ({
       id: r.id,
       kind: r.kind,

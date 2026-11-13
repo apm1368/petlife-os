@@ -5290,7 +5290,9 @@
         "twoStep": "Inloggen in twee stappen",
         "walletAdjustments": "Correctieaanvragen",
         "transactionExplorer": "Verkenner",
-        "setPet": "Set Pet-aanvragen"
+        "setPet": "Set Pet-aanvragen",
+        "walletBusiness": "Zakelijke portemonnees",
+        "walletTransfers": "Overboekingen"
       },
       "palette": {
         "actions": "Snelle acties",
@@ -11185,7 +11187,8 @@
         "REFUND": "Terugbetaling",
         "ADJUSTMENT": "Correctie door ons team",
         "EXPIRY": "Cadeautegoed verlopen",
-        "OTHER": "Mutatie"
+        "OTHER": "Mutatie",
+        "TRANSFER": "Overboeking door ons team (door twee personen goedgekeurd)"
       },
       "bucket": {
         "PURCHASE_ONLY": "Voor aankopen",
@@ -11197,9 +11200,29 @@
         "PAYMENT_CORRECTION": "Betalingscorrectie",
         "REFUND_OUTSIDE_SYSTEM": "Terugbetaling buiten een bestelling",
         "DUPLICATE_CREDIT_REVERSAL": "Dubbele bijschrijving teruggedraaid",
-        "OTHER": "Andere correctie"
+        "OTHER": "Andere correctie",
+        "OWNER_REQUEST": "Op verzoek van de eigenaar",
+        "ACCOUNT_CONSOLIDATION": "Samenvoegen van accounts",
+        "REFUND": "Terugbetaling",
+        "MISDIRECTED_PAYMENT": "Betaling naar het verkeerde account",
+        "ACCOUNT_SUCCESSION": "Account overgedragen",
+        "LEGAL_ORDER": "Wettelijk bevel",
+        "REVERSAL": "Eerdere overboeking teruggedraaid"
       },
       "expires": "Verloopt op {date}"
+    },
+    "business": {
+      "eyebrow": "Zakelijke portemonnee",
+      "title": "{name} – zakelijke portemonnee",
+      "description": "De eigen portemonnee van deze organisatie, los van je persoonlijke portemonnee. Opwaarderingen worden pas bijgeschreven als het geld is bevestigd, en alleen de portemonneebeheerders van de organisatie kunnen hem zien.",
+      "back": "Terug naar mijn portemonnee",
+      "listTitle": "Zakelijke portemonnees",
+      "listHint": "Portemonnees van de organisaties die je beheert. Elke portemonnee staat los van je persoonlijke portemonnee.",
+      "kind": {
+        "MEMBER": "Persoonlijke portemonnee",
+        "SELLER": "Winkel",
+        "PROVIDER": "Dienstverlener"
+      }
     }
   },
   "adminWallets": {
@@ -11396,6 +11419,109 @@
         "INSUFFICIENT_WALLET_BALANCE": "Er staat niet meer zoveel in dit deel van de portemonnee, dus de afschrijving kan niet worden geboekt.",
         "reasonTooShort": "De reden moet minstens 5 tekens bevatten.",
         "generic": "Dat is niet gelukt. Probeer het opnieuw."
+      }
+    },
+    "business": {
+      "title": "Portemonnees per eigenaar",
+      "subtitle": "Elke partnerorganisatie heeft een eigen zakelijke portemonnee, los van de persoonlijke portemonnees van haar leden.",
+      "typeLabel": "Eigenaar",
+      "search": "Zoeken op naam (of id)",
+      "searchButton": "Zoeken",
+      "empty": "Geen portemonnees gevonden.",
+      "kind": {
+        "MEMBER": "Lid",
+        "SELLER": "Winkel",
+        "PROVIDER": "Dienstverlener"
+      },
+      "kindPlural": {
+        "MEMBER": "Leden",
+        "SELLER": "Winkels",
+        "PROVIDER": "Dienstverleners"
+      },
+      "columns": {
+        "owner": "Eigenaar"
+      },
+      "memberPage": "Portemonneepagina van het lid",
+      "transferFrom": "Overboeken vanuit deze portemonnee",
+      "transferTo": "Overboeken naar deze portemonnee",
+      "history": "Geschiedenis",
+      "noHistory": "Nog geen bewegingen.",
+      "topUps": "Opwaarderingen",
+      "purpose": {
+        "TOP_UP": "Opwaardering",
+        "PURCHASE": "Aankoop",
+        "REFUND": "Terugbetaling",
+        "ADJUSTMENT": "Correctie door het team",
+        "TRANSFER": "Overboeking door het team",
+        "EXPIRY": "Cadeau verlopen",
+        "OTHER": "Overig"
+      }
+    },
+    "transfers": {
+      "title": "Overboekingen tussen portemonnees",
+      "subtitle": "Tegoed tussen portemonnees verplaatsen is alleen voor gevoelige gevallen: een beheerder vraagt het aan met een reden en bewijs, een andere beheerder keurt het goed, en pas dan wordt het geld verplaatst.",
+      "new": "Nieuwe overboeking",
+      "newHint": "Tot {max} per overboeking. Er wordt niets verplaatst voordat een tweede beheerder het goedkeurt.",
+      "from": "Van portemonnee",
+      "to": "Naar portemonnee",
+      "bucket": "Soort tegoed",
+      "amount": "Bedrag (toman)",
+      "reasonCode": "Reden",
+      "note": "Notitie",
+      "evidence": "Bewijs",
+      "evidenceHint": "Ticketnummer, brief of kenmerk van het bevel",
+      "rules": "Tussen portemonnees zonder gemeenschappelijke eigenaar kan alleen een terugbetaling, een betaling naar het verkeerde account, een accountoverdracht of een wettelijk bevel. Een winkel of dienstverlener die niet geverifieerd is, kan alleen een terugbetaling ontvangen.",
+      "submit": "Overboeking aanvragen",
+      "created": "Overboeking aangevraagd. Die wacht op een tweede beheerder.",
+      "available": "Saldo {amount}",
+      "change": "Wijzigen",
+      "filter": "Filteren op status",
+      "all": "Alle",
+      "empty": "Hier zijn geen overboekingen.",
+      "status": {
+        "PENDING": "Wacht op goedkeuring",
+        "APPROVED": "Geboekt",
+        "REJECTED": "Afgewezen",
+        "EXPIRED": "Verlopen"
+      },
+      "reason": {
+        "OWNER_REQUEST": "Op verzoek van de eigenaar",
+        "ACCOUNT_CONSOLIDATION": "Samenvoegen van accounts",
+        "PAYMENT_CORRECTION": "Betalingscorrectie",
+        "REFUND": "Terugbetaling",
+        "MISDIRECTED_PAYMENT": "Betaling naar het verkeerde account",
+        "ACCOUNT_SUCCESSION": "Account overgedragen",
+        "LEGAL_ORDER": "Wettelijk bevel",
+        "REVERSAL": "Eerdere overboeking teruggedraaid"
+      },
+      "reversal": "Terugboeking",
+      "unrelated": "Geen gemeenschappelijke eigenaar",
+      "requestedBy": "Aangevraagd door {name} op {date}",
+      "decidedBy": "besloten door {name} op {date}",
+      "expires": "verloopt op {date}",
+      "waitingForSecond": "Jij hebt dit aangevraagd; een andere beheerder moet het goedkeuren.",
+      "approve": "Goedkeuren en boeken",
+      "reject": "Afwijzen",
+      "withdraw": "Intrekken",
+      "rejectReason": "Reden",
+      "reverse": "Deze overboeking terugdraaien",
+      "reverseHint": "Een terugboeking is een nieuwe aanvraag voor hetzelfde bedrag in de andere richting en heeft ook een tweede beheerder nodig.",
+      "errors": {
+        "generic": "Dat is niet gelukt. Probeer het opnieuw.",
+        "forbidden": "Je hebt de rechten ‘Saldi corrigeren’ nodig.",
+        "WALLET_TRANSFER_SELF_APPROVAL": "Een overboeking die jij hebt aangevraagd, moet een andere beheerder goedkeuren.",
+        "WALLET_TRANSFER_NOT_PENDING": "Over deze overboeking is al beslist.",
+        "WALLET_TRANSFER_EXPIRED": "Deze overboeking is verlopen. Vraag een nieuwe aan.",
+        "UNRELATED_WALLETS": "Deze portemonnees hebben geen gemeenschappelijke eigenaar: kies terugbetaling, betaling naar het verkeerde account, accountoverdracht of wettelijk bevel.",
+        "DESTINATION_NOT_VERIFIED": "De ontvangende organisatie is niet geverifieerd: die kan alleen een terugbetaling ontvangen.",
+        "INSUFFICIENT_WALLET_BALANCE": "De bronportemonnee heeft niet genoeg tegoed van die soort.",
+        "SAME_WALLET": "Kies twee verschillende portemonnees.",
+        "TOO_MANY_PENDING": "Voor deze portemonnee wachten al te veel overboekingen.",
+        "OUT_OF_RANGE": "Het bedrag valt buiten het toegestane bereik.",
+        "ALREADY_REVERSED": "Deze overboeking is al teruggedraaid.",
+        "CANNOT_REVERSE_A_REVERSAL": "Een terugboeking kan niet worden teruggedraaid; vraag in plaats daarvan een nieuwe overboeking aan.",
+        "NOT_APPROVED": "Alleen een geboekte overboeking kan worden teruggedraaid.",
+        "OWNER_NOT_FOUND": "Deze eigenaar bestaat niet."
       }
     }
   },

@@ -851,6 +851,26 @@ export class WalletAdjustmentRequestExpiredException extends ApiException {
   }
 }
 
+/** FE-16 for staff transfers between wallets: the requester can never approve their own transfer. */
+export class WalletTransferSelfApprovalException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("WALLET_TRANSFER_SELF_APPROVAL", "A wallet transfer must be approved by a different admin than the requester.", HttpStatus.CONFLICT, { reason: "SELF_APPROVAL", ...details });
+  }
+}
+
+/** Already approved, rejected or expired: a decided transfer cannot be decided again. */
+export class WalletTransferNotPendingException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("WALLET_TRANSFER_NOT_PENDING", "This wallet transfer is no longer waiting for approval.", HttpStatus.CONFLICT, { reason: "NOT_PENDING", ...details });
+  }
+}
+
+export class WalletTransferExpiredException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("WALLET_TRANSFER_EXPIRED", "This wallet transfer expired before it was approved. Ask for a new one.", HttpStatus.CONFLICT, { reason: "EXPIRED", ...details });
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Company card-to-card account: two-person change (BO-14), mirroring refund approvals
 // ---------------------------------------------------------------------------
