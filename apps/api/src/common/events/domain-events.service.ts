@@ -247,6 +247,9 @@ export const DOMAIN_EVENT_TYPES = [
   "CommunityCommentAdded",
   "CommunityReportSubmitted",
   "CommunityContentModerated",
+  "CommunityContentStatusChangedByModerator",
+  "CommunityPostEdited",
+  "CommunityPostDeletedByAuthor",
   "PetMemoryAdded",
 
   // Handoff 19: Travel + Insurance + Pet-Friendly Places

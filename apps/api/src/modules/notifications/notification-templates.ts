@@ -511,6 +511,14 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "نظر تازه", body: "کسی زیر پست شما نظر گذاشت." },
     en: { title: "New comment", body: "Someone commented on your post." },
   },
+  "community.content_removed": {
+    fa: { title: "محتوای شما برداشته شد", body: "{{what}} شما در انجمن با قوانین انجمن هم‌خوان نبود و ناظر آن را برداشت. اگر فکر می‌کنید اشتباه شده، از پشتیبانی بخواهید دوباره بررسی شود." },
+    en: { title: "Your content was removed", body: "Your {{what}} in the community did not follow the community rules, and a moderator removed it. If you think this is a mistake, ask support to review it again." },
+  },
+  "community.content_restored": {
+    fa: { title: "محتوای شما برگردانده شد", body: "پس از بررسی دوباره، {{what}} شما در انجمن دوباره نمایش داده می‌شود." },
+    en: { title: "Your content is back", body: "After another review, your {{what}} is visible in the community again." },
+  },
   "community.chat_message": {
     fa: { title: "پیام تازه", body: "{{sender}} برایتان پیام فرستاد." },
     en: { title: "New message", body: "{{sender}} sent you a message." },

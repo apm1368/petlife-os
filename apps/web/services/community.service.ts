@@ -40,6 +40,10 @@ export const communityService = {
   createPost: (input: CreateCommunityPostInput) => apiFetch<CommunityPostDto>(`/community/posts`, { method: "POST", body: input }),
   requestMediaUpload: (contentType: string, fileSizeBytes: number) => apiFetch<UploadTargetDto>(`/community/posts/upload-url`, { method: "POST", body: { contentType, fileSizeBytes } }),
 
+  updatePost: (postId: string, input: { title?: string; body?: string }) => apiFetch<CommunityPostDto>(`/community/posts/${postId}`, { method: "PATCH", body: input }),
+  deletePost: (postId: string) => apiFetch<{ deleted: true }>(`/community/posts/${postId}`, { method: "DELETE" }),
+  updateComment: (commentId: string, body: string) => apiFetch<CommunityCommentDto>(`/community/comments/${commentId}`, { method: "PATCH", body: { body } }),
+  deleteComment: (commentId: string) => apiFetch<{ deleted: true }>(`/community/comments/${commentId}`, { method: "DELETE" }),
   listComments: (postId: string, input: { page?: number; pageSize?: number } = {}) => apiFetch<PaginatedDto<CommunityCommentDto>>(`/community/posts/${postId}/comments${toQueryString(input)}`),
   addComment: (postId: string, body: string) => apiFetch<CommunityCommentDto>(`/community/posts/${postId}/comments`, { method: "POST", body: { body } }),
 
