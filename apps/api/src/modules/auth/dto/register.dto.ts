@@ -1,4 +1,4 @@
-import { IsEmail, IsOptional, IsString, Length, Matches, MinLength } from "class-validator";
+import { IsEmail, IsOptional, IsString, Length, Matches } from "class-validator";
 
 export class RegisterDto {
   @IsString()
@@ -7,7 +7,8 @@ export class RegisterDto {
   username!: string;
 
   @IsString()
-  @MinLength(8)
+  // Same ceiling as sign-in (LoginPasswordDto): bounds Argon2id work (64 MiB per hash) on oversized input.
+  @Length(8, 200)
   password!: string;
 
   /** Optional for compatibility with existing API clients; the registration UI requires it. */

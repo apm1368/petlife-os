@@ -1,3 +1,4 @@
+import { ApiException } from "../../common/errors/api-exception";
 import { Body, Controller, Get, HttpCode, HttpStatus, NotFoundException, Post, Put, Req, Res, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import type { Request, Response } from "express";
@@ -31,7 +32,7 @@ export class AuthController {
 
   @Get("methods")
   getMethods(): AuthMethodsDto {
-    return { google: this.googleClient.isEnabled(), phone: this.otpEnabled(), password: true };
+    return { google: this.googleClient.isEnabled(), phone: this.otpEnabled(), password: true, passwordSignup: this.settings.get<boolean>("auth.passwordSignupEnabled") };
   }
 
   private otpEnabled(): boolean {
@@ -67,6 +68,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   async register(@Body() dto: RegisterDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    // Admins can close password sign-up (auth.passwordSignupEnabled); existing members still sign in.
+    if (!this.settings.get<boolean>("auth.passwordSignupEnabled")) throw new ApiException("SIGNUP_CLOSED", "New accounts cannot be created right now.", HttpStatus.FORBIDDEN);
     const user = await this.passwordAuth.register(dto, res, { userAgent: req.headers["user-agent"], ipAddress: req.ip });
     return { user: toUserDto(user) };
   }

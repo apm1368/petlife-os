@@ -75,8 +75,8 @@ describe("pet photo partial saves", () => {
   });
 
   it.each([
-    ["de", "Angaben bearbeiten", "Geschlecht", "Geburtsdatum", "Farbe und besondere Merkmale", "Mikrochipnummer", "Foto auswählen", "Das Foto ist größer als 10 MB.", "Das Foto konnte nicht hochgeladen werden; es wurden keine Änderungen gespeichert. Bitte versuchen Sie es erneut.", "Männlich"],
-    ["es", "Editar datos", "Sexo", "Fecha de nacimiento", "Color y marcas", "Número de microchip", "Elegir una foto", "La foto supera los 10 MB.", "No se pudo subir la foto; no se guardó ningún cambio. Inténtalo de nuevo.", "Macho"],
+    ["de", "Angaben bearbeiten", "Geschlecht", "Geburtsdatum", "Farbe und besondere Merkmale", "Mikrochipnummer", "Foto auswählen", "Das Foto ist größer als 50 MB.", "Das Foto konnte nicht hochgeladen werden; es wurden keine Änderungen gespeichert. Bitte versuchen Sie es erneut.", "Männlich"],
+    ["es", "Editar datos", "Sexo", "Fecha de nacimiento", "Color y marcas", "Número de microchip", "Elegir una foto", "La foto supera los 50 MB.", "No se pudo subir la foto; no se guardó ningún cambio. Inténtalo de nuevo.", "Macho"],
   ] as const)("localizes the full edit form, validation and upload error in %s", async (locale, title, sex, birth, color, microchip, choosePhoto, tooBig, photoFailed, male) => {
     const { container } = renderWithIntl(<EditPetIdentity pet={pet} locale={locale} onCancel={vi.fn()} onSaved={vi.fn()} />, locale);
     expect(screen.getByRole("heading", { name: title })).toBeTruthy();
@@ -90,7 +90,7 @@ describe("pet photo partial saves", () => {
     expect(screen.getByRole("button", { name: male })).toBeTruthy();
 
     const input = container.querySelector('input[type="file"]')!;
-    const tooLarge = new File([new Uint8Array(10 * 1024 * 1024 + 1)], "large.png", { type: "image/png" });
+    const tooLarge = new File([new Uint8Array(50 * 1024 * 1024 + 1)], "large.png", { type: "image/png" });
     fireEvent.change(input, { target: { files: [tooLarge] } });
     expect(await screen.findByText(tooBig)).toBeTruthy();
 

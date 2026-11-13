@@ -6,6 +6,8 @@ import type { ProviderCapabilities } from "@petlife/types";
 import type { AppEnv } from "../../../config/env";
 import { PROVIDER_CAPABILITIES } from "./payment-provider-registry";
 import type { PaymentChargeInput, PaymentChargeResult, PaymentGateway, PaymentRefundInput, PaymentRefundResult, PaymentStatusResult } from "./payment-gateway.interface";
+import { devSimulationAllowed } from "../../../common/dev/dev-simulation";
+import { PaymentProviderUnavailableException } from "../../../common/errors/api-exception";
 
 export interface ZibalRequestResult { trackId: string; redirectUrl: string; }
 export interface ZibalVerifyResult { verified: boolean; trackId: string; failureCode?: string; failureMessage?: string; }
@@ -25,7 +27,13 @@ export class ZibalGateway implements PaymentGateway {
 
   private get sandbox() { return this.config.get("PAYMENT_SANDBOX_MODE", { infer: true }) !== "production"; }
 
+  /** Zibal's sandbox answers "paid" for any track id: only usable where dev simulation is explicitly on. */
+  private assertSandboxAllowed() {
+    if (this.sandbox && !devSimulationAllowed(this.config)) throw new PaymentProviderUnavailableException({ provider: PaymentProvider.ZIBAL, reason: "SIMULATED_PAYMENTS_DISABLED" });
+  }
+
   async request(amount: number, callbackUrl: string, reference: string): Promise<ZibalRequestResult> {
+    this.assertSandboxAllowed();
     if (this.sandbox) {
       const trackId = `zibal_sandbox_${randomUUID()}`;
       return { trackId, redirectUrl: `https://gateway.zibal.ir/start/${trackId}` };
@@ -41,6 +49,7 @@ export class ZibalGateway implements PaymentGateway {
   }
 
   async verify(trackId: string): Promise<ZibalVerifyResult> {
+    this.assertSandboxAllowed();
     if (this.sandbox) return { verified: true, trackId };
     const response = await fetch(`${this.config.get("ZIBAL_API_BASE_URL", { infer: true })}/v1/verify`, {
       method: "POST", headers: { "content-type": "application/json" },

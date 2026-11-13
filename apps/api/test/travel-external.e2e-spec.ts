@@ -8,7 +8,9 @@ import { PrismaService } from "../src/common/prisma/prisma.service";
 import { TRAVEL_SOURCE_ADAPTERS } from "../src/modules/travel-external/adapters/adapter-registry";
 import { FixtureAdapter, type FixturePayload } from "../src/modules/travel-external/adapters/fixture.adapter";
 import { AdapterError } from "../src/modules/travel-external/adapters/travel-source-adapter";
-import { TravelExternalService } from "../src/modules/travel-external/travel-external.service";
+import { TravelExternalService, syncLockKey } from "../src/modules/travel-external/travel-external.service";
+import { REDIS_CLIENT } from "../src/common/redis/redis.module";
+import type Redis from "ioredis";
 
 type Actor = { id: string; cookie: string; csrf: string };
 const DAY = 86400e3;
@@ -109,6 +111,13 @@ describe("External pet-friendly stays", () => {
     fixture.script = { listings: all.slice(1), complete: false };
     await run(root);
     expect(await db.externalStay.findUniqueOrThrow({ where: { id: stay.id } })).toMatchObject({ status: "ACTIVE", missedRuns: 0 });
+    // A crawl that stopped early (a page kept timing out) is PARTIAL with the reason, never a clean success, and ages nobody out.
+    fixture.script = { listings: all.slice(1), stoppedEarly: { category: "TIMEOUT", message: "stopped at page 2 of 3: request timed out" } };
+    const cut = await run(root);
+    expect(cut).toMatchObject({ status: "PARTIAL", failed: 0, listingsDiscovered: 11, errorCategories: { DISCOVERY_INCOMPLETE: 1 } });
+    expect(cut.errors[0].message).toContain("TIMEOUT: stopped at page 2 of 3");
+    expect(await db.externalStay.findUniqueOrThrow({ where: { id: stay.id } })).toMatchObject({ status: "ACTIVE", missedRuns: 0 });
+    expect(await db.externalTravelSource.findUniqueOrThrow({ where: { code: "FIXTURE" } })).toMatchObject({ health: "DEGRADED", lastRunStatus: "PARTIAL", lastErrorCategory: "DISCOVERY_INCOMPLETE", healthReason: expect.stringContaining("Discovery stopped early") });
     fixture.script = { listings: all.slice(1) };
     await run(root);
     expect(await db.externalStay.findUniqueOrThrow({ where: { id: stay.id } })).toMatchObject({ status: "ACTIVE", missedRuns: 1 }); // one miss: still uncertain
@@ -167,6 +176,12 @@ describe("External pet-friendly stays", () => {
     // Stuck runs never lock forever.
     const src0 = await db.externalTravelSource.findUniqueOrThrow({ where: { code: "FIXTURE" } });
     const stuck = await db.externalSyncRun.create({ data: { sourceId: src0.id, kind: "FULL", startedAt: new Date(Date.now() - 3 * 3600e3) } });
+    // While a live run still holds (and refreshes) the source lock, a long run is slow, not stuck.
+    const redis = app.get<Redis>(REDIS_CLIENT);
+    await redis.set(syncLockKey("FIXTURE"), "live-run", "PX", 60_000);
+    await app.get(TravelExternalService).abandonStuckRuns();
+    expect((await db.externalSyncRun.findUniqueOrThrow({ where: { id: stuck.id } })).status).toBe("STARTED");
+    await redis.del(syncLockKey("FIXTURE"));
     await app.get(TravelExternalService).abandonStuckRuns();
     expect((await db.externalSyncRun.findUniqueOrThrow({ where: { id: stuck.id } })).status).toBe("ABANDONED");
     const errs = (await get(root, "/admin/travel/external/errors?source=FIXTURE").expect(200)).body;
@@ -244,6 +259,14 @@ describe("External pet-friendly stays", () => {
     expect(await search("&petPolicy=CONFIRMED_ALLOWED")).toEqual([stay.id]);
     expect(await search("&petPolicy=UNKNOWN")).toEqual([su.id]);
     expect(await search("&petPolicy=ANY")).toEqual(expect.arrayContaining([stay.id, su.id, sn.id]));
+    // The web always sends guests: its capacity condition must not replace the pet-policy condition.
+    expect(await search("&guests=2")).not.toContain(sn.id);
+    expect(await search("&guests=2&petPolicy=CONFIRMED_ALLOWED")).toEqual([stay.id]);
+    expect(await search("&guests=7")).toEqual([]); // every fixture listing sleeps 6
+    // Pagination happens in the database with an exact total and a stable order.
+    const paged = await Promise.all([1, 2].map((p) => get(null, `/travel/external/stays?city=${encodeURIComponent(mcity)}&petPolicy=ANY&pageSize=2&page=${p}`).expect(200).then((r) => r.body)));
+    expect(paged.map((p) => p.total)).toEqual([3, 3]);
+    expect([...paged[0].items, ...paged[1].items].map((i: { id: string }) => i.id).sort()).toEqual([stay.id, su.id, sn.id].sort());
     expect((await get(null, `/travel/external/stays/${su.id}`).expect(200)).body).toMatchObject({ pet: { policyStatus: "UNKNOWN", accepted: "UNKNOWN" }, trustLabels: expect.arrayContaining(["PET_POLICY_UNKNOWN", "AVAILABILITY_UNKNOWN"]) });
     expect(await search("&dogs=true")).toContain(stay.id);
     expect(await search("&cats=true")).not.toContain(stay.id); // UNKNOWN never counts as yes

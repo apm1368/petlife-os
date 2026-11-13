@@ -24,6 +24,8 @@ enum Locale {
   en
   de
   es
+  ar
+  nl
 }
 
 enum ThemePreference {
@@ -901,6 +903,32 @@ enum WalletCreditSource {
   MANUAL_CORRECTION
 }
 
+/// How a member adds money to their wallet. There is deliberately no sandbox rail: a simulated top-up would
+/// mint spendable credit without any money arriving.
+enum WalletTopUpRail {
+  ZIBAL
+  CARD_TO_CARD
+}
+
+enum WalletTopUpStatus {
+  /// Zibal: the member was sent to the gateway; nothing has arrived yet.
+  AWAITING_PAYMENT
+  /// Card to card: the member was shown the company card and must upload a receipt.
+  AWAITING_RECEIPT
+  /// Card to card: the receipt is waiting for finance.
+  REVIEW_PENDING
+  CREDITED
+  FAILED
+  REJECTED
+  EXPIRED
+  CANCELLED
+}
+
+enum WalletAdjustmentDirection {
+  CREDIT
+  DEBIT
+}
+
 enum ProviderSettlementStatus {
   CALCULATED
   APPROVED
@@ -996,6 +1024,9 @@ enum LedgerAccountCode {
   /// from append-only entries without ever persisting a mutable balance.
   WALLET_WITHDRAWABLE_LIABILITY
   WALLET_PURCHASE_LIABILITY
+  /// Counter-account for staff wallet corrections (a goodwill credit is a platform cost; a correcting debit
+  /// reverses one). Kept apart from PLATFORM_REVENUE so finance can see every manual wallet change in one place.
+  WALLET_ADJUSTMENT
   /// Cash confirmed from the platform's company card before it is allocated
   /// to the customer/payment clearing account.
   CARD_TRANSFER_RECEIVABLE
@@ -1146,6 +1177,14 @@ enum ShippingProvider {
   DEV
   ALOPEYK
   SNAPPBOX
+  /// opetlife's own couriers: priced from staff-set zone/distance rules, dispatched and updated by staff.
+  OPETLIFE_COURIER
+  /// Iran Post express (Pishtaz): a fixed price set by staff, no API; staff enter the Post tracking number.
+  POST_PISHTAZ
+  /// Snappbox / Alopeyk booked by staff in the courier's regular app (no business API): the member pays opetlife's
+  /// distance-based estimate; staff book the courier in the app and enter its tracking link and status here.
+  SNAPPBOX_APP
+  ALOPEYK_APP
 }
 
 /// A single, fixed value this phase (spec section 4's "fulfillmentType"
@@ -1235,6 +1274,8 @@ model User {
   avatarUrl              String?
   locale                 Locale            @default(fa)
   themePreference        ThemePreference   @default(SYSTEM)
+  /// PET_OWNER (default) or PARTNER: a partner signup ("ثبت‌نام همکار") never goes through the pet-owner onboarding.
+  signupIntent           String            @default("PET_OWNER")
   /// ERP-B: platform-level account suspension by staff (trust/admin). A suspended account can't sign in and its
   /// sessions stop resolving; nothing is deleted. Reason is internal (never shown on member-facing APIs).
   accountStatus          UserAccountStatus @default(ACTIVE)
@@ -1250,44 +1291,45 @@ model User {
   /// billing — updatedAt moves on every profile change, so it cannot answer "when were they last here".
   lastActiveAt           DateTime?
 
-  authIdentities          AuthIdentity[]
-  passwordResetTokens     PasswordResetToken[]
-  sessions                Session[]
-  householdMemberships    HouseholdMember[]
-  petAccessGrants         PetAccessGrant[]
-  activePetPreferences    ActivePetPreference[]
-  onboardingProgress      OnboardingProgress[]
-  petInterests            UserPetInterest[]
-  providerProfiles        ProviderUser[]
-  bookings                Booking[]
-  bookingSeries           BookingSeries[]
-  providerContext         ProviderContextPreference?
-  carts                   Cart[]
-  checkouts               Checkout[]
-  orders                  Order[]
-  sellerMemberships       SellerMembership[]
-  catalogProductRequests CatalogProductRequest[] @relation("RequestedCatalogProducts")
-  sellerContext           SellerContextPreference?
-  inventoryMovements      InventoryMovement[]
-  notifications           Notification[]
-  notificationPreferences NotificationPreference[]
-  notificationQuietHours  NotificationQuietHours?
-  consents                UserConsent[]
-  dataExportRequests      DataExportRequest[]
-  accountDeletionRequests AccountDeletionRequest[]
-  acceptedInvitations     HouseholdInvitation[]      @relation("AcceptedInvitationUser")
-  requestedInvitations    HouseholdInvitation[]      @relation("RequestedInvitationUser")
-  reviewedInvitations     HouseholdInvitation[]      @relation("ReviewedInvitationUser")
+  authIdentities             AuthIdentity[]
+  passwordResetTokens        PasswordResetToken[]
+  sessions                   Session[]
+  householdMemberships       HouseholdMember[]
+  petAccessGrants            PetAccessGrant[]
+  activePetPreferences       ActivePetPreference[]
+  onboardingProgress         OnboardingProgress[]
+  petInterests               UserPetInterest[]
+  providerProfiles           ProviderUser[]
+  bookings                   Booking[]
+  bookingSeries              BookingSeries[]
+  providerContext            ProviderContextPreference?
+  carts                      Cart[]
+  checkouts                  Checkout[]
+  orders                     Order[]
+  sellerMemberships          SellerMembership[]
+  catalogProductRequests     CatalogProductRequest[]    @relation("RequestedCatalogProducts")
+  sellerContext              SellerContextPreference?
+  inventoryMovements         InventoryMovement[]
+  notifications              Notification[]
+  notificationPreferences    NotificationPreference[]
+  notificationQuietHours     NotificationQuietHours?
+  pushSubscriptions          PushSubscription[]
+  consents                   UserConsent[]
+  dataExportRequests         DataExportRequest[]
+  accountDeletionRequests    AccountDeletionRequest[]
+  acceptedInvitations        HouseholdInvitation[]      @relation("AcceptedInvitationUser")
+  requestedInvitations       HouseholdInvitation[]      @relation("RequestedInvitationUser")
+  reviewedInvitations        HouseholdInvitation[]      @relation("ReviewedInvitationUser")
   /// Pets whose primary owner this user is (ID-01).
-  ownedPets               PetOwnership[]             @relation("PetPrimaryOwner")
+  ownedPets                  PetOwnership[]             @relation("PetPrimaryOwner")
   /// Ownership transfers this user proposed (ID-01, ID-05).
-  proposedOwnershipTransfers PetOwnershipTransfer[]  @relation("TransferProposedBy")
+  proposedOwnershipTransfers PetOwnershipTransfer[]     @relation("TransferProposedBy")
   /// Ownership transfers addressed to this user (ID-01, ID-05).
-  receivedOwnershipTransfers PetOwnershipTransfer[]  @relation("TransferRecipient")
+  receivedOwnershipTransfers PetOwnershipTransfer[]     @relation("TransferRecipient")
   /// Read-only memory copies left for this user after a household separation (ID-02).
-  memoryCopies            PetMemoryCopy[]
+  memoryCopies               PetMemoryCopy[]
   /// Subscriptions this user is the recorded payer for (ID-07).
-  paidSubscriptions       Subscription[]          @relation("SubscriptionPayer")
+  paidSubscriptions          Subscription[]             @relation("SubscriptionPayer")
 
   adminUser                 AdminUser?
   supportCasesRequested     SupportCase[]
@@ -1309,6 +1351,11 @@ model User {
   clinicInvitationsReceived ClinicInvitation[]       @relation("ClinicInvitationsReceived")
   walletAccount             WalletAccount?
   cardTransferPayments      CardTransferPayment[]
+  petTaxiRides              PetTaxiRide[]
+  walletTopUps              WalletTopUp[]
+  lostPetAreaAlert          LostPetAreaAlert?
+
+  clinicClientLinks        ClinicImportedContact[]  @relation("ClinicClientLinkedUser")
 
   @@map("users")
 }
@@ -1435,28 +1482,28 @@ model HouseholdMember {
 }
 
 model HouseholdInvitation {
-  id               String                    @id @default(uuid()) @db.Uuid
-  householdId      String                    @db.Uuid
-  household        Household                 @relation(fields: [householdId], references: [id], onDelete: Cascade)
-  contact          String
-  tokenHash        String                    @unique
-  status           HouseholdInvitationStatus @default(PENDING)
-  invitedByUserId  String                    @db.Uuid
-  acceptedByUserId String?                   @db.Uuid
-  acceptedBy       User?                     @relation("AcceptedInvitationUser", fields: [acceptedByUserId], references: [id], onDelete: SetNull)
-  requestedByUserId String?                  @db.Uuid
-  requestedBy       User?                    @relation("RequestedInvitationUser", fields: [requestedByUserId], references: [id], onDelete: SetNull)
-  reviewedByUserId String?                   @db.Uuid
-  reviewedBy       User?                     @relation("ReviewedInvitationUser", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
-  initialAccess    Json
-  expiresAt        DateTime
-  requestedAt      DateTime?
-  reviewedAt       DateTime?
-  acceptedAt       DateTime?
-  declinedAt       DateTime?
-  cancelledAt      DateTime?
-  createdAt        DateTime                  @default(now())
-  updatedAt        DateTime                  @updatedAt
+  id                String                    @id @default(uuid()) @db.Uuid
+  householdId       String                    @db.Uuid
+  household         Household                 @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  contact           String
+  tokenHash         String                    @unique
+  status            HouseholdInvitationStatus @default(PENDING)
+  invitedByUserId   String                    @db.Uuid
+  acceptedByUserId  String?                   @db.Uuid
+  acceptedBy        User?                     @relation("AcceptedInvitationUser", fields: [acceptedByUserId], references: [id], onDelete: SetNull)
+  requestedByUserId String?                   @db.Uuid
+  requestedBy       User?                     @relation("RequestedInvitationUser", fields: [requestedByUserId], references: [id], onDelete: SetNull)
+  reviewedByUserId  String?                   @db.Uuid
+  reviewedBy        User?                     @relation("ReviewedInvitationUser", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  initialAccess     Json
+  expiresAt         DateTime
+  requestedAt       DateTime?
+  reviewedAt        DateTime?
+  acceptedAt        DateTime?
+  declinedAt        DateTime?
+  cancelledAt       DateTime?
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
 
   @@index([householdId, status])
   @@index([contact, status])
@@ -1587,7 +1634,7 @@ model Pet {
 
   /// The pet's single primary owner (ID-01). At most one row — the primary owner is
   /// exactly one person, and a household only grants access to the rest.
-  ownership      PetOwnership?
+  ownership          PetOwnership?
   /// Transfer requests raised for this pet (ID-01, ID-05).
   ownershipTransfers PetOwnershipTransfer[]
   /// Read-only copies of this pet's memories left for separated members (ID-02).
@@ -1736,20 +1783,20 @@ model PetAccessGrant {
 /// the pet's home household; this table says who inside that household is accountable
 /// for it. Ownership transfer moves the pet to a new household AND moves this row.
 model PetOwnership {
-  id     String @id @default(uuid()) @db.Uuid
-  petId  String @unique @db.Uuid
-  pet    Pet    @relation(fields: [petId], references: [id], onDelete: Cascade)
+  id             String   @id @default(uuid()) @db.Uuid
+  petId          String   @unique @db.Uuid
+  pet            Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
   /// The primary owner. Always a member of `Pet.householdId` at the moment it is written.
-  ownerUserId String @db.Uuid
-  owner       User   @relation("PetPrimaryOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
+  ownerUserId    String   @db.Uuid
+  owner          User     @relation("PetPrimaryOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
   /// The household the pet lived in when this ownership row was written. Kept for audit:
   /// after a transfer the pet's household changes, and this records where it came from.
-  householdId String   @db.Uuid
+  householdId    String   @db.Uuid
   /// When ownership last changed hands, and how.
-  transferredAt      DateTime @default(now())
-  transferReason     String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  transferredAt  DateTime @default(now())
+  transferReason String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([ownerUserId])
   @@map("pet_ownerships")
@@ -1775,10 +1822,10 @@ model PetOwnershipTransfer {
   toUser   User   @relation("TransferRecipient", fields: [toUserId], references: [id], onDelete: Restrict)
 
   /// The household the pet lives in now (the source household of the move).
-  fromHouseholdId String   @db.Uuid
+  fromHouseholdId String @db.Uuid
   /// The household the pet will live in once accepted. Must be the recipient's own
   /// household, or a household they are already a member of.
-  toHouseholdId   String   @db.Uuid
+  toHouseholdId   String @db.Uuid
 
   status PetOwnershipTransferStatus @default(PENDING_REVIEW)
 
@@ -1811,19 +1858,19 @@ model PetOwnershipTransfer {
 /// original and records who the copy belongs to, so the separated member can read what
 /// they personally recorded without keeping any write access to the pet.
 model PetMemoryCopy {
-  id String @id @default(uuid()) @db.Uuid
+  id          String    @id @default(uuid()) @db.Uuid
   /// The original memory. Never deleted — the copy is a grant to read, not a fork of the data.
-  memoryId String   @db.Uuid
-  memory   PetMemory @relation(fields: [memoryId], references: [id], onDelete: Cascade)
+  memoryId    String    @db.Uuid
+  memory      PetMemory @relation(fields: [memoryId], references: [id], onDelete: Cascade)
   /// The person the copy is for (the separated member).
-  userId   String   @db.Uuid
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String    @db.Uuid
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   /// The household separation that caused the copy.
-  householdId String   @db.Uuid
+  householdId String    @db.Uuid
   /// The pet the copied memory belongs to, kept so a pet-scoped listing works without a join.
-  petId     String   @db.Uuid
-  pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  petId       String    @db.Uuid
+  pet         Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
 
   @@unique([memoryId, userId])
   @@index([userId, createdAt])
@@ -2107,7 +2154,7 @@ model ProviderOrganization {
   type                      ProviderType
   verificationStatus        ProviderVerificationStatus @default(NOT_STARTED)
   /// Fixture-origin records are safe for local/test flows but must never be surfaced by public production reads.
-  isDemoRecord             Boolean                    @default(false)
+  isDemoRecord              Boolean                    @default(false)
   /// ERP-C: partner-side submission time and the last admin note the partner may see (request for info / rejection).
   verificationSubmittedAt   DateTime?
   verificationNote          String?
@@ -2117,6 +2164,11 @@ model ProviderOrganization {
   phone       String?
   email       String?
   description String?
+  /// Every service kind the partner offers (multi-select at signup); `type` stays the first/primary one.
+  serviceKinds               ProviderType[]             @default([])
+  /// The partner's shop when one signup created both a service business and a shop (same owner).
+  linkedSellerOrganizationId String?                    @unique @db.Uuid
+  linkedSellerOrganization   SellerOrganization?        @relation("ProviderSellerLink", fields: [linkedSellerOrganizationId], references: [id], onDelete: SetNull)
   logoUrl     String?
   websiteUrl  String?
 
@@ -2324,7 +2376,9 @@ model ProviderService {
   freeCancellationHours         Int                   @default(24)
   lateCancellationRefundPercent Int                   @default(0)
   preparationNotes              String?
-  maxPetsPerBooking             Int                   @default(1)
+  /// How many pets one booking may bring (owner 2026-11-13: multi-pet bookings by default; for a pet taxi this is the
+  /// vehicle capacity, since the ride price stays the same).
+  maxPetsPerBooking             Int                   @default(4)
   requiredResourceType          ProviderResourceType?
   requestTtlHours               Int                   @default(24)
 
@@ -2430,7 +2484,11 @@ model CustomerAddress {
   countryCode  String
   latitude     Float?
   longitude    Float?
+  /// Neighbourhood / district (محله), which Iranian couriers and the opetlife courier zones use.
+  area         String?
   instructions String?
+  /// Removed from the address book by the member; kept because bookings and orders still point at it.
+  archivedAt   DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -2527,6 +2585,11 @@ model Booking {
   bookingSeries   BookingSeries? @relation(fields: [bookingSeriesId], references: [id], onDelete: SetNull)
 
   startAt  DateTime
+  /// Automatic appointment reminders (booking-reminder.worker.ts): set when each one was handled, sent or skipped.
+  reminder24hSentAt     DateTime?
+  reminder2hSentAt      DateTime?
+  /// The owner tapped "I'll be there" — shown to the provider.
+  attendanceConfirmedAt DateTime?
   endAt    DateTime
   /// The provider location's timezone at booking time — authoritative for
   /// this appointment's local time, independent of the viewer's own locale.
@@ -2607,6 +2670,9 @@ model Booking {
   /// Pet taxi only — immutable route and fare snapshot taken when the booking is made.
   transportRoute     BookingTransportRoute?
 
+  /// Staff refunds of this booking (finance two-person control).
+  adminRefundApprovals AdminRefundApproval[]
+
   @@index([petId])
   @@index([householdId])
   @@index([userId])
@@ -2628,10 +2694,22 @@ model BookingPetAccess {
   bookingId String  @unique @db.Uuid
   booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Restrict)
 
-  petAccessGrantId String         @unique @db.Uuid
-  petAccessGrant   PetAccessGrant @relation(fields: [petAccessGrantId], references: [id], onDelete: Restrict)
+  /// The grant held by whoever is assigned to the booking now. Null while nobody is assigned ("any
+  /// staff"): the consent below is kept and becomes a grant for the person the clinic assigns. When the
+  /// clinic reassigns, the previous assignee's grant is revoked and this points at the new one.
+  petAccessGrantId String?         @unique @db.Uuid
+  petAccessGrant   PetAccessGrant? @relation(fields: [petAccessGrantId], references: [id], onDelete: Restrict)
 
   scopePreset PetAccessScopePreset
+
+  /// The owner explicitly chose a health scope in the booking flow (a category default is not consent).
+  /// Only then does the grant read health; carried to every assignee and to a rescheduled successor.
+  healthConsented Boolean @default(false)
+
+  /// The owner's own health documents the owner ticked for this booking's vet (health consent only).
+  /// The assignee reads exactly these, and only while this booking's grant is active. The documents'
+  /// own visibility is never changed.
+  sharedDocumentIds String[] @default([]) @db.Uuid
 
   createdAt DateTime @default(now())
 
@@ -2741,6 +2819,15 @@ model SellerOrganization {
   status                    SellerStatus             @default(ACTIVE)
   countryCode               String
   city                      String?
+  /// Postal address from partner signup (city is the existing `city`); province = استان.
+  province                  String?
+  addressLine               String?
+  postalCode                String?
+  latitude                  Float?
+  longitude                 Float?
+  /// Shop opening hours for display only (no booking): [{ dayOfWeek, open, close }].
+  openingHours              Json?
+  linkedProviderOrganization ProviderOrganization?   @relation("ProviderSellerLink")
   logoUrl                   String?
   description               String?
 
@@ -2774,9 +2861,46 @@ model SellerOrganization {
   settlements                     SellerSettlement[]
   adjustments                     SellerAdjustment[]
   marketplaceSettlementStatements MarketplaceSettlementStatement[]
+  shippingProfile                 SellerShippingProfile?
 
   @@index([verificationStatus, status])
   @@map("seller_organizations")
+}
+
+/// How a seller ships: which of the platform's enabled methods it offers (empty = all of them) and where couriers
+/// pick parcels up. The pickup address feeds every quote and shipment instead of the organization's city alone.
+model SellerShippingProfile {
+  sellerOrganizationId String             @id @db.Uuid
+  sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Cascade)
+  offeredProviders     ShippingProvider[] @default([])
+  pickupContactName    String?
+  pickupPhone          String?
+  pickupAddressLine    String?
+  pickupCity           String?
+  pickupRegion         String?
+  pickupArea           String?
+  pickupPostalCode     String?
+  pickupLatitude       Float?
+  pickupLongitude      Float?
+  pickupInstructions   String?
+  updatedAt            DateTime           @updatedAt
+  createdAt            DateTime           @default(now())
+
+  @@map("seller_shipping_profiles")
+}
+
+/// Staff-managed shipping method settings: on/off and the pricing rules for methods priced by opetlife itself
+/// (OPETLIFE_COURIER zone/distance rules, POST_PISHTAZ fixed price). API couriers keep their env credentials;
+/// a row here can only switch them off, never on without credentials.
+model ShippingMethodSetting {
+  provider         ShippingProvider @id
+  enabled          Boolean          @default(false)
+  config           Json             @default("{}")
+  updatedByAdminId String?          @db.Uuid
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@map("shipping_method_settings")
 }
 
 /// The Seller OS equivalent of ProviderUser (spec section 4) — replaces
@@ -2826,7 +2950,7 @@ model Brand {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  products Product[]
+  products          Product[]
   catalogImportJobs CatalogImportJob[]
 
   @@map("brands")
@@ -2837,12 +2961,12 @@ model Brand {
 /// means removing a parent category never deletes its children, it just
 /// orphans them to the root level.
 model ProductCategory {
-  id       String            @id @default(uuid()) @db.Uuid
+  id           String            @id @default(uuid()) @db.Uuid
   /// Seed/demo taxonomy entries are excluded from public shop discovery.
-  isDemoRecord Boolean       @default(false)
-  parentId String?           @db.Uuid
-  parent   ProductCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
-  children ProductCategory[] @relation("CategoryHierarchy")
+  isDemoRecord Boolean           @default(false)
+  parentId     String?           @db.Uuid
+  parent       ProductCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children     ProductCategory[] @relation("CategoryHierarchy")
 
   name   String
   slug   String                @unique
@@ -2851,9 +2975,9 @@ model ProductCategory {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  products Product[]
+  products               Product[]
   catalogProductRequests CatalogProductRequest[]
-  importJobs CatalogImportJob[]
+  importJobs             CatalogImportJob[]
 
   @@map("product_categories")
 }
@@ -2906,9 +3030,9 @@ model Product {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  variants   ProductVariant[]
-  orderItems OrderItem[]
-  imports    CatalogImportItem[]
+  variants               ProductVariant[]
+  orderItems             OrderItem[]
+  imports                CatalogImportItem[]
   catalogProductRequests CatalogProductRequest[] @relation("ResolvedCatalogProductRequests")
 
   @@index([categoryId])
@@ -2922,6 +3046,9 @@ model Product {
 model CatalogImportJob {
   id               String                 @id @default(uuid()) @db.Uuid
   status           CatalogImportJobStatus @default(QUEUED)
+  /// PAGES = staff-submitted Digikala pages (flag-gated, photos); DIGIKALA_FACTS = the owner's one-time pet-category
+  /// facts run (no photos, no descriptions).
+  mode             String                 @default("PAGES")
   submittedUrls    String[]
   targetCategoryId String                 @db.Uuid
   targetCategory   ProductCategory        @relation(fields: [targetCategoryId], references: [id], onDelete: Restrict)
@@ -3034,31 +3161,31 @@ enum CatalogProductRequestStatus {
 /// Seller-originated request to add an absent central product. It never includes seller price or inventory;
 /// decision details and provenance remain attached to the request after approval, match, or rejection.
 model CatalogProductRequest {
-  id                   String @id @default(uuid()) @db.Uuid
-  sellerOrganizationId String @db.Uuid
+  id                   String             @id @default(uuid()) @db.Uuid
+  sellerOrganizationId String             @db.Uuid
   sellerOrganization   SellerOrganization @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
-  requestedByUserId    String @db.Uuid
-  requestedByUser      User @relation("RequestedCatalogProducts", fields: [requestedByUserId], references: [id], onDelete: Restrict)
-  categoryId           String? @db.Uuid
-  category             ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  resolvedProductId    String? @db.Uuid
-  resolvedProduct      Product? @relation("ResolvedCatalogProductRequests", fields: [resolvedProductId], references: [id], onDelete: SetNull)
-  reviewedByAdminId    String? @db.Uuid
-  reviewedByAdmin      AdminUser? @relation("ReviewedCatalogProducts", fields: [reviewedByAdminId], references: [id], onDelete: SetNull)
+  requestedByUserId    String             @db.Uuid
+  requestedByUser      User               @relation("RequestedCatalogProducts", fields: [requestedByUserId], references: [id], onDelete: Restrict)
+  categoryId           String?            @db.Uuid
+  category             ProductCategory?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  resolvedProductId    String?            @db.Uuid
+  resolvedProduct      Product?           @relation("ResolvedCatalogProductRequests", fields: [resolvedProductId], references: [id], onDelete: SetNull)
+  reviewedByAdminId    String?            @db.Uuid
+  reviewedByAdmin      AdminUser?         @relation("ReviewedCatalogProducts", fields: [reviewedByAdminId], references: [id], onDelete: SetNull)
 
-  requestedTitle       String
-  normalizedTitle      String
-  brandName            String?
-  description          String?
-  specifications       Json?
-  sourceUrl            String?
-  sourceName           String?
-  status               CatalogProductRequestStatus @default(PENDING_REVIEW)
-  decisionReason       String?
-  duplicateReview      Json?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-  reviewedAt           DateTime?
+  requestedTitle  String
+  normalizedTitle String
+  brandName       String?
+  description     String?
+  specifications  Json?
+  sourceUrl       String?
+  sourceName      String?
+  status          CatalogProductRequestStatus @default(PENDING_REVIEW)
+  decisionReason  String?
+  duplicateReview Json?
+  createdAt       DateTime                    @default(now())
+  updatedAt       DateTime                    @updatedAt
+  reviewedAt      DateTime?
 
   @@index([sellerOrganizationId, status, createdAt], map: "catalog_req_seller_status_created_idx")
   @@index([status, createdAt])
@@ -3229,6 +3356,9 @@ model Checkout {
   promotionCode       String?
   /// Batch 4: the priced lines (CartLineDto[]) frozen when the checkout was created. Orders are built from this, never from the mutable cart, so the order always equals what was charged.
   pricedLinesSnapshot Json?
+  /// The delivery address frozen when payment starts: the order ships to what the quote priced, even if the
+  /// member edits the saved address afterwards.
+  deliveryAddressSnapshot Json?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -3461,6 +3591,8 @@ model CardTransferPayment {
   currency                String                    @default("IRR")
   companyCardNumberMasked String
   accountHolderName       String
+  /// The admin-managed company account this payment was started with (null: the server env account).
+  cardTransferDestinationId String? @db.Uuid
   receiptObjectKey        String?
   receiptUploadedAt       DateTime?
   receiptUploadDeadlineAt DateTime
@@ -3489,6 +3621,7 @@ model WalletAccount {
   createdAt DateTime @default(now())
 
   entries WalletEntry[]
+  adjustments WalletAdjustment[]
 
   @@map("wallet_accounts")
 }
@@ -3511,6 +3644,68 @@ model WalletEntry {
   @@index([walletAccountId, balanceType, createdAt])
   @@index([expiresAt])
   @@map("wallet_entries")
+}
+
+/// A member's request to add money. Money only enters the wallet when the request is CREDITED, and then exactly
+/// once: walletEntryId points at the single WalletEntry that the credit wrote.
+model WalletTopUp {
+  id                String            @id @default(uuid()) @db.Uuid
+  userId            String            @db.Uuid
+  user              User              @relation(fields: [userId], references: [id], onDelete: Restrict)
+  rail              WalletTopUpRail
+  status            WalletTopUpStatus
+  /// What the member asked to add, in integer rials.
+  amount            Int
+  currency          String            @default("IRR")
+  idempotencyKey    String            @unique
+  zibalTrackId      String?           @unique
+  /// Card to card: masked snapshot of the receiving card, for audit (the full number is configuration).
+  cardNumberMasked  String?
+  cardHolderName    String?
+  /// The admin-managed company account this request was started with (null: the server env account).
+  cardTransferDestinationId String? @db.Uuid
+  receiptObjectKey  String?
+  receiptUploadedAt DateTime?
+  /// Card to card: the receipt must arrive before this, or the request expires.
+  receiptDeadlineAt DateTime?
+  /// What finance confirmed actually arrived; the credit is this amount, not the requested one.
+  receivedAmount    Int?
+  reviewedAt        DateTime?
+  reviewedByAdminId String?           @db.Uuid
+  reviewedByAdmin   AdminUser?        @relation("ReviewedWalletTopUps", fields: [reviewedByAdminId], references: [id], onDelete: Restrict)
+  rejectionReason   String?
+  failureCode       String?
+  walletEntryId     String?           @unique @db.Uuid
+  creditedAt        DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@map("wallet_top_ups")
+}
+
+/// A staff correction to one wallet bucket. Always carries a reason and its actor; the money moves through a
+/// WalletEntry + balanced ledger transaction written in the same database transaction as this row and its audit log.
+model WalletAdjustment {
+  id                String                    @id @default(uuid()) @db.Uuid
+  walletAccountId   String                    @db.Uuid
+  walletAccount     WalletAccount             @relation(fields: [walletAccountId], references: [id], onDelete: Restrict)
+  direction         WalletAdjustmentDirection
+  balanceType       WalletBalanceType
+  amount            Int
+  reasonCode        String
+  reason            String
+  evidenceReference String?
+  /// Client-chosen key: a retried or double-clicked adjustment returns the first one instead of moving money twice.
+  idempotencyKey    String?                   @unique
+  walletEntryId     String                    @unique @db.Uuid
+  createdByAdminId  String                    @db.Uuid
+  createdByAdmin    AdminUser                 @relation(fields: [createdByAdminId], references: [id], onDelete: Restrict)
+  createdAt         DateTime                  @default(now())
+
+  @@index([walletAccountId, createdAt])
+  @@map("wallet_adjustments")
 }
 
 model PaymentAttempt {
@@ -4199,6 +4394,10 @@ model ShippingQuote {
   estimatedDeliveryMinutes Int?
 
   providerQuoteId String?
+  /// How the price was reached, shown to the member: API, SANDBOX_ESTIMATE, DISTANCE_ESTIMATE, CITY_FLAT or FIXED_PRICE.
+  pricingBasis    String?
+  /// The checkout address this quote was priced for (see delivery-address-fingerprint.ts); a different one = stale.
+  deliveryAddressFingerprint String?
 
   status    ShippingQuoteStatus @default(AVAILABLE)
   expiresAt DateTime
@@ -4684,6 +4883,12 @@ enum NotificationFailureKind {
 enum MessagingProvider {
   DEV
   FARAZ
+  /// Email through smtp.gmail.com with an App Password.
+  GMAIL
+  /// Email through any other SMTP relay.
+  SMTP
+  /// Web Push (VAPID) to a browser or an installed app (PWA / Android TWA).
+  WEB_PUSH
 }
 
 /// The addressable, in-app-visible unit — always has exactly one recipient
@@ -4794,6 +4999,31 @@ model NotificationPreference {
 
   @@unique([userId, category, channel])
   @@map("notification_preferences")
+}
+
+/// One browser or installed app (PWA / Android TWA) that agreed to receive Web Push for a member. The endpoint is a
+/// capability URL issued by the browser's push service; only known push-service hosts are accepted (no SSRF), and an
+/// endpoint the push service reports gone (404/410) is deleted. One row per endpoint: when another member signs in
+/// on the same device and opts in, the row moves to them.
+model PushSubscription {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @db.Uuid
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint      String    @unique
+  p256dh        String
+  auth          String
+  /// Short description derived from the user agent ("Chrome · Android"), shown in settings.
+  deviceLabel   String?
+  expiresAt     DateTime?
+  lastSuccessAt DateTime?
+  lastFailureAt DateTime?
+  failureCount  Int       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("push_subscriptions")
 }
 
 /// Deliberately its own singleton-per-user table rather than smearing
@@ -5047,6 +5277,13 @@ enum AppealStatus {
   WITHDRAWN
 }
 
+/// What an AdminRefundApproval refunds.
+enum AdminRefundSubjectType {
+  ORDER
+  BOOKING
+  TRAVEL_BOOKING
+}
+
 /// Two-person control foundation for high-risk refunds (spec: "refund above
 /// threshold -> REQUESTED -> APPROVED -> EXECUTED"). Below
 /// `ADMIN_REFUND_APPROVAL_THRESHOLD_IRR`, a single FINANCE-permission admin
@@ -5066,6 +5303,28 @@ enum AdminRefundApprovalStatus {
 /// implicit access through normal user session alone"). Mirrors
 /// SellerMembership/ProviderUser's own shape (role + status keyed to a
 /// real User) rather than inventing a parallel credential system.
+/// A role the owner defines in the back office: a named set of admin permissions, optionally limited to some
+/// verticals. Members take exactly these permissions (the built-in role is kept on the membership and comes back when
+/// the custom role is cleared). It can never carry admin.manage, so role management itself stays with SUPER_ADMIN.
+model AdminCustomRole {
+  id               String          @id @default(uuid()) @db.Uuid
+  name             String
+  description      String?
+  permissions      String[]
+  /// Empty means every vertical.
+  verticals        AdminVertical[] @default([])
+  archivedAt       DateTime?
+  createdByAdminId String          @db.Uuid
+  updatedByAdminId String          @db.Uuid
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  members AdminUser[]
+
+  @@index([archivedAt])
+  @@map("admin_custom_roles")
+}
+
 model AdminUser {
   id            String                @id @default(uuid()) @db.Uuid
   userId        String                @unique @db.Uuid
@@ -5075,41 +5334,48 @@ model AdminUser {
   /// Only read for SERVICE_ADMIN, whose vertical is not implied by its role. Empty for every other
   /// role: an empty list never widens access, it just leaves the role's own verticals in charge.
   serviceScopes AdminVertical[]       @default([])
+  /// Owner-defined role (admin/access/roles). While set, it decides this admin's permissions and verticals instead of
+  /// the built-in role; clearing it restores the built-in role. Never set on a SUPER_ADMIN.
+  customRoleId  String?               @db.Uuid
+  customRole    AdminCustomRole?      @relation(fields: [customRoleId], references: [id], onDelete: Restrict)
 
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   lastActiveAt DateTime?
 
-  assignedSupportCases          SupportCase[]                     @relation("AssignedSupportCases")
-  authoredSupportCases          SupportCase[]                     @relation("CreatedSupportCases")
-  supportMessages               SupportMessage[]
-  internalNotes                 InternalNote[]
-  assignedTasks                 AdminTask[]                       @relation("AssignedTasks")
-  createdTasks                  AdminTask[]                       @relation("CreatedTasks")
-  assignedDisputes              Dispute[]                         @relation("AssignedDisputes")
-  disputeEvidence               DisputeEvidence[]
-  assignedTrustCases            TrustCase[]                       @relation("AssignedTrustCases")
-  openedTrustCases              TrustCase[]                       @relation("OpenedTrustCases")
-  trustActions                  TrustAction[]
-  reviewedAppeals               Appeal[]
-  auditLogs                     AdminAuditLog[]
-  reviewedCatalogProductRequests CatalogProductRequest[] @relation("ReviewedCatalogProducts")
-  requestedRefunds              AdminRefundApproval[]             @relation("RequestedRefunds")
-  approvedRefunds               AdminRefundApproval[]             @relation("ApprovedRefunds")
-  createdCommissionRules        CommissionRule[]
-  initiatedSettlements          SellerSettlement[]                @relation("InitiatedSettlements")
-  approvedSettlements           SellerSettlement[]                @relation("ApprovedSettlements")
-  createdSellerAdjustments      SellerAdjustment[]
-  importedMarketplaceStatements MarketplaceSettlementStatement[]
-  resolvedReconciliations       MarketplaceReconciliationResult[]
-  uploadedMediaAssets           MediaAsset[]
-  createdArticles               Article[]                         @relation("ArticleCreatedBy")
-  lastEditedArticleLocales      ArticleLocale[]                   @relation("ArticleLocaleLastEditedBy")
-  contentVersions               ContentVersion[]
-  updatedContentPlacements      ContentPlacement[]
-  subscriptionChanges           SubscriptionChange[]
-  grantedEntitlementOverrides   SubscriptionEntitlementOverride[]
+  assignedSupportCases           SupportCase[]                     @relation("AssignedSupportCases")
+  authoredSupportCases           SupportCase[]                     @relation("CreatedSupportCases")
+  supportMessages                SupportMessage[]
+  internalNotes                  InternalNote[]
+  assignedTasks                  AdminTask[]                       @relation("AssignedTasks")
+  createdTasks                   AdminTask[]                       @relation("CreatedTasks")
+  assignedDisputes               Dispute[]                         @relation("AssignedDisputes")
+  disputeEvidence                DisputeEvidence[]
+  assignedTrustCases             TrustCase[]                       @relation("AssignedTrustCases")
+  openedTrustCases               TrustCase[]                       @relation("OpenedTrustCases")
+  trustActions                   TrustAction[]
+  reviewedAppeals                Appeal[]
+  auditLogs                      AdminAuditLog[]
+  reviewedCatalogProductRequests CatalogProductRequest[]           @relation("ReviewedCatalogProducts")
+  requestedRefunds               AdminRefundApproval[]             @relation("RequestedRefunds")
+  approvedRefunds                AdminRefundApproval[]             @relation("ApprovedRefunds")
+  createdCommissionRules         CommissionRule[]
+  initiatedSettlements           SellerSettlement[]                @relation("InitiatedSettlements")
+  approvedSettlements            SellerSettlement[]                @relation("ApprovedSettlements")
+  createdSellerAdjustments       SellerAdjustment[]
+  createdWalletAdjustments       WalletAdjustment[]
+  reviewedWalletTopUps           WalletTopUp[]                     @relation("ReviewedWalletTopUps")
+  importedMarketplaceStatements  MarketplaceSettlementStatement[]
+  resolvedReconciliations        MarketplaceReconciliationResult[]
+  uploadedMediaAssets            MediaAsset[]
+  createdArticles                Article[]                         @relation("ArticleCreatedBy")
+  lastEditedArticleLocales       ArticleLocale[]                   @relation("ArticleLocaleLastEditedBy")
+  contentVersions                ContentVersion[]
+  updatedContentPlacements       ContentPlacement[]
+  subscriptionChanges            SubscriptionChange[]
+  grantedEntitlementOverrides    SubscriptionEntitlementOverride[]
 
+  @@index([customRoleId])
   @@map("admin_users")
 }
 
@@ -5160,12 +5426,22 @@ model SupportCase {
   lastUserMessageAt  DateTime?
   lastAdminMessageAt DateTime?
 
+  /// Set when a partner opened the case from their business panel (a provider
+  /// or a shop). requesterUserId is then the team member who wrote it, but the
+  /// case belongs to the organization: the team follows it there (managers see
+  /// every case, other members their own), and admin support lists it under
+  /// Partners. Both fields are set together or not at all (a CHECK in the
+  /// migration). No FK: the id points at a provider or a seller organization.
+  requesterOrgType PartnerSubjectType?
+  requesterOrgId   String?             @db.Uuid
+
   messages SupportMessage[]
   disputes Dispute[]
 
   @@index([requesterUserId])
   @@index([status, priority])
   @@index([assignedAdminId])
+  @@index([requesterOrgType, requesterOrgId])
   @@map("support_cases")
 }
 
@@ -5383,8 +5659,14 @@ model Appeal {
 /// approval rows for the same logical request.
 model AdminRefundApproval {
   id      String @id @default(uuid()) @db.Uuid
-  orderId String @db.Uuid
-  order   Order  @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  /// What is refunded: a shop order, a service booking or a travel stay; exactly one matching id is set (DB CHECK).
+  subjectType     AdminRefundSubjectType @default(ORDER)
+  orderId         String?                @db.Uuid
+  order           Order?                 @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  bookingId       String?                @db.Uuid
+  booking         Booking?               @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  travelBookingId String?                @db.Uuid
+  travelBooking   TravelBooking?         @relation(fields: [travelBookingId], references: [id], onDelete: Restrict)
 
   amount         Int
   reason         String
@@ -5404,6 +5686,8 @@ model AdminRefundApproval {
   executedAt DateTime?
 
   @@index([orderId])
+  @@index([bookingId])
+  @@index([travelBookingId])
   @@index([status])
   @@map("admin_refund_approvals")
 }
@@ -5661,10 +5945,11 @@ model Article {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  locales  ArticleLocale[]
-  tags     ArticleTag[]
-  versions ContentVersion[]
-  blocks   ContentBlock[]
+  locales       ArticleLocale[]
+  tags          ArticleTag[]
+  versions      ContentVersion[]
+  blocks        ContentBlock[]
+  slugRedirects ArticleSlugRedirect[]
 
   @@index([authorId])
   @@index([categoryId])
@@ -5711,6 +5996,24 @@ model ArticleLocale {
   @@unique([locale, slug])
   @@index([locale, status])
   @@map("content_article_locales")
+}
+
+/// An address an article locale used while it was public and no longer uses (its slug was renamed after
+/// publishing). The public site answers the old URL with a permanent redirect to the article's current
+/// address, so links and search results never break. A slug lives either here or on an ArticleLocale, never
+/// both: reusing an old slug for an article locale removes the redirect row in the same transaction.
+model ArticleSlugRedirect {
+  id        String  @id @default(uuid()) @db.Uuid
+  articleId String  @db.Uuid
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  locale    Locale
+  slug      String
+
+  createdAt DateTime @default(now())
+
+  @@unique([locale, slug])
+  @@index([articleId])
+  @@map("content_article_slug_redirects")
 }
 
 model ArticleTag {
@@ -7111,6 +7414,22 @@ enum LostPetSightingStatus {
 /// LostPetIncidentService, not a DB constraint, since "at a time" needs a
 /// status-aware check a partial unique index can express but a plain unique
 /// column cannot without excluding CLOSED/REUNITED rows.
+/// #290 Q53: a member's opt-in "tell me when a pet goes missing near me" area. The point and radius are private to
+/// the member: only used server-side to match new lost-pet reports, never returned to anyone else.
+model LostPetAreaAlert {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @unique @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  latitude  Float
+  longitude Float
+  radiusKm  Int      @default(3)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([latitude, longitude])
+  @@map("lost_pet_area_alerts")
+}
+
 model LostPetIncident {
   id          String    @id @default(uuid()) @db.Uuid
   petId       String    @db.Uuid
@@ -7737,6 +8056,8 @@ enum CommunityPostType {
   RESCUE
   ADOPTION
   MEMORY
+  /// #290 Q54: a finder posts a pet they found, so its family can recognise it.
+  FOUND_PET
 }
 
 /// The actual moderation outcome lives here (never a second status
@@ -7772,6 +8093,10 @@ model CommunityPost {
   pet             Pet?                   @relation(fields: [petId], references: [id], onDelete: SetNull)
   mediaObjectKeys String[]               @default([])
   status          CommunityContentStatus @default(PUBLISHED)
+  /// Set when the author changes the text; shown as "edited" so a reply never looks like it answered other words.
+  editedAt          DateTime?
+  /// Set when the author deletes it (status REMOVED). Distinguishes a self-deletion from a moderator removal.
+  removedByAuthorAt DateTime?
 
   sourceType              CommunitySourceType @default(USER)
   sourceLostPetIncidentId String?             @db.Uuid
@@ -7805,6 +8130,9 @@ model CommunityComment {
   body         String
   status       CommunityContentStatus @default(PUBLISHED)
   createdAt    DateTime               @default(now())
+  /// Same meaning as on CommunityPost.
+  editedAt          DateTime?
+  removedByAuthorAt DateTime?
 
   reports         CommunityReport[]
   /// One level of replies: a reply's parent is always a top-level comment.
@@ -8345,6 +8673,14 @@ enum PetFriendlyPlaceCategory {
   VENUE
   SERVICE
   OTHER
+  /// Seeded from OpenStreetMap (amenity=veterinary / shop=pet / shop=pet_grooming / animal_boarding /
+  /// animal_shelter / leisure=dog_park); also usable for staff-added places.
+  VETERINARY
+  PET_SHOP
+  GROOMING
+  BOARDING
+  SHELTER
+  DOG_PARK
 }
 
 enum PetFriendlyPlaceStatus {
@@ -8403,13 +8739,35 @@ model PetFriendlyPlace {
   status             PetFriendlyPlaceStatus @default(UNVERIFIED)
   isPubliclyListed   Boolean                @default(false)
 
+  /// MANUAL (staff/members) or OSM: imported from OpenStreetMap (ODbL, "© OpenStreetMap contributors"), shown as an
+  /// unclaimed, unverified listing until a KYC-verified business claims it.
+  source          String    @default("MANUAL")
+  /// node | way | relation, and the OSM id: the key for weekly re-sync and de-duplication.
+  osmType         String?
+  osmId           BigInt?
+  osmTags         Json?
+  osmSyncedAt     DateTime?
+  /// Set when a re-sync no longer finds the object in OpenStreetMap (the listing is hidden, not deleted).
+  osmMissingSince DateTime?
+  /// Fields staff changed by hand on an OSM listing; the weekly re-sync leaves them alone.
+  osmEditedFields String[]  @default([])
+  /// Business contact exactly as published in the OSM tags (no other source).
+  phone           String?
+  website         String?
+  /// A verified partner that claimed this listing; re-sync never overwrites a claimed listing.
+  claimedByProviderOrganizationId String?   @db.Uuid
+  claimedAt                       DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   favorites PetFriendlyPlaceFavorite[]
+  claims    PlaceClaim[]
 
+  @@unique([osmType, osmId])
   @@index([country, city])
   @@index([category])
+  @@index([source, city])
   @@map("pet_friendly_places")
 }
 
@@ -8722,6 +9080,9 @@ model TravelBooking {
 
   pets         TravelBookingPet[]
   bookedNights TravelBookedNight[]
+
+  /// Staff refunds of this stay (finance two-person control).
+  adminRefundApprovals AdminRefundApproval[]
 
   @@index([householdId, status])
   @@index([listingId, status])
@@ -10203,8 +10564,13 @@ model ClinicReminder {
   id                      String               @id @default(uuid()) @db.Uuid
   providerOrganizationId  String               @db.Uuid
   providerOrganization    ProviderOrganization @relation(fields: [providerOrganizationId], references: [id], onDelete: Cascade)
-  petId                   String               @db.Uuid
-  pet                     Pet                  @relation(fields: [petId], references: [id], onDelete: Cascade)
+  /// Exactly one target: a platform pet (petId) or a clinic client (contactId, optionally one of their clinic pets).
+  petId                   String?                @db.Uuid
+  pet                     Pet?                   @relation(fields: [petId], references: [id], onDelete: Cascade)
+  contactId               String?                @db.Uuid
+  contact                 ClinicImportedContact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  clientPetId             String?                @db.Uuid
+  clientPet               ClinicClientPet?       @relation(fields: [clientPetId], references: [id], onDelete: Cascade)
   createdByProviderUserId String               @db.Uuid
   kind                    ClinicReminderKind
   title                   String
@@ -10221,6 +10587,7 @@ model ClinicReminder {
   @@index([status, dueAt])
   @@index([providerOrganizationId, dueAt])
   @@index([petId])
+  @@index([contactId])
   @@map("clinic_reminders")
 }
 
@@ -10509,6 +10876,27 @@ model ClinicCampaign {
 
 /// A contact the clinic imported from its own records (CSV). Clinic-local, never linked or merged with a PET LIFE
 /// account automatically.
+enum ClinicClientSource {
+  IMPORT
+  MANUAL
+}
+
+enum ClinicClientMessageKind {
+  MESSAGE
+  REMINDER
+  INVITE
+}
+
+enum ClinicClientMessageStatus {
+  SENT
+  SIMULATED
+  FAILED
+  SKIPPED
+}
+
+/// A clinic's own client (owner) — added by hand or imported from CSV. Clinic-local: it is not a platform
+/// account. The owner can connect it to their opetlife account only by accepting the clinic's invitation
+/// (inviteToken), which sets linkedUserId; nothing links by phone number behind their back.
 model ClinicImportedContact {
   id                     String               @id @default(uuid()) @db.Uuid
   providerOrganizationId String               @db.Uuid
@@ -10516,14 +10904,69 @@ model ClinicImportedContact {
   name                   String
   phone                  String?
   email                  String?
+  /// Legacy single-pet columns from the CSV import; new pets live in ClinicClientPet.
   petName                String?
   species                String?
   notes                  String?
-  importBatchId          String               @db.Uuid
+  importBatchId          String?              @db.Uuid
+  source                 ClinicClientSource   @default(IMPORT)
+  linkedUserId           String?              @db.Uuid
+  linkedUser             User?                @relation("ClinicClientLinkedUser", fields: [linkedUserId], references: [id], onDelete: SetNull)
+  inviteToken            String?              @unique
+  invitedAt              DateTime?
+  /// Lets the recipient stop the clinic's texts themselves from the link at the end of each text.
+  optOutToken            String?              @unique
+  joinedAt               DateTime?
+  /// The owner asked the clinic to stop SMS; the clinic can no longer text this number.
+  smsOptOutAt            DateTime?
   createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @default(now()) @updatedAt
+
+  pets      ClinicClientPet[]
+  messages  ClinicClientMessage[]
+  reminders ClinicReminder[]
 
   @@index([providerOrganizationId])
+  @@index([linkedUserId])
   @@map("clinic_imported_contacts")
+}
+
+model ClinicClientPet {
+  id        String                @id @default(uuid()) @db.Uuid
+  contactId String                @db.Uuid
+  contact   ClinicImportedContact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  name      String
+  species   String?
+  breed     String?
+  birthDate DateTime?             @db.Date
+  notes     String?
+  createdAt DateTime              @default(now())
+
+  reminders ClinicReminder[]
+
+  @@index([contactId])
+  @@map("clinic_client_pets")
+}
+
+/// Every text a clinic sends to its own client, with what actually happened: SENT by the live provider,
+/// SIMULATED while SMS is in sandbox, FAILED, or SKIPPED (no phone / opted out).
+model ClinicClientMessage {
+  id                     String                    @id @default(uuid()) @db.Uuid
+  providerOrganizationId String                    @db.Uuid
+  contactId              String                    @db.Uuid
+  contact                ClinicImportedContact     @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  kind                   ClinicClientMessageKind
+  body                   String
+  status                 ClinicClientMessageStatus
+  providerMessageId      String?
+  failureReason          String?
+  sentByProviderUserId   String?                   @db.Uuid
+  reminderId             String?                   @db.Uuid
+  createdAt              DateTime                  @default(now())
+
+  @@index([contactId, createdAt])
+  @@index([providerOrganizationId, createdAt])
+  @@map("clinic_client_messages")
 }
 
 // ---------------------------------------------------------------------------
@@ -11079,6 +11522,8 @@ enum AdminTaskSource {
   SUPPORT
   CLINIC_FOLLOW_UP
   DATA_QUALITY
+  OWNERSHIP_DISPUTE
+  PROVIDER_NO_SHOW
 }
 
 enum ReconciliationCheck {
@@ -11763,16 +12208,16 @@ enum SystemIncidentImpact {
 /// A Help Center section. Titles are per-locale JSON ({ fa, en }) so a category needs no sibling table;
 /// `slug` is the stable URL key and never changes once published.
 model HelpCategory {
-  id          String   @id @default(uuid()) @db.Uuid
-  slug        String   @unique
-  titleFa     String
-  titleEn     String?
+  id            String   @id @default(uuid()) @db.Uuid
+  slug          String   @unique
+  titleFa       String
+  titleEn       String?
   descriptionFa String?
   descriptionEn String?
-  sortOrder   Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  sortOrder     Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   articles HelpArticle[]
 
@@ -11785,29 +12230,29 @@ model HelpCategory {
 /// "editing and publishing are separate actions" rule the blog follows. An article with nothing
 /// published has publishedVersion = null and is invisible publicly: empty means empty.
 model HelpArticle {
-  id         String       @id @default(uuid()) @db.Uuid
-  categoryId String       @db.Uuid
-  category   HelpCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  locale     Locale
-  slug       String
-  title      String
-  summary    String?
-  body       String
-  status     HelpArticleStatus @default(DRAFT)
+  id              String            @id @default(uuid()) @db.Uuid
+  categoryId      String            @db.Uuid
+  category        HelpCategory      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  locale          Locale
+  slug            String
+  title           String
+  summary         String?
+  body            String
+  status          HelpArticleStatus @default(DRAFT)
   /// Deep-link keys of the screens this article is "contextual help" for (e.g. "checkout.payment").
-  contextKeys String[] @default([])
-  isFaq      Boolean   @default(false)
-  sortOrder  Int       @default(0)
-  helpfulCount    Int  @default(0)
-  notHelpfulCount Int  @default(0)
+  contextKeys     String[]          @default([])
+  isFaq           Boolean           @default(false)
+  sortOrder       Int               @default(0)
+  helpfulCount    Int               @default(0)
+  notHelpfulCount Int               @default(0)
 
   publishedAt      DateTime?
   publishedVersion Int?
   /// Actor reference (no relation) — see the header comment.
-  createdByAdminId String   @db.Uuid
-  updatedByAdminId String   @db.Uuid
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdByAdminId String    @db.Uuid
+  updatedByAdminId String    @db.Uuid
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   versions HelpArticleVersion[]
   voteDedup HelpArticleVoteDedup[]
@@ -11852,13 +12297,13 @@ model HelpArticleVersion {
 /// published text takes effect and is what the public page shows as "last updated".
 /// GC-05: the English text is the authoritative reference; the Persian is informational.
 model LegalDocument {
-  id     String            @id @default(uuid()) @db.Uuid
-  kind   LegalDocumentKind
-  locale Locale
+  id               String            @id @default(uuid()) @db.Uuid
+  kind             LegalDocumentKind
+  locale           Locale
   /// The number of the version currently published, or null when nothing is published yet.
   publishedVersion Int?
-  updatedAt DateTime @updatedAt
-  createdAt DateTime @default(now())
+  updatedAt        DateTime          @updatedAt
+  createdAt        DateTime          @default(now())
 
   versions LegalDocumentVersion[]
 
@@ -11889,16 +12334,16 @@ model LegalDocumentVersion {
 /// status page reports what the operations team wrote, and an empty list is rendered as "all systems
 /// operational" only when there is genuinely no open incident.
 model SystemIncident {
-  id         String               @id @default(uuid()) @db.Uuid
-  title      String
-  status     SystemIncidentStatus @default(INVESTIGATING)
-  impact     SystemIncidentImpact @default(MINOR)
-  components String[]             @default([])
-  startedAt  DateTime             @default(now())
-  resolvedAt DateTime?
-  createdByAdminId String         @db.Uuid
-  createdAt  DateTime             @default(now())
-  updatedAt  DateTime             @updatedAt
+  id               String               @id @default(uuid()) @db.Uuid
+  title            String
+  status           SystemIncidentStatus @default(INVESTIGATING)
+  impact           SystemIncidentImpact @default(MINOR)
+  components       String[]             @default([])
+  startedAt        DateTime             @default(now())
+  resolvedAt       DateTime?
+  createdByAdminId String               @db.Uuid
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
 
   updates SystemIncidentUpdate[]
 
@@ -11907,13 +12352,13 @@ model SystemIncident {
 }
 
 model SystemIncidentUpdate {
-  id         String               @id @default(uuid()) @db.Uuid
-  incidentId String               @db.Uuid
-  incident   SystemIncident       @relation(fields: [incidentId], references: [id], onDelete: Cascade)
-  status     SystemIncidentStatus
-  body       String
-  authorAdminId String            @db.Uuid
-  createdAt  DateTime             @default(now())
+  id            String               @id @default(uuid()) @db.Uuid
+  incidentId    String               @db.Uuid
+  incident      SystemIncident       @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  status        SystemIncidentStatus
+  body          String
+  authorAdminId String               @db.Uuid
+  createdAt     DateTime             @default(now())
 
   @@index([incidentId, createdAt])
   @@map("system_incident_updates")
@@ -11921,15 +12366,15 @@ model SystemIncidentUpdate {
 
 /// A scheduled maintenance window shown on the status page and, while active, on the maintenance page.
 model MaintenanceWindow {
-  id        String   @id @default(uuid()) @db.Uuid
-  title     String
-  message   String?
-  startsAt  DateTime
-  endsAt    DateTime
-  createdByAdminId String @db.Uuid
-  cancelledAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String    @id @default(uuid()) @db.Uuid
+  title            String
+  message          String?
+  startsAt         DateTime
+  endsAt           DateTime
+  createdByAdminId String    @db.Uuid
+  cancelledAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   @@index([startsAt, endsAt])
   @@map("maintenance_windows")
@@ -11952,4 +12397,282 @@ model SupportEscalation {
   @@index([caseId])
   @@index([requesterUserId])
   @@map("support_escalations")
+}
+
+/// A staff change to the business calendar (Settings → Holidays and closures): close a day that is normally open
+/// (a sudden closure) or open one of Iran's official holidays as a working day. Official holidays themselves live in
+/// the repo (src/common/time/iran-holidays.data.ts), so nothing at request time depends on a third party.
+model CalendarDayOverride {
+  /// Tehran calendar date.
+  date             DateTime @id @db.Date
+  closed           Boolean
+  title            String
+  reason           String
+  updatedByAdminId String   @db.Uuid
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("calendar_day_overrides")
+}
+// ---------------------------------------------------------------------------
+// On-demand pet taxi (Uber/Snapp-style), next to the scheduled pet-taxi booking. A member asks for a ride now,
+// online drivers of verified PET_TAXI organizations see it, the first to accept takes it, and both sides follow it
+// live (the driver's phone browser reports its position; the member's page polls).
+// ---------------------------------------------------------------------------
+
+enum PetTaxiCarrierSize {
+  /// Cats, small dogs: a carrier on the seat.
+  SMALL
+  /// Medium dogs: a crate in the boot.
+  MEDIUM
+  /// Large dogs or several pets: a van or a large crate.
+  LARGE
+}
+
+enum PetTaxiRideStatus {
+  SEARCHING
+  DRIVER_ASSIGNED
+  ARRIVING
+  PICKED_UP
+  COMPLETED
+  CANCELLED_BY_MEMBER
+  CANCELLED_BY_DRIVER
+  NO_DRIVER
+}
+
+/// Fare rules per city ("*" is the default for every other city), set by staff. Integer rials.
+model PetTaxiFareRule {
+  id                     String   @id @default(uuid()) @db.Uuid
+  city                   String   @unique
+  baseFareIrr            Int
+  perKmIrr               Int
+  perMinuteIrr           Int      @default(0)
+  minimumFareIrr         Int      @default(0)
+  /// Extra for a crate in the boot / a large vehicle, as a percentage of the distance fare.
+  mediumSurchargePercent Int      @default(15)
+  largeSurchargePercent  Int      @default(35)
+  /// Each pet after the first.
+  extraPetIrr            Int      @default(0)
+  /// The city's bounding box: the server picks the rule whose box holds the pickup point (the member's typed city is
+  /// only a label). Required for every rule except "*", which prices everything outside the boxes.
+  south                  Float?
+  west                   Float?
+  north                  Float?
+  east                   Float?
+  active                 Boolean  @default(true)
+  updatedByAdminId       String?  @db.Uuid
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@map("pet_taxi_fare_rules")
+}
+
+/// Whether a pet-taxi driver is taking rides, and where their phone last said they are.
+enum PetTaxiDriverStatus {
+  PENDING
+  VERIFIED
+  SUSPENDED
+}
+
+/// A person a PET_TAXI organization lets drive: licence and vehicle, checked by staff before they can go online.
+model PetTaxiDriver {
+  id                     String              @id @default(uuid()) @db.Uuid
+  providerUserId         String              @unique @db.Uuid
+  providerOrganizationId String              @db.Uuid
+  userId                 String              @db.Uuid
+  licenceNumber          String
+  vehiclePlate           String
+  vehicleDescription     String
+  status                 PetTaxiDriverStatus @default(PENDING)
+  statusReason           String?
+  registeredByUserId     String              @db.Uuid
+  verifiedByAdminId      String?             @db.Uuid
+  verifiedAt             DateTime?
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+
+  @@index([providerOrganizationId])
+  @@index([status])
+  @@map("pet_taxi_drivers")
+}
+
+model PetTaxiDriverPresence {
+  providerUserId         String    @id @db.Uuid
+  userId                 String    @db.Uuid
+  providerOrganizationId String    @db.Uuid
+  online                 Boolean   @default(false)
+  latitude               Float?
+  longitude              Float?
+  locatedAt              DateTime?
+  updatedAt              DateTime  @updatedAt
+
+  @@index([online, locatedAt])
+  @@map("pet_taxi_driver_presence")
+}
+
+model PetTaxiRide {
+  id                     String             @id @default(uuid()) @db.Uuid
+  userId                 String             @db.Uuid
+  user                   User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  householdId            String?            @db.Uuid
+  petIds                 String[]           @db.Uuid
+  carrierSize            PetTaxiCarrierSize
+  idempotencyKey         String             @unique
+
+  pickupLabel            String
+  pickupLatitude         Float
+  pickupLongitude        Float
+  pickupCity             String?
+  pickupNote             String?
+  dropoffLabel           String
+  dropoffLatitude        Float
+  dropoffLongitude       Float
+
+  distanceMeters         Int
+  durationSeconds        Int
+  /// GOOGLE, NESHAN or STRAIGHT_LINE_ESTIMATE (shown to both sides as an estimate).
+  routeSource            String
+  fareIrr                Int
+  fareBreakdown          Json
+  fareRuleCity           String
+
+  status                 PetTaxiRideStatus  @default(SEARCHING)
+  searchExpiresAt        DateTime
+  providerOrganizationId String?            @db.Uuid
+  driverProviderUserId   String?            @db.Uuid
+  driverUserId           String?            @db.Uuid
+  driverLatitude         Float?
+  driverLongitude        Float?
+  driverLocatedAt        DateTime?
+
+  assignedAt             DateTime?
+  arrivingAt             DateTime?
+  pickedUpAt             DateTime?
+  completedAt            DateTime?
+  cancelledAt            DateTime?
+  cancelReason           String?
+
+  rating                 Int?
+  ratingComment          String?
+  ratedAt                DateTime?
+  /// Set by the retention worker once a finished ride's exact places were coarsened (30 days after it ended).
+  coordinatesRedactedAt  DateTime?
+
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  declines               PetTaxiRideDecline[]
+
+  @@index([status, searchExpiresAt])
+  @@index([userId, createdAt])
+  @@index([driverProviderUserId, status])
+  @@map("pet_taxi_rides")
+}
+
+/// A driver who passed on a request is not shown it again.
+model PetTaxiRideDecline {
+  rideId         String      @db.Uuid
+  ride           PetTaxiRide @relation(fields: [rideId], references: [id], onDelete: Cascade)
+  providerUserId String      @db.Uuid
+  createdAt      DateTime    @default(now())
+
+  @@id([rideId, providerUserId])
+  @@map("pet_taxi_ride_declines")
+}
+
+// ---------------------------------------------------------------------------
+// OpenStreetMap directory seeding (vets, pet shops, grooming, boarding, shelters, dog-friendly parks/cafés)
+// ---------------------------------------------------------------------------
+
+enum PlaceClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
+/// "Is this your business?": a member asks to take over a listing. Approval needs the business to have passed
+/// partner KYC (a VERIFIED provider organization); then the listing is theirs and re-sync stops touching it.
+model PlaceClaim {
+  id                     String           @id @default(uuid()) @db.Uuid
+  placeId                String           @db.Uuid
+  place                  PetFriendlyPlace @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  userId                 String           @db.Uuid
+  providerOrganizationId String?          @db.Uuid
+  status                 PlaceClaimStatus @default(PENDING)
+  message                String?
+  decisionReason         String?
+  decidedByAdminId       String?          @db.Uuid
+  decidedAt              DateTime?
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+
+  @@index([status, createdAt])
+  @@index([placeId])
+  @@index([userId])
+  @@map("place_claims")
+}
+
+/// A city (bounding box) re-synced weekly from the Overpass API, one area per worker tick (fair use).
+model OsmSyncArea {
+  id        String    @id @default(uuid()) @db.Uuid
+  city      String    @unique
+  province  String?
+  south     Float
+  west      Float
+  north     Float
+  east      Float
+  active    Boolean   @default(true)
+  lastRunAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  runs OsmImportRun[]
+
+  @@map("osm_sync_areas")
+}
+
+model OsmImportRun {
+  id                 String      @id @default(uuid()) @db.Uuid
+  areaId             String      @db.Uuid
+  area               OsmSyncArea @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  /// RUNNING | SUCCEEDED | FAILED | RATE_LIMITED
+  status             String
+  fetched            Int         @default(0)
+  created            Int         @default(0)
+  updated            Int         @default(0)
+  linked             Int         @default(0)
+  skipped            Int         @default(0)
+  hidden             Int         @default(0)
+  error              String?
+  requestedByAdminId String?     @db.Uuid
+  startedAt          DateTime    @default(now())
+  finishedAt         DateTime?
+
+  @@index([areaId, startedAt])
+  @@map("osm_import_runs")
+}
+
+/// The company account members pay into by card-to-card (wallet top-ups, card-transfer checkout and bookings).
+/// Managed by the owner in admin (SUPER_ADMIN + settings.manage). Append-only: a change adds a row and closes the
+/// previous one, so every past account stays on record for receipts and audits. The server env account is used
+/// only while no row has ever been created.
+model CardTransferDestination {
+  id               String    @id @default(uuid()) @db.Uuid
+  /// 16 digits, Luhn-checked.
+  cardNumber       String?
+  /// IR + 24 digits, IBAN-checked.
+  sheba            String?
+  holderName       String
+  bankName         String?
+  active           Boolean   @default(true)
+  reason           String
+  createdByAdminId String    @db.Uuid
+  createdAt        DateTime  @default(now())
+  closedAt         DateTime?
+  closedByAdminId  String?   @db.Uuid
+  closeReason      String?
+
+  @@index([active, createdAt])
+  @@map("card_transfer_destinations")
 }

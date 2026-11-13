@@ -1,5 +1,6 @@
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { LOCALE_PREFIX } from "@/lib/i18n/config";
 
 const APP = join(__dirname, "..", "app", "[locale]");
 
@@ -9,7 +10,7 @@ const APP = join(__dirname, "..", "app", "[locale]");
  * Used by "no dead CTA" tests so a link can never point at a route that does not exist.
  */
 export function routeExists(href: string): boolean {
-  const path = href.split(/[?#]/)[0]!.replace(/^\/(fa|en|de|es)(?=\/|$)/, "");
+  const path = href.split(/[?#]/)[0]!.replace(LOCALE_PREFIX, "");
   const segments = path.split("/").filter(Boolean);
   return match(APP, segments);
 }
@@ -18,7 +19,8 @@ function match(dir: string, segments: string[]): boolean {
   const entries = readdirSync(dir, { withFileTypes: true }).filter((e) => e.isDirectory());
   // Route groups don't consume a URL segment.
   for (const group of entries.filter((e) => e.name.startsWith("("))) if (match(join(dir, group.name), segments)) return true;
-  if (segments.length === 0) return existsSync(join(dir, "page.tsx"));
+  // A page, or a route handler such as the per-language RSS feed (/fa/feed.xml).
+  if (segments.length === 0) return existsSync(join(dir, "page.tsx")) || existsSync(join(dir, "route.ts"));
   const [head, ...rest] = segments;
   const literal = entries.find((e) => e.name === head);
   if (literal && match(join(dir, literal.name), rest)) return true;

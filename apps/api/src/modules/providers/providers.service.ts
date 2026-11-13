@@ -11,6 +11,7 @@ import { SlotGeneratorService } from "./slot-generator.service";
 import { toProviderLocationDto as toLocationDto, toProviderServiceDto as toServiceDto } from "./provider-dto.mapper";
 import { PetAccessService } from "../pet-access/pet-access.service";
 import { excludeDemoRecordsFromPublicReads } from "../../common/public-record-origin";
+import { publicProviderWhere } from "../../common/public-partner";
 
 type OrgWithRelations = ProviderOrganization & { locations: ProviderLocation[]; services: ProviderService[] };
 const VET_PROVIDER_TYPES: ProviderType[] = [ProviderType.VET_CLINIC, ProviderType.VET_HOSPITAL, ProviderType.VETERINARIAN];
@@ -90,7 +91,9 @@ export class ProvidersService {
       where: {
         id: query.serviceId,
         providerOrganizationId: providerId,
-        providerOrganization: excludeDemoRecordsFromPublicReads(),
+        isActive: true,
+        // Slots of a clinic still in verification are never public, same rule as the profile itself.
+        providerOrganization: publicProviderWhere(),
       },
     });
     if (!service || service.providerOrganizationId !== providerId || service.category !== ServiceCategory.VET) throw new NotFoundApiException("Service");

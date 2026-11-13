@@ -17,13 +17,13 @@ describe("ExploreServicesView", () => {
     expect(screen.getByText("Sitting")).toBeTruthy();
     expect(screen.getByText("Boarding")).toBeTruthy();
     expect(screen.getByText("Pet Taxi")).toBeTruthy();
-    expect(screen.getByRole("link", { name: /Veterinary/ }).getAttribute("href")).toBe("/en/services/VET");
+    expect(screen.getByRole("link", { name: /Veterinary/ }).getAttribute("href")).toBe("/en/services/vet");
   });
 
   it.each([
     ["fa", "مراقبت حرفه‌ای، نزدیک شما", "برای Luna", "دامپزشکی", "جست‌وجوی خدمات", "همهٔ خدمات"],
     ["en", "Professional care, near you", "For Luna", "Veterinary care", "Search services", "All services"],
-    ["de", "Professionelle Betreuung in Ihrer Nähe", "Für Luna", "Tiermedizin", "Dienstleistungen suchen", "Alle Leistungen"],
+    ["de", "Professionelle Betreuung in deiner Nähe", "Für Luna", "Tiermedizin", "Dienstleistungen suchen", "Alle Leistungen"],
     ["es", "Atención profesional cerca de ti", "Para Luna", "Veterinaria", "Buscar servicios", "Todos los servicios"],
   ] as const)("renders the whole services overview in %s", (locale, heading, petSubtitle, category, searchLabel, allServices) => {
     renderWithIntl(<ExploreServicesView />, locale);

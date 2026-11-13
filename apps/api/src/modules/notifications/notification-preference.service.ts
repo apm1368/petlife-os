@@ -15,7 +15,7 @@ import type { UpdateNotificationPreferencesDto } from "./dto/notification-prefer
 export const NON_SUPPRESSIBLE_CATEGORIES: ReadonlySet<NotificationCategory> = new Set([NotificationCategory.SECURITY]);
 
 const ALL_CATEGORIES = Object.values(NotificationCategory);
-const ALL_CHANNELS: NotificationChannel[] = [NotificationChannel.IN_APP, NotificationChannel.SMS];
+const ALL_CHANNELS: NotificationChannel[] = [NotificationChannel.IN_APP, NotificationChannel.SMS, NotificationChannel.EMAIL, NotificationChannel.PUSH];
 
 @Injectable()
 export class NotificationPreferenceService {
@@ -32,10 +32,21 @@ export class NotificationPreferenceService {
 
   /** Whether each channel reaches people. SMS uses the selected dev or Faraz Pattern API adapter. */
   private channelDelivery(): NonNullable<NotificationPreferencesDto["channels"]> {
+    type Row = NonNullable<NotificationPreferencesDto["channels"]>[number];
     const provider = this.config.get("MESSAGING_PROVIDER", { infer: true });
+    const smsLive = provider === "faraz" && this.config.get("MESSAGING_SANDBOX_MODE", { infer: true }) === "production";
+    const email = this.config.get("EMAIL_PROVIDER", { infer: true });
+    const emailLive =
+      (email === "gmail" && Boolean(this.config.get("GMAIL_USER", { infer: true }) && this.config.get("GMAIL_APP_PASSWORD", { infer: true }))) ||
+      (email === "smtp" && Boolean(this.config.get("SMTP_HOST", { infer: true }) && this.config.get("SMTP_USER", { infer: true })));
+    const pushLive = Boolean(this.config.get("WEB_PUSH_VAPID_PUBLIC_KEY", { infer: true }) && this.config.get("WEB_PUSH_VAPID_PRIVATE_KEY", { infer: true }));
     return [
-      { channel: NotificationChannel.IN_APP as unknown as NonNullable<NotificationPreferencesDto["channels"]>[number]["channel"], delivery: "LIVE" },
-      { channel: NotificationChannel.SMS as unknown as NonNullable<NotificationPreferencesDto["channels"]>[number]["channel"], delivery: provider === "dev" ? "SANDBOX" : "NOT_CONFIGURED" },
+      { channel: NotificationChannel.IN_APP as unknown as Row["channel"], delivery: "LIVE" },
+      // Web Push is real delivery as soon as the VAPID pair is configured; each device still opts in on its own.
+      { channel: NotificationChannel.PUSH as unknown as Row["channel"], delivery: pushLive ? "LIVE" : "NOT_CONFIGURED" },
+      // Live Faraz sending used to be reported as NOT_CONFIGURED; members now see the real state.
+      { channel: NotificationChannel.SMS as unknown as Row["channel"], delivery: smsLive ? "LIVE" : provider === "dev" || provider === "faraz" ? "SANDBOX" : "NOT_CONFIGURED" },
+      { channel: NotificationChannel.EMAIL as unknown as Row["channel"], delivery: emailLive ? "LIVE" : email === "dev" ? "SANDBOX" : "NOT_CONFIGURED" },
     ];
   }
 

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { usePathname } from "next/navigation";
 import { Button, Dialog, EmptyState, ErrorRecovery, Input, Skeleton } from "@petlife/ui";
 import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
@@ -11,32 +11,10 @@ import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
 import { adminServicesService, type AdminBookingDetail, type AdminBookingRow, type AdminReviewRow, type AdminServiceRow, type AdminServicesAnalytics } from "@/services/admin-services.service";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { DetailRow, EmptyRow, FilterBar, FilterField, Kpi, Panel, PanelTitle, SelectFilter, TableWrap, Tag, Td, TextFilter, Th } from "../console-ui";
+import { StaffBookingMoneyPanel } from "../finance/StaffBookingMoneyPanel";
 
 const STATUS_OPTIONS = ["REQUESTED", "AWAITING_PAYMENT", "CONFIRMED", "CHECKED_IN", "IN_PROGRESS", "COMPLETED", "CANCELLED_BY_USER", "CANCELLED_BY_PROVIDER", "REJECTED", "EXPIRED", "RESCHEDULED", "NO_SHOW"];
 const isOffline = () => typeof navigator !== "undefined" && navigator.onLine === false;
-
-/** Sub-navigation for the admin Services area. */
-export function AdminServicesNav() {
-  const locale = useLocale() as RouteLocale;
-  const t = useTranslations("adminServices");
-  const pathname = usePathname();
-  const base = `/${locale}/admin/services`;
-  const items = [
-    { href: base, label: t("nav.bookings") },
-    { href: `${base}/catalog`, label: t("nav.services") },
-    { href: `${base}/reviews`, label: t("nav.reviews") },
-    { href: `${base}/analytics`, label: t("nav.analytics") },
-  ];
-  return (
-    <nav aria-label={t("nav.label")} className="mb-4 flex gap-1 overflow-x-auto border-b border-border-subtle">
-      {items.map((i) => (
-        <Link key={i.href} href={i.href} aria-current={pathname === i.href ? "page" : undefined} className={`whitespace-nowrap px-3 py-2 text-sm ${pathname === i.href ? "border-b-2 border-brand-natural font-bold" : "text-text-secondary"}`}>
-          {i.label}
-        </Link>
-      ))}
-    </nav>
-  );
-}
 
 export function AdminServiceBookingsView() {
   const locale = useLocale() as RouteLocale;
@@ -44,6 +22,9 @@ export function AdminServiceBookingsView() {
   const tCommon = useTranslations("admin.common");
   const label = (key: string) => t.has(key) ? t(key) : t("unknownValue");
   const [status, setStatus] = useState<string | "all">("all");
+  // ?noShowParty=PROVIDER opens straight on members' "the provider didn't come" reports (dashboard tile, tasks).
+  const initialNoShow = useSearchParams()?.get("noShowParty");
+  const [noShow, setNoShow] = useState<string | "all">(initialNoShow === "PROVIDER" || initialNoShow === "OWNER" ? initialNoShow : "all");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [data, setData] = useState<{ total: number; items: AdminBookingRow[] } | null>(null);
@@ -53,11 +34,11 @@ export function AdminServiceBookingsView() {
     setError(null);
     setData(null);
     try {
-      setData(await adminServicesService.listBookings({ status: status === "all" ? undefined : status, q: q.trim() || undefined, page }));
+      setData(await adminServicesService.listBookings({ status: status === "all" ? undefined : status, noShowParty: noShow === "all" ? undefined : noShow, q: q.trim() || undefined, page }));
     } catch (e) {
       setError(e instanceof ApiError && e.status === 403 ? "forbidden" : isOffline() ? "offline" : "error");
     }
-  }, [status, q, page]);
+  }, [status, noShow, q, page]);
   useEffect(() => {
     const t = setTimeout(() => void load(), 250);
     return () => clearTimeout(t);
@@ -66,7 +47,6 @@ export function AdminServiceBookingsView() {
   return (
     <div>
       <h1 className="mb-3 text-page-title">{t("bookings.title")}</h1>
-      <AdminServicesNav />
       {error === "forbidden" ? <EmptyState title={t("states.bookingsAccessDenied")} /> : null}
         {error === "offline" ? <ErrorRecovery title={t("states.loadFailedTitle")} message={t("states.offline")} retryLabel={tCommon("retry")} onRetry={load} /> : null}
       <Panel>
@@ -74,6 +54,9 @@ export function AdminServiceBookingsView() {
           <FilterField label={t("bookings.searchLabel")}><TextFilter value={q} onChange={(v) => { setQ(v); setPage(1); }} /></FilterField>
           <FilterField label={t("bookings.statusLabel")}>
             <SelectFilter value={status} onChange={(v) => { setStatus(v); setPage(1); }} options={[{ value: "all", label: t("common.all") }, ...STATUS_OPTIONS.map((s) => ({ value: s, label: label(`bookingStatus.${s}`) }))]} />
+          </FilterField>
+          <FilterField label={t("bookings.noShowLabel")}>
+            <SelectFilter value={noShow} onChange={(v) => { setNoShow(v); setPage(1); }} options={[{ value: "all", label: t("common.all") }, { value: "PROVIDER", label: t("bookings.noShowProvider") }, { value: "OWNER", label: t("bookings.noShowOwner") }]} />
           </FilterField>
         </FilterBar>
         {error === "error" ? <ErrorRecovery title={t("states.loadFailedTitle")} message={t("states.bookingsLoadFailed")} retryLabel={tCommon("retry")} onRetry={load} /> : null}
@@ -91,7 +74,7 @@ export function AdminServiceBookingsView() {
                       <Td>{b.petName}</Td>
                       <Td>{b.providerName}</Td>
                       <Td>{b.serviceName}</Td>
-                      <Td><Tag tone={b.status === "COMPLETED" || b.status === "CONFIRMED" ? "success" : b.status === "REQUESTED" || b.status === "AWAITING_PAYMENT" ? "attention" : "neutral"}>{label(`bookingStatus.${b.status}`)}</Tag></Td>
+                      <Td><Tag tone={b.status === "COMPLETED" || b.status === "CONFIRMED" ? "success" : b.status === "REQUESTED" || b.status === "AWAITING_PAYMENT" || b.noShowParty === "PROVIDER" ? "attention" : "neutral"}>{label(`bookingStatus.${b.status}`)}</Tag>{b.noShowParty ? <span className="block text-metadata text-text-secondary">{b.noShowParty === "PROVIDER" ? t("bookings.noShowProvider") : t("bookings.noShowOwner")}</span> : null}</Td>
                       <Td>{label(`paymentStatus.${b.paymentStatus}`)}</Td>
                       <Td>{b.priceAmount !== null ? formatCurrency(b.priceAmount, locale) : "—"}</Td>
                     </tr>
@@ -141,7 +124,6 @@ export function AdminServiceBookingDetailView({ bookingId }: { bookingId: string
 
   return (
     <div className="flex flex-col gap-4">
-      <AdminServicesNav />
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-page-title" dir="ltr">{b.bookingNumber ?? b.id}</h1>
         <Tag tone="brand">{label(`bookingStatus.${b.status}`)}</Tag>
@@ -185,6 +167,7 @@ export function AdminServiceBookingDetailView({ bookingId }: { bookingId: string
           <DetailRow label={t("detail.review")}>{b.review ? `${b.review.rating}★ · ${label(`reviewStatus.${b.review.status}`)}` : "—"}</DetailRow>
           {b.supportCases.length ? b.supportCases.map((c) => <DetailRow key={c.id} label={t("detail.supportCase")}><Link href={`/${locale}/admin/support/${c.id}`}>{c.caseNumber}</Link> · {label(`supportStatus.${c.status}`)}</DetailRow>) : <DetailRow label={t("detail.support")}>—</DetailRow>}
         </Panel>
+        <StaffBookingMoneyPanel kind="BOOKING" bookingId={bookingId} />
       </div>
     </div>
   );
@@ -227,7 +210,6 @@ export function AdminProviderServicesView() {
   return (
     <div>
       <h1 className="mb-3 text-page-title">{t("services.title")}</h1>
-      <AdminServicesNav />
       {error === "forbidden" ? <EmptyState title={tAccess("servicesDenied")} /> : null}
       {error && error !== "forbidden" ? <ErrorRecovery title={t("states.loadFailedTitle")} message={error === "offline" ? t("states.offline") : t("states.servicesLoadFailed")} retryLabel={tCommon("retry")} onRetry={load} /> : null}
       {!rows && !error ? <Skeleton aria-label={t("states.servicesLoading")} className="h-64 w-full" /> : null}
@@ -298,7 +280,6 @@ export function AdminProviderReviewsView() {
   return (
     <div>
       <h1 className="mb-3 text-page-title">{t("reviews.title")}</h1>
-      <AdminServicesNav />
       <Panel>
         <FilterBar>
           <FilterField label={t("reviews.statusLabel")}><SelectFilter value={status} onChange={(v) => setStatus(v as typeof status)} options={[{ value: "PUBLISHED", label: t("reviews.published") }, { value: "HIDDEN", label: t("reviews.hidden") }, { value: "all", label: t("common.all") }]} /></FilterField>
@@ -360,7 +341,6 @@ export function AdminServicesAnalyticsView() {
   return (
     <div>
       <h1 className="mb-3 text-page-title">{t("analytics.title", { days: n(30) })}</h1>
-      <AdminServicesNav />
       {error === "forbidden" ? <EmptyState title={tAccess("analyticsDenied")} /> : null}
       {error && error !== "forbidden" ? <ErrorRecovery title={t("states.loadFailedTitle")} message={error === "offline" ? t("states.offline") : t("states.analyticsLoadFailed")} retryLabel={tCommon("retry")} onRetry={load} /> : null}
       {!data && !error ? <Skeleton aria-label={t("states.analyticsLoading")} className="h-48 w-full" /> : null}

@@ -7,7 +7,9 @@ import { ApiError } from "@/lib/api/client";
 import { AdminSupportQueueView } from "./AdminSupportQueueView";
 
 const push = vi.fn();
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
+const replace = vi.fn();
+let search = "";
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push, replace }), useSearchParams: () => new URLSearchParams(search) }));
 vi.mock("@/services/admin.service", () => ({
   adminService: { listSupportCases: vi.fn(), createSupportCase: vi.fn() },
 }));
@@ -39,6 +41,30 @@ describe("AdminSupportQueueView", () => {
     push.mockReset();
     vi.mocked(adminService.listSupportCases).mockReset();
     vi.mocked(adminService.createSupportCase).mockReset();
+    replace.mockReset();
+    search = "";
+  });
+
+  it("keeps partner cases on their own tab and names the business", async () => {
+    const partnerCase: SupportCaseSummaryDto = { ...CASE, id: "case-p", caseNumber: "CASE-000077", requesterOrganization: { type: "SELLER", id: "org-1", name: "Pet Corner" } };
+    vi.mocked(adminService.listSupportCases).mockResolvedValue(page([partnerCase]));
+
+    renderWithIntl(<AdminSupportQueueView />);
+    await waitFor(() => expect(screen.getByText("CASE-000077")).toBeTruthy());
+    expect(screen.getByText(/Shop: Pet Corner/)).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Partners" }));
+    await waitFor(() => expect(adminService.listSupportCases).toHaveBeenLastCalledWith(expect.objectContaining({ requesterKind: "PARTNER" })));
+    expect(replace).toHaveBeenCalledWith("/en/admin/support?requester=PARTNER");
+  });
+
+  it("opens on one business when the link names it", async () => {
+    search = "requester=PROVIDER&org=00000000-0000-4000-8000-000000000001";
+    vi.mocked(adminService.listSupportCases).mockResolvedValue(page([]));
+
+    renderWithIntl(<AdminSupportQueueView />);
+    await waitFor(() => expect(adminService.listSupportCases).toHaveBeenCalledWith(expect.objectContaining({ requesterKind: "PROVIDER", requesterOrgId: "00000000-0000-4000-8000-000000000001" })));
+    expect(screen.getByRole("tab", { name: "Services", selected: true })).toBeTruthy();
   });
 
   it("lists support cases and navigates to the detail page on click", async () => {

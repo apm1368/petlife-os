@@ -4,6 +4,8 @@ import type { TravelBookingDto, TravelListingDetailDto, TravelSearchResultDto, T
 import { renderWithIntl } from "@/test/render-with-intl";
 import { useSessionStore } from "@/stores/session-store";
 import { travelMarketService } from "@/services/travel-marketplace.service";
+import { travelExternalService } from "@/services/travel-external.service";
+import { externalStay } from "@/test/fixtures/external-stay";
 import { formatDay } from "@/lib/date/jalali";
 import { TravelResultsView } from "./TravelResultsView";
 import { TravelListingDetailView } from "./TravelListingDetailView";
@@ -20,6 +22,10 @@ vi.mock("@/services/travel-marketplace.service", () => ({
   travelMarketService: { search: vi.fn(), destinations: vi.fn().mockResolvedValue([]), detail: vi.fn(), unitCalendar: vi.fn().mockResolvedValue([]), quote: vi.fn(), hold: vi.fn(), getBooking: vi.fn(), submit: vi.fn(), pay: vi.fn(), trips: vi.fn().mockResolvedValue([]), hub: vi.fn(), addRules: vi.fn(), favorite: vi.fn(), unfavorite: vi.fn(), reviews: vi.fn() },
 }));
 vi.mock("@/services/households.service", () => ({ householdsService: { listMine: vi.fn().mockResolvedValue([]), listPets: vi.fn() } }));
+vi.mock("@/services/travel-external.service", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/services/travel-external.service")>();
+  return { ...actual, travelExternalService: { ...actual.travelExternalService, search: vi.fn().mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 6, context: null }) } };
+});
 
 const RATING = { average: null, count: 0, petFriendliness: null, cleanliness: null, location: null };
 
@@ -91,6 +97,52 @@ describe("localized travel stay dates", () => {
     ["es", "2 noches"],
   ] as const)("formats night counts in %s", (locale, expected) => {
     expect(stayDates(stay, locale)).toContain(expected);
+  });
+});
+
+describe("Jajiga stays in travel home and search", () => {
+  const jajigaStay = { ...externalStay, id: "jj1", title: "ویلای جنگلی", source: { ...externalStay.source, code: "JAJIGA", nameFa: "جاجیگا", nameEn: "Jajiga" } };
+  const opetlifeResult = { items: [{ id: "l1", title: "باغ رامسر", type: "VILLA", city: "رامسر", province: null, country: "IR", coverUrl: null, latitude: null, longitude: null, isVerified: true, bookingMode: "INSTANT_BOOKING", rating: RATING, petPolicySummary: { dogsAllowed: true, catsAllowed: false, maxPets: 2, maxWeightKg: 20, petFeeIrr: 0, stated: true }, stay: null, fromNightlyIrr: 30_000_000, freeCancellationAvailable: true, distanceKm: null, petMatch: null, amenities: [], favorited: false }], total: 1, page: 1, pageSize: 12, facets: { types: [], amenities: [], priceRange: null }, mapAvailable: false } as unknown as TravelSearchResultDto;
+  beforeEach(() => {
+    useSessionStore.setState({ status: "unauthenticated" });
+    vi.mocked(travelMarketService.search).mockReset().mockResolvedValue(opetlifeResult);
+    vi.mocked(travelExternalService.search).mockReset().mockResolvedValue({ items: [jajigaStay], total: 1, page: 1, pageSize: 4, context: null });
+  });
+
+  it("shows Jajiga stays on the travel home with a link to all of them in search", async () => {
+    renderWithIntl(<TravelHomeView />, "fa");
+    expect(await screen.findByText("ویلای جنگلی")).toBeTruthy();
+    expect(screen.getByText("از جاجیگا")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "همهٔ اقامتگاه‌های جاجیگا" }).getAttribute("href")).toBe("/fa/travel/search?source=jajiga");
+  });
+
+  it("search shows opetlife and Jajiga together by default, in the same city and dates", async () => {
+    params.set("city", "رامسر");
+    params.set("checkIn", "2026-12-01");
+    params.set("checkOut", "2026-12-03");
+    renderWithIntl(<TravelResultsView />, "fa");
+    expect(await screen.findByText("باغ رامسر")).toBeTruthy();
+    expect(await screen.findByText("ویلای جنگلی")).toBeTruthy();
+    expect(travelExternalService.search).toHaveBeenCalledWith(expect.objectContaining({ source: "JAJIGA", city: "رامسر", checkIn: "2026-12-01", checkOut: "2026-12-03" }), expect.any(AbortSignal));
+    expect(screen.getByRole("button", { name: "همه" }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("link", { name: "مشاهده و بررسی در سایت منبع" }).getAttribute("href")).toContain("/travel/external/stays/jj1/out");
+  });
+
+  it("the source filter narrows to Jajiga (no opetlife search) or to opetlife (no Jajiga)", async () => {
+    params.set("source", "jajiga");
+    const { unmount } = renderWithIntl(<TravelResultsView />, "en");
+    expect(await screen.findByText("ویلای جنگلی")).toBeTruthy();
+    expect(travelMarketService.search).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Jajiga" }).getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "opetlife" }));
+    expect(push).toHaveBeenLastCalledWith(expect.stringContaining("source=opetlife"), expect.anything());
+    unmount();
+
+    vi.mocked(travelExternalService.search).mockClear();
+    params.set("source", "opetlife");
+    renderWithIntl(<TravelResultsView />, "en");
+    expect(await screen.findByText("باغ رامسر")).toBeTruthy();
+    expect(travelExternalService.search).not.toHaveBeenCalled();
   });
 });
 

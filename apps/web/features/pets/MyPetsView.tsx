@@ -47,7 +47,7 @@ export function MyPetsView() {
           {pets.map((pet) => (
             <li key={pet.id}>
               <ContextSurface className={styles.card}>
-                <PetIdentity size="lg" className={styles.identity} pet={pet} isActive={pet.id === activePetId} labels={petIdentityLabels(pet, locale === "en" ? "en" : "fa")} />
+                <PetIdentity size="lg" className={styles.identity} pet={pet} isActive={pet.id === activePetId} labels={petIdentityLabels(pet, locale as "fa" | "en" | "de" | "es" | "ar" | "nl")} />
                 <div className={styles.actions}>
                   {pet.id !== activePetId ? (
                     <Button variant="secondary" size="sm" disabled={isSwitching} onClick={() => void selectPet(pet.id)}>

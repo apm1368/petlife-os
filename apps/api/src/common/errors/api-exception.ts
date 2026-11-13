@@ -1313,6 +1313,20 @@ export class SupportCampaignNotFoundException extends ApiException {
   }
 }
 
+/** Market-readiness #290 Q55: only organizations verified by staff may run a live fundraising campaign. */
+export class SupportCampaignOrganizationNotVerifiedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("SUPPORT_CAMPAIGN_ORGANIZATION_NOT_VERIFIED", "Only a verified organization can run an active campaign.", HttpStatus.CONFLICT, details);
+  }
+}
+
+/** A per-member daily cap on an action that reaches other members (abuse/spam guard). */
+export class DailyLimitReachedException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("DAILY_LIMIT_REACHED", "You have reached today's limit for this action. Please try again tomorrow.", HttpStatus.TOO_MANY_REQUESTS, details);
+  }
+}
+
 export class SupportCampaignNotAcceptingDonationsException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("SUPPORT_CAMPAIGN_NOT_ACCEPTING_DONATIONS", "This campaign is not currently accepting donations.", HttpStatus.CONFLICT, details);
@@ -1353,6 +1367,13 @@ export class CommunityCommentNotFoundException extends ApiException {
 export class CommunityContentNotVisibleException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("COMMUNITY_CONTENT_NOT_VISIBLE", "This content is no longer visible.", HttpStatus.NOT_FOUND, details);
+  }
+}
+
+/** M6: an author can't edit a post or comment while a report on it is open or escalated, so the reported words stay as reported. */
+export class CommunityContentUnderReviewException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("COMMUNITY_CONTENT_UNDER_REVIEW", "This was reported and is being reviewed; it can't be edited until the review ends.", HttpStatus.CONFLICT, details);
   }
 }
 

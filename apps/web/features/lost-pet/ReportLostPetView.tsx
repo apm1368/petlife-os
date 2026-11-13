@@ -7,7 +7,7 @@ import type { RouteLocale } from "@/lib/i18n/config";
 import { Button, ContextSurface } from "@petlife/ui";
 import { lostPetService } from "@/services/lost-pet.service";
 import { DateRangeField } from "@/features/shared/date-picker/DateRangePicker";
-import { addDays, formatDay, todayIso } from "@/lib/date/jalali";
+import { addDays, formatDay, localizeDigits, todayIso } from "@/lib/date/jalali";
 import { TimeSelect } from "@/features/shared/date-picker/TimeSelect";
 import { FilePicker } from "@/features/shared/FilePicker";
 
@@ -34,6 +34,9 @@ export function ReportLostPetView({ petId }: { petId: string }) {
   const [step, setStep] = useState<Step>("where");
   const [publicArea, setPublicArea] = useState("");
   const [lastKnownLocation, setLastKnownLocation] = useState("");
+  // #290 Q53: an optional private point (never public) so neighbours who opted in can be alerted.
+  const [point, setPoint] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locating, setLocating] = useState<"idle" | "busy" | "denied">("idle");
   const [seenDay, setSeenDay] = useState<string | null>(todayIso());
   const [seenTime, setSeenTime] = useState("");
   // Kept in state: the file input unmounts when the user moves to the next step.
@@ -65,6 +68,8 @@ export function ReportLostPetView({ petId }: { petId: string }) {
         description: description.trim(),
         publicArea: publicArea.trim() || undefined,
         lastKnownLocation: lastKnownLocation.trim() || undefined,
+        lastKnownLatitude: point?.latitude,
+        lastKnownLongitude: point?.longitude,
         lastSeenAt: seenDay ? toInstant(seenDay, seenTime) : undefined,
         publicNotes: publicNotes.trim() || undefined,
         privateNotes: privateNotes.trim() || undefined,
@@ -109,6 +114,18 @@ export function ReportLostPetView({ petId }: { petId: string }) {
               <input dir="auto" maxLength={300} value={lastKnownLocation} onChange={(e) => setLastKnownLocation(e.target.value)} className="min-h-12 rounded-md border border-border-subtle bg-surface-base px-3" />
               <span className="text-metadata text-text-secondary">{t("report.exactPlaceHelp")}</span>
             </label>
+            <div className="flex flex-col gap-1 text-sm">
+              <button type="button" className="btn-quiet self-start" disabled={locating === "busy"} onClick={() => {
+                if (!("geolocation" in navigator)) { setLocating("denied"); return; }
+                setLocating("busy");
+                navigator.geolocation.getCurrentPosition(
+                  (pos) => { setPoint({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }); setLocating("idle"); },
+                  () => setLocating("denied"),
+                  { enableHighAccuracy: true, timeout: 15000 },
+                );
+              }}>{point ? t("report.locationSaved") : t("report.useMyLocation")}<PrivateTag /></button>
+              <span className="text-metadata text-text-secondary">{locating === "denied" ? t("report.locationDenied") : t("report.useMyLocationHelp")}</span>
+            </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <DateRangeField mode="single" label={t("report.lastSeenAtLabel")} value={{ start: seenDay, end: null }} onChange={(v) => setSeenDay(v.start)} min={addDays(todayIso(), -60)} max={todayIso()} />
               <TimeSelect label={t("report.approximateTime")} value={seenTime} onChange={setSeenTime} />
@@ -168,7 +185,7 @@ export function ReportLostPetView({ petId }: { petId: string }) {
             <h2 className="font-bold">{t("report.reviewTitle")}</h2>
             <dl className="grid gap-1">
               <div><dt className="inline text-text-secondary">{t("report.review.area")}: </dt><dd className="inline">{publicArea.trim() || t("report.notGiven")}</dd></div>
-              <div><dt className="inline text-text-secondary">{t("report.review.when")}: </dt><dd className="inline">{seenDay ? `${formatDay(seenDay, lang)}${seenTime ? ` ${seenTime}` : ""}` : "—"}</dd></div>
+              <div><dt className="inline text-text-secondary">{t("report.review.when")}: </dt><dd className="inline">{seenDay ? `${formatDay(seenDay, lang)}${seenTime ? ` ${localizeDigits(seenTime, lang)}` : ""}` : "—"}</dd></div>
               <div><dt className="inline text-text-secondary">{t("report.review.photo")}: </dt><dd className="inline">{photo?.name ?? t("report.noPhoto")}</dd></div>
               <div><dt className="inline text-text-secondary">{t("report.descriptionLabel")}: </dt><dd className="inline">{description}</dd></div>
               {publicNotes.trim() ? <div><dt className="inline text-text-secondary">{t("report.publicNote")}: </dt><dd className="inline">{publicNotes}</dd></div> : null}

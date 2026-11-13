@@ -1,13 +1,16 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
+import { PetFriendlyPlaceStatus, Prisma } from "@prisma/client";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { StorageService } from "../storage/storage.service";
 import { AdminAuditLogService } from "../admin/audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../admin/auth/admin-context.types";
-import { PetFriendlyPlaceNotFoundException } from "../../common/errors/api-exception";
+import { PetFriendlyPlaceNotFoundException, ValidationApiException } from "../../common/errors/api-exception";
 import { resolvePagination, toPaginatedDto } from "../../common/pagination/pagination.dto";
 import { toPetFriendlyPlaceDto } from "./places-mapper";
 import type { CreatePetFriendlyPlaceDto, ListPetFriendlyPlacesQueryDto, SetPetFriendlyPlaceListedDto, SetPetFriendlyPlaceVerificationStatusDto, UpdatePetFriendlyPlaceDto } from "./dto/places.dto";
+
+/** Union of the fields staff have changed on an OSM listing, so the weekly re-sync leaves them as staff set them. */
+const editedFields = (current: string[], changed: string[]) => [...new Set([...current, ...changed])].sort();
 
 /**
  * Admin CRUD + verification lifecycle for Pet-Friendly Places. The
@@ -97,7 +100,11 @@ export class PetFriendlyPlaceService {
       const { openingHours, ...rest } = dto;
       const updated = await tx.petFriendlyPlace.update({
         where: { id },
-        data: { ...rest, ...(openingHours !== undefined ? { openingHours: openingHours ? (openingHours as unknown as Prisma.InputJsonValue) : Prisma.JsonNull } : {}) },
+        data: {
+          ...rest,
+          ...(openingHours !== undefined ? { openingHours: openingHours ? (openingHours as unknown as Prisma.InputJsonValue) : Prisma.JsonNull } : {}),
+          ...(existing.source === "OSM" ? { osmEditedFields: editedFields(existing.osmEditedFields, Object.keys(dto).filter((k) => dto[k as keyof UpdatePetFriendlyPlaceDto] !== undefined)) } : {}),
+        },
       });
       if (dto.latitude !== undefined || dto.longitude !== undefined) {
         await this.syncLocation(tx, id, dto.latitude ?? existing.latitude, dto.longitude ?? existing.longitude);
@@ -111,6 +118,10 @@ export class PetFriendlyPlaceService {
   async setVerificationStatus(admin: ResolvedAdminContext, id: string, dto: SetPetFriendlyPlaceVerificationStatusDto) {
     const row = await this.prisma.$transaction(async (tx) => {
       const existing = await this.getRawOrThrow(id);
+      // An OpenStreetMap import earns the verified badge only through a claim by a KYC-verified business.
+      if (dto.status === PetFriendlyPlaceStatus.VERIFIED && existing.source === "OSM" && !existing.claimedByProviderOrganizationId) {
+        throw new ValidationApiException({ field: "status", reason: "OSM_LISTING_NEEDS_VERIFIED_CLAIM" });
+      }
       const updated = await tx.petFriendlyPlace.update({ where: { id }, data: { status: dto.status, verifiedAt: new Date() } });
       await this.audit.record({
         adminUserId: admin.adminUserId,
@@ -129,7 +140,10 @@ export class PetFriendlyPlaceService {
   async setPubliclyListed(admin: ResolvedAdminContext, id: string, dto: SetPetFriendlyPlaceListedDto) {
     const row = await this.prisma.$transaction(async (tx) => {
       const existing = await this.getRawOrThrow(id);
-      const updated = await tx.petFriendlyPlace.update({ where: { id }, data: { isPubliclyListed: dto.isPubliclyListed } });
+      const updated = await tx.petFriendlyPlace.update({
+        where: { id },
+        data: { isPubliclyListed: dto.isPubliclyListed, ...(existing.source === "OSM" ? { osmEditedFields: editedFields(existing.osmEditedFields, ["isPubliclyListed"]) } : {}) },
+      });
       await this.audit.record({
         adminUserId: admin.adminUserId,
         action: "pet_friendly_place.listed_changed",

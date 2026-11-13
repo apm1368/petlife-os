@@ -29,6 +29,10 @@
 .park-public-articles__grid .editorial-card { min-width:0; border-radius:16px; }
 .park-public-articles__all { display:flex; width:max-content; min-height:48px; align-items:center; margin:24px auto 0; color:var(--campaign-plum); font-weight:750; text-underline-offset:5px; }
 .park-public-articles__all:focus-visible { outline:3px solid var(--campaign-copper); outline-offset:4px; }
+/* Dark mode: the latest-articles band sits between night sections, so it takes the night paper and light ink
+   instead of staying a cream block with unreadable empty-state text. Light mode is unchanged. */
+:root[data-theme="dark"] .park-public-articles { --campaign-cream:#1D1B15; --campaign-ink:#F1EDE4; --campaign-text:#C2C6BC; --campaign-plum:#CDB0DB; --campaign-copper:#E9A27A; --campaign-line:#3E453C; color:var(--campaign-ink); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .park-public-articles { --campaign-cream:#1D1B15; --campaign-ink:#F1EDE4; --campaign-text:#C2C6BC; --campaign-plum:#CDB0DB; --campaign-copper:#E9A27A; --campaign-line:#3E453C; color:var(--campaign-ink); } }
 .park-trust { background:var(--campaign-teal-tint); padding:64px 32px; }
 .park-trust__grid { max-width:1136px; margin:auto; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:45px; }
 .park-trust__grid article>svg { color:var(--campaign-teal); }

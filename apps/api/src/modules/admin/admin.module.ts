@@ -1,4 +1,5 @@
 import { AdminInsuranceApplicationsController } from "./insurance/admin-insurance-applications.controller";
+import { OrdersModule } from "../commerce/orders/orders.module";
 import { AdminTravelController } from "./travel/admin-travel.controller";
 import { AdminTravelService } from "./travel/admin-travel.service";
 import { TravelMarketplaceModule } from "../travel-marketplace/travel-marketplace.module";
@@ -23,12 +24,16 @@ import { AdminFinanceOpsController } from "./finance/finance-ops.controller";
 import { AutomaticTaskListener } from "./task/automatic-task.listener";
 import { AdminPartner360Service } from "./partners/admin-partner360.service";
 import { AdminPartner360Controller } from "./partners/admin-partner360.controller";
+import { AdminPartnerDirectoryController } from "./partners/admin-partner-directory.controller";
+import { AdminPartnerDirectoryService } from "./partners/admin-partner-directory.service";
 import { AutomaticTaskService } from "./task/automatic-task.service";
 import { AdminPet360Service } from "./pets/admin-pet360.service";
 import { AdminPet360Controller } from "./pets/admin-pet360.controller";
 import { AdminCustomerOverviewService } from "./customer/admin-customer-overview.service";
 import { AdminAccessControlService } from "./access/admin-access-control.service";
 import { AdminAccessControlController } from "./access/admin-access-control.controller";
+import { AdminCustomRolesController } from "./access/admin-custom-roles.controller";
+import { AdminCustomRolesService } from "./access/admin-custom-roles.service";
 import { AdminSettingsService } from "./settings/admin-settings.service";
 import { AdminSettingsController } from "./settings/admin-settings.controller";
 import { AdminFeatureFlagsController } from "./feature-flags/admin-feature-flags.controller";
@@ -40,6 +45,17 @@ import { AdminSystemController } from "./system/admin-system.controller";
 import { BookingModule } from "../booking/booking.module";
 import { PaymentsModule } from "../commerce/payments/payments.module";
 import { AdminCardTransferController } from "./finance/admin-card-transfer.controller";
+import { AdminShippingController } from "./commerce/admin-shipping.controller";
+import { LogisticsModule } from "../commerce/logistics/logistics.module";
+import { AdminPlacesOsmController } from "./places/admin-places-osm.controller";
+import { OsmDirectoryService } from "../places/osm/osm-directory.service";
+import { PlaceClaimsService } from "../places/osm/place-claims.service";
+import { AdminWalletsController } from "./finance/admin-wallets.controller";
+import { AdminCardTransferDestinationController } from "./finance/admin-card-transfer-destination.controller";
+import { AdminCardTransferDestinationService } from "./finance/admin-card-transfer-destination.service";
+import { AdminCardTransferReceiptsService } from "./finance/admin-card-transfer-receipts.service";
+import { ReceiptReviewNotifier } from "./finance/receipt-review.notifier";
+import { AdminWalletsService } from "./finance/admin-wallets.service";
 import { AdminServicesService } from "./services/admin-services.service";
 import { AdminServicesController } from "./services/admin-services.controller";
 import { NotificationsModule } from "../notifications/notifications.module";
@@ -50,6 +66,10 @@ import { StorageModule } from "../storage/storage.module";
 import { AdminAccessService } from "./auth/admin-access.service";
 import { AdminAuthGuard } from "./auth/admin-auth.guard";
 import { AdminMeController } from "./auth/admin-me.controller";
+import { AdminCalendarController } from "./calendar/admin-calendar.controller";
+import { AdminCalendarService } from "./calendar/admin-calendar.service";
+import { AdminOwnershipController } from "./ownership/admin-ownership.controller";
+import { AdminOwnershipService } from "./ownership/admin-ownership.service";
 import { AdminAuditLogService } from "./audit/admin-audit-log.service";
 import { AdminCustomerService } from "./customer/admin-customer.service";
 import { AdminCustomerController } from "./customer/admin-customer.controller";
@@ -73,17 +93,24 @@ import { AdminTaskService } from "./task/admin-task.service";
 import { AdminTaskController } from "./task/admin-task.controller";
 import { AdminFinanceService } from "./finance/admin-finance.service";
 import { AdminRefundService } from "./finance/admin-refund.service";
+import { AdminBookingMoneyService } from "./finance/admin-booking-money.service";
 import { AdminFinanceController } from "./finance/admin-finance.controller";
 import { AdminOrgService } from "./orgs/admin-org.service";
 import { AdminOrgController } from "./orgs/admin-org.controller";
 import { AdminAuditController } from "./audit/admin-audit.controller";
 import { AdminDashboardService } from "./dashboard/admin-dashboard.service";
+import { AdminReportsService } from "./reports/admin-reports.service";
+import { AdminReportsController } from "./reports/admin-reports.controller";
+import { AdminMessagingService } from "./messaging/admin-messaging.service";
+import { AdminMessagingController } from "./messaging/admin-messaging.controller";
+import { EmailModule } from "../../common/email/email.module";
 import { AdminDashboardController } from "./dashboard/admin-dashboard.controller";
 import { AdminSellerSettlementService } from "./finance/admin-seller-settlement.service";
 import { AdminSellerAdjustmentService } from "./finance/admin-seller-adjustment.service";
 import { AdminMarketplaceSettlementService } from "./finance/admin-marketplace-settlement.service";
 import { AdminSellerFinanceController } from "./finance/admin-seller-finance.controller";
 import { AdminArticleService } from "./content/admin-article.service";
+import { IndexNowService } from "../content/indexnow.service";
 import { AdminCategoryService } from "./content/admin-category.service";
 import { AdminTagService } from "./content/admin-tag.service";
 import { AdminContentAuthorService } from "./content/admin-content-author.service";
@@ -134,7 +161,9 @@ import { MemoriesModule } from "../memories/memories.module";
 @Module({
   imports: [
     NotificationsModule,
+    EmailModule,
     RefundsModule,
+    OrdersModule,
     PromotionsModule,
     TravelMarketplaceModule,
     PetAccessModule,
@@ -145,17 +174,28 @@ import { MemoriesModule } from "../memories/memories.module";
     CommunityModule,
     BookingModule,
     PaymentsModule,
+    LogisticsModule,
     MemoriesModule,
   ],
   controllers: [
+    AdminReportsController,
+    AdminMessagingController,
     AdminMeController,
+    AdminCalendarController,
+    AdminOwnershipController,
     AdminSupportOpsController,
     UserSupportAttachmentsController,
     AdminFinanceOpsController,
     AdminCardTransferController,
+    AdminShippingController,
+    AdminPlacesOsmController,
+    AdminWalletsController,
+    AdminCardTransferDestinationController,
     AdminPartner360Controller,
+    AdminPartnerDirectoryController,
     AdminPet360Controller,
     AdminAccessControlController,
+    AdminCustomRolesController,
     AdminSettingsController,
     AdminFeatureFlagsController,
     AdminSmsPatternsController,
@@ -191,6 +231,8 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminPetMemorialController,
   ],
   providers: [
+    AdminReportsService,
+    AdminMessagingService,
     SupportOpsService,
     DisputeOutcomeService,
     FinanceReconciliationService,
@@ -199,10 +241,14 @@ import { MemoriesModule } from "../memories/memories.module";
     SettlementOpsService,
     AutomaticTaskListener,
     AdminPartner360Service,
+    AdminPartnerDirectoryService,
     AutomaticTaskService,
     AdminPet360Service,
     AdminCustomerOverviewService,
     AdminAccessControlService,
+    AdminCalendarService,
+    AdminOwnershipService,
+    AdminCustomRolesService,
     AdminSettingsService,
     AdminFeatureFlagsService,
     AdminSmsPatternsService,
@@ -232,13 +278,21 @@ import { MemoriesModule } from "../memories/memories.module";
     AdminTaskService,
     AdminFinanceService,
     AdminRefundService,
+    AdminBookingMoneyService,
     AdminOrgService,
     AdminDashboardService,
+    OsmDirectoryService,
+    PlaceClaimsService,
+    AdminWalletsService,
+    AdminCardTransferDestinationService,
+    AdminCardTransferReceiptsService,
+    ReceiptReviewNotifier,
     AdminSellerSettlementService,
     AdminSellerAdjustmentService,
     AdminMarketplaceSettlementService,
     AdminMediaService,
     AdminArticleService,
+    IndexNowService,
     AdminCategoryService,
     AdminTagService,
     AdminContentAuthorService,

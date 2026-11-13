@@ -158,6 +158,7 @@ export class ServicesService {
       variantId: query.variantId,
       from: new Date(query.from),
       to: new Date(query.to),
+      petCount: Math.min(query.petCount ?? 1, service.maxPetsPerBooking),
     });
 
     return {

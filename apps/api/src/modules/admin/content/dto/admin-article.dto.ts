@@ -97,3 +97,21 @@ export class UpdateArticleDto {
   @IsUUID(undefined, { each: true })
   tagIds?: string[];
 }
+
+export class CheckArticleSlugQueryDto {
+  @IsEnum(Locale)
+  locale!: Locale;
+
+  @IsString()
+  @MaxLength(200)
+  slug!: string;
+
+  @IsOptional()
+  @IsUUID()
+  articleId?: string;
+
+  /** Optional: the category the editor has picked but not saved yet (decides /guides vs /blog). Empty string = none. */
+  @IsOptional()
+  @Matches(/^$|^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
+  categoryId?: string;
+}

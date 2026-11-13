@@ -2,7 +2,7 @@ import { ValidationApiException } from "../../../common/errors/api-exception";
 import { PlatformSettingsService } from "../../platform-settings/platform-settings.service";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { AdminRefundApprovalStatus, Prisma } from "@prisma/client";
+import { AdminRefundApprovalStatus, AdminRefundSubjectType, BookingActorType, PaymentIntentStatus, PaymentStatus, Prisma, RefundStatus } from "@prisma/client";
 import type { AdminRefundApprovalDto } from "@petlife/types";
 import type { AppEnv } from "../../../config/env";
 import { PrismaService } from "../../../common/prisma/prisma.service";
@@ -18,13 +18,16 @@ import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 import { RefundsService } from "../../commerce/refunds/refunds.service";
 
-const APPROVAL_INCLUDE = { requestedByAdmin: { include: { user: true } }, approvedByAdmin: { include: { user: true } } } as const;
-type ApprovalWithRelations = Prisma.AdminRefundApprovalGetPayload<{ include: typeof APPROVAL_INCLUDE }>;
+export const APPROVAL_INCLUDE = { requestedByAdmin: { include: { user: true } }, approvedByAdmin: { include: { user: true } } } as const;
+export type ApprovalWithRelations = Prisma.AdminRefundApprovalGetPayload<{ include: typeof APPROVAL_INCLUDE }>;
 
-function toDto(row: ApprovalWithRelations): AdminRefundApprovalDto {
+export function toRefundApprovalDto(row: ApprovalWithRelations): AdminRefundApprovalDto {
   return {
     id: row.id,
+    subjectType: row.subjectType as AdminRefundApprovalDto["subjectType"],
     orderId: row.orderId,
+    bookingId: row.bookingId,
+    travelBookingId: row.travelBookingId,
     amount: row.amount,
     reason: row.reason,
     status: row.status as never,
@@ -81,7 +84,7 @@ export class AdminRefundService {
         if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") throw error;
         // A double-click retry with the same key replays the original request rather than creating a second approval row.
         row = await this.prisma.adminRefundApproval.findUniqueOrThrow({ where: { idempotencyKey }, include: APPROVAL_INCLUDE });
-        return toDto(row);
+        return toRefundApprovalDto(row);
       }
     } else {
       row = await this.prisma.adminRefundApproval.create({
@@ -92,7 +95,7 @@ export class AdminRefundService {
 
     await this.events.publish("AdminRefundApprovalRequested", { approvalId: row.id, orderId, amount }, { aggregateType: "AdminRefundApproval", aggregateId: row.id });
     await this.auditLog.record({ adminUserId: admin.adminUserId, action: "admin_refund_approval.requested", entityType: "ADMIN_REFUND_APPROVAL", entityId: row.id, reason, afterSummary: { orderId, amount }, requestId });
-    return toDto(row);
+    return toRefundApprovalDto(row);
   }
 
   async approve(admin: ResolvedAdminContext, approvalId: string, requestId?: string): Promise<AdminRefundApprovalDto> {
@@ -114,7 +117,7 @@ export class AdminRefundService {
       await this.auditLog.record({ adminUserId: admin.adminUserId, action: "admin_refund_approval.approved", entityType: "ADMIN_REFUND_APPROVAL", entityId: approvalId, requestId, tx });
       return row;
     });
-    return toDto(updated);
+    return toRefundApprovalDto(updated);
   }
 
   async reject(admin: ResolvedAdminContext, approvalId: string, reason: string | undefined, requestId?: string): Promise<AdminRefundApprovalDto> {
@@ -132,7 +135,7 @@ export class AdminRefundService {
       await this.auditLog.record({ adminUserId: admin.adminUserId, action: "admin_refund_approval.rejected", entityType: "ADMIN_REFUND_APPROVAL", entityId: approvalId, reason, requestId, tx });
       return row;
     });
-    return toDto(updated);
+    return toRefundApprovalDto(updated);
   }
 
   /**
@@ -159,10 +162,15 @@ export class AdminRefundService {
         throw new InvalidAdminRefundApprovalTransitionException({ approvalId, from: existing.status, to: AdminRefundApprovalStatus.EXECUTED });
       }
 
-      const order = await tx.order.findUnique({ where: { id: existing.orderId } });
-      if (!order || !order.userId) throw new OrderNotFoundException({ orderId: existing.orderId });
-
-      const refund = await this.refunds.request(order.userId, existing.orderId, existing.reason, existing.amount);
+      let refund: { id: string };
+      if (existing.subjectType === AdminRefundSubjectType.ORDER) {
+        const orderId = existing.orderId!;
+        const order = await tx.order.findUnique({ where: { id: orderId } });
+        if (!order || !order.userId) throw new OrderNotFoundException({ orderId });
+        refund = await this.refunds.request(order.userId, orderId, existing.reason, existing.amount);
+      } else {
+        refund = await this.executeBookingRefund(admin, existing);
+      }
 
       const row = await tx.adminRefundApproval.update({
         where: { id: approvalId },
@@ -173,12 +181,99 @@ export class AdminRefundService {
       await this.auditLog.record({ adminUserId: admin.adminUserId, action: "admin_refund_approval.executed", entityType: "ADMIN_REFUND_APPROVAL", entityId: approvalId, afterSummary: { refundId: refund.id }, requestId, tx });
       return row;
     });
-    return toDto(updated);
+    return toRefundApprovalDto(updated);
+  }
+
+  /**
+   * Opens an approval for a service booking or a travel stay. The amount must fit what was captured online minus what
+   * has already gone back; execution re-checks it against the payment itself (RefundsService).
+   */
+  async requestForBooking(admin: ResolvedAdminContext, subject: { type: "BOOKING" | "TRAVEL_BOOKING"; id: string }, amount: number, reason: string, idempotencyKey?: string, requestId?: string): Promise<AdminRefundApprovalDto> {
+    const money = await this.bookingMoney(subject.type, subject.id);
+    if (!Number.isInteger(amount) || amount <= 0 || amount > money.refundableIrr) throw new ValidationApiException({ field: "amount", reason: "EXCEEDS_REFUNDABLE", refundableIrr: money.refundableIrr });
+    const subjectData = subject.type === "BOOKING" ? { subjectType: AdminRefundSubjectType.BOOKING, bookingId: subject.id } : { subjectType: AdminRefundSubjectType.TRAVEL_BOOKING, travelBookingId: subject.id };
+    if (idempotencyKey) {
+      const prior = await this.prisma.adminRefundApproval.findUnique({ where: { idempotencyKey }, include: APPROVAL_INCLUDE });
+      if (prior) return toRefundApprovalDto(prior);
+    }
+    const row = await this.prisma.adminRefundApproval.create({ data: { ...subjectData, amount, reason, idempotencyKey: idempotencyKey ?? null, requestedByAdminId: admin.adminUserId }, include: APPROVAL_INCLUDE });
+    await this.events.publish("AdminRefundApprovalRequested", { approvalId: row.id, subjectType: subject.type, subjectId: subject.id, amount }, { aggregateType: "AdminRefundApproval", aggregateId: row.id });
+    await this.auditLog.record({ adminUserId: admin.adminUserId, action: "admin_refund_approval.requested", entityType: "ADMIN_REFUND_APPROVAL", entityId: row.id, reason, afterSummary: { subjectType: subject.type, subjectId: subject.id, amount }, requestId });
+    return toRefundApprovalDto(row);
+  }
+
+  /** Captured online, refunded so far, and what is left, for a service booking or a stay (rials). */
+  async bookingMoney(type: "BOOKING" | "TRAVEL_BOOKING", id: string): Promise<{ paymentIntentId: string | null; checkoutId: string | null; paidIrr: number; refundedIrr: number; refundableIrr: number }> {
+    const row = type === "BOOKING"
+      ? await this.prisma.booking.findUnique({ where: { id }, select: { paymentIntentId: true } })
+      : await this.prisma.travelBooking.findUnique({ where: { id }, select: { paymentIntentId: true } });
+    if (!row) throw new ValidationApiException({ field: "booking", reason: "NOT_FOUND" });
+    const intent = row.paymentIntentId ? await this.prisma.paymentIntent.findUnique({ where: { id: row.paymentIntentId } }) : null;
+    if (!intent || intent.status !== PaymentIntentStatus.CAPTURED) return { paymentIntentId: intent?.id ?? null, checkoutId: intent?.checkoutId ?? null, paidIrr: 0, refundedIrr: 0, refundableIrr: 0 };
+    // Member-cancellation placeholders (REQUESTED with no admin) are not money that left; finance decides them here.
+    const refunds = await this.prisma.refund.findMany({ where: { paymentIntentId: intent.id, status: { in: [RefundStatus.SUCCEEDED, RefundStatus.PROCESSING] } }, select: { amount: true } });
+    const refundedIrr = refunds.reduce((sum, r) => sum + r.amount, 0);
+    return { paymentIntentId: intent.id, checkoutId: intent.checkoutId, paidIrr: intent.amount, refundedIrr, refundableIrr: Math.max(0, intent.amount - refundedIrr) };
+  }
+
+  /**
+   * Refunds a booking/stay payment through the gateway (RefundsService.refundStandalonePayment) and records it on the
+   * booking in the same transaction that marks the refund SUCCEEDED. A member's earlier refund request for the same
+   * payment (left REQUESTED by a cancellation) is superseded first, so the money can only go back once.
+   */
+  private async executeBookingRefund(admin: ResolvedAdminContext, approval: { id: string; subjectType: AdminRefundSubjectType; bookingId: string | null; travelBookingId: string | null; amount: number; reason: string }): Promise<{ id: string }> {
+    const type = approval.subjectType === AdminRefundSubjectType.BOOKING ? "BOOKING" : "TRAVEL_BOOKING";
+    const subjectId = (type === "BOOKING" ? approval.bookingId : approval.travelBookingId)!;
+    const money = await this.bookingMoney(type, subjectId);
+    if (!money.checkoutId || !money.paymentIntentId || money.paidIrr <= 0) throw new ValidationApiException({ field: "payment", reason: "NO_CAPTURED_ONLINE_PAYMENT" });
+    if (approval.amount > money.refundableIrr) throw new ValidationApiException({ field: "amount", reason: "EXCEEDS_REFUNDABLE", refundableIrr: money.refundableIrr });
+    await this.prisma.refund.updateMany({
+      where: { paymentIntentId: money.paymentIntentId, status: RefundStatus.REQUESTED, orderId: null, requestedByAdminUserId: null },
+      data: { status: RefundStatus.CANCELLED, reason: `SUPERSEDED_BY_ADMIN_APPROVAL:${approval.id}` },
+    });
+    const paidIrr = money.paidIrr;
+    const refundedAfter = money.refundedIrr + approval.amount;
+    return this.refunds.refundStandalonePayment(money.checkoutId, approval.amount, "IRR", approval.reason, null, {
+      actorType: "ADMIN",
+      actorId: admin.userId,
+      requestedByAdminUserId: admin.adminUserId,
+      allowAdditionalRefund: true,
+      onSucceeded: async (tx) => {
+        const note = `REFUNDED:${approval.amount}:APPROVAL:${approval.id}`;
+        if (type === "BOOKING") {
+          const booking = await tx.booking.findUniqueOrThrow({ where: { id: subjectId } });
+          await tx.booking.update({ where: { id: subjectId }, data: { paymentStatus: refundedAfter >= paidIrr ? PaymentStatus.REFUNDED : PaymentStatus.PAID } });
+          await tx.bookingStatusEvent.create({ data: { bookingId: subjectId, fromStatus: booking.bookingStatus, toStatus: booking.bookingStatus, actorType: BookingActorType.ADMIN, actorId: admin.userId, reason: note } });
+        } else {
+          const stay = await tx.travelBooking.findUniqueOrThrow({ where: { id: subjectId } });
+          await tx.travelBooking.update({ where: { id: subjectId }, data: { refundAmountIrr: refundedAfter, paymentStatus: refundedAfter >= paidIrr ? "REFUNDED" : "PARTIALLY_REFUNDED" } });
+          await tx.travelBookingEvent.create({ data: { bookingId: subjectId, fromStatus: stay.status, toStatus: stay.status, actorType: "ADMIN", actorId: admin.userId, reason: note } });
+        }
+      },
+    });
+  }
+
+  /** Approvals for one booking/stay, newest first. */
+  async listForBooking(type: "BOOKING" | "TRAVEL_BOOKING", id: string): Promise<AdminRefundApprovalDto[]> {
+    const rows = await this.prisma.adminRefundApproval.findMany({ where: type === "BOOKING" ? { bookingId: id } : { travelBookingId: id }, orderBy: { createdAt: "desc" }, include: APPROVAL_INCLUDE });
+    return rows.map(toRefundApprovalDto);
+  }
+
+  /** The finance queue: open approvals first (REQUESTED, then APPROVED), then recent decided ones. */
+  async list(input: { status?: AdminRefundApprovalStatus; page?: number; pageSize?: number }) {
+    const page = Math.max(1, input.page ?? 1);
+    const pageSize = Math.min(100, Math.max(1, input.pageSize ?? 20));
+    const where: Prisma.AdminRefundApprovalWhereInput = input.status ? { status: input.status } : {};
+    const [rows, total] = await Promise.all([
+      this.prisma.adminRefundApproval.findMany({ where, orderBy: [{ status: "asc" }, { createdAt: "desc" }], skip: (page - 1) * pageSize, take: pageSize, include: APPROVAL_INCLUDE }),
+      this.prisma.adminRefundApproval.count({ where }),
+    ]);
+    return { items: rows.map(toRefundApprovalDto), total, page, pageSize };
   }
 
   async get(approvalId: string): Promise<AdminRefundApprovalDto> {
     const row = await this.prisma.adminRefundApproval.findUnique({ where: { id: approvalId }, include: APPROVAL_INCLUDE });
     if (!row) throw new AdminRefundApprovalNotFoundException({ approvalId });
-    return toDto(row);
+    return toRefundApprovalDto(row);
   }
 }

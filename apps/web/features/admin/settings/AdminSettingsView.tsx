@@ -32,7 +32,7 @@ const isMoney = (key: string) => key.endsWith("Irr");
 const nameKey = (key: string) => key.replaceAll(".", "_");
 const ascii = (value: string) =>
   value
-    .replace(/[۰-۹]/g, (char) => String(char.charCodeAt(0) - 1776))
+    .replace(/[۰-۹]/g, (char) => String(char.charCodeAt(0) - 1776)).replace(/[٠-٩]/g, (char) => String(char.charCodeAt(0) - 1632))
     .replace(/[٠-٩]/g, (char) => String(char.charCodeAt(0) - 1632))
     .replace(/٫/g, ".")
     .trim();
@@ -44,9 +44,14 @@ export function parseSettingNumber(value: string, money: boolean): number | unde
   const result = money ? Number(whole) * 10 + Number(fraction) : Number(whole);
   return Number.isSafeInteger(result) ? result : undefined;
 }
+/** This editor edits fa/en; German and Spanish text written on the site-settings page must survive a save here. */
+function keepOtherLocales(value: SettingValue) {
+  if (!value || typeof value !== "object") return {};
+  return { ...(value.de ? { de: value.de } : {}), ...(value.es ? { es: value.es } : {}) };
+}
 function useCopy() {
   const t = useTranslations("adminSettings"),
-    locale = useLocale() as "fa" | "en" | "de" | "es";
+    locale = useLocale() as "fa" | "en" | "de" | "es" | "ar" | "nl";
   const number = (value: number) =>
     new Intl.NumberFormat(locale === "fa" ? "fa-IR" : locale, { maximumFractionDigits: 1 }).format(value);
   return {
@@ -73,6 +78,7 @@ function DisplayValue({ value, settingKey }: { value: SettingValue; settingKey: 
       </span>
     );
   if (typeof value === "boolean") return <span>{t(value ? "enabled" : "disabled")}</span>;
+  if (typeof value === "string") return <bdi dir="auto">{value}</bdi>;
   return (
     <div className="space-y-1">
       {value.fa && (
@@ -158,7 +164,9 @@ export function AdminSettingsView() {
                   {rows.length === 0 ? (
                     <EmptyState title={t("empty")} />
                   ) : (
-                    rows.map((row) => (
+                    // Site-facing keys (identity, contact, social, features, maintenance) have their own editor
+                    // on /admin/site-settings; this page keeps the operational thresholds and switches.
+                    rows.filter((row) => knownKeys.includes(row.key)).map((row) => (
                       <Panel key={row.key}>
                         <PanelTitle
                           title={label(row.key)}
@@ -217,7 +225,7 @@ function SettingEditor({ row, refresh }: { row: PlatformSetting; refresh: () => 
       : row.type === "boolean"
         ? bool
         : fa.trim() || en.trim()
-          ? { ...(fa.trim() ? { fa: fa.trim() } : {}), ...(en.trim() ? { en: en.trim() } : {}) }
+          ? { ...keepOtherLocales(row.value), ...(fa.trim() ? { fa: fa.trim() } : {}), ...(en.trim() ? { en: en.trim() } : {}) }
           : null;
   const valid =
     row.type !== "integer" ||

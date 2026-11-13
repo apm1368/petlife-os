@@ -1,5 +1,7 @@
 import { Throttle } from "@nestjs/throttler";
-import { IsIn, IsOptional, IsString, MaxLength } from "class-validator";
+import { IsBoolean, IsEnum, IsIn, IsOptional, IsString, MaxLength } from "class-validator";
+import { Transform } from "class-transformer";
+import { Locale } from "@prisma/client";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { OptionalSessionAuthGuard } from "../../common/auth/optional-session-auth.guard";
 import { CurrentUser, OptionalCurrentUser } from "../../common/auth/current-user.decorator";
@@ -22,6 +24,11 @@ class ArticleFeedbackDto {
   @IsOptional() @IsString() @MaxLength(500) reason?: string;
 }
 
+class ArticleFeedQueryDto {
+  @IsOptional() @IsEnum(Locale) locale?: Locale;
+  @IsOptional() @Transform(({ value }) => value === true || value === "true" || value === "1") @IsBoolean() withBody?: boolean;
+}
+
 @Controller("blog")
 export class PublicBlogController {
   constructor(private readonly content: PublicContentReadService) {}
@@ -29,6 +36,19 @@ export class PublicBlogController {
   @Get("articles")
   listArticles(@Query() query: ListPublicArticlesQueryDto) {
     return this.content.listArticles(query.locale, query);
+  }
+
+  /** Sitemap / RSS / llms.txt source: every visible article locale. Declared before `articles/:slug` so "feed" is never read as a slug. */
+  @Get("feed")
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  feed(@Query() query: ArticleFeedQueryDto) {
+    return this.content.feed(query.locale, query.withBody === true);
+  }
+
+  /** Where a renamed article's old slug points now (404 when it is not an old address of a visible article). */
+  @Get("slug-redirects/:slug")
+  slugRedirect(@Param("slug") slug: string, @Query() query: LocaleQueryDto) {
+    return this.content.slugRedirect(query.locale, slug);
   }
 
   @Get("articles/:slug")

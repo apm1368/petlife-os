@@ -4,7 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useStickyTop } from "@/features/shared/use-sticky-top";
-import { BadgeCheck, Button, ContextSurface, ErrorRecovery, Heart, Repeat, Skeleton, StatusLabel } from "@petlife/ui";
+import { BadgeCheck, Button, ContextSurface, ErrorRecovery, Heart, MapPin, Repeat, ShieldCheck, Skeleton, StatusLabel } from "@petlife/ui";
+import Link from "next/link";
 import type { ProductDetailDto, ProductReviewDto, SellerOfferDto } from "@petlife/types";
 import { useActivePet } from "@/hooks/use-active-pet";
 import { commerceService } from "@/services/commerce.service";
@@ -15,6 +16,7 @@ import { CommercePage } from "./CommercePage";
 import { ProductCard } from "./ProductCard";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { formatLocaleDate } from "@/lib/i18n/format";
+import { useCategoryName } from "./category-name";
 
 const COMPATIBILITY_TONE: Record<string, "success" | "attention" | "urgent" | "neutral"> = {
   COMPATIBLE: "success",
@@ -36,6 +38,7 @@ const MAX_LINE_QUANTITY = 20;
  */
 export function ProductDetailView({ productId }: { productId: string }) {
   const t = useTranslations("commerce.detail");
+  const categoryName = useCategoryName();
   const design = useTranslations("commerce.design");
   const tCompat = useTranslations("commerce.compatibility");
   const router = useRouter();
@@ -211,7 +214,7 @@ export function ProductDetailView({ productId }: { productId: string }) {
         </button>
         <span aria-hidden="true">/</span>
         <button type="button" className="hover:text-text-primary" onClick={() => router.push(`/${locale}/shop/products?category=${product.category.id}`)}>
-          {product.category.name}
+          {categoryName(product.category)}
         </button>
       </nav>
 
@@ -299,6 +302,19 @@ export function ProductDetailView({ productId }: { productId: string }) {
                         <StockBadge state={offer.stockState} available={offer.availableQuantity} />
                       </div>
                       <PriceBlock unitPrice={offer.effectiveUnitPrice} listUnitPrice={offer.unitDiscount > 0 ? offer.priceAmount : null} promotionName={offer.promotion?.name ?? null} />
+                      {product.trust?.sellerRatings[offer.sellerOrganization.id] || offer.sellerOrganization.city ? (
+                        <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-metadata text-text-secondary">
+                          {product.trust?.sellerRatings[offer.sellerOrganization.id] ? (
+                            <span>★ {t("trust.sellerRating", { average: formatNumber(product.trust.sellerRatings[offer.sellerOrganization.id]!.average, locale), count: product.trust.sellerRatings[offer.sellerOrganization.id]!.count })}</span>
+                          ) : null}
+                          {offer.sellerOrganization.city ? (
+                            <span className="inline-flex items-center gap-1">
+                              <MapPin size={14} aria-hidden="true" />
+                              {t("trust.shipsFrom", { city: offer.sellerOrganization.city })}
+                            </span>
+                          ) : null}
+                        </span>
+                      ) : null}
                       {offer.repeatDeliveryEligible ? (
                         <span className="inline-flex items-center gap-1 text-metadata text-text-secondary">
                           <Repeat size={14} aria-hidden="true" />
@@ -310,6 +326,24 @@ export function ProductDetailView({ productId }: { productId: string }) {
                 ))}
               </div>
             )}
+            {selectedOffer ? (
+              <Link href={`/${locale}/shop/sellers/${selectedOffer.sellerOrganization.slug ?? selectedOffer.sellerOrganization.id}`} className="mt-2 inline-flex text-metadata font-semibold text-brand-natural underline">
+                {t("trust.visitStore", { seller: selectedOffer.sellerOrganization.name })}
+              </Link>
+            ) : null}
+            {product.trust ? (
+              <ContextSurface className="mt-3 flex flex-col gap-2" aria-label={t("trust.title")}>
+                <p className="inline-flex items-center gap-2 text-body font-medium text-text-primary">
+                  <ShieldCheck size={18} aria-hidden="true" className="text-state-success" />
+                  {t("trust.title")}
+                </p>
+                <ul className="flex list-disc flex-col gap-1 ps-5 text-metadata text-text-secondary">
+                  <li>{t("trust.verified")}</li>
+                  <li>{t("trust.returns", { hours: formatNumber(product.trust.returnWindowHours, locale) })}</li>
+                  <li>{t("trust.protection")}</li>
+                </ul>
+              </ContextSurface>
+            ) : null}
           </div>
 
           {selectedOffer && maxQuantity > 0 ? (

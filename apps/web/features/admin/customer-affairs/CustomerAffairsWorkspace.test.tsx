@@ -10,7 +10,7 @@ describe("CustomerAffairsWorkspace", () => {
   it("opens on the agent's desk and states plainly that the data is not real", () => {
     render(<CustomerAffairsWorkspace />);
 
-    expect(screen.getByRole("heading", { level: 1 }).textContent).toContain("امور مشتریان opetlife");
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toContain("امور مشتریان اپت لایف");
     expect(screen.getByText(/داده‌های این بخش نمونه و ساختگی است/)).toBeTruthy();
     expect(screen.getByRole("button", { name: "میز کار من" })).toBeTruthy();
   });

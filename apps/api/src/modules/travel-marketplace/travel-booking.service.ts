@@ -10,7 +10,6 @@ import {
   TravelBookingStatus,
   TravelListingStatus,
   TravelReviewStatus,
-  ProviderVerificationStatus,
 } from "@prisma/client";
 import type { PaginatedDto, TravelBookingDto, TravelReviewDto, TripTravelSummaryDto } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
@@ -37,6 +36,8 @@ import { BOOKING_INCLUDE, toTravelBookingDto, type BookingWithRelations } from "
 import { INVENTORY_HOLDING_STATUSES, TravelAvailabilityService } from "./travel-availability.service";
 import { resolveStayRange, toDateKey, toUtcMidnight } from "./travel-date.util";
 import { decideTravelRefund, toKg, type PetFacts, type RatePlanTerms } from "./travel-pricing.util";
+import { PetAccessService } from "../pet-access/pet-access.service";
+import { publicProviderWhere } from "../../common/public-partner";
 
 export class TravelActionNotAllowedException extends ApiException {
   constructor(code: string, message: string, details?: Record<string, unknown>) {
@@ -104,6 +105,7 @@ export class TravelBookingService {
     private readonly ledger: LedgerService,
     private readonly refunds: RefundsService,
     private readonly storage: StorageService,
+    private readonly petAccess: PetAccessService,
   ) {}
 
   // --- Access -----------------------------------------------------------------
@@ -154,6 +156,8 @@ export class TravelBookingService {
     });
     // A pet id the caller cannot see is never silently dropped.
     if (rows.length !== new Set(petIds).size) throw new NotFoundApiException("Pet");
+    // Household membership is not access to every pet: the caller must be able to see each one.
+    for (const row of rows) if (!(await this.petAccess.getEffectivePermissions(row.id, userId))?.canViewIdentity) throw new NotFoundApiException("Pet");
     const householdIds = new Set(rows.map((r) => r.householdId));
     if (householdIds.size > 1) throw new ValidationApiException({ field: "petIds", reason: "PETS_FROM_DIFFERENT_HOUSEHOLDS" });
     return {
@@ -169,7 +173,7 @@ export class TravelBookingService {
   }
 
   async hold(userId: string, input: HoldInput): Promise<TravelBookingDto> {
-    const listing = await this.prisma.travelListing.findFirst({ where: { id: input.listingId, status: TravelListingStatus.PUBLISHED, isPubliclyListed: true, organization: { verificationStatus: ProviderVerificationStatus.VERIFIED } }, include: { petPolicy: true } });
+    const listing = await this.prisma.travelListing.findFirst({ where: { id: input.listingId, status: TravelListingStatus.PUBLISHED, isPubliclyListed: true, organization: publicProviderWhere() }, include: { petPolicy: true } });
     if (!listing) throw new TravelListingNotFoundException({ listingId: input.listingId });
     const unit = await this.prisma.travelInventoryUnit.findFirst({ where: { id: input.unitId, listingId: listing.id, isActive: true } });
     if (!unit) throw new TravelInventoryUnitNotFoundException({ unitId: input.unitId, listingId: listing.id });
@@ -355,6 +359,29 @@ export class TravelBookingService {
     if (!allowed.includes(row.status)) throw new InvalidTravelBookingTransitionException({ bookingId, from: row.status, to: TravelBookingStatus.CANCELLED });
     await this.cancel(row, { type: "PROVIDER", id: actorUserId }, reason, true);
     return this.toDto(await this.loadForOrganization(organizationId, bookingId));
+  }
+
+  /** Any stay by id, for staff (admin) actions; access is the admin permission on the calling route. */
+  async loadForStaff(bookingId: string): Promise<BookingWithRelations> {
+    const row = await this.prisma.travelBooking.findUnique({ where: { id: bookingId }, include: BOOKING_INCLUDE });
+    if (!row) throw new TravelBookingNotFoundException({ bookingId });
+    return row;
+  }
+
+  /** What the stay's own snapshotted terms would refund if the traveller cancelled now (staff preview). */
+  policyRefundIrr(row: BookingWithRelations, paidIrr: number): number {
+    return decideTravelRefund(row.ratePlanSnapshot as unknown as RatePlanTerms | null, row.checkIn, paidIrr, false).amountIrr;
+  }
+
+  /**
+   * Staff cancellation: releases the nights like any cancellation and tells both sides, but moves no money — a refund,
+   * if any, goes through a finance-approved AdminRefundApproval (see AdminBookingMoneyService).
+   */
+  async cancelAsStaff(adminUserId: string, bookingId: string, reason: string): Promise<void> {
+    const row = await this.loadForStaff(bookingId);
+    const allowed: TravelBookingStatus[] = [TravelBookingStatus.HELD, TravelBookingStatus.AWAITING_PROVIDER, TravelBookingStatus.AWAITING_PAYMENT, TravelBookingStatus.CONFIRMED, TravelBookingStatus.IN_PROGRESS];
+    if (!allowed.includes(row.status)) throw new InvalidTravelBookingTransitionException({ bookingId, from: row.status, to: TravelBookingStatus.CANCELLED });
+    await this.move(row, TravelBookingStatus.CANCELLED, { type: "ADMIN", id: adminUserId }, reason, { cancelledAt: new Date(), cancelReason: reason, cancelledBy: "ADMIN" });
   }
 
   /** Cancels (releasing inventory in the same transaction) and then refunds what the snapshotted terms allow. */
@@ -728,6 +755,8 @@ export class TravelBookingService {
     const doc = await this.prisma.medicalDocument.findUnique({ where: { id: input.medicalDocumentId }, select: { petId: true, householdId: true, voidedAt: true } });
     const bookingPetIds = new Set(row.pets.map((p) => p.petId));
     if (!doc || doc.voidedAt || doc.householdId !== row.householdId || !bookingPetIds.has(doc.petId)) throw new NotFoundApiException("Document");
+    // Sending a medical document to a host is a health-data disclosure: only someone who may read that pet's health can do it.
+    if (!(await this.petAccess.getEffectivePermissions(doc.petId, userId))?.canViewHealth) throw new NotFoundApiException("Document");
     const expiresAt = new Date(row.checkOut.getTime() + 86_400_000);
     await this.prisma.travelBookingDocumentShare.upsert({
       where: { bookingId_medicalDocumentId: { bookingId, medicalDocumentId: input.medicalDocumentId } },

@@ -13,6 +13,7 @@ import { DiscoveryPage } from "@/features/discovery/DiscoveryPage";
 import { formatCount } from "@/lib/number/format-number";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import type { RouteLocale } from "@/lib/i18n/config";
+import { persianSourceProps } from "@/lib/i18n/iran-places";
 
 /** Public discovery — no guard, works for anonymous visitors (spec: "public browsing" for insurance discovery must work without auth). */
 export function InsuranceListView() {
@@ -67,6 +68,8 @@ export function InsuranceListView() {
       {products.length === 0 ? (
         <EmptyState title={t("list.empty")} />
       ) : (
+        <>
+        {products.some((p) => persianSourceProps([p.coverageSummary, ...p.exclusions].join(" "), locale).lang) ? <p className="text-metadata text-text-secondary">{t("detail.insurerLanguageNote")}</p> : null}
         <ul className="flex flex-col">
           {products.map((product) => (
             <li key={product.id} className="plan-row">
@@ -74,7 +77,7 @@ export function InsuranceListView() {
                 <Link href={productHref(product.id)} className="plan-row__title">
                   {product.providerName} — {product.name}
                 </Link>
-                <p className="text-metadata text-text-secondary">{product.coverageSummary}</p>
+                <p className="text-metadata text-text-secondary" {...persianSourceProps(product.coverageSummary, locale)}>{product.coverageSummary}</p>
                 {/* The numbers that decide a plan (§36) — only those the insurer has published. */}
                 <dl className="plan-row__facts">
                   {product.annualLimitIrr !== null ? <div><dt>{t("list.annualLimit")}</dt><dd>{formatCurrency(product.annualLimitIrr, locale)}</dd></div> : null}
@@ -85,7 +88,7 @@ export function InsuranceListView() {
                 </dl>
                 {product.exclusions.length > 0 ? (
                   <p className="text-metadata text-text-secondary">
-                    <span className="font-semibold text-text-primary">{t("detail.exclusionsTitle")}:</span> {product.exclusions.slice(0, 2).join(locale === "fa" ? "، " : ", ")}
+                    <span className="font-semibold text-text-primary">{t("detail.exclusionsTitle")}:</span> <span {...persianSourceProps(product.exclusions.join(" "), locale)}>{product.exclusions.slice(0, 2).join(persianSourceProps(product.exclusions.join(" "), locale).lang || locale === "fa" ? "، " : ", ")}</span>
                     {product.exclusions.length > 2 ? "…" : ""}
                   </p>
                 ) : null}
@@ -103,6 +106,7 @@ export function InsuranceListView() {
             </li>
           ))}
         </ul>
+        </>
       )}
     </DiscoveryPage>
   );

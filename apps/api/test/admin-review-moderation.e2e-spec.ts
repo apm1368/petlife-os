@@ -289,10 +289,27 @@ describe("Admin review moderation (W2-9)", () => {
       moderationReason: "Contains promotional spam",
       labels: ["spam"],
     });
+    // The author hears the decision, with the moderator's reason, linked to their order.
+    const notice = async (type: string) => {
+      for (let i = 0; i < 30; i++) {
+        const n = await db.notification.findFirst({ where: { userId: review.userId, type, entityId: review.id } });
+        if (n) return n;
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      return null;
+    };
+    const rejectedNotice = await notice("review.rejected");
+    expect(rejectedNotice?.body).toContain("Contains promotional spam");
+    expect(rejectedNotice?.deepLink).toMatch(/^\/orders\//);
+    // Pending reviews are counted on the dashboard for admins who may moderate that vertical.
+    const pending = await productReview();
+    expect((await get(admin, "/admin/dashboard").expect(200)).body.pendingReviews).toBeGreaterThanOrEqual(1);
+    expect(pending.review.status).toBe("PENDING");
     await post(admin, `/admin/review-moderation/PRODUCT/${review.id}/approve`)
       .send({ reason: "Reviewed after appeal" })
       .expect(201);
     expect((await db.productReview.findUniqueOrThrow({ where: { id: review.id } })).status).toBe("APPROVED");
+    expect(await notice("review.approved")).not.toBeNull();
     await post(admin, `/admin/review-moderation/PRODUCT/${review.id}/approve`).send({}).expect(400);
   });
 

@@ -1,5 +1,6 @@
 import type {
   AdminCommerceAnalyticsDto,
+  AdminProductDetailDto,
   AdminCommerceOrderDetailDto,
   AdminCommerceOrderRowDto,
   AdminInventoryRowDto,
@@ -31,7 +32,11 @@ export const adminCommerceService = {
     refundRequested?: boolean;
     page?: number;
   }) => apiFetch<PaginatedDto<AdminCommerceOrderRowDto>>(`/admin/commerce/orders${qs(input)}`),
+  listRepeatDeliveries: (input: { status?: "ACTIVE" | "PAUSED" | "CANCELLED"; page?: number }) =>
+    apiFetch<PaginatedDto<AdminRepeatDeliveryRow>>(`/admin/commerce/repeat-deliveries${qs(input)}`),
   getOrder: (id: string) => apiFetch<AdminCommerceOrderDetailDto>(`/admin/commerce/orders/${id}`),
+  /** Staff cancel before dispatch: full refund in the same step (commerce.manage, audited). */
+  cancelOrder: (id: string, reason: string) => apiFetch<AdminCommerceOrderDetailDto>(`/admin/commerce/orders/${id}/cancel`, { method: "POST", body: { reason } }),
   listRefundRequests: (input: { status?: string; page?: number }) =>
     apiFetch<PaginatedDto<AdminRefundRequestDto>>(`/admin/commerce/refund-requests${qs(input)}`),
   approveRefundRequest: (id: string, note?: string) =>
@@ -54,17 +59,21 @@ export const adminCommerceService = {
   listProductBrands: () => apiFetch<Array<{ id: string; name: string; slug: string }>>("/admin/commerce/product-brands"),
   catalogImportAvailability: () => apiFetch<{ key: string; enabled: boolean; reason: string }>("/admin/commerce/catalog-imports/availability"),
   listCatalogImports: () => apiFetch<Array<{
-    id: string; status: string; submittedUrls: string[]; pagesVisited: number; productsSeen: number;
+    id: string; status: string; mode?: string; submittedUrls: string[]; pagesVisited: number; productsSeen: number;
     productsImported: number; productsFailed: number; lastError: string | null; createdAt: string;
     targetCategory: { id: string; name: string };
     items: Array<{ id: string; sourceItemId: string; sourceUrl: string; sourceSnapshot: { title?: string; brandName?: string | null }; pendingSnapshot?: { title?: string; brandName?: string | null } | null; status: string; errorCode: string | null; errorDetail: string | null; product: { id: string; title: string; status: string } | null }>;
   }>>("/admin/commerce/catalog-imports"),
-  listCatalogProductRequests: () => apiFetch<Array<{ id: string; requestedTitle: string; brandName: string | null; description: string | null; specifications: unknown; sourceUrl: string | null; sourceName: string | null; status: string; decisionReason: string | null; sellerOrganization: { id: string; name: string }; requestedByUser: { id: string; displayName: string | null }; category: { id: string; name: string } | null; duplicateCandidates: Array<{ id: string; title: string; slug: string; status: string; brand: { name: string } | null }> }>>("/admin/commerce/catalog-product-requests"),
+  getProduct: (id: string) => apiFetch<AdminProductDetailDto>(`/admin/commerce/products/${id}`),
+  listCatalogProductRequests: (status: "PENDING" | "DECIDED" = "PENDING") => apiFetch<Array<{ id: string; requestedTitle: string; brandName: string | null; description: string | null; specifications: unknown; sourceUrl: string | null; sourceName: string | null; status: string; decisionReason: string | null; sellerOrganization: { id: string; name: string }; requestedByUser: { id: string; displayName: string | null }; category: { id: string; name: string } | null; duplicateCandidates: Array<{ id: string; title: string; slug: string; status: string; brand: { name: string } | null }>; reviewedAt?: string | null; reviewedByName?: string | null; resolvedProduct?: { id: string; title: string } | null }>>(`/admin/commerce/catalog-product-requests${status === "DECIDED" ? "?status=DECIDED" : ""}`),
   matchCatalogProductRequest: (id: string, productId: string, reason: string) => apiFetch<unknown>(`/admin/commerce/catalog-product-requests/${id}/match`, { method: "POST", body: { productId, reason } }),
   approveCatalogProductRequest: (id: string, categoryId: string, reason: string, reviewedDuplicateProductIds: string[]) => apiFetch<unknown>(`/admin/commerce/catalog-product-requests/${id}/approve`, { method: "POST", body: { categoryId, reason, reviewedDuplicateProductIds } }),
   rejectCatalogProductRequest: (id: string, reason: string) => apiFetch<unknown>(`/admin/commerce/catalog-product-requests/${id}/reject`, { method: "POST", body: { reason } }),
   createCatalogImport: (input: { urls: string[]; categoryId: string; brandId?: string; maxPages: number; maxProducts: number; idempotencyKey: string }) =>
     apiFetch("/admin/commerce/catalog-imports", { method: "POST", body: input }),
+  /** The owner's one-time Digikala pet-category import, facts only (no photos, no descriptions). */
+  startDigikalaFactsImport: (input: { categoryId: string; maxProducts: number; idempotencyKey: string }) =>
+    apiFetch<{ id: string; status: string }>("/admin/commerce/catalog-imports/digikala-facts", { method: "POST", body: input }),
   cancelCatalogImport: (id: string) => apiFetch(`/admin/commerce/catalog-imports/${id}/cancel`, { method: "POST" }),
   applyCatalogSourceUpdate: (id: string, reason: string) => apiFetch(`/admin/commerce/catalog-import-items/${id}/apply-source-update`, { method: "POST", body: { reason } }),
   rejectCatalogSourceUpdate: (id: string, reason: string) => apiFetch(`/admin/commerce/catalog-import-items/${id}/reject-source-update`, { method: "POST", body: { reason } }),
@@ -146,3 +155,19 @@ export interface ProductMediaUploadTargetDto {
   headers?: Record<string, string>;
   expiresInSeconds: number;
 }
+
+/** A member's repeat-delivery schedule as staff see it (read-only). */
+export type AdminRepeatDeliveryRow = {
+  id: string;
+  status: "ACTIVE" | "PAUSED" | "CANCELLED";
+  member: { id: string; displayName: string };
+  product: { id: string; title: string; variant: string | null };
+  seller: { id: string; name: string };
+  quantity: number;
+  intervalDays: number;
+  unitPrice: number;
+  city: string | null;
+  nextCycleAt: string;
+  lastOrder: { id: string; status: string; createdAt: string } | null;
+  createdAt: string;
+};

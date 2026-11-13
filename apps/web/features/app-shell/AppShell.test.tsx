@@ -40,6 +40,18 @@ describe("AppShell bootstrap recovery", () => {
     fireEvent.click(screen.getByRole("button", { name: "Support" }));
     expect(push).toHaveBeenCalledWith("/en/support");
   });
+
+  it("puts the member frame on the 2026-11 pattern with the care reel and Cookie's switch", async () => {
+    vi.mocked(authService.getSession).mockResolvedValue({
+      user: { id: "u1", email: null, phone: null, displayName: "Demo", avatarUrl: null, locale: "en", themePreference: "SYSTEM", createdAt: "", updatedAt: "" },
+    });
+    vi.mocked(householdsService.listMine).mockResolvedValue([]);
+    const { container } = renderWithIntl(<AppShell>Product content</AppShell>);
+    await screen.findByText("Product content");
+    expect(container.querySelector(".opl-page .opl-page__body.member-shell")).toBeTruthy();
+    expect(container.querySelector("#opl-reel-care")).toBeTruthy();
+    expect(container.querySelector(".member-foot .opl-cookie-toggle")).toBeTruthy();
+  });
   beforeEach(() => {
     vi.resetAllMocks();
     useSessionStore.setState({ user: null, status: "idle" });

@@ -4,10 +4,14 @@ import {ProviderCareSuggestionForm} from "@/features/health-depth/ProviderCareSu
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Button, ContextSurface, Dialog, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
+import { Avatar, Button, ContextSurface, Dialog, ErrorRecovery, Input, Skeleton, StatusLabel } from "@petlife/ui";
 import type { ProviderBookingDetailDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
 import { providerOsService } from "@/services/provider-os.service";
+import { healthAdvancedService } from "@/services/health-advanced.service";
+import { formatAge, formatWeight, speciesLabel } from "@/features/pets/pet-identity";
+import { documentTypeLabel } from "@/features/health-advanced/document-labels";
+import { useInstantFormat } from "@/lib/date/use-instant-format";
 import { formatAppointmentDateTime } from "@/lib/date/appointment-date";
 import { bookingStatusTone } from "@/features/discovery/labels";
 import type { ProviderFollowUpInput } from "@/services/provider-os.service";
@@ -44,9 +48,12 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
   const tPayment = useTranslations("provider.bookings.paymentStatus");
   const tKnowledge = useTranslations("health.knowledgeState");
   const tVaccination = useTranslations("health.vaccinationStatus");
+  const tSeverity = useTranslations("healthShares.severity");
   const tCommon = useTranslations("common");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en" | "de" | "es";
+  const locale = useLocale() as "fa" | "en" | "de" | "es" | "ar" | "nl";
+  const fmt = useInstantFormat();
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const [detail, setDetail] = useState<ProviderBookingDetailDto | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -94,9 +101,23 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
   if (error) return <ErrorRecovery title={t("title")} message={error} retryLabel={tCommon("retry")} onRetry={load} />;
   if (!detail) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
-  const { booking, pet, access, careProfile, healthSummary, providerNotes } = detail;
+  const { booking, pet, access, careProfile, healthSummary, healthDetails, intake, providerNotes } = detail;
   const isCancellable = ["CONFIRMED", "CHECKED_IN", "AWAITING_PAYMENT"].includes(booking.bookingStatus);
   const started = new Date(booking.startAt).getTime() <= Date.now();
+  // The clinical record reads health: offer it only when this booking's grant actually includes health.
+  const healthGranted = access.state === "GRANTED" && access.canViewHealth;
+  const identity = pet.identity;
+  const notRecorded = t("petInfo.notRecorded");
+
+  async function download(documentId: string) {
+    setDownloadError(null);
+    try {
+      const target = await healthAdvancedService.downloadDocument(pet.id, documentId);
+      window.open(target.downloadUrl, "_blank", "noopener,noreferrer");
+    } catch {
+      setDownloadError(t("documents.downloadFailed"));
+    }
+  }
 
   return (
     <div className="flex flex-col gap-5">
@@ -118,9 +139,39 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
         <Row label={t("location")} value={booking.locationLabel} />
         <Row label={t("dateTime")} value={formatAppointmentDateTime(booking.startAt, locale, booking.timezone)} />
         {booking.reasonForVisit ? <Row label={t("reason")} value={booking.reasonForVisit} /> : null}
+        {booking.ownerNotes ? <Row label={t("ownerNotes")} value={booking.ownerNotes} /> : null}
         {booking.cancelledReason ? <Row label={t("cancelledReason")} value={booking.cancelledReason} /> : null}
         {booking.completionNote ? <Row label={t("completionNote")} value={booking.completionNote} /> : null}
       </ContextSurface>
+
+      <ContextSurface className="flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          <Avatar name={pet.name} src={pet.photoUrl} size="lg" className="shrink-0" />
+          <div className="flex min-w-0 flex-col gap-1">
+            <h2 className="text-section-title text-text-primary" dir="auto">{pet.name}</h2>
+            <p className="text-metadata text-text-secondary">{[speciesLabel(pet, locale), pet.breed].filter(Boolean).join(" · ")}</p>
+          </div>
+        </div>
+        {identity ? (
+          <dl className="grid grid-cols-2 gap-3 border-t border-border-subtle pt-3">
+            <Fact label={t("petInfo.sex")} value={identity.sex ? t(`petInfo.sexValue.${identity.sex}`) : notRecorded} />
+            <Fact label={t("petInfo.age")} value={formatAge(identity, locale, notRecorded)} />
+            <Fact label={t("petInfo.weight")} value={formatWeight(identity, locale, notRecorded)} />
+            <Fact label={t("petInfo.microchip")} value={identity.hasMicrochip ? t("petInfo.microchipPresent") : notRecorded} />
+          </dl>
+        ) : (
+          <p className="text-metadata text-text-secondary">{t("petInfo.moreAfterAssignment")}</p>
+        )}
+      </ContextSurface>
+
+      {intake && intake.answers.length ? (
+        <ContextSurface className="flex flex-col gap-2">
+          <h2 className="text-section-title text-text-primary">{t("intake.title")}</h2>
+          {intake.answers.map((answer) => (
+            <Row key={answer.key} label={answer.label} value={intakeValue(answer.value, { yes: t("intake.yes"), no: t("intake.no"), separator: locale === "fa" ? "، " : ", " })} />
+          ))}
+        </ContextSurface>
+      ) : null}
 
       <ContextSurface className="flex flex-col gap-2">
         <h2 className="text-section-title text-text-primary">{t("access.title")}</h2>
@@ -132,7 +183,10 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
             <Row label={t("access.expiresAt")} value={access.expiresAt ? formatAppointmentDateTime(access.expiresAt, locale, booking.timezone) : ""} />
           </>
         ) : null}
-        {access.state === "GRANTED" && booking.category === "VET" ? (
+        {access.state === "GRANTED" && booking.category === "VET" && !access.canViewHealth ? (
+          <p className="text-metadata text-text-secondary">{t("health.identityOnly")}</p>
+        ) : null}
+        {healthGranted && booking.category === "VET" ? (
           <Button variant="secondary" onClick={() => router.push(`/${locale}/provider/patients/${pet.id}`)}>
             {t("access.openClinicalRecord")}
           </Button>
@@ -149,10 +203,53 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
       ) : null}
 
       {healthSummary ? (
-        <ContextSurface className="flex flex-col gap-2">
+        <ContextSurface className="flex flex-col gap-3">
           <h2 className="text-section-title text-text-primary">{t("health.title")}</h2>
-          <Row label={t("health.allergyState")} value={tKnowledge(healthSummary.allergyState)} />
-          <Row label={t("health.vaccinationStatus")} value={tVaccination(healthSummary.vaccinationStatus)} />
+          {healthDetails ? (
+            <>
+              <HealthList
+                title={t("health.allergies")}
+                empty={tKnowledge(healthSummary.allergyState)}
+                items={healthDetails.allergies.map((a) => ({ id: a.id, text: [a.name, a.severity ? tSeverity(a.severity) : null, a.reaction].filter(Boolean).join(" · ") }))}
+              />
+              <HealthList
+                title={t("health.conditions")}
+                empty={tKnowledge(healthSummary.conditionsState)}
+                items={healthDetails.conditions.map((c) => ({ id: c.id, text: c.notes ? `${c.name} · ${c.notes}` : c.name }))}
+              />
+              <HealthList
+                title={t("health.medications")}
+                empty={tKnowledge(healthSummary.medicationsState)}
+                items={healthDetails.medications.map((m) => ({ id: m.id, text: [m.name, m.dosage !== null ? `${fmt.number(m.dosage)} ${m.unit ?? ""}`.trim() : null, m.frequencyText].filter(Boolean).join(" · ") }))}
+              />
+              <div className="flex flex-col gap-1 border-t border-border-subtle pt-3">
+                <Row label={t("health.vaccinationStatus")} value={tVaccination(healthDetails.vaccination.status)} />
+                <Row label={t("health.vaccinationLast")} value={healthDetails.vaccination.lastKnownDate ? fmt.date(healthDetails.vaccination.lastKnownDate) : notRecorded} />
+                <Row label={t("health.vaccinationNext")} value={healthDetails.vaccination.nextDueDate ? fmt.date(healthDetails.vaccination.nextDueDate) : notRecorded} />
+              </div>
+            </>
+          ) : (
+            <>
+              <Row label={t("health.allergyState")} value={tKnowledge(healthSummary.allergyState)} />
+              <Row label={t("health.vaccinationStatus")} value={tVaccination(healthSummary.vaccinationStatus)} />
+            </>
+          )}
+        </ContextSurface>
+      ) : null}
+
+      {healthDetails && healthDetails.sharedDocuments.length ? (
+        <ContextSurface className="flex flex-col gap-3">
+          <h2 className="text-section-title text-text-primary">{t("documents.title")}</h2>
+          {healthDetails.sharedDocuments.map((d) => (
+            <div key={d.id} className="flex flex-wrap items-center justify-between gap-2 border-t border-border-subtle pt-2 first-of-type:border-t-0 first-of-type:pt-0">
+              <div className="flex min-w-0 flex-col">
+                <span className="text-body text-text-primary" dir="auto">{d.title}</span>
+                <span className="text-metadata text-text-secondary">{[documentTypeLabel(d.documentType, locale), fmt.date(d.recordedAt ?? d.uploadedAt)].join(" · ")}</span>
+              </div>
+              <Button variant="secondary" size="sm" onClick={() => void download(d.id)}>{t("documents.download")}</Button>
+            </div>
+          ))}
+          {downloadError ? <p role="alert" className="text-metadata text-state-urgent">{downloadError}</p> : null}
         </ContextSurface>
       ) : null}
 
@@ -174,7 +271,7 @@ export function ProviderBookingDetailView({ bookingId }: { bookingId: string }) 
         {booking.bookingStatus === "CONFIRMED" && started ? (
           <Button variant="ghost" isLoading={isActing} onClick={() => runAction(() => providerOsService.markNoShow(booking.id))}>{t("actions.markNoShow")}</Button>
         ) : null}
-        {booking.category === "VET" && ["CONFIRMED", "CHECKED_IN", "IN_PROGRESS"].includes(booking.bookingStatus) && access.state === "GRANTED" ? (
+        {booking.category === "VET" && ["CONFIRMED", "CHECKED_IN", "IN_PROGRESS"].includes(booking.bookingStatus) && healthGranted ? (
           <Button variant="secondary" onClick={() => router.push(`/${locale}/provider/patients/${pet.id}?startVisitForBooking=${booking.id}`)}>{t("actions.startClinicalVisit")}</Button>
         ) : null}
         {booking.bookingStatus === "CONFIRMED" ? (
@@ -313,7 +410,40 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-3">
       <span className="text-metadata text-text-secondary">{label}</span>
-      <span className="text-body text-text-primary">{value}</span>
+      <span className="text-body text-end text-text-primary" dir="auto">{value}</span>
     </div>
   );
+}
+
+function Fact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex min-w-0 flex-col">
+      <dt className="text-metadata text-text-secondary">{label}</dt>
+      <dd className="text-body text-text-primary">{value}</dd>
+    </div>
+  );
+}
+
+/** An empty list shows the owner's recorded knowledge state ("None known", "Not recorded yet"), never an implied "none". */
+function HealthList({ title, empty, items }: { title: string; empty: string; items: { id: string; text: string }[] }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <h3 className="text-metadata font-bold text-text-secondary">{title}</h3>
+      {items.length ? (
+        <ul className="flex flex-col gap-1">
+          {items.map((item) => <li key={item.id} className="text-body text-text-primary" dir="auto">{item.text}</li>)}
+        </ul>
+      ) : (
+        <p className="text-body text-text-secondary">{empty}</p>
+      )}
+    </div>
+  );
+}
+
+/** Intake answers are owner-written data: shown as given, with booleans and lists made readable. */
+function intakeValue(value: unknown, words: { yes: string; no: string; separator: string }): string {
+  if (value === null || value === undefined || value === "") return "—";
+  if (typeof value === "boolean") return value ? words.yes : words.no;
+  if (Array.isArray(value)) return value.map(String).join(words.separator);
+  return String(value);
 }

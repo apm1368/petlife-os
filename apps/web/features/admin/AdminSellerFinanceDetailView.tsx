@@ -10,6 +10,7 @@ import { adminFinanceService } from "@/services/admin-finance.service";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { settlementTone } from "@/features/seller/settlement-tone";
 import { DateField } from "@/features/shared/date-picker/DateField";
+import { intlLocale } from "@/features/admin/admin-copy";
 
 /**
  * Admin drill-in for one seller (spec: "inspect balance/settlement,
@@ -114,7 +115,7 @@ export function AdminSellerFinanceDetailView({ sellerId }: { sellerId: string })
               <ContextSurface className="flex items-center justify-between gap-3">
                 <div className="flex flex-col">
                   <span className="text-body font-medium text-text-primary">{s.reference}</span>
-                  <span className="text-metadata text-text-secondary">{new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : "en-US").format(new Date(s.periodEnd))}</span>
+                  <span className="text-metadata text-text-secondary">{new Intl.DateTimeFormat(intlLocale(locale)).format(new Date(s.periodEnd))}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <StatusLabel tone={settlementTone(s.status)}>{s.status}</StatusLabel>

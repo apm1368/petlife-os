@@ -10,13 +10,15 @@ import { ApiError } from "@/lib/api/client";
 import { helpCenterService, type HelpArticle, type HelpArticleSummary, type HelpCategory, type LegalDocument, type LegalIndexEntry, type PublicIncident, type PublicStatus } from "@/services/help-center.service";
 
 const legalSlugs = ["terms", "privacy", "cookies", "community-guidelines", "animal-welfare", "ai-and-safety", "payment-and-refund", "delivery", "installment-help", "accessibility"] as const;
+/** Terms and Privacy always have text: the built-in drafts (lib/legal/builtin.ts) until a reviewed version is published. */
+const BUILTIN_LEGAL = new Set<string>(["terms", "privacy"]);
 const legalKinds = ["TERMS_OF_SERVICE", "PRIVACY_POLICY", "COOKIE_CONSENT", "COMMUNITY_GUIDELINES", "ANIMAL_WELFARE", "AI_AND_SAFETY", "PAYMENT_AND_REFUND", "DELIVERY", "INSTALLMENT_HELP", "ACCESSIBILITY"];
 
 function Shell({ title, children, subtitle, titleLang }: { title: string; subtitle?: string; children: ReactNode; titleLang?: "fa" | "en" }) {
   const titleId = useId();
   const locale = useLocale();
   const t = useTranslations("publicHelp");
-  return <section aria-labelledby={titleId} className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8"><header className="flex flex-col gap-2"><h1 id={titleId} lang={titleLang} className="text-page-title text-text-primary">{title}</h1>{subtitle ? <p lang={titleLang} className="text-body text-text-secondary">{subtitle}</p> : null}</header>{locale === "de" || locale === "es" ? <p className="text-metadata text-text-secondary">{t("sourceNotice")}</p> : null}{children}</section>;
+  return <section aria-labelledby={titleId} className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8"><header className="flex flex-col gap-2"><h1 id={titleId} lang={titleLang} className="text-page-title text-text-primary">{title}</h1>{subtitle ? <p lang={titleLang} className="text-body text-text-secondary">{subtitle}</p> : null}</header>{locale !== "fa" && locale !== "en" ? <p className="text-metadata text-text-secondary">{t("sourceNotice")}</p> : null}{children}</section>;
 }
 function Failure({ title, retry }: { title: string; retry: () => void }) {
   const t = useTranslations("publicHelp");
@@ -79,7 +81,7 @@ export function LegalIndexView() {
   const load = () => { setError(false); setEntries(null); void helpCenterService.legalIndex(locale).then(setEntries).catch(() => setError(true)); };
   useEffect(() => { load(); // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locale]);
-  return <Shell title={t("legalTitle")} subtitle={t("legalSubtitle")}>{error ? <Failure title={t("legalFailure")} retry={load} /> : !entries ? <Skeleton aria-label={t("loading")} className="h-64 w-full" /> : <ul className="grid gap-3 sm:grid-cols-2">{legalSlugs.map((slug, index) => { const entry = entries.find((e) => e.kind === legalKinds[index]); return <li key={slug}><Link className="flex h-full flex-wrap items-center justify-between gap-3 rounded-2xl border border-border-subtle bg-surface-elevated p-4" href={`/${locale}/legal/${slug}`}><span className="text-text-primary">{entry?.title || (t(`legalTitles.${legalSlugs[index]}`))}</span><StatusLabel tone={entry?.available ? "success" : "neutral"}>{entry?.available ? (t("published")) : (t("unpublished"))}</StatusLabel></Link></li>; })}</ul>}</Shell>;
+  return <Shell title={t("legalTitle")} subtitle={t("legalSubtitle")}>{error ? <Failure title={t("legalFailure")} retry={load} /> : !entries ? <Skeleton aria-label={t("loading")} className="h-64 w-full" /> : <ul className="grid gap-3 sm:grid-cols-2">{legalSlugs.map((slug, index) => { const entry = entries.find((e) => e.kind === legalKinds[index]); return <li key={slug}><Link className="flex h-full flex-wrap items-center justify-between gap-3 rounded-2xl border border-border-subtle bg-surface-elevated p-4" href={`/${locale}/legal/${slug}`}><span className="text-text-primary">{entry?.title || (t(`legalTitles.${legalSlugs[index]}`))}</span><StatusLabel tone={entry?.available || BUILTIN_LEGAL.has(slug) ? "success" : "neutral"}>{entry?.available || BUILTIN_LEGAL.has(slug) ? (t("published")) : (t("unpublished"))}</StatusLabel></Link></li>; })}</ul>}</Shell>;
 }
 
 export function LegalDocumentView({ slug }: { slug: string }) {

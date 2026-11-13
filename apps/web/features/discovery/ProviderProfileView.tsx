@@ -12,6 +12,8 @@ import { formatCount } from "@/lib/number/format-number";
 import { todayIso } from "@/lib/date/jalali";
 import { WeekAvailability } from "./WeekAvailability";
 import type { RouteLocale } from "@/lib/i18n/config";
+import { SafetyTip } from "@/features/shared/SafetyTip";
+import { placeName } from "@/lib/i18n/iran-places";
 
 type Service = ProviderProfile["services"][number];
 
@@ -33,6 +35,7 @@ export function ProviderProfileView({ providerId }: { providerId: string }) {
   const [profile, setProfile] = useState<ProviderProfile | null>(null);
   const [state, setState] = useState<"loading" | "ready" | "notFound" | "error">("loading");
   const [weekService, setWeekService] = useState<string | null>(null);
+  const [coverBroken, setCoverBroken] = useState(false);
 
   const load = useCallback(async () => {
     setState("loading");
@@ -91,9 +94,9 @@ export function ProviderProfileView({ providerId }: { providerId: string }) {
   return (
     <article className="pd" data-kind={isVet ? "vet" : "service"}>
       <header className="pd-head">
-        {profile.coverImageUrl ? (
+        {profile.coverImageUrl && !coverBroken ? (
           <div className="pd-head__cover">
-            <Image unoptimized src={profile.coverImageUrl} alt="" fill sizes="(max-width:1024px) 100vw, 1240px" priority />
+            <Image unoptimized src={profile.coverImageUrl} alt="" fill sizes="(max-width:1024px) 100vw, 1240px" priority onError={() => setCoverBroken(true)} />
           </div>
         ) : null}
         <div className="pd-head__identity">
@@ -107,7 +110,7 @@ export function ProviderProfileView({ providerId }: { providerId: string }) {
               {profile.verified ? <span className="pd-head__verified"><BadgeCheck size={16} aria-hidden="true" />{fa ? (isVet ? "هویت و پروانهٔ دامپزشکی تأییدشده" : "هویت و مجوز تأییدشده") : t(isVet ? "verifiedVet" : "verified")}</span> : null}
               {place ? <span><MapPin size={15} aria-hidden="true" />{place}</span> : null}
               {ratingText ? <span><Star size={15} aria-hidden="true" className="pd-star" />{ratingText}</span> : <span>{fa ? "هنوز نظری ثبت نشده" : t("noReviews")}</span>}
-              {profile.completedBookings ? <span>{fa ? `${formatCount(profile.completedBookings, "fa")} نوبت انجام‌شده در opetlife` : t("completedBookings", { count: profile.completedBookings })}</span> : null}
+              {profile.completedBookings ? <span>{fa ? `${formatCount(profile.completedBookings, "fa")} نوبت انجام‌شده در اپت لایف` : t("completedBookings", { count: profile.completedBookings })}</span> : null}
             </p>
             {isVet && profile.specialties.length ? (
               <p className="pd-head__specialties"><span>{fa ? "تخصص‌ها:" : t("specialties")}</span> {profile.specialties.map((specialty) => discoveryT.has(`specialties.${specialty}`) ? discoveryT(`specialties.${specialty}`) : specialty).join(sep)}</p>
@@ -228,14 +231,15 @@ export function ProviderProfileView({ providerId }: { providerId: string }) {
             <h2 id="pd-location">{t("locationContact")}</h2>
             <ul className="pd-contact">
               {profile.locations.map((l) => (
-                <li key={l.id}><MapPin size={16} aria-hidden="true" /><span>{[l.name, l.addressLine, l.region, l.city].filter(Boolean).join(sep)}</span></li>
+                <li key={l.id}><MapPin size={16} aria-hidden="true" /><span>{[l.name, l.addressLine, placeName(l.region, locale), placeName(l.city, locale)].filter(Boolean).join(sep)}</span></li>
               ))}
               {profile.phone ? <li><Phone size={16} aria-hidden="true" /><a href={`tel:${profile.phone}`} dir="ltr">{profile.phone}</a></li> : null}
             </ul>
+            <SafetyTip kind="contact" />
             {profile.type === "VET_CLINIC" && profile.locations[0]?.city ? (
               <p className="pd-muted">
                 {t("travelling")} {" "}
-                <Link className="pd-link" href={`/${locale}/travel/search?city=${encodeURIComponent(profile.locations[0].city)}`}>{t("petFriendlyStays", { city: profile.locations[0].city })}</Link>
+                <Link className="pd-link" href={`/${locale}/travel/search?city=${encodeURIComponent(profile.locations[0].city)}`}>{t("petFriendlyStays", { city: placeName(profile.locations[0].city, locale) })}</Link>
               </p>
             ) : null}
           </section>

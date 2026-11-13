@@ -22,6 +22,8 @@ export interface ConfirmBookingInput {
   reasonForVisit?: string;
   ownerNotes?: string;
   accessSelection?: PetAccessScopePreset;
+  /** VET + health basics only: the pet's own documents the owner ticked for this booking's vet. */
+  sharedDocumentIds?: string[];
   customerAddressId?: string;
   dropoffAddressId?: string;
 }
@@ -73,6 +75,7 @@ export const bookingsService = {
 
   getById: (id: string) => apiFetch<BookingDto>(`/bookings/${id}`),
 
+  confirmAttendance: (id: string) => apiFetch<BookingDto>(`/bookings/${encodeURIComponent(id)}/confirm-attendance`, { method: "POST" }),
   cancel: (id: string, reason?: string) =>
     apiFetch<BookingDto>(`/bookings/${id}/cancel`, { method: "POST", body: { reason } }),
 

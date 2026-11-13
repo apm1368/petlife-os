@@ -102,6 +102,72 @@ export const expenseCopy = {
     amount: "Importe (tomanes)", amountHint: "p. ej., 250.000", amountError: "Introduce un importe entero en tomanes.", category: "Categoría", date: "Fecha", note: "Nota (opcional)",
     emptyTitle: "Todavía no hay gastos registrados este año", emptyBody: "Añade comida, una visita veterinaria fuera de PET LIFE u otros gastos para ver el gasto real.",
     openBooking: "Ver reserva", openOrder: "Ver pedido", loading: "Cargando gastos", householdOnly: "Los gastos solo son visibles para los miembros del hogar al que pertenece esta mascota.", share: "Parte",
+  }, ar: {
+    title: "المصروفات",
+    intro: "كل ما أُنفق على هذا الحيوان الأليف في مكان واحد. تُحتسب حجوزات PET LIFE ومشتريات المتجر تلقائيًا؛ وأضف الباقي بنفسك.",
+    prevYear: "السنة السابقة",
+    nextYear: "السنة التالية",
+    year: "السنة",
+    total: "إجمالي الإنفاق",
+    monthlyAverage: "المتوسط الشهري",
+    entriesCount: "المصروفات",
+    byCategory: "حسب الفئة",
+    byMonth: "شهرًا بشهر",
+    entries: "كل المصروفات",
+    add: "إضافة مصروف",
+    edit: "تعديل",
+    remove: "حذف",
+    confirmRemove: "حذف هذا المصروف؟",
+    yes: "نعم، احذف",
+    no: "إلغاء",
+    save: "حفظ",
+    close: "إغلاق",
+    amount: "المبلغ (تومان)",
+    amountHint: "مثلًا 250,000",
+    amountError: "أدخل المبلغ بالتومان كعدد صحيح.",
+    category: "الفئة",
+    date: "التاريخ",
+    note: "ملاحظة (اختياري)",
+    emptyTitle: "لم تُسجَّل أي مصروفات لهذه السنة بعد",
+    emptyBody: "أضف الطعام أو زيارة طبيب بيطري خارج PET LIFE أو أي شيء آخر لترى أين يذهب المال فعلًا.",
+    openBooking: "عرض الحجز",
+    openOrder: "عرض الطلب",
+    loading: "جارٍ تحميل المصروفات",
+    householdOnly: "لا تظهر المصروفات إلا لأعضاء الأسرة التي ينتمي إليها هذا الحيوان الأليف.",
+    share: "الحصة"
+  }, nl: {
+    title: "Uitgaven",
+    intro: "Alles wat aan dit huisdier is uitgegeven, op één plek. Boekingen en winkelaankopen via PET LIFE tellen automatisch mee; de rest voeg je zelf toe.",
+    prevYear: "Vorig jaar",
+    nextYear: "Volgend jaar",
+    year: "Jaar",
+    total: "Totaal uitgegeven",
+    monthlyAverage: "Maandgemiddelde",
+    entriesCount: "Uitgaven",
+    byCategory: "Per categorie",
+    byMonth: "Per maand",
+    entries: "Alle uitgaven",
+    add: "Uitgave toevoegen",
+    edit: "Bewerken",
+    remove: "Verwijderen",
+    confirmRemove: "Deze uitgave verwijderen?",
+    yes: "Ja, verwijderen",
+    no: "Annuleren",
+    save: "Opslaan",
+    close: "Sluiten",
+    amount: "Bedrag (toman)",
+    amountHint: "bijv. 250.000",
+    amountError: "Voer een heel bedrag in toman in.",
+    category: "Categorie",
+    date: "Datum",
+    note: "Notitie (optioneel)",
+    emptyTitle: "Nog geen uitgaven vastgelegd voor dit jaar",
+    emptyBody: "Voeg voer, een dierenartsbezoek buiten PET LIFE of iets anders toe om te zien waar het geld echt naartoe gaat.",
+    openBooking: "Boeking bekijken",
+    openOrder: "Bestelling bekijken",
+    loading: "Uitgaven laden",
+    householdOnly: "Uitgaven zijn alleen zichtbaar voor leden van het huishouden waartoe dit huisdier behoort.",
+    share: "Aandeel"
   },
 } as const;
 
@@ -163,11 +229,11 @@ export function PetExpensesView({ petId }: { petId: string }) {
         </div>
         <div className="flex items-center gap-2" role="group" aria-label={c.year}>
           <Button variant="ghost" size="sm" onClick={() => setYear((y) => y - 1)} aria-label={c.prevYear}>
-            {locale === "fa" ? "›" : "‹"}
+            {(locale === "fa" || locale === "ar") ? "›" : "‹"}
           </Button>
           <span className="min-w-16 text-center font-semibold text-text-primary" aria-live="polite">{localizeDigits(year, locale)}</span>
           <Button variant="ghost" size="sm" onClick={() => setYear((y) => y + 1)} aria-label={c.nextYear} disabled={year >= thisYear}>
-            {locale === "fa" ? "‹" : "›"}
+            {(locale === "fa" || locale === "ar") ? "‹" : "›"}
           </Button>
           <Button size="sm" onClick={() => setForm("new")}>{c.add}</Button>
         </div>

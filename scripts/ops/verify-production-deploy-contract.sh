@@ -14,6 +14,14 @@ grep -Fq "bash scripts/smoke-production.sh" "$workflow"
 grep -Fq "Verify public HTML and build assets" "$workflow"
 grep -Fq "python3 docs/qa/tools/public-assets-smoke.py --expected-sha" "$workflow"
 grep -Fq "public-assets-" "$workflow"
+# A timed-out job can leave deploy.sh building on the server; the next job must wait for its lock before git reset.
+grep -Fq "flock -n /var/lock/petlife-deploy.lock -c true" "$workflow"
+# Releases are built on GitHub and verified + swapped in by deploy.sh; the box never compiles the site.
+grep -Fq "PREBUILT_ARCHIVE=" "$workflow"
+grep -Fq "install_prebuilt" deploy.sh
+# The box pulls the archive over parallel range requests; a single connection was too slow from the VPS (2026-11-12).
+grep -Fq "bash scripts/ops/fetch-release.sh" "$workflow"
+test -x scripts/ops/fetch-release.sh
 
 if grep -Fq "DEPLOYMENT_ENVIRONMENT='staging'" "$workflow"; then
   echo "deploy contract: production workflow must not label its release as staging" >&2

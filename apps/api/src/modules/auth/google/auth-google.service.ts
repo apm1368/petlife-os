@@ -6,7 +6,7 @@ import { SessionService, type SessionUser } from "../../../common/session/sessio
 import { DomainEventsService } from "../../../common/events/domain-events.service";
 import { GoogleAuthFailedException } from "../../../common/errors/api-exception";
 import type { GoogleProfile } from "./google-profile.types";
-import { markContactVerified } from "../contact-verification.util";
+import { markContactVerified, releaseUnprovenContact } from "../contact-verification.util";
 import { deviceLabel } from "../../../common/session/device-label.util";
 
 function isUniqueConstraintViolation(error: unknown): boolean {
@@ -74,6 +74,11 @@ export class AuthGoogleService {
     }
 
     const existingUserByEmail = await this.prisma.user.findUnique({ where: { email: profile.email } });
+    // An account that proved a phone but only ever had this email typed in belongs to someone else: take the
+    // unproven email off it and give the Google user an account of their own instead of signing them into it.
+    if (existingUserByEmail && (await releaseUnprovenContact(this.prisma, existingUserByEmail, "email"))) {
+      return this.createUserWithIdentity(profile);
+    }
     if (existingUserByEmail) {
       // Google proved this address; an account that never proved it must not stay reachable by whoever typed it in.
       await markContactVerified(this.prisma, existingUserByEmail, "email");

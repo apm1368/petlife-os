@@ -1,10 +1,12 @@
-import Image from "next/image";
+import type { RouteLocale } from "@/lib/i18n/config";
+import { OplMark } from "./OplMark";
 import styles from "./brand.module.css";
 
-/** The owner's supplied symbol, with the explicitly approved product name. */
-export function Brand({ compact = false }: { compact?: boolean }) {
-  return <span className={styles.brand} dir="ltr">
-    <Image unoptimized className={styles.symbol} src="/brand/opetlife/02_symbol_only_transparent_approx.png" width={36} height={36} alt="" aria-hidden="true" />
-    {!compact && <bdi>opetlife</bdi>}
+/** The approved opl mark with the localized wordmark: «اپت لایف» in Persian, «opetlife» elsewhere. */
+export function Brand({ compact = false, locale }: { compact?: boolean; locale?: RouteLocale }) {
+  const persian = locale === "fa";
+  return <span className={styles.brand} dir={persian ? "rtl" : "ltr"}>
+    <OplMark className={styles.symbol} />
+    {!compact && <bdi className={persian ? styles.wordFa : styles.wordLatin}>{persian ? "اپت لایف" : "opetlife"}</bdi>}
   </span>;
 }

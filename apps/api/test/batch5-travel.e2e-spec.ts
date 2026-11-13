@@ -373,6 +373,41 @@ describe("Batch 5 — Travel, Insurance, Places", () => {
       expect(hostCancelled.body.refundAmountIrr).toBe(byHost.payNowAmountIrr);
     });
 
+    it("staff cancel a paid stay without an automatic refund; money goes back through a finance approval, also from a dispute", async () => {
+      const p = await partner();
+      const l = await listing(p.orgId, { plans: [{ name: "NR", cancellationType: "NON_REFUNDABLE" }] });
+      const t = await traveler();
+      const first = await admin(AdminRole.SUPER_ADMIN);
+      const second = await admin(AdminRole.SUPER_ADMIN);
+      const stay = await holdAndSubmit(t.c, l, t.petIds, day(30), day(31), l.plans[0]!.id);
+      await t.c.post(`/travel/bookings/${stay.id}/pay`).send({ mode: "SUCCESS" }).expect(201);
+
+      const money = (await first.c.get(`/admin/travel/bookings/${stay.id}/money`).expect(200)).body;
+      expect(money).toMatchObject({ kind: "TRAVEL_BOOKING", paidIrr: stay.payNowAmountIrr, policyRefundIrr: 0, cancellable: true });
+      const cancelled = await first.c.post(`/admin/travel/bookings/${stay.id}/cancel`).send({ reason: "Listing removed after inspection", refund: "FULL" }).expect(201);
+      expect(cancelled.body).toMatchObject({ status: "CANCELLED", paymentStatus: "REFUND_PENDING" });
+      const approval = cancelled.body.approvals[0];
+      expect(approval).toMatchObject({ subjectType: "TRAVEL_BOOKING", travelBookingId: stay.id, amount: stay.payNowAmountIrr, status: "REQUESTED" });
+      const intentId = (await prisma.travelBooking.findUniqueOrThrow({ where: { id: stay.id } })).paymentIntentId!;
+      expect(await prisma.travelBookedNight.count({ where: { bookingId: stay.id } })).toBe(0);
+      expect(await prisma.refund.count({ where: { paymentIntentId: intentId, status: "SUCCEEDED" } })).toBe(0);
+      expect(await prisma.notification.count({ where: { userId: t.userId, type: "travel.booking_cancelled_by_staff" } })).toBe(1);
+
+      await first.c.patch(`/admin/transactions/refund-approvals/${approval.id}/approve`).send({}).expect(409);
+      await second.c.patch(`/admin/transactions/refund-approvals/${approval.id}/approve`).send({}).expect(200);
+      await second.c.patch(`/admin/transactions/refund-approvals/${approval.id}/execute`).send({}).expect(200);
+      expect(await prisma.travelBooking.findUniqueOrThrow({ where: { id: stay.id } })).toMatchObject({ paymentStatus: "REFUNDED", refundAmountIrr: stay.payNowAmountIrr });
+      await first.c.post(`/admin/travel/bookings/${stay.id}/cancel`).send({ reason: "Again", refund: "NONE" }).expect(400);
+
+      // A dispute about another paid stay, decided for the traveller with part of the money back.
+      const other = await holdAndSubmit(t.c, l, t.petIds, day(40), day(41), l.plans[0]!.id);
+      await t.c.post(`/travel/bookings/${other.id}/pay`).send({ mode: "SUCCESS" }).expect(201);
+      const dispute = await prisma.dispute.create({ data: { subjectType: "BOOKING", subjectId: other.id, claim: "Room was not pet friendly", status: "UNDER_REVIEW", raisedByUserId: t.userId } });
+      await first.c.post(`/admin/disputes/${dispute.id}/refund-outcome`).send({ amount: 300_000, reason: "Partial refund for the room" }).expect(201);
+      const outcome = (await first.c.get(`/admin/disputes/${dispute.id}/outcome`).expect(200)).body;
+      expect(outcome.refundApproval).toMatchObject({ subjectType: "TRAVEL_BOOKING", travelBookingId: other.id, amount: 300_000 });
+    });
+
     it("modification keeps the booking when the amount due is unchanged, refuses when it changes, and never loses the original on failure", async () => {
       const p = await partner();
       const l = await listing(p.orgId, { quantity: 1 });

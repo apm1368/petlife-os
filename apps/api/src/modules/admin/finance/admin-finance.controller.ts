@@ -1,4 +1,7 @@
-import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards, UseInterceptors } from "@nestjs/common";
+import { AdminRefundApprovalStatus } from "@prisma/client";
+import { Type } from "class-transformer";
+import { IsEnum, IsInt, IsOptional, Max, Min } from "class-validator";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
 import { IdempotencyInterceptor } from "../../../common/idempotency/idempotency.interceptor";
 import { AdminAuthGuard } from "../auth/admin-auth.guard";
@@ -8,6 +11,12 @@ import type { AdminAuthedRequest, ResolvedAdminContext } from "../auth/admin-con
 import { AdminFinanceService } from "./admin-finance.service";
 import { AdminRefundService } from "./admin-refund.service";
 import { RejectAdminRefundDto, RequestAdminRefundDto } from "./dto/admin-refund.dto";
+
+class RefundApprovalListQueryDto {
+  @IsOptional() @IsEnum(AdminRefundApprovalStatus) status?: AdminRefundApprovalStatus;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) page?: number;
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100) pageSize?: number;
+}
 
 @Controller("admin/transactions")
 @UseGuards(SessionAuthGuard, AdminAuthGuard)
@@ -28,6 +37,13 @@ export class AdminFinanceController {
   @UseInterceptors(IdempotencyInterceptor)
   request(@Body() dto: RequestAdminRefundDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() request: AdminAuthedRequest) {
     return this.refunds.request(admin, dto.orderId, dto.amount, dto.reason, dto.idempotencyKey, request.requestId);
+  }
+
+  /** The finance queue across orders, service bookings and stays. */
+  @Get("refund-approvals")
+  @RequireAdminPermission("finance.view")
+  list(@Query() query: RefundApprovalListQueryDto) {
+    return this.refunds.list(query);
   }
 
   @Get("refund-approvals/:id")

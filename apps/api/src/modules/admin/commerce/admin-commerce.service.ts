@@ -8,6 +8,8 @@ import {
   RepeatDeliveryStatus,
   SellerOfferModerationStatus,
   SellerOfferStatus,
+  SellerStatus,
+  SellerVerificationStatus,
   type FulfillmentStatus as PrismaFulfillmentStatus,
 } from "@prisma/client";
 import type {
@@ -15,6 +17,8 @@ import type {
   AdminCommerceOrderDetailDto,
   AdminCommerceOrderRowDto,
   AdminInventoryRowDto,
+  AdminProductDetailDto,
+  AdminProductOfferDto,
   AdminProductReviewRowDto,
   AdminProductRowDto,
   AdminRefundRequestDto,
@@ -93,6 +97,50 @@ export class AdminCommerceService {
     private readonly refundApprovals: AdminRefundService,
     private readonly storage: StorageService,
   ) {}
+
+  // ----------------------------------------------------- repeat deliveries
+
+  /** Members' repeat-delivery schedules (read-only for staff): what, how often, next run, and the last order made. */
+  async listRepeatDeliveries(query: { status?: "ACTIVE" | "PAUSED" | "CANCELLED"; page?: number; pageSize?: number }) {
+    const page = Math.max(1, query.page ?? 1);
+    const pageSize = Math.min(100, Math.max(1, query.pageSize ?? 20));
+    const where = query.status ? { status: query.status } : {};
+    const [rows, total] = await Promise.all([
+      this.prisma.repeatDeliverySchedule.findMany({
+        where,
+        orderBy: [{ status: "asc" }, { nextCycleAt: "asc" }],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: {
+          user: { select: { id: true, displayName: true } },
+          productVariant: { select: { title: true, product: { select: { id: true, title: true } } } },
+          sellerOffer: { select: { sellerOrganization: { select: { id: true, name: true } } } },
+          address: { select: { city: true } },
+          lastOrder: { select: { id: true, status: true, createdAt: true } },
+        },
+      }),
+      this.prisma.repeatDeliverySchedule.count({ where }),
+    ]);
+    return {
+      items: rows.map((r) => ({
+        id: r.id,
+        status: r.status,
+        member: { id: r.user.id, displayName: r.user.displayName },
+        product: { id: r.productVariant.product.id, title: r.productVariant.product.title, variant: r.productVariant.title },
+        seller: r.sellerOffer.sellerOrganization,
+        quantity: r.quantity,
+        intervalDays: r.intervalDays,
+        unitPrice: r.acceptedUnitPrice,
+        city: r.address?.city ?? null,
+        nextCycleAt: r.nextCycleAt.toISOString(),
+        lastOrder: r.lastOrder,
+        createdAt: r.createdAt.toISOString(),
+      })),
+      total,
+      page,
+      pageSize,
+    };
+  }
 
   // ---------------------------------------------------------------- orders
 
@@ -474,6 +522,7 @@ export class AdminCommerceService {
         return {
           id: p.id,
           title: p.title,
+          isDemoRecord: p.isDemoRecord,
           status: p.status as unknown as AdminProductRowDto["status"],
           categoryName: p.category.name,
           brandName: p.brand?.name ?? null,
@@ -493,6 +542,90 @@ export class AdminCommerceService {
       page,
       PAGE_SIZE,
     );
+  }
+
+  /**
+   * One product as staff see it: catalog identity, every variant, and every
+   * seller's offer with price, stock and whether a customer can buy it now,
+   * plus the seller requests it came from. Read-only; status changes stay on
+   * the existing product, offer-moderation and inventory actions.
+   */
+  async productDetail(productId: string): Promise<AdminProductDetailDto> {
+    const p = await this.prisma.product.findUnique({
+      where: { id: productId },
+      include: {
+        category: { select: { id: true, name: true } },
+        brand: { select: { id: true, name: true } },
+        _count: { select: { media: true } },
+        variants: {
+          orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+          include: {
+            offers: {
+              orderBy: [{ priceAmount: "asc" }, { id: "asc" }],
+              include: { inventoryItem: true, sellerOrganization: { select: { id: true, name: true, status: true, verificationStatus: true } } },
+            },
+          },
+        },
+      },
+    });
+    if (!p) throw new NotFoundApiException("Product", { productId });
+    const [rating, requests] = await Promise.all([
+      this.prisma.productReview.aggregate({ where: { productId, status: { in: [ProductReviewStatus.PUBLISHED, ProductReviewStatus.APPROVED] } }, _avg: { rating: true }, _count: { _all: true } }),
+      this.prisma.catalogProductRequest.findMany({ where: { resolvedProductId: productId }, orderBy: { createdAt: "desc" }, take: 20, include: { sellerOrganization: { select: { name: true } } } }),
+    ]);
+    const offers: AdminProductOfferDto[] = p.variants.flatMap((v) =>
+      v.offers.map((o) => {
+        const stock = o.inventoryItem ? { onHand: o.inventoryItem.onHand, reserved: o.inventoryItem.reserved, available: Math.max(0, o.inventoryItem.onHand - o.inventoryItem.reserved) } : null;
+        // Same conditions as the public catalog (ACTIVE_OFFER_WHERE) plus stock on hand.
+        const buyable =
+          p.status === ProductStatus.ACTIVE &&
+          o.status === SellerOfferStatus.ACTIVE &&
+          o.moderationStatus === SellerOfferModerationStatus.APPROVED &&
+          o.sellerOrganization.verificationStatus === SellerVerificationStatus.VERIFIED &&
+          o.sellerOrganization.status === SellerStatus.ACTIVE &&
+          (stock?.available ?? 0) > 0;
+        return {
+          id: o.id,
+          variantId: v.id,
+          variantSku: v.sku,
+          variantTitle: v.title,
+          seller: { id: o.sellerOrganization.id, name: o.sellerOrganization.name, status: o.sellerOrganization.status, verificationStatus: o.sellerOrganization.verificationStatus },
+          status: o.status,
+          moderationStatus: o.moderationStatus,
+          moderationReason: o.moderationReason,
+          priceAmount: o.priceAmount,
+          compareAtAmount: o.compareAtAmount,
+          currency: o.currency,
+          sellerSku: o.sellerSku,
+          stock,
+          buyable,
+          updatedAt: o.updatedAt.toISOString(),
+        };
+      }),
+    );
+    const buyablePrices = offers.filter((o) => o.buyable).map((o) => o.priceAmount);
+    return {
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+      isDemoRecord: p.isDemoRecord,
+      status: p.status as unknown as AdminProductDetailDto["status"],
+      categoryName: p.category.name,
+      brandName: p.brand?.name ?? null,
+      category: p.category,
+      brand: p.brand,
+      variantCount: p.variants.length,
+      activeOfferCount: offers.filter((o) => o.status === SellerOfferStatus.ACTIVE).length,
+      sellerCount: new Set(offers.map((o) => o.seller.id)).size,
+      rating: { average: rating._avg.rating ? Math.round(rating._avg.rating * 10) / 10 : null, count: rating._count._all },
+      mediaCount: p._count.media,
+      hasMedia: p._count.media > 0,
+      createdAt: p.createdAt.toISOString(),
+      variants: p.variants.map((v) => ({ id: v.id, sku: v.sku, title: v.title, isActive: v.isActive })),
+      offers,
+      catalogRequests: requests.map((r) => ({ id: r.id, status: r.status, sellerName: r.sellerOrganization.name, requestedTitle: r.requestedTitle, reviewedAt: r.reviewedAt?.toISOString() ?? null, decisionReason: r.decisionReason })),
+      lowestBuyablePrice: buyablePrices.length ? Math.min(...buyablePrices) : null,
+    };
   }
 
   /** Platform maintains catalog identity; seller offers remain the sole price/inventory owner. */

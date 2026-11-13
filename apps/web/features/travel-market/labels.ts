@@ -4,7 +4,7 @@ import { formatCurrency } from "@/lib/currency/format-currency";
 import { formatDay, localizeDigits } from "@/lib/date/jalali";
 
 export type Lang = "fa" | "en";
-export type LocalizedTravelLocale = Lang | "de" | "es";
+export type LocalizedTravelLocale = Lang | "de" | "es" | "ar" | "nl";
 type Pair = [string, string];
 const pick = (p: Pair, lang: Lang) => (lang === "fa" ? p[0] : p[1]);
 
@@ -24,13 +24,13 @@ export const LISTING_TYPE: Record<string, Pair> = {
 };
 /** Stay types a traveller can search for (transport types are not stays). */
 export const STAY_TYPES: TravelListingType[] = ["HOTEL", "PET_FRIENDLY_HOTEL", "ECO_LODGE", "GUESTHOUSE", "RESORT", "VILLA", "APARTMENT", "RESIDENCE", "PET_HOTEL"] as TravelListingType[];
-const LISTING_TYPE_DE_ES: Record<string, { de: string; es: string }> = {
-  HOTEL: { de: "Hotel", es: "Hotel" }, ECO_LODGE: { de: "Öko-Lodge", es: "Alojamiento ecológico" }, GUESTHOUSE: { de: "Gästehaus", es: "Casa de huéspedes" },
-  RESORT: { de: "Resort", es: "Complejo turístico" }, PET_HOTEL: { de: "Tierhotel", es: "Hotel para mascotas" }, PET_FRIENDLY_HOTEL: { de: "Haustierfreundliches Hotel", es: "Hotel que admite mascotas" },
-  VILLA: { de: "Villa", es: "Villa" }, APARTMENT: { de: "Ferienwohnung", es: "Apartamento" }, RESIDENCE: { de: "Unterkunft", es: "Residencia" }, BOARDING: { de: "Tierpension", es: "Residencia para mascotas" },
-  PET_TAXI: { de: "Haustiertaxi", es: "Taxi para mascotas" }, INTERCITY_TRANSPORT: { de: "Überregionaler Transport", es: "Transporte interurbano" },
+const LISTING_TYPE_DE_ES: Record<string, { de: string; es: string; ar: string; nl: string }> = {
+  HOTEL: { de: "Hotel", es: "Hotel", ar: "فندق", nl: "Hotel" }, ECO_LODGE: { de: "Öko-Lodge", es: "Alojamiento ecológico", ar: "نُزُل بيئي", nl: "Ecolodge" }, GUESTHOUSE: { de: "Gästehaus", es: "Casa de huéspedes", ar: "دار ضيافة", nl: "Pension" },
+  RESORT: { de: "Resort", es: "Complejo turístico", ar: "منتجع", nl: "Resort" }, PET_HOTEL: { de: "Tierhotel", es: "Hotel para mascotas", ar: "فندق للحيوانات الأليفة", nl: "Dierenhotel" }, PET_FRIENDLY_HOTEL: { de: "Haustierfreundliches Hotel", es: "Hotel que admite mascotas", ar: "فندق يرحّب بالحيوانات الأليفة", nl: "Huisdiervriendelijk hotel" },
+  VILLA: { de: "Villa", es: "Villa", ar: "فيلا", nl: "Villa" }, APARTMENT: { de: "Ferienwohnung", es: "Apartamento", ar: "شقة", nl: "Appartement" }, RESIDENCE: { de: "Unterkunft", es: "Residencia", ar: "مكان إقامة", nl: "Verblijf" }, BOARDING: { de: "Tierpension", es: "Residencia para mascotas", ar: "فندق إيواء للحيوانات", nl: "Dierenpension" },
+  PET_TAXI: { de: "Haustiertaxi", es: "Taxi para mascotas", ar: "تاكسي الحيوانات الأليفة", nl: "Dierentaxi" }, INTERCITY_TRANSPORT: { de: "Überregionaler Transport", es: "Transporte interurbano", ar: "نقل بين المدن", nl: "Vervoer tussen steden" },
 };
-export const listingTypeLabel = (t: string, lang: LocalizedTravelLocale) => lang === "de" || lang === "es" ? LISTING_TYPE_DE_ES[t]?.[lang] ?? t : pick(LISTING_TYPE[t] ?? [t, t], lang);
+export const listingTypeLabel = (t: string, lang: LocalizedTravelLocale) => lang !== "fa" && lang !== "en" ? LISTING_TYPE_DE_ES[t]?.[lang] ?? t : pick(LISTING_TYPE[t] ?? [t, t], lang);
 
 export const AMENITY: Record<string, Pair> = {
   WIFI: ["اینترنت", "Wi-Fi"],
@@ -52,14 +52,14 @@ export const AMENITY: Record<string, Pair> = {
   RESTAURANT: ["رستوران", "Restaurant"],
   ELEVATOR: ["آسانسور", "Elevator"],
 };
-const AMENITY_DE_ES: Record<string, { de: string; es: string }> = {
-  WIFI: { de: "WLAN", es: "Wi-Fi" }, PARKING: { de: "Parkplatz", es: "Aparcamiento" }, YARD: { de: "Garten", es: "Patio" }, FENCED_YARD: { de: "Eingezäunter Garten", es: "Patio vallado" },
-  POOL: { de: "Pool", es: "Piscina" }, KITCHEN: { de: "Küche", es: "Cocina" }, BREAKFAST: { de: "Frühstück", es: "Desayuno" }, AIR_CONDITIONING: { de: "Klimaanlage", es: "Aire acondicionado" },
-  HEATING: { de: "Heizung", es: "Calefacción" }, PET_BED: { de: "Tierbett", es: "Cama para mascotas" }, PET_BOWLS: { de: "Futter- und Wassernäpfe", es: "Cuencos para agua y comida" },
-  DOG_PARK_NEARBY: { de: "Hundewiese in der Nähe", es: "Parque canino cercano" }, PET_SITTING: { de: "Betreuung für Haustiere", es: "Cuidado de mascotas" }, GROOMING: { de: "Fellpflege", es: "Aseo de mascotas" },
-  VET_ON_CALL: { de: "Tierarzt auf Abruf", es: "Veterinario de guardia" }, WALKING_TRAILS: { de: "Wanderwege", es: "Rutas para pasear" }, RESTAURANT: { de: "Restaurant", es: "Restaurante" }, ELEVATOR: { de: "Aufzug", es: "Ascensor" },
+const AMENITY_DE_ES: Record<string, { de: string; es: string; ar: string; nl: string }> = {
+  WIFI: { de: "WLAN", es: "Wi-Fi", ar: "واي فاي", nl: "wifi" }, PARKING: { de: "Parkplatz", es: "Aparcamiento", ar: "موقف سيارات", nl: "Parkeerplaats" }, YARD: { de: "Garten", es: "Patio", ar: "فناء", nl: "Tuin" }, FENCED_YARD: { de: "Eingezäunter Garten", es: "Patio vallado", ar: "فناء مسوّر", nl: "Omheinde tuin" },
+  POOL: { de: "Pool", es: "Piscina", ar: "مسبح", nl: "Zwembad" }, KITCHEN: { de: "Küche", es: "Cocina", ar: "مطبخ", nl: "Keuken" }, BREAKFAST: { de: "Frühstück", es: "Desayuno", ar: "فطور", nl: "Ontbijt" }, AIR_CONDITIONING: { de: "Klimaanlage", es: "Aire acondicionado", ar: "تكييف", nl: "Airconditioning" },
+  HEATING: { de: "Heizung", es: "Calefacción", ar: "تدفئة", nl: "Verwarming" }, PET_BED: { de: "Tierbett", es: "Cama para mascotas", ar: "سرير للحيوان الأليف", nl: "Huisdierbed" }, PET_BOWLS: { de: "Futter- und Wassernäpfe", es: "Cuencos para agua y comida", ar: "أوعية الطعام والماء", nl: "Voer- en waterbakken" },
+  DOG_PARK_NEARBY: { de: "Hundewiese in der Nähe", es: "Parque canino cercano", ar: "حديقة كلاب قريبة", nl: "Hondenuitlaatplek in de buurt" }, PET_SITTING: { de: "Betreuung für Haustiere", es: "Cuidado de mascotas", ar: "رعاية الحيوانات الأليفة", nl: "Huisdieroppas" }, GROOMING: { de: "Fellpflege", es: "Aseo de mascotas", ar: "تجميل الحيوانات", nl: "Vachtverzorging" },
+  VET_ON_CALL: { de: "Tierarzt auf Abruf", es: "Veterinario de guardia", ar: "طبيب بيطري عند الطلب", nl: "Dierenarts op afroep" }, WALKING_TRAILS: { de: "Wanderwege", es: "Rutas para pasear", ar: "مسارات للمشي", nl: "Wandelpaden" }, RESTAURANT: { de: "Restaurant", es: "Restaurante", ar: "مطعم", nl: "Restaurant" }, ELEVATOR: { de: "Aufzug", es: "Ascensor", ar: "مصعد", nl: "Lift" },
 };
-export const amenityLabel = (a: string, lang: LocalizedTravelLocale) => lang === "de" || lang === "es" ? AMENITY_DE_ES[a]?.[lang] ?? a.replace(/_/g, " ").toLowerCase() : pick(AMENITY[a] ?? [a.replace(/_/g, " ").toLowerCase(), a.replace(/_/g, " ").toLowerCase()], lang);
+export const amenityLabel = (a: string, lang: LocalizedTravelLocale) => lang !== "fa" && lang !== "en" ? AMENITY_DE_ES[a]?.[lang] ?? a.replace(/_/g, " ").toLowerCase() : pick(AMENITY[a] ?? [a.replace(/_/g, " ").toLowerCase(), a.replace(/_/g, " ").toLowerCase()], lang);
 
 export const BOOKING_STATUS: Record<string, Pair> = {
   HELD: ["در انتظار تکمیل", "Dates held"],

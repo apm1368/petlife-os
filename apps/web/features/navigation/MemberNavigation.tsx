@@ -8,14 +8,17 @@ import { Avatar, ChevronLeft, ChevronRight, Compass, Sheet } from "@petlife/ui";
 import { useActivePet } from "@/hooks/use-active-pet";
 import { LanguageToggle } from "@/features/locale/LanguageToggle";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
-import { EXPLORE_GROUPS, PRIMARY_DESTINATIONS, currentDestination } from "./consumer-nav";
+import { EXPLORE_GROUPS, MOBILE_TABS, PRIMARY_DESTINATIONS, currentDestination, currentMobileTab } from "./consumer-nav";
+import { useHrefFilter } from "@/features/site-settings/site-settings";
 import type { RouteLocale } from "@/lib/i18n/config";
 
 const NAV_COPY: Record<RouteLocale, { main: string; destinations: string; everything: string; addPet: string; activePet: string; petProfile: (name: string) => string; bottom: string; explore: string; preferences: string; support: string; close: string }> = {
-  fa: { main: "منوی اصلی", destinations: "بخش‌های opetlife", everything: "همهٔ بخش‌های opetlife", addPet: "افزودن حیوان", activePet: "حیوان فعال", petProfile: (name) => `پروفایل ${name}`, bottom: "منوی پایین", explore: "کاوش", preferences: "زبان و ظاهر", support: "کمک و پشتیبانی", close: "بستن" },
+  fa: { main: "منوی اصلی", destinations: "بخش‌های اپت لایف", everything: "همهٔ بخش‌های اپت لایف", addPet: "افزودن حیوان", activePet: "حیوان فعال", petProfile: (name) => `پروفایل ${name}`, bottom: "منوی پایین", explore: "کاوش", preferences: "زبان و ظاهر", support: "کمک و پشتیبانی", close: "بستن" },
   en: { main: "Main menu", destinations: "opetlife destinations", everything: "Everything in opetlife", addPet: "Add a pet", activePet: "Active pet", petProfile: (name) => `${name}'s profile`, bottom: "Bottom menu", explore: "Explore", preferences: "Language and appearance", support: "Help and support", close: "Close" },
   de: { main: "Hauptmenü", destinations: "opetlife-Bereiche", everything: "Alle Bereiche von opetlife", addPet: "Tier hinzufügen", activePet: "Aktives Tier", petProfile: (name) => `Profil von ${name}`, bottom: "Untere Navigation", explore: "Entdecken", preferences: "Sprache und Darstellung", support: "Hilfe und Support", close: "Schließen" },
   es: { main: "Menú principal", destinations: "Secciones de opetlife", everything: "Todo opetlife", addPet: "Añadir mascota", activePet: "Mascota activa", petProfile: (name) => `Perfil de ${name}`, bottom: "Menú inferior", explore: "Explorar", preferences: "Idioma y apariencia", support: "Ayuda y soporte", close: "Cerrar" },
+  ar: { main: "القائمة الرئيسية", destinations: "أقسام opetlife", everything: "كل ما في opetlife", addPet: "أضف حيوانًا أليفًا", activePet: "الحيوان الأليف النشط", petProfile: (name) => `ملف ${name}`, bottom: "القائمة السفلية", explore: "استكشاف", preferences: "اللغة والمظهر", support: "المساعدة والدعم", close: "إغلاق" },
+  nl: { main: "Hoofdmenu", destinations: "opetlife-onderdelen", everything: "Alles in opetlife", addPet: "Huisdier toevoegen", activePet: "Actief huisdier", petProfile: (name) => `Profiel van ${name}`, bottom: "Onderste menu", explore: "Ontdekken", preferences: "Taal en weergave", support: "Hulp en ondersteuning", close: "Sluiten" },
 };
 
 const usePathKey = (locale: string) => (usePathname() ?? "").replace(new RegExp(`^/${locale}`), "") || "/";
@@ -46,6 +49,7 @@ function useDismiss(open: boolean, close: () => void, boundary: React.RefObject<
 
 /** Desktop primary navigation with the Explore mega menu. Hidden below 1024px (the bottom bar takes over). */
 export function PrimaryNav({ canViewHealth = true }: { canViewHealth?: boolean }) {
+  const enabled = useHrefFilter();
   const locale = useLocale() as RouteLocale;
   const c = NAV_COPY[locale];
   const current = currentDestination(usePathKey(locale));
@@ -76,13 +80,13 @@ export function PrimaryNav({ canViewHealth = true }: { canViewHealth?: boolean }
     if (!next && panel.current?.contains(document.activeElement)) return;
     hoverTimer.current = setTimeout(() => setOpen(next), next ? 90 : 180);
   };
-  const Forward = locale === "fa" ? ChevronLeft : ChevronRight;
+  const Forward = (locale === "fa" || locale === "ar") ? ChevronLeft : ChevronRight;
 
   return (
     <div className="member-nav" ref={wrap} onPointerLeave={hover(false)}>
       <nav aria-label={c.main}>
         <ul>
-          {PRIMARY_DESTINATIONS.filter(d => d.key !== "health" || canViewHealth).map((d) =>
+          {PRIMARY_DESTINATIONS.filter(d => enabled(d.href) && (d.key !== "health" || canViewHealth)).map((d) =>
             d.key === "explore" ? (
               <li key={d.key} onPointerEnter={hover(true)}>
                 <button
@@ -125,7 +129,7 @@ export function PrimaryNav({ canViewHealth = true }: { canViewHealth?: boolean }
             <section key={group.key} className="mega__group" style={{ ["--g" as string]: gi }} aria-labelledby={`${panelId}-${group.key}`}>
               <h2 id={`${panelId}-${group.key}`}>{group[locale]}</h2>
               <ul>
-                {group.links.filter(link => canViewHealth || link.href !== "/pets/active?view=health").map(({ href, icon: Icon, ...labels }) => (
+                {group.links.filter(link => enabled(link.href) && (canViewHealth || link.href !== "/pets/active?view=health")).map(({ href, icon: Icon, ...labels }) => (
                   <li key={href}>
                     <Link href={`/${locale}${href}`} className="mega__link" onClick={close}>
                       <span className="mega__icon"><Icon size={18} aria-hidden="true" /></span>
@@ -190,7 +194,30 @@ export function PetContextControl({ compact = false }: { compact?: boolean }) {
 }
 
 /** Below 1024px: five large targets at the thumb; Explore opens a grouped sheet instead of a page. */
-export function MobileTabBar({ canViewHealth = true }: { canViewHealth?: boolean }) {
+/**
+ * The app's bottom tab bar below 1024px: Home, My pets, Services, Shop, Profile. Explore (everything else, plus
+ * language and theme) is the compass button in the header, MobileExploreButton.
+ */
+export function MobileTabBar() {
+  const enabled = useHrefFilter();
+  const locale = useLocale() as RouteLocale;
+  const c = NAV_COPY[locale];
+  const current = currentMobileTab(usePathKey(locale));
+  return (
+    <nav className="member-tabbar" aria-label={c.bottom}>
+      {MOBILE_TABS.filter((tab) => enabled(tab.href)).map(({ key, href, icon: Icon, ...labels }) => (
+        <Link key={key} href={`/${locale}${href}`} aria-current={current === key ? "page" : undefined}>
+          <Icon size={21} aria-hidden="true" />
+          <span>{labels[locale]}</span>
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+/** Header compass button below 1024px: opens the Explore sheet (every other destination, language and theme). */
+export function MobileExploreButton({ canViewHealth = true }: { canViewHealth?: boolean }) {
+  const enabled = useHrefFilter();
   const locale = useLocale() as RouteLocale;
   const c = NAV_COPY[locale];
   const router = useRouter();
@@ -200,21 +227,9 @@ export function MobileTabBar({ canViewHealth = true }: { canViewHealth?: boolean
   useEffect(() => setSheet(false), [pathname]);
   return (
     <>
-      <nav className="member-tabbar" aria-label={c.bottom}>
-        {PRIMARY_DESTINATIONS.filter((d) => d.mobile && (d.key !== "health" || canViewHealth)).map(({ key, href, icon: Icon, ...labels }) =>
-          key === "explore" ? (
-            <button key={key} type="button" aria-haspopup="dialog" aria-expanded={sheet} aria-current={current === key ? "page" : undefined} onClick={() => setSheet(true)}>
-              <Compass size={21} aria-hidden="true" />
-              <span>{labels[locale]}</span>
-            </button>
-          ) : (
-            <Link key={key} href={`/${locale}${href}`} aria-current={current === key ? "page" : undefined}>
-              <Icon size={21} aria-hidden="true" />
-              <span>{labels[locale]}</span>
-            </Link>
-          ),
-        )}
-      </nav>
+      <button type="button" className="member-header__explore" aria-label={c.explore} aria-haspopup="dialog" aria-expanded={sheet} aria-current={current === "explore" ? "page" : undefined} onClick={() => setSheet(true)}>
+        <Compass size={21} aria-hidden="true" />
+      </button>
       <Sheet open={sheet} onClose={() => setSheet(false)} title={c.explore} className="member-explore-panel">
         <div className="explore-sheet">
           <PetContextSheetRow onNavigate={() => setSheet(false)} />
@@ -227,7 +242,7 @@ export function MobileTabBar({ canViewHealth = true }: { canViewHealth?: boolean
             <section key={group.key}>
               <h3>{group[locale]}</h3>
               <ul>
-                {group.links.filter(link => canViewHealth || link.href !== "/pets/active?view=health").map(({ href, icon: Icon, ...labels }) => (
+                {group.links.filter(link => enabled(link.href) && (canViewHealth || link.href !== "/pets/active?view=health")).map(({ href, icon: Icon, ...labels }) => (
                   <li key={href}>
                     <button type="button" onClick={() => { setSheet(false); router.push(`/${locale}${href}`); }}>
                       <Icon size={20} aria-hidden="true" />

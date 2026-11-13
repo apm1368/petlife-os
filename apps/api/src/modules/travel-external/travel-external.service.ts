@@ -29,6 +29,8 @@ export function assertSourceUrl(raw: string, hosts: string[]): URL {
   }
 }
 const DAY = 86400e3;
+/** Redis single-flight lock of one source's sync run; kept alive by the running process. */
+export const syncLockKey = (code: string) => `travel-ext-sync:${code}`;
 export const OVERRIDABLE = ["title", "city", "area", "stayType", "petPolicySummary", "descriptionSummary"] as const;
 type Overrides = Partial<Record<(typeof OVERRIDABLE)[number], { sourceValue: unknown; overrideValue: string; adminUserId: string; at: string }>>;
 type QuoteContext = { checkIn: string; checkOut: string; guests: number; pets?: number };
@@ -94,9 +96,11 @@ export class TravelExternalService {
   // ------------------------------------------------------------------ sync
   /** Stuck STARTED runs (worker restart, crash) become ABANDONED so nothing is locked forever. */
   async abandonStuckRuns(now = new Date()) {
-    const sources = await this.prisma.externalTravelSource.findMany({ select: { id: true, timeoutMs: true, maxRequestsPerRun: true, requestDelayMaxMs: true } });
+    const sources = await this.prisma.externalTravelSource.findMany({ select: { id: true, code: true, timeoutMs: true, maxRequestsPerRun: true, requestDelayMaxMs: true } });
     let n = 0;
     for (const s of sources) {
+      // A run whose process is alive keeps its single-flight lock refreshed: it is slow, not stuck.
+      if (await this.redis.exists(syncLockKey(s.code))) continue;
       const cutoff = new Date(now.getTime() - Math.max(15 * 60e3, 2 * (s.timeoutMs + s.requestDelayMaxMs) * (s.maxRequestsPerRun + 2)));
       n += (await this.prisma.externalSyncRun.updateMany({ where: { sourceId: s.id, status: ExternalSyncStatus.STARTED, startedAt: { lt: cutoff } }, data: { status: ExternalSyncStatus.ABANDONED, finishedAt: now } })).count;
     }
@@ -106,7 +110,7 @@ export class TravelExternalService {
   async runSync(code: string, kind: ExternalSyncKind, opts: { adminUserId?: string; listingId?: string; trigger?: ExternalSyncTrigger } = {}) {
     const source = await this.source(code);
     await this.abandonStuckRuns();
-    const lockKey = `travel-ext-sync:${code}`;
+    const lockKey = syncLockKey(code);
     const ttl = Math.max(120_000, (source.timeoutMs + source.requestDelayMaxMs) * (source.maxRequestsPerRun + 2));
     const token = randomUUID();
     if ((await this.redis.set(lockKey, token, "PX", ttl, "NX")) !== "OK") throw new ValidationApiException({ field: "source", reason: "SYNC_ALREADY_RUNNING" });
@@ -120,6 +124,10 @@ export class TravelExternalService {
     let fatal: AdapterError | null = null;
     let anomaly = false;
     const ctx = this.context(source);
+    // A crawl can outlast the lock's initial TTL (slow pages, back-offs); keep the lock while this process works on it.
+    const heartbeat = setInterval(() => void this.redis.get(lockKey).then((v) => (v === token ? this.redis.pexpire(lockKey, ttl) : 0)).catch(() => undefined), Math.max(30_000, Math.floor(ttl / 3)));
+    heartbeat.unref?.();
+    let stoppedEarly: string | undefined;
     try {
       const adapter = this.adapters.get(code);
       if (source.mode !== ExternalSourceMode.AUTOMATED || source.automationStatus !== ExternalAutomationStatus.SUPPORTED || !adapter || !adapter.parserReady) {
@@ -136,12 +144,14 @@ export class TravelExternalService {
         try {
           if (code === "JAJIGA") {
             // Jajiga's public detail page does not carry the pet-filter evidence or the list's location/capacity.
-            // Re-observe the listing in the allowed search result first; an incomplete page is never a removal signal.
-            const discovery = await adapter.discover(ctx);
+            // Re-observe the listing in the allowed search results (stopping once seen); not being found is never a removal signal.
+            const discovery = await adapter.discover(ctx, { stopAtExternalId: stay.sourceListingId });
             const observed = discovery.items.find((item) => item.externalId === stay.sourceListingId);
             if (!observed) {
               status = ExternalSyncStatus.PARTIAL;
-              fail("NOT_IN_OBSERVED_PAGE", "Listing was not on the currently observed first search page; it was not marked removed.", stay.sourceListingId);
+              fail("NOT_IN_OBSERVED_PAGE", "Listing was not in the currently observed search results; it was not marked removed.", stay.sourceListingId);
+            } else if (adapter.fetchesDetailPages === false) {
+              c[await this.ingestRaw(source, adapter, run.id, observed)]++;
             } else {
               const detail = await adapter.fetchDetails(ctx, observed.externalId, observed);
               c[await this.ingestRaw(source, adapter, run.id, detail, observed)]++;
@@ -157,13 +167,18 @@ export class TravelExternalService {
       } else {
         const disc = await adapter.discover(ctx);
         c.listingsDiscovered = disc.items.length;
+        if (disc.stoppedEarly) {
+          stoppedEarly = `${disc.stoppedEarly.category}: ${disc.stoppedEarly.message}`;
+          fail("DISCOVERY_INCOMPLETE", `discovery stopped early (${stoppedEarly}); ${disc.items.length} listings observed, unseen stays left unchanged`);
+        }
+        this.logger.log(`Travel sync ${code}: discovered ${disc.items.length} listings in ${Math.round((Date.now() - started) / 1000)} s over ${ctx.http.requests} requests (${disc.complete ? "complete" : stoppedEarly ? `stopped early — ${stoppedEarly}` : "partial scope"})`);
         anomaly = await this.isAnomalous(source, disc.items.length);
         const seen = new Set<string>();
         for (const raw of disc.items) {
           c.itemsScanned++;
           try {
             let detail: RawListing | null = null;
-            if (raw.stage === "search" && ctx.http.remaining > 0 && (await this.needsDetails(source, raw.externalId))) {
+            if (raw.stage === "search" && adapter.fetchesDetailPages !== false && ctx.http.remaining > 0 && (await this.needsDetails(source, raw.externalId))) {
               detail = await adapter.fetchDetails(ctx, raw.externalId, raw).catch((e) => { if (e instanceof AdapterError && FATAL.includes(e.category)) throw e; return null; });
             }
             c[await this.ingestRaw(source, adapter, run.id, detail ?? raw, detail ? raw : undefined)]++;
@@ -184,7 +199,7 @@ export class TravelExternalService {
           c.staleMarked = r.stale;
           c.removed = r.removed;
         }
-        status = anomaly || (c.failed && c.itemsScanned > c.failed) ? ExternalSyncStatus.PARTIAL : c.failed ? ExternalSyncStatus.FAILED : ExternalSyncStatus.SUCCEEDED;
+        status = anomaly || (c.itemsScanned > c.failed && (c.failed || stoppedEarly)) ? ExternalSyncStatus.PARTIAL : c.failed ? ExternalSyncStatus.FAILED : ExternalSyncStatus.SUCCEEDED;
       }
     } catch (e) {
       const cat = e instanceof AdapterError ? e.category : e instanceof SourceFetchError ? e.category : e instanceof NotFoundApiException ? "NOT_FOUND" : "UNEXPECTED";
@@ -193,9 +208,10 @@ export class TravelExternalService {
       status = ExternalSyncStatus.FAILED;
       if (!(e instanceof AdapterError) && !(e instanceof SourceFetchError) && !(e instanceof NotFoundApiException)) this.logger.error(`Travel sync ${code} failed`, e instanceof Error ? e.stack : undefined);
     } finally {
+      clearInterval(heartbeat);
       const durationMs = Date.now() - started;
       await this.prisma.externalSyncRun.update({ where: { id: run.id }, data: { ...c, pagesRequested: ctx.http.requests, status, finishedAt: new Date(), durationMs, anomaly, errorCategories: categories, errors: errors as unknown as Prisma.InputJsonValue } });
-      await this.recordHealth(source, run.id, status, Object.keys(categories)[0], fatal, { listingsSeen: c.listingsDiscovered || c.itemsScanned, durationMs, anomaly, message: errors[0]?.message });
+      await this.recordHealth(source, run.id, status, Object.keys(categories)[0], fatal, { listingsSeen: c.listingsDiscovered || c.itemsScanned, durationMs, anomaly, stoppedEarly, message: errors[0]?.message });
       if ((await this.redis.get(lockKey)) === token) await this.redis.del(lockKey);
     }
     await this.events.publish("ExternalTravelSyncCompleted", { sourceCode: code, runId: run.id, kind, status, created: c.created, updated: c.updated, removed: c.removed }, { aggregateType: "ExternalSyncRun", aggregateId: run.id });
@@ -238,12 +254,12 @@ export class TravelExternalService {
   }
 
   /** Circuit breaker + health. 403 → BLOCKED (24 h), 429 → wait Retry-After, other failures back off exponentially (max 24 h). */
-  private async recordHealth(source: ExternalTravelSource, runId: string, status: ExternalSyncStatus, category: string | undefined, fatal: AdapterError | null, m: { listingsSeen: number; durationMs: number; anomaly: boolean; message?: string }) {
+  private async recordHealth(source: ExternalTravelSource, runId: string, status: ExternalSyncStatus, category: string | undefined, fatal: AdapterError | null, m: { listingsSeen: number; durationMs: number; anomaly: boolean; stoppedEarly?: string; message?: string }) {
     const now = new Date();
     const base = { lastRunAt: now, lastRunStatus: status, lastDurationMs: m.durationMs, lastListingsSeen: m.listingsSeen };
     if (status === ExternalSyncStatus.SUCCEEDED || status === ExternalSyncStatus.PARTIAL) {
       const partial = status === ExternalSyncStatus.PARTIAL;
-      await this.prisma.externalTravelSource.update({ where: { id: source.id }, data: { ...base, lastSuccessAt: now, consecutiveFailures: 0, circuitOpenUntil: null, accessStatus: ExternalSourceAccessStatus.VERIFIED_PUBLIC, health: partial ? ExternalSourceHealth.DEGRADED : ExternalSourceHealth.HEALTHY, healthReason: m.anomaly ? "Parser anomaly: far fewer listings than usual" : partial ? "Some listings failed to parse" : null, lastErrorCategory: partial ? (category ?? null) : null, lastError: partial ? (m.message ?? null) : null } });
+      await this.prisma.externalTravelSource.update({ where: { id: source.id }, data: { ...base, lastSuccessAt: now, consecutiveFailures: 0, circuitOpenUntil: null, accessStatus: ExternalSourceAccessStatus.VERIFIED_PUBLIC, health: partial ? ExternalSourceHealth.DEGRADED : ExternalSourceHealth.HEALTHY, healthReason: m.anomaly ? "Parser anomaly: far fewer listings than usual" : m.stoppedEarly ? `Discovery stopped early (${m.stoppedEarly}); unseen stays left unchanged`.slice(0, 300) : partial ? "Some listings failed to parse" : null, lastErrorCategory: partial ? (category ?? null) : null, lastError: partial ? (m.message ?? null) : null } });
       return;
     }
     if (status === ExternalSyncStatus.CANCELLED) { await this.prisma.externalTravelSource.update({ where: { id: source.id }, data: base }); return; }

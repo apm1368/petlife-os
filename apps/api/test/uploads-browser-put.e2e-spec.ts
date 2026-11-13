@@ -10,12 +10,17 @@ import { signSessionCookie } from "../src/common/session/session-cookie.util";
  * as it would to a presigned object-store URL. The token is the authorization; CSRF must not block it,
  * while every other mutation still requires the double-submit token.
  */
-describe("Browser uploads to the local-storage upload target", () => {
+// Run once without and once with the local /uploads static mount main.ts installs on the live server: its private-path
+// guard once 404'd every PUT /uploads/:token before UploadsController saw it, and only the mounted run catches that.
+describe.each([
+  ["without the static mount", false],
+  ["through the live server's /uploads static mount", true],
+])("Browser uploads to the local-storage upload target (%s)", (_label, mounted) => {
   let app: INestApplication, db: PrismaService, cookie: string, csrf: string, petId: string;
   const png = Buffer.from("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d49444154789c6360000002000154a24f5d0000000049454e44ae426082", "hex");
 
   beforeAll(async () => {
-    app = await createTestApp();
+    app = await createTestApp({ mountLocalUploads: mounted });
     db = app.get(PrismaService);
     const user = await db.user.create({ data: { displayName: "Uploader", email: `upload-${randomUUID()}@example.com` } });
     const household = await db.household.create({ data: { name: "Upload household" } });
@@ -37,8 +42,10 @@ describe("Browser uploads to the local-storage upload target", () => {
     await request(app.getHttpServer()).put(path).set("Content-Type", "image/png").send(png).expect(404);
   });
 
-  it("an unknown token is refused", async () => {
-    await request(app.getHttpServer()).put(`/uploads/${randomUUID()}`).set("Content-Type", "image/png").send(png).expect(404);
+  it("an unknown token is refused by the upload controller itself", async () => {
+    const res = await request(app.getHttpServer()).put(`/uploads/${randomUUID()}`).set("Content-Type", "image/png").send(png).expect(404);
+    // An empty 404 would mean the static mount swallowed the PUT before the controller ran.
+    expect(JSON.stringify(res.body)).toMatch(/expired or invalid/i);
   });
 
   it("other mutations still require the CSRF token", async () => {

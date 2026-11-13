@@ -30,4 +30,10 @@ describe("owner lost-pet detail locale", () => {
     expect(screen.getByRole("button", { name: action })).toBeTruthy();
     expect(document.body.textContent).not.toMatch(/[\u0600-\u06FF]/);
   });
+
+  it("states last seen in Tehran time, day and time from the same zone (QA L12)", async () => {
+    vi.mocked(lostPetService.get).mockResolvedValue({ ...(incident as object), lastSeenAt: "2026-11-11T21:30:00.000Z" } as never);
+    renderWithIntl(<LostPetIncidentDetailView petId="pet-1" incidentId="incident-1" />, "fa");
+    expect(await screen.findByText((content) => content.includes("پنجشنبه، ۲۱ آبان ۱۴۰۵، ساعت ۰۱:۰۰ (به وقت تهران)"))).toBeTruthy();
+  });
 });

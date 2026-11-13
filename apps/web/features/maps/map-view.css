@@ -1,0 +1,19 @@
+/* App map — raster tiles with own pan/zoom; markers in pattern colours; works in light and dark. */
+.map-view { position: relative; overflow: hidden; border-radius: var(--radius-card, 20px); border: 1px solid var(--border-default); background: color-mix(in srgb, var(--surface-page) 70%, #cfe3d6); min-block-size: 18rem; isolation: isolate; }
+.map-view--loading { min-block-size: 18rem; }
+.map-view__canvas { position: absolute; inset: 0; cursor: grab; touch-action: none; outline: none; }
+.map-view__canvas:active { cursor: grabbing; }
+.map-view__canvas:focus-visible { box-shadow: inset 0 0 0 3px var(--focus-ring); }
+.map-view__tile { position: absolute; top: 0; left: 0; width: 256px; height: 256px; user-select: none; pointer-events: none; }
+:root[data-theme="dark"] .map-view__tile { filter: brightness(0.78) contrast(1.05) saturate(0.85); }
+.map-view__overlay { position: absolute; inset: 0; pointer-events: none; }
+.map-view__line { stroke: var(--brand-primary, #2f7d4c); stroke-width: 4; stroke-dasharray: 8 6; stroke-linecap: round; opacity: 0.85; }
+.map-view__marker { position: absolute; top: 0; left: 0; width: 22px; height: 22px; margin: -22px 0 0 -11px; border-radius: 50% 50% 50% 0; rotate: -45deg; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); pointer-events: none; }
+.map-view__marker--pickup { background: #2f7d4c; }
+.map-view__marker--dropoff { background: #c2410c; }
+.map-view__marker--driver { background: #1d4ed8; border-radius: 50%; rotate: 0deg; margin: -11px 0 0 -11px; }
+.map-view__marker--me { background: #6b7280; border-radius: 50%; rotate: 0deg; width: 16px; height: 16px; margin: -8px 0 0 -8px; }
+.map-view__zoom { position: absolute; inset-block-start: 10px; inset-inline-end: 10px; display: grid; gap: 6px; z-index: 2; }
+.map-view__zoom button { inline-size: 40px; block-size: 40px; border-radius: 12px; border: 1px solid var(--border-default); background: var(--surface-raised); color: var(--text-primary); font-size: 1.25rem; font-weight: 700; cursor: pointer; }
+.map-view__zoom button:focus-visible { outline: 3px solid var(--focus-ring); }
+.map-view__attribution { position: absolute; inset-block-end: 4px; inset-inline-start: 6px; z-index: 2; padding: 0 6px; border-radius: 6px; background: color-mix(in srgb, var(--surface-raised) 85%, transparent); color: var(--text-secondary); font-size: 0.68rem; direction: ltr; }

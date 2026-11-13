@@ -10,6 +10,7 @@ import { WaitlistService } from "./waitlist.service";
 import { ProviderReviewsService } from "./provider-reviews.service";
 import { JoinWaitlistDto } from "./dto/waitlist.dto";
 import { CreateProviderReviewDto } from "./dto/review.dto";
+import { publicProviderWhere } from "../../common/public-partner";
 
 /** Consumer-side waitlist, verified reviews and saved providers. */
 @Controller()
@@ -55,14 +56,14 @@ export class BookingEngagementController {
 
   @Get("me/favorite-providers")
   async favorites(@CurrentUser() user: SessionUser) {
-    const rows = await this.prisma.providerFavorite.findMany({ where: { userId: user.id }, include: { providerOrganization: { select: { id: true, name: true, type: true, logoUrl: true, verificationStatus: true } } }, orderBy: { createdAt: "desc" } });
-    return rows.filter((r) => r.providerOrganization.verificationStatus === "VERIFIED").map((r) => ({ ...r.providerOrganization, savedAt: r.createdAt.toISOString() }));
+    const rows = await this.prisma.providerFavorite.findMany({ where: { userId: user.id, providerOrganization: publicProviderWhere() }, include: { providerOrganization: { select: { id: true, name: true, type: true, logoUrl: true, verificationStatus: true } } }, orderBy: { createdAt: "desc" } });
+    return rows.map((r) => ({ ...r.providerOrganization, savedAt: r.createdAt.toISOString() }));
   }
 
   @Put("providers/:providerId/favorite")
   @HttpCode(204)
   async favorite(@CurrentUser() user: SessionUser, @Param("providerId", ParseUUIDPipe) providerId: string): Promise<void> {
-    const provider = await this.prisma.providerOrganization.findFirst({ where: { id: providerId, verificationStatus: "VERIFIED" } });
+    const provider = await this.prisma.providerOrganization.findFirst({ where: { id: providerId, ...publicProviderWhere() } });
     if (!provider) throw new NotFoundApiException("Provider");
     await this.prisma.providerFavorite.upsert({ where: { userId_providerOrganizationId: { userId: user.id, providerOrganizationId: providerId } }, create: { userId: user.id, providerOrganizationId: providerId }, update: {} });
   }
@@ -74,13 +75,18 @@ export class BookingEngagementController {
   }
 }
 
-/** Public, anonymous-readable reviews for a provider profile. */
+/** Public, anonymous-readable reviews for a provider profile — only for a provider the public may see at all. */
 @Controller("providers/:providerId/reviews")
 export class PublicProviderReviewsController {
-  constructor(private readonly reviews: ProviderReviewsService) {}
+  constructor(
+    private readonly reviews: ProviderReviewsService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @Get()
   async list(@Param("providerId", ParseUUIDPipe) providerId: string) {
+    const provider = await this.prisma.providerOrganization.findFirst({ where: { id: providerId, ...publicProviderWhere() }, select: { id: true } });
+    if (!provider) throw new NotFoundApiException("Provider");
     const [summary, reviews] = await Promise.all([this.reviews.summary(providerId), this.reviews.listPublic(providerId)]);
     return { summary, reviews };
   }

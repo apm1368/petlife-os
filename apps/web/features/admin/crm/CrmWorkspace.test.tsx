@@ -11,7 +11,7 @@ describe("CrmWorkspace", () => {
   it("opens on the agent's desk and says plainly that the data is not real", () => {
     render(<CrmWorkspace />);
 
-    expect(screen.getByRole("heading", { level: 1 }).textContent).toContain("CRM opetlife");
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toContain("CRM اپت لایف");
     expect(screen.getByText(/داده‌های این بخش نمونه و ساختگی است/)).toBeTruthy();
     expect(screen.getByText("لیدهای باز من")).toBeTruthy();
   });

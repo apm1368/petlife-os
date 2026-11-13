@@ -103,7 +103,11 @@ export class TravelNotificationListener {
   onCancelled(p: TravelEventPayload, id: string) {
     return this.safely("TravelBookingCancelled", async () => {
       if (p.cancelledBy === "PROVIDER") await this.traveler(p, "travel.booking_cancelled_by_provider", id, NotificationPriority.HIGH);
-      else await this.provider(p, "travel.booking_cancelled_by_traveler", id);
+      else if (p.cancelledBy === "ADMIN") {
+        // Cancelled by opetlife staff: both the guest and the host hear it.
+        await this.traveler(p, "travel.booking_cancelled_by_staff", id, NotificationPriority.HIGH);
+        await this.provider(p, "travel.booking_cancelled_by_staff_host", id);
+      } else await this.provider(p, "travel.booking_cancelled_by_traveler", id);
     });
   }
 

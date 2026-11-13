@@ -1,8 +1,16 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { OnEvent } from "@nestjs/event-emitter";
-import { NotificationCategory, SupportCaseStatus, SupportMessageAuthorType } from "@prisma/client";
+import { NotificationCategory, PartnerSubjectType, SupportCaseStatus, SupportMessageAuthorType } from "@prisma/client";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { NotificationOrchestratorService } from "../../notifications/notification-orchestrator.service";
+import { NotificationDeepLinks } from "../../notifications/notification-deeplink.util";
+
+/** Personal cases open in the support centre; a business case opens in the panel it came from. */
+export function supportCaseDeepLink(caseId: string, requesterOrgType: PartnerSubjectType | null | undefined): string {
+  if (requesterOrgType === PartnerSubjectType.PROVIDER) return NotificationDeepLinks.providerSupportCase(caseId);
+  if (requesterOrgType === PartnerSubjectType.SELLER) return NotificationDeepLinks.sellerSupportCase(caseId);
+  return NotificationDeepLinks.supportCase(caseId);
+}
 
 /**
  * Support notifications route through H10's NotificationOrchestrator only
@@ -20,6 +28,11 @@ export class SupportNotificationListener {
     private readonly prisma: PrismaService,
   ) {}
 
+  private async deepLink(caseId: string): Promise<string> {
+    const row = await this.prisma.supportCase.findUnique({ where: { id: caseId }, select: { requesterOrgType: true } });
+    return supportCaseDeepLink(caseId, row?.requesterOrgType);
+  }
+
   private async safely(label: string, run: () => Promise<void>): Promise<void> {
     try {
       await run();
@@ -36,6 +49,7 @@ export class SupportNotificationListener {
     if (payload.authorType === SupportMessageAuthorType.USER) return Promise.resolve();
 
     return this.safely("SupportMessagePosted", async () => {
+      const deepLink = await this.deepLink(payload.caseId);
       await this.orchestrator.notify({
         userId: payload.requesterUserId,
         type: "support.message_posted",
@@ -43,6 +57,7 @@ export class SupportNotificationListener {
         templateParams: { caseNumber: payload.caseNumber },
         entityType: "SupportCase",
         entityId: payload.caseId,
+        deepLink,
         domainEventId,
       });
     });
@@ -51,6 +66,7 @@ export class SupportNotificationListener {
   @OnEvent("SupportCaseResolved")
   onCaseResolved(payload: { caseId: string; caseNumber: string; requesterUserId: string }, domainEventId: string): Promise<void> {
     return this.safely("SupportCaseResolved", async () => {
+      const deepLink = await this.deepLink(payload.caseId);
       await this.orchestrator.notify({
         userId: payload.requesterUserId,
         type: "support.case_resolved",
@@ -58,6 +74,7 @@ export class SupportNotificationListener {
         templateParams: { caseNumber: payload.caseNumber },
         entityType: "SupportCase",
         entityId: payload.caseId,
+        deepLink,
         domainEventId,
       });
     });
@@ -87,6 +104,7 @@ export class SupportNotificationListener {
         templateParams: { caseNumber: supportCase.caseNumber },
         entityType: "SupportCase",
         entityId: payload.caseId,
+        deepLink: supportCaseDeepLink(payload.caseId, supportCase.requesterOrgType),
         domainEventId,
       });
     });
@@ -105,6 +123,7 @@ export class SupportNotificationListener {
         templateParams: { caseNumber: supportCase.caseNumber },
         entityType: "SupportCase",
         entityId: payload.caseId,
+        deepLink: supportCaseDeepLink(payload.caseId, supportCase.requesterOrgType),
         domainEventId,
       });
     });

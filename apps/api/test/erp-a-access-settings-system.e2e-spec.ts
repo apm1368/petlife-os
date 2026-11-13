@@ -18,7 +18,7 @@ describe("ERP-A access control, settings, system", () => {
 
   async function actor(name: string, role?: AdminRole): Promise<Actor> {
     const email = `erpa-${randomUUID()}@example.com`;
-    const user = await db.user.create({ data: { displayName: name, email } });
+    const user = await db.user.create({ data: { displayName: name, email, emailVerifiedAt: new Date() } });
     const admin = role ? await db.adminUser.create({ data: { userId: user.id, role, status: AdminMembershipStatus.ACTIVE } }) : null;
     const session = await db.session.create({ data: { userId: user.id, expiresAt: new Date(Date.now() + 86400000) } });
     const res = await request(server()).get("/health/live");
@@ -42,7 +42,7 @@ describe("ERP-A access control, settings, system", () => {
     // the Wave 2 scoped roles, so no pre-existing role lost reach when it was introduced.
     expect(caps).toEqual({ role: "EDITOR", permissions: ["content.view", "content.create", "content.edit", "content.media.manage"], verticals: null });
     await get(editor, "/admin/support/cases").expect(403);
-    expect((await get(editor, "/admin/dashboard").expect(200)).body).toEqual({ openSupportCases: null, openDisputes: null, openTrustCases: null, pendingRefundApprovals: null, openTasks: null });
+    expect((await get(editor, "/admin/dashboard").expect(200)).body).toEqual({ openSupportCases: null, openDisputes: null, openTrustCases: null, pendingRefundApprovals: null, openTasks: null, pendingVerifications: null, pendingRefundRequests: null, pendingOfferModeration: null, pendingCatalogRequests: null, pendingTravelListings: null, pendingSupportNeeds: null, openCommunityReports: null, pendingMemorials: null, openPlaceReports: null, pendingWalletTopUps: null, pendingDeletionRequests: null, openOwnershipDisputes: null, openProviderNoShows: null, pendingReviews: null, launchKpis: null });
     await db.adminUser.update({ where: { id: editor.adminUserId }, data: { role: AdminRole.SUPPORT } });
     const supportCaps = (await get(editor, "/admin/me/capabilities").expect(200)).body;
     expect(supportCaps.role).toBe("SUPPORT");
@@ -74,6 +74,12 @@ describe("ERP-A access control, settings, system", () => {
 
     await send("post", admin, "/admin/access/admins").send({ email: candidate.email, role: "SUPPORT", reason: "new support hire" }).expect(403);
     await send("post", root, "/admin/access/admins").send({ email: candidate.email, role: "SUPPORT" }).expect(400); // reason required
+    // Admin access only for a proven email or mobile (market-readiness Q76).
+    const unverified = await db.user.create({ data: { displayName: "unverified", email: `erpa-unverified-${randomUUID()}@example.com` } });
+    expect((await send("post", root, "/admin/access/admins").send({ email: unverified.email, role: "SUPPORT", reason: "should be refused" }).expect(409)).body.error.details.rule).toBe("UNVERIFIED_CONTACT");
+    // A verified phone never vouches for an unverified email (someone could register a future admin's email).
+    const phoneOnly = await db.user.create({ data: { displayName: "phone only", email: `erpa-phone-only-${randomUUID()}@example.com`, phone: `+989${randomUUID().replace(/\D/g, "").padEnd(9, "1").slice(0, 9)}`, phoneVerifiedAt: new Date() } });
+    expect((await send("post", root, "/admin/access/admins").send({ email: phoneOnly.email, role: "SUPPORT", reason: "should be refused" }).expect(409)).body.error.details.rule).toBe("UNVERIFIED_CONTACT");
     const granted = (await send("post", root, "/admin/access/admins").send({ email: candidate.email.toUpperCase(), role: "SUPPORT", reason: "new support hire" }).expect(201)).body;
     expect(granted).toMatchObject({ role: "SUPPORT", status: "ACTIVE" });
     expect((await send("post", root, "/admin/access/admins").send({ email: candidate.email, role: "FINANCE", reason: "duplicate grant" }).expect(409)).body.error.details.rule).toBe("ALREADY_ADMIN");
@@ -94,6 +100,47 @@ describe("ERP-A access control, settings, system", () => {
     expect(await db.domainEvent.count({ where: { type: "AdminMembershipChanged", aggregateId: granted.id } })).toBe(4);
   });
 
+  it("custom roles: SUPER_ADMIN defines per-section access, members get exactly it on their next request, and role management is never delegable", async () => {
+    const root = await actor("root", AdminRole.SUPER_ADMIN);
+    const admin = await actor("plain admin", AdminRole.ADMIN);
+    const staff = await actor("content editor", AdminRole.EDITOR);
+    const body = { name: `Shop desk ${randomUUID().slice(0, 6)}`, description: "Runs the shop", permissions: ["commerce.view", "commerce.manage"], verticals: ["SHOP"], reason: "Shop team gets its own role" };
+    await send("post", admin, "/admin/access/custom-roles").send(body).expect(403);
+    await send("post", root, "/admin/access/custom-roles").send({ ...body, permissions: ["admin.manage"] }).expect(409);
+    await send("post", root, "/admin/access/custom-roles").send({ ...body, permissions: ["commerce.vew"] }).expect(400);
+    const role = (await send("post", root, "/admin/access/custom-roles").send(body).expect(201)).body;
+    expect(role).toMatchObject({ name: body.name, permissions: ["commerce.view", "commerce.manage"], verticals: ["SHOP"], members: 0 });
+    await send("post", root, "/admin/access/custom-roles").send({ ...body, name: body.name.toUpperCase() }).expect(409);
+    expect((await get(admin, "/admin/access/custom-roles").expect(200)).body.some((r: { id: string }) => r.id === role.id)).toBe(true);
+
+    // Before: an EDITOR reaches content, not the shop.
+    await get(staff, "/admin/content/articles").expect(200);
+    await get(staff, "/admin/commerce/orders").expect(403);
+    await send("put", root, `/admin/access/admins/${root.adminUserId}/custom-role`).send({ customRoleId: role.id, reason: "Self change attempt" }).expect(409);
+    await send("put", root, `/admin/access/admins/${staff.adminUserId}/custom-role`).send({ customRoleId: role.id, reason: "Moves to the shop desk" }).expect(200);
+    // After: exactly the role's permissions — the shop opens, content closes — with no new session.
+    await get(staff, "/admin/commerce/orders").expect(200);
+    await get(staff, "/admin/content/articles").expect(403);
+    const me = (await get(staff, "/admin/me").expect(200)).body;
+    expect(me).toMatchObject({ customRoleName: body.name });
+    expect([...me.permissions].sort()).toEqual(["commerce.manage", "commerce.view"]);
+    expect((await get(staff, "/admin/me/capabilities").expect(200)).body.verticals).toEqual(["SHOP"]);
+    expect((await get(root, `/admin/access/admins/${staff.adminUserId}`).expect(200)).body).toMatchObject({ customRole: { id: role.id, name: body.name } });
+
+    // Editing the role applies on the next request; a role with members cannot be archived.
+    await send("put", root, `/admin/access/custom-roles/${role.id}`).send({ ...body, permissions: ["commerce.view"], reason: "Read only for now" }).expect(200);
+    expect((await get(staff, "/admin/me").expect(200)).body.permissions).toEqual(["commerce.view"]);
+    await send("post", root, `/admin/access/custom-roles/${role.id}/archive`).send({ reason: "No longer needed" }).expect(409);
+    await send("put", root, `/admin/access/admins/${staff.adminUserId}/custom-role`).send({ customRoleId: null, reason: "Back to content" }).expect(200);
+    await get(staff, "/admin/content/articles").expect(200);
+    await send("post", root, `/admin/access/custom-roles/${role.id}/archive`).send({ reason: "No longer needed" }).expect(201);
+    await send("put", root, `/admin/access/admins/${staff.adminUserId}/custom-role`).send({ customRoleId: role.id, reason: "Archived role" }).expect(409);
+    // The database refuses what the service refuses, even for a direct write.
+    await expect(db.adminCustomRole.create({ data: { name: "Root clone", permissions: ["admin.manage"], createdByAdminId: root.adminUserId!, updatedByAdminId: root.adminUserId! } })).rejects.toThrow();
+    const actions = (await db.adminAuditLog.findMany({ where: { entityId: { in: [role.id, staff.adminUserId!] } }, select: { action: true } })).map((r) => r.action);
+    expect(actions).toEqual(expect.arrayContaining(["admin_role.created", "admin_role.updated", "admin_role.archived", "admin_user.custom_role_assigned", "admin_user.custom_role_cleared"]));
+  });
+
   it("settings: harmless keys apply at once and are public only when PUBLIC; high-impact keys need a different approver; stale versions are refused", async () => {
     const root = await actor("root", AdminRole.SUPER_ADMIN);
     const root2 = await actor("root2", AdminRole.SUPER_ADMIN);
@@ -108,7 +155,7 @@ describe("ERP-A access control, settings, system", () => {
 
     const ann = list.find((s: { key: string }) => s.key === "platform.announcement");
     const text = { fa: `اطلاعیه ${randomUUID().slice(0, 6)}`, en: "Scheduled maintenance tonight" };
-    await send("put", admin, "/admin/settings/platform.announcement").send({ value: { fa: "x", de: "y" }, baseVersion: ann.version, reason: "bad locale" }).expect(400);
+    await send("put", admin, "/admin/settings/platform.announcement").send({ value: { fa: "x", fr: "y" }, baseVersion: ann.version, reason: "bad locale" }).expect(400);
     await send("put", admin, "/admin/settings/unknown.key").send({ value: 1, baseVersion: 0, reason: "nope nope" }).expect(404);
     const applied = (await send("put", admin, "/admin/settings/platform.announcement").send({ value: text, baseVersion: ann.version, reason: "maintenance notice" }).expect(200)).body;
     expect(applied.status).toBe("APPLIED");
@@ -151,7 +198,7 @@ describe("ERP-A access control, settings, system", () => {
     expect(health.components.outbox).toHaveProperty("pending");
     const integrations = (await get(ro, "/admin/system/integrations").expect(200)).body;
     const status = Object.fromEntries(integrations.items.map((i: { key: string; status: string }) => [i.key, i.status]));
-    expect(status).toMatchObject({ TLS: "NOT_CONFIGURED", OTP: "SANDBOX", PAYMENT: "SANDBOX", MAPS: "NOT_IMPLEMENTED", EMAIL: "NOT_IMPLEMENTED" });
+    expect(status).toMatchObject({ TLS: "NOT_CONFIGURED", OTP: "SANDBOX", PAYMENT: "SANDBOX", MAPS: "NOT_IMPLEMENTED", EMAIL: "NOT_CONFIGURED" });
     const text = JSON.stringify([health, integrations]);
     for (const secret of [process.env.SESSION_SECRET!, process.env.CSRF_SECRET!]) expect(text).not.toContain(secret);
     expect(text).not.toMatch(/postgres(ql)?:\/\/|redis:\/\//);

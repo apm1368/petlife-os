@@ -8,7 +8,9 @@ const CALLOUT_TONES = ["info", "warning"];
 
 /** http(s):// or a same-origin relative path only — never javascript:/data:/anything else (spec: "prevent arbitrary script injection"). Mirrors the exact allow-list ContentBlockLocale.ctaHref validation uses. */
 export function isSafeHref(href: string): boolean {
-  if (href.startsWith("/") && !href.startsWith("//")) return true;
+  // "/\\host" is turned into "//host" by browsers, so a backslash right after the slash is as off-site as "//".
+  if (/^\/(?![/\\])/.test(href)) return !href.includes("\\") && ![...href].some((char) => char.charCodeAt(0) < 0x20);
+  if (href.startsWith("/")) return false;
   try {
     const url = new URL(href);
     return url.protocol === "http:" || url.protocol === "https:";
@@ -76,6 +78,35 @@ function validateBlock(node: unknown): RichTextBlock {
       const caption = record.caption;
       if (caption !== undefined && !isPlainString(caption)) fail("image caption must be a string when present");
       return caption !== undefined ? { type: "image", mediaAssetId: record.mediaAssetId, alt: record.alt, caption } : { type: "image", mediaAssetId: record.mediaAssetId, alt: record.alt };
+    }
+    case "video": {
+      if (!isPlainString(record.mediaAssetId) || record.mediaAssetId.length === 0) fail("video block requires a mediaAssetId");
+      if (!isPlainString(record.title) || record.title.trim().length === 0) fail("video block requires a title — it names the video for viewers and search engines");
+      const video: Extract<RichTextBlock, { type: "video" }> = { type: "video", mediaAssetId: record.mediaAssetId, title: record.title };
+      for (const field of ["description", "caption", "posterMediaAssetId"] as const) {
+        const value = record[field];
+        if (value === undefined || value === "") continue;
+        if (!isPlainString(value)) fail(`video ${field} must be a string when present`);
+        video[field] = value;
+      }
+      if (record.durationSeconds !== undefined) {
+        const duration = record.durationSeconds;
+        if (typeof duration !== "number" || !Number.isFinite(duration) || duration <= 0 || duration > 86_400) fail("video durationSeconds must be a positive number of seconds");
+        video.durationSeconds = Math.round(duration);
+      }
+      return video;
+    }
+    case "faq": {
+      if (!Array.isArray(record.items) || record.items.length === 0) fail("faq block must have at least one question");
+      return {
+        type: "faq",
+        items: record.items.map((item: unknown) => {
+          if (typeof item !== "object" || item === null) fail("faq item must be an object");
+          const entry = item as Record<string, unknown>;
+          if (!isPlainString(entry.question) || entry.question.trim().length === 0) fail("faq question must be a non-empty string");
+          return { question: entry.question, answer: validateInlineArray(entry.answer) };
+        }),
+      };
     }
     default:
       fail(`unrecognized block type: ${String(record.type)}`);

@@ -1,0 +1,9 @@
+/* Users → Deletion requests */
+.gx-deletion-list { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.gx-deletion { display: grid; gap: 8px; }
+.gx-deletion p { margin: 0; }
+.gx-deletion--focus { outline: 2px solid var(--brand-natural); outline-offset: 2px; }
+.gx-deletion__head { display: flex; flex-wrap: wrap; align-items: start; justify-content: space-between; gap: 8px; }
+.gx-deletion__head h2 { margin: 0; }
+.gx-deletion__act { display: grid; gap: 8px; max-width: 560px; }
+.gx-deletion__buttons { display: flex; flex-wrap: wrap; gap: 8px; }

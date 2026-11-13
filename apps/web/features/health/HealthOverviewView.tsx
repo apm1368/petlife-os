@@ -32,7 +32,7 @@ type HealthOverviewData = {
 export function HealthOverviewView({ petId }: { petId: string }) {
   const statusText = useStatusText();
   const recordsT = useTranslations("rollout.records");
-  const locale = useLocale() as "fa" | "en" | "de" | "es";
+  const locale = useLocale() as "fa" | "en" | "de" | "es" | "ar" | "nl";
   const t = useTranslations("health");
   const c = useTranslations("health.overview");
   const base = `/${locale}/pets/${petId}/health`;
@@ -93,7 +93,7 @@ export function HealthOverviewView({ petId }: { petId: string }) {
     care.filter((i) => ["UPCOMING", "DUE", "SNOOZED"].includes(i.state)).length;
   const careOverdue = overview.overdueCare.length + care.filter((i) => i.state === "OVERDUE").length;
   const attention = summary.primaryAttention;
-  const Forward = locale === "fa" ? ChevronLeft : ChevronRight;
+  const Forward = (locale === "fa" || locale === "ar") ? ChevronLeft : ChevronRight;
   const hasUnavailableDetails = Object.values(data.unavailable).some(Boolean);
   return (
     <HealthCareFrame>
@@ -323,7 +323,7 @@ function Row({
   );
 }
 /** What is on record, by name (clinical names are shown exactly as recorded): two names, then a count. */
-function nameList(items: string[], locale: "fa" | "en" | "de" | "es", moreLabel: string): string | null {
+function nameList(items: string[], locale: "fa" | "en" | "de" | "es" | "ar" | "nl", moreLabel: string): string | null {
   if (!items.length) return null;
   const shown = new Intl.ListFormat(locale, { style: "long", type: "conjunction" }).format(items.slice(0, 2));
   return items.length > 2 ? `${shown} ${moreLabel}` : shown;

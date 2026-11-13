@@ -7,7 +7,11 @@ import { toPetFriendlyPlaceDto } from "./places-mapper";
 import type { ListPetFriendlyPlacesQueryDto, NearbyPetFriendlyPlacesQueryDto } from "./dto/places.dto";
 import { excludeDemoRecordsFromPublicReads } from "../../common/public-record-origin";
 
-const LISTED_FILTER = { status: PetFriendlyPlaceStatus.VERIFIED, isPubliclyListed: true };
+/**
+ * Public = listed and either VERIFIED, or an unverified OpenStreetMap import (shown with its "not verified" label and
+ * OSM attribution, as the owner approved). Suspended places never show.
+ */
+const LISTED_FILTER: Prisma.PetFriendlyPlaceWhereInput = { isPubliclyListed: true, OR: [{ status: PetFriendlyPlaceStatus.VERIFIED }, { status: PetFriendlyPlaceStatus.UNVERIFIED, source: "OSM" }] };
 const DEFAULT_RADIUS_METERS = 5_000;
 
 interface NearbyRow {
@@ -76,12 +80,12 @@ export class PublicPlacesReadService {
   async nearby(query: NearbyPetFriendlyPlacesQueryDto, userId?: string) {
     const { page, pageSize, skip, take } = resolvePagination(query);
     const radiusMeters = query.radiusMeters ?? DEFAULT_RADIUS_METERS;
-    const includeDemoRecords = process.env.NODE_ENV !== "production";
+    const includeDemoRecords = !("isDemoRecord" in excludeDemoRecordsFromPublicReads());
 
     const nearbyRows = await this.prisma.$queryRaw<NearbyRow[]>`
       SELECT id, ST_Distance(location, ST_SetSRID(ST_MakePoint(${query.longitude}, ${query.latitude}), 4326)::geography) AS distance_meters
       FROM pet_friendly_places
-      WHERE status = 'VERIFIED'
+      WHERE (status = 'VERIFIED' OR (status = 'UNVERIFIED' AND source = 'OSM'))
         AND "isPubliclyListed" = true
         AND (${includeDemoRecords} OR "isDemoRecord" = false)
         AND location IS NOT NULL
@@ -110,11 +114,11 @@ export class PublicPlacesReadService {
   }
 
   private async countNearby(query: NearbyPetFriendlyPlacesQueryDto, radiusMeters: number) {
-    const includeDemoRecords = process.env.NODE_ENV !== "production";
+    const includeDemoRecords = !("isDemoRecord" in excludeDemoRecordsFromPublicReads());
     const rows = await this.prisma.$queryRaw<{ count: bigint }[]>`
       SELECT COUNT(*) AS count
       FROM pet_friendly_places
-      WHERE status = 'VERIFIED'
+      WHERE (status = 'VERIFIED' OR (status = 'UNVERIFIED' AND source = 'OSM'))
         AND "isPubliclyListed" = true
         AND (${includeDemoRecords} OR "isDemoRecord" = false)
         AND location IS NOT NULL

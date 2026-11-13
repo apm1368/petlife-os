@@ -9,6 +9,7 @@ import { StorageService } from "../storage/storage.service";
 import type { UploadTarget } from "../storage/storage-driver.interface";
 import { assertOwnerEditable } from "../health/provenance.util";
 import { assertObjectKeyUnder } from "../../common/storage-keys/object-key.validator";
+import { documentReadScope } from "../pet-access/booking-document-shares";
 import { MEDICAL_DOCUMENT_INCLUDE, toMedicalDocumentDto } from "./clinical-health-mapper";
 import type { CreateMedicalDocumentDto, RequestMedicalDocumentUploadDto } from "./dto/medical-document.dto";
 import type { ResolvedProviderContext } from "../provider-os/auth/provider-context.types";
@@ -88,9 +89,14 @@ export class MedicalDocumentService {
     return toMedicalDocumentDto(row);
   }
 
-  async list(petId: string): Promise<MedicalDocumentDto[]> {
+  /**
+   * `readerUserId` (the household routes) narrows the list for a provider reading through a booking: they
+   * see what the provider record shows plus the owner documents ticked for their active bookings.
+   */
+  async list(petId: string, readerUserId?: string): Promise<MedicalDocumentDto[]> {
+    const scope = readerUserId ? await documentReadScope(this.prisma, petId, readerUserId) : {};
     const rows = await this.prisma.medicalDocument.findMany({
-      where: { petId, voidedAt: null },
+      where: { petId, voidedAt: null, ...scope },
       include: MEDICAL_DOCUMENT_INCLUDE,
       orderBy: { uploadedAt: "desc" },
     });
@@ -103,14 +109,27 @@ export class MedicalDocumentService {
     return row;
   }
 
-  async getDto(petId: string, documentId: string): Promise<MedicalDocumentDto> {
+  async getDto(petId: string, documentId: string, readerUserId?: string): Promise<MedicalDocumentDto> {
+    if (readerUserId) await this.assertReadable(petId, documentId, readerUserId);
     return toMedicalDocumentDto(await this.get(petId, documentId));
   }
 
-  /** Mints a short-TTL signed download URL — the CALLER (controller, via PetAccessGuard) has already verified viewing authorization before this runs. */
-  async getDownload(petId: string, documentId: string): Promise<MedicalDocumentDownloadDto> {
+  /**
+   * Mints a short-TTL signed download URL — the CALLER (controller, via PetAccessGuard) has already verified
+   * viewing authorization before this runs; `readerUserId` additionally applies the per-document scope.
+   */
+  async getDownload(petId: string, documentId: string, readerUserId?: string): Promise<MedicalDocumentDownloadDto> {
+    if (readerUserId) await this.assertReadable(petId, documentId, readerUserId);
     const row = await this.get(petId, documentId);
     return this.storage.createPrivateDownloadTarget(row.fileObjectKey);
+  }
+
+  /** A document outside the reader's scope answers exactly like a missing one. */
+  private async assertReadable(petId: string, documentId: string, readerUserId: string): Promise<void> {
+    const scope = await documentReadScope(this.prisma, petId, readerUserId);
+    if (!Object.keys(scope).length) return;
+    const visible = await this.prisma.medicalDocument.count({ where: { id: documentId, petId, ...scope } });
+    if (!visible) throw new MedicalDocumentNotFoundException({ documentId });
   }
 
   /**

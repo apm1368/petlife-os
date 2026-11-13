@@ -10,6 +10,7 @@ import { supportNeedsService, type SupportNeedLocationDto } from "@/services/sup
 import { formatDay, localizeDigits } from "@/lib/date/jalali";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { AnimalSupportNav } from "./AnimalSupportNav";
+import { placeName } from "@/lib/i18n/iran-places";
 
 const NEED_ICON: Record<SupportNeedCategory, typeof HandHeart> = {
   FOOD: Bone, MEDICINE: Pill, VETERINARY_CARE: Stethoscope, TEMPORARY_HOME: House, FOSTER: House, TRANSPORT: CarFront,
@@ -143,7 +144,7 @@ export function SupportNeedsListView() {
             label={t("list.cityLabel")}
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            options={[{ value: "", label: t("list.allCities") }, ...cities.map((value) => ({ value, label: value }))]}
+            options={[{ value: "", label: t("list.allCities") }, ...cities.map((value) => ({ value, label: placeName(value, locale) }))]}
           />
         <Select
           label={fa ? "مرتب‌سازی" : "Sort"}
@@ -198,7 +199,7 @@ export function SupportNeedsListView() {
                       {listing.organizationVerified ? <StatusLabel tone="success">{t("list.verifiedOrganization")}</StatusLabel> : null}
                     </span>
                     <span className="need-row__meta">
-                      {t(`category.${listing.category}`)} · {listing.city}{listing.neighborhood ? `، ${listing.neighborhood}` : ""} · {formatDay((listing.publishedAt ?? listing.createdAt).slice(0, 10), locale)}{listing.expiresAt ? ` · ${fa ? "مهلت" : "until"} ${formatDay(listing.expiresAt.slice(0, 10), locale, { year: false })}` : ""}
+                      {t(`category.${listing.category}`)} · {placeName(listing.city, locale)}{listing.neighborhood ? `${fa ? "، " : ", "}${listing.neighborhood}` : ""} · {formatDay((listing.publishedAt ?? listing.createdAt).slice(0, 10), locale)}{listing.expiresAt ? ` · ${fa ? "مهلت" : "until"} ${formatDay(listing.expiresAt.slice(0, 10), locale, { year: false })}` : ""}
                     </span>
                     {pct !== null ? (
                       <span className="need-row__progress">

@@ -2,7 +2,8 @@ import { apiFetch } from "@/lib/api/client";
 
 export interface ChatConversationSummary {
   id: string;
-  otherMember: { id: string; displayName: string; avatarUrl: string | null } | null;
+  /** id is null until the other member has written in this conversation (only their public first name until then). */
+  otherMember: { id: string | null; displayName: string; avatarUrl: string | null } | null;
   lastMessage: { id: string; body: string; senderIsMe: boolean; createdAt: string } | null;
   unreadCount: number;
   blocked: boolean;
@@ -15,6 +16,8 @@ export interface ChatMessageDto { id: string; body: string; senderIsMe: boolean;
 
 export const chatService = {
   open: (participantUserId: string) => apiFetch<ChatConversationSummary>("/chat/conversations", { method: "POST", body: { participantUserId } }),
+  /** #290 Q52: message a community post's author from the post; no contact details are exchanged. */
+  openForPost: (postId: string) => apiFetch<ChatConversationSummary>(`/chat/conversations/for-post/${postId}`, { method: "POST" }),
   list: () => apiFetch<ChatConversationSummary[]>("/chat/conversations"),
   messages: (id: string, before?: string) => apiFetch<{ items: ChatMessageDto[]; hasMore: boolean }>(`/chat/conversations/${id}/messages${before ? `?before=${encodeURIComponent(before)}` : ""}`),
   send: (id: string, body: string) => apiFetch<ChatMessageDto>(`/chat/conversations/${id}/messages`, { method: "POST", body: { body } }),

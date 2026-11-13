@@ -68,15 +68,45 @@ describe("Security: rate limiting (finding G)", () => {
 
   it("budgets failed OTP guesses per phone across codes, so resending never restores guesses", async () => {
     const target = phone(40);
-    await post("/auth/request-otp", nextIp(), { identifier: target }).expect(200);
-    for (let i = 0; i < 10; i++) {
-      const guess = await post("/auth/verify-otp", nextIp(), { identifier: target, code: String(100000 + i) });
-      expect(guess.status).toBeGreaterThanOrEqual(400);
-      expect(guess.status).not.toBe(429);
+    // Two codes, five wrong guesses each (each code dies after OTP_MAX_ATTEMPTS), from different addresses.
+    for (let round = 0; round < 2; round++) {
+      await redis.del(`otp:cooldown:${canonicalIdentifier(target)}`);
+      await post("/auth/request-otp", nextIp(), { identifier: target }).expect(200);
+      for (let i = 0; i < 5; i++) {
+        const guess = await post("/auth/verify-otp", nextIp(), { identifier: target, code: String(100000 + round * 10 + i) });
+        expect(guess.status).toBe(400);
+      }
     }
+    await redis.del(`otp:cooldown:${canonicalIdentifier(target)}`);
+    await post("/auth/request-otp", nextIp(), { identifier: target }).expect(200);
     const locked = await post("/auth/verify-otp", nextIp(), { identifier: target, code: "999999" });
     expect(locked.status).toBe(429);
     expect(locked.body.error.code).toBe("OTP_RATE_LIMITED");
+  });
+
+  it("does not let a stranger lock a number out by posting codes when none is outstanding", async () => {
+    const target = phone(45);
+    for (let i = 0; i < 15; i++) await post("/auth/verify-otp", nextIp(), { identifier: target, code: String(200000 + i) }).expect(400);
+    await post("/auth/request-otp", nextIp(), { identifier: target }).expect(200);
+    const guess = await post("/auth/verify-otp", nextIp(), { identifier: target, code: "299999" });
+    expect(guess.status).toBe(400);
+  });
+
+  it("puts contact-change codes under the same per-number send budget as sign-in codes", async () => {
+    const victim = phone(50);
+    const username = `rl_contact_${run}`;
+    const registered = await post("/auth/register", nextIp(), { username, password: `correct-horse-${run}` }).expect(200);
+    const session = extractCookie(registered.headers["set-cookie"], "petlife_session")!;
+    const asMember = (url: string, body: object) =>
+      request(app.getHttpServer()).post(url).set("X-Forwarded-For", nextIp()).set("Cookie", `petlife_csrf=${csrf}; petlife_session=${session}`).set("x-csrf-token", csrf).send(body);
+    for (let i = 0; i < 5; i++) {
+      await redis.del(`otp:cooldown:${canonicalIdentifier(victim)}`);
+      await asMember("/me/contact/request", { kind: "phone", value: victim }).expect(200);
+    }
+    await redis.del(`otp:cooldown:${canonicalIdentifier(victim)}`);
+    const sixth = await asMember("/me/contact/request", { kind: "phone", value: victim });
+    expect(sixth.status).toBe(429);
+    expect(sixth.body.error.code).toBe("OTP_RATE_LIMITED");
   });
 
   it("budgets failed password logins per username — identically for names that do not exist", async () => {

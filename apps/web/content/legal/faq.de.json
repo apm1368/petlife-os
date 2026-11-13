@@ -1,0 +1,193 @@
+{
+  "title": "Häufig gestellte Fragen",
+  "lede": "Kurze Antworten auf die Fragen, die wir am häufigsten hören. Bei allem anderen hilft dir unser Support-Team gern weiter.",
+  "updated": "2026-11-13",
+  "groups": [
+    {
+      "id": "members",
+      "heading": "Erste Schritte",
+      "items": [
+        {
+          "q": "Was ist opetlife?",
+          "a": "Ein Ort für das Leben mit deinen Tieren: ihre Akten und ihr Gesundheitsverlauf, Buchungen beim Tierarzt und für die Betreuung, ein Shop unabhängiger Händler, haustierfreundliches Reisen, ein Tiertaxi, Hilfe bei vermissten und gefundenen Tieren und eine Community von Familien mit Haustieren."
+        },
+        {
+          "q": "Wie registriere ich mich?",
+          "a": "Gib deine Mobilnummer und den Einmalcode ein, den wir dir per SMS schicken. Wo verfügbar, kannst du dich auch mit einem Passwort oder einem Google-Konto registrieren. Für ein eigenes Konto musst du mindestens 18 Jahre alt sein."
+        },
+        {
+          "q": "Kann meine Familie die Akten unserer Tiere gemeinsam nutzen?",
+          "a": "Ja. Die Inhaberin oder der Inhaber des Haushalts kann Familienmitglieder einladen, bestätigt jede Einladung und entscheidet, wer welches Tier sehen und verwalten darf."
+        },
+        {
+          "q": "Kostet opetlife etwas?",
+          "a": "Ein Konto zu erstellen und die Akten deiner Tiere zu führen, ist kostenlos. Du bezahlst nur für die Leistungen, Produkte und Fahrten, die du buchst oder kaufst. Einige Zusatzfunktionen gehören zu optionalen kostenpflichtigen Tarifen, die auf der Abo-Seite angezeigt werden."
+        }
+      ]
+    },
+    {
+      "id": "health",
+      "heading": "Tiere und Gesundheitsakten",
+      "items": [
+        {
+          "q": "Wer kann die Gesundheitsakten meines Tieres sehen?",
+          "a": "Nur du, die Haushaltsmitglieder, denen du es erlaubst, und alle, mit denen du sie teilen möchtest. Partner sehen Gesundheitsinformationen nur, wenn ihre Leistung sie erfordert, etwa eine Klinik oder Tierpension, und nur bis 24 Stunden nach der Buchung."
+        },
+        {
+          "q": "Wie teile ich Akten mit einem Tierarzt?",
+          "a": "Erstelle auf der Gesundheitsseite deines Tieres einen Freigabelink. Er gilt von 1 Stunde bis zu 7 Tagen, zeigt nur die Bereiche, die du auswählst, und kann jederzeit widerrufen werden. Du kannst auch einem Tierarzt einer verifizierten Klinik bis zu 90 Tage lang Zugriff geben."
+        },
+        {
+          "q": "Sind die Informationen auf opetlife medizinischer Rat?",
+          "a": "Nein. Gesundheitstools und Artikel helfen dir, den Überblick zu behalten und informiert zu bleiben, ersetzen aber keinen Tierarzt. Wende dich im Notfall sofort an einen Tierarzt oder eine Notfallklinik."
+        }
+      ]
+    },
+    {
+      "id": "bookings",
+      "heading": "Buchungen und Leistungen",
+      "items": [
+        {
+          "q": "Werden die Kliniken und Anbieter geprüft?",
+          "a": "Partner müssen Identitäts- und Unternehmensprüfungen bestehen, bevor sie Buchungen annehmen können, und tierärztliche Leistungen brauchen eine gültige Berufszulassung. Aus offenen Kartendaten importierte Unternehmenseinträge sind deutlich als nicht verifiziert gekennzeichnet, bis das Unternehmen sie übernimmt und verifiziert."
+        },
+        {
+          "q": "Wie storniere ich eine Buchung, und bekomme ich mein Geld zurück?",
+          "a": "Storniere auf der Buchungsseite. Jede Leistung zeigt ihre Stornierungsbedingungen, bevor du buchst. Innerhalb der kostenlosen Stornierungsfrist bekommst du den vollen Betrag zurück. Danach erhältst du den Prozentsatz, der bei der Buchung angezeigt wurde. Storniert der Anbieter, bekommst du immer den vollen Betrag zurück."
+        },
+        {
+          "q": "Was ist, wenn der Anbieter nicht erscheint?",
+          "a": "Melde es auf der Buchungsseite. Unser Support-Team prüft den Fall mit dem Anbieter und entscheidet, was in Ordnung gebracht werden muss."
+        },
+        {
+          "q": "Wie funktioniert das Tiertaxi?",
+          "a": "Lege Abhol- und Zielort auf der Karte fest, sieh dir den Fahrpreis an und verfolge deinen Fahrer live. Bis die Online-Zahlung für Fahrten freigeschaltet ist, bezahlst du den Fahrer bei Ankunft. Du kannst jederzeit vor der Abholung stornieren."
+        }
+      ]
+    },
+    {
+      "id": "shop",
+      "heading": "Shop, Zahlung, Versand und Rückgabe",
+      "items": [
+        {
+          "q": "Wer verkauft die Produkte?",
+          "a": "Unabhängige Händler. opetlife ist der Marktplatz, und jeder Händler ist für seine Produkte verantwortlich und stellt eine eigene Rechnung aus."
+        },
+        {
+          "q": "Wie kann ich bezahlen?",
+          "a": "An der Kasse siehst du die Möglichkeiten, die für diesen Kauf verfügbar sind, etwa Online-Zahlung, dein Guthaben oder eine Karte-zu-Karte-Überweisung. Die Preise sind in Toman angegeben und enthalten alles, was an der Kasse ausgewiesen wird."
+        },
+        {
+          "q": "Wie funktioniert die Karte-zu-Karte-Zahlung?",
+          "a": "Überweise den genauen Betrag auf das an der Kasse angezeigte Konto und lade innerhalb von 30 Minuten den Beleg hoch. Unser Finanzteam prüft Belege samstags bis mittwochs 9:00–18:00 Uhr und donnerstags 9:00–13:00 Uhr. Hast du zu viel bezahlt, geht die Differenz auf dein Guthaben. Hast du zu wenig bezahlt, hast du 30 Minuten Zeit, den Rest zu bezahlen."
+        },
+        {
+          "q": "Wie lange dauert die Lieferung?",
+          "a": "Das hängt vom Händler, von der Versandart und von deiner Stadt ab. Auf deiner Bestellseite siehst du die voraussichtliche Lieferzeit und, sobald die Bestellung versandt wurde, die Sendungsverfolgung."
+        },
+        {
+          "q": "Kann ich eine Bestellung stornieren oder zurückgeben?",
+          "a": "Du kannst jederzeit gegen volle Erstattung stornieren, solange der Händler noch nicht versandt hat. Kommt ein Artikel beschädigt an, entspricht er nicht seiner Beschreibung oder ist er abgelaufen, melde das innerhalb von 48 Stunden nach der Lieferung mit Fotos auf der Bestellseite und bewahre den Artikel und seine Verpackung auf. Deine gesetzlichen Verbraucherrechte gelten weiterhin."
+        },
+        {
+          "q": "Wohin gehen Erstattungen?",
+          "a": "Genehmigte Erstattungen gehen an deine ursprüngliche Zahlungsmethode zurück oder auf dein opetlife-Guthaben. In der Mitteilung zur Erstattung steht, was davon zutrifft."
+        }
+      ]
+    },
+    {
+      "id": "wallet",
+      "heading": "Guthaben",
+      "items": [
+        {
+          "q": "Was ist das Guthaben?",
+          "a": "Dein Guthabenkonto bei opetlife. Es enthält Erstattungsguthaben aus stornierten oder erstatteten Käufen und Einkaufsguthaben aus Aufladungen und Geschenken. Einkaufsguthaben kann nur bei opetlife ausgegeben werden, und Geschenkguthaben verfällt nach sechs Monaten."
+        },
+        {
+          "q": "Wie lade ich Guthaben auf?",
+          "a": "Auf der Guthaben-Seite per Karte-zu-Karte-Überweisung mit Beleg. Eine Aufladung muss zwischen 10.000 und 50.000.000 Toman liegen, und du kannst bis zu drei Aufladungen gleichzeitig zur Prüfung offen haben."
+        }
+      ]
+    },
+    {
+      "id": "lost-pets",
+      "heading": "Vermisste und gefundene Tiere",
+      "items": [
+        {
+          "q": "Mein Tier wird vermisst. Was soll ich tun?",
+          "a": "Erstelle eine Vermisstenmeldung mit einem deutlichen Foto und der Gegend, in der dein Tier zuletzt gesehen wurde (nicht deine Wohnadresse). Mitglieder in der Nähe, die Umkreis-Hinweise eingeschaltet haben, werden benachrichtigt, und alle, die dein Tier gesehen haben, können antworten."
+        },
+        {
+          "q": "Ich habe ein Tier gefunden. Wie kann ich helfen?",
+          "a": "Veröffentliche in der Community eine Fundmeldung mit einem Foto und der Gegend. Du kannst bis zu drei Fundmeldungen pro Tag veröffentlichen. Ist das Tier verletzt, bring es zuerst zu einem Tierarzt."
+        },
+        {
+          "q": "Verraten Umkreis-Hinweise, wo ich wohne?",
+          "a": "Nein. Dein Standortpunkt wird auf etwa einen Kilometer gerundet und niemandem angezeigt. Du kannst einen Radius von bis zu 10 km wählen und die Hinweise jederzeit ausschalten."
+        }
+      ]
+    },
+    {
+      "id": "partners",
+      "heading": "Für Partner",
+      "items": [
+        {
+          "q": "Wie werde ich als Klinik, Anbieter, Händler oder Gastgeber Partner?",
+          "a": "Starte auf den Partnerseiten, lege deine Organisation an und lade die angeforderten Unterlagen hoch. Wir bemühen uns, sie innerhalb von 24 Arbeitsstunden zu prüfen. Sobald du verifiziert bist, kannst du Buchungen annehmen oder verkaufen."
+        },
+        {
+          "q": "Welche Unterlagen brauche ich?",
+          "a": "Ein Ausweisdokument und für tierärztliche Leistungen eine gültige Berufszulassung. Je nach Unternehmen können wir außerdem einen nationalen Personalausweis, einen Gewerbeschein oder ein eNamad-Zertifikat, eine Festnetznummer und eine verifizierte Mobilnummer verlangen."
+        },
+        {
+          "q": "Mein Unternehmen ist bereits eingetragen. Wie übernehme ich den Eintrag?",
+          "a": "Öffne den Eintrag und wähle „Ist das dein Unternehmen?“. Nur eine verifizierte Organisation kann einen Eintrag übernehmen."
+        },
+        {
+          "q": "Wie werden Provisionen und Auszahlungen abgewickelt?",
+          "a": "Sie sind in deiner Partnervereinbarung festgelegt und in deinem Partner-Dashboard zu sehen, wo jede Abrechnung aufgeführt ist."
+        }
+      ]
+    },
+    {
+      "id": "privacy",
+      "heading": "Datenschutz und dein Konto",
+      "items": [
+        {
+          "q": "Verkauft opetlife meine Daten oder zeigt mir darauf basierende Werbung?",
+          "a": "Nein. Wir verkaufen keine personenbezogenen Daten und setzen keine Werbe- oder Analyse-Tracker ein. In der Datenschutzerklärung steht genau, was wir erheben und warum."
+        },
+        {
+          "q": "Kann ich meine Daten herunterladen?",
+          "a": "Ja. Unter Profil → Datenschutz kannst du eine Datei mit deinen Tieren, Gesundheitsakten, Buchungen, Bestellungen und mehr herunterladen. Die Datei bleibt 7 Tage lang verfügbar."
+        },
+        {
+          "q": "Wie lösche ich mein Konto?",
+          "a": "Beantrage die Löschung unter Profil → Datenschutz. Wir prüfen den Antrag, legen gesondert ab, was wir gesetzlich aufbewahren müssen, und löschen oder anonymisieren den Rest. Solange der Antrag geprüft wird, kannst du ihn zurückziehen. Offene Buchungen, Bestellungen, Erstattungen oder Streitfälle müssen vorher abgeschlossen sein."
+        },
+        {
+          "q": "Welche Benachrichtigungen bekomme ich?",
+          "a": "Die, die du auswählst, in der App und per Push, SMS oder E-Mail. Marketingnachrichten sind ausgeschaltet, bis du sie einschaltest. Sicherheitsmeldungen werden immer gesendet. Du kannst außerdem Ruhezeiten festlegen."
+        }
+      ]
+    },
+    {
+      "id": "app",
+      "heading": "Die App",
+      "items": [
+        {
+          "q": "Gibt es eine App?",
+          "a": "Ja. Du kannst opetlife direkt aus dem Browser auf dem Startbildschirm deines Handys installieren, und es gibt eine Android-App. Beide nutzen dasselbe Konto."
+        },
+        {
+          "q": "Wie schalte ich Push-Benachrichtigungen ein?",
+          "a": "Erlaube Benachrichtigungen, wenn die Website oder die App danach fragt, oder schalte sie in deinen Benachrichtigungseinstellungen ein. Du kannst sie jederzeit an derselben Stelle oder in deinem Browser wieder ausschalten."
+        },
+        {
+          "q": "Welche Sprachen unterstützt opetlife?",
+          "a": "Persisch, Englisch, Deutsch, Spanisch, Arabisch und Niederländisch. Du wechselst die Sprache über das Sprachmenü oben oder unten auf jeder Seite."
+        }
+      ]
+    }
+  ]
+}

@@ -44,7 +44,7 @@ export class PetAccessGuard implements CanActivate {
       throw new PetAccessDeniedException(lapse ? { petId, lapse } : { petId });
     }
 
-    const requiredFlag = this.reflector.get<keyof PetAccessFlags | undefined>(PET_ACCESS_KEY, context.getHandler());
+    const requiredFlag = this.reflector.getAllAndOverride<keyof PetAccessFlags | undefined>(PET_ACCESS_KEY, [context.getHandler(), context.getClass()]);
     if (requiredFlag && !effective[requiredFlag]) {
       throw new PetAccessDeniedException({ petId, requiredFlag });
     }
