@@ -61,7 +61,7 @@ export function TravelHomeView() {
       </section>
 
       {/* Jajiga's pet-accepting stays next to opetlife's own: labelled by source, click-out only, no booking here. */}
-      <JajigaStaysSection pageSize={6} hideWhenEmpty seeAllHref={`/${lang}/travel/search?source=jajiga`} />
+      <JajigaStaysSection hideWhenEmpty />
 
       <section aria-labelledby="how-title" className="feature-trio">
         <h2 id="how-title" className="sr-only">{t("howTitle")}</h2>

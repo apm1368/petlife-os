@@ -8795,6 +8795,44 @@
       "hint": "Listings from Jajiga: you book and pay on Jajiga's own site, and opetlife charges nothing. Confirm the pet rules with the host before booking.",
       "seeAll": "All Jajiga stays",
       "pages": "Jajiga pages"
+    },
+    "tile": {
+      "kind": {
+        "villa": "Villa",
+        "apartment": "Apartment or suite",
+        "cottage": "Cottage",
+        "ecolodge": "Eco-lodge",
+        "house": "House or stay"
+      },
+      "sourceChip": "From {source}",
+      "capacity": "Sleeps {count}",
+      "bedrooms": "Bedrooms: {count}",
+      "fromPrice": "From {amount} per night",
+      "updated": "Updated {date}",
+      "viewOn": "View on {source}"
+    },
+    "browser": {
+      "title": "More pet-friendly stays",
+      "sourceChip": "Jajiga stays",
+      "count": "Found: {count}",
+      "hint": "Listings from Jajiga: you book and pay on Jajiga's own site, and opetlife charges nothing. Confirm the pet rules with the host before booking.",
+      "filters": "Filter stays",
+      "province": "Province",
+      "allProvinces": "All provinces",
+      "city": "City",
+      "allCities": "All cities",
+      "guests": "Guests",
+      "anyGuests": "Any number",
+      "guestsAtLeast": "At least {count}",
+      "price": "Price per night",
+      "anyPrice": "Any price",
+      "priceUpTo": "Up to {max}",
+      "priceBetween": "{min} to {max}",
+      "priceOver": "Over {min}",
+      "clear": "Clear filters",
+      "noMatch": "No stays match these filters. Try removing one.",
+      "loadMore": "Show more ({shown} of {total})",
+      "mediaNote": "Photos and the full description of each stay are on the source site; here you see the key facts."
     }
   },
   "localDateTime": {

@@ -95,15 +95,39 @@ export class TravelExternalPublicService {
    * included and labelled). petPolicy=CONFIRMED_ALLOWED narrows to evidence-backed pet-friendly; ANY includes everything.
    * If every source is failing, the last known inventory is still served with its stale indicators.
    */
-  async search(q: { city?: string; checkIn?: string; checkOut?: string; guests?: number; pets?: number; stayType?: string; source?: string; minPrice?: number; maxPrice?: number; instantBooking?: boolean; dogs?: boolean; cats?: boolean; petPolicy?: PetPolicyFilter; page?: number; pageSize?: number }) {
+  private facetCache = new Map<string, { at: number; value: { provinces: { name: string; count: number }[]; cities: { name: string; province: string | null; count: number }[] } }>();
+
+  /** Provinces and cities with listed stays (optionally for one source), most stays first; 10-minute cache. */
+  async facets(source?: string) {
+    const key = source ?? "*";
+    const hit = this.facetCache.get(key);
+    if (hit && Date.now() - hit.at < 10 * 60_000) return hit.value;
+    const where: Prisma.ExternalStayWhereInput = { publishState: ExternalPublishState.PUBLISHED, status: { in: VISIBLE }, ...(source ? { source: { code: source } } : {}) };
+    const [byProvince, byCity] = await Promise.all([
+      this.prisma.externalStay.groupBy({ by: ["province"], where: { ...where, province: { not: null } }, _count: { _all: true } }),
+      this.prisma.externalStay.groupBy({ by: ["city", "province"], where, _count: { _all: true } }),
+    ]);
+    const value = {
+      provinces: byProvince.filter((r) => r.province).map((r) => ({ name: r.province!, count: r._count._all })).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "fa")),
+      cities: byCity.filter((r) => r.city).map((r) => ({ name: r.city, province: r.province, count: r._count._all })).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "fa")),
+    };
+    this.facetCache.set(key, { at: Date.now(), value });
+    return value;
+  }
+
+  async search(q: { city?: string; province?: string; checkIn?: string; checkOut?: string; guests?: number; pets?: number; stayType?: string; source?: string; minPrice?: number; maxPrice?: number; instantBooking?: boolean; dogs?: boolean; cats?: boolean; petPolicy?: PetPolicyFilter; page?: number; pageSize?: number }) {
     const ctx = this.context(q);
     const { page, pageSize, skip, take } = resolvePagination(q);
     const city = q.city?.trim();
+    const province = q.province?.trim();
+    // A province must be one the listings actually have, so the filter is a whitelist, not free text.
+    if (province && !(await this.facets(q.source)).provinces.some((p) => p.name === province)) throw new ValidationApiException({ field: "province", reason: "UNKNOWN_PROVINCE" });
     // Each condition is its own AND term: several of them are OR groups, and spreading them into one object would let
     // a later OR (e.g. guests) silently replace the pet-policy filter.
     const and: Prisma.ExternalStayWhereInput[] = [
       this.petWhere(q.petPolicy),
       ...(city ? [{ OR: [{ city: { equals: city, mode: "insensitive" as const } }, { province: { equals: city, mode: "insensitive" as const } }] }] : []),
+      ...(province ? [{ province }] : []),
       ...(q.guests ? [{ OR: [{ capacity: null }, { capacity: { gte: q.guests } }] }] : []),
       // Pet filters match only explicit source values; UNKNOWN never counts as "yes".
       ...(q.dogs ? [{ petPolicy: { path: ["dogs"], equals: true } }] : []),
@@ -119,7 +143,12 @@ export class TravelExternalPublicService {
     // Stable order across pages and across the day's sync: best rated first, then a unique tie-breaker.
     const orderBy: Prisma.ExternalStayOrderByWithRelationInput[] = [{ rating: { sort: "desc", nulls: "last" } }, { reviewCount: { sort: "desc", nulls: "last" } }, { id: "asc" }];
     const meta = { context: ctx, petPolicyFilter: q.petPolicy ?? "DEFAULT_EXCLUDES_CONFIRMED_NOT_ALLOWED", notice: "SOURCE_ATTRIBUTED_EXTERNAL_LISTINGS", externalDataDisclaimerRequired: true, disclaimerFa: EXTERNAL_DATA_DISCLAIMER_FA, bookingMode: "OUTBOUND_TO_SOURCE" };
-    if (q.minPrice === undefined && q.maxPrice === undefined) {
+    const priceFilter = q.minPrice !== undefined || q.maxPrice !== undefined;
+    if (priceFilter && !ctx) {
+      // No dates: filter on each stay's current "from" price (per night), the same one the card shows.
+      and.push({ id: { in: await this.staysWithFromPriceBetween(q.minPrice, q.maxPrice) } });
+    }
+    if (!priceFilter || !ctx) {
       // Paginate in the database and price only the page being returned.
       const [total, rows] = await Promise.all([this.prisma.externalStay.count({ where }), this.prisma.externalStay.findMany({ where, include: { source: true, images: true }, orderBy, skip, take })]);
       return { ...toPaginatedDto(await Promise.all(rows.map((s) => this.withPrice(s, ctx))), total, page, pageSize), ...meta };
@@ -129,6 +158,27 @@ export class TravelExternalPublicService {
     const items = await Promise.all(rows.map((s) => this.withPrice(s, ctx)));
     const priced = items.filter((i) => i.price.state === "FRESH" && "priceIrr" in i.price && i.price.priceIrr != null && (q.minPrice === undefined || i.price.priceIrr >= q.minPrice) && (q.maxPrice === undefined || i.price.priceIrr <= q.maxPrice));
     return { ...toPaginatedDto(priced.slice(skip, skip + take), priced.length, page, pageSize), ...meta };
+  }
+
+  /**
+   * Stays whose latest FROM_PRICE snapshot is not stale (same rule as the card's "from" price) and lies in [min, max].
+   * Snapshots are appended when a price changes, so only the newest one per stay counts.
+   */
+  private async staysWithFromPriceBetween(min?: number, max?: number): Promise<string[]> {
+    const rows = await this.prisma.$queryRaw<{ stayId: string }[]>`
+      SELECT p."stayId" FROM (
+        SELECT DISTINCT ON (ps."stayId") ps."stayId", ps."priceIrr", ps."lastConfirmedAt", src."priceAgingHours"
+        FROM external_stay_price_snapshots ps
+        JOIN external_stays st ON st.id = ps."stayId"
+        JOIN external_travel_sources src ON src.id = st."sourceId"
+        WHERE ps."priceType" = 'FROM_PRICE'
+        ORDER BY ps."stayId", ps."lastConfirmedAt" DESC
+      ) p
+      WHERE p."priceIrr" IS NOT NULL
+        AND p."lastConfirmedAt" >= now() - make_interval(hours => p."priceAgingHours")
+        AND p."priceIrr" >= ${min ?? 0}
+        AND p."priceIrr" <= ${max ?? 2_147_483_647}`;
+    return rows.map((r) => r.stayId);
   }
 
   /** Effective policy = staff review if present, else the source observation. */

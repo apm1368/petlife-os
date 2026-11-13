@@ -30,6 +30,8 @@ class ContextDto {
 }
 class SearchDto extends ContextDto {
   @IsOptional() @IsString() @Length(1, 60) city?: string;
+  /** Exact province as stored for listed stays (validated against GET travel/external/facets). */
+  @IsOptional() @IsString() @Length(1, 60) province?: string;
   @IsOptional() @IsString() @Length(1, 40) stayType?: string;
   @IsOptional() @IsString() @Length(2, 30) source?: string;
   @IsOptional() @Type(() => Number) @IsInt() @Min(0) minPrice?: number;
@@ -42,6 +44,9 @@ class SearchDto extends ContextDto {
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) page?: number;
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(50) pageSize?: number;
 }
+class FacetsDto {
+  @IsOptional() @IsString() @Length(2, 30) source?: string;
+}
 class AttachDto extends ContextDto {
   @IsString() @Matches(/^[0-9a-f-]{36}$/) stayId!: string;
 }
@@ -52,6 +57,11 @@ export class TravelExternalPublicController {
 
   @Get("stays")
   search(@Query() q: SearchDto) { return this.svc.search(q); }
+
+  /** Provinces and cities that actually have listed stays (for the filters), with counts; cached briefly. */
+  @Get("facets")
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
+  facets(@Query() q: FacetsDto) { return this.svc.facets(q.source); }
 
   @Get("stays/:id")
   @Throttle({ default: { limit: 60, ttl: 60_000 } })

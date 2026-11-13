@@ -7629,6 +7629,44 @@
       "hint": "Anuncios de Jajiga: reservas y pagas en el propio sitio de Jajiga y opetlife no cobra nada. Confirma las normas sobre mascotas con el anfitrión antes de reservar.",
       "seeAll": "Todos los alojamientos de Jajiga",
       "pages": "Páginas de Jajiga"
+    },
+    "tile": {
+      "kind": {
+        "villa": "Villa",
+        "apartment": "Apartamento o suite",
+        "cottage": "Cabaña",
+        "ecolodge": "Ecolodge",
+        "house": "Casa o alojamiento"
+      },
+      "sourceChip": "De {source}",
+      "capacity": "Capacidad: {count}",
+      "bedrooms": "Dormitorios: {count}",
+      "fromPrice": "Desde {amount} por noche",
+      "updated": "Actualizado el {date}",
+      "viewOn": "Ver en {source}"
+    },
+    "browser": {
+      "title": "Más alojamientos que aceptan mascotas",
+      "sourceChip": "Alojamientos de Jajiga",
+      "count": "Encontrados: {count}",
+      "hint": "Anuncios de Jajiga: reservas y pagas en el propio sitio de Jajiga y opetlife no cobra nada. Confirma las normas sobre mascotas con el anfitrión antes de reservar.",
+      "filters": "Filtrar alojamientos",
+      "province": "Provincia",
+      "allProvinces": "Todas las provincias",
+      "city": "Ciudad",
+      "allCities": "Todas las ciudades",
+      "guests": "Huéspedes",
+      "anyGuests": "Cualquier número",
+      "guestsAtLeast": "Al menos {count}",
+      "price": "Precio por noche",
+      "anyPrice": "Cualquier precio",
+      "priceUpTo": "Hasta {max}",
+      "priceBetween": "De {min} a {max}",
+      "priceOver": "Más de {min}",
+      "clear": "Quitar filtros",
+      "noMatch": "Ningún alojamiento coincide con estos filtros. Prueba a quitar uno.",
+      "loadMore": "Ver más ({shown} de {total})",
+      "mediaNote": "Las fotos y la descripción completa de cada alojamiento están en el sitio de origen; aquí ves los datos principales."
     }
   },
   "insurance": {
