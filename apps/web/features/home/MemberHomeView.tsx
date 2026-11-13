@@ -10,6 +10,7 @@ import { bookingsService } from "@/services/bookings.service";
 import { careRemindersService } from "@/services/care-reminders.service";
 import { careTitle } from "@/features/care/care-labels";
 import { GlassMemberHome } from "./GlassMemberHome";
+import { MembershipOffersCard } from "@/features/membership/MembershipOffersCard";
 import { commerceService } from "@/services/commerce.service";
 import { travelMarketService } from "@/services/travel-marketplace.service";
 import { subscriptionService } from "@/services/subscription.service";
@@ -474,6 +475,7 @@ export function MemberHomeView() {
         </div>
 
         <aside className="member-home__side">
+          <MembershipOffersCard />
           <section className="member-home__card" aria-labelledby="home-next">
             <h2 id="home-next">{c.next}</h2>
             {nextBooking === "failed" ? <div role="status"><p>{c.unavailable}</p><button type="button" onClick={load}>{c.retry}</button></div> : nextBooking ? (

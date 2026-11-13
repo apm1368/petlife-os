@@ -2344,7 +2344,58 @@
     "cancelKeeps2": "Je kunt vóór {date} hervatten en dan verandert er niets.",
     "cancelConfirm": "Lidmaatschap opzeggen",
     "trialNote": "Tijdens de proefperiode betaal je niets.",
-    "planContentEnglish": "Namen en beschrijvingen van pakketten zijn momenteel alleen in het Engels beschikbaar; de originele tekst wordt getoond."
+    "planContentEnglish": "Namen en beschrijvingen van pakketten zijn momenteel alleen in het Engels beschikbaar; de originele tekst wordt getoond.",
+    "offers": {
+      "region": "Lidmaatschapsaanbiedingen",
+      "freeWeek": {
+        "eyebrow": "Gratis proefperiode",
+        "title": "Probeer {plan} {days, number} dagen gratis",
+        "titleNoPlan": "Probeer het volledige lidmaatschap {days, number} dagen gratis",
+        "points": {
+          "noCard": "Geen kaart of betaling nodig om te beginnen.",
+          "noCharge": "Na afloop wordt niets afgeschreven: je gaat gewoon terug naar het gratis abonnement.",
+          "once": "Eén gratis proefperiode per account, huishouden en telefoonnummer.",
+          "reminder": "We herinneren je 2 dagen voor het einde. Je kunt op elk moment eerder stoppen."
+        },
+        "start": "Start mijn gratis week",
+        "activeTitle": "Je gratis proefperiode loopt",
+        "activeUntil": "Die eindigt op {date}.",
+        "phoneRequired": "Bevestig je telefoonnummer om de gratis proefperiode te starten.",
+        "verifyPhone": "Telefoonnummer bevestigen",
+        "withFirstPet": "Die start automatisch zodra je je eerste huisdier toevoegt.",
+        "ownerOnly": "Alleen een eigenaar van het huishouden kan die starten.",
+        "notEligible": "Dit account of huishouden heeft de gratis proefperiode al gebruikt.",
+        "failed": "De gratis proefperiode kon niet starten. Probeer het opnieuw."
+      },
+      "gift": {
+        "eyebrow": "Cadeau bij eerste aankoop",
+        "title": "{percent, number}% korting op je eerste betaalde lidmaatschap",
+        "codeLabel": "Je cadeaucode",
+        "copy": "Code kopiëren",
+        "copied": "Gekopieerd",
+        "apply": "Gebruiken bij afrekenen",
+        "expires": "Geldig tot {date}.",
+        "terms": "Alleen voor je eerste betaalde aankoop, één keer per account en huishouden. Werkt ook na een gratis proefperiode, is niet te combineren met andere kortingen en niet in te wisselen voor geld of tegoed in je portemonnee."
+      },
+      "checkout": {
+        "label": "Cadeaucode",
+        "apply": "Toepassen",
+        "remove": "Verwijderen",
+        "applied": "Cadeau toegepast: {percent, number}% korting op deze eerste betaling.",
+        "withGift": "met je cadeau",
+        "notApplicable": "Deze code kan niet voor deze aankoop worden gebruikt.",
+        "rateLimited": "Te veel pogingen. Wacht een minuut en probeer het opnieuw.",
+        "renewalNote": "Het cadeau geldt alleen voor deze eerste betaling; latere verlengingen kosten de normale prijs."
+      }
+    },
+    "endTrial": {
+      "action": "Proefperiode nu beëindigen",
+      "title": "De gratis proefperiode nu beëindigen",
+      "consequence1": "De functies van de proefperiode stoppen meteen en je gaat terug naar het gratis abonnement.",
+      "consequence2": "De proefperiode telt toch als gebruikt en kan niet opnieuw worden gestart.",
+      "keeps": "Er is niets afgeschreven en dat gebeurt ook niet. Alles wat je hebt vastgelegd blijft van jou.",
+      "confirm": "Proefperiode nu beëindigen"
+    }
   },
   "pets": {
     "myPets": "Mijn huisdieren",
@@ -7970,7 +8021,8 @@
         "EXPIRED": "Verlopen",
         "ADMIN_CANCELLED": "Geannuleerd door beheerder",
         "ENTITLEMENT_OVERRIDE_GRANTED": "Uitzondering op recht toegekend",
-        "ENTITLEMENT_OVERRIDE_REVOKED": "Uitzondering op recht ingetrokken"
+        "ENTITLEMENT_OVERRIDE_REVOKED": "Uitzondering op recht ingetrokken",
+        "TRIAL_ENDED_EARLY": "Proefperiode vroegtijdig beëindigd"
       }
     },
     "adminSearch": {
@@ -9829,7 +9881,14 @@
       "privacy_exportsPerDay": "Daglimiet voor verzoeken om gegevensexport",
       "approvals_mode_serviceBookings": "Boekingen van verzorgingsdiensten: goedkeuringsmodus",
       "approvals_mode_stayBookings": "Verblijfsboekingen: goedkeuringsmodus",
-      "approvals_mode_shopOrders": "Winkelbestellingen: goedkeuringsmodus"
+      "approvals_mode_shopOrders": "Winkelbestellingen: goedkeuringsmodus",
+      "membership_freeWeek_enabled": "Gratis proefperiode aan",
+      "membership_freeWeek_days": "Duur van de gratis proefperiode",
+      "membership_freeWeek_requireVerifiedPhone": "Gratis proefperiode alleen met bevestigd telefoonnummer",
+      "membership_firstPurchaseGift_enabled": "Cadeau bij eerste aankoop aan",
+      "membership_firstPurchaseGift_code": "Code van het cadeau bij eerste aankoop",
+      "membership_firstPurchaseGift_percentOff": "Korting van het cadeau bij eerste aankoop",
+      "membership_firstPurchaseGift_expiresOn": "Laatste dag van het cadeau bij eerste aankoop"
     },
     "statuses": {
       "PENDING": "Wacht op goedkeuring; niet toegepast",
@@ -9842,7 +9901,9 @@
       "toman": "toman",
       "seconds": "seconden",
       "hours": "uur",
-      "perDay": "per dag"
+      "perDay": "per dag",
+      "days": "dagen",
+      "percent": "%"
     },
     "options": {
       "PARTNER_CHOICE": "Eigen keuze van elke partner",
@@ -9850,7 +9911,9 @@
       "NEEDS_APPROVAL": "Goedkeuring nodig"
     },
     "choiceValue": "Nieuwe waarde",
-    "approvalsNote": "Aanvragen en vastgehouden bestellingen komen ter opvolging in de takenlijst. De eigen instelling van een bedrijf op zijn profielpagina gaat hiervoor."
+    "approvalsNote": "Aanvragen en vastgehouden bestellingen komen ter opvolging in de takenlijst. De eigen instelling van een bedrijf op zijn profielpagina gaat hiervoor.",
+    "textValue": "Waarde",
+    "membershipNote": "Lidmaatschapsaanbiedingen: wijzigingen gelden alleen voor nieuwe proefperiodes en aankopen. De cadeaucode heeft 4 tot 24 Latijnse letters, cijfers of streepjes; de laatste dag is YYYY-MM-DD (leeg = geen einddatum)."
   },
   "adminFeatureFlags": {
     "title": "Feature-flags",

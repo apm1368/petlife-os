@@ -3134,7 +3134,14 @@
       "privacy_exportsPerDay": "Tägliches Limit für Datenexporte",
       "approvals_mode_serviceBookings": "Betreuungsbuchungen: Freigabemodus",
       "approvals_mode_stayBookings": "Unterkunftsbuchungen: Freigabemodus",
-      "approvals_mode_shopOrders": "Shop-Bestellungen: Freigabemodus"
+      "approvals_mode_shopOrders": "Shop-Bestellungen: Freigabemodus",
+      "membership_freeWeek_enabled": "Kostenloser Test aktiv",
+      "membership_freeWeek_days": "Dauer des kostenlosen Tests",
+      "membership_freeWeek_requireVerifiedPhone": "Kostenloser Test nur mit bestätigter Telefonnummer",
+      "membership_firstPurchaseGift_enabled": "Geschenk zum ersten Kauf aktiv",
+      "membership_firstPurchaseGift_code": "Code des Geschenks zum ersten Kauf",
+      "membership_firstPurchaseGift_percentOff": "Rabatt des Geschenks zum ersten Kauf",
+      "membership_firstPurchaseGift_expiresOn": "Letzter Tag des Geschenks zum ersten Kauf"
     },
     "statuses": {
       "PENDING": "Genehmigung ausstehend; noch nicht angewendet",
@@ -3143,14 +3150,16 @@
       "CANCELLED": "Abgebrochen",
       "SUPERSEDED": "Durch eine neuere Änderung ersetzt"
     },
-    "units": { "toman": "Toman", "seconds": "Sekunden", "hours": "Stunden", "perDay": "pro Tag" },
+    "units": { "toman": "Toman", "seconds": "Sekunden", "hours": "Stunden", "perDay": "pro Tag", "days": "Tage", "percent": "%" },
     "options": {
       "PARTNER_CHOICE": "Eigene Wahl jedes Partners",
       "INSTANT": "Sofort",
       "NEEDS_APPROVAL": "Freigabe nötig"
     },
     "choiceValue": "Neuer Wert",
-    "approvalsNote": "Anfragen und zurückgehaltene Bestellungen landen zur Nachverfolgung in der Aufgabenliste. Die eigene Einstellung eines Unternehmens auf seiner Profilseite hat Vorrang."
+    "approvalsNote": "Anfragen und zurückgehaltene Bestellungen landen zur Nachverfolgung in der Aufgabenliste. Die eigene Einstellung eines Unternehmens auf seiner Profilseite hat Vorrang.",
+    "textValue": "Wert",
+    "membershipNote": "Mitgliedschaftsangebote: Änderungen gelten nur für neue Tests und Käufe. Der Geschenkcode hat 4 bis 24 lateinische Buchstaben, Ziffern oder Bindestriche; der letzte Tag ist YYYY-MM-DD (leer = kein Ablauf)."
   },
   "adminAccess": {
     "title": "Adminzugänge verwalten",
@@ -4935,7 +4944,58 @@
     "loadForbidden": "Sie haben keinen Zugriff auf die Mitgliedschaft dieses Haushalts.",
     "noHouseholdMessage": "Eine Mitgliedschaft gehört zu einem Haushalt. Erstellen Sie einen Haushalt oder treten Sie einem bei, bevor Sie Tarife verwalten.",
     "openHouseholds": "Haushalte verwalten",
-    "noPlans": "Zurzeit sind keine Tarife verfügbar."
+    "noPlans": "Zurzeit sind keine Tarife verfügbar.",
+    "offers": {
+      "region": "Mitgliedschaftsangebote",
+      "freeWeek": {
+        "eyebrow": "Kostenloser Test",
+        "title": "{plan} {days, number} Tage kostenlos testen",
+        "titleNoPlan": "Die volle Mitgliedschaft {days, number} Tage kostenlos testen",
+        "points": {
+          "noCard": "Zum Start ist keine Karte und keine Zahlung nötig.",
+          "noCharge": "Am Ende wird nichts abgebucht: Sie wechseln einfach zurück zum kostenlosen Tarif.",
+          "once": "Ein kostenloser Test pro Konto, Haushalt und Telefonnummer.",
+          "reminder": "Wir erinnern Sie 2 Tage vor dem Ende. Sie können den Test jederzeit früher beenden."
+        },
+        "start": "Gratiswoche starten",
+        "activeTitle": "Ihr kostenloser Test läuft",
+        "activeUntil": "Er endet am {date}.",
+        "phoneRequired": "Bestätigen Sie Ihre Telefonnummer, um den kostenlosen Test zu starten.",
+        "verifyPhone": "Telefonnummer bestätigen",
+        "withFirstPet": "Er startet automatisch, sobald Sie Ihr erstes Tier hinzufügen.",
+        "ownerOnly": "Nur ein Haushaltsinhaber kann ihn starten.",
+        "notEligible": "Dieses Konto oder dieser Haushalt hat den kostenlosen Test bereits genutzt.",
+        "failed": "Der kostenlose Test konnte nicht gestartet werden. Bitte versuchen Sie es erneut."
+      },
+      "gift": {
+        "eyebrow": "Geschenk zum ersten Kauf",
+        "title": "{percent, number} % Rabatt auf Ihre erste bezahlte Mitgliedschaft",
+        "codeLabel": "Ihr Geschenkcode",
+        "copy": "Code kopieren",
+        "copied": "Kopiert",
+        "apply": "Beim Bezahlen einlösen",
+        "expires": "Gültig bis {date}.",
+        "terms": "Nur für Ihren ersten bezahlten Kauf, einmal pro Konto und Haushalt. Gilt auch nach einem kostenlosen Test, ist nicht mit anderen Rabatten kombinierbar und kann nicht in Bargeld oder Guthaben umgetauscht werden."
+      },
+      "checkout": {
+        "label": "Geschenkcode",
+        "apply": "Einlösen",
+        "remove": "Entfernen",
+        "applied": "Geschenk eingelöst: {percent, number} % Rabatt auf diese erste Zahlung.",
+        "withGift": "mit Ihrem Geschenk",
+        "notApplicable": "Dieser Code kann für diesen Kauf nicht verwendet werden.",
+        "rateLimited": "Zu viele Versuche. Bitte warten Sie eine Minute und versuchen Sie es erneut.",
+        "renewalNote": "Das Geschenk gilt nur für diese erste Zahlung; spätere Verlängerungen kosten den regulären Preis."
+      }
+    },
+    "endTrial": {
+      "action": "Test jetzt beenden",
+      "title": "Kostenlosen Test jetzt beenden",
+      "consequence1": "Die Testfunktionen enden sofort und Sie wechseln zurück zum kostenlosen Tarif.",
+      "consequence2": "Der Test gilt trotzdem als genutzt und kann nicht erneut gestartet werden.",
+      "keeps": "Es wurde nichts abgebucht und es wird nichts abgebucht. Alles, was Sie erfasst haben, bleibt Ihres.",
+      "confirm": "Test jetzt beenden"
+    }
   },
   "common": {
     "appName": "opetlife",
@@ -6700,7 +6760,8 @@
         "EXPIRED": "Abgelaufen",
         "ADMIN_CANCELLED": "Von der Administration gekündigt",
         "ENTITLEMENT_OVERRIDE_GRANTED": "Berechtigungsausnahme erteilt",
-        "ENTITLEMENT_OVERRIDE_REVOKED": "Berechtigungsausnahme widerrufen"
+        "ENTITLEMENT_OVERRIDE_REVOKED": "Berechtigungsausnahme widerrufen",
+        "TRIAL_ENDED_EARLY": "Test vorzeitig beendet"
       }
     },
     "records": {

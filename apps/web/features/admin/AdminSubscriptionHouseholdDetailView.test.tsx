@@ -35,7 +35,7 @@ const DETAIL: AdminSubscriptionDetailDto = {
   household: { id: "household-1", name: "Rahimi Family" },
   changes: [],
   billingAttempts: [
-    { id: "attempt-1", reason: "INITIAL" as never, attemptNumber: 1, status: "SUCCEEDED" as never, amount: 500_000, currency: "IRR", failureCode: null, failureReason: null, paymentIntentId: "intent-1", createdAt: "2026-01-01T00:00:00.000Z", completedAt: "2026-01-01T00:01:00.000Z" },
+    { id: "attempt-1", reason: "INITIAL" as never, attemptNumber: 1, status: "SUCCEEDED" as never, amount: 500_000, discountAmount: 0, currency: "IRR", failureCode: null, failureReason: null, paymentIntentId: "intent-1", createdAt: "2026-01-01T00:00:00.000Z", completedAt: "2026-01-01T00:01:00.000Z" },
   ],
 };
 

@@ -1,0 +1,95 @@
+/* Membership offers card (free week + first-purchase gift), on the 2026-11 member pattern: a soft raised card with
+   the sun/leaf accents. Colours come from the pattern tokens (.opl-page) with the design-system tokens as fallback,
+   so the card follows light and dark mode wherever it is placed. */
+.membership-offers {
+  --mo-raised: var(--opl-raised, var(--surface-raised));
+  --mo-ink: var(--opl-ink, var(--text-primary));
+  --mo-ink-2: var(--opl-ink-2, var(--text-secondary));
+  --mo-line: var(--opl-line, var(--border-default));
+  --mo-sun: var(--opl-sun, #f2b544);
+  --mo-leaf: var(--opl-leaf, var(--brand-natural));
+  --mo-forest: var(--opl-forest, var(--brand-primary));
+  --mo-cream: var(--opl-cream, var(--brand-tint));
+  --mo-mint: var(--opl-mint, var(--brand-tint));
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  color: var(--mo-ink);
+}
+@media (min-width: 720px) {
+  .membership-offers:has(> .membership-offers__week):has(> .membership-offers__gift) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.membership-offers__week,
+.membership-offers__gift {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 20px 20px 18px;
+  border: 1px solid var(--mo-line);
+  border-radius: 24px;
+  background: var(--mo-raised);
+  box-shadow: 0 1px 0 rgb(46 40 28 / .03), 0 16px 34px -30px rgb(46 40 28 / .55);
+  overflow: hidden;
+}
+.membership-offers__week { background: linear-gradient(160deg, var(--mo-mint), var(--mo-raised) 70%); }
+.membership-offers__gift { background: linear-gradient(160deg, var(--mo-cream), var(--mo-raised) 70%); }
+.membership-offers__week::before,
+.membership-offers__gift::before {
+  content: ""; position: absolute; inset-block-start: 0; inset-inline: 20px; height: 4px; border-radius: 0 0 999px 999px;
+  background: linear-gradient(90deg, var(--mo-sun) 0 70%, var(--mo-leaf) 70% 100%);
+}
+.membership-offers__eyebrow { display: inline-flex; align-items: center; gap: 6px; margin: 0; color: var(--mo-forest); font-size: .78rem; font-weight: 700; }
+.membership-offers__title { margin: 0; font-size: 1.15rem; line-height: 1.5; font-weight: 800; color: var(--mo-ink); overflow-wrap: anywhere; }
+.membership-offers__date { display: flex; align-items: center; gap: 8px; margin: 0; font-weight: 700; color: var(--mo-ink); }
+.membership-offers__points { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; color: var(--mo-ink-2); font-size: .88rem; line-height: 1.7; }
+.membership-offers__points li { position: relative; padding-inline-start: 18px; }
+.membership-offers__points li::before { content: ""; position: absolute; inset-inline-start: 2px; top: .7em; width: 7px; height: 7px; border-radius: 999px; background: var(--mo-leaf); }
+.membership-offers__note { margin: 0; color: var(--mo-ink-2); font-size: .85rem; }
+.membership-offers__terms { margin: 0; color: var(--mo-ink-2); font-size: .76rem; line-height: 1.7; }
+.membership-offers__error { margin: 0; color: var(--state-urgent); font-size: .85rem; }
+.membership-offers__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 2px; }
+.membership-offers__link {
+  display: inline-flex; align-items: center; min-height: 40px; padding: 8px 18px; border-radius: 999px;
+  background: var(--mo-sun); color: var(--opl-on-sun, #3a2a05); font-weight: 700; font-size: .88rem; text-decoration: none;
+}
+.membership-offers__link:hover { filter: brightness(1.04); text-decoration: underline; }
+.membership-offers__link:focus-visible, .membership-offers__copy:focus-visible { outline: 2px solid var(--mo-forest); outline-offset: 2px; }
+.membership-offers__code-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.membership-offers__code-label { flex-basis: 100%; color: var(--mo-ink-2); font-size: .78rem; }
+.membership-offers__code {
+  padding: 6px 14px; border: 2px dashed var(--mo-sun); border-radius: 12px; background: var(--mo-raised);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 1.15rem; font-weight: 800; letter-spacing: .08em; color: var(--mo-ink);
+  overflow-wrap: anywhere;
+}
+.membership-offers__copy {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 6px 14px; border: 1px solid var(--mo-line); border-radius: 999px;
+  background: var(--mo-raised); color: var(--mo-ink); font-size: .82rem; font-weight: 600; cursor: pointer;
+}
+.membership-offers__copy:hover { border-color: var(--mo-forest); }
+:root[data-theme="dark"] .membership-offers__week,
+:root[data-theme="dark"] .membership-offers__gift { box-shadow: 0 16px 34px -30px rgb(0 0 0 / .8); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .membership-offers__week,
+  :root:not([data-theme="light"]) .membership-offers__gift { box-shadow: 0 16px 34px -30px rgb(0 0 0 / .8); }
+}
+@media (max-width: 480px) {
+  .membership-offers__week, .membership-offers__gift { padding: 18px 16px 16px; border-radius: 20px; }
+  .membership-offers__title { font-size: 1.05rem; }
+  .membership-offers__actions > * { flex: 1 1 auto; justify-content: center; }
+}
+
+/* Checkout: the gift-code field on the plans page. */
+.membership-gift-field { display: flex; flex-direction: column; gap: 8px; padding: 16px; border: 1px dashed var(--opl-sun, #f2b544); border-radius: 20px; background: var(--opl-cream, var(--brand-tint)); }
+.membership-gift-field__row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; }
+.membership-gift-field__row > :first-child { flex: 1 1 180px; min-width: 0; }
+.membership-gift-field__applied { margin: 0; font-weight: 700; color: var(--opl-forest, var(--brand-primary)); }
+.membership-price-was { color: var(--text-secondary); text-decoration: line-through; font-weight: 400; margin-inline-end: 8px; }
+
+/* Onboarding (first screen after sign-up): the grid's third child, under the steps list on wide screens and under
+   the current step on phones, so it never pushes the step itself down. */
+.onboarding-layout > .membership-offers--onboarding { grid-column: 1; align-self: start; }
+@media (min-width: 720px) {
+  .onboarding-layout > .membership-offers--onboarding:has(> .membership-offers__week):has(> .membership-offers__gift) { grid-template-columns: 1fr; }
+}

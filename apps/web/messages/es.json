@@ -3129,7 +3129,14 @@
       "privacy_exportsPerDay": "Límite diario de solicitudes de exportación de datos",
       "approvals_mode_serviceBookings": "Reservas de servicios de cuidado: modo de aprobación",
       "approvals_mode_stayBookings": "Reservas de alojamiento: modo de aprobación",
-      "approvals_mode_shopOrders": "Pedidos de la tienda: modo de aprobación"
+      "approvals_mode_shopOrders": "Pedidos de la tienda: modo de aprobación",
+      "membership_freeWeek_enabled": "Prueba gratuita activa",
+      "membership_freeWeek_days": "Duración de la prueba gratuita",
+      "membership_freeWeek_requireVerifiedPhone": "Prueba gratuita solo con teléfono verificado",
+      "membership_firstPurchaseGift_enabled": "Regalo de primera compra activo",
+      "membership_firstPurchaseGift_code": "Código del regalo de primera compra",
+      "membership_firstPurchaseGift_percentOff": "Descuento del regalo de primera compra",
+      "membership_firstPurchaseGift_expiresOn": "Último día del regalo de primera compra"
     },
     "statuses": {
       "PENDING": "Pendiente de aprobación; aún no aplicado",
@@ -3138,14 +3145,16 @@
       "CANCELLED": "Cancelado",
       "SUPERSEDED": "Sustituido por un cambio más reciente"
     },
-    "units": { "toman": "tomanes", "seconds": "segundos", "hours": "horas", "perDay": "por día" },
+    "units": { "toman": "tomanes", "seconds": "segundos", "hours": "horas", "perDay": "por día", "days": "días", "percent": "%" },
     "options": {
       "PARTNER_CHOICE": "Elección de cada socio",
       "INSTANT": "Inmediato",
       "NEEDS_APPROVAL": "Requiere aprobación"
     },
     "choiceValue": "Nuevo valor",
-    "approvalsNote": "Las solicitudes y los pedidos retenidos van a la lista de tareas para su seguimiento. El ajuste propio de un negocio en su página de perfil prevalece sobre este."
+    "approvalsNote": "Las solicitudes y los pedidos retenidos van a la lista de tareas para su seguimiento. El ajuste propio de un negocio en su página de perfil prevalece sobre este.",
+    "textValue": "Valor",
+    "membershipNote": "Ofertas de membresía: los cambios solo afectan a pruebas y compras nuevas. El código de regalo tiene de 4 a 24 letras latinas, cifras o guiones; el último día es YYYY-MM-DD (vacío = sin caducidad)."
   },
   "adminAccess": {
     "title": "Gestión de accesos de administración",
@@ -4925,7 +4934,58 @@
     "loadForbidden": "No tienes acceso a la membresía de este hogar.",
     "noHouseholdMessage": "La membresía pertenece a un hogar. Crea uno o únete a uno antes de gestionar los planes.",
     "openHouseholds": "Gestionar hogares",
-    "noPlans": "No hay planes disponibles en este momento."
+    "noPlans": "No hay planes disponibles en este momento.",
+    "offers": {
+      "region": "Ofertas de membresía",
+      "freeWeek": {
+        "eyebrow": "Prueba gratuita",
+        "title": "Prueba {plan} gratis durante {days, number} días",
+        "titleNoPlan": "Prueba la membresía completa gratis durante {days, number} días",
+        "points": {
+          "noCard": "No necesitas tarjeta ni pago para empezar.",
+          "noCharge": "Al terminar no se cobra nada: simplemente vuelves al plan gratuito.",
+          "once": "Una prueba gratuita por cuenta, hogar y número de teléfono.",
+          "reminder": "Te avisaremos 2 días antes de que termine. Puedes terminarla antes cuando quieras."
+        },
+        "start": "Empezar mi semana gratis",
+        "activeTitle": "Tu prueba gratuita está activa",
+        "activeUntil": "Termina el {date}.",
+        "phoneRequired": "Verifica tu número de teléfono para empezar la prueba gratuita.",
+        "verifyPhone": "Verificar número de teléfono",
+        "withFirstPet": "Empieza automáticamente cuando añades tu primera mascota.",
+        "ownerOnly": "Solo una persona administradora del hogar puede empezarla.",
+        "notEligible": "Esta cuenta o este hogar ya usó su prueba gratuita.",
+        "failed": "No se pudo empezar la prueba gratuita. Inténtalo de nuevo."
+      },
+      "gift": {
+        "eyebrow": "Regalo de primera compra",
+        "title": "{percent, number} % de descuento en tu primera membresía de pago",
+        "codeLabel": "Tu código de regalo",
+        "copy": "Copiar código",
+        "copied": "Copiado",
+        "apply": "Usar al pagar",
+        "expires": "Válido hasta el {date}.",
+        "terms": "Solo para tu primera compra de pago, una vez por cuenta y hogar. También sirve después de una prueba gratuita, no se combina con otros descuentos y no se puede canjear por dinero ni saldo del monedero."
+      },
+      "checkout": {
+        "label": "Código de regalo",
+        "apply": "Aplicar",
+        "remove": "Quitar",
+        "applied": "Regalo aplicado: {percent, number} % de descuento en este primer pago.",
+        "withGift": "con tu regalo",
+        "notApplicable": "Este código no se puede usar en esta compra.",
+        "rateLimited": "Demasiados intentos. Espera un minuto y vuelve a intentarlo.",
+        "renewalNote": "El regalo solo se aplica a este primer pago; las renovaciones posteriores tienen el precio normal."
+      }
+    },
+    "endTrial": {
+      "action": "Terminar la prueba ahora",
+      "title": "Terminar la prueba gratuita ahora",
+      "consequence1": "Las funciones de la prueba se detienen al instante y vuelves al plan gratuito.",
+      "consequence2": "La prueba cuenta como usada y no se puede volver a empezar.",
+      "keeps": "No se ha cobrado nada ni se cobrará. Todo lo que registraste sigue siendo tuyo.",
+      "confirm": "Terminar la prueba ahora"
+    }
   },
   "common": {
     "appName": "opetlife",
@@ -6690,7 +6750,8 @@
         "EXPIRED": "Caducada",
         "ADMIN_CANCELLED": "Cancelada por la administración",
         "ENTITLEMENT_OVERRIDE_GRANTED": "Excepción de derecho de uso concedida",
-        "ENTITLEMENT_OVERRIDE_REVOKED": "Excepción de derecho de uso revocada"
+        "ENTITLEMENT_OVERRIDE_REVOKED": "Excepción de derecho de uso revocada",
+        "TRIAL_ENDED_EARLY": "Prueba terminada antes de tiempo"
       }
     },
     "records": {

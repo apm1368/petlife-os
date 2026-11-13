@@ -12,6 +12,9 @@ import { SubscriptionBillingService } from "./subscription-billing.service";
 import { SubscriptionRenewalWorkerService } from "./subscription-renewal-worker.service";
 import { SubscriptionNotificationListener } from "./subscription-notification.listener";
 import { SubscriptionController } from "./subscription.controller";
+import { MembershipOffersController } from "./membership-offers.controller";
+import { SubscriptionGiftService } from "./subscription-gift.service";
+import { SubscriptionOffersService } from "./subscription-offers.service";
 
 /**
  * Reuses PaymentsModule/LedgerModule directly (spec: "reuse the H07 payment
@@ -22,8 +25,8 @@ import { SubscriptionController } from "./subscription.controller";
  */
 @Module({
   imports: [PaymentsModule, LedgerModule, NotificationsModule],
-  controllers: [SubscriptionController],
-  providers: [TrialEndingNotifier, SubscriptionInsightService, SubscriptionPlanReadService, UsageService, EntitlementService, SubscriptionService, SubscriptionBillingService, SubscriptionRenewalWorkerService, SubscriptionNotificationListener],
+  controllers: [SubscriptionController, MembershipOffersController],
+  providers: [SubscriptionGiftService, SubscriptionOffersService, TrialEndingNotifier, SubscriptionInsightService, SubscriptionPlanReadService, UsageService, EntitlementService, SubscriptionService, SubscriptionBillingService, SubscriptionRenewalWorkerService, SubscriptionNotificationListener],
   exports: [SubscriptionPlanReadService, UsageService, EntitlementService, SubscriptionService, SubscriptionBillingService],
 })
 export class SubscriptionsModule {}

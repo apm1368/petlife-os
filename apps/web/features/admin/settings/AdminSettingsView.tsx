@@ -30,6 +30,14 @@ const knownKeys = [
   "approvals.mode.serviceBookings",
   "approvals.mode.stayBookings",
   "approvals.mode.shopOrders",
+  // Membership offers (free trial + first-purchase gift); the gift is off until an admin turns it on.
+  "membership.freeWeek.enabled",
+  "membership.freeWeek.days",
+  "membership.freeWeek.requireVerifiedPhone",
+  "membership.firstPurchaseGift.enabled",
+  "membership.firstPurchaseGift.code",
+  "membership.firstPurchaseGift.percentOff",
+  "membership.firstPurchaseGift.expiresOn",
 ];
 const statuses: SettingChangeStatus[] = ["PENDING", "APPLIED", "REJECTED", "CANCELLED", "SUPERSEDED"];
 const isMoney = (key: string) => key.endsWith("Irr");
@@ -79,7 +87,11 @@ function DisplayValue({ value, settingKey }: { value: SettingValue; settingKey: 
             ? t("units.seconds")
             : settingKey === "privacy.exportsPerDay"
               ? t("units.perDay")
-              : t("units.hours")}
+              : settingKey === "membership.freeWeek.days"
+                ? t("units.days")
+                : settingKey.endsWith("percentOff")
+                  ? t("units.percent")
+                  : t("units.hours")}
       </span>
     );
   if (typeof value === "boolean") return <span>{t(value ? "enabled" : "disabled")}</span>;
@@ -185,6 +197,7 @@ export function AdminSettingsView() {
                         </DetailRow>
                         <DetailRow label={t("pending")}>{number(row.pendingChanges)}</DetailRow>
                         {row.key.startsWith("approvals.") && <p className="mt-2 text-metadata text-text-secondary">{t("approvalsNote")}</p>}
+                        {row.key.startsWith("membership.") && <p className="mt-2 text-metadata text-text-secondary">{t("membershipNote")}</p>}
                         {manage && knownKeys.includes(row.key) && (
                           <SettingEditor row={row} refresh={refresh} />
                         )}
@@ -219,6 +232,7 @@ function SettingEditor({ row, refresh }: { row: PlatformSetting; refresh: () => 
     [fa, setFa] = useState(typeof row.value === "object" ? (row.value?.fa ?? "") : ""),
     [en, setEn] = useState(typeof row.value === "object" ? (row.value?.en ?? "") : ""),
     [choice, setChoice] = useState(typeof row.value === "string" ? row.value : ""),
+    [text, setText] = useState(typeof row.value === "string" ? row.value : ""),
     [baseVersion, setBaseVersion] = useState(row.version),
     [reason, setReason] = useState(""),
     [confirmed, setConfirmed] = useState(false),
@@ -231,7 +245,9 @@ function SettingEditor({ row, refresh }: { row: PlatformSetting; refresh: () => 
       ? (parsed ?? 0)
       : row.type === "enum"
         ? choice
-        : row.type === "boolean"
+        : row.type === "text"
+          ? text.trim() || null
+          : row.type === "boolean"
         ? bool
         : fa.trim() || en.trim()
           ? { ...keepOtherLocales(row.value), ...(fa.trim() ? { fa: fa.trim() } : {}), ...(en.trim() ? { en: en.trim() } : {}) }
@@ -288,6 +304,18 @@ function SettingEditor({ row, refresh }: { row: PlatformSetting; refresh: () => 
                 }))}
                 onChange={(event) => {
                   setChoice(event.target.value);
+                  setConfirmed(false);
+                  setResult(null);
+                }}
+              />
+            ) : row.type === "text" ? (
+              <Input
+                label={t("textValue")}
+                dir="ltr"
+                maxLength={row.constraints.maxLength ?? 280}
+                value={text}
+                onChange={(event) => {
+                  setText(event.target.value);
                   setConfirmed(false);
                   setResult(null);
                 }}
