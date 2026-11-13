@@ -6,7 +6,7 @@ import "./approved-patterns.css";
 
 /** Shared visual rules reach every existing route without changing its role guards or API. */
 export function routePattern(pathname: string) {
-  const path = pathname.replace(/^\/(fa|en|de|es)(?=\/|$)/, "") || "/";
+  const path = pathname.replace(/^\/(fa|en|de|es|ar|nl)(?=\/|$)/, "") || "/";
   if (path === "/") return "landing";
   if (/^\/admin\/(crm|customer-affairs)(\/|$)/.test(path)) return "protected";
   if (/^\/admin(\/|$)/.test(path)) return "admin";

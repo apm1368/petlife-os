@@ -18,8 +18,8 @@ export function duplicateKeys(text: string): string[] {
     let out = "";
     i++;
     while (text[i] !== '"') {
-      if (text[i] === "\\") { out += text[i] + text[i + 1]; i += 2; continue; }
-      out += text[i++];
+      if (text[i] === "\\") { out += text.slice(i, i + 2); i += 2; continue; }
+      out += text.charAt(i++);
     }
     i++;
     return out;

@@ -72,7 +72,7 @@ export function PersonalSettingsView() {
       setSaved(true);
       // Only an explicit preference change moves the app. Preserve query and fragment state.
       if (language !== user.locale) {
-        const path = window.location.pathname.replace(/^\/(fa|en|de|es)(?=\/|$)/, `/${language}`);
+        const path = window.location.pathname.replace(/^\/(fa|en|de|es|ar|nl)(?=\/|$)/, `/${language}`);
         window.location.assign(`${path}${window.location.search}${window.location.hash}`);
       }
     } catch {
