@@ -52,7 +52,7 @@ describe("Admin two-step sign-in", () => {
   it("enrolment, one challenge per session, no replays, single-use recovery codes and a lock after five misses", async () => {
     const support = await admin("two-step support", AdminRole.SUPPORT);
     expect((await get(support, "/admin/me").expect(200)).body.twoStep).toEqual({ enrolled: false, verified: false, enforced: false, graceEndsAt: null, required: "NONE" });
-    await get(support, "/admin/support/cases").expect(200);
+    await get(support, "/admin/support").expect(200);
 
     const started = (await send("post", support, "/admin/two-step/enrolment").expect(201)).body;
     await send("post", support, "/admin/two-step/enrolment/confirm").send({ code: code(started.secret, 5) }).expect(400);
@@ -64,9 +64,9 @@ describe("Admin two-step sign-in", () => {
     expect(await db.adminTwoStepRecoveryCode.count({ where: { userId: support.userId, codeHash: { in: confirmed.recoveryCodes } } })).toBe(0);
     await send("post", support, "/admin/two-step/enrolment").expect(409);
     // The enrolling session is through; a new sign-in is not.
-    await get(support, "/admin/support/cases").expect(200);
+    await get(support, "/admin/support").expect(200);
     const laptop = await session(support.userId);
-    const blocked = (await get(laptop, "/admin/support/cases").expect(403)).body.error;
+    const blocked = (await get(laptop, "/admin/support").expect(403)).body.error;
     expect(blocked).toMatchObject({ code: "ADMIN_TWO_STEP_REQUIRED", details: { reason: "CHALLENGE" } });
     expect((await get(laptop, "/admin/me").expect(200)).body.twoStep).toMatchObject({ enrolled: true, verified: false, required: "CHALLENGE" });
     await get(laptop, "/admin/two-step").expect(200);
@@ -75,14 +75,14 @@ describe("Admin two-step sign-in", () => {
     // The code used to confirm can't be used again; the next step's code can, once.
     await send("post", laptop, "/admin/two-step/verify").send({ code: code(started.secret) }).expect(400);
     await send("post", laptop, "/admin/two-step/verify").send({ code: code(started.secret, 1) }).expect(201);
-    await get(laptop, "/admin/support/cases").expect(200);
+    await get(laptop, "/admin/support").expect(200);
     const phone = await session(support.userId);
     await send("post", phone, "/admin/two-step/verify").send({ code: code(started.secret, 1) }).expect(400);
 
     // Recovery codes work once each.
     const recovery = confirmed.recoveryCodes[0].toLowerCase().replace(/-/g, " ");
     expect((await send("post", phone, "/admin/two-step/verify").send({ recoveryCode: recovery }).expect(201)).body.recoveryCodesLeft).toBe(9);
-    await get(phone, "/admin/support/cases").expect(200);
+    await get(phone, "/admin/support").expect(200);
     const tablet = await session(support.userId);
     const reused = (await send("post", tablet, "/admin/two-step/verify").send({ recoveryCode: confirmed.recoveryCodes[0] }).expect(400)).body.error;
     expect(reused).toMatchObject({ code: "TWO_STEP_CODE_INVALID", details: { attemptsLeft: 4 } });
@@ -90,7 +90,7 @@ describe("Admin two-step sign-in", () => {
     const locked = (await send("post", tablet, "/admin/two-step/verify").send({ code: "000000" }).expect(429)).body.error;
     expect(locked.code).toBe("TWO_STEP_LOCKED");
     await send("post", tablet, "/admin/two-step/verify").send({ recoveryCode: confirmed.recoveryCodes[1] }).expect(429);
-    await get(tablet, "/admin/support/cases").expect(403);
+    await get(tablet, "/admin/support").expect(403);
     // A second lock-out before any success lasts an hour, not 15 minutes.
     await db.adminTwoStepFactor.update({ where: { userId: support.userId }, data: { lockedUntil: null } });
     for (let i = 0; i < 4; i++) await send("post", tablet, "/admin/two-step/verify").send({ code: "000000" }).expect(400);
@@ -140,14 +140,14 @@ describe("Admin two-step sign-in", () => {
 
     // An admin without an authenticator can only enrol now…
     const newcomer = await admin("two-step newcomer", AdminRole.SUPPORT);
-    expect((await get(newcomer, "/admin/support/cases").expect(403)).body.error.details.reason).toBe("ENROL");
+    expect((await get(newcomer, "/admin/support").expect(403)).body.error.details.reason).toBe("ENROL");
     expect((await get(newcomer, "/admin/two-step").expect(200)).body.required).toBe("ENROL");
     await enrol(newcomer);
-    await get(newcomer, "/admin/support/cases").expect(200);
+    await get(newcomer, "/admin/support").expect(200);
     // …unless the grace window is still open.
     await send("put", root, "/admin/two-step/policy").send({ ...body, graceDays: 3 }).expect(200);
     const later = await admin("two-step later", AdminRole.SUPPORT);
-    await get(later, "/admin/support/cases").expect(200);
+    await get(later, "/admin/support").expect(200);
     expect((await get(later, "/admin/me").expect(200)).body.twoStep).toMatchObject({ enforced: true, required: "NONE", graceEndsAt: expect.any(String) });
 
     // Nobody turns their own off while it is enforced; a lost authenticator is reset by a SUPER_ADMIN.
