@@ -9998,7 +9998,9 @@
         "myket": "Descargar en Myket",
         "googlePlay": "Descargar en Google Play",
         "apk": "Descargar para Android"
-      }
+      },
+      "apkMeta": "Versión {version} · {size} KB",
+      "apkHint": "Tras descargarla, abre el archivo y, si el teléfono lo pide, permite instalar desde este origen."
     }
   },
   "safety": {

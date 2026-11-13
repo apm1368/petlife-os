@@ -11056,7 +11056,9 @@
         "myket": "Ontdek het op Myket",
         "googlePlay": "Ontdek het op Google Play",
         "apk": "Downloaden voor Android"
-      }
+      },
+      "apkMeta": "Versie {version} · {size} KB",
+      "apkHint": "Open het bestand na het downloaden en sta, als je telefoon erom vraagt, installatie vanuit deze bron toe."
     }
   },
   "safety": {

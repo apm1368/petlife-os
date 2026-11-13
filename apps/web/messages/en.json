@@ -10987,7 +10987,9 @@
         "myket": "Get it on Myket",
         "googlePlay": "Get it on Google Play",
         "apk": "Download for Android"
-      }
+      },
+      "apkMeta": "Version {version} · {size} KB",
+      "apkHint": "After downloading, open the file and, if your phone asks, allow installs from this source."
     }
   },
   "safety": {

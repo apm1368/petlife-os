@@ -26,6 +26,15 @@ const nextConfig = {
         // current inline hydration, signed document previews or QR camera use.
         { key: "Content-Security-Policy", value: "frame-ancestors 'self'; object-src 'none'; base-uri 'self'" },
       ],
+    }, {
+      // The Android app download (public/app/*.apk): installer MIME type, saved as a file, revalidated hourly so a new
+      // release behind /app/opetlife.apk reaches people the same day.
+      source: "/app/:file(.+\\.apk)",
+      headers: [
+        { key: "Content-Type", value: "application/vnd.android.package-archive" },
+        { key: "Content-Disposition", value: "attachment" },
+        { key: "Cache-Control", value: "public, max-age=3600" },
+      ],
     }];
   },
   // Only the site's own static images go through the optimizer; every remote or uploaded image is rendered with

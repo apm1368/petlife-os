@@ -323,6 +323,8 @@
 .opl-foot__app-actions .opl-btn.sm { min-height:44px; }
 .opl-foot .opl-foot__app-actions a.opl-btn { color:var(--opl-ink); }
 .opl-foot__app-help { margin-top:10px !important; max-width:42ch; color:var(--opl-ink-2); font-size:.88rem; line-height:1.8; }
+.opl-foot__apk { margin-top:10px; display:grid; gap:4px; max-width:46ch; color:var(--opl-ink-2); font-size:.8rem; line-height:1.7; }
+.opl-foot__apk code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.72rem; word-break:break-all; color:var(--opl-ink-3); }
 .opl-foot h2 { font-size:.95rem; font-weight:800; margin:0 0 10px; }
 .opl-foot ul { list-style:none; margin:0; padding:0; display:grid; gap:6px; }
 .opl-foot a { color:var(--opl-ink-2); text-decoration:none; font-size:.92rem; }
