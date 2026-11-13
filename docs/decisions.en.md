@@ -120,7 +120,7 @@ overpricing and the product is hidden.
 | C-10 | Discount codes are created by both OptLife and the seller; the cost falls to the creator (an OptLife code from commission, a seller code from their share) | Owner |
 | C-11 | Delivery time and shipping cost are recorded for every offer | Original document |
 | C-12 | Source imports create drafts only in the central catalogue; source prices, stock and seller offers are not imported, and source changes stay separate from local content until an administrator explicitly approves them | Owner |
-| C-13 | Product directory (2026-11-13): Digikala photos and descriptions are imported into the central catalogue (the owner chose this after being told of the legal and takedown risk, which is theirs). Guardrails: fair-use pacing, stop on 403/429, re-hosted with provenance, a one-click takedown, sanitised text | Owner |
+| C-13 | Product directory (2026-11-13): the owner asked to import Digikala's product photos and descriptions. Declined on copyright grounds (the team would not copy another site's photos and text even with the owner's sign-off); #315 stays facts-only. Alternatives offered: our own fa/en/de/es descriptions written from the facts, brand media kits and seller photos with a rights confirmation, or a licensed feed if Digikala grants permission | Owner asked; team declined |
 
 ## O — Order, dispatch, delivery, return
 
