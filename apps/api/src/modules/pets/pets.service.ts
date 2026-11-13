@@ -4,12 +4,27 @@ import type { PetMicrochipConflictDetails } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { NotFoundApiException, ValidationApiException } from "../../common/errors/api-exception";
 import { DomainEventsService } from "../../common/events/domain-events.service";
+import { isOwnPublicObjectUrl } from "../storage/object-url.util";
 import { PetAccessService } from "../pet-access/pet-access.service";
 import { EntitlementService } from "../subscriptions/entitlement.service";
 import { PetLifecycleService } from "./pet-lifecycle.service";
 import { SubscriptionService } from "../subscriptions/subscription.service";
 import type { CreatePetDto } from "./dto/create-pet.dto";
 import type { UpdatePetDto } from "./dto/update-pet.dto";
+
+const PET_PHOTO_FILE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpg|png|webp)$/i;
+
+/**
+ * A pet photo address must be one this pet's own upload slot issued (`pets/<petId>/<uuid>.<ext>`). The photo is
+ * shown to vets, staff and on public pages (lost-pet posters, memorials), so an outside address would make their
+ * browsers fetch from a third party and skip the upload checks. A pet has no slot before it exists, so a new pet
+ * never takes an address; the web app uploads after creating it.
+ */
+export function assertOwnPetPhotoUrl(petId: string | null, photoUrl: string | null | undefined, current?: string | null): void {
+  if (photoUrl === undefined || photoUrl === null || photoUrl === current) return;
+  if (petId && isOwnPublicObjectUrl(photoUrl, `pets/${petId}/`, PET_PHOTO_FILE)) return;
+  throw new ValidationApiException({ field: "photoUrl", reason: "NOT_ISSUED_FOR_THIS_PET" });
+}
 
 /**
  * `pets_microchip_normalized_key` is a partial unique index across every household, so a chip that
@@ -64,6 +79,7 @@ export class PetsService {
     // EntitlementService/UsageService (which read via a separate,
     // non-transactional connection and therefore only ever see committed
     // state) and does not serialize unrelated households against each other.
+    assertOwnPetPhotoUrl(null, dto.photoUrl);
     const created = await this.prisma.$transaction(async (tx) => {
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${householdId})::bigint)`;
       await this.entitlements.assertWithinLimit(householdId, "pets.max");
@@ -151,6 +167,10 @@ export class PetsService {
 
   async update(id: string, dto: UpdatePetDto) {
     return this.prisma.$transaction(async (tx) => {
+      if (dto.photoUrl) {
+        const current = await tx.pet.findUnique({ where: { id }, select: { photoUrl: true } });
+        assertOwnPetPhotoUrl(id, dto.photoUrl, current?.photoUrl ?? null);
+      }
       const pet = await tx.pet.update({
         where: { id },
         data: {

@@ -65,6 +65,19 @@ function isPrivateKey(key: string): boolean {
 }
 
 /**
+ * Whether `url` is the public address this platform gives an object stored directly under `prefix`
+ * (for example `pets/<petId>/`) whose file name matches `fileName`. Image addresses that members set are shown
+ * in other people's browsers — vets, staff, public pages — so they must name a file that went through our own
+ * upload pipeline (type check, metadata strip), never an outside address.
+ */
+export function isOwnPublicObjectUrl(url: string, prefix: string, fileName: RegExp): boolean {
+  if (!PUBLIC_OBJECT_KEY_PREFIXES.some((p) => prefix.startsWith(p)) || prefix.includes("..") || !prefix.endsWith("/")) return false;
+  const base = `${process.env.STORAGE_PUBLIC_BASE_URL ?? DEFAULT_STORAGE_PUBLIC_BASE_URL}/${prefix}`;
+  if (!url.startsWith(base)) return false;
+  return fileName.test(url.slice(base.length));
+}
+
+/**
  * Whether a request path under the local static `/uploads` mount would reach a private key.
  * The path is decoded and normalised first (dot segments, repeated slashes) so `./health-documents/…`
  * or `%2e/…` can't slip past the prefix check while the static server still resolves them.

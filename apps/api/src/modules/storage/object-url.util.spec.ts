@@ -1,4 +1,4 @@
-import { isPrivateUploadPath, PRIVATE_OBJECT_KEY_PREFIXES, PUBLIC_OBJECT_KEY_PREFIXES, resolveObjectUrl, resolveObjectUrls } from "./object-url.util";
+import { isOwnPublicObjectUrl, isPrivateUploadPath, PRIVATE_OBJECT_KEY_PREFIXES, PUBLIC_OBJECT_KEY_PREFIXES, resolveObjectUrl, resolveObjectUrls } from "./object-url.util";
 import { isObjectKeyFor } from "../../common/storage-keys/object-key.validator";
 
 describe("isPrivateUploadPath (local /uploads static mount guard)", () => {
@@ -63,5 +63,26 @@ describe("object keys handed back by clients", () => {
     expect(err).toHaveBeenCalledTimes(1);
     expect(() => resolveObjectUrl(`health-documents/${u}/${v}.pdf`)).toThrow();
     err.mockRestore();
+  });
+});
+
+describe("isOwnPublicObjectUrl (member-set image addresses)", () => {
+  const file = /^[0-9a-f-]{36}\.(jpg|png|webp)$/i;
+  const id = "0ea309d0-c582-4710-80e4-276b41b5f94f";
+  const photo = "46536654-eebe-4986-af8f-076c9a1b2c3d.png";
+  const base = process.env.STORAGE_PUBLIC_BASE_URL ?? "http://localhost:4000/uploads";
+
+  it("accepts only a file under the given public prefix on our own storage address", () => {
+    expect(isOwnPublicObjectUrl(`${base}/pets/${id}/${photo}`, `pets/${id}/`, file)).toBe(true);
+  });
+
+  it("refuses outside hosts, other pets, nested paths, dot segments and private prefixes", () => {
+    expect(isOwnPublicObjectUrl(`https://evil.example/pets/${id}/${photo}`, `pets/${id}/`, file)).toBe(false);
+    expect(isOwnPublicObjectUrl(`${base}/pets/11111111-1111-1111-1111-111111111111/${photo}`, `pets/${id}/`, file)).toBe(false);
+    expect(isOwnPublicObjectUrl(`${base}/pets/${id}/x/${photo}`, `pets/${id}/`, file)).toBe(false);
+    expect(isOwnPublicObjectUrl(`${base}/pets/${id}/../${photo}`, `pets/${id}/`, file)).toBe(false);
+    expect(isOwnPublicObjectUrl(`${base}/pets/${id}/${photo}?x=https://evil.example`, `pets/${id}/`, file)).toBe(false);
+    expect(isOwnPublicObjectUrl(`${base}/health-documents/${id}/${photo}`, `health-documents/${id}/`, file)).toBe(false);
+    expect(isOwnPublicObjectUrl(`${base}.evil.example/pets/${id}/${photo}`, `pets/${id}/`, file)).toBe(false);
   });
 });
