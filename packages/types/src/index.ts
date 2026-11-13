@@ -2,6 +2,8 @@
 // Keep in sync with apps/api/prisma/schema.prisma enums — this package has no
 // runtime dependency on Prisma so it stays usable from the frontend.
 
+import type { WalletOwnerDto } from "./business-wallets";
+
 export type Locale = "fa" | "en" | "de" | "es" | "ar" | "nl";
 export type ThemePreference = "SYSTEM" | "LIGHT" | "DARK";
 
@@ -7365,13 +7367,25 @@ export type {
 } from "./ownership";
 export { OWNERSHIP_TRANSFER_EXPIRY_DAYS, PET_MEMORY_DISPOSITIONS, PET_OWNERSHIP_TRANSFER_STATUSES } from "./ownership";
 
+export type {
+  WalletOwnerTypeValue,
+  WalletOwnerDto,
+  BusinessWalletDto,
+  WalletTransferReasonCode,
+  AdminWalletAccountDto,
+  AdminWalletAccountDetailDto,
+  AdminWalletTransferDto,
+  AdminWalletTransferInput,
+} from "./business-wallets";
+export { WALLET_TRANSFER_REASON_CODES, WALLET_TRANSFER_UNRELATED_REASON_CODES } from "./business-wallets";
+
 // ---------------------------------------------------------------------------
 // Member wallet (balances are always derived from append-only entries)
 // ---------------------------------------------------------------------------
 
 export type WalletBalanceTypeValue = "WITHDRAWABLE" | "PURCHASE_ONLY";
 export type WalletEntryKindValue = "CREDIT" | "DEBIT" | "EXPIRY";
-export type WalletCreditSourceValue = "REFUND" | "TOP_UP" | "GIFT" | "OVERPAYMENT" | "DUPLICATE_PAYMENT" | "MANUAL_CORRECTION";
+export type WalletCreditSourceValue = "REFUND" | "TOP_UP" | "GIFT" | "OVERPAYMENT" | "DUPLICATE_PAYMENT" | "MANUAL_CORRECTION" | "TRANSFER";
 export type WalletTopUpRailValue = "ZIBAL" | "CARD_TO_CARD";
 export type WalletTopUpStatusValue = "AWAITING_PAYMENT" | "AWAITING_RECEIPT" | "REVIEW_PENDING" | "CREDITED" | "FAILED" | "REJECTED" | "EXPIRED" | "CANCELLED";
 export type WalletAdjustmentDirectionValue = "CREDIT" | "DEBIT";
@@ -7397,6 +7411,8 @@ export interface WalletTopUpOptionsDto {
 }
 
 export interface WalletSummaryDto {
+  /** Whose wallet this is; absent on the member's own wallet. */
+  owner?: WalletOwnerDto;
   balances: WalletBalancesDto;
   /** Gift credit that expires within 30 days, soonest first. */
   expiringSoon: { amount: number; expiresAt: string }[];
@@ -7410,8 +7426,8 @@ export interface WalletEntryDto {
   source: WalletCreditSourceValue | null;
   /** Positive for money in, negative for money out. */
   signedAmount: number;
-  /** What the movement was for: TOP_UP, PURCHASE, REFUND, ADJUSTMENT, EXPIRY or OTHER. */
-  purpose: "TOP_UP" | "PURCHASE" | "REFUND" | "ADJUSTMENT" | "EXPIRY" | "OTHER";
+  /** What the movement was for: TOP_UP, PURCHASE, REFUND, ADJUSTMENT, TRANSFER (a two-person staff transfer), EXPIRY or OTHER. */
+  purpose: "TOP_UP" | "PURCHASE" | "REFUND" | "ADJUSTMENT" | "TRANSFER" | "EXPIRY" | "OTHER";
   /** A staff adjustment's reason, shown to the member so a correction is never silent. */
   note: string | null;
   expiresAt: string | null;
@@ -7435,6 +7451,8 @@ export interface WalletTopUpDto {
   rejectionReason: string | null;
   createdAt: string;
   creditedAt: string | null;
+  /** The business wallet this tops up; null = the member's own wallet. */
+  walletAccountId: string | null;
 }
 
 /** Returned when a card-to-card top-up starts: where to send the money. */
@@ -7601,6 +7619,8 @@ export interface AdminWalletAdjustmentRequestDto {
 export interface AdminWalletTopUpDto extends WalletTopUpDto {
   userId: string;
   userDisplayName: string | null;
+  /** Set when the top-up is for a partner organisation's business wallet (userId is then who started it). */
+  businessWallet: WalletOwnerDto | null;
   cardNumberMasked: string | null;
   receiptUploadedAt: string | null;
   reviewedAt: string | null;
