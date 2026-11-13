@@ -4994,7 +4994,8 @@
         "profile": "Mijn account",
         "viewSite": "Site bekijken",
         "signOut": "Uitloggen",
-        "signingOut": "Bezig met uitloggen…"
+        "signingOut": "Bezig met uitloggen…",
+        "twoStep": "Inloggen in twee stappen"
       },
       "tabs": {
         "holidays": "Feestdagen en sluitingen",
@@ -5064,7 +5065,8 @@
         "walletCardReceipts": "Ontvangstbewijzen kaart-naar-kaartoverschrijving",
         "repeatDeliveries": "Herhaalleveringen",
         "orderLookup": "Bestelling opzoeken",
-        "refundApprovals": "Goedkeuring van terugbetalingen"
+        "refundApprovals": "Goedkeuring van terugbetalingen",
+        "twoStep": "Inloggen in twee stappen"
       },
       "palette": {
         "actions": "Snelle acties",
@@ -5342,6 +5344,11 @@
         "actionFailed": "De wijziging kon niet worden opgeslagen. Probeer het opnieuw.",
         "noMessages": "Nog geen berichten.",
         "noNotes": "Nog geen interne notities."
+      },
+      "humanEscalation": {
+        "label": "Opvolging door een medewerker gevraagd",
+        "reference": "Referentie: {reference}",
+        "submitted": "Aangevraagd: {date}"
       }
     },
     "disputes": {
@@ -8777,6 +8784,28 @@
     }
   },
   "externalTravel": {
+    "petPerSource": "Volgens {source} accepteert deze accommodatie huisdieren. Controleer de voorwaarden voor je huisdier en de beschikbaarheid op je reisdata bij {source} of de host.",
+    "petVerifiedByOpetlife": "Huisdieracceptatie gecontroleerd en bevestigd door opetlife",
+    "petFacts": {
+      "title": "Voorwaarden voor huisdieren",
+      "species": "Diersoort",
+      "size": "Grootte",
+      "indoor": "Toegang binnen",
+      "fee": "Huisdiertoeslag",
+      "approval": "Toestemming van de host",
+      "unknown": "Onbekend",
+      "yes": "Ja",
+      "no": "Nee",
+      "dogs": "Honden",
+      "cats": "Katten",
+      "upTo": "Tot {limit}",
+      "noFee": "Geen toeslag",
+      "approvalNeeded": "Nodig",
+      "approvalNotNeeded": "Niet nodig"
+    },
+    "startingPrice": "Vanaf {amount}",
+    "updatedAgo": "Bijgewerkt {ago}",
+    "viewOnSource": "Bekijk deze accommodatie op {source}",
     "title": "Verblijven van externe bronnen",
     "detailTitle": "Details extern verblijf",
     "disclaimer": "De informatie komt uit openbare bronnen en kan veranderen. Controleer bij de accommodatie of huisdieren welkom zijn en wat de verblijfsvoorwaarden zijn voordat je boekt.",
@@ -8842,7 +8871,7 @@
     "alreadyAttached": "Staat al in reisplan",
     "attach": "Aan reisplan toevoegen",
     "policy": {
-      "CONFIRMED_ALLOWED": "Huisdieren toegestaan, bevestigd onder bronvoorwaarden",
+      "CONFIRMED_ALLOWED": "Huisdiervriendelijk volgens de bron",
       "CONFIRMED_NOT_ALLOWED": "Huisdieren gemeld als niet toegestaan",
       "UNKNOWN": "Onbekend of huisdieren welkom zijn",
       "AMBIGUOUS": "Informatie over huisdieren is onduidelijk"
@@ -8875,10 +8904,7 @@
       },
       "sourceChip": "Van {source}",
       "capacity": "Max. gasten: {count}",
-      "bedrooms": "Slaapkamers: {count}",
-      "fromPrice": "Vanaf {amount} per nacht",
-      "updated": "Bijgewerkt op {date}",
-      "viewOn": "Bekijk op {source}"
+      "bedrooms": "Slaapkamers: {count}"
     },
     "browser": {
       "title": "Meer huisdiervriendelijke verblijven",
@@ -12283,6 +12309,140 @@
       "LOGO_FILE": "Het logo moet een JPG, PNG of WebP van minder dan 10 MB zijn.",
       "DOC_FILE": "Het document moet een JPG, PNG of PDF van minder dan 20 MB zijn.",
       "TOO_MANY_PENDING": "Er wachten te veel documenten op beoordeling."
+    }
+  },
+  "adminTwoStep": {
+    "kicker": "Accountbeveiliging",
+    "title": "Inloggen in twee stappen",
+    "retry": "Opnieuw proberen",
+    "intro": "Een code uit een authenticator-app op uw telefoon, naast uw wachtwoord. Beheerpagina's vragen er eenmaal per inlogsessie om en daarna elke 12 uur opnieuw.",
+    "status": {
+      "on": "Aan",
+      "off": "Uit",
+      "onSince": "Aan sinds {date}",
+      "recoveryLeft": "{count, plural, one {Nog # herstelcode over} other {Nog # herstelcodes over}}",
+      "recoveryLow": "{count, plural, =0 {Er zijn geen herstelcodes meer over.} one {Nog maar # herstelcode over.} other {Nog maar # herstelcodes over.}} Maak een nieuwe set aan.",
+      "enforced": "Verplicht voor elke beheerder in dit team.",
+      "optional": "Voorlopig optioneel. Een hoofdbeheerder kan het voor het hele team verplicht maken."
+    },
+    "actions": {
+      "turnOn": "Inloggen in twee stappen inschakelen",
+      "newCodes": "Nieuwe herstelcodes aanmaken",
+      "turnOff": "Uitschakelen",
+      "turnOffBlocked": "Dit kan niet worden uitgeschakeld zolang het verplicht is voor het team."
+    },
+    "enrol": {
+      "step1": "1. Voeg opetlife.ir toe aan uw authenticator-app",
+      "step1Help": "Kies in Google Authenticator, Microsoft Authenticator, 1Password, Bitwarden of Aegis voor “Account toevoegen” en daarna “Instelsleutel invoeren”, en voer de onderstaande sleutel in. Stelt u het in op deze telefoon? Gebruik “Openen in authenticator-app”.",
+      "copyKey": "Sleutel kopiëren",
+      "copied": "Gekopieerd",
+      "openApp": "Openen in authenticator-app",
+      "step2": "2. Voer de 6-cijferige code in die de app toont",
+      "confirm": "Inschakelen",
+      "cancel": "Annuleren",
+      "starting": "Voorbereiden…",
+      "accountLabel": "Accountnaam",
+      "keyLabel": "Instelsleutel",
+      "typeLabel": "Type",
+      "type": "Op tijd gebaseerd, 6 cijfers"
+    },
+    "codes": {
+      "title": "Bewaar uw herstelcodes",
+      "body": "Als u uw telefoon kwijtraakt, kunt u met elke code één keer inloggen. Ze worden niet opnieuw getoond, dus bewaar ze op een veilige plek, los van deze computer.",
+      "copy": "Codes kopiëren",
+      "download": "Downloaden als tekstbestand",
+      "saved": "Ik heb deze codes bewaard",
+      "continue": "Doorgaan",
+      "fileHeading": "Herstelcodes voor beheerders van opetlife.ir — elke code werkt één keer"
+    },
+    "challenge": {
+      "title": "Voer uw code in voor inloggen in twee stappen",
+      "body": "Open uw authenticator-app en voer de 6-cijferige code in die voor opetlife.ir wordt getoond.",
+      "codeLabel": "6-cijferige code",
+      "recoveryLabel": "Herstelcode",
+      "useRecovery": "Gebruik in plaats daarvan een herstelcode",
+      "useApp": "Gebruik in plaats daarvan de authenticator-app",
+      "submit": "Verifiëren",
+      "lostPhone": "Uw telefoon en herstelcodes kwijt? Vraag een hoofdbeheerder om uw inloggen in twee stappen te resetten.",
+      "signOut": "Uitloggen"
+    },
+    "forced": {
+      "title": "Schakel inloggen in twee stappen in om door te gaan",
+      "body": "Inloggen in twee stappen is nu verplicht voor elke beheerder. Het duurt ongeveer een minuut."
+    },
+    "banner": {
+      "optional": "Beveilig uw beheerdersaccount met inloggen in twee stappen.",
+      "enforced": "Inloggen in twee stappen is verplicht. Schakel het in vóór {date}.",
+      "action": "Inschakelen",
+      "dismiss": "Niet nu"
+    },
+    "errors": {
+      "invalidPlain": "Die code werkte niet. Controleer of uw telefoon de tijd automatisch instelt en voer daarna de nieuwste code in.",
+      "invalid": "Die code werkte niet. {count, plural, =0 {Na de volgende foute code wordt het tijdelijk geblokkeerd.} one {Nog # poging vóór een korte blokkering.} other {Nog # pogingen vóór een korte blokkering.}}",
+      "locked": "Te veel foute codes. Probeer het opnieuw na {time}.",
+      "generic": "Er is iets misgegaan. Probeer het opnieuw.",
+      "format": "Voer de 6 cijfers uit de app in.",
+      "recoveryFormat": "Een herstelcode bestaat uit 16 letters en cijfers, zoals ABCD-EFGH-2345-6723."
+    },
+    "confirmCode": {
+      "label": "Huidige 6-cijferige code",
+      "help": "Voer een nieuwe code uit uw app in. De oude herstelcodes werken dan niet meer.",
+      "turnOffHelp": "Voer een nieuwe code uit uw app in om inloggen in twee stappen uit te schakelen."
+    },
+    "done": {
+      "on": "Inloggen in twee stappen is ingeschakeld.",
+      "off": "Inloggen in twee stappen is uitgeschakeld.",
+      "newCodes": "Nieuwe herstelcodes staan klaar. De oude werken niet meer."
+    },
+    "policy": {
+      "title": "Inloggen in twee stappen voor het team",
+      "intro": "Als het verplicht is, voert elke beheerder bij het inloggen een code uit de authenticator-app in. Beheerders die het nog niet hebben ingeschakeld, kunnen tijdens de overgangsperiode doorwerken en moeten het daarna inschakelen voordat er een beheerpagina opent.",
+      "required": "Inloggen in twee stappen verplichten voor elke beheerder",
+      "on": "Verplicht",
+      "off": "Optioneel",
+      "coverage": "{enrolled} van {total} beheerders hebben het ingeschakeld",
+      "since": "verplicht sinds {date}",
+      "graceDays": "Overgangsperiode (dagen)",
+      "graceHelp": "Gerekend vanaf het moment dat het verplicht wordt of vanaf het moment dat een beheerder erbij komt, wat het laatst is. 0 betekent direct.",
+      "reason": "Reden",
+      "reasonPlaceholder": "Waarom deze wijziging",
+      "reasonRequired": "Geef een korte reden op (minimaal 5 tekens).",
+      "save": "Opslaan",
+      "saved": "Opgeslagen.",
+      "onlySuper": "Alleen een hoofdbeheerder kan dit wijzigen.",
+      "selfFirst": "Schakel eerst inloggen in twee stappen in voor uw eigen account.",
+      "selfFirstAction": "Mijn account instellen",
+      "mine": "Mijn inloggen in twee stappen",
+      "members": "Beheerders",
+      "col": {
+        "name": "Beheerder",
+        "role": "Rol",
+        "status": "Inloggen in twee stappen"
+      },
+      "member": {
+        "on": "Aan sinds {date}",
+        "grace": "Nog niet · tot {date}",
+        "overdue": "Moet het nu inschakelen",
+        "off": "Uit"
+      },
+      "reset": "Resetten",
+      "resetTitle": "Inloggen in twee stappen resetten voor {name}?",
+      "resetBody": "Gebruik dit als de beheerder telefoon en herstelcodes kwijt is. Diens authenticator en herstelcodes werken dan niet meer; bij de volgende keer inloggen stelt de beheerder het opnieuw in.",
+      "resetReasonPlaceholder": "Bijvoorbeeld: telefoon kwijt, bevestigd via telefoongesprek",
+      "resetConfirm": "Resetten",
+      "resetDone": "Gereset. {name} stelt het opnieuw in.",
+      "you": "u",
+      "enforcementLater": "Voorlopig is inloggen in twee stappen optioneel voor elke beheerder. Het voor iedereen verplicht stellen wordt mogelijk zodra sms en e-mail actief zijn."
+    },
+    "rules": {
+      "TWO_STEP_ALREADY_ON": "Inloggen in twee stappen is al ingeschakeld voor dit account.",
+      "TWO_STEP_NO_PENDING_ENROLMENT": "Dit instelproces is verlopen. Begin opnieuw.",
+      "TWO_STEP_NOT_ON": "Inloggen in twee stappen is niet ingeschakeld voor dit account.",
+      "TWO_STEP_ENFORCED": "Dit kan niet worden uitgeschakeld zolang het verplicht is voor het team.",
+      "TWO_STEP_SELF_RESET": "U kunt uw eigen instelling niet resetten. Schakel het zelf uit of vraag een andere hoofdbeheerder.",
+      "TWO_STEP_SELF_ENROLMENT_REQUIRED": "Schakel eerst inloggen in twee stappen in voor uw eigen account.",
+      "TWO_STEP_POLICY_SUPER_ADMIN_ONLY": "Alleen een hoofdbeheerder kan dit wijzigen.",
+      "TWO_STEP_KEY_CHANGED": "Uw authenticator kan na een wijziging van de serversleutel niet worden gecontroleerd. Gebruik een herstelcode of vraag een hoofdbeheerder om het te resetten."
     }
   }
 }

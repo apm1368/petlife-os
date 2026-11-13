@@ -1,4 +1,5 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Query, Req, UseGuards } from "@nestjs/common";
+import type { Request } from "express";
 import { Throttle } from "@nestjs/throttler";
 import { LegalDocumentKind } from "@prisma/client";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
@@ -56,8 +57,8 @@ export class PublicHelpController {
   @Post("articles/:slug/vote")
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 20, ttl: 60_000 } })
-  vote(@Param("slug") slug: string, @Query() q: LocaleQueryDto, @Body() dto: HelpVoteDto) {
-    return this.help.vote(q.locale, slug, dto.helpful);
+  vote(@Param("slug") slug: string, @Query() q: LocaleQueryDto, @Body() dto: HelpVoteDto, @Req() req: Request) {
+    return this.help.vote(q.locale, slug, dto.helpful, { ip: req.ip, userAgent: req.headers["user-agent"] });
   }
 }
 

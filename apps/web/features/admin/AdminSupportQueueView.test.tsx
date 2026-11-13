@@ -77,6 +77,12 @@ describe("AdminSupportQueueView", () => {
     expect(push).toHaveBeenCalledWith("/en/admin/support/case-1");
   });
 
+  it("marks requests for human follow-up in the queue", async () => {
+    vi.mocked(adminService.listSupportCases).mockResolvedValue(page([{ ...CASE, humanEscalation: { referenceNumber: "ESC-000001", reason: "Please contact me", confirmedAt: "2026-01-01T00:00:00.000Z" } }]));
+    renderWithIntl(<AdminSupportQueueView />);
+    await waitFor(() => expect(screen.getByText("Human follow-up requested")).toBeTruthy());
+  });
+
   it("shows an empty state when there are no cases", async () => {
     vi.mocked(adminService.listSupportCases).mockResolvedValue(page([]));
 

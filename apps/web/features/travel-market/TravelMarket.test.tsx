@@ -126,7 +126,7 @@ describe("Jajiga stays in travel home and search", () => {
     expect(await screen.findByText("ویلای جنگلی")).toBeTruthy();
     expect(travelExternalService.search).toHaveBeenCalledWith(expect.objectContaining({ source: "JAJIGA", city: "رامسر", checkIn: "2026-12-01", checkOut: "2026-12-03" }), expect.any(AbortSignal));
     expect(screen.getByRole("button", { name: "همه" }).getAttribute("aria-pressed")).toBe("true");
-    expect(screen.getByRole("link", { name: "مشاهده در جاجیگا" }).getAttribute("href")).toContain("/travel/external/stays/jj1/out");
+    expect(screen.getByRole("link", { name: "مشاهده همین اقامتگاه در جاجیگا" }).getAttribute("href")).toContain("/travel/external/stays/jj1/out");
   });
 
   it("the source filter narrows to Jajiga (no opetlife search) or to opetlife (no Jajiga)", async () => {

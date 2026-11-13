@@ -119,6 +119,12 @@ export function AdminSupportCaseDetailView({ caseId }: { caseId: string }) {
       <span className="text-body text-text-primary">{data.subject}</span>
       <span className="text-body text-text-secondary">{data.description}</span>
       <span className="text-metadata text-text-secondary">{t("detail.requester", { name: data.requesterDisplayName })}</span>
+      {data.humanEscalation ? <ContextSurface className="flex flex-col gap-1">
+        <span className="text-section-title text-text-primary">{t("humanEscalation.label")}</span>
+        <span className="text-metadata text-text-secondary">{t("humanEscalation.reference", { reference: data.humanEscalation.referenceNumber })}</span>
+        <span className="text-body text-text-primary">{data.humanEscalation.reason}</span>
+        <span className="text-metadata text-text-secondary">{t("humanEscalation.submitted", { date: formatDate(data.humanEscalation.confirmedAt, locale) })}</span>
+      </ContextSurface> : null}
       {data.requesterOrganization ? (
         <span className="text-metadata text-text-secondary">
           {t(`requesterOrg.${data.requesterOrganization.type}`)}: {data.requesterOrganization.name ?? t("requesterOrg.unnamed")} ·{" "}

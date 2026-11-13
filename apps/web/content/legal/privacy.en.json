@@ -102,7 +102,7 @@
         "Pet-taxi trips: exact locations for 30 days, then only roughly.",
         "Server logs: about 7 days.",
         "Financial records, such as orders, payments, refunds and invoices: for as long as the law requires.",
-        "After you delete your account, we delete or anonymise your personal data, except what the law requires us to keep."
+        "If you ask to delete your account, your request is recorded and reviewed, and it is carried out once our data-retention policy is published. We will then delete or anonymise your personal data, except what the law requires us to keep, and tell you when it is done."
       ]
     },
     {
@@ -112,7 +112,7 @@
         "See and correct your data from your profile, household and pet pages.",
         "Download a copy of your data from Profile → Privacy. You get a file with your pets, health records, bookings, orders, trips, support requests, consents, posts, chats and donations. The download stays available for 7 days.",
         "Change notification channels and marketing consent, and revoke share links and vet access, at any time.",
-        "Ask to delete your account from Profile → Privacy. We review each request. Data the law requires us to keep is set aside, and everything else is deleted or anonymised. You can cancel while the request is under review. While you have open bookings, orders, refunds, disputes, an active trip or a partner role, deletion has to wait until they are finished.",
+        "Ask to delete your account from Profile → Privacy. Your request is recorded and reviewed, and it is carried out once our data-retention policy is published; we will tell you when it is done. You can cancel while the request is pending. While you have open bookings, orders, refunds, disputes, an active trip or a partner role, deletion has to wait until they are finished.",
         "Raise a privacy concern through Support or the Contact page."
       ]
     },
@@ -120,7 +120,8 @@
       "id": "security",
       "heading": "11. How we protect it",
       "paragraphs": [
-        "Connections to opetlife are encrypted. Passwords are stored only as Argon2id hashes. Sign-in cookies can't be read by page scripts. Staff access depends on their role and is logged. Uploaded documents are kept privately and can be opened only through short-lived links. No system is perfectly secure, so please use a strong password and keep your sign-in codes to yourself."
+        "Connections to opetlife are encrypted. Passwords are stored only as Argon2id hashes. Sign-in cookies can't be read by page scripts. Staff access depends on their role and is logged. Uploaded documents are kept privately and can be opened only through short-lived links. No system is perfectly secure, so please use a strong password and keep your sign-in codes to yourself.",
+        "Photos you publish, such as in posts, lost-pet reports or memorials, are public files: removing or hiding them takes them off opetlife pages straight away, but someone who already has a photo's address may still open it until the file itself is deleted. Ask Support and our team will delete the file within 30 days."
       ]
     },
     {

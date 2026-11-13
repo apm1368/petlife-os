@@ -138,6 +138,14 @@ export type AdminAuditAction =
   | "admin_role.archived"
   | "admin_user.custom_role_assigned"
   | "admin_user.custom_role_cleared"
+  // Admin two-step sign-in (TOTP — market-readiness Q75)
+  | "admin_two_step.enrolled"
+  | "admin_two_step.recovery_code_used"
+  | "admin_two_step.recovery_codes_regenerated"
+  | "admin_two_step.locked"
+  | "admin_two_step.disabled"
+  | "admin_two_step.reset"
+  | "admin_two_step.policy_changed"
   // Business calendar (Settings → Holidays and closures)
   | "calendar_day.changed"
   | "calendar_day.cleared"

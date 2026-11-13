@@ -58,9 +58,16 @@ describe("JajigaStaysSection", () => {
     expect(within(tile).getByText("رشت، گیلان")).toBeTruthy();
     expect(within(tile).getByText(/تا ۶ نفر/)).toBeTruthy();
     expect(within(tile).getByText(/۲ اتاق خواب/)).toBeTruthy();
-    expect(within(tile).getByText(/شروع قیمت: ۲٬۵۰۰٬۰۰۰ تومان هر شب/)).toBeTruthy();
-    expect(within(tile).getByText("پذیرش پت طبق شرایط تأییدشده منبع")).toBeTruthy();
-    const out = within(tile).getByRole("link", { name: "مشاهده در جاجیگا" });
+    // The honest card rules (#358): starting price with its age, the source's claim (not "verified"), five pet
+    // conditions that read "unknown" because Jajiga states none of them, and a button that names the source.
+    expect(within(tile).getByText(/شروع قیمت از ۲٬۵۰۰٬۰۰۰ تومان/)).toBeTruthy();
+    expect(within(tile).getByText(/^به‌روزرسانی /)).toBeTruthy();
+    expect(within(tile).getByText(/^طبق اطلاعات جاجیگا، این اقامتگاه پت‌پذیر است/)).toBeTruthy();
+    expect(within(tile).queryByText("پذیرش پت طبق شرایط تأییدشده منبع")).toBeNull();
+    expect(within(tile).queryByText("پذیرش پت را اپت لایف بررسی و تأیید کرده است")).toBeNull();
+    const conditions = within(tile).getByRole("list", { name: "شرایط پت" });
+    expect(within(conditions).getAllByText("نامشخص")).toHaveLength(5);
+    const out = within(tile).getByRole("link", { name: "مشاهده همین اقامتگاه در جاجیگا" });
     expect(out.getAttribute("href")).toContain("/travel/external/stays/jj1/out");
     expect(out.getAttribute("href")).toContain("checkIn=2026-12-01");
     expect(out.getAttribute("target")).toBe("_blank");
@@ -127,11 +134,11 @@ describe("JajigaStaysSection", () => {
 
   it("labels the source in every language", async () => {
     for (const [locale, chip, out] of [
-      ["en", "Jajiga stays", "View on Jajiga"],
-      ["de", "Unterkünfte von Jajiga", "Auf Jajiga ansehen"],
-      ["es", "Alojamientos de Jajiga", "Ver en Jajiga"],
-      ["ar", "أماكن إقامة Jajiga", "عرض على Jajiga"],
-      ["nl", "Verblijven van Jajiga", "Bekijk op Jajiga"],
+      ["en", "Jajiga stays", "View this stay on Jajiga"],
+      ["de", "Unterkünfte von Jajiga", "Diese Unterkunft bei Jajiga ansehen"],
+      ["es", "Alojamientos de Jajiga", "Ver este alojamiento en Jajiga"],
+      ["ar", "أماكن إقامة Jajiga", "عرض هذا المكان على Jajiga"],
+      ["nl", "Verblijven van Jajiga", "Bekijk deze accommodatie op Jajiga"],
     ] as const) {
       const { unmount } = renderWithIntl(<JajigaStaysSection />, locale);
       expect(await screen.findByText(chip)).toBeTruthy();

@@ -5834,6 +5834,12 @@ pnpm --filter @petlife/api test:e2e
   pnpm test:e2e:fresh
   ```
 
+  The API fresh runner accepts `TEST_DATABASE_URL` for an isolated test
+  PostgreSQL server. Its database name must end in `_test`, and the configured
+  user must be able to connect to the `postgres` maintenance database and
+  create/drop temporary databases. The default local credentials may not
+  match an existing server; do not use a production server for this suite.
+
   To target an existing CI-style service manually:
 
   ```bash

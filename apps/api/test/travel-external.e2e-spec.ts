@@ -231,7 +231,10 @@ describe("External pet-friendly stays", () => {
     expect(fresh).toMatchObject({ cta: "VIEW_SOURCE", externalDataDisclaimerRequired: true, priceFreshness: "FRESH", availabilityStatus: "SOURCE_REPORTED_AVAILABLE", pet: { policyStatus: "CONFIRMED_ALLOWED", accepted: true } });
     expect(fresh.disclaimerFa).toContain("منبع عمومی");
     expect(fresh.lastSeenAt).toBeTruthy();
-    expect(fresh.trustLabels).toEqual(expect.arrayContaining(["PET_POLICY_CONFIRMED", "PRICE_FRESH", "EXTERNAL_SOURCE"]));
+    // The source's own claim, not opetlife's verification.
+    expect(fresh.pet.authority).toBe("SOURCE_OBSERVATION");
+    expect(fresh.trustLabels).toEqual(expect.arrayContaining(["PET_POLICY_SOURCE_REPORTED", "PRICE_FRESH", "EXTERNAL_SOURCE"]));
+    expect(fresh.trustLabels).not.toContain("PET_POLICY_CONFIRMED");
     expect(fresh.price).toMatchObject({ state: "FRESH", freshness: "FRESH", priceType: "EXACT", currency: "IRR", priceIrr: 45_000_000, availability: { state: "SOURCE_REPORTED_AVAILABLE" } });
     expect(fresh.fromPrice).toMatchObject({ priceType: "FROM_PRICE", priceIrr: 12_000_000 }); // never presented as the booking price
     expect(fresh.price.observedAt).toBeTruthy();
