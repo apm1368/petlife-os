@@ -6632,7 +6632,8 @@
           "openPlaceReports": "Ortsmeldungen",
           "openTasks": "Offene Aufgaben",
           "pendingWalletTopUps": "Aufladebelege",
-          "pendingWalletAdjustments": "Korrekturen zur Freigabe"
+          "pendingWalletAdjustments": "Korrekturen zur Freigabe",
+          "pendingCardDestinationChanges": "Kontoänderungen zur Freigabe"
         }
       },
       "performance": {
@@ -10963,7 +10964,7 @@
     },
     "readOnly": "Nur ein Super-Admin mit settings.manage kann dieses Konto ändern.",
     "change": "Konto ändern",
-    "changeHint": "Jede Änderung wird mit Grund protokolliert und alle Super-Admins werden benachrichtigt. Bereits begonnene Zahlungen behalten ihr ursprüngliches Konto.",
+    "changeHint": "Ein neues Konto gilt erst, wenn ein anderer Super-Admin es innerhalb von {hours} Stunden freigibt; bis dahin zahlen Mitglieder weiter auf das aktuelle Konto. Jeder Schritt wird mit Grund protokolliert und alle Super-Admins werden benachrichtigt. Bereits begonnene Zahlungen behalten ihr ursprüngliches Konto.",
     "fields": {
       "cardNumber": "Kartennummer (16 Ziffern)",
       "sheba": "Sheba / IBAN (optional)",
@@ -10972,9 +10973,9 @@
       "reason": "Grund der Änderung"
     },
     "confirm": "Ich bestätige, dass dieses Konto opetlife gehört.",
-    "save": "Neues Konto speichern",
+    "save": "Zur Freigabe senden",
     "saving": "Wird gespeichert…",
-    "saved": "Das neue Konto ist gespeichert, Super-Admins wurden benachrichtigt.",
+    "saved": "Zur Freigabe gesendet. Das aktuelle Konto bleibt in Gebrauch, bis ein anderer Super-Admin die Änderung freigibt.",
     "offReason": "Grund für das Abschalten der Kartenüberweisung",
     "switchOff": "Kartenüberweisung abschalten",
     "switchedOff": "Kartenüberweisung ist abgeschaltet.",
@@ -10983,7 +10984,9 @@
     "columns": {
       "setBy": "Festgelegt von",
       "reason": "Grund",
-      "closed": "Beendet"
+      "closed": "Beendet",
+      "status": "Status",
+      "approvedBy": "Freigegeben von"
     },
     "activeNow": "Aktiv",
     "loading": "Wird geladen…",
@@ -11000,7 +11003,38 @@
       "CARD_OR_SHEBA_REQUIRED": "Kartennummer oder Sheba eingeben.",
       "HOLDER_REQUIRED": "Kontoinhaber eingeben.",
       "SUPER_ADMIN_WITH_SETTINGS_MANAGE_REQUIRED": "Nur ein Super-Admin kann dieses Konto ändern.",
-      "generic": "Nicht gespeichert; bitte erneut versuchen."
+      "generic": "Nicht gespeichert; bitte erneut versuchen.",
+      "SELF_APPROVAL": "Sie haben diese Änderung beantragt; ein anderer Super-Admin muss sie freigeben.",
+      "ALREADY_PENDING": "Eine andere Änderung wartet bereits auf Freigabe.",
+      "NOT_PENDING": "Über diese Änderung wurde bereits entschieden; die Seite wurde aktualisiert.",
+      "EXPIRED": "Diese Änderung ist vor der Freigabe abgelaufen; beantragen Sie sie bei Bedarf erneut.",
+      "NOT_FOUND": "Diese Änderung gibt es nicht mehr.",
+      "CONFIRM_APPROVE": "Bestätigen Sie vor der Freigabe, dass Sie das Konto geprüft haben."
+    },
+    "pendingBlocksChange": "Eine Änderung wartet bereits auf Freigabe. Geben Sie sie frei, lehnen Sie sie ab oder ziehen Sie sie zurück, bevor Sie eine weitere beantragen.",
+    "pending": {
+      "title": "Änderung wartet auf Freigabe",
+      "hint": "Noch nicht in Gebrauch: Mitglieder zahlen weiter auf das aktuelle Konto, bis ein anderer Super-Admin diese Änderung freigibt.",
+      "requestedBy": "Beantragt von",
+      "expiresAt": "Läuft ab",
+      "yours": "Sie haben diese Änderung beantragt, daher muss ein anderer Super-Admin sie freigeben. Sie können sie zurückziehen.",
+      "confirm": "Ich habe mit der antragstellenden Person geprüft, dass dieses Konto opetlife gehört.",
+      "approve": "Freigeben und aktivieren",
+      "approving": "Wird freigegeben…",
+      "approved": "Freigegeben: Das neue Konto ist jetzt aktiv, Super-Admins wurden benachrichtigt.",
+      "rejectReason": "Grund für die Ablehnung",
+      "withdrawReason": "Grund für das Zurückziehen",
+      "reject": "Ablehnen",
+      "withdraw": "Meinen Antrag zurückziehen",
+      "rejected": "Die Änderung wurde abgelehnt; das aktuelle Konto bleibt unverändert.",
+      "withdrawn": "Ihr Antrag wurde zurückgezogen; das aktuelle Konto bleibt unverändert."
+    },
+    "status": {
+      "PENDING": "Wartet auf Freigabe",
+      "ACTIVE": "Aktiv",
+      "CLOSED": "Beendet",
+      "REJECTED": "Abgelehnt",
+      "EXPIRED": "Abgelaufen"
     }
   },
   "adminCardReceipts": {

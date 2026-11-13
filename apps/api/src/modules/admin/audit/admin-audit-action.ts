@@ -259,6 +259,10 @@ export type AdminAuditAction =
   | "pet_taxi_driver.suspended"
   | "wallet.credited"
   | "card_transfer_destination.changed"
+  // BO-14: a new card-to-card account is proposed, then approved by a second super admin or rejected/withdrawn.
+  | "card_transfer_destination.change_requested"
+  | "card_transfer_destination.approved"
+  | "card_transfer_destination.rejected"
   | "card_transfer.receipt_viewed"
   | "card_transfer_destination.deactivated"
   | "wallet.debited"

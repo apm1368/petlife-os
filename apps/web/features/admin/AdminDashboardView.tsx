@@ -74,6 +74,8 @@ const QUEUES: { key: QueueKey; href: string; permission: string | string[]; rout
   { key: "pendingRefundRequests", href: "/admin/commerce/refund-requests", permission: "commerce.view", icon: Receipt, tone: "attention" },
   { key: "pendingWalletTopUps", href: "/admin/wallets/top-ups", permission: "wallet.view", icon: Wallet, tone: "attention" },
   { key: "pendingWalletAdjustments", href: "/admin/wallets/adjustments", permission: "wallet.view", icon: Wallet, tone: "attention" },
+  // BO-14: a proposed company card-to-card account waits on a second super admin (the API counts it for them only).
+  { key: "pendingCardDestinationChanges", href: "/admin/wallets/card-account", permission: "settings.manage", icon: Wallet, tone: "urgent" },
   { key: "pendingDeletionRequests", href: "/admin/privacy/deletion-requests", permission: "admin.manage", icon: KeyRound, tone: "attention" },
   { key: "openOwnershipDisputes", href: "/admin/ownership-transfers", permission: "customer.view", icon: Gavel, tone: "attention" },
   { key: "openProviderNoShows", href: "/admin/services?noShowParty=PROVIDER", permission: "services.view", icon: Stethoscope, tone: "attention" },

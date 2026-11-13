@@ -8,8 +8,10 @@ import {
   PetOwnershipTransferStatus,
   AdminRefundApprovalStatus,
   AdminTaskStatus,
+  AdminRole,
   AdminVertical,
   BookingStatus,
+  CardTransferDestinationStatus,
   CatalogProductRequestStatus,
   CommunityReportStatus,
   DisputeStatus,
@@ -68,6 +70,7 @@ export class AdminDashboardService {
       openOwnershipDisputes,
       openProviderNoShows,
       pendingReviews,
+      pendingCardDestinationChanges,
     ] = await Promise.all([
       when(may("support.view"), () => this.prisma.supportCase.count({ where: { status: { notIn: [SupportCaseStatus.RESOLVED, SupportCaseStatus.CLOSED] } } })),
       when(may("dispute.view"), () => this.prisma.dispute.count({ where: { status: { notIn: [DisputeStatus.CLOSED] } } })),
@@ -104,6 +107,11 @@ export class AdminDashboardService {
       // Reviews every vertical holds back until a moderator decides (service, product, stay), counted only for the
       // verticals this admin may moderate; service reviews also respect the provider-type scope.
       this.pendingReviewCount(admin, may),
+      // BO-14: a proposed company card-to-card account waits on a second SUPER_ADMIN with settings.manage, the only
+      // people who may approve or reject it; a proposal past its approval window no longer counts.
+      when(admin.role === AdminRole.SUPER_ADMIN && may("settings.manage"), () =>
+        this.prisma.cardTransferDestination.count({ where: { status: CardTransferDestinationStatus.PENDING, expiresAt: { gt: new Date() } } }),
+      ),
     ]);
     return {
       openSupportCases,
@@ -122,6 +130,7 @@ export class AdminDashboardService {
       openPlaceReports,
       pendingWalletTopUps,
       pendingWalletAdjustments,
+      pendingCardDestinationChanges,
       pendingDeletionRequests,
       launchKpis,
       openOwnershipDisputes,

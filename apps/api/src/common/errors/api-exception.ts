@@ -848,6 +848,40 @@ export class WalletAdjustmentSelfApprovalException extends ApiException {
 export class WalletAdjustmentRequestExpiredException extends ApiException {
   constructor(details?: Record<string, unknown>) {
     super("WALLET_ADJUSTMENT_REQUEST_EXPIRED", "This wallet adjustment request has expired. Ask for a new one.", HttpStatus.CONFLICT, details);
+// ---------------------------------------------------------------------------
+// Company card-to-card account: two-person change (BO-14), mirroring refund approvals
+// ---------------------------------------------------------------------------
+
+/** The proposer of a new card-to-card account can never approve it; another SUPER_ADMIN must (409, as for refunds). */
+export class CardDestinationSelfApprovalException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CARD_DESTINATION_SELF_APPROVAL", "A new card-to-card account must be approved by a different super admin than the one who proposed it.", HttpStatus.CONFLICT, { reason: "SELF_APPROVAL", ...details });
+  }
+}
+
+export class CardDestinationChangeNotFoundException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CARD_DESTINATION_CHANGE_NOT_FOUND", "No such card-to-card account change.", HttpStatus.NOT_FOUND, { reason: "NOT_FOUND", ...details });
+  }
+}
+
+/** Already approved, rejected or withdrawn: a decided change cannot be decided again. */
+export class CardDestinationChangeNotPendingException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CARD_DESTINATION_CHANGE_NOT_PENDING", "This card-to-card account change is no longer waiting for approval.", HttpStatus.CONFLICT, { reason: "NOT_PENDING", ...details });
+  }
+}
+
+export class CardDestinationChangeExpiredException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CARD_DESTINATION_CHANGE_EXPIRED", "This card-to-card account change expired before it was approved.", HttpStatus.CONFLICT, { reason: "EXPIRED", ...details });
+  }
+}
+
+/** One proposal at a time: the waiting one must be approved, rejected or withdrawn (or expire) before another. */
+export class CardDestinationChangeAlreadyPendingException extends ApiException {
+  constructor(details?: Record<string, unknown>) {
+    super("CARD_DESTINATION_CHANGE_ALREADY_PENDING", "Another card-to-card account change is already waiting for approval.", HttpStatus.CONFLICT, { reason: "ALREADY_PENDING", ...details });
   }
 }
 

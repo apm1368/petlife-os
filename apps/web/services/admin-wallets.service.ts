@@ -43,10 +43,15 @@ export const adminWalletsService = {
   review: (id: string, input: { approve: boolean; receivedAmount?: number; reason?: string }) =>
     apiFetch<AdminWalletTopUpDto>(`/admin/wallet-top-ups/${id}/review`, { method: "POST", body: input }),
   receiptLink: (id: string) => apiFetch<{ downloadUrl: string; expiresInSeconds: number }>(`/admin/wallet-top-ups/${id}/receipt-link`, { method: "POST" }),
-  // The company card-to-card account: masked for wallet.view; change/switch-off for SUPER_ADMIN + settings.manage only.
+  // The company card-to-card account: masked for wallet.view; proposing, approving, rejecting and switching off for
+  // SUPER_ADMIN + settings.manage only. A proposal takes effect only when a different super admin approves it (BO-14).
   cardDestination: () => apiFetch<AdminCardTransferDestinationOverviewDto>("/admin/finance/card-transfer-destination"),
   changeCardDestination: (input: { cardNumber?: string; sheba?: string; holderName: string; bankName?: string; reason: string }) =>
     apiFetch<AdminCardTransferDestinationOverviewDto>("/admin/finance/card-transfer-destination", { method: "PUT", body: input }),
+  approveCardDestination: (id: string) =>
+    apiFetch<AdminCardTransferDestinationOverviewDto>(`/admin/finance/card-transfer-destination/pending/${encodeURIComponent(id)}/approve`, { method: "POST", body: {} }),
+  rejectCardDestination: (id: string, reason: string) =>
+    apiFetch<AdminCardTransferDestinationOverviewDto>(`/admin/finance/card-transfer-destination/pending/${encodeURIComponent(id)}/reject`, { method: "POST", body: { reason } }),
   deactivateCardDestination: (reason: string) =>
     apiFetch<AdminCardTransferDestinationOverviewDto>("/admin/finance/card-transfer-destination/deactivate", { method: "POST", body: { reason } }),
   // Card-to-card receipts for orders and bookings: finance.view to read, finance.refund.execute to review.
