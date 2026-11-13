@@ -17,7 +17,7 @@
       "items": [
         "Account: your mobile number and email (with whether you have verified them), username, name, display name and photo, language and theme, and a securely hashed password if you set one. We do not ask for your national ID number.",
         "Household and pets: household members and their roles, and each pet's profile (name, species, breed, sex, date of birth, photo, weight, markings, neutering and microchip). It also includes the health information you add: allergies, conditions, medications, vaccinations, visits, lab results and documents.",
-        "Addresses and location: the delivery or visit addresses you save and their map points, which you place and agree to when you save an address. When you allow it, your browser's location is used for nearby services and places (rounded to about 1 km and used only for that search; it isn't saved to your account, though our server logs keep the rounded value for about 7 days), lost-pet alerts and the pet taxi.",
+        "Addresses and location: the delivery or visit addresses you save and their map points, which you place and agree to when you save an address. When you allow it, your browser's location is used for nearby services and places (rounded to about 1 km and used only for that search; it isn't saved to your account, though our server logs keep the rounded value for up to 14 days), lost-pet alerts and the pet taxi.",
         "Bookings, orders and payments: what you booked or bought, delivery details, and refunds and disputes. For card-to-card payments we keep the receipt image you upload. We do not collect your bank card number or IBAN.",
         "What you publish: posts, comments, chats, reviews, lost and found reports, memorials, and the photos and files you upload. Location data inside photos (EXIF and GPS) is removed when you upload them.",
         "Place suggestions: the name, category, city, address, map point and notes of a place you suggest. Only our staff can see that it came from you. If our team checks and lists the place, its details and your notes may be published, never your name. We tell you in the app whether your suggestion was accepted.",
@@ -104,7 +104,7 @@
         "Sign-in sessions: 30 days, unless you sign out sooner.",
         "Data export files: 7 days.",
         "Pet-taxi trips: exact locations for 30 days, then only roughly.",
-        "Server logs: about 7 days.",
+        "Server logs: up to 14 days.",
         "Financial records, such as orders, payments, refunds and invoices: for as long as the law requires.",
         "If you ask to delete your account, your request is recorded and reviewed, and it is carried out once our data-retention policy is published. We will then delete or anonymise your personal data, except what the law requires us to keep, and tell you when it is done."
       ]

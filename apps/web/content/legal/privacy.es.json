@@ -17,7 +17,7 @@
       "items": [
         "Cuenta: tu número de móvil y tu correo electrónico (y si los has verificado), nombre de usuario, nombre, nombre visible y foto, idioma y tema, y un hash seguro de tu contraseña si estableces una. No te pedimos tu número de documento nacional de identidad.",
         "Hogar y mascotas: los miembros del hogar y sus roles, y el perfil de cada mascota (nombre, especie, raza, sexo, fecha de nacimiento, foto, peso, señas particulares, esterilización y microchip). También incluye la información de salud que añadas: alergias, afecciones, medicamentos, vacunas, visitas, resultados de laboratorio y documentos.",
-        "Direcciones y ubicación: las direcciones de entrega o de visita que guardas y sus puntos en el mapa, que marcas y aceptas al guardar una dirección. Cuando lo permites, la ubicación de tu navegador se usa para servicios y lugares cercanos (redondeada a aproximadamente 1 km y solo para esa búsqueda; no se guarda en tu cuenta, aunque los registros de nuestro servidor conservan el valor redondeado unos 7 días), alertas de mascotas perdidas y el taxi para mascotas.",
+        "Direcciones y ubicación: las direcciones de entrega o de visita que guardas y sus puntos en el mapa, que marcas y aceptas al guardar una dirección. Cuando lo permites, la ubicación de tu navegador se usa para servicios y lugares cercanos (redondeada a aproximadamente 1 km y solo para esa búsqueda; no se guarda en tu cuenta, aunque los registros de nuestro servidor conservan el valor redondeado hasta 14 días), alertas de mascotas perdidas y el taxi para mascotas.",
         "Reservas, pedidos y pagos: lo que has reservado o comprado, los datos de entrega, y los reembolsos y disputas. En los pagos de tarjeta a tarjeta conservamos la imagen del comprobante que subes. No recopilamos el número de tu tarjeta bancaria ni tu IBAN.",
         "Lo que publicas: publicaciones, comentarios, chats, reseñas, avisos de mascotas perdidas y encontradas, memoriales, y las fotos y archivos que subes. Los datos de ubicación incluidos en las fotos (EXIF y GPS) se eliminan al subirlas.",
         "Sugerencias de lugares: el nombre, la categoría, la ciudad, la dirección, el punto del mapa y las notas de un lugar que sugieres. Solo nuestro equipo puede ver que la sugerencia es tuya. Si nuestro equipo revisa el lugar y lo publica en el directorio, sus datos y tus notas pueden mostrarse, pero nunca tu nombre. Te avisamos en la app de si se aceptó tu sugerencia.",
@@ -104,7 +104,7 @@
         "Sesiones iniciadas: 30 días, salvo que cierres la sesión antes.",
         "Archivos de exportación de datos: 7 días.",
         "Viajes en taxi para mascotas: ubicaciones exactas durante 30 días; después, solo aproximadas.",
-        "Registros del servidor: unos 7 días.",
+        "Registros del servidor: hasta 14 días.",
         "Registros financieros, como pedidos, pagos, reembolsos y facturas: durante el tiempo que exija la ley.",
         "Si pides eliminar tu cuenta, tu solicitud se registra y se revisa, y se ejecuta una vez que publiquemos nuestra política de conservación de datos. Entonces eliminaremos o anonimizaremos tus datos personales, salvo lo que la ley nos obliga a conservar, y te avisaremos cuando esté hecho."
       ]
