@@ -28,6 +28,8 @@ describe("Location pins (e2e)", () => {
   const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   // A member's home in Birjand: far from every other suite's Tehran/Rasht fixtures, with digits no fixture uses.
   const HOME = { latitude: 32.871234, longitude: 59.218765 };
+  // Fixture points rounded to 6 decimals, so what the API returns compares exactly (no float-sum tails).
+  const r6 = (n: number) => Math.round(n * 1e6) / 1e6;
   const leaks = (body: unknown) => {
     const text = JSON.stringify(body);
     return ["32.871234", "59.218765", "32.87123", "59.21877"].filter((needle) => text.includes(needle));
@@ -78,7 +80,7 @@ describe("Location pins (e2e)", () => {
   /** A verified provider with one pinned location and an active service; `token` makes its name searchable. */
   async function provider(token: string, type: ProviderType, offset: { lat: number; lng: number }, category: "VET" | "SITTING" = "VET") {
     const org = await prisma.providerOrganization.create({ data: { name: `${token} ${type} ${unique()}`, type, verificationStatus: "VERIFIED" } });
-    const location = await prisma.providerLocation.create({ data: { providerOrganizationId: org.id, addressLine: "Street 1", city: "بیرجند", countryCode: "IR", timezone: "Asia/Tehran", latitude: HOME.latitude + offset.lat, longitude: HOME.longitude + offset.lng } });
+    const location = await prisma.providerLocation.create({ data: { providerOrganizationId: org.id, addressLine: "Street 1", city: "بیرجند", countryCode: "IR", timezone: "Asia/Tehran", latitude: r6(HOME.latitude + offset.lat), longitude: r6(HOME.longitude + offset.lng) } });
     const service = await prisma.providerService.create({ data: { providerOrganizationId: org.id, locationId: location.id, name: "Visit", type: category === "VET" ? "GENERAL_VET_VISIT" : "PET_SITTING", category, durationMinutes: 30, isActive: true, priceAmount: 1_000_000, currency: "IRR" } });
     return { org, location, service };
   }
@@ -231,8 +233,8 @@ describe("Location pins (e2e)", () => {
     const token = `Pinhome${unique().replace(/[^a-z0-9]/gi, "")}`;
     const sitter = await provider(token, ProviderType.SITTER, { lat: 0.004321, lng: 0.006789 }, "SITTING");
     const clinic = await provider(token, ProviderType.VET_CLINIC, { lat: 0.012345, lng: 0.023456 });
-    const exactSitter = { latitude: HOME.latitude + 0.004321, longitude: HOME.longitude + 0.006789 };
-    const exactClinic = { latitude: HOME.latitude + 0.012345, longitude: HOME.longitude + 0.023456 };
+    const exactSitter = { latitude: r6(HOME.latitude + 0.004321), longitude: r6(HOME.longitude + 0.006789) };
+    const exactClinic = { latitude: r6(HOME.latitude + 0.012345), longitude: r6(HOME.longitude + 0.023456) };
 
     const sitterProfile = (await request(server).get(`/discovery/providers/${sitter.org.id}`).expect(200)).body;
     expect(sitterProfile.locations[0]).toMatchObject({ latitude: Math.round(exactSitter.latitude * 100) / 100, longitude: Math.round(exactSitter.longitude * 100) / 100, pinPrecision: "APPROXIMATE" });
