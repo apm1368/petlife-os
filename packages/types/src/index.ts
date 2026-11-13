@@ -3656,6 +3656,7 @@ export type AdminPermissionName =
   | "wallet.view"
   | "wallet.adjust"
   | "wallet.topup.review"
+  | "finance.manage"
   | "travel.source.view"
   | "travel.source.manage"
   | "travel.sync.run"
@@ -7364,6 +7365,16 @@ export type {
   PetOwnershipTransferStatusName,
 } from "./ownership";
 export { OWNERSHIP_TRANSFER_EXPIRY_DAYS, PET_MEMORY_DISPOSITIONS, PET_OWNERSHIP_TRANSFER_STATUSES } from "./ownership";
+
+export type {
+  AdminTransactionKind,
+  AdminTransactionPurpose,
+  AdminTransactionGateway,
+  AdminTransactionRowDto,
+  AdminTransactionPageDto,
+  AdminTransactionFilters,
+} from "./admin-transactions";
+export { ADMIN_TRANSACTION_KINDS, ADMIN_TRANSACTION_GATEWAYS } from "./admin-transactions";
 
 // ---------------------------------------------------------------------------
 // Member wallet (balances are always derived from append-only entries)

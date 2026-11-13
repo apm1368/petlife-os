@@ -1126,7 +1126,8 @@
       "pet_access_manage": "Manage pet record access",
       "wallet_view": "View wallets",
       "wallet_adjust": "Correct balances",
-      "wallet_topup_review": "Review top-up receipts"
+      "wallet_topup_review": "Review top-up receipts",
+      "finance_manage": "Export finance data (CSV)"
     },
     "domains": {
       "customer": "Customers",
@@ -5115,7 +5116,8 @@
         "orderLookup": "Order lookup",
         "refundApprovals": "Refund approvals",
         "twoStep": "Two-step sign-in",
-        "walletAdjustments": "Correction requests"
+        "walletAdjustments": "Correction requests",
+        "transactionExplorer": "Explorer"
       },
       "palette": {
         "actions": "Quick actions",
@@ -12717,5 +12719,83 @@
     "notPending": "This order is no longer waiting for approval; reload the page.",
     "failed": "That did not work; please try again.",
     "noPermission": "Approving or rejecting needs the shop management permission."
+  },
+  "adminTransactionsExplorer": {
+    "kicker": "Finance",
+    "title": "Transactions explorer",
+    "subtitle": "Every payment, refund, wallet top-up and wallet correction in one list, newest first.",
+    "forbidden": "You need the finance view permission to see transactions.",
+    "privacyNote": "Card numbers show only the last four digits and contacts are masked. A search for a person and every export are written to the audit log.",
+    "filters": {
+      "title": "Filter transactions",
+      "person": "Person",
+      "personHint": "Name, mobile, email or user id",
+      "product": "Product",
+      "productHint": "Product name or id",
+      "kind": "Type",
+      "gateway": "Gateway",
+      "from": "From",
+      "to": "To",
+      "min": "Minimum (toman)",
+      "max": "Maximum (toman)",
+      "status": "Status",
+      "any": "Any",
+      "apply": "Search",
+      "clear": "Clear"
+    },
+    "kind": {
+      "PAYMENT": "Payment",
+      "REFUND": "Refund",
+      "WALLET_TOP_UP": "Wallet top-up",
+      "WALLET_ADJUSTMENT": "Wallet correction"
+    },
+    "purpose": {
+      "ORDER": "Shop order",
+      "BOOKING": "Service booking",
+      "STAY": "Stay",
+      "SUBSCRIPTION": "Subscription",
+      "DONATION": "Donation",
+      "WALLET": "Wallet",
+      "OTHER": "Other"
+    },
+    "gateway": {
+      "ZIBAL": "Zibal",
+      "CARD_TO_CARD": "Card to card",
+      "WALLET": "Wallet",
+      "STAFF": "Staff",
+      "DEV_SIMULATED": "Test (simulated)",
+      "STANDARD_GATEWAY": "Standard gateway",
+      "SNAPP_PAY": "SnappPay",
+      "DIGI_PAY": "DigiPay"
+    },
+    "direction": {
+      "IN": "In",
+      "OUT": "Out"
+    },
+    "columns": {
+      "when": "Date",
+      "kind": "Type",
+      "person": "Person",
+      "amount": "Amount",
+      "gateway": "Gateway",
+      "status": "Status",
+      "details": "Details"
+    },
+    "card": "Card",
+    "export": {
+      "button": "Export CSV",
+      "working": "Preparing file…",
+      "done": "Exported {rows} rows.",
+      "truncated": "Exported the newest {rows} rows; narrow the filters to export the rest.",
+      "forbidden": "Exporting needs the finance manage permission.",
+      "failed": "The export failed. Try again."
+    },
+    "invalid": "Check the filters: amounts must be whole numbers and the minimum can't be above the maximum.",
+    "failed": "Transactions couldn't be loaded.",
+    "retry": "Try again",
+    "loading": "Loading…",
+    "empty": "No transactions match these filters.",
+    "more": "Load older",
+    "end": "That's all: {count} rows."
   }
 }

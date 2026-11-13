@@ -180,6 +180,8 @@ export type AdminAuditAction =
   | "settlement.released"
   | "settlement.exported"
   | "finance.trace_viewed"
+  | "finance.transactions.searched"
+  | "finance.transactions.exported"
   | "card_transfer.reviewed"
   | "support_case.tags_changed"
   | "support_case.linked"

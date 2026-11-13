@@ -15,3 +15,13 @@ export function maskEmail(email: string): string {
   const visible = local.slice(0, 1);
   return `${visible}${"*".repeat(Math.max(local.length - 1, 3))}@${domain}`;
 }
+
+/**
+ * Masks a card number or IBAN for admin lists and exports: only the last four digits survive, e.g. "•••• 1234".
+ * Safe on a value that is already masked (it keeps whatever trailing digits are left) and on non-digit text.
+ */
+export function maskCardOrIban(value: string): string {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length < 4) return "••••";
+  return `•••• ${digits.slice(-4)}`;
+}

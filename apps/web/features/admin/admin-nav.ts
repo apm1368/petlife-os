@@ -244,6 +244,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
         tabs: [
           { href: "/transactions", labelKey: "tabs.orderLookup", permission: "finance.view", exact: true },
           { href: "/transactions/refund-approvals", labelKey: "tabs.refundApprovals", permission: "finance.view", queue: "pendingRefundApprovals" },
+          { href: "/transactions/explorer", labelKey: "tabs.transactionExplorer", permission: "finance.view" },
         ],
       },
       {

@@ -3570,6 +3570,8 @@ model PaymentIntent {
 
   @@index([checkoutId])
   @@index([idempotencyKey])
+  /// Admin transactions explorer: newest-first keyset pages over (createdAt, id).
+  @@index([createdAt, id])
   @@map("payment_intents")
 }
 
@@ -3626,6 +3628,8 @@ model CardTransferPayment {
   @@index([userId, status])
   @@index([bookingId, status])
   @@index([reviewAvailableAt, status])
+  /// Admin transactions explorer: newest-first keyset pages over (createdAt, id).
+  @@index([createdAt, id])
   @@map("card_transfer_payments")
 }
 
@@ -3701,6 +3705,8 @@ model WalletTopUp {
 
   @@index([userId, createdAt])
   @@index([status, createdAt])
+  /// Admin transactions explorer: newest-first keyset pages over (createdAt, id).
+  @@index([createdAt, id])
   @@map("wallet_top_ups")
 }
 
@@ -3726,6 +3732,8 @@ model WalletAdjustment {
   request           WalletAdjustmentRequest?
 
   @@index([walletAccountId, createdAt])
+  /// Admin transactions explorer: newest-first keyset pages over (createdAt, id).
+  @@index([createdAt, id])
   @@map("wallet_adjustments")
 }
 
@@ -3904,6 +3912,8 @@ model Refund {
   @@index([paymentIntentId])
   @@index([financingIntentId])
   @@index([orderId])
+  /// Admin transactions explorer: newest-first keyset pages over (createdAt, id).
+  @@index([createdAt, id])
   @@map("refunds")
 }
 
