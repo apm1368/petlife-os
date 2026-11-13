@@ -4465,7 +4465,8 @@
         "transactionExplorer": "Explorador",
         "setPet": "Solicitudes de Set Pet",
         "walletBusiness": "Monederos de empresa",
-        "walletTransfers": "Transferencias"
+        "walletTransfers": "Transferencias",
+        "sponsored": "Patrocinados"
       },
       "palette": {
         "actions": "Acciones rápidas",
@@ -10737,7 +10738,8 @@
         "ADJUSTMENT": "Corrección de nuestro equipo",
         "EXPIRY": "Saldo de regalo caducado",
         "OTHER": "Movimiento",
-        "TRANSFER": "Transferencia de nuestro equipo (aprobada por dos personas)"
+        "TRANSFER": "Transferencia de nuestro equipo (aprobada por dos personas)",
+        "SPONSORED_CLICK": "Clic en anuncio patrocinado"
       },
       "bucket": {
         "PURCHASE_ONLY": "Para compras",
@@ -11003,7 +11005,8 @@
         "ADJUSTMENT": "Corrección del equipo",
         "TRANSFER": "Transferencia del equipo",
         "EXPIRY": "Regalo caducado",
-        "OTHER": "Otro"
+        "OTHER": "Otro",
+        "SPONSORED_CLICK": "Clic en anuncio patrocinado"
       }
     },
     "transfers": {
@@ -13524,5 +13527,148 @@
   "locationNudge": {
     "text": "Marca tu dirección predeterminada en el mapa para entregas más precisas y lugares cerca de ti.",
     "action": "Marcar ahora"
+  },
+  "sponsored": {
+    "label": "Patrocinado",
+    "explain": "Patrocinado: este socio paga para aparecer más arriba en esta lista. No es una recomendación, una valoración ni una verificación de opetlife.",
+    "why": "¿Por qué veo esto?",
+    "blockLabel": "Anuncios patrocinados",
+    "partner": {
+      "title": "Anuncios patrocinados",
+      "price": "Cada clic cobrado cuesta {price}, igual para todos.",
+      "nextPrice": "A partir del {date} será {price}.",
+      "rules": "Solo pagas por clics reales: como máximo uno por visitante y día para cada anuncio. Los clics de tu propio equipo, del equipo de opetlife y de herramientas automatizadas son gratis, y nuestro equipo financiero reembolsa los clics que considere no válidos. Tu anuncio aparece en su propio bloque señalizado encima de la lista; los resultados normales nunca se reordenan.",
+      "switchedOff": "Los anuncios patrocinados están desactivados en este momento.",
+      "notVerified": "Solo las tiendas y los proveedores verificados pueden publicar anuncios patrocinados.",
+      "empty": "Aún no hay anuncios patrocinados.",
+      "new": "Nuevo anuncio patrocinado",
+      "serving": "Se está mostrando",
+      "notServing": {
+        "PAUSED": "En pausa",
+        "STOPPED": "Finalizado",
+        "STAFF_HOLD": "Retenido por opetlife",
+        "SWITCHED_OFF": "Los anuncios patrocinados están desactivados",
+        "ABOVE_CEILING": "El precio por clic supera tu límite",
+        "BUDGET_SPENT_TODAY": "Presupuesto de hoy agotado",
+        "NO_FUNDS": "Saldo insuficiente",
+        "LISTING_UNAVAILABLE": "El anuncio no está disponible",
+        "NOT_VERIFIED": "Organización no verificada"
+      },
+      "placement": {
+        "SHOP": "Listas de la tienda",
+        "VETS": "Directorio de veterinarios",
+        "SERVICES": "Proveedores de servicios"
+      },
+      "limits": "Presupuesto diario {budget} · máx. por clic {ceiling}",
+      "today": "Hoy: {spent} · {clicks} cobrados, {free} clics gratis",
+      "total": "En total: {spent} · {clicks} cobrados · reembolsado {refunded}",
+      "heldBecause": "Retenido por opetlife: {reason}",
+      "pause": "Pausar",
+      "resume": "Reanudar",
+      "stop": "Finalizar",
+      "confirmStop": "¿Finalizar este anuncio patrocinado definitivamente?",
+      "form": {
+        "target": "Qué quieres promocionar",
+        "alreadyLive": "ya en marcha",
+        "budget": "Presupuesto diario (tomanes)",
+        "ceiling": "Máx. por clic (tomanes)",
+        "ceilingHint": "Si el precio por clic llega a superar esta cifra, tu anuncio simplemente deja de mostrarse; nunca se te cobra más.",
+        "submit": "Empezar",
+        "cancel": "Cancelar",
+        "noTargets": "Aún no hay nada que promocionar: necesitas un anuncio activo y aprobado."
+      },
+      "errors": {
+        "generic": "No ha funcionado. Vuelve a intentarlo.",
+        "OUT_OF_RANGE": "Revisa los importes: el presupuesto y el máximo por clic deben ser al menos el precio por clic.",
+        "ALREADY_RUNNING": "Este anuncio ya tiene una campaña patrocinada.",
+        "NOT_PROMOTABLE": "Este anuncio no se puede promocionar.",
+        "NOT_VERIFIED": "Solo las organizaciones verificadas pueden publicar anuncios patrocinados.",
+        "SWITCHED_OFF": "Los anuncios patrocinados están desactivados en este momento.",
+        "STOPPED": "Este anuncio patrocinado ha finalizado."
+      }
+    }
+  },
+  "adminSponsored": {
+    "kicker": "Comercio",
+    "title": "Anuncios patrocinados",
+    "subtitle": "Todas las campañas de socios pagadas por clic desde un monedero de empresa: gasto, retenciones, reembolsos de clics no válidos y el precio por clic.",
+    "forbidden": "Necesitas el permiso «Gestionar promociones».",
+    "filter": "Filtrar por estado",
+    "status": {
+      "ACTIVE": "En curso",
+      "PAUSED": "En pausa",
+      "STOPPED": "Finalizada",
+      "ALL": "Todas"
+    },
+    "search": "Buscar anuncio u organización",
+    "searchButton": "Buscar",
+    "empty": "No hay campañas aquí.",
+    "retry": "Reintentar",
+    "serving": "Se muestra",
+    "notServing": {
+      "PAUSED": "En pausa",
+      "STOPPED": "Finalizado",
+      "STAFF_HOLD": "Retenido por opetlife",
+      "SWITCHED_OFF": "Los anuncios patrocinados están desactivados",
+      "ABOVE_CEILING": "El precio por clic supera tu límite",
+      "BUDGET_SPENT_TODAY": "Presupuesto de hoy agotado",
+      "NO_FUNDS": "Saldo insuficiente",
+      "LISTING_UNAVAILABLE": "El anuncio no está disponible",
+      "NOT_VERIFIED": "Organización no verificada"
+    },
+    "placement": {
+      "SHOP": "Listas de la tienda",
+      "VETS": "Directorio de veterinarios",
+      "SERVICES": "Proveedores de servicios"
+    },
+    "limits": "Presupuesto diario {budget} · máx. por clic {ceiling}",
+    "spend": "Hoy {today} ({todayClicks} cobrados) · total {total} ({totalClicks} cobrados, {free} gratis) · reembolsado {refunded}",
+    "heldBecause": "Retenida: {reason}",
+    "showClicks": "Clics",
+    "hideClicks": "Ocultar clics",
+    "hold": "Retener",
+    "release": "Liberar",
+    "stop": "Finalizar",
+    "cancel": "Cancelar",
+    "reason": "Motivo",
+    "pageOf": "Página {page, number} de {pages, number}",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "clicks": {
+      "empty": "Aún no hay clics.",
+      "outcome": {
+        "BILLED": "Cobrado",
+        "DUPLICATE": "Repetido (gratis)",
+        "SELF": "Equipo propio (gratis)",
+        "STAFF": "Equipo (gratis)",
+        "BOT": "Automatizado (gratis)",
+        "INACTIVE": "No estaba activo (gratis)",
+        "ABOVE_CEILING": "Por encima del límite (gratis)",
+        "OVER_BUDGET": "Por encima del presupuesto (gratis)",
+        "NO_FUNDS": "Sin saldo (gratis)"
+      },
+      "viewer": {
+        "SIGNED_IN": "visitante con sesión iniciada",
+        "ANONYMOUS": "visitante",
+        "ERASED": "visitante (borrado a los 90 días)"
+      },
+      "refund": "Reembolsar {count, number} clics",
+      "refunded": "Se reembolsaron {count, number} clics ({amount}).",
+      "refundedLine": "reembolsado: {reason}"
+    },
+    "rate": {
+      "title": "Precio por clic",
+      "current": "Ahora: {price} por clic cobrado",
+      "next": "desde el {date}: {price}",
+      "hint": "Un precio para todos. Un precio nuevo se aplica desde el momento que elijas; los precios anteriores quedan en el historial.",
+      "newPrice": "Precio nuevo (tomanes)",
+      "from": "Desde (vacío = ahora)",
+      "save": "Fijar precio",
+      "historyLine": "desde el {date} · {by} · {reason}"
+    },
+    "errors": {
+      "generic": "No ha funcionado. Vuelve a intentarlo.",
+      "forbidden": "No tienes permiso para esto."
+    }
   }
 }

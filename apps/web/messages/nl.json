@@ -5230,7 +5230,8 @@
         "transactionExplorer": "Verkenner",
         "setPet": "Set Pet-aanvragen",
         "walletBusiness": "Zakelijke portemonnees",
-        "walletTransfers": "Overboekingen"
+        "walletTransfers": "Overboekingen",
+        "sponsored": "Gesponsord"
       },
       "palette": {
         "actions": "Snelle acties",
@@ -11105,7 +11106,8 @@
         "ADJUSTMENT": "Correctie door ons team",
         "EXPIRY": "Cadeautegoed verlopen",
         "OTHER": "Mutatie",
-        "TRANSFER": "Overboeking door ons team (door twee personen goedgekeurd)"
+        "TRANSFER": "Overboeking door ons team (door twee personen goedgekeurd)",
+        "SPONSORED_CLICK": "Klik op gesponsorde vermelding"
       },
       "bucket": {
         "PURCHASE_ONLY": "Voor aankopen",
@@ -11371,7 +11373,8 @@
         "ADJUSTMENT": "Correctie door het team",
         "TRANSFER": "Overboeking door het team",
         "EXPIRY": "Cadeau verlopen",
-        "OTHER": "Overig"
+        "OTHER": "Overig",
+        "SPONSORED_CLICK": "Klik op gesponsorde vermelding"
       }
     },
     "transfers": {
@@ -13619,5 +13622,148 @@
   "locationNudge": {
     "text": "Zet uw standaardadres op de kaart voor nauwkeurigere bezorging en plekken bij u in de buurt.",
     "action": "Nu vastzetten"
+  },
+  "sponsored": {
+    "label": "Gesponsord",
+    "explain": "Gesponsord: deze partner betaalt om hoger in deze lijst te staan. Het is geen aanbeveling, beoordeling of verificatie door opetlife.",
+    "why": "Waarom zie ik dit?",
+    "blockLabel": "Gesponsorde vermeldingen",
+    "partner": {
+      "title": "Gesponsorde vermeldingen",
+      "price": "Elke betaalde klik kost {price}, voor iedereen hetzelfde.",
+      "nextPrice": "Vanaf {date} wordt het {price}.",
+      "rules": "Je betaalt alleen voor echte klikken: hoogstens één per bezoeker per dag voor elke vermelding. Klikken van je eigen team, het opetlife-team en geautomatiseerde middelen zijn gratis, en ons financiële team betaalt klikken terug die het ongeldig vindt. Je vermelding staat in een eigen, gemarkeerd blok boven de lijst; gewone resultaten worden nooit anders gerangschikt.",
+      "switchedOff": "Gesponsorde vermeldingen staan op dit moment uit.",
+      "notVerified": "Alleen geverifieerde winkels en dienstverleners kunnen gesponsorde vermeldingen plaatsen.",
+      "empty": "Nog geen gesponsorde vermeldingen.",
+      "new": "Nieuwe gesponsorde vermelding",
+      "serving": "Wordt nu getoond",
+      "notServing": {
+        "PAUSED": "Gepauzeerd",
+        "STOPPED": "Beëindigd",
+        "STAFF_HOLD": "Door opetlife aangehouden",
+        "SWITCHED_OFF": "Gesponsorde vermeldingen staan uit",
+        "ABOVE_CEILING": "Prijs per klik ligt boven je limiet",
+        "BUDGET_SPENT_TODAY": "Dagbudget is op",
+        "NO_FUNDS": "Niet genoeg saldo",
+        "LISTING_UNAVAILABLE": "De vermelding is niet beschikbaar",
+        "NOT_VERIFIED": "Organisatie niet geverifieerd"
+      },
+      "placement": {
+        "SHOP": "Winkellijsten",
+        "VETS": "Dierenartsengids",
+        "SERVICES": "Dienstverleners"
+      },
+      "limits": "Dagbudget {budget} · max. per klik {ceiling}",
+      "today": "Vandaag: {spent} · {clicks} betaald, {free} gratis klikken",
+      "total": "In totaal: {spent} · {clicks} betaald · terugbetaald {refunded}",
+      "heldBecause": "Door opetlife aangehouden: {reason}",
+      "pause": "Pauzeren",
+      "resume": "Hervatten",
+      "stop": "Beëindigen",
+      "confirmStop": "Deze gesponsorde vermelding definitief beëindigen?",
+      "form": {
+        "target": "Wat je wilt promoten",
+        "alreadyLive": "loopt al",
+        "budget": "Dagbudget (toman)",
+        "ceiling": "Max. per klik (toman)",
+        "ceilingHint": "Als de prijs per klik ooit hoger wordt, wordt je vermelding gewoon niet meer getoond; je betaalt nooit meer.",
+        "submit": "Starten",
+        "cancel": "Annuleren",
+        "noTargets": "Er is nog niets om te promoten: je hebt een actieve, goedgekeurde vermelding nodig."
+      },
+      "errors": {
+        "generic": "Dat is niet gelukt. Probeer het opnieuw.",
+        "OUT_OF_RANGE": "Controleer de bedragen: het budget en het maximum per klik moeten minstens de prijs per klik zijn.",
+        "ALREADY_RUNNING": "Voor deze vermelding loopt al een campagne.",
+        "NOT_PROMOTABLE": "Deze vermelding kan niet worden gepromoot.",
+        "NOT_VERIFIED": "Alleen geverifieerde organisaties kunnen gesponsorde vermeldingen plaatsen.",
+        "SWITCHED_OFF": "Gesponsorde vermeldingen staan op dit moment uit.",
+        "STOPPED": "Deze gesponsorde vermelding is beëindigd."
+      }
+    }
+  },
+  "adminSponsored": {
+    "kicker": "Handel",
+    "title": "Gesponsorde vermeldingen",
+    "subtitle": "Alle partnercampagnes die per klik uit een zakelijke portemonnee worden betaald: uitgaven, blokkeringen, terugbetalingen van ongeldige klikken en de prijs per klik.",
+    "forbidden": "Je hebt de rechten ‘Acties beheren’ nodig.",
+    "filter": "Filteren op status",
+    "status": {
+      "ACTIVE": "Actief",
+      "PAUSED": "Gepauzeerd",
+      "STOPPED": "Beëindigd",
+      "ALL": "Alle"
+    },
+    "search": "Vermelding of organisatie zoeken",
+    "searchButton": "Zoeken",
+    "empty": "Hier zijn geen campagnes.",
+    "retry": "Opnieuw proberen",
+    "serving": "Wordt getoond",
+    "notServing": {
+      "PAUSED": "Gepauzeerd",
+      "STOPPED": "Beëindigd",
+      "STAFF_HOLD": "Door opetlife aangehouden",
+      "SWITCHED_OFF": "Gesponsorde vermeldingen staan uit",
+      "ABOVE_CEILING": "Prijs per klik ligt boven je limiet",
+      "BUDGET_SPENT_TODAY": "Dagbudget is op",
+      "NO_FUNDS": "Niet genoeg saldo",
+      "LISTING_UNAVAILABLE": "De vermelding is niet beschikbaar",
+      "NOT_VERIFIED": "Organisatie niet geverifieerd"
+    },
+    "placement": {
+      "SHOP": "Winkellijsten",
+      "VETS": "Dierenartsengids",
+      "SERVICES": "Dienstverleners"
+    },
+    "limits": "Dagbudget {budget} · max. per klik {ceiling}",
+    "spend": "Vandaag {today} ({todayClicks} betaald) · totaal {total} ({totalClicks} betaald, {free} gratis) · terugbetaald {refunded}",
+    "heldBecause": "Aangehouden: {reason}",
+    "showClicks": "Klikken",
+    "hideClicks": "Klikken verbergen",
+    "hold": "Aanhouden",
+    "release": "Vrijgeven",
+    "stop": "Beëindigen",
+    "cancel": "Annuleren",
+    "reason": "Reden",
+    "pageOf": "Pagina {page, number} van {pages, number}",
+    "previous": "Vorige",
+    "next": "Volgende",
+    "clicks": {
+      "empty": "Nog geen klikken.",
+      "outcome": {
+        "BILLED": "Betaald",
+        "DUPLICATE": "Herhaling (gratis)",
+        "SELF": "Eigen team (gratis)",
+        "STAFF": "Team (gratis)",
+        "BOT": "Geautomatiseerd (gratis)",
+        "INACTIVE": "Liep niet (gratis)",
+        "ABOVE_CEILING": "Boven de limiet (gratis)",
+        "OVER_BUDGET": "Boven het budget (gratis)",
+        "NO_FUNDS": "Geen saldo (gratis)"
+      },
+      "viewer": {
+        "SIGNED_IN": "ingelogde bezoeker",
+        "ANONYMOUS": "bezoeker",
+        "ERASED": "bezoeker (na 90 dagen gewist)"
+      },
+      "refund": "{count, number} klikken terugbetalen",
+      "refunded": "{count, number} klikken terugbetaald ({amount}).",
+      "refundedLine": "terugbetaald: {reason}"
+    },
+    "rate": {
+      "title": "Prijs per klik",
+      "current": "Nu: {price} per betaalde klik",
+      "next": "vanaf {date}: {price}",
+      "hint": "Eén prijs voor iedereen. Een nieuwe prijs geldt vanaf het moment dat je kiest; eerdere prijzen blijven in de geschiedenis.",
+      "newPrice": "Nieuwe prijs (toman)",
+      "from": "Vanaf (leeg = nu)",
+      "save": "Prijs instellen",
+      "historyLine": "vanaf {date} · {by} · {reason}"
+    },
+    "errors": {
+      "generic": "Dat is niet gelukt. Probeer het opnieuw.",
+      "forbidden": "Je hebt hiervoor geen rechten."
+    }
   }
 }
