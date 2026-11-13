@@ -48,7 +48,8 @@ describe("OpenStreetMap directory (e2e)", () => {
     expect(list.map((p) => p.name).sort()).toEqual(["Shop Two", "Vet One"]);
     expect(list.every((p) => p.source === "OSM" && p.status === "UNVERIFIED" && !p.claimed && p.osmUrl.startsWith("https://www.openstreetmap.org/"))).toBe(true);
     const vetRow = await db.petFriendlyPlace.findFirstOrThrow({ where: { osmId: BigInt(id) } });
-    expect(vetRow).toMatchObject({ category: "VETERINARY", phone: "+98 21 000 0000", city });
+    // Only what the kind of place makes plain: a clinic is visited indoors; nothing about outdoors is claimed.
+    expect(vetRow).toMatchObject({ category: "VETERINARY", phone: "+98 21 000 0000", city, indoorAllowed: true, outdoorAllowed: false });
 
     // A member claims the vet; with no partner account the next step is sign-up.
     const owner = await actor("Dr. Owner");
