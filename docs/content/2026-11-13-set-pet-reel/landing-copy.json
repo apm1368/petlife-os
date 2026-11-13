@@ -1,0 +1,98 @@
+{
+  "fa": {
+    "setPet": {
+      "landing": {
+        "eyebrow": "تازه در اپت‌لایف",
+        "title": "ست پت: لباس ست تو و پتت",
+        "lede": "لباس تو و لباس پتت با یک طرح؛ طرحی که خودت می‌سازی.",
+        "line1": "تی‌شرت، هودی یا سویشرت؛ رنگ و سایزش را انتخاب کن.",
+        "line2": "عکس‌ها یا طرح‌های خودت و پتت را بارگذاری کن و روی سینه، پشت یا آستینِ لباست و پشت لباس پتت بچین.",
+        "line3": "سایز پتت را با جدول راهنما انتخاب کن؛ لباسش همان طرح را می‌گیرد.",
+        "line4": "بازهٔ قیمت را هنگام ساخت می‌بینی. قبل از چاپ، نمونهٔ چاپ را برایت می‌فرستیم و بعد از تأییدت پرداخت می‌کنی.",
+        "cta": "ست خودت و پتت را بساز",
+        "videoLabel": "ویدیوی معرفی ست پت",
+        "navLabel": "ست پت"
+      }
+    }
+  },
+  "en": {
+    "setPet": {
+      "landing": {
+        "eyebrow": "New on opetlife",
+        "title": "Set Pet: matching outfits for you and your pet",
+        "lede": "Your outfit and your pet's in one design, and you make the design.",
+        "line1": "Pick a T-shirt, hoodie or sweatshirt, then its colour and size.",
+        "line2": "Upload photos or designs of you and your pet and place them on the chest, back or sleeves of your garment and on the back of your pet's.",
+        "line3": "Pick your pet's size with the size guide, and their outfit gets the same design.",
+        "line4": "You see a price range as you build. Before printing we send you a print proof, and you pay once you approve it.",
+        "cta": "Make a set for you and your pet",
+        "videoLabel": "Set Pet introduction video",
+        "navLabel": "Set Pet"
+      }
+    }
+  },
+  "de": {
+    "setPet": {
+      "landing": {
+        "eyebrow": "Neu bei opetlife",
+        "title": "Set Pet: Partnerlook für dich und dein Haustier",
+        "lede": "Dein Outfit und das deines Tiers in einem Motiv – und das Motiv gestaltest du.",
+        "line1": "Wähle T-Shirt, Hoodie oder Sweatshirt, dann Farbe und Größe.",
+        "line2": "Lade Fotos oder Motive von dir und deinem Tier hoch und platziere sie auf Brust, Rücken oder Ärmeln deines Kleidungsstücks und auf dem Rücken des Tier-Outfits.",
+        "line3": "Wähle die Größe deines Tiers mit der Größentabelle – sein Outfit bekommt dasselbe Motiv.",
+        "line4": "Eine Preisspanne siehst du schon beim Gestalten. Vor dem Druck bekommst du eine Druckvorschau und zahlst erst nach deiner Freigabe.",
+        "cta": "Gestalte dein Set mit deinem Tier",
+        "videoLabel": "Vorstellungsvideo zu Set Pet",
+        "navLabel": "Set Pet"
+      }
+    }
+  },
+  "es": {
+    "setPet": {
+      "landing": {
+        "eyebrow": "Novedad en opetlife",
+        "title": "Set Pet: ropa a juego para ti y tu mascota",
+        "lede": "Tu prenda y la de tu mascota con un mismo diseño, y el diseño lo creas tú.",
+        "line1": "Elige camiseta, hoodie o sudadera, y después el color y la talla.",
+        "line2": "Sube fotos o diseños tuyos y de tu mascota y colócalos en el pecho, la espalda o las mangas de tu prenda y en la espalda de la de tu mascota.",
+        "line3": "Elige la talla de tu mascota con la guía de tallas, y su prenda lleva el mismo diseño.",
+        "line4": "Ves un rango de precio mientras lo creas. Antes de imprimir te enviamos una prueba de impresión y pagas cuando la apruebes.",
+        "cta": "Crea tu set con tu mascota",
+        "videoLabel": "Vídeo de presentación de Set Pet",
+        "navLabel": "Set Pet"
+      }
+    }
+  },
+  "ar": {
+    "setPet": {
+      "landing": {
+        "eyebrow": "جديد في opetlife",
+        "title": "Set Pet: ملابس متطابقة لك ولحيوانك الأليف",
+        "lede": "لباسك ولباس حيوانك بتصميم واحد، وأنت من يصنع التصميم.",
+        "line1": "اختر تيشيرت أو هودي أو سويتشيرت، ثم لونه ومقاسه.",
+        "line2": "ارفع صورًا أو تصاميم لك ولحيوانك، وضعها على الصدر أو الظهر أو الأكمام في لباسك وعلى ظهر لباس حيوانك.",
+        "line3": "اختر مقاس حيوانك من جدول المقاسات، ويحمل لباسه التصميم نفسه.",
+        "line4": "ترى نطاق السعر أثناء التصميم. وقبل الطباعة نرسل لك نموذج الطباعة، وتدفع بعد موافقتك عليه.",
+        "cta": "اصنع طقمك أنت وحيوانك",
+        "videoLabel": "فيديو تعريفي بـ Set Pet",
+        "navLabel": "Set Pet"
+      }
+    }
+  },
+  "nl": {
+    "setPet": {
+      "landing": {
+        "eyebrow": "Nieuw bij opetlife",
+        "title": "Set Pet: matchende outfits voor jou en je huisdier",
+        "lede": "Jouw outfit en die van je huisdier in één ontwerp, en dat ontwerp maak je zelf.",
+        "line1": "Kies een T-shirt, hoodie of sweater, en daarna de kleur en maat.",
+        "line2": "Upload foto's of ontwerpen van jou en je huisdier en plaats ze op de borst, rug of mouwen van je kledingstuk en op de rug van de outfit van je huisdier.",
+        "line3": "Kies de maat van je huisdier met de maattabel; de outfit krijgt hetzelfde ontwerp.",
+        "line4": "Je ziet al een prijsindicatie tijdens het ontwerpen. Voor het drukken krijg je een drukproef en je betaalt pas na je goedkeuring.",
+        "cta": "Maak een set voor jou en je huisdier",
+        "videoLabel": "Introductievideo van Set Pet",
+        "navLabel": "Set Pet"
+      }
+    }
+  }
+}
