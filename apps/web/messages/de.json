@@ -52,6 +52,99 @@
       "OWNERSHIP_CHANGED_CONCURRENTLY": "Jemand anderes hat diese Übertragung gerade geändert. Aktualisieren Sie die Liste."
     }
   },
+  "adminHolidays": {
+    "kicker": "Geschäftskalender",
+    "title": "Feiertage und Schließtage",
+    "retry": "Erneut versuchen",
+    "cancel": "Abbrechen",
+    "yearLabel": "Persisches Jahr",
+    "intro": "Die offiziellen Feiertage im Iran sowie alle Tage, die Ihr Team schließt oder öffnet. Ziele in Arbeitsstunden – etwa die Prüfung der Verifizierung innerhalb von 24 Stunden – überspringen geschlossene Tage, und Buchungen und Lieferschätzungen können denselben Kalender nutzen. Freitags ist immer geschlossen.",
+    "coverage": {
+      "official": "{count, plural, one {# geschlossener Tag} other {# geschlossene Tage}} in diesem Jahr, aus dem offiziellen Kalender und den Änderungen Ihres Teams.",
+      "provisional": "Die Mondfeiertage dieses Jahres sind vorläufig, bis der offizielle Kalender erscheint. Korrigieren Sie hier jeden Tag, der sich verschiebt.",
+      "none": "Für dieses Jahr gibt es noch keine offizielle Liste. Ein Entwickler ergänzt sie, sobald der offizielle Kalender erscheint; bis dahin fügen Sie Schließtage von Hand hinzu."
+    },
+    "add": {
+      "title": "Schließtag hinzufügen",
+      "help": "Für einen Tag, an dem das Büro geschlossen ist, der aber kein offizieller Feiertag ist – etwa eine kurzfristige Schließung oder ein Betriebsruhetag.",
+      "date": "Datum",
+      "name": "Bezeichnung",
+      "namePlaceholder": "Zum Beispiel: Büro geschlossen",
+      "submit": "Diesen Tag schließen"
+    },
+    "reason": "Grund",
+    "reasonPlaceholder": "Warum diese Änderung (bleibt im Prüfprotokoll)",
+    "list": {
+      "title": "Geschlossene und geänderte Tage",
+      "empty": "Für dieses Jahr gibt es keine Feiertage oder Änderungen.",
+      "date": "Datum",
+      "name": "Tag",
+      "status": "Status",
+      "actions": "Aktionen"
+    },
+    "status": {
+      "closed": "Geschlossen",
+      "open": "Geöffnet"
+    },
+    "source": {
+      "official": "Offizieller Feiertag",
+      "staffClosure": "Schließung durch das Team",
+      "staffOpened": "Vom Team geöffnet"
+    },
+    "actions": {
+      "open": "Als Arbeitstag öffnen",
+      "undo": "Teamänderung zurücknehmen"
+    },
+    "confirm": {
+      "openTitle": "{date} als Arbeitstag öffnen?",
+      "openBody": "Ziele in Arbeitsstunden zählen diesen Tag mit, und Buchungen können ihn als geöffnet behandeln.",
+      "undoTitle": "Änderung am {date} zurücknehmen?",
+      "undoBody": "Der Tag folgt wieder dem offiziellen Kalender."
+    },
+    "done": {
+      "closed": "Schließtag hinzugefügt.",
+      "opened": "Der Tag ist jetzt ein Arbeitstag.",
+      "undone": "Änderung zurückgenommen; der Tag folgt wieder dem offiziellen Kalender."
+    },
+    "errors": {
+      "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+      "closureFields": "Wählen Sie ein Datum, geben Sie eine Bezeichnung und einen kurzen Grund an (mindestens 5 Zeichen).",
+      "reason": "Geben Sie einen kurzen Grund an (mindestens 5 Zeichen)."
+    },
+    "rules": {
+      "CALENDAR_FRIDAY": "Freitags ist immer geschlossen – hier gibt es nichts zu ändern.",
+      "CALENDAR_ALREADY_OPEN": "Dieser Tag ist bereits ein Arbeitstag.",
+      "CALENDAR_ALREADY_CLOSED": "Das ist bereits ein offizieller Feiertag. Um ihn nach dem Öffnen wieder zu schließen, nehmen Sie die Teamänderung zurück.",
+      "CALENDAR_OUT_OF_RANGE": "Wählen Sie ein Datum von vor einem Monat bis zu zwei Jahren in der Zukunft.",
+      "CALENDAR_NO_STAFF_CHANGE": "An diesem Tag gibt es keine Teamänderung."
+    },
+    "names": {
+      "nowruz": "Nouruz (persisches Neujahr)",
+      "republicDay": "Tag der Islamischen Republik",
+      "natureDay": "Tag der Natur (Sizdah Bedar)",
+      "sadiqMartyrdom": "Martyrium von Imam Dschafar as-Sadiq",
+      "eidAlAdha": "Opferfest",
+      "khomeini": "Todestag von Imam Chomeini",
+      "ghadir": "Ghadir-Fest",
+      "khordad15": "Aufstand vom 15. Chordad",
+      "tasua": "Tasua",
+      "ashura": "Aschura",
+      "arbaeen": "Arbain",
+      "prophetDeath": "Todestag des Propheten und Martyrium von Imam Hasan",
+      "reza": "Martyrium von Imam Reza",
+      "askari": "Martyrium von Imam Hasan al-Askari",
+      "mawlid": "Geburtstag des Propheten und von Imam Dschafar as-Sadiq",
+      "fatima": "Martyrium von Fatima az-Zahra",
+      "aliBirth": "Geburtstag von Imam Ali (Vatertag)",
+      "mabath": "Mab'ath (Berufung des Propheten)",
+      "midShaban": "Mitte Scha'ban (Geburt von Imam Mahdi)",
+      "revolution": "Sieg der Islamischen Revolution",
+      "aliMartyrdom": "Martyrium von Imam Ali",
+      "eidAlFitr": "Fest des Fastenbrechens",
+      "eidAlFitr2": "Feiertag zum Fest des Fastenbrechens",
+      "oil": "Tag der Ölverstaatlichung"
+    }
+  },
   "adminDeletionRequests": {
     "kicker": "Datenschutz",
     "title": "Anträge auf Kontolöschung",
@@ -852,7 +945,8 @@
       "processing": "Zugeschnitten und neu codiert",
       "licence": "Lizenz- und Nutzungsbedingungen",
       "musicTitle": "Musik",
-      "musicUsage": "Die Instrumentalmusik der Reels auf der Website; ein 48-sekündiger Ausschnitt, ein- und ausgeblendet und neu kodiert."
+      "musicUsage": "Die Instrumentalmusik der Reels auf der Website; ein 48-sekündiger Ausschnitt, ein- und ausgeblendet und neu kodiert.",
+      "musicUsageVideo": "Die Instrumentalmusik des einminütigen Videos „10 Suchanfragen von Hunde- und Katzenhaltern“ im Blog und in sozialen Medien; ein 60-sekündiger Ausschnitt, ausgeblendet und neu kodiert."
     },
     "member": {
       "nav": "Meine Bereiche",
@@ -2323,7 +2417,8 @@
       "channels": {
         "EMAIL": "E-Mail",
         "IN_APP": "In der App",
-        "SMS": "SMS"
+        "SMS": "SMS",
+        "PUSH": "Push"
       },
       "quietHours": {
         "title": "Ruhezeiten",
@@ -2341,7 +2436,29 @@
       "marketingManage": "Im Datenschutz verwalten",
       "quietHoursHint": "Während der Ruhezeiten werden SMS bis zum Ende des Zeitfensters zurückgestellt (dringende Meldungen kommen weiterhin an). In-App-Mitteilungen erscheinen ohne Ton in deinem Posteingang.",
       "saveError": "Deine Einstellungen konnten nicht gespeichert werden. Bitte versuche es erneut.",
-      "unsaved": "Du hast ungespeicherte Änderungen."
+      "unsaved": "Du hast ungespeicherte Änderungen.",
+      "push": {
+        "title": "Benachrichtigungen auf diesem Gerät",
+        "intro": "Pflege-Erinnerungen, Termine, Bestellungen und Vermisst-Meldungen erreichen dieses Gerät, auch wenn opetlife geschlossen ist. Auf dem Sperrbildschirm steht nur ein allgemeiner Titel, nie Gesundheitsdetails oder der Name deines Tiers.",
+        "enable": "Benachrichtigungen einschalten",
+        "disable": "Auf diesem Gerät ausschalten",
+        "test": "Test-Benachrichtigung senden",
+        "testSent": "Test-Benachrichtigung gesendet. Sie sollte in ein paar Sekunden auf diesem Gerät ankommen.",
+        "testFailed": "Die Test-Benachrichtigung kam nicht an. Schalte die Benachrichtigungen aus und wieder ein.",
+        "on": "Benachrichtigungen sind auf diesem Gerät eingeschaltet.",
+        "off": "Benachrichtigungen sind auf diesem Gerät ausgeschaltet.",
+        "denied": "Dein Browser blockiert Benachrichtigungen für diese Seite. Erlaube Benachrichtigungen für opetlife.ir in den Browser-Einstellungen und öffne die Seite neu.",
+        "unsupported": "Dieser Browser kann keine Web-Benachrichtigungen empfangen. Probier Chrome, Edge, Firefox oder Samsung Internet.",
+        "iosInstall": "Auf dem iPhone funktionieren Benachrichtigungen nur in der installierten App: Tippe in Safari auf „Teilen“ → „Zum Home-Bildschirm“, öffne opetlife vom Home-Bildschirm und schalte die Benachrichtigungen hier ein (ab iOS 16.4).",
+        "notConfigured": "Geräte-Benachrichtigungen sind noch nicht verfügbar.",
+        "error": "Das hat nicht geklappt. Versuch es noch einmal.",
+        "devices": "Deine anderen Geräte",
+        "thisDevice": "Dieses Gerät",
+        "unknownDevice": "Gerät",
+        "added": "Hinzugefügt am {date}",
+        "remove": "Entfernen",
+        "removeLabel": "{device} aus den Benachrichtigungsgeräten entfernen"
+      }
     }
   },
   "auth": {
@@ -2968,6 +3085,7 @@
       "SUPPORT_AGENT": "Supportmitarbeitende"
     },
     "rules": {
+      "UNVERIFIED_CONTACT": "Admin-Zugriff gibt es nur für Konten mit bestätigter E-Mail-Adresse.",
       "ALREADY_ADMIN": "Dieses Konto ist bereits Admin. Öffne die bestehende Mitgliedschaft.",
       "SELF_CHANGE_FORBIDDEN": "Du kannst deine eigene Mitgliedschaft nicht ändern.",
       "LAST_SUPER_ADMIN": "Die letzte aktive Superadmin-Mitgliedschaft kann nicht geändert werden.",
@@ -3766,6 +3884,7 @@
       },
       "tabs": {
         "ownershipTransfers": "Eigentumsübertragungen",
+        "holidays": "Feiertage und Schließtage",
         "deletionRequests": "Löschanträge",
         "customRoles": "Eigene Rollen",
         "directory": "Verzeichnis",
@@ -6352,7 +6471,15 @@
       "insuranceProviders": "Versicherungsanbieter verwalten",
       "externalSources": "Externe Reisequellen verwalten",
       "accessControl": "Admin-Zugriffsverwaltung",
-      "verificationQueue": "Warteschlange zur Partnerprüfung"
+      "verificationQueue": "Warteschlange zur Partnerprüfung",
+      "launch": {
+        "title": "Ziel im Startmonat",
+        "hint": "Der Erfolgsmaßstab zum Start: registrierte Tiere und Buchungen pro Woche. Bis die Demodaten bereinigt sind (F4), werden sie mitgezählt.",
+        "registeredPets": "Registrierte Tiere",
+        "thisWeek": "diese Woche",
+        "bookingsThisWeek": "Buchungen diese Woche",
+        "vsLastWeek": "gegenüber {count} letzte Woche"
+      }
     },
     "adminSearch": {
       "title": "Kunden, Bestellungen oder Supportfälle suchen",
@@ -6555,7 +6682,11 @@
       "back": "Zurück",
       "continue": "Weiter",
       "photoLabel": "Foto",
-      "submit": "Vermisstes Tier melden"
+      "submit": "Vermisstes Tier melden",
+      "useMyLocation": "Meinen aktuellen Standort verwenden",
+      "useMyLocationHelp": "Wenn Sie dort sind, wo das Tier zuletzt gesehen wurde, speichern Sie den Standort, damit Nachbarn mit eingeschalteten Hinweisen davon erfahren. Der genaue Punkt bleibt privat.",
+      "locationSaved": "Standort gespeichert",
+      "locationDenied": "Standortzugriff wurde nicht erlaubt; Sie können ohne ihn fortfahren."
     },
     "list": {
       "title": "Meldungen zu vermissten Tieren",
@@ -6645,6 +6776,27 @@
         "reunited": "{name} ist wieder zu Hause. Danke an alle, die geholfen haben.",
         "photoAlt": "Foto von {name}"
       }
+    },
+    "areaAlert": {
+      "title": "Hinweise zu vermissten Tieren in meiner Nähe",
+      "body": "Wenn in Ihrer Nähe ein Tier vermisst wird, sagen wir Ihnen Bescheid, damit Sie helfen können.",
+      "on": "An: Sie erfahren von Meldungen im Umkreis von {km} km.",
+      "enable": "Hinweise einschalten",
+      "update": "Umkreis aktualisieren",
+      "disable": "Ausschalten",
+      "radius": "Umkreis",
+      "km": "{km} km",
+      "signIn": "Anmelden, um Hinweise einzuschalten",
+      "privacy": "Ihr Standort wird nur verwendet, um Meldungen in der Nähe zu finden, und niemandem angezeigt.",
+      "denied": "Der Browser hat den Standortzugriff nicht erlaubt.",
+      "failed": "Konnte nicht gespeichert werden. Bitte erneut versuchen."
+    },
+    "found": {
+      "title": "Von Nachbarn gefundene Tiere",
+      "subtitle": "Ein Tier gefunden? Posten Sie es hier, damit seine Familie es erkennt.",
+      "cta": "Ich habe ein Tier gefunden",
+      "empty": "Zurzeit keine Fundmeldungen.",
+      "untitled": "Gefundenes Tier"
     }
   },
   "community": {
@@ -6655,7 +6807,8 @@
       "LOST_PET_SHARE": "Vermisstes Tier",
       "RESCUE": "Rettung",
       "ADOPTION": "Adoption",
-      "MEMORY": "Erinnerung"
+      "MEMORY": "Erinnerung",
+      "FOUND_PET": "Tier gefunden"
     },
     "feed": {
       "title": "Community",
@@ -6714,6 +6867,30 @@
       "commentLabel": "Kommentar hinzufügen",
       "commentSubmit": "Senden",
       "commentsEmpty": "Noch keine Kommentare."
+    },
+    "contact": {
+      "message": "Nachricht an den Verfasser",
+      "adopt": "Adoption anfragen",
+      "signIn": "Anmelden, um eine Nachricht zu senden",
+      "private": "Das Gespräch bleibt in opetlife; Telefonnummern werden nie angezeigt.",
+      "screening": {
+        "title": "Ein paar kurze Fragen zur Adoption",
+        "hint": "Ihre Antworten werden als erste Nachricht gesendet, damit sorgfältig entschieden werden kann.",
+        "intro": "Hallo, ich möchte dieses Tier gern adoptieren.",
+        "home": "Wohnsituation",
+        "homes": {
+          "apartment": "Wohnung",
+          "houseWithYard": "Haus mit Garten",
+          "other": "Andere"
+        },
+        "experience": "Erfahrung mit Tieren",
+        "otherPets": "Andere Tiere im Haushalt",
+        "why": "Warum Sie adoptieren möchten",
+        "visit": "Ich kann mich persönlich treffen",
+        "visitYes": "Ich kann vorbeikommen und das Tier persönlich kennenlernen.",
+        "send": "Anfrage senden",
+        "cancel": "Abbrechen"
+      }
     }
   },
   "publicNavigation": {
@@ -7646,6 +7823,10 @@
     }
   },
   "partnerVerification": {
+    "sla": {
+      "overdue": "Über dem Ziel von 24 Arbeitsstunden",
+      "progress": "{hours} von {target} Arbeitsstunden verbraucht"
+    },
     "superseded": "Durch einen neueren Upload ersetzt",
     "reviewedBy": "von {name}",
     "caseSummary": "Stand des Falls",
@@ -9409,6 +9590,158 @@
         "SNOOZED": "Verschoben",
         "CANCELLED": "Abgesagt"
       }
+    }
+  },
+  "pwa": {
+    "install": {
+      "title": "Installiere opetlife auf deinem Handy",
+      "body": "Es öffnet sich wie eine App vom Startbildschirm, lädt schneller und kann dir Benachrichtigungen schicken.",
+      "action": "App installieren",
+      "later": "Später",
+      "dismiss": "Schließen",
+      "iosTitle": "Füge opetlife zum Home-Bildschirm deines iPhones hinzu",
+      "iosBody": "Tippe in Safari auf „Teilen“ und wähle „Zum Home-Bildschirm“. Öffne opetlife danach über den Home-Bildschirm.",
+      "installed": "opetlife ist installiert."
+    },
+    "header": {
+      "back": "Zurück",
+      "explore": "Alles entdecken"
+    },
+    "refresh": {
+      "pull": "Zum Aktualisieren ziehen",
+      "release": "Loslassen zum Aktualisieren",
+      "loading": "Wird aktualisiert…"
+    }
+  },
+  "safety": {
+    "title": "Schützen Sie sich vor Betrug",
+    "contact": "Bezahlen Sie nur über opetlife. Überweisen Sie nie Geld außerhalb der Website und geben Sie nie Bestätigungscodes oder Passwörter weiter.",
+    "payment": "Bezahlen Sie nur auf dieser Seite. opetlife fordert Sie nie auf, Geld auf ein Privatkonto zu überweisen oder einen Bestätigungscode zu nennen.",
+    "lostPet": "Wer vor der Rückgabe eines Tieres Geld oder Finderlohn verlangt, ist wahrscheinlich ein Betrüger. Treffen Sie sich an einem öffentlichen Ort und zahlen Sie nie im Voraus.",
+    "donation": "Spenden Sie nur über diese Seite. opetlife fordert Sie nie auf, eine Spende auf ein Privatkonto zu überweisen.",
+    "adoption": "Zahlen Sie nie vor dem ersten Treffen. Sehen Sie sich das Tier persönlich an und treffen Sie sich an einem sicheren Ort."
+  },
+  "aboutPage": {
+    "eyebrow": "Über opetlife",
+    "title": "Wir haben opetlife gebaut, damit die Sorge um ein Tier nie wieder bei null anfängt",
+    "lede": "Der Impfpass in einer Schublade, die Nummer der Tierarztpraxis irgendwo in einem Chat, ein Shop, der nichts von der Allergie weiß, eine Reise, die um „Haustiere nicht erlaubt“ herum geplant wird. opetlife bringt all das rund um ein Profil deines Tieres zusammen – und bleibt dabei ehrlich.",
+    "chapters": {
+      "label": "Auf dieser Seite",
+      "why": "Warum es uns gibt",
+      "connect": "Wie alles zusammenpasst",
+      "promises": "Was wir versprechen",
+      "values": "Wie wir entscheiden",
+      "contact": "Sprich mit uns"
+    },
+    "why": {
+      "title": "Fürsorge sollte nicht davon abhängen, an alles zu denken",
+      "p1": "Mit einem Hund, einer Katze oder einem Vogel zu leben bedeutet Hunderte kleiner Entscheidungen: Wann ist die nächste Impfung fällig, welches Futter verträgt ein empfindlicher Magen, wer kümmert sich, wenn du verreist? Dieses Wissen liegt meist verstreut – und ist genau dann schwer zu finden, wenn man es am dringendsten braucht.",
+      "p2": "opetlife begann mit einer einfachen Idee: Im Mittelpunkt steht das Tier, nicht die App. Alles, was wir bauen – Gesundheitsakte, Buchungen, Shop, Reisen, Tierschutz – liest aus dem Profil deines Tieres und ergänzt es, damit jeder Schritt weiß, was vorher war.",
+      "p3": "Wir schreiben zuerst auf Persisch, weil dort die meisten unserer Familien zu Hause sind, und auf Englisch, Deutsch und Spanisch für alle, die fern der Heimat mit einem Tier leben."
+    },
+    "connect": {
+      "title": "Ein Profil, viele helfende Hände",
+      "lede": "Jeder Teil von opetlife macht eine Sache gut und teilt nur, was du erlaubst.",
+      "steps": {
+        "record": {
+          "title": "Die Akte deines Tieres",
+          "body": "Impfungen, Medikamente, Allergien, Gewicht und Dokumente in einer Gesundheitsakte – mit Erinnerungen, bevor etwas fällig wird.",
+          "cta": "Tier hinzufügen"
+        },
+        "care": {
+          "title": "Tierärzte und Services",
+          "body": "Finde Praxen, Fellpflege, Betreuung und Haustiertaxis, sieh echte freie Zeiten und buche; teile die Gesundheitsakte zeitlich begrenzt mit einer Praxis.",
+          "cta": "Hilfe finden"
+        },
+        "shop": {
+          "title": "Shop",
+          "body": "Futter, Leckerlis und Zubehör – passend zu Tierart und Bedürfnissen deines Tieres.",
+          "cta": "Zum Shop"
+        },
+        "travel": {
+          "title": "Reisen",
+          "body": "Haustierfreundliche Unterkünfte und Reisen; jedes externe Angebot zeigt seine Quelle und wann wir es zuletzt geprüft haben.",
+          "cta": "Reise planen"
+        },
+        "safety": {
+          "title": "Sicherheit",
+          "body": "Vermisstenmeldungen, ein Tierausweis und klare Vergleiche von Versicherungstarifen – für die Tage, die hoffentlich nie kommen.",
+          "cta": "Vermisst und gefunden"
+        },
+        "together": {
+          "title": "Gemeinschaft und Tierschutz",
+          "body": "Tausche dich mit anderen aus, unterstütze verifizierte Tierschutzgruppen und sieh genau, wohin Spenden gehen.",
+          "cta": "Zur Community"
+        },
+        "learn": {
+          "title": "Lernen",
+          "body": "Praktische Artikel und Ratgeber zu Erziehung, Ernährung und Gesundheit – für den Alltag zu Hause.",
+          "cta": "Zum Magazin"
+        }
+      }
+    },
+    "promises": {
+      "title": "Was wir versprechen – und wie du es prüfen kannst",
+      "lede": "Vertrauen sollte kein Slogan sein. Das hier tut das Produkt, und du kannst es selbst sehen.",
+      "items": {
+        "verified": {
+          "title": "Verifiziert heißt geprüft",
+          "body": "Praxen, Tierärzte und Anbieter erhalten das Verifiziert-Abzeichen erst, nachdem unser Team ihre Unterlagen geprüft hat."
+        },
+        "consent": {
+          "title": "Die Akte deines Tieres, deine Entscheidung",
+          "body": "Eine Gesundheitsakte wird nur geteilt, wenn du es willst, zeitlich begrenzt, und du kannst den Zugriff jederzeit widerrufen."
+        },
+        "privacy": {
+          "title": "Deine Daten bleiben deine",
+          "body": "In deinem Datenschutzbereich kannst du eine Kopie deiner Daten herunterladen oder ihre Löschung beantragen."
+        },
+        "sources": {
+          "title": "Ehrlich, woher etwas kommt",
+          "body": "Angebote anderer Websites zeigen ihre Quelle und wann wir sie zuletzt geprüft haben; wir geben sie nie als unsere eigenen aus."
+        },
+        "ledger": {
+          "title": "Spenden, die du nachverfolgen kannst",
+          "body": "Jede Tierschutzkampagne zeigt einen laufenden Gesamtbetrag aus echten Transaktionen – nie eine Schätzung."
+        },
+        "credits": {
+          "title": "Ehre, wem Ehre gebührt",
+          "body": "Fotos und Musik von anderen nennen wir mit ihrer Lizenz auf unserer Seite mit Nachweisen."
+        }
+      }
+    },
+    "values": {
+      "title": "Wie wir entscheiden, was wir bauen",
+      "items": {
+        "animals": {
+          "title": "Das Tier zuerst",
+          "body": "Wenn eine Funktion gut fürs Geschäft, aber nicht fürs Tier ist, bauen wir sie nicht."
+        },
+        "honest": {
+          "title": "Sagen, was wir wissen – und was nicht",
+          "body": "Keine erfundene Verfügbarkeit, keine ausgedachten Bewertungen, keine medizinischen Versprechen. Wo etwas unsicher ist, sagen wir das."
+        },
+        "simple": {
+          "title": "Einfach für jede Familie",
+          "body": "Klare Worte, große Schaltflächen, helles und dunkles Design und Seiten, die auf jedem Handy funktionieren."
+        },
+        "kindness": {
+          "title": "Freundlichkeit zählt",
+          "body": "Rettung, Adoption und das Erinnern an Tiere, die wir verloren haben, gehören zu opetlife – nicht an den Rand."
+        }
+      }
+    },
+    "contact": {
+      "title": "Sprich mit uns",
+      "body": "Fragen, Ideen, eine Partnerschaft oder etwas, das nicht so funktioniert hat, wie es sollte: Deine Nachricht erreicht unser Support-Team, und die Antwort findest du in deinem Support-Postfach.",
+      "contactCta": "Nachricht senden",
+      "helpCta": "Hilfe-Center"
+    },
+    "cta": {
+      "title": "Fang mit dem Profil deines Tieres an",
+      "body": "Es dauert eine Minute, und alles andere baut darauf auf.",
+      "primary": "Konto erstellen",
+      "secondary": "Services entdecken"
     }
   }
 }

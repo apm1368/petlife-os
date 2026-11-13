@@ -43,8 +43,8 @@ const fa = {
   footerDescription: "سلامت، مراقبت، خدمات و لحظه‌های مشترک؛ یک دنیا برای تو و همراه کوچکت.",
   footerPartners: "همکاران", footerLabel: "دسترسی‌های پایین صفحه", footerTop: "بازگشت به پارک", footerPrivacy: "تنظیمات حریم خصوصی", footerCredits: "اعتبار تصاویر", footerNotice: "نسخهٔ آزمایشی؛ اطلاعات نمایشی ممکن است نمونه باشند.",
   footerGroups: [
-    { title: "خدمات", links: [{ label: "دامپزشکی", href: "/vet/find" }, { label: "پت‌شاپ", href: "/shop" }, { label: "آرایش و شست‌وشو", href: "/services/GROOMING" }, { label: "اقامت و مراقبت", href: "/services/BOARDING" }] },
-    { title: "زندگی کنار هم", links: [{ label: "سفر", href: "/travel" }, { label: "تاکسی", href: "/services/PET_TAXI" }, { label: "بیمه", href: "/insurance" }, { label: "حمایت از حیوانات", href: "/animal-support/needs" }] },
+    { title: "خدمات", links: [{ label: "دامپزشکی", href: "/vet/find" }, { label: "پت‌شاپ", href: "/shop" }, { label: "آرایش و شست‌وشو", href: "/services/grooming" }, { label: "اقامت و مراقبت", href: "/services/boarding" }] },
+    { title: "زندگی کنار هم", links: [{ label: "سفر", href: "/travel" }, { label: "تاکسی", href: "/services/pet-taxi" }, { label: "بیمه", href: "/insurance" }, { label: "حمایت از حیوانات", href: "/animal-support/needs" }] },
     { title: "همراه شما", links: [{ label: "راهنما", href: "/guides" }, { label: "مجله", href: "/blog" }, { label: "جامعه", href: "/community" }, { label: "پشتیبانی", href: "/support" }] },
   ],
 };
@@ -92,8 +92,8 @@ const en: StoryCopy = {
   footerDescription: "Health, care, services and shared moments. A world for you and your little companion.",
   footerPartners: "Partners", footerLabel: "Footer navigation", footerTop: "Back to the park", footerPrivacy: "Privacy settings", footerCredits: "Image credits", footerNotice: "Test release; displayed information may include examples.",
   footerGroups: [
-    { title: "Services", links: [{ label: "Veterinary", href: "/vet/find" }, { label: "Pet shop", href: "/shop" }, { label: "Grooming", href: "/services/GROOMING" }, { label: "Boarding and care", href: "/services/BOARDING" }] },
-    { title: "Life together", links: [{ label: "Travel", href: "/travel" }, { label: "Taxi", href: "/services/PET_TAXI" }, { label: "Insurance", href: "/insurance" }, { label: "Animal support", href: "/animal-support/needs" }] },
+    { title: "Services", links: [{ label: "Veterinary", href: "/vet/find" }, { label: "Pet shop", href: "/shop" }, { label: "Grooming", href: "/services/grooming" }, { label: "Boarding and care", href: "/services/boarding" }] },
+    { title: "Life together", links: [{ label: "Travel", href: "/travel" }, { label: "Taxi", href: "/services/pet-taxi" }, { label: "Insurance", href: "/insurance" }, { label: "Animal support", href: "/animal-support/needs" }] },
     { title: "By your side", links: [{ label: "Guides", href: "/guides" }, { label: "Journal", href: "/blog" }, { label: "Community", href: "/community" }, { label: "Support", href: "/support" }] },
   ],
 };
@@ -133,8 +133,8 @@ const de: StoryCopy = {
   footerDescription: "Gesundheit, Pflege, Dienste und gemeinsame Momente – eine Welt für dich und dein Tier.",
   footerPartners: "Partner", footerLabel: "Fußnavigation", footerTop: "Zurück zum Park", footerPrivacy: "Datenschutzeinstellungen", footerCredits: "Bildnachweise", footerNotice: "Testversion; angezeigte Informationen können Beispiele enthalten.",
   footerGroups: [
-    { title: "Dienste", links: [{ label: "Tiermedizin", href: "/vet/find" }, { label: "Tierbedarf", href: "/shop" }, { label: "Fellpflege", href: "/services/GROOMING" }, { label: "Unterkunft und Betreuung", href: "/services/BOARDING" }] },
-    { title: "Gemeinsam leben", links: [{ label: "Reisen", href: "/travel" }, { label: "Tier-Taxi", href: "/services/PET_TAXI" }, { label: "Versicherung", href: "/insurance" }, { label: "Tierschutz", href: "/animal-support/needs" }] },
+    { title: "Dienste", links: [{ label: "Tiermedizin", href: "/vet/find" }, { label: "Tierbedarf", href: "/shop" }, { label: "Fellpflege", href: "/services/grooming" }, { label: "Unterkunft und Betreuung", href: "/services/boarding" }] },
+    { title: "Gemeinsam leben", links: [{ label: "Reisen", href: "/travel" }, { label: "Tier-Taxi", href: "/services/pet-taxi" }, { label: "Versicherung", href: "/insurance" }, { label: "Tierschutz", href: "/animal-support/needs" }] },
     { title: "An deiner Seite", links: [{ label: "Ratgeber", href: "/guides" }, { label: "Magazin", href: "/blog" }, { label: "Community", href: "/community" }, { label: "Support", href: "/support" }] },
   ],
 };
@@ -174,8 +174,8 @@ const es: StoryCopy = {
   footerDescription: "Salud, cuidados, servicios y momentos compartidos: un mundo para ti y tu pequeña compañera.",
   footerPartners: "Profesionales", footerLabel: "Navegación del pie de página", footerTop: "Volver al parque", footerPrivacy: "Ajustes de privacidad", footerCredits: "Créditos de imagen", footerNotice: "Versión de prueba; la información mostrada puede incluir ejemplos.",
   footerGroups: [
-    { title: "Servicios", links: [{ label: "Veterinaria", href: "/vet/find" }, { label: "Tienda para mascotas", href: "/shop" }, { label: "Peluquería", href: "/services/GROOMING" }, { label: "Alojamiento y cuidados", href: "/services/BOARDING" }] },
-    { title: "Vida juntos", links: [{ label: "Viajes", href: "/travel" }, { label: "Taxi para mascotas", href: "/services/PET_TAXI" }, { label: "Seguro", href: "/insurance" }, { label: "Protección animal", href: "/animal-support/needs" }] },
+    { title: "Servicios", links: [{ label: "Veterinaria", href: "/vet/find" }, { label: "Tienda para mascotas", href: "/shop" }, { label: "Peluquería", href: "/services/grooming" }, { label: "Alojamiento y cuidados", href: "/services/boarding" }] },
+    { title: "Vida juntos", links: [{ label: "Viajes", href: "/travel" }, { label: "Taxi para mascotas", href: "/services/pet-taxi" }, { label: "Seguro", href: "/insurance" }, { label: "Protección animal", href: "/animal-support/needs" }] },
     { title: "A tu lado", links: [{ label: "Guías", href: "/guides" }, { label: "Revista", href: "/blog" }, { label: "Comunidad", href: "/community" }, { label: "Ayuda", href: "/support" }] },
   ],
 };

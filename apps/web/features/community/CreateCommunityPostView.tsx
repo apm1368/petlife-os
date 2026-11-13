@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocalizedRouter as useRouter } from "@/features/navigation/localized-link";
 import { useTranslations } from "next-intl";
 import { Button, ContextSurface, Input, Select } from "@petlife/ui";
@@ -10,7 +10,7 @@ import { apiErrorText } from "@/lib/errors/api-error-text";
 import { FilePicker } from "@/features/shared/FilePicker";
 import { CommunityFrame } from "./CommunityFrame";
 
-const POST_TYPES: CommunityPostType[] = [CommunityPostType.GENERAL, CommunityPostType.QUESTION, CommunityPostType.LOCAL, CommunityPostType.RESCUE, CommunityPostType.ADOPTION, CommunityPostType.MEMORY];
+const POST_TYPES: CommunityPostType[] = [CommunityPostType.GENERAL, CommunityPostType.QUESTION, CommunityPostType.LOCAL, CommunityPostType.RESCUE, CommunityPostType.ADOPTION, CommunityPostType.MEMORY, CommunityPostType.FOUND_PET];
 
 export function CreateCommunityPostView() {
   const t = useTranslations("community");
@@ -19,6 +19,11 @@ export function CreateCommunityPostView() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [type, setType] = useState<CommunityPostType>(CommunityPostType.GENERAL);
+  // #290 Q54: "Found a pet?" on the lost-pets page opens this form on the found-pet type (?type=FOUND_PET).
+  useEffect(() => {
+    const preset = new URLSearchParams(window.location.search).get("type");
+    if (POST_TYPES.includes(preset as CommunityPostType)) setType(preset as CommunityPostType);
+  }, []);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);

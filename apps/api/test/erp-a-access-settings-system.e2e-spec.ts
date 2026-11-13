@@ -18,7 +18,7 @@ describe("ERP-A access control, settings, system", () => {
 
   async function actor(name: string, role?: AdminRole): Promise<Actor> {
     const email = `erpa-${randomUUID()}@example.com`;
-    const user = await db.user.create({ data: { displayName: name, email } });
+    const user = await db.user.create({ data: { displayName: name, email, emailVerifiedAt: new Date() } });
     const admin = role ? await db.adminUser.create({ data: { userId: user.id, role, status: AdminMembershipStatus.ACTIVE } }) : null;
     const session = await db.session.create({ data: { userId: user.id, expiresAt: new Date(Date.now() + 86400000) } });
     const res = await request(server()).get("/health/live");
@@ -42,7 +42,7 @@ describe("ERP-A access control, settings, system", () => {
     // the Wave 2 scoped roles, so no pre-existing role lost reach when it was introduced.
     expect(caps).toEqual({ role: "EDITOR", permissions: ["content.view", "content.create", "content.edit", "content.media.manage"], verticals: null });
     await get(editor, "/admin/support/cases").expect(403);
-    expect((await get(editor, "/admin/dashboard").expect(200)).body).toEqual({ openSupportCases: null, openDisputes: null, openTrustCases: null, pendingRefundApprovals: null, openTasks: null, pendingVerifications: null, pendingRefundRequests: null, pendingOfferModeration: null, pendingCatalogRequests: null, pendingTravelListings: null, pendingSupportNeeds: null, openCommunityReports: null, pendingMemorials: null, openPlaceReports: null, pendingWalletTopUps: null, pendingDeletionRequests: null, openOwnershipDisputes: null });
+    expect((await get(editor, "/admin/dashboard").expect(200)).body).toEqual({ openSupportCases: null, openDisputes: null, openTrustCases: null, pendingRefundApprovals: null, openTasks: null, pendingVerifications: null, pendingRefundRequests: null, pendingOfferModeration: null, pendingCatalogRequests: null, pendingTravelListings: null, pendingSupportNeeds: null, openCommunityReports: null, pendingMemorials: null, openPlaceReports: null, pendingWalletTopUps: null, pendingDeletionRequests: null, launchKpis: null, openOwnershipDisputes: null });
     await db.adminUser.update({ where: { id: editor.adminUserId }, data: { role: AdminRole.SUPPORT } });
     const supportCaps = (await get(editor, "/admin/me/capabilities").expect(200)).body;
     expect(supportCaps.role).toBe("SUPPORT");
@@ -74,6 +74,12 @@ describe("ERP-A access control, settings, system", () => {
 
     await send("post", admin, "/admin/access/admins").send({ email: candidate.email, role: "SUPPORT", reason: "new support hire" }).expect(403);
     await send("post", root, "/admin/access/admins").send({ email: candidate.email, role: "SUPPORT" }).expect(400); // reason required
+    // Admin access only for a proven email or mobile (market-readiness Q76).
+    const unverified = await db.user.create({ data: { displayName: "unverified", email: `erpa-unverified-${randomUUID()}@example.com` } });
+    expect((await send("post", root, "/admin/access/admins").send({ email: unverified.email, role: "SUPPORT", reason: "should be refused" }).expect(409)).body.error.details.rule).toBe("UNVERIFIED_CONTACT");
+    // A verified phone never vouches for an unverified email (someone could register a future admin's email).
+    const phoneOnly = await db.user.create({ data: { displayName: "phone only", email: `erpa-phone-only-${randomUUID()}@example.com`, phone: `+989${randomUUID().replace(/\D/g, "").padEnd(9, "1").slice(0, 9)}`, phoneVerifiedAt: new Date() } });
+    expect((await send("post", root, "/admin/access/admins").send({ email: phoneOnly.email, role: "SUPPORT", reason: "should be refused" }).expect(409)).body.error.details.rule).toBe("UNVERIFIED_CONTACT");
     const granted = (await send("post", root, "/admin/access/admins").send({ email: candidate.email.toUpperCase(), role: "SUPPORT", reason: "new support hire" }).expect(201)).body;
     expect(granted).toMatchObject({ role: "SUPPORT", status: "ACTIVE" });
     expect((await send("post", root, "/admin/access/admins").send({ email: candidate.email, role: "FINANCE", reason: "duplicate grant" }).expect(409)).body.error.details.rule).toBe("ALREADY_ADMIN");

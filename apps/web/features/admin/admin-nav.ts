@@ -37,7 +37,8 @@ import {
  * page always knows where it lives (breadcrumbs, tabs and the command palette all read this one table).
  */
 
-export type QueueKey = keyof AdminDashboardSummaryDto;
+/** Every staff queue count on the summary (the launch KPIs are figures, not queues). */
+export type QueueKey = Exclude<keyof AdminDashboardSummaryDto, "launchKpis">;
 export type Permission = AdminPermissionName | AdminPermissionName[];
 type Icon = typeof LayoutDashboard;
 
@@ -288,6 +289,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
         href: "/settings",
         tabs: [
           { href: "/settings", labelKey: "tabs.platformSettings", permission: "settings.view" },
+          { href: "/settings/holidays", labelKey: "tabs.holidays", permission: "settings.view" },
           { href: "/feature-flags", labelKey: "tabs.featureFlags", permission: "settings.view" },
         ],
       },

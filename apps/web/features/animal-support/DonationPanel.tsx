@@ -14,6 +14,7 @@ import { localizeDigits } from "@/lib/date/jalali";
 import { animalSupportService } from "@/services/animal-support.service";
 import { useSessionStore } from "@/stores/session-store";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { SafetyTip } from "@/features/shared/SafetyTip";
 
 const PRESETS_TOMAN = [100_000, 300_000, 500_000, 1_000_000];
 type Step = "amount" | "review" | "done";
@@ -91,10 +92,11 @@ export function DonationPanel({ campaign, need, onDonated }: { campaign: Support
     <p className="rounded-md bg-state-attention/10 p-3 text-sm text-state-attention">{fa ? "درگاه پرداخت در حالت آزمایشی است: هیچ پول واقعی جابه‌جا نمی‌شود و این کمک مالی فقط برای آزمایش ثبت می‌شود." : "The payment gateway is in sandbox mode: no real money moves and this donation is recorded for testing only."}</p>
   ) : null;
 
-  if (env && !env.onlinePaymentAvailable) return <p className="text-sm text-text-secondary">{fa ? "پرداخت آنلاین در حال حاضر در دسترس نیست." : "Online payment is not available right now."}</p>;
+  if (env && !env.onlinePaymentAvailable) return <div className="flex flex-col gap-3"><p className="text-sm text-text-secondary">{fa ? "پرداخت آنلاین در حال حاضر در دسترس نیست." : "Online payment is not available right now."}</p><SafetyTip kind="donation" /></div>;
 
   return (
     <div className="flex flex-col gap-4">
+      <SafetyTip kind="donation" />
       {step === "amount" ? (
         <>
           <fieldset className="flex flex-col gap-2">

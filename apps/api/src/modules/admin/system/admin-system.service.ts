@@ -44,7 +44,7 @@ export class AdminSystemService {
 
   async health() {
     const now = Date.now();
-    const [database, redis, storage, outbox, notifications, payments, exports, migrations, travelScraper] = await Promise.all([
+    const [database, redis, storage, outbox, notifications, payments, exportFailures, migrations, travelScraper] = await Promise.all([
       timed(() => this.prisma.$queryRaw`SELECT 1`),
       timed(() => this.redis.ping()),
       this.storageCheck(),
@@ -70,7 +70,7 @@ export class AdminSystemService {
       outbox,
       workers,
       notifications24h: { sent: (notif.SENT ?? 0) + (notif.DELIVERED ?? 0), failed: notif.FAILED ?? 0, pending: (notif.PENDING ?? 0) + (notif.QUEUED ?? 0) + (notif.SENDING ?? 0), skipped: notif.SKIPPED ?? 0 },
-      failedJobs: { paymentProviderEvents: payments, dataExports: exports, outboxEventsWithErrors: outbox.withErrors },
+      failedJobs: { paymentProviderEvents: payments, dataExports: exportFailures, outboxEventsWithErrors: outbox.withErrors },
       migrations,
       travelScraper,
       deploy: { version: this.env("APP_VERSION"), sha: this.env("BUILD_SHA"), buildTime: this.env("BUILD_TIME"), environment: this.env("DEPLOYMENT_ENVIRONMENT"), deploymentId: this.env("DEPLOYMENT_ID") },
