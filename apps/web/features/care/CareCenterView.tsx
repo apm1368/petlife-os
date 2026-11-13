@@ -10,6 +10,7 @@ import { CareProfileView } from "./CareProfileView";
 import { CARE_KINDS, careTitle } from "./care-labels";
 import { LoadFailure } from "@/features/system/LoadFailure";
 import { formatCount } from "@/lib/number/format-number";
+import { formatDayOrDateTime } from "@/lib/date/tehran";
 import { DateField } from "@/features/shared/date-picker/DateField";
 import { ApiError } from "@/lib/api/client";
 import { isPlanError, PlanRequiredNote } from "@/features/subscription/PlanRequiredNote";
@@ -27,7 +28,6 @@ const TEHRAN = "+03:30"; // Iran has no DST.
 export function CareCenterView({ petId, itemId }: { petId: string; itemId?: string }) {
   const suggestionsT = useTranslations("careSuggestions");
   const locale = useLocale() as RouteLocale;
-  const fa = locale === "fa";
   const c = useTranslations("careCenter");
   const [items, setItems] = useState<CareReminder[] | null>(null);
   const [canEdit, setCanEdit] = useState(false);
@@ -46,7 +46,8 @@ export function CareCenterView({ petId, itemId }: { petId: string; itemId?: stri
   }, [petId, itemId]);
   useEffect(() => { void load(); }, [load]);
   const run = async (id: string, action: string, date?: string) => { setBusy(true); setActionError(null); try { await careRemindersService.act(petId, id, action, date); await load(); } catch { setActionError(c("actionFailed")); } finally { setBusy(false); } };
-  const format = (date: string) => new Intl.DateTimeFormat(fa ? "fa-IR-u-ca-persian" : locale, { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Tehran" }).format(new Date(date));
+  // A due date with no time of day (e.g. a vaccine's next due date) reads as a day, never "…، ۳:۳۰" (QA L12).
+  const format = (date: string) => formatDayOrDateTime(date, locale);
   if(error) return <LoadFailure error={error} onRetry={load}/>;
   if(!items) return <Skeleton className="h-64 w-full" aria-label={c("loading")}/>;
 

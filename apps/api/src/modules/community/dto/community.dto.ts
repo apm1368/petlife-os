@@ -56,6 +56,43 @@ export class CreateCommunityPostDto {
   region?: string;
 }
 
+/** The author's own edit of a post: the text and its tags. Type, pet, media and source never change after posting. */
+export class UpdateCommunityPostDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(5000)
+  body?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(3)
+  @Transform(canonicalTopics)
+  @ArrayUnique()
+  @IsIn(COMMUNITY_TOPICS, { each: true })
+  topics?: (typeof COMMUNITY_TOPICS)[number][];
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 80)
+  city?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 80)
+  region?: string;
+}
+
+export class UpdateCommunityCommentDto {
+  @IsString()
+  @MaxLength(2000)
+  body!: string;
+}
+
 export class ListCommunityPostsQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsEnum(CommunityPostType)

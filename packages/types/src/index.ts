@@ -3320,6 +3320,8 @@ export interface AdminOrderFinancialsDto {
 
 /** Minimal admin-facing org summaries, used to locate a Provider/Seller for verification overrides or as a TrustCase subject — never the seller/provider's own operational DTOs, which carry fields (context, membership) an internal admin view has no use for. */
 export interface AdminProviderOrgSummaryDto {
+  /** Demo/showcase content: hidden from the public site in production; staff see it labelled. */
+  isDemoRecord?: boolean;
   id: string;
   name: string;
   type: string;
@@ -3364,6 +3366,12 @@ export interface AdminDashboardSummaryDto {
   pendingWalletTopUps: number | null;
   /** Account deletion requests waiting on staff (REQUESTED or PENDING_RETENTION); admin.manage only. */
   pendingDeletionRequests: number | null;
+  /** Pet ownership transfers in DISPUTED, waiting for staff to record the outcome; customer.view. */
+  openOwnershipDisputes: number | null;
+  /** Members' reports that a provider didn't show up, still open as admin tasks; services.view. */
+  openProviderNoShows: number | null;
+  /** Service, product and stay reviews waiting for a moderator, in the verticals this admin may moderate. */
+  pendingReviews: number | null;
   /**
    * Market-readiness #290 Q97, the launch month's success measure: registered pets and weekly bookings
    * (analytics.view; null otherwise). Live bookings only, rolling 7-day windows.
@@ -3993,6 +4001,8 @@ export interface AdminArticleLocaleAvailabilityDto {
 }
 
 export interface AdminArticleListItemDto {
+  /** Demo/showcase content: hidden from the public site in production; staff see it labelled. */
+  isDemoRecord?: boolean;
   id: string;
   author: ContentAuthorDto | null;
   category: PublicCategoryDto | null;
@@ -5340,6 +5350,8 @@ export interface CommunityPostDto {
   /** Only present when the request is authenticated — the caller's own reaction, if any. */
   viewerReaction: CommunityReactionType | null;
   createdAt: string;
+  /** When the author last changed the text, if ever. */
+  editedAt?: string | null;
   /** Topic tags (fixed vocabulary). */
   topics?: string[];
   /** The first topic (canonical taxonomy), or null. */
@@ -5363,6 +5375,7 @@ export interface CommunityCommentDto {
   /** Published replies, on top-level comments from the comments list. */
   replies?: CommunityCommentDto[];
   createdAt: string;
+  editedAt?: string | null;
 }
 
 export interface CommunityReportDto {
@@ -5706,6 +5719,8 @@ export enum PetFriendlyPlaceStatus {
 }
 
 export interface PetFriendlyPlaceDto {
+  /** Demo/showcase content: hidden from the public site in production; staff see it labelled. */
+  isDemoRecord?: boolean;
   id: string;
   name: string;
   category: PetFriendlyPlaceCategory;
@@ -6554,6 +6569,8 @@ export interface AdminRefundRequestDto {
 }
 
 export interface AdminProductRowDto {
+  /** Demo/showcase content: hidden from the public site in production; staff see it labelled. */
+  isDemoRecord?: boolean;
   id: string;
   title: string;
   status: ProductStatus;

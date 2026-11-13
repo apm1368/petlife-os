@@ -10,6 +10,7 @@ import { petsService } from "@/services/pets.service";
 import { SystemState, systemStateFor, type SystemStateKind } from "@/features/system/SystemState";
 import { formatAge, formatWeight, speciesLabel } from "./pet-identity";
 import { useActivePet } from "@/hooks/use-active-pet";
+import { usePetStore } from "@/stores/pet-store";
 import type { RouteLocale } from "@/lib/i18n/config";
 
 const copy = {
@@ -264,6 +265,13 @@ function PetContextForId({ petId, children }: { petId: string; children: ReactNo
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId]);
+
+  // A save on a page below (e.g. "Edit details") puts the updated pet in the shared store; the hero follows it at
+  // once instead of showing the old weight or name until a reload (QA L11).
+  const storedPet = usePetStore((state) => state.pets.find((p) => p.id === petId) ?? null);
+  useEffect(() => {
+    if (storedPet && pet && storedPet.id === pet.id && storedPet.updatedAt > pet.updatedAt) setPet(storedPet);
+  }, [storedPet, pet]);
 
   if (error === "GENERIC_RETRYABLE_ERROR")
     return <ErrorRecovery title={c.loadError} message="" retryLabel={c.retry} onRetry={load} />;

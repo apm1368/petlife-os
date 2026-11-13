@@ -92,6 +92,59 @@
       "oil": "Dag van de nationalisatie van de olie"
     }
   },
+  "adminOwnership": {
+    "kicker": "Huisdieren",
+    "title": "Eigendomsoverdrachten",
+    "intro": "Elk verzoek om een huisdier aan een nieuwe eigenaar over te dragen, betwiste verzoeken eerst. Een geschil verplaatst het huisdier nooit: de geregistreerde eigenaar blijft tot er een officiële uitspraak of een schriftelijke afspraak is. Controleer de documenten van beide partijen (via support) en sluit het geschil daarna met een reden. Beide personen horen de uitkomst.",
+    "filterLabel": "Status van overdracht",
+    "search": "Zoeken",
+    "searchPlaceholder": "Naam van huisdier of persoon",
+    "apply": "Zoeken",
+    "retry": "Opnieuw proberen",
+    "cancel": "Annuleren",
+    "status": {
+      "DISPUTED": "Betwist",
+      "PENDING_REVIEW": "Wacht op ontvanger",
+      "ACCEPTED": "Overgedragen",
+      "DECLINED": "Afgewezen",
+      "CANCELLED": "Geannuleerd",
+      "EXPIRED": "Verlopen",
+      "ALL": "Alle"
+    },
+    "empty": "Geen overdrachten gevonden.",
+    "emptyDisputed": "Geen openstaande geschillen.",
+    "registeredOwner": "Huidige geregistreerde eigenaar",
+    "requested": "Aangevraagd",
+    "applied": "Overgedragen op",
+    "notApplied": "Niet overgedragen",
+    "memories": "Herinneringen",
+    "memory": {
+      "TRANSFER": "Gaan naar de nieuwe eigenaar",
+      "RETAIN": "Blijven bij de vorige eigenaar",
+      "COPY_READ_ONLY": "Kopie voor de nieuwe eigenaar (alleen lezen)"
+    },
+    "explain": {
+      "applied": "Deze overdracht was al uitgevoerd. Sluit je het geschil, dan blijft de overdracht ongewijzigd.",
+      "pending": "De ontvanger had nog niet geaccepteerd. Sluit je het geschil, dan wordt het verzoek gesloten; de geregistreerde eigenaar blijft."
+    },
+    "close": "Geschil sluiten",
+    "reason": "Uitkomst en reden",
+    "reasonPlaceholder": "Bijvoorbeeld: koopcontract telefonisch met beide partijen gecontroleerd",
+    "done": {
+      "stands": "Geschil over {pet} gesloten: de overdracht blijft staan. Beide partijen hebben een melding gekregen.",
+      "ownerStays": "Geschil over {pet} gesloten: het verzoek is gesloten en de geregistreerde eigenaar blijft. Beide partijen hebben een melding gekregen."
+    },
+    "errors": {
+      "reason": "Vul de uitkomst en reden in (minstens 5 tekens).",
+      "forbidden": "Je rol geeft geen toegang tot klantgegevens.",
+      "load": "Overdrachten konden niet worden geladen.",
+      "generic": "Dat is niet gelukt. Probeer het opnieuw."
+    },
+    "rules": {
+      "OWNERSHIP_NOT_DISPUTED": "Deze overdracht wordt niet meer betwist. Vernieuw de lijst.",
+      "OWNERSHIP_CHANGED_CONCURRENTLY": "Iemand anders heeft deze overdracht net gewijzigd. Vernieuw de lijst."
+    }
+  },
   "adminDeletionRequests": {
     "kicker": "Privacy",
     "title": "Verzoeken tot accountverwijdering",
@@ -1391,6 +1444,9 @@
       "analytics": "Analyse en wachtlijst"
     },
     "bookings": {
+      "noShowLabel": "Niet verschenen",
+      "noShowProvider": "Aanbieder niet verschenen (gemeld door lid)",
+      "noShowOwner": "Eigenaar niet verschenen",
       "title": "Diensten en boekingen",
       "searchLabel": "Zoek op nummer, huisdier of aanbieder",
       "statusLabel": "Boekingsstatus",
@@ -4661,6 +4717,7 @@
       },
       "tabs": {
         "holidays": "Feestdagen en sluitingen",
+        "ownershipTransfers": "Eigendomsoverdrachten",
         "deletionRequests": "Verwijderverzoeken",
         "customRoles": "Aangepaste rollen",
         "directory": "Gebruikerslijst",
@@ -5337,6 +5394,8 @@
         "URGENT": "Urgent"
       },
       "sources": {
+        "PROVIDER_NO_SHOW": "Aanbieder niet verschenen",
+        "OWNERSHIP_DISPUTE": "Eigendomsgeschil",
         "MANUAL": "Handmatige invoer",
         "TRAVEL_SOURCE": "Reisbronnen",
         "PARTNER_VERIFICATION": "Controle van partnerdocumenten",
@@ -5688,6 +5747,10 @@
         "limitValue": "Limietwaarde",
         "grantOverride": "Uitzondering toekennen"
       }
+    },
+    "demoRecord": {
+      "label": "Demo — verborgen op de live site",
+      "hint": "Voorbeeldgegevens voor demo’s en tests. De live site toont ze nooit aan leden, ook niet als ze hier als geverifieerd of openbaar zijn gemarkeerd."
     }
   },
   "blog": {
@@ -5772,7 +5835,9 @@
       "privateNotice": "Dit bestand is privé en heeft geen openbare URL. Bij elke download wordt een kortlevende, ondertekende toegangslink aangemaakt.",
       "previewDownload": "Voorbeeld en veilige download",
       "openFile": "Bestand openen",
-      "previewUnavailable": "Voor dit bestandstype is geen voorbeeld beschikbaar."
+      "previewUnavailable": "Voor dit bestandstype is geen voorbeeld beschikbaar.",
+      "manage": "Details en intrekken",
+      "details": "Details"
     },
     "labs": {
       "title": "Labonderzoek",
@@ -6217,6 +6282,18 @@
         "send": "Aanvraag versturen",
         "cancel": "Annuleren"
       }
+    },
+    "own": {
+      "edit": "Bewerken",
+      "delete": "Verwijderen",
+      "save": "Wijzigingen opslaan",
+      "cancel": "Annuleren",
+      "titleLabel": "Titel",
+      "bodyLabel": "Tekst",
+      "confirmPost": "Dit bericht voor iedereen verwijderen? De reacties verdwijnen ook.",
+      "confirmComment": "Deze reactie verwijderen?",
+      "deleteYes": "Ja, verwijderen",
+      "edited": "bewerkt"
     }
   },
   "communityChat": {
@@ -7212,6 +7289,9 @@
         "allClear": "Alles op orde — er wacht niets op je team.",
         "clearList": "Leeg: {list}",
         "queue": {
+          "pendingReviews": "Te modereren beoordelingen",
+          "openProviderNoShows": "Meldingen van niet-verschenen aanbieders",
+          "openOwnershipDisputes": "Eigendomsgeschillen",
           "pendingDeletionRequests": "Verzoeken tot accountverwijdering",
           "openTrustCases": "Vertrouwens- en veiligheidszaken",
           "openDisputes": "Openstaande geschillen",
@@ -9727,7 +9807,8 @@
       "checkInSelected": "Incheckdag gekozen; kies nu je uitcheckdag.",
       "checkInSuffix": ", inchecken",
       "checkOutSuffix": ", uitchecken"
-    }
+    },
+    "year": "Jaar"
   },
   "providerDiscovery": {
     "allServices": "Alle diensten",
@@ -11484,5 +11565,68 @@
     "invalid": "Kies een categorie en een aantal van 1 tot 3000.",
     "forbidden": "Recht commerce.manage vereist.",
     "failed": "Starten mislukt; probeer het opnieuw."
+  },
+  "petCard": {
+    "title": "Huisdierkaart en QR-code",
+    "intro": "Een openbare kaart voor de penning of halsband van {name}. Wie de code scant, ziet alleen wat je hier kiest en kan je via opetlife een bericht sturen. Je telefoonnummer wordt nooit getoond.",
+    "back": "Terug naar het profiel van {name}",
+    "fieldsTitle": "Wat de kaart toont",
+    "healthGroup": "Gezondheid (voor als een vinder het moet weten)",
+    "fields": {
+      "PHOTO": "Foto",
+      "SPECIES": "Diersoort",
+      "BREED": "Ras",
+      "SEX": "Geslacht",
+      "AGE": "Leeftijd",
+      "MICROCHIP_STATUS": "Of het dier gechipt is (niet het nummer)",
+      "ALLERGIES": "Allergieën",
+      "CONDITIONS": "Actieve aandoeningen",
+      "MEDICATIONS": "Huidige medicatie",
+      "BLOOD_TYPE": "Bloedgroep",
+      "CRITICAL_NOTES": "Kritieke notities"
+    },
+    "previewTitle": "Wie de code scant, ziet",
+    "previewName": "Naam: {name}",
+    "previewMessage": "Een knop “Bericht aan de eigenaar” via opetlife",
+    "neverTitle": "Nooit getoond",
+    "never": "Je adres, leden van je huishouden, telefoonnummer, het chipnummer, documenten en boekingen.",
+    "create": "Kaart en QR-code maken",
+    "replace": "Nieuwe kaart maken",
+    "replaceNote": "Maak je een nieuwe kaart, dan stopt de huidige meteen; de oude code opent dan niet meer.",
+    "creating": "Aanmaken…",
+    "createError": "De kaart is niet gemaakt. Probeer het opnieuw.",
+    "readyTitle": "Je kaart is klaar",
+    "onceNote": "Deze link en code zie je alleen nu. Download of print ze; ben je ze kwijt, maak dan een nieuwe kaart.",
+    "qrLabel": "QR-code voor de kaart van {name}",
+    "download": "QR-code downloaden",
+    "print": "Afdrukken",
+    "copy": "Link kopiëren",
+    "copied": "Gekopieerd",
+    "open": "Kaart bekijken",
+    "listTitle": "Kaarten van {name}",
+    "listEmpty": "Nog geen kaart.",
+    "kind": {
+      "ID_TAG": "Penningkaart",
+      "EMERGENCY": "Noodkaart"
+    },
+    "state": {
+      "ACTIVE": "Actief",
+      "REVOKED": "Ingetrokken",
+      "ROTATED": "Vervangen",
+      "EXPIRED": "Verlopen"
+    },
+    "created": "Gemaakt op {date}",
+    "ending": "Code eindigend op …{hint}",
+    "views": "Weergaven: {count}",
+    "lastViewed": "Laatst bekeken op {date}",
+    "revoke": "Kaart intrekken",
+    "revokeConfirm": "Ja, deze kaart intrekken",
+    "revokeCancel": "Annuleren",
+    "revoked": "De kaart is ingetrokken en de code opent niet meer.",
+    "revokeError": "Intrekken is niet gelukt. Probeer het opnieuw.",
+    "noAccess": "Alleen iemand die de toegang tot dit huisdier beheert, kan een kaart maken.",
+    "loadError": "De gegevens van de kaart konden niet worden geladen.",
+    "retry": "Opnieuw proberen",
+    "loading": "Laden…"
   }
 }

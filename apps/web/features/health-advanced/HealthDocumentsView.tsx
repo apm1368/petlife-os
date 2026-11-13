@@ -9,6 +9,7 @@ import { LoadFailure } from "@/features/system/LoadFailure";
 import { documentTypeLabel } from "./document-labels";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 import { FilePicker } from "@/features/shared/FilePicker";
+import Link from "@/features/navigation/localized-link";
 
 /** spec: "private medical documents must never be publicly exposed" — download always goes through a freshly-minted signed URL, never a stored/cached link. */
 export function HealthDocumentsView({ petId }: { petId: string }) {
@@ -108,9 +109,13 @@ export function HealthDocumentsView({ petId }: { petId: string }) {
                 </StatusLabel>
               </div>
               <span className="text-metadata text-text-secondary">{documentTypeLabel(doc.documentType, locale)}</span>
-              <Button variant="secondary" size="sm" onClick={() => handleDownload(doc.id)}>
-                {t("documents.download")}
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="secondary" size="sm" onClick={() => handleDownload(doc.id)}>
+                  {t("documents.download")}
+                </Button>
+                {/* Details hold retraction (own uploads) or a correction request (clinic documents) — M10. */}
+                <Link href={`/pets/${petId}/health/documents/${doc.id}`} className="account-link-button">{t(doc.sourceType === SourceType.PROVIDER || doc.sourceType === SourceType.CLINIC ? "documents.details" : "documents.manage")}</Link>
+              </div>
             </ContextSurface>
           ))}
         </div>

@@ -16,7 +16,7 @@ function Shell({ title, children, subtitle, titleLang }: { title: string; subtit
   const titleId = useId();
   const locale = useLocale();
   const t = useTranslations("publicHelp");
-  return <section aria-labelledby={titleId} className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8"><header className="flex flex-col gap-2"><h1 id={titleId} lang={titleLang} className="text-page-title text-text-primary">{title}</h1>{subtitle ? <p lang={titleLang} className="text-body text-text-secondary">{subtitle}</p> : null}</header>{locale === "de" || locale === "es" ? <p className="text-metadata text-text-secondary">{t("sourceNotice")}</p> : null}{children}</section>;
+  return <section aria-labelledby={titleId} className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8"><header className="flex flex-col gap-2"><h1 id={titleId} lang={titleLang} className="text-page-title text-text-primary">{title}</h1>{subtitle ? <p lang={titleLang} className="text-body text-text-secondary">{subtitle}</p> : null}</header>{locale !== "fa" && locale !== "en" ? <p className="text-metadata text-text-secondary">{t("sourceNotice")}</p> : null}{children}</section>;
 }
 function Failure({ title, retry }: { title: string; retry: () => void }) {
   const t = useTranslations("publicHelp");

@@ -45,5 +45,6 @@ export function toPetFriendlyPlaceDto(row: PetFriendlyPlace, options: { distance
     website: row.website,
     claimed: Boolean(row.claimedByProviderOrganizationId),
     osmUrl: row.osmType && row.osmId != null ? osmUrl(row.osmType, row.osmId) : null,
+    isDemoRecord: row.isDemoRecord,
   };
 }
