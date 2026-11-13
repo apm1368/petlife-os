@@ -74,6 +74,15 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "کیف پول شارژ شد", body: "رسید کارت‌به‌کارت شما تأیید شد و {{amount}} تومان به کیف پولتان اضافه شد." },
     en: { title: "Wallet topped up", body: "Your card-to-card receipt was approved and {{amount}} toman was added to your wallet." },
   },
+  // Two-person staff transfers between wallets: both wallets' people hear that money moved, and why.
+  "wallet.transfer_in": {
+    fa: { title: "اعتبار به کیف پول اضافه شد", body: "{{amount}} تومان از «{{counterparty}}» به کیف پول «{{wallet}}» منتقل شد. دلیل: {{reason}}" },
+    en: { title: "Credit added to your wallet", body: "{{amount}} toman was moved from “{{counterparty}}” to the “{{wallet}}” wallet. Reason: {{reason}}" },
+  },
+  "wallet.transfer_out": {
+    fa: { title: "اعتبار از کیف پول منتقل شد", body: "{{amount}} تومان از کیف پول «{{wallet}}» به «{{counterparty}}» منتقل شد. دلیل: {{reason}}. اگر این انتقال را نمی‌شناسید، با پشتیبانی تماس بگیرید." },
+    en: { title: "Credit moved out of your wallet", body: "{{amount}} toman was moved from the “{{wallet}}” wallet to “{{counterparty}}”. Reason: {{reason}}. If you don't recognise this transfer, contact support." },
+  },
   "wallet.top_up_rejected": {
     fa: { title: "رسید شارژ کیف پول پذیرفته نشد", body: "رسید کارت‌به‌کارت شما برای {{amount}} تومان پذیرفته نشد. دلیل: {{reason}}. اگر مبلغ را واریز کرده‌اید، با پشتیبانی تماس بگیرید." },
     en: { title: "Wallet top-up receipt not accepted", body: "Your card-to-card receipt for {{amount}} toman was not accepted. Reason: {{reason}}. If you did send the money, contact support." },

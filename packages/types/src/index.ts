@@ -7377,7 +7377,7 @@ export type {
   AdminWalletTransferDto,
   AdminWalletTransferInput,
 } from "./business-wallets";
-export { WALLET_TRANSFER_REASON_CODES, WALLET_TRANSFER_UNRELATED_REASON_CODES } from "./business-wallets";
+export { WALLET_TRANSFER_MAX_IRR, WALLET_TRANSFER_REASON_CODES, WALLET_TRANSFER_REFUND_REASON_CODES, WALLET_TRANSFER_UNRELATED_REASON_CODES } from "./business-wallets";
 
 // ---------------------------------------------------------------------------
 // Member wallet (balances are always derived from append-only entries)

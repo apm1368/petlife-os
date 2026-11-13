@@ -57,7 +57,9 @@ export function isReceiptWindowOver(topUp: { status: WalletTopUpStatus; receiptD
 
 /** Where Zibal sends the member back. Member pages live under the locale prefix in every language (only the
  * Persian home page is the bare domain), so the return lands directly and no redirect can drop Zibal's query. */
-export function walletReturnUrl(webOrigin: string, locale: string): string {
+/** Where Zibal sends the member back: their wallet page, or (`path`, from the server) a business wallet's page. */
+export function walletReturnUrl(webOrigin: string, locale: string, path = "/profile/wallet"): string {
   const origin = webOrigin.split(",")[0]!.trim().replace(/\/$/, "");
-  return `${origin}/${["fa", "en", "de", "es", "ar", "nl"].includes(locale) ? locale : "fa"}/profile/wallet`;
+  const safePath = /^\/profile\/wallet(\/business\/[0-9a-f-]{36})?$/.test(path) ? path : "/profile/wallet";
+  return `${origin}/${["fa", "en", "de", "es", "ar", "nl"].includes(locale) ? locale : "fa"}${safePath}`;
 }
