@@ -3,6 +3,13 @@
 Market-readiness Q75. Admin pages can require a 6-digit code from an authenticator app (RFC 6238: HMAC-SHA1,
 30-second steps), on top of the normal sign-in. Consumer, seller and provider pages are not affected.
 
+## Opt-in for now (owner, 2026-11-13)
+
+Every admin can turn two-step sign-in on for their own account. Requiring it for the whole team stays off until SMS and
+email delivery are live: the server setting `ADMIN_TWO_STEP_ENFORCEMENT` defaults to `off`. While it is off,
+`/admin/access/two-step` cannot switch enforcement on (`TWO_STEP_ENFORCEMENT_NOT_AVAILABLE`), and no stored policy
+row can lock anyone out. Set it to `on` in `apps/api/.env` and reload the API only when the owner decides.
+
 ## How it behaves
 
 | State | What the admin sees |

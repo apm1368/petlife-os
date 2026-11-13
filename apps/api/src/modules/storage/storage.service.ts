@@ -12,6 +12,9 @@ import {
   type UploadTarget,
 } from "./storage-driver.interface";
 
+/** Owner, 2026-11-13: one pet photo may be up to 50 MB. */
+export const PET_PHOTO_MAX_BYTES = 50 * 1024 * 1024;
+
 /** Handoff 17: allow-listed MIME types for a medical document — a narrow, explicit set, never "anything the client sends". */
 const HEALTH_DOCUMENT_MIME_EXTENSIONS: Record<string, string> = {
   "application/pdf": "pdf",
@@ -91,7 +94,9 @@ export class StorageService {
     const extension = extensionByContentType[contentType];
     if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
     const key = `pets/${petId}/${randomUUID()}.${extension}`;
-    return this.driver.createUploadTarget(key, contentType);
+    // Owner, 2026-11-13: pet photos up to 50 MB (the upload ceiling). The web app scales big originals down before
+    // sending; the upload controller still strips EXIF/XMP from whatever arrives.
+    return this.driver.createUploadTarget(key, contentType, PET_PHOTO_MAX_BYTES);
   }
 
   /** Copies a validated, already-public source photo into an independently controlled private memorial asset. */
@@ -338,6 +343,21 @@ export class StorageService {
       throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: ANIMAL_SUPPORT_MEDIA_MAX_BYTES });
     }
     const key = `animal-support-orgs/${organizationId}/${randomUUID()}.${extension}`;
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
+    return { ...target, key };
+  }
+
+  /**
+   * A partner's business logo from signup — public branding (a logo, never a document), keyed by the signing-up
+   * user. Nothing shows it publicly until the business is verified; KYC evidence uses the private partner prefix.
+   */
+  async createPartnerLogoUploadTarget(userId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+    const extension = TRAVEL_COMMERCE_MEDIA_MIME_EXTENSIONS[contentType];
+    if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
+    if (fileSizeBytes <= 0 || fileSizeBytes > TRAVEL_COMMERCE_MEDIA_MAX_BYTES) {
+      throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: TRAVEL_COMMERCE_MEDIA_MAX_BYTES });
+    }
+    const key = `partner-logos/${userId}/${randomUUID()}.${extension}`;
     const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
     return { ...target, key };
   }

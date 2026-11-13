@@ -51,7 +51,7 @@ describe("WalletView", () => {
     vi.mocked(walletService.startTopUp).mockResolvedValue({
       topUp: { id: "t1", rail: "CARD_TO_CARD", status: "AWAITING_RECEIPT", amount: 2_000_000, receivedAmount: null, currency: "IRR", receiptUploaded: false, receiptDeadlineAt: "2026-11-13T08:00:00.000Z", rejectionReason: null, createdAt: "2026-11-12T08:00:00.000Z", creditedAt: null },
       redirectUrl: null,
-      cardTransfer: { cardNumber: "6037-9912-3456-7890", cardHolderName: "PET LIFE OS" },
+      cardTransfer: { cardNumber: "6037-9912-3456-7890", cardHolderName: "PET LIFE OS", bankName: null, sheba: null },
     });
     renderWithIntl(<WalletView />, "en");
     fireEvent.click(await screen.findByRole("button", { name: "200,000 Toman" }));

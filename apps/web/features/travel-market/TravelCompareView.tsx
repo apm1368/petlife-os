@@ -9,6 +9,7 @@ import type { TravelSearchResultItemDto } from "@petlife/types";
 import { localizeDigits } from "@/lib/date/jalali";
 import { travelMarketService } from "@/services/travel-marketplace.service";
 import { listingTypeLabel, MATCH_LABEL, matchTone, money, ratingText } from "./labels";
+import { placeName } from "@/lib/i18n/iran-places";
 
 /** Side-by-side on desktop, stacked cards on phones; the same facts, never recomputed client-side. */
 export function TravelCompareView() {
@@ -27,7 +28,7 @@ export function TravelCompareView() {
   const NS = fa ? "اعلام نشده" : "Not specified";
   const rows: { label: string; value: (i: TravelSearchResultItemDto) => React.ReactNode }[] = [
     { label: fa ? "نوع" : "Type", value: (i) => listingTypeLabel(i.type, lang) },
-    { label: fa ? "شهر" : "City", value: (i) => i.city },
+    { label: fa ? "شهر" : "City", value: (i) => placeName(i.city, lang) },
     { label: fa ? "امتیاز" : "Rating", value: (i) => ratingText(i.rating.average, i.rating.count, lang) },
     { label: checkIn && checkOut ? (fa ? "قیمت کل اقامت" : "Stay total") : fa ? "قیمت" : "Price", value: (i) => (i.stay ? money(i.stay.totalIrr, lang) : i.fromNightlyIrr !== null ? (fa ? `از ${money(i.fromNightlyIrr, lang)} / شب` : `from ${money(i.fromNightlyIrr, lang)} / night`) : "—") },
     { label: fa ? "سگ" : "Dogs", value: (i) => (!i.petPolicySummary.stated ? NS : i.petPolicySummary.dogsAllowed ? "✓" : "✗") },

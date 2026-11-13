@@ -5,7 +5,7 @@ import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
 import { OrderNotFoundException } from "../../../common/errors/api-exception";
 import { toSellerSummaryDto } from "../commerce-dto.mapper";
-import { toFulfillmentDto } from "../logistics/logistics-dto.mapper";
+import { toBuyerFulfillmentDto } from "../logistics/logistics-dto.mapper";
 import { canCustomerCancel, canCustomerRequestRefund } from "./order-policy";
 import { REPEAT_REMINDER_LEAD_DAYS } from "../repeat-delivery/repeat-delivery.service";
 
@@ -249,7 +249,7 @@ export class OrdersService {
       paymentStatus: paymentStatus ?? null,
       financingStatus: financingStatus ?? null,
       refunds: refunds.map((r) => this.toRefundDto(r)),
-      fulfillment: fulfillment ? toFulfillmentDto(fulfillment) : null,
+      fulfillment: fulfillment ? toBuyerFulfillmentDto(fulfillment) : null,
       subtotalAmount: order.subtotalAmount,
       deliveryAmount: order.deliveryAmount,
       discountAmount: order.discountAmount,

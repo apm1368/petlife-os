@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { AdminMembershipStatus, InternalNoteEntityType, Prisma, SupportCaseCategory, SupportCaseStatus, SupportMessageAuthorType, SupportMessageVisibility } from "@prisma/client";
-import type { PaginatedDto, SupportCaseContextDto, SupportCaseDetailDto, SupportCaseSummaryDto, SupportCaseUserDetailDto, SupportCaseUserSummaryDto, SupportHealthSummaryDto, SupportLostPetSummaryDto, SupportMessageDto } from "@petlife/types";
+import { AdminMembershipStatus, InternalNoteEntityType, PartnerSubjectType, Prisma, SupportCaseCategory, SupportCaseStatus, SupportMessageAuthorType, SupportMessageVisibility } from "@prisma/client";
+import { PARTNER_SUPPORT_CATEGORIES, type PaginatedDto, type SupportCaseContextDto, type SupportCaseDetailDto, type SupportCasePartnerDetailDto, type SupportCasePartnerSummaryDto, type SupportCaseRequesterOrgDto, type SupportCaseSummaryDto, type SupportCaseUserDetailDto, type SupportCaseUserSummaryDto, type SupportHealthSummaryDto, type SupportLostPetSummaryDto, type SupportMessageDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../../common/events/domain-events.service";
 import {
@@ -18,7 +18,7 @@ import { InternalNoteService } from "../notes/internal-note.service";
 import { SubscriptionService } from "../../subscriptions/subscription.service";
 import { toSupportSubscriptionSummaryDto } from "../../subscriptions/subscription-mapper";
 import { SUPPORT_CASE_TRANSITIONS } from "./support-case-transitions";
-import { toSupportCaseDetailDto, toSupportCaseSummaryDto, toSupportCaseUserDetailDto, toSupportCaseUserSummaryDto, toSupportMessageDto } from "./support-case.mapper";
+import { toSupportCaseDetailDto, toSupportCasePartnerDetailDto, toSupportCasePartnerSummaryDto, toSupportCaseSummaryDto, toSupportCaseUserDetailDto, toSupportCaseUserSummaryDto, toSupportMessageDto, type SupportCaseWithRelations } from "./support-case.mapper";
 import type { CreateSupportCaseDto } from "./dto/support-case.dto";
 
 const CASE_INCLUDE = { assignedAdmin: { include: { user: true } }, requesterUser: true } as const;
@@ -31,6 +31,60 @@ export interface ListSupportCasesFilter {
   search?: string;
   createdFrom?: Date;
   createdTo?: Date;
+  /** PARTNER = any business case, PROVIDER / SELLER = one side, PERSONAL = a person asking for themselves. */
+  requesterKind?: SupportRequesterKind;
+  /** One business's cases (with requesterKind PROVIDER or SELLER). */
+  requesterOrgId?: string;
+}
+
+export const SUPPORT_REQUESTER_KINDS = ["PARTNER", "PROVIDER", "SELLER", "PERSONAL"] as const;
+export type SupportRequesterKind = (typeof SUPPORT_REQUESTER_KINDS)[number];
+
+/**
+ * Who is asking. A person asks for themselves (USER); a team member asks for
+ * their business from the provider or shop panel (PARTNER). A partner case
+ * belongs to the organization: managers follow every case of the team, other
+ * members only the ones they opened. A personal read never returns a business
+ * case, so someone who leaves a team keeps no window into its cases.
+ */
+export type SupportRequesterScope =
+  | { kind: "USER"; userId: string }
+  | { kind: "PARTNER"; userId: string; orgType: PartnerSubjectType; orgId: string; orgName: string; seesWholeTeam: boolean };
+
+export interface CreateSupportCaseAsPartnerInput {
+  subject: string;
+  description: string;
+  category: SupportCaseCategory;
+}
+
+type ScopedCaseFields = Pick<SupportCaseWithRelations, "requesterUserId" | "requesterOrgType" | "requesterOrgId">;
+
+function scopeWhere(scope: SupportRequesterScope): Prisma.SupportCaseWhereInput {
+  if (scope.kind === "USER") return { requesterUserId: scope.userId, requesterOrgId: null };
+  return { requesterOrgType: scope.orgType, requesterOrgId: scope.orgId, ...(scope.seesWholeTeam ? {} : { requesterUserId: scope.userId }) };
+}
+
+function inScope(scope: SupportRequesterScope, row: ScopedCaseFields): boolean {
+  if (scope.kind === "USER") return row.requesterUserId === scope.userId && row.requesterOrgId === null;
+  if (row.requesterOrgType !== scope.orgType || row.requesterOrgId !== scope.orgId) return false;
+  return scope.seesWholeTeam || row.requesterUserId === scope.userId;
+}
+
+function requesterKindWhere(kind: SupportRequesterKind | undefined, orgId: string | undefined): Prisma.SupportCaseWhereInput {
+  const where: Prisma.SupportCaseWhereInput = {};
+  if (kind === "PARTNER") where.requesterOrgId = { not: null };
+  else if (kind === "PERSONAL") where.requesterOrgId = null;
+  else if (kind === "PROVIDER") where.requesterOrgType = PartnerSubjectType.PROVIDER;
+  else if (kind === "SELLER") where.requesterOrgType = PartnerSubjectType.SELLER;
+  if (orgId && kind !== "PERSONAL") where.requesterOrgId = orgId;
+  return where;
+}
+
+/** Every case number comes from one Postgres sequence, so numbers never collide or reveal ids. */
+async function nextCaseNumber(tx: Prisma.TransactionClient): Promise<string> {
+  const rows = await tx.$queryRaw<{ nextval: bigint }[]>`SELECT nextval('support_case_number_seq') AS nextval`;
+  // A sequence's nextval() always returns exactly one row.
+  return `CASE-${rows[0]!.nextval.toString().padStart(6, "0")}`;
 }
 
 /** Only entity kinds a consumer can currently link their own case to — the two contextual entry points the spec requires (Order Detail, Booking Detail). */
@@ -70,12 +124,9 @@ export class SupportCaseService {
   ) {}
 
   async create(admin: ResolvedAdminContext, dto: CreateSupportCaseDto, requestId?: string): Promise<SupportCaseSummaryDto> {
+    const after: Array<() => Promise<void>> = [];
     const created = await this.prisma.$transaction(async (tx) => {
-      const rows = await tx.$queryRaw<{ nextval: bigint }[]>`SELECT nextval('support_case_number_seq') AS nextval`;
-      // A sequence's nextval() always returns exactly one row — the
-      // non-null assertion mirrors the same reasoning as the domainEventId!
-      // assertion in notification-orchestrator.service.ts (Handoff 10).
-      const caseNumber = `CASE-${rows[0]!.nextval.toString().padStart(6, "0")}`;
+      const caseNumber = await nextCaseNumber(tx);
 
       const row = await tx.supportCase.create({
         data: {
@@ -94,10 +145,11 @@ export class SupportCaseService {
         include: CASE_INCLUDE,
       });
 
-      await this.events.publish("SupportCaseCreated", { caseId: row.id, caseNumber, requesterUserId: row.requesterUserId }, { tx, aggregateType: "SupportCase", aggregateId: row.id });
+      after.push(await this.events.stage("SupportCaseCreated", { caseId: row.id, caseNumber, requesterUserId: row.requesterUserId }, { tx, aggregateType: "SupportCase", aggregateId: row.id }));
       await this.auditLog.record({ adminUserId: admin.adminUserId, action: "support_case.created", entityType: "SUPPORT_CASE", entityId: row.id, requestId, tx });
       return row;
     });
+    for (const dispatch of after) await dispatch();
 
     return toSupportCaseSummaryDto(created);
   }
@@ -110,22 +162,40 @@ export class SupportCaseService {
       category: filter.category,
       createdAt: filter.createdFrom || filter.createdTo ? { gte: filter.createdFrom, lte: filter.createdTo } : undefined,
       ...(filter.search ? { OR: [{ subject: { contains: filter.search, mode: "insensitive" } }, { caseNumber: { contains: filter.search, mode: "insensitive" } }] } : {}),
+      ...requesterKindWhere(filter.requesterKind, filter.requesterOrgId),
     };
     const [rows, total] = await Promise.all([
       this.prisma.supportCase.findMany({ where, include: CASE_INCLUDE, orderBy: { createdAt: "desc" }, skip, take }),
       this.prisma.supportCase.count({ where }),
     ]);
-    return toPaginatedDto(rows.map(toSupportCaseSummaryDto), total, page, pageSize);
+    const orgs = await this.requesterOrgs(rows);
+    return toPaginatedDto(rows.map((row) => toSupportCaseSummaryDto(row, orgs)), total, page, pageSize);
+  }
+
+  /** Names of the businesses behind partner cases, looked up once per page (the id can point at either side, so there is no FK to include). */
+  private async requesterOrgs(rows: ScopedCaseFields[]): Promise<Map<string, SupportCaseRequesterOrgDto>> {
+    const ids = (type: PartnerSubjectType) => [...new Set(rows.filter((r) => r.requesterOrgType === type && r.requesterOrgId).map((r) => r.requesterOrgId!))];
+    const providerIds = ids(PartnerSubjectType.PROVIDER);
+    const sellerIds = ids(PartnerSubjectType.SELLER);
+    const [providers, sellers] = await Promise.all([
+      providerIds.length ? this.prisma.providerOrganization.findMany({ where: { id: { in: providerIds } }, select: { id: true, name: true } }) : [],
+      sellerIds.length ? this.prisma.sellerOrganization.findMany({ where: { id: { in: sellerIds } }, select: { id: true, name: true } }) : [],
+    ]);
+    const out = new Map<string, SupportCaseRequesterOrgDto>();
+    for (const id of providerIds) out.set(`PROVIDER:${id}`, { type: "PROVIDER", id, name: providers.find((o) => o.id === id)?.name ?? null });
+    for (const id of sellerIds) out.set(`SELLER:${id}`, { type: "SELLER", id, name: sellers.find((o) => o.id === id)?.name ?? null });
+    return out;
   }
 
   async get(caseId: string): Promise<SupportCaseDetailDto> {
     const row = await this.prisma.supportCase.findUnique({ where: { id: caseId }, include: { ...CASE_INCLUDE, createdByAdmin: { include: { user: true } } } });
     if (!row) throw new SupportCaseNotFoundException({ caseId });
-    const [messages, internalNotes] = await Promise.all([
+    const [messages, internalNotes, orgs] = await Promise.all([
       this.prisma.supportMessage.findMany({ where: { caseId }, include: { authorUser: true, authorAdmin: { include: { user: true } } }, orderBy: { createdAt: "asc" } }),
       this.notes.listForEntity(InternalNoteEntityType.SUPPORT_CASE, caseId),
+      this.requesterOrgs([row]),
     ]);
-    return toSupportCaseDetailDto(row, messages.map(toSupportMessageDto), internalNotes);
+    return toSupportCaseDetailDto(row, messages.map(toSupportMessageDto), internalNotes, orgs);
   }
 
   /**
@@ -203,7 +273,7 @@ export class SupportCaseService {
       household: household ? { id: household.id, name: household.name ?? "Household" } : null,
       pet: pet ? { id: pet.id, name: pet.name } : null,
       relatedEntity,
-      previousCases: previousCases.map(toSupportCaseSummaryDto),
+      previousCases: previousCases.map((row) => toSupportCaseSummaryDto(row)),
       firstResponseAt: supportCase.firstResponseAt ? supportCase.firstResponseAt.toISOString() : null,
       firstResponseTimeMinutes: supportCase.firstResponseAt ? Math.round((supportCase.firstResponseAt.getTime() - supportCase.createdAt.getTime()) / 60000) : null,
       resolutionTimeMinutes: supportCase.resolvedAt ? Math.round((supportCase.resolvedAt.getTime() - supportCase.createdAt.getTime()) / 60000) : null,
@@ -275,6 +345,7 @@ export class SupportCaseService {
       throw new AdminAccessDeniedException({ reason: "ASSIGNEE_NOT_ACTIVE_ADMIN", assigneeAdminId });
     }
 
+    const after: Array<() => Promise<void>> = [];
     const updated = await this.prisma.$transaction(async (tx) => {
       const existing = await tx.supportCase.findUnique({ where: { id: caseId } });
       if (!existing) throw new SupportCaseNotFoundException({ caseId });
@@ -285,15 +356,17 @@ export class SupportCaseService {
       // a status transition, any ACTIVE admin is always a valid assignee).
       const firstAssigned = await tx.supportCase.findUniqueOrThrow({ where: { id: caseId }, select: { firstAssignedAt: true } });
       const row = await tx.supportCase.update({ where: { id: caseId }, data: { assignedAdminId: assigneeAdminId, ...(firstAssigned.firstAssignedAt ? {} : { firstAssignedAt: new Date() }) }, include: CASE_INCLUDE });
-      await this.events.publish("SupportCaseAssigned", { caseId, assigneeAdminId, previousAssigneeAdminId: existing.assignedAdminId }, { tx, aggregateType: "SupportCase", aggregateId: caseId });
+      after.push(await this.events.stage("SupportCaseAssigned", { caseId, assigneeAdminId, previousAssigneeAdminId: existing.assignedAdminId }, { tx, aggregateType: "SupportCase", aggregateId: caseId }));
       await this.auditLog.record({ adminUserId: admin.adminUserId, action: "support_case.assigned", entityType: "SUPPORT_CASE", entityId: caseId, afterSummary: { assigneeAdminId }, requestId, tx });
       return row;
     });
+    for (const dispatch of after) await dispatch();
 
     return toSupportCaseSummaryDto(updated);
   }
 
   async transition(admin: ResolvedAdminContext, caseId: string, to: SupportCaseStatus, requestId?: string): Promise<SupportCaseSummaryDto> {
+    const after: Array<() => Promise<void>> = [];
     const updated = await this.prisma.$transaction(async (tx) => {
       const [locked] = await tx.$queryRaw<{ id: string }[]>`SELECT "id" FROM "support_cases" WHERE "id" = ${caseId}::uuid FOR UPDATE`;
       if (!locked) throw new SupportCaseNotFoundException({ caseId });
@@ -313,12 +386,12 @@ export class SupportCaseService {
 
       const row = await tx.supportCase.update({ where: { id: caseId }, data, include: CASE_INCLUDE });
 
-      await this.events.publish("SupportCaseStatusChanged", { caseId, from: current.status, to }, { tx, aggregateType: "SupportCase", aggregateId: caseId });
+      after.push(await this.events.stage("SupportCaseStatusChanged", { caseId, from: current.status, to }, { tx, aggregateType: "SupportCase", aggregateId: caseId }));
       if (to === SupportCaseStatus.RESOLVED) {
-        await this.events.publish("SupportCaseResolved", { caseId, caseNumber: row.caseNumber, requesterUserId: row.requesterUserId }, { tx, aggregateType: "SupportCase", aggregateId: caseId });
+        after.push(await this.events.stage("SupportCaseResolved", { caseId, caseNumber: row.caseNumber, requesterUserId: row.requesterUserId }, { tx, aggregateType: "SupportCase", aggregateId: caseId }));
       }
       if (to === SupportCaseStatus.CLOSED) {
-        await this.events.publish("SupportCaseClosed", { caseId, requesterUserId: row.requesterUserId }, { tx, aggregateType: "SupportCase", aggregateId: caseId });
+        after.push(await this.events.stage("SupportCaseClosed", { caseId, requesterUserId: row.requesterUserId }, { tx, aggregateType: "SupportCase", aggregateId: caseId }));
       }
       await this.auditLog.record({
         adminUserId: admin.adminUserId,
@@ -333,11 +406,13 @@ export class SupportCaseService {
 
       return row;
     });
+    for (const dispatch of after) await dispatch();
 
     return toSupportCaseSummaryDto(updated);
   }
 
   async postMessage(admin: ResolvedAdminContext, caseId: string, body: string, visibility: SupportMessageVisibility, requestId?: string): Promise<SupportMessageDto> {
+    const after: Array<() => Promise<void>> = [];
     const message = await this.prisma.$transaction(async (tx) => {
       const supportCase = await tx.supportCase.findUnique({ where: { id: caseId } });
       if (!supportCase) throw new SupportCaseNotFoundException({ caseId });
@@ -364,16 +439,17 @@ export class SupportCaseService {
       // notification fan-out below only ever fires for PUBLIC messages, by
       // construction: an INTERNAL message never reaches NotifyInput at all.
       if (visibility === SupportMessageVisibility.PUBLIC) {
-        await this.events.publish(
+        after.push(await this.events.stage(
           "SupportMessagePosted",
           { caseId, caseNumber: supportCase.caseNumber, requesterUserId: supportCase.requesterUserId, visibility, authorType: SupportMessageAuthorType.ADMIN },
           { tx, aggregateType: "SupportCase", aggregateId: caseId },
-        );
+        ));
       }
       await this.auditLog.record({ adminUserId: admin.adminUserId, action: "support_message.posted", entityType: "SUPPORT_CASE", entityId: caseId, afterSummary: { visibility }, requestId, tx });
 
       return created;
     });
+    for (const dispatch of after) await dispatch();
 
     return toSupportMessageDto(message);
   }
@@ -445,9 +521,9 @@ export class SupportCaseService {
   async createAsUser(userId: string, input: CreateSupportCaseAsUserInput): Promise<SupportCaseUserSummaryDto> {
     await this.assertUserOwnsReferences(userId, input);
 
+    const after: Array<() => Promise<void>> = [];
     const created = await this.prisma.$transaction(async (tx) => {
-      const rows = await tx.$queryRaw<{ nextval: bigint }[]>`SELECT nextval('support_case_number_seq') AS nextval`;
-      const caseNumber = `CASE-${rows[0]!.nextval.toString().padStart(6, "0")}`;
+      const caseNumber = await nextCaseNumber(tx);
 
       const row = await tx.supportCase.create({
         data: {
@@ -464,31 +540,100 @@ export class SupportCaseService {
         include: CASE_INCLUDE,
       });
 
-      await this.events.publish("SupportCaseCreated", { caseId: row.id, caseNumber, requesterUserId: userId }, { tx, aggregateType: "SupportCase", aggregateId: row.id });
+      after.push(await this.events.stage("SupportCaseCreated", { caseId: row.id, caseNumber, requesterUserId: userId }, { tx, aggregateType: "SupportCase", aggregateId: row.id }));
       return row;
     });
+    for (const dispatch of after) await dispatch();
 
     return toSupportCaseUserSummaryDto(created);
   }
 
   async listForUser(userId: string, query: PaginationQueryDto): Promise<PaginatedDto<SupportCaseUserSummaryDto>> {
-    const { page, pageSize, skip, take } = resolvePagination(query);
-    const where: Prisma.SupportCaseWhereInput = { requesterUserId: userId };
-    const [rows, total] = await Promise.all([
-      this.prisma.supportCase.findMany({ where, include: CASE_INCLUDE, orderBy: { createdAt: "desc" }, skip, take }),
-      this.prisma.supportCase.count({ where }),
-    ]);
+    const { page, pageSize, rows, total } = await this.listScoped({ kind: "USER", userId }, query);
     return toPaginatedDto(rows.map(toSupportCaseUserSummaryDto), total, page, pageSize);
   }
 
   async getForUser(userId: string, caseId: string): Promise<SupportCaseUserDetailDto> {
+    const { row, messages } = await this.getScoped({ kind: "USER", userId }, caseId);
+    return toSupportCaseUserDetailDto(row, messages);
+  }
+
+  async postMessageAsUser(userId: string, caseId: string, body: string): Promise<SupportMessageDto> {
+    return this.postRequesterMessage({ kind: "USER", userId }, caseId, body);
+  }
+
+  async reopen(userId: string, caseId: string): Promise<SupportCaseUserSummaryDto> {
+    return toSupportCaseUserSummaryDto(await this.reopenScoped({ kind: "USER", userId }, caseId));
+  }
+
+  // ---- Partner panels (provider and shop). Same tables, same lifecycle; the scope decides what a team member sees.
+
+  async createAsPartner(scope: Extract<SupportRequesterScope, { kind: "PARTNER" }>, input: CreateSupportCaseAsPartnerInput): Promise<SupportCasePartnerSummaryDto> {
+    if (!(PARTNER_SUPPORT_CATEGORIES as readonly string[]).includes(input.category)) throw new SupportCaseInvalidReferenceException({ field: "category" });
+    const after: Array<() => Promise<void>> = [];
+    const created = await this.prisma.$transaction(async (tx) => {
+      const caseNumber = await nextCaseNumber(tx);
+      const row = await tx.supportCase.create({
+        data: {
+          caseNumber,
+          requesterUserId: scope.userId,
+          requesterOrgType: scope.orgType,
+          requesterOrgId: scope.orgId,
+          subject: input.subject,
+          description: input.description,
+          category: input.category,
+        },
+        include: CASE_INCLUDE,
+      });
+      after.push(await this.events.stage(
+        "SupportCaseCreated",
+        { caseId: row.id, caseNumber, requesterUserId: scope.userId, requesterOrgType: scope.orgType, requesterOrgId: scope.orgId },
+        { tx, aggregateType: "SupportCase", aggregateId: row.id },
+      ));
+      return row;
+    });
+    for (const dispatch of after) await dispatch();
+    return toSupportCasePartnerSummaryDto(created, scope);
+  }
+
+  async listForPartner(scope: Extract<SupportRequesterScope, { kind: "PARTNER" }>, query: PaginationQueryDto): Promise<PaginatedDto<SupportCasePartnerSummaryDto>> {
+    const { page, pageSize, rows, total } = await this.listScoped(scope, query);
+    return toPaginatedDto(rows.map((row) => toSupportCasePartnerSummaryDto(row, scope)), total, page, pageSize);
+  }
+
+  async getForPartner(scope: Extract<SupportRequesterScope, { kind: "PARTNER" }>, caseId: string): Promise<SupportCasePartnerDetailDto> {
+    const { row, messages } = await this.getScoped(scope, caseId);
+    return toSupportCasePartnerDetailDto(row, scope, messages);
+  }
+
+  async postMessageAsPartner(scope: Extract<SupportRequesterScope, { kind: "PARTNER" }>, caseId: string, body: string): Promise<SupportMessageDto> {
+    return this.postRequesterMessage(scope, caseId, body);
+  }
+
+  async reopenAsPartner(scope: Extract<SupportRequesterScope, { kind: "PARTNER" }>, caseId: string): Promise<SupportCasePartnerSummaryDto> {
+    return toSupportCasePartnerSummaryDto(await this.reopenScoped(scope, caseId), scope);
+  }
+
+  // ---- Shared requester-side reads and writes.
+
+  private async listScoped(scope: SupportRequesterScope, query: PaginationQueryDto) {
+    const { page, pageSize, skip, take } = resolvePagination(query);
+    const where = scopeWhere(scope);
+    const [rows, total] = await Promise.all([
+      this.prisma.supportCase.findMany({ where, include: CASE_INCLUDE, orderBy: { createdAt: "desc" }, skip, take }),
+      this.prisma.supportCase.count({ where }),
+    ]);
+    return { page, pageSize, rows, total };
+  }
+
+  private async getScoped(scope: SupportRequesterScope, caseId: string) {
     const row = await this.prisma.supportCase.findUnique({ where: { id: caseId }, include: CASE_INCLUDE });
     // Same 404-for-both shape as OrdersService/BookingsService's own
     // getById(userId, id) — "not found" and "not yours" must be
     // indistinguishable to the caller.
-    if (!row || row.requesterUserId !== userId) throw new SupportCaseNotFoundException({ caseId });
+    if (!row || !inScope(scope, row)) throw new SupportCaseNotFoundException({ caseId });
 
-    // Only PUBLIC messages are ever fetched for a user-facing read — an
+    // Only PUBLIC messages are ever fetched for a requester-facing read — an
     // INTERNAL row never enters process memory on this path, let alone the
     // response. This is the hard security requirement from the spec,
     // enforced at the query layer, not by filtering after the fact.
@@ -497,23 +642,23 @@ export class SupportCaseService {
       include: { authorUser: true, authorAdmin: { include: { user: true } } },
       orderBy: { createdAt: "asc" },
     });
-
-    return toSupportCaseUserDetailDto(row, messages.map(toSupportMessageDto));
+    return { row, messages: messages.map(toSupportMessageDto) };
   }
 
-  async postMessageAsUser(userId: string, caseId: string, body: string): Promise<SupportMessageDto> {
+  private async postRequesterMessage(scope: SupportRequesterScope, caseId: string, body: string): Promise<SupportMessageDto> {
+    const after: Array<() => Promise<void>> = [];
     const message = await this.prisma.$transaction(async (tx) => {
       const supportCase = await tx.supportCase.findUnique({ where: { id: caseId } });
-      if (!supportCase || supportCase.requesterUserId !== userId) throw new SupportCaseNotFoundException({ caseId });
+      if (!supportCase || !inScope(scope, supportCase)) throw new SupportCaseNotFoundException({ caseId });
 
       const created = await tx.supportMessage.create({
-        data: { caseId, authorType: SupportMessageAuthorType.USER, authorUserId: userId, body, visibility: SupportMessageVisibility.PUBLIC },
+        data: { caseId, authorType: SupportMessageAuthorType.USER, authorUserId: scope.userId, body, visibility: SupportMessageVisibility.PUBLIC },
         include: { authorUser: true, authorAdmin: { include: { user: true } } },
       });
 
       await tx.supportCase.update({ where: { id: caseId }, data: { lastUserMessageAt: new Date() } });
 
-      // A user replying while the case is parked in WAITING_ON_USER is
+      // A requester replying while the case is parked in WAITING_ON_USER is
       // exactly the event that state was waiting for — hand it back to the
       // queue automatically rather than leaving it stuck until an admin
       // notices. Any other status is left untouched; this is the one
@@ -521,58 +666,61 @@ export class SupportCaseService {
       // general rule.
       if (supportCase.status === SupportCaseStatus.WAITING_ON_USER) {
         await tx.supportCase.update({ where: { id: caseId }, data: { status: SupportCaseStatus.IN_PROGRESS } });
-        await this.events.publish(
+        after.push(await this.events.stage(
           "SupportCaseStatusChanged",
           { caseId, from: SupportCaseStatus.WAITING_ON_USER, to: SupportCaseStatus.IN_PROGRESS },
           { tx, aggregateType: "SupportCase", aggregateId: caseId },
-        );
+        ));
       }
 
       // Published for completeness (e.g. a future admin-side "customer
       // replied" indicator) but never notifies the requester — see the
       // authorType guard in SupportNotificationListener.onMessagePosted: a
       // user should never be notified about their own message.
-      await this.events.publish(
+      after.push(await this.events.stage(
         "SupportMessagePosted",
         { caseId, caseNumber: supportCase.caseNumber, requesterUserId: supportCase.requesterUserId, visibility: SupportMessageVisibility.PUBLIC, authorType: SupportMessageAuthorType.USER },
         { tx, aggregateType: "SupportCase", aggregateId: caseId },
-      );
+      ));
 
       return created;
     });
+    for (const dispatch of after) await dispatch();
 
     return toSupportMessageDto(message);
   }
 
   /**
-   * A narrower, user-triggered sibling of transition() — reachable only
-   * from RESOLVED/CLOSED and only targeting OPEN, and only by the case's
-   * own requester. Kept out of SUPPORT_CASE_TRANSITIONS deliberately: that
-   * map is the admin-facing state machine (its own RESOLVED -> IN_PROGRESS
-   * "reopen for internal work" already exists and has different actor
-   * semantics), and widening it to include a user-reachable OPEN edge would
-   * blur who is allowed to trigger which edge.
+   * A narrower, requester-triggered sibling of transition() — reachable only
+   * from RESOLVED/CLOSED and only targeting OPEN, and only by someone the
+   * scope lets see the case. Kept out of SUPPORT_CASE_TRANSITIONS
+   * deliberately: that map is the admin-facing state machine (its own
+   * RESOLVED -> IN_PROGRESS "reopen for internal work" already exists and has
+   * different actor semantics), and widening it to include a user-reachable
+   * OPEN edge would blur who is allowed to trigger which edge.
    */
-  async reopen(userId: string, caseId: string): Promise<SupportCaseUserSummaryDto> {
+  private async reopenScoped(scope: SupportRequesterScope, caseId: string): Promise<SupportCaseWithRelations> {
+    const after: Array<() => Promise<void>> = [];
     const updated = await this.prisma.$transaction(async (tx) => {
       const [locked] = await tx.$queryRaw<{ id: string }[]>`SELECT "id" FROM "support_cases" WHERE "id" = ${caseId}::uuid FOR UPDATE`;
       if (!locked) throw new SupportCaseNotFoundException({ caseId });
 
       const current = await tx.supportCase.findUniqueOrThrow({ where: { id: caseId } });
-      if (current.requesterUserId !== userId) throw new SupportCaseNotFoundException({ caseId });
+      if (!inScope(scope, current)) throw new SupportCaseNotFoundException({ caseId });
       if (current.status !== SupportCaseStatus.RESOLVED && current.status !== SupportCaseStatus.CLOSED) {
         throw new InvalidSupportCaseReopenException({ caseId, from: current.status });
       }
 
       const row = await tx.supportCase.update({ where: { id: caseId }, data: { status: SupportCaseStatus.OPEN, reopenCount: { increment: 1 } }, include: CASE_INCLUDE });
 
-      await this.events.publish("SupportCaseReopened", { caseId, from: current.status, requesterUserId: userId }, { tx, aggregateType: "SupportCase", aggregateId: caseId });
-      await this.events.publish("SupportCaseStatusChanged", { caseId, from: current.status, to: SupportCaseStatus.OPEN }, { tx, aggregateType: "SupportCase", aggregateId: caseId });
+      after.push(await this.events.stage("SupportCaseReopened", { caseId, from: current.status, requesterUserId: current.requesterUserId }, { tx, aggregateType: "SupportCase", aggregateId: caseId }));
+      after.push(await this.events.stage("SupportCaseStatusChanged", { caseId, from: current.status, to: SupportCaseStatus.OPEN }, { tx, aggregateType: "SupportCase", aggregateId: caseId }));
 
       return row;
     });
+    for (const dispatch of after) await dispatch();
 
-    return toSupportCaseUserSummaryDto(updated);
+    return updated;
   }
 }
 

@@ -12,6 +12,8 @@ import { formatCount } from "@/lib/number/format-number";
 import { todayIso } from "@/lib/date/jalali";
 import { WeekAvailability } from "./WeekAvailability";
 import type { RouteLocale } from "@/lib/i18n/config";
+import { SafetyTip } from "@/features/shared/SafetyTip";
+import { placeName } from "@/lib/i18n/iran-places";
 
 type Service = ProviderProfile["services"][number];
 
@@ -229,14 +231,15 @@ export function ProviderProfileView({ providerId }: { providerId: string }) {
             <h2 id="pd-location">{t("locationContact")}</h2>
             <ul className="pd-contact">
               {profile.locations.map((l) => (
-                <li key={l.id}><MapPin size={16} aria-hidden="true" /><span>{[l.name, l.addressLine, l.region, l.city].filter(Boolean).join(sep)}</span></li>
+                <li key={l.id}><MapPin size={16} aria-hidden="true" /><span>{[l.name, l.addressLine, placeName(l.region, locale), placeName(l.city, locale)].filter(Boolean).join(sep)}</span></li>
               ))}
               {profile.phone ? <li><Phone size={16} aria-hidden="true" /><a href={`tel:${profile.phone}`} dir="ltr">{profile.phone}</a></li> : null}
             </ul>
+            <SafetyTip kind="contact" />
             {profile.type === "VET_CLINIC" && profile.locations[0]?.city ? (
               <p className="pd-muted">
                 {t("travelling")} {" "}
-                <Link className="pd-link" href={`/${locale}/travel/search?city=${encodeURIComponent(profile.locations[0].city)}`}>{t("petFriendlyStays", { city: profile.locations[0].city })}</Link>
+                <Link className="pd-link" href={`/${locale}/travel/search?city=${encodeURIComponent(profile.locations[0].city)}`}>{t("petFriendlyStays", { city: placeName(profile.locations[0].city, locale) })}</Link>
               </p>
             ) : null}
           </section>

@@ -64,7 +64,7 @@ const PREVIEW_ONLY = [
   { href: "/customer-affairs", labelKey: "nav.customerAffairs" },
 ];
 const SIDEBAR_KEY = "petlife.admin.sidebar";
-const NUMBER_LOCALE: Record<string, string> = { fa: "fa-IR", en: "en-GB", de: "de-DE", es: "es-ES" };
+const NUMBER_LOCALE: Record<string, string> = { fa: "fa-IR", en: "en-GB", de: "de-DE", es: "es-ES", ar: "ar", nl: "nl-NL" };
 /** Leaf path words that name a page of their own below a record; any other segment is a record id. */
 const NAMED_SEGMENTS = new Set(["new", "versions", "products"]);
 

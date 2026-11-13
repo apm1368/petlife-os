@@ -17,6 +17,7 @@ import { useProviderBootstrap } from "@/hooks/use-provider-bootstrap";
 import { useProviderStore } from "@/stores/provider-store";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { LocaleSwitcher } from "@/features/locale/LocaleSwitcher";
+import { BusinessConsoleLinks } from "@/features/business/BusinessConsoleLinks";
 
 type SessionState = "loading" | "authenticated" | "unauthenticated";
 
@@ -36,7 +37,11 @@ const NAV_ITEMS = [
   { href: "/team", labelKey: "nav.team" },
   { href: "/reviews", labelKey: "nav.reviews" },
   { href: "/analytics", labelKey: "nav.analytics" },
+  // Open before verification too: a partner stuck in KYC is who needs support most.
+  { href: "/support", labelKey: "nav.support" },
   { href: "/travel", labelKey: "nav.travel" },
+  // Only pet-taxi organizations take on-demand rides.
+  { href: "/pet-taxi", labelKey: "nav.petTaxi", onlyFor: "PET_TAXI" },
 ] as const;
 
 /**
@@ -141,7 +146,7 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
     <div className="opl-page workspace-shell operator-shell min-h-screen">
       <header className="operator-shell__header">
         <div className="operator-shell__header-inner">
-          <Link href={`/${locale}/home`} className="operator-shell__brand" aria-label={locale === "fa" ? "اپت لایف" : "opetlife"}><Brand compact locale={locale as RouteLocale} /></Link>
+          <Link href={`/${locale}/business`} className="operator-shell__brand" aria-label={locale === "fa" ? "اپت لایف" : "opetlife"}><Brand compact locale={locale as RouteLocale} /></Link>
           <div className="flex flex-col">
             <span className="text-section-title text-text-primary">{active.organizationName}</span>
             <span className="text-metadata text-text-secondary">
@@ -154,6 +159,7 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
                 {t("switchOrg")}
               </Button>
             ) : null}
+            <BusinessConsoleLinks supportCategory="PROVIDER" />
             <LocaleSwitcher />
             <ThemeToggle />
           </div>
@@ -167,7 +173,7 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
       </header>
 
       <div className="operator-shell__nav-band"><nav className="operator-shell__nav" aria-label={t("nav.home")}>
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.filter((item) => !("onlyFor" in item) || item.onlyFor === active.organizationType).map((item) => {
           const href = `/${locale}/provider${item.href}`;
           const isActive = item.href === "" ? pathname === href : pathname.startsWith(href);
           return (
@@ -191,5 +197,5 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
 export function ProviderShell({ children }: { children: React.ReactNode }) {
   const locale = useLocale();
   const t = useTranslations("provider.shell");
-  return <LocalPreviewGate title="provider" items={NAV_ITEMS.map(item => ({ href: `/${locale}/provider${item.href}`, label: t(item.labelKey) }))} live={<LiveProviderShell>{children}</LiveProviderShell>}>{children}</LocalPreviewGate>;
+  return <LocalPreviewGate title="provider" items={NAV_ITEMS.filter((item) => !("onlyFor" in item)).map(item => ({ href: `/${locale}/provider${item.href}`, label: t(item.labelKey) }))} live={<LiveProviderShell>{children}</LiveProviderShell>}>{children}</LocalPreviewGate>;
 }

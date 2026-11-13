@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { AdminOrderCancelPanel } from "./AdminOrderCancelPanel";
+import { DemoRecordTag } from "../DemoRecordTag";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { Button, Dialog, EmptyState, ErrorRecovery, Input, Skeleton } from "@petlife/ui";
@@ -36,7 +38,7 @@ import {
 } from "../console-ui";
 import { copyFor, intlLocale, pickCopy } from "@/features/admin/admin-copy";
 
-type Lang = "fa" | "en" | "de" | "es";
+type Lang = "fa" | "en" | "de" | "es" | "ar" | "nl";
 type LoadError = "forbidden" | "notFound" | "error" | null;
 
 function useLang() {
@@ -512,6 +514,7 @@ export function AdminCommerceOrderDetailView({ orderId }: { orderId: string }) {
             <DetailRow label={tr("ارسال", "Delivery")}>{formatCurrency(o.deliveryAmount, lang)}</DetailRow>
             <DetailRow label={tr("مبلغ کل", "Total")}>{formatCurrency(o.totalAmount, lang)}</DetailRow>
           </Panel>
+          <AdminOrderCancelPanel orderId={o.id} cancelled={!!o.cancelledAt} fulfillmentStatus={o.fulfillmentStatus ?? null} onDone={() => void load()} />
           <Panel>
             <PanelTitle title={tr("اقلام", "Items")} />
             <ul className="flex flex-col gap-2">
@@ -1032,8 +1035,12 @@ export function AdminProductsView() {
                     data.items.map((p) => (
                       <tr key={p.id}>
                         <Td>
-                          <Link className="text-brand-natural" href={`/${lang}/shop/products/${p.id}`}>
+                          <Link className="text-brand-natural" href={`/${lang}/admin/commerce/products/${p.id}`}>
                             {p.title}
+                          </Link>
+                          <DemoRecordTag isDemoRecord={p.isDemoRecord} />
+                          <Link className="block text-metadata text-text-secondary underline" href={`/${lang}/shop/products/${p.id}`}>
+                            {tr("صفحهٔ عمومی", "Public page")}
                           </Link>
                           {p.brandName ? (
                             <span className="block text-metadata text-text-secondary">{p.brandName}</span>

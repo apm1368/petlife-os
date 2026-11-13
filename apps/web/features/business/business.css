@@ -1,0 +1,12 @@
+/* Business home: one card per business, two columns on wide screens, one on phones. */
+.business-hub__grid { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 62rem) { .business-hub__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.business-card { display: flex; flex-direction: column; gap: 0.75rem; min-width: 0; padding: 1rem 1.1rem; border: 1px solid var(--border-subtle); border-radius: 1rem; background: var(--surface-elevated); }
+.business-card__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.business-card__stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); gap: 0.5rem; }
+.business-card__stat { display: flex; flex-direction: column; gap: 0.1rem; padding: 0.55rem 0.7rem; border-radius: 0.7rem; background: var(--surface-base); }
+.business-card__stat b { font-size: 1.15rem; }
+.business-card__list { display: flex; flex-direction: column; gap: 0.35rem; margin: 0; padding: 0; list-style: none; }
+.business-card__list li { display: flex; justify-content: space-between; gap: 0.75rem; font-size: 0.9rem; }
+.business-card__actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.business-card__actions button, .business-card__actions a { min-height: 2.5rem; }

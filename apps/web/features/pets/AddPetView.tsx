@@ -14,6 +14,7 @@ import { ApiError } from "@/lib/api/client";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 import { isPlanError, PlanRequiredNote } from "@/features/subscription/PlanRequiredNote";
 import { SPECIES_LABELS } from "./pet-identity";
+import { PET_PHOTO_MAX_BYTES, uploadPetPhoto } from "@/features/pets/pet-photo-upload";
 
 const SPECIES: { value: PetSpecies; icon: typeof Dog }[] = [
   { value: PetSpecies.DOG, icon: Dog },
@@ -53,8 +54,8 @@ const COPY = {
     choosePhoto: "انتخاب عکس",
     replacePhoto: "تغییر عکس",
     removePhoto: "حذف عکس",
-    photoHint: "JPG، PNG یا WebP، حداکثر ۱۰ مگابایت. عکس روی پروفایل و کارت حیوان دیده می‌شود.",
-    photoTooBig: "حجم عکس بیشتر از ۱۰ مگابایت است.",
+    photoHint: "JPG، PNG یا WebP، حداکثر ۵۰ مگابایت. عکس روی پروفایل و کارت حیوان دیده می‌شود.",
+    photoTooBig: "حجم عکس بیشتر از ۵۰ مگابایت است.",
     sex: "جنسیت",
     sexes: { MALE: "نر", FEMALE: "ماده", UNKNOWN: "نمی‌دانم" },
     birth: "تاریخ تولد",
@@ -98,8 +99,8 @@ const COPY = {
     choosePhoto: "Choose a photo",
     replacePhoto: "Replace photo",
     removePhoto: "Remove photo",
-    photoHint: "JPG, PNG or WebP, up to 10 MB. Shown on the pet's profile and card.",
-    photoTooBig: "The photo is larger than 10 MB.",
+    photoHint: "JPG, PNG or WebP, up to 50 MB. Shown on the pet's profile and card.",
+    photoTooBig: "The photo is larger than 50 MB.",
     sex: "Sex",
     sexes: { MALE: "Male", FEMALE: "Female", UNKNOWN: "Not sure" },
     birth: "Birth date",
@@ -143,8 +144,8 @@ const COPY = {
     choosePhoto: "Foto auswählen",
     replacePhoto: "Foto ersetzen",
     removePhoto: "Foto entfernen",
-    photoHint: "JPG, PNG oder WebP, bis 10 MB. Wird im Profil und auf der Karte des Tiers angezeigt.",
-    photoTooBig: "Das Foto ist größer als 10 MB.",
+    photoHint: "JPG, PNG oder WebP, bis 50 MB. Wird im Profil und auf der Karte des Tiers angezeigt.",
+    photoTooBig: "Das Foto ist größer als 50 MB.",
     sex: "Geschlecht",
     sexes: { MALE: "Männlich", FEMALE: "Weiblich", UNKNOWN: "Weiß nicht" },
     birth: "Geburtsdatum",
@@ -188,8 +189,8 @@ const COPY = {
     choosePhoto: "Elegir una foto",
     replacePhoto: "Cambiar foto",
     removePhoto: "Quitar foto",
-    photoHint: "JPG, PNG o WebP, hasta 10 MB. Se muestra en el perfil y en la tarjeta de la mascota.",
-    photoTooBig: "La foto pesa más de 10 MB.",
+    photoHint: "JPG, PNG o WebP, hasta 50 MB. Se muestra en el perfil y en la tarjeta de la mascota.",
+    photoTooBig: "La foto pesa más de 50 MB.",
     sex: "Sexo",
     sexes: { MALE: "Macho", FEMALE: "Hembra", UNKNOWN: "No lo sé" },
     birth: "Fecha de nacimiento",
@@ -222,9 +223,99 @@ const COPY = {
     unnamed: "Nombre de la mascota",
     noHousehold: "Tu hogar aún no está listo; recarga la página.",
   },
+  ar: {
+    title: "إضافة حيوان أليف",
+    intro: "ثلاث خطوات قصيرة — الخطوة الأولى فقط مطلوبة، ويمكن تأجيل الباقي.",
+    steps: ["الهوية", "التفاصيل", "الهوية الصحية"],
+    stepsLabel: "خطوات إضافة حيوان أليف",
+    species: "النوع",
+    name: "الاسم",
+    photo: "الصورة",
+    choosePhoto: "اختر صورة",
+    replacePhoto: "استبدال الصورة",
+    removePhoto: "إزالة الصورة",
+    photoHint: "JPG أو PNG أو WebP، حتى 10 ميغابايت. تظهر في ملف الحيوان الأليف وبطاقته.",
+    photoTooBig: "حجم الصورة أكبر من 10 ميغابايت.",
+    sex: "الجنس",
+    sexes: { MALE: "ذكر", FEMALE: "أنثى", UNKNOWN: "غير متأكد" },
+    birth: "تاريخ الميلاد",
+    noBirth: "لا أعرف التاريخ بالضبط — عمر تقريبي",
+    years: "سنوات",
+    months: "أشهر",
+    breed: "السلالة",
+    breedHint: "اختر اقتراحًا أو اكتب السلالة بنفسك.",
+    breedUnknown: "سلالة غير معروفة أو مختلطة",
+    color: "اللون والعلامات",
+    colorHint: "مثلًا «أبيض مع بقعة بنية على الأذن اليسرى» — يفيد ذلك إذا ضاع يومًا.",
+    weight: "الوزن",
+    unit: "الوحدة",
+    units: { KG: "كغ", LB: "رطل" },
+    microchip: "رقم الشريحة الإلكترونية",
+    microchipHint: "يتكوّن عادةً من 15 رقمًا، ويكون مطبوعًا على بطاقة التطعيم أو شهادة الزرع.",
+    neutered: "التعقيم",
+    neuteredOptions: { NEUTERED: "معقّم", INTACT: "غير معقّم", UNKNOWN: "غير متأكد" },
+    healthNote: "هذه الخطوة اختيارية. أضف المستندات والتطعيمات من السجل الصحي بعد الحفظ.",
+    back: "رجوع",
+    next: "متابعة",
+    skipSave: "تخطٍّ وحفظ",
+    save: "حفظ الحيوان الأليف",
+    saving: "جارٍ الحفظ…",
+    needName: "أدخل اسم الحيوان الأليف.",
+    needAge: "أدخل تاريخ الميلاد أو عمرًا تقريبيًا.",
+    failed: "تعذّرت إضافة هذا الحيوان الأليف. حاول مرة أخرى.",
+    photoFailed: "تم حفظ الحيوان الأليف، لكن لم تُرفع الصورة؛ يمكنك المحاولة مرة أخرى من الملف الشخصي.",
+    preview: "معاينة الملف الشخصي",
+    unnamed: "اسم الحيوان الأليف",
+    noHousehold: "أسرتك ليست جاهزة بعد؛ حدّث الصفحة.",
+  },
+  nl: {
+    title: "Huisdier toevoegen",
+    intro: "Drie korte stappen — alleen de eerste is verplicht; de rest kan wachten.",
+    steps: ["Identiteit", "Details", "Gezondheidsgegevens"],
+    stepsLabel: "Stappen om een huisdier toe te voegen",
+    species: "Soort",
+    name: "Naam",
+    photo: "Foto",
+    choosePhoto: "Kies een foto",
+    replacePhoto: "Foto vervangen",
+    removePhoto: "Foto verwijderen",
+    photoHint: "JPG, PNG of WebP, maximaal 10 MB. Wordt getoond op het profiel en de kaart van je huisdier.",
+    photoTooBig: "De foto is groter dan 10 MB.",
+    sex: "Geslacht",
+    sexes: { MALE: "Mannetje", FEMALE: "Vrouwtje", UNKNOWN: "Weet ik niet" },
+    birth: "Geboortedatum",
+    noBirth: "Ik weet de exacte datum niet — geschatte leeftijd",
+    years: "Jaren",
+    months: "Maanden",
+    breed: "Ras",
+    breedHint: "Kies een suggestie of typ zelf een ras.",
+    breedUnknown: "Onbekend ras of kruising",
+    color: "Kleur en aftekening",
+    colorHint: "Bijvoorbeeld ‘wit met een bruine vlek op het linkeroor’ — handig als je huisdier ooit kwijtraakt.",
+    weight: "Gewicht",
+    unit: "Eenheid",
+    units: { KG: "kg", LB: "lb" },
+    microchip: "Chipnummer",
+    microchipHint: "Meestal 15 cijfers; staat op het vaccinatieboekje of het implantatiecertificaat.",
+    neutered: "Gesteriliseerd",
+    neuteredOptions: { NEUTERED: "Gesteriliseerd", INTACT: "Niet gesteriliseerd", UNKNOWN: "Weet ik niet" },
+    healthNote: "Deze stap is optioneel. Voeg na het opslaan documenten en vaccinaties toe via het gezondheidsdossier.",
+    back: "Terug",
+    next: "Doorgaan",
+    skipSave: "Overslaan en opslaan",
+    save: "Huisdier opslaan",
+    saving: "Opslaan…",
+    needName: "Vul de naam van je huisdier in.",
+    needAge: "Vul een geboortedatum of een geschatte leeftijd in.",
+    failed: "We konden dit huisdier niet toevoegen. Probeer het opnieuw.",
+    photoFailed: "Je huisdier is opgeslagen, maar de foto is niet geüpload; je kunt het opnieuw proberen via het profiel.",
+    preview: "Profielvoorbeeld",
+    unnamed: "Naam van je huisdier",
+    noHousehold: "Je huishouden is nog niet klaar; vernieuw de pagina.",
+  },
 } as const;
 
-const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
+const MAX_PHOTO_BYTES = PET_PHOTO_MAX_BYTES;
 
 /**
  * Add a pet in three short steps: identity (species, name, photo, sex), details (age, breed, colour)
@@ -318,11 +409,7 @@ export function AddPetView() {
       let saved = pet;
       if (photo) {
         try {
-          const contentType = photo.type === "image/png" || photo.type === "image/webp" ? photo.type : "image/jpeg";
-          const target = await petsService.createPhotoUploadUrl(pet.id, contentType);
-          const put = await fetch(target.uploadUrl, { method: "PUT", body: photo, headers: target.headers });
-          if (!put.ok) throw new Error(String(put.status));
-          saved = await petsService.update(pet.id, { photoUrl: target.publicUrl });
+          saved = await petsService.update(pet.id, { photoUrl: await uploadPetPhoto(pet.id, photo) });
         } catch {
           setError(c.photoFailed);
         }

@@ -124,9 +124,10 @@ export function AdminTwoStepPolicyView() {
             {canManage ? (
               <>
                 <label className="gx-twostep-check">
-                  <input type="checkbox" checked={enforced} onChange={(e) => setEnforced(e.target.checked)} />
+                  <input type="checkbox" checked={enforced} disabled={!policy.enforcementAvailable && !policy.enforced} onChange={(e) => setEnforced(e.target.checked)} />
                   {t("policy.required")}
                 </label>
+                {!policy.enforcementAvailable ? <p className="gx-muted">{t("policy.enforcementLater")}</p> : null}
                 <label className="gx-field">
                   {t("policy.graceDays")}
                   <input type="number" min={0} max={30} value={graceDays} onChange={(e) => setGraceDays(Math.max(0, Math.min(30, Number(e.target.value) || 0)))} />

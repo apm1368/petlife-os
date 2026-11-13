@@ -1,0 +1,193 @@
+{
+  "title": "Preguntas frecuentes",
+  "lede": "Respuestas breves a las preguntas que más nos hacen. Para cualquier otra cosa, nuestro equipo de soporte estará encantado de ayudarte.",
+  "updated": "2026-11-13",
+  "groups": [
+    {
+      "id": "members",
+      "heading": "Primeros pasos",
+      "items": [
+        {
+          "q": "¿Qué es opetlife?",
+          "a": "Un solo lugar para la vida con tus mascotas: sus registros e historial de salud, reservas veterinarias y de cuidados, una tienda de vendedores independientes, viajes que admiten mascotas, un taxi para mascotas, ayuda con mascotas perdidas y encontradas, y una comunidad de familias con mascotas."
+        },
+        {
+          "q": "¿Cómo me registro?",
+          "a": "Introduce tu número de móvil y el código de un solo uso que te enviamos por SMS. Cuando esté disponible, también puedes registrarte con una contraseña o una cuenta de Google. Debes tener al menos 18 años para tener tu propia cuenta."
+        },
+        {
+          "q": "¿Puede mi familia compartir los registros de nuestras mascotas?",
+          "a": "Sí. La persona titular del hogar puede invitar a miembros de la familia, aprueba cada invitación y decide quién puede ver y gestionar cada mascota."
+        },
+        {
+          "q": "¿Cuesta algo opetlife?",
+          "a": "Crear una cuenta y mantener los registros de tus mascotas es gratis. Solo pagas los servicios, productos y viajes que reservas o compras. Algunas funciones adicionales forman parte de planes de pago opcionales, que se muestran en la página de suscripción."
+        }
+      ]
+    },
+    {
+      "id": "health",
+      "heading": "Mascotas e historial de salud",
+      "items": [
+        {
+          "q": "¿Quién puede ver el historial de salud de mi mascota?",
+          "a": "Solo tú, los miembros del hogar a los que se lo permitas y las personas con las que decidas compartirlo. Los socios solo ven la información de salud cuando su servicio la necesita, como una clínica o un alojamiento, y solo hasta 24 horas después de la reserva."
+        },
+        {
+          "q": "¿Cómo comparto el historial con un veterinario?",
+          "a": "Crea un enlace para compartir desde la página de salud de la mascota. Dura desde 1 hora hasta 7 días, muestra solo las secciones que elijas y puede revocarse en cualquier momento. También puedes dar acceso a un veterinario de una clínica verificada durante un máximo de 90 días."
+        },
+        {
+          "q": "¿La información de opetlife es consejo médico?",
+          "a": "No. Las herramientas y los artículos de salud te ayudan a llevar un seguimiento y a estar al día, pero no sustituyen a un veterinario. En caso de urgencia, contacta de inmediato con un veterinario o con una clínica de urgencias."
+        }
+      ]
+    },
+    {
+      "id": "bookings",
+      "heading": "Reservas y servicios",
+      "items": [
+        {
+          "q": "¿Se verifican las clínicas y los proveedores?",
+          "a": "Los socios deben superar comprobaciones de identidad y de empresa antes de poder aceptar reservas, y los servicios clínicos necesitan una licencia profesional vigente. Las fichas de negocios importadas de datos cartográficos abiertos aparecen claramente marcadas como no verificadas hasta que el negocio las reclama y las verifica."
+        },
+        {
+          "q": "¿Cómo cancelo una reserva? ¿Me devolverán el dinero?",
+          "a": "Cancela desde la página de la reserva. Cada servicio muestra sus condiciones de cancelación antes de reservar. Dentro del plazo de cancelación gratuita recibes un reembolso completo. Después, recibes el porcentaje que se mostró al reservar. Si el proveedor cancela, siempre recibes un reembolso completo."
+        },
+        {
+          "q": "¿Y si el proveedor no se presenta?",
+          "a": "Notifícalo desde la página de la reserva. Nuestro equipo de soporte lo revisará con el proveedor y decidirá cómo solucionarlo."
+        },
+        {
+          "q": "¿Cómo funciona el taxi para mascotas?",
+          "a": "Marca en el mapa los puntos de recogida y de destino, consulta la tarifa y sigue a tu conductor en tiempo real. Hasta que se active el pago en línea para los viajes, pagas al conductor a su llegada. Puedes cancelar en cualquier momento antes de la recogida."
+        }
+      ]
+    },
+    {
+      "id": "shop",
+      "heading": "Tienda, pago, envío y devoluciones",
+      "items": [
+        {
+          "q": "¿Quién vende los productos?",
+          "a": "Vendedores independientes. opetlife es el mercado en línea, y cada vendedor es responsable de sus productos y emite su propia factura."
+        },
+        {
+          "q": "¿Cómo puedo pagar?",
+          "a": "En la página de pago se muestran las opciones disponibles para esa compra, como el pago en línea, tu monedero o una transferencia de tarjeta a tarjeta. Los precios están en tomanes e incluyen todo lo que aparece en la página de pago."
+        },
+        {
+          "q": "¿Cómo funciona el pago de tarjeta a tarjeta?",
+          "a": "Transfiere el importe exacto a la cuenta que aparece en la página de pago y sube el comprobante en un plazo de 30 minutos. Nuestro equipo de finanzas revisa los comprobantes de sábado a miércoles, 9:00–18:00, y los jueves, 9:00–13:00. Si pagaste de más, la diferencia va a tu monedero. Si pagaste de menos, tienes 30 minutos para pagar el resto."
+        },
+        {
+          "q": "¿Cuánto tarda la entrega?",
+          "a": "Depende del vendedor, del método de entrega y de tu ciudad. La página de tu pedido muestra el plazo previsto y, una vez enviado, el seguimiento."
+        },
+        {
+          "q": "¿Puedo cancelar o devolver un pedido?",
+          "a": "Puedes cancelarlo y recibir un reembolso completo en cualquier momento antes de que el vendedor lo envíe. Si un artículo llega dañado, no coincide con su descripción o está caducado, notifícalo desde la página del pedido en un plazo de 48 horas desde la entrega, con fotos, y conserva el artículo y su embalaje. Tus derechos legales como consumidor siguen siendo aplicables."
+        },
+        {
+          "q": "¿Adónde van los reembolsos?",
+          "a": "Los reembolsos aprobados vuelven a tu método de pago original o a tu monedero de opetlife. El aviso de reembolso te indica cuál de las dos opciones se aplica."
+        }
+      ]
+    },
+    {
+      "id": "wallet",
+      "heading": "Monedero",
+      "items": [
+        {
+          "q": "¿Qué es el monedero?",
+          "a": "Tu saldo en opetlife. Contiene saldo de reembolso, procedente de compras canceladas o reembolsadas, y saldo de compra, procedente de recargas y regalos. El saldo de compra solo puede gastarse en opetlife, y el saldo de regalo caduca a los seis meses."
+        },
+        {
+          "q": "¿Cómo hago una recarga?",
+          "a": "Desde la página del monedero, mediante una transferencia de tarjeta a tarjeta con comprobante. Cada recarga debe ser de entre 10.000 y 50.000.000 tomanes, y puedes tener hasta tres recargas pendientes de revisión a la vez."
+        }
+      ]
+    },
+    {
+      "id": "lost-pets",
+      "heading": "Mascotas perdidas y encontradas",
+      "items": [
+        {
+          "q": "Mi mascota se ha perdido. ¿Qué hago?",
+          "a": "Publica un aviso de mascota perdida con una foto nítida y la zona donde se vio a tu mascota por última vez (no la dirección de tu casa). Se avisará a los miembros cercanos que hayan activado las alertas de zona, y cualquiera que haya visto a tu mascota podrá responder."
+        },
+        {
+          "q": "He encontrado una mascota. ¿Cómo puedo ayudar?",
+          "a": "Publica un aviso de mascota encontrada en la comunidad con una foto y la zona. Puedes publicar hasta tres avisos de mascotas encontradas al día. Si la mascota está herida, llévala primero a un veterinario."
+        },
+        {
+          "q": "¿Las alertas de zona revelan dónde vivo?",
+          "a": "No. Tu punto se redondea a aproximadamente un kilómetro y nunca se muestra a nadie. Puedes elegir un radio de hasta 10 km y desactivar las alertas en cualquier momento."
+        }
+      ]
+    },
+    {
+      "id": "partners",
+      "heading": "Para socios",
+      "items": [
+        {
+          "q": "¿Cómo me uno como clínica, proveedor, vendedor o anfitrión?",
+          "a": "Empieza en las páginas para socios, crea tu organización y sube los documentos solicitados. Procuramos revisarlos en un plazo de 24 horas hábiles. Puedes aceptar reservas o vender en cuanto se complete tu verificación."
+        },
+        {
+          "q": "¿Qué documentos necesito?",
+          "a": "Un documento de identidad y, para los servicios clínicos, una licencia profesional vigente. Según tu negocio, también podemos pedirte una tarjeta de identidad nacional, una licencia comercial o un certificado eNamad, un teléfono fijo y un número de móvil verificado."
+        },
+        {
+          "q": "Mi negocio ya aparece en el directorio. ¿Cómo me hago cargo de él?",
+          "a": "Abre la ficha y elige «¿Es tu negocio?». Solo una organización verificada puede reclamar una ficha."
+        },
+        {
+          "q": "¿Cómo se gestionan las comisiones y los abonos?",
+          "a": "Se establecen en tu acuerdo de socio y se muestran en tu panel de socio, con cada liquidación detallada."
+        }
+      ]
+    },
+    {
+      "id": "privacy",
+      "heading": "Privacidad y tu cuenta",
+      "items": [
+        {
+          "q": "¿opetlife vende mis datos o me muestra anuncios basados en ellos?",
+          "a": "No. No vendemos datos personales ni usamos rastreadores publicitarios o de analítica. La Política de privacidad explica exactamente qué recopilamos y por qué."
+        },
+        {
+          "q": "¿Puedo descargar mis datos?",
+          "a": "Sí. Desde Perfil → Privacidad puedes descargar un archivo con tus mascotas, historiales de salud, reservas, pedidos y más. El archivo sigue disponible durante 7 días."
+        },
+        {
+          "q": "¿Cómo elimino mi cuenta?",
+          "a": "Solicítalo desde Perfil → Privacidad. Revisamos la solicitud, apartamos lo que la ley nos obliga a conservar y eliminamos o anonimizamos el resto. Puedes cancelarla mientras esté en revisión. Antes deben finalizar las reservas, los pedidos, los reembolsos o las disputas abiertos."
+        },
+        {
+          "q": "¿Qué notificaciones recibiré?",
+          "a": "Las que elijas, en la app y por push, SMS o correo electrónico. Los mensajes de marketing están desactivados salvo que los actives. Las alertas de seguridad se envían siempre. También puedes configurar horas de silencio."
+        }
+      ]
+    },
+    {
+      "id": "app",
+      "heading": "La app",
+      "items": [
+        {
+          "q": "¿Hay una app?",
+          "a": "Sí. Puedes instalar opetlife en la pantalla de inicio de tu teléfono directamente desde el navegador, y también hay una app para Android. Ambas usan la misma cuenta."
+        },
+        {
+          "q": "¿Cómo activo las notificaciones push?",
+          "a": "Permite las notificaciones cuando el sitio o la app te lo pidan, o actívalas en tu configuración de notificaciones. Puedes desactivarlas en cualquier momento en ese mismo lugar o en tu navegador."
+        },
+        {
+          "q": "¿Qué idiomas admite opetlife?",
+          "a": "Persa, inglés, alemán, español, árabe y neerlandés. Cambia de idioma desde el menú de idiomas, en la parte superior o inferior de cualquier página."
+        }
+      ]
+    }
+  ]
+}

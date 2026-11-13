@@ -32,6 +32,8 @@ export const PUBLIC_OBJECT_KEY_PREFIXES = [
   "support-need-images/",
   "travel-listing-images/",
   "product-media/",
+  // Partner business logos from signup: public branding (never a document); shown only once the business is verified.
+  "partner-logos/",
 ] as const;
 
 /** Private prefixes StorageService mints today — documentation and tests only; privacy is decided by PUBLIC_OBJECT_KEY_PREFIXES. */

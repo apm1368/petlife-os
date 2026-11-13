@@ -7,7 +7,7 @@ import { AdminGovernanceRuleException, ApiException, NotFoundApiException } from
 import type { SessionUser } from "../../../common/session/session.service";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
-import { evaluateTwoStep, type TwoStepGate } from "./two-step-gate";
+import { evaluateTwoStep, type TwoStepGate, twoStepEnforcementAvailable } from "./two-step-gate";
 import { base32Encode, hashRecoveryCode, matchTotp, newRecoveryCode, newTotpSecret, otpauthUri, RECOVERY_CODE_COUNT } from "./totp";
 import { openSecret, sealSecret } from "./two-step-secret";
 
@@ -145,7 +145,7 @@ export class AdminTwoStepService {
   /** Turning it off yourself needs a current code, and is refused while enforcement is on. */
   async disable(admin: ResolvedAdminContext, code: string) {
     const policy = await this.prisma.adminTwoStepPolicy.findUnique({ where: { id: 1 } });
-    if (policy?.enforcedAt) throw new AdminGovernanceRuleException({ rule: "TWO_STEP_ENFORCED" });
+    if (policy?.enforcedAt && twoStepEnforcementAvailable()) throw new AdminGovernanceRuleException({ rule: "TWO_STEP_ENFORCED" });
     await this.checkCode(admin, { code });
     await this.removeFactor(admin.userId, async (tx) => {
       await this.audit.record({ adminUserId: admin.adminUserId, action: "admin_two_step.disabled", entityType: "AdminUser", entityId: admin.adminUserId, beforeSummary: { twoStep: "ON" }, afterSummary: { twoStep: "OFF" }, tx });
@@ -183,12 +183,13 @@ export class AdminTwoStepService {
       const graceEndsAt = enforcedAt && !enrolledAt ? new Date(Math.max(enforcedAt.getTime(), a.createdAt.getTime()) + graceDays * 24 * 60 * 60 * 1000) : null;
       return { adminUserId: a.id, displayName: a.user.displayName, role: a.role, enrolled: !!enrolledAt, enrolledAt: enrolledAt?.toISOString() ?? null, graceEndsAt: graceEndsAt?.toISOString() ?? null };
     });
-    return { enforced: !!enforcedAt, enforcedAt: enforcedAt?.toISOString() ?? null, graceDays, enrolledCount: members.filter((m) => m.enrolled).length, members };
+    return { enforced: !!enforcedAt && twoStepEnforcementAvailable(), enforcementAvailable: twoStepEnforcementAvailable(), enforcedAt: enforcedAt?.toISOString() ?? null, graceDays, enrolledCount: members.filter((m) => m.enrolled).length, members };
   }
 
   /** SUPER_ADMIN only (admin.manage), and only once the actor's own account is protected. */
   async setPolicy(actor: ResolvedAdminContext, input: { enforced: boolean; graceDays: number; reason: string }) {
     if (actor.role !== AdminRole.SUPER_ADMIN) throw new AdminGovernanceRuleException({ rule: "TWO_STEP_POLICY_SUPER_ADMIN_ONLY" });
+    if (input.enforced && !twoStepEnforcementAvailable()) throw new AdminGovernanceRuleException({ rule: "TWO_STEP_ENFORCEMENT_NOT_AVAILABLE" });
     if (input.enforced) await this.assertActorEnrolled(actor);
     const before = await this.prisma.adminTwoStepPolicy.findUnique({ where: { id: 1 } });
     const enforcedAt = input.enforced ? before?.enforcedAt ?? new Date() : null;

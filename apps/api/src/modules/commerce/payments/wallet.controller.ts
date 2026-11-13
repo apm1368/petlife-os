@@ -17,7 +17,7 @@ class WalletHistoryQueryDto {
 class StartTopUpDto {
   @IsInt() @Min(1) amount!: number;
   @IsIn(Object.values(WalletTopUpRail)) rail!: WalletTopUpRail;
-  @IsOptional() @IsIn(["fa", "en", "de", "es"]) locale?: string;
+  @IsOptional() @IsIn(["fa", "en", "de", "es", "ar", "nl"]) locale?: string;
 }
 
 class ReceiptUploadTargetDto {
@@ -42,7 +42,7 @@ export class WalletController {
   @Get()
   async summary(@CurrentUser() user: SessionUser): Promise<WalletSummaryDto> {
     const { balances, expiringSoon } = await this.wallet.summary(user.id);
-    return { balances, expiringSoon, topUp: this.topUps.options() };
+    return { balances, expiringSoon, topUp: await this.topUps.options() };
   }
 
   @Get("entries")

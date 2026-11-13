@@ -3,6 +3,7 @@ import type { AvailabilityExceptionType, BookingStatus, ProviderAvailabilityRule
 import type { SlotAvailabilityState } from "@petlife/types";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { ValidationApiException } from "../../common/errors/api-exception";
+import { bookingSpanMinutes } from "../booking/booking-pricing.util";
 import { enumerateLocalDates, minutesToTimeString, timeStringToMinutes, zonedTimeToUtc } from "./timezone.util";
 
 /** Terminal states that never occupy capacity. */
@@ -30,6 +31,11 @@ export interface GenerateSlotsParams {
   to: Date;
   /** Booking being rescheduled: its own time does not count as a conflict. */
   ignoreBookingId?: string;
+  /**
+   * Pets in the booking. Grooming, vet and training take them one after another, so a slot then spans the duration
+   * × pets (still starting on the usual grid); other categories keep one duration whatever the count.
+   */
+  petCount?: number;
 }
 
 function overlaps(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date): boolean {
@@ -75,6 +81,7 @@ export class SlotGeneratorService {
     const variant = params.variantId ? service.variants.find((v) => v.id === params.variantId && v.isActive) : undefined;
     if (params.variantId && !variant) return [];
     const durationMinutes = variant?.durationMinutes ?? service.durationMinutes;
+    const spanMinutes = bookingSpanMinutes(service.category, durationMinutes, params.petCount ?? 1);
 
     const [rules, exceptions, activeBookings, staff, resources] = await Promise.all([
       this.prisma.providerAvailabilityRule.findMany({
@@ -149,9 +156,9 @@ export class SlotGeneratorService {
 
         const startMinutes = timeStringToMinutes(rule.startLocalTime);
         const endMinutes = timeStringToMinutes(rule.endLocalTime);
-        for (let m = startMinutes; m + durationMinutes <= endMinutes; m += durationMinutes) {
+        for (let m = startMinutes; m + spanMinutes <= endMinutes; m += durationMinutes) {
           const slotStart = zonedTimeToUtc(dateStr, minutesToTimeString(m), rule.timezone);
-          const slotEnd = new Date(slotStart.getTime() + durationMinutes * 60_000);
+          const slotEnd = new Date(slotStart.getTime() + spanMinutes * 60_000);
           addSlot(slotStart, slotEnd, rule.timezone, providerUserId ?? rule.providerUserId ?? null);
         }
       }
@@ -159,10 +166,10 @@ export class SlotGeneratorService {
 
     for (const override of overrides) {
       let cursor = override.startAt;
-      while (cursor.getTime() + durationMinutes * 60_000 <= override.endAt.getTime()) {
-        const slotEnd = new Date(cursor.getTime() + durationMinutes * 60_000);
+      while (cursor.getTime() + spanMinutes * 60_000 <= override.endAt.getTime()) {
+        const slotEnd = new Date(cursor.getTime() + spanMinutes * 60_000);
         addSlot(cursor, slotEnd, "UTC", providerUserId ?? override.providerUserId ?? null);
-        cursor = slotEnd;
+        cursor = new Date(cursor.getTime() + durationMinutes * 60_000);
       }
     }
 

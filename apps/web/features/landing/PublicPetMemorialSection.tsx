@@ -14,9 +14,10 @@ const CANDLES_KEY = "opl-candles";
 
 /**
  * Public memorials at twilight, in Persian arches (pattern-2026-11): only owner-consented, admin-approved names and
- * photos. A candle lit here stays on this device only; nothing is counted or sent.
+ * photos. A candle lit here stays on this device only; nothing is counted or sent. On the landing it shows the latest
+ * eight; with `page` it is the public /memorials page (market-readiness #290, Q60) and lists all the API returns (the latest 12).
  */
-export function PublicPetMemorialSection() {
+export function PublicPetMemorialSection({ page = false }: { page?: boolean } = {}) {
   const t = useTranslations("landing.publicMemorial");
   const tc = useTranslations("common");
   const raw = useLocale();
@@ -75,14 +76,14 @@ export function PublicPetMemorialSection() {
     <div className="opl-wrap">
       <header className="opl-head center">
         <p className="opl-eyebrow"><Heart size={18} aria-hidden="true" />{t("eyebrow")}</p>
-        <h2 className="opl-h2" id="park-memorial-title">{t("title")}</h2>
+        {page ? <h1 className="opl-h2" id="park-memorial-title">{t("title")}</h1> : <h2 className="opl-h2" id="park-memorial-title">{t("title")}</h2>}
         <p className="opl-lede">{t("description")}</p>
       </header>
       {failed ? <ErrorRecovery title={t("title")} message={t("loadError")} retryLabel={tc("retry")} onRetry={() => void load()} /> : null}
       {!failed && items === null ? <Skeleton className="h-64 w-full" aria-label={tc("loading")} /> : null}
       {!failed && items?.length === 0 ? <EmptyState title={t("empty")} /> : null}
       {!failed && items ? <div className="opl-arches">
-        {items.slice(0, 8).map((item) => {
+        {(page ? items : items.slice(0, 8)).map((item) => {
           const on = lit.has(item.id);
           return <figure key={item.id} className={`opl-arch${on ? " lit" : ""}`}>
             <div className="opl-arch__frame"><Image unoptimized src={item.imageUrl} alt={t("imageAlt", { name: item.name })} width={360} height={516} loading="lazy" /></div>

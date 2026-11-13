@@ -147,7 +147,8 @@ describe("Batch 8 — Account & security", () => {
         expect((await u.c.get("/me").expect(200)).body.locale).toBe(locale);
         expect((await prisma.user.findUniqueOrThrow({ where: { id: u.userId } })).locale).toBe(locale);
       }
-      await u.c.patch("/me").send({ locale: "ar" }).expect(400);
+      await u.c.patch("/me").send({ locale: "tr" }).expect(400);
+      expect((await u.c.patch("/me").send({ locale: "ar" }).expect(200)).body.locale).toBe("ar");
     });
 
     it("registers the requested account identity while keeping the phone explicitly unverified", async () => {
@@ -590,6 +591,11 @@ describe("Batch 8 — Account & security", () => {
       expect(before.body.consents.find((c: { kind: string }) => c.kind === "TERMS")).toMatchObject({ required: true, granted: false });
       await u.c.patch("/account/privacy/consent").send({ kind: "TERMS", granted: true }).expect(200);
       expect((await u.c.patch("/account/privacy/consent").send({ kind: "PRIVACY", granted: false }).expect(400)).body.error.code).toBe("CONSENT_REQUIRED");
+      // The overview reads the accepted version back (a local named `exports` once made CONSENT_VERSION undefined here,
+      // so every member saw Terms/Privacy as never accepted).
+      const after = await u.c.get("/account/privacy").expect(200);
+      expect(after.body.consentVersion).toEqual(expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/));
+      expect(after.body.consents.find((c: { kind: string }) => c.kind === "TERMS")).toMatchObject({ granted: true, currentVersion: after.body.consentVersion, lastRecordedVersion: after.body.consentVersion });
 
       let prefs = await u.c.get("/notification-preferences").expect(200);
       expect(prefs.body.marketingConsentGranted).toBe(false);

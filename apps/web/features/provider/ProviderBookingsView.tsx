@@ -16,7 +16,7 @@ const FILTERS: FilterKey[] = ["requests", "today", "upcoming", "past", "cancelle
 export function ProviderBookingsView() {
   const t = useTranslations("provider.bookings");
   const router = useRouter();
-  const locale = useLocale() as "fa" | "en" | "de" | "es";
+  const locale = useLocale() as "fa" | "en" | "de" | "es" | "ar" | "nl";
 
   const [filter, setFilter] = useState<FilterKey>("today");
   const [bookings, setBookings] = useState<ProviderBookingSummaryDto[] | null>(null);

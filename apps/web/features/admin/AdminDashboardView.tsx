@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import {
   ArrowLeftRight,
   BadgeCheck,
+  CalendarDays,
   ChartColumn,
   CircleCheck,
   ClipboardList,
@@ -22,6 +23,7 @@ import {
   MapPinned,
   MessagesSquare,
   PackageCheck,
+  PawPrint,
   Plus,
   Receipt,
   Search,
@@ -29,12 +31,14 @@ import {
   ShieldPlus,
   ShoppingBag,
   Siren,
+  Stethoscope,
   Skeleton,
   SlidersHorizontal,
   StatusLabel,
   Wallet,
 } from "@petlife/ui";
-import type { AdminTaskDto } from "@petlife/types";
+import type { AdminLaunchKpisDto, AdminTaskDto } from "@petlife/types";
+import { asLocale, fmtNumber } from "./reports/report-format";
 import { ApiError } from "@/lib/api/client";
 import Link from "@/features/navigation/localized-link";
 import { adminService, type SystemHealth, type TrustQueueItem } from "@/services/admin.service";
@@ -61,13 +65,18 @@ function failureKind(error: unknown): LoadFailure {
  * Each is gated by the permission of the list it opens — the API already withholds the count (null), and the
  * page never draws a tile it would not let the admin open.
  */
-const QUEUES: { key: QueueKey; href: string; permission: string; icon: Icon; tone: "urgent" | "attention" | "neutral" }[] = [
+/** `permission` may list several (any one shows the tile); `routes` then picks the list the admin can open. */
+const QUEUES: { key: QueueKey; href: string; permission: string | string[]; routes?: Record<string, string>; icon: Icon; tone: "urgent" | "attention" | "neutral" }[] = [
   { key: "openTrustCases", href: "/admin/trust", permission: "trust.view", icon: ShieldAlert, tone: "urgent" },
   { key: "openDisputes", href: "/admin/disputes", permission: "dispute.view", icon: Gavel, tone: "urgent" },
   { key: "openSupportCases", href: "/admin/support", permission: "support.view", icon: Headset, tone: "attention" },
-  { key: "pendingRefundApprovals", href: "/admin/transactions", permission: "finance.view", icon: ArrowLeftRight, tone: "attention" },
+  { key: "pendingRefundApprovals", href: "/admin/transactions/refund-approvals", permission: "finance.view", icon: ArrowLeftRight, tone: "attention" },
   { key: "pendingRefundRequests", href: "/admin/commerce/refund-requests", permission: "commerce.view", icon: Receipt, tone: "attention" },
-  { key: "pendingWalletTopUps", href: "/admin/wallets/top-ups", permission: "wallet.topup.review", icon: Wallet, tone: "attention" },
+  { key: "pendingWalletTopUps", href: "/admin/wallets/top-ups", permission: "wallet.view", icon: Wallet, tone: "attention" },
+  { key: "pendingDeletionRequests", href: "/admin/privacy/deletion-requests", permission: "admin.manage", icon: KeyRound, tone: "attention" },
+  { key: "openOwnershipDisputes", href: "/admin/ownership-transfers", permission: "customer.view", icon: Gavel, tone: "attention" },
+  { key: "openProviderNoShows", href: "/admin/services?noShowParty=PROVIDER", permission: "services.view", icon: Stethoscope, tone: "attention" },
+  { key: "pendingReviews", href: "/admin/services/reviews", permission: ["services.view", "commerce.view", "travel.view"], routes: { "services.view": "/admin/services/reviews", "commerce.view": "/admin/commerce/reviews", "travel.view": "/admin/travel/reviews" }, icon: MessagesSquare, tone: "neutral" },
   { key: "openCommunityReports", href: "/admin/community", permission: "trust.view", icon: Siren, tone: "attention" },
   { key: "pendingVerifications", href: "/admin/verification", permission: "verification.manage", icon: BadgeCheck, tone: "neutral" },
   { key: "pendingOfferModeration", href: "/admin/commerce/product-moderation", permission: "commerce.view", icon: ShoppingBag, tone: "neutral" },
@@ -164,7 +173,12 @@ export function AdminDashboardView() {
     return known[status] ?? status;
   };
 
-  const board = QUEUES.filter((q) => allowed(q.permission) && typeof summary[q.key] === "number").map((q) => ({ ...q, count: summary[q.key] as number }));
+  const may = (p: string | string[]) => (Array.isArray(p) ? p.some(allowed) : allowed(p));
+  const board = QUEUES.filter((q) => may(q.permission) && typeof summary[q.key] === "number").map((q) => ({
+    ...q,
+    href: q.routes ? (Object.entries(q.routes).find(([p]) => allowed(p))?.[1] ?? q.href) : q.href,
+    count: summary[q.key] as number,
+  }));
   const waiting = board.filter((q) => q.count > 0);
   const clear = board.filter((q) => q.count === 0);
   const total = waiting.reduce((sum, q) => sum + q.count, 0);
@@ -172,7 +186,9 @@ export function AdminDashboardView() {
   const hour = tehranHour();
   const greeting = t(hour < 12 ? "greeting.morning" : hour < 17 ? "greeting.afternoon" : "greeting.evening");
   const workers = health.value?.components.workers ?? [];
-  const healthyWorkers = workers.filter((w) => w.status === "RUNNING" || w.status === "HEALTHY" || w.status === "UP").length;
+  // The API reports OK / LATE / FAILING / WAITING_FIRST_RUN per worker (admin-system.service.ts); counting
+  // RUNNING/HEALTHY/UP showed "0 of 16" while every worker was fine.
+  const healthyWorkers = workers.filter((w) => w.status === "OK" || w.status === "WAITING_FIRST_RUN").length;
 
   return (
     <div className="gx-page gx-dashboard">
@@ -202,6 +218,8 @@ export function AdminDashboardView() {
           ) : null}
         </div>
       </header>
+
+      {summary.launchKpis ? <LaunchKpis kpis={summary.launchKpis} /> : null}
 
       {board.length ? (
         <section className="gx-card" aria-labelledby="dash-attention">
@@ -374,5 +392,32 @@ export function AdminDashboardView() {
         </div>
       ) : null}
     </div>
+  );
+}
+
+/** #290 Q97: the launch month's success measure, registered pets and weekly bookings, at the top of the dashboard. */
+function LaunchKpis({ kpis }: { kpis: AdminLaunchKpisDto }) {
+  const t = useTranslations("rollout.admin.launch");
+  const locale = asLocale(useLocale());
+  const delta = kpis.bookingsThisWeek - kpis.bookingsLastWeek;
+  return (
+    <section className="gx-page" aria-labelledby="dash-launch">
+      <div className="gx-section-title">
+        <h2 id="dash-launch">{t("title")}</h2>
+        <p>{t("hint")}</p>
+      </div>
+      <div className="gx-grid gx-grid--kpi">
+        <Link href="/admin/reports" className="gx-kpi gx-kpi--accent">
+          <span className="gx-kpi__label"><PawPrint size={16} aria-hidden="true" />{t("registeredPets")}</span>
+          <span className="gx-kpi__value">{fmtNumber(kpis.registeredPets, locale)}</span>
+          <span className="gx-kpi__foot"><span className="gx-delta gx-delta--up">+{fmtNumber(kpis.newPetsThisWeek, locale)}</span><span>{t("thisWeek")}</span></span>
+        </Link>
+        <Link href="/admin/services" className="gx-kpi">
+          <span className="gx-kpi__label"><CalendarDays size={16} aria-hidden="true" />{t("bookingsThisWeek")}</span>
+          <span className="gx-kpi__value">{fmtNumber(kpis.bookingsThisWeek, locale)}</span>
+          <span className="gx-kpi__foot"><span className={`gx-delta ${delta >= 0 ? "gx-delta--up" : "gx-delta--down"}`}>{delta >= 0 ? "+" : "−"}{fmtNumber(Math.abs(delta), locale)}</span><span>{t("vsLastWeek", { count: fmtNumber(kpis.bookingsLastWeek, locale) })}</span></span>
+        </Link>
+      </div>
+    </section>
   );
 }

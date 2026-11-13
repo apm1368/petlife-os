@@ -12,6 +12,9 @@ import { useSessionStore } from "@/stores/session-store";
 import { ReportContentPanel } from "@/features/shared/ReportContentPanel";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 import { CommunityFrame } from "./CommunityFrame";
+import { SafetyTip } from "@/features/shared/SafetyTip";
+import { MessagePoster } from "./MessagePoster";
+import { OwnContentControls } from "./OwnContentControls";
 
 const REACTIONS: CommunityReactionType[] = [CommunityReactionType.LIKE, CommunityReactionType.LOVE, CommunityReactionType.HELPFUL];
 
@@ -95,7 +98,7 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
     <CommunityFrame><div className="flex flex-col gap-5">
       <ContextSurface className="community-post flex flex-col gap-2">
         <div className="community-post__head flex items-center justify-between">
-          <span className="text-body text-text-primary">{post.authorDisplayName}</span>
+          <span className="text-body text-text-primary">{post.authorDisplayName}{post.editedAt ? <span className="text-metadata text-text-secondary"> · {t("own.edited")}</span> : null}</span>
           <span className="text-metadata text-text-secondary">{t(`postType.${post.type}`)}</span>
         </div>
         {post.title ? <h1 className="text-page-title text-text-primary">{post.title}</h1> : null}
@@ -117,7 +120,21 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
           ))}
         </div>
 
-        <ReportContentPanel successMessage={t("post.reportSuccess")} submit={(reason, details) => communityService.reportPost(postId, reason, details)} />
+        {post.type === "ADOPTION" ? <SafetyTip kind="adoption" /> : post.type === "LOST_PET_SHARE" || post.type === "FOUND_PET" ? <SafetyTip kind="lostPet" /> : post.type === "RESCUE" ? <SafetyTip kind="donation" /> : null}
+
+        <MessagePoster post={post} />
+        {post.isMine ? (
+          <OwnContentControls
+            kind="post"
+            title={post.title}
+            body={post.body}
+            canEdit={String(post.sourceType) === "USER"}
+            onSave={async (v) => setPost(await communityService.updatePost(postId, { title: v.title ?? "", body: v.body }))}
+            onDelete={async () => { await communityService.deletePost(postId); router.push(`/${locale}/community`); }}
+          />
+        ) : (
+          <ReportContentPanel successMessage={t("post.reportSuccess")} submit={(reason, details) => communityService.reportPost(postId, reason, details)} />
+        )}
 
         {actionError ? <p className="text-body text-state-urgent">{actionError}</p> : null}
       </ContextSurface>
@@ -139,9 +156,13 @@ export function CommunityPostDetailView({ postId }: { postId: string }) {
           <div className="flex flex-col gap-2">
             {comments.items.map((comment) => (
               <ContextSurface key={comment.id} className="community-comment flex flex-col gap-1">
-                <span className="text-metadata text-text-secondary">{comment.authorDisplayName}</span>
+                <span className="text-metadata text-text-secondary">{comment.authorDisplayName}{comment.editedAt ? ` · ${t("own.edited")}` : ""}</span>
                 <p className="text-body text-text-primary">{comment.body}</p>
-                <ReportContentPanel successMessage={t("post.reportSuccess")} submit={(reason, details) => communityService.reportComment(comment.id, reason, details)} />
+                {comment.isMine ? (
+                  <OwnContentControls kind="comment" body={comment.body} onSave={async (v) => { await communityService.updateComment(comment.id, v.body); await load(); }} onDelete={async () => { await communityService.deleteComment(comment.id); await load(); }} />
+                ) : (
+                  <ReportContentPanel successMessage={t("post.reportSuccess")} submit={(reason, details) => communityService.reportComment(comment.id, reason, details)} />
+                )}
               </ContextSurface>
             ))}
           </div>

@@ -10,6 +10,7 @@ import { petsService } from "@/services/pets.service";
 import { SystemState, systemStateFor, type SystemStateKind } from "@/features/system/SystemState";
 import { formatAge, formatWeight, speciesLabel } from "./pet-identity";
 import { useActivePet } from "@/hooks/use-active-pet";
+import { usePetStore } from "@/stores/pet-store";
 import type { RouteLocale } from "@/lib/i18n/config";
 
 const copy = {
@@ -142,6 +143,68 @@ const copy = {
     male: "Macho",
     female: "Hembra",
     registered: "Registrado",
+  }, ar: {
+    aria: "أقسام ملف الحيوان الأليف",
+    overview: "نظرة عامة",
+    health: "الصحة",
+    care: "الرعاية",
+    documents: "المستندات",
+    memories: "الذكريات",
+    activity: "النشاط",
+    travel: "السفر",
+    expenses: "المصروفات",
+    edit: "تعديل الهوية",
+    unknownBreed: "السلالة غير مسجّلة",
+    unknownAge: "العمر غير مسجّل",
+    weight: "الوزن",
+    microchip: "الشريحة الإلكترونية",
+    unknown: "غير مسجّل",
+    loadError: "ملف هذا الحيوان الأليف غير متاح.",
+    retry: "حاول مرة أخرى",
+    loading: "جارٍ تحميل ملف الحيوان الأليف",
+    active: "نشط",
+    lost: "مفقود",
+    transferred: "منقول مؤقتًا",
+    deceased: "متوفى",
+    memorial: "ذكرى",
+    lostMessage: "وضع الفقدان مفعّل؛ تبقى المعلومات الطبية خاصة.",
+    transferredMessage: "الرعاية منقولة مؤقتًا؛ راجع نطاق الوصول الحالي.",
+    memorialMessage: "يبقى السجل الصحي متاحًا؛ وتأتي الذكريات وقصة حياة الحيوان الأليف في المقدمة.",
+    sex: "الجنس",
+    male: "ذكر",
+    female: "أنثى",
+    registered: "مسجَّل"
+  }, nl: {
+    aria: "Onderdelen huisdierprofiel",
+    overview: "Overzicht",
+    health: "Gezondheid",
+    care: "Zorg",
+    documents: "Documenten",
+    memories: "Herinneringen",
+    activity: "Activiteit",
+    travel: "Reizen",
+    expenses: "Uitgaven",
+    edit: "Identiteit bewerken",
+    unknownBreed: "Ras niet vastgelegd",
+    unknownAge: "Leeftijd niet vastgelegd",
+    weight: "Gewicht",
+    microchip: "Microchip",
+    unknown: "Niet vastgelegd",
+    loadError: "Dit huisdierprofiel is niet beschikbaar.",
+    retry: "Opnieuw proberen",
+    loading: "Huisdierprofiel laden",
+    active: "Actief",
+    lost: "Vermist",
+    transferred: "Tijdelijk overgedragen",
+    deceased: "Overleden",
+    memorial: "In memoriam",
+    lostMessage: "Vermist-modus is actief; medische informatie blijft privé.",
+    transferredMessage: "De zorg is tijdelijk overgedragen; controleer de huidige toegang.",
+    memorialMessage: "De gezondheidsgeschiedenis blijft beschikbaar; herinneringen en het levensverhaal van het huisdier staan voorop.",
+    sex: "Geslacht",
+    male: "Mannetje",
+    female: "Vrouwtje",
+    registered: "Geregistreerd"
   },
 } as const;
 
@@ -202,6 +265,13 @@ function PetContextForId({ petId, children }: { petId: string; children: ReactNo
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [petId]);
+
+  // A save on a page below (e.g. "Edit details") puts the updated pet in the shared store; the hero follows it at
+  // once instead of showing the old weight or name until a reload (QA L11).
+  const storedPet = usePetStore((state) => state.pets.find((p) => p.id === petId) ?? null);
+  useEffect(() => {
+    if (storedPet && pet && storedPet.id === pet.id && storedPet.updatedAt > pet.updatedAt) setPet(storedPet);
+  }, [storedPet, pet]);
 
   if (error === "GENERIC_RETRYABLE_ERROR")
     return <ErrorRecovery title={c.loadError} message="" retryLabel={c.retry} onRetry={load} />;

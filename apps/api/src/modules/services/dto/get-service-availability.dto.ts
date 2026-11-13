@@ -1,4 +1,5 @@
-import { IsDateString, IsOptional, IsUUID } from "class-validator";
+import { Type } from "class-transformer";
+import { IsDateString, IsInt, IsOptional, IsUUID, Max, Min } from "class-validator";
 
 export class GetServiceAvailabilityDto {
   /** Required only when the service itself has no fixed locationId. */
@@ -24,4 +25,12 @@ export class GetServiceAvailabilityDto {
   @IsOptional()
   @IsUUID()
   variantId?: string;
+
+  /** Pets in the booking: grooming, vet and training slots then span the duration × pets. */
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(10)
+  petCount?: number;
 }

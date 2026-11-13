@@ -7,18 +7,20 @@ export const SITE_ORIGIN = "https://opetlife.ir";
 export const SITE_LOGO_PATH = "/brand/opl/app-icon-512.png";
 export const SITE_SHARE_IMAGE_PATH = "/brand/opl/social-card-1200x630.png";
 
-export const SITE_NAME: Record<RouteLocale, string> = { fa: "اپت‌لایف", en: "opetlife", de: "opetlife", es: "opetlife" };
+export const SITE_NAME: Record<RouteLocale, string> = { fa: "اپت‌لایف", en: "opetlife", de: "opetlife", es: "opetlife", ar: "opetlife", nl: "opetlife" };
 
-export const OG_LOCALE: Record<RouteLocale, string> = { fa: "fa_IR", en: "en_US", de: "de_DE", es: "es_ES" };
+export const OG_LOCALE: Record<RouteLocale, string> = { fa: "fa_IR", en: "en_US", de: "de_DE", es: "es_ES", ar: "ar_AR", nl: "nl_NL" };
 
 /** BCP 47 tags for `inLanguage` and feeds. */
-export const LANGUAGE_TAG: Record<RouteLocale, string> = { fa: "fa-IR", en: "en", de: "de", es: "es" };
+export const LANGUAGE_TAG: Record<RouteLocale, string> = { fa: "fa-IR", en: "en", de: "de", es: "es", ar: "ar", nl: "nl" };
 
 export const SITE_TAGLINE: Record<RouteLocale, string> = {
   fa: "خدمات، راهنما و ابزارهای نگهداری سگ و گربه در یک جا",
   en: "Care, guides and services for life with your dog or cat, in one place",
   de: "Pflege, Ratgeber und Services für das Leben mit Hund oder Katze an einem Ort",
   es: "Cuidados, guías y servicios para la vida con tu perro o gato en un solo lugar",
+  ar: "الرعاية والأدلة والخدمات لحياتك مع كلبك أو قطتك، في مكان واحد",
+  nl: "Zorg, gidsen en diensten voor het leven met je hond of kat, op één plek",
 };
 
 /**
@@ -59,6 +61,23 @@ export function organizationJsonLd(locale: RouteLocale) {
       publisher: { "@id": `${SITE_ORIGIN}/#organization` },
     },
   ];
+}
+
+/** The About page as an AboutPage about the site's Organization (same @id as the home page's Organization node). */
+export function aboutPageJsonLd(locale: RouteLocale, name: string, description: string) {
+  const url = absoluteUrl(`/${locale}/about`);
+  return {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "@id": `${url}#webpage`,
+    url,
+    name,
+    description,
+    inLanguage: LANGUAGE_TAG[locale],
+    isPartOf: { "@id": `${SITE_ORIGIN}/#website` },
+    about: { "@id": `${SITE_ORIGIN}/#organization` },
+    mainEntity: { "@id": `${SITE_ORIGIN}/#organization` },
+  };
 }
 
 /** Serialises structured data for a `<script type="application/ld+json">`, escaping `<` so content can never close the tag. */

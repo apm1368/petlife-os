@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronDown, HeartPulse, Menu, Plane, ShieldCheck, ShoppingBag, Sparkles, Users, X } from "@petlife/ui";
-import type { RouteLocale } from "@/lib/i18n/config";
+import { LOCALE_PREFIX, type RouteLocale } from "@/lib/i18n/config";
 import { Brand } from "@/features/brand/Brand";
 import { useSessionBootstrap } from "@/hooks/use-session-bootstrap";
 import { useSessionStore } from "@/stores/session-store";
@@ -40,7 +40,7 @@ export function ParkHeader({ locale }: { locale: RouteLocale }) {
   }, []);
   const links = [
     { href: `${root}/vet/find`, label: c.services.vet.title },
-    { href: `${home}#park-about`, label: c.about },
+    { href: `${root}/about`, label: c.about },
     { href: `${home}#park-partners`, label: c.partners },
   ];
   return <header className={`opl-hdr${scrolled ? " scrolled" : ""}`} onKeyDown={(event) => { if (event.key === "Escape") { setDd(false); if (open) { setOpen(false); menuButton.current?.focus(); } } }}>
@@ -66,7 +66,7 @@ export function ParkHeader({ locale }: { locale: RouteLocale }) {
         <label className="sr-only" htmlFor="park-language-select">{o.header.language}</label>
         <select id="park-language-select" className="opl-lang" aria-label={o.header.language} value={locale} onChange={(event) => {
           const url = new URL(window.location.href);
-          url.pathname = `/${event.target.value}${url.pathname.replace(/^\/(fa|en|de|es)/, "")}`;
+          url.pathname = `/${event.target.value}${url.pathname.replace(LOCALE_PREFIX, "")}`;
           window.location.assign(url.toString());
         }}>
           <option value="fa">فارسی</option><option value="en">English</option><option value="de">Deutsch</option><option value="es">Español</option>
@@ -90,7 +90,7 @@ export function ParkHeader({ locale }: { locale: RouteLocale }) {
         <Link href={`${root}/auth`} onClick={() => setOpen(false)}>{c.signIn}</Link>
         <Link href={`${root}/register`} onClick={() => setOpen(false)}>{c.memberJoin}</Link>
         <Link href={`${root}/auth?returnTo=${partnerReturn}`} onClick={() => setOpen(false)}>{c.partnerSignIn}</Link>
-        <Link href={`${root}/register?returnTo=${partnerReturn}`} onClick={() => setOpen(false)}>{c.partnerJoin}</Link>
+        <Link href={`${root}/partners/join`} onClick={() => setOpen(false)}>{c.partnerJoin}</Link>
         <div className="opl-msheet__tools"><ThemeToggle /><DisplayModeToggle locale={locale} compact /></div>
       </div>
     </nav>

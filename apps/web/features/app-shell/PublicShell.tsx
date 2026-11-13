@@ -17,7 +17,7 @@ import { FamilyReel } from "@/features/reel/FamilyReel";
 import { PublicFooter } from "./PublicFooter";
 import { MemberFrame } from "./MemberFrame";
 import { PlatformAnnouncement } from "./PlatformAnnouncement";
-import type { RouteLocale } from "@/lib/i18n/config";
+import { hasLocalePrefix, stripLocalePrefix, type RouteLocale } from "@/lib/i18n/config";
 
 /**
  * The shell for public browsing surfaces (vet/service/shop discovery) —
@@ -41,7 +41,8 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
   const publicCopy = useTranslations("publicNavigation");
   const router = useRouter();
   const preview = useLocalPreview();
-  const warmSurface = /^\/(fa|en|de|es)\//.test(usePathname() ?? "");
+  const pathname = usePathname() ?? "";
+  const warmSurface = hasLocalePrefix(pathname) && stripLocalePrefix(pathname).startsWith("/");
 
   // A signed-in member keeps the member frame on public discovery pages; the frame adds the family reel at the end.
   if (!preview && status === "authenticated" && user) return <MemberFrame>{children}</MemberFrame>;

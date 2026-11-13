@@ -78,17 +78,20 @@ export class SellerOrderService {
     return order;
   }
 
-  async getById(ctx: ResolvedSellerContext, orderId: string): Promise<OrderDetailDto & { source: SellerOrderSummaryDto["source"]; externalOrderId: string | null; paymentSource: SellerOrderSummaryDto["paymentSource"] }> {
+  async getById(ctx: ResolvedSellerContext, orderId: string): Promise<OrderDetailDto & { source: SellerOrderSummaryDto["source"]; externalOrderId: string | null; paymentSource: SellerOrderSummaryDto["paymentSource"]; deliveryProvider: string | null }> {
     const order = await this.loadOwned(ctx, orderId);
-    const [items, fulfillment, sellerOrganization, statusEvents, refundRequests] = await Promise.all([
+    const [items, fulfillment, sellerOrganization, statusEvents, refundRequests, chosenQuote] = await Promise.all([
       this.prisma.orderItem.findMany({ where: { orderId } }),
       this.prisma.fulfillment.findUnique({ where: { orderId_sequenceNumber: { orderId, sequenceNumber: 1 } } }),
       this.prisma.sellerOrganization.findUniqueOrThrow({ where: { id: order.sellerOrganizationId } }),
       this.prisma.orderStatusEvent.findMany({ where: { orderId }, orderBy: { createdAt: "asc" } }),
       this.prisma.orderRefundRequest.findMany({ where: { orderId }, orderBy: { createdAt: "desc" } }),
+      // The method the buyer chose for this seller (courier or post), so the seller knows how to hand the parcel over.
+      order.checkoutId ? this.prisma.shippingQuote.findFirst({ where: { checkoutId: order.checkoutId, sellerOrgId: order.sellerOrganizationId, status: "SELECTED" }, select: { provider: true } }) : null,
     ]);
 
     return {
+      deliveryProvider: chosenQuote?.provider ?? null,
       id: order.id,
       checkoutId: order.checkoutId,
       sellerOrganization: toSellerSummaryDto(sellerOrganization),

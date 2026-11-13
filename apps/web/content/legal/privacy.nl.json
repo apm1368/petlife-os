@@ -1,0 +1,166 @@
+{
+  "title": "Privacybeleid",
+  "lede": "In dit beleid lees je welke gegevens opetlife over jou en je huisdieren verzamelt, waarom we die nodig hebben, wie ze kan zien, hoe lang we ze bewaren en hoe je zelf de regie houdt. We verkopen je gegevens niet en we gebruiken geen trackers voor advertenties of analyse.",
+  "updated": "2026-11-13",
+  "sections": [
+    {
+      "id": "scope",
+      "heading": "1. Wie we zijn en waar dit beleid over gaat",
+      "paragraphs": [
+        "Dit beleid geldt voor de website van opetlife, de installeerbare app en de Android-app. De exploitant, van wie de gegevens in de footer van de site en op de contactpagina staan, is verantwoordelijk voor je gegevens. Partners die je gegevens ontvangen om een dienst te leveren (bijvoorbeeld een kliniek waar je boekt), zijn verantwoordelijk voor hun eigen gebruik ervan en moeten zich aan dit beleid en de wet houden.",
+        "De Android-app toont dezelfde site en vraagt maar twee Android-rechten: internettoegang en, vanaf Android 13, toestemming om meldingen te tonen, die pas wordt gevraagd als je meldingen aanzet. De app vraagt geen toegang tot locatie, camera, contacten of opslag. Als een functie zoals de dierentaxi, vermiste dieren of het uploaden van een foto je locatie of camera nodig heeft, vraagt de browser het je elke keer. De offlinecache van de app bewaart alleen statische bestanden zoals stijlen en afbeeldingen, nooit je pagina’s of gegevens, en de app bevat geen analysetools of SDK’s van derden."
+      ]
+    },
+    {
+      "id": "collect",
+      "heading": "2. Wat we verzamelen",
+      "items": [
+        "Account: je mobiele nummer en e-mailadres (en of je die hebt geverifieerd), gebruikersnaam, naam, weergavenaam en foto, taal en thema, en een veilig gehasht wachtwoord als je er een instelt. We vragen niet naar je nationale identificatienummer.",
+        "Huishouden en huisdieren: de leden van je huishouden en hun rollen, en het profiel van elk huisdier (naam, soort, ras, geslacht, geboortedatum, foto, gewicht, aftekeningen, castratie of sterilisatie en microchip). Daaronder valt ook de gezondheidsinformatie die je toevoegt: allergieën, aandoeningen, medicatie, vaccinaties, bezoeken, labuitslagen en documenten.",
+        "Adressen en locatie: de bezorg- of bezoekadressen die je opslaat, eventueel met een punt op de kaart. Als je daar toestemming voor geeft, wordt de locatie van je browser gebruikt voor diensten en plekken in de buurt, meldingen over vermiste huisdieren en de dierentaxi.",
+        "Boekingen, bestellingen en betalingen: wat je hebt geboekt of gekocht, bezorggegevens, en terugbetalingen en geschillen. Bij kaart-naar-kaartbetalingen bewaren we de afbeelding van het betaalbewijs dat je uploadt. We verzamelen het nummer van je bankkaart en je IBAN niet.",
+        "Wat je publiceert: berichten, reacties, chats, beoordelingen, meldingen van vermiste en gevonden huisdieren, gedenkpagina's, en de foto's en bestanden die je uploadt. Locatiegegevens in foto's (EXIF en GPS) worden bij het uploaden verwijderd.",
+        "Support en berichten: je supportverzoeken en onze antwoorden, en de meldingen die we je sturen.",
+        "Technisch: per ingelogde sessie de browsergegevens en het IP-adres van het apparaat. Voor pushmeldingen het pushadres van je browser. Wanneer iemand een deellink voor gezondheidsgegevens opent, registreren we het tijdstip, de browsergegevens en een onherkenbaar gemaakte vorm van het IP-adres."
+      ]
+    },
+    {
+      "id": "use",
+      "heading": "3. Waarvoor we ze gebruiken",
+      "items": [
+        "Om je account, je huishouden en de dossiers van je huisdieren te beheren, en om de boekingen, bestellingen, reizen en betalingen uit te voeren waar je om vraagt.",
+        "Om jou en het platform veilig te houden: inlogcodes, beveiligingsmeldingen, fraudepreventie, moderatie en de afhandeling van geschillen.",
+        "Om je de meldingen te sturen die je nodig hebt, en marketingberichten alleen als je daarmee instemt.",
+        "Om support te bieden en de dienst te verbeteren, op basis van onze eigen gegevens. We maken geen advertentieprofielen.",
+        "Om te voldoen aan onze wettelijke, fiscale en boekhoudkundige verplichtingen."
+      ]
+    },
+    {
+      "id": "health",
+      "heading": "4. Gezondheidsinformatie",
+      "items": [
+        "De gezondheidsdossiers van je huisdieren zijn alleen zichtbaar voor jou, voor leden van je huishouden aan wie je dat toestaat en voor mensen met wie je ze zelf deelt.",
+        "Een deellink is tussen 1 uur en 7 dagen geldig (standaard 24 uur). Hij toont alleen de onderdelen die je kiest, registreert elke keer dat hij wordt geopend en kan op elk moment worden ingetrokken.",
+        "Je kunt dossiers tot 90 dagen delen met een dierenarts van een geverifieerde kliniek, en dit op elk moment intrekken.",
+        "Als je een dienst boekt, ziet de partner alleen wat die dienst nodig heeft. Klinische diensten en pensions kunnen gezondheidsinformatie zien; trimmen en uitlaten niet. Deze toegang eindigt 24 uur na de boeking.",
+        "Als je een bezoek aan de dierenarts boekt, kun je ook gezondheidsdocumenten voor dat bezoek aanvinken. Alleen de dierenarts aan wie de boeking is toegewezen kan ze openen, en alleen tot 24 uur na het bezoek. Er wordt niets gedeeld wat je niet aanvinkt."
+      ]
+    },
+    {
+      "id": "location",
+      "heading": "5. Locatie",
+      "items": [
+        "We gebruiken je locatie alleen als je dat in de browser toestaat, en alleen voor de functie die je gebruikt.",
+        "Voor buurtmeldingen over vermiste huisdieren wordt je locatie afgerond op ongeveer 1 km en nooit aan anderen getoond. Meldingen van vermiste huisdieren tonen alleen het gebied dat de eigenaar opgeeft.",
+        "Tijdens een rit met de dierentaxi wordt de live positie van de chauffeur met je gedeeld. Na 30 dagen worden de locaties van ritten alleen bij benadering bewaard, tot op ongeveer 1 km."
+      ]
+    },
+    {
+      "id": "sharing",
+      "heading": "6. Met wie we ze delen",
+      "items": [
+        "Partners: de kliniek, aanbieder, verkoper, verhuurder of chauffeur bij wie je boekt of koopt, krijgt wat nodig is om je van dienst te zijn (je naam, contactgegevens en adres, en de informatie over je huisdier die voor die dienst is toegestaan).",
+        "Koeriers: voor de bezorging je naam, telefoonnummer en bezorgadres.",
+        "Betaaldienstverleners: als je online betaalt, verwerkt de betaalomgeving de betaling. Wij ontvangen het resultaat, niet je kaartgegevens.",
+        "Berichtenverkeer: inlogcodes en sms-meldingen gaan via onze sms-provider Faraz. E-mails worden verstuurd vanaf onze eigen mailserver. Pushmeldingen lopen via de pushdienst van je browser.",
+        "Kaarten: kaarten op de site laden kaarttegels van OpenStreetMap. Voor sommige zoekopdrachten naar routes en plaatsen kan een kaartdienst zoals Neshan of Google worden gebruikt. Deze diensten zien het gebied dat je bekijkt of doorzoekt, niet je account.",
+        "Verzekeraars: alleen als je een verzekeringsaanvraag indient, en alleen nadat je daarmee akkoord bent gegaan. De verzekeraar ontvangt dan je contactgegevens en de soort, het ras, de leeftijd en het gewicht van je huisdier.",
+        "Andere sites: als je een externe vermelding opent, bijvoorbeeld op Jajiga, registreren we de klik, en vanaf dat moment geldt het privacybeleid van die site.",
+        "Autoriteiten: als de wet dat vereist, bijvoorbeeld bij een gerechtelijk bevel.",
+        "We verkopen je persoonsgegevens nooit. Onze medewerkers kunnen persoonsgegevens alleen zien voor zover hun rol dat vereist. Voor het tonen van de volledige contactgegevens van een klant is een speciale bevoegdheid nodig, en elke inzage wordt vastgelegd."
+      ]
+    },
+    {
+      "id": "cookies",
+      "heading": "7. Cookies en lokale opslag",
+      "items": [
+        "petlife_session houdt je ingelogd. Deze cookie is 30 dagen geldig, kan niet worden gelezen door scripts op de pagina en wordt alleen naar onze site verstuurd.",
+        "petlife_csrf beschermt je formulieren en acties tegen cross-site-verzoeken.",
+        "petlife_oauth_state wordt alleen gebruikt tijdens het inloggen met Google en is 10 minuten geldig.",
+        "NEXT_LOCALE onthoudt de taal die je hebt gekozen.",
+        "De lokale opslag van je browser bewaart een paar kleine voorkeuren op je apparaat, zoals de instelling voor de hondencursor.",
+        "We gebruiken geen trackingcookies voor advertenties, analyse of sociale media."
+      ]
+    },
+    {
+      "id": "notifications",
+      "heading": "8. Meldingen",
+      "items": [
+        "We sturen je meldingen in de app en, afhankelijk van je instellingen, via push, sms of e-mail.",
+        "Marketingberichten staan uit, tenzij je ze aanzet. Beveiligingsmeldingen, zoals bij een nieuwe inlog of een gewijzigd wachtwoord, kun je niet uitzetten.",
+        "Je kunt stille uren instellen (22.00–08.00 uur, Teheraanse tijd). Niet-dringende sms-berichten worden dan tot de ochtend vastgehouden en pushmeldingen komen geluidloos binnen.",
+        "Voor pushmeldingen bewaren we het pushadres en de sleutels van je apparaat. Een pushmelding bevat alleen een korte titel van de categorie en een link, nooit de details, en het apparaat wordt verwijderd als je uitlogt."
+      ]
+    },
+    {
+      "id": "retention",
+      "heading": "9. Hoe lang we ze bewaren",
+      "items": [
+        "Gegevens van je account, huishouden en huisdieren: zolang je account openstaat.",
+        "Inlogsessies: 30 dagen, tenzij je eerder uitlogt.",
+        "Exportbestanden met je gegevens: 7 dagen.",
+        "Ritten met de dierentaxi: exacte locaties 30 dagen, daarna alleen bij benadering.",
+        "Serverlogs: ongeveer 7 dagen.",
+        "Financiële gegevens, zoals bestellingen, betalingen, terugbetalingen en facturen: zo lang als de wet vereist.",
+        "Nadat je je account hebt verwijderd, verwijderen of anonimiseren we je persoonsgegevens, behalve wat we volgens de wet moeten bewaren."
+      ]
+    },
+    {
+      "id": "rights",
+      "heading": "10. Je rechten en keuzes",
+      "items": [
+        "Je gegevens bekijken en corrigeren via je profiel en de pagina's van je huishouden en huisdieren.",
+        "Een kopie van je gegevens downloaden via Profiel → Privacy. Je krijgt een bestand met je huisdieren, gezondheidsdossiers, boekingen, bestellingen, reizen, supportverzoeken, toestemmingen, berichten, chats en donaties. De download blijft 7 dagen beschikbaar.",
+        "Op elk moment je meldingskanalen en je toestemming voor marketing wijzigen, en deellinks en toegang voor dierenartsen intrekken.",
+        "Via Profiel → Privacy vragen om je account te verwijderen. We beoordelen elk verzoek. Gegevens die we volgens de wet moeten bewaren, worden apart gezet, en al het andere wordt verwijderd of geanonimiseerd. Zolang het verzoek in behandeling is, kun je het annuleren. Heb je nog openstaande boekingen, bestellingen, terugbetalingen, geschillen, een actieve reis of een partnerrol, dan moet de verwijdering wachten tot die zijn afgerond.",
+        "Een zorg over privacy melden via Support of de contactpagina."
+      ]
+    },
+    {
+      "id": "security",
+      "heading": "11. Hoe we ze beschermen",
+      "paragraphs": [
+        "Verbindingen met opetlife zijn versleuteld. Wachtwoorden worden alleen als Argon2id-hashes opgeslagen. Inlogcookies kunnen niet worden gelezen door scripts op de pagina. De toegang van medewerkers hangt af van hun rol en wordt vastgelegd. Geüploade documenten worden privé bewaard en kunnen alleen worden geopend via links die kort geldig zijn. Geen enkel systeem is volledig veilig, dus gebruik een sterk wachtwoord en houd je inlogcodes voor jezelf."
+      ]
+    },
+    {
+      "id": "children",
+      "heading": "12. Kinderen",
+      "paragraphs": [
+        "Accounts zijn voor mensen van 18 jaar en ouder. Kinderen kunnen alleen meedoen via een huishouden dat wordt beheerd door een ouder of voogd, die verantwoordelijk is voor wat er over hen wordt toegevoegd."
+      ]
+    },
+    {
+      "id": "changes",
+      "heading": "13. Wijzigingen in dit beleid",
+      "paragraphs": [
+        "Over belangrijke wijzigingen informeren we je minstens 14 dagen voordat ze ingaan. De datum bovenaan toont de nieuwste versie."
+      ]
+    },
+    {
+      "id": "contact",
+      "heading": "14. Contact opnemen",
+      "paragraphs": [
+        "Voor vragen of verzoeken over privacy gebruik je Support of de contactpagina."
+      ],
+      "links": [
+        {
+          "label": "Je privacyinstellingen",
+          "href": "/profile/privacy"
+        },
+        {
+          "label": "Supportpagina",
+          "href": "/support"
+        },
+        {
+          "label": "Contactpagina",
+          "href": "/contact"
+        },
+        {
+          "label": "Voorwaarden en regels",
+          "href": "/legal/terms"
+        }
+      ]
+    }
+  ]
+}

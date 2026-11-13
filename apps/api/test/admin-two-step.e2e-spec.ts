@@ -42,6 +42,9 @@ describe("Admin two-step sign-in", () => {
     await policyOff();
   });
   afterAll(async () => {
+    delete process.env.ADMIN_TWO_STEP_ENFORCEMENT;
+  });
+  afterAll(async () => {
     await policyOff();
     await app.close();
   });
@@ -107,7 +110,23 @@ describe("Admin two-step sign-in", () => {
     expect(actions).toEqual(["admin_two_step.enrolled", "admin_two_step.locked", "admin_two_step.recovery_code_used", "admin_two_step.recovery_code_used", "admin_two_step.recovery_codes_regenerated"]);
   });
 
+  it("opt-in by default (owner 2026-11-13): enforcement can't be switched on, and a stored policy never locks anyone out", async () => {
+    delete process.env.ADMIN_TWO_STEP_ENFORCEMENT;
+    const root = await admin("opt-in root", AdminRole.SUPER_ADMIN);
+    const ops = await admin("opt-in ops", AdminRole.ADMIN);
+    await enrol(root);
+    const refused = await send("put", root, "/admin/two-step/policy").send({ enforced: true, graceDays: 0, reason: "Protect every admin account" }).expect(409);
+    expect(refused.body.error.details.rule).toBe("TWO_STEP_ENFORCEMENT_NOT_AVAILABLE");
+    expect((await get(root, "/admin/two-step/policy").expect(200)).body).toMatchObject({ enforced: false, enforcementAvailable: false });
+    // Even a policy row written straight to the database (e.g. by an earlier build) does not block an unenrolled admin.
+    await db.adminTwoStepPolicy.upsert({ where: { id: 1 }, create: { id: 1, enforcedAt: new Date(Date.now() - 86400000), graceDays: 0 }, update: { enforcedAt: new Date(Date.now() - 86400000), graceDays: 0 } });
+    expect((await get(ops, "/admin/me").expect(200)).body.twoStep).toMatchObject({ enforced: false, required: "NONE" });
+    await get(ops, "/admin/dashboard").expect(200);
+    await policyOff();
+  });
+
   it("enforcement: SUPER_ADMIN only, after enrolling; grace window; reset of a lost authenticator; off again", async () => {
+    process.env.ADMIN_TWO_STEP_ENFORCEMENT = "on";
     const root = await admin("two-step root", AdminRole.SUPER_ADMIN);
     const ops = await admin("two-step ops", AdminRole.ADMIN);
     const body = { enforced: true, graceDays: 0, reason: "Protect every admin account" };

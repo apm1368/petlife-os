@@ -39,10 +39,10 @@ export function companyCard(config: Pick<RailConfig, "CARD_TRANSFER_ACCOUNT_NUMB
  * Which rails can really take money. Zibal only in production mode with a merchant: in sandbox the gateway's
  * verify always answers "paid", which would mint spendable credit from nothing. There is no simulated rail.
  */
-export function availableTopUpRails(config: RailConfig): WalletTopUpRail[] {
+export function availableTopUpRails(config: RailConfig, cardConfigured: boolean = !!companyCard(config)): WalletTopUpRail[] {
   const rails: WalletTopUpRail[] = [];
   if (config.PAYMENT_SANDBOX_MODE === "production" && config.ZIBAL_ENABLED && config.ZIBAL_MERCHANT?.trim()) rails.push(WalletTopUpRail.ZIBAL);
-  if (companyCard(config)) rails.push(WalletTopUpRail.CARD_TO_CARD);
+  if (cardConfigured) rails.push(WalletTopUpRail.CARD_TO_CARD);
   return rails;
 }
 
@@ -55,9 +55,9 @@ export function isReceiptWindowOver(topUp: { status: WalletTopUpStatus; receiptD
   return topUp.status === WalletTopUpStatus.AWAITING_RECEIPT && !!topUp.receiptDeadlineAt && topUp.receiptDeadlineAt <= now;
 }
 
-/** Where Zibal sends the member back. Persian lives at the bare domain; other languages under their prefix. */
+/** Where Zibal sends the member back. Member pages live under the locale prefix in every language (only the
+ * Persian home page is the bare domain), so the return lands directly and no redirect can drop Zibal's query. */
 export function walletReturnUrl(webOrigin: string, locale: string): string {
   const origin = webOrigin.split(",")[0]!.trim().replace(/\/$/, "");
-  const prefix = locale === "fa" ? "" : `/${locale}`;
-  return `${origin}${prefix}/profile/wallet`;
+  return `${origin}/${["fa", "en", "de", "es", "ar", "nl"].includes(locale) ? locale : "fa"}/profile/wallet`;
 }

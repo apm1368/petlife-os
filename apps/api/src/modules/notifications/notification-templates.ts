@@ -37,9 +37,58 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "{{title}}", body: "{{body}}", smsBody: "{{smsBody}}" },
     en: { title: "{{title}}", body: "{{body}}", smsBody: "{{smsBody}}" },
   },
+  // Account deletion lifecycle, when staff move a request on (AccountDeletionStateChanged). In-app and email only.
+  "account.deletion_under_review": {
+    fa: { title: "درخواست حذف حساب در حال بررسی است", body: "درخواست حذف حساب شما بررسی می‌شود. پیش از حذف، اطلاعاتی که قانون نگه‌داشتنشان را لازم می‌داند جدا می‌شوند. تا پیش از اجرای حذف، می‌توانید درخواست را از بخش حریم خصوصی لغو کنید." },
+    en: { title: "Your account deletion request is being reviewed", body: "We're reviewing your request to delete your account. Before anything is deleted, records the law requires us to keep are set aside. You can still cancel the request from Privacy until it's carried out." },
+  },
+  "account.deletion_ready": {
+    fa: { title: "حذف حساب شما آمادهٔ اجراست", body: "بررسی درخواست حذف حساب شما تمام شد و حذف به‌زودی انجام می‌شود. اگر نظرتان عوض شده، همین حالا از بخش حریم خصوصی لغو کنید." },
+    en: { title: "Your account is ready to be deleted", body: "We've finished reviewing your deletion request and it will be carried out soon. If you've changed your mind, cancel it now from Privacy." },
+  },
+  // The company card-to-card account changed: every SUPER_ADMIN hears about it (SECURITY, so in-app + email), because
+  // swapping it would divert member payments.
+  "admin.card_destination_changed": {
+    fa: { title: "حساب کارت‌به‌کارت تغییر کرد", body: "{{actor}} حساب مقصد کارت‌به‌کارت را به {{account}} ({{holder}}) تغییر داد. دلیل: {{reason}}. اگر این تغییر را نمی‌شناسید، فوراً بررسی کنید." },
+    en: { title: "Card-to-card account changed", body: "{{actor}} changed the card-to-card account to {{account}} ({{holder}}). Reason: {{reason}}. If you don't recognise this change, check it now." },
+  },
+  "admin.card_destination_disabled": {
+    fa: { title: "کارت‌به‌کارت خاموش شد", body: "{{actor}} حساب کارت‌به‌کارت را غیرفعال کرد؛ اعضا تا تعیین حساب تازه نمی‌توانند کارت‌به‌کارت پرداخت کنند. دلیل: {{reason}}." },
+    en: { title: "Card-to-card switched off", body: "{{actor}} switched the card-to-card account off; members cannot pay by card-to-card until a new account is set. Reason: {{reason}}." },
+  },
+  // Card-to-card receipts: the member hears finance's decision (wallet top-ups and order/booking payments).
+  "wallet.top_up_credited": {
+    fa: { title: "کیف پول شارژ شد", body: "رسید کارت‌به‌کارت شما تأیید شد و {{amount}} تومان به کیف پولتان اضافه شد." },
+    en: { title: "Wallet topped up", body: "Your card-to-card receipt was approved and {{amount}} toman was added to your wallet." },
+  },
+  "wallet.top_up_rejected": {
+    fa: { title: "رسید شارژ کیف پول پذیرفته نشد", body: "رسید کارت‌به‌کارت شما برای {{amount}} تومان پذیرفته نشد. دلیل: {{reason}}. اگر مبلغ را واریز کرده‌اید، با پشتیبانی تماس بگیرید." },
+    en: { title: "Wallet top-up receipt not accepted", body: "Your card-to-card receipt for {{amount}} toman was not accepted. Reason: {{reason}}. If you did send the money, contact support." },
+  },
+  "payment.card_transfer_approved": {
+    fa: { title: "پرداخت کارت‌به‌کارت تأیید شد", body: "رسید شما برای {{amount}} تومان تأیید شد و پرداخت ثبت شد." },
+    en: { title: "Card-to-card payment approved", body: "Your receipt for {{amount}} toman was approved and the payment is recorded." },
+  },
+  "payment.card_transfer_rejected": {
+    fa: { title: "رسید پرداخت پذیرفته نشد", body: "رسید کارت‌به‌کارت شما برای {{amount}} تومان پذیرفته نشد. دلیل: {{reason}}. می‌توانید دوباره پرداخت کنید یا با پشتیبانی تماس بگیرید." },
+    en: { title: "Payment receipt not accepted", body: "Your card-to-card receipt for {{amount}} toman was not accepted. Reason: {{reason}}. You can pay again or contact support." },
+  },
+  "payment.card_transfer_underpaid": {
+    fa: { title: "مبلغ واریزی کامل نیست", body: "{{received}} تومان دریافت شد؛ برای تکمیل پرداخت {{difference}} تومان دیگر واریز کنید و رسید آن را بفرستید." },
+    en: { title: "Payment is short", body: "We received {{received}} toman; send the remaining {{difference}} toman and upload its receipt to complete the payment." },
+  },
   "booking.confirmed": {
     fa: { title: "نوبت شما تأیید شد", body: "نوبت شما تأیید شد. جزئیات را در اپلیکیشن ببینید.", smsBody: "نوبت شما در پت‌لایف تأیید شد." },
     en: { title: "Your booking is confirmed", body: "Your booking is confirmed. See the app for details.", smsBody: "Your PET LIFE OS booking is confirmed." },
+  },
+  // Automatic appointment reminders (booking-reminder.worker.ts). The SMS names only the pet, the provider and the time.
+  "booking.reminder_24h": {
+    fa: { title: "یادآور نوبت فردا", body: "نوبت {{petName}} در {{providerName}} فردا ساعت {{time}} است. حضور را تأیید کنید یا در صورت نیاز زمان را تغییر دهید.", smsBody: "یادآور اپت لایف: نوبت {{petName}} در {{providerName}} فردا ساعت {{time}}." },
+    en: { title: "Appointment tomorrow", body: "{{petName}}'s appointment at {{providerName}} is tomorrow at {{time}}. Confirm you'll attend, or reschedule if you need to.", smsBody: "opetlife reminder: {{petName}} at {{providerName}} tomorrow at {{time}}." },
+  },
+  "booking.reminder_2h": {
+    fa: { title: "نوبت تا دو ساعت دیگر", body: "نوبت {{petName}} در {{providerName}} ساعت {{time}} است.", smsBody: "یادآور اپت لایف: نوبت {{petName}} در {{providerName}} ساعت {{time}}." },
+    en: { title: "Appointment in two hours", body: "{{petName}}'s appointment at {{providerName}} is at {{time}}.", smsBody: "opetlife reminder: {{petName}} at {{providerName}} at {{time}}." },
   },
   "booking.cancelled": {
     fa: { title: "نوبت شما لغو شد", body: "نوبت شما لغو شد.", smsBody: "نوبت شما در پت‌لایف لغو شد." },
@@ -157,6 +206,14 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "میزبان رزرو را لغو کرد", body: "رزرو شما توسط میزبان لغو شد و مبلغ پرداختی کامل بازگردانده می‌شود." },
     en: { title: "Host cancelled your stay", body: "The host cancelled your stay; anything you paid is refunded in full." },
   },
+  "travel.booking_cancelled_by_staff": {
+    fa: { title: "رزرو شما لغو شد", body: "پشتیبانی اپت لایف این رزرو را لغو کرد. اگر مبلغی پرداخت کرده باشید، بازگشت آن پس از تأیید مالی انجام می‌شود." },
+    en: { title: "Your stay was cancelled", body: "opetlife support cancelled this stay. Anything you paid is refunded once finance approves it." },
+  },
+  "travel.booking_cancelled_by_staff_host": {
+    fa: { title: "یک رزرو لغو شد", body: "پشتیبانی اپت لایف یک رزرو را لغو کرد و تاریخ‌ها آزاد شد." },
+    en: { title: "A booking was cancelled", body: "opetlife support cancelled a stay; the dates were released." },
+  },
   "travel.booking_cancelled_by_traveler": {
     fa: { title: "مهمان رزرو را لغو کرد", body: "یک رزرو توسط مهمان لغو شد و تاریخ‌ها آزاد شد." },
     en: { title: "Guest cancelled", body: "A guest cancelled a stay; the dates were released." },
@@ -180,6 +237,14 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
   "insurance.application_needs_information": {
     fa: { title: "بیمه‌گر اطلاعات بیشتری خواسته است", body: "برای ادامه بررسی درخواست بیمه، اطلاعات خواسته‌شده را تکمیل کنید." },
     en: { title: "The insurer needs more information", body: "Add the requested information so the insurer can continue reviewing your application." },
+  },
+  "product.price_dropped": {
+    fa: { title: "قیمت «{{product}}» کمتر شد", body: "کالایی که نشان کرده‌اید حالا ارزان‌تر است. پیش از تمام شدن، سری بزنید." },
+    en: { title: "{{product}} is cheaper now", body: "An item you saved has dropped in price. Take a look before it changes again." },
+  },
+  "product.back_in_stock": {
+    fa: { title: "«{{product}}» دوباره موجود شد", body: "کالایی که نشان کرده‌اید دوباره در فروشگاه موجود است." },
+    en: { title: "{{product}} is back in stock", body: "An item you saved is available in the shop again." },
   },
   "shipment.delivered": {
     fa: { title: "سفارش شما تحویل داده شد", body: "سفارش شما با موفقیت تحویل داده شد.", smsBody: "سفارش شما در پت‌لایف تحویل داده شد." },
@@ -231,6 +296,28 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
   "pet.ownership_transfer_declined": {
     fa: { title: "انتقال مالکیت پت انجام نشد", body: "پیشنهاد انتقال مالکیت پت پذیرفته نشد؛ مالک ثبت‌شده همان فرد قبلی باقی ماند." },
     en: { title: "The pet ownership transfer did not happen", body: "The pet ownership transfer was declined; the registered owner remains unchanged." },
+  },
+  // Review moderation outcome for its author (Admin → Reviews). Rejections say why, in the moderator's words.
+  "review.approved": {
+    fa: { title: "نظر شما منتشر شد", body: "نظر شما دربارهٔ «{{subject}}» بررسی و منتشر شد. ممنون که تجربه‌تان را به اشتراک گذاشتید." },
+    en: { title: "Your review is published", body: "Your review of “{{subject}}” was checked and published. Thanks for sharing your experience." },
+  },
+  "review.rejected": {
+    fa: { title: "نظر شما منتشر نشد", body: "نظر شما دربارهٔ «{{subject}}» با قوانین انتشار هم‌خوان نبود و منتشر نشد. دلیل: {{reason}}" },
+    en: { title: "Your review wasn't published", body: "Your review of “{{subject}}” didn't meet the publishing rules and wasn't published. Reason: {{reason}}" },
+  },
+  // Ownership disputes (ID-03): the pet never moves on a dispute; staff check the documents and record the outcome.
+  "pet.ownership_disputed": {
+    fa: { title: "اختلاف دربارهٔ مالکیت «{{petName}}»", body: "{{actorName}} با انتقال مالکیت «{{petName}}» مخالفت کرد. تا بررسی پشتیبانی، مالک ثبت‌شده تغییر نمی‌کند. اگر مدرکی دارید، از بخش پشتیبانی بفرستید." },
+    en: { title: "Ownership of “{{petName}}” is disputed", body: "{{actorName}} disagreed with the ownership transfer of “{{petName}}”. The registered owner stays the same while support reviews it. If you have documents, send them through Support." },
+  },
+  "pet.ownership_dispute_closed_stands": {
+    fa: { title: "بررسی اختلاف مالکیت «{{petName}}» تمام شد", body: "پشتیبانی اختلاف را بررسی کرد و انتقال مالکیت «{{petName}}» به همان شکل باقی ماند." },
+    en: { title: "The ownership dispute about “{{petName}}” is closed", body: "Support reviewed the dispute and the ownership transfer of “{{petName}}” stands." },
+  },
+  "pet.ownership_dispute_closed_owner_stays": {
+    fa: { title: "بررسی اختلاف مالکیت «{{petName}}» تمام شد", body: "پشتیبانی اختلاف را بررسی کرد. درخواست انتقال بسته شد و مالک ثبت‌شدهٔ «{{petName}}» تغییری نکرد." },
+    en: { title: "The ownership dispute about “{{petName}}” is closed", body: "Support reviewed the dispute. The transfer request was closed and the registered owner of “{{petName}}” did not change." },
   },
   "pet.ownership_transfer_cancelled": {
     fa: { title: "درخواست انتقال مالکیت لغو شد", body: "درخواست انتقال مالکیت پت لغو شد و تغییری در مالکیت انجام نشد." },
@@ -399,6 +486,11 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "گزارش گم‌شدن حیوان خانگی ثبت شد", body: "گزارش گم‌شدن {{petName}} ثبت شد. اعضای خانواده مطلع شدند.", smsBody: "گزارش گم‌شدن {{petName}} در پت‌لایف ثبت شد." },
     en: { title: "Lost pet report created", body: "A lost pet report for {{petName}} was created. Household members have been notified.", smsBody: "A lost pet report for {{petName}} was created in PET LIFE OS." },
   },
+  /** #290 Q53: opt-in neighbourhood alert; public facts only (name and the owner's public area); in-app only, no smsBody. */
+  "lost_pet.nearby_opened": {
+    fa: { title: "حیوانی نزدیک شما گم شده", body: "{{petName}} در محدودهٔ {{area}} گم شده است. اگر دیدیدش، در صفحهٔ گزارش خبر بدهید." },
+    en: { title: "A pet is missing near you", body: "{{petName}} went missing around {{area}}. If you see them, report it on the lost-pet page." },
+  },
   "lost_pet.sighting_submitted": {
     fa: { title: "گزارش مشاهده جدید", body: "یک گزارش مشاهده جدید برای {{petName}} ثبت شد.", smsBody: "یک گزارش مشاهده جدید برای {{petName}} در پت‌لایف ثبت شد." },
     en: { title: "New sighting reported", body: "A new sighting was reported for {{petName}}.", smsBody: "A new sighting for {{petName}} was reported in PET LIFE OS." },
@@ -418,6 +510,14 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
   "community.post_comment": {
     fa: { title: "نظر تازه", body: "کسی زیر پست شما نظر گذاشت." },
     en: { title: "New comment", body: "Someone commented on your post." },
+  },
+  "community.content_removed": {
+    fa: { title: "محتوای شما برداشته شد", body: "{{what}} شما در انجمن با قوانین انجمن هم‌خوان نبود و ناظر آن را برداشت. اگر فکر می‌کنید اشتباه شده، از پشتیبانی بخواهید دوباره بررسی شود." },
+    en: { title: "Your content was removed", body: "Your {{what}} in the community did not follow the community rules, and a moderator removed it. If you think this is a mistake, ask support to review it again." },
+  },
+  "community.content_restored": {
+    fa: { title: "محتوای شما برگردانده شد", body: "پس از بررسی دوباره، {{what}} شما در انجمن دوباره نمایش داده می‌شود." },
+    en: { title: "Your content is back", body: "After another review, your {{what}} is visible in the community again." },
   },
   "community.chat_message": {
     fa: { title: "پیام تازه", body: "{{sender}} برایتان پیام فرستاد." },
@@ -651,4 +751,35 @@ export function renderNotificationTemplate(key: string, locale: Locale, params: 
     body: interpolate(variant.body, params),
     smsBody: variant.smsBody ? interpolate(variant.smsBody, params) : null,
   };
+}
+
+/** Where the parameters a notification was rendered with are kept, so the inbox can show it again in another language. */
+export const TEMPLATE_PARAMS_METADATA_KEY = "templateParams";
+
+/**
+ * A notification is rendered once, in the recipient's account language, when it is created. Someone reading
+ * the inbox in another UI language (a Persian account browsing /en) gets the same notification re-rendered
+ * from the code template, if it can be rendered fully. That is possible when the template has no parameters
+ * or when the parameters were stored with it. Otherwise the stored text is returned unchanged.
+ */
+export function notificationCopyFor(
+  row: { type: string; locale: string; title: string; body: string; metadata?: unknown },
+  viewerLocale: string | undefined,
+): { title: string; body: string } {
+  const stored = { title: row.title, body: row.body };
+  if (!viewerLocale) return stored;
+  const target: Locale = viewerLocale === "fa" ? "fa" : "en";
+  const storedAs: Locale = row.locale === "fa" ? "fa" : "en";
+  const entry = TEMPLATES[row.type];
+  if (target === storedAs || !entry) return stored;
+  const variant = entry[target];
+  if (!variant) return stored;
+  const raw = row.metadata && typeof row.metadata === "object" ? (row.metadata as Record<string, unknown>)[TEMPLATE_PARAMS_METADATA_KEY] : undefined;
+  const params: TemplateParams = {};
+  if (raw && typeof raw === "object") {
+    for (const [k, v] of Object.entries(raw as Record<string, unknown>)) if (typeof v === "string" || typeof v === "number") params[k] = v;
+  }
+  const needed = [...`${variant.title} ${variant.body}`.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]!);
+  if (needed.some((k) => !(k in params))) return stored;
+  return { title: interpolate(variant.title, params), body: interpolate(variant.body, params) };
 }

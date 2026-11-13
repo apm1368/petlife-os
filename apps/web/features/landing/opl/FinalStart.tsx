@@ -12,7 +12,7 @@ import { observeResize, observeVisible, prefersReducedMotion } from "./cursor-bu
 export function FinalStart() {
   const { locale, name } = useLanding();
   const s = storyCopy[locale], c = useOplCopy().final;
-  const Arrow = locale === "fa" ? ArrowLeft : ArrowRight;
+  const Arrow = (locale === "fa" || locale === "ar") ? ArrowLeft : ArrowRight;
   const canvas = useRef<HTMLCanvasElement>(null);
   const cta = useRef<HTMLAnchorElement>(null);
   const [hot, setHot] = useState(false);

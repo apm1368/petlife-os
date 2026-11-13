@@ -42,7 +42,7 @@ function copy(tr: Tr) {
 }
 
 export function AdminReviewModerationView({ initialVertical }: { initialVertical: AdminReviewVertical }) {
-  const locale = useLocale() as "fa" | "en" | "de" | "es";
+  const locale = useLocale() as "fa" | "en" | "de" | "es" | "ar" | "nl";
   const { tr, trf } = copyFor(locale);
   const text = copy(tr);
   const context = useAdminStore((state) => state.context);

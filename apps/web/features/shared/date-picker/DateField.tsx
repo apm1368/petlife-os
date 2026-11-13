@@ -1,6 +1,7 @@
 "use client";
 
 import { DateRangeField } from "./DateRangePicker";
+import { todayIso } from "@/lib/date/jalali";
 
 const PAST_FLOOR = "1900-01-01";
 
@@ -8,6 +9,13 @@ const PAST_FLOOR = "1900-01-01";
  * One calendar day, picked in the canonical PET LIFE picker: Jalali with Persian digits in fa,
  * Gregorian in en/de/es. The value stays an ISO day ("2026-10-04") — only presentation changes.
  */
+/** Today, kept inside the field's bounds: where an empty calendar opens. */
+export function openingDay(min: string | undefined, max: string | undefined, today = todayIso()): string {
+  if (max && today > max) return max;
+  if (min && today < min) return min;
+  return today;
+}
+
 export function DateField({ label, value, onChange, min, max, placeholder, error, className }: {
   label: string;
   value: string;
@@ -29,6 +37,8 @@ export function DateField({ label, value, onChange, min, max, placeholder, error
       // open the calendar to history. Without either bound the shared picker keeps its today-onwards floor.
       min={min ?? (max ? PAST_FLOOR : undefined)}
       max={max}
+      // Without a value the calendar opens at today (inside the bounds), never at the 1900 floor of a past-only field.
+      openAt={openingDay(min, max)}
       value={{ start: value || null, end: null }}
       onChange={(v) => onChange(v.start ?? "")}
     />

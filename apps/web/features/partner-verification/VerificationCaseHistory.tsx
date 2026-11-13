@@ -1,5 +1,5 @@
 "use client";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ContextSurface, StatusLabel } from "@petlife/ui";
 import type { VerificationDetail, VerificationHistoryEntry } from "@/services/partner-verification.service";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
@@ -13,8 +13,10 @@ import styles from "./verification.module.css";
 export function VerificationCaseSummary({ detail }: { detail: VerificationDetail }) {
   const t = useTranslations("partnerVerification");
   const format = useInstantFormat();
+  const locale = useLocale();
   const docs = detail.documents;
-  const count = (status: string) => docs.filter((d) => d.status === status).length;
+  // Persian digits in fa, Latin elsewhere (pattern rule).
+  const count = (status: string) => new Intl.NumberFormat(locale === "fa" ? "fa-IR" : locale).format(docs.filter((d) => d.status === status).length);
   const decision = detail.lastDecision;
   const statusLabel = (value: string | null) => (value && t.has(`statuses.${value}`) ? t(`statuses.${value}`) : value ?? "—");
   return (

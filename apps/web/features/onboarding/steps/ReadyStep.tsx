@@ -10,6 +10,7 @@ import { useOnboardingStore } from "@/stores/onboarding-store";
 import { onboardingService } from "@/services/onboarding.service";
 import { sanitizeReturnTo } from "@/lib/auth/return-to";
 import { petIdentityLabels } from "@/features/pets/pet-identity";
+import { reloadHouseholdPets } from "@/hooks/use-app-bootstrap";
 
 export function ReadyStep({ returnTo }: { returnTo?: string | null }) {
   const t = useTranslations("onboarding.ready");
@@ -30,7 +31,12 @@ export function ReadyStep({ returnTo }: { returnTo?: string | null }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function goToHome() {
+  const [isLeaving, setIsLeaving] = useState(false);
+
+  async function goToHome() {
+    setIsLeaving(true);
+    // The member area's pet store was filled before this pet existed; refresh it so Home shows the new pet at once.
+    await reloadHouseholdPets().catch(() => undefined);
     reset();
     router.replace(sanitizeReturnTo(returnTo, `/${locale}/home`));
   }
@@ -50,10 +56,10 @@ export function ReadyStep({ returnTo }: { returnTo?: string | null }) {
           }}
           isActive
           size="lg"
-          labels={petIdentityLabels({ species: draft.species, lifecycleStatus: PetLifecycleStatus.ACTIVE }, locale as "fa" | "en" | "de" | "es")}
+          labels={petIdentityLabels({ species: draft.species, lifecycleStatus: PetLifecycleStatus.ACTIVE }, locale as "fa" | "en" | "de" | "es" | "ar" | "nl")}
         />
       ) : null}
-      <Button variant="primary" isLoading={isCompleting} onClick={goToHome}>
+      <Button variant="primary" isLoading={isCompleting || isLeaving} onClick={() => void goToHome()}>
         {t("cta")}
       </Button>
     </div>

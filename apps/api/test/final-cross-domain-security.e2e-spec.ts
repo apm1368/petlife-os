@@ -46,6 +46,8 @@ const PUBLIC_GET = new Set([
   "/insurance/providers/:providerId",
   "/lost-pets/:incidentId",
   "/places/:placeId",
+  // The caller's own business claim on a public listing (null for anyone who has not claimed it).
+  "/places/:placeId/claim",
   "/provider-services/:serviceId",
   "/provider-services/:serviceId/availability",
   "/provider-services/:serviceId/intake-form",
@@ -63,11 +65,17 @@ const PUBLIC_GET = new Set([
 // The caller acting on their own relationship with a public item (their favourite, their reaction).
 const OWN_ACTION = new Set([
   "DELETE /community/posts/:postId/reactions",
+  // #290 Q52: any member may message a published post's author (identity stays hidden until they reply). Doing so makes
+  // the caller a participant; the sweep never targets those conversations (see rowsOf), so the per-conversation
+  // routes stay fully checked against conversations the caller is not in.
+  "POST /chat/conversations/for-post/:postId",
   "POST /community/posts/:postId/reactions",
   "POST /community/posts/:postId/save",
   "DELETE /community/posts/:postId/save",
   "POST /places/favorites/:placeId",
   "DELETE /places/favorites/:placeId",
+  // "Is this your business? Claim it": files the caller's own claim; approval still needs a KYC-verified business.
+  "POST /places/:placeId/claim",
   "PUT /travel/listings/:id/favorite",
   "DELETE /travel/listings/:id/favorite",
   "PUT /shop/products/:id/favorite",
@@ -201,7 +209,9 @@ describe("Final hardening — cross-domain security", () => {
     async function rowsOf(t: string): Promise<Row[]> {
       if (!cache[t]) {
         const hasCreated = (await q<{ n: number }>(`select count(*)::int as n from information_schema.columns where table_name='${t}' and column_name='createdAt'`))[0]!.n > 0;
-        const rows = await q<{ j: string }>(`select row_to_json(x)::text as j from (select * from "${t}" ${hasCreated ? `order by "createdAt" desc` : ""} limit 6) x`);
+        // Conversations the attacker opened mid-sweep (for-post) are their own; target only the ones they are not in.
+        const notOwn = t === "chat_conversations" ? `where id not in (select "conversationId" from chat_participants where "userId"='${attackerId}'::uuid)` : "";
+        const rows = await q<{ j: string }>(`select row_to_json(x)::text as j from (select * from "${t}" ${notOwn} ${hasCreated ? `order by "createdAt" desc` : ""} limit 6) x`);
         cache[t] = rows.map((r) => ({ ...JSON.parse(r.j), __t: t }) as Row).filter((r) => r.id !== attackerHousehold && r.householdId !== attackerHousehold && r.userId !== attackerId);
       }
       return cache[t]!;

@@ -117,5 +117,14 @@ describe("AdminDashboardView",()=>{
    expect(card.textContent).toContain("Clear: Open disputes, Offers to moderate, Catalog requests, Help requests to review, Memorials to review");
    expect(card.textContent).not.toContain("Refund approvals");
  });
+ it("shows the launch-month goal (registered pets, weekly bookings) when the API includes it (#290 Q97)", async () => {
+   useAdminStore.setState({context:{isAdmin:true,displayName:"Owner",permissions:["support.view"]} as never});
+   vi.mocked(adminService.getDashboard).mockResolvedValue({openSupportCases:0,openDisputes:null,openTrustCases:null,pendingRefundApprovals:null,openTasks:null,pendingVerifications:null,pendingRefundRequests:null,pendingOfferModeration:null,pendingCatalogRequests:null,pendingTravelListings:null,pendingSupportNeeds:null,openCommunityReports:null,pendingMemorials:null,openPlaceReports:null,pendingWalletTopUps:null,launchKpis:{registeredPets:1240,newPetsThisWeek:85,bookingsThisWeek:31,bookingsLastWeek:24}} as never);
+   renderWithIntl(<AdminDashboardView/>, "fa");
+   const goal = (await screen.findByRole("heading", { name: "هدف ماه اول" })).closest("section")!;
+   expect(goal.textContent).toContain("حیوان‌های ثبت‌شده");
+   expect(goal.textContent).toContain("۱٬۲۴۰");
+   expect(goal.textContent).toContain("+۸۵");
+   expect(goal.textContent).toContain("+۷");
+ });
 });
-

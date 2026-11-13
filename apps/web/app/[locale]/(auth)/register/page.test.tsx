@@ -78,15 +78,17 @@ describe("RegisterPage", () => {
   });
 
   it.each([
-    ["de", "Konto erstellen", "Benutzername", "Passwort", "Passwort bestätigen", "Ich akzeptiere die Nutzungsbedingungen und die Datenschutzerklärung von opetlife.", "Anzeigen"],
-    ["es", "Crear una cuenta", "Nombre de usuario", "Contraseña", "Confirmar contraseña", "Acepto las condiciones de uso y la política de privacidad de opetlife.", "Mostrar"],
+    ["de", "Konto erstellen", "Benutzername", "Passwort", "Passwort bestätigen", "Ich akzeptiere die AGB und Regeln und die Datenschutzerklärung von opetlife.", "Anzeigen"],
+    ["es", "Crear una cuenta", "Nombre de usuario", "Contraseña", "Confirmar contraseña", "Acepto los Términos y normas y la Política de privacidad de opetlife.", "Mostrar"],
   ] as const)("renders translated registration fields and consent copy in %s", (locale, title, username, password, confirmPassword, terms, showPassword) => {
     renderWithIntl(<RegisterPage />, locale);
     expect(screen.getByRole("heading", { name: title })).toBeTruthy();
     expect(screen.getByLabelText(username)).toBeTruthy();
     expect(screen.getByLabelText(password)).toBeTruthy();
     expect(screen.getByLabelText(confirmPassword)).toBeTruthy();
-    expect(screen.getByText(terms)).toBeTruthy();
+    // The consent line links the Terms and the Privacy Policy, so its text spans several elements.
+    const consent = screen.getByText((_, el) => el?.tagName === "SPAN" && el.textContent === terms);
+    expect(Array.from(consent.querySelectorAll("a")).map((a) => a.getAttribute("href"))).toEqual([`/${locale}/legal/terms`, `/${locale}/legal/privacy`]);
     expect(screen.getAllByRole("button", { name: showPassword })).toHaveLength(2);
     expect(screen.getByRole("button", { name: locale === "de" ? "Konto erstellen" : "Crear cuenta" })).toBeTruthy();
   });

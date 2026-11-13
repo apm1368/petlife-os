@@ -35,7 +35,7 @@ function numberLocale(locale: string): string {
   return locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-GB";
 }
 
-function contentLocale(locale: string): "fa" | "en" | "de" | "es" {
+function contentLocale(locale: string): "fa" | "en" | "de" | "es" | "ar" | "nl" {
   return locale === "fa" || locale === "de" || locale === "es" ? locale : "en";
 }
 

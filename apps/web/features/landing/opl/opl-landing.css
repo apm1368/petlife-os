@@ -316,6 +316,13 @@
 @media (max-width:900px) { .opl-foot__grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .opl-foot__brand { grid-column:1 / -1; } }
 .opl-foot__brand p { color:var(--opl-ink-2); font-size:.92rem; max-width:36ch; margin-top:10px; }
 .opl-foot__back { display:inline-flex; align-items:center; gap:6px; margin-top:12px; color:var(--opl-forest); font-weight:700; text-decoration:none; }
+/* "Install the app" (and the Android store links once they exist). */
+.opl-foot__app { margin-top:20px; padding-top:16px; border-top:1px dashed var(--opl-line-2); }
+.opl-foot__app h2 { margin-bottom:10px; }
+.opl-foot__app-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.opl-foot__app-actions .opl-btn.sm { min-height:44px; }
+.opl-foot .opl-foot__app-actions a.opl-btn { color:var(--opl-ink); }
+.opl-foot__app-help { margin-top:10px !important; max-width:42ch; color:var(--opl-ink-2); font-size:.88rem; line-height:1.8; }
 .opl-foot h2 { font-size:.95rem; font-weight:800; margin:0 0 10px; }
 .opl-foot ul { list-style:none; margin:0; padding:0; display:grid; gap:6px; }
 .opl-foot a { color:var(--opl-ink-2); text-decoration:none; font-size:.92rem; }
@@ -339,7 +346,12 @@
   -webkit-mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><ellipse cx='12' cy='15.6' rx='5' ry='4.2'/><ellipse cx='6.2' cy='10.2' rx='1.9' ry='2.4'/><ellipse cx='9.6' cy='6.9' rx='1.9' ry='2.5'/><ellipse cx='14.4' cy='6.9' rx='1.9' ry='2.5'/><ellipse cx='17.8' cy='10.2' rx='1.9' ry='2.4'/></svg>") center / contain no-repeat;
   mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><ellipse cx='12' cy='15.6' rx='5' ry='4.2'/><ellipse cx='6.2' cy='10.2' rx='1.9' ry='2.4'/><ellipse cx='9.6' cy='6.9' rx='1.9' ry='2.5'/><ellipse cx='14.4' cy='6.9' rx='1.9' ry='2.5'/><ellipse cx='17.8' cy='10.2' rx='1.9' ry='2.4'/></svg>") center / contain no-repeat; }
 @keyframes oplPpFade { 0% { opacity:.5; } 100% { opacity:0; } }
-.opl-ck { position:fixed; left:0; top:0; z-index:90; pointer-events:none; will-change:transform; }
+.opl-ck { position:fixed; left:0; top:0; z-index:90; pointer-events:none; will-change:transform; transition:opacity .25s; }
+/* Over a form Cookie steps back and fades, so fields and buttons stay readable (it never takes clicks anyway). */
+.opl-ck.shy { opacity:.25; }
+/* On phones Cookie rests in the bottom corner, where map cards keep their own controls ("my location", zoom): on any
+   page with a map it steps away (live 390px check of /pet-taxi, 2026-11-13). */
+@media (hover:none), (pointer:coarse) { body:has(.map-view) :is(.opl-ck, .opl-ck-ball, .opl-ck-prints) { opacity:0; visibility:hidden; } }
 .opl-ck__body { transform-origin:50% 90%; }
 .opl-ck__bubble { position:absolute; bottom:calc(100% + 4px); left:50%; transform:translateX(-50%) scale(.6); transform-origin:50% 100%; opacity:0; white-space:nowrap; background:var(--opl-raised); color:var(--opl-ink); font-size:.82rem; font-weight:800; padding:6px 14px; border-radius:999px; box-shadow:0 10px 24px -10px rgb(var(--opl-sh) / .6),0 0 0 1px var(--opl-line); transition:opacity .25s,transform .35s var(--opl-ease-emph); }
 .opl-ck.talk .opl-ck__bubble { opacity:1; transform:translateX(-50%) scale(1); }

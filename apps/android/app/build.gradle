@@ -1,0 +1,97 @@
+plugins {
+    id "com.android.application"
+}
+
+/*
+ * opetlife for Android: a Trusted Web Activity around https://opetlife.ir (the installable web app), built with
+ * Google's android-browser-helper, the same library Bubblewrap generates. Every web deploy updates the app; a new
+ * store release is needed only when something in this folder changes.
+ *
+ * Signing comes from the environment (GitHub Actions secrets), never from files in the repository:
+ *   ANDROID_KEYSTORE_FILE, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
+ */
+def twa = [
+    applicationId     : "ir.opetlife.app",
+    hostName          : "opetlife.ir",
+    // Unprefixed: the site sends the member to their chosen language (cookie), else the phone's language, else Persian.
+    launchUrl         : "/home",
+    name              : "اپت لایف",
+    launcherName      : "اپت لایف",
+    themeColor        : "#1F5A3D",
+    themeColorDark    : "#121512",
+    navigationColor   : "#FFFBF5",
+    navigationColorDark: "#121512",
+    navigationDividerColor: "#F0E7D9",
+    navigationDividerColorDark: "#2A2F29",
+    backgroundColor   : "#FFFBF5",
+    // Phones with no browser that can host a Trusted Web Activity (no Chrome, e.g. some devices sold without Google
+    // services) still open the site inside the app, in a WebView, never in a browser tab: store reviewers expect an
+    // app, not a link. Web push needs Chrome, so it is unavailable only on those phones.
+    fallbackType      : "webview",
+    orientation       : "portrait",
+]
+
+def versionCodeFromEnv = (System.getenv("ANDROID_VERSION_CODE") ?: "1") as Integer
+def keystoreFile = System.getenv("ANDROID_KEYSTORE_FILE")
+
+android {
+    namespace "ir.opetlife.app"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId twa.applicationId
+        minSdk 21
+        targetSdk 35
+        versionCode versionCodeFromEnv
+        versionName "1.0.${versionCodeFromEnv}"
+
+        resValue "string", "appName", twa.name
+        resValue "string", "launcherName", twa.launcherName
+        resValue "string", "launchUrl", "https://${twa.hostName}${twa.launchUrl}"
+        resValue "string", "hostName", twa.hostName
+        resValue "string", "providerAuthority", "${twa.applicationId}.fileprovider"
+        resValue "string", "fallbackType", twa.fallbackType
+        resValue "string", "orientation", twa.orientation
+        resValue "string", "assetStatements", "[{ \\\"relation\\\": [\\\"delegate_permission/common.handle_all_urls\\\"], \\\"target\\\": {\\\"namespace\\\": \\\"web\\\", \\\"site\\\": \\\"https://${twa.hostName}\\\"} }]"
+        resValue "color", "colorPrimary", twa.themeColor
+        resValue "color", "colorPrimaryDark", twa.themeColorDark
+        resValue "color", "navigationColor", twa.navigationColor
+        resValue "color", "navigationColorDark", twa.navigationColorDark
+        resValue "color", "navigationDividerColor", twa.navigationDividerColor
+        resValue "color", "navigationDividerColorDark", twa.navigationDividerColorDark
+        resValue "color", "backgroundColor", twa.backgroundColor
+    }
+
+    signingConfigs {
+        if (keystoreFile) {
+            release {
+                storeFile file(keystoreFile)
+                storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword System.getenv("ANDROID_KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt")
+            if (keystoreFile) signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lint {
+        checkReleaseBuilds true
+        abortOnError false
+    }
+}
+
+dependencies {
+    implementation "com.google.androidbrowserhelper:androidbrowserhelper:2.5.0"
+}

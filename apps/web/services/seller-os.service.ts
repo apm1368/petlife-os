@@ -1,25 +1,4 @@
-import type {
-  InventoryMovementDto,
-  MarketplaceChannelAccountDto,
-  MarketplaceListingDto,
-  MarketplaceProvider,
-  MarketplaceListingStatus,
-  MarketplaceListingSyncStatus,
-  MarketplaceReconciliationResultDto,
-  OrderDetailDto,
-  OrderStatus,
-  PaginatedDto,
-  SellerContextDto,
-  SellerDashboardDto,
-  SellerMembershipRole,
-  SellerOrderSummaryDto,
-  SellerOrganizationDetailDto,
-  SellerOsOfferDto,
-  PromotionDto,
-  PromotionInput,
-  SellerOfferStatus,
-  SellerTeamMemberDto,
-} from "@petlife/types";
+import type { InventoryMovementDto, MarketplaceChannelAccountDto, MarketplaceListingDto, MarketplaceListingStatus, MarketplaceListingSyncStatus, MarketplaceProvider, MarketplaceReconciliationResultDto, OrderDetailDto, OrderStatus, PaginatedDto, PromotionDto, PromotionInput, SellerCatalogDirectoryItemDto, SellerContextDto, SellerDashboardDto, SellerMembershipRole, SellerOfferStatus, SellerOrderSummaryDto, SellerOrganizationDetailDto, SellerOsOfferDto, SellerTeamMemberDto } from "@petlife/types";
 import { apiFetch } from "@/lib/api/client";
 
 function toQueryString(params: Record<string, string | number | boolean | undefined>): string {
@@ -74,13 +53,21 @@ export const sellerOsService = {
     apiFetch<{ id: string; status: string; amount: number }>(`/seller-organizations/${sellerId}/orders/${orderId}/cancel`, { method: "POST", body: { reason }, idempotencyKey }),
   markReadyForPickup: (orderId: string) => apiFetch<unknown>(`/orders/${orderId}/fulfillment/ready-for-pickup`, { method: "POST" }),
   requestCourier: (orderId: string, idempotencyKey?: string) => apiFetch<unknown>(`/orders/${orderId}/fulfillment/request-courier`, { method: "POST", idempotencyKey }),
-  getOrder: (sellerId: string, orderId: string) => apiFetch<OrderDetailDto & { source: string | null; externalOrderId: string | null; paymentSource: string }>(`/seller-organizations/${sellerId}/orders/${orderId}`),
+  getOrder: (sellerId: string, orderId: string) => apiFetch<OrderDetailDto & { source: string | null; externalOrderId: string | null; paymentSource: string; deliveryProvider?: string | null }>(`/seller-organizations/${sellerId}/orders/${orderId}`),
 
   listOffers: (sellerId: string, input: ListSellerOffersInput = {}) =>
     apiFetch<PaginatedDto<SellerOsOfferDto>>(`/seller-organizations/${sellerId}/offers${toQueryString({ search: input.search, status: input.status, lowStock: input.lowStock, page: input.page, pageSize: input.pageSize })}`),
   getOffer: (sellerId: string, offerId: string) => apiFetch<SellerOsOfferDto>(`/seller-organizations/${sellerId}/offers/${offerId}`),
   createOffer: (sellerId: string, input: { productVariantId: string; priceAmount: number; compareAtAmount?: number; sellerSku?: string; initialOnHand?: number }) =>
     apiFetch<SellerOsOfferDto>(`/seller-organizations/${sellerId}/offers`, { method: "POST", body: input }),
+  /** The product directory for listing: every active catalog product, offered or not, with this shop's own offer if any. */
+  searchCatalog: (sellerId: string, input: { q?: string; categoryId?: string; page?: number }) => {
+    const search = new URLSearchParams();
+    if (input.q) search.set("q", input.q);
+    if (input.categoryId) search.set("categoryId", input.categoryId);
+    if (input.page) search.set("page", String(input.page));
+    return apiFetch<{ items: SellerCatalogDirectoryItemDto[]; total: number; page: number; pageSize: number }>(`/seller-organizations/${sellerId}/catalog/search?${search.toString()}`);
+  },
   listCatalogProductRequests: (sellerId: string) => apiFetch<Array<{ id: string; requestedTitle: string; brandName: string | null; status: string; decisionReason: string | null; resolvedProductId: string | null; createdAt: string }>>(`/seller-organizations/${sellerId}/catalog-product-requests`),
   createCatalogProductRequest: (sellerId: string, input: { requestedTitle: string; brandName?: string; categoryId?: string; description?: string; sourceUrl?: string; sourceName?: string }) =>
     apiFetch<{ id: string; requestedTitle: string; status: string; createdAt: string }>(`/seller-organizations/${sellerId}/catalog-product-requests`, { method: "POST", body: input }),

@@ -1,0 +1,166 @@
+{
+  "title": "Política de privacidad",
+  "lede": "Esta política explica qué información recopila opetlife sobre ti y tus mascotas, por qué la necesitamos, quién puede verla, cuánto tiempo la conservamos y cómo mantienes el control. No vendemos tus datos ni usamos rastreadores publicitarios o de analítica.",
+  "updated": "2026-11-13",
+  "sections": [
+    {
+      "id": "scope",
+      "heading": "1. Quiénes somos y qué abarca esta política",
+      "paragraphs": [
+        "Esta política se aplica al sitio web de opetlife, a la app instalable y a la app para Android. El operador, cuyos datos figuran en el pie de página del sitio y en la página de Contacto, es el responsable de tus datos. Los socios que reciben tu información para prestar un servicio (por ejemplo, una clínica en la que reservas) son responsables del uso que hacen de ella, y deben cumplir esta política y la ley.",
+        "La app de Android muestra el mismo sitio y solo pide dos permisos de Android: acceso a internet y, en Android 13 o posterior, permiso para mostrar notificaciones, que solo solicita cuando activas las notificaciones. No pide acceso a la ubicación, la cámara, los contactos ni el almacenamiento. Cuando una función como el taxi para mascotas, las mascotas perdidas o la subida de fotos necesita tu ubicación o la cámara, el navegador te lo pregunta cada vez. La caché sin conexión de la app solo guarda archivos estáticos, como estilos e imágenes, nunca tus páginas ni tus datos, y la app no incluye herramientas de analítica ni SDK de terceros."
+      ]
+    },
+    {
+      "id": "collect",
+      "heading": "2. Qué recopilamos",
+      "items": [
+        "Cuenta: tu número de móvil y tu correo electrónico (y si los has verificado), nombre de usuario, nombre, nombre visible y foto, idioma y tema, y un hash seguro de tu contraseña si estableces una. No te pedimos tu número de documento nacional de identidad.",
+        "Hogar y mascotas: los miembros del hogar y sus roles, y el perfil de cada mascota (nombre, especie, raza, sexo, fecha de nacimiento, foto, peso, señas particulares, esterilización y microchip). También incluye la información de salud que añadas: alergias, afecciones, medicamentos, vacunas, visitas, resultados de laboratorio y documentos.",
+        "Direcciones y ubicación: las direcciones de entrega o de visita que guardas, opcionalmente con un punto en el mapa. Cuando lo permites, la ubicación de tu navegador se usa para servicios y lugares cercanos, alertas de mascotas perdidas y el taxi para mascotas.",
+        "Reservas, pedidos y pagos: lo que has reservado o comprado, los datos de entrega, y los reembolsos y disputas. En los pagos de tarjeta a tarjeta conservamos la imagen del comprobante que subes. No recopilamos el número de tu tarjeta bancaria ni tu IBAN.",
+        "Lo que publicas: publicaciones, comentarios, chats, reseñas, avisos de mascotas perdidas y encontradas, memoriales, y las fotos y archivos que subes. Los datos de ubicación incluidos en las fotos (EXIF y GPS) se eliminan al subirlas.",
+        "Soporte y mensajes: tus solicitudes de soporte y nuestras respuestas, y las notificaciones que te enviamos.",
+        "Datos técnicos: en cada sesión iniciada, los datos del navegador del dispositivo y la dirección IP. Para las notificaciones push, la dirección push de tu navegador. Cuando alguien abre un enlace para compartir datos de salud, registramos la hora, los datos del navegador y una versión ofuscada de la dirección IP."
+      ]
+    },
+    {
+      "id": "use",
+      "heading": "3. Para qué la usamos",
+      "items": [
+        "Para gestionar tu cuenta, tu hogar y los registros de tus mascotas, y para llevar a cabo las reservas, los pedidos, los viajes y los pagos que solicitas.",
+        "Para mantenerte a ti y a la plataforma a salvo: códigos de inicio de sesión, alertas de seguridad, prevención del fraude, moderación y gestión de disputas.",
+        "Para enviarte las notificaciones que necesitas, y mensajes de marketing solo si das tu consentimiento.",
+        "Para ofrecer soporte y mejorar el servicio, usando nuestros propios registros. No creamos perfiles publicitarios.",
+        "Para cumplir nuestras obligaciones legales, fiscales y contables."
+      ]
+    },
+    {
+      "id": "health",
+      "heading": "4. Información de salud",
+      "items": [
+        "El historial de salud de tus mascotas solo lo ven tú, los miembros del hogar a los que se lo permitas y las personas con las que decidas compartirlo.",
+        "Un enlace para compartir dura entre 1 hora y 7 días (24 horas por defecto). Muestra solo las secciones que elijas, registra cada apertura y puede revocarse en cualquier momento.",
+        "Puedes compartir el historial con un veterinario de una clínica verificada durante un máximo de 90 días y revocarlo en cualquier momento.",
+        "Cuando reservas un servicio, el socio solo ve lo que ese servicio necesita. Los servicios clínicos y de alojamiento pueden ver la información de salud; los de peluquería y paseo, no. Este acceso termina 24 horas después de la reserva.",
+        "Al reservar una visita veterinaria, también puedes marcar documentos de salud para esa visita. Solo el veterinario asignado a la reserva puede abrirlos, y solo hasta 24 horas después de la visita. No se comparte nada que no marques."
+      ]
+    },
+    {
+      "id": "location",
+      "heading": "5. Ubicación",
+      "items": [
+        "Solo usamos tu ubicación cuando lo permites en el navegador, y solo para la función que estás usando.",
+        "En las alertas de zona de mascotas perdidas, tu ubicación se redondea a aproximadamente 1 km y nunca se muestra a otras personas. Los avisos de mascotas perdidas solo muestran la zona que indica su dueño.",
+        "Durante un viaje en taxi para mascotas, la posición en tiempo real del conductor se comparte contigo. Pasados 30 días, las ubicaciones de los viajes solo se conservan de forma aproximada, con una precisión de alrededor de 1 km."
+      ]
+    },
+    {
+      "id": "sharing",
+      "heading": "6. Con quién la compartimos",
+      "items": [
+        "Socios: la clínica, el proveedor, el vendedor, el anfitrión o el conductor con el que reservas o al que compras recibe lo que necesita para atenderte (tu nombre, tus datos de contacto, tu dirección y la información de la mascota permitida para ese servicio).",
+        "Empresas de reparto: para la entrega, tu nombre, tu número de teléfono y tu dirección de entrega.",
+        "Proveedores de pago: cuando pagas en línea, la pasarela de pago procesa el pago. Nosotros recibimos el resultado, no los datos de tu tarjeta.",
+        "Comunicaciones: los códigos de inicio de sesión y las notificaciones por SMS se envían a través de nuestro proveedor de SMS, Faraz. Los correos electrónicos se envían desde nuestro propio servidor de correo. Las notificaciones push pasan por el servicio push de tu navegador.",
+        "Mapas: los mapas del sitio cargan teselas de OpenStreetMap. Algunas búsquedas de rutas y lugares pueden usar un proveedor de mapas como Neshan o Google. Estos servicios ven la zona que estás viendo o buscando, no tu cuenta.",
+        "Aseguradoras: solo cuando envías una solicitud de seguro, y solo después de que des tu consentimiento. La aseguradora recibe entonces tus datos de contacto y la especie, la raza, la edad y el peso de tu mascota.",
+        "Otros sitios: cuando abres un anuncio externo, por ejemplo en Jajiga, registramos el clic, y a partir de ese momento se aplica la política de privacidad de ese sitio.",
+        "Autoridades: cuando la ley lo exige, por ejemplo en virtud de una orden judicial.",
+        "Nunca vendemos tus datos personales. Nuestro personal solo puede ver los datos personales que su función requiere. Mostrar los datos de contacto completos de un cliente requiere un permiso especial, y cada vez que se muestran queda registrado."
+      ]
+    },
+    {
+      "id": "cookies",
+      "heading": "7. Cookies y almacenamiento local",
+      "items": [
+        "petlife_session mantiene tu sesión iniciada. Dura 30 días, los scripts de la página no pueden leerla y solo se envía a nuestro sitio.",
+        "petlife_csrf protege tus formularios y acciones frente a solicitudes entre sitios.",
+        "petlife_oauth_state solo se usa durante el inicio de sesión con Google y dura 10 minutos.",
+        "NEXT_LOCALE recuerda el idioma que elegiste.",
+        "El almacenamiento local de tu navegador guarda en tu dispositivo algunas preferencias pequeñas, como la configuración del cursor de perro.",
+        "No usamos cookies publicitarias, de analítica ni de seguimiento de redes sociales."
+      ]
+    },
+    {
+      "id": "notifications",
+      "heading": "8. Notificaciones",
+      "items": [
+        "Te avisamos en la app y, según tu configuración, por push, SMS o correo electrónico.",
+        "Los mensajes de marketing están desactivados salvo que los actives. Las alertas de seguridad, como un nuevo inicio de sesión o un cambio de contraseña, no se pueden desactivar.",
+        "Puedes configurar horas de silencio (22:00–08:00, hora de Teherán). Durante ese periodo, los SMS no urgentes se retienen hasta la mañana y las notificaciones push llegan sin sonido.",
+        "Para las notificaciones push guardamos la dirección push y las claves de tu dispositivo. Un mensaje push solo lleva un título breve de su categoría y un enlace, nunca los detalles, y el dispositivo se elimina al cerrar sesión."
+      ]
+    },
+    {
+      "id": "retention",
+      "heading": "9. Cuánto tiempo la conservamos",
+      "items": [
+        "Datos de la cuenta, del hogar y de las mascotas: mientras tu cuenta esté abierta.",
+        "Sesiones iniciadas: 30 días, salvo que cierres la sesión antes.",
+        "Archivos de exportación de datos: 7 días.",
+        "Viajes en taxi para mascotas: ubicaciones exactas durante 30 días; después, solo aproximadas.",
+        "Registros del servidor: unos 7 días.",
+        "Registros financieros, como pedidos, pagos, reembolsos y facturas: durante el tiempo que exija la ley.",
+        "Cuando eliminas tu cuenta, eliminamos o anonimizamos tus datos personales, salvo los que la ley nos obliga a conservar."
+      ]
+    },
+    {
+      "id": "rights",
+      "heading": "10. Tus derechos y opciones",
+      "items": [
+        "Consultar y corregir tus datos desde las páginas de tu perfil, tu hogar y tus mascotas.",
+        "Descargar una copia de tus datos desde Perfil → Privacidad. Recibes un archivo con tus mascotas, historiales de salud, reservas, pedidos, viajes, solicitudes de soporte, consentimientos, publicaciones, chats y donaciones. La descarga sigue disponible durante 7 días.",
+        "Cambiar los canales de notificación y el consentimiento de marketing, y revocar los enlaces para compartir y el acceso de veterinarios, en cualquier momento.",
+        "Solicitar la eliminación de tu cuenta desde Perfil → Privacidad. Revisamos cada solicitud. Los datos que la ley nos obliga a conservar se apartan, y todo lo demás se elimina o se anonimiza. Puedes cancelar la solicitud mientras esté en revisión. Mientras tengas reservas, pedidos, reembolsos o disputas abiertos, un viaje activo o un rol de socio, la eliminación tendrá que esperar a que finalicen.",
+        "Plantear una inquietud sobre privacidad a través de Soporte o de la página de Contacto."
+      ]
+    },
+    {
+      "id": "security",
+      "heading": "11. Cómo la protegemos",
+      "paragraphs": [
+        "Las conexiones con opetlife están cifradas. Las contraseñas solo se guardan como hashes Argon2id. Los scripts de la página no pueden leer las cookies de inicio de sesión. El acceso del personal depende de su función y queda registrado. Los documentos subidos se guardan de forma privada y solo se pueden abrir mediante enlaces de corta duración. Ningún sistema es totalmente seguro, así que usa una contraseña segura y no compartas tus códigos de inicio de sesión con nadie."
+      ]
+    },
+    {
+      "id": "children",
+      "heading": "12. Menores de edad",
+      "paragraphs": [
+        "Las cuentas son para personas de 18 años o más. Los menores solo pueden participar a través de un hogar gestionado por un padre, una madre o un tutor, que es responsable de lo que se añada sobre ellos."
+      ]
+    },
+    {
+      "id": "changes",
+      "heading": "13. Cambios en esta política",
+      "paragraphs": [
+        "Te informaremos de los cambios importantes al menos 14 días antes de que entren en vigor. La fecha que figura al principio indica la versión más reciente."
+      ]
+    },
+    {
+      "id": "contact",
+      "heading": "14. Contacto",
+      "paragraphs": [
+        "Para preguntas o solicitudes sobre privacidad, usa Soporte o la página de Contacto."
+      ],
+      "links": [
+        {
+          "label": "Tu configuración de privacidad",
+          "href": "/profile/privacy"
+        },
+        {
+          "label": "Soporte",
+          "href": "/support"
+        },
+        {
+          "label": "Contacto",
+          "href": "/contact"
+        },
+        {
+          "label": "Términos y normas",
+          "href": "/legal/terms"
+        }
+      ]
+    }
+  ]
+}

@@ -8,6 +8,9 @@ import { useSignOut } from "./use-sign-out";
 import { usePathname, useRouter } from "next/navigation";
 import type { ThemePreference } from "@petlife/types";
 import { useThemeStore } from "@/stores/theme-store";
+import { useTranslations } from "next-intl";
+import { useBusinessMemberships } from "@/hooks/use-business-memberships";
+import { hasBusiness } from "@/services/business.service";
 
 /** The avatar in the app header opens a small account menu: who is signed in, account shortcuts, and sign out. */
 export function AccountMenu({ user }: { user: UserDto }) {
@@ -20,6 +23,9 @@ export function AccountMenu({ user }: { user: UserDto }) {
   const setTheme = useThemeStore((s) => s.setTheme);
   const pathname = usePathname();
   const router = useRouter();
+  const tHub = useTranslations("businessHub");
+  // Only partners (a provider or shop membership) see the way to their business home.
+  const memberships = useBusinessMemberships(user.id);
   // Language and theme live here too, so phones (where the header hides them) can reach both.
   // Each control changes only its own setting.
   const switchLanguage = (next: "fa" | "en") => {
@@ -72,6 +78,9 @@ export function AccountMenu({ user }: { user: UserDto }) {
               ))}
             </div>
           </div>
+          {hasBusiness(memberships) ? (
+            <Link role="menuitem" href={`/${locale}/business`} onClick={() => setOpen(false)}>{tHub("myBusiness")}</Link>
+          ) : null}
           <Link role="menuitem" href={`/${locale}/profile`} onClick={() => setOpen(false)}>{t("حساب کاربری", "Account")}</Link>
           <Link role="menuitem" href={`/${locale}/profile/membership`} onClick={() => setOpen(false)}>{t("عضویت", "Membership")}</Link>
           <Link role="menuitem" href={`/${locale}/profile/security`} onClick={() => setOpen(false)}>{t("امنیت و دستگاه‌ها", "Security & devices")}</Link>

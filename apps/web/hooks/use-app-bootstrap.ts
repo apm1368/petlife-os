@@ -25,6 +25,22 @@ interface BootstrapState {
  * household's pets and active pet — populating the client stores that
  * Home / My Pets / the pet switcher all read from.
  */
+/**
+ * Re-reads the member's household, pets and active pet into the pet store. The store is filled once when the member
+ * area mounts, so anything that adds the first pet without a full page load (onboarding) must call this before
+ * navigating on, or Home still shows "add your first pet" until a reload (QA L11).
+ */
+export async function reloadHouseholdPets(): Promise<void> {
+  const households = await householdsService.listMine();
+  const household = households[0];
+  if (!household) return;
+  const store = usePetStore.getState();
+  store.setHousehold(household.id);
+  const [pets, activePet] = await Promise.all([householdsService.listPets(household.id), householdsService.getActivePet(household.id)]);
+  store.setPets(pets);
+  store.setActivePetId(activePet?.id ?? null);
+}
+
 export function useAppBootstrap(): BootstrapState {
   const [state, setState] = useState<{ isLoading: boolean; error: string | null }>({ isLoading: true, error: null });
   const [attempt, setAttempt] = useState(0);

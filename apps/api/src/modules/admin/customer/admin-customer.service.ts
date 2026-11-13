@@ -103,7 +103,7 @@ export class AdminCustomerService {
     return {
       customers: users.map(toListItem),
       orders: orders.map(toOrderSummary),
-      supportCases: cases.map(toSupportCaseSummaryDto),
+      supportCases: cases.map((row) => toSupportCaseSummaryDto(row)),
       searched,
     };
   }
@@ -152,7 +152,7 @@ export class AdminCustomerService {
 
     const orderDtos = orders.map(toOrderSummary);
     const bookingDtos = bookings.map((b) => ({ id: b.id, category: b.category, bookingStatus: b.bookingStatus, startAt: b.startAt.toISOString(), petId: b.petId }));
-    const supportCaseDtos = supportCases.map(toSupportCaseSummaryDto);
+    const supportCaseDtos = supportCases.map((row) => toSupportCaseSummaryDto(row));
     const disputeDtos = disputes.map(toDisputeDto);
     const noteDtos = internalNotes.map((n) => ({
       id: n.id,

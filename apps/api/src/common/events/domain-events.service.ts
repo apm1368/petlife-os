@@ -104,6 +104,8 @@ export const DOMAIN_EVENT_TYPES = [
   // Delivery & Logistics Core (Handoff 08)
   "ShippingQuoteCreated",
   "ShippingQuoteSelected",
+  /** A seller changed where couriers pick up (who, when, before/after): the audit trail behind courier prices. */
+  "SellerShippingProfileChanged",
   "FulfillmentCreated",
   "FulfillmentReadyForPickup",
   "FulfillmentFailed",
@@ -226,6 +228,8 @@ export const DOMAIN_EVENT_TYPES = [
   // Handoff 18: Lost Pet + Animal Support + Community + Memories
   "PetLifecycleTransitioned",
   "LostPetIncidentOpened",
+  /** #290 Q53: published after the opening transaction commits, so the neighbourhood fan-out can read the incident. */
+  "LostPetIncidentNearbyCheck",
   "LostPetSightingSubmitted",
   "LostPetSightingAccepted",
   "LostPetMarkedFound",
@@ -243,6 +247,9 @@ export const DOMAIN_EVENT_TYPES = [
   "CommunityCommentAdded",
   "CommunityReportSubmitted",
   "CommunityContentModerated",
+  "CommunityContentStatusChangedByModerator",
+  "CommunityPostEdited",
+  "CommunityPostDeletedByAuthor",
   "PetMemoryAdded",
 
   // Handoff 19: Travel + Insurance + Pet-Friendly Places
@@ -384,6 +391,8 @@ export const DOMAIN_EVENT_TYPES = [
   "PetOwnershipTransferCancelled",
   "PetOwnershipTransferExpired",
   "PetOwnershipDisputed",
+  "PetOwnershipDisputeClosed",
+  "ReviewModerated",
   "PetOwnershipTransferred",
 ] as const;
 
@@ -431,6 +440,31 @@ export class DomainEventsService {
     private readonly prisma: PrismaService,
     private readonly emitter: EventEmitter2,
   ) {}
+
+  /**
+   * Outbox write inside the caller's transaction, dispatch after it commits: the event row commits (or rolls back)
+   * with the change it describes, while listeners (notifications, SMS/email fan-out, automatic tasks) run only once
+   * the transaction is over. Call the returned function after `$transaction(...)` resolves. Listeners then see
+   * committed data, and their latency never counts against the interactive-transaction timeout (support cases hit
+   * Prisma's 5 s limit under load when the fan-out ran inside it).
+   */
+  async stage(type: DomainEventType, payload: Record<string, unknown>, options: PublishOptions & { tx: Prisma.TransactionClient }): Promise<() => Promise<void>> {
+    const event = await options.tx.domainEvent.create({
+      data: { type, payload: payload as Prisma.InputJsonValue, aggregateType: options.aggregateType, aggregateId: options.aggregateId },
+    });
+    return () => this.dispatchStored(event.id, type, payload);
+  }
+
+  private async dispatchStored(eventId: string, type: DomainEventType, payload: Record<string, unknown>): Promise<void> {
+    try {
+      await this.emitter.emitAsync(type, payload, eventId);
+      await this.prisma.domainEvent.update({ where: { id: eventId }, data: { processedAt: new Date() } });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to dispatch domain event ${type} (${eventId})`, error instanceof Error ? error.stack : undefined);
+      await this.prisma.domainEvent.update({ where: { id: eventId }, data: { attemptCount: { increment: 1 }, lastError: message } }).catch(() => undefined);
+    }
+  }
 
   async publish(
     type: DomainEventType,

@@ -1,135 +1,361 @@
 {
-  "adminTwoStep": {
-    "kicker": "Account security",
-    "title": "Two-step sign-in",
+  "partnerSupport": {
+    "title": "Support",
+    "intro": "Ask the opetlife team about verification, payouts, bookings, orders or your listing. Replies arrive here and as a notification.",
+    "newCta": "New request",
+    "empty": "No requests yet.",
+    "openedBy": "Opened by {name}",
+    "openedByYou": "Opened by you",
+    "loading": "Loading…",
     "retry": "Try again",
-    "intro": "A code from an authenticator app on your phone, on top of your password. Admin pages ask for it once per sign-in and again every 12 hours.",
+    "loadFailed": "Support requests could not be loaded.",
+    "create": {
+      "title": "New support request",
+      "category": "Topic",
+      "subject": "Subject",
+      "description": "What happened? Add order or booking numbers if there are any.",
+      "submit": "Send request",
+      "failed": "The request could not be sent. Try again.",
+      "required": "Fill in the subject and the description."
+    },
+    "category": {
+      "BUSINESS": "My business and verification",
+      "ACCOUNT": "Sign-in and team access",
+      "PAYMENT": "Payouts and payments",
+      "BOOKING": "Bookings",
+      "ORDER": "Orders",
+      "DELIVERY": "Shipping and delivery",
+      "SERVICE": "Services and prices",
+      "MARKETPLACE": "Products and listing",
+      "OTHER": "Something else"
+    },
+    "detail": {
+      "back": "All requests",
+      "caseNumber": "Request {number}",
+      "messages": "Conversation",
+      "noMessages": "No replies yet. The support team will answer here.",
+      "support": "opetlife support",
+      "team": "Your team",
+      "composePlaceholder": "Write a reply…",
+      "send": "Send",
+      "sendFailed": "The reply could not be sent.",
+      "reopen": "Reopen request",
+      "reopenFailed": "The request could not be reopened."
+    },
     "status": {
-      "on": "On",
-      "off": "Off",
-      "onSince": "On since {date}",
-      "recoveryLeft": "{count, plural, one {# recovery code left} other {# recovery codes left}}",
-      "recoveryLow": "{count, plural, =0 {No recovery codes left.} one {Only # recovery code left.} other {Only # recovery codes left.}} Make a new set.",
-      "enforced": "Required for every admin on this team.",
-      "optional": "Optional for now. A super admin can make it required for the whole team."
+      "SUBMITTED": "Received",
+      "UNDER_REVIEW": "In progress",
+      "WAITING": "Waiting for your reply",
+      "RESOLVED": "Resolved",
+      "CLOSED": "Closed"
+    }
+  },
+  "adminHolidays": {
+    "kicker": "Business calendar",
+    "title": "Holidays and closures",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "yearLabel": "Persian year",
+    "intro": "Iran's official public holidays, plus any day your team closes or opens. Working-hour targets such as the 24-hour verification review skip closed days, and bookings and delivery estimates can read the same calendar. Fridays are always closed.",
+    "coverage": {
+      "official": "{count, plural, one {# closed day} other {# closed days}} this year, from the official calendar and your team's changes.",
+      "provisional": "Lunar holidays for this year are provisional until the official calendar is published. Correct any day here if it moves.",
+      "none": "There's no official list for this year yet. A developer adds it once the official calendar is published; until then, add closures by hand."
+    },
+    "add": {
+      "title": "Add a closure",
+      "help": "For a day the office is closed that isn't an official holiday, such as a sudden closure or a company day off.",
+      "date": "Date",
+      "name": "Name",
+      "namePlaceholder": "For example: Office closed",
+      "submit": "Close this day"
+    },
+    "reason": "Reason",
+    "reasonPlaceholder": "Why this change (kept in the audit log)",
+    "list": {
+      "title": "Closed and changed days",
+      "empty": "No holidays or changes for this year.",
+      "date": "Date",
+      "name": "Day",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "closed": "Closed",
+      "open": "Open"
+    },
+    "source": {
+      "official": "Official holiday",
+      "staffClosure": "Team closure",
+      "staffOpened": "Opened by the team"
     },
     "actions": {
-      "turnOn": "Turn on two-step sign-in",
-      "newCodes": "Make new recovery codes",
-      "turnOff": "Turn off",
-      "turnOffBlocked": "It can't be turned off while it's required for the team."
+      "open": "Open as a working day",
+      "undo": "Undo team change"
     },
-    "enrol": {
-      "step1": "1. Add opetlife.ir to your authenticator app",
-      "step1Help": "In Google Authenticator, Microsoft Authenticator, 1Password, Bitwarden or Aegis, choose “Add account”, then “Enter a setup key”, and type the key below. Setting it up on this phone? Use “Open in authenticator app”.",
-      "copyKey": "Copy key",
-      "copied": "Copied",
-      "openApp": "Open in authenticator app",
-      "step2": "2. Enter the 6-digit code the app shows",
-      "confirm": "Turn on",
-      "cancel": "Cancel",
-      "starting": "Preparing…",
-      "accountLabel": "Account name",
-      "keyLabel": "Setup key",
-      "typeLabel": "Type",
-      "type": "Time-based, 6 digits"
-    },
-    "codes": {
-      "title": "Save your recovery codes",
-      "body": "If you lose your phone, each code gets you in once. They won't be shown again, so keep them somewhere safe and away from this computer.",
-      "copy": "Copy codes",
-      "download": "Download as a text file",
-      "saved": "I've saved these codes",
-      "continue": "Continue",
-      "fileHeading": "opetlife.ir admin recovery codes — each works once"
-    },
-    "challenge": {
-      "title": "Enter your two-step code",
-      "body": "Open your authenticator app and enter the 6-digit code shown for opetlife.ir.",
-      "codeLabel": "6-digit code",
-      "recoveryLabel": "Recovery code",
-      "useRecovery": "Use a recovery code instead",
-      "useApp": "Use the authenticator app instead",
-      "submit": "Verify",
-      "lostPhone": "Lost your phone and your recovery codes? Ask a super admin to reset your two-step sign-in.",
-      "signOut": "Sign out"
-    },
-    "forced": {
-      "title": "Turn on two-step sign-in to continue",
-      "body": "Two-step sign-in is now required for every admin. It takes about a minute."
-    },
-    "banner": {
-      "optional": "Protect your admin account with two-step sign-in.",
-      "enforced": "Two-step sign-in is required. Turn it on before {date}.",
-      "action": "Turn it on",
-      "dismiss": "Not now"
-    },
-    "errors": {
-      "invalidPlain": "That code didn't work. Make sure your phone sets its time automatically, then enter the newest code.",
-      "invalid": "That code didn't work. {count, plural, =0 {Next wrong code locks it for a while.} one {# more try before a short lock.} other {# more tries before a short lock.}}",
-      "locked": "Too many wrong codes. Try again after {time}.",
-      "generic": "Something went wrong. Please try again.",
-      "format": "Enter the 6 digits from the app.",
-      "recoveryFormat": "A recovery code has 16 letters and digits, like ABCD-EFGH-2345-6723."
-    },
-    "confirmCode": {
-      "label": "Current 6-digit code",
-      "help": "Enter a fresh code from your app. The old recovery codes stop working.",
-      "turnOffHelp": "Enter a fresh code from your app to turn two-step sign-in off."
+    "confirm": {
+      "openTitle": "Open {date} as a working day?",
+      "openBody": "Working-hour targets will count this day, and bookings may treat it as open.",
+      "undoTitle": "Undo the change on {date}?",
+      "undoBody": "The day goes back to the official calendar."
     },
     "done": {
-      "on": "Two-step sign-in is on.",
-      "off": "Two-step sign-in is off.",
-      "newCodes": "New recovery codes are ready. The old ones no longer work."
+      "closed": "Closure added.",
+      "opened": "The day is now a working day.",
+      "undone": "Change undone; the day follows the official calendar again."
     },
-    "policy": {
-      "title": "Two-step sign-in for the team",
-      "intro": "When it's required, every admin enters an authenticator code at sign-in. Admins who haven't turned it on keep working through the grace period, then must turn it on before any admin page opens.",
-      "required": "Require two-step sign-in for every admin",
-      "on": "Required",
-      "off": "Optional",
-      "coverage": "{enrolled} of {total} admins have it on",
-      "since": "required since {date}",
-      "graceDays": "Grace period (days)",
-      "graceHelp": "Counted from when it becomes required, or from when an admin joins, whichever is later. 0 means right away.",
-      "reason": "Reason",
-      "reasonPlaceholder": "Why this change",
-      "reasonRequired": "Write a short reason (at least 5 characters).",
-      "save": "Save",
-      "saved": "Saved.",
-      "onlySuper": "Only a super admin can change this.",
-      "selfFirst": "Turn on two-step sign-in for your own account first.",
-      "selfFirstAction": "Set up mine",
-      "mine": "My two-step sign-in",
-      "members": "Admins",
-      "col": {
-        "name": "Admin",
-        "role": "Role",
-        "status": "Two-step sign-in"
-      },
-      "member": {
-        "on": "On since {date}",
-        "grace": "Not yet · until {date}",
-        "overdue": "Must turn it on now",
-        "off": "Off"
-      },
-      "reset": "Reset",
-      "resetTitle": "Reset two-step sign-in for {name}?",
-      "resetBody": "Use this when they've lost their phone and their recovery codes. Their authenticator and recovery codes stop working, and they set it up again at their next sign-in.",
-      "resetReasonPlaceholder": "For example: lost phone, confirmed by phone call",
-      "resetConfirm": "Reset",
-      "resetDone": "Reset done. {name} will set it up again.",
-      "you": "you"
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "closureFields": "Pick a date, give it a name, and write a short reason (at least 5 characters).",
+      "reason": "Write a short reason (at least 5 characters)."
     },
     "rules": {
-      "TWO_STEP_ALREADY_ON": "Two-step sign-in is already on for this account.",
-      "TWO_STEP_NO_PENDING_ENROLMENT": "This setup has expired. Start again.",
-      "TWO_STEP_NOT_ON": "Two-step sign-in isn't on for this account.",
-      "TWO_STEP_ENFORCED": "It can't be turned off while it's required for the team.",
-      "TWO_STEP_SELF_RESET": "You can't reset your own. Turn it off yourself, or ask another super admin.",
-      "TWO_STEP_SELF_ENROLMENT_REQUIRED": "Turn on two-step sign-in for your own account first.",
-      "TWO_STEP_POLICY_SUPER_ADMIN_ONLY": "Only a super admin can change this.",
-      "TWO_STEP_KEY_CHANGED": "Your authenticator can't be checked after a server key change. Use a recovery code, or ask a super admin to reset it."
+      "CALENDAR_FRIDAY": "Fridays are always closed, so there's nothing to change.",
+      "CALENDAR_ALREADY_OPEN": "That day is already a working day.",
+      "CALENDAR_ALREADY_CLOSED": "That's already an official holiday. To close it again after opening it, undo the team change.",
+      "CALENDAR_OUT_OF_RANGE": "Pick a date from a month ago up to two years ahead.",
+      "CALENDAR_NO_STAFF_CHANGE": "There's no team change on that day."
+    },
+    "names": {
+      "nowruz": "Nowruz (Persian New Year)",
+      "republicDay": "Islamic Republic Day",
+      "natureDay": "Nature Day (Sizdah Bedar)",
+      "sadiqMartyrdom": "Martyrdom of Imam Ja'far al-Sadiq",
+      "eidAlAdha": "Eid al-Adha",
+      "khomeini": "Death of Imam Khomeini",
+      "ghadir": "Eid al-Ghadir",
+      "khordad15": "15 Khordad uprising",
+      "tasua": "Tasua",
+      "ashura": "Ashura",
+      "arbaeen": "Arbaeen",
+      "prophetDeath": "Death of the Prophet and martyrdom of Imam Hasan",
+      "reza": "Martyrdom of Imam Reza",
+      "askari": "Martyrdom of Imam Hasan al-Askari",
+      "mawlid": "Birth of the Prophet and Imam Ja'far al-Sadiq",
+      "fatima": "Martyrdom of Fatima al-Zahra",
+      "aliBirth": "Birth of Imam Ali (Father's Day)",
+      "mabath": "Mab'ath (the Prophet's mission)",
+      "midShaban": "Mid-Sha'ban (birth of Imam Mahdi)",
+      "revolution": "Victory of the Islamic Revolution",
+      "aliMartyrdom": "Martyrdom of Imam Ali",
+      "eidAlFitr": "Eid al-Fitr",
+      "eidAlFitr2": "Eid al-Fitr holiday",
+      "oil": "Oil Nationalization Day"
+    }
+  },
+  "adminOwnership": {
+    "kicker": "Pets",
+    "title": "Ownership transfers",
+    "intro": "Every request to move a pet to a new owner, disputed ones first. A dispute never moves the pet: the registered owner stays until an official ruling or a written agreement. Check the parties' documents (via support), then close the dispute with a reason. Both people are told the outcome.",
+    "filterLabel": "Transfer status",
+    "search": "Search",
+    "searchPlaceholder": "Pet or person name",
+    "apply": "Search",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "status": {
+      "DISPUTED": "Disputed",
+      "PENDING_REVIEW": "Waiting for recipient",
+      "ACCEPTED": "Transferred",
+      "DECLINED": "Declined",
+      "CANCELLED": "Cancelled",
+      "EXPIRED": "Expired",
+      "ALL": "All"
+    },
+    "empty": "No transfers match.",
+    "emptyDisputed": "No open disputes.",
+    "registeredOwner": "Registered owner now",
+    "requested": "Requested",
+    "applied": "Transferred on",
+    "notApplied": "Not transferred",
+    "memories": "Memories",
+    "memory": {
+      "TRANSFER": "Go to the new owner",
+      "RETAIN": "Stay with the previous owner",
+      "COPY_READ_ONLY": "Read-only copy for the new owner"
+    },
+    "explain": {
+      "applied": "This transfer had already happened. Closing the dispute keeps it as it is.",
+      "pending": "The recipient hadn't accepted yet. Closing the dispute closes the request; the registered owner stays."
+    },
+    "close": "Close dispute",
+    "reason": "Outcome and reason",
+    "reasonPlaceholder": "For example: purchase contract checked with both parties by phone",
+    "done": {
+      "stands": "Dispute about {pet} closed: the transfer stands. Both parties have been notified.",
+      "ownerStays": "Dispute about {pet} closed: the request is closed and the registered owner stays. Both parties have been notified."
+    },
+    "errors": {
+      "reason": "Write the outcome and reason (at least 5 characters).",
+      "forbidden": "Your role doesn't include customer records.",
+      "load": "Transfers couldn't be loaded.",
+      "generic": "That didn't work. Please try again."
+    },
+    "rules": {
+      "OWNERSHIP_NOT_DISPUTED": "This transfer isn't disputed any more. Refresh the list.",
+      "OWNERSHIP_CHANGED_CONCURRENTLY": "Someone else changed this transfer just now. Refresh the list."
+    }
+  },
+  "adminDeletionRequests": {
+    "kicker": "Privacy",
+    "title": "Account deletion requests",
+    "intro": "Members who asked to delete their account. Review each one: move it to retention review, then mark it ready once the retention policy is approved. Members can cancel until deletion is carried out, and they get a notice at each step.",
+    "executionDisabled": "Deletion itself is switched off until a retention policy is approved, so nothing here deletes data.",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "filterLabel": "Request state",
+    "state": {
+      "REQUESTED": "New",
+      "PENDING_RETENTION": "Retention review",
+      "READY_FOR_EXECUTION": "Ready",
+      "CANCELLED": "Cancelled by member",
+      "COMPLETED": "Completed"
+    },
+    "empty": {
+      "REQUESTED": "No new requests.",
+      "PENDING_RETENTION": "Nothing in retention review.",
+      "READY_FOR_EXECUTION": "Nothing ready for deletion.",
+      "CANCELLED": "No cancelled requests.",
+      "COMPLETED": "No completed deletions."
+    },
+    "requested": "Requested {date} · {days, plural, =0 {today} one {# day ago} other {# days ago}}",
+    "impact": "{households, plural, one {# household} other {# households}} · {pets, plural, one {# pet} other {# pets}} · {shared, plural, =0 {not shared with anyone} one {# shared with others} other {# shared with others}}",
+    "noImpact": "No households or pets recorded.",
+    "soleOwner": "Sole owner of a household that has other members: ownership has to move to someone else first.",
+    "lastChange": "Last step {date}",
+    "note": "Note (optional)",
+    "notePlaceholder": "For example: invoices kept for tax law until 1408",
+    "explain": {
+      "PENDING_RETENTION": "Starts the retention review: you check which records the law requires keeping. The member is told their request is being reviewed.",
+      "READY_FOR_EXECUTION": "Marks the review done. Only possible once a retention policy is approved. The member is told deletion will happen soon and can still cancel."
+    },
+    "action": {
+      "PENDING_RETENTION": "Start retention review",
+      "READY_FOR_EXECUTION": "Mark ready for deletion"
+    },
+    "done": {
+      "PENDING_RETENTION": "{name}'s request is in retention review; they've been notified.",
+      "READY_FOR_EXECUTION": "{name}'s request is ready; they've been notified."
+    },
+    "errors": {
+      "forbidden": "Only a super admin can handle deletion requests.",
+      "load": "Deletion requests couldn't be loaded.",
+      "generic": "That didn't work. Please try again.",
+      "RETENTION_POLICY_NOT_APPROVED": "Not yet: a retention policy has to be approved before any request can be marked ready.",
+      "INVALID_TRANSITION": "This request has moved on already. Refresh the list.",
+      "CHANGED_CONCURRENTLY": "Someone else changed this request just now. Refresh the list."
+    }
+  },
+  "clinicClients": {
+    "optOut": {
+      "title": "Stop clinic texts",
+      "loading": "Checking…",
+      "missing": "This link is not valid.",
+      "failed": "That did not work. Try again.",
+      "explain": "{clinic} sends you texts through opetlife.",
+      "button": "Stop texts from {clinic}",
+      "done": "You will no longer receive texts from {clinic}."
+    },
+    "title": "Clients",
+    "intro": "Your clinic's own clients: add owners and their pets, text them, set reminders and invite them to opetlife.",
+    "add": "Add client",
+    "cancel": "Cancel",
+    "search": "Search by name, phone or pet",
+    "loading": "Loading…",
+    "loadFailed": "Clients could not be loaded.",
+    "forbidden": "Clients are not included in your clinic plan.",
+    "retry": "Retry",
+    "empty": "No clients yet. Add your first client and their pets.",
+    "noMatch": "No client matches this search.",
+    "noPets": "No pets recorded",
+    "noPhone": "No phone",
+    "status": {
+      "CLINIC_ONLY": "Clinic only",
+      "INVITED": "Invited",
+      "JOINED": "On opetlife"
+    },
+    "newClient": "New client",
+    "name": "Owner's name",
+    "phone": "Mobile number",
+    "email": "Email (optional)",
+    "notes": "Notes (optional)",
+    "pets": "Pets",
+    "petName": "Pet's name",
+    "species": "Species",
+    "birthDate": "Birth date",
+    "addPet": "Add pet",
+    "removePet": "Remove",
+    "save": "Save client",
+    "statusLabel": "opetlife",
+    "petRemoved": "Pet removed.",
+    "petAdded": "Pet added.",
+    "saved": "Saved.",
+    "reminders": "Reminders",
+    "anyPet": "Any of their pets",
+    "reminderSaved": "Reminder saved.",
+    "history": "Messages sent",
+    "noMessages": "No messages yet.",
+    "messageStatus": {
+      "SENT": "Sent",
+      "SIMULATED": "Recorded (sandbox)",
+      "FAILED": "Failed",
+      "SKIPPED": "Not sent"
+    },
+    "messageKind": {
+      "MESSAGE": "Message",
+      "REMINDER": "Reminder",
+      "INVITE": "Invitation"
+    },
+    "sms": {
+      "live": "SMS is live: messages reach your clients' phones.",
+      "sandboxTitle": "SMS is in test mode.",
+      "sandbox": "Messages are recorded here but do not reach phones until the platform's SMS line is connected.",
+      "offTitle": "SMS is off.",
+      "off": "Messages cannot be sent right now.",
+      "title": "Text message",
+      "label": "Message",
+      "placeholder": "Your clinic's name is added at the start.",
+      "count": "{count, number}/420",
+      "send": "Send text",
+      "sent": "Text sent.",
+      "recorded": "Recorded in test mode — not delivered to the phone.",
+      "optOut": "Stop texts to this client",
+      "optIn": "Allow texts again"
+    },
+    "invite": {
+      "send": "Invite to opetlife",
+      "again": "Send the invitation again",
+      "sent": "Invitation sent.",
+      "recorded": "Invitation recorded in test mode — not delivered to the phone.",
+      "help": "The invitation is a link. The client connects to your clinic only if they open it and accept while signed in."
+    },
+    "errors": {
+      "TOO_MANY_OPEN_REMINDERS": "This client already has 20 scheduled reminders.",
+      "CLIENT_EXISTS": "A client with this mobile number already exists.",
+      "INVALID_PHONE": "Enter a valid Iranian mobile number.",
+      "INVALID_EMAIL": "Enter a valid email address.",
+      "NO_PHONE": "Add a mobile number to text this client.",
+      "OPTED_OUT": "This client asked not to receive texts.",
+      "CLIENT_DAILY_LIMIT": "Daily limit for this client reached. Try again tomorrow.",
+      "CLINIC_DAILY_LIMIT": "Your clinic's daily text limit is reached.",
+      "ALREADY_JOINED": "This client is already on opetlife.",
+      "LENGTH": "Check the length of the name or message.",
+      "PLAN": "This is not included in your clinic plan.",
+      "GENERIC": "That did not work. Check the details and try again."
+    },
+    "join": {
+      "sentTo": "Sent to {phone}",
+      "title": "Clinic invitation",
+      "loading": "Checking the invitation…",
+      "missing": "This invitation link is not valid or has expired.",
+      "failed": "The invitation could not be opened. Try again.",
+      "used": "This invitation was already used by another account.",
+      "invitedBy": "{clinic} invited you to opetlife.",
+      "pets": "Pets on their file: {pets}",
+      "explain": "Connecting lets the clinic send you reminders and messages here. They see only what they already recorded.",
+      "connected": "You are now connected with {clinic}.",
+      "addPets": "Add your pets",
+      "accept": "Connect with this clinic"
     }
   },
   "adminCustomRoles": {
@@ -767,7 +993,8 @@
       "processing": "Cropped/re-encoded",
       "licence": "Licence and usage terms",
       "musicTitle": "Music",
-      "musicUsage": "The wordless soundtrack of the site's reels; a 48-second excerpt, faded in and out and re-encoded."
+      "musicUsage": "The wordless soundtrack of the site's reels; a 48-second excerpt, faded in and out and re-encoded.",
+      "musicUsageVideo": "The instrumental soundtrack of the one-minute video “10 searches of dog and cat owners” on the blog and social media; a 60-second excerpt, faded out and re-encoded."
     },
     "member": {
       "nav": "My sections",
@@ -917,12 +1144,14 @@
     "on": "On",
     "off": "Off",
     "twoAdmins": "Needs a second admin",
-    "pendingCount": "{count} awaiting approval",
+    "pendingCount": "{count, number} awaiting approval",
     "languages": {
       "fa": "Persian",
       "en": "English",
       "de": "German",
-      "es": "Spanish"
+      "es": "Spanish",
+      "ar": "Arabic",
+      "nl": "Dutch"
     },
     "options": {
       "info": "Information",
@@ -999,11 +1228,11 @@
     "save": {
       "label": "Save changes",
       "reason": "Note for the audit trail",
-      "button": "Save {count} changes",
+      "button": "Save {count, number} changes",
       "saving": "Saving…",
       "discard": "Discard changes",
-      "applied": "{count} changes applied.",
-      "pending": "{count} changes are waiting for a second admin.",
+      "applied": "{count, number} changes applied.",
+      "pending": "{count, number} changes are waiting for a second admin.",
       "review": "Review in operational settings",
       "error": "“{name}” was not saved: {code}"
     },
@@ -1266,6 +1495,9 @@
       "analytics": "Analytics & waitlist"
     },
     "bookings": {
+      "noShowLabel": "No-show",
+      "noShowProvider": "Provider didn't show (reported by member)",
+      "noShowOwner": "Owner didn't show",
       "title": "Services & bookings",
       "searchLabel": "Search by number, pet or provider",
       "statusLabel": "Booking status",
@@ -1849,7 +2081,7 @@
       "haveAccount": "Already have an account? Log in",
       "confirmPassword": "Confirm password",
       "passwordMismatch": "Passwords do not match.",
-      "terms": "I accept opetlife's Terms and Privacy Policy.",
+      "terms": "I accept opetlife's <terms>Terms and Rules</terms> and <privacy>Privacy Policy</privacy>.",
       "genericError": "Could not create your account. Check the details and try again."
     },
     "forgot": {
@@ -2492,6 +2724,8 @@
       "genericAction": "That did not work. Check your connection and try again."
     },
     "ui": {
+      "confirmAttendance": "I'll be there",
+      "attendanceConfirmed": "You confirmed you'll attend. The provider can see this.",
       "loading": "Loading booking…",
       "forbidden": "You do not have access to this booking",
       "notFound": "Booking not found",
@@ -2844,6 +3078,7 @@
   "provider": {
     "shell": {
       "nav": {
+        "support": "Support",
         "home": "Home",
         "bookings": "Bookings",
         "schedule": "Schedule",
@@ -2858,7 +3093,8 @@
         "analytics": "Performance",
         "travel": "Travel & stays",
         "clinicWorkspace": "Clinic workspace",
-        "verification": "Verification documents"
+        "verification": "Verification documents",
+        "petTaxi": "Pet taxi"
       },
       "notAProvider": {
         "title": "No provider access",
@@ -2894,7 +3130,8 @@
       "noBookingsToday": "No bookings today.",
       "verificationLink": "Organization verification and documents"
     },
-    "bookingRow": { "respondBy": "Respond by " },
+    "bookingRow": {
+      "attendanceConfirmed": "Owner confirmed", "respondBy": "Respond by " },
     "bookings": {
       "title": "Bookings",
       "retry": "Retry",
@@ -2945,6 +3182,31 @@
       "reason": "Reason",
       "cancelledReason": "Cancellation reason",
       "completionNote": "Completion note",
+      "ownerNotes": "Owner notes",
+      "petInfo": {
+        "sex": "Sex",
+        "age": "Age",
+        "weight": "Weight",
+        "microchip": "Microchip",
+        "microchipPresent": "Microchipped",
+        "notRecorded": "Not recorded",
+        "sexValue": {
+          "MALE": "Male",
+          "FEMALE": "Female",
+          "UNKNOWN": "Unknown"
+        },
+        "moreAfterAssignment": "Sex, age, weight and microchip are shown to the team member this booking is assigned to."
+      },
+      "intake": {
+        "title": "Owner's intake answers",
+        "yes": "Yes",
+        "no": "No"
+      },
+      "documents": {
+        "title": "Documents the owner shared for this visit",
+        "download": "Secure download",
+        "downloadFailed": "The document could not be opened. Please try again."
+      },
       "access": {
         "title": "Pet data access",
         "state": {
@@ -2978,7 +3240,13 @@
       "health": {
         "title": "Health context",
         "allergyState": "Allergies",
-        "vaccinationStatus": "Vaccination"
+        "vaccinationStatus": "Vaccination",
+        "allergies": "Active allergies",
+        "conditions": "Conditions",
+        "medications": "Current medications",
+        "vaccinationLast": "Last vaccination",
+        "vaccinationNext": "Next vaccination due",
+        "identityOnly": "The owner shared basic identity only for this booking, so no health information or clinical record is available."
       },
       "actions": {
         "confirm": "Confirm",
@@ -3311,7 +3579,16 @@
       "reviewsVerifiedOnly": "Only customers who received the product can review it.",
       "verifiedPurchase": "Verified purchase",
       "moreReviews": "Show more reviews",
-      "related": "More from this category"
+      "related": "More from this category",
+      "trust": {
+        "title": "Shopping safely on opetlife",
+        "verified": "Every seller here has verified their identity and documents with opetlife.",
+        "returns": "If an item arrives damaged, wrong or expired, request a refund within {hours} hours of delivery; our team reviews it.",
+        "protection": "You pay through opetlife; if the order never arrives, you can request your money back.",
+        "shipsFrom": "Ships from {city}",
+        "sellerRating": "Seller rating {average} of 5 ({count, plural, one {# review} other {# reviews}})",
+        "visitStore": "Visit {seller}'s store"
+      }
     },
     "cart": {
       "title": "Cart",
@@ -3398,13 +3675,33 @@
         "title": "Choose delivery for each seller",
         "serviceLevel": {
           "STANDARD": "Standard delivery",
-          "EXPRESS": "Express delivery"
+          "EXPRESS": "Express delivery",
+          "COURIER": "Courier",
+          "POST_PISHTAZ": "Express post"
         },
         "eta": "Arrives in about {hours, plural, one {# hour} other {# hours}}",
         "selected": "Selected",
         "unavailable": "No delivery options available right now",
         "refresh": "Refresh delivery options",
-        "chooseFirst": "Choose a delivery option to continue."
+        "chooseFirst": "Choose a delivery option to continue.",
+        "provider": {
+          "DEV": "Test courier",
+          "ALOPEYK": "Alopeyk",
+          "SNAPPBOX": "Snappbox",
+          "OPETLIFE_COURIER": "opetlife courier",
+          "POST_PISHTAZ": "Iran Post express (Pishtaz)",
+          "SNAPPBOX_APP": "Snappbox",
+          "ALOPEYK_APP": "Alopeyk"
+        },
+        "basis": {
+          "API": "Live courier price",
+          "SANDBOX_ESTIMATE": "Test estimate: the courier was not asked yet",
+          "DISTANCE_ESTIMATE": "Estimated from distance",
+          "CITY_FLAT": "Flat city fare",
+          "FIXED_PRICE": "Fixed tariff"
+        },
+        "etaDays": "Arrives in about {days, plural, one {# working day} other {# working days}}",
+        "sandboxNote": "Shipping is in test mode for now: Alopeyk and Snappbox prices are estimates and no courier is sent."
       },
       "payment": {
         "title": "Payment",
@@ -3639,7 +3936,10 @@
         "cancel": "Cancel",
         "submit": "Submit for review",
         "failed": "Couldn't submit your review."
-      }
+      },
+      "deliveryMethod": "Delivery: {method}",
+      "postTracking": "Track the parcel on the Post website",
+      "courierTracking": "Track the courier"
     },
     "statusLabels": {
       "payment": {
@@ -3849,6 +4149,7 @@
   "seller": {
     "shell": {
       "nav": {
+        "support": "Support",
         "overview": "Overview",
         "orders": "Orders",
         "offers": "Offers",
@@ -3857,7 +4158,8 @@
         "team": "Team",
         "settings": "Settings",
         "finance": "Finance",
-        "promotions": "Promotions"
+        "promotions": "Promotions",
+        "shipping": "Shipping"
       },
       "notASeller": {
         "title": "No seller access",
@@ -4178,6 +4480,44 @@
           "ADJUSTMENT": "Adjustment"
         }
       }
+    },
+    "shipping": {
+      "title": "Shipping",
+      "subtitle": "The methods you offer buyers and the address couriers collect parcels from.",
+      "loading": "Loading…",
+      "failed": "Shipping settings could not be loaded.",
+      "methods": "Shipping methods",
+      "methodsHint": "If you pick none, every method opetlife has switched on is offered.",
+      "noneActive": "No shipping method is switched on at opetlife yet.",
+      "provider": {
+        "DEV": "Test courier",
+        "ALOPEYK": "Alopeyk",
+        "SNAPPBOX": "Snappbox",
+        "OPETLIFE_COURIER": "opetlife courier",
+        "POST_PISHTAZ": "Iran Post express (Pishtaz)",
+        "SNAPPBOX_APP": "Snappbox (booked by opetlife)",
+        "ALOPEYK_APP": "Alopeyk (booked by opetlife)"
+      },
+      "pickup": "Pickup address",
+      "pickupHint": "A map point lets the opetlife courier price by distance.",
+      "fields": {
+        "contactName": "Contact name",
+        "phone": "Phone",
+        "city": "City",
+        "region": "Province",
+        "area": "Neighbourhood",
+        "addressLine": "Full address",
+        "postalCode": "10-digit postal code",
+        "instructions": "Note for the courier"
+      },
+      "useLocation": "Use current location",
+      "clearLocation": "Remove map point",
+      "locationDenied": "Location access was not given.",
+      "save": "Save shipping settings",
+      "saving": "Saving…",
+      "saved": "Saved.",
+      "saveFailed": "Not saved. Check the fields (postal code: 10 digits).",
+      "readOnly": "Only a store admin can change this."
     }
   },
   "notifications": {
@@ -4258,7 +4598,8 @@
       "channels": {
         "EMAIL": "Email",
         "IN_APP": "In-app",
-        "SMS": "SMS"
+        "SMS": "SMS",
+        "PUSH": "Push"
       },
       "quietHours": {
         "title": "Quiet hours",
@@ -4276,7 +4617,29 @@
       "marketingManage": "Manage in Privacy",
       "quietHoursHint": "During quiet hours, SMS waits until the window ends (urgent alerts still come through). In-app notifications arrive silently in your inbox.",
       "saveError": "Your preferences weren't saved. Try again.",
-      "unsaved": "You have unsaved changes."
+      "unsaved": "You have unsaved changes.",
+      "push": {
+        "title": "Notifications on this device",
+        "intro": "Care reminders, bookings, orders and lost-pet alerts reach this device even when opetlife is closed. The lock screen shows only a general title, never health details or your pet's name.",
+        "enable": "Turn on notifications",
+        "disable": "Turn off on this device",
+        "test": "Send a test notification",
+        "testSent": "Test notification sent. It should arrive on this device in a few seconds.",
+        "testFailed": "The test notification didn't arrive. Turn notifications off and on again.",
+        "on": "Notifications are on for this device.",
+        "off": "Notifications are off for this device.",
+        "denied": "Your browser blocks notifications for this site. Allow notifications for opetlife.ir in the browser settings, then reopen this page.",
+        "unsupported": "This browser can't receive web notifications. Try Chrome, Edge, Firefox or Samsung Internet.",
+        "iosInstall": "On iPhone, notifications work only in the installed app: in Safari tap Share → “Add to Home Screen”, open opetlife from your home screen and turn notifications on here (iOS 16.4 or later).",
+        "notConfigured": "Device notifications aren't available yet.",
+        "error": "That didn't work. Try again.",
+        "devices": "Your other devices",
+        "thisDevice": "This device",
+        "unknownDevice": "Device",
+        "added": "Added {date}",
+        "remove": "Remove",
+        "removeLabel": "Remove {device} from notification devices"
+      }
     }
   },
   "support": {
@@ -4348,6 +4711,203 @@
     }
   },
   "admin": {
+    "partners": {
+      "servicesTitle": "Services",
+      "shopsTitle": "Shops",
+      "servicesIntro": "Vets, groomers, boarding, sitters, trainers, pet taxis and every other service business. A business that also has a shop appears under Shops too.",
+      "shopsIntro": "Every shop and its products. A shop that also offers services appears under Services too.",
+      "searchLabel": "Name, phone or city",
+      "searchPlaceholder": "Search businesses",
+      "search": "Search",
+      "verificationFilter": "Verification",
+      "kindFilter": "Service kind",
+      "shopStatusFilter": "Shop status",
+      "all": "All",
+      "forbidden": "You do not have permission to view partners.",
+      "loadFailed": "Could not load partners",
+      "resultCount": "{count} businesses",
+      "noAddress": "No address yet",
+      "serviceCounts": "{active} active services · {inactive} inactive",
+      "offerCounts": "{active} live offers · {pending} awaiting review",
+      "pendingDocuments": "{count} documents to review",
+      "alsoShop": "Also a shop: {name}",
+      "alsoService": "Also a service business: {name}",
+      "reviewKyc": "Review KYC",
+      "pagination": "Partner pages",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {page}",
+      "profile": {
+        "loading": "Loading…",
+        "loadFailed": "Could not load this business",
+        "retry": "Try again",
+        "forbidden": "You do not have permission to view this business.",
+        "notFound": "Business not found",
+        "backServices": "All service businesses",
+        "backShops": "All shops",
+        "alsoShop": "Also a shop: {name}",
+        "alsoService": "Also a service business: {name}",
+        "identity": "Business and contact",
+        "phone": "Phone",
+        "email": "Email",
+        "website": "Website",
+        "joined": "Joined",
+        "storefront": "Public shop page",
+        "kyc": "KYC",
+        "reviewKyc": "Review documents",
+        "submittedAt": "Submitted for review {when}",
+        "notSubmitted": "Not submitted for review yet",
+        "kycNote": "Note to the partner: {note}",
+        "contactName": "Responsible person",
+        "contactMobile": "Mobile",
+        "contactLandline": "Landline",
+        "enamad": "Enamad ID",
+        "noContact": "No contact details submitted yet.",
+        "noDocuments": "No documents uploaded yet.",
+        "uploaded": "Uploaded {when}",
+        "expires": "expires {when}",
+        "reviewNote": "Review note: {note}",
+        "address": "Address",
+        "province": "Province",
+        "city": "City",
+        "addressLine": "Address",
+        "postalCode": "Postal code",
+        "pin": "Map pin",
+        "noAddress": "No address yet.",
+        "services": "Services and prices",
+        "noServices": "No services yet.",
+        "serviceActive": "Live",
+        "serviceInactive": "Not live",
+        "perPet": "{price} per pet",
+        "minutes": "{count} min",
+        "maxPets": "up to {count} pets",
+        "dogs": "dogs",
+        "cats": "cats",
+        "taxiFare": "Taxi fare: {base} base + {perKm} per km",
+        "category": {
+          "VET": "Veterinary",
+          "GROOMING": "Grooming",
+          "TRAINING": "Training",
+          "WALKING": "Walking",
+          "SITTING": "Sitting",
+          "BOARDING": "Boarding",
+          "PET_TAXI": "Pet taxi",
+          "OTHER": "Other"
+        },
+        "calendar": "Calendar",
+        "noCalendar": "No working hours set yet.",
+        "exceptions": "Next 60 days",
+        "weekday": {
+          "0": "Sunday",
+          "1": "Monday",
+          "2": "Tuesday",
+          "3": "Wednesday",
+          "4": "Thursday",
+          "5": "Friday",
+          "6": "Saturday"
+        },
+        "hours": "Opening hours",
+        "noHours": "No opening hours set yet.",
+        "closed": "Closed",
+        "products": "Products, offers and stock",
+        "offerSummary": "{active} live · {pending} awaiting review · {requests} new-product requests",
+        "noOffers": "No products listed yet.",
+        "noStock": "no stock record",
+        "inStock": "{count} in stock",
+        "team": "Team",
+        "noTeam": "No team members.",
+        "providerRole": {
+          "OWNER": "Owner",
+          "VET": "Vet",
+          "STAFF": "Staff"
+        },
+        "supportCases": "Support cases from this business"
+    }
+  },
+    "productDetail": {
+      "title": "Product",
+      "back": "All products",
+      "loading": "Loading…",
+      "loadFailed": "The product could not be loaded.",
+      "retry": "Try again",
+      "forbidden": "commerce.view permission required",
+      "notFound": "Product not found",
+      "media": "{count, plural, one {# image} other {# images}}",
+      "publicPage": "Public page",
+      "productStatus": {
+        "DRAFT": "Draft",
+        "ACTIVE": "Active",
+        "INACTIVE": "Inactive",
+        "ARCHIVED": "Archived"
+      },
+      "facts": {
+        "sellers": "Sellers",
+        "buyable": "Buyable offers",
+        "lowestPrice": "Lowest live price",
+        "noneBuyable": "Nobody can sell it now",
+        "rating": "Rating"
+      },
+      "offers": {
+        "title": "Offers by seller",
+        "hint": "Each seller sets their own price and stock. A customer can buy an offer only when it is active and approved, the shop is verified and active, and stock is available.",
+        "empty": "No seller offers this product yet.",
+        "seller": "Seller",
+        "variant": "Variant",
+        "price": "Price",
+        "stock": "Stock",
+        "status": "Status",
+        "updated": "Updated",
+        "sellerNotLive": "Shop {status} · {verification}",
+        "sellerSku": "Seller SKU {sku}",
+        "available": "{count} available",
+        "onHandReserved": "{onHand} on hand · {reserved} reserved",
+        "noInventory": "No stock record",
+        "buyable": "Buyable now"
+      },
+      "offerStatus": {
+        "ACTIVE": "Active",
+        "PAUSED": "Paused",
+        "OUT_OF_STOCK": "Out of stock",
+        "SUSPENDED": "Suspended"
+      },
+      "moderation": {
+        "PENDING_REVIEW": "Awaiting review",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected"
+      },
+      "sellerStatus": {
+        "PENDING": "pending",
+        "ACTIVE": "active",
+        "INACTIVE": "inactive",
+        "SUSPENDED": "suspended",
+        "RESTRICTED": "restricted",
+        "CLOSED": "closed"
+      },
+      "sellerVerification": {
+        "NOT_STARTED": "not verified",
+        "SUBMITTED": "verification submitted",
+        "NEEDS_INFORMATION": "needs information",
+        "UNDER_REVIEW": "under review",
+        "VERIFIED": "verified",
+        "REJECTED": "verification rejected",
+        "SUSPENDED": "verification suspended"
+      },
+      "variants": {
+        "title": "Variants",
+        "inactive": "Inactive"
+      },
+      "requests": {
+        "title": "Seller requests",
+        "hint": "Requests from shops that created this product or were matched to it.",
+        "empty": "This product did not come from a seller request.",
+        "status": {
+          "PENDING_REVIEW": "Pending review",
+          "APPROVED": "Approved as new",
+          "MATCHED_EXISTING": "Matched to this product",
+          "REJECTED": "Rejected"
+        }
+      }
+    },
     "memorials": {
       "title": "Public pet memorials",
       "description": "Publish only when explicit owner consent is present. Review each name and selected photo; household and health data are not part of this view.",
@@ -4385,24 +4945,26 @@
         "products": "Products"
       },
       "account": {
-        "twoStep": "Two-step sign-in",
         "open": "Account menu for {name}",
         "title": "Account",
         "profile": "My account",
         "viewSite": "View site",
         "signOut": "Sign out",
-        "signingOut": "Signing out…"
+        "signingOut": "Signing out…",
+        "twoStep": "Two-step sign-in"
       },
       "tabs": {
-        "twoStep": "Two-step sign-in",
+        "holidays": "Holidays and closures",
+        "ownershipTransfers": "Ownership transfers",
+        "deletionRequests": "Deletion requests",
         "customRoles": "Custom roles",
         "directory": "Directory",
         "customer360": "Customer 360",
         "plans": "Plans",
         "households": "Households",
         "verification": "Verification queue",
-        "providers": "Providers",
-        "sellers": "Sellers",
+        "providers": "Services",
+        "sellers": "Shops",
         "overview": "Overview",
         "orders": "Orders",
         "refundRequests": "Refund requests",
@@ -4448,7 +5010,19 @@
         "channels": "Channels & delivery",
         "smsPatterns": "SMS patterns",
         "walletDirectory": "Member wallets",
-        "walletTopUps": "Top-up receipts"
+        "walletTopUps": "Top-up receipts",
+        "shipping": "Shipping",
+        "petTaxi": "Pet taxi",
+        "petTaxiDrivers": "Pet-taxi drivers",
+        "placeReports": "Place reports",
+        "osmImport": "OpenStreetMap",
+        "placeClaims": "Business claims",
+        "walletCardAccount": "Card-to-card account",
+        "walletCardReceipts": "Card-to-card receipts",
+        "repeatDeliveries": "Repeat deliveries",
+        "orderLookup": "Order lookup",
+        "refundApprovals": "Refund approvals",
+        "twoStep": "Two-step sign-in"
       },
       "palette": {
         "actions": "Quick actions",
@@ -4538,7 +5112,8 @@
         "featureFlags": "Feature flags",
         "smsPatterns": "SMS patterns",
         "verification": "Identity and documents",
-        "wallets": "Wallets"
+        "wallets": "Wallets",
+        "pets": "Pets"
       },
       "navigation": "Admin navigation",
       "openMenu": "Open menu",
@@ -4614,9 +5189,25 @@
         "placeholder": "Add an internal note (never shown to the customer)",
         "submit": "Add note"
       },
-      "pets": "{count} pet(s)"
+      "pets": "{count, number} pet(s)"
     },
     "support": {
+      "requesterTabs": {
+        "label": "Who asked",
+        "ALL": "All",
+        "PERSONAL": "Personal",
+        "PARTNER": "Partners",
+        "PROVIDER": "Services",
+        "SELLER": "Shops",
+        "oneBusiness": "Showing one business's cases.",
+        "allBusinesses": "Show all"
+      },
+      "requesterOrg": {
+        "PROVIDER": "Service business",
+        "SELLER": "Shop",
+        "unnamed": "(no name)",
+        "allCases": "All cases from this business"
+      },
       "title": "Support cases",
       "newCase": "New case",
       "createTitle": "Create support case",
@@ -4683,9 +5274,9 @@
           "household": "Household: {name}",
           "pet": "Pet: {name}",
           "relatedEntity": "Related to: {summary}",
-          "firstResponseTime": "First response after {minutes} min",
+          "firstResponseTime": "First response after {minutes, number} min",
           "noFirstResponseYet": "No response sent yet",
-          "resolutionTime": "Resolved after {minutes} min",
+          "resolutionTime": "Resolved after {minutes, number} min",
           "previousCases": "Previous tickets from this customer:",
           "noPreviousCases": "No previous tickets from this customer."
         }
@@ -4816,7 +5407,7 @@
         "missingSubject": "The subject no longer exists or has no summary.",
         "by": "By {name}",
         "openPublicPage": "Open public page",
-        "reportCount": "Reports: {total} · distinct reporters: {reporters}",
+        "reportCount": "Reports: {total, number} · distinct reporters: {reporters, number}",
         "unknownKind": "Other subject",
         "unknownStatus": "Status unavailable",
         "unknownReason": "Other or unrecognized reason",
@@ -5007,6 +5598,7 @@
       }
     },
     "tasks": {
+      "openRelated": "Open the request",
       "title": "Tasks",
       "newTask": "New task",
       "createTitle": "Create task",
@@ -5041,6 +5633,8 @@
         "URGENT": "Urgent"
       },
       "sources": {
+        "PROVIDER_NO_SHOW": "Provider no-show",
+        "OWNERSHIP_DISPUTE": "Ownership dispute",
         "MANUAL": "Manual entry",
         "TRAVEL_SOURCE": "Travel sources",
         "PARTNER_VERIFICATION": "Partner document review",
@@ -5196,7 +5790,7 @@
         "copied": "Copied",
         "slugChangeWarning": "This page has been published. If you change the address, the old one permanently redirects to the new one automatically.",
         "serpPreview": "Google results preview",
-        "charCount": "{count} of {max} characters",
+        "charCount": "{count, number} of {max, number} characters",
         "seoTitleHint": "Put the main keyword near the start of the SEO title (60 characters max).",
         "seoDescriptionHint": "120–160 characters; use the keyword naturally.",
         "cover": "Cover image",
@@ -5223,7 +5817,9 @@
           "de": "German content",
           "es": "Spanish content",
           "fa": "Persian content",
-          "en": "English content"
+          "en": "English content",
+          "ar": "Arabic content",
+          "nl": "Dutch content"
         },
         "titleField": "Title",
         "slug": "Slug",
@@ -5292,7 +5888,7 @@
         "retry": "Retry",
         "loading": "Loading versions…",
         "empty": "No versions yet.",
-        "version": "Version {number}",
+        "version": "Version {number, number}",
         "restore": "Restore",
         "actionError": "The operation failed. Please retry.",
         "closePreview": "Close preview",
@@ -5346,7 +5942,7 @@
           "HOME_EDUCATION": "Home education",
           "HOME_ANNOUNCEMENT": "Home announcement"
         },
-        "block": "Block {number}",
+        "block": "Block {number, number}",
         "remove": "Remove",
         "linkedArticleId": "Linked article ID (optional)",
         "mediaAssetId": "Media asset ID (optional)",
@@ -5390,6 +5986,10 @@
         "limitValue": "Limit value",
         "grantOverride": "Grant override"
       }
+    },
+    "demoRecord": {
+      "label": "Demo — hidden on the live site",
+      "hint": "Sample data for demos and tests. The live site never shows it to members, even if it is marked verified or public here."
     }
   },
   "blog": {
@@ -5474,7 +6074,9 @@
       "privateNotice": "This file is private and has no public object URL. Every download mints a short-lived signed access link.",
       "previewDownload": "Preview and secure download",
       "openFile": "Open file",
-      "previewUnavailable": "Preview is unavailable for this file type."
+      "previewUnavailable": "Preview is unavailable for this file type.",
+      "manage": "Details and retract",
+      "details": "Details"
     },
     "labs": {
       "title": "Labs",
@@ -5650,7 +6252,11 @@
       "back": "Back",
       "continue": "Continue",
       "photoLabel": "Photo",
-      "submit": "Report lost pet"
+      "submit": "Report lost pet",
+      "useMyLocation": "Use my current location",
+      "useMyLocationHelp": "If you are where they were last seen, save the location so neighbours who turned on alerts hear about it. The exact point stays private.",
+      "locationSaved": "Location saved",
+      "locationDenied": "Location access wasn't allowed; you can continue without it."
     },
     "list": {
       "title": "Lost pet reports",
@@ -5740,6 +6346,27 @@
         "reunited": "{name} is back home. Thank you to everyone who helped.",
         "photoAlt": "Photo of {name}"
       }
+    },
+    "areaAlert": {
+      "title": "Lost-pet alerts for my area",
+      "body": "When a pet goes missing near you, we'll let you know so you can help if you see them.",
+      "on": "On: you'll hear about reports within {km, number} km of you.",
+      "enable": "Turn on alerts",
+      "update": "Update area",
+      "disable": "Turn off",
+      "radius": "Area",
+      "km": "{km, number} km",
+      "signIn": "Sign in to turn on alerts",
+      "privacy": "Your location is only used to find nearby reports and is never shown to anyone.",
+      "denied": "The browser didn't allow location access.",
+      "failed": "Couldn't save. Please try again."
+    },
+    "found": {
+      "title": "Pets found by neighbours",
+      "subtitle": "Found a pet? Post it here so its family can recognise it.",
+      "cta": "I found a pet",
+      "empty": "No found-pet posts right now.",
+      "untitled": "Found pet"
     }
   },
   "animalSupport": {
@@ -5801,7 +6428,8 @@
       "LOST_PET_SHARE": "Lost pet",
       "RESCUE": "Rescue",
       "ADOPTION": "Adoption",
-      "MEMORY": "Memory"
+      "MEMORY": "Memory",
+      "FOUND_PET": "Found pet"
     },
     "reaction": {
       "LIKE": "Like",
@@ -5860,6 +6488,42 @@
       "commentLabel": "Add a comment",
       "commentSubmit": "Post",
       "commentsEmpty": "No comments yet."
+    },
+    "contact": {
+      "message": "Message the poster",
+      "adopt": "Ask to adopt",
+      "signIn": "Sign in to send a message",
+      "private": "The conversation stays inside opetlife; phone numbers are never shown.",
+      "screening": {
+        "title": "A few quick questions for adoption",
+        "hint": "Your answers are sent as your first message, so the poster can choose carefully.",
+        "intro": "Hello, I'd like to adopt this pet.",
+        "home": "Where you live",
+        "homes": {
+          "apartment": "Apartment",
+          "houseWithYard": "House with a yard",
+          "other": "Other"
+        },
+        "experience": "Experience with pets",
+        "otherPets": "Other pets at home",
+        "why": "Why you want to adopt",
+        "visit": "I can meet in person",
+        "visitYes": "I can come and meet them in person.",
+        "send": "Send request",
+        "cancel": "Cancel"
+      }
+  },
+    "own": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save changes",
+      "cancel": "Cancel",
+      "titleLabel": "Title",
+      "bodyLabel": "Text",
+      "confirmPost": "Delete this post for everyone? Its comments disappear too.",
+      "confirmComment": "Delete this comment?",
+      "deleteYes": "Yes, delete",
+      "edited": "edited"
     }
   },
   "communityChat": {
@@ -6156,6 +6820,7 @@
     "detail": {
       "exclusionsTitle": "Exclusions — read before contacting the insurer",
       "exclusionsEmpty": "No exclusions listed for this product.",
+      "insurerLanguageNote": "The insurer wrote this text in Persian; we show it unchanged.",
       "coverageTitle": "Coverage",
       "waitingPeriod": "Waiting period: {days} days",
       "deductible": "Deductible: {amount}",
@@ -6207,12 +6872,18 @@
       "BEACH": "Beach",
       "VENUE": "Venue",
       "SERVICE": "Service",
-      "OTHER": "Other"
+      "OTHER": "Other",
+      "VETERINARY": "Vet",
+      "PET_SHOP": "Pet shop",
+      "GROOMING": "Grooming",
+      "BOARDING": "Boarding",
+      "SHELTER": "Shelter",
+      "DOG_PARK": "Dog park"
     },
     "list": {
       "search": "Search",
       "title": "Pet-friendly places",
-      "subtitle": "Verified places that welcome pets.",
+      "subtitle": "Places that welcome pets. Verified places and listings from OpenStreetMap are labelled.",
       "empty": "No places found.",
       "nearMe": "Search near me",
       "allCategories": "All categories",
@@ -6234,6 +6905,38 @@
       "title": "Saved places",
       "empty": "You haven't saved any places yet.",
       "signInPrompt": "Sign in to save your favorite places."
+    },
+    "osm": {
+      "label": "From OpenStreetMap · not verified yet",
+      "explain": "This listing comes from the open map OpenStreetMap and opetlife has not checked it yet. Contact the place before you go.",
+      "attribution": "© OpenStreetMap contributors",
+      "viewOnOsm": "View on OpenStreetMap",
+      "phone": "Phone",
+      "website": "Website",
+      "managed": "This page is managed by the business itself, whose identity is verified."
+    },
+    "claim": {
+      "title": "Is this your business?",
+      "body": "Claim this page to keep its details up to date yourself and earn the verified badge.",
+      "button": "Claim it",
+      "sending": "Sending…",
+      "signIn": "Sign in to claim it",
+      "failed": "That did not work. Please try again.",
+      "next": {
+        "CREATE_PARTNER_ACCOUNT": "Request saved. Next: create a partner (business) account and send your documents for verification.",
+        "COMPLETE_VERIFICATION": "Request saved. Next: finish your business verification in the partner panel.",
+        "AWAITING_REVIEW": "Request saved. The opetlife team will review it and let you know."
+      },
+      "goPartner": "Create a partner account",
+      "goVerification": "Go to verification",
+      "status": {
+        "PENDING": "Your claim is being reviewed.",
+        "APPROVED": "Your claim was approved.",
+        "REJECTED": "Your claim was not accepted.",
+        "WITHDRAWN": "Claim withdrawn."
+      },
+      "refresh": "I've done that — update my claim",
+      "limit": "You can have at most 5 open claims; please wait for review."
     }
   },
   "supportNeeds": {
@@ -6484,6 +7187,19 @@
       "resolveAlert": "Resolve",
       "owner": "Owner: {name} · {phone}",
       "chip": "Chip {chip}",
+      "age": "Age {age}",
+      "ownerWeight": "{weight} (owner-recorded)",
+      "medications": "Current medications",
+      "conditions": "Conditions",
+      "vaccination": "Vaccination",
+      "vaccinationLast": "Last vaccination",
+      "vaccinationNext": "Next due",
+      "noLabs": "No lab results recorded.",
+      "labRange": "Reference {low}–{high}",
+      "noDocuments": "No documents available to you for this patient.",
+      "sharedByOwner": "Shared by the owner",
+      "download": "Secure download",
+      "downloadFailed": "The document could not be opened. Please try again.",
       "noneRecorded": "Nothing recorded",
       "allergies": "Allergies",
       "activeProblems": "Active problems",
@@ -6516,6 +7232,8 @@
         "vitals": "Exams",
         "prescriptions": "Prescriptions",
         "visits": "Visits",
+        "labs": "Labs",
+        "documents": "Documents",
         "financial": "Estimates"
       },
       "alertType": {
@@ -6786,7 +7504,7 @@
       "breadcrumb": "Breadcrumb",
       "contents": "In this article",
       "otherLanguages": "Read in other languages",
-      "pageLabel": "Page {page}",
+      "pageLabel": "Page {page, number}",
       "newer": "Previous page",
       "older": "Next page",
       "eyebrow": "The opetlife journal",
@@ -6816,6 +7534,10 @@
         "allClear": "All clear — nothing is waiting on your team.",
         "clearList": "Clear: {list}",
         "queue": {
+          "pendingReviews": "Reviews waiting for moderation",
+          "openProviderNoShows": "Provider no-show reports",
+          "openOwnershipDisputes": "Ownership disputes",
+          "pendingDeletionRequests": "Account deletion requests",
           "openTrustCases": "Trust & safety cases",
           "openDisputes": "Open disputes",
           "openSupportCases": "Open support cases",
@@ -6839,7 +7561,7 @@
       },
       "shortcuts": "Shortcuts",
       "healthLink": "Status page",
-      "workersSummary": "{running} of {total} background jobs running",
+      "workersSummary": "{running} of {total} background jobs healthy",
       "priority": {
         "URGENT": "Urgent",
         "HIGH": "High"
@@ -6899,7 +7621,15 @@
       "insuranceProviders": "Insurance provider management",
       "externalSources": "External travel source operations",
       "accessControl": "Admin access management",
-      "verificationQueue": "Partner verification queue"
+      "verificationQueue": "Partner verification queue",
+      "launch": {
+        "title": "Launch month goal",
+        "hint": "The launch success measure: registered pets and weekly bookings. Until the demo data is cleaned up (Q4), it is counted too.",
+        "registeredPets": "Registered pets",
+        "thisWeek": "this week",
+        "bookingsThisWeek": "Bookings this week",
+        "vsLastWeek": "vs {count} last week"
+      }
     },
     "records": {
       "clinical": "Clinical records",
@@ -7142,6 +7872,7 @@
     }
   },
   "clinicWorkspace": {
+    "clients": "Clients",
     "title": "Clinic workspace",
     "intro": "Appointments, follow-up tasks and clinic customers in one shared workspace.",
     "queue": "Visit queue",
@@ -7970,6 +8701,12 @@
       "possibleConflict": "May not fit the pet rules",
       "moreInfo": "More information needed",
       "distanceKm": "{distance} km"
+    },
+    "source": {
+      "label": "Source",
+      "all": "All",
+      "opetlife": "opetlife",
+      "jajiga": "Jajiga"
     }
   },
   "externalTravel": {
@@ -8052,6 +8789,14 @@
       "SOURCE_REPORTED_AVAILABLE": "Source reports availability. Confirm inventory when booking.",
       "SOURCE_REPORTED_UNAVAILABLE": "Source reports no availability.",
       "UNKNOWN": "Availability is unknown."
+    },
+    "fromSource": "From {source}",
+    "blend": {
+      "title": "Pet-friendly stays from Jajiga",
+      "titleCity": "Pet-friendly stays in {city} from Jajiga",
+      "hint": "Listings from Jajiga: you book and pay on Jajiga's own site, and opetlife charges nothing. Confirm the pet rules with the host before booking.",
+      "seeAll": "All Jajiga stays",
+      "pages": "Jajiga pages"
     }
   },
   "localDateTime": {
@@ -8516,6 +9261,7 @@
       "SUPPORT_AGENT": "Support agent"
     },
     "rules": {
+      "UNVERIFIED_CONTACT": "Admin access can only go to an account whose email address has been verified.",
       "ALREADY_ADMIN": "This account is already an admin; open its existing membership.",
       "SELF_CHANGE_FORBIDDEN": "You cannot change your own membership.",
       "LAST_SUPER_ADMIN": "The last active super admin cannot be changed.",
@@ -8544,6 +9290,10 @@
     }
   },
   "partnerVerification": {
+    "sla": {
+      "overdue": "Past the 24-working-hour target",
+      "progress": "{hours} of {target} working hours used"
+    },
     "superseded": "Replaced by a newer upload",
     "reviewedBy": "by {name}",
     "caseSummary": "Where this case stands",
@@ -9211,7 +9961,7 @@
     "addPet": "Add a pet",
     "chooseUpToPets": "Choose up to {count, number} pets",
     "whichPet": "For which pet?",
-    "petSelectionInfo": "All bookable pets in your household are listed. Selection limit: {count}.",
+    "petSelectionInfo": "All bookable pets in your household are listed. Selection limit: {count, number}.",
     "speciesNotSupported": "This service is not offered for this species",
     "petLimitReached": "The limit for this service has been reached.",
     "sameHouseholdRequired": "Pets in one booking must belong to the same household.",
@@ -9244,6 +9994,17 @@
     "shareHealthBasics": "Health summary (conditions, allergies, active medications, vaccination status) until 24h after the visit",
     "chooseHealthSharing": "Choose one of the two options to continue.",
     "shareSelectedDocuments": "Share selected documents precisely via Share with Vet",
+    "shareDocuments": {
+      "title": "Documents for this vet (optional)",
+      "description": "Tick the documents this visit's vet may open. Only the vet assigned to this booking can open them, and only until 24h after the visit. Nothing is shared unless you tick it.",
+      "loading": "Loading your documents",
+      "empty": "No health documents uploaded for this pet yet.",
+      "loadFailed": "Your documents could not be loaded. You can continue without sharing any.",
+      "limit": "You can share up to {max, number} documents with one booking.",
+      "reviewLabel": "Documents shared",
+      "reviewNone": "None",
+      "reviewCount": "{count, plural, one {# document} other {# documents}}"
+    },
     "reviewTitle": "Review everything once",
     "provider": "Provider",
     "service": "Service",
@@ -9293,6 +10054,11 @@
       "addressRequired": "Please choose the service address.",
       "petAccessDenied": "You are not allowed to book for this pet.",
       "bookingChanged": "This booking changed state. Please refresh."
+    },
+    "priceBreakdown": {
+      "perPet": "{unit} per pet × {pets, number} pets",
+      "perPetNight": "{unit} per pet per night × {pets, number} pets × {nights, number} nights",
+      "perRide": "{unit} per ride, however many pets"
     }
   },
   "datePicker": {
@@ -9316,7 +10082,8 @@
       "checkInSelected": "Check-in selected; now choose check-out.",
       "checkInSuffix": ", check-in",
       "checkOutSuffix": ", check-out"
-    }
+    },
+    "year": "Year"
   },
   "providerDiscovery": {
     "allServices": "All services",
@@ -9760,7 +10527,9 @@
       "deadline": "Upload the receipt by {date}.",
       "stepOne": "Transfer the amount to this card with your bank app or an ATM.",
       "stepTwo": "Take a photo or screenshot of the receipt.",
-      "stepThree": "Send the receipt here. Our finance team checks it and adds the money."
+      "stepThree": "Send the receipt here. Our finance team checks it and adds the money.",
+      "bank": "Bank",
+      "sheba": "Sheba"
     },
     "receipt": {
       "choose": "Choose the receipt image",
@@ -9848,7 +10617,7 @@
     "open": "Open",
     "previous": "Previous",
     "next": "Next",
-    "pageOf": "Page {page} of {pages}",
+    "pageOf": "Page {page, number} of {pages, number}",
     "never": "No movements",
     "detail": {
       "back": "All wallets",
@@ -9973,6 +10742,1574 @@
         "DUPLICATE_CREDIT_REVERSAL": "Duplicate credit reversed",
         "OTHER": "Other correction"
       }
+    }
+  },
+  "adminPets": {
+    "kicker": "Customers",
+    "title": "Pets",
+    "subtitle": "Every pet with its owner and household. Health shows only as counts and dates, never clinical text.",
+    "search": "Pet name, owner or family member name, ID or microchip",
+    "searchButton": "Search",
+    "speciesFilter": "Species",
+    "allSpecies": "All",
+    "species": {
+      "DOG": "Dog",
+      "CAT": "Cat",
+      "BIRD": "Bird",
+      "RABBIT": "Rabbit",
+      "RODENT": "Rodent",
+      "FISH": "Fish",
+      "REPTILE": "Reptile",
+      "OTHER": "Other"
+    },
+    "lifecycle": {
+      "ACTIVE": "Active",
+      "LOST": "Lost",
+      "TEMPORARILY_TRANSFERRED": "Temporarily with someone else",
+      "DECEASED": "Passed away",
+      "MEMORIAL": "Memorial",
+      "deleted": "Deleted"
+    },
+    "loading": "Loading…",
+    "failed": "The data could not be loaded.",
+    "retry": "Retry",
+    "forbidden": "You need the “View customers” permission to see pets.",
+    "empty": "No pets registered yet.",
+    "emptySearch": "No pet matches this search.",
+    "columns": {
+      "pet": "Pet",
+      "species": "Species and breed",
+      "owner": "Owner",
+      "household": "Household",
+      "family": "Other members",
+      "status": "Status",
+      "created": "Registered"
+    },
+    "noOwner": "No owner",
+    "open": "Open",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page, number} of {pages, number}",
+    "detail": {
+      "back": "All pets",
+      "identity": "Identity",
+      "fields": {
+        "species": "Species",
+        "breed": "Breed",
+        "sex": "Sex",
+        "birthDate": "Date of birth",
+        "age": "Approximate age",
+        "neutered": "Neutered",
+        "microchip": "Microchip",
+        "status": "Status",
+        "created": "Registered",
+        "photo": "Photo"
+      },
+      "months": "{months, number} months",
+      "sex": {
+        "MALE": "Male",
+        "FEMALE": "Female",
+        "UNKNOWN": "Unknown"
+      },
+      "neutered": {
+        "NEUTERED": "Yes",
+        "INTACT": "No",
+        "UNKNOWN": "Unknown"
+      },
+      "yes": "Yes",
+      "no": "No",
+      "owner": "Owner",
+      "ownerMissing": "This household has no active owner.",
+      "openCustomer": "Customer record",
+      "household": "Household: {name}",
+      "unnamedHousehold": "Unnamed",
+      "family": "Household members",
+      "familyEmpty": "No other members in this household.",
+      "roles": {
+        "OWNER": "Owner",
+        "FAMILY": "Family member"
+      },
+      "accountStatus": {
+        "ACTIVE": "Active account",
+        "SUSPENDED": "Suspended account"
+      },
+      "invitations": "Pending invitations",
+      "invitationExpires": "Expires {date}",
+      "grants": "Access to this pet",
+      "grantsEmpty": "No access recorded.",
+      "grantColumns": {
+        "person": "Person",
+        "source": "Source",
+        "scope": "Permissions",
+        "period": "Period",
+        "state": "State"
+      },
+      "sources": {
+        "HOUSEHOLD": "Household membership",
+        "MANUAL": "Shared by hand",
+        "TEMPORARY": "Temporary"
+      },
+      "scopeCount": "{count, number} permissions",
+      "states": {
+        "active": "Active",
+        "revoked": "Revoked",
+        "inactive": "Not active"
+      },
+      "notMember": "Not in the household",
+      "revoke": "Revoke access",
+      "revokeTitle": "Revoke {name}'s access",
+      "revokeReason": "Reason (kept in the audit log)",
+      "revokeConfirm": "Revoke",
+      "revokeCancel": "Cancel",
+      "revoked": "Access revoked.",
+      "revokeFailed": "The access could not be revoked.",
+      "reasonTooShort": "The reason needs at least 5 characters.",
+      "ownerGrantNote": "An owner's access is never revoked here.",
+      "health": "Health (counts and dates only)",
+      "healthFields": {
+        "documents": "Medical documents",
+        "visits": "Visits",
+        "labs": "Lab results",
+        "conditions": "Conditions",
+        "allergies": "Allergies",
+        "medications": "Medications"
+      },
+      "bookings": "Bookings",
+      "lost": "Lost reports",
+      "sightings": "{count, number} sightings",
+      "care": "Care reminders",
+      "travel": "Trips",
+      "insurance": "Insurance",
+      "claimPreps": "{count, number} claim drafts",
+      "sharing": "Sharing",
+      "shareCards": "{count, number} active share cards",
+      "healthShares": "{count, number} active health links",
+      "none": "None.",
+      "diagnostics": "Data-quality notes",
+      "diagnosticCodes": {
+        "NO_ACTIVE_OWNER": "The household has no active owner.",
+        "STALE_HOUSEHOLD_GRANT": "Someone who left the household still has access.",
+        "EXPIRED_GRANT_NOT_REVOKED": "A temporary access expired but was never revoked.",
+        "MEMBER_WITHOUT_GRANT": "A household member has no active access.",
+        "LONG_OPEN_LOST_INCIDENT": "A lost report has been open for over 90 days.",
+        "DELETED_BUT_ACTIVE": "The pet is deleted but still marked active."
+      },
+      "activity": "Recent activity",
+      "changed": "Changed: {fields}"
+    },
+    "labels": {
+      "bookingStatus": {
+        "HOLD": "On hold",
+        "PENDING_CONFIRMATION": "Awaiting confirmation",
+        "REQUESTED": "Requested",
+        "AWAITING_PAYMENT": "Awaiting payment",
+        "REJECTED": "Declined",
+        "EXPIRED": "Expired",
+        "RESCHEDULED": "Rescheduled",
+        "CONFIRMED": "Confirmed",
+        "CHECKED_IN": "Checked in",
+        "IN_PROGRESS": "In progress",
+        "COMPLETED": "Completed",
+        "CANCELLED_BY_USER": "Cancelled by the member",
+        "CANCELLED_BY_PROVIDER": "Cancelled by the provider",
+        "NO_SHOW": "No-show"
+      },
+      "serviceCategory": {
+        "VET": "Vet",
+        "GROOMING": "Grooming",
+        "TRAINING": "Training",
+        "WALKING": "Walking",
+        "SITTING": "Pet sitting",
+        "BOARDING": "Boarding",
+        "PET_TAXI": "Pet taxi",
+        "OTHER": "Other"
+      },
+      "lostStatus": {
+        "OPEN": "Open",
+        "SEARCHING": "Searching",
+        "SIGHTING_REPORTED": "Sighting reported",
+        "FOUND": "Found",
+        "REUNITED": "Back home",
+        "CLOSED": "Closed"
+      },
+      "tripStatus": {
+        "DRAFT": "Draft",
+        "PLANNING": "Planning",
+        "READY": "Ready",
+        "IN_PROGRESS": "Travelling",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled"
+      },
+      "insuranceStatus": {
+        "NEEDS_INFORMATION": "Needs information",
+        "DRAFT": "Draft",
+        "SUBMITTED": "Submitted",
+        "UNDER_REVIEW": "Under review",
+        "APPROVED": "Approved",
+        "DECLINED": "Declined",
+        "CANCELLED": "Cancelled"
+      },
+      "reminderState": {
+        "UPCOMING": "Upcoming",
+        "DUE": "Due",
+        "OVERDUE": "Overdue",
+        "COMPLETED": "Done",
+        "SNOOZED": "Snoozed",
+        "CANCELLED": "Cancelled"
+      }
+    }
+  },
+  "pwa": {
+    "install": {
+      "title": "Install opetlife on your phone",
+      "body": "It opens from your home screen like an app, loads faster and can send you notifications.",
+      "action": "Install app",
+      "later": "Not now",
+      "dismiss": "Close",
+      "iosTitle": "Add opetlife to your iPhone home screen",
+      "iosBody": "In Safari, tap the Share button and choose “Add to Home Screen”. Then open opetlife from your home screen.",
+      "installed": "opetlife is installed."
+    },
+    "header": {
+      "back": "Back",
+      "explore": "Explore everything"
+    },
+    "refresh": {
+      "pull": "Pull to refresh",
+      "release": "Release to refresh",
+      "loading": "Refreshing…"
+    },
+    "footer": {
+      "title": "The opetlife app",
+      "install": "Install the app",
+      "iosSteps": "On iPhone: in Safari, tap the Share button and choose “Add to Home Screen”.",
+      "otherSteps": "Open your browser menu and choose “Install app” or “Add to Home screen”. On Android, Chrome works best.",
+      "android": {
+        "bazaar": "Get it on Cafe Bazaar",
+        "myket": "Get it on Myket",
+        "googlePlay": "Get it on Google Play",
+        "apk": "Download for Android"
+      }
+    }
+  },
+  "safety": {
+    "title": "Stay safe from scams",
+    "contact": "Pay only inside opetlife. Never send a card-to-card transfer outside the site, and never share a verification code or password.",
+    "payment": "Pay only on this page. opetlife never asks you to transfer money to a personal account or to share a verification code.",
+    "lostPet": "Anyone who asks for money or a reward before returning a pet is probably a scammer. Meet in a public place and never pay in advance.",
+    "donation": "Donate only through this page. opetlife never asks you to transfer a donation to a personal account.",
+    "adoption": "Never pay a fee before meeting. See the pet in person and meet somewhere safe."
+  },
+  "aboutPage": {
+    "eyebrow": "About opetlife",
+    "title": "We built opetlife so caring for an animal never has to start from zero",
+    "lede": "A vaccination booklet in a drawer, a vet’s number lost in a chat, a shop that doesn’t know about an allergy, a trip planned around “no pets allowed”. opetlife brings all of it together around one profile of your pet — and keeps it honest.",
+    "chapters": {
+      "label": "On this page",
+      "why": "Why we exist",
+      "connect": "How it fits together",
+      "promises": "What we promise",
+      "values": "How we decide",
+      "contact": "Talk to us"
+    },
+    "why": {
+      "title": "Care shouldn’t depend on remembering everything",
+      "p1": "Living with a dog, a cat or a bird means hundreds of small decisions: when the next vaccine is due, which food suits a sensitive stomach, who can look after them when you travel. Most of that knowledge lives in scattered places — and when it is needed most, it is hard to find.",
+      "p2": "opetlife started from a simple idea: the animal is at the centre, not the app. Everything we build — records, bookings, the shop, travel, rescue — reads from and adds to your pet’s own profile, so each step knows what came before.",
+      "p3": "We write in Persian first, because that is where most of our families live, and in English, German and Spanish for everyone who lives with an animal far from home."
+    },
+    "connect": {
+      "title": "One profile, many helping hands",
+      "lede": "Each part of opetlife does one job well and shares only what you allow.",
+      "steps": {
+        "record": {
+          "title": "Your pet’s record",
+          "body": "Vaccinations, medications, allergies, weight and documents in one health file — with reminders before something is due.",
+          "cta": "Add your pet"
+        },
+        "care": {
+          "title": "Vets and services",
+          "body": "Find clinics, groomers, sitters and pet taxis, see real available times and book; share the health record with a vet for a limited time.",
+          "cta": "Find care"
+        },
+        "shop": {
+          "title": "Shop",
+          "body": "Food, treats and accessories, chosen with your pet’s species and needs in mind.",
+          "cta": "Visit the shop"
+        },
+        "travel": {
+          "title": "Travel",
+          "body": "Pet-friendly stays and trips; every external listing shows its source and when we last checked it.",
+          "cta": "Plan a trip"
+        },
+        "safety": {
+          "title": "Safety",
+          "body": "Lost-pet alerts, a pet ID card and plain comparisons of insurance plans, for the days you hope never come.",
+          "cta": "Lost and found"
+        },
+        "together": {
+          "title": "Community and rescue",
+          "body": "Talk with other owners, support verified rescue groups and see exactly where donations go.",
+          "cta": "Join the community"
+        },
+        "learn": {
+          "title": "Learn",
+          "body": "Practical articles and guides on training, nutrition and health, written to be used at home.",
+          "cta": "Read the magazine"
+        }
+      }
+    },
+    "promises": {
+      "title": "What we promise — and how you can check it",
+      "lede": "Trust shouldn’t be a slogan. These are things the product does, and you can see them for yourself.",
+      "items": {
+        "verified": {
+          "title": "Verified means checked",
+          "body": "Clinics, vets and service providers get a verified badge only after our team has reviewed their documents."
+        },
+        "consent": {
+          "title": "Your pet’s record, your decision",
+          "body": "A health record is shared only when you choose to share it, for a limited time, and you can revoke access at any moment."
+        },
+        "privacy": {
+          "title": "Your data stays yours",
+          "body": "From your privacy centre you can download a copy of your data or ask us to delete it."
+        },
+        "sources": {
+          "title": "Honest about where things come from",
+          "body": "Listings from other websites show their source and when we last checked them; we never present them as our own."
+        },
+        "ledger": {
+          "title": "Donations you can follow",
+          "body": "Every rescue campaign shows a running total built from real transactions — never an estimate."
+        },
+        "credits": {
+          "title": "Credit where it’s due",
+          "body": "Photos and music made by others are credited with their licence on our credits page."
+        }
+      }
+    },
+    "values": {
+      "title": "How we decide what to build",
+      "items": {
+        "animals": {
+          "title": "The animal comes first",
+          "body": "If a feature is good for business but not for the animal, we don’t build it."
+        },
+        "honest": {
+          "title": "Say what we know — and what we don’t",
+          "body": "No made-up availability, no invented reviews, no medical promises. When something is uncertain, we say so."
+        },
+        "simple": {
+          "title": "Simple for every family",
+          "body": "Clear words, large buttons, light and dark themes, and pages that work on any phone."
+        },
+        "kindness": {
+          "title": "Kindness counts",
+          "body": "Rescue, adoption and remembering the animals we have lost are part of opetlife, not an afterthought."
+        }
+      }
+    },
+    "contact": {
+      "title": "Talk to us",
+      "body": "Questions, ideas, a partnership or something that didn’t work as it should: your message reaches our support team, and you’ll see the reply in your support inbox.",
+      "contactCta": "Send a message",
+      "helpCta": "Help centre"
+    },
+    "cta": {
+      "title": "Start with your pet’s profile",
+      "body": "It takes a minute, and everything else builds on it.",
+      "primary": "Create an account",
+      "secondary": "Explore services"
+    }
+  },
+  "addressBook": {
+    "eyebrow": "Account",
+    "title": "Addresses",
+    "description": "Your household's delivery addresses, used by couriers and the post.",
+    "navHint": "Delivery addresses and default",
+    "loading": "Loading addresses…",
+    "failed": "The addresses could not be loaded.",
+    "noHousehold": "Create a household first to save addresses.",
+    "empty": "No addresses saved yet.",
+    "add": "Add address",
+    "edit": "Edit",
+    "remove": "Remove",
+    "removeConfirm": "Remove this address? Past orders keep their own copy.",
+    "removed": "Address removed.",
+    "makeDefault": "Make default",
+    "default": "Default",
+    "save": "Save address",
+    "saving": "Saving…",
+    "saved": "Address saved.",
+    "cancel": "Cancel",
+    "failedSave": "The address was not saved. Check the fields.",
+    "fields": {
+      "label": "Label (e.g. home, work)",
+      "recipient": "Recipient",
+      "phone": "Phone",
+      "city": "City",
+      "region": "Province",
+      "area": "Neighbourhood",
+      "addressLine": "Full address (street, alley, number, unit)",
+      "postalCode": "10-digit postal code",
+      "instructions": "Note for the courier (optional)",
+      "isDefault": "Use as default address"
+    },
+    "location": {
+      "use": "Use my current location",
+      "locating": "Finding your location…",
+      "set": "Map point saved; the opetlife courier can price more precisely.",
+      "clear": "Remove map point",
+      "denied": "Location access was not given. You can continue without it.",
+      "hasPoint": "Has a map point"
+    }
+  },
+  "adminShipping": {
+    "kicker": "Shop",
+    "title": "Shipping methods",
+    "subtitle": "Which methods checkout offers, at what price, and where every shipment stands.",
+    "loading": "Loading…",
+    "failed": "The data could not be loaded.",
+    "retry": "Retry",
+    "forbidden": "You need the “View shop” permission to see shipping.",
+    "mode": {
+      "sandbox": "Test mode: Alopeyk and Snappbox only give estimates and no courier is sent.",
+      "production": "Live mode: prices come from the couriers."
+    },
+    "provider": {
+      "DEV": "Test courier",
+      "ALOPEYK": "Alopeyk",
+      "SNAPPBOX": "Snappbox",
+      "OPETLIFE_COURIER": "opetlife courier",
+      "POST_PISHTAZ": "Iran Post express (Pishtaz)",
+      "SNAPPBOX_APP": "Snappbox — booked in the app",
+      "ALOPEYK_APP": "Alopeyk — booked in the app"
+    },
+    "kind": {
+      "API": "Priced by the courier's API",
+      "MANUAL": "Priced by opetlife"
+    },
+    "active": "Offered at checkout",
+    "inactive": "Not offered at checkout",
+    "notes": {
+      "NEEDS_PRICE": "Set a price first.",
+      "SWITCHED_OFF": "Switched off by staff.",
+      "DISABLED_IN_ENV": "Off in the server settings.",
+      "SANDBOX": "Test estimates until API keys are set."
+    },
+    "webhook": {
+      "yes": "Webhook secret set",
+      "no": "No webhook secret (needed for live mode)"
+    },
+    "enabled": "On",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved.",
+    "saveFailed": "Not saved. If it is on, it needs a valid price.",
+    "reason": "Reason (kept in the audit log)",
+    "readOnly": "Only “Manage shop” can change this.",
+    "courier": {
+      "cities": "Cities served (comma separated; empty = all)",
+      "baseFare": "Base fare (Toman)",
+      "perKm": "Per km (Toman)",
+      "minFare": "Minimum fare (Toman)",
+      "maxKm": "Maximum distance (km)",
+      "roadFactor": "Road factor (straight line ×)",
+      "defaultFlat": "Flat fare without a map point (Toman, 0 = none)",
+      "cityFares": "Flat fare per city (one per line: city=Toman)",
+      "pickupMinutes": "Minutes to pick up",
+      "minutesPerKm": "Minutes per km"
+    },
+    "post": {
+      "fixedPrice": "Fixed price (Toman)",
+      "includedKg": "Weight included (kg)",
+      "perExtraKg": "Each extra kilo (Toman)",
+      "etaMin": "Fastest delivery (days)",
+      "etaMax": "Slowest delivery (days)"
+    },
+    "shipments": {
+      "title": "Shipments",
+      "hint": "Staff move opetlife-courier and Post shipments; Alopeyk and Snappbox report their own status.",
+      "allMethods": "All methods",
+      "allStatuses": "All statuses",
+      "empty": "No shipments.",
+      "columns": {
+        "method": "Method",
+        "seller": "Seller",
+        "city": "Destination",
+        "status": "Status",
+        "tracking": "Tracking",
+        "updated": "Last change"
+      },
+      "status": {
+        "CREATED": "Created",
+        "REQUESTED": "Courier requested",
+        "ASSIGNED": "Courier assigned",
+        "PICKED_UP": "Picked up",
+        "IN_TRANSIT": "In transit",
+        "OUT_FOR_DELIVERY": "Out for delivery",
+        "DELIVERED": "Delivered",
+        "FAILED": "Failed",
+        "CANCELED": "Cancelled",
+        "UNKNOWN": "Unknown"
+      },
+      "update": "Update",
+      "updateTitle": "Update shipment",
+      "newStatus": "New status",
+      "trackingCode": "Post tracking number, courier reference or the app's tracking link",
+      "note": "Note (optional, in the audit log)",
+      "apply": "Apply",
+      "cancel": "Cancel",
+      "applied": "Shipment updated; the member sees it in tracking.",
+      "notApplied": "That status is behind the current one; nothing changed.",
+      "failed": "The update failed."
+    },
+    "appCourierHint": "Members pay the price from these distance/city rules (set them close to what the app charges). After an order, book the courier in the regular app with the pickup and drop-off pins, then paste its tracking link under Shipments and move the status."
+  },
+  "petTaxi": {
+    "member": {
+      "title": "Pet taxi",
+      "subtitle": "Tap your pickup and destination on the map, see the fare, and follow your driver live.",
+      "map": "Map",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "loading": "Loading…",
+      "failed": "Could not load.",
+      "retry": "Try again",
+      "step": {
+        "pickup": "Tap your pickup on the map",
+        "dropoff": "Tap your destination on the map",
+        "details": "Pets and vehicle"
+      },
+      "pickup": "Pickup",
+      "dropoff": "Destination",
+      "pinned": "Point picked on the map",
+      "myLocation": "My current location",
+      "locating": "Finding you…",
+      "locationDenied": "Location access was not given; tap the map instead.",
+      "savedAddresses": "Saved addresses",
+      "search": "Search a place",
+      "searchNone": "No place found.",
+      "city": "Pickup city",
+      "note": "Note for the driver (floor, bell…)",
+      "change": "Change",
+      "pets": "Which pets are riding?",
+      "noPets": "Add your pet first to request a ride.",
+      "carrier": "How your pet travels",
+      "carrierSize": {
+        "SMALL": "Small: cat or small dog in a carrier",
+        "MEDIUM": "Medium: medium dog in a boot crate",
+        "LARGE": "Large: big dog or several pets"
+      },
+      "quote": "Fare",
+      "quoting": "Working out the fare…",
+      "estimate": "Distance and time are estimates (straight line × road factor).",
+      "routed": "Based on the road route",
+      "notPriced": "Pet taxi is not available in this city yet.",
+      "distanceTime": "{km, number} km · about {minutes, number} min",
+      "payNote": "Online payment is not on yet; pay the driver on arrival.",
+      "request": "Request a ride",
+      "requesting": "Sending your request…",
+      "errors": {
+        "RIDE_ALREADY_OPEN": "You already have an open ride.",
+        "TOO_CLOSE": "Pickup and destination are too close.",
+        "TOO_FAR": "This trip is too long for the pet taxi.",
+        "NOT_PRICED": "Pet taxi is not available in this city yet.",
+        "generic": "That did not work. Please try again."
+      },
+      "status": {
+        "SEARCHING": "Finding a driver",
+        "DRIVER_ASSIGNED": "Driver on the way",
+        "ARRIVING": "Driver has arrived",
+        "PICKED_UP": "On the way to the destination",
+        "COMPLETED": "Arrived",
+        "CANCELLED_BY_MEMBER": "Cancelled",
+        "CANCELLED_BY_DRIVER": "Cancelled by the driver",
+        "NO_DRIVER": "No driver found"
+      },
+      "searchingHint": "Your request went to nearby drivers. If nobody accepts by {time}, we will tell you.",
+      "eta": "About {minutes, number} min away",
+      "driver": "Driver",
+      "call": "Call",
+      "positionAt": "Position at {time}",
+      "cancel": "Cancel ride",
+      "cancelConfirm": "Cancel this ride?",
+      "newRide": "New ride",
+      "rate": "Rate this ride",
+      "rateComment": "Your comment (optional)",
+      "rateSend": "Send rating",
+      "rated": "Thanks for rating.",
+      "stars": "{n, number} of 5",
+      "receipt": "Ride receipt",
+      "receiptLines": {
+        "base": "Base fare",
+        "distance": "Distance",
+        "time": "Time",
+        "carrier": "Carrier",
+        "extraPets": "Extra pets",
+        "minimum": "Minimum fare applied",
+        "total": "Total"
+      },
+      "history": "Past rides",
+      "historyEmpty": "No rides yet.",
+      "requestNow": "Request a pet taxi now",
+      "requestNowHint": "on a map, with an instant fare and live driver tracking"
+    },
+    "driver": {
+      "title": "Pet taxi: driver",
+      "subtitle": "Go online to see nearby requests. Your phone's position is sent only while you are online.",
+      "notEligible": {
+        "NOT_PET_TAXI": "This is only for pet-taxi providers.",
+        "NOT_VERIFIED": "You can go online once your provider documents are verified."
+      },
+      "online": "You are online",
+      "offline": "You are offline",
+      "goOnline": "Go online",
+      "goOffline": "Go offline",
+      "locationOff": "Your phone's location is unavailable; requests appear only with a current location.",
+      "requests": "Nearby requests",
+      "noRequests": "No requests right now. This page updates by itself.",
+      "kmFromYou": "{km, number} km to pickup",
+      "pets": "{count, plural, one {# pet} other {# pets}}",
+      "accept": "Accept",
+      "decline": "Pass",
+      "taken": "Another driver took this request.",
+      "activeRide": "Current ride",
+      "passenger": "Passenger",
+      "navigate": "Navigate",
+      "next": {
+        "ARRIVING": "I've arrived",
+        "PICKED_UP": "Pet picked up",
+        "COMPLETED": "Delivered"
+      },
+      "release": "I can't make it",
+      "releaseReason": "Reason (the ride goes back to other drivers)",
+      "fare": "Fare: {amount}",
+      "collect": "Collect the fare on delivery.",
+      "failed": "That did not work. Please try again.",
+      "driverStatus": {
+        "NONE": "You are not registered as a driver yet. Ask your organization's owner to add you with your licence and vehicle.",
+        "NONE_OWNER": "To go online, register yourself or your drivers with licence and vehicle below; the opetlife team checks them.",
+        "PENDING": "The opetlife team is checking your details; you can go online once they are verified.",
+        "VERIFIED": "You are verified.",
+        "SUSPENDED": "Your driving is suspended for now."
+      },
+      "around": "Around {city}",
+      "approxArea": "Approximate area",
+      "approxHint": "You see the exact address and note after you accept.",
+      "roster": {
+        "title": "Your drivers",
+        "hint": "Each driver is registered with licence and plate and cannot go online until the opetlife team verifies them. Changed details are checked again.",
+        "member": "Team member",
+        "licenceNumber": "Licence number",
+        "vehiclePlate": "Plate",
+        "vehicleDescription": "Vehicle (model and colour)",
+        "save": "Send for checking",
+        "saved": "Saved; it will be checked.",
+        "failed": "That did not work. Please try again.",
+        "incomplete": "Fill in every field.",
+        "empty": "No drivers registered yet.",
+        "status": {
+          "PENDING": "Waiting for check",
+          "VERIFIED": "Verified",
+          "SUSPENDED": "Suspended"
+        }
+      }
+    }
+  },
+  "adminPetTaxi": {
+    "kicker": "Services",
+    "title": "Pet taxi",
+    "subtitle": "Fares per city (“*” means every other city) and rides in progress.",
+    "loading": "Loading…",
+    "failed": "The data could not be loaded.",
+    "retry": "Retry",
+    "forbidden": "You need the “View services” permission.",
+    "onlineDrivers": "Drivers online",
+    "rules": "Fares",
+    "noRules": "No fares yet; the pet taxi quotes nothing until one exists.",
+    "fields": {
+      "city": "City (“*” for the default)",
+      "base": "Base fare (Toman)",
+      "perKm": "Per km (Toman)",
+      "perMinute": "Per minute (Toman)",
+      "minimum": "Minimum (Toman)",
+      "medium": "Medium surcharge %",
+      "large": "Large surcharge %",
+      "extraPet": "Each extra pet (Toman)",
+      "active": "Active",
+      "reason": "Reason (audit log)",
+      "south": "Box south (lat)",
+      "west": "Box west (lng)",
+      "north": "Box north (lat)",
+      "east": "Box east (lng)"
+    },
+    "add": "New city fare",
+    "save": "Save",
+    "saved": "Saved.",
+    "saveFailed": "Not saved. Check the numbers.",
+    "readOnly": "Only “Manage services” can change fares.",
+    "rides": "Rides in the last 24 hours",
+    "noRides": "No rides.",
+    "columns": {
+      "member": "Member",
+      "driver": "Driver",
+      "route": "Route",
+      "fare": "Fare",
+      "status": "Status",
+      "rating": "Rating"
+    },
+    "status": {
+      "SEARCHING": "Finding a driver",
+      "DRIVER_ASSIGNED": "Driver on the way",
+      "ARRIVING": "Driver has arrived",
+      "PICKED_UP": "On the way to the destination",
+      "COMPLETED": "Arrived",
+      "CANCELLED_BY_MEMBER": "Cancelled",
+      "CANCELLED_BY_DRIVER": "Cancelled by the driver",
+      "NO_DRIVER": "No driver found"
+    },
+    "disputesHint": "Complaints about a ride are handled in Disputes.",
+    "boxHint": "This city's fare applies to rides whose pickup is inside this box (at most 3°). The city a member types does not affect the price.",
+    "boxRequired": "A city fare needs all four box coordinates.",
+    "drivers": {
+      "kicker": "Pet taxi",
+      "title": "Drivers",
+      "subtitle": "Check each driver's licence and vehicle; only verified drivers can go online.",
+      "loading": "Loading…",
+      "failed": "That did not work. Please try again.",
+      "retry": "Retry",
+      "forbidden": "services.view permission required.",
+      "empty": "No drivers registered yet.",
+      "columns": {
+        "name": "Driver",
+        "organization": "Organization",
+        "licence": "Licence",
+        "vehicle": "Vehicle",
+        "status": "Status",
+        "decision": "Decision"
+      },
+      "status": {
+        "PENDING": "Waiting for check",
+        "VERIFIED": "Verified",
+        "SUSPENDED": "Suspended"
+      },
+      "reason": "Reason (audit log)",
+      "reasonRequired": "Write a reason for the decision.",
+      "verify": "Verify",
+      "suspend": "Suspend",
+      "decided": "Saved.",
+      "orgNotVerified": "organization not verified yet"
+    }
+  },
+  "sellerStorefront": {
+    "verified": "Verified seller",
+    "since": "On opetlife since {date}",
+    "rating": "{average} of 5 from {count, plural, one {# review} other {# reviews}}",
+    "noRating": "No reviews yet",
+    "city": "From {city}",
+    "products": "{count, plural, one {# product} other {# products}}",
+    "empty": "This seller has no products on sale right now.",
+    "notFound": "This store was not found.",
+    "backToShop": "Back to the shop",
+    "protection": "Buying from this seller follows the same opetlife refund and secure-payment rules."
+  },
+  "adminPlacesOsm": {
+    "osmTitle": "OpenStreetMap import",
+    "osmHint": "Each city is refreshed weekly with one gentle Overpass request. Imported places show as unverified until the business claims them.",
+    "columns": {
+      "city": "City",
+      "active": "Active",
+      "listed": "Listed places",
+      "lastRun": "Last run",
+      "result": "Result"
+    },
+    "result": "{created} new, {updated} updated, {hidden} hidden",
+    "status": {
+      "RUNNING": "Running",
+      "SUCCEEDED": "Done",
+      "FAILED": "Failed",
+      "RATE_LIMITED": "Overpass busy; retrying later"
+    },
+    "never": "Not run yet",
+    "runNow": "Run now",
+    "started": "Started; check back in a few minutes.",
+    "runFailed": "Not now: another run is in progress or this area just ran.",
+    "claimsTitle": "Business claims",
+    "claimsEmpty": "No claims waiting.",
+    "claimColumns": {
+      "place": "Place",
+      "claimant": "Claimant",
+      "organization": "Business",
+      "message": "Message"
+    },
+    "noOrganization": "No partner account yet",
+    "kyc": {
+      "VERIFIED": "KYC verified",
+      "other": "KYC not finished"
+    },
+    "approve": "Approve",
+    "reject": "Reject",
+    "reason": "Reason (audit log)",
+    "decided": "Saved.",
+    "decideFailed": "Not saved: approval needs the claim's own business to be KYC-verified, and the listing not suspended.",
+    "form": {
+      "title": "Add or edit a city",
+      "hint": "The city's bounding box (at most 1.5° each way). The city name is the one the city filter shows.",
+      "province": "Province",
+      "south": "South (lat)",
+      "west": "West (lng)",
+      "north": "North (lat)",
+      "east": "East (lng)",
+      "save": "Save",
+      "saved": "Saved.",
+      "saveFailed": "Not saved: check the box (south below north, west below east, at most 1.5°).",
+      "edit": "Edit",
+      "activate": "Activate",
+      "deactivate": "Pause",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "claimsHint": "Approve only for the business named on the claim, once its KYC is verified. Compare its KYC details with this listing's OpenStreetMap tags.",
+    "claimTabs": {
+      "PENDING": "Waiting for review",
+      "APPROVED": "Approved"
+    },
+    "approvedEmpty": "No listing has been handed over yet.",
+    "compare": {
+      "business": "Business (KYC)",
+      "listing": "This listing in OpenStreetMap",
+      "contact": "Contact",
+      "phone": "Phone",
+      "address": "Address",
+      "website": "Website"
+    },
+    "release": "Release from this business",
+    "releaseFailed": "Not released: the listing may no longer be held by this business."
+  },
+  "adminCardAccount": {
+    "kicker": "Finance",
+    "title": "Card-to-card account",
+    "subtitle": "The card members pay into for wallet top-ups and card-to-card payments.",
+    "current": "Current account",
+    "source": {
+      "ADMIN": "Set on this page.",
+      "ENV": "From the server settings (not set here yet).",
+      "NONE": "No account is set; card-to-card is off for members."
+    },
+    "readOnly": "Only a super admin with settings.manage can change this account.",
+    "change": "Change the account",
+    "changeHint": "Every change is recorded with its reason and every super admin is notified. Payments already started keep the account they began with.",
+    "fields": {
+      "cardNumber": "Card number (16 digits)",
+      "sheba": "Sheba / IBAN (optional)",
+      "holderName": "Account holder",
+      "bankName": "Bank (optional)",
+      "reason": "Reason for the change"
+    },
+    "confirm": "I confirm this account belongs to opetlife.",
+    "save": "Save the new account",
+    "saving": "Saving…",
+    "saved": "The new account is saved and super admins were notified.",
+    "offReason": "Reason for switching card-to-card off",
+    "switchOff": "Switch card-to-card off",
+    "switchedOff": "Card-to-card is switched off.",
+    "history": "Account history",
+    "noHistory": "No account has been set here yet.",
+    "columns": {
+      "setBy": "Set by",
+      "reason": "Reason",
+      "closed": "Ended"
+    },
+    "activeNow": "Active",
+    "loading": "Loading…",
+    "failed": "Could not load.",
+    "retry": "Retry",
+    "forbidden": "wallet.view permission required.",
+    "errors": {
+      "REASON_TOO_SHORT": "Write a reason of at least 10 characters.",
+      "CONFIRM": "Confirm that the account belongs to opetlife.",
+      "CARD_NUMBER_INVALID": "The card number must be 16 digits.",
+      "CARD_NUMBER_CHECKSUM": "This card number is not valid; check the digits.",
+      "SHEBA_INVALID": "Sheba must be IR followed by 24 digits.",
+      "SHEBA_CHECKSUM": "This Sheba number is not valid.",
+      "CARD_OR_SHEBA_REQUIRED": "Enter a card number or a Sheba.",
+      "HOLDER_REQUIRED": "Enter the account holder.",
+      "SUPER_ADMIN_WITH_SETTINGS_MANAGE_REQUIRED": "Only a super admin can change this account.",
+      "generic": "Not saved; please try again."
+    }
+  },
+  "adminCardReceipts": {
+    "kicker": "Finance",
+    "title": "Card-to-card receipts",
+    "subtitle": "Receipts for order and booking payments; pending ones first, oldest first.",
+    "filter": "Status filter",
+    "status": {
+      "REVIEW_PENDING": "Awaiting review",
+      "UNDERPAID_AWAITING_DIFFERENCE": "Awaiting difference",
+      "AWAITING_RECEIPT": "Awaiting receipt",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "EXPIRED": "Expired",
+      "CANCELLED": "Cancelled",
+      "ALL": "All"
+    },
+    "columns": {
+      "member": "Member",
+      "reference": "For",
+      "amount": "Amount",
+      "uploaded": "Receipt sent",
+      "status": "Status"
+    },
+    "reference": {
+      "booking": "Booking",
+      "order": "Order ({count, number})"
+    },
+    "open": "Review",
+    "empty": "No receipts with this status.",
+    "loading": "Loading…",
+    "failed": "Could not load.",
+    "retry": "Retry",
+    "forbidden": "finance.view permission required.",
+    "previous": "Previous",
+    "next": "Next",
+    "reviewTitle": "Review the receipt",
+    "receivedSoFar": "received: {amount}",
+    "account": "Paid to",
+    "rejectionReason": "Rejection reason",
+    "viewReceipt": "View the receipt",
+    "receiptOpening": "Opening…",
+    "receiptFailed": "The receipt could not be opened.",
+    "noReceipt": "No receipt has been sent yet.",
+    "availableAt": "Review opens at {date}.",
+    "receivedAmount": "Amount received (toman)",
+    "reason": "Reason (required to reject)",
+    "approve": "Approve",
+    "reject": "Reject",
+    "saving": "Saving…",
+    "readOnly": "Only finance.refund.execute can approve or reject a receipt.",
+    "done": {
+      "APPROVED": "Approved; the member was notified.",
+      "REJECTED": "Rejected; the member was notified.",
+      "UNDERPAID": "Short payment; the member was asked to pay the difference."
+    },
+    "errors": {
+      "amount": "Enter the amount received in toman.",
+      "reason": "To reject, write a reason of at least 5 characters.",
+      "notYet": "Review of this receipt is not open yet.",
+      "notReviewable": "This receipt can no longer be reviewed.",
+      "generic": "Not saved; please try again."
+    }
+  },
+  "adminOrderCancel": {
+    "title": "Cancel this order (support)",
+    "hint": "Only before a courier has the parcel. The customer gets the full amount back at once; delivery is cancelled and stock returns.",
+    "afterDispatch": "The parcel is with the courier; use a refund request instead.",
+    "reason": "Reason (audit log)",
+    "reasonRequired": "Write a short reason.",
+    "cancel": "Cancel order",
+    "confirm": "Yes, cancel and refund in full",
+    "back": "Back",
+    "notCancellable": "It can no longer be cancelled; the courier has the parcel.",
+    "failed": "That did not work; please try again."
+  },
+  "adminRepeatDeliveries": {
+    "title": "Repeat deliveries",
+    "hint": "Members' repeat-delivery schedules (view only). Members change or cancel them in their account.",
+    "filter": "Status",
+    "all": "All",
+    "status": {
+      "ACTIVE": "Active",
+      "PAUSED": "Paused",
+      "CANCELLED": "Cancelled"
+    },
+    "col": {
+      "member": "Member",
+      "product": "Product",
+      "seller": "Seller",
+      "every": "Every",
+      "next": "Next delivery",
+      "status": "Status",
+      "lastOrder": "Last order"
+    },
+    "days": "{count, number} days",
+    "empty": "None.",
+    "prev": "Previous",
+    "next": "Next",
+    "forbidden": "commerce.view permission required.",
+    "failed": "Could not load",
+    "retry": "Retry"
+  },
+  "adminBookingMoney": {
+    "title": "Cancel and refund",
+    "hint": "Cancelling follows the booking's own rules; money goes back only through a finance approval (a second admin above the threshold).",
+    "paid": "Paid online",
+    "refunded": "Refunded",
+    "refundable": "Can still go back",
+    "policy": "Under the cancellation terms",
+    "approvalStatus": {
+      "REQUESTED": "Awaiting approval",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "EXECUTED": "Refunded"
+    },
+    "openQueue": "Approval queue",
+    "cancel": "Cancel as staff",
+    "refund": "Refund",
+    "refundChoice": "What goes back?",
+    "choice": {
+      "POLICY": "Per the cancellation terms ({policy})",
+      "FULL": "Everything ({full})",
+      "AMOUNT": "A set amount",
+      "NONE": "No refund"
+    },
+    "amount": "Amount (IRR)",
+    "reason": "Reason (kept in the audit log)",
+    "confirmCancel": "I confirm the cancellation; the customer and the provider are told.",
+    "confirmRefund": "I confirm this refund request.",
+    "submitCancel": "Cancel booking",
+    "submitRefund": "Request refund",
+    "back": "Back",
+    "needReason": "Write a reason and tick the confirmation.",
+    "needAmount": "Enter a valid amount.",
+    "cancelled": "Booking cancelled.",
+    "refundRequested": "The refund is waiting in the finance approval queue.",
+    "forbidden": "You don't have the permission for this.",
+    "tooMuch": "More than can go back, or this booking can't be cancelled.",
+    "failed": "That didn't work; please try again."
+  },
+  "adminRefundApprovals": {
+    "title": "Refund approvals",
+    "hint": "Shop orders, service bookings and stays. Nobody approves their own request.",
+    "filter": "Status",
+    "all": "All",
+    "status": {
+      "REQUESTED": "Awaiting approval",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "EXECUTED": "Refunded"
+    },
+    "subject": {
+      "ORDER": "Shop order",
+      "BOOKING": "Service booking",
+      "TRAVEL_BOOKING": "Stay"
+    },
+    "columns": {
+      "subject": "For",
+      "amount": "Amount",
+      "reason": "Reason",
+      "requestedBy": "Requested by",
+      "status": "Status"
+    },
+    "empty": "Nothing here.",
+    "approve": "Approve",
+    "reject": "Reject",
+    "execute": "Pay back",
+    "rejectReason": "Reason for rejecting:",
+    "done": {
+      "approve": "Approved.",
+      "reject": "Rejected.",
+      "execute": "Refunded."
+    },
+    "selfApproval": "You can't approve your own request, or this step is no longer allowed.",
+    "forbidden": "finance.view permission required.",
+    "failed": "That didn't work; please try again."
+  },
+  "adminDisputeRefund": {
+    "title": "Outcome with a refund",
+    "hint": "In the customer's favour with money back: the refund goes to the finance approval queue and the dispute is resolved for the customer.",
+    "amount": "Amount (IRR)",
+    "reason": "Reason",
+    "submit": "Resolve with a refund",
+    "approval": "Refund of {amount}: {status}",
+    "status": {
+      "REQUESTED": "Awaiting approval",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "EXECUTED": "Refunded"
+    },
+    "notOpen": "Only for a dispute under review, with the finance permission.",
+    "invalid": "Enter an amount and a reason (at least 5 characters).",
+    "requested": "Refund requested.",
+    "tooMuch": "More than allowed, or this dispute can't end in a refund.",
+    "failed": "That didn't work; please try again."
+  },
+  "adminDigikalaFacts": {
+    "title": "One-time Digikala pet import (facts only)",
+    "hint": "Digikala's best-selling pet-category products come into the catalog once, as drafts.",
+    "rules": {
+      "facts": "Name, brand, category, specifications and weight are imported.",
+      "noContent": "Digikala's photos and descriptions are not copied; add our own text and images before publishing.",
+      "reference": "Digikala's price and stock stay on the import record as a reference only; they are not our selling price.",
+      "pace": "It runs slowly (one request every 3 seconds) and stops if Digikala blocks it."
+    },
+    "category": "Destination catalog category",
+    "maxProducts": "Maximum products (up to 3000)",
+    "start": "Start the one-time import",
+    "started": "Queued; progress shows in the jobs list.",
+    "alreadyRun": "This import has already run or is running.",
+    "invalid": "Choose a category and a number from 1 to 3000.",
+    "forbidden": "commerce.manage permission required.",
+    "failed": "Could not start; please try again."
+  },
+  "petCard": {
+    "title": "Pet card and QR code",
+    "intro": "A public card for {name}'s tag or collar. Anyone who scans the code sees only what you choose here and can message you through opetlife. Your phone number is never shown.",
+    "back": "Back to {name}'s profile",
+    "fieldsTitle": "What the card shows",
+    "healthGroup": "Health (for when a finder needs to know)",
+    "fields": {
+      "PHOTO": "Photo",
+      "SPECIES": "Species",
+      "BREED": "Breed",
+      "SEX": "Sex",
+      "AGE": "Age",
+      "MICROCHIP_STATUS": "Whether it's microchipped (not the number)",
+      "ALLERGIES": "Allergies",
+      "CONDITIONS": "Active conditions",
+      "MEDICATIONS": "Current medications",
+      "BLOOD_TYPE": "Blood type",
+      "CRITICAL_NOTES": "Critical notes"
+    },
+    "previewTitle": "Anyone who scans the code sees",
+    "previewName": "Name: {name}",
+    "previewMessage": "A “Message the owner” button through opetlife",
+    "neverTitle": "Never shown",
+    "never": "Your address, household members, phone number, the microchip number, documents and bookings.",
+    "create": "Create card and QR code",
+    "replace": "Create a new card",
+    "replaceNote": "Creating a new card stops the current one at once; its old code no longer opens.",
+    "creating": "Creating…",
+    "createError": "The card wasn't created. Try again.",
+    "readyTitle": "Your card is ready",
+    "onceNote": "This link and code are shown only now. Download or print them; if you lose them, create a new card.",
+    "qrLabel": "QR code for {name}'s card",
+    "download": "Download QR",
+    "print": "Print",
+    "copy": "Copy link",
+    "copied": "Copied",
+    "open": "View card",
+    "listTitle": "{name}'s cards",
+    "listEmpty": "No card yet.",
+    "kind": {
+      "ID_TAG": "Tag card",
+      "EMERGENCY": "Emergency card"
+    },
+    "state": {
+      "ACTIVE": "Active",
+      "REVOKED": "Revoked",
+      "ROTATED": "Replaced",
+      "EXPIRED": "Expired"
+    },
+    "created": "Created {date}",
+    "ending": "Code ending …{hint}",
+    "views": "Views: {count}",
+    "lastViewed": "Last viewed {date}",
+    "revoke": "Revoke card",
+    "revokeConfirm": "Yes, revoke this card",
+    "revokeCancel": "Cancel",
+    "revoked": "The card is revoked and its code no longer opens.",
+    "revokeError": "It wasn't revoked. Try again.",
+    "noAccess": "Only someone who manages this pet's access can create its card.",
+    "loadError": "The card details didn't load.",
+    "retry": "Try again",
+    "loading": "Loading…"
+  },
+  "legalPages": {
+    "eyebrow": {
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "faq": "Help"
+    },
+    "updated": "Last updated: {date}",
+    "onThisPage": "On this page",
+    "allLegal": "All legal documents",
+    "faqMore": "More answers in the help center",
+    "stillNeedHelp": "Still have a question?",
+    "contactSupport": "Contact support",
+    "terms": "Terms and Rules",
+    "privacy": "Privacy Policy",
+    "faq": "FAQ",
+    "consent": "By continuing, you agree to opetlife's <terms>Terms and Rules</terms> and <privacy>Privacy Policy</privacy>.",
+    "checkoutConsent": "By placing this order, you agree to the <terms>Terms and Rules</terms>, including <returns>cancellation and 48-hour returns</returns>, and the <privacy>Privacy Policy</privacy>.",
+    "adminDraft": {
+      "title": "Built-in Terms, Privacy Policy and FAQ are live — draft, needs the owner's legal review",
+      "body": "These texts were written from how the platform actually works and are shown in all six languages until you publish a reviewed version. Publishing Terms or Privacy here for Persian or English replaces the built-in text for that language. Points to check with a lawyer: the 48-hour return window next to the statutory right of withdrawal for distance purchases, where refunds go (original method or wallet), account deletion (execution is still switched off), and community posts appearing before review."
+    }
+  },
+  "businessHub": {
+    "title": "Business home",
+    "subtitle": "opetlife partner panel",
+    "intro": "Every business you belong to, with what needs you today.",
+    "emptyHint": "No business is linked to your account yet.",
+    "emptyTitle": "No business yet",
+    "emptyBody": "After partner sign-up and verification, your business appears here.",
+    "toPetOwnerHome": "Go to my pet-owner home",
+    "failed": "Could not load",
+    "retry": "Retry",
+    "loading": "Loading",
+    "finishVerification": "Finish verification",
+    "noReviews": "No reviews yet.",
+    "rating": "Rated {average} of 5 · {count} reviews",
+    "stars": "{rating} stars",
+    "support": "Contact support",
+    "homeLink": "Business home",
+    "myBusiness": "My business",
+    "svc": {
+      "today": "Today's bookings",
+      "upcoming": "Upcoming",
+      "pending": "Waiting for you",
+      "next": "Next bookings",
+      "noBookings": "No upcoming bookings.",
+      "services": "Services and prices ({active} active of {total})",
+      "noPrice": "No price",
+      "minutes": "{minutes} min",
+      "noServices": "No services yet.",
+      "open": "Open panel",
+      "bookings": "Bookings",
+      "calendar": "Calendar",
+      "servicesPrices": "Services & prices",
+      "reviews": "Reviews"
+    },
+    "shop": {
+      "kind": "Shop",
+      "toPrepare": "Orders to prepare",
+      "lowStock": "Low stock",
+      "pendingModeration": "Awaiting review",
+      "activeOffers": "Active offers",
+      "available": "Available to pay out",
+      "pendingPayout": "Pending",
+      "open": "Open shop panel",
+      "orders": "Orders",
+      "offers": "Products & prices",
+      "inventory": "Stock",
+      "payouts": "Payouts"
+    },
+    "joinAsPartner": "Join as a partner"
+  },
+  "partnerOnboarding": {
+    "loadFailed": "Could not load",
+    "retry": "Retry",
+    "saveAndContinue": "Save and continue",
+    "continue": "Continue",
+    "remove": "Remove",
+    "intro": {
+      "title": "Join as a partner",
+      "body": "Run a pet service or a pet shop? Join opetlife so pet owners can find you, book you or buy from you.",
+      "needs": {
+        "kinds": "Your business type (pick several, for example vet and pet shop)",
+        "documents": "Logo, national ID card and licence or permit",
+        "address": "Postal address with province and city",
+        "services": "For services: working days, hours and the price of each service",
+        "shop": "For a shop: opening hours and your products with price and stock",
+        "review": "Send for review and identity verification"
+      },
+      "reviewNote": "Nothing shows on the site until the opetlife team has verified your documents. Identity documents are only for review and are never published.",
+      "create": "Create a partner account",
+      "signIn": "I have an account — sign in"
+    },
+    "wizard": {
+      "title": "Partner signup",
+      "reviewNote": "Each step is saved, so you can continue later. Your business appears on the site once the opetlife team approves it.",
+      "steps": "Steps"
+    },
+    "steps": {
+      "kinds": "Business type",
+      "business": "Name and logo",
+      "owner": "Owner details",
+      "documents": "Documents",
+      "address": "Address",
+      "calendar": "Working calendar",
+      "services": "Services and prices",
+      "hours": "Shop hours",
+      "products": "Products",
+      "review": "Review and submit"
+    },
+    "kinds": {
+      "hint": "Pick every service you offer. If you also run a pet shop, tick it too.",
+      "services": "Services",
+      "shopTitle": "Shop"
+    },
+    "kind": {
+      "VET_CLINIC": "Vet clinic",
+      "VETERINARIAN": "Veterinarian",
+      "GROOMER": "Grooming",
+      "BOARDING": "Boarding",
+      "SITTER": "Pet sitting",
+      "TRAINER": "Training",
+      "WALKER": "Dog walking",
+      "PET_TAXI": "Pet taxi",
+      "SHOP": "Pet shop (online or in-store)"
+    },
+    "business": {
+      "name": "Business name",
+      "description": "Short description",
+      "logo": "Logo",
+      "logoHint": "JPG, PNG or WebP up to 10 MB. The logo shows on the site after approval."
+    },
+    "owner": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "phone": "Business phone",
+      "verifyMobile": "To continue, your account's mobile number must be confirmed with an SMS code.",
+      "verifyMobileLink": "Confirm my mobile"
+    },
+    "documents": {
+      "hint": "Your national ID card and business licence (or eNamad for an online shop) are required; vets also upload their veterinary licence.",
+      "none": "No documents uploaded yet.",
+      "kind": "Document type",
+      "file": "File (JPG, PNG or PDF up to 20 MB)",
+      "private": "Documents are stored privately; only the review team sees them.",
+      "upload": "Upload"
+    },
+    "docKind": {
+      "NATIONAL_ID_CARD": "National ID card",
+      "LICENSE": "Licence / permit",
+      "BUSINESS_LICENSE": "Business licence",
+      "BUSINESS_REGISTRATION": "Company registration",
+      "OTHER": "Other",
+      "ENAMAD": "eNamad (e-trust seal)"
+    },
+    "docStatus": {
+      "PENDING": "Waiting for review",
+      "ACCEPTED": "Accepted",
+      "REJECTED": "Rejected",
+      "EXPIRED": "Expired"
+    },
+    "address": {
+      "province": "Province",
+      "city": "City",
+      "pick": "Choose",
+      "otherCity": "Other city…",
+      "line": "Street address",
+      "postalCode": "Postal code (10 digits)",
+      "latitude": "Latitude (optional)",
+      "longitude": "Longitude (optional)",
+      "pinHint": "If you know your map position, add it so customers find you more easily."
+    },
+    "day": {
+      "6": "Saturday",
+      "0": "Sunday",
+      "1": "Monday",
+      "2": "Tuesday",
+      "3": "Wednesday",
+      "4": "Thursday",
+      "5": "Friday"
+    },
+    "hours": {
+      "from": "From ({day})",
+      "to": "To ({day})"
+    },
+    "services": {
+      "hint": "Prices are per pet; for several pets the price is multiplied. Booking slots follow each service's duration.",
+      "kind": "Type",
+      "name": "Service name",
+      "price": "Price per pet (toman)",
+      "duration": "Duration (minutes)",
+      "maxPets": "Max pets per booking",
+      "add": "Add a service"
+    },
+    "products": {
+      "hint": "Find your products in the opetlife product directory and set price and stock. They show in the shop after your shop is approved and the products are reviewed.",
+      "search": "Search products",
+      "searchButton": "Search",
+      "noResults": "No products found.",
+      "add": "Add",
+      "picked": "Your products",
+      "nonePicked": "No products yet (you can add them later too).",
+      "price": "Price (toman)",
+      "stock": "Stock",
+      "requestTitle": "Can't find your product?",
+      "requestName": "Product name",
+      "requestButton": "Request this product",
+      "requestSent": "Request sent; it's added to the directory after review.",
+      "requestLater": "Product requests become available in your shop panel after approval."
+    },
+    "review": {
+      "body": "Check everything and send it for verification. After sending, you can't edit until the review is done.",
+      "ready": "Everything is ready.",
+      "submit": "Send for review"
+    },
+    "missing": {
+      "ADDRESS": "Address",
+      "CALENDAR": "Working calendar",
+      "SERVICES": "At least one service with a price",
+      "OPENING_HOURS": "Shop opening hours",
+      "PROFILE": "Owner details (and a confirmed mobile)",
+      "DOCUMENTS": "Required documents (ID card and licence)",
+      "document": "Required document: {kind}"
+    },
+    "submitted": {
+      "title": "Your application is under review",
+      "body": "The opetlife team is reviewing your documents and will let you know. Until then nothing shows on the site.",
+      "verifiedTitle": "Your business is verified",
+      "verifiedBody": "Your services are live, and your products show in the shop after review.",
+      "toBusiness": "Go to my business"
+    },
+    "subject": {
+      "PROVIDER": "Services",
+      "SELLER": "Shop"
+    },
+    "lifecycle": {
+      "NOT_SUBMITTED": "Not sent",
+      "PENDING": "Waiting for review",
+      "UNDER_REVIEW": "Under review",
+      "RESUBMISSION_REQUESTED": "Changes requested",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "SUSPENDED": "Suspended"
+    },
+    "errors": {
+      "generic": "Not saved; please try again.",
+      "PICK_AT_LEAST_ONE": "Pick at least one service or a shop.",
+      "NAME_REQUIRED": "Enter the business name.",
+      "CANNOT_REMOVE_STARTED_BUSINESS": "A business type already started can't be removed; you can only add new ones.",
+      "UNDER_REVIEW_LOCKED": "It's under review and can't be changed right now.",
+      "VERIFIED_MOBILE_REQUIRED": "First confirm your account's mobile number with an SMS code.",
+      "ADDRESS_FIRST": "Save the address first.",
+      "START_BEFORE_END": "Start time must be before end time.",
+      "CATALOG_PRODUCT_NOT_AVAILABLE": "One of the products is no longer in the directory.",
+      "STEPS_INCOMPLETE": "Some steps aren't complete yet.",
+      "VERIFICATION_REQUIRED_DOCUMENTS_MISSING": "Required documents are still missing.",
+      "VERIFICATION_PROFILE_REQUIRED": "Owner details are not complete.",
+      "LOGO_FILE": "The logo must be JPG, PNG or WebP under 10 MB.",
+      "DOC_FILE": "The document must be JPG, PNG or PDF under 20 MB.",
+      "TOO_MANY_PENDING": "Too many documents are waiting for review."
+    }
+  },
+  "adminTwoStep": {
+    "kicker": "Account security",
+    "title": "Two-step sign-in",
+    "retry": "Try again",
+    "intro": "A code from an authenticator app on your phone, on top of your password. Admin pages ask for it once per sign-in and again every 12 hours.",
+    "status": {
+      "on": "On",
+      "off": "Off",
+      "onSince": "On since {date}",
+      "recoveryLeft": "{count, plural, one {# recovery code left} other {# recovery codes left}}",
+      "recoveryLow": "{count, plural, =0 {No recovery codes left.} one {Only # recovery code left.} other {Only # recovery codes left.}} Make a new set.",
+      "enforced": "Required for every admin on this team.",
+      "optional": "Optional for now. A super admin can make it required for the whole team."
+    },
+    "actions": {
+      "turnOn": "Turn on two-step sign-in",
+      "newCodes": "Make new recovery codes",
+      "turnOff": "Turn off",
+      "turnOffBlocked": "It can't be turned off while it's required for the team."
+    },
+    "enrol": {
+      "step1": "1. Add opetlife.ir to your authenticator app",
+      "step1Help": "In Google Authenticator, Microsoft Authenticator, 1Password, Bitwarden or Aegis, choose “Add account”, then “Enter a setup key”, and type the key below. Setting it up on this phone? Use “Open in authenticator app”.",
+      "copyKey": "Copy key",
+      "copied": "Copied",
+      "openApp": "Open in authenticator app",
+      "step2": "2. Enter the 6-digit code the app shows",
+      "confirm": "Turn on",
+      "cancel": "Cancel",
+      "starting": "Preparing…",
+      "accountLabel": "Account name",
+      "keyLabel": "Setup key",
+      "typeLabel": "Type",
+      "type": "Time-based, 6 digits"
+    },
+    "codes": {
+      "title": "Save your recovery codes",
+      "body": "If you lose your phone, each code gets you in once. They won't be shown again, so keep them somewhere safe and away from this computer.",
+      "copy": "Copy codes",
+      "download": "Download as a text file",
+      "saved": "I've saved these codes",
+      "continue": "Continue",
+      "fileHeading": "opetlife.ir admin recovery codes — each works once"
+    },
+    "challenge": {
+      "title": "Enter your two-step code",
+      "body": "Open your authenticator app and enter the 6-digit code shown for opetlife.ir.",
+      "codeLabel": "6-digit code",
+      "recoveryLabel": "Recovery code",
+      "useRecovery": "Use a recovery code instead",
+      "useApp": "Use the authenticator app instead",
+      "submit": "Verify",
+      "lostPhone": "Lost your phone and your recovery codes? Ask a super admin to reset your two-step sign-in.",
+      "signOut": "Sign out"
+    },
+    "forced": {
+      "title": "Turn on two-step sign-in to continue",
+      "body": "Two-step sign-in is now required for every admin. It takes about a minute."
+    },
+    "banner": {
+      "optional": "Protect your admin account with two-step sign-in.",
+      "enforced": "Two-step sign-in is required. Turn it on before {date}.",
+      "action": "Turn it on",
+      "dismiss": "Not now"
+    },
+    "errors": {
+      "invalidPlain": "That code didn't work. Make sure your phone sets its time automatically, then enter the newest code.",
+      "invalid": "That code didn't work. {count, plural, =0 {Next wrong code locks it for a while.} one {# more try before a short lock.} other {# more tries before a short lock.}}",
+      "locked": "Too many wrong codes. Try again after {time}.",
+      "generic": "Something went wrong. Please try again.",
+      "format": "Enter the 6 digits from the app.",
+      "recoveryFormat": "A recovery code has 16 letters and digits, like ABCD-EFGH-2345-6723."
+    },
+    "confirmCode": {
+      "label": "Current 6-digit code",
+      "help": "Enter a fresh code from your app. The old recovery codes stop working.",
+      "turnOffHelp": "Enter a fresh code from your app to turn two-step sign-in off."
+    },
+    "done": {
+      "on": "Two-step sign-in is on.",
+      "off": "Two-step sign-in is off.",
+      "newCodes": "New recovery codes are ready. The old ones no longer work."
+    },
+    "policy": {
+      "title": "Two-step sign-in for the team",
+      "intro": "When it's required, every admin enters an authenticator code at sign-in. Admins who haven't turned it on keep working through the grace period, then must turn it on before any admin page opens.",
+      "required": "Require two-step sign-in for every admin",
+      "on": "Required",
+      "off": "Optional",
+      "coverage": "{enrolled} of {total} admins have it on",
+      "since": "required since {date}",
+      "graceDays": "Grace period (days)",
+      "graceHelp": "Counted from when it becomes required, or from when an admin joins, whichever is later. 0 means right away.",
+      "reason": "Reason",
+      "reasonPlaceholder": "Why this change",
+      "reasonRequired": "Write a short reason (at least 5 characters).",
+      "save": "Save",
+      "saved": "Saved.",
+      "onlySuper": "Only a super admin can change this.",
+      "selfFirst": "Turn on two-step sign-in for your own account first.",
+      "selfFirstAction": "Set up mine",
+      "mine": "My two-step sign-in",
+      "members": "Admins",
+      "col": {
+        "name": "Admin",
+        "role": "Role",
+        "status": "Two-step sign-in"
+      },
+      "member": {
+        "on": "On since {date}",
+        "grace": "Not yet · until {date}",
+        "overdue": "Must turn it on now",
+        "off": "Off"
+      },
+      "reset": "Reset",
+      "resetTitle": "Reset two-step sign-in for {name}?",
+      "resetBody": "Use this when they've lost their phone and their recovery codes. Their authenticator and recovery codes stop working, and they set it up again at their next sign-in.",
+      "resetReasonPlaceholder": "For example: lost phone, confirmed by phone call",
+      "resetConfirm": "Reset",
+      "resetDone": "Reset done. {name} will set it up again.",
+      "you": "you",
+      "enforcementLater": "For now two-step sign-in is optional for each admin. Requiring it for everyone becomes available once SMS and email are live."
+    },
+    "rules": {
+      "TWO_STEP_ALREADY_ON": "Two-step sign-in is already on for this account.",
+      "TWO_STEP_NO_PENDING_ENROLMENT": "This setup has expired. Start again.",
+      "TWO_STEP_NOT_ON": "Two-step sign-in isn't on for this account.",
+      "TWO_STEP_ENFORCED": "It can't be turned off while it's required for the team.",
+      "TWO_STEP_SELF_RESET": "You can't reset your own. Turn it off yourself, or ask another super admin.",
+      "TWO_STEP_SELF_ENROLMENT_REQUIRED": "Turn on two-step sign-in for your own account first.",
+      "TWO_STEP_POLICY_SUPER_ADMIN_ONLY": "Only a super admin can change this.",
+      "TWO_STEP_KEY_CHANGED": "Your authenticator can't be checked after a server key change. Use a recovery code, or ask a super admin to reset it."
     }
   }
 }

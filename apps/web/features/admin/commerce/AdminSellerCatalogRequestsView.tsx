@@ -6,13 +6,15 @@ import { Button, EmptyState, ErrorRecovery, Input, Skeleton } from "@petlife/ui"
 import { ApiError } from "@/lib/api/client";
 import { adminCommerceService } from "@/services/admin-commerce.service";
 import { Panel, PanelTitle, Tag } from "../console-ui";
-import { copyFor } from "@/features/admin/admin-copy";
+import { copyFor, intlLocale } from "@/features/admin/admin-copy";
+import Link from "next/link";
 import { externalHref } from "@/lib/url/external-href";
 
 type Row = Awaited<ReturnType<typeof adminCommerceService.listCatalogProductRequests>>[number];
 export function AdminSellerCatalogRequestsView() {
   const locale = useLocale();
-  const { tr } = copyFor(locale);
+  const { tr, trf } = copyFor(locale);
+  const [tab, setTab] = useState<"PENDING" | "DECIDED">("PENDING");
   const [rows, setRows] = useState<Row[] | null>(null);
   const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
   const [reason, setReason] = useState("");
@@ -25,10 +27,10 @@ export function AdminSellerCatalogRequestsView() {
   const load = useCallback(async () => {
     setError(null);
     try {
-      const [pending, cats] = await Promise.all([adminCommerceService.listCatalogProductRequests(), adminCommerceService.listProductCategories()]);
-      setRows(pending); setCategories(cats); setCategoryId(current => current || cats[0]?.id || "");
+      const [list, cats] = await Promise.all([adminCommerceService.listCatalogProductRequests(tab), adminCommerceService.listProductCategories()]);
+      setRows(list); setCategories(cats); setCategoryId(current => current || cats[0]?.id || "");
     } catch (e) { setError(e instanceof ApiError && e.status === 403 ? "forbidden" : "load"); }
-  }, []);
+  }, [tab]);
   useEffect(() => { void load(); }, [load]);
 
   async function act(id: string, action: "approve" | "reject") {
@@ -52,7 +54,24 @@ export function AdminSellerCatalogRequestsView() {
 
   return <div className="flex flex-col gap-4">
     <header><h1 className="text-page-title">{tr("درخواست‌های افزودن کالا", "Seller catalog requests")}</h1><p className="mt-2 text-sm text-text-secondary">{tr("ابتدا موارد مشابه را بررسی کنید. تأیید فقط هویت کالا را در کاتالوگ مرکزی می‌سازد؛ پیشنهاد، قیمت و موجودی ایجاد نمی‌شود.", "Review possible duplicates first. Approval creates central product identity only; it does not create an offer, price, or inventory.")}</p></header>
-    <Panel><PanelTitle title={tr("صف بررسی", "Review queue")} hint={tr("دسترسی: commerce.view؛ تصمیم: commerce.manage", "Access: commerce.view; decisions: commerce.manage")} />
+    <div className="flex gap-2" role="tablist" aria-label={tr("وضعیت درخواست", "Request status")}>
+      {(["PENDING", "DECIDED"] as const).map(k => <Button key={k} size="sm" role="tab" aria-selected={tab === k} variant={tab === k ? "primary" : "ghost"} onClick={() => { setTab(k); setRows(null); setActionError(null); setDone(false); }}>{k === "PENDING" ? tr("در انتظار بررسی", "Pending review") : tr("تصمیم‌گرفته‌شده", "Decided")}</Button>)}
+    </div>
+    {tab === "DECIDED" ? <Panel><PanelTitle title={tr("تصمیم‌گرفته‌شده", "Decided")} hint={tr("تصمیم‌های مربوط به درخواست فروشندگان، تازه‌ترین در بالا.", "Decisions on seller requests appear here, newest first.")} />
+      {error === "forbidden" ? <EmptyState title={tr("دسترسی لازم است", "Permission required")} description="commerce.view" /> : null}
+      {error === "load" ? <ErrorRecovery title={tr("بارگیری انجام نشد", "Could not load")} message={tr("ارتباط با سامانه برقرار نشد.", "The service could not be reached.")} retryLabel={tr("تلاش دوباره", "Retry")} onRetry={() => void load()} /> : null}
+      {!rows && !error ? <Skeleton className="h-48 w-full" /> : null}
+      {rows?.length === 0 ? <EmptyState title={tr("هنوز درخواستی تصمیم‌گیری نشده", "No decided requests yet")} /> : null}
+      {rows?.map(row => <article key={row.id} className="mt-3 rounded-md border border-border-subtle p-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <Tag tone={row.status === "REJECTED" ? "concern" : "success"}>{row.status === "APPROVED" ? tr("به‌عنوان کالای جدید تأیید شد", "Approved as a new product") : row.status === "MATCHED_EXISTING" ? tr("به کالای موجود وصل شد", "Matched to an existing product") : tr("ردشده", "Rejected")}</Tag>
+          <strong>{row.requestedTitle}</strong><span className="text-metadata text-text-secondary">{row.sellerOrganization.name}</span>
+        </div>
+        <p className="mt-2 text-metadata text-text-secondary">{trf("تصمیم: {name} · {when}", "Decided by {name} · {when}", { name: row.reviewedByName ?? "—", when: row.reviewedAt ? new Intl.DateTimeFormat(intlLocale(locale), { dateStyle: "medium", timeStyle: "short" }).format(new Date(row.reviewedAt)) : "—" })}</p>
+        {row.decisionReason ? <p className="mt-1 text-sm"><span className="text-text-secondary">{tr("دلیل", "Reason")}: </span>{row.decisionReason}</p> : null}
+        {row.resolvedProduct ? <Link className="mt-2 inline-block text-metadata text-brand-natural underline" href={`/${locale}/admin/commerce/products/${row.resolvedProduct.id}`}>{tr("باز کردن کالا", "Open the product")}: {row.resolvedProduct.title}</Link> : null}
+      </article>)}
+    </Panel> : <Panel><PanelTitle title={tr("صف بررسی", "Review queue")} hint={tr("دسترسی: commerce.view؛ تصمیم: commerce.manage", "Access: commerce.view; decisions: commerce.manage")} />
       {error === "forbidden" ? <EmptyState title={tr("دسترسی لازم است", "Permission required")} description="commerce.view" /> : null}
       {error === "load" ? <ErrorRecovery title={tr("بارگیری انجام نشد", "Could not load")} message={tr("ارتباط با سامانه برقرار نشد.", "The service could not be reached.")} retryLabel={tr("تلاش دوباره", "Retry")} onRetry={() => void load()} /> : null}
       {!rows && !error ? <Skeleton className="h-48 w-full" /> : null}
@@ -66,6 +85,6 @@ export function AdminSellerCatalogRequestsView() {
         <div className="mt-3 flex flex-wrap gap-2"><Button disabled={busyId === row.id || !categoryId || !duplicateReviewed[row.id]} isLoading={busyId === row.id} onClick={() => void act(row.id, "approve")}>{tr("بررسی و ساخت کالای مرکزی", "Approve and create central product")}</Button><Button variant="ghost" disabled={busyId === row.id} onClick={() => void act(row.id, "reject")}>{tr("رد درخواست", "Reject request")}</Button></div>
       </article>)}
       {actionError ? <p role="alert" className="mt-3 text-metadata text-state-urgent">{actionError}</p> : null}{done ? <p role="status" className="mt-3 text-metadata text-state-success">{tr("تصمیم ثبت شد.", "Decision saved.")}</p> : null}
-    </Panel>
+    </Panel>}
   </div>;
 }

@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { bookingPrice, bookingSpanMinutes } from "./booking-pricing.util";
 import { BookingActorType, BookingMode, BookingPaymentMode, BookingSeriesFrequency as PrismaBookingSeriesFrequency, BookingStatus, CartStatus, CheckoutStatus, LocationMode as PrismaLocationMode, PaymentMethodType, PaymentProvider, PaymentStatus, Prisma, SetupStatus } from "@prisma/client";
 import {
   ServiceCategory,
@@ -33,7 +34,7 @@ import { SlotGeneratorService } from "../providers/slot-generator.service";
 import { toProviderLocationDto, toProviderServiceDto } from "../providers/provider-dto.mapper";
 import { CareCalendarService } from "../care-calendar/care-calendar.service";
 import { BookingHoldService } from "./booking-hold.service";
-import { BookingPetAccessService, DEFAULT_SCOPE_PRESET_BY_CATEGORY } from "./booking-pet-access.service";
+import { BookingPetAccessService, DEFAULT_SCOPE_PRESET_BY_CATEGORY, presetIncludesHealth } from "./booking-pet-access.service";
 import { BookingLifecycleService, OCCUPYING_STATUSES, TERMINAL_RELEASE_STATUSES, bookingEventFields } from "./booking-lifecycle.service";
 import { PetServiceCompatibilityService } from "../services/pet-service-compatibility.service";
 import { PaymentsService } from "../commerce/payments/payments.service";
@@ -214,7 +215,8 @@ export class BookingsService {
     } else {
       if (!dto.slotStart) throw new ValidationApiException({ field: "slotStart", reason: `${service.category} bookings require a slotStart` });
       rangeStart = new Date(dto.slotStart);
-      rangeEnd = new Date(rangeStart.getTime() + durationMinutes * 60_000);
+      // Grooming, vet and training take the pets one after another (booking-pricing.util).
+      rangeEnd = new Date(rangeStart.getTime() + bookingSpanMinutes(service.category, durationMinutes, pets.length) * 60_000);
 
       const slots = await this.slotGenerator.generate({
         providerOrganizationId: dto.providerId,
@@ -224,6 +226,7 @@ export class BookingsService {
         variantId: variant?.id,
         from: new Date(rangeStart.getTime() - 60_000),
         to: new Date(rangeEnd.getTime() + 60_000),
+        petCount: pets.length,
       });
       // "Any professional": slots are ordered by time then staff id, so the first available qualified
       // staff member at that time is assigned — deterministic and documented in the booking pattern.
@@ -282,8 +285,10 @@ export class BookingsService {
     const intake = peek && peek.userId === userId ? await this.resolveIntake(peek.providerServiceId, dto.intakeAnswers) : { intakeFormId: null, intakeAnswers: undefined };
     // Same for the address (missing, foreign or outside the service area): a correctable choice never costs the slot.
     if (peek && peek.userId === userId) {
-      const peekService = await this.prisma.providerService.findUnique({ where: { id: peek.providerServiceId }, select: { locationMode: true, serviceAreaCities: true } });
+      const peekService = await this.prisma.providerService.findUnique({ where: { id: peek.providerServiceId }, select: { locationMode: true, serviceAreaCities: true, category: true } });
       if (peekService) await this.resolveAddresses(peek.householdId, peekService.locationMode, dto, peekService.serviceAreaCities);
+      // Likewise the documents chosen for the vet.
+      if (peekService && dto.sharedDocumentIds?.length) await this.assertShareableDocuments(dto.petId, peekService.category as unknown as ServiceCategory, dto);
     }
     const hold = await this.bookingHold.consumeHold(dto.holdId);
     if (hold.petId !== dto.petId || hold.userId !== userId) {
@@ -315,9 +320,18 @@ export class BookingsService {
       : null;
     const unitPrice = variant?.priceAmount ?? service.priceAmount;
     const petCount = 1 + (hold.additionalPetIds?.length ?? 0);
-    const priceAmount = transportRoute?.distancePricingApplied
-      ? new Prisma.Decimal(transportRoute.estimatedFareIrr!) // one ride, however many pets ride in it
-      : unitPrice === null ? null : new Prisma.Decimal(unitPrice).mul(petCount);
+    // Owner rules (booking-pricing.util): a taxi ride is one price however many pets ride; a stay is per night per
+    // pet; everything else is per pet.
+    const price = bookingPrice({
+      category: service.category,
+      locationMode,
+      unitPrice: unitPrice === null ? null : Number(unitPrice),
+      petCount,
+      start: new Date(hold.slotStart),
+      end: new Date(hold.slotEnd),
+      distanceFare: transportRoute?.distancePricingApplied ? transportRoute.estimatedFareIrr! : null,
+    });
+    const priceAmount = price.total === null ? null : new Prisma.Decimal(price.total);
     const onlinePayment = service.paymentMode === BookingPaymentMode.FULL_PREPAYMENT || service.paymentMode === BookingPaymentMode.DEPOSIT;
     if (onlinePayment && (priceAmount === null || (service.paymentMode === BookingPaymentMode.DEPOSIT && !service.depositAmount))) {
       // A misconfigured paid service must never produce an unpriced "paid" booking.
@@ -366,7 +380,7 @@ export class BookingsService {
             discountAmount: 0,
             depositAmount: service.paymentMode === BookingPaymentMode.DEPOSIT ? service.depositAmount : null,
             currency: service.currency,
-            durationMinutes: variant?.durationMinutes ?? service.durationMinutes,
+            durationMinutes: bookingSpanMinutes(service.category, variant?.durationMinutes ?? service.durationMinutes, petCount),
             serviceNameSnapshot: service.name,
             variantNameSnapshot: variant?.name ?? null,
             cancellationPolicySnapshot: service.cancellationPolicy,
@@ -388,7 +402,8 @@ export class BookingsService {
           initialStatus === BookingStatus.REQUESTED ? "ServiceBookingRequested" : initialStatus === BookingStatus.AWAITING_PAYMENT ? "ServiceBookingAwaitingPayment" : "ServiceBookingConfirmed";
         await this.events.publish(eventType, bookingEventFields(created), { tx, aggregateType: "Booking", aggregateId: created.id });
 
-        await this.petAccessGrants.grantForBooking(created, hold.providerUserId ?? undefined, scopePreset, tx, dto.accessSelection !== undefined);
+        const sharedDocumentIds = dto.sharedDocumentIds?.length && category === ServiceCategory.VET ? dto.sharedDocumentIds : [];
+        await this.petAccessGrants.grantForBooking(created, hold.providerUserId ?? undefined, scopePreset, tx, dto.accessSelection !== undefined, sharedDocumentIds);
         if (initialStatus !== BookingStatus.REQUESTED) await this.careCalendar.upsertForBooking(created, tx);
 
         return created.id;
@@ -657,6 +672,7 @@ export class BookingsService {
       from: new Date(newStart.getTime() - 60_000),
       to: new Date(newEnd.getTime() + 60_000),
       ignoreBookingId: id,
+      petCount: 1 + booking.additionalPets.length,
     });
     const match = slots.find((s) => s.startAt.getTime() === newStart.getTime() && s.state === "AVAILABLE");
     if (!match) throw new SlotUnavailableException({ slotStart: dto.slotStart });
@@ -692,8 +708,8 @@ export class BookingsService {
         // Access moves with the appointment: end the old grant, issue one for the new window with the same consent.
         await this.petAccessGrants.revokeForBooking(id, userId, tx);
         if (booking.petAccess) {
-          const consented = booking.petAccess.petAccessGrant.reason?.endsWith("_HEALTH_CONSENT") ?? false;
-          await this.petAccessGrants.grantForBooking(successor, successor.providerUserId ?? undefined, booking.petAccess.scopePreset as unknown as PetAccessScopePreset, tx, consented);
+          const { scopePreset, healthConsented, sharedDocumentIds } = booking.petAccess;
+          await this.petAccessGrants.grantForBooking(successor, successor.providerUserId ?? undefined, scopePreset as unknown as PetAccessScopePreset, tx, healthConsented, sharedDocumentIds);
         }
         await this.careCalendar.upsertForBooking(successor, tx);
         await this.events.publish("ServiceBookingRescheduled", { ...bookingEventFields(successor), fromBookingId: id }, { tx, aggregateType: "Booking", aggregateId: successor.id });
@@ -717,7 +733,7 @@ export class BookingsService {
    * series-wide cancel endpoint this phase; see README Known limitations.
    */
   async createWeeklySeries(userId: string, originBookingId: string, occurrences: number, intervalWeeks = 1): Promise<{ series: BookingSeriesDto; createdBookingIds: string[]; skippedStarts: string[] }> {
-    const origin = await this.prisma.booking.findUnique({ where: { id: originBookingId }, include: { petAccess: true } });
+    const origin = await this.prisma.booking.findUnique({ where: { id: originBookingId }, include: { petAccess: true, additionalPets: true } });
     if (!origin) throw new NotFoundApiException("Booking");
 
     if (!(await this.petAccess.canActOnBooking(origin, userId))) throw new PetAccessDeniedException({ bookingId: originBookingId });
@@ -753,8 +769,7 @@ export class BookingsService {
 
     const scopePreset = (origin.petAccess?.scopePreset as unknown as PetAccessScopePreset | undefined) ?? DEFAULT_SCOPE_PRESET_BY_CATEGORY[category];
     // Occurrences inherit the owner's health-consent decision from the origin booking, never widen it.
-    const originGrant = origin.petAccess ? await this.prisma.petAccessGrant.findUnique({ where: { id: origin.petAccess.petAccessGrantId }, select: { reason: true } }) : null;
-    const originConsented = originGrant?.reason?.endsWith("_HEALTH_CONSENT") ?? false;
+    const originConsented = origin.petAccess?.healthConsented ?? false;
     const durationMs = origin.endAt.getTime() - origin.startAt.getTime();
 
     const series = await this.prisma.bookingSeries.create({
@@ -784,6 +799,7 @@ export class BookingsService {
         variantId: origin.variantId ?? undefined,
         from: new Date(startAt.getTime() - 60_000),
         to: new Date(endAt.getTime() + 60_000),
+        petCount: 1 + origin.additionalPets.length,
       });
       const slot = slots.find((s) => s.startAt.getTime() === startAt.getTime() && s.state === "AVAILABLE");
       if (!slot) {
@@ -830,6 +846,8 @@ export class BookingsService {
               freeCancellationHours: origin.freeCancellationHours,
               lateCancellationRefundPercent: origin.lateCancellationRefundPercent,
               preparationSnapshot: origin.preparationSnapshot,
+              // Every occurrence brings the same pets as the first visit (its span and price already count them).
+              additionalPets: { create: origin.additionalPets.map((p) => ({ petId: p.petId })) },
             },
           });
           await this.lifecycle.recordCreated(tx, created, BookingActorType.USER, userId);
@@ -871,6 +889,18 @@ export class BookingsService {
    * starts at or after the chosen occurrence, each through the same cancel path (policy refund,
    * capacity release, timeline). Earlier and already-attended occurrences are untouched.
    */
+  /** The owner confirms they will attend an upcoming confirmed appointment (offered by the automatic reminders). */
+  async confirmAttendance(userId: string, id: string): Promise<BookingDto> {
+    const booking = await this.prisma.booking.findUnique({ where: { id } });
+    if (!booking) throw new NotFoundApiException("Booking");
+    if (!(await this.petAccess.canActOnBooking(booking, userId))) throw new PetAccessDeniedException({ bookingId: id });
+    if (booking.bookingStatus !== BookingStatus.CONFIRMED || booking.startAt <= new Date()) {
+      throw new ValidationApiException({ field: "bookingStatus", reason: "NOT_UPCOMING_CONFIRMED", status: booking.bookingStatus });
+    }
+    if (!booking.attendanceConfirmedAt) await this.prisma.booking.update({ where: { id }, data: { attendanceConfirmedAt: new Date() } });
+    return this.toDto(await this.loadWithRelations(id));
+  }
+
   async cancelSeriesFrom(userId: string, bookingId: string, reason?: string): Promise<{ cancelledBookingIds: string[] }> {
     const anchor = await this.prisma.booking.findUnique({ where: { id: bookingId } });
     if (!anchor?.bookingSeriesId) throw new NotFoundApiException("Booking series");
@@ -917,6 +947,20 @@ export class BookingsService {
   }
 
   /** Only a completely NOT_STARTED required profile blocks confirmation — see PetContextIncompleteException's doc comment. */
+  /**
+   * Documents shared with a booking's vet: only for a VET booking whose owner chose a health scope, and only
+   * this pet's own, non-retracted documents. Checked before the hold is consumed, so a wrong pick never
+   * costs the slot.
+   */
+  private async assertShareableDocuments(petId: string, category: ServiceCategory, dto: Pick<CreateBookingDto, "accessSelection" | "sharedDocumentIds">): Promise<void> {
+    const ids = dto.sharedDocumentIds ?? [];
+    if (!ids.length) return;
+    if (category !== ServiceCategory.VET) throw new ValidationApiException({ field: "sharedDocumentIds", reason: "ONLY_FOR_VET" });
+    if (!dto.accessSelection || !presetIncludesHealth(dto.accessSelection)) throw new ValidationApiException({ field: "sharedDocumentIds", reason: "REQUIRES_HEALTH_SHARING" });
+    const found = await this.prisma.medicalDocument.count({ where: { id: { in: ids }, petId, voidedAt: null } });
+    if (found !== new Set(ids).size) throw new ValidationApiException({ field: "sharedDocumentIds", reason: "DOCUMENT_NOT_FOUND" });
+  }
+
   private async assertPetContextComplete(petId: string, service: { requiresCareProfile: boolean; requiresHealthBasics: boolean }): Promise<void> {
     if (service.requiresCareProfile) {
       const careProfile = await this.prisma.careProfile.findUnique({ where: { petId } });
@@ -958,6 +1002,7 @@ export class BookingsService {
       reasonForVisit: booking.reasonForVisit,
       ownerNotes: booking.ownerNotes,
       cancelledAt: booking.cancelledAt?.toISOString() ?? null,
+      attendanceConfirmedAt: booking.attendanceConfirmedAt?.toISOString() ?? null,
       cancelledReason: booking.cancelledReason,
       cancellationReasonCode: booking.cancellationReasonCode,
       completedAt: booking.completedAt?.toISOString() ?? null,
@@ -1011,7 +1056,7 @@ export class BookingsService {
   private toPetAccessSummary(petAccess: NonNullable<BookingWithRelations["petAccess"]>): BookingPetAccessSummaryDto {
     return {
       scopePreset: petAccess.scopePreset as unknown as BookingPetAccessSummaryDto["scopePreset"],
-      expiresAt: petAccess.petAccessGrant.expiresAt?.toISOString() ?? "",
+      expiresAt: petAccess.petAccessGrant?.expiresAt?.toISOString() ?? "",
     };
   }
 }

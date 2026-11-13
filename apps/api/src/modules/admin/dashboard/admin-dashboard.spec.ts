@@ -24,6 +24,13 @@ describe("dashboard permission boundary", () => {
       petMemorialSubmission: counter(14),
       placeReport: counter(15),
       walletTopUp: counter(16),
+      accountDeletionRequest: counter(17),
+      pet: counter(40),
+      booking: counter(7),
+      petOwnershipTransfer: counter(18),
+      providerReview: counter(1),
+      productReview: counter(2),
+      travelReview: counter(4),
     };
     return { db, service: new AdminDashboardService(db as unknown as PrismaService) };
   };
@@ -32,6 +39,9 @@ describe("dashboard permission boundary", () => {
     const summary = await service.getSummary(actor(AdminRole.EDITOR));
     expect([summary.openSupportCases, summary.openDisputes, summary.openTrustCases, summary.pendingRefundApprovals, summary.openTasks]).toEqual([null, null, null, null, null]);
     for (const table of [db.supportCase, db.dispute, db.trustCase, db.adminRefundApproval, db.adminTask]) expect(table.count).not.toHaveBeenCalled();
+    // #290 Q97: the launch KPIs belong to analytics.view.
+    expect(summary.launchKpis).toBeNull();
+    expect(db.pet.count).not.toHaveBeenCalled();
   });
   it("allows support counts without finance or trust counts", async () => {
     const { db, service } = setup();
@@ -58,6 +68,11 @@ describe("dashboard permission boundary", () => {
       pendingMemorials: 14,
       openPlaceReports: 15,
       pendingWalletTopUps: 16,
+      pendingDeletionRequests: 17,
+      launchKpis: { registeredPets: 40, newPetsThisWeek: 40, bookingsThisWeek: 7, bookingsLastWeek: 7 },
+      openOwnershipDisputes: 18,
+      openProviderNoShows: 5,
+      pendingReviews: 7,
     });
   });
   it("hides vertical queues from an admin scoped to another vertical", async () => {
@@ -68,4 +83,32 @@ describe("dashboard permission boundary", () => {
     const stays = { ...actor(AdminRole.SERVICE_ADMIN), serviceScopes: [AdminVertical.ACCOMMODATION] };
     expect((await service.getSummary(stays)).pendingTravelListings).toBe(10);
   });
+  it("shows deletion requests only to admins who manage access, and top-ups to anyone who may open Wallets", async () => {
+    const { db, service } = setup();
+    const admin = await service.getSummary(actor(AdminRole.ADMIN));
+    expect(admin.pendingDeletionRequests).toBeNull();
+    expect(db.accountDeletionRequest.count).not.toHaveBeenCalled();
+    expect((await service.getSummary(actor(AdminRole.READ_ONLY))).pendingWalletTopUps).toBe(16);
+    expect((await service.getSummary(actor(AdminRole.SUPER_ADMIN))).pendingDeletionRequests).toBe(17);
+  });
+
+  it("keeps the platform-wide launch figures from vertical-scoped roles (#290 Q97)", async () => {
+    const { db, service } = setup();
+    // A custom role with analytics.view but limited to the shop: figures belong to every vertical, so none.
+    const shopAnalyst = { ...actor(AdminRole.ANALYTICS), permissions: ["analytics.view"], customRole: { id: "r", name: "Shop analyst", verticals: [AdminVertical.SHOP] } } as unknown as ResolvedAdminContext;
+    expect((await service.getSummary(shopAnalyst)).launchKpis).toBeNull();
+    expect(db.booking.count).not.toHaveBeenCalled();
+    const allVerticals = { ...actor(AdminRole.ANALYTICS), permissions: ["analytics.view"], customRole: { id: "r2", name: "Analyst", verticals: [] } } as unknown as ResolvedAdminContext;
+    expect((await service.getSummary(allVerticals)).launchKpis).toEqual({ registeredPets: 40, newPetsThisWeek: 40, bookingsThisWeek: 7, bookingsLastWeek: 7 });
+  });
+
+  it("counts pending reviews only in the verticals an admin may moderate", async () => {
+    const { db, service } = setup();
+    expect((await service.getSummary(actor(AdminRole.EDITOR))).pendingReviews).toBeNull();
+    const shop = await service.getSummary(actor(AdminRole.SHOP_ADMIN));
+    expect(shop.pendingReviews).toBe(2);
+    expect(db.providerReview.count).not.toHaveBeenCalled();
+    expect(db.travelReview.count).not.toHaveBeenCalled();
+  });
 });
+

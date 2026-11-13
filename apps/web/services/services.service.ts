@@ -16,6 +16,8 @@ export interface GetServiceAvailabilityInput {
   petId?: string;
   providerUserId?: string;
   variantId?: string;
+  /** Pets in the booking; grooming, vet and training slots span the duration × pets. */
+  petCount?: number;
 }
 
 function toQueryString(params: object): string {

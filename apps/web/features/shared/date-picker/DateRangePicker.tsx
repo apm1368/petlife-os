@@ -33,6 +33,8 @@ export interface DateRangePickerProps {
   min?: string;
   /** Latest selectable ISO day (inclusive). */
   max?: string;
+  /** The day the calendar opens at when there is no value yet. Defaults to `min` (or today). */
+  openAt?: string;
   /**
    * A day that cannot be *occupied* (sold out / blocked night). It cannot start a stay and no
    * stay may span it, but it can still be the check-out day because that night is not used.
@@ -51,7 +53,7 @@ export interface DateRangePickerProps {
 
 type Lang = RouteLocale;
 
-const DATE_LOCALES: Record<Lang, string> = { fa: "fa-IR-u-ca-persian", en: "en-GB", de: "de-DE", es: "es-ES" };
+const DATE_LOCALES: Record<Lang, string> = { fa: "fa-IR-u-ca-persian", en: "en-GB", de: "de-DE", es: "es-ES", ar: "ar", nl: "nl-NL" };
 function localizedDate(iso: string, locale: Lang, options: { system?: CalendarSystem; weekday?: boolean; year?: boolean } = {}): string {
   if (locale === "fa") return formatDay(iso, "fa", options);
   const g = calendarFromIso(options.system ?? "gregorian", iso);
@@ -79,6 +81,7 @@ export function DateRangePicker({
   onChange,
   min,
   max,
+  openAt,
   isUnavailable,
   minNights = 1,
   maxNights = 30,
@@ -93,7 +96,7 @@ export function DateRangePicker({
   const [system, setSystem] = useState<CalendarSystem>(systemProp ?? (fa ? "jalali" : "gregorian"));
   const today = useMemo(() => todayIso(), []);
   const floor = min ?? today;
-  const anchorIso = value.start ?? floor;
+  const anchorIso = value.start ?? openAt ?? floor;
   const [view, setView] = useState(() => {
     const c = calendarFromIso(system, anchorIso);
     return { year: c.year, month: c.month };
@@ -202,12 +205,38 @@ export function DateRangePicker({
     setFocused(first < floor ? floor : first);
   };
 
+  // Year jump: a past date (a last vaccination, a memory) is years away by month arrows alone.
+  const lastIso = max ?? addDays(today, 5 * 366);
+  const firstYear = calendarFromIso(system, floor).year;
+  const lastYear = calendarFromIso(system, lastIso).year;
+  const historyFirst = lastIso <= addDays(today, 1);
+  const years = Array.from({ length: Math.max(1, lastYear - firstYear + 1) }, (_, i) => (historyFirst ? lastYear - i : firstYear + i));
+  const jumpToYear = (year: number) => {
+    const first = monthGrid(system, year, view.month).find((x) => x.inMonth)!.iso;
+    const target = first < floor ? floor : max && first > max ? max : first;
+    const c = calendarFromIso(system, target);
+    setView({ year: c.year, month: c.month });
+    setFocused(target);
+  };
+
   return (
     <div className={cn("flex flex-col gap-3", className)} dir={fa ? "rtl" : "ltr"}>
       <div className="flex items-center justify-between gap-2">
         <button type="button" onClick={() => shiftView(-1)} disabled={!canGoBack} aria-label={t("previousMonth")} className="min-h-11 min-w-11 rounded-full border border-border-subtle p-2 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">
           {fa ? <ChevronRight aria-hidden className="mx-auto h-5 w-5" /> : <ChevronLeft aria-hidden className="mx-auto h-5 w-5" />}
         </button>
+        {years.length > 1 ? (
+          <select
+            aria-label={t("year")}
+            value={view.year}
+            onChange={(e) => jumpToYear(Number(e.target.value))}
+            className="min-h-11 rounded-full border border-border-subtle bg-surface-base px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
+          >
+            {years.map((y) => (
+              <option key={y} value={y}>{fa ? localizeDigits(y, "fa") : String(y)}</option>
+            ))}
+          </select>
+        ) : null}
         {allowSystemToggle && fa ? (
           <div role="group" aria-label={t("calendarSystem")} className="flex rounded-full border border-border-subtle p-0.5 text-metadata">
             {(["jalali", "gregorian"] as const).map((s) => (

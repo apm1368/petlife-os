@@ -6,6 +6,7 @@ import { BadgeCheck, Heart, StatusLabel, Star } from "@petlife/ui";
 import type { TravelSearchResultItemDto } from "@petlife/types";
 import { localizeDigits } from "@/lib/date/jalali";
 import { amenityLabel, listingTypeLabel, matchTone, money, ratingText, type LocalizedTravelLocale } from "./labels";
+import { placeName } from "@/lib/i18n/iran-places";
 
 export function TravelResultCard({ item, href, onFavorite, compareOn, onCompare, compareDisabled }: { item: TravelSearchResultItemDto; href: string; onFavorite?: () => void; compareOn?: boolean; onCompare?: () => void; compareDisabled?: boolean }) {
   const lang = useLocale() as LocalizedTravelLocale;
@@ -38,7 +39,7 @@ export function TravelResultCard({ item, href, onFavorite, compareOn, onCompare,
         <div className="flex flex-wrap items-center gap-2 text-metadata text-text-secondary">
           <span>{listingTypeLabel(item.type, lang)}</span>
           <span aria-hidden>·</span>
-          <span>{item.city}{item.province ? `${fa ? "، " : ", "}${item.province}` : ""}</span>
+          <span>{placeName(item.city, lang)}{item.province ? `${fa ? "، " : ", "}${placeName(item.province, lang)}` : ""}</span>
           {item.distanceKm !== null ? <span>· {t("distanceKm", { distance: formatNumber(item.distanceKm, 1) })}</span> : null}
           {item.isVerified ? <span className="inline-flex items-center gap-1 text-state-success"><BadgeCheck aria-hidden className="h-4 w-4" />{t("verified")}</span> : null}
         </div>

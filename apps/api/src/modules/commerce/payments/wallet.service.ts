@@ -4,7 +4,7 @@ import type { WalletBalancesDto, WalletEntryDto, WalletEntryPageDto } from "@pet
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { ValidationApiException } from "../../../common/errors/api-exception";
 import { LedgerService } from "../ledger/ledger.service";
-import { deriveWalletBalances, sixMonthGiftExpiry } from "./payment-infrastructure.policy";
+import { deriveWalletBalances, replayWallet, sixMonthGiftExpiry } from "./payment-infrastructure.policy";
 
 type QueryClient = PrismaService | Prisma.TransactionClient;
 
@@ -106,20 +106,14 @@ export class WalletService {
 
   async summary(userId: string, now = new Date()): Promise<{ balances: WalletBalancesDto; expiringSoon: { amount: number; expiresAt: string }[] }> {
     const account = await this.prisma.walletAccount.findUnique({ where: { userId }, include: { entries: true } });
-    const entries = account?.entries ?? [];
-    const balances = toBalancesDto(deriveWalletBalances(entries, now), account?.currency ?? "IRR");
+    const replay = replayWallet(account?.entries ?? [], now);
+    const balances = toBalancesDto(replay.balances, account?.currency ?? "IRR");
     const horizon = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-    let left = balances.purchaseOnly;
-    const expiringSoon = entries
-      .filter((e) => e.kind === WalletEntryKind.CREDIT && e.expiresAt && e.expiresAt > now && e.expiresAt <= horizon)
-      .sort((a, b) => a.expiresAt!.getTime() - b.expiresAt!.getTime())
-      .map((e) => {
-        // Never promise more than is left to spend: spent gift money cannot expire again.
-        const amount = Math.min(e.amount, left);
-        left -= amount;
-        return { amount, expiresAt: e.expiresAt!.toISOString() };
-      })
-      .filter((e) => e.amount > 0);
+    // Only what is still unspent of each gift can expire.
+    const expiringSoon = replay.open
+      .filter((lot) => lot.expiresAt <= horizon)
+      .sort((a, b) => a.expiresAt.getTime() - b.expiresAt.getTime())
+      .map((lot) => ({ amount: lot.remaining, expiresAt: lot.expiresAt.toISOString() }));
     return { balances, expiringSoon };
   }
 
@@ -183,21 +177,26 @@ export class WalletService {
     return { withdrawable, purchaseOnly };
   }
 
-  /** Appends (never removes) expiry records for matured gift credits. */
+  /**
+   * Appends (never removes) expiry records for matured gift credits: one per lapsed gift, for its unspent remainder only
+   * (a gift that was fully spent leaves nothing to expire), so the ledger matches the replayed balance.
+   */
   async expireGiftCredits(now = new Date()): Promise<number> {
-    const expired = await this.prisma.walletEntry.findMany({ where: { kind: WalletEntryKind.CREDIT, source: WalletCreditSource.GIFT, expiresAt: { lte: now } } });
+    const accounts = await this.prisma.walletAccount.findMany({ where: { entries: { some: { kind: WalletEntryKind.CREDIT, expiresAt: { lte: now } } } }, include: { entries: true } });
     let count = 0;
-    for (const credit of expired) {
-      const alreadyExpired = await this.prisma.walletEntry.findFirst({ where: { kind: WalletEntryKind.EXPIRY, referenceType: "WALLET_GIFT_EXPIRY", referenceId: credit.id } });
-      if (alreadyExpired) continue;
-      await this.prisma.$transaction(async (tx) => {
-        const ledgerTransactionId = await this.ledger.recordBalanced("Gift wallet credit expired", "WALLET_EXPIRY", credit.id, "IRR", [
-          { accountCode: LedgerAccountCode.WALLET_PURCHASE_LIABILITY, direction: LedgerEntryDirection.DEBIT, amount: credit.amount },
-          { accountCode: LedgerAccountCode.PLATFORM_REVENUE, direction: LedgerEntryDirection.CREDIT, amount: credit.amount },
-        ], tx);
-        await tx.walletEntry.create({ data: { walletAccountId: credit.walletAccountId, ledgerTransactionId, balanceType: WalletBalanceType.PURCHASE_ONLY, kind: WalletEntryKind.EXPIRY, amount: credit.amount, referenceType: "WALLET_GIFT_EXPIRY", referenceId: credit.id } });
-      });
-      count++;
+    for (const account of accounts) {
+      const recorded = new Set(account.entries.filter((e) => e.kind === WalletEntryKind.EXPIRY && e.referenceType === "WALLET_GIFT_EXPIRY").map((e) => e.referenceId));
+      for (const lot of replayWallet(account.entries, now).expired) {
+        if (recorded.has(lot.creditId)) continue;
+        await this.prisma.$transaction(async (tx) => {
+          const ledgerTransactionId = await this.ledger.recordBalanced("Gift wallet credit expired", "WALLET_EXPIRY", lot.creditId, "IRR", [
+            { accountCode: accountFor(lot.balanceType), direction: LedgerEntryDirection.DEBIT, amount: lot.remaining },
+            { accountCode: LedgerAccountCode.PLATFORM_REVENUE, direction: LedgerEntryDirection.CREDIT, amount: lot.remaining },
+          ], tx);
+          await tx.walletEntry.create({ data: { walletAccountId: account.id, ledgerTransactionId, balanceType: lot.balanceType, kind: WalletEntryKind.EXPIRY, amount: lot.remaining, referenceType: "WALLET_GIFT_EXPIRY", referenceId: lot.creditId } });
+        });
+        count++;
+      }
     }
     return count;
   }

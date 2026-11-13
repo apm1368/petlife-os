@@ -7,8 +7,9 @@ import { ApiError } from "@/lib/api/client";
 import { adminCommerceService } from "@/services/admin-commerce.service";
 import { Panel, PanelTitle, Tag } from "../console-ui";
 import { copyFor } from "@/features/admin/admin-copy";
+import { DigikalaFactsImportPanel } from "./DigikalaFactsImportPanel";
 
-type Lang = "fa" | "en" | "de" | "es";
+type Lang = "fa" | "en" | "de" | "es" | "ar" | "nl";
 type Category = { id: string; name: string; slug: string };
 type Brand = { id: string; name: string; slug: string };
 type ImportRow = Awaited<ReturnType<typeof adminCommerceService.listCatalogImports>>[number];
@@ -130,6 +131,8 @@ export function AdminCatalogImportsView() {
         </p>
         <p className="mt-2 text-metadata text-text-secondary" dir="ltr">{availability.key}</p>
       </Panel> : null}
+
+      {error !== "forbidden" ? <DigikalaFactsImportPanel categories={categories} jobs={jobs} onStarted={() => void load()} /> : null}
 
       <Panel>
         <PanelTitle title={tr("کارها و بازبینی تغییرات", "Jobs and incoming changes")} />

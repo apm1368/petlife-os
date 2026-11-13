@@ -11,7 +11,7 @@ export type WorldKey = "health" | "daily" | "travel" | "safe" | "together";
 export const worldOrder: WorldKey[] = ["health", "daily", "travel", "safe", "together"];
 export const worldRoutes: Record<WorldKey, { cta: string; feats: [string, string, string, string] }> = {
   health: { cta: "/register", feats: ["/pets", "/care-calendar", "/vet/find", "/pets"] },
-  daily: { cta: "/shop", feats: ["/shop", "/repeat-delivery", "/services/GROOMING", "/services/BOARDING"] },
+  daily: { cta: "/shop", feats: ["/shop", "/repeat-delivery", "/services/grooming", "/services/boarding"] },
   travel: { cta: "/travel", feats: ["/travel/search", "/travel/compare", "/travel/trips", "/pets"] },
   safe: { cta: "/insurance", feats: ["/insurance", "/lost-pets", "/pets", "/support"] },
   together: { cta: "/community", feats: ["/community", "/animal-support/needs", "/pets", "/pets"] },

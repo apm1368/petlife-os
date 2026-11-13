@@ -20,7 +20,7 @@ const DOC_STATE: Record<string, { key: string; tone: "success" | "attention" | "
   UNKNOWN: { key: "UNKNOWN", tone: "neutral" },
 };
 
-function tripDate(value: string, locale: "fa" | "en" | "de" | "es", detail = false) {
+function tripDate(value: string, locale: "fa" | "en" | "de" | "es" | "ar" | "nl", detail = false) {
   const day = value.slice(0, 10);
   if (locale === "fa") return formatDay(day, "fa", { weekday: detail, year: !detail });
   const date = new Date(`${day}T12:00:00+03:30`);
@@ -33,7 +33,7 @@ function tripDate(value: string, locale: "fa" | "en" | "de" | "es", detail = fal
  * as REQUIRED with their source, jurisdiction and verification date shown; stale rules are flagged.
  */
 export function TripHubView({ tripId }: { tripId: string }) {
-  const lang = useLocale() as "fa" | "en" | "de" | "es";
+  const lang = useLocale() as "fa" | "en" | "de" | "es" | "ar" | "nl";
   const fa = lang === "fa";
   const t = useTranslations("travel");
   const th = useTranslations("travelHub");

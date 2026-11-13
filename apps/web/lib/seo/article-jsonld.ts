@@ -4,8 +4,8 @@ import { inlineToText, richTextWordCount } from "./rich-text-text";
 import { LANGUAGE_TAG, SITE_LOGO_PATH, SITE_NAME, SITE_ORIGIN, absoluteUrl, localeHomePath } from "./site";
 import { localizedAuthorName } from "../content/author-name";
 
-const BLOG_LABEL: Record<RouteLocale, string> = { fa: "مجله", en: "Magazine", de: "Magazin", es: "Revista" };
-const GUIDES_LABEL: Record<RouteLocale, string> = { fa: "راهنماها", en: "Guides", de: "Ratgeber", es: "Guías" };
+const BLOG_LABEL: Record<RouteLocale, string> = { fa: "مجله", en: "Magazine", de: "Magazin", es: "Revista", ar: "المجلة", nl: "Magazine" };
+const GUIDES_LABEL: Record<RouteLocale, string> = { fa: "راهنماها", en: "Guides", de: "Ratgeber", es: "Guías", ar: "الأدلة", nl: "Gidsen" };
 
 function isoDuration(seconds: number): string {
   const m = Math.floor(seconds / 60);

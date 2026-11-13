@@ -22,6 +22,7 @@ import { LoadFailure } from "@/features/system/LoadFailure";
 import { careTitle } from "@/features/care/care-labels";
 import { formatAge, formatWeight, speciesLabel } from "@/features/pets/pet-identity";
 import { formatDay, todayIso } from "@/lib/date/jalali";
+import { dayOf } from "@/lib/date/tehran";
 import type { RouteLocale } from "@/lib/i18n/config";
 
 type Locale = RouteLocale;
@@ -132,6 +133,28 @@ const copy = {
     stay: "Para esta estancia", stayHint: "No se guarda; solo aparece en esta ficha impresa.", emergencyName: "Contacto de emergencia — nombre", emergencyPhone: "Contacto de emergencia — teléfono", stayNotes: "Notas para la persona cuidadora",
     severity: { MILD: "Leve", MODERATE: "Moderada", SEVERE: "Grave", UNKNOWN: "Gravedad desconocida" }, reaction: "Reacción", weight: "Peso", microchip: "Tiene microchip", unknownBreed: "Raza sin registrar", unknownAge: "Edad sin registrar", loading: "Preparando la ficha de cuidados",
     sourceNote: "Los datos de salud proceden del historial de opetlife. Que no aparezca un dato significa que no se registró, no que se haya confirmado su ausencia.",
+  },
+  ar: {
+    title: "ورقة الرعاية",
+    intro: "كل ما يحتاج جليس الحيوان إلى معرفته في صفحة واحدة. اطبعها أو احفظها بصيغة PDF وسلّمها له.",
+    print: "طباعة / حفظ بصيغة PDF", printedOn: "أُعدّت في", routine: "الروتين اليومي", feeding: "التغذية", toilet: "قضاء الحاجة", leash: "المقود والنزهات", separation: "البقاء وحيدًا",
+    temperament: "الطباع", temperamentGeneral: "عام", people: "مع الناس", animals: "مع الحيوانات الأخرى", handling: "الحساسية للّمس", instructions: "تعليمات خاصة",
+    health: "ملاحظات صحية", allergies: "الحساسيات النشطة", medications: "الأدوية الحالية", conditions: "الحالات المرضية النشطة", noneRecorded: "لا يوجد شيء مسجّل.", notRecorded: "غير مسجّل",
+    upcoming: "الرعاية خلال الأيام الـ14 القادمة", noUpcoming: "لا توجد تذكيرات في هذه الفترة.", denied: "ليست لديك صلاحية الوصول إلى هذا القسم، لذا لن يظهر في الورقة.", failed: "تعذّر تحميل هذا القسم، لذا لن يظهر في الورقة.",
+    stay: "لهذه الإقامة", stayHint: "لا يُحفظ — يُطبع على الورقة فقط.", emergencyName: "جهة اتصال الطوارئ — الاسم", emergencyPhone: "جهة اتصال الطوارئ — الهاتف", stayNotes: "ملاحظات لجليس الحيوان",
+    severity: { MILD: "خفيفة", MODERATE: "متوسطة", SEVERE: "شديدة", UNKNOWN: "شدة غير معروفة" }, reaction: "رد الفعل", weight: "الوزن", microchip: "مزوّد بشريحة إلكترونية", unknownBreed: "السلالة غير مسجّلة", unknownAge: "العمر غير مسجّل", loading: "جارٍ إعداد الورقة",
+    sourceNote: "تأتي التفاصيل الصحية من سجل opetlife. عدم إدراج أي عنصر يعني أنه لم يُسجَّل، وليس تأكيدًا على عدم وجوده.",
+  },
+  nl: {
+    title: "Verzorgingsblad",
+    intro: "Alles wat een oppas moet weten, op één pagina. Druk het af of sla het op als PDF en geef het mee.",
+    print: "Afdrukken / opslaan als PDF", printedOn: "Opgesteld op", routine: "Dagelijkse routine", feeding: "Voeding", toilet: "Toilet", leash: "Riem en wandelingen", separation: "Alleen zijn",
+    temperament: "Karakter", temperamentGeneral: "Algemeen", people: "Bij mensen", animals: "Bij andere dieren", handling: "Gevoeligheid voor aanraking", instructions: "Speciale instructies",
+    health: "Gezondheidsnotities", allergies: "Actieve allergieën", medications: "Huidige medicatie", conditions: "Actieve aandoeningen", noneRecorded: "Niets vastgelegd.", notRecorded: "Niet vastgelegd",
+    upcoming: "Verzorging in de komende 14 dagen", noUpcoming: "Geen herinneringen in deze periode.", denied: "Je hebt geen toegang tot dit onderdeel; het staat niet op het blad.", failed: "Dit onderdeel kon niet worden geladen; het staat niet op het blad.",
+    stay: "Voor dit verblijf", stayHint: "Wordt niet opgeslagen — alleen op het blad afgedrukt.", emergencyName: "Noodcontact — naam", emergencyPhone: "Noodcontact — telefoon", stayNotes: "Notities voor de oppas",
+    severity: { MILD: "Mild", MODERATE: "Matig", SEVERE: "Ernstig", UNKNOWN: "Ernst onbekend" }, reaction: "Reactie", weight: "Gewicht", microchip: "Gechipt", unknownBreed: "Ras niet vastgelegd", unknownAge: "Leeftijd niet vastgelegd", loading: "Verzorgingsblad wordt voorbereid",
+    sourceNote: "Gezondheidsgegevens komen uit het opetlife-dossier. Staat er niets, dan is er niets vastgelegd; dat betekent niet dat het zeker ontbreekt.",
   },
 } as const;
 
@@ -264,7 +287,7 @@ export function CareSheetView({ petId }: { petId: string }) {
               {upcoming.value.map((r) => (
                 <li key={r.id} className="flex justify-between gap-3 py-2">
                   <span className="text-text-primary">{careTitle(r, locale)}</span>
-                  <span className="text-text-secondary">{formatDay(new Date(r.snoozedUntil ?? r.dueAt).toISOString().slice(0, 10), locale, { weekday: true })}</span>
+                  <span className="text-text-secondary">{formatDay(dayOf(r.snoozedUntil ?? r.dueAt), locale, { weekday: true })}</span>
                 </li>
               ))}
             </ul>

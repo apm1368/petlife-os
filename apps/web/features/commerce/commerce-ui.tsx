@@ -52,7 +52,7 @@ export function RatingInline({ rating }: { rating: RatingSummaryDto }) {
   const t = useTranslations("commerce.rating");
   const locale = useLocale() as Locale;
   if (!rating.count || rating.average === null) return null;
-  const nf = new Intl.NumberFormat(({ fa: "fa-IR-u-ca-persian-nu-arabext", en: "en-GB", de: "de-DE", es: "es-ES" })[locale], { maximumFractionDigits: 1 });
+  const nf = new Intl.NumberFormat(({ fa: "fa-IR-u-ca-persian-nu-arabext", en: "en-GB", de: "de-DE", es: "es-ES", ar: "ar", nl: "nl-NL" })[locale], { maximumFractionDigits: 1 });
   return (
     <span className="inline-flex items-center gap-1 text-metadata text-text-secondary" aria-label={t("aria", { average: nf.format(rating.average), count: rating.count })}>
       <Star size={14} aria-hidden="true" className="fill-current text-brand-gold" />

@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { ApiError } from "@/lib/api/client";
 import type { RouteLocale } from "@/lib/i18n/config";
 
-const DATE_LOCALE: Record<RouteLocale, string> = { fa: "fa-IR-u-ca-persian-nu-arabext", en: "en-GB", de: "de-DE", es: "es-ES" };
+const DATE_LOCALE: Record<RouteLocale, string> = { fa: "fa-IR-u-ca-persian-nu-arabext", en: "en-GB", de: "de-DE", es: "es-ES", ar: "ar", nl: "nl-NL" };
 
 export function useTwoStepFormat() {
   const locale = useLocale() as RouteLocale;

@@ -22,7 +22,9 @@ describe("public Help Center, legal and status views", () => {
   it("never substitutes legal placeholder copy when a document is unpublished", async () => {
     vi.mocked(helpCenterService.legalIndex).mockResolvedValue([]);
     renderWithIntl(<LegalIndexView />);
-    expect(await screen.findAllByText("Not yet published")).toHaveLength(10);
+    // Terms and Privacy always have the built-in text; the other eight wait for an approved, published version.
+    expect(await screen.findAllByText("Not yet published")).toHaveLength(8);
+    expect(screen.getAllByText("Published")).toHaveLength(2);
     expect(screen.queryByText(/Lorem ipsum|sample legal/i)).toBeNull();
   });
 

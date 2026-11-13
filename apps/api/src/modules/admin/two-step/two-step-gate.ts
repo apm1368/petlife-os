@@ -32,6 +32,11 @@ export class AdminTwoStepRequiredException extends ApiException {
   }
 }
 
+/** Whether team enforcement may be switched on at all (server setting; off by default, see docs/ops/admin-two-step.md). */
+export function twoStepEnforcementAvailable(): boolean {
+  return process.env.ADMIN_TWO_STEP_ENFORCEMENT === "on";
+}
+
 /**
  * The one place that decides whether an admin session is through two-step. Read by AdminAuthGuard on every admin
  * request and by /admin/me for the shell, so they can never disagree. Takes PrismaService directly (it is global)
@@ -49,7 +54,9 @@ export async function evaluateTwoStep(prisma: PrismaService, userId: string, ses
   // A check from before the current authenticator was confirmed (e.g. before a reset) never counts.
   const verifiedUntil = enrolled && verifiedAt && verifiedAt >= confirmedAt ? new Date(verifiedAt.getTime() + TWO_STEP_VERIFIED_HOURS * 60 * 60 * 1000) : null;
   const verified = !!verifiedUntil && verifiedUntil > now;
-  const enforced = !!policy?.enforcedAt;
+  // Owner (2026-11-13): two-step is opt-in for now; team enforcement waits for live SMS and email. Until the server
+  // sets ADMIN_TWO_STEP_ENFORCEMENT=on, a stored policy never locks anyone out.
+  const enforced = twoStepEnforcementAvailable() && !!policy?.enforcedAt;
   let graceEndsAt: Date | null = null;
   if (enforced && !enrolled) {
     const admin = await prisma.adminUser.findUnique({ where: { userId }, select: { createdAt: true } });

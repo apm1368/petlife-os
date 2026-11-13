@@ -6,19 +6,20 @@ import { MedicalDocumentService } from "../clinical-health/medical-document.serv
 import { ClinicalVisitService } from "../clinical-health/clinical-visit.service";
 import type { VetShareDto } from "./vet-share.dto";
 import { EntitlementService } from "../subscriptions/entitlement.service";
+import { publicProviderWhere } from "../../common/public-partner";
 
 @Injectable()
 export class VetShareService {
   constructor(private readonly prisma: PrismaService, private readonly access: PetAccessService, private readonly documents: MedicalDocumentService, private readonly visits: ClinicalVisitService, private readonly entitlements: EntitlementService) {}
   providers() {
-    return this.prisma.providerUser.findMany({ where: { role: "VET", removedAt: null, providerOrganization: { verificationStatus: "VERIFIED" } }, select: { id:true,displayTitle:true,providerOrganization:{select:{id:true,name:true}},user:{select:{displayName:true}} }, take: 100 });
+    return this.prisma.providerUser.findMany({ where: { role: "VET", removedAt: null, providerOrganization: publicProviderWhere() }, select: { id:true,displayTitle:true,providerOrganization:{select:{id:true,name:true}},user:{select:{displayName:true}} }, take: 100 });
   }
   private async assertManager(petId: string, userId: string) {
     const access=await this.access.getEffectivePermissions(petId,userId);
     if(!access?.canManageAccess || !access.canViewHealth) throw new PetAccessDeniedException();
   }
   private async validate(petId:string,dto:VetShareDto) {
-    const provider=await this.prisma.providerUser.findFirst({where:{id:dto.providerUserId,role:"VET",removedAt:null,providerOrganization:{verificationStatus:"VERIFIED"}}});
+    const provider=await this.prisma.providerUser.findFirst({where:{id:dto.providerUserId,role:"VET",removedAt:null,providerOrganization:publicProviderWhere()}});
     if(!provider) throw new NotFoundApiException("Verified veterinarian");
     const startsAt=new Date(dto.startsAt), expiresAt=new Date(dto.expiresAt);
     if(!/(Z|[+-]\d{2}:\d{2})$/.test(dto.startsAt) || !/(Z|[+-]\d{2}:\d{2})$/.test(dto.expiresAt) || startsAt>=expiresAt || expiresAt<=new Date() || expiresAt.getTime()-startsAt.getTime()>90*86400000) throw new ValidationApiException({reason:"Choose a valid period, at most 90 days, with timezone."});

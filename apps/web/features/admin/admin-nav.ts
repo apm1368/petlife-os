@@ -17,6 +17,7 @@ import {
   LifeBuoy,
   MapPinned,
   MessagesSquare,
+  PawPrint,
   ScrollText,
   Settings,
   ShieldAlert,
@@ -36,7 +37,8 @@ import {
  * page always knows where it lives (breadcrumbs, tabs and the command palette all read this one table).
  */
 
-export type QueueKey = keyof AdminDashboardSummaryDto;
+/** Every staff queue count on the summary (the launch KPIs are figures, not queues). */
+export type QueueKey = Exclude<keyof AdminDashboardSummaryDto, "launchKpis">;
 export type Permission = AdminPermissionName | AdminPermissionName[];
 type Icon = typeof LayoutDashboard;
 
@@ -90,8 +92,12 @@ export const ADMIN_SECTIONS: AdminSection[] = [
         tabs: [
           { href: "/users", labelKey: "tabs.directory", permission: "customer.view" },
           { href: "/customers", labelKey: "tabs.customer360", permission: "customer.view" },
+          { href: "/ownership-transfers", labelKey: "tabs.ownershipTransfers", permission: "customer.view", queue: "openOwnershipDisputes" },
+          { href: "/privacy/deletion-requests", labelKey: "tabs.deletionRequests", permission: "admin.manage", queue: "pendingDeletionRequests" },
         ],
       },
+      // Each pet with its owner and household members (Pet 360); health appears as counts only.
+      { key: "pets", labelKey: "nav.pets", icon: PawPrint, href: "/pets", permission: "customer.view" },
       { key: "support", labelKey: "nav.support", icon: Headset, href: "/support", permission: "support.view", queue: "openSupportCases" },
       { key: "disputes", labelKey: "nav.disputes", icon: Gavel, href: "/disputes", permission: "dispute.view", queue: "openDisputes" },
       {
@@ -128,12 +134,14 @@ export const ADMIN_SECTIONS: AdminSection[] = [
         tabs: [
           { href: "/commerce", labelKey: "tabs.overview", permission: "commerce.view", exact: true },
           { href: "/commerce/orders", labelKey: "tabs.orders", permission: "commerce.view" },
+          { href: "/commerce/repeat-deliveries", labelKey: "tabs.repeatDeliveries", permission: "commerce.view" },
           { href: "/commerce/refund-requests", labelKey: "tabs.refundRequests", permission: "commerce.view", queue: "pendingRefundRequests" },
           { href: "/commerce/products", labelKey: "tabs.products", permission: "commerce.view" },
           { href: "/commerce/product-moderation", labelKey: "tabs.offerModeration", permission: "commerce.view", queue: "pendingOfferModeration" },
           { href: "/commerce/catalog-product-requests", labelKey: "tabs.catalogRequests", permission: "commerce.view", queue: "pendingCatalogRequests" },
           { href: "/commerce/catalog-imports", labelKey: "tabs.catalogImports", permission: "commerce.view" },
           { href: "/commerce/inventory", labelKey: "tabs.inventory", permission: "commerce.view" },
+          { href: "/commerce/shipping", labelKey: "tabs.shipping", permission: "commerce.view" },
           { href: "/commerce/reviews", labelKey: "tabs.reviews", permission: "commerce.view" },
           { href: "/commerce/sellers", labelKey: "tabs.sellerStores", permission: "commerce.view" },
           { href: "/commerce/promotions", labelKey: "tabs.promotions", permission: "commerce.view" },
@@ -145,8 +153,10 @@ export const ADMIN_SECTIONS: AdminSection[] = [
         icon: Stethoscope,
         href: "/services",
         tabs: [
-          { href: "/services", labelKey: "tabs.bookings", permission: "services.view", exact: true },
+          { href: "/services", labelKey: "tabs.bookings", permission: "services.view", exact: true, queue: "openProviderNoShows" },
           { href: "/services/catalog", labelKey: "tabs.serviceCatalog", permission: "services.view" },
+          { href: "/services/pet-taxi", labelKey: "tabs.petTaxi", permission: "services.view", exact: true },
+          { href: "/services/pet-taxi/drivers", labelKey: "tabs.petTaxiDrivers", permission: "services.view" },
           { href: "/services/reviews", labelKey: "tabs.reviews", permission: "services.view" },
           { href: "/services/analytics", labelKey: "tabs.analytics", permission: "services.view" },
         ],
@@ -178,7 +188,17 @@ export const ADMIN_SECTIONS: AdminSection[] = [
           { href: "/insurance/providers", labelKey: "tabs.insuranceProviders", permission: "insurance.view" },
         ],
       },
-      { key: "places", labelKey: "nav.places", icon: MapPinned, href: "/places", permission: "places.view", queue: "openPlaceReports" },
+      {
+        key: "places",
+        labelKey: "nav.places",
+        icon: MapPinned,
+        href: "/places",
+        tabs: [
+          { href: "/places", labelKey: "tabs.placeReports", permission: "places.view", exact: true, queue: "openPlaceReports" },
+          { href: "/places/osm", labelKey: "tabs.osmImport", permission: "places.view" },
+          { href: "/places/claims", labelKey: "tabs.placeClaims", permission: "places.view" },
+        ],
+      },
     ],
   },
   {
@@ -215,7 +235,16 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   {
     key: "finance",
     modules: [
-      { key: "transactions", labelKey: "nav.transactions", icon: ArrowLeftRight, href: "/transactions", permission: "finance.view", queue: "pendingRefundApprovals" },
+      {
+        key: "transactions",
+        labelKey: "nav.transactions",
+        icon: ArrowLeftRight,
+        href: "/transactions",
+        tabs: [
+          { href: "/transactions", labelKey: "tabs.orderLookup", permission: "finance.view", exact: true },
+          { href: "/transactions/refund-approvals", labelKey: "tabs.refundApprovals", permission: "finance.view", queue: "pendingRefundApprovals" },
+        ],
+      },
       {
         key: "sellerFinance",
         labelKey: "nav.sellerFinance",
@@ -236,6 +265,8 @@ export const ADMIN_SECTIONS: AdminSection[] = [
         tabs: [
           { href: "/wallets", labelKey: "tabs.walletDirectory", permission: "wallet.view" },
           { href: "/wallets/top-ups", labelKey: "tabs.walletTopUps", permission: "wallet.view", queue: "pendingWalletTopUps" },
+          { href: "/wallets/card-receipts", labelKey: "tabs.walletCardReceipts", permission: "finance.view" },
+          { href: "/wallets/card-account", labelKey: "tabs.walletCardAccount", permission: "wallet.view" },
         ],
       },
     ],
@@ -284,6 +315,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
         href: "/settings",
         tabs: [
           { href: "/settings", labelKey: "tabs.platformSettings", permission: "settings.view" },
+          { href: "/settings/holidays", labelKey: "tabs.holidays", permission: "settings.view" },
           { href: "/feature-flags", labelKey: "tabs.featureFlags", permission: "settings.view" },
         ],
       },
