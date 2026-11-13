@@ -17,6 +17,7 @@ import { useSellerBootstrap } from "@/hooks/use-seller-bootstrap";
 import { useSellerStore } from "@/stores/seller-store";
 import { ThemeToggle } from "@/features/theme/ThemeToggle";
 import { LocaleSwitcher } from "@/features/locale/LocaleSwitcher";
+import { BusinessConsoleLinks } from "@/features/business/BusinessConsoleLinks";
 
 type SessionState = "loading" | "authenticated" | "unauthenticated";
 
@@ -128,7 +129,7 @@ function LiveSellerShell({ children }: { children: React.ReactNode }) {
     <div className="opl-page workspace-shell operator-shell min-h-screen">
       <header className="operator-shell__header">
         <div className="operator-shell__header-inner">
-          <Link href={`/${locale}/home`} className="operator-shell__brand" aria-label={locale === "fa" ? "اپت لایف" : "opetlife"}><Brand compact locale={locale as RouteLocale} /></Link>
+          <Link href={`/${locale}/business`} className="operator-shell__brand" aria-label={locale === "fa" ? "اپت لایف" : "opetlife"}><Brand compact locale={locale as RouteLocale} /></Link>
           <div className="flex flex-col">
             <span className="text-section-title text-text-primary">{active.organizationName}</span>
             <span className="text-metadata text-text-secondary">{t("headerRole", { role: t(`role.${active.role}`) })}</span>
@@ -139,6 +140,7 @@ function LiveSellerShell({ children }: { children: React.ReactNode }) {
                 {t("switchOrg")}
               </Button>
             ) : null}
+            <BusinessConsoleLinks supportCategory="SELLER" />
             <LocaleSwitcher />
             <ThemeToggle />
           </div>

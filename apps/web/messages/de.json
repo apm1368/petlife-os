@@ -10670,5 +10670,54 @@
       "title": "Integrierte AGB, Datenschutzerklärung und FAQ sind live – Entwurf, rechtliche Prüfung durch den Inhaber nötig",
       "body": "Diese Texte beschreiben, wie die Plattform tatsächlich funktioniert, und werden in allen sechs Sprachen angezeigt, bis du eine geprüfte Fassung veröffentlichst. Wenn du hier AGB oder Datenschutz auf Persisch oder Englisch veröffentlichst, ersetzt das den integrierten Text in dieser Sprache. Mit einem Anwalt zu prüfen: die 48-Stunden-Rückgabefrist neben dem gesetzlichen Widerrufsrecht bei Fernkäufen, wohin Erstattungen gehen (ursprüngliche Zahlungsart oder Wallet), die Kontolöschung (die Ausführung ist noch abgeschaltet) und dass Community-Beiträge vor der Prüfung erscheinen."
     }
+  },
+  "businessHub": {
+    "title": "Geschäftsstart",
+    "subtitle": "opetlife-Partnerbereich",
+    "intro": "Jedes Unternehmen, zu dem Sie gehören, mit dem, was heute ansteht.",
+    "emptyHint": "Mit Ihrem Konto ist noch kein Unternehmen verknüpft.",
+    "emptyTitle": "Noch kein Unternehmen",
+    "emptyBody": "Nach der Partner-Registrierung und Prüfung erscheint Ihr Unternehmen hier.",
+    "toPetOwnerHome": "Zu meinem Tierhalter-Bereich",
+    "failed": "Konnte nicht laden",
+    "retry": "Erneut versuchen",
+    "loading": "Wird geladen",
+    "finishVerification": "Prüfung abschließen",
+    "noReviews": "Noch keine Bewertungen.",
+    "rating": "Bewertet mit {average} von 5 · {count} Bewertungen",
+    "stars": "{rating} Sterne",
+    "support": "Support kontaktieren",
+    "homeLink": "Geschäftsstart",
+    "myBusiness": "Mein Unternehmen",
+    "svc": {
+      "today": "Heutige Buchungen",
+      "upcoming": "Anstehend",
+      "pending": "Warten auf Bestätigung",
+      "next": "Nächste Buchungen",
+      "noBookings": "Keine anstehenden Buchungen.",
+      "services": "Leistungen und Preise ({active} aktiv von {total})",
+      "noPrice": "Kein Preis",
+      "minutes": "{minutes} Min.",
+      "noServices": "Noch keine Leistungen.",
+      "open": "Bereich öffnen",
+      "bookings": "Buchungen",
+      "calendar": "Kalender",
+      "servicesPrices": "Leistungen & Preise",
+      "reviews": "Bewertungen"
+    },
+    "shop": {
+      "kind": "Shop",
+      "toPrepare": "Zu packende Bestellungen",
+      "lowStock": "Niedriger Bestand",
+      "pendingModeration": "In Prüfung",
+      "activeOffers": "Aktive Angebote",
+      "available": "Auszahlbar",
+      "pendingPayout": "Ausstehend",
+      "open": "Shop-Bereich öffnen",
+      "orders": "Bestellungen",
+      "offers": "Produkte & Preise",
+      "inventory": "Bestand",
+      "payouts": "Auszahlungen"
+    }
   }
 }

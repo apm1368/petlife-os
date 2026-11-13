@@ -7,7 +7,7 @@ import { Skeleton } from "@petlife/ui";
 import { authService } from "@/services/auth.service";
 import { onboardingService } from "@/services/onboarding.service";
 import { useSessionStore } from "@/stores/session-store";
-import { resolvePostAuthDestination } from "@/lib/auth/resolve-post-auth-destination";
+import { loadBusinessLanding, resolvePostAuthDestination } from "@/lib/auth/resolve-post-auth-destination";
 import { adminService } from "@/services/admin.service";
 
 /**
@@ -35,9 +35,9 @@ function AuthCompleteFlow() {
         const { user } = await authService.getSession();
         if (cancelled) return;
         setUser(user);
-        const [progress, staff] = await Promise.all([onboardingService.getProgress(), adminService.getMe().catch(() => null)]);
+        const [progress, staff, business] = await Promise.all([onboardingService.getProgress(), adminService.getMe().catch(() => null), loadBusinessLanding()]);
         if (cancelled) return;
-        router.replace(resolvePostAuthDestination(locale, returnTo, progress, { isAdmin: !!staff?.isAdmin }));
+        router.replace(resolvePostAuthDestination(locale, returnTo, progress, { isAdmin: !!staff?.isAdmin, business }));
       } catch {
         if (!cancelled) router.replace(`/${locale}/welcome`);
       }
