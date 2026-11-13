@@ -5590,6 +5590,12 @@
       "possibleConflict": "Podría no coincidir con las normas para mascotas",
       "moreInfo": "Se necesita más información",
       "distanceKm": "{distance} km"
+    },
+    "source": {
+      "label": "Fuente",
+      "all": "Todos",
+      "opetlife": "opetlife",
+      "jajiga": "Jajiga"
     }
   },
   "services": {
@@ -7269,6 +7275,14 @@
       "SOURCE_REPORTED_AVAILABLE": "La fuente indica disponibilidad. Confirma el inventario al reservar.",
       "SOURCE_REPORTED_UNAVAILABLE": "La fuente indica que no hay disponibilidad.",
       "UNKNOWN": "Se desconoce la disponibilidad."
+    },
+    "fromSource": "De {source}",
+    "blend": {
+      "title": "Alojamientos que aceptan mascotas, de Jajiga",
+      "titleCity": "Alojamientos que aceptan mascotas en {city}, de Jajiga",
+      "hint": "Anuncios de Jajiga: reservas y pagas en el propio sitio de Jajiga y opetlife no cobra nada. Confirma las normas sobre mascotas con el anfitrión antes de reservar.",
+      "seeAll": "Todos los alojamientos de Jajiga",
+      "pages": "Páginas de Jajiga"
     }
   },
   "insurance": {

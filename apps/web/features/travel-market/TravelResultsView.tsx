@@ -15,8 +15,12 @@ import { TravelResultCard } from "./TravelResultCard";
 import { searchStateFromParams, TravelSearchForm } from "./TravelSearchForm";
 import { formatStayRange } from "@/features/shared/date-picker/DateRangePicker";
 import { readChosenPetIds, writeChosenPetIds } from "./use-my-pets";
+import { JajigaStaysSection } from "@/features/travel-external/JajigaStaysSection";
 
 const SORTS: TravelSort[] = ["RECOMMENDED", "BEST_PET_MATCH", "PRICE_ASC", "PRICE_DESC", "RATING"];
+/** Which results to show: opetlife's own (bookable) stays, Jajiga's (click-out only), or both. */
+const SOURCES = ["all", "opetlife", "jajiga"] as const;
+type ResultSource = (typeof SOURCES)[number];
 
 const FILTER_KEYS = ["types", "minPrice", "maxPrice", "minRating", "verified", "noPetFee", "freeCancellation", "instantBooking", "amenities"] as const;
 
@@ -41,6 +45,9 @@ export function TravelResultsView() {
   const search = searchStateFromParams(new URLSearchParams(params.toString()));
   const sort = (params.get("sort") as TravelSort | null) ?? "RECOMMENDED";
   const page = Math.max(1, Number(params.get("page") ?? 1) || 1);
+  const source: ResultSource = (SOURCES as readonly string[]).includes(params.get("source") ?? "") ? (params.get("source") as ResultSource) : "all";
+  const jajigaPage = Math.max(1, Number(params.get("jpage") ?? 1) || 1);
+  const externalContext = { checkIn: search.checkIn ?? undefined, checkOut: search.checkOut ?? undefined, pets: search.species ? search.petCount : 1 };
 
   const query = useMemo<TravelSearchParams>(() => {
     const list = (k: string) => (params.get(k) ? params.get(k)!.split(",").filter(Boolean) : undefined);
@@ -92,8 +99,10 @@ export function TravelResultsView() {
 
   useEffect(() => {
     if (session === "idle" || session === "loading") return;
+    // Jajiga-only results don't need opetlife's search at all.
+    if (source === "jajiga") return;
     void load();
-  }, [load, session]);
+  }, [load, session, source]);
 
   const setParams = (patch: Record<string, string | null>, resetPage = true) => {
     const next = new URLSearchParams(params.toString());
@@ -154,6 +163,13 @@ export function TravelResultsView() {
             {SORTS.map((s) => <option key={s} value={s}>{t(`sortOptions.${s}`)}</option>)}
           </select>
         </label>
+        <div role="group" aria-label={t("source.label")} className="flex rounded-full border border-border-subtle p-0.5">
+          {SOURCES.map((v) => (
+            <button key={v} type="button" aria-pressed={source === v} onClick={() => setParams({ source: v === "all" ? null : v, jpage: null })} className={`min-h-10 rounded-full px-4 text-sm ${source === v ? "bg-surface-subtle text-text-primary" : "text-text-secondary"}`}>
+              {t(`source.${v}`)}
+            </button>
+          ))}
+        </div>
         <div role="group" aria-label={t("view")} className="ms-auto flex rounded-full border border-border-subtle p-0.5">
           {(["list", "map"] as const).map((v) => (
             <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)} className={`min-h-10 rounded-full px-4 text-sm ${view === v ? "bg-surface-subtle text-text-primary" : "text-text-secondary"}`}>
@@ -174,7 +190,7 @@ export function TravelResultsView() {
               <p className="max-w-md text-sm text-text-secondary">{t("mapUnavailableHelp")}</p>
             </div>
           ) : null}
-          {state === "loading" ? (
+          {source === "jajiga" ? null : state === "loading" ? (
             [0, 1, 2].map((i) => <Skeleton key={i} className="h-56 w-full" />)
           ) : state === "error" ? (
             <ErrorRecovery title={t("loadFailed")} message={t("loadError")} retryLabel={t("retry")} onRetry={() => void load()} />
@@ -211,6 +227,16 @@ export function TravelResultsView() {
               ) : null}
             </>
           )}
+          {source !== "opetlife" ? (
+            <JajigaStaysSection
+              city={search.city || undefined}
+              context={externalContext}
+              pageSize={source === "jajiga" ? 12 : 4}
+              page={source === "jajiga" ? jajigaPage : 1}
+              onPage={source === "jajiga" ? (next) => setParams({ jpage: String(next) }, false) : undefined}
+              seeAllHref={source === "all" ? `${pathname}?${withParams(params, { source: "jajiga", page: null, jpage: null })}` : undefined}
+            />
+          ) : null}
         </section>
       </div>
 
@@ -301,4 +327,13 @@ function formatResultsDateRange(start: string, end: string, locale: LocalizedTra
   if (locale === "fa" || locale === "en") return formatStayRange({ start, end }, locale);
   const formatter = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", timeZone: "Asia/Tehran" });
   return `${formatter.format(new Date(`${start}T12:00:00+03:30`))} – ${formatter.format(new Date(`${end}T12:00:00+03:30`))}`;
+}
+
+function withParams(params: URLSearchParams | ReturnType<typeof useSearchParams>, patch: Record<string, string | null>): string {
+  const next = new URLSearchParams(params.toString());
+  for (const [k, v] of Object.entries(patch)) {
+    if (v) next.set(k, v);
+    else next.delete(k);
+  }
+  return next.toString();
 }

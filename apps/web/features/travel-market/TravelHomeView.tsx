@@ -9,6 +9,7 @@ import { travelMarketService } from "@/services/travel-marketplace.service";
 import { useSessionStore } from "@/stores/session-store";
 import { TravelSearchForm } from "./TravelSearchForm";
 import { DiscoveryPage } from "@/features/discovery/DiscoveryPage";
+import { JajigaStaysSection } from "@/features/travel-external/JajigaStaysSection";
 import type { RouteLocale } from "@/lib/i18n/config";
 
 /**
@@ -17,7 +18,6 @@ import type { RouteLocale } from "@/lib/i18n/config";
  * property itself states about pets, and says so when it states nothing.
  */
 export function TravelHomeView() {
-  const externalT = useTranslations("externalTravel");
   const t = useTranslations("travelMarketplace");
   const lang = useLocale() as RouteLocale;
   const session = useSessionStore((s) => s.status);
@@ -29,7 +29,6 @@ export function TravelHomeView() {
 
   return (
     <DiscoveryPage kind="travel">
-      <Link className="underline" href={`/${lang}/travel/external`}>{externalT("title")}</Link>
       <section className="travel-hero">
       <header className="travel-hero__head">
         <p className="travel-hero__eyebrow">{t("heroEyebrow")}</p>
@@ -59,6 +58,9 @@ export function TravelHomeView() {
           </ul>
         )}
       </section>
+
+      {/* Jajiga's pet-accepting stays next to opetlife's own: labelled by source, click-out only, no booking here. */}
+      <JajigaStaysSection pageSize={6} hideWhenEmpty seeAllHref={`/${lang}/travel/search?source=jajiga`} />
 
       <section aria-labelledby="how-title" className="feature-trio">
         <h2 id="how-title" className="sr-only">{t("howTitle")}</h2>
