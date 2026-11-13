@@ -30,10 +30,13 @@ describe("/set-pet and the landing section (owner's #368 answers)", () => {
     expect(screen.getByRole("heading", { level: 1 }).textContent).toMatch(/Set Pet/);
   });
 
-  it("puts a Set Pet section on the landing page with the owner's CTA, and the mockup until the reel is ready", () => {
-    renderWithIntl(<SetPetLandingSection />, "fa");
-    expect(screen.getByRole("link", { name: "ست خودت و پتت را بساز" }).getAttribute("href")).toBe("/fa/set-pet");
-    expect(document.querySelector("video")).toBeNull();
-    expect(screen.getByText("تی‌شرت، M")).toBeTruthy();
+  it("puts a Set Pet section on the landing page with the owner's CTA and X7's reel (our own CMS media) in every language", () => {
+    for (const locale of ["fa", "en", "de", "es", "ar", "nl"] as const) {
+      const { unmount } = renderWithIntl(<SetPetLandingSection />, locale);
+      expect(screen.getByRole("link", { name: locale === "fa" ? "ست خودت و پتت را بساز" : /./ }).getAttribute("href")).toBe(`/${locale}/set-pet`);
+      // Without IntersectionObserver (as with reduced motion) the poster waits for a tap.
+      expect(document.querySelector(".setpet-landing__poster img")?.getAttribute("src")).toMatch(/^\/api\/uploads\/cms\/media\/bundle-[0-9a-f]{32}\.webp$/);
+      unmount();
+    }
   });
 });
