@@ -166,6 +166,10 @@
           "a": "Beantrage sie unter Profil → Datenschutz. Dein Antrag wird erfasst und geprüft und ausgeführt, sobald unsere Richtlinie zur Datenspeicherung veröffentlicht ist; wir geben dir Bescheid, wenn es erledigt ist. Solange er offen ist, kannst du ihn zurückziehen. Offene Buchungen, Bestellungen, Erstattungen oder Streitfälle müssen vorher abgeschlossen sein."
         },
         {
+          "q": "Wer sieht meine Adresse auf der Karte?",
+          "a": "Nur du und dein Haushalt. Verkaufsstellen, Anbieter und andere Mitglieder sehen den Kartenpunkt nicht. Du kannst den Punkt jederzeit verschieben oder die Adresse löschen."
+        },
+        {
           "q": "Welche Benachrichtigungen bekomme ich?",
           "a": "Die, die du auswählst, in der App und per Push, SMS oder E-Mail. Marketingnachrichten sind ausgeschaltet, bis du sie einschaltest. Sicherheitsmeldungen werden immer gesendet. Du kannst außerdem Ruhezeiten festlegen."
         }
