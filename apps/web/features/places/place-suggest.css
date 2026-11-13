@@ -32,3 +32,14 @@
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .place-suggest__alert { background: #3B1E1C; color: #F9DEDC; } :root:not([data-theme="light"]) .place-suggest__error, :root:not([data-theme="light"]) .place-suggest__field [aria-invalid="true"] { color: #F2B8B5; border-color: #F2B8B5; } }
 :root[data-theme="dark"] .place-suggest__alert { background: #3B1E1C; color: #F9DEDC; }
 :root[data-theme="dark"] .place-suggest__error { color: #F2B8B5; }
+
+/* Photos (owner #6): up to three local previews, a 44px add button, private until staff approve the place. */
+.place-suggest__photos { display: grid; gap: 8px; margin: 0; padding: 0; border: 0; }
+.place-suggest__photos legend { margin-bottom: 4px; font-weight: 650; }
+.place-suggest__thumbs { display: flex; flex-wrap: wrap; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.place-suggest__thumbs li { position: relative; width: 96px; height: 96px; overflow: hidden; border-radius: 14px; border: 1px solid var(--opl-line-2, var(--border-subtle)); background: var(--opl-paper-2, var(--surface-base)); }
+.place-suggest__thumbs img { width: 100%; height: 100%; object-fit: cover; }
+.place-suggest__thumb-remove { position: absolute; inset-block-start: 4px; inset-inline-end: 4px; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgb(0 0 0 / .55); color: #fff; cursor: pointer; }
+.place-suggest__add-photo { position: relative; display: inline-flex; align-items: center; gap: 8px; width: fit-content; min-height: 44px; padding: 0 16px; border: 1px dashed var(--opl-line-2, var(--border-default)); border-radius: 999px; color: var(--opl-forest, var(--brand-natural)); font-weight: 700; cursor: pointer; }
+.place-suggest__add-photo input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.place-suggest__add-photo:focus-within { outline: 2px solid var(--opl-forest, var(--brand-natural)); outline-offset: 2px; }

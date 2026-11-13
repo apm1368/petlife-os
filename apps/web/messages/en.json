@@ -7365,6 +7365,20 @@
         "tooFast": "Too many tries in a short time. Please wait a minute and try again.",
         "check": "Some details need checking.",
         "generic": "The suggestion couldn't be sent. Please try again."
+      },
+      "photos": {
+        "label": "Photos (optional)",
+        "hint": "Up to 3 photos (JPG, PNG or WebP, up to 10 MB each). They stay private and their location and camera data are removed; if the place is approved, they may appear in its gallery.",
+        "add": "Add photos",
+        "remove": "Remove {name}",
+        "count": "{count, plural, one {# photo} other {# photos}}",
+        "errors": {
+          "type": "Only JPG, PNG or WebP photos are accepted.",
+          "tooLarge": "Each photo can be up to 10 MB.",
+          "max": "You can add up to 3 photos.",
+          "notImage": "One of the files isn't a photo. Please choose another.",
+          "upload": "A photo couldn't be uploaded. Please try again."
+        }
       }
     }
   },

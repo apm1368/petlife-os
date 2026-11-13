@@ -72,4 +72,5 @@ export {
   Play,
   Volume2,
   VolumeX,
+  ImagePlus,
 } from "lucide-react";

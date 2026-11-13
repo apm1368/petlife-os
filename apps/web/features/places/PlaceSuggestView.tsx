@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { PetFriendlyPlaceCategory } from "@petlife/types";
-import { CircleAlert, CircleCheck, LocateFixed, MapPin } from "@petlife/ui";
+import { CircleAlert, CircleCheck, ImagePlus, LocateFixed, MapPin, Trash2 } from "@petlife/ui";
 import { ApiError } from "@/lib/api/client";
 import { formatLocaleDate } from "@/lib/i18n/format";
 import type { RouteLocale } from "@/lib/i18n/config";
@@ -15,6 +15,9 @@ import "./place-suggest.css";
 const TEHRAN: MapPoint = { latitude: 35.6892, longitude: 51.389 };
 const CATEGORIES = Object.values(PetFriendlyPlaceCategory);
 const LIMITS = { name: 200, city: 80, address: 300, notes: 1000 } as const;
+/** Owner #6: up to three photos, JPEG/PNG/WebP, at most 10 MB each; private until staff approve the place. */
+const PHOTO = { max: 3, maxBytes: 10 * 1024 * 1024, types: ["image/jpeg", "image/png", "image/webp"] } as const;
+type Photo = { id: number; file: File; url: string };
 
 /**
  * Suggest a pet-friendly place (owner, 2026-11-13): name, category, city, address and a map pin (staff need the
@@ -39,6 +42,51 @@ export function PlaceSuggestView() {
   const [errors, setErrors] = useState<Partial<Record<"name" | "category" | "city" | "pin", string>>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const photoSeq = useRef(0);
+  const photoUrls = useRef(new Set<string>());
+
+  // Local previews are the member's own picked files (blob URLs in <img>); release them when the page goes away.
+  useEffect(() => {
+    const urls = photoUrls.current;
+    return () => urls.forEach((url) => URL.revokeObjectURL(url));
+  }, []);
+
+  function pickPhotos(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = "";
+    setPhotoError(null);
+    const room = PHOTO.max - photos.length;
+    const accepted: Photo[] = [];
+    for (const file of files) {
+      if (!(PHOTO.types as readonly string[]).includes(file.type)) { setPhotoError(t("photos.errors.type")); continue; }
+      if (file.size > PHOTO.maxBytes) { setPhotoError(t("photos.errors.tooLarge")); continue; }
+      if (accepted.length >= room) { setPhotoError(t("photos.errors.max")); break; }
+      const url = URL.createObjectURL(file);
+      photoUrls.current.add(url);
+      accepted.push({ id: ++photoSeq.current, file, url });
+    }
+    if (accepted.length) setPhotos((list) => [...list, ...accepted]);
+  }
+
+  function removePhoto(photo: Photo) {
+    URL.revokeObjectURL(photo.url);
+    photoUrls.current.delete(photo.url);
+    setPhotos((list) => list.filter((p) => p.id !== photo.id));
+  }
+
+  /** Upload slot → PUT; returns the keys for photoObjectKeys (the server checks the bytes and strips photo metadata). */
+  async function uploadPhotos(): Promise<string[]> {
+    const keys: string[] = [];
+    for (const photo of photos) {
+      const slot = await placeSuggestionsService.photoUploadUrl({ contentType: photo.file.type, fileSizeBytes: photo.file.size });
+      const put = await fetch(slot.uploadUrl, { method: slot.method, headers: slot.headers ?? { "Content-Type": photo.file.type }, body: photo.file, credentials: "omit" });
+      if (!put.ok) throw Object.assign(new Error("photo upload failed"), { photoStatus: put.status });
+      keys.push(slot.key);
+    }
+    return keys;
+  }
   const [sent, setSent] = useState<PlaceSuggestionDto | null>(null);
   const [mine, setMine] = useState<PlaceSuggestionDto[] | null>(null);
   const [mineState, setMineState] = useState<"loading" | "ready" | "error">("loading");
@@ -100,6 +148,7 @@ export function PlaceSuggestView() {
     }
     setSending(true);
     try {
+      const photoObjectKeys = photos.length ? await uploadPhotos() : [];
       const created = await placeSuggestionsService.suggest({
         name: name.trim(),
         category,
@@ -108,14 +157,21 @@ export function PlaceSuggestView() {
         latitude: Math.round(pin.latitude * 1e6) / 1e6,
         longitude: Math.round(pin.longitude * 1e6) / 1e6,
         ...(notes.trim() ? { notes: notes.trim() } : {}),
+        ...(photoObjectKeys.length ? { photoObjectKeys } : {}),
       });
       setSent(created);
       setMine((list) => [created, ...(list ?? [])]);
       setName(""); setCategory(""); setCity(""); setAddress(""); setNotes(""); setPin(null);
+      photos.forEach((p) => { URL.revokeObjectURL(p.url); photoUrls.current.delete(p.url); });
+      setPhotos([]);
     } catch (error) {
       const reason = error instanceof ApiError ? (error.details as { reason?: string } | undefined)?.reason : undefined;
+      const photoStatus = (error as { photoStatus?: number }).photoStatus;
       setFormError(
-        reason === "TOO_MANY_PENDING_SUGGESTIONS" ? t("errors.tooManyPending")
+        photoStatus === 415 ? t("photos.errors.notImage")
+        : photoStatus !== undefined ? t("photos.errors.upload")
+        : reason === "NOT_YOUR_UPLOAD" ? t("photos.errors.upload")
+        : reason === "TOO_MANY_PENDING_SUGGESTIONS" ? t("errors.tooManyPending")
         : error instanceof ApiError && error.status === 429 ? t("errors.tooFast")
         : error instanceof ApiError && error.code === "VALIDATION_ERROR" ? t("errors.check")
         : t("errors.generic"),
@@ -197,6 +253,32 @@ export function PlaceSuggestView() {
             <small id="place-suggest-notes-hint" className="place-suggest__hint">{t("notesPublic")}</small>
           </label>
 
+          <fieldset className="place-suggest__photos">
+            <legend>{t("photos.label")}</legend>
+            <p className="place-suggest__hint" id="place-suggest-photos-hint">{t("photos.hint")}</p>
+            {photos.length ? (
+              <ul className="place-suggest__thumbs">
+                {photos.map((photo) => (
+                  <li key={photo.id}>
+                    {/* eslint-disable-next-line @next/next/no-img-element -- the member's own picked JPEG/PNG/WebP, as a local preview */}
+                    <img src={photo.url} alt={photo.file.name} />
+                    <button type="button" className="place-suggest__thumb-remove" aria-label={t("photos.remove", { name: photo.file.name })} onClick={() => removePhoto(photo)}>
+                      <Trash2 size={16} aria-hidden="true" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            {photos.length < PHOTO.max ? (
+              <label className="place-suggest__add-photo">
+                <input type="file" accept={PHOTO.types.join(",")} multiple onChange={pickPhotos} aria-describedby="place-suggest-photos-hint" />
+                <ImagePlus size={18} aria-hidden="true" />
+                <span>{t("photos.add")}</span>
+              </label>
+            ) : null}
+            {photoError ? <p className="place-suggest__error" role="alert">{photoError}</p> : null}
+          </fieldset>
+
           <p className="place-suggest__hint">{t("review")}</p>
           {formError ? <p className="place-suggest__alert" role="alert"><CircleAlert size={16} aria-hidden="true" />{formError}</p> : null}
           <button type="submit" className="opl-btn primary" disabled={sending} aria-busy={sending || undefined}>{sending ? t("sending") : t("send")}</button>
@@ -212,7 +294,7 @@ export function PlaceSuggestView() {
           <ul>
             {mine.map((s) => (
               <li key={s.id}>
-                <span className="place-suggest__mine-name"><strong dir="auto">{s.name}</strong><small>{[s.category ? tc(s.category) : null, s.city, formatLocaleDate(s.createdAt, locale)].filter(Boolean).join(sep)}</small></span>
+                <span className="place-suggest__mine-name"><strong dir="auto">{s.name}</strong><small>{[s.category ? tc(s.category) : null, s.city, formatLocaleDate(s.createdAt, locale), s.photoCount ? t("photos.count", { count: s.photoCount }) : null].filter(Boolean).join(sep)}</small></span>
                 <span className={`place-suggest__status place-suggest__status--${s.status.toLowerCase()}`}>{t(`status.${s.status}`)}</span>
                 {s.status === "APPROVED" && s.createdPlaceId ? <Link className="place-suggest__view" href={`/${locale}/places/${s.createdPlaceId}`}>{t("mine.view")}</Link> : null}
                 {s.status === "REJECTED" && s.reviewNote ? <p className="place-suggest__note" dir="auto">{s.reviewNote}</p> : null}

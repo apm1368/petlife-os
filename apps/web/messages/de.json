@@ -10334,6 +10334,20 @@
         "tooFast": "Zu viele Versuche in kurzer Zeit. Bitte warte eine Minute und versuche es erneut.",
         "check": "Einige Angaben müssen geprüft werden.",
         "generic": "Der Vorschlag konnte nicht gesendet werden. Bitte versuche es erneut."
+      },
+      "photos": {
+        "label": "Fotos (optional)",
+        "hint": "Bis zu 3 Fotos (JPG, PNG oder WebP, je bis zu 10 MB). Sie bleiben privat, Standort- und Kameradaten werden entfernt; wird der Ort freigegeben, können sie in seiner Galerie erscheinen.",
+        "add": "Fotos hinzufügen",
+        "remove": "{name} entfernen",
+        "count": "{count, plural, one {# Foto} other {# Fotos}}",
+        "errors": {
+          "type": "Nur JPG-, PNG- oder WebP-Fotos sind erlaubt.",
+          "tooLarge": "Jedes Foto darf höchstens 10 MB groß sein.",
+          "max": "Du kannst bis zu 3 Fotos hinzufügen.",
+          "notImage": "Eine der Dateien ist kein Foto. Bitte wähle ein anderes.",
+          "upload": "Ein Foto konnte nicht hochgeladen werden. Bitte versuche es erneut."
+        }
       }
     }
   },
