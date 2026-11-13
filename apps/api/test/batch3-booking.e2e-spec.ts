@@ -6,6 +6,7 @@ import {
   AdminRole,
   BookingStatus,
   LocationMode,
+  Prisma,
   ProviderServiceType,
   ProviderUserRole,
   ServiceCategory,
@@ -302,7 +303,7 @@ describe("Batch 3 — services, booking lifecycle, provider and admin operations
     });
 
     it("two pets at the groomer: per-pet price, back-to-back time, and the slot list sized for both (owner 2026-11-13)", async () => {
-      const c = await clinic({ category: ServiceCategory.GROOMING, type: ProviderServiceType.GROOMING_SESSION, service: { priceAmount: 900_000, durationMinutes: 45 } });
+      const c = await clinic({ category: ServiceCategory.GROOMING, type: ProviderServiceType.GROOMING_SESSION, service: { priceAmount: new Prisma.Decimal(900_000), durationMinutes: 45 } });
       expect(c.service.maxPetsPerBooking).toBe(4);
       const owner = await actor("owner");
       const { pets } = await household(owner, ["اول", "دوم"]);
