@@ -56,10 +56,10 @@ describe("Pet identity platform", () => {
     await send("patch", o, `/pets/${pet.id}`).send({ photoUrl: null }).expect(200);
     expect((await db.pet.findUniqueOrThrow({ where: { id: pet.id } })).photoUrl).toBeNull();
 
-    await send("patch", o, "/users/me").send({ avatarUrl: "https://evil.example/me.png" }).expect(400);
+    await send("patch", o, "/me").send({ avatarUrl: "https://evil.example/me.png" }).expect(400);
     await db.user.update({ where: { id: o.id }, data: { avatarUrl: "https://media.example.test/legacy.png" } });
-    await send("patch", o, "/users/me").send({ displayName: "Kept", avatarUrl: "https://media.example.test/legacy.png" }).expect(200);
-    await send("patch", o, "/users/me").send({ avatarUrl: null }).expect(200);
+    await send("patch", o, "/me").send({ displayName: "Kept", avatarUrl: "https://media.example.test/legacy.png" }).expect(200);
+    await send("patch", o, "/me").send({ avatarUrl: null }).expect(200);
     expect((await db.user.findUniqueOrThrow({ where: { id: o.id } })).avatarUrl).toBeNull();
   });
 
