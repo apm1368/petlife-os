@@ -1,4 +1,55 @@
 {
+  "partnerSupport": {
+    "title": "Soporte",
+    "intro": "Pregunta al equipo de opetlife sobre la verificación, los pagos, las reservas, los pedidos o tu ficha. Las respuestas llegan aquí y como notificación.",
+    "newCta": "Nueva solicitud",
+    "empty": "Todavía no hay solicitudes.",
+    "openedBy": "Abierta por {name}",
+    "openedByYou": "Abierta por ti",
+    "loading": "Cargando…",
+    "retry": "Reintentar",
+    "loadFailed": "No se pudieron cargar las solicitudes de soporte.",
+    "create": {
+      "title": "Nueva solicitud de soporte",
+      "category": "Tema",
+      "subject": "Asunto",
+      "description": "¿Qué ha pasado? Añade números de pedido o de reserva si los hay.",
+      "submit": "Enviar solicitud",
+      "failed": "No se pudo enviar la solicitud. Inténtalo de nuevo.",
+      "required": "Completa el asunto y la descripción."
+    },
+    "category": {
+      "BUSINESS": "Mi negocio y verificación",
+      "ACCOUNT": "Acceso y equipo",
+      "PAYMENT": "Pagos y liquidaciones",
+      "BOOKING": "Reservas",
+      "ORDER": "Pedidos",
+      "DELIVERY": "Envío y entrega",
+      "SERVICE": "Servicios y precios",
+      "MARKETPLACE": "Productos y ficha",
+      "OTHER": "Otro tema"
+    },
+    "detail": {
+      "back": "Todas las solicitudes",
+      "caseNumber": "Solicitud {number}",
+      "messages": "Conversación",
+      "noMessages": "Aún no hay respuestas. El equipo de soporte responderá aquí.",
+      "support": "Soporte de opetlife",
+      "team": "Tu equipo",
+      "composePlaceholder": "Escribe una respuesta…",
+      "send": "Enviar",
+      "sendFailed": "No se pudo enviar la respuesta.",
+      "reopen": "Reabrir solicitud",
+      "reopenFailed": "No se pudo reabrir la solicitud."
+    },
+    "status": {
+      "SUBMITTED": "Recibida",
+      "UNDER_REVIEW": "En curso",
+      "WAITING": "Esperando tu respuesta",
+      "RESOLVED": "Resuelta",
+      "CLOSED": "Cerrada"
+    }
+  },
   "adminHolidays": {
     "kicker": "Calendario laboral",
     "title": "Festivos y cierres",
@@ -3880,6 +3931,22 @@
       }
     },
     "support": {
+      "requesterTabs": {
+        "label": "Solicitante",
+        "ALL": "Todos",
+        "PERSONAL": "Personales",
+        "PARTNER": "Socios",
+        "PROVIDER": "Servicios",
+        "SELLER": "Tiendas",
+        "oneBusiness": "Se muestran los casos de un solo negocio.",
+        "allBusinesses": "Mostrar todos"
+      },
+      "requesterOrg": {
+        "PROVIDER": "Negocio de servicios",
+        "SELLER": "Tienda",
+        "unnamed": "(sin nombre)",
+        "allCases": "Todos los casos de este negocio"
+      },
       "title": "Casos de soporte",
       "newCase": "Nuevo caso",
       "createTitle": "Crear caso de soporte",
@@ -7096,6 +7163,7 @@
     },
     "shell": {
       "nav": {
+        "support": "Soporte",
         "shipping": "Envíos"
       }
     }
@@ -7704,6 +7772,7 @@
   "provider": {
     "shell": {
       "nav": {
+        "support": "Soporte",
         "home": "Resumen",
         "bookings": "Reservas",
         "schedule": "Agenda",

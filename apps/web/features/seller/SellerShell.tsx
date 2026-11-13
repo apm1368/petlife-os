@@ -31,6 +31,7 @@ const NAV_ITEMS = [
   { href: "/finance", labelKey: "nav.finance" },
   { href: "/team", labelKey: "nav.team" },
   { href: "/shipping", labelKey: "nav.shipping" },
+  { href: "/support", labelKey: "nav.support" },
   { href: "/settings", labelKey: "nav.settings" },
 ] as const;
 

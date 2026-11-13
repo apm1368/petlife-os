@@ -5426,12 +5426,22 @@ model SupportCase {
   lastUserMessageAt  DateTime?
   lastAdminMessageAt DateTime?
 
+  /// Set when a partner opened the case from their business panel (a provider
+  /// or a shop). requesterUserId is then the team member who wrote it, but the
+  /// case belongs to the organization: the team follows it there (managers see
+  /// every case, other members their own), and admin support lists it under
+  /// Partners. Both fields are set together or not at all (a CHECK in the
+  /// migration). No FK: the id points at a provider or a seller organization.
+  requesterOrgType PartnerSubjectType?
+  requesterOrgId   String?             @db.Uuid
+
   messages SupportMessage[]
   disputes Dispute[]
 
   @@index([requesterUserId])
   @@index([status, priority])
   @@index([assignedAdminId])
+  @@index([requesterOrgType, requesterOrgId])
   @@map("support_cases")
 }
 

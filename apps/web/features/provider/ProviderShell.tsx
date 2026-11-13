@@ -37,6 +37,8 @@ const NAV_ITEMS = [
   { href: "/team", labelKey: "nav.team" },
   { href: "/reviews", labelKey: "nav.reviews" },
   { href: "/analytics", labelKey: "nav.analytics" },
+  // Open before verification too: a partner stuck in KYC is who needs support most.
+  { href: "/support", labelKey: "nav.support" },
   { href: "/travel", labelKey: "nav.travel" },
   // Only pet-taxi organizations take on-demand rides.
   { href: "/pet-taxi", labelKey: "nav.petTaxi", onlyFor: "PET_TAXI" },

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, ContextSurface, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import { SupportCaseStatus, SupportMessageVisibility, type SupportCaseContextDto, type SupportCaseDetailDto, SUPPORT_CASE_NEXT } from "@petlife/types";
@@ -118,6 +119,12 @@ export function AdminSupportCaseDetailView({ caseId }: { caseId: string }) {
       <span className="text-body text-text-primary">{data.subject}</span>
       <span className="text-body text-text-secondary">{data.description}</span>
       <span className="text-metadata text-text-secondary">{t("detail.requester", { name: data.requesterDisplayName })}</span>
+      {data.requesterOrganization ? (
+        <span className="text-metadata text-text-secondary">
+          {t(`requesterOrg.${data.requesterOrganization.type}`)}: {data.requesterOrganization.name ?? t("requesterOrg.unnamed")} ·{" "}
+          <Link className="underline" href={`/${locale}/admin/support?requester=${data.requesterOrganization.type}&org=${data.requesterOrganization.id}`}>{t("requesterOrg.allCases")}</Link>
+        </span>
+      ) : null}
       {actionError ? <p role="alert" className="text-error">{t("states.actionFailed")}</p> : null}
 
       {context ? (
