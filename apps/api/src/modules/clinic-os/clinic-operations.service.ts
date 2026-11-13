@@ -5,6 +5,7 @@ import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import { NotFoundApiException, PetAccessDeniedException, ValidationApiException } from "../../common/errors/api-exception";
 import { NotificationOrchestratorService } from "../notifications/notification-orchestrator.service";
+import { BookingPetAccessService } from "../booking/booking-pet-access.service";
 import { NotificationDeepLinks } from "../notifications/notification-deeplink.util";
 import type { ResolvedProviderContext } from "../provider-os/auth/provider-context.types";
 import { ClinicEntitlementService } from "./clinic-entitlement.service";
@@ -41,6 +42,7 @@ export class ClinicOperationsService {
     private readonly entitlements: ClinicEntitlementService,
     private readonly reminders: ClinicRemindersService,
     private readonly notifications: NotificationOrchestratorService,
+    private readonly bookingPetAccess: BookingPetAccessService,
   ) {}
 
   // ---------------------------------------------------------------- notes
@@ -166,7 +168,12 @@ export class ClinicOperationsService {
       }
       data.resourceId = dto.resourceId;
     }
-    await this.prisma.booking.update({ where: { id: booking.id }, data });
+    await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.booking.update({ where: { id: booking.id }, data });
+      // The booking's pet access follows the person it is assigned to: an "any staff" booking's consent becomes
+      // the assignee's grant, and a reassignment moves it (the previous assignee keeps only grants of their own).
+      if (dto.providerUserId !== undefined) await this.bookingPetAccess.followAssignee(updated, ctx.userId, tx);
+    });
     await this.events.publish("ClinicAppointmentAssigned", { bookingId, providerUserId: dto.providerUserId ?? null, resourceId: dto.resourceId ?? null, actorProviderUserId: ctx.providerUserId }, { aggregateType: "Booking", aggregateId: bookingId });
     if (dto.providerUserId && dto.providerUserId !== ctx.providerUserId) {
       const member = await this.prisma.providerUser.findUniqueOrThrow({ where: { id: dto.providerUserId }, select: { userId: true } });

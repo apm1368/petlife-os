@@ -2683,10 +2683,22 @@ model BookingPetAccess {
   bookingId String  @unique @db.Uuid
   booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Restrict)
 
-  petAccessGrantId String         @unique @db.Uuid
-  petAccessGrant   PetAccessGrant @relation(fields: [petAccessGrantId], references: [id], onDelete: Restrict)
+  /// The grant held by whoever is assigned to the booking now. Null while nobody is assigned ("any
+  /// staff"): the consent below is kept and becomes a grant for the person the clinic assigns. When the
+  /// clinic reassigns, the previous assignee's grant is revoked and this points at the new one.
+  petAccessGrantId String?         @unique @db.Uuid
+  petAccessGrant   PetAccessGrant? @relation(fields: [petAccessGrantId], references: [id], onDelete: Restrict)
 
   scopePreset PetAccessScopePreset
+
+  /// The owner explicitly chose a health scope in the booking flow (a category default is not consent).
+  /// Only then does the grant read health; carried to every assignee and to a rescheduled successor.
+  healthConsented Boolean @default(false)
+
+  /// The owner's own health documents the owner ticked for this booking's vet (health consent only).
+  /// The assignee reads exactly these, and only while this booking's grant is active. The documents'
+  /// own visibility is never changed.
+  sharedDocumentIds String[] @default([]) @db.Uuid
 
   createdAt DateTime @default(now())
 

@@ -5535,6 +5535,17 @@
     "shareHealthBasics": "Resumen de salud (afecciones, alergias, medicamentos activos y vacunas) hasta 24 horas después de la cita",
     "chooseHealthSharing": "Elige una de las dos opciones para continuar.",
     "shareSelectedDocuments": "Comparte documentos concretos desde «Compartir con veterinario»",
+    "shareDocuments": {
+      "title": "Documentos para este veterinario (opcional)",
+      "description": "Marca los documentos que podrá abrir el veterinario de esta cita. Solo la persona asignada a la reserva podrá verlos, y solo hasta 24 horas después de la cita. No se comparte nada que no marques.",
+      "loading": "Cargando tus documentos",
+      "empty": "Aún no hay documentos de salud subidos para esta mascota.",
+      "loadFailed": "No se pudieron cargar tus documentos. Puedes continuar sin compartir ninguno.",
+      "limit": "Puedes compartir hasta {max, number} documentos por reserva.",
+      "reviewLabel": "Documentos compartidos",
+      "reviewNone": "Ninguno",
+      "reviewCount": "{count, plural, one {# documento} other {# documentos}}"
+    },
     "reviewTitle": "Revisa todos los datos",
     "provider": "Proveedor",
     "service": "Servicio",
@@ -7113,6 +7124,25 @@
         "EMERGENT": "Emergencia",
         "CRITICAL": "Crítico"
       }
+    },
+    "record": {
+      "age": "Edad {age}",
+      "ownerWeight": "{weight} (dato del hogar)",
+      "medications": "Medicación actual",
+      "conditions": "Afecciones",
+      "vaccination": "Vacunación",
+      "vaccinationLast": "Última vacuna",
+      "vaccinationNext": "Próxima",
+      "noLabs": "No hay resultados de laboratorio registrados.",
+      "labRange": "Referencia {low}–{high}",
+      "noDocuments": "No tienes documentos disponibles de esta mascota.",
+      "sharedByOwner": "Compartido por la persona responsable",
+      "download": "Descarga segura",
+      "downloadFailed": "No se pudo abrir el documento. Inténtalo de nuevo.",
+      "tab": {
+        "labs": "Laboratorio",
+        "documents": "Documentos"
+      }
     }
   },
   "travel": {
@@ -7810,6 +7840,31 @@
       "reason": "Motivo",
       "cancelledReason": "Motivo de cancelación",
       "completionNote": "Nota de finalización",
+      "ownerNotes": "Notas de la persona responsable",
+      "petInfo": {
+        "sex": "Sexo",
+        "age": "Edad",
+        "weight": "Peso",
+        "microchip": "Microchip",
+        "microchipPresent": "Con microchip",
+        "notRecorded": "Sin registrar",
+        "sexValue": {
+          "MALE": "Macho",
+          "FEMALE": "Hembra",
+          "UNKNOWN": "Desconocido"
+        },
+        "moreAfterAssignment": "El sexo, la edad, el peso y el microchip se muestran a la persona del equipo a la que se asigne esta reserva."
+      },
+      "intake": {
+        "title": "Respuestas del cuestionario de admisión",
+        "yes": "Sí",
+        "no": "No"
+      },
+      "documents": {
+        "title": "Documentos compartidos para esta cita",
+        "download": "Descarga segura",
+        "downloadFailed": "No se pudo abrir el documento. Inténtalo de nuevo."
+      },
       "respondBy": "Responder antes del",
       "access": {
         "title": "Acceso a los datos de la mascota",
@@ -7844,7 +7899,13 @@
       "health": {
         "title": "Contexto de salud",
         "allergyState": "Alergias",
-        "vaccinationStatus": "Vacunación"
+        "vaccinationStatus": "Vacunación",
+        "allergies": "Alergias activas",
+        "conditions": "Afecciones",
+        "medications": "Medicación actual",
+        "vaccinationLast": "Última vacuna",
+        "vaccinationNext": "Próxima vacuna",
+        "identityOnly": "Para esta reserva solo se compartieron los datos básicos, así que no hay información de salud ni historia clínica disponible."
       },
       "actions": {
         "confirm": "Confirmar",

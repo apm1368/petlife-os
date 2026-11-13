@@ -5545,6 +5545,17 @@
     "shareHealthBasics": "Gesundheitsübersicht (Erkrankungen, Allergien, aktuelle Medikamente, Impfstatus) bis 24 Stunden nach dem Termin",
     "chooseHealthSharing": "Wähle eine der beiden Optionen, um fortzufahren.",
     "shareSelectedDocuments": "Einzelne Dokumente unter „Mit Tierarztpraxis teilen“ gezielt freigeben",
+    "shareDocuments": {
+      "title": "Dokumente für diese Tierarztpraxis (optional)",
+      "description": "Hake die Dokumente an, die die Tierärztin oder der Tierarzt dieses Termins öffnen darf. Nur die Person, der die Buchung zugewiesen ist, sieht sie – und nur bis 24 Stunden nach dem Termin. Ohne Häkchen wird nichts geteilt.",
+      "loading": "Deine Dokumente werden geladen",
+      "empty": "Für dieses Tier wurden noch keine Gesundheitsdokumente hochgeladen.",
+      "loadFailed": "Deine Dokumente konnten nicht geladen werden. Du kannst ohne Dokumente fortfahren.",
+      "limit": "Pro Buchung kannst du bis zu {max, number} Dokumente teilen.",
+      "reviewLabel": "Geteilte Dokumente",
+      "reviewNone": "Keine",
+      "reviewCount": "{count, plural, one {# Dokument} other {# Dokumente}}"
+    },
     "reviewTitle": "Bitte prüfe alle Angaben",
     "provider": "Anbieter",
     "service": "Leistung",
@@ -7123,6 +7134,25 @@
         "EMERGENT": "Notfall",
         "CRITICAL": "Kritisch"
       }
+    },
+    "record": {
+      "age": "Alter {age}",
+      "ownerWeight": "{weight} (Angabe des Haushalts)",
+      "medications": "Aktuelle Medikamente",
+      "conditions": "Erkrankungen",
+      "vaccination": "Impfungen",
+      "vaccinationLast": "Letzte Impfung",
+      "vaccinationNext": "Nächste fällig",
+      "noLabs": "Keine Laborergebnisse erfasst.",
+      "labRange": "Referenz {low}–{high}",
+      "noDocuments": "Für dieses Tier sind dir keine Dokumente zugänglich.",
+      "sharedByOwner": "Vom Haushalt geteilt",
+      "download": "Sicher herunterladen",
+      "downloadFailed": "Das Dokument konnte nicht geöffnet werden. Bitte versuche es erneut.",
+      "tab": {
+        "labs": "Labor",
+        "documents": "Dokumente"
+      }
     }
   },
   "travel": {
@@ -7812,6 +7842,31 @@
       "reason": "Anliegen",
       "cancelledReason": "Stornierungsgrund",
       "completionNote": "Abschlussnotiz",
+      "ownerNotes": "Hinweise der Halterin oder des Halters",
+      "petInfo": {
+        "sex": "Geschlecht",
+        "age": "Alter",
+        "weight": "Gewicht",
+        "microchip": "Mikrochip",
+        "microchipPresent": "Gechippt",
+        "notRecorded": "Nicht erfasst",
+        "sexValue": {
+          "MALE": "Männlich",
+          "FEMALE": "Weiblich",
+          "UNKNOWN": "Unbekannt"
+        },
+        "moreAfterAssignment": "Geschlecht, Alter, Gewicht und Mikrochip sieht das Teammitglied, dem diese Buchung zugewiesen ist."
+      },
+      "intake": {
+        "title": "Angaben im Aufnahmebogen",
+        "yes": "Ja",
+        "no": "Nein"
+      },
+      "documents": {
+        "title": "Für diesen Termin geteilte Dokumente",
+        "download": "Sicher herunterladen",
+        "downloadFailed": "Das Dokument konnte nicht geöffnet werden. Bitte versuche es erneut."
+      },
       "respondBy": "Antwort bis",
       "access": {
         "title": "Zugriff auf Haustierdaten",
@@ -7846,7 +7901,13 @@
       "health": {
         "title": "Gesundheitskontext",
         "allergyState": "Allergien",
-        "vaccinationStatus": "Impfstatus"
+        "vaccinationStatus": "Impfstatus",
+        "allergies": "Aktive Allergien",
+        "conditions": "Erkrankungen",
+        "medications": "Aktuelle Medikamente",
+        "vaccinationLast": "Letzte Impfung",
+        "vaccinationNext": "Nächste Impfung fällig",
+        "identityOnly": "Für diese Buchung wurden nur Basisangaben geteilt – Gesundheitsdaten und die klinische Akte sind nicht verfügbar."
       },
       "actions": {
         "confirm": "Bestätigen",

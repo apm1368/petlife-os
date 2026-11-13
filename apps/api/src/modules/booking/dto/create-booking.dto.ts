@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { ArrayUnique, Equals, IsArray, IsBoolean, IsEnum, IsIn, IsObject, IsOptional, IsString, IsUUID, Length, Matches, ValidateNested } from "class-validator";
+import { ArrayMaxSize, ArrayUnique, Equals, IsArray, IsBoolean, IsEnum, IsIn, IsObject, IsOptional, IsString, IsUUID, Length, Matches, ValidateNested } from "class-validator";
 import { TRANSPORT_REQUIREMENTS } from "../booking-cancellation.util";
 import { PetAccessScopePreset } from "@petlife/types";
 
@@ -31,6 +31,17 @@ export class CreateBookingDto {
   @IsOptional()
   @IsEnum(PetAccessScopePreset)
   accessSelection?: PetAccessScopePreset;
+
+  /**
+   * VET bookings with a health scope only: the pet's own health documents the owner ticks for this
+   * booking's vet (default none). The vet reads exactly these while the booking's access lasts.
+   */
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @ArrayMaxSize(20)
+  @IsUUID(undefined, { each: true })
+  sharedDocumentIds?: string[];
 
   /** Required when the service's LocationMode is AT_CUSTOMER/MOBILE (the service address) or TRANSPORT (the pickup address). */
   @IsOptional()

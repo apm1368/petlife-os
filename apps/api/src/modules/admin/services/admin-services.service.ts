@@ -145,7 +145,12 @@ export class AdminServicesService {
       provider: b.providerOrganization,
       location: b.providerLocation,
       staff: b.providerUser,
-      healthAccess: b.petAccess ? { scopePreset: b.petAccess.scopePreset, ...b.petAccess.petAccessGrant, expiresAt: b.petAccess.petAccessGrant.expiresAt?.toISOString() ?? null, revokedAt: b.petAccess.petAccessGrant.revokedAt?.toISOString() ?? null } : null,
+      // An "any staff" booking has the owner's decision recorded but no grant until someone is assigned.
+      healthAccess: b.petAccess
+        ? b.petAccess.petAccessGrant
+          ? { scopePreset: b.petAccess.scopePreset, ...b.petAccess.petAccessGrant, expiresAt: b.petAccess.petAccessGrant.expiresAt?.toISOString() ?? null, revokedAt: b.petAccess.petAccessGrant.revokedAt?.toISOString() ?? null }
+          : { scopePreset: b.petAccess.scopePreset, canViewHealth: b.petAccess.healthConsented, canRecordClinicalData: false, expiresAt: null, revokedAt: null, reason: null }
+        : null,
       timeline: b.statusEvents.map((e) => ({ fromStatus: e.fromStatus, toStatus: e.toStatus, actorType: e.actorType, reason: e.reason, createdAt: e.createdAt.toISOString() })),
       payment: intent,
       refunds: refunds.map((r) => ({ ...r, createdAt: r.createdAt.toISOString() })),
