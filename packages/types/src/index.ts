@@ -3434,6 +3434,8 @@ export interface AdminDashboardSummaryDto {
   pendingMemorials: number | null;
   /** User reports about wrong place data. */
   openPlaceReports: number | null;
+  /** Owner #6: members' place suggestions (new places, corrections, closures) waiting for review; places.view. */
+  pendingPlaceSuggestions: number | null;
   /** Card-to-card wallet top-up receipts waiting for finance. */
   pendingWalletTopUps: number | null;
   /** FE-16: wallet corrections waiting for a second admin's approval (PENDING, not yet expired); wallet.view. */

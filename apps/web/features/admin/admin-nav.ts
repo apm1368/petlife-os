@@ -196,6 +196,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
         href: "/places",
         tabs: [
           { href: "/places", labelKey: "tabs.placeReports", permission: "places.view", exact: true, queue: "openPlaceReports" },
+          { href: "/places/suggestions", labelKey: "tabs.placeSuggestions", permission: "places.view", queue: "pendingPlaceSuggestions" },
           { href: "/places/osm", labelKey: "tabs.osmImport", permission: "places.view" },
           { href: "/places/claims", labelKey: "tabs.placeClaims", permission: "places.view" },
         ],

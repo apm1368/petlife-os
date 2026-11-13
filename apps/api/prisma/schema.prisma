@@ -11063,6 +11063,8 @@ model PlaceSuggestion {
   reviewedByAdminId String?                  @db.Uuid
   reviewNote        String?
   createdPlaceId    String?                  @db.Uuid
+  /// Owner #6: up to 3 private member photos (place-suggestions/<userId>/…); copied to the place gallery on approval.
+  photoObjectKeys   String[]                 @default([])
   createdAt         DateTime                 @default(now())
   updatedAt         DateTime                 @updatedAt
 
