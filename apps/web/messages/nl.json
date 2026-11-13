@@ -7077,7 +7077,7 @@
       "zoomOut": "Uitzoomen",
       "pinned": "Voorgestelde plek",
       "pinSet": "Markering geplaatst",
-      "myLocation": "Mijn locatie",
+      "myLocation": "Mijn locatie gebruiken",
       "locating": "Locatie zoeken…",
       "notesPublic": "Wat maakt de plek huisdiervriendelijk? Als de plek wordt goedgekeurd, kunnen deze opmerkingen openbaar als beschrijving worden getoond.",
       "review": "Ons team controleert je suggestie voordat die verschijnt. Je naam wordt nooit openbaar getoond.",
@@ -7106,7 +7106,7 @@
         "pin": "Plaats de markering op de kaart: ons team heeft de locatie nodig om de plek toe te voegen.",
         "noLocation": "We konden je locatie niet bepalen. Tik op de kaart.",
         "tooManyPending": "Je hebt al 10 suggesties in beoordeling. Wacht tot er een paar zijn beoordeeld.",
-        "tooFast": "Te veel pogingen in korte tijd. Wacht een minuut.",
+        "tooFast": "Te veel pogingen in korte tijd. Wacht een minuut en probeer het opnieuw.",
         "check": "Sommige gegevens moeten worden gecontroleerd.",
         "generic": "De suggestie kon niet worden verstuurd. Probeer het opnieuw."
       }

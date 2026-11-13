@@ -9986,7 +9986,7 @@
         "pin": "Coloca el marcador en el mapa: nuestro equipo necesita la ubicación para añadir el lugar.",
         "noLocation": "No pudimos obtener tu ubicación. Toca el mapa.",
         "tooManyPending": "Ya tienes 10 sugerencias en revisión. Espera a que se revisen algunas.",
-        "tooFast": "Demasiados intentos en poco tiempo. Espera un minuto.",
+        "tooFast": "Demasiados intentos en poco tiempo. Espera un minuto y vuelve a intentarlo.",
         "check": "Hay datos que revisar.",
         "generic": "No se pudo enviar la sugerencia. Vuelve a intentarlo."
       }

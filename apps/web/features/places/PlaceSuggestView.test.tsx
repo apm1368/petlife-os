@@ -62,7 +62,7 @@ describe("suggest a place (owner, 2026-11-13)", () => {
   it("lists the member's suggestions with what happened to them", async () => {
     svc.mine.mockResolvedValue([row({ id: "a", status: "APPROVED", createdPlaceId: "p9" }), row({ id: "b", name: "Cafe Roshan", status: "REJECTED", reviewNote: "Closed last year" }), row({ id: "c", kind: "CORRECTION" })]);
     renderWithIntl(<PlaceSuggestView />, "fa");
-    const mine = await screen.findByRole("region", { name: "پیشنهادهای تو" });
+    const mine = await screen.findByRole("region", { name: "پیشنهادهای شما" });
     expect(within(mine).getAllByRole("listitem")).toHaveLength(2);
     expect(within(mine).getByRole("link", { name: "دیدن مکان" }).getAttribute("href")).toBe("/fa/places/p9");
     expect(within(mine).getByText("Closed last year")).toBeTruthy();
