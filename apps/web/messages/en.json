@@ -10425,6 +10425,18 @@
       "pull": "Pull to refresh",
       "release": "Release to refresh",
       "loading": "Refreshing…"
+    },
+    "footer": {
+      "title": "The opetlife app",
+      "install": "Install the app",
+      "iosSteps": "On iPhone: in Safari, tap the Share button and choose “Add to Home Screen”.",
+      "otherSteps": "Open your browser menu and choose “Install app” or “Add to Home screen”. On Android, Chrome works best.",
+      "android": {
+        "bazaar": "Get it on Cafe Bazaar",
+        "myket": "Get it on Myket",
+        "googlePlay": "Get it on Google Play",
+        "apk": "Download for Android"
+      }
     }
   },
   "safety": {
