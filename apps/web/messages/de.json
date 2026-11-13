@@ -4062,6 +4062,10 @@
           "EXECUTED": "Ausgeführt"
         }
       }
+    },
+    "demoRecord": {
+      "label": "Demo – auf der Live-Seite ausgeblendet",
+      "hint": "Beispieldaten für Demos und Tests. Die Live-Seite zeigt sie Mitgliedern nie, auch wenn sie hier als geprüft oder öffentlich markiert sind."
     }
   },
   "adminUsers": {

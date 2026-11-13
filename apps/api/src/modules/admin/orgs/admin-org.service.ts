@@ -49,8 +49,8 @@ export class AdminOrgService {
   }
 }
 
-function toProviderSummary(row: { id: string; name: string; type: string; verificationStatus: ProviderVerificationStatus; createdAt: Date }): AdminProviderOrgSummaryDto {
-  return { id: row.id, name: row.name, type: row.type, verificationStatus: row.verificationStatus as never, createdAt: row.createdAt.toISOString() };
+function toProviderSummary(row: { id: string; name: string; type: string; verificationStatus: ProviderVerificationStatus; createdAt: Date; isDemoRecord?: boolean }): AdminProviderOrgSummaryDto {
+  return { id: row.id, name: row.name, type: row.type, verificationStatus: row.verificationStatus as never, createdAt: row.createdAt.toISOString(), isDemoRecord: row.isDemoRecord ?? false };
 }
 
 function toSellerSummary(row: { id: string; name: string; status: SellerStatus; verificationStatus: SellerVerificationStatus; createdAt: Date }): AdminSellerOrgSummaryDto {

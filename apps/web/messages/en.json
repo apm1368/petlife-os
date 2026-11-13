@@ -5624,6 +5624,10 @@
         "limitValue": "Limit value",
         "grantOverride": "Grant override"
       }
+    },
+    "demoRecord": {
+      "label": "Demo — hidden on the live site",
+      "hint": "Sample data for demos and tests. The live site never shows it to members, even if it is marked verified or public here."
     }
   },
   "blog": {
