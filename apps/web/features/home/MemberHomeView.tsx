@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { OrderSummaryDto, PetOverviewDto, SubscriptionDto, TravelBookingDto } from "@petlife/types";
-import { Avatar, CalendarDays, ChevronLeft, ChevronRight, HeartPulse, Images, MapPin, PackageCheck, Plane, Plus, Scissors, ShoppingBag, Skeleton, Sparkles, StatusLabel, Stethoscope, Users } from "@petlife/ui";
+import { Avatar, CalendarDays, ChevronLeft, ChevronRight, HeartPulse, Images, MapPin, PackageCheck, Plane, Plus, Scissors, ShieldCheck, ShoppingBag, Skeleton, Sparkles, StatusLabel, Stethoscope, Users } from "@petlife/ui";
 import { petsService } from "@/services/pets.service";
 import { bookingsService } from "@/services/bookings.service";
 import { careRemindersService } from "@/services/care-reminders.service";
 import { careTitle } from "@/features/care/care-labels";
-import { GlassMemberHome } from "./GlassMemberHome";
+import { GlassMemberHome, isMemorialPet } from "./GlassMemberHome";
+import { MemberHomeSlot } from "./member-home-slots";
+import { useOplCopy, type WorldKey } from "@/features/landing/opl/opl-copy";
 import { commerceService } from "@/services/commerce.service";
 import { travelMarketService } from "@/services/travel-marketplace.service";
 import { subscriptionService } from "@/services/subscription.service";
@@ -294,6 +296,8 @@ export const dashboardCopy = {
 export function MemberHomeView() {
   const locale = useLocale() as RouteLocale;
   const c = dashboardCopy[locale];
+  const o = useOplCopy();
+  const hub = useTranslations("pattern2026.member.hub");
   const Forward = (locale === "fa" || locale === "ar") ? ChevronLeft : ChevronRight;
   const user = useSessionStore((s) => s.user);
   const { pets, activePetId, switchActivePet, isSwitching } = useActivePet();
@@ -423,17 +427,36 @@ export function MemberHomeView() {
   const petBase = `/${locale}/pets/${pet.id}`;
   const shownHealth = new Set(overview.recentHealth.slice(0, 4).map((item) => `${item.type}-${item.id}`));
   const activity = overview.recentActivity.filter((item) => !shownHealth.has(`${item.type}-${item.id}`));
+  const memorial = isMemorialPet(pet);
+  // Memorial mode: memories first, records respectfully available, no shopping, booking or travel nudges.
+  const worlds: WorldKey[] = memorial ? ["together", "health"] : ["health", "daily", "travel", "safe", "together"];
+  const can = permission.access;
+  const link = (href: string, key: string) => ({ href, label: hub(`links.${key}`) });
+  const worldLinks: Record<WorldKey, { href: string; label: string }[]> = {
+    // In memorial mode the records stay reachable from the pet card; no "find a vet" or care nudges.
+    health: memorial ? [] : [link(`/${locale}/vet/find`, "findVet"), ...(can?.canViewCareProfile ? [link(`/${locale}/care-calendar`, "careCalendar")] : [])],
+    daily: [link(`/${locale}/services`, "services"), link(`/${locale}/shop`, "shop")],
+    travel: [link(`/${locale}/travel`, "stays"), link(`/${locale}/pet-taxi`, "petTaxi"), link(`${petBase}/travel`, "petTravel")],
+    safe: [...(can?.canViewIdentity ? [link(`${petBase}/card`, "petCard")] : []), link(`/${locale}/lost-pets`, "lostPets"), link(`/${locale}/insurance`, "insurance")],
+    together: [link(`${petBase}/memories`, "memories"), link(`/${locale}/memorials`, "memorial"), link(`/${locale}/community`, "community"), link(`/${locale}/animal-support`, "animalSupport")],
+  };
   return (
     <div className="member-home">
       <h1 className="sr-only">{firstName ? c.hello(firstName) : pet.name}</h1>
       {switchError ? <p role="alert">{c.unavailable}</p> : null}
       <GlassMemberHome locale={locale} userName={firstName ?? null} pet={pet} overview={overview} pets={pets} activePetId={petId} careFailed={careFailed} onRetryCare={load} permission={permission} isSwitching={isSwitching} onSwitch={(id) => { setSwitchError(false); void switchActivePet(id).catch(() => setSwitchError(true)); }} />
 
-      <div className="member-home__layout">
-        <div className="member-home__main">
-          {permission.access?.canViewHealth ? <section className="member-home__card" aria-labelledby="home-health">
+      <MemberHomeSlot name="location-nudge" />
+      {memorial ? null : <MemberHomeSlot name="offers" />}
+
+      {/* The five questions of the 2026-11 pattern around the pet's record; memorial mode keeps only the calm ones. */}
+      <section className="member-worlds" aria-label={o.world.worldsLabel}>
+        {worlds.map((world) => (
+          <WorldCard key={world} world={world} question={o.world.worlds[world].q} title={o.world.worlds[world].name} links={worldLinks[world]}>
+            {world === "health" ? <>
+              {permission.access?.canViewHealth ? <section className="member-home__card" aria-labelledby="home-health">
             <div className="member-home__card-head">
-              <h2 id="home-health">{c.recentHealth}</h2>
+              <h3 id="home-health">{c.recentHealth}</h3>
               <Link href={`${petBase}/health`}>{c.allHealth}</Link>
             </div>
             {overview.recentHealth.length === 0 ? (
@@ -454,28 +477,9 @@ export function MemberHomeView() {
               </ul>
             )}
           </section> : null}
-          {/* Activity repeats nothing already listed under recent health — only care, memories and older records. */}
-          {activity.length > 0 || overview.recentHealth.length === 0 ? <section className="member-home__card" aria-labelledby="home-activity">
-            <div className="member-home__card-head"><h2 id="home-activity">{c.recentActivity}</h2></div>
-            {activity.length === 0 ? <p className="member-home__empty">{c.noActivity}</p> : (
-              <ul className="member-home__list member-home__timeline">
-                {activity.slice(0, 4).map((item) => (
-                  <li key={`${item.type}-${item.id}`}>
-                    <Link href={item.href.startsWith("/bookings/") ? `/${locale}${item.href}` : petBase + item.href}>
-                      <span className="member-home__timeline-dot" aria-hidden="true" />
-                      <span className="member-home__item-text"><strong>{eventTitle(item.title, locale)}</strong><span>{formatOverviewDate(item.occurredAt, locale)} · {item.providerName ?? eventSourceLabel(item, locale)}</span></span>
-                      <Forward size={16} aria-hidden="true" className="member-home__go" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section> : null}
-        </div>
-
-        <aside className="member-home__side">
-          <section className="member-home__card" aria-labelledby="home-next">
-            <h2 id="home-next">{c.next}</h2>
+            </> : world === "daily" ? <>
+              <section className="member-home__card" aria-labelledby="home-next">
+            <h3 id="home-next">{c.next}</h3>
             {nextBooking === "failed" ? <div role="status"><p>{c.unavailable}</p><button type="button" onClick={load}>{c.retry}</button></div> : nextBooking ? (
               <Link href={`/${locale}/bookings/${nextBooking.id}`} className="member-home__next">
                 <span className="member-home__next-icon"><Stethoscope size={20} aria-hidden="true" /></span>
@@ -496,31 +500,9 @@ export function MemberHomeView() {
               </div>
             )}
           </section>
-
-          <section className="member-home__card" aria-labelledby="home-membership">
+              <section className="member-home__card" aria-labelledby="home-orders">
             <div className="member-home__card-head">
-              <h2 id="home-membership"><Sparkles size={16} aria-hidden="true" /> {c.membership}</h2>
-              {membership && membership !== "failed" ? <Link href={`/${locale}/subscription`}>{membership === "none" ? c.seePlans : c.manage}</Link> : null}
-            </div>
-            {membership === null ? (
-              <Skeleton className="h-10 w-full" aria-label={c.loadingMembership} />
-            ) : membership === "failed" ? (
-              <div role="status"><p className="member-home__empty">{c.unavailable}</p><button type="button" onClick={retryMembership}>{c.retry}</button></div>
-            ) : membership === "none" ? (
-              <p className="member-home__empty">{c.noMembership}</p>
-            ) : (
-              <div className="member-home__fact-row">
-                <strong>{locale === "fa" ? membership.plan.nameFa : membership.plan.nameEn}</strong>
-                {locale !== "fa" && locale !== "en" ? <small>{c.planNameInEnglish}</small> : null}
-                <StatusLabel tone="success">{statusLabel(membership.status, locale, "subscription")}</StatusLabel>
-                {membership.trialEndsAt && membership.status === "TRIALING" ? <span>{c.trialUntil} {formatDay(membership.trialEndsAt.slice(0, 10), locale)}</span> : membership.currentPeriod?.endAt ? <span>{c.renewsOn} {formatDay(membership.currentPeriod.endAt.slice(0, 10), locale)}</span> : null}
-              </div>
-            )}
-          </section>
-
-          <section className="member-home__card" aria-labelledby="home-orders">
-            <div className="member-home__card-head">
-              <h2 id="home-orders">{c.orders}</h2>
+              <h3 id="home-orders">{c.orders}</h3>
               {Array.isArray(orders) && orders.length ? <Link href={`/${locale}/orders`}>{c.allOrders}</Link> : null}
             </div>
             {orders === null ? (
@@ -545,10 +527,10 @@ export function MemberHomeView() {
               </ul>
             )}
           </section>
-
-          <section className="member-home__card" aria-labelledby="home-trips">
+            </> : world === "travel" ? <>
+              <section className="member-home__card" aria-labelledby="home-trips">
             <div className="member-home__card-head">
-              <h2 id="home-trips">{c.trips}</h2>
+              <h3 id="home-trips">{c.trips}</h3>
               <Link href={`/${locale}/travel`}>{c.findStay}</Link>
             </div>
             {trips === null ? (
@@ -573,11 +555,79 @@ export function MemberHomeView() {
               </ul>
             )}
           </section>
-        </aside>
+            </> : world === "safe" ? <>
+              <section className="member-home__card" aria-labelledby="home-membership">
+            <div className="member-home__card-head">
+              <h3 id="home-membership"><Sparkles size={16} aria-hidden="true" /> {c.membership}</h3>
+              {membership && membership !== "failed" ? <Link href={`/${locale}/subscription`}>{membership === "none" ? c.seePlans : c.manage}</Link> : null}
+            </div>
+            {membership === null ? (
+              <Skeleton className="h-10 w-full" aria-label={c.loadingMembership} />
+            ) : membership === "failed" ? (
+              <div role="status"><p className="member-home__empty">{c.unavailable}</p><button type="button" onClick={retryMembership}>{c.retry}</button></div>
+            ) : membership === "none" ? (
+              <p className="member-home__empty">{c.noMembership}</p>
+            ) : (
+              <div className="member-home__fact-row">
+                <strong>{locale === "fa" ? membership.plan.nameFa : membership.plan.nameEn}</strong>
+                {locale !== "fa" && locale !== "en" ? <small>{c.planNameInEnglish}</small> : null}
+                <StatusLabel tone="success">{statusLabel(membership.status, locale, "subscription")}</StatusLabel>
+                {membership.trialEndsAt && membership.status === "TRIALING" ? <span>{c.trialUntil} {formatDay(membership.trialEndsAt.slice(0, 10), locale)}</span> : membership.currentPeriod?.endAt ? <span>{c.renewsOn} {formatDay(membership.currentPeriod.endAt.slice(0, 10), locale)}</span> : null}
+              </div>
+            )}
+          </section>
+            </> : overview.recentMemory ? (
+              <Link className="member-world__memory" href={`${petBase}/memories/${overview.recentMemory.id}`}>
+                <Images size={18} aria-hidden="true" />
+                <span className="member-home__item-text"><strong>{overview.recentMemory.title ?? hub("lastMemory")}</strong><span>{formatOverviewDate(overview.recentMemory.occurredAt, locale)}</span></span>
+                <Forward size={16} aria-hidden="true" className="member-home__go" />
+              </Link>
+            ) : null}
+          </WorldCard>
+        ))}
+      </section>
+
+      <div className="member-home__main">
+        {/* Activity repeats nothing already listed under recent health — only care, memories and older records. */}
+          {activity.length > 0 || overview.recentHealth.length === 0 ? <section className="member-home__card" aria-labelledby="home-activity">
+            <div className="member-home__card-head"><h2 id="home-activity">{c.recentActivity}</h2></div>
+            {activity.length === 0 ? <p className="member-home__empty">{c.noActivity}</p> : (
+              <ul className="member-home__list member-home__timeline">
+                {activity.slice(0, 4).map((item) => (
+                  <li key={`${item.type}-${item.id}`}>
+                    <Link href={item.href.startsWith("/bookings/") ? `/${locale}${item.href}` : petBase + item.href}>
+                      <span className="member-home__timeline-dot" aria-hidden="true" />
+                      <span className="member-home__item-text"><strong>{eventTitle(item.title, locale)}</strong><span>{formatOverviewDate(item.occurredAt, locale)} · {item.providerName ?? eventSourceLabel(item, locale)}</span></span>
+                      <Forward size={16} aria-hidden="true" className="member-home__go" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section> : null}
       </div>
 
-      <DashboardExplore locale={locale} />
+      {memorial ? null : <DashboardExplore locale={locale} />}
+      <MemberHomeSlot name="social" />
     </div>
+  );
+}
+
+const WORLD_ICONS = { health: HeartPulse, daily: ShoppingBag, travel: Plane, safe: ShieldCheck, together: Users } as const;
+
+/** One of the five questions around the pet's record: the question, its name, what is live for this pet, and where to go. */
+function WorldCard({ world, question, title, links, children }: { world: WorldKey; question: string; title: string; links: { href: string; label: string }[]; children?: ReactNode }) {
+  const Icon = WORLD_ICONS[world];
+  const id = `member-world-${world}`;
+  return (
+    <section className={`member-world member-world--${world}`} aria-labelledby={id}>
+      <header className="member-world__head">
+        <span className="member-world__icon" aria-hidden="true"><Icon size={22} /></span>
+        <div><p className="member-world__q">{question}</p><h2 id={id}>{title}</h2></div>
+      </header>
+      {children ? <div className="member-world__body">{children}</div> : null}
+      {links.length ? <nav className="member-world__links" aria-label={title}>{links.map((l) => <Link key={l.href} href={l.href}>{l.label}</Link>)}</nav> : null}
+    </section>
   );
 }
 
