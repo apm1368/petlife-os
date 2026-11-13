@@ -3167,6 +3167,31 @@
       "reason": "Reden",
       "cancelledReason": "Reden van annulering",
       "completionNote": "Afrondingsnotitie",
+      "ownerNotes": "Notities van de eigenaar",
+      "petInfo": {
+        "sex": "Geslacht",
+        "age": "Leeftijd",
+        "weight": "Gewicht",
+        "microchip": "Chip",
+        "microchipPresent": "Gechipt",
+        "notRecorded": "Niet vastgelegd",
+        "sexValue": {
+          "MALE": "Mannetje",
+          "FEMALE": "Vrouwtje",
+          "UNKNOWN": "Onbekend"
+        },
+        "moreAfterAssignment": "Geslacht, leeftijd, gewicht en chip zijn zichtbaar voor het teamlid aan wie deze boeking is toegewezen."
+      },
+      "intake": {
+        "title": "Antwoorden van de eigenaar op de intakevragen",
+        "yes": "Ja",
+        "no": "Nee"
+      },
+      "documents": {
+        "title": "Documenten die de eigenaar voor dit bezoek heeft gedeeld",
+        "download": "Veilig downloaden",
+        "downloadFailed": "Het document kon niet worden geopend. Probeer het opnieuw."
+      },
       "access": {
         "title": "Toegang tot huisdiergegevens",
         "state": {
@@ -3200,7 +3225,13 @@
       "health": {
         "title": "Gezondheidscontext",
         "allergyState": "Allergieën",
-        "vaccinationStatus": "Vaccinatie"
+        "vaccinationStatus": "Vaccinatie",
+        "allergies": "Actieve allergieën",
+        "conditions": "Aandoeningen",
+        "medications": "Huidige medicatie",
+        "vaccinationLast": "Laatste vaccinatie",
+        "vaccinationNext": "Volgende vaccinatie",
+        "identityOnly": "De eigenaar heeft voor deze boeking alleen basisgegevens gedeeld, dus er is geen gezondheidsinformatie of klinisch dossier beschikbaar."
       },
       "actions": {
         "confirm": "Bevestigen",
@@ -6957,6 +6988,19 @@
       "resolveAlert": "Oplossen",
       "owner": "Eigenaar: {name} · {phone}",
       "chip": "Chip {chip}",
+      "age": "Leeftijd {age}",
+      "ownerWeight": "{weight} (door eigenaar vastgelegd)",
+      "medications": "Huidige medicatie",
+      "conditions": "Aandoeningen",
+      "vaccination": "Vaccinatie",
+      "vaccinationLast": "Laatste vaccinatie",
+      "vaccinationNext": "Volgende",
+      "noLabs": "Geen labuitslagen vastgelegd.",
+      "labRange": "Referentie {low}–{high}",
+      "noDocuments": "Er zijn geen documenten van deze patiënt voor jou beschikbaar.",
+      "sharedByOwner": "Gedeeld door de eigenaar",
+      "download": "Veilig downloaden",
+      "downloadFailed": "Het document kon niet worden geopend. Probeer het opnieuw.",
       "noneRecorded": "Niets vastgelegd",
       "allergies": "Allergieën",
       "activeProblems": "Actieve problemen",
@@ -6989,6 +7033,8 @@
         "vitals": "Onderzoeken",
         "prescriptions": "Recepten",
         "visits": "Consulten",
+        "labs": "Lab",
+        "documents": "Documenten",
         "financial": "Kostenramingen"
       },
       "alertType": {
@@ -9735,6 +9781,17 @@
     "shareHealthBasics": "Gezondheidsoverzicht (aandoeningen, allergieën, actuele medicatie, vaccinatiestatus) tot 24 uur na het bezoek",
     "chooseHealthSharing": "Kies een van de twee opties om door te gaan.",
     "shareSelectedDocuments": "Deel gericht geselecteerde documenten via Delen met dierenarts",
+    "shareDocuments": {
+      "title": "Documenten voor deze dierenarts (optioneel)",
+      "description": "Vink de documenten aan die de dierenarts van dit bezoek mag openen. Alleen de dierenarts aan wie deze boeking is toegewezen kan ze openen, en alleen tot 24 uur na het bezoek. Er wordt niets gedeeld wat je niet aanvinkt.",
+      "loading": "Je documenten worden geladen",
+      "empty": "Er zijn nog geen gezondheidsdocumenten voor dit dier geüpload.",
+      "loadFailed": "Je documenten konden niet worden geladen. Je kunt doorgaan zonder iets te delen.",
+      "limit": "Je kunt maximaal {max, number} documenten met één boeking delen.",
+      "reviewLabel": "Gedeelde documenten",
+      "reviewNone": "Geen",
+      "reviewCount": "{count, plural, one {# document} other {# documenten}}"
+    },
     "reviewTitle": "Controleer alles nog één keer",
     "provider": "Aanbieder",
     "service": "Dienst",

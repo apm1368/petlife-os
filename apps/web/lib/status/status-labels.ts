@@ -103,6 +103,8 @@ const DE_ES: Partial<Record<StatusDomain, Record<string, readonly [de: string, e
   order: { PENDING: ["Zahlung ausstehend", "Pago pendiente"], PREPARING: ["Wird vorbereitet", "En preparación"], READY_FOR_FULFILLMENT: ["Versandbereit", "Listo para enviar"], FULFILLED: ["Versendet", "Enviado"] },
   lifecycle: { ACTIVE: ["Aktiv", "En activo"], LOST: ["Vermisst", "Sin localizar"], TEMPORARILY_TRANSFERRED: ["Vorübergehend bei einer anderen Person", "Temporalmente con otra persona"], DECEASED: ["Verstorben", "Ha fallecido"], MEMORIAL: ["In Erinnerung", "En memoria"] },
   subscription: { TRIALING: ["Testphase", "Prueba"], PAST_DUE: ["Zahlung überfällig", "Pago atrasado"], GRACE_PERIOD: ["Zahlungsfrist", "Periodo de gracia"], CANCEL_AT_PERIOD_END: ["Endet zum Laufzeitende", "Finaliza al terminar el periodo"] },
+  lab: { PENDING: ["Ergebnis ausstehend", "Resultado pendiente"], FINAL: ["Endgültiges Ergebnis", "Resultado final"], AMENDED: ["Korrigiertes Ergebnis", "Resultado corregido"] },
+  labFlag: { NORMAL: ["Im Referenzbereich", "Dentro del rango"], ABNORMAL: ["Außerhalb des Referenzbereichs", "Fuera de rango"] },
   vaccination: { UP_TO_DATE: ["Auf dem neuesten Stand", "Al día"], DUE_SOON: ["Bald fällig", "Vence pronto"], OVERDUE: ["Überfällig", "Vencida"], UNKNOWN: ["Status unbekannt", "Estado desconocido"], INCOMPLETE: ["Noch nicht erfasst", "Aún no registrado"] },
   source: { OWNER: ["Halterin oder Halter", "Persona responsable"], HOUSEHOLD_MEMBER: ["Haushaltsmitglied", "Miembro del hogar"], PROVIDER: ["Tierarztpraxis", "Clínica veterinaria"], CLINIC: ["Klinik", "Clínica"], IMPORTED_DOCUMENT: ["Aus Dokument", "De un documento"], SYSTEM: ["Automatisch erfasst", "Registro automático"] },
 };

@@ -118,7 +118,7 @@ export class ClinicTeamService {
       await tx.providerUser.update({ where: { id: member.id }, data: { removedAt: now, removedByProviderUserId: ctx.providerUserId } });
       // Access this person held through this clinic's bookings ends with the membership.
       const grants = await tx.bookingPetAccess.findMany({ where: { booking: { providerOrganizationId: ctx.organizationId }, petAccessGrant: { userId: member.userId, revokedAt: null } }, select: { petAccessGrantId: true } });
-      if (grants.length) await tx.petAccessGrant.updateMany({ where: { id: { in: grants.map((g) => g.petAccessGrantId) } }, data: { revokedAt: now, revokedByUserId: ctx.userId } });
+      if (grants.length) await tx.petAccessGrant.updateMany({ where: { id: { in: grants.flatMap((g) => (g.petAccessGrantId ? [g.petAccessGrantId] : [])) } }, data: { revokedAt: now, revokedByUserId: ctx.userId } });
       // Open appointments go back to the clinic for reassignment rather than pointing at someone without access.
       const unassigned = await tx.booking.updateMany({ where: { providerOrganizationId: ctx.organizationId, providerUserId: member.id, bookingStatus: { in: OPEN_BOOKING } }, data: { providerUserId: null } });
       await tx.providerContextPreference.deleteMany({ where: { userId: member.userId, providerOrganizationId: ctx.organizationId } });

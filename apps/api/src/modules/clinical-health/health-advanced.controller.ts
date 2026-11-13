@@ -53,20 +53,20 @@ export class HealthAdvancedController {
 
   @Get()
   @RequirePetAccess("canViewHealth")
-  getOverview(@Param("petId") petId: string) {
-    return this.overview.get(petId);
+  getOverview(@Param("petId") petId: string, @CurrentUser() user: SessionUser) {
+    return this.overview.get(petId, user.id);
   }
 
   @Get("timeline")
   @RequirePetAccess("canViewHealth")
-  getTimeline(@Param("petId") petId: string) {
-    return this.timeline.list(petId);
+  getTimeline(@Param("petId") petId: string, @CurrentUser() user: SessionUser) {
+    return this.timeline.list(petId, undefined, user.id);
   }
 
   @Get("documents")
   @RequirePetAccess("canViewHealth")
-  listDocuments(@Param("petId") petId: string) {
-    return this.documents.list(petId);
+  listDocuments(@Param("petId") petId: string, @CurrentUser() user: SessionUser) {
+    return this.documents.list(petId, user.id);
   }
 
   @Post("documents/upload-url")
@@ -83,14 +83,14 @@ export class HealthAdvancedController {
 
   @Get("documents/:documentId")
   @RequirePetAccess("canViewHealth")
-  getDocument(@Param("petId") petId: string, @Param("documentId") documentId: string) {
-    return this.documents.getDto(petId, documentId);
+  getDocument(@Param("petId") petId: string, @Param("documentId") documentId: string, @CurrentUser() user: SessionUser) {
+    return this.documents.getDto(petId, documentId, user.id);
   }
 
   @Get("documents/:documentId/download")
   @RequirePetAccess("canViewHealth")
-  downloadDocument(@Param("petId") petId: string, @Param("documentId") documentId: string) {
-    return this.documents.getDownload(petId, documentId);
+  downloadDocument(@Param("petId") petId: string, @Param("documentId") documentId: string, @CurrentUser() user: SessionUser) {
+    return this.documents.getDownload(petId, documentId, user.id);
   }
 
   @Post("documents/:documentId/void")
