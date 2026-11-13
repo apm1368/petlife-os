@@ -29,6 +29,16 @@ describe("footer: install the app (owner, 2026-11-13)", () => {
     expect(screen.getByRole("status").textContent).toContain("Browsermenü");
   });
 
+  it("offers the Android download with its version, size and SHA-256", () => {
+    standalone(false);
+    renderWithIntl(<FooterAppInstall />, "fa");
+    const link = screen.getByRole("link", { name: "دانلود مستقیم اندروید" });
+    expect(link.getAttribute("href")).toBe("https://opetlife.ir/app/opetlife.apk");
+    expect(link.hasAttribute("download")).toBe(true);
+    expect(screen.getByText("نسخهٔ ۱.۰.۱۴ · ۱۷۸ کیلوبایت")).toBeTruthy();
+    expect(screen.getByText("32806b76452526c2d4f74383b09b6c922eb3f2ffdc4bcce20cf1ec6e4d5ee700")).toBeTruthy();
+  });
+
   it("opens the browser's own install prompt when Chrome offered one", async () => {
     standalone(false);
     const prompt = vi.fn(async () => undefined);
@@ -54,4 +64,6 @@ describe("footer: install the app (owner, 2026-11-13)", () => {
       { store: "bazaar", url: "https://cafebazaar.ir/app/ir.opetlife.app" },
     ]);
   });
+
 });
+

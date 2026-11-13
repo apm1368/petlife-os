@@ -10000,7 +10000,9 @@
         "myket": "Bei Myket laden",
         "googlePlay": "Bei Google Play laden",
         "apk": "Für Android herunterladen"
-      }
+      },
+      "apkMeta": "Version {version} · {size} KB",
+      "apkHint": "Öffne die Datei nach dem Download und erlaube, falls gefragt, die Installation aus dieser Quelle."
     }
   },
   "safety": {

@@ -40,4 +40,15 @@ describe("web response-header security boundary", () => {
       expect(headers[key]).toBeUndefined();
     }
   });
+
+  it("sends the Android APK download as an installer file", async () => {
+    const rules = await config.headers?.();
+    const apk = rules.find((rule) => rule.source.startsWith("/app/"));
+    expect(apk).toBeDefined();
+    const headers = Object.fromEntries(apk.headers.map(({ key, value }) => [key.toLowerCase(), value]));
+    expect(headers["content-type"]).toBe("application/vnd.android.package-archive");
+    expect(headers["content-disposition"]).toBe("attachment");
+    expect(new RegExp(`^${apk.source.replace("/app/:file(", "/app/(")}$`).test("/app/opetlife.apk")).toBe(true);
+  });
 });
+
