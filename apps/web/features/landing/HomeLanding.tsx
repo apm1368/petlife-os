@@ -14,6 +14,7 @@ import { LostStrip } from "./opl/LostStrip";
 import { KindnessLight } from "./opl/KindnessLight";
 import { PartnersInvite } from "./opl/PartnersInvite";
 import { FinalStart } from "./opl/FinalStart";
+import { SetPetLandingSection } from "@/features/set-pet/SetPetLandingSection";
 
 /** The landing (docs/design/pattern-2026-11): the approved hero unchanged, then the five questions, reel, steps,
  *  trust, lost-pet help, the memorial, kindness, articles, partners and the closing call. */
@@ -24,6 +25,7 @@ export function HomeLanding({ locale }: { locale: RouteLocale }) {
       <ParkHeader locale={locale} />
       <main id="lp-main" tabIndex={-1}>
         <ParkHero locale={locale} />
+        <SetPetLandingSection />
         <WorldOrbit />
         <LandingReel />
         <PathSteps />

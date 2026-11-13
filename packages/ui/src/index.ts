@@ -63,4 +63,13 @@ export {
   Smartphone,
   Copy,
   Laptop,
+  Upload,
+  Trash2,
+  Shirt,
+  Ruler,
+  Clock,
+  Minus,
+  Play,
+  Volume2,
+  VolumeX,
 } from "lucide-react";

@@ -99,3 +99,12 @@ describe("Approved park landing", () => {
     // The 2026-11 pattern copy (park, landing, reels) is checked across all four catalogs in messages/pattern2026-locale-parity.test.ts.
   });
 });
+
+describe("Set Pet in the landing header (owner, 2026-11-13)", () => {
+  it.each([["fa", "ست پت"], ["en", "Set Pet"], ["ar", "Set Pet"]] as const)("links the %s header to /set-pet", (locale, label) => {
+    renderWithIntl(<ParkHeader locale={locale} />, locale);
+    const hrefs = screen.getAllByRole("link", { name: label }).map((link) => link.getAttribute("href"));
+    expect(hrefs).toContain(`/${locale}/set-pet`);
+    expect(routeExists(`/${locale}/set-pet`)).toBe(true);
+  });
+});

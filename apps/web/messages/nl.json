@@ -12719,5 +12719,293 @@
       "TWO_STEP_POLICY_SUPER_ADMIN_ONLY": "Alleen een hoofdbeheerder kan dit wijzigen.",
       "TWO_STEP_KEY_CHANGED": "Uw authenticator kan na een wijziging van de serversleutel niet worden gecontroleerd. Gebruik een herstelcode of vraag een hoofdbeheerder om het te resetten."
     }
+  },
+  "setPet": {
+    "landing": {
+      "eyebrow": "Nieuw bij opetlife",
+      "title": "Set Pet: matchende outfits voor jou en je huisdier",
+      "lede": "Jouw T-shirt en de outfit van je huisdier in één ontwerp, en dat ontwerp maak je zelf.",
+      "line1": "Kies de kleur en maat van je T-shirt.",
+      "line2": "Upload tot drie foto's of ontwerpen van jou en je huisdier en plaats ze op de borst, rug of mouwen van het T-shirt en op de rug van het huisdiershirt.",
+      "line3": "Geef de nek- en borstomvang en ruglengte van je huisdier op, zodat de outfit precies past.",
+      "cta": "Maak een set voor jou en je huisdier",
+      "navLabel": "Set Pet",
+      "videoLabel": "Introductievideo van Set Pet",
+      "play": "Set Pet-video afspelen",
+      "soundOn": "Geluid aan",
+      "soundOff": "Dempen",
+      "line4": "Ons team checkt je ontwerp en bevestigt de eindprijs. Set Pet wordt op bestelling gemaakt en is geen winkelartikel."
+    },
+    "page": {
+      "eyebrow": "Set Pet",
+      "title": "Set Pet: bijpassende shirts voor jou en je huisdier",
+      "lede": "Bestel een T-shirt voor jezelf en een bijpassend shirt voor je huisdier, in dezelfde kleur en met je eigen ontwerpen. Je kiest maten, kleur en printvlakken en ziet beide shirts naast elkaar; daarna controleert ons team alles en stuurt je een prijs.",
+      "start": "Begin met ontwerpen",
+      "howTitle": "Zo werkt het",
+      "how": {
+        "shirts": "Kies hoeveel T-shirts en per shirt een maat, met de maattabel in cm.",
+        "pet": "Meet je huisdier (nek, borst, ruglengte en gewicht); wij stellen een maat voor.",
+        "colour": "Kies één kleur voor de hele set.",
+        "zones": "Kies waar je wilt printen: mouwen, voorkant, rug of de rug van het huisdiershirt.",
+        "designs": "Upload tot drie ontwerpen en bekijk ze op beide shirts.",
+        "review": "Controleer alles en verstuur de aanvraag. Ons team antwoordt met een prijs en een datum."
+      },
+      "factsLabel": "Goed om te weten",
+      "facts": {
+        "print": {
+          "title": "Wat er geprint wordt",
+          "body": "Op je T-shirt: bovenaan de rechter- of linkermouw (10 × 10 cm), midden voor of op de rug (20 × 20 cm). Op het huisdiershirt: de rug. Eén ontwerp per vlak, in totaal maximaal drie ontwerpen."
+        },
+        "sizing": {
+          "title": "Maten",
+          "body": "Maten S tot 3XL voor jou en je huisdier. De tabellen zijn een richtlijn; ons team controleert je maten en de maten van je huisdier vóór het printen."
+        },
+        "timing": {
+          "title": "Planning",
+          "body": "Na je aanvraag antwoordt ons team met een prijs en een verwachte klaardatum. De productie start pas als jij akkoord gaat."
+        },
+        "price": {
+          "title": "Prijs en betaling",
+          "body": "Dit is een bestelaanvraag, geen aankoop. De prijs hangt af van de shirts en printvlakken en wordt door ons team bevestigd. Er wordt nu niets afgeschreven."
+        }
+      },
+      "buildTitle": "Ontwerp je set",
+      "signIn": {
+        "body": "Je kunt meteen beginnen; je logt pas in om je aanvraag te versturen. Je ontwerpen blijven privé: alleen jij en ons printteam zien ze.",
+        "cta": "Inloggen",
+        "join": "Account aanmaken"
+      },
+      "mineTitle": "Je Set Pet-aanvragen",
+      "done": {
+        "title": "Aanvraag {reference} verstuurd",
+        "body": "Ons team controleert je maten en ontwerpen en stuurt je een prijs en klaardatum. Je vindt die onder ‘Je Set Pet-aanvragen’; er wordt niets afgeschreven tot je akkoord gaat.",
+        "another": "Nog een set ontwerpen"
+      }
+    },
+    "builder": {
+      "stepsLabel": "Set Pet-stappen",
+      "steps": {
+        "shirts": "T-shirts",
+        "pet": "Huisdiershirt",
+        "colour": "Kleur",
+        "zones": "Printvlakken",
+        "designs": "Ontwerpen",
+        "review": "Controleren en versturen"
+      },
+      "loading": "Laden…",
+      "comingSoon": "Set Pet-bestellingen gaan heel binnenkort open. Kom straks terug.",
+      "loadError": "We konden Set Pet nu niet laden.",
+      "retry": "Opnieuw proberen",
+      "back": "Terug",
+      "next": "Volgende",
+      "size": "Maat",
+      "cm": "cm",
+      "kg": "kg",
+      "range": "{min}–{max}",
+      "approximate": "Richtmaten: ons team bevestigt elke maat vóór het printen.",
+      "previewLabel": "Voorbeeld van beide shirts",
+      "previewShirt": "T-shirt in het voorbeeld",
+      "shirtN": "T-shirt {n}",
+      "previewNote": "Elk ontwerp wordt op zijn echte printformaat getoond. Tik op ‘Achterkant tonen’ om het T-shirt te draaien.",
+      "shirts": {
+        "title": "Je T-shirts",
+        "lede": "Hoeveel T-shirts voor de mensen in de set, en welke maat per shirt?",
+        "count": "Aantal T-shirts",
+        "fewer": "Eén T-shirt minder",
+        "more": "Eén T-shirt meer",
+        "sizeFor": "Maat van T-shirt {n}",
+        "guideTitle": "Zo wordt het T-shirt gemeten: A borstbreedte, B lengte",
+        "chartCaption": "Maattabel T-shirt (cm, plat gelegd)",
+        "chest": "A · Borstbreedte",
+        "length": "B · Lengte",
+        "suggest": "Twijfel je? Stel een maat voor",
+        "height": "Lengte",
+        "weight": "Gewicht",
+        "suggested": "Voorgestelde maat: {size}",
+        "use": "{size} kiezen",
+        "mismatch": "Wij zouden {size} voorstellen; je keuze is prima als je een andere pasvorm wilt."
+      },
+      "pet": {
+        "title": "Het shirt van je huisdier",
+        "lede": "Meet je huisdier met een zacht meetlint, aansluitend maar niet strak. We stellen een maat voor op basis van de borst.",
+        "which": "Voor welk huisdier? (optioneel)",
+        "noPet": "Niet gekoppeld aan een huisdier",
+        "guideTitle": "Waar je je huisdier meet: 1 nek, 2 borst, 3 ruglengte",
+        "guide": {
+          "neck": "Nek: rond de basis van de nek, waar de halsband zit.",
+          "chest": "Borst: rond het breedste deel, net achter de voorpoten.",
+          "back": "Ruglengte: van de basis van de nek tot de aanzet van de staart."
+        },
+        "fields": {
+          "neckCm": "Nekomtrek",
+          "chestCm": "Borstomtrek",
+          "backLengthCm": "Ruglengte",
+          "weightKg": "Gewicht"
+        },
+        "size": "Maat huisdiershirt",
+        "suggested": "Voorgestelde maat op basis van de borst: {size}",
+        "chartCaption": "Maattabel huisdiershirt (cm)",
+        "errors": {
+          "fix": "Controleer de maten van je huisdier.",
+          "required": "Verplicht",
+          "range": "Tussen {min} en {max}"
+        },
+        "mismatch": "De borstomtrek wijst op {size}. Je keuze is prima als je het ruimer of strakker wilt."
+      },
+      "colour": {
+        "title": "Kleur",
+        "lede": "Eén kleur voor de hele set; het huisdiershirt past erbij.",
+        "human": "Kleur T-shirt",
+        "petDifferent": "Een andere kleur voor het huisdiershirt",
+        "petColour": "Kleur huisdiershirt"
+      },
+      "zones": {
+        "title": "Printvlakken",
+        "lede": "Vink aan waar je een print wilt. Je kunt het altijd aanpassen: het voorbeeld beweegt mee.",
+        "area": "{cm} × {cm} cm",
+        "petArea": "Afgestemd op het huisdiershirt",
+        "errors": {
+          "none": "Kies minstens één printvlak."
+        }
+      },
+      "designs": {
+        "title": "Ontwerpen",
+        "lede": "Upload tot drie ontwerpen en kies welk ontwerp op welk vlak komt."
+      },
+      "upload": {
+        "choose": "Ontwerpbestanden kiezen",
+        "limits": "Tot {max} bestanden, elk tot {mb} MB",
+        "formats": "Foto's (JPG, PNG, WebP) verschijnen in het voorbeeld; printbestanden (PDF, SVG, AI, PSD, HEIC) gaan zonder voorbeeld naar ons team.",
+        "status": {
+          "uploading": "Uploaden…",
+          "checking": "Bestand wordt gecontroleerd…",
+          "ready": "Klaar",
+          "local": "Klaar; wordt met je aanvraag verstuurd"
+        },
+        "receivedNoPreview": "Bestand ontvangen; ons team controleert het (geen voorbeeld)",
+        "remove": "{name} verwijderen",
+        "earlier": "Eerdere uploads ({n})",
+        "use": "Gebruiken",
+        "delete": "Verwijderen",
+        "untitled": "Naamloos ontwerp",
+        "assignTitle": "Welk ontwerp waar komt",
+        "pick": "Kies een ontwerp",
+        "errors": {
+          "type": "Dit bestandstype wordt niet geaccepteerd.",
+          "tooManyFiles": "Je hebt te veel ongebruikte uploads. Verwijder er een paar onder ‘Eerdere uploads’ en probeer het opnieuw.",
+          "notUploaded": "De upload is niet voltooid. Probeer het opnieuw.",
+          "tooLarge": "Het bestand is te groot (tot {mb} MB).",
+          "mismatch": "De inhoud van het bestand past niet bij het type.",
+          "rejected": "Dit bestand kan niet worden gebruikt. Probeer een ander bestand.",
+          "generic": "De upload is mislukt. Probeer het opnieuw.",
+          "max": "Je kunt maximaal {max} ontwerpen gebruiken.",
+          "wait": "Wacht tot je bestanden klaar zijn met uploaden.",
+          "zoneMissing": "Kies een ontwerp voor ‘{zone}’.",
+          "someFailed": "Sommige ontwerpen konden niet worden geüpload. Controleer ze en verstuur opnieuw."
+        },
+        "lowRes": "Deze afbeelding kan wazig worden geprint op ‘{zone}’ (ongeveer {dpi} dpi; vanaf 150 wordt het scherp)."
+      },
+      "review": {
+        "title": "Controleren en versturen",
+        "lede": "Controleer je set. Ons team bevestigt alles samen met de prijs voordat er iets geprint wordt.",
+        "shirts": "T-shirts",
+        "shirtsValue": "{n} · maten {sizes}",
+        "pet": "Huisdiershirt",
+        "petValue": "Maat {size} · {name}",
+        "measurements": "Maten van je huisdier",
+        "measurementsValue": "Nek {neck} · borst {chest} · rug {back} cm · {weight} kg",
+        "colour": "Kleur",
+        "zones": "Prints",
+        "notes": "Opmerkingen voor ons team (optioneel)",
+        "notesPlaceholder": "Bijvoorbeeld een tekst om te printen of een kleurdetail",
+        "priceNote": "Dit is een bestelaanvraag: ons team bevestigt de prijs en de klaardatum. Je betaalt nu niets.",
+        "send": "Aanvraag versturen",
+        "sending": "Versturen…",
+        "errors": {
+          "tooManyOpen": "Je hebt al drie openstaande aanvragen. Wacht tot er één klaar is, of annuleer er één.",
+          "designUnavailable": "Een van de ontwerpen is niet meer beschikbaar. Upload het opnieuw.",
+          "validation": "Sommige gegevens moeten worden gecontroleerd. Loop de stappen nog eens door.",
+          "unavailable": "Set Pet-bestellingen zijn nog niet open. Probeer het binnenkort opnieuw.",
+          "generic": "De aanvraag kon niet worden verstuurd. Probeer het opnieuw."
+        },
+        "signInToSend": "Inloggen en versturen",
+        "signInNote": "Om te versturen log je in of maak je een account aan. Je set blijft zolang op dit apparaat bewaard.",
+        "uploading": "Je ontwerpen worden verstuurd…"
+      }
+    },
+    "zones": {
+      "RIGHT_UPPER_ARM": {
+        "name": "Rechtermouw boven",
+        "hint": "op de rechterarm van de drager"
+      },
+      "LEFT_UPPER_ARM": {
+        "name": "Linkermouw boven",
+        "hint": "op de linkerarm van de drager"
+      },
+      "FRONT_CENTER": {
+        "name": "Midden voor",
+        "hint": "op de borst"
+      },
+      "BACK": {
+        "name": "Rug",
+        "hint": "tussen de schouderbladen"
+      },
+      "PET_BACK": {
+        "name": "Rug van het huisdiershirt",
+        "hint": "aan de buitenkant, over de rug van je huisdier"
+      }
+    },
+    "colours": {
+      "white": "Wit",
+      "black": "Zwart",
+      "heather-grey": "Grijs gemêleerd",
+      "navy": "Marineblauw",
+      "cream": "Crème",
+      "sage": "Saliegroen",
+      "pink": "Zachtroze"
+    },
+    "preview": {
+      "human": "T-shirt · {size}",
+      "pet": "Huisdiershirt · {size}",
+      "showBack": "Achterkant tonen",
+      "showFront": "Voorkant tonen",
+      "frontCaption": "Voorkant (de rechtermouw van de drager staat links)",
+      "backCaption": "Achterkant",
+      "petCaption": "Van bovenaf, over de rug van je huisdier",
+      "zoneLabel": "{zone} ({cm} × {cm} cm)",
+      "designOn": "{name} op {zone}",
+      "fileReceived": "Bestand ontvangen",
+      "cm": "cm"
+    },
+    "requests": {
+      "loading": "Je aanvragen worden geladen…",
+      "loadError": "We konden je aanvragen niet laden.",
+      "retry": "Opnieuw proberen",
+      "empty": "Je hebt nog geen Set Pet-aanvraag verstuurd.",
+      "summary": "{n, plural, one {# T-shirt} other {# T-shirts}} ({sizes}) en een huisdiershirt ({pet}), {colour}",
+      "sent": "Verstuurd op {date}",
+      "quote": "Prijs: {amount}",
+      "ready": "Klaar rond {date}",
+      "waiting": "Wacht op de prijs van ons team.",
+      "accept": "Prijs accepteren en starten",
+      "cancel": "Aanvraag annuleren",
+      "cancelConfirm": "Deze aanvraag annuleren?",
+      "cancelYes": "Ja, annuleren",
+      "cancelNo": "Behouden",
+      "status": {
+        "SUBMITTED": "Verstuurd",
+        "QUOTED": "Prijs klaar",
+        "CONFIRMED": "Geaccepteerd",
+        "IN_PRODUCTION": "In productie",
+        "SHIPPED": "Verzonden",
+        "CANCELLED": "Geannuleerd"
+      },
+      "errors": {
+        "notCancellable": "Deze aanvraag kan niet meer worden geannuleerd.",
+        "noQuote": "Er is nog geen prijs om te accepteren.",
+        "quoteChanged": "Ons team heeft de prijs bijgewerkt. Bekijk de nieuwe prijs voordat je accepteert.",
+        "generic": "Dat is niet gelukt. Probeer het opnieuw."
+      }
+    }
   }
 }
