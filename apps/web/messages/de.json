@@ -11627,18 +11627,19 @@
   },
   "setPet": {
     "landing": {
-      "eyebrow": "Set Pet · neu",
-      "title": "Partnerlook für dich und dein Tier",
-      "lede": "Ein T-Shirt für dich und ein Shirt für dein Tier in derselben Farbe, bedruckt mit deinem eigenen Motiv: einem Foto, einer Zeichnung oder dem Namen deines Tieres.",
-      "line1": "Wähle Größen, eine Farbe und wohin jedes Motiv kommt.",
-      "line2": "Sieh dir beide Shirts nebeneinander an, bevor du die Anfrage sendest.",
-      "line3": "Unser Team prüft Größen und Motive und bestätigt den Preis. Jetzt zahlst du nichts.",
-      "cta": "Stell dein Set mit deinem Tier zusammen",
+      "eyebrow": "Neu bei opetlife",
+      "title": "Set Pet: Partnerlook für dich und dein Haustier",
+      "lede": "Dein T-Shirt und das Outfit deines Tiers in einem Motiv – und das Motiv gestaltest du.",
+      "line1": "Wähle Farbe und Größe deines T-Shirts.",
+      "line2": "Lade bis zu drei Fotos oder Motive von dir und deinem Tier hoch und platziere sie auf Brust, Rücken oder Ärmeln des T-Shirts und auf dem Rücken des Tiershirts.",
+      "line3": "Gib Hals- und Brustumfang sowie die Rückenlänge deines Tiers an, damit sein Outfit genau passt.",
+      "cta": "Gestalte dein Set mit deinem Tier",
       "navLabel": "Set Pet",
-      "videoLabel": "Set-Pet-Video: so bestellst du Partnershirts für dich und dein Tier",
+      "videoLabel": "Vorstellungsvideo zu Set Pet",
       "play": "Set-Pet-Video abspielen",
       "soundOn": "Ton an",
-      "soundOff": "Stumm"
+      "soundOff": "Stumm",
+      "line4": "Unser Team prüft dein Motiv und bestätigt den Endpreis. Set Pet wird auf Bestellung gefertigt und ist kein Lagerartikel."
     },
     "page": {
       "eyebrow": "Set Pet",

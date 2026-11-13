@@ -11625,18 +11625,19 @@
   },
   "setPet": {
     "landing": {
-      "eyebrow": "Set Pet · nuevo",
-      "title": "Camisetas a juego para ti y tu mascota",
-      "lede": "Una camiseta para ti y otra para tu mascota del mismo color, estampadas con tu propio diseño: una foto, un dibujo o el nombre de tu mascota.",
-      "line1": "Elige las tallas, un color y dónde va cada diseño.",
-      "line2": "Mira las dos camisetas una al lado de la otra antes de enviar la solicitud.",
-      "line3": "Nuestro equipo revisa tallas y diseños y confirma el precio. Ahora no pagas nada.",
-      "cta": "Crea tu conjunto con tu mascota",
+      "eyebrow": "Novedad en opetlife",
+      "title": "Set Pet: ropa a juego para ti y tu mascota",
+      "lede": "Tu camiseta y la prenda de tu mascota con un mismo diseño, y el diseño lo creas tú.",
+      "line1": "Elige el color y la talla de tu camiseta.",
+      "line2": "Sube hasta tres fotos o diseños tuyos y de tu mascota y colócalos en el pecho, la espalda o las mangas de la camiseta y en la espalda de la prenda de tu mascota.",
+      "line3": "Indica el contorno del cuello y del pecho y el largo del lomo de tu mascota para que su prenda le quede perfecta.",
+      "cta": "Crea tu set con tu mascota",
       "navLabel": "Set Pet",
-      "videoLabel": "Vídeo de Set Pet: cómo pedir camisetas a juego para ti y tu mascota",
+      "videoLabel": "Vídeo de presentación de Set Pet",
       "play": "Reproducir el vídeo de Set Pet",
       "soundOn": "Activar sonido",
-      "soundOff": "Silenciar"
+      "soundOff": "Silenciar",
+      "line4": "Nuestro equipo revisa tu diseño y confirma el precio final. Set Pet se hace por encargo; no es un artículo de tienda."
     },
     "page": {
       "eyebrow": "Set Pet",

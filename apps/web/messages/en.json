@@ -12343,18 +12343,19 @@
   },
   "setPet": {
     "landing": {
-      "eyebrow": "Set Pet · new",
-      "title": "Matching shirts for you and your pet",
-      "lede": "A T-shirt for you and a shirt for your pet in the same colour, printed with your own design: a photo, a drawing or your pet's name.",
-      "line1": "Pick your sizes, one colour, and where each design goes.",
-      "line2": "See both shirts side by side before you send the request.",
-      "line3": "Our team checks your sizes and designs and confirms the price. Nothing is paid now.",
-      "cta": "Build your set with your pet",
+      "eyebrow": "New on opetlife",
+      "title": "Set Pet: matching outfits for you and your pet",
+      "lede": "Your T-shirt and your pet's outfit in one design, and you make the design.",
+      "line1": "Pick your T-shirt colour and size.",
+      "line2": "Upload up to three photos or designs of you and your pet and place them on the chest, back or sleeves of the T-shirt and on the back of your pet's shirt.",
+      "line3": "Add your pet's neck, chest and back length so their outfit fits just right.",
+      "cta": "Make a set for you and your pet",
       "navLabel": "Set Pet",
-      "videoLabel": "Set Pet video: how to order matching shirts for you and your pet",
+      "videoLabel": "Set Pet introduction video",
       "play": "Play the Set Pet video",
       "soundOn": "Sound on",
-      "soundOff": "Mute"
+      "soundOff": "Mute",
+      "line4": "Our team checks your design and confirms the final price. Set Pet is made to order, not an off-the-shelf item."
     },
     "page": {
       "eyebrow": "Set Pet",

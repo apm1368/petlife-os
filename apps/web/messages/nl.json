@@ -12412,18 +12412,19 @@
   },
   "setPet": {
     "landing": {
-      "eyebrow": "Set Pet · nieuw",
-      "title": "Bijpassende shirts voor jou en je huisdier",
-      "lede": "Een T-shirt voor jou en een shirt voor je huisdier in dezelfde kleur, bedrukt met je eigen ontwerp: een foto, een tekening of de naam van je huisdier.",
-      "line1": "Kies je maten, één kleur en waar elk ontwerp komt.",
-      "line2": "Bekijk beide shirts naast elkaar voordat je de aanvraag verstuurt.",
-      "line3": "Ons team controleert maten en ontwerpen en bevestigt de prijs. Je betaalt nu niets.",
-      "cta": "Stel je set samen met je huisdier",
+      "eyebrow": "Nieuw bij opetlife",
+      "title": "Set Pet: matchende outfits voor jou en je huisdier",
+      "lede": "Jouw T-shirt en de outfit van je huisdier in één ontwerp, en dat ontwerp maak je zelf.",
+      "line1": "Kies de kleur en maat van je T-shirt.",
+      "line2": "Upload tot drie foto's of ontwerpen van jou en je huisdier en plaats ze op de borst, rug of mouwen van het T-shirt en op de rug van het huisdiershirt.",
+      "line3": "Geef de nek- en borstomvang en ruglengte van je huisdier op, zodat de outfit precies past.",
+      "cta": "Maak een set voor jou en je huisdier",
       "navLabel": "Set Pet",
-      "videoLabel": "Set Pet-video: zo bestel je bijpassende shirts voor jou en je huisdier",
+      "videoLabel": "Introductievideo van Set Pet",
       "play": "Set Pet-video afspelen",
       "soundOn": "Geluid aan",
-      "soundOff": "Dempen"
+      "soundOff": "Dempen",
+      "line4": "Ons team checkt je ontwerp en bevestigt de eindprijs. Set Pet wordt op bestelling gemaakt en is geen winkelartikel."
     },
     "page": {
       "eyebrow": "Set Pet",

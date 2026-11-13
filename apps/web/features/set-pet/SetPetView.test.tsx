@@ -29,8 +29,8 @@ describe("/set-pet and the landing section (owner, 2026-11-13)", () => {
 
   it("puts a Set Pet section on the landing page with the way in, and the shirts mockup until the reel is ready", () => {
     renderWithIntl(<SetPetLandingSection />, "en");
-    expect(screen.getByRole("heading", { name: "Matching shirts for you and your pet" })).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Build your set with your pet" }).getAttribute("href")).toBe("/en/set-pet");
+    expect(screen.getByRole("heading", { name: "Set Pet: matching outfits for you and your pet" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Make a set for you and your pet" }).getAttribute("href")).toBe("/en/set-pet");
     expect(document.querySelector("video")).toBeNull();
     expect(screen.getByText("T-shirt · M")).toBeTruthy();
   });

@@ -57,6 +57,7 @@ export function SetPetLandingSection() {
           <li>{t("line1")}</li>
           <li>{t("line2")}</li>
           <li>{t("line3")}</li>
+          <li>{t("line4")}</li>
         </ul>
         <Link className="opl-btn primary" href={`/${locale}/set-pet`}>{t("cta")}</Link>
       </div>
