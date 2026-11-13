@@ -1275,13 +1275,16 @@
       "x": "X",
       "linkedin": "LinkedIn",
       "youtube": "YouTube",
-      "aparat": "Aparat"
+      "aparat": "Aparat",
+      "bale": "بله"
     },
     "maintenance": {
       "title": "نعمل على تحديث opetlife",
       "defaultMessage": "opetlife غير متاح لفترة وجيزة بينما نعمل على تحسينه. يُرجى العودة قريبًا.",
       "status": "حالة النظام"
-    }
+    },
+    "enamad": "ختم الثقة eNamad",
+    "followUs": "opetlife على شبكات التواصل"
   },
   "adminMessaging": {
     "kicker": "الرسائل النصية والبريد الإلكتروني",
