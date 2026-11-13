@@ -39,6 +39,11 @@ class CreateRequestDto {
   @IsOptional() @IsString() @Length(0, 1000) notes?: string;
 }
 
+class AcceptQuoteDto {
+  /** The amount the member saw; if staff revised the quote since, accepting fails instead of agreeing to a new price. */
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) amountIrr?: number;
+}
+
 class CancelDto {
   @IsOptional() @IsString() @Length(0, 500) reason?: string;
 }
@@ -109,7 +114,7 @@ export class SetPetController {
 
   @Post("requests/:id/accept-quote")
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
-  acceptQuote(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string): Promise<SetPetRequestDto> {
-    return this.setPet.acceptQuote(user.id, id);
+  acceptQuote(@CurrentUser() user: SessionUser, @Param("id", ParseUUIDPipe) id: string, @Body() dto: AcceptQuoteDto): Promise<SetPetRequestDto> {
+    return this.setPet.acceptQuote(user.id, id, dto.amountIrr);
   }
 }

@@ -132,7 +132,9 @@ describe("Set Pet requests (member side)", () => {
     const quoted = await get(owner, `/set-pet/requests/${created.id}`).expect(200);
     expect(quoted.body.quote).toMatchObject({ amountIrr: 45_000_000, note: "دو هفته" });
     expect(JSON.stringify(quoted.body)).not.toContain("INTERNAL-ONLY");
-    const confirmed = (await post(owner, `/set-pet/requests/${created.id}/accept-quote`).send({}).expect(201)).body;
+    // Accepting an amount staff have since revised fails instead of agreeing to a price the member never saw.
+    expect((await post(owner, `/set-pet/requests/${created.id}/accept-quote`).send({ amountIrr: 40_000_000 }).expect(409)).body.error).toMatchObject({ code: "SET_PET_QUOTE_CHANGED", details: { amountIrr: 45_000_000 } });
+    const confirmed = (await post(owner, `/set-pet/requests/${created.id}/accept-quote`).send({ amountIrr: 45_000_000 }).expect(201)).body;
     expect(confirmed).toMatchObject({ status: "CONFIRMED" });
     expect(confirmed.timeline.map((e: { toStatus: string }) => e.toStatus)).toEqual(["SUBMITTED", "QUOTED", "CONFIRMED"]);
     expect(await db.domainEvent.count({ where: { type: "SetPetQuoteAccepted", aggregateId: created.id } })).toBe(1);

@@ -18,5 +18,6 @@ export const setPetService = {
   list: (signal?: AbortSignal) => apiFetch<SetPetRequestDto[]>("/set-pet/requests", { signal }),
   get: (id: string, signal?: AbortSignal) => apiFetch<SetPetRequestDto>(`/set-pet/requests/${id}`, { signal }),
   cancel: (id: string, reason?: string) => apiFetch<SetPetRequestDto>(`/set-pet/requests/${id}/cancel`, { method: "POST", body: { reason } }),
-  acceptQuote: (id: string) => apiFetch<SetPetRequestDto>(`/set-pet/requests/${id}/accept-quote`, { method: "POST" }),
+  /** Send the amount shown: if staff revised the quote meanwhile the API answers 409 SET_PET_QUOTE_CHANGED. */
+  acceptQuote: (id: string, amountIrr: number) => apiFetch<SetPetRequestDto>(`/set-pet/requests/${id}/accept-quote`, { method: "POST", body: { amountIrr } }),
 };

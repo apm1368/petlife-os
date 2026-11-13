@@ -278,12 +278,20 @@ export class SetPetService {
     return this.get(userId, id);
   }
 
-  /** Accepting staff's quote confirms the order (payment is settled separately, later). */
-  async acceptQuote(userId: string, id: string): Promise<SetPetRequestDto> {
+  /**
+   * Accepting staff's quote confirms the order (payment is settled separately, later). With `seenAmountIrr` the member
+   * accepts exactly the price they saw: if staff revised the quote meanwhile, nothing changes and they see the new one.
+   */
+  async acceptQuote(userId: string, id: string, seenAmountIrr?: number): Promise<SetPetRequestDto> {
     const current = await this.ownRequest(userId, id);
     const dispatch = await this.prisma.$transaction(async (tx) => {
-      const moved = await tx.setPetRequest.updateMany({ where: { id, userId, status: SetPetRequestStatus.QUOTED, quoteAmountIrr: { not: null } }, data: { status: SetPetRequestStatus.CONFIRMED, confirmedAt: new Date() } });
-      if (!moved.count) throw new ApiException("SET_PET_NO_QUOTE", "There is no quote to accept.", HttpStatus.CONFLICT, { status: current.status });
+      const moved = await tx.setPetRequest.updateMany({ where: { id, userId, status: SetPetRequestStatus.QUOTED, quoteAmountIrr: seenAmountIrr === undefined ? { not: null } : seenAmountIrr }, data: { status: SetPetRequestStatus.CONFIRMED, confirmedAt: new Date() } });
+      if (!moved.count) {
+        if (current.status === SetPetRequestStatus.QUOTED && seenAmountIrr !== undefined && current.quoteAmountIrr !== seenAmountIrr) {
+          throw new ApiException("SET_PET_QUOTE_CHANGED", "The quote has changed; please review the new price.", HttpStatus.CONFLICT, { amountIrr: current.quoteAmountIrr });
+        }
+        throw new ApiException("SET_PET_NO_QUOTE", "There is no quote to accept.", HttpStatus.CONFLICT, { status: current.status });
+      }
       await tx.setPetRequestEvent.create({ data: { requestId: id, fromStatus: SetPetRequestStatus.QUOTED, toStatus: SetPetRequestStatus.CONFIRMED, actor: SetPetActor.MEMBER, actorUserId: userId } });
       return this.events.stage("SetPetQuoteAccepted", { requestId: id, userId, amountIrr: current.quoteAmountIrr }, { tx, aggregateType: "SetPetRequest", aggregateId: id });
     });
