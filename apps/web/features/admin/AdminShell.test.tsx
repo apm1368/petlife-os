@@ -148,13 +148,13 @@ describe("AdminShell", () => {
     expect(within(sidebar()).getByRole("link", { name: "Partners & verification" }).getAttribute("aria-current")).toBe("page");
     expect(within(sidebar()).getByRole("link", { name: "Dashboard" }).getAttribute("aria-current")).toBeNull();
     const tabs = within(screen.getByRole("navigation", { name: "Partners & verification sections" }));
-    expect(tabs.getByRole("link", { name: "Providers" }).getAttribute("aria-current")).toBe("page");
-    expect(tabs.getByRole("link", { name: "Sellers" }).getAttribute("aria-current")).toBeNull();
+    expect(tabs.getByRole("link", { name: "Services" }).getAttribute("aria-current")).toBe("page");
+    expect(tabs.getByRole("link", { name: "Shops" }).getAttribute("aria-current")).toBeNull();
     const crumbs = screen.getByRole("navigation", { name: "Breadcrumb" });
-    expect(crumbs.textContent).toBe("AdminMarketplacePartners & verificationProvidersDetails");
+    expect(crumbs.textContent).toBe("AdminMarketplacePartners & verificationServicesDetails");
     route.pathname = "/en/admin/sellers/seller-1";
     view.rerender(<NextIntlClientProvider locale="en" messages={en}><AdminShell><div>seller content</div></AdminShell></NextIntlClientProvider>);
-    await waitFor(() => expect(within(screen.getByRole("navigation", { name: "Partners & verification sections" })).getByRole("link", { name: "Sellers" }).getAttribute("aria-current")).toBe("page"));
+    await waitFor(() => expect(within(screen.getByRole("navigation", { name: "Partners & verification sections" })).getByRole("link", { name: "Shops" }).getAttribute("aria-current")).toBe("page"));
   });
 
   it("puts waiting-queue counts on modules and tabs", async () => {

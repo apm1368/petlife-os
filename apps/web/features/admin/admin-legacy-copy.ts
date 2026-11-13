@@ -423,4 +423,13 @@ export const LEGACY_COPY: Readonly<Record<string, readonly [de: string, es: stri
   "Withdrawn": ["Zurückgezogen", "Retirado"],
   "Active": ["Aktiv", "Activo"],
   "Inactive": ["Inaktiv", "Inactivo"],
+  "Public page": ["Öffentliche Seite", "Página pública"],
+  "Decided": ["Entschieden", "Resueltas"],
+  "Request status": ["Anfragestatus", "Estado de la solicitud"],
+  "Approved as a new product": ["Als neues Produkt freigegeben", "Aprobado como producto nuevo"],
+  "Matched to an existing product": ["Einem bestehenden Produkt zugeordnet", "Asociado a un producto existente"],
+  "Decided by {name} · {when}": ["Entschieden von {name} · {when}", "Decidido por {name} · {when}"],
+  "Open the product": ["Produkt öffnen", "Abrir el producto"],
+  "No decided requests yet": ["Noch keine entschiedenen Anfragen", "Todavía no hay solicitudes resueltas"],
+  "Decisions on seller requests appear here, newest first.": ["Entscheidungen zu Verkäuferanfragen erscheinen hier, die neuesten zuerst.", "Las decisiones sobre solicitudes de vendedores aparecen aquí, las más recientes primero."],
 };

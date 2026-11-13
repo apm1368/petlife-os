@@ -1,4 +1,55 @@
 {
+  "partnerSupport": {
+    "title": "Support",
+    "intro": "Stel het opetlife-team je vragen over verificatie, uitbetalingen, boekingen, bestellingen of je bedrijfspagina. Antwoorden verschijnen hier en als melding.",
+    "newCta": "Nieuw verzoek",
+    "empty": "Nog geen verzoeken.",
+    "openedBy": "Geopend door {name}",
+    "openedByYou": "Geopend door jou",
+    "loading": "Laden…",
+    "retry": "Opnieuw proberen",
+    "loadFailed": "Supportverzoeken konden niet worden geladen.",
+    "create": {
+      "title": "Nieuw supportverzoek",
+      "category": "Thema",
+      "subject": "Onderwerp",
+      "description": "Wat is er gebeurd? Voeg bestel- of boekingsnummers toe als je die hebt.",
+      "submit": "Verzoek versturen",
+      "failed": "Het verzoek kon niet worden verstuurd. Probeer het opnieuw.",
+      "required": "Vul het onderwerp en de beschrijving in."
+    },
+    "category": {
+      "BUSINESS": "Mijn bedrijf en verificatie",
+      "ACCOUNT": "Inloggen en teamtoegang",
+      "PAYMENT": "Uitbetalingen en betalingen",
+      "BOOKING": "Boekingen",
+      "ORDER": "Bestellingen",
+      "DELIVERY": "Verzending en bezorging",
+      "SERVICE": "Diensten en prijzen",
+      "MARKETPLACE": "Producten en winkelpagina",
+      "OTHER": "Iets anders"
+    },
+    "detail": {
+      "back": "Alle verzoeken",
+      "caseNumber": "Verzoek {number}",
+      "messages": "Gesprek",
+      "noMessages": "Nog geen antwoorden. Het supportteam reageert hier.",
+      "support": "opetlife-support",
+      "team": "Jouw team",
+      "composePlaceholder": "Schrijf een antwoord…",
+      "send": "Versturen",
+      "sendFailed": "Het antwoord kon niet worden verstuurd.",
+      "reopen": "Verzoek heropenen",
+      "reopenFailed": "Het verzoek kon niet worden heropend."
+    },
+    "status": {
+      "SUBMITTED": "Ontvangen",
+      "UNDER_REVIEW": "In behandeling",
+      "WAITING": "Wacht op je reactie",
+      "RESOLVED": "Opgelost",
+      "CLOSED": "Gesloten"
+    }
+  },
   "adminHolidays": {
     "kicker": "Bedrijfskalender",
     "title": "Feestdagen en sluitingsdagen",
@@ -3062,6 +3113,7 @@
   "provider": {
     "shell": {
       "nav": {
+        "support": "Support",
         "home": "Start",
         "bookings": "Boekingen",
         "schedule": "Planning",
@@ -4141,6 +4193,7 @@
   "seller": {
     "shell": {
       "nav": {
+        "support": "Support",
         "overview": "Overzicht",
         "orders": "Bestellingen",
         "offers": "Aanbiedingen",
@@ -4702,6 +4755,203 @@
     }
   },
   "admin": {
+    "partners": {
+      "servicesTitle": "Diensten",
+      "shopsTitle": "Winkels",
+      "servicesIntro": "Dierenartsen, trimsalons, pensions, oppassers, trainers, dierentaxi’s en elk ander dienstenbedrijf. Een bedrijf dat ook een winkel heeft, staat ook onder Winkels.",
+      "shopsIntro": "Alle winkels en hun producten. Een winkel die ook diensten aanbiedt, staat ook onder Diensten.",
+      "searchLabel": "Naam, telefoon of stad",
+      "searchPlaceholder": "Bedrijven zoeken",
+      "search": "Zoeken",
+      "verificationFilter": "Verificatie",
+      "kindFilter": "Soort dienst",
+      "shopStatusFilter": "Winkelstatus",
+      "all": "Alle",
+      "forbidden": "Je hebt geen toestemming om partners te bekijken.",
+      "loadFailed": "Partners konden niet worden geladen",
+      "resultCount": "{count} bedrijven",
+      "noAddress": "Nog geen adres",
+      "serviceCounts": "{active} actieve diensten · {inactive} inactief",
+      "offerCounts": "{active} actieve aanbiedingen · {pending} wachten op beoordeling",
+      "pendingDocuments": "{count} documenten te beoordelen",
+      "alsoShop": "Ook een winkel: {name}",
+      "alsoService": "Ook een dienstverlener: {name}",
+      "reviewKyc": "KYC beoordelen",
+      "pagination": "Partnerpagina’s",
+      "previous": "Vorige",
+      "next": "Volgende",
+      "page": "Pagina {page}",
+      "profile": {
+        "loading": "Laden…",
+        "loadFailed": "Dit bedrijf kon niet worden geladen",
+        "retry": "Opnieuw proberen",
+        "forbidden": "Je hebt geen toestemming om dit bedrijf te bekijken.",
+        "notFound": "Bedrijf niet gevonden",
+        "backServices": "Alle dienstverleners",
+        "backShops": "Alle winkels",
+        "alsoShop": "Ook een winkel: {name}",
+        "alsoService": "Ook een dienstverlener: {name}",
+        "identity": "Bedrijf en contact",
+        "phone": "Telefoon",
+        "email": "E-mail",
+        "website": "Website",
+        "joined": "Lid sinds",
+        "storefront": "Openbare winkelpagina",
+        "kyc": "KYC",
+        "reviewKyc": "Documenten beoordelen",
+        "submittedAt": "Ingediend ter beoordeling: {when}",
+        "notSubmitted": "Nog niet ingediend ter beoordeling",
+        "kycNote": "Notitie voor de partner: {note}",
+        "contactName": "Verantwoordelijke",
+        "contactMobile": "Mobiel",
+        "contactLandline": "Vaste telefoon",
+        "enamad": "Enamad-ID",
+        "noContact": "Nog geen contactgegevens ingediend.",
+        "noDocuments": "Nog geen documenten geüpload.",
+        "uploaded": "Geüpload: {when}",
+        "expires": "verloopt: {when}",
+        "reviewNote": "Beoordelingsnotitie: {note}",
+        "address": "Adres",
+        "province": "Provincie",
+        "city": "Stad",
+        "addressLine": "Adres",
+        "postalCode": "Postcode",
+        "pin": "Locatie op de kaart",
+        "noAddress": "Nog geen adres.",
+        "services": "Diensten en prijzen",
+        "noServices": "Nog geen diensten.",
+        "serviceActive": "Live",
+        "serviceInactive": "Niet live",
+        "perPet": "{price} per huisdier",
+        "minutes": "{count} min",
+        "maxPets": "tot {count} huisdieren",
+        "dogs": "honden",
+        "cats": "katten",
+        "taxiFare": "Taxitarief: {base} basis + {perKm} per km",
+        "category": {
+          "VET": "Diergeneeskunde",
+          "GROOMING": "Trimmen en verzorging",
+          "TRAINING": "Training",
+          "WALKING": "Uitlaten",
+          "SITTING": "Oppassen",
+          "BOARDING": "Dierenpension",
+          "PET_TAXI": "Dierentaxi",
+          "OTHER": "Overig"
+        },
+        "calendar": "Agenda",
+        "noCalendar": "Nog geen werktijden ingesteld.",
+        "exceptions": "Komende 60 dagen",
+        "weekday": {
+          "0": "Zondag",
+          "1": "Maandag",
+          "2": "Dinsdag",
+          "3": "Woensdag",
+          "4": "Donderdag",
+          "5": "Vrijdag",
+          "6": "Zaterdag"
+        },
+        "hours": "Openingstijden",
+        "noHours": "Nog geen openingstijden ingesteld.",
+        "closed": "Gesloten",
+        "products": "Producten, aanbiedingen en voorraad",
+        "offerSummary": "{active} live · {pending} wachten op beoordeling · {requests} aanvragen voor nieuwe producten",
+        "noOffers": "Nog geen producten aangeboden.",
+        "noStock": "geen voorraadgegevens",
+        "inStock": "{count} op voorraad",
+        "team": "Team",
+        "noTeam": "Geen teamleden.",
+        "providerRole": {
+          "OWNER": "Eigenaar",
+          "VET": "Dierenarts",
+          "STAFF": "Medewerker"
+        },
+        "supportCases": "Supportverzoeken van dit bedrijf"
+      }
+    },
+    "productDetail": {
+      "title": "Product",
+      "back": "Alle producten",
+      "loading": "Laden…",
+      "loadFailed": "Het product kon niet worden geladen.",
+      "retry": "Opnieuw proberen",
+      "forbidden": "Recht commerce.view vereist",
+      "notFound": "Product niet gevonden",
+      "media": "{count, plural, one {# afbeelding} other {# afbeeldingen}}",
+      "publicPage": "Openbare pagina",
+      "productStatus": {
+        "DRAFT": "Concept",
+        "ACTIVE": "Actief",
+        "INACTIVE": "Inactief",
+        "ARCHIVED": "Gearchiveerd"
+      },
+      "facts": {
+        "sellers": "Verkopers",
+        "buyable": "Koopbare aanbiedingen",
+        "lowestPrice": "Laagste actuele prijs",
+        "noneBuyable": "Niemand kan het nu verkopen",
+        "rating": "Beoordeling"
+      },
+      "offers": {
+        "title": "Aanbiedingen per verkoper",
+        "hint": "Elke verkoper bepaalt zelf prijs en voorraad. Een klant kan een aanbieding alleen kopen als die actief en goedgekeurd is, de winkel geverifieerd en actief is en er voorraad is.",
+        "empty": "Nog geen enkele verkoper biedt dit product aan.",
+        "seller": "Verkoper",
+        "variant": "Variant",
+        "price": "Prijs",
+        "stock": "Voorraad",
+        "status": "Status",
+        "updated": "Bijgewerkt",
+        "sellerNotLive": "Winkel {status} · {verification}",
+        "sellerSku": "Verkopers-SKU {sku}",
+        "available": "{count} beschikbaar",
+        "onHandReserved": "{onHand} op voorraad · {reserved} gereserveerd",
+        "noInventory": "Geen voorraadgegevens",
+        "buyable": "Nu te koop"
+      },
+      "offerStatus": {
+        "ACTIVE": "Actief",
+        "PAUSED": "Gepauzeerd",
+        "OUT_OF_STOCK": "Uitverkocht",
+        "SUSPENDED": "Geschorst"
+      },
+      "moderation": {
+        "PENDING_REVIEW": "Wacht op beoordeling",
+        "APPROVED": "Goedgekeurd",
+        "REJECTED": "Afgewezen"
+      },
+      "sellerStatus": {
+        "PENDING": "in afwachting",
+        "ACTIVE": "actief",
+        "INACTIVE": "inactief",
+        "SUSPENDED": "geschorst",
+        "RESTRICTED": "beperkt",
+        "CLOSED": "gesloten"
+      },
+      "sellerVerification": {
+        "NOT_STARTED": "niet geverifieerd",
+        "SUBMITTED": "verificatie ingediend",
+        "NEEDS_INFORMATION": "informatie nodig",
+        "UNDER_REVIEW": "in beoordeling",
+        "VERIFIED": "geverifieerd",
+        "REJECTED": "verificatie afgewezen",
+        "SUSPENDED": "verificatie opgeschort"
+      },
+      "variants": {
+        "title": "Varianten",
+        "inactive": "Inactief"
+      },
+      "requests": {
+        "title": "Verzoeken van verkopers",
+        "hint": "Verzoeken van winkels die dit product hebben aangemaakt of eraan zijn gekoppeld.",
+        "empty": "Dit product komt niet voort uit een verkopersverzoek.",
+        "status": {
+          "PENDING_REVIEW": "Wacht op beoordeling",
+          "APPROVED": "Goedgekeurd als nieuw product",
+          "MATCHED_EXISTING": "Gekoppeld aan dit product",
+          "REJECTED": "Afgewezen"
+        }
+      }
+    },
     "memorials": {
       "title": "Openbare gedenkpagina's voor huisdieren",
       "description": "Publiceer alleen als er uitdrukkelijke toestemming van de eigenaar is. Controleer elke naam en de gekozen foto; gegevens over het huishouden en de gezondheid zijn hier niet zichtbaar.",
@@ -4984,6 +5234,22 @@
       "pets": "{count, number} huisdier(en)"
     },
     "support": {
+      "requesterTabs": {
+        "label": "Aanvrager",
+        "ALL": "Alle",
+        "PERSONAL": "Particulieren",
+        "PARTNER": "Partners",
+        "PROVIDER": "Diensten",
+        "SELLER": "Winkels",
+        "oneBusiness": "Je ziet de zaken van één bedrijf.",
+        "allBusinesses": "Alles tonen"
+      },
+      "requesterOrg": {
+        "PROVIDER": "Dienstverlener",
+        "SELLER": "Winkel",
+        "unnamed": "(geen naam)",
+        "allCases": "Alle zaken van dit bedrijf"
+      },
       "title": "Supportzaken",
       "newCase": "Nieuwe zaak",
       "createTitle": "Supportzaak aanmaken",
@@ -8502,6 +8768,12 @@
       "possibleConflict": "Past mogelijk niet bij de huisdierregels",
       "moreInfo": "Meer informatie nodig",
       "distanceKm": "{distance} km"
+    },
+    "source": {
+      "label": "Bron",
+      "all": "Alle",
+      "opetlife": "opetlife",
+      "jajiga": "Jajiga"
     }
   },
   "externalTravel": {
@@ -8584,6 +8856,14 @@
       "SOURCE_REPORTED_AVAILABLE": "De bron meldt beschikbaarheid. Controleer de beschikbaarheid bij het boeken.",
       "SOURCE_REPORTED_UNAVAILABLE": "De bron meldt geen beschikbaarheid.",
       "UNKNOWN": "Beschikbaarheid is onbekend."
+    },
+    "fromSource": "Van {source}",
+    "blend": {
+      "title": "Huisdiervriendelijke verblijven van Jajiga",
+      "titleCity": "Huisdiervriendelijke verblijven in {city} van Jajiga",
+      "hint": "Advertenties van Jajiga: je boekt en betaalt op de eigen site van Jajiga, en opetlife rekent niets. Check de huisdierregels bij de verhuurder voordat je boekt.",
+      "seeAll": "Alle verblijven op Jajiga",
+      "pages": "Jajiga-pagina’s"
     }
   },
   "localDateTime": {
@@ -9841,6 +10121,11 @@
       "addressRequired": "Kies het adres van de dienst.",
       "petAccessDenied": "Je mag niet boeken voor dit huisdier.",
       "bookingChanged": "De status van deze boeking is gewijzigd. Vernieuw de pagina."
+    },
+    "priceBreakdown": {
+      "perPet": "{unit} per huisdier × {pets, number} huisdieren",
+      "perPetNight": "{unit} per huisdier per nacht × {pets, number} huisdieren × {nights, number} nachten",
+      "perRide": "{unit} per rit, ongeacht het aantal huisdieren"
     }
   },
   "datePicker": {
@@ -10760,6 +11045,18 @@
       "pull": "Trek om te vernieuwen",
       "release": "Loslaten om te vernieuwen",
       "loading": "Vernieuwen…"
+    },
+    "footer": {
+      "title": "De opetlife-app",
+      "install": "Installeer de app",
+      "iosSteps": "Op de iPhone: tik in Safari op Deel en kies ‘Zet op beginscherm’.",
+      "otherSteps": "Open het menu van je browser en kies ‘App installeren’ of ‘Toevoegen aan startscherm’. Op Android werkt Chrome het best.",
+      "android": {
+        "bazaar": "Ontdek het op Cafe Bazaar",
+        "myket": "Ontdek het op Myket",
+        "googlePlay": "Ontdek het op Google Play",
+        "apk": "Downloaden voor Android"
+      }
     }
   },
   "safety": {
@@ -11706,6 +12003,246 @@
     "adminDraft": {
       "title": "Ingebouwde Voorwaarden, Privacybeleid en FAQ staan live — concept, juridische controle door de eigenaar nodig",
       "body": "Deze teksten beschrijven hoe het platform echt werkt en worden in alle zes talen getoond tot je een gecontroleerde versie publiceert. Als je hier de Voorwaarden of Privacy in het Perzisch of Engels publiceert, vervangt dat de ingebouwde tekst voor die taal. Met een jurist te controleren: de retourtermijn van 48 uur naast het wettelijke herroepingsrecht bij aankopen op afstand, waar terugbetalingen naartoe gaan (oorspronkelijke betaalmethode of wallet), het verwijderen van accounts (de uitvoering staat nog uit) en dat communityberichten verschijnen vóór controle."
+    }
+  },
+  "businessHub": {
+    "title": "Zakelijke startpagina",
+    "subtitle": "opetlife-partnerpanel",
+    "intro": "Elk bedrijf waar je bij hoort, met wat er vandaag op je wacht.",
+    "emptyHint": "Er is nog geen bedrijf aan je account gekoppeld.",
+    "emptyTitle": "Nog geen bedrijf",
+    "emptyBody": "Na je aanmelding als partner en de verificatie verschijnt je bedrijf hier.",
+    "toPetOwnerHome": "Naar mijn startpagina als baasje",
+    "failed": "Laden mislukt",
+    "retry": "Opnieuw proberen",
+    "loading": "Laden",
+    "finishVerification": "Verificatie afronden",
+    "noReviews": "Nog geen beoordelingen.",
+    "rating": "Beoordeeld met {average} van 5 · {count} beoordelingen",
+    "stars": "{rating} sterren",
+    "support": "Contact met support",
+    "homeLink": "Zakelijke startpagina",
+    "myBusiness": "Mijn bedrijf",
+    "svc": {
+      "today": "Boekingen van vandaag",
+      "upcoming": "Aankomend",
+      "pending": "Wacht op jou",
+      "next": "Volgende boekingen",
+      "noBookings": "Geen aankomende boekingen.",
+      "services": "Diensten en prijzen ({active} actief van {total})",
+      "noPrice": "Geen prijs",
+      "minutes": "{minutes} min",
+      "noServices": "Nog geen diensten.",
+      "open": "Panel openen",
+      "bookings": "Boekingen",
+      "calendar": "Agenda",
+      "servicesPrices": "Diensten en prijzen",
+      "reviews": "Beoordelingen"
+    },
+    "shop": {
+      "kind": "Winkel",
+      "toPrepare": "Voor te bereiden bestellingen",
+      "lowStock": "Lage voorraad",
+      "pendingModeration": "Wacht op beoordeling",
+      "activeOffers": "Actieve aanbiedingen",
+      "available": "Beschikbaar voor uitbetaling",
+      "pendingPayout": "In afwachting",
+      "open": "Winkelpanel openen",
+      "orders": "Bestellingen",
+      "offers": "Producten en prijzen",
+      "inventory": "Voorraad",
+      "payouts": "Uitbetalingen"
+    },
+    "joinAsPartner": "Aanmelden als partner"
+  },
+  "partnerOnboarding": {
+    "loadFailed": "Laden mislukt",
+    "retry": "Opnieuw proberen",
+    "saveAndContinue": "Opslaan en doorgaan",
+    "continue": "Doorgaan",
+    "remove": "Verwijderen",
+    "intro": {
+      "title": "Meld je aan als partner",
+      "body": "Heb je een dienst voor huisdieren of een dierenwinkel? Sluit je aan bij opetlife, zodat baasjes je kunnen vinden, bij je kunnen boeken of bij je kunnen kopen.",
+      "needs": {
+        "kinds": "Het soort bedrijf (kies er gerust meerdere, bijvoorbeeld dierenarts en dierenwinkel)",
+        "documents": "Logo, nationale identiteitskaart en licentie of vergunning",
+        "address": "Postadres met provincie en plaats",
+        "services": "Voor diensten: werkdagen, werktijden en de prijs van elke dienst",
+        "shop": "Voor een winkel: openingstijden en je producten met prijs en voorraad",
+        "review": "Indienen ter beoordeling en identiteitsverificatie"
+      },
+      "reviewNote": "Er verschijnt niets op de site totdat het opetlife-team je documenten heeft geverifieerd. Identiteitsdocumenten zijn alleen voor de beoordeling en worden nooit gepubliceerd.",
+      "create": "Partneraccount aanmaken",
+      "signIn": "Ik heb al een account — inloggen"
+    },
+    "wizard": {
+      "title": "Aanmelden als partner",
+      "reviewNote": "Elke stap wordt opgeslagen, dus je kunt later verdergaan. Je bedrijf verschijnt op de site zodra het opetlife-team het goedkeurt.",
+      "steps": "Stappen"
+    },
+    "steps": {
+      "kinds": "Soort bedrijf",
+      "business": "Naam en logo",
+      "owner": "Gegevens van de eigenaar",
+      "documents": "Documenten",
+      "address": "Adres",
+      "calendar": "Werkkalender",
+      "services": "Diensten en prijzen",
+      "hours": "Openingstijden winkel",
+      "products": "Producten",
+      "review": "Controleren en indienen"
+    },
+    "kinds": {
+      "hint": "Kies elke dienst die je aanbiedt. Heb je ook een dierenwinkel, vink die dan ook aan.",
+      "services": "Diensten",
+      "shopTitle": "Winkel"
+    },
+    "kind": {
+      "VET_CLINIC": "Dierenartspraktijk",
+      "VETERINARIAN": "Dierenarts",
+      "GROOMER": "Trimsalon",
+      "BOARDING": "Pension",
+      "SITTER": "Dierenoppas",
+      "TRAINER": "Training",
+      "WALKER": "Honden uitlaten",
+      "PET_TAXI": "Huisdierentaxi",
+      "SHOP": "Dierenwinkel (online of fysiek)"
+    },
+    "business": {
+      "name": "Bedrijfsnaam",
+      "description": "Korte beschrijving",
+      "logo": "Logo",
+      "logoHint": "JPG, PNG of WebP tot 10 MB. Het logo verschijnt na goedkeuring op de site."
+    },
+    "owner": {
+      "firstName": "Voornaam",
+      "lastName": "Achternaam",
+      "phone": "Zakelijk telefoonnummer",
+      "verifyMobile": "Om door te gaan moet het mobiele nummer van je account bevestigd zijn met een sms-code.",
+      "verifyMobileLink": "Mijn mobiele nummer bevestigen"
+    },
+    "documents": {
+      "hint": "Je nationale identiteitskaart en bedrijfsvergunning (of Enamad voor een webwinkel) zijn verplicht; dierenartsen uploaden ook hun diergeneeskundige vergunning.",
+      "none": "Nog geen documenten geüpload.",
+      "kind": "Type document",
+      "file": "Bestand (JPG, PNG of PDF tot 20 MB)",
+      "private": "Documenten worden privé opgeslagen; alleen het beoordelingsteam ziet ze.",
+      "upload": "Uploaden"
+    },
+    "docKind": {
+      "NATIONAL_ID_CARD": "Nationale identiteitskaart",
+      "LICENSE": "Licentie / vergunning",
+      "BUSINESS_LICENSE": "Bedrijfsvergunning",
+      "BUSINESS_REGISTRATION": "Bedrijfsregistratie",
+      "OTHER": "Overig",
+      "ENAMAD": "Enamad (e-trustkeurmerk)"
+    },
+    "docStatus": {
+      "PENDING": "Wacht op beoordeling",
+      "ACCEPTED": "Geaccepteerd",
+      "REJECTED": "Afgewezen",
+      "EXPIRED": "Verlopen"
+    },
+    "address": {
+      "province": "Provincie",
+      "city": "Plaats",
+      "pick": "Kiezen",
+      "otherCity": "Andere plaats…",
+      "line": "Straat en huisnummer",
+      "postalCode": "Postcode (10 cijfers)",
+      "latitude": "Breedtegraad (optioneel)",
+      "longitude": "Lengtegraad (optioneel)",
+      "pinHint": "Weet je je positie op de kaart? Vul die dan in, zodat klanten je makkelijker vinden."
+    },
+    "day": {
+      "6": "Zaterdag",
+      "0": "Zondag",
+      "1": "Maandag",
+      "2": "Dinsdag",
+      "3": "Woensdag",
+      "4": "Donderdag",
+      "5": "Vrijdag"
+    },
+    "hours": {
+      "from": "Van ({day})",
+      "to": "Tot ({day})"
+    },
+    "services": {
+      "hint": "Prijzen gelden per huisdier; bij meerdere huisdieren wordt de prijs vermenigvuldigd. Boekingsmomenten volgen de duur van elke dienst.",
+      "kind": "Type",
+      "name": "Naam van de dienst",
+      "price": "Prijs per huisdier (toman)",
+      "duration": "Duur (minuten)",
+      "maxPets": "Max. huisdieren per boeking",
+      "add": "Dienst toevoegen"
+    },
+    "products": {
+      "hint": "Zoek je producten in de productcatalogus van opetlife en stel prijs en voorraad in. Ze verschijnen in de winkel nadat je winkel is goedgekeurd en de producten zijn beoordeeld.",
+      "search": "Producten zoeken",
+      "searchButton": "Zoeken",
+      "noResults": "Geen producten gevonden.",
+      "add": "Toevoegen",
+      "picked": "Je producten",
+      "nonePicked": "Nog geen producten (je kunt ze ook later toevoegen).",
+      "price": "Prijs (toman)",
+      "stock": "Voorraad",
+      "requestTitle": "Kun je je product niet vinden?",
+      "requestName": "Productnaam",
+      "requestButton": "Dit product aanvragen",
+      "requestSent": "Aanvraag verstuurd; het product wordt na beoordeling aan de catalogus toegevoegd.",
+      "requestLater": "Na goedkeuring kun je producten aanvragen via je winkelpaneel."
+    },
+    "review": {
+      "body": "Controleer alles en dien het in ter verificatie. Na het indienen kun je niets meer wijzigen totdat de beoordeling klaar is.",
+      "ready": "Alles is klaar.",
+      "submit": "Indienen ter beoordeling"
+    },
+    "missing": {
+      "ADDRESS": "Adres",
+      "CALENDAR": "Werkkalender",
+      "SERVICES": "Minstens één dienst met een prijs",
+      "OPENING_HOURS": "Openingstijden van de winkel",
+      "PROFILE": "Gegevens van de eigenaar (en een bevestigd mobiel nummer)",
+      "DOCUMENTS": "Verplichte documenten (identiteitskaart en vergunning)",
+      "document": "Verplicht document: {kind}"
+    },
+    "submitted": {
+      "title": "Je aanvraag wordt beoordeeld",
+      "body": "Het opetlife-team beoordeelt je documenten en laat je weten wat de uitkomst is. Tot die tijd verschijnt er niets op de site.",
+      "verifiedTitle": "Je bedrijf is geverifieerd",
+      "verifiedBody": "Je diensten zijn live en je producten verschijnen na beoordeling in de winkel.",
+      "toBusiness": "Naar mijn bedrijf"
+    },
+    "subject": {
+      "PROVIDER": "Diensten",
+      "SELLER": "Winkel"
+    },
+    "lifecycle": {
+      "NOT_SUBMITTED": "Niet ingediend",
+      "PENDING": "Wacht op beoordeling",
+      "UNDER_REVIEW": "In beoordeling",
+      "RESUBMISSION_REQUESTED": "Wijzigingen gevraagd",
+      "APPROVED": "Goedgekeurd",
+      "REJECTED": "Afgewezen",
+      "SUSPENDED": "Opgeschort"
+    },
+    "errors": {
+      "generic": "Niet opgeslagen; probeer het opnieuw.",
+      "PICK_AT_LEAST_ONE": "Kies minstens één dienst of een winkel.",
+      "NAME_REQUIRED": "Vul de bedrijfsnaam in.",
+      "CANNOT_REMOVE_STARTED_BUSINESS": "Een soort bedrijf waarmee je al bent begonnen, kun je niet verwijderen; je kunt alleen nieuwe toevoegen.",
+      "UNDER_REVIEW_LOCKED": "Dit wordt nu beoordeeld en kan op dit moment niet worden gewijzigd.",
+      "VERIFIED_MOBILE_REQUIRED": "Bevestig eerst het mobiele nummer van je account met een sms-code.",
+      "ADDRESS_FIRST": "Sla eerst het adres op.",
+      "START_BEFORE_END": "De begintijd moet vóór de eindtijd liggen.",
+      "CATALOG_PRODUCT_NOT_AVAILABLE": "Een van de producten staat niet meer in de catalogus.",
+      "STEPS_INCOMPLETE": "Sommige stappen zijn nog niet voltooid.",
+      "VERIFICATION_REQUIRED_DOCUMENTS_MISSING": "Er ontbreken nog verplichte documenten.",
+      "VERIFICATION_PROFILE_REQUIRED": "De gegevens van de eigenaar zijn niet compleet.",
+      "LOGO_FILE": "Het logo moet een JPG, PNG of WebP van minder dan 10 MB zijn.",
+      "DOC_FILE": "Het document moet een JPG, PNG of PDF van minder dan 20 MB zijn.",
+      "TOO_MANY_PENDING": "Er wachten te veel documenten op beoordeling."
     }
   }
 }

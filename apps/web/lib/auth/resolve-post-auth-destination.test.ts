@@ -32,6 +32,27 @@ describe("resolvePostAuthDestination", () => {
     expect(dest).toBe("/en/home");
   });
 
+  it("sends a partner who is not a pet owner to the business home, never to pet-owner onboarding", () => {
+    const business = { hasBusiness: true, hasHousehold: false };
+    expect(resolvePostAuthDestination("fa", null, { status: "IN_PROGRESS", chapter: "PET_IDENTITY" }, { business })).toBe("/fa/business");
+    expect(resolvePostAuthDestination("en", "/en/provider/bookings", { status: "IN_PROGRESS", chapter: "PET_IDENTITY" }, { business })).toBe("/en/provider/bookings");
+    expect(resolvePostAuthDestination("en", "https://evil.example", { status: "COMPLETED", chapter: "READY" }, { business })).toBe("/en/business");
+  });
+
+  it("sends a partner signup to the partner wizard until it is submitted, then to the business home — never to pet-owner onboarding", () => {
+    const inProgress = { status: "IN_PROGRESS", chapter: "ACCOUNT", signupIntent: "PARTNER", partnerStage: "IN_PROGRESS" };
+    expect(resolvePostAuthDestination("fa", null, inProgress)).toBe("/fa/partners/join");
+    expect(resolvePostAuthDestination("fa", "https://evil.example", inProgress)).toBe("/fa/partners/join");
+    expect(resolvePostAuthDestination("fa", null, { ...inProgress, partnerStage: "SUBMITTED" })).toBe("/fa/business");
+    // Anyone signing in on the way into the partner area continues there, not into the pet-owner onboarding.
+    expect(resolvePostAuthDestination("en", "/en/partners/join", { status: "IN_PROGRESS", chapter: "ACCOUNT" })).toBe("/en/partners/join");
+  });
+
+  it("keeps the pet-owner home for a pet owner who is also a partner", () => {
+    expect(resolvePostAuthDestination("en", null, { status: "COMPLETED", chapter: "READY" }, { business: { hasBusiness: true, hasHousehold: true } })).toBe("/en/home");
+    expect(resolvePostAuthDestination("en", null, { status: "COMPLETED", chapter: "READY" }, { business: null })).toBe("/en/home");
+  });
+
   it("never puts pet-owner onboarding between someone and the console they were sent back to", () => {
     const incomplete = { status: "IN_PROGRESS", chapter: "WELCOME" };
     expect(resolvePostAuthDestination("fa", "/fa/admin/tasks", incomplete)).toBe("/fa/admin/tasks");

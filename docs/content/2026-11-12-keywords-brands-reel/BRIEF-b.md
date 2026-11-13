@@ -85,3 +85,11 @@ This file only lists what is **different** for batch B, plus one row per article
 - Per brand, 70–130 words (Persian), neutral facts only: country of origin, owner/parent company if well known, what it is known for (e.g. breed/size-specific lines, veterinary diets, retractable leads, chew toys), and one line "In Iran: …" (fa only; other languages skip Iran availability or keep one short sentence in a final note). No logos, no ratings, no "best", no health claims (no "prevents kidney disease"), no prices, no claims of partnership.
 - Brand list and Iran-availability notes are in the agent prompt you received (QA may refine it). Only state facts you are confident about; if unsure of a founding year or owner, leave it out.
 - Targets: shop, food category, accessories category. Article links: best-dry-cat-food, best-dry-dog-food, online-pet-shop-guide, cat-litter-types.
+
+## Arabic (ar) and Dutch (nl) versions — added 2026-11-12
+- The owner decided Arabic and Dutch go live before launch. Every batch-B article gets `ar.md` and `nl.md`, using the slugs and focus keywords from `plan-b.json`.
+- **Source:** localize from the article's `en.md`, and use `fa.md` where it helps. Keep the same structure (summary, sections, warning, FAQ, scenes, VIDEO/INFOGRAPHIC markers) and the same facts. Write natively for that language's readers; don't translate literally.
+- **Arabic:** Modern Standard Arabic, clear and warm, written for readers across the Arab world. Use Western digits (0–9), as the site's Arabic UI does. Keep the brand name in Latin as "opetlife". Don't name Iranian businesses. Don't add Iran-specific claims, except in 31 (brands) and 32 (hub), where you follow the en version: the en brand guide leaves Iran availability out, and the hub's data source is "Google Trends, Iran".
+- **Dutch:** Dutch from the Netherlands, addressing the reader with "je/jij". Use metric units.
+- **Links:** ar/nl articles must link only to (a) batch-B articles in the same language, using the plan-b `ar`/`nl` slugs, or (b) site sections `/{ar|nl}/...` from the article's `targets`. The 20 older articles have no ar/nl versions, so drop or replace links to them. Keep 2–3 target links and 3–5 article links.
+- Medical-safety, honesty, no-prices and no-brands rules are the same as above.

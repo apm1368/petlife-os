@@ -25,6 +25,23 @@ export class SellerCatalogReviewService {
     }));
   }
 
+  /** Decided requests, newest decision first: what was asked, by which shop, the outcome, who decided and why. */
+  async listDecided() {
+    const rows = await this.prisma.catalogProductRequest.findMany({
+      where: { status: { not: CatalogProductRequestStatus.PENDING_REVIEW } },
+      orderBy: [{ reviewedAt: "desc" }, { id: "asc" }],
+      take: PAGE_LIMIT,
+      include: {
+        sellerOrganization: { select: { id: true, name: true } },
+        requestedByUser: { select: { id: true, displayName: true } },
+        category: { select: { id: true, name: true } },
+        resolvedProduct: { select: { id: true, title: true } },
+        reviewedByAdmin: { select: { user: { select: { displayName: true } } } },
+      },
+    });
+    return rows.map(({ reviewedByAdmin, ...row }) => ({ ...row, reviewedByName: reviewedByAdmin?.user.displayName ?? null, duplicateCandidates: [] as Array<{ id: string; title: string; slug: string; status: string; brand: { name: string } | null }> }));
+  }
+
   async matchExisting(admin: ResolvedAdminContext, requestId: string, productId: string, reason: string, requestIdHeader?: string) {
     const request = await this.pendingRequest(requestId);
     const candidates = await this.findDuplicateCandidates(request.requestedTitle);

@@ -1,5 +1,6 @@
 import type {
   AdminCommerceAnalyticsDto,
+  AdminProductDetailDto,
   AdminCommerceOrderDetailDto,
   AdminCommerceOrderRowDto,
   AdminInventoryRowDto,
@@ -63,7 +64,8 @@ export const adminCommerceService = {
     targetCategory: { id: string; name: string };
     items: Array<{ id: string; sourceItemId: string; sourceUrl: string; sourceSnapshot: { title?: string; brandName?: string | null }; pendingSnapshot?: { title?: string; brandName?: string | null } | null; status: string; errorCode: string | null; errorDetail: string | null; product: { id: string; title: string; status: string } | null }>;
   }>>("/admin/commerce/catalog-imports"),
-  listCatalogProductRequests: () => apiFetch<Array<{ id: string; requestedTitle: string; brandName: string | null; description: string | null; specifications: unknown; sourceUrl: string | null; sourceName: string | null; status: string; decisionReason: string | null; sellerOrganization: { id: string; name: string }; requestedByUser: { id: string; displayName: string | null }; category: { id: string; name: string } | null; duplicateCandidates: Array<{ id: string; title: string; slug: string; status: string; brand: { name: string } | null }> }>>("/admin/commerce/catalog-product-requests"),
+  getProduct: (id: string) => apiFetch<AdminProductDetailDto>(`/admin/commerce/products/${id}`),
+  listCatalogProductRequests: (status: "PENDING" | "DECIDED" = "PENDING") => apiFetch<Array<{ id: string; requestedTitle: string; brandName: string | null; description: string | null; specifications: unknown; sourceUrl: string | null; sourceName: string | null; status: string; decisionReason: string | null; sellerOrganization: { id: string; name: string }; requestedByUser: { id: string; displayName: string | null }; category: { id: string; name: string } | null; duplicateCandidates: Array<{ id: string; title: string; slug: string; status: string; brand: { name: string } | null }>; reviewedAt?: string | null; reviewedByName?: string | null; resolvedProduct?: { id: string; title: string } | null }>>(`/admin/commerce/catalog-product-requests${status === "DECIDED" ? "?status=DECIDED" : ""}`),
   matchCatalogProductRequest: (id: string, productId: string, reason: string) => apiFetch<unknown>(`/admin/commerce/catalog-product-requests/${id}/match`, { method: "POST", body: { productId, reason } }),
   approveCatalogProductRequest: (id: string, categoryId: string, reason: string, reviewedDuplicateProductIds: string[]) => apiFetch<unknown>(`/admin/commerce/catalog-product-requests/${id}/approve`, { method: "POST", body: { categoryId, reason, reviewedDuplicateProductIds } }),
   rejectCatalogProductRequest: (id: string, reason: string) => apiFetch<unknown>(`/admin/commerce/catalog-product-requests/${id}/reject`, { method: "POST", body: { reason } }),

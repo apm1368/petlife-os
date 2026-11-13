@@ -15,8 +15,8 @@ const CHROME = "/root/.cache/ms-playwright/chromium-1140/chrome-linux/chrome";
 const FONT_DIR = path.join(__dirname, "fonts");
 const BRAND = "/root/opetlife-brand-kit/svg";
 const FPS = 24;
-const RTL = new Set(["fa"]);
-const DIGITS = { fa: (n) => new Intl.NumberFormat("fa-IR").format(n), en: String, de: String, es: String };
+const RTL = new Set(["fa", "ar"]);
+const DIGITS = { fa: (n) => new Intl.NumberFormat("fa-IR").format(n), en: String, de: String, es: String, ar: String, nl: String };
 const DOMAIN = "opetlife.ir";
 
 function loadArticle(id, locale) {
@@ -212,7 +212,7 @@ async function renderVideo(browser, id, locale, a, file, posterFile) {
   const frames = Math.round(tl.duration * FPS);
   const posterAt = Math.round((tl.intro + tl.tip * 0.6) * FPS);
   const chunks = await recordFrames(pg, {
-    width: 1280, height: 720, fps: FPS, frames, bitrate: 500_000,
+    width: 1280, height: 720, fps: FPS, frames, bitrate: 500_000, latencyMode: "realtime",
     drawFrame: (f) => pg.evaluate((t) => window.frame(t), f / FPS),
     onFrame: async (f) => { if (f === posterAt && posterFile) await writeWebp(pg, await pg.screenshot({ type: "png" }), posterFile, 0.82); },
   });

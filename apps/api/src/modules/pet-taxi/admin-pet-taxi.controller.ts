@@ -21,7 +21,8 @@ class FareRuleDto {
   @IsInt() @Min(0) @Max(IRR) minimumFareIrr!: number;
   @IsInt() @Min(0) @Max(300) mediumSurchargePercent!: number;
   @IsInt() @Min(0) @Max(300) largeSurchargePercent!: number;
-  @IsInt() @Min(0) @Max(IRR) extraPetIrr!: number;
+  /** Retired (one price per ride, X-08): accepted for older clients, always stored as 0. */
+  @IsOptional() @IsInt() @Min(0) @Max(IRR) extraPetIrr?: number;
   @IsBoolean() active!: boolean;
   /** The city's bounding box; required for every rule except "*". */
   @IsOptional() @IsLatitude() south?: number;
@@ -77,7 +78,7 @@ export class AdminPetTaxiController {
     // A city rule applies where its box is; "*" covers everything else and has no box.
     const box = { south: south ?? null, west: west ?? null, north: north ?? null, east: east ?? null };
     if (city !== "*" && !validCityBox(box)) throw new ValidationApiException({ field: "bbox", reason: "CITY_BOX_REQUIRED" });
-    const data = { ...rest, ...(city === "*" ? { south: null, west: null, north: null, east: null } : box) };
+    const data = { ...rest, extraPetIrr: 0, ...(city === "*" ? { south: null, west: null, north: null, east: null } : box) };
     await this.prisma.$transaction(async (tx) => {
       const before = await tx.petTaxiFareRule.findUnique({ where: { city } });
       const after = await tx.petTaxiFareRule.upsert({ where: { city }, create: { city, ...data, updatedByAdminId: admin.adminUserId }, update: { ...data, updatedByAdminId: admin.adminUserId } });

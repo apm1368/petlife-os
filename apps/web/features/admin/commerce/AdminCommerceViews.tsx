@@ -1035,10 +1035,13 @@ export function AdminProductsView() {
                     data.items.map((p) => (
                       <tr key={p.id}>
                         <Td>
-                          <Link className="text-brand-natural" href={`/${lang}/shop/products/${p.id}`}>
+                          <Link className="text-brand-natural" href={`/${lang}/admin/commerce/products/${p.id}`}>
                             {p.title}
                           </Link>
                           <DemoRecordTag isDemoRecord={p.isDemoRecord} />
+                          <Link className="block text-metadata text-text-secondary underline" href={`/${lang}/shop/products/${p.id}`}>
+                            {tr("صفحهٔ عمومی", "Public page")}
+                          </Link>
                           {p.brandName ? (
                             <span className="block text-metadata text-text-secondary">{p.brandName}</span>
                           ) : null}

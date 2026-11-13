@@ -11,6 +11,7 @@ import { UpdatePetDto } from "./dto/update-pet.dto";
 import { PetsService } from "./pets.service";
 import { StorageService } from "../storage/storage.service";
 import { PetOverviewService } from "./pet-overview.service";
+import { Throttle } from "@nestjs/throttler";
 
 class CreateUploadUrlDto {
   @IsIn(["image/jpeg", "image/png", "image/webp"])
@@ -64,6 +65,8 @@ export class PetsController {
 
   @Post(":id/photo-upload-url")
   @RequirePetAccess("canEditIdentity")
+  // Each target allows a 50 MB upload (owner, 2026-11-13); a person changing a photo needs a handful, not hundreds.
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   createPhotoUploadUrl(@Param("id") id: string, @Body() dto: CreateUploadUrlDto) {
     return this.storageService.createPetPhotoUploadTarget(id, dto.contentType);
   }

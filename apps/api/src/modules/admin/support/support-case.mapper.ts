@@ -1,10 +1,16 @@
 import type { Prisma } from "@prisma/client";
 import { SupportCaseStatus } from "@prisma/client";
-import { UserFacingSupportCaseStatus, type SupportCaseDetailDto, type SupportCaseSummaryDto, type SupportCaseUserDetailDto, type SupportCaseUserSummaryDto, type SupportMessageDto } from "@petlife/types";
+import { UserFacingSupportCaseStatus, type SupportCaseDetailDto, type SupportCasePartnerDetailDto, type SupportCasePartnerSummaryDto, type SupportCaseRequesterOrgDto, type SupportCaseSummaryDto, type SupportCaseUserDetailDto, type SupportCaseUserSummaryDto, type SupportMessageDto } from "@petlife/types";
 
 export type SupportCaseWithRelations = Prisma.SupportCaseGetPayload<{ include: { assignedAdmin: { include: { user: true } }; requesterUser: true } }>;
 
-export function toSupportCaseSummaryDto(row: SupportCaseWithRelations): SupportCaseSummaryDto {
+/** `orgs` carries the business names for a page of cases (keyed `TYPE:id`); without it a partner case still says which business, just unnamed. */
+function requesterOrganization(row: SupportCaseWithRelations, orgs?: ReadonlyMap<string, SupportCaseRequesterOrgDto>): SupportCaseRequesterOrgDto | null {
+  if (!row.requesterOrgType || !row.requesterOrgId) return null;
+  return orgs?.get(`${row.requesterOrgType}:${row.requesterOrgId}`) ?? { type: row.requesterOrgType, id: row.requesterOrgId, name: null };
+}
+
+export function toSupportCaseSummaryDto(row: SupportCaseWithRelations, orgs?: ReadonlyMap<string, SupportCaseRequesterOrgDto>): SupportCaseSummaryDto {
   return {
     id: row.id,
     caseNumber: row.caseNumber,
@@ -25,6 +31,7 @@ export function toSupportCaseSummaryDto(row: SupportCaseWithRelations): SupportC
     firstAssignedAt: row.firstAssignedAt?.toISOString() ?? null,
     firstResponseAt: row.firstResponseAt?.toISOString() ?? null,
     reopenCount: row.reopenCount,
+    requesterOrganization: requesterOrganization(row, orgs),
   };
 }
 
@@ -46,9 +53,9 @@ export type SupportCaseDetailWithRelations = SupportCaseWithRelations & {
   createdByAdmin: Prisma.AdminUserGetPayload<{ include: { user: true } }> | null;
 };
 
-export function toSupportCaseDetailDto(row: SupportCaseDetailWithRelations, messages: SupportMessageDto[], internalNotes: SupportCaseDetailDto["internalNotes"]): SupportCaseDetailDto {
+export function toSupportCaseDetailDto(row: SupportCaseDetailWithRelations, messages: SupportMessageDto[], internalNotes: SupportCaseDetailDto["internalNotes"], orgs?: ReadonlyMap<string, SupportCaseRequesterOrgDto>): SupportCaseDetailDto {
   return {
-    ...toSupportCaseSummaryDto(row),
+    ...toSupportCaseSummaryDto(row, orgs),
     description: row.description,
     relatedEntityType: row.relatedEntityType,
     relatedEntityId: row.relatedEntityId,
@@ -115,4 +122,18 @@ export function toSupportCaseUserDetailDto(row: SupportCaseWithRelations & { des
     description: row.description,
     messages,
   };
+}
+
+/** The partner panel's view: the user-facing shape plus who on the team opened it. Built on the user mapper, so priority and assignee stay out. */
+export function toSupportCasePartnerSummaryDto(row: SupportCaseWithRelations, viewer: { userId: string; orgType: "PROVIDER" | "SELLER"; orgId: string; orgName: string }): SupportCasePartnerSummaryDto {
+  return {
+    ...toSupportCaseUserSummaryDto(row),
+    openedBy: { id: row.requesterUserId, displayName: row.requesterUser.displayName, isMe: row.requesterUserId === viewer.userId },
+    organization: { type: viewer.orgType, id: viewer.orgId, name: viewer.orgName },
+  };
+}
+
+/** Same rule as toSupportCaseUserDetailDto: `messages` must already be PUBLIC-only. */
+export function toSupportCasePartnerDetailDto(row: SupportCaseWithRelations & { description: string }, viewer: Parameters<typeof toSupportCasePartnerSummaryDto>[1], messages: SupportMessageDto[]): SupportCasePartnerDetailDto {
+  return { ...toSupportCasePartnerSummaryDto(row, viewer), description: row.description, messages };
 }

@@ -9,6 +9,7 @@ import { SlotGeneratorService } from "../providers/slot-generator.service";
 import { PetAccessService } from "../pet-access/pet-access.service";
 import { BookingsService } from "./bookings.service";
 import type { BookingHoldDto } from "@petlife/types";
+import { isPublicProvider } from "../../common/public-partner";
 
 const MAX_WINDOW_DAYS = 30;
 const MAX_ACTIVE_ENTRIES_PER_USER = 10;
@@ -130,8 +131,9 @@ export class WaitlistService {
   async join(userId: string, dto: JoinWaitlistDto): Promise<WaitlistEntryDto> {
     const pet = await this.prisma.pet.findUnique({ where: { id: dto.petId } });
     if (!pet) throw new NotFoundApiException("Pet");
-    const service = await this.prisma.providerService.findUnique({ where: { id: dto.serviceId }, include: { variants: true } });
-    if (!service || service.providerOrganizationId !== dto.providerId || !service.isActive) throw new NotFoundApiException("Service");
+    const service = await this.prisma.providerService.findUnique({ where: { id: dto.serviceId }, include: { variants: true, providerOrganization: { select: { verificationStatus: true, isDemoRecord: true } } } });
+    // A waitlist is a promise of a booking: the same public rule as booking itself.
+    if (!service || service.providerOrganizationId !== dto.providerId || !service.isActive || !isPublicProvider(service.providerOrganization)) throw new NotFoundApiException("Service");
     if (dto.variantId && !service.variants.some((v) => v.id === dto.variantId && v.isActive)) throw new NotFoundApiException("Service variant");
     const windowStart = new Date(dto.windowStart);
     const windowEnd = new Date(dto.windowEnd);

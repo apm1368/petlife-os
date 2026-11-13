@@ -5,6 +5,7 @@ import { PrismaService } from "../../../common/prisma/prisma.service";
 import { AddressRequiredException, NotFoundApiException, ServiceNotAvailableException } from "../../../common/errors/api-exception";
 import type { AppEnv } from "../../../config/env";
 import { computeTransportFare, straightLineMeters } from "./transport-fare.util";
+import { isPublicProvider } from "../../../common/public-partner";
 
 export interface TransportRouteSnapshot {
   pickupAddressText: string;
@@ -78,8 +79,8 @@ export class TransportRouteService {
 
   /** A pre-booking estimate for the member's own saved addresses. */
   async quote(userId: string, serviceId: string, pickupAddressId: string, dropoffAddressId: string) {
-    const service = await this.prisma.providerService.findUnique({ where: { id: serviceId } });
-    if (!service || !service.isActive) throw new NotFoundApiException("Service");
+    const service = await this.prisma.providerService.findUnique({ where: { id: serviceId }, include: { providerOrganization: { select: { verificationStatus: true, isDemoRecord: true } } } });
+    if (!service || !service.isActive || !isPublicProvider(service.providerOrganization)) throw new NotFoundApiException("Service");
     if (service.locationMode !== LocationMode.TRANSPORT) throw new ServiceNotAvailableException({ serviceId, reason: "NOT_A_TRANSPORT_SERVICE" });
     const address = await this.prisma.customerAddress.findUnique({ where: { id: pickupAddressId }, select: { householdId: true } });
     const member = address ? await this.prisma.householdMember.findFirst({ where: { householdId: address.householdId, userId } }) : null;

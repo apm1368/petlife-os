@@ -5,6 +5,7 @@ import { Avatar, Button, Camera, Input } from "@petlife/ui";
 import { NeuteredStatus, PetSex, WeightUnit, type PetDto } from "@petlife/types";
 import { petsService } from "@/services/pets.service";
 import { BirthDateField } from "@/features/shared/date-picker/BirthDateField";
+import { PET_PHOTO_MAX_BYTES, uploadPetPhoto } from "@/features/pets/pet-photo-upload";
 
 const COPY = {
   fa: {
@@ -13,8 +14,8 @@ const COPY = {
     choose: "انتخاب عکس",
     replace: "تغییر عکس",
     remove: "حذف عکس",
-    photoHint: "JPG، PNG یا WebP، حداکثر ۱۰ مگابایت.",
-    tooBig: "حجم عکس بیشتر از ۱۰ مگابایت است.",
+    photoHint: "JPG، PNG یا WebP، حداکثر ۵۰ مگابایت.",
+    tooBig: "حجم عکس بیشتر از ۵۰ مگابایت است.",
     name: "نام",
     sex: "جنسیت",
     sexes: { MALE: "نر", FEMALE: "ماده", UNKNOWN: "نمی‌دانم" },
@@ -37,8 +38,8 @@ const COPY = {
     choose: "Choose a photo",
     replace: "Replace photo",
     remove: "Remove photo",
-    photoHint: "JPG, PNG or WebP, up to 10 MB.",
-    tooBig: "The photo is larger than 10 MB.",
+    photoHint: "JPG, PNG or WebP, up to 50 MB.",
+    tooBig: "The photo is larger than 50 MB.",
     name: "Name",
     sex: "Sex",
     sexes: { MALE: "Male", FEMALE: "Female", UNKNOWN: "Not sure" },
@@ -56,10 +57,10 @@ const COPY = {
     photoFailed: "The photo didn't upload, so none of the changes were saved. Please try again.",
   },
   de: {
-    title: "Angaben bearbeiten", photo: "Foto", choose: "Foto auswählen", replace: "Foto ändern", remove: "Foto entfernen", photoHint: "JPG, PNG oder WebP, höchstens 10 MB.", tooBig: "Das Foto ist größer als 10 MB.", name: "Name", sex: "Geschlecht", sexes: { MALE: "Männlich", FEMALE: "Weiblich", UNKNOWN: "Nicht sicher" }, birth: "Geburtsdatum", breed: "Rasse", color: "Farbe und besondere Merkmale", weight: "Gewicht", units: { KG: "kg", LB: "lb" }, microchip: "Mikrochipnummer", neutered: "Kastrationsstatus", neuteredOptions: { NEUTERED: "Kastriert", INTACT: "Nicht kastriert", UNKNOWN: "Nicht bekannt" }, cancel: "Abbrechen", save: "Speichern", failed: "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.", photoFailed: "Das Foto konnte nicht hochgeladen werden; es wurden keine Änderungen gespeichert. Bitte versuchen Sie es erneut.",
+    title: "Angaben bearbeiten", photo: "Foto", choose: "Foto auswählen", replace: "Foto ändern", remove: "Foto entfernen", photoHint: "JPG, PNG oder WebP, höchstens 50 MB.", tooBig: "Das Foto ist größer als 50 MB.", name: "Name", sex: "Geschlecht", sexes: { MALE: "Männlich", FEMALE: "Weiblich", UNKNOWN: "Nicht sicher" }, birth: "Geburtsdatum", breed: "Rasse", color: "Farbe und besondere Merkmale", weight: "Gewicht", units: { KG: "kg", LB: "lb" }, microchip: "Mikrochipnummer", neutered: "Kastrationsstatus", neuteredOptions: { NEUTERED: "Kastriert", INTACT: "Nicht kastriert", UNKNOWN: "Nicht bekannt" }, cancel: "Abbrechen", save: "Speichern", failed: "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.", photoFailed: "Das Foto konnte nicht hochgeladen werden; es wurden keine Änderungen gespeichert. Bitte versuchen Sie es erneut.",
   },
   es: {
-    title: "Editar datos", photo: "Foto", choose: "Elegir una foto", replace: "Cambiar foto", remove: "Quitar foto", photoHint: "JPG, PNG o WebP, hasta 10 MB.", tooBig: "La foto supera los 10 MB.", name: "Nombre", sex: "Sexo", sexes: { MALE: "Macho", FEMALE: "Hembra", UNKNOWN: "No lo sé" }, birth: "Fecha de nacimiento", breed: "Raza", color: "Color y marcas", weight: "Peso", units: { KG: "kg", LB: "lb" }, microchip: "Número de microchip", neutered: "Esterilización", neuteredOptions: { NEUTERED: "Esterilizada", INTACT: "No esterilizada", UNKNOWN: "No lo sé" }, cancel: "Cancelar", save: "Guardar", failed: "No se pudo guardar. Inténtalo de nuevo.", photoFailed: "No se pudo subir la foto; no se guardó ningún cambio. Inténtalo de nuevo.",
+    title: "Editar datos", photo: "Foto", choose: "Elegir una foto", replace: "Cambiar foto", remove: "Quitar foto", photoHint: "JPG, PNG o WebP, hasta 50 MB.", tooBig: "La foto supera los 50 MB.", name: "Nombre", sex: "Sexo", sexes: { MALE: "Macho", FEMALE: "Hembra", UNKNOWN: "No lo sé" }, birth: "Fecha de nacimiento", breed: "Raza", color: "Color y marcas", weight: "Peso", units: { KG: "kg", LB: "lb" }, microchip: "Número de microchip", neutered: "Esterilización", neuteredOptions: { NEUTERED: "Esterilizada", INTACT: "No esterilizada", UNKNOWN: "No lo sé" }, cancel: "Cancelar", save: "Guardar", failed: "No se pudo guardar. Inténtalo de nuevo.", photoFailed: "No se pudo subir la foto; no se guardó ningún cambio. Inténtalo de nuevo.",
   },
   ar: {
     title: "تعديل البيانات", photo: "الصورة", choose: "اختر صورة", replace: "استبدال الصورة", remove: "إزالة الصورة", photoHint: "JPG أو PNG أو WebP، حتى 10 ميغابايت.", tooBig: "حجم الصورة أكبر من 10 ميغابايت.", name: "الاسم", sex: "الجنس", sexes: { MALE: "ذكر", FEMALE: "أنثى", UNKNOWN: "غير متأكد" }, birth: "تاريخ الميلاد", breed: "السلالة", color: "اللون والعلامات", weight: "الوزن", units: { KG: "كغ", LB: "رطل" }, microchip: "رقم الشريحة الإلكترونية", neutered: "التعقيم", neuteredOptions: { NEUTERED: "معقّم", INTACT: "غير معقّم", UNKNOWN: "غير متأكد" }, cancel: "إلغاء", save: "حفظ", failed: "تعذّر الحفظ. حاول مرة أخرى.", photoFailed: "لم تُرفع الصورة، لذا لم يُحفظ أي من التغييرات. حاول مرة أخرى.",
@@ -104,11 +105,7 @@ export function EditPetIdentity({ pet, locale, onCancel, onSaved }: { pet: PetDt
     try {
       let nextPhotoUrl: string | null | undefined;
       if (photo) {
-        const contentType = photo.type === "image/png" || photo.type === "image/webp" ? photo.type : "image/jpeg";
-        const target = await petsService.createPhotoUploadUrl(pet.id, contentType);
-        const put = await fetch(target.uploadUrl, { method: "PUT", body: photo, headers: target.headers });
-        if (!put.ok) throw new Error(String(put.status));
-        nextPhotoUrl = target.publicUrl;
+        nextPhotoUrl = await uploadPetPhoto(pet.id, photo);
       } else if (removePhoto) {
         nextPhotoUrl = null;
       }
@@ -145,7 +142,7 @@ export function EditPetIdentity({ pet, locale, onCancel, onSaved }: { pet: PetDt
                 const file = e.target.files?.[0];
                 e.target.value = "";
                 if (!file) return;
-                if (file.size > 10 * 1024 * 1024) return setMessage(c.tooBig);
+                if (file.size > PET_PHOTO_MAX_BYTES) return setMessage(c.tooBig);
                 setPhoto(file);
                 setRemovePhoto(false);
                 setPreview(URL.createObjectURL(file));

@@ -20,7 +20,7 @@ window.__enc = {
   },
   video: null,
   async startVideo(cfg) {
-    const mk = (c) => { const st = { chunks: [], error: null, w: c.width, h: c.height }; st.enc = new VideoEncoder({ output: (chunk) => { const d = new Uint8Array(chunk.byteLength); chunk.copyTo(d); st.chunks.push({ ts: chunk.timestamp, key: chunk.type === 'key', d }); }, error: (e) => { st.error = String(e); } }); st.enc.configure({ codec: c.codec, width: c.width, height: c.height, bitrate: c.bitrate, framerate: cfg.fps, latencyMode: 'quality', bitrateMode: 'variable' }); return st; };
+    const mk = (c) => { const st = { chunks: [], error: null, w: c.width, h: c.height }; st.enc = new VideoEncoder({ output: (chunk) => { const d = new Uint8Array(chunk.byteLength); chunk.copyTo(d); st.chunks.push({ ts: chunk.timestamp, key: chunk.type === 'key', d }); }, error: (e) => { st.error = String(e); } }); st.enc.configure({ codec: c.codec, width: c.width, height: c.height, bitrate: c.bitrate, framerate: cfg.fps, latencyMode: cfg.latencyMode || 'quality', bitrateMode: 'variable' }); return st; };
     this.video = { n: 0, fps: cfg.fps, gop: cfg.gop, outs: [mk(cfg), ...(cfg.extra || []).map((e) => mk({ ...e, codec: e.codec || cfg.codec }))] };
     return true;
   },
@@ -91,10 +91,10 @@ async function writeWebp(page, png, file, quality = 0.84) {
  * Records `frames` frames of the page: for each, calls drawFrame(f) (which must update the page), takes a CDP JPEG
  * screenshot and feeds it to VP9. Returns the encoded chunks; pass them to writeWebm.
  */
-async function recordFrames(page, { width, height, fps, frames, bitrate, codec, gop, extra, onFrame, drawFrame }) {
+async function recordFrames(page, { width, height, fps, frames, bitrate, codec, gop, extra, latencyMode, onFrame, drawFrame }) {
   if (!(await page.evaluate(() => !!window.__enc))) await install(page);
   const pick = (w, h) => (w * h > 1280 * 720 ? "vp09.00.40.08" : "vp09.00.31.08");
-  await page.evaluate((cfg) => window.__enc.startVideo(cfg), { codec: codec || pick(width, height), width, height, bitrate, fps, gop: gop || fps * 2, extra: (extra || []).map((e) => ({ ...e, codec: pick(e.width, e.height) })) });
+  await page.evaluate((cfg) => window.__enc.startVideo(cfg), { codec: codec || pick(width, height), width, height, bitrate, fps, latencyMode, gop: gop || fps * 2, extra: (extra || []).map((e) => ({ ...e, codec: pick(e.width, e.height) })) });
   const cdp = await page.context().newCDPSession(page);
   const outs = [[], ...(extra || []).map(() => [])];
   const take = (lists) => lists.forEach((arr, i) => { for (const c of arr) outs[i].push({ ts: c.ts, key: c.key, data: Buffer.from(c.b64, "base64") }); });

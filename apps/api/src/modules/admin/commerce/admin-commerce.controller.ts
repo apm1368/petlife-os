@@ -134,6 +134,7 @@ class ReasonDto {
 
 class CatalogImportSnapshotDecisionDto extends ReasonDto {}
 class CatalogRequestMatchDto extends ReasonDto { @IsUUID() productId!: string; }
+class CatalogRequestListQueryDto { @IsOptional() @IsIn(["PENDING", "DECIDED"]) status?: "PENDING" | "DECIDED"; }
 class CatalogRequestApproveDto extends ReasonDto { @IsUUID() categoryId!: string; @IsArray() @ArrayMaxSize(50) @IsUUID("all", { each: true }) reviewedDuplicateProductIds!: string[]; }
 
 class SellerOfferModerationDecisionDto extends ReasonDto {
@@ -290,6 +291,12 @@ export class AdminCommerceController {
     return this.commerce.listProducts(query);
   }
 
+  @Get("products/:id")
+  @RequireAdminPermission("commerce.view")
+  productDetail(@Param("id", ParseUUIDPipe) id: string) {
+    return this.commerce.productDetail(id);
+  }
+
   @Get("product-categories")
   @RequireAdminPermission("commerce.view")
   listProductCategories() {
@@ -310,8 +317,8 @@ export class AdminCommerceController {
 
   @Get("catalog-product-requests")
   @RequireAdminPermission("commerce.view")
-  listCatalogProductRequests() {
-    return this.sellerCatalogRequests.listPending();
+  listCatalogProductRequests(@Query() query: CatalogRequestListQueryDto) {
+    return query.status === "DECIDED" ? this.sellerCatalogRequests.listDecided() : this.sellerCatalogRequests.listPending();
   }
 
   @Post("catalog-product-requests/:id/match")

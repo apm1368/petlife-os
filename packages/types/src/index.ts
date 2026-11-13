@@ -2895,6 +2895,8 @@ export interface SupportCaseSummaryDto {
   firstAssignedAt?: string | null;
   firstResponseAt?: string | null;
   reopenCount?: number;
+  /** Set when a partner opened the case from their business panel; admin support lists these under Partners. */
+  requesterOrganization?: SupportCaseRequesterOrgDto | null;
 }
 
 export interface SupportCaseDetailDto extends SupportCaseSummaryDto {
@@ -2966,6 +2968,35 @@ export interface SupportCaseUserSummaryDto {
 }
 
 export interface SupportCaseUserDetailDto extends SupportCaseUserSummaryDto {
+  description: string;
+  messages: SupportMessageDto[];
+}
+
+/** The business (provider or shop) a partner case was opened for. */
+export interface SupportCaseRequesterOrgDto {
+  type: "PROVIDER" | "SELLER";
+  id: string;
+  name: string | null;
+}
+
+/**
+ * Categories a partner can pick in their business panel. PROVIDER / SELLER
+ * is the general "about my business" topic; the rest are the money and
+ * order questions partners actually raise.
+ */
+export const PARTNER_SUPPORT_CATEGORIES = ["PROVIDER", "SELLER", "ACCOUNT", "PAYMENT", "BOOKING", "ORDER", "DELIVERY", "SERVICE", "MARKETPLACE", "OTHER"] as const;
+export type PartnerSupportCategory = (typeof PARTNER_SUPPORT_CATEGORIES)[number];
+
+/**
+ * A case seen from a partner panel. Same user-facing status as the personal
+ * support centre (no priority, no assignee), plus who on the team opened it.
+ */
+export interface SupportCasePartnerSummaryDto extends SupportCaseUserSummaryDto {
+  openedBy: { id: string; displayName: string; isMe: boolean };
+  organization: SupportCaseRequesterOrgDto;
+}
+
+export interface SupportCasePartnerDetailDto extends SupportCasePartnerSummaryDto {
   description: string;
   messages: SupportMessageDto[];
 }
@@ -6628,6 +6659,157 @@ export interface AdminProductRowDto {
   createdAt: string;
 }
 
+/** A business on the other side of a partner link (one owner, a service business and a shop). */
+export interface AdminPartnerLinkDto {
+  id: string;
+  name: string;
+  verificationStatus: string;
+  /** Shop operating status; null for a service business. */
+  status: string | null;
+}
+
+/** KYC as staff see it in a partner profile: the case status and every document (never the file itself; opening one goes through the audited verification screen). */
+export interface AdminPartnerKycDto {
+  status: string;
+  submittedAt: string | null;
+  note: string | null;
+  contact: { firstName: string; lastName: string; mobile: string; landline: string; websiteUrl: string | null; enamadId: string | null } | null;
+  documents: Array<{ id: string; kind: string; status: string; reviewNote: string | null; expiresAt: string | null; uploadedAt: string; reviewedAt: string | null }>;
+}
+
+export interface AdminPartnerServiceRowDto {
+  id: string;
+  name: string;
+  logoUrl: string | null;
+  type: string;
+  /** Every kind offered (vet, groomer, boarding, sitter, trainer, taxi…); the first is `type`. */
+  serviceKinds: string[];
+  phone: string | null;
+  city: string | null;
+  province: string | null;
+  verificationStatus: string;
+  submittedAt: string | null;
+  isDemoRecord: boolean;
+  activeServices: number;
+  inactiveServices: number;
+  pendingDocuments: number;
+  linkedShop: AdminPartnerLinkDto | null;
+  createdAt: string;
+}
+
+export interface AdminPartnerShopRowDto {
+  id: string;
+  name: string;
+  logoUrl: string | null;
+  phone: string | null;
+  city: string | null;
+  province: string | null;
+  status: string;
+  verificationStatus: string;
+  submittedAt: string | null;
+  activeOffers: number;
+  pendingOffers: number;
+  pendingDocuments: number;
+  linkedService: (AdminPartnerLinkDto & { type: string }) | null;
+  createdAt: string;
+}
+
+export interface AdminPartnerServiceDetailDto {
+  id: string;
+  name: string;
+  logoUrl: string | null;
+  type: string;
+  serviceKinds: string[];
+  phone: string | null;
+  email: string | null;
+  websiteUrl: string | null;
+  description: string | null;
+  isDemoRecord: boolean;
+  createdAt: string;
+  kyc: AdminPartnerKycDto;
+  locations: Array<{ id: string; name: string | null; addressLine: string; city: string; province: string | null; latitude: number | null; longitude: number | null; phone: string | null; timezone: string }>;
+  services: Array<{
+    id: string;
+    name: string;
+    category: string;
+    type: string;
+    locationMode: string;
+    isActive: boolean;
+    durationMinutes: number;
+    priceAmount: number | null;
+    currency: string | null;
+    maxPetsPerBooking: number;
+    supportsDog: boolean;
+    supportsCat: boolean;
+    variants: Array<{ id: string; name: string; priceAmount: number | null; durationMinutes: number; isActive: boolean }>;
+    transportPricing: { baseFareIrr: number; perKmRateIrr: number; isActive: boolean } | null;
+  }>;
+  /** Weekly opening rules (0 = Sunday … 6 = Saturday) and the closures/extra openings of the next 60 days. */
+  calendar: {
+    rules: Array<{ id: string; dayOfWeek: number; start: string; end: string; timezone: string; locationName: string | null; staffName: string | null; serviceName: string | null }>;
+    exceptions: Array<{ id: string; startAt: string; endAt: string; type: string; reason: string | null; staffName: string | null }>;
+  };
+  team: Array<{ id: string; role: string; displayName: string; displayTitle: string | null }>;
+  linkedShop: AdminPartnerLinkDto | null;
+}
+
+export interface AdminPartnerShopDetailDto {
+  id: string;
+  name: string;
+  slug: string | null;
+  logoUrl: string | null;
+  description: string | null;
+  phone: string | null;
+  email: string | null;
+  status: string;
+  createdAt: string;
+  address: { province: string | null; city: string | null; addressLine: string | null; postalCode: string | null; latitude: number | null; longitude: number | null };
+  /** Display-only opening hours from signup (0 = Sunday … 6 = Saturday); empty when the shop has not set them. */
+  openingHours: Array<{ dayOfWeek: number; open: string; close: string }>;
+  kyc: AdminPartnerKycDto;
+  offers: {
+    counts: Record<string, number>;
+    pendingReview: number;
+    items: Array<{ id: string; productId: string; productTitle: string; productStatus: string; variantSku: string; variantTitle: string | null; priceAmount: number; currency: string; status: string; moderationStatus: string; available: number | null; updatedAt: string }>;
+  };
+  pendingCatalogRequests: number;
+  team: Array<{ id: string; role: string; displayName: string }>;
+  linkedService: (AdminPartnerLinkDto & { type: string; serviceKinds: string[] }) | null;
+}
+
+/** One seller's offer on a product variant, as staff see it: who sells it, at what price, how much is in stock, and whether it is live. */
+export interface AdminProductOfferDto {
+  id: string;
+  variantId: string;
+  variantSku: string;
+  variantTitle: string | null;
+  seller: { id: string; name: string; status: string; verificationStatus: string };
+  status: string;
+  moderationStatus: string;
+  moderationReason: string | null;
+  priceAmount: number;
+  compareAtAmount: number | null;
+  currency: string;
+  sellerSku: string | null;
+  /** null when the offer has no inventory row yet. available = onHand - reserved, never below zero. */
+  stock: { onHand: number; reserved: number; available: number } | null;
+  /** True when a customer can buy it right now: offer active and approved, seller verified and active, stock available. */
+  buyable: boolean;
+  updatedAt: string;
+}
+
+export interface AdminProductDetailDto extends AdminProductRowDto {
+  slug: string;
+  category: { id: string; name: string };
+  brand: { id: string; name: string } | null;
+  variants: Array<{ id: string; sku: string; title: string | null; isActive: boolean }>;
+  offers: AdminProductOfferDto[];
+  /** The seller request this product came from (approved as new or matched to it), newest first. */
+  catalogRequests: Array<{ id: string; status: string; sellerName: string; requestedTitle: string; reviewedAt: string | null; decisionReason: string | null }>;
+  /** Lowest live price across buyable offers, or null when nobody can sell it now. */
+  lowestBuyablePrice: number | null;
+}
+
 export interface AdminProductReviewRowDto {
   id: string;
   productId: string;
@@ -7531,4 +7713,70 @@ export interface AdminPet360Dto {
   sharing: { activeShareCards: number; activeHealthShares: number };
   activity: { id: string; type: string; at: string; changedFields?: string[]; photoChanged?: boolean }[];
   diagnostics: { code: AdminPetDiagnosticCode; severity: "WARNING" | "INFO"; entityId?: string; detail?: Record<string, unknown> }[];
+}
+
+/** A catalog product as a shop sees it when listing (any active product, offered or not). */
+export interface SellerCatalogDirectoryItemDto {
+  productId: string;
+  title: string;
+  brandName: string | null;
+  categoryName: string;
+  imageUrl: string | null;
+  variants: { id: string; title: string | null; sku: string; weight: string | null; myOffer: { id: string; status: string } | null }[];
+}
+
+// ---------------------------------------------------------------------------
+// Partner business home (GET /business/memberships, /business/overview)
+// ---------------------------------------------------------------------------
+
+export interface BusinessServiceMembershipDto {
+  providerOrganizationId: string;
+  name: string;
+  type: ProviderType;
+  role: ProviderUserRole;
+  verificationStatus: ProviderVerificationStatus;
+}
+
+export interface BusinessShopMembershipDto {
+  sellerOrganizationId: string;
+  name: string;
+  role: SellerMembershipRole;
+  verificationStatus: SellerVerificationStatus;
+  sellerStatus: SellerStatus;
+}
+
+/** Every business the signed-in user belongs to; `hasHousehold` says whether they also use opetlife as a pet owner. */
+export interface BusinessMembershipsDto {
+  services: BusinessServiceMembershipDto[];
+  shops: BusinessShopMembershipDto[];
+  hasHousehold: boolean;
+}
+
+export interface BusinessReviewSnippetDto {
+  id: string;
+  rating: number;
+  body: string | null;
+  /** The product a shop review is about; null for a service review. */
+  productTitle: string | null;
+  createdAt: string;
+}
+
+export interface BusinessServiceCardDto extends BusinessServiceMembershipDto {
+  counts: { today: number; upcoming: number; pendingConfirmation: number };
+  nextBookings: { id: string; startAt: string; status: string; serviceName: string; petName: string | null }[];
+  services: { total: number; active: number; items: { id: string; name: string; durationMinutes: number; priceAmount: number | null; currency: string | null; isActive: boolean }[] };
+  reviews: { average: number | null; count: number; latest: BusinessReviewSnippetDto[] };
+}
+
+export interface BusinessShopCardDto extends BusinessShopMembershipDto {
+  counts: { ordersToPrepare: number; lowStockOffers: number; offersPendingModeration: number; activeOffers: number };
+  reviews: { average: number | null; count: number; latest: BusinessReviewSnippetDto[] };
+  /** Settlement balance in rials, only for roles that see money in the seller panel (owner, admin, finance). */
+  balance: { pendingIrr: number; availableIrr: number; paidIrr: number } | null;
+}
+
+export interface BusinessOverviewDto {
+  services: BusinessServiceCardDto[];
+  shops: BusinessShopCardDto[];
+  hasHousehold: boolean;
 }

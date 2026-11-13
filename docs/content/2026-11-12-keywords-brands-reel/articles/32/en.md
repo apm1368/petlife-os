@@ -24,45 +24,45 @@ opetlife is a Persian-first platform based in Iran, so we compared ten Persian s
 
 No business, brand or shop paid to appear here, and no position can be bought. We only compared searches about services and shopping; health topics have their own guides. The headings use the English equivalent of each Persian term, and the tips work wherever you live.
 
-## 10. Pet taxi: does a cat really need a carrier?
+## No. 10 – Pet taxi: does a cat really need a carrier?
 
 People look for a pet taxi when they don't drive or don't want to handle a nervous animal in traffic on the way to the vet, groomer or boarding place. The rule here is simple: cats travel in a carrier every single time, even for a five-minute ride, because a loose cat can slip under the pedals or bolt through an open door. Our [pet taxi guide](/en/blog/pet-taxi-guide) covers what to ask before booking and how to get a cat used to the carrier; browse [pet taxi services on opetlife](/en/services/PET_TAXI).
 
-## 9. Dog grooming: should you shave a double coat in summer?
+## No. 9 – Dog grooming: should you shave a double coat in summer?
 
 When it heats up, many owners book a groomer hoping a short cut will keep their dog cool. If your dog has a double coat, like a Husky, German Shepherd or Golden Retriever, don't shave it: that coat helps regulate body temperature and shields the skin from the sun, so brush out the dead undercoat instead. Our [dog grooming guide](/en/blog/dog-grooming-guide) explains what a good groomer does and how often each coat needs a visit; see also [grooming services on opetlife](/en/services/GROOMING).
 
-## 8. Dog trainer: how do you spot a good one?
+## No. 8 – Dog trainer: how do you spot a good one?
 
 Pulling on the leash, nonstop barking, nipping or accidents indoors send many owners looking for a dog trainer. The one thing to check: good trainers reward the behavior they want and never punish, so walk away from anyone who talks about choke, prong or shock collars, hitting, or "showing the dog who's boss". Our guide on [how to choose a dog trainer](/en/blog/choose-dog-trainer) lists the questions to ask before you pay; browse [dog training services on opetlife](/en/services/TRAINING).
 
-## 7. Dog boarding: what should you check before you book?
+## No. 7 – Dog boarding: what should you check before you book?
 
 Holidays and work trips are the usual reasons people search for dog boarding. Visit the place before you book and see with your own eyes whether it's clean, cool and well ventilated, whether dogs and cats are kept apart, whether someone is there at night and whether every guest must show vaccination records; photos online don't tell you any of that. The [dog and cat boarding guide](/en/blog/pet-boarding-guide) has the full visit checklist and packing list, and you can [compare boarding providers on opetlife](/en/services/BOARDING).
 
-## 6. Dry dog food: which food suits your dog?
+## No. 6 – Dry dog food: which food suits your dog?
 
 "What's the best dry dog food?" has no single answer. Match the food to your dog's age, size and activity: puppies, adults and seniors need different things, large-breed puppies need a food made for their growth, and a laid-back apartment dog burns less energy than one that runs all day. Our [dry dog food guide](/en/blog/best-dry-dog-food) explains how to read the label, portion meals and switch foods gradually; if you're curious about the big names, read our [neutral guide to 10 well-known pet food and gear brands](/en/blog/top-pet-food-and-gear-brands). You can also browse [dog food in the opetlife shop](/en/shop/products?category=food&species=DOG).
 
 [[INFOGRAPHIC]]
 
-## 5. Pet insurance: what should you read before you sign?
+## No. 5 – Pet insurance: what should you read before you sign?
 
 An unexpected operation can cost a lot, which is why pet insurance keeps showing up in searches. Before you sign any policy, read the exclusions carefully: pre-existing conditions, routine vaccines and check-ups, and waiting periods are usually listed there, and knowing them up front saves you nasty surprises later. Our [pet insurance guide](/en/blog/pet-insurance-guide) explains how policies are built and gives you a comparison checklist, and you can [see insurance options side by side on opetlife](/en/insurance/compare).
 
-## 4. 24-hour vet: why save the number today?
+## No. 4 – 24-hour vet: why save the number today?
 
 This search usually happens at the worst moment: at night, with a pet who isn't well. So do this one today: find the 24-hour vet nearest to your home and save the number and address in your phone. If you're ever unsure whether something is an emergency, call a vet. Our [24-hour emergency vet guide](/en/blog/24-hour-vet-guide) covers the signs that can't wait until morning and what to take with you, and in the [opetlife vet finder](/en/vet/find) you can search clinics by city and see their opening hours.
 
-## 3. Dry cat food: why does fresh water matter so much?
+## No. 3 – Dry cat food: why does fresh water matter so much?
 
 Dry cat food is third on the list, often followed by questions about portions or food for neutered cats. If your cat eats dry food, keep fresh, clean water within reach at all times: cats naturally drink little and dry food contains very little moisture, so a few water bowls in different spots can encourage your cat to drink more. Read how to choose by age, neutering and weight in our [dry cat food guide](/en/blog/best-dry-cat-food), and browse [cat food in the opetlife shop](/en/shop/products?category=food&species=CAT).
 
-## 2. Cat litter: how often should you clean the box?
+## No. 2 – Cat litter: how often should you clean the box?
 
 "How often should I change cat litter?" comes up most with this search. The short answer: scoop clumps and poop every day, and have one more litter box than you have cats, so three boxes for two cats, in quiet spots away from the food bowl. Our guide to [types of cat litter](/en/blog/cat-litter-types) compares clumping clay, carbon, silica and plant-based litters and explains the full-change routine, and you'll find [litter and cat supplies in the opetlife shop](/en/shop/products?category=accessories&species=CAT).
 
-## 1. Pet shop: what should you check before you buy?
+## No. 1 – Pet shop: what should you check before you buy?
 
 The pet shop, in person or online, tops the list, because food, litter and supplies are the purchases every dog and cat owner makes again and again. Make one habit stick: check the expiry date and the seal before you pay, since repacked bags, counterfeit food and stock close to its date do turn up. Our [online pet shop guide](/en/blog/online-pet-shop-guide) has the full checklist for buying food, litter and gear, and you can browse products by category in the [opetlife shop](/en/shop).
 

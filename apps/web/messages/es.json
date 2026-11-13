@@ -1,4 +1,55 @@
 {
+  "partnerSupport": {
+    "title": "Soporte",
+    "intro": "Pregunta al equipo de opetlife sobre la verificación, los pagos, las reservas, los pedidos o tu ficha. Las respuestas llegan aquí y como notificación.",
+    "newCta": "Nueva solicitud",
+    "empty": "Todavía no hay solicitudes.",
+    "openedBy": "Abierta por {name}",
+    "openedByYou": "Abierta por ti",
+    "loading": "Cargando…",
+    "retry": "Reintentar",
+    "loadFailed": "No se pudieron cargar las solicitudes de soporte.",
+    "create": {
+      "title": "Nueva solicitud de soporte",
+      "category": "Tema",
+      "subject": "Asunto",
+      "description": "¿Qué ha pasado? Añade números de pedido o de reserva si los hay.",
+      "submit": "Enviar solicitud",
+      "failed": "No se pudo enviar la solicitud. Inténtalo de nuevo.",
+      "required": "Completa el asunto y la descripción."
+    },
+    "category": {
+      "BUSINESS": "Mi negocio y verificación",
+      "ACCOUNT": "Acceso y equipo",
+      "PAYMENT": "Pagos y liquidaciones",
+      "BOOKING": "Reservas",
+      "ORDER": "Pedidos",
+      "DELIVERY": "Envío y entrega",
+      "SERVICE": "Servicios y precios",
+      "MARKETPLACE": "Productos y ficha",
+      "OTHER": "Otro tema"
+    },
+    "detail": {
+      "back": "Todas las solicitudes",
+      "caseNumber": "Solicitud {number}",
+      "messages": "Conversación",
+      "noMessages": "Aún no hay respuestas. El equipo de soporte responderá aquí.",
+      "support": "Soporte de opetlife",
+      "team": "Tu equipo",
+      "composePlaceholder": "Escribe una respuesta…",
+      "send": "Enviar",
+      "sendFailed": "No se pudo enviar la respuesta.",
+      "reopen": "Reabrir solicitud",
+      "reopenFailed": "No se pudo reabrir la solicitud."
+    },
+    "status": {
+      "SUBMITTED": "Recibida",
+      "UNDER_REVIEW": "En curso",
+      "WAITING": "Esperando tu respuesta",
+      "RESOLVED": "Resuelta",
+      "CLOSED": "Cerrada"
+    }
+  },
   "adminHolidays": {
     "kicker": "Calendario laboral",
     "title": "Festivos y cierres",
@@ -3107,6 +3158,203 @@
     "tabs": { "admins": "Administradores", "roles": "Roles", "permissions": "Permisos" }
   },
   "admin": {
+    "partners": {
+      "servicesTitle": "Servicios",
+      "shopsTitle": "Tiendas",
+      "servicesIntro": "Veterinarios, peluquerías, residencias, cuidadores, adiestradores, taxis para mascotas y cualquier otro negocio de servicios. Un negocio que también tiene tienda aparece también en Tiendas.",
+      "shopsIntro": "Todas las tiendas y sus productos. Una tienda que también ofrece servicios aparece también en Servicios.",
+      "searchLabel": "Nombre, teléfono o ciudad",
+      "searchPlaceholder": "Buscar negocios",
+      "search": "Buscar",
+      "verificationFilter": "Verificación",
+      "kindFilter": "Tipo de servicio",
+      "shopStatusFilter": "Estado de la tienda",
+      "all": "Todos",
+      "forbidden": "No tienes permiso para ver los socios.",
+      "loadFailed": "No se pudieron cargar los socios",
+      "resultCount": "{count} negocios",
+      "noAddress": "Aún sin dirección",
+      "serviceCounts": "{active} servicios activos · {inactive} inactivos",
+      "offerCounts": "{active} ofertas activas · {pending} en revisión",
+      "pendingDocuments": "{count} documentos por revisar",
+      "alsoShop": "También tienda: {name}",
+      "alsoService": "También negocio de servicios: {name}",
+      "reviewKyc": "Revisar KYC",
+      "pagination": "Páginas de socios",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "page": "Página {page}",
+      "profile": {
+        "loading": "Cargando…",
+        "loadFailed": "No se pudo cargar este negocio",
+        "retry": "Reintentar",
+        "forbidden": "No tienes permiso para ver este negocio.",
+        "notFound": "Negocio no encontrado",
+        "backServices": "Todos los negocios de servicios",
+        "backShops": "Todas las tiendas",
+        "alsoShop": "También tienda: {name}",
+        "alsoService": "También negocio de servicios: {name}",
+        "identity": "Negocio y contacto",
+        "phone": "Teléfono",
+        "email": "Correo",
+        "website": "Sitio web",
+        "joined": "Alta",
+        "storefront": "Página pública de la tienda",
+        "kyc": "KYC",
+        "reviewKyc": "Revisar documentos",
+        "submittedAt": "Enviado a revisión {when}",
+        "notSubmitted": "Aún no enviado a revisión",
+        "kycNote": "Nota para el socio: {note}",
+        "contactName": "Responsable",
+        "contactMobile": "Móvil",
+        "contactLandline": "Teléfono fijo",
+        "enamad": "ID de Enamad",
+        "noContact": "Aún no hay datos de contacto.",
+        "noDocuments": "Aún no hay documentos.",
+        "uploaded": "Subido {when}",
+        "expires": "vence {when}",
+        "reviewNote": "Nota de revisión: {note}",
+        "address": "Dirección",
+        "province": "Provincia",
+        "city": "Ciudad",
+        "addressLine": "Dirección",
+        "postalCode": "Código postal",
+        "pin": "Ubicación en el mapa",
+        "noAddress": "Aún sin dirección.",
+        "services": "Servicios y precios",
+        "noServices": "Aún no hay servicios.",
+        "serviceActive": "Activo",
+        "serviceInactive": "No activo",
+        "perPet": "{price} por mascota",
+        "minutes": "{count} min",
+        "maxPets": "hasta {count} mascotas",
+        "dogs": "perros",
+        "cats": "gatos",
+        "taxiFare": "Tarifa de taxi: {base} base + {perKm} por km",
+        "category": {
+          "VET": "Veterinaria",
+          "GROOMING": "Peluquería",
+          "TRAINING": "Adiestramiento",
+          "WALKING": "Paseos",
+          "SITTING": "Cuidado a domicilio",
+          "BOARDING": "Residencia",
+          "PET_TAXI": "Taxi para mascotas",
+          "OTHER": "Otros"
+        },
+        "calendar": "Calendario",
+        "noCalendar": "Aún no hay horario de trabajo.",
+        "exceptions": "Próximos 60 días",
+        "weekday": {
+          "0": "Domingo",
+          "1": "Lunes",
+          "2": "Martes",
+          "3": "Miércoles",
+          "4": "Jueves",
+          "5": "Viernes",
+          "6": "Sábado"
+        },
+        "hours": "Horario de apertura",
+        "noHours": "Aún no hay horario de apertura.",
+        "closed": "Cerrado",
+        "products": "Productos, ofertas y stock",
+        "offerSummary": "{active} activas · {pending} en revisión · {requests} solicitudes de producto nuevo",
+        "noOffers": "Aún no hay productos.",
+        "noStock": "sin registro de stock",
+        "inStock": "{count} en stock",
+        "team": "Equipo",
+        "noTeam": "Sin miembros.",
+        "providerRole": {
+          "OWNER": "Propietario",
+          "VET": "Veterinario",
+          "STAFF": "Personal"
+        },
+        "supportCases": "Casos de soporte de este negocio"
+    }
+  },
+    "productDetail": {
+      "title": "Producto",
+      "back": "Todos los productos",
+      "loading": "Cargando…",
+      "loadFailed": "No se pudo cargar el producto.",
+      "retry": "Reintentar",
+      "forbidden": "Se requiere el permiso commerce.view",
+      "notFound": "Producto no encontrado",
+      "media": "{count, plural, one {# imagen} other {# imágenes}}",
+      "publicPage": "Página pública",
+      "productStatus": {
+        "DRAFT": "Borrador",
+        "ACTIVE": "Activo",
+        "INACTIVE": "Inactivo",
+        "ARCHIVED": "Archivado"
+      },
+      "facts": {
+        "sellers": "Vendedores",
+        "buyable": "Ofertas comprables",
+        "lowestPrice": "Precio activo más bajo",
+        "noneBuyable": "Ahora nadie lo vende",
+        "rating": "Valoración"
+      },
+      "offers": {
+        "title": "Ofertas por vendedor",
+        "hint": "Cada vendedor fija su propio precio y su stock. Un cliente solo puede comprar si la oferta está activa y aprobada, la tienda está verificada y activa, y hay stock.",
+        "empty": "Ningún vendedor ofrece este producto todavía.",
+        "seller": "Vendedor",
+        "variant": "Variante",
+        "price": "Precio",
+        "stock": "Stock",
+        "status": "Estado",
+        "updated": "Actualizado",
+        "sellerNotLive": "Tienda {status} · {verification}",
+        "sellerSku": "SKU del vendedor {sku}",
+        "available": "{count} disponibles",
+        "onHandReserved": "{onHand} en almacén · {reserved} reservados",
+        "noInventory": "Sin registro de stock",
+        "buyable": "Comprable ahora"
+      },
+      "offerStatus": {
+        "ACTIVE": "Activa",
+        "PAUSED": "En pausa",
+        "OUT_OF_STOCK": "Agotada",
+        "SUSPENDED": "Suspendida"
+      },
+      "moderation": {
+        "PENDING_REVIEW": "Pendiente de revisión",
+        "APPROVED": "Aprobada",
+        "REJECTED": "Rechazada"
+      },
+      "sellerStatus": {
+        "PENDING": "pendiente",
+        "ACTIVE": "activa",
+        "INACTIVE": "inactiva",
+        "SUSPENDED": "suspendida",
+        "RESTRICTED": "restringida",
+        "CLOSED": "cerrada"
+      },
+      "sellerVerification": {
+        "NOT_STARTED": "sin verificar",
+        "SUBMITTED": "verificación enviada",
+        "NEEDS_INFORMATION": "faltan datos",
+        "UNDER_REVIEW": "en revisión",
+        "VERIFIED": "verificada",
+        "REJECTED": "verificación rechazada",
+        "SUSPENDED": "verificación suspendida"
+      },
+      "variants": {
+        "title": "Variantes",
+        "inactive": "Inactiva"
+      },
+      "requests": {
+        "title": "Solicitudes de vendedores",
+        "hint": "Solicitudes de tiendas que crearon este producto o se asociaron a él.",
+        "empty": "Este producto no proviene de una solicitud de vendedor.",
+        "status": {
+          "PENDING_REVIEW": "Pendiente de revisión",
+          "APPROVED": "Aprobada como nuevo",
+          "MATCHED_EXISTING": "Asociada a este producto",
+          "REJECTED": "Rechazada"
+        }
+      }
+    },
     "memorials": {
       "title": "Memoriales públicos de mascotas",
       "description": "Publica solo si existe el consentimiento explícito de la persona responsable. Revisa cada nombre y la foto seleccionada; los datos del hogar y de salud no forman parte de esta vista.",
@@ -3767,6 +4015,22 @@
       }
     },
     "support": {
+      "requesterTabs": {
+        "label": "Solicitante",
+        "ALL": "Todos",
+        "PERSONAL": "Personales",
+        "PARTNER": "Socios",
+        "PROVIDER": "Servicios",
+        "SELLER": "Tiendas",
+        "oneBusiness": "Se muestran los casos de un solo negocio.",
+        "allBusinesses": "Mostrar todos"
+      },
+      "requesterOrg": {
+        "PROVIDER": "Negocio de servicios",
+        "SELLER": "Tienda",
+        "unnamed": "(sin nombre)",
+        "allCases": "Todos los casos de este negocio"
+      },
       "title": "Casos de soporte",
       "newCase": "Nuevo caso",
       "createTitle": "Crear caso de soporte",
@@ -3895,8 +4159,8 @@
         "plans": "Planes",
         "households": "Hogares",
         "verification": "Verificaciones",
-        "providers": "Proveedores",
-        "sellers": "Vendedores",
+        "providers": "Servicios",
+        "sellers": "Tiendas",
         "overview": "Resumen",
         "orders": "Pedidos",
         "refundRequests": "Solicitudes de reembolso",
@@ -5476,6 +5740,11 @@
       "addressRequired": "Elige la dirección del servicio.",
       "petAccessDenied": "No tienes permiso para reservar para esta mascota.",
       "bookingChanged": "El estado de esta reserva ha cambiado. Actualiza la página."
+    },
+    "priceBreakdown": {
+      "perPet": "{unit} por mascota × {pets, number} mascotas",
+      "perPetNight": "{unit} por mascota y noche × {pets, number} mascotas × {nights, number} noches",
+      "perRide": "{unit} por viaje, con cualquier número de mascotas"
     }
   },
   "datePicker": {
@@ -5587,6 +5856,12 @@
       "possibleConflict": "Podría no coincidir con las normas para mascotas",
       "moreInfo": "Se necesita más información",
       "distanceKm": "{distance} km"
+    },
+    "source": {
+      "label": "Fuente",
+      "all": "Todos",
+      "opetlife": "opetlife",
+      "jajiga": "Jajiga"
     }
   },
   "services": {
@@ -6972,6 +7247,7 @@
     },
     "shell": {
       "nav": {
+        "support": "Soporte",
         "shipping": "Envíos"
       }
     }
@@ -7345,6 +7621,14 @@
       "SOURCE_REPORTED_AVAILABLE": "La fuente indica disponibilidad. Confirma el inventario al reservar.",
       "SOURCE_REPORTED_UNAVAILABLE": "La fuente indica que no hay disponibilidad.",
       "UNKNOWN": "Se desconoce la disponibilidad."
+    },
+    "fromSource": "De {source}",
+    "blend": {
+      "title": "Alojamientos que aceptan mascotas, de Jajiga",
+      "titleCity": "Alojamientos que aceptan mascotas en {city}, de Jajiga",
+      "hint": "Anuncios de Jajiga: reservas y pagas en el propio sitio de Jajiga y opetlife no cobra nada. Confirma las normas sobre mascotas con el anfitrión antes de reservar.",
+      "seeAll": "Todos los alojamientos de Jajiga",
+      "pages": "Páginas de Jajiga"
     }
   },
   "insurance": {
@@ -7572,6 +7856,7 @@
   "provider": {
     "shell": {
       "nav": {
+        "support": "Soporte",
         "home": "Resumen",
         "bookings": "Reservas",
         "schedule": "Agenda",
@@ -8778,7 +9063,7 @@
     "list": {
       "search": "Buscar",
       "title": "Lugares que admiten mascotas",
-      "subtitle": "Lugares verificados donde las mascotas son bienvenidas.",
+      "subtitle": "Lugares donde las mascotas son bienvenidas. Los verificados y los de OpenStreetMap están etiquetados.",
       "empty": "No se encontraron lugares.",
       "nearMe": "Buscar cerca de mí",
       "allCategories": "Todas las categorías",
@@ -9702,6 +9987,18 @@
       "pull": "Desliza para actualizar",
       "release": "Suelta para actualizar",
       "loading": "Actualizando…"
+    },
+    "footer": {
+      "title": "La app de opetlife",
+      "install": "Instalar la app",
+      "iosSteps": "En iPhone: en Safari, toca el botón Compartir y elige “Añadir a pantalla de inicio”.",
+      "otherSteps": "Abre el menú del navegador y elige “Instalar app” o “Añadir a la pantalla de inicio”. En Android, Chrome funciona mejor.",
+      "android": {
+        "bazaar": "Descargar en Cafe Bazaar",
+        "myket": "Descargar en Myket",
+        "googlePlay": "Descargar en Google Play",
+        "apk": "Descargar para Android"
+      }
     }
   },
   "safety": {
@@ -10648,6 +10945,246 @@
     "adminDraft": {
       "title": "Los Términos, la Política de privacidad y las preguntas frecuentes integrados están publicados: borrador, pendiente de revisión legal del propietario",
       "body": "Estos textos describen cómo funciona realmente la plataforma y se muestran en los seis idiomas hasta que publiques una versión revisada. Publicar aquí los Términos o la Privacidad en persa o inglés sustituye el texto integrado en ese idioma. Puntos que debe revisar un abogado: el plazo de devolución de 48 horas junto al derecho legal de desistimiento en compras a distancia, adónde van los reembolsos (método original o monedero), la eliminación de cuentas (la ejecución sigue desactivada) y que las publicaciones de la comunidad aparecen antes de revisarse."
+    }
+  },
+  "businessHub": {
+    "title": "Inicio del negocio",
+    "subtitle": "Panel de socios de opetlife",
+    "intro": "Cada negocio al que perteneces, con lo que necesita hoy.",
+    "emptyHint": "Aún no hay ningún negocio vinculado a tu cuenta.",
+    "emptyTitle": "Aún no hay negocios",
+    "emptyBody": "Tras el registro de socio y la verificación, tu negocio aparecerá aquí.",
+    "toPetOwnerHome": "Ir a mi inicio de dueño de mascota",
+    "failed": "No se pudo cargar",
+    "retry": "Reintentar",
+    "loading": "Cargando",
+    "finishVerification": "Completar la verificación",
+    "noReviews": "Aún no hay reseñas.",
+    "rating": "Valoración {average} de 5 · {count} reseñas",
+    "stars": "{rating} estrellas",
+    "support": "Contactar con soporte",
+    "homeLink": "Inicio del negocio",
+    "myBusiness": "Mi negocio",
+    "svc": {
+      "today": "Reservas de hoy",
+      "upcoming": "Próximas",
+      "pending": "Pendientes de confirmar",
+      "next": "Próximas reservas",
+      "noBookings": "No hay reservas próximas.",
+      "services": "Servicios y precios ({active} activos de {total})",
+      "noPrice": "Sin precio",
+      "minutes": "{minutes} min",
+      "noServices": "Aún no hay servicios.",
+      "open": "Abrir panel",
+      "bookings": "Reservas",
+      "calendar": "Calendario",
+      "servicesPrices": "Servicios y precios",
+      "reviews": "Reseñas"
+    },
+    "shop": {
+      "kind": "Tienda",
+      "toPrepare": "Pedidos por preparar",
+      "lowStock": "Poco stock",
+      "pendingModeration": "En revisión",
+      "activeOffers": "Ofertas activas",
+      "available": "Disponible para pago",
+      "pendingPayout": "Pendiente",
+      "open": "Abrir panel de tienda",
+      "orders": "Pedidos",
+      "offers": "Productos y precios",
+      "inventory": "Stock",
+      "payouts": "Pagos"
+    },
+    "joinAsPartner": "Registrarse como socio"
+  },
+  "partnerOnboarding": {
+    "loadFailed": "No se pudo cargar",
+    "retry": "Reintentar",
+    "saveAndContinue": "Guardar y continuar",
+    "continue": "Continuar",
+    "remove": "Quitar",
+    "intro": {
+      "title": "Registro de socios",
+      "body": "¿Ofreces servicios para mascotas o tienes una tienda? Únete a opetlife para que los dueños te encuentren, reserven o compren.",
+      "needs": {
+        "kinds": "Tu tipo de negocio (puedes elegir varios, p. ej. veterinario y tienda)",
+        "documents": "Logo, documento de identidad y licencia o permiso",
+        "address": "Dirección postal con provincia y ciudad",
+        "services": "Para servicios: días y horario de trabajo y el precio de cada servicio",
+        "shop": "Para una tienda: horario y productos con precio y stock",
+        "review": "Enviar a revisión y verificación de identidad"
+      },
+      "reviewNote": "Nada aparece en el sitio hasta que el equipo de opetlife verifique tus documentos. Los documentos de identidad solo se usan para la revisión y nunca se publican.",
+      "create": "Crear cuenta de socio",
+      "signIn": "Ya tengo cuenta — entrar"
+    },
+    "wizard": {
+      "title": "Registro de socio",
+      "reviewNote": "Cada paso se guarda y puedes continuar más tarde. Tu negocio aparecerá cuando el equipo de opetlife lo apruebe.",
+      "steps": "Pasos"
+    },
+    "steps": {
+      "kinds": "Tipo de negocio",
+      "business": "Nombre y logo",
+      "owner": "Datos del titular",
+      "documents": "Documentos",
+      "address": "Dirección",
+      "calendar": "Calendario",
+      "services": "Servicios y precios",
+      "hours": "Horario de la tienda",
+      "products": "Productos",
+      "review": "Revisar y enviar"
+    },
+    "kinds": {
+      "hint": "Elige todos los servicios que ofreces. Si también tienes tienda, márcala.",
+      "services": "Servicios",
+      "shopTitle": "Tienda"
+    },
+    "kind": {
+      "VET_CLINIC": "Clínica veterinaria",
+      "VETERINARIAN": "Veterinario/a",
+      "GROOMER": "Peluquería",
+      "BOARDING": "Residencia",
+      "SITTER": "Cuidado a domicilio",
+      "TRAINER": "Adiestramiento",
+      "WALKER": "Paseo de perros",
+      "PET_TAXI": "Taxi para mascotas",
+      "SHOP": "Tienda de mascotas (online o física)"
+    },
+    "business": {
+      "name": "Nombre del negocio",
+      "description": "Descripción breve",
+      "logo": "Logo",
+      "logoHint": "JPG, PNG o WebP hasta 10 MB. El logo se muestra tras la aprobación."
+    },
+    "owner": {
+      "firstName": "Nombre",
+      "lastName": "Apellidos",
+      "phone": "Teléfono del negocio",
+      "verifyMobile": "Para continuar, el móvil de tu cuenta debe estar confirmado con un código SMS.",
+      "verifyMobileLink": "Confirmar mi móvil"
+    },
+    "documents": {
+      "hint": "Son obligatorios el documento de identidad y la licencia comercial (o eNamad para tienda online); los veterinarios suben además su licencia profesional.",
+      "none": "Aún no hay documentos.",
+      "kind": "Tipo de documento",
+      "file": "Archivo (JPG, PNG o PDF hasta 20 MB)",
+      "private": "Los documentos se guardan en privado; solo los ve el equipo de revisión.",
+      "upload": "Subir"
+    },
+    "docKind": {
+      "NATIONAL_ID_CARD": "Documento de identidad",
+      "LICENSE": "Licencia / permiso",
+      "BUSINESS_LICENSE": "Licencia comercial",
+      "BUSINESS_REGISTRATION": "Registro mercantil",
+      "OTHER": "Otro",
+      "ENAMAD": "eNamad (sello de confianza)"
+    },
+    "docStatus": {
+      "PENDING": "Pendiente de revisión",
+      "ACCEPTED": "Aceptado",
+      "REJECTED": "Rechazado",
+      "EXPIRED": "Caducado"
+    },
+    "address": {
+      "province": "Provincia",
+      "city": "Ciudad",
+      "pick": "Elige",
+      "otherCity": "Otra ciudad…",
+      "line": "Dirección",
+      "postalCode": "Código postal (10 dígitos)",
+      "latitude": "Latitud (opcional)",
+      "longitude": "Longitud (opcional)",
+      "pinHint": "Si conoces tu ubicación en el mapa, añádela para que te encuentren más fácil."
+    },
+    "day": {
+      "6": "Sábado",
+      "0": "Domingo",
+      "1": "Lunes",
+      "2": "Martes",
+      "3": "Miércoles",
+      "4": "Jueves",
+      "5": "Viernes"
+    },
+    "hours": {
+      "from": "Desde ({day})",
+      "to": "Hasta ({day})"
+    },
+    "services": {
+      "hint": "Los precios son por mascota; con varias se multiplica. Las citas siguen la duración de cada servicio.",
+      "kind": "Tipo",
+      "name": "Nombre del servicio",
+      "price": "Precio por mascota (tomanes)",
+      "duration": "Duración (minutos)",
+      "maxPets": "Máx. mascotas por cita",
+      "add": "Añadir servicio"
+    },
+    "products": {
+      "hint": "Busca tus productos en el directorio de opetlife y fija precio y stock. Se mostrarán cuando se apruebe la tienda y se revisen los productos.",
+      "search": "Buscar productos",
+      "searchButton": "Buscar",
+      "noResults": "No se encontraron productos.",
+      "add": "Añadir",
+      "picked": "Tus productos",
+      "nonePicked": "Aún no hay productos (puedes añadirlos más tarde).",
+      "price": "Precio (tomanes)",
+      "stock": "Stock",
+      "requestTitle": "¿No encuentras tu producto?",
+      "requestName": "Nombre del producto",
+      "requestButton": "Solicitar este producto",
+      "requestSent": "Solicitud enviada; se añadirá tras la revisión.",
+      "requestLater": "Las solicitudes de producto estarán disponibles en tu panel tras la aprobación."
+    },
+    "review": {
+      "body": "Revisa todo y envíalo a verificación. Después no podrás editar hasta que termine la revisión.",
+      "ready": "Todo está listo.",
+      "submit": "Enviar a revisión"
+    },
+    "missing": {
+      "ADDRESS": "Dirección",
+      "CALENDAR": "Calendario",
+      "SERVICES": "Al menos un servicio con precio",
+      "OPENING_HOURS": "Horario de la tienda",
+      "PROFILE": "Datos del titular (y móvil confirmado)",
+      "DOCUMENTS": "Documentos necesarios (identidad y licencia)",
+      "document": "Documento obligatorio: {kind}"
+    },
+    "submitted": {
+      "title": "Tu solicitud está en revisión",
+      "body": "El equipo de opetlife está revisando tus documentos y te avisará. Hasta entonces no se muestra nada en el sitio.",
+      "verifiedTitle": "Tu negocio está verificado",
+      "verifiedBody": "Tus servicios están activos y tus productos aparecerán en la tienda tras la revisión.",
+      "toBusiness": "Ir a mi negocio"
+    },
+    "subject": {
+      "PROVIDER": "Servicios",
+      "SELLER": "Tienda"
+    },
+    "lifecycle": {
+      "NOT_SUBMITTED": "No enviado",
+      "PENDING": "Pendiente de revisión",
+      "UNDER_REVIEW": "En revisión",
+      "RESUBMISSION_REQUESTED": "Cambios solicitados",
+      "APPROVED": "Aprobado",
+      "REJECTED": "Rechazado",
+      "SUSPENDED": "Suspendido"
+    },
+    "errors": {
+      "generic": "No se guardó; inténtalo de nuevo.",
+      "PICK_AT_LEAST_ONE": "Elige al menos un servicio o una tienda.",
+      "NAME_REQUIRED": "Escribe el nombre del negocio.",
+      "CANNOT_REMOVE_STARTED_BUSINESS": "No se puede quitar un tipo ya iniciado; solo puedes añadir nuevos.",
+      "UNDER_REVIEW_LOCKED": "Está en revisión y no se puede cambiar ahora.",
+      "VERIFIED_MOBILE_REQUIRED": "Primero confirma el móvil de tu cuenta con un código SMS.",
+      "ADDRESS_FIRST": "Guarda primero la dirección.",
+      "START_BEFORE_END": "La hora de inicio debe ser anterior a la de fin.",
+      "CATALOG_PRODUCT_NOT_AVAILABLE": "Uno de los productos ya no está en el directorio.",
+      "STEPS_INCOMPLETE": "Algunos pasos aún no están completos.",
+      "VERIFICATION_REQUIRED_DOCUMENTS_MISSING": "Faltan documentos obligatorios.",
+      "VERIFICATION_PROFILE_REQUIRED": "Los datos del titular están incompletos.",
+      "LOGO_FILE": "El logo debe ser JPG, PNG o WebP de menos de 10 MB.",
+      "DOC_FILE": "El documento debe ser JPG, PNG o PDF de menos de 20 MB.",
+      "TOO_MANY_PENDING": "Demasiados documentos pendientes de revisión."
     }
   }
 }

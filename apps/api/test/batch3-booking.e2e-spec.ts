@@ -6,6 +6,7 @@ import {
   AdminRole,
   BookingStatus,
   LocationMode,
+  Prisma,
   ProviderServiceType,
   ProviderUserRole,
   ServiceCategory,
@@ -299,6 +300,27 @@ describe("Batch 3 — services, booking lifecycle, provider and admin operations
       expect(booking.priceAmount).toBe(2_000_000);
       const filtered = await get(owner, `/bookings?petId=${pets[1]!.id}`).expect(200);
       expect(filtered.body.map((b: { id: string }) => b.id)).toContain(booking.id);
+    });
+
+    it("two pets at the groomer: per-pet price, back-to-back time, and the slot list sized for both (owner 2026-11-13)", async () => {
+      const c = await clinic({ category: ServiceCategory.GROOMING, type: ProviderServiceType.GROOMING_SESSION, service: { priceAmount: new Prisma.Decimal(900_000), durationMinutes: 45 } });
+      expect(c.service.maxPetsPerBooking).toBe(4);
+      const owner = await actor("owner");
+      const { pets } = await household(owner, ["اول", "دوم"]);
+      const from = new Date(Date.now() + 48 * 3600_000);
+      const listed = await get(owner, `/provider-services/${c.service.id}/availability?locationId=${c.location.id}&from=${from.toISOString()}&to=${new Date(from.getTime() + 86400_000).toISOString()}&petCount=2`).expect(200);
+      const first = listed.body.slots.find((x: { state: string }) => x.state === "AVAILABLE");
+      expect(new Date(first.endAt).getTime() - new Date(first.startAt).getTime()).toBe(90 * 60_000);
+      const hold = await post(owner, "/booking-holds")
+        .send({ petId: pets[0]!.id, providerId: c.org.id, locationId: c.location.id, serviceId: c.service.id, slotStart: first.startAt, additionalPetIds: [pets[1]!.id] })
+        .expect(201);
+      const booking = (await post(owner, "/bookings").set("Idempotency-Key", randomUUID()).send({ holdId: hold.body.holdId, petId: pets[0]!.id }).expect(201)).body;
+      expect(booking.priceAmount).toBe(1_800_000);
+      expect(booking.durationMinutes).toBe(90);
+      expect(new Date(booking.endAt).getTime() - new Date(booking.startAt).getTime()).toBe(90 * 60_000);
+      // The groomer's next free start for this staff member is after both pets, not in the middle.
+      const after = await app.get(SlotGeneratorService).generate({ providerOrganizationId: c.org.id, locationId: c.location.id, serviceId: c.service.id, from: new Date(booking.startAt), to: new Date(new Date(booking.startAt).getTime() + 3 * 3600_000) });
+      expect(after.find((x) => x.startAt.getTime() === new Date(booking.startAt).getTime() + 45 * 60_000)?.state).toBe("BOOKED");
     });
 
     it("enforces the provider's own pet eligibility rules", async () => {

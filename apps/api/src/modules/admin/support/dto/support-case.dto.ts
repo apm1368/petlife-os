@@ -1,6 +1,7 @@
 import { IsDateString, IsEnum, IsIn, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
 import { AdminPriority, SupportCaseCategory, SupportCaseStatus, SupportMessageVisibility } from "@prisma/client";
 import { PaginationQueryDto } from "../../../../common/pagination/pagination.dto";
+import { SUPPORT_REQUESTER_KINDS, type SupportRequesterKind } from "../support-case.service";
 
 export class ListSupportCasesQueryDto extends PaginationQueryDto {
   @IsOptional()
@@ -26,6 +27,15 @@ export class ListSupportCasesQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsDateString()
   createdTo?: string;
+
+  /** PARTNER = cases opened from a provider or shop panel; PROVIDER / SELLER = one side; PERSONAL = everyone else. */
+  @IsOptional()
+  @IsIn(SUPPORT_REQUESTER_KINDS)
+  requesterKind?: SupportRequesterKind;
+
+  @IsOptional()
+  @IsUUID()
+  requesterOrgId?: string;
 }
 
 export class CreateSupportCaseDto {

@@ -1,15 +1,22 @@
-import { approximate, computeFare, normalizeCity, pickRuleForPoint, validCityBox } from "./pet-taxi-fare.policy";
+import { MAX_PETS_PER_RIDE, approximate, computeFare, normalizeCity, pickRuleForPoint, validCityBox } from "./pet-taxi-fare.policy";
 import { straightLineRoute } from "../maps/maps.service";
 
 const rule = { city: "*", baseFareIrr: 500_000, perKmIrr: 80_000, perMinuteIrr: 10_000, minimumFareIrr: 1_000_000, mediumSurchargePercent: 20, largeSurchargePercent: 40, extraPetIrr: 200_000 };
 
 describe("pet taxi fare", () => {
-  it("adds base, distance, time, the carrier surcharge on the trip part and extra pets, rounded up to 1,000 toman", () => {
+  it("adds base, distance, time and the carrier surcharge on the trip part, rounded up to 1,000 toman", () => {
     const { fareIrr, breakdown } = computeFare(rule, { distanceMeters: 10_000, durationSeconds: 1_800 }, "MEDIUM", 2);
-    // 500k + 800k + 300k + 20% of 1.1M (220k) + 200k = 2,020,000
-    expect(breakdown).toMatchObject({ baseIrr: 500_000, distanceIrr: 800_000, timeIrr: 300_000, carrierIrr: 220_000, extraPetsIrr: 200_000, minimumApplied: false, km: 10, minutes: 30 });
-    expect(fareIrr).toBe(2_020_000);
+    // 500k + 800k + 300k + 20% of 1.1M (220k) = 1,820,000; no per-pet charge
+    expect(breakdown).toMatchObject({ baseIrr: 500_000, distanceIrr: 800_000, timeIrr: 300_000, carrierIrr: 220_000, extraPetsIrr: 0, minimumApplied: false, km: 10, minutes: 30 });
+    expect(fareIrr).toBe(1_820_000);
     expect(computeFare(rule, { distanceMeters: 10_000, durationSeconds: 1_800 }, "LARGE", 1).fareIrr).toBe(500_000 + 1_100_000 + 440_000);
+  });
+
+  it("charges one price per ride for 1 to 3 pets, even if an old rule still has a per-pet amount", () => {
+    const route = { distanceMeters: 10_000, durationSeconds: 1_800 };
+    const one = computeFare(rule, route, "SMALL", 1).fareIrr;
+    expect(computeFare(rule, route, "SMALL", MAX_PETS_PER_RIDE).fareIrr).toBe(one);
+    expect(MAX_PETS_PER_RIDE).toBe(3);
   });
 
   it("never charges below the minimum, and rounds odd rials up", () => {

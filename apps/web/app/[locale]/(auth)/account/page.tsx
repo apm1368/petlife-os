@@ -12,7 +12,7 @@ import { authService } from "@/services/auth.service";
 import { onboardingService } from "@/services/onboarding.service";
 import { useSessionStore } from "@/stores/session-store";
 import { signInErrorText } from "@/features/auth/sign-in-error";
-import { resolvePostAuthDestination } from "@/lib/auth/resolve-post-auth-destination";
+import { loadBusinessLanding, resolvePostAuthDestination } from "@/lib/auth/resolve-post-auth-destination";
 import { adminService } from "@/services/admin.service";
 import { LegalConsentLine } from "@/features/legal/LegalConsentLine";
 
@@ -42,8 +42,8 @@ function AccountFlow() {
   }, [cooldown]);
 
   async function afterAuth() {
-    const [progress, staff] = await Promise.all([onboardingService.getProgress(), adminService.getMe().catch(() => null)]);
-    router.replace(resolvePostAuthDestination(locale, returnTo, progress, { isAdmin: !!staff?.isAdmin }));
+    const [progress, staff, business] = await Promise.all([onboardingService.getProgress(), adminService.getMe().catch(() => null), loadBusinessLanding()]);
+    router.replace(resolvePostAuthDestination(locale, returnTo, progress, { isAdmin: !!staff?.isAdmin, business }));
   }
 
   async function sendCode() {

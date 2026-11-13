@@ -7,6 +7,7 @@ import type { RouteLocale } from "@/lib/i18n/config";
 import { storyCopy } from "./story-copy";
 import { CookieToggle } from "./opl/CookieToggle";
 import { localeHomePath } from "@/lib/seo/site";
+import { FooterAppInstall } from "@/features/pwa/FooterAppInstall";
 
 export function ParkFooter({ locale }: { locale: RouteLocale }) {
   const c = storyCopy[locale];
@@ -20,13 +21,14 @@ export function ParkFooter({ locale }: { locale: RouteLocale }) {
           <p>{c.footerDescription}</p>
           <FooterSiteDetails />
           <Link href={`/${locale}#lp-main`} className="opl-foot__back">{c.footerTop}<ArrowUp size={16} aria-hidden="true" /></Link>
+          <FooterAppInstall />
         </div>
         {c.footerGroups.map((group) => <FooterLinkGroup key={group.title} title={group.title} links={group.links} locale={locale} />)}
         <nav aria-label={c.footerPartners}>
           <h2>{c.footerPartners}</h2>
           <ul>
             <li><Link href={`/${locale}/auth?returnTo=${encodeURIComponent(`/${locale}/provider`)}`}>{c.partnerLogin}</Link></li>
-            <li><Link href={`/${locale}/register?returnTo=${encodeURIComponent(`/${locale}/provider`)}`}>{c.partnerJoin}</Link></li>
+            <li><Link href={`/${locale}/partners/join`}>{c.partnerJoin}</Link></li>
           </ul>
         </nav>
       </div>

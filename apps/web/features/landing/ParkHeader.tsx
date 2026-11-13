@@ -90,7 +90,7 @@ export function ParkHeader({ locale }: { locale: RouteLocale }) {
         <Link href={`${root}/auth`} onClick={() => setOpen(false)}>{c.signIn}</Link>
         <Link href={`${root}/register`} onClick={() => setOpen(false)}>{c.memberJoin}</Link>
         <Link href={`${root}/auth?returnTo=${partnerReturn}`} onClick={() => setOpen(false)}>{c.partnerSignIn}</Link>
-        <Link href={`${root}/register?returnTo=${partnerReturn}`} onClick={() => setOpen(false)}>{c.partnerJoin}</Link>
+        <Link href={`${root}/partners/join`} onClick={() => setOpen(false)}>{c.partnerJoin}</Link>
         <div className="opl-msheet__tools"><ThemeToggle /><DisplayModeToggle locale={locale} compact /></div>
       </div>
     </nav>

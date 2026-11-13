@@ -69,7 +69,7 @@ const LAYOUT = {
 function reelHtml(locale, fmt) {
   const F = FORMATS[fmt];
   const L = LAYOUT[F.layout];
-  const rtl = locale === "fa";
+  const rtl = locale === "fa" || locale === "ar";
   const W = F.layout === "p" ? 1080 : 1920;
   const H = F.layout === "p" ? 1920 : 1080;
   const items = COPY.items;
@@ -124,9 +124,9 @@ svg.art{position:absolute;inset:0}
 .search .q{font-weight:800;color:#1F5A3D;white-space:nowrap;overflow:hidden}
 .search .caret{flex:none;width:6px;border-radius:3px;background:#1F5A3D}
 .sub{position:absolute;left:0;right:0;display:flex;justify-content:center}
-.sub p{background:rgba(30,36,31,.82);color:#fff;border-radius:28px;font-weight:800;text-align:center}
+.sub p{background:rgba(30,36,31,.82);color:#fff;border-radius:28px;font-weight:800;text-align:center;text-wrap:balance}
 .sub .w{display:inline-block;opacity:0}
-.hook .q1{position:absolute;left:0;right:0;text-align:center;font-weight:900;color:#1F5A3D}
+.hook .q1{position:absolute;left:0;right:0;text-align:center;font-weight:900;color:#1F5A3D;text-wrap:balance}
 .hook .q1 .w{display:inline-block;opacity:0}
 .hook .q2{position:absolute;left:0;right:0;display:flex;justify-content:center}
 .hook .q2 span{background:#F2B544;border:5px solid #1E241F;border-radius:22px;font-weight:900;color:#1E241F;box-shadow:0 10px 0 rgba(30,36,31,.15)}
@@ -139,9 +139,9 @@ svg.art{position:absolute;inset:0}
 .recap .grid{position:absolute;display:grid;direction:${rtl ? "rtl" : "ltr"}}
 .chip{display:flex;align-items:center;gap:18px;background:#fff;border:4px solid #1E241F;border-radius:999px;opacity:0;box-shadow:0 8px 0 rgba(30,36,31,.12)}
 .chip b{flex:none;border-radius:50%;background:#F2B544;display:flex;align-items:center;justify-content:center;font-weight:900}
-.chip span{font-weight:800;color:#1F5A3D;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip{min-width:0}.chip span{min-width:0;font-weight:800;color:#1F5A3D;line-height:1.15;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .cta .logo svg{filter:drop-shadow(0 6px 0 rgba(0,0,0,.12))}
-.cta .line{position:absolute;left:0;right:0;text-align:center;color:#fff;font-weight:850}
+.cta .line{position:absolute;left:0;right:0;text-align:center;color:#fff;font-weight:850;text-wrap:balance}
 .cta .btn{position:absolute;left:0;right:0;display:flex;justify-content:center}
 .cta .btn span{background:#F2B544;color:#1E241F;border:5px solid #1E241F;border-radius:999px;font-weight:900;direction:ltr;box-shadow:0 10px 0 rgba(0,0,0,.18)}
 .cta .share{position:absolute;left:0;right:0;text-align:center;color:#FCE3B0;font-weight:700}
@@ -158,8 +158,8 @@ ${F.layout === "p" ? `
 .note{top:1440px;font-size:30px}
 .logo{top:760px}.logo svg{height:200px}.logo p{font-size:54px;margin-top:34px}
 .recap h2{top:300px;font-size:76px}
-.recap .grid{top:470px;left:70px;right:70px;grid-template-columns:1fr 1fr;gap:26px 28px}
-.chip{height:128px;padding:0 26px}.chip b{width:78px;height:78px;font-size:42px}.chip span{font-size:40px}
+.recap .grid{top:470px;left:70px;right:70px;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px 28px}
+.chip{height:128px;padding:0 24px}.chip b{width:74px;height:74px;font-size:40px}.chip span{font-size:35px}
 .cta .logo{top:300px}.cta .logo svg{height:190px}
 .cta .line{top:520px;padding:0 80px;font-size:62px;line-height:1.5}
 .cta .btn{top:740px}.cta .btn span{font-size:64px;padding:18px 64px}
@@ -176,8 +176,8 @@ ${F.layout === "p" ? `
 .note{top:1012px;font-size:26px}
 .logo{top:380px}.logo svg{height:220px}.logo p{font-size:54px;margin-top:30px}
 .recap h2{top:110px;font-size:70px}
-.recap .grid{top:380px;left:110px;right:110px;grid-template-columns:repeat(5,1fr);gap:40px 26px}
-.chip{height:116px;padding:0 20px;gap:14px}.chip b{width:70px;height:70px;font-size:38px}.chip span{font-size:31px}
+.recap .grid{top:380px;left:110px;right:110px;grid-template-columns:repeat(5,minmax(0,1fr));gap:40px 22px}
+.chip{height:116px;padding:0 18px;gap:12px}.chip b{width:62px;height:62px;font-size:34px;flex:none}.chip span{font-size:26px}
 .cta .logo{top:90px}.cta .logo svg{height:150px}
 .cta .line{top:300px;padding:0 160px;font-size:56px;line-height:1.45}
 .cta .btn{top:460px}.cta .btn span{font-size:56px;padding:14px 60px}
@@ -306,6 +306,52 @@ async function main() {
           fs.unlinkSync(tmp);
           continue;
         }
+        const names = [fmt, ...(F.extra || []).map((e) => e.name)];
+        const sizes = [[F.W, F.H], ...(F.extra || []).map((e) => [e.width, e.height])];
+        const partFile = (name, from) => path.join(OUT, "parts", `${locale}-${name}-${String(from).padStart(2, "0")}.bin`);
+        // --assemble: join the 10 s segments written by --from/--to runs into one WebM per output, with the music.
+        if (args.includes("--assemble")) {
+          audio = music ? await encodeAudio(pg, music, { start: musicStart, length: DURATION, fadeIn: 0.12, fadeOut: 2.8, targetRms: 0.12, bitrate: 128000 }) : null;
+          names.forEach((name, i) => {
+            const chunks = [];
+            for (let from = 0; from < DURATION; from += 10) {
+              const buf = fs.readFileSync(partFile(name, from));
+              for (let o = 0; o < buf.length;) { const ts = Number(buf.readBigInt64LE(o)); const key = buf[o + 8] === 1; const len = buf.readUInt32LE(o + 9); chunks.push({ ts, key, data: buf.subarray(o + 13, o + 13 + len) }); o += 13 + len; }
+            }
+            chunks.sort((a, b) => a.ts - b.ts);
+            const r = writeWebm(path.join(OUT, `reel-${locale}-${name}.webm`), { width: sizes[i][0], height: sizes[i][1], fps: FPS, chunks }, audio || undefined);
+            console.log("reel", locale, name, `${(r.bytes / 1048576).toFixed(1)} MB`, `${(r.durationMs / 1000).toFixed(1)}s`, `${chunks.length} frames`);
+          });
+          await pg.close();
+          fs.unlinkSync(tmp);
+          continue;
+        }
+        // --from/--to: render one segment (starts on a keyframe) and store its encoded frames for --assemble.
+        if (args.includes("--from")) {
+          const from = Number(opt("--from", "0")), to = Number(opt("--to", String(from + 10)));
+          const t0 = Date.now();
+          const extra = (F.extra || []).map((e) => ({ width: e.width, height: e.height, bitrate: e.bitrate }));
+          const res = await recordFrames(pg, {
+            width: F.W, height: F.H, fps: FPS, frames: Math.round((to - from) * FPS), bitrate: F.bitrate, extra,
+            drawFrame: (f) => pg.evaluate((t) => window.frame(t), from + f / FPS),
+            onFrame: async (f) => {
+              if (from === 0 && f === Math.round(2.9 * FPS)) {
+                const png = await pg.screenshot({ type: "png" });
+                fs.writeFileSync(path.join(OUT, `thumb-${locale}-${fmt}.png`), png);
+                await writeWebp(pg, png, path.join(OUT, `poster-${locale}-${fmt}.webp`), 0.85);
+              }
+            },
+          });
+          fs.mkdirSync(path.join(OUT, "parts"), { recursive: true });
+          (extra.length ? res : [res]).forEach((chunks, i) => {
+            const bufs = chunks.map((c) => { const h = Buffer.alloc(13); h.writeBigInt64LE(BigInt(c.ts + Math.round(from * 1e6))); h[8] = c.key ? 1 : 0; h.writeUInt32LE(c.data.length, 9); return Buffer.concat([h, c.data]); });
+            fs.writeFileSync(partFile(names[i], from), Buffer.concat(bufs));
+          });
+          console.log("part", locale, fmt, `${from}-${to}s`, `${((Date.now() - t0) / 1000).toFixed(0)}s`);
+          await pg.close();
+          fs.unlinkSync(tmp);
+          continue;
+        }
         if (music && !audio) {
           audio = await encodeAudio(pg, music, { start: musicStart, length: DURATION, fadeIn: 0.12, fadeOut: 2.8, targetRms: 0.12, bitrate: 128000 });
           console.log("audio", audio.chunks.length, "packets", JSON.stringify(audio.level), audio.codecPrivate ? "OpusHead from encoder" : "OpusHead built");
@@ -327,8 +373,6 @@ async function main() {
           },
         });
         const lists = extra.length ? res : [res];
-        const names = [fmt, ...(F.extra || []).map((e) => e.name)];
-        const sizes = [[F.W, F.H], ...extra.map((e) => [e.width, e.height])];
         const aud = audio ? { ...audio, chunks: audio.chunks.filter((c) => c.ts < seconds * 1e6) } : undefined;
         lists.forEach((chunks, i) => {
           const file = path.join(OUT, `reel-${locale}-${names[i]}.webm`);
