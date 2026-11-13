@@ -7085,3 +7085,59 @@ export interface SellerCatalogDirectoryItemDto {
   imageUrl: string | null;
   variants: { id: string; title: string | null; sku: string; weight: string | null; myOffer: { id: string; status: string } | null }[];
 }
+
+// ---------------------------------------------------------------------------
+// Partner business home (GET /business/memberships, /business/overview)
+// ---------------------------------------------------------------------------
+
+export interface BusinessServiceMembershipDto {
+  providerOrganizationId: string;
+  name: string;
+  type: ProviderType;
+  role: ProviderUserRole;
+  verificationStatus: ProviderVerificationStatus;
+}
+
+export interface BusinessShopMembershipDto {
+  sellerOrganizationId: string;
+  name: string;
+  role: SellerMembershipRole;
+  verificationStatus: SellerVerificationStatus;
+  sellerStatus: SellerStatus;
+}
+
+/** Every business the signed-in user belongs to; `hasHousehold` says whether they also use opetlife as a pet owner. */
+export interface BusinessMembershipsDto {
+  services: BusinessServiceMembershipDto[];
+  shops: BusinessShopMembershipDto[];
+  hasHousehold: boolean;
+}
+
+export interface BusinessReviewSnippetDto {
+  id: string;
+  rating: number;
+  body: string | null;
+  /** The product a shop review is about; null for a service review. */
+  productTitle: string | null;
+  createdAt: string;
+}
+
+export interface BusinessServiceCardDto extends BusinessServiceMembershipDto {
+  counts: { today: number; upcoming: number; pendingConfirmation: number };
+  nextBookings: { id: string; startAt: string; status: string; serviceName: string; petName: string | null }[];
+  services: { total: number; active: number; items: { id: string; name: string; durationMinutes: number; priceAmount: number | null; currency: string | null; isActive: boolean }[] };
+  reviews: { average: number | null; count: number; latest: BusinessReviewSnippetDto[] };
+}
+
+export interface BusinessShopCardDto extends BusinessShopMembershipDto {
+  counts: { ordersToPrepare: number; lowStockOffers: number; offersPendingModeration: number; activeOffers: number };
+  reviews: { average: number | null; count: number; latest: BusinessReviewSnippetDto[] };
+  /** Settlement balance in rials, only for roles that see money in the seller panel (owner, admin, finance). */
+  balance: { pendingIrr: number; availableIrr: number; paidIrr: number } | null;
+}
+
+export interface BusinessOverviewDto {
+  services: BusinessServiceCardDto[];
+  shops: BusinessShopCardDto[];
+  hasHousehold: boolean;
+}

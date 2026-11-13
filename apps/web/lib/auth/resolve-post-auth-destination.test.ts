@@ -31,4 +31,16 @@ describe("resolvePostAuthDestination", () => {
     const dest = resolvePostAuthDestination("en", "https://evil.example", { status: "COMPLETED", chapter: "READY" });
     expect(dest).toBe("/en/home");
   });
+
+  it("sends a partner who is not a pet owner to the business home, never to pet-owner onboarding", () => {
+    const business = { hasBusiness: true, hasHousehold: false };
+    expect(resolvePostAuthDestination("fa", null, { status: "IN_PROGRESS", chapter: "PET_IDENTITY" }, business)).toBe("/fa/business");
+    expect(resolvePostAuthDestination("en", "/en/provider/bookings", { status: "IN_PROGRESS", chapter: "PET_IDENTITY" }, business)).toBe("/en/provider/bookings");
+    expect(resolvePostAuthDestination("en", "https://evil.example", { status: "COMPLETED", chapter: "READY" }, business)).toBe("/en/business");
+  });
+
+  it("keeps the pet-owner home for a pet owner who is also a partner", () => {
+    expect(resolvePostAuthDestination("en", null, { status: "COMPLETED", chapter: "READY" }, { hasBusiness: true, hasHousehold: true })).toBe("/en/home");
+    expect(resolvePostAuthDestination("en", null, { status: "COMPLETED", chapter: "READY" }, null)).toBe("/en/home");
+  });
 });
