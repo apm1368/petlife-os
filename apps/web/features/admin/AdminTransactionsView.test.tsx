@@ -54,7 +54,10 @@ const FINANCIALS: AdminOrderFinancialsDto = {
 
 const APPROVAL: AdminRefundApprovalDto = {
   id: "approval-1",
+  subjectType: "ORDER",
   orderId: "order-1",
+  bookingId: null,
+  travelBookingId: null,
   amount: 1000,
   reason: "Owner-approved correction",
   status: "REQUESTED" as never,

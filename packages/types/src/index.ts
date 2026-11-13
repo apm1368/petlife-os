@@ -754,6 +754,8 @@ export interface CustomerAddressDto {
   /** Batch 4 — Iranian 10-digit postal code, when known. */
   postalCode?: string | null;
   isDefault?: boolean;
+  /** Neighbourhood / district (محله). */
+  area?: string | null;
 }
 
 /** A single (provider, service) discovery result row — one provider can appear multiple times, once per matching service. */
@@ -1442,6 +1444,9 @@ export interface SellerOrganizationSummaryDto {
   verificationStatus: SellerVerificationStatus;
   status: SellerStatus;
   city: string | null;
+  /** Public storefront address (/shop/sellers/{slug}) and logo, when the seller has them. */
+  slug?: string | null;
+  logoUrl?: string | null;
 }
 
 export interface SellerOfferDto {
@@ -1528,6 +1533,30 @@ export interface ProductSummaryDto {
   supportedSpecies?: Array<`${PetSpecies}`>;
 }
 
+/** Facts that help a shopper trust an offer: only what the platform actually enforces or has measured. */
+export interface ProductTrustDto {
+  /** The platform's refund window after delivery (damaged, wrong or expired items), in hours. */
+  returnWindowHours: number;
+  /** Published review averages per seller (from verified purchases); a seller without reviews is absent. */
+  sellerRatings: Record<string, { average: number; count: number }>;
+}
+
+export interface PublicSellerStorefrontDto {
+  seller: {
+    id: string;
+    slug: string | null;
+    name: string;
+    logoUrl: string | null;
+    description: string | null;
+    city: string | null;
+    verified: boolean;
+    memberSince: string;
+    rating: { average: number; count: number } | null;
+  };
+  products: ProductSummaryDto[];
+  total: number;
+}
+
 export interface ProductDetailDto {
   id: string;
   title: string;
@@ -1549,6 +1578,7 @@ export interface ProductDetailDto {
   reviews: ProductReviewDto[];
   related: ProductSummaryDto[];
   favorited: boolean;
+  trust?: ProductTrustDto;
   supportsDog: boolean;
   supportsCat: boolean;
   supportedSpecies?: Array<`${PetSpecies}`>;
@@ -1811,6 +1841,12 @@ export enum ShippingProvider {
   DEV = "DEV",
   ALOPEYK = "ALOPEYK",
   SNAPPBOX = "SNAPPBOX",
+  /** opetlife's own couriers (staff-set zone/distance pricing, staff-updated status). */
+  OPETLIFE_COURIER = "OPETLIFE_COURIER",
+  /** Iran Post express (Pishtaz): staff-set fixed price, staff-entered tracking number. */
+  POST_PISHTAZ = "POST_PISHTAZ",
+  SNAPPBOX_APP = "SNAPPBOX_APP",
+  ALOPEYK_APP = "ALOPEYK_APP",
 }
 
 export enum FulfillmentStatus {
@@ -1864,6 +1900,11 @@ export interface AddressSnapshotDto {
   region: string | null;
   countryCode: string | null;
   instructions: string | null;
+  /** Neighbourhood, postal code and map point when known (older snapshots have none). */
+  area?: string | null;
+  postalCode?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface ShippingQuoteDto {
@@ -1878,6 +1919,98 @@ export interface ShippingQuoteDto {
   status: ShippingQuoteStatus;
   expiresAt: string;
   createdAt: string;
+  /** How the price was reached, so the member is told when it is only an estimate. */
+  pricingBasis?: ShippingPricingBasis | null;
+}
+
+/**
+ * API: the courier's live quote. SANDBOX_ESTIMATE: shipping runs in sandbox, no courier was asked.
+ * DISTANCE_ESTIMATE: opetlife courier, straight-line distance x road factor. CITY_FLAT: opetlife courier city fare.
+ * FIXED_PRICE: Post Pishtaz price set by staff.
+ */
+export type ShippingPricingBasis = "API" | "SANDBOX_ESTIMATE" | "DISTANCE_ESTIMATE" | "CITY_FLAT" | "FIXED_PRICE";
+
+/** opetlife courier pricing rules (integer rials). */
+export interface OpetlifeCourierConfig {
+  /** Cities served (exact names as members type them, e.g. "تهران"); empty = every city. */
+  cities: string[];
+  baseFareIrr: number;
+  perKmIrr: number;
+  minFareIrr: number;
+  /** Beyond this straight-line x road-factor distance the courier is not offered. */
+  maxKm: number;
+  /** Straight-line to road distance multiplier, e.g. 1.3. */
+  roadFactor: number;
+  /** Fare when either side has no map point: per city, then the default. 0 = not offered without a map point. */
+  cityFlatFareIrr: Record<string, number>;
+  defaultFlatFareIrr: number;
+  /** Minutes to pick up, and minutes of travel per km. */
+  pickupMinutes: number;
+  minutesPerKm: number;
+}
+
+/** Post Pishtaz fixed pricing (integer rials). */
+export interface PostPishtazConfig {
+  fixedPriceIrr: number;
+  /** Weight included in the fixed price; each started kilo above it adds perExtraKgIrr. */
+  includedKg: number;
+  perExtraKgIrr: number;
+  etaDaysMin: number;
+  etaDaysMax: number;
+}
+
+export interface AdminShippingMethodDto {
+  provider: ShippingProvider;
+  /** Staff switch (for API couriers it can only turn an env-enabled courier off). */
+  enabled: boolean;
+  /** What actually applies now: env flag, credentials, mode and the staff switch together. */
+  active: boolean;
+  /** API couriers: why the method is not active (e.g. "SANDBOX", "DISABLED_IN_ENV"). */
+  note: string | null;
+  kind: "API" | "MANUAL";
+  config: OpetlifeCourierConfig | PostPishtazConfig | Record<string, never>;
+  webhookSecretConfigured: boolean | null;
+  updatedAt: string | null;
+}
+
+export interface AdminShippingOverviewDto {
+  mode: "sandbox" | "production";
+  methods: AdminShippingMethodDto[];
+}
+
+export interface AdminShipmentListItemDto {
+  id: string;
+  provider: ShippingProvider;
+  status: ShipmentStatus;
+  trackingCode: string | null;
+  orderId: string;
+  sellerName: string;
+  deliveryCity: string | null;
+  createdAt: string;
+  updatedAt: string;
+  /** Only opetlife courier and Post shipments are moved by staff; API couriers report their own status. */
+  staffManaged: boolean;
+}
+
+export interface SellerShippingProfileDto {
+  sellerOrganizationId: string;
+  /** Methods this seller offers; empty means every method the platform has switched on. */
+  offeredProviders: ShippingProvider[];
+  /** Methods the platform has switched on right now (the seller chooses among these). */
+  availableProviders: ShippingProvider[];
+  pickup: {
+    contactName: string | null;
+    phone: string | null;
+    addressLine: string | null;
+    city: string | null;
+    region: string | null;
+    area: string | null;
+    postalCode: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    instructions: string | null;
+  };
+  updatedAt: string | null;
 }
 
 /** One seller's shipping-option set for a Checkout (spec section 28: "shipping options per seller"). At most one quote in `quotes` has `status: SELECTED`. */
@@ -2890,9 +3023,15 @@ export interface TrustCaseDto {
 }
 
 /** Wraps (never replaces) RefundsService.request() — see the AdminRefundApproval model's own doc comment. `refundId` is set only once EXECUTED actually calls the refund flow. */
+export type AdminRefundSubjectType = "ORDER" | "BOOKING" | "TRAVEL_BOOKING";
+
 export interface AdminRefundApprovalDto {
   id: string;
-  orderId: string;
+  /** What is refunded; exactly the matching id below is set. */
+  subjectType: AdminRefundSubjectType;
+  orderId: string | null;
+  bookingId: string | null;
+  travelBookingId: string | null;
   amount: number;
   reason: string;
   status: AdminRefundApprovalStatus;
@@ -2902,6 +3041,23 @@ export interface AdminRefundApprovalDto {
   createdAt: string;
   updatedAt: string;
   executedAt: string | null;
+}
+
+/** Money on a service booking or stay as staff see it before cancelling or refunding (all rials). */
+export interface AdminBookingMoneyDto {
+  kind: "BOOKING" | "TRAVEL_BOOKING";
+  bookingId: string;
+  reference: string | null;
+  status: string;
+  paymentStatus: string;
+  /** Captured online; card-to-card or pay-at-provider money is not refundable from here. */
+  paidIrr: number;
+  refundedIrr: number;
+  refundableIrr: number;
+  /** What the booking's own cancellation terms would give back now. */
+  policyRefundIrr: number;
+  cancellable: boolean;
+  approvals: AdminRefundApprovalDto[];
 }
 
 export interface AdminAuditLogDto {
@@ -3164,6 +3320,8 @@ export interface AdminOrderFinancialsDto {
 
 /** Minimal admin-facing org summaries, used to locate a Provider/Seller for verification overrides or as a TrustCase subject — never the seller/provider's own operational DTOs, which carry fields (context, membership) an internal admin view has no use for. */
 export interface AdminProviderOrgSummaryDto {
+  /** Demo/showcase content: hidden from the public site in production; staff see it labelled. */
+  isDemoRecord?: boolean;
   id: string;
   name: string;
   type: string;
@@ -3208,6 +3366,12 @@ export interface AdminDashboardSummaryDto {
   pendingWalletTopUps: number | null;
   /** Account deletion requests waiting on staff (REQUESTED or PENDING_RETENTION); admin.manage only. */
   pendingDeletionRequests: number | null;
+  /** Pet ownership transfers in DISPUTED, waiting for staff to record the outcome; customer.view. */
+  openOwnershipDisputes: number | null;
+  /** Members' reports that a provider didn't show up, still open as admin tasks; services.view. */
+  openProviderNoShows: number | null;
+  /** Service, product and stay reviews waiting for a moderator, in the verticals this admin may moderate. */
+  pendingReviews: number | null;
   /**
    * Market-readiness #290 Q97, the launch month's success measure: registered pets and weekly bookings
    * (analytics.view; null otherwise). Live bookings only, rolling 7-day windows.
@@ -3837,6 +4001,8 @@ export interface AdminArticleLocaleAvailabilityDto {
 }
 
 export interface AdminArticleListItemDto {
+  /** Demo/showcase content: hidden from the public site in production; staff see it labelled. */
+  isDemoRecord?: boolean;
   id: string;
   author: ContentAuthorDto | null;
   category: PublicCategoryDto | null;
@@ -5535,6 +5701,12 @@ export enum PetFriendlyPlaceCategory {
   VENUE = "VENUE",
   SERVICE = "SERVICE",
   OTHER = "OTHER",
+  VETERINARY = "VETERINARY",
+  PET_SHOP = "PET_SHOP",
+  GROOMING = "GROOMING",
+  BOARDING = "BOARDING",
+  SHELTER = "SHELTER",
+  DOG_PARK = "DOG_PARK",
 }
 
 export enum PetFriendlyPlaceStatus {
@@ -5544,6 +5716,8 @@ export enum PetFriendlyPlaceStatus {
 }
 
 export interface PetFriendlyPlaceDto {
+  /** Demo/showcase content: hidden from the public site in production; staff see it labelled. */
+  isDemoRecord?: boolean;
   id: string;
   name: string;
   category: PetFriendlyPlaceCategory;
@@ -5582,6 +5756,21 @@ export interface PetFriendlyPlaceDto {
   petFriendlyLevel?: "FULL" | "PARTIAL" | "OUTDOOR_ONLY" | null;
   openingHours?: { day: number; open: string; close: string }[] | null;
   province?: string | null;
+  /** OSM = imported from OpenStreetMap: show its "not verified" label and "© OpenStreetMap contributors". */
+  source?: "MANUAL" | "OSM";
+  /** Business contact as published in OpenStreetMap. */
+  phone?: string | null;
+  website?: string | null;
+  /** A KYC-verified business has claimed this listing. */
+  claimed?: boolean;
+  osmUrl?: string | null;
+}
+
+export interface PlaceClaimResultDto {
+  claimId: string;
+  status: "PENDING" | "APPROVED" | "REJECTED" | "WITHDRAWN";
+  /** What the member does next: sign up as a partner, finish KYC, or wait for review. */
+  nextStep: "CREATE_PARTNER_ACCOUNT" | "COMPLETE_VERIFICATION" | "AWAITING_REVIEW" | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -6377,6 +6566,8 @@ export interface AdminRefundRequestDto {
 }
 
 export interface AdminProductRowDto {
+  /** Demo/showcase content: hidden from the public site in production; staff see it labelled. */
+  isDemoRecord?: boolean;
   id: string;
   title: string;
   status: ProductStatus;
@@ -6932,6 +7123,57 @@ export interface WalletTopUpDto {
 export interface WalletCardTransferInstructionsDto {
   cardNumber: string;
   cardHolderName: string;
+  bankName: string | null;
+  /** IR + 24 digits, when the owner set one. */
+  sheba: string | null;
+}
+
+/** One company card-to-card account, masked (admin never sees the full number back). */
+export interface AdminCardTransferDestinationDto {
+  id: string;
+  cardNumberMasked: string | null;
+  shebaMasked: string | null;
+  holderName: string;
+  bankName: string | null;
+  active: boolean;
+  reason: string;
+  createdAt: string;
+  createdBy: string | null;
+  closedAt: string | null;
+  closedBy: string | null;
+  closeReason: string | null;
+}
+
+export type CardTransferPaymentStatusValue = "AWAITING_RECEIPT" | "REVIEW_PENDING" | "APPROVED" | "REJECTED" | "UNDERPAID_AWAITING_DIFFERENCE" | "EXPIRED" | "CANCELLED";
+
+/** A card-to-card payment for an order or a booking, as finance sees it in the receipts queue. */
+export interface AdminCardTransferPaymentDto {
+  id: string;
+  status: CardTransferPaymentStatusValue;
+  member: { userId: string; displayName: string | null };
+  reference: { kind: "ORDER" | "BOOKING"; bookingId: string | null; orderIds: string[] };
+  /** Rials. */
+  expectedAmount: number;
+  receivedAmount: number | null;
+  currency: string;
+  companyCardNumberMasked: string;
+  accountHolderName: string;
+  receiptUploaded: boolean;
+  receiptUploadedAt: string | null;
+  /** Review opens at the next working-hours slot after the upload. */
+  reviewAvailableAt: string;
+  reviewedAt: string | null;
+  rejectionReason: string | null;
+  createdAt: string;
+}
+
+export interface AdminCardTransferDestinationOverviewDto {
+  /** ADMIN = set by the owner here; ENV = the server fallback (none set here yet); NONE = card-to-card is off. */
+  source: "ADMIN" | "ENV" | "NONE";
+  current: { cardNumberMasked: string | null; shebaMasked: string | null; holderName: string; bankName: string | null } | null;
+  /** Only SUPER_ADMIN with settings.manage may change it. */
+  canEdit: boolean;
+  history: AdminCardTransferDestinationDto[];
 }
 
 export interface WalletTopUpStartedDto {
@@ -6996,6 +7238,177 @@ export interface AdminWalletDetailDto {
   topUps: AdminWalletTopUpDto[];
   adjustments: AdminWalletAdjustmentDto[];
   audit: AdminWalletAuditDto[];
+}
+
+// ---------------------------------------------------------------------------
+// On-demand pet taxi (Uber/Snapp-style) and maps
+// ---------------------------------------------------------------------------
+
+export interface MapsClientConfigDto {
+  provider: "none" | "neshan" | "google";
+  tileUrl: string;
+  tileAttribution: string;
+  googleBrowserKey: string | null;
+  search: boolean;
+  /** Routes are straight-line estimates (no routing provider configured or reachable). */
+  estimatesOnly: boolean;
+}
+
+export interface MapPlaceDto {
+  label: string;
+  address: string | null;
+  city: string | null;
+  latitude: number;
+  longitude: number;
+}
+
+export type PetTaxiCarrierSizeValue = "SMALL" | "MEDIUM" | "LARGE";
+export type PetTaxiRideStatusValue = "SEARCHING" | "DRIVER_ASSIGNED" | "ARRIVING" | "PICKED_UP" | "COMPLETED" | "CANCELLED_BY_MEMBER" | "CANCELLED_BY_DRIVER" | "NO_DRIVER";
+export type PetTaxiRouteSource = "GOOGLE" | "NESHAN" | "STRAIGHT_LINE_ESTIMATE";
+
+export interface PetTaxiPointDto {
+  label: string;
+  latitude: number;
+  longitude: number;
+  city?: string | null;
+  note?: string | null;
+}
+
+export interface PetTaxiFareBreakdownDto {
+  baseIrr: number;
+  distanceIrr: number;
+  timeIrr: number;
+  carrierIrr: number;
+  extraPetsIrr: number;
+  minimumApplied: boolean;
+  km: number;
+  minutes: number;
+}
+
+export interface PetTaxiQuoteDto {
+  available: boolean;
+  /** NOT_PRICED: no fare rule for this city yet. */
+  reason: "NOT_PRICED" | null;
+  fareIrr: number | null;
+  breakdown: PetTaxiFareBreakdownDto | null;
+  distanceMeters: number;
+  durationSeconds: number;
+  routeSource: PetTaxiRouteSource;
+  fareRuleCity: string | null;
+}
+
+export interface PetTaxiRideDto {
+  id: string;
+  status: PetTaxiRideStatusValue;
+  carrierSize: PetTaxiCarrierSizeValue;
+  petIds: string[];
+  pickup: PetTaxiPointDto;
+  dropoff: PetTaxiPointDto;
+  fareIrr: number;
+  breakdown: PetTaxiFareBreakdownDto;
+  distanceMeters: number;
+  durationSeconds: number;
+  routeSource: PetTaxiRouteSource;
+  searchExpiresAt: string;
+  /** Shown to the member once a driver accepts. */
+  driver: { name: string; organizationName: string; phone: string | null; latitude: number | null; longitude: number | null; locatedAt: string | null } | null;
+  /** Shown to the driver once they accept. */
+  member: { name: string; phone: string | null } | null;
+  /** Straight-line estimate to the pickup (before pickup) or to the drop-off (after). */
+  etaSeconds: number | null;
+  assignedAt: string | null;
+  arrivingAt: string | null;
+  pickedUpAt: string | null;
+  completedAt: string | null;
+  cancelledAt: string | null;
+  cancelReason: string | null;
+  rating: number | null;
+  ratingComment: string | null;
+  createdAt: string;
+}
+
+export interface PetTaxiRequestDto {
+  id: string;
+  /** Before accepting, pickup and drop-off are a ~500 m grid point plus the city: no address label, no note. */
+  approximate: boolean;
+  pickup: PetTaxiPointDto;
+  dropoff: PetTaxiPointDto;
+  carrierSize: PetTaxiCarrierSizeValue;
+  petCount: number;
+  fareIrr: number;
+  distanceMeters: number;
+  durationSeconds: number;
+  /** Straight-line km from the driver's fresh position to the approximate pickup, rounded to half a km. */
+  kmFromYou: number | null;
+  searchExpiresAt: string;
+}
+
+export type PetTaxiDriverStatusValue = "PENDING" | "VERIFIED" | "SUSPENDED";
+
+/** One person a pet-taxi organization lets drive, with the staff check of their licence and vehicle. */
+export interface PetTaxiDriverDto {
+  id: string;
+  providerUserId: string;
+  name: string;
+  licenceNumber: string;
+  vehiclePlate: string;
+  vehicleDescription: string;
+  status: PetTaxiDriverStatusValue;
+  statusReason: string | null;
+  verifiedAt: string | null;
+  createdAt: string;
+}
+
+/** The owner's view: registered drivers and the members (owner/staff) who could be registered. */
+export interface PetTaxiDriversDto {
+  drivers: PetTaxiDriverDto[];
+  members: { providerUserId: string; name: string; role: "OWNER" | "STAFF" }[];
+}
+
+export interface AdminPetTaxiDriverDto extends PetTaxiDriverDto {
+  organizationName: string;
+  organizationVerified: boolean;
+}
+
+export interface PetTaxiDriverStateDto {
+  /** False when this organization is not a verified pet-taxi provider. */
+  eligible: boolean;
+  reason: "NOT_PET_TAXI" | "NOT_VERIFIED" | null;
+  /** This person may go online: a driving role and a staff-verified driver record. */
+  canDrive: boolean;
+  /** The organization owner, who registers drivers. */
+  isOwner: boolean;
+  /** This person's own driver record in this organization, if registered. */
+  driver: PetTaxiDriverDto | null;
+  online: boolean;
+  organizationName: string;
+  activeRide: PetTaxiRideDto | null;
+  requests: PetTaxiRequestDto[];
+}
+
+export interface AdminPetTaxiFareRuleDto {
+  id: string;
+  city: string;
+  baseFareIrr: number;
+  perKmIrr: number;
+  perMinuteIrr: number;
+  minimumFareIrr: number;
+  mediumSurchargePercent: number;
+  largeSurchargePercent: number;
+  extraPetIrr: number;
+  /** The city's bounding box (null for "*"). */
+  south: number | null;
+  west: number | null;
+  north: number | null;
+  east: number | null;
+  active: boolean;
+  updatedAt: string;
+}
+
+export interface AdminPetTaxiOverviewDto {
+  rules: AdminPetTaxiFareRuleDto[];
+  onlineDrivers: number;
+  rides: (PetTaxiRideDto & { memberName: string; driverName: string | null })[];
 }
 
 // ---------------------------------------------------------------------------

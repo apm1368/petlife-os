@@ -19,6 +19,7 @@ import { WalletService, WALLET_ADJUSTMENT_REFERENCE, toBalancesDto } from "../..
 import { WalletTopUpService, toTopUpDto } from "../../commerce/payments/wallet-top-up.service";
 import { deriveWalletBalances } from "../../commerce/payments/payment-infrastructure.policy";
 import { WALLET_ADJUSTMENT_MAX_IRR } from "../../commerce/payments/wallet-top-up.policy";
+import { ReceiptReviewNotifier } from "./receipt-review.notifier";
 
 export const WALLET_ADJUSTMENT_REASON_CODES: WalletAdjustmentReasonCode[] = [
   "GOODWILL",
@@ -74,6 +75,7 @@ export class AdminWalletsService {
     private readonly wallet: WalletService,
     private readonly topUps: WalletTopUpService,
     private readonly audit: AdminAuditLogService,
+    private readonly notifier: ReceiptReviewNotifier,
   ) {}
 
   async list(query: { q?: string; page: number; pageSize: number }): Promise<PaginatedDto<AdminWalletListItemDto>> {
@@ -226,7 +228,9 @@ export class AdminWalletsService {
         tx,
       });
     });
-    return toAdminTopUpDto(await this.prisma.walletTopUp.findUniqueOrThrow({ where: { id }, include: TOP_UP_INCLUDE }));
+    const row = await this.prisma.walletTopUp.findUniqueOrThrow({ where: { id }, include: TOP_UP_INCLUDE });
+    await this.notifier.topUpReviewed(row);
+    return toAdminTopUpDto(row);
   }
 
   /** Looking at a bank receipt is itself recorded: it shows a member's card and bank details. */

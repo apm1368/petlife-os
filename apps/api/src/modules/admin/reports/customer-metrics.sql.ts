@@ -5,12 +5,14 @@ import type { AdminCustomerSegment } from "@petlife/types";
  * One definition of "what a customer has done", shared by the users directory filters, the per-user
  * behaviour panel and the segment breakdown in reports, so the three can never disagree.
  *
- * Money is IRR. An order counts once it is not CANCELLED/REFUNDED; a service booking counts once it was
- * confirmed (or later) and a stay once confirmed (or later) — holds, drafts, expiries and rejections are
- * attempts, not purchases.
+ * Money is IRR. An order counts once it is not CANCELLED/REFUNDED; a stay once confirmed (or later) — holds,
+ * drafts, expiries and rejections are attempts, not purchases. A service booking is a *booking* once confirmed,
+ * but a *purchase* (and spend) only once money moved: paid online, or completed at the provider and not refunded.
+ * A confirmed pay-at-clinic appointment that hasn't happened yet is not a purchase.
  */
 export const LIVE_ORDER = Prisma.sql`o.status::text NOT IN ('CANCELLED', 'REFUNDED')`;
 export const LIVE_BOOKING = Prisma.sql`b."bookingStatus"::text IN ('CONFIRMED', 'CHECKED_IN', 'IN_PROGRESS', 'COMPLETED', 'NO_SHOW')`;
+export const PAID_BOOKING = Prisma.sql`(${LIVE_BOOKING} AND (b."paymentStatus"::text IN ('PAID', 'AUTHORIZED') OR (b."bookingStatus"::text = 'COMPLETED' AND b."paymentStatus"::text NOT IN ('REFUND_PENDING', 'REFUNDED'))))`;
 export const LIVE_STAY = Prisma.sql`t.status::text IN ('CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'NO_SHOW')`;
 
 /** Spend at or above this many rials (or this many purchases) makes an engaged customer VIP. */
@@ -30,7 +32,8 @@ export const CUSTOMER_METRIC_CTES = Prisma.sql`
   bm AS (
     SELECT b."userId" AS uid,
       COUNT(*) FILTER (WHERE ${LIVE_BOOKING})::int AS bookings,
-      COALESCE(SUM(COALESCE(b."priceAmount", 0) - b."discountAmount") FILTER (WHERE ${LIVE_BOOKING} AND COALESCE(b.currency, 'IRR') = 'IRR'), 0)::bigint AS spend,
+      COUNT(*) FILTER (WHERE ${PAID_BOOKING})::int AS purchases,
+      COALESCE(SUM(COALESCE(b."priceAmount", 0) - b."discountAmount") FILTER (WHERE ${PAID_BOOKING} AND COALESCE(b.currency, 'IRR') = 'IRR'), 0)::bigint AS spend,
       MAX(b."createdAt") FILTER (WHERE ${LIVE_BOOKING}) AS last_booking,
       COUNT(*) FILTER (WHERE b."bookingStatus"::text = 'CANCELLED_BY_USER')::int AS cancelled,
       COUNT(*) FILTER (WHERE b."bookingStatus"::text = 'NO_SHOW' AND b."noShowParty"::text = 'OWNER')::int AS no_show
@@ -56,7 +59,7 @@ export const CUSTOMER_METRIC_CTES = Prisma.sql`
 export function customerMetricColumns(now: Date): Prisma.Sql {
   const d30 = new Date(now.getTime() - 30 * 86_400_000);
   const d90 = new Date(now.getTime() - 90 * 86_400_000);
-  const purchases = Prisma.sql`(COALESCE(om.orders, 0) + COALESCE(bm.bookings, 0) + COALESCE(tm.stays, 0))`;
+  const purchases = Prisma.sql`(COALESCE(om.orders, 0) + COALESCE(bm.purchases, 0) + COALESCE(tm.stays, 0))`;
   const spend = Prisma.sql`(COALESCE(om.spend, 0) + COALESCE(bm.spend, 0) + COALESCE(tm.spend, 0))`;
   const lastBooking = Prisma.sql`GREATEST(bm.last_booking, tm.last_stay)`;
   const engaged = Prisma.sql`GREATEST(u."lastActiveAt", om.last_order, bm.last_booking, tm.last_stay, u."createdAt")`;

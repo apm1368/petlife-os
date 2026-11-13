@@ -29,6 +29,9 @@ export const viewport: Viewport = {
   ],
 };
 
+/** A static brand image (not a page), so it carries no locale prefix. */
+const APPLE_TOUCH_ICON = "/brand/opl/app-icon-180.png";
+
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
@@ -41,14 +44,14 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     metadataBase: new URL(SITE_ORIGIN),
     title: SITE_NAME[routeLocale],
     applicationName: "opetlife",
-    manifest: manifestPath(routeLocale),
+    // The web app manifest and the Apple touch icon are written straight into <head> below: on pages with async
+    // metadata Next streams these tags into <body>, where browsers ignore them for installing the app.
     appleWebApp: { capable: true, title: "opetlife", statusBarStyle: "default" },
     icons: {
       icon: [
         { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },
         { url: "/brand/opl/favicon.svg", type: "image/svg+xml" },
       ],
-      apple: "/brand/opl/app-icon-180.png",
     },
     description: SITE_TAGLINE[routeLocale],
     alternates: { types: { "application/rss+xml": `/${routeLocale}/feed.xml` } },
@@ -76,6 +79,8 @@ export default async function LocaleLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         {/* Which commit this bundle was built from — lets a reviewer confirm the preview is current. */}
         <meta name="petlife-build" content={process.env.NEXT_PUBLIC_BUILD_SHA ?? "dev"} />
+        <link rel="manifest" href={manifestPath(locale)} />
+        <link rel="apple-touch-icon" href={APPLE_TOUCH_ICON} />
       </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
