@@ -1,4 +1,55 @@
 {
+  "partnerSupport": {
+    "title": "Support",
+    "intro": "Fragen Sie das opetlife-Team zu Verifizierung, Auszahlungen, Buchungen, Bestellungen oder Ihrem Eintrag. Antworten erscheinen hier und als Benachrichtigung.",
+    "newCta": "Neue Anfrage",
+    "empty": "Noch keine Anfragen.",
+    "openedBy": "Eröffnet von {name}",
+    "openedByYou": "Von Ihnen eröffnet",
+    "loading": "Wird geladen…",
+    "retry": "Erneut versuchen",
+    "loadFailed": "Supportanfragen konnten nicht geladen werden.",
+    "create": {
+      "title": "Neue Supportanfrage",
+      "category": "Thema",
+      "subject": "Betreff",
+      "description": "Was ist passiert? Nennen Sie Bestell- oder Buchungsnummern, falls vorhanden.",
+      "submit": "Anfrage senden",
+      "failed": "Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
+      "required": "Bitte Betreff und Beschreibung ausfüllen."
+    },
+    "category": {
+      "BUSINESS": "Mein Unternehmen und Verifizierung",
+      "ACCOUNT": "Anmeldung und Teamzugang",
+      "PAYMENT": "Auszahlungen und Zahlungen",
+      "BOOKING": "Buchungen",
+      "ORDER": "Bestellungen",
+      "DELIVERY": "Versand und Lieferung",
+      "SERVICE": "Leistungen und Preise",
+      "MARKETPLACE": "Produkte und Eintrag",
+      "OTHER": "Etwas anderes"
+    },
+    "detail": {
+      "back": "Alle Anfragen",
+      "caseNumber": "Anfrage {number}",
+      "messages": "Verlauf",
+      "noMessages": "Noch keine Antwort. Das Supportteam antwortet hier.",
+      "support": "opetlife-Support",
+      "team": "Ihr Team",
+      "composePlaceholder": "Antwort schreiben…",
+      "send": "Senden",
+      "sendFailed": "Die Antwort konnte nicht gesendet werden.",
+      "reopen": "Anfrage wieder öffnen",
+      "reopenFailed": "Die Anfrage konnte nicht wieder geöffnet werden."
+    },
+    "status": {
+      "SUBMITTED": "Eingegangen",
+      "UNDER_REVIEW": "In Bearbeitung",
+      "WAITING": "Wartet auf Ihre Antwort",
+      "RESOLVED": "Gelöst",
+      "CLOSED": "Geschlossen"
+    }
+  },
   "adminHolidays": {
     "kicker": "Geschäftskalender",
     "title": "Feiertage und Schließtage",
@@ -3768,6 +3819,22 @@
       }
     },
     "support": {
+      "requesterTabs": {
+        "label": "Anfragende",
+        "ALL": "Alle",
+        "PERSONAL": "Privat",
+        "PARTNER": "Partner",
+        "PROVIDER": "Dienstleister",
+        "SELLER": "Shops",
+        "oneBusiness": "Es werden die Fälle eines einzelnen Unternehmens angezeigt.",
+        "allBusinesses": "Alle anzeigen"
+      },
+      "requesterOrg": {
+        "PROVIDER": "Dienstleister",
+        "SELLER": "Shop",
+        "unnamed": "(ohne Namen)",
+        "allCases": "Alle Fälle dieses Unternehmens"
+      },
       "title": "Supportfälle",
       "newCase": "Neuer Fall",
       "createTitle": "Supportfall erstellen",
@@ -7076,6 +7143,7 @@
     },
     "shell": {
       "nav": {
+        "support": "Support",
         "shipping": "Versand"
       }
     }
@@ -7656,6 +7724,7 @@
   "provider": {
     "shell": {
       "nav": {
+        "support": "Support",
         "home": "Übersicht",
         "bookings": "Buchungen",
         "schedule": "Kalender",

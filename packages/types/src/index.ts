@@ -2856,6 +2856,8 @@ export interface SupportCaseSummaryDto {
   firstAssignedAt?: string | null;
   firstResponseAt?: string | null;
   reopenCount?: number;
+  /** Set when a partner opened the case from their business panel; admin support lists these under Partners. */
+  requesterOrganization?: SupportCaseRequesterOrgDto | null;
 }
 
 export interface SupportCaseDetailDto extends SupportCaseSummaryDto {
@@ -2927,6 +2929,35 @@ export interface SupportCaseUserSummaryDto {
 }
 
 export interface SupportCaseUserDetailDto extends SupportCaseUserSummaryDto {
+  description: string;
+  messages: SupportMessageDto[];
+}
+
+/** The business (provider or shop) a partner case was opened for. */
+export interface SupportCaseRequesterOrgDto {
+  type: "PROVIDER" | "SELLER";
+  id: string;
+  name: string | null;
+}
+
+/**
+ * Categories a partner can pick in their business panel. PROVIDER / SELLER
+ * is the general "about my business" topic; the rest are the money and
+ * order questions partners actually raise.
+ */
+export const PARTNER_SUPPORT_CATEGORIES = ["PROVIDER", "SELLER", "ACCOUNT", "PAYMENT", "BOOKING", "ORDER", "DELIVERY", "SERVICE", "MARKETPLACE", "OTHER"] as const;
+export type PartnerSupportCategory = (typeof PARTNER_SUPPORT_CATEGORIES)[number];
+
+/**
+ * A case seen from a partner panel. Same user-facing status as the personal
+ * support centre (no priority, no assignee), plus who on the team opened it.
+ */
+export interface SupportCasePartnerSummaryDto extends SupportCaseUserSummaryDto {
+  openedBy: { id: string; displayName: string; isMe: boolean };
+  organization: SupportCaseRequesterOrgDto;
+}
+
+export interface SupportCasePartnerDetailDto extends SupportCasePartnerSummaryDto {
   description: string;
   messages: SupportMessageDto[];
 }

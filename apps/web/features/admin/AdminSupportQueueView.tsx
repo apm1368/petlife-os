@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button, ContextSurface, EmptyState, ErrorRecovery, Input, Select, Skeleton, StatusLabel } from "@petlife/ui";
 import { SupportCaseCategory, type AdminPriority, type SupportCaseStatus, type SupportCaseSummaryDto } from "@petlife/types";
 import { ApiError } from "@/lib/api/client";
@@ -12,12 +12,23 @@ import { DateField } from "@/features/shared/date-picker/DateField";
 
 const STATUSES: SupportCaseStatus[] = ["OPEN", "IN_PROGRESS", "WAITING_ON_USER", "WAITING_ON_INTERNAL", "RESOLVED", "CLOSED"] as SupportCaseStatus[];
 
+/** Who asked: everyone, people for themselves, or businesses from their panel (all, services, shops). */
+const REQUESTER_TABS = ["ALL", "PERSONAL", "PARTNER", "PROVIDER", "SELLER"] as const;
+type RequesterTab = (typeof REQUESTER_TABS)[number];
+
+function initialTab(value: string | null): RequesterTab {
+  return REQUESTER_TABS.includes(value as RequesterTab) ? (value as RequesterTab) : "ALL";
+}
+
 export function AdminSupportQueueView() {
   const t = useTranslations("admin.support");
   const tCommon = useTranslations("admin.common");
   const router = useRouter();
   const locale = useLocale();
+  const searchParams = useSearchParams();
 
+  const [tab, setTab] = useState<RequesterTab>(() => initialTab(searchParams.get("requester")));
+  const orgFilter = searchParams.get("org");
   const [cases, setCases] = useState<SupportCaseSummaryDto[] | null>(null);
   const [status, setStatus] = useState<SupportCaseStatus | "">("");
   const [categoryFilter, setCategoryFilter] = useState<SupportCaseCategory | "">("");
@@ -40,6 +51,8 @@ export function AdminSupportQueueView() {
     setError(null);
     try {
       const page = await adminService.listSupportCases({
+        requesterKind: tab === "ALL" ? undefined : tab,
+        requesterOrgId: orgFilter && (tab === "PROVIDER" || tab === "SELLER") ? orgFilter : undefined,
         status: status || undefined,
         category: categoryFilter || undefined,
         search: search || undefined,
@@ -56,7 +69,17 @@ export function AdminSupportQueueView() {
   useEffect(() => {
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, categoryFilter, createdFrom, createdTo]);
+  }, [tab, orgFilter, status, categoryFilter, createdFrom, createdTo]);
+
+  function pickTab(next: RequesterTab) {
+    setTab(next);
+    setCases(null);
+    // Keep the tab in the address so a link from a partner's page opens on it. Picking a tab drops a one-business filter.
+    const query = new URLSearchParams();
+    if (next !== "ALL") query.set("requester", next);
+    const qs = query.toString();
+    router.replace(`/${locale}/admin/support${qs ? `?${qs}` : ""}`);
+  }
 
   async function createCase() {
     setFormError(false);
@@ -119,6 +142,20 @@ export function AdminSupportQueueView() {
         </ContextSurface>
       ) : null}
 
+      <div className="flex flex-wrap gap-2" role="tablist" aria-label={t("requesterTabs.label")}>
+        {REQUESTER_TABS.map((k) => (
+          <Button key={k} size="sm" role="tab" aria-selected={tab === k} variant={tab === k ? "primary" : "ghost"} onClick={() => pickTab(k)}>
+            {t(`requesterTabs.${k}`)}
+          </Button>
+        ))}
+      </div>
+      {orgFilter && (tab === "PROVIDER" || tab === "SELLER") ? (
+        <p className="text-metadata text-text-secondary">
+          {t("requesterTabs.oneBusiness")}{" "}
+          <button type="button" className="underline" onClick={() => pickTab(tab)}>{t("requesterTabs.allBusinesses")}</button>
+        </p>
+      ) : null}
+
       <div className="flex flex-wrap items-end gap-2">
         <Select
           label={t("filter.allStatuses")}
@@ -160,8 +197,14 @@ export function AdminSupportQueueView() {
             <div className="flex flex-col">
               <span className="text-body font-medium text-text-primary">{c.caseNumber}</span>
               <span className="text-metadata text-text-secondary">{c.subject}</span>
+              {c.requesterOrganization ? (
+                <span className="text-metadata text-text-secondary">
+                  {t(`requesterOrg.${c.requesterOrganization.type}`)}: {c.requesterOrganization.name ?? t("requesterOrg.unnamed")} · {c.requesterDisplayName}
+                </span>
+              ) : null}
             </div>
             <div className="flex items-center gap-2">
+              {c.requesterOrganization ? <StatusLabel tone="info">{t("requesterTabs.PARTNER")}</StatusLabel> : null}
               <StatusLabel tone={adminStatusTone(c.priority)}>{t(`priority.${c.priority}`)}</StatusLabel>
               <StatusLabel tone={adminStatusTone(c.status)}>{t(`status.${c.status}`)}</StatusLabel>
             </div>

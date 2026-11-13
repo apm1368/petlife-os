@@ -1,5 +1,6 @@
-import { IsIn, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsIn, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from "class-validator";
 import { SupportCaseCategory } from "@prisma/client";
+import { PARTNER_SUPPORT_CATEGORIES, type PartnerSupportCategory } from "@petlife/types";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
 import { USER_LINKABLE_RELATED_ENTITY_TYPES, type UserLinkableRelatedEntityType } from "../../admin/support/support-case.service";
 
@@ -43,5 +44,28 @@ export class CreateMySupportCaseDto {
 export class PostMySupportMessageDto {
   @IsString()
   @IsNotEmpty()
+  body!: string;
+}
+
+/** A partner's case from their business panel: no household, pet or priority — the business itself is the context. */
+export class CreatePartnerSupportCaseDto {
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(200)
+  subject!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(5000)
+  description!: string;
+
+  @IsIn(PARTNER_SUPPORT_CATEGORIES)
+  category!: PartnerSupportCategory;
+}
+
+export class PostPartnerSupportMessageDto {
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(5000)
   body!: string;
 }

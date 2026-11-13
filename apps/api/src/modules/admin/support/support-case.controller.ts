@@ -31,6 +31,8 @@ export class SupportCaseController {
         search: query.search,
         createdFrom: query.createdFrom ? new Date(query.createdFrom) : undefined,
         createdTo: query.createdTo ? new Date(query.createdTo) : undefined,
+        requesterKind: query.requesterKind,
+        requesterOrgId: query.requesterOrgId,
       },
       query,
     );

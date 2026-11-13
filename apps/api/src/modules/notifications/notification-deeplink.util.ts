@@ -66,4 +66,8 @@ export const NotificationDeepLinks = {
   ngoVerification: () => `/ngo/verification`,
   communityPost: (postId: string) => `/community/posts/${postId}`,
   donationReceipt: (donationIntentId: string) => `/donations/${donationIntentId}`,
+  supportCase: (caseId: string) => `/support/tickets/${caseId}`,
+  /** A case opened from a business panel opens back in that panel, where the team follows it. */
+  providerSupportCase: (caseId: string) => `/provider/support/${caseId}`,
+  sellerSupportCase: (caseId: string) => `/seller/support/${caseId}`,
 };

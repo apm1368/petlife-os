@@ -1,4 +1,55 @@
 {
+  "partnerSupport": {
+    "title": "Support",
+    "intro": "Ask the opetlife team about verification, payouts, bookings, orders or your listing. Replies arrive here and as a notification.",
+    "newCta": "New request",
+    "empty": "No requests yet.",
+    "openedBy": "Opened by {name}",
+    "openedByYou": "Opened by you",
+    "loading": "Loading…",
+    "retry": "Try again",
+    "loadFailed": "Support requests could not be loaded.",
+    "create": {
+      "title": "New support request",
+      "category": "Topic",
+      "subject": "Subject",
+      "description": "What happened? Add order or booking numbers if there are any.",
+      "submit": "Send request",
+      "failed": "The request could not be sent. Try again.",
+      "required": "Fill in the subject and the description."
+    },
+    "category": {
+      "BUSINESS": "My business and verification",
+      "ACCOUNT": "Sign-in and team access",
+      "PAYMENT": "Payouts and payments",
+      "BOOKING": "Bookings",
+      "ORDER": "Orders",
+      "DELIVERY": "Shipping and delivery",
+      "SERVICE": "Services and prices",
+      "MARKETPLACE": "Products and listing",
+      "OTHER": "Something else"
+    },
+    "detail": {
+      "back": "All requests",
+      "caseNumber": "Request {number}",
+      "messages": "Conversation",
+      "noMessages": "No replies yet. The support team will answer here.",
+      "support": "opetlife support",
+      "team": "Your team",
+      "composePlaceholder": "Write a reply…",
+      "send": "Send",
+      "sendFailed": "The reply could not be sent.",
+      "reopen": "Reopen request",
+      "reopenFailed": "The request could not be reopened."
+    },
+    "status": {
+      "SUBMITTED": "Received",
+      "UNDER_REVIEW": "In progress",
+      "WAITING": "Waiting for your reply",
+      "RESOLVED": "Resolved",
+      "CLOSED": "Closed"
+    }
+  },
   "adminHolidays": {
     "kicker": "Business calendar",
     "title": "Holidays and closures",
@@ -3025,6 +3076,7 @@
   "provider": {
     "shell": {
       "nav": {
+        "support": "Support",
         "home": "Home",
         "bookings": "Bookings",
         "schedule": "Schedule",
@@ -4064,6 +4116,7 @@
   "seller": {
     "shell": {
       "nav": {
+        "support": "Support",
         "overview": "Overview",
         "orders": "Orders",
         "offers": "Offers",
@@ -4907,6 +4960,22 @@
       "pets": "{count} pet(s)"
     },
     "support": {
+      "requesterTabs": {
+        "label": "Who asked",
+        "ALL": "All",
+        "PERSONAL": "Personal",
+        "PARTNER": "Partners",
+        "PROVIDER": "Services",
+        "SELLER": "Shops",
+        "oneBusiness": "Showing one business's cases.",
+        "allBusinesses": "Show all"
+      },
+      "requesterOrg": {
+        "PROVIDER": "Service business",
+        "SELLER": "Shop",
+        "unnamed": "(no name)",
+        "allCases": "All cases from this business"
+      },
       "title": "Support cases",
       "newCase": "New case",
       "createTitle": "Create support case",
