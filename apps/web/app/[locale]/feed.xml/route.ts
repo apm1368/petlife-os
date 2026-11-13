@@ -1,5 +1,5 @@
 import { isRouteLocale } from "@/lib/i18n/config";
-import { fetchArticleFeed } from "@/lib/seo/blog-server";
+import { fetchArticleFeedResult, upstreamUnavailableResponse } from "@/lib/seo/blog-server";
 import { publicPageMetadata } from "@/lib/seo/public-metadata";
 import { LANGUAGE_TAG, absoluteUrl } from "@/lib/seo/site";
 
@@ -11,7 +11,9 @@ const escapeXml = (value: string) => value.replace(/&/g, "&amp;").replace(/</g, 
 export async function GET(_request: Request, { params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!isRouteLocale(locale)) return new Response("Not found", { status: 404 });
-  const items = (await fetchArticleFeed({ locale })).slice(0, 50);
+  const feed = await fetchArticleFeedResult({ locale });
+  if (feed.unavailable) return upstreamUnavailableResponse();
+  const items = feed.items.slice(0, 50);
   const meta = publicPageMetadata(locale, "blog");
   const channelUrl = absoluteUrl(`/${locale}/blog`);
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

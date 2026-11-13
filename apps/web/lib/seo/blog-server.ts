@@ -12,17 +12,70 @@ const SERVER_API_ORIGIN = process.env.API_INTERNAL_ORIGIN ?? process.env.NEXT_PU
 /** Article slugs are lowercase ASCII words joined by single hyphens (the API enforces the same rule on write). */
 export const ARTICLE_SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
-class UpstreamError extends Error {}
+class UpstreamError extends Error {
+  constructor(message: string, readonly status: number) {
+    super(message);
+  }
+}
 
-async function getJson<T>(path: string, init: { fresh?: boolean; revalidate?: number } = {}): Promise<T | null> {
+/** The API did not answer usefully after a retry and there is no recent copy to fall back on. */
+export class UpstreamUnavailableError extends Error {}
+
+const TIMEOUT_MS = 8_000;
+/** How long a last good answer may stand in when the API is slow or down (cold start, a deploy, load). */
+const STALE_FOR_MS = 6 * 60 * 60 * 1000;
+const LAST_GOOD_LIMIT = 300;
+const lastGood = new Map<string, { at: number; value: unknown }>();
+
+function remember(path: string, value: unknown) {
+  lastGood.delete(path);
+  lastGood.set(path, { at: Date.now(), value });
+  if (lastGood.size > LAST_GOOD_LIMIT) lastGood.delete(lastGood.keys().next().value as string);
+}
+
+/** Timeouts, dropped connections and 5xx are worth one more try; a 4xx is an answer. */
+function isTransient(error: unknown): boolean {
+  if (error instanceof UpstreamError) return error.status >= 500;
+  const name = (error as { name?: string } | null)?.name;
+  return name === "TimeoutError" || name === "AbortError" || error instanceof TypeError;
+}
+
+async function fetchJson<T>(path: string, init: { fresh?: boolean; revalidate?: number }): Promise<T | null> {
   const response = await fetch(`${SERVER_API_ORIGIN}${path}`, {
     headers: { accept: "application/json" },
     ...(init.fresh ? { cache: "no-store" as const } : { next: { revalidate: init.revalidate ?? 300 } }),
-    signal: AbortSignal.timeout(8_000),
+    signal: AbortSignal.timeout(TIMEOUT_MS),
   });
   if (response.status === 404) return null;
-  if (!response.ok) throw new UpstreamError(`${path} answered ${response.status}`);
+  if (!response.ok) throw new UpstreamError(`${path} answered ${response.status}`, response.status);
   return (await response.json()) as T;
+}
+
+/**
+ * One read of the public API. A slow or failing API (QA saw first requests time out under load) is retried
+ * once; if it still fails, the last good answer for the same path is used for up to six hours. Only when
+ * neither works does it throw `UpstreamUnavailableError`, which routes turn into a 503 where they can.
+ */
+async function getJson<T>(path: string, init: { fresh?: boolean; revalidate?: number } = {}): Promise<T | null> {
+  let failure: unknown;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const value = await fetchJson<T>(path, init);
+      remember(path, value);
+      return value;
+    } catch (error) {
+      failure = error;
+      if (!isTransient(error)) break;
+    }
+  }
+  const stale = lastGood.get(path);
+  if (stale && Date.now() - stale.at < STALE_FOR_MS) return stale.value as T | null;
+  throw new UpstreamUnavailableError(`${path}: ${failure instanceof Error ? failure.message : String(failure)}`);
+}
+
+/** For tests: forget the last good answers. */
+export function resetBlogServerCache() {
+  lastGood.clear();
 }
 
 function query(params: Record<string, string | number | boolean | undefined>): string {
@@ -103,10 +156,20 @@ export const fetchTag = cache(async (locale: RouteLocale, slug: string): Promise
 });
 
 /** Every visible article locale for the sitemap, feeds and llms.txt — short revalidation so new articles appear within minutes. */
-export async function fetchArticleFeed(options: { locale?: RouteLocale; withBody?: boolean } = {}): Promise<PublicArticleFeedItemDto[]> {
+export async function fetchArticleFeedResult(options: { locale?: RouteLocale; withBody?: boolean } = {}): Promise<{ items: PublicArticleFeedItemDto[]; unavailable: boolean }> {
   try {
-    return (await getJson<PublicArticleFeedItemDto[]>(`/blog/feed${query({ locale: options.locale, withBody: options.withBody ? "true" : undefined })}`, { revalidate: 300 })) ?? [];
+    return { items: (await getJson<PublicArticleFeedItemDto[]>(`/blog/feed${query({ locale: options.locale, withBody: options.withBody ? "true" : undefined })}`, { revalidate: 300 })) ?? [], unavailable: false };
   } catch {
-    return [];
+    return { items: [], unavailable: true };
   }
+}
+
+/** The feed, or an empty list when the API is unavailable (the sitemap still lists every static page). */
+export async function fetchArticleFeed(options: { locale?: RouteLocale; withBody?: boolean } = {}): Promise<PublicArticleFeedItemDto[]> {
+  return (await fetchArticleFeedResult(options)).items;
+}
+
+/** A plain-text 503 that tells crawlers to come back soon instead of caching an empty or broken answer. */
+export function upstreamUnavailableResponse(): Response {
+  return new Response("Temporarily unavailable. Please retry shortly.", { status: 503, headers: { "content-type": "text/plain; charset=utf-8", "retry-after": "120", "cache-control": "no-store" } });
 }
