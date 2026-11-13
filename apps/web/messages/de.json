@@ -9989,6 +9989,18 @@
       "pull": "Zum Aktualisieren ziehen",
       "release": "Loslassen zum Aktualisieren",
       "loading": "Wird aktualisiert…"
+    },
+    "footer": {
+      "title": "Die opetlife-App",
+      "install": "App installieren",
+      "iosSteps": "Auf dem iPhone: Tippe in Safari auf „Teilen“ und wähle „Zum Home-Bildschirm“.",
+      "otherSteps": "Öffne das Browsermenü und wähle „App installieren“ oder „Zum Startbildschirm hinzufügen“. Unter Android funktioniert Chrome am besten.",
+      "android": {
+        "bazaar": "Bei Cafe Bazaar laden",
+        "myket": "Bei Myket laden",
+        "googlePlay": "Bei Google Play laden",
+        "apk": "Für Android herunterladen"
+      }
     }
   },
   "safety": {

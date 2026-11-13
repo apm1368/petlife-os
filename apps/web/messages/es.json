@@ -9987,6 +9987,18 @@
       "pull": "Desliza para actualizar",
       "release": "Suelta para actualizar",
       "loading": "Actualizando…"
+    },
+    "footer": {
+      "title": "La app de opetlife",
+      "install": "Instalar la app",
+      "iosSteps": "En iPhone: en Safari, toca el botón Compartir y elige “Añadir a pantalla de inicio”.",
+      "otherSteps": "Abre el menú del navegador y elige “Instalar app” o “Añadir a la pantalla de inicio”. En Android, Chrome funciona mejor.",
+      "android": {
+        "bazaar": "Descargar en Cafe Bazaar",
+        "myket": "Descargar en Myket",
+        "googlePlay": "Descargar en Google Play",
+        "apk": "Descargar para Android"
+      }
     }
   },
   "safety": {
