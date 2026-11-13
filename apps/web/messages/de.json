@@ -1289,6 +1289,8 @@
     }
   },
   "adminSiteSettings": {
+    "enamadCheck": "Dieses Siegel bei eNamad prüfen",
+    "enamadIncomplete": "Gib eine gültige ID und einen gültigen Code ein, um das Siegel zu prüfen.",
     "kicker": "Website-Konfiguration",
     "title": "Website-Einstellungen",
     "subtitle": "Verwalten Sie hier Identität, Kontaktdaten, soziale Netzwerke, Ankündigung, aktive Bereiche, Registrierung und Wartungsmodus. Jede Änderung wird protokolliert.",
@@ -1321,6 +1323,10 @@
       "everyone": "Alle Besuchenden"
     },
     "sections": {
+      "trust": {
+        "title": "eNamad-Vertrauenssiegel",
+        "hint": "Gib nur die ID und den Code aus dem eNamad-Siegelcode ein, nie das HTML. Das Siegel erscheint in der Fußzeile, sobald es eingeschaltet ist und beide Werte ausgefüllt sind."
+      },
       "identity": {
         "title": "Identität und Fußzeile",
         "hint": "Kurzer Text unter dem Logo und Hinweis am Seitenende (rechtlicher Name, Registernummer)."
@@ -1331,7 +1337,7 @@
       },
       "social": {
         "title": "Soziale Medien",
-        "hint": "Vollständige https-Adressen; nur ausgefüllte Links werden gezeigt."
+        "hint": "Vollständige https-Links zur Website des jeweiligen Netzwerks; ein Link wird nur angezeigt, solange sein Schalter an ist."
       },
       "announcement": {
         "title": "Seitenweite Ankündigung",
@@ -1351,6 +1357,18 @@
       }
     },
     "names": {
+      "social_bale": "Bale",
+      "social_instagramEnabled": "Instagram anzeigen",
+      "social_telegramEnabled": "Telegram anzeigen",
+      "social_whatsappEnabled": "WhatsApp anzeigen",
+      "social_baleEnabled": "Bale anzeigen",
+      "social_xEnabled": "X anzeigen",
+      "social_linkedinEnabled": "LinkedIn anzeigen",
+      "social_youtubeEnabled": "YouTube anzeigen",
+      "social_aparatEnabled": "Aparat anzeigen",
+      "trust_enamadEnabled": "eNamad-Siegel anzeigen",
+      "trust_enamadId": "eNamad-ID (Ziffern nach id=)",
+      "trust_enamadCode": "eNamad-Code (nach Code=)",
       "site_tagline": "Slogan",
       "site_footerNote": "Fußzeilenhinweis",
       "site_contactPhone": "Support-Telefon",
@@ -1396,6 +1414,7 @@
       "error": "„{name}“ wurde nicht gespeichert: {code}"
     },
     "errors": {
+      "URL_HOST_NOT_ALLOWED": "dieser Link muss auf die eigene Website des Netzwerks zeigen (https)",
       "URL_INVALID": "Adresse muss mit https:// oder / beginnen",
       "EMAIL_INVALID": "keine gültige E-Mail",
       "FORMAT_INVALID": "ungültiges Format",
@@ -1415,13 +1434,16 @@
       "x": "X",
       "linkedin": "LinkedIn",
       "youtube": "YouTube",
-      "aparat": "Aparat"
+      "aparat": "Aparat",
+      "bale": "Bale"
     },
     "maintenance": {
       "title": "Wir aktualisieren opetlife",
       "defaultMessage": "opetlife ist kurz nicht erreichbar, während wir es verbessern. Bitte schauen Sie bald wieder vorbei.",
       "status": "Systemstatus"
-    }
+    },
+    "enamad": "eNamad-Vertrauenssiegel",
+    "followUs": "opetlife in sozialen Netzwerken"
   },
   "adminMessaging": {
     "kicker": "SMS und E-Mail",
@@ -10001,6 +10023,60 @@
       },
       "refresh": "Erledigt – Antrag aktualisieren",
       "limit": "Höchstens 5 offene Anträge; bitte die Prüfung abwarten."
+    },
+    "suggest": {
+      "cta": "Ort vorschlagen",
+      "eyebrow": "Tierfreundliche Orte",
+      "title": "Einen tierfreundlichen Ort vorschlagen",
+      "lede": "Kennst du einen Park, ein Café oder einen Laden, wo Tiere willkommen sind? Erzähl uns davon. Unser Team prüft jeden Vorschlag, bevor er im Verzeichnis erscheint.",
+      "fields": {
+        "name": "Name des Ortes",
+        "category": "Kategorie",
+        "categoryPick": "Kategorie wählen",
+        "city": "Stadt",
+        "address": "Adresse (optional)",
+        "pin": "Lage auf der Karte",
+        "notes": "Hinweise (optional)"
+      },
+      "pinHint": "Tippe auf die Karte, wo der Ort liegt, oder nutze deinen Standort.",
+      "map": "Karte: tippen, um die Markierung zu setzen",
+      "zoomIn": "Vergrößern",
+      "zoomOut": "Verkleinern",
+      "pinned": "Vorgeschlagener Ort",
+      "pinSet": "Markierung gesetzt",
+      "myLocation": "Meinen Standort verwenden",
+      "locating": "Standort wird gesucht …",
+      "notesPublic": "Was macht den Ort tierfreundlich? Wird der Ort freigegeben, können diese Hinweise öffentlich als Beschreibung erscheinen.",
+      "review": "Unser Team prüft deinen Vorschlag, bevor er erscheint. Dein Name wird nie öffentlich gezeigt.",
+      "send": "Vorschlag senden",
+      "sending": "Wird gesendet …",
+      "done": {
+        "title": "Danke! Dein Vorschlag wird geprüft",
+        "body": "Wir prüfen die Angaben und nehmen den Ort ins Verzeichnis auf, wenn er passt. Den Stand siehst du unten.",
+        "another": "Weiteren Ort vorschlagen"
+      },
+      "mine": {
+        "title": "Deine Vorschläge",
+        "loading": "Vorschläge werden geladen …",
+        "error": "Deine Vorschläge konnten nicht geladen werden.",
+        "retry": "Erneut versuchen",
+        "empty": "Du hast noch keinen Ort vorgeschlagen.",
+        "view": "Ort ansehen"
+      },
+      "status": {
+        "PENDING": "In Prüfung",
+        "APPROVED": "Aufgenommen",
+        "REJECTED": "Nicht aufgenommen"
+      },
+      "errors": {
+        "required": "Erforderlich",
+        "pin": "Setze die Markierung auf der Karte: Unser Team braucht die Lage, um den Ort aufzunehmen.",
+        "noLocation": "Dein Standort ist nicht verfügbar. Tippe stattdessen auf die Karte.",
+        "tooManyPending": "Du hast bereits 10 Vorschläge in Prüfung. Bitte warte, bis einige geprüft sind.",
+        "tooFast": "Zu viele Versuche in kurzer Zeit. Bitte warte eine Minute und versuche es erneut.",
+        "check": "Einige Angaben müssen geprüft werden.",
+        "generic": "Der Vorschlag konnte nicht gesendet werden. Bitte versuche es erneut."
+      }
     }
   },
   "healthDepth": {

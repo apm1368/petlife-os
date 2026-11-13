@@ -1191,6 +1191,8 @@
     }
   },
   "adminSiteSettings": {
+    "enamadCheck": "Dit keurmerk controleren bij eNamad",
+    "enamadIncomplete": "Vul een geldige id en code in om het keurmerk te controleren.",
     "kicker": "Siteconfiguratie",
     "title": "Site-instellingen",
     "subtitle": "Beheer hier identiteit, contactgegevens, sociale links, de aankondiging, actieve onderdelen, aanmelden en onderhoudsmodus. Elke wijziging wordt vastgelegd in het auditlogboek.",
@@ -1223,6 +1225,10 @@
       "everyone": "Alle bezoekers"
     },
     "sections": {
+      "trust": {
+        "title": "eNamad-keurmerk",
+        "hint": "Vul alleen de id en de code uit de eNamad-keurmerkcode in, nooit de HTML. Het keurmerk verschijnt in de footer zodra het is ingeschakeld en beide velden zijn ingevuld."
+      },
       "identity": {
         "title": "Identiteit en footer",
         "hint": "De korte regel onder het logo en de notitie onderaan elke pagina (officiële naam, registratienummer)."
@@ -1233,7 +1239,7 @@
       },
       "social": {
         "title": "Sociale media",
-        "hint": "Volledige https-pagina-adressen; alleen ingevulde links worden getoond."
+        "hint": "Volledige https-links naar de eigen site van elk netwerk; een link wordt alleen getoond zolang de schakelaar aan staat."
       },
       "announcement": {
         "title": "Aankondiging op de hele site",
@@ -1253,6 +1259,18 @@
       }
     },
     "names": {
+      "social_bale": "Bale",
+      "social_instagramEnabled": "Instagram tonen",
+      "social_telegramEnabled": "Telegram tonen",
+      "social_whatsappEnabled": "WhatsApp tonen",
+      "social_baleEnabled": "Bale tonen",
+      "social_xEnabled": "X tonen",
+      "social_linkedinEnabled": "LinkedIn tonen",
+      "social_youtubeEnabled": "YouTube tonen",
+      "social_aparatEnabled": "Aparat tonen",
+      "trust_enamadEnabled": "eNamad-keurmerk tonen",
+      "trust_enamadId": "eNamad-id (cijfers na id=)",
+      "trust_enamadCode": "eNamad-code (na Code=)",
       "site_tagline": "Slogan",
       "site_footerNote": "Footernotitie",
       "site_contactPhone": "Telefoonnummer support",
@@ -1298,6 +1316,7 @@
       "error": "“{name}” is niet opgeslagen: {code}"
     },
     "errors": {
+      "URL_HOST_NOT_ALLOWED": "deze link moet naar de eigen site van het netwerk verwijzen (https)",
       "URL_INVALID": "het adres moet beginnen met https:// of /",
       "EMAIL_INVALID": "geen geldig e-mailadres",
       "FORMAT_INVALID": "ongeldige notatie",
@@ -1317,13 +1336,16 @@
       "x": "X",
       "linkedin": "LinkedIn",
       "youtube": "YouTube",
-      "aparat": "Aparat"
+      "aparat": "Aparat",
+      "bale": "Bale"
     },
     "maintenance": {
       "title": "We werken opetlife bij",
       "defaultMessage": "opetlife is even niet beschikbaar terwijl we het verbeteren. Kom snel weer terug.",
       "status": "Systeemstatus"
-    }
+    },
+    "enamad": "eNamad-keurmerk",
+    "followUs": "opetlife op sociale media"
   },
   "adminMessaging": {
     "kicker": "Sms en e-mail",
@@ -7118,6 +7140,60 @@
       },
       "refresh": "Gedaan — werk mijn claim bij",
       "limit": "Je kunt maximaal 5 openstaande claims hebben; wacht op de beoordeling."
+    },
+    "suggest": {
+      "cta": "Plek voorstellen",
+      "eyebrow": "Huisdiervriendelijke plekken",
+      "title": "Stel een huisdiervriendelijke plek voor",
+      "lede": "Ken je een park, café of winkel waar huisdieren welkom zijn? Vertel het ons. Ons team controleert elke suggestie voordat die in de gids verschijnt.",
+      "fields": {
+        "name": "Naam van de plek",
+        "category": "Categorie",
+        "categoryPick": "Kies een categorie",
+        "city": "Plaats",
+        "address": "Adres (optioneel)",
+        "pin": "Locatie op de kaart",
+        "notes": "Opmerkingen (optioneel)"
+      },
+      "pinHint": "Tik op de kaart waar de plek is, of gebruik je huidige locatie.",
+      "map": "Kaart: tik om de markering te plaatsen",
+      "zoomIn": "Inzoomen",
+      "zoomOut": "Uitzoomen",
+      "pinned": "Voorgestelde plek",
+      "pinSet": "Markering geplaatst",
+      "myLocation": "Mijn locatie gebruiken",
+      "locating": "Locatie zoeken…",
+      "notesPublic": "Wat maakt de plek huisdiervriendelijk? Als de plek wordt goedgekeurd, kunnen deze opmerkingen openbaar als beschrijving worden getoond.",
+      "review": "Ons team controleert je suggestie voordat die verschijnt. Je naam wordt nooit openbaar getoond.",
+      "send": "Suggestie versturen",
+      "sending": "Versturen…",
+      "done": {
+        "title": "Bedankt! Je suggestie wordt beoordeeld",
+        "body": "We controleren de gegevens en zetten de plek in de gids als die past. Je volgt de status hieronder.",
+        "another": "Nog een plek voorstellen"
+      },
+      "mine": {
+        "title": "Jouw suggesties",
+        "loading": "Je suggesties worden geladen…",
+        "error": "We konden je suggesties niet laden.",
+        "retry": "Opnieuw proberen",
+        "empty": "Je hebt nog geen plek voorgesteld.",
+        "view": "Plek bekijken"
+      },
+      "status": {
+        "PENDING": "In beoordeling",
+        "APPROVED": "Toegevoegd",
+        "REJECTED": "Niet toegevoegd"
+      },
+      "errors": {
+        "required": "Verplicht",
+        "pin": "Plaats de markering op de kaart: ons team heeft de locatie nodig om de plek toe te voegen.",
+        "noLocation": "We konden je locatie niet bepalen. Tik op de kaart.",
+        "tooManyPending": "Je hebt al 10 suggesties in beoordeling. Wacht tot er een paar zijn beoordeeld.",
+        "tooFast": "Te veel pogingen in korte tijd. Wacht een minuut en probeer het opnieuw.",
+        "check": "Sommige gegevens moeten worden gecontroleerd.",
+        "generic": "De suggestie kon niet worden verstuurd. Probeer het opnieuw."
+      }
     }
   },
   "supportNeeds": {

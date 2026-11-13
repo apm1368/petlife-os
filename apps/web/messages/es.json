@@ -1289,6 +1289,8 @@
     }
   },
   "adminSiteSettings": {
+    "enamadCheck": "Comprobar este sello en eNamad",
+    "enamadIncomplete": "Introduce un id y un código válidos para comprobar el sello.",
     "kicker": "Configuración del sitio",
     "title": "Ajustes del sitio",
     "subtitle": "Gestiona aquí la identidad, los datos de contacto, las redes sociales, el anuncio, las secciones activas, el registro y el modo mantenimiento. Cada cambio queda registrado.",
@@ -1321,6 +1323,10 @@
       "everyone": "Todos los visitantes"
     },
     "sections": {
+      "trust": {
+        "title": "Sello de confianza eNamad",
+        "hint": "Introduce solo el id y el código que aparecen en el código del sello de eNamad, nunca el HTML. El sello aparece en el pie de página cuando está activado y ambos campos están rellenados."
+      },
       "identity": {
         "title": "Identidad y pie de página",
         "hint": "La frase bajo el logotipo y la nota al final de cada página (razón social, número de registro)."
@@ -1331,7 +1337,7 @@
       },
       "social": {
         "title": "Redes sociales",
-        "hint": "Direcciones https completas; solo se muestran los enlaces rellenados."
+        "hint": "Enlaces https completos al sitio de cada red; un enlace solo se muestra mientras su interruptor está activado."
       },
       "announcement": {
         "title": "Anuncio general",
@@ -1351,6 +1357,18 @@
       }
     },
     "names": {
+      "social_bale": "Bale",
+      "social_instagramEnabled": "Mostrar Instagram",
+      "social_telegramEnabled": "Mostrar Telegram",
+      "social_whatsappEnabled": "Mostrar WhatsApp",
+      "social_baleEnabled": "Mostrar Bale",
+      "social_xEnabled": "Mostrar X",
+      "social_linkedinEnabled": "Mostrar LinkedIn",
+      "social_youtubeEnabled": "Mostrar YouTube",
+      "social_aparatEnabled": "Mostrar Aparat",
+      "trust_enamadEnabled": "Mostrar el sello eNamad",
+      "trust_enamadId": "Id de eNamad (dígitos después de id=)",
+      "trust_enamadCode": "Código de eNamad (después de Code=)",
       "site_tagline": "Lema",
       "site_footerNote": "Nota del pie",
       "site_contactPhone": "Teléfono de soporte",
@@ -1396,6 +1414,7 @@
       "error": "«{name}» no se guardó: {code}"
     },
     "errors": {
+      "URL_HOST_NOT_ALLOWED": "este enlace debe apuntar al sitio de la propia red (https)",
       "URL_INVALID": "la dirección debe empezar por https:// o /",
       "EMAIL_INVALID": "correo no válido",
       "FORMAT_INVALID": "formato no válido",
@@ -1415,13 +1434,16 @@
       "x": "X",
       "linkedin": "LinkedIn",
       "youtube": "YouTube",
-      "aparat": "Aparat"
+      "aparat": "Aparat",
+      "bale": "Bale"
     },
     "maintenance": {
       "title": "Estamos actualizando opetlife",
       "defaultMessage": "opetlife no está disponible durante un momento mientras lo mejoramos. Vuelve pronto.",
       "status": "Estado del sistema"
-    }
+    },
+    "enamad": "Sello de confianza eNamad",
+    "followUs": "opetlife en redes sociales"
   },
   "adminMessaging": {
     "kicker": "SMS y correo",
@@ -9999,6 +10021,60 @@
       },
       "refresh": "Hecho: actualizar mi solicitud",
       "limit": "Puedes tener como máximo 5 solicitudes abiertas; espera la revisión."
+    },
+    "suggest": {
+      "cta": "Sugerir un lugar",
+      "eyebrow": "Lugares que admiten mascotas",
+      "title": "Sugiere un lugar que admita mascotas",
+      "lede": "¿Conoces un parque, café o tienda que acepte mascotas? Cuéntanoslo. Nuestro equipo revisa cada sugerencia antes de que aparezca en el directorio.",
+      "fields": {
+        "name": "Nombre del lugar",
+        "category": "Categoría",
+        "categoryPick": "Elige una categoría",
+        "city": "Ciudad",
+        "address": "Dirección (opcional)",
+        "pin": "Ubicación en el mapa",
+        "notes": "Notas (opcional)"
+      },
+      "pinHint": "Toca el mapa donde está el lugar o usa tu ubicación actual.",
+      "map": "Mapa: toca para colocar el marcador",
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar",
+      "pinned": "Lugar sugerido",
+      "pinSet": "Marcador colocado",
+      "myLocation": "Usar mi ubicación",
+      "locating": "Buscando tu ubicación…",
+      "notesPublic": "¿Qué lo hace apto para mascotas? Si se aprueba el lugar, estas notas pueden mostrarse públicamente como su descripción.",
+      "review": "Nuestro equipo revisa tu sugerencia antes de publicarla. Tu nombre nunca se muestra públicamente.",
+      "send": "Enviar sugerencia",
+      "sending": "Enviando…",
+      "done": {
+        "title": "¡Gracias! Tu sugerencia está en revisión",
+        "body": "Revisaremos los datos y añadiremos el lugar al directorio si encaja. Puedes seguirla abajo.",
+        "another": "Sugerir otro lugar"
+      },
+      "mine": {
+        "title": "Tus sugerencias",
+        "loading": "Cargando tus sugerencias…",
+        "error": "No hemos podido cargar tus sugerencias.",
+        "retry": "Reintentar",
+        "empty": "Aún no has sugerido ningún lugar.",
+        "view": "Ver el lugar"
+      },
+      "status": {
+        "PENDING": "En revisión",
+        "APPROVED": "Añadido",
+        "REJECTED": "No añadido"
+      },
+      "errors": {
+        "required": "Obligatorio",
+        "pin": "Coloca el marcador en el mapa: nuestro equipo necesita la ubicación para añadir el lugar.",
+        "noLocation": "No pudimos obtener tu ubicación. Toca el mapa.",
+        "tooManyPending": "Ya tienes 10 sugerencias en revisión. Espera a que se revisen algunas.",
+        "tooFast": "Demasiados intentos en poco tiempo. Espera un minuto y vuelve a intentarlo.",
+        "check": "Hay datos que revisar.",
+        "generic": "No se pudo enviar la sugerencia. Vuelve a intentarlo."
+      }
     }
   },
   "healthDepth": {

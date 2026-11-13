@@ -20,6 +20,7 @@
         "Adressen en locatie: de bezorg- of bezoekadressen die je opslaat, eventueel met een punt op de kaart. Als je daar toestemming voor geeft, wordt de locatie van je browser gebruikt voor diensten en plekken in de buurt, meldingen over vermiste huisdieren en de dierentaxi.",
         "Boekingen, bestellingen en betalingen: wat je hebt geboekt of gekocht, bezorggegevens, en terugbetalingen en geschillen. Bij kaart-naar-kaartbetalingen bewaren we de afbeelding van het betaalbewijs dat je uploadt. We verzamelen het nummer van je bankkaart en je IBAN niet.",
         "Wat je publiceert: berichten, reacties, chats, beoordelingen, meldingen van vermiste en gevonden huisdieren, gedenkpagina's, en de foto's en bestanden die je uploadt. Locatiegegevens in foto's (EXIF en GPS) worden bij het uploaden verwijderd.",
+        "Plaatsvoorstellen: de naam, categorie, stad, het adres, het kaartpunt en de opmerkingen van een plek die je voorstelt. Alleen ons team kan zien dat het voorstel van jou komt. Als ons team de plek controleert en in de gids opneemt, kunnen de gegevens en je opmerkingen worden gepubliceerd, je naam nooit. In de app laten we je weten of je voorstel is aangenomen.",
         "Support en berichten: je supportverzoeken en onze antwoorden, en de meldingen die we je sturen.",
         "Technisch: per ingelogde sessie de browsergegevens en het IP-adres van het apparaat. Voor pushmeldingen het pushadres van je browser. Wanneer iemand een deellink voor gezondheidsgegevens opent, registreren we het tijdstip, de browsergegevens en een onherkenbaar gemaakte vorm van het IP-adres."
       ]
@@ -66,6 +67,7 @@
         "Kaarten: kaarten op de site laden kaarttegels van OpenStreetMap. Voor sommige zoekopdrachten naar routes en plaatsen kan een kaartdienst zoals Neshan of Google worden gebruikt. Deze diensten zien het gebied dat je bekijkt of doorzoekt, niet je account.",
         "Verzekeraars: alleen als je een verzekeringsaanvraag indient, en alleen nadat je daarmee akkoord bent gegaan. De verzekeraar ontvangt dan je contactgegevens en de soort, het ras, de leeftijd en het gewicht van je huisdier.",
         "Andere sites: als je een externe vermelding opent, bijvoorbeeld op Jajiga, registreren we de klik, en vanaf dat moment geldt het privacybeleid van die site.",
+        "Keurmerk: als het e-trustkeurmerk (eNamad) onderaan onze pagina's staat, laadt je browser het van enamad.ir. Die dienst kan je IP-adres zien en dat je op opetlife bent.",
         "Autoriteiten: als de wet dat vereist, bijvoorbeeld bij een gerechtelijk bevel.",
         "We verkopen je persoonsgegevens nooit. Onze medewerkers kunnen persoonsgegevens alleen zien voor zover hun rol dat vereist. Voor het tonen van de volledige contactgegevens van een klant is een speciale bevoegdheid nodig, en elke inzage wordt vastgelegd."
       ]
@@ -79,7 +81,7 @@
         "petlife_oauth_state wordt alleen gebruikt tijdens het inloggen met Google en is 10 minuten geldig.",
         "NEXT_LOCALE onthoudt de taal die je hebt gekozen.",
         "De lokale opslag van je browser bewaart een paar kleine voorkeuren op je apparaat, zoals de instelling voor de hondencursor.",
-        "We gebruiken geen trackingcookies voor advertenties, analyse of sociale media."
+        "We gebruiken geen trackingcookies voor advertenties, analyse of sociale media. Onze links naar Instagram, Telegram en andere sociale netwerken zijn gewone links: er wordt niets van die diensten geladen totdat je er een opent."
       ]
     },
     {
