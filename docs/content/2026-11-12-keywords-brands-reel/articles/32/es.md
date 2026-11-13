@@ -24,45 +24,45 @@ opetlife tiene su base en Irán, así que comparamos diez términos en persa, co
 
 Nadie ha pagado por aparecer aquí y ningún puesto se puede comprar. Solo comparamos búsquedas sobre servicios y compras; los temas de salud tienen sus propias guías. Los títulos muestran el equivalente en español de cada término persa, y los consejos sirven vivas donde vivas.
 
-## 10. Taxi para mascotas: ¿el gato tiene que ir siempre en transportín?
+## N.º 10 – Taxi para mascotas: ¿el gato tiene que ir siempre en transportín?
 
 Buscan un taxi para mascotas quienes no tienen vehículo o no quieren llevar a un animal nervioso entre el tráfico hasta el veterinario o la residencia. La regla es sencilla: el gato viaja siempre en su transportín, incluso en un trayecto de cinco minutos, porque un gato suelto puede meterse bajo los pedales o escaparse por una puerta abierta. Nuestra [guía del taxi para mascotas](/es/blog/taxi-mascotas) explica qué preguntar antes de reservar y cómo acostumbrar al gato al transportín; mira también los [servicios de taxi para mascotas en opetlife](/es/services/PET_TAXI).
 
-## 9. Peluquería canina: ¿hay que rapar el manto doble en verano?
+## N.º 9 – Peluquería canina: ¿hay que rapar el manto doble en verano?
 
 Con el calor, muchos dueños piden cita en la peluquería canina pensando que un corte corto refrescará al perro. Si tu perro tiene manto doble (husky, pastor alemán, golden retriever), no lo rapes: ese pelo ayuda a regular la temperatura y protege la piel del sol, así que mejor cepilla a menudo la subcapa muerta. Nuestra guía de [peluquería canina](/es/blog/peluqueria-canina) explica qué hace un buen peluquero y cada cuánto conviene ir según el pelo; mira también los [servicios de peluquería en opetlife](/es/services/GROOMING).
 
-## 8. Adiestrador canino: ¿cómo reconocer a uno bueno?
+## N.º 8 – Adiestrador canino: ¿cómo reconocer a uno bueno?
 
 Tirones de correa, ladridos sin fin, mordisqueos o pipís en casa llevan a muchos a buscar un adiestrador canino. Lo que debes comprobar: un buen adiestrador premia la conducta que busca y no castiga; si alguien habla de collares de ahorque, de pinchos o eléctricos, de golpes o de «demostrar quién manda», busca otro. En la guía [cómo elegir un adiestrador canino](/es/blog/elegir-adiestrador-canino) tienes las preguntas que conviene hacer antes de pagar; mira también los [servicios de adiestramiento en opetlife](/es/services/TRAINING).
 
-## 7. Residencia canina: ¿qué revisar antes de reservar?
+## N.º 7 – Residencia canina: ¿qué revisar antes de reservar?
 
 Vacaciones y viajes de trabajo son los motivos habituales para buscar una residencia canina. Visita la residencia antes de reservar y comprueba con tus propios ojos si está limpia, fresca y bien ventilada, si separan a perros y gatos, si hay alguien por la noche y si exigen a todos los huéspedes la cartilla de vacunación; las fotos en internet no lo muestran. La guía de [residencias para perros y gatos](/es/blog/residencia-perros-gatos) trae la lista para la visita y qué llevar, y en opetlife puedes [comparar residencias](/es/services/BOARDING).
 
-## 6. Pienso para perros: ¿qué alimento le conviene a tu perro?
+## N.º 6 – Pienso para perros: ¿qué alimento le conviene a tu perro?
 
 «¿Cuál es el mejor pienso para perros?» no tiene una respuesta única. Elige según edad, tamaño y actividad: cachorros, adultos y mayores necesitan cosas distintas, los cachorros de razas grandes, un alimento para su crecimiento, y un perro tranquilo de apartamento gasta menos energía que uno que corre todo el día. Nuestra guía del [mejor pienso para perros](/es/blog/mejor-pienso-perros) explica cómo leer la etiqueta, calcular las raciones y cambiar de alimento poco a poco; si te interesan las grandes marcas, lee nuestra [guía neutral de 10 marcas conocidas de pienso y accesorios](/es/blog/marcas-pienso-accesorios-mascotas). Y aquí tienes el [pienso para perros en la tienda de opetlife](/es/shop/products?category=food&species=DOG).
 
 [[INFOGRAPHIC]]
 
-## 5. Seguro para mascotas: ¿qué leer antes de firmar?
+## N.º 5 – Seguro para mascotas: ¿qué leer antes de firmar?
 
 Una operación inesperada puede salir cara, y por eso el seguro para mascotas está entre las búsquedas habituales. Antes de firmar, lee con calma las exclusiones: enfermedades previas, vacunas y revisiones de rutina y periodos de carencia suelen figurar ahí, y conocerlos antes te ahorra sorpresas. Nuestra guía del [seguro para mascotas](/es/blog/seguro-mascotas) explica cómo se estructuran las pólizas y cómo compararlas, y en opetlife puedes [ver opciones de seguro una al lado de otra](/es/insurance/compare).
 
-## 4. Veterinario 24 horas: ¿por qué guardar el número hoy mismo?
+## N.º 4 – Veterinario 24 horas: ¿por qué guardar el número hoy mismo?
 
 Esta búsqueda suele llegar en el peor momento: de noche, con un animal que no se encuentra bien. Así que haz esto hoy: busca el veterinario 24 horas más cercano y guarda su número y dirección en el teléfono. Si alguna vez dudas de si es una urgencia, llama a un veterinario. Nuestra guía del [veterinario 24 horas](/es/blog/veterinario-24-horas) repasa las señales que no pueden esperar y qué llevar, y en el [buscador de veterinarios de opetlife](/es/vet/find) puedes buscar clínicas por ciudad y ver sus horarios.
 
-## 3. Pienso para gatos: ¿por qué importa tanto el agua fresca?
+## N.º 3 – Pienso para gatos: ¿por qué importa tanto el agua fresca?
 
 El pienso para gatos ocupa el tercer puesto, seguido a menudo de preguntas sobre la cantidad diaria o el alimento para gatos esterilizados. Si tu gato come pienso, ten siempre agua fresca y limpia a mano: los gatos beben poco por naturaleza y el alimento seco apenas contiene humedad, así que varios cuencos en distintos rincones lo animan a beber más. Lee cómo elegir según edad, esterilización y peso en nuestra guía del [mejor pienso para gatos](/es/blog/mejor-pienso-gatos), y mira el [alimento para gatos en la tienda de opetlife](/es/shop/products?category=food&species=CAT).
 
-## 2. Arena para gatos: ¿cada cuánto hay que limpiar el arenero?
+## N.º 2 – Arena para gatos: ¿cada cuánto hay que limpiar el arenero?
 
 «¿Cada cuánto se cambia la arena del gato?» es la pregunta que más acompaña a esta búsqueda. La respuesta corta: retira los grumos y las heces a diario y ten un arenero más que gatos, (tres para dos gatos), en lugares tranquilos y lejos del comedero. Nuestra guía de [tipos de arena para gatos](/es/blog/tipos-arena-gatos) compara la aglomerante de bentonita, la de carbón activado, la de sílice y las vegetales; además, encontrarás [arena y accesorios para gatos en la tienda de opetlife](/es/shop/products?category=accessories&species=CAT).
 
-## 1. Tienda de mascotas: ¿qué revisar antes de comprar?
+## N.º 1 – Tienda de mascotas: ¿qué revisar antes de comprar?
 
 La tienda de mascotas, física u online, encabeza la lista, porque comida, arena y accesorios son compras que todo dueño repite una y otra vez. Conviértelo en costumbre: antes de pagar, revisa la fecha de caducidad y el precinto, porque existen sacos reenvasados, pienso falsificado y productos a punto de caducar. Nuestra guía de la [tienda de mascotas online](/es/blog/tienda-mascotas-online) tiene la lista completa de compra, y en la [tienda de opetlife](/es/shop) puedes ver los productos por categoría.
 
