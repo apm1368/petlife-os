@@ -10,6 +10,7 @@ import type { DiscoverProvidersDto, DiscoverySort } from "./discovery.dto";
 import { excludeDemoRecordsFromPublicReads } from "../../common/public-record-origin";
 import type { ProviderServiceDto } from "@petlife/types";
 import { ApprovalPolicyService } from "../approvals/approval-policy.service";
+import { coarseKm, haversineKm, providerPinIsExact, publicPin } from "../../common/geo/geo";
 
 const MAX_CANDIDATES = 60;
 const AVAILABILITY_HORIZON_DAYS = 7;
@@ -41,7 +42,10 @@ export interface ProviderDiscoveryResultDto {
   coverImageUrl: string | null;
   specialties: string[];
   location: { id: string; city: string; region: string | null; addressLine: string } | null;
+  /** Whole kilometres from the viewer's point (0 = under 1 km), never finer. */
   distanceKm: number | null;
+  /** Internal: the unrounded distance used for sorting; stripped before the response leaves the service. */
+  sortDistanceKm?: number | null;
   services: DiscoveryServiceSummary[];
   startingPrice: number | null;
   currency: string | null;
@@ -54,12 +58,15 @@ export interface ProviderDiscoveryResultDto {
   rankingScore: number;
 }
 
-function haversineKm(aLat: number, aLng: number, bLat: number, bLng: number): number {
-  const rad = (d: number) => (d * Math.PI) / 180;
-  const dLat = rad(bLat - aLat);
-  const dLng = rad(bLng - aLng);
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(aLat)) * Math.cos(rad(bLat)) * Math.sin(dLng / 2) ** 2;
-  return Math.round(2 * 6371 * Math.asin(Math.sqrt(h)) * 10) / 10;
+/**
+ * Distance from the viewer to the location's PUBLIC point (a home-based provider's ~1 km approximation, so distances
+ * from arbitrary query points cannot triangulate a home). Null without a viewer point or a pin.
+ */
+function publicDistanceKm(query: DiscoverProvidersDto, orgType: string, location: ProviderLocation): number | null {
+  if (query.lat === undefined || query.lng === undefined) return null;
+  const pin = publicPin(location, providerPinIsExact(orgType, location.pinPublicExact));
+  if (pin.latitude === null || pin.longitude === null) return null;
+  return haversineKm({ latitude: query.lat, longitude: query.lng }, { latitude: pin.latitude, longitude: pin.longitude });
 }
 
 function startingPrice(service: ServiceWithVariants): number | null {
@@ -129,9 +136,11 @@ export class DiscoveryService {
     const results: ProviderDiscoveryResultDto[] = [];
     for (const org of orgs) {
       const locations = org.locations.filter((l) => (!query.city || l.city.toLowerCase() === query.city.toLowerCase()) && (!query.neighborhood || (l.region ?? "").toLowerCase().includes(query.neighborhood.toLowerCase())));
-      const location = this.pickLocation(locations.length ? locations : org.locations, query);
-      const distanceKm = location && query.lat !== undefined && query.lng !== undefined && location.latitude !== null && location.longitude !== null ? haversineKm(query.lat, query.lng, location.latitude, location.longitude) : null;
-      if (query.radiusKm && (distanceKm === null || distanceKm > query.radiusKm)) continue;
+      const location = this.pickLocation(locations.length ? locations : org.locations, query, org.type);
+      const exactKm = location ? publicDistanceKm(query, org.type, location) : null;
+      if (query.radiusKm && (exactKm === null || exactKm > query.radiusKm)) continue;
+      // Members are only ever shown whole kilometres (0 = under 1 km); ranking still uses the unrounded value.
+      const distanceKm = exactKm === null ? null : coarseKm(exactKm);
 
       const services = org.services;
       const prices = services.map(startingPrice).filter((p): p is number => p !== null);
@@ -148,7 +157,7 @@ export class DiscoveryService {
       const completedBookings = completed.find((c) => c.providerOrganizationId === org.id)?._count._all ?? 0;
       const bayes = (PRIOR_RATING * PRIOR_WEIGHT + (rating.average ?? 0) * rating.count) / (PRIOR_WEIGHT + rating.count);
       const soonBonus = nextAvailableAt && new Date(nextAvailableAt).getTime() - now.getTime() <= AVAILABILITY_HORIZON_DAYS * 86400_000 ? 3 : 0;
-      const proximity = distanceKm === null ? 0 : Math.max(0, 1 - distanceKm / 20);
+      const proximity = exactKm === null ? 0 : Math.max(0, 1 - exactKm / 20);
       const rankingScore = Math.round((soonBonus + (2 * bayes) / 5 + Math.min(completedBookings, 50) / 50 + proximity) * 1000) / 1000;
 
       results.push({
@@ -162,6 +171,7 @@ export class DiscoveryService {
         specialties: org.specialties,
         location: location ? { id: location.id, city: location.city, region: location.region, addressLine: location.addressLine } : null,
         distanceKm,
+        sortDistanceKm: exactKm,
         services: services.map((s) => ({ id: s.id, name: s.name, category: s.category, type: s.type, startingPrice: startingPrice(s), currency: s.currency, durationMinutes: s.durationMinutes, homeVisit: isHomeVisit(s), bookingMode: modeOf(s) })),
         startingPrice: minPrice,
         currency: services.find((s) => s.currency)?.currency ?? null,
@@ -175,17 +185,13 @@ export class DiscoveryService {
     }
 
     this.sort(results, query.sort ?? "RECOMMENDED");
-    return { total: results.length, items: results };
+    return { total: results.length, items: results.map(({ sortDistanceKm: _sort, ...item }) => item) };
   }
 
-  private pickLocation(locations: ProviderLocation[], query: DiscoverProvidersDto): ProviderLocation | null {
+  private pickLocation(locations: ProviderLocation[], query: DiscoverProvidersDto, orgType: string): ProviderLocation | null {
     if (!locations.length) return null;
     if (query.lat === undefined || query.lng === undefined) return locations[0]!;
-    return [...locations].sort((a, b) => {
-      const da = a.latitude === null || a.longitude === null ? Infinity : haversineKm(query.lat!, query.lng!, a.latitude, a.longitude);
-      const db = b.latitude === null || b.longitude === null ? Infinity : haversineKm(query.lat!, query.lng!, b.latitude, b.longitude);
-      return da - db;
-    })[0]!;
+    return [...locations].sort((a, b) => (publicDistanceKm(query, orgType, a) ?? Infinity) - (publicDistanceKm(query, orgType, b) ?? Infinity))[0]!;
   }
 
   /** Earliest real open slot across the provider's matching services at the chosen location. */
@@ -211,7 +217,7 @@ export class DiscoveryService {
         case "EARLIEST":
           return nullsLast(time(a.nextAvailableAt), time(b.nextAvailableAt)) || byName(a, b);
         case "NEAREST":
-          return nullsLast(a.distanceKm, b.distanceKm) || byName(a, b);
+          return nullsLast(a.sortDistanceKm, b.sortDistanceKm) || byName(a, b);
         case "TOP_RATED":
           return nullsLast(a.rating.average === null ? null : -a.rating.average, b.rating.average === null ? null : -b.rating.average) || b.rating.count - a.rating.count || byName(a, b);
         case "LOWEST_PRICE":
@@ -254,7 +260,7 @@ export class DiscoveryService {
       faqs,
       phone: org.phone,
       websiteUrl: org.websiteUrl,
-      locations: org.locations.map(toProviderLocationDto),
+      locations: org.locations.map((l) => toProviderLocationDto(l, { publicFor: org.type })),
       // bookingMode = what booking will do (approval policy applied), so the flow's "instant / request" copy is right.
       services: org.services.map((s) => ({ ...toProviderServiceDto(s), bookingMode: modeOf(s) as unknown as ProviderServiceDto["bookingMode"], startingPrice: startingPrice(s), homeVisit: isHomeVisit(s), staffIds: s.qualifiedStaff.map((q) => q.providerUserId) })),
       team: org.providerUsers.map((m) => ({ providerUserId: m.id, displayName: m.user.displayName, avatarUrl: m.user.avatarUrl, displayTitle: m.displayTitle, publicBio: m.publicBio, role: m.role === "VET" ? "VET" : "STAFF", serviceIds: m.qualifiedServices.map((q) => q.serviceId) })),

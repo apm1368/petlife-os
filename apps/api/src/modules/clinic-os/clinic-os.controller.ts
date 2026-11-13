@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseEnumPipe, ParseUUIDPipe, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseEnumPipe, ParseUUIDPipe, Patch, Post, Put, Query, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import { ProviderUserRole } from "@prisma/client";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
@@ -19,7 +19,7 @@ import { ClinicFinanceService } from "./clinic-finance.service";
 import { ClinicTeamService } from "./clinic-team.service";
 import { ClinicOperationsService } from "./clinic-operations.service";
 import { ClinicClientsService } from "./clinic-clients.service";
-import { AddClinicBranchDto, AddClinicStaffDto, AddCustomerNoteDto, AssignAppointmentDto, AssignClinicPlanDto, CampaignPreviewDto, CreateClinicTaskDto, CreateTagDto, ImportContactsDto, ListClinicTasksQueryDto, ListContactsQueryDto, QueueQueryDto, SendCampaignDto, ClinicFinanceReportQueryDto, CreateClinicReminderDto, ListClinicCustomersQueryDto, ListClinicRemindersQueryDto, ClinicClientDto, ClinicClientPetDto, ClinicClientMessageDto, InviteClinicClientDto, ListClinicClientsQueryDto } from "./dto/clinic-os.dto";
+import { AddClinicBranchDto, AddClinicStaffDto, AddCustomerNoteDto, SetBranchPinDto, AssignAppointmentDto, AssignClinicPlanDto, CampaignPreviewDto, CreateClinicTaskDto, CreateTagDto, ImportContactsDto, ListClinicTasksQueryDto, ListContactsQueryDto, QueueQueryDto, SendCampaignDto, ClinicFinanceReportQueryDto, CreateClinicReminderDto, ListClinicCustomersQueryDto, ListClinicRemindersQueryDto, ClinicClientDto, ClinicClientPetDto, ClinicClientMessageDto, InviteClinicClientDto, ListClinicClientsQueryDto } from "./dto/clinic-os.dto";
 
 /** Clinic OS endpoints for the caller's active provider organisation. Appointments and medical records reuse /provider/bookings and /provider/clinical. */
 @Controller("provider/clinic")
@@ -236,6 +236,14 @@ export class ClinicOsController {
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   addBranch(@CurrentProviderContext() ctx: ResolvedProviderContext, @Body() dto: AddClinicBranchDto) {
     return this.team.addBranch(ctx, dto);
+  }
+
+  /** Owner-only: set, move or remove a branch's map pin and choose whether the public sees the exact spot. */
+  @Put("branches/:locationId/pin")
+  @RequireProviderRole(ProviderUserRole.OWNER)
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  setBranchPin(@CurrentProviderContext() ctx: ResolvedProviderContext, @Param("locationId", ParseUUIDPipe) locationId: string, @Body() dto: SetBranchPinDto) {
+    return this.team.setBranchPin(ctx, locationId, dto);
   }
 
   /** Owner-only; refused while the branch is the last one or anything operational still points at it. */

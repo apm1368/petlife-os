@@ -2264,6 +2264,12 @@ model ProviderLocation {
   countryCode String
   latitude    Float?
   longitude   Float?
+  /// When the business confirmed its map pin (location consent). Null for pins saved before 2026-11-13.
+  pinConsentAt   DateTime?
+  /// Whether the public sees the exact pin. Null = the default for the organization type: storefronts (clinics,
+  /// hospitals, multi-service centres, accommodation) exact; home-based providers (sitters, walkers, boarding,
+  /// trainers, groomers, individual vets, pet taxi) a ~1 km approximate point until they opt in.
+  pinPublicExact Boolean?
   phone       String?
   /// IANA timezone (e.g. "Asia/Tehran") — authoritative for this location's
   /// appointment times. See README "Timezone behavior".
@@ -2499,8 +2505,11 @@ model CustomerAddress {
   city         String
   region       String?
   countryCode  String
+  /// The member's exact map pin. Private: only the member, delivery/fare/distance computations and staff ever read it.
   latitude     Float?
   longitude    Float?
+  /// When the member consented to storing the pin (cleared with the pin).
+  locationConsentAt DateTime?
   /// Neighbourhood / district (محله), which Iranian couriers and the opetlife courier zones use.
   area         String?
   instructions String?
@@ -2842,6 +2851,8 @@ model SellerOrganization {
   postalCode                String?
   latitude                  Float?
   longitude                 Float?
+  /// When the seller confirmed its map pin (partner signup).
+  pinConsentAt              DateTime?
   /// Shop opening hours for display only (no booking): [{ dayOfWeek, open, close }].
   openingHours              Json?
   linkedProviderOrganization ProviderOrganization?   @relation("ProviderSellerLink")
@@ -2899,6 +2910,8 @@ model SellerShippingProfile {
   pickupPostalCode     String?
   pickupLatitude       Float?
   pickupLongitude      Float?
+  /// When the seller confirmed the pickup pin.
+  pickupPinConsentAt   DateTime?
   pickupInstructions   String?
   updatedAt            DateTime           @updatedAt
   createdAt            DateTime           @default(now())
@@ -8927,6 +8940,9 @@ model TravelListing {
   /// this stays a plain lat/lng rather than a second geography column.
   latitude  Float?
   longitude Float?
+  /// Whether the public sees the exact pin. Null = by listing type: homes (villa, apartment, residence, boarding)
+  /// show a ~1 km approximate point until the host opts in; hotels and other storefronts show the exact pin.
+  pinPublicExact Boolean?
 
   imageObjectKeys String[] @default([])
   amenities       String[] @default([])

@@ -1,4 +1,4 @@
-import type { PaginatedDto } from "@petlife/types";
+import type { AdminMapsCoverageDto, PaginatedDto } from "@petlife/types";
 import { apiFetch } from "@/lib/api/client";
 
 export type SettingValue = number | boolean | string | { fa?: string; en?: string; de?: string; es?: string } | null;
@@ -34,6 +34,8 @@ export interface SettingChange {
 }
 export const adminSettingsService = {
   list: (signal?: AbortSignal) => apiFetch<PlatformSetting[]>("/admin/settings", { signal }),
+  /** Saved addresses / business locations still without a map pin, and the map the site draws. */
+  mapsCoverage: (signal?: AbortSignal) => apiFetch<AdminMapsCoverageDto>("/admin/settings/maps-coverage", { signal }),
   changes: (params: { key?: string; status?: SettingChangeStatus; page: number }, signal?: AbortSignal) => {
     const q = new URLSearchParams({ page: String(params.page), pageSize: "20" });
     if (params.key) q.set("key", params.key);

@@ -1159,7 +1159,9 @@
       "warning": "Waarschuwing",
       "urgent": "Dringend",
       "members": "Alleen leden",
-      "everyone": "Alle bezoekers"
+      "everyone": "Alle bezoekers",
+      "osm": "OpenStreetMap",
+      "google": "Google Maps"
     },
     "sections": {
       "identity": {
@@ -1189,6 +1191,10 @@
       "maintenance": {
         "title": "Onderhoudsmodus",
         "hint": "Bezoekers zien een onderhoudsmelding; het beheerpaneel, inloggen en de statuspagina blijven beschikbaar."
+      },
+      "maps": {
+        "title": "Kaarten",
+        "hint": "Welke kaart de site toont. Google heeft een browsersleutel nodig die in Google Cloud tot opetlife.ir is beperkt (met facturering aan); zonder sleutel, of als Google onbereikbaar is, blijft de site OpenStreetMap gebruiken."
       }
     },
     "names": {
@@ -1223,7 +1229,9 @@
       "auth_otpEnabled": "Inloggen met sms-code",
       "auth_googleEnabled": "Inloggen met Google",
       "maintenance_enabled": "Onderhoudsmodus aan",
-      "maintenance_message": "Onderhoudsmelding"
+      "maintenance_message": "Onderhoudsmelding",
+      "maps_provider": "Kaartaanbieder",
+      "maps_googleBrowserKey": "Google Maps-browsersleutel"
     },
     "save": {
       "label": "Wijzigingen opslaan",
@@ -1244,6 +1252,12 @@
       "UNCHANGED": "niets gewijzigd",
       "SETTING_CHANGE_CONFLICT": "ondertussen gewijzigd — vernieuw de pagina",
       "OPTION_INVALID": "ongeldige optie"
+    },
+    "coverage": {
+      "title": "Opgeslagen locaties zonder speld",
+      "addresses": "Ledenadressen: {missing, number} van {total, number}",
+      "providers": "Locaties van aanbieders: {missing, number} van {total, number}",
+      "pickups": "Ophaaladressen van verkopers: {missing, number} van {total, number}"
     }
   },
   "siteSettings": {
@@ -8119,6 +8133,12 @@
       "OWNER": "Eigenaar",
       "VET": "Dierenarts",
       "STAFF": "Medewerker"
+    },
+    "location": {
+      "noPin": "Nog geen speld: voeg er een toe zodat klanten deze vestiging vinden.",
+      "edit": "Locatie op de kaart instellen",
+      "save": "Locatie opslaan",
+      "cancel": "Annuleren"
     }
   },
   "clinicContacts": {
@@ -11440,7 +11460,8 @@
       "set": "Kaartpunt opgeslagen; de opetlife-koerier kan de prijs nauwkeuriger berekenen.",
       "clear": "Kaartpunt verwijderen",
       "denied": "Geen toegang tot je locatie. Je kunt ook zonder doorgaan.",
-      "hasPoint": "Heeft een kaartpunt"
+      "hasPoint": "Heeft een kaartpunt",
+      "noPoint": "Nog geen speld: voeg er een toe voor nauwkeurigere bezorging"
     }
   },
   "adminShipping": {
@@ -12682,5 +12703,35 @@
     "notPending": "Deze bestelling wacht niet meer op goedkeuring; laad de pagina opnieuw.",
     "failed": "Dat is niet gelukt; probeer het opnieuw.",
     "noPermission": "Voor goedkeuren of afwijzen heb je het recht voor winkelbeheer nodig."
+  },
+  "locationPicker": {
+    "title": "Locatie op de kaart",
+    "required": "Verplicht",
+    "hint": "Tik op de kaart of sleep de speld precies naar de deur. Knijp of gebruik + en − om te zoomen.",
+    "searchPlaceholder": "Zoek een straat of plaats",
+    "search": "Zoeken",
+    "searchNone": "Niets gevonden. Zet de speld in plaats daarvan op de kaart.",
+    "pinLabel": "Uw speld",
+    "mapLabel": "Kaart: tik om de speld te plaatsen, sleep om hem te verplaatsen",
+    "zoomIn": "Inzoomen",
+    "zoomOut": "Uitzoomen",
+    "useMyLocation": "Mijn huidige locatie gebruiken",
+    "locating": "Uw locatie wordt gezocht…",
+    "clear": "Speld verwijderen",
+    "denied": "Toegang tot de locatie is geweigerd of niet beschikbaar. Tik op de kaart om de speld te plaatsen.",
+    "outsideIran": "Dat punt ligt buiten Iran. Zet de speld op uw adres in Iran.",
+    "pinNeeded": "Zet een speld zodat koeriers en chauffeurs de juiste deur vinden.",
+    "privacyMember": "Uw exacte speld is privé. Hij wordt alleen gebruikt voor bezorging, ritprijzen en afstanden „bij mij in de buurt”, en door de koerier of chauffeur die u helpt. Niemand anders ziet hem; anderen zien hooguit een afgeronde afstand zoals ~2 km. U kunt hem altijd verplaatsen of verwijderen.",
+    "privacyBusiness": "Klanten zien deze speld op uw openbare pagina. Werkt u vanuit huis, dan ziet het publiek een benaderd punt (ongeveer 1 km), tenzij u kiest voor de exacte plek.",
+    "consentMember": "Deze exacte locatie bewaren voor mijn bezorgingen en afstandsschattingen",
+    "consentBusiness": "Dit is de locatie van mijn bedrijf en ik ga akkoord met de weergave zoals hierboven beschreven",
+    "exactPublic": "Mijn exacte locatie openbaar tonen (anders een benaderd punt, ongeveer 1 km)",
+    "consentNeeded": "Vink het vakje onder de kaart aan om de speld te bewaren, of verwijder de speld.",
+    "privacyPickup": "Alleen de koeriers die uw pakketten ophalen en ons supportteam gebruiken deze speld; hij verschijnt nooit op uw openbare pagina's.",
+    "consentPickup": "Deze exacte ophaallocatie bewaren voor koeriers"
+  },
+  "locationNudge": {
+    "text": "Zet uw standaardadres op de kaart voor nauwkeurigere bezorging en plekken bij u in de buurt.",
+    "action": "Nu vastzetten"
   }
 }

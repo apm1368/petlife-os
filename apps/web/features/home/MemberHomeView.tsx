@@ -26,6 +26,7 @@ import type { RouteLocale } from "@/lib/i18n/config";
 
 import { eventTitle, eventSourceLabel, formatOverviewDate, mergeCareIntoOverview } from "@/features/pets/overview-labels";
 import "./member-home.css";
+import { LocationNudge } from "@/features/maps/LocationNudge";
 
 type Booking = Awaited<ReturnType<typeof bookingsService.list>>[number];
 
@@ -427,6 +428,7 @@ export function MemberHomeView() {
     <div className="member-home">
       <h1 className="sr-only">{firstName ? c.hello(firstName) : pet.name}</h1>
       {switchError ? <p role="alert">{c.unavailable}</p> : null}
+      <LocationNudge />
       <GlassMemberHome locale={locale} userName={firstName ?? null} pet={pet} overview={overview} pets={pets} activePetId={petId} careFailed={careFailed} onRetryCare={load} permission={permission} isSwitching={isSwitching} onSwitch={(id) => { setSwitchError(false); void switchActivePet(id).catch(() => setSwitchError(true)); }} />
 
       <div className="member-home__layout">

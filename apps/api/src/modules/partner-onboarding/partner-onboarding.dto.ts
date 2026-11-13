@@ -1,5 +1,6 @@
 import { Type } from "class-transformer";
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsIn, IsInt, IsLatitude, IsLongitude, IsOptional, IsString, IsUUID, Length, Matches, Max, MaxLength, Min, ValidateNested } from "class-validator";
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsIn, IsInt, IsOptional, IsString, IsUUID, Length, Matches, Max, MaxLength, Min, ValidateNested } from "class-validator";
+import { IsIranLatitude, IsIranLongitude } from "../../common/geo/geo";
 
 /** Service kinds a partner can pick at signup (a shop is chosen separately). */
 export const PARTNER_SERVICE_KINDS = ["VET_CLINIC", "VETERINARIAN", "GROOMER", "BOARDING", "SITTER", "TRAINER", "WALKER", "PET_TAXI"] as const;
@@ -46,8 +47,12 @@ export class PartnerAddressDto {
   @IsString() @Length(2, 80) city!: string;
   @IsString() @Length(5, 300) addressLine!: string;
   @IsOptional() @Matches(/^[0-9۰-۹]{10}$/) postalCode?: string;
-  @IsOptional() @IsLatitude() latitude?: number;
-  @IsOptional() @IsLongitude() longitude?: number;
+  /** The business's map pin, inside Iran. Sent together with locationConsent: true. */
+  @IsOptional() @IsIranLatitude() latitude?: number;
+  @IsOptional() @IsIranLongitude() longitude?: number;
+  @IsOptional() @IsBoolean() locationConsent?: boolean;
+  /** Home-based services: show the exact pin publicly instead of the ~1 km approximate point (default off). */
+  @IsOptional() @IsBoolean() exactPinPublic?: boolean;
 }
 
 export class PartnerDayHoursDto {

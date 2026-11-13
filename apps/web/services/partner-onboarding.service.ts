@@ -17,7 +17,7 @@ export interface PartnerOnboardingStateDto {
   linked: boolean;
   business: { name: string; description: string | null; logoUrl: string | null } | null;
   owner: { firstName: string; lastName: string; phone: string } | null;
-  address: { province: string | null; city: string | null; addressLine: string | null; postalCode: string | null; latitude: number | null; longitude: number | null } | null;
+  address: { province: string | null; city: string | null; addressLine: string | null; postalCode: string | null; latitude: number | null; longitude: number | null; exactPinPublic?: boolean | null } | null;
   calendar: DayHours[];
   services: { id: string; kind: PartnerServiceKind | null; name: string; priceIrr: number; durationMinutes: number; maxPets: number; isActive: boolean }[];
   openingHours: { dayOfWeek: number; open: string; close: string }[];
@@ -41,7 +41,7 @@ export const partnerOnboardingService = {
   owner: (input: { firstName: string; lastName: string; phone: string }) => apiFetch<PartnerOnboardingStateDto>("/partner-onboarding/owner", { method: "PUT", body: input }),
   documentUpload: (subject: PartnerSubject, contentType: string, fileSizeBytes: number) => apiFetch<UploadTarget>("/partner-onboarding/documents/upload", { method: "POST", body: { subject, contentType, fileSizeBytes } }),
   registerDocument: (input: { subject: PartnerSubject; objectKey: string; kind: string; contentType: string; fileSizeBytes: number; expiresAt?: string }) => apiFetch<PartnerOnboardingStateDto>("/partner-onboarding/documents", { method: "POST", body: input }),
-  address: (input: { province: string; city: string; addressLine: string; postalCode?: string; latitude?: number; longitude?: number }) => apiFetch<PartnerOnboardingStateDto>("/partner-onboarding/address", { method: "PUT", body: input }),
+  address: (input: { province: string; city: string; addressLine: string; postalCode?: string; latitude?: number; longitude?: number; locationConsent?: boolean; exactPinPublic?: boolean }) => apiFetch<PartnerOnboardingStateDto>("/partner-onboarding/address", { method: "PUT", body: input }),
   calendar: (days: DayHours[]) => apiFetch<PartnerOnboardingStateDto>("/partner-onboarding/calendar", { method: "PUT", body: { days } }),
   services: (services: { kind: PartnerServiceKind; name: string; priceIrr: number; durationMinutes: number; maxPets: number }[]) => apiFetch<PartnerOnboardingStateDto>("/partner-onboarding/services", { method: "PUT", body: { services } }),
   openingHours: (days: DayHours[]) => apiFetch<PartnerOnboardingStateDto>("/partner-onboarding/opening-hours", { method: "PUT", body: { days } }),

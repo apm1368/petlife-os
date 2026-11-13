@@ -1,4 +1,4 @@
-import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsIn, IsInt, IsLatitude, IsLongitude, IsNumber, IsOptional, IsString, IsUUID, Length, Matches, Max, MaxLength, Min, ValidateNested } from "class-validator";
+import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsIn, IsInt, IsLatitude, IsLongitude, IsNumber, IsOptional, IsString, IsUUID, Length, Matches, Max, MaxLength, Min, ValidateNested, ValidateIf } from "class-validator";
 import { Type } from "class-transformer";
 import { PetFriendlyPlaceCategory, PetFriendlyPlaceStatus, PetSpecies } from "@petlife/types";
 import { PaginationQueryDto } from "../../../common/pagination/pagination.dto";
@@ -217,15 +217,23 @@ export class ListPetFriendlyPlacesQueryDto extends PaginationQueryDto {
 }
 
 export class NearbyPetFriendlyPlacesQueryDto extends PaginationQueryDto {
+  /** The viewer's point for this one request (never stored). Not needed with near=home. */
+  @ValidateIf((o: NearbyPetFriendlyPlacesQueryDto) => o.near !== "home")
   @Type(() => Number)
   @IsNumber()
   @IsLatitude()
   latitude!: number;
 
+  @ValidateIf((o: NearbyPetFriendlyPlacesQueryDto) => o.near !== "home")
   @Type(() => Number)
   @IsNumber()
   @IsLongitude()
   longitude!: number;
+
+  /** "home": from the signed-in member's own pinned default address, looked up server-side. */
+  @IsOptional()
+  @IsIn(["home"])
+  near?: "home";
 
   /** Search radius in meters — capped to keep a single query bounded. */
   @IsOptional()

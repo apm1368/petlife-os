@@ -1257,7 +1257,9 @@
       "warning": "Warnung",
       "urgent": "Dringend",
       "members": "Nur Mitglieder",
-      "everyone": "Alle Besuchenden"
+      "everyone": "Alle Besuchenden",
+      "osm": "OpenStreetMap",
+      "google": "Google Maps"
     },
     "sections": {
       "identity": {
@@ -1287,6 +1289,10 @@
       "maintenance": {
         "title": "Wartungsmodus",
         "hint": "Besuchende sehen eine Wartungsnachricht; Admin-Bereich, Anmeldung und Statusseite bleiben erreichbar."
+      },
+      "maps": {
+        "title": "Karten",
+        "hint": "Welche Karte die Website zeigt. Google braucht einen Browser-Schlüssel, der in Google Cloud auf opetlife.ir beschränkt ist (mit aktiver Abrechnung); ohne ihn oder wenn Google nicht erreichbar ist, bleibt OpenStreetMap."
       }
     },
     "names": {
@@ -1321,7 +1327,9 @@
       "auth_otpEnabled": "Anmeldung per SMS-Code",
       "auth_googleEnabled": "Anmeldung mit Google",
       "maintenance_enabled": "Wartungsmodus an",
-      "maintenance_message": "Wartungsnachricht"
+      "maintenance_message": "Wartungsnachricht",
+      "maps_provider": "Kartenanbieter",
+      "maps_googleBrowserKey": "Google-Maps-Browserschlüssel"
     },
     "save": {
       "label": "Änderungen speichern",
@@ -1342,6 +1350,12 @@
       "UNCHANGED": "nichts geändert",
       "SETTING_CHANGE_CONFLICT": "zwischenzeitlich geändert – Seite neu laden",
       "OPTION_INVALID": "ungültige Option"
+    },
+    "coverage": {
+      "title": "Gespeicherte Standorte ohne Kartennadel",
+      "addresses": "Mitgliederadressen: {missing, number} von {total, number}",
+      "providers": "Anbieterstandorte: {missing, number} von {total, number}",
+      "pickups": "Abholadressen von Händlern: {missing, number} von {total, number}"
     }
   },
   "siteSettings": {
@@ -11082,7 +11096,8 @@
       "set": "Kartenpunkt gespeichert; der opetlife-Kurier kann genauer rechnen.",
       "clear": "Kartenpunkt entfernen",
       "denied": "Kein Standortzugriff. Sie können ohne ihn fortfahren.",
-      "hasPoint": "Mit Kartenpunkt"
+      "hasPoint": "Mit Kartenpunkt",
+      "noPoint": "Noch keine Nadel: für genauere Lieferung eine setzen"
     }
   },
   "adminShipping": {
@@ -12227,6 +12242,12 @@
       "OWNER": "Inhaber/in",
       "VET": "Tierarzt/Tierärztin",
       "STAFF": "Mitarbeiter/in"
+    },
+    "location": {
+      "noPin": "Noch keine Kartennadel: Setzen Sie eine, damit Kunden diese Filiale finden.",
+      "edit": "Standort auf der Karte festlegen",
+      "save": "Standort speichern",
+      "cancel": "Abbrechen"
     }
   },
   "clinicContacts": {
@@ -12591,5 +12612,35 @@
     "notPending": "Diese Bestellung wartet nicht mehr auf Freigabe; lade die Seite neu.",
     "failed": "Das hat nicht geklappt; bitte erneut versuchen.",
     "noPermission": "Zum Freigeben oder Ablehnen ist die Berechtigung zur Shop-Verwaltung nötig."
+  },
+  "locationPicker": {
+    "title": "Standort auf der Karte",
+    "required": "Pflichtfeld",
+    "hint": "Tippen Sie auf die Karte oder ziehen Sie die Nadel genau vor die Tür. Zum Zoomen zwei Finger oder + und − verwenden.",
+    "searchPlaceholder": "Straße oder Ort suchen",
+    "search": "Suchen",
+    "searchNone": "Nichts gefunden. Setzen Sie die Nadel stattdessen auf der Karte.",
+    "pinLabel": "Ihre Nadel",
+    "mapLabel": "Karte: Tippen setzt die Nadel, Ziehen verschiebt sie",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern",
+    "useMyLocation": "Meinen aktuellen Standort verwenden",
+    "locating": "Standort wird ermittelt…",
+    "clear": "Nadel entfernen",
+    "denied": "Der Standortzugriff wurde abgelehnt oder ist nicht verfügbar. Tippen Sie stattdessen auf die Karte.",
+    "outsideIran": "Dieser Punkt liegt außerhalb des Iran. Setzen Sie die Nadel auf Ihre Adresse im Iran.",
+    "pinNeeded": "Setzen Sie eine Nadel, damit Kuriere und Fahrer die richtige Tür finden.",
+    "privacyMember": "Ihre genaue Nadel ist privat. Sie dient nur der Lieferung, dem Fahrpreis und Entfernungen „in meiner Nähe“ sowie dem Kurier oder Fahrer, der Sie beliefert. Niemand sonst sieht sie; andere sehen höchstens eine gerundete Entfernung wie ~2 km. Sie können sie jederzeit verschieben oder entfernen.",
+    "privacyBusiness": "Kundinnen und Kunden sehen diese Nadel auf Ihrer öffentlichen Seite. Wenn Sie von zu Hause arbeiten, sieht die Öffentlichkeit nur einen ungefähren Punkt (etwa 1 km), außer Sie zeigen die genaue Stelle.",
+    "consentMember": "Diesen genauen Standort für meine Lieferungen und Entfernungsangaben speichern",
+    "consentBusiness": "Das ist der Standort meines Betriebs, und ich bin mit der oben beschriebenen Anzeige einverstanden",
+    "exactPublic": "Meinen genauen Standort öffentlich zeigen (sonst ein ungefährer Punkt, etwa 1 km)",
+    "consentNeeded": "Setzen Sie das Häkchen unter der Karte, um die Nadel zu speichern, oder entfernen Sie die Nadel.",
+    "privacyPickup": "Nur die Kuriere, die Ihre Pakete abholen, und unser Support nutzen diese Nadel; sie erscheint nie auf Ihren öffentlichen Seiten.",
+    "consentPickup": "Diesen genauen Abholort für Kuriere speichern"
+  },
+  "locationNudge": {
+    "text": "Setzen Sie Ihre Standardadresse auf der Karte, für genauere Lieferungen und Orte in Ihrer Nähe.",
+    "action": "Jetzt setzen"
   }
 }
