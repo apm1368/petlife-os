@@ -31,15 +31,18 @@ describe("admin place suggestions", () => {
 
   it("shows duplicates and photos, approves once (staff pin allowed), rejects only with a reason, and tells the member", async () => {
     const city = `Sagabad-${randomUUID().slice(0, 6)}`;
+    // A random spot no other suite uses (south-east Iran), so other suites' places never count as "nearby" here
+    // and the places this test creates never show up in theirs.
+    const lat = 27.2 + Math.random() * 0.6, lng = 60.4 + Math.random() * 0.6;
     const ops = await actor("Places Ops", AdminRole.ADMIN);
     const viewer = await actor("Read Only", AdminRole.READ_ONLY);
     const member = await actor("Mina Member");
     const other = await actor("Omid Member");
 
     // An existing place 40 m from the pin, and one with the same name spelled with Arabic letters and a ZWNJ.
-    const near = await db.petFriendlyPlace.create({ data: { name: "Green Corner", category: "PARK", city, country: "IR", latitude: 35.7001, longitude: 51.4001 } });
-    await db.$executeRaw`UPDATE "pet_friendly_places" SET "location" = ST_SetSRID(ST_MakePoint(51.4001, 35.7001), 4326)::geography WHERE id = ${near.id}::uuid`;
-    const twinName = await db.petFriendlyPlace.create({ data: { name: "كافه سگ‌ها", category: "CAFE", city, country: "IR", latitude: 35.8, longitude: 51.5 } });
+    const near = await db.petFriendlyPlace.create({ data: { name: "Green Corner", category: "PARK", city, country: "IR", latitude: lat + 0.0001, longitude: lng + 0.0001 } });
+    await db.$executeRaw`UPDATE "pet_friendly_places" SET "location" = ST_SetSRID(ST_MakePoint(${lng + 0.0001}::float8, ${lat + 0.0001}::float8), 4326)::geography WHERE id = ${near.id}::uuid`;
+    const twinName = await db.petFriendlyPlace.create({ data: { name: "كافه سگ‌ها", category: "CAFE", city, country: "IR", latitude: lat + 0.1, longitude: lng + 0.1 } });
 
     // Photos: a private upload slot under the member's own prefix, no public URL; someone else's key is refused.
     const slot = (await post(member, "/place-suggestions/photo-upload-url").send({ contentType: "image/webp", fileSizeBytes: 2048 }).expect(201)).body;
@@ -52,8 +55,8 @@ describe("admin place suggestions", () => {
     const cafe = (await post(member, "/place-suggestions").send({ name: "کافه سگها", category: "CAFE", city, photoObjectKeys: [slot.key] }).expect(201)).body;
     expect(cafe).toMatchObject({ photoCount: 1 });
     expect(JSON.stringify(cafe)).not.toContain(slot.key);
-    const park = (await post(member, "/place-suggestions").send({ name: "Green corner park", category: "PARK", city, latitude: 35.7004, longitude: 51.4003 }).expect(201)).body;
-    const twin = (await post(other, "/place-suggestions").send({ name: "Green Corner Park", category: "PARK", city, latitude: 35.7005, longitude: 51.4004 }).expect(201)).body;
+    const park = (await post(member, "/place-suggestions").send({ name: "Green corner park", category: "PARK", city, latitude: lat + 0.0004, longitude: lng + 0.0003 }).expect(201)).body;
+    const twin = (await post(other, "/place-suggestions").send({ name: "Green Corner Park", category: "PARK", city, latitude: lat + 0.0005, longitude: lng + 0.0004 }).expect(201)).body;
 
     await get(member, "/admin/place-suggestions/queue").expect(403);
     const queue = (await get(viewer, "/admin/place-suggestions/queue?status=PENDING&kind=NEW_PLACE").expect(200)).body;
@@ -73,11 +76,13 @@ describe("admin place suggestions", () => {
     await post(ops, `/admin/place-suggestions/${twin.id}/reject`).send({ note: "no" }).expect(400);
     await post(ops, `/admin/place-suggestions/${twin.id}/reject`).send({ note: "Same place as another suggestion" }).expect(201);
     await post(ops, `/admin/place-suggestions/${cafe.id}/approve`).send({}).expect(400);
-    await post(ops, `/admin/place-suggestions/${cafe.id}/approve`).send({ latitude: 35.8 }).expect(400);
-    const approved = (await post(ops, `/admin/place-suggestions/${cafe.id}/approve`).send({ latitude: 35.81, longitude: 51.51, note: "Pin from the address" }).expect(201)).body;
+    await post(ops, `/admin/place-suggestions/${cafe.id}/approve`).send({ latitude: lat + 0.11 }).expect(400);
+    const approved = (await post(ops, `/admin/place-suggestions/${cafe.id}/approve`).send({ latitude: lat + 0.11, longitude: lng + 0.11, note: "Pin from the address" }).expect(201)).body;
     expect(approved.status).toBe("APPROVED");
     const created = await db.petFriendlyPlace.findUniqueOrThrow({ where: { id: approved.createdPlaceId } });
-    expect(created).toMatchObject({ status: "UNVERIFIED", isPubliclyListed: false, latitude: 35.81, longitude: 51.51 });
+    expect(created).toMatchObject({ status: "UNVERIFIED", isPubliclyListed: false });
+    expect(created.latitude).toBeCloseTo(lat + 0.11, 6);
+    expect(created.longitude).toBeCloseTo(lng + 0.11, 6);
     await post(ops, `/admin/place-suggestions/${cafe.id}/approve`).send({ note: "again" }).expect(400);
     await post(ops, `/admin/place-suggestions/${park.id}/approve`).send({}).expect(201);
 
