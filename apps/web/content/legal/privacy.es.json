@@ -66,6 +66,7 @@
         "Mapas: los mapas del sitio cargan teselas de OpenStreetMap. Algunas búsquedas de rutas y lugares pueden usar un proveedor de mapas como Neshan o Google. Estos servicios ven la zona que estás viendo o buscando, no tu cuenta.",
         "Aseguradoras: solo cuando envías una solicitud de seguro, y solo después de que des tu consentimiento. La aseguradora recibe entonces tus datos de contacto y la especie, la raza, la edad y el peso de tu mascota.",
         "Otros sitios: cuando abres un anuncio externo, por ejemplo en Jajiga, registramos el clic, y a partir de ese momento se aplica la política de privacidad de ese sitio.",
+        "Sello de confianza: cuando el sello de confianza electrónica (eNamad) aparece al pie de nuestras páginas, tu navegador lo carga desde enamad.ir, que puede ver tu dirección IP y que estás en opetlife.",
         "Autoridades: cuando la ley lo exige, por ejemplo en virtud de una orden judicial.",
         "Nunca vendemos tus datos personales. Nuestro personal solo puede ver los datos personales que su función requiere. Mostrar los datos de contacto completos de un cliente requiere un permiso especial, y cada vez que se muestran queda registrado."
       ]
@@ -79,7 +80,7 @@
         "petlife_oauth_state solo se usa durante el inicio de sesión con Google y dura 10 minutos.",
         "NEXT_LOCALE recuerda el idioma que elegiste.",
         "El almacenamiento local de tu navegador guarda en tu dispositivo algunas preferencias pequeñas, como la configuración del cursor de perro.",
-        "No usamos cookies publicitarias, de analítica ni de seguimiento de redes sociales."
+        "No usamos cookies publicitarias, de analítica ni de seguimiento de redes sociales. Nuestros enlaces a Instagram, Telegram y otras redes sociales son enlaces simples: no se carga nada de esos servicios hasta que abres uno."
       ]
     },
     {

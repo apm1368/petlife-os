@@ -2,7 +2,8 @@
  * Social network marks for the footer and the member dashboard (owner, 2026-11-13), drawn in-house: 24×24,
  * monochrome currentColor, no brand files, no remote images, no embeds. Each is a simplified, recognisable sign.
  */
-import type { SocialNetwork } from "./public-links";
+export const SOCIAL_NETWORKS = ["instagram", "telegram", "whatsapp", "bale", "youtube", "aparat", "x", "linkedin"] as const;
+export type SocialNetwork = (typeof SOCIAL_NETWORKS)[number];
 
 const STROKE = { fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round" } as const;
 

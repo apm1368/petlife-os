@@ -21,18 +21,6 @@ export interface PublicPlatformSettings {
   "social.linkedin"?: string | null;
   "social.youtube"?: string | null;
   "social.aparat"?: string | null;
-  "social.bale"?: string | null;
-  "social.instagramEnabled"?: boolean;
-  "social.telegramEnabled"?: boolean;
-  "social.whatsappEnabled"?: boolean;
-  "social.baleEnabled"?: boolean;
-  "social.xEnabled"?: boolean;
-  "social.linkedinEnabled"?: boolean;
-  "social.youtubeEnabled"?: boolean;
-  "social.aparatEnabled"?: boolean;
-  "trust.enamadEnabled"?: boolean;
-  "trust.enamadId"?: string | null;
-  "trust.enamadCode"?: string | null;
   "maintenance.enabled"?: boolean;
   "maintenance.message"?: LocalizedSettingText;
   "features.shop"?: boolean;

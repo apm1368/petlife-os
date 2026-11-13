@@ -3,16 +3,17 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Mail, Phone, MapPin, Clock3 } from "@petlife/ui";
 import { localizedSetting, useSiteSettings } from "./site-settings";
-import { SocialIcon } from "./SocialIcons";
-import { visibleSocialLinks, type SocialNetwork } from "./public-links";
-import type { PublicPlatformSettings } from "@/services/platform-settings.service";
+import { SOCIAL_NETWORKS, SocialIcon, type SocialNetwork } from "./SocialIcons";
+import type { SocialSettings } from "./social-settings";
 
-/**
- * The admin's social links in footer order (X3's rule: link set and the network's switch not off), plus a client-side
- * https check as a second line of defence behind the API's host allowlist.
- */
-export function socialLinks(settings: PublicPlatformSettings | null): { network: SocialNetwork; url: string }[] {
-  return visibleSocialLinks(settings).flatMap(({ network, href }) => (/^https:\/\/[^\s"'<>]+$/i.test(href) ? [{ network, url: href }] : []));
+/** The admin's social links (social.*): shown when the network's switch is not off and its https link is set. */
+export function socialLinks(settings: SocialSettings | null): { network: SocialNetwork; url: string }[] {
+  if (!settings) return [];
+  return SOCIAL_NETWORKS.flatMap((network) => {
+    const url = settings[`social.${network}`];
+    const on = settings[`social.${network}Enabled`] !== false;
+    return on && typeof url === "string" && /^https:\/\/[^\s"'<>]+$/i.test(url) ? [{ network, url }] : [];
+  });
 }
 
 /**
@@ -21,7 +22,7 @@ export function socialLinks(settings: PublicPlatformSettings | null): { network:
  */
 export function SocialLinks({ className = "", title }: { className?: string; title?: string }) {
   const t = useTranslations("siteSettings");
-  const links = socialLinks(useSiteSettings());
+  const links = socialLinks(useSiteSettings() as SocialSettings | null);
   if (!links.length) return null;
   const list = (
     <ul className={`site-social ${className}`} aria-label={title ?? t("social")}>

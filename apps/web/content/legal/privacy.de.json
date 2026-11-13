@@ -66,6 +66,7 @@
         "Karten: Karten auf der Website laden Kartenkacheln von OpenStreetMap. Manche Routen- und Ortssuchen können einen Kartenanbieter wie Neshan oder Google nutzen. Diese Dienste sehen den Bereich, den du ansiehst oder durchsuchst, nicht dein Konto.",
         "Versicherer: nur wenn du einen Versicherungsantrag stellst, und nur nach deiner Zustimmung. Der Versicherer erhält dann deine Kontaktdaten sowie Tierart, Rasse, Alter und Gewicht deines Tieres.",
         "Andere Websites: Wenn du ein externes Angebot öffnest, zum Beispiel auf Jajiga, erfassen wir den Klick, und ab dann gilt die Datenschutzerklärung dieser Website.",
+        "Vertrauenssiegel: Wenn das E-Trust-Siegel (eNamad) unten auf unseren Seiten angezeigt wird, lädt dein Browser es von enamad.ir. Dieser Dienst kann deine IP-Adresse sehen und dass du auf opetlife bist.",
         "Behörden: wenn das Gesetz es verlangt, zum Beispiel aufgrund eines Gerichtsbeschlusses.",
         "Wir verkaufen deine personenbezogenen Daten niemals. Unsere Mitarbeitenden sehen personenbezogene Daten nur in dem Umfang, den ihre Rolle erfordert. Die vollständigen Kontaktdaten einer Kundin oder eines Kunden lassen sich nur mit einer besonderen Berechtigung einblenden, und jedes Einblenden wird protokolliert."
       ]
@@ -79,7 +80,7 @@
         "petlife_oauth_state wird nur während der Anmeldung mit Google verwendet und gilt 10 Minuten.",
         "NEXT_LOCALE merkt sich die Sprache, die du gewählt hast.",
         "Der lokale Speicher deines Browsers bewahrt einige kleine Einstellungen auf deinem Gerät auf, zum Beispiel die Einstellung für den Hunde-Mauszeiger.",
-        "Wir verwenden keine Cookies für Werbung, Analyse oder Tracking durch soziale Medien."
+        "Wir verwenden keine Cookies für Werbung, Analyse oder Tracking durch soziale Medien. Unsere Links zu Instagram, Telegram und anderen sozialen Netzwerken sind einfache Links: Von diesen Diensten wird erst etwas geladen, wenn du einen davon öffnest."
       ]
     },
     {
