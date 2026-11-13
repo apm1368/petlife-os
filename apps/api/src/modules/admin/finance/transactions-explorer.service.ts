@@ -134,7 +134,7 @@ export class TransactionsExplorerService {
       requestId,
     });
     const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
-    const content = `﻿${[header, ...lines].map((r) => r.map(csvCell).join(",")).join("\r\n")}\r\n`;
+    const content = `\uFEFF${[header, ...lines].map((r) => r.map(csvCell).join(",")).join("\r\n")}\r\n`;
     return { fileName: `transactions-${stamp}.csv`, content, rows: items.length, truncated };
   }
 
