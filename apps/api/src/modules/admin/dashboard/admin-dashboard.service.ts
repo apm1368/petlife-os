@@ -19,6 +19,7 @@ import {
   ProviderVerificationStatus,
   SellerOfferModerationStatus,
   SellerVerificationStatus,
+  SetPetRequestStatus,
   SupportCaseStatus,
   SupportNeedStatus,
   TravelListingStatus,
@@ -66,6 +67,7 @@ export class AdminDashboardService {
       openOwnershipDisputes,
       openProviderNoShows,
       pendingReviews,
+      newSetPetRequests,
     ] = await Promise.all([
       when(may("support.view"), () => this.prisma.supportCase.count({ where: { status: { notIn: [SupportCaseStatus.RESOLVED, SupportCaseStatus.CLOSED] } } })),
       when(may("dispute.view"), () => this.prisma.dispute.count({ where: { status: { notIn: [DisputeStatus.CLOSED] } } })),
@@ -100,6 +102,8 @@ export class AdminDashboardService {
       // Reviews every vertical holds back until a moderator decides (service, product, stay), counted only for the
       // verticals this admin may moderate; service reviews also respect the provider-type scope.
       this.pendingReviewCount(admin, may),
+      // «ست پت» requests members submitted that still need a quote.
+      when(may("commerce.view", AdminVertical.SHOP), () => this.prisma.setPetRequest.count({ where: { status: SetPetRequestStatus.SUBMITTED } })),
     ]);
     return {
       openSupportCases,
@@ -122,6 +126,7 @@ export class AdminDashboardService {
       openOwnershipDisputes,
       openProviderNoShows,
       pendingReviews,
+      newSetPetRequests,
     };
   }
 

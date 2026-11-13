@@ -269,4 +269,9 @@ export type AdminAuditAction =
   | "osm_area.run_requested"
   | "place_claim.approved"
   | "place_claim.rejected"
-  | "place_claim.released";
+  | "place_claim.released"
+  // «ست پت» Set Pet requests
+  | "set_pet.quoted"
+  | "set_pet.status_changed"
+  | "set_pet.note_saved"
+  | "set_pet.design_opened";

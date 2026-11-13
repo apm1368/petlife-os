@@ -276,6 +276,26 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "پاسخ جدید به درخواست پشتیبانی شما", body: "یک پاسخ جدید برای درخواست پشتیبانی {{caseNumber}} ثبت شد.", smsBody: "پاسخ جدیدی برای درخواست پشتیبانی شما در پت‌لایف ثبت شد." },
     en: { title: "New reply on your support case", body: "A new reply was posted on support case {{caseNumber}}.", smsBody: "You have a new reply on your PET LIFE OS support case." },
   },
+  "set_pet.quoted": {
+    fa: { title: "قیمت سفارش ست پت آماده شد", body: "قیمت و زمان آماده‌شدن سفارش {{number}} اعلام شد. برای دیدن جزئیات و تأیید، سفارش را باز کنید.", smsBody: "قیمت سفارش ست پت {{number}} در اپت لایف اعلام شد." },
+    en: { title: "Your Set Pet quote is ready", body: "The price and ready-by date for order {{number}} are in. Open the order to see the details and confirm.", smsBody: "Your opetlife Set Pet quote {{number}} is ready." },
+  },
+  "set_pet.quote_revised": {
+    fa: { title: "قیمت سفارش ست پت تغییر کرد", body: "قیمت یا زمان آماده‌شدن سفارش {{number}} به‌روزرسانی شد. لطفاً پیش از تأیید دوباره بررسی کنید.", smsBody: "قیمت سفارش ست پت {{number}} به‌روزرسانی شد." },
+    en: { title: "Your Set Pet quote changed", body: "The price or ready-by date for order {{number}} was updated. Please check it again before confirming.", smsBody: "Your opetlife Set Pet quote {{number}} was updated." },
+  },
+  "set_pet.in_production": {
+    fa: { title: "ست پت شما در حال تولید است", body: "تولید سفارش {{number}} شروع شد. وقتی ارسال شد خبرتان می‌کنیم.", smsBody: "تولید سفارش ست پت {{number}} شروع شد." },
+    en: { title: "Your Set Pet is in production", body: "Production of order {{number}} has started. We'll let you know when it ships.", smsBody: "Your opetlife Set Pet {{number}} is in production." },
+  },
+  "set_pet.shipped": {
+    fa: { title: "ست پت شما ارسال شد", body: "سفارش {{number}} ارسال شد. {{shippingNote}}", smsBody: "سفارش ست پت {{number}} ارسال شد." },
+    en: { title: "Your Set Pet has shipped", body: "Order {{number}} has shipped. {{shippingNote}}", smsBody: "Your opetlife Set Pet {{number}} has shipped." },
+  },
+  "set_pet.cancelled": {
+    fa: { title: "سفارش ست پت لغو شد", body: "سفارش {{number}} لغو شد. دلیل: {{reason}}", smsBody: "سفارش ست پت {{number}} لغو شد." },
+    en: { title: "Your Set Pet order was cancelled", body: "Order {{number}} was cancelled. Reason: {{reason}}", smsBody: "Your opetlife Set Pet order {{number}} was cancelled." },
+  },
   "support.case_resolved": {
     fa: { title: "درخواست پشتیبانی شما حل شد", body: "درخواست پشتیبانی {{caseNumber}} به عنوان حل‌شده علامت‌گذاری شد.", smsBody: "درخواست پشتیبانی شما در پت‌لایف حل شد." },
     en: { title: "Your support case was resolved", body: "Support case {{caseNumber}} was marked resolved.", smsBody: "Your PET LIFE OS support case was resolved." },

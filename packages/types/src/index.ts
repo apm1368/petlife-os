@@ -3444,6 +3444,8 @@ export interface AdminDashboardSummaryDto {
   openProviderNoShows: number | null;
   /** Service, product and stay reviews waiting for a moderator, in the verticals this admin may moderate. */
   pendingReviews: number | null;
+  /** «ست پت» Set Pet requests submitted and waiting for a quote; commerce.view (shop vertical). */
+  newSetPetRequests: number | null;
   /**
    * Market-readiness #290 Q97, the launch month's success measure: registered pets and weekly bookings
    * (analytics.view; null otherwise). Live bookings only, rolling 7-day windows.
@@ -6845,6 +6847,73 @@ export interface AdminProductDetailDto extends AdminProductRowDto {
   catalogRequests: Array<{ id: string; status: string; sellerName: string; requestedTitle: string; reviewedAt: string | null; decisionReason: string | null }>;
   /** Lowest live price across buyable offers, or null when nobody can sell it now. */
   lowestBuyablePrice: number | null;
+}
+
+/** «ست پت» Set Pet, admin side. Sizes are S…XXXL (shown as 2XL/3XL); zones are the fixed print areas. */
+export type SetPetStatus = "SUBMITTED" | "QUOTED" | "CONFIRMED" | "IN_PRODUCTION" | "SHIPPED" | "CANCELLED";
+export type SetPetSizeCode = "S" | "M" | "L" | "XL" | "XXL" | "XXXL";
+export type SetPetZoneCode = "RIGHT_UPPER_ARM" | "LEFT_UPPER_ARM" | "FRONT_CENTER" | "BACK" | "PET_BACK";
+
+export interface AdminSetPetRowDto {
+  id: string;
+  /** SP-000123 */
+  number: string;
+  status: SetPetStatus;
+  memberName: string;
+  petName: string | null;
+  petSpecies: string | null;
+  humanSizes: SetPetSizeCode[];
+  petSize: SetPetSizeCode;
+  placements: number;
+  designs: number;
+  quoteAmountIrr: number | null;
+  estimatedReadyAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminSetPetListDto {
+  items: AdminSetPetRowDto[];
+  total: number;
+  page: number;
+  pageSize: number;
+  /** Per status, for the same search (ignores the status filter). */
+  counts: Record<SetPetStatus, number>;
+}
+
+export interface AdminSetPetDesignFileDto {
+  id: string;
+  mimeType: string;
+  fileSizeBytes: number;
+  originalFilename: string | null;
+  /** JPEG/PNG/WebP only; anything else downloads as a plain file. */
+  previewable: boolean;
+  status: "PENDING_UPLOAD" | "READY" | "REJECTED";
+  rejectReason: string | null;
+  uploadedAt: string | null;
+}
+
+export interface AdminSetPetDetailDto {
+  id: string;
+  number: string;
+  status: SetPetStatus;
+  member: { id: string; displayName: string };
+  pet: { id: string; name: string; species: string } | null;
+  human: { colour: string; sizes: SetPetSizeCode[] };
+  petGarment: { size: SetPetSizeCode; colour: string; neckCm: number | null; chestCm: number | null; backLengthCm: number | null; weightKg: number | null };
+  notes: string | null;
+  placements: Array<{ zone: SetPetZoneCode; designFile: AdminSetPetDesignFileDto }>;
+  designs: AdminSetPetDesignFileDto[];
+  quote: { amountIrr: number | null; note: string | null; estimatedReadyAt: string | null; quotedAt: string | null; quotedBy: string | null };
+  shippingNote: string | null;
+  cancelled: { at: string; by: "MEMBER" | "STAFF" | null; reason: string | null } | null;
+  /** Staff-only; never shown to the member. */
+  adminNote: string | null;
+  allowedTransitions: SetPetStatus[];
+  canQuote: boolean;
+  timeline: Array<{ id: string; at: string; from: SetPetStatus | null; to: SetPetStatus; actor: "MEMBER" | "STAFF"; staffName: string | null; note: string | null }>;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AdminProductReviewRowDto {
