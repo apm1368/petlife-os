@@ -7,11 +7,15 @@ export type TrFormat = (fa: string, en: string, values: Record<string, string | 
 
 const cache = new Map<string, { tr: Tr; trf: TrFormat }>();
 
+/** Column of each language in the LEGACY_COPY sheet ([de, es, ar, nl]); fa and en come from the call site. */
+const SHEET_COLUMN: Record<string, 0 | 1 | 2 | 3> = { de: 0, es: 1, ar: 2, nl: 3 };
+
 export function pickCopy(locale: string, fa: string, en: string): string {
   if (locale === "fa") return fa;
-  if (locale === "de" || locale === "es") {
-    const row = LEGACY_COPY[en];
-    if (row) return locale === "de" ? row[0] : row[1];
+  const column = SHEET_COLUMN[locale];
+  if (column !== undefined) {
+    const value = LEGACY_COPY[en]?.[column];
+    if (value) return value;
   }
   return en;
 }
@@ -35,5 +39,5 @@ export function copyFor(locale: string): { tr: Tr; trf: TrFormat } {
 
 /** Intl locale for numbers and dates on these pages (English keeps its historical en-US formatting). */
 export function intlLocale(locale: string): string {
-  return locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-US";
+  return locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : locale === "ar" ? "ar" : locale === "nl" ? "nl-NL" : "en-US";
 }

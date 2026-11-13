@@ -4219,7 +4219,7 @@
       "sourcePetlife": "opetlife",
       "externalOrderId": "External order: {id}",
       "paymentSource": {
-        "PETLIFE_PAYMENT": "Paid vian opetlife",
+        "PETLIFE_PAYMENT": "Paid via opetlife",
         "MARKETPLACE_COLLECTED": "Collected by marketplace",
         "CASH_ON_DELIVERY": "Cash on delivery",
         "UNKNOWN": "Payment source unknown"
@@ -4233,7 +4233,7 @@
       "sourcePetlife": "opetlife",
       "externalOrderId": "External order: {id}",
       "paymentSource": {
-        "PETLIFE_PAYMENT": "Paid vian opetlife",
+        "PETLIFE_PAYMENT": "Paid via opetlife",
         "MARKETPLACE_COLLECTED": "Collected by marketplace",
         "CASH_ON_DELIVERY": "Cash on delivery",
         "UNKNOWN": "Payment source unknown"

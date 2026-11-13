@@ -5006,8 +5006,8 @@
         "plans": "Abonnementsplannen",
         "households": "Huishoudens",
         "verification": "Verificatiewachtrij",
-        "providers": "Aanbieders",
-        "sellers": "Verkopers",
+        "providers": "Diensten",
+        "sellers": "Winkels",
         "overview": "Overzicht",
         "orders": "Bestellingen",
         "refundRequests": "Terugbetalingsverzoeken",
@@ -6950,7 +6950,7 @@
     "list": {
       "search": "Zoeken",
       "title": "Huisdiervriendelijke plekken",
-      "subtitle": "Geverifieerde plekken waar huisdieren welkom zijn.",
+      "subtitle": "Plekken waar huisdieren welkom zijn. Geverifieerde plekken en vermeldingen uit OpenStreetMap zijn gemarkeerd.",
       "empty": "Geen plekken gevonden.",
       "nearMe": "Zoeken in mijn buurt",
       "allCategories": "Alle categorieën",
@@ -7628,7 +7628,7 @@
       },
       "shortcuts": "Snelkoppelingen",
       "healthLink": "Statuspagina",
-      "workersSummary": "{running} van {total} achtergrondtaken actief",
+      "workersSummary": "{running} van {total} achtergrondtaken gezond",
       "priority": {
         "URGENT": "Dringend",
         "HIGH": "Hoog"

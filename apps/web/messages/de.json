@@ -359,7 +359,80 @@
     }
   },
   "clinicWorkspace": {
-    "clients": "Kundschaft"
+    "clients": "Kundschaft",
+    "title": "Klinikverwaltung",
+    "intro": "Termine, Aufgaben zur Nachverfolgung und die Kundschaft der Klinik in einem gemeinsamen Arbeitsbereich.",
+    "queue": "Besuchswarteschlange",
+    "tasks": "Aufgaben zur Nachverfolgung",
+    "customers": "Kundschaft",
+    "plan": "Klinik-Abo",
+    "saveError": "Speichern fehlgeschlagen. Deine Eingaben bleiben erhalten; bitte versuche es erneut.",
+    "loadError": "Diese Informationen konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "loading": "Wird geladen …",
+    "date": "Termindatum",
+    "empty": "Keine passenden Einträge.",
+    "unnamed": "Kein Anzeigename",
+    "openBooking": "Buchung öffnen",
+    "taskTitle": "Titel der Aufgabe",
+    "taskType": "Art der Nachverfolgung",
+    "dueAt": "Fälligkeitsdatum (Ortszeit des Geräts)",
+    "create": "Aufgabe erstellen",
+    "filter": "Aufgabenstatus",
+    "taskLimit": "Pro Status werden bis zu 200 Aufgaben angezeigt.",
+    "overdue": "Überfällig",
+    "done": "Als erledigt markieren",
+    "cancel": "Aufgabe abbrechen",
+    "search": "Nach Kunden- oder Tiername suchen",
+    "visits": "Abgeschlossene Besuche: {count}",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "reminderUsage": "Erinnerungen in diesem Monat: {count}",
+    "expires": "Zeitraum endet:",
+    "planNote": "Tarifänderungen nimmt die Administration vor; Klinik-Tarife lassen sich noch nicht online kaufen.",
+    "buckets": {
+      "SCHEDULED": "Geplant",
+      "WAITING": "Wartend",
+      "IN_CONSULTATION": "In Behandlung",
+      "COMPLETED": "Abgeschlossen",
+      "NO_SHOW": "Nicht erschienen",
+      "CANCELLED": "Storniert"
+    },
+    "statuses": {
+      "OPEN": "Offen",
+      "DONE": "Erledigt",
+      "CANCELLED": "Abgebrochen"
+    },
+    "types": {
+      "CALL_CUSTOMER": "Kunden anrufen",
+      "FOLLOW_UP_LAB": "Laborbefund nachverfolgen",
+      "CONFIRM_APPOINTMENT": "Termin bestätigen",
+      "COLLECT_PAYMENT": "Zahlung einziehen",
+      "OTHER": "Sonstiges"
+    },
+    "notes": {
+      "title": "Kundennotizen",
+      "loading": "Notizen werden geladen …",
+      "empty": "Noch keine Kliniknotizen.",
+      "shared": "Mit den Mitgliedern des Kundenhaushalts geteilt",
+      "internal": "Nur für die Klinik",
+      "remove": "Notiz entfernen",
+      "error": "Notizen konnten nicht geladen oder gespeichert werden. Dein Entwurf bleibt erhalten.",
+      "retry": "Notizen neu laden",
+      "body": "Neue Notiz",
+      "share": "Diese Notiz mit den Mitgliedern des Kundenhaushalts teilen",
+      "privacy": "Notizen bleiben in der Klinik, außer du wählst ausdrücklich das Teilen aus. Verwende sie nicht für medizinische Akten.",
+      "save": "Notiz speichern",
+      "confirm": "Diese Notiz entfernen?",
+      "keep": "Notiz behalten"
+    },
+    "staff": "Klinikteam",
+    "branches": "Klinikstandorte",
+    "contacts": "Klinikkontakte",
+    "campaigns": "Erinnerungskampagnen",
+    "finance": "Finanzbericht der Klinik",
+    "reminders": "Klinik-Erinnerungen",
+    "tags": "Schlagwörter"
   },
   "adminCustomRoles": {
     "loading": "Rollen werden geladen …",
@@ -2301,7 +2374,10 @@
       "FULL_PREPAYMENT": "Vollständige Online-Vorauszahlung",
       "DEPOSIT": "Online-Anzahlung"
     },
-    "bookingMode": { "INSTANT": "Sofortbuchung", "REQUEST": "Anfrage mit Bestätigung durch Anbieter" },
+    "bookingMode": {
+      "INSTANT": "Sofortbuchung",
+      "REQUEST": "Anfrage mit Bestätigung durch Anbieter"
+    },
     "paymentStatus": {
       "NOT_REQUIRED": "Nicht erforderlich",
       "PENDING": "Ausstehend",
@@ -2609,7 +2685,9 @@
     "actionFailed": "Das hat nicht funktioniert. Bitte versuche es erneut.",
     "loading": "Pflegeerinnerungen werden geladen",
     "filtersAria": "Pflegefilter",
-    "filters": { "all": "Alle" },
+    "filters": {
+      "all": "Alle"
+    },
     "states": {
       "DUE": "Bald fällig",
       "OVERDUE": "Überfällig",
@@ -2629,14 +2707,30 @@
     "create": "Erinnerung erstellen",
     "empty": {
       "body": "Erinnerungen können aus Impfungen, Medikamenten und Terminen entstehen. Du kannst auch eine persönliche Erinnerung hinzufügen.",
-      "all": { "title": "Noch keine Pflegeeinträge" },
-      "due": { "title": "Nichts ist bald fällig" },
-      "overdue": { "title": "Nichts ist überfällig" },
-      "upcoming": { "title": "Keine anstehenden Erinnerungen" },
-      "completed": { "title": "Noch keine erledigte Pflege" },
-      "snoozed": { "title": "Keine verschobenen Erinnerungen" },
-      "cancelled": { "title": "Keine abgesagten Erinnerungen" },
-      "custom": { "title": "Keine persönlichen Erinnerungen" }
+      "all": {
+        "title": "Noch keine Pflegeeinträge"
+      },
+      "due": {
+        "title": "Nichts ist bald fällig"
+      },
+      "overdue": {
+        "title": "Nichts ist überfällig"
+      },
+      "upcoming": {
+        "title": "Keine anstehenden Erinnerungen"
+      },
+      "completed": {
+        "title": "Noch keine erledigte Pflege"
+      },
+      "snoozed": {
+        "title": "Keine verschobenen Erinnerungen"
+      },
+      "cancelled": {
+        "title": "Keine abgesagten Erinnerungen"
+      },
+      "custom": {
+        "title": "Keine persönlichen Erinnerungen"
+      }
     },
     "recentlyCompleted": "Kürzlich erledigt",
     "dailyInstructions": "Tägliche Pflegehinweise",
@@ -2716,7 +2810,11 @@
     "notes": "Notizen (optional)",
     "providerConfirm": "Ich bestätige, dass ich diesen Pflegevorschlag an die berechtigte Bezugsperson sende.",
     "providerSubmit": "Vorschlag speichern und senden",
-    "statuses": { "PENDING": "Entscheidung ausstehend", "ACCEPTED": "Angenommen", "DISMISSED": "Abgelehnt" },
+    "statuses": {
+      "PENDING": "Entscheidung ausstehend",
+      "ACCEPTED": "Angenommen",
+      "DISMISSED": "Abgelehnt"
+    },
     "types": {
       "VACCINATION": "Impfung",
       "VET_VISIT": "Tierarztbesuch",
@@ -3067,7 +3165,12 @@
       "CANCELLED": "Abgebrochen",
       "SUPERSEDED": "Durch eine neuere Änderung ersetzt"
     },
-    "units": { "toman": "Toman", "seconds": "Sekunden", "hours": "Stunden", "perDay": "pro Tag" }
+    "units": {
+      "toman": "Toman",
+      "seconds": "Sekunden",
+      "hours": "Stunden",
+      "perDay": "pro Tag"
+    }
   },
   "adminAccess": {
     "title": "Adminzugänge verwalten",
@@ -3159,8 +3262,15 @@
       "ACCOMMODATION": "Unterkünfte und Tierbetreuung",
       "INSURANCE": "Versicherung"
     },
-    "statuses": { "ACTIVE": "Aktiv", "SUSPENDED": "Ausgesetzt" },
-    "tabs": { "admins": "Admins", "roles": "Rollen", "permissions": "Berechtigungen" }
+    "statuses": {
+      "ACTIVE": "Aktiv",
+      "SUSPENDED": "Ausgesetzt"
+    },
+    "tabs": {
+      "admins": "Admins",
+      "roles": "Rollen",
+      "permissions": "Berechtigungen"
+    }
   },
   "admin": {
     "partners": {
@@ -3274,8 +3384,8 @@
           "STAFF": "Mitarbeiter"
         },
         "supportCases": "Supportfälle dieses Unternehmens"
-    }
-  },
+      }
+    },
     "productDetail": {
       "title": "Produkt",
       "back": "Alle Produkte",
@@ -3633,7 +3743,9 @@
           "fa": "Persischer Inhalt",
           "en": "Englischer Inhalt",
           "ar": "Arabischer Inhalt",
-          "nl": "Niederländischer Inhalt"
+          "nl": "Niederländischer Inhalt",
+          "de": "Deutscher Inhalt",
+          "es": "Spanischer Inhalt"
         },
         "titleField": "Titel",
         "slug": "Slug",
@@ -3660,7 +3772,31 @@
         "sharedSaveFailed": "Kategorie, Autor oder Tags konnten nicht gespeichert werden. Ihre Auswahl ist weiterhin vorhanden – versuchen Sie es erneut.",
         "transitionForbidden": "Sie haben keine Berechtigung, den Status dieses Artikels zu ändern.",
         "transitionFailed": "Der Status konnte nicht geändert werden. Versuchen Sie es erneut.",
-        "saveLive": "Speichern und Live-Artikel aktualisieren"
+        "saveLive": "Speichern und Live-Artikel aktualisieren",
+        "urlSection": "Seitenadresse (URL)",
+        "urlHelp": "Nur englische Kleinbuchstaben, Ziffern und Bindestriche, z. B. puppy-potty-training. Die Seite geht unter dieser Adresse live, wenn du auf Veröffentlichen klickst.",
+        "generateSlug": "Aus dem Titel erstellen",
+        "slugFromOtherLocale": "{locale}-Adresse übernehmen",
+        "slugTaken": "Ein anderer Artikel in dieser Sprache verwendet diese Adresse bereits: {title}",
+        "slugRedirectWarning": "Diese Adresse gehörte früher zu einem anderen Artikel; dessen alte Links führen jetzt hierher.",
+        "slugAvailable": "Diese Adresse ist verfügbar.",
+        "slugChecking": "Adresse wird geprüft …",
+        "liveAt": "Veröffentlicht und live unter:",
+        "willGoLiveAt": "Geht nach der Veröffentlichung unter dieser Adresse live:",
+        "hiddenAt": "Ausgeblendet; diese Adresse ist offline, bis sie erneut veröffentlicht wird:",
+        "openLive": "Seite öffnen",
+        "copyLink": "Adresse kopieren",
+        "copied": "Kopiert",
+        "slugChangeWarning": "Diese Seite ist veröffentlicht. Wenn du die Adresse änderst, leitet die alte automatisch dauerhaft auf die neue weiter.",
+        "serpPreview": "Vorschau in den Google-Ergebnissen",
+        "charCount": "{count, number} von {max, number} Zeichen",
+        "seoTitleHint": "Setze das Haupt-Keyword nah an den Anfang des SEO-Titels (max. 60 Zeichen).",
+        "seoDescriptionHint": "120–160 Zeichen; verwende das Keyword natürlich.",
+        "cover": "Titelbild",
+        "coverNone": "Kein Titelbild",
+        "coverHelp": "Wird aus der Medienbibliothek gewählt und beim Teilen, in Suchergebnissen und oben im Artikel angezeigt. Klicke bei den gemeinsamen Feldern auf Speichern, um es zu behalten.",
+        "publishedNotice": "Veröffentlicht – die Seitenadresse ist live.",
+        "publishNeedsSave": "Speichere deine Änderungen vor dem Veröffentlichen."
       },
       "blockEditor": {
         "blockType": {
@@ -3669,7 +3805,9 @@
           "list": "Liste",
           "quote": "Zitat",
           "callout": "Hinweisbox",
-          "image": "Bild"
+          "image": "Bild",
+          "video": "Video",
+          "faq": "Häufige Fragen"
         },
         "moveUp": "Nach oben",
         "moveDown": "Nach unten",
@@ -3684,7 +3822,16 @@
         "mediaAssetId": "Medien-Asset-ID",
         "altText": "Alternativtext",
         "caption": "Bildunterschrift",
-        "addBlock": "{type} hinzufügen"
+        "addBlock": "{type} hinzufügen",
+        "videoTitle": "Videotitel",
+        "videoDescription": "Kurze Videobeschreibung",
+        "posterMediaAssetId": "ID des Vorschaubilds",
+        "durationSeconds": "Dauer (Sekunden)",
+        "faqQuestion": "Frage",
+        "faqAnswer": "Antwort",
+        "addFaqItem": "Frage hinzufügen",
+        "removeFaqItem": "Diese Frage entfernen",
+        "pickMedia": "Aus der Bibliothek wählen"
       },
       "versions": {
         "title": "Versionsverlauf",
@@ -3807,14 +3954,22 @@
       "title": "Vertrauen und Sicherheit",
       "newCase": "Vertrauensfall eröffnen",
       "createTitle": "Vertrauensfall eröffnen",
-      "filter": { "status": "Nach Status filtern", "allStatuses": "Alle Status" },
+      "filter": {
+        "status": "Nach Status filtern",
+        "allStatuses": "Alle Status"
+      },
       "status": {
         "OPEN": "Offen",
         "UNDER_REVIEW": "Wird geprüft",
         "RESOLVED": "Gelöst",
         "CLOSED": "Geschlossen"
       },
-      "severity": { "LOW": "Niedrig", "MEDIUM": "Mittel", "HIGH": "Hoch", "CRITICAL": "Kritisch" },
+      "severity": {
+        "LOW": "Niedrig",
+        "MEDIUM": "Mittel",
+        "HIGH": "Hoch",
+        "CRITICAL": "Kritisch"
+      },
       "subjectType": {
         "USER": "Nutzer",
         "HOUSEHOLD": "Haushalt",
@@ -3965,7 +4120,10 @@
       "title": "Streitfälle",
       "newDispute": "Neuer Streitfall",
       "createTitle": "Streitfall eröffnen",
-      "filter": { "status": "Nach Status filtern", "allStatuses": "Alle Status" },
+      "filter": {
+        "status": "Nach Status filtern",
+        "allStatuses": "Alle Status"
+      },
       "status": {
         "OPEN": "Offen",
         "UNDER_REVIEW": "Wird geprüft",
@@ -4001,7 +4159,10 @@
         "evidencePlaceholder": "Beschreibung des Belegs",
         "changeStatus": "Status ändern",
         "financialNote": "Finanzielle Vorgänge (einschließlich Erstattungen) werden separat verfolgt. Eine Streitfallentscheidung löst keine automatische Erstattung aus.",
-        "actorType": { "USER": "Nutzer", "ADMIN": "Admin" }
+        "actorType": {
+          "USER": "Nutzer",
+          "ADMIN": "Admin"
+        }
       },
       "states": {
         "loading": "Streitfälle werden geladen …",
@@ -4070,7 +4231,12 @@
         "TRUST_SAFETY": "Vertrauen und Sicherheit",
         "OTHER": "Sonstiges"
       },
-      "priority": { "LOW": "Niedrig", "NORMAL": "Normal", "HIGH": "Hoch", "URGENT": "Dringend" },
+      "priority": {
+        "LOW": "Niedrig",
+        "NORMAL": "Normal",
+        "HIGH": "Hoch",
+        "URGENT": "Dringend"
+      },
       "form": {
         "requesterUserId": "Nutzer-ID der anfragenden Person",
         "subject": "Betreff",
@@ -4082,7 +4248,11 @@
       "detail": {
         "caseNumber": "Fall {number}",
         "requester": "Anfragende Person: {name}",
-        "authorType": { "USER": "Kunde", "ADMIN": "Admin", "SYSTEM": "System" },
+        "authorType": {
+          "USER": "Kunde",
+          "ADMIN": "Admin",
+          "SYSTEM": "System"
+        },
         "assignTo": "Admin zuweisen",
         "changeStatus": "Status ändern",
         "messages": "Nachrichten",
@@ -4352,7 +4522,10 @@
         "FAILED": "Fehlgeschlagen",
         "CANCELLED": "Abgebrochen"
       },
-      "ledgerDirection": { "DEBIT": "Soll", "CREDIT": "Haben" },
+      "ledgerDirection": {
+        "DEBIT": "Soll",
+        "CREDIT": "Haben"
+      },
       "ledgerAccount": {
         "CASH_GATEWAY_RECEIVABLE": "Forderung an Zahlungsanbieter",
         "CUSTOMER_PAYMENT_CLEARING": "Verrechnungskonto für Kundenzahlungen",
@@ -5215,7 +5388,10 @@
       "courierTracking": "Kurier verfolgen"
     },
     "checkout": {
-      "summary": { "title": "Bestellübersicht", "deliveryNext": "Wird im Lieferschritt ausgewählt" },
+      "summary": {
+        "title": "Bestellübersicht",
+        "deliveryNext": "Wird im Lieferschritt ausgewählt"
+      },
       "address": {
         "title": "Lieferadresse",
         "addNew": "Neue Adresse hinzufügen",
@@ -5235,7 +5411,10 @@
       },
       "delivery": {
         "title": "Lieferart",
-        "method": { "STANDARD": "Standard", "EXPRESS": "Express" },
+        "method": {
+          "STANDARD": "Standard",
+          "EXPRESS": "Express"
+        },
         "quotesNext": "Die verfügbaren Kurieroptionen wählst du im nächsten Schritt."
       },
       "safetyAck": {
@@ -5253,7 +5432,12 @@
       },
       "shipping": {
         "title": "Lieferung für jeden Verkäufer auswählen",
-        "serviceLevel": { "STANDARD": "Standardlieferung", "EXPRESS": "Expresslieferung", "COURIER": "Kurier", "POST_PISHTAZ": "Expresspost" },
+        "serviceLevel": {
+          "STANDARD": "Standardlieferung",
+          "EXPRESS": "Expresslieferung",
+          "COURIER": "Kurier",
+          "POST_PISHTAZ": "Expresspost"
+        },
         "eta": "Lieferung in etwa {hours, plural, one {# Stunde} other {# Stunden}}",
         "selected": "Ausgewählt",
         "unavailable": "Zurzeit sind keine Lieferoptionen verfügbar",
@@ -5351,7 +5535,12 @@
         "retry": "Erneut versuchen"
       },
       "progress": {
-        "steps": { "address": "Adresse", "review": "Prüfen", "shipping": "Lieferung", "payment": "Zahlung" },
+        "steps": {
+          "address": "Adresse",
+          "review": "Prüfen",
+          "shipping": "Lieferung",
+          "payment": "Zahlung"
+        },
         "label": "Schritte beim Bezahlen"
       }
     },
@@ -6293,8 +6482,14 @@
       "restore": "Erinnerung wiederherstellen",
       "archivedNotice": "Diese Erinnerung ist archiviert. Sie bleibt hier sicher gespeichert und kann jederzeit wiederhergestellt werden."
     },
-    "timeline": { "title": "Lebensverlauf", "empty": "Noch nichts zu zeigen." },
-    "editMemory": { "title": "Erinnerung bearbeiten", "submit": "Änderungen speichern" }
+    "timeline": {
+      "title": "Lebensverlauf",
+      "empty": "Noch nichts zu zeigen."
+    },
+    "editMemory": {
+      "title": "Erinnerung bearbeiten",
+      "submit": "Änderungen speichern"
+    }
   },
   "healthAdvanced": {
     "documents": {
@@ -6848,10 +7043,48 @@
     "noAccess": "Sie haben keinen Zugriff auf diese Kliniknachrichten. Melden Sie sich erneut an oder wenden Sie sich an die Klinik.",
     "retry": "Erneut versuchen",
     "loading": "Wird geladen …",
-    "emptyShared": "Es wurden noch keine Kliniknachrichten geteilt."
+    "emptyShared": "Es wurden noch keine Kliniknachrichten geteilt.",
+    "tagsTitle": "Kunden-Tags der Klinik",
+    "tagsIntro": "Tags ordnen die Kundschaft innerhalb dieser Klinik und werden Haushalten nicht angezeigt.",
+    "saved": "Änderung gespeichert.",
+    "emptyTags": "Es wurden noch keine Tags angelegt.",
+    "tagCount": "{count} Haushalte mit diesem Tag",
+    "deleteTag": "Klinik-Tag löschen",
+    "tagName": "Name des Tags",
+    "saveFailed": "Die Änderung konnte nicht gespeichert werden; deine Auswahl und dein Entwurf bleiben erhalten.",
+    "createTag": "Tag anlegen",
+    "deleteTagHelp": "Dadurch wird der Tag aus dem Katalog der Klinik und bei allen Kunden mit diesem Tag entfernt. Die Kundendaten bleiben erhalten.",
+    "confirmDelete": "Löschen des Tags bestätigen",
+    "cancel": "Abbrechen",
+    "customerTags": "Tags dieses Kunden verwalten",
+    "removeCustomerTag": "Tag {name} entfernen",
+    "selectTag": "Vorhandenen Tag auswählen",
+    "choose": "Bitte wählen",
+    "addCustomerTag": "Tag zum Kunden hinzufügen",
+    "createTagsFirst": "Lege zuerst im Tab „Tags“ einen Tag an.",
+    "reloadTags": "Tags neu laden",
+    "assignAppointment": "Personal und Ressource für den Termin zuweisen",
+    "assignmentHelp": "Wähle eine Person aus dem Team oder eine Ressource; „Beibehalten“ lässt die bestehende Zuweisung unverändert. Bei Terminkonflikten ist eine andere Auswahl nötig.",
+    "assignedStaff": "Buchbares Teammitglied",
+    "assignedResource": "Aktiver Raum oder aktive Ressource",
+    "keepAssignment": "Beibehalten: {name}",
+    "unassigned": "Nicht zugewiesen",
+    "unnamed": "Kein Anzeigename",
+    "branchNotProvided": "Standortname nicht angegeben",
+    "assignmentConfirm": "Ich bestätige diese Auswahl von Personal und Ressource für diesen Termin.",
+    "saveAssignment": "Zuweisung speichern",
+    "waiting": "Wird gespeichert …",
+    "staffConflict": "Dieses Teammitglied hat in diesem Zeitfenster bereits einen anderen Termin. Wähle eine andere Person.",
+    "resourceConflict": "Diese Ressource ist in diesem Zeitfenster bereits belegt.",
+    "notAssignable": "Der Status des Termins hat sich geändert, er kann nicht mehr zugewiesen werden. Aktualisiere die Warteschlange.",
+    "assignFailed": "Die Zuweisung konnte nicht gespeichert werden; deine Auswahl bleibt erhalten. Prüfe den Status des Termins und deine Berechtigung."
   },
   "lostPet": {
-    "species": { "dog": "Hund", "cat": "Katze", "other": "Andere" },
+    "species": {
+      "dog": "Hund",
+      "cat": "Katze",
+      "other": "Andere"
+    },
     "report": {
       "title": "Vermisstes Haustier melden",
       "subtitle": "Teile Einzelheiten, damit die Gemeinschaft bei der Suche helfen kann.",
@@ -6895,7 +7128,12 @@
       "publicContactPlaceholder": "Zum Beispiel: 0912***4567 — nur SMS",
       "publicContactWarning": "Alle können diesen Text sehen. Vermeide nach Möglichkeit eine vollständige Telefonnummer.",
       "reviewTitle": "Was in der öffentlichen Meldung zu sehen ist",
-      "review": { "area": "Gegend", "when": "Zeitpunkt", "photo": "Foto", "contact": "Kontakt" },
+      "review": {
+        "area": "Gegend",
+        "when": "Zeitpunkt",
+        "photo": "Foto",
+        "contact": "Kontakt"
+      },
       "notGiven": "Nicht angegeben",
       "noPhoto": "Kein Foto",
       "contactThroughApp": "Über opetlife",
@@ -7112,7 +7350,7 @@
         "send": "Anfrage senden",
         "cancel": "Abbrechen"
       }
-  },
+    },
     "own": {
       "edit": "Bearbeiten",
       "delete": "Löschen",
@@ -7258,7 +7496,278 @@
     "shell": {
       "nav": {
         "support": "Support",
-        "shipping": "Versand"
+        "shipping": "Versand",
+        "overview": "Übersicht",
+        "orders": "Bestellungen",
+        "offers": "Angebote",
+        "inventory": "Bestand",
+        "channels": "Kanäle",
+        "team": "Team",
+        "settings": "Einstellungen",
+        "finance": "Finanzen",
+        "promotions": "Aktionen"
+      },
+      "notASeller": {
+        "title": "Kein Verkäuferzugang",
+        "body": "Dein Konto gehört keiner Verkäuferorganisation an.",
+        "backToApp": "Zurück zu opetlife"
+      },
+      "chooseOrg": {
+        "title": "Verkäufer auswählen",
+        "body": "Du gehörst mehreren Verkäuferorganisationen an. Wähle aus, in welcher du arbeitest."
+      },
+      "headerRole": "{role}",
+      "role": {
+        "OWNER": "Inhaber/in",
+        "ADMIN": "Administration",
+        "OPERATIONS": "Betrieb",
+        "CATALOG_MANAGER": "Katalogverwaltung",
+        "ORDER_MANAGER": "Bestellverwaltung",
+        "FINANCE": "Finanzen",
+        "SUPPORT": "Kundenservice",
+        "VIEWER": "Leseberechtigt"
+      },
+      "switchOrg": "Verkäufer wechseln",
+      "suspendedBanner": "Diese Verkäuferorganisation ist gesperrt. Neue betriebliche Aktionen sind blockiert."
+    },
+    "orders": {
+      "title": "Bestellungen",
+      "loading": "Bestellungen werden geladen …",
+      "retry": "Erneut versuchen",
+      "empty": "Noch keine Bestellungen.",
+      "sourceMarketplace": "{provider}",
+      "sourcePetlife": "opetlife",
+      "externalOrderId": "Externe Bestellung: {id}",
+      "paymentSource": {
+        "PETLIFE_PAYMENT": "Über opetlife bezahlt",
+        "MARKETPLACE_COLLECTED": "Vom Marktplatz kassiert",
+        "CASH_ON_DELIVERY": "Barzahlung bei Lieferung",
+        "UNKNOWN": "Zahlungsquelle unbekannt"
+      }
+    },
+    "orderDetail": {
+      "title": "Bestelldetails",
+      "loading": "Bestellung wird geladen …",
+      "retry": "Erneut versuchen",
+      "sourceMarketplace": "{provider}",
+      "sourcePetlife": "opetlife",
+      "externalOrderId": "Externe Bestellung: {id}",
+      "paymentSource": {
+        "PETLIFE_PAYMENT": "Über opetlife bezahlt",
+        "MARKETPLACE_COLLECTED": "Vom Marktplatz kassiert",
+        "CASH_ON_DELIVERY": "Barzahlung bei Lieferung",
+        "UNKNOWN": "Zahlungsquelle unbekannt"
+      },
+      "items": "Artikel",
+      "quantity": "Menge {count}",
+      "subtotal": "Zwischensumme",
+      "delivery": "Lieferung",
+      "total": "Gesamt",
+      "cancelledDoNotShip": "Diese Bestellung wurde storniert und erstattet. Bitte nicht versenden.",
+      "actionFailed": "Das hat nicht funktioniert. Bitte versuche es erneut.",
+      "nextStep": "Nächster Schritt",
+      "markReady": "Als verpackt und abholbereit markieren",
+      "requestCourier": "Kurier anfordern",
+      "cancelOrder": "Versand nicht möglich — Bestellung stornieren",
+      "cancelExplain": "Der Kunde erhält sofort eine volle Erstattung ({amount}), und die Artikel gehen zurück in deinen Bestand.",
+      "cancelReason": "Grund (für den Kunden sichtbar)",
+      "cancelConfirm": "Stornieren und dem Kunden erstatten",
+      "orderStatus": {
+        "PENDING": "Ausstehend",
+        "CONFIRMED": "Bestätigt",
+        "PREPARING": "In Vorbereitung",
+        "READY_FOR_FULFILLMENT": "Versandbereit",
+        "FULFILLED": "Versendet",
+        "CANCELLED": "Storniert",
+        "PARTIALLY_REFUNDED": "Teilweise erstattet",
+        "REFUNDED": "Erstattet"
+      },
+      "promotionApplied": "Aktion: {name}",
+      "discount": "Rabatte",
+      "refundRequests": "Erstattungsanfragen",
+      "refundReason": {
+        "DAMAGED": "Beschädigt angekommen",
+        "WRONG_ITEM": "Falscher Artikel",
+        "NOT_AS_DESCRIBED": "Entspricht nicht der Beschreibung",
+        "MISSING_ITEMS": "Artikel fehlen",
+        "NOT_DELIVERED": "Nicht geliefert",
+        "PET_REACTION": "Mein Tier hat schlecht darauf reagiert",
+        "OTHER": "Sonstiges"
+      },
+      "refundStatus": {
+        "PENDING_REVIEW": "Wird geprüft",
+        "APPROVED": "Genehmigt",
+        "REJECTED": "Abgelehnt",
+        "WITHDRAWN": "Zurückgezogen"
+      },
+      "refundRequestsNote": "opetlife prüft Erstattungsanfragen; genehmigte Erstattungen werden von deiner Abrechnung abgezogen."
+    },
+    "inventory": {
+      "title": "Bestand",
+      "loading": "Bestand wird geladen …",
+      "retry": "Erneut versuchen",
+      "empty": "Noch kein Bestand vorhanden.",
+      "lowStock": "Wenig auf Lager",
+      "reserved": "Reserviert",
+      "available": "Verfügbar",
+      "onHand": "Auf Lager",
+      "save": "Speichern",
+      "adjustFailed": "Durch diese Anpassung würde der Bestand negativ."
+    },
+    "channels": {
+      "title": "Kanäle",
+      "loading": "Kanäle werden geladen …",
+      "retry": "Erneut versuchen",
+      "connections": "Verbindungen",
+      "lastSync": "Zuletzt synchronisiert: {when}",
+      "neverSynced": "Noch nie synchronisiert",
+      "connect": "Verbinden",
+      "listings": "Einträge",
+      "noListings": "Noch keine Marktplatz-Einträge",
+      "noListingsBody": "Ordne auf der Seite „Angebote“ ein Angebot einem Kanal zu, um es zu veröffentlichen.",
+      "resync": "Erneut synchronisieren",
+      "publish": "Veröffentlichen",
+      "reconcile": "Abgleichen",
+      "inventoryMismatch": "Der veröffentlichte Bestand ({published}) weicht vom opetlife-Bestand ({canonical}) ab.",
+      "noDiscrepancy": "Keine Abweichung gefunden.",
+      "discrepancy": {
+        "INVENTORY_MISMATCH": "Bestandsabweichung erkannt.",
+        "PRICE_MISMATCH": "Preisabweichung erkannt.",
+        "LISTING_STATUS_MISMATCH": "Abweichung beim Eintragsstatus erkannt.",
+        "ORDER_STATUS_MISMATCH": "Abweichung beim Bestellstatus erkannt.",
+        "UNKNOWN_PROVIDER_REFERENCE": "Zuordnung des Eintrags erforderlich."
+      }
+    },
+    "team": {
+      "title": "Team",
+      "loading": "Team wird geladen …",
+      "retry": "Erneut versuchen",
+      "invite": "Teammitglied einladen",
+      "inviteIdentifier": "E-Mail oder Telefon",
+      "inviteHint": "Die Person braucht bereits ein opetlife-Konto.",
+      "role": "Rolle",
+      "inviteAction": "Einladen",
+      "inviteFailed": "Diese Person konnte nicht eingeladen werden.",
+      "statusLabel": {
+        "PENDING": "Ausstehend",
+        "ACTIVE": "Aktiv",
+        "DEACTIVATED": "Deaktiviert"
+      },
+      "remove": "Entfernen",
+      "roles": {
+        "OWNER": "Inhaber/in",
+        "ADMIN": "Administration",
+        "OPERATIONS": "Betrieb",
+        "CATALOG_MANAGER": "Katalogverwaltung",
+        "ORDER_MANAGER": "Bestellverwaltung",
+        "FINANCE": "Finanzen",
+        "SUPPORT": "Kundenservice",
+        "VIEWER": "Leseberechtigt"
+      }
+    },
+    "settings": {
+      "title": "Einstellungen",
+      "loading": "Einstellungen werden geladen …",
+      "retry": "Erneut versuchen",
+      "verificationNote": "Rechtliche Angaben und Verifizierungsdaten werden über die Prüfung durch opetlife verwaltet und können hier nicht bearbeitet werden.",
+      "supportEmail": "Support-E-Mail",
+      "supportPhone": "Support-Telefon",
+      "city": "Stadt",
+      "timezone": "Zeitzone",
+      "description": "Beschreibung",
+      "save": "Speichern",
+      "saved": "Gespeichert"
+    },
+    "finance": {
+      "title": "Finanzen",
+      "loading": "Finanzdaten werden geladen …",
+      "retry": "Erneut versuchen",
+      "viewTransactions": "Transaktionen ansehen",
+      "viewAllSettlements": "Alle Abrechnungen ansehen",
+      "balance": {
+        "pending": "Ausstehend",
+        "reserved": "Für die Abrechnung reserviert",
+        "available": "Zur Auszahlung verfügbar",
+        "paid": "Bisher ausgezahlt"
+      },
+      "nextSettlementEligible": "Abrechnungsfähiger Betrag (nächste Abrechnung)",
+      "accountCurrency": "Konto in {currency} · Abrechnungsrhythmus: {schedule}",
+      "schedule": {
+        "WEEKLY": "Wöchentlich",
+        "BIWEEKLY": "Alle zwei Wochen",
+        "MONTHLY": "Monatlich",
+        "MANUAL": "Manuell"
+      },
+      "lastSettlement": "Letzte Abrechnung",
+      "noSettlementsYet": "Noch keine Abrechnungen.",
+      "status": {
+        "CALCULATED": "Berechnet",
+        "APPROVED": "Genehmigt",
+        "PAID": "Ausgezahlt",
+        "FAILED": "Fehlgeschlagen",
+        "RECONCILIATION_REQUIRED": "Abgleich erforderlich",
+        "CANCELLED": "Storniert"
+      },
+      "transactions": {
+        "title": "Transaktionen",
+        "loading": "Transaktionen werden geladen …",
+        "retry": "Erneut versuchen",
+        "empty": "Noch keine Transaktionen.",
+        "loadMore": "Mehr laden",
+        "gross": "Brutto: {amount}",
+        "commission": "Provision: {amount}",
+        "settlementStatus": {
+          "CALCULATED": "Berechnet",
+          "APPROVED": "Genehmigt",
+          "PAID": "Ausgezahlt",
+          "FAILED": "Fehlgeschlagen",
+          "RECONCILIATION_REQUIRED": "Abgleich erforderlich",
+          "CANCELLED": "Storniert",
+          "UNSETTLED": "Nicht abgerechnet"
+        }
+      },
+      "settlements": {
+        "title": "Abrechnungen",
+        "loading": "Abrechnungen werden geladen …",
+        "retry": "Erneut versuchen",
+        "empty": "Noch keine Abrechnungen.",
+        "status": {
+          "CALCULATED": "Berechnet",
+          "APPROVED": "Genehmigt",
+          "PAID": "Ausgezahlt",
+          "FAILED": "Fehlgeschlagen",
+          "RECONCILIATION_REQUIRED": "Abgleich erforderlich",
+          "CANCELLED": "Storniert"
+        }
+      },
+      "settlementDetail": {
+        "title": "Abrechnung",
+        "loading": "Abrechnung wird geladen …",
+        "retry": "Erneut versuchen",
+        "status": {
+          "CALCULATED": "Berechnet",
+          "APPROVED": "Genehmigt",
+          "PAID": "Ausgezahlt",
+          "FAILED": "Fehlgeschlagen",
+          "RECONCILIATION_REQUIRED": "Abgleich erforderlich",
+          "CANCELLED": "Storniert"
+        },
+        "period": "{start} – {end}",
+        "breakdown": {
+          "gross": "Warenwert brutto",
+          "commission": "Plattformprovision",
+          "refunds": "Erstattungen",
+          "adjustments": "Anpassungen",
+          "net": "Nettoauszahlung"
+        },
+        "payoutMethod": "Auszahlungsmethode",
+        "paidAt": "Ausgezahlt am {date}",
+        "items": "{count, plural, one {# Position} other {# Positionen}}",
+        "sourceType": {
+          "ORDER": "Bestellung",
+          "REFUND": "Erstattung",
+          "ADJUSTMENT": "Anpassung"
+        }
       }
     }
   },
@@ -7308,7 +7817,258 @@
       "downloadFailed": "Das Dokument konnte nicht geöffnet werden. Bitte versuche es erneut.",
       "tab": {
         "labs": "Labor",
-        "documents": "Dokumente"
+        "documents": "Dokumente",
+        "summary": "Übersicht",
+        "problems": "Probleme",
+        "vitals": "Untersuchungen",
+        "prescriptions": "Verordnungen",
+        "visits": "Besuche",
+        "financial": "Kostenvoranschläge"
+      },
+      "startVisit": "Besuch beginnen",
+      "admit": "Stationär aufnehmen",
+      "admitPrompt": "Grund für die stationäre Aufnahme",
+      "openTreatmentSheet": "Behandlungsblatt",
+      "resolveAlert": "Erledigt",
+      "owner": "Halter/in: {name} · {phone}",
+      "chip": "Mikrochip {chip}",
+      "noneRecorded": "Nichts erfasst",
+      "allergies": "Allergien",
+      "activeProblems": "Aktive Probleme",
+      "latestVitals": "Letzte Untersuchung",
+      "noVitalsRecorded": "Keine Untersuchung erfasst.",
+      "careContext": "Versorgungskontext",
+      "weight": "Gewicht",
+      "temperature": "Temperatur",
+      "heartRate": "Herzfrequenz",
+      "respiratoryRate": "Atemfrequenz",
+      "bodyCondition": "Körperkondition",
+      "painScore": "Schmerzscore",
+      "weightTrend": "Gewichtsverlauf",
+      "trendCaption": "{count, number} erfasste Messungen. Die Punkte sind tatsächliche Messwerte — dazwischen wird nichts geschätzt.",
+      "onset": "Beginn {date}",
+      "noProblems": "Keine Probleme erfasst.",
+      "noPrescriptions": "Keine Verordnungen erfasst.",
+      "noVisits": "Keine Besuche erfasst.",
+      "noEstimates": "Keine Kostenvoranschläge erfasst.",
+      "refills": "Folgeabgaben {used, number}/{authorized, number}",
+      "controlledSubstance": "Betäubungsmittel",
+      "dispenseRefill": "Folgeabgabe ausgeben",
+      "cancelPrescription": "Stornieren",
+      "cancelPrompt": "Warum wird diese Verordnung storniert?",
+      "presentEstimate": "An Halter/in senden",
+      "awaitingOwner": "Wartet auf die Entscheidung der Halterin oder des Halters.",
+      "alertType": {
+        "HANDLING": "Umgang",
+        "AGGRESSION": "Aggressivität",
+        "MEDICAL": "Medizinisch",
+        "ANAESTHETIC": "Anästhesie",
+        "ALLERGY": "Allergie",
+        "INFECTIOUS": "Infektiös",
+        "OTHER": "Hinweis"
+      },
+      "problemStatus": {
+        "ACTIVE": "Aktiv",
+        "CHRONIC": "Chronisch",
+        "RESOLVED": "Abgeklungen",
+        "RULED_OUT": "Ausgeschlossen"
+      },
+      "prescriptionStatus": {
+        "ACTIVE": "Aktiv",
+        "COMPLETED": "Abgeschlossen",
+        "CANCELLED": "Storniert"
+      },
+      "estimateStatus": {
+        "DRAFT": "Entwurf",
+        "PRESENTED": "An Halter/in gesendet",
+        "APPROVED": "Freigegeben",
+        "DECLINED": "Abgelehnt",
+        "EXPIRED": "Abgelaufen"
+      },
+      "estimateRange": "{low}–{high} IRR",
+      "species": {
+        "DOG": "Hund",
+        "CAT": "Katze"
+      },
+      "sex": {
+        "MALE": "Männlich",
+        "FEMALE": "Weiblich",
+        "UNKNOWN": "Geschlecht unbekannt"
+      },
+      "route": {
+        "ORAL": "p.o.",
+        "SUBCUTANEOUS": "s.c.",
+        "INTRAVENOUS": "i.v.",
+        "INTRAMUSCULAR": "i.m.",
+        "TOPICAL": "Topisch",
+        "OTIC": "Aurikulär",
+        "OPHTHALMIC": "Okulär",
+        "INHALED": "Inhalativ",
+        "RECTAL": "Rektal",
+        "INTRANASAL": "Nasal",
+        "OTHER": "Anderer Applikationsweg"
+      }
+    },
+    "registry": {
+      "title": "Patienten",
+      "searchLabel": "Patienten suchen",
+      "searchPlaceholder": "Name, Mikrochip oder Halter/in",
+      "search": "Suchen",
+      "hospitalizedOnly": "Nur stationäre Patienten",
+      "empty": "Keine Patienten gefunden.",
+      "emptyDescription": "Ein Tier erscheint hier, sobald deine Klinik einen Termin für es gebucht oder einen Besuch dokumentiert hat.",
+      "accessState": {
+        "ACTIVE": "Akte offen",
+        "EXPIRED": "Zugriff abgelaufen"
+      },
+      "ownedBy": "Halter/in: {name}",
+      "inpatient": "Stationär",
+      "visitOpen": "Besuch offen",
+      "alerts": "{count, number} Hinweise",
+      "lastVisit": "Letzter Besuch {date}",
+      "noVisitsYet": "Keine Besuche erfasst",
+      "previous": "Zurück",
+      "next": "Weiter",
+      "pageOf": "Seite {page, number} von {totalPages, number}",
+      "species": {
+        "DOG": "Hund",
+        "CAT": "Katze"
+      }
+    },
+    "treatmentSheet": {
+      "title": "Behandlungsblatt",
+      "status": {
+        "ADMITTED": "Stationär",
+        "DISCHARGED": "Entlassen",
+        "CANCELLED": "Storniert"
+      },
+      "kennel": "Gehege {label}",
+      "admittedAt": "Aufgenommen {time}",
+      "dischargedAt": "Entlassen {time}",
+      "counts": {
+        "scheduled": "{count, number} geplant",
+        "overdue": "{count, number} überfällig",
+        "done": "{count, number} erledigt",
+        "skipped": "{count, number} ausgelassen",
+        "missed": "{count, number} versäumt"
+      },
+      "scheduleTreatment": "Behandlung planen",
+      "discharge": "Entlassen",
+      "dischargePrompt": "Entlassungsnotiz (optional)",
+      "taskTypeLabel": "Art",
+      "taskTitle": "Behandlung",
+      "taskDetail": "Details",
+      "everyHours": "Alle (Stunden)",
+      "occurrences": "Anzahl der Dosen",
+      "seriesExplainer": "Dadurch wird ab jetzt ein Eintrag pro Dosis angelegt. Jeder Eintrag wird einzeln abgearbeitet und bleibt genau so bestehen, wie er geplant wurde.",
+      "addToSheet": "Zum Blatt hinzufügen",
+      "sheet": "Blatt",
+      "noTasks": "Nichts geplant.",
+      "noTasksDescription": "Plane eine Behandlung, um das Behandlungsblatt dieses Patienten zu beginnen.",
+      "overdue": "Überfällig",
+      "actionedAt": "Erfasst {time}",
+      "outcomePrompt": "Was ist passiert? (wird auf dem Blatt erfasst)",
+      "vitalsDuringStay": "Vitalwerte während dieses Aufenthalts",
+      "noVitals": "Während dieses Aufenthalts wurden keine Vitalwerte erfasst.",
+      "noneRecorded": "Nichts erfasst",
+      "pain": "Schmerz",
+      "triage": {
+        "ROUTINE": "Regulär",
+        "URGENT": "Dringend",
+        "EMERGENT": "Notfall",
+        "CRITICAL": "Kritisch"
+      },
+      "taskType": {
+        "MEDICATION": "Medikation",
+        "FLUID_THERAPY": "Infusion",
+        "MONITORING": "Überwachung",
+        "FEEDING": "Fütterung",
+        "WALK": "Ausführen",
+        "PROCEDURE": "Eingriff",
+        "SAMPLE_COLLECTION": "Probe",
+        "OTHER": "Sonstiges"
+      },
+      "taskStatus": {
+        "SCHEDULED": "Geplant",
+        "DONE": "Erledigt",
+        "SKIPPED": "Ausgelassen",
+        "MISSED": "Versäumt"
+      },
+      "taskAction": {
+        "DONE": "Erledigt",
+        "SKIPPED": "Ausgelassen",
+        "MISSED": "Versäumt"
+      }
+    },
+    "visitTools": {
+      "templates": "Notizvorlagen",
+      "templatesExplainer": "Eine Vorlage füllt nur die Felder oben aus. Gespeichert wird erst, wenn du deine Notizen speicherst.",
+      "exam": "Untersuchung",
+      "recordExam": "Untersuchung erfassen",
+      "noExamRecorded": "Für diesen Patienten ist keine Untersuchung erfasst.",
+      "noneRecorded": "Nichts erfasst",
+      "weightKg": "Gewicht (kg)",
+      "temperatureC": "Temperatur (°C)",
+      "heartRate": "Herzfrequenz (Schläge/min)",
+      "respiratoryRate": "Atemfrequenz (Atemzüge/min)",
+      "bodyConditionScore": "Körperkondition (1–9)",
+      "bodyConditionHint": "Erfasst auf der Purina-Skala von 1–9.",
+      "painScore": "Schmerzscore (0–4)",
+      "painScoreHint": "Erfasst auf der Glasgow-CMPS-SF-Skala von 0–4.",
+      "examNotes": "Befundnotizen",
+      "blankFieldsExplainer": "Lass ein Feld leer, wenn du es nicht gemessen hast — ein leeres Feld wird als „nicht gemessen“ erfasst, nie als normal.",
+      "saveExam": "Untersuchung speichern",
+      "prescriptions": "Verordnungen",
+      "prescribe": "Verordnen",
+      "noActivePrescriptions": "Keine aktiven Verordnungen.",
+      "controlled": "BtM",
+      "drugName": "Medikament",
+      "strength": "Wirkstärke",
+      "routeLabel": "Applikationsweg",
+      "doseHelperTitle": "Dosisrechner (nicht Teil der Verordnung)",
+      "mgPerKg": "mg/kg",
+      "weightKgHelper": "Gewicht (kg)",
+      "suggestedDose": "Vorschlag: {value} mg",
+      "doseHelperEmpty": "Gib mg/kg und Gewicht ein, um einen Vorschlag zu sehen.",
+      "doseHelperDisclaimer": "Das ist nur eine Rechenhilfe. Trage die Dosis, die du verordnest, im Feld unten ein — der Vorschlag wird nie in deinem Namen gespeichert.",
+      "doseAmount": "Dosis",
+      "doseUnit": "Dosiseinheit",
+      "frequency": "Häufigkeit",
+      "durationDays": "Dauer (Tage)",
+      "refillsAuthorized": "Genehmigte Folgeabgaben",
+      "ownerInstructions": "Hinweise für die Halterin oder den Halter",
+      "prescriptionExplainer": "Dadurch wird das Medikament auch in die Medikamentenliste des Haushalts aufgenommen.",
+      "savePrescription": "Verordnung speichern",
+      "dischargeSummary": "Entlassungsbericht",
+      "dischargeStatus": {
+        "DRAFT": "Entwurf",
+        "ISSUED": "Ausgestellt"
+      },
+      "issuedNotice": "Ausgestellt {time}. Ein ausgestellter Bericht kann nicht mehr geändert werden — korrigiere stattdessen den Besuch und stelle einen neuen aus.",
+      "noDischargeDraft": "Noch kein Entlassungsbericht verfasst.",
+      "editDischarge": "Entwurf bearbeiten",
+      "writeDischarge": "Entlassungsbericht verfassen",
+      "dischargeSummaryText": "Zusammenfassung",
+      "homeCare": "Hinweise zur Pflege zu Hause",
+      "medicationsSummary": "Medikamente für zu Hause",
+      "warningSigns": "Ruf uns sofort an, wenn …",
+      "warningSignsHint": "Die Anzeichen, bei denen die Halterin oder der Halter sofort wiederkommen sollte.",
+      "followUpInstructions": "Nachsorge",
+      "saveDraft": "Entwurf speichern",
+      "issueToOwner": "Ausstellen und an Halter/in senden",
+      "issueExplainer": "Beim Ausstellen wird der Bericht an die Halterin oder den Halter gesendet und gesperrt. Speichere ihn als Entwurf, solange du noch daran arbeitest.",
+      "route": {
+        "ORAL": "Peroral",
+        "SUBCUTANEOUS": "Subkutan",
+        "INTRAVENOUS": "Intravenös",
+        "INTRAMUSCULAR": "Intramuskulär",
+        "TOPICAL": "Topisch",
+        "OTIC": "Aurikulär",
+        "OPHTHALMIC": "Okulär",
+        "INHALED": "Inhalativ",
+        "RECTAL": "Rektal",
+        "INTRANASAL": "Nasal",
+        "OTHER": "Sonstiger"
       }
     }
   },
@@ -7894,7 +8654,11 @@
         "body": "Du gehörst mehreren Anbieterorganisationen an. Wähle aus, in welcher du arbeitest."
       },
       "headerRole": "{role}",
-      "role": { "OWNER": "Inhaber/in", "VET": "Tierarzt/Tierärztin", "STAFF": "Mitarbeiter/in" },
+      "role": {
+        "OWNER": "Inhaber/in",
+        "VET": "Tierarzt/Tierärztin",
+        "STAFF": "Mitarbeiter/in"
+      },
       "switchOrg": "Organisation wechseln",
       "notVerifiedBanner": "Diese Organisation ist noch nicht bestätigt. Einige Aktionen sind eingeschränkt."
     },
@@ -7915,14 +8679,24 @@
       "verificationLink": "Organisationsnachweise und Verifizierung"
     },
     "bookingRow": {
-      "attendanceConfirmed": "Teilnahme bestätigt", "respondBy": "Antwort bis " },
+      "attendanceConfirmed": "Teilnahme bestätigt",
+      "respondBy": "Antwort bis "
+    },
     "availability": {
       "title": "Verfügbarkeit",
       "retry": "Erneut versuchen",
       "loading": "Wird geladen",
       "loadFailed": "Die Verfügbarkeit konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.",
       "accessDenied": "Du darfst die Verfügbarkeit nicht verwalten.",
-      "day": { "sun": "So", "mon": "Mo", "tue": "Di", "wed": "Mi", "thu": "Do", "fri": "Fr", "sat": "Sa" },
+      "day": {
+        "sun": "So",
+        "mon": "Mo",
+        "tue": "Di",
+        "wed": "Mi",
+        "thu": "Do",
+        "fri": "Fr",
+        "sat": "Sa"
+      },
       "rules": {
         "title": "Wöchentlicher Zeitplan",
         "empty": "Es sind noch keine wiederkehrenden Zeiten eingerichtet.",
@@ -7946,7 +8720,10 @@
         "startAt": "Beginn",
         "endAt": "Ende",
         "typeLabel": "Art",
-        "type": { "BLOCKED": "Gesperrt", "AVAILABLE_OVERRIDE": "Zusätzliche Verfügbarkeit" },
+        "type": {
+          "BLOCKED": "Gesperrt",
+          "AVAILABLE_OVERRIDE": "Zusätzliche Verfügbarkeit"
+        },
         "reason": "Grund (optional)",
         "add": "Hinzufügen",
         "fieldsRequired": "Standort, Beginn und Ende sind erforderlich.",
@@ -7957,7 +8734,11 @@
         "conflictCancel": "Abbrechen",
         "conflictProceed": "Trotzdem sperren"
       },
-      "actions": { "edit": "Bearbeiten", "cancel": "Abbrechen", "save": "Änderungen speichern" }
+      "actions": {
+        "edit": "Bearbeiten",
+        "cancel": "Abbrechen",
+        "save": "Änderungen speichern"
+      }
     },
     "bookings": {
       "title": "Buchungen",
@@ -8141,7 +8922,11 @@
       "loading": "Wird geladen",
       "loadFailed": "Das Team konnte nicht geladen werden.",
       "empty": "Es gibt noch keine Teammitglieder.",
-      "role": { "OWNER": "Inhaber/in", "VET": "Tierarzt/Tierärztin", "STAFF": "Mitarbeiter/in" },
+      "role": {
+        "OWNER": "Inhaber/in",
+        "VET": "Tierarzt/Tierärztin",
+        "STAFF": "Mitarbeiter/in"
+      },
       "settings": {
         "title": "Leistungen und öffentliches Profil je Teammitglied",
         "description": "Wenn einer Leistung keine Personen zugeordnet sind, wird sie von allen buchbaren Teammitgliedern angeboten. Hier werden keine Personaldaten gespeichert.",
@@ -8158,6 +8943,36 @@
         "saveFailed": "Die Änderung konnte nicht gespeichert werden.",
         "ownerOnly": "Nur Inhaber/innen der Organisation können das Team bearbeiten."
       }
+    },
+    "schedule": {
+      "title": "Kalender",
+      "retry": "Erneut versuchen",
+      "loading": "Wird geladen",
+      "empty": "Keine Termine geplant.",
+      "tab": {
+        "today": "Heute",
+        "agenda": "Terminübersicht",
+        "week": "Woche"
+      }
+    },
+    "services": {
+      "title": "Leistungen",
+      "retry": "Erneut versuchen",
+      "loading": "Wird geladen",
+      "empty": "Noch keine Leistungen.",
+      "active": "Aktiv",
+      "inactive": "Deaktiviert",
+      "minutes": "Min.",
+      "name": "Bezeichnung",
+      "priceAmount": "Preis",
+      "durationMinutes": "Dauer (Minuten)",
+      "cancel": "Abbrechen",
+      "save": "Speichern",
+      "edit": "Bearbeiten",
+      "disable": "Deaktivieren",
+      "enable": "Aktivieren",
+      "saveFailed": "Die Änderungen konnten nicht gespeichert werden.",
+      "ownerOnly": "Nur Inhaber/innen der Organisation können Leistungen ändern."
     }
   },
   "partnerVerification": {
@@ -8532,7 +9347,12 @@
       "everydayCareProfile": "Alltägliches Pflegeprofil",
       "until": "bis",
       "timeline": "Verlauf",
-      "actor": { "USER": "Du", "PROVIDER": "Dienstleister", "SYSTEM": "System", "ADMIN": "Support" },
+      "actor": {
+        "USER": "Du",
+        "PROVIDER": "Dienstleister",
+        "SYSTEM": "System",
+        "ADMIN": "Support"
+      },
       "reschedule": "Termin ändern",
       "cancelFollowing": "Diese und folgende Buchungen stornieren",
       "weeklyCreated": "Wöchentliche Buchungen erstellt; ausgebuchte Wochen wurden übersprungen.",
@@ -11187,6 +12007,273 @@
       "LOGO_FILE": "Das Logo muss JPG, PNG oder WebP unter 10 MB sein.",
       "DOC_FILE": "Das Dokument muss JPG, PNG oder PDF unter 20 MB sein.",
       "TOO_MANY_PENDING": "Zu viele Unterlagen warten auf Prüfung."
+    }
+  },
+  "clinicalOs": {
+    "patient": {
+      "title": "Patientenakte",
+      "allergies": "Allergien",
+      "medications": "Aktuelle Medikation",
+      "conditions": "Bekannte Erkrankungen",
+      "recentVisits": "Letzte Behandlungen",
+      "recentLabs": "Aktuelle Laborbefunde",
+      "documents": "Dokumente",
+      "carePlans": "Pflegepläne",
+      "startVisit": "Behandlung beginnen"
+    },
+    "visit": {
+      "title": "Klinische Behandlung",
+      "reasonForVisit": "Vorstellungsgrund",
+      "history": "Anamnese",
+      "observations": "Befunde",
+      "assessment": "Beurteilung",
+      "plan": "Behandlungsplan",
+      "save": "Notizen speichern",
+      "complete": "Behandlung abschließen",
+      "amend": "Behandlung berichtigen",
+      "void": "Behandlung stornieren",
+      "amendReason": "Grund der Berichtigung",
+      "voidReason": "Grund der Stornierung",
+      "status": {
+        "DRAFT": "Entwurf",
+        "IN_PROGRESS": "In Bearbeitung",
+        "COMPLETED": "Abgeschlossen",
+        "AMENDED": "Berichtigt",
+        "VOIDED": "Storniert"
+      },
+      "revisionHistory": "Versionsverlauf",
+      "completedNotice": "Diese Behandlung ist abgeschlossen. Nutze „Behandlung berichtigen“ für weitere Änderungen – der bisherige Inhalt bleibt erhalten."
+    }
+  },
+  "clinicTeam": {
+    "staff": "Klinikteam",
+    "branches": "Klinikstandorte",
+    "staffIntro": "Verwalte Teammitglieder und Einladungen, die noch nicht angenommen wurden.",
+    "branchesIntro": "Adressen der Standorte und die Kapazität deines aktuellen Tarifs.",
+    "loading": "Wird geladen …",
+    "loadFailed": "Diese Informationen konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "saveFailed": "Der Vorgang konnte nicht abgeschlossen werden. Deine Eingaben bleiben erhalten; bitte versuche es erneut.",
+    "saved": "Änderungen gespeichert.",
+    "branchInUse": "Dieser Standort kann nicht entfernt werden: Er ist der letzte oder hat Besuchsverlauf, Leistungen oder Abhängigkeiten in der Terminplanung.",
+    "limitReached": "Die Kapazität deines aktuellen Tarifs ist ausgeschöpft.",
+    "alreadyMember": "Dieses Konto ist bereits Teammitglied.",
+    "invitationConflict": "Diese Einladung hat sich geändert. Lade die Liste neu.",
+    "notFound": "Der ausgewählte Eintrag oder das Konto wurde nicht gefunden. Eingeladene Personen brauchen bereits ein opetlife-Konto.",
+    "accessDenied": "Du hast keine Berechtigung für diese Aktion.",
+    "staffUsage": "Mitglieder: {used} · Offene Einladungen: {pending} · Kapazität: {limit}",
+    "branchUsage": "Standorte: {used} · Kapazität: {limit}",
+    "unlimited": "Unbegrenzt",
+    "unnamed": "Kein Anzeigename",
+    "joined": "Dabei seit",
+    "removeMember": "Aus dem Team entfernen",
+    "pending": "Offene Einladungen",
+    "emptyStaff": "Keine Teammitglieder vorhanden.",
+    "emptyInvitations": "Keine offenen Einladungen.",
+    "expires": "Läuft ab:",
+    "revoke": "Einladung widerrufen",
+    "email": "Konto-E-Mail der Kollegin oder des Kollegen",
+    "role": "Rolle",
+    "displayTitle": "Berufsbezeichnung (optional)",
+    "invitationHelp": "Sendet eine Einladung an ein bestehendes Konto. Die Mitgliedschaft wird erst aktiv, wenn die Person annimmt.",
+    "invite": "Teameinladung senden",
+    "emptyBranches": "Keine Standorte erfasst.",
+    "branchName": "Name des Standorts",
+    "city": "Stadt",
+    "address": "Adresse",
+    "region": "Bezirk (optional)",
+    "phone": "Telefon (optional)",
+    "latitude": "Breitengrad (optional)",
+    "longitude": "Längengrad (optional)",
+    "addBranch": "Standort hinzufügen",
+    "removeBranch": "Standort entfernen",
+    "confirmTitle": "Änderung bestätigen",
+    "confirmBody": "Ausgewählte Aktion für „{name}“ ausführen?",
+    "removalHelp": "Inhaber/innen können nicht entfernt werden. Der letzte Standort und Standorte mit Verlauf oder betrieblichen Abhängigkeiten können nicht gelöscht werden.",
+    "confirm": "Bestätigen und fortfahren",
+    "keep": "Abbrechen",
+    "roles": {
+      "OWNER": "Inhaber/in",
+      "VET": "Tierarzt/Tierärztin",
+      "STAFF": "Mitarbeiter/in"
+    }
+  },
+  "clinicContacts": {
+    "title": "Klinikkontakte",
+    "intro": "Importierte Kontakte gehören zu dieser Klinik und werden nie mit opetlife-Konten zusammengeführt.",
+    "search": "Nach Name, Tier oder Telefon suchen",
+    "listLimit": "Es werden bis zu 200 passende Kontakte angezeigt.",
+    "loadFailed": "Kontakte konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "loading": "Wird geladen …",
+    "empty": "Keine passenden Kontakte.",
+    "importTitle": "Kontakte importieren",
+    "csvHelp": "CSV in UTF-8, höchstens 1 MB und 1.000 Zeilen. Ein Name und mindestens eine Telefonnummer oder E-Mail-Adresse sind erforderlich. Verwende diese Spaltenüberschriften:",
+    "file": "CSV-Datei mit Kontakten",
+    "reading": "Datei wird gelesen …",
+    "preview": "Prüfen und Vorschau anzeigen",
+    "previewTitle": "Ergebnis der Dateiprüfung",
+    "summary": "Gesamt: {total} · Gültig: {valid} · Duplikate: {duplicates} · Fehler: {errors}",
+    "rowError": "Zeile {row}: ungültiger Wert für {field}.",
+    "duplicateFile": "Zeile {row}: Duplikat innerhalb der Datei; wird übersprungen.",
+    "duplicateExisting": "Zeile {row}: Kontakt existiert bereits; wird übersprungen.",
+    "confirmImport": "Ich bestätige den Import von {count} gültigen Kontakten ohne Duplikate.",
+    "commit": "Bestätigen und Kontakte importieren",
+    "imported": "{count} Kontakte importiert.",
+    "fileTooLarge": "Die Datei darf höchstens 1 MB groß sein.",
+    "fileFailed": "Diese Datei konnte nicht gelesen werden. Wähle sie erneut aus.",
+    "previewFailed": "Die Datei konnte nicht geprüft werden. Prüfe Format, Spaltenüberschriften und Zeilenanzahl und versuche es dann erneut.",
+    "importFailed": "Der Import wurde nicht bestätigt. Erstelle eine neue Vorschau und bestätige die Zeilenanzahl erneut.",
+    "exportFailed": "Der Export konnte nicht heruntergeladen werden. Bitte versuche es erneut.",
+    "exportTitle": "Klinikdaten exportieren",
+    "exportHelp": "Exporte folgen den Zugriffsregeln des Servers. Kundschaft und Termine sind auf 5.000 Zeilen begrenzt, Kontakte auf 200 Zeilen. Termine umfassen das vergangene Jahr.",
+    "exportKind": "Art des Exports",
+    "download": "CSV herunterladen",
+    "fields": {
+      "name": "Name",
+      "phone": "Telefon",
+      "email": "E-Mail",
+      "notes": "Notizen",
+      "other": "Daten"
+    },
+    "exports": {
+      "customers": "Kundschaft",
+      "appointments": "Termine",
+      "services": "Leistungen",
+      "contacts": "Kontakte"
+    },
+    "chooseFile": "CSV-Datei auswählen"
+  },
+  "clinicCampaigns": {
+    "title": "Erinnerungskampagnen",
+    "intro": "Prüfe zuerst die Zielgruppe. Ohne deine ausdrückliche Bestätigung wird nichts gesendet.",
+    "segment": "Zielgruppensegment",
+    "preview": "Vorschau der Zielgruppe",
+    "audience": "Berechtigte Empfänger: {count} · Ausgeschlossen: {excluded}",
+    "sample": "Stichprobe der Zielgruppe (bis zu 20)",
+    "alreadySent": "Dieses Segment wurde heute bereits kontaktiert. Ein weiterer Versand ist nicht möglich.",
+    "empty": "Keine berechtigten Empfänger.",
+    "noSend": "Das Senden von Erinnerungen ist in deinem aktuellen Tarif nicht enthalten.",
+    "messageTitle": "Titel der Nachricht",
+    "note": "Nachrichtentext (optional)",
+    "confirm": "Ich bestätige den Versand dieser Nachricht an die {count} geprüften Empfänger.",
+    "send": "Bestätigen und Erinnerungen senden",
+    "result": "{count} Einträge verarbeitet; {delivered} Erinnerungen waren in der Zustellphase des Servers erfolgreich. Das bestätigt nicht, dass die Nachrichten gelesen wurden.",
+    "failed": "Der Vorgang wurde nicht bestätigt. Prüfe Tarifkontingent, Zielgruppenstatus und Verbindung und erstelle dann eine neue Vorschau. Dein Text bleibt erhalten.",
+    "segments": {
+      "APPOINTMENTS_TOMORROW": "Termine von morgen",
+      "VACCINES_DUE": "Fällige Impfungen",
+      "FOLLOW_UP_DUE": "Fällige Nachkontrollen"
+    },
+    "reasons": {
+      "DUPLICATE_PET": "Doppelte Tiere: {count}",
+      "PET_INACTIVE": "Inaktive Tiere: {count}",
+      "NO_RECIPIENT": "Kein berechtigter Empfänger: {count}",
+      "OTHER": "Sonstige Ausschlüsse: {count}"
+    }
+  },
+  "clinicFinance": {
+    "title": "Finanzbericht der Klinik",
+    "intro": "Datumsangaben folgen der Teheraner Zeit; das Enddatum ist ausgeschlossen. Abgerechnete Beträge sind nicht dasselbe wie eingenommenes Geld.",
+    "from": "Von",
+    "to": "Bis (ausschließlich)",
+    "apply": "Bericht laden",
+    "invalid": "Wähle einen gültigen Zeitraum (Beginn vor Ende) von höchstens 366 Tagen.",
+    "failed": "Der Bericht konnte nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "loading": "Bericht wird geladen …",
+    "noMoney": "In dieser Kategorie ist kein Betrag erfasst.",
+    "services": "Abgeschlossene Leistungen",
+    "empty": "Keine abgeschlossenen Leistungen in diesem Zeitraum.",
+    "unnamed": "Leistung ohne Namen",
+    "visits": "Anzahl: {count}",
+    "counts": {
+      "total": "Alle Termine",
+      "completed": "Abgeschlossen",
+      "cancelled": "Storniert",
+      "noShow": "Nicht erschienen",
+      "refunded": "Erstattet"
+    },
+    "money": {
+      "billedAmount": "Abrechnung abgeschlossener Leistungen",
+      "payAtClinic": "Zahlung in der Klinik",
+      "collectedOnline": "Erfasste Onlinezahlungen",
+      "ledgerPosted": "Hauptbuchbuchungen"
+    },
+    "hints": {
+      "billedAmount": "Netto-Abrechnung abgeschlossener Leistungen; kein Nachweis über den Zahlungseingang.",
+      "payAtClinic": "Abrechnung mit Zahlung beim Anbieter; keine Bestätigung des Bargeldeingangs.",
+      "collectedOnline": "Vom Server gemeldete Zahlungen mit Status CAPTURED; Erstattungen nicht abgezogen.",
+      "ledgerPosted": "Zugehörige Buchungen im Zahlungshauptbuch; kein Kontostand."
+    }
+  },
+  "clinicReminders": {
+    "title": "Klinik-Erinnerungen",
+    "intro": "Einzelne Erinnerungen erstellst du im Tab „Kundschaft“ über das jeweilige Tier. Der Zustellstatus kommt vom Server.",
+    "compose": "Erinnerung für ein Tier",
+    "pet": "Tier auswählen",
+    "kind": "Art der Erinnerung",
+    "messageTitle": "Titel der Erinnerung",
+    "note": "Nachricht (optional)",
+    "dueAt": "Sendezeit (optional, Gerätezeit)",
+    "dueHelp": "Leer lassen, um sofort zu senden. Geplante Zustellungen müssen innerhalb des nächsten Jahres liegen.",
+    "confirmNow": "Ich bestätige, dass diese Nachricht jetzt an die berechtigten Halterinnen und Halter des Tiers gesendet wird.",
+    "confirmSchedule": "Ich bestätige, dass diese Nachricht für die berechtigten Halterinnen und Halter des Tiers geplant wird.",
+    "schedule": "Bestätigen und planen",
+    "sendNow": "Bestätigen und jetzt senden",
+    "created": "Erinnerung erfasst; Serverstatus: {status}.",
+    "createFailed": "Die Erinnerung wurde nicht bestätigt. Prüfe Tarifkapazität, ausgewähltes Tier, Uhrzeit und Verbindung. Dein Entwurf bleibt erhalten.",
+    "filter": "Status der Erinnerung",
+    "all": "Alle Status",
+    "loadFailed": "Erinnerungen konnten nicht geladen werden.",
+    "loading": "Wird geladen …",
+    "retry": "Erneut versuchen",
+    "empty": "Keine Erinnerungen für diesen Filter.",
+    "recipients": "Vom Server erfasste Empfänger: {count}",
+    "cancel": "Erinnerung stornieren",
+    "confirmCancel": "Diese geplante Erinnerung stornieren?",
+    "cancelFailed": "Stornieren nicht möglich. Die Erinnerung wurde möglicherweise schon gesendet.",
+    "keep": "Erinnerung behalten",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "statuses": {
+      "SCHEDULED": "Geplant",
+      "SENT": "Gesendet",
+      "CANCELLED": "Storniert",
+      "FAILED": "Zustellung fehlgeschlagen"
+    },
+    "kinds": {
+      "CHECKUP": "Untersuchung",
+      "VACCINATION": "Impfung",
+      "MEDICATION": "Medikament",
+      "FOLLOW_UP": "Nachkontrolle",
+      "MESSAGE": "Nachricht"
+    }
+  },
+  "clinicPlans": {
+    "title": "Tarife für die Klinikverwaltung",
+    "intro": "Vergleiche die tatsächlichen Funktionen und Limits, die der Server liefert.",
+    "loading": "Tarife werden geladen …",
+    "error": "Tarife konnten nicht geladen werden. Das heißt nicht, dass es keine Tarife gibt.",
+    "retry": "Erneut versuchen",
+    "empty": "Derzeit gibt es keine aktiven Tarife.",
+    "current": "Aktueller Tarif",
+    "unannounced": "Preis noch nicht bekannt gegeben",
+    "included": "Enthalten",
+    "excluded": "Nicht enthalten",
+    "unlimited": "Unbegrenzt",
+    "adminOnly": "Tarifänderungen nimmt die Administration vor. Klinik-Abos lassen sich noch nicht online kaufen.",
+    "intervals": {
+      "MONTHLY": "Monatlich",
+      "YEARLY": "Jährlich"
+    },
+    "features": {
+      "clinic_customers": "Kundenverwaltung",
+      "clinic_reminders": "Erinnerungen",
+      "clinic_bulk_reminders": "Sammelerinnerungen",
+      "clinic_exports": "Datenexporte",
+      "clinic_staff": "Teammitglieder",
+      "clinic_branches": "Standorte"
     }
   }
 }
