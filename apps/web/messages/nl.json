@@ -8784,6 +8784,28 @@
     }
   },
   "externalTravel": {
+    "petPerSource": "Volgens {source} accepteert deze accommodatie huisdieren. Controleer de voorwaarden voor je huisdier en de beschikbaarheid op je reisdata bij {source} of de host.",
+    "petVerifiedByOpetlife": "Huisdieracceptatie gecontroleerd en bevestigd door opetlife",
+    "petFacts": {
+      "title": "Voorwaarden voor huisdieren",
+      "species": "Diersoort",
+      "size": "Grootte",
+      "indoor": "Toegang binnen",
+      "fee": "Huisdiertoeslag",
+      "approval": "Toestemming van de host",
+      "unknown": "Onbekend",
+      "yes": "Ja",
+      "no": "Nee",
+      "dogs": "Honden",
+      "cats": "Katten",
+      "upTo": "Tot {limit}",
+      "noFee": "Geen toeslag",
+      "approvalNeeded": "Nodig",
+      "approvalNotNeeded": "Niet nodig"
+    },
+    "startingPrice": "Vanaf {amount}",
+    "updatedAgo": "Bijgewerkt {ago}",
+    "viewOnSource": "Bekijk deze accommodatie op {source}",
     "title": "Verblijven van externe bronnen",
     "detailTitle": "Details extern verblijf",
     "disclaimer": "De informatie komt uit openbare bronnen en kan veranderen. Controleer bij de accommodatie of huisdieren welkom zijn en wat de verblijfsvoorwaarden zijn voordat je boekt.",
@@ -8849,7 +8871,7 @@
     "alreadyAttached": "Staat al in reisplan",
     "attach": "Aan reisplan toevoegen",
     "policy": {
-      "CONFIRMED_ALLOWED": "Huisdieren toegestaan, bevestigd onder bronvoorwaarden",
+      "CONFIRMED_ALLOWED": "Huisdiervriendelijk volgens de bron",
       "CONFIRMED_NOT_ALLOWED": "Huisdieren gemeld als niet toegestaan",
       "UNKNOWN": "Onbekend of huisdieren welkom zijn",
       "AMBIGUOUS": "Informatie over huisdieren is onduidelijk"

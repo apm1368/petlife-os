@@ -8715,6 +8715,28 @@
     }
   },
   "externalTravel": {
+    "petPerSource": "According to {source}, this stay accepts pets. Check the conditions for your pet and availability for your dates with {source} or the host.",
+    "petVerifiedByOpetlife": "Pet acceptance checked and verified by opetlife",
+    "petFacts": {
+      "title": "Pet conditions",
+      "species": "Species",
+      "size": "Size",
+      "indoor": "Indoor access",
+      "fee": "Pet fee",
+      "approval": "Host approval",
+      "unknown": "Unknown",
+      "yes": "Yes",
+      "no": "No",
+      "dogs": "Dogs",
+      "cats": "Cats",
+      "upTo": "Up to {limit}",
+      "noFee": "No fee",
+      "approvalNeeded": "Required",
+      "approvalNotNeeded": "Not required"
+    },
+    "startingPrice": "Starting from {amount}",
+    "updatedAgo": "Updated {ago}",
+    "viewOnSource": "View this stay on {source}",
     "title": "Stays from external sources",
     "detailTitle": "External stay details",
     "disclaimer": "Information is collected from public sources and may change. Confirm pet acceptance and stay conditions with the property before booking.",
@@ -8780,7 +8802,7 @@
     "alreadyAttached": "Already in trip plan",
     "attach": "Add to trip plan",
     "policy": {
-      "CONFIRMED_ALLOWED": "Pet acceptance confirmed under source conditions",
+      "CONFIRMED_ALLOWED": "Pet-friendly according to the source",
       "CONFIRMED_NOT_ALLOWED": "Pets reported as not allowed",
       "UNKNOWN": "Pet acceptance unknown",
       "AMBIGUOUS": "Pet acceptance information is ambiguous"
