@@ -342,6 +342,9 @@
 .opl-ck { position:fixed; left:0; top:0; z-index:90; pointer-events:none; will-change:transform; transition:opacity .25s; }
 /* Over a form Cookie steps back and fades, so fields and buttons stay readable (it never takes clicks anyway). */
 .opl-ck.shy { opacity:.25; }
+/* On phones Cookie rests in the bottom corner, where map cards keep their own controls ("my location", zoom): on any
+   page with a map it steps away (live 390px check of /pet-taxi, 2026-11-13). */
+@media (hover:none), (pointer:coarse) { body:has(.map-view) :is(.opl-ck, .opl-ck-ball, .opl-ck-prints) { opacity:0; visibility:hidden; } }
 .opl-ck__body { transform-origin:50% 90%; }
 .opl-ck__bubble { position:absolute; bottom:calc(100% + 4px); left:50%; transform:translateX(-50%) scale(.6); transform-origin:50% 100%; opacity:0; white-space:nowrap; background:var(--opl-raised); color:var(--opl-ink); font-size:.82rem; font-weight:800; padding:6px 14px; border-radius:999px; box-shadow:0 10px 24px -10px rgb(var(--opl-sh) / .6),0 0 0 1px var(--opl-line); transition:opacity .25s,transform .35s var(--opl-ease-emph); }
 .opl-ck.talk .opl-ck__bubble { opacity:1; transform:translateX(-50%) scale(1); }
