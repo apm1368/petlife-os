@@ -1,0 +1,17 @@
+{
+  "batch": "2026-11-13 Set Pet (owner request via QA)",
+  "note": "Article 33 is the Set Pet guide. It carries the 90 s Set Pet reel per language (16:9 site file) plus a measuring infographic. Import it WITHOUT --publish: it stays a draft until the order flow at /{l}/set-pet is live (X5 front end; X/X2 APIs). The landing section uses the same CMS media URLs (manifest for X5: deliverables/set-pet-reel-manifest.json).",
+  "articles": [
+    {
+      "id": 33,
+      "pillar": "services",
+      "species": "both",
+      "tags": ["dog", "cat", "shopping"],
+      "slugs": {"fa": "set-pet-guide", "en": "set-pet-guide", "de": "set-pet-ratgeber", "es": "guia-set-pet", "ar": "set-pet-guide", "nl": "set-pet-gids"},
+      "focus": {"fa": "لباس ست تو و پتت", "en": "matching outfits for you and your pet", "de": "Partnerlook mit Haustier", "es": "ropa a juego para ti y tu mascota", "ar": "ملابس متطابقة لك ولحيوانك الأليف", "nl": "matchende outfits voor jou en je huisdier"},
+      "targets": ["/{l}/set-pet"],
+      "video": "setpet",
+      "draft": true
+    }
+  ]
+}
