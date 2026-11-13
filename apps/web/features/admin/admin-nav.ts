@@ -37,7 +37,8 @@ import {
  * page always knows where it lives (breadcrumbs, tabs and the command palette all read this one table).
  */
 
-export type QueueKey = keyof AdminDashboardSummaryDto;
+/** Every staff queue count on the summary (the launch KPIs are figures, not queues). */
+export type QueueKey = Exclude<keyof AdminDashboardSummaryDto, "launchKpis">;
 export type Permission = AdminPermissionName | AdminPermissionName[];
 type Icon = typeof LayoutDashboard;
 
@@ -91,6 +92,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
         tabs: [
           { href: "/users", labelKey: "tabs.directory", permission: "customer.view" },
           { href: "/customers", labelKey: "tabs.customer360", permission: "customer.view" },
+          { href: "/privacy/deletion-requests", labelKey: "tabs.deletionRequests", permission: "admin.manage", queue: "pendingDeletionRequests" },
         ],
       },
       // Each pet with its owner and household members (Pet 360); health appears as counts only.
@@ -286,6 +288,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
         href: "/settings",
         tabs: [
           { href: "/settings", labelKey: "tabs.platformSettings", permission: "settings.view" },
+          { href: "/settings/holidays", labelKey: "tabs.holidays", permission: "settings.view" },
           { href: "/feature-flags", labelKey: "tabs.featureFlags", permission: "settings.view" },
         ],
       },

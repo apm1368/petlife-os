@@ -46,6 +46,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     applicationName: "opetlife",
     // The web app manifest and the Apple touch icon are written straight into <head> below: on pages with async
     // metadata Next streams these tags into <body>, where browsers ignore them for installing the app.
+    appleWebApp: { capable: true, title: "opetlife", statusBarStyle: "default" },
     icons: {
       icon: [
         { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },

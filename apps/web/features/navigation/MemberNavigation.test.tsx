@@ -154,10 +154,10 @@ describe("member navigation", () => {
     routing.pathname = `/${locale}/home`;
     renderWithIntl(<><MobileExploreButton /><MobileTabBar /></>, locale);
     const labels = {
-      fa: { home: "خانه", explore: "کاوش", preferences: "زبان و ظاهر", language: "زبان", german: "آلمانی", help: "کمک و پشتیبانی", guides: /راهنماها راهنمای عملی/ },
-      en: { home: "Home", explore: "Explore", preferences: "Language and appearance", language: "Language", german: "German", help: "Help and support", guides: /Guides Practical/ },
-      de: { home: "Start", explore: "Entdecken", preferences: "Sprache und Darstellung", language: "Sprache", german: "Deutsch", help: "Hilfe und Support", guides: /Ratgeber Praktische Pflegehinweise/ },
-      es: { home: "Inicio", explore: "Explorar", preferences: "Idioma y apariencia", language: "Idioma", german: "alemán", help: "Ayuda y soporte", guides: /Guías Consejos prácticos/ },
+      fa: { home: "خانه", explore: "کاوش", preferences: "زبان و ظاهر", language: "زبان", german: "آلمانی (آزمایشی)", help: "کمک و پشتیبانی", guides: /راهنماها راهنمای عملی/ },
+      en: { home: "Home", explore: "Explore", preferences: "Language and appearance", language: "Language", german: "German (beta)", help: "Help and support", guides: /Guides Practical/ },
+      de: { home: "Start", explore: "Entdecken", preferences: "Sprache und Darstellung", language: "Sprache", german: "Deutsch (Beta)", help: "Hilfe und Support", guides: /Ratgeber Praktische Pflegehinweise/ },
+      es: { home: "Inicio", explore: "Explorar", preferences: "Idioma y apariencia", language: "Idioma", german: "alemán (beta)", help: "Ayuda y soporte", guides: /Guías Consejos prácticos/ },
     }[locale];
     expect(screen.getByRole("link", { name: labels.home }).getAttribute("href")).toBe(`/${locale}/home`);
     const trigger = screen.getByRole("button", { name: labels.explore });

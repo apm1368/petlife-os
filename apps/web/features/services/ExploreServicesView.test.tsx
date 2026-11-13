@@ -17,7 +17,7 @@ describe("ExploreServicesView", () => {
     expect(screen.getByText("Sitting")).toBeTruthy();
     expect(screen.getByText("Boarding")).toBeTruthy();
     expect(screen.getByText("Pet Taxi")).toBeTruthy();
-    expect(screen.getByRole("link", { name: /Veterinary/ }).getAttribute("href")).toBe("/en/services/VET");
+    expect(screen.getByRole("link", { name: /Veterinary/ }).getAttribute("href")).toBe("/en/services/vet");
   });
 
   it.each([

@@ -3206,6 +3206,20 @@ export interface AdminDashboardSummaryDto {
   openPlaceReports: number | null;
   /** Card-to-card wallet top-up receipts waiting for finance. */
   pendingWalletTopUps: number | null;
+  /** Account deletion requests waiting on staff (REQUESTED or PENDING_RETENTION); admin.manage only. */
+  pendingDeletionRequests: number | null;
+  /**
+   * Market-readiness #290 Q97, the launch month's success measure: registered pets and weekly bookings
+   * (analytics.view; null otherwise). Live bookings only, rolling 7-day windows.
+   */
+  launchKpis: AdminLaunchKpisDto | null;
+}
+
+export interface AdminLaunchKpisDto {
+  registeredPets: number;
+  newPetsThisWeek: number;
+  bookingsThisWeek: number;
+  bookingsLastWeek: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -5099,6 +5113,7 @@ export enum CommunityPostType {
   RESCUE = "RESCUE",
   ADOPTION = "ADOPTION",
   MEMORY = "MEMORY",
+  FOUND_PET = "FOUND_PET",
 }
 
 export enum CommunityContentStatus {

@@ -17,6 +17,7 @@ import { lostPetStatusTone } from "./lost-pet-status";
 import { SystemState } from "@/features/system/SystemState";
 import { TimeSelect } from "@/features/shared/date-picker/TimeSelect";
 import { FilePicker } from "@/features/shared/FilePicker";
+import { SafetyTip } from "@/features/shared/SafetyTip";
 
 const SPECIES_KEYS: Record<string, "species.dog" | "species.cat" | "species.other"> = { DOG: "species.dog", CAT: "species.cat", OTHER: "species.other" };
 
@@ -119,6 +120,7 @@ export function PublicLostPetView({ incidentId }: { incidentId: string }) {
           </dl>
           {incident.publicNotes ? <p className="text-body text-text-primary">{incident.publicNotes}</p> : null}
           {incident.publicContactMode ? <p className="text-body text-text-primary">{t("public.contact", { contact: incident.publicContactMode })}</p> : null}
+          {!reunited ? <SafetyTip kind="lostPet" /> : null}
           {!reunited ? <ShareBar url={`/${lang}/lost-pets/${incident.id}`} text={shareText} /> : null}
           <ReportContentPanel submit={(reason, details) => communityService.reportContent("LOST_PET_INCIDENT", incident.id, reason, details)} />
         </ContextSurface>

@@ -48,6 +48,16 @@ describe("Privacy governance", () => {
     expect((await get(admin, "/admin/privacy/deletion-requests?state=PENDING_RETENTION").expect(200)).body.map((r: { id: string }) => r.id)).toContain(req.id);
     expect(await db.adminAuditLog.count({ where: { entityId: req.id, action: "account_deletion.state_changed" } })).toBe(1);
     expect(await db.domainEvent.count({ where: { type: "AccountDeletionStateChanged", aggregateId: member.id } })).toBe(1);
+    // The member hears that staff are reviewing it (in-app, can't be muted), with a link to Privacy.
+    let notice = null;
+    for (let i = 0; i < 30 && !notice; i++) {
+      notice = await db.notification.findFirst({ where: { userId: member.id, type: "account.deletion_under_review" } });
+      if (!notice) await new Promise((r) => setTimeout(r, 100));
+    }
+    expect(notice).toMatchObject({ category: "SECURITY", deepLink: "/profile/privacy", entityType: "AccountDeletionRequest", entityId: req.id });
+    // Super admins see it waiting on the dashboard; other admins get no count at all.
+    expect((await get(admin, "/admin/dashboard").expect(200)).body.pendingDeletionRequests).toBeGreaterThanOrEqual(1);
+    expect((await get(support, "/admin/dashboard").expect(200)).body.pendingDeletionRequests).toBeNull();
 
     // Another member can't cancel it; the owner can, while still pending retention.
     await send("post", await actor("other"), `/account/privacy/deletion/${req.id}/cancel`).expect(404);

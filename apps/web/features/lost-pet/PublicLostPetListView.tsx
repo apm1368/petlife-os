@@ -11,6 +11,7 @@ import { formatDay, localizeDigits } from "@/lib/date/jalali";
 import { tehranDay } from "@/lib/date/tehran";
 import { lostPetStatusTone } from "./lost-pet-status";
 import { LoadFailure } from "@/features/system/LoadFailure";
+import { FoundByNeighbours, LostPetAreaAlertCard } from "./LostPetNeighbourhood";
 
 /** Public, paginated list of open incidents — approximate area only, never an exact location. */
 export function PublicLostPetListView() {
@@ -39,6 +40,7 @@ export function PublicLostPetListView() {
         <h1 className="text-page-title text-text-primary">{t("public.list.title")}</h1>
         <p className="text-body text-text-secondary">{t("public.list.subtitle")}</p>
       </div>
+      <LostPetAreaAlertCard />
       <div role="group" aria-label={t("public.list.speciesFilter")} className="flex flex-wrap gap-2">
         {[["", t("public.list.allSpecies")], ["DOG", t("species.dog")], ["CAT", t("species.cat")], ["OTHER", t("species.other")]].map(([value, label]) => (
           <button key={value} type="button" aria-pressed={species === value} onClick={() => { setSpecies(value!); setPage(1); }} className={`min-h-11 rounded-full border px-4 text-sm ${species === value ? "border-brand-natural bg-brand-solid/10" : "border-border-subtle text-text-secondary"}`}>{label}</button>
@@ -79,6 +81,7 @@ export function PublicLostPetListView() {
           ) : null}
         </>
       )}
+      <FoundByNeighbours />
     </div>
   );
 }

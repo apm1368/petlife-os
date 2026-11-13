@@ -37,6 +37,15 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "{{title}}", body: "{{body}}", smsBody: "{{smsBody}}" },
     en: { title: "{{title}}", body: "{{body}}", smsBody: "{{smsBody}}" },
   },
+  // Account deletion lifecycle, when staff move a request on (AccountDeletionStateChanged). In-app and email only.
+  "account.deletion_under_review": {
+    fa: { title: "درخواست حذف حساب در حال بررسی است", body: "درخواست حذف حساب شما بررسی می‌شود. پیش از حذف، اطلاعاتی که قانون نگه‌داشتنشان را لازم می‌داند جدا می‌شوند. تا پیش از اجرای حذف، می‌توانید درخواست را از بخش حریم خصوصی لغو کنید." },
+    en: { title: "Your account deletion request is being reviewed", body: "We're reviewing your request to delete your account. Before anything is deleted, records the law requires us to keep are set aside. You can still cancel the request from Privacy until it's carried out." },
+  },
+  "account.deletion_ready": {
+    fa: { title: "حذف حساب شما آمادهٔ اجراست", body: "بررسی درخواست حذف حساب شما تمام شد و حذف به‌زودی انجام می‌شود. اگر نظرتان عوض شده، همین حالا از بخش حریم خصوصی لغو کنید." },
+    en: { title: "Your account is ready to be deleted", body: "We've finished reviewing your deletion request and it will be carried out soon. If you've changed your mind, cancel it now from Privacy." },
+  },
   "booking.confirmed": {
     fa: { title: "نوبت شما تأیید شد", body: "نوبت شما تأیید شد. جزئیات را در اپلیکیشن ببینید.", smsBody: "نوبت شما در پت‌لایف تأیید شد." },
     en: { title: "Your booking is confirmed", body: "Your booking is confirmed. See the app for details.", smsBody: "Your PET LIFE OS booking is confirmed." },
@@ -407,6 +416,11 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
   "lost_pet.incident_opened": {
     fa: { title: "گزارش گم‌شدن حیوان خانگی ثبت شد", body: "گزارش گم‌شدن {{petName}} ثبت شد. اعضای خانواده مطلع شدند.", smsBody: "گزارش گم‌شدن {{petName}} در پت‌لایف ثبت شد." },
     en: { title: "Lost pet report created", body: "A lost pet report for {{petName}} was created. Household members have been notified.", smsBody: "A lost pet report for {{petName}} was created in PET LIFE OS." },
+  },
+  /** #290 Q53: opt-in neighbourhood alert; public facts only (name and the owner's public area); in-app only, no smsBody. */
+  "lost_pet.nearby_opened": {
+    fa: { title: "حیوانی نزدیک شما گم شده", body: "{{petName}} در محدودهٔ {{area}} گم شده است. اگر دیدیدش، در صفحهٔ گزارش خبر بدهید." },
+    en: { title: "A pet is missing near you", body: "{{petName}} went missing around {{area}}. If you see them, report it on the lost-pet page." },
   },
   "lost_pet.sighting_submitted": {
     fa: { title: "گزارش مشاهده جدید", body: "یک گزارش مشاهده جدید برای {{petName}} ثبت شد.", smsBody: "یک گزارش مشاهده جدید برای {{petName}} در پت‌لایف ثبت شد." },
