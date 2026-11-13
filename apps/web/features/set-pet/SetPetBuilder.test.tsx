@@ -64,7 +64,7 @@ async function fillGarmentsAndPrint() {
   await screen.findByRole("heading", { name: "Prints" });
   next();
   expect(screen.getByRole("alert").textContent).toContain("Add at least one print.");
-  fireEvent.click(screen.getByRole("listitem", { name: /^Front/ }));
+  fireEvent.click(screen.getByRole("button", { name: /^Front/ }));
   fireEvent.click(screen.getByRole("tab", { name: "Text" }));
   fireEvent.change(screen.getByLabelText("Text (up to 40 characters)"), { target: { value: "Shiraz & me" } });
   fireEvent.click(screen.getByRole("radio", { name: "Bold" }));

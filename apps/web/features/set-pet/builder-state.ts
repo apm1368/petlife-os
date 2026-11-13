@@ -93,8 +93,8 @@ export function readSnapshot(raw: unknown): BuilderSnapshot | null {
   // A reorder sends the order's placements; a draft sends prints.
   const placements = Array.isArray(r.placements) ? (r.placements as Array<Record<string, unknown>>) : null;
   const entries: Array<[string, Record<string, unknown>]> = placements
-    ? placements.map((p) => [String(p.zone), p.designFileId ? { kind: "image", designId: p.designFileId, scale: p.scale, offsetX: p.offsetX, offsetY: p.offsetY } : { kind: "text", text: p.text, font: p.font, colour: p.textColour }])
-    : Object.entries(rawPrints).map(([zone, p]) => [zone, (p ?? {}) as Record<string, unknown>]);
+    ? placements.map((p): [string, Record<string, unknown>] => [String(p.zone), p.designFileId ? { kind: "image", designId: p.designFileId, scale: p.scale, offsetX: p.offsetX, offsetY: p.offsetY } : { kind: "text", text: p.text, font: p.font, colour: p.textColour }])
+    : Object.entries(rawPrints).map(([zone, p]): [string, Record<string, unknown>] => [zone, (p ?? {}) as Record<string, unknown>]);
   for (const [zone, p] of entries) {
     if (!(SET_PET_ZONE_KEYS as string[]).includes(zone)) continue;
     if (p.kind === "image" && typeof p.designId === "string") {

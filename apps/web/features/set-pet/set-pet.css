@@ -247,8 +247,8 @@ button.setpet-zone:focus-visible { outline: 2px solid var(--opl-forest); outline
 .setpet-chart { width: 100%; margin-top: 10px; border-collapse: collapse; font-size: .86rem; text-align: center; }
 .setpet-chart caption { margin-bottom: 6px; color: var(--opl-ink-2); text-align: start; }
 .setpet-chart th, .setpet-chart td { padding: 6px 4px; border-bottom: 1px solid var(--opl-line-2); }
-.setpet-zonelist { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); margin-bottom: 14px; }
-.setpet-zonecard { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 64px; padding: 10px 12px; border: 1px solid var(--opl-line-2); border-radius: 14px; background: var(--opl-raised); color: var(--opl-ink); font: inherit; text-align: start; cursor: pointer; }
+.setpet-zonelist { padding: 0; list-style: none; display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); margin-bottom: 14px; }
+.setpet-zonecard { width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 64px; padding: 10px 12px; border: 1px solid var(--opl-line-2); border-radius: 14px; background: var(--opl-raised); color: var(--opl-ink); font: inherit; text-align: start; cursor: pointer; }
 .setpet-zonecard span, .setpet-zonecard small { color: var(--opl-ink-2); font-size: .8rem; }
 .setpet-zonecard small { overflow: hidden; max-width: 100%; text-overflow: ellipsis; white-space: nowrap; }
 .setpet-zonecard.is-on { border-color: var(--opl-forest); }

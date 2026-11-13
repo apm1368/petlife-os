@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } f
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
+  SET_PET_FONTS,
   priceRangeSetPet,
   priceSetPet,
   setPetWearerOf,
@@ -22,8 +23,7 @@ import { formatLocaleNumber } from "@/lib/i18n/format";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { setPetService } from "@/services/set-pet.service";
 import { householdsService } from "@/services/households.service";
-import type { PrintPreview } from "./GarmentMockups";
-import { FONT_FAMILY } from "./GarmentMockups";
+import { FONT_FAMILY, type PrintPreview } from "./GarmentMockups";
 import { SetPetPreview } from "./SetPetPreview";
 import { BUILDER_STEPS, emptySnapshot, newKey, readSnapshot, toOrderInput, type BuilderSnapshot, type BuilderStep, type ItemState, type PrintState } from "./builder-state";
 import { clearDraft, readDraft, readDraftFiles, saveDraft, saveDraftChoices } from "./draft-store";
@@ -679,19 +679,21 @@ export function SetPetBuilder({ signedIn, editOrder, initial, onSubmitted }: Pro
 
           {step === "prints" ? (
             <>
-              <div className="setpet-zonelist" role="list">
+              <ul className="setpet-zonelist">
                 {ALL_ZONES.filter((z) => z !== "PET_BACK" || petItems.length).map((z) => {
                   const p = s.prints[z];
                   const cm = ZONE_CM[z];
                   return (
-                    <button key={z} type="button" role="listitem" className={`setpet-zonecard${selected === z ? " is-selected" : ""}${p ? " is-on" : ""}`} aria-pressed={selected === z} onClick={() => setZone(z)}>
-                      <strong>{tz(`${z}.name`)}</strong>
-                      <span>{cm ? t("prints.size", { cm: num(cm) }) : t("prints.petSize")}</span>
-                      <small>{p ? (p.kind === "text" ? `«${p.text}»` : designById.get(p.designId)?.name || t("upload.untitled")) : t("prints.empty")}</small>
-                    </button>
+                    <li key={z}>
+                      <button type="button" className={`setpet-zonecard${selected === z ? " is-selected" : ""}${p ? " is-on" : ""}`} aria-pressed={selected === z} onClick={() => setZone(z)}>
+                        <strong>{tz(`${z}.name`)}</strong>
+                        <span>{cm ? t("prints.size", { cm: num(cm) }) : t("prints.petSize")}</span>
+                        <small>{p ? (p.kind === "text" ? `«${p.text}»` : designById.get(p.designId)?.name || t("upload.untitled")) : t("prints.empty")}</small>
+                      </button>
+                    </li>
                   );
                 })}
-              </div>
+              </ul>
 
               {selected ? (
                 <div className="setpet-editor" aria-label={tz(`${selected}.name`)}>
@@ -706,7 +708,7 @@ export function SetPetBuilder({ signedIn, editOrder, initial, onSubmitted }: Pro
                         <input value={current.text} maxLength={40} onChange={(e) => setPrint(selected, { ...current, text: e.target.value })} />
                       </label>
                       <div className="setpet-seg setpet-seg--wide" role="radiogroup" aria-label={t("prints.font")}>
-                        {(options?.fonts ?? ["VAZIRMATN", "LALEZAR", "AMIRI"]).map((f) => (
+                        {(options?.fonts ?? SET_PET_FONTS).map((f) => (
                           <label key={f} className={current.font === f ? "is-on" : undefined}>
                             <input type="radio" name={`font-${selected}`} checked={current.font === f} onChange={() => setPrint(selected, { ...current, font: f })} />
                             <span style={{ fontFamily: FONT_FAMILY[f] }}>{tf(f)}</span>
