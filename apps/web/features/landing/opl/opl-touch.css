@@ -1,0 +1,30 @@
+/*
+ * Touch screens (owner's P7 design pass, 2026-11-13). Loaded with LandingShell, so it covers the landing, every public
+ * page and the member area. Desktop with a mouse is unchanged. Rules sit under :root so they win over the base rules
+ * (opl-landing.css, reel.css, globals.css) whatever order the bundles load in.
+ */
+
+/* Cookie is a mouse-cursor companion: on a touch screen there is no cursor to follow, so it would only sit on top
+   of cards and buttons. The Cookie toggle, the hero and the reels stay. */
+@media (hover: none) and (pointer: coarse) {
+  :root .opl-ck-host { display: none !important; }
+}
+
+/* Every control at least 44×44 CSS px on touch (WCAG 2.5.5, Apple and Android guidance). */
+@media (pointer: coarse) {
+  :root .opl-hdr .opl-brand,
+  :root .member-header__brand { min-height: 44px; }
+  :root .opl-iconbtn { width: 44px; height: 44px; }
+  :root .opl-lang,
+  :root .opl-btn.sm,
+  :root .opl-cookie-toggle,
+  :root .opl-seg button { min-height: 44px; }
+  :root .opl-rbtn { width: 44px; height: 44px; }
+  :root .disc-row__save { width: 44px; height: 44px; }
+  :root .section-tabs a { display: inline-flex; align-items: center; min-height: 44px; }
+  :root .opl-foot__back,
+  :root .opl-foot ul a,
+  :root .opl-foot__bottom nav a { display: inline-flex; align-items: center; min-height: 44px; }
+  :root .opl-foot ul { gap: 0; }
+  :root .opl-foot__bottom nav { flex-wrap: wrap; column-gap: 16px; row-gap: 0; }
+}

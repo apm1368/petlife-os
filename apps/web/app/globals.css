@@ -981,7 +981,7 @@ body{background:var(--surface-page);color:var(--text-primary)}
 .mem-gallery__text{display:flex;flex-direction:column;justify-content:flex-end;gap:4px;width:100%;height:100%;padding:var(--space-4);background:color-mix(in srgb,var(--mem) 12%,var(--surface-raised));color:var(--text-primary)}
 .mem-gallery__text strong{font-size:1rem;font-weight:750;line-height:1.5}
 .mem-gallery__text span{color:var(--text-muted);font-size:var(--text-metadata-size)}
-.mem-life-link{align-self:flex-start;color:var(--mem);font-weight:700}
+.mem-life-link{display:inline-flex;align-items:center;min-height:44px;align-self:flex-start;color:var(--mem);font-weight:700}
 .mem-life-link:hover{text-decoration:underline;text-underline-offset:3px}
 @media(prefers-reduced-motion:reduce){.mem-entry{animation:none}.mem-gallery__item:hover .mem-gallery__img{transform:none}}
 
@@ -1295,3 +1295,10 @@ a.erp-list__row:hover { background:var(--erp-bg); }
 .clinic-sms-mode { margin:0; padding:10px 14px; border-radius:14px; font-size:.86rem; }
 .clinic-sms-mode--live { background:color-mix(in srgb,var(--state-success,#2f7d4c) 12%,transparent); color:var(--text-primary); }
 .clinic-sms-mode--sandbox { background:color-mix(in srgb,var(--state-attention,#c98a1b) 16%,transparent); color:var(--text-primary); }
+
+/* P7 (owner, 2026-11-13): on touch screens every control is at least 44px tall (WCAG 2.5.5). Desktop keeps its sizes. */
+@media (pointer: coarse) {
+  .language-toggle, .account-link-button, .activity-filter, .mega__foot a, .pet-context__links a, .calendar-toolbar__pet select,
+  .care-filters button, .disc-sort select, .disc-filter-btn, .add-pet-segment button, .add-pet-check, .mem-views button,
+  .pd-service__book, .pd-week-select select, .commerce-nav__brand { min-height: 44px; }
+}
