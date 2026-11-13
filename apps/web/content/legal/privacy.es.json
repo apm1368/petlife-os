@@ -42,7 +42,8 @@
         "El historial de salud de tus mascotas solo lo ven tú, los miembros del hogar a los que se lo permitas y las personas con las que decidas compartirlo.",
         "Un enlace para compartir dura entre 1 hora y 7 días (24 horas por defecto). Muestra solo las secciones que elijas, registra cada apertura y puede revocarse en cualquier momento.",
         "Puedes compartir el historial con un veterinario de una clínica verificada durante un máximo de 90 días y revocarlo en cualquier momento.",
-        "Cuando reservas un servicio, el socio solo ve lo que ese servicio necesita. Los servicios clínicos y de alojamiento pueden ver la información de salud; los de peluquería y paseo, no. Este acceso termina 24 horas después de la reserva."
+        "Cuando reservas un servicio, el socio solo ve lo que ese servicio necesita. Los servicios clínicos y de alojamiento pueden ver la información de salud; los de peluquería y paseo, no. Este acceso termina 24 horas después de la reserva.",
+        "Al reservar una visita veterinaria, también puedes marcar documentos de salud para esa visita. Solo el veterinario asignado a la reserva puede abrirlos, y solo hasta 24 horas después de la visita. No se comparte nada que no marques."
       ]
     },
     {

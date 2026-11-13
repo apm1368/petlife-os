@@ -42,7 +42,8 @@
         "Your pets' health records are visible only to you, to household members you allow, and to people you choose to share them with.",
         "A share link lasts between 1 hour and 7 days (24 hours by default). It shows only the sections you pick, logs every opening and can be revoked at any time.",
         "You can share records with a vet of a verified clinic for up to 90 days, and revoke this at any time.",
-        "When you book a service, the partner sees only what that service needs. Clinical and boarding services can see health information; grooming and walking cannot. This access ends 24 hours after the booking."
+        "When you book a service, the partner sees only what that service needs. Clinical and boarding services can see health information; grooming and walking cannot. This access ends 24 hours after the booking.",
+        "When you book a vet visit, you can also tick health documents for that visit. Only the vet assigned to the booking can open them, and only until 24 hours after the visit. Nothing is shared unless you tick it."
       ]
     },
     {

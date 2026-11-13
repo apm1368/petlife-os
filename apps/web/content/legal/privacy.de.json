@@ -42,7 +42,8 @@
         "Die Gesundheitsakten deiner Tiere sind nur für dich sichtbar, für die Haushaltsmitglieder, denen du es erlaubst, und für die Personen, mit denen du sie teilen möchtest.",
         "Ein Freigabelink gilt zwischen 1 Stunde und 7 Tagen (standardmäßig 24 Stunden). Er zeigt nur die Bereiche, die du auswählst, protokolliert jedes Öffnen und kann jederzeit widerrufen werden.",
         "Du kannst Akten bis zu 90 Tage lang mit einem Tierarzt einer verifizierten Klinik teilen und diese Freigabe jederzeit widerrufen.",
-        "Wenn du eine Leistung buchst, sieht der Partner nur, was diese Leistung erfordert. Bei tierärztlichen Leistungen und Unterbringung sind Gesundheitsinformationen sichtbar, bei Fellpflege und Gassigehen nicht. Dieser Zugriff endet 24 Stunden nach der Buchung."
+        "Wenn du eine Leistung buchst, sieht der Partner nur, was diese Leistung erfordert. Bei tierärztlichen Leistungen und Unterbringung sind Gesundheitsinformationen sichtbar, bei Fellpflege und Gassigehen nicht. Dieser Zugriff endet 24 Stunden nach der Buchung.",
+        "Wenn du einen Tierarzttermin buchst, kannst du außerdem Gesundheitsdokumente für diesen Termin auswählen. Nur die für die Buchung zuständige Tierärztin oder der zuständige Tierarzt kann sie öffnen, und nur bis 24 Stunden nach dem Termin. Ohne deine Auswahl wird nichts geteilt."
       ]
     },
     {
