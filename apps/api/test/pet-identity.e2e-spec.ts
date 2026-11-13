@@ -41,6 +41,28 @@ describe("Pet identity platform", () => {
   });
   afterAll(async () => app.close());
 
+  it("takes a pet photo only from the pet's own upload slot, and a profile picture can only be kept or cleared", async () => {
+    const o = await actor("photo-owner");
+    const hh = (await send("post", o, "/households").send({}).expect(201)).body;
+    await send("post", o, `/households/${hh.id}/pets`).send({ name: "Outside photo", species: "CAT", photoUrl: "https://evil.example/x.png" }).expect(400);
+    const pet = (await send("post", o, `/households/${hh.id}/pets`).send({ name: "Own photo", species: "CAT" }).expect(201)).body;
+    const target = (await send("post", o, `/pets/${pet.id}/photo-upload-url`).send({ contentType: "image/png" }).expect(201)).body;
+    for (const bad of ["https://evil.example/x.png", target.publicUrl.replace(pet.id, randomUUID()), `${target.publicUrl}?u=https://evil.example`]) {
+      const res = await send("patch", o, `/pets/${pet.id}`).send({ photoUrl: bad }).expect(400);
+      expect(JSON.stringify(res.body)).toContain("NOT_ISSUED_FOR_THIS_PET");
+    }
+    await send("patch", o, `/pets/${pet.id}`).send({ photoUrl: target.publicUrl }).expect(200);
+    await send("patch", o, `/pets/${pet.id}`).send({ name: "Own photo", photoUrl: target.publicUrl }).expect(200);
+    await send("patch", o, `/pets/${pet.id}`).send({ photoUrl: null }).expect(200);
+    expect((await db.pet.findUniqueOrThrow({ where: { id: pet.id } })).photoUrl).toBeNull();
+
+    await send("patch", o, "/me").send({ avatarUrl: "https://evil.example/me.png" }).expect(400);
+    await db.user.update({ where: { id: o.id }, data: { avatarUrl: "https://media.example.test/legacy.png" } });
+    await send("patch", o, "/me").send({ displayName: "Kept", avatarUrl: "https://media.example.test/legacy.png" }).expect(200);
+    await send("patch", o, "/me").send({ avatarUrl: null }).expect(200);
+    expect((await db.user.findUniqueOrThrow({ where: { id: o.id } })).avatarUrl).toBeNull();
+  });
+
   it("creates a pet with unknown age and permits completing its birth date later", async () => {
     const o = await actor("unknown-age-owner");
     const hh = (await send("post", o, "/households").send({}).expect(201)).body;

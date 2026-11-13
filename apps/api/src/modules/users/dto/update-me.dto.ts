@@ -15,7 +15,8 @@ export class UpdateMeDto {
   @IsIn(["SYSTEM", "LIGHT", "DARK"])
   themePreference?: "SYSTEM" | "LIGHT" | "DARK";
 
+  /** Keep or clear (null) only; see UsersService.update. */
   @IsOptional()
   @IsUrl()
-  avatarUrl?: string;
+  avatarUrl?: string | null;
 }
