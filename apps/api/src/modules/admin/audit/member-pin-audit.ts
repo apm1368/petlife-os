@@ -10,7 +10,7 @@ export const carriesPin = (address: { latitude?: unknown; longitude?: unknown } 
  */
 export function auditMemberPinRead(
   audit: AdminAuditLogService,
-  input: { adminUserId: string; entityType: string; entityId: string; field: string; requestId?: string },
+  input: { adminUserId: string; entityType: string; entityId: string | undefined; field: string; requestId?: string },
 ): Promise<void> {
   return audit.record({
     adminUserId: input.adminUserId,

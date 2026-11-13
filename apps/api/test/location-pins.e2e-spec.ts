@@ -258,6 +258,16 @@ describe("Location pins (e2e)", () => {
     await prisma.fulfillment.create({ data: { orderId: plain.id, sellerOrgId: seller.id, pickupAddressSnapshot: {}, deliveryAddressSnapshot: { city: "بیرجند" } } });
     await staff.c.get(`/admin/commerce/orders/${plain.id}`).expect(200);
     expect(await prisma.adminAuditLog.count({ where: { action: "member_pin.viewed", entityId: plain.id } })).toBe(0);
+
+    // The staff pet-taxi overview shows recent rides' exact pickup / drop-off points: that read is audited too.
+    const pet = await prisma.pet.create({ data: { householdId: member.householdId, name: "Pishi", species: "CAT" } });
+    await prisma.petTaxiRide.create({ data: { userId: member.user.id, petIds: [pet.id], carrierSize: "SMALL", pickupLabel: "Home", pickupLatitude: HOME.latitude, pickupLongitude: HOME.longitude, pickupNote: "Ring twice", dropoffLabel: "Clinic", dropoffLatitude: 32.86, dropoffLongitude: 59.2, distanceMeters: 2_000, durationSeconds: 600, routeSource: "STRAIGHT_LINE_ESTIMATE", fareIrr: 500_000, fareBreakdown: {}, fareRuleCity: "*", searchExpiresAt: new Date(), status: "CANCELLED_BY_MEMBER", cancelledAt: new Date(), idempotencyKey: `pin-${unique()}` } });
+    const before = await prisma.adminAuditLog.count({ where: { action: "member_pin.viewed", entityType: "PetTaxiOverview", adminUserId: (await prisma.adminUser.findFirstOrThrow({ where: { userId: staff.user.id } })).id } });
+    await staff.c.get("/admin/pet-taxi").expect(200);
+    const overviewRows = await prisma.adminAuditLog.findMany({ where: { action: "member_pin.viewed", entityType: "PetTaxiOverview" }, orderBy: { createdAt: "desc" }, take: 1 });
+    expect(overviewRows[0]).toMatchObject({ reason: "dispatch" });
+    expect(await prisma.adminAuditLog.count({ where: { action: "member_pin.viewed", entityType: "PetTaxiOverview", adminUserId: overviewRows[0]!.adminUserId } })).toBe(before + 1);
+    expect(leaks(overviewRows)).toEqual([]);
   });
 
   it("clears the pin and its consent when the member removes an address; past order snapshots stay", async () => {
