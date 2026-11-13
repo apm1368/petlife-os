@@ -1130,6 +1130,8 @@
     }
   },
   "adminSiteSettings": {
+    "enamadCheck": "التحقق من هذا الختم على موقع eNamad",
+    "enamadIncomplete": "أدخل معرّفًا ورمزًا صالحين للتحقق من الختم.",
     "kicker": "تهيئة الموقع",
     "title": "إعدادات الموقع",
     "subtitle": "أدِر هنا الهوية وبيانات التواصل وروابط التواصل الاجتماعي والإعلان والأقسام النشطة والتسجيل ووضع الصيانة. يُسجَّل كل تغيير في سجل التدقيق.",
@@ -1162,6 +1164,10 @@
       "everyone": "جميع الزوار"
     },
     "sections": {
+      "trust": {
+        "title": "ختم الثقة eNamad",
+        "hint": "أدخل المعرّف والرمز فقط من شيفرة ختم eNamad، وليس HTML أبدًا. يظهر الختم في تذييل الصفحة بعد تفعيله وملء القيمتين."
+      },
       "identity": {
         "title": "الهوية وتذييل الصفحة",
         "hint": "السطر القصير أسفل الشعار والملاحظة في أسفل كل صفحة (الاسم القانوني، رقم التسجيل)."
@@ -1172,7 +1178,7 @@
       },
       "social": {
         "title": "وسائل التواصل الاجتماعي",
-        "hint": "عناوين صفحات كاملة تبدأ بـ https؛ تظهر الروابط المعبأة فقط."
+        "hint": "روابط https كاملة إلى موقع كل شبكة نفسها؛ ولا يظهر الرابط إلا ما دام مفتاحه مفعّلًا."
       },
       "announcement": {
         "title": "إعلان على مستوى الموقع",
@@ -1192,6 +1198,18 @@
       }
     },
     "names": {
+      "social_bale": "بله",
+      "social_instagramEnabled": "إظهار إنستغرام",
+      "social_telegramEnabled": "إظهار تيليغرام",
+      "social_whatsappEnabled": "إظهار واتساب",
+      "social_baleEnabled": "إظهار بله",
+      "social_xEnabled": "إظهار X",
+      "social_linkedinEnabled": "إظهار لينكدإن",
+      "social_youtubeEnabled": "إظهار يوتيوب",
+      "social_aparatEnabled": "إظهار آبارات",
+      "trust_enamadEnabled": "إظهار ختم eNamad",
+      "trust_enamadId": "معرّف eNamad (الأرقام بعد id=)",
+      "trust_enamadCode": "رمز eNamad (بعد Code=)",
       "site_tagline": "الشعار النصي",
       "site_footerNote": "ملاحظة التذييل",
       "site_contactPhone": "هاتف الدعم",
@@ -1237,6 +1255,7 @@
       "error": "لم يُحفظ «{name}»: {code}"
     },
     "errors": {
+      "URL_HOST_NOT_ALLOWED": "يجب أن يشير هذا الرابط إلى موقع الشبكة نفسها (https)",
       "URL_INVALID": "يجب أن يبدأ العنوان بـ https:// أو /",
       "EMAIL_INVALID": "بريد إلكتروني غير صالح",
       "FORMAT_INVALID": "تنسيق غير صالح",
