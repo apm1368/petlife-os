@@ -1057,6 +1057,8 @@ enum LedgerAccountCode {
   /// Passes money between two wallets in a staff transfer: debited and credited by the same amount in the same
   /// database transaction, so it always nets to zero.
   WALLET_TRANSFER_CLEARING
+  /// Sponsored-listing (CPC) clicks billed to partners' prepaid business wallets (ER-02: platform revenue).
+  CPC_REVENUE
 }
 
 enum LedgerEntryDirection {
@@ -2261,6 +2263,7 @@ model ProviderOrganization {
   clinicContacts     ClinicImportedContact[]
   /// The organisation's business wallet (CPC budget and other prepaid credit), kept apart from its members' wallets.
   walletAccount      WalletAccount?
+  sponsoredCampaigns SponsoredCampaign[]
 
   @@index([verificationStatus])
   @@map("provider_organizations")
@@ -2895,6 +2898,7 @@ model SellerOrganization {
   shippingProfile                 SellerShippingProfile?
   /// The organisation's business wallet (CPC budget and other prepaid credit), kept apart from its members' wallets.
   walletAccount                   WalletAccount?
+  sponsoredCampaigns              SponsoredCampaign[]
 
   @@index([verificationStatus, status])
   @@map("seller_organizations")
@@ -3067,6 +3071,7 @@ model Product {
   orderItems             OrderItem[]
   imports                CatalogImportItem[]
   catalogProductRequests CatalogProductRequest[] @relation("ResolvedCatalogProductRequests")
+  sponsoredCampaigns     SponsoredCampaign[]
 
   @@index([categoryId])
   @@index([status])
@@ -3667,6 +3672,7 @@ model WalletAccount {
   entries      WalletEntry[]
   adjustments  WalletAdjustment[]
   topUps       WalletTopUp[]
+  sponsoredCampaigns SponsoredCampaign[]
   transfersOut WalletTransferRequest[] @relation("WalletTransferFrom")
   transfersIn  WalletTransferRequest[] @relation("WalletTransferTo")
 
@@ -5504,6 +5510,7 @@ model AdminUser {
   requestedWalletAdjustments     WalletAdjustmentRequest[]         @relation("RequestedWalletAdjustments")
   decidedWalletAdjustments       WalletAdjustmentRequest[]         @relation("DecidedWalletAdjustments")
   requestedWalletTransfers       WalletTransferRequest[]           @relation("RequestedWalletTransfers")
+  setSponsoredCpcRates           SponsoredCpcRate[]                @relation("SetSponsoredCpcRates")
   decidedWalletTransfers         WalletTransferRequest[]           @relation("DecidedWalletTransfers")
   reviewedWalletTopUps           WalletTopUp[]                     @relation("ReviewedWalletTopUps")
   importedMarketplaceStatements  MarketplaceSettlementStatement[]
@@ -12922,3 +12929,122 @@ model CardTransferDestination {
   @@index([status, createdAt])
   @@map("card_transfer_destinations")
 }
+
+// ---------------------------------------------------------------------------
+// Sponsored listings billed per click (owner #2, 2026-11-13; decisions F-10, T-01, P-01, S-02, P-03)
+// ---------------------------------------------------------------------------
+
+/// Where a sponsored slot shows: above the shop's product lists, the vets directory, or the service-providers list.
+enum SponsoredPlacement {
+  SHOP
+  VETS
+  SERVICES
+}
+
+enum SponsoredCampaignStatus {
+  ACTIVE
+  /// Paused by the partner; resumable.
+  PAUSED
+  /// Ended for good (by the partner or by staff).
+  STOPPED
+}
+
+/// What happened to a click: only BILLED clicks cost anything; every other click is logged with why it was free.
+enum SponsoredClickOutcome {
+  BILLED
+  /// The same signed-in viewer or the same IP already had a billed click on this listing today (Tehran day).
+  DUPLICATE
+  /// A member of the partner's own organisation.
+  SELF
+  /// opetlife staff.
+  STAFF
+  /// An automated user agent.
+  BOT
+  /// The campaign was not serving (paused, stopped, held by staff, or switched off).
+  INACTIVE
+  /// The flat price is above the partner's own ceiling.
+  ABOVE_CEILING
+  /// Today's spend would pass the daily budget.
+  OVER_BUDGET
+  /// The business wallet can't cover the click.
+  NO_FUNDS
+}
+
+/// The one flat price per billable click for everyone (F-10), set by staff with settings.manage. Append-only and
+/// effective-dated: the price at a moment is the newest row whose effectiveFrom is not in the future (default
+/// 20,000 IRR = 2,000 toman, T-01, while there is none).
+model SponsoredCpcRate {
+  id            String    @id @default(uuid()) @db.Uuid
+  rateIrr       Int
+  effectiveFrom DateTime
+  reason        String
+  setByAdminId  String    @db.Uuid
+  setByAdmin    AdminUser @relation("SetSponsoredCpcRates", fields: [setByAdminId], references: [id], onDelete: Restrict)
+  createdAt     DateTime  @default(now())
+
+  @@index([effectiveFrom])
+  @@map("sponsored_cpc_rates")
+}
+
+/// A partner's sponsored listing: one product (shop) or the provider organisation itself (vets / services), paid
+/// per billable click from the organisation's business wallet, within a daily budget and the partner's ceiling.
+/// At most one live (not STOPPED) campaign per listing and placement (partial unique index).
+model SponsoredCampaign {
+  id                     String                  @id @default(uuid()) @db.Uuid
+  walletAccountId        String                  @db.Uuid
+  walletAccount          WalletAccount           @relation(fields: [walletAccountId], references: [id], onDelete: Restrict)
+  placement              SponsoredPlacement
+  sellerOrganizationId   String?                 @db.Uuid
+  sellerOrganization     SellerOrganization?     @relation(fields: [sellerOrganizationId], references: [id], onDelete: Restrict)
+  productId              String?                 @db.Uuid
+  product                Product?                @relation(fields: [productId], references: [id], onDelete: Restrict)
+  providerOrganizationId String?                 @db.Uuid
+  providerOrganization   ProviderOrganization?   @relation(fields: [providerOrganizationId], references: [id], onDelete: Restrict)
+  status                 SponsoredCampaignStatus @default(ACTIVE)
+  /// Integer rials the partner allows per Tehran day.
+  dailyBudgetIrr         Int
+  /// The partner's ceiling per click: if the flat price is ever set above it, the campaign stops being served.
+  maxCpcIrr              Int
+  createdByUserId        String                  @db.Uuid
+  /// Staff hold: never served while set, whatever the partner does; only staff release it.
+  staffHeldAt            DateTime?
+  staffHoldReason        String?
+  stoppedAt              DateTime?
+  stoppedReason          String?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+
+  clicks SponsoredClick[]
+
+  @@index([placement, status])
+  @@index([walletAccountId, createdAt])
+  @@map("sponsored_campaigns")
+}
+
+/// One click on a sponsored slot. A billed click points at the wallet debit it wrote; staff can mark it invalid,
+/// which credits the cost back (creditEntryId). The viewer's account and the keyed IP hash (never the raw IP) are
+/// erased after 90 days; the outcome and cost stay for accounting.
+model SponsoredClick {
+  id                   String                @id @default(uuid()) @db.Uuid
+  campaignId           String                @db.Uuid
+  campaign             SponsoredCampaign     @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+  /// The Tehran calendar day of the click (budgets and the one-billed-click rule count per day).
+  day                  DateTime              @db.Date
+  clickedAt            DateTime              @default(now())
+  outcome              SponsoredClickOutcome
+  costIrr              Int                   @default(0)
+  rateIrr              Int
+  viewerUserId         String?               @db.Uuid
+  ipHash               String?
+  walletEntryId        String?               @unique @db.Uuid
+  invalidatedAt        DateTime?
+  invalidatedByAdminId String?               @db.Uuid
+  invalidReason        String?
+  creditEntryId        String?               @unique @db.Uuid
+  personalDataErasedAt DateTime?
+
+  @@index([campaignId, day])
+  @@index([clickedAt])
+  @@map("sponsored_clicks")
+}
+

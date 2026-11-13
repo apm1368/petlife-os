@@ -20,6 +20,8 @@ export const WALLET_ADJUSTMENT_REFERENCE = "WALLET_ADJUSTMENT";
 export const WALLET_TOP_UP_REFERENCE = "WALLET_TOP_UP";
 /** referenceType of both entries written by a two-person staff transfer (referenceId = WalletTransferRequest.id). */
 export const WALLET_TRANSFER_REFERENCE = "WALLET_TRANSFER";
+/** referenceType of a billed sponsored-listing click (referenceId = SponsoredClick.id); its refund adds "_REFUND". */
+export const SPONSORED_CLICK_REFERENCE = "SPONSORED_CLICK";
 
 export function toBalancesDto(balances: Record<WalletBalanceType, number>, currency = "IRR"): WalletBalancesDto {
   const purchaseOnly = balances[WalletBalanceType.PURCHASE_ONLY];
@@ -32,6 +34,7 @@ function entryPurpose(entry: Pick<WalletEntry, "kind" | "referenceType" | "sourc
   if (entry.referenceType === WALLET_TOP_UP_REFERENCE) return "TOP_UP";
   if (entry.referenceType === WALLET_ADJUSTMENT_REFERENCE) return "ADJUSTMENT";
   if (entry.referenceType === WALLET_TRANSFER_REFERENCE) return "TRANSFER";
+  if (entry.referenceType === SPONSORED_CLICK_REFERENCE) return "SPONSORED_CLICK";
   if (entry.referenceType === "PAYMENT_INTENT") return "PURCHASE";
   if (/REFUND|OVERPAYMENT/.test(entry.referenceType) || entry.source === WalletCreditSource.REFUND || entry.source === WalletCreditSource.OVERPAYMENT) return "REFUND";
   return "OTHER";
@@ -67,6 +70,29 @@ export class WalletService {
       case WalletOwnerType.PROVIDER:
         return client.walletAccount.upsert({ where: { providerOrganizationId: owner.id }, update: {}, create: { ownerType: WalletOwnerType.PROVIDER, providerOrganizationId: owner.id } });
     }
+  }
+
+  /**
+   * Pays for a service (a sponsored-listing click) out of ONE bucket — purchase-only credit first (top-ups and gifts),
+   * then withdrawable — so the payment is a single wallet entry. Returns null when neither bucket can cover it. The
+   * caller holds the wallet lock (lockAccountById).
+   */
+  async debitForService(
+    input: { walletAccountId: string; amount: number; referenceType: string; referenceId: string; creditAccount: LedgerAccountCode; description: string },
+    client: Prisma.TransactionClient,
+  ): Promise<{ entryId: string; balanceType: WalletBalanceType } | null> {
+    if (!Number.isInteger(input.amount) || input.amount <= 0) throw new ValidationApiException({ field: "amount", reason: "INTEGER_RIAL_REQUIRED" });
+    const balances = await this.balancesOf(input.walletAccountId, client);
+    const balanceType = balances[WalletBalanceType.PURCHASE_ONLY] >= input.amount ? WalletBalanceType.PURCHASE_ONLY : balances[WalletBalanceType.WITHDRAWABLE] >= input.amount ? WalletBalanceType.WITHDRAWABLE : null;
+    if (!balanceType) return null;
+    const ledgerTransactionId = await this.ledger.recordBalanced(input.description, input.referenceType, input.referenceId, "IRR", [
+      { accountCode: accountFor(balanceType), direction: LedgerEntryDirection.DEBIT, amount: input.amount },
+      { accountCode: input.creditAccount, direction: LedgerEntryDirection.CREDIT, amount: input.amount },
+    ], client);
+    const entry = await client.walletEntry.create({
+      data: { walletAccountId: input.walletAccountId, ledgerTransactionId, balanceType, kind: WalletEntryKind.DEBIT, amount: input.amount, referenceType: input.referenceType, referenceId: input.referenceId },
+    });
+    return { entryId: entry.id, balanceType };
   }
 
   /** Row-locks a wallet for the rest of the transaction (spends and transfers serialise on it). */

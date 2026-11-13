@@ -24,6 +24,9 @@ import { SettlementOpsService } from "./finance/settlement-ops.service";
 import { AdminFinanceOpsController } from "./finance/finance-ops.controller";
 import { AdminWalletTransfersController } from "./finance/admin-wallet-transfers.controller";
 import { AdminWalletTransfersService } from "./finance/admin-wallet-transfers.service";
+import { AdminSponsoredController } from "./finance/admin-sponsored.controller";
+import { AdminSponsoredService } from "./finance/admin-sponsored.service";
+import { SponsoredModule } from "../sponsored/sponsored.module";
 import { AutomaticTaskListener } from "./task/automatic-task.listener";
 import { AdminPartner360Service } from "./partners/admin-partner360.service";
 import { AdminPartner360Controller } from "./partners/admin-partner360.controller";
@@ -168,6 +171,7 @@ import { MemoriesModule } from "../memories/memories.module";
 @Module({
   imports: [
     NotificationsModule,
+    SponsoredModule,
     EmailModule,
     RefundsModule,
     OrdersModule,
@@ -195,6 +199,7 @@ import { MemoriesModule } from "../memories/memories.module";
     UserSupportAttachmentsController,
     AdminFinanceOpsController,
     AdminWalletTransfersController,
+    AdminSponsoredController,
     AdminCardTransferController,
     AdminShippingController,
     AdminPlacesOsmController,
@@ -249,6 +254,7 @@ import { MemoriesModule } from "../memories/memories.module";
     FinanceReconciliationWorker,
     PaymentTraceService,
     AdminWalletTransfersService,
+    AdminSponsoredService,
     SettlementOpsService,
     AutomaticTaskListener,
     AdminPartner360Service,
