@@ -8,7 +8,7 @@
 .opl-install__text h2 { margin:0 0 4px; font-size:1.02rem; font-weight:800; line-height:1.5; }
 .opl-install__text p { margin:0 0 12px; color:var(--opl-ink-2); font-size:.92rem; line-height:1.75; }
 .opl-install__actions { display:flex; flex-wrap:wrap; gap:8px; }
-.opl-install__actions .opl-btn { min-height:44px; }
+.opl-install__actions .opl-btn, .opl-install__actions .opl-btn.sm { min-height:44px; }
 .opl-install__close { position:absolute; top:10px; inset-inline-end:10px; display:grid; place-items:center; width:44px; height:44px; border:0; border-radius:999px; background:transparent; color:var(--opl-ink-2); cursor:pointer; }
 .opl-install__close:hover { background:var(--opl-raised); color:var(--opl-ink); }
 .opl-install__done { margin:0 0 16px; padding:12px 16px; border-radius:16px; background:var(--opl-mint); color:var(--opl-forest); font-weight:700; }
@@ -21,7 +21,7 @@
 .opl-push__state[data-on="true"] { color:var(--opl-forest); }
 .opl-push__note { margin:0; padding:12px 14px; border-radius:16px; background:var(--opl-cream); color:var(--opl-ink-2); font-size:.9rem; line-height:1.75; }
 .opl-push__actions { display:flex; flex-wrap:wrap; gap:8px; }
-.opl-push__actions .opl-btn { min-height:44px; }
+.opl-push__actions .opl-btn, .opl-push__actions .opl-btn.sm { min-height:44px; }
 .opl-push__actions .opl-btn:disabled { opacity:.6; cursor:progress; transform:none; }
 .opl-push__devices ul { margin:8px 0 0; padding:0; list-style:none; border-top:1px solid var(--opl-line); }
 .opl-push__devices li { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:56px; border-bottom:1px solid var(--opl-line); }

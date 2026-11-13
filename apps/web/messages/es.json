@@ -92,6 +92,59 @@
       "oil": "Día de la Nacionalización del Petróleo"
     }
   },
+  "adminOwnership": {
+    "kicker": "Mascotas",
+    "title": "Transferencias de propiedad",
+    "intro": "Todas las solicitudes para pasar una mascota a un nuevo propietario, primero las disputadas. Una disputa nunca mueve a la mascota: el propietario registrado sigue hasta una resolución oficial o un acuerdo por escrito. Revisa los documentos de las partes (a través de soporte) y cierra la disputa con un motivo. Se avisa a ambas personas del resultado.",
+    "filterLabel": "Estado de la transferencia",
+    "search": "Buscar",
+    "searchPlaceholder": "Nombre de la mascota o de la persona",
+    "apply": "Buscar",
+    "retry": "Reintentar",
+    "cancel": "Cancelar",
+    "status": {
+      "DISPUTED": "En disputa",
+      "PENDING_REVIEW": "Pendiente del destinatario",
+      "ACCEPTED": "Transferida",
+      "DECLINED": "Rechazada",
+      "CANCELLED": "Cancelada",
+      "EXPIRED": "Caducada",
+      "ALL": "Todas"
+    },
+    "empty": "No hay transferencias que coincidan.",
+    "emptyDisputed": "No hay disputas abiertas.",
+    "registeredOwner": "Propietario registrado ahora",
+    "requested": "Solicitada",
+    "applied": "Transferida el",
+    "notApplied": "Sin transferir",
+    "memories": "Recuerdos",
+    "memory": {
+      "TRANSFER": "Pasan al nuevo propietario",
+      "RETAIN": "Se quedan con el propietario anterior",
+      "COPY_READ_ONLY": "Copia de solo lectura para el nuevo propietario"
+    },
+    "explain": {
+      "applied": "Esta transferencia ya se había hecho. Cerrar la disputa la mantiene tal cual.",
+      "pending": "El destinatario aún no había aceptado. Cerrar la disputa cierra la solicitud; el propietario registrado sigue."
+    },
+    "close": "Cerrar disputa",
+    "reason": "Resultado y motivo",
+    "reasonPlaceholder": "Por ejemplo: contrato de compra revisado por teléfono con ambas partes",
+    "done": {
+      "stands": "Disputa sobre {pet} cerrada: la transferencia se mantiene. Se ha avisado a ambas partes.",
+      "ownerStays": "Disputa sobre {pet} cerrada: la solicitud se cierra y el propietario registrado sigue. Se ha avisado a ambas partes."
+    },
+    "errors": {
+      "reason": "Escribe el resultado y el motivo (al menos 5 caracteres).",
+      "forbidden": "Tu rol no incluye los datos de clientes.",
+      "load": "No se han podido cargar las transferencias.",
+      "generic": "No ha funcionado. Inténtalo de nuevo."
+    },
+    "rules": {
+      "OWNERSHIP_NOT_DISPUTED": "Esta transferencia ya no está en disputa. Actualiza la lista.",
+      "OWNERSHIP_CHANGED_CONCURRENTLY": "Otra persona acaba de cambiar esta transferencia. Actualiza la lista."
+    }
+  },
   "adminDeletionRequests": {
     "kicker": "Privacidad",
     "title": "Solicitudes de eliminación de cuenta",
@@ -2050,6 +2103,9 @@
       "analytics": "Análisis y lista de espera"
     },
     "bookings": {
+      "noShowLabel": "No presentado",
+      "noShowProvider": "El proveedor no se presentó (aviso del miembro)",
+      "noShowOwner": "El dueño no se presentó",
       "title": "Servicios y reservas",
       "searchLabel": "Buscar por número, mascota o proveedor",
       "statusLabel": "Estado de la reserva",
@@ -3172,6 +3228,8 @@
         "URGENT": "Urgente"
       },
       "sources": {
+        "PROVIDER_NO_SHOW": "Proveedor no se presentó",
+        "OWNERSHIP_DISPUTE": "Disputa de propiedad",
         "MANUAL": "Entrada manual",
         "TRAVEL_SOURCE": "Fuentes de viaje",
         "PARTNER_VERIFICATION": "Revisión de documentos de socios",
@@ -3825,6 +3883,7 @@
       },
       "tabs": {
         "holidays": "Festivos y cierres",
+        "ownershipTransfers": "Transferencias de propiedad",
         "deletionRequests": "Solicitudes de eliminación",
         "customRoles": "Roles personalizados",
         "directory": "Directorio",
@@ -3879,7 +3938,18 @@
         "channels": "Canales y envíos",
         "smsPatterns": "Plantillas SMS",
         "walletDirectory": "Miembros",
-        "walletTopUps": "Comprobantes de recarga"
+        "walletTopUps": "Comprobantes de recarga",
+        "shipping": "Envíos",
+        "petTaxi": "Taxi para mascotas",
+        "petTaxiDrivers": "Conductores de taxi",
+        "placeReports": "Reportes de lugares",
+        "osmImport": "OpenStreetMap",
+        "placeClaims": "Reclamaciones",
+        "walletCardAccount": "Cuenta de tarjeta",
+        "walletCardReceipts": "Comprobantes de tarjeta",
+        "repeatDeliveries": "Entregas periódicas",
+        "orderLookup": "Buscar pedido",
+        "refundApprovals": "Aprobaciones de reembolso"
       },
       "palette": {
         "actions": "Acciones rápidas",
@@ -4046,6 +4116,10 @@
           "EXECUTED": "Ejecutado"
         }
       }
+    },
+    "demoRecord": {
+      "label": "Demo: oculto en el sitio público",
+      "hint": "Datos de ejemplo para demos y pruebas. El sitio público nunca los muestra, aunque aquí figuren como verificados o públicos."
     }
   },
   "adminUsers": {
@@ -4685,7 +4759,16 @@
       "reviewsVerifiedOnly": "Solo pueden opinar quienes hayan recibido el producto.",
       "verifiedPurchase": "Compra verificada",
       "moreReviews": "Ver más reseñas",
-      "related": "Más productos de esta categoría"
+      "related": "Más productos de esta categoría",
+      "trust": {
+        "title": "Compra segura en opetlife",
+        "verified": "Todos los vendedores verificaron su identidad y documentos con opetlife.",
+        "returns": "Si un artículo llega dañado, equivocado o caducado, pide el reembolso dentro de {hours} horas tras la entrega; nuestro equipo lo revisa.",
+        "protection": "Pagas a través de opetlife; si el pedido no llega, puedes pedir que te devolvamos el dinero.",
+        "shipsFrom": "Se envía desde {city}",
+        "sellerRating": "Valoración del vendedor {average} de 5 ({count, plural, one {# reseña} other {# reseñas}})",
+        "visitStore": "Ver la tienda de {seller}"
+      }
     },
     "cart": {
       "title": "Carrito",
@@ -4971,7 +5054,10 @@
         "cancel": "Cancelar",
         "submit": "Enviar para revisión",
         "failed": "No se pudo enviar la reseña."
-      }
+      },
+      "deliveryMethod": "Envío: {method}",
+      "postTracking": "Seguir el envío en la web de Correos",
+      "courierTracking": "Seguir al mensajero"
     },
     "checkout": {
       "summary": { "title": "Resumen del pedido", "deliveryNext": "Se elige en el paso de entrega" },
@@ -5012,12 +5098,30 @@
       },
       "shipping": {
         "title": "Elige la entrega para cada vendedor",
-        "serviceLevel": { "STANDARD": "Entrega estándar", "EXPRESS": "Entrega exprés" },
+        "serviceLevel": { "STANDARD": "Entrega estándar", "EXPRESS": "Entrega exprés", "COURIER": "Mensajero", "POST_PISHTAZ": "Correo exprés" },
         "eta": "Llega en aproximadamente {hours, plural, one {# hora} other {# horas}}",
         "selected": "Seleccionada",
         "unavailable": "Ahora no hay opciones de entrega disponibles",
         "refresh": "Actualizar opciones de entrega",
-        "chooseFirst": "Elige una opción de entrega para continuar."
+        "chooseFirst": "Elige una opción de entrega para continuar.",
+        "provider": {
+          "DEV": "Mensajero de prueba",
+          "ALOPEYK": "Alopeyk",
+          "SNAPPBOX": "Snappbox",
+          "OPETLIFE_COURIER": "Mensajero de opetlife",
+          "POST_PISHTAZ": "Correo exprés de Irán (Pishtaz)",
+          "SNAPPBOX_APP": "Snappbox",
+          "ALOPEYK_APP": "Alopeyk"
+        },
+        "basis": {
+          "API": "Precio actual del mensajero",
+          "SANDBOX_ESTIMATE": "Estimación de prueba: aún no se consultó al mensajero",
+          "DISTANCE_ESTIMATE": "Estimado según la distancia",
+          "CITY_FLAT": "Tarifa fija de la ciudad",
+          "FIXED_PRICE": "Tarifa fija"
+        },
+        "etaDays": "Llega en aproximadamente {days, plural, one {# día hábil} other {# días hábiles}}",
+        "sandboxNote": "Por ahora el envío está en modo de prueba: los precios de Alopeyk y Snappbox son estimaciones y no se envía ningún mensajero."
       },
       "payment": {
         "title": "Pago",
@@ -5503,7 +5607,8 @@
       "checkInSelected": "Entrada seleccionada; ahora elige la salida.",
       "checkInSuffix": ", entrada",
       "checkOutSuffix": ", salida"
-    }
+    },
+    "year": "Año"
   },
   "filePicker": {
     "choose": "Elegir archivo",
@@ -6321,6 +6426,9 @@
         "allClear": "Todo al día: no hay nada pendiente para tu equipo.",
         "clearList": "Al día: {list}",
         "queue": {
+          "pendingReviews": "Reseñas pendientes de moderación",
+          "openProviderNoShows": "Avisos de proveedor ausente",
+          "openOwnershipDisputes": "Disputas de propiedad",
           "pendingDeletionRequests": "Solicitudes de eliminación de cuenta",
           "openTrustCases": "Casos de confianza y seguridad",
           "openDisputes": "Disputas abiertas",
@@ -6345,7 +6453,7 @@
       },
       "shortcuts": "Accesos directos",
       "healthLink": "Página de estado",
-      "workersSummary": "{running} de {total} tareas en segundo plano en marcha",
+      "workersSummary": "{running} de {total} tareas en segundo plano sin errores",
       "priority": {
         "URGENT": "Urgente",
         "HIGH": "Alta"
@@ -6916,6 +7024,49 @@
         "intervals": "Intervalos de entrega",
         "everyDays": "Cada {days} días",
         "pickOne": "Elige al menos un intervalo."
+      }
+    },
+    "shipping": {
+      "title": "Envíos",
+      "subtitle": "Los métodos que ofreces y la dirección donde los mensajeros recogen los paquetes.",
+      "loading": "Cargando…",
+      "failed": "No se pudieron cargar los ajustes de envío.",
+      "methods": "Métodos de envío",
+      "methodsHint": "Si no eliges ninguno, se ofrecen todos los métodos activos de opetlife.",
+      "noneActive": "Todavía no hay métodos de envío activos en opetlife.",
+      "provider": {
+        "DEV": "Mensajero de prueba",
+        "ALOPEYK": "Alopeyk",
+        "SNAPPBOX": "Snappbox",
+        "OPETLIFE_COURIER": "Mensajero de opetlife",
+        "POST_PISHTAZ": "Correo exprés de Irán (Pishtaz)",
+        "SNAPPBOX_APP": "Snappbox (reservado por opetlife)",
+        "ALOPEYK_APP": "Alopeyk (reservado por opetlife)"
+      },
+      "pickup": "Dirección de recogida",
+      "pickupHint": "Un punto en el mapa permite al mensajero de opetlife calcular por distancia.",
+      "fields": {
+        "contactName": "Persona de contacto",
+        "phone": "Teléfono",
+        "city": "Ciudad",
+        "region": "Provincia",
+        "area": "Barrio",
+        "addressLine": "Dirección completa",
+        "postalCode": "Código postal de 10 dígitos",
+        "instructions": "Nota para el mensajero"
+      },
+      "useLocation": "Usar la ubicación actual",
+      "clearLocation": "Quitar punto del mapa",
+      "locationDenied": "No se dio acceso a la ubicación.",
+      "save": "Guardar ajustes de envío",
+      "saving": "Guardando…",
+      "saved": "Guardado.",
+      "saveFailed": "No se guardó. Revisa los campos (código postal: 10 dígitos).",
+      "readOnly": "Solo un administrador de la tienda puede cambiarlo."
+    },
+    "shell": {
+      "nav": {
+        "shipping": "Envíos"
       }
     }
   },
@@ -7509,7 +7660,8 @@
         "analytics": "Rendimiento",
         "travel": "Viajes y estancias",
         "clinicWorkspace": "Gestión de la clínica",
-        "verification": "Documentos de verificación"
+        "verification": "Documentos de verificación",
+        "petTaxi": "Taxi para mascotas"
       },
       "notAProvider": {
         "title": "Sin acceso al panel de proveedores",
@@ -8658,7 +8810,13 @@
       "BEACH": "Playa",
       "VENUE": "Local",
       "SERVICE": "Servicio",
-      "OTHER": "Otro"
+      "OTHER": "Otro",
+      "VETERINARY": "Veterinario",
+      "PET_SHOP": "Tienda de mascotas",
+      "GROOMING": "Peluquería",
+      "BOARDING": "Residencia",
+      "SHELTER": "Refugio",
+      "DOG_PARK": "Parque para perros"
     },
     "list": {
       "search": "Buscar",
@@ -8685,6 +8843,38 @@
       "title": "Lugares guardados",
       "empty": "Aún no has guardado ningún lugar.",
       "signInPrompt": "Inicia sesión para guardar tus lugares favoritos."
+    },
+    "osm": {
+      "label": "De OpenStreetMap · aún sin verificar",
+      "explain": "Esta ficha viene del mapa abierto OpenStreetMap y opetlife aún no la ha revisado. Contacta con el lugar antes de ir.",
+      "attribution": "© colaboradores de OpenStreetMap",
+      "viewOnOsm": "Ver en OpenStreetMap",
+      "phone": "Teléfono",
+      "website": "Sitio web",
+      "managed": "Esta página la gestiona el propio negocio, con identidad verificada."
+    },
+    "claim": {
+      "title": "¿Es tu negocio?",
+      "body": "Reclama esta página para mantener tú mismo sus datos y obtener la insignia de verificado.",
+      "button": "Reclamar",
+      "sending": "Enviando…",
+      "signIn": "Inicia sesión para reclamarla",
+      "failed": "No funcionó. Inténtalo de nuevo.",
+      "next": {
+        "CREATE_PARTNER_ACCOUNT": "Solicitud guardada. Siguiente paso: crea una cuenta de socio y envía tus documentos para verificarlos.",
+        "COMPLETE_VERIFICATION": "Solicitud guardada. Siguiente paso: completa la verificación de tu negocio en el panel de socios.",
+        "AWAITING_REVIEW": "Solicitud guardada. El equipo de opetlife la revisará y te avisará."
+      },
+      "goPartner": "Crear cuenta de socio",
+      "goVerification": "Ir a la verificación",
+      "status": {
+        "PENDING": "Tu solicitud está en revisión.",
+        "APPROVED": "Tu solicitud fue aprobada.",
+        "REJECTED": "Tu solicitud no fue aceptada.",
+        "WITHDRAWN": "Solicitud retirada."
+      },
+      "refresh": "Hecho: actualizar mi solicitud",
+      "limit": "Puedes tener como máximo 5 solicitudes abiertas; espera la revisión."
     }
   },
   "healthDepth": {
@@ -9104,7 +9294,9 @@
       "deadline": "Sube el comprobante antes del {date}.",
       "stepOne": "Transfiere el importe a esta tarjeta desde tu app bancaria o un cajero.",
       "stepTwo": "Haz una foto o una captura del comprobante.",
-      "stepThree": "Envía aquí el comprobante. Nuestro equipo de finanzas lo revisa y añade el saldo."
+      "stepThree": "Envía aquí el comprobante. Nuestro equipo de finanzas lo revisa y añade el saldo.",
+      "bank": "Banco",
+      "sheba": "Sheba"
     },
     "receipt": {
       "choose": "Elegir la imagen del comprobante",
@@ -9685,6 +9877,799 @@
       "primary": "Crear una cuenta",
       "secondary": "Explorar servicios"
     }
+  },
+  "addressBook": {
+    "eyebrow": "Cuenta",
+    "title": "Direcciones",
+    "description": "Las direcciones de entrega de tu hogar, para mensajeros y correo.",
+    "navHint": "Direcciones de entrega y predeterminada",
+    "loading": "Cargando direcciones…",
+    "failed": "No se pudieron cargar las direcciones.",
+    "noHousehold": "Crea primero un hogar para guardar direcciones.",
+    "empty": "Aún no hay direcciones guardadas.",
+    "add": "Añadir dirección",
+    "edit": "Editar",
+    "remove": "Eliminar",
+    "removeConfirm": "¿Eliminar esta dirección? Los pedidos anteriores conservan su propia copia.",
+    "removed": "Dirección eliminada.",
+    "makeDefault": "Hacer predeterminada",
+    "default": "Predeterminada",
+    "save": "Guardar dirección",
+    "saving": "Guardando…",
+    "saved": "Dirección guardada.",
+    "cancel": "Cancelar",
+    "failedSave": "No se guardó la dirección. Revisa los campos.",
+    "fields": {
+      "label": "Etiqueta (p. ej., casa, trabajo)",
+      "recipient": "Destinatario",
+      "phone": "Teléfono",
+      "city": "Ciudad",
+      "region": "Provincia",
+      "area": "Barrio",
+      "addressLine": "Dirección completa (calle, callejón, número, unidad)",
+      "postalCode": "Código postal de 10 dígitos",
+      "instructions": "Nota para el mensajero (opcional)",
+      "isDefault": "Usar como dirección predeterminada"
+    },
+    "location": {
+      "use": "Usar mi ubicación actual",
+      "locating": "Buscando tu ubicación…",
+      "set": "Punto del mapa guardado; el mensajero de opetlife puede calcular mejor.",
+      "clear": "Quitar punto del mapa",
+      "denied": "No se dio acceso a la ubicación. Puedes continuar sin ella.",
+      "hasPoint": "Con punto en el mapa"
+    }
+  },
+  "adminShipping": {
+    "kicker": "Tienda",
+    "title": "Métodos de envío",
+    "subtitle": "Qué métodos ofrece el pago, a qué precio y en qué estado está cada envío.",
+    "loading": "Cargando…",
+    "failed": "No se pudieron cargar los datos.",
+    "retry": "Reintentar",
+    "forbidden": "Necesitas el permiso «Ver tienda» para ver los envíos.",
+    "mode": {
+      "sandbox": "Modo de prueba: Alopeyk y Snappbox solo dan estimaciones y no se envía mensajero.",
+      "production": "Modo real: los precios vienen de los mensajeros."
+    },
+    "provider": {
+      "DEV": "Mensajero de prueba",
+      "ALOPEYK": "Alopeyk",
+      "SNAPPBOX": "Snappbox",
+      "OPETLIFE_COURIER": "Mensajero de opetlife",
+      "POST_PISHTAZ": "Correo exprés de Irán (Pishtaz)",
+      "SNAPPBOX_APP": "Snappbox — reservado en la app",
+      "ALOPEYK_APP": "Alopeyk — reservado en la app"
+    },
+    "kind": {
+      "API": "Precio por la API del mensajero",
+      "MANUAL": "Precio de opetlife"
+    },
+    "active": "Se ofrece al pagar",
+    "inactive": "No se ofrece al pagar",
+    "notes": {
+      "NEEDS_PRICE": "Primero define un precio.",
+      "SWITCHED_OFF": "Apagado por el equipo.",
+      "DISABLED_IN_ENV": "Apagado en la configuración del servidor.",
+      "SANDBOX": "Estimaciones de prueba hasta que se configuren las claves de API."
+    },
+    "webhook": {
+      "yes": "Secreto de webhook configurado",
+      "no": "Sin secreto de webhook (necesario para el modo real)"
+    },
+    "enabled": "Activado",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "saved": "Guardado.",
+    "saveFailed": "No se guardó. Si está activado, necesita un precio válido.",
+    "reason": "Motivo (queda en el registro de auditoría)",
+    "readOnly": "Solo «Gestionar tienda» puede cambiarlo.",
+    "courier": {
+      "cities": "Ciudades atendidas (separadas por comas; vacío = todas)",
+      "baseFare": "Tarifa base (tomanes)",
+      "perKm": "Por km (tomanes)",
+      "minFare": "Tarifa mínima (tomanes)",
+      "maxKm": "Distancia máxima (km)",
+      "roadFactor": "Factor de ruta (línea recta ×)",
+      "defaultFlat": "Tarifa fija sin punto en el mapa (tomanes, 0 = ninguna)",
+      "cityFares": "Tarifa fija por ciudad (una por línea: ciudad=tomanes)",
+      "pickupMinutes": "Minutos hasta la recogida",
+      "minutesPerKm": "Minutos por km"
+    },
+    "post": {
+      "fixedPrice": "Precio fijo (tomanes)",
+      "includedKg": "Peso incluido (kg)",
+      "perExtraKg": "Cada kilo extra (tomanes)",
+      "etaMin": "Entrega más rápida (días)",
+      "etaMax": "Entrega más lenta (días)"
+    },
+    "shipments": {
+      "title": "Envíos",
+      "hint": "El equipo mueve los envíos del mensajero de opetlife y de Correos; Alopeyk y Snappbox informan su propio estado.",
+      "allMethods": "Todos los métodos",
+      "allStatuses": "Todos los estados",
+      "empty": "No hay envíos.",
+      "columns": {
+        "method": "Método",
+        "seller": "Vendedor",
+        "city": "Destino",
+        "status": "Estado",
+        "tracking": "Seguimiento",
+        "updated": "Último cambio"
+      },
+      "status": {
+        "CREATED": "Creado",
+        "REQUESTED": "Mensajero solicitado",
+        "ASSIGNED": "Mensajero asignado",
+        "PICKED_UP": "Recogido",
+        "IN_TRANSIT": "En tránsito",
+        "OUT_FOR_DELIVERY": "En reparto",
+        "DELIVERED": "Entregado",
+        "FAILED": "Fallido",
+        "CANCELED": "Cancelado",
+        "UNKNOWN": "Desconocido"
+      },
+      "update": "Actualizar",
+      "updateTitle": "Actualizar envío",
+      "newStatus": "Nuevo estado",
+      "trackingCode": "Número de seguimiento de correos, referencia del mensajero o enlace de seguimiento de la app",
+      "note": "Nota (opcional, en el registro de auditoría)",
+      "apply": "Aplicar",
+      "cancel": "Cancelar",
+      "applied": "Envío actualizado; el miembro lo ve en el seguimiento.",
+      "notApplied": "Ese estado es anterior al actual; no cambió nada.",
+      "failed": "La actualización falló."
+    },
+    "appCourierHint": "Los miembros pagan el precio de estas reglas de distancia/ciudad (ajústalas cerca de lo que cobra la app). Tras un pedido, reserva el mensajero en la app normal con los pines de recogida y entrega, pega el enlace de seguimiento en Envíos y avanza el estado."
+  },
+  "petTaxi": {
+    "member": {
+      "title": "Taxi para mascotas",
+      "subtitle": "Marca la recogida y el destino en el mapa, ve la tarifa y sigue a tu conductor en vivo.",
+      "map": "Mapa",
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar",
+      "loading": "Cargando…",
+      "failed": "No se pudo cargar.",
+      "retry": "Reintentar",
+      "step": {
+        "pickup": "Marca la recogida en el mapa",
+        "dropoff": "Marca el destino en el mapa",
+        "details": "Mascotas y vehículo"
+      },
+      "pickup": "Recogida",
+      "dropoff": "Destino",
+      "pinned": "Punto elegido en el mapa",
+      "myLocation": "Mi ubicación actual",
+      "locating": "Buscando tu ubicación…",
+      "locationDenied": "No se dio acceso a la ubicación; marca en el mapa.",
+      "savedAddresses": "Direcciones guardadas",
+      "search": "Buscar un lugar",
+      "searchNone": "No se encontró ningún lugar.",
+      "city": "Ciudad de recogida",
+      "note": "Nota para el conductor (piso, timbre…)",
+      "change": "Cambiar",
+      "pets": "¿Qué mascotas viajan?",
+      "noPets": "Añade primero tu mascota para pedir un viaje.",
+      "carrier": "Cómo viaja tu mascota",
+      "carrierSize": {
+        "SMALL": "Pequeño: gato o perro pequeño en transportín",
+        "MEDIUM": "Mediano: perro mediano en una caja en el maletero",
+        "LARGE": "Grande: perro grande o varias mascotas"
+      },
+      "quote": "Tarifa",
+      "quoting": "Calculando la tarifa…",
+      "estimate": "La distancia y el tiempo son estimaciones (línea recta × factor de ruta).",
+      "routed": "Según la ruta por carretera",
+      "notPriced": "El taxi para mascotas aún no está disponible en esta ciudad.",
+      "distanceTime": "{km} km · unos {minutes} min",
+      "payNote": "El pago en línea aún no está activo; paga al conductor al llegar.",
+      "request": "Pedir viaje",
+      "requesting": "Enviando la solicitud…",
+      "errors": {
+        "RIDE_ALREADY_OPEN": "Ya tienes un viaje abierto.",
+        "TOO_CLOSE": "La recogida y el destino están demasiado cerca.",
+        "TOO_FAR": "Este viaje es demasiado largo para el taxi de mascotas.",
+        "NOT_PRICED": "El taxi para mascotas aún no está disponible en esta ciudad.",
+        "generic": "No funcionó. Inténtalo de nuevo."
+      },
+      "status": {
+        "SEARCHING": "Buscando conductor",
+        "DRIVER_ASSIGNED": "El conductor va en camino",
+        "ARRIVING": "El conductor ha llegado",
+        "PICKED_UP": "Camino al destino",
+        "COMPLETED": "Llegaste",
+        "CANCELLED_BY_MEMBER": "Cancelado",
+        "CANCELLED_BY_DRIVER": "Cancelado por el conductor",
+        "NO_DRIVER": "No se encontró conductor"
+      },
+      "searchingHint": "Tu solicitud se envió a conductores cercanos. Si nadie la acepta antes de las {time}, te avisaremos.",
+      "eta": "A unos {minutes} min",
+      "driver": "Conductor",
+      "call": "Llamar",
+      "positionAt": "Posición a las {time}",
+      "cancel": "Cancelar viaje",
+      "cancelConfirm": "¿Cancelar este viaje?",
+      "newRide": "Nuevo viaje",
+      "rate": "Califica este viaje",
+      "rateComment": "Tu comentario (opcional)",
+      "rateSend": "Enviar calificación",
+      "rated": "Gracias por calificar.",
+      "stars": "{n} de 5",
+      "receipt": "Recibo del viaje",
+      "receiptLines": {
+        "base": "Tarifa base",
+        "distance": "Distancia",
+        "time": "Tiempo",
+        "carrier": "Transporte",
+        "extraPets": "Mascotas extra",
+        "minimum": "Se aplicó la tarifa mínima",
+        "total": "Total"
+      },
+      "history": "Viajes anteriores",
+      "historyEmpty": "Aún no hay viajes.",
+      "requestNow": "Pedir un taxi para mascotas ahora",
+      "requestNowHint": "en el mapa, con tarifa al instante y seguimiento en vivo"
+    },
+    "driver": {
+      "title": "Taxi para mascotas: conductor",
+      "subtitle": "Conéctate para ver solicitudes cercanas. La posición de tu teléfono solo se envía mientras estás en línea.",
+      "notEligible": {
+        "NOT_PET_TAXI": "Solo para proveedores de taxi para mascotas.",
+        "NOT_VERIFIED": "Podrás conectarte cuando se verifiquen tus documentos."
+      },
+      "online": "Estás en línea",
+      "offline": "Estás desconectado",
+      "goOnline": "Conectarme",
+      "goOffline": "Desconectarme",
+      "locationOff": "La ubicación de tu teléfono no está disponible; las solicitudes solo aparecen con una ubicación actual.",
+      "requests": "Solicitudes cercanas",
+      "noRequests": "No hay solicitudes ahora. Esta página se actualiza sola.",
+      "kmFromYou": "{km} km hasta la recogida",
+      "pets": "{count, plural, one {# mascota} other {# mascotas}}",
+      "accept": "Aceptar",
+      "decline": "Pasar",
+      "taken": "Otro conductor tomó esta solicitud.",
+      "activeRide": "Viaje actual",
+      "passenger": "Pasajero",
+      "navigate": "Navegar",
+      "next": {
+        "ARRIVING": "He llegado",
+        "PICKED_UP": "Mascota recogida",
+        "COMPLETED": "Entregado"
+      },
+      "release": "No puedo ir",
+      "releaseReason": "Motivo (el viaje vuelve a otros conductores)",
+      "fare": "Tarifa: {amount}",
+      "collect": "Cobra la tarifa al entregar.",
+      "failed": "No funcionó. Inténtalo de nuevo.",
+      "driverStatus": {
+        "NONE": "Aún no estás registrado como conductor. Pide al titular de tu organización que te añada con tu permiso y vehículo.",
+        "NONE_OWNER": "Para conectarte, registra abajo a ti o a tus conductores con permiso y vehículo; el equipo de opetlife lo revisa.",
+        "PENDING": "El equipo de opetlife está revisando tus datos; podrás conectarte cuando estén verificados.",
+        "VERIFIED": "Estás verificado.",
+        "SUSPENDED": "Tu actividad como conductor está suspendida por ahora."
+      },
+      "around": "Alrededor de {city}",
+      "approxArea": "Zona aproximada",
+      "approxHint": "Verás la dirección exacta y la nota después de aceptar.",
+      "roster": {
+        "title": "Tus conductores",
+        "hint": "Cada conductor se registra con permiso y matrícula y no puede conectarse hasta que opetlife lo verifique. Los datos cambiados se revisan de nuevo.",
+        "member": "Miembro del equipo",
+        "licenceNumber": "Número de permiso",
+        "vehiclePlate": "Matrícula",
+        "vehicleDescription": "Vehículo (modelo y color)",
+        "save": "Enviar a revisión",
+        "saved": "Guardado; se revisará.",
+        "failed": "No funcionó. Inténtalo de nuevo.",
+        "incomplete": "Completa todos los campos.",
+        "empty": "Aún no hay conductores registrados.",
+        "status": {
+          "PENDING": "Pendiente de revisión",
+          "VERIFIED": "Verificado",
+          "SUSPENDED": "Suspendido"
+        }
+      }
+    }
+  },
+  "adminPetTaxi": {
+    "kicker": "Servicios",
+    "title": "Taxi para mascotas",
+    "subtitle": "Tarifas por ciudad («*» = todas las demás) y viajes en curso.",
+    "loading": "Cargando…",
+    "failed": "No se pudieron cargar los datos.",
+    "retry": "Reintentar",
+    "forbidden": "Necesitas el permiso «Ver servicios».",
+    "onlineDrivers": "Conductores en línea",
+    "rules": "Tarifas",
+    "noRules": "Aún no hay tarifas; el taxi no cotiza hasta que exista una.",
+    "fields": {
+      "city": "Ciudad («*» para la predeterminada)",
+      "base": "Tarifa base (tomanes)",
+      "perKm": "Por km (tomanes)",
+      "perMinute": "Por minuto (tomanes)",
+      "minimum": "Mínimo (tomanes)",
+      "medium": "Recargo mediano %",
+      "large": "Recargo grande %",
+      "extraPet": "Cada mascota extra (tomanes)",
+      "active": "Activa",
+      "reason": "Motivo (auditoría)",
+      "south": "Recuadro sur (lat)",
+      "west": "Recuadro oeste (long)",
+      "north": "Recuadro norte (lat)",
+      "east": "Recuadro este (long)"
+    },
+    "add": "Nueva tarifa de ciudad",
+    "save": "Guardar",
+    "saved": "Guardado.",
+    "saveFailed": "No se guardó. Revisa los números.",
+    "readOnly": "Solo «Gestionar servicios» puede cambiar tarifas.",
+    "rides": "Viajes de las últimas 24 horas",
+    "noRides": "No hay viajes.",
+    "columns": {
+      "member": "Miembro",
+      "driver": "Conductor",
+      "route": "Ruta",
+      "fare": "Tarifa",
+      "status": "Estado",
+      "rating": "Calificación"
+    },
+    "status": {
+      "SEARCHING": "Buscando conductor",
+      "DRIVER_ASSIGNED": "El conductor va en camino",
+      "ARRIVING": "El conductor ha llegado",
+      "PICKED_UP": "Camino al destino",
+      "COMPLETED": "Llegaste",
+      "CANCELLED_BY_MEMBER": "Cancelado",
+      "CANCELLED_BY_DRIVER": "Cancelado por el conductor",
+      "NO_DRIVER": "No se encontró conductor"
+    },
+    "disputesHint": "Las quejas sobre un viaje se gestionan en Disputas.",
+    "boxHint": "La tarifa de esta ciudad se aplica a viajes cuya recogida está dentro de este recuadro (máx. 3°). La ciudad que escribe el usuario no afecta al precio.",
+    "boxRequired": "Una tarifa de ciudad necesita las cuatro coordenadas del recuadro.",
+    "drivers": {
+      "kicker": "Taxi para mascotas",
+      "title": "Conductores",
+      "subtitle": "Revisa el permiso y vehículo de cada conductor; solo los verificados pueden conectarse.",
+      "loading": "Cargando…",
+      "failed": "No funcionó. Inténtalo de nuevo.",
+      "retry": "Reintentar",
+      "forbidden": "Se requiere el permiso services.view.",
+      "empty": "Aún no hay conductores registrados.",
+      "columns": {
+        "name": "Conductor",
+        "organization": "Organización",
+        "licence": "Permiso",
+        "vehicle": "Vehículo",
+        "status": "Estado",
+        "decision": "Decisión"
+      },
+      "status": {
+        "PENDING": "Pendiente de revisión",
+        "VERIFIED": "Verificado",
+        "SUSPENDED": "Suspendido"
+      },
+      "reason": "Motivo (auditoría)",
+      "reasonRequired": "Escribe un motivo.",
+      "verify": "Verificar",
+      "suspend": "Suspender",
+      "decided": "Guardado.",
+      "orgNotVerified": "organización aún no verificada"
+    }
+  },
+  "sellerStorefront": {
+    "verified": "Vendedor verificado",
+    "since": "En opetlife desde {date}",
+    "rating": "{average} de 5 de {count, plural, one {# reseña} other {# reseñas}}",
+    "noRating": "Aún no hay reseñas",
+    "city": "Desde {city}",
+    "products": "{count, plural, one {# producto} other {# productos}}",
+    "empty": "Este vendedor no tiene productos a la venta ahora.",
+    "notFound": "No se encontró esta tienda.",
+    "backToShop": "Volver a la tienda",
+    "protection": "Comprar a este vendedor sigue las mismas reglas de reembolso y pago seguro de opetlife."
+  },
+  "adminPlacesOsm": {
+    "osmTitle": "Importación de OpenStreetMap",
+    "osmHint": "Cada ciudad se actualiza semanalmente con una consulta suave a Overpass. Los lugares importados aparecen sin verificar hasta que el negocio los reclame.",
+    "columns": {
+      "city": "Ciudad",
+      "active": "Activa",
+      "listed": "Lugares listados",
+      "lastRun": "Última ejecución",
+      "result": "Resultado"
+    },
+    "result": "{created} nuevos, {updated} actualizados, {hidden} ocultos",
+    "status": {
+      "RUNNING": "En curso",
+      "SUCCEEDED": "Hecho",
+      "FAILED": "Fallido",
+      "RATE_LIMITED": "Overpass ocupado; se reintentará"
+    },
+    "never": "Aún sin ejecutar",
+    "runNow": "Ejecutar ahora",
+    "started": "Iniciado; vuelve en unos minutos.",
+    "runFailed": "Ahora no: hay otra ejecución en curso o esta zona acaba de ejecutarse.",
+    "claimsTitle": "Solicitudes de reclamación",
+    "claimsEmpty": "No hay solicitudes pendientes.",
+    "claimColumns": {
+      "place": "Lugar",
+      "claimant": "Solicitante",
+      "organization": "Negocio",
+      "message": "Mensaje"
+    },
+    "noOrganization": "Aún sin cuenta de socio",
+    "kyc": {
+      "VERIFIED": "Verificado",
+      "other": "Verificación pendiente"
+    },
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "reason": "Motivo (auditoría)",
+    "decided": "Guardado.",
+    "decideFailed": "No se guardó: el negocio de la solicitud debe estar verificado y la ficha no puede estar suspendida.",
+    "form": {
+      "title": "Añadir o editar ciudad",
+      "hint": "El recuadro de la ciudad (máx. 1,5° por lado). El nombre es el que muestra el filtro de ciudad.",
+      "province": "Provincia",
+      "south": "Sur (lat)",
+      "west": "Oeste (long)",
+      "north": "Norte (lat)",
+      "east": "Este (long)",
+      "save": "Guardar",
+      "saved": "Guardado.",
+      "saveFailed": "No se guardó: revisa el recuadro (sur menor que norte, oeste menor que este, máx. 1,5°).",
+      "edit": "Editar",
+      "activate": "Activar",
+      "deactivate": "Pausar",
+      "yes": "Sí",
+      "no": "No"
+    },
+    "claimsHint": "Aprueba solo para el negocio indicado en la solicitud y ya verificado. Compara sus datos KYC con las etiquetas de OpenStreetMap de la ficha.",
+    "claimTabs": {
+      "PENDING": "Pendientes",
+      "APPROVED": "Aprobadas"
+    },
+    "approvedEmpty": "Aún no se ha entregado ninguna ficha.",
+    "compare": {
+      "business": "Negocio (KYC)",
+      "listing": "Esta ficha en OpenStreetMap",
+      "contact": "Contacto",
+      "phone": "Teléfono",
+      "address": "Dirección",
+      "website": "Sitio web"
+    },
+    "release": "Retirar a este negocio",
+    "releaseFailed": "No se retiró: puede que la ficha ya no sea de este negocio."
+  },
+  "adminCardAccount": {
+    "kicker": "Finanzas",
+    "title": "Cuenta de transferencia con tarjeta",
+    "subtitle": "La tarjeta a la que pagan los miembros para recargas del monedero y pagos con tarjeta.",
+    "current": "Cuenta actual",
+    "source": {
+      "ADMIN": "Configurada en esta página.",
+      "ENV": "De la configuración del servidor (aún no se configuró aquí).",
+      "NONE": "No hay cuenta; el pago con tarjeta está desactivado para los miembros."
+    },
+    "readOnly": "Solo un superadministrador con settings.manage puede cambiar esta cuenta.",
+    "change": "Cambiar la cuenta",
+    "changeHint": "Cada cambio se registra con su motivo y se avisa a todos los superadministradores. Los pagos ya iniciados conservan la cuenta con la que empezaron.",
+    "fields": {
+      "cardNumber": "Número de tarjeta (16 dígitos)",
+      "sheba": "Sheba / IBAN (opcional)",
+      "holderName": "Titular de la cuenta",
+      "bankName": "Banco (opcional)",
+      "reason": "Motivo del cambio"
+    },
+    "confirm": "Confirmo que esta cuenta pertenece a opetlife.",
+    "save": "Guardar la nueva cuenta",
+    "saving": "Guardando…",
+    "saved": "La nueva cuenta se guardó y se avisó a los superadministradores.",
+    "offReason": "Motivo para desactivar el pago con tarjeta",
+    "switchOff": "Desactivar el pago con tarjeta",
+    "switchedOff": "El pago con tarjeta está desactivado.",
+    "history": "Historial de cuentas",
+    "noHistory": "Aún no se ha configurado ninguna cuenta aquí.",
+    "columns": {
+      "setBy": "Configurada por",
+      "reason": "Motivo",
+      "closed": "Finalizada"
+    },
+    "activeNow": "Activa",
+    "loading": "Cargando…",
+    "failed": "No se pudo cargar.",
+    "retry": "Reintentar",
+    "forbidden": "Se requiere el permiso wallet.view.",
+    "errors": {
+      "REASON_TOO_SHORT": "Escribe un motivo de al menos 10 caracteres.",
+      "CONFIRM": "Confirma que la cuenta pertenece a opetlife.",
+      "CARD_NUMBER_INVALID": "El número de tarjeta debe tener 16 dígitos.",
+      "CARD_NUMBER_CHECKSUM": "Este número de tarjeta no es válido; revisa los dígitos.",
+      "SHEBA_INVALID": "El Sheba debe ser IR seguido de 24 dígitos.",
+      "SHEBA_CHECKSUM": "Este número Sheba no es válido.",
+      "CARD_OR_SHEBA_REQUIRED": "Introduce un número de tarjeta o un Sheba.",
+      "HOLDER_REQUIRED": "Introduce el titular de la cuenta.",
+      "SUPER_ADMIN_WITH_SETTINGS_MANAGE_REQUIRED": "Solo un superadministrador puede cambiar esta cuenta.",
+      "generic": "No se guardó; inténtalo de nuevo."
+    }
+  },
+  "adminCardReceipts": {
+    "kicker": "Finanzas",
+    "title": "Comprobantes de transferencia con tarjeta",
+    "subtitle": "Comprobantes de pagos de pedidos y citas; primero los pendientes, del más antiguo.",
+    "filter": "Filtro de estado",
+    "status": {
+      "REVIEW_PENDING": "Pendiente de revisión",
+      "UNDERPAID_AWAITING_DIFFERENCE": "Pendiente de diferencia",
+      "AWAITING_RECEIPT": "Pendiente de comprobante",
+      "APPROVED": "Aprobado",
+      "REJECTED": "Rechazado",
+      "EXPIRED": "Caducado",
+      "CANCELLED": "Cancelado",
+      "ALL": "Todos"
+    },
+    "columns": {
+      "member": "Miembro",
+      "reference": "Para",
+      "amount": "Importe",
+      "uploaded": "Comprobante enviado",
+      "status": "Estado"
+    },
+    "reference": {
+      "booking": "Cita",
+      "order": "Pedido ({count})"
+    },
+    "open": "Revisar",
+    "empty": "No hay comprobantes con este estado.",
+    "loading": "Cargando…",
+    "failed": "No se pudo cargar.",
+    "retry": "Reintentar",
+    "forbidden": "Se requiere el permiso finance.view.",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "reviewTitle": "Revisar el comprobante",
+    "receivedSoFar": "recibido: {amount}",
+    "account": "Pagado a",
+    "rejectionReason": "Motivo del rechazo",
+    "viewReceipt": "Ver el comprobante",
+    "receiptOpening": "Abriendo…",
+    "receiptFailed": "No se pudo abrir el comprobante.",
+    "noReceipt": "Aún no se ha enviado comprobante.",
+    "availableAt": "La revisión se abre el {date}.",
+    "receivedAmount": "Importe recibido (tomanes)",
+    "reason": "Motivo (obligatorio para rechazar)",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "saving": "Guardando…",
+    "readOnly": "Solo finance.refund.execute puede aprobar o rechazar comprobantes.",
+    "done": {
+      "APPROVED": "Aprobado; se avisó al miembro.",
+      "REJECTED": "Rechazado; se avisó al miembro.",
+      "UNDERPAID": "Pago insuficiente; se pidió al miembro la diferencia."
+    },
+    "errors": {
+      "amount": "Introduce el importe recibido en tomanes.",
+      "reason": "Para rechazar, escribe un motivo de al menos 5 caracteres.",
+      "notYet": "La revisión de este comprobante aún no está abierta.",
+      "notReviewable": "Este comprobante ya no se puede revisar.",
+      "generic": "No se guardó; inténtalo de nuevo."
+    }
+  },
+  "adminOrderCancel": {
+    "title": "Cancelar este pedido (soporte)",
+    "hint": "Solo antes de que un mensajero tenga el paquete. El cliente recibe el importe completo al instante; el envío se cancela y el stock vuelve.",
+    "afterDispatch": "El paquete ya está con el mensajero; usa una solicitud de reembolso.",
+    "reason": "Motivo (auditoría)",
+    "reasonRequired": "Escribe un motivo breve.",
+    "cancel": "Cancelar pedido",
+    "confirm": "Sí, cancelar y reembolsar todo",
+    "back": "Volver",
+    "notCancellable": "Ya no se puede cancelar; el mensajero tiene el paquete.",
+    "failed": "No funcionó; inténtalo de nuevo."
+  },
+  "adminRepeatDeliveries": {
+    "title": "Entregas periódicas",
+    "hint": "Programaciones de entrega periódica de los miembros (solo lectura). Los miembros las cambian o cancelan en su cuenta.",
+    "filter": "Estado",
+    "all": "Todas",
+    "status": {
+      "ACTIVE": "Activa",
+      "PAUSED": "En pausa",
+      "CANCELLED": "Cancelada"
+    },
+    "col": {
+      "member": "Miembro",
+      "product": "Producto",
+      "seller": "Vendedor",
+      "every": "Cada",
+      "next": "Próxima entrega",
+      "status": "Estado",
+      "lastOrder": "Último pedido"
+    },
+    "days": "{count} días",
+    "empty": "Ninguna.",
+    "prev": "Anterior",
+    "next": "Siguiente",
+    "forbidden": "Se requiere el permiso commerce.view.",
+    "failed": "No se pudo cargar",
+    "retry": "Reintentar"
+  },
+  "adminBookingMoney": {
+    "title": "Cancelar y reembolsar",
+    "hint": "La cancelación sigue las reglas de la reserva; el dinero solo se devuelve con aprobación de finanzas (un segundo admin por encima del umbral).",
+    "paid": "Pagado en línea",
+    "refunded": "Reembolsado",
+    "refundable": "Aún reembolsable",
+    "policy": "Según las condiciones de cancelación",
+    "approvalStatus": {
+      "REQUESTED": "Pendiente de aprobación",
+      "APPROVED": "Aprobado",
+      "REJECTED": "Rechazado",
+      "EXECUTED": "Reembolsado"
+    },
+    "openQueue": "Cola de aprobación",
+    "cancel": "Cancelar como equipo",
+    "refund": "Reembolsar",
+    "refundChoice": "¿Qué se devuelve?",
+    "choice": {
+      "POLICY": "Según las condiciones ({policy})",
+      "FULL": "Todo ({full})",
+      "AMOUNT": "Un importe concreto",
+      "NONE": "Sin reembolso"
+    },
+    "amount": "Importe (IRR)",
+    "reason": "Motivo (queda en la auditoría)",
+    "confirmCancel": "Confirmo la cancelación; se avisa al cliente y al proveedor.",
+    "confirmRefund": "Confirmo esta solicitud de reembolso.",
+    "submitCancel": "Cancelar reserva",
+    "submitRefund": "Solicitar reembolso",
+    "back": "Volver",
+    "needReason": "Escribe un motivo y marca la confirmación.",
+    "needAmount": "Introduce un importe válido.",
+    "cancelled": "Reserva cancelada.",
+    "refundRequested": "El reembolso espera en la cola de aprobación de finanzas.",
+    "forbidden": "No tienes permiso para esto.",
+    "tooMuch": "Más de lo reembolsable, o la reserva no se puede cancelar.",
+    "failed": "No funcionó; inténtalo de nuevo."
+  },
+  "adminRefundApprovals": {
+    "title": "Aprobaciones de reembolso",
+    "hint": "Pedidos, citas y estancias. Nadie aprueba su propia solicitud.",
+    "filter": "Estado",
+    "all": "Todos",
+    "status": {
+      "REQUESTED": "Pendiente de aprobación",
+      "APPROVED": "Aprobado",
+      "REJECTED": "Rechazado",
+      "EXECUTED": "Reembolsado"
+    },
+    "subject": {
+      "ORDER": "Pedido de la tienda",
+      "BOOKING": "Cita de servicio",
+      "TRAVEL_BOOKING": "Estancia"
+    },
+    "columns": {
+      "subject": "Para",
+      "amount": "Importe",
+      "reason": "Motivo",
+      "requestedBy": "Solicitado por",
+      "status": "Estado"
+    },
+    "empty": "No hay nada.",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "execute": "Devolver",
+    "rejectReason": "Motivo del rechazo:",
+    "done": {
+      "approve": "Aprobado.",
+      "reject": "Rechazado.",
+      "execute": "Reembolsado."
+    },
+    "selfApproval": "No puedes aprobar tu propia solicitud, o este paso ya no está permitido.",
+    "forbidden": "Se requiere el permiso finance.view.",
+    "failed": "No funcionó; inténtalo de nuevo."
+  },
+  "adminDisputeRefund": {
+    "title": "Resultado con reembolso",
+    "hint": "A favor del cliente con reembolso: el reembolso va a la cola de finanzas y la disputa se resuelve a favor del cliente.",
+    "amount": "Importe (IRR)",
+    "reason": "Motivo",
+    "submit": "Resolver con reembolso",
+    "approval": "Reembolso de {amount}: {status}",
+    "status": {
+      "REQUESTED": "Pendiente de aprobación",
+      "APPROVED": "Aprobado",
+      "REJECTED": "Rechazado",
+      "EXECUTED": "Reembolsado"
+    },
+    "notOpen": "Solo para una disputa en revisión y con permiso de finanzas.",
+    "invalid": "Introduce un importe y un motivo (mín. 5 caracteres).",
+    "requested": "Reembolso solicitado.",
+    "tooMuch": "Más de lo permitido, o esta disputa no admite reembolso.",
+    "failed": "No funcionó; inténtalo de nuevo."
+  },
+  "adminDigikalaFacts": {
+    "title": "Importación única de mascotas de Digikala (solo datos)",
+    "hint": "Los productos más vendidos de la categoría de mascotas de Digikala entran una vez al catálogo como borradores.",
+    "rules": {
+      "facts": "Se importan nombre, marca, categoría, especificaciones y peso.",
+      "noContent": "No se copian fotos ni descripciones de Digikala; añade textos e imágenes propios antes de publicar.",
+      "reference": "El precio y el stock de Digikala quedan solo como referencia en el registro; no son nuestro precio de venta.",
+      "pace": "Se ejecuta despacio (una solicitud cada 3 segundos) y se detiene si Digikala bloquea."
+    },
+    "category": "Categoría de destino",
+    "maxProducts": "Máximo de productos (hasta 3000)",
+    "start": "Iniciar la importación única",
+    "started": "En cola; el progreso aparece en la lista de trabajos.",
+    "alreadyRun": "Esta importación ya se ejecutó o está en curso.",
+    "invalid": "Elige una categoría y un número de 1 a 3000.",
+    "forbidden": "Se requiere el permiso commerce.manage.",
+    "failed": "No se pudo iniciar; inténtalo de nuevo."
+  },
+  "petCard": {
+    "title": "Tarjeta de la mascota y código QR",
+    "intro": "Una tarjeta pública para la placa o el collar de {name}. Quien escanee el código solo verá lo que elijas aquí y podrá escribirte a través de opetlife. Tu número de teléfono nunca se muestra.",
+    "back": "Volver al perfil de {name}",
+    "fieldsTitle": "Qué muestra la tarjeta",
+    "healthGroup": "Salud (por si quien la encuentra necesita saberlo)",
+    "fields": {
+      "PHOTO": "Foto",
+      "SPECIES": "Especie",
+      "BREED": "Raza",
+      "SEX": "Sexo",
+      "AGE": "Edad",
+      "MICROCHIP_STATUS": "Si tiene microchip (no el número)",
+      "ALLERGIES": "Alergias",
+      "CONDITIONS": "Enfermedades activas",
+      "MEDICATIONS": "Medicamentos actuales",
+      "BLOOD_TYPE": "Grupo sanguíneo",
+      "CRITICAL_NOTES": "Notas importantes"
+    },
+    "previewTitle": "Quien escanee el código verá",
+    "previewName": "Nombre: {name}",
+    "previewMessage": "Un botón «Escribir al dueño» a través de opetlife",
+    "neverTitle": "Nunca se muestra",
+    "never": "Tu dirección, los miembros de tu hogar, tu teléfono, el número de microchip, los documentos y las citas.",
+    "create": "Crear tarjeta y código QR",
+    "replace": "Crear una tarjeta nueva",
+    "replaceNote": "Al crear una tarjeta nueva, la actual deja de funcionar al instante y su código antiguo ya no abre.",
+    "creating": "Creando…",
+    "createError": "No se creó la tarjeta. Inténtalo de nuevo.",
+    "readyTitle": "Tu tarjeta está lista",
+    "onceNote": "Este enlace y este código solo se muestran ahora. Descárgalos o imprímelos; si los pierdes, crea una tarjeta nueva.",
+    "qrLabel": "Código QR de la tarjeta de {name}",
+    "download": "Descargar QR",
+    "print": "Imprimir",
+    "copy": "Copiar enlace",
+    "copied": "Copiado",
+    "open": "Ver tarjeta",
+    "listTitle": "Tarjetas de {name}",
+    "listEmpty": "Todavía no hay ninguna tarjeta.",
+    "kind": {
+      "ID_TAG": "Tarjeta de placa",
+      "EMERGENCY": "Tarjeta de emergencia"
+    },
+    "state": {
+      "ACTIVE": "Activa",
+      "REVOKED": "Revocada",
+      "ROTATED": "Sustituida",
+      "EXPIRED": "Caducada"
+    },
+    "created": "Creada el {date}",
+    "ending": "Código que termina en …{hint}",
+    "views": "Visitas: {count}",
+    "lastViewed": "Última visita: {date}",
+    "revoke": "Revocar tarjeta",
+    "revokeConfirm": "Sí, revocar esta tarjeta",
+    "revokeCancel": "Cancelar",
+    "revoked": "La tarjeta está revocada y su código ya no abre.",
+    "revokeError": "No se revocó. Inténtalo de nuevo.",
+    "noAccess": "Solo quien gestiona el acceso a esta mascota puede crear su tarjeta.",
+    "loadError": "No se cargaron los datos de la tarjeta.",
+    "retry": "Reintentar",
+    "loading": "Cargando…"
   },
   "businessHub": {
     "title": "Inicio del negocio",

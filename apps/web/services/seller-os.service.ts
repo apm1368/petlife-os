@@ -53,7 +53,7 @@ export const sellerOsService = {
     apiFetch<{ id: string; status: string; amount: number }>(`/seller-organizations/${sellerId}/orders/${orderId}/cancel`, { method: "POST", body: { reason }, idempotencyKey }),
   markReadyForPickup: (orderId: string) => apiFetch<unknown>(`/orders/${orderId}/fulfillment/ready-for-pickup`, { method: "POST" }),
   requestCourier: (orderId: string, idempotencyKey?: string) => apiFetch<unknown>(`/orders/${orderId}/fulfillment/request-courier`, { method: "POST", idempotencyKey }),
-  getOrder: (sellerId: string, orderId: string) => apiFetch<OrderDetailDto & { source: string | null; externalOrderId: string | null; paymentSource: string }>(`/seller-organizations/${sellerId}/orders/${orderId}`),
+  getOrder: (sellerId: string, orderId: string) => apiFetch<OrderDetailDto & { source: string | null; externalOrderId: string | null; paymentSource: string; deliveryProvider?: string | null }>(`/seller-organizations/${sellerId}/orders/${orderId}`),
 
   listOffers: (sellerId: string, input: ListSellerOffersInput = {}) =>
     apiFetch<PaginatedDto<SellerOsOfferDto>>(`/seller-organizations/${sellerId}/offers${toQueryString({ search: input.search, status: input.status, lowStock: input.lowStock, page: input.page, pageSize: input.pageSize })}`),

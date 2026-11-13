@@ -22,6 +22,7 @@ import { LoadFailure } from "@/features/system/LoadFailure";
 import { careTitle } from "@/features/care/care-labels";
 import { formatAge, formatWeight, speciesLabel } from "@/features/pets/pet-identity";
 import { formatDay, todayIso } from "@/lib/date/jalali";
+import { dayOf } from "@/lib/date/tehran";
 import type { RouteLocale } from "@/lib/i18n/config";
 
 type Locale = RouteLocale;
@@ -264,7 +265,7 @@ export function CareSheetView({ petId }: { petId: string }) {
               {upcoming.value.map((r) => (
                 <li key={r.id} className="flex justify-between gap-3 py-2">
                   <span className="text-text-primary">{careTitle(r, locale)}</span>
-                  <span className="text-text-secondary">{formatDay(new Date(r.snoozedUntil ?? r.dueAt).toISOString().slice(0, 10), locale, { weekday: true })}</span>
+                  <span className="text-text-secondary">{formatDay(dayOf(r.snoozedUntil ?? r.dueAt), locale, { weekday: true })}</span>
                 </li>
               ))}
             </ul>

@@ -78,7 +78,7 @@ describe("Member wallet: top-ups, corrections and permissions (e2e)", () => {
     const { c, user } = await member();
     const key = unique();
     const started = await c.post("/wallet/top-ups").set("Idempotency-Key", key).send({ amount: 2_000_000, rail: "CARD_TO_CARD", locale: "en" }).expect(201);
-    expect(started.body.cardTransfer).toEqual({ cardNumber: "6037-9912-3456-7890", cardHolderName: "PET LIFE OS" });
+    expect(started.body.cardTransfer).toEqual({ cardNumber: "6037-9912-3456-7890", cardHolderName: "PET LIFE OS", bankName: null, sheba: null });
     expect(started.body.topUp.status).toBe("AWAITING_RECEIPT");
     // A retried start replays the same request instead of opening a second one.
     const replay = await c.post("/wallet/top-ups").set("Idempotency-Key", key).send({ amount: 2_000_000, rail: "CARD_TO_CARD" }).expect(201);

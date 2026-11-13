@@ -18,6 +18,9 @@ export interface BusinessLanding {
 /** The partner signup page: the wizard for signed-in partners, the introduction otherwise. */
 export const partnerJoinPath = (locale: string) => `/${locale}/partners/join`;
 
+/** Staff and partner consoles: onboarding is the pet-owner flow, so it never stands between someone and these. */
+const CONSOLE = /^\/[a-z]{2}\/(admin|provider|seller|insurer|ngo|business)(\/|\?|$)/;
+
 /**
  * The single place every sign-in method (OTP, username/password, Google)
  * decides where to send a just-authenticated user — "Auth != onboarding":
@@ -28,21 +31,26 @@ export const partnerJoinPath = (locale: string) => `/${locale}/partners/join`;
  * Partners never go to the pet-owner onboarding: a partner account (or anyone signing in on the way into the partner
  * area) continues the partner wizard until it is submitted, then lands on the business home.
  */
-export function resolvePostAuthDestination(locale: string, returnTo: string | null | undefined, progress: OnboardingProgressLike, business?: BusinessLanding | null): string {
+export function resolvePostAuthDestination(locale: string, returnTo: string | null | undefined, progress: OnboardingProgressLike, opts: { isAdmin?: boolean; business?: BusinessLanding | null } = {}): string {
   const isOnboardingComplete = progress.status === "COMPLETED" && progress.chapter === "READY";
 
-  // Only a safe returnTo that really points into the partner area counts; an unsafe one never becomes a partner
-  // target through a fallback.
-  const safeReturn = returnTo ? sanitizeReturnTo(returnTo, "") : "";
-  const intoPartnerArea = safeReturn.startsWith(partnerJoinPath(locale));
+  // Someone sent back to a console after signing in goes straight there (the console checks access itself), and an
+  // admin signing in with nowhere particular to go lands in admin, not in pet-owner onboarding.
+  const target = returnTo ? sanitizeReturnTo(returnTo, "") : "";
+  if (target && CONSOLE.test(target)) return target;
+  if (opts.isAdmin && !target) return `/${locale}/admin`;
+
+  // Partners continue the partner wizard until it is submitted, then land on the business home. Only a safe returnTo
+  // that really points into the partner area counts; an unsafe one never becomes a partner target through a fallback.
+  const intoPartnerArea = target.startsWith(partnerJoinPath(locale));
   if (progress.signupIntent === "PARTNER" || intoPartnerArea) {
-    if (progress.partnerStage === "SUBMITTED") return safeReturn || `/${locale}/business`;
-    return intoPartnerArea ? safeReturn : partnerJoinPath(locale);
+    if (progress.partnerStage === "SUBMITTED") return target || `/${locale}/business`;
+    return intoPartnerArea ? target : partnerJoinPath(locale);
   }
 
   // A partner who is not also a pet owner lands on their business home and never on the pet-owner onboarding.
   // A pet owner who is also a partner keeps the pet-owner home (the account menu links to the business home).
-  if (business?.hasBusiness && !business.hasHousehold) return sanitizeReturnTo(returnTo, `/${locale}/business`);
+  if (opts.business?.hasBusiness && !opts.business.hasHousehold) return target || `/${locale}/business`;
 
   if (!isOnboardingComplete) {
     const onboardingPath = `/${locale}/onboarding`;

@@ -22,13 +22,16 @@ import { SellerCatalogDirectoryController } from "./seller-catalog-directory.con
 import { SellerCatalogRequestService } from "./seller-catalog-request.service";
 import { PromotionsModule } from "../commerce/promotions/promotions.module";
 import { OrdersModule } from "../commerce/orders/orders.module";
+import { LogisticsModule } from "../commerce/logistics/logistics.module";
+import { SellerShippingController } from "./seller-shipping.controller";
 
 @Module({
-  imports: [InventoryModule, SellerFinanceModule, PromotionsModule, OrdersModule],
+  imports: [InventoryModule, SellerFinanceModule, PromotionsModule, OrdersModule, LogisticsModule],
   controllers: [
     SellerContextController,
     SellerContextPreferenceController,
     SellerOrganizationController,
+    SellerShippingController,
     SellerTeamController,
     SellerOfferController,
     SellerCatalogRequestController,

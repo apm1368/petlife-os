@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { DemoRecordTag } from "../DemoRecordTag";
 import { useLocale } from "next-intl";
 import { Button, EmptyState, ErrorRecovery, Input, Skeleton } from "@petlife/ui";
 import type { PetFriendlyPlaceDto } from "@petlife/types";
@@ -11,7 +12,7 @@ import { useAdminStore } from "@/stores/admin-store";
 import { EmptyRow, Panel, PanelTitle, TableWrap, Tag, Td, Th } from "../console-ui";
 import { copyFor } from "@/features/admin/admin-copy";
 
-const REASON: Record<string, [string, string]> = { CLOSED_PERMANENTLY: ["بسته شده", "Closed"], NOT_PET_FRIENDLY: ["دیگر حیوان نمی‌پذیرد", "No longer pet-friendly"], WRONG_LOCATION: ["مکان نادرست", "Wrong location"], WRONG_DETAILS: ["اطلاعات نادرست", "Wrong details"], OTHER: ["سایر", "Other"] };
+const REASON: Record<string, [string, string]> = { CLOSED_PERMANENTLY: ["بسته شده", "Closed"], NOT_PET_FRIENDLY: ["دیگر حیوان نمی‌پذیرد", "No longer pet-friendly"], WRONG_LOCATION: ["مکان نادرست", "Wrong location"], WRONG_DETAILS: ["اطلاعات نادرست", "Wrong details"], CLAIMED_BY_SOMEONE_ELSE: ["ادعای مالکیت نادرست (تحویل از درخواست‌های مالکیت)", "Wrong business claim (release it under Business claims)"], OTHER: ["سایر", "Other"] };
 
 /** MAP/PLACES admin: user reports queue first, then the directory with verification and listing toggles (both audited). */
 export function AdminPlacesView() {
@@ -116,15 +117,16 @@ export function AdminPlacesView() {
               <thead><tr><Th>{tr("نام", "Name")}</Th><Th>{tr("شهر", "City")}</Th><Th>{tr("وضعیت", "Status")}</Th><Th>{tr("عمومی", "Public")}</Th><Th>{tr("اقدام", "Actions")}</Th></tr></thead>
               <tbody>{places.length === 0 ? <EmptyRow colSpan={5} label={tr("مکانی نیست", "No places")} /> : places.map((p) => (
                 <tr key={p.id}>
-                  <Td>{editingPlaceId === p.id ? <Input label={tr("نام مکان", "Place name")} value={nameDraft} onChange={(e) => setNameDraft(e.target.value)} /> : p.name}</Td><Td>{p.city}</Td>
-                  <Td><Tag tone={p.status === "VERIFIED" ? "success" : p.status === "SUSPENDED" ? "urgent" : "neutral"}>{p.status}</Tag></Td>
+                  <Td>{editingPlaceId === p.id ? <Input label={tr("نام مکان", "Place name")} value={nameDraft} onChange={(e) => setNameDraft(e.target.value)} /> : <>{p.name}<DemoRecordTag isDemoRecord={p.isDemoRecord} /></>}</Td><Td>{p.city}</Td>
+                  <Td><Tag tone={p.status === "VERIFIED" ? "success" : p.status === "SUSPENDED" ? "urgent" : "neutral"}>{p.status}</Tag>{p.source === "OSM" ? <> <Tag tone="brand">OSM</Tag></> : null}</Td>
                   <Td>{p.isPubliclyListed ? "✓" : "—"}</Td>
                   <Td>{canManage ? <div className="flex flex-wrap gap-1">
                     {editingPlaceId === p.id ? <>
                       <Button size="sm" disabled={savingPlaceId === p.id} onClick={() => void saveName(p.id)}>{tr("ذخیرهٔ نام", "Save name")}</Button>
                       <Button size="sm" variant="ghost" disabled={savingPlaceId === p.id} onClick={() => { setEditingPlaceId(null); setNameDraft(""); setMsg(null); }}>{tr("انصراف", "Cancel")}</Button>
                     </> : <Button size="sm" variant="ghost" onClick={() => beginRename(p)}>{tr("ویرایش نام", "Edit name")}</Button>}
-                    {p.status !== "VERIFIED" ? <Button size="sm" variant="ghost" onClick={() => void act(() => adminPlacesService.setVerification(p.id, "VERIFIED"))}>{tr("تأیید", "Verify")}</Button> : null}
+                    {/* An OpenStreetMap import is verified only through a business claim (claims tab). */}
+                    {p.status !== "VERIFIED" && !(p.source === "OSM" && !p.claimed) ? <Button size="sm" variant="ghost" onClick={() => void act(() => adminPlacesService.setVerification(p.id, "VERIFIED"))}>{tr("تأیید", "Verify")}</Button> : null}
                     {p.status !== "SUSPENDED" ? <Button size="sm" variant="ghost" onClick={() => void act(() => adminPlacesService.setVerification(p.id, "SUSPENDED"))}>{tr("تعلیق", "Suspend")}</Button> : null}
                     <Button size="sm" variant="ghost" onClick={() => void act(() => adminPlacesService.setListed(p.id, !p.isPubliclyListed))}>{p.isPubliclyListed ? (tr("خروج از فهرست", "Unlist")) : tr("نمایش عمومی", "List")}</Button>
                   </div> : <span className="text-sm text-text-secondary">—</span>}</Td>

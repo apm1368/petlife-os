@@ -94,6 +94,50 @@ export class AdminCommerceService {
     private readonly storage: StorageService,
   ) {}
 
+  // ----------------------------------------------------- repeat deliveries
+
+  /** Members' repeat-delivery schedules (read-only for staff): what, how often, next run, and the last order made. */
+  async listRepeatDeliveries(query: { status?: "ACTIVE" | "PAUSED" | "CANCELLED"; page?: number; pageSize?: number }) {
+    const page = Math.max(1, query.page ?? 1);
+    const pageSize = Math.min(100, Math.max(1, query.pageSize ?? 20));
+    const where = query.status ? { status: query.status } : {};
+    const [rows, total] = await Promise.all([
+      this.prisma.repeatDeliverySchedule.findMany({
+        where,
+        orderBy: [{ status: "asc" }, { nextCycleAt: "asc" }],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: {
+          user: { select: { id: true, displayName: true } },
+          productVariant: { select: { title: true, product: { select: { id: true, title: true } } } },
+          sellerOffer: { select: { sellerOrganization: { select: { id: true, name: true } } } },
+          address: { select: { city: true } },
+          lastOrder: { select: { id: true, status: true, createdAt: true } },
+        },
+      }),
+      this.prisma.repeatDeliverySchedule.count({ where }),
+    ]);
+    return {
+      items: rows.map((r) => ({
+        id: r.id,
+        status: r.status,
+        member: { id: r.user.id, displayName: r.user.displayName },
+        product: { id: r.productVariant.product.id, title: r.productVariant.product.title, variant: r.productVariant.title },
+        seller: r.sellerOffer.sellerOrganization,
+        quantity: r.quantity,
+        intervalDays: r.intervalDays,
+        unitPrice: r.acceptedUnitPrice,
+        city: r.address?.city ?? null,
+        nextCycleAt: r.nextCycleAt.toISOString(),
+        lastOrder: r.lastOrder,
+        createdAt: r.createdAt.toISOString(),
+      })),
+      total,
+      page,
+      pageSize,
+    };
+  }
+
   // ---------------------------------------------------------------- orders
 
   async listOrders(query: {
@@ -474,6 +518,7 @@ export class AdminCommerceService {
         return {
           id: p.id,
           title: p.title,
+          isDemoRecord: p.isDemoRecord,
           status: p.status as unknown as AdminProductRowDto["status"],
           categoryName: p.category.name,
           brandName: p.brand?.name ?? null,

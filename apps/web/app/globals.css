@@ -200,6 +200,9 @@ ol.activity-list{margin:0;padding:0;list-style:none}
 @media(max-width:1200px){.pet-access-cards{grid-template-columns:1fr}}
 @media(max-width:480px){.pet-access-card{grid-template-columns:44px minmax(0,1fr)}.pet-access-card>button,.pet-access-card>span{grid-column:1 / -1;justify-self:start}}
 .security-row .text-status,.member-row .text-status,.contact-row .text-status{white-space:nowrap}
+/* A preference row without an icon (Simple display): text column + control, never the 42px icon column (QA L11). */
+.security-row--plain{grid-template-columns:minmax(0,1fr) auto}.security-row--plain>div:first-child{min-width:0}
+@media(max-width:620px){.security-row.security-row--plain{grid-template-columns:minmax(0,1fr) auto}.security-row.security-row--plain>div:last-child{grid-column:auto}}
 
 /* UX-A: page intro (context line under one H1) — the member-page header pattern. */
 .page-intro{display:flex;flex-direction:column;gap:6px;padding-bottom:20px;margin-bottom:24px;border-bottom:1px solid var(--border-subtle)}

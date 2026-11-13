@@ -9,9 +9,11 @@ export interface CreateAddressInput {
   addressLine: string;
   city: string;
   region?: string;
+  /** Neighbourhood / district (محله). */
+  area?: string;
   countryCode: string;
-  latitude?: number;
-  longitude?: number;
+  latitude?: number | null;
+  longitude?: number | null;
   instructions?: string;
   /** Iranian 10-digit postal code. */
   postalCode?: string;
@@ -26,4 +28,7 @@ export const addressesService = {
   list: (householdId: string) => apiFetch<CustomerAddressDto[]>(`/addresses?householdId=${householdId}`),
 
   update: (id: string, input: UpdateAddressInput) => apiFetch<CustomerAddressDto>(`/addresses/${id}`, { method: "PATCH", body: input }),
+
+  /** Removes it from the book; past orders keep their own copy. */
+  archive: (id: string) => apiFetch<{ archived: true; newDefaultId: string | null }>(`/addresses/${id}`, { method: "DELETE" }),
 };

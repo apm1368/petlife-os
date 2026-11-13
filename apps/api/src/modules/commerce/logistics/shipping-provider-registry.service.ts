@@ -6,6 +6,8 @@ import { ShippingProviderDisabledException, ShippingProviderUnavailableException
 import { DevShippingAdapter } from "./dev-shipping.adapter";
 import { AloPeykAdapter } from "./alopeyk.adapter";
 import { SnappBoxAdapter } from "./snappbox.adapter";
+import { AlopeykAppAdapter, OpetlifeCourierAdapter, PostPishtazAdapter, SnappboxAppAdapter } from "./manual-shipping.adapters";
+import { MANUAL_PROVIDERS } from "./shipping-method-settings.service";
 import type { ShippingGateway } from "./shipping-gateway.interface";
 
 /**
@@ -23,12 +25,20 @@ export class ShippingProviderRegistry {
     dev: DevShippingAdapter,
     alopeyk: AloPeykAdapter,
     snappbox: SnappBoxAdapter,
+    courier: OpetlifeCourierAdapter,
+    post: PostPishtazAdapter,
+    snappboxApp: SnappboxAppAdapter,
+    alopeykApp: AlopeykAppAdapter,
     private readonly config: ConfigService<AppEnv, true>,
   ) {
     this.gateways = new Map<ShippingProvider, ShippingGateway>([
       [ShippingProvider.DEV, dev],
       [ShippingProvider.ALOPEYK, alopeyk],
       [ShippingProvider.SNAPPBOX, snappbox],
+      [ShippingProvider.OPETLIFE_COURIER, courier],
+      [ShippingProvider.POST_PISHTAZ, post],
+      [ShippingProvider.SNAPPBOX_APP, snappboxApp],
+      [ShippingProvider.ALOPEYK_APP, alopeykApp],
     ]);
   }
 
@@ -36,6 +46,9 @@ export class ShippingProviderRegistry {
     if (provider === ShippingProvider.DEV) return this.config.get("DEV_SHIPPING_ENABLED", { infer: true });
     if (provider === ShippingProvider.ALOPEYK) return this.config.get("ALOPEYK_ENABLED", { infer: true });
     if (provider === ShippingProvider.SNAPPBOX) return this.config.get("SNAPPBOX_ENABLED", { infer: true });
+    // Staff-run methods stay resolvable so their existing shipments can be moved; whether they are offered in
+    // checkout is the staff switch, checked by the adapter's quote.
+    if (MANUAL_PROVIDERS.has(provider)) return true;
     return false;
   }
 

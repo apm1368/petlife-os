@@ -11,7 +11,7 @@ import { useSellerStore } from "@/stores/seller-store";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { fulfillmentTone } from "@/features/commerce/fulfillment-tone";
 
-type SellerOrderDetail = OrderDetailDto & { source: string | null; externalOrderId: string | null; paymentSource: string };
+type SellerOrderDetail = OrderDetailDto & { source: string | null; externalOrderId: string | null; paymentSource: string; deliveryProvider?: string | null };
 
 /** Seller Order detail (spec section 38) — shows source/settlement honestly, and every commercial fact is the immutable snapshot from order creation, never re-derived from the live catalog. */
 export function SellerOrderDetailView({ orderId }: { orderId: string }) {
@@ -22,6 +22,7 @@ export function SellerOrderDetailView({ orderId }: { orderId: string }) {
   const [order, setOrder] = useState<SellerOrderDetail | null>(null);
   const [error, setError] = useState(false);
   const tStatus = useTranslations("commerce.statusLabels");
+  const tShip = useTranslations("seller.shipping");
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [busy, setBusy] = useState(false);
@@ -112,6 +113,11 @@ export function SellerOrderDetailView({ orderId }: { orderId: string }) {
         {order.externalOrderId ? <p className="text-metadata text-text-secondary">{t("externalOrderId", { id: order.externalOrderId })}</p> : null}
         <StatusLabel tone="neutral">{t(`paymentSource.${order.paymentSource}`)}</StatusLabel>
         {order.fulfillment ? <StatusLabel tone={fulfillmentTone(order.fulfillment.status)}>{tStatus(`fulfillment.${order.fulfillment.status}`)}</StatusLabel> : null}
+        {order.deliveryProvider && tShip.has(`provider.${order.deliveryProvider}`) ? (
+          <p className="text-metadata text-text-secondary">
+            {tShip("methods")}: {tShip(`provider.${order.deliveryProvider}` as "provider.DEV")}
+          </p>
+        ) : null}
       </ContextSurface>
 
       <div>

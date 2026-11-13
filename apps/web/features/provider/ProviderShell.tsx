@@ -38,6 +38,8 @@ const NAV_ITEMS = [
   { href: "/reviews", labelKey: "nav.reviews" },
   { href: "/analytics", labelKey: "nav.analytics" },
   { href: "/travel", labelKey: "nav.travel" },
+  // Only pet-taxi organizations take on-demand rides.
+  { href: "/pet-taxi", labelKey: "nav.petTaxi", onlyFor: "PET_TAXI" },
 ] as const;
 
 /**
@@ -169,7 +171,7 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
       </header>
 
       <div className="operator-shell__nav-band"><nav className="operator-shell__nav" aria-label={t("nav.home")}>
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.filter((item) => !("onlyFor" in item) || item.onlyFor === active.organizationType).map((item) => {
           const href = `/${locale}/provider${item.href}`;
           const isActive = item.href === "" ? pathname === href : pathname.startsWith(href);
           return (
@@ -193,5 +195,5 @@ function LiveProviderShell({ children }: { children: React.ReactNode }) {
 export function ProviderShell({ children }: { children: React.ReactNode }) {
   const locale = useLocale();
   const t = useTranslations("provider.shell");
-  return <LocalPreviewGate title="provider" items={NAV_ITEMS.map(item => ({ href: `/${locale}/provider${item.href}`, label: t(item.labelKey) }))} live={<LiveProviderShell>{children}</LiveProviderShell>}>{children}</LocalPreviewGate>;
+  return <LocalPreviewGate title="provider" items={NAV_ITEMS.filter((item) => !("onlyFor" in item)).map(item => ({ href: `/${locale}/provider${item.href}`, label: t(item.labelKey) }))} live={<LiveProviderShell>{children}</LiveProviderShell>}>{children}</LocalPreviewGate>;
 }
