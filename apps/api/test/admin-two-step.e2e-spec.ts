@@ -107,7 +107,7 @@ describe("Admin two-step sign-in", () => {
     await send("post", tablet, "/admin/two-step/verify").send({ recoveryCode: fresh[0] }).expect(201);
 
     const actions = (await db.adminAuditLog.findMany({ where: { adminUserId: support.adminUserId, action: { startsWith: "admin_two_step." } } })).map((r) => r.action).sort();
-    expect(actions).toEqual(["admin_two_step.enrolled", "admin_two_step.locked", "admin_two_step.recovery_code_used", "admin_two_step.recovery_code_used", "admin_two_step.recovery_codes_regenerated"]);
+    expect(actions).toEqual(["admin_two_step.enrolled", "admin_two_step.locked", "admin_two_step.locked", "admin_two_step.recovery_code_used", "admin_two_step.recovery_code_used", "admin_two_step.recovery_codes_regenerated"]);
   });
 
   it("opt-in by default (owner 2026-11-13): enforcement can't be switched on, and a stored policy never locks anyone out", async () => {
