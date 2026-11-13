@@ -22,6 +22,14 @@
         {
           "q": "Kostet opetlife etwas?",
           "a": "Ein Konto zu erstellen und die Akten deiner Tiere zu führen, ist kostenlos. Du bezahlst nur für die Leistungen, Produkte und Fahrten, die du buchst oder kaufst. Einige Zusatzfunktionen gehören zu optionalen kostenpflichtigen Tarifen, die auf der Abo-Seite angezeigt werden."
+        },
+        {
+          "q": "Wie funktioniert der kostenlose Test?",
+          "a": "Er ist für Mitglieder, die noch nie für einen Tarif bezahlt haben. Er kann beginnen, wenn du dein erstes Tier hinzufügst, oder du startest ihn auf der Abo-Seite. Du brauchst keine Karte und zahlst nichts. Er dauert so viele Tage, wie beim Start angezeigt, normalerweise 7, und jedes Konto, jeder Haushalt und jede Mobilnummer kann ihn einmal nutzen. Zwei Tage vor dem Ende erinnern wir dich. Danach bist du einfach wieder im kostenlosen Tarif; es wird nie automatisch etwas berechnet."
+        },
+        {
+          "q": "Gibt es einen Geschenkcode?",
+          "a": "Wenn wir einen anbieten, steht er auf der Abo-Seite. Er gilt einmal, für dein erstes kostenpflichtiges Abo, und lässt sich weder mit anderen Aktionen kombinieren noch in Bargeld oder Guthaben umwandeln."
         }
       ]
     },

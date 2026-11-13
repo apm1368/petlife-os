@@ -22,6 +22,14 @@
         {
           "q": "¿Cuesta algo opetlife?",
           "a": "Crear una cuenta y mantener los registros de tus mascotas es gratis. Solo pagas los servicios, productos y viajes que reservas o compras. Algunas funciones adicionales forman parte de planes de pago opcionales, que se muestran en la página de suscripción."
+        },
+        {
+          "q": "¿Cómo funciona la prueba gratuita?",
+          "a": "Es para miembros que nunca han pagado un plan. Puede empezar al añadir tu primera mascota, o puedes iniciarla en la página de suscripción. No necesitas tarjeta ni pagar nada. Dura los días que se indican al empezar, normalmente 7, y cada cuenta, hogar y número de móvil tiene una sola prueba. Te avisamos dos días antes de que termine. Después vuelves sin más al plan gratuito; nunca se cobra nada automáticamente."
+        },
+        {
+          "q": "¿Hay un código regalo?",
+          "a": "Cuando lo ofrezcamos, aparecerá en la página de suscripción. Sirve una vez, en tu primera suscripción de pago, y no es acumulable con otras promociones ni se puede convertir en dinero ni en saldo del monedero."
         }
       ]
     },
