@@ -106,6 +106,10 @@
         {
           "q": "Wie lade ich Guthaben auf?",
           "a": "Auf der Guthaben-Seite per Karte-zu-Karte-Überweisung mit Beleg. Eine Aufladung muss zwischen 10.000 und 50.000.000 Toman liegen, und du kannst bis zu drei Aufladungen gleichzeitig zur Prüfung offen haben."
+        },
+        {
+          "q": "Kann opetlife Guthaben zwischen Konten verschieben?",
+          "a": "Nur aus einem festgehaltenen Grund, etwa auf deinen Wunsch, als Erstattung oder bei einer Zahlung an das falsche Konto, mit Nachweis, genehmigt von zwei verschiedenen Personen aus unserem Team und höchstens 50.000.000 Toman pro Übertragung. Die Beteiligten beider Guthaben werden in der App informiert, und eine Übertragung lässt sich nur durch eine neue, ebenso genehmigte Übertragung rückgängig machen."
         }
       ]
     },

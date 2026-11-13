@@ -106,6 +106,10 @@
         {
           "q": "How do I top up?",
           "a": "From the wallet page, by card-to-card with a receipt. A top-up must be between 10,000 and 50,000,000 toman, and you can have up to three top-ups waiting for review at a time."
+        },
+        {
+          "q": "Can opetlife move credit between wallets?",
+          "a": "Only for a recorded reason, such as your request, a refund or a payment sent to the wrong account, with evidence, approved by two different staff members, and at most 50,000,000 toman per transfer. The people of both wallets are told in the app, and a transfer can only be undone by a new transfer approved the same way."
         }
       ]
     },
