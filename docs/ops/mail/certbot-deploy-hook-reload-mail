@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Reload the mail daemons when the mail.opetlife.ir certificate renews (nginx is reloaded by reload-nginx).
+set -euo pipefail
+case "${RENEWED_LINEAGE:-}" in
+  */mail.opetlife.ir)
+    systemctl reload postfix || systemctl restart postfix
+    systemctl reload dovecot || systemctl restart dovecot
+    ;;
+esac

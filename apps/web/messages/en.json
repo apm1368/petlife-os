@@ -5802,7 +5802,9 @@
       "privateNotice": "This file is private and has no public object URL. Every download mints a short-lived signed access link.",
       "previewDownload": "Preview and secure download",
       "openFile": "Open file",
-      "previewUnavailable": "Preview is unavailable for this file type."
+      "previewUnavailable": "Preview is unavailable for this file type.",
+      "manage": "Details and retract",
+      "details": "Details"
     },
     "labs": {
       "title": "Labs",
@@ -6238,6 +6240,18 @@
         "send": "Send request",
         "cancel": "Cancel"
       }
+  },
+    "own": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save changes",
+      "cancel": "Cancel",
+      "titleLabel": "Title",
+      "bodyLabel": "Text",
+      "confirmPost": "Delete this post for everyone? Its comments disappear too.",
+      "confirmComment": "Delete this comment?",
+      "deleteYes": "Yes, delete",
+      "edited": "edited"
     }
   },
   "communityChat": {

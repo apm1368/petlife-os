@@ -6160,7 +6160,9 @@
       "privateNotice": "Este archivo es privado y no tiene una URL pública. Cada descarga genera un enlace de acceso firmado y de corta duración.",
       "previewDownload": "Vista previa y descarga segura",
       "openFile": "Abrir archivo",
-      "previewUnavailable": "La vista previa no está disponible para este tipo de archivo."
+      "previewUnavailable": "La vista previa no está disponible para este tipo de archivo.",
+      "manage": "Detalles y retirar",
+      "details": "Detalles"
     },
     "nav": {
       "overview": "Resumen",
@@ -6944,6 +6946,18 @@
         "send": "Enviar solicitud",
         "cancel": "Cancelar"
       }
+  },
+    "own": {
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "save": "Guardar cambios",
+      "cancel": "Cancelar",
+      "titleLabel": "Título",
+      "bodyLabel": "Texto",
+      "confirmPost": "¿Eliminar esta publicación para todos? Sus comentarios también desaparecen.",
+      "confirmComment": "¿Eliminar este comentario?",
+      "deleteYes": "Sí, eliminar",
+      "edited": "editado"
     }
   },
   "publicNavigation": {
