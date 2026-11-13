@@ -116,7 +116,7 @@ AD-02→BO-02، M-05→CM-11) و ارجاع‌های درون‌متنی ناش�
 | OF-13 | رزرو موجودی ۱۵ دقیقه‌ای | **پیاده‌سازی‌شده** | `inventory-reservation.service.ts` در PR #100 | merge #100 | E2E سبز |
 | O-04 | تحویل ۳ روزه؛ **مرجوعی ۴۸ ساعت** | **ناسازگار** | `order-policy.ts:24` `RETURN_WINDOW_DAYS = 7` — با O-04/O-07 (۴۸ ساعت) ناسازگار است | تصمیم مالک | **اصلاح به ۴۸ ساعت** یا ثبت تصمیم جایگزین |
 | PY-01..PY-04 | کارت‌به‌کارت با آپلود فیش | **نیمه‌کاره** | `card-transfer-payment.service.ts` + `admin-card-transfer.controller.ts` فقط در PR #100 | merge #100 | — |
-| PY-19 | کلید idempotency هر پرداخت | **پیاده‌سازی‌شده** | `common/idempotency/idempotency.interceptor.ts` + ایندکس `payment_intents.idempotencyKey` | — | — |
+| PY-19 | کلید idempotency هر پرداخت؛ تکرار callback هیچ پولی جابه‌جا نمی‌کند؛ بازپرداخت تکراری فقط با مدرک تراکنش دوم و تأیید مدیر دوم | **پیاده‌سازی‌شده** | `common/idempotency/idempotency.interceptor.ts` + ایندکس `payment_intents.idempotencyKey`؛ `provider-events.service.ts` (`recordIfNew` ← `IGNORED_DUPLICATE`)؛ اصلاح کیف پول دو‌نفره (FE-16) | — | واردکردن گزارش تسویهٔ زیبال/بانک برای کشف خودکار مغایرت هنوز نیست (شاخهٔ `feat/py19-zibal-reconciliation`) |
 | PY-05 | کیف پول دوم موجودی | **نیمه‌کاره** | `WalletBalanceType.WITHDRAWABLE/PURCHASE_ONLY` فقط در PR #100 | merge #100 | — |
 | PY-18 | مغایرت‌گیری روزانهٔ خودکار | **نیمه‌کاره** | `ReconciliationLog` + `FinanceReconciliationFinding` وجود دارد؛ **خودکارِ روزانه نه** | قرارداد زیبال | بی‌طرف: reconcile با دفتر + صورتحساب بانک |
 | F-01 | روش‌های پرداخت فاز اول | **نیمه‌کاره** | `ZibalPayment` + `PaymentRail` فقط در PR #100 | merge #100 | — |
