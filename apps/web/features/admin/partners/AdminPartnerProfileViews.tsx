@@ -12,6 +12,7 @@ import { formatCurrency } from "@/lib/currency/format-currency";
 import { intlLocale } from "@/features/admin/admin-copy";
 import { DemoRecordTag } from "../DemoRecordTag";
 import { adminStatusTone } from "../status-tone";
+import { PartnerApprovalModePanel } from "./PartnerApprovalModePanel";
 
 type Locale = "fa" | "en" | "de" | "es" | "ar" | "nl";
 type LoadError = "forbidden" | "notFound" | "load" | null;
@@ -192,6 +193,7 @@ export function AdminPartnerServiceProfile({ id }: { id: string }) {
       </Section>
 
       <KycSection kyc={data.kyc} subject="provider" id={data.id} />
+      <PartnerApprovalModePanel kind="services" organizationId={data.id} />
 
       <Section title={t("address")}>
         {data.locations.length === 0 ? <p className="text-metadata text-text-secondary">{t("noAddress")}</p> : null}
@@ -329,6 +331,7 @@ export function AdminPartnerShopProfile({ id }: { id: string }) {
       </Section>
 
       <KycSection kyc={data.kyc} subject="seller" id={data.id} />
+      <PartnerApprovalModePanel kind="shops" organizationId={data.id} />
 
       <Section title={t("address")}>
         <dl className="grid gap-3 sm:grid-cols-2">

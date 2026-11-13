@@ -9085,6 +9085,9 @@ model TravelBooking {
   cancelledBy            String?
   noShowAt               DateTime?
   modifiedFromBookingId  String?                      @unique @db.Uuid
+  /// The booking mode in effect when the dates were held (platform approval policy applied); null on older rows,
+  /// which read the listing's own mode.
+  bookingMode            TravelBookingMode?
   statusEvents           TravelBookingEvent[]
   review                 TravelReview?
   documentShares         TravelBookingDocumentShare[]
@@ -11397,6 +11400,36 @@ model PlatformSetting {
   @@map("platform_settings")
 }
 
+/// Approval modes (owner request 2026-11-13): which flows a policy covers. Pet-taxi dispatch is not covered.
+enum ApprovalScope {
+  SERVICE_BOOKINGS
+  STAY_BOOKINGS
+  SHOP_ORDERS
+}
+
+enum ApprovalMode {
+  INSTANT
+  NEEDS_APPROVAL
+}
+
+/// A per-partner exception to the vertical approval setting (`approvals.mode.*` in the settings registry). The
+/// override wins over the vertical setting, which wins over the partner's own per-service/listing choice.
+/// `organizationId` is a ProviderOrganization (PROVIDER) or SellerOrganization (SELLER) id, so it has no FK.
+model PartnerApprovalOverride {
+  id               String             @id @default(uuid()) @db.Uuid
+  partnerType      PartnerSubjectType
+  organizationId   String             @db.Uuid
+  scope            ApprovalScope
+  mode             ApprovalMode
+  reason           String
+  updatedByAdminId String?            @db.Uuid
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@unique([partnerType, organizationId, scope])
+  @@map("partner_approval_overrides")
+}
+
 enum PlatformSettingChangeStatus {
   PENDING
   APPLIED
@@ -11583,6 +11616,10 @@ enum AdminTaskSource {
   DATA_QUALITY
   OWNERSHIP_DISPUTE
   PROVIDER_NO_SHOW
+  /// A booking or stay request waiting on the partner's answer (approval modes); closes itself when answered.
+  BOOKING_APPROVAL
+  /// A paid shop order held for staff approval before the seller prepares it.
+  ORDER_APPROVAL
 }
 
 enum ReconciliationCheck {

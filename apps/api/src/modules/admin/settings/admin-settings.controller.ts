@@ -20,7 +20,7 @@ class ReviewSettingDto {
   @IsOptional() @IsString() @Length(1, 500) note?: string;
 }
 class ChangesQueryDto extends PaginationQueryDto {
-  @IsOptional() @IsString() @Matches(/^[a-z]+\.[A-Za-z]+$/) key?: string;
+  @IsOptional() @IsString() @Matches(/^[a-z]+(?:\.[A-Za-z]+){1,2}$/) key?: string;
   @IsOptional() @IsIn(Object.values(PlatformSettingChangeStatus)) status?: PlatformSettingChangeStatus;
 }
 

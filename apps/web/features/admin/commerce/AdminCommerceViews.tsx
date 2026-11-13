@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { AdminOrderCancelPanel } from "./AdminOrderCancelPanel";
+import { AdminOrderApprovalPanel } from "./AdminOrderApprovalPanel";
 import { DemoRecordTag } from "../DemoRecordTag";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
@@ -514,7 +515,12 @@ export function AdminCommerceOrderDetailView({ orderId }: { orderId: string }) {
             <DetailRow label={tr("ارسال", "Delivery")}>{formatCurrency(o.deliveryAmount, lang)}</DetailRow>
             <DetailRow label={tr("مبلغ کل", "Total")}>{formatCurrency(o.totalAmount, lang)}</DetailRow>
           </Panel>
-          <AdminOrderCancelPanel orderId={o.id} cancelled={!!o.cancelledAt} fulfillmentStatus={o.fulfillmentStatus ?? null} onDone={() => void load()} />
+          {/* Approval modes: a paid order held for staff approval is approved or rejected here instead of cancelled. */}
+          {o.status === "PENDING" && !o.cancelledAt ? (
+            <AdminOrderApprovalPanel orderId={o.id} onDone={() => void load()} />
+          ) : (
+            <AdminOrderCancelPanel orderId={o.id} cancelled={!!o.cancelledAt} fulfillmentStatus={o.fulfillmentStatus ?? null} onDone={() => void load()} />
+          )}
           <Panel>
             <PanelTitle title={tr("اقلام", "Items")} />
             <ul className="flex flex-col gap-2">

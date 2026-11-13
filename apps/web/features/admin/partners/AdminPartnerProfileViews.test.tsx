@@ -8,6 +8,8 @@ import { ApiError } from "@/lib/api/client";
 import { AdminPartnerServiceProfile, AdminPartnerShopProfile } from "./AdminPartnerProfileViews";
 
 vi.mock("@/services/admin-partners.service", () => ({ adminPartnersService: { getService: vi.fn(), getShop: vi.fn() } }));
+// The approval-mode panel on each profile has its own test (PartnerApprovalModePanel.test.tsx).
+vi.mock("@/services/admin-approvals.service", () => ({ adminApprovalsService: { get: vi.fn(() => new Promise(() => undefined)), set: vi.fn(), clear: vi.fn() } }));
 
 const kyc = {
   status: "UNDER_REVIEW",

@@ -104,7 +104,7 @@ export function MyOrdersView() {
                 </span>
                 <span className="order-row__side">
                   <span className="flex flex-wrap justify-end gap-1.5">
-                    <StatusLabel tone={order.cancelledAt ? "neutral" : order.status === "CONFIRMED" ? "success" : order.status === "CANCELLED" ? "urgent" : "neutral"}>
+                    <StatusLabel tone={order.cancelledAt ? "neutral" : order.status === "CONFIRMED" ? "success" : order.status === "CANCELLED" ? "urgent" : order.status === "PENDING" ? "pending" : "neutral"}>
                       {order.cancelledAt ? t("cancelledRefunded") : t(`status.${order.status}`)}
                     </StatusLabel>
                     {order.fulfillmentStatus ? (

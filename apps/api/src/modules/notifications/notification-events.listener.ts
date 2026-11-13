@@ -477,7 +477,9 @@ export class NotificationEventsListener {
 
   // ---- Batch 4: commerce. Payload-only (events publish before commit). ----
 
+  // An order held for staff approval reaches the seller on approval (OrderApproved), not at checkout.
   @OnEvent("OrderCreated")
+  @OnEvent("OrderApproved")
   onOrderCreated(payload: { orderId: string; sellerOrganizationId: string; userId?: string }, domainEventId: string): Promise<void> {
     return this.safely("OrderCreated", () =>
       this.notifySellerAdmins(payload.sellerOrganizationId, "order.received", "Order", payload.orderId, NotificationDeepLinks.sellerOrderDetail(payload.orderId), domainEventId),
@@ -485,7 +487,7 @@ export class NotificationEventsListener {
   }
 
   @OnEvent("OrderCancelled")
-  onOrderCancelled(payload: { orderId: string; userId: string; sellerOrganizationId: string; cancelledBy?: "CUSTOMER" | "SELLER" }, domainEventId: string): Promise<void> {
+  onOrderCancelled(payload: { orderId: string; userId: string; sellerOrganizationId: string; cancelledBy?: "CUSTOMER" | "SELLER" | "ADMIN"; awaitingApproval?: boolean }, domainEventId: string): Promise<void> {
     return this.safely("OrderCancelled", async () => {
       await this.orchestrator.notify({
         userId: payload.userId,
@@ -496,7 +498,7 @@ export class NotificationEventsListener {
         entityId: payload.orderId,
         domainEventId,
       });
-      if (payload.cancelledBy !== "SELLER") {
+      if (payload.cancelledBy !== "SELLER" && !payload.awaitingApproval) {
         await this.notifySellerAdmins(payload.sellerOrganizationId, "order.cancelled_by_customer", "Order", payload.orderId, NotificationDeepLinks.sellerOrderDetail(payload.orderId), domainEventId);
       }
     });

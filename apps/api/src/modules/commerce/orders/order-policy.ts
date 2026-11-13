@@ -3,7 +3,8 @@ import { FulfillmentStatus, OrderRefundRequestStatus, OrderStatus } from "@prism
 /**
  * Customer self-service policy for commerce orders (Batch 4).
  *
- * - Cancel: allowed while the parcel has not been handed to a courier —
+ * - Cancel: allowed while an order waits for staff approval (PENDING, no
+ *   fulfillment yet) and while the parcel has not been handed to a courier —
  *   the fulfillment is still with the seller (PENDING,
  *   AWAITING_SELLER_PREPARATION, READY_FOR_PICKUP). Cancelling refunds the
  *   full order total immediately through the gateway and restocks.
@@ -44,7 +45,8 @@ export interface PolicyFulfillment {
 
 export function canCustomerCancel(order: PolicyOrder, fulfillment: PolicyFulfillment | null): boolean {
   if (!order.checkoutId || order.cancelledAt) return false;
-  if (order.status !== OrderStatus.CONFIRMED) return false;
+  // PENDING = paid and held for staff approval (approval modes): nothing has reached the seller yet.
+  if (order.status !== OrderStatus.CONFIRMED && order.status !== OrderStatus.PENDING) return false;
   return !fulfillment || CUSTOMER_CANCELLABLE_FULFILLMENT.has(fulfillment.status);
 }
 

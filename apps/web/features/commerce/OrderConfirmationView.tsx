@@ -53,10 +53,11 @@ export function OrderConfirmationView({ orderIds }: { orderIds: string[] }) {
         <ContextSurface key={order.id} className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-3">
             <p className="text-body font-medium text-text-primary">{order.sellerOrganization.name}</p>
-            <StatusLabel tone={order.status === "CONFIRMED" ? "success" : order.status === "CANCELLED" ? "urgent" : "neutral"}>
+            <StatusLabel tone={order.status === "CONFIRMED" ? "success" : order.status === "CANCELLED" ? "urgent" : order.status === "PENDING" ? "pending" : "neutral"}>
               {t(`orderStatus.${order.status}`)}
             </StatusLabel>
           </div>
+          {order.status === "PENDING" && !order.cancelledAt ? <p className="text-metadata text-text-secondary">{t("awaitingConfirmation")}</p> : null}
           {order.items.map((item) => (
             <div key={item.id} className="flex items-center justify-between gap-3">
               <span className="text-metadata text-text-secondary">

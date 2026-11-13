@@ -57,7 +57,8 @@ export class SellerOrderService {
   async list(ctx: ResolvedSellerContext, query: { status?: OrderStatus; page?: number; pageSize?: number }): Promise<PaginatedDto<SellerOrderSummaryDto>> {
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? 20;
-    const where: Prisma.OrderWhereInput = { sellerOrganizationId: ctx.sellerOrganizationId, ...(query.status ? { status: query.status } : {}) };
+    // Orders held for staff approval (PENDING) are not the seller's work yet; they appear once approved.
+    const where: Prisma.OrderWhereInput = { sellerOrganizationId: ctx.sellerOrganizationId, AND: [{ status: { not: OrderStatus.PENDING } }, ...(query.status ? [{ status: query.status }] : [])] };
 
     const [rows, total] = await Promise.all([
       this.prisma.order.findMany({ where, include: ORDER_WITH_MARKETPLACE_INCLUDE, orderBy: { createdAt: "desc" }, skip: (page - 1) * pageSize, take: pageSize }),
@@ -74,7 +75,7 @@ export class SellerOrderService {
 
   private async loadOwned(ctx: ResolvedSellerContext, orderId: string): Promise<Order & { marketplaceOrder: OrderWithMarketplace["marketplaceOrder"] }> {
     const order = await this.prisma.order.findUnique({ where: { id: orderId }, include: { marketplaceOrder: true } });
-    if (!order || order.sellerOrganizationId !== ctx.sellerOrganizationId) throw new OrderNotFoundException({ orderId });
+    if (!order || order.sellerOrganizationId !== ctx.sellerOrganizationId || order.status === OrderStatus.PENDING) throw new OrderNotFoundException({ orderId });
     return order;
   }
 

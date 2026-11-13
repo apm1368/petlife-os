@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma, PetFriendlyPlaceStatus, ProviderType, TravelListingStatus, TravelReviewStatus } from "@prisma/client";
+import { ApprovalScope, Prisma, PetFriendlyPlaceStatus, ProviderType, TravelBookingMode, TravelListingStatus, TravelReviewStatus } from "@prisma/client";
 import type {
   PetPolicyMatchOutcome,
   TravelDestinationDto,
@@ -17,6 +17,7 @@ import { haversineKm, matchPetPolicy, priceStay, ratePlanApplies, type PetFacts,
 import type { TravelSearchQueryDto } from "./dto/travel-marketplace.dto";
 import { TravelBookingService } from "./travel-booking.service";
 import { publicProviderWhere } from "../../common/public-partner";
+import { ApprovalPolicyService } from "../approvals/approval-policy.service";
 
 const MAX_CANDIDATES = 300;
 const BAYES_PRIOR = 4;
@@ -47,6 +48,7 @@ export class TravelSearchService {
     private readonly prisma: PrismaService,
     private readonly availability: TravelAvailabilityService,
     private readonly bookings: TravelBookingService,
+    private readonly approvals: ApprovalPolicyService,
   ) {}
 
   async ratings(listingIds: string[]): Promise<Map<string, TravelRatingSummaryDto>> {
@@ -128,7 +130,8 @@ export class TravelSearchService {
       ...(q.country ? { country: { equals: q.country, mode: "insensitive" } } : {}),
       ...(q.types?.length ? { type: { in: q.types } } : {}),
       ...(q.verified ? { isVerified: true } : {}),
-      ...(q.instantBooking ? { bookingMode: "INSTANT_BOOKING" } : {}),
+      // Approval modes: the listing's own mode decides only under PARTNER_CHOICE; otherwise filter on the effective mode below.
+      ...(q.instantBooking && this.approvals.vertical(ApprovalScope.STAY_BOOKINGS) === "PARTNER_CHOICE" ? { bookingMode: TravelBookingMode.INSTANT_BOOKING } : {}),
       ...(q.amenities?.length ? { amenities: { hasEvery: q.amenities } } : {}),
       ...(q.q ? { OR: [{ title: { contains: q.q, mode: "insensitive" } }, { description: { contains: q.q, mode: "insensitive" } }, { city: { contains: q.q, mode: "insensitive" } }] } : {}),
       ...(species.size > 0 || q.noPetFee
@@ -146,6 +149,7 @@ export class TravelSearchService {
     const candidates = await this.prisma.travelListing.findMany({ where, include: LISTING_INCLUDE, orderBy: [{ createdAt: "desc" }, { id: "asc" }], take: MAX_CANDIDATES });
 
     const ratings = await this.ratings(candidates.map((c) => c.id));
+    const modeOf = await this.approvals.stayModeResolver(candidates.map((c) => c.organizationId));
     let nights: Date[] = [];
     let checkIn: Date | null = null;
     let states = new Map<string, UnitNightState>();
@@ -161,6 +165,8 @@ export class TravelSearchService {
     for (const listing of candidates) {
       const rating = ratings.get(listing.id) ?? EMPTY_TRAVEL_RATING;
       if (q.minRating && (rating.average === null || rating.average < q.minRating)) continue;
+      const bookingMode = modeOf(listing);
+      if (q.instantBooking && bookingMode !== TravelBookingMode.INSTANT_BOOKING) continue;
       const stay = checkIn ? this.bestStay(listing, nights, states, guests, pets.length, checkIn) : null;
       if (checkIn && !stay) continue;
       const fromNightlyIrr = this.fromNightly(listing);
@@ -179,6 +185,7 @@ export class TravelSearchService {
       const proximity = distanceKm === null ? 0 : Math.max(0, 1 - distanceKm / 50);
       items.push({
         ...toSearchItem(listing, rating, stay, fromNightlyIrr, favorites.has(listing.id)),
+        bookingMode: bookingMode as unknown as TravelSearchResultItemDto["bookingMode"],
         freeCancellationAvailable,
         distanceKm,
         petMatch,
@@ -251,8 +258,11 @@ export class TravelSearchService {
       this.nearbyPlaces(row.latitude, row.longitude),
       this.nearbyVets(row.city, row.latitude, row.longitude),
     ]);
+    // Approval modes: show the mode booking will actually use (admin vertical setting / per-partner override).
+    const modeOf = await this.approvals.stayModeResolver([row.organizationId]);
     return {
       ...toTravelListingDto(row, ratings.get(row.id) ?? EMPTY_TRAVEL_RATING),
+      bookingMode: modeOf(row) as unknown as TravelListingDetailDto["bookingMode"],
       // Only active units and rate plans are offered to the public.
       units: toTravelListingDto(row).units.filter((u) => u.isActive).map((u) => ({ ...u, ratePlans: u.ratePlans.filter((p) => p.isActive) })),
       reviews: reviews.items,
@@ -308,12 +318,13 @@ export class TravelSearchService {
       states = await this.availability.getNightStates(rows.flatMap((r) => r.units), nights);
     }
     const favorites = userId ? new Set((await this.prisma.travelListingFavorite.findMany({ where: { userId, listingId: { in: rows.map((r) => r.id) } }, select: { listingId: true } })).map((f) => f.listingId)) : new Set<string>();
+    const modeOf = await this.approvals.stayModeResolver(rows.map((r) => r.organizationId));
     return ids
       .map((id) => rows.find((r) => r.id === id))
       .filter((r): r is ListingWithRelations => Boolean(r))
       .map((r) => {
         const stay = checkIn ? this.bestStay(r, nights, states, 1, 0, checkIn) : null;
-        return { ...toSearchItem(r, ratings.get(r.id) ?? EMPTY_TRAVEL_RATING, stay, this.fromNightly(r), favorites.has(r.id)), freeCancellationAvailable: stay ? stay.freeCancellation : hasFreeCancellationRate(r), distanceKm: null, petMatch: null };
+        return { ...toSearchItem(r, ratings.get(r.id) ?? EMPTY_TRAVEL_RATING, stay, this.fromNightly(r), favorites.has(r.id)), bookingMode: modeOf(r) as unknown as TravelSearchResultItemDto["bookingMode"], freeCancellationAvailable: stay ? stay.freeCancellation : hasFreeCancellationRate(r), distanceKm: null, petMatch: null };
       });
   }
 

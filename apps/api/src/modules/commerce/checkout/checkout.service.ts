@@ -4,6 +4,7 @@ import {
   CheckoutStatus,
   DeliveryMethod,
   FinancingIntentStatus,
+  OrderStatus,
   PaymentIntentStatus,
   PaymentMethodType,
   PaymentProvider,
@@ -548,8 +549,10 @@ export class CheckoutService {
           address ? toOrderAddress(address) : null,
           deliveryAmountBySeller,
         );
+        // Orders held for staff approval (approval modes) get their fulfillment and seller attribution when approved
+        // (OrderApprovalService), so the seller never sees a parcel to prepare for an order that may be refused.
         const createdOrders = await tx.order.findMany({
-          where: { id: { in: orderIds } },
+          where: { id: { in: orderIds }, status: { not: OrderStatus.PENDING } },
           select: { id: true, sellerOrganizationId: true },
         });
         await this.logistics.createFulfillmentsForOrders(

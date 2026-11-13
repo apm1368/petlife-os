@@ -26,6 +26,10 @@ const knownKeys = [
   "trust.highSeveritySlaHours",
   "trust.standardSlaHours",
   "privacy.exportsPerDay",
+  // Approval modes per vertical; a partner's own override (its profile page) wins over these.
+  "approvals.mode.serviceBookings",
+  "approvals.mode.stayBookings",
+  "approvals.mode.shopOrders",
 ];
 const statuses: SettingChangeStatus[] = ["PENDING", "APPLIED", "REJECTED", "CANCELLED", "SUPERSEDED"];
 const isMoney = (key: string) => key.endsWith("Irr");
@@ -64,6 +68,7 @@ function useCopy() {
 function DisplayValue({ value, settingKey }: { value: SettingValue; settingKey: string }) {
   const { t, number } = useCopy();
   if (value === null) return <span>{t("none")}</span>;
+  if (typeof value === "string" && settingKey.startsWith("approvals.") && t.has(`options.${value}`)) return <span>{t(`options.${value}`)}</span>;
   if (typeof value === "number")
     return (
       <span>
@@ -179,6 +184,7 @@ export function AdminSettingsView() {
                           {t(row.source === "DEFAULT" ? "default" : "override")}
                         </DetailRow>
                         <DetailRow label={t("pending")}>{number(row.pendingChanges)}</DetailRow>
+                        {row.key.startsWith("approvals.") && <p className="mt-2 text-metadata text-text-secondary">{t("approvalsNote")}</p>}
                         {manage && knownKeys.includes(row.key) && (
                           <SettingEditor row={row} refresh={refresh} />
                         )}
@@ -212,6 +218,7 @@ function SettingEditor({ row, refresh }: { row: PlatformSetting; refresh: () => 
     [bool, setBool] = useState(row.value === true),
     [fa, setFa] = useState(typeof row.value === "object" ? (row.value?.fa ?? "") : ""),
     [en, setEn] = useState(typeof row.value === "object" ? (row.value?.en ?? "") : ""),
+    [choice, setChoice] = useState(typeof row.value === "string" ? row.value : ""),
     [baseVersion, setBaseVersion] = useState(row.version),
     [reason, setReason] = useState(""),
     [confirmed, setConfirmed] = useState(false),
@@ -222,7 +229,9 @@ function SettingEditor({ row, refresh }: { row: PlatformSetting; refresh: () => 
   const value: SettingValue =
     row.type === "integer"
       ? (parsed ?? 0)
-      : row.type === "boolean"
+      : row.type === "enum"
+        ? choice
+        : row.type === "boolean"
         ? bool
         : fa.trim() || en.trim()
           ? { ...keepOtherLocales(row.value), ...(fa.trim() ? { fa: fa.trim() } : {}), ...(en.trim() ? { en: en.trim() } : {}) }
@@ -269,6 +278,20 @@ function SettingEditor({ row, refresh }: { row: PlatformSetting; refresh: () => 
                 />
                 <p>{t("clearText")}</p>
               </>
+            ) : row.type === "enum" ? (
+              <Select
+                label={t("choiceValue")}
+                value={choice}
+                options={(row.constraints.options ?? []).map((option) => ({
+                  value: option,
+                  label: t.has(`options.${option}`) ? t(`options.${option}`) : option,
+                }))}
+                onChange={(event) => {
+                  setChoice(event.target.value);
+                  setConfirmed(false);
+                  setResult(null);
+                }}
+              />
             ) : row.type === "boolean" ? (
               <label className="flex gap-2">
                 <input

@@ -3833,7 +3833,7 @@
       "title": "Bestelling bevestigd",
       "subtitle": "{count, plural, one {1 bestelling is} other {# bestellingen zijn}} geplaatst",
       "orderStatus": {
-        "PENDING": "In behandeling",
+        "PENDING": "Wacht op bevestiging",
         "CONFIRMED": "Bevestigd",
         "CANCELLED": "Geannuleerd",
         "PARTIALLY_REFUNDED": "Gedeeltelijk terugbetaald",
@@ -3842,7 +3842,8 @@
       "delivery": "Bezorging",
       "total": "Totaal",
       "viewOrders": "Mijn bestellingen bekijken",
-      "continueShopping": "Verder winkelen"
+      "continueShopping": "Verder winkelen",
+      "awaitingConfirmation": "Betaald. opetlife bevestigt deze bestelling voordat de verkoper die voorbereidt; kan ze niet worden bevestigd, dan wordt het volledige bedrag terugbetaald."
     },
     "myOrders": {
       "title": "Mijn bestellingen",
@@ -3852,7 +3853,7 @@
       "browseShop": "Naar de winkel",
       "itemCount": "{count, plural, one {1 artikel} other {# artikelen}}",
       "status": {
-        "PENDING": "In behandeling",
+        "PENDING": "Wacht op bevestiging",
         "CONFIRMED": "Bevestigd",
         "CANCELLED": "Geannuleerd",
         "PARTIALLY_REFUNDED": "Gedeeltelijk terugbetaald",
@@ -3891,7 +3892,7 @@
       "trackingUnavailable": "Trackingupdate tijdelijk niet beschikbaar",
       "placedAt": "Geplaatst {when}",
       "status": {
-        "PENDING": "In behandeling",
+        "PENDING": "Wacht op bevestiging",
         "CONFIRMED": "Bevestigd",
         "CANCELLED": "Geannuleerd",
         "PARTIALLY_REFUNDED": "Gedeeltelijk terugbetaald",
@@ -3962,7 +3963,7 @@
       },
       "timeline": {
         "title": "Bestelgeschiedenis",
-        "PENDING": "Bestelling aangemaakt",
+        "PENDING": "Betaling ontvangen — wacht op bevestiging",
         "CONFIRMED": "Betaling bevestigd — bestelling geplaatst",
         "PREPARING": "Verkoper bereidt voor",
         "READY_FOR_FULFILLMENT": "Klaar voor verzending",
@@ -3983,7 +3984,8 @@
       },
       "deliveryMethod": "Bezorging: {method}",
       "postTracking": "Volg het pakket op de website van de Post",
-      "courierTracking": "Volg de koerier"
+      "courierTracking": "Volg de koerier",
+      "awaitingConfirmation": "Je betaling is ontvangen. opetlife bevestigt deze bestelling voordat de verkoper die voorbereidt; kan ze niet worden bevestigd, dan krijg je het volledige bedrag terug."
     },
     "statusLabels": {
       "payment": {
@@ -5710,7 +5712,9 @@
         "FAILED_IMPORT": "Mislukte import",
         "SUPPORT": "Support",
         "CLINIC_FOLLOW_UP": "Opvolging door praktijk",
-        "DATA_QUALITY": "Datakwaliteit"
+        "DATA_QUALITY": "Datakwaliteit",
+        "BOOKING_APPROVAL": "Opvolging boekingsaanvraag",
+        "ORDER_APPROVAL": "Bestelling wacht op goedkeuring"
       },
       "checkList": "Takenlijst controleren"
     },
@@ -9782,7 +9786,10 @@
       "support_firstResponseSlaHours": "Streeftijd eerste supportreactie (uren)",
       "trust_highSeveritySlaHours": "Streeftijd reactie bij hoge ernst (uren)",
       "trust_standardSlaHours": "Standaard streeftijd voor reactie (uren)",
-      "privacy_exportsPerDay": "Daglimiet voor verzoeken om gegevensexport"
+      "privacy_exportsPerDay": "Daglimiet voor verzoeken om gegevensexport",
+      "approvals_mode_serviceBookings": "Boekingen van verzorgingsdiensten: goedkeuringsmodus",
+      "approvals_mode_stayBookings": "Verblijfsboekingen: goedkeuringsmodus",
+      "approvals_mode_shopOrders": "Winkelbestellingen: goedkeuringsmodus"
     },
     "statuses": {
       "PENDING": "Wacht op goedkeuring; niet toegepast",
@@ -9796,7 +9803,14 @@
       "seconds": "seconden",
       "hours": "uur",
       "perDay": "per dag"
-    }
+    },
+    "options": {
+      "PARTNER_CHOICE": "Eigen keuze van elke partner",
+      "INSTANT": "Direct",
+      "NEEDS_APPROVAL": "Goedkeuring nodig"
+    },
+    "choiceValue": "Nieuwe waarde",
+    "approvalsNote": "Aanvragen en vastgehouden bestellingen komen ter opvolging in de takenlijst. De eigen instelling van een bedrijf op zijn profielpagina gaat hiervoor."
   },
   "adminFeatureFlags": {
     "title": "Feature-flags",
@@ -12568,5 +12582,56 @@
       "TWO_STEP_POLICY_SUPER_ADMIN_ONLY": "Alleen een hoofdbeheerder kan dit wijzigen.",
       "TWO_STEP_KEY_CHANGED": "Uw authenticator kan na een wijziging van de serversleutel niet worden gecontroleerd. Gebruik een herstelcode of vraag een hoofdbeheerder om het te resetten."
     }
+  },
+  "adminApprovalModes": {
+    "title": "Goedkeuringsmodus",
+    "hint": "Direct of met goedkeuring, per onderdeel. Een keuze hier geldt alleen voor dit bedrijf en gaat voor op de platforminstelling.",
+    "scopes": {
+      "SERVICE_BOOKINGS": "Boekingen van verzorgingsdiensten",
+      "STAY_BOOKINGS": "Verblijfsboekingen",
+      "SHOP_ORDERS": "Winkelbestellingen"
+    },
+    "modes": {
+      "PARTNER_CHOICE": "Eigen keuze van het bedrijf (per dienst of accommodatie)",
+      "INSTANT": "Direct",
+      "NEEDS_APPROVAL": "Goedkeuring nodig"
+    },
+    "platform": "Platforminstelling",
+    "source": "Bron",
+    "overridden": "Ingesteld voor dit bedrijf",
+    "inherited": "Overgenomen van de platforminstelling",
+    "overrideReason": "Reden: {reason}",
+    "overrideBy": "{name}, {when}",
+    "unknownAdmin": "Een teamlid",
+    "choice": "Voor dit bedrijf",
+    "choices": {
+      "INHERIT": "Platforminstelling overnemen",
+      "INSTANT": "Direct",
+      "NEEDS_APPROVAL": "Goedkeuring nodig"
+    },
+    "reason": "Reden (auditlog)",
+    "reasonHint": "Minstens 5 tekens.",
+    "reasonRequired": "Schrijf een reden van minstens 5 tekens.",
+    "save": "Opslaan",
+    "saved": "Opgeslagen.",
+    "saveFailed": "Niet opgeslagen; probeer het opnieuw.",
+    "loadFailed": "De goedkeuringsmodus kon niet worden geladen.",
+    "retry": "Opnieuw proberen",
+    "loading": "Laden…",
+    "readOnly": "Om dit te wijzigen heb je het recht voor instellingen nodig."
+  },
+  "adminOrderApproval": {
+    "title": "Wacht op goedkeuring",
+    "hint": "Betaald en vastgehouden voordat de verkoper het ziet. Keur goed om het ter voorbereiding naar de verkoper te sturen; wijs af om de klant het volledige bedrag terug te betalen.",
+    "note": "Notitie (optioneel, auditlog)",
+    "approve": "Goedkeuren en naar de verkoper sturen",
+    "reject": "Afwijzen en terugbetalen",
+    "reason": "Reden van afwijzing (auditlog)",
+    "reasonRequired": "Schrijf een korte reden.",
+    "confirmReject": "Ja, afwijzen en volledig terugbetalen",
+    "back": "Terug",
+    "notPending": "Deze bestelling wacht niet meer op goedkeuring; laad de pagina opnieuw.",
+    "failed": "Dat is niet gelukt; probeer het opnieuw.",
+    "noPermission": "Voor goedkeuren of afwijzen heb je het recht voor winkelbeheer nodig."
   }
 }

@@ -1,4 +1,5 @@
 import { OrderLifecycleService } from "../../commerce/orders/order-lifecycle.service";
+import { OrderApprovalService } from "../../commerce/orders/order-approval.service";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
 import {
   Body,
@@ -132,6 +133,10 @@ class ReasonDto {
   @IsString() @Length(3, 500) reason!: string;
 }
 
+class ApproveOrderDto {
+  @IsOptional() @IsString() @MaxLength(500) note?: string;
+}
+
 class CatalogImportSnapshotDecisionDto extends ReasonDto {}
 class CatalogRequestMatchDto extends ReasonDto { @IsUUID() productId!: string; }
 class CatalogRequestListQueryDto { @IsOptional() @IsIn(["PENDING", "DECIDED"]) status?: "PENDING" | "DECIDED"; }
@@ -228,6 +233,7 @@ export class AdminCommerceController {
     private readonly sellerCatalogRequests: SellerCatalogReviewService,
     private readonly orderLifecycle: OrderLifecycleService,
     private readonly audit: AdminAuditLogService,
+    private readonly orderApproval: OrderApprovalService,
   ) {}
 
   @Get("orders")
@@ -254,6 +260,24 @@ export class AdminCommerceController {
   async cancelOrder(@Param("id", ParseUUIDPipe) id: string, @Body() dto: ReasonDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
     const refund = await this.orderLifecycle.adminCancel(admin.userId, id, dto.reason);
     await this.audit.record({ adminUserId: admin.adminUserId, action: "order.cancelled_by_staff", entityType: "Order", entityId: id, reason: dto.reason, afterSummary: { refundId: refund.id, amount: refund.amount, status: refund.status }, requestId: req.requestId });
+    return this.commerce.getOrder(id);
+  }
+
+  /** Approval modes: a paid order held for approval goes to the seller (fulfillment created) — audited. */
+  @Post("orders/:id/approve")
+  @RequireAdminPermission("commerce.manage")
+  async approveOrder(@Param("id", ParseUUIDPipe) id: string, @Body() dto: ApproveOrderDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
+    await this.orderApproval.approve(admin.userId, id, dto.note);
+    await this.audit.record({ adminUserId: admin.adminUserId, action: "order.approved_by_staff", entityType: "Order", entityId: id, reason: dto.note?.trim() || undefined, beforeSummary: { status: "PENDING" }, afterSummary: { status: "CONFIRMED" }, requestId: req.requestId });
+    return this.commerce.getOrder(id);
+  }
+
+  /** Approval modes: a held order is refused — full refund and restock on the staff-cancel path; audited with the reason. */
+  @Post("orders/:id/reject")
+  @RequireAdminPermission("commerce.manage")
+  async rejectOrder(@Param("id", ParseUUIDPipe) id: string, @Body() dto: ReasonDto, @CurrentAdmin() admin: ResolvedAdminContext, @Req() req: AdminAuthedRequest) {
+    const refund = await this.orderApproval.reject(admin.userId, id, dto.reason);
+    await this.audit.record({ adminUserId: admin.adminUserId, action: "order.rejected_by_staff", entityType: "Order", entityId: id, reason: dto.reason, beforeSummary: { status: "PENDING" }, afterSummary: { refundId: refund.id, amount: refund.amount, status: refund.status }, requestId: req.requestId });
     return this.commerce.getOrder(id);
   }
 
