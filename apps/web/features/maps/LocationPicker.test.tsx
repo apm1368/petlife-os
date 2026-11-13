@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, screen } from "@testing-library/react";
+import { act, fireEvent, screen } from "@testing-library/react";
 import { renderWithIntl } from "@/test/render-with-intl";
 import type { MapMarker, MapPoint, MapViewProps } from "./MapView";
 import { LocationPicker } from "./LocationPicker";
@@ -52,15 +52,15 @@ describe("LocationPicker", () => {
 
   it("moves the pin when it is dragged or the map is tapped, rounded to 6 decimals", () => {
     const { onChange } = setup({ value: { latitude: 35.75, longitude: 51.41 } });
-    lastProps!.onMarkerDrag!("pin", { latitude: 35.761234567, longitude: 51.422345678 });
+    act(() => lastProps!.onMarkerDrag!("pin", { latitude: 35.761234567, longitude: 51.422345678 }));
     expect(onChange).toHaveBeenLastCalledWith({ latitude: 35.761235, longitude: 51.422346 });
-    lastProps!.onPick!({ latitude: 36.3, longitude: 59.6 });
+    act(() => lastProps!.onPick!({ latitude: 36.3, longitude: 59.6 }));
     expect(onChange).toHaveBeenLastCalledWith({ latitude: 36.3, longitude: 59.6 });
   });
 
   it("refuses a point outside Iran", () => {
     const { onChange } = setup();
-    lastProps!.onPick!({ latitude: 48.8566, longitude: 2.3522 });
+    act(() => lastProps!.onPick!({ latitude: 48.8566, longitude: 2.3522 }));
     expect(onChange).not.toHaveBeenCalled();
     expect(screen.getByRole("alert").textContent).toMatch(/outside Iran/);
   });
