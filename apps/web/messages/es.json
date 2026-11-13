@@ -92,6 +92,59 @@
       "oil": "Día de la Nacionalización del Petróleo"
     }
   },
+  "adminOwnership": {
+    "kicker": "Mascotas",
+    "title": "Transferencias de propiedad",
+    "intro": "Todas las solicitudes para pasar una mascota a un nuevo propietario, primero las disputadas. Una disputa nunca mueve a la mascota: el propietario registrado sigue hasta una resolución oficial o un acuerdo por escrito. Revisa los documentos de las partes (a través de soporte) y cierra la disputa con un motivo. Se avisa a ambas personas del resultado.",
+    "filterLabel": "Estado de la transferencia",
+    "search": "Buscar",
+    "searchPlaceholder": "Nombre de la mascota o de la persona",
+    "apply": "Buscar",
+    "retry": "Reintentar",
+    "cancel": "Cancelar",
+    "status": {
+      "DISPUTED": "En disputa",
+      "PENDING_REVIEW": "Pendiente del destinatario",
+      "ACCEPTED": "Transferida",
+      "DECLINED": "Rechazada",
+      "CANCELLED": "Cancelada",
+      "EXPIRED": "Caducada",
+      "ALL": "Todas"
+    },
+    "empty": "No hay transferencias que coincidan.",
+    "emptyDisputed": "No hay disputas abiertas.",
+    "registeredOwner": "Propietario registrado ahora",
+    "requested": "Solicitada",
+    "applied": "Transferida el",
+    "notApplied": "Sin transferir",
+    "memories": "Recuerdos",
+    "memory": {
+      "TRANSFER": "Pasan al nuevo propietario",
+      "RETAIN": "Se quedan con el propietario anterior",
+      "COPY_READ_ONLY": "Copia de solo lectura para el nuevo propietario"
+    },
+    "explain": {
+      "applied": "Esta transferencia ya se había hecho. Cerrar la disputa la mantiene tal cual.",
+      "pending": "El destinatario aún no había aceptado. Cerrar la disputa cierra la solicitud; el propietario registrado sigue."
+    },
+    "close": "Cerrar disputa",
+    "reason": "Resultado y motivo",
+    "reasonPlaceholder": "Por ejemplo: contrato de compra revisado por teléfono con ambas partes",
+    "done": {
+      "stands": "Disputa sobre {pet} cerrada: la transferencia se mantiene. Se ha avisado a ambas partes.",
+      "ownerStays": "Disputa sobre {pet} cerrada: la solicitud se cierra y el propietario registrado sigue. Se ha avisado a ambas partes."
+    },
+    "errors": {
+      "reason": "Escribe el resultado y el motivo (al menos 5 caracteres).",
+      "forbidden": "Tu rol no incluye los datos de clientes.",
+      "load": "No se han podido cargar las transferencias.",
+      "generic": "No ha funcionado. Inténtalo de nuevo."
+    },
+    "rules": {
+      "OWNERSHIP_NOT_DISPUTED": "Esta transferencia ya no está en disputa. Actualiza la lista.",
+      "OWNERSHIP_CHANGED_CONCURRENTLY": "Otra persona acaba de cambiar esta transferencia. Actualiza la lista."
+    }
+  },
   "adminDeletionRequests": {
     "kicker": "Privacidad",
     "title": "Solicitudes de eliminación de cuenta",
@@ -2052,6 +2105,9 @@
       "analytics": "Análisis y lista de espera"
     },
     "bookings": {
+      "noShowLabel": "No presentado",
+      "noShowProvider": "El proveedor no se presentó (aviso del miembro)",
+      "noShowOwner": "El dueño no se presentó",
       "title": "Servicios y reservas",
       "searchLabel": "Buscar por número, mascota o proveedor",
       "statusLabel": "Estado de la reserva",
@@ -3174,6 +3230,8 @@
         "URGENT": "Urgente"
       },
       "sources": {
+        "PROVIDER_NO_SHOW": "Proveedor no se presentó",
+        "OWNERSHIP_DISPUTE": "Disputa de propiedad",
         "MANUAL": "Entrada manual",
         "TRAVEL_SOURCE": "Fuentes de viaje",
         "PARTNER_VERIFICATION": "Revisión de documentos de socios",
@@ -3829,6 +3887,7 @@
       },
       "tabs": {
         "holidays": "Festivos y cierres",
+        "ownershipTransfers": "Transferencias de propiedad",
         "deletionRequests": "Solicitudes de eliminación",
         "customRoles": "Roles personalizados",
         "directory": "Directorio",
@@ -4061,6 +4120,10 @@
           "EXECUTED": "Ejecutado"
         }
       }
+    },
+    "demoRecord": {
+      "label": "Demo: oculto en el sitio público",
+      "hint": "Datos de ejemplo para demos y pruebas. El sitio público nunca los muestra, aunque aquí figuren como verificados o públicos."
     }
   },
   "adminUsers": {
@@ -5548,7 +5611,8 @@
       "checkInSelected": "Entrada seleccionada; ahora elige la salida.",
       "checkInSuffix": ", entrada",
       "checkOutSuffix": ", salida"
-    }
+    },
+    "year": "Año"
   },
   "filePicker": {
     "choose": "Elegir archivo",
@@ -6089,7 +6153,9 @@
       "privateNotice": "Este archivo es privado y no tiene una URL pública. Cada descarga genera un enlace de acceso firmado y de corta duración.",
       "previewDownload": "Vista previa y descarga segura",
       "openFile": "Abrir archivo",
-      "previewUnavailable": "La vista previa no está disponible para este tipo de archivo."
+      "previewUnavailable": "La vista previa no está disponible para este tipo de archivo.",
+      "manage": "Detalles y retirar",
+      "details": "Detalles"
     },
     "nav": {
       "overview": "Resumen",
@@ -6366,6 +6432,9 @@
         "allClear": "Todo al día: no hay nada pendiente para tu equipo.",
         "clearList": "Al día: {list}",
         "queue": {
+          "pendingReviews": "Reseñas pendientes de moderación",
+          "openProviderNoShows": "Avisos de proveedor ausente",
+          "openOwnershipDisputes": "Disputas de propiedad",
           "pendingDeletionRequests": "Solicitudes de eliminación de cuenta",
           "openTrustCases": "Casos de confianza y seguridad",
           "openDisputes": "Disputas abiertas",
@@ -6390,7 +6459,7 @@
       },
       "shortcuts": "Accesos directos",
       "healthLink": "Página de estado",
-      "workersSummary": "{running} de {total} tareas en segundo plano en marcha",
+      "workersSummary": "{running} de {total} tareas en segundo plano sin errores",
       "priority": {
         "URGENT": "Urgente",
         "HIGH": "Alta"
@@ -6870,6 +6939,18 @@
         "send": "Enviar solicitud",
         "cancel": "Cancelar"
       }
+  },
+    "own": {
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "save": "Guardar cambios",
+      "cancel": "Cancelar",
+      "titleLabel": "Título",
+      "bodyLabel": "Texto",
+      "confirmPost": "¿Eliminar esta publicación para todos? Sus comentarios también desaparecen.",
+      "confirmComment": "¿Eliminar este comentario?",
+      "deleteYes": "Sí, eliminar",
+      "edited": "editado"
     }
   },
   "publicNavigation": {
@@ -10545,6 +10626,69 @@
     "invalid": "Elige una categoría y un número de 1 a 3000.",
     "forbidden": "Se requiere el permiso commerce.manage.",
     "failed": "No se pudo iniciar; inténtalo de nuevo."
+  },
+  "petCard": {
+    "title": "Tarjeta de la mascota y código QR",
+    "intro": "Una tarjeta pública para la placa o el collar de {name}. Quien escanee el código solo verá lo que elijas aquí y podrá escribirte a través de opetlife. Tu número de teléfono nunca se muestra.",
+    "back": "Volver al perfil de {name}",
+    "fieldsTitle": "Qué muestra la tarjeta",
+    "healthGroup": "Salud (por si quien la encuentra necesita saberlo)",
+    "fields": {
+      "PHOTO": "Foto",
+      "SPECIES": "Especie",
+      "BREED": "Raza",
+      "SEX": "Sexo",
+      "AGE": "Edad",
+      "MICROCHIP_STATUS": "Si tiene microchip (no el número)",
+      "ALLERGIES": "Alergias",
+      "CONDITIONS": "Enfermedades activas",
+      "MEDICATIONS": "Medicamentos actuales",
+      "BLOOD_TYPE": "Grupo sanguíneo",
+      "CRITICAL_NOTES": "Notas importantes"
+    },
+    "previewTitle": "Quien escanee el código verá",
+    "previewName": "Nombre: {name}",
+    "previewMessage": "Un botón «Escribir al dueño» a través de opetlife",
+    "neverTitle": "Nunca se muestra",
+    "never": "Tu dirección, los miembros de tu hogar, tu teléfono, el número de microchip, los documentos y las citas.",
+    "create": "Crear tarjeta y código QR",
+    "replace": "Crear una tarjeta nueva",
+    "replaceNote": "Al crear una tarjeta nueva, la actual deja de funcionar al instante y su código antiguo ya no abre.",
+    "creating": "Creando…",
+    "createError": "No se creó la tarjeta. Inténtalo de nuevo.",
+    "readyTitle": "Tu tarjeta está lista",
+    "onceNote": "Este enlace y este código solo se muestran ahora. Descárgalos o imprímelos; si los pierdes, crea una tarjeta nueva.",
+    "qrLabel": "Código QR de la tarjeta de {name}",
+    "download": "Descargar QR",
+    "print": "Imprimir",
+    "copy": "Copiar enlace",
+    "copied": "Copiado",
+    "open": "Ver tarjeta",
+    "listTitle": "Tarjetas de {name}",
+    "listEmpty": "Todavía no hay ninguna tarjeta.",
+    "kind": {
+      "ID_TAG": "Tarjeta de placa",
+      "EMERGENCY": "Tarjeta de emergencia"
+    },
+    "state": {
+      "ACTIVE": "Activa",
+      "REVOKED": "Revocada",
+      "ROTATED": "Sustituida",
+      "EXPIRED": "Caducada"
+    },
+    "created": "Creada el {date}",
+    "ending": "Código que termina en …{hint}",
+    "views": "Visitas: {count}",
+    "lastViewed": "Última visita: {date}",
+    "revoke": "Revocar tarjeta",
+    "revokeConfirm": "Sí, revocar esta tarjeta",
+    "revokeCancel": "Cancelar",
+    "revoked": "La tarjeta está revocada y su código ya no abre.",
+    "revokeError": "No se revocó. Inténtalo de nuevo.",
+    "noAccess": "Solo quien gestiona el acceso a esta mascota puede crear su tarjeta.",
+    "loadError": "No se cargaron los datos de la tarjeta.",
+    "retry": "Reintentar",
+    "loading": "Cargando…"
   },
   "legalPages": {
     "eyebrow": {

@@ -8053,6 +8053,10 @@ model CommunityPost {
   pet             Pet?                   @relation(fields: [petId], references: [id], onDelete: SetNull)
   mediaObjectKeys String[]               @default([])
   status          CommunityContentStatus @default(PUBLISHED)
+  /// Set when the author changes the text; shown as "edited" so a reply never looks like it answered other words.
+  editedAt          DateTime?
+  /// Set when the author deletes it (status REMOVED). Distinguishes a self-deletion from a moderator removal.
+  removedByAuthorAt DateTime?
 
   sourceType              CommunitySourceType @default(USER)
   sourceLostPetIncidentId String?             @db.Uuid
@@ -8086,6 +8090,9 @@ model CommunityComment {
   body         String
   status       CommunityContentStatus @default(PUBLISHED)
   createdAt    DateTime               @default(now())
+  /// Same meaning as on CommunityPost.
+  editedAt          DateTime?
+  removedByAuthorAt DateTime?
 
   reports         CommunityReport[]
   /// One level of replies: a reply's parent is always a top-level comment.
@@ -11475,6 +11482,8 @@ enum AdminTaskSource {
   SUPPORT
   CLINIC_FOLLOW_UP
   DATA_QUALITY
+  OWNERSHIP_DISPUTE
+  PROVIDER_NO_SHOW
 }
 
 enum ReconciliationCheck {

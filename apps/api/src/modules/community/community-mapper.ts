@@ -44,6 +44,7 @@ export function toCommunityPostDto(row: PostWithRelations, authorDisplayName: st
     reactionCount: row._count.reactions,
     viewerReaction,
     createdAt: row.createdAt.toISOString(),
+    editedAt: row.editedAt?.toISOString() ?? null,
   };
 }
 
@@ -59,6 +60,7 @@ export function toCommunityCommentDto(row: CommunityComment, authorDisplayName: 
     status: row.status as unknown as CommunityCommentDto["status"],
     parentCommentId: row.parentCommentId,
     createdAt: row.createdAt.toISOString(),
+    editedAt: row.editedAt?.toISOString() ?? null,
   };
 }
 

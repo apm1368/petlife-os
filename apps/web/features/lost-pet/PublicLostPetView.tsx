@@ -10,6 +10,7 @@ import { ApiError } from "@/lib/api/client";
 import { DateRangeField } from "@/features/shared/date-picker/DateRangePicker";
 import { ShareBar } from "@/features/shared/ShareBar";
 import { addDays, formatDay, localizeDigits, todayIso } from "@/lib/date/jalali";
+import { formatTehranDateTime } from "@/lib/date/tehran";
 import { ReportContentPanel } from "@/features/shared/ReportContentPanel";
 import { communityService } from "@/services/community.service";
 import { lostPetStatusTone } from "./lost-pet-status";
@@ -92,7 +93,7 @@ export function PublicLostPetView({ incidentId }: { incidentId: string }) {
     [t("public.detail.colorMarkings"), incident.petColorMarkings],
     [t("public.detail.approximateAge"), incident.petApproximateAgeMonths !== null ? t("public.detail.ageYears", { count: localizeDigits(Math.max(1, Math.round(incident.petApproximateAgeMonths / 12)), lang) }) : null],
     [t("public.detail.lastSeenAround"), incident.approximateArea],
-    [t("public.detail.lastSeen"), incident.lastSeenAt ? formatDay(incident.lastSeenAt.slice(0, 10), lang, { weekday: true }) : null],
+    [t("public.detail.lastSeen"), incident.lastSeenAt ? formatTehranDateTime(incident.lastSeenAt, lang, { weekday: true, zone: true }) : null],
   ];
 
   return (

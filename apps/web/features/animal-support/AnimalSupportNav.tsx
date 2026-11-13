@@ -15,8 +15,8 @@ const NAV_LABEL = { fa: "بخش‌های حمایت از حیوان", en: "Anima
 /** One secondary nav for the animal-support area, so needs, campaigns and organizations are never dead ends from each other. */
 export function AnimalSupportNav() {
   const raw = useLocale();
-  const locale = (raw === "fa" || raw === "de" || raw === "es" ? raw : "en") as keyof typeof NAV_LABEL;
-  const path = (usePathname() ?? "").replace(/^\/(fa|en|de|es)/, "");
+  const locale = (raw in NAV_LABEL ? raw : "en") as keyof typeof NAV_LABEL;
+  const path = (usePathname() ?? "").replace(/^\/(fa|en|de|es|ar|nl)(?=\/|$)/, "");
   return (
     <nav aria-label={NAV_LABEL[locale]} className="section-tabs">
       {ITEMS.map((item) => {

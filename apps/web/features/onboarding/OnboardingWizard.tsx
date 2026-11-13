@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { ErrorRecovery, Skeleton } from "@petlife/ui";
 import { onboardingService } from "@/services/onboarding.service";
 import { petsService } from "@/services/pets.service";
+import { reloadHouseholdPets } from "@/hooks/use-app-bootstrap";
 import { useOnboardingStore } from "@/stores/onboarding-store";
 import { sanitizeReturnTo } from "@/lib/auth/return-to";
 import { HouseholdStep } from "./steps/HouseholdStep";
@@ -59,6 +60,8 @@ function OnboardingWizardInner() {
       if (cancelled) return;
 
       if (progress.status === "COMPLETED" && progress.chapter === "READY") {
+        await reloadHouseholdPets().catch(() => undefined);
+        if (cancelled) return;
         router.replace(sanitizeReturnTo(returnTo, `/${locale}/home`));
         return;
       }

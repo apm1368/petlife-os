@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, Req, UseGuards } from "@nestjs/common";
-import { BookingStatus, ProviderReviewStatus } from "@prisma/client";
+import { BookingStatus, NoShowParty, ProviderReviewStatus } from "@prisma/client";
 import { Type } from "class-transformer";
 import { IsDateString, IsEnum, IsIn, IsInt, IsOptional, IsString, IsUUID, Length, Max, MaxLength, Min } from "class-validator";
 import { SessionAuthGuard } from "../../../common/auth/session-auth.guard";
@@ -25,6 +25,8 @@ export class StaffRefundBookingDto {
 
 class AdminBookingListQueryDto {
   @IsOptional() @IsEnum(BookingStatus) status?: BookingStatus;
+  /** PROVIDER: members reported the provider didn't show up; OWNER: the provider marked the owner absent. */
+  @IsOptional() @IsEnum(NoShowParty) noShowParty?: NoShowParty;
   @IsOptional() @IsUUID() providerId?: string;
   @IsOptional() @IsString() @MaxLength(100) q?: string;
   @IsOptional() @IsDateString() from?: string;
