@@ -7090,7 +7090,7 @@
       },
       "shortcuts": "میانبرها",
       "healthLink": "صفحهٔ وضعیت",
-      "workersSummary": "{running} از {total} کار پس‌زمینه در حال اجراست",
+      "workersSummary": "{running} از {total} کار پس‌زمینه سالم است",
       "priority": {
         "URGENT": "فوری",
         "HIGH": "بالا"

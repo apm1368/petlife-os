@@ -176,7 +176,9 @@ export function AdminDashboardView() {
   const hour = tehranHour();
   const greeting = t(hour < 12 ? "greeting.morning" : hour < 17 ? "greeting.afternoon" : "greeting.evening");
   const workers = health.value?.components.workers ?? [];
-  const healthyWorkers = workers.filter((w) => w.status === "RUNNING" || w.status === "HEALTHY" || w.status === "UP").length;
+  // The API reports OK / LATE / FAILING / WAITING_FIRST_RUN per worker (admin-system.service.ts); counting
+  // RUNNING/HEALTHY/UP showed "0 of 16" while every worker was fine.
+  const healthyWorkers = workers.filter((w) => w.status === "OK" || w.status === "WAITING_FIRST_RUN").length;
 
   return (
     <div className="gx-page gx-dashboard">

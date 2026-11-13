@@ -6400,7 +6400,7 @@
       },
       "shortcuts": "Schnellzugriffe",
       "healthLink": "Statusseite",
-      "workersSummary": "{running} von {total} Hintergrundjobs laufen",
+      "workersSummary": "{running} von {total} Hintergrundjobs fehlerfrei",
       "priority": {
         "URGENT": "Dringend",
         "HIGH": "Hoch"

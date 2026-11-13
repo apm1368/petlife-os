@@ -6390,7 +6390,7 @@
       },
       "shortcuts": "Accesos directos",
       "healthLink": "Página de estado",
-      "workersSummary": "{running} de {total} tareas en segundo plano en marcha",
+      "workersSummary": "{running} de {total} tareas en segundo plano sin errores",
       "priority": {
         "URGENT": "Urgente",
         "HIGH": "Alta"
