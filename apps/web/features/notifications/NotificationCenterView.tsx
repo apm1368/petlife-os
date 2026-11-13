@@ -28,7 +28,7 @@ const CATEGORY_TONE: Record<string, "neutral" | "success" | "urgent"> = {
 };
 
 function formatTimestamp(iso: string, locale: string): string {
-  const intlLocale = locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-US";
+  const intlLocale = locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : locale === "ar" ? "ar" : locale === "nl" ? "nl-NL" : "en-US";
   return new Intl.DateTimeFormat(intlLocale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(iso));
 }
 

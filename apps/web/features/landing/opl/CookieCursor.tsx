@@ -16,7 +16,8 @@ export function CookieCursor() {
   const host = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const root = host.current;
-    if (!root || prefersReducedMotion()) return;
+    // Touch-only screens: no cursor to follow, so no Cookie (hidden by opl-touch.css) and no animation loop.
+    if (!root || prefersReducedMotion() || mediaMatches("(hover: none) and (pointer: coarse)")) return;
     const ck = root.querySelector<HTMLDivElement>(".opl-ck")!;
     const body = root.querySelector<HTMLDivElement>(".opl-ck__body")!;
     const bubble = root.querySelector<HTMLDivElement>(".opl-ck__bubble")!;

@@ -15,6 +15,11 @@ describe("formatCurrency", () => {
     expect(formatCurrency(1_250_000, "es")).toBe("125.000 Toman");
   });
 
+  it("writes the unit in Arabic script on Arabic pages and keeps Toman in Dutch", () => {
+    expect(formatCurrency(1_250_000, "ar")).toBe("125,000 تومان");
+    expect(formatCurrency(1_250_000, "nl")).toBe("125.000 Toman");
+  });
+
   it("rounds rather than truncating a non-multiple-of-10 amount", () => {
     expect(formatCurrency(1_255_005, "en")).toBe("125,501 Toman");
   });

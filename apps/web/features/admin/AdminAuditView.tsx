@@ -7,7 +7,7 @@ import type { AdminAuditLogDto } from "@petlife/types";
 import { adminService } from "@/services/admin.service";
 
 function formatDate(iso: string, locale: string) {
-  const dateLocale = locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-US";
+  const dateLocale = locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : locale === "ar" ? "ar" : locale === "nl" ? "nl-NL" : "en-US";
   return new Intl.DateTimeFormat(dateLocale, { dateStyle: "short", timeStyle: "short" }).format(new Date(iso));
 }
 

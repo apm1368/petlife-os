@@ -34,7 +34,7 @@ interface Props {
 export function WeekAvailability({ serviceId, locationId, start, locale, variantId, providerUserId, petId, selected, onSelect, hrefFor }: Props) {
   const fa = locale === "fa";
   const t = useTranslations("providerProfile.availability");
-  const dateLocale = locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-GB";
+  const dateLocale = locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : locale === "ar" ? "ar" : locale === "nl" ? "nl-NL" : "en-GB";
   const [counts, setCounts] = useState<Record<string, number> | null>(null);
   const [failed, setFailed] = useState(false);
 

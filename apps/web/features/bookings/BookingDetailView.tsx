@@ -364,7 +364,7 @@ export function BookingDetailView({ bookingId }: { bookingId: string }) {
                     onClick={() => setRescheduleSlot(slot.startAt)}
                     className={`rounded border px-2 py-2 text-sm ${rescheduleSlot === slot.startAt ? "border-brand-natural bg-brand-solid text-on-brand" : "border-border-subtle"}`}
                   >
-                    {new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-GB", {
+                    {new Intl.DateTimeFormat(locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : locale === "ar" ? "ar" : locale === "nl" ? "nl-NL" : "en-GB", {
                       hour: "2-digit",
                       minute: "2-digit",
                       timeZone: slot.timezone,
