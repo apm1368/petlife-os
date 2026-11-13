@@ -66,7 +66,9 @@ export class TravelExternalPublicService {
   /** Semantic trust labels; Codex decides the visuals. */
   private trustLabels(item: ReturnType<TravelExternalPublicService["display"]>, price: { state: string; freshness?: string; availability?: { state: string } }) {
     const l: string[] = [];
-    l.push(item.pet.policyStatus === "CONFIRMED_ALLOWED" ? "PET_POLICY_CONFIRMED" : item.pet.policyStatus === "CONFIRMED_NOT_ALLOWED" ? "PET_POLICY_NOT_ALLOWED" : item.pet.policyStatus === "AMBIGUOUS" ? "PET_POLICY_AMBIGUOUS" : "PET_POLICY_UNKNOWN");
+    // CONFIRMED means opetlife staff checked it. A source's own pet marker (Jajiga's filter, a scraped amenity) is that
+    // source's claim and is labelled as such, never as confirmed.
+    l.push(item.pet.policyStatus === "CONFIRMED_ALLOWED" ? (item.pet.authority === "ADMIN_CONFIRMED" ? "PET_POLICY_CONFIRMED" : "PET_POLICY_SOURCE_REPORTED") : item.pet.policyStatus === "CONFIRMED_NOT_ALLOWED" ? "PET_POLICY_NOT_ALLOWED" : item.pet.policyStatus === "AMBIGUOUS" ? "PET_POLICY_AMBIGUOUS" : "PET_POLICY_UNKNOWN");
     if (price.state === "FRESH") l.push(price.freshness === "AGING" ? "PRICE_AGING" : "PRICE_FRESH");
     else if (price.state === "STALE") l.push("PRICE_STALE");
     else l.push("PRICE_UNKNOWN");

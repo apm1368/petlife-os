@@ -7542,6 +7542,28 @@
     "searchAction": "Buscar"
   },
   "externalTravel": {
+    "petPerSource": "Según {source}, este alojamiento admite mascotas. Consulta las condiciones para tu mascota y la disponibilidad para tus fechas con {source} o con el anfitrión.",
+    "petVerifiedByOpetlife": "Aceptación de mascotas revisada y verificada por opetlife",
+    "petFacts": {
+      "title": "Condiciones para mascotas",
+      "species": "Especie",
+      "size": "Tamaño",
+      "indoor": "Acceso al interior",
+      "fee": "Tarifa por mascota",
+      "approval": "Aprobación del anfitrión",
+      "unknown": "Desconocido",
+      "yes": "Sí",
+      "no": "No",
+      "dogs": "Perros",
+      "cats": "Gatos",
+      "upTo": "Hasta {limit}",
+      "noFee": "Sin cargo",
+      "approvalNeeded": "Necesaria",
+      "approvalNotNeeded": "No necesaria"
+    },
+    "startingPrice": "Desde {amount}",
+    "updatedAgo": "Actualizado {ago}",
+    "viewOnSource": "Ver este alojamiento en {source}",
     "title": "Alojamientos de fuentes externas",
     "detailTitle": "Detalles del alojamiento externo",
     "disclaimer": "La información procede de fuentes públicas y puede cambiar. Confirma con el alojamiento la aceptación de mascotas y las condiciones antes de reservar.",
@@ -7607,7 +7629,7 @@
     "alreadyAttached": "Ya está en el plan de viaje",
     "attach": "Añadir al plan de viaje",
     "policy": {
-      "CONFIRMED_ALLOWED": "Aceptación de mascotas confirmada según las condiciones de la fuente",
+      "CONFIRMED_ALLOWED": "Admite mascotas según la fuente",
       "CONFIRMED_NOT_ALLOWED": "La fuente indica que no se admiten mascotas",
       "UNKNOWN": "Se desconoce si admite mascotas",
       "AMBIGUOUS": "La información sobre mascotas es ambigua"

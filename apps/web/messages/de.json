@@ -7552,6 +7552,28 @@
     "searchAction": "Suchen"
   },
   "externalTravel": {
+    "petPerSource": "Laut {source} nimmt diese Unterkunft Haustiere auf. Kläre die Bedingungen für dein Tier und die Verfügbarkeit zu deinen Reisedaten mit {source} oder dem Gastgeber.",
+    "petVerifiedByOpetlife": "Haustieraufnahme von opetlife geprüft und bestätigt",
+    "petFacts": {
+      "title": "Bedingungen für Haustiere",
+      "species": "Tierart",
+      "size": "Größe",
+      "indoor": "Zugang ins Haus",
+      "fee": "Haustiergebühr",
+      "approval": "Zustimmung des Gastgebers",
+      "unknown": "Unbekannt",
+      "yes": "Ja",
+      "no": "Nein",
+      "dogs": "Hunde",
+      "cats": "Katzen",
+      "upTo": "Bis {limit}",
+      "noFee": "Keine Gebühr",
+      "approvalNeeded": "Erforderlich",
+      "approvalNotNeeded": "Nicht erforderlich"
+    },
+    "startingPrice": "Ab {amount}",
+    "updatedAgo": "Aktualisiert {ago}",
+    "viewOnSource": "Diese Unterkunft bei {source} ansehen",
     "title": "Unterkünfte aus externen Quellen",
     "detailTitle": "Details zur externen Unterkunft",
     "disclaimer": "Die Informationen stammen aus öffentlichen Quellen und können sich ändern. Bestätige die Haustieraufnahme und die Bedingungen vor der Buchung direkt bei der Unterkunft.",
@@ -7617,7 +7639,7 @@
     "alreadyAttached": "Bereits im Reiseplan",
     "attach": "Zum Reiseplan hinzufügen",
     "policy": {
-      "CONFIRMED_ALLOWED": "Haustieraufnahme laut Quellenbedingungen bestätigt",
+      "CONFIRMED_ALLOWED": "Laut Quelle haustierfreundlich",
       "CONFIRMED_NOT_ALLOWED": "Laut Quelle sind Haustiere nicht erlaubt",
       "UNKNOWN": "Haustieraufnahme unbekannt",
       "AMBIGUOUS": "Angaben zur Haustieraufnahme sind unklar"
