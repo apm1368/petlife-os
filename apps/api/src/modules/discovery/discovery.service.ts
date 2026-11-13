@@ -217,7 +217,7 @@ export class DiscoveryService {
         case "EARLIEST":
           return nullsLast(time(a.nextAvailableAt), time(b.nextAvailableAt)) || byName(a, b);
         case "NEAREST":
-          return nullsLast(a.sortDistanceKm, b.sortDistanceKm) || byName(a, b);
+          return nullsLast(a.sortDistanceKm ?? null, b.sortDistanceKm ?? null) || byName(a, b);
         case "TOP_RATED":
           return nullsLast(a.rating.average === null ? null : -a.rating.average, b.rating.average === null ? null : -b.rating.average) || b.rating.count - a.rating.count || byName(a, b);
         case "LOWEST_PRICE":
