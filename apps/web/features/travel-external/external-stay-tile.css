@@ -51,3 +51,22 @@ details.xs-tile__conditions li span:last-child { color: var(--text-primary); }
 .xs-tile__cta:focus-visible { outline: 3px solid var(--focus-ring, var(--brand-natural)); outline-offset: 2px; }
 .xs-tile__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; font-size: .8rem; color: var(--text-secondary); }
 .xs-tile__foot a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; color: var(--text-primary); text-decoration: underline; text-underline-offset: 3px; }
+
+/* Pattern tokens first (opl, light/dark), shared tokens as fallback: the card reads the same on every surface. */
+.xs-tile__price { background: var(--opl-mint, color-mix(in srgb, var(--brand-natural) 8%, var(--surface-elevated))); }
+.xs-tile__cta { background: var(--opl-forest, var(--brand-solid)); color: var(--opl-on-forest, var(--text-inverse, #fff)); }
+.xs-tile__cta:hover { background: var(--opl-forest-2, var(--opl-forest, var(--brand-solid-strong, var(--brand-solid)))); }
+details.xs-tile__conditions summary { color: var(--opl-forest, var(--brand-natural)); }
+.xs-tile__placeholder { position: relative; z-index: 1; }
+.xs-tile__placeholder svg { color: var(--opl-forest, var(--brand-natural)); }
+.xs-tile__placeholder strong { color: var(--opl-ink, var(--text-primary)); }
+/* Designed placeholders per kind of stay (no source photos): soft opl gradients with two quiet shapes. */
+.xs-tile__media::before, .xs-tile__media::after { content: ""; position: absolute; border-radius: 50%; opacity: .55; pointer-events: none; }
+.xs-tile__media::before { width: 46%; aspect-ratio: 1; inset-block-start: -18%; inset-inline-end: -10%; background: var(--opl-raised, rgba(255, 255, 255, .7)); }
+.xs-tile__media::after { width: 30%; aspect-ratio: 1; inset-block-end: -14%; inset-inline-start: -6%; background: var(--opl-cream, rgba(255, 255, 255, .5)); }
+.xs-tile__media:has(img)::before, .xs-tile__media:has(img)::after { display: none; }
+.xs-kind--villa { background: linear-gradient(135deg, var(--opl-mint, #EEF7EC), var(--opl-apricot-bg, #FFF0E4)); }
+.xs-kind--apartment { background: linear-gradient(135deg, var(--opl-cream, #FDF4E6), var(--opl-plum-bg, #F3EDF7)); }
+.xs-kind--cottage { background: linear-gradient(135deg, var(--opl-mint, #EEF7EC), var(--opl-cream, #FDF4E6)); }
+.xs-kind--ecolodge { background: linear-gradient(135deg, var(--opl-apricot-bg, #FFF0E4), var(--opl-mint, #EEF7EC)); }
+.xs-kind--house { background: linear-gradient(135deg, var(--opl-apricot-bg, #FFF0E4), var(--opl-cream, #FDF4E6)); }
