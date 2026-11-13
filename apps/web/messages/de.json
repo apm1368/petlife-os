@@ -4222,7 +4222,8 @@
         "walletCardReceipts": "Kartenbelege",
         "repeatDeliveries": "Liefer-Abos",
         "orderLookup": "Bestellsuche",
-        "refundApprovals": "Erstattungsfreigaben"
+        "refundApprovals": "Erstattungsfreigaben",
+        "walletAdjustments": "Korrekturanträge"
       },
       "palette": {
         "actions": "Schnellaktionen",
@@ -6623,7 +6624,8 @@
           "pendingMemorials": "Zu prüfende Gedenkseiten",
           "openPlaceReports": "Ortsmeldungen",
           "openTasks": "Offene Aufgaben",
-          "pendingWalletTopUps": "Aufladebelege"
+          "pendingWalletTopUps": "Aufladebelege",
+          "pendingWalletAdjustments": "Korrekturen zur Freigabe"
         }
       },
       "performance": {
@@ -9642,11 +9644,12 @@
       "audit": "Prüfprotokoll",
       "auditEmpty": "Noch nichts protokolliert.",
       "by": "von {name}",
-      "openCustomer": "Kundenakte"
+      "openCustomer": "Kundenakte",
+      "approvedBy": "freigegeben von {name}"
     },
     "adjust": {
-      "title": "Guthaben korrigieren",
-      "hint": "Nur um einen Fehler zu beheben oder auszugleichen. Jede Korrektur wird mit Ihrem Namen, dem Grund und dem Guthaben davor und danach protokolliert.",
+      "title": "Korrektur beantragen (zweite Freigabe nötig)",
+      "hint": "Nur um einen Fehler zu beheben oder auszugleichen. Das Guthaben ändert sich erst, wenn ein anderer Admin mit derselben Berechtigung den Antrag freigibt. Beide Namen, der Grund und das Guthaben davor und danach werden protokolliert.",
       "direction": "Richtung",
       "directions": {
         "CREDIT": "Guthaben erhöhen",
@@ -9669,19 +9672,21 @@
       },
       "reason": "Erläuterung (bleibt im Prüfprotokoll)",
       "evidence": "Ticket oder Referenz (optional)",
-      "submit": "Korrektur speichern",
-      "confirm": "„{direction}“ über {amount} in „{bucket}“ buchen? Das wirkt sofort auf das Guthaben.",
-      "confirmYes": "Ja, buchen",
+      "submit": "Zur Freigabe senden",
+      "confirm": "„{direction}“ über {amount} in „{bucket}“ beantragen? Das Guthaben ändert sich erst nach der Freigabe durch einen zweiten Admin.",
+      "confirmYes": "Ja, Antrag senden",
       "cancel": "Abbrechen",
-      "saving": "Wird gespeichert…",
-      "done": "Korrektur gespeichert.",
-      "noPermission": "Für Korrekturen brauchen Sie die Berechtigung „Guthaben korrigieren“.",
+      "saving": "Wird gesendet…",
+      "done": "Antrag gesendet. Ein zweiter Admin muss ihn freigeben, bevor sich das Guthaben ändert.",
+      "noPermission": "Für das Beantragen oder Freigeben von Korrekturen brauchen Sie die Berechtigung „Guthaben korrigieren“.",
       "errors": {
         "INSUFFICIENT_WALLET_BALANCE": "Dieser Guthabenteil reicht dafür nicht aus.",
         "reasonTooShort": "Die Erläuterung braucht mindestens 5 Zeichen.",
         "amount": "Geben Sie einen gültigen Betrag ein.",
-        "generic": "Die Korrektur wurde nicht gespeichert."
-      }
+        "generic": "Der Antrag wurde nicht gesendet.",
+        "TOO_MANY_PENDING": "Für dieses Mitglied warten bereits so viele Anträge wie erlaubt. Entscheiden Sie zuerst über einige davon."
+      },
+      "confirmTitle": "Antrag senden?"
     },
     "topUps": {
       "title": "Aufladebelege",
@@ -9730,7 +9735,10 @@
       "wallet_debited": "Guthaben verringert",
       "wallet_top_up_approved": "Beleg bestätigt",
       "wallet_top_up_rejected": "Beleg abgelehnt",
-      "wallet_top_up_receipt_viewed": "Beleg angesehen"
+      "wallet_top_up_receipt_viewed": "Beleg angesehen",
+      "wallet_adjustment_requested": "Korrektur beantragt",
+      "wallet_adjustment_approved": "Korrektur freigegeben und gebucht",
+      "wallet_adjustment_rejected": "Korrekturantrag abgelehnt"
     },
     "entry": {
       "purpose": {
@@ -9752,6 +9760,48 @@
         "REFUND_OUTSIDE_SYSTEM": "Erstattung außerhalb einer Bestellung",
         "DUPLICATE_CREDIT_REVERSAL": "Doppelte Gutschrift storniert",
         "OTHER": "Andere Korrektur"
+      }
+    },
+    "requests": {
+      "title": "Korrekturanträge",
+      "subtitle": "Jede Guthabenkorrektur braucht einen zweiten Admin. Mit der Freigabe wird sie sofort gebucht; ein Antrag, über den niemand entscheidet, verfällt nach 72 Stunden.",
+      "detailTitle": "Korrekturanträge für dieses Mitglied",
+      "empty": "Keine Anträge.",
+      "filter": "Status",
+      "all": "Alle",
+      "status": {
+        "PENDING": "Wartet auf Freigabe",
+        "APPROVED": "Freigegeben und gebucht",
+        "REJECTED": "Abgelehnt",
+        "EXPIRED": "Verfallen"
+      },
+      "itemLabel": "Antrag über {amount} von {name}",
+      "requestedBy": "Beantragt von {name}",
+      "decidedBy": "entschieden von {name}",
+      "expires": "verfällt {date}",
+      "yours": "Ihr eigener Antrag: Ein anderer Admin muss ihn freigeben.",
+      "approve": "Freigeben",
+      "reject": "Ablehnen",
+      "approveTitle": "Diese Korrektur freigeben?",
+      "rejectTitle": "Diesen Antrag ablehnen?",
+      "summary": "„{direction}“ über {amount} in „{bucket}“ für {member}.",
+      "approveWarning": "Mit der Freigabe wird die Korrektur sofort gebucht und Ihr Name als zweiter Admin protokolliert.",
+      "rejectWarning": "Es wird nichts gebucht. Der Grund bleibt im Prüfprotokoll.",
+      "rejectReason": "Grund der Ablehnung (Pflichtfeld)",
+      "confirmApprove": "Freigeben und buchen",
+      "confirmReject": "Antrag ablehnen",
+      "cancel": "Abbrechen",
+      "approved": "Freigegeben; die Korrektur wurde gebucht.",
+      "rejected": "Abgelehnt; es wurde nichts gebucht.",
+      "noPermission": "Für Entscheidungen über Anträge brauchen Sie die Berechtigung „Guthaben korrigieren“.",
+      "errors": {
+        "WALLET_ADJUSTMENT_SELF_APPROVAL": "Sie haben diese Korrektur beantragt, daher muss ein anderer Admin sie freigeben.",
+        "WALLET_ADJUSTMENT_REQUEST_EXPIRED": "Dieser Antrag ist verfallen. Stellen Sie bei Bedarf einen neuen.",
+        "INVALID_WALLET_ADJUSTMENT_REQUEST_TRANSITION": "Über diesen Antrag wurde bereits entschieden. Laden Sie die Seite neu, um den Status zu sehen.",
+        "WALLET_ADJUSTMENT_REQUEST_NOT_FOUND": "Diesen Antrag gibt es nicht mehr.",
+        "INSUFFICIENT_WALLET_BALANCE": "In diesem Guthabenteil ist nicht mehr so viel vorhanden; die Abbuchung kann nicht gebucht werden.",
+        "reasonTooShort": "Der Grund braucht mindestens 5 Zeichen.",
+        "generic": "Das hat nicht geklappt. Bitte versuchen Sie es erneut."
       }
     }
   },

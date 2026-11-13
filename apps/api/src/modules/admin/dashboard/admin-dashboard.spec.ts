@@ -24,6 +24,7 @@ describe("dashboard permission boundary", () => {
       petMemorialSubmission: counter(14),
       placeReport: counter(15),
       walletTopUp: counter(16),
+      walletAdjustmentRequest: counter(19),
       accountDeletionRequest: counter(17),
       pet: counter(40),
       booking: counter(7),
@@ -68,6 +69,7 @@ describe("dashboard permission boundary", () => {
       pendingMemorials: 14,
       openPlaceReports: 15,
       pendingWalletTopUps: 16,
+      pendingWalletAdjustments: 19,
       pendingDeletionRequests: 17,
       launchKpis: { registeredPets: 40, newPetsThisWeek: 40, bookingsThisWeek: 7, bookingsLastWeek: 7 },
       openOwnershipDisputes: 18,
@@ -90,6 +92,17 @@ describe("dashboard permission boundary", () => {
     expect(db.accountDeletionRequest.count).not.toHaveBeenCalled();
     expect((await service.getSummary(actor(AdminRole.READ_ONLY))).pendingWalletTopUps).toBe(16);
     expect((await service.getSummary(actor(AdminRole.SUPER_ADMIN))).pendingDeletionRequests).toBe(17);
+  });
+
+  it("counts wallet corrections waiting for a second admin for anyone who may open Wallets, and only unexpired ones (FE-16)", async () => {
+    const { db, service } = setup();
+    expect((await service.getSummary(actor(AdminRole.FINANCE))).pendingWalletAdjustments).toBe(19);
+    const where = db.walletAdjustmentRequest.count.mock.calls[0][0].where;
+    expect(where.status).toBe("PENDING");
+    expect(where.expiresAt.gt).toBeInstanceOf(Date);
+    db.walletAdjustmentRequest.count.mockClear();
+    expect((await service.getSummary(actor(AdminRole.EDITOR))).pendingWalletAdjustments).toBeNull();
+    expect(db.walletAdjustmentRequest.count).not.toHaveBeenCalled();
   });
 
   it("keeps the platform-wide launch figures from vertical-scoped roles (#290 Q97)", async () => {

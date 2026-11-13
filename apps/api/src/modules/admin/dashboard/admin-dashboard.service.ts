@@ -23,6 +23,7 @@ import {
   SupportNeedStatus,
   TravelListingStatus,
   TrustCaseStatus,
+  WalletAdjustmentRequestStatus,
   WalletTopUpStatus,
 } from "@prisma/client";
 import type { AdminDashboardSummaryDto, AdminLaunchKpisDto } from "@petlife/types";
@@ -61,6 +62,7 @@ export class AdminDashboardService {
       pendingMemorials,
       openPlaceReports,
       pendingWalletTopUps,
+      pendingWalletAdjustments,
       pendingDeletionRequests,
       launchKpis,
       openOwnershipDisputes,
@@ -89,6 +91,8 @@ export class AdminDashboardService {
       when(may("places.view"), () => this.prisma.placeReport.count({ where: { status: PlaceReportStatus.OPEN } })),
       // Same permission as the Wallets tab the badge sits on (a view-only admin sees the queue; reviewing needs more).
       when(may("wallet.view"), () => this.prisma.walletTopUp.count({ where: { status: WalletTopUpStatus.REVIEW_PENDING } })),
+      // FE-16: wallet corrections waiting for a second admin (not yet lapsed); same tab permission as the top-ups.
+      when(may("wallet.view"), () => this.prisma.walletAdjustmentRequest.count({ where: { status: WalletAdjustmentRequestStatus.PENDING, expiresAt: { gt: new Date() } } })),
       // Account deletion requests waiting on staff: new ones and those in retention review (execution stays disabled).
       when(may("admin.manage"), () => this.prisma.accountDeletionRequest.count({ where: { state: { in: [AccountDeletionState.REQUESTED, AccountDeletionState.PENDING_RETENTION] } } })),
       // Platform-wide figures: only for unscoped roles, so a vertical-limited role never sees other verticals' bookings.
@@ -117,6 +121,7 @@ export class AdminDashboardService {
       pendingMemorials,
       openPlaceReports,
       pendingWalletTopUps,
+      pendingWalletAdjustments,
       pendingDeletionRequests,
       launchKpis,
       openOwnershipDisputes,

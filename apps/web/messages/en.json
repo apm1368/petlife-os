@@ -5020,7 +5020,8 @@
         "walletCardReceipts": "Card-to-card receipts",
         "repeatDeliveries": "Repeat deliveries",
         "orderLookup": "Order lookup",
-        "refundApprovals": "Refund approvals"
+        "refundApprovals": "Refund approvals",
+        "walletAdjustments": "Correction requests"
       },
       "palette": {
         "actions": "Quick actions",
@@ -7550,7 +7551,8 @@
           "pendingMemorials": "Memorials to review",
           "openPlaceReports": "Place reports",
           "openTasks": "Open tasks",
-          "pendingWalletTopUps": "Top-up receipts"
+          "pendingWalletTopUps": "Top-up receipts",
+          "pendingWalletAdjustments": "Corrections to approve"
         }
       },
       "performance": {
@@ -10629,11 +10631,12 @@
       "audit": "Audit log",
       "auditEmpty": "Nothing recorded yet.",
       "by": "by {name}",
-      "openCustomer": "Customer record"
+      "openCustomer": "Customer record",
+      "approvedBy": "approved by {name}"
     },
     "adjust": {
-      "title": "Correct the balance",
-      "hint": "Only to fix a mistake or make up for one. Each correction is logged with your name, the reason and the balance before and after.",
+      "title": "Request adjustment (needs a second admin)",
+      "hint": "Only to fix a mistake or make up for one. Nothing changes until a different admin with the same permission approves the request. Both names, the reason and the balance before and after are logged.",
       "direction": "Direction",
       "directions": {
         "CREDIT": "Add money",
@@ -10656,19 +10659,21 @@
       },
       "reason": "Explanation (kept in the audit log)",
       "evidence": "Ticket or reference (optional)",
-      "submit": "Save correction",
-      "confirm": "Record “{direction}” of {amount} in “{bucket}”? It applies to the balance immediately.",
-      "confirmYes": "Yes, record it",
+      "submit": "Send for approval",
+      "confirm": "Ask for “{direction}” of {amount} in “{bucket}”? The balance changes only after a second admin approves it.",
+      "confirmYes": "Yes, send the request",
       "cancel": "Cancel",
-      "saving": "Saving…",
-      "done": "Correction saved.",
-      "noPermission": "Correcting a balance needs the “Correct balances” permission.",
+      "saving": "Sending…",
+      "done": "Request sent. A second admin must approve it before the balance changes.",
+      "noPermission": "Requesting or approving a correction needs the “Correct balances” permission.",
       "errors": {
         "INSUFFICIENT_WALLET_BALANCE": "This part of the wallet does not hold that much.",
         "reasonTooShort": "The explanation needs at least 5 characters.",
         "amount": "Enter a valid amount.",
-        "generic": "The correction was not saved."
-      }
+        "generic": "The request was not sent.",
+        "TOO_MANY_PENDING": "This member already has as many requests waiting as allowed. Decide some of them first."
+      },
+      "confirmTitle": "Send this request?"
     },
     "topUps": {
       "title": "Top-up receipts",
@@ -10717,7 +10722,10 @@
       "wallet_debited": "Balance reduced",
       "wallet_top_up_approved": "Receipt approved",
       "wallet_top_up_rejected": "Receipt declined",
-      "wallet_top_up_receipt_viewed": "Receipt viewed"
+      "wallet_top_up_receipt_viewed": "Receipt viewed",
+      "wallet_adjustment_requested": "Correction requested",
+      "wallet_adjustment_approved": "Correction approved and posted",
+      "wallet_adjustment_rejected": "Correction request rejected"
     },
     "entry": {
       "purpose": {
@@ -10739,6 +10747,48 @@
         "REFUND_OUTSIDE_SYSTEM": "Refund outside an order",
         "DUPLICATE_CREDIT_REVERSAL": "Duplicate credit reversed",
         "OTHER": "Other correction"
+      }
+    },
+    "requests": {
+      "title": "Correction requests",
+      "subtitle": "Every balance correction needs a second admin. Approving posts it to the wallet at once; a request nobody decides lapses after 72 hours.",
+      "detailTitle": "Correction requests for this member",
+      "empty": "No requests here.",
+      "filter": "Status",
+      "all": "All",
+      "status": {
+        "PENDING": "Waiting for approval",
+        "APPROVED": "Approved and posted",
+        "REJECTED": "Rejected",
+        "EXPIRED": "Expired"
+      },
+      "itemLabel": "Request for {amount} by {name}",
+      "requestedBy": "Asked by {name}",
+      "decidedBy": "decided by {name}",
+      "expires": "lapses {date}",
+      "yours": "Your request: another admin must approve it.",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approveTitle": "Approve this correction?",
+      "rejectTitle": "Reject this request?",
+      "summary": "“{direction}” of {amount} in “{bucket}” for {member}.",
+      "approveWarning": "Approving posts it to the wallet immediately and records your name as the second admin.",
+      "rejectWarning": "Nothing is posted. The reason is kept in the audit log.",
+      "rejectReason": "Reason for rejecting (required)",
+      "confirmApprove": "Approve and post",
+      "confirmReject": "Reject request",
+      "cancel": "Cancel",
+      "approved": "Approved; the correction was posted to the wallet.",
+      "rejected": "Rejected; nothing was posted.",
+      "noPermission": "Deciding on a request needs the “Correct balances” permission.",
+      "errors": {
+        "WALLET_ADJUSTMENT_SELF_APPROVAL": "You asked for this correction, so a different admin must approve it.",
+        "WALLET_ADJUSTMENT_REQUEST_EXPIRED": "This request has expired. Ask for a new one if it is still needed.",
+        "INVALID_WALLET_ADJUSTMENT_REQUEST_TRANSITION": "This request was already decided. Reload to see its status.",
+        "WALLET_ADJUSTMENT_REQUEST_NOT_FOUND": "This request no longer exists.",
+        "INSUFFICIENT_WALLET_BALANCE": "The wallet no longer holds that much in this part, so the debit can't be posted.",
+        "reasonTooShort": "The reason needs at least 5 characters.",
+        "generic": "That didn't work. Please try again."
       }
     }
   },

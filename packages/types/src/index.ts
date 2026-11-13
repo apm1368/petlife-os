@@ -3434,6 +3434,8 @@ export interface AdminDashboardSummaryDto {
   openPlaceReports: number | null;
   /** Card-to-card wallet top-up receipts waiting for finance. */
   pendingWalletTopUps: number | null;
+  /** FE-16: wallet corrections waiting for a second admin's approval (PENDING, not yet expired); wallet.view. */
+  pendingWalletAdjustments: number | null;
   /** Account deletion requests waiting on staff (REQUESTED or PENDING_RETENTION); admin.manage only. */
   pendingDeletionRequests: number | null;
   /** Pet ownership transfers in DISPUTED, waiting for staff to record the outcome; customer.view. */
@@ -7286,6 +7288,8 @@ export type WalletTopUpRailValue = "ZIBAL" | "CARD_TO_CARD";
 export type WalletTopUpStatusValue = "AWAITING_PAYMENT" | "AWAITING_RECEIPT" | "REVIEW_PENDING" | "CREDITED" | "FAILED" | "REJECTED" | "EXPIRED" | "CANCELLED";
 export type WalletAdjustmentDirectionValue = "CREDIT" | "DEBIT";
 export type WalletAdjustmentReasonCode = "GOODWILL" | "SERVICE_RECOVERY" | "PAYMENT_CORRECTION" | "REFUND_OUTSIDE_SYSTEM" | "DUPLICATE_CREDIT_REVERSAL" | "OTHER";
+/** FE-16: a correction is requested by one admin and posted only when a different admin approves it. */
+export type WalletAdjustmentRequestStatusValue = "PENDING" | "APPROVED" | "REJECTED" | "EXPIRED";
 
 export interface WalletBalancesDto {
   /** Top-ups and gifts: spendable on purchases only. */
@@ -7435,7 +7439,37 @@ export interface AdminWalletAdjustmentDto {
   reasonCode: string;
   reason: string;
   evidenceReference: string | null;
+  /** The admin who asked for the correction. */
   createdBy: { adminUserId: string; displayName: string | null };
+  /** The second admin who approved and posted it (FE-16); null for corrections made before two-person approval. */
+  approvedBy: { adminUserId: string; displayName: string | null } | null;
+  createdAt: string;
+}
+
+/**
+ * FE-16: a wallet correction waiting for (or decided by) a second admin. Nothing is posted while it is PENDING;
+ * APPROVED means the WalletAdjustment and its wallet entry were written (walletAdjustmentId / walletEntryId).
+ */
+export interface AdminWalletAdjustmentRequestDto {
+  id: string;
+  userId: string;
+  userDisplayName: string | null;
+  direction: WalletAdjustmentDirectionValue;
+  balanceType: WalletBalanceTypeValue;
+  /** Integer rials. */
+  amount: number;
+  reasonCode: WalletAdjustmentReasonCode;
+  /** The requester's explanation. */
+  reason: string;
+  evidenceReference: string | null;
+  status: WalletAdjustmentRequestStatusValue;
+  requestedBy: { adminUserId: string; displayName: string | null };
+  decidedBy: { adminUserId: string; displayName: string | null } | null;
+  decidedAt: string | null;
+  decisionReason: string | null;
+  walletAdjustmentId: string | null;
+  walletEntryId: string | null;
+  expiresAt: string;
   createdAt: string;
 }
 
@@ -7463,6 +7497,8 @@ export interface AdminWalletDetailDto {
   entries: WalletEntryDto[];
   topUps: AdminWalletTopUpDto[];
   adjustments: AdminWalletAdjustmentDto[];
+  /** FE-16: this member's correction requests, open ones first. */
+  adjustmentRequests: AdminWalletAdjustmentRequestDto[];
   audit: AdminWalletAuditDto[];
 }
 
