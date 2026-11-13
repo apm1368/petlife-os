@@ -1303,4 +1303,6 @@ a.erp-list__row:hover { background:var(--erp-bg); }
   .pd-service__book, .pd-week-select select, .commerce-nav__brand { min-height: 44px; }
   /* The switch keeps its 48×28 look; a transparent border makes the tap area 64×44. */
   .account-switch { box-sizing: content-box; border: 8px solid transparent; background-clip: padding-box; }
+  /* The password show/hide toggle is also used outside the auth pages (e.g. /profile/security), where auth.css is not loaded. */
+  .auth-password-toggle { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; }
 }

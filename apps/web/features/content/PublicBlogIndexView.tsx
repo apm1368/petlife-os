@@ -81,11 +81,11 @@ export function PublicBlogIndexView({ categorySlug, tagSlug, titleOverride, desc
 
       {section === "blog" && categories.length > 0 ? (
         <div className="editorial-topics">
-          <Link href={`/${locale}/blog`} className="rounded-full border border-border-strong px-3 py-1 text-metadata text-text-secondary">
+          <Link href={`/${locale}/blog`} className="inline-flex min-h-11 items-center rounded-full border border-border-strong px-3 py-1 text-metadata text-text-secondary">
             {t("allCategories")}
           </Link>
           {categories.map((c) => (
-            <Link key={c.id} href={`/${locale}/blog/category/${c.slug}`} className="rounded-full border border-border-strong px-3 py-1 text-metadata text-text-secondary">
+            <Link key={c.id} href={`/${locale}/blog/category/${c.slug}`} className="inline-flex min-h-11 items-center rounded-full border border-border-strong px-3 py-1 text-metadata text-text-secondary">
               {c.name}
             </Link>
           ))}
