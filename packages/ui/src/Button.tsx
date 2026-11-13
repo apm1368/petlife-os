@@ -22,7 +22,7 @@ const variantClasses: Record<ButtonVariant, string> = {
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: "h-9 px-3 text-cta",
+  sm: "h-9 px-3 text-cta [@media(pointer:coarse)]:h-11 [@media(pointer:coarse)]:min-w-11",
   md: "h-11 px-4 text-cta",
   lg: "min-h-[var(--touch-target-large)] px-6 text-cta",
 };

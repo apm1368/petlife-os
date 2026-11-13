@@ -12,6 +12,7 @@ import { ApiError } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency/format-currency";
 import { entitlementLabelKey } from "./entitlement-labels";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { isRouteLocale } from "@/lib/i18n/config";
 
 /**
  * Plan comparison (spec: "must not visually hide Free"). FREE is rendered
@@ -67,8 +68,8 @@ export function SubscriptionPlansView() {
   if (!plans || !sub) return <Skeleton className="h-64 w-full" aria-label={tCommon("loading")} />;
 
   const onFreePlan = !sub.price;
-  const numberLocale = locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-GB";
-  const currencyLocale = locale === "fa" || locale === "de" || locale === "es" ? locale : "en";
+  const numberLocale = locale === "fa" ? "fa-IR" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : locale === "ar" ? "ar" : locale === "nl" ? "nl-NL" : "en-GB";
+  const currencyLocale = isRouteLocale(locale) ? locale : "en";
 
   return (
     <div className="flex flex-col gap-4">
@@ -95,7 +96,7 @@ export function SubscriptionPlansView() {
                 <h2 className="text-section-title text-text-primary">{locale === "fa" ? plan.nameFa : plan.nameEn}</h2>
                 {isCurrent ? <span className="text-metadata text-text-secondary">{t("currentPlanBadge")}</span> : null}
               </div>
-              {locale === "de" || locale === "es" ? <p className="text-metadata text-text-secondary">{t("planContentEnglish")}</p> : null}
+              {locale !== "fa" && locale !== "en" ? <p className="text-metadata text-text-secondary">{t("planContentEnglish")}</p> : null}
               {(locale === "fa" ? plan.descriptionFa : plan.descriptionEn) ? <p className="text-body text-text-secondary">{locale === "fa" ? plan.descriptionFa : plan.descriptionEn}</p> : null}
               <p className="text-body font-medium text-text-primary">{plan.isFree ? t("free") : price ? formatCurrency(price.amount, currencyLocale) : t("notAvailableHere")}</p>
 

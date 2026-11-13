@@ -117,7 +117,7 @@ export function PetCardManagerView({ petId }: { petId: string }) {
   return (
     <div className="pet-card-manager flex flex-col gap-5">
       <div>
-        <Link href={back} className="text-metadata text-text-secondary underline">{t("back", { name })}</Link>
+        <Link href={back} className="inline-flex min-h-11 items-center text-metadata text-text-secondary underline">{t("back", { name })}</Link>
         <h1 className="mt-2 text-page-title text-text-primary">{t("title")}</h1>
         <p className="mt-1 text-body text-text-secondary">{t("intro", { name })}</p>
       </div>

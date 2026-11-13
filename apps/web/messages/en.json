@@ -4221,7 +4221,7 @@
       "sourcePetlife": "opetlife",
       "externalOrderId": "External order: {id}",
       "paymentSource": {
-        "PETLIFE_PAYMENT": "Paid vian opetlife",
+        "PETLIFE_PAYMENT": "Paid via opetlife",
         "MARKETPLACE_COLLECTED": "Collected by marketplace",
         "CASH_ON_DELIVERY": "Cash on delivery",
         "UNKNOWN": "Payment source unknown"
@@ -4235,7 +4235,7 @@
       "sourcePetlife": "opetlife",
       "externalOrderId": "External order: {id}",
       "paymentSource": {
-        "PETLIFE_PAYMENT": "Paid vian opetlife",
+        "PETLIFE_PAYMENT": "Paid via opetlife",
         "MARKETPLACE_COLLECTED": "Collected by marketplace",
         "CASH_ON_DELIVERY": "Cash on delivery",
         "UNKNOWN": "Payment source unknown"
@@ -4713,6 +4713,45 @@
     }
   },
   "admin": {
+    "productReadiness": {
+      "title": "Incomplete products",
+      "intro": "Products that are not ready to sell, and every reason. Fix them on the product and its offers; nothing here publishes or hides a product.",
+      "issuesLabel": "Problems",
+      "issue": {
+        "ANY": "All problems",
+        "MEDIA_INCOMPLETE": "Images incomplete",
+        "MISSING_BRAND": "No brand",
+        "MISSING_SPECS": "No specifications",
+        "UNREVIEWED_SOURCE": "Source facts not reviewed",
+        "NO_LIVE_OFFER": "No live offer"
+      },
+      "search": "Product name",
+      "statusFilter": "Product status",
+      "allStatuses": "All statuses",
+      "status": {
+        "ACTIVE": "Live",
+        "DRAFT": "Draft",
+        "INACTIVE": "Inactive"
+      },
+      "searchButton": "Search",
+      "listTitle": "Products to fix",
+      "rule": "Publishing needs exactly 3 images, each with alternative text. A live offer is an active, approved offer from a verified, active shop with stock.",
+      "forbidden": "commerce.view permission required",
+      "loadFailed": "Could not load the readiness queue",
+      "loadFailedHint": "The error came from the server and is shown as is; nothing was hidden.",
+      "retry": "Try again",
+      "loading": "Loading…",
+      "empty": "Every product is ready to sell.",
+      "emptyIssue": "No product has this problem.",
+      "media": "{count} of 3 images · {withoutAlt} without alt text",
+      "publishOk": "publishing allowed",
+      "publishBlocked": "publishing blocked",
+      "offers": "{live} live offers of {total}",
+      "pages": "Pages",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {page} of {pages}"
+    },
     "partners": {
       "servicesTitle": "Services",
       "shopsTitle": "Shops",
@@ -4956,6 +4995,7 @@
         "twoStep": "Two-step sign-in"
       },
       "tabs": {
+        "productReadiness": "Incomplete products",
         "holidays": "Holidays and closures",
         "ownershipTransfers": "Ownership transfers",
         "deletionRequests": "Deletion requests",
@@ -12039,21 +12079,30 @@
   },
   "adminDigikalaFacts": {
     "title": "One-time Digikala pet import (facts only)",
-    "hint": "Digikala's best-selling pet-category products come into the catalog once, as drafts.",
+    "hint": "Digikala's best-selling products from every pet sub-category (in proportion to each one's size) come into the catalog once, as drafts.",
     "rules": {
-      "facts": "Name, brand, category, specifications and weight are imported.",
+      "facts": "Name, brand, category, specifications, weight and variants (colour, size, flavour) are imported.",
       "noContent": "Digikala's photos and descriptions are not copied; add our own text and images before publishing.",
       "reference": "Digikala's price and stock stay on the import record as a reference only; they are not our selling price.",
-      "pace": "It runs slowly (one request every 3 seconds) and stops if Digikala blocks it."
+      "pace": "It runs slowly (one request every 3 seconds) and stops if Digikala blocks it.",
+      "resume": "After a server restart it carries on where it was; products an earlier run already read are skipped and count towards the total."
     },
     "category": "Destination catalog category",
-    "maxProducts": "Maximum products (up to 3000)",
+    "maxProducts": "Total products (up to 16,000)",
     "start": "Start the one-time import",
     "started": "Queued; progress shows in the jobs list.",
-    "alreadyRun": "This import has already run or is running.",
-    "invalid": "Choose a category and a number from 1 to 3000.",
+    "alreadyRun": "This import is running or has already read its full total.",
+    "invalid": "Choose a category and a number from 1 to 16,000.",
     "forbidden": "commerce.manage permission required.",
-    "failed": "Could not start; please try again."
+    "failed": "Could not start; please try again.",
+    "progress": {
+      "title": "Import progress",
+      "planning": "Measuring sub-categories: {done} of {total}",
+      "subcategory": "Sub-category {index} of {count}: {title}",
+      "fill": "Topping up the total from sub-categories with more products",
+      "counts": "{seen} of {target} read · {imported} drafts · {failed} failed",
+      "eta": "About {hours} h left"
+    }
   },
   "petCard": {
     "title": "Pet card and QR code",

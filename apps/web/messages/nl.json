@@ -4757,6 +4757,45 @@
     }
   },
   "admin": {
+    "productReadiness": {
+      "title": "Onvolledige producten",
+      "intro": "Producten die nog niet klaar zijn voor verkoop, met alle redenen. Los ze op bij het product en de aanbiedingen; hier wordt niets gepubliceerd of verborgen.",
+      "issuesLabel": "Problemen",
+      "issue": {
+        "ANY": "Alle problemen",
+        "MEDIA_INCOMPLETE": "Afbeeldingen onvolledig",
+        "MISSING_BRAND": "Geen merk",
+        "MISSING_SPECS": "Geen specificaties",
+        "UNREVIEWED_SOURCE": "Brongegevens niet gecontroleerd",
+        "NO_LIVE_OFFER": "Geen actieve aanbieding"
+      },
+      "search": "Productnaam",
+      "statusFilter": "Productstatus",
+      "allStatuses": "Alle statussen",
+      "status": {
+        "ACTIVE": "Actief",
+        "DRAFT": "Concept",
+        "INACTIVE": "Inactief"
+      },
+      "searchButton": "Zoeken",
+      "listTitle": "Te herstellen producten",
+      "rule": "Publiceren vereist precies 3 afbeeldingen, elk met alternatieve tekst. Een actieve aanbieding is actief en goedgekeurd, van een geverifieerde, actieve winkel en met voorraad.",
+      "forbidden": "Recht commerce.view vereist",
+      "loadFailed": "De gereedheidslijst kon niet worden geladen",
+      "loadFailedHint": "De fout komt van de server en wordt ongewijzigd getoond; er is niets verborgen.",
+      "retry": "Opnieuw proberen",
+      "loading": "Laden…",
+      "empty": "Alle producten zijn klaar voor verkoop.",
+      "emptyIssue": "Geen product heeft dit probleem.",
+      "media": "{count} van 3 afbeeldingen · {withoutAlt} zonder alternatieve tekst",
+      "publishOk": "publiceren toegestaan",
+      "publishBlocked": "publiceren geblokkeerd",
+      "offers": "{live} actieve aanbiedingen van {total}",
+      "pages": "Pagina's",
+      "previous": "Vorige",
+      "next": "Volgende",
+      "page": "Pagina {page} van {pages}"
+    },
     "partners": {
       "servicesTitle": "Diensten",
       "shopsTitle": "Winkels",
@@ -5000,6 +5039,7 @@
         "twoStep": "Inloggen in twee stappen"
       },
       "tabs": {
+        "productReadiness": "Onvolledige producten",
         "holidays": "Feestdagen en sluitingen",
         "ownershipTransfers": "Eigendomsoverdrachten",
         "deletionRequests": "Verwijderverzoeken",
@@ -5009,8 +5049,8 @@
         "plans": "Abonnementsplannen",
         "households": "Huishoudens",
         "verification": "Verificatiewachtrij",
-        "providers": "Aanbieders",
-        "sellers": "Verkopers",
+        "providers": "Diensten",
+        "sellers": "Winkels",
         "overview": "Overzicht",
         "orders": "Bestellingen",
         "refundRequests": "Terugbetalingsverzoeken",
@@ -6962,7 +7002,7 @@
     "list": {
       "search": "Zoeken",
       "title": "Huisdiervriendelijke plekken",
-      "subtitle": "Geverifieerde plekken waar huisdieren welkom zijn.",
+      "subtitle": "Plekken waar huisdieren welkom zijn. Geverifieerde plekken en vermeldingen uit OpenStreetMap zijn gemarkeerd.",
       "empty": "Geen plekken gevonden.",
       "nearMe": "Zoeken in mijn buurt",
       "allCategories": "Alle categorieën",
@@ -7642,7 +7682,7 @@
       },
       "shortcuts": "Snelkoppelingen",
       "healthLink": "Statuspagina",
-      "workersSummary": "{running} van {total} achtergrondtaken actief",
+      "workersSummary": "{running} van {total} achtergrondtaken gezond",
       "priority": {
         "URGENT": "Dringend",
         "HIGH": "Hoog"
@@ -12108,21 +12148,30 @@
   },
   "adminDigikalaFacts": {
     "title": "Eenmalige import van huisdierproducten van Digikala (alleen feitelijke gegevens)",
-    "hint": "De bestverkochte producten uit de huisdiercategorie van Digikala komen eenmalig als concepten in de catalogus.",
+    "hint": "De bestverkochte producten uit alle huisdier-subcategorieën van Digikala (naar verhouding van hun grootte) komen eenmalig als concepten in de catalogus.",
     "rules": {
-      "facts": "Naam, merk, categorie, specificaties en gewicht worden geïmporteerd.",
+      "facts": "Naam, merk, categorie, specificaties, gewicht en varianten (kleur, maat, smaak) worden geïmporteerd.",
       "noContent": "Foto's en beschrijvingen van Digikala worden niet gekopieerd; voeg vóór publicatie onze eigen tekst en afbeeldingen toe.",
       "reference": "De prijs en voorraad van Digikala blijven alleen ter referentie in het importrecord; dat is niet onze verkoopprijs.",
-      "pace": "Het loopt langzaam (één verzoek per 3 seconden) en stopt als Digikala het blokkeert."
+      "pace": "Het loopt langzaam (één verzoek per 3 seconden) en stopt als Digikala het blokkeert.",
+      "resume": "Na een herstart van de server gaat het verder waar het was; producten die al gelezen zijn worden overgeslagen en tellen mee voor het totaal."
     },
     "category": "Doelcategorie in de catalogus",
-    "maxProducts": "Maximaal aantal producten (tot 3000)",
+    "maxProducts": "Totaal aantal producten (tot 16.000)",
     "start": "Eenmalige import starten",
     "started": "In de wachtrij; de voortgang staat in de takenlijst.",
-    "alreadyRun": "Deze import is al uitgevoerd of loopt nog.",
-    "invalid": "Kies een categorie en een aantal van 1 tot 3000.",
+    "alreadyRun": "Deze import loopt of heeft zijn volledige totaal al gelezen.",
+    "invalid": "Kies een categorie en een aantal van 1 tot 16.000.",
     "forbidden": "Recht commerce.manage vereist.",
-    "failed": "Starten mislukt; probeer het opnieuw."
+    "failed": "Starten mislukt; probeer het opnieuw.",
+    "progress": {
+      "title": "Voortgang van de import",
+      "planning": "Subcategorieën worden gemeten: {done} van {total}",
+      "subcategory": "Subcategorie {index} van {count}: {title}",
+      "fill": "Totaal wordt aangevuld uit subcategorieën met meer producten",
+      "counts": "{seen} van {target} gelezen · {imported} concepten · {failed} mislukt",
+      "eta": "Nog ongeveer {hours} uur"
+    }
   },
   "petCard": {
     "title": "Huisdierkaart en QR-code",

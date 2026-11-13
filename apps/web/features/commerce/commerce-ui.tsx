@@ -5,7 +5,7 @@ import { PackageCheck, Star, StatusLabel } from "@petlife/ui";
 import type { RatingSummaryDto, StockState } from "@petlife/types";
 import { isolate } from "@/lib/text/bidi";
 import { formatCurrency } from "@/lib/currency/format-currency";
-import type { RouteLocale } from "@/lib/i18n/config";
+import { isRouteLocale, type RouteLocale } from "@/lib/i18n/config";
 import { formatLocaleNumber } from "@/lib/i18n/format";
 
 type Locale = RouteLocale;
@@ -86,5 +86,5 @@ export function ProductImage({ src, alt, className = "" }: { src: string | null;
 }
 
 export function formatNumber(value: number, locale: string): string {
-  return formatLocaleNumber(value, (locale === "fa" || locale === "de" || locale === "es" ? locale : "en"));
+  return formatLocaleNumber(value, isRouteLocale(locale) ? locale : "en");
 }

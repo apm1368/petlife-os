@@ -104,8 +104,8 @@ const rowProps = { petId, locale, canEdit, busy, format, onRun: run, onEdit: (it
         <ul className="care-rows">{rows.map(item => <CareRow key={item.id} item={item} {...rowProps}/>)}</ul>
       </section>
     ))}
-    <Link className="underline" href={`/${locale}/pets/${petId}/care/suggestions`}>{suggestionsT("title")}</Link>
-    <details className="border-t border-border-subtle pt-5"><summary className="cursor-pointer text-section-title">{c("dailyInstructions")}</summary><div className="mt-5"><CareProfileView petId={petId}/></div></details>
+    <Link className="inline-flex min-h-11 items-center self-start underline" href={`/${locale}/pets/${petId}/care/suggestions`}>{suggestionsT("title")}</Link>
+    <details className="border-t border-border-subtle pt-5"><summary className="flex min-h-11 cursor-pointer items-center text-section-title">{c("dailyInstructions")}</summary><div className="mt-5"><CareProfileView petId={petId}/></div></details>
   </div></HealthCareFrame>;
 }
 

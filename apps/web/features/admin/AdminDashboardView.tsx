@@ -159,7 +159,7 @@ export function AdminDashboardView() {
   if (!summary) return <Skeleton className="h-96 w-full" aria-label={t("loading")} />;
 
   const date = (iso: string, options: Intl.DateTimeFormatOptions = { dateStyle: "medium" }) =>
-    new Intl.DateTimeFormat(locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-GB", { ...options, timeZone: "Asia/Tehran" }).format(new Date(iso));
+    new Intl.DateTimeFormat(locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : locale === "ar" ? "ar" : locale === "nl" ? "nl-NL" : "en-GB", { ...options, timeZone: "Asia/Tehran" }).format(new Date(iso));
   const renderFailure = (kind: LoadFailure | null) => (
     <div role="alert" className="gx-inline-alert">
       <p>{t(kind ?? "failed")}</p>

@@ -145,7 +145,7 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
     );
   }
 
-  const dateLocale = locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-GB";
+  const dateLocale = locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : locale === "ar" ? "ar" : locale === "nl" ? "nl-NL" : "en-GB";
   const categoryName = (value: string) => t.has(`categories.${value}`) ? t(`categories.${value}`) : categoryLabel(value, fa);
   const providerName = (value: string) => t.has(`providerTypes.${value}`) ? t(`providerTypes.${value}`) : providerTypeLabel(value, fa);
   const formatPrice = (amountRial: number) => `${Math.round(amountRial / 10).toLocaleString(dateLocale)} ${t("currencyUnit")}`;
@@ -353,7 +353,7 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
                           {p.location ? <span><MapPin size={14} aria-hidden="true" />{[placeName(p.location.region, locale), placeName(p.location.city, locale)].filter(Boolean).join(fa ? "، " : ", ")}{p.distanceKm !== null ? ` · ${formatCount(p.distanceKm, locale)} ${t("distanceUnit")}` : ""}</span> : null}
                           <span className={p.nextAvailableAt ? "disc-row__open" : undefined}><Clock3 size={14} aria-hidden="true" />{p.nextAvailableAt ? `${t("nextOpening")}: ${fmtTime(p.nextAvailableAt)}` : t("noOpening")}</span>
                           {p.homeVisit ? <span><House size={14} aria-hidden="true" />{t("filters.homeVisitPlural")}</span> : null}
-                          {p.petTypes.length ? <span>{p.petTypes.map((petType) => t(petType === "DOG" ? "species.dogs" : "species.cats")).join(fa ? " و " : locale === "de" ? " und " : locale === "es" ? " y " : " & ")}</span> : null}
+                          {p.petTypes.length ? <span>{p.petTypes.map((petType) => t(petType === "DOG" ? "species.dogs" : "species.cats")).join(fa ? " و " : locale === "de" ? " und " : locale === "es" ? " y " : locale === "ar" ? " و " : locale === "nl" ? " en " : " & ")}</span> : null}
                         </p>
                       </div>
                       <div className="disc-row__side">

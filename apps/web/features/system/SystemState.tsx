@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { Button } from "@petlife/ui";
+import { isRouteLocale } from "@/lib/i18n/config";
 
 export type SystemStateKind =
   | "AUTH_REQUIRED"
@@ -63,9 +64,9 @@ export function SystemState({
 }) {
   const locale = useLocale();
   const copy = COPY[kind];
-  const localized = locale === "fa" ? copy.fa : locale === "de" ? copy.de : locale === "es" ? copy.es : copy.en;
+  const localized = copy[isRouteLocale(locale) ? locale : "en"];
   const [defaultTitle, defaultBody] = localized;
-  const labels = locale === "fa" ? { signIn: "ورود", retry: "تلاش دوباره", home: "بازگشت به خانه" } : locale === "de" ? { signIn: "Anmelden", retry: "Erneut versuchen", home: "Zur Startseite" } : locale === "es" ? { signIn: "Iniciar sesión", retry: "Reintentar", home: "Volver al inicio" } : { signIn: "Sign in", retry: "Try again", home: "Go to home" };
+  const labels = locale === "fa" ? { signIn: "ورود", retry: "تلاش دوباره", home: "بازگشت به خانه" } : locale === "de" ? { signIn: "Anmelden", retry: "Erneut versuchen", home: "Zur Startseite" } : locale === "es" ? { signIn: "Iniciar sesión", retry: "Reintentar", home: "Volver al inicio" } : locale === "ar" ? { signIn: "تسجيل الدخول", retry: "إعادة المحاولة", home: "العودة إلى الرئيسية" } : locale === "nl" ? { signIn: "Inloggen", retry: "Opnieuw proberen", home: "Naar de startpagina" } : { signIn: "Sign in", retry: "Try again", home: "Go to home" };
   const firstAction: SystemStateAction | undefined =
     primary ??
     (kind === "AUTH_REQUIRED"

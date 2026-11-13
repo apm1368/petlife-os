@@ -3077,6 +3077,8 @@ model CatalogImportJob {
   productsSeen     Int                    @default(0)
   productsImported Int                    @default(0)
   productsFailed   Int                    @default(0)
+  /// DIGIKALA_FACTS only: the sub-category plan and each one's cursor, saved after every product so a restart resumes.
+  progress         Json?
   cancelRequested  Boolean                @default(false)
   attempt          Int                    @default(0)
   nextAttemptAt    DateTime               @default(now())

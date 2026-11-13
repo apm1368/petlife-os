@@ -374,7 +374,7 @@ export function MemberHomeView() {
   }
 
   const firstName = (user?.displayName ?? "").split(" ")[0] ?? "";
-  const today = new Intl.DateTimeFormat(locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : "en-US", { weekday: "long", day: "numeric", month: "long", timeZone: "Asia/Tehran" }).format(new Date());
+  const today = new Intl.DateTimeFormat(locale === "fa" ? "fa-IR-u-ca-persian" : locale === "de" ? "de-DE" : locale === "es" ? "es-ES" : locale === "ar" ? "ar" : locale === "nl" ? "nl-NL" : "en-US", { weekday: "long", day: "numeric", month: "long", timeZone: "Asia/Tehran" }).format(new Date());
 
   if (!petId) {
     return (
@@ -511,7 +511,7 @@ export function MemberHomeView() {
             ) : (
               <div className="member-home__fact-row">
                 <strong>{locale === "fa" ? membership.plan.nameFa : membership.plan.nameEn}</strong>
-                {locale === "de" || locale === "es" ? <small>{c.planNameInEnglish}</small> : null}
+                {locale !== "fa" && locale !== "en" ? <small>{c.planNameInEnglish}</small> : null}
                 <StatusLabel tone="success">{statusLabel(membership.status, locale, "subscription")}</StatusLabel>
                 {membership.trialEndsAt && membership.status === "TRIALING" ? <span>{c.trialUntil} {formatDay(membership.trialEndsAt.slice(0, 10), locale)}</span> : membership.currentPeriod?.endAt ? <span>{c.renewsOn} {formatDay(membership.currentPeriod.endAt.slice(0, 10), locale)}</span> : null}
               </div>

@@ -5,6 +5,7 @@ import type { RouteLocale } from "@/lib/i18n/config";
 import { CookieCursor } from "./CookieCursor";
 import { HookBar } from "./HookBar";
 import { prefersReducedMotion } from "./cursor-bus";
+import "./opl-touch.css";
 
 export type Species = "dog" | "cat" | "bird" | "rabbit" | "other";
 type LandingState = {

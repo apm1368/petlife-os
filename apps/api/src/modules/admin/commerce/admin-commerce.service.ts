@@ -40,6 +40,7 @@ import { resolveObjectUrl } from "../../storage/object-url.util";
 import { StorageService } from "../../storage/storage.service";
 import { toPaginatedDto } from "../../../common/pagination/pagination.dto";
 import { AdminAuditLogService } from "../audit/admin-audit-log.service";
+import { mediaMeetsPublishRule } from "./product-readiness.service";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 import { AdminRefundService } from "../finance/admin-refund.service";
 import { orderNumberOf, toOrderItemDto } from "../../commerce/orders/orders.service";
@@ -717,7 +718,7 @@ export class AdminCommerceService {
       orderBy: { sortOrder: "asc" },
     });
     const hasDescriptiveAlt = media.every((item) => Boolean(item.alt?.trim()));
-    if (media.length !== 3 || !hasDescriptiveAlt) {
+    if (!mediaMeetsPublishRule(media.length, media.filter((item) => !item.alt?.trim()).length)) {
       throw new ApiException(
         "PRODUCT_MEDIA_INCOMPLETE",
         "A public product needs exactly three images with alternative text.",

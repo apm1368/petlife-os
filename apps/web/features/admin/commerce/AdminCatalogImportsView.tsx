@@ -150,6 +150,7 @@ export function AdminCatalogImportsView() {
               <p className="mt-2 text-metadata text-text-secondary" dir="ltr">{job.submittedUrls.join(" · ")}</p>
               <p className="mt-2 text-metadata text-text-secondary">{tr("صفحه / دیده‌شده / پیش‌نویس / خطا", "Pages / seen / drafts / failed")}: {job.pagesVisited} / {job.productsSeen} / {job.productsImported} / {job.productsFailed}</p>
               {job.lastError ? <p role="alert" className="mt-1 text-metadata text-state-urgent">{job.lastError}</p> : null}
+              {job._count && job._count.items > job.items.length ? <p className="mt-2 text-metadata text-text-secondary">{trf("آخرین {shown} مورد از {total}", "Latest {shown} of {total} items", { shown: job.items.length, total: job._count.items })}</p> : null}
               {job.items.map((item) => (
                 <div key={item.id} className="mt-3 border-t border-border-subtle pt-3">
                   <div className="flex flex-wrap items-center gap-2">
