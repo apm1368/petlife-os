@@ -46,7 +46,8 @@ describe("Admin transactions explorer", () => {
       },
     });
     const refund = await db.refund.create({ data: { paymentIntentId: zibal.id, amount: 100_000, status: "SUCCEEDED" } });
-    const topUp = await db.walletTopUp.create({ data: { userId: buyer.id, rail: "ZIBAL", status: "CREDITED", amount: 2_000_000, idempotencyKey: randomUUID() } });
+    // Not CREDITED: a credited top-up must point at its wallet entry (wallet_top_ups_credited_has_entry); the explorer lists every status.
+    const topUp = await db.walletTopUp.create({ data: { userId: buyer.id, rail: "ZIBAL", status: "AWAITING_PAYMENT", amount: 2_000_000, idempotencyKey: randomUUID() } });
     return { buyer, national, zibal, card, refund, topUp };
   }
 
