@@ -97,7 +97,7 @@ export class AdminPetTaxiController {
         tx,
       });
     });
-    return this.overview();
+    return this.overview(admin, request);
   }
 
   /** Every registered driver, pending checks first. */
