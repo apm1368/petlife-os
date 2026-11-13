@@ -63,6 +63,8 @@ export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; on
   const activePetId = usePetStore((s) => s.activePetId);
   const router = useRouter();
   const num = (value: number) => formatLocaleNumber(value, locale);
+  // A middle dot next to Persian/Arabic digits reads like a zero (۰): those languages separate with «،».
+  const sep = locale === "fa" || locale === "ar" ? "، " : " · ";
   const [draft] = useState<SetPetDraft | null>(() => (typeof window === "undefined" ? null : readDraft()));
 
   const [options, setOptions] = useState<SetPetOptionsDto | null>(null);
@@ -93,6 +95,7 @@ export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; on
   const seq = useRef(0);
   const errorRef = useRef<HTMLParagraphElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const stepsRef = useRef<HTMLOListElement>(null);
   // Uploads finish after the member may have changed zones: read the zones at that moment, not at upload start.
   const zonesRef = useRef(zones);
   useEffect(() => {
@@ -164,6 +167,17 @@ export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; on
       cancelled = true;
     };
   }, [draft]);
+
+  // On phones the step bar scrolls sideways: keep the current step in view.
+  useEffect(() => {
+    const bar = stepsRef.current;
+    const current = bar?.querySelector<HTMLElement>('[aria-current="step"]');
+    if (!bar || !current || typeof bar.scrollBy !== "function") return;
+    // Scroll only the bar (never the page), so arriving on /set-pet does not jump to the builder.
+    const b = bar.getBoundingClientRect();
+    const c = current.getBoundingClientRect();
+    bar.scrollBy({ left: c.left + c.width / 2 - (b.left + b.width / 2), behavior: "smooth" });
+  }, [step, optionsState]);
 
   // The pet this set is for: the active pet by default (optional; staff see the name).
   useEffect(() => {
@@ -459,7 +473,7 @@ export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; on
 
   return (
     <div className="setpet-builder">
-      <ol className="setpet-steps" aria-label={t("stepsLabel")}>
+      <ol ref={stepsRef} className="setpet-steps" aria-label={t("stepsLabel")}>
         {STEPS.map((s, i) => (
           <li key={s} className={s === step ? "is-current" : i < index ? "is-done" : undefined}>
             <button type="button" onClick={() => go(s)} disabled={i > reached && i > index} aria-current={s === step ? "step" : undefined}>
@@ -652,7 +666,7 @@ export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; on
                   <input type="checkbox" checked={zones.has(zone)} onChange={() => toggleZone(zone)} />
                   <span>
                     <strong>{tz(`${zone}.name`)}</strong>
-                    <small>{ZONE_CM[zone] ? t("zones.area", { cm: num(ZONE_CM[zone]!) }) : t("zones.petArea")} · {tz(`${zone}.hint`)}</small>
+                    <small>{ZONE_CM[zone] ? t("zones.area", { cm: num(ZONE_CM[zone]!) }) : t("zones.petArea")}{sep}{tz(`${zone}.hint`)}</small>
                   </span>
                 </label>
               ))}
@@ -727,7 +741,7 @@ export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; on
                 <div><dt>{t("review.shirts")}</dt><dd>{t("review.shirtsValue", { n: num(humanSizes.length), sizes: humanSizes.map(sizeLabel).join(locale === "fa" || locale === "ar" ? "، " : ", ") })}</dd></div>
                 <div><dt>{t("review.pet")}</dt><dd>{t("review.petValue", { size: sizeLabel(petSize), name: pets.find((p) => p.id === petId)?.name ?? t("pet.noPet") })}</dd></div>
                 <div><dt>{t("review.measurements")}</dt><dd>{t("review.measurementsValue", { neck: num(measured.neckCm ?? 0), chest: num(measured.chestCm ?? 0), back: num(measured.backLengthCm ?? 0), weight: num(measured.weightKg ?? 0) })}</dd></div>
-                <div><dt>{t("review.colour")}</dt><dd>{petColour && petColour !== colour ? `${tc(colour)} · ${t("colour.petColour")}: ${tc(petColour)}` : tc(colour)}</dd></div>
+                <div><dt>{t("review.colour")}</dt><dd>{petColour && petColour !== colour ? `${tc(colour)}${sep}${t("colour.petColour")}: ${tc(petColour)}` : tc(colour)}</dd></div>
                 <div><dt>{t("review.zones")}</dt><dd><ul>{ALL_ZONES.filter((zone) => zones.has(zone)).map((zone) => <li key={zone}>{tz(`${zone}.name`)}: <span dir="auto">{previewDesigns.get(placements[zone] ?? "")?.name}</span></li>)}</ul></dd></div>
               </dl>
               <label className="setpet-field">
@@ -769,7 +783,7 @@ export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; on
               <div className="setpet-seg setpet-seg--small" role="group" aria-label={t("previewShirt")}>
                 {humanSizes.map((s, i) => (
                   <button key={i} type="button" aria-pressed={i === Math.min(previewShirt, humanSizes.length - 1)} onClick={() => setPreviewShirt(i)}>
-                    {t("shirtN", { n: num(i + 1) })} · <span dir="ltr">{sizeLabel(s)}</span>
+                    {t("shirtN", { n: num(i + 1) })} (<span dir="ltr">{sizeLabel(s)}</span>)
                   </button>
                 ))}
               </div>

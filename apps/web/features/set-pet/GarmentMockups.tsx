@@ -5,7 +5,7 @@ import type { SetPetSize, SetPetZone } from "@petlife/types";
 import { FileText, Plus, RotateCcw } from "@petlife/ui";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { formatLocaleNumber } from "@/lib/i18n/format";
-import { HUMAN_FRAME, HUMAN_RULER, PET_FRAME, PET_RULER, boxStyle, humanCollarPath, humanShirtPath, humanZoneBox, petShirtShape, rulerTicks, type Box } from "./garment-geometry";
+import { boxStyle, humanCollarPath, humanFrame, humanRuler, humanShirtPath, humanZoneBox, petFrame, petRuler, petShirtShape, rulerTicks, type Box, type Frame } from "./garment-geometry";
 import { HUMAN_ZONES, ZONE_CM, colourHex, isDarkColour, sizeLabel, zoneSide } from "./set-pet-catalog";
 
 export type PreviewDesign = { id: string; name: string; previewUrl: string | null };
@@ -38,10 +38,10 @@ function Ruler({ y, fromX, lengthCm, unit, format }: { y: number; fromX: number;
       {rulerTicks(fromX, lengthCm).map((tick) => (
         <g key={tick.x}>
           <line x1={tick.x} x2={tick.x} y1={y} y2={y + tick.size} />
-          {tick.label != null ? <text x={tick.x} y={y + 5.4}>{format(tick.label)}</text> : null}
+          {tick.label != null ? <text x={tick.x} y={y + 6.6}>{format(tick.label)}</text> : null}
         </g>
       ))}
-      <text className="setpet-ruler__unit" x={fromX} y={y - 1.4}>{unit}</text>
+      <text className="setpet-ruler__unit" x={fromX} y={y - 1.6}>{unit}</text>
     </g>
   );
 }
@@ -57,8 +57,10 @@ export function GarmentMockups({ humanSize, petSize, colour, petColour, side, on
   const format = (n: number) => formatLocaleNumber(n, locale);
   const pet = petShirtShape(petSize);
   const humanZones = HUMAN_ZONES.filter((zone) => zoneSide(zone) === side);
+  const HUMAN_FRAME = humanFrame(humanSize);
+  const PET_FRAME = petFrame(petSize);
 
-  const zoneTile = (zone: SetPetZone, box: Box, frame: typeof HUMAN_FRAME) => {
+  const zoneTile = (zone: SetPetZone, box: Box, frame: Frame) => {
     const on = zones.has(zone);
     if (!on && !onToggleZone) return null;
     const design = on ? designs.get(placements[zone] ?? "") : undefined;
@@ -101,7 +103,7 @@ export function GarmentMockups({ humanSize, petSize, colour, petColour, side, on
           <svg viewBox={`${HUMAN_FRAME.minX} ${HUMAN_FRAME.minY} ${HUMAN_FRAME.width} ${HUMAN_FRAME.height}`} aria-hidden="true" focusable="false">
             <path className="setpet-garment__body" d={humanShirtPath(humanSize, side)} fill={fill} />
             <path className="setpet-garment__collar" d={humanCollarPath(side)} fill="none" />
-            <Ruler {...HUMAN_RULER} unit={t("cm")} format={format} />
+            <Ruler {...humanRuler(humanSize)} unit={t("cm")} format={format} />
           </svg>
           {humanZones.map((zone) => {
             const box = humanZoneBox(zone, humanSize);
@@ -119,7 +121,7 @@ export function GarmentMockups({ humanSize, petSize, colour, petColour, side, on
           <svg viewBox={`${PET_FRAME.minX} ${PET_FRAME.minY} ${PET_FRAME.width} ${PET_FRAME.height}`} aria-hidden="true" focusable="false">
             <path className="setpet-garment__body" d={pet.path} fill={petFill} />
             <path className="setpet-garment__collar" d={pet.collar} fill="none" />
-            <Ruler {...PET_RULER} unit={t("cm")} format={format} />
+            <Ruler {...petRuler(petSize)} unit={t("cm")} format={format} />
           </svg>
           {zoneTile("PET_BACK", pet.zone, PET_FRAME)}
         </div>

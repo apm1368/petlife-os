@@ -8,17 +8,23 @@ import { HUMAN_CHART, PET_CHART, ZONE_CM } from "./set-pet-catalog";
  */
 export type Box = { cx: number; cy: number; w: number; h: number; rotate: number };
 
-/** One frame for every human size (the largest size fits), so sizes compare honestly; the cm ruler sits under it. */
-export const HUMAN_FRAME = { minX: -48, minY: -3, width: 96, height: 96 };
-/** One frame for every pet size, ruler included. */
-export const PET_FRAME = { minX: -26, minY: -3, width: 52, height: 80 };
+/**
+ * One width for every size (the largest fits), so a centimetre is the same size on screen for every garment and sizes
+ * compare honestly; the height follows the garment so there is no empty band, with the cm ruler just under the hem.
+ */
+export type Frame = { minX: number; minY: number; width: number; height: number };
+export const HUMAN_FRAME: Frame = { minX: -48, minY: -3, width: 96, height: 96 };
+export const PET_FRAME: Frame = { minX: -26, minY: -3, width: 52, height: 80 };
+export const humanFrame = (size: SetPetSize): Frame => ({ ...HUMAN_FRAME, height: HUMAN_CHART[size].lengthCm + 16 });
+export const petFrame = (size: SetPetSize): Frame => ({ ...PET_FRAME, height: petShirtShape(size).length + 15 });
+export const humanRuler = (size: SetPetSize) => ({ y: HUMAN_CHART[size].lengthCm + 5, fromX: -25, lengthCm: 50 });
+export const petRuler = (size: SetPetSize) => ({ y: petShirtShape(size).length + 5, fromX: -20, lengthCm: 40 });
 
 /** A cm ruler (owner, #368 P34): ticks every cm, longer every 5, numbered every 10. */
 export function rulerTicks(fromX: number, lengthCm: number) {
   return Array.from({ length: lengthCm + 1 }, (_, cm) => ({ x: fromX + cm, size: cm % 10 === 0 ? 2.6 : cm % 5 === 0 ? 1.8 : 1, label: cm % 10 === 0 ? cm : null }));
 }
-export const HUMAN_RULER = { y: 85, fromX: -25, lengthCm: 50 };
-export const PET_RULER = { y: 67, fromX: -20, lengthCm: 40 };
+
 
 const SLEEVE_ANGLE = 31; // degrees: the sleeve's slope on the flat-laid shirt
 
@@ -93,7 +99,7 @@ export function petShirtShape(size: SetPetSize) {
 }
 
 /** A zone box as CSS percentages of its mockup frame (for the HTML <img> overlay). */
-export function boxStyle(box: Box, frame: { minX: number; minY: number; width: number; height: number }) {
+export function boxStyle(box: Box, frame: Frame) {
   return {
     left: `${((box.cx - box.w / 2 - frame.minX) / frame.width) * 100}%`,
     top: `${((box.cy - box.h / 2 - frame.minY) / frame.height) * 100}%`,

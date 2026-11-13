@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { HUMAN_FRAME, PET_FRAME, boxStyle, humanZoneBox, petShirtShape } from "./garment-geometry";
+import { HUMAN_FRAME, boxStyle, humanFrame, humanZoneBox, petFrame, petShirtShape } from "./garment-geometry";
 import { HUMAN_CHART, SIZES, checkMeasurement, isRasterPreviewable, parseMeasurement, roundMeasurement, sizeLabel, suggestPetSize, zoneSide } from "./set-pet-catalog";
 import { setPetReel } from "./set-pet-reel";
 
@@ -70,7 +70,9 @@ describe("garment mockups at true scale", () => {
       }
       const pet = petShirtShape(size);
       expect(pet.zone.cy + pet.zone.h / 2).toBeLessThan(pet.length);
-      expect(pet.length).toBeLessThan(PET_FRAME.minY + PET_FRAME.height);
+      // Frames end just under the ruler, below the hem, and keep one width (one cm scale) for every size.
+      expect(pet.length).toBeLessThan(petFrame(size).minY + petFrame(size).height);
+      expect(humanFrame(size).width).toBe(HUMAN_FRAME.width);
     }
   });
 
