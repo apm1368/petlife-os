@@ -26,7 +26,7 @@ export function ParkFooter({ locale }: { locale: RouteLocale }) {
           <h2>{c.footerPartners}</h2>
           <ul>
             <li><Link href={`/${locale}/auth?returnTo=${encodeURIComponent(`/${locale}/provider`)}`}>{c.partnerLogin}</Link></li>
-            <li><Link href={`/${locale}/register?returnTo=${encodeURIComponent(`/${locale}/provider`)}`}>{c.partnerJoin}</Link></li>
+            <li><Link href={`/${locale}/partners/join`}>{c.partnerJoin}</Link></li>
           </ul>
         </nav>
       </div>

@@ -39,6 +39,15 @@ describe("resolvePostAuthDestination", () => {
     expect(resolvePostAuthDestination("en", "https://evil.example", { status: "COMPLETED", chapter: "READY" }, { business })).toBe("/en/business");
   });
 
+  it("sends a partner signup to the partner wizard until it is submitted, then to the business home — never to pet-owner onboarding", () => {
+    const inProgress = { status: "IN_PROGRESS", chapter: "ACCOUNT", signupIntent: "PARTNER", partnerStage: "IN_PROGRESS" };
+    expect(resolvePostAuthDestination("fa", null, inProgress)).toBe("/fa/partners/join");
+    expect(resolvePostAuthDestination("fa", "https://evil.example", inProgress)).toBe("/fa/partners/join");
+    expect(resolvePostAuthDestination("fa", null, { ...inProgress, partnerStage: "SUBMITTED" })).toBe("/fa/business");
+    // Anyone signing in on the way into the partner area continues there, not into the pet-owner onboarding.
+    expect(resolvePostAuthDestination("en", "/en/partners/join", { status: "IN_PROGRESS", chapter: "ACCOUNT" })).toBe("/en/partners/join");
+  });
+
   it("keeps the pet-owner home for a pet owner who is also a partner", () => {
     expect(resolvePostAuthDestination("en", null, { status: "COMPLETED", chapter: "READY" }, { business: { hasBusiness: true, hasHousehold: true } })).toBe("/en/home");
     expect(resolvePostAuthDestination("en", null, { status: "COMPLETED", chapter: "READY" }, { business: null })).toBe("/en/home");

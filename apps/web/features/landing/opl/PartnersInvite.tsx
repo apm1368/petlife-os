@@ -25,7 +25,7 @@ export function PartnersInvite({ locale }: { locale: RouteLocale }) {
         <Bird kind="budgie" flip style={{ top: -40, insetInlineStart: "30%" }} />
         <p>{s.partnerBody}</p>
         <div className="opl-actions">
-          <Link className="opl-btn primary" href={`/${locale}/register?returnTo=${provider}`}>{s.partnerJoin}</Link>
+          <Link className="opl-btn primary" href={`/${locale}/partners/join`}>{s.partnerJoin}</Link>
           <Link className="opl-btn line" href={`/${locale}/auth?returnTo=${provider}`}>{s.partnerLogin}</Link>
         </div>
       </div>

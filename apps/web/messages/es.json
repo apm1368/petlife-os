@@ -10716,6 +10716,197 @@
       "offers": "Productos y precios",
       "inventory": "Stock",
       "payouts": "Pagos"
+    },
+    "joinAsPartner": "Registrarse como socio"
+  },
+  "partnerOnboarding": {
+    "loadFailed": "No se pudo cargar",
+    "retry": "Reintentar",
+    "saveAndContinue": "Guardar y continuar",
+    "continue": "Continuar",
+    "remove": "Quitar",
+    "intro": {
+      "title": "Registro de socios",
+      "body": "¿Ofreces servicios para mascotas o tienes una tienda? Únete a opetlife para que los dueños te encuentren, reserven o compren.",
+      "needs": {
+        "kinds": "Tu tipo de negocio (puedes elegir varios, p. ej. veterinario y tienda)",
+        "documents": "Logo, documento de identidad y licencia o permiso",
+        "address": "Dirección postal con provincia y ciudad",
+        "services": "Para servicios: días y horario de trabajo y el precio de cada servicio",
+        "shop": "Para una tienda: horario y productos con precio y stock",
+        "review": "Enviar a revisión y verificación de identidad"
+      },
+      "reviewNote": "Nada aparece en el sitio hasta que el equipo de opetlife verifique tus documentos. Los documentos de identidad solo se usan para la revisión y nunca se publican.",
+      "create": "Crear cuenta de socio",
+      "signIn": "Ya tengo cuenta — entrar"
+    },
+    "wizard": {
+      "title": "Registro de socio",
+      "reviewNote": "Cada paso se guarda y puedes continuar más tarde. Tu negocio aparecerá cuando el equipo de opetlife lo apruebe.",
+      "steps": "Pasos"
+    },
+    "steps": {
+      "kinds": "Tipo de negocio",
+      "business": "Nombre y logo",
+      "owner": "Datos del titular",
+      "documents": "Documentos",
+      "address": "Dirección",
+      "calendar": "Calendario",
+      "services": "Servicios y precios",
+      "hours": "Horario de la tienda",
+      "products": "Productos",
+      "review": "Revisar y enviar"
+    },
+    "kinds": {
+      "hint": "Elige todos los servicios que ofreces. Si también tienes tienda, márcala.",
+      "services": "Servicios",
+      "shopTitle": "Tienda"
+    },
+    "kind": {
+      "VET_CLINIC": "Clínica veterinaria",
+      "VETERINARIAN": "Veterinario/a",
+      "GROOMER": "Peluquería",
+      "BOARDING": "Residencia",
+      "SITTER": "Cuidado a domicilio",
+      "TRAINER": "Adiestramiento",
+      "WALKER": "Paseo de perros",
+      "PET_TAXI": "Taxi para mascotas",
+      "SHOP": "Tienda de mascotas (online o física)"
+    },
+    "business": {
+      "name": "Nombre del negocio",
+      "description": "Descripción breve",
+      "logo": "Logo",
+      "logoHint": "JPG, PNG o WebP hasta 10 MB. El logo se muestra tras la aprobación."
+    },
+    "owner": {
+      "firstName": "Nombre",
+      "lastName": "Apellidos",
+      "phone": "Teléfono del negocio",
+      "verifyMobile": "Para continuar, el móvil de tu cuenta debe estar confirmado con un código SMS.",
+      "verifyMobileLink": "Confirmar mi móvil"
+    },
+    "documents": {
+      "hint": "Son obligatorios el documento de identidad y la licencia comercial (o eNamad para tienda online); los veterinarios suben además su licencia profesional.",
+      "none": "Aún no hay documentos.",
+      "kind": "Tipo de documento",
+      "file": "Archivo (JPG, PNG o PDF hasta 20 MB)",
+      "private": "Los documentos se guardan en privado; solo los ve el equipo de revisión.",
+      "upload": "Subir"
+    },
+    "docKind": {
+      "NATIONAL_ID_CARD": "Documento de identidad",
+      "LICENSE": "Licencia / permiso",
+      "BUSINESS_LICENSE": "Licencia comercial",
+      "BUSINESS_REGISTRATION": "Registro mercantil",
+      "OTHER": "Otro",
+      "ENAMAD": "eNamad (sello de confianza)"
+    },
+    "docStatus": {
+      "PENDING": "Pendiente de revisión",
+      "ACCEPTED": "Aceptado",
+      "REJECTED": "Rechazado",
+      "EXPIRED": "Caducado"
+    },
+    "address": {
+      "province": "Provincia",
+      "city": "Ciudad",
+      "pick": "Elige",
+      "otherCity": "Otra ciudad…",
+      "line": "Dirección",
+      "postalCode": "Código postal (10 dígitos)",
+      "latitude": "Latitud (opcional)",
+      "longitude": "Longitud (opcional)",
+      "pinHint": "Si conoces tu ubicación en el mapa, añádela para que te encuentren más fácil."
+    },
+    "day": {
+      "6": "Sábado",
+      "0": "Domingo",
+      "1": "Lunes",
+      "2": "Martes",
+      "3": "Miércoles",
+      "4": "Jueves",
+      "5": "Viernes"
+    },
+    "hours": {
+      "from": "Desde ({day})",
+      "to": "Hasta ({day})"
+    },
+    "services": {
+      "hint": "Los precios son por mascota; con varias se multiplica. Las citas siguen la duración de cada servicio.",
+      "kind": "Tipo",
+      "name": "Nombre del servicio",
+      "price": "Precio por mascota (tomanes)",
+      "duration": "Duración (minutos)",
+      "maxPets": "Máx. mascotas por cita",
+      "add": "Añadir servicio"
+    },
+    "products": {
+      "hint": "Busca tus productos en el directorio de opetlife y fija precio y stock. Se mostrarán cuando se apruebe la tienda y se revisen los productos.",
+      "search": "Buscar productos",
+      "searchButton": "Buscar",
+      "noResults": "No se encontraron productos.",
+      "add": "Añadir",
+      "picked": "Tus productos",
+      "nonePicked": "Aún no hay productos (puedes añadirlos más tarde).",
+      "price": "Precio (tomanes)",
+      "stock": "Stock",
+      "requestTitle": "¿No encuentras tu producto?",
+      "requestName": "Nombre del producto",
+      "requestButton": "Solicitar este producto",
+      "requestSent": "Solicitud enviada; se añadirá tras la revisión.",
+      "requestLater": "Las solicitudes de producto estarán disponibles en tu panel tras la aprobación."
+    },
+    "review": {
+      "body": "Revisa todo y envíalo a verificación. Después no podrás editar hasta que termine la revisión.",
+      "ready": "Todo está listo.",
+      "submit": "Enviar a revisión"
+    },
+    "missing": {
+      "ADDRESS": "Dirección",
+      "CALENDAR": "Calendario",
+      "SERVICES": "Al menos un servicio con precio",
+      "OPENING_HOURS": "Horario de la tienda",
+      "PROFILE": "Datos del titular (y móvil confirmado)",
+      "DOCUMENTS": "Documentos necesarios (identidad y licencia)",
+      "document": "Documento obligatorio: {kind}"
+    },
+    "submitted": {
+      "title": "Tu solicitud está en revisión",
+      "body": "El equipo de opetlife está revisando tus documentos y te avisará. Hasta entonces no se muestra nada en el sitio.",
+      "verifiedTitle": "Tu negocio está verificado",
+      "verifiedBody": "Tus servicios están activos y tus productos aparecerán en la tienda tras la revisión.",
+      "toBusiness": "Ir a mi negocio"
+    },
+    "subject": {
+      "PROVIDER": "Servicios",
+      "SELLER": "Tienda"
+    },
+    "lifecycle": {
+      "NOT_SUBMITTED": "No enviado",
+      "PENDING": "Pendiente de revisión",
+      "UNDER_REVIEW": "En revisión",
+      "RESUBMISSION_REQUESTED": "Cambios solicitados",
+      "APPROVED": "Aprobado",
+      "REJECTED": "Rechazado",
+      "SUSPENDED": "Suspendido"
+    },
+    "errors": {
+      "generic": "No se guardó; inténtalo de nuevo.",
+      "PICK_AT_LEAST_ONE": "Elige al menos un servicio o una tienda.",
+      "NAME_REQUIRED": "Escribe el nombre del negocio.",
+      "CANNOT_REMOVE_STARTED_BUSINESS": "No se puede quitar un tipo ya iniciado; solo puedes añadir nuevos.",
+      "UNDER_REVIEW_LOCKED": "Está en revisión y no se puede cambiar ahora.",
+      "VERIFIED_MOBILE_REQUIRED": "Primero confirma el móvil de tu cuenta con un código SMS.",
+      "ADDRESS_FIRST": "Guarda primero la dirección.",
+      "START_BEFORE_END": "La hora de inicio debe ser anterior a la de fin.",
+      "CATALOG_PRODUCT_NOT_AVAILABLE": "Uno de los productos ya no está en el directorio.",
+      "STEPS_INCOMPLETE": "Algunos pasos aún no están completos.",
+      "VERIFICATION_REQUIRED_DOCUMENTS_MISSING": "Faltan documentos obligatorios.",
+      "VERIFICATION_PROFILE_REQUIRED": "Los datos del titular están incompletos.",
+      "LOGO_FILE": "El logo debe ser JPG, PNG o WebP de menos de 10 MB.",
+      "DOC_FILE": "El documento debe ser JPG, PNG o PDF de menos de 20 MB.",
+      "TOO_MANY_PENDING": "Demasiados documentos pendientes de revisión."
     }
   }
 }

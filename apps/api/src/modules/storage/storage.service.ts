@@ -347,6 +347,21 @@ export class StorageService {
     return { ...target, key };
   }
 
+  /**
+   * A partner's business logo from signup — public branding (a logo, never a document), keyed by the signing-up
+   * user. Nothing shows it publicly until the business is verified; KYC evidence uses the private partner prefix.
+   */
+  async createPartnerLogoUploadTarget(userId: string, contentType: string, fileSizeBytes: number): Promise<UploadTarget & { key: string }> {
+    const extension = TRAVEL_COMMERCE_MEDIA_MIME_EXTENSIONS[contentType];
+    if (!extension) throw new UnsupportedDocumentTypeException({ contentType });
+    if (fileSizeBytes <= 0 || fileSizeBytes > TRAVEL_COMMERCE_MEDIA_MAX_BYTES) {
+      throw new DocumentTooLargeException({ fileSizeBytes, maxBytes: TRAVEL_COMMERCE_MEDIA_MAX_BYTES });
+    }
+    const key = `partner-logos/${userId}/${randomUUID()}.${extension}`;
+    const target = await this.driver.createUploadTarget(key, contentType, fileSizeBytes);
+    return { ...target, key };
+  }
+
   /** An Insurance provider's logo — public, keyed by providerId. */
   async createInsuranceProviderLogoUploadTarget(
     providerId: string,
