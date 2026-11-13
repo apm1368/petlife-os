@@ -1,5 +1,6 @@
 import { PartialType, OmitType } from "@nestjs/mapped-types";
-import { IsBoolean, IsLatitude, IsLongitude, IsOptional, IsString, IsUUID, Length, Matches } from "class-validator";
+import { IsBoolean, IsOptional, IsString, IsUUID, Length, Matches } from "class-validator";
+import { IsIranLatitude, IsIranLongitude } from "../../../common/geo/geo";
 
 export class CreateAddressDto {
   @IsUUID()
@@ -43,13 +44,19 @@ export class CreateAddressDto {
   @Length(1, 120)
   area?: string;
 
+  /** The exact map pin (inside Iran). Private to the household; null on an edit removes it. */
   @IsOptional()
-  @IsLatitude()
-  latitude?: number;
+  @IsIranLatitude()
+  latitude?: number | null;
 
   @IsOptional()
-  @IsLongitude()
-  longitude?: number;
+  @IsIranLongitude()
+  longitude?: number | null;
+
+  /** Required (true) whenever a pin is sent: the member ticked "save this exact location for deliveries". */
+  @IsOptional()
+  @IsBoolean()
+  locationConsent?: boolean;
 
   @IsOptional()
   @IsString()

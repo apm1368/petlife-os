@@ -24,6 +24,8 @@ import { signSessionCookie } from "../src/common/session/session-cookie.util";
 
 // Public by design: anyone may read these (published catalogue, public listings, reviews).
 const PUBLIC_GET = new Set([
+  // «ست پت» catalogue and fixed price table: the builder works before sign-in (owner #368 P4).
+  "/set-pet/options",
   "/settings/public",
   "/travel/external/stays",
   "/travel/external/facets",

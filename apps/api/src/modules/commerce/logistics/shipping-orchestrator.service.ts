@@ -21,9 +21,29 @@ import { buildShippingPackage } from "./shipping-package.util";
 import { ShippingMethodSettingsService } from "./shipping-method-settings.service";
 import type { SellerShippingProfile } from "@prisma/client";
 
-/** A seller's pickup point: its shipping profile when filled in, otherwise just its name and city. */
-export function pickupFromProfile(seller: { name: string; city: string | null; countryCode: string }, profile: SellerShippingProfile | null): AddressSnapshotDto {
-  if (!profile?.pickupAddressLine && !profile?.pickupCity) return { recipient: seller.name, phone: null, addressLine: null, city: seller.city, region: null, countryCode: seller.countryCode, instructions: null };
+/**
+ * A seller's pickup point: its shipping profile when filled in, otherwise the shop address and map pin it gave at
+ * partner signup (or just its name and city). The pin drives distance pricing; the address text is the courier's
+ * backup when there is no pin.
+ */
+export function pickupFromProfile(
+  seller: { name: string; city: string | null; countryCode: string; addressLine?: string | null; province?: string | null; postalCode?: string | null; latitude?: number | null; longitude?: number | null },
+  profile: SellerShippingProfile | null,
+): AddressSnapshotDto {
+  if (!profile?.pickupAddressLine && !profile?.pickupCity) {
+    const pinned = typeof seller.latitude === "number" && typeof seller.longitude === "number";
+    return {
+      recipient: seller.name,
+      phone: null,
+      addressLine: seller.addressLine ?? null,
+      city: seller.city,
+      region: seller.province ?? null,
+      countryCode: seller.countryCode,
+      instructions: null,
+      ...(seller.postalCode ? { postalCode: seller.postalCode } : {}),
+      ...(pinned ? { latitude: seller.latitude, longitude: seller.longitude } : {}),
+    };
+  }
   return {
     recipient: profile.pickupContactName ?? seller.name,
     phone: profile.pickupPhone,

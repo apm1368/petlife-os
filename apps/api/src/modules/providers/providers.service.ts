@@ -81,7 +81,7 @@ export class ProvidersService {
       description: org.description,
       logoUrl: org.logoUrl,
       websiteUrl: org.websiteUrl,
-      locations: org.locations.map(toLocationDto),
+      locations: org.locations.map((l) => toLocationDto(l, { publicFor: org.type })),
       services: org.services.filter((s) => s.isActive && s.category === ServiceCategory.VET).map((service) => toServiceDto(service)),
     };
   }
@@ -142,7 +142,7 @@ export class ProvidersService {
       verificationStatus: org.verificationStatus as ProviderSummaryDto["verificationStatus"],
       description: org.description,
       logoUrl: org.logoUrl,
-      locations: locations.map(toLocationDto),
+      locations: locations.map((l) => toLocationDto(l, { publicFor: org.type })),
       services: services.map((service) => toServiceDto(service)),
       nextAvailableSlotStart,
     };

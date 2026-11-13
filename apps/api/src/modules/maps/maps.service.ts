@@ -1,6 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import type { AppEnv } from "../../config/env";
+import { PlatformSettingsService } from "../platform-settings/platform-settings.service";
 
 export type LatLng = { latitude: number; longitude: number };
 export type RouteSource = "GOOGLE" | "NESHAN" | "STRAIGHT_LINE_ESTIMATE";
@@ -59,7 +60,10 @@ export function validLatLng(p: Partial<LatLng> | null | undefined): p is LatLng 
 export class MapsService {
   private readonly logger = new Logger(MapsService.name);
 
-  constructor(private readonly config: ConfigService<AppEnv, true>) {}
+  constructor(
+    private readonly config: ConfigService<AppEnv, true>,
+    private readonly settings: PlatformSettingsService,
+  ) {}
 
   private provider(): "none" | "neshan" | "google" {
     const p = this.config.get("MAPS_PROVIDER", { infer: true });
@@ -68,16 +72,22 @@ export class MapsService {
     return "none";
   }
 
+  /**
+   * What the browser draws. Admin › Site settings › Maps chooses OpenStreetMap or Google and holds the Google browser
+   * key (public by design, HTTP-referrer restricted; env values are only the fallback until an admin sets them).
+   * Without a key the web keeps OpenStreetMap tiles. Search and routes still use the server key from the env.
+   */
   clientConfig(): MapsClientConfig {
-    const provider = this.provider();
-    const browserKey = this.config.get("GOOGLE_MAPS_BROWSER_KEY", { infer: true });
+    const server = this.provider();
+    const browserKey = this.settings.get<string | null>("maps.googleBrowserKey");
+    const googleMap = this.settings.get<string>("maps.provider") === "google" && !!browserKey;
     return {
-      provider: provider === "google" && !browserKey ? "none" : provider,
+      provider: googleMap ? "google" : server === "neshan" ? "neshan" : "none",
       tileUrl: this.config.get("MAP_TILE_URL", { infer: true }),
       tileAttribution: this.config.get("MAP_TILE_ATTRIBUTION", { infer: true }),
-      googleBrowserKey: provider === "google" ? browserKey ?? null : null,
-      search: provider !== "none",
-      estimatesOnly: provider === "none",
+      googleBrowserKey: googleMap ? browserKey : null,
+      search: server !== "none",
+      estimatesOnly: server === "none",
     };
   }
 

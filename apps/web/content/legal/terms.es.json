@@ -98,7 +98,9 @@
         "Tarjeta a tarjeta: transfiere el importe exacto a la cuenta que aparece en la página de pago y sube el comprobante en un plazo de 30 minutos. Nuestro equipo de finanzas revisa los comprobantes en horario laboral: de sábado a miércoles, 9:00–18:00, y los jueves, 9:00–13:00, hora de Teherán. Una reserva pagada de esta forma debe comenzar al menos 24 horas después. Si pagaste de más, la diferencia se abona en tu monedero. Si pagaste de menos, tienes 30 minutos para pagar el resto.",
         "El monedero tiene dos tipos de saldo. El saldo de reembolso es el que te devolvemos por compras canceladas o reembolsadas. El saldo de compra procede de recargas y regalos, y solo puede gastarse en opetlife. El saldo de regalo caduca seis meses después de concederse. El monedero no genera intereses. Ambos tipos se pueden gastar en opetlife. Retirar el saldo de reembolsos a una cuenta bancaria todavía no está disponible en la app; si lo necesitas, contacta con soporte y nuestro equipo de finanzas revisará tu solicitud.",
         "Cada recarga debe ser de al menos 10.000 tomanes y como máximo de 50.000.000 tomanes. Puedes tener como máximo tres solicitudes de recarga pendientes de revisión.",
-        "Las promociones se aplican automáticamente cuando cumples los requisitos y no son acumulables. No hay códigos de descuento.",
+        "Las promociones se aplican automáticamente cuando cumples los requisitos y no son acumulables. Aparte del código regalo de suscripción que se describe más abajo, cuando lo ofrezcamos, no hay códigos de descuento.",
+        "Suscripciones y prueba gratuita: algunas funciones adicionales forman parte de planes de pago opcionales, que se muestran con su precio en la página de suscripción. Si nunca has pagado un plan, puedes probar uno gratis una vez: la prueba puede empezar al añadir tu primera mascota, o puedes iniciarla en la página de suscripción. Empezar la prueba no requiere tarjeta ni pago, y dura los días que se indican al empezar, normalmente 7. Cada cuenta, hogar y número de móvil solo puede tener una prueba; para comprobar el número, solo guardamos una forma cifrada (hash) de él. Te lo recordamos en la app, y por SMS cuando esté disponible, dos días antes de que termine. Al terminar, simplemente vuelves al plan gratuito: nunca te cobramos sin tu consentimiento expreso. Puedes terminar la prueba antes, pero seguirá contando como usada.",
+        "Código regalo de suscripción: cuando lo ofrezcamos, aparecerá en la página de suscripción. Solo sirve para tu primera compra de una suscripción de pago, también después de una prueba gratuita, y se puede usar una vez por cuenta y hogar. No es acumulable con otras promociones ni se puede canjear por dinero ni por saldo del monedero. Verás el precio con descuento antes de pagar, y un código con fecha de fin deja de funcionar después de ese día.",
         "El pago fraccionado, cuando se ofrece, lo presta una empresa de financiación externa, sujeto a sus propias condiciones y a su aprobación."
       ]
     },
@@ -168,7 +170,7 @@
       "id": "changes",
       "heading": "17. Cambios en estos términos",
       "paragraphs": [
-        "Te informaremos de los cambios importantes al menos 14 días antes de que entren en vigor, en el sitio y mediante una notificación. La fecha que figura al principio de esta página indica la versión más reciente. Si sigues usando opetlife después de que un cambio entre en vigor, se aplican los nuevos términos."
+        "Los cambios entran en vigor cuando los publicamos aquí. Para los cambios importantes, además mostramos un aviso en el sitio y te enviamos un correo electrónico si tu cuenta tiene una dirección de correo. La fecha que figura al principio de esta página indica la versión más reciente. Si sigues usando opetlife después de un cambio, se aplican los nuevos términos."
       ]
     },
     {

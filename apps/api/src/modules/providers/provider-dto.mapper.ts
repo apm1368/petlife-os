@@ -1,5 +1,6 @@
 import type { ProviderLocation, ProviderService, ProviderServiceVariant } from "@prisma/client";
 import { supportedSpecies } from "../../common/species/catalog-species";
+import { providerPinIsExact, publicPin } from "../../common/geo/geo";
 import type { ProviderLocationDto, ProviderServiceDto, ProviderServiceVariantDto } from "@petlife/types";
 
 /**
@@ -8,7 +9,15 @@ import type { ProviderLocationDto, ProviderServiceDto, ProviderServiceVariantDto
  * ProviderServiceDto shape (Handoff 04 added category/age/weight/requires-
  * flags/locationMode) only needs updating once.
  */
-export function toProviderLocationDto(location: ProviderLocation): ProviderLocationDto {
+/**
+ * Who reads the location decides the pin it carries:
+ * - `{ publicFor: orgType }` — anyone (discovery, service pages): storefronts at their exact pin, home-based providers
+ *   (sitters, walkers, boarding, trainers, groomers, individual vets, pet taxi) at a ~1 km approximate point unless
+ *   they opted in to show the exact spot;
+ * - `"exact"` — the business itself, staff, and a member with a booking there (they have to find the door).
+ */
+export function toProviderLocationDto(location: ProviderLocation, view: { publicFor: string } | "exact"): ProviderLocationDto {
+  const pin = view === "exact" ? publicPin(location, true) : publicPin(location, providerPinIsExact(view.publicFor, location.pinPublicExact));
   return {
     id: location.id,
     providerOrganizationId: location.providerOrganizationId,
@@ -17,8 +26,10 @@ export function toProviderLocationDto(location: ProviderLocation): ProviderLocat
     city: location.city,
     region: location.region,
     countryCode: location.countryCode,
-    latitude: location.latitude,
-    longitude: location.longitude,
+    latitude: pin.latitude,
+    longitude: pin.longitude,
+    pinPrecision: pin.pinPrecision,
+    ...(view === "exact" ? { pinPublicExact: location.pinPublicExact } : {}),
     phone: location.phone,
     timezone: location.timezone,
   };

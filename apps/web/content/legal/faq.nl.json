@@ -22,6 +22,14 @@
         {
           "q": "Kost opetlife iets?",
           "a": "Een account aanmaken en de dossiers van je huisdieren bijhouden is gratis. Je betaalt alleen voor de diensten, producten en reizen die je boekt of koopt. Sommige extra functies horen bij optionele betaalde abonnementen, die op de abonnementspagina staan."
+        },
+        {
+          "q": "Hoe werkt de gratis proefperiode?",
+          "a": "Hij is voor leden die nog nooit voor een abonnement hebben betaald. Hij kan starten wanneer je je eerste huisdier toevoegt, of je start hem op de abonnementspagina. Je hebt geen kaart nodig en betaalt niets. Hij duurt het aantal dagen dat bij de start wordt getoond, normaal 7, en elk account, elk huishouden en elk mobiel nummer krijgt één proefperiode. Twee dagen voor het einde herinneren we je eraan. Daarna ga je gewoon terug naar het gratis abonnement; er wordt nooit automatisch iets in rekening gebracht."
+        },
+        {
+          "q": "Is er een cadeaucode?",
+          "a": "Als we die aanbieden, staat hij op de abonnementspagina. Hij werkt één keer, voor je eerste betaalde abonnement, en is niet te combineren met andere acties of in te wisselen voor geld of tegoed in je portemonnee."
         }
       ]
     },
@@ -164,6 +172,10 @@
         {
           "q": "Hoe verwijder ik mijn account?",
           "a": "Vraag het aan via Profiel → Privacy. Je verzoek wordt vastgelegd en beoordeeld, en uitgevoerd zodra ons bewaarbeleid voor gegevens is gepubliceerd; we laten je weten wanneer het is gebeurd. Zolang het openstaat, kun je het annuleren. Openstaande boekingen, bestellingen, terugbetalingen of geschillen moeten eerst zijn afgerond."
+        },
+        {
+          "q": "Wie kan mijn adres op de kaart zien?",
+          "a": "Jij en je huishouden. Verder zien alleen de koerier van een zending naar dat adres, ons team dat je bestelling afhandelt en je dierentaxichauffeur zodra de rit is geaccepteerd het exacte punt. Verkopers, aanbieders en andere leden zien het nooit. Je kunt het punt altijd verplaatsen of verwijderen."
         },
         {
           "q": "Welke meldingen krijg ik?",

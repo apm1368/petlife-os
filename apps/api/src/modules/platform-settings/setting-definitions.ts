@@ -1,6 +1,6 @@
 import type { AppEnv } from "../../config/env";
 
-export type SettingCategory = "platform" | "booking" | "commerce" | "approvals" | "support" | "content" | "notifications" | "privacy" | "country" | "auth" | "site" | "social" | "features" | "maintenance";
+export type SettingCategory = "platform" | "booking" | "commerce" | "approvals" | "membership" | "support" | "content" | "notifications" | "privacy" | "country" | "auth" | "site" | "social" | "features" | "maintenance" | "maps";
 export type SettingType = "integer" | "boolean" | "localizedText" | "text" | "url" | "email" | "enum";
 /** Locales a localizedText value may carry. Older values hold fa/en only and stay valid. */
 export const SETTING_LOCALES = ["fa", "en", "de", "es", "ar", "nl"] as const;
@@ -96,8 +96,39 @@ const SITE_SETTINGS: SettingDefinition[] = [
 ];
 
 /**
+ * Which map the web draws (GET /maps/config). The Google *browser* key is public by design: it ships to every
+ * visitor's browser and Google restricts it by HTTP referrer (opetlife.ir) in the Cloud console, so it may live here.
+ * The Google *server* key (Distance Matrix, place search) is a real secret and stays in the server env.
+ * Neither ever lives in git. Without a usable browser key the web keeps OpenStreetMap tiles.
+ */
+const MAPS_SETTINGS: SettingDefinition[] = [
+  {
+    key: "maps.provider",
+    category: "maps",
+    type: "enum",
+    scope: "INTERNAL",
+    highImpact: false,
+    options: ["osm", "google"],
+    fallback: (env) => (env("MAPS_PROVIDER") === "google" ? "google" : "osm"),
+    description: "Map drawn on the site: OpenStreetMap tiles, or Google Maps when a browser key is set (falls back to OpenStreetMap whenever Google is unreachable).",
+  },
+  {
+    key: "maps.googleBrowserKey",
+    category: "maps",
+    type: "text",
+    scope: "INTERNAL",
+    highImpact: false,
+    maxLength: 60,
+    pattern: /^AIza[0-9A-Za-z_-]{35}$/,
+    fallback: (env) => env("GOOGLE_MAPS_BROWSER_KEY") ?? null,
+    description: "Google Maps JavaScript API browser key (public by design; restrict it to the opetlife.ir HTTP referrers in Google Cloud). Never commit it to git.",
+  },
+];
+
+/**
  * The explicit registry. Only keys that something actually reads are listed — a setting nobody consumes would be a
- * fake control. Secrets, credentials and provider modes are deliberately NOT settings (they stay in the server env).
+ * fake control. Secrets, credentials and provider modes are deliberately NOT settings (they stay in the server env);
+ * the one exception is the map's public browser key and provider choice (see MAPS_SETTINGS).
  */
 export const SETTING_DEFINITIONS: SettingDefinition[] = [
   {
@@ -141,6 +172,7 @@ export const SETTING_DEFINITIONS: SettingDefinition[] = [
     description: "Who sees the announcement: signed-in members only, or every visitor.",
   },
   ...SITE_SETTINGS,
+  ...MAPS_SETTINGS,
   {
     key: "auth.googleEnabled",
     category: "auth",
@@ -223,6 +255,79 @@ export const SETTING_DEFINITIONS: SettingDefinition[] = [
     options: ["INSTANT", "NEEDS_APPROVAL"],
     fallback: () => "INSTANT",
     description: "Shop orders: go to the seller as soon as they are paid, or wait for staff approval first (approve sends them to the seller; reject refunds in full).",
+  },
+  // Membership offers (owner request 2026-11-13; decision T-04: amounts are set here, never in code). Read by
+  // SubscriptionService (free week) and SubscriptionGiftService (first-purchase gift). The gift is off by default.
+  {
+    key: "membership.freeWeek.enabled",
+    category: "membership",
+    type: "boolean",
+    scope: "INTERNAL",
+    highImpact: false,
+    fallback: () => true,
+    description: "Offer the free trial: it starts with a household's first pet, and a member who never had a trial or a paid membership can start it in one click. No card; nothing is charged afterwards. Off stops new trials only; running trials keep their end date.",
+  },
+  {
+    key: "membership.freeWeek.days",
+    category: "membership",
+    type: "integer",
+    scope: "INTERNAL",
+    highImpact: false,
+    min: 1,
+    max: 30,
+    fallback: () => 7,
+    description: "Length of the free trial in days. Applies to trials started after the change.",
+  },
+  {
+    key: "membership.freeWeek.requireVerifiedPhone",
+    category: "membership",
+    type: "boolean",
+    scope: "INTERNAL",
+    highImpact: false,
+    fallback: () => false,
+    description: "Only accounts with a verified phone can start the free trial. Every trial already claims a verified phone for good, so a new account on the same number never gets a second one; turn this on once SMS verification is live so that email-only sign-ups get no trial either.",
+  },
+  {
+    key: "membership.firstPurchaseGift.enabled",
+    category: "membership",
+    type: "boolean",
+    scope: "INTERNAL",
+    highImpact: false,
+    fallback: () => false,
+    description: "Show and accept the first-purchase gift code: a percentage off a member's first paid membership purchase. Once per account and per household; it never stacks and never becomes cash or wallet credit.",
+  },
+  {
+    key: "membership.firstPurchaseGift.code",
+    category: "membership",
+    type: "text",
+    scope: "INTERNAL",
+    highImpact: false,
+    maxLength: 24,
+    pattern: /^[A-Za-z0-9-]{4,24}$/,
+    fallback: () => "WELCOME",
+    description: "The gift code members see and enter: 4 to 24 Latin letters, digits or dashes, matched without regard to case. Empty = no gift.",
+  },
+  {
+    key: "membership.firstPurchaseGift.percentOff",
+    category: "membership",
+    type: "integer",
+    scope: "INTERNAL",
+    highImpact: false,
+    min: 1,
+    max: 90,
+    fallback: () => 10,
+    description: "Percent taken off the list price of the first paid purchase (any plan and duration).",
+  },
+  {
+    key: "membership.firstPurchaseGift.expiresOn",
+    category: "membership",
+    type: "text",
+    scope: "INTERNAL",
+    highImpact: false,
+    maxLength: 10,
+    pattern: /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/,
+    fallback: () => null,
+    description: "Last day the gift code can be used, as YYYY-MM-DD (Gregorian calendar, Tehran time, inclusive). Empty = no expiry.",
   },
   {
     key: "support.firstResponseSlaHours",

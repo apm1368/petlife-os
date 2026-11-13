@@ -2,7 +2,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { CustomerAddressDto } from "@petlife/types";
-import { Button, EmptyState, Input, LocateFixed, MapPin, Skeleton, StatusLabel } from "@petlife/ui";
+import { Button, EmptyState, Input, MapPin, Skeleton, StatusLabel } from "@petlife/ui";
+import { LocationPicker } from "@/features/maps/LocationPicker";
 import { SystemState } from "@/features/system/SystemState";
 import { addressesService, type CreateAddressInput } from "@/services/addresses.service";
 import { householdsService } from "@/services/households.service";
@@ -48,7 +49,8 @@ const latinDigits = (v: string) => v.replace(/[۰-۹]/g, (d) => String(d.charCod
 
 /**
  * The household's address book (account menu): every delivery address, which one is the default, the neighbourhood
- * and an optional map point (current location) that lets the opetlife courier price by distance.
+ * and the map pin (required for new addresses, a nudge on older ones) that couriers, fares and "near me" use. The pin
+ * is private to the household and saved only with the member's consent.
  */
 export function AddressBookView() {
   const t = useTranslations("addressBook");
@@ -127,7 +129,9 @@ export function AddressBookView() {
                       <span>
                         <MapPin size={14} aria-hidden /> {t("location.hasPoint")}
                       </span>
-                    ) : null}
+                    ) : (
+                      <span className="address-book__nudge">{t("location.noPoint")}</span>
+                    )}
                   </p>
                 </div>
                 <div className="address-book__actions">
@@ -181,30 +185,20 @@ function AddressForm({ householdId, editing, onCancel, onSaved }: { householdId:
   const [d, setD] = useState<Draft>(editing.draft);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [locating, setLocating] = useState(false);
-  const [locationNote, setLocationNote] = useState<string | null>(null);
+  const tp = useTranslations("locationPicker");
+  // An already saved pin was consented to when it was saved; a new or moved pin needs the box ticked again.
+  const savedPin = editing.draft.latitude != null && editing.draft.longitude != null ? { latitude: editing.draft.latitude, longitude: editing.draft.longitude } : null;
+  const [consent, setConsent] = useState(savedPin !== null);
+  const pin = d.latitude != null && d.longitude != null ? { latitude: d.latitude, longitude: d.longitude } : null;
+  const pinChanged = (pin?.latitude ?? null) !== (savedPin?.latitude ?? null) || (pin?.longitude ?? null) !== (savedPin?.longitude ?? null);
   const set = (k: keyof Draft) => (e: React.ChangeEvent<HTMLInputElement>) => setD((x) => ({ ...x, [k]: k === "postalCode" ? latinDigits(e.target.value) : e.target.value }));
-
-  function locate() {
-    if (!navigator.geolocation) return setLocationNote(t("location.denied"));
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setD((x) => ({ ...x, latitude: Math.round(pos.coords.latitude * 1e6) / 1e6, longitude: Math.round(pos.coords.longitude * 1e6) / 1e6 }));
-        setLocationNote(t("location.set"));
-        setLocating(false);
-      },
-      () => {
-        setLocationNote(t("location.denied"));
-        setLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 15_000 },
-    );
-  }
 
   async function save(event: React.FormEvent) {
     event.preventDefault();
     if (!d.addressLine.trim() || !d.city.trim() || (d.postalCode && !/^\d{10}$/.test(d.postalCode))) return setError(t("failedSave"));
+    // New addresses need a pin (couriers and fares use it); older ones keep working without one.
+    if (!editing.id && !pin) return setError(tp("pinNeeded"));
+    if (pin && pinChanged && !consent) return setError(tp("consentNeeded"));
     setBusy(true);
     setError(null);
     const body: Omit<CreateAddressInput, "householdId"> = {
@@ -219,8 +213,8 @@ function AddressForm({ householdId, editing, onCancel, onSaved }: { householdId:
       instructions: d.instructions.trim() || undefined,
       countryCode: "IR",
       isDefault: d.isDefault,
-      // A cleared map point is sent as null so an edit removes it too.
-      ...(d.latitude != null && d.longitude != null ? { latitude: d.latitude, longitude: d.longitude } : editing.id ? { latitude: null, longitude: null } : {}),
+      // Only a new or moved pin is sent (with the member's consent); a cleared pin is sent as null so the edit removes it.
+      ...(pin && pinChanged ? { latitude: pin.latitude, longitude: pin.longitude, locationConsent: true } : !pin && savedPin ? { latitude: null, longitude: null } : {}),
     };
     try {
       onSaved(editing.id ? await addressesService.update(editing.id, body) : await addressesService.create({ householdId, ...body }));
@@ -246,22 +240,14 @@ function AddressForm({ householdId, editing, onCancel, onSaved }: { householdId:
         <Input label={t("fields.postalCode")} value={d.postalCode} onChange={set("postalCode")} inputMode="numeric" dir="ltr" maxLength={10} autoComplete="postal-code" />
         <Input label={t("fields.instructions")} value={d.instructions} onChange={set("instructions")} maxLength={500} />
       </div>
-      <div className="address-book__location">
-        <Button type="button" variant="secondary" size="sm" onClick={locate} isLoading={locating}>
-          <LocateFixed size={16} aria-hidden /> {locating ? t("location.locating") : t("location.use")}
-        </Button>
-        {d.latitude != null && d.longitude != null ? (
-          <>
-            <span dir="ltr" className="address-book__coords">
-              {d.latitude.toFixed(5)}, {d.longitude.toFixed(5)}
-            </span>
-            <Button type="button" variant="ghost" size="sm" onClick={() => setD((x) => ({ ...x, latitude: null, longitude: null }))}>
-              {t("location.clear")}
-            </Button>
-          </>
-        ) : null}
-        {locationNote ? <small role="status">{locationNote}</small> : null}
-      </div>
+      <LocationPicker
+        audience="member"
+        required={!editing.id}
+        value={pin}
+        onChange={(p) => setD((x) => ({ ...x, latitude: p?.latitude ?? null, longitude: p?.longitude ?? null }))}
+        consent={consent}
+        onConsentChange={setConsent}
+      />
       <label className="address-book__check">
         <input type="checkbox" checked={d.isDefault} onChange={(e) => setD((x) => ({ ...x, isDefault: e.target.checked }))} /> {t("fields.isDefault")}
       </label>

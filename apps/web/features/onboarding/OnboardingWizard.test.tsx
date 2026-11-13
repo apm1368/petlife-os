@@ -17,6 +17,8 @@ const completed: OnboardingProgressDto = {
   step: "ready", status: OnboardingStatus.COMPLETED, completedSteps: [], lastCompletedAt: null,
 };
 
+// The membership offers card loads its own data; these views are tested without it.
+vi.mock("@/services/membership-offers.service", () => ({ membershipOffersService: { forHousehold: vi.fn(() => new Promise(() => undefined)), forAccount: vi.fn(() => new Promise(() => undefined)), startFreeWeek: vi.fn(), checkGift: vi.fn() } }));
 describe("Onboarding resume recovery", () => {
   beforeEach(() => {
     vi.resetAllMocks();

@@ -6,6 +6,9 @@ import { adminApprovalsService } from "@/services/admin-approvals.service";
 import { useAdminStore } from "@/stores/admin-store";
 import { PartnerApprovalModePanel } from "./PartnerApprovalModePanel";
 
+// CI runners are loaded: the default 1 s wait for the validation message timed out at ~1.1 s (2026-11-13, flaky).
+const SLOW = { timeout: 5_000 };
+
 vi.mock("@/services/admin-approvals.service", () => ({ adminApprovalsService: { get: vi.fn(), set: vi.fn(), clear: vi.fn() } }));
 const svc = vi.mocked(adminApprovalsService);
 
@@ -49,23 +52,23 @@ describe("PartnerApprovalModePanel", () => {
     svc.set.mockResolvedValue({ ...PROVIDER, items: [{ ...PROVIDER.items[0]!, override: { mode: "NEEDS_APPROVAL", reason: "New clinic, checking quality", updatedAt: "2026-11-13T09:00:00Z", updatedByName: "Ops" }, effective: "NEEDS_APPROVAL" }, PROVIDER.items[1]!] });
     svc.clear.mockResolvedValue({ ...PROVIDER, items: [PROVIDER.items[0]!, { ...PROVIDER.items[1]!, override: null, effective: "NEEDS_APPROVAL" }] });
     renderWithIntl(<PartnerApprovalModePanel kind="services" organizationId="org1" />);
-    const services = (await screen.findByRole("heading", { name: "Care-service bookings" })).closest("li")!;
+    const services = (await screen.findByRole("heading", { name: "Care-service bookings" }, SLOW)).closest("li")!;
 
     fireEvent.change(within(services).getByLabelText("For this business"), { target: { value: "NEEDS_APPROVAL" } });
     fireEvent.click(within(services).getByRole("button", { name: "Save" }));
-    expect(await within(services).findByText("Write a reason of at least 5 characters.")).toBeTruthy();
+    expect(await within(services).findByText("Write a reason of at least 5 characters.", {}, SLOW)).toBeTruthy();
     expect(svc.set).not.toHaveBeenCalled();
     fireEvent.change(within(services).getByLabelText("Reason (audit log)"), { target: { value: "New clinic, checking quality" } });
     fireEvent.click(within(services).getByRole("button", { name: "Save" }));
-    await waitFor(() => expect(svc.set).toHaveBeenCalledWith("services", "org1", "SERVICE_BOOKINGS", "NEEDS_APPROVAL", "New clinic, checking quality"));
-    expect(await screen.findByText(/Reason: New clinic, checking quality/)).toBeTruthy();
+    await waitFor(() => expect(svc.set).toHaveBeenCalledWith("services", "org1", "SERVICE_BOOKINGS", "NEEDS_APPROVAL", "New clinic, checking quality"), SLOW);
+    expect(await screen.findByText(/Reason: New clinic, checking quality/, {}, SLOW)).toBeTruthy();
 
     const stays = screen.getByRole("heading", { name: "Stay bookings" }).closest("li")!;
     fireEvent.change(within(stays).getByLabelText("For this business"), { target: { value: "INHERIT" } });
     fireEvent.change(within(stays).getByLabelText("Reason (audit log)"), { target: { value: "Back to the platform rule" } });
     fireEvent.click(within(stays).getByRole("button", { name: "Save" }));
-    await waitFor(() => expect(svc.clear).toHaveBeenCalledWith("services", "org1", "STAY_BOOKINGS", "Back to the platform rule"));
-  });
+    await waitFor(() => expect(svc.clear).toHaveBeenCalledWith("services", "org1", "STAY_BOOKINGS", "Back to the platform rule"), SLOW);
+  }, 20_000);
 
   it("renders in Persian and offers a retry when loading fails", async () => {
     admin("commerce.view");

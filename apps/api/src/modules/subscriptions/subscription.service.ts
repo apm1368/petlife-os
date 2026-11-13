@@ -7,8 +7,11 @@ import type { SubscriptionBillingHistoryDto, SubscriptionChangeDto, Subscription
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { DomainEventsService } from "../../common/events/domain-events.service";
 import { InvalidSubscriptionStatusTransitionException, SubscriptionAlreadyCancelledException, SubscriptionTrialNotEligibleException } from "../../common/errors/api-exception";
+import { PlatformSettingsService } from "../platform-settings/platform-settings.service";
 import { SubscriptionPlanReadService } from "./subscription-plan-read.service";
 import { resolveHouseholdCountry } from "./household-country.util";
+import { householdHasPaid, userHasPaid } from "./membership-history.util";
+import { trialPhoneHash, verifiedPhoneOf } from "./trial-phone-claim.util";
 import {
   CHANGE_INCLUDE,
   PERIOD_INCLUDE,
@@ -22,6 +25,13 @@ import {
 
 type QueryClient = PrismaService | Prisma.TransactionClient;
 
+export interface StartTrialOptions {
+  /** Trial length in days; the free week passes the admin setting, a plan's own trial uses `plan.trialDays`. */
+  days?: number;
+  /** The free week is for members who never paid: re-checked inside the locked transaction. */
+  requireNeverPaid?: boolean;
+}
+
 /**
  * The subscription state machine (spec: "use an explicit state machine...
  * define allowed transitions explicitly... never use payment status names
@@ -33,7 +43,8 @@ type QueryClient = PrismaService | Prisma.TransactionClient;
  */
 const ALLOWED_TRANSITIONS: Record<SubscriptionStatus, SubscriptionStatus[]> = {
   [SubscriptionStatus.ACTIVE]: [SubscriptionStatus.TRIALING, SubscriptionStatus.PAST_DUE, SubscriptionStatus.CANCEL_AT_PERIOD_END],
-  [SubscriptionStatus.TRIALING]: [SubscriptionStatus.ACTIVE, SubscriptionStatus.EXPIRED, SubscriptionStatus.CANCEL_AT_PERIOD_END],
+  // TRIALING → CANCELLED: the member ends the trial early (endTrialNow); access ends at once.
+  [SubscriptionStatus.TRIALING]: [SubscriptionStatus.ACTIVE, SubscriptionStatus.EXPIRED, SubscriptionStatus.CANCEL_AT_PERIOD_END, SubscriptionStatus.CANCELLED],
   [SubscriptionStatus.PAST_DUE]: [SubscriptionStatus.ACTIVE, SubscriptionStatus.GRACE_PERIOD, SubscriptionStatus.CANCEL_AT_PERIOD_END],
   [SubscriptionStatus.GRACE_PERIOD]: [SubscriptionStatus.ACTIVE, SubscriptionStatus.EXPIRED, SubscriptionStatus.CANCEL_AT_PERIOD_END],
   [SubscriptionStatus.CANCEL_AT_PERIOD_END]: [SubscriptionStatus.ACTIVE, SubscriptionStatus.CANCELLED],
@@ -59,6 +70,7 @@ export class SubscriptionService {
     private readonly plans: SubscriptionPlanReadService,
     private readonly events: DomainEventsService,
     private readonly config: ConfigService<AppEnv, true>,
+    private readonly settings: PlatformSettingsService,
   ) {}
 
   assertTransition(from: SubscriptionStatus, to: SubscriptionStatus): void {
@@ -144,12 +156,13 @@ export class SubscriptionService {
    * `userId` is who acts (recorded on the TRIAL_STARTED change); `trialUserId` is whose one lifetime trial is
    * consumed — the actor for a manual trial, the household owner for the welcome trial (see startWelcomeTrial).
    */
-  async startTrial(householdId: string, planId: string, userId: string, trialUserId: string = userId): Promise<SubscriptionDto> {
+  async startTrial(householdId: string, planId: string, userId: string, trialUserId: string = userId, options: StartTrialOptions = {}): Promise<SubscriptionDto> {
     const plan = await this.plans.getRawById(planId);
-    if (!plan.trialDays || plan.trialDays <= 0) throw new SubscriptionTrialNotEligibleException({ planId, reason: "PLAN_HAS_NO_TRIAL" });
+    const days = options.days ?? plan.trialDays;
+    if (!days || days <= 0) throw new SubscriptionTrialNotEligibleException({ planId, reason: "PLAN_HAS_NO_TRIAL" });
 
     const startAt = new Date();
-    const endAt = new Date(startAt.getTime() + plan.trialDays * 24 * 60 * 60 * 1000);
+    const endAt = new Date(startAt.getTime() + days * 24 * 60 * 60 * 1000);
 
     try {
       return await this.prisma
@@ -170,6 +183,15 @@ export class SubscriptionService {
           if (await tx.subscriptionChange.count({ where: { type: SubscriptionChangeType.TRIAL_STARTED, initiatedByUserId: trialUserId, subscription: { household: { welcomeTrialConsumedAt: null } } } })) {
             throw new SubscriptionTrialNotEligibleException({ planId, reason: "USER_TRIAL_ALREADY_USED" });
           }
+          if (options.requireNeverPaid && ((await householdHasPaid(tx, householdId)) || (await userHasPaid(tx, trialUserId)))) {
+            throw new SubscriptionTrialNotEligibleException({ planId, reason: "ALREADY_PAID" });
+          }
+          // One trial per verified phone, too: the trial claims the number for good, so a new account on the same
+          // number (after deleting this one, or after this account moved to another number) never gets a second.
+          const phone = verifiedPhoneOf(await tx.user.findUnique({ where: { id: trialUserId }, select: { phone: true, phoneVerifiedAt: true } }));
+          if (!phone && this.settings.get<boolean>("membership.freeWeek.requireVerifiedPhone") === true) {
+            throw new SubscriptionTrialNotEligibleException({ planId, reason: "PHONE_VERIFICATION_REQUIRED" });
+          }
           // The single-use guarantee itself: conditional row updates. A concurrent attempt for the same household
           // or user blocks on the row lock, then sees the column already set and updates nothing.
           const consumedAt = new Date();
@@ -177,6 +199,10 @@ export class SubscriptionService {
           if (household.count !== 1) throw new SubscriptionTrialNotEligibleException({ planId, reason: "TRIAL_ALREADY_USED" });
           const user = await tx.user.updateMany({ where: { id: trialUserId, welcomeTrialConsumedAt: null }, data: { welcomeTrialConsumedAt: consumedAt } });
           if (user.count !== 1) throw new SubscriptionTrialNotEligibleException({ planId, reason: "USER_TRIAL_ALREADY_USED" });
+          if (phone) {
+            const claim = await tx.subscriptionTrialPhoneClaim.createMany({ data: [{ phoneHash: this.phoneHash(phone), userId: trialUserId, householdId }], skipDuplicates: true });
+            if (claim.count !== 1) throw new SubscriptionTrialNotEligibleException({ planId, reason: "PHONE_TRIAL_ALREADY_USED" });
+          }
 
           if (sub.currentPeriodId) await tx.subscriptionPeriod.update({ where: { id: sub.currentPeriodId }, data: { status: SubscriptionPeriodStatus.ENDED } });
           const period = await tx.subscriptionPeriod.create({ data: { subscriptionId: sub.id, planId, priceId: null, startAt, endAt, isTrial: true, status: SubscriptionPeriodStatus.ACTIVE } });
@@ -299,7 +325,7 @@ export class SubscriptionService {
    */
   async startWelcomeTrial(householdId: string, userId: string): Promise<void> {
     const code = this.config.get("WELCOME_TRIAL_PLAN_CODE", { infer: true });
-    if (!code) return;
+    if (!code || !this.freeWeekEnabled()) return;
     // The household's own trial is its owner's: a family member who adds the first pet must not spend their
     // own lifetime trial on someone else's household (or, having used it elsewhere, deny this household one).
     const [household, owner] = await Promise.all([
@@ -307,9 +333,83 @@ export class SubscriptionService {
       this.prisma.householdMember.findFirst({ where: { householdId, role: HouseholdRole.OWNER }, orderBy: { createdAt: "asc" }, select: { user: { select: { id: true, welcomeTrialConsumedAt: true } } } }),
     ]);
     if (!household || !owner || household.welcomeTrialConsumedAt || owner.user.welcomeTrialConsumedAt) return;
-    const plan = await this.prisma.subscriptionPlan.findUnique({ where: { code }, select: { id: true, trialDays: true, status: true } });
-    if (!plan || plan.status !== "ACTIVE" || !plan.trialDays) return;
-    await this.startTrial(householdId, plan.id, userId, owner.user.id).catch((error: unknown) => this.logger.warn(`Welcome trial not started for household ${householdId}: ${error instanceof Error ? error.message : String(error)}`));
+    const plan = await this.freeWeekPlan();
+    if (!plan) return;
+    await this.startTrial(householdId, plan.id, userId, owner.user.id, { days: this.freeWeekDays() }).catch((error: unknown) => this.logger.warn(`Welcome trial not started for household ${householdId}: ${error instanceof Error ? error.message : String(error)}`));
+  }
+
+  /** Admin setting `membership.freeWeek.enabled` (default on). Off stops new free-week trials; running ones keep their end. */
+  freeWeekEnabled(): boolean {
+    return this.settings.get<boolean>("membership.freeWeek.enabled") !== false;
+  }
+
+  /** Admin setting `membership.freeWeek.days` (default 7). */
+  freeWeekDays(): number {
+    const days = this.settings.getInt("membership.freeWeek.days");
+    return Number.isInteger(days) && days > 0 ? days : 7;
+  }
+
+  /** The plan the free week opens (WELCOME_TRIAL_PLAN_CODE), when it exists and is active. */
+  async freeWeekPlan(): Promise<{ id: string; code: string; nameFa: string; nameEn: string } | null> {
+    const code = this.config.get("WELCOME_TRIAL_PLAN_CODE", { infer: true });
+    if (!code) return null;
+    const plan = await this.prisma.subscriptionPlan.findUnique({ where: { code }, select: { id: true, code: true, nameFa: true, nameEn: true, status: true } });
+    return plan && plan.status === "ACTIVE" ? { id: plan.id, code: plan.code, nameFa: plan.nameFa, nameEn: plan.nameEn } : null;
+  }
+
+  phoneHash(phone: string): string {
+    return trialPhoneHash(phone, this.config.get("SESSION_SECRET", { infer: true }));
+  }
+
+  /**
+   * One click, no card: a household owner who never had a trial or a paid membership starts the free week now.
+   * Idempotent: while the household's trial runs, a repeat call returns that trial (`started: false`) and never
+   * creates a second one; once the trial was used it is refused (TRIAL_ALREADY_USED and friends), whatever the
+   * account, household or verified phone. Nothing is charged when it ends: the household returns to the FREE plan.
+   */
+  async startFreeWeek(householdId: string, userId: string): Promise<{ started: boolean; subscription: SubscriptionDto }> {
+    const running = async () => {
+      const current = await this.getOrCreateRaw(householdId);
+      return current.status === SubscriptionStatus.TRIALING ? { started: false, subscription: toSubscriptionDto(current) } : null;
+    };
+    const already = await running();
+    if (already) return already;
+    const plan = this.freeWeekEnabled() ? await this.freeWeekPlan() : null;
+    if (!plan) throw new SubscriptionTrialNotEligibleException({ reason: "FREE_WEEK_UNAVAILABLE" });
+    try {
+      return { started: true, subscription: await this.startTrial(householdId, plan.id, userId, userId, { days: this.freeWeekDays(), requireNeverPaid: true }) };
+    } catch (error) {
+      // A concurrent first call won the row lock and started the trial: answer with that trial.
+      if (error instanceof SubscriptionTrialNotEligibleException && error.details?.reason === "ALREADY_SUBSCRIBED") {
+        const raced = await running();
+        if (raced) return raced;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * The member ends the trial before its end date: access to the trial plan stops at once (CANCELLED → FREE
+   * entitlements), nothing is charged, and the trial still counts as used (the consumed flags stay set).
+   */
+  async endTrialNow(householdId: string, userId: string): Promise<SubscriptionDto> {
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const sub = await this.lockAndGetCurrent(householdId, tx);
+      if (sub.status !== SubscriptionStatus.TRIALING) throw new InvalidSubscriptionStatusTransitionException({ from: sub.status, to: SubscriptionStatus.CANCELLED });
+      this.assertTransition(sub.status, SubscriptionStatus.CANCELLED);
+      const now = new Date();
+      if (sub.currentPeriodId) await tx.subscriptionPeriod.update({ where: { id: sub.currentPeriodId }, data: { status: SubscriptionPeriodStatus.ENDED, endAt: now } });
+      await tx.subscriptionTrial.updateMany({ where: { subscriptionId: sub.id, endAt: { gt: now } }, data: { endAt: now } });
+      const row = await tx.subscription.update({
+        where: { id: sub.id },
+        data: { status: SubscriptionStatus.CANCELLED, trialEndsAt: now, cancelRequestedAt: now, cancelEffectiveAt: now, pendingPlanId: null, pendingPriceId: null },
+        include: SUBSCRIPTION_INCLUDE,
+      });
+      await tx.subscriptionChange.create({ data: { subscriptionId: sub.id, type: SubscriptionChangeType.TRIAL_ENDED_EARLY, fromPlanId: sub.planId, effectiveAt: now, initiatedByUserId: userId } });
+      await this.events.publish("SubscriptionTrialEndedEarly", { subscriptionId: sub.id, householdId }, { tx, aggregateType: "Subscription", aggregateId: sub.id });
+      return row;
+    });
+    return toSubscriptionDto(updated);
   }
 
   /**

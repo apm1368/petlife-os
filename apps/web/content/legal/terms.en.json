@@ -98,7 +98,9 @@
         "Card-to-card: transfer the exact amount to the account shown at checkout, then upload the receipt within 30 minutes. Our finance team checks receipts during working hours: Saturday to Wednesday 9:00–18:00 and Thursday 9:00–13:00, Tehran time. A booking paid this way must start at least 24 hours later. If you paid too much, the difference is credited to your wallet. If you paid too little, you have 30 minutes to pay the rest.",
         "The wallet has two kinds of credit. Refund credit comes back to you from cancelled or refunded purchases. Purchase credit comes from top-ups and gifts, and can only be spent on opetlife. Gift credit expires six months after it is given. The wallet does not earn interest. Both kinds can be spent on opetlife. Paying refund credit out to a bank account is not yet available in the app; if you need it, contact Support and our finance team will review your request.",
         "A top-up must be at least 10,000 toman and at most 50,000,000 toman. You can have at most three top-up requests waiting for review.",
-        "Promotions apply automatically when you are eligible and cannot be combined. There are no discount codes.",
+        "Promotions apply automatically when you are eligible and cannot be combined. Apart from the subscription gift code described below, when we offer one, there are no discount codes.",
+        "Subscriptions and free trial: some extra features are part of optional paid plans, shown with their price on the subscription page. If you have never paid for a plan, you can try one for free once: it can start when you add your first pet, or you can start it from the subscription page. Starting the trial needs no card and no payment, and it lasts the number of days shown when it starts, normally 7. Each account, household and mobile number can have only one trial; to check the number, we keep only a scrambled (hashed) form of it. We remind you in the app, and by SMS where available, two days before it ends. When it ends, you simply go back to the free plan: we never charge you without your explicit consent. You can end the trial early, but it still counts as used.",
+        "Subscription gift code: when we offer one, it is shown on the subscription page. It works only on your first paid subscription purchase, including after a free trial, and can be used once per account and household. It can't be combined with other promotions or exchanged for cash or wallet credit. You see the discounted price before you pay, and a code with an end date stops working after that day.",
         "Instalment payments, when offered, are provided by a third-party financing company under its own terms and approval."
       ]
     },
@@ -168,7 +170,7 @@
       "id": "changes",
       "heading": "17. Changes to these terms",
       "paragraphs": [
-        "We will tell you about important changes at least 14 days before they take effect, on the site and by notification. The date at the top of this page shows the latest version. If you keep using opetlife after a change takes effect, the new terms apply."
+        "Changes take effect when we publish them here. For important changes, we also show a notice on the site and email you if your account has an email address. The date at the top of this page shows the latest version. If you keep using opetlife after a change, the new terms apply."
       ]
     },
     {

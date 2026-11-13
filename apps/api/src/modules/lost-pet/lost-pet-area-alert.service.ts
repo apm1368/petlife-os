@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
+import { roundToKm } from "../../common/geo/geo";
 import type { SetLostPetAreaAlertDto } from "./dto/lost-pet.dto";
 
 /** Rough upper bound on how many neighbours one report may alert, so a dense area never turns into a broadcast. */
@@ -16,7 +17,7 @@ export function distanceKm(aLat: number, aLng: number, bLat: number, bLng: numbe
 }
 
 /** ~1.1 km precision. */
-export const roundToKm = (degrees: number) => Math.round(degrees * 100) / 100;
+export { roundToKm };
 
 export interface LostPetAreaAlertDto {
   active: boolean;

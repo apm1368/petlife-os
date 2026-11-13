@@ -180,6 +180,8 @@ export type AdminAuditAction =
   | "settlement.released"
   | "settlement.exported"
   | "finance.trace_viewed"
+  | "finance.transactions.searched"
+  | "finance.transactions.exported"
   | "card_transfer.reviewed"
   | "support_case.tags_changed"
   | "support_case.linked"
@@ -281,4 +283,11 @@ export type AdminAuditAction =
   | "osm_area.run_requested"
   | "place_claim.approved"
   | "place_claim.rejected"
-  | "place_claim.released";
+  | "place_claim.released"
+  // «ست پت» Set Pet requests
+  | "set_pet.proof_sent"
+  | "set_pet.design_rejected"
+  | "set_pet.prices_saved"
+  | "set_pet.status_changed"
+  | "set_pet.note_saved"
+  | "set_pet.design_opened";

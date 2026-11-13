@@ -1004,7 +1004,35 @@
       "care": "Care",
       "memories": "Memories",
       "shop": "Shop",
-      "skip": "Skip to content"
+      "skip": "Skip to content",
+      "hub": {
+        "contextLabel": "Your household and pets",
+        "petsLabel": "Choose a pet",
+        "show": "Show {name}",
+        "addPet": "Add a pet",
+        "links": {
+          "findVet": "Vet directory",
+          "careCalendar": "Care calendar",
+          "services": "Services",
+          "shop": "Shop",
+          "stays": "Pet-friendly stays",
+          "petTaxi": "Pet taxi",
+          "petTravel": "Travel papers",
+          "petCard": "Lost-pet card & QR",
+          "lostPets": "Lost & found",
+          "insurance": "Pet insurance",
+          "memories": "Memories",
+          "memorial": "Memorial garden",
+          "community": "Community",
+          "animalSupport": "Help animals in need"
+        },
+        "lastMemory": "Latest memory",
+        "memorialEyebrow": "In loving memory",
+        "memorialTitle": "{name} is always part of your home",
+        "memorialBody": "Their memories, life story and records stay here, safe and private, for as long as you want.",
+        "openMemories": "Open {name}'s memories",
+        "visitMemorial": "Visit the memorial garden"
+      }
     }
   },
   "adminAccessMatrix": {
@@ -1098,7 +1126,8 @@
       "pet_access_manage": "Manage pet record access",
       "wallet_view": "View wallets",
       "wallet_adjust": "Correct balances",
-      "wallet_topup_review": "Review top-up receipts"
+      "wallet_topup_review": "Review top-up receipts",
+      "finance_manage": "Export finance data (CSV)"
     },
     "domains": {
       "customer": "Customers",
@@ -1161,7 +1190,9 @@
       "warning": "Warning",
       "urgent": "Urgent",
       "members": "Members only",
-      "everyone": "Every visitor"
+      "everyone": "Every visitor",
+      "osm": "OpenStreetMap",
+      "google": "Google Maps"
     },
     "sections": {
       "trust": {
@@ -1195,6 +1226,10 @@
       "maintenance": {
         "title": "Maintenance mode",
         "hint": "Visitors see a maintenance message; the admin panel, sign-in and the status page stay available."
+      },
+      "maps": {
+        "title": "Maps",
+        "hint": "Which map the site draws. Google needs a browser key restricted to opetlife.ir in Google Cloud (with billing on); without one, or when Google is unreachable, the site keeps OpenStreetMap."
       }
     },
     "names": {
@@ -1241,7 +1276,9 @@
       "auth_otpEnabled": "SMS code sign-in",
       "auth_googleEnabled": "Google sign-in",
       "maintenance_enabled": "Maintenance mode on",
-      "maintenance_message": "Maintenance message"
+      "maintenance_message": "Maintenance message",
+      "maps_provider": "Map provider",
+      "maps_googleBrowserKey": "Google Maps browser key"
     },
     "save": {
       "label": "Save changes",
@@ -1263,6 +1300,12 @@
       "UNCHANGED": "nothing changed",
       "SETTING_CHANGE_CONFLICT": "changed meanwhile — refresh the page",
       "OPTION_INVALID": "invalid option"
+    },
+    "coverage": {
+      "title": "Saved locations without a map pin",
+      "addresses": "Member addresses: {missing, number} of {total, number}",
+      "providers": "Provider locations: {missing, number} of {total, number}",
+      "pickups": "Seller pickup addresses: {missing, number} of {total, number}"
     }
   },
   "siteSettings": {
@@ -2354,7 +2397,58 @@
     "cancelKeeps2": "You can resume before {date} and nothing changes.",
     "cancelConfirm": "Cancel membership",
     "trialNote": "No payment is taken during the trial.",
-    "planContentEnglish": "Plan names and descriptions are currently available only in English; the original text is shown."
+    "planContentEnglish": "Plan names and descriptions are currently available only in English; the original text is shown.",
+    "offers": {
+      "region": "Membership offers",
+      "freeWeek": {
+        "eyebrow": "Free trial",
+        "title": "Try {plan} free for {days, number} days",
+        "titleNoPlan": "Try full membership free for {days, number} days",
+        "points": {
+          "noCard": "No card or payment needed to start.",
+          "noCharge": "Nothing is charged when it ends: you simply go back to the free plan.",
+          "once": "One free trial per account, household and phone number.",
+          "reminder": "We'll remind you 2 days before it ends. You can end it early at any time."
+        },
+        "start": "Start my free week",
+        "activeTitle": "Your free trial is on",
+        "activeUntil": "It ends on {date}.",
+        "phoneRequired": "Verify your phone number to start the free trial.",
+        "verifyPhone": "Verify phone number",
+        "withFirstPet": "It starts automatically when you add your first pet.",
+        "ownerOnly": "Only a household owner can start it.",
+        "notEligible": "This account or household has already used its free trial.",
+        "failed": "The free trial couldn't be started. Please try again."
+      },
+      "gift": {
+        "eyebrow": "First-purchase gift",
+        "title": "{percent, number}% off your first paid membership",
+        "codeLabel": "Your gift code",
+        "copy": "Copy code",
+        "copied": "Copied",
+        "apply": "Apply at checkout",
+        "expires": "Valid until {date}.",
+        "terms": "For your first paid purchase only, once per account and household. It also works after a free trial, doesn't combine with other discounts and can't be exchanged for cash or wallet credit."
+      },
+      "checkout": {
+        "label": "Gift code",
+        "apply": "Apply",
+        "remove": "Remove",
+        "applied": "Gift applied: {percent, number}% off this first payment.",
+        "withGift": "with your gift",
+        "notApplicable": "This code can't be used for this purchase.",
+        "rateLimited": "Too many tries. Please wait a minute and try again.",
+        "renewalNote": "The gift applies to this first payment only; later renewals are at the regular price."
+      }
+    },
+    "endTrial": {
+      "action": "End trial now",
+      "title": "End the free trial now",
+      "consequence1": "Trial features stop right away and you go back to the free plan.",
+      "consequence2": "The trial still counts as used and can't be started again.",
+      "keeps": "Nothing was charged and nothing will be. Everything you recorded stays yours.",
+      "confirm": "End trial now"
+    }
   },
   "pets": {
     "myPets": "My Pets",
@@ -3849,7 +3943,8 @@
         "active": "Nothing in progress.",
         "delivered": "No delivered orders yet.",
         "closed": "No cancelled or refunded orders."
-      }
+      },
+      "setPetLink": "My Set Pet orders"
     },
     "orderDetail": {
       "title": "Order",
@@ -5087,7 +5182,9 @@
         "orderLookup": "Order lookup",
         "refundApprovals": "Refund approvals",
         "twoStep": "Two-step sign-in",
-        "walletAdjustments": "Correction requests"
+        "walletAdjustments": "Correction requests",
+        "transactionExplorer": "Explorer",
+        "setPet": "Set Pet requests"
       },
       "palette": {
         "actions": "Quick actions",
@@ -6062,6 +6159,150 @@
     "demoRecord": {
       "label": "Demo — hidden on the live site",
       "hint": "Sample data for demos and tests. The live site never shows it to members, even if it is marked verified or public here."
+    },
+    "setPet": {
+      "title": "Set Pet",
+      "intro": "Matching outfits members design. Send a print proof for every order; members pay after approving it; then print and ship.",
+      "statusTabs": "Order status",
+      "search": "Search",
+      "searchPlaceholder": "SP-000123 or member name",
+      "searchButton": "Search",
+      "forbidden": "You need commerce.view to see Set Pet orders.",
+      "loadFailed": "Couldn't load.",
+      "retry": "Try again",
+      "loading": "Loading…",
+      "empty": "No orders here.",
+      "notFound": "Order not found.",
+      "rowGarments": "{people} for people, {pets} for pets, {zones} print areas",
+      "submittedOn": "Sent {date}",
+      "readyBy": "Ready by {date}",
+      "pages": "Pages",
+      "previous": "Previous",
+      "next": "Next",
+      "back": "All Set Pet orders",
+      "inMemoryOf": "in memory of {name}",
+      "actionsTitle": "Actions",
+      "garments": "Garments",
+      "species": {
+        "DOG": "dog",
+        "CAT": "cat"
+      },
+      "memberNotes": "Member's notes: {notes}",
+      "placement": "Prints",
+      "placementHint": "Each print goes on every garment of its kind: human areas on every human garment, the pet area on every pet garment.",
+      "cm": "{size} cm",
+      "textPrint": "Text «{text}», {font}, {colour}",
+      "transform": "zoom {zoom}, offset {x} / {y}",
+      "openDesign": "Open design",
+      "downloadsAudited": "Designs open only as downloads, and every opening is logged with its reason.",
+      "priceTitle": "Price and payment",
+      "discountLine": "Set discount {percent}%: −{amount}",
+      "itemsTotal": "Garments and prints: {amount}",
+      "paidLine": "Paid {amount} (delivery {shipping}, {method}) on {date}",
+      "refundedLine": "Refunded to the wallet: {amount}",
+      "shipTo": "Ship to: {address}",
+      "shippingLine": "Shipping: {note}",
+      "cancelledLine": "Cancelled by {by}: {reason}",
+      "actor": {
+        "MEMBER": "member",
+        "STAFF": "staff"
+      },
+      "timeline": "Timeline",
+      "edited": "Member changed the order",
+      "adminNote": "Staff note",
+      "adminNoteHint": "Only staff see this.",
+      "saveNote": "Save note",
+      "reasonRequired": "Write the reason the member will read.",
+      "trackingRequired": "Add the courier and tracking details.",
+      "defectRequired": "After printing starts, cancel only for a print defect: tick the box to confirm.",
+      "memberIsNotified": "The member is notified on the site and by email.",
+      "confirm": "Confirm",
+      "shippingNote": "Courier and tracking",
+      "cancelReason": "Reason (the member reads it)",
+      "statusNote": "Note (optional, the member reads it)",
+      "defectConfirm": "This is a print defect (full refund to the member's wallet)",
+      "refundNote": "{amount} goes back to the member's wallet.",
+      "downloadReason": "Why are you opening it?",
+      "downloadConfirm": "Open",
+      "downloadFailed": "Couldn't open the design.",
+      "actionFailed": "That didn't work.",
+      "proof": {
+        "title": "Print proof",
+        "send": "Send print proof",
+        "replace": "Send a newer proof",
+        "none": "No proof sent yet.",
+        "alt": "Print proof ({status})",
+        "status": {
+          "UPLOADING": "Uploading",
+          "SENT": "Waiting for the member",
+          "APPROVED": "Approved",
+          "SUPERSEDED": "Replaced"
+        },
+        "petSize": "Pet print: {w}×{h} cm",
+        "file": "Proof image (JPG, PNG or WebP)",
+        "petWidth": "Pet print width (cm)",
+        "petHeight": "Pet print height (cm)",
+        "note": "Note to the member",
+        "type": "The proof must be a JPG, PNG or WebP image."
+      },
+      "reject": {
+        "action": "Refuse a design",
+        "reason": "Why it can't be printed (unsuitable or copyrighted); the member reads it",
+        "current": "Design refused: {reason}"
+      },
+      "action": {
+        "IN_PRODUCTION": "Start printing",
+        "SHIPPED": "Mark as shipped",
+        "CANCELLED": "Cancel order",
+        "defect": "Cancel for a print defect"
+      },
+      "hint": {
+        "SUBMITTED": "Make the print proof and send it. Refuse a design if it can't be printed.",
+        "NEEDS_NEW_DESIGN": "Waiting for the member to send a new design.",
+        "PROOF_SENT": "Waiting for the member to approve or change the order. You can send a newer proof.",
+        "AWAITING_PAYMENT": "The member approved the proof and is paying.",
+        "PAID": "Paid: start printing when the press is free.",
+        "IN_PRODUCTION": "When it's packed, mark it shipped with tracking details.",
+        "SHIPPED": "Done. A print defect can still be refunded.",
+        "CANCELLED": "Cancelled."
+      },
+      "zone": {
+        "RIGHT_UPPER_ARM": "Right sleeve",
+        "LEFT_UPPER_ARM": "Left sleeve",
+        "FRONT_CENTER": "Front",
+        "BACK": "Back",
+        "PET_BACK": "Pet's back"
+      },
+      "status": {
+        "SUBMITTED": "Needs proof",
+        "NEEDS_NEW_DESIGN": "Needs new design",
+        "PROOF_SENT": "Proof sent",
+        "AWAITING_PAYMENT": "Awaiting payment",
+        "PAID": "Paid, to print",
+        "IN_PRODUCTION": "Printing",
+        "SHIPPED": "Shipped",
+        "CANCELLED": "Cancelled"
+      },
+      "prices": {
+        "link": "Price table",
+        "title": "Set Pet prices",
+        "intro": "Fixed prices in toman. A garment's price is the unprinted garment plus each print area on it. Members can send orders only once every garment and area has a price.",
+        "updated": "Last saved {date}",
+        "garments": "Garments (each)",
+        "zones": "Print areas (per garment)",
+        "zonesHint": "Charged once for every garment that carries the print.",
+        "other": "Discount and timing",
+        "toman": "{name} (toman)",
+        "discount": "Set discount % (human and pet garments together)",
+        "days": "Production time (working days)",
+        "city": "Workshop city (for courier delivery)",
+        "cityHint": "Couriers deliver only within this city; Post works everywhere.",
+        "invalid": "Prices must be whole numbers in toman.",
+        "saved": "Prices saved. They apply to orders sent or changed from now on.",
+        "save": "Save prices",
+        "forPeople": "For people",
+        "forPets": "For pets"
+      }
     }
   },
   "blog": {
@@ -7680,7 +7921,8 @@
           "openTasks": "Open tasks",
           "pendingWalletTopUps": "Top-up receipts",
           "pendingWalletAdjustments": "Corrections to approve",
-          "pendingCardDestinationChanges": "Card account changes to approve"
+          "pendingCardDestinationChanges": "Card account changes to approve",
+          "newSetPetRequests": "New Set Pet requests"
         }
       },
       "performance": {
@@ -7977,7 +8219,8 @@
         "EXPIRED": "Expired",
         "ADMIN_CANCELLED": "Cancelled by administrator",
         "ENTITLEMENT_OVERRIDE_GRANTED": "Entitlement override granted",
-        "ENTITLEMENT_OVERRIDE_REVOKED": "Entitlement override revoked"
+        "ENTITLEMENT_OVERRIDE_REVOKED": "Entitlement override revoked",
+        "TRIAL_ENDED_EARLY": "Trial ended early"
       }
     },
     "adminSearch": {
@@ -8126,6 +8369,12 @@
       "OWNER": "Owner",
       "VET": "Veterinarian",
       "STAFF": "Staff"
+    },
+    "location": {
+      "noPin": "No map pin yet: add one so customers can find this branch.",
+      "edit": "Set location on map",
+      "save": "Save location",
+      "cancel": "Cancel"
     }
   },
   "clinicContacts": {
@@ -9836,7 +10085,14 @@
       "privacy_exportsPerDay": "Daily data-export request limit",
       "approvals_mode_serviceBookings": "Care-service bookings: approval mode",
       "approvals_mode_stayBookings": "Stay bookings: approval mode",
-      "approvals_mode_shopOrders": "Shop orders: approval mode"
+      "approvals_mode_shopOrders": "Shop orders: approval mode",
+      "membership_freeWeek_enabled": "Free trial on",
+      "membership_freeWeek_days": "Free trial length",
+      "membership_freeWeek_requireVerifiedPhone": "Free trial needs a verified phone",
+      "membership_firstPurchaseGift_enabled": "First-purchase gift on",
+      "membership_firstPurchaseGift_code": "First-purchase gift code",
+      "membership_firstPurchaseGift_percentOff": "First-purchase gift discount",
+      "membership_firstPurchaseGift_expiresOn": "First-purchase gift last day"
     },
     "statuses": {
       "PENDING": "Pending approval; not applied",
@@ -9849,7 +10105,9 @@
       "toman": "Toman",
       "seconds": "seconds",
       "hours": "hours",
-      "perDay": "per day"
+      "perDay": "per day",
+      "days": "days",
+      "percent": "%"
     },
     "options": {
       "PARTNER_CHOICE": "Each partner's own choice",
@@ -9857,7 +10115,9 @@
       "NEEDS_APPROVAL": "Needs approval"
     },
     "choiceValue": "New value",
-    "approvalsNote": "Requests and held orders go to the task list for follow-up. A business's own setting on its profile page wins over this."
+    "approvalsNote": "Requests and held orders go to the task list for follow-up. A business's own setting on its profile page wins over this.",
+    "textValue": "Value",
+    "membershipNote": "Membership offers: changes apply to new trials and purchases only. The gift code is 4 to 24 Latin letters, digits or dashes; the last day is YYYY-MM-DD (empty = no expiry)."
   },
   "adminFeatureFlags": {
     "title": "Feature flags",
@@ -11447,7 +11707,8 @@
       "set": "Map point saved; the opetlife courier can price more precisely.",
       "clear": "Remove map point",
       "denied": "Location access was not given. You can continue without it.",
-      "hasPoint": "Has a map point"
+      "hasPoint": "Has a map point",
+      "noPoint": "No map pin yet: add one for more precise delivery"
     }
   },
   "adminShipping": {
@@ -12689,5 +12950,479 @@
     "notPending": "This order is no longer waiting for approval; reload the page.",
     "failed": "That did not work; please try again.",
     "noPermission": "Approving or rejecting needs the shop management permission."
+  },
+  "adminTransactionsExplorer": {
+    "kicker": "Finance",
+    "title": "Transactions explorer",
+    "subtitle": "Every payment, refund, wallet top-up and wallet correction in one list, newest first.",
+    "forbidden": "You need the finance view permission to see transactions.",
+    "privacyNote": "Card numbers show only the last four digits and contacts are masked. A search for a person and every export are written to the audit log.",
+    "filters": {
+      "title": "Filter transactions",
+      "person": "Person",
+      "personHint": "Name, mobile, email or user id",
+      "product": "Product",
+      "productHint": "Product name or id",
+      "kind": "Type",
+      "gateway": "Gateway",
+      "from": "From",
+      "to": "To",
+      "min": "Minimum (toman)",
+      "max": "Maximum (toman)",
+      "status": "Status",
+      "any": "Any",
+      "apply": "Search",
+      "clear": "Clear"
+    },
+    "kind": {
+      "PAYMENT": "Payment",
+      "REFUND": "Refund",
+      "WALLET_TOP_UP": "Wallet top-up",
+      "WALLET_ADJUSTMENT": "Wallet correction"
+    },
+    "purpose": {
+      "ORDER": "Shop order",
+      "BOOKING": "Service booking",
+      "STAY": "Stay",
+      "SUBSCRIPTION": "Subscription",
+      "DONATION": "Donation",
+      "WALLET": "Wallet",
+      "OTHER": "Other"
+    },
+    "gateway": {
+      "ZIBAL": "Zibal",
+      "CARD_TO_CARD": "Card to card",
+      "WALLET": "Wallet",
+      "STAFF": "Staff",
+      "DEV_SIMULATED": "Test (simulated)",
+      "STANDARD_GATEWAY": "Standard gateway",
+      "SNAPP_PAY": "SnappPay",
+      "DIGI_PAY": "DigiPay"
+    },
+    "direction": {
+      "IN": "In",
+      "OUT": "Out"
+    },
+    "columns": {
+      "when": "Date",
+      "kind": "Type",
+      "person": "Person",
+      "amount": "Amount",
+      "gateway": "Gateway",
+      "status": "Status",
+      "details": "Details"
+    },
+    "card": "Card",
+    "export": {
+      "button": "Export CSV",
+      "working": "Preparing file…",
+      "done": "Exported {rows} rows.",
+      "truncated": "Exported the newest {rows} rows; narrow the filters to export the rest.",
+      "forbidden": "Exporting needs the finance manage permission.",
+      "failed": "The export failed. Try again."
+    },
+    "invalid": "Check the filters: amounts must be whole numbers and the minimum can't be above the maximum.",
+    "failed": "Transactions couldn't be loaded.",
+    "retry": "Try again",
+    "loading": "Loading…",
+    "empty": "No transactions match these filters.",
+    "more": "Load older",
+    "end": "That's all: {count} rows."
+  },
+  "setPet": {
+    "landing": {
+      "eyebrow": "New on opetlife",
+      "title": "Set Pet: matching outfits for you and your pet",
+      "lede": "Your outfit and your pet's in one design, and you make the design.",
+      "line1": "Pick a T-shirt, hoodie or sweatshirt, then its colour and size.",
+      "line2": "Upload photos or designs of you and your pet and place them on the chest, back or sleeves of your garment and on the back of your pet's.",
+      "line3": "Pick your pet's size with the size guide, and their outfit gets the same design.",
+      "cta": "Make a set for you and your pet",
+      "navLabel": "Set Pet",
+      "videoLabel": "Set Pet introduction video",
+      "play": "Play the Set Pet video",
+      "soundOn": "Sound on",
+      "soundOff": "Mute",
+      "line4": "You see a price range as you build. Before printing we send you a print proof, and you pay once you approve it."
+    },
+    "page": {
+      "eyebrow": "New at opetlife",
+      "title": "Set Pet: matching outfits for you and your pet",
+      "lede": "Design one look for you and your pet: pick tees, hoodies or sweatshirts for you and a tee, hoodie or bandana for each dog or cat, add your photos or text, and see it in 3D. We send a print proof before anything is printed.",
+      "start": "Build your set",
+      "howTitle": "How it works",
+      "how": {
+        "build": {
+          "title": "Build your set",
+          "body": "Garments, sizes, colours and prints, with a live price range."
+        },
+        "proof": {
+          "title": "Get the print proof",
+          "body": "Our team sends a proof of exactly how it will print. Until you approve it, you can still change anything."
+        },
+        "pay": {
+          "title": "Approve and pay",
+          "body": "Pay the full amount from your wallet; top it up by card-to-card if needed."
+        },
+        "make": {
+          "title": "We print it",
+          "body": "Printed in opetlife's own workshop in about 5 working days."
+        },
+        "ship": {
+          "title": "Delivery",
+          "body": "Sent with the same delivery methods as the shop."
+        }
+      },
+      "factsLabel": "What to know",
+      "facts": {
+        "print": {
+          "title": "What gets printed",
+          "body": "Your sleeves 10×10 cm, the front or back 20×20 cm, and the back of your pet's garment. One design can go on several places; text comes in three fonts."
+        },
+        "sizing": {
+          "title": "Sizes S to 3XL",
+          "body": "Unisex cotton garments with a cm chart and a suggestion from your height and weight. For pets, choose the size letter with the guide."
+        },
+        "timing": {
+          "title": "About 5 working days",
+          "body": "Counted from payment. You'll get updates on the site and by email."
+        },
+        "price": {
+          "title": "Fixed prices",
+          "body": "Each garment plus each print area, with a discount when the set has both your garment and your pet's. Cancel free of charge until printing starts."
+        }
+      },
+      "buildTitle": "Build your set",
+      "editTitle": "Change order {reference}",
+      "done": {
+        "title": "Order {reference} is in",
+        "editedTitle": "Order {reference} was updated",
+        "body": "We'll send you the print proof on the site and by email. Nothing is paid until you approve it.",
+        "view": "See my order",
+        "another": "Build another set"
+      },
+      "signIn": {
+        "body": "Build freely; you only need to sign in when you send the order. Your set waits on this device.",
+        "cta": "Sign in",
+        "join": "Create an account"
+      },
+      "mineTitle": "My Set Pet orders"
+    },
+    "builder": {
+      "stepsLabel": "Steps",
+      "steps": {
+        "garments": "Garments",
+        "prints": "Prints",
+        "review": "Review and send"
+      },
+      "loading": "Loading the builder…",
+      "loadError": "The builder couldn't load.",
+      "retry": "Try again",
+      "back": "Back",
+      "next": "Next",
+      "previewLabel": "Preview",
+      "range": "Price range: {min} to {max}",
+      "autosave": {
+        "saving": "Saving your draft…",
+        "saved": "Draft saved to your account"
+      },
+      "garments": {
+        "title": "Who wears what",
+        "lede": "Up to five garments for people, and one for each of your dogs and cats.",
+        "people": "For people",
+        "personN": "Garment {n}",
+        "addPerson": "Add a garment for a person",
+        "maxPeople": "Up to {max} garments for people.",
+        "pets": "For pets",
+        "petN": "Pet garment {n}",
+        "addPet": "Add a garment for a pet",
+        "remove": "Remove",
+        "type": "Garment",
+        "size": "Size",
+        "colour": "Colour",
+        "suggest": "Not sure of the size? Size chart and suggestion",
+        "height": "Height (cm)",
+        "weight": "Weight (kg)",
+        "suggested": "Suggested size: {size}",
+        "useSize": "Use {size}",
+        "humanChart": "Garment laid flat, cm",
+        "chestWidth": "Chest width",
+        "length": "Length",
+        "whichPet": "Which pet",
+        "otherPet": "Another pet (type the name)",
+        "petName": "Pet's name",
+        "species": "Dog or cat",
+        "dog": "Dog",
+        "cat": "Cat",
+        "sizeMismatch": "This size looks unusual for your pet's recorded weight. You can still choose it.",
+        "petGuide": "Size guide for pets",
+        "petChart": "Pet garment guide, cm",
+        "neck": "Neck",
+        "chest": "Chest",
+        "back": "Back length",
+        "sameColour": "Same colour as my garment",
+        "p8": "A set includes your pet's garment. Ordering only for yourself is possible in memory of a pet that is lost or has passed away.",
+        "inMemoryOf": "In memory of",
+        "choose": "Choose",
+        "noMemorial": "To order without a pet garment, the pet must be marked lost or passed away in its profile.",
+        "errors": {
+          "human": "Add at least one garment for a person.",
+          "tooMany": "Up to {max} garments for people.",
+          "petName": "Type your pet's name, or choose it from your profile.",
+          "petRequired": "Add a garment for your pet, or choose the pet this set remembers."
+        }
+      },
+      "prints": {
+        "title": "Prints",
+        "lede": "Choose an area, then add a design or text. One design may go on several areas.",
+        "size": "{cm}×{cm} cm",
+        "petSize": "Size set in the proof",
+        "empty": "Nothing yet",
+        "design": "Design",
+        "text": "Text",
+        "textLabel": "Text (up to 40 characters)",
+        "font": "Font",
+        "zoom": "Zoom",
+        "moveX": "Move sideways",
+        "moveY": "Move up or down",
+        "noBackground": "The image is printed as it is; backgrounds are not removed.",
+        "clear": "Remove this print",
+        "pick": "Choose a print area above or on the preview.",
+        "errors": {
+          "none": "Add at least one print.",
+          "design": "The design on {zone} isn't ready; choose another or try again."
+        }
+      },
+      "upload": {
+        "cta": "Upload a design",
+        "hint": "Photos (JPG, PNG, WebP, HEIC) or print files (PDF, SVG, AI, PSD), up to {mb} MB",
+        "yours": "Your designs",
+        "untitled": "Design",
+        "uploading": "Uploading…",
+        "checking": "Checking…",
+        "lowRes": "{zone}: this image may print blurry (about {dpi} dpi). A larger image prints sharper.",
+        "errors": {
+          "type": "This file type can't be used.",
+          "tooManyFiles": "Remove an unused design before uploading another.",
+          "notUploaded": "The file didn't arrive; try again.",
+          "tooLarge": "The file is larger than {mb} MB.",
+          "mismatch": "The file's content doesn't match its type.",
+          "rejected": "This file can't be used.",
+          "generic": "The upload failed; try again.",
+          "wait": "Wait until your designs finish uploading.",
+          "someFailed": "Some designs didn't upload; check them and try again."
+        }
+      },
+      "review": {
+        "title": "Review and send",
+        "lede": "Check your set and the exact price. Nothing is paid now.",
+        "item": "{garment}, {size}, {colour}",
+        "line": "{garment} {size} with {zones} prints",
+        "discount": "Set discount ({percent}%)",
+        "total": "Total (delivery chosen at payment)",
+        "next": {
+          "proof": "We send you a print proof.",
+          "approve": "You approve it, or change your order.",
+          "pay": "You pay from your wallet.",
+          "make": "We print it in about {days} working days.",
+          "ship": "It's delivered by the shop's delivery methods."
+        },
+        "notes": "Notes for our team (optional)",
+        "uploading": "Uploading designs…",
+        "sending": "Sending…",
+        "saveChanges": "Save changes",
+        "send": "Send order",
+        "signInAndSend": "Sign in and send",
+        "editNote": "Changes go back to our team for a new print proof.",
+        "noPaymentYet": "You pay only after you approve the print proof.",
+        "errors": {
+          "tooManyOpen": "You have several orders in progress; wait for one to finish or cancel one.",
+          "prices": "Your order couldn't be sent right now; please try again a little later.",
+          "designUnavailable": "A design is missing or not checked yet.",
+          "notEditable": "This order can no longer be changed.",
+          "validation": "Something in the set needs fixing; check each step.",
+          "generic": "The order couldn't be sent; try again."
+        }
+      }
+    },
+    "zones": {
+      "RIGHT_UPPER_ARM": {
+        "name": "Right sleeve"
+      },
+      "LEFT_UPPER_ARM": {
+        "name": "Left sleeve"
+      },
+      "FRONT_CENTER": {
+        "name": "Front"
+      },
+      "BACK": {
+        "name": "Back"
+      },
+      "PET_BACK": {
+        "name": "Pet's back"
+      }
+    },
+    "colours": {
+      "white": "White",
+      "black": "Black",
+      "heather-grey": "Heather grey",
+      "navy": "Navy",
+      "cream": "Cream",
+      "sage": "Sage"
+    },
+    "garments": {
+      "HUMAN_TEE": "T-shirt",
+      "HUMAN_HOODIE": "Hoodie",
+      "HUMAN_SWEATSHIRT": "Sweatshirt",
+      "PET_TEE": "Tee/vest",
+      "PET_HOODIE": "Hoodie",
+      "PET_BANDANA": "Bandana"
+    },
+    "fonts": {
+      "VAZIRMATN": "Simple",
+      "LALEZAR": "Bold",
+      "AMIRI": "Classic"
+    },
+    "preview": {
+      "zoneLabel": "{zone}, {cm}×{cm} cm",
+      "designOn": "{name} on {zone}",
+      "cm": "cm",
+      "human": "{garment}, {size}",
+      "pet": "Pet {garment}, {size}",
+      "showBack": "Show the back",
+      "showFront": "Show the front",
+      "frontCaption": "Front, with the sleeves",
+      "backCaption": "Back",
+      "petCaption": "From above: your pet's back",
+      "loading3d": "Loading the 3D view…",
+      "turn": "Turn around",
+      "rulerLabel": "Scale: {cm} cm",
+      "modeLabel": "View",
+      "mode3d": "3D",
+      "modeFlat": "Flat with ruler",
+      "label3dHuman": "3D view of your {garment}; drag to turn it",
+      "label3dPet": "3D view of your pet's {garment}; drag to turn it",
+      "approxNote": "The preview is close to real size; the print proof shows exactly how it will print."
+    },
+    "status": {
+      "SUBMITTED": "Waiting for the print proof",
+      "NEEDS_NEW_DESIGN": "Needs a new design",
+      "PROOF_SENT": "Proof ready to approve",
+      "AWAITING_PAYMENT": "Waiting for payment",
+      "PAID": "Paid, in the print queue",
+      "IN_PRODUCTION": "Printing",
+      "SHIPPED": "Shipped",
+      "CANCELLED": "Cancelled"
+    },
+    "shipping": {
+      "OPETLIFE_COURIER": "opetlife courier",
+      "SNAPPBOX_APP": "Snappbox",
+      "ALOPEYK_APP": "Alopeyk",
+      "POST_PISHTAZ": "Iran Post express",
+      "SNAPPBOX": "Snappbox",
+      "ALOPEYK": "Alopeyk",
+      "DEV": "Test delivery",
+      "STAFF_ARRANGED": "Our team arranges delivery and contacts you (no delivery fee online)"
+    },
+    "orders": {
+      "pageTitle": "My Set Pet orders",
+      "new": "Build a new set",
+      "allOrders": "All my orders",
+      "loading": "Loading your orders…",
+      "loadError": "Your orders couldn't load.",
+      "retry": "Try again",
+      "empty": "You have no Set Pet orders yet.",
+      "start": "Build your set",
+      "item": "{garment} {size} ({colour})",
+      "price": "Price: {amount}",
+      "discount": "{percent}% set discount included",
+      "next": {
+        "SUBMITTED": "Our team is preparing your print proof. You can still change your order.",
+        "NEEDS_NEW_DESIGN": "A design can't be printed: {reason} Please change it and send the order again.",
+        "PROOF_SENT": "Here is how your set will print. Approve it to pay, or change your order.",
+        "PAID": "Paid. Ready around {date}. You can still cancel free of charge until printing starts.",
+        "IN_PRODUCTION": "Printing now. Ready around {date}.",
+        "SHIPPED": "Shipped. {note}"
+      },
+      "proofLoading": "Loading the proof…",
+      "proofAlt": "Print proof for {reference}",
+      "petPrintSize": "Print on your pet's back: {w}×{h} cm",
+      "approve": "Approve the proof",
+      "requestChange": "Change my order",
+      "edit": "Change my order",
+      "reorder": "Order again",
+      "cancel": "Cancel order",
+      "confirmCancel": "Cancel this order?",
+      "confirmCancelPaid": "Cancel? The full amount goes back to your wallet.",
+      "yesCancel": "Yes, cancel",
+      "keep": "Keep it",
+      "cancelled": "Cancelled.",
+      "cancelledReason": "Cancelled: {reason}",
+      "refunded": "{amount} was returned to your wallet.",
+      "defectHelp": "Is there a print defect?",
+      "support": "Contact support",
+      "timeline": "History",
+      "edited": "Order changed",
+      "errors": {
+        "proofChanged": "A newer proof was sent; please look at it again.",
+        "notCancellable": "Printing has started; contact support if there is a print defect.",
+        "generic": "That didn't work; try again."
+      },
+      "pay": {
+        "title": "Payment and delivery",
+        "loading": "Loading…",
+        "address": "Deliver to",
+        "noAddress": "Add a delivery address first.",
+        "addAddress": "Add address",
+        "shippingLoading": "Finding delivery options…",
+        "shipping": "Delivery",
+        "eta": "within {days} days",
+        "noShipping": "No delivery method serves this address yet; please contact support.",
+        "items": "Your set",
+        "delivery": "Delivery",
+        "total": "Total",
+        "balance": "Wallet balance: {amount}",
+        "topUpNeeded": "Add {amount} to your wallet (card-to-card or online) to pay.",
+        "topUp": "Top up my wallet",
+        "paying": "Paying…",
+        "cta": "Pay {amount} from my wallet",
+        "ctaPlain": "Pay from my wallet",
+        "errors": {
+          "balance": "Your wallet balance isn't enough yet.",
+          "changed": "The total changed; please check it again.",
+          "generic": "The payment didn't go through; try again."
+        }
+      }
+    }
+  },
+  "locationPicker": {
+    "title": "Location on the map",
+    "required": "Required",
+    "hint": "Tap the map or drag the pin onto the exact door. Pinch or use + and − to zoom.",
+    "searchPlaceholder": "Search a street or place",
+    "search": "Search",
+    "searchNone": "Nothing found. Place the pin on the map instead.",
+    "pinLabel": "Your pin",
+    "mapLabel": "Map: tap to place the pin, drag the pin to move it",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "useMyLocation": "Use my current location",
+    "locating": "Finding your location…",
+    "clear": "Remove pin",
+    "denied": "Location access was denied or is unavailable. Tap the map to place the pin instead.",
+    "outsideIran": "That point is outside Iran. Place the pin on your address in Iran.",
+    "pinNeeded": "Place a pin so couriers and drivers can find the door.",
+    "privacyMember": "Your exact pin is private. It is used only for delivery, fares and “near me” distances, and by the courier or driver who serves you. Nobody else sees it; others only ever see a rounded distance such as ~2 km. You can move or remove it at any time.",
+    "privacyBusiness": "Customers see this pin on your public page. If you work from home, the public sees an approximate point (about 1 km) unless you choose to show the exact spot.",
+    "consentMember": "Save this exact location for my deliveries and distance estimates",
+    "consentBusiness": "This is my business location, and I agree to it being shown as described above",
+    "exactPublic": "Show my exact location publicly (otherwise an approximate point, about 1 km)",
+    "consentNeeded": "Tick the box under the map to save the pin, or remove the pin.",
+    "privacyPickup": "Only the couriers collecting your parcels and our support team use this pin; it is never shown on your public pages.",
+    "consentPickup": "Save this exact pickup location for couriers"
+  },
+  "locationNudge": {
+    "text": "Pin your default address on the map for more precise delivery and places near you.",
+    "action": "Pin it now"
   }
 }

@@ -1023,7 +1023,7 @@ export class BookingsService {
       createdAt: booking.createdAt.toISOString(),
       updatedAt: booking.updatedAt.toISOString(),
       provider: toProviderSummaryDto(booking.providerOrganization),
-      location: toProviderLocationDto(booking.providerLocation),
+      location: toProviderLocationDto(booking.providerLocation, "exact"),
       service: toProviderServiceDto(booking.providerService),
       customerAddress: toAddressDto(booking.customerAddress),
       dropoffAddress: toAddressDto(booking.dropoffAddress),

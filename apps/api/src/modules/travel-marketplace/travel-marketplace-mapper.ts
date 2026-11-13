@@ -110,6 +110,7 @@ export function toTravelListingDto(row: ListingWithRelations, rating: TravelRati
     address: row.address,
     latitude: row.latitude,
     longitude: row.longitude,
+    pinPublicExact: row.pinPublicExact,
     imageObjectKeys: row.imageObjectKeys,
     // Listing photos are public marketplace content, never a private key —
     // resolveObjectUrls() throws if that ever stops being true.

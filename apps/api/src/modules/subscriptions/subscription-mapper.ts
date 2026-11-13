@@ -94,6 +94,7 @@ export function toBillingAttemptDto(row: Prisma.SubscriptionBillingAttemptGetPay
     attemptNumber: row.attemptNumber,
     status: row.status as unknown as SubscriptionBillingAttemptDto["status"],
     amount: row.amount,
+    discountAmount: row.discountAmount,
     currency: row.currency,
     failureCode: row.failureCode,
     failureReason: row.failureReason,

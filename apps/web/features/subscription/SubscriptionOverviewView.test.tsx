@@ -34,6 +34,8 @@ const FREE_SUB: SubscriptionDto = {
 const ENTITLEMENTS: ResolvedEntitlementDto[] = [{ key: "pets.max", type: "LIMIT" as never, boolValue: null, limitValue: 2, overridden: false }];
 const USAGE: SubscriptionUsageItemDto[] = [{ key: "pets.max", limit: 2, used: 1, remaining: 1 }];
 
+// The membership offers card loads its own data; these views are tested without it.
+vi.mock("@/services/membership-offers.service", () => ({ membershipOffersService: { forHousehold: vi.fn(() => new Promise(() => undefined)), forAccount: vi.fn(() => new Promise(() => undefined)), startFreeWeek: vi.fn(), checkGift: vi.fn() } }));
 describe("SubscriptionOverviewView", () => {
   beforeEach(() => {
     testState.householdId = "household-1";

@@ -106,6 +106,12 @@ export const DOMAIN_EVENT_TYPES = [
   "ShippingQuoteSelected",
   /** A seller changed where couriers pick up (who, when, before/after): the audit trail behind courier prices. */
   "SellerShippingProfileChanged",
+  // «ست پت» Set Pet orders (member side; staff proof and status changes are on the order timeline and audit log)
+  "SetPetRequestSubmitted",
+  "SetPetRequestEdited",
+  "SetPetRequestCancelled",
+  "SetPetProofApproved",
+  "SetPetRequestPaid",
   "FulfillmentCreated",
   "FulfillmentReadyForPickup",
   "FulfillmentFailed",
@@ -204,6 +210,10 @@ export const DOMAIN_EVENT_TYPES = [
   "SubscriptionUpgraded",
   "SubscriptionDowngradeScheduled",
   "SubscriptionPlanChanged",
+  // Membership offers (2026-11-13): audit-only outbox rows, no listener. A trial the member ended early, and a
+  // first-purchase gift taken off a paid purchase (the redemption row holds the amounts).
+  "SubscriptionTrialEndedEarly",
+  "SubscriptionGiftRedeemed",
 
   // Handoff 17: Advanced Health / Clinical OS
   "MedicalDocumentAdded",

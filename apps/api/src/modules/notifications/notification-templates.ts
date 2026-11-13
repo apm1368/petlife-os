@@ -289,6 +289,30 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "پاسخ جدید به درخواست پشتیبانی شما", body: "یک پاسخ جدید برای درخواست پشتیبانی {{caseNumber}} ثبت شد.", smsBody: "پاسخ جدیدی برای درخواست پشتیبانی شما در پت‌لایف ثبت شد." },
     en: { title: "New reply on your support case", body: "A new reply was posted on support case {{caseNumber}}.", smsBody: "You have a new reply on your PET LIFE OS support case." },
   },
+  "set_pet.proof_sent": {
+    fa: { title: "نمونهٔ چاپ ست پت آماده است", body: "نمونهٔ چاپ سفارش {{number}} آماده شد. آن را ببینید و تأیید کنید، یا اگر تغییری لازم است سفارش را ویرایش کنید.", smsBody: "نمونهٔ چاپ ست پت {{number}} آماده است." },
+    en: { title: "Your Set Pet print proof is ready", body: "The print proof for order {{number}} is ready. Check it and approve it, or edit the order if something should change.", smsBody: "Your opetlife Set Pet proof {{number}} is ready." },
+  },
+  "set_pet.needs_new_design": {
+    fa: { title: "برای ست پت طرح دیگری بفرستید", body: "طرح سفارش {{number}} قابل چاپ نیست. دلیل: {{reason}} لطفاً طرح دیگری بفرستید.", smsBody: "سفارش ست پت {{number}} به طرح جدید نیاز دارد." },
+    en: { title: "Please send another design for your Set Pet", body: "A design on order {{number}} can't be printed. Reason: {{reason}} Please send another design.", smsBody: "Your opetlife Set Pet {{number}} needs a new design." },
+  },
+  "set_pet.in_production": {
+    fa: { title: "ست پت شما در حال تولید است", body: "چاپ سفارش {{number}} شروع شد. وقتی ارسال شد خبرتان می‌کنیم.", smsBody: "تولید سفارش ست پت {{number}} شروع شد." },
+    en: { title: "Your Set Pet is in production", body: "Production of order {{number}} has started. We'll let you know when it ships.", smsBody: "Your opetlife Set Pet {{number}} is in production." },
+  },
+  "set_pet.shipped": {
+    fa: { title: "ست پت شما ارسال شد", body: "سفارش {{number}} ارسال شد. {{shippingNote}}", smsBody: "سفارش ست پت {{number}} ارسال شد." },
+    en: { title: "Your Set Pet has shipped", body: "Order {{number}} has shipped. {{shippingNote}}", smsBody: "Your opetlife Set Pet {{number}} has shipped." },
+  },
+  "set_pet.cancelled_refunded": {
+    fa: { title: "سفارش ست پت لغو و مبلغ بازگردانده شد", body: "سفارش {{number}} لغو شد و مبلغ پرداختی به کیف پول شما برگشت. دلیل: {{reason}}", smsBody: "سفارش ست پت {{number}} لغو و مبلغ به کیف پول برگشت." },
+    en: { title: "Your Set Pet order was cancelled and refunded", body: "Order {{number}} was cancelled and the amount paid is back in your wallet. Reason: {{reason}}", smsBody: "Your opetlife Set Pet {{number}} was cancelled and refunded to your wallet." },
+  },
+  "set_pet.cancelled": {
+    fa: { title: "سفارش ست پت لغو شد", body: "سفارش {{number}} لغو شد. دلیل: {{reason}}", smsBody: "سفارش ست پت {{number}} لغو شد." },
+    en: { title: "Your Set Pet order was cancelled", body: "Order {{number}} was cancelled. Reason: {{reason}}", smsBody: "Your opetlife Set Pet order {{number}} was cancelled." },
+  },
   "support.case_resolved": {
     fa: { title: "درخواست پشتیبانی شما حل شد", body: "درخواست پشتیبانی {{caseNumber}} به عنوان حل‌شده علامت‌گذاری شد.", smsBody: "درخواست پشتیبانی شما در پت‌لایف حل شد." },
     en: { title: "Your support case was resolved", body: "Support case {{caseNumber}} was marked resolved.", smsBody: "Your PET LIFE OS support case was resolved." },
@@ -395,9 +419,19 @@ const TEMPLATES: Record<string, Partial<Record<Locale, NotificationTemplateVaria
     fa: { title: "اشتراک شما فعال شد", body: "اشتراک {{planName}} برای خانواده شما فعال شد." },
     en: { title: "Your subscription is active", body: "Your household is now on the {{planName}} plan." },
   },
+  // The one subscription notice with an smsBody (owner request 2026-11-13): the trial reminder may also go by SMS, but
+  // TrialEndingNotifier only asks for SMS when the SMS channel is live; otherwise it is in-app (and push) only.
   "subscription.trial_ending": {
-    fa: { title: "دوره‌ی آزمایشی رو به پایان است", body: "دوره‌ی آزمایشی {{planName}} تا {{days}} روز دیگر تمام می‌شود." },
-    en: { title: "Your trial is ending", body: "Your {{planName}} trial ends in {{days}} day(s)." },
+    fa: {
+      title: "دوره‌ی آزمایشی رو به پایان است",
+      body: "دوره‌ی آزمایشی {{planName}} تا {{days}} روز دیگر تمام می‌شود. پس از آن به طرح رایگان برمی‌گردید و هیچ مبلغی خودکار برداشت نمی‌شود.",
+      smsBody: "اپت لایف: دوره‌ی آزمایشی رایگان شما تا {{days}} روز دیگر تمام می‌شود. هیچ مبلغی خودکار برداشت نمی‌شود.",
+    },
+    en: {
+      title: "Your trial is ending",
+      body: "Your {{planName}} trial ends in {{days}} day(s). After that you return to the free plan; nothing is charged automatically.",
+      smsBody: "opetlife: your free trial ends in {{days}} day(s). Nothing is charged automatically.",
+    },
   },
   "subscription.trial_started": {
     fa: { title: "دوره آزمایشی شما شروع شد", body: "دوره آزمایشی {{planName}} برای خانواده شما فعال شد." },

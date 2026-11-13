@@ -62,6 +62,11 @@ export class CreateTravelListingDto {
   @IsLongitude()
   longitude?: number;
 
+  /** Homes (villa, apartment, residence, boarding): show the exact pin publicly instead of a ~1 km point. */
+  @IsOptional()
+  @IsBoolean()
+  exactPinPublic?: boolean | null;
+
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(12)
@@ -120,6 +125,11 @@ export class UpdateTravelListingDto {
   @IsOptional()
   @IsLongitude()
   longitude?: number;
+
+  /** Homes (villa, apartment, residence, boarding): show the exact pin publicly instead of a ~1 km point. */
+  @IsOptional()
+  @IsBoolean()
+  exactPinPublic?: boolean | null;
 
   @IsOptional()
   @IsArray()

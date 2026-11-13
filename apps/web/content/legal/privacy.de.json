@@ -17,7 +17,7 @@
       "items": [
         "Konto: deine Mobilnummer und E-Mail-Adresse (samt der Angabe, ob du sie bestätigt hast), Benutzername, Name, Anzeigename und Foto, Sprache und Design sowie ein sicher gehashtes Passwort, falls du eines festlegst. Nach deiner nationalen Identifikationsnummer fragen wir nicht.",
         "Haushalt und Tiere: Haushaltsmitglieder und ihre Rollen sowie das Profil jedes Tieres (Name, Tierart, Rasse, Geschlecht, Geburtsdatum, Foto, Gewicht, Merkmale, Kastration und Mikrochip). Dazu gehören auch die Gesundheitsinformationen, die du hinzufügst: Allergien, Erkrankungen, Medikamente, Impfungen, Besuche, Laborergebnisse und Dokumente.",
-        "Adressen und Standort: die Liefer- oder Besuchsadressen, die du speicherst, optional mit einem Punkt auf der Karte. Wenn du es erlaubst, wird der Standort deines Browsers für Dienste und Orte in der Nähe, Hinweise zu vermissten Tieren und das Tiertaxi verwendet.",
+        "Adressen und Standort: die Liefer- oder Besuchsadressen, die du speicherst, und ihre Kartenpunkte, die du beim Speichern einer Adresse setzt und bestätigst. Wenn du es erlaubst, wird der Standort deines Browsers für Dienste und Orte in der Nähe (auf etwa 1 km gerundet und nur für diese Suche; er wird nicht in deinem Konto gespeichert, unsere Serverprotokolle behalten den gerundeten Wert aber bis zu 14 Tage), Hinweise zu vermissten Tieren und das Tiertaxi verwendet.",
         "Buchungen, Bestellungen und Zahlungen: was du gebucht oder gekauft hast, Lieferangaben sowie Erstattungen und Streitfälle. Bei Karte-zu-Karte-Zahlungen speichern wir das Bild des Belegs, das du hochlädst. Deine Bankkartennummer oder IBAN erheben wir nicht.",
         "Was du veröffentlichst: Beiträge, Kommentare, Chats, Bewertungen, Vermissten- und Fundmeldungen, Gedenkseiten sowie die Fotos und Dateien, die du hochlädst. Standortdaten in Fotos (EXIF und GPS) werden beim Hochladen entfernt.",
         "Ortsvorschläge: Name, Kategorie, Stadt, Adresse, Kartenpunkt und Hinweise zu einem Ort, den du vorschlägst. Nur unser Team sieht, dass der Vorschlag von dir kommt. Wenn unser Team den Ort prüft und ins Verzeichnis aufnimmt, können seine Angaben und deine Hinweise veröffentlicht werden, dein Name nie. Ob dein Vorschlag angenommen wurde, erfährst du in der App.",
@@ -52,6 +52,8 @@
       "heading": "5. Standort",
       "items": [
         "Wir nutzen deinen Standort nur, wenn du es im Browser erlaubst, und nur für die Funktion, die du gerade verwendest.",
+        "Wenn du eine Adresse speicherst, setzt du ihren Punkt auf der Karte und stimmst zu, dass wir ihn speichern; den Zeitpunkt deiner Zustimmung halten wir fest. Wir nutzen den Punkt, um Versandkosten, Fahrpreise und Orte in deiner Nähe zu berechnen. Außer dir und deinem Haushalt sehen den genauen Punkt nur: der Kurier einer Sendung an diese Adresse, unser Team, das deine Bestellung bearbeitet, und die Fahrerin oder der Fahrer deiner Tiertaxi-Fahrt, sobald die Fahrt angenommen ist (vorher sehen Fahrer einen auf etwa 500 m gerundeten Punkt). Verkaufsstellen, Anbieter und andere Mitglieder sehen ihn nie. Du kannst den Punkt jederzeit verschieben oder entfernen. Wenn du eine Adresse löschst, wird sie mit ihrem Punkt archiviert, damit deine früheren Bestellungen weiter zeigen, wohin sie gingen.",
+        "Geschäftsstandorte von Partnern werden öffentlich am markierten Punkt auf der Karte angezeigt. Partner, die von zu Hause aus arbeiten, etwa Tiersitting, Gassi-Service und private Unterkünfte, werden öffentlich nur an einem ungefähren Punkt etwa 1 km vom tatsächlichen Ort entfernt angezeigt, außer sie entscheiden sich, den genauen Punkt zu zeigen; Mitglieder mit einer Buchung sehen den genauen Punkt. Der Abholort einer Verkaufsstelle wird nie öffentlich angezeigt.",
         "Für Umkreis-Hinweise zu vermissten Tieren wird dein Standort auf etwa 1 km gerundet und anderen nie angezeigt. Vermisstenmeldungen zeigen nur die Gegend, die die Besitzerin oder der Besitzer angibt.",
         "Während einer Tiertaxi-Fahrt wird die Live-Position des Fahrers mit dir geteilt. Nach 30 Tagen werden die Orte von Fahrten nur noch ungefähr gespeichert, auf etwa 1 km genau."
       ]
@@ -61,10 +63,10 @@
       "heading": "6. Mit wem wir sie teilen",
       "items": [
         "Partner: Wenn du bei einer Klinik, einem Anbieter, Händler, Gastgeber oder Fahrer buchst oder kaufst, erhält dieser Partner, was nötig ist, um dich zu bedienen (deinen Namen, deine Kontaktdaten, deine Adresse und die für diese Leistung zulässigen Tierinformationen).",
-        "Kurierdienste: für die Lieferung dein Name, deine Telefonnummer und deine Lieferadresse.",
+        "Kurierdienste: für die Lieferung dein Name, deine Telefonnummer und deine Lieferadresse samt genauem Kartenpunkt, nur für diese Sendung.",
         "Zahlungsdienstleister: Wenn du online bezahlst, wickelt das Zahlungsportal die Zahlung ab. Wir erhalten das Ergebnis, nicht deine Kartendaten.",
         "Nachrichtenversand: Anmeldecodes und SMS-Benachrichtigungen laufen über unseren SMS-Anbieter Faraz. E-Mails werden von unserem eigenen Mailserver versendet. Push-Benachrichtigungen laufen über den Push-Dienst deines Browsers.",
-        "Karten: Karten auf der Website laden Kartenkacheln von OpenStreetMap. Manche Routen- und Ortssuchen können einen Kartenanbieter wie Neshan oder Google nutzen. Diese Dienste sehen den Bereich, den du ansiehst oder durchsuchst, nicht dein Konto.",
+        "Karten: Karten auf der Website laden Kartenkacheln von OpenStreetMap. Wenn wir einen anderen Kartenanbieter wie Google Maps einschalten, können Karten und Ortssuchen stattdessen von diesem Anbieter kommen. Diese Dienste sehen den Bereich, den du ansiehst oder durchsuchst, nicht dein Konto.",
         "Versicherer: nur wenn du einen Versicherungsantrag stellst, und nur nach deiner Zustimmung. Der Versicherer erhält dann deine Kontaktdaten sowie Tierart, Rasse, Alter und Gewicht deines Tieres.",
         "Andere Websites: Wenn du ein externes Angebot öffnest, zum Beispiel auf Jajiga, erfassen wir den Klick, und ab dann gilt die Datenschutzerklärung dieser Website.",
         "Vertrauenssiegel: Wenn das E-Trust-Siegel (eNamad) unten auf unseren Seiten angezeigt wird, lädt dein Browser es von enamad.ir. Dieser Dienst kann deine IP-Adresse sehen und dass du auf opetlife bist.",
@@ -102,7 +104,7 @@
         "Anmeldesitzungen: 30 Tage, sofern du dich nicht früher abmeldest.",
         "Dateien mit Datenexporten: 7 Tage.",
         "Tiertaxi-Fahrten: genaue Orte 30 Tage lang, danach nur noch ungefähr.",
-        "Serverprotokolle: etwa 7 Tage.",
+        "Serverprotokolle: bis zu 14 Tage.",
         "Finanzunterlagen wie Bestellungen, Zahlungen, Erstattungen und Rechnungen: so lange, wie das Gesetz es verlangt.",
         "Wenn du die Löschung deines Kontos beantragst, wird dein Antrag erfasst und geprüft und ausgeführt, sobald unsere Richtlinie zur Datenspeicherung veröffentlicht ist. Dann löschen oder anonymisieren wir deine personenbezogenen Daten, außer dem, was wir gesetzlich aufbewahren müssen, und geben dir Bescheid, wenn es erledigt ist."
       ]
@@ -137,7 +139,7 @@
       "id": "changes",
       "heading": "13. Änderungen dieser Erklärung",
       "paragraphs": [
-        "Über wichtige Änderungen informieren wir dich mindestens 14 Tage, bevor sie wirksam werden. Das Datum oben zeigt die aktuelle Fassung."
+        "Änderungen gelten ab ihrer Veröffentlichung hier. Bei wichtigen Änderungen zeigen wir zusätzlich einen Hinweis auf der Website und schicken dir eine E-Mail, wenn in deinem Konto eine E-Mail-Adresse hinterlegt ist. Das Datum oben zeigt die aktuelle Fassung."
       ]
     },
     {

@@ -1080,7 +1080,35 @@
       "care": "Pflege",
       "memories": "Erinnerungen",
       "shop": "Shop",
-      "skip": "Zum Inhalt springen"
+      "skip": "Zum Inhalt springen",
+      "hub": {
+        "contextLabel": "Dein Haushalt und deine Tiere",
+        "petsLabel": "Tier wählen",
+        "show": "{name} anzeigen",
+        "addPet": "Tier hinzufügen",
+        "links": {
+          "findVet": "Tierarztverzeichnis",
+          "careCalendar": "Pflegekalender",
+          "services": "Services",
+          "shop": "Shop",
+          "stays": "Tierfreundliche Unterkünfte",
+          "petTaxi": "Tiertaxi",
+          "petTravel": "Reisedokumente",
+          "petCard": "Vermisstenkarte & QR",
+          "lostPets": "Vermisst & gefunden",
+          "insurance": "Tierversicherung",
+          "memories": "Erinnerungen",
+          "memorial": "Gedenkgarten",
+          "community": "Community",
+          "animalSupport": "Tieren in Not helfen"
+        },
+        "lastMemory": "Neueste Erinnerung",
+        "memorialEyebrow": "In liebevoller Erinnerung",
+        "memorialTitle": "{name} bleibt immer Teil deines Zuhauses",
+        "memorialBody": "Erinnerungen, Lebensgeschichte und Unterlagen bleiben hier sicher und privat, so lange du willst.",
+        "openMemories": "Erinnerungen an {name} öffnen",
+        "visitMemorial": "Zum Gedenkgarten"
+      }
     }
   },
   "blog": {
@@ -1196,7 +1224,8 @@
       "pet_access_manage": "Zugriff auf Tierakten verwalten",
       "wallet_view": "Guthaben ansehen",
       "wallet_adjust": "Guthaben korrigieren",
-      "wallet_topup_review": "Aufladebelege prüfen"
+      "wallet_topup_review": "Aufladebelege prüfen",
+      "finance_manage": "Finanzdaten exportieren (CSV)"
     },
     "domains": {
       "customer": "Kundschaft",
@@ -1259,7 +1288,9 @@
       "warning": "Warnung",
       "urgent": "Dringend",
       "members": "Nur Mitglieder",
-      "everyone": "Alle Besuchenden"
+      "everyone": "Alle Besuchenden",
+      "osm": "OpenStreetMap",
+      "google": "Google Maps"
     },
     "sections": {
       "trust": {
@@ -1293,6 +1324,10 @@
       "maintenance": {
         "title": "Wartungsmodus",
         "hint": "Besuchende sehen eine Wartungsnachricht; Admin-Bereich, Anmeldung und Statusseite bleiben erreichbar."
+      },
+      "maps": {
+        "title": "Karten",
+        "hint": "Welche Karte die Website zeigt. Google braucht einen Browser-Schlüssel, der in Google Cloud auf opetlife.ir beschränkt ist (mit aktiver Abrechnung); ohne ihn oder wenn Google nicht erreichbar ist, bleibt OpenStreetMap."
       }
     },
     "names": {
@@ -1339,7 +1374,9 @@
       "auth_otpEnabled": "Anmeldung per SMS-Code",
       "auth_googleEnabled": "Anmeldung mit Google",
       "maintenance_enabled": "Wartungsmodus an",
-      "maintenance_message": "Wartungsnachricht"
+      "maintenance_message": "Wartungsnachricht",
+      "maps_provider": "Kartenanbieter",
+      "maps_googleBrowserKey": "Google-Maps-Browserschlüssel"
     },
     "save": {
       "label": "Änderungen speichern",
@@ -1361,6 +1398,12 @@
       "UNCHANGED": "nichts geändert",
       "SETTING_CHANGE_CONFLICT": "zwischenzeitlich geändert – Seite neu laden",
       "OPTION_INVALID": "ungültige Option"
+    },
+    "coverage": {
+      "title": "Gespeicherte Standorte ohne Kartennadel",
+      "addresses": "Mitgliederadressen: {missing, number} von {total, number}",
+      "providers": "Anbieterstandorte: {missing, number} von {total, number}",
+      "pickups": "Abholadressen von Händlern: {missing, number} von {total, number}"
     }
   },
   "siteSettings": {
@@ -3156,7 +3199,14 @@
       "privacy_exportsPerDay": "Tägliches Limit für Datenexporte",
       "approvals_mode_serviceBookings": "Betreuungsbuchungen: Freigabemodus",
       "approvals_mode_stayBookings": "Unterkunftsbuchungen: Freigabemodus",
-      "approvals_mode_shopOrders": "Shop-Bestellungen: Freigabemodus"
+      "approvals_mode_shopOrders": "Shop-Bestellungen: Freigabemodus",
+      "membership_freeWeek_enabled": "Kostenloser Test aktiv",
+      "membership_freeWeek_days": "Dauer des kostenlosen Tests",
+      "membership_freeWeek_requireVerifiedPhone": "Kostenloser Test nur mit bestätigter Telefonnummer",
+      "membership_firstPurchaseGift_enabled": "Geschenk zum ersten Kauf aktiv",
+      "membership_firstPurchaseGift_code": "Code des Geschenks zum ersten Kauf",
+      "membership_firstPurchaseGift_percentOff": "Rabatt des Geschenks zum ersten Kauf",
+      "membership_firstPurchaseGift_expiresOn": "Letzter Tag des Geschenks zum ersten Kauf"
     },
     "statuses": {
       "PENDING": "Genehmigung ausstehend; noch nicht angewendet",
@@ -3165,14 +3215,16 @@
       "CANCELLED": "Abgebrochen",
       "SUPERSEDED": "Durch eine neuere Änderung ersetzt"
     },
-    "units": { "toman": "Toman", "seconds": "Sekunden", "hours": "Stunden", "perDay": "pro Tag" },
+    "units": { "toman": "Toman", "seconds": "Sekunden", "hours": "Stunden", "perDay": "pro Tag", "days": "Tage", "percent": "%" },
     "options": {
       "PARTNER_CHOICE": "Eigene Wahl jedes Partners",
       "INSTANT": "Sofort",
       "NEEDS_APPROVAL": "Freigabe nötig"
     },
     "choiceValue": "Neuer Wert",
-    "approvalsNote": "Anfragen und zurückgehaltene Bestellungen landen zur Nachverfolgung in der Aufgabenliste. Die eigene Einstellung eines Unternehmens auf seiner Profilseite hat Vorrang."
+    "approvalsNote": "Anfragen und zurückgehaltene Bestellungen landen zur Nachverfolgung in der Aufgabenliste. Die eigene Einstellung eines Unternehmens auf seiner Profilseite hat Vorrang.",
+    "textValue": "Wert",
+    "membershipNote": "Mitgliedschaftsangebote: Änderungen gelten nur für neue Tests und Käufe. Der Geschenkcode hat 4 bis 24 lateinische Buchstaben, Ziffern oder Bindestriche; der letzte Tag ist YYYY-MM-DD (leer = kein Ablauf)."
   },
   "adminAccess": {
     "title": "Adminzugänge verwalten",
@@ -4414,7 +4466,9 @@
         "orderLookup": "Bestellsuche",
         "refundApprovals": "Erstattungsfreigaben",
         "twoStep": "Zwei-Schritt-Anmeldung",
-        "walletAdjustments": "Korrekturanträge"
+        "walletAdjustments": "Korrekturanträge",
+        "transactionExplorer": "Explorer",
+        "setPet": "Set-Pet-Anfragen"
       },
       "palette": {
         "actions": "Schnellaktionen",
@@ -4585,6 +4639,150 @@
     "demoRecord": {
       "label": "Demo – auf der Live-Seite ausgeblendet",
       "hint": "Beispieldaten für Demos und Tests. Die Live-Seite zeigt sie Mitgliedern nie, auch wenn sie hier als geprüft oder öffentlich markiert sind."
+    },
+    "setPet": {
+      "title": "Set Pet",
+      "intro": "Partnerlooks, die Mitglieder gestalten. Für jede Bestellung einen Druckabzug senden; Mitglieder zahlen nach der Freigabe; dann drucken und versenden.",
+      "statusTabs": "Bestellstatus",
+      "search": "Suche",
+      "searchPlaceholder": "SP-000123 oder Name",
+      "searchButton": "Suchen",
+      "forbidden": "Für Set-Pet-Bestellungen ist commerce.view nötig.",
+      "loadFailed": "Laden fehlgeschlagen.",
+      "retry": "Erneut",
+      "loading": "Lädt…",
+      "empty": "Keine Bestellungen.",
+      "notFound": "Bestellung nicht gefunden.",
+      "rowGarments": "{people} für Menschen, {pets} für Tiere, {zones} Druckflächen",
+      "submittedOn": "Gesendet {date}",
+      "readyBy": "Fertig bis {date}",
+      "pages": "Seiten",
+      "previous": "Zurück",
+      "next": "Weiter",
+      "back": "Alle Set-Pet-Bestellungen",
+      "inMemoryOf": "in Erinnerung an {name}",
+      "actionsTitle": "Aktionen",
+      "garments": "Kleidung",
+      "species": {
+        "DOG": "Hund",
+        "CAT": "Katze"
+      },
+      "memberNotes": "Hinweise des Mitglieds: {notes}",
+      "placement": "Motive",
+      "placementHint": "Jedes Motiv kommt auf jedes Teil seiner Art: Menschenflächen auf jedes Menschenteil, die Tierfläche auf jedes Tierteil.",
+      "cm": "{size} cm",
+      "textPrint": "Text «{text}», {font}, {colour}",
+      "transform": "Zoom {zoom}, Versatz {x} / {y}",
+      "openDesign": "Motiv öffnen",
+      "downloadsAudited": "Motive öffnen nur als Download; jedes Öffnen wird mit Grund protokolliert.",
+      "priceTitle": "Preis und Zahlung",
+      "discountLine": "Set-Rabatt {percent} %: −{amount}",
+      "itemsTotal": "Kleidung und Druck: {amount}",
+      "paidLine": "Bezahlt {amount} (Versand {shipping}, {method}) am {date}",
+      "refundedLine": "Ins Guthaben erstattet: {amount}",
+      "shipTo": "Lieferadresse: {address}",
+      "shippingLine": "Versand: {note}",
+      "cancelledLine": "Storniert von {by}: {reason}",
+      "actor": {
+        "MEMBER": "Mitglied",
+        "STAFF": "Team"
+      },
+      "timeline": "Verlauf",
+      "edited": "Mitglied hat die Bestellung geändert",
+      "adminNote": "Teamnotiz",
+      "adminNoteHint": "Nur das Team sieht das.",
+      "saveNote": "Notiz speichern",
+      "reasonRequired": "Schreibe den Grund, den das Mitglied liest.",
+      "trackingRequired": "Versanddienst und Sendungsnummer angeben.",
+      "defectRequired": "Nach Druckbeginn nur bei Druckfehler stornieren: Kästchen zur Bestätigung ankreuzen.",
+      "memberIsNotified": "Das Mitglied wird auf der Website und per E-Mail benachrichtigt.",
+      "confirm": "Bestätigen",
+      "shippingNote": "Versanddienst und Sendungsnummer",
+      "cancelReason": "Grund (das Mitglied liest ihn)",
+      "statusNote": "Notiz (optional, das Mitglied liest sie)",
+      "defectConfirm": "Das ist ein Druckfehler (volle Erstattung ins Guthaben)",
+      "refundNote": "{amount} geht zurück ins Guthaben des Mitglieds.",
+      "downloadReason": "Warum öffnest du es?",
+      "downloadConfirm": "Öffnen",
+      "downloadFailed": "Motiv konnte nicht geöffnet werden.",
+      "actionFailed": "Das hat nicht geklappt.",
+      "proof": {
+        "title": "Druckabzug",
+        "send": "Druckabzug senden",
+        "replace": "Neueren Abzug senden",
+        "none": "Noch kein Abzug gesendet.",
+        "alt": "Druckabzug ({status})",
+        "status": {
+          "UPLOADING": "Wird hochgeladen",
+          "SENT": "Wartet auf Mitglied",
+          "APPROVED": "Freigegeben",
+          "SUPERSEDED": "Ersetzt"
+        },
+        "petSize": "Tierdruck: {w}×{h} cm",
+        "file": "Abzugsbild (JPG, PNG oder WebP)",
+        "petWidth": "Breite Tierdruck (cm)",
+        "petHeight": "Höhe Tierdruck (cm)",
+        "note": "Nachricht an das Mitglied",
+        "type": "Der Abzug muss ein JPG-, PNG- oder WebP-Bild sein."
+      },
+      "reject": {
+        "action": "Motiv ablehnen",
+        "reason": "Warum es nicht gedruckt werden kann (ungeeignet oder urheberrechtlich geschützt); das Mitglied liest es",
+        "current": "Motiv abgelehnt: {reason}"
+      },
+      "action": {
+        "IN_PRODUCTION": "Druck starten",
+        "SHIPPED": "Als versendet markieren",
+        "CANCELLED": "Bestellung stornieren",
+        "defect": "Wegen Druckfehler stornieren"
+      },
+      "hint": {
+        "SUBMITTED": "Druckabzug erstellen und senden. Ein nicht druckbares Motiv ablehnen.",
+        "NEEDS_NEW_DESIGN": "Wartet auf ein neues Motiv vom Mitglied.",
+        "PROOF_SENT": "Wartet auf Freigabe oder Änderung durch das Mitglied. Ein neuerer Abzug ist möglich.",
+        "AWAITING_PAYMENT": "Das Mitglied hat freigegeben und bezahlt gerade.",
+        "PAID": "Bezahlt: Druck starten, sobald die Presse frei ist.",
+        "IN_PRODUCTION": "Nach dem Verpacken mit Sendungsnummer als versendet markieren.",
+        "SHIPPED": "Fertig. Ein Druckfehler kann noch erstattet werden.",
+        "CANCELLED": "Storniert."
+      },
+      "zone": {
+        "RIGHT_UPPER_ARM": "Rechter Ärmel",
+        "LEFT_UPPER_ARM": "Linker Ärmel",
+        "FRONT_CENTER": "Vorne",
+        "BACK": "Hinten",
+        "PET_BACK": "Rücken des Tieres"
+      },
+      "status": {
+        "SUBMITTED": "Abzug nötig",
+        "NEEDS_NEW_DESIGN": "Neues Motiv nötig",
+        "PROOF_SENT": "Abzug gesendet",
+        "AWAITING_PAYMENT": "Wartet auf Zahlung",
+        "PAID": "Bezahlt, zu drucken",
+        "IN_PRODUCTION": "Im Druck",
+        "SHIPPED": "Versendet",
+        "CANCELLED": "Storniert"
+      },
+      "prices": {
+        "link": "Preistabelle",
+        "title": "Set-Pet-Preise",
+        "intro": "Feste Preise in Toman. Preis eines Teils = Teil ohne Druck + jede Druckfläche darauf. Mitglieder können erst bestellen, wenn jedes Teil und jede Fläche einen Preis hat.",
+        "updated": "Zuletzt gespeichert {date}",
+        "garments": "Kleidung (je Stück)",
+        "zones": "Druckflächen (je Teil)",
+        "zonesHint": "Wird für jedes Teil mit diesem Druck einmal berechnet.",
+        "other": "Rabatt und Dauer",
+        "toman": "{name} (Toman)",
+        "discount": "Set-Rabatt in % (Mensch und Tier zusammen)",
+        "days": "Produktionszeit (Werktage)",
+        "city": "Stadt der Werkstatt (für Kurierzustellung)",
+        "cityHint": "Kuriere liefern nur in dieser Stadt; die Post überall.",
+        "invalid": "Preise müssen ganze Toman-Beträge sein.",
+        "saved": "Preise gespeichert. Sie gelten für ab jetzt gesendete oder geänderte Bestellungen.",
+        "save": "Preise speichern",
+        "forPeople": "Für Menschen",
+        "forPets": "Für Tiere"
+      }
     }
   },
   "adminUsers": {
@@ -4957,7 +5155,58 @@
     "loadForbidden": "Sie haben keinen Zugriff auf die Mitgliedschaft dieses Haushalts.",
     "noHouseholdMessage": "Eine Mitgliedschaft gehört zu einem Haushalt. Erstellen Sie einen Haushalt oder treten Sie einem bei, bevor Sie Tarife verwalten.",
     "openHouseholds": "Haushalte verwalten",
-    "noPlans": "Zurzeit sind keine Tarife verfügbar."
+    "noPlans": "Zurzeit sind keine Tarife verfügbar.",
+    "offers": {
+      "region": "Mitgliedschaftsangebote",
+      "freeWeek": {
+        "eyebrow": "Kostenloser Test",
+        "title": "{plan} {days, number} Tage kostenlos testen",
+        "titleNoPlan": "Die volle Mitgliedschaft {days, number} Tage kostenlos testen",
+        "points": {
+          "noCard": "Zum Start ist keine Karte und keine Zahlung nötig.",
+          "noCharge": "Am Ende wird nichts abgebucht: Sie wechseln einfach zurück zum kostenlosen Tarif.",
+          "once": "Ein kostenloser Test pro Konto, Haushalt und Telefonnummer.",
+          "reminder": "Wir erinnern Sie 2 Tage vor dem Ende. Sie können den Test jederzeit früher beenden."
+        },
+        "start": "Gratiswoche starten",
+        "activeTitle": "Ihr kostenloser Test läuft",
+        "activeUntil": "Er endet am {date}.",
+        "phoneRequired": "Bestätigen Sie Ihre Telefonnummer, um den kostenlosen Test zu starten.",
+        "verifyPhone": "Telefonnummer bestätigen",
+        "withFirstPet": "Er startet automatisch, sobald Sie Ihr erstes Tier hinzufügen.",
+        "ownerOnly": "Nur ein Haushaltsinhaber kann ihn starten.",
+        "notEligible": "Dieses Konto oder dieser Haushalt hat den kostenlosen Test bereits genutzt.",
+        "failed": "Der kostenlose Test konnte nicht gestartet werden. Bitte versuchen Sie es erneut."
+      },
+      "gift": {
+        "eyebrow": "Geschenk zum ersten Kauf",
+        "title": "{percent, number} % Rabatt auf Ihre erste bezahlte Mitgliedschaft",
+        "codeLabel": "Ihr Geschenkcode",
+        "copy": "Code kopieren",
+        "copied": "Kopiert",
+        "apply": "Beim Bezahlen einlösen",
+        "expires": "Gültig bis {date}.",
+        "terms": "Nur für Ihren ersten bezahlten Kauf, einmal pro Konto und Haushalt. Gilt auch nach einem kostenlosen Test, ist nicht mit anderen Rabatten kombinierbar und kann nicht in Bargeld oder Guthaben umgetauscht werden."
+      },
+      "checkout": {
+        "label": "Geschenkcode",
+        "apply": "Einlösen",
+        "remove": "Entfernen",
+        "applied": "Geschenk eingelöst: {percent, number} % Rabatt auf diese erste Zahlung.",
+        "withGift": "mit Ihrem Geschenk",
+        "notApplicable": "Dieser Code kann für diesen Kauf nicht verwendet werden.",
+        "rateLimited": "Zu viele Versuche. Bitte warten Sie eine Minute und versuchen Sie es erneut.",
+        "renewalNote": "Das Geschenk gilt nur für diese erste Zahlung; spätere Verlängerungen kosten den regulären Preis."
+      }
+    },
+    "endTrial": {
+      "action": "Test jetzt beenden",
+      "title": "Kostenlosen Test jetzt beenden",
+      "consequence1": "Die Testfunktionen enden sofort und Sie wechseln zurück zum kostenlosen Tarif.",
+      "consequence2": "Der Test gilt trotzdem als genutzt und kann nicht erneut gestartet werden.",
+      "keeps": "Es wurde nichts abgebucht und es wird nichts abgebucht. Alles, was Sie erfasst haben, bleibt Ihres.",
+      "confirm": "Test jetzt beenden"
+    }
   },
   "common": {
     "appName": "opetlife",
@@ -5575,7 +5824,8 @@
         "active": "Keine Bestellungen in Bearbeitung.",
         "delivered": "Noch keine Bestellungen zugestellt.",
         "closed": "Keine stornierten oder erstatteten Bestellungen."
-      }
+      },
+      "setPetLink": "Meine Set-Pet-Bestellungen"
     },
     "statusLabels": {
       "payment": {
@@ -6722,7 +6972,8 @@
         "EXPIRED": "Abgelaufen",
         "ADMIN_CANCELLED": "Von der Administration gekündigt",
         "ENTITLEMENT_OVERRIDE_GRANTED": "Berechtigungsausnahme erteilt",
-        "ENTITLEMENT_OVERRIDE_REVOKED": "Berechtigungsausnahme widerrufen"
+        "ENTITLEMENT_OVERRIDE_REVOKED": "Berechtigungsausnahme widerrufen",
+        "TRIAL_ENDED_EARLY": "Test vorzeitig beendet"
       }
     },
     "records": {
@@ -6819,7 +7070,8 @@
           "openTasks": "Offene Aufgaben",
           "pendingWalletTopUps": "Aufladebelege",
           "pendingWalletAdjustments": "Korrekturen zur Freigabe",
-          "pendingCardDestinationChanges": "Kontoänderungen zur Freigabe"
+          "pendingCardDestinationChanges": "Kontoänderungen zur Freigabe",
+          "newSetPetRequests": "Neue Set-Pet-Anfragen"
         }
       },
       "performance": {
@@ -11158,7 +11410,8 @@
       "set": "Kartenpunkt gespeichert; der opetlife-Kurier kann genauer rechnen.",
       "clear": "Kartenpunkt entfernen",
       "denied": "Kein Standortzugriff. Sie können ohne ihn fortfahren.",
-      "hasPoint": "Mit Kartenpunkt"
+      "hasPoint": "Mit Kartenpunkt",
+      "noPoint": "Noch keine Nadel: für genauere Lieferung eine setzen"
     }
   },
   "adminShipping": {
@@ -12303,6 +12556,12 @@
       "OWNER": "Inhaber/in",
       "VET": "Tierarzt/Tierärztin",
       "STAFF": "Mitarbeiter/in"
+    },
+    "location": {
+      "noPin": "Noch keine Kartennadel: Setzen Sie eine, damit Kunden diese Filiale finden.",
+      "edit": "Standort auf der Karte festlegen",
+      "save": "Standort speichern",
+      "cancel": "Abbrechen"
     }
   },
   "clinicContacts": {
@@ -12667,5 +12926,479 @@
     "notPending": "Diese Bestellung wartet nicht mehr auf Freigabe; lade die Seite neu.",
     "failed": "Das hat nicht geklappt; bitte erneut versuchen.",
     "noPermission": "Zum Freigeben oder Ablehnen ist die Berechtigung zur Shop-Verwaltung nötig."
+  },
+  "adminTransactionsExplorer": {
+    "kicker": "Finanzen",
+    "title": "Transaktions-Explorer",
+    "subtitle": "Alle Zahlungen, Erstattungen, Guthaben-Aufladungen und Guthaben-Korrekturen in einer Liste, die neuesten zuerst.",
+    "forbidden": "Du brauchst die Berechtigung zum Ansehen der Finanzen, um Transaktionen zu sehen.",
+    "privacyNote": "Von Kartennummern werden nur die letzten vier Ziffern angezeigt, Kontaktdaten sind maskiert. Die Suche nach einer Person und jeder Export werden im Prüfprotokoll festgehalten.",
+    "filters": {
+      "title": "Transaktionen filtern",
+      "person": "Person",
+      "personHint": "Name, Mobilnummer, E-Mail oder Nutzer-ID",
+      "product": "Produkt",
+      "productHint": "Produktname oder -ID",
+      "kind": "Art",
+      "gateway": "Zahlungsweg",
+      "from": "Von",
+      "to": "Bis",
+      "min": "Mindestens (Toman)",
+      "max": "Höchstens (Toman)",
+      "status": "Status",
+      "any": "Alle",
+      "apply": "Suchen",
+      "clear": "Zurücksetzen"
+    },
+    "kind": {
+      "PAYMENT": "Zahlung",
+      "REFUND": "Erstattung",
+      "WALLET_TOP_UP": "Guthaben-Aufladung",
+      "WALLET_ADJUSTMENT": "Guthaben-Korrektur"
+    },
+    "purpose": {
+      "ORDER": "Shop-Bestellung",
+      "BOOKING": "Buchung einer Leistung",
+      "STAY": "Unterkunft",
+      "SUBSCRIPTION": "Abo",
+      "DONATION": "Spende",
+      "WALLET": "Guthaben",
+      "OTHER": "Sonstiges"
+    },
+    "gateway": {
+      "ZIBAL": "Zibal",
+      "CARD_TO_CARD": "Karte zu Karte",
+      "WALLET": "Guthaben",
+      "STAFF": "Team",
+      "DEV_SIMULATED": "Test (simuliert)",
+      "STANDARD_GATEWAY": "Standard-Zahlungsgateway",
+      "SNAPP_PAY": "SnappPay",
+      "DIGI_PAY": "DigiPay"
+    },
+    "direction": {
+      "IN": "Eingang",
+      "OUT": "Ausgang"
+    },
+    "columns": {
+      "when": "Datum",
+      "kind": "Art",
+      "person": "Person",
+      "amount": "Betrag",
+      "gateway": "Zahlungsweg",
+      "status": "Status",
+      "details": "Details"
+    },
+    "card": "Karte",
+    "export": {
+      "button": "CSV exportieren",
+      "working": "Datei wird vorbereitet …",
+      "done": "{rows} Zeilen exportiert.",
+      "truncated": "Die neuesten {rows} Zeilen wurden exportiert; grenze die Filter ein, um den Rest zu exportieren.",
+      "forbidden": "Für den Export brauchst du die Berechtigung zur Finanzverwaltung.",
+      "failed": "Der Export ist fehlgeschlagen. Versuche es erneut."
+    },
+    "invalid": "Prüfe die Filter: Beträge müssen ganze Zahlen sein, und das Minimum darf nicht über dem Maximum liegen.",
+    "failed": "Transaktionen konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "loading": "Wird geladen …",
+    "empty": "Keine Transaktionen passen zu diesen Filtern.",
+    "more": "Ältere laden",
+    "end": "Das war alles: {count} Zeilen."
+  },
+  "setPet": {
+    "landing": {
+      "eyebrow": "Neu bei opetlife",
+      "title": "Set Pet: Partnerlook für dich und dein Haustier",
+      "lede": "Dein Outfit und das deines Tiers in einem Motiv – und das Motiv gestaltest du.",
+      "line1": "Wähle T-Shirt, Hoodie oder Sweatshirt, dann Farbe und Größe.",
+      "line2": "Lade Fotos oder Motive von dir und deinem Tier hoch und platziere sie auf Brust, Rücken oder Ärmeln deines Kleidungsstücks und auf dem Rücken des Tier-Outfits.",
+      "line3": "Wähle die Größe deines Tiers mit der Größentabelle – sein Outfit bekommt dasselbe Motiv.",
+      "cta": "Gestalte dein Set mit deinem Tier",
+      "navLabel": "Set Pet",
+      "videoLabel": "Vorstellungsvideo zu Set Pet",
+      "play": "Set-Pet-Video abspielen",
+      "soundOn": "Ton an",
+      "soundOff": "Stumm",
+      "line4": "Eine Preisspanne siehst du schon beim Gestalten. Vor dem Druck bekommst du eine Druckvorschau und zahlst erst nach deiner Freigabe."
+    },
+    "page": {
+      "eyebrow": "Neu bei opetlife",
+      "title": "Set Pet: Partnerlook für dich und dein Tier",
+      "lede": "Gestalte einen Look für dich und dein Tier: T-Shirt, Hoodie oder Sweatshirt für dich, T-Shirt, Hoodie oder Halstuch für jeden Hund und jede Katze, dazu deine Fotos oder Text – und sieh alles in 3D. Vor dem Druck schicken wir dir einen Druckabzug.",
+      "start": "Set gestalten",
+      "howTitle": "So funktioniert es",
+      "how": {
+        "build": {
+          "title": "Set gestalten",
+          "body": "Kleidung, Größen, Farben und Motive, mit Preisspanne in Echtzeit."
+        },
+        "proof": {
+          "title": "Druckabzug erhalten",
+          "body": "Unser Team schickt dir einen Abzug, genau wie gedruckt wird. Bis zu deiner Freigabe kannst du alles ändern."
+        },
+        "pay": {
+          "title": "Freigeben und bezahlen",
+          "body": "Bezahle den vollen Betrag aus deinem Guthaben; lade es bei Bedarf per Kartenüberweisung auf."
+        },
+        "make": {
+          "title": "Wir drucken",
+          "body": "In der eigenen opetlife-Werkstatt, in etwa 5 Werktagen."
+        },
+        "ship": {
+          "title": "Versand",
+          "body": "Mit denselben Versandarten wie im Shop."
+        }
+      },
+      "factsLabel": "Gut zu wissen",
+      "facts": {
+        "print": {
+          "title": "Was gedruckt wird",
+          "body": "Deine Ärmel 10×10 cm, vorne oder hinten 20×20 cm und der Rücken des Tierkleidungsstücks. Ein Motiv kann an mehreren Stellen stehen; Text in drei Schriften."
+        },
+        "sizing": {
+          "title": "Größen S bis 3XL",
+          "body": "Unisex aus Baumwolle, mit cm-Tabelle und Vorschlag nach Größe und Gewicht. Für Tiere wählst du den Größenbuchstaben mit der Tabelle."
+        },
+        "timing": {
+          "title": "Etwa 5 Werktage",
+          "body": "Ab der Zahlung. Updates bekommst du auf der Website und per E-Mail."
+        },
+        "price": {
+          "title": "Feste Preise",
+          "body": "Jedes Kleidungsstück plus jede Druckfläche, mit Rabatt, wenn dein Teil und das deines Tieres im Set sind. Kostenlos stornierbar bis zum Druckbeginn."
+        }
+      },
+      "buildTitle": "Set gestalten",
+      "editTitle": "Bestellung {reference} ändern",
+      "done": {
+        "title": "Bestellung {reference} ist eingegangen",
+        "editedTitle": "Bestellung {reference} wurde aktualisiert",
+        "body": "Den Druckabzug schicken wir dir auf der Website und per E-Mail. Bezahlt wird erst nach deiner Freigabe.",
+        "view": "Meine Bestellung ansehen",
+        "another": "Weiteres Set gestalten"
+      },
+      "signIn": {
+        "body": "Gestalte frei; anmelden musst du dich erst beim Absenden. Dein Set bleibt auf diesem Gerät.",
+        "cta": "Anmelden",
+        "join": "Konto erstellen"
+      },
+      "mineTitle": "Meine Set-Pet-Bestellungen"
+    },
+    "builder": {
+      "stepsLabel": "Schritte",
+      "steps": {
+        "garments": "Kleidung",
+        "prints": "Motive",
+        "review": "Prüfen und senden"
+      },
+      "loading": "Wird geladen…",
+      "loadError": "Der Konfigurator konnte nicht geladen werden.",
+      "retry": "Erneut versuchen",
+      "back": "Zurück",
+      "next": "Weiter",
+      "previewLabel": "Vorschau",
+      "range": "Preisspanne: {min} bis {max}",
+      "autosave": {
+        "saving": "Entwurf wird gespeichert…",
+        "saved": "Entwurf in deinem Konto gespeichert"
+      },
+      "garments": {
+        "title": "Wer trägt was",
+        "lede": "Bis zu fünf Teile für Menschen und je eines für deine Hunde und Katzen.",
+        "people": "Für Menschen",
+        "personN": "Teil {n}",
+        "addPerson": "Teil für eine Person hinzufügen",
+        "maxPeople": "Höchstens {max} Teile für Menschen.",
+        "pets": "Für Tiere",
+        "petN": "Tierkleidung {n}",
+        "addPet": "Teil für ein Tier hinzufügen",
+        "remove": "Entfernen",
+        "type": "Kleidungsstück",
+        "size": "Größe",
+        "colour": "Farbe",
+        "suggest": "Größe unsicher? Tabelle und Vorschlag",
+        "height": "Körpergröße (cm)",
+        "weight": "Gewicht (kg)",
+        "suggested": "Vorgeschlagene Größe: {size}",
+        "useSize": "{size} wählen",
+        "humanChart": "Flach gelegt, cm",
+        "chestWidth": "Brustbreite",
+        "length": "Länge",
+        "whichPet": "Welches Tier",
+        "otherPet": "Anderes Tier (Namen eingeben)",
+        "petName": "Name des Tieres",
+        "species": "Hund oder Katze",
+        "dog": "Hund",
+        "cat": "Katze",
+        "sizeMismatch": "Diese Größe passt kaum zum gespeicherten Gewicht deines Tieres. Du kannst sie trotzdem wählen.",
+        "petGuide": "Größentabelle für Tiere",
+        "petChart": "Tierkleidung, cm",
+        "neck": "Hals",
+        "chest": "Brust",
+        "back": "Rückenlänge",
+        "sameColour": "Gleiche Farbe wie mein Teil",
+        "p8": "Zu einem Set gehört die Kleidung deines Tieres. Nur für dich zu bestellen ist möglich in Erinnerung an ein Tier, das vermisst wird oder gestorben ist.",
+        "inMemoryOf": "In Erinnerung an",
+        "choose": "Auswählen",
+        "noMemorial": "Ohne Tierkleidung zu bestellen geht nur, wenn das Tier in seinem Profil als vermisst oder verstorben markiert ist.",
+        "errors": {
+          "human": "Füge mindestens ein Teil für eine Person hinzu.",
+          "tooMany": "Höchstens {max} Teile für Menschen.",
+          "petName": "Gib den Namen deines Tieres ein oder wähle es aus deinem Profil.",
+          "petRequired": "Füge ein Teil für dein Tier hinzu oder wähle das Tier, an das dieses Set erinnert."
+        }
+      },
+      "prints": {
+        "title": "Motive",
+        "lede": "Wähle eine Fläche und füge ein Motiv oder Text hinzu. Ein Motiv kann auf mehreren Flächen stehen.",
+        "size": "{cm}×{cm} cm",
+        "petSize": "Größe im Druckabzug festgelegt",
+        "empty": "Noch leer",
+        "design": "Motiv",
+        "text": "Text",
+        "textLabel": "Text (bis 40 Zeichen)",
+        "font": "Schrift",
+        "zoom": "Zoom",
+        "moveX": "Seitlich verschieben",
+        "moveY": "Nach oben oder unten verschieben",
+        "noBackground": "Das Bild wird gedruckt, wie es ist; Hintergründe werden nicht entfernt.",
+        "clear": "Dieses Motiv entfernen",
+        "pick": "Wähle oben oder in der Vorschau eine Druckfläche.",
+        "errors": {
+          "none": "Füge mindestens ein Motiv hinzu.",
+          "design": "Das Motiv auf {zone} ist nicht bereit; wähle ein anderes oder versuche es erneut."
+        }
+      },
+      "upload": {
+        "cta": "Motiv hochladen",
+        "hint": "Fotos (JPG, PNG, WebP, HEIC) oder Druckdateien (PDF, SVG, AI, PSD), bis {mb} MB",
+        "yours": "Deine Motive",
+        "untitled": "Motiv",
+        "uploading": "Wird hochgeladen…",
+        "checking": "Wird geprüft…",
+        "lowRes": "{zone}: Dieses Bild könnte unscharf gedruckt werden (etwa {dpi} dpi). Ein größeres Bild druckt schärfer.",
+        "errors": {
+          "type": "Dieser Dateityp geht nicht.",
+          "tooManyFiles": "Entferne ein ungenutztes Motiv, bevor du ein neues hochlädst.",
+          "notUploaded": "Die Datei ist nicht angekommen; versuche es erneut.",
+          "tooLarge": "Die Datei ist größer als {mb} MB.",
+          "mismatch": "Der Inhalt passt nicht zum Dateityp.",
+          "rejected": "Diese Datei geht nicht.",
+          "generic": "Hochladen fehlgeschlagen; versuche es erneut.",
+          "wait": "Warte, bis deine Motive hochgeladen sind.",
+          "someFailed": "Einige Motive wurden nicht hochgeladen; prüfe sie und versuche es erneut."
+        }
+      },
+      "review": {
+        "title": "Prüfen und senden",
+        "lede": "Prüfe dein Set und den genauen Preis. Jetzt wird nichts bezahlt.",
+        "item": "{garment}, {size}, {colour}",
+        "line": "{garment} {size} mit {zones} Motiven",
+        "discount": "Set-Rabatt ({percent} %)",
+        "total": "Summe (Versand bei der Zahlung)",
+        "next": {
+          "proof": "Wir schicken dir einen Druckabzug.",
+          "approve": "Du gibst ihn frei oder änderst deine Bestellung.",
+          "pay": "Du bezahlst aus deinem Guthaben.",
+          "make": "Wir drucken in etwa {days} Werktagen.",
+          "ship": "Versand mit den Versandarten des Shops."
+        },
+        "notes": "Hinweise für unser Team (optional)",
+        "uploading": "Motive werden hochgeladen…",
+        "sending": "Wird gesendet…",
+        "saveChanges": "Änderungen speichern",
+        "send": "Bestellung senden",
+        "signInAndSend": "Anmelden und senden",
+        "editNote": "Änderungen gehen für einen neuen Druckabzug an unser Team.",
+        "noPaymentYet": "Du bezahlst erst nach Freigabe des Druckabzugs.",
+        "errors": {
+          "tooManyOpen": "Du hast mehrere laufende Bestellungen; warte, bis eine fertig ist, oder storniere eine.",
+          "prices": "Deine Bestellung konnte gerade nicht gesendet werden; bitte versuche es etwas später erneut.",
+          "designUnavailable": "Ein Motiv fehlt oder ist noch nicht geprüft.",
+          "notEditable": "Diese Bestellung kann nicht mehr geändert werden.",
+          "validation": "Im Set muss etwas korrigiert werden; prüfe die Schritte.",
+          "generic": "Die Bestellung konnte nicht gesendet werden; versuche es erneut."
+        }
+      }
+    },
+    "zones": {
+      "RIGHT_UPPER_ARM": {
+        "name": "Rechter Ärmel"
+      },
+      "LEFT_UPPER_ARM": {
+        "name": "Linker Ärmel"
+      },
+      "FRONT_CENTER": {
+        "name": "Vorne"
+      },
+      "BACK": {
+        "name": "Hinten"
+      },
+      "PET_BACK": {
+        "name": "Rücken des Tieres"
+      }
+    },
+    "colours": {
+      "white": "Weiß",
+      "black": "Schwarz",
+      "heather-grey": "Grau meliert",
+      "navy": "Marineblau",
+      "cream": "Creme",
+      "sage": "Salbei"
+    },
+    "garments": {
+      "HUMAN_TEE": "T-Shirt",
+      "HUMAN_HOODIE": "Hoodie",
+      "HUMAN_SWEATSHIRT": "Sweatshirt",
+      "PET_TEE": "Shirt/Weste",
+      "PET_HOODIE": "Hoodie",
+      "PET_BANDANA": "Halstuch"
+    },
+    "fonts": {
+      "VAZIRMATN": "Schlicht",
+      "LALEZAR": "Fett",
+      "AMIRI": "Klassisch"
+    },
+    "preview": {
+      "zoneLabel": "{zone}, {cm}×{cm} cm",
+      "designOn": "{name} auf {zone}",
+      "cm": "cm",
+      "human": "{garment}, {size}",
+      "pet": "Tier-{garment}, {size}",
+      "showBack": "Rückseite zeigen",
+      "showFront": "Vorderseite zeigen",
+      "frontCaption": "Vorne, mit Ärmeln",
+      "backCaption": "Hinten",
+      "petCaption": "Von oben: Rücken deines Tieres",
+      "loading3d": "3D-Ansicht wird geladen…",
+      "turn": "Umdrehen",
+      "rulerLabel": "Maßstab: {cm} cm",
+      "modeLabel": "Ansicht",
+      "mode3d": "3D",
+      "modeFlat": "Flach mit Lineal",
+      "label3dHuman": "3D-Ansicht deines Teils ({garment}); zum Drehen ziehen",
+      "label3dPet": "3D-Ansicht der Tierkleidung ({garment}); zum Drehen ziehen",
+      "approxNote": "Die Vorschau ist nahe an der echten Größe; der Druckabzug zeigt genau, wie gedruckt wird."
+    },
+    "status": {
+      "SUBMITTED": "Wartet auf Druckabzug",
+      "NEEDS_NEW_DESIGN": "Neues Motiv nötig",
+      "PROOF_SENT": "Druckabzug zur Freigabe",
+      "AWAITING_PAYMENT": "Wartet auf Zahlung",
+      "PAID": "Bezahlt, in der Druckwarteschlange",
+      "IN_PRODUCTION": "Wird gedruckt",
+      "SHIPPED": "Versendet",
+      "CANCELLED": "Storniert"
+    },
+    "shipping": {
+      "OPETLIFE_COURIER": "opetlife-Kurier",
+      "SNAPPBOX_APP": "Snappbox",
+      "ALOPEYK_APP": "Alopeyk",
+      "POST_PISHTAZ": "Iran Post Express",
+      "SNAPPBOX": "Snappbox",
+      "ALOPEYK": "Alopeyk",
+      "DEV": "Testversand",
+      "STAFF_ARRANGED": "Unser Team organisiert den Versand und meldet sich bei dir (keine Versandkosten online)"
+    },
+    "orders": {
+      "pageTitle": "Meine Set-Pet-Bestellungen",
+      "new": "Neues Set gestalten",
+      "allOrders": "Alle Bestellungen",
+      "loading": "Bestellungen werden geladen…",
+      "loadError": "Bestellungen konnten nicht geladen werden.",
+      "retry": "Erneut versuchen",
+      "empty": "Du hast noch keine Set-Pet-Bestellung.",
+      "start": "Set gestalten",
+      "item": "{garment} {size} ({colour})",
+      "price": "Preis: {amount}",
+      "discount": "inkl. {percent} % Set-Rabatt",
+      "next": {
+        "SUBMITTED": "Unser Team bereitet deinen Druckabzug vor. Du kannst deine Bestellung noch ändern.",
+        "NEEDS_NEW_DESIGN": "Ein Motiv kann nicht gedruckt werden: {reason} Bitte ändere es und sende die Bestellung erneut.",
+        "PROOF_SENT": "So wird dein Set gedruckt. Gib es frei, um zu bezahlen, oder ändere deine Bestellung.",
+        "PAID": "Bezahlt. Fertig etwa am {date}. Bis zum Druckbeginn kostenlos stornierbar.",
+        "IN_PRODUCTION": "Wird gedruckt. Fertig etwa am {date}.",
+        "SHIPPED": "Versendet. {note}"
+      },
+      "proofLoading": "Druckabzug wird geladen…",
+      "proofAlt": "Druckabzug für {reference}",
+      "petPrintSize": "Druck auf dem Rücken deines Tieres: {w}×{h} cm",
+      "approve": "Druckabzug freigeben",
+      "requestChange": "Bestellung ändern",
+      "edit": "Bestellung ändern",
+      "reorder": "Erneut bestellen",
+      "cancel": "Bestellung stornieren",
+      "confirmCancel": "Diese Bestellung stornieren?",
+      "confirmCancelPaid": "Stornieren? Der volle Betrag geht zurück in dein Guthaben.",
+      "yesCancel": "Ja, stornieren",
+      "keep": "Behalten",
+      "cancelled": "Storniert.",
+      "cancelledReason": "Storniert: {reason}",
+      "refunded": "{amount} wurde deinem Guthaben gutgeschrieben.",
+      "defectHelp": "Gibt es einen Druckfehler?",
+      "support": "Support kontaktieren",
+      "timeline": "Verlauf",
+      "edited": "Bestellung geändert",
+      "errors": {
+        "proofChanged": "Ein neuerer Druckabzug wurde gesendet; bitte sieh ihn dir erneut an.",
+        "notCancellable": "Der Druck hat begonnen; bei einem Druckfehler kontaktiere den Support.",
+        "generic": "Das hat nicht geklappt; versuche es erneut."
+      },
+      "pay": {
+        "title": "Zahlung und Versand",
+        "loading": "Wird geladen…",
+        "address": "Lieferadresse",
+        "noAddress": "Füge zuerst eine Lieferadresse hinzu.",
+        "addAddress": "Adresse hinzufügen",
+        "shippingLoading": "Versandarten werden gesucht…",
+        "shipping": "Versand",
+        "eta": "in {days} Tagen",
+        "noShipping": "Für diese Adresse gibt es noch keine Versandart; bitte kontaktiere den Support.",
+        "items": "Dein Set",
+        "delivery": "Versand",
+        "total": "Gesamt",
+        "balance": "Guthaben: {amount}",
+        "topUpNeeded": "Lade {amount} auf dein Guthaben (Kartenüberweisung oder online), um zu bezahlen.",
+        "topUp": "Guthaben aufladen",
+        "paying": "Wird bezahlt…",
+        "cta": "{amount} aus dem Guthaben zahlen",
+        "ctaPlain": "Aus dem Guthaben zahlen",
+        "errors": {
+          "balance": "Dein Guthaben reicht noch nicht.",
+          "changed": "Der Betrag hat sich geändert; bitte prüfe ihn erneut.",
+          "generic": "Die Zahlung ist fehlgeschlagen; versuche es erneut."
+        }
+      }
+    }
+  },
+  "locationPicker": {
+    "title": "Standort auf der Karte",
+    "required": "Pflichtfeld",
+    "hint": "Tippen Sie auf die Karte oder ziehen Sie die Nadel genau vor die Tür. Zum Zoomen zwei Finger oder + und − verwenden.",
+    "searchPlaceholder": "Straße oder Ort suchen",
+    "search": "Suchen",
+    "searchNone": "Nichts gefunden. Setzen Sie die Nadel stattdessen auf der Karte.",
+    "pinLabel": "Ihre Nadel",
+    "mapLabel": "Karte: Tippen setzt die Nadel, Ziehen verschiebt sie",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern",
+    "useMyLocation": "Meinen aktuellen Standort verwenden",
+    "locating": "Standort wird ermittelt…",
+    "clear": "Nadel entfernen",
+    "denied": "Der Standortzugriff wurde abgelehnt oder ist nicht verfügbar. Tippen Sie stattdessen auf die Karte.",
+    "outsideIran": "Dieser Punkt liegt außerhalb des Iran. Setzen Sie die Nadel auf Ihre Adresse im Iran.",
+    "pinNeeded": "Setzen Sie eine Nadel, damit Kuriere und Fahrer die richtige Tür finden.",
+    "privacyMember": "Ihre genaue Nadel ist privat. Sie dient nur der Lieferung, dem Fahrpreis und Entfernungen „in meiner Nähe“ sowie dem Kurier oder Fahrer, der Sie beliefert. Niemand sonst sieht sie; andere sehen höchstens eine gerundete Entfernung wie ~2 km. Sie können sie jederzeit verschieben oder entfernen.",
+    "privacyBusiness": "Kundinnen und Kunden sehen diese Nadel auf Ihrer öffentlichen Seite. Wenn Sie von zu Hause arbeiten, sieht die Öffentlichkeit nur einen ungefähren Punkt (etwa 1 km), außer Sie zeigen die genaue Stelle.",
+    "consentMember": "Diesen genauen Standort für meine Lieferungen und Entfernungsangaben speichern",
+    "consentBusiness": "Das ist der Standort meines Betriebs, und ich bin mit der oben beschriebenen Anzeige einverstanden",
+    "exactPublic": "Meinen genauen Standort öffentlich zeigen (sonst ein ungefährer Punkt, etwa 1 km)",
+    "consentNeeded": "Setzen Sie das Häkchen unter der Karte, um die Nadel zu speichern, oder entfernen Sie die Nadel.",
+    "privacyPickup": "Nur die Kuriere, die Ihre Pakete abholen, und unser Support nutzen diese Nadel; sie erscheint nie auf Ihren öffentlichen Seiten.",
+    "consentPickup": "Diesen genauen Abholort für Kuriere speichern"
+  },
+  "locationNudge": {
+    "text": "Setzen Sie Ihre Standardadresse auf der Karte, für genauere Lieferungen und Orte in Ihrer Nähe.",
+    "action": "Jetzt setzen"
   }
 }
