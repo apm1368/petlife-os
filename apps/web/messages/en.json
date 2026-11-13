@@ -5063,7 +5063,8 @@
         "orderLookup": "Order lookup",
         "refundApprovals": "Refund approvals",
         "twoStep": "Two-step sign-in",
-        "walletAdjustments": "Correction requests"
+        "walletAdjustments": "Correction requests",
+        "setPet": "Set Pet requests"
       },
       "palette": {
         "actions": "Quick actions",
@@ -6036,6 +6037,106 @@
     "demoRecord": {
       "label": "Demo — hidden on the live site",
       "hint": "Sample data for demos and tests. The live site never shows it to members, even if it is marked verified or public here."
+    },
+    "setPet": {
+      "title": "Set Pet requests",
+      "intro": "Matching outfits for a member and their pet. Quote each new request, then move it through production and shipping; every change reaches the member.",
+      "statusTabs": "Request status",
+      "search": "Request number or member",
+      "searchPlaceholder": "SP-000123 or a name",
+      "searchButton": "Search",
+      "forbidden": "commerce.view permission required",
+      "loadFailed": "Could not load Set Pet requests",
+      "retry": "Try again",
+      "loading": "Loading…",
+      "empty": "No requests here.",
+      "pages": "Pages",
+      "previous": "Previous",
+      "next": "Next",
+      "rowSizes": "Person {human} · pet {pet}",
+      "rowDesigns": "{zones} zones · {files} files",
+      "submittedOn": "Submitted {date}",
+      "readyBy": "ready by {date}",
+      "back": "All Set Pet requests",
+      "notFound": "Request not found",
+      "actionFailed": "The action could not be completed.",
+      "downloadFailed": "The design could not be opened.",
+      "garments": "Garments",
+      "humanGarment": "Person's T-shirts",
+      "petGarment": "Pet's garment",
+      "humanLine": "{count} × size {sizes}, colour {colour}",
+      "petLine": "Size {size}, colour {colour}",
+      "memberNotes": "Member's notes: {notes}",
+      "placement": "Print placement",
+      "placementHint": "Fixed print areas: person's right and left upper arm, front centre and back; on the pet, the back only.",
+      "cm": "{size} cm",
+      "openDesign": "Open design",
+      "noDesign": "No design here",
+      "downloadsAudited": "Designs open only as downloads, and each opening is recorded with its reason.",
+      "quote": "Quote",
+      "quoteLine": "{amount} · ready by {date}",
+      "by": "by {name}",
+      "noQuote": "Not quoted yet.",
+      "quoteInvalid": "Enter a price, a ready-by date and a note for the member.",
+      "amountToman": "Price (toman)",
+      "readyByLabel": "Ready by",
+      "quoteNote": "Note to the member",
+      "requote": "Send revised quote",
+      "sendQuote": "Send quote",
+      "statusActions": "Production and shipping",
+      "waitingForMember": "Waiting for the member to confirm the quote.",
+      "cancelledLine": "Cancelled by {by}: {reason}",
+      "shippingLine": "Shipping: {note}",
+      "timeline": "Timeline",
+      "adminNote": "Staff note",
+      "adminNoteHint": "Only staff see this note.",
+      "saveNote": "Save note",
+      "cancelReasonRequired": "Write the reason the member will read.",
+      "shippingNote": "Carrier and tracking",
+      "cancelReason": "Reason for cancelling (the member reads it)",
+      "statusNote": "Note (optional)",
+      "memberIsNotified": "The member is notified.",
+      "confirm": "Confirm",
+      "downloadReason": "Why are you opening this design?",
+      "downloadConfirm": "Open (recorded)",
+      "status": {
+        "SUBMITTED": "New",
+        "QUOTED": "Quoted",
+        "CONFIRMED": "Confirmed",
+        "IN_PRODUCTION": "In production",
+        "SHIPPED": "Shipped",
+        "CANCELLED": "Cancelled"
+      },
+      "action": {
+        "IN_PRODUCTION": "Start production",
+        "SHIPPED": "Mark shipped",
+        "CANCELLED": "Cancel request",
+        "CONFIRMED": "Confirm",
+        "QUOTED": "Quote",
+        "SUBMITTED": "Submitted"
+      },
+      "zone": {
+        "RIGHT_UPPER_ARM": "Right upper arm",
+        "LEFT_UPPER_ARM": "Left upper arm",
+        "FRONT_CENTER": "Front centre",
+        "BACK": "Back",
+        "PET_BACK": "Pet's back"
+      },
+      "measure": {
+        "neckCm": "Neck (cm)",
+        "chestCm": "Chest (cm)",
+        "backLengthCm": "Back length (cm)",
+        "weightKg": "Weight (kg)"
+      },
+      "actor": {
+        "MEMBER": "Member",
+        "STAFF": "Staff"
+      },
+      "fileStatus": {
+        "PENDING_UPLOAD": "Upload not finished",
+        "READY": "Ready",
+        "REJECTED": "Rejected"
+      }
     }
   },
   "blog": {
@@ -7600,7 +7701,8 @@
           "openTasks": "Open tasks",
           "pendingWalletTopUps": "Top-up receipts",
           "pendingWalletAdjustments": "Corrections to approve",
-          "pendingCardDestinationChanges": "Card account changes to approve"
+          "pendingCardDestinationChanges": "Card account changes to approve",
+          "newSetPetRequests": "New Set Pet requests"
         }
       },
       "performance": {

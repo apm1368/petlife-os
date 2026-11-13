@@ -3448,6 +3448,8 @@ export interface AdminDashboardSummaryDto {
   openProviderNoShows: number | null;
   /** Service, product and stay reviews waiting for a moderator, in the verticals this admin may moderate. */
   pendingReviews: number | null;
+  /** «ست پت» Set Pet requests submitted and waiting for a quote; commerce.view (shop vertical). */
+  newSetPetRequests: number | null;
   /**
    * Market-readiness #290 Q97, the launch month's success measure: registered pets and weekly bookings
    * (analytics.view; null otherwise). Live bookings only, rolling 7-day windows.
@@ -6876,6 +6878,71 @@ export interface AdminProductReadinessDto {
   page: number;
   pageSize: number;
   counts: Record<"ANY" | "MEDIA_INCOMPLETE" | "MISSING_BRAND" | "MISSING_SPECS" | "UNREVIEWED_SOURCE" | "NO_LIVE_OFFER", number>;
+/** «ست پت» Set Pet, admin side; statuses, sizes and zones are the shared ones from ./set-pet (X2's member API). */
+type SetPetStatus = import("./set-pet").SetPetRequestStatus;
+type SetPetSizeCode = import("./set-pet").SetPetSize;
+type SetPetZoneCode = import("./set-pet").SetPetZone;
+
+export interface AdminSetPetRowDto {
+  id: string;
+  /** SP-000123 */
+  number: string;
+  status: SetPetStatus;
+  memberName: string;
+  petName: string | null;
+  petSpecies: string | null;
+  humanSizes: SetPetSizeCode[];
+  petSize: SetPetSizeCode;
+  placements: number;
+  designs: number;
+  quoteAmountIrr: number | null;
+  estimatedReadyAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminSetPetListDto {
+  items: AdminSetPetRowDto[];
+  total: number;
+  page: number;
+  pageSize: number;
+  /** Per status, for the same search (ignores the status filter). */
+  counts: Record<SetPetStatus, number>;
+}
+
+export interface AdminSetPetDesignFileDto {
+  id: string;
+  mimeType: string;
+  fileSizeBytes: number;
+  originalFilename: string | null;
+  /** JPEG/PNG/WebP only; anything else downloads as a plain file. */
+  previewable: boolean;
+  status: "PENDING_UPLOAD" | "READY" | "REJECTED";
+  rejectReason: string | null;
+  uploadedAt: string | null;
+}
+
+export interface AdminSetPetDetailDto {
+  id: string;
+  number: string;
+  status: SetPetStatus;
+  member: { id: string; displayName: string };
+  pet: { id: string; name: string; species: string } | null;
+  human: { colour: string; sizes: SetPetSizeCode[] };
+  petGarment: { size: SetPetSizeCode; colour: string; neckCm: number | null; chestCm: number | null; backLengthCm: number | null; weightKg: number | null };
+  notes: string | null;
+  placements: Array<{ zone: SetPetZoneCode; designFile: AdminSetPetDesignFileDto }>;
+  designs: AdminSetPetDesignFileDto[];
+  quote: { amountIrr: number | null; note: string | null; estimatedReadyAt: string | null; quotedAt: string | null; quotedBy: string | null };
+  shippingNote: string | null;
+  cancelled: { at: string; by: "MEMBER" | "STAFF" | null; reason: string | null } | null;
+  /** Staff-only; never shown to the member. */
+  adminNote: string | null;
+  allowedTransitions: SetPetStatus[];
+  canQuote: boolean;
+  timeline: Array<{ id: string; at: string; from: SetPetStatus | null; to: SetPetStatus; actor: "MEMBER" | "STAFF"; staffName: string | null; note: string | null }>;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AdminProductReviewRowDto {
@@ -7342,6 +7409,22 @@ export type {
   PetOwnershipTransferStatusName,
 } from "./ownership";
 export { OWNERSHIP_TRANSFER_EXPIRY_DAYS, PET_MEMORY_DISPOSITIONS, PET_OWNERSHIP_TRANSFER_STATUSES } from "./ownership";
+
+export type {
+  SetPetRequestStatus,
+  SetPetSize,
+  SetPetZone,
+  SetPetMeasurements,
+  SetPetDesignFileStatus,
+  SetPetDesignFileDto,
+  SetPetUploadTargetDto,
+  SetPetPlacementDto,
+  SetPetTimelineEntryDto,
+  SetPetRequestDto,
+  SetPetCreateRequestInput,
+  SetPetOptionsDto,
+} from "./set-pet";
+export { SET_PET_STATUSES, SET_PET_SIZES, SET_PET_ZONES, SET_PET_MEASUREMENT_RANGES } from "./set-pet";
 
 // ---------------------------------------------------------------------------
 // Member wallet (balances are always derived from append-only entries)

@@ -5107,7 +5107,8 @@
         "orderLookup": "البحث عن طلب",
         "refundApprovals": "موافقات الاسترداد",
         "twoStep": "تسجيل الدخول بخطوتين",
-        "walletAdjustments": "طلبات التعديل"
+        "walletAdjustments": "طلبات التعديل",
+        "setPet": "طلبات ست بِت"
       },
       "palette": {
         "actions": "إجراءات سريعة",
@@ -6096,6 +6097,106 @@
     "demoRecord": {
       "label": "تجريبي — مخفي على الموقع العام",
       "hint": "بيانات نموذجية للعروض التجريبية والاختبارات. لا يعرضها الموقع العام للأعضاء أبدًا، حتى لو كانت مُعلَّمة هنا بأنها موثَّقة أو عامة."
+    },
+    "setPet": {
+      "title": "طلبات ست بِت",
+      "intro": "ملابس متطابقة للعضو وحيوانه الأليف. قدّم عرض سعر لكل طلب جديد ثم انقله إلى الإنتاج والشحن؛ كل تغيير يصل إلى العضو.",
+      "statusTabs": "حالة الطلب",
+      "search": "رقم الطلب أو العضو",
+      "searchPlaceholder": "SP-000123 أو اسم",
+      "searchButton": "بحث",
+      "forbidden": "يلزم إذن commerce.view",
+      "loadFailed": "تعذّر تحميل طلبات ست بِت",
+      "retry": "إعادة المحاولة",
+      "loading": "جارٍ التحميل…",
+      "empty": "لا توجد طلبات هنا.",
+      "pages": "الصفحات",
+      "previous": "السابق",
+      "next": "التالي",
+      "rowSizes": "الشخص {human} · الحيوان {pet}",
+      "rowDesigns": "{zones} مناطق · {files} ملفات",
+      "submittedOn": "استُلم {date}",
+      "readyBy": "جاهز بحلول {date}",
+      "back": "كل طلبات ست بِت",
+      "notFound": "الطلب غير موجود",
+      "actionFailed": "تعذّر إتمام الإجراء.",
+      "downloadFailed": "تعذّر فتح التصميم.",
+      "garments": "الملابس",
+      "humanGarment": "قمصان الشخص",
+      "petGarment": "لباس الحيوان",
+      "humanLine": "{count} × مقاس {sizes}، اللون {colour}",
+      "petLine": "مقاس {size}، اللون {colour}",
+      "memberNotes": "ملاحظات العضو: {notes}",
+      "placement": "مكان الطباعة",
+      "placementHint": "مناطق طباعة ثابتة: العضد الأيمن والأيسر، منتصف الأمام والظهر للشخص؛ وعلى الحيوان الظهر فقط.",
+      "cm": "{size} سم",
+      "openDesign": "فتح التصميم",
+      "noDesign": "لا يوجد تصميم",
+      "downloadsAudited": "تُفتح التصاميم كتنزيل فقط، ويُسجَّل كل فتح مع سببه.",
+      "quote": "عرض السعر",
+      "quoteLine": "{amount} · جاهز بحلول {date}",
+      "by": "بواسطة {name}",
+      "noQuote": "لم يُقدَّم عرض سعر بعد.",
+      "quoteInvalid": "أدخل السعر وتاريخ الجاهزية وملاحظة للعضو.",
+      "amountToman": "السعر (تومان)",
+      "readyByLabel": "جاهز بحلول",
+      "quoteNote": "ملاحظة للعضو",
+      "requote": "إرسال عرض سعر معدَّل",
+      "sendQuote": "إرسال عرض السعر",
+      "statusActions": "الإنتاج والشحن",
+      "waitingForMember": "بانتظار تأكيد العضو لعرض السعر.",
+      "cancelledLine": "أُلغي بواسطة {by}: {reason}",
+      "shippingLine": "الشحن: {note}",
+      "timeline": "السجل",
+      "adminNote": "ملاحظة الموظفين",
+      "adminNoteHint": "يرى هذه الملاحظة الموظفون فقط.",
+      "saveNote": "حفظ الملاحظة",
+      "cancelReasonRequired": "اكتب السبب الذي سيقرؤه العضو.",
+      "shippingNote": "شركة الشحن ورقم التتبّع",
+      "cancelReason": "سبب الإلغاء (يقرؤه العضو)",
+      "statusNote": "ملاحظة (اختيارية)",
+      "memberIsNotified": "سيُبلَّغ العضو.",
+      "confirm": "تأكيد",
+      "downloadReason": "لماذا تفتح هذا التصميم؟",
+      "downloadConfirm": "فتح (يُسجَّل)",
+      "status": {
+        "SUBMITTED": "جديد",
+        "QUOTED": "تم تسعيره",
+        "CONFIRMED": "مؤكَّد",
+        "IN_PRODUCTION": "قيد الإنتاج",
+        "SHIPPED": "تم الشحن",
+        "CANCELLED": "ملغى"
+      },
+      "action": {
+        "IN_PRODUCTION": "بدء الإنتاج",
+        "SHIPPED": "تسجيل الشحن",
+        "CANCELLED": "إلغاء الطلب",
+        "CONFIRMED": "تأكيد",
+        "QUOTED": "عرض سعر",
+        "SUBMITTED": "مُستلم"
+      },
+      "zone": {
+        "RIGHT_UPPER_ARM": "العضد الأيمن",
+        "LEFT_UPPER_ARM": "العضد الأيسر",
+        "FRONT_CENTER": "منتصف الأمام",
+        "BACK": "الظهر",
+        "PET_BACK": "ظهر الحيوان"
+      },
+      "measure": {
+        "neckCm": "الرقبة (سم)",
+        "chestCm": "الصدر (سم)",
+        "backLengthCm": "طول الظهر (سم)",
+        "weightKg": "الوزن (كغ)"
+      },
+      "actor": {
+        "MEMBER": "العضو",
+        "STAFF": "الموظفون"
+      },
+      "fileStatus": {
+        "PENDING_UPLOAD": "لم يكتمل الرفع",
+        "READY": "جاهز",
+        "REJECTED": "مرفوض"
+      }
     }
   },
   "blog": {
@@ -7669,7 +7770,8 @@
           "openTasks": "المهام المفتوحة",
           "pendingWalletTopUps": "إيصالات شحن الرصيد",
           "pendingWalletAdjustments": "تعديلات بانتظار الموافقة",
-          "pendingCardDestinationChanges": "تغييرات حساب البطاقة بانتظار الموافقة"
+          "pendingCardDestinationChanges": "تغييرات حساب البطاقة بانتظار الموافقة",
+          "newSetPetRequests": "طلبات ست بِت الجديدة"
         }
       },
       "performance": {

@@ -4380,7 +4380,8 @@
         "orderLookup": "Bestellsuche",
         "refundApprovals": "Erstattungsfreigaben",
         "twoStep": "Zwei-Schritt-Anmeldung",
-        "walletAdjustments": "Korrekturanträge"
+        "walletAdjustments": "Korrekturanträge",
+        "setPet": "Set-Pet-Anfragen"
       },
       "palette": {
         "actions": "Schnellaktionen",
@@ -4551,6 +4552,106 @@
     "demoRecord": {
       "label": "Demo – auf der Live-Seite ausgeblendet",
       "hint": "Beispieldaten für Demos und Tests. Die Live-Seite zeigt sie Mitgliedern nie, auch wenn sie hier als geprüft oder öffentlich markiert sind."
+    },
+    "setPet": {
+      "title": "Set-Pet-Anfragen",
+      "intro": "Passende Outfits für ein Mitglied und sein Tier. Erstelle für jede neue Anfrage ein Angebot und führe sie dann durch Produktion und Versand; jede Änderung erreicht das Mitglied.",
+      "statusTabs": "Anfragestatus",
+      "search": "Anfragenummer oder Mitglied",
+      "searchPlaceholder": "SP-000123 oder ein Name",
+      "searchButton": "Suchen",
+      "forbidden": "Berechtigung commerce.view erforderlich",
+      "loadFailed": "Set-Pet-Anfragen konnten nicht geladen werden",
+      "retry": "Erneut versuchen",
+      "loading": "Wird geladen…",
+      "empty": "Hier gibt es keine Anfragen.",
+      "pages": "Seiten",
+      "previous": "Zurück",
+      "next": "Weiter",
+      "rowSizes": "Person {human} · Tier {pet}",
+      "rowDesigns": "{zones} Bereiche · {files} Dateien",
+      "submittedOn": "Eingegangen {date}",
+      "readyBy": "fertig bis {date}",
+      "back": "Alle Set-Pet-Anfragen",
+      "notFound": "Anfrage nicht gefunden",
+      "actionFailed": "Die Aktion konnte nicht ausgeführt werden.",
+      "downloadFailed": "Das Design konnte nicht geöffnet werden.",
+      "garments": "Kleidung",
+      "humanGarment": "T-Shirts der Person",
+      "petGarment": "Kleidung des Tiers",
+      "humanLine": "{count} × Größe {sizes}, Farbe {colour}",
+      "petLine": "Größe {size}, Farbe {colour}",
+      "memberNotes": "Notizen des Mitglieds: {notes}",
+      "placement": "Druckplatzierung",
+      "placementHint": "Feste Druckbereiche: rechter und linker Oberarm, vorne mittig und Rücken der Person; beim Tier nur der Rücken.",
+      "cm": "{size} cm",
+      "openDesign": "Design öffnen",
+      "noDesign": "Kein Design",
+      "downloadsAudited": "Designs werden nur als Download geöffnet, und jedes Öffnen wird mit Grund protokolliert.",
+      "quote": "Angebot",
+      "quoteLine": "{amount} · fertig bis {date}",
+      "by": "von {name}",
+      "noQuote": "Noch kein Angebot.",
+      "quoteInvalid": "Gib einen Preis, ein Fertigstellungsdatum und eine Notiz für das Mitglied ein.",
+      "amountToman": "Preis (Toman)",
+      "readyByLabel": "Fertig bis",
+      "quoteNote": "Notiz an das Mitglied",
+      "requote": "Neues Angebot senden",
+      "sendQuote": "Angebot senden",
+      "statusActions": "Produktion und Versand",
+      "waitingForMember": "Wartet auf die Bestätigung des Mitglieds.",
+      "cancelledLine": "Storniert von {by}: {reason}",
+      "shippingLine": "Versand: {note}",
+      "timeline": "Verlauf",
+      "adminNote": "Interne Notiz",
+      "adminNoteHint": "Diese Notiz sehen nur Mitarbeitende.",
+      "saveNote": "Notiz speichern",
+      "cancelReasonRequired": "Schreibe den Grund, den das Mitglied liest.",
+      "shippingNote": "Versanddienst und Sendungsnummer",
+      "cancelReason": "Grund der Stornierung (das Mitglied liest ihn)",
+      "statusNote": "Notiz (optional)",
+      "memberIsNotified": "Das Mitglied wird benachrichtigt.",
+      "confirm": "Bestätigen",
+      "downloadReason": "Warum öffnest du dieses Design?",
+      "downloadConfirm": "Öffnen (wird protokolliert)",
+      "status": {
+        "SUBMITTED": "Neu",
+        "QUOTED": "Angeboten",
+        "CONFIRMED": "Bestätigt",
+        "IN_PRODUCTION": "In Produktion",
+        "SHIPPED": "Versandt",
+        "CANCELLED": "Storniert"
+      },
+      "action": {
+        "IN_PRODUCTION": "Produktion starten",
+        "SHIPPED": "Als versandt markieren",
+        "CANCELLED": "Anfrage stornieren",
+        "CONFIRMED": "Bestätigen",
+        "QUOTED": "Angebot",
+        "SUBMITTED": "Eingegangen"
+      },
+      "zone": {
+        "RIGHT_UPPER_ARM": "Rechter Oberarm",
+        "LEFT_UPPER_ARM": "Linker Oberarm",
+        "FRONT_CENTER": "Vorne mittig",
+        "BACK": "Rücken",
+        "PET_BACK": "Rücken des Tiers"
+      },
+      "measure": {
+        "neckCm": "Hals (cm)",
+        "chestCm": "Brust (cm)",
+        "backLengthCm": "Rückenlänge (cm)",
+        "weightKg": "Gewicht (kg)"
+      },
+      "actor": {
+        "MEMBER": "Mitglied",
+        "STAFF": "Team"
+      },
+      "fileStatus": {
+        "PENDING_UPLOAD": "Upload nicht abgeschlossen",
+        "READY": "Bereit",
+        "REJECTED": "Abgelehnt"
+      }
     }
   },
   "adminUsers": {
@@ -6783,7 +6884,8 @@
           "openTasks": "Offene Aufgaben",
           "pendingWalletTopUps": "Aufladebelege",
           "pendingWalletAdjustments": "Korrekturen zur Freigabe",
-          "pendingCardDestinationChanges": "Kontoänderungen zur Freigabe"
+          "pendingCardDestinationChanges": "Kontoänderungen zur Freigabe",
+          "newSetPetRequests": "Neue Set-Pet-Anfragen"
         }
       },
       "performance": {

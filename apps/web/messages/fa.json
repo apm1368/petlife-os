@@ -4987,7 +4987,8 @@
         "orderLookup": "جست‌وجوی سفارش",
         "refundApprovals": "تأیید بازگشت وجه",
         "twoStep": "ورود دومرحله‌ای",
-        "walletAdjustments": "درخواست‌های اصلاح"
+        "walletAdjustments": "درخواست‌های اصلاح",
+        "setPet": "درخواست‌های ست پت"
       },
       "palette": {
         "actions": "اقدام‌های سریع",
@@ -5960,6 +5961,106 @@
     "demoRecord": {
       "label": "نمایشی — در سایت عمومی پنهان",
       "hint": "دادهٔ نمونه برای نمایش و آزمایش. روی سایت اصلی به کاربران نشان داده نمی‌شود، حتی اگر اینجا «تأییدشده» یا «عمومی» باشد."
+    },
+    "setPet": {
+      "title": "درخواست‌های ست پت",
+      "intro": "لباس ست برای عضو و پتش. برای هر درخواست جدید قیمت بدهید، سپس آن را تا تولید و ارسال جلو ببرید؛ هر تغییر به عضو اطلاع داده می‌شود.",
+      "statusTabs": "وضعیت درخواست",
+      "search": "شماره درخواست یا نام عضو",
+      "searchPlaceholder": "SP-000123 یا نام",
+      "searchButton": "جستجو",
+      "forbidden": "دسترسی commerce.view لازم است",
+      "loadFailed": "درخواست‌های ست پت بارگذاری نشد",
+      "retry": "تلاش دوباره",
+      "loading": "در حال بارگذاری…",
+      "empty": "درخواستی در این بخش نیست.",
+      "pages": "صفحه‌ها",
+      "previous": "قبلی",
+      "next": "بعدی",
+      "rowSizes": "انسان {human} · پت {pet}",
+      "rowDesigns": "{zones} ناحیه · {files} فایل",
+      "submittedOn": "ثبت: {date}",
+      "readyBy": "آماده تا {date}",
+      "back": "همه درخواست‌های ست پت",
+      "notFound": "درخواست پیدا نشد",
+      "actionFailed": "انجام نشد.",
+      "downloadFailed": "طرح باز نشد.",
+      "garments": "لباس‌ها",
+      "humanGarment": "تیشرت‌های انسان",
+      "petGarment": "لباس پت",
+      "humanLine": "{count} عدد · سایز {sizes}، رنگ {colour}",
+      "petLine": "سایز {size}، رنگ {colour}",
+      "memberNotes": "توضیح عضو: {notes}",
+      "placement": "محل چاپ",
+      "placementHint": "نواحی ثابت چاپ: بازوی راست و چپ، جلو وسط و پشت لباس انسان؛ روی لباس پت فقط پشت.",
+      "cm": "{size} سانتی‌متر",
+      "openDesign": "باز کردن طرح",
+      "noDesign": "طرحی ندارد",
+      "downloadsAudited": "طرح‌ها فقط به‌صورت فایل دانلود می‌شوند و هر بار باز کردن با دلیلش ثبت می‌شود.",
+      "quote": "قیمت",
+      "quoteLine": "{amount} · آماده تا {date}",
+      "by": "توسط {name}",
+      "noQuote": "هنوز قیمت داده نشده است.",
+      "quoteInvalid": "قیمت، تاریخ آماده‌شدن و توضیحی برای عضو وارد کنید.",
+      "amountToman": "قیمت (تومان)",
+      "readyByLabel": "آماده تا",
+      "quoteNote": "توضیح برای عضو",
+      "requote": "ارسال قیمت جدید",
+      "sendQuote": "ارسال قیمت",
+      "statusActions": "تولید و ارسال",
+      "waitingForMember": "منتظر تأیید قیمت توسط عضو.",
+      "cancelledLine": "لغو توسط {by}: {reason}",
+      "shippingLine": "ارسال: {note}",
+      "timeline": "تاریخچه",
+      "adminNote": "یادداشت کارشناس",
+      "adminNoteHint": "این یادداشت را فقط کارشناسان می‌بینند.",
+      "saveNote": "ذخیره یادداشت",
+      "cancelReasonRequired": "دلیلی را بنویسید که عضو می‌خواند.",
+      "shippingNote": "شرکت حمل و کد رهگیری",
+      "cancelReason": "دلیل لغو (عضو آن را می‌خواند)",
+      "statusNote": "توضیح (اختیاری)",
+      "memberIsNotified": "به عضو اطلاع داده می‌شود.",
+      "confirm": "تأیید",
+      "downloadReason": "چرا این طرح را باز می‌کنید؟",
+      "downloadConfirm": "باز کردن (ثبت می‌شود)",
+      "status": {
+        "SUBMITTED": "جدید",
+        "QUOTED": "قیمت داده‌شده",
+        "CONFIRMED": "تأییدشده",
+        "IN_PRODUCTION": "در حال تولید",
+        "SHIPPED": "ارسال‌شده",
+        "CANCELLED": "لغوشده"
+      },
+      "action": {
+        "IN_PRODUCTION": "شروع تولید",
+        "SHIPPED": "ثبت ارسال",
+        "CANCELLED": "لغو درخواست",
+        "CONFIRMED": "تأیید",
+        "QUOTED": "قیمت",
+        "SUBMITTED": "ثبت‌شده"
+      },
+      "zone": {
+        "RIGHT_UPPER_ARM": "بازوی راست",
+        "LEFT_UPPER_ARM": "بازوی چپ",
+        "FRONT_CENTER": "جلو وسط",
+        "BACK": "پشت",
+        "PET_BACK": "پشت لباس پت"
+      },
+      "measure": {
+        "neckCm": "دور گردن (سانتی‌متر)",
+        "chestCm": "دور سینه (سانتی‌متر)",
+        "backLengthCm": "طول پشت (سانتی‌متر)",
+        "weightKg": "وزن (کیلوگرم)"
+      },
+      "actor": {
+        "MEMBER": "عضو",
+        "STAFF": "کارشناس"
+      },
+      "fileStatus": {
+        "PENDING_UPLOAD": "بارگذاری کامل نشده",
+        "READY": "آماده",
+        "REJECTED": "ردشده"
+      }
     }
   },
   "blog": {
@@ -7524,7 +7625,8 @@
           "openTasks": "کارهای باز",
           "pendingWalletTopUps": "رسیدهای افزایش اعتبار",
           "pendingWalletAdjustments": "اصلاح‌های در انتظار تأیید",
-          "pendingCardDestinationChanges": "تغییر حساب کارت‌به‌کارت برای تأیید"
+          "pendingCardDestinationChanges": "تغییر حساب کارت‌به‌کارت برای تأیید",
+          "newSetPetRequests": "درخواست‌های جدید ست پت"
         }
       },
       "performance": {
