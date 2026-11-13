@@ -7,7 +7,7 @@ import { ProviderDiscoveryView } from "./ProviderDiscoveryView";
 const params = new URLSearchParams();
 const replace = vi.fn();
 const push = vi.fn();
-vi.mock("next/navigation", () => ({ useRouter: () => ({ replace, push }), usePathname: () => "/fa/services/VET", useSearchParams: () => params }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace, push }), usePathname: () => "/fa/services/vet", useSearchParams: () => params }));
 vi.mock("next/image", () => ({ default: (props: { alt: string }) => <span data-alt={props.alt} /> }));
 vi.mock("@/services/discovery.service", () => ({ discoveryService: { search: vi.fn(), cities: vi.fn(), favorites: vi.fn(), favorite: vi.fn(), unfavorite: vi.fn() } }));
 vi.mock("@/features/experience/CinematicPageHero", () => ({ CinematicPageHero: ({ title, children }: { title: string; children?: React.ReactNode }) => <div><h1>{title}</h1>{children}</div> }));
@@ -63,7 +63,7 @@ describe("ProviderDiscoveryView", () => {
 
     expect(await screen.findByText("Tierarztpraxis")).toBeTruthy();
     expect(screen.getByRole("search").querySelector("input")?.getAttribute("aria-label")).toBe("Name oder Fachgebiet suchen");
-    expect(screen.getByRole("link", { name: "Tiermedizin" }).getAttribute("href")).toBe("/de/services/VET");
+    expect(screen.getByRole("link", { name: "Tiermedizin" }).getAttribute("href")).toBe("/de/services/vet");
     expect(screen.getByText("In den nächsten 7 Tagen kein freier Termin")).toBeTruthy();
     expect(screen.getByText(/100\.000 Toman/)).toBeTruthy();
     expect(screen.getByRole("link", { name: "کلینیک مهر" }).getAttribute("href")).toBe("/de/providers/p1");
@@ -75,6 +75,6 @@ describe("ProviderDiscoveryView", () => {
 
     expect(await screen.findByText("No hay proveedores que coincidan con estos filtros")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Limpiar filtros" })).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Peluquería y baño" }).getAttribute("href")).toBe("/es/services/GROOMING");
+    expect(screen.getByRole("link", { name: "Peluquería y baño" }).getAttribute("href")).toBe("/es/services/grooming");
   });
 });

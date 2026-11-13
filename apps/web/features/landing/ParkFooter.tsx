@@ -1,5 +1,6 @@
 import { Brand } from "@/features/brand/Brand";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ArrowUp } from "@petlife/ui";
 import { FooterLinkGroup, FooterSiteDetails } from "@/features/site-settings/FooterLinks";
 import type { RouteLocale } from "@/lib/i18n/config";
@@ -9,6 +10,7 @@ import { localeHomePath } from "@/lib/seo/site";
 
 export function ParkFooter({ locale }: { locale: RouteLocale }) {
   const c = storyCopy[locale];
+  const park = useTranslations("pattern2026.park");
   return <footer className="opl-foot" aria-label={c.footerLabel}>
     <div className="opl-wrap">
       <div className="opl-foot__grid">
@@ -30,6 +32,7 @@ export function ParkFooter({ locale }: { locale: RouteLocale }) {
       <div className="opl-foot__bottom">
         <CookieToggle />
         <nav aria-label={c.footerPrivacy}>
+          <Link href={`/${locale}/about`}>{park("about")}</Link>
           <Link href={`/${locale}/profile/privacy`}>{c.footerPrivacy}</Link>
           <Link href={`/${locale}/credits`}>{c.footerCredits}</Link>
         </nav>

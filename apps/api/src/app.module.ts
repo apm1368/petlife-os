@@ -71,6 +71,7 @@ import { MemberTrustModule } from "./modules/member-trust/member-trust.module";
 import { HealthDepthModule } from "./modules/health-depth/health-depth.module";
 import { PrivacyGovernanceModule } from "./modules/privacy-governance/privacy-governance.module";
 import { PlatformSettingsModule } from "./modules/platform-settings/platform-settings.module";
+import { CalendarModule } from "./modules/calendar/calendar.module";
 import { PartnerVerificationModule } from "./modules/partner-verification/partner-verification.module";
 import { TravelExternalModule } from "./modules/travel-external/travel-external.module";
 import { ConsumerHubModule } from "./modules/consumer-hub/consumer-hub.module";
@@ -149,6 +150,7 @@ import { PlacesModule } from "./modules/places/places.module";
     HealthDepthModule,
     PrivacyGovernanceModule,
     PlatformSettingsModule,
+    CalendarModule,
     PartnerVerificationModule,
     TravelExternalModule,
     VetPanelModule,

@@ -3208,12 +3208,24 @@ export interface AdminDashboardSummaryDto {
   pendingWalletTopUps: number | null;
   /** Account deletion requests waiting on staff (REQUESTED or PENDING_RETENTION); admin.manage only. */
   pendingDeletionRequests: number | null;
+  /**
+   * Market-readiness #290 Q97, the launch month's success measure: registered pets and weekly bookings
+   * (analytics.view; null otherwise). Live bookings only, rolling 7-day windows.
+   */
+  launchKpis: AdminLaunchKpisDto | null;
   /** Pet ownership transfers in DISPUTED, waiting for staff to record the outcome; customer.view. */
   openOwnershipDisputes: number | null;
   /** Members' reports that a provider didn't show up, still open as admin tasks; services.view. */
   openProviderNoShows: number | null;
   /** Service, product and stay reviews waiting for a moderator, in the verticals this admin may moderate. */
   pendingReviews: number | null;
+}
+
+export interface AdminLaunchKpisDto {
+  registeredPets: number;
+  newPetsThisWeek: number;
+  bookingsThisWeek: number;
+  bookingsLastWeek: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -5107,6 +5119,7 @@ export enum CommunityPostType {
   RESCUE = "RESCUE",
   ADOPTION = "ADOPTION",
   MEMORY = "MEMORY",
+  FOUND_PET = "FOUND_PET",
 }
 
 export enum CommunityContentStatus {

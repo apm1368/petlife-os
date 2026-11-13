@@ -11,7 +11,13 @@ import { AdminAuditLogService } from "../admin/audit/admin-audit-log.service";
 import { AutomaticTaskService } from "../admin/task/automatic-task.service";
 import type { ResolvedAdminContext } from "../admin/auth/admin-context.types";
 import { evaluateVerificationPolicy, matchesVerificationEvidence, WAVE2_VERIFICATION_POLICY_VERSION } from "./verification-policy";
+import { businessHoursBetween } from "../../common/time/business-hours";
+import { HolidayCalendarService } from "../calendar/holiday-calendar.service";
+
 import { DOC_KIND_FA } from "../admin/task/task-titles";
+
+/** Partner KYC review target (market-readiness Q73): a decision within 24 working hours. */
+const KYC_SLA_WORKING_HOURS = 24;
 
 /** Provider and seller verification share one status vocabulary (identical enums). */
 type Status = VS;
@@ -64,6 +70,7 @@ export class PartnerVerificationService {
     private readonly audit: AdminAuditLogService,
     private readonly tasks: AutomaticTaskService,
     private readonly notifications: NotificationOrchestratorService,
+    private readonly holidays: HolidayCalendarService,
   ) {}
 
   // ------------------------------------------------------------------ shared reads
@@ -178,6 +185,12 @@ export class PartnerVerificationService {
     return this.status(s);
   }
 
+  /** Review target: a decision within 24 working hours of submission (market-readiness Q73). Shown on the queue. */
+  private sla(status: Status, submittedAt: Date | null, now: number) {
+    const waiting = submittedAt && (status === VS.SUBMITTED || status === VS.UNDER_REVIEW) ? businessHoursBetween(submittedAt, new Date(now), this.holidays.closedDays()) : null;
+    return { slaHours: KYC_SLA_WORKING_HOURS, workingHoursWaiting: waiting === null ? null : Math.round(waiting * 10) / 10, overdue: waiting !== null && waiting > KYC_SLA_WORKING_HOURS };
+  }
+
   // ------------------------------------------------------------------ staff side
   async queue(q: { subjectType?: PartnerSubjectType; status?: Status }) {
     const statuses = q.status ? [q.status] : [VS.SUBMITTED, VS.UNDER_REVIEW, VS.NEEDS_INFORMATION];
@@ -195,7 +208,7 @@ export class PartnerVerificationService {
     ];
     return rows
       .sort((a, b) => (a.submittedAt?.getTime() ?? 0) - (b.submittedAt?.getTime() ?? 0))
-      .map((r) => ({ ...r, submittedAt: iso(r.submittedAt), waitingHours: r.submittedAt ? Math.round((now - r.submittedAt.getTime()) / 3600e3) : null, documents: { pending: docCount(r.id, PartnerDocumentStatus.PENDING), accepted: docCount(r.id, PartnerDocumentStatus.ACCEPTED), rejected: docCount(r.id, PartnerDocumentStatus.REJECTED), expired: docCount(r.id, PartnerDocumentStatus.EXPIRED) } }));
+      .map((r) => ({ ...r, submittedAt: iso(r.submittedAt), waitingHours: r.submittedAt ? Math.round((now - r.submittedAt.getTime()) / 3600e3) : null, ...this.sla(r.status, r.submittedAt, now), documents: { pending: docCount(r.id, PartnerDocumentStatus.PENDING), accepted: docCount(r.id, PartnerDocumentStatus.ACCEPTED), rejected: docCount(r.id, PartnerDocumentStatus.REJECTED), expired: docCount(r.id, PartnerDocumentStatus.EXPIRED) } }));
   }
 
   async adminDetail(s: Subject) {

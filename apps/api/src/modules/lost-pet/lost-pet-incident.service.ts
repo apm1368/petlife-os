@@ -97,6 +97,9 @@ export class LostPetIncidentService {
       await this.events.publish("LostPetIncidentOpened", { petId, householdId: pet.householdId, incidentId: created.id }, { tx, aggregateType: "Pet", aggregateId: petId });
       return created;
     });
+    // Handlers of LostPetIncidentOpened run inside the transaction above; the neighbourhood fan-out needs the
+    // committed incident (its private point and public area), so it gets its own event after commit.
+    await this.events.publish("LostPetIncidentNearbyCheck", { petId, incidentId: row.id }, { aggregateType: "Pet", aggregateId: petId });
     if (!dto.exposeIdentityCard) return toLostPetIncidentDto(row);
     const linked = await this.setIdentityCard(petId, row.id, createdByUserId, true, canManageAccess);
     return { ...linked.incident, identityCardToken: linked.identityCardToken };

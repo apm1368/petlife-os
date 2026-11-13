@@ -12,3 +12,16 @@ export const REEL_TRACK = {
   license: "CC0 1.0 Universal",
   licenseUrl: "https://creativecommons.org/publicdomain/zero/1.0/",
 } as const;
+
+/**
+ * Soundtrack of the one-minute video "10 searches of dog and cat owners" (blog hub article + social platforms).
+ * CC0 1.0: 60 s from 0:08 of the original, faded out, encoded to Opus inside the video file. Credited on /credits.
+ */
+export const VIDEO_REEL_TRACK = {
+  title: "Happy Dance",
+  author: "HoliznaCC0",
+  album: "Power Pop",
+  page: "https://freemusicarchive.org/music/holiznacc0/power-pop/happy-dance-2/",
+  license: "CC0 1.0 Universal",
+  licenseUrl: "https://creativecommons.org/publicdomain/zero/1.0/",
+} as const;

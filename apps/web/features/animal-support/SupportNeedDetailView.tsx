@@ -16,6 +16,7 @@ import { communityService } from "@/services/community.service";
 import { ShareBar } from "@/features/shared/ShareBar";
 import { useInstantFormat } from "@/lib/date/use-instant-format";
 import { apiErrorText } from "@/lib/errors/api-error-text";
+import { SafetyTip } from "@/features/shared/SafetyTip";
 
 const HELP_TYPES: SupportNeedCategory[] = [
   SupportNeedCategory.FOOD,
@@ -163,6 +164,7 @@ export function SupportNeedDetailView({ listingId }: { listingId: string }) {
           ) : (
             <>
               <p className="text-metadata text-text-secondary">{t("detail.contactExplainer")}</p>
+              <SafetyTip kind="contact" />
               <Select
                 label={t("detail.helpTypeLabel")}
                 value={helpType}

@@ -9,6 +9,7 @@ import {
   AdminRefundApprovalStatus,
   AdminTaskStatus,
   AdminVertical,
+  BookingStatus,
   CatalogProductRequestStatus,
   CommunityReportStatus,
   DisputeStatus,
@@ -24,10 +25,10 @@ import {
   TrustCaseStatus,
   WalletTopUpStatus,
 } from "@prisma/client";
-import type { AdminDashboardSummaryDto } from "@petlife/types";
+import type { AdminDashboardSummaryDto, AdminLaunchKpisDto } from "@petlife/types";
 import { PrismaService } from "../../../common/prisma/prisma.service";
 import { adminCan, type AdminPermission } from "../auth/admin-permissions";
-import { allowedProviderTypes, canReachVertical } from "../auth/admin-verticals";
+import { allowedProviderTypes, allowedVerticals, canReachVertical } from "../auth/admin-verticals";
 import type { ResolvedAdminContext } from "../auth/admin-context.types";
 
 /**
@@ -61,6 +62,7 @@ export class AdminDashboardService {
       openPlaceReports,
       pendingWalletTopUps,
       pendingDeletionRequests,
+      launchKpis,
       openOwnershipDisputes,
       openProviderNoShows,
       pendingReviews,
@@ -89,6 +91,8 @@ export class AdminDashboardService {
       when(may("wallet.view"), () => this.prisma.walletTopUp.count({ where: { status: WalletTopUpStatus.REVIEW_PENDING } })),
       // Account deletion requests waiting on staff: new ones and those in retention review (execution stays disabled).
       when(may("admin.manage"), () => this.prisma.accountDeletionRequest.count({ where: { state: { in: [AccountDeletionState.REQUESTED, AccountDeletionState.PENDING_RETENTION] } } })),
+      // Platform-wide figures: only for unscoped roles, so a vertical-limited role never sees other verticals' bookings.
+      may("analytics.view") && allowedVerticals(admin) === null ? this.launchKpis() : Promise.resolve(null),
       // Pet ownership disputes waiting for staff to record an outcome (ID-03).
       when(may("customer.view"), () => this.prisma.petOwnershipTransfer.count({ where: { status: PetOwnershipTransferStatus.DISPUTED } })),
       // Members' provider no-show reports that staff haven't finished with (their automatic tasks still open).
@@ -114,10 +118,26 @@ export class AdminDashboardService {
       openPlaceReports,
       pendingWalletTopUps,
       pendingDeletionRequests,
+      launchKpis,
       openOwnershipDisputes,
       openProviderNoShows,
       pendingReviews,
     };
+  }
+
+  /** #290 Q97: registered pets (not deleted) and live bookings created in this and the previous rolling week. */
+  private async launchKpis(): Promise<AdminLaunchKpisDto> {
+    const now = Date.now();
+    const weekAgo = new Date(now - 7 * 24 * 3600 * 1000);
+    const twoWeeksAgo = new Date(now - 14 * 24 * 3600 * 1000);
+    const live = { bookingStatus: { in: [BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN, BookingStatus.IN_PROGRESS, BookingStatus.COMPLETED, BookingStatus.NO_SHOW] } };
+    const [registeredPets, newPetsThisWeek, bookingsThisWeek, bookingsLastWeek] = await Promise.all([
+      this.prisma.pet.count({ where: { deletedAt: null } }),
+      this.prisma.pet.count({ where: { deletedAt: null, createdAt: { gte: weekAgo } } }),
+      this.prisma.booking.count({ where: { ...live, createdAt: { gte: weekAgo } } }),
+      this.prisma.booking.count({ where: { ...live, createdAt: { gte: twoWeeksAgo, lt: weekAgo } } }),
+    ]);
+    return { registeredPets, newPetsThisWeek, bookingsThisWeek, bookingsLastWeek };
   }
 
   private async pendingReviewCount(admin: ResolvedAdminContext, may: (permission: AdminPermission, vertical?: AdminVertical) => boolean): Promise<number | null> {

@@ -5,10 +5,10 @@ import type faMessages from "@/messages/fa.json";
 export const parkDestinations = [
   { key: "shop", href: "/shop", x: 9.4, y: 47, width: 10.4, tone: "plum" },
   { key: "vet", href: "/vet/find", x: 21.2, y: 48.5, width: 10.4, tone: "teal" },
-  { key: "grooming", href: "/services/GROOMING", x: 31.1, y: 50, width: 10.4, tone: "rose" },
-  { key: "boarding", href: "/services/BOARDING", x: 42.4, y: 50, width: 10.4, tone: "copper" },
+  { key: "grooming", href: "/services/grooming", x: 31.1, y: 50, width: 10.4, tone: "rose" },
+  { key: "boarding", href: "/services/boarding", x: 42.4, y: 50, width: 10.4, tone: "copper" },
   { key: "travel", href: "/travel", x: 56, y: 50, width: 10.4, tone: "green" },
-  { key: "taxi", href: "/services/PET_TAXI", x: 71.2, y: 49.5, width: 10.4, tone: "gold" },
+  { key: "taxi", href: "/services/pet-taxi", x: 71.2, y: 49.5, width: 10.4, tone: "gold" },
   { key: "support", href: "/animal-support/needs", x: 81.6, y: 48.5, width: 10.4, tone: "coral" },
   { key: "insurance", href: "/insurance", x: 92.1, y: 47.5, width: 10.4, tone: "blue" },
 ] as const;

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -15,6 +15,19 @@ import { DesignRoot } from "@/features/design-system/DesignRoot";
 import { PageMotion } from "@/features/motion/PageMotion";
 import { SITE_NAME, SITE_ORIGIN, SITE_TAGLINE } from "@/lib/seo/site";
 import { MaintenanceGate } from "@/features/site-settings/MaintenanceGate";
+import { PwaRuntime } from "@/features/pwa/PwaRuntime";
+import { manifestPath, PWA_BACKGROUND_COLOR, PWA_DARK_BACKGROUND_COLOR } from "@/lib/pwa/manifest";
+
+/** Phones: content may use the whole screen (the app shell pads for notches and the home indicator); the browser bar takes the page colour. */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: PWA_BACKGROUND_COLOR },
+    { media: "(prefers-color-scheme: dark)", color: PWA_DARK_BACKGROUND_COLOR },
+  ],
+};
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -28,6 +41,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     metadataBase: new URL(SITE_ORIGIN),
     title: SITE_NAME[routeLocale],
     applicationName: "opetlife",
+    manifest: manifestPath(routeLocale),
+    appleWebApp: { capable: true, title: "opetlife", statusBarStyle: "default" },
     icons: {
       icon: [
         { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },
@@ -64,7 +79,7 @@ export default async function LocaleLayout({
       </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeSync /><DisplayModeSync /><ToastProvider><PageMotion><AuthModalOrigin><LocalReviewTools><DesignRoot><MaintenanceGate>{children}{modal}</MaintenanceGate></DesignRoot></LocalReviewTools></AuthModalOrigin></PageMotion></ToastProvider>
+          <ThemeSync /><DisplayModeSync /><PwaRuntime /><ToastProvider><PageMotion><AuthModalOrigin><LocalReviewTools><DesignRoot><MaintenanceGate>{children}{modal}</MaintenanceGate></DesignRoot></LocalReviewTools></AuthModalOrigin></PageMotion></ToastProvider>
         </NextIntlClientProvider>
       </body>
     </html>

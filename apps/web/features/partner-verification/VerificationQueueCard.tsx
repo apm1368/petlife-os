@@ -14,7 +14,10 @@ export function VerificationQueueCard({ row }: { row: VerificationQueueItem }) {
   return <ContextSurface className={styles.card}>
     <div className={styles.cardHeader}>
       <h2 className="text-section-title">{row.name}</h2>
-      <StatusLabel tone={adminStatusTone(row.status)}>{t(`statuses.${row.status}`)}</StatusLabel>
+      <span className="flex flex-wrap items-center gap-2">
+        {row.overdue ? <StatusLabel tone="urgent">{t("sla.overdue")}</StatusLabel> : null}
+        <StatusLabel tone={adminStatusTone(row.status)}>{t(`statuses.${row.status}`)}</StatusLabel>
+      </span>
     </div>
     <dl className={styles.metadata}>
       <div><dt>{t("rowPartner")}</dt><dd>{t(`subjects.${row.subjectType}`)} · {t.has(`businessKinds.${row.kind}`) ? t(`businessKinds.${row.kind}`) : t("otherBusiness")}</dd></div>
@@ -24,7 +27,7 @@ export function VerificationQueueCard({ row }: { row: VerificationQueueItem }) {
       {(["pending", "accepted", "rejected", "expired"] as const).map(key => <div key={key}><dt>{t(`documentCountLabels.${key}`)}</dt><dd>{format.number(row.documents[key])}</dd></div>)}
     </dl></div>
     <div className={styles.footer}>
-      {row.waitingHours !== null ? <p>{t("waitingHours", { count: format.number(row.waitingHours) })}</p> : null}
+      {row.workingHoursWaiting != null && row.slaHours ? <p>{t("sla.progress", { hours: format.number(Math.floor(row.workingHoursWaiting)), target: format.number(row.slaHours) })}</p> : row.waitingHours !== null ? <p>{t("waitingHours", { count: format.number(row.waitingHours) })}</p> : null}
       <Link className={styles.reviewLink} href={`/${locale}/admin/verification/${row.subjectType.toLowerCase()}/${row.id}`}>{t("reviewCase")}</Link>
     </div>
   </ContextSurface>;
