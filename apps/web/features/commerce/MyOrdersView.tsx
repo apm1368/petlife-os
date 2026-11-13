@@ -54,15 +54,30 @@ export function MyOrdersView() {
 
   if (error) return <ErrorRecovery title={t("title")} message="" retryLabel={t("retry")} onRetry={load} />;
   if (!orders) return <Skeleton className="h-64 w-full" aria-label={t("loading")} />;
-  if (orders.length === 0) return <EmptyState title={t("empty")} actionLabel={t("browseShop")} onAction={() => router.push(`/${locale}/shop`)} />;
+  if (orders.length === 0) {
+    return (
+      <div className="flex flex-col gap-4">
+        <EmptyState title={t("empty")} actionLabel={t("browseShop")} onAction={() => router.push(`/${locale}/shop`)} />
+        <button type="button" className="text-cta text-brand-natural" onClick={() => router.push(`/${locale}/orders/set-pet`)}>
+          {t("setPetLink")}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-page-title text-text-primary">{t("title")}</h1>
-        <button type="button" className="text-cta text-brand-natural" onClick={() => router.push(`/${locale}/repeat-delivery`)}>
-          {t("repeatLink")}
-        </button>
+        <div className="flex flex-wrap gap-4">
+          {/* «ست پت» orders have a section of their own (owner, #368 P38). */}
+          <button type="button" className="text-cta text-brand-natural" onClick={() => router.push(`/${locale}/orders/set-pet`)}>
+            {t("setPetLink")}
+          </button>
+          <button type="button" className="text-cta text-brand-natural" onClick={() => router.push(`/${locale}/repeat-delivery`)}>
+            {t("repeatLink")}
+          </button>
+        </div>
       </div>
 
       <div role="tablist" aria-label={t("title")} className="flex gap-2 overflow-x-auto">

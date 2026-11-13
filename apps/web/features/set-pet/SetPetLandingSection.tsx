@@ -3,19 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import type { SetPetZone } from "@petlife/types";
 import { PawPrint, Play, Volume2, VolumeX } from "@petlife/ui";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { GarmentMockups } from "./GarmentMockups";
 import { setPetReel } from "./set-pet-reel";
 import "./set-pet.css";
 
-const SAMPLE_ZONES: ReadonlySet<SetPetZone> = new Set<SetPetZone>(["FRONT_CENTER", "PET_BACK"]);
-const NO_DESIGNS = new Map();
 
 /**
  * «ست پت» on the landing page, right below the hero (owner, 2026-11-13; the hero itself is untouched): what it is,
- * three short lines, the way in (/set-pet), and X7's reel. The reel plays muted on its own when it scrolls into view,
+ * four short lines (X7's copy, owner's #368 answers), the way in (/set-pet), and X7's reel. The reel plays muted on its own when it scrolls into view,
  * with a sound button (owner, #368 P3); with reduced motion or Save-Data it waits for a tap. Until it is rendered,
  * the matching shirts mockup stands in.
  */
@@ -79,7 +76,7 @@ export function SetPetLandingSection() {
             </button>
           )
         ) : (
-          <GarmentMockups humanSize="M" petSize="M" colour="white" side={side} onSideChange={setSide} zones={SAMPLE_ZONES} placements={{}} designs={NO_DESIGNS} />
+          <GarmentMockups human={{ garment: "HUMAN_TEE", size: "M", colour: "sage" }} pet={{ garment: "PET_TEE", size: "M", colour: "sage" }} side={side} onSideChange={setSide} prints={{}} showEmptyZones />
         )}
       </div>
       </div>

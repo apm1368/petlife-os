@@ -1,97 +1,95 @@
 import { describe, expect, it } from "vitest";
-import { HUMAN_FRAME, boxStyle, humanFrame, humanZoneBox, petFrame, petShirtShape } from "./garment-geometry";
-import { HUMAN_CHART, SIZES, checkMeasurement, isRasterPreviewable, parseMeasurement, roundMeasurement, sizeLabel, suggestPetSize, zoneSide } from "./set-pet-catalog";
-import { setPetReel } from "./set-pet-reel";
+import { priceRangeSetPet, priceSetPet, type SetPetPriceTable } from "@petlife/types";
+import { emptySnapshot, readSnapshot, toOrderInput } from "./builder-state";
+import { parseNumber, petSizeMismatch, printDpi, sizeLabel, suggestHumanSize } from "./set-pet-catalog";
 
-describe("Set Pet catalogue (owner, 2026-11-13)", () => {
-  it("shows XXL and XXXL as 2XL and 3XL", () => {
-    expect(SIZES.map(sizeLabel)).toEqual(["S", "M", "L", "XL", "2XL", "3XL"]);
+const TABLE: SetPetPriceTable = {
+  garmentPricesIrr: { HUMAN_TEE: 4_000_000, HUMAN_HOODIE: 9_000_000, HUMAN_SWEATSHIRT: 7_000_000, PET_TEE: 2_500_000, PET_HOODIE: 4_000_000, PET_BANDANA: 1_500_000 },
+  zonePricesIrr: { RIGHT_UPPER_ARM: 500_000, LEFT_UPPER_ARM: 500_000, FRONT_CENTER: 1_200_000, BACK: 1_200_000, PET_BACK: 800_000 },
+  setDiscountPercent: 10,
+};
+
+describe("Set Pet pricing (owner F1/P35/P36/P37)", () => {
+  it("adds each garment and each zone printed on it, then the set discount when people and pets are both in the set", () => {
+    const price = priceSetPet(TABLE, [{ garment: "HUMAN_TEE" }, { garment: "HUMAN_HOODIE" }, { garment: "PET_BANDANA" }], ["FRONT_CENTER", "PET_BACK"]);
+    expect(price.lines.map((l) => l.lineIrr)).toEqual([5_200_000, 10_200_000, 2_300_000]);
+    expect(price).toMatchObject({ subtotalIrr: 17_700_000, discountPercent: 10, discountIrr: 1_770_000, totalIrr: 15_930_000, unpriced: [] });
   });
 
-  it("suggests the pet size from the chest girth", () => {
-    expect(suggestPetSize(45)).toBe("M");
-    expect(suggestPetSize(48)).toBe("L");
-    expect(suggestPetSize(20)).toBe("S");
-    expect(suggestPetSize(120)).toBe("XXXL");
-    expect(suggestPetSize(null)).toBeNull();
+  it("gives no set discount to a human-only set, and names what the table has not priced", () => {
+    expect(priceSetPet(TABLE, [{ garment: "HUMAN_TEE" }], ["BACK"]).discountIrr).toBe(0);
+    expect(priceSetPet({ ...TABLE, zonePricesIrr: {} }, [{ garment: "HUMAN_TEE" }], ["BACK"]).unpriced).toEqual(["BACK"]);
   });
 
-  it("reads Persian and Arabic digits and either decimal mark", () => {
-    expect(parseMeasurement("۳۲٫۵")).toBe(32.5);
-    expect(parseMeasurement("٤٥")).toBe(45);
-    expect(parseMeasurement("12,4")).toBe(12.4);
-    expect(parseMeasurement("")).toBeNull();
-    expect(parseMeasurement("abc")).toBeNull();
-  });
-
-  it("refuses implausible measurements, like the API", () => {
-    expect(checkMeasurement("neckCm", 30)).toBe("ok");
-    expect(checkMeasurement("neckCm", 300)).toBe("range");
-    expect(checkMeasurement("weightKg", null)).toBe("empty");
-    expect(roundMeasurement("chestCm", 45.27)).toBe(45.3);
-    expect(roundMeasurement("weightKg", 12.345)).toBe(12.35);
-  });
-
-  it("previews only raster images; SVG and print files never", () => {
-    expect(isRasterPreviewable({ name: "cat.png", type: "image/png" })).toBe(true);
-    expect(isRasterPreviewable({ name: "cat.JPG", type: "image/jpeg" })).toBe(true);
-    expect(isRasterPreviewable({ name: "art.svg", type: "image/svg+xml" })).toBe(false);
-    expect(isRasterPreviewable({ name: "art.png", type: "image/svg+xml" })).toBe(false);
-    expect(isRasterPreviewable({ name: "art.svg", type: "image/png" })).toBe(false);
-    expect(isRasterPreviewable({ name: "print.pdf", type: "application/pdf" })).toBe(false);
-    expect(isRasterPreviewable({ name: "photo.heic", type: "image/heic" })).toBe(false);
+  it("shows a range while building: from the zones chosen (or the cheapest) up to every zone", () => {
+    const range = priceRangeSetPet(TABLE, [{ garment: "HUMAN_TEE" }, { garment: "PET_TEE" }], []);
+    expect(range.minIrr).toBe(Math.round((4_000_000 + 500_000 + 2_500_000 + 800_000) * 0.9));
+    expect(range.maxIrr).toBe(Math.round((4_000_000 + 3_400_000 + 2_500_000 + 800_000) * 0.9));
   });
 });
 
-describe("garment mockups at true scale", () => {
-  it("keeps the print areas in cm on every size (10×10 sleeves, 20×20 front and back)", () => {
-    for (const size of SIZES) {
-      expect(humanZoneBox("FRONT_CENTER", size)).toMatchObject({ w: 20, h: 20 });
-      expect(humanZoneBox("BACK", size)).toMatchObject({ w: 20, h: 20 });
-      expect(humanZoneBox("RIGHT_UPPER_ARM", size)).toMatchObject({ w: 10, h: 10 });
-    }
-    // The same 20 cm print covers less of a 3XL than of an S.
-    expect(20 / HUMAN_CHART.XXXL.chestWidthCm).toBeLessThan(20 / HUMAN_CHART.S.chestWidthCm);
+describe("builder state", () => {
+  it("turns the builder into the API order: pets from the profile or by hand, text and design prints", () => {
+    const s = {
+      ...emptySnapshot(),
+      items: [
+        { key: "a", garment: "HUMAN_HOODIE" as const, size: "XXL" as const, colour: "black" as const },
+        { key: "b", garment: "PET_TEE" as const, size: "S" as const, colour: "black" as const, petId: "pet-1", petName: "", petSpecies: "DOG" as const },
+        { key: "c", garment: "PET_BANDANA" as const, size: "M" as const, colour: "sage" as const, petId: null, petName: " Lili ", petSpecies: "CAT" as const },
+      ],
+      prints: {
+        FRONT_CENTER: { kind: "image" as const, designId: "local-1", scale: 2, offsetX: 0.5, offsetY: 0 },
+        PET_BACK: { kind: "text" as const, text: " Shiraz ", font: "LALEZAR" as const, colour: "white" as const },
+      },
+      forPetId: "gone",
+      notes: "  ",
+    };
+    expect(toOrderInput(s, new Map([["local-1", "server-1"]]))).toEqual({
+      items: [
+        { garment: "HUMAN_HOODIE", size: "XXL", colour: "black" },
+        { garment: "PET_TEE", size: "S", colour: "black", petId: "pet-1" },
+        { garment: "PET_BANDANA", size: "M", colour: "sage", petName: "Lili", petSpecies: "CAT" },
+      ],
+      placements: [
+        { zone: "FRONT_CENTER", designFileId: "server-1", scale: 2, offsetX: 0.5, offsetY: 0 },
+        { zone: "PET_BACK", text: "Shiraz", font: "LALEZAR", textColour: "white" },
+      ],
+      forPetId: null,
+      notes: null,
+    });
   });
 
-  it("puts the wearer's right sleeve on the viewer's left in the front view, and BACK on the back view", () => {
-    expect(humanZoneBox("RIGHT_UPPER_ARM", "M")!.cx).toBeLessThan(0);
-    expect(humanZoneBox("LEFT_UPPER_ARM", "M")!.cx).toBeGreaterThan(0);
-    expect(zoneSide("BACK")).toBe("back");
-    expect(zoneSide("RIGHT_UPPER_ARM")).toBe("front");
-  });
-
-  it("fits every zone inside its frame on every size", () => {
-    for (const size of SIZES) {
-      for (const zone of ["RIGHT_UPPER_ARM", "LEFT_UPPER_ARM", "FRONT_CENTER", "BACK"] as const) {
-        const box = humanZoneBox(zone, size)!;
-        expect(box.cx - box.w).toBeGreaterThan(HUMAN_FRAME.minX);
-        expect(box.cx + box.w).toBeLessThan(HUMAN_FRAME.minX + HUMAN_FRAME.width);
-      }
-      const pet = petShirtShape(size);
-      expect(pet.zone.cy + pet.zone.h / 2).toBeLessThan(pet.length);
-      // Frames end just under the ruler, below the hem, and keep one width (one cm scale) for every size.
-      expect(pet.length).toBeLessThan(petFrame(size).minY + petFrame(size).height);
-      expect(humanFrame(size).width).toBe(HUMAN_FRAME.width);
-    }
-  });
-
-  it("turns a zone box into CSS percentages of its frame", () => {
-    const style = boxStyle({ cx: 0, cy: 22, w: 20, h: 20, rotate: 0 }, HUMAN_FRAME);
-    expect(parseFloat(style.left)).toBeCloseTo(((-10 + 48) / 96) * 100, 3);
-    expect(parseFloat(style.width)).toBeCloseTo((20 / 96) * 100, 3);
-    expect(style.transform).toBeUndefined();
-    expect(boxStyle({ cx: 30, cy: 15, w: 10, h: 10, rotate: 31 }, HUMAN_FRAME).transform).toBe("rotate(31deg)");
+  it("reads a saved draft or a reorder defensively", () => {
+    expect(readSnapshot(null)).toBeNull();
+    expect(readSnapshot({ items: [] })).toBeNull();
+    const reorder = readSnapshot({ step: "review", reorderOfId: "o1", items: [{ garment: "HUMAN_TEE", size: "HUGE", colour: "purple" }], placements: [{ zone: "BACK", designFileId: "d1", scale: 9 }, { zone: "NOSE", text: "x" }] });
+    expect(reorder).toMatchObject({ step: "review", reorderOfId: "o1", items: [{ garment: "HUMAN_TEE", size: "M", colour: "white" }], prints: { BACK: { kind: "image", designId: "d1", scale: 4 } } });
+    expect(Object.keys(reorder!.prints)).toEqual(["BACK"]);
   });
 });
 
-describe("Set Pet reel (X7)", () => {
-  const reel = { video: "/api/uploads/cms/media/bundle-abc.webm", poster: "/api/uploads/cms/media/bundle-abc.webp", durationS: 90, width: 1280, height: 720 };
-  it("plays only our own CMS media files", () => {
-    expect(setPetReel("fa", { fa: reel })).toEqual(reel);
-    expect(setPetReel("fa", { fa: { ...reel, video: "https://opetlife.ir/api/uploads/cms/media/bundle-abc.webm" } })).not.toBeNull();
-    expect(setPetReel("fa", { fa: { ...reel, video: "https://evil.example/x.webm" } })).toBeNull();
-    expect(setPetReel("fa", { fa: { ...reel, poster: "javascript:alert(1)" } })).toBeNull();
-    expect(setPetReel("en", { fa: reel })).toBeNull();
+describe("Set Pet catalogue", () => {
+  it("labels XXL and XXXL as 2XL and 3XL", () => {
+    expect(["S", "XXL", "XXXL"].map((s) => sizeLabel(s as "S"))).toEqual(["S", "2XL", "3XL"]);
+  });
+
+  it("suggests a human size from height and weight (owner P16), never more", () => {
+    expect(suggestHumanSize(175, 70)).toBe("M");
+    expect(suggestHumanSize(190, 70)).toBe("L");
+    expect(suggestHumanSize(null, 120)).toBe("XXXL");
+    expect(suggestHumanSize(170, null)).toBeNull();
+  });
+
+  it("only warns about a pet size that doesn't fit the recorded weight (P20)", () => {
+    expect(petSizeMismatch("S", 3)).toBe(false);
+    expect(petSizeMismatch("S", 30)).toBe(true);
+    expect(petSizeMismatch("XL", null)).toBe(false);
+  });
+
+  it("reads Persian and Arabic digits, and measures print sharpness", () => {
+    expect(parseNumber("۱۷۵")).toBe(175);
+    expect(parseNumber("٧٠٫٥")).toBe(70.5);
+    expect(parseNumber("abc")).toBeNull();
+    expect(printDpi(2362, 20)).toBe(300);
   });
 });

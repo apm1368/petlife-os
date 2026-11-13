@@ -1,28 +1,18 @@
-import type { SetPetSize, SetPetZone } from "@petlife/types";
+import type { BuilderSnapshot } from "./builder-state";
 
 /**
- * The set a visitor is building, kept on their own device while they sign in (owner, #368 P4: build freely, sign in
- * only to send). Choices go to sessionStorage; picked design files go to IndexedDB (files are never put in web
- * storage as text). Both are cleared once the request is sent. Everything is best effort: private windows or blocked
- * storage simply start fresh.
+ * The set a visitor is building, kept on their own device while they sign in (owner P4: build freely, sign in only to
+ * send). Choices go to sessionStorage; picked design files go to IndexedDB (files are never put in web storage as
+ * text). Both are cleared once the order is sent. Signed-in members' drafts live in their account (owner P5) instead.
+ * Everything is best effort: private windows or blocked storage simply start fresh.
  */
 export type SetPetDraft = {
-  step: string;
-  humanSizes: SetPetSize[];
-  petSize: SetPetSize;
-  petSizeChosen: boolean;
-  raw: Record<string, string>;
-  petId: string;
-  colour: string;
-  petColour: string | null;
-  zones: SetPetZone[];
-  placements: Partial<Record<SetPetZone, string>>;
-  notes: string;
+  snapshot: BuilderSnapshot;
   /** Designs picked before signing in: the File itself is in IndexedDB under the same id. */
   files: Array<{ id: string; name: string }>;
 };
 
-const KEY = "opl.setpet.draft.v1";
+const KEY = "opl.setpet.draft.v2";
 const DB = "opl-setpet";
 const STORE = "files";
 
@@ -32,6 +22,15 @@ export function readDraft(): SetPetDraft | null {
     return raw ? (JSON.parse(raw) as SetPetDraft) : null;
   } catch {
     return null;
+  }
+}
+
+/** Keeps the visitor's choices (not files) as they build, so a reload does not lose them. */
+export function saveDraftChoices(draft: SetPetDraft): void {
+  try {
+    window.sessionStorage.setItem(KEY, JSON.stringify(draft));
+  } catch {
+    // Storage blocked: nothing to keep.
   }
 }
 

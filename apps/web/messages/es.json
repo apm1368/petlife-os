@@ -4561,103 +4561,147 @@
       "hint": "Datos de ejemplo para demos y pruebas. El sitio público nunca los muestra, aunque aquí figuren como verificados o públicos."
     },
     "setPet": {
-      "title": "Solicitudes de Set Pet",
-      "intro": "Conjuntos a juego para un miembro y su mascota. Presupuesta cada solicitud nueva y llévala por producción y envío; cada cambio llega al miembro.",
-      "statusTabs": "Estado de la solicitud",
-      "search": "Número de solicitud o miembro",
-      "searchPlaceholder": "SP-000123 o un nombre",
+      "title": "Set Pet",
+      "intro": "Conjuntos a juego que diseñan los miembros. Envía una prueba de impresión en cada pedido; el miembro paga tras aprobarla; después se imprime y se envía.",
+      "statusTabs": "Estado del pedido",
+      "search": "Buscar",
+      "searchPlaceholder": "SP-000123 o nombre",
       "searchButton": "Buscar",
-      "forbidden": "Se requiere el permiso commerce.view",
-      "loadFailed": "No se pudieron cargar las solicitudes de Set Pet",
+      "forbidden": "Necesitas commerce.view para ver pedidos de Set Pet.",
+      "loadFailed": "No se pudo cargar.",
       "retry": "Reintentar",
       "loading": "Cargando…",
-      "empty": "No hay solicitudes aquí.",
+      "empty": "No hay pedidos.",
+      "notFound": "Pedido no encontrado.",
+      "rowGarments": "{people} para personas, {pets} para mascotas, {zones} zonas de impresión",
+      "submittedOn": "Enviado el {date}",
+      "readyBy": "Listo para el {date}",
       "pages": "Páginas",
       "previous": "Anterior",
       "next": "Siguiente",
-      "rowSizes": "Persona {human} · mascota {pet}",
-      "rowDesigns": "{zones} zonas · {files} archivos",
-      "submittedOn": "Recibida {date}",
-      "readyBy": "lista el {date}",
-      "back": "Todas las solicitudes de Set Pet",
-      "notFound": "Solicitud no encontrada",
-      "actionFailed": "No se pudo completar la acción.",
-      "downloadFailed": "No se pudo abrir el diseño.",
+      "back": "Todos los pedidos de Set Pet",
+      "inMemoryOf": "en recuerdo de {name}",
+      "actionsTitle": "Acciones",
       "garments": "Prendas",
-      "humanGarment": "Camisetas de la persona",
-      "petGarment": "Prenda de la mascota",
-      "humanLine": "{count} × talla {sizes}, color {colour}",
-      "petLine": "Talla {size}, color {colour}",
+      "species": {
+        "DOG": "perro",
+        "CAT": "gato"
+      },
       "memberNotes": "Notas del miembro: {notes}",
-      "placement": "Ubicación de la impresión",
-      "placementHint": "Zonas fijas: brazo derecho e izquierdo, centro delantero y espalda de la persona; en la mascota, solo la espalda.",
+      "placement": "Diseños",
+      "placementHint": "Cada diseño va en todas las prendas de su tipo: zonas de persona en cada prenda de persona y la zona de mascota en cada prenda de mascota.",
       "cm": "{size} cm",
+      "textPrint": "Texto «{text}», {font}, {colour}",
+      "transform": "zoom {zoom}, desplazamiento {x} / {y}",
       "openDesign": "Abrir diseño",
-      "noDesign": "Sin diseño",
       "downloadsAudited": "Los diseños solo se abren como descarga y cada apertura queda registrada con su motivo.",
-      "quote": "Presupuesto",
-      "quoteLine": "{amount} · lista el {date}",
-      "by": "por {name}",
-      "noQuote": "Aún sin presupuesto.",
-      "quoteInvalid": "Indica un precio, una fecha de entrega y una nota para el miembro.",
-      "amountToman": "Precio (tomanes)",
-      "readyByLabel": "Lista el",
-      "quoteNote": "Nota para el miembro",
-      "requote": "Enviar presupuesto revisado",
-      "sendQuote": "Enviar presupuesto",
-      "statusActions": "Producción y envío",
-      "waitingForMember": "Esperando que el miembro confirme el presupuesto.",
-      "cancelledLine": "Cancelada por {by}: {reason}",
+      "priceTitle": "Precio y pago",
+      "discountLine": "Descuento de set {percent} %: −{amount}",
+      "itemsTotal": "Prendas e impresión: {amount}",
+      "paidLine": "Pagado {amount} (envío {shipping}, {method}) el {date}",
+      "refundedLine": "Devuelto al monedero: {amount}",
+      "shipTo": "Enviar a: {address}",
       "shippingLine": "Envío: {note}",
+      "cancelledLine": "Cancelado por {by}: {reason}",
+      "actor": {
+        "MEMBER": "miembro",
+        "STAFF": "equipo"
+      },
       "timeline": "Historial",
+      "edited": "El miembro cambió el pedido",
       "adminNote": "Nota interna",
-      "adminNoteHint": "Solo el personal ve esta nota.",
+      "adminNoteHint": "Solo la ve el equipo.",
       "saveNote": "Guardar nota",
-      "cancelReasonRequired": "Escribe el motivo que leerá el miembro.",
-      "shippingNote": "Transportista y seguimiento",
-      "cancelReason": "Motivo de la cancelación (el miembro lo lee)",
-      "statusNote": "Nota (opcional)",
-      "memberIsNotified": "Se avisa al miembro.",
+      "reasonRequired": "Escribe el motivo que leerá el miembro.",
+      "trackingRequired": "Indica el transportista y el número de seguimiento.",
+      "defectRequired": "Una vez empezada la impresión, solo se cancela por defecto de impresión: marca la casilla para confirmarlo.",
+      "memberIsNotified": "El miembro recibe un aviso en la web y por correo.",
       "confirm": "Confirmar",
-      "downloadReason": "¿Por qué abres este diseño?",
-      "downloadConfirm": "Abrir (queda registrado)",
-      "status": {
-        "SUBMITTED": "Nueva",
-        "QUOTED": "Presupuestada",
-        "CONFIRMED": "Confirmada",
-        "IN_PRODUCTION": "En producción",
-        "SHIPPED": "Enviada",
-        "CANCELLED": "Cancelada"
+      "shippingNote": "Transportista y seguimiento",
+      "cancelReason": "Motivo (lo lee el miembro)",
+      "statusNote": "Nota (opcional, la lee el miembro)",
+      "defectConfirm": "Es un defecto de impresión (reembolso total al monedero del miembro)",
+      "refundNote": "{amount} vuelve al monedero del miembro.",
+      "downloadReason": "¿Por qué lo abres?",
+      "downloadConfirm": "Abrir",
+      "downloadFailed": "No se pudo abrir el diseño.",
+      "actionFailed": "No funcionó.",
+      "proof": {
+        "title": "Prueba de impresión",
+        "send": "Enviar prueba de impresión",
+        "replace": "Enviar una prueba más reciente",
+        "none": "Aún no se ha enviado ninguna prueba.",
+        "alt": "Prueba de impresión ({status})",
+        "status": {
+          "UPLOADING": "Subiendo",
+          "SENT": "Esperando al miembro",
+          "APPROVED": "Aprobada",
+          "SUPERSEDED": "Reemplazada"
+        },
+        "petSize": "Impresión de mascota: {w}×{h} cm",
+        "file": "Imagen de la prueba (JPG, PNG o WebP)",
+        "petWidth": "Ancho impresión mascota (cm)",
+        "petHeight": "Alto impresión mascota (cm)",
+        "note": "Mensaje para el miembro",
+        "type": "La prueba debe ser una imagen JPG, PNG o WebP."
+      },
+      "reject": {
+        "action": "Rechazar un diseño",
+        "reason": "Por qué no se puede imprimir (inadecuado o con derechos de autor); lo lee el miembro",
+        "current": "Diseño rechazado: {reason}"
       },
       "action": {
-        "IN_PRODUCTION": "Iniciar producción",
-        "SHIPPED": "Marcar como enviada",
-        "CANCELLED": "Cancelar solicitud",
-        "CONFIRMED": "Confirmar",
-        "QUOTED": "Presupuesto",
-        "SUBMITTED": "Recibida"
+        "IN_PRODUCTION": "Empezar a imprimir",
+        "SHIPPED": "Marcar como enviado",
+        "CANCELLED": "Cancelar pedido",
+        "defect": "Cancelar por defecto de impresión"
+      },
+      "hint": {
+        "SUBMITTED": "Prepara la prueba de impresión y envíala. Rechaza un diseño si no se puede imprimir.",
+        "NEEDS_NEW_DESIGN": "Esperando un diseño nuevo del miembro.",
+        "PROOF_SENT": "Esperando que el miembro apruebe o cambie el pedido. Puedes enviar una prueba más reciente.",
+        "AWAITING_PAYMENT": "El miembro aprobó la prueba y está pagando.",
+        "PAID": "Pagado: empieza a imprimir cuando la máquina esté libre.",
+        "IN_PRODUCTION": "Cuando esté empaquetado, márcalo como enviado con el seguimiento.",
+        "SHIPPED": "Terminado. Un defecto de impresión aún se puede reembolsar.",
+        "CANCELLED": "Cancelado."
       },
       "zone": {
-        "RIGHT_UPPER_ARM": "Brazo derecho",
-        "LEFT_UPPER_ARM": "Brazo izquierdo",
-        "FRONT_CENTER": "Centro delantero",
+        "RIGHT_UPPER_ARM": "Manga derecha",
+        "LEFT_UPPER_ARM": "Manga izquierda",
+        "FRONT_CENTER": "Delante",
         "BACK": "Espalda",
         "PET_BACK": "Espalda de la mascota"
       },
-      "measure": {
-        "neckCm": "Cuello (cm)",
-        "chestCm": "Pecho (cm)",
-        "backLengthCm": "Largo de espalda (cm)",
-        "weightKg": "Peso (kg)"
+      "status": {
+        "SUBMITTED": "Falta la prueba",
+        "NEEDS_NEW_DESIGN": "Falta diseño nuevo",
+        "PROOF_SENT": "Prueba enviada",
+        "AWAITING_PAYMENT": "Esperando pago",
+        "PAID": "Pagado, por imprimir",
+        "IN_PRODUCTION": "Imprimiendo",
+        "SHIPPED": "Enviado",
+        "CANCELLED": "Cancelado"
       },
-      "actor": {
-        "MEMBER": "Miembro",
-        "STAFF": "Personal"
-      },
-      "fileStatus": {
-        "PENDING_UPLOAD": "Subida sin terminar",
-        "READY": "Listo",
-        "REJECTED": "Rechazado"
+      "prices": {
+        "link": "Tabla de precios",
+        "title": "Precios de Set Pet",
+        "intro": "Precios fijos en tomanes. El precio de una prenda = prenda sin imprimir + cada zona impresa en ella. Los miembros solo pueden enviar pedidos cuando todas las prendas y zonas tienen precio.",
+        "updated": "Guardado el {date}",
+        "garments": "Prendas (cada una)",
+        "zones": "Zonas de impresión (por prenda)",
+        "zonesHint": "Se cobra una vez por cada prenda que lleva la impresión.",
+        "other": "Descuento y plazos",
+        "toman": "{name} (tomanes)",
+        "discount": "Descuento de set en % (persona y mascota juntas)",
+        "days": "Tiempo de producción (días laborables)",
+        "city": "Ciudad del taller (para envío por mensajero)",
+        "cityHint": "Los mensajeros solo entregan en esta ciudad; el correo, en todas partes.",
+        "invalid": "Los precios deben ser números enteros en tomanes.",
+        "saved": "Precios guardados. Se aplican a los pedidos enviados o cambiados a partir de ahora.",
+        "save": "Guardar precios",
+        "forPeople": "Para personas",
+        "forPets": "Para mascotas"
       }
     }
   },
@@ -5644,7 +5688,8 @@
         "active": "No hay pedidos en curso.",
         "delivered": "Aún no hay pedidos entregados.",
         "closed": "No hay pedidos cancelados ni reembolsados."
-      }
+      },
+      "setPetLink": "Mis pedidos de Set Pet"
     },
     "statusLabels": {
       "payment": {
@@ -12696,235 +12741,234 @@
     "landing": {
       "eyebrow": "Novedad en opetlife",
       "title": "Set Pet: ropa a juego para ti y tu mascota",
-      "lede": "Tu camiseta y la prenda de tu mascota con un mismo diseño, y el diseño lo creas tú.",
-      "line1": "Elige el color y la talla de tu camiseta.",
-      "line2": "Sube hasta tres fotos o diseños tuyos y de tu mascota y colócalos en el pecho, la espalda o las mangas de la camiseta y en la espalda de la prenda de tu mascota.",
-      "line3": "Indica el contorno del cuello y del pecho y el largo del lomo de tu mascota para que su prenda le quede perfecta.",
+      "lede": "Tu prenda y la de tu mascota con un mismo diseño, y el diseño lo creas tú.",
+      "line1": "Elige camiseta, hoodie o sudadera, y después el color y la talla.",
+      "line2": "Sube fotos o diseños tuyos y de tu mascota y colócalos en el pecho, la espalda o las mangas de tu prenda y en la espalda de la de tu mascota.",
+      "line3": "Elige la talla de tu mascota con la guía de tallas, y su prenda lleva el mismo diseño.",
       "cta": "Crea tu set con tu mascota",
       "navLabel": "Set Pet",
       "videoLabel": "Vídeo de presentación de Set Pet",
       "play": "Reproducir el vídeo de Set Pet",
       "soundOn": "Activar sonido",
       "soundOff": "Silenciar",
-      "line4": "Nuestro equipo revisa tu diseño y confirma el precio final. Set Pet se hace por encargo; no es un artículo de tienda."
+      "line4": "Ves un rango de precio mientras lo creas. Antes de imprimir te enviamos una prueba de impresión y pagas cuando la apruebes."
     },
     "page": {
-      "eyebrow": "Set Pet",
-      "title": "Set Pet: camisetas a juego para ti y tu mascota",
-      "lede": "Pide una camiseta para ti y otra a juego para tu mascota, del mismo color y con tus propios diseños. Eliges tallas, color y zonas de impresión y ves las dos camisetas juntas; después nuestro equipo lo revisa todo y te envía un precio.",
-      "start": "Empezar a diseñar",
+      "eyebrow": "Nuevo en opetlife",
+      "title": "Set Pet: ropa a juego para ti y tu mascota",
+      "lede": "Diseña un mismo look para ti y tu mascota: camiseta, sudadera con capucha o sudadera para ti; camiseta, sudadera o pañuelo para cada perro o gato; añade tus fotos o un texto y míralo en 3D. Antes de imprimir te enviamos una prueba de impresión.",
+      "start": "Crea tu set",
       "howTitle": "Cómo funciona",
       "how": {
-        "shirts": "Elige cuántas camisetas y la talla de cada una, con la tabla de tallas en cm.",
-        "pet": "Mide a tu mascota (cuello, pecho, largo de espalda y peso); te sugerimos una talla.",
-        "colour": "Elige un color para todo el conjunto.",
-        "zones": "Elige dónde imprimir: mangas, delante, espalda o la espalda de la camiseta de tu mascota.",
-        "designs": "Sube hasta tres diseños y míralos en las dos camisetas.",
-        "review": "Revísalo todo y envía la solicitud. Nuestro equipo responde con un precio y una fecha."
+        "build": {
+          "title": "Crea tu set",
+          "body": "Prendas, tallas, colores y diseños, con un rango de precio al instante."
+        },
+        "proof": {
+          "title": "Recibe la prueba",
+          "body": "Nuestro equipo te envía una prueba exacta de la impresión. Hasta que la apruebes, puedes cambiar lo que quieras."
+        },
+        "pay": {
+          "title": "Aprueba y paga",
+          "body": "Paga el importe completo con tu monedero; recárgalo por transferencia de tarjeta si hace falta."
+        },
+        "make": {
+          "title": "Lo imprimimos",
+          "body": "En el taller propio de opetlife, en unos 5 días laborables."
+        },
+        "ship": {
+          "title": "Envío",
+          "body": "Con los mismos métodos de envío de la tienda."
+        }
       },
-      "factsLabel": "Conviene saber",
+      "factsLabel": "Lo que debes saber",
       "facts": {
         "print": {
           "title": "Qué se imprime",
-          "body": "En tu camiseta: parte alta de la manga derecha o izquierda (10 × 10 cm), centro delantero o espalda (20 × 20 cm). En la camiseta de tu mascota: la espalda. Un diseño por zona y hasta tres diseños en total."
+          "body": "Tus mangas 10×10 cm, delante o detrás 20×20 cm y la espalda de la prenda de tu mascota. Un diseño puede ir en varios sitios; el texto, en tres fuentes."
         },
         "sizing": {
-          "title": "Tallas",
-          "body": "Tallas de la S a la 3XL para ti y para tu mascota. Las tablas son orientativas; nuestro equipo revisa tus tallas y las medidas de tu mascota antes de imprimir."
+          "title": "Tallas de S a 3XL",
+          "body": "Prendas unisex de algodón con tabla en cm y sugerencia según altura y peso. Para mascotas, elige la letra de talla con la guía."
         },
         "timing": {
-          "title": "Plazos",
-          "body": "Tras enviar la solicitud, nuestro equipo te responde con un precio y una fecha estimada. La producción empieza solo cuando aceptas."
+          "title": "Unos 5 días laborables",
+          "body": "Desde el pago. Recibirás avisos en la web y por correo."
         },
         "price": {
-          "title": "Precio y pago",
-          "body": "Es una solicitud de pedido, no una compra. El precio depende de las camisetas y las zonas de impresión, y lo confirma nuestro equipo. Ahora no se cobra nada."
+          "title": "Precios fijos",
+          "body": "Cada prenda más cada zona de impresión, con descuento cuando el set incluye tu prenda y la de tu mascota. Cancelación gratuita hasta que empiece la impresión."
         }
       },
-      "buildTitle": "Diseña tu conjunto",
-      "signIn": {
-        "body": "Puedes empezar ya; solo inicias sesión para enviar la solicitud. Tus diseños son privados: solo los veis tú y nuestro equipo de impresión.",
-        "cta": "Iniciar sesión",
-        "join": "Crear una cuenta"
-      },
-      "mineTitle": "Tus solicitudes de Set Pet",
+      "buildTitle": "Crea tu set",
+      "editTitle": "Cambiar el pedido {reference}",
       "done": {
-        "title": "Solicitud {reference} enviada",
-        "body": "Nuestro equipo revisará tus tallas y diseños y te enviará un precio y una fecha. Lo verás en «Tus solicitudes de Set Pet»; no se cobra nada hasta que aceptes.",
-        "another": "Diseñar otro conjunto"
-      }
+        "title": "Pedido {reference} recibido",
+        "editedTitle": "Pedido {reference} actualizado",
+        "body": "Te enviaremos la prueba de impresión en la web y por correo. No pagas nada hasta aprobarla.",
+        "view": "Ver mi pedido",
+        "another": "Crear otro set"
+      },
+      "signIn": {
+        "body": "Diseña libremente; solo necesitas iniciar sesión al enviar el pedido. Tu set se guarda en este dispositivo.",
+        "cta": "Iniciar sesión",
+        "join": "Crear cuenta"
+      },
+      "mineTitle": "Mis pedidos de Set Pet"
     },
     "builder": {
-      "stepsLabel": "Pasos de Set Pet",
+      "stepsLabel": "Pasos",
       "steps": {
-        "shirts": "Camisetas",
-        "pet": "Camiseta de mascota",
-        "colour": "Color",
-        "zones": "Zonas de impresión",
-        "designs": "Diseños",
+        "garments": "Prendas",
+        "prints": "Diseños",
         "review": "Revisar y enviar"
       },
       "loading": "Cargando…",
-      "comingSoon": "Los pedidos de Set Pet abren muy pronto. Vuelve en un rato.",
-      "loadError": "Ahora mismo no hemos podido cargar Set Pet.",
+      "loadError": "No se pudo cargar el creador.",
       "retry": "Reintentar",
       "back": "Atrás",
       "next": "Siguiente",
-      "size": "Talla",
-      "cm": "cm",
-      "kg": "kg",
-      "range": "{min}–{max}",
-      "approximate": "Tallas orientativas: nuestro equipo confirma cada talla antes de imprimir.",
-      "previewLabel": "Vista previa de las dos camisetas",
-      "previewShirt": "Camiseta en la vista previa",
-      "shirtN": "Camiseta {n}",
-      "previewNote": "Cada diseño se muestra a su tamaño real de impresión. Toca «Ver espalda» para girar la camiseta.",
-      "shirts": {
-        "title": "Tus camisetas",
-        "lede": "¿Cuántas camisetas para las personas del conjunto y qué talla cada una?",
-        "count": "Número de camisetas",
-        "fewer": "Una camiseta menos",
-        "more": "Una camiseta más",
-        "sizeFor": "Talla de la camiseta {n}",
-        "guideTitle": "Cómo se mide la camiseta: A ancho de pecho, B largo",
-        "chartCaption": "Tabla de tallas de camiseta (cm, en plano)",
-        "chest": "A · Ancho de pecho",
-        "length": "B · Largo",
-        "suggest": "¿No estás seguro? Sugerir una talla",
-        "height": "Altura",
-        "weight": "Peso",
+      "previewLabel": "Vista previa",
+      "range": "Rango de precio: de {min} a {max}",
+      "autosave": {
+        "saving": "Guardando tu borrador…",
+        "saved": "Borrador guardado en tu cuenta"
+      },
+      "garments": {
+        "title": "Quién lleva qué",
+        "lede": "Hasta cinco prendas para personas y una para cada perro o gato.",
+        "people": "Para personas",
+        "personN": "Prenda {n}",
+        "addPerson": "Añadir prenda para una persona",
+        "maxPeople": "Hasta {max} prendas para personas.",
+        "pets": "Para mascotas",
+        "petN": "Prenda de mascota {n}",
+        "addPet": "Añadir prenda para una mascota",
+        "remove": "Quitar",
+        "type": "Prenda",
+        "size": "Talla",
+        "colour": "Color",
+        "suggest": "¿Dudas con la talla? Tabla y sugerencia",
+        "height": "Altura (cm)",
+        "weight": "Peso (kg)",
         "suggested": "Talla sugerida: {size}",
-        "use": "Usar {size}",
-        "mismatch": "Te sugeriríamos {size}; tu elección está bien si prefieres otro ajuste."
-      },
-      "pet": {
-        "title": "La camiseta de tu mascota",
-        "lede": "Mide a tu mascota con una cinta métrica blanda, ajustada pero sin apretar. Sugerimos la talla según el pecho.",
-        "which": "¿Para qué mascota es? (opcional)",
-        "noPet": "Sin vincular a una mascota",
-        "guideTitle": "Dónde medir a tu mascota: 1 cuello, 2 pecho, 3 largo de espalda",
-        "guide": {
-          "neck": "Cuello: alrededor de la base del cuello, donde va el collar.",
-          "chest": "Pecho: por la parte más ancha, justo detrás de las patas delanteras.",
-          "back": "Largo de espalda: desde la base del cuello hasta el nacimiento de la cola."
-        },
-        "fields": {
-          "neckCm": "Cuello",
-          "chestCm": "Pecho",
-          "backLengthCm": "Largo de espalda",
-          "weightKg": "Peso"
-        },
-        "size": "Talla de la camiseta de mascota",
-        "suggested": "Sugerida según el pecho: {size}",
-        "chartCaption": "Tabla de tallas para mascota (cm)",
+        "useSize": "Elegir {size}",
+        "humanChart": "Prenda extendida, cm",
+        "chestWidth": "Ancho de pecho",
+        "length": "Largo",
+        "whichPet": "Qué mascota",
+        "otherPet": "Otra mascota (escribe el nombre)",
+        "petName": "Nombre de la mascota",
+        "species": "Perro o gato",
+        "dog": "Perro",
+        "cat": "Gato",
+        "sizeMismatch": "Esta talla no parece encajar con el peso registrado de tu mascota. Aun así puedes elegirla.",
+        "petGuide": "Guía de tallas para mascotas",
+        "petChart": "Guía de prendas para mascotas, cm",
+        "neck": "Cuello",
+        "chest": "Pecho",
+        "back": "Largo de espalda",
+        "sameColour": "Mismo color que mi prenda",
+        "p8": "Un set incluye la prenda de tu mascota. Pedir solo para ti es posible en recuerdo de una mascota perdida o fallecida.",
+        "inMemoryOf": "En recuerdo de",
+        "choose": "Elige",
+        "noMemorial": "Para pedir sin prenda de mascota, la mascota debe figurar como perdida o fallecida en su perfil.",
         "errors": {
-          "fix": "Revisa las medidas de tu mascota.",
-          "required": "Obligatorio",
-          "range": "Entre {min} y {max}"
-        },
-        "mismatch": "La medida del pecho sugiere {size}. Tu elección está bien si lo quieres más holgado o más ajustado."
-      },
-      "colour": {
-        "title": "Color",
-        "lede": "Un color para todo el conjunto; la camiseta de tu mascota va a juego.",
-        "human": "Color de la camiseta",
-        "petDifferent": "Otro color para la camiseta de la mascota",
-        "petColour": "Color de la camiseta de mascota"
-      },
-      "zones": {
-        "title": "Zonas de impresión",
-        "lede": "Marca dónde quieres una impresión. Puedes cambiarlo cuando quieras: la vista previa te sigue.",
-        "area": "{cm} × {cm} cm",
-        "petArea": "Ajustada a la camiseta de tu mascota",
-        "errors": {
-          "none": "Elige al menos una zona de impresión."
+          "human": "Añade al menos una prenda para una persona.",
+          "tooMany": "Hasta {max} prendas para personas.",
+          "petName": "Escribe el nombre de tu mascota o elígela de tu perfil.",
+          "petRequired": "Añade una prenda para tu mascota o elige la mascota que recuerda este set."
         }
       },
-      "designs": {
+      "prints": {
         "title": "Diseños",
-        "lede": "Sube hasta tres diseños y elige cuál va en cada zona."
+        "lede": "Elige una zona y añade un diseño o un texto. Un diseño puede ir en varias zonas.",
+        "size": "{cm}×{cm} cm",
+        "petSize": "Tamaño fijado en la prueba",
+        "empty": "Vacía",
+        "design": "Diseño",
+        "text": "Texto",
+        "textLabel": "Texto (hasta 40 caracteres)",
+        "font": "Fuente",
+        "zoom": "Zoom",
+        "moveX": "Mover a los lados",
+        "moveY": "Mover arriba o abajo",
+        "noBackground": "La imagen se imprime tal cual; no se quita el fondo.",
+        "clear": "Quitar este diseño",
+        "pick": "Elige una zona arriba o en la vista previa.",
+        "errors": {
+          "none": "Añade al menos un diseño.",
+          "design": "El diseño de {zone} no está listo; elige otro o vuelve a intentarlo."
+        }
       },
       "upload": {
-        "choose": "Elegir archivos de diseño",
-        "limits": "Hasta {max} archivos, de hasta {mb} MB cada uno",
-        "formats": "Las fotos (JPG, PNG, WebP) se ven en la vista previa; los archivos de impresión (PDF, SVG, AI, PSD, HEIC) llegan a nuestro equipo sin vista previa.",
-        "status": {
-          "uploading": "Subiendo…",
-          "checking": "Comprobando el archivo…",
-          "ready": "Listo",
-          "local": "Listo; se envía con tu solicitud"
-        },
-        "receivedNoPreview": "Archivo recibido; nuestro equipo lo revisará (sin vista previa)",
-        "remove": "Quitar {name}",
-        "earlier": "Subidas anteriores ({n})",
-        "use": "Usar",
-        "delete": "Eliminar",
-        "untitled": "Diseño sin nombre",
-        "assignTitle": "Qué diseño va en cada zona",
-        "pick": "Elige un diseño",
+        "cta": "Subir un diseño",
+        "hint": "Fotos (JPG, PNG, WebP, HEIC) o archivos de impresión (PDF, SVG, AI, PSD), hasta {mb} MB",
+        "yours": "Tus diseños",
+        "untitled": "Diseño",
+        "uploading": "Subiendo…",
+        "checking": "Comprobando…",
+        "lowRes": "{zone}: esta imagen podría imprimirse borrosa (unos {dpi} ppp). Una imagen más grande sale más nítida.",
         "errors": {
-          "type": "Este tipo de archivo no se admite.",
-          "tooManyFiles": "Tienes demasiadas subidas sin usar. Elimina algunas en «Subidas anteriores» y vuelve a intentarlo.",
-          "notUploaded": "La subida no terminó. Vuelve a intentarlo.",
-          "tooLarge": "El archivo es demasiado grande (hasta {mb} MB).",
-          "mismatch": "El contenido del archivo no coincide con su tipo.",
-          "rejected": "No se puede usar este archivo. Prueba con otro.",
-          "generic": "La subida falló. Vuelve a intentarlo.",
-          "max": "Puedes usar hasta {max} diseños.",
-          "wait": "Espera a que terminen de subirse tus archivos.",
-          "zoneMissing": "Elige un diseño para «{zone}».",
-          "someFailed": "Algunos diseños no se pudieron subir. Revísalos y vuelve a enviar."
-        },
-        "lowRes": "Esta imagen podría imprimirse borrosa en «{zone}» (unos {dpi} ppp; con 150 o más queda nítida)."
+          "type": "Este tipo de archivo no sirve.",
+          "tooManyFiles": "Quita un diseño sin usar antes de subir otro.",
+          "notUploaded": "El archivo no llegó; inténtalo de nuevo.",
+          "tooLarge": "El archivo pesa más de {mb} MB.",
+          "mismatch": "El contenido no coincide con el tipo de archivo.",
+          "rejected": "Este archivo no sirve.",
+          "generic": "La subida falló; inténtalo de nuevo.",
+          "wait": "Espera a que terminen de subirse tus diseños.",
+          "someFailed": "Algunos diseños no se subieron; revísalos e inténtalo de nuevo."
+        }
       },
       "review": {
         "title": "Revisar y enviar",
-        "lede": "Revisa tu conjunto. Nuestro equipo lo confirma todo junto con el precio antes de imprimir nada.",
-        "shirts": "Camisetas",
-        "shirtsValue": "{n} · tallas {sizes}",
-        "pet": "Camiseta de mascota",
-        "petValue": "Talla {size} · {name}",
-        "measurements": "Medidas de la mascota",
-        "measurementsValue": "Cuello {neck} · pecho {chest} · espalda {back} cm · {weight} kg",
-        "colour": "Color",
-        "zones": "Impresiones",
-        "notes": "Notas para nuestro equipo (opcional)",
-        "notesPlaceholder": "Por ejemplo, un texto para imprimir o un detalle de color",
-        "priceNote": "Es una solicitud de pedido: nuestro equipo confirma el precio y la fecha. Ahora no pagas nada.",
-        "send": "Enviar solicitud",
-        "sending": "Enviando…",
-        "errors": {
-          "tooManyOpen": "Ya tienes tres solicitudes abiertas. Espera a que termine una o cancela alguna.",
-          "designUnavailable": "Uno de los diseños ya no está disponible. Vuelve a subirlo.",
-          "validation": "Hay datos que revisar. Repasa los pasos.",
-          "unavailable": "Los pedidos de Set Pet aún no están abiertos. Inténtalo de nuevo pronto.",
-          "generic": "No se pudo enviar la solicitud. Vuelve a intentarlo."
+        "lede": "Revisa tu set y el precio exacto. Ahora no pagas nada.",
+        "item": "{garment}, {size}, {colour}",
+        "line": "{garment} {size} con {zones} diseños",
+        "discount": "Descuento de set ({percent} %)",
+        "total": "Total (envío al pagar)",
+        "pricesSoon": "Los precios se publicarán pronto; ya puedes crear tu set.",
+        "next": {
+          "proof": "Te enviamos una prueba de impresión.",
+          "approve": "La apruebas o cambias tu pedido.",
+          "pay": "Pagas con tu monedero.",
+          "make": "Lo imprimimos en unos {days} días laborables.",
+          "ship": "Se envía con los métodos de envío de la tienda."
         },
-        "signInToSend": "Iniciar sesión y enviar",
-        "signInNote": "Para enviarla, inicias sesión o creas una cuenta. Mientras tanto, tu conjunto se guarda en este dispositivo.",
-        "uploading": "Enviando tus diseños…"
+        "notes": "Notas para nuestro equipo (opcional)",
+        "uploading": "Subiendo diseños…",
+        "sending": "Enviando…",
+        "saveChanges": "Guardar cambios",
+        "send": "Enviar pedido",
+        "signInAndSend": "Iniciar sesión y enviar",
+        "editNote": "Los cambios vuelven a nuestro equipo para una nueva prueba.",
+        "noPaymentYet": "Solo pagas después de aprobar la prueba de impresión.",
+        "errors": {
+          "tooManyOpen": "Tienes varios pedidos en curso; espera a que termine uno o cancela uno.",
+          "prices": "Los precios aún no se han publicado; vuelve a intentarlo pronto.",
+          "designUnavailable": "Falta un diseño o aún no está comprobado.",
+          "notEditable": "Este pedido ya no se puede cambiar.",
+          "validation": "Hay algo que corregir en el set; revisa cada paso.",
+          "generic": "No se pudo enviar el pedido; inténtalo de nuevo."
+        }
       }
     },
     "zones": {
       "RIGHT_UPPER_ARM": {
-        "name": "Manga derecha (arriba)",
-        "hint": "en el brazo derecho de quien la lleva"
+        "name": "Manga derecha"
       },
       "LEFT_UPPER_ARM": {
-        "name": "Manga izquierda (arriba)",
-        "hint": "en el brazo izquierdo de quien la lleva"
+        "name": "Manga izquierda"
       },
       "FRONT_CENTER": {
-        "name": "Centro delantero",
-        "hint": "en el pecho"
+        "name": "Delante"
       },
       "BACK": {
-        "name": "Espalda",
-        "hint": "entre los omóplatos"
+        "name": "Espalda"
       },
       "PET_BACK": {
-        "name": "Espalda de la camiseta de mascota",
-        "hint": "por fuera, sobre el lomo de tu mascota"
+        "name": "Espalda de la mascota"
       }
     },
     "colours": {
@@ -12933,50 +12977,129 @@
       "heather-grey": "Gris jaspeado",
       "navy": "Azul marino",
       "cream": "Crema",
-      "sage": "Verde salvia",
-      "pink": "Rosa suave"
+      "sage": "Salvia"
+    },
+    "garments": {
+      "HUMAN_TEE": "Camiseta",
+      "HUMAN_HOODIE": "Sudadera con capucha",
+      "HUMAN_SWEATSHIRT": "Sudadera",
+      "PET_TEE": "Camiseta/chaleco",
+      "PET_HOODIE": "Sudadera con capucha",
+      "PET_BANDANA": "Pañuelo"
+    },
+    "fonts": {
+      "VAZIRMATN": "Sencilla",
+      "LALEZAR": "Gruesa",
+      "AMIRI": "Clásica"
     },
     "preview": {
-      "human": "Camiseta · {size}",
-      "pet": "Camiseta de mascota · {size}",
-      "showBack": "Ver espalda",
-      "showFront": "Ver delante",
-      "frontCaption": "Delante (la manga derecha de quien la lleva está a la izquierda)",
-      "backCaption": "Espalda",
-      "petCaption": "Vista desde arriba, sobre el lomo de tu mascota",
-      "zoneLabel": "{zone} ({cm} × {cm} cm)",
+      "zoneLabel": "{zone}, {cm}×{cm} cm",
       "designOn": "{name} en {zone}",
-      "fileReceived": "Archivo recibido",
-      "cm": "cm"
+      "cm": "cm",
+      "human": "{garment}, {size}",
+      "pet": "{garment} de mascota, {size}",
+      "showBack": "Ver la espalda",
+      "showFront": "Ver el frente",
+      "frontCaption": "Delante, con las mangas",
+      "backCaption": "Espalda",
+      "petCaption": "Desde arriba: la espalda de tu mascota",
+      "loading3d": "Cargando la vista 3D…",
+      "turn": "Girar",
+      "rulerLabel": "Escala: {cm} cm",
+      "modeLabel": "Vista",
+      "mode3d": "3D",
+      "modeFlat": "Plana con regla",
+      "label3dHuman": "Vista 3D de tu {garment}; arrastra para girarla",
+      "label3dPet": "Vista 3D de la prenda de tu mascota ({garment}); arrastra para girarla",
+      "approxNote": "La vista previa se acerca al tamaño real; la prueba de impresión muestra exactamente cómo saldrá."
     },
-    "requests": {
-      "loading": "Cargando tus solicitudes…",
-      "loadError": "No hemos podido cargar tus solicitudes.",
+    "status": {
+      "SUBMITTED": "Esperando la prueba",
+      "NEEDS_NEW_DESIGN": "Necesita un diseño nuevo",
+      "PROOF_SENT": "Prueba lista para aprobar",
+      "AWAITING_PAYMENT": "Esperando el pago",
+      "PAID": "Pagado, en cola de impresión",
+      "IN_PRODUCTION": "Imprimiendo",
+      "SHIPPED": "Enviado",
+      "CANCELLED": "Cancelado"
+    },
+    "shipping": {
+      "OPETLIFE_COURIER": "Mensajero de opetlife",
+      "SNAPPBOX_APP": "Snappbox",
+      "ALOPEYK_APP": "Alopeyk",
+      "POST_PISHTAZ": "Correo urgente de Irán",
+      "SNAPPBOX": "Snappbox",
+      "ALOPEYK": "Alopeyk",
+      "DEV": "Envío de prueba"
+    },
+    "orders": {
+      "pageTitle": "Mis pedidos de Set Pet",
+      "new": "Crear un set nuevo",
+      "allOrders": "Todos mis pedidos",
+      "loading": "Cargando tus pedidos…",
+      "loadError": "No se pudieron cargar tus pedidos.",
       "retry": "Reintentar",
-      "empty": "Aún no has enviado ninguna solicitud de Set Pet.",
-      "summary": "{n, plural, one {# camiseta} other {# camisetas}} ({sizes}) y una camiseta de mascota ({pet}), {colour}",
-      "sent": "Enviada el {date}",
-      "quote": "Precio: {amount}",
-      "ready": "Lista hacia el {date}",
-      "waiting": "Esperando el precio de nuestro equipo.",
-      "accept": "Aceptar el precio y empezar",
-      "cancel": "Cancelar solicitud",
-      "cancelConfirm": "¿Cancelar esta solicitud?",
-      "cancelYes": "Sí, cancelar",
-      "cancelNo": "Mantenerla",
-      "status": {
-        "SUBMITTED": "Enviada",
-        "QUOTED": "Precio listo",
-        "CONFIRMED": "Aceptada",
-        "IN_PRODUCTION": "En producción",
-        "SHIPPED": "Despachada",
-        "CANCELLED": "Cancelada"
+      "empty": "Aún no tienes pedidos de Set Pet.",
+      "start": "Crea tu set",
+      "item": "{garment} {size} ({colour})",
+      "price": "Precio: {amount}",
+      "discount": "incluye {percent} % de descuento de set",
+      "next": {
+        "SUBMITTED": "Nuestro equipo prepara tu prueba de impresión. Aún puedes cambiar tu pedido.",
+        "NEEDS_NEW_DESIGN": "Un diseño no se puede imprimir: {reason} Cámbialo y vuelve a enviar el pedido.",
+        "PROOF_SENT": "Así se imprimirá tu set. Apruébalo para pagar o cambia tu pedido.",
+        "PAID": "Pagado. Listo hacia el {date}. Puedes cancelar gratis hasta que empiece la impresión.",
+        "IN_PRODUCTION": "Imprimiendo. Listo hacia el {date}.",
+        "SHIPPED": "Enviado. {note}"
       },
+      "proofLoading": "Cargando la prueba…",
+      "proofAlt": "Prueba de impresión de {reference}",
+      "petPrintSize": "Impresión en la espalda de tu mascota: {w}×{h} cm",
+      "approve": "Aprobar la prueba",
+      "requestChange": "Cambiar mi pedido",
+      "edit": "Cambiar mi pedido",
+      "reorder": "Volver a pedir",
+      "cancel": "Cancelar pedido",
+      "confirmCancel": "¿Cancelar este pedido?",
+      "confirmCancelPaid": "¿Cancelar? El importe completo vuelve a tu monedero.",
+      "yesCancel": "Sí, cancelar",
+      "keep": "Mantenerlo",
+      "cancelled": "Cancelado.",
+      "cancelledReason": "Cancelado: {reason}",
+      "refunded": "Se devolvieron {amount} a tu monedero.",
+      "defectHelp": "¿Hay un defecto de impresión?",
+      "support": "Contactar con soporte",
+      "timeline": "Historial",
+      "edited": "Pedido cambiado",
       "errors": {
-        "notCancellable": "Esta solicitud ya no se puede cancelar.",
-        "noQuote": "Todavía no hay un precio que aceptar.",
-        "quoteChanged": "Nuestro equipo ha actualizado el precio. Revisa el nuevo precio antes de aceptar.",
-        "generic": "No ha funcionado. Vuelve a intentarlo."
+        "proofChanged": "Se envió una prueba más reciente; vuelve a mirarla.",
+        "notCancellable": "La impresión ya empezó; si hay un defecto, contacta con soporte.",
+        "generic": "No funcionó; inténtalo de nuevo."
+      },
+      "pay": {
+        "title": "Pago y envío",
+        "loading": "Cargando…",
+        "address": "Enviar a",
+        "noAddress": "Primero añade una dirección de envío.",
+        "addAddress": "Añadir dirección",
+        "shippingLoading": "Buscando métodos de envío…",
+        "shipping": "Envío",
+        "eta": "en {days} días",
+        "noShipping": "Aún no hay método de envío para esta dirección; contacta con soporte.",
+        "items": "Tu set",
+        "delivery": "Envío",
+        "total": "Total",
+        "balance": "Saldo del monedero: {amount}",
+        "topUpNeeded": "Añade {amount} a tu monedero (transferencia de tarjeta o en línea) para pagar.",
+        "topUp": "Recargar monedero",
+        "paying": "Pagando…",
+        "cta": "Pagar {amount} con mi monedero",
+        "ctaPlain": "Pagar con mi monedero",
+        "errors": {
+          "balance": "Tu saldo aún no alcanza.",
+          "changed": "El total cambió; revísalo de nuevo.",
+          "generic": "El pago no se completó; inténtalo de nuevo."
+        }
       }
     }
   }

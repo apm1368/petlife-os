@@ -1,4 +1,4 @@
-import type { AdminSetPetDetailDto, AdminSetPetListDto, SetPetRequestStatus as SetPetStatus } from "@petlife/types";
+import type { AdminSetPetDetailDto, AdminSetPetListDto, AdminSetPetProofUploadTargetDto, AdminSetPetSettingsDto, SetPetRequestStatus as SetPetStatus } from "@petlife/types";
 import { apiFetch } from "@/lib/api/client";
 
 function query(input: Record<string, string | number | undefined>): string {
@@ -8,12 +8,22 @@ function query(input: Record<string, string | number | undefined>): string {
   return text ? `?${text}` : "";
 }
 
-/** Admin «ست پت»: the request queue, one request, and the staff actions on it. */
+/** Admin «ست پت»: the order queue, one order and the staff actions on it, and the fixed price table. */
 export const adminSetPetService = {
   list: (input: { status?: SetPetStatus; q?: string; page?: number } = {}) => apiFetch<AdminSetPetListDto>(`/admin/set-pet/requests${query(input)}`),
   get: (id: string) => apiFetch<AdminSetPetDetailDto>(`/admin/set-pet/requests/${id}`),
-  quote: (id: string, input: { amountIrr: number; estimatedReadyAt: string; note: string }) => apiFetch<AdminSetPetDetailDto>(`/admin/set-pet/requests/${id}/quote`, { method: "POST", body: input }),
-  setStatus: (id: string, input: { to: SetPetStatus; note?: string; shippingNote?: string }) => apiFetch<AdminSetPetDetailDto>(`/admin/set-pet/requests/${id}/status`, { method: "POST", body: input }),
+  /** Print proof: upload target → PUT the image → send (with a note and the pet print size). */
+  proofUploadTarget: (id: string, input: { contentType: string; fileSizeBytes: number }) =>
+    apiFetch<AdminSetPetProofUploadTargetDto>(`/admin/set-pet/requests/${id}/proofs/upload-target`, { method: "POST", body: input }),
+  sendProof: (id: string, proofId: string, input: { note?: string; petPrintWidthCm?: number; petPrintHeightCm?: number }) =>
+    apiFetch<AdminSetPetDetailDto>(`/admin/set-pet/requests/${id}/proofs/${proofId}/send`, { method: "POST", body: input }),
+  proofLink: (id: string, proofId: string) => apiFetch<{ url: string; expiresInSeconds: number }>(`/admin/set-pet/requests/${id}/proofs/${proofId}`),
+  rejectDesign: (id: string, reason: string) => apiFetch<AdminSetPetDetailDto>(`/admin/set-pet/requests/${id}/reject-design`, { method: "POST", body: { reason } }),
+  setStatus: (id: string, input: { to: SetPetStatus; note?: string; shippingNote?: string; printDefect?: boolean }) =>
+    apiFetch<AdminSetPetDetailDto>(`/admin/set-pet/requests/${id}/status`, { method: "POST", body: input }),
   saveNote: (id: string, note: string) => apiFetch<AdminSetPetDetailDto>(`/admin/set-pet/requests/${id}/admin-note`, { method: "PUT", body: { note } }),
-  download: (fileId: string, reason: string) => apiFetch<{ fileId: string; filename: string; downloadUrl: string; expiresInSeconds: number }>(`/admin/set-pet/files/${fileId}/download`, { method: "POST", body: { reason } }),
+  download: (id: string, fileId: string, reason: string) =>
+    apiFetch<{ fileId: string; filename: string; downloadUrl: string; expiresInSeconds: number }>(`/admin/set-pet/requests/${id}/files/${fileId}/download`, { method: "POST", body: { reason } }),
+  settings: () => apiFetch<AdminSetPetSettingsDto>("/admin/set-pet/settings"),
+  saveSettings: (input: Omit<AdminSetPetSettingsDto, "updatedAt">) => apiFetch<AdminSetPetSettingsDto>("/admin/set-pet/settings", { method: "PUT", body: input }),
 };

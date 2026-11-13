@@ -3,39 +3,51 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { WeightUnit, type SetPetCreateRequestInput, type SetPetDesignFileDto, type SetPetOptionsDto, type SetPetRequestDto, type SetPetSize, type SetPetZone } from "@petlife/types";
-import { Check, ChevronLeft, ChevronRight, CircleAlert, FileText, Info, Minus, Plus, Trash2, Upload } from "@petlife/ui";
+import {
+  priceRangeSetPet,
+  priceSetPet,
+  setPetWearerOf,
+  type PetDto,
+  type SetPetDesignFileDto,
+  type SetPetGarment,
+  type SetPetOptionsDto,
+  type SetPetRequestDto,
+  type SetPetSize,
+  type SetPetZone,
+} from "@petlife/types";
+import { Check, ChevronLeft, ChevronRight, CircleAlert, FileText, Info, Plus, Trash2, Upload } from "@petlife/ui";
 import { ApiError } from "@/lib/api/client";
+import { formatCurrency } from "@/lib/currency/format-currency";
 import { formatLocaleNumber } from "@/lib/i18n/format";
 import type { RouteLocale } from "@/lib/i18n/config";
 import { setPetService } from "@/services/set-pet.service";
-import { usePetStore } from "@/stores/pet-store";
-import { GarmentMockups, type PreviewDesign } from "./GarmentMockups";
-import { PetMeasureGuide, ShirtMeasureGuide } from "./MeasureGuides";
+import { householdsService } from "@/services/households.service";
+import type { PrintPreview } from "./GarmentMockups";
+import { FONT_FAMILY } from "./GarmentMockups";
+import { SetPetPreview } from "./SetPetPreview";
+import { BUILDER_STEPS, emptySnapshot, newKey, readSnapshot, toOrderInput, type BuilderSnapshot, type BuilderStep, type ItemState, type PrintState } from "./builder-state";
+import { clearDraft, readDraft, readDraftFiles, saveDraft, saveDraftChoices } from "./draft-store";
 import {
-  ALL_ZONES, COLOURS, DEFAULT_LIMITS, HUMAN_CHART, MEASUREMENT_KEYS, MEASUREMENT_RANGES, MIN_SHARP_DPI, PET_CHART, SIZES, ZONE_CM,
-  checkMeasurement, isRasterPreviewable, parseMeasurement, printDpi, roundMeasurement, sizeLabel, suggestHumanSize, suggestPetSize, zoneSide,
-  type MeasurementKey,
+  ALL_ZONES, COLOURS, HUMAN_CHART, HUMAN_GARMENTS, MIN_SHARP_DPI, PET_CHART, PET_GARMENTS, SIZES, ZONE_CM,
+  isRasterPreviewable, parseNumber, petSizeMismatch, printDpi, sizeLabel, suggestHumanSize,
 } from "./set-pet-catalog";
-import { clearDraft, readDraft, readDraftFiles, saveDraft, type SetPetDraft } from "./draft-store";
-
-const STEPS = ["shirts", "pet", "colour", "zones", "designs", "review"] as const;
-type Step = (typeof STEPS)[number];
 
 type DesignItem = {
   /** The server's file id, or a temporary "local-n" id until the file is uploaded. */
   id: string;
   name: string;
   previewUrl: string | null;
-  /** "local": picked before signing in, kept on the device and uploaded when the request is sent. */
+  /** "local": picked before signing in, kept on the device and uploaded when the order is sent. */
   status: "local" | "uploading" | "checking" | "ready" | "error";
   error?: string;
   file?: File;
-  /** Raster size in pixels, for the print-quality warning. */
+  /** Raster size in pixels, for the print-quality warning (owner P26). */
   px?: { w: number; h: number };
 };
 
 const usable = (d: DesignItem) => d.status === "ready" || d.status === "local";
+const isPet = (g: SetPetGarment) => setPetWearerOf(g) === "PET";
+const MEMORIAL = new Set(["LOST", "DECEASED", "MEMORIAL"]);
 
 /** Pixel size of a raster preview (resolves null when it can't be read). */
 function measureImage(url: string): Promise<{ w: number; h: number } | null> {
@@ -47,78 +59,99 @@ function measureImage(url: string): Promise<{ w: number; h: number } | null> {
   });
 }
 
+/** The member's dogs and cats, including pets that are lost or have died (owner P8, P11, P18). */
+function useDogsAndCats(signedIn: boolean): PetDto[] {
+  const [pets, setPets] = useState<PetDto[]>([]);
+  useEffect(() => {
+    if (!signedIn) return setPets([]);
+    let cancelled = false;
+    void (async () => {
+      try {
+        const households = await householdsService.listMine();
+        const lists = await Promise.all(households.map((h) => householdsService.listPets(h.id)));
+        if (!cancelled) setPets(lists.flat().filter((p) => String(p.species) === "DOG" || String(p.species) === "CAT"));
+      } catch {
+        if (!cancelled) setPets([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [signedIn]);
+  return pets;
+}
+
+const petWeightKg = (p: PetDto | undefined) => (p?.latestWeightValue == null ? null : p.latestWeightUnit === "LB" ? p.latestWeightValue * 0.4536 : p.latestWeightValue);
+
+type Props = {
+  signedIn: boolean;
+  /** Opening the builder on a sent order (owner P39: edit until the proof is approved). */
+  editOrder?: SetPetRequestDto | null;
+  /** A draft the page already has (a one-click reorder, P40). */
+  initial?: BuilderSnapshot | null;
+  onSubmitted: (order: SetPetRequestDto, edited: boolean) => void;
+};
+
 /**
- * «ست پت» builder (owner, 2026-11-13): the member's T-shirts (one size per shirt) → the pet's shirt (measurements,
- * suggested size) → one colour → fixed print zones → designs, one per zone → review and send. From the colour step on,
- * the human and pet shirts are previewed side by side with every design on its zone. Nothing is paid here: staff
- * confirm the price and dates with a quote. Anyone can build (owner, #368 P4); signing in is asked only to send, and
- * the set waits on the device meanwhile (draft-store).
+ * «ست پت» builder (owner's #368 answers): garments for people (tee, hoodie or sweatshirt, up to five) and for pets
+ * (tee/vest, hoodie or bandana; dogs and cats, from the profile or typed by hand) → prints on the fixed zones (designs
+ * or text in three fonts, simple zoom and move) → review with the exact price from the fixed table → send. A price
+ * range shows while building. The preview is a rotatable 3D view (or flat with a cm ruler). Anyone can build;
+ * signing in is asked only to send (P4). Signed-in members' work is auto-saved to their account (P5).
  */
-export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; onSubmitted: (request: SetPetRequestDto) => void }) {
+export function SetPetBuilder({ signedIn, editOrder, initial, onSubmitted }: Props) {
   const t = useTranslations("setPet.builder");
   const tz = useTranslations("setPet.zones");
   const tc = useTranslations("setPet.colours");
+  const tg = useTranslations("setPet.garments");
+  const tf = useTranslations("setPet.fonts");
   const locale = useLocale() as RouteLocale;
-  const pets = usePetStore((s) => s.pets);
-  const activePetId = usePetStore((s) => s.activePetId);
   const router = useRouter();
   const num = (value: number) => formatLocaleNumber(value, locale);
-  // A middle dot next to Persian/Arabic digits reads like a zero (۰): those languages separate with «،».
-  const sep = locale === "fa" || locale === "ar" ? "، " : " · ";
-  const [draft] = useState<SetPetDraft | null>(() => (typeof window === "undefined" ? null : readDraft()));
+  const money = (irr: number) => formatCurrency(irr, locale);
+  const pets = useDogsAndCats(signedIn);
 
   const [options, setOptions] = useState<SetPetOptionsDto | null>(null);
-  const [optionsState, setOptionsState] = useState<"loading" | "ready" | "unavailable" | "error">("loading");
-  const restoredStep = draft && (STEPS as readonly string[]).includes(draft.step) ? (draft.step as Step) : "shirts";
-  const [step, setStep] = useState<Step>(restoredStep);
-  const [reached, setReached] = useState(STEPS.indexOf(restoredStep));
-  const [humanSizes, setHumanSizes] = useState<SetPetSize[]>(draft?.humanSizes?.length ? draft.humanSizes : ["M"]);
-  const [hints, setHints] = useState<Array<{ height: string; weight: string }>>([]);
-  const [petSize, setPetSize] = useState<SetPetSize>(draft?.petSize ?? "M");
-  const [petSizeChosen, setPetSizeChosen] = useState(draft?.petSizeChosen ?? false);
-  const [raw, setRaw] = useState<Record<MeasurementKey, string>>({ neckCm: "", chestCm: "", backLengthCm: "", weightKg: "", ...(draft?.raw ?? {}) });
-  const [petId, setPetId] = useState<string>(draft?.petId ?? "");
-  const [colour, setColour] = useState<string>(draft?.colour ?? "white");
-  /** null = the pet's shirt matches the human colour (owner, #368 P13: same by default, changeable). */
-  const [petColour, setPetColour] = useState<string | null>(draft?.petColour ?? null);
-  const [zones, setZones] = useState<Set<SetPetZone>>(() => new Set<SetPetZone>(draft?.zones?.length ? draft.zones : ["FRONT_CENTER"]));
-  const [placements, setPlacements] = useState<Partial<Record<SetPetZone, string>>>(draft?.placements ?? {});
+  const [optionsState, setOptionsState] = useState<"loading" | "ready" | "error">("loading");
+  const [s, setS] = useState<BuilderSnapshot>(() => {
+    if (editOrder) return readSnapshot({ ...editOrder, step: "garments", prints: undefined }) ?? emptySnapshot();
+    if (initial) return initial;
+    const local = typeof window === "undefined" ? null : readDraft();
+    return (local && readSnapshot(local.snapshot)) || emptySnapshot();
+  });
   const [designs, setDesigns] = useState<DesignItem[]>([]);
-  const [earlier, setEarlier] = useState<SetPetDesignFileDto[]>([]);
-  const [side, setSide] = useState<"front" | "back">("front");
-  const [previewShirt, setPreviewShirt] = useState(0);
-  const [notes, setNotes] = useState(draft?.notes ?? "");
+  const [library, setLibrary] = useState<SetPetDesignFileDto[]>([]);
+  const [zone, setZone] = useState<SetPetZone | null>(null);
+  const [reached, setReached] = useState(BUILDER_STEPS.indexOf(s.step));
   const [stepError, setStepError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState<false | "uploading" | "sending">(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [saved, setSaved] = useState<"idle" | "saving" | "saved">("idle");
+  const [hints, setHints] = useState<Record<string, { height: string; weight: string }>>({});
   const blobUrls = useRef(new Set<string>());
   const seq = useRef(0);
-  const errorRef = useRef<HTMLParagraphElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const stepsRef = useRef<HTMLOListElement>(null);
-  // Uploads finish after the member may have changed zones: read the zones at that moment, not at upload start.
-  const zonesRef = useRef(zones);
-  useEffect(() => {
-    zonesRef.current = zones;
-  }, [zones]);
+  const errorRef = useRef<HTMLParagraphElement>(null);
+  const accountDraftChecked = useRef(!!editOrder || !!initial);
+  const update = useCallback((patch: Partial<BuilderSnapshot> | ((prev: BuilderSnapshot) => Partial<BuilderSnapshot>)) => {
+    setS((prev) => ({ ...prev, ...(typeof patch === "function" ? patch(prev) : patch) }));
+  }, []);
 
-  const limits = {
-    acceptedExtensions: options?.acceptedExtensions ?? DEFAULT_LIMITS.acceptedExtensions,
-    maxFileBytes: options?.maxFileBytes ?? DEFAULT_LIMITS.maxFileBytes,
-    maxDesigns: options?.maxDesigns ?? DEFAULT_LIMITS.maxDesigns,
-  };
-  const maxDesigns = limits.maxDesigns;
-  const maxGarments = Math.min(options?.maxHumanGarments ?? DEFAULT_LIMITS.maxHumanGarments, DEFAULT_LIMITS.maxHumanGarments);
-  const accept = limits.acceptedExtensions.map((ext) => (ext.startsWith(".") ? ext : `.${ext}`)).join(",");
-  const maxMb = num(Math.round(limits.maxFileBytes / 1_048_576));
+  const step = s.step;
+  const humans = s.items.filter((i) => !isPet(i.garment));
+  const petItems = s.items.filter((i) => isPet(i.garment));
+  const limits = options?.limits;
+  const maxHumans = limits?.maxHumanGarments ?? 5;
+  const maxPets = limits?.maxPetGarments ?? 12;
+  const maxMb = num(Math.round((limits?.maxFileBytes ?? 50 * 1024 * 1024) / 1_048_576));
+  const accept = (options?.acceptedExtensions ?? ["jpg", "jpeg", "png", "webp", "heic", "heif", "pdf", "svg", "ai", "psd"]).map((e) => `.${e}`).join(",");
+  const memorialPets = pets.filter((p) => MEMORIAL.has(String(p.lifecycleStatus)));
+  const activePets = pets.filter((p) => String(p.lifecycleStatus) === "ACTIVE");
+
+  // ---------------------------------------------------------------------------------------------- loading
 
   const loadOptions = useCallback(() => {
     const controller = new AbortController();
-    // Options and earlier uploads need a session; visitors build on the published limits until they sign in.
-    if (!signedIn) {
-      setOptionsState("ready");
-      return controller;
-    }
     setOptionsState("loading");
     setPetService
       .options(controller.signal)
@@ -126,16 +159,11 @@ export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; on
         setOptions(value);
         setOptionsState("ready");
       })
-      .catch((error: unknown) => {
-        if (controller.signal.aborted) return;
-        setOptionsState(error instanceof ApiError && error.status === 404 ? "unavailable" : "error");
+      .catch(() => {
+        if (!controller.signal.aborted) setOptionsState("error");
       });
-    setPetService
-      .looseDesigns(controller.signal)
-      .then((files) => setEarlier(files.filter((file) => file.status === "READY")))
-      .catch(() => undefined);
     return controller;
-  }, [signedIn]);
+  }, []);
 
   useEffect(() => {
     const controller = loadOptions();
@@ -147,103 +175,110 @@ export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; on
     };
   }, [loadOptions]);
 
+  const addServerDesign = useCallback(async (file: SetPetDesignFileDto) => {
+    setDesigns((list) => (list.some((d) => d.id === file.id) ? list : [...list, { id: file.id, name: file.originalFilename ?? "", previewUrl: null, status: "ready", px: file.widthPx && file.heightPx ? { w: file.widthPx, h: file.heightPx } : undefined }]));
+    if (!file.previewable) return;
+    const preview = await setPetService.previewDesign(file.id).catch(() => null);
+    // Only a same-origin URL (our API's signed link) is ever drawn.
+    if (preview && (preview.url.startsWith("/") || preview.url.startsWith(window.location.origin))) {
+      setDesigns((list) => list.map((d) => (d.id === file.id ? { ...d, previewUrl: preview.url } : d)));
+    }
+  }, []);
+
+  // The member's checked designs (reusable on any order), and those the current set prints.
+  useEffect(() => {
+    if (!signedIn) return;
+    const controller = new AbortController();
+    setPetService.designs(controller.signal).then((files) => {
+      setLibrary(files);
+      const used = new Set(Object.values(s.prints).flatMap((p) => (p?.kind === "image" ? [p.designId] : [])));
+      files.filter((f) => used.has(f.id)).forEach((f) => void addServerDesign(f));
+    }).catch(() => undefined);
+    return () => controller.abort();
+    // Only on sign-in; later prints add their designs themselves.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signedIn, addServerDesign]);
+
+  // A signed-in member comes back to their account draft (owner P5), unless this device has a newer set.
+  useEffect(() => {
+    if (!signedIn || accountDraftChecked.current) return;
+    accountDraftChecked.current = true;
+    if (readDraft()) return;
+    setPetService.draft().then(({ draft }) => {
+      const restored = draft && readSnapshot(draft.data);
+      if (restored) {
+        setS(restored);
+        setReached(BUILDER_STEPS.indexOf(restored.step));
+      }
+    }).catch(() => undefined);
+  }, [signedIn]);
+
   // Designs picked before signing in come back from this device's IndexedDB.
   useEffect(() => {
-    if (!draft?.files.length) return;
+    const local = readDraft();
+    if (!local?.files.length) return;
     let cancelled = false;
-    void readDraftFiles(draft.files.map((f) => f.id)).then((found) => {
+    void readDraftFiles(local.files.map((f) => f.id)).then((found) => {
       if (cancelled || !found.size) return;
       const items: DesignItem[] = [];
       found.forEach((file, id) => {
-        const name = draft.files.find((f) => f.id === id)?.name ?? file.name;
+        const name = local.files.find((f) => f.id === id)?.name ?? file.name;
         const url = isRasterPreviewable({ name, type: file.type }) ? URL.createObjectURL(file) : null;
         if (url) blobUrls.current.add(url);
         items.push({ id, name, previewUrl: url, status: "local", file });
         seq.current = Math.max(seq.current, Number(id.replace("local-", "")) || 0);
+        if (url) void measureImage(url).then((px) => px && setDesigns((list) => list.map((d) => (d.id === id ? { ...d, px } : d))));
       });
       setDesigns((list) => [...list, ...items]);
     });
     return () => {
       cancelled = true;
     };
-  }, [draft]);
+  }, []);
 
-  // On phones the step bar scrolls sideways: keep the current step in view.
+  // Auto-save (owner P5): to the account when signed in (not while editing a sent order), else to this device.
   useEffect(() => {
-    const bar = stepsRef.current;
-    const current = bar?.querySelector<HTMLElement>('[aria-current="step"]');
-    if (!bar || !current || typeof bar.scrollBy !== "function") return;
-    // Scroll only the bar (never the page), so arriving on /set-pet does not jump to the builder.
-    const b = bar.getBoundingClientRect();
-    const c = current.getBoundingClientRect();
-    bar.scrollBy({ left: c.left + c.width / 2 - (b.left + b.width / 2), behavior: "smooth" });
-  }, [step, optionsState]);
+    if (editOrder) return;
+    const files = designs.filter((d) => d.status === "local").map((d) => ({ id: d.id, name: d.name }));
+    if (!signedIn) {
+      saveDraftChoices({ snapshot: s, files });
+      return;
+    }
+    setSaved("saving");
+    const timer = window.setTimeout(() => {
+      const prints = Object.fromEntries(Object.entries(s.prints).filter(([, p]) => !(p?.kind === "image" && p.designId.startsWith("local-"))));
+      setPetService.saveDraft({ ...s, prints }).then(() => setSaved("saved")).catch(() => setSaved("idle"));
+    }, 1500);
+    return () => window.clearTimeout(timer);
+  }, [s, signedIn, editOrder, designs]);
 
-  // The pet this set is for: the active pet by default (optional; staff see the name).
-  useEffect(() => {
-    if (!petId && activePetId && pets.some((pet) => pet.id === activePetId)) setPetId(activePetId);
-  }, [activePetId, petId, pets]);
+  // ---------------------------------------------------------------------------------------------- garments
 
-  useEffect(() => {
-    const pet = pets.find((p) => p.id === petId);
-    if (pet?.latestWeightValue && pet.latestWeightUnit === WeightUnit.KG && !raw.weightKg) setRaw((r) => ({ ...r, weightKg: String(pet.latestWeightValue) }));
-  }, [petId, pets, raw.weightKg]);
-
-  const measured = useMemo(() => Object.fromEntries(MEASUREMENT_KEYS.map((key) => [key, parseMeasurement(raw[key])])) as Record<MeasurementKey, number | null>, [raw]);
-  const suggested = suggestPetSize(measured.chestCm != null && checkMeasurement("chestCm", measured.chestCm) === "ok" ? measured.chestCm : null);
-
-  // Until the member picks a pet size themselves, follow the chest measurement.
-  useEffect(() => {
-    if (!petSizeChosen && suggested) setPetSize(suggested);
-  }, [petSizeChosen, suggested]);
-
-  const previewDesigns = useMemo(() => new Map<string, PreviewDesign>(designs.filter(usable).map((d) => [d.id, { id: d.id, name: d.name, previewUrl: d.previewUrl }])), [designs]);
-  const readyDesigns = designs.filter(usable);
-  const activeDesigns = designs.filter((d) => d.status !== "error");
-  const usedDesigns = new Set(Object.entries(placements).filter(([zone]) => zones.has(zone as SetPetZone)).map(([, id]) => id));
-
-  // Owner, #368 P26: warn (never block) when a photo has too few pixels for its print area.
-  const lowRes = ALL_ZONES.filter((zone) => zones.has(zone) && ZONE_CM[zone]).flatMap((zone) => {
-    const design = designs.find((d) => d.id === placements[zone]);
-    if (!design?.px) return [];
-    const dpi = printDpi(Math.min(design.px.w, design.px.h), ZONE_CM[zone]!);
-    return dpi < MIN_SHARP_DPI ? [t("upload.lowRes", { zone: tz(`${zone}.name`), dpi: num(dpi) })] : [];
-  });
-
-  function noteSize(id: string, url: string | null) {
-    if (url) void measureImage(url).then((px) => px && setDesigns((list) => list.map((d) => (d.id === id ? { ...d, px } : d))));
-  }
-
-  function updateDesign(id: string, patch: Partial<DesignItem>) {
-    setDesigns((list) => list.map((d) => (d.id === id ? { ...d, ...patch } : d)));
-  }
-
-  /** A new design fills every chosen zone that has none yet, so the preview shows it at once. */
-  function assignToEmptyZones(designId: string) {
-    setPlacements((current) => {
-      const next = { ...current };
-      zonesRef.current.forEach((zone) => {
-        if (!next[zone]) next[zone] = designId;
-      });
-      return next;
+  const firstHumanColour = humans[0]?.colour ?? "white";
+  function setItem(key: string, patch: Partial<ItemState>) {
+    update((prev) => {
+      const items = prev.items.map((i) => (i.key === key ? { ...i, ...patch } : i));
+      // Pet garments that follow the human colour change with the first human garment (owner P13).
+      const lead = items.find((i) => !isPet(i.garment));
+      return { items: items.map((i) => (isPet(i.garment) && i.colourFollowsHuman && lead ? { ...i, colour: lead.colour } : i)) };
     });
   }
-
-  function toggleZone(zone: SetPetZone) {
+  function addItem(wearer: "HUMAN" | "PET") {
     setStepError(null);
-    const on = !zones.has(zone);
-    setZones((current) => {
-      const next = new Set(current);
-      if (on) next.add(zone);
-      else next.delete(zone);
-      return next;
-    });
-    if (!on) return;
-    if (zone !== "PET_BACK") setSide(zoneSide(zone));
-    // With a single design uploaded, a newly ticked zone gets it straight away (the preview moves live).
-    const only = readyDesigns.length === 1 ? readyDesigns[0]?.id : undefined;
-    if (only) setPlacements((p) => (p[zone] ? p : { ...p, [zone]: only }));
+    update((prev) => ({
+      items: [
+        ...prev.items,
+        wearer === "HUMAN"
+          ? { key: newKey(), garment: "HUMAN_TEE" as const, size: "M" as const, colour: firstHumanColour as ItemState["colour"] }
+          : { key: newKey(), garment: "PET_TEE" as const, size: "M" as const, colour: firstHumanColour as ItemState["colour"], petId: null, petName: "", petSpecies: "DOG" as const, colourFollowsHuman: true },
+      ],
+    }));
   }
+  function removeItem(key: string) {
+    update((prev) => ({ items: prev.items.filter((i) => i.key !== key) }));
+  }
+
+  // ---------------------------------------------------------------------------------------------- designs
 
   function uploadErrorText(error: unknown): string {
     if (error instanceof ApiError) {
@@ -260,29 +295,14 @@ export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; on
     return t("upload.errors.generic");
   }
 
-  function pick(file: File) {
-    const extension = file.name.toLowerCase().split(".").pop() ?? "";
-    const allowed = limits.acceptedExtensions.map((ext) => ext.replace(/^\./, "").toLowerCase());
-    const tempId = `local-${++seq.current}`;
-    const fail = (error: string) => setDesigns((list) => [...list, { id: tempId, name: file.name, previewUrl: null, status: "error", error }]);
-    if (!allowed.includes(extension)) return fail(t("upload.errors.type"));
-    if (file.size > limits.maxFileBytes) return fail(t("upload.errors.tooLarge", { mb: maxMb }));
-
-    // Only the member's own JPEG/PNG/WebP is previewed, from a local blob URL, in <img>. Never an SVG or print file.
-    const localUrl = isRasterPreviewable(file) ? URL.createObjectURL(file) : null;
-    if (localUrl) blobUrls.current.add(localUrl);
-    const item: DesignItem = { id: tempId, name: file.name, previewUrl: localUrl, status: "local", file };
-    setDesigns((list) => [...list, item]);
-    noteSize(tempId, localUrl);
-    if (signedIn) void upload(item);
-    else assignToEmptyZones(tempId);
+  function updateDesign(id: string, patch: Partial<DesignItem>) {
+    setDesigns((list) => list.map((d) => (d.id === id ? { ...d, ...patch } : d)));
   }
 
   /** Upload target → PUT → complete. Returns the server id, or null when the file was refused. */
   async function upload(item: DesignItem): Promise<string | null> {
     const file = item.file!;
     const tempId = item.id;
-    const localUrl = item.previewUrl;
     updateDesign(tempId, { status: "uploading", error: undefined });
     let id = tempId;
     try {
@@ -294,10 +314,10 @@ export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; on
       updateDesign(id, { status: "checking" });
       const done = await setPetService.completeDesign(id);
       if (done.status !== "READY") throw new ApiError({ code: "SET_PET_FILE_REJECTED", message: "rejected", requestId: "client", details: { reason: done.rejectReason ?? undefined } }, 422);
-      updateDesign(id, { status: "ready", previewUrl: done.previewable ? localUrl : null, file: undefined });
-      // The design keeps its zones under its new server id.
-      setPlacements((current) => Object.fromEntries(Object.entries(current).map(([zone, d]) => [zone, d === tempId ? id : d])));
-      assignToEmptyZones(id);
+      updateDesign(id, { status: "ready", previewUrl: done.previewable ? item.previewUrl : null, file: undefined });
+      // The print keeps its design under the new server id.
+      update((prev) => ({ prints: Object.fromEntries(Object.entries(prev.prints).map(([z, p]) => [z, p?.kind === "image" && p.designId === tempId ? { ...p, designId: id } : p])) }));
+      setLibrary((list) => (list.some((f) => f.id === done.id) ? list : [done, ...list]));
       return id;
     } catch (error) {
       updateDesign(id, { status: "error", error: uploadErrorText(error) });
@@ -305,72 +325,104 @@ export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; on
     }
   }
 
-  function onFiles(event: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(event.target.files ?? []);
+  function onFiles(event: ChangeEvent<HTMLInputElement>, forZone: SetPetZone) {
+    const file = event.target.files?.[0];
     event.target.value = "";
     setStepError(null);
-    const room = Math.max(0, maxDesigns - activeDesigns.length);
-    files.slice(0, room).forEach((file) => pick(file));
-    if (files.length > room) setStepError(t("upload.errors.max", { max: num(maxDesigns) }));
+    if (!file) return;
+    const extension = file.name.toLowerCase().split(".").pop() ?? "";
+    const tempId = `local-${++seq.current}`;
+    const allowed = (options?.acceptedExtensions ?? ["jpg", "jpeg", "png", "webp", "heic", "heif", "pdf", "svg", "ai", "psd"]) as readonly string[];
+    if (!allowed.includes(extension)) return setStepError(t("upload.errors.type"));
+    if (file.size > (limits?.maxFileBytes ?? 50 * 1024 * 1024)) return setStepError(t("upload.errors.tooLarge", { mb: maxMb }));
+    // Only the member's own JPEG/PNG/WebP is previewed, from a local blob URL, in <img>. Never an SVG or print file.
+    const localUrl = isRasterPreviewable(file) ? URL.createObjectURL(file) : null;
+    if (localUrl) blobUrls.current.add(localUrl);
+    const item: DesignItem = { id: tempId, name: file.name, previewUrl: localUrl, status: "local", file };
+    setDesigns((list) => [...list, item]);
+    if (localUrl) void measureImage(localUrl).then((px) => px && updateDesign(tempId, { px }));
+    setPrint(forZone, { kind: "image", designId: tempId, scale: 1, offsetX: 0, offsetY: 0 });
+    if (signedIn) void upload(item);
   }
 
-  async function removeDesign(item: DesignItem) {
-    setDesigns((list) => list.filter((d) => d.id !== item.id));
-    setPlacements((current) => Object.fromEntries(Object.entries(current).filter(([, id]) => id !== item.id)));
-    if (item.previewUrl?.startsWith("blob:")) {
-      URL.revokeObjectURL(item.previewUrl);
-      blobUrls.current.delete(item.previewUrl);
+  function setPrint(z: SetPetZone, print: PrintState | null) {
+    update((prev) => {
+      const prints = { ...prev.prints };
+      if (print) prints[z] = print;
+      else delete prints[z];
+      return { prints };
+    });
+  }
+
+  function chooseDesign(z: SetPetZone, designId: string) {
+    const file = library.find((f) => f.id === designId);
+    if (file) void addServerDesign(file);
+    setPrint(z, { kind: "image", designId, scale: 1, offsetX: 0, offsetY: 0 });
+  }
+
+  // ---------------------------------------------------------------------------------------------- derived
+
+  const zonesInUse = ALL_ZONES.filter((z) => s.prints[z] && (z !== "PET_BACK" || petItems.length > 0));
+  const designById = useMemo(() => new Map(designs.map((d) => [d.id, d])), [designs]);
+  const previews = useMemo(() => {
+    const out: Partial<Record<SetPetZone, PrintPreview>> = {};
+    for (const z of ALL_ZONES) {
+      const p = s.prints[z];
+      if (!p) continue;
+      if (p.kind === "text") out[z] = { kind: "text", text: p.text, font: p.font, colour: p.colour };
+      else {
+        const d = designById.get(p.designId);
+        out[z] = { kind: "image", name: d?.name || t("upload.untitled"), url: d && usable(d) ? d.previewUrl : null, scale: p.scale, offsetX: p.offsetX, offsetY: p.offsetY };
+      }
     }
-    if (signedIn && !item.id.startsWith("local-") && item.status !== "uploading") await setPetService.removeDesign(item.id).catch(() => undefined);
-  }
+    return out;
+  }, [s.prints, designById, t]);
+  const lowRes = zonesInUse.flatMap((z) => {
+    const p = s.prints[z];
+    const cm = ZONE_CM[z];
+    if (p?.kind !== "image" || !cm) return [];
+    const px = designById.get(p.designId)?.px;
+    if (!px) return [];
+    const dpi = printDpi(Math.min(px.w, px.h) / p.scale, cm);
+    return dpi < MIN_SHARP_DPI ? [t("upload.lowRes", { zone: tz(`${z}.name`), dpi: num(dpi) })] : [];
+  });
+  const priceItems = s.items.map((i) => ({ garment: i.garment }));
+  const range = options ? priceRangeSetPet(options.prices, priceItems, zonesInUse) : null;
+  const exact = options ? priceSetPet(options.prices, priceItems, zonesInUse) : null;
+  const pricesReady = !!options?.pricesReady;
 
-  async function pickEarlier(file: SetPetDesignFileDto) {
-    if (activeDesigns.length >= maxDesigns) return setStepError(t("upload.errors.max", { max: num(maxDesigns) }));
-    setEarlier((list) => list.filter((f) => f.id !== file.id));
-    setDesigns((list) => [...list, { id: file.id, name: file.originalFilename ?? t("upload.untitled"), previewUrl: null, status: "ready" }]);
-    assignToEmptyZones(file.id);
-    if (file.previewable) {
-      const preview = await setPetService.previewDesign(file.id).catch(() => null);
-      if (preview?.url.startsWith("/") || preview?.url.startsWith(window.location.origin)) updateDesign(file.id, { previewUrl: preview.url });
+  // ---------------------------------------------------------------------------------------------- steps
+
+  function validate(target: BuilderStep): string | null {
+    if (target === "garments") {
+      if (!humans.length) return t("garments.errors.human");
+      if (humans.length > maxHumans) return t("garments.errors.tooMany", { max: num(maxHumans) });
+      if (petItems.some((i) => !i.petId && !(i.petName ?? "").trim())) return t("garments.errors.petName");
+      // Owner P8: a set includes the pet; a human-only set is only in memory of a pet that is lost or has died.
+      if (!petItems.length && !s.forPetId) return t("garments.errors.petRequired");
     }
-  }
-
-  async function deleteEarlier(file: SetPetDesignFileDto) {
-    setEarlier((list) => list.filter((f) => f.id !== file.id));
-    await setPetService.removeDesign(file.id).catch(() => undefined);
-  }
-
-  function snapshot(at: Step, files: Map<string, File>): SetPetDraft {
-    return {
-      step: at, humanSizes, petSize, petSizeChosen, raw, petId, colour, petColour, zones: [...zones], notes,
-      placements: Object.fromEntries(Object.entries(placements).filter(([, id]) => id && (files.has(id) || !id.startsWith("local-")))),
-      files: [...files.keys()].map((id) => ({ id, name: designs.find((d) => d.id === id)?.name ?? "" })),
-    };
-  }
-
-  function validate(target: Step): string | null {
-    if (target === "pet") {
-      const bad = MEASUREMENT_KEYS.find((key) => checkMeasurement(key, measured[key]) !== "ok");
-      return bad ? t("pet.errors.fix") : null;
-    }
-    if (target === "zones" && zones.size === 0) return t("zones.errors.none");
-    if (target === "designs") {
+    if (target === "prints") {
+      if (!zonesInUse.length) return t("prints.errors.none");
       if (designs.some((d) => d.status === "uploading" || d.status === "checking")) return t("upload.errors.wait");
-      const missing = ALL_ZONES.filter((zone) => zones.has(zone)).find((zone) => !placements[zone] || !previewDesigns.has(placements[zone]!));
-      if (missing) return t("upload.errors.zoneMissing", { zone: tz(`${missing}.name`) });
-      if (usedDesigns.size > maxDesigns) return t("upload.errors.max", { max: num(maxDesigns) });
+      const broken = zonesInUse.find((z) => {
+        const p = s.prints[z];
+        if (p?.kind !== "image") return false;
+        const d = designById.get(p.designId);
+        return !d || !usable(d);
+      });
+      if (broken) return t("prints.errors.design", { zone: tz(`${broken}.name`) });
     }
     return null;
   }
 
-  function go(target: Step) {
-    const from = STEPS.indexOf(step);
-    const to = STEPS.indexOf(target);
+  function go(target: BuilderStep) {
+    const from = BUILDER_STEPS.indexOf(step);
+    const to = BUILDER_STEPS.indexOf(target);
     if (to > from) {
-      for (const s of STEPS.slice(from, to)) {
-        const error = validate(s);
+      for (const st of BUILDER_STEPS.slice(from, to)) {
+        const error = validate(st);
         if (error) {
-          setStep(s);
+          update({ step: st });
           setStepError(error);
           requestAnimationFrame(() => errorRef.current?.focus());
           return;
@@ -378,71 +430,62 @@ export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; on
       }
     }
     setStepError(null);
-    setStep(target);
+    update({ step: target });
     setReached((r) => Math.max(r, to));
     requestAnimationFrame(() => headingRef.current?.focus());
   }
 
   async function submit() {
-    for (const s of STEPS) {
-      const error = validate(s);
+    for (const st of BUILDER_STEPS) {
+      const error = validate(st);
       if (error) {
-        setStep(s);
+        update({ step: st });
         setStepError(error);
         return;
       }
     }
     if (!signedIn) {
-      // Keep the set on this device, then sign in (the in-page sign-in sheet) and come back to send it.
+      // Keep the set on this device, then sign in and come back to send it (owner P4).
       const files = new Map<string, File>();
       designs.forEach((d) => d.status === "local" && d.file && files.set(d.id, d.file));
-      await saveDraft(snapshot("review", files), files);
+      await saveDraft({ snapshot: { ...s, step: "review" }, files: [...files.keys()].map((id) => ({ id, name: designById.get(id)?.name ?? "" })) }, files);
       router.push(`/${locale}/welcome?returnTo=${encodeURIComponent(`/${locale}/set-pet?resume=1#setpet-builder`)}`);
       return;
     }
     setSubmitError(null);
     const ids = new Map<string, string>();
-    const local = designs.filter((d) => d.status === "local" && usedDesigns.has(d.id));
+    const usedIds = new Set(zonesInUse.flatMap((z) => (s.prints[z]?.kind === "image" ? [(s.prints[z] as { designId: string }).designId] : [])));
+    const local = designs.filter((d) => d.status === "local" && usedIds.has(d.id));
     if (local.length) {
       setSubmitting("uploading");
       for (const item of local) {
         const id = await upload(item);
         if (!id) {
           setSubmitting(false);
-          setStep("designs");
+          update({ step: "prints" });
           setStepError(t("upload.errors.someFailed"));
           return;
         }
         ids.set(item.id, id);
       }
     }
-    const input: SetPetCreateRequestInput = {
-      humanColour: colour,
-      humanSizes,
-      petSize,
-      petColour: petColour ?? colour,
-      petMeasurements: {
-        neckCm: roundMeasurement("neckCm", measured.neckCm ?? 0),
-        chestCm: roundMeasurement("chestCm", measured.chestCm ?? 0),
-        backLengthCm: roundMeasurement("backLengthCm", measured.backLengthCm ?? 0),
-        weightKg: roundMeasurement("weightKg", measured.weightKg ?? 0),
-      },
-      placements: ALL_ZONES.filter((zone) => zones.has(zone)).map((zone) => ({ zone, designFileId: ids.get(placements[zone]!) ?? placements[zone]! })),
-      ...(petId ? { petId } : {}),
-      ...(notes.trim() ? { notes: notes.trim() } : {}),
-    };
     setSubmitting("sending");
     try {
-      const request = await setPetService.create(input);
+      const input = toOrderInput(s, ids);
+      const order = editOrder ? await setPetService.update(editOrder.id, input) : await setPetService.create({ ...input, reorderOfId: s.reorderOfId ?? null });
       void clearDraft();
-      onSubmitted(request);
+      if (!editOrder) void setPetService.deleteDraft().catch(() => undefined);
+      onSubmitted(order, !!editOrder);
     } catch (error) {
       const code = error instanceof ApiError ? error.code : "";
+      const reason = error instanceof ApiError ? (error.details as { reason?: string } | undefined)?.reason : undefined;
       setSubmitError(
         code === "SET_PET_TOO_MANY_OPEN" ? t("review.errors.tooManyOpen")
+        : code === "SET_PET_PRICES_NOT_SET" ? t("review.errors.prices")
         : code === "SET_PET_DESIGN_UNAVAILABLE" ? t("review.errors.designUnavailable")
+        : code === "SET_PET_NOT_EDITABLE" ? t("review.errors.notEditable")
+        : reason === "PET_GARMENT_REQUIRED" ? t("garments.errors.petRequired")
         : code === "VALIDATION_ERROR" ? t("review.errors.validation")
-        : error instanceof ApiError && error.status === 404 ? t("review.errors.unavailable")
         : t("review.errors.generic"),
       );
     } finally {
@@ -451,7 +494,6 @@ export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; on
   }
 
   if (optionsState === "loading") return <p className="setpet-state" role="status">{t("loading")}</p>;
-  if (optionsState === "unavailable") return <p className="setpet-state" role="status">{t("comingSoon")}</p>;
   if (optionsState === "error") {
     return (
       <div className="setpet-state" role="alert">
@@ -461,338 +503,351 @@ export function SetPetBuilder({ signedIn, onSubmitted }: { signedIn: boolean; on
     );
   }
 
-  const index = STEPS.indexOf(step);
-  const showPreview = index >= STEPS.indexOf("colour");
-  const shirtForPreview = humanSizes[Math.min(previewShirt, humanSizes.length - 1)] ?? "M";
-  const fieldError = (key: MeasurementKey) => {
-    const state = checkMeasurement(key, measured[key]);
-    if (state === "ok" || (state === "empty" && !stepError)) return null;
-    const { min, max } = MEASUREMENT_RANGES[key];
-    return state === "empty" ? t("pet.errors.required") : t("pet.errors.range", { min: num(min), max: num(max) });
-  };
+  const index = BUILDER_STEPS.indexOf(step);
+  const previewHuman = humans[0] ?? { garment: "HUMAN_TEE" as const, size: "M" as const, colour: "white" as const };
+  const previewPet = petItems[0] ?? null;
+  const selected = zone && (zone !== "PET_BACK" || petItems.length) ? zone : null;
+  const current = selected ? s.prints[selected] : undefined;
+
+  const sizeSeg = (name: string, value: SetPetSize, onChange: (v: SetPetSize) => void) => (
+    <div className="setpet-seg" role="radiogroup" aria-label={t("garments.size")}>
+      {SIZES.map((sz) => (
+        <label key={sz} className={sz === value ? "is-on" : undefined}>
+          <input type="radio" name={name} value={sz} checked={sz === value} onChange={() => onChange(sz)} />
+          <span dir="ltr">{sizeLabel(sz)}</span>
+        </label>
+      ))}
+    </div>
+  );
+  const colourSeg = (name: string, value: string, onChange: (v: ItemState["colour"]) => void) => (
+    <div className="setpet-swatches" role="radiogroup" aria-label={t("garments.colour")}>
+      {COLOURS.map((c) => (
+        <label key={c.id} className={c.id === value ? "is-on" : undefined} title={tc(c.id)}>
+          <input type="radio" name={name} value={c.id} checked={c.id === value} onChange={() => onChange(c.id as ItemState["colour"])} />
+          <span className="setpet-swatch" style={{ background: c.hex }} aria-hidden="true" />
+          <span className="sr-only">{tc(c.id)}</span>
+        </label>
+      ))}
+    </div>
+  );
+  const garmentSeg = (name: string, list: readonly SetPetGarment[], value: SetPetGarment, onChange: (g: SetPetGarment) => void) => (
+    <div className="setpet-seg setpet-seg--wide" role="radiogroup" aria-label={t("garments.type")}>
+      {list.map((g) => (
+        <label key={g} className={g === value ? "is-on" : undefined}>
+          <input type="radio" name={name} value={g} checked={g === value} onChange={() => onChange(g)} />
+          <span>{tg(g)}</span>
+        </label>
+      ))}
+    </div>
+  );
 
   return (
     <div className="setpet-builder">
-      <ol ref={stepsRef} className="setpet-steps" aria-label={t("stepsLabel")}>
-        {STEPS.map((s, i) => (
-          <li key={s} className={s === step ? "is-current" : i < index ? "is-done" : undefined}>
-            <button type="button" onClick={() => go(s)} disabled={i > reached && i > index} aria-current={s === step ? "step" : undefined}>
+      <ol className="setpet-steps" aria-label={t("stepsLabel")}>
+        {BUILDER_STEPS.map((st, i) => (
+          <li key={st} className={st === step ? "is-current" : i < index ? "is-done" : undefined}>
+            <button type="button" onClick={() => go(st)} disabled={i > reached && i > index} aria-current={st === step ? "step" : undefined}>
               <span className="setpet-steps__n" aria-hidden="true">{i < index ? <Check size={14} /> : num(i + 1)}</span>
-              <span>{t(`steps.${s}`)}</span>
+              <span>{t(`steps.${st}`)}</span>
             </button>
           </li>
         ))}
       </ol>
 
-      <div className={`setpet-stage${showPreview ? " has-preview" : ""}`}>
+      <div className="setpet-stage has-preview">
         <section className="setpet-panel" aria-labelledby="setpet-step-title">
           <h2 id="setpet-step-title" ref={headingRef} tabIndex={-1}>{t(`${step}.title`)}</h2>
           <p className="setpet-panel__lede">{t(`${step}.lede`)}</p>
 
-          {step === "shirts" ? (
+          {step === "garments" ? (
             <>
-              <div className="setpet-count">
-                <span id="setpet-count-label">{t("shirts.count")}</span>
-                <div className="setpet-count__ctl" role="group" aria-labelledby="setpet-count-label">
-                  <button type="button" className="opl-iconbtn" aria-label={t("shirts.fewer")} disabled={humanSizes.length <= 1} onClick={() => { setHumanSizes((s) => s.slice(0, -1)); setPreviewShirt(0); }}><Minus size={18} aria-hidden="true" /></button>
-                  <output aria-live="polite">{num(humanSizes.length)}</output>
-                  <button type="button" className="opl-iconbtn" aria-label={t("shirts.more")} disabled={humanSizes.length >= maxGarments} onClick={() => setHumanSizes((s) => [...s, s[s.length - 1] ?? "M"])}><Plus size={18} aria-hidden="true" /></button>
-                </div>
-              </div>
-              {humanSizes.map((size, i) => {
-                const hint = hints[i] ?? { height: "", weight: "" };
-                const tip = suggestHumanSize(parseMeasurement(hint.height), parseMeasurement(hint.weight));
-                const setHint = (patch: Partial<typeof hint>) => setHints((list) => { const next = [...list]; next[i] = { ...hint, ...patch }; return next; });
-                const choose = (s: SetPetSize) => setHumanSizes((list) => list.map((v, j) => (j === i ? s : v)));
+              <h3 className="setpet-sub">{t("garments.people")}</h3>
+              {humans.map((item, i) => {
+                const hint = hints[item.key] ?? { height: "", weight: "" };
+                const tip = suggestHumanSize(parseNumber(hint.height), parseNumber(hint.weight));
                 return (
-                  <fieldset key={i} className="setpet-sizes">
-                    <legend>{t("shirts.sizeFor", { n: num(i + 1) })}</legend>
-                    <div className="setpet-seg">
-                      {SIZES.map((s) => (
-                        <label key={s} className={s === size ? "is-on" : undefined}>
-                          <input type="radio" name={`setpet-human-${i}`} value={s} checked={s === size} onChange={() => choose(s)} />
-                          <span dir="ltr">{sizeLabel(s)}</span>
-                        </label>
-                      ))}
-                    </div>
+                  <fieldset key={item.key} className="setpet-item">
+                    <legend>{t("garments.personN", { n: num(i + 1) })}</legend>
+                    {garmentSeg(`g-${item.key}`, HUMAN_GARMENTS, item.garment, (g) => setItem(item.key, { garment: g }))}
+                    {sizeSeg(`s-${item.key}`, item.size, (v) => setItem(item.key, { size: v }))}
+                    {colourSeg(`c-${item.key}`, item.colour, (v) => setItem(item.key, { colour: v }))}
                     <details className="setpet-hint">
-                      <summary>{t("shirts.suggest")}</summary>
+                      <summary>{t("garments.suggest")}</summary>
                       <div className="setpet-hint__fields">
-                        <label className="setpet-field">
-                          <span>{t("shirts.height")}<span className="sr-only"> ({t("cm")})</span></span>
-                          <input inputMode="numeric" autoComplete="off" value={hint.height} onChange={(e) => setHint({ height: e.target.value })} />
-                        </label>
-                        <label className="setpet-field">
-                          <span>{t("shirts.weight")}<span className="sr-only"> ({t("kg")})</span></span>
-                          <input inputMode="decimal" autoComplete="off" value={hint.weight} onChange={(e) => setHint({ weight: e.target.value })} />
-                        </label>
+                        <label>{t("garments.height")}<input inputMode="decimal" value={hint.height} onChange={(e) => setHints((h) => ({ ...h, [item.key]: { ...hint, height: e.target.value } }))} /></label>
+                        <label>{t("garments.weight")}<input inputMode="decimal" value={hint.weight} onChange={(e) => setHints((h) => ({ ...h, [item.key]: { ...hint, weight: e.target.value } }))} /></label>
                       </div>
                       {tip ? (
-                        <p className="setpet-suggest" role="status">
-                          {t("shirts.suggested", { size: sizeLabel(tip) })}
-                          {tip !== size ? <button type="button" className="opl-btn soft sm" onClick={() => choose(tip)}>{t("shirts.use", { size: sizeLabel(tip) })}</button> : null}
+                        <p className="setpet-hint__tip">
+                          {t("garments.suggested", { size: sizeLabel(tip) })}{" "}
+                          {tip !== item.size ? <button type="button" className="opl-btn line sm" onClick={() => setItem(item.key, { size: tip })}>{t("garments.useSize", { size: sizeLabel(tip) })}</button> : null}
                         </p>
                       ) : null}
+                      <table className="setpet-chart">
+                        <caption>{t("garments.humanChart")}</caption>
+                        <thead><tr><th scope="col">{t("garments.size")}</th><th scope="col">{t("garments.chestWidth")}</th><th scope="col">{t("garments.length")}</th></tr></thead>
+                        <tbody>
+                          {SIZES.map((sz) => (
+                            <tr key={sz}><th scope="row" dir="ltr">{sizeLabel(sz)}</th><td>{num(HUMAN_CHART[sz].chestWidthCm)}</td><td>{num(HUMAN_CHART[sz].lengthCm)}</td></tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </details>
-                    {tip && tip !== size ? <p className="setpet-note">{t("shirts.mismatch", { size: sizeLabel(tip) })}</p> : null}
+                    {humans.length > 1 ? <button type="button" className="setpet-remove" onClick={() => removeItem(item.key)}><Trash2 size={16} aria-hidden="true" />{t("garments.remove")}</button> : null}
                   </fieldset>
                 );
               })}
-              <div className="setpet-chart">
-                <ShirtMeasureGuide title={t("shirts.guideTitle")} />
-                <table>
-                  <caption>{t("shirts.chartCaption")}</caption>
-                  <thead><tr><th scope="col">{t("size")}</th><th scope="col">{t("shirts.chest")}</th><th scope="col">{t("shirts.length")}</th></tr></thead>
-                  <tbody>
-                    {SIZES.map((s) => (
-                      <tr key={s} className={humanSizes.includes(s) ? "is-on" : undefined}>
-                        <th scope="row" dir="ltr">{sizeLabel(s)}</th>
-                        <td>{num(HUMAN_CHART[s].chestWidthCm)}</td>
-                        <td>{num(HUMAN_CHART[s].lengthCm)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <p className="setpet-note"><Info size={16} aria-hidden="true" />{t("approximate")}</p>
+              <button type="button" className="opl-btn soft sm" disabled={humans.length >= maxHumans} onClick={() => addItem("HUMAN")}><Plus size={16} aria-hidden="true" />{t("garments.addPerson")}</button>
+              {humans.length >= maxHumans ? <p className="setpet-note">{t("garments.maxPeople", { max: num(maxHumans) })}</p> : null}
+
+              <h3 className="setpet-sub">{t("garments.pets")}</h3>
+              {petItems.map((item, i) => {
+                const profilePet = pets.find((p) => p.id === item.petId);
+                const mismatch = petSizeMismatch(item.size, petWeightKg(profilePet));
+                return (
+                  <fieldset key={item.key} className="setpet-item">
+                    <legend>{t("garments.petN", { n: num(i + 1) })}</legend>
+                    <label className="setpet-field">
+                      <span>{t("garments.whichPet")}</span>
+                      <select value={item.petId ?? ""} onChange={(e) => setItem(item.key, { petId: e.target.value || null })}>
+                        <option value="">{t("garments.otherPet")}</option>
+                        {activePets.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                      </select>
+                    </label>
+                    {item.petId ? null : (
+                      <div className="setpet-hint__fields">
+                        <label>{t("garments.petName")}<input value={item.petName ?? ""} maxLength={40} onChange={(e) => setItem(item.key, { petName: e.target.value })} /></label>
+                        <div className="setpet-seg" role="radiogroup" aria-label={t("garments.species")}>
+                          {(["DOG", "CAT"] as const).map((sp) => (
+                            <label key={sp} className={item.petSpecies === sp ? "is-on" : undefined}>
+                              <input type="radio" name={`sp-${item.key}`} checked={item.petSpecies === sp} onChange={() => setItem(item.key, { petSpecies: sp })} />
+                              <span>{t(`garments.${sp === "DOG" ? "dog" : "cat"}`)}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {garmentSeg(`g-${item.key}`, PET_GARMENTS, item.garment, (g) => setItem(item.key, { garment: g }))}
+                    {sizeSeg(`s-${item.key}`, item.size, (v) => setItem(item.key, { size: v }))}
+                    {mismatch ? <p className="setpet-warn"><CircleAlert size={16} aria-hidden="true" />{t("garments.sizeMismatch")}</p> : null}
+                    <details className="setpet-hint">
+                      <summary>{t("garments.petGuide")}</summary>
+                      <table className="setpet-chart">
+                        <caption>{t("garments.petChart")}</caption>
+                        <thead><tr><th scope="col">{t("garments.size")}</th><th scope="col">{t("garments.neck")}</th><th scope="col">{t("garments.chest")}</th><th scope="col">{t("garments.back")}</th></tr></thead>
+                        <tbody>
+                          {SIZES.map((sz) => (
+                            <tr key={sz}>
+                              <th scope="row" dir="ltr">{sizeLabel(sz)}</th>
+                              <td>{num(PET_CHART[sz].neckCm[0])}–{num(PET_CHART[sz].neckCm[1])}</td>
+                              <td>{num(PET_CHART[sz].chestCm[0])}–{num(PET_CHART[sz].chestCm[1])}</td>
+                              <td>{num(PET_CHART[sz].backLengthCm[0])}–{num(PET_CHART[sz].backLengthCm[1])}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </details>
+                    <label className="setpet-check">
+                      <input type="checkbox" checked={!!item.colourFollowsHuman} onChange={(e) => setItem(item.key, { colourFollowsHuman: e.target.checked, ...(e.target.checked ? { colour: firstHumanColour as ItemState["colour"] } : {}) })} />
+                      {t("garments.sameColour")}
+                    </label>
+                    {item.colourFollowsHuman ? null : colourSeg(`c-${item.key}`, item.colour, (v) => setItem(item.key, { colour: v }))}
+                    <button type="button" className="setpet-remove" onClick={() => removeItem(item.key)}><Trash2 size={16} aria-hidden="true" />{t("garments.remove")}</button>
+                  </fieldset>
+                );
+              })}
+              <button type="button" className="opl-btn soft sm" disabled={petItems.length >= maxPets} onClick={() => addItem("PET")}><Plus size={16} aria-hidden="true" />{t("garments.addPet")}</button>
+
+              {petItems.length ? null : (
+                <div className="setpet-memorial">
+                  <p><Info size={16} aria-hidden="true" />{t("garments.p8")}</p>
+                  {memorialPets.length ? (
+                    <label className="setpet-field">
+                      <span>{t("garments.inMemoryOf")}</span>
+                      <select value={s.forPetId ?? ""} onChange={(e) => update({ forPetId: e.target.value || null })}>
+                        <option value="">{t("garments.choose")}</option>
+                        {memorialPets.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                      </select>
+                    </label>
+                  ) : (
+                    <p className="setpet-note">{t("garments.noMemorial")}</p>
+                  )}
+                </div>
+              )}
             </>
           ) : null}
 
-          {step === "pet" ? (
+          {step === "prints" ? (
             <>
-              {pets.length ? (
-                <label className="setpet-field">
-                  <span>{t("pet.which")}</span>
-                  <select value={petId} onChange={(e) => setPetId(e.target.value)}>
-                    <option value="">{t("pet.noPet")}</option>
-                    {pets.map((pet) => <option key={pet.id} value={pet.id}>{pet.name}</option>)}
-                  </select>
-                </label>
-              ) : null}
-              <div className="setpet-chart setpet-chart--pet">
-                <PetMeasureGuide title={t("pet.guideTitle")} />
-                <ol className="setpet-guide-steps">
-                  <li>{t("pet.guide.neck")}</li>
-                  <li>{t("pet.guide.chest")}</li>
-                  <li>{t("pet.guide.back")}</li>
-                </ol>
-              </div>
-              <div className="setpet-measures">
-                {MEASUREMENT_KEYS.map((key, i) => {
-                  const error = fieldError(key);
-                  const id = `setpet-m-${key}`;
-                  const unit = key === "weightKg" ? t("kg") : t("cm");
+              <div className="setpet-zonelist" role="list">
+                {ALL_ZONES.filter((z) => z !== "PET_BACK" || petItems.length).map((z) => {
+                  const p = s.prints[z];
+                  const cm = ZONE_CM[z];
                   return (
-                    <div key={key} className="setpet-field">
-                      <label htmlFor={id}>
-                        {key === "weightKg" ? t("pet.fields.weightKg") : `${num(i + 1)}. ${t(`pet.fields.${key}`)}`}
-                        <span className="sr-only"> ({unit})</span>
-                      </label>
-                      <span className="setpet-field__unit">
-                        <input id={id} inputMode="decimal" autoComplete="off" value={raw[key]} aria-invalid={error ? true : undefined} aria-describedby={error ? `${id}-error` : undefined}
-                          onChange={(e) => { setStepError(null); setRaw((r) => ({ ...r, [key]: e.target.value })); }} />
-                        <small aria-hidden="true">{unit}</small>
-                      </span>
-                      {error ? <small id={`${id}-error`} className="setpet-field__error">{error}</small> : null}
-                    </div>
+                    <button key={z} type="button" role="listitem" className={`setpet-zonecard${selected === z ? " is-selected" : ""}${p ? " is-on" : ""}`} aria-pressed={selected === z} onClick={() => setZone(z)}>
+                      <strong>{tz(`${z}.name`)}</strong>
+                      <span>{cm ? t("prints.size", { cm: num(cm) }) : t("prints.petSize")}</span>
+                      <small>{p ? (p.kind === "text" ? `«${p.text}»` : designById.get(p.designId)?.name || t("upload.untitled")) : t("prints.empty")}</small>
+                    </button>
                   );
                 })}
               </div>
-              <fieldset className="setpet-sizes">
-                <legend>{t("pet.size")}</legend>
-                {suggested ? <p className="setpet-suggest" role="status">{t("pet.suggested", { size: sizeLabel(suggested) })}</p> : null}
-                <div className="setpet-seg">
-                  {SIZES.map((s) => (
-                    <label key={s} className={s === petSize ? "is-on" : undefined}>
-                      <input type="radio" name="setpet-pet-size" value={s} checked={s === petSize} onChange={() => { setPetSize(s); setPetSizeChosen(true); }} />
-                      <span dir="ltr">{sizeLabel(s)}</span>
-                    </label>
-                  ))}
+
+              {selected ? (
+                <div className="setpet-editor" aria-label={tz(`${selected}.name`)}>
+                  <div className="setpet-tabs" role="tablist">
+                    <button type="button" role="tab" aria-selected={current?.kind !== "text"} onClick={() => (current?.kind === "text" ? setPrint(selected, null) : undefined)}>{t("prints.design")}</button>
+                    <button type="button" role="tab" aria-selected={current?.kind === "text"} onClick={() => setPrint(selected, { kind: "text", text: current?.kind === "text" ? current.text : "", font: "VAZIRMATN", colour: "black" })}>{t("prints.text")}</button>
+                  </div>
+                  {current?.kind === "text" ? (
+                    <>
+                      <label className="setpet-field">
+                        <span>{t("prints.textLabel")}</span>
+                        <input value={current.text} maxLength={40} onChange={(e) => setPrint(selected, { ...current, text: e.target.value })} />
+                      </label>
+                      <div className="setpet-seg setpet-seg--wide" role="radiogroup" aria-label={t("prints.font")}>
+                        {(options?.fonts ?? ["VAZIRMATN", "LALEZAR", "AMIRI"]).map((f) => (
+                          <label key={f} className={current.font === f ? "is-on" : undefined}>
+                            <input type="radio" name={`font-${selected}`} checked={current.font === f} onChange={() => setPrint(selected, { ...current, font: f })} />
+                            <span style={{ fontFamily: FONT_FAMILY[f] }}>{tf(f)}</span>
+                          </label>
+                        ))}
+                      </div>
+                      {colourSeg(`tc-${selected}`, current.colour, (v) => setPrint(selected, { ...current, colour: v }))}
+                    </>
+                  ) : (
+                    <>
+                      <label className="setpet-upload">
+                        <Upload size={18} aria-hidden="true" />
+                        <span>{t("upload.cta")}</span>
+                        <small>{t("upload.hint", { mb: maxMb })}</small>
+                        <input type="file" accept={accept} onChange={(e) => onFiles(e, selected)} />
+                      </label>
+                      {(() => {
+                        const choices = [...designs.filter((d) => d.status !== "error"), ...library.filter((f) => !designById.has(f.id)).map((f) => ({ id: f.id, name: f.originalFilename ?? "", previewUrl: null, status: "ready" as const }))];
+                        return choices.length ? (
+                          <div className="setpet-library" role="radiogroup" aria-label={t("upload.yours")}>
+                            {choices.map((d) => (
+                              <label key={d.id} className={current?.kind === "image" && current.designId === d.id ? "is-on" : undefined}>
+                                <input type="radio" name={`lib-${selected}`} checked={current?.kind === "image" && current.designId === d.id} onChange={() => chooseDesign(selected, d.id)} />
+                                {d.previewUrl ? (
+                                  // eslint-disable-next-line @next/next/no-img-element -- a local blob or short-lived same-origin URL of a raster file
+                                  <img src={d.previewUrl} alt="" />
+                                ) : (
+                                  <FileText size={22} aria-hidden="true" />
+                                )}
+                                <span>{d.name || t("upload.untitled")}</span>
+                                {d.status === "uploading" || d.status === "checking" ? <small>{t(`upload.${d.status}`)}</small> : null}
+                              </label>
+                            ))}
+                          </div>
+                        ) : null;
+                      })()}
+                      {designs.filter((d) => d.status === "error").map((d) => (
+                        <p key={d.id} className="setpet-warn"><CircleAlert size={16} aria-hidden="true" />{d.name}: {d.error}</p>
+                      ))}
+                      {current?.kind === "image" ? (
+                        <div className="setpet-crop">
+                          <label>{t("prints.zoom")}<input type="range" min={1} max={4} step={0.05} value={current.scale} onChange={(e) => setPrint(selected, { ...current, scale: Number(e.target.value) })} /></label>
+                          <label>{t("prints.moveX")}<input type="range" min={-1} max={1} step={0.02} value={current.offsetX} disabled={current.scale <= 1} onChange={(e) => setPrint(selected, { ...current, offsetX: Number(e.target.value) })} /></label>
+                          <label>{t("prints.moveY")}<input type="range" min={-1} max={1} step={0.02} value={current.offsetY} disabled={current.scale <= 1} onChange={(e) => setPrint(selected, { ...current, offsetY: Number(e.target.value) })} /></label>
+                          <p className="setpet-note">{t("prints.noBackground")}</p>
+                        </div>
+                      ) : null}
+                    </>
+                  )}
+                  {current ? <button type="button" className="setpet-remove" onClick={() => setPrint(selected, null)}><Trash2 size={16} aria-hidden="true" />{t("prints.clear")}</button> : null}
                 </div>
-                {suggested && suggested !== petSize ? <p className="setpet-note">{t("pet.mismatch", { size: sizeLabel(suggested) })}</p> : null}
-              </fieldset>
-              <table className="setpet-table">
-                <caption>{t("pet.chartCaption")}</caption>
-                <thead><tr><th scope="col">{t("size")}</th><th scope="col">{t("pet.fields.neckCm")}</th><th scope="col">{t("pet.fields.chestCm")}</th><th scope="col">{t("pet.fields.backLengthCm")}</th></tr></thead>
-                <tbody>
-                  {SIZES.map((s) => (
-                    <tr key={s} className={s === petSize ? "is-on" : undefined}>
-                      <th scope="row" dir="ltr">{sizeLabel(s)}</th>
-                      {(["neckCm", "chestCm", "backLengthCm"] as const).map((key) => <td key={key}>{t("range", { min: num(PET_CHART[s][key][0]), max: num(PET_CHART[s][key][1]) })}</td>)}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <p className="setpet-note"><Info size={16} aria-hidden="true" />{t("approximate")}</p>
-            </>
-          ) : null}
-
-          {step === "colour" ? (
-            <>
-              <fieldset className="setpet-colours">
-                <legend className={petColour ? undefined : "sr-only"}>{petColour ? t("colour.human") : t("colour.title")}</legend>
-                {COLOURS.map((c) => (
-                  <label key={c.id} className={c.id === colour ? "is-on" : undefined}>
-                    <input type="radio" name="setpet-colour" value={c.id} checked={c.id === colour} onChange={() => setColour(c.id)} />
-                    <span className="setpet-swatch" style={{ background: c.hex }} aria-hidden="true" />
-                    <span>{tc(c.id)}</span>
-                  </label>
-                ))}
-              </fieldset>
-              <label className="setpet-check">
-                <input type="checkbox" checked={petColour !== null} onChange={(e) => setPetColour(e.target.checked ? colour : null)} />
-                <span>{t("colour.petDifferent")}</span>
-              </label>
-              {petColour ? (
-                <fieldset className="setpet-colours">
-                  <legend>{t("colour.petColour")}</legend>
-                  {COLOURS.map((c) => (
-                    <label key={c.id} className={c.id === petColour ? "is-on" : undefined}>
-                      <input type="radio" name="setpet-pet-colour" value={c.id} checked={c.id === petColour} onChange={() => setPetColour(c.id)} />
-                      <span className="setpet-swatch" style={{ background: c.hex }} aria-hidden="true" />
-                      <span>{tc(c.id)}</span>
-                    </label>
-                  ))}
-                </fieldset>
-              ) : null}
-            </>
-          ) : null}
-
-          {step === "zones" ? (
-            <fieldset className="setpet-zones">
-              <legend className="sr-only">{t("zones.title")}</legend>
-              {ALL_ZONES.map((zone) => (
-                <label key={zone} className={zones.has(zone) ? "is-on" : undefined}>
-                  <input type="checkbox" checked={zones.has(zone)} onChange={() => toggleZone(zone)} />
-                  <span>
-                    <strong>{tz(`${zone}.name`)}</strong>
-                    <small>{ZONE_CM[zone] ? t("zones.area", { cm: num(ZONE_CM[zone]!) }) : t("zones.petArea")}{sep}{tz(`${zone}.hint`)}</small>
-                  </span>
-                </label>
-              ))}
-            </fieldset>
-          ) : null}
-
-          {step === "designs" ? (
-            <>
-              <label className={`setpet-upload${activeDesigns.length >= maxDesigns ? " is-full" : ""}`}>
-                <input type="file" accept={accept || undefined} multiple disabled={activeDesigns.length >= maxDesigns} onChange={onFiles} />
-                <Upload size={22} aria-hidden="true" />
-                <strong>{t("upload.choose")}</strong>
-                <small>{t("upload.limits", { max: num(maxDesigns), mb: maxMb })}</small>
-                <small>{t("upload.formats")}</small>
-              </label>
-              {designs.length ? (
-                <ul className="setpet-files" aria-live="polite">
-                  {designs.map((d) => (
-                    <li key={d.id} className={`is-${d.status}`}>
-                      <span className="setpet-files__thumb" aria-hidden="true">
-                        {d.previewUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element -- local blob / short-lived same-origin raster preview
-                          <img src={d.previewUrl} alt="" />
-                        ) : <FileText size={20} />}
-                      </span>
-                      <span className="setpet-files__name">
-                        <strong dir="auto">{d.name}</strong>
-                        <small>{d.status === "error" ? d.error : usable(d) && !d.previewUrl ? t("upload.receivedNoPreview") : t(`upload.status.${d.status}`)}</small>
-                      </span>
-                      <button type="button" className="opl-iconbtn" aria-label={t("upload.remove", { name: d.name })} disabled={d.status === "uploading" || d.status === "checking"} onClick={() => void removeDesign(d)}>
-                        <Trash2 size={18} aria-hidden="true" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-              {lowRes.map((warning) => <p key={warning} className="setpet-note setpet-note--warn"><CircleAlert size={16} aria-hidden="true" />{warning}</p>)}
-              {earlier.length ? (
-                <details className="setpet-earlier">
-                  <summary>{t("upload.earlier", { n: num(earlier.length) })}</summary>
-                  <ul>
-                    {earlier.map((file) => (
-                      <li key={file.id}>
-                        <span dir="auto">{file.originalFilename ?? t("upload.untitled")}</span>
-                        <button type="button" className="opl-btn soft sm" onClick={() => void pickEarlier(file)}>{t("upload.use")}</button>
-                        <button type="button" className="opl-btn line sm" onClick={() => void deleteEarlier(file)}>{t("upload.delete")}</button>
-                      </li>
-                    ))}
-                  </ul>
-                </details>
-              ) : null}
-              {zones.size ? (
-                <div className="setpet-assign">
-                  <h3>{t("upload.assignTitle")}</h3>
-                  {ALL_ZONES.filter((zone) => zones.has(zone)).map((zone) => (
-                    <label key={zone} className="setpet-field">
-                      <span>{tz(`${zone}.name`)}</span>
-                      <select value={placements[zone] ?? ""} onChange={(e) => setPlacements((p) => ({ ...p, [zone]: e.target.value || undefined }))} disabled={!readyDesigns.length}>
-                        <option value="">{t("upload.pick")}</option>
-                        {readyDesigns.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-                      </select>
-                    </label>
-                  ))}
-                </div>
-              ) : null}
+              ) : (
+                <p className="setpet-note">{t("prints.pick")}</p>
+              )}
+              {lowRes.map((line) => <p key={line} className="setpet-warn"><CircleAlert size={16} aria-hidden="true" />{line}</p>)}
             </>
           ) : null}
 
           {step === "review" ? (
             <>
-              <dl className="setpet-review">
-                <div><dt>{t("review.shirts")}</dt><dd>{t("review.shirtsValue", { n: num(humanSizes.length), sizes: humanSizes.map(sizeLabel).join(locale === "fa" || locale === "ar" ? "، " : ", ") })}</dd></div>
-                <div><dt>{t("review.pet")}</dt><dd>{t("review.petValue", { size: sizeLabel(petSize), name: pets.find((p) => p.id === petId)?.name ?? t("pet.noPet") })}</dd></div>
-                <div><dt>{t("review.measurements")}</dt><dd>{t("review.measurementsValue", { neck: num(measured.neckCm ?? 0), chest: num(measured.chestCm ?? 0), back: num(measured.backLengthCm ?? 0), weight: num(measured.weightKg ?? 0) })}</dd></div>
-                <div><dt>{t("review.colour")}</dt><dd>{petColour && petColour !== colour ? `${tc(colour)}${sep}${t("colour.petColour")}: ${tc(petColour)}` : tc(colour)}</dd></div>
-                <div><dt>{t("review.zones")}</dt><dd><ul>{ALL_ZONES.filter((zone) => zones.has(zone)).map((zone) => <li key={zone}>{tz(`${zone}.name`)}: <span dir="auto">{previewDesigns.get(placements[zone] ?? "")?.name}</span></li>)}</ul></dd></div>
-              </dl>
+              <ul className="setpet-summary">
+                {s.items.map((item) => {
+                  const profilePet = pets.find((p) => p.id === item.petId);
+                  const who = isPet(item.garment) ? profilePet?.name ?? item.petName ?? "" : null;
+                  return (
+                    <li key={item.key}>
+                      <span className="setpet-swatch" style={{ background: COLOURS.find((c) => c.id === item.colour)?.hex }} aria-hidden="true" />
+                      {t("review.item", { garment: tg(item.garment), size: sizeLabel(item.size), colour: tc(item.colour) })}
+                      {who ? ` — ${who}` : null}
+                    </li>
+                  );
+                })}
+              </ul>
+              <ul className="setpet-summary">
+                {zonesInUse.map((z) => {
+                  const p = s.prints[z]!;
+                  return <li key={z}><strong>{tz(`${z}.name`)}:</strong> {p.kind === "text" ? `«${p.text}» (${tf(p.font)})` : designById.get(p.designId)?.name || t("upload.untitled")}</li>;
+                })}
+              </ul>
+              {pricesReady && exact ? (
+                <table className="setpet-price">
+                  <tbody>
+                    {exact.lines.map((line) => {
+                      const item = s.items[line.position];
+                      return (
+                        <tr key={line.position}>
+                          <th scope="row">{t("review.line", { garment: tg(line.garment), size: item ? sizeLabel(item.size) : "", zones: num(line.zones.length) })}</th>
+                          <td>{money(line.lineIrr)}</td>
+                        </tr>
+                      );
+                    })}
+                    {exact.discountIrr ? <tr><th scope="row">{t("review.discount", { percent: num(exact.discountPercent) })}</th><td>−{money(exact.discountIrr)}</td></tr> : null}
+                    <tr className="is-total"><th scope="row">{t("review.total")}</th><td>{money(exact.totalIrr)}</td></tr>
+                  </tbody>
+                </table>
+              ) : (
+                <p className="setpet-note" role="status">{t("review.pricesSoon")}</p>
+              )}
+              <ol className="setpet-next">
+                <li>{t("review.next.proof")}</li>
+                <li>{t("review.next.approve")}</li>
+                <li>{t("review.next.pay")}</li>
+                <li>{t("review.next.make", { days: num(options?.productionWorkingDays ?? 5) })}</li>
+                <li>{t("review.next.ship")}</li>
+              </ol>
               <label className="setpet-field">
                 <span>{t("review.notes")}</span>
-                <textarea rows={3} maxLength={1000} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t("review.notesPlaceholder")} />
+                <textarea rows={3} maxLength={1000} value={s.notes} onChange={(e) => update({ notes: e.target.value })} />
               </label>
-              {lowRes.map((warning) => <p key={warning} className="setpet-note setpet-note--warn"><CircleAlert size={16} aria-hidden="true" />{warning}</p>)}
-              <p className="setpet-note"><Info size={16} aria-hidden="true" />{t("review.priceNote")}</p>
-              {!signedIn ? <p className="setpet-note"><Info size={16} aria-hidden="true" />{t("review.signInNote")}</p> : null}
               {submitError ? <p className="setpet-error" role="alert"><CircleAlert size={16} aria-hidden="true" />{submitError}</p> : null}
+              <button type="button" className="opl-btn primary" disabled={!!submitting || !pricesReady} onClick={() => void submit()}>
+                {submitting === "uploading" ? t("review.uploading") : submitting === "sending" ? t("review.sending") : editOrder ? t("review.saveChanges") : signedIn ? t("review.send") : t("review.signInAndSend")}
+              </button>
+              <p className="setpet-note">{editOrder ? t("review.editNote") : t("review.noPaymentYet")}</p>
             </>
           ) : null}
 
           {stepError ? <p ref={errorRef} tabIndex={-1} className="setpet-error" role="alert"><CircleAlert size={16} aria-hidden="true" />{stepError}</p> : null}
 
+          {range && step !== "review" ? (
+            <p className="setpet-range" aria-live="polite">
+              {pricesReady ? t("range", { min: money(range.minIrr), max: money(range.maxIrr) }) : t("review.pricesSoon")}
+            </p>
+          ) : null}
+
           <div className="setpet-nav">
-            {index > 0 ? (
-              <button type="button" className="opl-btn line" onClick={() => go(STEPS[index - 1] ?? "shirts")}>
-                <ChevronRight size={18} aria-hidden="true" className="setpet-nav__back" />
-                {t("back")}
-              </button>
-            ) : <span />}
-            {step === "review" ? (
-              <button type="button" className="opl-btn primary" disabled={submitting !== false} aria-busy={submitting ? true : undefined} onClick={() => void submit()}>
-                {submitting === "uploading" ? t("review.uploading") : submitting ? t("review.sending") : signedIn ? t("review.send") : t("review.signInToSend")}
-              </button>
-            ) : (
-              <button type="button" className="opl-btn primary" onClick={() => go(STEPS[index + 1] ?? "review")}>
-                {t("next")}
-                <ChevronLeft size={18} aria-hidden="true" className="setpet-nav__next" />
-              </button>
-            )}
+            {index > 0 ? <button type="button" className="opl-btn line sm" onClick={() => go(BUILDER_STEPS[index - 1]!)}><ChevronRight size={16} aria-hidden="true" className="setpet-nav__back" />{t("back")}</button> : <span />}
+            {index < BUILDER_STEPS.length - 1 ? <button type="button" className="opl-btn primary sm" onClick={() => go(BUILDER_STEPS[index + 1]!)}>{t("next")}<ChevronLeft size={16} aria-hidden="true" className="setpet-nav__next" /></button> : null}
           </div>
+          {signedIn && !editOrder ? <p className="setpet-saved" aria-live="polite">{saved === "saving" ? t("autosave.saving") : saved === "saved" ? t("autosave.saved") : ""}</p> : null}
         </section>
 
-        {showPreview ? (
-          <aside className="setpet-aside" aria-label={t("previewLabel")}>
-            {humanSizes.length > 1 ? (
-              <div className="setpet-seg setpet-seg--small" role="group" aria-label={t("previewShirt")}>
-                {humanSizes.map((s, i) => (
-                  <button key={i} type="button" aria-pressed={i === Math.min(previewShirt, humanSizes.length - 1)} onClick={() => setPreviewShirt(i)}>
-                    {t("shirtN", { n: num(i + 1) })} (<span dir="ltr">{sizeLabel(s)}</span>)
-                  </button>
-                ))}
-              </div>
-            ) : null}
-            <GarmentMockups humanSize={shirtForPreview} petSize={petSize} colour={colour} petColour={petColour ?? colour} side={side} onSideChange={setSide} zones={zones} placements={placements} designs={previewDesigns}
-              onToggleZone={step === "zones" || step === "designs" ? toggleZone : undefined} />
-            <p className="setpet-note"><Info size={16} aria-hidden="true" />{t("previewNote")}</p>
-          </aside>
-        ) : null}
+        <aside className="setpet-aside" aria-label={t("previewLabel")}>
+          <SetPetPreview
+            human={previewHuman}
+            pet={previewPet}
+            prints={previews}
+            selectedZone={step === "prints" ? selected : null}
+            onZoneClick={step === "prints" ? (z) => setZone(z) : undefined}
+          />
+        </aside>
       </div>
     </div>
   );

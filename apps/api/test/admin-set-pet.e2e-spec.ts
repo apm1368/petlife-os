@@ -53,12 +53,12 @@ describe("admin Set Pet orders", () => {
   }
 
   /** Staff upload a proof image (target → PUT → send). */
-  async function proof(ops: Actor, id: string, bytes = png, body: Record<string, unknown> = { note: "Front 20×20, pet back 18×18", petPrintWidthCm: 18, petPrintHeightCm: 18 }) {
+  async function proof(ops: Actor, id: string, expectStatus: number, bytes = png, body: Record<string, unknown> = { note: "Front 20×20, pet back 18×18", petPrintWidthCm: 18, petPrintHeightCm: 18 }) {
     const target = (await send("post", ops, `/admin/set-pet/requests/${id}/proofs/upload-target`).send({ contentType: "image/png", fileSizeBytes: bytes.length }).expect(201)).body;
     const upload = request(server()).put(path(target.uploadUrl));
     for (const [k, v] of Object.entries((target.headers ?? {}) as Record<string, string>)) upload.set(k, v);
     await upload.set("Content-Type", target.headers?.["Content-Type"] ?? "image/png").send(bytes).expect(200);
-    return send("post", ops, `/admin/set-pet/requests/${id}/proofs/${target.proofId}/send`).send(body);
+    return send("post", ops, `/admin/set-pet/requests/${id}/proofs/${target.proofId}/send`).send(body).expect(expectStatus);
   }
 
   beforeAll(async () => {
@@ -111,13 +111,13 @@ describe("admin Set Pet orders", () => {
     await send("post", ops, `/admin/set-pet/requests/${req.id}/proofs/upload-target`).send({ contentType: "image/svg+xml", fileSizeBytes: 100 }).expect(400);
     await send("post", ops, `/admin/set-pet/requests/${req.id}/status`).send({ to: "IN_PRODUCTION" }).expect(400);
     // A "proof" that isn't an image is refused and removed.
-    expect((await proof(ops, req.id, Buffer.from("<html>not an image</html>")).expect(400)).body.error.details).toMatchObject({ reason: "NOT_A_JPEG_PNG_OR_WEBP" });
+    expect((await proof(ops, req.id, 400, Buffer.from("<html>not an image</html>"))).body.error.details).toMatchObject({ reason: "NOT_A_JPEG_PNG_OR_WEBP" });
 
-    const proofed = (await proof(ops, req.id).expect(201)).body;
+    const proofed = (await proof(ops, req.id, 201)).body;
     expect(proofed).toMatchObject({ status: "PROOF_SENT", proofs: [{ status: "SENT", note: "Front 20×20, pet back 18×18", petPrintWidthCm: 18, uploadedBy: "Shop Ops" }] });
     expect((await get(viewer, `/admin/set-pet/requests/${req.id}/proofs/${proofed.proofs[0].id}`).expect(200)).body.url).toBeTruthy();
     // A newer proof replaces one the member has not answered.
-    const again = (await proof(ops, req.id, png, { note: "Bigger front print" }).expect(201)).body;
+    const again = (await proof(ops, req.id, 201, png, { note: "Bigger front print" })).body;
     expect(again.proofs.map((p: { status: string }) => p.status)).toEqual(["SENT", "SUPERSEDED"]);
     // The member sees the current proof through their own short-lived link.
     expect((await get(member, `/set-pet/requests/${req.id}/proof`).expect(200)).body.url).toBeTruthy();
