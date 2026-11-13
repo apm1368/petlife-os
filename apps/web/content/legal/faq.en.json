@@ -22,6 +22,14 @@
         {
           "q": "Does opetlife cost anything?",
           "a": "Creating an account and keeping your pets' records is free. You pay only for the services, products and trips you book or buy. Some extra features are part of optional paid plans, which are shown on the subscription page."
+        },
+        {
+          "q": "How does the free trial work?",
+          "a": "It's for members who have never paid for a plan. It can start when you add your first pet, or you can start it on the subscription page. You don't need a card or any payment. It lasts the days shown when it starts, normally 7, and each account, household and mobile number gets one trial. We remind you two days before it ends. Then you simply go back to the free plan; nothing is ever charged automatically."
+        },
+        {
+          "q": "Is there a gift code?",
+          "a": "When we offer one, it is shown on the subscription page. It works once, on your first paid subscription, and can't be combined with other promotions or turned into cash or wallet credit."
         }
       ]
     },
@@ -168,6 +176,10 @@
         {
           "q": "How do I delete my account?",
           "a": "Ask from Profile → Privacy. Your request is recorded and reviewed, and it is carried out once our data-retention policy is published; we will tell you when it is done. You can cancel while it is pending. Open bookings, orders, refunds or disputes must be finished first."
+        },
+        {
+          "q": "Who can see my address on the map?",
+          "a": "You and your household. Besides you, only the courier of a shipment to that address, our staff handling your order, and your pet-taxi driver once the ride is accepted see the exact point. Sellers, providers and other members never see it. You can move or remove the point at any time."
         },
         {
           "q": "Which notifications will I get?",

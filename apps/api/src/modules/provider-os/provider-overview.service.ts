@@ -59,7 +59,7 @@ export class ProviderOverviewService {
 
     return {
       organization: { id: ctx.organizationId, name: ctx.organizationName, verificationStatus: ctx.verificationStatus as unknown as ProviderOverviewDto["organization"]["verificationStatus"] },
-      location: primaryLocation ? toProviderLocationDto(primaryLocation) : null,
+      location: primaryLocation ? toProviderLocationDto(primaryLocation, "exact") : null,
       providerUser: { id: ctx.providerUserId, role: ctx.role as unknown as ProviderOverviewDto["providerUser"]["role"], displayTitle: ctx.displayTitle },
       todaysBookings: todaysBookingRows.map((b) => toProviderBookingSummaryDto(b as ProviderBookingRow)),
       nextBooking: nextBookingRows[0] ? toProviderBookingSummaryDto(nextBookingRows[0] as ProviderBookingRow) : null,

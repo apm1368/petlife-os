@@ -6,6 +6,7 @@ import { PlacesController } from "./places.controller";
 import { PublicPlacesController } from "./public-places.controller";
 import { PlaceClaimsController } from "./osm/place-claims.controller";
 import { PlaceClaimsService } from "./osm/place-claims.service";
+import { AddressesModule } from "../addresses/addresses.module";
 
 /**
  * The public/consumer half of the Handoff 19 Pet-Friendly Places domain —
@@ -17,6 +18,7 @@ import { PlaceClaimsService } from "./osm/place-claims.service";
  * from AdminModule back into this module.
  */
 @Module({
+  imports: [AddressesModule],
   // PlacesController ("/places/favorites/*") is registered before
   // PublicPlacesController ("/places/:placeId") deliberately — Nest/Express
   // binds routes in controller-declaration order, and a ":placeId" route

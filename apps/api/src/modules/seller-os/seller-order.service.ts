@@ -4,7 +4,7 @@ import type { OrderDetailDto, PaginatedDto, SellerOrderSummaryDto } from "@petli
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { toPaginatedDto } from "../../common/pagination/pagination.dto";
 import { OrderNotFoundException } from "../../common/errors/api-exception";
-import { toFulfillmentDto } from "../commerce/logistics/logistics-dto.mapper";
+import { toSellerFulfillmentDto } from "../commerce/logistics/logistics-dto.mapper";
 import { toSellerSummaryDto } from "../commerce/commerce-dto.mapper";
 import { orderNumberOf } from "../commerce/orders/orders.service";
 import type { ResolvedSellerContext } from "./auth/seller-context.types";
@@ -100,7 +100,7 @@ export class SellerOrderService {
       paymentStatus: null,
       financingStatus: null,
       refunds: [],
-      fulfillment: fulfillment ? toFulfillmentDto(fulfillment) : null,
+      fulfillment: fulfillment ? toSellerFulfillmentDto(fulfillment) : null,
       subtotalAmount: order.subtotalAmount,
       deliveryAmount: order.deliveryAmount,
       discountAmount: order.discountAmount,

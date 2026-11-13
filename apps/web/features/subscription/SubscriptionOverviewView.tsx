@@ -16,6 +16,7 @@ import { SubscriptionChanges } from "./SubscriptionChanges";
 import { ConfirmActionDialog } from "@/features/account/ConfirmActionDialog";
 import { apiErrorText } from "@/lib/errors/api-error-text";
 import { isRouteLocale } from "@/lib/i18n/config";
+import { MembershipOffersCard } from "@/features/membership/MembershipOffersCard";
 
 const STATUS_TONE: Record<SubscriptionStatus, StatusTone> = {
   [SubscriptionStatus.TRIALING]: "neutral",
@@ -62,6 +63,7 @@ export function SubscriptionOverviewView() {
   const [history, setHistory] = useState<SubscriptionBillingHistoryDto | null>(null);
   const [isOwner, setIsOwner] = useState(true);
   const [confirmCancel, setConfirmCancel] = useState(false);
+  const [confirmEndTrial, setConfirmEndTrial] = useState(false);
 
   const load = useCallback(async () => {
     if (!householdId) return;
@@ -100,6 +102,13 @@ export function SubscriptionOverviewView() {
     setSub(updated);
   }
 
+  async function endTrial() {
+    if (!householdId) return;
+    setActionError(null);
+    // Errors surface inside the confirmation dialog.
+    setSub(await subscriptionService.endTrial(householdId));
+  }
+
   async function resume() {
     if (!householdId) return;
     setActionError(null);
@@ -127,6 +136,8 @@ export function SubscriptionOverviewView() {
           <h1>{t("title")}</h1>
         </div>
       </header>
+
+      <MembershipOffersCard refreshKey={`${sub.status}:${sub.price?.id ?? ""}`} onTrialStarted={load} />
 
       <div className="split-layout">
         <div className="split-main">
@@ -166,6 +177,10 @@ export function SubscriptionOverviewView() {
               {!isOwner ? null : sub.status === SubscriptionStatus.CANCEL_AT_PERIOD_END ? (
                 <Button variant="secondary" isLoading={actionBusy} onClick={resume}>
                   {t("resume")}
+                </Button>
+              ) : sub.status === SubscriptionStatus.TRIALING ? (
+                <Button variant="ghost" className="text-state-urgent" onClick={() => setConfirmEndTrial(true)}>
+                  {t("endTrial.action")}
                 </Button>
               ) : sub.price && sub.status !== SubscriptionStatus.CANCELLED && sub.status !== SubscriptionStatus.EXPIRED ? (
                 <Button variant="ghost" className="text-state-urgent" onClick={() => setConfirmCancel(true)}>
@@ -231,6 +246,17 @@ export function SubscriptionOverviewView() {
       </div>
 
       {householdId ? <SubscriptionChanges key={householdId} householdId={householdId} /> : null}
+      {confirmEndTrial ? (
+        <ConfirmActionDialog
+          open
+          onClose={() => setConfirmEndTrial(false)}
+          title={t("endTrial.title")}
+          consequences={[t("endTrial.consequence1"), t("endTrial.consequence2")]}
+          keeps={[t("endTrial.keeps")]}
+          confirmLabel={t("endTrial.confirm")}
+          onConfirm={endTrial}
+        />
+      ) : null}
       {confirmCancel ? (
         <ConfirmActionDialog
           open

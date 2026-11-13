@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Put, UseGuards } from "@nestjs/common";
 import { SellerMembershipRole, ShippingProvider } from "@prisma/client";
-import { ArrayMaxSize, IsArray, IsIn, IsLatitude, IsLongitude, IsOptional, IsString, Length, Matches } from "class-validator";
+import { ArrayMaxSize, IsArray, IsBoolean, IsIn, IsOptional, IsString, Length, Matches } from "class-validator";
+import { IsIranLatitude, IsIranLongitude, pinFromInput } from "../../common/geo/geo";
 import type { SellerShippingProfileDto } from "@petlife/types";
 import { SessionAuthGuard } from "../../common/auth/session-auth.guard";
 import { PrismaService } from "../../common/prisma/prisma.service";
@@ -22,8 +23,10 @@ class UpdateSellerShippingDto {
   @IsOptional() @IsString() @Length(1, 120) region?: string;
   @IsOptional() @IsString() @Length(1, 120) area?: string;
   @IsOptional() @Matches(/^[0-9]{10}$/) postalCode?: string;
-  @IsOptional() @IsLatitude() latitude?: number;
-  @IsOptional() @IsLongitude() longitude?: number;
+  /** The pickup pin couriers come to (inside Iran), with the seller's consent; omitted = the pin is removed. */
+  @IsOptional() @IsIranLatitude() latitude?: number;
+  @IsOptional() @IsIranLongitude() longitude?: number;
+  @IsOptional() @IsBoolean() locationConsent?: boolean;
   @IsOptional() @IsString() @Length(1, 500) instructions?: string;
 }
 
@@ -53,6 +56,7 @@ export class SellerShippingController {
         postalCode: profile?.pickupPostalCode ?? null,
         latitude: profile?.pickupLatitude ?? null,
         longitude: profile?.pickupLongitude ?? null,
+        pinConsentAt: profile?.pickupPinConsentAt?.toISOString() ?? null,
         instructions: profile?.pickupInstructions ?? null,
       },
       updatedAt: profile?.updatedAt.toISOString() ?? null,
@@ -67,6 +71,9 @@ export class SellerShippingController {
   @Put()
   @RequireSellerRole(SellerMembershipRole.ADMIN)
   async update(@CurrentSellerContext() ctx: ResolvedSellerContext, @Body() dto: UpdateSellerShippingDto) {
+    const pin = pinFromInput(dto);
+    const current = pin ? await this.prisma.sellerShippingProfile.findUnique({ where: { sellerOrganizationId: ctx.sellerOrganizationId }, select: { pickupLatitude: true, pickupLongitude: true, pickupPinConsentAt: true } }) : null;
+    const samePin = !!pin && current?.pickupLatitude === pin.latitude && current.pickupLongitude === pin.longitude;
     const data = {
       offeredProviders: [...new Set(dto.offeredProviders)],
       pickupContactName: dto.contactName?.trim() || null,
@@ -76,8 +83,9 @@ export class SellerShippingController {
       pickupRegion: dto.region?.trim() || null,
       pickupArea: dto.area?.trim() || null,
       pickupPostalCode: dto.postalCode ?? null,
-      pickupLatitude: dto.latitude ?? null,
-      pickupLongitude: dto.longitude ?? null,
+      pickupLatitude: pin?.latitude ?? null,
+      pickupLongitude: pin?.longitude ?? null,
+      pickupPinConsentAt: pin ? (samePin && current?.pickupPinConsentAt ? current.pickupPinConsentAt : new Date()) : null,
       pickupInstructions: dto.instructions?.trim() || null,
     };
     await this.prisma.$transaction(async (tx) => {

@@ -4,12 +4,17 @@ import { OptionalSessionAuthGuard } from "../../common/auth/optional-session-aut
 import { OptionalCurrentUser } from "../../common/auth/current-user.decorator";
 import type { SessionUser } from "../../common/session/session.service";
 import { PublicPlacesReadService } from "./public-places-read.service";
+import { AddressesService } from "../addresses/addresses.service";
+import { ValidationApiException } from "../../common/errors/api-exception";
 import { ListPetFriendlyPlacesQueryDto, NearbyPetFriendlyPlacesQueryDto } from "./dto/places.dto";
 
 /** Public directory — no guard by design, mirroring PublicAnimalSupportController/CommunityController. OptionalSessionAuthGuard only personalizes isFavorited, never gates access. */
 @Controller("places")
 export class PublicPlacesController {
-  constructor(private readonly reads: PublicPlacesReadService) {}
+  constructor(
+    private readonly reads: PublicPlacesReadService,
+    private readonly addresses: AddressesService,
+  ) {}
 
   @Get()
   @Throttle({ default: { limit: 60, ttl: 60_000 } })
@@ -21,8 +26,12 @@ export class PublicPlacesController {
   @Get("nearby")
   @Throttle({ default: { limit: 60, ttl: 60_000 } })
   @UseGuards(OptionalSessionAuthGuard)
-  nearby(@Query() query: NearbyPetFriendlyPlacesQueryDto, @OptionalCurrentUser() user: SessionUser | undefined) {
-    return this.reads.nearby(query, user?.id);
+  async nearby(@Query() query: NearbyPetFriendlyPlacesQueryDto, @OptionalCurrentUser() user: SessionUser | undefined) {
+    if (query.near !== "home") return this.reads.nearby(query, user?.id);
+    // The member's own pin, read server-side: it is used for the distance query and never echoed back.
+    const home = user ? await this.addresses.homePoint(user.id) : null;
+    if (!home) throw new ValidationApiException({ field: "near", reason: "HOME_PIN_MISSING" });
+    return this.reads.nearby({ ...query, latitude: home.latitude, longitude: home.longitude }, user?.id);
   }
 
   @Get(":placeId")

@@ -139,7 +139,8 @@ export function ProviderDiscoveryView({ category }: { category?: string }) {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setLocating("idle");
-        setParam({ lat: pos.coords.latitude.toFixed(4), lng: pos.coords.longitude.toFixed(4), sort: "NEAREST" });
+        // Rounded to ~1 km before it enters the URL (and server logs); it is never stored.
+        setParam({ lat: pos.coords.latitude.toFixed(2), lng: pos.coords.longitude.toFixed(2), sort: "NEAREST" });
       },
       () => setLocating("denied"),
       { maximumAge: 300_000, timeout: 10_000 },

@@ -37,6 +37,8 @@ describe("Public landing", () => {
     for (const src of images) {
       // Vector illustrations ship inline (pattern-2026-11); every file image must exist on disk.
       if (src.startsWith("data:image/svg+xml")) continue;
+      // Content-addressed CMS media (e.g. the «ست پت» reel poster) is served by the API, not from public/.
+      if (/^\/api\/uploads\/cms\/media\/bundle-[0-9a-f]{32}\.(webp|jpe?g|png)$/.test(src)) continue;
       expect(src, src).toMatch(/\.(webp|jpe?g|png|svg)$/);
       expect(existsSync(join(PUBLIC, src)), src).toBe(true);
     }

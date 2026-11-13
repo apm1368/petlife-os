@@ -9,6 +9,8 @@
 .map-view__overlay { position: absolute; inset: 0; pointer-events: none; }
 .map-view__line { stroke: var(--brand-primary, #2f7d4c); stroke-width: 4; stroke-dasharray: 8 6; stroke-linecap: round; opacity: 0.85; }
 .map-view__marker { position: absolute; top: 0; left: 0; width: 22px; height: 22px; margin: -22px 0 0 -11px; border-radius: 50% 50% 50% 0; rotate: -45deg; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); pointer-events: none; }
+.map-view__marker--draggable { pointer-events: auto; cursor: grab; touch-action: none; width: 28px; height: 28px; margin: -28px 0 0 -14px; }
+.map-view__marker--draggable:active { cursor: grabbing; }
 .map-view__marker--pickup { background: #2f7d4c; }
 .map-view__marker--dropoff { background: #c2410c; }
 .map-view__marker--driver { background: #1d4ed8; border-radius: 50%; rotate: 0deg; margin: -11px 0 0 -11px; }

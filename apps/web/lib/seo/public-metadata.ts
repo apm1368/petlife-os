@@ -127,6 +127,18 @@ const pages = {
       nl: { title: "De opetlife-app voor Android, iPhone en iPad | opetlife", description: "Download de ondertekende opetlife-app voor Android of zet opetlife via Safari op het beginscherm van je iPhone of iPad." },
     },
   },
+  setPet: {
+    path: "set-pet",
+    indexable: true,
+    copy: {
+      fa: { title: "ست پت؛ لباس ست تو و حیوان خانگی‌ات با طرح خودت | اپت لایف", description: "تی‌شرت تو و لباس حیوان خانگی‌ات را هم‌رنگ و با طرح دلخواه سفارش بده: سایز، رنگ و جای چاپ را انتخاب کن، طرحت را بفرست و قیمت را کارشناس تأیید می‌کند." },
+      en: { title: "Set Pet: matching shirts for you and your pet, with your own design | opetlife", description: "Order a T-shirt for you and a matching shirt for your pet with your own design: pick sizes, colour and print areas, upload your artwork, and our team confirms the price." },
+      de: { title: "Set Pet: Partnerlook für dich und dein Tier mit eigenem Motiv | opetlife", description: "Bestelle ein T-Shirt für dich und ein passendes Shirt für dein Tier mit eigenem Motiv: Größen, Farbe und Druckflächen wählen, Motiv hochladen, unser Team bestätigt den Preis." },
+      es: { title: "Set Pet: camisetas a juego para ti y tu mascota con tu diseño | opetlife", description: "Pide una camiseta para ti y otra a juego para tu mascota con tu propio diseño: elige tallas, color y zonas de impresión, sube tu diseño y nuestro equipo confirma el precio." },
+      ar: { title: "Set Pet: ملابس متطابقة لك ولحيوانك الأليف بتصميمك | opetlife", description: "اطلب قميصًا لك وقميصًا مطابقًا لحيوانك الأليف بتصميمك الخاص: اختر المقاسات واللون ومواضع الطباعة، وارفع تصميمك، ويؤكد فريقنا السعر." },
+      nl: { title: "Set Pet: bijpassende shirts voor jou en je huisdier met je eigen ontwerp | opetlife", description: "Bestel een T-shirt voor jezelf en een bijpassend shirt voor je huisdier met je eigen ontwerp: kies maten, kleur en printvlakken, upload je ontwerp en ons team bevestigt de prijs." },
+    },
+  },
   credits: {
     path: "credits",
     indexable: true,
@@ -390,7 +402,7 @@ const pages = {
 export type PublicSeoPage = keyof typeof pages;
 
 export const sitemapPages: readonly PublicSeoPage[] = [
-  "home", "blog", "guides", "services", "vetFind", "community", "lostPets", "animalSupport", "animalSupportCampaigns", "animalSupportNeeds", "travel", "travelExternal", "about", "legalTerms", "legalPrivacy", "faq", "contact", "credits", "status", "memorials", "appInstall",
+  "home", "blog", "guides", "services", "vetFind", "community", "lostPets", "animalSupport", "animalSupportCampaigns", "animalSupportNeeds", "travel", "travelExternal", "about", "legalTerms", "legalPrivacy", "faq", "contact", "credits", "status", "memorials", "appInstall", "setPet",
 ];
 
 export function publicPagePath(locale: RouteLocale, page: PublicSeoPage): string {

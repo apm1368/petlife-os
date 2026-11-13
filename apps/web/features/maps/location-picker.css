@@ -1,0 +1,22 @@
+/* Location picker: map + pin + consent. Pattern tokens, light and dark, usable at 390 px. */
+.location-picker { display: grid; gap: 10px; min-inline-size: 0; margin: 0; padding: 14px; border: 1px solid var(--border-default); border-radius: var(--radius-card, 20px); background: var(--surface-raised); color: var(--text-primary); }
+.location-picker__legend { display: inline-flex; align-items: center; gap: 6px; padding: 0 6px; font-weight: 700; }
+.location-picker__required { margin-inline-start: 6px; padding: 1px 8px; border-radius: 999px; background: color-mix(in srgb, var(--brand-primary, #2f7d4c) 14%, transparent); color: var(--text-primary); font-size: 0.72rem; font-weight: 600; }
+.location-picker__hint, .location-picker__privacy { margin: 0; color: var(--text-secondary); font-size: 0.82rem; line-height: 1.6; }
+.location-picker__map { min-block-size: 16rem; block-size: clamp(16rem, 52vw, 22rem); }
+.location-picker__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.location-picker__coords { font-variant-numeric: tabular-nums; font-size: 0.8rem; color: var(--text-secondary); }
+.location-picker__note { margin: 0; font-size: 0.82rem; }
+.location-picker__note--error { color: var(--state-urgent, #b42318); }
+.location-picker__note--info { color: var(--text-secondary); }
+.location-picker__check { display: flex; align-items: flex-start; gap: 8px; font-size: 0.86rem; line-height: 1.6; }
+.location-picker__check input { margin-block-start: 0.3rem; inline-size: 1.1rem; block-size: 1.1rem; accent-color: var(--brand-primary, #2f7d4c); flex: none; }
+.location-picker__search { position: relative; display: flex; gap: 8px; }
+.location-picker__search input { flex: 1; min-inline-size: 0; block-size: 40px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--border-default); background: var(--surface-page); color: var(--text-primary); font: inherit; }
+.location-picker__results { position: absolute; inset-inline: 0; inset-block-start: 46px; z-index: 5; margin: 0; padding: 4px; list-style: none; border-radius: 12px; border: 1px solid var(--border-default); background: var(--surface-raised); box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18); max-block-size: 16rem; overflow: auto; }
+.location-picker__results button { display: grid; inline-size: 100%; gap: 2px; padding: 8px 10px; border: 0; border-radius: 8px; background: none; color: inherit; text-align: start; cursor: pointer; font: inherit; }
+.location-picker__results button:hover, .location-picker__results button:focus-visible { background: color-mix(in srgb, var(--brand-primary, #2f7d4c) 10%, transparent); outline: none; }
+.location-picker__results small { color: var(--text-secondary); }
+/* Member home: a one-line prompt to pin the default address. */
+.location-nudge { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-radius: var(--radius-card, 20px); border: 1px dashed var(--border-default); background: var(--surface-raised); color: var(--text-primary); }
+.location-nudge p { margin: 0; display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; }

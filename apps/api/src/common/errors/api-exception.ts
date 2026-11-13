@@ -1221,6 +1221,24 @@ export class SubscriptionTrialNotEligibleException extends ApiException {
   }
 }
 
+/**
+ * First-purchase gift: one answer for every refusal (wrong code, gift switched off or expired, not the first paid
+ * purchase, already used by this account or household, not an owner). It never says which, so a guess can't learn
+ * whether a code exists or whether someone else already used it.
+ */
+export class SubscriptionGiftCodeNotApplicableException extends ApiException {
+  constructor() {
+    super("SUBSCRIPTION_GIFT_CODE_NOT_APPLICABLE", "This gift code can't be used for this purchase.", HttpStatus.BAD_REQUEST);
+  }
+}
+
+/** Too many gift-code attempts by one account in a short window. */
+export class SubscriptionGiftRateLimitedException extends ApiException {
+  constructor(retryAfterSeconds: number) {
+    super("SUBSCRIPTION_GIFT_RATE_LIMITED", "Too many gift code attempts. Please try again in a minute.", HttpStatus.TOO_MANY_REQUESTS, { retryAfterSeconds });
+  }
+}
+
 /** spec: "limit checks must happen server-side... API returns typed entitlement/limit error." */
 export class SubscriptionEntitlementLimitExceededException extends ApiException {
   constructor(details?: Record<string, unknown>) {

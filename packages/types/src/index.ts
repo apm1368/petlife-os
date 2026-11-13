@@ -666,8 +666,13 @@ export interface ProviderLocationDto {
   city: string;
   region: string | null;
   countryCode: string;
+  /** Public reads: the exact pin for storefronts, a ~1 km approximate point for home-based providers (see pinPrecision). */
   latitude: number | null;
   longitude: number | null;
+  /** EXACT, APPROXIMATE (rounded to ~1 km for privacy), or null when the location has no pin. */
+  pinPrecision?: "EXACT" | "APPROXIMATE" | null;
+  /** The provider's own choice to show the exact pin publicly (null = the default for its type). Owner views only. */
+  pinPublicExact?: boolean | null;
   phone: string | null;
   timezone: string;
 }
@@ -750,8 +755,11 @@ export interface CustomerAddressDto {
   city: string;
   region: string | null;
   countryCode: string;
+  /** The exact pin — private: only ever returned to the household's own members. */
   latitude: number | null;
   longitude: number | null;
+  /** When the member consented to storing the pin. */
+  locationConsentAt?: string | null;
   instructions: string | null;
   /** Batch 4 — Iranian 10-digit postal code, when known. */
   postalCode?: string | null;
@@ -2049,6 +2057,8 @@ export interface SellerShippingProfileDto {
     postalCode: string | null;
     latitude: number | null;
     longitude: number | null;
+    /** When the seller confirmed the pickup pin. */
+    pinConsentAt?: string | null;
     instructions: string | null;
   };
   updatedAt: string | null;
@@ -3450,6 +3460,8 @@ export interface AdminDashboardSummaryDto {
   openProviderNoShows: number | null;
   /** Service, product and stay reviews waiting for a moderator, in the verticals this admin may moderate. */
   pendingReviews: number | null;
+  /** «ست پت» Set Pet orders sent and waiting for a print proof; commerce.view (shop vertical). */
+  newSetPetRequests: number | null;
   /**
    * Market-readiness #290 Q97, the launch month's success measure: registered pets and weekly bookings
    * (analytics.view; null otherwise). Live bookings only, rolling 7-day windows.
@@ -3658,6 +3670,7 @@ export type AdminPermissionName =
   | "wallet.view"
   | "wallet.adjust"
   | "wallet.topup.review"
+  | "finance.manage"
   | "travel.source.view"
   | "travel.source.manage"
   | "travel.sync.run"
@@ -4349,6 +4362,7 @@ export enum SubscriptionChangeType {
   ADMIN_CANCELLED = "ADMIN_CANCELLED",
   ENTITLEMENT_OVERRIDE_GRANTED = "ENTITLEMENT_OVERRIDE_GRANTED",
   ENTITLEMENT_OVERRIDE_REVOKED = "ENTITLEMENT_OVERRIDE_REVOKED",
+  TRIAL_ENDED_EARLY = "TRIAL_ENDED_EARLY",
 }
 
 export enum SubscriptionBillingReason {
@@ -4425,13 +4439,56 @@ export interface SubscriptionBillingAttemptDto {
   reason: SubscriptionBillingReason;
   attemptNumber: number;
   status: SubscriptionBillingAttemptStatus;
+  /** What was charged: the list price minus `discountAmount`. */
   amount: number;
+  /** First-purchase gift taken off the list price; 0 when none. */
+  discountAmount: number;
   currency: string;
   failureCode: string | null;
   failureReason: string | null;
   paymentIntentId: string | null;
   createdAt: string;
   completedAt: string | null;
+}
+
+/**
+ * Membership offers (owner request 2026-11-13). The free week: one trial per account, household and verified phone,
+ * no card, nothing charged afterwards. AVAILABLE = can start now; ACTIVE = running (see trialEndsAt); USED = this
+ * account or household already had its trial; ALREADY_PAID = only for members who never paid; PHONE_REQUIRED = the
+ * admin requires a verified phone; UNAVAILABLE = switched off or not offered right now.
+ */
+export type MembershipFreeWeekStatus = "AVAILABLE" | "ACTIVE" | "USED" | "ALREADY_PAID" | "PHONE_REQUIRED" | "UNAVAILABLE";
+
+export interface MembershipFreeWeekOfferDto {
+  status: MembershipFreeWeekStatus;
+  /** Trial length in days (admin setting). */
+  days: number;
+  /** This viewer can start it now with one click (an owner of this household). */
+  canStart: boolean;
+  /** The account or household already had (or has) its one trial. */
+  trialUsed: boolean;
+  /** When the running trial ends (status ACTIVE); null otherwise. */
+  trialEndsAt: string | null;
+  plan: SubscriptionPlanRefDto | null;
+}
+
+/** The first-purchase gift, shown only to someone who can still use it. */
+export interface MembershipGiftOfferDto {
+  code: string;
+  percentOff: number;
+  /** Last valid day (YYYY-MM-DD, Tehran), or null for no expiry. */
+  expiresOn: string | null;
+}
+
+export interface MembershipOffersDto {
+  freeWeek: MembershipFreeWeekOfferDto;
+  firstPurchaseGift: MembershipGiftOfferDto | null;
+}
+
+export interface StartFreeWeekResultDto {
+  /** false when the household's trial was already running: the same trial is returned, never a second one. */
+  started: boolean;
+  subscription: SubscriptionDto;
 }
 
 export interface SubscriptionChangeDto {
@@ -5843,7 +5900,7 @@ export interface PetFriendlyPlaceDto {
   address: string | null;
   latitude: number;
   longitude: number;
-  /** Only present on a nearby-search result — the caller's own straight-line distance to this place, in meters, computed server-side via PostGIS ST_Distance. */
+  /** Only present on a nearby-search result — the caller's straight-line distance to this place, computed server-side via PostGIS and rounded to whole kilometres (0 = under 1 km): members never see exact metres. */
   distanceMeters: number | null;
   speciesAllowed: PetSpecies[];
   sizeRestrictions: string | null;
@@ -5991,8 +6048,12 @@ export interface TravelListingDto {
   country: string;
   city: string;
   address: string | null;
+  /** Public reads of a home stay (villa, apartment, residence, boarding) show a ~1 km approximate point unless the host opted in. */
   latitude: number | null;
   longitude: number | null;
+  pinPrecision?: "EXACT" | "APPROXIMATE" | null;
+  /** The host's choice to show the exact pin publicly (null = the default for the listing type). Owner views only. */
+  pinPublicExact?: boolean | null;
   imageObjectKeys: string[];
   imageUrls: string[];
   amenities: string[];
@@ -6806,7 +6867,7 @@ export interface AdminPartnerShopDetailDto {
   email: string | null;
   status: string;
   createdAt: string;
-  address: { province: string | null; city: string | null; addressLine: string | null; postalCode: string | null; latitude: number | null; longitude: number | null };
+  address: { province: string | null; city: string | null; addressLine: string | null; postalCode: string | null; latitude: number | null; longitude: number | null; exactPinPublic?: boolean | null };
   /** Display-only opening hours from signup (0 = Sunday … 6 = Saturday); empty when the shop has not set them. */
   openingHours: Array<{ dayOfWeek: number; open: string; close: string }>;
   kyc: AdminPartnerKycDto;
@@ -6900,6 +6961,103 @@ export interface AdminProductReadinessDto {
   page: number;
   pageSize: number;
   counts: Record<"ANY" | "MEDIA_INCOMPLETE" | "MISSING_BRAND" | "MISSING_SPECS" | "UNREVIEWED_SOURCE" | "NO_LIVE_OFFER", number>;
+}
+
+/** «ست پت» Set Pet, admin side (v2, owner's #368 answers); statuses, garments and zones are the shared ones from ./set-pet. */
+type SetPetStatus = import("./set-pet").SetPetRequestStatus;
+
+export interface AdminSetPetRowDto {
+  id: string;
+  /** SP-000123 */
+  number: string;
+  status: SetPetStatus;
+  memberName: string;
+  humanGarments: number;
+  petGarments: number;
+  placements: number;
+  itemsTotalIrr: number;
+  totalPaidIrr: number | null;
+  estimatedReadyAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminSetPetListDto {
+  items: AdminSetPetRowDto[];
+  total: number;
+  page: number;
+  pageSize: number;
+  /** Per status, for the same search (ignores the status filter). */
+  counts: Record<SetPetStatus, number>;
+}
+
+export interface AdminSetPetDesignFileDto {
+  id: string;
+  mimeType: string;
+  fileSizeBytes: number;
+  originalFilename: string | null;
+  /** JPEG/PNG/WebP only; anything else downloads as a plain file. */
+  previewable: boolean;
+  widthPx: number | null;
+  heightPx: number | null;
+  status: "PENDING_UPLOAD" | "READY" | "REJECTED";
+  uploadedAt: string | null;
+}
+
+export interface AdminSetPetProofDto {
+  id: string;
+  status: "UPLOADING" | "SENT" | "APPROVED" | "SUPERSEDED";
+  mimeType: string;
+  note: string | null;
+  petPrintWidthCm: number | null;
+  petPrintHeightCm: number | null;
+  uploadedBy: string | null;
+  sentAt: string | null;
+  decidedAt: string | null;
+}
+
+export interface AdminSetPetDetailDto {
+  id: string;
+  number: string;
+  status: SetPetStatus;
+  member: { id: string; displayName: string };
+  forPet: { id: string; name: string; species: string; lifecycleStatus: string } | null;
+  items: Array<import("./set-pet").SetPetItemDto & { pet: { id: string; name: string; species: string } | null }>;
+  placements: Array<import("./set-pet").SetPetPlacementDto & { designFile: AdminSetPetDesignFileDto | null }>;
+  notes: string | null;
+  price: { lines: import("./set-pet").SetPetPriceLine[]; subtotalIrr: number; discountPercent: number; discountIrr: number; totalIrr: number };
+  payment: { shippingProvider: string | null; shippingIrr: number | null; shippingAddress: unknown; totalPaidIrr: number | null; paidAt: string | null; refundedIrr: number | null; refundedAt: string | null };
+  proofs: AdminSetPetProofDto[];
+  designRejectReason: string | null;
+  estimatedReadyAt: string | null;
+  shippingNote: string | null;
+  cancelled: { at: string; by: "MEMBER" | "STAFF" | null; reason: string | null } | null;
+  /** Staff-only; never shown to the member. */
+  adminNote: string | null;
+  /** What staff may do now. */
+  actions: { sendProof: boolean; rejectDesign: boolean; startProduction: boolean; ship: boolean; cancel: boolean; refundsOnCancel: boolean; printDefectOnly: boolean };
+  timeline: Array<{ id: string; at: string; from: SetPetStatus | null; to: SetPetStatus; actor: "MEMBER" | "STAFF"; staffName: string | null; note: string | null }>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminSetPetSettingsDto {
+  garmentPricesIrr: import("./set-pet").SetPetPriceTable["garmentPricesIrr"];
+  zonePricesIrr: import("./set-pet").SetPetPriceTable["zonePricesIrr"];
+  setDiscountPercent: number;
+  productionWorkingDays: number;
+  workshopCity: string | null;
+  workshopLatitude: number | null;
+  workshopLongitude: number | null;
+  updatedAt: string | null;
+}
+
+export interface AdminSetPetProofUploadTargetDto {
+  proofId: string;
+  uploadUrl: string;
+  method: "PUT";
+  headers?: Record<string, string>;
+  expiresInSeconds: number;
 }
 
 export interface AdminProductReviewRowDto {
@@ -7398,6 +7556,63 @@ export type {
 } from "./sponsored";
 export { SPONSORED_DEFAULT_CPC_IRR, SPONSORED_SLOTS_PER_LIST } from "./sponsored";
 
+export type {
+  AdminTransactionKind,
+  AdminTransactionPurpose,
+  AdminTransactionGateway,
+  AdminTransactionRowDto,
+  AdminTransactionPageDto,
+  AdminTransactionFilters,
+} from "./admin-transactions";
+export { ADMIN_TRANSACTION_KINDS, ADMIN_TRANSACTION_GATEWAYS } from "./admin-transactions";
+
+export type {
+  SetPetRequestStatus,
+  SetPetSize,
+  SetPetGarment,
+  SetPetWearer,
+  SetPetZone,
+  SetPetFont,
+  SetPetColour,
+  SetPetPriceTable,
+  SetPetPriceLine,
+  SetPetPrice,
+  SetPetDesignFileStatus,
+  SetPetDesignFileDto,
+  SetPetUploadTargetDto,
+  SetPetItemInput,
+  SetPetPlacementInput,
+  SetPetOrderInput,
+  SetPetItemDto,
+  SetPetPlacementDto,
+  SetPetProofDto,
+  SetPetTimelineEntryDto,
+  SetPetRequestDto,
+  SetPetShippingOptionDto,
+  SetPetPayInput,
+  SetPetOptionsDto,
+  SetPetDraftDto,
+} from "./set-pet";
+export {
+  SET_PET_STATUSES,
+  SET_PET_EDITABLE_STATUSES,
+  SET_PET_MEMBER_CANCELLABLE,
+  SET_PET_SIZES,
+  SET_PET_HUMAN_GARMENTS,
+  SET_PET_PET_GARMENTS,
+  SET_PET_GARMENTS,
+  SET_PET_ZONES,
+  SET_PET_ZONE_KEYS,
+  SET_PET_FONTS,
+  SET_PET_COLOURS,
+  SET_PET_COLOUR_KEYS,
+  SET_PET_LIMITS,
+  SET_PET_ACCEPTED_EXTENSIONS,
+  setPetWearerOf,
+  priceSetPet,
+  priceRangeSetPet,
+} from "./set-pet";
+
 // ---------------------------------------------------------------------------
 // Member wallet (balances are always derived from append-only entries)
 // ---------------------------------------------------------------------------
@@ -7678,6 +7893,16 @@ export interface MapsClientConfigDto {
   search: boolean;
   /** Routes are straight-line estimates (no routing provider configured or reachable). */
   estimatesOnly: boolean;
+}
+
+/** Admin › Site settings › Maps: how many saved locations still have no map pin (cheap counts, no rows). */
+export interface AdminMapsCoverageDto {
+  memberAddresses: { total: number; withoutPin: number };
+  providerLocations: { total: number; withoutPin: number };
+  sellerPickups: { total: number; withoutPin: number };
+  /** Where the browser map comes from right now, and why. */
+  provider: "none" | "neshan" | "google";
+  googleBrowserKeySet: boolean;
 }
 
 export interface MapPlaceDto {
