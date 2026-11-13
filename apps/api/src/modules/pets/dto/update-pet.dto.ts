@@ -39,8 +39,9 @@ export class UpdatePetDto {
   @Max(600)
   approximateAgeMonths?: number | null;
 
+  /** Shape only; PetsService.update accepts nothing but this pet's own upload (or the unchanged current value). */
   @IsOptional()
-  @IsUrl()
+  @IsUrl({ require_tld: false, require_protocol: true, protocols: ["http", "https"] })
   photoUrl?: string | null;
 
   @IsOptional()
