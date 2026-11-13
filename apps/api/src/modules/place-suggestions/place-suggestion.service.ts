@@ -210,7 +210,9 @@ export class PlaceSuggestionService {
       await this.audit.record({ adminUserId: admin.adminUserId, action: "place_suggestion.approved", entityType: "PlaceSuggestion", entityId: id, reason: note ?? undefined, afterSummary: { createdPlaceId: place.id, pinFrom: input.latitude !== undefined ? "STAFF" : "MEMBER", memberPhotos: s.photoObjectKeys.length }, tx });
       return { suggestion: updated, userId: s.userId, name: s.name, photos: s.photoObjectKeys, placeId: place.id };
     });
-    if ("placeId" in result && result.photos.length) await this.copyPhotosToPlace(id, result.placeId, result.photos);
+    const createdPlaceId = "placeId" in result ? result.placeId : undefined;
+    const photos = "photos" in result ? result.photos ?? [] : [];
+    if (createdPlaceId && photos.length) await this.copyPhotosToPlace(id, createdPlaceId, photos);
     await this.notifyMember(result.userId, "place_suggestion.approved", id, { name: result.name });
     return toDto(result.suggestion);
   }
