@@ -40,6 +40,8 @@ export function AdminPartnerDirectory({ kind }: { kind: "provider" | "seller" })
   const [revision, setRevision] = useState(0);
   const [result, setResult] = useState<PaginatedDto<Row> | null>(null);
   const [error, setError] = useState<unknown>(null);
+  const [archivingId, setArchivingId] = useState<string | null>(null);
+  const [archiveFailedId, setArchiveFailedId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!canRead) return;
@@ -177,7 +179,29 @@ export function AdminPartnerDirectory({ kind }: { kind: "provider" | "seller" })
                         {t("reviewKyc")}
                       </Link>
                     ) : null}
+                    {canReview && org.verificationStatus === "NOT_STARTED" && org.submittedAt === null ? (
+                      <Button
+                        type="button"
+                        variant="danger"
+                        isLoading={archivingId === org.id}
+                        disabled={archivingId !== null}
+                        onClick={() => {
+                          const reason = window.prompt(t("archiveReasonPrompt"));
+                          if (!reason?.trim()) return;
+                          if (!window.confirm(t("archiveConfirm", { name: org.name }))) return;
+                          setArchivingId(org.id);
+                          setArchiveFailedId(null);
+                          void adminPartnersService.archiveDraft(kind, org.id, reason.trim())
+                            .then(() => setRevision((v) => v + 1))
+                            .catch(() => setArchiveFailedId(org.id))
+                            .finally(() => setArchivingId(null));
+                        }}
+                      >
+                        {t("archiveDraft")}
+                      </Button>
+                    ) : null}
                   </div>
+                  {archiveFailedId === org.id ? <p role="alert" className="text-metadata text-state-urgent">{t("archiveFailed")}</p> : null}
                 </ContextSurface>
               ))}
               <nav className="flex flex-wrap items-center gap-3" aria-label={t("pagination")}>

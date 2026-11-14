@@ -2196,6 +2196,11 @@ model ProviderOrganization {
   verificationNote          String?
   /// Null retains the evidence policy of cases submitted before the Wave 2 rollout.
   verificationPolicyVersion String?
+  /// A never-submitted partner signup removed from the active onboarding flow.
+  onboardingArchivedAt      DateTime?
+  onboardingArchiveReason   String?
+  /// A wallet with ledger or operational references is retained when its draft organization is cancelled.
+  onboardingWalletRetained   Boolean                    @default(false)
 
   phone       String?
   email       String?
@@ -2864,6 +2869,11 @@ model SellerOrganization {
   verificationSubmittedAt   DateTime?
   verificationNote          String?
   verificationPolicyVersion String?
+  /// A never-submitted partner signup removed from the active onboarding flow.
+  onboardingArchivedAt      DateTime?
+  onboardingArchiveReason   String?
+  /// A wallet with ledger or operational references is retained when its draft organization is cancelled.
+  onboardingWalletRetained   Boolean                    @default(false)
   status                    SellerStatus             @default(ACTIVE)
   countryCode               String
   city                      String?

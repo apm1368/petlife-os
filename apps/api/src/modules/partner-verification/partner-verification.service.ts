@@ -73,6 +73,51 @@ export class PartnerVerificationService {
     private readonly holidays: HolidayCalendarService,
   ) {}
 
+  /** Staff-only cleanup for never-submitted partner signup drafts. */
+  async archiveNotStartedDraft(admin: ResolvedAdminContext, s: Subject, reason: string, requestId?: string) {
+    const trimmedReason = reason.trim();
+    if (trimmedReason.length < 5 || trimmedReason.length > 500) throw new ValidationApiException({ field: "reason", reason: "INVALID_REASON" });
+    return this.prisma.$transaction(async (tx) => {
+      const now = new Date();
+      let before: { id: string; name: string; verificationStatus: string; verificationSubmittedAt: Date | null; onboardingArchivedAt: Date | null; walletAccount: { id: string; _count: { entries: number; adjustments: number; topUps: number; sponsoredCampaigns: number; transfersOut: number; transfersIn: number } } | null };
+      if (s.type === PartnerSubjectType.PROVIDER) {
+        const provider = await tx.providerOrganization.findUnique({
+          where: { id: s.id },
+          select: {
+            id: true, name: true, verificationStatus: true, verificationSubmittedAt: true, onboardingArchivedAt: true,
+            walletAccount: { include: { _count: { select: { entries: true, adjustments: true, topUps: true, sponsoredCampaigns: true, transfersOut: true, transfersIn: true } } } },
+          },
+        });
+        if (!provider) throw new NotFoundApiException("Provider organization");
+        before = provider;
+      } else {
+        const seller = await tx.sellerOrganization.findUnique({
+          where: { id: s.id },
+          select: {
+            id: true, name: true, verificationStatus: true, verificationSubmittedAt: true, onboardingArchivedAt: true,
+            walletAccount: { include: { _count: { select: { entries: true, adjustments: true, topUps: true, sponsoredCampaigns: true, transfersOut: true, transfersIn: true } } } },
+          },
+        });
+        if (!seller) throw new NotFoundApiException("Seller organization");
+        before = seller;
+      }
+      if (before.verificationStatus !== "NOT_STARTED" || before.verificationSubmittedAt !== null) throw new ValidationApiException({ field: "status", reason: "CANCELLATION_NOT_AVAILABLE" });
+      if (before.onboardingArchivedAt) return { id: before.id, archived: true, alreadyArchived: true, walletRetained: !!before.walletAccount };
+
+      const walletRetained = !!before.walletAccount && Object.values(before.walletAccount._count).some((count) => count > 0);
+      if (before.walletAccount && !walletRetained) await tx.walletAccount.delete({ where: { id: before.walletAccount.id } });
+      if (s.type === PartnerSubjectType.PROVIDER) {
+        await tx.providerOrganization.update({ where: { id: s.id }, data: { onboardingArchivedAt: now, onboardingArchiveReason: "ARCHIVED_BY_ADMIN", onboardingWalletRetained: walletRetained } });
+        await tx.providerUser.updateMany({ where: { providerOrganizationId: s.id, removedAt: null }, data: { removedAt: now } });
+      } else {
+        await tx.sellerOrganization.update({ where: { id: s.id }, data: { onboardingArchivedAt: now, onboardingArchiveReason: "ARCHIVED_BY_ADMIN", onboardingWalletRetained: walletRetained, status: "INACTIVE" } });
+        await tx.sellerMembership.updateMany({ where: { sellerOrganizationId: s.id, status: "ACTIVE" }, data: { status: "DEACTIVATED" } });
+      }
+      await this.audit.record({ adminUserId: admin.adminUserId, action: "verification.draft_archived", entityType: s.type === PartnerSubjectType.PROVIDER ? "ProviderOrganization" : "SellerOrganization", entityId: s.id, reason: trimmedReason, beforeSummary: { verificationStatus: before.verificationStatus, onboardingArchivedAt: null }, afterSummary: { onboardingArchivedAt: now.toISOString(), walletRetained }, requestId, tx });
+      return { id: s.id, archived: true, alreadyArchived: false, walletRetained };
+    }, { isolationLevel: "Serializable" });
+  }
+
   // ------------------------------------------------------------------ shared reads
   private async org(s: Subject, db: Pick<PrismaService, "providerOrganization" | "sellerOrganization"> = this.prisma) {
     if (s.type === PartnerSubjectType.PROVIDER) {
@@ -195,8 +240,8 @@ export class PartnerVerificationService {
   async queue(q: { subjectType?: PartnerSubjectType; status?: Status }) {
     const statuses = q.status ? [q.status] : [VS.SUBMITTED, VS.UNDER_REVIEW, VS.NEEDS_INFORMATION];
     const [providers, sellers] = await Promise.all([
-      q.subjectType === PartnerSubjectType.SELLER ? [] : this.prisma.providerOrganization.findMany({ where: { verificationStatus: { in: statuses } }, select: { id: true, name: true, type: true, verificationStatus: true, verificationSubmittedAt: true }, take: 200 }),
-      q.subjectType === PartnerSubjectType.PROVIDER ? [] : this.prisma.sellerOrganization.findMany({ where: { verificationStatus: { in: statuses as never } }, select: { id: true, name: true, verificationStatus: true, verificationSubmittedAt: true }, take: 200 }),
+      q.subjectType === PartnerSubjectType.SELLER ? [] : this.prisma.providerOrganization.findMany({ where: { verificationStatus: { in: statuses }, onboardingArchivedAt: null }, select: { id: true, name: true, type: true, verificationStatus: true, verificationSubmittedAt: true }, take: 200 }),
+      q.subjectType === PartnerSubjectType.PROVIDER ? [] : this.prisma.sellerOrganization.findMany({ where: { verificationStatus: { in: statuses as never }, onboardingArchivedAt: null }, select: { id: true, name: true, verificationStatus: true, verificationSubmittedAt: true }, take: 200 }),
     ]);
     const ids = [...providers.map((p) => p.id), ...sellers.map((s) => s.id)];
     const counts = await this.prisma.partnerVerificationDocument.groupBy({ by: ["subjectId", "status"], where: { subjectId: { in: ids } }, _count: { _all: true } });

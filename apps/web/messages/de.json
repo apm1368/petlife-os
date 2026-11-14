@@ -3442,6 +3442,10 @@
       "alsoShop": "Auch ein Shop: {name}",
       "alsoService": "Auch ein Dienstleister: {name}",
       "reviewKyc": "KYC prüfen",
+      "archiveDraft": "Nicht eingereichte Anmeldung archivieren",
+      "archiveReasonPrompt": "Grund für die Archivierung eingeben (mindestens 5 Zeichen).",
+      "archiveConfirm": "{name} archivieren? Der Zugang der Mitglieder wird entzogen und die Aktion protokolliert.",
+      "archiveFailed": "Die Anmeldung konnte nicht archiviert werden. Bitte erneut versuchen.",
       "pagination": "Partnerseiten",
       "previous": "Zurück",
       "next": "Weiter",
@@ -12497,6 +12501,12 @@
     "saveAndContinue": "Speichern und weiter",
     "continue": "Weiter",
     "remove": "Entfernen",
+    "cancellation": {
+      "cancel": "Anmeldung abbrechen",
+      "confirmTitle": "Partneranmeldung abbrechen?",
+      "confirmBody": "Sie können nur vor dem Absenden zur Prüfung abbrechen. Ihr Geschäftsentwurf und Ihr Zugriff werden entfernt. Eine Wallet mit Vorgängen bleibt zur Wahrung der Finanzhistorie erhalten.",
+      "failed": "Die Anmeldung konnte nicht abgebrochen werden. Bitte versuchen Sie es erneut."
+    },
     "intro": {
       "title": "Als Partner registrieren",
       "body": "Sie bieten Tierdienstleistungen an oder führen einen Tierbedarf-Shop? Registrieren Sie sich bei opetlife, damit Tierhalter Sie finden, buchen oder bei Ihnen kaufen.",

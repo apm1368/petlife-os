@@ -75,12 +75,12 @@ export class PartnerOnboardingService {
   private async orgs(userId: string, db: Prisma.TransactionClient | PrismaService = this.prisma) {
     const [pu, sm] = await Promise.all([
       db.providerUser.findFirst({
-        where: { userId, role: ProviderUserRole.OWNER, removedAt: null, providerOrganization: { serviceKinds: { isEmpty: false } } },
+        where: { userId, role: ProviderUserRole.OWNER, removedAt: null, providerOrganization: { serviceKinds: { isEmpty: false }, onboardingArchivedAt: null } },
         orderBy: { createdAt: "asc" },
         include: { providerOrganization: { include: { locations: { orderBy: { createdAt: "asc" }, take: 1 } } } },
       }),
       db.sellerMembership.findFirst({
-        where: { userId, role: SellerMembershipRole.OWNER, status: SellerMembershipStatus.ACTIVE, sellerOrganization: { businessMetadata: { path: ["source"], equals: PARTNER_ONBOARDING_SOURCE } } },
+        where: { userId, role: SellerMembershipRole.OWNER, status: SellerMembershipStatus.ACTIVE, sellerOrganization: { businessMetadata: { path: ["source"], equals: PARTNER_ONBOARDING_SOURCE }, onboardingArchivedAt: null } },
         orderBy: { createdAt: "asc" },
         include: { sellerOrganization: true },
       }),
@@ -145,6 +145,91 @@ export class PartnerOnboardingService {
       }
       if (providerId && sellerId) await tx.providerOrganization.update({ where: { id: providerId }, data: { linkedSellerOrganizationId: sellerId } });
     });
+    return this.state(userId);
+  }
+
+  /**
+   * Cancel only this member's never-submitted onboarding. An unused wallet is
+   * removed; any wallet or business history that is referenced is retained on
+   * an archived organization and the member role is revoked. This keeps
+   * accounting references intact while removing the signup from active flows.
+   */
+  async cancel(userId: string) {
+    const objectKeys: string[] = [];
+    await this.prisma.$transaction(async (tx) => {
+      const o = await this.orgs(userId, tx);
+      if (!o.provider && !o.seller) throw new ValidationApiException({ field: "onboarding", reason: "NOT_STARTED" });
+      for (const org of [o.provider, o.seller].filter((v) => v !== null)) {
+        if (org.verificationStatus !== "NOT_STARTED" || org.verificationSubmittedAt !== null) {
+          throw new ValidationApiException({ field: "status", reason: "CANCELLATION_NOT_AVAILABLE" });
+        }
+      }
+
+      const provider = o.provider ? await tx.providerOrganization.findUniqueOrThrow({
+        where: { id: o.provider.id },
+        include: {
+          walletAccount: { include: { _count: { select: { entries: true, adjustments: true, topUps: true, sponsoredCampaigns: true, transfersOut: true, transfersIn: true } } } },
+          _count: { select: { bookings: true, providerSettlements: true, clinicalVisits: true, labResults: true, imagingStudies: true, prescriptions: true, hospitalizations: true, sponsoredCampaigns: true } },
+        },
+      }) : null;
+      const seller = o.seller ? await tx.sellerOrganization.findUniqueOrThrow({
+        where: { id: o.seller.id },
+        include: {
+          walletAccount: { include: { _count: { select: { entries: true, adjustments: true, topUps: true, sponsoredCampaigns: true, transfersOut: true, transfersIn: true } } } },
+          _count: { select: { orders: true, fulfillments: true, inventoryMovements: true, marketplaceOrders: true, ledgerTransactions: true, settlements: true, adjustments: true, marketplaceSettlementStatements: true, catalogProductRequests: true, sponsoredCampaigns: true } },
+        },
+      }) : null;
+
+      const documents = await tx.partnerVerificationDocument.findMany({
+        where: { OR: [
+          ...(provider ? [{ subjectType: PartnerSubjectType.PROVIDER, subjectId: provider.id }] : []),
+          ...(seller ? [{ subjectType: PartnerSubjectType.SELLER, subjectId: seller.id }] : []),
+        ] },
+        select: { id: true, objectKey: true },
+      });
+      objectKeys.push(...documents.map((d) => d.objectKey));
+      await tx.partnerVerificationDocument.deleteMany({ where: { id: { in: documents.map((d) => d.id) } } });
+      await tx.partnerVerificationProfile.deleteMany({ where: { OR: [
+        ...(provider ? [{ subjectType: PartnerSubjectType.PROVIDER, subjectId: provider.id }] : []),
+        ...(seller ? [{ subjectType: PartnerSubjectType.SELLER, subjectId: seller.id }] : []),
+      ] } });
+      const walletUsed = (wallet: { _count: { entries: number; adjustments: number; topUps: number; sponsoredCampaigns: number; transfersOut: number; transfersIn: number } } | null) => !!wallet && Object.values(wallet._count).some((count) => count > 0);
+      const providerHasHistory = !!provider && Object.values(provider._count).some((count) => count > 0);
+      const sellerHasHistory = !!seller && Object.values(seller._count).some((count) => count > 0);
+      const keepProvider = providerHasHistory || walletUsed(provider?.walletAccount ?? null);
+      const keepSeller = sellerHasHistory || walletUsed(seller?.walletAccount ?? null);
+      const now = new Date();
+
+      if (provider) {
+        if (provider.walletAccount && !walletUsed(provider.walletAccount)) await tx.walletAccount.delete({ where: { id: provider.walletAccount.id } });
+        if (keepProvider) {
+          await tx.providerOrganization.update({ where: { id: provider.id }, data: { onboardingArchivedAt: now, onboardingArchiveReason: "CANCELLED_BY_OWNER", onboardingWalletRetained: walletUsed(provider.walletAccount) } });
+          await tx.providerUser.updateMany({ where: { providerOrganizationId: provider.id, userId, removedAt: null }, data: { removedAt: now } });
+        } else {
+          await tx.partnerApprovalOverride.deleteMany({ where: { partnerType: PartnerSubjectType.PROVIDER, organizationId: provider.id } });
+          await tx.providerOrganization.delete({ where: { id: provider.id } });
+        }
+      }
+      if (seller) {
+        if (seller.walletAccount && !walletUsed(seller.walletAccount)) await tx.walletAccount.delete({ where: { id: seller.walletAccount.id } });
+        if (keepSeller) {
+          await tx.sellerOrganization.update({ where: { id: seller.id }, data: { onboardingArchivedAt: now, onboardingArchiveReason: "CANCELLED_BY_OWNER", onboardingWalletRetained: walletUsed(seller.walletAccount), status: SellerStatus.INACTIVE } });
+          await tx.sellerMembership.updateMany({ where: { sellerOrganizationId: seller.id, userId, status: SellerMembershipStatus.ACTIVE }, data: { status: SellerMembershipStatus.DEACTIVATED } });
+        } else {
+          await tx.partnerApprovalOverride.deleteMany({ where: { partnerType: PartnerSubjectType.SELLER, organizationId: seller.id } });
+          await tx.sellerOrganization.delete({ where: { id: seller.id } });
+        }
+      }
+      const [providerRoles, sellerRoles] = await Promise.all([
+        tx.providerUser.count({ where: { userId, removedAt: null } }),
+        tx.sellerMembership.count({ where: { userId, status: SellerMembershipStatus.ACTIVE } }),
+      ]);
+      if (providerRoles + sellerRoles === 0) await tx.user.update({ where: { id: userId }, data: { signupIntent: "PET_OWNER" } });
+    }, { isolationLevel: "Serializable" });
+
+    // KYC objects are private. Remove the registered objects after the DB
+    // commit; storage outages cannot roll back the user's cancellation.
+    await Promise.all(objectKeys.map((key) => this.storage.deletePrivateObject(key).catch(() => undefined)));
     return this.state(userId);
   }
 

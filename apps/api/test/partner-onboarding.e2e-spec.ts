@@ -132,6 +132,7 @@ describe("Partner onboarding (e2e)", () => {
     expect((await stranger.get("/partner-onboarding").expect(200)).body).toMatchObject({ started: false, providerOrganizationId: null, sellerOrganizationId: null });
     await stranger.put("/partner-onboarding/business").send({ name: "Hijack" }).expect(400);
     await stranger.post("/partner-onboarding/documents").send({ subject: "PROVIDER", objectKey: docs.NATIONAL_ID_CARD, kind: "OTHER", contentType: "image/png", fileSizeBytes: 2048 }).expect(400);
+    expect((await stranger.post("/partner-onboarding/cancel").send({}).expect(400)).body.error.details?.reason).toBe("NOT_STARTED");
     expect((await db.providerOrganization.findUniqueOrThrow({ where: { id: provider.id } })).name).toBe("کلینیک و پت‌شاپ آریا");
 
     // Submit hands both businesses to KYC; the wizard then reads as submitted.
@@ -140,6 +141,8 @@ describe("Partner onboarding (e2e)", () => {
     expect((await db.providerOrganization.findUniqueOrThrow({ where: { id: provider.id } })).verificationStatus).toBe("SUBMITTED");
     expect((await db.sellerOrganization.findUniqueOrThrow({ where: { id: seller.id } })).verificationStatus).toBe("SUBMITTED");
     expect((await partner.get("/onboarding").expect(200)).body).toMatchObject({ partnerStage: "SUBMITTED" });
+    const cancelledSubmission = await partner.post("/partner-onboarding/cancel").send({}).expect(400);
+    expect(cancelledSubmission.body.error.details?.reason).toBe("CANCELLATION_NOT_AVAILABLE");
     await partner.put("/partner-onboarding/business").send({ name: "Changed after submit" }).expect(400);
 
     // Staff approval (simulated here) makes what the partner prepared go live; offers still await moderation.
@@ -160,5 +163,41 @@ describe("Partner onboarding (e2e)", () => {
     expect(res.body.error.details?.reason).toBe("VERIFIED_MOBILE_REQUIRED");
     // A grooming-only partner has no shop step.
     await partner.put("/partner-onboarding/opening-hours").send({ days: [{ dayOfWeek: 6, start: "10:00", end: "21:00" }] }).expect(400);
+  });
+
+  it("cancels only an unsubmitted signup, removes unused wallets and roles, and clears the account deletion blocker", async () => {
+    const partner = await member("Cancel signup");
+    const started = (await partner.post("/partner-onboarding/start").send({ serviceKinds: ["GROOMER"], shop: true, businessName: "Draft business" }).expect(201)).body;
+    const providerWallet = await db.walletAccount.create({ data: { ownerType: "PROVIDER", providerOrganizationId: started.providerOrganizationId } });
+    const sellerWallet = await db.walletAccount.create({ data: { ownerType: "SELLER", sellerOrganizationId: started.sellerOrganizationId } });
+
+    const cancelled = (await partner.post("/partner-onboarding/cancel").send({}).expect(201)).body;
+    expect(cancelled).toMatchObject({ started: false, signupIntent: "PET_OWNER", providerOrganizationId: null, sellerOrganizationId: null });
+    expect(await db.providerOrganization.findUnique({ where: { id: started.providerOrganizationId } })).toBeNull();
+    expect(await db.sellerOrganization.findUnique({ where: { id: started.sellerOrganizationId } })).toBeNull();
+    expect(await db.walletAccount.findUnique({ where: { id: providerWallet.id } })).toBeNull();
+    expect(await db.walletAccount.findUnique({ where: { id: sellerWallet.id } })).toBeNull();
+    expect(await db.providerUser.count({ where: { userId: partner.id, removedAt: null } })).toBe(0);
+    expect(await db.sellerMembership.count({ where: { userId: partner.id, status: "ACTIVE" } })).toBe(0);
+    const deletion = (await partner.get("/account/privacy/deletion/preview").expect(200)).body;
+    expect(deletion.canRequest).toBe(true);
+    expect(deletion.blockers.some((b: { code: string }) => b.code === "PARTNER_ROLES")).toBe(false);
+  });
+
+  it("retains and flags a wallet with an existing request while revoking the cancelled owner's role", async () => {
+    const partner = await member("Wallet retained");
+    const started = (await partner.post("/partner-onboarding/start").send({ serviceKinds: [], shop: true, businessName: "Shop draft" }).expect(201)).body;
+    const wallet = await db.walletAccount.create({ data: { ownerType: "SELLER", sellerOrganizationId: started.sellerOrganizationId } });
+    await db.walletTopUp.create({ data: { userId: partner.id, walletAccountId: wallet.id, rail: "CARD_TO_CARD", status: "AWAITING_RECEIPT", amount: 1000, idempotencyKey: randomUUID() } });
+
+    const cancelled = (await partner.post("/partner-onboarding/cancel").send({}).expect(201)).body;
+    expect(cancelled.started).toBe(false);
+    const seller = await db.sellerOrganization.findUniqueOrThrow({ where: { id: started.sellerOrganizationId } });
+    expect(seller).toMatchObject({ onboardingArchiveReason: "CANCELLED_BY_OWNER", onboardingWalletRetained: true, status: "INACTIVE" });
+    expect(seller.onboardingArchivedAt).toBeInstanceOf(Date);
+    expect(await db.walletAccount.findUnique({ where: { id: wallet.id } })).not.toBeNull();
+    expect(await db.sellerMembership.count({ where: { userId: partner.id, sellerOrganizationId: seller.id, status: "ACTIVE" } })).toBe(0);
+    const deletion = (await partner.get("/account/privacy/deletion/preview").expect(200)).body;
+    expect(deletion.blockers.some((b: { code: string }) => b.code === "PARTNER_ROLES")).toBe(false);
   });
 });

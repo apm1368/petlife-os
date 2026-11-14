@@ -11,7 +11,7 @@ vi.mock("@/services/partner-onboarding.service", async (importOriginal) => {
     ...actual,
     partnerOnboardingService: {
       state: vi.fn(), start: vi.fn(), logoUpload: vi.fn(), business: vi.fn(), owner: vi.fn(), documentUpload: vi.fn(), registerDocument: vi.fn(),
-      address: vi.fn(), calendar: vi.fn(), services: vi.fn(), openingHours: vi.fn(), products: vi.fn(), submit: vi.fn(),
+      address: vi.fn(), calendar: vi.fn(), services: vi.fn(), openingHours: vi.fn(), products: vi.fn(), submit: vi.fn(), cancel: vi.fn(),
     },
   };
 });
@@ -25,8 +25,12 @@ describe("PartnerJoinView", () => {
   beforeEach(() => {
     vi.mocked(partnerOnboardingService.state).mockReset();
     vi.mocked(partnerOnboardingService.start).mockReset();
+    vi.mocked(partnerOnboardingService.cancel).mockReset();
   });
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
 
   it("introduces partner signup to signed-out visitors and keeps them in the partner flow after signing up", () => {
     useSessionStore.setState({ status: "unauthenticated", user: null });
@@ -78,5 +82,28 @@ describe("PartnerJoinView", () => {
     expect(await screen.findByText("Your application is under review")).toBeTruthy();
     expect(screen.getByText(/Services: Waiting for review/)).toBeTruthy();
     expect(screen.getByRole("link", { name: "Go to my business" }).getAttribute("href")).toBe("/en/business");
+  });
+
+  it("requires confirmation before cancelling an unsubmitted signup and returns to the start step", async () => {
+    useSessionStore.setState({ status: "authenticated", user: { id: "u1" } as never });
+    vi.mocked(partnerOnboardingService.state).mockResolvedValue({ ...base, started: true, serviceKinds: ["GROOMER"] });
+    vi.mocked(partnerOnboardingService.cancel).mockResolvedValue(base);
+    const confirm = vi.fn().mockReturnValue(true);
+    vi.spyOn(window, "confirm").mockImplementation(confirm);
+    renderWithIntl(<PartnerJoinView />, "en");
+    fireEvent.click(await screen.findByRole("button", { name: "Cancel signup" }));
+    await waitFor(() => expect(partnerOnboardingService.cancel).toHaveBeenCalledOnce());
+    expect(confirm).toHaveBeenCalledWith(expect.stringContaining("Cancel partner signup?"));
+    expect(await screen.findByText("Pick every service you offer. If you also run a pet shop, tick it too.")).toBeTruthy();
+  });
+
+  it("does not call cancellation when the member declines confirmation", async () => {
+    useSessionStore.setState({ status: "authenticated", user: { id: "u1" } as never });
+    vi.mocked(partnerOnboardingService.state).mockResolvedValue({ ...base, started: true, serviceKinds: ["GROOMER"] });
+    const confirm = vi.fn().mockReturnValue(false);
+    vi.spyOn(window, "confirm").mockImplementation(confirm);
+    renderWithIntl(<PartnerJoinView />, "en");
+    fireEvent.click(await screen.findByRole("button", { name: "Cancel signup" }));
+    expect(partnerOnboardingService.cancel).not.toHaveBeenCalled();
   });
 });

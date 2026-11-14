@@ -4952,6 +4952,10 @@
       "alsoShop": "Also a shop: {name}",
       "alsoService": "Also a service business: {name}",
       "reviewKyc": "Review KYC",
+      "archiveDraft": "Archive unsubmitted signup",
+      "archiveReasonPrompt": "Enter a reason for archiving (at least 5 characters).",
+      "archiveConfirm": "Archive {name}? Member access will be revoked and this action will be recorded.",
+      "archiveFailed": "Could not archive the signup. Try again.",
       "pagination": "Partner pages",
       "previous": "Previous",
       "next": "Next",
@@ -12794,6 +12798,12 @@
     "saveAndContinue": "Save and continue",
     "continue": "Continue",
     "remove": "Remove",
+    "cancellation": {
+      "cancel": "Cancel signup",
+      "confirmTitle": "Cancel partner signup?",
+      "confirmBody": "You can cancel only before submitting for review. Your draft business and access will be removed. A wallet with history is retained to preserve financial records.",
+      "failed": "Signup could not be cancelled. Please try again."
+    },
     "intro": {
       "title": "Join as a partner",
       "body": "Run a pet service or a pet shop? Join opetlife so pet owners can find you, book you or buy from you.",

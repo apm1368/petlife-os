@@ -128,6 +128,12 @@ export class AdminPartnerVerificationController {
     return this.verification.transition(admin, { type: parseSubject(subjectType), id }, dto.to, dto.reason, req.requestId);
   }
 
+  @Post("verification/:subjectType/:id/archive")
+  @RequireAdminPermission("verification.manage")
+  archiveNotStarted(@CurrentAdmin() admin: ResolvedAdminContext, @Param("subjectType") subjectType: string, @Param("id", ParseUUIDPipe) id: string, @Body() dto: ReasonDto, @Req() req: AdminAuthedRequest) {
+    return this.verification.archiveNotStartedDraft(admin, { type: parseSubject(subjectType), id }, dto.reason, req.requestId);
+  }
+
   @Post("verification/documents/:documentId/review")
   @RequireAdminPermission("verification.manage")
   review(@CurrentAdmin() admin: ResolvedAdminContext, @Param("documentId", ParseUUIDPipe) documentId: string, @Body() dto: ReviewDocumentDto) { return this.verification.reviewDocument(admin, documentId, dto); }
