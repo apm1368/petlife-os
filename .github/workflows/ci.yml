@@ -75,6 +75,10 @@ jobs:
       - name: Verify production deploy contract
         run: bash scripts/ops/verify-production-deploy-contract.sh
 
+      # The VPS pulls each release in resumable range parts; a local server drops, stalls, corrupts and ignores ranges.
+      - name: Test release download resume
+        run: bash scripts/ops/fetch-release.test.sh
+
       - name: Build shared packages (types, config)
         run: |
           pnpm --filter @petlife/types build
