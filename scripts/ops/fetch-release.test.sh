@@ -112,6 +112,7 @@ echo "fetch-release.test: ok - dropped and stalled parts resumed ($resumed resum
 start_server corrupt
 if run_fetch; then fail "a corrupted archive was accepted"; fi
 grep -q "checksum mismatch" "$work/stderr" || fail "expected a checksum mismatch"
+[[ ! -e "$work/out/$name" ]] || fail "a corrupted archive was left behind"
 stop_server
 rm -rf "$work/out"
 echo "fetch-release.test: ok - corrupted archive refused by the checksum"

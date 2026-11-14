@@ -95,6 +95,6 @@ for pid in "${pids[@]}"; do wait "$pid" || failed=1; done
 
 for (( i = 0; i < ${#pids[@]}; i++ )); do cat "$out.part$i"; done > "$out"
 rm -f "$out".part*
-[[ "$(stat -c %s "$out")" -eq "$size" ]] || { echo "fetch-release: size mismatch" >&2; exit 1; }
-( cd "$dir" && sha256sum --quiet -c "$name.sha256" ) || { echo "fetch-release: checksum mismatch" >&2; exit 1; }
+[[ "$(stat -c %s "$out")" -eq "$size" ]] || { echo "fetch-release: size mismatch" >&2; rm -f "$out"; exit 1; }
+( cd "$dir" && sha256sum --quiet -c "$name.sha256" ) || { echo "fetch-release: checksum mismatch" >&2; rm -f "$out"; exit 1; }
 echo "fetch-release: $name ($size bytes) in ${SECONDS}s"
