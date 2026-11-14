@@ -12,6 +12,7 @@ import { NotificationEventsListener } from "./notification-events.listener";
 import { MessagingProviderRegistry } from "./messaging/messaging-provider-registry.service";
 import { DevMessagingAdapter } from "./messaging/dev-messaging.adapter";
 import { FarazSmsAdapter } from "./messaging/faraz-sms.adapter";
+import { KavenegarSmsAdapter } from "./messaging/kavenegar-sms.adapter";
 import { SmsPatternTemplateService } from "./sms-pattern-template.service";
 import { WebPushService } from "./push/web-push.service";
 import { PushSubscriptionService } from "./push/push-subscription.service";
@@ -30,6 +31,7 @@ import { PushConfigController, PushSubscriptionsController } from "./push/push.c
     MessagingProviderRegistry,
     DevMessagingAdapter,
     FarazSmsAdapter,
+    KavenegarSmsAdapter,
     SmsPatternTemplateService,
     WebPushService,
     PushSubscriptionService,

@@ -4,6 +4,7 @@ import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { DevOtpProvider } from "./otp/dev-otp.provider";
 import { FarazOtpProvider } from "./otp/faraz-otp.provider";
+import { KavenegarOtpProvider } from "./otp/kavenegar-otp.provider";
 import { OTP_PROVIDER } from "./otp/otp-provider.interface";
 import { OtpCodeStore } from "./otp/otp-code-store";
 import { OtpService } from "./otp/otp.service";
@@ -25,11 +26,14 @@ import { ContactChangeService } from "./contact-change.service";
     AuthService,
     DevOtpProvider,
     FarazOtpProvider,
+    KavenegarOtpProvider,
     {
       provide: OTP_PROVIDER,
-      inject: [ConfigService, DevOtpProvider, FarazOtpProvider],
-      useFactory: (config: ConfigService<AppEnv, true>, dev: DevOtpProvider, faraz: FarazOtpProvider) =>
-        config.get("OTP_PROVIDER", { infer: true }) === "faraz" ? faraz : dev,
+      inject: [ConfigService, DevOtpProvider, FarazOtpProvider, KavenegarOtpProvider],
+      useFactory: (config: ConfigService<AppEnv, true>, dev: DevOtpProvider, faraz: FarazOtpProvider, kavenegar: KavenegarOtpProvider) => {
+        const selected = config.get("OTP_PROVIDER", { infer: true });
+        return selected === "kavenegar" ? kavenegar : selected === "faraz" ? faraz : dev;
+      },
     },
     OtpCodeStore,
     OtpService,

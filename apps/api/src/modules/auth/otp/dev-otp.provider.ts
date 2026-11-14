@@ -20,7 +20,7 @@ export class DevOtpProvider implements OtpProvider {
     // sign in as anyone. The canonical server runs NODE_ENV=development, so "live" is decided by the deploy
     // contract and the public https origin too (isLiveDeployment), not by NODE_ENV alone.
     if (isLiveDeployment(this.config)) {
-      this.logger.warn(`[DEV OTP] the development OTP provider was invoked on a live deployment (purpose=${purpose}) — no code was logged or delivered. Configure OTP_PROVIDER=faraz.`);
+      this.logger.warn(`[DEV OTP] the development OTP provider was invoked on a live deployment (purpose=${purpose}) — no code was logged or delivered. Configure OTP_PROVIDER=kavenegar or faraz.`);
       return;
     }
     const ttlSeconds = this.config.get("OTP_TTL_SECONDS", { infer: true });

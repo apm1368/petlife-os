@@ -5,6 +5,7 @@ import type { AppEnv } from "../../../config/env";
 import { MessagingProviderDisabledException, MessagingProviderUnavailableException } from "../../../common/errors/api-exception";
 import { DevMessagingAdapter } from "./dev-messaging.adapter";
 import { FarazSmsAdapter } from "./faraz-sms.adapter";
+import { KavenegarSmsAdapter } from "./kavenegar-sms.adapter";
 import type { MessagingGateway } from "./messaging-gateway.interface";
 
 /**
@@ -21,17 +22,20 @@ export class MessagingProviderRegistry {
   constructor(
     dev: DevMessagingAdapter,
     faraz: FarazSmsAdapter,
+    kavenegar: KavenegarSmsAdapter,
     private readonly config: ConfigService<AppEnv, true>,
   ) {
     this.gateways = new Map<MessagingProvider, MessagingGateway>([
       [MessagingProvider.DEV, dev],
       [MessagingProvider.FARAZ, faraz],
+      [MessagingProvider.KAVENEGAR, kavenegar],
     ]);
   }
 
   isEnabled(provider: MessagingProvider): boolean {
     if (provider === MessagingProvider.DEV) return this.config.get("DEV_MESSAGING_ENABLED", { infer: true });
     if (provider === MessagingProvider.FARAZ) return this.config.get("FARAZ_SMS_ENABLED", { infer: true });
+    if (provider === MessagingProvider.KAVENEGAR) return this.config.get("KAVENEGAR_ENABLED", { infer: true });
     return false;
   }
 
@@ -42,10 +46,11 @@ export class MessagingProviderRegistry {
     return gateway;
   }
 
-  /** Resolves the active SMS provider from `MESSAGING_PROVIDER` (dev|faraz) — the one place that env var is read. */
+  /** Resolves the active SMS provider from `MESSAGING_PROVIDER` (dev|faraz|kavenegar) — the one place that env var is read. */
   resolveActiveSmsProvider(): MessagingGateway {
     const configured = this.config.get("MESSAGING_PROVIDER", { infer: true });
-    const provider = configured === "faraz" ? MessagingProvider.FARAZ : MessagingProvider.DEV;
+    const provider =
+      configured === "kavenegar" ? MessagingProvider.KAVENEGAR : configured === "faraz" ? MessagingProvider.FARAZ : MessagingProvider.DEV;
     return this.resolve(provider);
   }
 }

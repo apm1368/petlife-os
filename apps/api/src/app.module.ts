@@ -12,6 +12,7 @@ import { CsrfGuard } from "./common/csrf/csrf.guard";
 import { PrismaModule } from "./common/prisma/prisma.module";
 import { RedisModule } from "./common/redis/redis.module";
 import { FarazSmsModule } from "./common/faraz/faraz-sms.module";
+import { KavenegarSmsModule } from "./common/kavenegar/kavenegar-sms.module";
 import { SessionModule } from "./common/session/session.module";
 import { DomainEventsModule } from "./common/events/domain-events.module";
 import { validateEnv } from "./config/env";
@@ -105,6 +106,7 @@ import { SetPetModule } from "./modules/set-pet/set-pet.module";
     PrismaModule,
     RedisModule,
     FarazSmsModule,
+    KavenegarSmsModule,
     RateLimitModule,
     SessionModule,
     DomainEventsModule,

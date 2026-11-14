@@ -2547,6 +2547,7 @@ export enum NotificationFailureKind {
 export enum MessagingProvider {
   DEV = "DEV",
   FARAZ = "FARAZ",
+  KAVENEGAR = "KAVENEGAR",
 }
 
 export interface NotificationDeliveryDto {

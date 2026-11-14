@@ -79,4 +79,12 @@ describe("AdminSystemService integration truthfulness", () => {
     expect(statuses.MARKETPLACE).toMatchObject({ status: "NOT_IMPLEMENTED", configurationComplete: true });
     expect(JSON.stringify(statuses)).not.toContain("secret");
   });
+
+  it("reports Kavenegar as LIVE only in production mode with its key, and lists what is missing otherwise", async () => {
+    const missing = statusByKey(await setup({ OTP_PROVIDER: "kavenegar" }).service.integrations());
+    expect(missing.KAVENEGAR_SMS).toMatchObject({ status: "NOT_CONFIGURED", missingConfiguration: ["KAVENEGAR_ENABLED", "KAVENEGAR_API_KEY", "KAVENEGAR_SENDER"] });
+    const live = statusByKey(await setup({ MESSAGING_PROVIDER: "kavenegar", MESSAGING_SANDBOX_MODE: "production", KAVENEGAR_ENABLED: true, KAVENEGAR_API_KEY: "key", KAVENEGAR_SENDER: "2000660110" }).service.integrations());
+    expect(live.KAVENEGAR_SMS).toMatchObject({ status: "LIVE", missingConfiguration: [] });
+    expect(live.FARAZ_SMS?.status).not.toBe("LIVE");
+  });
 });

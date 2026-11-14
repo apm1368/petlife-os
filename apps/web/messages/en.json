@@ -1393,7 +1393,7 @@
   "adminMessaging": {
     "kicker": "SMS and email",
     "title": "Messaging centre",
-    "subtitle": "Pattern SMS (FarazSMS) and email (Gmail) status, test sends and a log of every message sent.",
+    "subtitle": "SMS and email (Gmail) status, test sends and a log of every message sent.",
     "patterns": "SMS patterns",
     "refresh": "Refresh",
     "loading": "Loading…",
@@ -1415,6 +1415,7 @@
       "title": "Pattern SMS",
       "provider": "Provider",
       "devProvider": "Development simulator",
+      "kavenegarProvider": "Kavenegar",
       "mode": "Mode",
       "modes": {
         "sandbox": "Sandbox",
@@ -1425,6 +1426,7 @@
       "bindings": "Active panel patterns",
       "check": {
         "apiKey": "FarazSMS API key",
+        "apiKeyKavenegar": "Kavenegar API key",
         "sender": "Sender line number",
         "otpPattern": "One-time code pattern",
         "notificationPattern": "Notification pattern (or panel patterns)",
@@ -1475,6 +1477,10 @@
       "sms2": "Create a one-time-code pattern with a code variable and note its pattern code once approved.",
       "sms3": "Create a notification pattern with a message variable; specific messages can get their own pattern under SMS patterns.",
       "sms4": "Store the values on the server; the next deploy switches live sending on automatically.",
+      "kavenegarTitle": "SMS (Kavenegar)",
+      "kavenegar1": "In the Kavenegar panel, copy the API key and note your sender line number.",
+      "kavenegar2": "Optional (advanced service): create a Verify template with an English name (e.g. opetlifeotp) whose text contains %token; without one, sign-in codes go as plain text from your sender line.",
+      "kavenegar3": "Notifications go out as plain text and need no template.",
       "emailTitle": "Email (Gmail)",
       "email1": "Turn on 2-Step Verification for the Google account.",
       "email2": "Create an App Password under Security › App passwords (16 characters).",
@@ -2127,7 +2133,7 @@
     },
     "manualMessage": {
       "title": "Send a message to this user",
-      "smsNote": "SMS is attempted only when Faraz is live, the recipient allows it, and notification rules permit it.",
+      "smsNote": "SMS is attempted only when live SMS sending is on, the recipient allows it, and notification rules permit it.",
       "subject": "Title",
       "message": "Message",
       "attemptSms": "Also attempt SMS when permitted",
