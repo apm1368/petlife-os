@@ -24,4 +24,9 @@ export const adminPartnersService = {
   listShops: (input: PartnerDirectoryInput = {}) => apiFetch<PaginatedDto<AdminPartnerShopRowDto>>(`/admin/partners/shops${query(input)}`),
   getService: (id: string) => apiFetch<AdminPartnerServiceDetailDto>(`/admin/partners/services/${id}`),
   getShop: (id: string) => apiFetch<AdminPartnerShopDetailDto>(`/admin/partners/shops/${id}`),
+  archiveDraft: (kind: "provider" | "seller", id: string, reason: string) =>
+    apiFetch<{ id: string; archived: boolean; alreadyArchived: boolean; walletRetained: boolean }>(`/admin/verification/${kind}/${id}/archive`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    }),
 };

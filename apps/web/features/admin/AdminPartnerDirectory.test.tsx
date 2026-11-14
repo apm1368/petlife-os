@@ -8,7 +8,7 @@ import en from "@/messages/en.json";
 import { AdminPartnerDirectory } from "./AdminPartnerDirectory";
 
 vi.mock("@/services/admin-partners.service", () => ({
-  adminPartnersService: { listServices: vi.fn(), listShops: vi.fn() },
+  adminPartnersService: { listServices: vi.fn(), listShops: vi.fn(), archiveDraft: vi.fn() },
 }));
 
 const service = {
@@ -120,6 +120,19 @@ describe("partner directory", () => {
     renderWithIntl(<AdminPartnerDirectory kind="seller" />);
     await screen.findByText("Real partner");
     expect(screen.getByRole("link", { name: "Review KYC" }).getAttribute("href")).toBe("/en/admin/verification/seller/shop1");
+  });
+
+  it("lets verification staff archive only a not-started signup with a reason and confirmation", async () => {
+    permissions(["verification.manage"]);
+    const draft = { ...service, verificationStatus: "NOT_STARTED", submittedAt: null };
+    vi.mocked(adminPartnersService.listServices).mockResolvedValue(page(draft) as never);
+    vi.mocked(adminPartnersService.archiveDraft).mockResolvedValue({ id: "org1", archived: true, alreadyArchived: false, walletRetained: false });
+    vi.spyOn(window, "prompt").mockReturnValue("Duplicate abandoned registration");
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    renderWithIntl(<AdminPartnerDirectory kind="provider" />);
+    fireEvent.click(await screen.findByRole("button", { name: "Archive unsubmitted signup" }));
+    await waitFor(() => expect(adminPartnersService.archiveDraft).toHaveBeenCalledWith("provider", "org1", "Duplicate abandoned registration"));
+    expect(window.confirm).toHaveBeenCalledWith(expect.stringContaining("Archive Real partner?"));
   });
 
   it("ignores a late service response when the directory changes to shops", async () => {

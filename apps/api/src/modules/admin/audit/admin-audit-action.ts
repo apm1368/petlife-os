@@ -61,6 +61,7 @@ export type AdminAuditAction =
   | "admin_refund_approval.rejected"
   | "admin_refund_approval.executed"
   | "verification.status_changed"
+  | "verification.draft_archived"
   | "pii.revealed"
   | "seller_settlement.calculated"
   | "seller_settlement.approved"

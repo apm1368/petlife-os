@@ -17,6 +17,7 @@ describe("admin partners directory and profiles", () => {
   let app: INestApplication, db: PrismaService;
   const server = () => app.getHttpServer();
   const get = (a: Actor, u: string) => request(server()).get(u).set("Cookie", a.cookie);
+  const post = (a: Actor, u: string) => request(server()).post(u).set("Cookie", a.cookie).set("x-csrf-token", a.csrf);
 
   async function actor(name: string, role?: AdminRole, serviceScopes: AdminVertical[] = []): Promise<Actor> {
     const user = await db.user.create({ data: { displayName: name, email: `apdir-${randomUUID()}@example.com` } });
@@ -106,5 +107,30 @@ describe("admin partners directory and profiles", () => {
     expect(listed).not.toContain(clinic.id);
     await get(groomingAdmin, `/admin/partners/services/${clinic.id}`).expect(404);
     await get(groomingAdmin, `/admin/partners/services/${groomer.id}`).expect(200);
+  });
+
+  it("allows only verification staff to archive never-submitted drafts and records the action", async () => {
+    const tag = randomUUID().slice(0, 8);
+    const ops = await actor("Verification staff", AdminRole.VERIFICATION);
+    const customer = await actor("Customer without verification permission");
+    const owner = await actor("Draft owner");
+    const draft = await db.providerOrganization.create({
+      data: { name: `Draft ${tag}`, type: "GROOMER", serviceKinds: ["GROOMER"], providerUsers: { create: { userId: owner.id, role: "OWNER" } } },
+    });
+
+    await post(customer, `/admin/verification/PROVIDER/${draft.id}/archive`).send({ reason: "Duplicate QA signup" }).expect(403);
+    const archived = await post(ops, `/admin/verification/PROVIDER/${draft.id}/archive`).send({ reason: "Duplicate QA signup" }).expect(201);
+    expect(archived.body).toMatchObject({ id: draft.id, archived: true, walletRetained: false });
+    const stored = await db.providerOrganization.findUniqueOrThrow({ where: { id: draft.id } });
+    expect(stored).toMatchObject({ onboardingArchiveReason: "ARCHIVED_BY_ADMIN", onboardingWalletRetained: false });
+    expect(stored.onboardingArchivedAt).toBeInstanceOf(Date);
+    expect(await db.providerUser.count({ where: { providerOrganizationId: draft.id, removedAt: null } })).toBe(0);
+    expect(await db.adminAuditLog.count({ where: { adminUserId: (await db.adminUser.findUniqueOrThrow({ where: { userId: ops.id } })).id, action: "verification.draft_archived", entityId: draft.id } })).toBe(1);
+    await get(ops, `/admin/partners/services?q=${encodeURIComponent(`Draft ${tag}`)}`).expect(200).expect((res) => expect(res.body.items).toEqual([]));
+
+    const submitted = await db.providerOrganization.create({ data: { name: `Submitted ${tag}`, type: "GROOMER", verificationStatus: "SUBMITTED", verificationSubmittedAt: new Date() } });
+    const refused = await post(ops, `/admin/verification/PROVIDER/${submitted.id}/archive`).send({ reason: "Do not archive submitted" }).expect(400);
+    expect(refused.body.error.details?.reason).toBe("CANCELLATION_NOT_AVAILABLE");
+    expect((await db.providerOrganization.findUniqueOrThrow({ where: { id: submitted.id } })).onboardingArchivedAt).toBeNull();
   });
 });

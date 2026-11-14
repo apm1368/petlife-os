@@ -89,7 +89,8 @@ export class AdminPartnerDirectoryService {
     if (query.q) {
       and.push({ OR: [{ name: { contains: query.q, mode: "insensitive" } }, { phone: { contains: query.q } }, { locations: { some: { city: { contains: query.q, mode: "insensitive" } } } }] });
     }
-    const where: Prisma.ProviderOrganizationWhereInput = and.length ? { AND: and } : {};
+    and.push({ onboardingArchivedAt: null });
+    const where: Prisma.ProviderOrganizationWhereInput = { AND: and };
     const [rows, total] = await Promise.all([
       this.prisma.providerOrganization.findMany({
         where,
@@ -139,7 +140,8 @@ export class AdminPartnerDirectoryService {
     if (query.q) {
       and.push({ OR: [{ name: { contains: query.q, mode: "insensitive" } }, { supportContactPhone: { contains: query.q } }, { city: { contains: query.q, mode: "insensitive" } }] });
     }
-    const where: Prisma.SellerOrganizationWhereInput = and.length ? { AND: and } : {};
+    and.push({ onboardingArchivedAt: null });
+    const where: Prisma.SellerOrganizationWhereInput = { AND: and };
     const [rows, total] = await Promise.all([
       this.prisma.sellerOrganization.findMany({
         where,

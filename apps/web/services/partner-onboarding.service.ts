@@ -47,6 +47,7 @@ export const partnerOnboardingService = {
   openingHours: (days: DayHours[]) => apiFetch<PartnerOnboardingStateDto>("/partner-onboarding/opening-hours", { method: "PUT", body: { days } }),
   products: (items: { productVariantId: string; priceIrr: number; stock: number }[]) => apiFetch<PartnerOnboardingStateDto>("/partner-onboarding/products", { method: "PUT", body: { items } }),
   submit: () => apiFetch<PartnerOnboardingStateDto>("/partner-onboarding/submit", { method: "POST" }),
+  cancel: () => apiFetch<PartnerOnboardingStateDto>("/partner-onboarding/cancel", { method: "POST" }),
 };
 
 /** PUT the file bytes to a target the API issued (private KYC key or the public logo key). */

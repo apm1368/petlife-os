@@ -105,4 +105,10 @@ export class PartnerOnboardingController {
   submit(@CurrentUser() user: SessionUser) {
     return this.onboarding.submit(user.id);
   }
+
+  @Post("cancel")
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  cancel(@CurrentUser() user: SessionUser) {
+    return this.onboarding.cancel(user.id);
+  }
 }

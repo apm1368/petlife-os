@@ -4996,6 +4996,10 @@
       "alsoShop": "Ook een winkel: {name}",
       "alsoService": "Ook een dienstverlener: {name}",
       "reviewKyc": "KYC beoordelen",
+      "archiveDraft": "Niet-ingediende aanmelding archiveren",
+      "archiveReasonPrompt": "Voer een reden voor archivering in (minimaal 5 tekens).",
+      "archiveConfirm": "{name} archiveren? De toegang van leden wordt ingetrokken en de actie wordt vastgelegd.",
+      "archiveFailed": "De aanmelding kon niet worden gearchiveerd. Probeer het opnieuw.",
       "pagination": "Partnerpagina’s",
       "previous": "Vorige",
       "next": "Volgende",
@@ -12863,6 +12867,12 @@
     "saveAndContinue": "Opslaan en doorgaan",
     "continue": "Doorgaan",
     "remove": "Verwijderen",
+    "cancellation": {
+      "cancel": "Aanmelding annuleren",
+      "confirmTitle": "Partneraanmelding annuleren?",
+      "confirmBody": "U kunt alleen annuleren voordat u de aanvraag ter beoordeling indient. Uw bedrijfsconcept en toegang worden verwijderd. Een wallet met historie blijft behouden om financiële gegevens te bewaren.",
+      "failed": "De aanmelding kon niet worden geannuleerd. Probeer het opnieuw."
+    },
     "intro": {
       "title": "Meld je aan als partner",
       "body": "Heb je een dienst voor huisdieren of een dierenwinkel? Sluit je aan bij opetlife, zodat baasjes je kunnen vinden, bij je kunnen boeken of bij je kunnen kopen.",

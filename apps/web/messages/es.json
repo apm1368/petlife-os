@@ -3437,6 +3437,10 @@
       "alsoShop": "También tienda: {name}",
       "alsoService": "También negocio de servicios: {name}",
       "reviewKyc": "Revisar KYC",
+      "archiveDraft": "Archivar el registro sin enviar",
+      "archiveReasonPrompt": "Escribe el motivo del archivo (al menos 5 caracteres).",
+      "archiveConfirm": "¿Archivar {name}? Se revocará el acceso de sus miembros y la acción quedará registrada.",
+      "archiveFailed": "No se pudo archivar el registro. Inténtalo de nuevo.",
       "pagination": "Páginas de socios",
       "previous": "Anterior",
       "next": "Siguiente",
@@ -12495,6 +12499,12 @@
     "saveAndContinue": "Guardar y continuar",
     "continue": "Continuar",
     "remove": "Quitar",
+    "cancellation": {
+      "cancel": "Cancelar registro",
+      "confirmTitle": "¿Cancelar el registro de socio?",
+      "confirmBody": "Solo puede cancelar antes de enviar la solicitud a revisión. Se eliminarán el negocio en borrador y su acceso. Si la cartera tiene movimientos, se conservará para mantener el historial financiero.",
+      "failed": "No se pudo cancelar el registro. Inténtelo de nuevo."
+    },
     "intro": {
       "title": "Registro de socios",
       "body": "¿Ofreces servicios para mascotas o tienes una tienda? Únete a opetlife para que los dueños te encuentren, reserven o compren.",

@@ -60,7 +60,7 @@ export function PartnerJoinView() {
   if (failed) return <ErrorRecovery title={t("loadFailed")} message="" retryLabel={t("retry")} onRetry={() => void load()} />;
   if (!state) return <Skeleton className="h-64 w-full" />;
   if (state.submitted) return <PartnerSubmitted state={state} />;
-  return <PartnerWizard state={state} onState={setState} />;
+  return <PartnerWizard key={state.started ? "started" : "not-started"} state={state} onState={setState} />;
 }
 
 function PartnerJoinIntro() {
@@ -108,6 +108,8 @@ function PartnerSubmitted({ state }: { state: PartnerOnboardingStateDto }) {
 
 function PartnerWizard({ state, onState }: { state: PartnerOnboardingStateDto; onState: (s: PartnerOnboardingStateDto) => void }) {
   const t = useTranslations("partnerOnboarding");
+  const [cancelBusy, setCancelBusy] = useState(false);
+  const [cancelError, setCancelError] = useState(false);
   const steps = useMemo<StepKey[]>(() => {
     if (!state.started) return ["kinds"];
     return ["kinds", "business", "owner", "documents", "address", ...(state.serviceKinds.length ? (["calendar", "services"] as StepKey[]) : []), ...(state.shop ? (["hours", "products"] as StepKey[]) : []), "review"];
@@ -149,6 +151,28 @@ function PartnerWizard({ state, onState }: { state: PartnerOnboardingStateDto; o
         {step === "products" ? <ProductsStep state={state} onSaved={next} /> : null}
         {step === "review" ? <ReviewStep state={state} onSubmitted={onState} /> : null}
       </section>
+      {state.started && !state.submitted ? (
+        <div className="flex flex-col items-start gap-2">
+          {cancelError ? <p role="alert" className="text-sm text-state-urgent">{t("cancellation.failed")}</p> : null}
+          <Button
+            type="button"
+            variant="danger"
+            isLoading={cancelBusy}
+            disabled={cancelBusy}
+            onClick={() => {
+              if (!window.confirm(`${t("cancellation.confirmTitle")}\n\n${t("cancellation.confirmBody")}`)) return;
+              setCancelBusy(true);
+              setCancelError(false);
+              void partnerOnboardingService.cancel().then((nextState) => {
+                onState(nextState);
+                setStep("kinds");
+              }).catch(() => setCancelError(true)).finally(() => setCancelBusy(false));
+            }}
+          >
+            {t("cancellation.cancel")}
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }
